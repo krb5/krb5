@@ -34,12 +34,19 @@
 typedef struct _krb5_fulladdr {
     krb5_address *	address;
     krb5_ui_4		port;
+#ifdef KRB5_USE_INET6
+    krb5_boolean	is_ipv6;
+#endif
 } krb5_fulladdr;
 
+krb5_error_code mt_krb5_db_get_principal(krb5_context kcontext,
+                      krb5_const_principal search_for,
+                      krb5_db_entry * entries,
+                      int *nentries, krb5_boolean * more);
 krb5_error_code check_hot_list (krb5_ticket *);
-krb5_boolean realm_compare (krb5_principal, krb5_principal);
-krb5_boolean krb5_is_tgs_principal (krb5_principal);
-krb5_error_code add_to_transited (krb5_data *,
+krb5_boolean realm_compare (krb5_context, krb5_principal, krb5_principal);
+krb5_boolean krb5_is_tgs_principal (krb5_context, krb5_principal);
+krb5_error_code add_to_transited (krb5_context, krb5_data *,
 					    krb5_data *,
 					    krb5_principal,
 					    krb5_principal,
@@ -47,7 +54,7 @@ krb5_error_code add_to_transited (krb5_data *,
 krb5_error_code compress_transited (krb5_data *,
 					      krb5_principal,
 					      krb5_data *);
-krb5_error_code concat_authorization_data (krb5_authdata **,
+krb5_error_code concat_authorization_data (krb5_context, krb5_authdata **,
 						     krb5_authdata **,
 						     krb5_authdata ***);
 krb5_error_code fetch_last_req_info (krb5_db_entry *,
@@ -57,13 +64,13 @@ krb5_error_code kdc_convert_key (krb5_keyblock *,
 					   krb5_keyblock *,
 					   int);
 krb5_error_code kdc_process_tgs_req 
-	(krb5_kdc_req *,
+	(krb5_context, krb5_kdc_req *,
 	           const krb5_fulladdr *,
 	           krb5_data *,
 	           krb5_ticket **,
 	           krb5_keyblock **);
 
-krb5_error_code kdc_get_server_key (krb5_ticket *,
+krb5_error_code kdc_get_server_key (krb5_context, krb5_ticket *,
 					      krb5_keyblock **,
 					      krb5_kvno *);
 
@@ -71,7 +78,7 @@ int validate_as_request (krb5_kdc_req *, krb5_db_entry,
 					  krb5_db_entry, krb5_timestamp,
 					  const char **);
 
-int validate_tgs_request (krb5_kdc_req *, krb5_db_entry, 
+int validate_tgs_request (krb5_context, krb5_kdc_req *, krb5_db_entry, 
 					  krb5_ticket *, krb5_timestamp,
 					  const char **);
 
@@ -107,23 +114,28 @@ void
 rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
 
 /* do_as_req.c */
-krb5_error_code process_as_req (krb5_kdc_req *, krb5_data *,
+krb5_error_code process_as_req (krb5_context, krb5_kdc_req *,
+				    krb5_data *,
 					  const krb5_fulladdr *,
 					  krb5_data ** );
 
 /* do_tgs_req.c */
-krb5_error_code process_tgs_req (krb5_data *,
+krb5_error_code process_tgs_req (krb5_context, krb5_kdc_req *,
+					   krb5_data *,
 					   const krb5_fulladdr *,
 					   krb5_data ** );
+
 /* dispatch.c */
 krb5_error_code dispatch (krb5_data *,
 				    const krb5_fulladdr *,
-				    krb5_data **);
+				    krb5_data **,
+				    int);
 
 /* main.c */
 krb5_error_code kdc_initialize_rcache (krb5_context, char *);
 
-krb5_error_code setup_server_realm (krb5_principal);
+krb5_error_code setup_server_realm (krb5_principal, krb5_context *,
+					int thread_num);
 
 /* network.c */
 krb5_error_code listen_and_process (const char *);
@@ -142,7 +154,7 @@ int against_local_policy_tgs (krb5_kdc_req *, krb5_db_entry,
 const char * missing_required_preauth
     (krb5_db_entry *client, krb5_db_entry *server,
 	       krb5_enc_tkt_part *enc_tkt_reply);
-void get_preauth_hint_list (krb5_kdc_req * request,
+void get_preauth_hint_list (krb5_context, krb5_kdc_req * request,
 				      krb5_db_entry *client,
 				      krb5_db_entry *server,
 				      krb5_data *e_data);
@@ -164,8 +176,9 @@ krb5_error_code free_padata_context
     (krb5_context context, void **padata_context);
 
 /* replay.c */
-krb5_boolean kdc_check_lookaside (krb5_data *, krb5_data **);
-void kdc_insert_lookaside (krb5_data *, krb5_data *);
+krb5_boolean kdc_check_lookaside (krb5_context, krb5_data *, krb5_data **);
+void kdc_insert_lookaside_1 (krb5_context, krb5_data *);
+void kdc_insert_lookaside_2 (krb5_context, krb5_data *, krb5_data *);
 void kdc_free_lookaside(krb5_context);
 
 #define isflagset(flagfield, flag) (flagfield & (flag))
@@ -173,7 +186,7 @@ void kdc_free_lookaside(krb5_context);
 #define clear(flagfield, flag) (flagfield &= ~(flag))
 
 #ifdef KRB5_KRB4_COMPAT
-krb5_error_code process_v4 (const krb5_data *,
+krb5_error_code process_v4 (krb5_context, const krb5_data *,
 				      const krb5_fulladdr *,
 				      krb5_data **);
 void process_v4_mode (const char *, const char *);

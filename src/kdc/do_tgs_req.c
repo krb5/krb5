@@ -45,20 +45,20 @@
 #include "adm_proto.h"
 
 
-static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
+static void find_alternate_tgs (krb5_context, krb5_kdc_req *, krb5_db_entry *,
 				krb5_boolean *, int *);
 
-static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
-					  int, const char *, krb5_data **,
-					  const char *);
+static krb5_error_code prepare_error_tgs (krb5_context, krb5_kdc_req *,
+					  krb5_ticket *, int, const char *,
+					  krb5_data **, const char *);
 
 /*ARGSUSED*/
 krb5_error_code
-process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
+process_tgs_req(krb5_context kdc_context, krb5_kdc_req *request,
+		krb5_data *pkt, const krb5_fulladdr *from,
 		krb5_data **response)
 {
     krb5_keyblock * subkey;
-    krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
     krb5_enc_kdc_rep_part reply_encpart;
@@ -87,20 +87,15 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     char ktypestr[128];
     char rep_etypestr[128];
     char fromstringbuf[70];
+    kdc_realm_t *kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     session_key.contents = 0;
     
-    retval = decode_krb5_tgs_req(pkt, &request);
-    if (retval)
-	return retval;
-
     ktypes2str(ktypestr, sizeof(ktypestr),
 	       request->nktypes, request->ktype);
-    /*
-     * setup_server_realm() sets up the global realm-specific data pointer.
-     */
-    if ((retval = setup_server_realm(request->server)))
-	return retval;
 
     fromstring = inet_ntop(ADDRTYPE2FAMILY(from->address->addrtype),
 			   from->address->contents,
@@ -115,7 +110,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     limit_string(sname);
 
    /* errcode = kdc_process_tgs_req(request, from, pkt, &req_authdat); */
-    errcode = kdc_process_tgs_req(request, from, pkt, &header_ticket, &subkey);
+    errcode = kdc_process_tgs_req(kdc_context, request, from, pkt, &header_ticket, &subkey);
 
     if (header_ticket && header_ticket->enc_part2 &&
 	(errcode2 = krb5_unparse_name(kdc_context, 
@@ -150,7 +145,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
        header? */
 
     nprincs = 1;
-    if ((errcode = krb5_db_get_principal(kdc_context, request->server, &server,
+    if ((errcode = mt_krb5_db_get_principal(kdc_context, request->server, &server,
 					&nprincs, &more))) {
 	status = "LOOKING_UP_SERVER";
 	nprincs = 0;
@@ -166,7 +161,7 @@ tgt_again:
 	 * might be a request for a TGT for some other realm; we
 	 * should do our best to find such a TGS in this db
 	 */
-	if (firstpass && krb5_is_tgs_principal(request->server) == TRUE) {
+	if (firstpass && krb5_is_tgs_principal(kdc_context, request->server) == TRUE) {
 	    if (krb5_princ_size(kdc_context, request->server) == 2) {
 		krb5_data *server_1 =
 		    krb5_princ_component(kdc_context, request->server, 1);
@@ -175,7 +170,7 @@ tgt_again:
 
 		if (!tgs_1 || !data_eq(*server_1, *tgs_1)) {
 		    krb5_db_free_principal(kdc_context, &server, nprincs);
-		    find_alternate_tgs(request, &server, &more, &nprincs);
+		    find_alternate_tgs(kdc_context, request, &server, &more, &nprincs);
 		    firstpass = 0;
 		    goto tgt_again;
 		}
@@ -192,7 +187,7 @@ tgt_again:
 	goto cleanup;
     }
     
-    if ((retval = validate_tgs_request(request, server, header_ticket,
+    if ((retval = validate_tgs_request(kdc_context, request, server, header_ticket,
 				      kdc_time, &status))) {
 	if (!status)
 	    status = "UNKNOWN_REASON";
@@ -220,7 +215,8 @@ tgt_again:
 	/*
 	 * Get the key for the second ticket, and decrypt it.
 	 */
-	if ((errcode = kdc_get_server_key(request->second_ticket[st_idx],
+	if ((errcode = kdc_get_server_key(kdc_context,
+					 request->second_ticket[st_idx],
 					 &st_sealing_key,
 					 &st_srv_kvno))) {
 	    status = "2ND_TKT_SERVER";
@@ -435,7 +431,7 @@ tgt_again:
 	}
 
 	if ((errcode =
-	     concat_authorization_data(request->unenc_authdata,
+	     concat_authorization_data(kdc_context, request->unenc_authdata,
 				       header_ticket->enc_part2->authorization_data, 
 				       &enc_tkt_reply.authorization_data))) {
 	    status = "CONCAT_AUTH";
@@ -459,8 +455,8 @@ tgt_again:
      */
 
     /* realm compare is like strcmp, but knows how to deal with these args */
-    if (realm_compare(header_ticket->server, tgs_server) ||
-	realm_compare(header_ticket->server, enc_tkt_reply.client)) {
+    if (realm_compare(kdc_context, header_ticket->server, tgs_server) ||
+	realm_compare(kdc_context, header_ticket->server, enc_tkt_reply.client)) {
 	/* tgt issued by local realm or issued by realm of client */
 	enc_tkt_reply.transited = header_ticket->enc_part2->transited;
     } else {
@@ -479,7 +475,8 @@ tgt_again:
 	enc_tkt_transited.tr_contents.length = 0;
 	enc_tkt_reply.transited = enc_tkt_transited;
 	if ((errcode =
-	     add_to_transited(&header_ticket->enc_part2->transited.tr_contents,
+	     add_to_transited(kdc_context,
+			      &header_ticket->enc_part2->transited.tr_contents,
 			      &enc_tkt_reply.transited.tr_contents,
 			      header_ticket->server,
 			      enc_tkt_reply.client,
@@ -690,7 +687,7 @@ cleanup:
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;
 	    
-	retval = prepare_error_tgs(request, header_ticket, errcode,
+	retval = prepare_error_tgs(kdc_context, request, header_ticket, errcode,
 				   fromstring, response, status);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
@@ -700,8 +697,6 @@ cleanup:
     
     if (header_ticket)
 	krb5_free_ticket(kdc_context, header_ticket);
-    if (request)
-	krb5_free_kdc_req(kdc_context, request);
     if (cname)
 	free(cname);
     if (sname)
@@ -717,8 +712,9 @@ cleanup:
 }
 
 static krb5_error_code
-prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
-		   const char *ident, krb5_data **response, const char *status)
+prepare_error_tgs (krb5_context kdc_context, krb5_kdc_req *request,
+		   krb5_ticket *ticket, int error, const char *ident,
+		   krb5_data **response, const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -764,12 +760,16 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
  * some intermediate realm.
  */
 static void
-find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
-		   krb5_boolean *more, int *nprincs)
+find_alternate_tgs(krb5_context kdc_context, krb5_kdc_req *request,
+		   krb5_db_entry *server, krb5_boolean *more, int *nprincs)
 {
     krb5_error_code retval;
     krb5_principal *plist, *pl2;
     krb5_data tmp;
+    kdc_realm_t *kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     *nprincs = 0;
     *more = FALSE;
@@ -796,7 +796,7 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
 	tmp = *krb5_princ_realm(kdc_context, *pl2);
 	krb5_princ_set_realm(kdc_context, *pl2, 
 			     krb5_princ_realm(kdc_context, tgs_server));
-	retval = krb5_db_get_principal(kdc_context, *pl2, server, nprincs, more);
+	retval = mt_krb5_db_get_principal(kdc_context, *pl2, server, nprincs, more);
 	krb5_princ_set_realm(kdc_context, *pl2, &tmp);
 	if (retval) {
 	    *nprincs = 0;

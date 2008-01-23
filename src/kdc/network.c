@@ -64,6 +64,22 @@
 
 #include "fake-addrinfo.h"
 
+#ifdef USE_THREADS
+#define UDP 0
+#define TCP 1
+
+#include <signal.h>
+
+static krb5_error_code mt_dispatch(krb5_data *, krb5_fulladdr *, krb5_fulladdr *, int, int);
+static krb5_error_code init_multithread(const char *prog);
+
+static pthread_t main_thread_id;
+
+static int notifier[2];
+
+#include "kdc_request_queue.h"
+#endif /* USE_THREADS */
+
 /* Misc utility routines.  */
 static void
 set_sa_port(struct sockaddr *addr, int port)
@@ -165,7 +181,11 @@ static const char *paddr (struct sockaddr *sa)
 
 /* KDC data.  */
 
+#ifdef USE_THREADS
+enum kdc_conn_type { CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP, CONN_NOTIFIER };
+#else
 enum kdc_conn_type { CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP };
+#endif
 
 /* Per-connection info.  */
 struct connection {
@@ -375,6 +395,23 @@ delete_fd (struct connection *xconn)
 	}
     free(xconn);
 }
+
+#ifdef USE_THREADS
+static struct connection * get_conn_from_fd (int fd) {
+    struct connection *conn;
+    int i, found = 0;
+
+    FOREACH_ELT(connections, i, conn)
+        if (conn->fd == fd) {
+            found = 1;
+            break;
+        }
+    if (found == 1)
+        return conn;
+    else
+        return NULL;
+}
+#endif
 
 static int
 setnbio(int sock)
@@ -715,6 +752,41 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
     return setup_udp_port_1(data, addr, haddrbuf, 0);
 }
 
+#ifdef USE_THREADS
+static void no_service(struct connection *con, const char *prog, int i)
+{
+    char c[32];
+
+    while (read(con->fd, c, sizeof (c)) != 0)
+        ;
+}
+
+static krb5_error_code setup_notifier(struct socksetup *s)
+{
+    int flag;
+    krb5_error_code ret;
+
+    if (pipe(notifier) != 0) {
+        ret = errno;
+        com_err("krb5kdc", ret, "while creating pipe");
+        return ret;
+    }
+    flag = fcntl(notifier[0], F_GETFL);
+    flag |= O_NONBLOCK;
+    fcntl(notifier[0], F_SETFL, flag);
+
+    FD_SET(notifier[0], &sstate.rfds);
+    if (notifier[0] >= sstate.max)
+        sstate.max = notifier[0] + 1;
+
+    if (add_fd(s, notifier[0], CONN_NOTIFIER, no_service) == NULL) {
+        return s->retval;
+    }
+
+    return 0;
+}
+#endif /* USE_THREADS */
+
 #if 1
 static void klog_handler(const void *data, size_t len)
 {
@@ -831,6 +903,12 @@ setup_network(const char *prog)
 	com_err(prog, 0, "no sockets set up?");
 	exit (1);
     }
+#ifdef USE_THREADS
+    retval = setup_notifier(&setup_data);
+    if (retval) {
+        return retval;
+    }
+#endif
 
     return 0;
 }
@@ -846,6 +924,7 @@ static void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
 	break;
 #ifdef KRB5_USE_INET6
     case AF_INET6:
+        faddr->is_ipv6 = 1;
 	if (IN6_IS_ADDR_V4MAPPED(&sa2sin6(sa)->sin6_addr)) {
 	    faddr->address->addrtype = ADDRTYPE_INET;
 	    faddr->address->length = 4;
@@ -866,6 +945,68 @@ static void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
 	break;
     }
 }
+
+static void fulladdr2sockaddr(struct sockaddr *sa, krb5_fulladdr *faddr)
+{
+    switch (faddr->address->addrtype) {
+        case ADDRTYPE_INET:
+            assert(faddr->address->length == 4);
+#ifdef KRB5_USE_INET6
+            if (faddr->is_ipv6) {
+                sa->sa_family = AF_INET6;
+                bzero((krb5_octet *) &sa2sin6(sa)->sin6_addr, 12);
+                memcpy(12 + (krb5_octet *) &sa2sin6(sa)->sin6_addr,
+                       faddr->address->contents, 4);
+                sa2sin6(sa)->sin6_port = htons(faddr->port);
+            } else {
+#endif
+                sa->sa_family = AF_INET;
+                memcpy((krb5_octet *) &sa2sin(sa)->sin_addr,
+                       faddr->address->contents, 4);
+                sa2sin(sa)->sin_port = htons(faddr->port);
+#ifdef KRB5_USE_INET6
+            }
+#endif
+            break;
+#ifdef KRB5_USE_INET6
+        case ADDRTYPE_INET6:
+            sa->sa_family = AF_INET6;
+            memcpy((krb5_octet *) &sa2sin6(sa)->sin6_addr,
+                   faddr->address->contents, 16);
+            sa2sin6(sa)->sin6_port = htons(faddr->port);
+            break;
+#endif
+        default:
+            assert(0);
+            break;
+    }
+}
+
+#ifdef USE_THREADS
+static krb5_error_code krb5_copy_fulladdr(krb5_context context,
+                                          const krb5_fulladdr *in,
+                                          krb5_fulladdr **out)
+{
+    krb5_error_code ret;
+
+    *out = (krb5_fulladdr *)malloc(sizeof(krb5_fulladdr));
+    if (*out == NULL) {
+        return ENOMEM;
+    }
+    memset(*out, 0, sizeof(krb5_fulladdr));
+
+    (*out)->port = in->port;
+
+    ret = krb5_copy_addr(context, in->address, &((*out)->address));
+    if (ret != 0) {
+        free(*out);
+        *out = NULL;
+        return ret;
+    }
+
+    return 0;
+}
+#endif /* USE_THREADS */
 
 static int
 recv_from_to(int s, void *buf, size_t len, int flags,
@@ -1022,7 +1163,7 @@ static void process_packet(struct connection *conn, const char *prog,
 {
     int cc;
     socklen_t saddr_len, daddr_len;
-    krb5_fulladdr faddr;
+    krb5_fulladdr faddr = {0};
     krb5_error_code retval;
     struct sockaddr_storage saddr, daddr;
     krb5_address addr;
@@ -1030,6 +1171,12 @@ static void process_packet(struct connection *conn, const char *prog,
     krb5_data *response;
     char pktbuf[MAX_DGRAM_SIZE];
     int port_fd = conn->fd;
+#ifdef USE_THREADS
+    krb5_fulladdr *faddr_dup;
+    krb5_fulladdr faddr_daddr;
+    krb5_fulladdr *faddr_daddr_dup;
+    krb5_address addr2;
+#endif
 
     response = NULL;
     saddr_len = sizeof(saddr);
@@ -1061,20 +1208,51 @@ static void process_packet(struct connection *conn, const char *prog,
 #endif
 
     request.length = cc;
+#ifdef USE_THREADS
+    request.data = (char *) malloc (request.length);
+    if (request.data == NULL) {
+        com_err(prog, ENOMEM, "while processing UDP request");
+        return ;
+    }
+    memcpy (request.data, pktbuf, request.length);
+#else
     request.data = pktbuf;
+#endif
     faddr.address = &addr;
     init_addr(&faddr, ss2sa(&saddr));
     /* this address is in net order */
-    if ((retval = dispatch(&request, &faddr, &response))) {
+#ifdef USE_THREADS
+    if ((retval = krb5_copy_fulladdr(def_kdc_context, &faddr, &faddr_dup))) {
+        com_err(prog, ENOMEM, "while duplicating address");
+        return;
+    }
+
+    faddr_daddr.address = &addr2;
+    init_addr(&faddr_daddr, ss2sa(&daddr));
+
+    if ((retval = krb5_copy_fulladdr(def_kdc_context, &faddr_daddr, &faddr_daddr_dup))) {
+        com_err(prog, ENOMEM, "while duplicating address");
+        return;
+    }
+
+    if ((retval = mt_dispatch(&request, faddr_dup, faddr_daddr_dup, port_fd, UDP))) {
+        com_err(prog, retval, "while dispatching (udp)");
+        return;
+    }
+#else
+    if ((retval = dispatch(&request, &faddr, &response, 0))) {
 	com_err(prog, retval, "while dispatching (udp)");
 	return;
     }
+#endif
+
+#ifndef USE_THREADS
     cc = send_to_from(port_fd, response->data, (socklen_t) response->length, 0,
 		      (struct sockaddr *)&saddr, saddr_len,
 		      (struct sockaddr *)&daddr, daddr_len);
     if (cc == -1) {
 	char addrbuf[46];
-        krb5_free_data(kdc_context, response);
+        krb5_free_data(def_kdc_context, response);
 	if (inet_ntop(((struct sockaddr *)&saddr)->sa_family,
 		      addr.contents, addrbuf, sizeof(addrbuf)) == 0) {
 	    strcpy(addrbuf, "?");
@@ -1084,12 +1262,14 @@ static void process_packet(struct connection *conn, const char *prog,
 	return;
     }
     if (cc != response->length) {
-	krb5_free_data(kdc_context, response);
+	krb5_free_data(def_kdc_context, response);
 	com_err(prog, 0, "short reply write %d vs %d\n",
 		response->length, cc);
 	return;
     }
-    krb5_free_data(kdc_context, response);
+    krb5_free_data(def_kdc_context, response);
+#endif
+
     return;
 }
 
@@ -1201,7 +1381,7 @@ static void
 kill_tcp_connection(struct connection *conn)
 {
     if (conn->u.tcp.response)
-	krb5_free_data(kdc_context, conn->u.tcp.response);
+	krb5_free_data(def_kdc_context, conn->u.tcp.response);
     if (conn->u.tcp.buffer)
 	free(conn->u.tcp.buffer);
     FD_CLR(conn->fd, &sstate.rfds);
@@ -1226,11 +1406,15 @@ make_toolong_error (krb5_data **out)
     krb5_error_code retval;
     krb5_data *scratch;
 
-    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    retval = krb5_us_timeofday(def_kdc_context, &errpkt.stime, &errpkt.susec);
     if (retval)
 	return retval;
     errpkt.error = KRB_ERR_FIELD_TOOLONG;
-    errpkt.server = tgs_server;
+    /*
+     * Using first realm's server name since we haven't actually decoded the
+     * packet yet.  This should be NULL - but that would violate the RFC.
+     */
+    errpkt.server = kdc_realmlist[0]->realm_tgsprinc;
     errpkt.client = NULL;
     errpkt.cusec = 0;
     errpkt.ctime = 0;
@@ -1241,7 +1425,7 @@ make_toolong_error (krb5_data **out)
     scratch = malloc(sizeof(*scratch));
     if (scratch == NULL)
 	return ENOMEM;
-    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    retval = krb5_mk_error(def_kdc_context, &errpkt, scratch);
     if (retval) {
 	free(scratch);
 	return retval;
@@ -1360,12 +1544,19 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 	    /* have a complete message, and exactly one message */
 	    request.length = conn->u.tcp.msglen;
 	    request.data = conn->u.tcp.buffer + 4;
+#ifdef USE_THREADS
+            err = mt_dispatch(&request, &conn->u.tcp.faddr, NULL, conn->fd, TCP);
+#else
 	    err = dispatch(&request, &conn->u.tcp.faddr,
-			   &conn->u.tcp.response);
+			   &conn->u.tcp.response, 0);
+#endif
 	    if (err) {
 		com_err(prog, err, "while dispatching (tcp)");
 		goto kill_tcp_connection;
 	    }
+#ifdef USE_THREADS
+            return;
+#endif
 	have_response:
 	    queue_tcp_outgoing_response(conn);
 	    FD_CLR(conn->fd, &sstate.rfds);
@@ -1385,6 +1576,17 @@ static void service_conn(struct connection *conn, const char *prog,
     conn->service(conn, prog, selflags);
 }
 
+#ifdef USE_THREADS
+static void *service_thread(void *);
+
+struct thread_list {
+    struct thread_list *next;
+    pthread_t t;
+};
+
+static struct thread_list *thread_list_head;
+#endif /* USE_THREADS */
+
 krb5_error_code
 listen_and_process(const char *prog)
 {
@@ -1398,14 +1600,127 @@ listen_and_process(const char *prog)
 
     if (conns == (struct connection **) NULL)
 	return KDC5_NONET;
-    
-    while (!signal_requests_exit) {
+
+#ifdef USE_THREADS
+    /* Spawn the threads */
+    {
+        sigset_t sigset;
+
+        err = init_multithread(prog);
+        if (err != 0)
+            return err;
+
+        lock_kdc();
+        sigemptyset(&sigset);
+        sigaddset(&sigset, SIGINT);
+        sigaddset(&sigset, SIGTERM);
+        sigaddset(&sigset, SIGHUP);
+
+        /* SIGINT, SIGTERM and SIGHUP must be received only by main thread */
+        err = pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+        if (err != 0) {
+            com_err(prog, err, "while setting thread signal mask");
+            unlock_kdc();
+            return err;
+        }
+
+        thread_list_head = NULL;
+
+        for (i = 0; i < thread_count; i++) {
+            int *thread_num;
+            struct thread_list *tl;
+
+#ifdef DEBUG
+            printf("Num threads = %d\n", thread_count);
+#endif
+
+            tl = (struct thread_list *)malloc(sizeof(struct thread_list));
+            if (tl == NULL) {
+                com_err(prog, ENOMEM, "while allocating thread list");
+                unlock_kdc();
+                return ENOMEM;
+            }
+            tl->next = thread_list_head;
+            thread_list_head = tl;
+
+            thread_num = (int *)malloc(sizeof(*thread_num));
+            if (thread_num == NULL) {
+                com_err(prog, ENOMEM, "while allocating thread counter");
+                unlock_kdc();
+                return ENOMEM;
+            }
+
+            *thread_num = i;
+
+            err = pthread_create(&thread_list_head->t, NULL, service_thread, (void *) thread_num);
+            if (err != 0) {
+                com_err(prog, err, "while creating service thread");
+                unlock_kdc();
+                return err;
+            }
+        }
+
+        err = pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
+        if (err != 0) {
+            com_err(prog, err, "while restoring thread signal mask");
+            return err;
+        }
+    }
+#endif /* USE_THREADS */
+
+#ifdef USE_THREADS
+    while (1)
+#else
+    while (!signal_requests_exit)
+#endif
+    {
 	if (signal_requests_hup) {
-	    krb5_klog_reopen(kdc_context);
+	    krb5_klog_reopen(def_kdc_context);
 	    signal_requests_hup = 0;
 	}
 	sstate.end_time.tv_sec = sstate.end_time.tv_usec = 0;
+#ifdef USE_THREADS
+        {
+            struct select_state tmp;
+            tmp = sstate;
+            if (signal_requests_exit) {
+                int active_tcp = 0;
+                /* Don't accept new KDC requests */
+                for (i = 0; i < n_sockets; i++) {
+                    if (conns[i]->type == CONN_UDP || conns[i]->type == CONN_UDP_PKTINFO || conns[i]->type == CONN_TCP_LISTENER) {
+                        FD_CLR(conns[i]->fd, &tmp.rfds);
+                        FD_CLR(conns[i]->fd, &tmp.wfds);
+                        if (tmp.max == conns[i]->fd + 1)
+                            while (tmp.max > 0
+                                    && ! FD_ISSET(tmp.max-1, &tmp.rfds)
+                                    && ! FD_ISSET(tmp.max-1, &tmp.wfds)
+                                  )
+                                tmp.max--;
+                    }
+                }
+                /* If there are no active TCP requests, exit */
+                for (i = 0; i < n_sockets; i++) {
+                    if (conns[i]->type == CONN_TCP) {
+                        active_tcp = 1;
+                        break;
+                    }
+                }
+                if (active_tcp == 0) {
+                    unlock_kdc();
+                    break;
+                }
+            }
+            unlock_kdc();
+            err = krb5int_cm_call_select(&tmp, &sout, &sret);
+            lock_kdc();
+        }
+
+        if (err == -1 && errno == EINTR)
+            /* Some service thread has modified sstate */
+            continue;
+#else
 	err = krb5int_cm_call_select(&sstate, &sout, &sret);
+#endif
 	if (err) {
 	    com_err(prog, err, "while selecting for network input(1)");
 	    continue;
@@ -1428,6 +1743,37 @@ listen_and_process(const char *prog)
 		service_conn(conns[i], prog, sflags);
 	}
     }
+
+#ifdef USE_THREADS
+    /* Stop the service threads */
+    {
+        kdc_request_t *req;
+        struct thread_list *ptr = thread_list_head, *tmp;
+
+        /* Notify the remaining service threads to exit */
+        for (i = 0; i < thread_count; i++) {
+            req = (kdc_request_t *)calloc(1, sizeof(*req));
+            if (req == NULL)
+                continue; /* XXX */
+
+            req->request = NULL;
+
+            add_to_req_queue (req);
+        }
+
+        while (ptr != NULL) {
+            pthread_join (ptr->t, NULL);
+            tmp = ptr;
+            ptr = ptr->next;
+            free (tmp);
+        }
+        thread_list_head = NULL;
+
+        /* Cleanup the queue */
+        destroy_queue();
+    }
+#endif /* USE_THREADS */
+
     return 0;
 }
 
@@ -1456,5 +1802,195 @@ closedown_network(const char *prog)
 
     return 0;
 }
+
+#ifdef USE_THREADS
+static krb5_error_code init_multithread(const char *prog)
+{
+    krb5_error_code ret;
+
+    ret = k5_mutex_init (&kdc_lock);
+    if (ret != 0) {
+        com_err(prog, ret, "while initializing global mutex");
+        return ret;
+    }
+
+    main_thread_id = pthread_self();
+
+    if (pipe(notifier) != 0) {
+        ret = errno;
+        com_err(prog, ret, "while initializing notification pipe");
+        return ret;
+    }
+
+    /* Initialize the request queue */
+    return init_queue();
+}
+
+/*
+ * Tell the main thread to re-look at the set of file descriptors it is
+ * 'select'ing
+ */
+krb5_error_code notify_main_thread(void)
+{
+    krb5_error_code ret;
+
+    /* Write a single byte to make main thread return from select */
+    if (write(notifier[1], "*", 1) != 1) {
+        ret = errno;
+        com_err("krb5kdc", ret, "while writing to notification pipe");
+        return errno;
+    }
+
+    return 0;
+}
+
+static krb5_error_code
+mt_dispatch(krb5_data *pkt, krb5_fulladdr *from, krb5_fulladdr *to, int sockfd, int transport)
+{
+    kdc_request_t *req;
+    krb5_error_code ret;
+
+    req = (kdc_request_t *)malloc(sizeof(kdc_request_t));
+    if (req == NULL)
+        return ENOMEM;
+
+    req->request = (krb5_data *)malloc(sizeof(krb5_data));
+    if (req->request == NULL) {
+        free(req);
+        return ENOMEM;
+    }
+    *req->request = *pkt;
+    req->response = NULL;
+    req->from = from;
+    req->transport = transport;
+    req->sockfd = sockfd;
+
+    if (transport == UDP) {
+        req->to_addr = to;
+    }
+
+    if (transport == TCP) {
+        FD_CLR(sockfd, &sstate.rfds);
+        if (sstate.max == sockfd + 1)
+            while (sstate.max > 0
+                    && ! FD_ISSET(sstate.max-1, &sstate.rfds)
+                    && ! FD_ISSET(sstate.max-1, &sstate.wfds)
+                  )
+                sstate.max--;
+    }
+
+    /* We don't want the main thread to hold the lock and wait on a full queue */
+    unlock_kdc();
+    ret = add_to_req_queue (req);
+    lock_kdc();
+
+    return ret;
+}
+
+static void *service_thread(void *_thread_num)
+{
+    int thread_num;
+    const char *prog = "krb5kdc";
+    krb5_error_code retval;
+
+    thread_num = *((int *)_thread_num);
+
+    while (1) {
+        int cc;
+        kdc_request_t *req;
+        req = get_req_from_queue ();
+
+        if (req->request == NULL)
+            goto cleanup_and_continue;
+
+        lock_kdc();
+        retval = dispatch(req->request, req->from, &req->response, thread_num);
+        if (retval != 0) {
+            if (req->transport == TCP)
+                com_err(prog, retval, "while dispatching (tcp)");
+            else if (req->transport == UDP)
+                com_err(prog, retval, "while dispatching (udp)");
+            else
+                abort();
+        }
+
+        if (req->transport == UDP) {
+            struct sockaddr saddr;
+            socklen_t saddr_len;
+            struct sockaddr daddr;
+            socklen_t daddr_len;
+
+            fulladdr2sockaddr(&saddr, req->from);
+            if (saddr.sa_family == AF_INET)
+                saddr_len = sizeof(struct sockaddr_in);
+            else
+                saddr_len = sizeof(struct sockaddr_in6);
+
+            fulladdr2sockaddr(&daddr, req->to_addr);
+            if (daddr.sa_family == AF_INET)
+                daddr_len = sizeof(struct sockaddr_in);
+            else
+                daddr_len = sizeof(struct sockaddr_in6);
+
+            cc = send_to_from(req->sockfd, req->response->data, (socklen_t) req->response->length, 0,
+                    &saddr, saddr_len, &daddr, daddr_len);
+            if (cc == -1) {
+                char addrbuf[46];
+                if (inet_ntop(saddr.sa_family,
+                            req->from->address->contents, addrbuf, sizeof(addrbuf)) == 0) {
+                    strcpy(addrbuf, "?");
+                }
+                com_err(prog, errno, "while sending reply to %s/%d",
+                        addrbuf, req->from->port);
+                goto unlock_and_continue;
+            }
+            if (cc != req->response->length)
+                com_err(prog, 0, "short reply write %d vs %d\n",
+                        req->response->length, cc);
+
+
+        } else if (req->transport == TCP) {
+            struct connection *conn;
+
+            conn = get_conn_from_fd (req->sockfd);
+            if (conn == NULL)
+                goto unlock_and_continue;
+
+            conn->u.tcp.response = req->response;
+
+            queue_tcp_outgoing_response(conn);
+            FD_CLR(conn->fd, &sstate.rfds);
+
+            if (conn->fd >= sstate.max)
+                sstate.max = conn->fd + 1;
+
+            req->request = req->response = NULL;
+            req->from = NULL;
+            /* Tell main thread to send the response */
+            notify_main_thread();
+        } else
+            abort ();
+
+unlock_and_continue:
+        unlock_kdc();
+
+cleanup_and_continue:
+        if (req->request != NULL)
+            krb5_free_data(def_kdc_context, req->request);
+        if (req->response != NULL)
+            krb5_free_data(def_kdc_context, req->response);
+        if (req->transport == UDP) {
+                if (req->from != NULL)
+                        krb5_free_address(def_kdc_context, req->from->address);
+                free (req->from);
+        }
+        free (req);
+
+        if (signal_requests_exit)
+            pthread_exit (NULL);
+    }
+}
+
+#endif
 
 #endif /* INET */

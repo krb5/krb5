@@ -45,13 +45,15 @@
 #include "adm_proto.h"
 #include "extern.h"
 
-static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
-					 krb5_data **, const char *);
+static krb5_error_code prepare_error_as (krb5_context, krb5_kdc_req *,
+					 int, krb5_data *, krb5_data **,
+					 const char *);
 
 /*ARGSUSED*/
 krb5_error_code
-process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
-	       const krb5_fulladdr *from, krb5_data **response)
+process_as_req(krb5_context kdc_context, krb5_kdc_req *request,
+	       krb5_data *req_pkt, const krb5_fulladdr *from,
+	       krb5_data **response)
 {
     krb5_db_entry client, server;
     krb5_kdc_rep reply;
@@ -79,6 +81,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     char rep_etypestr[128];
     char fromstringbuf[70];
     void *pa_context = NULL;
+    kdc_realm_t *kdc_active_realm = NULL;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
@@ -118,7 +124,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     limit_string(sname);
     
     c_nprincs = 1;
-    if ((errcode = krb5_db_get_principal(kdc_context, request->client,
+    if ((errcode = mt_krb5_db_get_principal(kdc_context, request->client,
 					 &client, &c_nprincs, &more))) {
 	status = "LOOKING_UP_CLIENT";
 	c_nprincs = 0;
@@ -139,7 +145,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     
     s_nprincs = 1;
-    if ((errcode = krb5_db_get_principal(kdc_context, request->server, &server,
+    if ((errcode = mt_krb5_db_get_principal(kdc_context, request->server, &server,
 					 &s_nprincs, &more))) {
 	status = "LOOKING_UP_SERVER";
 	goto errout;
@@ -296,7 +302,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     status = missing_required_preauth(&client, &server, &enc_tkt_reply);
     if (status) {
 	errcode = KRB5KDC_ERR_PREAUTH_REQUIRED;
-	get_preauth_hint_list(request, &client, &server, &e_data);
+	get_preauth_hint_list(kdc_context, request, &client, &server, &e_data);
 	goto errout;
     }
 
@@ -458,8 +464,8 @@ errout:
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;
 	    
-	errcode = prepare_error_as(request, errcode, &e_data, response,
-				   status);
+	errcode = prepare_error_as(kdc_context, request, errcode, &e_data,
+				   response, status);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
 	    status = 0;
@@ -511,8 +517,8 @@ errout:
 }
 
 static krb5_error_code
-prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
-		  krb5_data **response, const char *status)
+prepare_error_as (krb5_context kdc_context, krb5_kdc_req *request, int error,
+		  krb5_data *e_data, krb5_data **response, const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;

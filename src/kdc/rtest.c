@@ -64,7 +64,7 @@ main(int argc, char **argv)
 	krb5_data ntrans;
 	krb5_principal tgs, cl, sv;
 	krb5_error_code kret;
-	kdc_realm_t	kdc_realm;
+	kdc_realm_t	kdc_realm, *realm_list[2];
 
 	if (argc < 4) {
 	    fprintf(stderr, "not enough args\n");
@@ -79,7 +79,9 @@ main(int argc, char **argv)
 	  exit(2);
 	}
 	/* Needed so kdc_context will work */
-	kdc_active_realm = &kdc_realm;
+	realm_list[0] = &kdc_realm;
+	realm_list[1] = NULL;
+	kdc_realmlist = realm_list;
 
 	ntrans.length = 0;
 	ntrans.data = 0;
@@ -91,11 +93,11 @@ main(int argc, char **argv)
 	  otrans.data = 0;
 	memcpy(otrans.data,argv[1], otrans.length);
 
-	tgs = make_princ(kdc_context, argv[2], argv[0]);
-	cl  = make_princ(kdc_context, argv[3], argv[0]);
-	sv  = make_princ(kdc_context, argv[4], argv[0]);
+	tgs = make_princ(def_kdc_context, argv[2], argv[0]);
+	cl  = make_princ(def_kdc_context, argv[3], argv[0]);
+	sv  = make_princ(def_kdc_context, argv[4], argv[0]);
 	
-	add_to_transited(&otrans,&ntrans,tgs,cl,sv);
+	add_to_transited(def_kdc_context, &otrans,&ntrans,tgs,cl,sv);
 
 	printf("%s\n",ntrans.data);
 

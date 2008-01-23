@@ -67,12 +67,12 @@
 extern void swab(const void *, void *, size_t );
 #endif
 
-static int compat_decrypt_key (krb5_key_data *, C_Block,
+static int compat_decrypt_key (krb5_context, krb5_key_data *, C_Block,
 					 krb5_keyblock *, int);
-static int kerb_get_principal (char *, char *, Principal *,
+static int kerb_get_principal (krb5_context, char *, char *, Principal *,
 					 int *, krb5_keyblock *, krb5_kvno,
 					 int, krb5_deltat *);
-static int check_princ (char *, char *, int, Principal *,
+static int check_princ (krb5_context, char *, char *, int, Principal *,
 				  krb5_keyblock *, int, krb5_deltat *);
 
 static char * v4_klog (int, const char *, ...)
@@ -149,9 +149,9 @@ static void hang(void);
 
 static krb5_data *response;
 
-void kerberos_v4 (struct sockaddr_in *, KTEXT);
+void kerberos_v4 (krb5_context, struct sockaddr_in *, KTEXT);
 void kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
-static int set_tgtkey (char *, krb5_kvno, krb5_boolean);
+static int set_tgtkey (krb5_context, char *, krb5_kvno, krb5_boolean);
 
 /* Attributes converted from V5 to V4 - internal representation */
 #define V4_KDB_REQUIRES_PREAUTH  0x1
@@ -218,7 +218,7 @@ void enable_v4_crossrealm ( char *programname) {
 }
 
 krb5_error_code
-process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
+process_v4(krb5_context kdc_context, const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
 	   krb5_data **resp)
 {
     struct sockaddr_in client_sockaddr;
@@ -227,6 +227,10 @@ process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
     krb5_timestamp now;
     KTEXT_ST v4_pkt;
     char *lrealm;
+    kdc_realm_t *kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     /* Check if disabled completely */
     if (kdc_v4 == KDC_V4_NONE) {
@@ -270,7 +274,7 @@ process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
     v4_pkt.mbz = 0;
     memcpy( v4_pkt.dat, pkt->data, pkt->length);
 
-    kerberos_v4( &client_sockaddr, &v4_pkt);
+    kerberos_v4(kdc_context, &client_sockaddr, &v4_pkt);
     *resp = response;
     return(retval);
 }
@@ -313,7 +317,7 @@ int krb4_sendto(int s, const char *msg, int len, int flags,
 	return ENOMEM;
     }
     if ( !(response->data = (char *) malloc( len))) {
-	krb5_free_data(kdc_context,  response);
+	krb5_free_data(def_kdc_context,  response);
 	return ENOMEM;
     }
     response->length = len;
@@ -354,10 +358,14 @@ hang(void)
  * Also, keep old krb5_keyblock around in case we want to use it later.
  */
 static int
-compat_decrypt_key (krb5_key_data *in5, unsigned char *out4,
-		    krb5_keyblock *out5, int issrv)
+compat_decrypt_key (krb5_context kdc_context, krb5_key_data *in5,
+		    unsigned char *out4, krb5_keyblock *out5, int issrv)
 {
     krb5_error_code retval;
+    kdc_realm_t *kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     out5->contents = NULL;
     memset(out4, 0, sizeof(out4));
@@ -404,7 +412,8 @@ compat_decrypt_key (krb5_key_data *in5, unsigned char *out4,
  * the client case.  It is still returned so the caller can free it.
  */
 static int
-kerb_get_principal(char *name, char *inst, /* could have wild cards */
+kerb_get_principal(krb5_context kdc_context, char *name, 
+                   char *inst, /* could have wild cards */
 		   Principal *principal,
 		   int *more,	/* more tuples than room for */
 		   krb5_keyblock *k5key, krb5_kvno kvno,
@@ -491,7 +500,7 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
 	}
     }
 
-    if (!compat_decrypt_key(pkey, k, k5key, issrv)) {
+    if (!compat_decrypt_key(kdc_context, pkey, k, k5key, issrv)) {
  	memcpy( &principal->key_low, k, LONGLEN);
        	memcpy( &principal->key_high, (krb5_ui_4 *) k + 1, LONGLEN);
     }
@@ -516,7 +525,7 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
 	    krb5_db_free_principal(kdc_context, &entries, nprinc);
 	    return(0);
 	}
-	compat_decrypt_key(pkey, k, k5key, issrv);
+	compat_decrypt_key(kdc_context, pkey, k, k5key, issrv);
 	memset (k, 0, sizeof k);
     }
 
@@ -593,7 +602,7 @@ static void str_length_check(char *str, int max_size)
 }
 
 void
-kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
+kerberos_v4(krb5_context kdc_context, struct sockaddr_in *client, KTEXT pkt)
 {
     static KTEXT_ST rpkt_st;
     KTEXT   rpkt = &rpkt_st;
@@ -711,7 +720,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    "Initial ticket request Host: %s User: \"%s\" \"%s\"",
 	       inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
 
-	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
+	    if ((i = check_princ(kdc_context, req_name_ptr, req_inst_ptr, 0,
 				 &a_name_data, &k5key, 0, &ck5life))) {
 		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_low = a_name_data.key_high = 0;
@@ -726,7 +735,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		    "INITIAL request from %s.%s for %s.%s", req_name_ptr,
 		    req_inst_ptr, service, instance, 0);
 	    /* this does all the checking */
-	    if ((i = check_princ(service, instance, lifetime,
+	    if ((i = check_princ(kdc_context, service, instance, lifetime,
 				 &s_name_data, &k5key, 1, &sk5life))) {
 		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_high = a_name_data.key_low = 0;
@@ -858,7 +867,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 			       KERB_ERR_PRINCIPAL_UNKNOWN, lt);
 		return;
 	    }
-	    if (set_tgtkey(tktrlm, kvno, 0)) {
+	    if (set_tgtkey(kdc_context, tktrlm, kvno, 0)) {
 	      lt = klog(L_ERR_UNK,
 			  "FAILED set_tgtkey realm %s, kvno %d. Host: %s ",
 			  tktrlm, kvno, inet_ntoa(client_host));
@@ -870,7 +879,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    kerno = krb_rd_req(auth, "krbtgt", tktrlm, client_host.s_addr,
 		ad, 0);
 	    if (kerno) {
-		if (set_tgtkey(tktrlm, kvno, 1)) {
+		if (set_tgtkey(kdc_context, tktrlm, kvno, 1)) {
 		    lt = klog(L_ERR_UNK,
 			      "FAILED 3des set_tgtkey realm %s, kvno %d. Host: %s ",
 			      tktrlm, kvno, inet_ntoa(client_host));
@@ -919,7 +928,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		     "Can't authorize password changed based on TGT");
 		return;
 	    }
-	    kerno = check_princ(service, instance, req_life,
+	    kerno = check_princ(kdc_context, service, instance, req_life,
 				&s_name_data, &k5key, 1, &sk5life);
 	    if (kerno) {
 		kerb_err_reply(client, pkt, kerno, "check_princ failed");
@@ -1033,14 +1042,14 @@ kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string
 }
 
 static int
-check_princ(char *p_name, char *instance, int lifetime, Principal *p,
-	    krb5_keyblock *k5key, int issrv, krb5_deltat *k5life)
+check_princ(krb5_context kdc_context, char *p_name, char *instance, int lifetime, 
+            Principal *p, krb5_keyblock *k5key, int issrv, krb5_deltat *k5life)
 {
     static int n;
     static int more;
  /* long trans; */
 
-    n = kerb_get_principal(p_name, instance, p, &more, k5key, 0,
+    n = kerb_get_principal(kdc_context, p_name, instance, p, &more, k5key, 0,
 			   issrv, k5life);
     klog(L_ALL_REQ,
 	 "Principal: \"%s\", Instance: \"%s\" Lifetime = %d n = %d",
@@ -1143,7 +1152,7 @@ check_princ(char *p_name, char *instance, int lifetime, Principal *p,
 
 /* Set the key for krb_rd_req so we can check tgt */
 static int
-set_tgtkey(char *r, krb5_kvno kvno, krb5_boolean use_3des)
+set_tgtkey(krb5_context kdc_context, char *r, krb5_kvno kvno, krb5_boolean use_3des)
 {
     int     n;
     static char lastrealm[REALM_SZ] = "";
@@ -1161,7 +1170,7 @@ set_tgtkey(char *r, krb5_kvno kvno, krb5_boolean use_3des)
 
 /*  log("Getting key for %s", r); */
 
-    n = kerb_get_principal("krbtgt", r, p, &more, &k5key, kvno, 1, NULL);
+    n = kerb_get_principal(kdc_context, "krbtgt", r, p, &more, &k5key, kvno, 1, NULL);
     if (n == 0)
 	return (KFAILURE);
 

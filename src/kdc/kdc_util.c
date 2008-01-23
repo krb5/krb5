@@ -88,8 +88,8 @@ kdc_initialize_rcache(krb5_context kcontext, char *rcache_name)
  * The replacement should be freed with krb5_free_authdata().
  */
 krb5_error_code
-concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
-			  krb5_authdata ***output)
+concat_authorization_data(krb5_context kdc_context, krb5_authdata **first,
+			  krb5_authdata **second, krb5_authdata ***output)
 {
     register int i, j;
     register krb5_authdata **ptr, **retdata;
@@ -135,7 +135,7 @@ concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
 }
 
 krb5_boolean
-realm_compare(krb5_principal princ1, krb5_principal princ2)
+realm_compare(krb5_context kdc_context, krb5_principal princ1, krb5_principal princ2)
 {
     krb5_data *realm1 = krb5_princ_realm(kdc_context, princ1);
     krb5_data *realm2 = krb5_princ_realm(kdc_context, princ2);
@@ -147,7 +147,7 @@ realm_compare(krb5_principal princ1, krb5_principal princ2)
  * Returns TRUE if the kerberos principal is the name of a Kerberos ticket
  * service.
  */
-krb5_boolean krb5_is_tgs_principal(krb5_principal principal)
+krb5_boolean krb5_is_tgs_principal(krb5_context kdc_context, krb5_principal principal)
 {
     if ((krb5_princ_size(kdc_context, principal) > 0) &&
 	data_eq_string (*krb5_princ_component(kdc_context, principal, 0),
@@ -187,9 +187,9 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
 }
 
 krb5_error_code 
-kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
-		    krb5_data *pkt, krb5_ticket **ticket,
-		    krb5_keyblock **subkey)
+kdc_process_tgs_req(krb5_context kdc_context, krb5_kdc_req *request,
+		    const krb5_fulladdr *from, krb5_data *pkt,
+		    krb5_ticket **ticket, krb5_keyblock **subkey)
 {
     krb5_pa_data       ** tmppa;
     krb5_ap_req 	* apreq;
@@ -200,6 +200,10 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     krb5_auth_context 	  auth_context = NULL;
     krb5_authenticator	* authenticator = NULL;
     krb5_checksum 	* his_cksum = NULL;
+    kdc_realm_t *kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 /*    krb5_keyblock 	* key = NULL;*/
 /*    krb5_kvno 		  kvno = 0;*/
 
@@ -374,17 +378,22 @@ cleanup:
  * much else. -- tlyu
  */
 krb5_error_code
-kdc_get_server_key(krb5_ticket *ticket, krb5_keyblock **key, krb5_kvno *kvno)
+kdc_get_server_key(krb5_context kdc_context, krb5_ticket *ticket,
+		   krb5_keyblock **key, krb5_kvno *kvno)
 {
     krb5_error_code 	  retval;
     krb5_db_entry 	  server;
     krb5_boolean 	  more;
     int	nprincs;
     krb5_key_data	* server_key;
+    kdc_realm_t		*kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     nprincs = 1;
 
-    if ((retval = krb5_db_get_principal(kdc_context, ticket->server,
+    if ((retval = mt_krb5_db_get_principal(kdc_context, ticket->server,
 					&server, &nprincs,
 					&more))) {
 	return(retval);
@@ -555,9 +564,9 @@ data2string (krb5_data *d)
 }
 
 krb5_error_code 
-add_to_transited(krb5_data *tgt_trans, krb5_data *new_trans,
-		 krb5_principal tgs, krb5_principal client,
-		 krb5_principal server)
+add_to_transited(krb5_context kdc_context, krb5_data *tgt_trans,
+		 krb5_data *new_trans, krb5_principal tgs,
+		 krb5_principal client, krb5_principal server)
 {
   krb5_error_code retval;
   char        *realm;
@@ -1111,12 +1120,16 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
 		       KDC_OPT_VALIDATE)
 
 int
-validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
-		     krb5_ticket *ticket, krb5_timestamp kdc_time,
-		     const char **status)
+validate_tgs_request(krb5_context kdc_context, register krb5_kdc_req *request,
+		     krb5_db_entry server, krb5_ticket *ticket,
+		     krb5_timestamp kdc_time, const char **status)
 {
     int		errcode;
     int		st_idx = 0;
+    kdc_realm_t *kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(kdc_context->default_realm, strlen(kdc_context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     /*
      * If an illegal option is set, ignore it.
@@ -1160,7 +1173,7 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 	    return KRB_AP_ERR_NOT_US;
 	}
 	/* ...that the first component is krbtgt... */
-	if (!krb5_is_tgs_principal(ticket->server)) {
+	if (!krb5_is_tgs_principal(kdc_context, ticket->server)) {
 	    *status = "BAD TGS SERVER NAME";
 	    return KRB_AP_ERR_NOT_US;
 	}
@@ -1313,7 +1326,8 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 	    *status = "NO_2ND_TKT";
 	    return(KDC_ERR_BADOPTION);
 	}
-	if (!krb5_principal_compare(kdc_context, request->second_ticket[st_idx]->server,
+	if (!krb5_principal_compare(kdc_context,
+				    request->second_ticket[st_idx]->server,
 				    tgs_server)) {
 		*status = "2ND_TKT_NOT_TGS";
 		return(KDC_ERR_POLICY);
@@ -1577,4 +1591,20 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
     }
     strcat(s, "}");
     return;
+}
+
+krb5_error_code
+mt_krb5_db_get_principal(krb5_context kcontext,
+                      krb5_const_principal search_for,
+                      krb5_db_entry * entries,
+                      int *nentries, krb5_boolean * more)
+{
+    int errorcode = 0;
+
+    unlock_kdc();
+    errorcode = krb5_db_get_principal(kcontext, search_for,
+                                         entries, nentries, more);
+    lock_kdc();
+
+    return errorcode;
 }

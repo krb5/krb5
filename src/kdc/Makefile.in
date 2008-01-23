@@ -33,7 +33,8 @@ SRCS= \
 	$(srcdir)/policy.c \
 	$(srcdir)/extern.c \
 	$(srcdir)/replay.c \
-	$(srcdir)/kerberos_v4.c
+	$(srcdir)/kerberos_v4.c \
+        $(srcdir)/kdc_request_queue.c
 
 OBJS= \
 	kdc5_err.o \
@@ -47,7 +48,8 @@ OBJS= \
 	policy.o \
 	extern.o \
 	replay.o \
-	kerberos_v4.o
+	kerberos_v4.o \
+        kdc_request_queue.o
 
 RT_OBJS= rtest.o \
 	kdc_util.o \
@@ -63,7 +65,7 @@ kdc5_err.h: kdc5_err.et
 kdc5_err.o: kdc5_err.h
 
 krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
-	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
+	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB) -lpthread
 
 rtest: $(RT_OBJS) $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o rtest $(RT_OBJS) $(KDB5_LIBS) $(KADM_COMM_LIBS) $(KRB5_BASE_LIBS)
@@ -212,6 +214,19 @@ $(OUTPRE)kerberos_v4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   extern.h kdc_util.h kerberos_v4.c
+$(OUTPRE)kdc_req_queue.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/klog.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/krb_db.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
+  extern.h kdc_util.h kdc_req_queue.c
 $(OUTPRE)fakeka.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \

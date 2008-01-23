@@ -32,7 +32,6 @@
 /* real declarations of KDC's externs */
 kdc_realm_t	**kdc_realmlist = (kdc_realm_t **) NULL;
 int		kdc_numrealms = 0;
-kdc_realm_t	*kdc_active_realm = (kdc_realm_t *) NULL;
 krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
 krb5_rcache	kdc_rcache = (krb5_rcache) NULL;
@@ -40,3 +39,40 @@ krb5_keyblock	psr_key;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */
 volatile int signal_requests_hup = 0;   /* ditto */
+
+krb5_context def_kdc_context;
+
+#ifdef USE_THREADS
+krb5_int32 thread_count;
+k5_mutex_t kdc_lock;
+
+inline void sleep_kdc(pthread_cond_t *cond)
+{
+	pthread_cond_wait(cond, &kdc_lock.os.p);
+}
+
+inline void wakeup_kdc(pthread_cond_t *cond)
+{
+	pthread_cond_broadcast(cond);
+}
+#endif
+
+inline void lock_kdc()
+{
+#ifdef USE_THREADS
+	int rc;
+
+	rc = k5_mutex_lock(&kdc_lock);
+	assert (rc == 0);
+#endif
+}
+
+inline void unlock_kdc()
+{
+#ifdef USE_THREADS
+	int rc;
+
+	rc = k5_mutex_unlock(&kdc_lock);
+	assert (rc == 0);
+#endif
+}

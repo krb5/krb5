@@ -566,6 +566,10 @@ get_entry_data(krb5_context context,
     krb5_deltat *delta;
     krb5_keyblock *keys;
     krb5_key_data *entry_key;
+    kdc_realm_t *realm;
+
+    realm = find_realm_data(context->default_realm, strlen(context->default_realm));
+    assert(realm != NULL);
 
     switch (type) {
     case krb5plugin_preauth_entry_request_certificate:
@@ -605,7 +609,7 @@ get_entry_data(krb5_context context,
 	    if (krb5_dbe_find_enctype(context, entry, request->ktype[i],
 				      -1, 0, &entry_key) != 0)
 		continue;
-	    if (krb5_dbekd_decrypt_key_data(context, &master_keyblock,
+	    if (krb5_dbekd_decrypt_key_data(context, &realm->realm_mkey,
 					    entry_key, &keys[k], NULL) != 0) {
 		if (keys[k].contents != NULL)
 		    krb5_free_keyblock_contents(context, &keys[k]);
@@ -795,8 +799,9 @@ const char *missing_required_preauth(krb5_db_entry *client,
     return 0;
 }
 
-void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
-			   krb5_db_entry *server, krb5_data *e_data)
+void get_preauth_hint_list(krb5_context kdc_context, krb5_kdc_req *request,
+			   krb5_db_entry *client, krb5_db_entry *server,
+			   krb5_data *e_data)
 {
     int hw_only;
     krb5_preauth_systems *ap;
@@ -1240,6 +1245,10 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     krb5_int32			start;
     krb5_timestamp		timenow;
     krb5_error_code		decrypt_err = 0;
+    kdc_realm_t			*kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(context->default_realm, strlen(context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     scratch.data = pa->contents;
     scratch.length = pa->length;
@@ -1637,7 +1646,7 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
 	padata->length = 0;
 	break;
     case KRB5_KDB_SALTTYPE_NOREALM:
-	if ((retval = krb5_principal2salt_norealm(kdc_context, 
+	if ((retval = krb5_principal2salt_norealm(context, 
 						   request->client,
 						   &salt_data)))
 	    goto cleanup;
@@ -1651,7 +1660,7 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
 	   variable that specifies the old cell name. */
 	padata->pa_type = KRB5_PADATA_AFS3_SALT;
 	/* it would be just like ONLYREALM, but we need to pass the 0 */
-	scratch = krb5_princ_realm(kdc_context, request->client);
+	scratch = krb5_princ_realm(context, request->client);
 	if ((padata->contents = malloc(scratch->length+1)) == NULL) {
 	    retval = ENOMEM;
 	    goto cleanup;
@@ -1661,7 +1670,7 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
 	padata->contents[scratch->length] = 0;
 	break;
     case KRB5_KDB_SALTTYPE_ONLYREALM:
-	scratch = krb5_princ_realm(kdc_context, request->client);
+	scratch = krb5_princ_realm(context, request->client);
 	if ((padata->contents = malloc(scratch->length)) == NULL) {
 	    retval = ENOMEM;
 	    goto cleanup;
@@ -1849,6 +1858,10 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
     char response[9];
     char inputblock[8];
     krb5_data predict_response;
+    kdc_realm_t *kdc_active_realm;
+
+    kdc_active_realm = find_realm_data(context->default_realm, strlen(context->default_realm));
+    assert(kdc_active_realm != NULL);
 
     memset(&sc, 0, sizeof(sc));
     memset(&psr, 0, sizeof(psr));
@@ -1876,55 +1889,55 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 
       sc.sam_type = 0;
 
-      retval = krb5_copy_principal(kdc_context, request->client, &newp);
+      retval = krb5_copy_principal(context, request->client, &newp);
       if (retval) {
 	com_err("krb5kdc", retval, "copying client name for preauth probe");
 	return retval;
       }
 
       probeslot = krb5_princ_size(context, newp)++;
-      krb5_princ_name(kdc_context, newp) = 
-	realloc(krb5_princ_name(kdc_context, newp),
+      krb5_princ_name(context, newp) = 
+	realloc(krb5_princ_name(context, newp),
 		krb5_princ_size(context, newp) * sizeof(krb5_data));
 
       for(sam_ptr = sam_inst_map; sam_ptr->name; sam_ptr++) {
-	krb5_princ_component(kdc_context,newp,probeslot)->data = sam_ptr->name;
-	krb5_princ_component(kdc_context,newp,probeslot)->length = 
+	krb5_princ_component(context,newp,probeslot)->data = sam_ptr->name;
+	krb5_princ_component(context,newp,probeslot)->length = 
 	  strlen(sam_ptr->name);
 	npr = 1;
-	retval = krb5_db_get_principal(kdc_context, newp, &assoc, &npr, &more);
+	retval = mt_krb5_db_get_principal(context, newp, &assoc, &npr, &more);
 	if(!retval && npr) {
 	  sc.sam_type = sam_ptr->sam_type;
 	  break;
 	}
       }
 
-      krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
-      krb5_princ_component(kdc_context,newp,probeslot)->length = 0;
+      krb5_princ_component(context,newp,probeslot)->data = 0;
+      krb5_princ_component(context,newp,probeslot)->length = 0;
       krb5_princ_size(context, newp)--;
 
-      krb5_free_principal(kdc_context, newp);
+      krb5_free_principal(context, newp);
 
       /* if sc.sam_type is set, it worked */
       if (sc.sam_type) {
 	/* so use assoc to get the key out! */
 	{
 	  /* here's what do_tgs_req does */
-	  retval = krb5_dbe_find_enctype(kdc_context, &assoc,
+	  retval = krb5_dbe_find_enctype(context, &assoc,
 					 ENCTYPE_DES_CBC_RAW,
 					 KRB5_KDB_SALTTYPE_NORMAL,
 					 0,		/* Get highest kvno */
 					 &assoc_key);
 	  if (retval) {
 	    char *sname;
-	    krb5_unparse_name(kdc_context, request->client, &sname);
+	    krb5_unparse_name(context, request->client, &sname);
 	    com_err("krb5kdc", retval, 
 		    "snk4 finding the enctype and key <%s>", sname);
 	    free(sname);
 	    return retval;
 	  }
 	  /* convert server.key into a real key */
-	  retval = krb5_dbekd_decrypt_key_data(kdc_context,
+	  retval = krb5_dbekd_decrypt_key_data(context,
 					       &master_keyblock, 
 					       assoc_key, &encrypting_key,
 					       NULL);
@@ -2051,7 +2064,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 
 	memset(inputblock, 0, 8);
 
-	retval = krb5_c_make_random_key(kdc_context, ENCTYPE_DES_CBC_CRC,
+	retval = krb5_c_make_random_key(context, ENCTYPE_DES_CBC_CRC,
 					&session_key);
 
 	if (retval) {
@@ -2070,7 +2083,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	  inputblock[i] = '0' + ((session_key.contents[i]/2) % 10);
 	}
 	if (session_key.contents)
-	  krb5_free_keyblock_contents(kdc_context, &session_key);
+	  krb5_free_keyblock_contents(context, &session_key);
 
 	/* retval = krb5_finish_key(kdc_context, &eblock); */
 	/* now we have inputblock containing the 8 byte input to DES... */
@@ -2096,7 +2109,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	    cipher.ciphertext.length = 8;
 	    cipher.ciphertext.data = outputblock;
 
-	    if ((retval = krb5_c_encrypt(kdc_context, &encrypting_key,
+	    if ((retval = krb5_c_encrypt(context, &encrypting_key,
 					 /* XXX */ 0, 0, &plain, &cipher))) {
 		com_err("krb5kdc", retval, "snk4 response generation failed");
 		return retval;
@@ -2297,7 +2310,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 	rep.server = "SAM/rc";  /* Should not match any principal name. */
 	rep.ctime = psr->stime;
 	rep.cusec = psr->susec;
-	retval = krb5_rc_store(kdc_context, kdc_rcache, &rep);
+	retval = krb5_rc_store(context, kdc_rcache, &rep);
 	if (retval) {
 	    com_err("krb5kdc", retval, "SAM psr replay attack!");
 	    goto cleanup;

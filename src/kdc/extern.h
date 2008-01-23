@@ -38,7 +38,7 @@ typedef struct __kdc_realm_data {
  * The db_context is then associated with the realm keytab using 
  * krb5_ktkdb_resolv(). There should be nothing in the context which 
  * cannot span multiple realms -- proven */
-    krb5_context	realm_context;	/* Context to be used for realm	    */
+    krb5_context	*realm_context;	/* Context to be used for realm	    */
     krb5_keytab		realm_keytab; 	/* keytab to be used for this realm */
     char *		realm_profile;	/* Profile file for this realm	    */
     /*
@@ -68,7 +68,6 @@ typedef struct __kdc_realm_data {
 
 extern kdc_realm_t	**kdc_realmlist;
 extern int		kdc_numrealms;
-extern kdc_realm_t	*kdc_active_realm;
 
 kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 
@@ -77,7 +76,6 @@ kdc_realm_t *find_realm_data (char *, krb5_ui_4);
  * realm data.  This allows us to support multiple realms with minimal logic
  * changes.
  */
-#define	kdc_context			kdc_active_realm->realm_context
 #define	max_life_for_realm		kdc_active_realm->realm_maxlife
 #define	max_renewable_life_for_realm	kdc_active_realm->realm_maxrlife
 #define	master_keyblock			kdc_active_realm->realm_mkey
@@ -93,4 +91,18 @@ extern krb5_keyblock	psr_key;	/* key for predicted sam response */
 
 extern volatile int signal_requests_exit;
 extern volatile int signal_requests_hup;
+
+extern inline void lock_kdc(void);
+extern inline void unlock_kdc(void);
+
+#ifdef USE_THREADS
+extern inline void sleep_kdc(pthread_cond_t *cond);
+extern inline void wakeup_kdc(pthread_cond_t *cond);
+
+extern krb5_int32 thread_count;
+extern k5_mutex_t kdc_lock;
+#endif /* USE_THREADS */
+
+
+extern krb5_context def_kdc_context;
 #endif /* __KRB5_KDC_EXTERN__ */
