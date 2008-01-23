@@ -1812,7 +1812,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 		 * radix_encode, gss_seal, plus slop.
 		 */
 		char in[FTP_BUFSIZ*3/2], out[FTP_BUFSIZ*3/2];
-		int length, kerror;
+		int length = 0, kerror;
 		if (n) sprintf(in, "%d%c", n, cont_char);
 		else in[0] = '\0';
 		strncat(in, buf, sizeof (in) - strlen(in) - 1);

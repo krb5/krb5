@@ -75,4 +75,9 @@ cc_int32 ccapi_context_compare (cc_context_t  in_context,
                                 cc_context_t  in_compare_to_context,
                                 cc_uint32    *out_equal);
 
+#ifdef WIN32
+void cci_thread_init__auxinit();
+#endif
+
+
 #endif /* CCAPI_CONTEXT_H */

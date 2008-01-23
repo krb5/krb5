@@ -57,9 +57,10 @@ typedef mach_port_t ccs_pipe_t;  /* Mach IPC port */
 #else
 
 #ifdef WIN32
-/* On Windows, a pipe is the name of the endpoint to which to send the reply: */
-typedef char* ccs_pipe_t;
-#define CCS_PIPE_NULL (char*)NULL
+/* On Windows, a pipe is s struct: */
+#include "ccs_win_pipe.h"
+typedef struct ccs_win_pipe_t* ccs_pipe_t;
+#define CCS_PIPE_NULL (ccs_pipe_t)NULL
 
 #else
 typedef int ccs_pipe_t; /* Unix domain socket */
@@ -67,6 +68,7 @@ typedef int ccs_pipe_t; /* Unix domain socket */
 
 #endif
 #endif
+
 #ifdef TARGET_OS_MAC
 #pragma mark -
 #endif

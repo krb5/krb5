@@ -255,14 +255,6 @@ error_message(long code)
 
 oops:
 
-#if TARGET_OS_MAC
-	{
-		/* ComErr doesn't know about this error, ask the system */
-		/* Of course there's no way to tell if it knew what error it got */
-		return (strerror (code));
-	}
-#endif
-
 	cp = get_thread_buffer();
 	if (cp == NULL)
 	    return "Unknown error code";

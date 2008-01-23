@@ -300,15 +300,15 @@ krb5_verify_tkt_def(context, client, server, cred_ses_key,
 	return retval;
     }
     
-    if (server && !krb5_principal_compare(context, server, tkt->server)){
-	return KRB5KRB_AP_WRONG_PRINC;
-    }
-    
     if (auth_debug){ 
-	fprintf(stderr,"krb5_verify_tkt_def: verified target server\n");
+	fprintf(stderr,"krb5_verify_tkt_def: verifying target server\n");
 	dump_principal(context, "server", server); 
 	dump_principal(context, "tkt->server", tkt->server); 
     } 	
+    
+    if (server && !krb5_principal_compare(context, server, tkt->server)){
+	return KRB5KRB_AP_WRONG_PRINC;
+    }
     
     /* get the default keytab */
     if ((retval = krb5_kt_default(context, &keytabid))){

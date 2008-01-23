@@ -520,7 +520,15 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 #endif
 #if TARGET_OS_MAC
 # include <architecture/byte_order.h>
-# define SWAP16			OSSwapInt16
+# if 0 /* This causes compiler warnings.  */
+#  define SWAP16		OSSwapInt16
+# else
+#  define SWAP16		k5_swap16
+static inline unsigned int k5_swap16 (unsigned int x) {
+    x &= 0xffff;
+    return (x >> 8) | ((x & 0xff) << 8);
+}
+# endif
 # define SWAP32			OSSwapInt32
 # define SWAP64			OSSwapInt64
 #endif

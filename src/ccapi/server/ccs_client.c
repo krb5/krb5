@@ -161,7 +161,7 @@ cc_int32 ccs_client_uses_pipe (ccs_client_t  in_client,
     if (!out_uses_pipe) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        *out_uses_pipe = (in_client->client_pipe == in_pipe);
+        err = ccs_pipe_compare (in_client->client_pipe, in_pipe, out_uses_pipe);
     }
     
     return cci_check_error (err);    

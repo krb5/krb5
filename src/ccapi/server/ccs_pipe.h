@@ -31,6 +31,10 @@
 
 cc_int32 ccs_pipe_valid (ccs_pipe_t in_pipe);
 
+cc_int32 ccs_pipe_compare (ccs_pipe_t  in_pipe,
+                           ccs_pipe_t  in_compare_to_pipe,
+                           cc_uint32  *out_equal);
+
 cc_int32 ccs_pipe_copy (ccs_pipe_t *out_pipe,
 			ccs_pipe_t  in_pipe);
 

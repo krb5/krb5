@@ -82,19 +82,17 @@ static char * v4_klog (int, const char *, ...)
     ;
 #define klog v4_klog
 
-/* take this out when we don't need it anymore */
-int krbONE = 1;
-/* XXX inline former contents of krb_conf.h for now */
 /* Byte ordering */
-extern int krbONE;
-#define		HOST_BYTE_ORDER	(* (char *) &krbONE)
-#define		MSB_FIRST		0	/* 68000, IBM RT/PC */
-#define		LSB_FIRST		1	/* Vax, PC8086 */
-
-int     f;
-
-/* XXX several files in libkdb know about this */
-char *progname;
+/*#define		MSB_FIRST		0	/ * 68000, IBM RT/PC */
+/*#define		LSB_FIRST		1	/ * Vax, PC8086 */
+#if defined K5_LE
+# define HOST_BYTE_ORDER 1
+#elif defined K5_BE
+# define HOST_BYTE_ORDER 0
+#else
+static int krbONE = 1;
+# define HOST_BYTE_ORDER (* (char *) &krbONE)
+#endif
 
 #ifndef BACKWARD_COMPAT
 static Key_schedule master_key_schedule;
@@ -149,8 +147,8 @@ static void hang(void);
 
 static krb5_data *response;
 
-void kerberos_v4 (krb5_context, struct sockaddr_in *, KTEXT);
-void kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
+static void kerberos_v4 (krb5_context, struct sockaddr_in *, KTEXT);
+static void kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
 static int set_tgtkey (krb5_context, char *, krb5_kvno, krb5_boolean);
 
 /* Attributes converted from V5 to V4 - internal representation */
@@ -310,8 +308,7 @@ static char * v4_klog( int type, const char *format, ...)
 }
 
 static
-int krb4_sendto(int s, const char *msg, int len, int flags,
-		const struct sockaddr *to, int to_len)
+int set_response(const char *msg, int len)
 {
     if (  !(response = (krb5_data *) malloc( sizeof *response))) {
 	return ENOMEM;
@@ -453,8 +450,10 @@ kerb_get_principal(krb5_context kdc_context, char *name,
 					  local_realm, &search)))
 	return(0);
 
-    if ((retval = krb5_db_get_principal(kdc_context, search, &entries, 
-					&nprinc, &more5))) {
+    /* The krb4 support in the KDC is not thread-safe yet, so maintain
+       the global lock until that gets fixed.  */
+    if ((retval = get_principal_locked(kdc_context, search, &entries, 
+				       &nprinc, &more5))) {
         krb5_free_principal(kdc_context, search);
         return(0);
     }
@@ -659,8 +658,8 @@ kerberos_v4(krb5_context kdc_context, struct sockaddr_in *client, KTEXT pkt)
     /* check packet version */
     if (req_version != KRB_PROT_VERSION) {
 	lt = klog(L_KRB_PERR,
-	"KRB prot version mismatch: KRB =%d request = %d",
-		  KRB_PROT_VERSION, req_version, 0);
+		  "KRB prot version mismatch: KRB =%d request = %d",
+		  KRB_PROT_VERSION, req_version);
 	/* send an error reply */
 	req_name_ptr = req_inst_ptr = req_realm_ptr = "";
 	kerb_err_reply(client, pkt, KERB_ERR_PKT_VER, lt);
@@ -717,8 +716,8 @@ kerberos_v4(krb5_context kdc_context, struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = &rpkt_st;
 
 	    klog(L_INI_REQ,
-	    "Initial ticket request Host: %s User: \"%s\" \"%s\"",
-	       inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
+		 "Initial ticket request Host: %s User: \"%s\" \"%s\"",
+		 inet_ntoa(client_host), req_name_ptr, req_inst_ptr);
 
 	    if ((i = check_princ(kdc_context, req_name_ptr, req_inst_ptr, 0,
 				 &a_name_data, &k5key, 0, &ck5life))) {
@@ -732,8 +731,8 @@ kerberos_v4(krb5_context kdc_context, struct sockaddr_in *client, KTEXT pkt)
 	    tk->length = 0;	/* init */
 	    if (strcmp(service, "krbtgt"))
 		klog(L_NTGT_INTK,
-		    "INITIAL request from %s.%s for %s.%s", req_name_ptr,
-		    req_inst_ptr, service, instance, 0);
+		     "INITIAL request from %s.%s for %s.%s", req_name_ptr,
+		     req_inst_ptr, service, instance);
 	    /* this does all the checking */
 	    if ((i = check_princ(kdc_context, service, instance, lifetime,
 				 &s_name_data, &k5key, 1, &sk5life))) {
@@ -812,8 +811,7 @@ kerberos_v4(krb5_context kdc_context, struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(req_name_ptr, req_inst_ptr,
 		req_realm_ptr, req_time_ws, 0, a_name_data.exp_date,
 		a_name_data.key_version, ciph);
-	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, sizeof (struct sockaddr_in));
+	    set_response((char *) rpkt->dat, rpkt->length);
 	    memset(&a_name_data, 0, sizeof(a_name_data));
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
@@ -912,8 +910,8 @@ kerberos_v4(krb5_context kdc_context, struct sockaddr_in *client, KTEXT pkt)
 	    str_length_check(instance, INST_SZ);
 
 	    klog(L_APPL_REQ, "APPL Request %s.%s@%s on %s for %s.%s",
-	     ad->pname, ad->pinst, ad->prealm,
-	     inet_ntoa(client_host), service, instance, 0);
+		 ad->pname, ad->pinst, ad->prealm,
+		 inet_ntoa(client_host), service, instance);
 	    req_name_ptr = ad->pname;
 	    req_inst_ptr = ad->pinst;
 	    req_realm_ptr = ad->prealm;
@@ -990,8 +988,7 @@ kerberos_v4(krb5_context kdc_context, struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(ad->pname, ad->pinst,
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
-	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, sizeof (struct sockaddr_in));
+	    set_response((char *) rpkt->dat, rpkt->length);
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
 	}
@@ -1036,8 +1033,7 @@ kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string
     strncat(e_msg, string, sizeof(e_msg) - 1 - 19);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
-    krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
-	   (struct sockaddr *) client, sizeof (struct sockaddr_in));
+    set_response((char *) e_pkt->dat, e_pkt->length);
 
 }
 
@@ -1053,7 +1049,7 @@ check_princ(krb5_context kdc_context, char *p_name, char *instance, int lifetime
 			   issrv, k5life);
     klog(L_ALL_REQ,
 	 "Principal: \"%s\", Instance: \"%s\" Lifetime = %d n = %d",
-	 p_name, instance, lifetime, n, 0);
+	 p_name, instance, lifetime, n);
     
     if (n < 0) {
 	lt = klog(L_KRB_PERR, "Database unavailable!");
@@ -1068,14 +1064,13 @@ check_princ(krb5_context kdc_context, char *p_name, char *instance, int lifetime
      */
     if (n == 0) {
 	/* service unknown, log error, skip to next request */
-	lt = klog(L_ERR_UNK, "UNKNOWN \"%s\" \"%s\"", p_name,
-	    instance, 0);
+	lt = klog(L_ERR_UNK, "UNKNOWN \"%s\" \"%s\"", p_name, instance);
 	return KERB_ERR_PRINCIPAL_UNKNOWN;
     }
     if (more) {
 	/* not unique, log error */
 	lt = klog(L_ERR_NUN, "Principal NOT UNIQUE \"%s\" \"%s\"",
-		  p_name, instance, 0);
+		  p_name, instance);
 	return KERB_ERR_PRINCIPAL_NOT_UNIQUE;
     }
 
@@ -1125,8 +1120,7 @@ check_princ(krb5_context kdc_context, char *p_name, char *instance, int lifetime
     if (k5key->contents != NULL && K4KDC_ENCTYPE_OK(k5key->enctype)) {
 	if ((p->key_low == 0) && (p->key_high == 0)) {
 	    /* User has a null key */
-	    lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name,
-		      instance, 0);
+	    lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name, instance);
 	    return KERB_ERR_NULL_KEY;
 	}
     }

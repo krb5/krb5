@@ -145,8 +145,8 @@ process_tgs_req(krb5_context kdc_context, krb5_kdc_req *request,
        header? */
 
     nprincs = 1;
-    if ((errcode = mt_krb5_db_get_principal(kdc_context, request->server, &server,
-					&nprincs, &more))) {
+    if ((errcode = get_principal(kdc_context, request->server, &server,
+				 &nprincs, &more))) {
 	status = "LOOKING_UP_SERVER";
 	nprincs = 0;
 	goto cleanup;
@@ -796,7 +796,7 @@ find_alternate_tgs(krb5_context kdc_context, krb5_kdc_req *request,
 	tmp = *krb5_princ_realm(kdc_context, *pl2);
 	krb5_princ_set_realm(kdc_context, *pl2, 
 			     krb5_princ_realm(kdc_context, tgs_server));
-	retval = mt_krb5_db_get_principal(kdc_context, *pl2, server, nprincs, more);
+	retval = get_principal(kdc_context, *pl2, server, nprincs, more);
 	krb5_princ_set_realm(kdc_context, *pl2, &tmp);
 	if (retval) {
 	    *nprincs = 0;

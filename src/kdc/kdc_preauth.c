@@ -1,7 +1,7 @@
 /*
  * kdc/kdc_preauth.c
  *
- * Copyright 1995, 2003 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2003, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -1905,7 +1905,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	krb5_princ_component(context,newp,probeslot)->length = 
 	  strlen(sam_ptr->name);
 	npr = 1;
-	retval = mt_krb5_db_get_principal(context, newp, &assoc, &npr, &more);
+	retval = get_principal(context, newp, &assoc, &npr, &more);
 	if(!retval && npr) {
 	  sc.sam_type = sam_ptr->sam_type;
 	  break;

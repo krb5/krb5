@@ -200,6 +200,11 @@ typedef _W64 int 	 ssize_t;
 #define strncasecmp  strnicmp
 #endif
 
+/* VS2005 has deprecated strdup */
+#ifndef strdup
+#define strdup _strdup
+#endif
+
 HINSTANCE get_lib_instance(void);
 
 #define GETSOCKNAME_ARG2_TYPE	struct sockaddr

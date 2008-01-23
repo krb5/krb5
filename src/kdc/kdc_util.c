@@ -393,9 +393,9 @@ kdc_get_server_key(krb5_context kdc_context, krb5_ticket *ticket,
 
     nprincs = 1;
 
-    if ((retval = mt_krb5_db_get_principal(kdc_context, ticket->server,
-					&server, &nprincs,
-					&more))) {
+    if ((retval = get_principal(kdc_context, ticket->server,
+				&server, &nprincs,
+				&more))) {
 	return(retval);
     }
     if (more) {
@@ -1594,16 +1594,27 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
 }
 
 krb5_error_code
-mt_krb5_db_get_principal(krb5_context kcontext,
-                      krb5_const_principal search_for,
-                      krb5_db_entry * entries,
-                      int *nentries, krb5_boolean * more)
+get_principal_locked (krb5_context kcontext,
+		      krb5_const_principal search_for,
+		      krb5_db_entry *entries, int *nentries,
+		      krb5_boolean *more)
 {
+    return krb5_db_get_principal (kcontext, search_for, entries, nentries,
+				  more);
+}
+
+krb5_error_code
+get_principal (krb5_context kcontext,
+	       krb5_const_principal search_for,
+	       krb5_db_entry *entries, int *nentries, krb5_boolean *more)
+{
+    /* Eventually this will be used to manage locking while looking up
+       principals in the database.  */
     int errorcode = 0;
 
     unlock_kdc();
-    errorcode = krb5_db_get_principal(kcontext, search_for,
-                                         entries, nentries, more);
+    errorcode = get_principal_locked (kcontext, search_for, entries, nentries,
+				      more);
     lock_kdc();
 
     return errorcode;
