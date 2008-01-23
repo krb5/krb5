@@ -93,7 +93,7 @@ dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response,
     }
 #ifdef KRB5_KRB4_COMPAT
     else if (pkt->data[0] == 4)		/* old version */
-	retval = process_v4(def_kdc_context, pkt, from, response);
+	retval = process_v4(kdc_realmlist[0]->realm_context[thread_num], pkt, from, response);
 #endif
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
