@@ -977,7 +977,7 @@ static void fulladdr2sockaddr(struct sockaddr *sa, krb5_fulladdr *faddr)
             break;
 #endif
         default:
-            assert(0);
+            sa->sa_family = -1;
             break;
     }
 }
@@ -1923,14 +1923,22 @@ static void *service_thread(void *_thread_num)
             fulladdr2sockaddr(&saddr, req->from);
             if (saddr.sa_family == AF_INET)
                 saddr_len = sizeof(struct sockaddr_in);
-            else
+#ifdef KRB5_USE_INET6
+            else if (saddr.sa_family == AF_INET6)
                 saddr_len = sizeof(struct sockaddr_in6);
+#endif
+            else
+                saddr_len = 0;
 
             fulladdr2sockaddr(&daddr, req->to_addr);
             if (daddr.sa_family == AF_INET)
                 daddr_len = sizeof(struct sockaddr_in);
-            else
+#ifdef KRB5_USE_INET6
+            else if (daddr.sa_family == AF_INET6)
                 daddr_len = sizeof(struct sockaddr_in6);
+#endif
+            else
+                daddr_len = 0;
 
             cc = send_to_from(req->sockfd, req->response->data, (socklen_t) req->response->length, 0,
                     &saddr, saddr_len, &daddr, daddr_len);
