@@ -34,7 +34,7 @@ main()
 	bindir=/bin/.
 
 	if [ $# -eq 0 ]; then
-		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20; do
+		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20 40; do
 			test$t
 		done
 	else
@@ -45,7 +45,7 @@ main()
 			[0-9]*)
 				test$1;;
 			btree)
-				for t in 1 2 3 7 8 9 10 12 13; do
+				for t in 1 2 3 7 8 9 10 12 13 40; do
 					test$t
 				done;;
 			hash)
@@ -741,6 +741,56 @@ bsize=$bsize ffactor=$ffactor nelem=25000 cachesize=65536 failed"
 			exit 1
 		fi
 	done
+}
+
+# Test for a weird page split condition where an insertion into index
+# 0 of a page that would cause the new item to be the only item on the
+# left page results in index 0 of the right page being erroneously
+# skipped; this only happens with one particular key+data length for
+# each page size.
+test40 () {
+	echo "Test 40: btree: page split on index 0"
+	e=:
+	for psize in 512 1024 2048 4096 8192; do
+		echo "    page size $psize"
+		kdsizes=`awk 'BEGIN {
+			psize = '$psize'; hsize = int(psize/2);
+			for (kdsize = hsize-40; kdsize <= hsize; kdsize++) {
+				print kdsize;
+			}
+		}' /dev/null`
+
+		# Use a series of keylen+datalen values in the right
+		# neighborhood to find the one that triggers the bug.
+		# We could compute the exact size that triggers the
+		# bug but this additional fuzz may be useful.
+
+		# Insert keys in reverse order to maximize the chances
+		# for a split on index 0.
+
+		for kdsize in $kdsizes; do
+			awk 'BEGIN {
+				kdsize = '$kdsize';
+				for (i = 8; i-- > 0; ) {
+					s = sprintf("a%03d:%09d", i, kdsize);
+					for (j = 0; j < kdsize-20; j++) {
+						s = s "x";
+					}
+					printf("p\nka%03d\nd%s\n", i, s);
+				}
+				print "o";
+			}' /dev/null > $TMP2
+			sed -n 's/^d//p' $TMP2 | sort > $TMP1
+			$PROG -o $TMP3 -i psize=$psize btree $TMP2
+			if (cmp -s $TMP1 $TMP3); then :
+			else
+				echo "test40: btree: page size $psize, \
+keylen+datalen=$kdsize failed"
+				e='exit 1'
+			fi
+		done
+	done
+	$e
 }
 
 main $*
