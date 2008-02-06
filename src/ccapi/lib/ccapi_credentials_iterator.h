@@ -43,4 +43,10 @@ cc_int32 ccapi_credentials_iterator_next (cc_credentials_iterator_t  in_credenti
 cc_int32 ccapi_credentials_iterator_clone (cc_credentials_iterator_t  in_credentials_iterator,
                                            cc_credentials_iterator_t *out_credentials_iterator);
 
+cc_int32 cci_credentials_iterator_get_compat_version (cc_credentials_iterator_t  in_credentials_iterator,
+                                                      cc_uint32                 *out_compat_version);
+
+cc_int32 cci_credentials_iterator_set_compat_version (cc_credentials_iterator_t io_credentials_iterator,
+                                                      cc_uint32                 in_compat_version);
+
 #endif /* CCAPI_CREDENTIALS_ITERATOR_H */

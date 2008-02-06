@@ -96,4 +96,11 @@ cc_int32 ccapi_ccache_set_kdc_time_offset (cc_ccache_t io_ccache,
 cc_int32 ccapi_ccache_clear_kdc_time_offset (cc_ccache_t io_ccache,
                                              cc_uint32   in_credentials_version);
 
+cc_int32 cci_ccache_get_compat_version (cc_ccache_t  in_ccache,
+                                        cc_uint32   *out_compat_version);
+
+cc_int32 cci_ccache_set_compat_version (cc_ccache_t io_ccache,
+                                        cc_uint32   in_compat_version);
+
+
 #endif /* CCAPI_CCACHE_H */

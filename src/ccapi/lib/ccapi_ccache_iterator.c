@@ -36,6 +36,7 @@ typedef struct cci_ccache_iterator_d {
     cc_ccache_iterator_f *vector_functions;
 #endif
     cci_identifier_t identifier;
+    char *saved_ccache_name;
 } *cci_ccache_iterator_t;
 
 /* ------------------------------------------------------------------------ */
@@ -43,6 +44,7 @@ typedef struct cci_ccache_iterator_d {
 struct cci_ccache_iterator_d cci_ccache_iterator_initializer = { 
     NULL 
     VECTOR_FUNCTIONS_INITIALIZER, 
+    NULL,
     NULL
 };
 
@@ -125,6 +127,7 @@ cc_int32 ccapi_ccache_iterator_release (cc_ccache_iterator_t io_ccache_iterator)
     if (!err) {
         free ((char *) ccache_iterator->functions);
         cci_identifier_release (ccache_iterator->identifier);
+        free (ccache_iterator->saved_ccache_name);
         free (ccache_iterator);
     }
     
@@ -219,6 +222,52 @@ cc_int32 ccapi_ccache_iterator_clone (cc_ccache_iterator_t  in_ccache_iterator,
 
     cci_identifier_release (identifier);
     cci_stream_release (reply);
+    
+    return cci_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 cci_ccache_iterator_get_saved_ccache_name (cc_ccache_iterator_t   in_ccache_iterator,
+                                                    const char           **out_saved_ccache_name)
+{
+    cc_int32 err = ccNoError;
+    cci_ccache_iterator_t ccache_iterator = (cci_ccache_iterator_t) in_ccache_iterator;
+    
+    if (!in_ccache_iterator   ) { err = cci_check_error (ccErrBadParam); }
+    if (!out_saved_ccache_name) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        *out_saved_ccache_name = ccache_iterator->saved_ccache_name;
+    }
+    
+    return cci_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 cci_ccache_iterator_set_saved_ccache_name (cc_ccache_iterator_t  io_ccache_iterator,
+                                                    const char            *in_saved_ccache_name)
+{
+    cc_int32 err = ccNoError;
+    cci_ccache_iterator_t ccache_iterator = (cci_ccache_iterator_t) io_ccache_iterator;
+    char *new_saved_ccache_name = NULL;
+    
+    if (!io_ccache_iterator) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err && in_saved_ccache_name) {
+        new_saved_ccache_name = strdup (in_saved_ccache_name);
+        if (!new_saved_ccache_name) { err = ccErrNoMem; }
+    }
+    
+    if (!err) {
+        free (ccache_iterator->saved_ccache_name);
+        
+        ccache_iterator->saved_ccache_name = new_saved_ccache_name;
+        new_saved_ccache_name = NULL; /* take ownership */
+    }
+    
+    free (new_saved_ccache_name);
     
     return cci_check_error (err);
 }

@@ -36,6 +36,7 @@ typedef struct cci_credentials_iterator_d {
     cc_credentials_iterator_f *vector_functions;
 #endif
     cci_identifier_t identifier;
+    cc_uint32 compat_version;
 } *cci_credentials_iterator_t;
 
 /* ------------------------------------------------------------------------ */
@@ -43,7 +44,8 @@ typedef struct cci_credentials_iterator_d {
 struct cci_credentials_iterator_d cci_credentials_iterator_initializer = { 
     NULL 
     VECTOR_FUNCTIONS_INITIALIZER, 
-    NULL
+    NULL,
+    0
 };
 
 cc_credentials_iterator_f cci_credentials_iterator_f_initializer = { 
@@ -189,6 +191,45 @@ cc_int32 ccapi_credentials_iterator_clone (cc_credentials_iterator_t  in_credent
     
     cci_stream_release (reply);
     cci_identifier_release (identifier);
+    
+    return cci_check_error (err);
+}
+
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 cci_credentials_iterator_get_compat_version (cc_credentials_iterator_t  in_credentials_iterator,
+                                                      cc_uint32                 *out_compat_version)
+{
+    cc_int32 err = ccNoError;
+    cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
+    
+    if (!in_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
+    if (!out_compat_version     ) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        *out_compat_version = credentials_iterator->compat_version;
+    }
+    
+    return cci_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 cci_credentials_iterator_set_compat_version (cc_credentials_iterator_t io_credentials_iterator,
+                                                      cc_uint32                 in_compat_version)
+{
+    cc_int32 err = ccNoError;
+    cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) io_credentials_iterator;
+    
+    if (!io_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        credentials_iterator->compat_version = in_compat_version;
+    }
     
     return cci_check_error (err);
 }

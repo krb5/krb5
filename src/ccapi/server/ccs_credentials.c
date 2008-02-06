@@ -56,7 +56,7 @@ cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
     }
     
     if (!err) {
-        err = cci_cred_union_read (&credentials->cred_union, in_stream);
+        err = cci_credentials_union_read (&credentials->cred_union, in_stream);
     }
     
     if (!err && !(credentials->cred_union->version & in_ccache_version)) {
@@ -89,7 +89,7 @@ cc_int32 ccs_credentials_release (ccs_credentials_t io_credentials)
     cc_int32 err = ccNoError;
     
     if (!err && io_credentials) {
-        cci_cred_union_release (io_credentials->cred_union);
+        cci_credentials_union_release (io_credentials->cred_union);
         cci_identifier_release (io_credentials->identifier);
         free (io_credentials);
     }
@@ -112,7 +112,7 @@ cc_int32 ccs_credentials_write (ccs_credentials_t in_credentials,
     }
     
     if (!err) {
-        err = cci_cred_union_write (in_credentials->cred_union, io_stream);
+        err = cci_credentials_union_write (in_credentials->cred_union, io_stream);
     }
     
     return cci_check_error (err);    

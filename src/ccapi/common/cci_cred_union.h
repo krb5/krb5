@@ -28,14 +28,26 @@
 #define CCI_CRED_UNION_H
 
 #include "cci_types.h"
+#include <CredentialsCache2.h>
 
-cc_uint32 cci_cred_union_release (cc_credentials_union *io_credentials);
+cc_uint32 cci_credentials_union_release (cc_credentials_union *io_credentials);
 
-cc_uint32 cci_cred_union_read (cc_credentials_union **out_credentials_union,
-                               cci_stream_t           io_stream);
+cc_uint32 cci_credentials_union_read (cc_credentials_union **out_credentials_union,
+                                      cci_stream_t           io_stream);
 
-cc_uint32 cci_cred_union_write (const cc_credentials_union *in_credentials_union,
-                                cci_stream_t                io_stream);
+cc_uint32 cci_credentials_union_write (const cc_credentials_union *in_credentials_union,
+                                       cci_stream_t                io_stream);
 
+cc_uint32 cci_cred_union_release (cred_union *io_cred_union);
+
+cc_uint32 cci_credentials_union_to_cred_union (const cc_credentials_union  *in_credentials_union,
+                                               cred_union                 **out_cred_union);
+
+cc_uint32 cci_cred_union_to_credentials_union (const cred_union      *in_cred_union,
+                                               cc_credentials_union **out_credentials_union);
+
+cc_uint32 cci_cred_union_compare_to_credentials_union (const cred_union           *in_cred_union_compat,
+                                                       const cc_credentials_union *in_credentials_union,
+                                                       cc_uint32                  *out_equal);
 
 #endif /* CCI_CRED_UNION_H */

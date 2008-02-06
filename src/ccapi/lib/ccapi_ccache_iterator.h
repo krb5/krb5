@@ -43,4 +43,10 @@ cc_int32 ccapi_ccache_iterator_next (cc_ccache_iterator_t  in_ccache_iterator,
 cc_int32 ccapi_ccache_iterator_clone (cc_ccache_iterator_t  in_ccache_iterator,
                                       cc_ccache_iterator_t *out_ccache_iterator);
 
+cc_int32 cci_ccache_iterator_get_saved_ccache_name (cc_ccache_iterator_t   in_ccache_iterator,
+                                                    const char           **out_saved_ccache_name);
+
+cc_int32 cci_ccache_iterator_set_saved_ccache_name (cc_ccache_iterator_t  io_ccache_iterator,
+                                                    const char           *in_saved_ccache_name);
+
 #endif /* CCAPI_CCACHE_ITERATOR_H */

@@ -122,9 +122,6 @@ cc_int32 cc_initialize (cc_context_t  *out_context,
     if (!err) {
         switch (in_version) { 
             case ccapi_version_2: 
-                err = CC_BAD_API_VERSION;
-                break;
-                
             case ccapi_version_3:
             case ccapi_version_4:
             case ccapi_version_5:

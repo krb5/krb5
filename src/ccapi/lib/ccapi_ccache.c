@@ -45,6 +45,7 @@ typedef struct cci_ccache_d {
 #endif
     cci_identifier_t identifier;
     cc_time_t last_wait_for_change_time;
+    cc_uint32 compat_version;
 } *cci_ccache_t;
 
 /* ------------------------------------------------------------------------ */
@@ -379,7 +380,7 @@ cc_int32 ccapi_ccache_store_credentials (cc_ccache_t                 io_ccache,
     }
     
     if (!err) {
-        err = cci_cred_union_write (in_credentials_union, request);
+        err = cci_credentials_union_write (in_credentials_union, request);
     }
     
     if (!err) {
@@ -767,6 +768,45 @@ cc_int32 ccapi_ccache_clear_kdc_time_offset (cc_ccache_t io_ccache,
     }
     
     cci_stream_release (request);
+    
+    return cci_check_error (err);
+}
+
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 cci_ccache_get_compat_version (cc_ccache_t  in_ccache,
+                                        cc_uint32   *out_compat_version)
+{
+    cc_int32 err = ccNoError;
+    cci_ccache_t ccache = (cci_ccache_t) in_ccache;
+    
+    if (!in_ccache         ) { err = cci_check_error (ccErrBadParam); }
+    if (!out_compat_version) { err = cci_check_error (ccErrBadParam); }
+   
+    if (!err) {
+        *out_compat_version = ccache->compat_version;
+    }
+    
+    return cci_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 cci_ccache_set_compat_version (cc_ccache_t io_ccache,
+                                        cc_uint32   in_compat_version)
+{
+    cc_int32 err = ccNoError;
+    cci_ccache_t ccache = (cci_ccache_t) io_ccache;
+
+    if (!io_ccache) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        ccache->compat_version = in_compat_version;
+    }
     
     return cci_check_error (err);
 }
