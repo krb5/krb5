@@ -157,19 +157,6 @@ cc_int32 ccapi_ccache_release (cc_ccache_t io_ccache)
     if (!err) {
         cci_identifier_release (ccache->identifier);
         
-#if TARGET_OS_MAC
-#warning Workaround for AppleConnect crash causes leak
-        CFBundleRef main_bundle = CFBundleGetMainBundle ();
-        if (main_bundle) {
-            CFStringRef bundle_id = CFBundleGetIdentifier (main_bundle);
-            if (bundle_id) {
-                CFStringRef ac_id = CFSTR("com.apple.ist.ds.appleconnect");
-                if (CFStringCompare (bundle_id, ac_id, 0) == kCFCompareEqualTo) {
-                    return ccNoError;
-                }
-            }
-        }
-#endif
         free ((char *) ccache->functions);
         free (ccache);
     }
