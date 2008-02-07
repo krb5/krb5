@@ -257,7 +257,8 @@ __bt_dpage(dbp, h)
 				    *(db_pgno_t *)bl->bytes,
 				    *(u_int32_t *)(bl->bytes + sizeof(db_pgno_t)));
 			else if (bl->ksize)
-				(void)fprintf(tracefp, "%s/", bl->bytes);
+				(void)fprintf(tracefp, "%.*s/",
+					      (int)bl->ksize, bl->bytes);
 			if (bl->flags & P_BIGDATA)
 				(void)fprintf(tracefp,
 				    "big data page %lu size %u",
