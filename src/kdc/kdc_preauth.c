@@ -1834,10 +1834,10 @@ cleanup:
     return retval;
 }
     
-static struct {
+static struct sam {
   char* name;
   int   sam_type;
-} *sam_ptr, sam_inst_map[] = {
+} sam_inst_map[] = {
   { "SNK4", PA_SAM_TYPE_DIGI_PATH, },
   { "SECURID", PA_SAM_TYPE_SECURID, },
   { "GRAIL", PA_SAM_TYPE_GRAIL, },
@@ -1886,6 +1886,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
       krb5_key_data  *assoc_key;
       krb5_principal newp;
       int probeslot;
+      struct sam *sam_ptr = NULL;
 
       sc.sam_type = 0;
 
