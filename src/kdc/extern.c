@@ -49,6 +49,11 @@ k5_mutex_t kdc_lock;
 inline void sleep_kdc(pthread_cond_t *cond)
 {
 	pthread_cond_wait(cond, &kdc_lock.os.p);
+        /* This is a temporary fix. It has to be handled appropriately
+           while writing the shim layer for condition variables */
+#ifdef DEBUG_THREADS
+        kdc_lock.os.owner = pthread_self();
+#endif
 }
 
 inline void wakeup_kdc(pthread_cond_t *cond)
