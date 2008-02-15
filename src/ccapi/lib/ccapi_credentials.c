@@ -53,7 +53,7 @@ cc_credentials_f cci_credentials_f_initializer = {
     ccapi_credentials_compare
 };
 
-cc_credentials_union cci_cred_union_initializer = {
+cc_credentials_union cci_credentials_union_initializer = {
     0,
     { NULL }
 };
@@ -92,7 +92,7 @@ cc_int32 cci_credentials_read (cc_credentials_t *out_credentials,
     }
     
     if (!err) {
-        err = cci_cred_union_read (&credentials->data, in_stream);
+        err = cci_credentials_union_read (&credentials->data, in_stream);
     }
     
     if (!err) {
@@ -156,7 +156,7 @@ cc_int32 ccapi_credentials_release (cc_credentials_t io_credentials)
     if (!io_credentials) { err = ccErrBadParam; }
     
     if (!err) {
-        cci_cred_union_release (credentials->data);
+        cci_credentials_union_release (credentials->data);
         free ((char *) credentials->functions);
         cci_identifier_release (credentials->identifier);
         free (credentials);

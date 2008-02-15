@@ -140,13 +140,8 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
     if (!out_reply_stream ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = kipc_client_lookup_server (cci_server_bundle_id, cci_server_path, 
-                                         in_launch_server, &server_port);
-    }
-    
-    if (!err) {
         /* depending on how big the message is, use the fast inline buffer or  
-        * the slow dynamically allocated buffer */
+         * the slow dynamically allocated buffer */
         mach_msg_type_number_t request_length = cci_stream_size (in_request_stream);
         
         if (request_length > kCCAPIMaxILMsgSize) {
@@ -164,7 +159,7 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
             inl_request = cci_stream_data (in_request_stream);
         }
     }
-    
+
     if (!err) {
         request_port = pthread_getspecific (g_request_port_key);
         
@@ -183,6 +178,11 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
         err = mach_port_allocate (mach_task_self (), MACH_PORT_RIGHT_RECEIVE, &reply_port);
     }
 
+    if (!err) {
+        err = kipc_client_lookup_server (cci_server_bundle_id, cci_server_path, 
+                                         in_launch_server, TRUE, &server_port);
+    }
+    
     while (!err && !done) {
         if (!err && !MACH_PORT_VALID (*request_port)) {
             err = cci_mipc_create_client_connection (server_port, request_port);
@@ -196,15 +196,20 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
         }
         
         if (err == MACH_SEND_INVALID_DEST) {
+            if (try_count < 2) { 
+                try_count++;
+                err = ccNoError;
+            }
+
             if (request_port && MACH_PORT_VALID (*request_port)) {
                 mach_port_mod_refs (mach_task_self(), *request_port, MACH_PORT_RIGHT_SEND, -1 );
                 *request_port = MACH_PORT_NULL;
             }    
             
-            if (try_count < 2) { 
-                try_count++;
-                err = ccNoError;
-            }
+            /* Look up server name again without using the cached copy */
+            err = kipc_client_lookup_server (cci_server_bundle_id, cci_server_path, 
+                                             in_launch_server, FALSE, &server_port);
+            
         } else {
             /* Talked to server, though we may have gotten an error */
             done = 1;

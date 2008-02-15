@@ -173,8 +173,8 @@ NODEBUG=1
 
 CD=cd
 RM=del /q
-MKDIR=mkdir
-RMDIR=rmdir
+MKDIR=md
+RMDIR=rd
 ECHO=echo
 MAKECMD=nmake /nologo
 CP=copy /y

@@ -316,11 +316,11 @@ sub main {
         }
 
     print "Executing $cmdline\n";
-    local $argvsize = @ARGV;
+    local $argvsize     = @ARGV;
+    local $nmakeargs    = "";
     if ($argvsize > 0) {
-        print "\nArguments for NMAKE: ";
-        map {print " $_ "} @ARGV;
-        print "\n";
+        map {$nmakeargs .= " $_ "} @ARGV;
+        print "Arguments for NMAKE: $nmakeargs\n";
         }
        
     print "Info -- Using unix find in $odr->{unixfind}->{value}\n"   if ($verbose);
@@ -519,7 +519,7 @@ sub main {
         chdir("$wd\\athena") or die "Fatal -- couldn't chdir to source directory $wd\\athena\n";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         local $dbgswitch = ($odr->{debug}->{def}) ? " " : "NODEBUG=1";
-        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=1")
+        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=1 $nmakeargs")
             or die "Fatal -- build $buildtarget failed.";
             
         chdir("$wd")                        or die "Fatal -- couldn't chdir to $wd.";

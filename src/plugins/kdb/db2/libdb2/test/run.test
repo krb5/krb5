@@ -34,7 +34,7 @@ main()
 	bindir=/bin/.
 
 	if [ $# -eq 0 ]; then
-		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20; do
+		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20 40 41; do
 			test$t
 		done
 	else
@@ -45,7 +45,7 @@ main()
 			[0-9]*)
 				test$1;;
 			btree)
-				for t in 1 2 3 7 8 9 10 12 13; do
+				for t in 1 2 3 7 8 9 10 12 13 40 41; do
 					test$t
 				done;;
 			hash)
@@ -741,6 +741,164 @@ bsize=$bsize ffactor=$ffactor nelem=25000 cachesize=65536 failed"
 			exit 1
 		fi
 	done
+}
+
+# Test for a weird page split condition where an insertion into index
+# 0 of a page that would cause the new item to be the only item on the
+# left page results in index 0 of the right page being erroneously
+# skipped; this only happens with one particular key+data length for
+# each page size.
+test40 () {
+	echo "Test 40: btree: page split on index 0"
+	e=:
+	for psize in 512 1024 2048 4096 8192; do
+		echo "    page size $psize"
+		kdsizes=`awk 'BEGIN {
+			psize = '$psize'; hsize = int(psize/2);
+			for (kdsize = hsize-40; kdsize <= hsize; kdsize++) {
+				print kdsize;
+			}
+		}' /dev/null`
+
+		# Use a series of keylen+datalen values in the right
+		# neighborhood to find the one that triggers the bug.
+		# We could compute the exact size that triggers the
+		# bug but this additional fuzz may be useful.
+
+		# Insert keys in reverse order to maximize the chances
+		# for a split on index 0.
+
+		for kdsize in $kdsizes; do
+			awk 'BEGIN {
+				kdsize = '$kdsize';
+				for (i = 8; i-- > 0; ) {
+					s = sprintf("a%03d:%09d", i, kdsize);
+					for (j = 0; j < kdsize-20; j++) {
+						s = s "x";
+					}
+					printf("p\nka%03d\nd%s\n", i, s);
+				}
+				print "o";
+			}' /dev/null > $TMP2
+			sed -n 's/^d//p' $TMP2 | sort > $TMP1
+			$PROG -o $TMP3 -i psize=$psize btree $TMP2
+			if (cmp -s $TMP1 $TMP3); then :
+			else
+				echo "test40: btree: page size $psize, \
+keylen+datalen=$kdsize failed"
+				e='exit 1'
+			fi
+		done
+	done
+	$e
+}
+
+# Extremely tricky test attempting to replicate some unusual database
+# corruption seen in the field: pieces of the database becoming
+# inaccessible to random access, sequential access, or both.  The
+# hypothesis is that at least some of these are triggered by the bug
+# in page splits on index 0 with a particular exact keylen+datalen.
+# (See Test 40.)  For psize=4096, this size is exactly 2024.
+
+# The order of operations here relies on very specific knowledge of
+# the internals of the btree access method in order to place records
+# at specific offsets in a page and to create certain keys on internal
+# pages.  The to-be-split page immediately prior to the bug-triggering
+# split has the following properties:
+#
+# * is not the leftmost leaf page
+# * key on the parent page is compares less than the key of the item
+#   on index 0
+# * triggering record's key also compares greater than the key on the
+#   parent page
+
+# Additionally, we prime the mpool LRU chain so that the head page on
+# the chain has the following properties:
+#
+# * record at index 0 is located where it will not get overwritten by
+#   items written to the right-hand page during the split
+# * key of the record at index 0 compares less than the key of the
+#   bug-triggering record
+
+# If the page-split bug exists, this test appears to create a database
+# where some records are inaccessible to a search, but still remain in
+# the file and are accessible by sequential traversal.  At least one
+# record gets duplicated out of sequence.
+
+test41 () {
+	echo "Test 41: btree: no unsearchables due to page split on index 0"
+	# list of individual retrievals in a variable for easy reuse
+	list=`(for i in a b c d; do
+			for j in 990 998 999; do
+				echo g ${i}${j} 1024
+			done
+		done;
+		echo g y997 2014
+		for i in y z; do
+			for j in 998 999; do
+				echo g ${i}${j} 1024
+			done
+		done)`
+	# Exact number for trigger condition accounts for newlines
+	# retained by dbtest with -ofile but not without; we use
+	# -ofile, so count newlines.  keylen=5,datalen=5+2014 for
+	# psize=4096 here.
+	(cat - <<EOF
+p z999 1024
+p z998 1024
+p y999 1024
+p y990 1024
+p d999 1024
+p d990 1024
+p c999 1024
+p c990 1024
+p b999 1024
+p b990 1024
+p a999 1024
+p a990 1024
+p y998 1024
+r y990
+p d998 1024
+p d990 1024
+p c998 1024
+p c990 1024
+p b998 1024
+p b990 1024
+p a998 1024
+p a990 1024
+p y997 2014
+S
+o
+EOF
+	echo "$list") |
+	# awk script input:
+	# {p|g|r} key [datasize]
+	awk '/^[pgr]/{
+		printf("%s\nk%s\n", $1, $2);
+	}
+	/^p/{
+		s = $2;
+		for (i = 0; i < $3; i++) {
+			s = s "x";
+		}
+		printf("d%s\n", s);
+	}
+	!/^[pgr]/{
+		print $0;
+	}' > $TMP2
+	(echo "$list"; echo "$list") | awk '{
+		s = $2;
+		for (i = 0; i < $3; i++) {
+			s = s "x";
+		}
+		print s;
+	}' > $TMP1
+	$PROG -o $TMP3 -i psize=4096 btree $TMP2
+	if (cmp -s $TMP1 $TMP3); then :
+	else
+		echo "test41: btree: failed"
+		exit 1
+	fi
 }
 
 main $*

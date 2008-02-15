@@ -6,7 +6,8 @@
         <META http-equiv="Expires" content="-1">
         <LINK href="css/main-action.css" type="text/css" rel="stylesheet">
             <LINK href="css\main-action(1).css" type="text/css" rel="stylesheet">
-                <META content="MSHTML 6.00.2900.3059" name="GENERATOR"></HEAD>
+                <META content="MSHTML 6.00.2900.3059" name="GENERATOR">
+</HEAD>
     <BODY>
         <DIV style="MARGIN-LEFT: 10px; MARGIN-RIGHT: 10px" align="left">
             <DIV class="wiki-content" style="MARGIN-TOP: 5px; MARGIN-BOTTOM: 5px" align="left">The 
@@ -80,8 +81,8 @@
             <P>perl must be installed so that .pl files are automatically executed with perl. 
                 The ActivePerl installation will do this for you.</P>
             <P>In the INCLUDE path, the Microsoft Platform SDK must come before the Microsoft 
-                Visual C++ include files. Using a Platform SDK Build Environment window will 
-                set this up the right way.&nbsp;</P>
+                Visual C++ include files. In the PATH path, the Platform SDK bin area must come before the Visual Studio VC\bin area. Using a Platform SDK Build Environment window will 
+                set this up the right way.&nbsp; Make sure to use a Platform SDK Windows XP Build Environment shell. </P>
             <P>If you make your path modifications permanent via Control Panel / System / 
                 Advanced / Environment Variables:&nbsp; If you use a Platform SDK Build 
                 Environment window, it appears that you need to put your PATH components in the 
@@ -291,7 +292,7 @@ Default is bkw.pl.log. <BR>&nbsp;
                 will substitute %bldtype% with either dbg or rel, depending on the build 
                 type.&nbsp;<STRONG></P>
         </DIV>
-        <DIV style="MARGIN-LEFT: 10px; MARGIN-RIGHT: 10px" align="left">
+    <DIV style="MARGIN-LEFT: 10px; MARGIN-RIGHT: 10px" align="left">
             <H3>Example</H3>
             </STRONG>
             <P>Here is&nbsp;a copylist entry.&nbsp; Each segment of the file's path that comes 
@@ -299,7 +300,7 @@ Default is bkw.pl.log. <BR>&nbsp;
             <P>Release build.&nbsp; Config file:
             </P>
             <P>
-                <TABLE id="Table2" cellSpacing="1" cellPadding="1" border="0">
+          <TABLE id="Table2" cellSpacing="1" cellPadding="1" border="0">
                     <TR>
                         <TD colSpan="4"><FONT face="courier">&lt;BKW_Config&gt;</FONT></TD>
                     </TR>
@@ -313,7 +314,7 @@ Default is bkw.pl.log. <BR>&nbsp;
                         <TD><FONT face="courier">&lt;src&nbsp;value ="<FONT color="#000099">C:\bkw"</FONT> /&gt;</FONT>
                         </TD>
                     </TR>
-                </TABLE>
+          </TABLE>
             </P>
             <P>Copylist comments:</P>
             <P><tt>&lt;!-- File from paths are relative to
@@ -349,8 +350,18 @@ Default is bkw.pl.log. <BR>&nbsp;
             </H2>
             <P><STRONG>Can't clean directory; can't delete file or directory</STRONG><BR>
                 Make sure a file in the named directory isn't open in another application.</P>
-            <P><STRONG>Can't find kerberos.ver</STRONG><BR>
-                You skipped the repository step and are trying to build in an empty directory.</P>
-        </DIV>
+        <P><STRONG>Can't find kerberos.ver</STRONG><BR>
+            You skipped the repository step and are trying to build in an empty directory.</P>
+        <P><strong>Directories don't exist or can't be created <br>
+        </strong>This can be a symptom of the Platform SDK bin area not being before the Visual Studio bin areas, such that the version of nmake running is version 8.x.<strong>  <br>
+        </strong>[This explanation courtesy of Jeff Altman]: <br>
+        nmake V8 appears to favor executables over shell commands. As a result, using 'mkdir' instead of 'md' in Makefiles, as a command for creating directory trees, fails when the Cygwin mkdir.exe is present in the PATH. Changing the</P>
+        <P>MKDIR=mkdir<br>
+        RMDIR=rmdir</P>
+        <P>macros in the Makefiles to</P>
+        <P>MKDIR=md<br>
+        RMDIR=rd</P>
+        <P>should make the shell versions execute in all cases.</P>
+    </DIV>
     </BODY>
 </HTML>
