@@ -61,10 +61,18 @@ static int num_entries = 0;
 		    ((strcmp(ptr->realm, kdc_context->default_realm) == 0) && \
 		    ((ptr)->db_age != db_age)))
 
+#ifdef USE_THREADS
+#define MATCH(ptr) (((ptr)->req_packet->length == inpkt->length) &&	\
+		    !memcmp((ptr)->req_packet->data, inpkt->data,	\
+			    inpkt->length) &&				\
+		    ((ptr->reply_packet == NULL) || ((ptr)->db_age == db_age)))
+#else
 #define MATCH(ptr) (((ptr)->req_packet->length == inpkt->length) &&	\
 		    !memcmp((ptr)->req_packet->data, inpkt->data,	\
 			    inpkt->length) &&				\
 		    ((ptr)->db_age == db_age))
+#endif
+
 /* XXX
    Todo:  quench the size of the queue...
  */
