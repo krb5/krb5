@@ -537,7 +537,7 @@ $1.$2 and the remote file name "mydata.data", $1 would have the value
 "mydata", and $2 would have the value "data".  The
 .I outpattern
 determines the resulting mapped filename.  The sequences `$1', `$2',
-...., `$9' are replaced by any value resulting from the
+\&..., `$9' are replaced by any value resulting from the
 .I inpattern
 template.  The sequence `$0' is replace by the original filename.
 Additionally, the sequence `[\fIseq1\fP, \fIseq2\fP]' is replaced by

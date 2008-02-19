@@ -1,5 +1,5 @@
 .\" appl/bsd/v4rcp.M
-.TH RCP 1 \*h
+.TH V4RCP 1
 .SH NAME
 v4rcp \- back end for Kerberos V4 rcp
 .SH SYNOPSIS
