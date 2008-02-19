@@ -88,7 +88,7 @@ LIBS    = -lkrb5
 LFLAGS	= /nologo $(LOPTS)
 
 all-mac::     setup-test-dir pingtest stop_here simple_lock_test build-base build-tests link-tests copy-script success-message
-all-windows:: setup-windows build-base $(OUTPRE)pingtest.exe build-tests copy-script stop_here success-message
+all-windows:: setup-windows build-base $(OUTPRE)pingtest.exe build-tests copy-script success-message
 
 # compile base files used by all tests
 build-base: $(PINGOBJS)
