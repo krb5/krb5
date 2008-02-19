@@ -31,13 +31,14 @@
 
 #include "windows.h"
 #include "time.h"
+#include "rpc.h"
 
 #include "cci_stream.h"
 
 #define UUID_SIZE   128
 
-/* The client code can be run in any client thread.  The thread-specific data
-   is defined here.
+/* The client code can be run in any client thread.  
+   The thread-specific data is defined here.
  */
 
 struct tspdata {
@@ -66,5 +67,7 @@ time_t           tspdata_getSST      (const struct tspdata* p);
 cci_stream_t     tspdata_getStream   (const struct tspdata* p);
 char*            tspdata_getUUID     (const struct tspdata* p);
 
+BOOL WINAPI PutTspData(DWORD tlsIndex, struct tspdata*  dw);
+BOOL WINAPI GetTspData(DWORD tlsIndex, struct tspdata** pdw);
 
 #endif _tls_h

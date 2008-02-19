@@ -28,6 +28,9 @@
 #include <string.h>
 #include <time.h>
 #include "windows.h"
+#include <stdlib.h>
+#include <malloc.h>
+
 
 #include "win-utils.h"
 #include "cci_debugging.h"

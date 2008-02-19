@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+
+#include "k5-platform.h"
 #include "test_ccapi_util.h"
 
 

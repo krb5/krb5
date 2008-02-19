@@ -141,7 +141,7 @@ DEBUGOPT=/Zi
 !else
 CCLINKOPTION=
 SCLIB=
-DEBUGOPT=/ZI
+DEBUGOPT=/Zi
 !endif
 
 #if the compiler is vstudio 8, generate manifest

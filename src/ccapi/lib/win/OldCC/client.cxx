@@ -124,10 +124,10 @@ DWORD find_server(Init::InitInfo& info, LPSTR endpoint) {
 
     psa = isNT() ? &sa : 0;
 
-//    cci_debug_printf("%s Looking for server; ccs_request_IfHandle:0x%X", __FUNCTION__, ccs_request_IfHandle);
+    cci_debug_printf("%s Looking for server; ccs_request_IfHandle:0x%X", __FUNCTION__, ccs_request_IfHandle);
     status = cci_check_error(RpcMgmtIsServerListening(ccs_request_IfHandle));
     if (status == RPC_S_NOT_LISTENING) {
-//        cci_debug_printf("  Server *NOT* found!");
+        cci_debug_printf("  Server *NOT* found!");
         si.cb = sizeof(si);
 
         status = alloc_module_dir_name(CCAPI_DLL, &szDir);

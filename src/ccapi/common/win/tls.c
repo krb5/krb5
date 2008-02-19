@@ -25,6 +25,8 @@
  */
 
 #include "string.h"
+#include <stdlib.h>
+#include <malloc.h>
 
 #include "tls.h"
 
@@ -58,14 +60,47 @@ void         tspdata_setSST       (struct tspdata* p, time_t t)         {p->_sst
 void         tspdata_setStream    (struct tspdata* p, cci_stream_t s)   {p->_stream = s;}
 
 
-BOOL         tspdata_getConnected (struct tspdata* p)         {return p->_CCAPI_Connected;}
+BOOL         tspdata_getConnected (const struct tspdata* p)         {return p->_CCAPI_Connected;}
 
-HANDLE       tspdata_getReplyEvent(struct tspdata* p)         {return p->_replyEvent;}
+HANDLE       tspdata_getReplyEvent(const struct tspdata* p)         {return p->_replyEvent;}
 
-time_t       tspdata_getSST       (const struct tspdata* p)   {return p->_sst;}
+time_t       tspdata_getSST       (const struct tspdata* p)         {return p->_sst;}
 
-cci_stream_t tspdata_getStream    (const struct tspdata* p)   {return p->_stream;}
+cci_stream_t tspdata_getStream    (const struct tspdata* p)         {return p->_stream;}
 
-char*        tspdata_getUUID      (const struct tspdata* p)   {return p->_uuid;}
+char*        tspdata_getUUID      (const struct tspdata* p)         {return p->_uuid;}
 
-RPC_ASYNC_STATE* tspdata_getRpcAState (const struct tspdata* p)   {return p->_rpcState;}
+RPC_ASYNC_STATE* tspdata_getRpcAState (const struct tspdata* p)     {return p->_rpcState;}
+
+BOOL WINAPI PutTspData(DWORD dwTlsIndex, struct tspdata* dw) {
+    LPVOID              lpvData; 
+    struct tspdata**    pData;  // The stored memory pointer 
+
+    // Retrieve a data pointer for the current thread:
+    lpvData = TlsGetValue(dwTlsIndex); 
+
+    // If NULL, allocate memory for the TLS slot for this thread:
+    if (lpvData == NULL) {
+        lpvData = (LPVOID) LocalAlloc(LPTR, sizeof(struct tspdata)); 
+        if (lpvData == NULL)                      return FALSE;
+        if (!TlsSetValue(dwTlsIndex, lpvData))    return FALSE;
+        }
+
+    pData = (struct tspdata**) lpvData; // Cast to my data type.
+    // In this example, it is only a pointer to a DWORD
+    // but it can be a structure pointer to contain more complicated data.
+
+    (*pData) = dw;
+    return TRUE;
+    }
+
+BOOL WINAPI GetTspData(DWORD dwTlsIndex, struct tspdata**  pdw) {
+    struct tspdata*  pData;      // The stored memory pointer 
+
+    pData = (struct tspdata*)TlsGetValue(dwTlsIndex); 
+    if (pData == NULL) return FALSE;
+    (*pdw) = pData;
+    return TRUE;
+    }
+
+

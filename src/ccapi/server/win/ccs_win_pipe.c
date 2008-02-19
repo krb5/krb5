@@ -25,6 +25,8 @@
  */
 
 #include "assert.h"
+#include <stdlib.h>
+#include <malloc.h>
 
 #include "ccs_win_pipe.h"
 #include "cci_debugging.h"

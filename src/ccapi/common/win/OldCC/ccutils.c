@@ -25,6 +25,8 @@
  */
 
 #include <windows.h>
+#include <stdlib.h>
+#include <malloc.h>
 
 #include "cci_debugging.h"
 #include "util.h"

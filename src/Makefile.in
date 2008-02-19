@@ -15,6 +15,9 @@ LOCALINCLUDES = -I$(srcdir)
 SRCS =  
 HDRS = 
 
+# Why aren't these flags showing up in Windows builds?
+##DOS##CPPFLAGS=$(CPPFLAGS) -D_X86_=1  -DWIN32 -D_WIN32 -W3 -D_WINNT
+
 DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
 
 all-unix:: krb5-config
@@ -36,6 +39,12 @@ all-windows:: maybe-awk Makefile-windows
 	@echo Making autoconf.h in include
 	cd include
 	$(MAKE) -$(MFLAGS) autoconf.h
+
+	@echo Making in ccapi
+	cd ..\ccapi
+	cd
+	$(MAKE) -$(MFLAGS)
+
 	@echo Making in util
 	cd ..\util
 	$(MAKE) -$(MFLAGS)
@@ -171,6 +180,10 @@ config-windows:: Makefile-windows
 WINMAKEFILES=Makefile \
 	appl\gss-sample\Makefile \
 	appl\gssftp\ftp\Makefile \
+	ccapi\Makefile \
+	ccapi\lib\win\Makefile \
+	ccapi\server\win\Makefile \
+    ccapi\test\Makefile \
 	clients\Makefile clients\kdestroy\Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
@@ -214,6 +227,14 @@ WINMAKEFILES=Makefile \
 ##DOS##appl\gss-sample\Makefile: appl\gss-sample\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##appl\gssftp\ftp\Makefile: appl\gssftp\ftp\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##ccapi\Makefile: ccapi\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##ccapi\lib\win\Makefile: ccapi\lib\win\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##ccapi\server\win\Makefile: ccapi\server\win\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##ccapi\test\Makefile: ccapi\test\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\Makefile: clients\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -344,10 +365,10 @@ clean-windows:: Makefile-windows
 	@echo Making clean in clients
 	cd ..\clients
 	$(MAKE) -$(MFLAGS) clean
-	@echo Making in appl\gss-sample
+	@echo Making clean in appl\gss-sample
 	cd ..\appl\gss-sample
 	$(MAKE) -$(MFLAGS) clean
-	@echo Making in appl\gssftp\ftp
+	@echo Making clean in appl\gssftp\ftp
 	cd ..\..\appl\gssftp\ftp
 	$(MAKE) -$(MFLAGS) clean
 	cd ..\..\..
@@ -365,7 +386,7 @@ ren2long:
 #
 ZIP=zip
 FILES= ./* \
-	clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
+    clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
 	clients/kpasswd/* clients/kcpytkt/* clients/kdeltkt/* \
 	config/* include/* include/kerberosIV/* \
 	include/krb5/* include/krb5/stock/* include/sys/* krb524/* lib/* \
@@ -383,7 +404,12 @@ FILES= ./* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
 	util/* util/et/* util/profile/*
 
-WINFILES= util/windows/* windows/* windows/lib/* windows/cns/* \
+WINFILES= \
+    ccapi/common/* ccapi/common/win/* ccapi/common/win/OldCC/* \
+    ccapi/lib/* ccapi/lib/win/* ccapi/lib/win/OldCC/* \
+    ccapi/server/* ccapi/server/win/* \
+    ccapi\test\* \
+    util/windows/* windows/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gss/* windows/gina/* windows/ms2mit/* \
 	windows/kfwlogon/*
 
@@ -575,6 +601,8 @@ install-windows::
 	$(CP) appl\gss-sample\$(OUTPRE)gss-client.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(CP) windows\ms2mit\$(OUTPRE)ms2mit.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(CP) appl\gssftp\ftp\$(OUTPRE)ftp.exe "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) ccapi\lib\win\$(OUTPRE)ccapi.dll "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) ccapi\server\win\$(OUTPRE)ccapiserver.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(CP) clients\kvno\$(OUTPRE)kvno.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(CP) clients\klist\$(OUTPRE)klist.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(CP) clients\kinit\$(OUTPRE)kinit.exe "$(KRB_INSTALL_DIR)\bin\."
