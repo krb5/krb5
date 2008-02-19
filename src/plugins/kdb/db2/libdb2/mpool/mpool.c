@@ -377,7 +377,7 @@ mpool_bkt(mp)
 			head = &mp->hqh[HASHKEY(bp->pgno)];
 			CIRCLEQ_REMOVE(head, bp, hq);
 			CIRCLEQ_REMOVE(&mp->lqh, bp, q);
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(DEBUG_IDX0SPLIT)
 			{ void *spage;
 				spage = bp->page;
 				memset(bp, 0xff, sizeof(BKT) + mp->pagesize);
