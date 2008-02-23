@@ -206,12 +206,12 @@ Specifying "ago" in a duration may result in unexpected behavior.
 creates the principal
 .IR newprinc ,
 prompting twice for a password.  If no policy is specified with the
--policy option, and the policy named "default" exists, then that
+\-policy option, and the policy named "default" exists, then that
 policy is assigned to the principal; note that the assignment of the
 policy "default" only occurs automatically when a principal is first
 created, so the policy "default" must already exist for the assignment
 to occur.  This assignment of "default" can be suppressed with the
--clearpolicy option.  This command requires the 
+\-clearpolicy option.  This command requires the 
 .I add
 privilege.  This command has the aliases
 .B addprinc
@@ -411,7 +411,7 @@ Re-enter password for principal tlyu/admin@BLEEP.COM:
 Principal "tlyu/admin@BLEEP.COM" created.
 kadmin:
 
-kadmin: addprinc -x dn=cn=mwm_user,o=org mwm_user
+kadmin: addprinc \-x dn=cn=mwm_user,o=org mwm_user
 WARNING: no policy specified for "mwm_user@BLEEP.COM";
 defaulting to no policy.
 Enter password for principal mwm_user@BLEEP.COM: 
@@ -639,7 +639,7 @@ sets the number of past keys kept for a principal. This option is not supported 
 .nf
 .TP
 EXAMPLES:
-kadmin: add_policy -maxlife "2 days" -minlength 5 guests
+kadmin: add_policy \-maxlife "2 days" \-minlength 5 guests
 kadmin:
 .TP
 ERRORS:
