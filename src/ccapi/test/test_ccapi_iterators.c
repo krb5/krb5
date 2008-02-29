@@ -2,6 +2,7 @@
 #include "test_ccapi_iterators.h"
 #include "test_ccapi_check.h"
 #include "test_ccapi_util.h"
+#include "cci_debugging.h"
 
 
 // ---------------------------------------------------------------------------
@@ -55,7 +56,8 @@ int check_cc_ccache_iterator_next() {
 	}
 	for(i = 0; !err && (i < 1000); i++)
 	{
-		err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
+        if (i%10 == 0) cci_debug_printf("%s loop: %d", __FUNCTION__, i);	
+        err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
 		if (ccache) {
 			cc_ccache_release(ccache);
 			ccache = NULL;
@@ -186,7 +188,8 @@ int check_cc_credentials_iterator_next() {
 		err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
 	}
 	for(i = 0; !err && (i < 1000); i++) {
-		new_v5_creds_union(&creds_union, "BAR.ORG");
+        if (i%10 == 0) cci_debug_printf("%s loop: %d", __FUNCTION__, i);	
+        new_v5_creds_union(&creds_union, "BAR.ORG");
 		err = cc_ccache_store_credentials(ccache, &creds_union);
 		release_v5_creds_union(&creds_union);
 	}

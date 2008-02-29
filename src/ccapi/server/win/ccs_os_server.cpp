@@ -242,9 +242,10 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
 
             if (worklist_remove(&rpcmsg, &pipe, &buf, &serverStartTime)) {
                 uuid = ccs_win_pipe_getUuid(pipe);
+#if 0
                 cci_debug_printf("%s: processing WorkItem msg:%ld pipeUUID:<%s> pipeHandle:0x%X SST:%ld", 
                     __FUNCTION__, rpcmsg, uuid, ccs_win_pipe_getHandle(pipe), serverStartTime);
-
+#endif
                 if (serverStartTime <= getMySST()) {
                     switch (rpcmsg) {
                         case CCMSG_CONNECT: {

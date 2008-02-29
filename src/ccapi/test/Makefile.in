@@ -47,9 +47,14 @@ PINGOBJS =  $(OUTPRE)ccs_request_c.$(OBJEXT) \
             $(OUTPRE)pingtest.$(OBJEXT) \
             $(OBJECTS)
 
-TEST_NAMES =    test_constants \
+TESTALLOBJS=$(OUTPRE)main.$(OBJEXT) \
+            $(OBJECTS)
+
+TEST_NAMES =    test_cc_ccache_iterator_next \
+                test_constants \
                 test_cc_initialize \
-                test_cc_context_get_version 
+                test_cc_context_get_version \
+                test_cc_credentials_iterator_next
                 
 MORE_TESTS =    test_cc_context_release \
                 test_cc_context_get_change_time \
@@ -77,9 +82,7 @@ MORE_TESTS =    test_cc_context_release \
                 test_cc_ccache_compare \
                 test_cc_ccache_get_kdc_time_offset \
                 test_cc_ccache_set_kdc_time_offset \
-                test_cc_ccache_clear_kdc_time_offset \
-                test_cc_ccache_iterator_next \
-                test_cc_credentials_iterator_next
+                test_cc_ccache_clear_kdc_time_offset 
 
 ##### Linker
 LINK	= link
@@ -87,8 +90,8 @@ LIBS    = -lkrb5
 ##DOS##LIBS = advapi32.lib rpcrt4.lib user32.lib ws2_32.lib ccapi.lib
 LFLAGS	= /nologo $(LOPTS)
 
-all-mac::     setup-test-dir pingtest stop_here simple_lock_test build-base build-tests link-tests copy-script success-message
-all-windows:: setup-windows build-base $(OUTPRE)pingtest.exe build-tests copy-script success-message
+all-mac::     setup-test-dir pingtest simple_lock_test build-base build-tests link-tests copy-script success-message
+all-windows:: setup-windows build-base $(OUTPRE)pingtest.exe build-tests build-testall copy-script success-message
 
 # compile base files used by all tests
 build-base: $(PINGOBJS)
@@ -125,7 +128,7 @@ $(WINH):
     copy ..\lib\win\srctmp\$@ .
 
 # This rule assumes that nmake in ..\lib\win\ has already run.
-$(OUTPRE)pingtest.exe: $(OBJECTS)
+$(OUTPRE)pingtest.exe: $(OBJECTS) $(PINGOBJS)
 # There doesn't appear to be any way to examine a variable and return a value 
 #  indicating whether a string is present in it.  We use a perl script to 
 #  check the LIB variable.  If the path to ccapi.lib isn't present, the script
@@ -140,6 +143,12 @@ $(OUTPRE)pingtest.exe: $(OBJECTS)
 	$(LINK) $(LFLAGS)    /map:$(@B)2.map /out:$(*B)2.exe $(conflags) $(PINGOBJS) $(LIBS) $(conlibsdll) 
 
 link-tests: $(TEST_NAMES)
+
+build-testall: $(TEST_NAMES) $(OBJECTS) $(TESTALLOBJS) testall.exe
+
+testall.exe:
+    $(LINK) $(linkdebug) /map:$(@B)1.map -out:$(*B)1.exe $(conflags) $(TESTALLOBJS) $(LIBS) $(conslibdll)
+
 
 simple_lock_test:
 	$(CC) -o $(TESTDIR)/simple_lock_test simple_lock_test.c $(LIBS)

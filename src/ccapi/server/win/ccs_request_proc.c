@@ -46,10 +46,9 @@ void ccs_rpc_request(
     cci_stream_t    stream;
     DWORD*          p       = (DWORD*)(tspHandle);
     WIN_PIPE*       pipe    = NULL;
-
-    cci_debug_printf("%s rpcmsg:%d; UUID:<%s> SST:<%s>", 
-        __FUNCTION__, rpcmsg, pszUUID, serverStartTime);
-
+#if 0
+    cci_debug_printf("%s rpcmsg:%d; UUID:<%s> SST:<%s>", __FUNCTION__, rpcmsg, pszUUID, serverStartTime);
+#endif
     status = (rpcmsg != CCMSG_REQUEST) && (rpcmsg != CCMSG_PING);
     
     if (!status) {                         
@@ -74,9 +73,9 @@ void ccs_rpc_connect(
 
     DWORD*      p       = (DWORD*)(tspHandle);
     WIN_PIPE*   pipe    = ccs_win_pipe_new(pszUUID, *p);
-
+#if 0
     cci_debug_printf("%s; rpcmsg:%d; UUID: <%s>", __FUNCTION__, rpcmsg, pszUUID);
-
+#endif
     worklist_add(   rpcmsg, 
                     pipe,
                     NULL,               /* No payload with connect request */
@@ -91,9 +90,9 @@ CC_UINT32 ccs_authenticate(const CC_CHAR* name) {
     PDWORD      pvalue  = 0;
     CC_UINT32   result  = 0;
     DWORD       status  = 0;
-
+#if 0
     cci_debug_printf("%s ( %s )", __FUNCTION__, name);
-
+#endif
     hMap = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, (LPSTR)name);
     status  = !hMap;
 
