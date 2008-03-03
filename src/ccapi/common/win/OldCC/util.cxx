@@ -26,15 +26,16 @@
 
 #include <windows.h>
 #include <stdio.h>  // for _snprintf
-
-#include "util.h"
-#include "secure.hxx"
+#include <malloc.h>
+#include <stdlib.h>
 
 extern "C" {
 #include "cci_debugging.h"
 #include "ccutils.h"
     }
 
+#include "util.h"
+#include "secure.hxx"
 
 
 void* malloc_alloc_p(size_t size) {

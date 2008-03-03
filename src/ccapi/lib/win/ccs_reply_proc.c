@@ -49,11 +49,9 @@ void ccs_rpc_request_reply(
     struct tspdata* tsp     = (struct tspdata*)*p;
     cci_stream_t    stream;
     long            status  = 0;
-
+#if 0
     cci_debug_printf("%s! msg#:%d SST:%ld uuid:%s", __FUNCTION__, rpcmsg, srvStartTime, uuid);
-    cci_debug_printf("  payload:<%s>", chIn);
-    cci_debug_printf("  uuid from handle:<%s>", tspdata_getUUID(tsp));
-
+#endif
     if (!status) {                         
         status = cci_stream_new (&stream);  /* Create a stream for the request data */
         }
@@ -80,9 +78,9 @@ void ccs_rpc_connect_reply(
 
     HANDLE  hEvent  = openThreadEvent(uuid, REPLY_SUFFIX);
     DWORD*  p       = (DWORD*)(tspHandle);
-
+#if 0
     cci_debug_printf("%s! msg#:%d SST:%ld uuid:%s", __FUNCTION__, rpcmsg, srvStartTime, uuid);
-
+#endif
     SetEvent(hEvent);
     CloseHandle(hEvent);
     }

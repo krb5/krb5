@@ -242,9 +242,10 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
 
             if (worklist_remove(&rpcmsg, &pipe, &buf, &serverStartTime)) {
                 uuid = ccs_win_pipe_getUuid(pipe);
+#if 0
                 cci_debug_printf("%s: processing WorkItem msg:%ld pipeUUID:<%s> pipeHandle:0x%X SST:%ld", 
                     __FUNCTION__, rpcmsg, uuid, ccs_win_pipe_getHandle(pipe), serverStartTime);
-
+#endif
                 if (serverStartTime <= getMySST()) {
                     switch (rpcmsg) {
                         case CCMSG_CONNECT: {
@@ -941,10 +942,10 @@ RPC_STATUS RPC_ENTRY sec_callback(  IN RPC_IF_ID *Interface,
 /*                 MIDL allocate and free                            */
 /*********************************************************************/
 
-void  __RPC_FAR * __RPC_USER midl_user_allocate(size_t len) {
+extern "C" void  __RPC_FAR * __RPC_USER midl_user_allocate(size_t len) {
     return(malloc(len));
     }
 
-void __RPC_USER midl_user_free(void __RPC_FAR * ptr) {
+extern "C" void __RPC_USER midl_user_free(void __RPC_FAR * ptr) {
     free(ptr);
     }

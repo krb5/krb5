@@ -27,21 +27,22 @@
 extern "C" {
 #include "k5-thread.h"
 #include "ccapi_os_ipc.h"
-#include "tls.h"
-#include "dllmain.h"
+#include "cci_debugging.h"
 #include "ccs_reply.h"
 #include "ccs_request.h"
-#include "win-utils.h"
 #include "ccutils.h"
+#include "tls.h"
 #include "util.h"
+#include "win-utils.h"
     }
 
+#include "autolock.hxx"
 #include "CredentialsCache.h"
 #include "secure.hxx"
 #include "opts.hxx"
 #include "client.h"
-#include "autolock.hxx"
-#include "cci_debugging.h"
+
+extern "C" DWORD GetTlsIndex();
 
 #define SECONDS_TO_WAIT 10
 #define CLIENT_REQUEST_RPC_HANDLE ccs_request_IfHandle
@@ -81,7 +82,7 @@ extern "C" cc_int32 cci_os_ipc_thread_init (void) {
     UUID __RPC_FAR              uuid;
     unsigned char __RPC_FAR*    uuidString  = NULL;
 
-    if (!GetTspData(&ptspdata)) return ccErrNoMem;
+    if (!GetTspData(GetTlsIndex(), &ptspdata)) return ccErrNoMem;
 
     opts.cMinCalls  = 1;
     opts.cMaxCalls  = 20;
@@ -94,8 +95,9 @@ extern "C" cc_int32 cci_os_ipc_thread_init (void) {
     if (!err) {                                 // Save in thread local storage
         tspdata_setUUID(ptspdata, uuidString);
         }
+#if 0
     cci_debug_printf("%s UUID:<%s>", __FUNCTION__, tspdata_getUUID(ptspdata));
-
+#endif
     // Initialize old CCAPI if necessary:
     if (!err) if (!Init::  Initialized()) err = Init::  Initialize( );
     if (!err) if (!Client::Initialized()) err = Client::Initialize(0);
@@ -150,7 +152,7 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
     if (!in_request_stream) { err = cci_check_error (ccErrBadParam); }
     if (!out_reply_stream ) { err = cci_check_error (ccErrBadParam); }
     
-    if (!GetTspData(&ptspdata)) {return ccErrBadParam;}
+    if (!GetTspData(GetTlsIndex(), &ptspdata)) {return ccErrBadParam;}
     bCCAPI_Connected = tspdata_getConnected  (ptspdata);
     replyEvent       = tspdata_getReplyEvent (ptspdata);
     sst              = tspdata_getSST (ptspdata);
@@ -187,12 +189,13 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
     // New code using new RPC procedures for sending the data and receiving a reply:
     if (!err) {
         RpcTryExcept {
-            if (!GetTspData(&ptspdata)) {return ccErrBadParam;}
+            if (!GetTspData(GetTlsIndex(), &ptspdata)) {return ccErrBadParam;}
             uuid    = tspdata_getUUID(ptspdata);
             lenUUID = 1 + strlen(uuid);     /* 1+ includes terminating \0. */
+#if 0
             cci_debug_printf("%s calling remote ccs_rpc_request tsp*:0x%X", __FUNCTION__, ptspdata);
             cci_debug_printf("  rpcmsg:%d; UUID[%d]:<%s> SST:%ld", in_msg, lenUUID, uuid, sst);
-
+#endif
             ccs_rpc_request(                    /* make call with user message: */
                 in_msg,                         /* Message type */
                 (unsigned char*)&ptspdata,      /* Our tspdata* will be sent back to the reply proc. */
@@ -216,9 +219,7 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
 
     // Wait for reply handler to set event:
     if (!err) {
-        cci_debug_printf("  Waiting for request reply.");
         err = cci_check_error(WaitForSingleObject(replyEvent, INFINITE));//(SECONDS_TO_WAIT)*1000));
-        cci_debug_printf("  Request reply received!");
         }
 
     if (!err) {
@@ -237,8 +238,6 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
     if (!err) {
         *out_reply_stream = tspdata_getStream(ptspdata);
         }
-    
-    cci_debug_printf("  payload:<%s>", cci_stream_data(*out_reply_stream));
 
     return cci_check_error (err);    
     }
@@ -358,7 +357,9 @@ cc_int32 ccapi_connect(const struct tspdata* tsp) {
     ReleaseMutex(hCCAPIv2Mutex);       
 
     if (!status) {
+#if 0
         cci_debug_printf("%s Waiting for replyEvent.", __FUNCTION__);
+#endif
         status = WaitForSingleObject(replyEvent, INFINITE);//(SECONDS_TO_WAIT)*1000);
         status = cci_check_error(RpcMgmtIsServerListening(CLIENT_REQUEST_RPC_HANDLE));
         cci_debug_printf("  Server %sFOUND!", (status) ? "NOT " : "");
@@ -367,7 +368,5 @@ cc_int32 ccapi_connect(const struct tspdata* tsp) {
         cci_debug_printf("  unexpected error while looking for server... (%u)", status);
         } 
     
-    cci_debug_printf("%s TODO:  check connect reply result.", __FUNCTION__);
-    cci_debug_printf("%s TODO:  merge this connect code with that request code.", __FUNCTION__);
     return status;
     }

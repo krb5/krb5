@@ -24,18 +24,19 @@
  * or implied warranty.
  */
 
+extern "C" {
 #include <windows.h>
 #include <LMCons.h>
 
-extern "C" {
 #include "dllmain.h"
 #include "tls.h"
 #include "cci_debugging.h"
 #include "ccapi_context.h"
 #include "client.h"
 
-//void cci_thread_init__auxinit();
+void cci_thread_init__auxinit();
     }
+
 
 #define CCAPI_V2_MUTEX_NAME     TEXT("MIT_CCAPI_V4_MUTEX")
 
@@ -51,6 +52,8 @@ DWORD           firstThreadID   = 0;
 //  to keep track of the state of the RPC connection.  All data is static.
 static Init     init;
 static Client   client;
+
+DWORD    GetTlsIndex()  {return dwTlsIndex;}
 
 // DllMain() is the entry-point function for this DLL. 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
@@ -196,72 +199,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
 extern "C" {          // we need to export the C interface
 #endif
 
-__declspec(dllexport)
-BOOL WINAPI PutTspData(struct tspdata* dw) {
-    LPVOID              lpvData; 
-    struct tspdata**    pData;  // The stored memory pointer 
-
-    // Retrieve a data pointer for the current thread:
-    lpvData = TlsGetValue(dwTlsIndex); 
-
-    // If NULL, allocate memory for the TLS slot for this thread:
-    if (lpvData == NULL) {
-        lpvData = (LPVOID) LocalAlloc(LPTR, sizeof(struct tspdata)); 
-        if (lpvData == NULL)                      return FALSE;
-        if (!TlsSetValue(dwTlsIndex, lpvData))    return FALSE;
-        }
-
-    pData = (struct tspdata**) lpvData; // Cast to my data type.
-    // In this example, it is only a pointer to a DWORD
-    // but it can be a structure pointer to contain more complicated data.
-
-    (*pData) = dw;
-    return TRUE;
-    }
-
-__declspec(dllexport)
-BOOL WINAPI GetTspData(struct tspdata**  pdw) {
-   struct tspdata*  pData;      // The stored memory pointer 
-
-   pData = (struct tspdata*)TlsGetValue(dwTlsIndex); 
-   if (pData == NULL) return FALSE;
-   (*pdw) = pData;
-   return TRUE;
-    }
-
-#if 0   // replaced by clientEndpoint / serverEndpoint.
-__declspec(dllexport)
-char* WINAPI getEndpoint(enum EndpointType ep) {
-    // The server endpoint is of the form CCS_<LSID>
-    // The client endpoint is of the form CCAPI_<uuid>
-    //   Each client thread can have its own connection.
-    //
-    // NB:  Caller must free the data the returned char* points to.
-    struct tspdata* pData;
-    char*           s;
-    char*           uuid;
-    unsigned int    len;
-
-    switch (ep) {
-        case EPT_SERVER:
-            s       = (char*)malloc(32);    // Length of CCS_<DWORD>
-            sprintf(s, "%s_%ld", ep_prefices[EPT_SERVER], sessionToken);
-            break;
-        case EPT_CLIENT:
-            GetTspData(&pData);
-            uuid    = tspdata_getUUID(pData);
-            len     = 4 + strlen(ep_prefices[ep]) + strlen(_user) + strlen(uuid);
-            s       = (char*)malloc(len);
-            sprintf(s, "%s_%s_%s", ep_prefices[EPT_CLIENT], _user, uuid);
-            break;
-        default:;
-        }
-    cci_debug_printf("%s(%d) returning %s", __FUNCTION__, ep, s);
-
-    return s;
-    }
-#endif
-
 #ifdef __cplusplus
 }
 #endif
@@ -270,10 +207,10 @@ char* WINAPI getEndpoint(enum EndpointType ep) {
 /*                 MIDL allocate and free                            */
 /*********************************************************************/
 
-void  __RPC_FAR * __RPC_USER midl_user_allocate(size_t len) {
+extern "C" void  __RPC_FAR * __RPC_USER MIDL_user_allocate(size_t len) {
     return(malloc(len));
     }
 
-void __RPC_USER midl_user_free(void __RPC_FAR * ptr) {
+extern "C" void __RPC_USER MIDL_user_free(void __RPC_FAR * ptr) {
     free(ptr);
     }

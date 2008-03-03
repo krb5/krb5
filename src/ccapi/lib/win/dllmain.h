@@ -29,15 +29,12 @@
 
 #include "windows.h"
 
-enum EndpointType {EPT_SERVER=0, EPT_CLIENT};
-
 #ifdef __cplusplus    // If used by C++ code, 
 extern "C" {          // we need to export the C interface
 #endif
-__declspec(dllexport) BOOL  WINAPI PutTspData(struct tspdata*  p);
-__declspec(dllexport) BOOL  WINAPI GetTspData(struct tspdata** p);
 
-//__declspec(dllexport) char* WINAPI getEndpoint(enum EndpointType);
+DWORD GetTlsIndex();
+
 #ifdef __cplusplus
 }
 #endif

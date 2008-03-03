@@ -11,7 +11,7 @@ int check_cc_initialize() {
 	BEGIN_TEST("cc_initialize");
 	
 	// try every api_version
-	err = check_once_cc_initialize(&context, ccapi_version_2, NULL, NULL, 9, "cc_initialize with ccapi_version_2");   	   // err == CC_BAD_API_VERSION (9) would be imported by CredentialsCache2.h
+	err = check_once_cc_initialize(&context, ccapi_version_2, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_2");   	   // err == CC_BAD_API_VERSION (9) would be imported by CredentialsCache2.h
 	err = check_once_cc_initialize(&context, ccapi_version_3, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_3");   	   // !err                                    
 	err = check_once_cc_initialize(&context, ccapi_version_4, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_4");   	   //        "                                            
 	err = check_once_cc_initialize(&context, ccapi_version_5, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_5");   	   //        "                                            

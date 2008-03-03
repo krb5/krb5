@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <malloc.h>
 
 #include "cci_debugging.h"
 #include "CredentialsCache.h"
@@ -20,11 +22,15 @@ extern cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
                                 cc_int32        in_msg,
                                 cci_stream_t*   out_reply_stream);
 
+static DWORD    dwTlsIndex;
+
+DWORD GetTlsIndex()    {return dwTlsIndex;}
+
 RPC_STATUS send_test(char* endpoint) {
     unsigned char*  pszNetworkAddress   = NULL;
     unsigned char*  pszOptions          = NULL;
     unsigned char*  pszStringBinding    = NULL;
-    unsigned char*  pszUuid             = NULL;
+    unsigned char*  pszUuid             = NULL; 
     RPC_STATUS      status;
  
     status = RpcStringBindingCompose(pszUuid,
@@ -66,6 +72,8 @@ int main(   int argc, char *argv[]) {
     cci_stream_t    reply_stream    = NULL;
     char*           message         = "Hello, RPC!";
 
+
+    if ((dwTlsIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES) return FALSE; 
 
 //    send_test("krbcc.229026.0.ep");
 

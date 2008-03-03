@@ -164,9 +164,6 @@ sub main {
 ##++ Assemble configuration from config file and command line:
 
     my $bOutputCleaned  = 0;
-
-#while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
-
     # Scan the configuration for switch definitions:
     while (($sw, $val) = each %$odr) {
         next if (! exists $val->{def}); ## ?? Should always exist.
@@ -174,7 +171,10 @@ sub main {
         # Set/clear environment variables:
         if ($val->{env}) {
             if ($val->{def})    {$ENV{$sw}   = (exists $val->{value}) ? $val->{value} : 1; }
-            else                {delete $ENV{$sw};  }
+            else                {
+                delete $ENV{$sw};  
+                undef  $sw;
+                }
             }
 
         # If the switch is in the command line, override the stored value:
@@ -184,14 +184,20 @@ sub main {
                 $val->{def}     = 1;
                 }
             else {
-                $val->{def}   = $OPT->{$sw};    ## If no<switch>, value will be zero.
+                $val->{def}   = $OPT->{$sw};  ## If -NO<switch>, value will be zero.
                 }
             }
         # If the switch can be negated, test that, too:
         if ( ! ($val->{def} =~ /A/)) {
             local $nosw = "no".$sw;
-            if (exists $OPT->{$nosw}) {
-                $val->{def} = 0;
+            if (exists $OPT->{$sw}) {         ## -NO<environment variable> ?
+                if ($val->{env}) {              
+                    if (!$val->{def}) {
+                        print "Deleting environment variable $sw\n";
+                        delete $ENV{$sw};           
+                        undef $sw;
+                        }
+                    }
                 }
             }
     
@@ -314,6 +320,9 @@ sub main {
         $l->start;
         $l->no_die_handler;        ## Needed so XML::Simple won't throw exceptions.
         }
+
+    print "Command line options:\n";
+    while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
 
     print "Executing $cmdline\n";
     local $argvsize     = @ARGV;

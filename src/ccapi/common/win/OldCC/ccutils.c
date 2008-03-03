@@ -25,6 +25,8 @@
  */
 
 #include <windows.h>
+#include <stdlib.h>
+#include <malloc.h>
 
 #include "cci_debugging.h"
 #include "util.h"
@@ -100,8 +102,9 @@ HANDLE createThreadEvent(char* uuid, char* suffix) {
         event_name = allocEventName(uuid, suffix);
         if (!event_name) status = cci_check_error(ccErrNoMem);
         }
+#if 0
     cci_debug_printf("%s event_name:%s", __FUNCTION__, event_name);
-    
+#endif    
     if (!status) {
         hEvent = CreateEvent(psa, FALSE, FALSE, event_name);
         if (!hEvent)     status = cci_check_error(GetLastError());
@@ -123,8 +126,9 @@ HANDLE openThreadEvent(char* uuid, char* suffix) {
 
     event_name = allocEventName(uuid, suffix);
     if (!event_name) status = cci_check_error(ccErrNoMem);
+#if 0
     cci_debug_printf("%s event_name:%s", __FUNCTION__, event_name);
-
+#endif
     if (!status) {
         hEvent = OpenEvent(EVENT_MODIFY_STATE, FALSE, event_name);
         if (!hEvent) status = cci_check_error(GetLastError());

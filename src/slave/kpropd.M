@@ -122,7 +122,7 @@ mode.
 .TP
 .B \-a
 allows the user to specify the path to the
-.KR kpropd.acl
+kpropd.acl
 file; by default the path used is KPROPD_ACL_FILE
 (normally /usr/local/var/krb5kdc/kpropd.acl).
 .SH FILES
