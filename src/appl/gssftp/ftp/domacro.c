@@ -36,10 +36,10 @@ static char sccsid[] = "@(#)domacro.c	1.8 (Berkeley) 9/28/90";
 #endif /* not lint */
 
 #include <stdio.h>
+#include <signal.h>
 
 #include "ftp_var.h"
 
-#include <signal.h>
 #include <errno.h>
 #include <ctype.h>
 #include <string.h>

@@ -52,6 +52,7 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 #endif
 
 #include <stdio.h>
+#include <signal.h>
 #include "ftp_var.h"
 #ifndef _WIN32
 #ifndef KRB5_KRB4_COMPAT
@@ -71,7 +72,6 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 
 #include <arpa/ftp.h>
 
-#include <signal.h>
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
