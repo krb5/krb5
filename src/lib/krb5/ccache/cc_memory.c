@@ -248,12 +248,6 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     krb5_error_code err;
     krb5_mcc_data *d;
 
-    lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
-    if (lid == NULL)
-	return KRB5_CC_NOMEM;
-
-    lid->ops = &krb5_mcc_ops;
-
     err = k5_mutex_lock(&krb5int_mcc_mutex);
     if (err)
 	return err;
@@ -266,11 +260,16 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 	err = new_mcc_data(residual, &d);
 	if (err) {
 	    k5_mutex_unlock(&krb5int_mcc_mutex);
-	    krb5_xfree(lid);
 	    return err;
 	}
     }
     k5_mutex_unlock(&krb5int_mcc_mutex);
+
+    lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
+    if (lid == NULL)
+	return KRB5_CC_NOMEM;
+    
+    lid->ops = &krb5_mcc_ops;
     lid->data = d;
     *id = lid; 
     return KRB5_OK;
