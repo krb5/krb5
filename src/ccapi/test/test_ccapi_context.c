@@ -4,7 +4,7 @@
 #include "test_ccapi_check.h"
 #include "test_ccapi_util.h"
 
-int check_cc_initialize() {
+int check_cc_initialize(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	
@@ -63,89 +63,7 @@ cc_int32 check_once_cc_initialize(cc_context_t *out_context, cc_int32 in_version
 	return err;
 }
 
-
-int check_cc_context_get_version() {
-	BEGIN_TEST("cc_context_get_version");
-	
-	#ifndef cc_context_get_version
-	log_error("cc_context_get_version is not implemented yet");
-	failure_count++;
-	#else
-	// This code is all untested, since there is no cc_context_get_version to test against
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	
-	// try every api_version
-	err = check_once_cc_context_get_version(&context, ccapi_version_3, NULL, NULL, ccNoError);   	     // !err                                    
-	err = check_once_cc_context_get_version(&context, ccapi_version_4, NULL, NULL, ccNoError);   	     //        "                                            
-	err = check_once_cc_context_get_version(&context, ccapi_version_5, NULL, NULL, ccNoError);   	     //        "                                            
-	err = check_once_cc_context_get_version(&context, ccapi_version_6, NULL, NULL, ccNoError);   	     //        "                                            
-	
-	// try bad api_version
-	err = check_once_cc_context_get_version(&context, INT_MAX,         NULL, NULL, ccErrBadAPIVersion);  // err == ccErrBadAPIVersion                             
-	
-	// try bad param
-	err = check_once_cc_context_get_version(NULL,     ccapi_version_3, NULL, NULL, ccErrInvalidContext); // err == ccErrInvalidContext                                 	   
-	
-	
-	#endif /* cc_context_get_version */
-	
-	END_TEST_AND_RETURN
-}
-
-cc_int32 check_once_cc_context_get_version(cc_context_t *out_context, cc_int32 in_version, cc_int32 *out_supported_version, char const **out_vendor, cc_int32 expected_err, const char *description) {
-	cc_int32 err = 0;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_get_version
-	// This code is all untested, since there is no cc_context_get_version to test against
-	
-	cc_context_t context = NULL;
-	cc_int32 reported_version;
-	
-	cc_int32 possible_return_values[3] = {
-		ccNoError, 
-		ccErrInvalidContext, 
-		ccErrBadParam,
-	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
-	err = cc_initialize(out_context, in_version, out_supported_version, out_vendor);
-	
-	if (err != ccNoError) {
-		log_error("failure in cc_initialize, unable to perform check");
-		return err;
-	}
-	else {
-		context = *out_context;
-		err = cc_context_get_version(context, &reported_version);
-		
-		// check returned error
-		check_err(err, expected_err, possible_return_values);
-	}
-			
-	// check output parameters and free memory
-	if (!err) {
-		check_if(reported_version != in_version, NULL);
-	} else if (err == ccErrBadParam) {
-		check_if_not((context == NULL || &reported_version == NULL), "given ccErrBadParam but no param was bad");
-	}
-	
-	if (context) { 
-		cc_context_release(context); 
-		*out_context = NULL;
-	}
-	
-	#endif /* cc_context_get_version */
-	
-	END_CHECK_ONCE;
-	
-	return err;
-}
-
-int check_cc_context_release() {
+int check_cc_context_release(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	
@@ -212,7 +130,7 @@ cc_int32 check_once_cc_context_release(cc_context_t *out_context, cc_int32 expec
 	return err;
 }
 
-int check_cc_context_get_change_time() {
+int check_cc_context_get_change_time(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_time_t last_change_time = 0;
@@ -354,7 +272,7 @@ cc_int32 check_once_cc_context_get_change_time(cc_context_t context, cc_time_t *
 	return err;
 }
 
-int check_cc_context_get_default_ccache_name() {
+int check_cc_context_get_default_ccache_name(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -430,7 +348,7 @@ cc_int32 check_once_cc_context_get_default_ccache_name(cc_context_t context, cc_
 	return err;
 }
 
-int check_cc_context_open_ccache() {
+int check_cc_context_open_ccache(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -538,7 +456,7 @@ cc_int32 check_once_cc_context_open_ccache(cc_context_t context, const char *nam
 	return err;
 }
 
-int check_cc_context_open_default_ccache() {
+int check_cc_context_open_default_ccache(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -630,7 +548,7 @@ cc_int32 check_once_cc_context_open_default_ccache(cc_context_t context, cc_ccac
 	return err;
 }
 
-int check_cc_context_create_ccache() {
+int check_cc_context_create_ccache(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -735,7 +653,7 @@ cc_int32 check_once_cc_context_create_ccache(cc_context_t context, const char *n
 	return err;
 }
 
-int check_cc_context_create_default_ccache() {
+int check_cc_context_create_default_ccache(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -826,7 +744,7 @@ cc_int32 check_once_cc_context_create_default_ccache(cc_context_t context, cc_ui
 	return err;
 }
 
-int check_cc_context_create_new_ccache() {
+int check_cc_context_create_new_ccache(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -937,7 +855,7 @@ cc_int32 check_once_cc_context_create_new_ccache(cc_context_t context, cc_int32 
 	return err;
 }
 
-int check_cc_context_new_ccache_iterator() {
+int check_cc_context_new_ccache_iterator(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -1010,7 +928,7 @@ cc_int32 check_once_cc_context_new_ccache_iterator(cc_context_t context, cc_ccac
 
 // ---------------------------------------------------------------------------
 
-int check_cc_context_compare(){
+int check_cc_context_compare(void) {
 	cc_int32 err = 0;
 	cc_context_t context_a = NULL;
 	cc_context_t context_b = NULL;
