@@ -1102,7 +1102,7 @@ cc_uint32 cci_cred_union_compare_to_credentials_union (const cred_union         
                 !strcmp (old_creds_v5->client, new_creds_v5->client) &&
                 !strcmp (old_creds_v5->server, new_creds_v5->server) &&
                 (old_creds_v5->starttime == new_creds_v5->starttime)) { 
-                return 1;
+                equal = 1;
             }
         }
     }
