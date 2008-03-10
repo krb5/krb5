@@ -450,6 +450,7 @@ cc_result cc_set_principal (apiCB    *in_context,
 {
     cc_result err = ccNoError;
     cc_uint32 version;
+    cc_uint32 compat_version;
     
     if (!in_context  ) { err = cci_check_error (ccErrBadParam); }
     if (!io_ccache   ) { err = cci_check_error (ccErrBadParam); }
@@ -459,6 +460,14 @@ cc_result cc_set_principal (apiCB    *in_context,
         err = cci_remap_version (in_version, &version);
     }
 
+    if (!err) {
+        err = cci_ccache_get_compat_version (io_ccache, &compat_version);
+    }
+    
+    if (!err && version != compat_version) {
+        err = cci_check_error (ccErrBadCredentialsVersion);
+    }
+    
     if (!err) {
         err = ccapi_ccache_set_principal (io_ccache, version, in_principal);
     }
