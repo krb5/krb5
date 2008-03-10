@@ -154,7 +154,9 @@ cc_int32 ccs_ccache_reset (ccs_ccache_t            io_ccache,
     char *v5_principal = NULL;
     ccs_credentials_list_t credentials = NULL;
     
-    if (!io_ccache) { err = cci_check_error (ccErrBadParam); }
+    if (!io_ccache          ) { err = cci_check_error (ccErrBadParam); }
+    if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
+    if (!in_principal       ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
         io_ccache->creds_version = in_creds_version;
