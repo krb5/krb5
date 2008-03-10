@@ -8,6 +8,7 @@
 #include "test_ccapi_context.h"
 #include "test_ccapi_ccache.h"
 #include "test_ccapi_iterators.h"
+#include "test_ccapi_v2.h"
 
 int main (int argc, const char * argv[]) {
     
@@ -20,11 +21,29 @@ int main (int argc, const char * argv[]) {
 	
 	T_CCAPI_INIT;
 	
+	// *** ccapi v2 compat ***
+	err = check_cc_shutdown();
+	err = check_cc_get_change_time();
+	err = check_cc_open();
+	err = check_cc_create();
+	err = check_cc_close();
+	err = check_cc_destroy();
+	err = check_cc_get_cred_version();
+	err = check_cc_get_name();
+	err = check_cc_get_principal();
+	err = check_cc_set_principal();
+	err = check_cc_store();
+	err = check_cc_remove_cred();
+	//err = check_cc_seq_fetch_NCs_begin();
+	//err = check_cc_seq_fetch_NCs_next();
+	//err = check_cc_seq_fetch_creds_begin();
+	//err = check_cc_seq_fetch_creds_next();
+	//err = check_cc_get_NC_info();
+    
 	err = check_constants();
 	
 	// *** cc_context ***
 	err = check_cc_initialize();
-	err = check_cc_context_get_version();
 	err = check_cc_context_release();
 	err = check_cc_context_get_change_time();
 	err = check_cc_context_get_default_ccache_name();
