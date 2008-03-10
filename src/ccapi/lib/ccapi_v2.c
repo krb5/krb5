@@ -681,7 +681,7 @@ cc_result cc_seq_fetch_NCs_end (apiCB       *in_context,
                                 ccache_cit **io_iterator) 
 {
     cc_result err = ccNoError;
-    cc_ccache_iterator_t iterator = (cc_ccache_iterator_t) io_iterator;
+    cc_ccache_iterator_t iterator = (cc_ccache_iterator_t) *io_iterator;
     
     if (!in_context ) { err = cci_check_error (ccErrBadParam); }
     if (!io_iterator) { err = cci_check_error (ccErrBadParam); }
@@ -779,13 +779,13 @@ cc_result cc_seq_fetch_creds_end (apiCB       *in_context,
                                   ccache_cit **io_iterator) 
 {
     cc_result err = ccNoError;
-    cc_credentials_iterator_t *iterator = (cc_credentials_iterator_t *) io_iterator;
+    cc_credentials_iterator_t iterator = (cc_credentials_iterator_t) *io_iterator;
     
     if (!in_context ) { err = cci_check_error (ccErrBadParam); }
     if (!io_iterator) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = ccapi_credentials_iterator_release (*iterator);
+        err = ccapi_credentials_iterator_release (iterator);
     }
     
     if (!err) {
