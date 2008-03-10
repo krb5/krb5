@@ -61,8 +61,17 @@ static cc_int32 cci_remap_version (cc_int32   in_v2_version,
 
 /* ------------------------------------------------------------------------ */
 
-static cc_result cci_remap_error (cc_result in_error) 
+static cc_result _cci_remap_error (cc_result   in_error, 
+                                   const char *in_function, 
+                                   const char *in_file, 
+                                   int         in_line) 
 {
+    _cci_check_error (in_error, in_function, in_file, in_line);
+    
+    if (in_error >= CC_NOERROR && in_error <= CC_ERR_CRED_VERSION) {
+        return in_error;
+    }
+    
     switch (in_error) {
         case ccNoError:
             return CC_NOERROR;
@@ -71,16 +80,18 @@ static cc_result cci_remap_error (cc_result in_error)
             return CC_END;
             
         case ccErrBadParam:
+        case ccErrContextNotFound:
+        case ccErrInvalidContext:
         case ccErrInvalidCredentials:
         case ccErrInvalidCCacheIterator:
         case ccErrInvalidCredentialsIterator:
+        case ccErrInvalidLock:
         case ccErrBadLockType:
             return CC_BAD_PARM;
             
         case ccErrNoMem:
             return CC_NOMEM;
             
-        case ccErrInvalidContext:
         case ccErrInvalidCCache:
         case ccErrCCacheNotFound:
             return CC_NO_EXIST;
@@ -91,6 +102,12 @@ static cc_result cci_remap_error (cc_result in_error)
         case ccErrBadName:
             return CC_BADNAME;
             
+        case ccErrBadCredentialsVersion:
+            return CC_ERR_CRED_VERSION;
+            
+        case ccErrBadAPIVersion:
+            return CC_BAD_API_VERSION;
+            
         case ccErrContextLocked:
         case ccErrContextUnlocked:
         case ccErrCCacheLocked:
@@ -99,13 +116,21 @@ static cc_result cci_remap_error (cc_result in_error)
             
         case ccErrServerUnavailable:
         case ccErrServerInsecure:
+        case ccErrServerCantBecomeUID:
+        case ccErrBadInternalMessage:
+        case ccErrClientNotFound:
             return CC_IO;
+            
+        case ccErrNotImplemented:
+            return CC_NOT_SUPP;
             
         default:
             cci_debug_printf ("%s(): Unhandled error", __FUNCTION__);
             return CC_BAD_PARM;
     }
 }
+#define cci_remap_error(err) _cci_remap_error(err, __FUNCTION__, __FILE__, __LINE__)
+
 
 #if TARGET_OS_MAC
 #pragma mark -
@@ -197,12 +222,11 @@ cc_result cc_get_NC_info (apiCB    *in_context,
         
         for (i = 0; !err && i < count; i++) {
             ccache_p *ccache = NULL;
-            infoNC *item = NULL;
             
             err = cc_seq_fetch_NCs_next (in_context, &ccache, iterator);
             
             if (!err) {
-                info[i] = malloc (sizeof (*item));
+                info[i] = malloc (sizeof (*info[i]));
                 if (info[i]) { 
                     *info[i] = infoNC_initializer; 
                 } else {
@@ -282,7 +306,7 @@ cc_int32 cc_open (apiCB       *in_context,
         if (compat_version & real_version) {
             err = cci_ccache_set_compat_version (ccache, compat_version);
         } else {
-            err = ccErrInvalidCCache;
+            err = ccErrBadCredentialsVersion;
         }
     }
     
