@@ -871,13 +871,21 @@ cc_uint32 cci_credentials_union_to_cred_union (const cc_credentials_union  *in_c
             }
             
             if (!err) {
-                compat_v5creds->client = strdup (v5creds->client);
-                if (!compat_v5creds->client) { err = cci_check_error (ccErrNoMem); }
+                if (!v5creds->client) { 
+                    err = cci_check_error (ccErrBadParam);
+                } else {
+                    compat_v5creds->client = strdup (v5creds->client);
+                    if (!compat_v5creds->client) { err = cci_check_error (ccErrNoMem); }
+                }
             }
             
             if (!err) {
-                compat_v5creds->server = strdup (v5creds->server);
-                if (!compat_v5creds->server) { err = cci_check_error (ccErrNoMem); }
+                if (!v5creds->server) { 
+                    err = cci_check_error (ccErrBadParam);
+                } else {
+                    compat_v5creds->server = strdup (v5creds->server);
+                    if (!compat_v5creds->server) { err = cci_check_error (ccErrNoMem); }
+                }
             }
             
             if (!err) {
@@ -987,13 +995,21 @@ cc_uint32 cci_cred_union_to_credentials_union (const cred_union      *in_cred_un
             }
             
             if (!err) {
-                v5creds->client = strdup (compat_v5creds->client);
-                if (!v5creds->client) { err = cci_check_error (ccErrNoMem); }
+                if (!compat_v5creds->client) { 
+                    err = cci_check_error (ccErrBadParam);
+                } else {
+                    v5creds->client = strdup (compat_v5creds->client);
+                    if (!v5creds->client) { err = cci_check_error (ccErrNoMem); }
+                }
             }
             
             if (!err) {
-                v5creds->server = strdup (compat_v5creds->server);
-                if (!v5creds->server) { err = cci_check_error (ccErrNoMem); }
+                if (!compat_v5creds->server) { 
+                    err = cci_check_error (ccErrBadParam);
+                } else {
+                    v5creds->server = strdup (compat_v5creds->server);
+                    if (!v5creds->server) { err = cci_check_error (ccErrNoMem); }
+                }
             }
             
             if (!err) {
@@ -1077,7 +1093,7 @@ cc_uint32 cci_cred_union_compare_to_credentials_union (const cred_union         
             }
             
         } else if (in_cred_union_compat->cred_type == CC_CRED_V5 && 
-               in_credentials_union->version == cc_credentials_v5) {
+                   in_credentials_union->version == cc_credentials_v5) {
             cc_credentials_v5_compat *old_creds_v5 = in_cred_union_compat->cred.pV5Cred;
             cc_credentials_v5_t *new_creds_v5 = in_credentials_union->credentials.credentials_v5;
             
