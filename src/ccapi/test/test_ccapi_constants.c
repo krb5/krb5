@@ -2,7 +2,7 @@
 #include "test_ccapi_globals.h"
 #include "test_ccapi_check.h"
 
-int check_constants() {
+int check_constants(void) {
 	BEGIN_TEST("constants");
 	/* API versions */
 	

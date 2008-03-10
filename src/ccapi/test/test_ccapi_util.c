@@ -38,7 +38,7 @@ cc_int32 new_v5_creds_union (cc_credentials_union *out_union, const char *realm)
     cc_int32 err = ccNoError;
     cc_credentials_union *cred_union = NULL;
 	cc_credentials_v5_t *v5creds = NULL;
-    static num_runs = 1;
+    static int num_runs = 1;
 	char *client = NULL;
 	char *server = NULL;
 	

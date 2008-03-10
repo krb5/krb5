@@ -7,7 +7,7 @@ void _log_error_v(const char *file, int line, const char *format, va_list ap)
 {
 	fprintf(stdout, "\n\t%s:%d: ", file, line);
 	if (!format) {
-		fprintf(stdout, "An unknown error occurred", file, line);
+		fprintf(stdout, "An unknown error occurred");
 	} else {
 		vfprintf(stdout, format, ap);
 	}

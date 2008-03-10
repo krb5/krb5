@@ -17,7 +17,7 @@
 #endif
 
 
-void * other_thread () {
+void * other_thread (void) {
     cc_int32 err;
     cc_context_t context = NULL;
     

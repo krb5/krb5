@@ -11,7 +11,7 @@
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_release() {
+int check_cc_ccache_release(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
