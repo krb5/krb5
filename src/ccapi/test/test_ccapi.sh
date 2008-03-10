@@ -20,7 +20,6 @@ run_test simple_lock_test
 run_test test_constants
 
 run_test test_cc_initialize
-run_test test_cc_context_get_version
 run_test test_cc_context_release
 run_test test_cc_context_get_change_time
 run_test test_cc_context_get_default_ccache_name
