@@ -544,36 +544,36 @@ cc_result cc_remove_cred (apiCB      *in_context,
 {
     cc_result err = ccNoError;
     cc_credentials_iterator_t iterator = NULL;
+    cc_uint32 found = 0;
     
-    if (!in_context    ) { err = cci_check_error (ccErrBadParam); }
-    if (!in_ccache     ) { err = cci_check_error (ccErrBadParam); }
+    if (!in_context) { err = cci_check_error (ccErrBadParam); }
+    if (!in_ccache ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
         err = ccapi_ccache_new_credentials_iterator (in_ccache, &iterator);
     }
     
-    while (!err) {
+    while (!err && !found) {
         cc_credentials_t creds = NULL;
-        cc_uint32 equal = 0;
         
         err = ccapi_credentials_iterator_next (iterator, &creds);
         
         if (!err) {
             err = cci_cred_union_compare_to_credentials_union (&in_credentials, 
                                                                creds->data,
-                                                               &equal);
+                                                               &found);
         }
         
-        if (!err && equal) {
+        if (!err && found) {
             err = ccapi_ccache_remove_credentials (in_ccache, creds);
         }
         
         ccapi_credentials_release (creds);
     }
-    if (err) { err = cci_check_error (ccErrCredentialsNotFound); }
+    if (err == ccIteratorEnd) { err = cci_check_error (ccErrCredentialsNotFound); }
     
     return cci_remap_error (err);    
-}	
+}
 
 #if TARGET_OS_MAC
 #pragma mark -
