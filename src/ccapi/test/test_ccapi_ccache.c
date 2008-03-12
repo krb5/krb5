@@ -85,7 +85,7 @@ cc_int32 check_once_cc_ccache_release(cc_context_t context, cc_ccache_t ccache, 
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_destroy() {
+int check_cc_ccache_destroy(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -159,7 +159,7 @@ cc_int32 check_once_cc_ccache_destroy(cc_context_t context, cc_ccache_t ccache, 
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_set_default() {
+int check_cc_ccache_set_default(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -278,7 +278,7 @@ cc_int32 check_once_cc_ccache_set_default(cc_context_t context, cc_ccache_t ccac
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_get_credentials_version() {
+int check_cc_ccache_get_credentials_version(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -397,7 +397,7 @@ cc_int32 check_once_cc_ccache_get_credentials_version(cc_ccache_t ccache, cc_uin
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_get_name() {
+int check_cc_ccache_get_name(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -554,7 +554,7 @@ cc_int32 check_once_cc_ccache_get_principal(cc_ccache_t ccache,
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_get_principal() {
+int check_cc_ccache_get_principal(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -626,7 +626,7 @@ int check_cc_ccache_get_principal() {
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_set_principal() {
+int check_cc_ccache_set_principal(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -794,7 +794,7 @@ cc_int32 check_once_cc_ccache_set_principal(cc_ccache_t ccache, cc_uint32 cred_v
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_store_credentials() {
+int check_cc_ccache_store_credentials(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -950,7 +950,7 @@ cc_int32 check_once_cc_ccache_store_credentials(cc_ccache_t ccache, const cc_cre
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_remove_credentials() {
+int check_cc_ccache_remove_credentials(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -1104,7 +1104,7 @@ cc_int32 check_once_cc_ccache_remove_credentials(cc_ccache_t ccache, cc_credenti
 // ---------------------------------------------------------------------------
 
 
-int check_cc_ccache_new_credentials_iterator() {
+int check_cc_ccache_new_credentials_iterator(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -1249,7 +1249,7 @@ cc_int32 check_once_cc_ccache_get_change_time(cc_ccache_t ccache, cc_time_t *las
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_get_change_time() {
+int check_cc_ccache_get_change_time(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t dummy_ccache = NULL;
@@ -1417,7 +1417,7 @@ cc_int32 check_once_cc_ccache_get_last_default_time(cc_ccache_t ccache, cc_time_
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_get_last_default_time() {
+int check_cc_ccache_get_last_default_time(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache_1 = NULL;
@@ -1509,7 +1509,7 @@ int check_cc_ccache_get_last_default_time() {
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_move() {
+int check_cc_ccache_move(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t source = NULL;
@@ -1681,7 +1681,7 @@ cc_int32 check_once_cc_ccache_move(cc_ccache_t source, cc_ccache_t destination, 
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_compare() {
+int check_cc_ccache_compare(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache_a = NULL;
@@ -1780,7 +1780,7 @@ cc_int32 check_once_cc_ccache_compare(cc_ccache_t ccache, cc_ccache_t compare_to
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_get_kdc_time_offset() {
+int check_cc_ccache_get_kdc_time_offset(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -1879,7 +1879,7 @@ cc_int32 check_once_cc_ccache_get_kdc_time_offset(cc_ccache_t ccache, cc_int32 c
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_set_kdc_time_offset() {
+int check_cc_ccache_set_kdc_time_offset(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -1957,7 +1957,7 @@ cc_int32 check_once_cc_ccache_set_kdc_time_offset(cc_ccache_t ccache, cc_int32 c
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_clear_kdc_time_offset() {
+int check_cc_ccache_clear_kdc_time_offset(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;

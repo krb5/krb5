@@ -34,11 +34,11 @@ int main (int argc, const char * argv[]) {
 	err = check_cc_set_principal();
 	err = check_cc_store();
 	err = check_cc_remove_cred();
-	//err = check_cc_seq_fetch_NCs_begin();
-	//err = check_cc_seq_fetch_NCs_next();
-	//err = check_cc_seq_fetch_creds_begin();
-	//err = check_cc_seq_fetch_creds_next();
-	//err = check_cc_get_NC_info();
+	err = check_cc_seq_fetch_NCs_begin();
+	err = check_cc_seq_fetch_NCs_next();
+	err = check_cc_seq_fetch_creds_begin();
+	err = check_cc_seq_fetch_creds_next();
+	err = check_cc_get_NC_info();
     
 	err = check_constants();
 	

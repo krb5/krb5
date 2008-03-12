@@ -12,11 +12,67 @@ TESTDIR = $(DSTDIR)/tests
 
 SCRIPT_NAME = test_ccapi.sh
 
-_OBJECTS = test_ccapi_ccache test_ccapi_check test_ccapi_constants test_ccapi_context test_ccapi_globals test_ccapi_iterators test_ccapi_log test_ccapi_util
+_OBJECTS =      test_ccapi_ccache \
+                test_ccapi_check \
+                test_ccapi_constants \
+                test_ccapi_context \
+                test_ccapi_globals \
+                test_ccapi_iterators \
+                test_ccapi_log \
+                test_ccapi_util \
+                test_ccapi_v2
 
 OBJECTS = $(patsubst %,$(OBJDIR)/%.o,$(_OBJECTS))
 
-TEST_NAMES = test_constants test_cc_initialize test_cc_context_release test_cc_context_get_change_time test_cc_context_get_default_ccache_name test_cc_context_open_ccache test_cc_context_open_default_ccache test_cc_context_create_ccache test_cc_context_create_default_ccache test_cc_context_create_new_ccache test_cc_context_new_ccache_iterator test_cc_context_compare test_cc_ccache_release test_cc_ccache_destroy test_cc_ccache_set_default test_cc_ccache_get_credentials_version test_cc_ccache_get_name test_cc_ccache_get_principal test_cc_ccache_set_principal test_cc_ccache_store_credentials test_cc_ccache_remove_credentials test_cc_ccache_new_credentials_iterator test_cc_ccache_get_change_time test_cc_ccache_get_last_default_time test_cc_ccache_move test_cc_ccache_compare test_cc_ccache_get_kdc_time_offset test_cc_ccache_set_kdc_time_offset test_cc_ccache_clear_kdc_time_offset test_cc_ccache_iterator_next test_cc_credentials_iterator_next
+TEST_NAMES =    test_constants \
+                test_cc_initialize \
+                test_cc_context_release \
+                test_cc_context_get_change_time \
+                test_cc_context_get_default_ccache_name \
+                test_cc_context_open_ccache \
+                test_cc_context_open_default_ccache \
+                test_cc_context_create_ccache \
+                test_cc_context_create_default_ccache \
+                test_cc_context_create_new_ccache \
+                test_cc_context_new_ccache_iterator \
+                test_cc_context_compare \
+                test_cc_ccache_release \
+                test_cc_ccache_destroy \
+                test_cc_ccache_set_default \
+                test_cc_ccache_get_credentials_version \
+                test_cc_ccache_get_name \
+                test_cc_ccache_get_principal \
+                test_cc_ccache_set_principal \
+                test_cc_ccache_store_credentials \
+                test_cc_ccache_remove_credentials \
+                test_cc_ccache_new_credentials_iterator \
+                test_cc_ccache_get_change_time \
+                test_cc_ccache_get_last_default_time \
+                test_cc_ccache_move \
+                test_cc_ccache_compare \
+                test_cc_ccache_get_kdc_time_offset \
+                test_cc_ccache_set_kdc_time_offset \
+                test_cc_ccache_clear_kdc_time_offset \
+                test_cc_ccache_iterator_next \
+                test_cc_credentials_iterator_next\
+                test_cc_shutdown \
+                test_cc_get_change_time \
+                test_cc_open \
+                test_cc_create \
+                test_cc_close \
+                test_cc_destroy \
+                test_cc_get_cred_version \
+                test_cc_get_name \
+                test_cc_get_principal \
+                test_cc_set_principal \
+                test_cc_store \
+                test_cc_remove_cred \
+                test_cc_seq_fetch_NCs_begin \
+                test_cc_seq_fetch_NCs_next \
+                test_cc_seq_fetch_creds_begin \
+                test_cc_seq_fetch_creds_next \
+                test_cc_get_NC_info
+
 
 TEST_OBJECTS = $(patsubst %,$(OBJDIR)/%.o,$(TEST_NAMES))
 
@@ -46,7 +102,7 @@ $(TEST_NAMES): $(TEST_OBJECTS)
 	$(CC) -o $(TESTDIR)/$@ $(OBJDIR)/$@.o $(OBJECTS) $(LIBS)
 
 simple_lock_test:
-	$(CC) -o $(TESTDIR)/simple_lock_test simple_lock_test.c $(LIBS)
+	$(CC) -o $(TESTDIR)/simple_lock_test simple_lock_test.c test_ccapi_log.c $(LIBS)
 
 copy-script:
 	cp $(SCRIPT_NAME) $(DSTDIR)/$(SCRIPT_NAME)

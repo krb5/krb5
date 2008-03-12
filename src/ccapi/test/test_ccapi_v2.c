@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------------------
 
 static cc_result destroy_all_ccaches_v2(apiCB *context) {
-    cc_result err = ccNoError;
+    cc_result err = CC_NOERROR;
     infoNC **info = NULL;
     int i = 0;
     
@@ -80,7 +80,7 @@ static cc_result new_v5_creds_union_compat (cred_union *out_union, const char *r
     if (!err) {
         v5creds = malloc (sizeof (*v5creds));
         if (!v5creds) {
-            err = ccErrNoMem;
+            err = CC_NOMEM;
         }
     }
     
@@ -88,7 +88,7 @@ static cc_result new_v5_creds_union_compat (cred_union *out_union, const char *r
         asprintf(&client, "client@%s", realm);
         asprintf(&server, "host/%d%s@%s", num_runs++, realm, realm);
         if (!client || !server) {
-            err = ccErrNoMem;
+            err = CC_NOMEM;
         }
     }
     
@@ -121,7 +121,7 @@ static cc_result new_v5_creds_union_compat (cred_union *out_union, const char *r
             creds_union->cred_type = CC_CRED_V5;
             creds_union->cred.pV5Cred = v5creds;
         } else { 
-            err = ccErrNoMem; 
+            err = CC_NOMEM; 
         }
     }
     if (!err) {
@@ -248,7 +248,7 @@ int check_cc_get_change_time(void) {
         check_once_cc_get_change_time(context, &last_change_time, CC_NOERROR, "after creating a new ccache");
         
         if (!err) {
-            // change principal (fails with ccErrBadInternalMessage)
+            // change principal
             err = cc_set_principal(context, ccache, CC_CRED_V5, "foo@BAR.ORG");
             if (err) {
                 log_error("failed to change ccache's principal - %s (%d)", translate_ccapi_error(err), err);
@@ -1184,9 +1184,9 @@ cc_result check_once_cc_store(apiCB *context, ccache_p *ccache, const cred_union
         if (creds) { cc_free_creds(context, &creds); }
     }
     
-    if (err == ccIteratorEnd) { 
+    if (err == CC_END) { 
         check_if(found, "stored credentials not found in ccache");
-        err = ccNoError;
+        err = CC_NOERROR;
     }
     
     if (iterator) { cc_seq_fetch_creds_end(context, &iterator); }
@@ -1239,7 +1239,7 @@ int check_cc_remove_cred(void) {
         creds_array[i] = NULL;
         err = cc_seq_fetch_creds_next(context, &creds_array[i], iterator);
     }
-    if (err == ccIteratorEnd) { err = ccNoError; }
+    if (err == CC_END) { err = CC_NOERROR; }
     
     // remove 10 valid creds
     for (i = 0; !err && (i < 10); i++) {
@@ -1322,9 +1322,9 @@ cc_result check_once_cc_remove_cred(apiCB *context, ccache_p *ccache, cred_union
         if (creds) { cc_free_creds(context, &creds); }
     }
     
-    if (err == ccIteratorEnd) { 
-        check_if(!found, "credentials not removed from ccache");
-        err = ccNoError;
+    if (err == CC_END) { 
+        check_if(found, "credentials not removed from ccache");
+        err = CC_NOERROR;
     }
     
     if (iterator) { cc_seq_fetch_creds_end(context, &iterator); }
@@ -1333,3 +1333,507 @@ cc_result check_once_cc_remove_cred(apiCB *context, ccache_p *ccache, cred_union
     
     return err;
 }
+
+// ---------------------------------------------------------------------------
+
+int check_cc_seq_fetch_NCs_begin(void) {
+    cc_result err = 0;
+    apiCB *context = NULL;
+    ccache_p *ccache = NULL;
+    ccache_cit *iterator = NULL;
+    
+    BEGIN_TEST("cc_seq_fetch_NCs_begin");
+    
+    err = cc_initialize(&context, ccapi_version_2, NULL, NULL);
+    if (!err) {	
+        err = destroy_all_ccaches_v2(context);
+    }
+    if (!err) {	
+        // try making when there are no existing ccaches (shouldn't make a difference, but just in case)
+        check_once_cc_seq_fetch_NCs_begin(context, &iterator, CC_NOERROR, "when there are no existing ccaches");
+	
+        err = cc_create(context, "TEST_CC_SEQ_FETCH_NCS_BEGIN", "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+    }
+    if (!err) {	
+        // try making when at least one ccache already exists (just to cover all our bases)
+        check_once_cc_seq_fetch_NCs_begin(context, &iterator, CC_NOERROR, "when at least one ccache already exists");
+        
+        // try bad parameters
+        check_once_cc_seq_fetch_NCs_begin(context, NULL, CC_BAD_PARM, "NULL param"); // NULL iterator
+    }
+    // we'll do a comprehensive test of cc_ccache_iterator related functions later in the test suite
+    
+    if (ccache ) { cc_close(context, &ccache); }
+    if (context) { cc_shutdown(&context); }
+    
+    END_TEST_AND_RETURN
+}
+
+// ---------------------------------------------------------------------------
+
+cc_result check_once_cc_seq_fetch_NCs_begin(apiCB *context, ccache_cit **iterator, cc_result expected_err, const char *description) {
+    cc_result err = CC_NOERROR;
+    
+    cc_result possible_return_values[4] = {
+        CC_NOERROR, 
+        CC_BAD_PARM, 
+        CC_NOMEM, 
+        CC_NO_EXIST 
+    };
+    
+    BEGIN_CHECK_ONCE(description);
+    
+#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+    
+     err = cc_seq_fetch_NCs_begin(context, iterator);
+    
+    // check returned error
+    check_err(err, expected_err, possible_return_values);
+    
+    // we'll do a comprehensive test of cc_ccache_iterator related functions later
+    
+    return err;
+}
+
+// ---------------------------------------------------------------------------
+
+int check_cc_seq_fetch_NCs_next(void) {
+    cc_result err = 0;
+    apiCB *context = NULL;
+    ccache_p *ccache = NULL;
+    ccache_cit *iterator = NULL;
+    unsigned int i;
+    
+    BEGIN_TEST("cc_seq_fetch_NCs_next");
+    
+    err = cc_initialize(&context, ccapi_version_2, NULL, NULL);
+    
+    if (!err) {
+        err = destroy_all_ccaches_v2(context);
+    }
+    
+    // iterate with no ccaches
+    if (!err) {
+        err = cc_seq_fetch_NCs_begin(context, &iterator);
+    }
+    check_once_cc_seq_fetch_NCs_next(context, iterator, 0, CC_NOERROR, "iterating over an empty collection");
+    if (iterator) {
+        cc_seq_fetch_creds_end(context, &iterator);
+        iterator = NULL;
+    }
+    
+    // iterate with one ccache
+    if (!err) {
+        destroy_all_ccaches_v2(context);
+        err = cc_create(context, "TEST_CC_SEQ_FETCH_NCS_NEXT", "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+    }
+    if (ccache) {
+        cc_close(context, &ccache);
+        ccache = NULL;
+    }
+    if (!err) {
+        err = cc_seq_fetch_NCs_begin(context, &iterator);
+    }
+    check_once_cc_seq_fetch_NCs_next(context, iterator, 1, CC_NOERROR, "iterating over a collection of 1 ccache");
+    if (iterator) {
+        cc_seq_fetch_creds_end(context, &iterator);
+        iterator = NULL;
+    }
+    
+    // iterate with several ccaches
+    if (!err) {
+        destroy_all_ccaches_v2(context);
+    }
+    for(i = 0; !err && (i < 1000); i++)
+    {
+        char *name = NULL;
+        
+        if (i%100 == 0) fprintf(stdout, ".");	
+        asprintf (&name, "TEST_CC_SEQ_FETCH_NCS_NEXT_%d", i);
+        err = cc_create(context, name, "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+        if (ccache) {
+            cc_close(context, &ccache);
+            ccache = NULL;
+        }
+        free (name);
+    }
+    if (!err) {
+        err = cc_seq_fetch_NCs_begin(context, &iterator);
+    }
+    check_once_cc_seq_fetch_NCs_next(context, iterator, 1000, CC_NOERROR, "iterating over a collection of 1000 ccache");
+    if (iterator) {
+        cc_seq_fetch_creds_end(context, &iterator);
+        iterator = NULL;
+    }
+    
+    
+    if (ccache) { cc_close(context, &ccache); }
+    if (iterator) { cc_seq_fetch_creds_end(context, &iterator); }
+    if (context) { 
+        destroy_all_ccaches_v2(context);
+        cc_shutdown(&context);
+    }
+    
+    END_TEST_AND_RETURN
+}
+
+// ---------------------------------------------------------------------------
+
+cc_result check_once_cc_seq_fetch_NCs_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description) {
+    cc_result err = CC_NOERROR;
+    
+    BEGIN_CHECK_ONCE(description);
+    
+    cc_result possible_return_values[5] = {
+        CC_NOERROR, 
+        CC_END, 
+        CC_BAD_PARM, 
+        CC_NOMEM, 
+        CC_NO_EXIST
+    };
+#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+    
+    ccache_p *ccache = NULL;
+    cc_uint32 actual_count = 0;
+    
+    while (!err) {
+        err = cc_seq_fetch_NCs_next(context, &ccache, iterator);
+        if (ccache) {
+            actual_count++;
+            cc_close(context, &ccache);
+            ccache = NULL;
+        }
+    }
+    if (err == CC_END) {
+        err = CC_NOERROR;
+    }
+    
+    // check returned error
+    check_err(err, expected_err, possible_return_values);
+    
+    check_if(actual_count != expected_count, "iterator didn't iterate over all ccaches");
+    
+    END_CHECK_ONCE;
+    
+    return err;	
+}
+
+// ---------------------------------------------------------------------------
+
+int check_cc_get_NC_info(void) {
+    cc_result err = 0;
+    apiCB *context = NULL;
+    ccache_p *ccache = NULL;
+    unsigned int i;
+    
+    BEGIN_TEST("cc_get_NC_info");
+    
+    err = cc_initialize(&context, ccapi_version_2, NULL, NULL);
+    
+    if (!err) {
+        err = destroy_all_ccaches_v2(context);
+    }
+    
+    // iterate with no ccaches
+    check_once_cc_get_NC_info(context, "", "", CC_CRED_MAX, 0, CC_NOERROR, "iterating over an empty collection");
+    
+    // iterate with one ccache
+    if (!err) {
+        destroy_all_ccaches_v2(context);
+        err = cc_create(context, "TEST_CC_GET_NC_INFO", "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+    }
+    if (ccache) {
+        cc_close(context, &ccache);
+        ccache = NULL;
+    }
+    check_once_cc_get_NC_info(context, "TEST_CC_GET_NC_INFO", "foo@BAR.ORG", CC_CRED_V5, 1, CC_NOERROR, "iterating over a collection of 1 ccache");
+    
+    // iterate with several ccaches
+    if (!err) {
+        destroy_all_ccaches_v2(context);
+    }
+    for(i = 0; !err && (i < 1000); i++)
+    {
+        char *name = NULL;
+        
+        if (i%100 == 0) fprintf(stdout, ".");	
+        asprintf (&name, "TEST_CC_GET_NC_INFO_%d", i);
+        err = cc_create(context, name, "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+        if (ccache) {
+            cc_close(context, &ccache);
+            ccache = NULL;
+        }
+        free (name);
+    }
+    check_once_cc_get_NC_info(context, "TEST_CC_GET_NC_INFO", "foo@BAR.ORG", CC_CRED_V5, 1000, CC_NOERROR, "iterating over a collection of 1000 ccache");    
+    
+    if (ccache) { cc_close(context, &ccache); }
+    if (context) { 
+        destroy_all_ccaches_v2(context);
+        cc_shutdown(&context);
+    }
+    
+    END_TEST_AND_RETURN
+}
+
+// ---------------------------------------------------------------------------
+
+cc_result check_once_cc_get_NC_info(apiCB *context, 
+                                    const char *expected_name_prefix, 
+                                    const char *expected_principal, 
+                                    cc_int32 expected_version, 
+                                    cc_uint32 expected_count, 
+                                    cc_result expected_err, 
+                                    const char *description) {
+    cc_result err = CC_NOERROR;
+    infoNC **info = NULL;
+    
+    BEGIN_CHECK_ONCE(description);
+    
+    cc_result possible_return_values[4] = {
+        CC_NOERROR,
+        CC_BAD_PARM, 
+        CC_NOMEM, 
+        CC_NO_EXIST
+    };
+#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+    
+    cc_uint32 actual_count = 0;
+    
+    err = cc_get_NC_info(context, &info);
+    
+    for (actual_count = 0; !err && info[actual_count]; actual_count++) {
+        check_if(strncmp(info[actual_count]->name, expected_name_prefix, strlen(expected_name_prefix)), "got incorrect ccache name");
+        check_if(strcmp(info[actual_count]->principal, expected_principal), "got incorrect principal name");
+        check_if(info[actual_count]->vers != expected_version, "got incorrect cred version");
+    }
+    
+    // check returned error
+    check_err(err, expected_err, possible_return_values);
+    
+    check_if(actual_count != expected_count, "NC info didn't list all ccaches");
+    
+    if (info) { cc_free_NC_info (context, &info); }
+    END_CHECK_ONCE;
+    
+    return err;	
+}
+
+// ---------------------------------------------------------------------------
+
+int check_cc_seq_fetch_creds_begin(void) {
+    cc_result err = 0;
+    apiCB *context = NULL;
+    ccache_p *ccache = NULL;
+    ccache_p *dup_ccache = NULL;
+    ccache_cit *creds_iterator = NULL;
+    char *name = NULL;
+    
+    BEGIN_TEST("cc_seq_fetch_creds_begin");
+    
+    err = cc_initialize(&context, ccapi_version_2, NULL, NULL);
+    
+    if (!err) {
+        err = destroy_all_ccaches_v2(context);
+    }
+    
+    if (!err) {
+        err = cc_create(context, "TEST_CC_SEQ_FETCH_CREDS_BEGIN", "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+    }
+    
+    // valid params
+    if (!err) {
+        check_once_cc_seq_fetch_creds_begin(context, ccache, &creds_iterator, CC_NOERROR, "valid params");
+    }
+    if (creds_iterator) { 
+        cc_seq_fetch_creds_end(context, &creds_iterator); 
+        creds_iterator = NULL;
+    }
+    
+    // NULL out param
+    if (!err) {
+        check_once_cc_seq_fetch_creds_begin(context, ccache, NULL, CC_BAD_PARM, "NULL out iterator param");
+    }
+    if (creds_iterator) { 
+        cc_seq_fetch_creds_end(context, &creds_iterator); 
+        creds_iterator = NULL;
+    }
+    
+    // non-existent ccache
+    if (ccache) { 
+        err = cc_get_name(context, ccache, &name);
+        if (!err) {
+            err = cc_open(context, name, CC_CRED_V5, 0, &dup_ccache);
+        }
+        if (name) { cc_free_name(context, &name); }
+        if (dup_ccache) { cc_destroy(context, &dup_ccache); }
+    }
+    
+    if (!err) {
+        check_once_cc_seq_fetch_creds_begin(context, ccache, &creds_iterator, CC_NO_EXIST, "invalid ccache");
+    }
+    
+    if (creds_iterator) { 
+        cc_seq_fetch_creds_end(context, &creds_iterator); 
+        creds_iterator = NULL;
+    }
+    if (ccache) { cc_close(context, &ccache); }
+    if (context) { 
+        destroy_all_ccaches_v2(context);
+        cc_shutdown(&context);
+    }
+    
+    END_TEST_AND_RETURN
+}
+
+// ---------------------------------------------------------------------------
+
+cc_result check_once_cc_seq_fetch_creds_begin(apiCB *context, ccache_p *ccache, ccache_cit **iterator, cc_result expected_err, const char *description) {
+    cc_result err = CC_NOERROR;
+    
+    cc_result possible_return_values[5] = {
+        CC_NOERROR, 
+        CC_BAD_PARM, 
+        CC_NOMEM, 
+        CC_NO_EXIST
+    };
+    
+    BEGIN_CHECK_ONCE(description);
+    
+#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+    
+    err = cc_seq_fetch_creds_begin(context, ccache, iterator);
+    
+    // check returned error
+    check_err(err, expected_err, possible_return_values);
+    
+    END_CHECK_ONCE;
+    
+    return err;
+}
+
+// ---------------------------------------------------------------------------
+
+int check_cc_seq_fetch_creds_next(void) {
+    cc_result err = 0;
+    apiCB *context = NULL;
+    ccache_p *ccache = NULL;
+    cred_union creds_union;
+    ccache_cit *iterator = NULL;
+    unsigned int i;
+    
+    BEGIN_TEST("cc_seq_fetch_creds_next");
+    
+    err = cc_initialize(&context, ccapi_version_2, NULL, NULL);
+    
+    if (!err) {
+        err = destroy_all_ccaches_v2(context);
+    }
+    
+    // iterate with no creds
+    if (!err) {
+        err = cc_create(context, "TEST_CC_SEQ_FETCH_CREDS_NEXT", "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+    }
+    if (!err) {
+        err = cc_seq_fetch_creds_begin(context, ccache, &iterator);
+    }
+    check_once_cc_seq_fetch_creds_next(context, iterator, 0, CC_NOERROR, "iterating over an empty ccache");
+    if (iterator) {
+        cc_seq_fetch_creds_end(context, &iterator);
+        iterator = NULL;
+    }
+    if (ccache) {
+        cc_close(context, &ccache);
+        ccache = NULL;
+    }
+    
+    // iterate with one cred
+    if (!err) {
+        destroy_all_ccaches_v2(context);
+        err = cc_create(context, "TEST_CC_SEQ_FETCH_CREDS_NEXT", "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+    }
+    if (!err) {
+        new_v5_creds_union_compat(&creds_union, "BAR.ORG");
+        err = cc_store(context, ccache, creds_union);
+        release_v5_creds_union_compat(&creds_union);
+    }
+    if (!err) {
+        err = cc_seq_fetch_creds_begin(context, ccache, &iterator);
+    }
+    check_once_cc_seq_fetch_creds_next(context, iterator, 1, CC_NOERROR, "iterating over a ccache with 1 cred");
+    if (iterator) {
+        cc_seq_fetch_creds_end(context, &iterator);
+        iterator = NULL;
+    }
+    if (ccache) {
+        cc_close(context, &ccache);
+        ccache = NULL;
+    }
+    
+    // iterate with several creds
+    if (!err) {
+        destroy_all_ccaches_v2(context);
+        err = cc_create(context, "TEST_CC_SEQ_FETCH_CREDS_NEXT", "foo@BAR.ORG", CC_CRED_V5, 0, &ccache);
+    }
+    for(i = 0; !err && (i < 1000); i++) {
+        if (i%100 == 0) fprintf(stdout, ".");	
+        new_v5_creds_union_compat(&creds_union, "BAR.ORG");
+        err = cc_store(context, ccache, creds_union);
+        release_v5_creds_union_compat(&creds_union);
+    }
+    if (!err) {
+        err = cc_seq_fetch_creds_begin(context, ccache, &iterator);
+    }
+    check_once_cc_seq_fetch_creds_next(context, iterator, 1000, CC_NOERROR, "iterating over a ccache with 1000 creds");	
+    
+    if (ccache) { cc_close(context, &ccache); }
+    if (iterator) { cc_seq_fetch_creds_end(context, &iterator); }
+    if (context) { 
+        destroy_all_ccaches_v2(context);
+        cc_shutdown(&context);
+    }
+    
+    END_TEST_AND_RETURN
+}
+
+// ---------------------------------------------------------------------------
+
+cc_result check_once_cc_seq_fetch_creds_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description) {
+    cc_result   err             = CC_NOERROR;
+    cred_union *creds           = NULL;
+    cc_uint32   actual_count    = 0;
+    
+    cc_result possible_return_values[5] = {
+        CC_NOERROR, 
+        CC_END, 
+        CC_BAD_PARM, 
+        CC_NOMEM, 
+        CC_NO_EXIST,
+    };
+    
+    BEGIN_CHECK_ONCE(description);
+    
+#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+    
+    while (!err) {
+        err = cc_seq_fetch_creds_next(context, &creds, iterator);
+        if (creds) {
+            actual_count++;
+            cc_free_creds(context, &creds);
+            creds = NULL;
+        }
+    }
+    if (err == CC_END) {
+        err = CC_NOERROR;
+    }
+    
+    // check returned error
+    check_err(err, expected_err, possible_return_values);
+    
+    check_if(actual_count != expected_count, "iterator didn't iterate over all ccaches");
+    
+    END_CHECK_ONCE;
+    
+    return err;	
+}
+

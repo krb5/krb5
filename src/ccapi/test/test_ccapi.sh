@@ -53,6 +53,24 @@ run_test test_cc_ccache_iterator_next
 
 run_test test_cc_credentials_iterator_next
 
+run_test test_cc_shutdown
+run_test test_cc_get_change_time
+run_test test_cc_open
+run_test test_cc_create
+run_test test_cc_close
+run_test test_cc_destroy
+run_test test_cc_get_cred_version
+run_test test_cc_get_name
+run_test test_cc_get_principal
+run_test test_cc_set_principal
+run_test test_cc_store
+run_test test_cc_remove_cred
+run_test test_cc_seq_fetch_NCs_begin
+run_test test_cc_seq_fetch_NCs_next
+run_test test_cc_seq_fetch_creds_begin
+run_test test_cc_seq_fetch_creds_next
+run_test test_cc_get_NC_info
+
 printf "\nFinished testing CCAPI. $failure_count failures in total.\n"
 
 exit 0

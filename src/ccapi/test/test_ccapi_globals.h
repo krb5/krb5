@@ -3,6 +3,10 @@
 
 #include <krb5.h> // gets us TARGET_OS_MAC
 
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#include <TargetConditionals.h>
+#endif
+
 #ifdef TARGET_OS_MAC
 #include <Kerberos/CredentialsCache.h>
 #else

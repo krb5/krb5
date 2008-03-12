@@ -2,12 +2,10 @@
 #include "test_ccapi_iterators.h"
 #include "test_ccapi_check.h"
 #include "test_ccapi_util.h"
-#include "cci_debugging.h"
-
 
 // ---------------------------------------------------------------------------
 
-int check_cc_ccache_iterator_next() {
+int check_cc_ccache_iterator_next(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -56,7 +54,7 @@ int check_cc_ccache_iterator_next() {
 	}
 	for(i = 0; !err && (i < 1000); i++)
 	{
-        if (i%10 == 0) cci_debug_printf("%s loop: %d", __FUNCTION__, i);	
+        if (i%100 == 0) fprintf(stdout, ".");	
         err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
 		if (ccache) {
 			cc_ccache_release(ccache);
@@ -126,7 +124,7 @@ cc_int32 check_once_cc_ccache_iterator_next(cc_ccache_iterator_t iterator, cc_ui
 
 // ---------------------------------------------------------------------------
 
-int check_cc_credentials_iterator_next() {
+int check_cc_credentials_iterator_next(void) {
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -188,8 +186,8 @@ int check_cc_credentials_iterator_next() {
 		err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
 	}
 	for(i = 0; !err && (i < 1000); i++) {
-        if (i%10 == 0) cci_debug_printf("%s loop: %d", __FUNCTION__, i);	
-        new_v5_creds_union(&creds_union, "BAR.ORG");
+        if (i%100 == 0) fprintf(stdout, ".");	
+		new_v5_creds_union(&creds_union, "BAR.ORG");
 		err = cc_ccache_store_credentials(ccache, &creds_union);
 		release_v5_creds_union(&creds_union);
 	}

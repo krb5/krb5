@@ -48,4 +48,26 @@ cc_result check_once_cc_store(apiCB *context, ccache_p *ccache, const cred_union
 
 int check_cc_remove_cred(void);
 cc_result check_once_cc_remove_cred(apiCB *context, ccache_p *ccache, cred_union in_creds, cc_int32 expected_err, const char *description);
+
+int check_cc_seq_fetch_NCs_begin(void);
+cc_result check_once_cc_seq_fetch_NCs_begin(apiCB *context, ccache_cit **iterator, cc_result expected_err, const char *description);
+
+int check_cc_seq_fetch_NCs_next(void);
+cc_result check_once_cc_seq_fetch_NCs_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description);
+
+int check_cc_get_NC_info(void);
+cc_result check_once_cc_get_NC_info(apiCB *context, 
+                                    const char *expected_name, 
+                                    const char *expected_principal, 
+                                    cc_int32 expected_version, 
+                                    cc_uint32 expected_count, 
+                                    cc_result expected_err, 
+                                    const char *description);
+
+int check_cc_seq_fetch_creds_begin(void);
+cc_result check_once_cc_seq_fetch_creds_begin(apiCB *context, ccache_p *ccache, ccache_cit **iterator, cc_result expected_err, const char *description);
+
+int check_cc_seq_fetch_creds_next(void);
+cc_result check_once_cc_seq_fetch_creds_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description);    
+
 #endif /* _TEST_CCAPI_V2_H_ */

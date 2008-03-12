@@ -38,6 +38,7 @@ OBJECTS =   $(OUTPRE)test_ccapi_ccache.$(OBJEXT) \
             $(OUTPRE)test_ccapi_check.$(OBJEXT) \
             $(OUTPRE)test_ccapi_constants.$(OBJEXT) \
             $(OUTPRE)test_ccapi_context.$(OBJEXT) \
+            $(OUTPRE)test_ccapi_v2.$(OBJEXT) \
             $(OUTPRE)test_ccapi_globals.$(OBJEXT) \
             $(OUTPRE)test_ccapi_iterators.$(OBJEXT) \
             $(OUTPRE)test_ccapi_log.$(OBJEXT) \
@@ -53,7 +54,6 @@ TESTALLOBJS=$(OUTPRE)main.$(OBJEXT) \
 TEST_NAMES =    test_cc_ccache_iterator_next \
                 test_constants \
                 test_cc_initialize \
-                test_cc_context_get_version \
                 test_cc_credentials_iterator_next
                 
 MORE_TESTS =    test_cc_context_release \
@@ -82,7 +82,25 @@ MORE_TESTS =    test_cc_context_release \
                 test_cc_ccache_compare \
                 test_cc_ccache_get_kdc_time_offset \
                 test_cc_ccache_set_kdc_time_offset \
-                test_cc_ccache_clear_kdc_time_offset 
+                test_cc_ccache_clear_kdc_time_offset \
+                test_cc_shutdown \
+                test_cc_get_change_time \
+                test_cc_open \
+                test_cc_create \
+                test_cc_close \
+                test_cc_destroy \
+                test_cc_get_cred_version \
+                test_cc_get_name \
+                test_cc_get_principal \
+                test_cc_set_principal \
+                test_cc_store \
+                test_cc_remove_cred \
+                test_cc_seq_fetch_NCs_begin \
+                test_cc_seq_fetch_NCs_next \
+                test_cc_seq_fetch_creds_begin \
+                test_cc_seq_fetch_creds_next \
+                test_cc_get_NC_info
+
 
 ##### Linker
 LINK	= link
