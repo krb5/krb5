@@ -723,6 +723,10 @@ cc_result cc_seq_fetch_NCs_end (apiCB       *in_context,
         err = ccapi_ccache_iterator_release (iterator);
     }
     
+    if (!err) {
+        *io_iterator = NULL;
+    }
+    
     return cci_remap_error (err);
 }
 
@@ -822,7 +826,7 @@ cc_result cc_seq_fetch_creds_end (apiCB       *in_context,
     }
     
     if (!err) {
-        *iterator = NULL;
+        *io_iterator = NULL;
     }
     
     return cci_remap_error (err);
