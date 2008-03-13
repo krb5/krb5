@@ -2,6 +2,7 @@ thisconfigdir=..$(S)..
 myfulldir=ccapi$(S)test
 mydir=ccapi$(S)test
 BUILDTOP=..$(S)..
+CCAPI=$(BUILDTOP)$(S)CCAPI
 
 !if defined(KRB5_KFW_COMPILE)
 KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
@@ -10,7 +11,7 @@ KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
 # Because all the sources are in ., 
 #  the only includes we need are to directories outside of ccapi.
 LOCALINCLUDES = /I$(BUILDTOP) /I$(BUILDTOP)$(S)include /I$(BUILDTOP)$(S)include$(S)krb5 $(KFWINC) \
-    -I$(BUILDTOP)$(S)util$(S)et /I.
+    -I$(BUILDTOP)$(S)util$(S)et /I. -I$(CCAPI)$(S)COMMON -I$(CCAPI)$(S)LIB
 
 # run with "make all" to create CCAPI tests in "/tmp/ccapi_test"
 # run resulting tests with "sh test_ccapi.sh"
@@ -26,11 +27,28 @@ LOCALINCLUDES = /I$(BUILDTOP) /I$(BUILDTOP)$(S)include /I$(BUILDTOP)$(S)include$
 ##DOS##       cci_types.h \
 ##DOS##       win-utils.h
 
+##DOS##LIBSRC=ccapi_ccache.c \
+##DOS##       ccapi_ccache_iterator.c \
+##DOS##       ccapi_context.c \
+##DOS##       ccapi_context_change_time.c \
+##DOS##       ccapi_ipc.c \
+##DOS##       ccapi_credentials.c \
+##DOS##       ccapi_credentials_iterator.c \
+##DOS##       ccapi_v2.c
+
+##DOS##COMSRC=cci_cred_union.c \
+##DOS##       cci_identifier.c \
+##DOS##       cci_message.c \
+##DOS##       cci_stream.c
+
+##DOS##COWSRC=cci_os_identifier.c
+
 SRCDIR  = .
 DSTROOT = $(SRCDIR)
 OBJDIR  = $(DSTROOT)$(S)ccapi_intermediates
 DSTDIR  = $(DSTROOT)$(S)ccapi_test
 TESTDIR = $(DSTDIR)$(S)tests
+SRCTMP  = $(SRCDIR)\srctmp
 
 SCRIPT_NAME = test_ccapi.sh
 
@@ -44,7 +62,20 @@ OBJECTS =   $(OUTPRE)test_ccapi_ccache.$(OBJEXT) \
             $(OUTPRE)test_ccapi_log.$(OBJEXT) \
             $(OUTPRE)test_ccapi_util.$(OBJEXT)
 
-PINGOBJS =  $(OUTPRE)ccs_request_c.$(OBJEXT) \
+PINGOBJS =  $(OUTPRE)ccapi_ccache.$(OBJEXT) \
+            $(OUTPRE)ccapi_ccache_iterator.$(OBJEXT) \
+            $(OUTPRE)ccapi_context.$(OBJEXT) \
+            $(OUTPRE)ccapi_context_change_time.$(OBJEXT) \
+            $(OUTPRE)ccapi_ipc.$(OBJEXT) \
+            $(OUTPRE)ccapi_credentials.$(OBJEXT) \
+            $(OUTPRE)ccapi_credentials_iterator.$(OBJEXT) \
+            $(OUTPRE)ccapi_v2.$(OBJEXT) \
+            $(OUTPRE)cci_cred_union.$(OBJEXT) \
+            $(OUTPRE)cci_identifier.$(OBJEXT) \
+            $(OUTPRE)cci_os_identifier.$(OBJEXT) \
+            $(OUTPRE)cci_message.$(OBJEXT) \
+            $(OUTPRE)cci_stream.$(OBJEXT) \
+            $(OUTPRE)ccs_request_c.$(OBJEXT) \
             $(OUTPRE)pingtest.$(OBJEXT) \
             $(OBJECTS)
 
@@ -135,7 +166,7 @@ setup-test-dir:
 	mkdir -p "$(OBJDIR)"
 	
 ## The same trick as used in TEST_NAMES to run an action on each element ofthe list WINH:
-setup-windows: $(WINH)
+setup-windows: $(WINH) $(LIBSRC) $(COMSRC) $(COWSRC)
 	if NOT exist $(TESTDIR) mkdir $(TESTDIR)
 	if NOT exist $(OBJDIR)  mkdir $(OBJDIR)
 	set LINK = link
@@ -144,6 +175,15 @@ setup-windows: $(WINH)
 #   That is how ..\Makefile.in is set up.
 $(WINH):
     copy ..\lib\win\srctmp\$@ .
+
+$(LIBSRC):
+    copy ..\lib\$@ .
+
+$(COMSRC):
+    copy ..\common\$@ .
+
+$(COWSRC):
+    copy ..\common\win\$@ .
 
 # This rule assumes that nmake in ..\lib\win\ has already run.
 $(OUTPRE)pingtest.exe: $(OBJECTS) $(PINGOBJS)

@@ -1,4 +1,5 @@
 #include <string.h>
+#include "k5-platform.h"	/* pull in asprintf decl/defn */
 #include "test_ccapi_v2.h"
 #include <limits.h>
 #include <time.h>
@@ -1482,8 +1483,6 @@ int check_cc_seq_fetch_NCs_next(void) {
 cc_result check_once_cc_seq_fetch_NCs_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description) {
     cc_result err = CC_NOERROR;
     
-    BEGIN_CHECK_ONCE(description);
-    
     cc_result possible_return_values[5] = {
         CC_NOERROR, 
         CC_END, 
@@ -1495,6 +1494,8 @@ cc_result check_once_cc_seq_fetch_NCs_next(apiCB *context, ccache_cit *iterator,
     
     ccache_p *ccache = NULL;
     cc_uint32 actual_count = 0;
+    
+    BEGIN_CHECK_ONCE(description);
     
     while (!err) {
         err = cc_seq_fetch_NCs_next(context, &ccache, iterator);
@@ -1588,8 +1589,6 @@ cc_result check_once_cc_get_NC_info(apiCB *context,
     cc_result err = CC_NOERROR;
     infoNC **info = NULL;
     
-    BEGIN_CHECK_ONCE(description);
-    
     cc_result possible_return_values[4] = {
         CC_NOERROR,
         CC_BAD_PARM, 
@@ -1599,6 +1598,8 @@ cc_result check_once_cc_get_NC_info(apiCB *context,
 #define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
     
     cc_uint32 actual_count = 0;
+    
+    BEGIN_CHECK_ONCE(description);
     
     err = cc_get_NC_info(context, &info);
     

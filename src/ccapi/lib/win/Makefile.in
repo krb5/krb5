@@ -9,6 +9,7 @@ OBJS	= $(OUTPRE)ccapi_ccache.obj \
           $(OUTPRE)ccapi_ipc.obj \
           $(OUTPRE)ccapi_os_ipc.obj \
           $(OUTPRE)ccapi_string.obj \
+          $(OUTPRE)ccapi_v2.obj \
           $(OUTPRE)cci_array_internal.obj \
           $(OUTPRE)cci_cred_union.obj \
           $(OUTPRE)cci_debugging.obj \
