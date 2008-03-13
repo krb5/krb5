@@ -31,11 +31,6 @@
 #include "ccapi_credentials_iterator.h"
 #include "ccapi_ipc.h"
 
-#if TARGET_OS_MAC
-#warning Workaround for AppleConnect crash causes leak
-#include <CoreFoundation/CoreFoundation.h>
-#endif
-
 /* ------------------------------------------------------------------------ */
 
 typedef struct cci_ccache_d {
