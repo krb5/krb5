@@ -125,6 +125,25 @@ cc_int32 ccapi_ccache_iterator_release (cc_ccache_iterator_t io_ccache_iterator)
     if (!io_ccache_iterator) { err = ccErrBadParam; }
     
     if (!err) {
+        cc_uint32 initialized = 0;
+        
+        err = cci_identifier_is_initialized (ccache_iterator->identifier,
+                                             &initialized);
+        
+        if (!err && initialized) {
+            err =  cci_ipc_send (cci_ccache_iterator_release_msg_id,
+                                 ccache_iterator->identifier,
+                                 NULL,
+                                 NULL);
+            if (err) {
+                cci_debug_printf ("%s: cci_ipc_send failed with error %d", 
+                                 __FUNCTION__, err);
+                err = ccNoError;
+            }
+        }
+    }
+    
+    if (!err) {
         free ((char *) ccache_iterator->functions);
         cci_identifier_release (ccache_iterator->identifier);
         free (ccache_iterator->saved_ccache_name);
