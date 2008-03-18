@@ -229,7 +229,9 @@ static cc_int32 ccs_cache_collection_find_ccache_by_name (ccs_cache_collection_t
     if (!out_ccache         ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = ccs_ccache_list_new_iterator (in_cache_collection->ccaches, &iterator);
+        err = ccs_ccache_list_new_iterator (in_cache_collection->ccaches, 
+                                            CCS_PIPE_NULL, 
+                                            &iterator);
     }
     
     while (!err) {
@@ -374,7 +376,9 @@ cc_int32 ccs_cache_collection_find_credentials_iterator (ccs_cache_collection_t 
     if (!out_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = ccs_ccache_list_new_iterator (in_cache_collection->ccaches, &iterator);
+        err = ccs_ccache_list_new_iterator (in_cache_collection->ccaches, 
+                                            CCS_PIPE_NULL, 
+                                            &iterator);
     }
     
     while (!err) {
@@ -473,6 +477,7 @@ static cc_int32 ccs_cache_collection_get_default_ccache (ccs_cache_collection_t 
             ccs_ccache_list_iterator_t iterator = NULL;
             
             err = ccs_ccache_list_new_iterator (in_cache_collection->ccaches,
+                                                CCS_PIPE_NULL, 
                                                 &iterator);
             
             if (!err) {
@@ -916,6 +921,7 @@ static cc_int32 ccs_cache_collection_create_new_ccache (ccs_cache_collection_t i
 /* ------------------------------------------------------------------------ */
 
 static  cc_int32 ccs_cache_collection_new_ccache_iterator (ccs_cache_collection_t io_cache_collection,
+                                                           ccs_pipe_t             in_client_pipe,
                                                            cci_stream_t           in_request_data,
                                                            cci_stream_t           io_reply_data)
 {
@@ -928,6 +934,7 @@ static  cc_int32 ccs_cache_collection_new_ccache_iterator (ccs_cache_collection_
     
     if (!err) {
         err = ccs_ccache_list_new_iterator (io_cache_collection->ccaches,
+                                            in_client_pipe,
                                             &ccache_iterator);
     }
     
@@ -1070,7 +1077,9 @@ static cc_int32 ccs_cache_collection_unlock (ccs_pipe_t             in_client_pi
             
         } else if (in_request_name == cci_context_new_ccache_iterator_msg_id) {
             err = ccs_cache_collection_new_ccache_iterator (io_cache_collection,
-                                                            in_request_data, reply_data);
+                                                            in_client_pipe,
+                                                            in_request_data, 
+                                                            reply_data);
             
         } else if (in_request_name == cci_context_lock_msg_id) {
             err = ccs_cache_collection_lock (in_client_pipe, in_reply_pipe, 

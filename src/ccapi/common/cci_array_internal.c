@@ -52,7 +52,6 @@ static cc_int32 cci_array_resize (cci_array_t io_array,
 {
     cc_int32 err = ccNoError;
     cc_uint64 new_max_count = 0;
-    cci_array_object_t *objects = NULL;
     
     if (!io_array) { err = cci_check_error (ccErrBadParam); }
     
@@ -75,8 +74,8 @@ static cc_int32 cci_array_resize (cci_array_t io_array,
         }
     }
     
-    if (!err) {
-        objects = io_array->objects;
+    if (!err && io_array->max_count != new_max_count) {
+        cci_array_object_t *objects = io_array->objects;
         
         if (!objects) {
             objects = malloc (new_max_count * sizeof (*objects));
@@ -84,11 +83,11 @@ static cc_int32 cci_array_resize (cci_array_t io_array,
             objects = realloc (objects, new_max_count * sizeof (*objects));
         }
         if (!objects) { err = cci_check_error (ccErrNoMem); }
-    }
-    
-    if (!err) {
-        io_array->objects = objects;
-        io_array->max_count = new_max_count;
+        
+        if (!err) {
+            io_array->objects = objects;
+            io_array->max_count = new_max_count;
+        }        
     }
     
     return cci_check_error (err); 
@@ -236,12 +235,12 @@ cc_int32 cci_array_remove (cci_array_t io_array,
             memmove (&io_array->objects[in_position], &io_array->objects[in_position + 1],
                      move_count * sizeof (*io_array->objects));
         }
-        
-        if (io_array->object_release) { io_array->object_release (object); }
         io_array->count--;
         
+        if (io_array->object_release) { io_array->object_release (object); }
+        
         cci_array_resize (io_array, io_array->count);
-    }
+     }
     
     return cci_check_error (err);    
 }

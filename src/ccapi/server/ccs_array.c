@@ -212,7 +212,8 @@ cc_int32 ccs_callback_array_remove (ccs_callback_array_t io_array,
 
 cc_int32 ccs_callbackref_array_new (ccs_callbackref_array_t *out_array)
 {
-    return cci_array_new (out_array, NULL /* Just a reference, not owner */ );
+    /* Ref arrays do not own their contents; pass NULL for release function */
+    return cci_array_new (out_array, NULL);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -249,6 +250,60 @@ cc_int32 ccs_callbackref_array_insert (ccs_callbackref_array_t io_array,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_callbackref_array_remove (ccs_callbackref_array_t io_array,
+				       cc_uint64               in_position)
+{
+    return cci_array_remove (io_array, in_position);
+}
+
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_iteratorref_array_new (ccs_iteratorref_array_t *out_array)
+{
+    /* Ref arrays do not own their contents; pass NULL for release function */
+    return cci_array_new (out_array, NULL);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_iteratorref_array_release (ccs_iteratorref_array_t io_array)
+{
+    return cci_array_release (io_array);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_uint64 ccs_iteratorref_array_count (ccs_iteratorref_array_t in_array)
+{
+    return cci_array_count (in_array);
+}
+
+/* ------------------------------------------------------------------------ */
+
+ccs_generic_list_iterator_t ccs_iteratorref_array_object_at_index (ccs_iteratorref_array_t io_array,
+                                                                   cc_uint64               in_position)
+{
+    return (ccs_generic_list_iterator_t) cci_array_object_at_index (io_array, 
+                                                                    in_position);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_iteratorref_array_insert (ccs_iteratorref_array_t     io_array,
+				       ccs_generic_list_iterator_t in_iterator,
+				       cc_uint64                   in_position)
+{
+    return cci_array_insert (io_array, 
+                             (cci_array_object_t) in_iterator, 
+                             in_position);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_iteratorref_array_remove (ccs_iteratorref_array_t io_array,
 				       cc_uint64               in_position)
 {
     return cci_array_remove (io_array, in_position);

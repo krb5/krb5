@@ -27,7 +27,7 @@
 #ifndef CCS_LIST_INTERNAL_H
 #define CCS_LIST_INTERNAL_H
 
-#include "cci_common.h"
+#include "ccs_common.h"
 #include "cci_array_internal.h"
 
 struct ccs_list_d;
@@ -49,6 +49,7 @@ cc_int32 ccs_list_new (ccs_list_t                      *out_list,
 cc_int32 ccs_list_release (ccs_list_t io_list);
 
 cc_int32 ccs_list_new_iterator (ccs_list_t           io_list,
+                                ccs_pipe_t           in_client_pipe,
                                 ccs_list_iterator_t *out_list_iterator);
 
 cc_int32 ccs_list_release_iterator (ccs_list_t       io_list,
@@ -87,7 +88,8 @@ cc_int32 ccs_list_iterator_current (ccs_list_iterator_t  io_list_iterator,
 cc_int32 ccs_list_iterator_next (ccs_list_iterator_t  io_list_iterator,
                                  ccs_list_object_t   *out_object);
 
-cc_int32 ccs_list_iterator_release (ccs_list_iterator_t io_list_iterator);
+cc_int32 ccs_list_iterator_invalidate (ccs_list_iterator_t io_list_iterator);
 
+cc_int32 ccs_list_iterator_release (ccs_list_iterator_t io_list_iterator);
 
 #endif /* CCS_LIST_INTERNAL_H */

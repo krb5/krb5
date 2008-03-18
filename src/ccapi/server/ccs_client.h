@@ -40,6 +40,12 @@ cc_int32 ccs_client_add_callback (ccs_client_t   io_client,
 cc_int32 ccs_client_remove_callback (ccs_client_t   io_client,
 				     ccs_callback_t in_lock);
 
+cc_int32 ccs_client_add_iterator (ccs_client_t                io_client,
+				  ccs_generic_list_iterator_t in_iterator);
+
+cc_int32 ccs_client_remove_iterator (ccs_client_t                io_client,
+				     ccs_generic_list_iterator_t in_iterator);
+
 cc_int32 ccs_client_uses_pipe (ccs_client_t  in_client,
                                ccs_pipe_t    in_pipe,
                                cc_uint32    *out_uses_pipe);

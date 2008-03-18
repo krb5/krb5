@@ -53,14 +53,16 @@ struct ccs_list_d ccs_list_initializer = { NULL, NULL, -1, -1, NULL };
 
 struct ccs_list_iterator_d {
     cci_identifier_t identifier;
+    ccs_pipe_t client_pipe;
     ccs_list_t list;
     cc_uint64 current;
 };
 
-struct ccs_list_iterator_d ccs_list_iterator_initializer = { NULL, NULL, 0 };
+struct ccs_list_iterator_d ccs_list_iterator_initializer = { NULL, CCS_PIPE_NULL, NULL, 0 };
 
 static cc_int32 ccs_list_iterator_new (ccs_list_iterator_t *out_list_iterator,
-                                       ccs_list_t           in_list);
+                                       ccs_list_t           in_list,
+                                       ccs_pipe_t           in_client_pipe);
 
 static cc_int32 ccs_list_iterator_object_release (cci_array_object_t io_list_iterator);
 
@@ -138,9 +140,12 @@ cc_int32 ccs_list_release (ccs_list_t io_list)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_list_new_iterator (ccs_list_t           io_list,
+                                ccs_pipe_t           in_client_pipe,
                                 ccs_list_iterator_t *out_list_iterator)
 {
-    return cci_check_error (ccs_list_iterator_new (out_list_iterator, io_list));
+    return cci_check_error (ccs_list_iterator_new (out_list_iterator, 
+                                                   io_list, 
+                                                   in_client_pipe));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -415,13 +420,15 @@ cc_int32 ccs_list_push_front (ccs_list_t       io_list,
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_list_iterator_new (ccs_list_iterator_t *out_list_iterator,
-                                       ccs_list_t           io_list)
+                                       ccs_list_t           io_list,
+                                       ccs_pipe_t           in_client_pipe)
 {
     cc_int32 err = ccNoError;
     ccs_list_iterator_t list_iterator = NULL;
     
     if (!out_list_iterator) { err = cci_check_error (ccErrBadParam); }
     if (!io_list          ) { err = cci_check_error (ccErrBadParam); }
+    /* client_pipe may be NULL if the iterator exists for internal server use */
     
     if (!err) {
         list_iterator = malloc (sizeof (*list_iterator));
@@ -443,6 +450,20 @@ static cc_int32 ccs_list_iterator_new (ccs_list_iterator_t *out_list_iterator,
         err = cci_array_insert (io_list->iterators, 
                                 (cci_array_object_t) list_iterator, 
 				cci_array_count (io_list->iterators));
+    }
+    
+    if (!err && ccs_pipe_valid (in_client_pipe)) {
+        ccs_client_t client = NULL;
+        
+        err = ccs_pipe_copy (&list_iterator->client_pipe, in_client_pipe);
+        
+        if (!err) {
+            err = ccs_server_client_for_pipe (in_client_pipe, &client);
+        }
+        
+        if (!err) {
+            err = ccs_client_add_iterator (client, list_iterator);
+        }
     }
 
     if (!err) {
@@ -485,7 +506,9 @@ cc_int32 ccs_list_iterator_clone (ccs_list_iterator_t  in_list_iterator,
     if (!out_list_iterator) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = ccs_list_iterator_new (&list_iterator, in_list_iterator->list);
+        err = ccs_list_iterator_new (&list_iterator, 
+                                     in_list_iterator->list, 
+                                     in_list_iterator->client_pipe);
     }
     
     if (!err) {
@@ -509,7 +532,19 @@ static cc_int32 ccs_list_iterator_object_release (cci_array_object_t io_list_ite
     
     if (!io_list_iterator) { err = ccErrBadParam; }
     
+    if (!err && ccs_pipe_valid (list_iterator->client_pipe)) {
+	ccs_client_t client = NULL;
+
+        err = ccs_server_client_for_pipe (list_iterator->client_pipe, &client);
+        
+        if (!err && client) {
+	    /* if client object still has a reference to us, remove it */
+	    err = ccs_client_remove_iterator (client, list_iterator);
+        }
+    }
+    
     if (!err) {
+        ccs_pipe_release (list_iterator->client_pipe);
         cci_identifier_release (list_iterator->identifier);
         free (io_list_iterator);
     }
@@ -534,6 +569,28 @@ cc_int32 ccs_list_iterator_release (ccs_list_iterator_t io_list_iterator)
         } else {
             cci_debug_printf ("Warning: iterator not in iterator list!");
         }
+    }
+    
+    return err;        
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_list_iterator_invalidate (ccs_list_iterator_t io_list_iterator)
+{
+    cc_int32 err = ccNoError;
+    ccs_list_iterator_t list_iterator = (ccs_list_iterator_t) io_list_iterator;
+    
+    if (!io_list_iterator) { err = ccErrBadParam; }
+    
+    if (!err) {
+        /* Client owner died.  Remove client reference and then the iterator. */
+        if (ccs_pipe_valid (list_iterator->client_pipe)) { 
+            ccs_pipe_release (list_iterator->client_pipe);
+            list_iterator->client_pipe = CCS_PIPE_NULL;
+        }
+        
+        err =  ccs_list_iterator_release (io_list_iterator);
     }
     
     return err;        

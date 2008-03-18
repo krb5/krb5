@@ -747,6 +747,7 @@ static cc_int32 ccs_ccache_remove_credentials (ccs_ccache_t           io_ccache,
 
 static cc_int32 ccs_ccache_new_credentials_iterator (ccs_ccache_t           io_ccache,
                                                      ccs_cache_collection_t io_cache_collection,
+                                                     ccs_pipe_t             in_client_pipe,
                                                      cci_stream_t           in_request_data,
                                                      cci_stream_t           io_reply_data)
 {
@@ -760,6 +761,7 @@ static cc_int32 ccs_ccache_new_credentials_iterator (ccs_ccache_t           io_c
     
     if (!err) {
         err = ccs_credentials_list_new_iterator (io_ccache->credentials,
+                                                 in_client_pipe,
                                                  &credentials_iterator);
     }
     
@@ -1163,8 +1165,11 @@ cc_int32 ccs_ccache_handle_message (ccs_pipe_t              in_client_pipe,
                                                  in_request_data, reply_data);
             
         } else if (in_request_name == cci_ccache_new_credentials_iterator_msg_id) {
-            err = ccs_ccache_new_credentials_iterator (io_ccache, io_cache_collection,
-                                                       in_request_data, reply_data);
+            err = ccs_ccache_new_credentials_iterator (io_ccache, 
+                                                       io_cache_collection,
+                                                       in_client_pipe,
+                                                       in_request_data, 
+                                                       reply_data);
             
         } else if (in_request_name == cci_ccache_move_msg_id) {
             err = ccs_ccache_move (io_ccache, io_cache_collection,

@@ -110,4 +110,24 @@ cc_int32 ccs_callbackref_array_insert (ccs_callbackref_array_t io_array,
 cc_int32 ccs_callbackref_array_remove (ccs_callbackref_array_t io_array,
 				       cc_uint64               in_position);
 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
+
+cc_int32 ccs_iteratorref_array_new (ccs_iteratorref_array_t *out_array);
+
+cc_int32 ccs_iteratorref_array_release (ccs_iteratorref_array_t io_array);
+
+cc_uint64 ccs_iteratorref_array_count (ccs_iteratorref_array_t in_array);
+
+ccs_generic_list_iterator_t ccs_iteratorref_array_object_at_index (ccs_iteratorref_array_t io_array,
+                                                                   cc_uint64               in_position);
+
+cc_int32 ccs_iteratorref_array_insert (ccs_iteratorref_array_t     io_array,
+                                       ccs_generic_list_iterator_t in_iterator,
+                                       cc_uint64                   in_position);
+
+cc_int32 ccs_iteratorref_array_remove (ccs_iteratorref_array_t io_array,
+                                       cc_uint64               in_position);
+
 #endif /* CCS_ARRAY_H */

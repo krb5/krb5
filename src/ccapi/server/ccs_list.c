@@ -132,9 +132,10 @@ cc_int32 ccs_ccache_list_new (ccs_ccache_list_t *out_list)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_ccache_list_new_iterator (ccs_ccache_list_t           in_list,
+                                       ccs_pipe_t                  in_client_pipe,
                                        ccs_ccache_list_iterator_t *out_list_iterator)
 {
-    return ccs_list_new_iterator (in_list, out_list_iterator);
+    return ccs_list_new_iterator (in_list, in_client_pipe, out_list_iterator);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -262,9 +263,10 @@ cc_int32 ccs_credentials_list_new (ccs_credentials_list_t *out_list)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_credentials_list_new_iterator (ccs_credentials_list_t              in_list,
+                                            ccs_pipe_t                          in_client_pipe,
                                             ccs_credentials_list_iterator_t    *out_list_iterator)
 {
-    return ccs_list_new_iterator (in_list, out_list_iterator);
+    return ccs_list_new_iterator (in_list, in_client_pipe, out_list_iterator);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -346,4 +348,15 @@ cc_int32 ccs_credentials_list_iterator_next (ccs_credentials_list_iterator_t  io
 cc_int32 ccs_credentials_list_iterator_release (ccs_credentials_list_iterator_t io_list_iterator)
 {
     return ccs_list_iterator_release (io_list_iterator);
+}
+
+#ifdef TARGET_OS_MAC
+#pragma mark-
+#endif
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_generic_list_iterator_invalidate (ccs_generic_list_iterator_t io_list_iterator)
+{
+    return ccs_list_iterator_invalidate (io_list_iterator);
 }

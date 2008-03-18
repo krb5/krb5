@@ -41,6 +41,8 @@ typedef struct cci_array_d *ccs_callback_array_t;
 
 typedef struct cci_array_d *ccs_callbackref_array_t;
 
+typedef struct cci_array_d *ccs_iteratorref_array_t;
+
 typedef struct cci_array_d *ccs_lock_array_t;
 
 #ifdef TARGET_OS_MAC
@@ -78,6 +80,9 @@ typedef struct ccs_callback_d *ccs_callback_t;
 
 struct ccs_list_d;
 struct ccs_list_iterator_d;
+
+/* Used for iterator array invalidate function */
+typedef struct ccs_list_iterator_d *ccs_generic_list_iterator_t;
 
 typedef struct ccs_list_d *ccs_cache_collection_list_t;
 
