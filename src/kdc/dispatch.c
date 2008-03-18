@@ -107,7 +107,7 @@ dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
 #ifndef NOCACHE
     /* put the response into the lookaside buffer */
-    if (!retval)
+    if (!retval && *response != NULL)
 	kdc_insert_lookaside(pkt, *response);
 #endif
 

@@ -1069,6 +1069,8 @@ static void process_packet(struct connection *conn, const char *prog,
 	com_err(prog, retval, "while dispatching (udp)");
 	return;
     }
+    if (response == NULL)
+	return;
     cc = send_to_from(port_fd, response->data, (socklen_t) response->length, 0,
 		      (struct sockaddr *)&saddr, saddr_len,
 		      (struct sockaddr *)&daddr, daddr_len);
