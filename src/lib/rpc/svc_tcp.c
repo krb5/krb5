@@ -53,6 +53,14 @@ static char sccsid[] = "@(#)svc_tcp.c 1.21 87/08/11 Copyr 1984 Sun Micro";
 extern errno;
 */
 
+#ifndef FD_SETSIZE
+#ifdef NBBY
+#define NOFILE (sizeof(int) * NBBY)
+#else
+#define NOFILE (sizeof(int) * 8)
+#endif
+#endif
+
 /*
  * Ops vector for TCP/IP based rpc service handle
  */
@@ -213,6 +221,19 @@ makefd_xprt(
 	register SVCXPRT *xprt;
 	register struct tcp_conn *cd;
  
+#ifdef FD_SETSIZE
+	if (fd >= FD_SETSIZE) {
+		(void) fprintf(stderr, "svc_tcp: makefd_xprt: fd too high\n");
+		xprt = NULL;
+		goto done;
+	}
+#else
+	if (fd >= NOFILE) {
+		(void) fprintf(stderr, "svc_tcp: makefd_xprt: fd too high\n");
+		xprt = NULL;
+		goto done;
+	}
+#endif
 	xprt = (SVCXPRT *)mem_alloc(sizeof(SVCXPRT));
 	if (xprt == (SVCXPRT *)NULL) {
 		(void) fprintf(stderr, "svc_tcp: makefd_xprt: out of memory\n");
@@ -268,6 +289,10 @@ rendezvous_request(
 	 * make a new transporter (re-uses xprt)
 	 */
 	xprt = makefd_xprt(sock, r->sendsize, r->recvsize);
+	if (xprt == NULL) {
+		close(sock);
+		return (FALSE);
+	}
 	xprt->xp_raddr = addr;
 	xprt->xp_addrlen = len;
 	xprt->xp_laddr = laddr;
