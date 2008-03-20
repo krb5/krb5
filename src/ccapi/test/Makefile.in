@@ -34,6 +34,7 @@ LOCALINCLUDES = /I$(BUILDTOP) /I$(BUILDTOP)$(S)include /I$(BUILDTOP)$(S)include$
 ##DOS##       ccapi_ipc.c \
 ##DOS##       ccapi_credentials.c \
 ##DOS##       ccapi_credentials_iterator.c \
+##DOS##       ccapi_string.c \
 ##DOS##       ccapi_v2.c
 
 ##DOS##COMSRC=cci_cred_union.c \
@@ -69,6 +70,7 @@ PINGOBJS =  $(OUTPRE)ccapi_ccache.$(OBJEXT) \
             $(OUTPRE)ccapi_ipc.$(OBJEXT) \
             $(OUTPRE)ccapi_credentials.$(OBJEXT) \
             $(OUTPRE)ccapi_credentials_iterator.$(OBJEXT) \
+            $(OUTPRE)ccapi_string.$(OBJEXT) \
             $(OUTPRE)ccapi_v2.$(OBJEXT) \
             $(OUTPRE)cci_cred_union.$(OBJEXT) \
             $(OUTPRE)cci_identifier.$(OBJEXT) \
@@ -212,7 +214,10 @@ simple_lock_test:
 	$(CC) -o $(TESTDIR)/simple_lock_test simple_lock_test.c $(LIBS)
 
 copy-script:
-	cp $(SCRIPT_NAME) $(DSTDIR)/$(SCRIPT_NAME)
+    echo Copy script ...
+    cd
+    dir ccapi_test
+	cp $(SCRIPT_NAME) $(DSTDIR)$(S)$(SCRIPT_NAME)
 
 success-message:
 	@echo
