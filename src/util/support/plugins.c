@@ -31,9 +31,6 @@
 #if USE_DLOPEN
 #include <dlfcn.h>
 #endif
-#if USE_CFBUNDLE
-#include <CoreFoundation/CoreFoundation.h>
-#endif
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_STAT_H
@@ -51,6 +48,16 @@
 
 #include "k5-platform.h"
 
+#if USE_DLOPEN && USE_CFBUNDLE
+#include <CoreFoundation/CoreFoundation.h>
+
+/* Currently CoreFoundation only exists on the Mac so we just use
+ * pthreads directly to avoid creating empty function calls on other
+ * platforms.  If a thread initializer ever gets created in the common
+ * plugin code, move this there */
+static pthread_mutex_t krb5int_bundle_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
 #include <stdarg.h>
 static void Tprintf (const char *fmt, ...)
 {
@@ -66,10 +73,7 @@ struct plugin_file_handle {
 #if USE_DLOPEN
     void *dlhandle;
 #endif
-#if USE_CFBUNDLE
-    CFBundleRef bundle;
-#endif
-#if !defined (USE_DLOPEN) && !defined (USE_CFBUNDLE)
+#if !defined (USE_DLOPEN)
     char dummy;
 #endif
 };
@@ -95,14 +99,83 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
     }
 
 #if USE_DLOPEN
-    if (!err && (statbuf.st_mode & S_IFMT) == S_IFREG) {
+    if (!err && ((statbuf.st_mode & S_IFMT) == S_IFREG
+#if USE_CFBUNDLE
+                 || (statbuf.st_mode & S_IFMT) == S_IFDIR
+#endif /* USE_CFBUNDLE */
+        )) {
         void *handle = NULL;
+        
+#if USE_CFBUNDLE
+        char executablepath[MAXPATHLEN];
+        
+        if ((statbuf.st_mode & S_IFMT) == S_IFDIR) {
+            int lock_err = 0;
+            CFStringRef pluginString = NULL;
+            CFURLRef pluginURL = NULL;
+            CFBundleRef pluginBundle = NULL;
+            CFURLRef executableURL = NULL;
+
+            /* Lock around CoreFoundation calls since objects are refcounted
+             * and the refcounts are not thread-safe.  Using pthreads directly
+             * because this code is Mac-specific */
+            lock_err = pthread_mutex_lock(&krb5int_bundle_mutex);
+            if (lock_err) { err = lock_err; }
+            
+            if (!err) {
+                pluginString = CFStringCreateWithCString (kCFAllocatorDefault, 
+                                                          filepath, 
+                                                          kCFStringEncodingASCII);
+                if (pluginString == NULL) { err = ENOMEM; }
+            }
+            
+            if (!err) {
+                pluginURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, 
+                                                           pluginString, 
+                                                           kCFURLPOSIXPathStyle, 
+                                                           true);
+                if (pluginURL == NULL) { err = ENOMEM; }
+            }
+            
+            if (!err) {
+                pluginBundle = CFBundleCreate (kCFAllocatorDefault, pluginURL);
+                if (pluginBundle == NULL) { err = ENOENT; } /* XXX need better error */
+            }
+            
+            if (!err) {
+                executableURL = CFBundleCopyExecutableURL (pluginBundle);
+                if (executableURL == NULL) { err = ENOMEM; }
+            }
+            
+            if (!err) {
+                if (!CFURLGetFileSystemRepresentation (executableURL,
+                                                       true, /* absolute */
+                                                       (UInt8 *)executablepath, 
+                                                       sizeof (executablepath))) {
+                    err = ENOMEM;
+                }
+            }
+            
+            if (!err) {
+                /* override the path the caller passed in */
+                filepath = executablepath;
+            }
+            
+            if (executableURL    != NULL) { CFRelease (executableURL); }
+            if (pluginBundle     != NULL) { CFRelease (pluginBundle); }
+            if (pluginURL        != NULL) { CFRelease (pluginURL); }
+            if (pluginString     != NULL) { CFRelease (pluginString); }
+            
+            /* unlock after CFRelease calls since they modify refcounts */
+            if (!lock_err) { pthread_mutex_unlock (&krb5int_bundle_mutex); }
+        }
+#endif /* USE_CFBUNDLE */
+
 #ifdef RTLD_GROUP
 #define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_GROUP)
 #else
 #define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL)
 #endif
-
         if (!err) {
             handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS);
             if (handle == NULL) {
@@ -121,49 +194,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 
         if (handle != NULL) { dlclose (handle); }
     }
-#endif
-
-#if USE_CFBUNDLE
-    if (!err && (statbuf.st_mode & S_IFMT) == S_IFDIR) {
-        CFStringRef pluginPath = NULL;
-        CFURLRef pluginURL = NULL;
-        CFBundleRef pluginBundle = NULL;
-
-        if (!err) {
-            pluginPath = CFStringCreateWithCString (kCFAllocatorDefault, filepath, 
-                                                    kCFStringEncodingASCII);
-            if (pluginPath == NULL) { err = ENOMEM; }
-        }
-        
-        if (!err) {
-            pluginURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, pluginPath, 
-                                                       kCFURLPOSIXPathStyle, true);
-            if (pluginURL == NULL) { err = ENOMEM; }
-        }
-        
-        if (!err) {
-            pluginBundle = CFBundleCreate (kCFAllocatorDefault, pluginURL);
-            if (pluginBundle == NULL) { err = ENOENT; } /* XXX need better error */
-        }
-        
-        if (!err) {
-            if (!CFBundleIsExecutableLoaded (pluginBundle)) {
-                int loaded = CFBundleLoadExecutable (pluginBundle);
-                if (!loaded) { err = ENOENT; }  /* XXX need better error */
-            }
-        }
-        
-        if (!err) {
-            got_plugin = 1;
-            htmp->bundle = pluginBundle;
-            pluginBundle = NULL;  /* htmp->bundle takes ownership */
-        }
-
-        if (pluginBundle != NULL) { CFRelease (pluginBundle); }
-        if (pluginURL    != NULL) { CFRelease (pluginURL); }
-        if (pluginPath   != NULL) { CFRelease (pluginPath); }
-    }
-#endif
+#endif /* USE_DLOPEN */
         
     if (!err && !got_plugin) {
         err = ENOENT;  /* no plugin or no way to load plugins */
@@ -198,29 +229,6 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
             err = ENOENT; /* XXX */
 	    krb5int_set_error(ep, err, "%s", e);
         }
-    }
-#endif
-    
-#if USE_CFBUNDLE
-    if (!err && !sym && (h->bundle != NULL)) {
-        CFStringRef cfsymname = NULL;
-        
-        if (!err) {
-            cfsymname = CFStringCreateWithCString (kCFAllocatorDefault, csymname, 
-                                                   kCFStringEncodingASCII);
-            if (cfsymname == NULL) { err = ENOMEM; }
-        }
-        
-        if (!err) {
-            if (isfunc) {
-                sym = CFBundleGetFunctionPointerForName (h->bundle, cfsymname);
-            } else {
-                sym = CFBundleGetDataPointerForName (h->bundle, cfsymname);
-            }
-            if (sym == NULL) { err = ENOENT; }  /* XXX */       
-        }
-        
-        if (cfsymname != NULL) { CFRelease (cfsymname); }
     }
 #endif
     
@@ -260,11 +268,6 @@ krb5int_close_plugin (struct plugin_file_handle *h)
 {
 #if USE_DLOPEN
     if (h->dlhandle != NULL) { dlclose(h->dlhandle); }
-#endif
-#if USE_CFBUNDLE
-    /* Do not call CFBundleUnloadExecutable because it's not ref counted. 
-     * CFRelease will unload the bundle if the internal refcount goes to zero. */
-    if (h->bundle != NULL) { CFRelease (h->bundle); }
 #endif
     free (h);
 }
@@ -339,7 +342,7 @@ krb5int_plugin_file_handle_array_free (struct plugin_file_handle **harray)
 }
 
 #if TARGET_OS_MAC
-#define FILEEXTS { "", ".bundle", ".so", NULL }
+#define FILEEXTS { "", ".bundle", ".dylib", ".so", NULL }
 #elif defined(_WIN32)
 #define FILEEXTS  { "", ".dll", NULL }
 #else
