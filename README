@@ -1,4 +1,4 @@
-                  Kerberos Version 5, Release 1.6.3
+                  Kerberos Version 5, Release 1.6.4
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.6.3.tar.gz.  Instructions on how to extract the entire
+krb5-1.6.4.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.6.3.tar.gz
+        gtar zxpf krb5-1.6.4.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.6.3.tar.gz | tar xpf -
+        gzcat krb5-1.6.4.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.6.3/src and
-the documentation into krb5-1.6.3/doc.
+Both of these methods will extract the sources into krb5-1.6.4/src and
+the documentation into krb5-1.6.4/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -58,6 +58,54 @@ You may view bug reports by visiting
 http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
+
+Major changes in krb5-1.6.4
+---------------------------
+
+[5880]  Fix long-standing bug in libdb btree page splits that could
+        cause database corruption under unusual circumstances.  This
+        is believed to be one of the major causes of unexplained
+        database corruption events reported to us over many years.
+
+[5918]  Fix MITKRB5-SA-2008-002 rpc/svc.c file descriptor array
+        overrun. [CVE-2008-0947]
+
+[5919]  Fix MITKRB5-SA-2008-001 double-free in KDC krb4 code
+        [CVE-2008-0062], and uninitialized data in KDC krb4 code.
+        [CVE-2008-0063]
+
+krb5-1.6.4 changes by ticket ID
+-------------------------------
+
+5752    gcc -fworking-directory breaks make depend
+5777    keytab iteration + search don't mix
+5830    src/plugins/preauth/pkinit/configure.in erroneous
+        AC_CHECK_FUNCS
+5842    NIM 1.3.1 - Show Network Identity Manager Window bug
+5851    KFW BUG: WIX: 64-bit installer attempts to uninstall 32-bit
+        NSIS
+5852    copy correct key for lucid context acceptor_subkey
+5853    apparent uninit length in ftpd.c:reply() [CVE-2007-5894]
+5854    freeing non-heap in gss_indicate_mechs() [CVE-2007-5901]
+5855    integer overflow in svcauth_gss_get_principal()
+        [CVE-2007-5902]
+5856    double-free in gss_krb5int_make_seal_token_v3()
+        [CVE-2007-5971]
+5857    double fclose() in krb5_def_store_mkey() [CVE-2007-5972]
+5858    KFW: BUG: KRB5CRED: Set identity data before sending
+        notification
+5875    Windows: avoid use of cygwin mkdir and rmdir commands
+5879    Actually pass the nmake arguments to nmake
+5880    libdb btree page split on zero index corrupts db
+5888    more tests for libdb btree page split on zero index
+5892    man page macro and hyphen fixes
+5893    krb5_get_cred_from_kdc_opt does not preserve NUL-terminated
+        realm data
+5897    Possible memory leak in krb5_mcc_resolve
+5918    MITKRB5-SA-2008-002 rpc/svc.c descriptor array overrun
+        [CVE-2008-0947]
+5919    MITKRB5-SA-2008-001 kdc krb4 double-free [CVE-2008-0062],
+        uninit data [CVE-2008-0063] vulns
 
 Major changes in krb5-1.6.3
 ---------------------------
