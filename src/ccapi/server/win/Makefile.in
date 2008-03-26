@@ -69,8 +69,16 @@ LINK	= link
 LIBS	= rpcrt4.lib advapi32.lib ws2_32.lib user32.lib
 LFLAGS	= /nologo $(LOPTS)
 
+# BINPLACE argument:
+!ifdef NODEBUG
+DBGSYM = --nodebug
+!else
+DBGSYM = --debug
+!endif        
 
-all:: Makefile copysrc midl $(OUTPRE)ccapiserver.exe finish
+TARGET = krbcc32s
+
+all:: Makefile copysrc midl $(OUTPRE)$(TARGET).exe finish
 
 ccs_request.h ccs_request_c.c ccs_request_s.c : ccs_request.idl ccs_request.acf
     midl $(MIDL_OPTIMIZATION) $(MIDLI) -oldnames -cpp_cmd $(CC) -cpp_opt "-E" \
@@ -81,7 +89,7 @@ ccs_reply.h   ccs_reply_c.c   ccs_reply_s.c   : ccs_reply.idl   ccs_reply.acf
     ccs_reply.idl
 
 copysrc :
-    echo "Copying all sources needed to build ccapiserver.exe to $(SRCTMP)"
+    echo "Copying all sources needed to build $(TARGET).exe to $(SRCTMP)"
     if NOT exist $(SRCTMP)\nul mkdir $(SRCTMP)
     xcopy /D/Y   $(CO)\*.*     $(SRCTMP)
     xcopy /D/Y   $(COWIN)\*.*  $(SRCTMP)
@@ -93,11 +101,13 @@ copysrc :
 
 midl : ccs_request.h ccs_reply.h
 
-$(OUTPRE)ccapiserver.exe: $(OBJS)
+$(OUTPRE)$(TARGET).exe: $(OBJS)
+    echo $(LFLAGS)
 	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(LIBS) $(conlibsdll) $(conflags) 
+	$(BINPLACE_CMD) $(DBGSYM) --optional $@ 
 
 finish : 
-    @echo "Finished building ccapiserver.exe"
+    @echo "Finished building $(TARGET).exe"
     cd
 
 clean:: 

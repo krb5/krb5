@@ -49,11 +49,11 @@ void ccs_rpc_request_reply(
     struct tspdata* tsp     = (struct tspdata*)*p;
     cci_stream_t    stream;
     long            status  = 0;
-#if 0
+#if 1
     cci_debug_printf("%s! msg#:%d SST:%ld uuid:%s", __FUNCTION__, rpcmsg, srvStartTime, uuid);
 #endif
     if (!status) {                         
-        status = cci_stream_new (&stream);  /* Create a stream for the request data */
+        status = cci_stream_new (&stream);    /* Create a stream for the request data */
         }
 
     if (!status) {                          /* Put the data into the stream */

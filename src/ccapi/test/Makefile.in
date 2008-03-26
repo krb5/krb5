@@ -138,7 +138,7 @@ MORE_TESTS =    test_cc_context_release \
 ##### Linker
 LINK	= link
 LIBS    = -lkrb5
-##DOS##LIBS = advapi32.lib rpcrt4.lib user32.lib ws2_32.lib ccapi.lib
+##DOS##LIBS = advapi32.lib rpcrt4.lib user32.lib ws2_32.lib krbcc32.lib
 LFLAGS	= /nologo $(LOPTS)
 
 all-mac::     setup-test-dir pingtest simple_lock_test build-base build-tests link-tests copy-script success-message
@@ -193,12 +193,13 @@ $(OUTPRE)pingtest.exe: $(OBJECTS) $(PINGOBJS)
 #  indicating whether a string is present in it.  We use a perl script to 
 #  check the LIB variable.  If the path to ccapi.lib isn't present, the script
 #  deletes a.tmp and the following nmake actions correct LIB.
-	echo %%PATH%% > a.tmp
-    perl setlib.pl
-    if not exist a.tmp (
-        @echo Adding ..\lib\win\srctmp to LIB
-        set LIB=%%LIB%%;..\lib\win\srctmp
-        )
+#	echo %%PATH%% > a.tmp
+#    perl setlib.pl
+#    if not exist a.tmp (
+#        @echo Adding ..\lib\win\srctmp to LIB
+#        set LIB=%%LIB%%;..\lib\win\srctmp\$(OUTPRE)
+#        )
+    set LIB=%%LIB%%;c:\Program Files\MIT\Kerberos\lib\i386
     $(LINK) $(linkdebug) /map:$(@B)1.map -out:$(*B)1.exe $(conflags) $(PINGOBJS) $(LIBS) 
 	$(LINK) $(LFLAGS)    /map:$(@B)2.map /out:$(*B)2.exe $(conflags) $(PINGOBJS) $(LIBS) $(conlibsdll) 
 

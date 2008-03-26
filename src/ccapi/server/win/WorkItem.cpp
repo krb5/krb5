@@ -103,6 +103,18 @@ char* WorkItem::print(char* buf) {
     return buf;
     }
 
+
+bool WorkList::isEmpty() {
+    bool    bEmpty;
+
+    EnterCriticalSection(&cs);
+		bEmpty = wl.empty();
+    LeaveCriticalSection(&cs);
+
+    return bEmpty;
+	}
+
+
 int WorkList::add(WorkItem* item) {
     EnterCriticalSection(&cs);
         wl.push_front(item);
@@ -113,14 +125,14 @@ int WorkList::add(WorkItem* item) {
 int WorkList::remove(WorkItem** item) {
     bool    bEmpty;
 
-    bEmpty = wl.empty() & 1;
+    EnterCriticalSection(&cs);
+		bEmpty = wl.empty();
 
-    if (!bEmpty) {
-        EnterCriticalSection(&cs);
-            *item    = wl.back();
-            wl.pop_back();
-        LeaveCriticalSection(&cs);
-        }
+		if (!bEmpty) {
+          *item    = wl.back();
+          wl.pop_back();
+			}
+    LeaveCriticalSection(&cs);
 
     return !bEmpty;
     }

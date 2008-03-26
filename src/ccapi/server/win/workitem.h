@@ -11,16 +11,16 @@ extern "C" {
 
 class WorkItem {
 private:
-          cci_stream_t    _buf;
-          WIN_PIPE*       _pipe;
-    const long            _rpcmsg;
-    const long            _sst;
+    cci_stream_t	_buf;
+    WIN_PIPE*		_pipe;
+    const long		_rpcmsg;
+    const long		_sst;
 public:
-    WorkItem(   cci_stream_t  buf, 
-                WIN_PIPE*     pipe, 
-                const long    type, 
-                const long    serverStartTime);
-    WorkItem(   const         WorkItem&);
+    WorkItem(  cci_stream_t  buf, 
+              WIN_PIPE*     pipe, 
+              const long    type, 
+              const long    serverStartTime);
+    WorkItem(	const         WorkItem&);
     WorkItem();
     ~WorkItem();
 
@@ -40,9 +40,9 @@ private:
 public:
     WorkList();
     ~WorkList();
-    int add(WorkItem*);
-    int remove(WorkItem**);
-    bool isEmpty() {return wl.empty();}
+    int		add(WorkItem*);
+    int		remove(WorkItem**);
+    bool	isEmpty();
     };
 
 #endif  // __WorkItem
