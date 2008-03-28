@@ -1,7 +1,7 @@
 /*
  * kdc/dispatch.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2007 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -107,7 +107,7 @@ dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
 #ifndef NOCACHE
     /* put the response into the lookaside buffer */
-    if (!retval)
+    if (!retval && *response != NULL)
 	kdc_insert_lookaside(pkt, *response);
 #endif
 

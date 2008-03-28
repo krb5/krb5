@@ -1,7 +1,7 @@
 /*
  * kdc/network.c
  *
- * Copyright 1990,2000 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -747,6 +747,8 @@ static void process_packet(struct connection *conn, const char *prog,
 	com_err(prog, retval, "while dispatching (udp)");
 	return;
     }
+    if (response == NULL)
+	return;
     cc = sendto(port_fd, response->data, (socklen_t) response->length, 0,
 		(struct sockaddr *)&saddr, saddr_len);
     if (cc == -1) {

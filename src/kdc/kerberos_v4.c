@@ -1,7 +1,7 @@
 /*
  * kdc/kerberos_v4.c
  *
- * Copyright 1985, 1986, 1987, 1988,1991 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988,1991,2007 by the Massachusetts Institute
  * of Technology.
  * All Rights Reserved.
  *
@@ -88,11 +88,6 @@ extern int krbONE;
 #define		MSB_FIRST		0	/* 68000, IBM RT/PC */
 #define		LSB_FIRST		1	/* Vax, PC8086 */
 
-int     f;
-
-/* XXX several files in libkdb know about this */
-char *progname;
-
 #ifndef BACKWARD_COMPAT
 static Key_schedule master_key_schedule;
 static C_Block master_key;
@@ -144,10 +139,8 @@ static void hang(void);
 #include "com_err.h"
 #include "extern.h"		/* to pick up master_princ */
 
-static krb5_data *response;
-
-void kerberos_v4 (struct sockaddr_in *, KTEXT);
-void kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
+static krb5_data *kerberos_v4 (struct sockaddr_in *, KTEXT);
+static krb5_data *kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
 static int set_tgtkey (char *, krb5_kvno, krb5_boolean);
 
 /* Attributes converted from V5 to V4 - internal representation */
@@ -263,12 +256,12 @@ process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
 	    (void) klog(L_KRB_PERR, "V4 request too long.");
 	    return KRB5KRB_ERR_FIELD_TOOLONG;
     }
+    memset( &v4_pkt, 0, sizeof(v4_pkt));
     v4_pkt.length = pkt->length;
     v4_pkt.mbz = 0;
     memcpy( v4_pkt.dat, pkt->data, pkt->length);
 
-    kerberos_v4( &client_sockaddr, &v4_pkt);
-    *resp = response;
+    *resp = kerberos_v4( &client_sockaddr, &v4_pkt);
     return(retval);
 }
 
@@ -301,19 +294,20 @@ char * v4_klog( int type, const char *format, ...)
 }
 
 static
-int krb4_sendto(int s, const char *msg, int len, int flags,
-		const struct sockaddr *to, int to_len)
+krb5_data *make_response(const char *msg, int len)
 {
+    krb5_data *response;
+
     if (  !(response = (krb5_data *) malloc( sizeof *response))) {
-	return ENOMEM;
+	return 0;
     }
     if ( !(response->data = (char *) malloc( len))) {
 	krb5_free_data(kdc_context,  response);
-	return ENOMEM;
+	return 0;
     }
     response->length = len;
     memcpy( response->data, msg, len);
-    return( 0);
+    return response;
 }
 static void
 hang(void)
@@ -592,7 +586,7 @@ static void str_length_check(char *str, int max_size)
 	*cp = 0;
 }
 
-void
+static krb5_data *
 kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 {
     static KTEXT_ST rpkt_st;
@@ -605,7 +599,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
     KTEXT   auth = &auth_st;
     AUTH_DAT ad_st;
     AUTH_DAT *ad = &ad_st;
-
+    krb5_data *response = 0;
 
     static struct in_addr client_host;
     static int msg_byte_order;
@@ -643,8 +637,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		  inet_ntoa(client_host));
 	/* send an error reply */
 	req_name_ptr = req_inst_ptr = req_realm_ptr = "";
-	kerb_err_reply(client, pkt, KERB_ERR_PKT_VER, lt);
-	return;
+	return kerb_err_reply(client, pkt, KERB_ERR_PKT_VER, lt);
     }
 
     /* check packet version */
@@ -654,8 +647,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		  KRB_PROT_VERSION, req_version, 0);
 	/* send an error reply */
 	req_name_ptr = req_inst_ptr = req_realm_ptr = "";
-	kerb_err_reply(client, pkt, KERB_ERR_PKT_VER, lt);
-	return;
+	return kerb_err_reply(client, pkt, KERB_ERR_PKT_VER, lt);
     }
     msg_byte_order = req_msg_type & 1;
 
@@ -713,10 +705,10 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 
 	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
 				 &a_name_data, &k5key, 0, &ck5life))) {
-		kerb_err_reply(client, pkt, i, "check_princ failed");
+		response = kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_low = a_name_data.key_high = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
-		return;
+		return response;
 	    }
 	    /* don't use k5key for client */
 	    krb5_free_keyblock_contents(kdc_context, &k5key);
@@ -728,11 +720,11 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    /* this does all the checking */
 	    if ((i = check_princ(service, instance, lifetime,
 				 &s_name_data, &k5key, 1, &sk5life))) {
-		kerb_err_reply(client, pkt, i, "check_princ failed");
+		response = kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_high = a_name_data.key_low = 0;
 		s_name_data.key_high = s_name_data.key_low = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
-		return;
+		return response;
 	    }
 	    /* Bound requested lifetime with service and user */
 	    v4req_end = krb_life_to_time(kerb_time.tv_sec, req_life);
@@ -803,8 +795,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(req_name_ptr, req_inst_ptr,
 		req_realm_ptr, req_time_ws, 0, a_name_data.exp_date,
 		a_name_data.key_version, ciph);
-	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, S_AD_SZ);
+	    response = make_response((char *) rpkt->dat, rpkt->length);
 	    memset(&a_name_data, 0, sizeof(a_name_data));
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
@@ -830,9 +821,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		lt = klog(L_KRB_PERR,
 			  "APPL request with realm length too long from %s",
 			  inet_ntoa(client_host));
-		kerb_err_reply(client, pkt, RD_AP_INCON,
-			       "realm length too long");
-		return;
+		return kerb_err_reply(client, pkt, RD_AP_INCON,
+				      "realm length too long");
 	    }
 
 	    auth->length += (int) *(pkt->dat + auth->length) +
@@ -841,9 +831,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		lt = klog(L_KRB_PERR,
 			  "APPL request with funky tkt or req_id length from %s",
 			  inet_ntoa(client_host));
-		kerb_err_reply(client, pkt, RD_AP_INCON,
-			       "funky tkt or req_id length");
-		return;
+		return kerb_err_reply(client, pkt, RD_AP_INCON,
+				      "funky tkt or req_id length");
 	    }
 
 	    memcpy(auth->dat, pkt->dat, auth->length);
@@ -854,18 +843,16 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    if ((!allow_v4_crossrealm)&&strcmp(tktrlm, local_realm) != 0) {
 	      lt = klog(L_ERR_UNK,
 			"Cross realm ticket from %s denied by policy,", tktrlm);
-	      kerb_err_reply(client, pkt,
-			       KERB_ERR_PRINCIPAL_UNKNOWN, lt);
-		return;
+	      return kerb_err_reply(client, pkt,
+				    KERB_ERR_PRINCIPAL_UNKNOWN, lt);
 	    }
 	    if (set_tgtkey(tktrlm, kvno, 0)) {
-	      lt = klog(L_ERR_UNK,
+		lt = klog(L_ERR_UNK,
 			  "FAILED set_tgtkey realm %s, kvno %d. Host: %s ",
 			  tktrlm, kvno, inet_ntoa(client_host));
 		/* no better error code */
-		kerb_err_reply(client, pkt,
-			       KERB_ERR_PRINCIPAL_UNKNOWN, lt);
-		return;
+		return kerb_err_reply(client, pkt,
+				      KERB_ERR_PRINCIPAL_UNKNOWN, lt);
 	    }
 	    kerno = krb_rd_req(auth, "krbtgt", tktrlm, client_host.s_addr,
 		ad, 0);
@@ -875,9 +862,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 			      "FAILED 3des set_tgtkey realm %s, kvno %d. Host: %s ",
 			      tktrlm, kvno, inet_ntoa(client_host));
 		    /* no better error code */
-		    kerb_err_reply(client, pkt,
-				   KERB_ERR_PRINCIPAL_UNKNOWN, lt);
-		    return;
+		    return kerb_err_reply(client, pkt,
+					  KERB_ERR_PRINCIPAL_UNKNOWN, lt);
 		}
 		kerno = krb_rd_req(auth, "krbtgt", tktrlm, client_host.s_addr,
 				   ad, 0);
@@ -887,8 +873,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		klog(L_ERR_UNK, "FAILED krb_rd_req from %s: %s",
 		     inet_ntoa(client_host), krb_get_err_text(kerno));
 		req_name_ptr = req_inst_ptr = req_realm_ptr = "";
-		kerb_err_reply(client, pkt, kerno, "krb_rd_req failed");
-		return;
+		return kerb_err_reply(client, pkt, kerno, "krb_rd_req failed");
 	    }
 	    ptr = (char *) pkt->dat + auth->length;
 
@@ -910,22 +895,21 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    req_realm_ptr = ad->prealm;
 
 	    if (strcmp(ad->prealm, tktrlm)) {
-		kerb_err_reply(client, pkt, KERB_ERR_PRINCIPAL_UNKNOWN,
-		     "Can't hop realms");
-		return;
+		return kerb_err_reply(client, pkt, KERB_ERR_PRINCIPAL_UNKNOWN,
+				      "Can't hop realms");
 	    }
 	    if (!strcmp(service, "changepw")) {
-		kerb_err_reply(client, pkt, KERB_ERR_PRINCIPAL_UNKNOWN,
-		     "Can't authorize password changed based on TGT");
-		return;
+		return kerb_err_reply(client, pkt, KERB_ERR_PRINCIPAL_UNKNOWN,
+				      "Can't authorize password changed based on TGT");
 	    }
 	    kerno = check_princ(service, instance, req_life,
 				&s_name_data, &k5key, 1, &sk5life);
 	    if (kerno) {
-		kerb_err_reply(client, pkt, kerno, "check_princ failed");
+		response = kerb_err_reply(client, pkt, kerno,
+					  "check_princ failed");
 		s_name_data.key_high = s_name_data.key_low = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
-		return;
+		return response;
 	    }
 	    /* Bound requested lifetime with service and user */
 	    v4endtime = krb_life_to_time((KRB4_32)ad->time_sec, ad->life);
@@ -981,8 +965,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(ad->pname, ad->pinst,
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
-	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, S_AD_SZ);
+	    response = make_response((char *) rpkt->dat, rpkt->length);
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
 	}
@@ -1007,6 +990,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    break;
 	}
     }
+    return response;
 }
 
 
@@ -1016,7 +1000,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
  * client. 
  */
 
-void
+static krb5_data *
 kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string)
 {
     static KTEXT_ST e_pkt_st;
@@ -1027,9 +1011,7 @@ kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string
     strncat(e_msg, string, sizeof(e_msg) - 1 - 19);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
-    krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
-	   (struct sockaddr *) client, S_AD_SZ);
-
+    return make_response((char *) e_pkt->dat, e_pkt->length);
 }
 
 static int
