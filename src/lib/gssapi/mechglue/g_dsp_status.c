@@ -121,9 +121,6 @@ gss_buffer_t		status_string;
     if (mech && mech->gss_display_status) {
 	OM_uint32 r;
 
-	if (mech_type == GSS_C_NULL_OID)
-	    mech_type = &mech->mech_type;
-
 	r = mech->gss_display_status(mech->context, minor_status,
 				     status_value, status_type, mech_type,
 				     message_context, status_string);
