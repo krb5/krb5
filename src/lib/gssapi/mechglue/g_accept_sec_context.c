@@ -281,12 +281,6 @@ gss_cred_id_t *		d_cred;
 		    goto error_out;
 		}
 
-		if (status != GSS_S_COMPLETE) {
-		    free(d_u_cred->cred_array);
-		    free(d_u_cred);
-		    goto error_out;
-		}
-
 		internal_name = GSS_C_NO_NAME;
 
 		d_u_cred->auxinfo.creation_time = time(0);
