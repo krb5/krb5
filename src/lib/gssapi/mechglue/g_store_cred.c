@@ -39,6 +39,16 @@ val_store_cred_args(
 	if (input_cred_handle == GSS_C_NO_CREDENTIAL)
 		return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CRED);
 
+	if (cred_usage != GSS_C_ACCEPT
+	    && cred_usage != GSS_C_INITIATE
+	    && cred_usage != GSS_C_BOTH) {
+	    if (minor_status) {
+		*minor_status = EINVAL;
+		map_errcode(minor_status);
+	    }
+	    return GSS_S_FAILURE;
+	}
+
 	return (GSS_S_COMPLETE);
 }
 
