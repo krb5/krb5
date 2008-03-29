@@ -124,13 +124,15 @@ gssint_der_length_size(unsigned int len)
 int
 gssint_put_der_length(unsigned int length, unsigned char **buf, unsigned int max_len)
 {
-    unsigned char *s = *buf, *p;
+    unsigned char *s, *p;
     unsigned int buf_len = 0;
     int i, first;
 
     /* Oops */
     if (buf == 0 || max_len < 1)
 	return (-1);
+
+    s = *buf;
 
     /* Single byte is the length */
     if (length < 128) {
