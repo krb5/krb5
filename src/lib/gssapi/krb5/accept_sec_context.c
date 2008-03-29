@@ -995,7 +995,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (!verifier_cred_handle && cred_handle) {
 	   krb5_gss_release_cred(minor_status, &cred_handle);
    }
-   if (major_status && *minor_status && context)
+   if (major_status && *minor_status)
        save_error_info(*minor_status, context);
    krb5_free_context(context);
    return (major_status);
