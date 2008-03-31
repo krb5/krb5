@@ -21,7 +21,7 @@
 * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
-*/
+*/   
 
 /* $Id$ */
 
@@ -379,8 +379,10 @@ khm_int32 init_imports(void) {
  } while (FALSE)
 
 #ifndef _WIN64
+#ifndef NO_KRB4
     imp_rv = LoadFuncs(KRB4_DLL, k4_fi, &hKrb4, 0, 1, 0, 0);
     CKRV(KRB4_DLL);
+#endif
 #endif
 
     imp_rv = LoadFuncs(KRB5_DLL, k5_fi, &hKrb5, 0, 1, 0, 0);
@@ -396,8 +398,10 @@ khm_int32 init_imports(void) {
     CKRV(SECUR32_DLL);
 
 #ifndef _WIN64
+#ifndef NO_KRB4
     imp_rv = LoadFuncs(KRB524_DLL, k524_fi, &hKrb524, 0, 1, 1, 1);
     CKRV(KRB524_DLL);
+#endif
 #endif
 
     imp_rv = LoadFuncs(PROFILE_DLL, profile_fi, &hProfile, 0, 1, 0, 0);

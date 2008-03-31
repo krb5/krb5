@@ -157,7 +157,7 @@ $(OUTPRE)k524init.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 $(OUTPRE)krb524d.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(KRB_ERR_H_DEP) \
+  $(KRB_ERR_H_DEP) \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
   $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \

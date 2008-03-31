@@ -35,6 +35,7 @@ OBJFILES= \
 	$(LIBDIR)\dynimport.obj
 
 all: mkdirs $(INCFILES) $(OBJFILES)
+	echo KPK: DEFS:$(DEFS) DEFINES:$(DEFINES)
 
 clean::
 	if exist "$(INCDIR)" $(RM) $(INCFILES)

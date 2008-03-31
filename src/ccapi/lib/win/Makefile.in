@@ -52,6 +52,9 @@ TARGET	= krbcc32
 KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
 !endif
 
+CPPFLAGS = $(CPPFLAGS) /EHsc -D_CRTAPI1=_cdecl -D_CRTAPI2=_cdecl -DWINVER=0x0501 \
+-D_WIN32_WINNT=0x0501 -D_CRT_SECURE_NO_WARNINGS
+
 # Because all the sources are pulled together into the temp directory SRCTMP,
 #  the only includes we need are to directories outside of ccapi.
 LOCALINCLUDES = /I..\$(BUILDTOP) /I..\$(BUILDTOP)\include /I..\$(BUILDTOP)\include\krb5 $(KFWINC) \

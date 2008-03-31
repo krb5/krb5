@@ -84,9 +84,7 @@
             <ComponentRef Id="csc_leash32_exe" />
 
             <ComponentRef Id="cmf_k524init_exe" />
-            <ComponentRef Id="cmf_kclnt32_dll" />
             <ComponentRef Id="cmf_krb524_dll" />
-            <ComponentRef Id="cmf_krbv4w32_dll" />
         <?endif?>
             
             <ComponentRef Id="cmf_nidmgr32_dll" />
@@ -95,10 +93,6 @@
         <?endif?>
             <ComponentRef Id="cmf_krb5cred_dll" />
             <ComponentRef Id="cmf_krb5cred_en_us_dll" />
-        <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmf_krb4cred_dll" />
-            <ComponentRef Id="cmf_krb4cred_en_us_dll" />
-        <?endif?>
             <ComponentRef Id="cmf_netidmgr_exe" />
         <?if $(var.Platform) = "Intel" ?>
             <ComponentRef Id="cmf_netidmgr_exe_w2k" />
@@ -182,8 +176,6 @@
             
             <ComponentRef Id="cmp_dirdoc_netid" />
         <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmp_dirinc_kclient" />
-            <ComponentRef Id="cmp_dirinc_krb4" />
             <ComponentRef Id="cmp_dirlib_i386" />
         <?else?>
             <ComponentRef Id="cmp_dirlib_amd64" />
@@ -192,7 +184,6 @@
             <ComponentRef Id="cmp_dirinc_krb5_KerberosIV" />
             <ComponentRef Id="cmp_dirinc_krb5_krb5" />
             <ComponentRef Id="cmp_dirinc_krb5" />
-            <ComponentRef Id="cmp_dirinc_krbcc" />
             <ComponentRef Id="cmp_dirinc_leash" />
             <ComponentRef Id="cmp_dirinc_loadfuncs" />
             <ComponentRef Id="cmp_dirinc_wshelper" />

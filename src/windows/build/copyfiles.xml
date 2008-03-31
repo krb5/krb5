@@ -39,11 +39,8 @@
           <File name="wshelp32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="loadfuncs.lib"        from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="leashw32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
-          <File name="krbv4w32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="krbcc32.lib"          from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="krb5_32.lib"          from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
-          <File name="krb524.lib"           from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
-          <File name="kclnt32.lib"          from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="gssapi32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="getopt.lib"           from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="delaydlls.lib"        from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
@@ -69,7 +66,6 @@
           <File name="leash32.chm"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kpasswd.pdb"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kvno.pdb"             from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
-          <File name="krbv4w32.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="krbcc32s.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="krbcc32.pdb"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="k5sprt32.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
@@ -78,7 +74,6 @@
           <File name="klist.pdb"            from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kinit.pdb"            from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kdestroy.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
-          <File name="kclnt32.pdb"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="k524init.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="gssapi32.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="gss-server.pdb"       from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
@@ -104,7 +99,6 @@
           <File name="leash32.exe"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kpasswd.exe"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kvno.exe"             from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
-          <File name="krbv4w32.dll"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="krbcc32s.exe"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="krbcc32.dll"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="k5sprt32.dll"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
@@ -113,7 +107,6 @@
           <File name="klist.exe"            from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kinit.exe"            from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kdestroy.exe"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
-          <File name="kclnt32.dll"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="k524init.exe"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="gssapi32.dll"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="gss-server.exe"       from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
@@ -132,17 +125,6 @@
         <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\images\"     to="\sample\templates\credprov\images" />
         <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\lang\"       to="\sample\templates\credprov\lang" />
         <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\lang\en_us\" to="\sample\templates\credprov\lang\en_us" />
-        <File name="kclient.h"              from="auth\krb4\kclient\include\"    to="\inc\kclient" />
-        <File name="kcmacerr.h"             from="auth\krb4\kclient\include\"    to="\inc\kclient" />
-        <File name="com_err.h"              from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="conf-pc.h"              from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="conf.h"                 from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="des.h"                  from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="kadm_err.h"             from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="krb.h"                  from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="krberr.h"               from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="mit_copy.h"             from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="osconf.h"               from="auth\krb4\include\"    to="\inc\krb4" />
         <File name="com_err.h"              from="auth\krb5\src\include\"       to="\inc\krb5" />
         <File name="krb5.h"                 from="auth\krb5\src\include\"       to="\inc\krb5" />
         <File name="profile.h"              from="auth\krb5\src\include\"       to="\inc\krb5" />
@@ -152,11 +134,9 @@
         <File name="gssapi_generic.h"       from="auth\krb5\src\include\gssapi\"    to="\inc\krb5\gssapi" />
         <File name="gssapi_krb5.h"          from="auth\krb5\src\include\gssapi\"    to="\inc\krb5\gssapi" />
         <File name="des.h"                  from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
-        <File name="kadm_err.h"             from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
         <File name="krb_err.h"              from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
         <File name="krb.h"                  from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
         <File name="mit-copyright.h"        from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
-        <File name="cacheapi.h"             from="auth\krbcc\include\"    to="\inc\krbcc" />
         <File name="leasherr.h"             from="auth\leash\include\"    to="\inc\leash" />
         <File name="leashinfo.h"            from="auth\leash\include\"    to="\inc\leash" />
         <File name="leashwin.h"             from="auth\leash\include\"    to="\inc\leash" />

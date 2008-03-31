@@ -195,7 +195,6 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-server.exe"      "$INSTDIR\bin\gss-server.exe"    "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gssapi32.dll"        "$INSTDIR\bin\gssapi32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k524init.exe"        "$INSTDIR\bin\k524init.exe"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kclnt32.dll"         "$INSTDIR\bin\kclnt32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdestroy.exe"        "$INSTDIR\bin\kdestroy.exe"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kinit.exe"           "$INSTDIR\bin\kinit.exe"         "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\klist.exe"           "$INSTDIR\bin\klist.exe"         "$INSTDIR"
@@ -206,11 +205,8 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb524.dll"          "$INSTDIR\bin\krb524.dll"        "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32.dll"         "$INSTDIR\bin\krbcc32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbv4w32.dll"        "$INSTDIR\bin\krbv4w32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.chm"         "$INSTDIR\bin\netidmgr.chm"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb4cred.dll"         "$INSTDIR\bin\krb4cred.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred.dll"         "$INSTDIR\bin\krb5cred.dll"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb4cred_en_us.dll"   "$INSTDIR\bin\krb4cred_en_us.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred_en_us.dll"   "$INSTDIR\bin\krb5cred_en_us.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leashw32.dll"        "$INSTDIR\bin\leashw32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\ms2mit.exe"          "$INSTDIR\bin\ms2mit.exe"        "$INSTDIR"
@@ -402,16 +398,7 @@ nid_done:
   WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Dependencies" "Krb5Cred"
   WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Type"  2
   WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Flags" 0
-
-  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" "ImagePath" "$INSTDIR\bin\krb4cred.dll"
-  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" "PluginList" "Krb4Cred"
-
-  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Module" "MITKrb4"
-  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Description" "Kerberos v4 Credentials Provider"
-  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Dependencies" "Krb5Cred"
-  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Type"  1
-  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Flags" 0
-  
+ 
   ;Write start menu entries
   CreateDirectory "$SMPROGRAMS\${PROGRAM_NAME}"
   SetOutPath "$INSTDIR\bin"
@@ -494,7 +481,6 @@ Section "Debug Symbols" secDebug
   File "${KFW_BIN_DIR}\gss-server.pdb"
   File "${KFW_BIN_DIR}\gssapi32.pdb"
   File "${KFW_BIN_DIR}\k524init.pdb"
-  File "${KFW_BIN_DIR}\kclnt32.pdb"
   File "${KFW_BIN_DIR}\kdestroy.pdb"
   File "${KFW_BIN_DIR}\kinit.pdb"
   File "${KFW_BIN_DIR}\klist.pdb"
@@ -505,9 +491,7 @@ Section "Debug Symbols" secDebug
   File "${KFW_BIN_DIR}\krb524.pdb"
   File "${KFW_BIN_DIR}\krbcc32.pdb"
   File "${KFW_BIN_DIR}\krbcc32s.pdb"
-  File "${KFW_BIN_DIR}\krbv4w32.pdb"
   File "${KFW_BIN_DIR}\leashw32.pdb"
-  File "${KFW_BIN_DIR}\krb4cred.pdb"
   File "${KFW_BIN_DIR}\krb5cred.pdb"
   File "${KFW_BIN_DIR}\ms2mit.pdb"
   File "${KFW_BIN_DIR}\mit2ms.pdb"
@@ -569,17 +553,8 @@ Section "KfW SDK" secSDK
   SetOutPath "$INSTDIR\doc"
   File /r "${KFW_DOC_DIR}\netiddev.chm"
 
-  SetOutPath "$INSTDIR\inc\kclient"
-  File /r "${KFW_INC_DIR}\kclient\*"  
-
-  SetOutPath "$INSTDIR\inc\krb4"
-  File /r "${KFW_INC_DIR}\krb4\*"  
-
   SetOutPath "$INSTDIR\inc\krb5"
   File /r "${KFW_INC_DIR}\krb5\*"  
-
-  SetOutPath "$INSTDIR\inc\krbcc"
-  File /r "${KFW_INC_DIR}\krbcc\*"  
 
   SetOutPath "$INSTDIR\inc\leash"
   File /r "${KFW_INC_DIR}\leash\*"  
@@ -1169,7 +1144,6 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\gss-server.exe"
    Delete /REBOOTOK "$INSTDIR\bin\gssapi32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\k524init.exe"
-   Delete /REBOOTOK "$INSTDIR\bin\kclnt32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\kdestroy.exe"
    Delete /REBOOTOK "$INSTDIR\bin\kinit.exe"
    Delete /REBOOTOK "$INSTDIR\bin\klist.exe"   
@@ -1180,13 +1154,10 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\krb524.dll"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.exe"
-   Delete /REBOOTOK "$INSTDIR\bin\krbv4w32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\netidmgr.exe"      
    Delete /REBOOTOK "$INSTDIR\bin\netidmgr.chm"      
    Delete /REBOOTOK "$INSTDIR\bin\nidmgr32.dll"      
-   Delete /REBOOTOK "$INSTDIR\bin\krb4cred.dll"      
    Delete /REBOOTOK "$INSTDIR\bin\krb5cred.dll"      
-   Delete /REBOOTOK "$INSTDIR\bin\krb4cred_en_us.dll"
    Delete /REBOOTOK "$INSTDIR\bin\krb5cred_en_us.dll"
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.exe"  
@@ -1204,7 +1175,6 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\gss-server.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gssapi32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\k524init.pdb"
-   Delete /REBOOTOK "$INSTDIR\bin\kclnt32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\kdestroy.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\kinit.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\klist.pdb"   
@@ -1215,10 +1185,8 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\krb524.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.pdb"
-   Delete /REBOOTOK "$INSTDIR\bin\krbv4w32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\netidmgr.pdb"      
    Delete /REBOOTOK "$INSTDIR\bin\nidmgr32.pdb"      
-   Delete /REBOOTOK "$INSTDIR\bin\krb4cred.pdb"      
    Delete /REBOOTOK "$INSTDIR\bin\krb5cred.pdb"      
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.pdb"  
@@ -1378,10 +1346,8 @@ StartRemove:
 
   ; NIM Registry Keys
   DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Modules\MITKrb5"
-  DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Modules\MITKrb4"
   DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins\Krb5Cred"
   DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins\Krb5Ident"
-  DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins\Krb4Cred"
   DeleteRegKey /ifempty HKLM "${NIM_REGKEY_ROOT}\PluginManager\Modules"
   DeleteRegKey /ifempty HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins"
   DeleteRegKey /ifempty HKLM "${NIM_REGKEY_ROOT}\PluginManager"

@@ -238,7 +238,7 @@ lndeflibflag=/NODEFAULTLIB:MSVCRT
 lndeflibflag=/NODEFAULTLIB:MSVCRTD
 !endif
 
-khcflags=$(cdebug) $(cflags) $(incflags) $(khdefines) $(khcwarn)
+khcflags=$(cdebug) $(cflags) -DNO_KRB4 $(incflags) $(khdefines) $(khcwarn)
 khlguiflags=$(ldebug) $(guilflags) $(lndeflibflag)
 khlconflags=$(ldebug) $(conlflags) $(lndeflibflag)
 khldllguiflags=$(ldebug) $(dlllflags) $(lndeflibflag)

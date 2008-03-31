@@ -102,8 +102,10 @@ copysrc :
 midl : ccs_request.h ccs_reply.h
 
 $(OUTPRE)$(TARGET).exe: $(OBJS)
-    echo $(LFLAGS)
-	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(LIBS) $(conlibsdll) $(conflags) 
+    echo LFLAGS: $(LFLAGS)
+    echo _VC_MANIFEST_EMBED_EXE: $(_VC_MANIFEST_EMBED_EXE)
+	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(LIBS) $(conlibsdll) $(conflags)
+	$(_VC_MANIFEST_EMBED_EXE)
 	$(BINPLACE_CMD) $(DBGSYM) --optional $@ 
 
 finish : 
