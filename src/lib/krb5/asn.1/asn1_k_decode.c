@@ -1,7 +1,7 @@
 /*
  * src/lib/krb5/asn.1/asn1_k_decode.c
  * 
- * Copyright 1994, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -724,16 +724,31 @@ asn1_error_code asn1_decode_kdc_rep(asn1buf *buf, krb5_kdc_rep *val)
 retval = decoder(&seqbuf,element);\
 if(retval) return retval
      
+static void *
+array_expand (void *array, int n_elts, size_t elt_size)
+{
+    void *new_array;
+    size_t new_size;
+
+    if (n_elts <= 0)
+	return NULL;
+    if (n_elts > SIZE_MAX / elt_size)
+	return NULL;
+    new_size = n_elts * elt_size;
+    if (new_size == 0)
+	return NULL;
+    if (new_size / elt_size != n_elts)
+	return NULL;
+    new_array = realloc(array, new_size);
+    return new_array;
+}
+
 #define array_append(array,size,element,type)\
 size++;\
-if (*(array) == NULL)\
-     *(array) = (type**)malloc((size+1)*sizeof(type*));\
-else\
-  *(array) = (type**)realloc(*(array),\
-			     (size+1)*sizeof(type*));\
+*(array) = array_expand(*(array), (size+1), sizeof(type*));\
 if(*(array) == NULL) return ENOMEM;\
 (*(array))[(size)-1] = elt
-     
+
 #define decode_array_body(type,decoder)\
   asn1_error_code retval;\
   type *elt;\
