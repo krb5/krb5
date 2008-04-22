@@ -325,13 +325,6 @@ sub main {
     while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
 
     print "Executing $cmdline\n";
-    local $argvsize     = @ARGV;
-    local $nmakeargs    = "";
-    if ($argvsize > 0) {
-        map {$nmakeargs .= " $_ "} @ARGV;
-        print "Arguments for NMAKE: $nmakeargs\n";
-        }
-       
     print "Info -- Using unix find in $odr->{unixfind}->{value}\n"   if ($verbose);
 
 ##++ Begin repository action:
@@ -527,8 +520,15 @@ sub main {
         
         chdir("$wd\\athena") or die "Fatal -- couldn't chdir to source directory $wd\\athena\n";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        local $dbgswitch = ($odr->{debug}->{def}) ? " " : "NODEBUG=1";
-        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=1 $nmakeargs")
+        local $nmakeargs    = "";
+        local $argvsize     = @ARGV;
+        if (!($odr->{debug}->{def})) {$nmakeargs .= " NODEBUG=1";}
+        if ($argvsize > 0) {
+            map {$nmakeargs .= " $_ "} @ARGV;
+            print "Arguments for NMAKE: $nmakeargs\n";
+            }
+       
+        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=1 $nmakeargs")
             or die "Fatal -- build $buildtarget failed.";
             
         chdir("$wd")                        or die "Fatal -- couldn't chdir to $wd.";
@@ -541,7 +541,7 @@ sub main {
     
         if ($verbose) {print "Info -- ***   End build".$buildtext."\n";}
         }                                           ## End make conditional.
-    else {print "Info -- *** Skipping build.\n"    if ($verbose);}
+    else {print "Info -- *** Skipping build.\n"     if ($verbose);}
 ##-- Make action.
         
 ##++ Package action:
@@ -553,6 +553,8 @@ sub main {
         }
     else {
         if ($verbose) {print "Info -- *** Begin prepackage.\n";}
+
+        local $dbgswitch = ($odr->{debug}->{def}) ? "DEBUG=1" : "";
 
         if (! $bOutputCleaned) {                        ## In case somebody cleaned $out before us.
             if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
@@ -650,7 +652,7 @@ sub main {
         chdir("$wd\\buildwix")                      or die "Fatal -- Couldn't cd to $wd\\buildwix";
         print "Info -- *** Make .msi:\n"            if ($verbose);
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        !system("$MAKE")                            or die "Error -- msi installer build failed.";
+        !system("$MAKE $dbgswitch")                 or die "Error -- msi installer build failed.";
                 
         chdir("$wd\\buildnsi")                      or die "Fatal -- Couldn't cd to $wd\\buildnsi";
         print "Info -- *** Make NSIS:\n"            if ($verbose);
@@ -687,10 +689,21 @@ sub main {
     system("rm -rf $out/a.tmp");                ## Clean up junk.
     system("rm -rf $out/ziptemp");              ## Clean up junk.
 
-    print "Now check for ntsecapitest.i.\n";
+    # Now check for ntsecapitest.i.  If it is present, it means that the test in the Windows
+    # directory passed.  
     $dir    = "$wd\\athena\\auth\\krb5\\src\\windows";
     chdir($dir)                                 or die "Fatal -- Couldn't cd to $dir";
     print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+       
+    system("nmake ntsecapitest");
+    if (!-e  "ntsecapitest.i") {
+        print "Warning!  This build does not use the Vista ntsecapi.h.\n";
+        print "  That means that the Windows Identity management code does not have MSLSA\n";
+        print "  access code enabled.  To build with that support, copy ntsecapi.h from a\n";
+        print "  Vista build environment to somewhere in the compiler's include path, like\n";
+        print "  c:\\Program Files\\Platform SDK Server 2003 R2\\Include.  Make sure that the \n";
+        print "  symbol TRUST_ATTRIBUTE_TRUST_USES_AES_KEYS is defined in ntsecapi.h.\n";
+        }
 
 # End logging:
     if ($odr->{logfile}->{def})   {$l->stop;}

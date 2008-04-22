@@ -6,8 +6,5 @@
     cci_stream_data
     cci_stream_write
     cci_stream_new
+    ccapi_authenticate
     
-    ccs_authenticate
-    
-	    
-	

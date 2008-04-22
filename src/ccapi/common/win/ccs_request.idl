@@ -38,7 +38,7 @@ typedef unsigned int CC_UINT32;
 
 const long HSIZE = sizeof(void*);
 
-void ccs_rpc_request(
+void ccapi_rpc_request(
     [in]                        const long  rpcmsg,         /* Message type */
     [in, size_is(HSIZE)]        const char  tsphandle[],
     [in,  string]               const char* pszUUID,        /* Requestor's UUID */
@@ -47,12 +47,12 @@ void ccs_rpc_request(
     [in]                        const long  serverStartTime,/* Which server session we're talking to */
     [out]                       long*       status );       /* Return code */
 
-void ccs_rpc_connect(
+void ccapi_rpc_connect(
     [in]                        const long  rpcmsg,         /* Message type */
     [in, size_is(HSIZE)]        const char  tsphandle[],
     [in,  string]               const char* pszUUID,        /* Requestor's UUID */
     [out]                       long*       status );       /* Return code */
 
-CC_UINT32 ccs_authenticate(
+CC_UINT32 ccapi_authenticate(
     [in, string]                const CC_CHAR* name );
 }

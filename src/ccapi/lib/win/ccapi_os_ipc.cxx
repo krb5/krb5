@@ -160,7 +160,7 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
 
     // The lazy connection to the server has been put off as long as possible!
     // ccapi_connect starts listening for replies as an RPC server and then
-    //   calls ccs_rpc_connect.
+    //   calls ccapi_rpc_connect.
     if (!bCCAPI_Connected) {
         err                 = cci_check_error(ccapi_connect(ptspdata));
         bCCAPI_Connected    = !err;
@@ -193,10 +193,10 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
             uuid    = tspdata_getUUID(ptspdata);
             lenUUID = 1 + strlen(uuid);     /* 1+ includes terminating \0. */
 #if 0
-            cci_debug_printf("%s calling remote ccs_rpc_request tsp*:0x%X", __FUNCTION__, ptspdata);
+            cci_debug_printf("%s calling remote ccapi_rpc_request tsp*:0x%X", __FUNCTION__, ptspdata);
             cci_debug_printf("  rpcmsg:%d; UUID[%d]:<%s> SST:%ld", in_msg, lenUUID, uuid, sst);
 #endif
-            ccs_rpc_request(                    /* make call with user message: */
+            ccapi_rpc_request(                    /* make call with user message: */
                 in_msg,                         /* Message type */
                 (unsigned char*)&ptspdata,      /* Our tspdata* will be sent back to the reply proc. */
                 (unsigned char*)uuid,
@@ -265,7 +265,7 @@ cc_int32 ccapi_connect(const struct tspdata* tsp) {
     char*                   uuid        = NULL;
 
     /* Start listening to our uuid before establishing the connection,
-     *  so that when the server tries to call ccapi_listen, we will be ready.
+     *  so that when the server tries to call ccs_listen, we will be ready.
      */
 
     /* Build complete RPC uuid using previous CCAPI implementation: */
@@ -339,7 +339,7 @@ cc_int32 ccapi_connect(const struct tspdata* tsp) {
     // New code using new RPC procedures for sending the data and receiving a reply:
     if (!status) {
         RpcTryExcept {
-            ccs_rpc_connect(                /* make call with user message: */
+            ccapi_rpc_connect(                /* make call with user message: */
                 CCMSG_CONNECT,              /* Message type */
                 (unsigned char*)&tsp,       /* Our tspdata* will be sent back to the reply proc. */
                 (unsigned char*)uuid,

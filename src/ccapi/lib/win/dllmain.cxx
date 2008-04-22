@@ -34,11 +34,10 @@ extern "C" {
 #include "ccapi_context.h"
 #include "client.h"
 
-void cci_thread_init__auxinit();
+int cci_ipc_thread_init(void);
     }
 
-
-#define CCAPI_V2_MUTEX_NAME     TEXT("MIT_CCAPI_V4_MUTEX")
+#define CCAPI_V3_MUTEX_NAME     TEXT("MIT_CCAPI_V3_MUTEX")
 
 // Process-specific data:
 static DWORD    dwTlsIndex;
@@ -73,7 +72,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
         case DLL_PROCESS_ATTACH: 
             cci_debug_printf("%s DLL_PROCESS_ATTACH", __FUNCTION__);
             // Process-wide mutex used to allow only one thread at a time into the RPC code:
-            hCCAPIv2Mutex = CreateMutex(NULL, FALSE, CCAPI_V2_MUTEX_NAME);
+            hCCAPIv2Mutex = CreateMutex(NULL, FALSE, CCAPI_V3_MUTEX_NAME);
 
             // Figure out our username; it's process-wide:
             bStatus = GetUserName(_user, &maxUN);
@@ -109,6 +108,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
 
             // Initialize CCAPI once per DLL load:
             if (GetCurrentThreadId() == firstThreadID) cci_thread_init__auxinit();
+            // For all threads, initialize thread:
+            else cci_ipc_thread_init();
 
             break; 
  
@@ -193,7 +194,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
     UNREFERENCED_PARAMETER(lpvReserved); 
     return status ? FALSE : TRUE;
 }
-
 
 #ifdef __cplusplus    // If used by C++ code, 
 extern "C" {          // we need to export the C interface

@@ -291,7 +291,7 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
                     if (buf)        cci_stream_release(buf);
                     /* Don't free uuid, which was allocated here.  A pointer to it is in the 
                        rpcargs struct which was passed to connectionListener which will be
-                       received by ccapi_listen when the client exits.  ccapi_listen needs 
+                       received by ccs_listen when the client exits.  ccs_listen needs 
                        the uuid to know which client to disconnect.
                      */
                     }
@@ -475,7 +475,7 @@ void    receiveLoop(void* rpcargs) {
 
 /* ------------------------------------------------------------------------ */
 /* The connection listener thread waits forever for a call to the CCAPI_CLIENT_<UUID>
-   endpoint, ccapi_listen function to complete.  If the call completes or gets an 
+   endpoint, ccs_listen function to complete.  If the call completes or gets an 
    RPC exception, it means the client has disappeared.
 
    A separate connectionListener is started for each client that has connected to the server.
@@ -502,7 +502,7 @@ void    connectionListener(void* rpcargs) {
 
     /* [If in use] Free previous binding: */
     if (bRpcHandleInited) {     
-        // Free previous binding (could have been used to call ccapi_listen 
+        // Free previous binding (could have been used to call ccs_listen 
         //  in a different client thread).
         // Don't check result or update status.
         RpcStringFree(&pszStringBinding);
@@ -528,8 +528,8 @@ void    connectionListener(void* rpcargs) {
     if (!status) {bRpcHandleInited  = TRUE;}
 
     RpcTryExcept {
-        cci_debug_printf("  Calling remote procedure ccapi_listen");
-        ccapi_listen(rpcState, SERVER_REPLY_RPC_HANDLE, CCMSG_LISTEN, &status);
+        cci_debug_printf("  Calling remote procedure ccs_listen");
+        ccs_listen(rpcState, SERVER_REPLY_RPC_HANDLE, CCMSG_LISTEN, &status);
         /* Asynchronous call will return immediately. */
         }
     RpcExcept(1) {

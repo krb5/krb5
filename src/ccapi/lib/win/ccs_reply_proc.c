@@ -85,7 +85,7 @@ void ccs_rpc_connect_reply(
     CloseHandle(hEvent);
     }
 
-void ccapi_listen(
+void ccs_listen(
     RPC_ASYNC_STATE*    rpcState,
     handle_t            hBinding,
     const long          rpcmsg,         /* Message type */

@@ -27,5 +27,5 @@
 [implicit_handle(handle_t ccs_reply_IfHandle)]
 
 interface ccs_reply {
-    [async] ccapi_listen();
+    [async] ccs_listen();
     }

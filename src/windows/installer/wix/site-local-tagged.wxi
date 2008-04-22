@@ -51,8 +51,8 @@
 
     <!-- At most one of the following could be defined and must correspond
          to the type of build performed. -->
-    <!-- <?define Debug?> -->
-    <?define Release?>
+    <?define Debug?>
+    <!-- <?define Release?> -->
 
     <!-- We are including debug symbols anyway.  Undefine this for a leaner 
          installer without debug syms. -->

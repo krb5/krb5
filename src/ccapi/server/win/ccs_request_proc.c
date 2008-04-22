@@ -33,7 +33,7 @@
 #include "win-utils.h"
 #include "ccs_win_pipe.h"
 
-void ccs_rpc_request(
+void ccapi_rpc_request(
     const long  rpcmsg,             /* Message type */
     const char  tspHandle[],        /* Client's tspdata* */
     const char* pszUUID,            /* Where client will listen for the reply */
@@ -65,7 +65,7 @@ void ccs_rpc_request(
     }
 
 
-void ccs_rpc_connect(
+void ccapi_rpc_connect(
     const long  rpcmsg,             /* Message type */
     const char  tspHandle[],        /* Client's tspdata* */
     const char* pszUUID,            /* Data buffer */
@@ -85,7 +85,7 @@ void ccs_rpc_connect(
 
 // 'Authentication' is client setting a value in a file and the server
 //   returning that value plus one.
-CC_UINT32 ccs_authenticate(const CC_CHAR* name) {
+CC_UINT32 ccapi_authenticate(const CC_CHAR* name) {
     HANDLE      hMap    = 0;
     PDWORD      pvalue  = 0;
     CC_UINT32   result  = 0;

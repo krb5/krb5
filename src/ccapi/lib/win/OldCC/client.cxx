@@ -279,7 +279,7 @@ authenticate_server(Init::InitInfo& info) {
         *pvalue = challenge;
 
         RpcTryExcept {
-            response = ccs_authenticate( (CC_CHAR*)mem_name );
+            response = ccapi_authenticate( (CC_CHAR*)mem_name );
             }
         RpcExcept(1) {
             status = RpcExceptionCode();

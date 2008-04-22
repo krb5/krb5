@@ -193,13 +193,13 @@ $(OUTPRE)pingtest.exe: $(OBJECTS) $(PINGOBJS)
 #  indicating whether a string is present in it.  We use a perl script to 
 #  check the LIB variable.  If the path to ccapi.lib isn't present, the script
 #  deletes a.tmp and the following nmake actions correct LIB.
-#	echo %%PATH%% > a.tmp
-#    perl setlib.pl
-#    if not exist a.tmp (
-#        @echo Adding ..\lib\win\srctmp to LIB
-#        set LIB=%%LIB%%;..\lib\win\srctmp\$(OUTPRE)
-#        )
-    set LIB=%%LIB%%;c:\Program Files\MIT\Kerberos\lib\i386
+	echo %%PATH%% > a.tmp
+    perl setlib.pl
+    if not exist a.tmp (
+        @echo Adding ..\lib\win\srctmp to LIB
+        set LIB=%%LIB%%;..\lib\win\srctmp\$(OUTPRE)
+        )
+    cd
     $(LINK) $(linkdebug) /map:$(@B)1.map -out:$(*B)1.exe $(conflags) $(PINGOBJS) $(LIBS) 
 	$(LINK) $(LFLAGS)    /map:$(@B)2.map /out:$(*B)2.exe $(conflags) $(PINGOBJS) $(LIBS) $(conlibsdll) 
 

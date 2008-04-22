@@ -50,9 +50,9 @@ RPC_STATUS send_test(char* endpoint) {
 
     if (!status) {
         RpcTryExcept {
-            cci_debug_printf("%s calling remote procedure 'ccs_authenticate'", __FUNCTION__);
-            status = ccs_authenticate((CC_CHAR*)"DLLMAIN TEST!");
-            cci_debug_printf("  ccs_authenticate returned %d", status);
+            cci_debug_printf("%s calling remote procedure 'ccapi_authenticate'", __FUNCTION__);
+            status = ccapi_authenticate((CC_CHAR*)"DLLMAIN TEST!");
+            cci_debug_printf("  ccapi_authenticate returned %d", status);
             }
         RpcExcept(1) {
             status = cci_check_error(RpcExceptionCode());

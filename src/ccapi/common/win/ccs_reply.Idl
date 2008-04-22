@@ -52,7 +52,7 @@ void ccs_rpc_connect_reply(
     [in]                    const long      srvStartTime,   /* Server Start Time */
     [out]                   long*           status );       /* Return code */
 
-void ccapi_listen(
+void ccs_listen(
     handle_t                hBinding,   
     [in]                    const long rpcmsg,              /* Message type */
     [out]                   long* status );                 /* Return code */
