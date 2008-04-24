@@ -1,7 +1,7 @@
 /*
  * include/k5-thread.h
  *
- * Copyright 2004,2005,2006,2007 by the Massachusetts Institute of Technology.
+ * Copyright 2004,2005,2006,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -145,7 +145,6 @@
 
 #define DEBUG_THREADS
 #define DEBUG_THREADS_LOC
-#undef DEBUG_THREADS_SLOW /* debugging stuff that'll slow things down? */
 #undef DEBUG_THREADS_STATS
 
 #include <assert.h>
@@ -534,50 +533,6 @@ static inline void k5_pthread_assert_locked(k5_os_mutex *m) { }
 
 static inline void k5_pthread_assert_unlocked(pthread_mutex_t *m) { }
 
-#if defined(DEBUG_THREADS_SLOW) && HAVE_SCHED_H && (HAVE_SCHED_YIELD || HAVE_PRAGMA_WEAK_REF)
-# include <sched.h>
-# if !HAVE_SCHED_YIELD
-#  pragma weak sched_yield
-#  define MAYBE_SCHED_YIELD()	((void)((&sched_yield != NULL) ? sched_yield() : 0))
-# else
-#  define MAYBE_SCHED_YIELD()	((void)sched_yield())
-# endif
-#else
-# define MAYBE_SCHED_YIELD()	((void)0)
-#endif
-
-/* It may not be obvious why this function is desirable.
-
-   I want to call pthread_mutex_lock, then sched_yield, then look at
-   the return code from pthread_mutex_lock.  That can't be implemented
-   in a macro without a temporary variable, or GNU C extensions.
-
-   There used to be an inline function which did it, with both
-   functions called from the inline function.  But that messes with
-   the debug information on a lot of configurations, and you can't
-   tell where the inline function was called from.  (Typically, gdb
-   gives you the name of the function from which the inline function
-   was called, and a line number within the inline function itself.)
-
-   With this auxiliary function, pthread_mutex_lock can be called at
-   the invoking site via a macro; once it returns, the inline function
-   is called (with messed-up line-number info for gdb hopefully
-   localized to just that call).  */
-#ifdef __GNUC__
-#define return_after_yield(R)			\
-	__extension__ ({			\
-	    int _r = (R);			\
-	    MAYBE_SCHED_YIELD();		\
-	    _r;					\
-	})
-#else
-static inline int return_after_yield(int r)
-{
-    MAYBE_SCHED_YIELD();
-    return r;
-}
-#endif
-
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
 # if defined(PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP) && defined(DEBUG_THREADS)
@@ -606,15 +561,14 @@ static inline int return_after_yield(int r)
 	  ? pthread_mutex_destroy(&(M)->p)	\
 	  : 0))
 
-# define k5_os_mutex_lock(M)						\
-	return_after_yield(K5_PTHREADS_LOADED				\
-			   ? k5_pthread_mutex_lock(M)			\
-			   : k5_os_nothread_mutex_lock(&(M)->n))
+# define k5_os_mutex_lock(M)				\
+	(K5_PTHREADS_LOADED				\
+	 ? k5_pthread_mutex_lock(M)			\
+	 : k5_os_nothread_mutex_lock(&(M)->n))
 # define k5_os_mutex_unlock(M)				\
-	(MAYBE_SCHED_YIELD(),				\
-	 (K5_PTHREADS_LOADED				\
-	  ? k5_pthread_mutex_unlock(M)			\
-	  : k5_os_nothread_mutex_unlock(&(M)->n)))
+	(K5_PTHREADS_LOADED				\
+	 ? k5_pthread_mutex_unlock(M)			\
+	 : k5_os_nothread_mutex_unlock(&(M)->n))
 
 # define k5_os_mutex_assert_unlocked(M)			\
 	(K5_PTHREADS_LOADED				\
@@ -643,8 +597,8 @@ static inline int return_after_yield(int r)
 static inline int k5_os_mutex_finish_init(k5_os_mutex *m) { return 0; }
 # define k5_os_mutex_init(M)		pthread_mutex_init(&(M)->p, 0)
 # define k5_os_mutex_destroy(M)		pthread_mutex_destroy(&(M)->p)
-# define k5_os_mutex_lock(M)	return_after_yield(k5_pthread_mutex_lock(M))
-# define k5_os_mutex_unlock(M)		(MAYBE_SCHED_YIELD(),k5_pthread_mutex_unlock(M))
+# define k5_os_mutex_lock(M)		k5_pthread_mutex_lock(M)
+# define k5_os_mutex_unlock(M)		k5_pthread_mutex_unlock(M)
 
 # define k5_os_mutex_assert_unlocked(M)	k5_pthread_assert_unlocked(&(M)->p)
 # define k5_os_mutex_assert_locked(M)	k5_pthread_assert_locked(M)
