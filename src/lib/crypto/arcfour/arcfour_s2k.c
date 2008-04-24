@@ -2,7 +2,7 @@
 #include "rsa-md4.h"
 #include "arcfour-int.h"
 
-#if TARGET_OS_MAC
+#if TARGET_OS_MAC && !defined(DEPEND)
 #include <CoreFoundation/CFString.h>
 #endif
 
@@ -11,7 +11,7 @@ utf8to16(unsigned char *utf16_buf, const char *utf8_str, size_t *len)
 {
     krb5_error_code err = 0;
     
-#if TARGET_OS_MAC
+#if TARGET_OS_MAC && !defined(DEPEND)
     CFStringRef string = NULL;
     CFIndex length = *len;
     
