@@ -369,26 +369,32 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
     long err = 0;
     static const char *const fileexts[] = FILEEXTS;
     char **tempnames = NULL;
-    int i;
+    size_t bases_count = 0;
+    size_t exts_count = 0;
+    size_t i;
 
+    if (!filebases) { err = EINVAL; }
+    if (!filenames) { err = EINVAL; }
+   
     if (!err) {
-        size_t count = 0;
-        for (i = 0; filebases[i] != NULL; i++, count++);
-        for (i = 0; fileexts[i] != NULL; i++, count++);
-        tempnames = calloc (count, sizeof (char *));
-        if (tempnames == NULL) { err = errno; }
+        for (i = 0; filebases[i]; i++) { bases_count++; }
+        for (i = 0; fileexts[i]; i++) { exts_count++; }
+        tempnames = calloc ((bases_count * exts_count)+1, sizeof (char *));
+        if (!tempnames) { err = errno; }
     }
 
     if (!err) {
         int j;
-        for (i = 0; !err && (filebases[i] != NULL); i++) {
-            for (j = 0; !err && (fileexts[j] != NULL); j++) {
-		if (asprintf(&tempnames[i+j], "%s%s", filebases[i], fileexts[j]) < 0) {
-		    tempnames[i+j] = NULL;
+        for (i = 0; !err && filebases[i]; i++) {
+            for (j = 0; !err && fileexts[j]; j++) {
+		if (asprintf(&tempnames[(i*exts_count)+j], "%s%s", 
+                             filebases[i], fileexts[j]) < 0) {
+		    tempnames[(i*exts_count)+j] = NULL;
 		    err = errno;
 		}
             }
         }
+        tempnames[bases_count * exts_count] = NULL; /* NUL-terminate */
     }
     
     if (!err) {
@@ -396,7 +402,7 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
         tempnames = NULL;
     }
     
-    if (tempnames != NULL) { krb5int_free_plugin_filenames (tempnames); }
+    if (tempnames) { krb5int_free_plugin_filenames (tempnames); }
     
     return err;
 }
