@@ -89,7 +89,7 @@ static struct  xdr_ops xdrrec_ops = {
  * meet the needs of xdr and rpc based on tcp.
  */
 
-#define LAST_FRAG ((uint32_t)(1L << 31))
+#define LAST_FRAG ((uint32_t)(1UL << 31))
 
 typedef struct rec_strm {
 	caddr_t tcp_handle;
