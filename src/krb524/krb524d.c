@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002, 2007 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2002, 2007, 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -462,7 +462,7 @@ krb5_error_code lookup_service_key(context, p, ktype, kvno, key, kvnop)
 	    memcpy(key->contents, entry.key.contents, key->length);
 	else if (key->length) {
 	    /* out of memory? */
-	    ret = errno;
+	    ret = ENOMEM;
 	    memset (key, 0, sizeof (*key));
 	    return ret;
 	}

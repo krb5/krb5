@@ -1,7 +1,7 @@
 /*
  * kdc/network.c
  *
- * Copyright 1990,2000,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007,2008 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -320,14 +320,14 @@ add_fd (struct socksetup *data, int sock, enum kdc_conn_type conntype,
     }
     newconn = malloc(sizeof(*newconn));
     if (newconn == 0) {
-	data->retval = errno;
-	com_err(data->prog, errno,
+	data->retval = ENOMEM;
+	com_err(data->prog, ENOMEM,
 		"cannot allocate storage for connection info");
 	return 0;
     }
     if (!ADD(connections, newconn, tmp)) {
-	data->retval = errno;
-	com_err(data->prog, data->retval, "cannot save socket info");
+	data->retval = ENOMEM;
+	com_err(data->prog, ENOMEM, "cannot save socket info");
 	free(newconn);
 	return 0;
     }

@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/changepw.c
  *
- * Copyright 1990,1999,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1999,2001,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -139,7 +139,7 @@ static int kpasswd_sendto_msg_callback(struct conn_state *conn, void *callback_c
 	local_kaddr.length = addrs[0]->length;
 	local_kaddr.contents = malloc(addrs[0]->length);
 	if (local_kaddr.contents == NULL && addrs[0]->length != 0) {
-	    code = errno;
+	    code = ENOMEM;
 	    krb5_free_addresses(ctx->context, addrs);
 	    goto cleanup;
 	}

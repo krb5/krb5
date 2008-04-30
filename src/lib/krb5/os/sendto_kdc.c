@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/sendto_kdc.c
  *
- * Copyright 1990,1991,2001,2002,2004,2005,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2002,2004,2005,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -1044,7 +1044,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 		       conn->x.in.buf);
 		if (conn->x.in.buf == 0) {
 		    /* allocation failure */
-		    e = errno;
+		    e = ENOMEM;
 		    goto kill_conn;
 		}
 	    }

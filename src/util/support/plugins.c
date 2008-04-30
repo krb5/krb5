@@ -1,7 +1,7 @@
 /*
  * util/support/plugins.c
  *
- * Copyright 2006 by the Massachusetts Institute of Technology.
+ * Copyright 2006, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -95,7 +95,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 
     if (!err) {
         htmp = calloc (1, sizeof (*htmp)); /* calloc initializes ptrs to NULL */
-        if (htmp == NULL) { err = errno; }
+        if (htmp == NULL) { err = ENOMEM; }
     }
 
 #if USE_DLOPEN
@@ -303,7 +303,7 @@ krb5int_plugin_file_handle_array_init (struct plugin_file_handle ***harray)
     long err = 0;
 
     *harray = calloc (1, sizeof (**harray)); /* calloc initializes to NULL */
-    if (*harray == NULL) { err = errno; }
+    if (*harray == NULL) { err = ENOMEM; }
 
     return err;
 }
@@ -318,7 +318,7 @@ krb5int_plugin_file_handle_array_add (struct plugin_file_handle ***harray, int *
     
     newharray = realloc (*harray, ((newcount + 1) * sizeof (**harray))); /* +1 for NULL */
     if (newharray == NULL) { 
-        err = errno; 
+        err = ENOMEM;
     } else {
         newharray[newcount - 1] = p;
         newharray[newcount] = NULL;
@@ -380,7 +380,7 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
         for (i = 0; filebases[i]; i++) { bases_count++; }
         for (i = 0; fileexts[i]; i++) { exts_count++; }
         tempnames = calloc ((bases_count * exts_count)+1, sizeof (char *));
-        if (!tempnames) { err = errno; }
+        if (!tempnames) { err = ENOMEM; }
     }
 
     if (!err) {
@@ -390,7 +390,7 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
 		if (asprintf(&tempnames[(i*exts_count)+j], "%s%s", 
                              filebases[i], fileexts[j]) < 0) {
 		    tempnames[(i*exts_count)+j] = NULL;
-		    err = errno;
+		    err = ENOMEM;
 		}
             }
         }
@@ -444,7 +444,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
 		if (!err) {
 		    if (asprintf(&filepath, "%s/%s", dirnames[i], filenames[j]) < 0) {
 			filepath = NULL;
-			err = errno;
+			err = ENOMEM;
 		    }
 		}
 		
@@ -478,7 +478,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                     int len = NAMELEN (d);
 		    if (asprintf(&filepath, "%s/%*s", dirnames[i], len, d->d_name) < 0) {
 			filepath = NULL;
-			err = errno;
+			err = ENOMEM;
 		    }
 		}
                 
@@ -553,7 +553,7 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
 
     if (!err) {
         p = calloc (1, sizeof (*p)); /* calloc initializes to NULL */
-        if (p == NULL) { err = errno; }
+        if (p == NULL) { err = ENOMEM; }
     }
     
     if (!err && (dirhandle != NULL) && (dirhandle->files != NULL)) {
@@ -568,7 +568,7 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
                 count++;
                 newp = realloc (p, ((count + 1) * sizeof (*p))); /* +1 for NULL */
                 if (newp == NULL) { 
-                    err = errno; 
+                    err = ENOMEM; 
                 } else {
                     p = newp;
                     p[count - 1] = sym;
@@ -612,7 +612,7 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
     
     if (!err) {
         p = calloc (1, sizeof (*p)); /* calloc initializes to NULL */
-        if (p == NULL) { err = errno; }
+        if (p == NULL) { err = ENOMEM; }
     }
     
     if (!err && (dirhandle != NULL) && (dirhandle->files != NULL)) {
@@ -627,7 +627,7 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
                 count++;
                 newp = realloc (p, ((count + 1) * sizeof (*p))); /* +1 for NULL */
                 if (newp == NULL) { 
-                    err = errno; 
+                    err = ENOMEM;
                 } else {
                     p = newp;
                     p[count - 1] = sym;

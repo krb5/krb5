@@ -1418,7 +1418,7 @@ kadm5_chpass_principal_3(void *server_handle,
 
         if (!ret) {
             pstring = malloc ((princ->length + 1) * sizeof (char));
-            if (pstring == NULL) { ret = errno; }
+            if (pstring == NULL) { ret = ENOMEM; }
         }
 
         if (!ret) {

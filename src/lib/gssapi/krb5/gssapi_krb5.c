@@ -203,7 +203,7 @@ kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
     if (kg_ccache_name != NULL) {
 	name = strdup(kg_ccache_name);
 	if (name == NULL)
-	    err = errno;
+	    err = ENOMEM;
     } else {
 	krb5_context context = NULL;
 
@@ -217,7 +217,7 @@ kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
 	    if (name) {
 		name = strdup(name);
 		if (name == NULL)
-		    err = errno;
+		    err = ENOMEM;
 	    }
 	}
 	if (err && context)

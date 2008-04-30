@@ -559,7 +559,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	P.buf_size = P.lifnum.lifn_count * sizeof (struct lifreq) * 2;
 	P.buf = malloc (P.buf_size);
 	if (P.buf == NULL) {
-	    retval = errno;
+	    retval = ENOMEM;
 	    goto punt;
 	}
 
@@ -732,7 +732,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	P.buf_size = P.if_num * sizeof (struct if_laddrreq) * 2;
 	P.buf = malloc (P.buf_size);
 	if (P.buf == NULL) {
-	    retval = errno;
+	    retval = ENOMEM;
 	    goto punt;
 	}
 

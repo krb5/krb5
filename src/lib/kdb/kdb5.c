@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by the Massachusetts Institute of Technology.
+ * Copyright 2006, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -354,7 +354,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     path = calloc(ndx + db_dl_n_locations, sizeof (char *));
     if (path == NULL) {
-	status = errno;
+	status = ENOMEM;
 	goto clean_n_exit;
     }
     if (ndx)

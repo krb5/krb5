@@ -309,7 +309,7 @@ add_kdc_config_file(profile_filespec_t **pfiles)
     memcpy(newfiles + 1, *pfiles, (count-1) * sizeof(*newfiles));
     newfiles[0] = strdup(file);
     if (newfiles[0] == NULL) {
-	int e = errno;
+	int e = ENOMEM;
 	free(newfiles);
 	return e;
     }
