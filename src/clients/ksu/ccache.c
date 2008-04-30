@@ -226,7 +226,7 @@ int count = 0;
 int chunk_count = 1; 
 	
   if ( ! ( temp_creds = (krb5_creds **) malloc( CHUNK * sizeof(krb5_creds *)))){
-                return errno;
+                return ENOMEM;
         }
 
 
@@ -264,7 +264,7 @@ int chunk_count = 1;
                		  chunk_count ++;
                 	 if (!(temp_creds = (krb5_creds **) realloc(temp_creds,
                        	       chunk_count * CHUNK * sizeof(krb5_creds *)))){
-                       	       return errno;
+                       	       return ENOMEM;
                  	}
          	}
 	}
@@ -415,9 +415,9 @@ krb5_get_login_princ(luser, princ_list)
     /* check each line */
 
 
-    if( !(linebuf = (char *) calloc (BUFSIZ, sizeof(char)))) return errno; 
+    if( !(linebuf = (char *) calloc (BUFSIZ, sizeof(char)))) return ENOMEM;
 
-    if (!(buf_out = (char **) malloc( CHUNK * sizeof(char *)))) return errno;
+    if (!(buf_out = (char **) malloc( CHUNK * sizeof(char *)))) return ENOMEM;
 
     while ( fgets(linebuf, BUFSIZ, fp) != NULL) {
 	/* null-terminate the input string */
@@ -434,7 +434,7 @@ krb5_get_login_princ(luser, princ_list)
             chunk_count ++;
             if (!(buf_out = (char **) realloc(buf_out,
                             chunk_count * CHUNK * sizeof(char *)))){
-                            return errno;
+                            return ENOMEM;
             }
         }
 
@@ -442,7 +442,7 @@ krb5_get_login_princ(luser, princ_list)
 	if (!newline)
 	    while (((gobble = getc(fp)) != EOF) && gobble != '\n');
 
-    	if( !(linebuf = (char *) calloc (BUFSIZ, sizeof(char)))) return errno; 
+    	if( !(linebuf = (char *) calloc (BUFSIZ, sizeof(char)))) return ENOMEM;
     }
 
     buf_out[count] = NULL;

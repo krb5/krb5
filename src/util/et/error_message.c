@@ -1,5 +1,5 @@
 /*
- * Copyright 1997,2000,2001,2004 by Massachusetts Institute of Technology
+ * Copyright 1997,2000,2001,2004,2008 by Massachusetts Institute of Technology
  * 
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -294,7 +294,7 @@ add_error_table(/*@dependent@*/ const struct error_table * et)
 
     del = (struct dynamic_et_list *)malloc(sizeof(struct dynamic_et_list));
     if (del == NULL)
-	return errno;
+	return ENOMEM;
 
     del->table = et;
 

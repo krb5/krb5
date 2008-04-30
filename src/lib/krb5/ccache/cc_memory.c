@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/cc_memory.c
  *
- * Copyright 1990,1991,2000,2004 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2000,2004,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -614,7 +614,7 @@ krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
 
     new_node = malloc(sizeof(krb5_mcc_link));
     if (new_node == NULL)
-	return errno;
+	return ENOMEM;
     err = krb5_copy_creds(ctx, creds, &new_node->creds);
     if (err) {
 	free(new_node);

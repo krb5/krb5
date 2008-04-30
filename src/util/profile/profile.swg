@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -204,7 +204,7 @@ static errcode_t iter_create(profile_t p, const char **nullterm,
 
     it = malloc(sizeof(*it));
     if (it == NULL)
-	return errno;
+	return ENOMEM;
     {
 	/* Memory leak!
 
@@ -218,11 +218,11 @@ static errcode_t iter_create(profile_t p, const char **nullterm,
 	for (count = 0; nullterm[count]; count++) ;
 	args = calloc(count+1, sizeof(char *));
 	if (args == NULL)
-	    return errno;
+	    return ENOMEM;
 	for (j = 0; j < count; j++) {
 	    args[j] = strdup(nullterm[j]);
 	    if (args[j] == NULL)
-		return errno;
+		return ENOMEM;
 	}
 	args[j] = NULL;
     }

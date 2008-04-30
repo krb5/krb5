@@ -1,7 +1,7 @@
 /*
  * util/support/threads.c
  *
- * Copyright 2004,2005,2006,2007 by the Massachusetts Institute of Technology.
+ * Copyright 2004,2005,2006,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -270,7 +270,7 @@ int k5_setspecific (k5_key_t keynum, void *value)
 	int i;
 	t = malloc(sizeof(*t));
 	if (t == NULL)
-	    return errno;
+	    return ENOMEM;
 	for (i = 0; i < K5_KEY_MAX; i++)
 	    t->values[i] = 0;
 	/* add to global linked list */
@@ -290,7 +290,7 @@ int k5_setspecific (k5_key_t keynum, void *value)
 	    int i;
 	    t = malloc(sizeof(*t));
 	    if (t == NULL)
-		return errno;
+		return ENOMEM;
 	    for (i = 0; i < K5_KEY_MAX; i++)
 		t->values[i] = 0;
 	    /* add to global linked list */
@@ -624,7 +624,7 @@ krb5int_mutex_alloc (k5_mutex_t **m)
 
     ptr = malloc (sizeof (k5_mutex_t));
     if (ptr == NULL)
-	return errno;
+	return ENOMEM;
     err = k5_mutex_init (ptr);
     if (err) {
 	free (ptr);

@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/init_ctx.c
  *
- * Copyright 1994, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -305,7 +305,7 @@ add_kdc_config_file(profile_filespec_t **pfiles)
     count += 2;
     newfiles = malloc(count * sizeof(*newfiles));
     if (newfiles == NULL)
-	return errno;
+	return ENOMEM;
     memcpy(newfiles + 1, *pfiles, (count-1) * sizeof(*newfiles));
     newfiles[0] = strdup(file);
     if (newfiles[0] == NULL) {

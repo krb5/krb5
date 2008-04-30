@@ -1,7 +1,7 @@
 /*
  * lib/kadm/alt_prof.c
  *
- * Copyright 1995,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1995,2001,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -91,7 +91,7 @@ krb5_aprof_init(fname, envname, acontextp)
     profile_path = malloc(2 + krb5_config_len + kdc_config_len);
     if (profile_path == NULL) {
 	krb5_free_config_files(filenames);
-	return errno;
+	return ENOMEM;
     }
     if (kdc_config_len)
 	strcpy(profile_path, kdc_config);

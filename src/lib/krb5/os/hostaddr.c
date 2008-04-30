@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/hostaddr.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -73,7 +73,7 @@ krb5_os_hostaddr(krb5_context context, const char *name, krb5_address ***ret_add
 
     addrs = malloc ((i+1) * sizeof(*addrs));
     if (!addrs)
-	return errno;
+	return ENOMEM;
 
     for (j = 0; j < i + 1; j++)
 	addrs[j] = 0;

@@ -205,7 +205,7 @@ trunc_hmac (const struct krb5_hash_provider *hash,
     tmp.length = hashsize;
     tmp.data = malloc(hashsize);
     if (tmp.data == NULL)
-	return errno;
+	return ENOMEM;
     ret = krb5_hmac(hash, ki, num, input, &tmp);
     if (ret == 0)
 	memcpy(output->data, tmp.data, output->length);

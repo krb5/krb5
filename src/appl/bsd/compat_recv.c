@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/compat_recv.c
  *
- * Copyright 1993 by the Massachusetts Institute of Technology.
+ * Copyright 1993, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -276,7 +276,7 @@ krb5_compat_recvauth_version(context, auth_context,
 		version->data = malloc (KRB_SENDAUTH_VLEN + 1);
 		version->data[KRB_SENDAUTH_VLEN] = 0;
 		if (version->data == 0)
-		    return errno;
+		    return ENOMEM;
 		retval = krb_v4_recvauth(v4_options, fd, v4_ticket,
 					 v4_service, v4_instance, v4_faddr,
 					 v4_laddr, *v4_kdata, v4_filename,

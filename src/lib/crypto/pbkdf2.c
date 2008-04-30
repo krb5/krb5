@@ -1,7 +1,7 @@
 /*
  * lib/crypto/pbkdf2.c
  *
- * Copyright 2002 by the Massachusetts Institute of Technology.
+ * Copyright 2002, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -171,11 +171,11 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 
     utmp1 = /*output + dklen; */ malloc(hlen);
     if (utmp1 == NULL)
-	return errno;
+	return ENOMEM;
     utmp2 = /*utmp1 + hlen; */ malloc(salt->length + 4 + hlen);
     if (utmp2 == NULL) {
 	free(utmp1);
-	return errno;
+	return ENOMEM;
     }
 
     /* Step 3.  */

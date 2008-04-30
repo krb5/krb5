@@ -1,7 +1,7 @@
 /*
  * lib/crypto/des/des_s2k.c
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -84,7 +84,7 @@ mit_des_string_to_key_int (krb5_keyblock *key,
        a byte array, not a string.  */
     copy = malloc(copylen);
     if (copy == NULL)
-	return errno;
+	return ENOMEM;
     memcpy(copy, pw->data, pw->length);
     if (salt)
 	memcpy(copy + pw->length, salt->data, salt->length);

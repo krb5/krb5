@@ -228,7 +228,7 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	expanded_filename = malloc(len);
 	if (expanded_filename == 0) {
 	    free(prf);
-	    return errno;
+	    return ENOMEM;
 	}
 	if (home_env) {
 	    strcpy(expanded_filename, home_env);

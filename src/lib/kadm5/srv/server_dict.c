@@ -108,7 +108,7 @@ int init_dict(kadm5_config_params *params)
 	return errno;
     }
     if ((word_block = (char *) malloc(sb.st_size + 1)) == NULL)
-	return errno;
+	return ENOMEM;
     if (read(fd, word_block, sb.st_size) != sb.st_size)
 	return errno;
     (void) close(fd);
@@ -123,7 +123,7 @@ int init_dict(kadm5_config_params *params)
 	word_count++;
     }
     if ((word_list = (char **) malloc(word_count * sizeof(char *))) == NULL)
-	return errno;
+	return ENOMEM;
     p = word_block;
     for (i = 0; i < word_count; i++) {
 	word_list[i] = p;

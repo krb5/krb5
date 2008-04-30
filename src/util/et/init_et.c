@@ -1,5 +1,5 @@
 /*
- * Copyright 1997 by Massachusetts Institute of Technology
+ * Copyright 1997, 2008 by Massachusetts Institute of Technology
  * 
  * Copyright 1986, 1987, 1988 by MIT Student Information Processing Board
  *
@@ -47,7 +47,7 @@ int init_error_table(msgs, base, count)
 
     new_et = (struct foobar *) malloc(sizeof(struct foobar));
     if (!new_et)
-	return errno;	/* oops */
+	return ENOMEM;	/* oops */
     new_et->etl.table = &new_et->et;
     new_et->et.msgs = msgs;
     new_et->et.base = base;

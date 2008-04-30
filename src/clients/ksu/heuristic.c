@@ -50,7 +50,7 @@ krb5_error_code get_all_princ_from_file (fp, plist)
     int count = 0, chunk_count = 1;
 
     if (!(temp_list = (char **) malloc( CHUNK * sizeof(char *))))
-	return errno;
+	return ENOMEM;
 
     retval = get_line(fp, &line);
     if (retval)
@@ -68,7 +68,7 @@ krb5_error_code get_all_princ_from_file (fp, plist)
 	    chunk_count ++;
 	    if (!(temp_list = (char **) realloc(temp_list,
 						chunk_count * CHUNK * sizeof(char *)))){
-		return errno;
+		return ENOMEM;
 	    }
 	}
 
@@ -114,7 +114,7 @@ krb5_error_code list_union(list1, list2, combined_list)
     while (list2[c2]) c2++;
 	
     if (!(tlist = (char **) calloc( c1 + c2 + 1, sizeof ( char *))))
-	return errno;
+	return ENOMEM;
 
     i = 0;
     while(list1[i]) {
@@ -176,7 +176,7 @@ filter(fp, cmd, k5users_list, k5users_filt_list)
     }
 
     if (! (temp_filt_list = (char **) calloc(found_count +1, sizeof (char*))))
-	return errno;
+	return ENOMEM;
 
     for(j= 0, k=0; j < i; j++ ) {	
 	if (k5users_list[j]){

@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/locate_kdc.c
  *
- * Copyright 1990,2000,2001,2002,2003,2004,2006 Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2001,2002,2003,2004,2006,2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -110,7 +110,7 @@ krb5int_grow_addrlist (struct addrlist *lp, int nmore)
 
     newaddrs = realloc (lp->addrs, newsize);
     if (newaddrs == NULL)
-	return errno;
+	return ENOMEM;
     lp->addrs = newaddrs;
     for (i = lp->space; i < newspace; i++) {
 	lp->addrs[i].ai = NULL;

@@ -931,7 +931,7 @@ get_params(optindex, pargc, pargv, params)
     int size = pargc - *optindex + 2;
     
     if ((ret_params = (char **) calloc(size, sizeof (char *)))== NULL ){
-	return errno;
+	return ENOMEM;
     }
     
     for (i = *optindex, j=1; i < pargc; i++,j++){

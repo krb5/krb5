@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/localaddr.c
  *
- * Copyright 1990,1991,2000,2001,2002,2004,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2000,2001,2002,2004,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -873,7 +873,7 @@ get_ifreq_array(char **bufp, size_t *np, int s)
 	current_buf_size = est_ifreq_size * est_if_count + SLOP;
     buf = malloc (current_buf_size);
     if (buf == NULL)
-	return errno;
+	return ENOMEM;
 
 ask_again:
     size = current_buf_size;
@@ -905,7 +905,7 @@ ask_again:
 	new_size = est_ifreq_size * est_if_count + SLOP;
 	buf = grow_or_free (buf, new_size);
 	if (buf == 0)
-	    return errno;
+	    return ENOMEM;
 	current_buf_size = new_size;
 	goto ask_again;
     }

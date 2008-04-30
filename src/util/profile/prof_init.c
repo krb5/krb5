@@ -90,7 +90,7 @@ profile_copy(profile_t old_profile, profile_t *new_profile)
     COUNT_LINKED_LIST (size, prf_file_t, old_profile->first_file, next);
     files = malloc ((size+1) * sizeof(*files));
     if (files == NULL)
-	return errno;
+	return ENOMEM;
     for (i = 0, file = old_profile->first_file; i < size; i++, file = file->next)
 	files[i] = file->data->filespec;
     files[size] = NULL;
