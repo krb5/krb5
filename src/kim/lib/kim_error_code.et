@@ -1,0 +1,72 @@
+# Copyright 2005-2006 by the Massachusetts Institute of Technology.
+# 
+# Export of this software from the United States of America may
+# require a specific license from the United States Government.
+# It is the responsibility of any person or organization contemplating
+# export to obtain such a license before exporting.
+# 
+# WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+# distribute this software and its documentation for any purpose and
+# without fee is hereby granted, provided that the above copyright
+# notice appear in all copies and that both that copyright notice and
+# this permission notice appear in supporting documentation, and that
+# the name of M.I.T. not be used in advertising or publicity pertaining
+# to distribution of the software without specific, written prior
+# permission.  Furthermore if you modify this software you must label
+# your software as modified software and not distribute it in such a
+# fashion that it might be confused with the original M.I.T. software.
+# M.I.T. makes no representations about the suitability of
+# this software for any purpose.  It is provided "as is" without express
+# or implied warranty.
+
+error_table_manager "Kerberos Identity Management"
+error_table KIM
+
+# Configuration and System Errors
+error_code KIM_OUT_OF_MEMORY_ECODE,                 "Out of memory"
+error_code KIM_PARAMETER_ECODE,                     "%s(): argument %d (%s) may not be %s.  Please consult the KIM API documentation"
+error_code KIM_KRB5_INIT_FAILED_ECODE,              "Unable to initialize Kerberos v5"
+error_code KIM_NO_REALMS_ECODE,                     "There are no Kerberos realms configured"
+error_code KIM_NO_SUCH_REALM_ECODE,                 "The realm '%s' is not in your configuration file or does not exist"
+
+index 25
+# Principal Errors
+error_code KIM_BAD_PRINCIPAL_STRING_ECODE,          "'%s' is not a valid Kerberos principal"
+error_code KIM_BAD_COMPONENT_INDEX_ECODE,           "Principal does not have a component at index %d"
+error_code KIM_PASSWORD_MISMATCH_ECODE,             "New and verify passwords do not match"
+error_code KIM_INSECURE_PASSWORD_ECODE,             "Your new password for '%s' is insecure; please pick another one"
+error_code KIM_PASSWORD_CHANGE_FAILED_ECODE,        "Unable to change password for %s"
+
+index 50
+# Options Errors
+error_code KIM_BAD_OPTIONS_ECODE,                   "Invalid options"
+error_code KIM_BAD_OPTIONS_VALUE_ECODE,             "Invalid value for Kerberos default login option"
+
+index 75
+# User Interface Errors
+error_code KIM_CAPS_LOCK_ECODE,                     "Password Incorrect (check your Caps Lock)"
+error_code KIM_USER_CANCELED_ECODE,                 "The user cancelled the operation"
+error_code KIM_NO_SERVER_ECODE,                     "Unable to launch or contact %s"
+error_code KIM_NO_GUI_ECODE,                        "Unable to display a graphical user interface from this environment"
+error_code KIM_NO_CLI_ECODE,                        "Unable to display a command line user interface from this environment"
+
+index 100
+# Preferences Errors
+error_code KIM_PREFERENCES_READ_ECODE,              "Unable to read user preferences.  The file may be missing, inaccessible or corrupted"
+error_code KIM_PREFERENCES_WRITE_ECODE,             "Unable to write user preferences.  The file may be inaccessible"
+error_code KIM_IDENTITY_NOT_IN_IDENTITIES_LIST,     "Identity %s is not in the favorite identities list"
+error_code KIM_IDENTITY_ALREADY_IN_IDENTITIES_LIST, "Identity %s is already in the favorite identities list"
+error_code KIM_BAD_IDENTITY_INDEX_ECODE,            "No identity at index %d in the favorite identities list"
+
+index 125
+# Cache Collection Errors
+error_code KIM_NO_SUCH_PRINCIPAL_ECODE,             "Principal '%s' does not exist in the cache collection"
+error_code KIM_CANT_BECOME_DEFAULT_ECODE,           "The credentials cache '%s' cannot become the system default ccache."
+error_code KIM_CREDENTIALS_EXPIRED_ECODE,           "The Kerberos credentials for '%s' have expired"
+error_code KIM_NO_CREDENTIALS_ECODE,                "You do not have Kerberos credentials for principal '%s'"
+error_code KIM_BAD_IP_ADDRESS_ECODE,                "The IP addresses in the Kerberos credentials for '%s' do not match any of your computer's IP addresses"
+error_code KIM_NO_SUCH_CCACHE_ECODE,                "The credentials cache '%s' does not exist"
+error_code KIM_BAD_HOST_CONFIGURATION_ECODE,        "Unable to get local hostname or address information"
+error_code KIM_NEEDS_VALIDATION_ECODE,              "The Kerberos credentials for '%s' need to be validated"
+
+end
