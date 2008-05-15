@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/lucid_context.c
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -89,8 +89,6 @@ gss_krb5int_export_lucid_sec_context(
     }
 
     ctx = (krb5_gss_ctx_id_t) *context_handle;
-    if (kret)
-	goto error_out;
 
     /* Externalize a structure of the right version */
     switch (version) {
