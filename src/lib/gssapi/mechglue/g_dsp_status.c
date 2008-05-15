@@ -53,6 +53,7 @@ gss_buffer_t		status_string;
 {
     gss_OID		mech_type = (gss_OID) req_mech_type;
     gss_mechanism	mech;
+    gss_OID_desc	m_oid = { 0, 0 };
 
     if (minor_status != NULL)
 	*minor_status = 0;
@@ -96,7 +97,6 @@ gss_buffer_t		status_string;
     }
     {
 	int err;
-	gss_OID_desc m_oid = { 0, 0 };
 	OM_uint32 m_status = 0, status;
 
 	err = gssint_mecherrmap_get(status_value, &m_oid, &m_status);
