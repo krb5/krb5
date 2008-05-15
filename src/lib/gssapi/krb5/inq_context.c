@@ -101,7 +101,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
       if (! kg_save_name((gss_name_t) accept)) {
 	 krb5_free_principal(context, accept);
 	 if (init) {
-	    kg_delete_name((gss_name_t) accept);
+	    kg_delete_name((gss_name_t) init);
 	    krb5_free_principal(context, init);
 	 }
 	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
