@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/import_sec_context.c
  *
- * Copyright 1995,2004,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1995,2004,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -91,9 +91,9 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
     }
     kret = krb5_gss_ser_init(context);
     if (kret) {
-	krb5_free_context(context);
 	*minor_status = kret;
 	save_error_info(*minor_status, context);
+	krb5_free_context(context);
 	return GSS_S_FAILURE;
     }
 
