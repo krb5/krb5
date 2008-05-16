@@ -954,10 +954,10 @@ krb5_db_put_principal(krb5_context kcontext,
 	}
     }
 
-    /* Giving db_args as part of tl data causes, db2 to store the
+    /* Giving db_args as part of tl data causes db2 to store the
        tl_data as such.  To prevent this, tl_data is collated and
-       passed as a sepearte argument. Currently supports only one
-       principal.  but passing it as a seperate argument makes it
+       passed as a separate argument.  Currently supports only one
+       principal, but passing it as a separate argument makes it
        difficult for kadmin remote to pass arguments to server.  */
     prev = NULL, curr = entries->tl_data;
     while (curr) {
@@ -968,7 +968,7 @@ krb5_db_put_principal(krb5_context kcontext,
 	       passing it to db.  */
 	    if (((char *) curr->tl_data_contents)[curr->tl_data_length - 1] !=
 		'\0') {
-		/* not null terminated. Dangerous input */
+		/* Not null terminated. Dangerous input.  */
 		status = EINVAL;
 		goto clean_n_exit;
 	    }
@@ -1202,7 +1202,7 @@ krb5_db_get_mkey(krb5_context kcontext, krb5_keyblock ** key)
 	goto clean_n_exit;
     }
 
-    /* Lets use temp key and copy it later to avoid memory problems
+    /* Let's use temp key and copy it later to avoid memory problems
        when freed by the caller.  */
     status = dal_handle->lib_handle->vftabl.get_master_key(kcontext, key);
     get_errmsg(kcontext, status);
@@ -1538,9 +1538,11 @@ krb5_dbe_lookup_tl_data(context, entry, ret_tl_data)
 	}
     }
 
-    /* if the requested record isn't found, return zero bytes.
-     * if it ever means something to have a zero-length tl_data,
-     * this code and its callers will have to be changed */
+    /*
+     * If the requested record isn't found, return zero bytes.  If it
+     * ever means something to have a zero-length tl_data, this code
+     * and its callers will have to be changed.
+     */
 
     ret_tl_data->tl_data_length = 0;
     ret_tl_data->tl_data_contents = NULL;
@@ -1664,15 +1666,19 @@ krb5_dbe_update_tl_data(context, entry, new_tl_data)
     krb5_tl_data *tl_data = NULL;
     krb5_octet *tmp;
 
-    /* copy the new data first, so we can fail cleanly if malloc()
-     * fails */
+    /*
+     * Copy the new data first, so we can fail cleanly if malloc()
+     * fails.
+     */
     if ((tmp =
 	 (krb5_octet *) krb5_db_alloc(context, NULL,
 				      new_tl_data->tl_data_length)) == NULL)
 	return (ENOMEM);
 
-    /* Find an existing entry of the specified type and point at
-     * it, or NULL if not found */
+    /*
+     * Find an existing entry of the specified type and point at
+     * it, or NULL if not found.
+     */
 
     if (new_tl_data->tl_data_type != KRB5_TL_DB_ARGS) {	/* db_args can be multiple */
 	for (tl_data = entry->tl_data; tl_data;
@@ -1681,7 +1687,7 @@ krb5_dbe_update_tl_data(context, entry, new_tl_data)
 		break;
     }
 
-    /* if necessary, chain a new record in the beginning and point at it */
+    /* If necessary, chain a new record in the beginning and point at it.  */
 
     if (!tl_data) {
 	if ((tl_data =
