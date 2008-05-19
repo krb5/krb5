@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <k5-int.h>
 #include <kdb.h>
 #include <kadm5/admin.h>
@@ -172,7 +173,7 @@ static char *build_name_with_realm(char *name, char *realm)
 static int add_admin_princs(void *handle, krb5_context context, char *realm)
 {
   krb5_error_code ret = 0;
-  char service_name[MAXHOSTNAMELEN + 8];
+  char *service_name = 0, *p;
   char localname[MAXHOSTNAMELEN];
   struct addrinfo *ai, ai_hints;
   int gai_error;
@@ -199,7 +200,26 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
       freeaddrinfo(ai);
       goto clean_and_exit;
   }
-  sprintf(service_name, "kadmin/%s", ai->ai_canonname);
+  for (p = ai->ai_canonname; *p; p++) {
+#ifdef isascii
+      if (!isascii(*p))
+	  continue;
+#else
+      if (*p < ' ')
+	  continue;
+      if (*p > '~')
+	  continue;
+#endif
+      if (!isupper(*p))
+	  continue;
+      *p = tolower(*p);
+  }
+  if (asprintf(&service_name, "kadmin/%s", ai->ai_canonname) < 0) {
+      ret = ENOMEM;
+      fprintf(stderr, "Out of memory\n");
+      freeaddrinfo(ai);
+      goto clean_and_exit;
+  }
   freeaddrinfo(ai);
 
   if ((ret = add_admin_princ(handle, context,
