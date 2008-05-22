@@ -1,7 +1,7 @@
 /*
  * lib/kadm5/srv/server_acl.h
  *
- * Copyright 1995-2004, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1995-2004, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -58,6 +58,7 @@
 /* #define ACL_EXTRACT		64 */
 #define	ACL_LIST		128
 #define ACL_SETKEY		256
+#define ACL_IPROP		512
 #define	ACL_RENAME		(ACL_ADD+ACL_DELETE)
 
 #define	ACL_ALL_MASK		(ACL_ADD	| \
@@ -66,6 +67,7 @@
 				 ACL_CHANGEPW	| \
 				 ACL_INQUIRE	| \
 				 ACL_LIST	| \
+				 ACL_IPROP	| \
 				 ACL_SETKEY)
 
 typedef struct _restriction {

@@ -1,5 +1,5 @@
 /*
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -549,6 +549,11 @@ char *kadmin_startup(argc, argv)
 	   should go away */
 	extern char *krb5_defkeyname;
 	krb5_defkeyname = DEFAULT_KEYTAB;
+    }
+
+    if ((retval = kadm5_init_iprop(handle)) != 0) {
+	com_err(whoami, retval, _("while mapping update log"));
+	exit(1);
     }
 
     return query;

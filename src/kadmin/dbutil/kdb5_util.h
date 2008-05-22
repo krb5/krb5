@@ -1,7 +1,7 @@
 /*
  * admin/edit/kdb5_edit.h
  *
- * Copyright 1992 by the Massachusetts Institute of Technology.
+ * Copyright 1992, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,6 +24,8 @@
  * or implied warranty.
  * 
  */
+
+#include <kdb/kdb_log.h>
 
 #define REALM_SEP	'@'
 #define REALM_SEP_STR	"@"

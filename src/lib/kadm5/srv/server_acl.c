@@ -1,7 +1,7 @@
 /*
  * lib/kadm5/srv/server_acl.c
  *
- * Copyright 1995-2004, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1995-2004, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -66,6 +66,7 @@ static const aop_t acl_op_table[] = {
     { 'c',	ACL_CHANGEPW },
     { 'i',	ACL_INQUIRE },
     { 'l',	ACL_LIST },
+    { 'p',	ACL_IPROP },
     { 's',	ACL_SETKEY },
     { 'x',	ACL_ALL_MASK },
     { '*',	ACL_ALL_MASK },

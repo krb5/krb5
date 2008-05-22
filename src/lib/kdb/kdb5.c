@@ -37,6 +37,7 @@
 #include <osconf.h>
 #include "kdb5.h"
 #include <assert.h>
+#include "kdb_log.h"
 
 /* Currently DB2 policy related errors are exported from DAL.  But
    other databases should set_err function to return string.  */
@@ -946,6 +947,11 @@ krb5_db_put_principal(krb5_context kcontext,
     char  **db_args = NULL;
     krb5_tl_data *prev, *curr, *next;
     int     db_args_size = 0;
+    kdb_incr_update_t *upd, *fupd;
+    char *princ_name = NULL;
+    kdb_log_context *log_ctx;
+
+    log_ctx = context->kdblog_context;
 
     if (kcontext->db_context == NULL) {
 	status = kdb_setup_lib_handle(kcontext);
@@ -1008,10 +1014,54 @@ krb5_db_put_principal(krb5_context kcontext,
 	goto clean_n_exit;
     }
 
+    /*
+     * We need the lock since ulog_conv_2logentry() does a get
+     */
+    if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
+	if (!(upd = (kdb_incr_update_t *)
+	  malloc(sizeof (kdb_incr_update_t)*n))) {
+	    status = errno;
+	    goto err_lock;
+	}
+	fupd = upd;
+
+	(void) memset(upd, 0, sizeof(kdb_incr_update_t)*n);
+
+        if ((status = ulog_conv_2logentry(context, entries, upd, n))) {
+	    goto err_lock;
+	}
+    }
+
+    for (i = 0; i < nentries; i++) {
+	/*
+	 * We'll be sharing the same locks as db for logging
+	 */
+        if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
+		if ((retval = krb5_unparse_name(context, entries->princ,
+		    &princ_name)))
+			goto err_lock;
+
+		upd->kdb_princ_name.utf8str_t_val = princ_name;
+		upd->kdb_princ_name.utf8str_t_len = strlen(princ_name);
+
+                if (retval = ulog_add_update(context, upd))
+			goto err_lock;
+        }
+	upd++;
+    }
+
     status = dal_handle->lib_handle->vftabl.db_put_principal(kcontext, entries,
 							     nentries,
 							     db_args);
     get_errmsg(kcontext, status);
+    if (status == 0 && log_ctx && log_ctx->iproprole == IPROP_MASTER) {
+	upd = fupd;
+	for (i = 0; i < nentries; i++) {
+	    (void) ulog_finish_update(context, upd);
+	    upd++;
+	}
+    }
+err_lock:
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
@@ -1025,6 +1075,13 @@ krb5_db_put_principal(krb5_context kcontext,
     if (db_args)
 	free(db_args);
 
+    if (log_ctx && (log_ctx->iproprole == IPROP_MASTER))
+	/*
+	 * XXX Bad deref in error case (malloc fail while creating
+	 * array entries). --KR
+	 */
+        ulog_free_entries(fupd, n);
+
     return status;
 }
 
@@ -1034,6 +1091,11 @@ krb5_db_delete_principal(krb5_context kcontext,
 {
     krb5_error_code status = 0;
     kdb5_dal_handle *dal_handle;
+    kdb_incr_update_t upd;
+    char *princ_name = NULL;
+    kdb_log_context *log_ctx;
+
+    log_ctx = context->kdblog_context;
 
     if (kcontext->db_context == NULL) {
 	status = kdb_setup_lib_handle(kcontext);
@@ -1048,11 +1110,42 @@ krb5_db_delete_principal(krb5_context kcontext,
 	goto clean_n_exit;
     }
 
+    /*
+     * We'll be sharing the same locks as db for logging
+     */
+    if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
+	if ((status = krb5_unparse_name(context, searchfor, &princ_name))) {
+	    (void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
+	    return retval;
+	}
+
+	(void) memset(&upd, 0, sizeof (kdb_incr_update_t));
+
+	upd.kdb_princ_name.utf8str_t_val = princ_name;
+	upd.kdb_princ_name.utf8str_t_len = strlen(princ_name);
+
+	if (status = ulog_delete_update(context, &upd)) {
+		free(princ_name);
+		(void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
+		return retval;
+	}
+
+	free(princ_name);
+    }
+
     status =
 	dal_handle->lib_handle->vftabl.db_delete_principal(kcontext,
 							   search_for,
 							   nentries);
     get_errmsg(kcontext, status);
+
+    /*
+     * We need to commit our update upon success
+     */
+    if (!status)
+	if (log_ctx && (log_ctx->iproprole == IPROP_MASTER))
+		(void) ulog_finish_update(context, &upd);
+
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:

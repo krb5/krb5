@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007,2008 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -1170,6 +1170,9 @@ struct _krb5_context {
 
     /* error detail info */
     struct errinfo err;
+
+    /* For Sun iprop code; does this really have to be here?  */
+    void *kdblog_context;
 };
 
 /* could be used in a table to find an etype and initialize a block */

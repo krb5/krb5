@@ -6,7 +6,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
-all::	kprop kpropd
+all::	kprop kpropd kproplog
 
 CLIENTSRCS= $(srcdir)/kprop.c 
 CLIENTOBJS= kprop.o 
@@ -14,7 +14,10 @@ CLIENTOBJS= kprop.o
 SERVERSRCS= $(srcdir)/kpropd.c 
 SERVEROBJS= kpropd.o
 
-SRCS= $(CLIENTSRCS) $(SERVERSRCS)
+LOGSRCS= $(srcdir)/kproplog.c
+LOGOBJS= kproplog.o
+
+SRCS= $(CLIENTSRCS) $(SERVERSRCS) $(LOGSRCS)
 
 
 kprop: $(CLIENTOBJS) $(KRB5_BASE_DEPLIBS)
@@ -23,8 +26,11 @@ kprop: $(CLIENTOBJS) $(KRB5_BASE_DEPLIBS)
 kpropd: $(SERVEROBJS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB)
 	$(CC_LINK) -o kpropd $(SERVEROBJS) $(KRB5_BASE_LIBS) $(APPUTILS_LIB) @LIBUTIL@
 
+kproplog: $(LOGOBJS)
+	$(CC_LINK) -o kproplog $(LOGOBJS)
+
 install::
-	for f in kprop kpropd; do \
+	for f in kprop kpropd kproplog; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \

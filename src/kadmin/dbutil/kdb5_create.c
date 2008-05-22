@@ -1,7 +1,7 @@
 /*
  * kadmin/dbutil/kdb5_create.c
  *
- * Copyright 1990,1991,2001, 2002 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001, 2002, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -161,6 +161,7 @@ void kdb5_create(argc, argv)
     unsigned int pw_size = 0;
     int do_stash = 0;
     krb5_data pwd, seed;
+    kdb_log_context *log_ctx;
 	   
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -189,6 +190,8 @@ void kdb5_create(argc, argv)
     rblock.flags = global_params.flags;
     rblock.nkslist = global_params.num_keysalts;
     rblock.kslist = global_params.keysalts;
+
+    log_ctx = util_context->kdblog_context;
 
     printf ("Loading random data\n");
     retval = krb5_c_random_os_entropy (util_context, 1, NULL);
@@ -274,6 +277,34 @@ master key name '%s'\n",
 /* 		global_params.dbname); */
 /* 	exit_status++; return; */
 /*     } */
+
+    if (log_ctx && log_ctx->iproprole) {
+	if (retval = ulog_map(util_context, &global_params, FKCOMMAND)) {
+	    com_err(argv[0], retval,
+		    gettext("while creating update log"));
+	    exit_status++;
+	    goto cleanup;
+	}
+
+	/*
+	 * We're reinitializing the update log in case one already
+	 * existed, but this should never happen.
+	 */
+	(void) memset(log_ctx->ulog, 0, sizeof (kdb_hlog_t));
+
+	log_ctx->ulog->kdb_hmagic = KDB_HMAGIC;        
+	log_ctx->ulog->db_version_num = KDB_VERSION;
+	log_ctx->ulog->kdb_state = KDB_STABLE;
+	log_ctx->ulog->kdb_block = ULOG_BLOCK;
+
+	/*
+	 * Since we're creating a new db we shouldn't worry about
+	 * adding the initial principals since any slave might as well
+	 * do full resyncs from this newly created db.
+	 */
+	log_ctx->iproprole = IPROP_NULL;
+    }
+
     if ((retval = add_principal(util_context, master_princ, MASTER_KEY, &rblock)) ||
 	(retval = add_principal(util_context, &tgt_princ, TGT_KEY, &rblock))) {
 	(void) krb5_db_fini(util_context);

@@ -1,7 +1,7 @@
 /*
  * lib/kadm5/admin.h
  *
- * Copyright 2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -48,6 +48,7 @@
 #define KADM5_ADMIN_SERVICE	"kadmin/admin"
 #define KADM5_CHANGEPW_SERVICE	"kadmin/changepw"
 #define KADM5_HIST_PRINCIPAL	"kadmin/history"
+#define KADM5_KIPROP_HOST_SERVICE "kiprop"
 
 typedef krb5_principal	kadm5_princ_t;
 typedef	char		*kadm5_policy_t;
@@ -107,32 +108,35 @@ typedef long		kadm5_ret_t;
 #define KADM5_REF_COUNT		0x080000
 
 /* kadm5_config_params */
-#define KADM5_CONFIG_REALM		0x000001
-#define KADM5_CONFIG_DBNAME		0x000002
-#define KADM5_CONFIG_MKEY_NAME		0x000004
-#define KADM5_CONFIG_MAX_LIFE		0x000008
-#define KADM5_CONFIG_MAX_RLIFE		0x000010
-#define KADM5_CONFIG_EXPIRATION		0x000020
-#define KADM5_CONFIG_FLAGS		0x000040
-#define KADM5_CONFIG_ADMIN_KEYTAB	0x000080
-#define KADM5_CONFIG_STASH_FILE		0x000100
-#define KADM5_CONFIG_ENCTYPE		0x000200
-#define KADM5_CONFIG_ADBNAME		0x000400
-#define KADM5_CONFIG_ADB_LOCKFILE	0x000800
-/*#define KADM5_CONFIG_PROFILE		0x001000*/
-#define KADM5_CONFIG_ACL_FILE		0x002000
-#define KADM5_CONFIG_KADMIND_PORT	0x004000
-#define KADM5_CONFIG_ENCTYPES		0x008000
-#define KADM5_CONFIG_ADMIN_SERVER	0x010000
-#define KADM5_CONFIG_DICT_FILE		0x020000
-#define KADM5_CONFIG_MKEY_FROM_KBD	0x040000
-#define KADM5_CONFIG_KPASSWD_PORT	0x080000
-#define KADM5_CONFIG_OLD_AUTH_GSSAPI	0x100000
-#define KADM5_CONFIG_NO_AUTH		0x200000
-#define KADM5_CONFIG_AUTH_NOFALLBACK	0x400000
+#define KADM5_CONFIG_REALM		0x0000001
+#define KADM5_CONFIG_DBNAME		0x0000002
+#define KADM5_CONFIG_MKEY_NAME		0x0000004
+#define KADM5_CONFIG_MAX_LIFE		0x0000008
+#define KADM5_CONFIG_MAX_RLIFE		0x0000010
+#define KADM5_CONFIG_EXPIRATION		0x0000020
+#define KADM5_CONFIG_FLAGS		0x0000040
+#define KADM5_CONFIG_ADMIN_KEYTAB	0x0000080
+#define KADM5_CONFIG_STASH_FILE		0x0000100
+#define KADM5_CONFIG_ENCTYPE		0x0000200
+#define KADM5_CONFIG_ADBNAME		0x0000400
+#define KADM5_CONFIG_ADB_LOCKFILE	0x0000800
+/*#define KADM5_CONFIG_PROFILE		0x0001000*/
+#define KADM5_CONFIG_ACL_FILE		0x0002000
+#define KADM5_CONFIG_KADMIND_PORT	0x0004000
+#define KADM5_CONFIG_ENCTYPES		0x0008000
+#define KADM5_CONFIG_ADMIN_SERVER	0x0010000
+#define KADM5_CONFIG_DICT_FILE		0x0020000
+#define KADM5_CONFIG_MKEY_FROM_KBD	0x0040000
+#define KADM5_CONFIG_KPASSWD_PORT	0x0080000
+#define KADM5_CONFIG_OLD_AUTH_GSSAPI	0x0100000
+#define KADM5_CONFIG_NO_AUTH		0x0200000
+#define KADM5_CONFIG_AUTH_NOFALLBACK	0x0400000
 #ifdef notyet /* Novell */
-#define KADM5_CONFIG_KPASSWD_SERVER     0x800000
+#define KADM5_CONFIG_KPASSWD_SERVER     0x0800000
 #endif
+#define KADM5_CONFIG_IPROP_ENABLED	0x1000000
+#define KADM5_CONFIG_ULOG_SIZE		0x2000000
+#define KADM5_CONFIG_POLL_TIME		0x4000000
 /*
  * permission bits
  */
@@ -243,6 +247,10 @@ typedef struct _kadm5_config_params {
      krb5_flags		flags;
      krb5_key_salt_tuple *keysalts;
      krb5_int32		num_keysalts;
+
+    bool_t		iprop_enabled;
+    int			iprop_ulogsize;
+    char		*iprop_polltime;
 } kadm5_config_params;
 
 /***********************************************************************

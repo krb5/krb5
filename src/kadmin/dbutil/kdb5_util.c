@@ -1,7 +1,7 @@
 /*
  * admin/edit/kdb5_edit.c
  *
- * (C) Copyright 1990,1991, 1996 by the Massachusetts Institute of Technology.
+ * (C) Copyright 1990,1991, 1996, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -307,6 +307,11 @@ int main(argc, argv)
     cmd = cmd_lookup(cmd_argv[0]);
     if (cmd->opendb && open_db_and_mkey())
 	 return exit_status;
+
+    if (global_params.iprop_enabled == TRUE)
+	ulog_set_role(util_context, IPROP_MASTER);
+    else
+	ulog_set_role(util_context, IPROP_NULL);
 
     (*cmd->func)(cmd_argc, cmd_argv);
 

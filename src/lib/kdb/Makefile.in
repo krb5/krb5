@@ -7,7 +7,7 @@ KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_C
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 CFLAGS=@CFLAGS@ -DKDB5_USE_LIB_KDB_DB2
-LOCALINCLUDES= -I.
+LOCALINCLUDES= -I. -I$(SRCTOP)/iprop -I$(SRCTOP)/slave
 DEFS=
 
 LIBBASE=kdb5
@@ -35,6 +35,8 @@ SRCS= \
 	$(srcdir)/kdb_default.c \
 	$(srcdir)/kdb_cpw.c \
 	adb_err.c \
+	$(srcdir)/kdb_convert.c \
+	$(srcdir)/kdb_log.c \
 	$(srcdir)/keytab.c
 
 STOBJLISTS=OBJS.ST
@@ -45,6 +47,8 @@ STLIBOBJS= \
 	kdb_default.o \
 	kdb_cpw.o \
 	adb_err.o \
+	kdb_convert.o \
+	kdb_log.o \
 	keytab.o
 
 all-unix:: all-liblinks

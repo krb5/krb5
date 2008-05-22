@@ -33,6 +33,7 @@
 #include "adm_proto.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <kdb/kdb_log.h>
 
 static krb5_key_salt_tuple *copy_key_salt_tuple(ksalt, len)
 krb5_key_salt_tuple *ksalt;
@@ -733,6 +734,66 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	      krb5_xfree(svalue);
     }
     
+	hierarchy[2] = "sunw_dbprop_enable";
+
+	params.iprop_enabled = FALSE;
+	params.mask |= KADM5_CONFIG_IPROP_ENABLED;
+
+	if (params_in->mask & KADM5_CONFIG_IPROP_ENABLED) {
+		params.mask |= KADM5_CONFIG_IPROP_ENABLED;
+		params.iprop_enabled = params_in->iprop_enabled;
+	} else {
+		if (aprofile && !krb5_aprof_get_string(aprofile, hierarchy,
+		    TRUE, &svalue)) {
+			if (strncasecmp(svalue, "Y", 1) == 0)
+				params.iprop_enabled = TRUE;
+			if (strncasecmp(svalue, "true", 4) == 0)
+				params.iprop_enabled = TRUE;
+			params.mask |= KADM5_CONFIG_IPROP_ENABLED;
+			krb5_xfree(svalue);
+		}
+	}
+
+	hierarchy[2] = "sunw_dbprop_master_ulogsize";
+
+	params.iprop_ulogsize = DEF_ULOGENTRIES;
+	params.mask |= KADM5_CONFIG_ULOG_SIZE;
+
+	if (params_in->mask & KADM5_CONFIG_ULOG_SIZE) {
+		params.mask |= KADM5_CONFIG_ULOG_SIZE;
+		params.iprop_ulogsize = params_in->iprop_ulogsize;
+	} else {
+		if (aprofile && !krb5_aprof_get_int32(aprofile, hierarchy,
+		    TRUE, &ivalue)) {
+			if (ivalue > MAX_ULOGENTRIES)
+				params.iprop_ulogsize = MAX_ULOGENTRIES;
+			else if (ivalue <= 0)
+				params.iprop_ulogsize = DEF_ULOGENTRIES;
+			else
+				params.iprop_ulogsize = ivalue;
+			params.mask |= KADM5_CONFIG_ULOG_SIZE;
+		}
+	}
+
+	hierarchy[2] = "sunw_dbprop_slave_poll";
+
+	params.iprop_polltime = "2m";
+	params.mask |= KADM5_CONFIG_POLL_TIME;
+
+	if (params_in->mask & KADM5_CONFIG_POLL_TIME) {
+		params.iprop_polltime = strdup(params_in->iprop_polltime);
+		if (params.iprop_polltime)
+			params.mask |= KADM5_CONFIG_POLL_TIME;
+	} else {
+		if (aprofile && !krb5_aprof_get_string(aprofile, hierarchy,
+		    TRUE, &svalue)) {
+			params.iprop_polltime = strdup(svalue);
+			params.mask |= KADM5_CONFIG_POLL_TIME;
+			krb5_xfree(svalue);
+		}
+	}
+
+
     *params_out = params;
     
 cleanup:

@@ -16,6 +16,7 @@ static char *rcsid = "$Header$";
 #include "k5-int.h"		/* needed for gssapiP_krb5.h */
 #include <kadm5/admin.h>
 #include <krb5.h>
+#include <kdb/kdb_log.h>
 #include "server_internal.h"
 #include "osconf.h"
 
@@ -431,4 +432,20 @@ krb5_error_code kadm5_init_krb5_context (krb5_context *ctx)
 	first_time = 0;
     }
     return krb5int_init_context_kdc(ctx);
+}
+
+krb5_error_code
+kadm5_init_iprop(void *handle)
+{
+	kadm5_server_handle_t iprop_h;
+	krb5_error_code retval;
+
+	iprop_h = handle;
+	if (iprop_h->params.iprop_enabled) {
+		ulog_set_role(iprop_h->context, IPROP_MASTER);
+		if ((retval = ulog_map(iprop_h->context, &iprop_h->params,
+		    FKCOMMAND)) != 0)
+			return (retval);
+	}
+	return (0);
 }

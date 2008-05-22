@@ -1,7 +1,7 @@
 /*
  * kadmin/dbutil/dump.c
  *
- * Copyright 1990,1991,2001,2006 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2006,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -77,6 +77,8 @@ static krb5_error_code dump_k5beta6_iterator (krb5_pointer,
 static krb5_error_code dump_k5beta6_iterator_ext (krb5_pointer,
 						  krb5_db_entry *,
 						  int);
+static krb5_error_code dump_iprop_iterator (krb5_pointer,
+					    krb5_db_entry *);
 static krb5_error_code dump_k5beta7_princ (krb5_pointer,
 					   krb5_db_entry *);
 static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
@@ -84,6 +86,8 @@ static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
 					       int);
 static krb5_error_code dump_k5beta7_princ_withpolicy
 			(krb5_pointer, krb5_db_entry *);
+static krb5_error_code dump_iprop_princ (krb5_pointer,
+					 krb5_db_entry *);
 static krb5_error_code dump_ov_princ (krb5_pointer,
 				      krb5_db_entry *);
 static void dump_k5beta7_policy (void *, osa_policy_ent_t);
@@ -136,6 +140,15 @@ dump_version beta7_version = {
      0,
      0,
      dump_k5beta7_princ,
+     dump_k5beta7_policy,
+     process_k5beta7_record,
+};
+dump_version iprop_version = {
+     "Kerberos iprop version",
+     "iprop",
+     0,
+     0,
+     dump_iprop_princ,
      dump_k5beta7_policy,
      process_k5beta7_record,
 };
@@ -237,6 +250,7 @@ static const char null_mprinc_name[] = "kdb5_dump@MISSING";
 static const char oldoption[] = "-old";
 static const char b6option[] = "-b6";
 static const char b7option[] = "-b7";
+static const char ipropoption[] = "-i";
 static const char verboseoption[] = "-verbose";
 static const char updateoption[] = "-update";
 static const char hashoption[] = "-hash";
@@ -825,6 +839,163 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 }
 
 /*
+ * dump_iprop_iterator()	- Output a dump record in iprop format.
+ */
+static krb5_error_code
+dump_iprop_iterator(ptr, entry)
+    krb5_pointer	ptr;
+    krb5_db_entry	*entry;
+{
+    krb5_error_code	retval;
+    struct dump_args	*arg;
+    char		*name;
+    krb5_tl_data	*tlp;
+    krb5_key_data	*kdata;
+    int			counter, i, j;
+
+    /* Initialize */
+    arg = (struct dump_args *) ptr;
+    name = (char *) NULL;
+
+    /*
+     * Flatten the principal name.
+     */
+    if ((retval = krb5_unparse_name(arg->kcontext,
+				    entry->princ,
+				    &name))) {
+		fprintf(stderr, gettext(pname_unp_err),
+		arg->programname, error_message(retval));
+	return(retval);
+    }
+
+    /*
+     * Re-encode the keys in the new master key, if necessary.
+     */
+    if (mkey_convert) {
+	retval = master_key_convert(arg->kcontext, entry);
+	if (retval) {
+	    com_err(arg->programname, retval, remaster_err_fmt, name);
+	    return retval;
+	}
+    }
+    
+    /*
+     * If we don't have any match strings, or if our name matches, then
+     * proceed with the dump, otherwise, just forget about it.
+     */
+    if (!arg->nnames || name_matches(name, arg)) {
+	/*
+	 * We'd like to just blast out the contents as they would
+	 * appear in the database so that we can just suck it back
+	 * in, but it doesn't lend itself to easy editing.
+	 */
+
+	/*
+	 * The dump format is as follows: len strlen(name)
+	 * n_tl_data n_key_data e_length name attributes max_life
+	 * max_renewable_life expiration pw_expiration last_success
+	 * last_failed fail_auth_count n_tl_data*[type length
+	 * <contents>] n_key_data*[ver kvno ver*(type length
+	 * <contents>)] <e_data> Fields which are not encapsulated
+	 * by angle-brackets are to appear verbatim.  Bracketed
+	 * fields absence is indicated by a -1 in its place
+	 */
+
+	/*
+	 * Make sure that the tagged list is reasonably correct.
+	 */
+	counter = 0;
+	for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next)
+		  counter++;
+	
+	if (counter == entry->n_tl_data) {
+	    /* Pound out header */
+	    fprintf(arg->ofile, "%d\t%d\t%d\t%d\t%d\t%s\t",
+		    (int) entry->len,
+		    strlen(name),
+		    (int) entry->n_tl_data,
+		    (int) entry->n_key_data,
+		    (int) entry->e_length,
+		    name);
+	    fprintf(arg->ofile, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
+		    entry->attributes,
+		    entry->max_life,
+		    entry->max_renewable_life,
+		    entry->expiration,
+		    entry->pw_expiration,
+		    entry->last_success,
+		    entry->last_failed,
+		    entry->fail_auth_count);
+	    /* Pound out tagged data. */
+			for (tlp = entry->tl_data; tlp;
+			    tlp = tlp->tl_data_next) {
+		fprintf(arg->ofile, "%d\t%d\t",
+			(int) tlp->tl_data_type,
+			(int) tlp->tl_data_length);
+		if (tlp->tl_data_length)
+					for (i = 0;
+					    i < tlp->tl_data_length;
+					    i++)
+						fprintf(arg->ofile, "%02x",
+							tlp->
+							tl_data_contents[i]);
+		else
+		    fprintf(arg->ofile, "%d", -1);
+		fprintf(arg->ofile, "\t");
+	    }
+
+	    /* Pound out key data */
+			for (counter = 0;
+			    counter < entry->n_key_data; counter++) {
+		kdata = &entry->key_data[counter];
+		fprintf(arg->ofile, "%d\t%d\t",
+			(int) kdata->key_data_ver,
+			(int) kdata->key_data_kvno);
+		for (i=0; i<kdata->key_data_ver; i++) {
+		    fprintf(arg->ofile, "%d\t%d\t",
+			    kdata->key_data_type[i],
+			    kdata->key_data_length[i]);
+		    if (kdata->key_data_length[i])
+						for (j = 0;
+						    j < kdata->
+							key_data_length[i];
+						    j++)
+							fprintf(arg->ofile,
+							    "%02x",
+							    kdata->
+							    key_data_contents
+								[i][j]);
+		    else
+			fprintf(arg->ofile, "%d", -1);
+		    fprintf(arg->ofile, "\t");
+		}
+	    }
+
+	    /* Pound out extra data */
+	    if (entry->e_length)
+		for (i=0; i<entry->e_length; i++)
+					fprintf(arg->ofile, "%02x",
+						entry->e_data[i]);
+	    else
+		fprintf(arg->ofile, "%d", -1);
+
+	    /* Print trailer */
+	    fprintf(arg->ofile, ";\n");
+
+	    if (arg->verbose)
+		fprintf(stderr, "%s\n", name);
+		} else {
+			fprintf(stderr, gettext(sdump_tl_inc_err),
+		    arg->programname, name, counter,
+		    (int) entry->n_tl_data); 
+	    retval = EINVAL;
+	}
+    }
+    krb5_xfree(name);
+    return(retval);
+}
+
+/*
  * dump_k5beta7_iterator()	- Output a dump record in krb5b7 format.
  */
 static krb5_error_code
@@ -884,6 +1055,51 @@ dump_k5beta7_princ_withpolicy(ptr, entry)
     krb5_db_entry	*entry;
 {
     return dump_k5beta7_princ_ext(ptr, entry, 1);
+}
+
+/*
+ * dump_iprop_princ()	- Output a dump record in iprop format.
+ * This was created in order to dump more data, such as kadm5 tl
+ */
+static krb5_error_code
+dump_iprop_princ(ptr, entry)
+    krb5_pointer	ptr;
+    krb5_db_entry	*entry;
+{
+     krb5_error_code retval;
+     struct dump_args *arg;
+     char *name;
+     int tmp_nnames;
+
+     /* Initialize */
+     arg = (struct dump_args *) ptr;
+     name = (char *) NULL;
+
+     /*
+      * Flatten the principal name.
+      */
+     if ((retval = krb5_unparse_name(arg->kcontext,
+				     entry->princ,
+				     &name))) {
+		fprintf(stderr, gettext(pname_unp_err),
+		  arg->programname, error_message(retval));
+	  return(retval);
+     }
+     /*
+      * If we don't have any match strings, or if our name matches, then
+      * proceed with the dump, otherwise, just forget about it.
+      */
+     if (!arg->nnames || name_matches(name, arg)) {
+	  fprintf(arg->ofile, "princ\t");
+	  
+	  /* save the callee from matching the name again */
+	  tmp_nnames = arg->nnames;
+	  arg->nnames = 0;
+	  retval = dump_iprop_iterator(ptr, entry);
+	  arg->nnames = tmp_nnames;
+     }
+     free(name);
+	return (retval);
 }
 
 void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
@@ -1023,7 +1239,9 @@ dump_db(argc, argv)
     int			aindex;
     krb5_boolean	locked;
     char		*new_mkey_file = 0;
-	
+    bool_t		dump_sno = FALSE;
+    kdb_log_context	*log_ctx;
+
     /*
      * Parse the arguments.
      */
@@ -1037,6 +1255,7 @@ dump_db(argc, argv)
     mkey_convert = 0;
     backwards = 0;
     recursive = 0;
+    log_ctx = util_context->kdblog_context;
 
     /*
      * Parse the qualifiers.
@@ -1050,7 +1269,22 @@ dump_db(argc, argv)
 	     dump = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     dump = &ov_version;
-	else if (!strcmp(argv[aindex], verboseoption))
+	else if (!strcmp(argv[aindex], ipropoption)) {
+	    if (log_ctx && log_ctx->iproprole) {
+		dump = &iprop_version;
+		/*
+		 * dump_sno is used to indicate if the serial
+		 * # should be populated in the output
+		 * file to be used later by iprop for updating
+		 * the slave's update log when loading
+		 */
+		dump_sno = TRUE;
+	    } else {
+		fprintf(stderr, gettext("Iprop not enabled\n"));
+		exit_status++;
+		return;
+	    }
+	} else if (!strcmp(argv[aindex], verboseoption))
 	    arglist.verbose++;
 	else if (!strcmp(argv[aindex], "-mkey_convert"))
 	    mkey_convert = 1;
@@ -1171,6 +1405,31 @@ dump_db(argc, argv)
 	arglist.ofile = f;
 	arglist.kcontext = util_context;
 	fprintf(arglist.ofile, "%s", dump->header);
+
+	if (dump_sno) {
+	    if (ulog_map(util_context, &global_params, FKCOMMAND)) {
+		fprintf(stderr,
+			gettext("%s: Could not map log\n"), programname);
+		exit_status++;
+		goto error;
+	    }
+
+	    /*
+	     * We grab the lock twice (once again in the iterator call),
+	     * but that's ok since the lock func handles incr locks held.
+	     */
+	    if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
+		fprintf(stderr,
+			gettext("%s: Couldn't grab lock\n"), programname);
+		exit_status++;
+		goto error;
+	    }
+
+	    fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
+	    fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
+	    fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
+	}
+
 	if (dump->header[strlen(dump->header)-1] != '\n')
 	     fputc('\n', arglist.ofile);
 	
@@ -1181,6 +1440,8 @@ dump_db(argc, argv)
 	     fprintf(stderr, dumprec_err,
 		     programname, dump->name, error_message(kret));
 	     exit_status++;
+	     if (dump_sno)
+		 (void) krb5_db_unlock(util_context);
 	}
 	if (dump->dump_policy &&
 	    (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
@@ -2136,6 +2397,8 @@ load_db(argc, argv)
     krb5_int32		crflags;
     int			aindex;
     int			db_locked = 0;
+    char		iheader[MAX_HEADER];
+    kdb_log_context	*log_ctx;
 
     /*
      * Parse the arguments.
@@ -2151,6 +2414,8 @@ load_db(argc, argv)
     crflags = KRB5_KDB_CREATE_BTREE;
     exit_status = 0;
     dbname_tmp = (char *) NULL;
+    log_ctx = util_context->kdblog_context;
+
     for (aindex = 1; aindex < argc; aindex++) {
 	if (!strcmp(argv[aindex], oldoption))
 	     load = &old_version;
@@ -2160,7 +2425,16 @@ load_db(argc, argv)
 	     load = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     load = &ov_version;
-	else if (!strcmp(argv[aindex], verboseoption))
+	else if (!strcmp(argv[aindex], ipropoption)) {
+	    if (log_ctx && log_ctx->iproprole) {
+		load = &iprop_version;
+		add_update = FALSE;
+	    } else {
+		fprintf(stderr, gettext("Iprop not enabled\n"));
+		exit_status++;
+		return;
+	    }
+	} else if (!strcmp(argv[aindex], verboseoption))
 	    verbose = 1;
 	else if (!strcmp(argv[aindex], updateoption))
 	    update = 1;
@@ -2204,6 +2478,9 @@ load_db(argc, argv)
 	exit_status++;
 	return;
     }
+
+    if (log_ctx && log_ctx->iproprole)
+	kcontext->kdblog_context = (void *)log_ctx;
 
     /*
      * Open the dumpfile
@@ -2357,6 +2634,53 @@ load_db(argc, argv)
     else
 	db_locked = 1;
     
+    if (log_ctx && log_ctx->iproprole) {
+	if (add_update)
+	    caller = FKCOMMAND;
+	else
+	    caller = FKPROPD;
+
+	if (ulog_map(kcontext, &global_params, caller)) {
+	    fprintf(stderr,
+		    gettext("%s: Could not map log\n"),
+		    programname);
+	    exit_status++;
+	    goto error;
+	}
+
+	/*
+	 * We don't want to take out the ulog out from underneath
+	 * kadmind so we reinit the header log.
+	 *
+	 * We also don't want to add to the update log since we
+	 * are doing a whole sale replace of the db, because:
+	 * 	we could easily exceed # of update entries
+	 * 	we could implicity delete db entries during a replace
+	 *	no advantage in incr updates when entire db is replaced
+	 */
+	if (!update) {
+	    memset(log_ctx->ulog, 0, sizeof (kdb_hlog_t));
+
+	    log_ctx->ulog->kdb_hmagic = KDB_HMAGIC;
+	    log_ctx->ulog->db_version_num = KDB_VERSION;
+	    log_ctx->ulog->kdb_state = KDB_STABLE;
+	    log_ctx->ulog->kdb_block = ULOG_BLOCK;
+
+	    log_ctx->iproprole = IPROP_NULL;
+
+	    if (!add_update) {
+		sscanf(buf, "%s %u %u %u", iheader, &last_sno,
+		       &last_seconds, &last_useconds);
+
+		log_ctx->ulog->kdb_last_sno = last_sno;
+		log_ctx->ulog->kdb_last_time.seconds =
+		    last_seconds;
+		log_ctx->ulog->kdb_last_time.useconds =
+		    last_useconds;
+	    }
+	}
+    }
+
     if (restore_dump(programname, kcontext, (dumpfile) ? dumpfile : stdin_name,
 		     f, verbose, load)) {
 	 fprintf(stderr, restfail_fmt,

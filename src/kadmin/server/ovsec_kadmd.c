@@ -53,6 +53,7 @@
 #include    "kdb_kt.h"	/* for krb5_ktkdb_set_context */
 #include    <string.h>
 #include    "kadm5/server_internal.h" /* XXX for kadm5_server_handle_t */
+#include    <kdb/kdb_log.h>
 
 #include    "misc.h"
 
@@ -71,7 +72,7 @@ extern int daemon(int, int);
 
 volatile int	signal_request_exit = 0;
 volatile int	signal_request_hup = 0;
-void    setup_signal_handlers(void);
+void    setup_signal_handlers(iprop_role iproprole);
 void	request_exit(int);
 void	request_hup(int);
 void	reset_db(void);
@@ -117,6 +118,12 @@ void do_schpw(int s, kadm5_config_params *params);
 #ifdef USE_PASSWORD_SERVER
 void kadm5_set_use_password_server (void);
 #endif
+
+extern void krb5_iprop_prog_1();
+extern kadm5_ret_t kiprop_get_adm_host_srv_name(
+	krb5_context,
+	const char *,
+	char **);
 
 /*
  * Function: usage
@@ -199,12 +206,14 @@ static krb5_context context;
 
 static krb5_context hctx;
 
+int nofork = 0;
+
 int main(int argc, char *argv[])
 {
      register	SVCXPRT *transp;
      extern	char *optarg;
      extern	int optind, opterr;
-     int ret, nofork, oldnames = 0;
+     int ret, oldnames = 0;
      OM_uint32 OMret, major_status, minor_status;
      char *whoami;
      gss_buffer_desc in_buf;
@@ -217,6 +226,9 @@ int main(int argc, char *argv[])
      char **db_args      = NULL;
      int    db_args_size = 0;
      char *errmsg;
+
+     char *kiprop_name = NULL;	/* iprop svc name */
+     kdb_log_context *log_ctx;
 
      setvbuf(stderr, NULL, _IONBF, 0);
 
@@ -644,7 +656,96 @@ kterr:
      }
 	  
      setup_signal_handlers();
-     krb5_klog_syslog(LOG_INFO, "starting");
+    if (params.iprop_enabled == TRUE)
+	ulog_set_role(ctx, IPROP_MASTER);
+    else
+	ulog_set_role(ctx, IPROP_NULL);
+
+    log_ctx = ctx->kdblog_context;
+
+    if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
+	/*
+	 * IProp is enabled, so let's map in the update log
+	 * and setup the service.
+	 */
+	if (ret = ulog_map(ctx, &params, FKADMIND)) {
+	    fprintf(stderr,
+		    gettext("%s: %s while mapping update log "
+			    "(`%s.ulog')\n"), whoami, error_message(ret),
+		    params.dbname);
+	    krb5_klog_syslog(LOG_ERR,
+			     gettext("%s while mapping update log "
+				     "(`%s.ulog')"), error_message(ret),
+			     params.dbname);
+	    krb5_klog_close(ctx);
+	    exit(1);
+	}
+
+ 
+	if (nofork)
+	    fprintf(stderr,
+		    "%s: create IPROP svc (PROG=%d, VERS=%d)\n",
+		    whoami, KRB5_IPROP_PROG, KRB5_IPROP_VERS);
+
+	if (!svc_create(krb5_iprop_prog_1,
+			KRB5_IPROP_PROG, KRB5_IPROP_VERS,
+			"circuit_v")) {
+	    fprintf(stderr,
+		    gettext("%s: Cannot create IProp RPC service (PROG=%d, VERS=%d)\n"),
+		    whoami,
+		    KRB5_IPROP_PROG, KRB5_IPROP_VERS);
+	    krb5_klog_syslog(LOG_ERR,
+			     gettext("Cannot create IProp RPC service (PROG=%d, VERS=%d), failing."),
+			     KRB5_IPROP_PROG, KRB5_IPROP_VERS);
+	    krb5_klog_close(ctx);
+	    exit(1);
+	}
+
+	if (ret = kiprop_get_adm_host_srv_name(ctx,
+					       params.realm,
+					       &kiprop_name)) {
+	    krb5_klog_syslog(LOG_ERR,
+			     gettext("%s while getting IProp svc name, failing"),
+			     error_message(ret));
+	    fprintf(stderr,
+		    gettext("%s: %s while getting IProp svc name, failing\n"),
+		    whoami, error_message(ret));
+	    krb5_klog_close(ctx);
+	    exit(1);
+	}
+
+	if (!rpc_gss_set_svc_name(kiprop_name, "kerberos_v5", 0,
+				  KRB5_IPROP_PROG, KRB5_IPROP_VERS)) {
+	    rpc_gss_error_t err;
+	    (void) rpc_gss_get_error(&err);
+
+	    krb5_klog_syslog(LOG_ERR,
+			     gettext("Unable to set RPCSEC_GSS service name (`%s'), failing."),
+			     kiprop_name ? kiprop_name : "<null>");
+
+	    fprintf(stderr,
+		    gettext("%s: Unable to set RPCSEC_GSS service name (`%s'), failing.\n"),
+		    whoami,
+		    kiprop_name ? kiprop_name : "<null>");
+
+	    if (nofork) {
+		fprintf(stderr,
+			"%s: set svc name (rpcsec err=%d, sys err=%d)\n",
+			whoami,
+			err.rpc_gss_error,
+			err.system_error);
+	    }
+
+	    exit(1);
+	}
+	free(kiprop_name);
+    }
+
+    setup_signal_handlers(log_ctx->iproprole);
+    krb5_klog_syslog(LOG_INFO, gettext("starting"));
+    if (nofork)
+	fprintf(stderr, "%s: starting...\n", whoami);
+
      kadm_svc_run(&params);
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
 
@@ -677,7 +778,7 @@ kterr:
  * if possible, otherwise with System V's signal().
  */
 
-void setup_signal_handlers(void) {
+void setup_signal_handlers(iprop_role iproprole) {
 #ifdef POSIX_SIGNALS
      (void) sigemptyset(&s_action.sa_mask);
      s_action.sa_handler = request_exit;
@@ -694,6 +795,13 @@ void setup_signal_handlers(void) {
      s_action.sa_handler = request_pure_clear;
      (void) sigaction(SIGUSR2, &s_action, (struct sigaction *) NULL);
 #endif /* PURIFY */
+
+     /*
+      * IProp will fork for a full-resync, we don't want to
+      * wait on it and we don't want the living dead procs either.
+      */
+     if (iproprole == IPROP_MASTER)
+	 (void) xxx xxx xxx;
 #else /* POSIX_SIGNALS */
      signal(SIGINT, request_exit);
      signal(SIGTERM, request_exit);
@@ -704,6 +812,13 @@ void setup_signal_handlers(void) {
      signal(SIGUSR1, request_pure_report);
      signal(SIGUSR2, request_pure_clear);
 #endif /* PURIFY */
+
+     /*
+      * IProp will fork for a full-resync, we don't want to
+      * wait on it and we don't want the living dead procs either.
+      */
+     if (iproprole == IPROP_MASTER)
+	 (void) signal(SIGCHLD, SIG_IGN);
 #endif /* POSIX_SIGNALS */
 }
 
