@@ -101,7 +101,7 @@ extern int daemon(int, int);
 
 char *poll_time = NULL;
 char *def_realm = NULL;
-boolean_t runonce = B_FALSE;
+int runonce = 0;
 
 /*
  * This struct simulates the use of _kadm5_server_handle_t
@@ -487,7 +487,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx) {
 	int backoff_cnt = 0;
 	int reinit_cnt = 0;
 	int ret;
-	boolean_t frdone = B_FALSE;
+	int frdone = 0;
 
 	kdb_incr_result_t *incr_ret;
 	static kdb_last_t mylast;
@@ -644,7 +644,7 @@ reinit:
 			 * X'fer was a resync and if the master sno is
 			 * still "0", i.e. no updates so far.
 			 */
-			if ((frdone == B_TRUE) && (incr_ret->lastentry.last_sno
+			if ((frdone == 1) && (incr_ret->lastentry.last_sno
 						== 0)) {
 				break;
 			} else {
@@ -686,7 +686,7 @@ reinit:
 						fprintf(stderr,
 						    gettext("Full resync "
 						    "was successful\n"));
-				frdone = B_TRUE;
+				frdone = 1;
 				break;
 
 			case UPDATE_BUSY:
@@ -700,7 +700,7 @@ reinit:
 			case UPDATE_NIL:
 			default:
 				backoff_cnt = 0;
-				frdone = B_FALSE;
+				frdone = 0;
 				syslog(LOG_ERR, gettext("kpropd: Full resync,"
 					" invalid return from master KDC."));
 				break;
@@ -719,7 +719,7 @@ reinit:
 
 		case UPDATE_OK:
 			backoff_cnt = 0;
-			frdone = B_FALSE;
+			frdone = 0;
 
 			/*
 			 * ulog_replay() will convert the ulog updates to db
@@ -764,7 +764,7 @@ reinit:
 				fprintf(stderr, gettext("Master, slave KDC's "
 					"are in-sync, no updates\n"));
 			backoff_cnt = 0;
-			frdone = B_FALSE;
+			frdone = 0;
 			break;
 
 		default:
@@ -774,7 +774,7 @@ reinit:
 			break;
 		}
 
-		if (runonce == B_TRUE)
+		if (runonce == 1)
 			goto done;
 
 		/*
@@ -820,7 +820,7 @@ done:
 	if (kpropd_context)
 		krb5_free_context(kpropd_context);
 
-	if (runonce == B_TRUE)
+	if (runonce == 1)
 		return (0);
 	else
 		exit(1);
@@ -997,7 +997,7 @@ void PRS(argv)
 				     * Option to run the kpropd server exactly
 				     * once (this is true only if iprop is enabled).
 				     */
-				    runonce = B_TRUE;
+				    runonce = 1;
 				    break;
 
 				default:

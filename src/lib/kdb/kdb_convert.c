@@ -366,7 +366,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 	kdbe_attr_type_t *attr_types;
 	kdb_incr_update_t *upd;
 	krb5_db_entry *ent;
-	boolean_t kadm_data_yes;
+	int kadm_data_yes;
 
 	if ((updates == NULL) || (entries == NULL))
 		return (KRB5KRB_ERR_GENERIC);
@@ -377,7 +377,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 	for (k = 0; k < nentries; k++) {
 		nprincs = nattrs = tmpint = 0;
 		final = -1;
-		kadm_data_yes = B_FALSE;
+		kadm_data_yes = 0;
 		attr_types = NULL;
 
 		if ((upd->kdb_update.kdbe_t_val = (kdbe_val_t *)
@@ -583,14 +583,14 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 
 					case KRB5_TL_KADM_DATA:
 					default:
-						if (kadm_data_yes == B_FALSE) {
+						if (kadm_data_yes == 0) {
 							ULOG_ENTRY_TYPE(upd, ++final).av_type = AT_TL_DATA;
 							ULOG_ENTRY(upd, final).av_tldata.av_tldata_len = 0;
 							ULOG_ENTRY(upd, final).av_tldata.av_tldata_val = malloc(ent->n_tl_data * sizeof(kdbe_tl_t));
 
 							if (ULOG_ENTRY(upd, final).av_tldata.av_tldata_val == NULL)
 								return (ENOMEM);
-							kadm_data_yes = B_TRUE;
+							kadm_data_yes = 1;
 						}
 
 						tmpint = ULOG_ENTRY(upd, final).av_tldata.av_tldata_len;

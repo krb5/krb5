@@ -312,7 +312,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 
      if ((strstr(service_name, iprop_svc) != NULL) &&
 	 (strstr(client_name, iprop_svc) != NULL)) {
-	 iprop_enable = B_TRUE;
+	 iprop_enable = 1;
 	 handle->clnt = clnttcp_create(&addr, KRB5_IPROP_PROG, KRB5_IPROP_VERS,
 				       &fd, 0, 0);
      } else
@@ -342,7 +342,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
       * Bypass the remainder of the code and return straightaway
       * if the gss service requested is kiprop
       */
-     if (iprop_enable == B_TRUE) {
+     if (iprop_enable == 1) {
 	 code = 0;
 	 goto cleanup;
      }
@@ -587,7 +587,7 @@ kadm5_setup_gss(kadm5_server_handle_t handle,
      const char *c_ccname_orig;
      char *ccname_orig;
      char *iprop_svc;
-     boolean_t iprop_enable = B_FALSE;
+     int iprop_enable = 0;
 
      code = KADM5_GSS_ERROR;
      gss_client_creds = GSS_C_NO_CREDENTIAL;
