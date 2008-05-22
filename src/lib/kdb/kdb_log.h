@@ -6,7 +6,7 @@
 #ifndef	_KDB_LOG_H
 #define	_KDB_LOG_H
 
-#pragma ident	"@(#)kdb_log.h	1.3	04/02/23 SMI"
+/* #pragma ident	"@(#)kdb_log.h	1.3	04/02/23 SMI" */
 
 #include <k5-int.h>
 #include <iprop_hdr.h>

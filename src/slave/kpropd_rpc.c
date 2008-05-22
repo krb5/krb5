@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"@(#)kpropd_rpc.c	1.2	04/02/20 SMI"
+/* #pragma ident	"@(#)kpropd_rpc.c	1.2	04/02/20 SMI" */
 
 #include <iprop_hdr.h>
 #include "iprop.h"

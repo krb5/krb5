@@ -5,7 +5,6 @@
 
 #include <memory.h> /* for memset */
 #include "iprop.h"
-#pragma ident "@(#)iprop.x	1.2	04/02/20 SMI"
 
 /* Default timeout can be changed using clnt_control() */
 static struct timeval TIMEOUT = { 25, 0 };

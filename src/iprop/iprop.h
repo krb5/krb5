@@ -13,7 +13,6 @@
 extern "C" {
 #endif
 
-#pragma ident "@(#)iprop.x	1.2	04/02/20 SMI"
 
 typedef struct {
 	u_int utf8str_t_len;

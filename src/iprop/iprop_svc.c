@@ -15,7 +15,6 @@
 #ifndef SIG_PF
 #define SIG_PF void(*)(int)
 #endif
-#pragma ident "@(#)iprop.x	1.2	04/02/20 SMI"
 
 static void
 krb5_iprop_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)

@@ -5,7 +5,6 @@
  */
 
 #include "iprop.h"
-#pragma ident "@(#)iprop.x	1.2	04/02/20 SMI"
 
 void *
 iprop_null_1_svc(void *argp, struct svc_req *rqstp)

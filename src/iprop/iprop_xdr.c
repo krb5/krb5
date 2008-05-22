@@ -4,7 +4,6 @@
  */
 
 #include "iprop.h"
-#pragma ident "@(#)iprop.x	1.2	04/02/20 SMI"
 #include "iprop.h"
 
 bool_t

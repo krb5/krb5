@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"@(#)ipropd_svc.c	1.2	04/02/20 SMI"
+/* #pragma ident	"@(#)ipropd_svc.c	1.2	04/02/20 SMI" */
 
 
 #include <stdio.h>

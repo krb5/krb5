@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"@(#)kdb_convert.c	1.2	04/02/20 SMI"
+/* #pragma ident	"@(#)kdb_convert.c	1.2	04/02/20 SMI" */
 
 /*
  * This file contains api's for conversion of the kdb_incr_update_t

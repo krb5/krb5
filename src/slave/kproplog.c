@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"@(#)kproplog.c	1.4	04/03/19 SMI"
+/* #pragma ident	"@(#)kproplog.c	1.4	04/03/19 SMI" */
 
 /*
  * This module will parse the update logs on the master or slave servers.

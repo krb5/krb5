@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"@(#)kdb_log.c	1.3	04/02/23 SMI"
+/* #pragma ident	"@(#)kdb_log.c	1.3	04/02/23 SMI" */
 
 #include <sys/stat.h>
 #include <sys/types.h>
