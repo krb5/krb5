@@ -6,7 +6,7 @@
 #ifndef _IPROP_H_RPCGEN
 #define _IPROP_H_RPCGEN
 
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 
 
 #ifdef __cplusplus
