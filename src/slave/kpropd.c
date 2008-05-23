@@ -843,6 +843,15 @@ unsigned int backoff_from_master(int *cnt) {
 }
 
 
+static char *
+copy_leading_substring(char *src, size_t len)
+{
+    char *result;
+    result = malloc((len + 1) * sizeof(char));
+    (void) strncpy(result, src, len+1);
+    result[len] = 0;
+    return result;
+}
 /*
  * Routine to convert the `pollstr' string to seconds
  */
@@ -852,21 +861,20 @@ int convert_polltime(char *pollstr) {
 
 	len = polltime = 0;
 
+	/* XXX Memory leak?  pollstr="4m30s", tokenptr is assigned twice.  */
+	/* XXX Do we export a time-interval-parsing routine from libkrb5?  */
 	if ((len = strcspn(pollstr, "s")) < strlen(pollstr)) {
-		tokenptr = malloc((len + 1) * sizeof(char));
-		(void) strlcpy(tokenptr, pollstr, len + 1);
+		tokenptr = copy_leading_substring(pollstr, len);
 		polltime = atoi(tokenptr);
 	}
 
 	if ((len = strcspn(pollstr, "m")) < strlen(pollstr)) {
-		tokenptr = malloc((len + 1) * sizeof(char));
-		(void) strlcpy(tokenptr, pollstr, len + 1);
+		tokenptr = copy_leading_substring(pollstr, len);
 		polltime = atoi(tokenptr) * 60;
 	}
 
 	if ((len = strcspn(pollstr, "h")) < strlen(pollstr)) {
-		tokenptr = malloc((len + 1) * sizeof(char));
-		(void) strlcpy(tokenptr, pollstr, len + 1);
+		tokenptr = copy_leading_substring(pollstr, len);
 		polltime = atoi(tokenptr) * 3600;
 	}
 

@@ -343,9 +343,10 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret)
 				goto cleanup;
 			}
 
-			(void) strlcpy(dbprincstr,
+			(void) strncpy(dbprincstr,
 			    (char *)upd->kdb_princ_name.utf8str_t_val,
 			    (upd->kdb_princ_name.utf8str_t_len + 1));
+			dbprincstr[upd->kdb_princ_name.utf8str_t_len] = 0;
 
 			if (retval = krb5_parse_name(context, dbprincstr,
 			    &dbprinc)) {

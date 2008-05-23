@@ -214,9 +214,14 @@ getclhoststr(char *clprinc, char *cl, int len)
 {
 	char *s;
 	if (s = strchr(clprinc, '/')) {
-		if (!++s || strlcpy(cl, s, len) >= len) {
-			return (NULL);
-		}
+		/* XXX "!++s"?  */
+		if (!++s)
+		    return NULL;
+		if (strlen(s) >= len)
+		    return NULL;
+		strcpy(cl, s);
+		/* XXX Copy with @REALM first, with bounds check, then
+		   chop off the realm??  */
 		if (s = strchr(cl, '@')) {
 			*s = '\0';
 			return (cl); /* success */
@@ -233,8 +238,8 @@ iprop_full_resync_1(
 	struct svc_req *rqstp)
 {
 	static kdb_fullresync_result_t ret;
-	char tmpf[MAX_FILENAME] = {0};
-	char ubuf[MAX_FILENAME + sizeof (KDB5_UTIL_DUMP_STR)] = {0};
+	char *tmpf = 0;
+	char *ubuf = 0;
 	char clhost[MAXHOSTNAMELEN] = {0};
 	int pret, fret;
 	kadm5_server_handle_t handle = global_server_handle;
@@ -297,12 +302,10 @@ iprop_full_resync_1(
 	/*
 	 * construct db dump file name; kprop style name + clnt fqdn
 	 */
-	(void) strcpy(tmpf, "/var/krb5/slave_datatrans_");
-	if (strlcat(tmpf, clhost, sizeof (tmpf)) >= sizeof (tmpf)) {
-		krb5_klog_syslog(LOG_ERR,
-		gettext("%s: db dump file name too long; max length=%d"),
-				whoami,
-				(sizeof (tmpf) - 1));
+	if (asprintf(&tmpf, "/var/krb5/slave_datatrans_%s", clhost) < 0) {
+	    krb5_klog_syslog(LOG_ERR,
+			     gettext("%s: unable to construct db dump file name; out of memory"),
+			     whoami);
 		goto out;
 	}
 
@@ -310,15 +313,10 @@ iprop_full_resync_1(
 	 * note the -i; modified version of kdb5_util dump format
 	 * to include sno (serial number)
 	 */
-	if (strlcpy(ubuf, KDB5_UTIL_DUMP_STR, sizeof (ubuf)) >=
-	    sizeof (ubuf)) {
-		goto out;
-	}
-	if (strlcat(ubuf, tmpf, sizeof (ubuf)) >= sizeof (ubuf)) {
+	if (asprintf(&ubuf, "%s%s", KDB5_UTIL_DUMP_STR, tmpf) < 0) {
 		krb5_klog_syslog(LOG_ERR,
-		gettext("%s: kdb5 util dump string too long; max length=%d"),
-				whoami,
-				(sizeof (ubuf) - 1));
+				 gettext("%s: cannot construct kdb5 util dump string too long; out of memory"),
+				 whoami);
 		goto out;
 	}
 
@@ -402,6 +400,10 @@ out:
 		free(service_name);
 	if (name)
 		gss_release_name(&min_stat, &name);
+	if (tmpf)
+	    free(tmpf);
+	if (ubuf)
+	    free(ubuf);
 	return (&ret);
 }
 
