@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <syslog.h>
-#include "kdb_db2.h"
+#include "kdb5.h"
 #include "kdb_log.h"
 
 /*
@@ -28,6 +28,11 @@ static int		pagesize = 0;
 
 #define	INIT_ULOG(ctx)	log_ctx = ctx->kdblog_context; \
 			ulog = log_ctx->ulog
+
+/* XXX */
+typedef unsigned long ulong_t;
+typedef unsigned int uint_t;
+
 /*
  * Sync update entry to disk.
  */

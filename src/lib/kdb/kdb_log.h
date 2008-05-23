@@ -106,7 +106,7 @@ typedef struct kdb_ent_header {
 	kdbe_time_t	kdb_time;	/* Timestamp of update */
 	bool_t		kdb_commit;	/* Is the entry committed or not */
 	uint32_t	kdb_entry_size;	/* Size of update entry */
-	uchar_t		entry_data[4];	/* Address of kdb_incr_update_t */
+	uint8_t		entry_data[4];	/* Address of kdb_incr_update_t */
 } kdb_ent_header_t;
 
 typedef struct _kdb_log_context {

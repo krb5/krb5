@@ -16,6 +16,7 @@
 #include <iprop_hdr.h>
 #include "iprop.h"
 #include <k5-int.h>
+#include <kdb.h>
 
 /* BEGIN CSTYLED */
 #define	ULOG_ENTRY_TYPE(upd, i)	((kdb_incr_update_t *)upd)->kdb_update.kdbe_t_val[i]
@@ -40,9 +41,9 @@ typedef enum {
  * (by comparing it to the db_entry currently present in principal.db)
  * in the update.
  */
-void
+static void
 find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
-				kdbe_attr_type_t *attrs, int *nattrs) {
+		   kdbe_attr_type_t *attrs, int *nattrs) {
 	int i = 0, j = 0;
 
 	krb5_tl_data *first, *second;
@@ -160,9 +161,10 @@ conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 		ULOG_ENTRY(upd, cnt).av_princ.k_realm.utf8str_t_val =
 				(princ->realm.data != NULL) ?
 				strdup(princ->realm.data) : NULL;
+		/* XXX Should check for allocation failure above.  */
 
 		ULOG_ENTRY(upd, cnt).av_princ.k_components.k_components_len =
-				(uint_t)princ->length;
+				princ->length;
 
 		ULOG_ENTRY(upd, cnt).av_princ.k_components.k_components_val =
 				malloc(princ->length * sizeof (kdbe_data_t));
@@ -178,6 +180,7 @@ conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 			ULOG_ENTRY_PRINC(upd, cnt, i).k_data.utf8str_t_val =
 				(princ->data[i].data != NULL) ?
 				strdup(princ->data[i].data) : NULL;
+			/* XXX Check for allocation failure above.  */
 		}
 		break;
 
@@ -191,9 +194,10 @@ conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 		ULOG_ENTRY(upd, cnt).av_mod_princ.k_realm.utf8str_t_val =
 				(princ->realm.data != NULL) ?
 				strdup(princ->realm.data) : NULL;
+		/* XXX check for allocation failure above.  */
 
 		ULOG_ENTRY(upd, cnt).av_mod_princ.k_components.k_components_len
-				= (uint_t)princ->length;
+				= princ->length;
 
 		ULOG_ENTRY(upd, cnt).av_mod_princ.k_components.k_components_val
 				= malloc(princ->length * sizeof (kdbe_data_t));
@@ -209,6 +213,7 @@ conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 			ULOG_ENTRY_MOD_PRINC(upd, cnt, i).k_data.utf8str_t_val
 				= (princ->data[i].data != NULL) ?
 				strdup(princ->data[i].data) : NULL;
+			/* XXX Check for allocation failure above.  */
 		}
 		break;
 

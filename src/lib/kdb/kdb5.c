@@ -950,8 +950,9 @@ krb5_db_put_principal(krb5_context kcontext,
     kdb_incr_update_t *upd, *fupd;
     char *princ_name = NULL;
     kdb_log_context *log_ctx;
+    int i;
 
-    log_ctx = context->kdblog_context;
+    log_ctx = kcontext->kdblog_context;
 
     if (kcontext->db_context == NULL) {
 	status = kdb_setup_lib_handle(kcontext);
@@ -1019,15 +1020,15 @@ krb5_db_put_principal(krb5_context kcontext,
      */
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
 	if (!(upd = (kdb_incr_update_t *)
-	  malloc(sizeof (kdb_incr_update_t)*n))) {
+	  malloc(sizeof (kdb_incr_update_t)* *nentries))) {
 	    status = errno;
 	    goto err_lock;
 	}
 	fupd = upd;
 
-	(void) memset(upd, 0, sizeof(kdb_incr_update_t)*n);
+	(void) memset(upd, 0, sizeof(kdb_incr_update_t)* *nentries);
 
-        if ((status = ulog_conv_2logentry(context, entries, upd, n))) {
+        if ((status = ulog_conv_2logentry(kcontext, entries, upd, *nentries))) {
 	    goto err_lock;
 	}
     }
@@ -1037,14 +1038,14 @@ krb5_db_put_principal(krb5_context kcontext,
 	 * We'll be sharing the same locks as db for logging
 	 */
         if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
-		if ((retval = krb5_unparse_name(context, entries->princ,
+		if ((status = krb5_unparse_name(kcontext, entries->princ,
 		    &princ_name)))
 			goto err_lock;
 
 		upd->kdb_princ_name.utf8str_t_val = princ_name;
 		upd->kdb_princ_name.utf8str_t_len = strlen(princ_name);
 
-                if (retval = ulog_add_update(context, upd))
+                if (status = ulog_add_update(kcontext, upd))
 			goto err_lock;
         }
 	upd++;
@@ -1057,7 +1058,7 @@ krb5_db_put_principal(krb5_context kcontext,
     if (status == 0 && log_ctx && log_ctx->iproprole == IPROP_MASTER) {
 	upd = fupd;
 	for (i = 0; i < nentries; i++) {
-	    (void) ulog_finish_update(context, upd);
+	    (void) ulog_finish_update(kcontext, upd);
 	    upd++;
 	}
     }
@@ -1080,7 +1081,7 @@ err_lock:
 	 * XXX Bad deref in error case (malloc fail while creating
 	 * array entries). --KR
 	 */
-        ulog_free_entries(fupd, n);
+        ulog_free_entries(fupd, *nentries);
 
     return status;
 }
@@ -1095,7 +1096,7 @@ krb5_db_delete_principal(krb5_context kcontext,
     char *princ_name = NULL;
     kdb_log_context *log_ctx;
 
-    log_ctx = context->kdblog_context;
+    log_ctx = kcontext->kdblog_context;
 
     if (kcontext->db_context == NULL) {
 	status = kdb_setup_lib_handle(kcontext);
@@ -1114,9 +1115,9 @@ krb5_db_delete_principal(krb5_context kcontext,
      * We'll be sharing the same locks as db for logging
      */
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
-	if ((status = krb5_unparse_name(context, searchfor, &princ_name))) {
+	if ((status = krb5_unparse_name(kcontext, search_for, &princ_name))) {
 	    (void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
-	    return retval;
+	    return status;
 	}
 
 	(void) memset(&upd, 0, sizeof (kdb_incr_update_t));
@@ -1124,10 +1125,10 @@ krb5_db_delete_principal(krb5_context kcontext,
 	upd.kdb_princ_name.utf8str_t_val = princ_name;
 	upd.kdb_princ_name.utf8str_t_len = strlen(princ_name);
 
-	if (status = ulog_delete_update(context, &upd)) {
+	if ((status = ulog_delete_update(kcontext, &upd)) != 0) {
 		free(princ_name);
 		(void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
-		return retval;
+		return status;
 	}
 
 	free(princ_name);
@@ -1144,7 +1145,7 @@ krb5_db_delete_principal(krb5_context kcontext,
      */
     if (!status)
 	if (log_ctx && (log_ctx->iproprole == IPROP_MASTER))
-		(void) ulog_finish_update(context, &upd);
+		(void) ulog_finish_update(kcontext, &upd);
 
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
