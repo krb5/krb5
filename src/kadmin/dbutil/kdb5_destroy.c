@@ -56,7 +56,6 @@ kdb5_destroy(argc, argv)
     krb5_error_code retval1;
     krb5_context context;
     int force = 0;
-    char ufilename[MAX_FILENAME];
 
     retval1 = kadm5_init_krb5_context(&context);
     if( retval1 )
@@ -108,16 +107,14 @@ kdb5_destroy(argc, argv)
     }
 
     if (global_params.iprop_enabled) {
-	if (strlcpy(ufilename, dbname, MAX_FILENAME) >= MAX_FILENAME) {
-	    exit_status++;
-	    return;
-	}
-	if (strlcat(ufilename, ".ulog", MAX_FILENAME) >= MAX_FILENAME) {
+	char *ufilename;
+	if (asprintf(&ufilename, "%s.ulog", dbname) < 0) {
 	    exit_status++;
 	    return;
 	}
 
 	(void) unlink(ufilename);
+	free(ufilename);
     }
 
     dbactive = FALSE;
