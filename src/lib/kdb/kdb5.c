@@ -1033,7 +1033,7 @@ krb5_db_put_principal(krb5_context kcontext,
 	}
     }
 
-    for (i = 0; i < nentries; i++) {
+    for (i = 0; i < *nentries; i++) {
 	/*
 	 * We'll be sharing the same locks as db for logging
 	 */
@@ -1057,7 +1057,7 @@ krb5_db_put_principal(krb5_context kcontext,
     get_errmsg(kcontext, status);
     if (status == 0 && log_ctx && log_ctx->iproprole == IPROP_MASTER) {
 	upd = fupd;
-	for (i = 0; i < nentries; i++) {
+	for (i = 0; i < *nentries; i++) {
 	    (void) ulog_finish_update(kcontext, upd);
 	    upd++;
 	}
