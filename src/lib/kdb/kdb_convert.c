@@ -219,6 +219,25 @@ conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 }
 
 /*
+ * Copies a UTF-8 string from ulog to a krb5_data object, which may
+ * already have allocated storage associated with it.
+ *
+ * Maybe a return value should indicate success/failure?
+ */
+static void
+replace_with_utf8str(krb5_data *d, utf8str_t u)
+{
+    d->length = u.utf8str_t_len;
+    /* XXX Memory leak: old d->data if realloc failed.  */
+    /* XXX Overflow check?  d->length + 1.  */
+    d->data = realloc(d->data, d->length + 1);
+    if (d->data == NULL)
+	return;
+    strncpy(d->data, u.utf8str_t_val, d->length + 1);
+    d->data[d->length] = 0;
+}
+
+/*
  * Converts the krb5_principal struct from ulog to db2 format.
  */
 krb5_error_code
@@ -259,17 +278,11 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 
 		princ->type = (krb5_int32)
 			kdbe_princ->k_nametype;
-		princ->realm.length = (int)
-			kdbe_princ->k_realm.utf8str_t_len;
-
 		if (princ_exists == 0)
 			princ->realm.data = NULL;
-		princ->realm.data = (char *)realloc(princ->realm.data,
-						    (princ->realm.length + 1));
+		replace_with_utf8str(&princ->realm, kdbe_princ->k_realm);
 		if (princ->realm.data == NULL)
 			goto error;
-		strlcpy(princ->realm.data, (char *)kdbe_princ->k_realm.utf8str_t_val,
-			(princ->realm.length + 1));
 
 		princ->length = (krb5_int32)kdbe_princ->k_components.k_components_len;
 
@@ -283,18 +296,12 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 		for (i = 0; i < princ->length; i++) {
 			princ->data[i].magic =
 				components[i].k_magic;
-			princ->data[i].length = (int)
-			components[i].k_data.utf8str_t_len;
-
 			if (princ_exists == 0)
 				princ->data[i].data = NULL;
-			princ->data[i].data = (char *)realloc(
-				princ->data[i].data,
-				(princ->data[i].length + 1));
+			replace_with_utf8str(&princ->data[i],
+					     components[i].k_data);
 			if (princ->data[i].data == NULL)
 				goto error;
-			strlcpy(princ->data[i].data, (char *)components[i].k_data.utf8str_t_val,
-				(princ->data[i].length + 1));
 		}
 		break;
 
@@ -650,8 +657,9 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 					* sizeof (char));
 		if (dbprincstr == NULL)
 			return (ENOMEM);
-		strlcpy(dbprincstr, (char *)upd->kdb_princ_name.utf8str_t_val,
+		strncpy(dbprincstr, (char *)upd->kdb_princ_name.utf8str_t_val,
 				(upd->kdb_princ_name.utf8str_t_len + 1));
+		dbprincstr[upd->kdb_princ_name.utf8str_t_len] = 0;
 
 		ret = krb5_parse_name(context, dbprincstr, &dbprinc);
 		free(dbprincstr);
