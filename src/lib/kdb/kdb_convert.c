@@ -1,9 +1,9 @@
 /*
- * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+ * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
-/* #pragma ident	"@(#)kdb_convert.c	1.2	04/02/20 SMI" */
+/* #pragma ident	"@(#)kdb_convert.c	1.3	05/01/05 SMI" */
 
 /*
  * This file contains api's for conversion of the kdb_incr_update_t
@@ -623,6 +623,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 	krb5_tl_data *newtl = NULL;
 	krb5_error_code ret;
 	unsigned int more;
+	unsigned int prev_n_keys = 0;
 
 	if ((updates == NULL) || (entries == NULL))
 		return (KRB5KRB_ERR_GENERIC);
@@ -719,6 +720,8 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 				break;
 
 			case AT_KEYDATA:
+				if (nprincs != 0)
+					prev_n_keys = ent->n_key_data;
 				ent->n_key_data = (krb5_int16)ULOG_ENTRY(upd,
 					i).av_keydata.av_keydata_len;
 				if (nprincs == 0)
@@ -739,7 +742,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 					for (cnt = 0; cnt < ent->key_data[j].key_data_ver; cnt++) {
 						ent->key_data[j].key_data_type[cnt] =  (krb5_int16)ULOG_ENTRY_KEYVAL(upd, i, j).k_enctype.k_enctype_val[cnt];
 						ent->key_data[j].key_data_length[cnt] = (krb5_int16)ULOG_ENTRY_KEYVAL(upd, i, j).k_contents.k_contents_val[cnt].utf8str_t_len;
-						if (nprincs == 0)
+						if ((nprincs == 0) || (j >= prev_n_keys))
 							ent->key_data[j].key_data_contents[cnt] = NULL;
 
 						ent->key_data[j].key_data_contents[cnt] = (krb5_octet *)realloc(ent->key_data[j].key_data_contents[cnt], ent->key_data[j].key_data_length[cnt]);
