@@ -229,6 +229,8 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 
 	int i;
 	krb5_principal princ;
+	kdbe_princ_t *kdbe_princ;
+	kdbe_data_t *components;
 
 	if (upd == NULL)
 		return (KRB5KRB_ERR_GENERIC);
@@ -245,82 +247,44 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 
 	switch (tp) {
 	case REG_PRINC:
-		princ->type = (krb5_int32)
-			ULOG_ENTRY(upd, cnt).av_princ.k_nametype;
-		princ->realm.length = (int)
-			ULOG_ENTRY(upd, cnt).av_princ.k_realm.utf8str_t_len;
-
-		if (princ_exists == 0)
-			princ->realm.data = NULL;
-		princ->realm.data = (char *)realloc(princ->realm.data,
-					(princ->realm.length + 1));
-		if (princ->realm.data == NULL)
-			goto error;
-		strlcpy(princ->realm.data,
-		(char *)ULOG_ENTRY(upd, cnt).av_princ.k_realm.utf8str_t_val,
-		(princ->realm.length + 1));
-
-		princ->length = (krb5_int32)ULOG_ENTRY(upd,
-				cnt).av_princ.k_components.k_components_len;
-
-		if (princ_exists == 0)
-			princ->data = NULL;
-		princ->data = (krb5_data *)realloc(princ->data,
-			(princ->length * sizeof (krb5_data)));
-		if (princ->data == NULL)
-			goto error;
-
-		for (i = 0; i < princ->length; i++) {
-			princ->data[i].magic =
-				ULOG_ENTRY_PRINC(upd, cnt, i).k_magic;
-			princ->data[i].length = (int)
-			ULOG_ENTRY_PRINC(upd, cnt, i).k_data.utf8str_t_len;
-
-			if (princ_exists == 0)
-				princ->data[i].data = NULL;
-			princ->data[i].data = (char *)realloc(
-				princ->data[i].data,
-				(princ->data[i].length + 1));
-			if (princ->data[i].data == NULL)
-				goto error;
-
-			strlcpy(princ->data[i].data, (char *)ULOG_ENTRY_PRINC(
-				upd, cnt, i).k_data.utf8str_t_val,
-				(princ->data[i].length + 1));
-		}
-		break;
+		kdbe_princ = &ULOG_ENTRY(upd, cnt).av_princ;
+		components = kdbe_princ->k_components.k_components_val;
+		goto copy_ulog_princ;
 
 	case MOD_PRINC:
+		kdbe_princ = &ULOG_ENTRY(upd, cnt).av_mod_princ;
+		components = kdbe_princ->k_components.k_components_val;
+
+	copy_ulog_princ:
+
 		princ->type = (krb5_int32)
-			ULOG_ENTRY(upd, cnt).av_mod_princ.k_nametype;
+			kdbe_princ->k_nametype;
 		princ->realm.length = (int)
-			ULOG_ENTRY(upd, cnt).av_mod_princ.k_realm.utf8str_t_len;
+			kdbe_princ->k_realm.utf8str_t_len;
 
 		if (princ_exists == 0)
 			princ->realm.data = NULL;
 		princ->realm.data = (char *)realloc(princ->realm.data,
-			(princ->realm.length + 1));
+						    (princ->realm.length + 1));
 		if (princ->realm.data == NULL)
 			goto error;
-		strlcpy(princ->realm.data, (char *)ULOG_ENTRY(upd,
-				cnt).av_mod_princ.k_realm.utf8str_t_val,
-				(princ->realm.length + 1));
+		strlcpy(princ->realm.data, (char *)kdbe_princ->k_realm.utf8str_t_val,
+			(princ->realm.length + 1));
 
-		princ->length = (krb5_int32)ULOG_ENTRY(upd,
-				cnt).av_mod_princ.k_components.k_components_len;
+		princ->length = (krb5_int32)kdbe_princ->k_components.k_components_len;
 
 		if (princ_exists == 0)
 			princ->data = NULL;
 		princ->data = (krb5_data *)realloc(princ->data,
-				(princ->length * sizeof (krb5_data)));
+						   (princ->length * sizeof (krb5_data)));
 		if (princ->data == NULL)
 			goto error;
 
 		for (i = 0; i < princ->length; i++) {
 			princ->data[i].magic =
-				ULOG_ENTRY_MOD_PRINC(upd, cnt, i).k_magic;
+				components[i].k_magic;
 			princ->data[i].length = (int)
-			ULOG_ENTRY_MOD_PRINC(upd, cnt, i).k_data.utf8str_t_len;
+			components[i].k_data.utf8str_t_len;
 
 			if (princ_exists == 0)
 				princ->data[i].data = NULL;
@@ -329,10 +293,8 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 				(princ->data[i].length + 1));
 			if (princ->data[i].data == NULL)
 				goto error;
-			strlcpy(princ->data[i].data,
-				(char *)ULOG_ENTRY_MOD_PRINC(upd,
-					cnt, i).k_data.utf8str_t_val,
-					(princ->data[i].length + 1));
+			strlcpy(princ->data[i].data, (char *)components[i].k_data.utf8str_t_val,
+				(princ->data[i].length + 1));
 		}
 		break;
 
