@@ -18,8 +18,8 @@ typedef short int16_t;
 typedef unsigned short uint16_t;
 typedef int int32_t;
 typedef unsigned int uint32_t;
-typedef hyper int64_t;
-typedef unsigned hyper uint64_t;
+/*typedef hyper int64_t;*/
+/*typedef unsigned hyper uint64_t;*/
 #endif  /* !RPC_HDR */
 
 typedef opaque	 utf8str_t<>;

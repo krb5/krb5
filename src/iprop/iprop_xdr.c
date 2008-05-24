@@ -47,26 +47,6 @@ xdr_uint32_t (XDR *xdrs, uint32_t *objp)
 }
 
 bool_t
-xdr_int64_t (XDR *xdrs, int64_t *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_quad_t (xdrs, objp))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
-xdr_uint64_t (XDR *xdrs, uint64_t *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_u_quad_t (xdrs, objp))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
 xdr_utf8str_t (XDR *xdrs, utf8str_t *objp)
 {
 	register int32_t *buf;
