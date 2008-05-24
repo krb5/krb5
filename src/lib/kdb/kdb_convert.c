@@ -271,15 +271,9 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 
 	switch (tp) {
 	case REG_PRINC:
-		kdbe_princ = &ULOG_ENTRY(upd, cnt).av_princ;
-		components = kdbe_princ->k_components.k_components_val;
-		goto copy_ulog_princ;
-
 	case MOD_PRINC:
-		kdbe_princ = &ULOG_ENTRY(upd, cnt).av_mod_princ;
+		kdbe_princ = &ULOG_ENTRY(upd, cnt).av_princ; /* or av_mod_princ */
 		components = kdbe_princ->k_components.k_components_val;
-
-	copy_ulog_princ:
 
 		princ->type = (krb5_int32)
 			kdbe_princ->k_nametype;
