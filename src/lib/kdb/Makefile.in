@@ -20,13 +20,17 @@ RELDIR=kdb
 
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libgssrpc$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+SHLIB_EXPLIBS=-lgssrpc -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 adb_err.$(OBJEXT): adb_err.c
 adb_err.c adb_err.h: $(srcdir)/adb_err.et
+iprop_xdr.c: $(SRCTOP)/iprop/iprop_xdr.c
+	$(RM) iprop_xdr.c
+	$(CP) $(SRCTOP)/iprop/iprop_xdr.c iprop_xdr.c
 
 SRCS= \
 	$(srcdir)/kdb5.c \
@@ -35,6 +39,7 @@ SRCS= \
 	$(srcdir)/kdb_default.c \
 	$(srcdir)/kdb_cpw.c \
 	adb_err.c \
+	iprop_xdr.c \
 	$(srcdir)/kdb_convert.c \
 	$(srcdir)/kdb_log.c \
 	$(srcdir)/keytab.c
@@ -47,6 +52,7 @@ STLIBOBJS= \
 	kdb_default.o \
 	kdb_cpw.o \
 	adb_err.o \
+	iprop_xdr.o \
 	kdb_convert.o \
 	kdb_log.o \
 	keytab.o
