@@ -289,7 +289,10 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 			princ->data = NULL;
 		princ->data = (krb5_data *)realloc(princ->data,
 						   (princ->length * sizeof (krb5_data)));
+		/* XXX Memory leak: Old string data in krb5_data
+		   records eliminated by resizing to smaller size.  */
 		if (princ->data == NULL)
+		    /* XXX Memory leak: Old storage.  */
 			goto error;
 
 		for (i = 0; i < princ->length; i++) {
@@ -297,6 +300,8 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 				components[i].k_magic;
 			if (princ_exists == 0)
 				princ->data[i].data = NULL;
+			/* XXX Uninitialized: ->data[i] if array was
+			   reallocated to larger size.  */
 			replace_with_utf8str(&princ->data[i],
 					     components[i].k_data);
 			if (princ->data[i].data == NULL)
@@ -738,7 +743,11 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 					ent->key_data,
 					(ent->n_key_data *
 						sizeof (krb5_key_data)));
+				/* XXX Memory leak: Old key data in
+				   records eliminated by resizing to
+				   smaller size.  */
 				if (ent->key_data == NULL)
+				    /* XXX Memory leak: old storage.  */
 					return (ENOMEM);
 
 /* BEGIN CSTYLED */
@@ -754,6 +763,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 
 						ent->key_data[j].key_data_contents[cnt] = (krb5_octet *)realloc(ent->key_data[j].key_data_contents[cnt], ent->key_data[j].key_data_length[cnt]);
 						if (ent->key_data[j].key_data_contents[cnt] == NULL)
+						    /* XXX Memory leak: old storage.  */
 								return (ENOMEM);
 
 						(void) memset(ent->key_data[j].key_data_contents[cnt], 0, (ent->key_data[j].key_data_length[cnt] * sizeof (krb5_octet)));
@@ -775,6 +785,9 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 					newtl[j].tl_data_contents = NULL;
 					newtl[j].tl_data_contents = malloc(newtl[j].tl_data_length * sizeof (krb5_octet));
 					if (newtl[j].tl_data_contents == NULL)
+					    /* XXX Memory leak: newtl
+					       and previously
+					       allocated elements.  */
 						return (ENOMEM);
 
 					(void) memset(newtl[j].tl_data_contents, 0, (newtl[j].tl_data_length * sizeof (krb5_octet)));
