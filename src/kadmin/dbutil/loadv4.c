@@ -54,6 +54,8 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include <stdio.h>
+
 #ifdef KRB5_KRB4_COMPAT
 
 #include "k5-int.h"
@@ -71,7 +73,6 @@ static Key_schedule master_key_schedule;
 static char *v4_mkeyfile = "/.k";
 
 #include <kadm5/admin.h>
-#include <stdio.h>
 /* Define to make certain blocks private */
 #define V4_DECLARES_STATIC
 #include "kdb5_util.h"
