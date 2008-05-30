@@ -65,7 +65,7 @@ krb5_encode_princ_contents(context, content, entry)
     int 		  i, j;
     unsigned int	  unparse_princ_size;
     char 		* unparse_princ;
-    char		* nextloc;
+    unsigned char	* nextloc;
     krb5_tl_data	* tl_data;
     krb5_error_code 	  retval;
     krb5_int16		  psize16;
@@ -128,7 +128,7 @@ krb5_encode_princ_contents(context, content, entry)
      * Now we go through entry again, this time copying data 
      * These first entries are always saved regardless of version
      */
-    nextloc = content->data;
+    nextloc = (unsigned char *)content->data;
 
 	/* Base Length */
     krb5_kdb_encode_int16(entry->len, nextloc);
@@ -250,7 +250,7 @@ krb5_decode_princ_contents(context, content, entry)
     krb5_db_entry 	* entry;
 {
     int			  sizeleft, i;
-    char 		* nextloc;
+    unsigned char 	* nextloc;
     krb5_tl_data       ** tl_data;
     krb5_int16		  i16;
 
@@ -269,7 +269,7 @@ krb5_decode_princ_contents(context, content, entry)
      */
 
     /* First do the easy stuff */
-    nextloc = content->data;
+    nextloc = (unsigned char *)content->data;
     sizeleft = content->length;
     if ((sizeleft -= KRB5_KDB_V1_BASE_LENGTH) < 0) 
 	return KRB5_KDB_TRUNCATED_RECORD;
@@ -349,9 +349,9 @@ krb5_decode_princ_contents(context, content, entry)
     i = (int) i16;
     nextloc += 2;
 
-    if ((retval = krb5_parse_name(context, nextloc, &(entry->princ))))
+    if ((retval = krb5_parse_name(context, (char *)nextloc, &(entry->princ))))
 	goto error_out;
-    if (((size_t) i != (strlen(nextloc) + 1)) || (sizeleft < i)) {
+    if (((size_t) i != (strlen((char *)nextloc) + 1)) || (sizeleft < i)) {
 	retval = KRB5_KDB_TRUNCATED_RECORD;
 	goto error_out;
     }
