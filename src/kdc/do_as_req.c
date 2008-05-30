@@ -45,6 +45,15 @@
 #include "adm_proto.h"
 #include "extern.h"
 
+#if APPLE_PKINIT
+#define     AS_REQ_DEBUG    0
+#if	    AS_REQ_DEBUG
+#define     asReqDebug(args...)       printf(args)
+#else
+#define     asReqDebug(args...)
+#endif
+#endif /* APPLE_PKINIT */
+
 static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
 					 krb5_data **, const char *);
 
@@ -79,6 +88,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     char rep_etypestr[128];
     char fromstringbuf[70];
     void *pa_context = NULL;
+
+#if APPLE_PKINIT
+    asReqDebug("process_as_req top realm %s name %s\n", 
+	request->client->realm.data, request->client->data->data);
+#endif /* APPLE_PKINIT */
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
@@ -390,6 +404,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	status = "KDC_RETURN_PADATA";
 	goto errout;
     }
+
+#if APPLE_PKINIT
+    asReqDebug("process_as_req reply realm %s name %s\n", 
+	reply.client->realm.data, reply.client->data->data);
+#endif /* APPLE_PKINIT */
 
     /* now encode/encrypt the response */
 

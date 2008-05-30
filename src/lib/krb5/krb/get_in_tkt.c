@@ -33,6 +33,15 @@
 #include "int-proto.h"
 #include "os-proto.h"
 
+#if APPLE_PKINIT
+#define     IN_TKT_DEBUG    0
+#if	    IN_TKT_DEBUG
+#define     inTktDebug(args...)       printf(args)
+#else
+#define     inTktDebug(args...)
+#endif
+#endif /* APPLE_PKINIT */
+
 /*
  All-purpose initial ticket routine, usually called via
  krb5_get_in_tkt_with_password or krb5_get_in_tkt_with_skey.
@@ -99,6 +108,26 @@ static krb5_int32 krb5int_addint32 (krb5_int32 x, krb5_int32 y)
     return x + y;
 }
 
+#if APPLE_PKINIT
+/*
+ * Common code to generate krb5_kdc_req.nonce. Like the original MIT code this
+ * just uses krb5_timeofday(); it should use a PRNG. Even more unfortunately this
+ * value is used interchangeably with an explicit now_time throughout this module...
+ */
+static krb5_error_code  
+gen_nonce(krb5_context  context,
+          krb5_int32    *nonce)
+{
+    krb5_int32 time_now;
+    krb5_error_code retval = krb5_timeofday(context, &time_now);
+    if(retval) {
+	return retval;
+    }
+    *nonce = time_now;
+    return 0;
+}
+#endif /* APPLE_PKINIT */
+
 /*
  * This function sends a request to the KDC, and gets back a response;
  * the response is parsed into ret_err_reply or ret_as_reply if the
@@ -138,6 +167,10 @@ send_again:
     retval = krb5_sendto_kdc(context, packet, 
 			     krb5_princ_realm(context, request->client),
 			     &reply, use_master, tcp_only);
+#if APPLE_PKINIT
+    inTktDebug("krb5_sendto_kdc returned %d\n", (int)retval);
+#endif /* APPLE_PKINIT */
+
     if (retval)
 	goto cleanup;
 
@@ -285,8 +318,20 @@ verify_as_reply(krb5_context 		context,
 	    (as_reply->enc_part2->flags & KDC_OPT_RENEWABLE) &&
 	    (request->till != 0) &&
 	    (as_reply->enc_part2->times.renew_till > request->till))
-	)
+	) {
+#if APPLE_PKINIT
+	inTktDebug("verify_as_reply: KDCREP_MODIFIED\n");
+	#if IN_TKT_DEBUG
+	if(request->client->realm.length && request->client->data->length)
+	    inTktDebug("request: name %s realm %s\n", 
+		request->client->realm.data, request->client->data->data);
+	if(as_reply->client->realm.length && as_reply->client->data->length)
+	    inTktDebug("reply  : name %s realm %s\n", 
+		as_reply->client->realm.data, as_reply->client->data->data);
+	#endif
+#endif /* APPLE_PKINIT */
 	return KRB5_KDCREP_MODIFIED;
+    }
 
     if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) {
 	retval = krb5_set_real_time(context,
@@ -464,6 +509,10 @@ krb5_get_in_tkt(krb5_context context,
     krb5_int32		do_more = 0;
     int             use_master = 0;
 
+#if APPLE_PKINIT
+    inTktDebug("krb5_get_in_tkt top\n");
+#endif /* APPLE_PKINIT */
+
     if (! krb5_realm_compare(context, creds->client, creds->server))
 	return KRB5_IN_TKT_REALM_MISMATCH;
 
@@ -490,6 +539,13 @@ krb5_get_in_tkt(krb5_context context,
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
+#if APPLE_PKINIT
+    retval = gen_nonce(context, (krb5_int32 *)&time_now);
+    if(retval) {
+	goto cleanup;
+    }
+    request.nonce = time_now;
+#endif /* APPLE_PKINIT */
 
     request.ktype = malloc (sizeof(get_in_tkt_enctypes));
     if (request.ktype == NULL) {
@@ -545,6 +601,9 @@ krb5_get_in_tkt(krb5_context context,
 	    goto cleanup;
 	}
 
+#if APPLE_PKINIT
+	inTktDebug("krb5_get_in_tkt calling krb5_obtain_padata\n");
+#endif /* APPLE_PKINIT */
 	if ((retval = krb5_obtain_padata(context, preauth_to_use, key_proc,
 					 keyseed, creds, &request)) != 0)
 	    goto cleanup;
@@ -884,7 +943,10 @@ krb5_get_init_creds(krb5_context context,
     salt.data = NULL;
 
 	local_as_reply = 0;
-
+#if APPLE_PKINIT
+    inTktDebug("krb5_get_init_creds top\n");
+#endif /* APPLE_PKINIT */
+    
     err_reply = NULL;
 
     /*
@@ -1210,6 +1272,10 @@ krb5_get_init_creds(krb5_context context,
 	}
     }
 
+#if APPLE_PKINIT
+    inTktDebug("krb5_get_init_creds done with send_as_request loop lc %d\n",
+	(int)loopcount);
+#endif /* APPLE_PKINIT */
     if (loopcount == MAX_IN_TKT_LOOPS) {
 	ret = KRB5_GET_IN_TKT_LOOP;
 	goto cleanup;
@@ -1227,8 +1293,12 @@ krb5_get_init_creds(krb5_context context,
 			       local_as_reply->padata, &kdc_padata,
 			       &salt, &s2kparams, &etype, &as_key, prompter,
 			       prompter_data, gak_fct, gak_data,
-			       &get_data_rock, options)))
+			       &get_data_rock, options))) {
+#if APPLE_PKINIT
+        inTktDebug("krb5_get_init_creds krb5_do_preauth returned %d\n", (int)ret);
+#endif /* APPLE_PKINIT */
 	goto cleanup;
+	}
 
     /* XXX For 1.1.1 and prior KDC's, when SAM is used w/ USE_SAD_AS_KEY,
        the AS_REP comes back encrypted in the user's longterm key

@@ -880,7 +880,11 @@ kadmin_free_tl_data(kadm5_principal_ent_t princ)
 #define KRB5_TL_DB_ARGS 0x7fff
 static int
 kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
-			ks_tuple, n_ks_tuple, caller)
+			ks_tuple, n_ks_tuple, 
+#if APPLE_PKINIT
+                        cert_hash, 
+#endif /* APPLE_PKINIT */
+                        caller)
     int argc;
     char *argv[];
     kadm5_principal_ent_t oprinc;
@@ -889,6 +893,9 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
     int *randkey;
     krb5_key_salt_tuple **ks_tuple;
     int *n_ks_tuple;
+#if APPLE_PKINIT
+    char **cert_hash;
+#endif /* APPLE_PKINIT */
     char *caller;
 {
     int i, j, attrib_set;
@@ -901,6 +908,9 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
     *pass = NULL;
     *n_ks_tuple = 0;
     *ks_tuple = NULL;
+#if APPLE_PKINIT
+    *cert_hash = NULL;
+#endif /* APPLE_PKINIT */
     time(&now);
     *randkey = 0;
     for (i = 1; i < argc - 1; i++) {
@@ -1040,6 +1050,17 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 	    ++*randkey;
 	    continue;
 	}
+#if APPLE_PKINIT
+	if (strlen(argv[i]) == 9 &&
+	    !strcmp("-certhash", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		*cert_hash = argv[i];
+		continue;
+	    }
+	}
+#endif /* APPLE_PKINIT */
 	if (!strcmp("-e", argv[i])) {
 	    if (++i > argc - 2)
 		return -1;
@@ -1095,7 +1116,11 @@ kadmin_addprinc_usage(func)
 {
     fprintf(stderr, "usage: %s [options] principal\n", func);
     fprintf(stderr, "\toptions are:\n");
-    fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy] [-randkey]\n\t\t[-pw password] [-maxrenewlife maxrenewlife]\n\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n");
+    fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy] [-randkey]\n\t\t[-pw password] [-maxrenewlife maxrenewlife]\n\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n"
+#if APPLE_PKINIT
+            "\t\t[-certhash hash_string]\n"
+#endif /* APPLE_PKINIT */
+            );
     fprintf(stderr, "\tattributes are:\n");
     fprintf(stderr, "%s%s%s",
 	    "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
@@ -1136,6 +1161,9 @@ void kadmin_addprinc(argc, argv)
     krb5_error_code retval;
     static char newpw[1024], dummybuf[256];
     static char prompt1[1024], prompt2[1024];
+#if APPLE_PKINIT
+    char *cert_hash = NULL;
+#endif /* APPLE_PKINIT */
 
     if (dummybuf[0] == 0) {
 	for (i = 0; i < 256; i++)
@@ -1149,11 +1177,22 @@ void kadmin_addprinc(argc, argv)
     if (kadmin_parse_princ_args(argc, argv,
 				&princ, &mask, &pass, &randkey,
 				&ks_tuple, &n_ks_tuple,
+#if APPLE_PKINIT
+                                &cert_hash,
+#endif /* APPLE_PKINIT */
 				"add_principal")) {
 	kadmin_addprinc_usage("add_principal");
 	kadmin_free_tl_data(&princ); /* need to free ks_tuple also??? */
 	return;
     }
+
+#if APPLE_PKINIT
+    if(cert_hash != NULL) {
+	fprintf(stderr,
+              "add_principal: -certhash not allowed; use modify_principal\n");
+	return;
+    }
+#endif /* APPLE_PKINIT */
 
     retval = krb5_unparse_name(context, princ.principal, &canon);
     if (retval) {
@@ -1284,6 +1323,9 @@ void kadmin_modprinc(argc, argv)
     int randkey = 0;
     int n_ks_tuple = 0;
     krb5_key_salt_tuple *ks_tuple;
+#if APPLE_PKINIT
+    char *cert_hash = NULL;
+#endif /* APPLE_PKINIT */
 
     if (argc < 2) {
 	kadmin_modprinc_usage("modify_principal");
@@ -1307,10 +1349,10 @@ void kadmin_modprinc(argc, argv)
     }
     retval = kadm5_get_principal(handle, kprinc, &oldprinc,
 				 KADM5_PRINCIPAL_NORMAL_MASK);
-    krb5_free_principal(context, kprinc);
     if (retval) {
 	com_err("modify_principal", retval, "while getting \"%s\".",
 		canon);
+	krb5_free_principal(context, kprinc);
 	free(canon);
 	return;
     }
@@ -1320,24 +1362,30 @@ void kadmin_modprinc(argc, argv)
 				     &princ, &mask,
 				     &pass, &randkey,
 				     &ks_tuple, &n_ks_tuple,
+#if APPLE_PKINIT
+                                     &cert_hash,
+#endif /* APPLE_PKINIT */
 				     "modify_principal");
     if (ks_tuple != NULL) {
 	free(ks_tuple);
 	kadmin_modprinc_usage("modify_principal");
 	free(canon);
-	kadmin_free_tl_data(&princ);
+	krb5_free_principal(context, kprinc);
+	kadmin_free_tl_data(&princ); /* Apple had this commented out.  Why? */
 	return;
     }
     if (retval) {
 	kadmin_modprinc_usage("modify_principal");
 	free(canon);
-	kadmin_free_tl_data(&princ);
+	krb5_free_principal(context, kprinc);
+	kadmin_free_tl_data(&princ); /* Apple had this commented out.  Why? */
 	return;
     }
     if (randkey) {
 	fprintf(stderr, "modify_principal: -randkey not allowed\n");
 	krb5_free_principal(context, princ.principal);
 	free(canon);
+	krb5_free_principal(context, kprinc);
 	kadmin_free_tl_data(&princ);
 	return;
     }
@@ -1346,10 +1394,45 @@ void kadmin_modprinc(argc, argv)
 		"modify_principal: -pw not allowed; use change_password\n");
 	krb5_free_principal(context, princ.principal);
 	free(canon);
+	krb5_free_principal(context, kprinc);
 	kadmin_free_tl_data(&princ);
 	return;
     }
-    retval = kadm5_modify_principal(handle, &princ, mask);
+#if APPLE_PKINIT
+    if (cert_hash) {
+        /* 
+         * Use something other than the 1st preferred enctype here for fallback
+         * to pwd authentication
+         */
+        krb5_key_salt_tuple key_salt = {ENCTYPE_ARCFOUR_HMAC, KRB5_KDB_SALTTYPE_CERTHASH};
+        krb5_keyblock keyblock;
+        kadm5_ret_t kadmin_rtn;
+        
+        keyblock.magic = KV5M_KEYBLOCK;
+        keyblock.enctype = ENCTYPE_ARCFOUR_HMAC;
+        keyblock.length = strlen(cert_hash);
+        keyblock.contents = (krb5_octet *)cert_hash;
+        kadmin_rtn = kadm5_setkey_principal_3(handle, kprinc,
+                                              TRUE,       /* keepold - we're appending */
+                                              1, &key_salt,
+                                              &keyblock, 1);
+        if (kadmin_rtn) {
+            com_err("modify_principal", kadmin_rtn,
+                    "while adding certhash for \"%s\".", canon);
+            printf("realm %s data %s\n", (char *)kprinc->realm.data, (char *)kprinc->data->data);
+            free(canon);
+            krb5_free_principal(context, princ.principal);
+            krb5_free_principal(context, kprinc);
+            return;
+        }
+        retval = 0;
+    }
+#endif /* APPLE_PKINIT */
+    if (mask) {
+	/* skip this if all we're doing is setting certhash */
+	retval = kadm5_modify_principal(handle, &princ, mask);
+    }
+    krb5_free_principal(context, kprinc);
     krb5_free_principal(context, princ.principal);
     if (retval) {
 	com_err("modify_principal", retval,

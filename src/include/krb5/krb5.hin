@@ -368,6 +368,15 @@ typedef struct _krb5_enc_data {
 #define	ENCTYPE_DES3_CBC_SHA	0x0005	/* DES-3 cbc mode with NIST-SHA */
 #define	ENCTYPE_DES3_CBC_RAW	0x0006	/* DES-3 cbc mode raw */
 #define ENCTYPE_DES_HMAC_SHA1	0x0008
+/* PKINIT */
+#define ENCTYPE_DSA_SHA1_CMS	0x0009	/* DSA with SHA1, CMS signature */
+#define ENCTYPE_MD5_RSA_CMS	0x000a	/* MD5 with RSA, CMS signature */
+#define ENCTYPE_SHA1_RSA_CMS	0x000b	/* SHA1 with RSA, CMS signature */
+#define ENCTYPE_RC2_CBC_ENV	0x000c	/* RC2 cbc mode, CMS enveloped data */
+#define ENCTYPE_RSA_ENV		0x000d	/* RSA encryption, CMS enveloped data */
+#define ENCTYPE_RSA_ES_OAEP_ENV	0x000e	/* RSA w/OEAP encryption, CMS enveloped data */
+#define ENCTYPE_DES3_CBC_ENV	0x000f	/* DES-3 cbc mode, CMS enveloped data */
+
 #define ENCTYPE_DES3_CBC_SHA1	0x0010
 #define ENCTYPE_AES128_CTS_HMAC_SHA1_96	0x0011
 #define ENCTYPE_AES256_CTS_HMAC_SHA1_96	0x0012
