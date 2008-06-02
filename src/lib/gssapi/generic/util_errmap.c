@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by the Massachusetts Institute of Technology.
+ * Copyright 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -152,7 +152,7 @@ int gssint_mecherrmap_init(void)
 
 /* Currently the enumeration template doesn't handle freeing
    element storage when destroying the collection.  */
-static int free_one(size_t i, struct mecherror value, void *p)
+static int free_one(OM_uint32 i, struct mecherror value, void *p)
 {
     if (value.mech.length && value.mech.elements)
 	free(value.mech.elements);

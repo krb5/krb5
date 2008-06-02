@@ -40,12 +40,12 @@ static void
 CopyTicket(dest, src, numBytes, version, includeVersion)
 	char *dest;
 	KTEXT src;
-	unsigned long *numBytes;
+	unsigned KRB4_32 *numBytes;
 	char *version;
 	int includeVersion;
 {
-	unsigned long tkt_len;
-	unsigned long nbytes = 0;
+	unsigned KRB4_32 tkt_len;
+	unsigned KRB4_32 nbytes = 0;
 		
     /* first put version info into the buffer */
     if (includeVersion) {

@@ -285,7 +285,7 @@ rendezvous_request(
 	       return (FALSE);
 	}
 	set_cloexec_fd(sock);
-	if (getsockname(sock, &laddr, &llen) < 0)
+	if (getsockname(sock, (struct sockaddr *) &laddr, &llen) < 0)
 	     return (FALSE);
 	
 	/*
