@@ -83,7 +83,7 @@ static void usage()
      exit(1);
 }
 
-FILE *log;
+FILE *logfile;
 
 int verbose = 0;
 
@@ -183,8 +183,8 @@ static int server_establish_context(s, server_creds, context, client_name,
      }
 
      if (! (token_flags & TOKEN_NOOP)) {
-       if (log)
-	 fprintf(log, "Expected NOOP token, got %d token instead\n",
+       if (logfile)
+	 fprintf(logfile, "Expected NOOP token, got %d token instead\n",
 		 token_flags);
        return -1;
      }
@@ -196,8 +196,8 @@ static int server_establish_context(s, server_creds, context, client_name,
 	 if (recv_token(s, &token_flags, &recv_tok) < 0)
 	   return -1;
 
-	 if (verbose && log) {
-	   fprintf(log, "Received token (size=%d): \n", (int) recv_tok.length);
+	 if (verbose && logfile) {
+	   fprintf(logfile, "Received token (size=%d): \n", (int) recv_tok.length);
 	   print_token(&recv_tok);
 	 }
 
@@ -220,15 +220,15 @@ static int server_establish_context(s, server_creds, context, client_name,
 	 }
 
 	 if (send_tok.length != 0) {
-	   if (verbose && log) {
-	     fprintf(log,
+	   if (verbose && logfile) {
+	     fprintf(logfile,
 		     "Sending accept_sec_context token (size=%d):\n",
 		     (int) send_tok.length);
 	     print_token(&send_tok);
 	   }
 	   if (send_token(s, TOKEN_CONTEXT, &send_tok) < 0) {
-	     if (log)
-	       fprintf(log, "failure sending token\n");
+	     if (logfile)
+	       fprintf(logfile, "failure sending token\n");
 	     return -1;
 	   }
 
@@ -243,25 +243,25 @@ static int server_establish_context(s, server_creds, context, client_name,
 	      return -1;
 	 }
  
-	 if (verbose && log) {
+	 if (verbose && logfile) {
 	   if (maj_stat == GSS_S_CONTINUE_NEEDED)
-	     fprintf(log, "continue needed...\n");
+	     fprintf(logfile, "continue needed...\n");
 	   else
-	     fprintf(log, "\n");
-	   fflush(log);
+	     fprintf(logfile, "\n");
+	   fflush(logfile);
 	 }
        } while (maj_stat == GSS_S_CONTINUE_NEEDED);
 
        /* display the flags */
        display_ctx_flags(*ret_flags);
 
-       if (verbose && log) {
+       if (verbose && logfile) {
 	 maj_stat = gss_oid_to_str(&min_stat, doid, &oid_name);
 	 if (maj_stat != GSS_S_COMPLETE) {
 	   display_status("converting oid->string", maj_stat, min_stat);
 	   return -1;
 	 }
-	 fprintf(log, "Accepted connection using mechanism OID %.*s.\n",
+	 fprintf(logfile, "Accepted connection using mechanism OID %.*s.\n",
 		 (int) oid_name.length, (char *) oid_name.value);
 	 (void) gss_release_buffer(&min_stat, &oid_name);
        }
@@ -280,8 +280,8 @@ static int server_establish_context(s, server_creds, context, client_name,
      else {
        client_name->length = *ret_flags = 0;
 
-       if (log)
-	 fprintf(log, "Accepted unauthenticated connection.\n");
+       if (logfile)
+	 fprintf(logfile, "Accepted unauthenticated connection.\n");
      }
 
      return 0;
@@ -362,15 +362,15 @@ static int test_import_export_context(context)
 		return 1;
 	}
 	gettimeofday(&tm2, (struct timezone *)0);
-	if (verbose && log)
-		fprintf(log, "Exported context: %d bytes, %7.4f seconds\n",
+	if (verbose && logfile)
+		fprintf(logfile, "Exported context: %d bytes, %7.4f seconds\n",
 			(int) context_token.length, 
 			timeval_subtract(&tm2, &tm1));
 	copied_token.length = context_token.length;
 	copied_token.value = malloc(context_token.length);
 	if (copied_token.value == 0) {
-	  if (log)
-	    fprintf(log, "Couldn't allocate memory to copy context token.\n");
+	  if (logfile)
+	    fprintf(logfile, "Couldn't allocate memory to copy context token.\n");
 	  return 1;
 	}
 	memcpy(copied_token.value, context_token.value, copied_token.length);
@@ -381,8 +381,8 @@ static int test_import_export_context(context)
 	}
 	free(copied_token.value);
 	gettimeofday(&tm1, (struct timezone *)0);
-	if (verbose && log)
-		fprintf(log, "Importing context: %7.4f seconds\n",
+	if (verbose && logfile)
+		fprintf(logfile, "Importing context: %7.4f seconds\n",
 			timeval_subtract(&tm1, &tm2));
 	(void) gss_release_buffer(&min_stat, &context_token);
 	return 0;
@@ -452,8 +452,8 @@ static int sign_server(s, server_creds, export)
             return(-1);
 
         if (token_flags & TOKEN_NOOP) {
-            if (log)
-                fprintf(log, "NOOP token\n");
+            if (logfile)
+                fprintf(logfile, "NOOP token\n");
             if(xmit_buf.value) {
                 free(xmit_buf.value);
                 xmit_buf.value = 0;
@@ -461,15 +461,15 @@ static int sign_server(s, server_creds, export)
             break;
         }
 
-        if (verbose && log) {
-            fprintf(log, "Message token (flags=%d):\n", token_flags);
+        if (verbose && logfile) {
+            fprintf(logfile, "Message token (flags=%d):\n", token_flags);
             print_token(&xmit_buf);
         }
 
         if ((context == GSS_C_NO_CONTEXT) &&
              (    token_flags & (TOKEN_WRAPPED|TOKEN_ENCRYPTED|TOKEN_SEND_MIC))) {
-            if (log)
-                fprintf(log,
+            if (logfile)
+                fprintf(logfile,
                          "Unauthenticated client requested authenticated services!\n");
             if(xmit_buf.value) {
                 free (xmit_buf.value);
@@ -501,15 +501,15 @@ static int sign_server(s, server_creds, export)
             msg_buf = xmit_buf;
         }
 
-        if (log) {
-            fprintf(log, "Received message: ");
+        if (logfile) {
+            fprintf(logfile, "Received message: ");
             cp = msg_buf.value;
             if ((isprint((int) cp[0]) || isspace((int) cp[0])) &&
                  (isprint((int) cp[1]) || isspace((int) cp[1]))) {
-                fprintf(log, "\"%.*s\"\n", (int) msg_buf.length, 
+                fprintf(logfile, "\"%.*s\"\n", (int) msg_buf.length, 
                          (char *) msg_buf.value);
                  } else {
-                     fprintf(log, "\n");
+                     fprintf(logfile, "\n");
                      print_token(&msg_buf);
                  }
         }
@@ -556,8 +556,8 @@ static int sign_server(s, server_creds, export)
         }
     }
 
-    if (log)
-        fflush(log);
+    if (logfile)
+        fflush(logfile);
 
     return(0);
 }
@@ -700,7 +700,7 @@ main(argc, argv)
      int export = 0;
 
      signal(SIGPIPE, SIG_IGN);
-     log = stdout;
+     logfile = stdout;
      display_file = stdout;
      argc--; argv++;
      while (argc) {
@@ -732,12 +732,12 @@ main(argc, argv)
                  more efficient because it doesn't actually write data
                  to /dev/null. */
 	      if (! strcmp(*argv, "/dev/null")) {
-		log = display_file = NULL;
+		logfile = display_file = NULL;
 	      }
 	      else {
-		log = fopen(*argv, "a");
-		display_file = log;
-		if (!log) {
+		logfile = fopen(*argv, "a");
+		display_file = logfile;
+		if (!logfile) {
 		  perror(*argv);
 		  exit(1);
 		}
