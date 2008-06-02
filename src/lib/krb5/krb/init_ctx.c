@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/init_ctx.c
  *
- * Copyright 1994,1999,2000, 2002, 2003, 2007  by the Massachusetts Institute of Technology.
+ * Copyright 1994,1999,2000, 2002, 2003, 2007, 2008  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -529,7 +529,7 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->tgs_ktype_count = 0;
     nctx->default_realm = NULL;
     nctx->profile = NULL;
-    nctx->db_context = NULL;
+    nctx->dal_handle = NULL;
     nctx->ser_ctx_count = 0;
     nctx->ser_ctx = NULL;
     nctx->prompt_types = NULL;

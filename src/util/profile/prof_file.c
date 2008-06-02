@@ -157,6 +157,15 @@ static int r_access(const_profile_filespec_t filespec)
 #endif
 }
 
+int profile_file_is_writable(prf_file_t profile)
+{
+    if (profile && profile->data) {
+        return rw_access(profile->data->filespec);
+    } else {
+        return 0;
+    }
+}
+
 prf_data_t
 profile_make_prf_data(const char *filename)
 {
@@ -371,9 +380,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 	}
 	set_cloexec_file(f);
 	data->upd_serial++;
-	data->flags &= PROFILE_FILE_SHARED;
-	if (rw_access(data->filespec))
-		data->flags |= PROFILE_FILE_RW;
+	data->flags &= PROFILE_FILE_SHARED;  /* FIXME same as '=' operator */
 	retval = profile_parse_file(f, &data->root);
 	fclose(f);
 	if (retval) {
@@ -472,8 +479,6 @@ static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
 	}
 
 	data->flags = 0;
-	if (rw_access(outfile))
-		data->flags |= PROFILE_FILE_RW;
 	retval = 0;
 
 errout:

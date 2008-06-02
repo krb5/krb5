@@ -1125,6 +1125,8 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 #include "com_err.h"
 #include "k5-plugin.h"
 
+struct _kdb5_dal_handle;	/* private, in kdb5.h */
+typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _krb5_context {
 	krb5_magic	magic;
 	krb5_enctype	*in_tkt_ktypes;
@@ -1134,7 +1136,7 @@ struct _krb5_context {
 	struct _krb5_os_context	os_context;
 	char		*default_realm;
 	profile_t	profile;
-	void		*db_context;
+	kdb5_dal_handle	*dal_handle;
 	int		ser_ctx_count;
 	void		*ser_ctx;
 	/* allowable clock skew */

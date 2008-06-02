@@ -256,12 +256,13 @@ log_unauth(
     slen = server->length;
     trunc_name(&slen, &sdots);
 
+    /* okay to cast lengths to int because trunc_name limits max value */
     return krb5_klog_syslog(LOG_NOTICE,
 			    "Unauthorized request: %s, %.*s%s, "
 			    "client=%.*s%s, service=%.*s%s, addr=%s",
-			    op, tlen, target, tdots,
-			    clen, client->value, cdots,
-			    slen, server->value, sdots,
+			    op, (int)tlen, target, tdots,
+			    (int)clen, (char *)client->value, cdots,
+			    (int)slen, (char *)server->value, sdots,
 			    inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
 }
 
@@ -269,7 +270,7 @@ static int
 log_done(
     char *op,
     char *target,
-    char *errmsg,
+    const char *errmsg,
     gss_buffer_t client,
     gss_buffer_t server,
     struct svc_req *rqstp)
@@ -284,12 +285,13 @@ log_done(
     slen = server->length;
     trunc_name(&slen, &sdots);
 
+    /* okay to cast lengths to int because trunc_name limits max value */
     return krb5_klog_syslog(LOG_NOTICE,
 			    "Request: %s, %.*s%s, %s, "
 			    "client=%.*s%s, service=%.*s%s, addr=%s",
-			    op, tlen, target, tdots, errmsg,
-			    clen, client->value, cdots,
-			    slen, server->value, sdots,
+			    op, (int)tlen, target, tdots, errmsg,
+			    (int)clen, (char *)client->value, cdots,
+			    (int)slen, (char *)server->value, sdots,
 			    inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
 }
 
@@ -302,7 +304,7 @@ create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
     OM_uint32			minor_stat;
     kadm5_server_handle_t	handle;
     restriction_t		*rp;
-    char			*errmsg;
+    const char			*errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -365,7 +367,7 @@ create_principal3_2_svc(cprinc3_arg *arg, struct svc_req *rqstp)
     OM_uint32			minor_stat;
     kadm5_server_handle_t	handle;
     restriction_t		*rp;
-    char                        *errmsg;
+    const char                  *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -429,7 +431,7 @@ delete_principal_2_svc(dprinc_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -489,7 +491,7 @@ modify_principal_2_svc(mprinc_arg *arg, struct svc_req *rqstp)
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
     restriction_t		    *rp;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -550,7 +552,7 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
     OM_uint32			minor_stat;
     kadm5_server_handle_t	handle;
     restriction_t		*rp;
-    char                        *errmsg;
+    const char                  *errmsg;
     size_t			tlen1, tlen2, clen, slen;
     char			*tdots1, *tdots2, *cdots, *sdots;
 
@@ -598,14 +600,15 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
     } else
 	 ret.code = KADM5_AUTH_INSUFFICIENT;
     if (ret.code != KADM5_OK) {
+	 /* okay to cast lengths to int because trunc_name limits max value */
 	 krb5_klog_syslog(LOG_NOTICE,
 			  "Unauthorized request: kadm5_rename_principal, "
 			  "%.*s%s to %.*s%s, "
 			  "client=%.*s%s, service=%.*s%s, addr=%s",
-			  tlen1, prime_arg1, tdots1,
-			  tlen2, prime_arg2, tdots2,
-			  clen, client_name.value, cdots,
-			  slen, service_name.value, sdots,
+			  (int)tlen1, prime_arg1, tdots1,
+			  (int)tlen2, prime_arg2, tdots2,
+			  (int)clen, (char *)client_name.value, cdots,
+			  (int)slen, (char *)service_name.value, sdots,
 			  inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
     } else {
 	 ret.code = kadm5_rename_principal((void *)handle, arg->src,
@@ -615,14 +618,15 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
 	 else
 	     errmsg = krb5_get_error_message(handle ? handle->context : NULL, ret.code);
 
+	 /* okay to cast lengths to int because trunc_name limits max value */
 	 krb5_klog_syslog(LOG_NOTICE,
 			  "Request: kadm5_rename_principal, "
 			  "%.*s%s to %.*s%s, %s, "
 			  "client=%.*s%s, service=%.*s%s, addr=%s",
-			  tlen1, prime_arg1, tdots1,
-			  tlen2, prime_arg2, tdots2, errmsg,
-			  clen, client_name.value, cdots,
-			  slen, service_name.value, sdots,
+			  (int)tlen1, prime_arg1, tdots1,
+			  (int)tlen2, prime_arg2, tdots2, errmsg,
+			  (int)clen, (char *)client_name.value, cdots,
+			  (int)slen, (char *)service_name.value, sdots,
 			  inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
     }
     free_server_handle(handle);
@@ -644,7 +648,7 @@ get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                     *errmsg;
 
     xdr_free(xdr_gprinc_ret, &ret);
 
@@ -719,7 +723,7 @@ get_princs_2_svc(gprincs_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                     *errmsg;
 
     xdr_free(xdr_gprincs_ret, &ret);
 
@@ -778,7 +782,7 @@ chpass_principal_2_svc(chpass_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                     *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -842,7 +846,7 @@ chpass_principal3_2_svc(chpass3_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -912,7 +916,7 @@ setv4key_principal_2_svc(setv4key_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -973,7 +977,7 @@ setkey_principal_2_svc(setkey_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -1034,7 +1038,7 @@ setkey_principal3_2_svc(setkey3_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -1100,7 +1104,7 @@ chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
 	    			service_name;
     OM_uint32			minor_stat;
     kadm5_server_handle_t	handle;
-    char                        *errmsg;
+    const char                  *errmsg;
 
     xdr_free(xdr_chrand_ret, &ret);
 
@@ -1180,7 +1184,7 @@ chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
 	    			service_name;
     OM_uint32			minor_stat;
     kadm5_server_handle_t	handle;
-    char                        *errmsg;
+    const char                  *errmsg;
 
     xdr_free(xdr_chrand_ret, &ret);
 
@@ -1263,7 +1267,7 @@ create_policy_2_svc(cpol_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;    
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -1318,7 +1322,7 @@ delete_policy_2_svc(dpol_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;    
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -1371,7 +1375,7 @@ modify_policy_2_svc(mpol_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;    
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                     *errmsg;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -1428,7 +1432,7 @@ get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
     kadm5_policy_ent_t	e;
     kadm5_principal_ent_rec	caller_ent;
     kadm5_server_handle_t	handle;
-    char                        *errmsg;
+    const char                 *errmsg;
 
     xdr_free(xdr_gpol_ret,  &ret);
 
@@ -1513,7 +1517,7 @@ get_pols_2_svc(gpols_arg *arg, struct svc_req *rqstp)
 				    service_name;
     OM_uint32			    minor_stat;
     kadm5_server_handle_t	    handle;
-    char                            *errmsg;
+    const char                      *errmsg;
 
     xdr_free(xdr_gpols_ret, &ret);
 
@@ -1566,7 +1570,7 @@ getprivs_ret * get_privs_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      gss_buffer_desc		    client_name, service_name;
      OM_uint32			    minor_stat;
      kadm5_server_handle_t	    handle;
-     char                           *errmsg;
+     const char                     *errmsg;
 
      xdr_free(xdr_getprivs_ret, &ret);
 
@@ -1608,7 +1612,7 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 	 			service_name;
      kadm5_server_handle_t	handle;
      OM_uint32			minor_stat;
-     char                       *errmsg = 0;
+     const char                *errmsg = NULL;
      size_t clen, slen;
      char *cdots, *sdots;
 
@@ -1636,13 +1640,14 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      trunc_name(&clen, &cdots);
      slen = service_name.length;
      trunc_name(&slen, &sdots);
+     /* okay to cast lengths to int because trunc_name limits max value */
      krb5_klog_syslog(LOG_NOTICE, "Request: %s, %.*s%s, %s, "
 		      "client=%.*s%s, service=%.*s%s, addr=%s, flavor=%d",
 		      (ret.api_version == KADM5_API_VERSION_1 ?
 		       "kadm5_init (V1)" : "kadm5_init"),
-		      clen, client_name.value, cdots, errmsg,
-		      clen, client_name.value, cdots,
-		      slen, service_name.value, sdots,
+		      (int)clen, (char *)client_name.value, cdots, errmsg,
+		      (int)clen, (char *)client_name.value, cdots,
+		      (int)slen, (char *)service_name.value, sdots,
 		      inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
 		      rqstp->rq_cred.oa_flavor);
      gss_release_buffer(&minor_stat, &client_name);

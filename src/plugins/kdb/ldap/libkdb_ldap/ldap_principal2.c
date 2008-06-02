@@ -102,7 +102,7 @@ krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
     if (searchfor == NULL)
 	return EINVAL;
 
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     CHECK_LDAP_HANDLE(ldap_context);

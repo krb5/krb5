@@ -47,7 +47,7 @@ krb5_ldap_get_mkey (context, key)
     /* Clear the global error string */
     krb5_clear_error_message(context);
 
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     if (ldap_context == NULL || ldap_context->lrparams == NULL)
@@ -75,7 +75,7 @@ krb5_ldap_set_mkey (context, pwd, key)
     /* Clear the global error string */
     krb5_clear_error_message(context);
 
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     if (ldap_context == NULL || ldap_context->lrparams == NULL)

@@ -20,6 +20,8 @@ static char *rcsid = "$Header$";
 #include	<stdlib.h>
 #ifdef USE_PASSWORD_SERVER
 #include	<sys/wait.h>
+#include	<signal.h>
+
 #endif
 
 extern	krb5_principal	    master_princ;

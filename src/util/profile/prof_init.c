@@ -160,7 +160,7 @@ profile_is_writable(profile_t profile, int *writable)
         return EINVAL;
     
     if (profile->first_file)
-        *writable = (profile->first_file->data->flags & PROFILE_FILE_RW);
+        *writable = profile_file_is_writable(profile->first_file);
     
     return 0;
 }
