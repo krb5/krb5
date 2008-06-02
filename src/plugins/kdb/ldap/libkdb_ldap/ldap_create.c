@@ -250,7 +250,7 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	t_ptr++;
     }
 
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     dal_handle->db_context = (kdb5_dal_handle *) ldap_context;
 
     status = krb5_ldap_read_server_params(context, conf_section, KRB5_KDB_SRV_TYPE_ADMIN);

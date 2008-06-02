@@ -56,7 +56,7 @@ static krb5_error_code init_ldap_realm (int argc, char *argv[]) {
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
                                                                                                                              
-    dal_handle = (kdb5_dal_handle *) util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     if (!ldap_context) {
         retval = EINVAL;

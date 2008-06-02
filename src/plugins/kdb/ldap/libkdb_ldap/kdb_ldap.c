@@ -441,7 +441,7 @@ krb5_error_code krb5_ldap_open(krb5_context context,
 	t_ptr++;
     }
 
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     dal_handle->db_context = ldap_context;
     status = krb5_ldap_read_server_params(context, conf_section, mode & 0x0300);
     if (status) {

@@ -1,7 +1,7 @@
 /*
  * kadmin/ldap_util/kdb5_ldap_realm.c
  *
- * Copyright 1990,1991,2001, 2002 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001, 2002, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -521,7 +521,7 @@ void kdb5_ldap_create(argc, argv)
 	goto err_nomsg;
     }
 
-    dal_handle = (kdb5_dal_handle *) util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     if (!ldap_context) {
 	retval = EINVAL;
@@ -923,7 +923,7 @@ void kdb5_ldap_modify(argc, argv)
     int subtree_changed = 0;
 #endif
 
-    dal_handle = (kdb5_dal_handle *) util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     if (!(ldap_context)) {
 	retval = EINVAL;
@@ -1800,7 +1800,7 @@ void kdb5_ldap_view(argc, argv)
     krb5_ldap_context *ldap_context=NULL;
     int mask = 0;
 
-    dal_handle = (kdb5_dal_handle *) util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     if (!(ldap_context)) {
 	retval = EINVAL;
@@ -1998,7 +1998,7 @@ void kdb5_ldap_list(argc, argv)
     kdb5_dal_handle *dal_handle=NULL;
     krb5_ldap_context *ldap_context=NULL;
 
-    dal_handle = (kdb5_dal_handle *)util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     if (!(ldap_context)) {
 	retval = EINVAL;
@@ -2239,7 +2239,7 @@ kdb_ldap_create_principal (context, princ, op, pblock)
 	retval = EINVAL;
 	goto cleanup;
     }
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     if (!(ldap_context)) {
 	retval = EINVAL;
@@ -2431,7 +2431,7 @@ kdb5_ldap_destroy(argc, argv)
 	printf("OK, deleting database of '%s'...\n", global_params.realm);
     }
 
-    dal_handle = (kdb5_dal_handle *)util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     if (!(ldap_context)) {
 	com_err(argv[0], EINVAL, "while initializing database");

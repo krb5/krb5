@@ -186,12 +186,13 @@ typedef struct _db_library {
     struct _db_library *next, *prev;
 } *db_library;
 
-typedef struct _kdb5_dal_handle
+struct _kdb5_dal_handle
 {
     /* Helps us to change db_library without affecting modules to some
        extent.  */
     void *db_context;
     db_library lib_handle;
-} kdb5_dal_handle;
+};
+/* typedef kdb5_dal_handle is in k5-int.h now */
 
 #endif  /* end of _KRB5_KDB5_H_ */

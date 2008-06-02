@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007,2008 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -1125,6 +1125,8 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 #include "com_err.h"
 #include "k5-plugin.h"
 
+struct _kdb5_dal_handle;	/* private, in kdb5.h */
+typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _krb5_context {
 	krb5_magic	magic;
 	krb5_enctype	*in_tkt_ktypes;
@@ -1134,7 +1136,7 @@ struct _krb5_context {
 	struct _krb5_os_context	os_context;
 	char		*default_realm;
 	profile_t	profile;
-	void		*db_context;
+	kdb5_dal_handle	*dal_handle;
 	int		ser_ctx_count;
 	void		*ser_ctx;
 	/* allowable clock skew */

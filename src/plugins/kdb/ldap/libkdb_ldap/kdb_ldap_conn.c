@@ -338,11 +338,11 @@ krb5_ldap_close(krb5_context context)
     krb5_ldap_context *ldap_context=NULL;
 
     if (context == NULL ||
-	context->db_context == NULL ||
-	((kdb5_dal_handle *)context->db_context)->db_context == NULL)
+	context->dal_handle == NULL ||
+	context->dal_handle->db_context == NULL)
 	return 0;
 
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     dal_handle->db_context = NULL;
 

@@ -1,7 +1,7 @@
 /*
  * kadmin/ldap_util/kdb5_ldap_util.c
  *
- * (C) Copyright 1990,1991, 1996 by the Massachusetts Institute of Technology.
+ * (C) Copyright 1990,1991, 1996, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -579,7 +579,7 @@ int main(argc, argv)
 	goto cleanup;
     }
     dal_handle->db_context = ldap_context;
-    util_context->db_context = (void *) dal_handle;
+    util_context->dal_handle = dal_handle;
 
     db_retval = krb5_ldap_read_server_params(util_context, conf_section, KRB5_KDB_SRV_TYPE_OTHER);
     if (db_retval) {

@@ -77,11 +77,11 @@ extern struct timeval timelimit;
 #define IGNORE_STATUS              0
 #define CHECK_STATUS               1
 
-#define SETUP_CONTEXT() if (context == NULL || context->db_context == NULL \
-            || ((kdb5_dal_handle *)context->db_context)->db_context == NULL) { \
+#define SETUP_CONTEXT() if (context == NULL || context->dal_handle == NULL \
+            || context->dal_handle->db_context == NULL) { \
         return EINVAL; \
     } \
-    dal_handle = (kdb5_dal_handle *)context->db_context; \
+    dal_handle = context->dal_handle; \
     ldap_context = (krb5_ldap_context *) dal_handle->db_context; \
     if (ldap_context == NULL || ldap_context->server_info_list == NULL) \
         return KRB5_KDB_DBNOTINITED;

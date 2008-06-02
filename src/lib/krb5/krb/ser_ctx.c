@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/ser_ctx.c
  *
- * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -138,10 +138,10 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 				&required);
 
 	/* Calculate size required by db_context, if appropriate */
-	if (!kret && context->db_context)
+	if (!kret && context->dal_handle)
 	    kret = krb5_size_opaque(kcontext,
 				    KV5M_DB_CONTEXT,
-				    (krb5_pointer) context->db_context,
+				    (krb5_pointer) context->dal_handle,
 				    &required);
 
 	/* Finally, calculate size required by profile, if appropriate */
@@ -288,9 +288,9 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
 	return (kret);
 
     /* Now handle database context, if appropriate */
-    if (context->db_context) {
+    if (context->dal_handle) {
 	kret = krb5_externalize_opaque(kcontext, KV5M_DB_CONTEXT,
-				       (krb5_pointer) context->db_context,
+				       (krb5_pointer) context->dal_handle,
 				       &bp, &remain);
 	if (kret)
 	    return (kret);
@@ -465,7 +465,7 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 
     /* Attempt to read in the db_context */
     kret = krb5_internalize_opaque(kcontext, KV5M_DB_CONTEXT,
-				   (krb5_pointer *) &context->db_context,
+				   (krb5_pointer *) &context->dal_handle,
 				   &bp, &remain);
     if (kret && (kret != EINVAL) && (kret != ENOENT))
 	goto cleanup;

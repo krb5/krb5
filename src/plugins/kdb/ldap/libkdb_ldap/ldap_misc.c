@@ -152,7 +152,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_info       ***server_info=NULL;
 
-    dal_handle = (kdb5_dal_handle *) context->db_context;
+    dal_handle = context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     /* copy the conf_section into ldap_context for later use */
