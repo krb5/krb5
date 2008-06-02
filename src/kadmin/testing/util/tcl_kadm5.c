@@ -142,7 +142,8 @@ static int put_server_handle(Tcl_Interp *interp, void *handle, char **name)
     return TCL_OK;
 }
 
-static int get_server_handle(Tcl_Interp *interp, char *name, void **handle) 
+static int get_server_handle(Tcl_Interp *interp, const char *name,
+			     void **handle) 
 {
     Tcl_HashEntry *entry;
 
@@ -163,7 +164,7 @@ static int get_server_handle(Tcl_Interp *interp, char *name, void **handle)
     return TCL_OK;
 }
 
-static int remove_server_handle(Tcl_Interp *interp, char *name) 
+static int remove_server_handle(Tcl_Interp *interp, const char *name)
 {
     Tcl_HashEntry *entry;
 
@@ -179,7 +180,7 @@ static int remove_server_handle(Tcl_Interp *interp, char *name)
 
 #define GET_HANDLE(num_args, ignored) \
     void *server_handle; \
-    char *whoami = argv[0]; \
+    const char *whoami = argv[0]; \
     argv++, argc--; \
     if (argc != num_args + 1) { \
 	Tcl_AppendResult(interp, whoami, ": ", arg_error, 0); \
@@ -245,7 +246,7 @@ static Tcl_DString *unparse_str(char *in_str)
 
 
 	  
-static int parse_str(Tcl_Interp *interp, char *in_str, char **out_str)
+static int parse_str(Tcl_Interp *interp, const char *in_str, char **out_str)
 {
      if (! in_str) {
 	  *out_str = 0;
@@ -254,7 +255,7 @@ static int parse_str(Tcl_Interp *interp, char *in_str, char **out_str)
 	  *out_str = 0;
      }
      else {
-	  *out_str = in_str;
+	  *out_str = (char *) in_str;
      }
      return TCL_OK;
 }
@@ -508,7 +509,7 @@ static Tcl_DString *unparse_tl_data(krb5_tl_data *tl_data, int n_tl_data)
 	  sprintf(buf, "%d", tl_data->tl_data_length);
 	  Tcl_DStringAppendElement(str, buf);
 	  Tcl_DStringAppend(str, " ", 1);
-	  Tcl_DStringAppend(str, tl_data->tl_data_contents,
+	  Tcl_DStringAppend(str, (char *) tl_data->tl_data_contents,
 			    tl_data->tl_data_length);
 	  Tcl_DStringEndSublist(str);
      }
@@ -541,11 +542,11 @@ static Tcl_DString *unparse_flags(struct flagval *array, int size,
 
 
 static int parse_flags(Tcl_Interp *interp, Tcl_HashTable *table,
-		       struct flagval *array, int size, char *str,
+		       struct flagval *array, int size, const char *str,
 		       krb5_flags *flags)
 {
      int tmp, argc, i, retcode = TCL_OK;
-     char **argv;
+     const char **argv;
      Tcl_HashEntry *entry;
 
      if (Tcl_GetInt(interp, str, &tmp) == TCL_OK) {
@@ -573,7 +574,7 @@ static int parse_flags(Tcl_Interp *interp, Tcl_HashTable *table,
 	  *flags |= *(krb5_flags *) Tcl_GetHashValue(entry);
      }
   
-     Tcl_Free(argv);
+     Tcl_Free((char *) argv);
      return(retcode);
 }
 
@@ -590,7 +591,8 @@ static Tcl_DString *unparse_krb5_flags(krb5_flags flags)
 			  sizeof(struct flagval), flags);
 }
 
-static int parse_krb5_flags(Tcl_Interp *interp, char *str, krb5_flags *flags)
+static int parse_krb5_flags(Tcl_Interp *interp, const char *str,
+			    krb5_flags *flags)
 {
      krb5_flags tmp;
      static Tcl_HashTable *table = 0;
@@ -614,7 +616,8 @@ static Tcl_DString *unparse_aux_attributes(krb5_int32 flags)
 }
 
 
-static int parse_aux_attributes(Tcl_Interp *interp, char *str, long *flags)
+static int parse_aux_attributes(Tcl_Interp *interp, const char *str,
+				long *flags)
 {
      krb5_flags tmp;
      static Tcl_HashTable *table = 0;
@@ -631,7 +634,8 @@ static int parse_aux_attributes(Tcl_Interp *interp, char *str, long *flags)
      return TCL_OK;
 }
 
-static int parse_principal_mask(Tcl_Interp *interp, char *str, krb5_int32 *flags)
+static int parse_principal_mask(Tcl_Interp *interp, const char *str,
+				krb5_int32 *flags)
 {
      krb5_flags tmp;
      static Tcl_HashTable *table = 0;
@@ -648,7 +652,8 @@ static int parse_principal_mask(Tcl_Interp *interp, char *str, krb5_int32 *flags
      return TCL_OK;
 }
 
-static int parse_policy_mask(Tcl_Interp *interp, char *str, krb5_int32 *flags)
+static int parse_policy_mask(Tcl_Interp *interp, const char *str,
+			     krb5_int32 *flags)
 {
      krb5_flags tmp;
      static Tcl_HashTable *table = 0;
@@ -787,11 +792,11 @@ static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ,
      return str;
 }
 
-static int parse_keysalts(Tcl_Interp *interp, char *list,
+static int parse_keysalts(Tcl_Interp *interp, const char *list,
 			  krb5_key_salt_tuple **keysalts,
 			  int num_keysalts)
 {
-     char **argv, **argv1 = NULL;
+     const char **argv, **argv1 = NULL;
      int i, tmp, argc, argc1, retcode;
 
      *keysalts = NULL;
@@ -835,23 +840,23 @@ static int parse_keysalts(Tcl_Interp *interp, char *list,
 	  }
 	  (*keysalts)[i].ks_salttype = tmp;
 
-	  Tcl_Free(argv1);
+	  Tcl_Free((char *) argv1);
 	  argv1 = NULL;
      }
 
 finished:
      if (argv1) {
-	  Tcl_Free(argv1);
+	 Tcl_Free((char *) argv1);
      }
-     Tcl_Free(argv);
+     Tcl_Free((char *) argv);
      return retcode;
 }
 
-static int parse_key_data(Tcl_Interp *interp, char *list,
+static int parse_key_data(Tcl_Interp *interp, const char *list,
 			  krb5_key_data **key_data,
 			  int n_key_data)
 {
-     char **argv;
+     const char **argv;
      int argc, retcode;
 
      *key_data = NULL;
@@ -882,16 +887,16 @@ static int parse_key_data(Tcl_Interp *interp, char *list,
      }
 
 finished:
-     Tcl_Free(argv);
+     Tcl_Free((char *) argv);
      return retcode;
 }
 
-static int parse_tl_data(Tcl_Interp *interp, char *list,
+static int parse_tl_data(Tcl_Interp *interp, const char *list,
 			 krb5_tl_data **tlp,
 			 int n_tl_data)
 {
      krb5_tl_data *tl, *tl2;
-     char **argv, **argv1 = NULL;
+     const char **argv, **argv1 = NULL;
      int i, tmp, argc, argc1, retcode;
 
      *tlp = NULL;
@@ -959,7 +964,7 @@ static int parse_tl_data(Tcl_Interp *interp, char *list,
 	  tl->tl_data_contents = (krb5_octet *) malloc(tmp+1);
 	  strcpy((char *) tl->tl_data_contents, argv1[2]);
 
-	  Tcl_Free(argv1);
+	  Tcl_Free((char *) argv1);
 	  argv1 = NULL;
 	  tl = tl->tl_data_next;
      }
@@ -972,9 +977,9 @@ static int parse_tl_data(Tcl_Interp *interp, char *list,
 
 finished:
      if (argv1) {
-	  Tcl_Free(argv1);
+	 Tcl_Free((char *) argv1);
      }
-     Tcl_Free(argv);
+     Tcl_Free((char *) argv);
      return retcode;
 }
 
@@ -982,7 +987,7 @@ static int parse_config_params(Tcl_Interp *interp, char *list,
 			       kadm5_config_params *params)
 {
      static Tcl_HashTable *table = 0;
-     char **argv = NULL;
+     const char **argv = NULL;
      int tmp, argc, retcode;
 
      memset(params, 0, sizeof(kadm5_config_params));
@@ -1134,7 +1139,7 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
      krb5_error_code krb5_ret;
      int tcl_ret;
      int argc;
-     char **argv;
+     const char **argv;
      int tmp;
      int retcode = TCL_OK;
 
@@ -1326,7 +1331,7 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
      }
 
 finished:
-     Tcl_Free(argv);
+     Tcl_Free((char *) argv);
      *out_princ = princ;
      return retcode;
 }
@@ -1386,7 +1391,7 @@ static int parse_policy_ent(Tcl_Interp *interp, char *list,
      kadm5_policy_ent_t policy = 0;
      int tcl_ret;
      int argc;
-     char **argv;
+     const char **argv;
      int tmp;
      int retcode = TCL_OK;
 
@@ -1475,7 +1480,7 @@ static int parse_policy_ent(Tcl_Interp *interp, char *list,
      policy->policy_refcnt = tmp;
 
 finished:
-     Tcl_Free(argv);
+     Tcl_Free((char *) argv);
      *out_policy = policy;
      return retcode;
 }
@@ -1558,16 +1563,16 @@ static Tcl_DString *unparse_keyblocks(krb5_keyblock *keyblocks, int num_keys)
 enum init_type { INIT_NONE, INIT_PASS, INIT_CREDS };
      
 static int _tcl_kadm5_init_any(enum init_type init_type, ClientData clientData,
-			Tcl_Interp *interp, int argc, char *argv[])
+			Tcl_Interp *interp, int argc, const char *argv[])
 {
      kadm5_ret_t ret;
      char *client_name, *pass, *service_name;
      int tcl_ret;
      krb5_ui_4 struct_version, api_version;
-     char *handle_var;
+     const char *handle_var;
      void *server_handle;
      char *handle_name, *params_str;
-     char *whoami = argv[0];
+     const char *whoami = argv[0];
      kadm5_config_params params;
 
      argv++, argc--;
@@ -1643,19 +1648,19 @@ static int _tcl_kadm5_init_any(enum init_type init_type, ClientData clientData,
 }
 
 static int tcl_kadm5_init(ClientData clientData, Tcl_Interp *interp,
-			  int argc, char *argv[])
+			  int argc, const char *argv[])
 {
      return _tcl_kadm5_init_any(INIT_PASS, clientData, interp, argc, argv);
 }
 
 static int tcl_kadm5_init_with_creds(ClientData clientData, Tcl_Interp *interp,
-				     int argc, char *argv[])
+				     int argc, const char *argv[])
 {
      return _tcl_kadm5_init_any(INIT_CREDS, clientData, interp, argc, argv);
 }
 
 static int tcl_kadm5_destroy(ClientData clientData, Tcl_Interp *interp,
-			     int argc, char *argv[])
+			     int argc, const char *argv[])
 {
      kadm5_ret_t ret;
      int tcl_ret;
@@ -1679,7 +1684,7 @@ static int tcl_kadm5_destroy(ClientData clientData, Tcl_Interp *interp,
 
 static int tcl_kadm5_create_principal(ClientData clientData, 
 				      Tcl_Interp *interp,
-				      int argc, char *argv[])
+				      int argc, const char *argv[])
 {
      int tcl_ret;
      kadm5_ret_t ret;
@@ -1749,7 +1754,7 @@ finished:
 
 static int tcl_kadm5_delete_principal(ClientData clientData, 
 				      Tcl_Interp *interp,
-				      int argc, char *argv[])
+				      int argc, const char *argv[])
 {
      krb5_principal princ;
      krb5_error_code krb5_ret;
@@ -1787,7 +1792,7 @@ static int tcl_kadm5_delete_principal(ClientData clientData,
 
 static int tcl_kadm5_modify_principal(ClientData clientData, 
 				      Tcl_Interp *interp,
-				      int argc, char *argv[])
+				      int argc, const char *argv[])
 {
      char *princ_string;
      kadm5_principal_ent_t princ = 0;
@@ -1834,7 +1839,7 @@ finished:
 
 static int tcl_kadm5_rename_principal(ClientData clientData, 
 				      Tcl_Interp *interp,
-				      int argc, char *argv[])
+				      int argc, const char *argv[])
 {
      krb5_principal source, target;
      krb5_error_code krb5_ret;
@@ -1875,7 +1880,7 @@ static int tcl_kadm5_rename_principal(ClientData clientData,
 	  
 static int tcl_kadm5_chpass_principal(ClientData clientData, 
 				      Tcl_Interp *interp,
-				      int argc, char *argv[])
+				      int argc, const char *argv[])
 {
      krb5_principal princ;
      char *pw;
@@ -1931,7 +1936,7 @@ finished:
 
 static int tcl_kadm5_chpass_principal_util(ClientData clientData,
 					   Tcl_Interp *interp,
-					   int argc, char *argv[])
+					   int argc, const char *argv[])
 {
      krb5_principal princ;
      char *new_pw;
@@ -2016,7 +2021,7 @@ finished:
 
 static int tcl_kadm5_randkey_principal(ClientData clientData, 
 				       Tcl_Interp *interp,
-				       int argc, char *argv[])
+				       int argc, const char *argv[])
 {
      krb5_principal princ;
      krb5_keyblock *keyblocks;
@@ -2089,7 +2094,7 @@ finished:
 
 
 static int tcl_kadm5_get_principal(ClientData clientData, Tcl_Interp *interp,
-				   int argc, char *argv[])
+				   int argc, const const char *argv[])
 {
      krb5_principal princ;
      kadm5_principal_ent_rec ent;
@@ -2163,7 +2168,7 @@ finished:
 }
      
 static int tcl_kadm5_create_policy(ClientData clientData, Tcl_Interp *interp,
-				   int argc, char *argv[])
+				   int argc, const char *argv[])
 {
      int tcl_ret;
      kadm5_ret_t ret;
@@ -2211,7 +2216,7 @@ finished:
 
 
 static int tcl_kadm5_delete_policy(ClientData clientData, Tcl_Interp *interp,
-				   int argc, char *argv[])
+				   int argc, const char *argv[])
 {
      kadm5_ret_t ret;
      char *policy;
@@ -2238,7 +2243,7 @@ static int tcl_kadm5_delete_policy(ClientData clientData, Tcl_Interp *interp,
 
 
 static int tcl_kadm5_modify_policy(ClientData clientData, Tcl_Interp *interp,
-				   int argc, char *argv[])
+				   int argc, const char *argv[])
 {
      char *policy_string;
      kadm5_policy_ent_t policy = 0;
@@ -2284,7 +2289,7 @@ finished:
 
 
 static int tcl_kadm5_get_policy(ClientData clientData, Tcl_Interp *interp,
-				int argc, char *argv[])
+				int argc, const char *argv[])
 {
      kadm5_policy_ent_rec ent;
      Tcl_DString *ent_dstring = 0;
@@ -2343,7 +2348,7 @@ finished:
      
 static int tcl_kadm5_free_principal_ent(ClientData clientData,
 					Tcl_Interp *interp,
-					int argc, char *argv[])
+					int argc, const char *argv[])
 {
      char *ent_name;
      kadm5_principal_ent_t ent;
@@ -2399,7 +2404,7 @@ static int tcl_kadm5_free_principal_ent(ClientData clientData,
 		    
 static int tcl_kadm5_free_policy_ent(ClientData clientData,
 				     Tcl_Interp *interp,
-				     int argc, char *argv[])
+				     int argc, const char *argv[])
 {
      char *ent_name;
      kadm5_policy_ent_t ent;
@@ -2453,9 +2458,9 @@ static int tcl_kadm5_free_policy_ent(ClientData clientData,
 	  
 		    
 static int tcl_kadm5_get_privs(ClientData clientData, Tcl_Interp *interp,
-			       int argc, char *argv[])
+			       int argc, const char *argv[])
 {
-     char *set_ret;
+     const char *set_ret;
      kadm5_ret_t ret;
      char *priv_var;
      long privs;
