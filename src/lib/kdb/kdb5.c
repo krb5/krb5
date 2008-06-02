@@ -936,35 +936,35 @@ krb5_db_free_principal(krb5_context kcontext, krb5_db_entry * entry, int count)
     return status;
 }
 
-krb5_error_code
-krb5_db_put_principal(krb5_context kcontext,
-		      krb5_db_entry * entries, int *nentries)
+static void
+free_db_args(krb5_context kcontext, char **db_args)
 {
-    krb5_error_code status = 0;
-    kdb5_dal_handle *dal_handle;
-    char  **db_args = NULL;
-    krb5_tl_data *prev, *curr, *next;
-    int     db_args_size = 0;
-    kdb_incr_update_t *upd, *fupd;
-    char *princ_name = NULL;
-    kdb_log_context *log_ctx;
     int i;
-
-    log_ctx = kcontext->kdblog_context;
-
-    if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
-	if (status) {
-	    goto clean_n_exit;
-	}
+    if (db_args) {
+	/* XXX Is this right?  Or are we borrowing storage from
+	   the caller?  */
+	for (i = 0; db_args[i]; i++)
+	    krb5_db_free(kcontext, db_args[i]);
+	free(db_args);
     }
+}
+
+static krb5_error_code
+extract_db_args_from_tl_data(krb5_context kcontext,
+			     krb5_tl_data **start, krb5_int16 *count,
+			     char ***db_argsp)
+{
+    char **db_args = NULL;
+    int db_args_size = 0;
+    krb5_tl_data *prev, *curr, *next;
+    krb5_error_code status;
 
     /* Giving db_args as part of tl data causes db2 to store the
        tl_data as such.  To prevent this, tl_data is collated and
        passed as a separate argument.  Currently supports only one
        principal, but passing it as a separate argument makes it
        difficult for kadmin remote to pass arguments to server.  */
-    prev = NULL, curr = entries->tl_data;
+    prev = NULL, curr = *start;
     while (curr) {
 	if (curr->tl_data_type == KRB5_TL_DB_ARGS) {
 	    char  **t;
@@ -992,11 +992,11 @@ krb5_db_put_principal(krb5_context kcontext,
 	    next = curr->tl_data_next;
 	    if (prev == NULL) {
 		/* current node is the first in the linked list. remove it */
-		entries->tl_data = curr->tl_data_next;
+		*start = curr->tl_data_next;
 	    } else {
 		prev->tl_data_next = curr->tl_data_next;
 	    }
-	    entries->n_tl_data--;
+	    (*count)--;
 	    krb5_db_free(kcontext, curr);
 
 	    /* previous does not change */
@@ -1006,6 +1006,66 @@ krb5_db_put_principal(krb5_context kcontext,
 	    curr = curr->tl_data_next;
 	}
     }
+    status = 0;
+clean_n_exit:
+    if (status != 0) {
+	free_db_args(kcontext, db_args);
+	db_args = NULL;
+    }
+    *db_argsp = db_args;
+    return status;
+}
+
+krb5_error_code
+krb5int_put_principal_no_log(krb5_context kcontext,
+			     krb5_db_entry *entries, int *nentries)
+{
+    kdb5_dal_handle *dal_handle;
+    krb5_error_code status;
+    char **db_args;
+
+    status = extract_db_args_from_tl_data(kcontext, &entries->tl_data,
+					  &entries->n_tl_data,
+					  &db_args);
+    if (status)
+	return status;
+    assert (kcontext->dal_handle != NULL); /* XXX */
+    dal_handle = kcontext->dal_handle;
+    /* XXX Locking?  */
+    status = dal_handle->lib_handle->vftabl.db_put_principal(kcontext, entries,
+							     nentries,
+							     db_args);
+    get_errmsg(kcontext, status);
+    free_db_args(kcontext, db_args);
+    return status;
+}
+
+krb5_error_code
+krb5_db_put_principal(krb5_context kcontext,
+		      krb5_db_entry * entries, int *nentries)
+{
+    krb5_error_code status = 0;
+    kdb5_dal_handle *dal_handle;
+    char  **db_args = NULL;
+    kdb_incr_update_t *upd, *fupd;
+    char *princ_name = NULL;
+    kdb_log_context *log_ctx;
+    int i;
+
+    log_ctx = kcontext->kdblog_context;
+
+    if (kcontext->dal_handle == NULL) {
+	status = kdb_setup_lib_handle(kcontext);
+	if (status) {
+	    goto clean_n_exit;
+	}
+    }
+
+    status = extract_db_args_from_tl_data(kcontext, &entries->tl_data,
+					  &entries->n_tl_data,
+					  &db_args);
+    if (status)
+	goto clean_n_exit;
 
     dal_handle = kcontext->dal_handle;
     status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
@@ -1064,15 +1124,7 @@ err_lock:
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
-    while (db_args_size) {
-	if (db_args[db_args_size - 1])
-	    krb5_db_free(kcontext, db_args[db_args_size - 1]);
-
-	db_args_size--;
-    }
-
-    if (db_args)
-	free(db_args);
+    free_db_args(kcontext, db_args);
 
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER))
 	/*
@@ -1081,6 +1133,25 @@ err_lock:
 	 */
         ulog_free_entries(fupd, *nentries);
 
+    return status;
+}
+
+krb5_error_code
+krb5int_delete_principal_no_log(krb5_context kcontext,
+				krb5_principal search_for,
+				int *nentries)
+{
+    kdb5_dal_handle *dal_handle;
+    krb5_error_code status;
+
+    assert (kcontext->dal_handle != NULL); /* XXX */
+
+    dal_handle = kcontext->dal_handle;
+    /* XXX Locking?  */
+    status = dal_handle->lib_handle->vftabl.db_delete_principal(kcontext,
+								 search_for,
+								 nentries);
+    get_errmsg(kcontext, status);
     return status;
 }
 
@@ -1132,10 +1203,9 @@ krb5_db_delete_principal(krb5_context kcontext,
 	free(princ_name);
     }
 
-    status =
-	dal_handle->lib_handle->vftabl.db_delete_principal(kcontext,
-							   search_for,
-							   nentries);
+    status = dal_handle->lib_handle->vftabl.db_delete_principal(kcontext,
+								 search_for,
+								 nentries);
     get_errmsg(kcontext, status);
 
     /*

@@ -70,7 +70,8 @@ extern "C" {
  * Prototype declarations
  */
 extern krb5_error_code ulog_map(krb5_context context,
-	kadm5_config_params *params, int caller);
+				kadm5_config_params *params, int caller,
+				char **db_args);
 extern krb5_error_code ulog_add_update(krb5_context context,
 	kdb_incr_update_t *upd);
 extern krb5_error_code ulog_delete_update(krb5_context context,
@@ -80,7 +81,7 @@ extern krb5_error_code ulog_finish_update(krb5_context context,
 extern krb5_error_code ulog_get_entries(krb5_context context, kdb_last_t last,
 	kdb_incr_result_t *ulog_handle);
 extern krb5_error_code ulog_replay(krb5_context context,
-	kdb_incr_result_t *incr_ret);
+				   kdb_incr_result_t *incr_ret, char **db_args);
 extern krb5_error_code ulog_conv_2logentry(krb5_context context,
 	krb5_db_entry *entries, kdb_incr_update_t *updates, int nentries);
 extern krb5_error_code ulog_conv_2dbentry(krb5_context context,

@@ -304,7 +304,7 @@ ulog_delete_update(krb5_context context, kdb_incr_update_t *upd)
  * the incr update log.
  */
 krb5_error_code
-ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret)
+ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 {
 	krb5_db_entry		*entry = NULL;
 	kdb_incr_update_t	*upd = NULL, *fupd;
@@ -330,7 +330,8 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret)
 	errlast.last_time.seconds = (unsigned int)0;
 	errlast.last_time.useconds = (unsigned int)0;
 
-	if ((retval = krb5_db_init(context)))
+	if ((retval = krb5_db_open(context, db_args,
+				   KRB5_KDB_OPEN_RW|KRB5_KDB_SRV_TYPE_ADMIN)))
 		goto cleanup;
 
 	for (i = 0; i < no_of_updates; i++) {
@@ -361,8 +362,9 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret)
 			if (dbprincstr)
 				free(dbprincstr);
 
-			retval = krb5_db2_db_delete_principal(context,
-			    dbprinc, &nentry);
+			retval = krb5int_delete_principal_no_log(context,
+								 dbprinc,
+								 &nentry);
 
 			if (dbprinc)
 				krb5_free_principal(context, dbprinc);
@@ -382,8 +384,8 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret)
 			if (retval = ulog_conv_2dbentry(context, entry, upd, 1))
 				goto cleanup;
 
-			retval = krb5_db2_db_put_principal(context, entry,
-			    &nentry);
+			retval = krb5int_put_principal_no_log(context, entry,
+							      &nentry);
 
 			if (entry) {
 				krb5_db_free_principal(context, entry, nentry);
@@ -415,8 +417,8 @@ cleanup:
  * Validate the log file and resync any uncommitted update entries
  * to the principal database.
  */
-krb5_error_code
-ulog_check(krb5_context context, kdb_hlog_t *ulog)
+static krb5_error_code
+ulog_check(krb5_context context, kdb_hlog_t *ulog, char **db_args)
 {
 	XDR			xdrs;
 	krb5_error_code		retval = 0;
@@ -474,7 +476,7 @@ ulog_check(krb5_context context, kdb_hlog_t *ulog)
 			 * existing update to be propagated later on
 			 */
 			ulog_set_role(context, IPROP_NULL);
-			retval = ulog_replay(context, incr_ret);
+			retval = ulog_replay(context, incr_ret, db_args);
 
 			/*
 			 * upd was freed by ulog_replay, we NULL
@@ -525,7 +527,8 @@ error:
  * Returns 0 on success else failure.
  */
 krb5_error_code
-ulog_map(krb5_context context, kadm5_config_params *params, int caller)
+ulog_map(krb5_context context, kadm5_config_params *params, int caller,
+	 char **db_args)
 {
 	struct stat	st;
 	krb5_error_code	retval;
@@ -537,7 +540,10 @@ ulog_map(krb5_context context, kadm5_config_params *params, int caller)
 	int		ulogfd = -1;
 
 	if ((caller == FKADMIND) || (caller == FKCOMMAND))
-		ulogentries = params->iprop_ulogsize;
+	    ulogentries = params->iprop_ulogsize;
+	else
+	    /* Gets copied, but actual value should be irrelevant.  */
+	    ulogentries = 0xFEEDFACE;
 
 	ulog_filesize = sizeof (kdb_hlog_t);
 
@@ -643,7 +649,7 @@ ulog_map(krb5_context context, kadm5_config_params *params, int caller)
 				/*
 				 * Log is currently un/stable, check anyway
 				 */
-				retval = ulog_check(context, ulog);
+				retval = ulog_check(context, ulog, db_args);
 				if (retval == KRB5_LOG_CORRUPT) {
 					return (retval);
 				}

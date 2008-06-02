@@ -33,7 +33,7 @@
 #include "adm_proto.h"
 #include <stdio.h>
 #include <ctype.h>
-#include <kdb/kdb_log.h>
+#include <kdb_log.h>
 
 static krb5_key_salt_tuple *copy_key_salt_tuple(ksalt, len)
 krb5_key_salt_tuple *ksalt;
