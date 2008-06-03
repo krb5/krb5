@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002, 2004, 2007 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2001, 2002, 2004, 2007, 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * 
@@ -172,7 +172,7 @@ read_entropy_from_device (krb5_context context, const char *device)
       return 0;
   }
 
-  for (bp = &buf, left = sizeof (buf); left > 0;) {
+  for (bp = buf, left = sizeof (buf); left > 0;) {
     ssize_t count;
     count = read (fd, bp, (unsigned) left);
     if (count <= 0) {

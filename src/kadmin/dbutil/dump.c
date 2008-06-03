@@ -611,8 +611,9 @@ dump_k5beta_iterator(ptr, entry)
 	 * First put out strings representing the length of the variable
 	 * length data in this record, then the name and the primary key type.
 	 */
-	fprintf(arg->ofile, "%d\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t", strlen(name),
-		strlen(mod_name),
+	fprintf(arg->ofile, "%lu\t%lu\t%d\t%d\t%d\t%d\t%s\t%d\t",
+		(unsigned long) strlen(name),
+		(unsigned long) strlen(mod_name),
 		(krb5_int32) pkey->key_data_length[0],
 		(krb5_int32) akey->key_data_length[0],
 		(krb5_int32) pkey->key_data_length[1],
@@ -762,9 +763,9 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 	
 	if (counter + skip == entry->n_tl_data) {
 	    /* Pound out header */
-	    fprintf(arg->ofile, "%d\t%d\t%d\t%d\t%d\t%s\t",
+	    fprintf(arg->ofile, "%d\t%lu\t%d\t%d\t%d\t%s\t",
 		    (int) entry->len,
-		    strlen(name),
+		    (unsigned long) strlen(name),
 		    counter,
 		    (int) entry->n_key_data,
 		    (int) entry->e_length,

@@ -301,7 +301,7 @@ check_rpcsec_auth(struct svc_req *rqstp)
 fail_princ:
      if (!success) {
 	 krb5_klog_syslog(LOG_ERR, "bad service principal %.*s%s",
-			  slen, gss_str.value, sdots);
+			  (int) slen, (char *) gss_str.value, sdots);
      }
      gss_release_buffer(&min_stat, &gss_str);
      krb5_free_principal(kctx, princ);

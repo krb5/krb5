@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/ser_sctx.c
  *
- * Copyright 1995, 2004 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2004, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -561,10 +561,14 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 		return kret;
 	    }
 
-	    if ((kret = kg_oid_internalize(kcontext, &ctx->mech_used, &bp,
-					   &remain))) {
-		 if (kret == EINVAL)
-		      kret = 0;
+	    {
+		krb5_pointer tmp;
+		kret = kg_oid_internalize(kcontext, &tmp, &bp,
+					  &remain);
+		if (kret == 0)
+		    ctx->mech_used = tmp;
+		else if (kret == EINVAL)
+		    kret = 0;
 	    }
 	    /* Now get substructure data */
 	    if ((kret = krb5_internalize_opaque(kcontext,

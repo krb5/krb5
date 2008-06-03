@@ -313,7 +313,7 @@ int main(argc, argv)
     decode_run("encryption_key","(enctype = -255)","30 12 A0 04 02 02 FF 01 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key,krb5_free_keyblock);
     ref.enctype = 255;
     decode_run("encryption_key","(enctype = 255)","30 12 A0 04 02 02 00 FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key,krb5_free_keyblock);
-    ref.enctype = -2147483648;
+    ref.enctype = -2147483648U;
     decode_run("encryption_key","(enctype = -2147483648)","30 14 A0 06 02 04 80 00 00 00 A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key,krb5_free_keyblock);
     ref.enctype = 2147483647;
     decode_run("encryption_key","(enctype = 2147483647)","30 14 A0 06 02 04 7F FF FF FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key,krb5_free_keyblock);
