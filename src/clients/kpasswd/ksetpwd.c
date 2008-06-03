@@ -61,7 +61,7 @@ static kbrccache_t userinitcontext(
 	if( kres )
 		goto return_error;
 	if( domain )
-		kres = krb5_build_principal( kcontext, &kme, strlen(domain), domain, user, 0 );
+		kres = krb5_build_principal( kcontext, &kme, strlen(domain), domain, user, (char *) 0 );
 	else
 		kres = krb5_parse_name( kcontext, user, &kme );
 	if( kres )
