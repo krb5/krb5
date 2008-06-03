@@ -229,7 +229,7 @@ static Tcl_DString *unparse_str(char *in_str)
 
 	  
 static int parse_str(Tcl_Interp *interp, const char *in_str,
-		     const char **out_str)
+		     char **out_str)
 {
      if (! in_str) {
 	  *out_str = 0;
@@ -238,7 +238,7 @@ static int parse_str(Tcl_Interp *interp, const char *in_str,
 	  *out_str = 0;
      }
      else {
-	 *out_str = in_str;
+	 *out_str = (char *) in_str;
      }
      return TCL_OK;
 }
@@ -1174,7 +1174,7 @@ static int tcl_ovsec_kadm_delete_principal(ClientData clientData,
      krb5_error_code krb5_ret;
      ovsec_kadm_ret_t ret;
      int tcl_ret;
-     const char *name;
+     char *name;
      
      GET_HANDLE(1, 0);
 
@@ -1209,7 +1209,7 @@ static int tcl_ovsec_kadm_modify_principal(ClientData clientData,
 					   Tcl_Interp *interp,
 					   int argc, const char *argv[])
 {
-     const char *princ_string;
+     char *princ_string;
      ovsec_kadm_principal_ent_t princ = 0;
      int tcl_ret;
      krb5_int32 mask;
@@ -1442,7 +1442,7 @@ static int tcl_ovsec_kadm_randkey_principal(ClientData clientData,
 {
      krb5_principal princ;
      krb5_keyblock *keyblock;
-     const char *keyblock_var;
+     char *keyblock_var;
      Tcl_DString *keyblock_dstring = 0;
 #ifdef OVERRIDE     
      int override_qual;
