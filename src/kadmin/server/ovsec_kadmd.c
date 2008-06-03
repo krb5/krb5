@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
 
      if ((params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_klog_syslog(LOG_ERR, "%s: Missing required configuration values "
-			   "while initializing, aborting", whoami,
+			   "(%lx) while initializing, aborting", whoami,
 			   (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
 	  fprintf(stderr, "%s: Missing required configuration values "
 		  "(%lx) while initializing, aborting\n", whoami,
@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
 	 if (setsockopt(schpw, SOL_SOCKET, SO_REUSEADDR,
 			(char *) &allowed, sizeof(allowed)) < 0) {
 	     const char *e_txt = krb5_get_error_message (context, ret);
-	     krb5_klog_syslog(LOG_ERR, "main",
+	     krb5_klog_syslog(LOG_ERR,
 			      "cannot set SO_REUSEADDR on simple chpw socket: %s", 
 			      e_txt);
 	     fprintf(stderr,
@@ -1029,13 +1029,13 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
      if (procname != NULL)
 	  krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %s, "
 			   "claimed client = %.*s%s, server = %.*s%s, addr = %s",
-			   procname, clen, client.value, cdots,
-			   slen, server.value, sdots, a);
+			   procname, (int) clen, (char *) client.value, cdots,
+			   (int) slen, (char *) server.value, sdots, a);
      else
 	  krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %d, "
 			   "claimed client = %.*s%s, server = %.*s%s, addr = %s",
-			   proc, clen, client.value, cdots,
-			   slen, server.value, sdots, a);
+			   proc, (int) clen, (char *) client.value, cdots,
+			   (int) slen, (char *) server.value, sdots, a);
 
      (void) gss_release_buffer(&minor, &client);
      (void) gss_release_buffer(&minor, &server);
@@ -1125,12 +1125,14 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 		    log_badauth_display_status_1(m, minor_stat,
 						 GSS_C_MECH_CODE, 1);
 	       } else
-		    krb5_klog_syslog(LOG_ERR, "GSS-API authentication error %s: "
-			   "recursive failure!", msg);
+		    krb5_klog_syslog(LOG_ERR, "GSS-API authentication error %.*s: "
+				     "recursive failure!", (int) msg.length,
+				     (char *) msg.value);
 	       return;
 	  }
 
-	  krb5_klog_syslog(LOG_NOTICE, "%s %s", m, (char *)msg.value); 
+	  krb5_klog_syslog(LOG_NOTICE, "%s %.*s", m, (int)msg.length,
+			   (char *)msg.value);
 	  (void) gss_release_buffer(&minor_stat, &msg);
 	  
 	  if (!msg_ctx)

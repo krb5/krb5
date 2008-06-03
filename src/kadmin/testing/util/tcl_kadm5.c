@@ -418,7 +418,7 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
      case ENOENT: code_string = "ENOENT"; break;
 
      default:
-	 fprintf(stderr, "**** CODE %d (%s) ***\n", code,
+	 fprintf(stderr, "**** CODE %ld (%s) ***\n", (long) code,
 		 error_message (code));
 	 code_string = "UNKNOWN";
 	 break;
@@ -956,8 +956,8 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
 	  tl->tl_data_length = tmp;
 	  if (tl->tl_data_length != strlen(argv1[2])) {
 	       sprintf(interp->result, "specified length %d does not "
-		       "match length %d of string \"%s\"", tmp,
-		       strlen(argv1[2]), argv1[2]);
+		       "match length %lu of string \"%s\"", tmp,
+		       (unsigned long) strlen(argv1[2]), argv1[2]);
 	       retcode = TCL_ERROR;
 	       goto finished;
 	  }

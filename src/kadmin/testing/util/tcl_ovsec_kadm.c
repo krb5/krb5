@@ -378,7 +378,7 @@ static Tcl_DString *unparse_err(ovsec_kadm_ret_t code)
      case EINVAL: code_string = "EINVAL"; break;
      case ENOENT: code_string = "ENOENT"; break;
      default:
-	 fprintf(stderr, "**** CODE %d (%s) ***\n", code,
+	 fprintf(stderr, "**** CODE %ld (%s) ***\n", (long) code,
 		 error_message (code));
 	 code_string = "UNKNOWN";
 	 break;

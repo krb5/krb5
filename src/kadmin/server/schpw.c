@@ -264,7 +264,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     trunc_name(&clen, &cdots);
     krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
 		     inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
-		     clen, clientstr, cdots,
+		     (int) clen, clientstr, cdots,
 		     ret ? krb5_get_error_message (context, ret) : "success");
     krb5_free_unparsed_name(context, clientstr);
 

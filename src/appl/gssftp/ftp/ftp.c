@@ -475,9 +475,9 @@ static int secure_command(char* cmd)
 					"GSSAPI didn't encrypt message");
 			} else {
 				if (debug)
-				  fprintf(stderr, "sealed (%s) %d bytes\n",
+				  fprintf(stderr, "sealed (%s) %lu bytes\n",
 					  clevel==PROT_P?"ENC":"MIC", 
-					  out_buf.length);
+					  (unsigned long) out_buf.length);
 				length=out_buf.length;
 				memcpy(out, out_buf.value, out_buf.length);
 				gss_release_buffer(&min_stat, &out_buf);
