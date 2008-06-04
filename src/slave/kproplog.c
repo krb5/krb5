@@ -10,21 +10,25 @@
  */
 
 #include <stdio.h>
-#include <libintl.h>
 #include <sys/types.h>
 #include <time.h>
 #include <limits.h>
 #include <locale.h>
 #include <syslog.h>
-#include <kdb/kdb_log.h>
+#include "k5-int.h"
+#include <kdb_log.h>
 #include <kadm5/admin.h>
+
+#ifndef gettext
+#define textdomain(X) 0
+#endif
 
 static char	*progname;
 
 static void
 usage()
 {
-	(void) fprintf(stderr, gettext("\nUsage: %s [-h] [-v] [-e num]\n\n"),
+	(void) fprintf(stderr, _("\nUsage: %s [-h] [-v] [-e num]\n\n"),
 	    progname);
 	exit(1);
 }
@@ -37,64 +41,64 @@ print_attr(kdbe_attr_type_t type)
 {
 	switch (type) {
 		case AT_ATTRFLAGS:
-			(void) printf(gettext("\t\tAttribute flags\n"));
+			(void) printf(_("\t\tAttribute flags\n"));
 			break;
 		case AT_MAX_LIFE:
-			(void) printf(gettext("\t\tMaximum ticket life\n"));
+			(void) printf(_("\t\tMaximum ticket life\n"));
 			break;
 		case AT_MAX_RENEW_LIFE:
-			(void) printf(gettext("\t\tMaximum renewable life\n"));
+			(void) printf(_("\t\tMaximum renewable life\n"));
 			break;
 		case AT_EXP:
-			(void) printf(gettext("\t\tPrincipal expiration\n"));
+			(void) printf(_("\t\tPrincipal expiration\n"));
 			break;
 		case AT_PW_EXP:
-			(void) printf(gettext("\t\tPassword expiration\n"));
+			(void) printf(_("\t\tPassword expiration\n"));
 			break;
 		case AT_LAST_SUCCESS:
-			(void) printf(gettext("\t\tLast successful auth\n"));
+			(void) printf(_("\t\tLast successful auth\n"));
 			break;
 		case AT_LAST_FAILED:
-			(void) printf(gettext("\t\tLast failed auth\n"));
+			(void) printf(_("\t\tLast failed auth\n"));
 			break;
 		case AT_FAIL_AUTH_COUNT:
-			(void) printf(gettext("\t\tFailed passwd attempt\n"));
+			(void) printf(_("\t\tFailed passwd attempt\n"));
 			break;
 		case AT_PRINC:
-			(void) printf(gettext("\t\tPrincipal\n"));
+			(void) printf(_("\t\tPrincipal\n"));
 			break;
 		case AT_KEYDATA:
-			(void) printf(gettext("\t\tKey data\n"));
+			(void) printf(_("\t\tKey data\n"));
 			break;
 		case AT_TL_DATA:
-			(void) printf(gettext("\t\tTL data\n"));
+			(void) printf(_("\t\tTL data\n"));
 			break;
 		case AT_LEN:
-			(void) printf(gettext("\t\tLength\n"));
+			(void) printf(_("\t\tLength\n"));
 			break;
 		case AT_MOD_PRINC:
-			(void) printf(gettext("\t\tModifying principal\n"));
+			(void) printf(_("\t\tModifying principal\n"));
 			break;
 		case AT_MOD_TIME:
-			(void) printf(gettext("\t\tModification time\n"));
+			(void) printf(_("\t\tModification time\n"));
 			break;
 		case AT_MOD_WHERE:
-			(void) printf(gettext("\t\tModified where\n"));
+			(void) printf(_("\t\tModified where\n"));
 			break;
 		case AT_PW_LAST_CHANGE:
-			(void) printf(gettext("\t\tPassword last changed\n"));
+			(void) printf(_("\t\tPassword last changed\n"));
 			break;
 		case AT_PW_POLICY:
-			(void) printf(gettext("\t\tPassword policy\n"));
+			(void) printf(_("\t\tPassword policy\n"));
 			break;
 		case AT_PW_POLICY_SWITCH:
-			(void) printf(gettext("\t\tPassword policy switch\n"));
+			(void) printf(_("\t\tPassword policy switch\n"));
 			break;
 		case AT_PW_HIST_KVNO:
-			(void) printf(gettext("\t\tPassword history KVNO\n"));
+			(void) printf(_("\t\tPassword history KVNO\n"));
 			break;
 		case AT_PW_HIST:
-			(void) printf(gettext("\t\tPassword history\n"));
+			(void) printf(_("\t\tPassword history\n"));
 			break;
 	} /* switch */
 
@@ -126,7 +130,7 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, bool_t verbose)
 		 */
 		if (indx_log->kdb_umagic != KDB_UMAGIC) {
 			(void) fprintf(stderr,
-			    gettext("Corrupt update entry\n\n"));
+			    _("Corrupt update entry\n\n"));
 			exit(1);
 		}
 
@@ -134,46 +138,46 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, bool_t verbose)
 		xdrmem_create(&xdrs, (char *)indx_log->entry_data,
 		    indx_log->kdb_entry_size, XDR_DECODE);
 		if (!xdr_kdb_incr_update_t(&xdrs, &upd)) {
-			(void) printf(gettext("Entry data decode failure\n\n"));
+			(void) printf(_("Entry data decode failure\n\n"));
 			exit(1);
 		}
 
 		(void) printf("---\n");
-		(void) printf(gettext("Update Entry\n"));
+		(void) printf(_("Update Entry\n"));
 
-		(void) printf(gettext("\tUpdate serial # : %u\n"),
+		(void) printf(_("\tUpdate serial # : %u\n"),
 		    indx_log->kdb_entry_sno);
 
-		(void) printf(gettext("\tUpdate operation : "));
+		(void) printf(_("\tUpdate operation : "));
 		if (upd.kdb_deleted)
-			(void) printf(gettext("Delete\n"));
+			(void) printf(_("Delete\n"));
 		else
-			(void) printf(gettext("Add\n"));
+			(void) printf(_("Add\n"));
 
 		dbprinc = malloc(upd.kdb_princ_name.utf8str_t_len + 1);
 		if (dbprinc == NULL) {
-			(void) printf(gettext("Could not allocate "
+			(void) printf(_("Could not allocate "
 			    "principal name\n\n"));
 			exit(1);
 		}
 		(void) strncpy(dbprinc, upd.kdb_princ_name.utf8str_t_val,
 		    (upd.kdb_princ_name.utf8str_t_len + 1));
-		dbprint[upd.kdb_princ_name.utf8str_t_len] = 0;
-		(void) printf(gettext("\tUpdate principal : %s\n"), dbprinc);
+		dbprinc[upd.kdb_princ_name.utf8str_t_len] = 0;
+		(void) printf(_("\tUpdate principal : %s\n"), dbprinc);
 
-		(void) printf(gettext("\tUpdate size : %u\n"),
+		(void) printf(_("\tUpdate size : %u\n"),
 		    indx_log->kdb_entry_size);
 
-		(void) printf(gettext("\tUpdate committed : %s\n"),
+		(void) printf(_("\tUpdate committed : %s\n"),
 		    indx_log->kdb_commit ? "True" : "False");
 
 		if (indx_log->kdb_time.seconds == 0L)
-			(void) printf(gettext("\tUpdate time stamp : None\n"));
+			(void) printf(_("\tUpdate time stamp : None\n"));
 		else
-			(void) printf(gettext("\tUpdate time stamp : %s"),
+			(void) printf(_("\tUpdate time stamp : %s"),
 			    ctime((time_t *)&(indx_log->kdb_time.seconds)));
 
-		(void) printf(gettext("\tAttributes changed : %d\n"),
+		(void) printf(_("\tAttributes changed : %d\n"),
 		    upd.kdb_update.kdbe_t_len);
 
 		if (verbose)
@@ -198,6 +202,7 @@ main(int argc, char **argv)
 	kadm5_config_params	params;
 	kdb_log_context		*log_ctx;
 	kdb_hlog_t		*ulog = NULL;
+	char			**db_args = NULL; /* XXX */
 
 	(void) setlocale(LC_ALL, "");
 
@@ -209,7 +214,7 @@ main(int argc, char **argv)
 
 	if (geteuid() != (uid_t)0) {
 		(void) fprintf(stderr,
-		    gettext("kproplog must be run as root\n\n"));
+		    _("kproplog must be run as root\n\n"));
 		exit(1);
 	}
 
@@ -233,23 +238,23 @@ main(int argc, char **argv)
 
 	if (krb5_init_context(&context)) {
 		(void) fprintf(stderr,
-		    gettext("Unable to initialize Kerberos\n\n"));
+		    _("Unable to initialize Kerberos\n\n"));
 		exit(1);
 	}
 
 	(void) memset((char *)&params, 0, sizeof (params));
 
-	if (kadm5_get_config_params(context, NULL, NULL, &params, &params)) {
+	if (kadm5_get_config_params(context, 1, &params, &params)) {
 		(void) fprintf(stderr,
-		    gettext("Couldn't read database_name\n\n"));
+		    _("Couldn't read database_name\n\n"));
 		exit(1);
 	}
 
-	(void) printf(gettext("\nKerberos update log (%s.ulog)\n"),
+	(void) printf(_("\nKerberos update log (%s.ulog)\n"),
 	    params.dbname);
 
-	if (ulog_map(context, &params, FKPROPLOG)) {
-		(void) fprintf(stderr, gettext("Unable to map log file "
+	if (ulog_map(context, &params, FKPROPLOG, db_args)) {
+		(void) fprintf(stderr, _("Unable to map log file "
 		    "%s.ulog\n\n"), params.dbname);
 		exit(1);
 	}
@@ -258,64 +263,64 @@ main(int argc, char **argv)
 	if (log_ctx)
 		ulog = log_ctx->ulog;
 	else {
-		(void) fprintf(stderr, gettext("Unable to map log file "
+		(void) fprintf(stderr, _("Unable to map log file "
 		    "%s.ulog\n\n"), params.dbname);
 		exit(1);
 	}
 
 	if (ulog->kdb_hmagic != KDB_HMAGIC) {
 		(void) fprintf(stderr,
-		    gettext("Corrupt header log, exiting\n\n"));
+		    _("Corrupt header log, exiting\n\n"));
 		exit(1);
 	}
 
-	(void) printf(gettext("Update log dump :\n"));
-	(void) printf(gettext("\tLog version # : %u\n"), ulog->db_version_num);
-	(void) printf(gettext("\tLog state : "));
+	(void) printf(_("Update log dump :\n"));
+	(void) printf(_("\tLog version # : %u\n"), ulog->db_version_num);
+	(void) printf(_("\tLog state : "));
 	switch (ulog->kdb_state) {
 		case KDB_STABLE:
-			(void) printf(gettext("Stable\n"));
+			(void) printf(_("Stable\n"));
 			break;
 		case KDB_UNSTABLE:
-			(void) printf(gettext("Unstable\n"));
+			(void) printf(_("Unstable\n"));
 			break;
 		case KDB_CORRUPT:
-			(void) printf(gettext("Corrupt\n"));
+			(void) printf(_("Corrupt\n"));
 			break;
 		default:
-			(void) printf(gettext("Unknown state: %d\n"),
+			(void) printf(_("Unknown state: %d\n"),
 			    ulog->kdb_state);
 			break;
 	}
-	(void) printf(gettext("\tEntry block size : %u\n"), ulog->kdb_block);
-	(void) printf(gettext("\tNumber of entries : %u\n"), ulog->kdb_num);
+	(void) printf(_("\tEntry block size : %u\n"), ulog->kdb_block);
+	(void) printf(_("\tNumber of entries : %u\n"), ulog->kdb_num);
 
 	if (ulog->kdb_last_sno == 0)
-		(void) printf(gettext("\tLast serial # : None\n"));
+		(void) printf(_("\tLast serial # : None\n"));
 	else {
 		if (ulog->kdb_first_sno == 0)
-			(void) printf(gettext("\tFirst serial # : None\n"));
+			(void) printf(_("\tFirst serial # : None\n"));
 		else {
-			(void) printf(gettext("\tFirst serial # : "));
+			(void) printf(_("\tFirst serial # : "));
 			(void) printf("%u\n", ulog->kdb_first_sno);
 		}
 
-		(void) printf(gettext("\tLast serial # : "));
+		(void) printf(_("\tLast serial # : "));
 		(void) printf("%u\n", ulog->kdb_last_sno);
 	}
 
 	if (ulog->kdb_last_time.seconds == 0L) {
-		(void) printf(gettext("\tLast time stamp : None\n"));
+		(void) printf(_("\tLast time stamp : None\n"));
 	} else {
 		if (ulog->kdb_first_time.seconds == 0L)
-			(void) printf(gettext("\tFirst time stamp : None\n"));
+			(void) printf(_("\tFirst time stamp : None\n"));
 		else {
-			(void) printf(gettext("\tFirst time stamp : %s"),
+			(void) printf(_("\tFirst time stamp : %s"),
 			    ctime((time_t *)
 			    &(ulog->kdb_first_time.seconds)));
 		}
 
-		(void) printf(gettext("\tLast time stamp : %s\n"),
+		(void) printf(_("\tLast time stamp : %s\n"),
 		    ctime((time_t *)&(ulog->kdb_last_time.seconds)));
 	}
 

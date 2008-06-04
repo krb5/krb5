@@ -167,6 +167,8 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      struct hostent *hp;
      int fd;
 
+     char *iprop_svc;
+     int iprop_enable = 0;
      char full_svcname[BUFSIZ];
      char *realm;
      
@@ -310,7 +312,8 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      if (iprop_svc == NULL)
 	 return ENOMEM;
 
-     if ((strstr(service_name, iprop_svc) != NULL) &&
+     if (service_name != NULL &&
+	 (strstr(service_name, iprop_svc) != NULL) &&
 	 (strstr(client_name, iprop_svc) != NULL)) {
 	 iprop_enable = 1;
 	 handle->clnt = clnttcp_create(&addr, KRB5_IPROP_PROG, KRB5_IPROP_VERS,
@@ -586,8 +589,6 @@ kadm5_setup_gss(kadm5_server_handle_t handle,
      gss_cred_id_t gss_client_creds;
      const char *c_ccname_orig;
      char *ccname_orig;
-     char *iprop_svc;
-     int iprop_enable = 0;
 
      code = KADM5_GSS_ERROR;
      gss_client_creds = GSS_C_NO_CREDENTIAL;

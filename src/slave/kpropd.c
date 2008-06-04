@@ -84,7 +84,7 @@
 #include <iprop_hdr.h>
 #include "iprop.h"
 #include <kadm5/admin.h>
-#include <kdb/kdb_log.h>
+#include <kdb_log.h>
 
 #ifndef GETSOCKNAME_ARG3_TYPE
 #define GETSOCKNAME_ARG3_TYPE unsigned int
@@ -141,9 +141,12 @@ krb5_address	sender_addr;
 krb5_address	receiver_addr;
 short 		port = 0;
 
+char **db_args = NULL;
+int db_args_size = 0;
+
 void	PRS
 	(char**);
-void	do_standalone
+int	do_standalone
 	(iprop_role iproprole);
 void	doit
 	(int);
@@ -178,13 +181,18 @@ void	recv_error
 int	convert_polltime(char *);
 unsigned int backoff_from_master(int *);
 
+static kadm5_ret_t
+kadm5_get_kiprop_host_srv_name(krb5_context context,
+			       const char *realm,
+			       char **host_service_name);
+
 static void usage()
 {
 	fprintf(stderr,
 		"\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n",
 		progname);
 	fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n");
-	fprintf(stderr, "\t[-P port] [-a acl_file]\n");
+	fprintf(stderr, "\t[-x db_args]* [-P port] [-a acl_file]\n");
 	exit(1);
 }
 
@@ -193,7 +201,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-    krb_error_code retval;
+    krb5_error_code retval;
     int ret = 0;
     kdb_log_context *log_ctx;
 
@@ -208,7 +216,7 @@ main(argc, argv)
 	retval = do_iprop(log_ctx);
 	if (retval) {
 	    com_err(progname, retval,
-		    gettext("do_iprop failed.\n"));
+		    _("do_iprop failed.\n"));
 	    exit(1);
 	}
 
@@ -222,7 +230,7 @@ main(argc, argv)
     exit(ret);
 }
 
-void do_standalone(iprop_role iproprole)
+int do_standalone(iprop_role iproprole)
 {
 	struct	sockaddr_in	my_sin, frominet;
 	struct servent *sp;
@@ -254,16 +262,19 @@ void do_standalone(iprop_role iproprole)
 	 * linger around for too long
 	 */
 	if (iproprole == IPROP_SLAVE) {
+	    int on = 1;
+	    struct linger linger;
+
 	    if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR,
 			   (char *)&on, sizeof(on)) < 0)
 		com_err(progname, errno,
-			gettext("in setsockopt(SO_REUSEADDR)"));
+			_("in setsockopt(SO_REUSEADDR)"));
 	    linger.l_onoff = 1;
 	    linger.l_linger = 2;
 	    if (setsockopt(finet, SOL_SOCKET, SO_LINGER,
 			   (void *)&linger, sizeof(linger)) < 0)
 		com_err(progname, errno,
-			gettext("in setsockopt(SO_LINGER)"));
+			_("in setsockopt(SO_LINGER)"));
 	}
 	if ((ret = bind(finet, (struct sockaddr *) &my_sin, sizeof(my_sin))) < 0) {
 	    if (debug) {
@@ -298,6 +309,7 @@ void do_standalone(iprop_role iproprole)
 	}
 	while (1) {
 		int child_pid;
+		int status;
 	    
 		memset((char *)&frominet, 0, sizeof(frominet));
 		fromlen = sizeof(frominet);
@@ -326,7 +338,7 @@ void do_standalone(iprop_role iproprole)
 		default:
 		    if (wait(&status) < 0) {
 			com_err(progname, errno,
-				gettext("while waiting to receive database"));
+				_("while waiting to receive database"));
 			exit(1);
 		    }
 
@@ -473,7 +485,6 @@ void doit(fd)
  * Routine to handle incremental update transfer(s) from master KDC
  */
 krb5_error_code do_iprop(kdb_log_context *log_ctx) {
-	CLIENT *cl;
 	kadm5_ret_t retval;
 	kadm5_config_params params;
 	krb5_ccache cc;
@@ -481,7 +492,6 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx) {
 	void *server_handle = NULL;
 	char *iprop_svc_princstr = NULL;
 	char *master_svc_princstr = NULL;
-	char *admin_server = NULL;
 	char *keytab_name = NULL;
 	unsigned int pollin, backoff_time;
 	int backoff_cnt = 0;
@@ -505,6 +515,35 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx) {
 	(void) memset((char *)&params, 0, sizeof (params));
 	ulog = log_ctx->ulog;
 
+
+	retval = kadm5_get_config_params(kpropd_context, 1, &params, &params);
+	if (retval) {
+		com_err(progname, retval, _("while initializing"));
+		exit(1);
+	}
+	if (params.iprop_enabled == TRUE) {
+		ulog_set_role(kpropd_context, IPROP_SLAVE);
+		poll_time = params.iprop_polltime;
+
+		if (ulog_map(kpropd_context, &params, FKPROPD, db_args)) { 
+ 			com_err(progname, errno,
+			    _("Unable to map log!\n")); 
+			exit(1); 
+		} 
+	}
+
+	/*
+	 * Grab the realm info and check if iprop is enabled.
+	 */
+	if (def_realm == NULL) {
+		retval = krb5_get_default_realm(kpropd_context, &def_realm);
+		if (retval) {
+			com_err(progname, retval,
+				_("Unable to get default realm"));
+			exit(1);
+		}
+	}
+
 	params.mask |= KADM5_CONFIG_REALM;
 	params.realm = def_realm;
 
@@ -512,7 +551,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx) {
 		if (retval = kadm5_get_kiprop_host_srv_name(kpropd_context,
 					def_realm, &master_svc_princstr)) {
 			com_err(progname, retval,
-				gettext("%s: unable to get kiprop host based "
+				_("%s: unable to get kiprop host based "
 					"service name for realm %s\n"),
 					progname, def_realm);
 			exit(1);
@@ -524,7 +563,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx) {
 	 */
 	if (retval = krb5_cc_default(kpropd_context, &cc)) {
 		com_err(progname, retval,
-			gettext("while opening default "
+			_("while opening default "
 				"credentials cache"));
 		exit(1);
 	}
@@ -532,7 +571,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx) {
 	retval = krb5_sname_to_principal(kpropd_context, NULL, KIPROP_SVC_NAME,
 				KRB5_NT_SRV_HST, &iprop_svc_principal);
 	if (retval) {
-		com_err(progname, retval, gettext("while trying to construct "
+		com_err(progname, retval, _("while trying to construct "
 						"host service principal"));
 		exit(1);
 	}
@@ -540,7 +579,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx) {
 	if (retval = krb5_unparse_name(kpropd_context, iprop_svc_principal,
 				&iprop_svc_princstr)) {
 		com_err(progname, retval,
-			gettext("while canonicalizing "
+			_("while canonicalizing "
 				"principal name"));
 		krb5_free_principal(kpropd_context, iprop_svc_principal);
 		exit(1);
@@ -552,11 +591,12 @@ reinit:
 	 * Authentication, initialize rpcsec_gss handle etc.
 	 */
 	retval = kadm5_init_with_skey(iprop_svc_princstr, keytab_name,
-				    master_svc_princstr,
-				    &params,
-				    KADM5_STRUCT_VERSION,
-				    KADM5_API_VERSION_2,
- 				    &server_handle);
+				      master_svc_princstr,
+				      &params,
+				      KADM5_STRUCT_VERSION,
+				      KADM5_API_VERSION_2,
+				      db_args,
+				      &server_handle);
 
 	if (retval) {
 		if (retval == KADM5_RPC_ERROR) {
@@ -566,7 +606,7 @@ reinit:
 			server_handle = (void *)NULL;
 			handle = (kadm5_iprop_handle_t)NULL;
 
-			com_err(progname, retval, gettext(
+			com_err(progname, retval, _(
 					"while attempting to connect"
 					" to master KDC ... retrying"));
 			backoff_time = backoff_from_master(&reinit_cnt);
@@ -574,7 +614,7 @@ reinit:
 			goto reinit;
 		} else {
 			com_err(progname, retval,
-                                gettext("while initializing %s interface"),
+                                _("while initializing %s interface"),
 				progname);
 			if (retval == KADM5_BAD_CLIENT_PARAMS ||
 			    retval == KADM5_BAD_SERVER_PARAMS)
@@ -600,7 +640,7 @@ reinit:
 	if (poll_time == NULL) {
 		if ((poll_time = (char *)strdup("2m")) == NULL) {
 			com_err(progname, ENOMEM,
-				gettext("Unable to allocate poll_time"));
+				_("Unable to allocate poll_time"));
 			exit(1);
 		}
 	}
@@ -675,17 +715,18 @@ reinit:
 				ret = do_standalone(log_ctx->iproprole);
 				if (ret)
 					syslog(LOG_WARNING,
-					    gettext("kpropd: Full resync, "
+					    _("kpropd: Full resync, "
 					    "invalid return."));
-				if (debug)
+				if (debug) {
 					if (ret)
 						fprintf(stderr,
-						    gettext("Full resync "
+						    _("Full resync "
 						    "was unsuccessful\n"));
 					else
 						fprintf(stderr,
-						    gettext("Full resync "
+						    _("Full resync "
 						    "was successful\n"));
+				}
 				frdone = 1;
 				break;
 
@@ -701,17 +742,17 @@ reinit:
 			default:
 				backoff_cnt = 0;
 				frdone = 0;
-				syslog(LOG_ERR, gettext("kpropd: Full resync,"
+				syslog(LOG_ERR, _("kpropd: Full resync,"
 					" invalid return from master KDC."));
 				break;
 
 			case UPDATE_PERM_DENIED:
-				syslog(LOG_ERR, gettext("kpropd: Full resync,"
+				syslog(LOG_ERR, _("kpropd: Full resync,"
 					" permission denied."));
 				goto error;
 
 			case UPDATE_ERROR:
-				syslog(LOG_ERR, gettext("kpropd: Full resync,"
+				syslog(LOG_ERR, _("kpropd: Full resync,"
 					" error returned from master KDC."));
 				goto error;
 			}
@@ -726,26 +767,27 @@ reinit:
 			 * entries using the kdb conv api and will commit
 			 * the entries to the slave kdc database
 			 */
-			retval = ulog_replay(kpropd_context, incr_ret);
+			retval = ulog_replay(kpropd_context, incr_ret,
+					     db_args);
 
 			if (retval) {
-				syslog(LOG_ERR, gettext("kpropd: ulog_replay"
+				syslog(LOG_ERR, _("kpropd: ulog_replay"
 					" failed, updates not registered."));
 				break;
 			}
 
 			if (debug)
-				fprintf(stderr, gettext("Update transfer "
+				fprintf(stderr, _("Update transfer "
 					"from master was OK\n"));
 			break;
 
 		case UPDATE_PERM_DENIED:
-			syslog(LOG_ERR, gettext("kpropd: get_updates,"
+			syslog(LOG_ERR, _("kpropd: get_updates,"
 						" permission denied."));
 			goto error;
 
 		case UPDATE_ERROR:
-			syslog(LOG_ERR, gettext("kpropd: get_updates, error "
+			syslog(LOG_ERR, _("kpropd: get_updates, error "
 						"returned from master KDC."));
 			goto error;
 
@@ -761,7 +803,7 @@ reinit:
 			 * Master-slave are in sync
 			 */
 			if (debug)
-				fprintf(stderr, gettext("Master, slave KDC's "
+				fprintf(stderr, _("Master, slave KDC's "
 					"are in-sync, no updates\n"));
 			backoff_cnt = 0;
 			frdone = 0;
@@ -769,7 +811,7 @@ reinit:
 
 		default:
 			backoff_cnt = 0;
-			syslog(LOG_ERR, gettext("kpropd: get_updates,"
+			syslog(LOG_ERR, _("kpropd: get_updates,"
 					" invalid return from master KDC."));
 			break;
 		}
@@ -785,7 +827,7 @@ reinit:
 		if (backoff_cnt > 0) {
 			backoff_time = backoff_from_master(&backoff_cnt);
 			if (debug)
-				fprintf(stderr, gettext("Busy signal received "
+				fprintf(stderr, _("Busy signal received "
 					"from master, backoff for %d secs\n"),
 					backoff_time);
 			(void) sleep(backoff_time);
@@ -798,8 +840,8 @@ reinit:
 
 error:
 	if (debug)
-		fprintf(stderr, gettext("ERROR returned by master, bailing\n"));
-	syslog(LOG_ERR, gettext("kpropd: ERROR returned by master KDC,"
+		fprintf(stderr, _("ERROR returned by master, bailing\n"));
+	syslog(LOG_ERR, _("kpropd: ERROR returned by master KDC,"
 			" bailing.\n"));
 done:
 	if (poll_time)
@@ -810,7 +852,7 @@ done:
 		free(master_svc_princstr);
 	if (retval = krb5_cc_close(kpropd_context, cc)) {
 		com_err(progname, retval,
-			gettext("while closing default ccache"));
+			_("while closing default ccache"));
 		exit(1);
 	}
 	if (def_realm)
@@ -920,7 +962,7 @@ void PRS(argv)
 	}
 	log_ctx = kpropd_context->kdblog_context;
 	if (log_ctx && (log_ctx->iproprole == IPROP_SLAVE))
-		ulog_set_role(doit_context, IPROP_SLAVE);
+		ulog_set_role(kpropd_context, IPROP_SLAVE);
 
 	progname = *argv++;
 	while ((word = *argv++)) {
@@ -1008,6 +1050,27 @@ void PRS(argv)
 				    runonce = 1;
 				    break;
 
+				case 'x':
+				    {
+					char **new_db_args;
+					new_db_args = realloc(db_args,
+							      (db_args_size+2)*sizeof(*db_args));
+					if (new_db_args == NULL) {
+					    com_err(argv[0], errno, "copying db args");
+					    exit(1);
+					}
+					db_args = new_db_args;
+					if (*word)
+					    db_args[db_args_size] = word;
+					else
+					    db_args[db_args_size] = *argv++;
+					word = 0;
+					if (db_args[db_args_size] == NULL)
+					    usage();
+					db_args[db_args_size+1] = NULL;
+					db_args_size++;
+				    }
+
 				default:
 					usage();
 				}
@@ -1054,35 +1117,6 @@ void PRS(argv)
 	}
 	strcpy(temp_file_name, file);
 	strcat(temp_file_name, tmp);
-
-	retval = kadm5_get_config_params(kpropd_context, NULL, NULL, &params,
-	    &params);
-	if (retval) {
-		com_err(progname, retval, gettext("while initializing"));
-		exit(1);
-	}
-	if (params.iprop_enabled == TRUE) {
-		ulog_set_role(kpropd_context, IPROP_SLAVE);
-		poll_time = params.iprop_polltime;
-
-		if (ulog_map(kpropd_context, &params, FKPROPD)) { 
- 			com_err(progname, errno,
-			    gettext("Unable to map log!\n")); 
-			exit(1); 
-		} 
-	}
-
-	/*
-	 * Grab the realm info and check if iprop is enabled.
-	 */
-	if (def_realm == NULL) {
-		retval = krb5_get_default_realm(kpropd_context, &def_realm);
-		if (retval) {
-			com_err(progname, retval,
-				gettext("Unable to get default realm"));
-			exit(1);
-		}
-	}
 }
 
 /*
@@ -1485,7 +1519,7 @@ load_database(context, kdb_util, database_file_name)
 	if (debug)
 		printf("calling kdb5_util to load database\n");
 
-	log_cxt = context->kdblog_context;
+	log_ctx = context->kdblog_context;
 
 	edit_av[0] = kdb_util;
 	count = 1;
@@ -1545,4 +1579,37 @@ load_database(context, kdb_util, database_file_name)
 		exit(1);
 	}
 	return;
+}
+
+/*
+ * Get the host base service name for the kiprop principal. Returns
+ * KADM5_OK on success. Caller must free the storage allocated
+ * for host_service_name.
+ */
+static kadm5_ret_t
+kadm5_get_kiprop_host_srv_name(krb5_context context,
+			       const char *realm,
+			       char **host_service_name)
+{
+	kadm5_ret_t ret;
+	char *name;
+	char *host;
+
+#if 0 /* XXX */
+	if (ret = kadm5_get_master(context, realm, &host))
+		return (ret);
+#else
+	host = strdup("foobarbaz.mit.edu");
+#endif
+
+	name = malloc(strlen(KADM5_KIPROP_HOST_SERVICE) + strlen(host) + 2);
+	if (name == NULL) {
+		free(host);
+		return (ENOMEM);
+	}
+	sprintf(name, "%s@%s", KADM5_KIPROP_HOST_SERVICE, host);
+	free(host);
+	*host_service_name = name;
+
+	return (KADM5_OK);
 }

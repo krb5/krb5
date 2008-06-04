@@ -25,6 +25,8 @@
  * the OVSecure library
  */
 
+/* for "_" macro */
+#include "k5-platform.h"
 #include <krb5.h>
 #include <kadm5/admin.h>
 #include <adm_proto.h>

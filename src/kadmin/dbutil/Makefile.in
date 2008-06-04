@@ -4,7 +4,7 @@ mydir=kadmin/dbutil
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DKDB4_DISABLE
 DEFS=
-LOCALINCLUDES = -I. @KRB4_INCLUDES@ 
+LOCALINCLUDES = -I. @KRB4_INCLUDES@ -I$(SRCTOP)/lib/kdb -I$(SRCTOP)/iprop
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
@@ -56,7 +56,9 @@ $(OUTPRE)kdb5_util.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h kdb5_util.c kdb5_util.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  kdb5_util.c kdb5_util.h
 $(OUTPRE)kdb5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
@@ -74,7 +76,9 @@ $(OUTPRE)kdb5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h kdb5_create.c kdb5_util.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  kdb5_create.c kdb5_util.h
 $(OUTPRE)kadm5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
@@ -91,8 +95,9 @@ $(OUTPRE)kadm5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h kadm5_create.c kdb5_util.h \
-  string_table.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  kadm5_create.c kdb5_util.h string_table.h
 $(OUTPRE)string_table.$(OBJEXT): string_table.c
 $(OUTPRE)kdb5_destroy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
@@ -109,7 +114,9 @@ $(OUTPRE)kdb5_destroy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h kdb5_destroy.c kdb5_util.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  kdb5_destroy.c kdb5_util.h
 $(OUTPRE)kdb5_stash.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
@@ -125,7 +132,9 @@ $(OUTPRE)kdb5_stash.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h kdb5_stash.c kdb5_util.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  kdb5_stash.c kdb5_util.h
 $(OUTPRE)import_err.$(OBJEXT): $(COM_ERR_DEPS) import_err.c
 $(OUTPRE)strtok.$(OBJEXT): nstrtok.h strtok.c
 $(OUTPRE)dump.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -144,7 +153,9 @@ $(OUTPRE)dump.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h dump.c kdb5_util.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  dump.c kdb5_util.h
 $(OUTPRE)ovload.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
@@ -161,5 +172,6 @@ $(OUTPRE)ovload.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h import_err.h kdb5_util.h \
-  nstrtok.h ovload.c
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  import_err.h kdb5_util.h nstrtok.h ovload.c

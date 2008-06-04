@@ -864,7 +864,7 @@ dump_iprop_iterator(ptr, entry)
     if ((retval = krb5_unparse_name(arg->kcontext,
 				    entry->princ,
 				    &name))) {
-		fprintf(stderr, gettext(pname_unp_err),
+		fprintf(stderr, _(pname_unp_err),
 		arg->programname, error_message(retval));
 	return(retval);
     }
@@ -986,7 +986,7 @@ dump_iprop_iterator(ptr, entry)
 	    if (arg->verbose)
 		fprintf(stderr, "%s\n", name);
 		} else {
-			fprintf(stderr, gettext(sdump_tl_inc_err),
+			fprintf(stderr, _(sdump_tl_inc_err),
 		    arg->programname, name, counter,
 		    (int) entry->n_tl_data); 
 	    retval = EINVAL;
@@ -1082,7 +1082,7 @@ dump_iprop_princ(ptr, entry)
      if ((retval = krb5_unparse_name(arg->kcontext,
 				     entry->princ,
 				     &name))) {
-		fprintf(stderr, gettext(pname_unp_err),
+		fprintf(stderr, _(pname_unp_err),
 		  arg->programname, error_message(retval));
 	  return(retval);
      }
@@ -1242,6 +1242,7 @@ dump_db(argc, argv)
     char		*new_mkey_file = 0;
     bool_t		dump_sno = FALSE;
     kdb_log_context	*log_ctx;
+    char		**db_args = 0; /* XXX */
 
     /*
      * Parse the arguments.
@@ -1281,7 +1282,7 @@ dump_db(argc, argv)
 		 */
 		dump_sno = TRUE;
 	    } else {
-		fprintf(stderr, gettext("Iprop not enabled\n"));
+		fprintf(stderr, _("Iprop not enabled\n"));
 		exit_status++;
 		return;
 	    }
@@ -1408,11 +1409,11 @@ dump_db(argc, argv)
 	fprintf(arglist.ofile, "%s", dump->header);
 
 	if (dump_sno) {
-	    if (ulog_map(util_context, &global_params, FKCOMMAND)) {
+	    if (ulog_map(util_context, &global_params, FKCOMMAND, db_args)) {
 		fprintf(stderr,
-			gettext("%s: Could not map log\n"), programname);
+			_("%s: Could not map log\n"), programname);
 		exit_status++;
-		goto error;
+		goto unlock_and_return;
 	    }
 
 	    /*
@@ -1421,9 +1422,9 @@ dump_db(argc, argv)
 	     */
 	    if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
 		fprintf(stderr,
-			gettext("%s: Couldn't grab lock\n"), programname);
+			_("%s: Couldn't grab lock\n"), programname);
 		exit_status++;
-		goto error;
+		goto unlock_and_return;
 	    }
 
 	    fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
@@ -1460,6 +1461,7 @@ dump_db(argc, argv)
 	    update_ok_file(ofile);
 	}
     }
+unlock_and_return:
     if (locked)
 	(void) krb5_lock_file(util_context, fileno(f), KRB5_LOCKMODE_UNLOCK);
 }
@@ -2400,6 +2402,8 @@ load_db(argc, argv)
     int			db_locked = 0;
     char		iheader[MAX_HEADER];
     kdb_log_context	*log_ctx;
+    int			add_update = 1;
+    uint32_t		caller, last_sno, last_seconds, last_useconds;
 
     /*
      * Parse the arguments.
@@ -2431,7 +2435,7 @@ load_db(argc, argv)
 		load = &iprop_version;
 		add_update = FALSE;
 	    } else {
-		fprintf(stderr, gettext("Iprop not enabled\n"));
+		fprintf(stderr, _("Iprop not enabled\n"));
 		exit_status++;
 		return;
 	    }
@@ -2641,9 +2645,8 @@ load_db(argc, argv)
 	else
 	    caller = FKPROPD;
 
-	if (ulog_map(kcontext, &global_params, caller)) {
-	    fprintf(stderr,
-		    gettext("%s: Could not map log\n"),
+	if (ulog_map(kcontext, &global_params, caller, db5util_db_args)) {
+	    fprintf(stderr, _("%s: Could not map log\n"),
 		    programname);
 	    exit_status++;
 	    goto error;

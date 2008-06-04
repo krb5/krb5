@@ -3,6 +3,7 @@ myfulldir=lib/kadm5/srv
 mydir=lib/kadm5/srv
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5 \
+	-I$(SRCTOP)/iprop -I$(srcdir)/../../kdb \
 	-I$(SRCTOP)/lib/gssapi/krb5 -I$(SRCTOP)/lib/gssapi/generic \
 	-I$(BUILDTOP)/lib/gssapi/krb5 -I$(BUILDTOP)/lib/gssapi/generic
 DEFINES = @HESIOD_DEFS@
@@ -197,9 +198,10 @@ server_init.so server_init.po $(OUTPRE)server_init.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../gssapi/generic/gssapiP_generic.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(srcdir)/../../gssapi/generic/gssapiP_generic.h \
   $(srcdir)/../../gssapi/generic/gssapi_generic.h $(srcdir)/../../gssapi/krb5/gssapiP_krb5.h \
-  server_init.c
+  $(srcdir)/../../kdb/kdb_log.h server_init.c
 server_dict.so server_dict.po $(OUTPRE)server_dict.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \

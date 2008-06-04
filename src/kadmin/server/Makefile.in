@@ -6,7 +6,8 @@ KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 DEFS=
 
 LOCALINCLUDES = -I$(SRCTOP)/lib/gssapi/generic -I$(SRCTOP)/lib/gssapi/krb5 \
-	-I$(BUILDTOP)/lib/gssapi/generic -I$(BUILDTOP)/lib/gssapi/krb5
+	-I$(BUILDTOP)/lib/gssapi/generic -I$(BUILDTOP)/lib/gssapi/krb5 \
+	-I$(SRCTOP)/lib/kdb -I$(SRCTOP)/iprop -I$(SRCTOP)/lib/kadm5/srv
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -83,8 +84,10 @@ $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
+  $(SRCTOP)/iprop/iprop.h $(SRCTOP)/iprop/iprop_hdr.h \
   $(SRCTOP)/lib/gssapi/generic/gssapiP_generic.h $(SRCTOP)/lib/gssapi/generic/gssapi_generic.h \
-  $(SRCTOP)/lib/gssapi/krb5/gssapiP_krb5.h misc.h ovsec_kadmd.c
+  $(SRCTOP)/lib/gssapi/krb5/gssapiP_krb5.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  misc.h ovsec_kadmd.c
 $(OUTPRE)schpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
@@ -132,3 +135,20 @@ $(OUTPRE)server_glue_v1.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h misc.h \
   server_glue_v1.c
+$(OUTPRE)ipropd_svc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/kadm5/kadm_rpc.h $(BUILDTOP)/include/kadm5/server_internal.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/lib/gssapi/krb5/gssapi_krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/syslog.h \
+  $(SRCTOP)/iprop/iprop.h $(SRCTOP)/iprop/iprop_hdr.h \
+  $(SRCTOP)/lib/kadm5/srv/server_acl.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  ipropd_svc.c misc.h

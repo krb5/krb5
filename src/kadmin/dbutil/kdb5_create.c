@@ -279,11 +279,11 @@ master key name '%s'\n",
 /*     } */
 
     if (log_ctx && log_ctx->iproprole) {
-	if (retval = ulog_map(util_context, &global_params, FKCOMMAND)) {
+	if (retval = ulog_map(util_context, &global_params, FKCOMMAND, db5util_db_args)) {
 	    com_err(argv[0], retval,
-		    gettext("while creating update log"));
+		    _("while creating update log"));
 	    exit_status++;
-	    goto cleanup;
+	    return;
 	}
 
 	/*
