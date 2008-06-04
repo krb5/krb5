@@ -8,7 +8,6 @@
 
 /* #pragma ident	"@(#)kdb_log.h	1.3	04/02/23 SMI" */
 
-#include <k5-int.h>
 #include <iprop_hdr.h>
 #include <iprop.h>
 #include <limits.h>
@@ -21,7 +20,7 @@ extern "C" {
 /*
  * DB macros
  */
-#define	INDEX(ulogaddr, i) ((ulong_t) ulogaddr + sizeof (kdb_hlog_t) + \
+#define	INDEX(ulogaddr, i) ((unsigned long) ulogaddr + sizeof (kdb_hlog_t) + \
 	(i*ulog->kdb_block))
 
 /*
