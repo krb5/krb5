@@ -403,6 +403,11 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	 params.realm = lrealm;
 	 params.mask |= KADM5_CONFIG_REALM;
     }
+
+    if (params_in->mask & KADM5_CONFIG_KVNO) {
+	params.kvno = params_in->kvno;
+        params.mask |= KADM5_CONFIG_KVNO;
+    }
     /*
      * XXX These defaults should to work on both client and
      * server.  kadm5_get_config_params can be implemented as a

@@ -1106,6 +1106,7 @@ dump_db(argc, argv)
 		    }
 		    retval = krb5_db_verify_master_key(util_context,
 						       master_princ,
+                                                       NULL,
 						       &master_keyblock);
 		    if (retval) {
 			    com_err(argv[0], retval,

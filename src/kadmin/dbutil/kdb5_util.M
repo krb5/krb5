@@ -5,6 +5,7 @@ kdb5_util \- Kerberos database maintainance utility
 .B kdb5_util
 [\fB\-r\fP\ \fIrealm\fP] [\fB\-d\fP\ \fIdbname\fP]
 [\fB\-k\fP\ \fImkeytype\fP] [\fB\-M\fP\ \fImkeyname\fP]
+[\fB\-kv\fP\ \fImkeyVNO\fP] 
 [\fB\-sf\fP\ \fIstashfilename\fP]
 [\fB\-m\fP]
 .I command
@@ -57,6 +58,10 @@ value.
 specifies the key type of the master key in the database; the default is
 that given in
 .IR kdc.conf .
+.TP
+\fB\-kv\fP\ \fImkeyVNO\fP
+Specifies the version number of the master key in the database; the default is
+0.
 .TP
 \fB\-M\fP\ \fImkeyname\fP
 principal name for the master key in the database; the default is

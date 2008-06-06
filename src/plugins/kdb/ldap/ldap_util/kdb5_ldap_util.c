@@ -116,7 +116,7 @@ void usage()
 "\t\t[-kdcdn kdc_service_list] [-admindn admin_service_list]\n"
 "\t\t[-pwddn passwd_service_list]\n"
 #endif
-"\t\t[-m|-P password|-sf stashfilename] [-k mkeytype] [-s]\n"
+"\t\t[-m|-P password|-sf stashfilename] [-k mkeytype] [-kv mkeyVNO] [-s]\n"
 "\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
 "\t\t[ticket_flags] [-r realm]\n"
 
@@ -343,10 +343,20 @@ int main(argc, argv)
 		goto cleanup;
 	    }
 	} else if (strcmp(*argv, "-k") == 0 && ARG_VAL) {
-	    if (krb5_string_to_enctype(koptarg, &global_params.enctype))
-		com_err(argv[0], 0, "%s is an invalid enctype", koptarg);
-	    else
+	    if (krb5_string_to_enctype(koptarg, &global_params.enctype)) {
+		com_err(progname, EINVAL, ": %s is an invalid enctype", koptarg);
+		exit_status++;
+		goto cleanup;
+            } else
 		global_params.mask |= KADM5_CONFIG_ENCTYPE;
+	} else if (strcmp(*argv, "-kv") == 0 && ARG_VAL) {
+	    global_params.kvno = (krb5_kvno) atoi(koptarg);
+            if (global_params.kvno == IGNORE_VNO) {
+                com_err(progname, EINVAL, ": %s is an invalid mkeyVNO", koptarg);
+		exit_status++;
+		goto cleanup;
+            } else
+                global_params.mask |= KADM5_CONFIG_KVNO;
 	} else if (strcmp(*argv, "-M") == 0 && ARG_VAL) {
 	    global_params.mkey_name = koptarg;
 	    global_params.mask |= KADM5_CONFIG_MKEY_NAME;

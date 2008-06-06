@@ -133,6 +133,7 @@ typedef long		kadm5_ret_t;
 #ifdef notyet /* Novell */
 #define KADM5_CONFIG_KPASSWD_SERVER     0x800000
 #endif
+#define KADM5_CONFIG_KVNO               0x1000000
 /*
  * permission bits
  */
@@ -243,6 +244,7 @@ typedef struct _kadm5_config_params {
      krb5_flags		flags;
      krb5_key_salt_tuple *keysalts;
      krb5_int32		num_keysalts;
+     krb5_kvno          kvno;
 } kadm5_config_params;
 
 /***********************************************************************

@@ -139,6 +139,7 @@ typedef struct _kdb_vftabl{
     krb5_error_code (*store_master_key) (krb5_context kcontext,
 					 char *db_arg,
 					 krb5_principal mname,
+                                         krb5_kvno kvno,
 					 krb5_keyblock *key,
 					 char *master_pwd);
 
@@ -150,6 +151,7 @@ typedef struct _kdb_vftabl{
 
     krb5_error_code (*verify_master_key) (krb5_context kcontext,
 					  krb5_principal mprinc,
+					  krb5_kvno     *kvno,
 					  krb5_keyblock *mkey);
 
     krb5_error_code (*dbe_search_enctype) (krb5_context kcontext,

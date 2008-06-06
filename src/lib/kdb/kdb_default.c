@@ -132,94 +132,116 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 #endif
 
 krb5_error_code
-krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
-    krb5_context context;
-    char *keyfile;
-    krb5_principal mname;
-    krb5_keyblock *key;
-    char *master_pwd;
+krb5_def_store_mkey(krb5_context   context,
+                    char           *keyfile,
+                    krb5_principal mname,
+                    krb5_kvno      kvno,
+                    krb5_keyblock  *key,
+                    char           *master_pwd)
 {
-    FILE *kf;
     krb5_error_code retval = 0;
-    krb5_ui_2 enctype;
     char defkeyfile[MAXPATHLEN+1];
+    char *tmp_ktname = NULL, *tmp_ktpath;
     krb5_data *realm = krb5_princ_realm(context, mname);
-#if HAVE_UMASK
-    mode_t oumask;
-#endif
+    krb5_keytab kt;
+    krb5_keytab_entry new_entry;
+    struct stat stb;
+    int statrc;
 
     if (!keyfile) {
-	(void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
-	(void) strncat(defkeyfile, realm->data,
-		       min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
-			   realm->length));
-	defkeyfile[sizeof(defkeyfile) - 1] = '\0';
-	keyfile = defkeyfile;
+        (void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
+        (void) strncat(defkeyfile, realm->data,
+            min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
+                realm->length));
+        defkeyfile[sizeof(defkeyfile) - 1] = '\0';
+        keyfile = defkeyfile;
     }
 
-#if HAVE_UMASK
-    oumask = umask(077);
-#endif
-#ifdef ANSI_STDIO
-    if (!(kf = fopen(keyfile, "wb")))
-#else
-    if (!(kf = fopen(keyfile, "w")))
-#endif
-    {
-	int e = errno;
-#if HAVE_UMASK
-	(void) umask(oumask);
-#endif
-	krb5_set_error_message (context, e,
-				"%s accessing file '%s'",
-				error_message (e), keyfile);
-	return e;
+    /*
+     * XXX making the assumption that the keyfile is in a dir that requires root
+     * privilege to write to thus making timing attacks unlikely.
+     */
+    if ((statrc = stat(keyfile, &stb)) >= 0) {
+        /* if keyfile exists it better be a regular file */
+        if (!S_ISREG(stb.st_mode)) {
+            retval = EINVAL;
+            krb5_set_error_message (context, retval,
+                "keyfile (%s) is not a regular file: %s",
+                keyfile, error_message(retval));
+            goto out;
+        }
     }
-    set_cloexec_file(kf);
-    enctype = key->enctype;
-    if ((fwrite((krb5_pointer) &enctype,
-		2, 1, kf) != 1) ||
-	(fwrite((krb5_pointer) &key->length,
-		sizeof(key->length), 1, kf) != 1) ||
-	(fwrite((krb5_pointer) key->contents,
-		sizeof(key->contents[0]), (unsigned) key->length, 
-		kf) != key->length)) {
-	retval = errno;
-	(void) fclose(kf);
-    } else if (fclose(kf) == EOF)
-	retval = errno;
-#if HAVE_UMASK
-    (void) umask(oumask);
-#endif
+
+    /* Use temp keytab file name in case creation of keytab fails */
+
+    /* create temp file template for use by mktemp() */
+    if ((retval = asprintf(&tmp_ktname, "WRFILE:%s_XXXXX", keyfile)) < 0) {
+        krb5_set_error_message (context, retval,
+            "Could not create temp keytab file name.");
+        goto out;
+    }
+    if (mktemp(tmp_ktname) == NULL) {
+        retval = errno;
+        krb5_set_error_message (context, retval,
+            "Could not create temp stash file: %s",
+            error_message(errno));
+        goto out;
+    }
+
+    /* create new stash keytab using temp file name */
+    retval = krb5_kt_resolve(context, tmp_ktname, &kt);
+    if (retval != 0)
+        goto out;
+
+    memset((char *) &new_entry, 0, sizeof(new_entry));
+    new_entry.principal = mname;
+    new_entry.key = *key;
+    new_entry.vno = kvno;
+
+    /*
+     * Set tmp_ktpath to point to the keyfile path (skip WRFILE:).  Subtracting
+     * 1 to account for NULL terminator in sizeof calculation of a string
+     * constant.  Used further down.
+     */
+    tmp_ktpath = tmp_ktname + (sizeof("WRFILE:") - 1);
+
+    retval = krb5_kt_add_entry(context, kt, &new_entry);
+    if (retval != 0) {
+        /* delete tmp keyfile if it exists and an error occurrs */
+        if (stat(keyfile, &stb) >= 0)
+            (void) unlink(tmp_ktpath);
+    } else {
+        /* rename original keyfile to original filename */
+        if (rename(tmp_ktpath, keyfile) < 0) {
+            retval = errno;
+            krb5_set_error_message (context, retval,
+                "rename of temporary keyfile (%s) to (%s) failed: %s",
+                tmp_ktpath, keyfile, error_message(errno));
+        }
+    }
+
+out:
+    if (tmp_ktname != NULL)
+        free(tmp_ktname);
+
     return retval;
 }
 
-
-krb5_error_code
-krb5_db_def_fetch_mkey( krb5_context   context,
+static krb5_error_code
+krb5_db_def_fetch_mkey_stash( krb5_context   context,
+			const char *keyfile,
 			krb5_principal mname,
 			krb5_keyblock *key,
-			int           *kvno,
-			char          *db_args)
+			krb5_kvno     *kvno)
 {
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     krb5_ui_2 enctype;
-    char defkeyfile[MAXPATHLEN+1];
-    krb5_data *realm = krb5_princ_realm(context, mname);
     FILE *kf = NULL;
 
-    retval = 0;
-    key->magic = KV5M_KEYBLOCK;
-    (void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
-    (void) strncat(defkeyfile, realm->data,
-		   min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
-		       realm->length));
-    defkeyfile[sizeof(defkeyfile) - 1] = '\0';
-	
 #ifdef ANSI_STDIO
-    if (!(kf = fopen((db_args) ? db_args : defkeyfile, "rb")))
+    if (!(kf = fopen(keyfile, "rb")))
 #else
-    if (!(kf = fopen((db_args) ? db_args : defkeyfile, "r")))
+    if (!(kf = fopen(keyfile, "r")))
 #endif
 	return KRB5_KDB_CANTREAD_STORED;
     set_cloexec_file(kf);
@@ -252,9 +274,8 @@ krb5_db_def_fetch_mkey( krb5_context   context,
 	goto errout;
     }
 
-    if (fread((krb5_pointer) key->contents,
-	      sizeof(key->contents[0]), key->length, kf) 
-	!= key->length) {
+    if (fread((krb5_pointer) key->contents, sizeof(key->contents[0]),
+					    key->length, kf) != key->length) {
 	retval = KRB5_KDB_CANTREAD_STORED;
 	memset(key->contents, 0,  key->length);
 	free(key->contents);
@@ -262,20 +283,144 @@ krb5_db_def_fetch_mkey( krb5_context   context,
     } else
 	retval = 0;
 
-    *kvno = 0;
+    /*
+     * Note, the old stash format did not store the kvno so it was always hard
+     * coded to be 0.
+     */
+    if (kvno)
+	*kvno = 0;
 
  errout:
     (void) fclose(kf);
     return retval;
-
 }
 
+static krb5_error_code
+krb5_db_def_fetch_mkey_keytab(  krb5_context   context,
+                                const char     *keyfile,
+                                krb5_principal mname,
+                                krb5_keyblock  *key,
+                                krb5_kvno      *kvno)
+{
+    krb5_error_code retval = 0;
+    char *ktname = NULL;
+    krb5_keytab kt;
+    krb5_keytab_entry kt_ent;
+
+    /* memset krb5_kt_free_entry so can be called safely later */
+    memset(&kt_ent, 0, sizeof(kt_ent));
+
+    /* create keytab name string to feed to krb5_kt_resolve */
+    if ((retval = asprintf(&ktname, "FILE:%s", keyfile)) < 0) {
+        krb5_set_error_message (context, retval,
+            "Could not create keytab name string.");
+        goto errout;
+    }
+
+    if ((retval = krb5_kt_resolve(context, ktname, &kt)) != 0)
+        goto errout;
+
+    if ((retval = krb5_kt_get_entry(context, kt, mname,
+                                    kvno ? *kvno : IGNORE_VNO,
+                                    IGNORE_ENCTYPE,
+                                    &kt_ent)) == 0) {
+
+        if (key->enctype == ENCTYPE_UNKNOWN)
+            key->enctype = kt_ent.key.enctype;
+        else if (kt_ent.key.enctype != key->enctype) {
+            retval = KRB5_KDB_BADSTORED_MKEY;
+            goto errout;
+        }
+
+        if (((int) kt_ent.key.length) < 0) {
+            retval = KRB5_KDB_BADSTORED_MKEY;
+            goto errout;
+        }
+
+        key->length = kt_ent.key.length;
+
+        if (kvno != NULL) {
+            /*
+             * if a kvno pointer was passed in and it dereferences to
+             * IGNORE_VNO then it should be assigned the value of the
+             * kvno found in the keytab otherwise the KNVO specified
+             * should be the same as the one returned from the keytab.
+             */
+            if (*kvno == IGNORE_VNO) {
+                *kvno = kt_ent.vno;
+            } else if (*kvno != kt_ent.vno) {
+                retval = KRB5_KDB_BADSTORED_MKEY;
+                goto errout;
+            }
+        }
+
+        /*
+         * kt_ent will be free'd later so need to allocate and copy key
+         * contents for output to caller.
+         */
+        if (!(key->contents = (krb5_octet *)malloc(key->length))) {
+            retval = ENOMEM;
+            goto errout;
+        }
+        memcpy(key->contents, kt_ent.key.contents, kt_ent.key.length);
+    }
+
+errout:
+    krb5_kt_free_entry(context, &kt_ent);
+    return retval;
+}
 
 krb5_error_code
-krb5_def_verify_master_key(context, mprinc, mkey)
-    krb5_context context;
-    krb5_principal mprinc;
-    krb5_keyblock *mkey;
+krb5_db_def_fetch_mkey( krb5_context   context,
+                        krb5_principal mname,
+                        krb5_keyblock *key,
+                        krb5_kvno     *kvno,
+                        char          *db_args)
+{
+    krb5_error_code retval_ofs = 0, retval_kt = 0;
+    char defkeyfile[MAXPATHLEN+1];
+    krb5_data *realm = krb5_princ_realm(context, mname);
+
+    key->magic = KV5M_KEYBLOCK;
+    (void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
+    (void) strncat(defkeyfile, realm->data,
+                    min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
+                    realm->length));
+    defkeyfile[sizeof(defkeyfile) - 1] = '\0';
+
+    /* assume the master key is in a keytab */
+    retval_kt = krb5_db_def_fetch_mkey_keytab(context, defkeyfile, mname, key,
+                                              kvno);
+    if (retval_kt != 0) {
+        /*
+         * If it's not in a keytab, fall back and try getting the mkey from the
+         * older stash file format.
+         */
+        retval_ofs = krb5_db_def_fetch_mkey_stash(context, defkeyfile, mname,
+                                                  key, kvno);
+    }
+
+    if (retval_kt != 0 && retval_ofs != 0) {
+        /*
+         * Error, not able to get mkey from either file format.
+         *
+         * XXX note this masks the underlying error, wonder if there is a better
+         * way to deal with this.
+         */
+        krb5_set_error_message (context, KRB5_KDB_CANTREAD_STORED,
+            "Can not get master key either from keytab (error: %d) or old "
+            "format (error %d).", retval_kt, retval_ofs);
+        return KRB5_KDB_CANTREAD_STORED;
+    } else {
+        return 0;
+    }
+}
+
+krb5_error_code
+krb5_def_verify_master_key( krb5_context    context,
+                            krb5_principal  mprinc,
+                            krb5_kvno       *kvno,
+                            krb5_keyblock   *mkey)
 {
     krb5_error_code retval;
     krb5_db_entry master_entry;
@@ -308,6 +453,18 @@ krb5_def_verify_master_key(context, mprinc, mkey)
 	memcmp((char *)mkey->contents,
 	       (char *)tempkey.contents,mkey->length)) {
 	retval = KRB5_KDB_BADMASTERKEY;
+    }
+
+    if (kvno != NULL) {
+        if (*kvno == IGNORE_VNO) {
+            /* return value of mkey princs kvno */
+            *kvno = master_entry.key_data->key_data_kvno;
+        } else if (*kvno != (krb5_kvno) master_entry.key_data->key_data_kvno) {
+            retval = KRB5_KDB_BADMASTERKEY;
+            krb5_set_error_message (context, retval,
+                "User specified mkeyVNO (%u) does not match master key princ's KVNO (%u)",
+                *kvno, master_entry.key_data->key_data_kvno);
+        }
     }
 
     memset((char *)tempkey.contents, 0, tempkey.length);

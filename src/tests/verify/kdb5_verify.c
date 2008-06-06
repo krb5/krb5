@@ -416,7 +416,7 @@ set_dbname_help(context, pname, dbname)
 	return(1);
     }
     if ((retval = krb5_db_verify_master_key(context, master_princ, 
-					    &master_keyblock))) {
+					    NULL, &master_keyblock))) {
 	com_err(pname, retval, "while verifying master key");
 	(void) krb5_db_fini(context);
 	return(1);

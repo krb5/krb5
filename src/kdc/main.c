@@ -277,6 +277,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     /* Verify the master key */
     if ((kret = krb5_db_verify_master_key(rdp->realm_context,
 					  rdp->realm_mprinc,
+                                          NULL,
 					  &rdp->realm_mkey))) {
 	com_err(progname, kret,
 		"while verifying master key for realm %s", realm);

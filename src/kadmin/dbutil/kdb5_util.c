@@ -81,7 +81,7 @@ void usage()
 {
      fprintf(stderr, "Usage: "
 	   "kdb5_util [-x db_args]* [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
-	     "\t        [-sf stashfilename] [-m] cmd [cmd_options]\n"
+	     "\t        [-kv mkeyVNO] [-sf stashfilename] [-m] cmd [cmd_options]\n"
 	     "\tcreate	[-s]\n"
 	     "\tdestroy	[-f]\n"
 	     "\tstash	[-f keyfile]\n"
@@ -203,7 +203,7 @@ int main(argc, argv)
     }
     memset(cmd_argv, 0, sizeof(char *)*argc);
     cmd_argc = 1;
-	 
+
     argv++; argc--;
     while (*argv) {
        if (strcmp(*argv, "-P") == 0 && ARG_VAL) {
@@ -244,10 +244,18 @@ int main(argc, argv)
 		 exit(1);
 	    }
        } else if (strcmp(*argv, "-k") == 0 && ARG_VAL) {
-	    if (krb5_string_to_enctype(koptarg, &global_params.enctype))
-		 com_err(argv[0], 0, "%s is an invalid enctype", koptarg);
-	    else
+	    if (krb5_string_to_enctype(koptarg, &global_params.enctype)) {
+		com_err(progname, EINVAL, ": %s is an invalid enctype", koptarg);
+                exit(1);
+            } else
 		 global_params.mask |= KADM5_CONFIG_ENCTYPE;
+       } else if (strcmp(*argv, "-kv") == 0 && ARG_VAL) {
+	    global_params.kvno = (krb5_kvno) atoi(koptarg);
+            if (global_params.kvno == IGNORE_VNO) {
+                com_err(progname, EINVAL, ": %s is an invalid mkeyVNO", koptarg);
+                exit(1);
+            } else
+                global_params.mask |= KADM5_CONFIG_KVNO;
        } else if (strcmp(*argv, "-M") == 0 && ARG_VAL) {
 	    global_params.mkey_name = koptarg;
 	    global_params.mask |= KADM5_CONFIG_MKEY_NAME;
@@ -457,7 +465,7 @@ static int open_db_and_mkey()
 	return(0);
     }
     if ((retval = krb5_db_verify_master_key(util_context, master_princ, 
-					    &master_keyblock))) {
+					    NULL, &master_keyblock))) {
 	com_err(progname, retval, "while verifying master key");
 	exit_status++;
 	krb5_free_keyblock_contents(util_context, &master_keyblock);

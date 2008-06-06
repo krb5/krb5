@@ -25,7 +25,7 @@ This option is not recommended.
 Specifies the URI of the LDAP server.
 .SH COMMANDS
 .TP
-\fBcreate\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-s\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
+\fBcreate\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-kv\fP\ \fImkeyVNO\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-s\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
 Creates realm in directory. Options:
 .RS
 .TP
@@ -46,6 +46,10 @@ If the container reference is not configured for a realm, the principals will be
 Specifies the key type of the master key in the database; the default is
 that given in
 .IR kdc.conf .
+.TP
+\fB\-kv\fP\ \fImkeyVNO\fP
+Specifies the version number of the master key in the database; the default is
+0.
 .TP
 \fB\-m\fP
 Specifies that the master database password should be read from the TTY

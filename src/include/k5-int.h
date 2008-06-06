@@ -1778,6 +1778,11 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 #endif
 
+/* value to use when requesting a keytab entry and KVNO doesn't matter */
+#define IGNORE_VNO 0
+/* value to use when requesting a keytab entry and enctype doesn't matter */
+#define IGNORE_ENCTYPE 0
+
 /*
  * Convenience function for structure magic number
  */

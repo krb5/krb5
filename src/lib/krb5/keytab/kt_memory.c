@@ -39,8 +39,6 @@
 /*
  * Constants
  */
-#define IGNORE_VNO 0
-#define IGNORE_ENCTYPE 0
 
 /* 
  * Types

@@ -81,6 +81,7 @@ kdb5_stash(argc, argv)
     char *mkey_fullname;
     char *keyfile = 0;
     krb5_context context;
+    krb5_kvno mkey_kvno;
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -153,7 +154,14 @@ kdb5_stash(argc, argv)
 	exit_status++; return; 
     }
 
+    if (global_params.mask & KADM5_CONFIG_KVNO)
+        mkey_kvno = global_params.kvno; /* user specified */
+    else
+        mkey_kvno = IGNORE_VNO; /* use whatever krb5_db_verify_master_key finds */
+
+    /* verify will set mkey_kvno to mkey princ's kvno mkey_kvno if it's IGNORE_VNO */
     retval = krb5_db_verify_master_key(context, master_princ, 
+                                       &mkey_kvno,
 				       &master_keyblock);
     if (retval) {
 	com_err(argv[0], retval, "while verifying master key");
@@ -162,7 +170,8 @@ kdb5_stash(argc, argv)
     }	
 
     retval = krb5_db_store_master_key(context, keyfile, master_princ, 
-				      &master_keyblock, NULL);
+				      mkey_kvno, &master_keyblock,
+				      NULL);
     if (retval) {
 	com_err(argv[0], errno, "while storing key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);

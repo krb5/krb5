@@ -61,7 +61,7 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 	goto done;
 				 
     if ((ret = krb5_db_verify_master_key(handle->context, master_princ,
-					 &master_keyblock))) {
+					 NULL, &master_keyblock))) {
 	  krb5_db_fini(handle->context);
 	  return ret;
     }

@@ -1212,8 +1212,9 @@ krb5_db_get_mkey(krb5_context kcontext, krb5_keyblock ** key)
 
 krb5_error_code
 krb5_db_store_master_key(krb5_context kcontext,
-			 char *db_arg,
+			 char *keyfile,
 			 krb5_principal mname,
+			 krb5_kvno kvno,
 			 krb5_keyblock * key, char *master_pwd)
 {
     krb5_error_code status = 0;
@@ -1233,8 +1234,9 @@ krb5_db_store_master_key(krb5_context kcontext,
     }
 
     status = dal_handle->lib_handle->vftabl.store_master_key(kcontext,
-							     db_arg,
+							     keyfile,
 							     mname,
+							     kvno,
 							     key, master_pwd);
     get_errmsg(kcontext, status);
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
@@ -1258,7 +1260,7 @@ krb5_db_fetch_mkey(krb5_context context,
     char    password[BUFSIZ];
     krb5_data pwd;
     unsigned int size = sizeof(password);
-    int     kvno;
+    int     kvno = IGNORE_VNO;
     krb5_keyblock tmp_key;
 
     memset(&tmp_key, 0, sizeof(tmp_key));
@@ -1337,8 +1339,10 @@ krb5_db_fetch_mkey(krb5_context context,
 }
 
 krb5_error_code
-krb5_db_verify_master_key(krb5_context kcontext,
-			  krb5_principal mprinc, krb5_keyblock * mkey)
+krb5_db_verify_master_key(krb5_context   kcontext,
+			  krb5_principal mprinc,
+			  krb5_kvno      *kvno,
+                          krb5_keyblock  *mkey)
 {
     krb5_error_code status = 0;
     kdb5_dal_handle *dal_handle;
@@ -1357,7 +1361,9 @@ krb5_db_verify_master_key(krb5_context kcontext,
     }
 
     status = dal_handle->lib_handle->vftabl.verify_master_key(kcontext,
-							      mprinc, mkey);
+							      mprinc,
+							      kvno,
+                                                              mkey);
     get_errmsg(kcontext, status);
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 

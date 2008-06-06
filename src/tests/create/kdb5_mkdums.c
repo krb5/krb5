@@ -389,7 +389,7 @@ char *dbname;
     free(args[0]);
 
     if ((retval = krb5_db_verify_master_key(test_context, master_princ, 
-					   &master_keyblock))){
+					   NULL, &master_keyblock))){
 	com_err(pname, retval, "while verifying master key");
 	(void) krb5_db_fini(test_context);
 	return(1);
