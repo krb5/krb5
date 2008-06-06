@@ -75,22 +75,23 @@ synchronization between KDC servers.
 .TP
 \fB\-v\fP
 Display individual attributes per update.
-.\" An example of the output generated for one entry:</para>
-.\" <programlisting>Update Entry
-.\"    Update serial # : 4
-.\"    Update operation : Add
-.\"    Update principal : test@EXAMPLE.COM
-.\"    Update size : 424
-.\"    Update committed : True
-.\"    Update time stamp : Fri Feb 20 23:37:42 2004
-.\"    Attributes changed : 6
-.\"          Principal
-.\"          Key data
-.\"          Password last changed
-.\"          Modifying principal
-.\"          Modification time
-.\"          TL data</programlisting>
-.\"
+An example of the output generated for one entry:
+.nf
+ Update Entry
+    Update serial # : 4
+    Update operation : Add
+    Update principal : test@EXAMPLE.COM
+    Update size : 424
+    Update committed : True
+    Update time stamp : Fri Feb 20 23:37:42 2004
+    Attributes changed : 6
+          Principal
+          Key data
+          Password last changed
+          Modifying principal
+          Modification time
+          TL data
+.fi
 
 .SH FILES
 .TP
