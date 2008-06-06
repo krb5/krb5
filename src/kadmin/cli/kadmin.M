@@ -71,6 +71,20 @@ except for database dump and load, which is now provided by the
 utility.
 .PP
 If the database is LDAP, kadmin.local need not be run on the KDC. 
+.PP
+kadmin.local can be configured to log updates for incremental database
+propagation.  Incremental propagation allows slave KDC servers to
+receive principal and policy updates incrementally instead of
+receiving full dumps of the database.  This facility can be enabled in
+the
+.I kdc.conf
+file with the
+.I sunw_dbprop_enable
+option.  See the
+.I kdc.conf
+documentation for other options for tuning incremental propagation
+parameters.
+
 .SH OPTIONS
 .TP
 \fB\-r\fP \fIrealm\fP
