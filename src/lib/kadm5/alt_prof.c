@@ -729,8 +729,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	 if (params.num_keysalts)
 	      params.mask |= KADM5_CONFIG_ENCTYPES;
 
-	 if (svalue)
-	      krb5_xfree(svalue);
+	 krb5_xfree(svalue);
     }
     
     *params_out = params;
@@ -753,29 +752,17 @@ kadm5_free_config_params(context, params)
     kadm5_config_params	*params;
 {
     if (params) {
-	if (params->dbname)
-	    krb5_xfree(params->dbname);
-	if (params->mkey_name)
-	    krb5_xfree(params->mkey_name);
-	if (params->stash_file)
-	    krb5_xfree(params->stash_file);
-	if (params->keysalts)
-	    krb5_xfree(params->keysalts);
-	if (params->admin_server)
-	     free(params->admin_server);
-	if (params->admin_keytab)
-	     free(params->admin_keytab);
-	if (params->dict_file)
-	     free(params->dict_file);
-	if (params->acl_file)
-	     free(params->acl_file);
-	if (params->realm)
-	     free(params->realm);
-	if (params->admin_dbname)
-	     free(params->admin_dbname);
-	if (params->admin_lockfile)
-	     free(params->admin_lockfile);
-
+	krb5_xfree(params->dbname);
+	krb5_xfree(params->mkey_name);
+	krb5_xfree(params->stash_file);
+	krb5_xfree(params->keysalts);
+	free(params->admin_server);
+	free(params->admin_keytab);
+	free(params->dict_file);
+	free(params->acl_file);
+	free(params->realm);
+	free(params->admin_dbname);
+	free(params->admin_lockfile);
     }
     return(0);
 }
@@ -995,8 +982,7 @@ krb5_read_realm_params(kcontext, realm, rparamp)
 cleanup:
     if (aprofile)
 	krb5_aprof_finish(aprofile);
-    if (lrealm)
-	free(lrealm);
+    free(lrealm);
     if (kret) {
 	if (rparams)
 	    krb5_free_realm_params(kcontext, rparams);
@@ -1015,22 +1001,14 @@ krb5_free_realm_params(kcontext, rparams)
     krb5_realm_params	*rparams;
 {
     if (rparams) {
-	if (rparams->realm_profile)
-	    krb5_xfree(rparams->realm_profile);
-	if (rparams->realm_dbname)
-	    krb5_xfree(rparams->realm_dbname);
-	if (rparams->realm_mkey_name)
-	    krb5_xfree(rparams->realm_mkey_name);
-	if (rparams->realm_stash_file)
-	    krb5_xfree(rparams->realm_stash_file);
-	if (rparams->realm_keysalts)
-	    krb5_xfree(rparams->realm_keysalts);
-	if (rparams->realm_kdc_ports)
-	    krb5_xfree(rparams->realm_kdc_ports);
-	if (rparams->realm_kdc_tcp_ports)
-	    krb5_xfree(rparams->realm_kdc_tcp_ports);
-	if (rparams->realm_acl_file)
-	    krb5_xfree(rparams->realm_acl_file);
+	krb5_xfree(rparams->realm_profile);
+	krb5_xfree(rparams->realm_dbname);
+	krb5_xfree(rparams->realm_mkey_name);
+	krb5_xfree(rparams->realm_stash_file);
+	krb5_xfree(rparams->realm_keysalts);
+	krb5_xfree(rparams->realm_kdc_ports);
+	krb5_xfree(rparams->realm_kdc_tcp_ports);
+	krb5_xfree(rparams->realm_acl_file);
 	krb5_xfree(rparams);
     }
     return(0);
