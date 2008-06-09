@@ -570,7 +570,7 @@ int main(int argc, char *argv[])
 	  krb5_klog_close(context);	  
 	  exit(1);
      }
-     if (!svc_register(iproptransp, KRB5_IPROP_PROG, KRB5_IPROP_VERS, krb5_iprop_prog_1, 0)) {
+     if (!svc_register(iproptransp, KRB5_IPROP_PROG, KRB5_IPROP_VERS, krb5_iprop_prog_1, IPPROTO_TCP)) {
 	  fprintf(stderr, "%s: Cannot register RPC service.\n", whoami);
 	  krb5_klog_syslog(LOG_ERR, "Cannot register RPC service, failing.");
 	  kadm5_destroy(global_server_handle);
