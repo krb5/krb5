@@ -484,7 +484,8 @@ void doit(fd)
 /*
  * Routine to handle incremental update transfer(s) from master KDC
  */
-krb5_error_code do_iprop(kdb_log_context *log_ctx) {
+krb5_error_code do_iprop(kdb_log_context *log_ctx)
+{
 	kadm5_ret_t retval;
 	kadm5_config_params params;
 	krb5_ccache cc;
