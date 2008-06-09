@@ -242,6 +242,7 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
        goto clean_and_exit;
   
 clean_and_exit:
+  free(service_name);
 
   return ret;
 }
