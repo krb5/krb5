@@ -129,3 +129,4 @@ xdr_setkey3_arg
 xdr_setkey_arg
 xdr_setv4key_arg
 xdr_ui_4
+kadm5_init_iprop

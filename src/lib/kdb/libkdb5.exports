@@ -49,3 +49,12 @@ krb5_db_delete_policy
 krb5_db_free_policy
 krb5_def_store_mkey
 krb5_db_promote
+ulog_map
+ulog_set_role
+ulog_free_entries
+xdr_kdb_last_t
+xdr_kdb_incr_result_t
+xdr_kdb_fullresync_result_t
+ulog_get_entries
+ulog_replay
+xdr_kdb_incr_update_t
