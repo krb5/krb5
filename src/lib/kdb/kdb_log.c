@@ -583,15 +583,14 @@ ulog_map(krb5_context context, kadm5_config_params *params, int caller,
 
 	} else {
 
-		if ((ulogfd = open(logname, O_RDWR, 0600)) == -1) {
-			/*
-			 * Can't open existing log file
-			 */
-			free(logname);
-			return (errno);
-		}
+		ulogfd = open(logname, O_RDWR, 0600);
+		free(logname);
+		if (ulogfd == -1)
+		    /*
+		     * Can't open existing log file
+		     */
+		    return errno;
 	}
-	free(logname);
 
 	if (caller == FKPROPLOG) {
 		fstat(ulogfd, &st);
