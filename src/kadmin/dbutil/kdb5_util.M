@@ -150,7 +150,7 @@ option will.
 .RE
 .TP
 \fBload\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-b7\fP] [\fB\-ov\fP] [\fB\-hash\fP]
-[\fB\-verbose\fP] [\fB\-update\fP] \fIfilename dbname\fP [\fIadmin_dbname\fP]
+[\fB\-verbose\fP] [\fB\-update\fP] \fIfilename dbname\fP
 .br
 Loads a database dump from the named file into the named database.
 Unless the 
@@ -206,11 +206,6 @@ in the dump file and the old one destroyed upon successful completion.
 .B dbname
 is required and overrides the value specified on the command line or the
 default.
-.TP
-.B admin_dbname
-is optional and is derived from
-.B dbname
-if not specified.
 .RE
 .TP
 \fBdump_v4\fP [\fB\-S\fP] [\fIfilename\fP]
