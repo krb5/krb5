@@ -464,18 +464,9 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	      params.mask |= KADM5_CONFIG_DBNAME;
     }
 
-    /*
-     * admin database name and lockfile are now always derived from dbname
-     */
-    if (params.mask & KADM5_CONFIG_DBNAME) {
-	if (asprintf(&params.admin_dbname, "%s.kadm5", params.dbname) > 0)
-	    params.mask |= KADM5_CONFIG_ADBNAME;
-	else
-	    params.admin_dbname = NULL;
-    }
-
+    params.admin_dbname_was_here = NULL;
     params.admin_lockfile_was_here = NULL;
-    /* never set KADM5_CONFIG_ADB_LOCKFILE */
+    /* never set KADM5_CONFIG_ADBNAME, KADM5_CONFIG_ADB_LOCKFILE */
 
     /* Get the value for the admin (policy) database lock file*/
     hierarchy[2] = "admin_keytab";
@@ -757,7 +748,6 @@ kadm5_free_config_params(context, params)
 	free(params->dict_file);
 	free(params->acl_file);
 	free(params->realm);
-	free(params->admin_dbname);
     }
     return(0);
 }

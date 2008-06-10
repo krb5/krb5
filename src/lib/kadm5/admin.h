@@ -227,9 +227,9 @@ typedef struct _kadm5_config_params {
 #endif
 
      char *		dbname;
-     char *		admin_dbname;
 
      /* dummy fields to preserve abi for now */
+     char *		admin_dbname_was_here;
      char *		admin_lockfile_was_here;
 
      char *		admin_keytab;
