@@ -212,12 +212,6 @@ main(int argc, char **argv)
 
 	(void) textdomain(TEXT_DOMAIN);
 
-	if (geteuid() != (uid_t)0) {
-		(void) fprintf(stderr,
-		    _("kproplog must be run as root\n\n"));
-		exit(1);
-	}
-
 	progname = argv[0];
 
 	while ((c = getopt(argc, argv, "vhe:")) != -1) {
