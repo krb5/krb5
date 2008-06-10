@@ -130,8 +130,8 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	case EEXIST:
 	    retval = KRB5_RC_IO_PERM;
 	    krb5_set_error_message(context, retval,
-				   "Cannot create replay cache: %s",
-				   strerror(errno));
+				   "Cannot create replay cache file %s: %s",
+				   d->fn, strerror(errno));
 	    do_not_unlink = 1;
 	    goto cleanup;
 

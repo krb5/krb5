@@ -184,7 +184,7 @@ struct svc_req {
  *	rpcprog_t prog;
  *	rpcvers_t vers;
  *	void (*dispatch)();
- *	int protocol;  like TCP or UDP, zero means do not register 
+ *	int protocol;  like IPPROTO_TCP or _UDP; zero means do not register 
  *
  * registerrpc(prog, vers, proc, routine, inproc, outproc)
  * 	returns 0 upon success, -1 if error.

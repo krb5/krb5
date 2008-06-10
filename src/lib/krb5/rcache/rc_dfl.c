@@ -64,12 +64,13 @@ static int rc_store(context, krb5_rcache id, krb5_donot_replay *rep)
  * dfl_recover.
  */
 
-static int
-hash(krb5_donot_replay *rep, int hsize)
+static unsigned int
+hash(krb5_donot_replay *rep, unsigned int hsize)
 {
-    return (int) ((((rep->cusec + rep->ctime + *rep->server + *rep->client)
-		    % hsize) + hsize) % hsize);
-    /* We take this opportunity to once again complain about C's idiotic %. */
+    unsigned int h = rep->cusec + rep->ctime;
+    h += *rep->server;
+    h += *rep->client;
+    return h % hsize;
 }
 
 #define CMP_MALLOC -3
@@ -104,7 +105,7 @@ struct dfl_data
 {
     char *name;
     krb5_deltat lifespan;
-    int hsize;
+    unsigned int hsize;
     int numhits;
     int nummisses;
     struct authlist **h;
@@ -130,7 +131,7 @@ rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
 	 krb5_int32 now)
 {
     struct dfl_data *t = (struct dfl_data *)id->data;
-    int rephash;
+    unsigned int rephash;
     struct authlist *ta;
 
     rephash = hash(rep, t->hsize);
@@ -614,7 +615,7 @@ krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
 {
     struct dfl_data *t = (struct dfl_data *)id->data;
 #ifdef NOIOSTUFF
-    int i;
+    unsigned int i;
     struct authlist **q;
     struct authlist **qt;
     struct authlist *r;
