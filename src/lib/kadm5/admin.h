@@ -1,7 +1,7 @@
 /*
  * lib/kadm5/admin.h
  *
- * Copyright 2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -228,7 +228,10 @@ typedef struct _kadm5_config_params {
 
      char *		dbname;
      char *		admin_dbname;
-     char *		admin_lockfile;
+
+     /* dummy fields to preserve abi for now */
+     char *		admin_lockfile_was_here;
+
      char *		admin_keytab;
      char *		acl_file;
      char *		dict_file;

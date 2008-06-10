@@ -1042,11 +1042,7 @@ static int parse_config_params(Tcl_Interp *interp, char *list,
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[6], &params->admin_lockfile)) != TCL_OK) {
-	  Tcl_AppendElement(interp, "while parsing admin_lockfile name");
-	  retcode = TCL_ERROR;
-	  goto finished;
-     }
+     /* Ignore argv[6], which used to set the admin_lockfile field.  */
      if ((retcode = parse_str(interp, argv[7], &params->admin_keytab)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing admin_keytab name");
 	  retcode = TCL_ERROR;
