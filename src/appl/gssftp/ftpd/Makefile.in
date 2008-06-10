@@ -88,15 +88,13 @@ $(OUTPRE)ftpd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-util.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/ftp.h \
-  $(srcdir)/../arpa/telnet.h ftpd.c ftpd_var.h pathnames.h \
-  secure.h
+  $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
+  ftpd.c ftpd_var.h pathnames.h secure.h
 $(OUTPRE)ftpcmd.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(KRB_ERR_H_DEP) \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/syslog.h \
-  $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
-  ftpcmd.c ftpd_var.h
+  $(SRCTOP)/include/kerberosIV/krb.h $(srcdir)/../arpa/ftp.h \
+  $(srcdir)/../arpa/telnet.h ftpcmd.c ftpd_var.h
 $(OUTPRE)popen.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h ftpd_var.h \
   popen.c

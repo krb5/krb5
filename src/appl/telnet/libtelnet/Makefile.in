@@ -114,9 +114,8 @@ kerberos.so kerberos.po $(OUTPRE)kerberos.$(OBJEXT): \
   encrypt.h kerberos.c misc-proto.h misc.h
 kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/telnet.h \
-  auth-proto.h auth.h enc-proto.h encrypt.h kerberos5.c \
-  krb5forw.h misc-proto.h misc.h
+  $(srcdir)/../arpa/telnet.h auth-proto.h auth.h enc-proto.h \
+  encrypt.h kerberos5.c krb5forw.h misc-proto.h misc.h
 forward.so forward.po $(OUTPRE)forward.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h forward.c \
   krb5forw.h

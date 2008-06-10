@@ -44,8 +44,7 @@ $(OUTPRE)kadm_rpc_svc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
   $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/syslog.h \
-  kadm_rpc_svc.c misc.h
+  $(SRCTOP)/include/krb5.h kadm_rpc_svc.c misc.h
 $(OUTPRE)server_stubs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \
@@ -59,8 +58,8 @@ $(OUTPRE)server_stubs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
   $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/syslog.h \
-  misc.h server_stubs.c
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h misc.h \
+  server_stubs.c
 $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
@@ -82,9 +81,9 @@ $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/kdb_kt.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/lib/gssapi/generic/gssapiP_generic.h $(SRCTOP)/lib/gssapi/generic/gssapi_generic.h \
-  $(SRCTOP)/lib/gssapi/krb5/gssapiP_krb5.h misc.h ovsec_kadmd.c
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/gssapi/generic/gssapiP_generic.h \
+  $(SRCTOP)/lib/gssapi/generic/gssapi_generic.h $(SRCTOP)/lib/gssapi/krb5/gssapiP_krb5.h \
+  misc.h ovsec_kadmd.c
 $(OUTPRE)schpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
@@ -101,8 +100,7 @@ $(OUTPRE)schpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  misc.h schpw.c
+  $(SRCTOP)/include/socket-utils.h misc.h schpw.c
 $(OUTPRE)misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
