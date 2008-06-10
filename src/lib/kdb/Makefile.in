@@ -165,9 +165,8 @@ kdb_log.so kdb_log.po $(OUTPRE)kdb_log.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/iprop/iprop.h $(SRCTOP)/iprop/iprop_hdr.h \
-  kdb5.h kdb_log.c kdb_log.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h kdb5.h kdb_log.c kdb_log.h
 keytab.so keytab.po $(OUTPRE)keytab.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \

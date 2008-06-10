@@ -73,9 +73,9 @@ $(OUTPRE)kpropd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/iprop/iprop.h $(SRCTOP)/iprop/iprop_hdr.h \
-  $(SRCTOP)/lib/kdb/kdb_log.h kprop.h kpropd.c
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  kprop.h kpropd.c
 $(OUTPRE)kpropd_rpc.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/auth.h \
   $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
@@ -99,6 +99,6 @@ $(OUTPRE)kproplog.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/iprop/iprop.h $(SRCTOP)/iprop/iprop_hdr.h \
-  $(SRCTOP)/lib/kdb/kdb_log.h kproplog.c
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/iprop/iprop.h \
+  $(SRCTOP)/iprop/iprop_hdr.h $(SRCTOP)/lib/kdb/kdb_log.h \
+  kproplog.c
