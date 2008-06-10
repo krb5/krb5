@@ -226,6 +226,10 @@ typedef struct _kadm5_config_params {
      char *		kpasswd_server;
 #endif
 
+     /* Deprecated except for db2 backwards compatibility.  Don't add
+	new uses except as fallbacks for parameters that should be
+	specified in the database module section of the config
+	file.  */
      char *		dbname;
 
      /* dummy fields to preserve abi for now */
