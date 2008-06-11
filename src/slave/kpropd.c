@@ -99,7 +99,6 @@ extern int daemon(int, int);
 
 #define SYSLOG_CLASS LOG_DAEMON
 
-char *poll_time = NULL;
 char *def_realm = NULL;
 int runonce = 0;
 
@@ -178,7 +177,6 @@ void	send_error
 void	recv_error
 	(krb5_context,
     		   krb5_data *);
-int	convert_polltime(char *);
 unsigned int backoff_from_master(int *);
 
 static kadm5_ret_t
@@ -524,14 +522,14 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	}
 	if (params.iprop_enabled == TRUE) {
 		ulog_set_role(kpropd_context, IPROP_SLAVE);
-		poll_time = params.iprop_polltime;
 
 		if (ulog_map(kpropd_context, &params, FKPROPD, db_args)) { 
  			com_err(progname, errno,
 			    _("Unable to map log!\n")); 
 			exit(1); 
-		} 
+		}
 	}
+	pollin = params.iprop_poll_time;
 
 	/*
 	 * Grab the realm info and check if iprop is enabled.
@@ -634,21 +632,6 @@ reinit:
 	 */
 	handle = server_handle;
 	
-	/*
-	 * If we have reached this far, we have succesfully established
-	 * a RPCSEC_GSS connection; we now start polling for updates
-	 */
-	if (poll_time == NULL) {
-		if ((poll_time = (char *)strdup("2m")) == NULL) {
-			com_err(progname, ENOMEM,
-				_("Unable to allocate poll_time"));
-			exit(1);
-		}
-	}
-
-	if (pollin == (unsigned int)0)
-		pollin = convert_polltime(poll_time);
-
 	for (;;) {
 		incr_ret = NULL;
 		full_ret = NULL;
@@ -845,8 +828,6 @@ error:
 	syslog(LOG_ERR, _("kpropd: ERROR returned by master KDC,"
 			" bailing.\n"));
 done:
-	if (poll_time)
-		free(poll_time);
 	if(iprop_svc_princstr)
 		free(iprop_svc_princstr);
 	if (master_svc_princstr)
@@ -894,42 +875,6 @@ copy_leading_substring(char *src, size_t len)
     (void) strncpy(result, src, len+1);
     result[len] = 0;
     return result;
-}
-/*
- * Routine to convert the `pollstr' string to seconds
- */
-int convert_polltime(char *pollstr) {
-	char *tokenptr = NULL;
-	int len, polltime;
-
-	len = polltime = 0;
-
-	/* XXX Memory leak?  pollstr="4m30s", tokenptr is assigned twice.  */
-	/* XXX Do we export a time-interval-parsing routine from libkrb5?  */
-	if ((len = strcspn(pollstr, "s")) < strlen(pollstr)) {
-		tokenptr = copy_leading_substring(pollstr, len);
-		polltime = atoi(tokenptr);
-	}
-
-	if ((len = strcspn(pollstr, "m")) < strlen(pollstr)) {
-		tokenptr = copy_leading_substring(pollstr, len);
-		polltime = atoi(tokenptr) * 60;
-	}
-
-	if ((len = strcspn(pollstr, "h")) < strlen(pollstr)) {
-		tokenptr = copy_leading_substring(pollstr, len);
-		polltime = atoi(tokenptr) * 3600;
-	}
-
-	if (tokenptr != NULL)
-		free(tokenptr);
-	/*
-	 * If we have a bogus pollstr value, set polltime to the
-	 * default of 2 mts (120 seconds).
-	 */
-	if (polltime == 0)
-		polltime = 120;
-	return (polltime);
 }
 
 static void

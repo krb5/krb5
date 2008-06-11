@@ -754,29 +754,8 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 		}
 	}
 
-	hierarchy[2] = "sunw_dbprop_slave_poll";
-
-	/* XXX Inconsistent memory mgmt: iprop_polltime a static
-	   string, later heap storage used.  */
-	params.iprop_polltime = "2m";
-	params.mask |= KADM5_CONFIG_POLL_TIME;
-
-	/* XXX Should be a delta-t.  */
-	if (params_in->mask & KADM5_CONFIG_POLL_TIME) {
-	        /* XXX Memory leak: iprop_polltime never freed.  */
-		params.iprop_polltime = strdup(params_in->iprop_polltime);
-		if (params.iprop_polltime)
-			params.mask |= KADM5_CONFIG_POLL_TIME;
-	} else {
-		if (aprofile && !krb5_aprof_get_string(aprofile, hierarchy,
-		    TRUE, &svalue)) {
-		        /* XXX Memory leak: iprop_polltime never freed.  */
-			params.iprop_polltime = strdup(svalue);
-			params.mask |= KADM5_CONFIG_POLL_TIME;
-			krb5_xfree(svalue);
-		}
-	}
-
+	GET_DELTAT_PARAM(iprop_poll_time, KADM5_CONFIG_POLL_TIME,
+			 "sunw_dbprop_slave_poll", 2 * 60); /* 2m */
 
     *params_out = params;
     
