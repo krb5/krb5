@@ -343,6 +343,100 @@ krb5_aprof_finish(acontext)
 }
 
 /*
+ * Returns nonzero if it found something to copy; the caller may still
+ * need to check the output field or mask to see if the copy
+ * (allocation) was successful.  Returns zero if nothing was found to
+ * copy, and thus the caller may want to apply some default heuristic.
+ * If the default action is just to use a fixed, compiled-in string,
+ * supply it as the default value here and ignore the return value.
+ */
+static int
+get_string_param(char **param_out, char *param_in,
+		 long *mask_out, long mask_in, long mask_bit,
+		 krb5_pointer aprofile,
+		 const char **hierarchy,
+		 const char *config_name,
+		 const char *default_value)
+{
+    char *svalue;
+
+    hierarchy[2] = config_name;
+    if (mask_in & mask_bit) {
+	*param_out = strdup(param_in);
+	if (*param_out)
+	    *mask_out |= mask_bit;
+	return 1;
+    } else if (aprofile &&
+	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+	*param_out = svalue;
+	*mask_out |= mask_bit;
+	return 1;
+    } else if (default_value) {
+	*param_out = strdup(default_value);
+	if (*param_out)
+	    *mask_out |= mask_bit;
+	return 1;
+    } else {
+	return 0;
+    }
+}
+/*
+ * Similar, for (host-order) port number, if not already set in the
+ * output field; default is required.
+ */
+static void
+get_port_param(int *param_out, int param_in,
+	       long *mask_out, long mask_in, long mask_bit,
+	       krb5_pointer aprofile,
+	       const char **hierarchy,
+	       const char *config_name,
+	       int default_value)
+{
+    krb5_int32 ivalue;
+
+    if (! (*mask_out & mask_bit)) {
+	hierarchy[2] = config_name;
+	if (mask_in & mask_bit) {
+	    *mask_out |= mask_bit;
+	    *param_out = param_in;
+	} else if (aprofile &&
+		   !krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+	    *param_out = ivalue;
+	    *mask_out |= mask_bit;
+	} else {
+	    *param_out = default_value;
+	    *mask_out |= mask_bit;
+	}
+    }
+}
+/*
+ * Similar, for delta_t; default is required.
+ */
+static void
+get_deltat_param(krb5_deltat *param_out, krb5_deltat param_in,
+		 long *mask_out, long mask_in, long mask_bit,
+		 krb5_pointer aprofile,
+		 const char **hierarchy,
+		 const char *config_name,
+		 krb5_deltat default_value)
+{
+    krb5_deltat dtvalue;
+
+    hierarchy[2] = config_name;
+    if (mask_in & mask_bit) {
+	*mask_out |= mask_bit;
+	*param_out = param_in;
+    } else if (aprofile &&
+	       !krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
+	*param_out = dtvalue;
+	*mask_out |= mask_bit;
+    } else {
+	*param_out = default_value;
+	*mask_out |= mask_bit;
+    }
+}
+
+/*
  * Function: kadm5_get_config_params
  *
  * Purpose: Merge configuration parameters provided by the caller with
@@ -383,7 +477,6 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     const char		*hierarchy[4];
     char		*svalue;
     krb5_int32		ivalue;
-    krb5_deltat		dtvalue;
     kadm5_config_params params, empty_params;
 
     krb5_error_code	kret = 0;
@@ -428,17 +521,15 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     hierarchy[1] = lrealm;
     hierarchy[3] = (char *) NULL;
 
+#define GET_STRING_PARAM(FIELD, BIT, CONFTAG, DEFAULT)		\
+    get_string_param(&params.FIELD, params_in->FIELD,		\
+		     &params.mask, params_in->mask, BIT,	\
+		     aprofile, hierarchy, CONFTAG, DEFAULT)
+
     /* Get the value for the admin server */
-    hierarchy[2] = "admin_server";
-    if (params_in->mask & KADM5_CONFIG_ADMIN_SERVER) {
-	 params.admin_server = strdup(params_in->admin_server);
-	 if (params.admin_server)
-	      params.mask |= KADM5_CONFIG_ADMIN_SERVER;
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.admin_server = svalue;
-	 params.mask |= KADM5_CONFIG_ADMIN_SERVER;
-    }
+    GET_STRING_PARAM(admin_server, KADM5_CONFIG_ADMIN_SERVER, "admin_server",
+		     NULL);
+
     if (params.mask & KADM5_CONFIG_ADMIN_SERVER) {
 	 char *p;
 	 p = strchr(params.admin_server, ':');
@@ -450,119 +541,47 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     }
 
     /* Get the value for the database */
-    hierarchy[2] = "database_name";
-    if (params_in->mask & KADM5_CONFIG_DBNAME) {
-	 params.dbname = strdup(params_in->dbname);
-	 if (params.dbname)
-	      params.mask |= KADM5_CONFIG_DBNAME;
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.dbname = svalue;
-	 params.mask |= KADM5_CONFIG_DBNAME;
-    } else {
-	 params.dbname = strdup(DEFAULT_KDB_FILE);
-	 if (params.dbname) 
-	      params.mask |= KADM5_CONFIG_DBNAME;
-    }
+    GET_STRING_PARAM(dbname, KADM5_CONFIG_DBNAME, "database_name",
+		     DEFAULT_KDB_FILE);
 
     params.admin_dbname_was_here = NULL;
     params.admin_lockfile_was_here = NULL;
     /* never set KADM5_CONFIG_ADBNAME, KADM5_CONFIG_ADB_LOCKFILE */
 
     /* Get the value for the admin (policy) database lock file*/
-    hierarchy[2] = "admin_keytab";
-    if (params_in->mask & KADM5_CONFIG_ADMIN_KEYTAB) {
-	 params.admin_keytab = strdup(params_in->admin_keytab);
-	 if (params.admin_keytab)
-	      params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
-	 params.admin_keytab = svalue;
-    } else if ((params.admin_keytab = (char *) getenv("KRB5_KTNAME"))) {
-	 params.admin_keytab = strdup(params.admin_keytab);
-	 if (params.admin_keytab)
-	      params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
-    } else {
-	 params.admin_keytab = strdup(DEFAULT_KADM5_KEYTAB);
-	 if (params.admin_keytab)
-	      params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
+    if (!GET_STRING_PARAM(admin_keytab, KADM5_CONFIG_ADMIN_KEYTAB,
+			  "admin_keytab", NULL)) {
+	const char *s = getenv("KRB5_KTNAME");
+	if (s == NULL)
+	    s = DEFAULT_KADM5_KEYTAB;
+	params.admin_keytab = strdup(s);
+	if (params.admin_keytab)
+	    params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
     }
     
     /* Get the name of the acl file */
-    hierarchy[2] = "acl_file";
-    if (params_in->mask & KADM5_CONFIG_ACL_FILE) {
-	 params.acl_file = strdup(params_in->acl_file);
-	 if (params.acl_file)
-	      params.mask |= KADM5_CONFIG_ACL_FILE;
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.mask |= KADM5_CONFIG_ACL_FILE;
-	 params.acl_file = svalue;
-    } else {
-	 params.acl_file = strdup(DEFAULT_KADM5_ACL_FILE);
-	 if (params.acl_file)
-	      params.mask |= KADM5_CONFIG_ACL_FILE;
-    }
-    
+    GET_STRING_PARAM(acl_file, KADM5_CONFIG_ACL_FILE, "acl_file",
+		     DEFAULT_KADM5_ACL_FILE);
+
     /* Get the name of the dict file */
-    hierarchy[2] = "dict_file";
-    if (params_in->mask & KADM5_CONFIG_DICT_FILE) {
-	 params.dict_file = strdup(params_in->dict_file);
-	 if (params.dict_file)
-	      params.mask |= KADM5_CONFIG_DICT_FILE;
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.mask |= KADM5_CONFIG_DICT_FILE;
-	 params.dict_file = svalue;
-    }
-	    
+    GET_STRING_PARAM(dict_file, KADM5_CONFIG_DICT_FILE, "dict_file", NULL);
+
+#define GET_PORT_PARAM(FIELD, BIT, CONFTAG, DEFAULT)		\
+    get_port_param(&params.FIELD, params_in->FIELD,		\
+		   &params.mask, params_in->mask, BIT,		\
+		   aprofile, hierarchy, CONFTAG, DEFAULT)
     /* Get the value for the kadmind port */
-    if (! (params.mask & KADM5_CONFIG_KADMIND_PORT)) {
-	 hierarchy[2] = "kadmind_port";
-	 if (params_in->mask & KADM5_CONFIG_KADMIND_PORT) {
-	      params.mask |= KADM5_CONFIG_KADMIND_PORT;
-	      params.kadmind_port = params_in->kadmind_port;
-	 } else if (aprofile &&
-		    !krb5_aprof_get_int32(aprofile, hierarchy, TRUE,
-					  &ivalue)) { 
-	      params.kadmind_port = ivalue;
-	      params.mask |= KADM5_CONFIG_KADMIND_PORT;
-	 } else {
-	      params.kadmind_port = DEFAULT_KADM5_PORT;
-	      params.mask |= KADM5_CONFIG_KADMIND_PORT;
-	 }
-    }
-    
+    GET_PORT_PARAM(kadmind_port, KADM5_CONFIG_KADMIND_PORT,
+		   "kadmind_port", DEFAULT_KADM5_PORT);
+
     /* Get the value for the kpasswd port */
-    if (! (params.mask & KADM5_CONFIG_KPASSWD_PORT)) {
-	hierarchy[2] = "kpasswd_port";
-	if (params_in->mask & KADM5_CONFIG_KPASSWD_PORT) {
-	    params.mask |= KADM5_CONFIG_KPASSWD_PORT;
-	    params.kpasswd_port = params_in->kpasswd_port;
-	} else if (aprofile &&
-		   !krb5_aprof_get_int32(aprofile, hierarchy, TRUE,
-					 &ivalue)) { 
-	    params.kpasswd_port = ivalue;
-	    params.mask |= KADM5_CONFIG_KPASSWD_PORT;
-	} else {
-	    params.kpasswd_port = DEFAULT_KPASSWD_PORT;
-	    params.mask |= KADM5_CONFIG_KPASSWD_PORT;
-	}
-    }
-    
+    GET_PORT_PARAM(kpasswd_port, KADM5_CONFIG_KPASSWD_PORT,
+		   "kpasswd_port", DEFAULT_KPASSWD_PORT);
+
     /* Get the value for the master key name */
-	 hierarchy[2] = "master_key_name";
-    if (params_in->mask & KADM5_CONFIG_MKEY_NAME) {
-	 params.mkey_name = strdup(params_in->mkey_name);
-	 if (params.mkey_name)
-	      params.mask |= KADM5_CONFIG_MKEY_NAME;
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.mask |= KADM5_CONFIG_MKEY_NAME;
-	 params.mkey_name = svalue;
-    }
-    
+    GET_STRING_PARAM(mkey_name, KADM5_CONFIG_MKEY_NAME,
+		     "master_key_name", NULL);
+
     /* Get the value for the master key type */
     hierarchy[2] = "master_key_type";
     if (params_in->mask & KADM5_CONFIG_ENCTYPE) {
@@ -586,45 +605,22 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     }
     
     /* Get the value for the stashfile */
-    hierarchy[2] = "key_stash_file";
-    if (params_in->mask & KADM5_CONFIG_STASH_FILE) {
-	 params.stash_file = strdup(params_in->stash_file);
-	 if (params.stash_file)
-	      params.mask |= KADM5_CONFIG_STASH_FILE;
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.mask |= KADM5_CONFIG_STASH_FILE;
-	 params.stash_file = svalue;
-    }
+    GET_STRING_PARAM(stash_file, KADM5_CONFIG_STASH_FILE,
+		     "key_stash_file", NULL);
 
     /* Get the value for maximum ticket lifetime. */
-    hierarchy[2] = "max_life";
-    if (params_in->mask & KADM5_CONFIG_MAX_LIFE) {
-	 params.mask |= KADM5_CONFIG_MAX_LIFE;
-	 params.max_life = params_in->max_life;
-    } else if (aprofile &&
-	       !krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
-	 params.max_life = dtvalue;
-	 params.mask |= KADM5_CONFIG_MAX_LIFE;
-    } else {
-	 params.max_life = 24 * 60 * 60; /* 1 day */
-	 params.mask |= KADM5_CONFIG_MAX_LIFE;
-    }	 
-	    
+#define GET_DELTAT_PARAM(FIELD, BIT, CONFTAG, DEFAULT)		\
+    get_deltat_param(&params.FIELD, params_in->FIELD,		\
+		     &params.mask, params_in->mask, BIT,	\
+		     aprofile, hierarchy, CONFTAG, DEFAULT)
+
+    GET_DELTAT_PARAM(max_life, KADM5_CONFIG_MAX_LIFE, "max_life",
+		     24 * 60 * 60); /* 1 day */
+
     /* Get the value for maximum renewable ticket lifetime. */
-    hierarchy[2] = "max_renewable_life";
-    if (params_in->mask & KADM5_CONFIG_MAX_RLIFE) {
-	 params.mask |= KADM5_CONFIG_MAX_RLIFE;
-	 params.max_rlife = params_in->max_rlife;
-    } else if (aprofile &&
-	       !krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
-	 params.max_rlife = dtvalue;
-	 params.mask |= KADM5_CONFIG_MAX_RLIFE;
-    } else {
-	 params.max_rlife = 0;
-	 params.mask |= KADM5_CONFIG_MAX_RLIFE;
-    }
-	    
+    GET_DELTAT_PARAM(max_rlife, KADM5_CONFIG_MAX_RLIFE, "max_renewable_life",
+		     0);
+
     /* Get the value for the default principal expiration */
     hierarchy[2] = "default_principal_expiration";
     if (params_in->mask & KADM5_CONFIG_EXPIRATION) {
@@ -860,8 +856,7 @@ err_params:
 
 /***********************************************************************
  * This is the old krb5_realm_read_params, which I mutated into
- * kadm5_get_config_params but which old code (kdb5_* and krb5kdc)
- * still uses.
+ * kadm5_get_config_params but which old KDC code still uses.
  ***********************************************************************/
 
 /*
