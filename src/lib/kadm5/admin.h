@@ -137,6 +137,7 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_IPROP_ENABLED	0x1000000
 #define KADM5_CONFIG_ULOG_SIZE		0x2000000
 #define KADM5_CONFIG_POLL_TIME		0x4000000
+#define KADM5_CONFIG_DBPROP_LOGFILE	0x8000000
 /*
  * permission bits
  */
@@ -235,9 +236,9 @@ typedef struct _kadm5_config_params {
 	specified in the database module section of the config
 	file.  */
      char *		dbname;
+     char *		dbprop_logfile;
 
-     /* dummy fields to preserve abi for now */
-     char *		admin_dbname_was_here;
+     /* dummy field to preserve abi for now */
      char *		admin_lockfile_was_here;
 
      char *		admin_keytab;

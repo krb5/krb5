@@ -725,14 +725,11 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 		params.mask |= KADM5_CONFIG_IPROP_ENABLED;
 		params.iprop_enabled = params_in->iprop_enabled;
 	} else {
-		if (aprofile && !krb5_aprof_get_string(aprofile, hierarchy,
-		    TRUE, &svalue)) {
-			if (strncasecmp(svalue, "Y", 1) == 0)
-				params.iprop_enabled = TRUE;
-			if (strncasecmp(svalue, "true", 4) == 0)
-				params.iprop_enabled = TRUE;
-			params.mask |= KADM5_CONFIG_IPROP_ENABLED;
-			krb5_xfree(svalue);
+		krb5_boolean bvalue;
+		if (aprofile &&
+		    !krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
+		    params.iprop_enabled = bvalue;
+		    params.mask |= KADM5_CONFIG_IPROP_ENABLED;
 		}
 	}
 
