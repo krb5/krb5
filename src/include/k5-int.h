@@ -1127,6 +1127,7 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 
 struct _kdb5_dal_handle;	/* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
+struct _kdb_log_context;
 struct _krb5_context {
 	krb5_magic	magic;
 	krb5_enctype	*in_tkt_ktypes;
@@ -1174,7 +1175,7 @@ struct _krb5_context {
     struct errinfo err;
 
     /* For Sun iprop code; does this really have to be here?  */
-    void *kdblog_context;
+    struct _kdb_log_context *kdblog_context;
 };
 
 /* could be used in a table to find an etype and initialize a block */

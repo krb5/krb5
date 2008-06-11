@@ -616,7 +616,7 @@ ulog_map(krb5_context context, kadm5_config_params *params, int caller,
 	if (!context->kdblog_context) {
 		if (!(log_ctx = malloc(sizeof (kdb_log_context))))
 			return (errno);
-		context->kdblog_context = (void *)log_ctx;
+		context->kdblog_context = log_ctx;
 	} else
 		log_ctx = context->kdblog_context;
 	log_ctx->ulog = ulog;
@@ -866,7 +866,7 @@ ulog_set_role(krb5_context ctx, iprop_role role)
 	if (!ctx->kdblog_context) {
 		if (!(log_ctx = malloc(sizeof (kdb_log_context))))
 			return (errno);
-		ctx->kdblog_context = (void *)log_ctx;
+		ctx->kdblog_context = log_ctx;
 	} else
 		log_ctx = ctx->kdblog_context;
 

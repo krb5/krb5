@@ -2339,7 +2339,7 @@ load_db(argc, argv)
     }
 
     if (log_ctx && log_ctx->iproprole)
-	kcontext->kdblog_context = (void *)log_ctx;
+	kcontext->kdblog_context = log_ctx;
 
     /*
      * Open the dumpfile
