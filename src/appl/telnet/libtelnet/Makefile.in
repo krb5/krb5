@@ -45,7 +45,6 @@ SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/kerberos.c \
 	$(srcdir)/kerberos5.c \
 	$(srcdir)/forward.c \
-	$(srcdir)/spx.c \
 	$(srcdir)/enc_des.c \
 	$(srcdir)/setenv.c \
 	$(srcdir)/getent.c \
@@ -58,7 +57,7 @@ SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/strerror.c
 
 STLIBOBJS=   auth.o encrypt.o genget.o \
-	misc.o kerberos.o kerberos5.o forward.o spx.o enc_des.o \
+	misc.o kerberos.o kerberos5.o forward.o enc_des.o \
 	$(LIBOBJS) getent.o $(SETENVOBJ)
 
 TELNET_H= $(srcdir)/../arpa/telnet.h
@@ -119,8 +118,6 @@ kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
 forward.so forward.po $(OUTPRE)forward.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h forward.c \
   krb5forw.h
-spx.so spx.po $(OUTPRE)spx.$(OBJEXT): misc-proto.h \
-  spx.c
 enc_des.so enc_des.po $(OUTPRE)enc_des.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h $(srcdir)/../arpa/telnet.h \
   enc-proto.h enc_des.c encrypt.h key-proto.h misc-proto.h
