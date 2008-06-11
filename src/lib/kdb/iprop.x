@@ -5,6 +5,19 @@
 
 /* %#pragma ident	"@(#)iprop.x	1.2	04/02/20 SMI" */
 
+/*
+ * Main source:
+ * lib/kdb/iprop.x
+ *
+ * Generated files:
+ * lib/kdb/iprop_xdr.c
+ * include/iprop.h
+ * slave/kpropd_rpc.c (clnt)
+ *
+ * Derived files:
+ * kadmin/server/ipropd_svc.c
+ */
+
 #ifdef RPC_XDR
 %#include "iprop.h"
 #endif /* RPC_XDR */
