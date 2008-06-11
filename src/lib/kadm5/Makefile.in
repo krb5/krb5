@@ -4,7 +4,7 @@ mydir=lib/kadm5
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS = clnt srv unit-test
 DEFS=
-LOCALINCLUDES = -I$(srcdir)/../kdb -I$(SRCTOP)/iprop
+LOCALINCLUDES = -I$(srcdir)/../kdb
 
 ##DOSBUILDTOP = ..\..
 

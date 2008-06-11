@@ -5,7 +5,7 @@ BUILDTOP=$(REL)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
-LOCALINCLUDES=-I$(SRCTOP)/iprop -I$(SRCTOP)/lib/kdb
+LOCALINCLUDES=-I$(SRCTOP)/lib/kdb
 
 all::	kprop kpropd kproplog
 
