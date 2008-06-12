@@ -527,28 +527,17 @@ error:
  * Returns 0 on success else failure.
  */
 krb5_error_code
-ulog_map(krb5_context context, kadm5_config_params *params, int caller,
-	 char **db_args)
+ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
+	 int caller, char **db_args)
 {
 	struct stat	st;
 	krb5_error_code	retval;
 	uint32_t	ulog_filesize;
-	char		*logname;
 	kdb_log_context	*log_ctx;
 	kdb_hlog_t	*ulog = NULL;
-	uint32_t	ulogentries;
 	int		ulogfd = -1;
 
-	if ((caller == FKADMIND) || (caller == FKCOMMAND))
-	    ulogentries = params->iprop_ulogsize;
-	else
-	    /* Gets copied, but actual value should be irrelevant.  */
-	    ulogentries = 0xFEEDFACE;
-
 	ulog_filesize = sizeof (kdb_hlog_t);
-
-	if (asprintf(&logname, "%s.ulog", params->dbname) < 0)
-	    return KRB5_LOG_ERROR;
 
 	if (stat(logname, &st) == -1) {
 
@@ -556,16 +545,13 @@ ulog_map(krb5_context context, kadm5_config_params *params, int caller,
 			/*
 			 * File doesn't exist so we exit with kproplog
 			 */
-			free(logname);
 			return (errno);
 		}
 
 		if ((ulogfd = open(logname, O_RDWR+O_CREAT, 0600)) == -1) {
-			free(logname);
 			return (errno);
 		}
 
-		free(logname);
 		if (lseek(ulogfd, 0L, SEEK_CUR) == -1) {
 			return (errno);
 		}
@@ -584,7 +570,6 @@ ulog_map(krb5_context context, kadm5_config_params *params, int caller,
 	} else {
 
 		ulogfd = open(logname, O_RDWR, 0600);
-		free(logname);
 		if (ulogfd == -1)
 		    /*
 		     * Can't open existing log file

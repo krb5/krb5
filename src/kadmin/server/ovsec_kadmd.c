@@ -726,7 +726,8 @@ kterr:
 	 * IProp is enabled, so let's map in the update log
 	 * and setup the service.
 	 */
-	if ((ret = ulog_map(context, &params, FKADMIND, db_args)) != 0) {
+	if ((ret = ulog_map(context, params.iprop_logfile,
+			    params.iprop_ulogsize, FKADMIND, db_args)) != 0) {
 	    fprintf(stderr,
 		    _("%s: %s while mapping update log (`%s.ulog')\n"),
 		    whoami, error_message(ret), params.dbname);

@@ -1263,7 +1263,8 @@ dump_db(argc, argv)
 	fprintf(arglist.ofile, "%s", dump->header);
 
 	if (dump_sno) {
-	    if (ulog_map(util_context, &global_params, FKCOMMAND, db_args)) {
+	    if (ulog_map(util_context, global_params.iprop_logfile,
+			 global_params.iprop_ulogsize, FKCOMMAND, db_args)) {
 		fprintf(stderr,
 			_("%s: Could not map log\n"), programname);
 		exit_status++;
@@ -2499,7 +2500,8 @@ load_db(argc, argv)
 	else
 	    caller = FKPROPD;
 
-	if (ulog_map(kcontext, &global_params, caller, db5util_db_args)) {
+	if (ulog_map(kcontext, global_params.iprop_logfile,
+		     global_params.iprop_ulogsize, caller, db5util_db_args)) {
 	    fprintf(stderr, _("%s: Could not map log\n"),
 		    programname);
 	    exit_status++;

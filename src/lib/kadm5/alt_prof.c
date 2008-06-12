@@ -733,6 +733,14 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 		}
 	}
 
+	/* XXX */
+	if (params.mask & KADM5_CONFIG_DBNAME) {
+	    if (asprintf(&params.iprop_logfile, "%s.ulog", params.dbname) < 0) {
+		params.iprop_logfile = NULL;
+	    }
+	} else
+	    params.iprop_logfile = NULL;
+
 	hierarchy[2] = "sunw_dbprop_master_ulogsize";
 
 	params.iprop_ulogsize = DEF_ULOGENTRIES;

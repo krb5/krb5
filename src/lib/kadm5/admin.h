@@ -256,8 +256,9 @@ typedef struct _kadm5_config_params {
      krb5_int32		num_keysalts;
 
     bool_t		iprop_enabled;
-    int			iprop_ulogsize;
+    uint32_t		iprop_ulogsize;
     krb5_deltat		iprop_poll_time;
+    char *		iprop_logfile;
 } kadm5_config_params;
 
 /***********************************************************************

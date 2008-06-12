@@ -247,7 +247,7 @@ main(int argc, char **argv)
 	(void) printf(_("\nKerberos update log (%s.ulog)\n"),
 	    params.dbname);
 
-	if (ulog_map(context, &params, FKPROPLOG, db_args)) {
+	if (ulog_map(context, params.iprop_logfile, 0, FKPROPLOG, db_args)) {
 		(void) fprintf(stderr, _("Unable to map log file "
 		    "%s.ulog\n\n"), params.dbname);
 		exit(1);

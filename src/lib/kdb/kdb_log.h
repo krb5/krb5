@@ -11,7 +11,7 @@
 #include <iprop_hdr.h>
 #include <iprop.h>
 #include <limits.h>
-#include <kadm5/admin.h>
+#include "kdb.h"
 
 #ifdef	__cplusplus
 extern "C" {
@@ -69,7 +69,8 @@ extern "C" {
  * Prototype declarations
  */
 extern krb5_error_code ulog_map(krb5_context context,
-				kadm5_config_params *params, int caller,
+				const char *logname, uint32_t entries,
+				int caller,
 				char **db_args);
 extern krb5_error_code ulog_add_update(krb5_context context,
 	kdb_incr_update_t *upd);

@@ -523,7 +523,8 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	if (params.iprop_enabled == TRUE) {
 		ulog_set_role(kpropd_context, IPROP_SLAVE);
 
-		if (ulog_map(kpropd_context, &params, FKPROPD, db_args)) { 
+		if (ulog_map(kpropd_context, params.iprop_logfile,
+			     params.iprop_ulogsize, FKPROPD, db_args)) { 
  			com_err(progname, errno,
 			    _("Unable to map log!\n")); 
 			exit(1); 
