@@ -870,8 +870,10 @@ void setup_signal_handlers(iprop_role iproprole) {
       * IProp will fork for a full-resync, we don't want to
       * wait on it and we don't want the living dead procs either.
       */
-     if (iproprole == IPROP_MASTER)
-	 (void) sigaction(SIGCHLD, SIG_IGN, (struct sigaction *) NULL);
+     if (iproprole == IPROP_MASTER) {
+	 s_action.sa_handler = SIG_IGN;
+	 (void) sigaction(SIGCHLD, &s_action, (struct sigaction *) NULL);
+     }
 #else /* POSIX_SIGNALS */
      signal(SIGINT, request_exit);
      signal(SIGTERM, request_exit);
