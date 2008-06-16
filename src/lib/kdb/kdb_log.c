@@ -27,7 +27,9 @@
 static int		pagesize = 0;
 
 #define	INIT_ULOG(ctx)	log_ctx = ctx->kdblog_context; \
-			ulog = log_ctx->ulog
+			assert(log_ctx != NULL); \
+			ulog = log_ctx->ulog; \
+			assert(ulog != NULL)
 
 /* XXX */
 typedef unsigned long ulong_t;
