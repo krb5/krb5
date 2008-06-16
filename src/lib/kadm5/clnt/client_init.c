@@ -347,6 +347,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
       */
      if (iprop_enable == 1) {
 	 code = 0;
+	 *server_handle = (void *) handle;
 	 goto cleanup;
      }
 
