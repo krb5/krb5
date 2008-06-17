@@ -715,18 +715,18 @@ kterr:
      }
 	  
     if (params.iprop_enabled == TRUE)
-	ulog_set_role(context, IPROP_MASTER);
+	ulog_set_role(hctx, IPROP_MASTER);
     else
-	ulog_set_role(context, IPROP_NULL);
+	ulog_set_role(hctx, IPROP_NULL);
 
-    log_ctx = context->kdblog_context;
+    log_ctx = hctx->kdblog_context;
 
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
 	/*
 	 * IProp is enabled, so let's map in the update log
 	 * and setup the service.
 	 */
-	if ((ret = ulog_map(context, params.iprop_logfile,
+	if ((ret = ulog_map(hctx, params.iprop_logfile,
 			    params.iprop_ulogsize, FKADMIND, db_args)) != 0) {
 	    fprintf(stderr,
 		    _("%s: %s while mapping update log (`%s.ulog')\n"),
