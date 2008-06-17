@@ -27,10 +27,12 @@
 #include <netdb.h>
 #include <kdb_log.h>
 #include "misc.h"
+#include "osconf.h"
 
 extern gss_name_t rqst2name(struct svc_req *rqstp);
 
-extern int setup_gss_names(struct svc_req *, char **, char **);
+extern int setup_gss_names(struct svc_req *, gss_buffer_desc *,
+			   gss_buffer_desc *);
 extern char *client_addr(struct svc_req *, char *);
 extern void *global_server_handle;
 extern int nofork;
@@ -53,8 +55,6 @@ static char *reply_unknown_str	= "<UNKNOWN_CODE>";
 			"client=%s, service=%s, addr=%s")
 #define	LOG_DONE    _("Request: %s, %s, %s, client=%s, " \
 			"service=%s, addr=%s")
-
-#define	KDB5_UTIL_DUMP_STR "/usr/sbin/kdb5_util dump -i "
 
 #ifdef	DPRINT
 #undef	DPRINT
@@ -111,6 +111,22 @@ replystr(update_status_t ret)
 	}
 }
 
+/* Returns null on allocation failure.
+   Regardless of success or failure, frees the input buffer.  */
+static char *
+buf_to_string(gss_buffer_desc *b)
+{
+    OM_uint32 min_stat;
+    char *s = malloc(b->length+1);
+
+    if (s) {
+	memcpy(s, b->value, b->length);
+	s[b->length] = 0;
+    }
+    (void) gss_release_buffer(&min_stat, b);
+    return s;
+}
+
 kdb_incr_result_t *
 iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 {
@@ -118,7 +134,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 	char *whoami = "iprop_get_updates_1";
 	int kret;
 	kadm5_server_handle_t handle = global_server_handle;
-	char *client_name = NULL, *service_name = NULL;
+	char *client_name = 0, *service_name = 0;
 	char obuf[256] = {0};
 
 	/* default return code */
@@ -134,11 +150,25 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 		goto out;
 	}
 
-	if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
+	{
+	    gss_buffer_desc client_desc, service_desc;
+
+	    if (setup_gss_names(rqstp, &client_desc, &service_desc) < 0) {
 		krb5_klog_syslog(LOG_ERR,
-			_("%s: setup_gss_names failed"),
-			whoami);
+				 _("%s: setup_gss_names failed"),
+				 whoami);
 		goto out;
+	    }
+	    client_name = buf_to_string(&client_desc);
+	    service_name = buf_to_string(&service_desc);
+	    if (client_name == NULL || service_name == NULL) {
+		free(client_name);
+		free(service_name);
+		krb5_klog_syslog(LOG_ERR,
+				 "%s: out of memory recording principal names",
+				 whoami);
+		goto out;
+	    }
 	}
 
 	DPRINT(("%s: clprinc=`%s'\n\tsvcprinc=`%s'\n",
@@ -244,11 +274,25 @@ iprop_full_resync_1_svc(
 
 	DPRINT(("%s: start\n", whoami));
 
-	if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
+	{
+	    gss_buffer_desc client_desc, service_desc;
+
+	    if (setup_gss_names(rqstp, &client_desc, &service_desc) < 0) {
 		krb5_klog_syslog(LOG_ERR,
-			_("%s: setup_gss_names failed"),
-			whoami);
+				 _("%s: setup_gss_names failed"),
+				 whoami);
 		goto out;
+	    }
+	    client_name = buf_to_string(&client_desc);
+	    service_name = buf_to_string(&service_desc);
+	    if (client_name == NULL || service_name == NULL) {
+		free(client_name);
+		free(service_name);
+		krb5_klog_syslog(LOG_ERR,
+				 "%s: out of memory recording principal names",
+				 whoami);
+		goto out;
+	    }
 	}
 
 	DPRINT(("%s: clprinc=`%s'\n\tsvcprinc=`%s'\n",
@@ -288,7 +332,8 @@ iprop_full_resync_1_svc(
 	 * note the -i; modified version of kdb5_util dump format
 	 * to include sno (serial number)
 	 */
-	if (asprintf(&ubuf, "%s%s", KDB5_UTIL_DUMP_STR, tmpf) < 0) {
+	if (asprintf(&ubuf, "%s dump -i %s", KPROPD_DEFAULT_KDB5_UTIL,
+		     tmpf) < 0) {
 		krb5_klog_syslog(LOG_ERR,
 				 _("%s: cannot construct kdb5 util dump string too long; out of memory"),
 				 whoami);
@@ -333,8 +378,14 @@ iprop_full_resync_1_svc(
 
 		DPRINT(("%s: exec `kprop -f %s %s' ...\n",
 			whoami, tmpf, clhost));
-		pret = execl("/usr/lib/krb5/kprop", "kprop", "-f", tmpf,
-			    clhost, NULL);
+		/* XXX Yuck!  */
+		if (getenv("KPROP_PORT"))
+		    pret = execl(KPROPD_DEFAULT_KPROP, "kprop", "-f", tmpf,
+				 "-P", getenv("KPROP_PORT"),
+				 clhost, NULL);
+		else
+		    pret = execl(KPROPD_DEFAULT_KPROP, "kprop", "-f", tmpf,
+				 clhost, NULL);
 		if (pret == -1) {
 			if (nofork) {
 				perror(whoami);
