@@ -363,6 +363,7 @@ procedure is based on that recommendation.
 * Add Kerberos Principals to the Database::  
 * Limit Access to the KDCs::    
 * Switching Master and Slave KDCs::  
+* Incremental Database Propagation::  
 @end menu
 
 @node Install the Master KDC, Install the Slave KDCs, Installing KDCs, Installing KDCs
@@ -950,7 +951,7 @@ eklogin   stream tcp nowait root @value{ROOTDIR}/sbin/klogind
 @end group
 @end smallexample
 
-@node Switching Master and Slave KDCs,  , Limit Access to the KDCs, Installing KDCs
+@node Switching Master and Slave KDCs, Incremental Database Propagation, Limit Access to the KDCs, Installing KDCs
 @subsection Switching Master and Slave KDCs
 
 You may occasionally want to use one of your slave KDCs as the master.
@@ -1000,6 +1001,101 @@ this, you'll need to change the @code{krb5.conf} file on every client
 machine in your Kerberos realm.)
 
 @end enumerate
+
+@node Incremental Database Propagation,  , Switching Master and Slave KDCs, Installing KDCs
+@subsection Incremental Database Propagation
+
+At some very large sites, dumping and transmitting the database can
+take more time than is desirable for changes to propagate from the
+master KDC to the slave KDCs.  The incremental propagation support
+added in the 1.7 release is intended to address this.
+
+With incremental propagation enabled, all programs on the master KDC
+that change the database also write information about the changes to
+an ``update log'' file, maintained as a circular buffer of a certain
+size.  A process on each slave KDC connects to a service on the master
+KDC (currently implmented in the @code{kadmind} server) and
+periodically requests the changes that have been made since the last
+check.  By default, this check is done every two minutes.  If the
+database has just been modified in the previous several seconds, the
+slave will not retrieve updates, but instead will pause and try again
+soon after.  This reduces the likelihood that incremental update
+queries will cause delays for an administrator trying to make a bunch
+of changes to the database at the same time.
+
+Incremental propagation uses the following entries in the per-realm
+data in the KDC config file:
+
+@table @asis
+@item @code{sunw_dbprop_enable} (boolean)
+If this is set to @code{true}, then incremental propagation is
+enabled, and (as noted below) normal @code{kprop} propagation is
+disabled.  The default is @code{false}.
+
+@item @code{sunw_dbprop_master_ulogsize} (integer)
+This indicates the number of entries that should be retained in the
+update log.  The default is 1000; the maximum number is 2500.
+
+@item @code{sunw_dbprop_slave_poll} (time interval)
+This indicates how often the slave should poll the master KDC for
+changes to the database.  The default is two minutes.
+
+@item update log file spec?
+@end table
+
+Both master and slave sides must have principals named
+@code{kiprop/@var{hostname}} (where @var{hostname} is, as usual, the
+lower-case, fully-qualified, canonical name for the host) registered
+and keys stored in the default keytab file (@file{/etc/krb5.keytab}).
+@i{(XXX: I think the master side, at least, might be able to read the
+key out of the database.  Test and document this.)}
+
+On the master KDC side, the @code{kiprop/@var{hostname}} principal
+must be listed in the @code{kadmind} ACL file @code{kadm5.acl}, and
+given the @code{p} privilege.  The master host must also (currently)
+be running an RPC portmapper, configured to listen for requests over
+UDP.
+
+On the slave KDC side, @code{kpropd} should be run.  When incremental
+propagation is enabled, it will connect to the @code{kadmind} on the
+master KDC and start requesting updates.
+
+The normal @code{kprop} mechanism is disabled by the incremental
+propagation support.  However, if the slave has been unable to fetch
+changes from the master KDC for too long (network problems, perhaps),
+the log on the master may wrap around and overwrite some of the
+updates that the slave has not yet retrieved.  In this case, the slave
+will instruct the master KDC to dump the current database out to a
+file and invoke a one-time @code{kprop} propagation, with special
+options to also convey the point in the update log at which the slave
+should resume fetching incremental updates.  Thus, all the keytab and
+ACL setup previously described for @code{kprop} propagation is still
+needed.
+
+There are several known bugs and restrictions in the current
+implementation:
+@itemize
+@item
+If the @code{kadmind} process on the master is restarted, or the
+connection from the slave to the master is lost, the @code{kpropd}
+process on the slave may crash and need to be restarted.
+@item
+The ``call out to @code{kprop}'' mechanism is a bit fragile; if the
+@code{kprop} propagation fails to connect for some reason, the process
+on the slave may hang waiting for it, and will need to be restarted.
+@item
+The master and slave must be able to initiate TCP connections in
+both directions, without an intervening NAT.  They must also be able
+to communicate over IPv4, since MIT's RPC code does not currently
+support IPv6.
+@item
+As mentioned above, an RPC portmapper process must be running.  All
+other MIT Kerberos services work without the port number, but require
+use of default or user-specified port numbers; this allows multiple
+instances to be run on a host at once, for production or testing
+purposes.  The incremental-propagation code will probably be changed
+to do this in the future as well.
+@end itemize
 
 @node Installing and Configuring UNIX Client Machines, UNIX Application Servers, Installing KDCs, Installing Kerberos V5
 @section Installing and Configuring UNIX Client Machines
