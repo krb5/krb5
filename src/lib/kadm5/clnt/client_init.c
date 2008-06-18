@@ -240,6 +240,9 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	       realm = NULL;
      }
 
+#if 0 /* Since KDC config params can now be put in krb5.conf, these
+	 could show up even when you're just using the remote kadmin
+	 client.  */
 #define ILLEGAL_PARAMS (KADM5_CONFIG_DBNAME | KADM5_CONFIG_ADBNAME | \
 			KADM5_CONFIG_ADB_LOCKFILE | \
 			KADM5_CONFIG_ACL_FILE | KADM5_CONFIG_DICT_FILE \
@@ -255,7 +258,8 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  free(handle);
 	  return KADM5_BAD_CLIENT_PARAMS;
      }
-			
+#endif
+
      if ((code = kadm5_get_config_params(handle->context, 0,
 					 params_in, &handle->params))) {
 	  krb5_free_context(handle->context);
