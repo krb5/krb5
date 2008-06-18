@@ -125,7 +125,7 @@ cc_int32 ccapi_credentials_iterator_release (cc_credentials_iterator_t io_creden
     if (!io_credentials_iterator) { err = ccErrBadParam; }
     
     if (!err) {
-        err =  cci_ipc_send (cci_credentials_iterator_next_msg_id,
+        err =  cci_ipc_send (cci_credentials_iterator_release_msg_id,
                              credentials_iterator->identifier,
                              NULL,
                              NULL);
