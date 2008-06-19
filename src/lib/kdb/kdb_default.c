@@ -284,11 +284,11 @@ krb5_db_def_fetch_mkey_stash( krb5_context   context,
 	retval = 0;
 
     /*
-     * Note, the old stash format did not store the kvno so it was always hard
-     * coded to be 0.
+     * Note, the old stash format did not store the kvno and at this point it
+     * can be assumed to be 1 as is the case for the mkey princ.
      */
     if (kvno)
-	*kvno = 0;
+	*kvno = 1;
 
  errout:
     (void) fclose(kf);
@@ -341,10 +341,10 @@ krb5_db_def_fetch_mkey_keytab(  krb5_context   context,
 
         if (kvno != NULL) {
             /*
-             * if a kvno pointer was passed in and it dereferences to
-             * IGNORE_VNO then it should be assigned the value of the
-             * kvno found in the keytab otherwise the KNVO specified
-             * should be the same as the one returned from the keytab.
+             * If a kvno pointer was passed in and it dereferences the
+             * IGNORE_VNO value then it should be assigned the value of the kvno
+             * found in the keytab otherwise the KNVO specified should be the
+             * same as the one returned from the keytab.
              */
             if (*kvno == IGNORE_VNO) {
                 *kvno = kt_ent.vno;
@@ -419,7 +419,7 @@ krb5_db_def_fetch_mkey( krb5_context   context,
 krb5_error_code
 krb5_def_verify_master_key( krb5_context    context,
                             krb5_principal  mprinc,
-                            krb5_kvno       *kvno,
+                            krb5_kvno       kvno,
                             krb5_keyblock   *mkey)
 {
     krb5_error_code retval;
@@ -455,16 +455,12 @@ krb5_def_verify_master_key( krb5_context    context,
 	retval = KRB5_KDB_BADMASTERKEY;
     }
 
-    if (kvno != NULL) {
-        if (*kvno == IGNORE_VNO) {
-            /* return value of mkey princs kvno */
-            *kvno = master_entry.key_data->key_data_kvno;
-        } else if (*kvno != (krb5_kvno) master_entry.key_data->key_data_kvno) {
-            retval = KRB5_KDB_BADMASTERKEY;
-            krb5_set_error_message (context, retval,
-                "User specified mkeyVNO (%u) does not match master key princ's KVNO (%u)",
-                *kvno, master_entry.key_data->key_data_kvno);
-        }
+    if (kvno != IGNORE_VNO &&
+        kvno != (krb5_kvno) master_entry.key_data->key_data_kvno) {
+        retval = KRB5_KDB_BADMASTERKEY;
+        krb5_set_error_message (context, retval,
+            "User specified mkeyVNO (%u) does not match master key princ's KVNO (%u)",
+            kvno, master_entry.key_data->key_data_kvno);
     }
 
     memset((char *)tempkey.contents, 0, tempkey.length);

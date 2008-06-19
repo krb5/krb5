@@ -256,6 +256,7 @@ static krb5_error_code master_key_convert(context, db_entry)
     int	      i, j;
     krb5_key_data	new_key_data, *key_data;
     krb5_boolean	is_mkey;
+    krb5_kvno           kvno;
 
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
@@ -274,10 +275,22 @@ static krb5_error_code master_key_convert(context, db_entry)
 		return retval;
 
 	memset(&new_key_data, 0, sizeof(new_key_data));
-	key_ptr = is_mkey ? &new_master_keyblock : &v5plainkey;
+
+        if (is_mkey) {
+            key_ptr = &new_master_keyblock;
+            /* override mkey princ's kvno */
+            if (global_params.mask & KADM5_CONFIG_KVNO)
+                kvno = global_params.kvno;
+            else
+                kvno = (krb5_kvno) key_data->key_data_kvno;
+        } else {
+            key_ptr = &v5plainkey;
+            kvno = (krb5_kvno) key_data->key_data_kvno;
+        }
+
 	retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
 					     key_ptr, &keysalt,
-					     key_data->key_data_kvno,
+					     (int) kvno,
 					     &new_key_data);
 	if (retval)
 		return retval;
@@ -1092,12 +1105,14 @@ dump_db(argc, argv)
      */
     if (mkey_convert) {
 	    if (!valid_master_key) {
+                    krb5_kvno mkvno = IGNORE_VNO;
 		    /* TRUE here means read the keyboard, but only once */
 		    retval = krb5_db_fetch_mkey(util_context,
 						master_princ,
 						master_keyblock.enctype,
 						TRUE, FALSE,
-						(char *) NULL, 0,
+						(char *) NULL,
+                                                NULL, NULL,
 						&master_keyblock);
 		    if (retval) {
 			    com_err(argv[0], retval,
@@ -1106,7 +1121,7 @@ dump_db(argc, argv)
 		    }
 		    retval = krb5_db_verify_master_key(util_context,
 						       master_princ,
-                                                       NULL,
+                                                       IGNORE_VNO,
 						       &master_keyblock);
 		    if (retval) {
 			    com_err(argv[0], retval,
@@ -1117,18 +1132,38 @@ dump_db(argc, argv)
 	    new_master_keyblock.enctype = global_params.enctype;
 	    if (new_master_keyblock.enctype == ENCTYPE_UNKNOWN)
 		    new_master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
-	    if (!new_mkey_file)
-		    printf("Please enter new master key....\n");
-	    if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
-					     new_master_keyblock.enctype,
-					     (new_mkey_file == 0) ? 
-					        (krb5_boolean) 1 : 0, 
-					     TRUE, 
-					     new_mkey_file, 0,
-					     &new_master_keyblock))) { 
-		    com_err(argv[0], retval, "while reading new master key");
-		    exit(1);
-	    }
+
+            if (new_mkey_file) {
+                krb5_kvno kt_kvno;
+
+                if (global_params.mask & KADM5_CONFIG_KVNO)
+                    kt_kvno = global_params.kvno;
+                else
+                    kt_kvno = IGNORE_VNO;
+
+                if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
+                            new_master_keyblock.enctype,
+                            FALSE, 
+                            FALSE, 
+                            new_mkey_file,
+                            &kt_kvno,
+                            NULL,
+                            &new_master_keyblock))) { 
+                    com_err(argv[0], retval, "while reading new master key");
+                    exit(1);
+                }
+            } else {
+                printf("Please enter new master key....\n");
+                if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
+                            new_master_keyblock.enctype,
+                            TRUE,
+                            TRUE, 
+                            NULL, NULL, NULL,
+                            &new_master_keyblock))) { 
+                    com_err(argv[0], retval, "while reading new master key");
+                    exit(1);
+                }
+            }
     }
 
     kret = 0;

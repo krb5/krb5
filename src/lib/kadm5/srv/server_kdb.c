@@ -54,6 +54,7 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 			     master_keyblock.enctype, from_kbd,
 			     FALSE /* only prompt once */,
 			     handle->params.stash_file,
+                             NULL /* don't care about kvno */,
 			     NULL /* I'm not sure about this,
 				     but it's what the kdc does --marc */,
 			     &master_keyblock);
@@ -61,7 +62,7 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 	goto done;
 				 
     if ((ret = krb5_db_verify_master_key(handle->context, master_princ,
-					 NULL, &master_keyblock))) {
+					 IGNORE_VNO, &master_keyblock))) {
 	  krb5_db_fini(handle->context);
 	  return ret;
     }
