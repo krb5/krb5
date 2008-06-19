@@ -603,6 +603,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 	if (!context->kdblog_context) {
 		if (!(log_ctx = malloc(sizeof (kdb_log_context))))
 			return (errno);
+		memset(log_ctx, 0, sizeof(*log_ctx));
 		context->kdblog_context = log_ctx;
 	} else
 		log_ctx = context->kdblog_context;
@@ -853,6 +854,7 @@ ulog_set_role(krb5_context ctx, iprop_role role)
 	if (!ctx->kdblog_context) {
 		if (!(log_ctx = malloc(sizeof (kdb_log_context))))
 			return (errno);
+		memset(log_ctx, 0, sizeof(*log_ctx));
 		ctx->kdblog_context = log_ctx;
 	} else
 		log_ctx = ctx->kdblog_context;
