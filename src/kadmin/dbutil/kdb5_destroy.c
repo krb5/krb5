@@ -107,14 +107,7 @@ kdb5_destroy(argc, argv)
     }
 
     if (global_params.iprop_enabled) {
-	char *ufilename;
-	if (asprintf(&ufilename, "%s.ulog", dbname) < 0) {
-	    exit_status++;
-	    return;
-	}
-
-	(void) unlink(ufilename);
-	free(ufilename);
+	(void) unlink(global_params.iprop_logfile);
     }
 
     dbactive = FALSE;
