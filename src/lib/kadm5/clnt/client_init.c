@@ -300,14 +300,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  goto cleanup;
      }
 
-     memset(&addr, 0, sizeof(addr));
-     addr.sin_family = hp->h_addrtype;
-     (void) memcpy((char *) &addr.sin_addr, (char *) hp->h_addr,
-		   sizeof(addr.sin_addr));
-     addr.sin_port = htons((u_short) handle->params.kadmind_port);
-     
-     fd = RPC_ANYSOCK;
-
      /*
       * If the service_name and client_name are iprop-centric,
       * we need to clnttcp_create to the appropriate RPC prog.
@@ -318,8 +310,23 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 
      if (service_name != NULL &&
 	 (strstr(service_name, iprop_svc) != NULL) &&
-	 (strstr(client_name, iprop_svc) != NULL)) {
+	 (strstr(client_name, iprop_svc) != NULL))
 	 iprop_enable = 1;
+     else
+	 iprop_enable = 0;
+
+     memset(&addr, 0, sizeof(addr));
+     addr.sin_family = hp->h_addrtype;
+     (void) memcpy((char *) &addr.sin_addr, (char *) hp->h_addr,
+		   sizeof(addr.sin_addr));
+     if (iprop_enable)
+	 addr.sin_port = htons((u_short) handle->params.iprop_port);
+     else
+	 addr.sin_port = htons((u_short) handle->params.kadmind_port);
+     
+     fd = RPC_ANYSOCK;
+
+     if (iprop_enable) {
 	 handle->clnt = clnttcp_create(&addr, KRB5_IPROP_PROG, KRB5_IPROP_VERS,
 				       &fd, 0, 0);
      } else
