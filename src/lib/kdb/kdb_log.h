@@ -52,7 +52,6 @@ extern "C" {
 /*
  * Default ulog file attributes
  */
-#define	ULOG_FILE	"/var/krb5/principal.ulog"
 #define	MAX_FILENAME	(PATH_MAX + 1)
 #define	MAX_ULOGENTRIES	2500
 #define	DEF_ULOGENTRIES	1000
