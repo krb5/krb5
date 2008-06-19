@@ -104,6 +104,9 @@ int runonce = 0;
 
 /*
  * This struct simulates the use of _kadm5_server_handle_t
+ *
+ * This is a COPY of kadm5_server_handle_t from
+ * lib/kadm5/clnt/client_internal.h!
  */
 typedef struct _kadm5_iprop_handle_t {
 	krb5_ui_4	magic_number;
@@ -206,6 +209,18 @@ main(argc, argv)
     PRS(argv);
 
     log_ctx = kpropd_context->kdblog_context;
+
+    {
+#ifdef POSIX_SIGNALS
+	struct sigaction s_action;
+	memset(&s_action, 0, sizeof(s_action));
+	sigemptyset(&s_action.sa_mask);
+	s_action.sa_handler = SIG_IGN;
+	sigaction(SIGPIPE, &s_action, NULL);
+#else
+	signal(SIGPIPE, SIG_IGN);
+#endif
+    }
 
     if (log_ctx && (log_ctx->iproprole == IPROP_SLAVE)) {
 	/*
@@ -311,6 +326,8 @@ int do_standalone(iprop_role iproprole)
 	    
 		memset((char *)&frominet, 0, sizeof(frominet));
 		fromlen = sizeof(frominet);
+		if (debug)
+		    fprintf(stderr, "waiting for a kprop connection\n");
 		s = accept(finet, (struct sockaddr *) &frominet, &fromlen);
 
 		if (s < 0) {
@@ -415,6 +432,10 @@ void doit(fd)
 				"While unparsing client name");
 			exit(1);
 		}
+		if (debug)
+		    fprintf(stderr,
+			    "Rejected connection from unauthorized principal %s\n",
+			    name);
 		syslog(LOG_WARNING,
 		       "Rejected connection from unauthorized principal %s",
 		       name);
@@ -482,10 +503,10 @@ void doit(fd)
 /*
  * Routine to handle incremental update transfer(s) from master KDC
  */
+kadm5_config_params params;
 krb5_error_code do_iprop(kdb_log_context *log_ctx)
 {
 	kadm5_ret_t retval;
-	kadm5_config_params params;
 	krb5_ccache cc;
 	krb5_principal iprop_svc_principal;
 	void *server_handle = NULL;
@@ -510,27 +531,11 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	if (!debug)
 		daemon(0, 0);
 
-	pollin = (unsigned int)0;
-	(void) memset((char *)&params, 0, sizeof (params));
 	ulog = log_ctx->ulog;
 
-
-	retval = kadm5_get_config_params(kpropd_context, 1, &params, &params);
-	if (retval) {
-		com_err(progname, retval, _("while initializing"));
-		exit(1);
-	}
-	if (params.iprop_enabled == TRUE) {
-		ulog_set_role(kpropd_context, IPROP_SLAVE);
-
-		if (ulog_map(kpropd_context, params.iprop_logfile,
-			     params.iprop_ulogsize, FKPROPD, db_args)) { 
- 			com_err(progname, errno,
-			    _("Unable to map log!\n")); 
-			exit(1); 
-		}
-	}
 	pollin = params.iprop_poll_time;
+	if (pollin < 10)
+	    pollin = 10;
 
 	/*
 	 * Grab the realm info and check if iprop is enabled.
@@ -571,16 +576,30 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	retval = krb5_sname_to_principal(kpropd_context, NULL, KIPROP_SVC_NAME,
 				KRB5_NT_SRV_HST, &iprop_svc_principal);
 	if (retval) {
-		com_err(progname, retval, _("while trying to construct "
-						"host service principal"));
+		com_err(progname, retval,
+			_("while trying to construct host service principal"));
 		exit(1);
 	}
 
+	/* XXX referrals? */
+	if (krb5_is_referral_realm(krb5_princ_realm(kpropd_context,
+						    iprop_svc_principal))) {
+	    krb5_data *r = krb5_princ_realm(kpropd_context,
+					    iprop_svc_principal);
+	    assert(def_realm != NULL);
+	    r->length = strlen(def_realm);
+	    r->data = strdup(def_realm);
+	    if (r->data == NULL) {
+		com_err(progname, retval,
+			_("while determining local service principal name"));
+		exit(1);
+	    }
+	    /* XXX Memory leak: Old r->data value.  */
+	}
 	if (retval = krb5_unparse_name(kpropd_context, iprop_svc_principal,
 				&iprop_svc_princstr)) {
 		com_err(progname, retval,
-			_("while canonicalizing "
-				"principal name"));
+			_("while canonicalizing principal name"));
 		krb5_free_principal(kpropd_context, iprop_svc_principal);
 		exit(1);
 	}
@@ -902,14 +921,13 @@ void PRS(argv)
 	static const char	tmp[] = ".temp";
 	kdb_log_context *log_ctx;
 
+	(void) memset((char *)&params, 0, sizeof (params));
+
 	retval = krb5_init_context(&kpropd_context);
 	if (retval) {
 		com_err(argv[0], retval, "while initializing krb5");
 		exit(1);
 	}
-	log_ctx = kpropd_context->kdblog_context;
-	if (log_ctx && (log_ctx->iproprole == IPROP_SLAVE))
-		ulog_set_role(kpropd_context, IPROP_SLAVE);
 
 	progname = *argv++;
 	while ((word = *argv++)) {
@@ -1064,6 +1082,25 @@ void PRS(argv)
 	}
 	strcpy(temp_file_name, file);
 	strcat(temp_file_name, tmp);
+
+	retval = kadm5_get_config_params(kpropd_context, 1, &params, &params);
+	if (retval) {
+		com_err(progname, retval, _("while initializing"));
+		exit(1);
+	}
+	if (params.iprop_enabled == TRUE) {
+		ulog_set_role(kpropd_context, IPROP_SLAVE);
+
+		if (ulog_map(kpropd_context, params.iprop_logfile,
+			     params.iprop_ulogsize, FKPROPD, db_args)) { 
+ 			com_err(progname, errno,
+			    _("Unable to map log!\n")); 
+			exit(1); 
+		}
+	}
+	log_ctx = kpropd_context->kdblog_context;
+	if (log_ctx && (log_ctx->iproprole == IPROP_SLAVE))
+		ulog_set_role(kpropd_context, IPROP_SLAVE);
 }
 
 /*
@@ -1546,7 +1583,7 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 	if (ret = kadm5_get_master(context, realm, &host))
 		return (ret);
 #else
-	host = strdup("foobarbaz.mit.edu");
+	host = strdup("nome-king.mit.edu");
 #endif
 
 	name = malloc(strlen(KADM5_KIPROP_HOST_SERVICE) + strlen(host) + 2);
@@ -1554,7 +1591,7 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 		free(host);
 		return (ENOMEM);
 	}
-	sprintf(name, "%s@%s", KADM5_KIPROP_HOST_SERVICE, host);
+	sprintf(name, "%s/%s", KADM5_KIPROP_HOST_SERVICE, host);
 	free(host);
 	*host_service_name = name;
 
