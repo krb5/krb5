@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
      memset(&addr, 0, sizeof(addr));
      addr.sin_family = AF_INET;
      addr.sin_addr.s_addr = INADDR_ANY;
-     addr.sin_port = htons(12349); /* XXX */
+     addr.sin_port = htons(params.iprop_port);
      if (bind(ipropfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 	  char portbuf[32];
 	  int oerrno = errno;
@@ -572,10 +572,12 @@ int main(int argc, char *argv[])
      }
      if (!svc_register(iproptransp, KRB5_IPROP_PROG, KRB5_IPROP_VERS, krb5_iprop_prog_1, IPPROTO_TCP)) {
 	  fprintf(stderr, "%s: Cannot register RPC service.\n", whoami);
-	  krb5_klog_syslog(LOG_ERR, "Cannot register RPC service, failing.");
+	  krb5_klog_syslog(LOG_ERR, "Cannot register RPC service, continuing.");
+#if 0
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close(context);	  
 	  exit(1);
+#endif
      }
 
 
