@@ -141,11 +141,28 @@ find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
 
 
 /*
+ */
+static int
+data_to_utf8str(utf8str_t *u, krb5_data d)
+{
+    u->utf8str_t_len = d.length;
+    if (d.data) {
+	/* XXX Is the data always a nul-terminated string?  */
+	u->utf8str_t_val = strdup(d.data);
+	if (u->utf8str_t_val == NULL)
+	    return -1;
+    } else
+	u->utf8str_t_val = NULL;
+    return 0;
+}
+
+/*
  * Converts the krb5_principal struct from db2 to ulog format.
  */
 krb5_error_code
 conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
-				int cnt, princ_type tp) {
+				int cnt, princ_type tp)
+{
 	int i = 0;
 	kdbe_princ_t *p;
 	kdbe_data_t *components;
@@ -159,28 +176,37 @@ conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 		p = &ULOG_ENTRY(upd, cnt).av_princ; /* or av_mod_princ */
 		p->k_nametype = (int32_t)princ->type;
 
-		p->k_realm.utf8str_t_len = princ->realm.length;
-
-		p->k_realm.utf8str_t_val =
-				(princ->realm.data != NULL) ?
-				strdup(princ->realm.data) : NULL;
-		/* XXX check for allocation failure above.  */
+		if (data_to_utf8str(&p->k_realm, princ->realm) < 0) {
+		    return ENOMEM;
+		}
 
 		p->k_components.k_components_len = princ->length;
 
 		p->k_components.k_components_val = components
 				= malloc(princ->length * sizeof (kdbe_data_t));
-		if (p->k_components.k_components_val == NULL)
+		if (p->k_components.k_components_val == NULL) {
+			free(p->k_realm.utf8str_t_val);
+			p->k_realm.utf8str_t_val = NULL;
 			return (ENOMEM);
+		}
 
+		memset(components, 0, princ->length * sizeof(kdbe_data_t));
+		for (i = 0; i < princ->length; i++)
+		    components[i].k_data.utf8str_t_val = NULL;
 		for (i = 0; i < princ->length; i++) {
 			components[i].k_magic = princ->data[i].magic;
-			components[i].k_data.utf8str_t_len
-				= princ->data[i].length;
-			components[i].k_data.utf8str_t_val
-				= (princ->data[i].data != NULL) ?
-				strdup(princ->data[i].data) : NULL;
-			/* XXX Check for allocation failure above.  */
+			if (data_to_utf8str(&components[i].k_data, princ->data[i]) < 0) {
+			    int j;
+			    for (j = 0; j < i; j++) {
+				free(components[j].k_data.utf8str_t_val);
+				components[j].k_data.utf8str_t_val = NULL;
+			    }
+			    free(components);
+			    p->k_components.k_components_val = NULL;
+			    free(p->k_realm.utf8str_t_val);
+			    p->k_realm.utf8str_t_val = NULL;
+			    return ENOMEM;
+			}
 		}
 		break;
 
