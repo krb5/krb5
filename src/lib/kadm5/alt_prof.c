@@ -382,7 +382,7 @@ get_string_param(char **param_out, char *param_in,
 }
 /*
  * Similar, for (host-order) port number, if not already set in the
- * output field; default is required.
+ * output field; default_value==0 means no default.
  */
 static void
 get_port_param(int *param_out, int param_in,
@@ -403,7 +403,7 @@ get_port_param(int *param_out, int param_in,
 		   !krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
 	    *param_out = ivalue;
 	    *mask_out |= mask_bit;
-	} else {
+	} else if (default_value) {
 	    *param_out = default_value;
 	    *mask_out |= mask_bit;
 	}
@@ -733,13 +733,17 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 		}
 	}
 
-	/* XXX */
-	if (params.mask & KADM5_CONFIG_DBNAME) {
-	    if (asprintf(&params.iprop_logfile, "%s.ulog", params.dbname) < 0) {
-		params.iprop_logfile = NULL;
+	if (!GET_STRING_PARAM(iprop_logfile, KADM5_CONFIG_IPROP_LOGFILE,
+			      "iprop_logfile", NULL)) {
+	    if (params.mask & KADM5_CONFIG_DBNAME) {
+		if (asprintf(&params.iprop_logfile, "%s.ulog", params.dbname) >= 0) {
+		    params.mask |= KADM5_CONFIG_IPROP_LOGFILE;
+		}
 	    }
-	} else
-	    params.iprop_logfile = NULL;
+	}
+
+	GET_PORT_PARAM(iprop_port, KADM5_CONFIG_IPROP_PORT,
+		       "iprop_port", 0);
 
 	hierarchy[2] = "sunw_dbprop_master_ulogsize";
 
