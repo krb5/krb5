@@ -2521,7 +2521,7 @@ load_db(argc, argv)
 	if (!update) {
 	    memset(log_ctx->ulog, 0, sizeof (kdb_hlog_t));
 
-	    log_ctx->ulog->kdb_hmagic = KDB_HMAGIC;
+	    log_ctx->ulog->kdb_hmagic = KDB_ULOG_HDR_MAGIC;
 	    log_ctx->ulog->db_version_num = KDB_VERSION;
 	    log_ctx->ulog->kdb_state = KDB_STABLE;
 	    log_ctx->ulog->kdb_block = ULOG_BLOCK;

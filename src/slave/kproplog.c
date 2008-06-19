@@ -128,7 +128,7 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, bool_t verbose)
 		/*
 		 * Check for corrupt update entry
 		 */
-		if (indx_log->kdb_umagic != KDB_UMAGIC) {
+		if (indx_log->kdb_umagic != KDB_ULOG_MAGIC) {
 			(void) fprintf(stderr,
 			    _("Corrupt update entry\n\n"));
 			exit(1);
@@ -262,7 +262,7 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	if (ulog->kdb_hmagic != KDB_HMAGIC) {
+	if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC) {
 		(void) fprintf(stderr,
 		    _("Corrupt header log, exiting\n\n"));
 		exit(1);

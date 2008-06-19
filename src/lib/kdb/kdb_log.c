@@ -109,7 +109,7 @@ ulog_resize(kdb_hlog_t *ulog, uint32_t ulogentries, int ulogfd, uint_t recsize)
 		 */
 		(void) memset(ulog, 0, sizeof (kdb_hlog_t));
 
-		ulog->kdb_hmagic = KDB_HMAGIC;
+		ulog->kdb_hmagic = KDB_ULOG_HDR_MAGIC;
 		ulog->db_version_num = KDB_VERSION;
 		ulog->kdb_state = KDB_STABLE;
 		ulog->kdb_block = new_block;
@@ -202,7 +202,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
 
 	(void) memset(indx_log, 0, ulog->kdb_block);
 
-	indx_log->kdb_umagic = KDB_UMAGIC;
+	indx_log->kdb_umagic = KDB_ULOG_MAGIC;
 	indx_log->kdb_entry_size = upd_size;
 	indx_log->kdb_entry_sno = cur_sno;
 	indx_log->kdb_time = upd->kdb_time = ktime;
@@ -434,7 +434,7 @@ ulog_check(krb5_context context, kdb_hlog_t *ulog, char **db_args)
 	for (i = 0; i < ulog->kdb_num; i++) {
 		indx_log = (kdb_ent_header_t *)INDEX(ulog, i);
 
-		if (indx_log->kdb_umagic != KDB_UMAGIC) {
+		if (indx_log->kdb_umagic != KDB_ULOG_MAGIC) {
 			/*
 			 * Update entry corrupted we should scream and die
 			 */
@@ -610,14 +610,14 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 	log_ctx->ulogentries = ulogentries;
 	log_ctx->ulogfd = ulogfd;
 
-	if (ulog->kdb_hmagic != KDB_HMAGIC) {
+	if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC) {
 		if (ulog->kdb_hmagic == 0) {
 			/*
 			 * New update log
 			 */
 			(void) memset(ulog, 0, sizeof (kdb_hlog_t));
 
-			ulog->kdb_hmagic = KDB_HMAGIC;
+			ulog->kdb_hmagic = KDB_ULOG_HDR_MAGIC;
 			ulog->db_version_num = KDB_VERSION;
 			ulog->kdb_state = KDB_STABLE;
 			ulog->kdb_block = ULOG_BLOCK;
@@ -665,7 +665,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 		    (ulog->kdb_num > ulogentries))) {
 			(void) memset(ulog, 0, sizeof (kdb_hlog_t));
 
-			ulog->kdb_hmagic = KDB_HMAGIC;
+			ulog->kdb_hmagic = KDB_ULOG_HDR_MAGIC;
 			ulog->db_version_num = KDB_VERSION;
 			ulog->kdb_state = KDB_STABLE;
 			ulog->kdb_block = ULOG_BLOCK;
