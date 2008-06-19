@@ -231,7 +231,8 @@ replace_with_utf8str(krb5_data *d, utf8str_t u)
     d->data = realloc(d->data, d->length + 1);
     if (d->data == NULL)
 	return;
-    strncpy(d->data, u.utf8str_t_val, d->length + 1);
+    if (u.utf8str_t_val)	/* May be null if length = 0.  */
+	strncpy(d->data, u.utf8str_t_val, d->length + 1);
     d->data[d->length] = 0;
 }
 
@@ -242,8 +243,8 @@ krb5_error_code
 conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 			kdb_incr_update_t *upd,
 			int cnt, princ_type tp,
-			int princ_exists) {
-
+			int princ_exists)
+{
 	int i;
 	krb5_principal princ;
 	kdbe_princ_t *kdbe_princ;
@@ -276,25 +277,30 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 		if (princ->realm.data == NULL)
 			goto error;
 
-		princ->length = (krb5_int32)kdbe_princ->k_components.k_components_len;
-
-		if (princ_exists == 0)
-			princ->data = NULL;
+		/* Free up old entries we're about to release.  */
+		if (princ_exists) {
+		    for (i = kdbe_princ->k_components.k_components_len; i < princ->length; i++) {
+			free(princ->data[i].data);
+			princ->data[i].data = NULL;
+		    }
+		} else
+		    princ->data = NULL;
 		princ->data = (krb5_data *)realloc(princ->data,
 						   (princ->length * sizeof (krb5_data)));
-		/* XXX Memory leak: Old string data in krb5_data
-		   records eliminated by resizing to smaller size.  */
 		if (princ->data == NULL)
-		    /* XXX Memory leak: Old storage.  */
-			goto error;
+		    /* XXX Memory leak: old storage not freed.  */
+		    goto error;
+		/* Initialize pointers in added component slots.  */
+		for (i = princ->length; i < kdbe_princ->k_components.k_components_len; i++) {
+		    princ->data[i].data = NULL;
+		}
+		princ->length = (krb5_int32)kdbe_princ->k_components.k_components_len;
 
 		for (i = 0; i < princ->length; i++) {
 			princ->data[i].magic =
 				components[i].k_magic;
 			if (princ_exists == 0)
 				princ->data[i].data = NULL;
-			/* XXX Uninitialized: ->data[i] if array was
-			   reallocated to larger size.  */
 			replace_with_utf8str(&princ->data[i],
 					     components[i].k_data);
 			if (princ->data[i].data == NULL)
@@ -615,8 +621,9 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 krb5_error_code
 ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 				kdb_incr_update_t *updates,
-				int nentries) {
-	int i, j, k, cnt, mod_time, nattrs, nprincs;
+				int nentries)
+{
+	int i, j, k, cnt, mod_time = 0, nattrs, nprincs;
 	krb5_principal mod_princ = NULL;
 	krb5_principal dbprinc;
 	char *dbprincstr = NULL;
@@ -989,7 +996,7 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates) {
 				 * XXX: Free av_pw_hist
 				 *
 				 * For now, we just free the pointer
-				 * to av_pw_hist_val, since we arent
+				 * to av_pw_hist_val, since we aren't
 				 * populating this union member in
 				 * the conv api function(s) anyways.
 				 */
