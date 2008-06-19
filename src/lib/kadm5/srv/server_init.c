@@ -240,11 +240,25 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 			 KADM5_CONFIG_MAX_LIFE | KADM5_CONFIG_MAX_RLIFE | \
 			 KADM5_CONFIG_EXPIRATION | KADM5_CONFIG_ENCTYPES)
 
+#define IPROP_REQUIRED_PARAMS \
+			(KADM5_CONFIG_IPROP_ENABLED | \
+			 KADM5_CONFIG_IPROP_LOGFILE | \
+			 KADM5_CONFIG_IPROP_PORT)
+
      if ((handle->params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_free_context(handle->context);
 	  free_db_args(handle);
 	  free(handle);
 	  return KADM5_MISSING_CONF_PARAMS;
+     }
+     if ((handle->params.mask & KADM5_CONFIG_IPROP_ENABLED) == KADM5_CONFIG_IPROP_ENABLED
+	 && handle->params.iprop_enabled) {
+	 if ((handle->params.mask & IPROP_REQUIRED_PARAMS) != IPROP_REQUIRED_PARAMS) {
+	     krb5_free_context(handle->context);
+	     free_db_args(handle);
+	     free(handle);
+	     return KADM5_MISSING_CONF_PARAMS;
+	 }
      }
 
      ret = krb5_set_default_realm(handle->context, handle->params.realm);
