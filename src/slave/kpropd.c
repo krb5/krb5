@@ -1579,12 +1579,7 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 	char *name;
 	char *host;
 
-#if 0 /* XXX */
-	if (ret = kadm5_get_master(context, realm, &host))
-		return (ret);
-#else
-	host = strdup("nome-king.mit.edu");
-#endif
+	host = params.admin_server; /* XXX */
 
 	name = malloc(strlen(KADM5_KIPROP_HOST_SERVICE) + strlen(host) + 2);
 	if (name == NULL) {
@@ -1592,7 +1587,6 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 		return (ENOMEM);
 	}
 	sprintf(name, "%s/%s", KADM5_KIPROP_HOST_SERVICE, host);
-	free(host);
 	*host_service_name = name;
 
 	return (KADM5_OK);
