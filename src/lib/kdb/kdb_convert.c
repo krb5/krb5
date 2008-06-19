@@ -147,70 +147,37 @@ krb5_error_code
 conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 				int cnt, princ_type tp) {
 	int i = 0;
+	kdbe_princ_t *p;
+	kdbe_data_t *components;
 
 	if ((upd == NULL) || !princ)
 		return (KRB5KRB_ERR_GENERIC);
 
 	switch (tp) {
 	case REG_PRINC:
-		ULOG_ENTRY(upd, cnt).av_princ.k_nametype =
-				(int32_t)princ->type;
-
-		ULOG_ENTRY(upd, cnt).av_princ.k_realm.utf8str_t_len =
-				princ->realm.length;
-		ULOG_ENTRY(upd, cnt).av_princ.k_realm.utf8str_t_val =
-				(princ->realm.data != NULL) ?
-				strdup(princ->realm.data) : NULL;
-		/* XXX Should check for allocation failure above.  */
-
-		ULOG_ENTRY(upd, cnt).av_princ.k_components.k_components_len =
-				princ->length;
-
-		ULOG_ENTRY(upd, cnt).av_princ.k_components.k_components_val =
-				malloc(princ->length * sizeof (kdbe_data_t));
-		if (ULOG_ENTRY(upd, cnt).av_princ.k_components.k_components_val
-				== NULL)
-			return (ENOMEM);
-
-		for (i = 0; i < princ->length; i++) {
-			ULOG_ENTRY_PRINC(upd, cnt, i).k_magic =
-				princ->data[i].magic;
-			ULOG_ENTRY_PRINC(upd, cnt, i).k_data.utf8str_t_len =
-				princ->data[i].length;
-			ULOG_ENTRY_PRINC(upd, cnt, i).k_data.utf8str_t_val =
-				(princ->data[i].data != NULL) ?
-				strdup(princ->data[i].data) : NULL;
-			/* XXX Check for allocation failure above.  */
-		}
-		break;
-
 	case MOD_PRINC:
-		ULOG_ENTRY(upd, cnt).av_mod_princ.k_nametype =
-				(int32_t)princ->type;
+		p = &ULOG_ENTRY(upd, cnt).av_princ; /* or av_mod_princ */
+		p->k_nametype = (int32_t)princ->type;
 
-		ULOG_ENTRY(upd, cnt).av_mod_princ.k_realm.utf8str_t_len =
-				princ->realm.length;
+		p->k_realm.utf8str_t_len = princ->realm.length;
 
-		ULOG_ENTRY(upd, cnt).av_mod_princ.k_realm.utf8str_t_val =
+		p->k_realm.utf8str_t_val =
 				(princ->realm.data != NULL) ?
 				strdup(princ->realm.data) : NULL;
 		/* XXX check for allocation failure above.  */
 
-		ULOG_ENTRY(upd, cnt).av_mod_princ.k_components.k_components_len
-				= princ->length;
+		p->k_components.k_components_len = princ->length;
 
-		ULOG_ENTRY(upd, cnt).av_mod_princ.k_components.k_components_val
+		p->k_components.k_components_val = components
 				= malloc(princ->length * sizeof (kdbe_data_t));
-		if (ULOG_ENTRY(upd,
-			cnt).av_mod_princ.k_components.k_components_val == NULL)
+		if (p->k_components.k_components_val == NULL)
 			return (ENOMEM);
 
 		for (i = 0; i < princ->length; i++) {
-			ULOG_ENTRY_MOD_PRINC(upd, cnt, i).k_magic =
-				princ->data[i].magic;
-			ULOG_ENTRY_MOD_PRINC(upd, cnt, i).k_data.utf8str_t_len
+			components[i].k_magic = princ->data[i].magic;
+			components[i].k_data.utf8str_t_len
 				= princ->data[i].length;
-			ULOG_ENTRY_MOD_PRINC(upd, cnt, i).k_data.utf8str_t_val
+			components[i].k_data.utf8str_t_val
 				= (princ->data[i].data != NULL) ?
 				strdup(princ->data[i].data) : NULL;
 			/* XXX Check for allocation failure above.  */
