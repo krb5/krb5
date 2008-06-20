@@ -363,9 +363,10 @@ iprop_full_resync_1_svc(
 		DPRINT(("%s: run `%s' ...\n", whoami, ubuf));
 		(void) signal(SIGCHLD, SIG_DFL);
 		/* run kdb5_util(1M) dump for IProp */
+		/* XXX popen can return NULL; is pclose(NULL) okay?  */
 		pret = pclose(popen(ubuf, "w"));
 		DPRINT(("%s: pclose=%d\n", whoami, pret));
-		if (pret == -1) {
+		if (pret != 0) {
 			if (nofork) {
 				perror(whoami);
 			}
