@@ -335,7 +335,7 @@ verify_as_reply(krb5_context 		context,
 
     if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) {
 	retval = krb5_set_real_time(context,
-				    as_reply->enc_part2->times.authtime, 0);
+				    as_reply->enc_part2->times.authtime, -1);
 	if (retval)
 	    return retval;
     } else {
