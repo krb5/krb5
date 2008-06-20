@@ -367,6 +367,9 @@ iprop_full_resync_1_svc(
 		pret = pclose(popen(ubuf, "w"));
 		DPRINT(("%s: pclose=%d\n", whoami, pret));
 		if (pret != 0) {
+			/* XXX popen/pclose may not set errno
+			   properly, and the error could be from the
+			   subprocess anyways.  */
 			if (nofork) {
 				perror(whoami);
 			}
