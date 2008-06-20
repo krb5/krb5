@@ -35,6 +35,8 @@ static int		pagesize = 0;
 typedef unsigned long ulong_t;
 typedef unsigned int uint_t;
 
+static int extend_file_to(int fd, uint_t new_size);
+
 /*
  * Sync update entry to disk.
  */
@@ -119,13 +121,8 @@ ulog_resize(kdb_hlog_t *ulog, uint32_t ulogentries, int ulogfd, uint_t recsize)
 		/*
 		 * Time to expand log considering new block size
 		 */
-		if (lseek(ulogfd, new_size, SEEK_SET) == -1) {
-			return (errno);
-		}
-
-		if (write(ulogfd, "+", 1) != 1) {
-			return (errno);
-		}
+		if (extend_file_to(ulogfd, new_size) < 0)
+		    return errno;
 	} else {
 		/*
 		 * Can't map into file larger than MAXLOGLEN
@@ -561,14 +558,8 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 		if ((caller == FKADMIND) || (caller == FKCOMMAND))
 			ulog_filesize += ulogentries * ULOG_BLOCK;
 
-		if (lseek(ulogfd, ulog_filesize, SEEK_SET) == -1) {
-			return (errno);
-		}
-
-		if (write(ulogfd, "+", 1) != 1) {
-			return (errno);
-		}
-
+		if (extend_file_to(ulogfd, ulog_filesize) < 0)
+		    return errno;
 	} else {
 
 		ulogfd = open(logname, O_RDWR, 0600);
@@ -680,13 +671,8 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 		if (ulog->kdb_num < ulogentries) {
 			ulog_filesize += ulogentries * ulog->kdb_block;
 
-			if (lseek(ulogfd, ulog_filesize, SEEK_SET) == -1) {
-				return (errno);
-			}
-
-			if (write(ulogfd, "+", 1) != 1) {
-				return (errno);
-			}
+			if (extend_file_to(ulogfd, ulog_filesize) < 0)
+			    return errno;
 		}
 	}
 
@@ -862,4 +848,16 @@ ulog_set_role(krb5_context ctx, iprop_role role)
 	log_ctx->iproprole = role;
 
 	return (0);
+}
+
+/*
+ * Extend update log file.
+ */
+static int extend_file_to(int fd, uint_t new_size)
+{
+    if (lseek(fd, new_size, SEEK_SET) == -1)
+	return -1;
+    if (write(fd, "+", 1) != 1)
+	return -1;
+    return 0;
 }
