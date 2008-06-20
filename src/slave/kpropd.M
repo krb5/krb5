@@ -91,9 +91,9 @@ file with any updates from the master.
 can be used to view a summary of the update entry log on the slave
 KDC.  Incremental propagation is not enabled by default; it can be
 enabled using the
-.I sunw_dbprop_enable
+.I iprop_enable
 and
-.I sunw_dbprop_slave_poll
+.I iprop_slave_poll
 settings in
 .IR kdc.conf (5).
 The principal "kiprop/slavehostname@REALM" (where "slavehostname" is

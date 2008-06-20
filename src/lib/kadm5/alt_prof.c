@@ -716,7 +716,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	 krb5_xfree(svalue);
     }
     
-	hierarchy[2] = "sunw_dbprop_enable";
+	hierarchy[2] = "iprop_enable";
 
 	params.iprop_enabled = FALSE;
 	params.mask |= KADM5_CONFIG_IPROP_ENABLED;
@@ -745,7 +745,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	GET_PORT_PARAM(iprop_port, KADM5_CONFIG_IPROP_PORT,
 		       "iprop_port", 0);
 
-	hierarchy[2] = "sunw_dbprop_master_ulogsize";
+	hierarchy[2] = "iprop_master_ulogsize";
 
 	params.iprop_ulogsize = DEF_ULOGENTRIES;
 	params.mask |= KADM5_CONFIG_ULOG_SIZE;
@@ -767,7 +767,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	}
 
 	GET_DELTAT_PARAM(iprop_poll_time, KADM5_CONFIG_POLL_TIME,
-			 "sunw_dbprop_slave_poll", 2 * 60); /* 2m */
+			 "iprop_slave_poll", 2 * 60); /* 2m */
 
     *params_out = params;
     

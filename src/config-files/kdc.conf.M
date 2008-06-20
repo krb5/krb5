@@ -224,19 +224,19 @@ This
 specifies the maximum time period that a ticket may be renewed for in
 this realm. 
 
-.IP sunw_dbprop_enable
+.IP iprop_enable
 This
 .B boolean
 ("true" or "false") specifies whether incremental database propagation
 is enabled.  The default is "false".
 
-.IP sunw_dbprop_master_ulogsize
+.IP iprop_master_ulogsize
 This
 .B numeric value
 specifies the maximum number of log entries to be retained for
 incremental propagation.  The maximum value is 2500; default is 1000.
 
-.IP sunw_dbprop_slave_poll
+.IP iprop_slave_poll
 This
 .B delta time string
 specfies how often the slave KDC polls for new updates from the

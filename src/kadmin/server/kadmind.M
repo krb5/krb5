@@ -61,7 +61,7 @@ and policy updates incrementally instead of receiving full dumps of
 the database.  This facility can be enabled in the
 .I kdc.conf
 file with the
-.I sunw_dbprop_enable
+.I iprop_enable
 option.  See the
 .I kdc.conf
 documentation for other options for tuning incremental propagation

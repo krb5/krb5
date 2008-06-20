@@ -1027,16 +1027,16 @@ Incremental propagation uses the following entries in the per-realm
 data in the KDC config file:
 
 @table @asis
-@item @code{sunw_dbprop_enable} (boolean)
+@item @code{iprop_enable} (boolean)
 If this is set to @code{true}, then incremental propagation is
 enabled, and (as noted below) normal @code{kprop} propagation is
 disabled.  The default is @code{false}.
 
-@item @code{sunw_dbprop_master_ulogsize} (integer)
+@item @code{iprop_master_ulogsize} (integer)
 This indicates the number of entries that should be retained in the
 update log.  The default is 1000; the maximum number is 2500.
 
-@item @code{sunw_dbprop_slave_poll} (time interval)
+@item @code{iprop_slave_poll} (time interval)
 This indicates how often the slave should poll the master KDC for
 changes to the database.  The default is two minutes.
 
