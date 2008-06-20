@@ -321,7 +321,7 @@ iprop_full_resync_1_svc(
 	/*
 	 * construct db dump file name; kprop style name + clnt fqdn
 	 */
-	if (asprintf(&tmpf, "/var/krb5/slave_datatrans_%s", clhost) < 0) {
+	if (asprintf(&tmpf, "%s_%s", KPROP_DEFAULT_FILE, clhost) < 0) {
 	    krb5_klog_syslog(LOG_ERR,
 			     _("%s: unable to construct db dump file name; out of memory"),
 			     whoami);
