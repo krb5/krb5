@@ -176,10 +176,10 @@ alt_prof.so alt_prof.po $(OUTPRE)alt_prof.$(OBJEXT): \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int-pkinit.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/kdb_log.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb_log.h \
-  alt_prof.c
+  $(SRCTOP)/include/socket-utils.h alt_prof.c
 str_conv.so str_conv.po $(OUTPRE)str_conv.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \
