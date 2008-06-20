@@ -38,7 +38,7 @@ typedef unsigned int uint_t;
 /*
  * Sync update entry to disk.
  */
-krb5_error_code
+static krb5_error_code
 ulog_sync_update(kdb_hlog_t *ulog, kdb_ent_header_t *upd)
 {
 	ulong_t		start, end, size;
@@ -66,7 +66,7 @@ ulog_sync_update(kdb_hlog_t *ulog, kdb_ent_header_t *upd)
 /*
  * Sync memory to disk for the update log header.
  */
-void
+static void
 ulog_sync_header(kdb_hlog_t *ulog)
 {
 
@@ -88,7 +88,7 @@ ulog_sync_header(kdb_hlog_t *ulog)
  * performance reasons.  Slaves will subsequently do a full resync, but
  * the need for resizing should be very small.
  */
-krb5_error_code
+static krb5_error_code
 ulog_resize(kdb_hlog_t *ulog, uint32_t ulogentries, int ulogfd, uint_t recsize)
 {
 	uint_t		new_block, new_size;
@@ -279,7 +279,7 @@ ulog_finish_update(krb5_context context, kdb_incr_update_t *upd)
 /*
  * Set the header log details on the slave and sync it to file.
  */
-void
+static void
 ulog_finish_update_slave(kdb_hlog_t *ulog, kdb_last_t lastentry)
 {
 
