@@ -1,4 +1,4 @@
-Copyright @copyright{} 1985-2007 by the Massachusetts Institute of Technology.
+Copyright @copyright{} 1985-2008 by the Massachusetts Institute of Technology.
 
 @quotation
 Export of software employing encryption from the United States of
@@ -307,6 +307,21 @@ lib/gssapi/mechglue/mglueP.h
 lib/gssapi/mechglue/oid_ops.c
 lib/gssapi/spnego/gssapiP_spnego.h
 lib/gssapi/spnego/spnego_mech.c
+@end smallexample
+
+and the initial implementation of incremental propagation, including
+the following new or changed files:
+
+@smallexample
+  include/iprop_hdr.h
+  kadmin/server/ipropd_svc.c
+  lib/kdb/iprop.x
+  lib/kdb/kdb_convert.c
+  lib/kdb/kdb_log.c
+  lib/kdb/kdb_log.h
+  lib/krb5/error_tables/kdb5_err.et
+  slave/kpropd_rpc.c
+  slave/kproplog.c
 @end smallexample
 
 are subject to the following license:
