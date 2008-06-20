@@ -43,7 +43,8 @@ typedef enum {
  */
 static void
 find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
-		   kdbe_attr_type_t *attrs, int *nattrs) {
+		   kdbe_attr_type_t *attrs, int *nattrs)
+{
 	int i = 0, j = 0;
 
 	krb5_tl_data *first, *second;
@@ -328,7 +329,8 @@ error:
 krb5_error_code
 ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 				kdb_incr_update_t *updates,
-				int nentries) {
+				int nentries)
+{
 	int i, j, k, cnt, final, nattrs, tmpint, nprincs;
 	unsigned int more;
 	krb5_principal tmpprinc;
@@ -869,7 +871,8 @@ next:
  * This routine frees up memory associated with the bunched ulog entries.
  */
 void
-ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates) {
+ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
+{
 
 	kdb_incr_update_t *upd;
 	int i, j, k, cnt;
