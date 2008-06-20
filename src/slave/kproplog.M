@@ -36,8 +36,7 @@ The
 .I kproplog
 command displays the contents of the Kerberos principal update log to
 standard output.  It can be used to keep track of the incremental
-updates to the principal database, when enabled.  The
-.I /var/krb5/principal.ulog
+updates to the principal database, when enabled.  The update log
 file contains the update log maintained by the
 .I kadmind
 process on the master KDC server and the kpropd process on the slave
@@ -92,11 +91,6 @@ An example of the output generated for one entry:
           Modification time
           TL data
 .fi
-
-.SH FILES
-.TP
-.I /var/krb5/principal.ulog
-The update log file for incremental propagation.
 
 .SH SEE ALSO
 kpropd(8)
