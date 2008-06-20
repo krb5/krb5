@@ -1040,21 +1040,33 @@ update log.  The default is 1000; the maximum number is 2500.
 This indicates how often the slave should poll the master KDC for
 changes to the database.  The default is two minutes.
 
-@item update log file spec?
+@item @code{iprop_port} (integer)
+This specifies the port number to be used for incremental
+propagation.  This is required in both master and slave configuration
+files.
+
+@item @code{iprop_logfile} (file name)
+This specifies where the update log file for the realm database is to
+be stored.  The default is to use the @code{database_name} entry from
+the @code{realms} section of the config file, with @file{.ulog} appended.
+(NOTE: If @code{database_name} isn't specified in the @code{realms}
+section, perhaps because the LDAP database back end is being used, or
+the file name is specified in the @code{dbmodules} section, then the
+hard-coded default for @code{database_name} is used.  Determination of
+the @code{iprop_logfile} default value will not use values from the
+@code{dbmodules} section.)
 @end table
 
 Both master and slave sides must have principals named
 @code{kiprop/@var{hostname}} (where @var{hostname} is, as usual, the
 lower-case, fully-qualified, canonical name for the host) registered
 and keys stored in the default keytab file (@file{/etc/krb5.keytab}).
-@i{(XXX: I think the master side, at least, might be able to read the
-key out of the database.  Test and document this.)}
+@c XXX: I think the master side, at least, might be able to read the
+@c key out of the database.  Test and document this.
 
 On the master KDC side, the @code{kiprop/@var{hostname}} principal
 must be listed in the @code{kadmind} ACL file @code{kadm5.acl}, and
-given the @code{p} privilege.  The master host must also (currently)
-be running an RPC portmapper, configured to listen for requests over
-UDP.
+given the @code{p} privilege.
 
 On the slave KDC side, @code{kpropd} should be run.  When incremental
 propagation is enabled, it will connect to the @code{kadmind} on the
@@ -1076,10 +1088,6 @@ There are several known bugs and restrictions in the current
 implementation:
 @itemize
 @item
-If the @code{kadmind} process on the master is restarted, or the
-connection from the slave to the master is lost, the @code{kpropd}
-process on the slave may crash and need to be restarted.
-@item
 The ``call out to @code{kprop}'' mechanism is a bit fragile; if the
 @code{kprop} propagation fails to connect for some reason, the process
 on the slave may hang waiting for it, and will need to be restarted.
@@ -1088,14 +1096,37 @@ The master and slave must be able to initiate TCP connections in
 both directions, without an intervening NAT.  They must also be able
 to communicate over IPv4, since MIT's RPC code does not currently
 support IPv6.
-@item
-As mentioned above, an RPC portmapper process must be running.  All
-other MIT Kerberos services work without the port number, but require
-use of default or user-specified port numbers; this allows multiple
-instances to be run on a host at once, for production or testing
-purposes.  The incremental-propagation code will probably be changed
-to do this in the future as well.
 @end itemize
+
+@menu
+* Sun/MIT Incremental Propagation Differences::  
+@end menu
+
+@node Sun/MIT Incremental Propagation Differences,  , Incremental Database Propagation, Incremental Database Propagation
+@subsubsection Sun/MIT Incremental Propagation Differences
+
+Sun donated the original code for supporting incremental database
+propagation to MIT.  Some changes have been made in the MIT source
+tree that will be visible to administrators.  (These notes are based
+on Sun's patches.  Changes to Sun's implementation since then may not
+be reflected here.)
+
+The Sun config file support looks for @code{sunw_dbprop_enable},
+@code{sunw_dbprop_master_ulogsize}, and @code{sunw_dbprop_slave_poll}.
+
+The incremental propagation service is implemented as an ONC RPC
+service.  In the Sun implementation, the service is registered with
+@code{rpcbind} (also known as @code{portmapper}) and the client looks
+up the port number to contact.  In the MIT implementation, where
+interaction with some modern versions of @code{rpcbind} doesn't always
+work well, the port number must be specified in the config file on
+both the master and slave sides.
+
+The Sun implementation hard-codes pathnames in @file{/var/krb5} for
+the update log and the per-slave @code{kprop} dump files.  In the MIT
+implementation, the pathname for the update log is specified in the
+config file, and the per-slave dump files are stored in
+@code{@value{ROOTDIR}/var/krb5kdc/slave_datatrans_@var{hostname}}.
 
 @node Installing and Configuring UNIX Client Machines, UNIX Application Servers, Installing KDCs, Installing Kerberos V5
 @section Installing and Configuring UNIX Client Machines
