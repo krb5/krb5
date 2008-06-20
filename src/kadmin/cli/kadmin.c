@@ -24,6 +24,10 @@
  * kadmin.c: base functions for a kadmin command line interface using
  * the OVSecure library
  */
+/*
+ * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 
 /* for "_" macro */
 #include "k5-platform.h"

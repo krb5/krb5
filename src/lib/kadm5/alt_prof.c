@@ -24,6 +24,10 @@
  * or implied warranty.
  *
  */
+/*
+ * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 
 /*
  * alt_prof.c - Implement alternate profile file handling.
