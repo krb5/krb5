@@ -855,9 +855,30 @@ ulog_set_role(krb5_context ctx, iprop_role role)
  */
 static int extend_file_to(int fd, uint_t new_size)
 {
-    if (lseek(fd, new_size, SEEK_SET) == -1)
+    int current_offset;
+    static const char zero[512] = { 0, };
+
+    current_offset = lseek(fd, 0, SEEK_END);
+    if (current_offset < 0)
 	return -1;
-    if (write(fd, "+", 1) != 1)
+    if (new_size > INT_MAX) {
+	errno = EINVAL;
 	return -1;
+    }
+    while (current_offset < new_size) {
+	int write_size, wrote_size;
+	write_size = new_size - current_offset;
+	if (write_size > 512)
+	    write_size = 512;
+	wrote_size = write(fd, zero, write_size);
+	if (wrote_size < 0)
+	    return -1;
+	if (wrote_size == 0) {
+	    errno = EINVAL;	/* XXX ?? */
+	    return -1;
+	}
+	current_offset += wrote_size;
+	write_size = new_size - current_offset;
+    }
     return 0;
 }
