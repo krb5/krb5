@@ -597,8 +597,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 
 	}
 
-	if (attr_types)
-	    free(attr_types);
+	free(attr_types);
 
 	/*
 	 * Update len field in kdb_update
@@ -890,8 +889,7 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 	/*
 	 * ulog entry - kdb_princ_name
 	 */
-	if (upd->kdb_princ_name.utf8str_t_val)
-	    free(upd->kdb_princ_name.utf8str_t_val);
+	free(upd->kdb_princ_name.utf8str_t_val);
 
 /* BEGIN CSTYLED */
 
@@ -899,24 +897,20 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 	 * ulog entry - kdb_kdcs_seen_by
 	 */
 	if (upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_val) {
-	    for (i = 0; i < upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_len; i++) {
-		if (upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_val[i].utf8str_t_val)
-		    free(upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_val[i].utf8str_t_val);
-	    }
-	    if (upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_val)
-		free(upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_val);
+	    for (i = 0; i < upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_len; i++)
+		free(upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_val[i].utf8str_t_val);
+	    free(upd->kdb_kdcs_seen_by.kdb_kdcs_seen_by_val);
 	}
 
 	/*
 	 * ulog entry - kdb_futures
 	 */
-	if (upd->kdb_futures.kdb_futures_val)
-	    free(upd->kdb_futures.kdb_futures_val);
+	free(upd->kdb_futures.kdb_futures_val);
 
 	/*
 	 * ulog entry - kdb_update
 	 */
-	if(upd->kdb_update.kdbe_t_val) {
+	if (upd->kdb_update.kdbe_t_val) {
 	    /*
 	     * Loop thru all the attributes and free up stuff
 	     */
@@ -928,12 +922,10 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 		if ((ULOG_ENTRY_TYPE(upd, i).av_type == AT_KEYDATA) && ULOG_ENTRY(upd, i).av_keydata.av_keydata_val) {
 
 		    for (j = 0; j < ULOG_ENTRY(upd, i).av_keydata.av_keydata_len; j++) {
-			if (ULOG_ENTRY_KEYVAL(upd, i, j).k_enctype.k_enctype_val)
-			    free(ULOG_ENTRY_KEYVAL(upd, i, j).k_enctype.k_enctype_val);
+			free(ULOG_ENTRY_KEYVAL(upd, i, j).k_enctype.k_enctype_val);
 			if (ULOG_ENTRY_KEYVAL(upd, i, j).k_contents.k_contents_val) {
 			    for (k = 0; k < ULOG_ENTRY_KEYVAL(upd, i, j).k_ver; k++) {
-				if (ULOG_ENTRY_KEYVAL(upd, i, j).k_contents.k_contents_val[k].utf8str_t_val)
-				    free(ULOG_ENTRY_KEYVAL(upd, i, j).k_contents.k_contents_val[k].utf8str_t_val);
+				free(ULOG_ENTRY_KEYVAL(upd, i, j).k_contents.k_contents_val[k].utf8str_t_val);
 			    }
 			    free(ULOG_ENTRY_KEYVAL(upd, i, j).k_contents.k_contents_val);
 			}
@@ -947,8 +939,7 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 		 */
 		if ((ULOG_ENTRY_TYPE(upd, i).av_type == AT_TL_DATA) && ULOG_ENTRY(upd, i).av_tldata.av_tldata_val) {
 		    for (j = 0; j < ULOG_ENTRY(upd, i).av_tldata.av_tldata_len; j++) {
-			if (ULOG_ENTRY(upd, i).av_tldata.av_tldata_val[j].tl_data.tl_data_val)
-			    free(ULOG_ENTRY(upd, i).av_tldata.av_tldata_val[j].tl_data.tl_data_val);
+			free(ULOG_ENTRY(upd, i).av_tldata.av_tldata_val[j].tl_data.tl_data_val);
 		    }
 		    free(ULOG_ENTRY(upd, i).av_tldata.av_tldata_val);
 		}
@@ -957,12 +948,10 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 		 * Free av_princ
 		 */
 		if (ULOG_ENTRY_TYPE(upd, i).av_type == AT_PRINC) {
-		    if (ULOG_ENTRY(upd, i).av_princ.k_realm.utf8str_t_val)
-			free(ULOG_ENTRY(upd, i).av_princ.k_realm.utf8str_t_val);
+		    free(ULOG_ENTRY(upd, i).av_princ.k_realm.utf8str_t_val);
 		    if (ULOG_ENTRY(upd, i).av_princ.k_components.k_components_val) {
 			for (j = 0; j < ULOG_ENTRY(upd, i).av_princ.k_components.k_components_len; j++) {
-			    if (ULOG_ENTRY_PRINC(upd, i, j).k_data.utf8str_t_val)
-				free(ULOG_ENTRY_PRINC(upd, i, j).k_data.utf8str_t_val);
+			    free(ULOG_ENTRY_PRINC(upd, i, j).k_data.utf8str_t_val);
 			}
 			free(ULOG_ENTRY(upd, i).av_princ.k_components.k_components_val);
 		    }
@@ -972,12 +961,10 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 		 * Free av_mod_princ
 		 */
 		if (ULOG_ENTRY_TYPE(upd, i).av_type == AT_MOD_PRINC) {
-		    if (ULOG_ENTRY(upd, i).av_mod_princ.k_realm.utf8str_t_val)
-			free(ULOG_ENTRY(upd, i).av_mod_princ.k_realm.utf8str_t_val);
+		    free(ULOG_ENTRY(upd, i).av_mod_princ.k_realm.utf8str_t_val);
 		    if (ULOG_ENTRY(upd, i).av_mod_princ.k_components.k_components_val) {
 			for (j = 0; j < ULOG_ENTRY(upd, i).av_mod_princ.k_components.k_components_len; j++) {
-			    if (ULOG_ENTRY_MOD_PRINC(upd, i, j).k_data.utf8str_t_val)
-				free(ULOG_ENTRY_MOD_PRINC(upd, i, j).k_data.utf8str_t_val);
+			    free(ULOG_ENTRY_MOD_PRINC(upd, i, j).k_data.utf8str_t_val);
 			}
 			free(ULOG_ENTRY(upd, i).av_mod_princ.k_components.k_components_val);
 		    }
@@ -1011,8 +998,7 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 	    /*
 	     * Free up the pointer to kdbe_t_val
 	     */
-	    if (upd->kdb_update.kdbe_t_val)
-		free(upd->kdb_update.kdbe_t_val);
+	    free(upd->kdb_update.kdbe_t_val);
 	}
 
 /* END CSTYLED */
@@ -1027,6 +1013,5 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
     /*
      * Finally, free up the pointer to the bunched ulog entries
      */
-    if (updates)
-	free(updates);
+    free(updates);
 }

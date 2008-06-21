@@ -359,8 +359,7 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 		goto cleanup;
 	    }
 
-	    if (dbprincstr)
-		free(dbprincstr);
+	    free(dbprincstr);
 
 	    retval = krb5int_delete_principal_no_log(context,
 						     dbprinc,
@@ -510,8 +509,7 @@ error:
     if (upd)
 	ulog_free_entries(upd, 1);
 
-    if (incr_ret)
-	free(incr_ret);
+    free(incr_ret);
 
     ulog_sync_header(ulog);
 

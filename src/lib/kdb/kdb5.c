@@ -1127,11 +1127,7 @@ err_lock:
     free_db_args(kcontext, db_args);
 
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER))
-	/*
-	 * XXX Bad deref in error case (malloc fail while creating
-	 * array entries). --KR
-	 */
-        ulog_free_entries(fupd, *nentries);
+	ulog_free_entries(fupd, *nentries);
 
     return status;
 }
