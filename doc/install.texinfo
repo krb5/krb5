@@ -1017,11 +1017,12 @@ size.  A process on each slave KDC connects to a service on the master
 KDC (currently implmented in the @code{kadmind} server) and
 periodically requests the changes that have been made since the last
 check.  By default, this check is done every two minutes.  If the
-database has just been modified in the previous several seconds, the
-slave will not retrieve updates, but instead will pause and try again
-soon after.  This reduces the likelihood that incremental update
-queries will cause delays for an administrator trying to make a bunch
-of changes to the database at the same time.
+database has just been modified in the previous several seconds
+(currently the threshold is hard-coded at 10 seconds), the slave will
+not retrieve updates, but instead will pause and try again soon after.
+This reduces the likelihood that incremental update queries will cause
+delays for an administrator trying to make a bunch of changes to the
+database at the same time.
 
 Incremental propagation uses the following entries in the per-realm
 data in the KDC config file:
