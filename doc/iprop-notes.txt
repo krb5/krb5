@@ -116,6 +116,17 @@ but if we break log-format compatibility with Sun at some point, use
 the chance to make the kdb_ent_header_t offsets be more strictly
 aligned in the file.  (16 or 32 bytes?)
 
+Not thread safe!  The kdb5.c code will get a lock on the update log
+file while making changes, but the lock is per-process.  Currently
+there are no processes I know of that use multiple threads and change
+the database.  (There's the Novell patch to make the KDC
+multithreaded, but the kdc-kdb-update option doesn't currently
+compile.)
+
+Logging in kpropd is poor to useless.  If there are any problems, run
+it in debug mode ("-d").  You'll still lose all output from the
+invocation of kdb5_util dump and kprop run out of kadmind.
+
 Before merge:
  * investigate locking
  * check service princ
