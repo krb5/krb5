@@ -29,6 +29,10 @@ case, B would want to operate in both modes.  Granted, with iprop the
 bandwidth issues should be less important, but there may still be
 reasons one may wish to run in such a configuration.
 
+The propagation of changes does not happen in real time.  It's not a
+"push" protocol; the slaves poll periodically for changes.  Perhaps a
+future revision of the protocol could address that.
+
 kadmin/cli/kadmin.c call to kadm5_init_iprop - is this needed in
 client-side program? Should it be done in libkadm5srv instead as part
 of the existing kadm5_init* so that database-accessing applications
