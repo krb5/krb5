@@ -632,13 +632,21 @@ reinit:
 			(void) sleep(backoff_time);
 			goto reinit;
 		} else {
-			com_err(progname, retval,
-                                _("while initializing %s interface"),
-				progname);
 			if (retval == KADM5_BAD_CLIENT_PARAMS ||
-			    retval == KADM5_BAD_SERVER_PARAMS)
-				usage();
-			exit(1);
+			    retval == KADM5_BAD_SERVER_PARAMS) {
+			    com_err(progname, retval,
+				    _("while initializing %s interface"),
+				    progname);
+
+			    usage();
+			}
+			reinit_cnt++;
+			com_err(progname, retval,
+                                _("while initializing %s interface, retrying"),
+				progname);
+			backoff_time = backoff_from_master(&reinit_cnt);
+			sleep(backoff_time);
+			goto reinit;
                 }
 	}
 
