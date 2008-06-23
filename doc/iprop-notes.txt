@@ -80,13 +80,6 @@ full propagation only.  Doing incremental propagation over IPv6 will
 take work on the RPC library, and probably introduce
 backwards-incompatible ABI changes.)
 
-The principal.ulog file appears to be created in ulog_map and has one
-byte written at offset ulogentries*ULOG_BLOCK.  On some systems this
-will create a sparse file, which we then mmap in; if the file system
-doesn't have enough free space for the entire file to be filled in,
-what happens when we try to write to those pages?  May be better to
-preallocate at file creation time.
-
 Overflow checks for ulogentries times block size?
 
 If file can't be made the size indicated by ulogentries, shoud we
@@ -98,8 +91,6 @@ for the default realm.  No clean way to specify a port number, either.
 Would it be overkill to come up with a way to configure host+port for
 kpropd on the master?  Preferably in a way that'd support cascading
 propagations.
-
-Checking for correct kiprop service principal on kadmind side?
 
 The kadmind process, when it needs to run kprop, extracts the slave
 host name from the client principal name.  It assumes that the
@@ -125,8 +116,5 @@ compile.)
 Logging in kpropd is poor to useless.  If there are any problems, run
 it in debug mode ("-d").  You'll still lose all output from the
 invocation of kdb5_util dump and kprop run out of kadmind.
-
-Before merge:
- * check service princ
 
 Other man page updates needed: Anything with new -x options.
