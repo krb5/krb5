@@ -46,8 +46,8 @@ ulog_lock(krb5_context ctx, int mode)
 
     if (ctx == NULL)
 	return KRB5_LOG_ERROR;
-    if (ctx->kdblog_context == NULL)
-	return KRB5_LOG_ERROR;
+    if (ctx->kdblog_context == NULL || ctx->kdblog_context->iproprole == IPROP_NULL)
+	return 0;
     INIT_ULOG(ctx);
     return krb5_lock_file(ctx, log_ctx->ulogfd, mode);
 }
