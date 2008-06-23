@@ -127,7 +127,6 @@ it in debug mode ("-d").  You'll still lose all output from the
 invocation of kdb5_util dump and kprop run out of kadmind.
 
 Before merge:
- * investigate locking
  * check service princ
 
 Other man page updates needed: Anything with new -x options.
