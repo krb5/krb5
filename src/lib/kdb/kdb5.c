@@ -1051,6 +1051,7 @@ krb5_db_put_principal(krb5_context kcontext,
     char *princ_name = NULL;
     kdb_log_context *log_ctx;
     int i;
+    int ulog_locked = 0;
 
     log_ctx = kcontext->kdblog_context;
 
@@ -1091,6 +1092,11 @@ krb5_db_put_principal(krb5_context kcontext,
 	}
     }
 
+    status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+    if (status != 0)
+	goto err_lock;
+    ulog_locked = 1;
+
     for (i = 0; i < *nentries; i++) {
 	/*
 	 * We'll be sharing the same locks as db for logging
@@ -1121,6 +1127,9 @@ krb5_db_put_principal(krb5_context kcontext,
 	}
     }
 err_lock:
+    if (ulog_locked)
+	ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
@@ -1176,11 +1185,18 @@ krb5_db_delete_principal(krb5_context kcontext,
 	goto clean_n_exit;
     }
 
+    status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+    if (status) {
+	kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
+	return status;
+    }
+
     /*
      * We'll be sharing the same locks as db for logging
      */
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
 	if ((status = krb5_unparse_name(kcontext, search_for, &princ_name))) {
+	    ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
 	    (void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 	    return status;
 	}
@@ -1191,6 +1207,7 @@ krb5_db_delete_principal(krb5_context kcontext,
 	upd.kdb_princ_name.utf8str_t_len = strlen(princ_name);
 
 	if ((status = ulog_delete_update(kcontext, &upd)) != 0) {
+		ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
 		free(princ_name);
 		(void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 		return status;
@@ -1211,6 +1228,7 @@ krb5_db_delete_principal(krb5_context kcontext,
 	if (log_ctx && (log_ctx->iproprole == IPROP_MASTER))
 		(void) ulog_finish_update(kcontext, &upd);
 
+    ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:

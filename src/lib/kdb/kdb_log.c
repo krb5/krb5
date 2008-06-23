@@ -38,6 +38,20 @@ typedef unsigned int uint_t;
 
 static int extend_file_to(int fd, uint_t new_size);
 
+krb5_error_code
+ulog_lock(krb5_context ctx, int mode)
+{
+    kdb_log_context *log_ctx = NULL;
+    kdb_hlog_t *ulog = NULL;
+
+    if (ctx == NULL)
+	return KRB5_LOG_ERROR;
+    if (ctx->kdblog_context == NULL)
+	return KRB5_LOG_ERROR;
+    INIT_ULOG(ctx);
+    return krb5_lock_file(ctx, log_ctx->ulogfd, mode);
+}
+
 /*
  * Sync update entry to disk.
  */
@@ -302,6 +316,8 @@ ulog_delete_update(krb5_context context, kdb_incr_update_t *upd)
 /*
  * Used by the slave or master (during ulog_check) to update it's hash db from
  * the incr update log.
+ *
+ * Must be called with lock held.
  */
 krb5_error_code
 ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
@@ -415,6 +431,8 @@ cleanup:
 /*
  * Validate the log file and resync any uncommitted update entries
  * to the principal database.
+ *
+ * Must be called with lock held.
  */
 static krb5_error_code
 ulog_check(krb5_context context, kdb_hlog_t *ulog, char **db_args)
@@ -620,6 +638,9 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
     }
 
     if (caller == FKADMIND) {
+	retval = ulog_lock(context, KRB5_LOCKMODE_EXCLUSIVE);
+	if (retval)
+	    return retval;
 	switch (ulog->kdb_state) {
 	case KDB_STABLE:
 	case KDB_UNSTABLE:
@@ -627,16 +648,19 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 	     * Log is currently un/stable, check anyway
 	     */
 	    retval = ulog_check(context, ulog, db_args);
+	    ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	    if (retval == KRB5_LOG_CORRUPT) {
 		return (retval);
 	    }
 	    break;
 	case KDB_CORRUPT:
+	    ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	    return (KRB5_LOG_CORRUPT);
 	default:
 	    /*
 	     * Invalid db state
 	     */
+	    ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	    return (KRB5_LOG_ERROR);
 	}
     } else if ((caller == FKPROPLOG) || (caller == FKPROPD)) {
@@ -650,10 +674,14 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
      * Reinit ulog if the log is being truncated or expanded after
      * we have circled.
      */
+    retval = ulog_lock(context, KRB5_LOCKMODE_EXCLUSIVE);
+    if (retval)
+	return retval;
     if (ulog->kdb_num != ulogentries) {
 	if ((ulog->kdb_num != 0) &&
 	    ((ulog->kdb_last_sno > ulog->kdb_num) ||
 	     (ulog->kdb_num > ulogentries))) {
+	    
 	    (void) memset(ulog, 0, sizeof (kdb_hlog_t));
 
 	    ulog->kdb_hmagic = KDB_ULOG_HDR_MAGIC;
@@ -670,10 +698,13 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 	if (ulog->kdb_num < ulogentries) {
 	    ulog_filesize += ulogentries * ulog->kdb_block;
 
-	    if (extend_file_to(ulogfd, ulog_filesize) < 0)
+	    if (extend_file_to(ulogfd, ulog_filesize) < 0) {
+		ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 		return errno;
+	    }
 	}
     }
+    ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 
     return (0);
 }
@@ -700,11 +731,16 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
     INIT_ULOG(context);
     ulogentries = log_ctx->ulogentries;
 
+    retval = ulog_lock(context, KRB5_LOCKMODE_SHARED);
+    if (retval)
+	return retval;
+
     /*
      * Check to make sure we don't have a corrupt ulog first.
      */
     if (ulog->kdb_state == KDB_CORRUPT) {
 	ulog_handle->ret = UPDATE_ERROR;
+	(void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	return (KRB5_LOG_CORRUPT);
     }
 
@@ -713,6 +749,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
     tdiff = timestamp.tv_sec - ulog->kdb_last_time.seconds;
     if (tdiff <= ULOG_IDLE_TIME) {
 	ulog_handle->ret = UPDATE_BUSY;
+	(void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	return (0);
     }
 
@@ -722,8 +759,10 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
      * we can share with other readers.
      */
     retval = krb5_db_lock(context, KRB5_LOCKMODE_SHARED);
-    if (retval)
+    if (retval) {
+	(void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	return (retval);
+    }
 
     /*
      * We may have overflowed the update log or we shrunk the log, or
@@ -733,6 +772,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
 	(last.last_sno < ulog->kdb_first_sno) ||
 	(last.last_sno == 0)) {
 	ulog_handle->lastentry.last_sno = ulog->kdb_last_sno;
+	(void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	(void) krb5_db_unlock(context);
 	ulog_handle->ret = UPDATE_FULL_RESYNC_NEEDED;
 	return (0);
@@ -753,6 +793,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
 	     * If we have the same sno we return success
 	     */
 	    if (last.last_sno == ulog->kdb_last_sno) {
+		(void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 		(void) krb5_db_unlock(context);
 		ulog_handle->ret = UPDATE_NIL;
 		return (0);
@@ -767,6 +808,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
 	    upd = ulog_handle->updates.kdb_ulog_t_val;
 
 	    if (upd == NULL) {
+		(void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 		(void) krb5_db_unlock(context);
 		ulog_handle->ret = UPDATE_ERROR;
 		return (errno);
@@ -784,6 +826,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
 			      (char *)indx_log->entry_data,
 			      indx_log->kdb_entry_size, XDR_DECODE);
 		if (!xdr_kdb_incr_update_t(&xdrs, upd)) {
+		    (void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 		    (void) krb5_db_unlock(context);
 		    ulog_handle->ret = UPDATE_ERROR;
 		    return (KRB5_LOG_CONV);
@@ -808,6 +851,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
 		ulog->kdb_last_time.useconds;
 	    ulog_handle->ret = UPDATE_OK;
 
+	    (void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	    (void) krb5_db_unlock(context);
 
 	    return (0);
@@ -816,6 +860,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
 	     * We have time stamp mismatch or we no longer have
 	     * the slave's last sno, so we brute force it
 	     */
+	    (void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
 	    (void) krb5_db_unlock(context);
 	    ulog_handle->ret = UPDATE_FULL_RESYNC_NEEDED;
 
@@ -826,6 +871,7 @@ ulog_get_entries(krb5_context context,		/* input - krb5 lib config */
     /*
      * Should never get here, return error
      */
+    (void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
     ulog_handle->ret = UPDATE_ERROR;
     return (KRB5_LOG_ERROR);
 }

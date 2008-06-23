@@ -87,6 +87,8 @@ extern krb5_error_code ulog_conv_2dbentry(krb5_context context,
 extern void ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates);
 extern krb5_error_code ulog_set_role(krb5_context ctx, iprop_role role);
 
+extern krb5_error_code ulog_lock(krb5_context ctx, int mode);
+
 typedef struct kdb_hlog {
 	uint32_t	kdb_hmagic;	/* Log header magic # */
 	uint16_t	db_version_num;	/* Kerberos database version no. */
