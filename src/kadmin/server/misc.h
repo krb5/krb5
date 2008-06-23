@@ -47,3 +47,7 @@ void  kadm_1(struct svc_req *, SVCXPRT *);
 #endif
 
 void trunc_name(size_t *len, char **dots);
+
+int
+gss_to_krb5_name_1(struct svc_req *rqstp, krb5_context ctx, gss_name_t gss_name,
+		   krb5_principal *princ, gss_buffer_t gss_str);

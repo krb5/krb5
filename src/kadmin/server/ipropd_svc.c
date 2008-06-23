@@ -424,6 +424,80 @@ out:
     return (&ret);
 }
 
+static int
+check_iprop_rpcsec_auth(struct svc_req *rqstp)
+{
+    /* XXX Since the client can authenticate against any principal in
+       the database, we need to do a sanity check.  Only checking for
+       "kiprop" now, but that means theoretically the client could be
+       authenticating to kiprop on some other machine.  */
+    /* Code taken from kadm_rpc_svc.c, tweaked.  */
+
+     gss_ctx_id_t ctx;
+     krb5_context kctx;
+     OM_uint32 maj_stat, min_stat;
+     gss_name_t name;
+     krb5_principal princ;
+     int ret, success;
+     krb5_data *c1, *c2, *realm;
+     gss_buffer_desc gss_str;
+     kadm5_server_handle_t handle;
+     size_t slen;
+     char *sdots;
+
+     success = 0;
+     handle = (kadm5_server_handle_t)global_server_handle;
+
+     if (rqstp->rq_cred.oa_flavor != RPCSEC_GSS)
+	  return 0;
+
+     ctx = rqstp->rq_svccred;
+
+     maj_stat = gss_inquire_context(&min_stat, ctx, NULL, &name,
+				    NULL, NULL, NULL, NULL, NULL);
+     if (maj_stat != GSS_S_COMPLETE) {
+	  krb5_klog_syslog(LOG_ERR, "check_rpcsec_auth: "
+			   "failed inquire_context, stat=%u", maj_stat);
+	  log_badauth(maj_stat, min_stat,
+		      &rqstp->rq_xprt->xp_raddr, NULL);
+	  goto fail_name;
+     }
+
+     kctx = handle->context;
+     ret = gss_to_krb5_name_1(rqstp, kctx, name, &princ, &gss_str);
+     if (ret == 0)
+	  goto fail_name;
+
+     slen = gss_str.length;
+     trunc_name(&slen, &sdots);
+     /*
+      * Since we accept with GSS_C_NO_NAME, the client can authenticate
+      * against the entire kdb.  Therefore, ensure that the service
+      * name is something reasonable.
+      */
+     if (krb5_princ_size(kctx, princ) != 2)
+	  goto fail_princ;
+
+     c1 = krb5_princ_component(kctx, princ, 0);
+     c2 = krb5_princ_component(kctx, princ, 1);
+     realm = krb5_princ_realm(kctx, princ);
+     if (strncmp(handle->params.realm, realm->data, realm->length) == 0
+	 && strncmp("kiprop", c1->data, c1->length) == 0) {
+	 success = 1;
+     }
+
+fail_princ:
+     if (!success) {
+	 krb5_klog_syslog(LOG_ERR, "bad service principal %.*s%s",
+			  (int) slen, (char *) gss_str.value, sdots);
+     }
+     gss_release_buffer(&min_stat, &gss_str);
+     krb5_free_principal(kctx, princ);
+fail_name:
+     gss_release_name(&min_stat, &name);
+     return success;
+}
+
 void
 krb5_iprop_prog_1(struct svc_req *rqstp,
 		  register SVCXPRT *transp)
@@ -435,6 +509,15 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     bool_t (*_xdr_argument)(), (*_xdr_result)();
     char *(*local)(/* union XXX *, struct svc_req * */);
     char *whoami = "krb5_iprop_prog_1";
+
+    if (!check_iprop_rpcsec_auth(rqstp)) {
+	krb5_klog_syslog(LOG_ERR,
+			 "authentication attempt failed: %s, RPC authentication flavor %d",
+			 inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
+			 rqstp->rq_cred.oa_flavor);
+	svcerr_weakauth(transp);
+	return;
+    }
 
     switch (rqstp->rq_proc) {
     case NULLPROC:
