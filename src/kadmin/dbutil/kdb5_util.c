@@ -381,7 +381,7 @@ static int open_db_and_mkey()
     int nentries;
     krb5_boolean more;
     krb5_data scratch, pwd, seed;
-    krb5_kvno mprinc_kvno, kvno;
+    krb5_kvno kvno;
 
     dbactive = FALSE;
     valid_master_key = 0;
@@ -424,7 +424,10 @@ static int open_db_and_mkey()
     }
 
     /* may be used later */
-    mprinc_kvno = (krb5_kvno) master_entry.key_data->key_data_kvno;
+    if (global_params.mask & KADM5_CONFIG_KVNO)
+        kvno = global_params.kvno; /* user specified */
+    else
+        kvno = (krb5_kvno) master_entry.key_data->key_data_kvno;
 
     krb5_db_free_principal(util_context, &master_entry, nentries);
 
@@ -458,10 +461,6 @@ static int open_db_and_mkey()
 	free(scratch.data);
 	mkey_password = 0;
 
-        if (global_params.mask & KADM5_CONFIG_KVNO)
-            kvno = global_params.kvno; /* user specified */
-        else
-            kvno = mprinc_kvno;
     } else if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
 					    master_keyblock.enctype,
 					    manual_mkey, FALSE,

@@ -285,9 +285,11 @@ krb5_db_def_fetch_mkey_stash( krb5_context   context,
 
     /*
      * Note, the old stash format did not store the kvno and at this point it
-     * can be assumed to be 1 as is the case for the mkey princ.
+     * can be assumed to be 1 as is the case for the mkey princ.  If the kvno is
+     * passed in and isn't ignore_vno just leave it alone as this could cause
+     * verifcation trouble if the mkey princ is using a kvno other than 1.
      */
-    if (kvno)
+    if (kvno && *kvno == IGNORE_VNO)
 	*kvno = 1;
 
  errout:
@@ -378,39 +380,49 @@ krb5_db_def_fetch_mkey( krb5_context   context,
                         char          *db_args)
 {
     krb5_error_code retval_ofs = 0, retval_kt = 0;
-    char defkeyfile[MAXPATHLEN+1];
+    char keyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
 
     key->magic = KV5M_KEYBLOCK;
-    (void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
-    (void) strncat(defkeyfile, realm->data,
-                    min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
-                    realm->length));
-    defkeyfile[sizeof(defkeyfile) - 1] = '\0';
+
+    if (db_args != NULL) {
+        (void) strncpy(keyfile, db_args, sizeof(keyfile));
+    } else {
+        (void) strcpy(keyfile, DEFAULT_KEYFILE_STUB);
+        (void) strncat(keyfile, realm->data,
+            min(sizeof(keyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
+                realm->length));
+    }
+    /* null terminate no matter what */
+    keyfile[sizeof(keyfile) - 1] = '\0';
 
     /* assume the master key is in a keytab */
-    retval_kt = krb5_db_def_fetch_mkey_keytab(context, defkeyfile, mname, key,
+    retval_kt = krb5_db_def_fetch_mkey_keytab(context, keyfile, mname, key,
                                               kvno);
     if (retval_kt != 0) {
         /*
          * If it's not in a keytab, fall back and try getting the mkey from the
          * older stash file format.
          */
-        retval_ofs = krb5_db_def_fetch_mkey_stash(context, defkeyfile, mname,
+        retval_ofs = krb5_db_def_fetch_mkey_stash(context, keyfile, mname,
                                                   key, kvno);
     }
 
     if (retval_kt != 0 && retval_ofs != 0) {
         /*
-         * Error, not able to get mkey from either file format.
-         *
-         * XXX note this masks the underlying error, wonder if there is a better
-         * way to deal with this.
+         * Error, not able to get mkey from either file format.  Note, in order
+         * to try to return a more correct error, the logic below is assuming
+         * that if either of the stash reading functions returned
+         * KRB5_KDB_BADSTORED_MKEY then this is probably the real error.
          */
-        krb5_set_error_message (context, KRB5_KDB_CANTREAD_STORED,
-            "Can not get master key either from keytab (error: %d) or old "
-            "format (error %d).", retval_kt, retval_ofs);
-        return KRB5_KDB_CANTREAD_STORED;
+        if (retval_kt == KRB5_KDB_BADSTORED_MKEY || retval_ofs == KRB5_KDB_BADSTORED_MKEY) {
+            return KRB5_KDB_BADSTORED_MKEY;
+        } else {
+            krb5_set_error_message (context, KRB5_KDB_CANTREAD_STORED,
+                "Can not fetch master key either from keytab (error: %d) or old "
+                "format (error %d).", retval_kt, retval_ofs);
+            return KRB5_KDB_CANTREAD_STORED;
+        }
     } else {
         return 0;
     }
