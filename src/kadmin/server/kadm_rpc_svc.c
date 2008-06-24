@@ -24,7 +24,6 @@
 extern void *global_server_handle;
 
 static int check_rpcsec_auth(struct svc_req *);
-static int gss_to_krb5_name(struct svc_req *, krb5_context, gss_name_t, krb5_principal *, gss_buffer_t);
 
 void log_badauth(OM_uint32 major, OM_uint32 minor,
 		 struct sockaddr_in *addr, char *data);
@@ -272,7 +271,7 @@ check_rpcsec_auth(struct svc_req *rqstp)
      }
 
      kctx = handle->context;
-     ret = gss_to_krb5_name(rqstp, kctx, name, &princ, &gss_str);
+     ret = gss_to_krb5_name_1(rqstp, kctx, name, &princ, &gss_str);
      if (ret == 0)
 	  goto fail_name;
 
@@ -310,9 +309,9 @@ fail_name:
      return success;
 }
 
-static int
-gss_to_krb5_name(struct svc_req *rqstp, krb5_context ctx, gss_name_t gss_name,
-		 krb5_principal *princ, gss_buffer_t gss_str)
+int
+gss_to_krb5_name_1(struct svc_req *rqstp, krb5_context ctx, gss_name_t gss_name,
+		   krb5_principal *princ, gss_buffer_t gss_str)
 {
      OM_uint32 status, minor_stat;
      gss_OID gss_type;

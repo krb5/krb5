@@ -48,6 +48,8 @@
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>
 #include "client_internal.h"
+#include <iprop_hdr.h>
+#include "iprop.h"
 
 #include <gssrpc/rpc.h>
 #include <gssapi/gssapi.h>
@@ -165,6 +167,8 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      struct hostent *hp;
      int fd;
 
+     char *iprop_svc;
+     int iprop_enable = 0;
      char full_svcname[BUFSIZ];
      char *realm;
      
@@ -296,15 +300,37 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  goto cleanup;
      }
 
+     /*
+      * If the service_name and client_name are iprop-centric,
+      * we need to clnttcp_create to the appropriate RPC prog.
+      */
+     iprop_svc = strdup(KIPROP_SVC_NAME);
+     if (iprop_svc == NULL)
+	 return ENOMEM;
+
+     if (service_name != NULL &&
+	 (strstr(service_name, iprop_svc) != NULL) &&
+	 (strstr(client_name, iprop_svc) != NULL))
+	 iprop_enable = 1;
+     else
+	 iprop_enable = 0;
+
      memset(&addr, 0, sizeof(addr));
      addr.sin_family = hp->h_addrtype;
      (void) memcpy((char *) &addr.sin_addr, (char *) hp->h_addr,
 		   sizeof(addr.sin_addr));
-     addr.sin_port = htons((u_short) handle->params.kadmind_port);
+     if (iprop_enable)
+	 addr.sin_port = htons((u_short) handle->params.iprop_port);
+     else
+	 addr.sin_port = htons((u_short) handle->params.kadmind_port);
      
      fd = RPC_ANYSOCK;
-     
-     handle->clnt = clnttcp_create(&addr, KADM, KADMVERS, &fd, 0, 0);
+
+     if (iprop_enable) {
+	 handle->clnt = clnttcp_create(&addr, KRB5_IPROP_PROG, KRB5_IPROP_VERS,
+				       &fd, 0, 0);
+     } else
+	 handle->clnt = clnttcp_create(&addr, KADM, KADMVERS, &fd, 0, 0);
      if (handle->clnt == NULL) {
 	  code = KADM5_RPC_ERROR;
 #ifdef DEBUG
@@ -325,6 +351,16 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      code = kadm5_setup_gss(handle, params_in, client_name, full_svcname);
      if (code)
 	  goto error;
+
+     /*
+      * Bypass the remainder of the code and return straightaway
+      * if the gss service requested is kiprop
+      */
+     if (iprop_enable == 1) {
+	 code = 0;
+	 *server_handle = (void *) handle;
+	 goto cleanup;
+     }
 
      r = init_2(&handle->api_version, handle->clnt);
      if (r == NULL) {
@@ -793,4 +829,14 @@ int _kadm5_check_handle(void *handle)
 krb5_error_code kadm5_init_krb5_context (krb5_context *ctx)
 {
     return krb5_init_context(ctx);
+}
+
+/*
+ * Stub function for kadmin.  It was created to eliminate the dependency on
+ * libkdb's ulog functions.  The srv equivalent makes the actual calls.
+ */
+krb5_error_code
+kadm5_init_iprop(void *handle)
+{
+	return (0);
 }

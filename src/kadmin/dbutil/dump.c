@@ -26,6 +26,10 @@
  *
  * Dump a KDC database
  */
+/*
+ * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 
 #include <stdio.h>
 #include <k5-int.h>
@@ -77,6 +81,8 @@ static krb5_error_code dump_k5beta6_iterator (krb5_pointer,
 static krb5_error_code dump_k5beta6_iterator_ext (krb5_pointer,
 						  krb5_db_entry *,
 						  int);
+static krb5_error_code dump_iprop_iterator (krb5_pointer,
+					    krb5_db_entry *);
 static krb5_error_code dump_k5beta7_princ (krb5_pointer,
 					   krb5_db_entry *);
 static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
@@ -84,6 +90,8 @@ static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
 					       int);
 static krb5_error_code dump_k5beta7_princ_withpolicy
 			(krb5_pointer, krb5_db_entry *);
+static krb5_error_code dump_iprop_princ (krb5_pointer,
+					 krb5_db_entry *);
 static krb5_error_code dump_ov_princ (krb5_pointer,
 				      krb5_db_entry *);
 static void dump_k5beta7_policy (void *, osa_policy_ent_t);
@@ -136,6 +144,15 @@ dump_version beta7_version = {
      0,
      0,
      dump_k5beta7_princ,
+     dump_k5beta7_policy,
+     process_k5beta7_record,
+};
+dump_version iprop_version = {
+     "Kerberos iprop version",
+     "iprop",
+     0,
+     0,
+     dump_iprop_princ,
      dump_k5beta7_policy,
      process_k5beta7_record,
 };
@@ -237,6 +254,7 @@ static const char null_mprinc_name[] = "kdb5_dump@MISSING";
 static const char oldoption[] = "-old";
 static const char b6option[] = "-b6";
 static const char b7option[] = "-b7";
+static const char ipropoption[] = "-i";
 static const char verboseoption[] = "-verbose";
 static const char updateoption[] = "-update";
 static const char hashoption[] = "-hash";
@@ -826,6 +844,17 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 }
 
 /*
+ * dump_iprop_iterator()	- Output a dump record in iprop format.
+ */
+static krb5_error_code
+dump_iprop_iterator(ptr, entry)
+    krb5_pointer	ptr;
+    krb5_db_entry	*entry;
+{
+    return dump_k5beta6_iterator_ext(ptr, entry, 1);
+}
+
+/*
  * dump_k5beta7_iterator()	- Output a dump record in krb5b7 format.
  */
 static krb5_error_code
@@ -885,6 +914,51 @@ dump_k5beta7_princ_withpolicy(ptr, entry)
     krb5_db_entry	*entry;
 {
     return dump_k5beta7_princ_ext(ptr, entry, 1);
+}
+
+/*
+ * dump_iprop_princ()	- Output a dump record in iprop format.
+ * This was created in order to dump more data, such as kadm5 tl
+ */
+static krb5_error_code
+dump_iprop_princ(ptr, entry)
+    krb5_pointer	ptr;
+    krb5_db_entry	*entry;
+{
+     krb5_error_code retval;
+     struct dump_args *arg;
+     char *name;
+     int tmp_nnames;
+
+     /* Initialize */
+     arg = (struct dump_args *) ptr;
+     name = (char *) NULL;
+
+     /*
+      * Flatten the principal name.
+      */
+     if ((retval = krb5_unparse_name(arg->kcontext,
+				     entry->princ,
+				     &name))) {
+		fprintf(stderr, _(pname_unp_err),
+		  arg->programname, error_message(retval));
+	  return(retval);
+     }
+     /*
+      * If we don't have any match strings, or if our name matches, then
+      * proceed with the dump, otherwise, just forget about it.
+      */
+     if (!arg->nnames || name_matches(name, arg)) {
+	  fprintf(arg->ofile, "princ\t");
+	  
+	  /* save the callee from matching the name again */
+	  tmp_nnames = arg->nnames;
+	  arg->nnames = 0;
+	  retval = dump_iprop_iterator(ptr, entry);
+	  arg->nnames = tmp_nnames;
+     }
+     free(name);
+	return (retval);
 }
 
 void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
@@ -1024,7 +1098,10 @@ dump_db(argc, argv)
     int			aindex;
     krb5_boolean	locked;
     char		*new_mkey_file = 0;
-	
+    bool_t		dump_sno = FALSE;
+    kdb_log_context	*log_ctx;
+    char		**db_args = 0; /* XXX */
+
     /*
      * Parse the arguments.
      */
@@ -1038,6 +1115,7 @@ dump_db(argc, argv)
     mkey_convert = 0;
     backwards = 0;
     recursive = 0;
+    log_ctx = util_context->kdblog_context;
 
     /*
      * Parse the qualifiers.
@@ -1051,7 +1129,22 @@ dump_db(argc, argv)
 	     dump = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     dump = &ov_version;
-	else if (!strcmp(argv[aindex], verboseoption))
+	else if (!strcmp(argv[aindex], ipropoption)) {
+	    if (log_ctx && log_ctx->iproprole) {
+		dump = &iprop_version;
+		/*
+		 * dump_sno is used to indicate if the serial
+		 * # should be populated in the output
+		 * file to be used later by iprop for updating
+		 * the slave's update log when loading
+		 */
+		dump_sno = TRUE;
+	    } else {
+		fprintf(stderr, _("Iprop not enabled\n"));
+		exit_status++;
+		return;
+	    }
+	} else if (!strcmp(argv[aindex], verboseoption))
 	    arglist.verbose++;
 	else if (!strcmp(argv[aindex], "-mkey_convert"))
 	    mkey_convert = 1;
@@ -1172,6 +1265,32 @@ dump_db(argc, argv)
 	arglist.ofile = f;
 	arglist.kcontext = util_context;
 	fprintf(arglist.ofile, "%s", dump->header);
+
+	if (dump_sno) {
+	    if (ulog_map(util_context, global_params.iprop_logfile,
+			 global_params.iprop_ulogsize, FKCOMMAND, db_args)) {
+		fprintf(stderr,
+			_("%s: Could not map log\n"), programname);
+		exit_status++;
+		goto unlock_and_return;
+	    }
+
+	    /*
+	     * We grab the lock twice (once again in the iterator call),
+	     * but that's ok since the lock func handles incr locks held.
+	     */
+	    if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
+		fprintf(stderr,
+			_("%s: Couldn't grab lock\n"), programname);
+		exit_status++;
+		goto unlock_and_return;
+	    }
+
+	    fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
+	    fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
+	    fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
+	}
+
 	if (dump->header[strlen(dump->header)-1] != '\n')
 	     fputc('\n', arglist.ofile);
 	
@@ -1182,6 +1301,8 @@ dump_db(argc, argv)
 	     fprintf(stderr, dumprec_err,
 		     programname, dump->name, error_message(kret));
 	     exit_status++;
+	     if (dump_sno)
+		 (void) krb5_db_unlock(util_context);
 	}
 	if (dump->dump_policy &&
 	    (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
@@ -1199,6 +1320,7 @@ dump_db(argc, argv)
 	    update_ok_file(ofile);
 	}
     }
+unlock_and_return:
     if (locked)
 	(void) krb5_lock_file(util_context, fileno(f), KRB5_LOCKMODE_UNLOCK);
 }
@@ -2137,6 +2259,10 @@ load_db(argc, argv)
     krb5_int32		crflags;
     int			aindex;
     int			db_locked = 0;
+    char		iheader[MAX_HEADER];
+    kdb_log_context	*log_ctx;
+    int			add_update = 1;
+    uint32_t		caller, last_sno, last_seconds, last_useconds;
 
     /*
      * Parse the arguments.
@@ -2152,6 +2278,8 @@ load_db(argc, argv)
     crflags = KRB5_KDB_CREATE_BTREE;
     exit_status = 0;
     dbname_tmp = (char *) NULL;
+    log_ctx = util_context->kdblog_context;
+
     for (aindex = 1; aindex < argc; aindex++) {
 	if (!strcmp(argv[aindex], oldoption))
 	     load = &old_version;
@@ -2161,7 +2289,16 @@ load_db(argc, argv)
 	     load = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     load = &ov_version;
-	else if (!strcmp(argv[aindex], verboseoption))
+	else if (!strcmp(argv[aindex], ipropoption)) {
+	    if (log_ctx && log_ctx->iproprole) {
+		load = &iprop_version;
+		add_update = FALSE;
+	    } else {
+		fprintf(stderr, _("Iprop not enabled\n"));
+		exit_status++;
+		return;
+	    }
+	} else if (!strcmp(argv[aindex], verboseoption))
 	    verbose = 1;
 	else if (!strcmp(argv[aindex], updateoption))
 	    update = 1;
@@ -2205,6 +2342,9 @@ load_db(argc, argv)
 	exit_status++;
 	return;
     }
+
+    if (log_ctx && log_ctx->iproprole)
+	kcontext->kdblog_context = log_ctx;
 
     /*
      * Open the dumpfile
@@ -2358,6 +2498,53 @@ load_db(argc, argv)
     else
 	db_locked = 1;
     
+    if (log_ctx && log_ctx->iproprole) {
+	if (add_update)
+	    caller = FKCOMMAND;
+	else
+	    caller = FKPROPD;
+
+	if (ulog_map(kcontext, global_params.iprop_logfile,
+		     global_params.iprop_ulogsize, caller, db5util_db_args)) {
+	    fprintf(stderr, _("%s: Could not map log\n"),
+		    programname);
+	    exit_status++;
+	    goto error;
+	}
+
+	/*
+	 * We don't want to take out the ulog out from underneath
+	 * kadmind so we reinit the header log.
+	 *
+	 * We also don't want to add to the update log since we
+	 * are doing a whole sale replace of the db, because:
+	 * 	we could easily exceed # of update entries
+	 * 	we could implicity delete db entries during a replace
+	 *	no advantage in incr updates when entire db is replaced
+	 */
+	if (!update) {
+	    memset(log_ctx->ulog, 0, sizeof (kdb_hlog_t));
+
+	    log_ctx->ulog->kdb_hmagic = KDB_ULOG_HDR_MAGIC;
+	    log_ctx->ulog->db_version_num = KDB_VERSION;
+	    log_ctx->ulog->kdb_state = KDB_STABLE;
+	    log_ctx->ulog->kdb_block = ULOG_BLOCK;
+
+	    log_ctx->iproprole = IPROP_NULL;
+
+	    if (!add_update) {
+		sscanf(buf, "%s %u %u %u", iheader, &last_sno,
+		       &last_seconds, &last_useconds);
+
+		log_ctx->ulog->kdb_last_sno = last_sno;
+		log_ctx->ulog->kdb_last_time.seconds =
+		    last_seconds;
+		log_ctx->ulog->kdb_last_time.useconds =
+		    last_useconds;
+	    }
+	}
+    }
+
     if (restore_dump(programname, kcontext, (dumpfile) ? dumpfile : stdin_name,
 		     f, verbose, load)) {
 	 fprintf(stderr, restfail_fmt,

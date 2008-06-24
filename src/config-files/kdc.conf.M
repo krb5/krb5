@@ -1,4 +1,4 @@
-.\" Copyright 1995 by the Massachusetts Institute of Technology.
+.\" Copyright 1995, 2008 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may
 .\"   require a specific license from the United States Government.
@@ -223,6 +223,24 @@ This
 .B delta time string
 specifies the maximum time period that a ticket may be renewed for in
 this realm. 
+
+.IP iprop_enable
+This
+.B boolean
+("true" or "false") specifies whether incremental database propagation
+is enabled.  The default is "false".
+
+.IP iprop_master_ulogsize
+This
+.B numeric value
+specifies the maximum number of log entries to be retained for
+incremental propagation.  The maximum value is 2500; default is 1000.
+
+.IP iprop_slave_poll
+This
+.B delta time string
+specfies how often the slave KDC polls for new updates from the
+master.  Default is "2m" (that is, two minutes).
 
 .IP supported_enctypes
 list of key:salt strings that specifies the default key/salt

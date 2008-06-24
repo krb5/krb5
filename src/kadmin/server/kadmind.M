@@ -54,6 +54,21 @@ section below.
 .PP
 After the server begins running, it puts itself in the background and
 disassociates itself from its controlling terminal.
+.PP
+kadmind can be configured for incremental database propagation.
+Incremental propagation allows slave KDC servers to receive principal
+and policy updates incrementally instead of receiving full dumps of
+the database.  This facility can be enabled in the
+.I kdc.conf
+file with the
+.I iprop_enable
+option.  See the
+.I kdc.conf
+documentation for other options for tuning incremental propagation
+parameters.  Incremental propagation requires the principal
+"kiprop/MASTER@REALM" (where MASTER is the master KDC's canonical host
+name, and REALM the realm name) to be registered in the database.
+
 .SH OPTIONS
 .TP 
 \fB\-x\fP \fIdb_args\fP
@@ -197,6 +212,10 @@ character is lower-case, then the operation is permitted.
 .TP
 .B l
 [Dis]allows the listing of principals or policies in the database.
+.sp -1v
+.TP
+.B p
+[Dis]allows the propagation of the principal database.
 .sp -1v
 .TP
 .B x

@@ -1,7 +1,7 @@
 /*
  * admin/destroy/kdb5_destroy.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -104,6 +104,10 @@ kdb5_destroy(argc, argv)
     if (retval1) {
 	com_err(argv[0], retval1, "deleting database '%s'",dbname);
 	exit_status++; return;
+    }
+
+    if (global_params.iprop_enabled) {
+	(void) unlink(global_params.iprop_logfile);
     }
 
     dbactive = FALSE;

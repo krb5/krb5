@@ -1,6 +1,6 @@
 .\" slave/kpropd.M
 .\"
-.\" Copyright 1992 by the Massachusetts Institute of Technology.
+.\" Copyright 1992, 2008 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may
 .\"   require a specific license from the United States Government.
@@ -49,10 +49,15 @@ kpropd \- Kerberos V5 slave KDC update server
 ]
 .br
 .SH DESCRIPTION
+The
 .I kpropd 
-is the server which accepts connections from the 
+command runs on the slave KDC server.  It listens for update requests
+made by the
 .IR kprop (8)
-program.  
+program, and periodically requests incremental updates from the
+master KDC.
+
+When the slave receives a kprop request from the master,
 .I kpropd 
 accepts the dumped KDC database and places it in a file, and then runs 
 .IR kdb5_util (8)
@@ -76,6 +81,25 @@ However, kpropd can also run as a standalone deamon, if the
 option is turned on.  This is done for debugging purposes, or if for
 some reason the system administrator just doesn't want to run it out of
 .IR inetd (8).
+
+When the slave periodically requests incremental updates,
+.I kpropd
+updates its
+.I principal.ulog
+file with any updates from the master.
+.IR kproplog (8)
+can be used to view a summary of the update entry log on the slave
+KDC.  Incremental propagation is not enabled by default; it can be
+enabled using the
+.I iprop_enable
+and
+.I iprop_slave_poll
+settings in
+.IR kdc.conf (5).
+The principal "kiprop/slavehostname@REALM" (where "slavehostname" is
+the name of the slave KDC host, and "REALM" is the name of the
+Kerberos realm) must be present in the slave's keytab file.
+
 .SH OPTIONS
 .TP
 \fB\-r\fP \fIrealm\fP

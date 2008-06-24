@@ -37,7 +37,7 @@ static int gss_name_to_string(gss_name_t gss_name, gss_buffer_desc *str);
 
 static gss_name_t acceptor_name(gss_ctx_id_t context);
 
-static gss_name_t rqst2name(struct svc_req *rqstp);
+gss_name_t rqst2name(struct svc_req *rqstp);
 
 static int cmp_gss_names(gss_name_t n1, gss_name_t n2)
 {
@@ -158,7 +158,6 @@ static void free_server_handle(kadm5_server_handle_t handle)
  * server_name, both of which must be freed by the caller.  Returns 0
  * on success and -1 on failure.
  */
-static 
 int setup_gss_names(struct svc_req *rqstp,
 		    gss_buffer_desc *client_name,
 		    gss_buffer_desc *server_name)
@@ -1657,7 +1656,7 @@ exit_func:
      return(&ret);
 }
 
-static gss_name_t
+gss_name_t
 rqst2name(struct svc_req *rqstp)
 {
 

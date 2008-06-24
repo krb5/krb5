@@ -24,6 +24,10 @@
  * or implied warranty.
  *
  */
+/*
+ * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 
 /*
  * alt_prof.c - Implement alternate profile file handling.
@@ -33,6 +37,7 @@
 #include "adm_proto.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <kdb_log.h>
 
 static krb5_key_salt_tuple *copy_key_salt_tuple(ksalt, len)
 krb5_key_salt_tuple *ksalt;
@@ -381,7 +386,7 @@ get_string_param(char **param_out, char *param_in,
 }
 /*
  * Similar, for (host-order) port number, if not already set in the
- * output field; default is required.
+ * output field; default_value==0 means no default.
  */
 static void
 get_port_param(int *param_out, int param_in,
@@ -402,7 +407,7 @@ get_port_param(int *param_out, int param_in,
 		   !krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
 	    *param_out = ivalue;
 	    *mask_out |= mask_bit;
-	} else {
+	} else if (default_value) {
 	    *param_out = default_value;
 	    *mask_out |= mask_bit;
 	}
@@ -475,6 +480,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     krb5_pointer	aprofile = 0;
     const char		*hierarchy[4];
     char		*svalue;
+    krb5_int32		ivalue;
     kadm5_config_params params, empty_params;
 
     krb5_error_code	kret = 0;
@@ -714,6 +720,59 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 	 krb5_xfree(svalue);
     }
     
+	hierarchy[2] = "iprop_enable";
+
+	params.iprop_enabled = FALSE;
+	params.mask |= KADM5_CONFIG_IPROP_ENABLED;
+
+	if (params_in->mask & KADM5_CONFIG_IPROP_ENABLED) {
+		params.mask |= KADM5_CONFIG_IPROP_ENABLED;
+		params.iprop_enabled = params_in->iprop_enabled;
+	} else {
+		krb5_boolean bvalue;
+		if (aprofile &&
+		    !krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
+		    params.iprop_enabled = bvalue;
+		    params.mask |= KADM5_CONFIG_IPROP_ENABLED;
+		}
+	}
+
+	if (!GET_STRING_PARAM(iprop_logfile, KADM5_CONFIG_IPROP_LOGFILE,
+			      "iprop_logfile", NULL)) {
+	    if (params.mask & KADM5_CONFIG_DBNAME) {
+		if (asprintf(&params.iprop_logfile, "%s.ulog", params.dbname) >= 0) {
+		    params.mask |= KADM5_CONFIG_IPROP_LOGFILE;
+		}
+	    }
+	}
+
+	GET_PORT_PARAM(iprop_port, KADM5_CONFIG_IPROP_PORT,
+		       "iprop_port", 0);
+
+	hierarchy[2] = "iprop_master_ulogsize";
+
+	params.iprop_ulogsize = DEF_ULOGENTRIES;
+	params.mask |= KADM5_CONFIG_ULOG_SIZE;
+
+	if (params_in->mask & KADM5_CONFIG_ULOG_SIZE) {
+		params.mask |= KADM5_CONFIG_ULOG_SIZE;
+		params.iprop_ulogsize = params_in->iprop_ulogsize;
+	} else {
+		if (aprofile && !krb5_aprof_get_int32(aprofile, hierarchy,
+		    TRUE, &ivalue)) {
+			if (ivalue > MAX_ULOGENTRIES)
+				params.iprop_ulogsize = MAX_ULOGENTRIES;
+			else if (ivalue <= 0)
+				params.iprop_ulogsize = DEF_ULOGENTRIES;
+			else
+				params.iprop_ulogsize = ivalue;
+			params.mask |= KADM5_CONFIG_ULOG_SIZE;
+		}
+	}
+
+	GET_DELTAT_PARAM(iprop_poll_time, KADM5_CONFIG_POLL_TIME,
+			 "iprop_slave_poll", 2 * 60); /* 2m */
+
     *params_out = params;
     
 cleanup:

@@ -1,7 +1,7 @@
 /*
  * k5-platform.h
  *
- * Copyright 2003, 2004, 2005, 2007 Massachusetts Institute of Technology.
+ * Copyright 2003, 2004, 2005, 2007, 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -980,6 +980,9 @@ extern int krb5int_mkstemp(char *);
 #define mkstemp krb5int_mkstemp
 #endif
 
-
+/* Fudge for future adoption of gettext or the like.  */
+#ifndef _
+#define _(X) (X)
+#endif
 
 #endif /* K5_PLATFORM_H */

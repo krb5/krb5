@@ -4,6 +4,10 @@
  * $Id$
  * $Source$
  */
+/*
+ * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 
 #if !defined(lint) && !defined(__CODECENTER__)
 static char *rcsid = "$Header$";
@@ -16,8 +20,10 @@ static char *rcsid = "$Header$";
 #include "k5-int.h"		/* needed for gssapiP_krb5.h */
 #include <kadm5/admin.h>
 #include <krb5.h>
+#include <kdb_log.h>
 #include "server_internal.h"
 #include "osconf.h"
+#include "iprop_hdr.h"
 
 /*
  * Function check_handle
@@ -238,11 +244,25 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 			 KADM5_CONFIG_MAX_LIFE | KADM5_CONFIG_MAX_RLIFE | \
 			 KADM5_CONFIG_EXPIRATION | KADM5_CONFIG_ENCTYPES)
 
+#define IPROP_REQUIRED_PARAMS \
+			(KADM5_CONFIG_IPROP_ENABLED | \
+			 KADM5_CONFIG_IPROP_LOGFILE | \
+			 KADM5_CONFIG_IPROP_PORT)
+
      if ((handle->params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_free_context(handle->context);
 	  free_db_args(handle);
 	  free(handle);
 	  return KADM5_MISSING_CONF_PARAMS;
+     }
+     if ((handle->params.mask & KADM5_CONFIG_IPROP_ENABLED) == KADM5_CONFIG_IPROP_ENABLED
+	 && handle->params.iprop_enabled) {
+	 if ((handle->params.mask & IPROP_REQUIRED_PARAMS) != IPROP_REQUIRED_PARAMS) {
+	     krb5_free_context(handle->context);
+	     free_db_args(handle);
+	     free(handle);
+	     return KADM5_MISSING_CONF_PARAMS;
+	 }
      }
 
      ret = krb5_set_default_realm(handle->context, handle->params.realm);
@@ -429,4 +449,22 @@ krb5_error_code kadm5_init_krb5_context (krb5_context *ctx)
 	first_time = 0;
     }
     return krb5int_init_context_kdc(ctx);
+}
+
+krb5_error_code
+kadm5_init_iprop(void *handle, char **db_args)
+{
+	kadm5_server_handle_t iprop_h;
+	krb5_error_code retval;
+
+	iprop_h = handle;
+	if (iprop_h->params.iprop_enabled) {
+		ulog_set_role(iprop_h->context, IPROP_MASTER);
+		if ((retval = ulog_map(iprop_h->context,
+				       iprop_h->params.iprop_logfile,
+				       iprop_h->params.iprop_ulogsize,
+				       FKCOMMAND, db_args)) != 0)
+			return (retval);
+	}
+	return (0);
 }

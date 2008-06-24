@@ -53,6 +53,7 @@
 #include    "kdb_kt.h"	/* for krb5_ktkdb_set_context */
 #include    <string.h>
 #include    "kadm5/server_internal.h" /* XXX for kadm5_server_handle_t */
+#include    <kdb_log.h>
 
 #include    "misc.h"
 
@@ -71,7 +72,7 @@ extern int daemon(int, int);
 
 volatile int	signal_request_exit = 0;
 volatile int	signal_request_hup = 0;
-void    setup_signal_handlers(void);
+void    setup_signal_handlers(iprop_role iproprole);
 void	request_exit(int);
 void	request_hup(int);
 void	reset_db(void);
@@ -114,9 +115,17 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 int schpw;
 void do_schpw(int s, kadm5_config_params *params);
 
+int ipropfd;
+
 #ifdef USE_PASSWORD_SERVER
 void kadm5_set_use_password_server (void);
 #endif
+
+extern void krb5_iprop_prog_1();
+extern kadm5_ret_t kiprop_get_adm_host_srv_name(
+	krb5_context,
+	const char *,
+	char **);
 
 /*
  * Function: usage
@@ -199,12 +208,14 @@ static krb5_context context;
 
 static krb5_context hctx;
 
+int nofork = 0;
+
 int main(int argc, char *argv[])
 {
-     register	SVCXPRT *transp;
+    register	SVCXPRT *transp, *iproptransp;
      extern	char *optarg;
      extern	int optind, opterr;
-     int ret, nofork, oldnames = 0;
+     int ret, oldnames = 0;
      OM_uint32 OMret, major_status, minor_status;
      char *whoami;
      gss_buffer_desc in_buf;
@@ -217,6 +228,9 @@ int main(int argc, char *argv[])
      char **db_args      = NULL;
      int    db_args_size = 0;
      char *errmsg;
+
+     char *kiprop_name = NULL;	/* iprop svc name */
+     kdb_log_context *log_ctx;
 
      setvbuf(stderr, NULL, _IONBF, 0);
 
@@ -316,11 +330,6 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-     if( db_args )
-     {
-	 free(db_args), db_args=NULL;
-     }
-     
      if ((ret = kadm5_get_config_params(context, 1, &params,
 					&params))) {
 	  const char *e_txt = krb5_get_error_message (context, ret);
@@ -353,19 +362,23 @@ int main(int argc, char *argv[])
      addr.sin_port = htons(params.kadmind_port);
 
      if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	  const char *e_txt = krb5_get_error_message (context, ret);
-	  krb5_klog_syslog(LOG_ERR, "Cannot create TCP socket: %s",
-			   e_txt);
-	  fprintf(stderr, "Cannot create TCP socket: %s",
-		  e_txt);
-	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close(context);	  
-	  exit(1);
+	 const char *e_txt;
+	 ret = SOCKET_ERRNO;
+	 e_txt = krb5_get_error_message (context, ret);
+	 krb5_klog_syslog(LOG_ERR, "Cannot create TCP socket: %s",
+			  e_txt);
+	 fprintf(stderr, "Cannot create TCP socket: %s",
+		 e_txt);
+	 kadm5_destroy(global_server_handle);
+	 krb5_klog_close(context);	  
+	 exit(1);
      }
      set_cloexec_fd(s);
 
      if ((schpw = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	 const char *e_txt = krb5_get_error_message (context, ret);
+	 const char *e_txt;
+	 ret = SOCKET_ERRNO;
+	 e_txt = krb5_get_error_message (context, ret);
 	 krb5_klog_syslog(LOG_ERR,
 			  "cannot create simple chpw socket: %s",
 			  e_txt);
@@ -376,6 +389,21 @@ int main(int argc, char *argv[])
 	 exit(1);
      }
      set_cloexec_fd(schpw);
+
+     if ((ipropfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	 const char *e_txt;
+	 ret = SOCKET_ERRNO;
+	 e_txt = krb5_get_error_message (context, ret);
+	 krb5_klog_syslog(LOG_ERR,
+			  "cannot create iprop listening socket: %s",
+			  e_txt);
+	 fprintf(stderr, "cannot create iprop listening socket: %s",
+		 e_txt);
+	 kadm5_destroy(global_server_handle);
+	 krb5_klog_close(context);
+	 exit(1);
+     }
+     set_cloexec_fd(ipropfd);
 
 #ifdef SO_REUSEADDR
      /* the old admin server turned on SO_REUSEADDR for non-default
@@ -390,12 +418,16 @@ int main(int argc, char *argv[])
 	 int	allowed;
 
 	 allowed = 1;
-	 if (setsockopt(s,
-			SOL_SOCKET,
-			SO_REUSEADDR,
-			(char *) &allowed,
-			sizeof(allowed)) < 0) {
-	     const char *e_txt = krb5_get_error_message (context, ret);
+	 if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			(char *) &allowed, sizeof(allowed)) < 0 ||
+	     setsockopt(schpw, SOL_SOCKET, SO_REUSEADDR,
+			(char *) &allowed, sizeof(allowed)) < 0 ||
+	     setsockopt(ipropfd, SOL_SOCKET, SO_REUSEADDR,
+			(char *) &allowed, sizeof(allowed)) < 0
+	     ) {
+	     const char *e_txt;
+	     ret = SOCKET_ERRNO;
+	     e_txt = krb5_get_error_message (context, ret);
 	     krb5_klog_syslog(LOG_ERR, "Cannot set SO_REUSEADDR: %s",
 			      e_txt);
 	     fprintf(stderr, "Cannot set SO_REUSEADDR: %s", e_txt);
@@ -403,19 +435,6 @@ int main(int argc, char *argv[])
 	     krb5_klog_close(context);	  
 	     exit(1);
 	 }
-	 if (setsockopt(schpw, SOL_SOCKET, SO_REUSEADDR,
-			(char *) &allowed, sizeof(allowed)) < 0) {
-	     const char *e_txt = krb5_get_error_message (context, ret);
-	     krb5_klog_syslog(LOG_ERR,
-			      "cannot set SO_REUSEADDR on simple chpw socket: %s", 
-			      e_txt);
-	     fprintf(stderr,
-		     "Cannot set SO_REUSEADDR on simple chpw socket: %s",
- 		     e_txt);
- 	     kadm5_destroy(global_server_handle);
- 	     krb5_klog_close(context);
-	 }
-
      }
 #endif /* SO_REUSEADDR */
      memset(&addr, 0, sizeof(addr));
@@ -456,6 +475,7 @@ int main(int argc, char *argv[])
 	  krb5_klog_close(context);
 	  exit(1);
      }
+
      memset(&addr, 0, sizeof(addr));
      addr.sin_family = AF_INET;
      addr.sin_addr.s_addr = INADDR_ANY;
@@ -491,7 +511,41 @@ int main(int argc, char *argv[])
  	  krb5_klog_close(context);
 	  exit(1);
      }
-     
+
+     memset(&addr, 0, sizeof(addr));
+     addr.sin_family = AF_INET;
+     addr.sin_addr.s_addr = INADDR_ANY;
+     addr.sin_port = htons(params.iprop_port);
+     if (bind(ipropfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+	  char portbuf[32];
+	  int oerrno = errno;
+	  const char *e_txt = krb5_get_error_message (context, errno);
+	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
+	  fprintf(stderr, "bind: %s\n", e_txt);
+	  errno = oerrno;
+	  snprintf(portbuf, sizeof(portbuf), "%d", ntohs(addr.sin_port));
+	  krb5_klog_syslog(LOG_ERR, "cannot bind iprop socket: %s",
+			   e_txt);
+	  if(oerrno == EADDRINUSE) {
+	       char *w = strrchr(whoami, '/');
+	       if (w) {
+		    w++;
+	       }
+	       else {
+		    w = whoami;
+	       }
+	       fprintf(stderr,
+"This probably means that another %s process is already\n"
+"running, or that another program is using the server port (number %d).\n"
+"If another %s is already running, you should kill it before\n"
+"restarting the server.\n",
+		       w, ntohs(addr.sin_port), w);
+ 	  }
+ 	  kadm5_destroy(global_server_handle);
+ 	  krb5_klog_close(context);
+	  exit(1);
+     }
+
      transp = svctcp_create(s, 0, 0);
      if(transp == NULL) {
 	  fprintf(stderr, "%s: Cannot create RPC service.\n", whoami);
@@ -507,6 +561,25 @@ int main(int argc, char *argv[])
 	  krb5_klog_close(context);	  
 	  exit(1);
      }
+
+     iproptransp = svctcp_create(ipropfd, 0, 0);
+     if (iproptransp == NULL) {
+	  fprintf(stderr, "%s: Cannot create RPC service.\n", whoami);
+	  krb5_klog_syslog(LOG_ERR, "Cannot create RPC service: %m");
+	  kadm5_destroy(global_server_handle);
+	  krb5_klog_close(context);	  
+	  exit(1);
+     }
+     if (!svc_register(iproptransp, KRB5_IPROP_PROG, KRB5_IPROP_VERS, krb5_iprop_prog_1, IPPROTO_TCP)) {
+	  fprintf(stderr, "%s: Cannot register RPC service.\n", whoami);
+	  krb5_klog_syslog(LOG_ERR, "Cannot register RPC service, continuing.");
+#if 0
+	  kadm5_destroy(global_server_handle);
+	  krb5_klog_close(context);	  
+	  exit(1);
+#endif
+     }
+
 
      names[0].name = build_princ_name(KADM5_ADMIN_SERVICE, params.realm);
      names[1].name = build_princ_name(KADM5_CHANGEPW_SERVICE, params.realm);
@@ -643,8 +716,108 @@ kterr:
 	  exit(1);
      }
 	  
-     setup_signal_handlers();
-     krb5_klog_syslog(LOG_INFO, "starting");
+    if (params.iprop_enabled == TRUE)
+	ulog_set_role(hctx, IPROP_MASTER);
+    else
+	ulog_set_role(hctx, IPROP_NULL);
+
+    log_ctx = hctx->kdblog_context;
+
+    if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
+	/*
+	 * IProp is enabled, so let's map in the update log
+	 * and setup the service.
+	 */
+	if ((ret = ulog_map(hctx, params.iprop_logfile,
+			    params.iprop_ulogsize, FKADMIND, db_args)) != 0) {
+	    fprintf(stderr,
+		    _("%s: %s while mapping update log (`%s.ulog')\n"),
+		    whoami, error_message(ret), params.dbname);
+	    krb5_klog_syslog(LOG_ERR,
+			     _("%s while mapping update log (`%s.ulog')"),
+			     error_message(ret), params.dbname);
+	    krb5_klog_close(context);
+	    exit(1);
+	}
+
+ 
+	if (nofork)
+	    fprintf(stderr,
+		    "%s: create IPROP svc (PROG=%d, VERS=%d)\n",
+		    whoami, KRB5_IPROP_PROG, KRB5_IPROP_VERS);
+
+#if 0
+	if (!svc_create(krb5_iprop_prog_1,
+			KRB5_IPROP_PROG, KRB5_IPROP_VERS,
+			"circuit_v")) {
+	    fprintf(stderr,
+		    _("%s: Cannot create IProp RPC service (PROG=%d, VERS=%d)\n"),
+		    whoami,
+		    KRB5_IPROP_PROG, KRB5_IPROP_VERS);
+	    krb5_klog_syslog(LOG_ERR,
+			     _("Cannot create IProp RPC service (PROG=%d, VERS=%d), failing."),
+			     KRB5_IPROP_PROG, KRB5_IPROP_VERS);
+	    krb5_klog_close(context);
+	    exit(1);
+	}
+#endif
+
+#if 0 /* authgss only? */
+	if ((ret = kiprop_get_adm_host_srv_name(context,
+						params.realm,
+						&kiprop_name)) != 0) {
+	    krb5_klog_syslog(LOG_ERR,
+			     _("%s while getting IProp svc name, failing"),
+			     error_message(ret));
+	    fprintf(stderr,
+		    _("%s: %s while getting IProp svc name, failing\n"),
+		    whoami, error_message(ret));
+	    krb5_klog_close(context);
+	    exit(1);
+	}
+
+	auth_gssapi_name iprop_name;
+	iprop_name.name = build_princ_name(foo, bar);
+	if (iprop_name.name == NULL) {
+	    foo error;
+	}
+	iprop_name.type = nt_krb5_name_oid;
+	if (svcauth_gssapi_set_names(&iprop_name, 1) == FALSE) {
+	    foo error;
+	}
+	if (!rpc_gss_set_svc_name(kiprop_name, "kerberos_v5", 0,
+				  KRB5_IPROP_PROG, KRB5_IPROP_VERS)) {
+	    rpc_gss_error_t err;
+	    (void) rpc_gss_get_error(&err);
+
+	    krb5_klog_syslog(LOG_ERR,
+			     _("Unable to set RPCSEC_GSS service name (`%s'), failing."),
+			     kiprop_name ? kiprop_name : "<null>");
+
+	    fprintf(stderr,
+		    _("%s: Unable to set RPCSEC_GSS service name (`%s'), failing.\n"),
+		    whoami,
+		    kiprop_name ? kiprop_name : "<null>");
+
+	    if (nofork) {
+		fprintf(stderr,
+			"%s: set svc name (rpcsec err=%d, sys err=%d)\n",
+			whoami,
+			err.rpc_gss_error,
+			err.system_error);
+	    }
+
+	    exit(1);
+	}
+	free(kiprop_name);
+#endif
+    }
+
+    setup_signal_handlers(log_ctx->iproprole);
+    krb5_klog_syslog(LOG_INFO, _("starting"));
+    if (nofork)
+	fprintf(stderr, "%s: starting...\n", whoami);
+
      kadm_svc_run(&params);
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
 
@@ -677,7 +850,7 @@ kterr:
  * if possible, otherwise with System V's signal().
  */
 
-void setup_signal_handlers(void) {
+void setup_signal_handlers(iprop_role iproprole) {
 #ifdef POSIX_SIGNALS
      (void) sigemptyset(&s_action.sa_mask);
      s_action.sa_handler = request_exit;
@@ -694,6 +867,15 @@ void setup_signal_handlers(void) {
      s_action.sa_handler = request_pure_clear;
      (void) sigaction(SIGUSR2, &s_action, (struct sigaction *) NULL);
 #endif /* PURIFY */
+
+     /*
+      * IProp will fork for a full-resync, we don't want to
+      * wait on it and we don't want the living dead procs either.
+      */
+     if (iproprole == IPROP_MASTER) {
+	 s_action.sa_handler = SIG_IGN;
+	 (void) sigaction(SIGCHLD, &s_action, (struct sigaction *) NULL);
+     }
 #else /* POSIX_SIGNALS */
      signal(SIGINT, request_exit);
      signal(SIGTERM, request_exit);
@@ -704,6 +886,13 @@ void setup_signal_handlers(void) {
      signal(SIGUSR1, request_pure_report);
      signal(SIGUSR2, request_pure_clear);
 #endif /* PURIFY */
+
+     /*
+      * IProp will fork for a full-resync, we don't want to
+      * wait on it and we don't want the living dead procs either.
+      */
+     if (iproprole == IPROP_MASTER)
+	 (void) signal(SIGCHLD, SIG_IGN);
 #endif /* POSIX_SIGNALS */
 }
 

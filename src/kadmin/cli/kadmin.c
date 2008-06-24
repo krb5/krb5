@@ -1,5 +1,5 @@
 /*
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,7 +24,13 @@
  * kadmin.c: base functions for a kadmin command line interface using
  * the OVSecure library
  */
+/*
+ * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 
+/* for "_" macro */
+#include "k5-platform.h"
 #include <krb5.h>
 #include <kadm5/admin.h>
 #include <adm_proto.h>
@@ -549,6 +555,11 @@ char *kadmin_startup(argc, argv)
 	   should go away */
 	extern char *krb5_defkeyname;
 	krb5_defkeyname = DEFAULT_KEYTAB;
+    }
+
+    if ((retval = kadm5_init_iprop(handle)) != 0) {
+	com_err(whoami, retval, _("while mapping update log"));
+	exit(1);
     }
 
     return query;
