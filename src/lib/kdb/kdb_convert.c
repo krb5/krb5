@@ -17,6 +17,7 @@
 #include "iprop.h"
 #include <k5-int.h>
 #include <kdb.h>
+#include <kdb_log.h>
 
 /* BEGIN CSTYLED */
 #define	ULOG_ENTRY_TYPE(upd, i)	((kdb_incr_update_t *)upd)->kdb_update.kdbe_t_val[i]
@@ -160,7 +161,7 @@ data_to_utf8str(utf8str_t *u, krb5_data d)
 /*
  * Converts the krb5_principal struct from db2 to ulog format.
  */
-krb5_error_code
+static krb5_error_code
 conv_princ_2ulog(krb5_principal princ, kdb_incr_update_t *upd,
 		 int cnt, princ_type tp)
 {
@@ -240,7 +241,7 @@ replace_with_utf8str(krb5_data *d, utf8str_t u)
 /*
  * Converts the krb5_principal struct from ulog to db2 format.
  */
-krb5_error_code
+static krb5_error_code
 conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 	       kdb_incr_update_t *upd,
 	       int cnt, princ_type tp,
