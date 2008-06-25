@@ -230,7 +230,6 @@ out:
 static krb5_error_code
 krb5_db_def_fetch_mkey_stash( krb5_context   context,
 			const char *keyfile,
-			krb5_principal mname,
 			krb5_keyblock *key,
 			krb5_kvno     *kvno)
 {
@@ -300,72 +299,84 @@ krb5_db_def_fetch_mkey_stash( krb5_context   context,
 static krb5_error_code
 krb5_db_def_fetch_mkey_keytab(  krb5_context   context,
                                 const char     *keyfile,
-                                krb5_principal mname,
                                 krb5_keyblock  *key,
                                 krb5_kvno      *kvno)
 {
     krb5_error_code retval = 0;
-    char *ktname = NULL;
+    char ktname[MAXPATHLEN + 6]; /* 6 for FILE: + \0 */
     krb5_keytab kt;
     krb5_keytab_entry kt_ent;
+    krb5_kt_cursor cursor = NULL;
 
     /* memset krb5_kt_free_entry so can be called safely later */
     memset(&kt_ent, 0, sizeof(kt_ent));
 
-    /* create keytab name string to feed to krb5_kt_resolve */
-    if ((retval = asprintf(&ktname, "FILE:%s", keyfile)) < 0) {
-        krb5_set_error_message (context, retval,
-            "Could not create keytab name string.");
+    if ((retval = krb5_kt_resolve(context, keyfile, &kt)) != 0)
+        goto errout;
+
+    if ((retval = krb5_kt_get_name(context, kt, ktname, sizeof(ktname))))
+        goto errout;
+
+    if ((retval = krb5_kt_start_seq_get(context, kt, &cursor)))
+        goto errout;
+
+    while ((retval = krb5_kt_next_entry(context, kt, &kt_ent, &cursor)) == 0) {
+        if (key->enctype != ENCTYPE_UNKNOWN && key->enctype != kt_ent.key.enctype)
+            continue;
+        if (kvno != NULL && *kvno != IGNORE_VNO && *kvno != kt_ent.vno)
+            continue;
+        break;
+    }
+
+    if (retval != 0) {
+        if (retval == KRB5_KT_END) {
+            (void) krb5_kt_end_seq_get(context, kt, &cursor);
+            retval = KRB5_KDB_BADSTORED_MKEY;
+        }
         goto errout;
     }
 
-    if ((retval = krb5_kt_resolve(context, ktname, &kt)) != 0)
+    if ((retval = krb5_kt_end_seq_get(context, kt, &cursor)))
         goto errout;
 
-    if ((retval = krb5_kt_get_entry(context, kt, mname,
-                                    kvno ? *kvno : IGNORE_VNO,
-                                    IGNORE_ENCTYPE,
-                                    &kt_ent)) == 0) {
+    if (key->enctype == ENCTYPE_UNKNOWN)
+        key->enctype = kt_ent.key.enctype;
+    else if (kt_ent.key.enctype != key->enctype) {
+        retval = KRB5_KDB_BADSTORED_MKEY;
+        goto errout;
+    }
 
-        if (key->enctype == ENCTYPE_UNKNOWN)
-            key->enctype = kt_ent.key.enctype;
-        else if (kt_ent.key.enctype != key->enctype) {
-            retval = KRB5_KDB_BADSTORED_MKEY;
-            goto errout;
-        }
+    if (((int) kt_ent.key.length) < 0) {
+        retval = KRB5_KDB_BADSTORED_MKEY;
+        goto errout;
+    }
 
-        if (((int) kt_ent.key.length) < 0) {
-            retval = KRB5_KDB_BADSTORED_MKEY;
-            goto errout;
-        }
+    key->length = kt_ent.key.length;
 
-        key->length = kt_ent.key.length;
-
-        if (kvno != NULL) {
-            /*
-             * If a kvno pointer was passed in and it dereferences the
-             * IGNORE_VNO value then it should be assigned the value of the kvno
-             * found in the keytab otherwise the KNVO specified should be the
-             * same as the one returned from the keytab.
-             */
-            if (*kvno == IGNORE_VNO) {
-                *kvno = kt_ent.vno;
-            } else if (*kvno != kt_ent.vno) {
-                retval = KRB5_KDB_BADSTORED_MKEY;
-                goto errout;
-            }
-        }
-
+    if (kvno != NULL) {
         /*
-         * kt_ent will be free'd later so need to allocate and copy key
-         * contents for output to caller.
+         * If a kvno pointer was passed in and it dereferences the
+         * IGNORE_VNO value then it should be assigned the value of the kvno
+         * found in the keytab otherwise the KNVO specified should be the
+         * same as the one returned from the keytab.
          */
-        if (!(key->contents = (krb5_octet *)malloc(key->length))) {
-            retval = ENOMEM;
+        if (*kvno == IGNORE_VNO) {
+            *kvno = kt_ent.vno;
+        } else if (*kvno != kt_ent.vno) {
+            retval = KRB5_KDB_BADSTORED_MKEY;
             goto errout;
         }
-        memcpy(key->contents, kt_ent.key.contents, kt_ent.key.length);
     }
+
+    /*
+     * kt_ent will be free'd later so need to allocate and copy key
+     * contents for output to caller.
+     */
+    if (!(key->contents = (krb5_octet *)malloc(key->length))) {
+        retval = ENOMEM;
+        goto errout;
+    }
+    memcpy(key->contents, kt_ent.key.contents, kt_ent.key.length);
 
 errout:
     krb5_kt_free_entry(context, &kt_ent);
@@ -397,15 +408,13 @@ krb5_db_def_fetch_mkey( krb5_context   context,
     keyfile[sizeof(keyfile) - 1] = '\0';
 
     /* assume the master key is in a keytab */
-    retval_kt = krb5_db_def_fetch_mkey_keytab(context, keyfile, mname, key,
-                                              kvno);
+    retval_kt = krb5_db_def_fetch_mkey_keytab(context, keyfile, key, kvno);
     if (retval_kt != 0) {
         /*
          * If it's not in a keytab, fall back and try getting the mkey from the
          * older stash file format.
          */
-        retval_ofs = krb5_db_def_fetch_mkey_stash(context, keyfile, mname,
-                                                  key, kvno);
+        retval_ofs = krb5_db_def_fetch_mkey_stash(context, keyfile, key, kvno);
     }
 
     if (retval_kt != 0 && retval_ofs != 0) {

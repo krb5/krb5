@@ -423,7 +423,6 @@ static int open_db_and_mkey()
 	return(1);
     }
 
-    /* may be used later */
     if (global_params.mask & KADM5_CONFIG_KVNO)
         kvno = global_params.kvno; /* user specified */
     else
