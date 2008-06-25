@@ -1891,6 +1891,8 @@ kadm5_setkey_principal_3(void *server_handle,
 	    goto done;
 	}
 	tptr = &kdb.key_data[i];
+	tptr->key_data_ver = tmp_key_data.key_data_ver;
+	tptr->key_data_kvno = tmp_key_data.key_data_kvno;
 	for (k = 0; k < tmp_key_data.key_data_ver; k++) {
 	    tptr->key_data_type[k] = tmp_key_data.key_data_type[k];
 	    tptr->key_data_length[k] = tmp_key_data.key_data_length[k];
