@@ -12,7 +12,7 @@ SUBDIRS=unit-test
 
 LIBBASE=gssrpc
 LIBMAJOR=4
-LIBMINOR=0
+LIBMINOR=1
 STOBJLISTS=OBJS.ST
 SHLIB_EXPDEPS= \
 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
@@ -551,6 +551,9 @@ xdr_reference.so xdr_reference.po $(OUTPRE)xdr_reference.$(OBJEXT): \
 xdr_stdio.so xdr_stdio.po $(OUTPRE)xdr_stdio.$(OBJEXT): \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/rename.h \
   $(SRCTOP)/include/gssrpc/xdr.h xdr_stdio.c
+xdr_sizeof.so xdr_sizeof.po $(OUTPRE)xdr_sizeof.$(OBJEXT): \
+  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/xdr.h xdr_sizeof.c
 xdr_alloc.so xdr_alloc.po $(OUTPRE)xdr_alloc.$(OBJEXT): \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/rename.h \
   $(SRCTOP)/include/gssrpc/xdr.h dyn.h xdr_alloc.c
