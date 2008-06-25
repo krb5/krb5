@@ -4,6 +4,8 @@
 <dict>
         <key>Label</key>
         <string>edu.mit.Kerberos.CCacheServer</string>
+        <key>LimitLoadToSessionType</key>
+        <string>Background</string>
         <key>Program</key>
         <string>/System/Library/CoreServices/CCacheServer.app/Contents/MacOS/CCacheServer</string>
         <key>MachServices</key>
@@ -13,5 +15,12 @@
         </dict>
         <key>OnDemand</key>
         <true/>
+ 	<key>ThrottleInterval</key>
+ 	<integer>0</integer>
+        <key>EnvironmentVariables</key>
+        <dict>
+        <key>CFFIXED_USER_HOME</key>
+                <string>/var/empty</string>
+        </dict>
 </dict>
 </plist>
