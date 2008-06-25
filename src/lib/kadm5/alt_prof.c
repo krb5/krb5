@@ -405,7 +405,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     }
 
     if (params_in->mask & KADM5_CONFIG_KVNO) {
-	params.kvno = params_in->kvno;
+        params.kvno = params_in->kvno;
         params.mask |= KADM5_CONFIG_KVNO;
     }
     /*

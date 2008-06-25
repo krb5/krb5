@@ -172,8 +172,7 @@ kdb5_stash(argc, argv)
     }	
 
     retval = krb5_db_store_master_key(context, keyfile, master_princ, 
-				      mkey_kvno, &master_keyblock,
-				      NULL);
+                                      mkey_kvno, &master_keyblock, NULL);
     if (retval) {
 	com_err(argv[0], errno, "while storing key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);

@@ -180,6 +180,7 @@ krb5_def_store_mkey(krb5_context   context,
             "Could not create temp keytab file name.");
         goto out;
     }
+
     if (mktemp(tmp_ktname) == NULL) {
         retval = errno;
         krb5_set_error_message (context, retval,
@@ -321,15 +322,19 @@ krb5_db_def_fetch_mkey_keytab(  krb5_context   context,
         goto errout;
 
     while ((retval = krb5_kt_next_entry(context, kt, &kt_ent, &cursor)) == 0) {
-        if (key->enctype != ENCTYPE_UNKNOWN && key->enctype != kt_ent.key.enctype)
+
+        if ((key->enctype != ENCTYPE_UNKNOWN && key->enctype != kt_ent.key.enctype) ||
+            (kvno != NULL && *kvno != IGNORE_VNO && *kvno != kt_ent.vno)) {
+
+            krb5_kt_free_entry(context, &kt_ent);
             continue;
-        if (kvno != NULL && *kvno != IGNORE_VNO && *kvno != kt_ent.vno)
-            continue;
+        }
         break;
     }
 
     if (retval != 0) {
         if (retval == KRB5_KT_END) {
+            /* didn't find an entry so indicate no key found */
             (void) krb5_kt_end_seq_get(context, kt, &cursor);
             retval = KRB5_KDB_BADSTORED_MKEY;
         }

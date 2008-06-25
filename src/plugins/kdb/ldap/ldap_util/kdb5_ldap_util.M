@@ -49,7 +49,7 @@ that given in
 .TP
 \fB\-kv\fP\ \fImkeyVNO\fP
 Specifies the version number of the master key in the database; the default is
-0.
+1. Note that 0 is not allowed.
 .TP
 \fB\-m\fP
 Specifies that the master database password should be read from the TTY

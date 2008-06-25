@@ -61,7 +61,7 @@ that given in
 .TP
 \fB\-kv\fP\ \fImkeyVNO\fP
 Specifies the version number of the master key in the database; the default is
-0.
+1.  Note that 0 is not allowed.
 .TP
 \fB\-M\fP\ \fImkeyname\fP
 principal name for the master key in the database; the default is
