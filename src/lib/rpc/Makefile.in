@@ -69,6 +69,7 @@ SRCS = $(srcdir)/auth_none.c \
 	$(srcdir)/xdr_rec.c \
 	$(srcdir)/xdr_reference.c \
 	$(srcdir)/xdr_stdio.c \
+	$(srcdir)/xdr_sizeof.c \
 	$(srcdir)/xdr_alloc.c
 
 OBJS = auth_none.$(OBJEXT) \
@@ -116,6 +117,7 @@ OBJS = auth_none.$(OBJEXT) \
 	xdr_rec.$(OBJEXT) \
 	xdr_reference.$(OBJEXT) \
 	xdr_stdio.$(OBJEXT) \
+	xdr_sizeof.$(OBJEXT) \
 	xdr_alloc.$(OBJEXT)
 
 STLIBOBJS = \
@@ -164,6 +166,7 @@ STLIBOBJS = \
 	xdr_rec.o \
 	xdr_reference.o \
 	xdr_stdio.o \
+	xdr_sizeof.o \
 	xdr_alloc.o
 
 HDRDIR=$(BUILDTOP)/include/gssrpc

@@ -118,6 +118,7 @@ gssrpc_xdr_rpc_gss_init_res
 gssrpc_xdr_rpc_gss_unwrap_data
 gssrpc_xdr_rpc_gss_wrap_data
 gssrpc_xdr_short
+gssrpc_xdr_sizeof
 gssrpc_xdr_string
 gssrpc_xdr_u_char
 gssrpc_xdr_u_int

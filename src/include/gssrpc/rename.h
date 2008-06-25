@@ -289,6 +289,8 @@
 #define xdr_wrapstring	gssrpc_xdr_wrapstring
 #define xdr_free	gssrpc_xdr_free
 
+#define xdr_sizeof	gssrpc_xdr_sizeof
+
 #define xdr_netobj	gssrpc_xdr_netobj
 #define xdr_int32	gssrpc_xdr_int32
 #define xdr_u_int32	gssrpc_xdr_u_int32

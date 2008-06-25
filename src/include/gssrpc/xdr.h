@@ -271,6 +271,8 @@ extern bool_t	xdr_reference(XDR *, caddr_t *, u_int, xdrproc_t);
 extern bool_t	xdr_pointer(XDR *, char **, u_int, xdrproc_t);
 extern bool_t	xdr_wrapstring(XDR *, char **);
 
+extern unsigned long xdr_sizeof(xdrproc_t, void *);
+
 #define xdr_rpcprog	xdr_u_int32
 #define xdr_rpcvers	xdr_u_int32
 #define xdr_rpcprot	xdr_u_int32
