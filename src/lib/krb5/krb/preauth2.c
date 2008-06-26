@@ -1146,6 +1146,40 @@ cleanup:
 
 }
 
+/* If and only if the realm is that of a Local KDC, accept
+ * the KDC certificate as valid if its hash matches the
+ * realm.
+ */
+static krb5_boolean local_kdc_cert_match(
+    krb5_context context,
+    krb5_data *signer_cert,
+    krb5_principal client)
+{
+    static const char lkdcprefix[] = "LKDC:SHA1.";
+    krb5_boolean match = FALSE;
+    size_t cert_hash_len;
+    char *cert_hash;
+    const char *realm_hash;
+    size_t realm_hash_len;
+
+    if (client->realm.length <= sizeof(lkdcprefix) ||
+        0 != memcmp(lkdcprefix, client->realm.data, sizeof(lkdcprefix)-1))
+	return match;
+    realm_hash = &client->realm.data[sizeof(lkdcprefix)-1];
+    realm_hash_len = client->realm.length - sizeof(lkdcprefix) + 1;
+    kdcPkinitDebug("checking realm versus certificate hash\n");
+    if (NULL != (cert_hash = krb5_pkinit_cert_hash_str(signer_cert))) {
+	kdcPkinitDebug("hash = %s\n", cert_hash);
+	cert_hash_len = strlen(cert_hash);
+	if (cert_hash_len == realm_hash_len &&
+	    0 == memcmp(cert_hash, realm_hash, cert_hash_len))
+	    match = TRUE;
+	free(cert_hash);
+    }
+    kdcPkinitDebug("result: %s\n", match ? "matches" : "does not match");
+    return match;
+}
+
 static krb5_error_code pa_pkinit_parse_rep(
     krb5_context context,
     krb5_kdc_req *request,
@@ -1169,7 +1203,8 @@ static krb5_error_code pa_pkinit_parse_rep(
     krb5_checksum		as_req_checksum_rcd = {0};  /* received checksum */
     krb5_checksum		as_req_checksum_gen = {0};  /* calculated checksum */
     krb5_data			*encoded_as_req = NULL;
-   
+    krb5_data			signer_cert = {0};
+
     *out_padata = NULL;
     kdcPkinitDebug("pa_pkinit_parse_rep\n");
     if((in_padata == NULL) || (in_padata->length== 0)) {
@@ -1198,8 +1233,7 @@ static krb5_error_code pa_pkinit_parse_rep(
     asRep.length = in_padata->length;
     krtn = krb5int_pkinit_as_rep_parse(context, &asRep, client_cert, 
 	&local_key, &as_req_checksum_rcd, &sig_status,
-	/* don't care about returned certs - do we? */
-	NULL, NULL, NULL);
+	&signer_cert, NULL, NULL);
     if(krtn) {
 	kdcPkinitDebug("pkinit_as_rep_parse returned %d\n", (int)krtn);
 	return krtn;
@@ -1207,6 +1241,10 @@ static krb5_error_code pa_pkinit_parse_rep(
     switch(sig_status) {
 	case pki_cs_good:
 	    break;
+	case pki_cs_unknown_root:
+	    if (local_kdc_cert_match(context, &signer_cert, request->client))
+		break;
+	    /* FALLTHROUGH */
 	default:
 	    kdcPkinitDebug("pa_pkinit_parse_rep: bad cert/sig status %d\n", 
 		(int)sig_status);
@@ -1252,6 +1290,9 @@ static krb5_error_code pa_pkinit_parse_rep(
     krtn = 0;
     
 error_out:
+    if (signer_cert.data) {
+	    free(signer_cert.data);
+    }
     if(as_req_checksum_rcd.contents) {
 	free(as_req_checksum_rcd.contents);
     }

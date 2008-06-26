@@ -44,6 +44,12 @@ extern "C" {
  */
 typedef void *krb5_pkinit_signing_cert_t;
 
+/*
+ * Opaque reference to a machine-dependent representation of a certificate.
+ * On Mac OS X this is actually a SecCertificateRef.
+ */
+typedef void *krb5_pkinit_cert_t;
+
 /* 
  * Opaque reference to a database in which PKINIT-related certificates are stored. 
  */
@@ -72,9 +78,12 @@ krb5_boolean krb5_pkinit_have_client_cert(
  * in NULL for the client_cert has the effect of deleting the relevant entry
  * in the cert storage.
  */
-krb5_error_code krb5_pkinit_set_client_cert(
+krb5_error_code krb5_pkinit_set_client_cert_from_signing_cert(
     const char			*principal,     /* full principal string */
     krb5_pkinit_signing_cert_t	client_cert);
+krb5_error_code krb5_pkinit_set_client_cert(
+    const char			*principal,     /* full principal string */
+    krb5_pkinit_cert_t	client_cert);
 
 /* 
  * Obtain a reference to the client's cert database. Specify either principal

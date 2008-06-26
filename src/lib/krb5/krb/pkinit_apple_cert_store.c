@@ -335,36 +335,64 @@ krb5_boolean krb5_pkinit_have_client_cert(
 
 /*
  * Store the specified certificate (or, more likely, some platform-dependent
- * reference to it) as the specified principal's signing cert. Passing
+ * reference to it) as the specified principal's signing certificate. Passing
+ * in NULL for the client_cert has the effect of deleting the relevant entry
+ * in the cert storage.
+ */
+krb5_error_code krb5_pkinit_set_client_cert_from_signing_cert(
+    const char			*principal,     /* full principal string */
+    krb5_pkinit_signing_cert_t	client_cert)
+{
+    SecIdentityRef idRef = (SecIdentityRef)client_cert;
+    SecCertificateRef certRef = NULL;
+    OSStatus ortn;
+    krb5_error_code ourRtn = 0;
+
+    if (NULL != idRef) {
+	if (CFGetTypeID(idRef) != SecIdentityGetTypeID()) {
+	    ourRtn = KRB5KRB_ERR_GENERIC;
+	    goto fin;
+	}
+	/* Get the cert */
+	ortn = SecIdentityCopyCertificate(idRef, &certRef);
+	if (ortn) {
+	    pkiCssmErr("SecIdentityCopyCertificate", ortn);
+	    ourRtn = KRB5KRB_ERR_GENERIC;
+	    goto fin;
+	}
+    }
+    ourRtn = krb5_pkinit_set_client_cert(principal, (krb5_pkinit_cert_t)certRef);
+fin:
+    if (certRef)
+	CFRelease(certRef);
+    return ourRtn;
+}
+
+
+/*
+ * Store the specified certificate (or, more likely, some platform-dependent
+ * reference to it) as the specified principal's certificate. Passing
  * in NULL for the client_cert has the effect of deleting the relevant entry
  * in the cert storage.
  */
 krb5_error_code krb5_pkinit_set_client_cert(
     const char			*principal,     /* full principal string */
-    krb5_pkinit_signing_cert_t	client_cert)
+    krb5_pkinit_cert_t		client_cert)
 {
-    SecIdentityRef idRef = (SecIdentityRef)client_cert;
+    SecCertificateRef certRef = (SecCertificateRef)client_cert;
     OSStatus ortn;
     CSSM_DATA issuerSerial = {0, NULL};
     CFDataRef cfIssuerSerial = NULL;
     CFDictionaryRef existDict = NULL;
     CFMutableDictionaryRef newDict = NULL;
-    SecCertificateRef certRef = NULL;
     CFStringRef keyStr = NULL;
     krb5_error_code ourRtn = 0;
     
-    if(idRef != NULL) {
-	if(CFGetTypeID(idRef) != SecIdentityGetTypeID()) {
+    if(certRef != NULL) {
+	if(CFGetTypeID(certRef) != SecCertificateGetTypeID()) {
 	    return KRB5KRB_ERR_GENERIC;
 	}
     
-	/* Get the cert */
-	ortn = SecIdentityCopyCertificate(idRef, &certRef);
-	if(ortn) {
-	    pkiCssmErr("SecIdentityCopyCertificate", ortn);
-	    return KRB5KRB_ERR_GENERIC;
-	}
-	
 	/* Cook up DER-encoded issuer/serial number */
 	ortn = pkinit_get_cert_issuer_sn(certRef, &issuerSerial);
 	if(ortn) {
@@ -383,7 +411,7 @@ krb5_error_code krb5_pkinit_set_client_cert(
 	newDict = CFDictionaryCreateMutableCopy(NULL, 0, existDict);
     }
     else {
-	if(idRef == NULL) {
+	if(certRef == NULL) {
 	    /* no existing entry, nothing to delete, we're done */
 	    return 0;
 	}
@@ -397,7 +425,7 @@ krb5_error_code krb5_pkinit_set_client_cert(
 
     /* issuer / serial number ==> that dictionary */
     keyStr = CFStringCreateWithCString(NULL, principal, kCFStringEncodingASCII);
-    if(idRef == NULL) {
+    if(certRef == NULL) {
 	CFDictionaryRemoveValue(newDict, keyStr);
     }
     else {
@@ -416,9 +444,6 @@ krb5_error_code krb5_pkinit_set_client_cert(
 	ourRtn = EACCES;   /* any better ideas? */
     }
 errOut:
-    if(certRef) {
-	CFRelease(certRef);
-    }   
     if(cfIssuerSerial) {
 	CFRelease(cfIssuerSerial);
     }
