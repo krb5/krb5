@@ -323,9 +323,11 @@ krb5_db_def_fetch_mkey_keytab(  krb5_context   context,
 
     while ((retval = krb5_kt_next_entry(context, kt, &kt_ent, &cursor)) == 0) {
 
-        if ((key->enctype != ENCTYPE_UNKNOWN && key->enctype != kt_ent.key.enctype) ||
-            (kvno != NULL && *kvno != IGNORE_VNO && *kvno != kt_ent.vno)) {
-
+        if (key->enctype != ENCTYPE_UNKNOWN && key->enctype != kt_ent.key.enctype) {
+            krb5_kt_free_entry(context, &kt_ent);
+            continue;
+        }
+        if (kvno != NULL && *kvno != IGNORE_VNO && *kvno != kt_ent.vno) {
             krb5_kt_free_entry(context, &kt_ent);
             continue;
         }
