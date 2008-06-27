@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/rd_safe.c
  *
- * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -116,11 +116,11 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
 
     message->checksum = &our_cksum;
 
-    if ((retval = encode_krb5_safe_with_body(message, &safe_body, &scratch)))
+    retval = encode_krb5_safe_with_body(message, &safe_body, &scratch);
+    message->checksum = his_cksum;
+    if (retval)
 	goto cleanup;
 
-    message->checksum = his_cksum;
-			 
     retval = krb5_c_verify_checksum(context, keyblock,
 				    KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
 				    scratch, his_cksum, &valid);
