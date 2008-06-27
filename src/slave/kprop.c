@@ -1,7 +1,7 @@
 /*
  * slave/kprop.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -505,12 +505,12 @@ open_database(context, data_fn, size)
 		free(data_ok_fn);
 		exit(1);
 	}
-	free(data_ok_fn);
 	if (stbuf.st_mtime > stbuf_ok.st_mtime) {
 		com_err(progname, 0, "'%s' more recent than '%s'.",
 			data_fn, data_ok_fn);
 		exit(1);
 	}
+	free(data_ok_fn);
 	*size = stbuf.st_size;
 	return(fd);
 }
