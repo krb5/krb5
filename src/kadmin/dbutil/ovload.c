@@ -108,7 +108,7 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop)
     krb5_tl_data	    tl_data;
     krb5_principal	    princ;
     krb5_db_entry	    kdb;
-    char		    *current;
+    char		    *current = 0;
     char		    *cp;
     int			    x, one;
     krb5_boolean	    more;

@@ -1,7 +1,7 @@
 /*
  * clients/kinit/kinit.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -805,10 +805,11 @@ k5_kinit(opts, k5)
     if (!got_k5)
 	return 0;
 
+    memset(&my_creds, 0, sizeof(my_creds));
+
     code = krb5_get_init_creds_opt_alloc(k5->ctx, &options);
     if (code)
 	goto cleanup;
-    memset(&my_creds, 0, sizeof(my_creds));
 
     /*
       From this point on, we can goto cleanup because my_creds is

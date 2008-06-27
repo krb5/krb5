@@ -242,6 +242,7 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 	err = ENOMEM;
 	goto done;
     }
+    data->name = NULL;
 
     err = k5_mutex_init(&data->lock);
     if (err) {
