@@ -150,6 +150,10 @@ krb5_db2_get_db_opt(char *input, char **opt, char **val)
 	*opt = malloc((pos - input) + 1);
 	*val = strdup(pos + 1);
 	if (!*opt || !*val) {
+	    free(*opt);
+	    *opt = NULL;
+	    free(*val);
+	    *val = NULL;
 	    return ENOMEM;
 	}
 	memcpy(*opt, input, pos - input);
@@ -1261,6 +1265,11 @@ krb5_db2_open(krb5_context kcontext,
 	if (opt && !strcmp(opt, "dbname")) {
 	    if (dbname) free(dbname);
 	    dbname = strdup(val);
+	    if (dbname == NULL) {
+		free(opt);
+		free(val);
+		return ENOMEM;
+	    }
 	}
 	else if (!opt && !strcmp(val, "temporary") ) {
 	    tempdb = 1;
@@ -1336,6 +1345,11 @@ krb5_db2_create(krb5_context kcontext, char *conf_section, char **db_args)
 	krb5_db2_get_db_opt(*t_ptr, &opt, &val);
 	if (opt && !strcmp(opt, "dbname")) {
 	    db_name = strdup(val);
+	    if (db_name == NULL) {
+		free(opt);
+		free(val);
+		return ENOMEM;
+	    }
 	}
 	else if (!opt && !strcmp(val, "temporary")) {
 	    tempdb = 1;
@@ -1386,6 +1400,11 @@ krb5_db2_create(krb5_context kcontext, char *conf_section, char **db_args)
 	}
 
 	db_name = strdup(value);
+	if (db_name == NULL) {
+	    status = ENOMEM;
+	    profile_release_string(value);
+	    goto clean_n_exit;
+	}
 	status = krb5_db2_db_set_name(kcontext, value, tempdb);
 	profile_release_string(value);
 	if (!status) {
@@ -1425,6 +1444,11 @@ krb5_db2_destroy(krb5_context kcontext, char *conf_section, char **db_args)
 	krb5_db2_get_db_opt(*t_ptr, &opt, &val);
 	if (opt && !strcmp(opt, "dbname")) {
 	    db_name = strdup(val);
+	    if (db_name == NULL) {
+		free(opt);
+		free(val);
+		return ENOMEM;
+	    }
 	}
 	else if (!opt && !strcmp(val, "temporary")) {
 	    tempdb = 1;
@@ -1463,6 +1487,10 @@ krb5_db2_destroy(krb5_context kcontext, char *conf_section, char **db_args)
 	}
 
 	db_name = strdup(value);
+	if (db_name == NULL) {
+	    status = ENOMEM;
+	    goto clean_n_exit;
+	}
 	status = krb5_db2_db_set_name(kcontext, value, tempdb);
 	profile_release_string(value);
 	if (status) {
@@ -1617,6 +1645,10 @@ krb5_db2_promote_db(krb5_context kcontext, char *conf_section, char **db_args)
 	kdb5_dal_handle *dal_handle = kcontext->dal_handle;
 	krb5_db2_context *db_ctx = dal_handle->db_context;
 	db_name = strdup(db_ctx->db_name);
+	if (db_name == NULL) {
+	    status = ENOMEM;
+	    goto clean_n_exit;
+	}
     }
 
     assert(kcontext->dal_handle != NULL);
