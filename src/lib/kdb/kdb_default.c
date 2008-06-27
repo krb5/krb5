@@ -30,6 +30,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <arpa/inet.h>
 
 
 /*
@@ -142,6 +143,7 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
     FILE *kf;
     krb5_error_code retval = 0;
     krb5_ui_2 enctype;
+    unsigned long keylength;
     char defkeyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
 #if HAVE_UMASK
@@ -176,11 +178,17 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
 	return e;
     }
     set_cloexec_file(kf);
+#if BIG_ENDIAN_MASTER_KEY
+    enctype = htons(key->enctype);
+    keylength = htonl(key->length);
+#else
     enctype = key->enctype;
+    keylength = key->length;
+#endif
     if ((fwrite((krb5_pointer) &enctype,
 		2, 1, kf) != 1) ||
-	(fwrite((krb5_pointer) &key->length,
-		sizeof(key->length), 1, kf) != 1) ||
+	(fwrite((krb5_pointer) &keylength,
+		sizeof(keylength), 1, kf) != 1) ||
 	(fwrite((krb5_pointer) key->contents,
 		sizeof(key->contents[0]), (unsigned) key->length, 
 		kf) != key->length)) {
@@ -229,6 +237,10 @@ krb5_db_def_fetch_mkey( krb5_context   context,
 	goto errout;
     }
 
+#if BIG_ENDIAN_MASTER_KEY
+    enctype = ntohs(enctype);
+#endif
+
     if (key->enctype == ENCTYPE_UNKNOWN)
 	key->enctype = enctype;
     else if (enctype != key->enctype) {
@@ -242,6 +254,10 @@ krb5_db_def_fetch_mkey( krb5_context   context,
 	goto errout;
     }
 
+#if BIG_ENDIAN_MASTER_KEY
+    key->length = ntohl(key->length);
+#endif
+    
     if (!key->length || ((int) key->length) < 0) {
 	retval = KRB5_KDB_BADSTORED_MKEY;
 	goto errout;
