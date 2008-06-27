@@ -1,7 +1,7 @@
 /*
  * kadmin/ktutil/ktutil.c
  *
- * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -252,6 +252,7 @@ void ktutil_list(argc, argv)
 	    char fill;
 	    time_t tstamp;
 
+	    tstamp = lp->entry->timestamp;
 	    (void) localtime(&tstamp);
 	    lp->entry->timestamp = tstamp;
 	    fill = ' ';
