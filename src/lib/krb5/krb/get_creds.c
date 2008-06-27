@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/get_creds.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -207,8 +207,12 @@ krb5_get_credentials_val_renew_core(krb5_context context, krb5_flags options,
 	    retval = 255;
 	    break;
     }
-    if (retval) return retval;
+    /*
+     * Callers to krb5_get_cred_blah... must free up tgts even in
+     * error cases.
+     */
     if (tgts) krb5_free_tgt_creds(context, tgts);
+    if (retval) return retval;
 
     retval = krb5_cc_get_principal(context, ccache, &tmp);
     if (retval) return retval;

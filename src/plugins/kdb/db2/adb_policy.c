@@ -358,6 +358,7 @@ osa_adb_iter_policy(osa_adb_policy_t db, osa_adb_iter_policy_func func,
 	if(!xdr_osa_policy_ent_rec(&xdrs, entry)) {
 	    xdr_destroy(&xdrs);
 	    free(aligned_data);
+	    osa_free_policy_ent(entry);
 	    ret = OSA_ADB_FAILURE;
 	    goto error;
 	}
