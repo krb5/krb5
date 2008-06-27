@@ -306,6 +306,7 @@ add_gic_opt_ext_preauth_data(krb5_context context,
 	newpad = realloc(opte->opt_private->preauth_data, newsize);
     if (newpad == NULL)
 	return ENOMEM;
+    opte->opt_private->preauth_data = newpad;
 
     i = opte->opt_private->num_preauth_data;
     newpad[i].attr = strdup(attr);
@@ -317,7 +318,6 @@ add_gic_opt_ext_preauth_data(krb5_context context,
 	return ENOMEM;
     }
     opte->opt_private->num_preauth_data += 1;
-    opte->opt_private->preauth_data = newpad;
     return 0;
 }
 
