@@ -160,6 +160,7 @@ gss_krb5_free_lucid_sec_context(
     version = ((gss_krb5_lucid_context_version_t *)kctx)->version;
     switch (version) {
     case 1:
+	(void)kg_delete_lucidctx_id(kctx);
 	free_external_lucid_ctx_v1((gss_krb5_lucid_context_v1_t*) kctx);
 	break;
     default:
@@ -171,7 +172,6 @@ gss_krb5_free_lucid_sec_context(
 	goto error_out;
 
     /* Success! */
-    (void)kg_delete_lucidctx_id(kctx);
     *minor_status = 0;
     retval = GSS_S_COMPLETE;
 
