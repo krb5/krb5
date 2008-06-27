@@ -165,6 +165,11 @@ AUTH *auth_gssapi_create(
      auth = (AUTH *) malloc(sizeof(*auth));
      pdata = (struct auth_gssapi_data *) malloc(sizeof(*pdata));
      if (auth == NULL || pdata == NULL) {
+	  /* They needn't both have failed; clean up.  */
+	  free(auth);
+	  free(pdata);
+	  auth = NULL;
+	  pdata = NULL;
 	  rpc_createerr.cf_stat = RPC_SYSTEMERROR;
 	  rpc_createerr.cf_error.re_errno = ENOMEM;
 	  goto cleanup;
@@ -437,12 +442,14 @@ next_token:
      
 cleanup:
      PRINTF(("gssapi_create: bailing\n\n"));
-     
-     if (AUTH_PRIVATE(auth))
-	  auth_gssapi_destroy(auth);
-     else if (auth)
-	  free(auth);
-     auth = NULL;
+
+     if (auth) {
+	 if (AUTH_PRIVATE(auth))
+	     auth_gssapi_destroy(auth);
+	 else
+	     free(auth);
+	 auth = NULL;
+     }
      
      /* don't assume the caller will want to change clnt->cl_auth */
      clnt->cl_auth = save_auth;
