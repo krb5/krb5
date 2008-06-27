@@ -147,8 +147,10 @@ krb5_random_key(krb5_context context, const krb5_encrypt_block *eblock,
     if ((key = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))) == NULL)
 	return(ENOMEM);
 
-    if ((ret = krb5_c_make_random_key(context, eblock->crypto_entry, key)))
+    if ((ret = krb5_c_make_random_key(context, eblock->crypto_entry, key))) {
 	free(key);
+	key = NULL;
+    }
 
     *keyblock = key;
 
