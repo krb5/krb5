@@ -143,7 +143,8 @@ kdb_convert.so kdb_convert.po $(OUTPRE)kdb_convert.$(OBJEXT): \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int-pkinit.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/kdb_log.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h kdb_convert.c
 kdb_log.so kdb_log.po $(OUTPRE)kdb_log.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
