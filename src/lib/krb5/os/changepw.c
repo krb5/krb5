@@ -143,7 +143,8 @@ static int kpasswd_sendto_msg_callback(struct conn_state *conn, void *callback_c
 	    krb5_free_addresses(ctx->context, addrs);
 	    goto cleanup;
 	}
-	memcpy(local_kaddr.contents, addrs[0]->contents, addrs[0]->length);
+	if (addrs[0]->length)
+	    memcpy(local_kaddr.contents, addrs[0]->contents, addrs[0]->length);
 
 	krb5_free_addresses(ctx->context, addrs);
     }
