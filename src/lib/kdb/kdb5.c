@@ -366,7 +366,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     if ((status = krb5int_open_plugin_dirs ((const char **) path, 
                                             filebases, 
                                             &(*lib)->dl_dir_handle, &kcontext->err))) {
-        char *err_str = krb5_get_error_message(kcontext, status);
+	const char *err_str = krb5_get_error_message(kcontext, status);
 	status = KRB5_KDB_DBTYPE_NOTFOUND;
 	krb5_set_error_message (kcontext, status,
 				"Unable to find requested database type: %s", err_str);
@@ -376,7 +376,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     if ((status = krb5int_get_plugin_dir_data (&(*lib)->dl_dir_handle, "kdb_function_table",
                                                &vftabl_addrs, &kcontext->err))) {
-        char *err_str = krb5_get_error_message(kcontext, status);
+        const char *err_str = krb5_get_error_message(kcontext, status);
         status = KRB5_KDB_DBTYPE_INIT;
         krb5_set_error_message (kcontext, status,
                                 "plugin symbol 'kdb_function_table' lookup failed: %s", err_str);
