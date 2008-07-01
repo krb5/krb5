@@ -143,7 +143,7 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
     FILE *kf;
     krb5_error_code retval = 0;
     krb5_ui_2 enctype;
-    unsigned long keylength;
+    krb5_ui_4 keylength;
     char defkeyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
 #if HAVE_UMASK
@@ -179,8 +179,8 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
     }
     set_cloexec_file(kf);
 #if BIG_ENDIAN_MASTER_KEY
-    enctype = htons(key->enctype);
-    keylength = htonl(key->length);
+    enctype = htons((uint16_t) key->enctype);
+    keylength = htonl((uint32_t) key->length);
 #else
     enctype = key->enctype;
     keylength = key->length;
@@ -212,6 +212,7 @@ krb5_db_def_fetch_mkey( krb5_context   context,
 {
     krb5_error_code retval;
     krb5_ui_2 enctype;
+    krb5_ui_4 keylength;
     char defkeyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
     FILE *kf = NULL;
@@ -238,7 +239,7 @@ krb5_db_def_fetch_mkey( krb5_context   context,
     }
 
 #if BIG_ENDIAN_MASTER_KEY
-    enctype = ntohs(enctype);
+    enctype = ntohs((uint16_t) enctype);
 #endif
 
     if (key->enctype == ENCTYPE_UNKNOWN)
@@ -248,14 +249,16 @@ krb5_db_def_fetch_mkey( krb5_context   context,
 	goto errout;
     }
 
-    if (fread((krb5_pointer) &key->length,
-	      sizeof(key->length), 1, kf) != 1) {
+    if (fread((krb5_pointer) &keylength,
+	      sizeof(keylength), 1, kf) != 1) {
 	retval = KRB5_KDB_CANTREAD_STORED;
 	goto errout;
     }
 
 #if BIG_ENDIAN_MASTER_KEY
-    key->length = ntohl(key->length);
+    key->length = ntohl((uint32_t) keylength);
+#else
+    key->length = keylength;
 #endif
     
     if (!key->length || ((int) key->length) < 0) {
