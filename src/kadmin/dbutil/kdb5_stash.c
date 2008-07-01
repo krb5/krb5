@@ -160,8 +160,6 @@ kdb5_stash(argc, argv)
 	exit_status++; return; 
     }
 
-
-    /* verify will set mkey_kvno to mkey princ's kvno mkey_kvno if it's IGNORE_VNO */
     retval = krb5_db_verify_master_key(context, master_princ, 
                                        mkey_kvno,
 				       &master_keyblock);

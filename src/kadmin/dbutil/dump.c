@@ -1105,7 +1105,6 @@ dump_db(argc, argv)
      */
     if (mkey_convert) {
 	    if (!valid_master_key) {
-                    krb5_kvno mkvno = IGNORE_VNO;
 		    /* TRUE here means read the keyboard, but only once */
 		    retval = krb5_db_fetch_mkey(util_context,
 						master_princ,
