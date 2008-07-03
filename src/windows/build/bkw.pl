@@ -22,6 +22,11 @@ my $OPT = {foo => 'bar'};
 my $MAKE = 'NMAKE';
 our $config;
 
+# List of programs which must be in PATH:
+my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'doxygen', 
+                     'hhc', 'candle', 'light', 'makensis', 'nmake', 'filever');
+my @required_for_repository_access = ('cvs', 'svn', 'plink');
+
 sub get_info {
     my $cmd = shift || die;
     my $which = $^X.' which.pl';
@@ -130,32 +135,6 @@ sub main {
         
     delete $OPT->{foo};        
 
-##++ Validate required conditions:
-
-    # List of programs which must be in PATH:
-    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 
-                         'hhc', 'candle', 'light', 'makensis', 'nmake', 'plink', 'filever');
-    my $requirements_met    = 1;
-    my $first_missing       = 0;
-    my $error_list          = "";
-    foreach my $required (@required_list) {
-        if (!get_info($required)) {
-            $requirements_met = 0;
-            if (!$first_missing) {
-                $first_missing = 1;
-                $error_list = "Fatal -- Environment problem!  The following program(s) are not in PATH:\n";
-                }
-            $error_list .= "$required\n";
-            }
-        }
-    if (!$requirements_met) {
-        print $error_list;
-        print "Info -- Update PATH or install the programs and try again.\n";
-        exit(0);
-        }
-
-##-- Validate required conditions.
-    
     use Time::gmtime;
     $ENV{DATE} = gmctime()." GMT";
     our $originalDir = `cd`;
@@ -298,8 +277,35 @@ sub main {
         if ($len < 1) {
             die "Fatal -- you won't get far accessing the repository without specifying a username.";
             }
+        # If repository action is anything but SKIP, then additional programs must
+        #  be installed to enable repository access:
+        @required_list = (@required_for_repository_access, @required_list);
+
         }
 
+##++ Validate required conditions:
+
+    my $requirements_met    = 1;
+    my $first_missing       = 0;
+    my $error_list          = "";
+    foreach my $required (@required_list) {
+        if (!get_info($required)) {
+            $requirements_met = 0;
+            if (!$first_missing) {
+                $first_missing = 1;
+                $error_list = "Fatal -- Environment problem!  The following program(s) are not in PATH:\n";
+                }
+            $error_list .= "$required\n";
+            }
+        }
+    if (!$requirements_met) {
+        print $error_list;
+        print "Info -- Update PATH or install the programs and try again.\n";
+        exit(0);
+        }
+
+##-- Validate required conditions.
+    
     #                (------------------------------------------------)
     if ( (-d $wd) && ( ($rverb =~ /export/) || ($rverb =~ /checkout/) ) ) {
         print "\n\nHEADS UP!!\n\n";
