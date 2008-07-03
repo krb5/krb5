@@ -109,15 +109,10 @@ krb5int_enc_aes256
 krb5int_enc_arcfour
 krb5int_enc_des
 krb5int_enc_des3
-krb5int_fl_tab
-krb5int_ft_tab
 krb5int_hash_crc32
 krb5int_hash_md4
 krb5int_hash_md5
 krb5int_hash_sha1
-krb5int_il_tab
-krb5int_im_tab
-krb5int_it_tab
 krb5int_keyhash_descbc
 krb5int_keyhash_hmac_md5
 krb5int_keyhash_md4des
