@@ -921,7 +921,7 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 		return r;
 	    }
 #endif
-#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO)
+#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO)&& defined(HAVE_STRUCT_IN6_PKTINFO)
 	    if (cmsgptr->cmsg_level == IPPROTO_IPV6
 		&& cmsgptr->cmsg_type == IPV6_PKTINFO
 		&& *tolen >= sizeof(struct sockaddr_in6)) {
@@ -995,7 +995,7 @@ send_to_from(int s, void *buf, size_t len, int flags,
 	msg.msg_controllen = CMSG_SPACE(sizeof(struct in_pktinfo));
 	break;
 #endif
-#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO)
+#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
     case AF_INET6:
 	if (fromlen != sizeof(struct sockaddr_in6))
 	    goto use_sendto;
