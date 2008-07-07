@@ -13,6 +13,8 @@
                 <key>edu.mit.Kerberos.CCacheServer.ipcService</key>
                 <true/>
         </dict>
+        <key>EnableTransactions</key>
+        <true/>
         <key>OnDemand</key>
         <true/>
  	<key>ThrottleInterval</key>
