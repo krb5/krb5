@@ -216,8 +216,19 @@ krb5int_gic_opte_copy(krb5_context context,
     if (NULL == oe)
 	return ENOMEM;
 
-    if (opt)
-        memcpy(oe, opt, sizeof(*opt));
+    if (opt) {
+	oe->flags               = opt->flags;
+	oe->tkt_life            = opt->tkt_life;
+	oe->renew_life          = opt->renew_life;
+	oe->forwardable         = opt->forwardable;
+	oe->proxiable           = opt->proxiable;
+	oe->etype_list          = opt->etype_list;
+	oe->etype_list_length   = opt->etype_list_length;
+	oe->address_list        = opt->address_list;
+	oe->preauth_list        = opt->preauth_list;
+	oe->preauth_list_length = opt->preauth_list_length;
+	oe->salt                = opt->salt;
+    }
 
     /*
      * Fix the flags -- the EXTENDED flag would have been
