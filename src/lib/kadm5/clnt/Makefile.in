@@ -50,7 +50,7 @@ all-unix:: includes
 all-unix:: all-liblinks
 all-windows:: $(OBJS)
 
-generate-files-mac: includes
+generate-files-mac: includes darwin.exports
 
 includes:: client_internal.h
 	if cmp $(srcdir)/client_internal.h \

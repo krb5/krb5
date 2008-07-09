@@ -175,6 +175,8 @@ all-prerecurse: all-liblinks
 
 all-windows:: $(OBJS)
 
+generate-files-mac: darwin.exports
+
 install-unix:: install-libs
 
 install-unix::

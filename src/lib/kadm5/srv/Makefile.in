@@ -67,7 +67,7 @@ all-unix:: includes
 all-unix:: all-liblinks
 all-windows:: $(OBJS)
 
-generate-files-mac: includes
+generate-files-mac: includes darwin.exports
 
 includes:: server_acl.h
 	if cmp $(srcdir)/server_acl.h \
