@@ -447,7 +447,8 @@ cc_int32 ccs_ccache_find_credentials_iterator (ccs_ccache_t                in_cc
                                                   out_credentials_iterator);
     }
     
-    return cci_check_error (err);
+    // Don't report ccErrInvalidCredentials to the log file.  Non-fatal.
+    return (err == ccErrInvalidCredentials) ? err : cci_check_error (err);
 }
 
 #ifdef TARGET_OS_MAC

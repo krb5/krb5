@@ -284,10 +284,11 @@ static cc_int32 ccs_list_find_iterator_index (ccs_list_t        in_list,
     }
     
     if (!err && !found) {
-        err = cci_check_error (in_list->object_not_found_err); 
+        // Don't report this error to the log file.  Non-fatal.
+        return in_list->object_not_found_err; 
+    } else {
+        return cci_check_error (err);    
     }
-    
-    return cci_check_error (err);    
 }
 
 /* ------------------------------------------------------------------------ */
@@ -565,7 +566,7 @@ cc_int32 ccs_list_iterator_release (ccs_list_iterator_t io_list_iterator)
                                           io_list_iterator->identifier, 
                                           &i) == ccNoError) {
             /* cci_array_remove will call ccs_list_iterator_object_release */
-            cci_array_remove (io_list_iterator->list->iterators, i);
+            err = cci_array_remove (io_list_iterator->list->iterators, i);
         } else {
             cci_debug_printf ("Warning: iterator not in iterator list!");
         }
@@ -590,7 +591,7 @@ cc_int32 ccs_list_iterator_invalidate (ccs_list_iterator_t io_list_iterator)
             list_iterator->client_pipe = CCS_PIPE_NULL;
         }
         
-        err =  ccs_list_iterator_release (io_list_iterator);
+        err = ccs_list_iterator_release (io_list_iterator);
     }
     
     return err;        
