@@ -61,7 +61,7 @@ error_code KIM_BAD_IDENTITY_INDEX_ECODE,            "No identity at index %d in 
 index 125
 # Cache Collection Errors
 error_code KIM_NO_SUCH_PRINCIPAL_ECODE,             "Principal '%s' does not exist in the cache collection"
-error_code KIM_CANT_BECOME_DEFAULT_ECODE,           "The credentials cache '%s' cannot become the system default ccache."
+error_code KIM_CANT_BECOME_DEFAULT_ECODE,           "The credentials cache '%s' cannot become the system default cache."
 error_code KIM_CREDENTIALS_EXPIRED_ECODE,           "The Kerberos credentials for '%s' have expired"
 error_code KIM_NO_CREDENTIALS_ECODE,                "You do not have Kerberos credentials for principal '%s'"
 error_code KIM_BAD_IP_ADDRESS_ECODE,                "The IP addresses in the Kerberos credentials for '%s' do not match any of your computer's IP addresses"
