@@ -982,6 +982,10 @@ typedef struct _krb5_gic_opt_private {
     krb5_gic_opt_pa_data *preauth_data;
 } krb5_gic_opt_private;
 
+#if TARGET_OS_MAC
+#    pragma pack(push,2)
+#endif
+
 typedef struct _krb5_gic_opt_ext {
     krb5_flags flags;
     krb5_deltat tkt_life;
@@ -1001,6 +1005,10 @@ typedef struct _krb5_gic_opt_ext {
      */
     krb5_gic_opt_private *opt_private;
 } krb5_gic_opt_ext;
+
+#if TARGET_OS_MAC
+#    pragma pack(pop)
+#endif
 
 krb5_error_code
 krb5int_gic_opt_to_opte(krb5_context context,
