@@ -123,13 +123,8 @@ cc_int32 ccs_list_release (ccs_list_t io_list)
 {
     cc_int32 err = ccNoError;
     
-    if (!err && io_list) {
-        cc_uint64 i;
-        
-        for (i = 0; i < cci_array_count (io_list->iterators); i++) {
-            ccs_list_iterator_release ((ccs_list_iterator_t) cci_array_object_at_index (io_list->iterators, i));
-        }
-        free (io_list->iterators);
+    if (!err && io_list) {        
+        cci_array_release (io_list->iterators);
         cci_array_release (io_list->objects);
         free (io_list);
     }
@@ -220,6 +215,7 @@ static cc_int32 ccs_list_find_index (ccs_list_t        in_list,
             if (!err && equal) {
                 found = 1;
                 *out_object_index = i;
+                break;
             }
         }        
     }
@@ -279,6 +275,7 @@ static cc_int32 ccs_list_find_iterator_index (ccs_list_t        in_list,
             if (!err && equal) {
                 found = 1;
                 *out_object_index = i;
+                break;
             }
         }        
     }
