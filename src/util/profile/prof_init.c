@@ -34,8 +34,11 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
 	memset(profile, 0, sizeof(struct _profile_t));
 	profile->magic = PROF_MAGIC_PROFILE;
 
-        /* if the filenames list is not specified return an empty profile */
-        if ( files ) {
+	/*
+	 * If the filenames list is not specified or empty, return an empty
+	 * profile.
+	 */
+	if ( files && !PROFILE_LAST_FILESPEC(*files) ) {
 	    for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
 		retval = profile_open_file(*fs, &new_file);
 		/* if this file is missing, skip to the next */
