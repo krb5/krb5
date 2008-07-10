@@ -83,6 +83,13 @@
 
 #include "osconf.h"
 
+#if defined(__MACH__) && defined(__APPLE__)
+#	include <TargetConditionals.h>
+#    if TARGET_RT_MAC_CFM
+#	error "Use KfM 4.0 SDK headers for CFM compilation."
+#    endif
+#endif
+
 /*
  * Begin "k5-config.h"
  */
@@ -982,6 +989,10 @@ typedef struct _krb5_gic_opt_private {
     krb5_gic_opt_pa_data *preauth_data;
 } krb5_gic_opt_private;
 
+/*
+ * On the Mac, ensure that the layout of krb5_gic_opt_ext matches that
+ * of krb5_get_init_creds_opt.
+ */
 #if TARGET_OS_MAC
 #    pragma pack(push,2)
 #endif
