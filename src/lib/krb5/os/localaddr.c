@@ -174,6 +174,23 @@ void printaddr (struct sockaddr *sa)
 }
 #endif
 
+static int
+is_loopback_address(struct sockaddr *sa)
+{
+    switch (sa->sa_family) {
+    case AF_INET: {
+	struct sockaddr_in *s4 = (struct sockaddr_in *)sa;
+	return s4->sin_addr.s_addr == htonl(INADDR_LOOPBACK);
+    }
+    case AF_INET6: {
+	struct sockaddr_in6 *s6 = (struct sockaddr_in6 *)sa;
+	return IN6_IS_ADDR_LOOPBACK(&s6->sin6_addr);
+    }
+    default:
+	return 0;
+    }
+}
+
 #ifdef HAVE_IFADDRS_H
 #include <ifaddrs.h>
 
@@ -437,12 +454,6 @@ foreach_localaddr (/*@null@*/ void *data,
 #endif
 	if ((ifp->ifa_flags & IFF_UP) == 0)
 	    continue;
-	if (ifp->ifa_flags & IFF_LOOPBACK) {
-	    /* Pretend it's not up, so the second pass will skip
-	       it.  */
-	    ifp->ifa_flags &= ~IFF_UP;
-	    continue;
-	}
 	if (ifp->ifa_addr == NULL) {
 	    /* Can't use an interface without an address.  Linux
 	       apparently does this sometimes.  [RT ticket 1770 from
@@ -455,12 +466,16 @@ foreach_localaddr (/*@null@*/ void *data,
 	    ifp->ifa_flags &= ~IFF_UP;
 	    continue;
 	}
+	if (is_loopback_address(ifp->ifa_addr)) {
+	    /* Pretend it's not up, so the second pass will skip
+	       it.  */
+	    ifp->ifa_flags &= ~IFF_UP;
+	    continue;
+	}
 	/* If this address is a duplicate, punt.  */
 	match = 0;
 	for (ifp2 = ifp_head; ifp2 && ifp2 != ifp; ifp2 = ifp2->ifa_next) {
 	    if ((ifp2->ifa_flags & IFF_UP) == 0)
-		continue;
-	    if (ifp2->ifa_flags & IFF_LOOPBACK)
 		continue;
 	    if (addr_eq (ifp->ifa_addr, ifp2->ifa_addr)) {
 		match = 1;
@@ -585,13 +600,11 @@ foreach_localaddr (/*@null@*/ void *data,
 	    }
 	    /*@=moduncon@*/
 
-#ifdef IFF_LOOPBACK
 	    /* None of the current callers want loopback addresses.  */
-	    if (lifreq.lifr_flags & IFF_LOOPBACK) {
+	    if (is_loopback_address((struct sockaddr *)&lifr->lifr_addr)) {
 		Tprintf (("  loopback\n"));
 		goto skip;
 	    }
-#endif
 	    /* Ignore interfaces that are down.  */
 	    if ((lifreq.lifr_flags & IFF_UP) == 0) {
 		Tprintf (("  down\n"));
@@ -758,13 +771,11 @@ foreach_localaddr (/*@null@*/ void *data,
 	    }
 	    /*@=moduncon@*/
 
-#ifdef IFF_LOOPBACK
 	    /* None of the current callers want loopback addresses.  */
-	    if (lifreq.iflr_flags & IFF_LOOPBACK) {
+	    if (is_loopback_address(&lifr->iflr_addr)) {
 		Tprintf (("  loopback\n"));
 		goto skip;
 	    }
-#endif
 	    /* Ignore interfaces that are down.  */
 	    if ((lifreq.iflr_flags & IFF_UP) == 0) {
 		Tprintf (("  down\n"));
@@ -975,13 +986,11 @@ foreach_localaddr (/*@null@*/ void *data,
 	}
 	/*@=moduncon@*/
 
-#ifdef IFF_LOOPBACK
 	/* None of the current callers want loopback addresses.  */
-	if (ifreq.ifr_flags & IFF_LOOPBACK) {
+	if (is_loopback_address(&ifreq.ifr_addr)) {
 	    Tprintf (("  loopback\n"));
 	    goto skip;
 	}
-#endif
 	/* Ignore interfaces that are down.  */
 	if ((ifreq.ifr_flags & IFF_UP) == 0) {
 	    Tprintf (("  down\n"));
