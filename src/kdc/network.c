@@ -239,7 +239,7 @@ struct connection {
   (set.data[idx] = set.data[--set.n], 0)
 
 #define FREE_SET_DATA(set) \
-  (free(set.data), set.data = 0, set.max = 0)
+  (free(set.data), set.data = 0, set.max = 0, set.n = 0)
 
 
 /* Set<struct connection *> connections; */
