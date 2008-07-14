@@ -115,6 +115,16 @@ setv6only(int sock, int value)
 }
 #endif
 
+/* Use RFC 3542 API below, but fall back from IPV6_RECVPKTINFO to
+   IPV6_PKTINFO for RFC 2292 implementations.  */
+#ifndef IPV6_RECVPKTINFO
+#define IPV6_RECVPKTINFO IPV6_PKTINFO
+#endif
+/* Parallel, though not standardized.  */
+#ifndef IP_RECVPKTINFO
+#define IP_RECVPKTINFO IP_PKTINFO
+#endif
+
 static int
 set_pktinfo(int sock, int family)
 {
@@ -125,13 +135,13 @@ set_pktinfo(int sock, int family)
 #if defined(IP_PKTINFO) && defined(HAVE_STRUCT_IN_PKTINFO)
     case AF_INET:
 	proto = IPPROTO_IP;
-	option = IP_PKTINFO;
+	option = IP_RECVPKTINFO;
 	break;
 #endif
 #if defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
     case AF_INET6:
 	proto = IPPROTO_IPV6;
-	option = IPV6_PKTINFO;
+	option = IPV6_RECVPKTINFO;
 	break;
 #endif
     default:
