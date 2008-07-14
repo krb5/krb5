@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/gc_via_tgt.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -249,7 +249,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	    switch (err_reply->error) {
 	    case KRB_ERR_GENERIC:
 		krb5_set_error_message(context, retval,
-				       "KDC returned error string: %s",
+				       "KDC returned error string: %.*s",
+				       err_reply->text.length,
 				       err_reply->text.data);
 		break;
 	    default:
