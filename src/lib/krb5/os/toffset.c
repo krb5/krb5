@@ -34,6 +34,9 @@
  * routines will return the correct time as corrected by difference
  * between the system time and the "real time" as passed to this
  * routine
+ *
+ * If the real time microseconds are given as -1 the caller doesn't
+ * know the microseconds value so the usec offset is always zero.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
@@ -45,8 +48,10 @@ krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 micr
     retval = krb5_crypto_us_timeofday(&sec, &usec);
     if (retval)
 	    return retval;
+
     os_ctx->time_offset = seconds - sec;
-    os_ctx->usec_offset = microseconds - usec;
+    os_ctx->usec_offset = (microseconds > -1) ? microseconds - usec : 0;
+
     os_ctx->os_flags = ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_TIME) |
 			KRB5_OS_TOFFSET_VALID);
     return 0;
