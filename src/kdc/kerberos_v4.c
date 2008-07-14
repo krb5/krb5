@@ -811,7 +811,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 
 	    auth->mbz = 0;	/* pkt->mbz already zeroed */
 	    auth->length = 4 + strlen((char *)pkt->dat + 3);
-	    if (auth->length + 1 > MAX_KTXT_LEN) {
+	    if (auth->length + 1 >= MAX_KTXT_LEN) {
 		lt = klog(L_KRB_PERR,
 			  "APPL request with realm length too long from %s",
 			  inet_ntoa(client_host));
