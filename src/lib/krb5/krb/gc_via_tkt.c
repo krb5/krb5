@@ -97,6 +97,7 @@ cleanup_keyblock:
 
 cleanup:
     free (*ppcreds);
+    *ppcreds = NULL;
     return retval;
 }
  
