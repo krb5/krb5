@@ -1249,15 +1249,15 @@ char   *krb5_mkey_pwd_prompt1 = KRB5_KDC_MKEY_1;
 char   *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
 
 krb5_error_code
-krb5_db_fetch_mkey( krb5_context    context,
-                    krb5_principal  mname,
-                    krb5_enctype    etype,
-                    krb5_boolean    fromkeyboard,
-                    krb5_boolean    twice,
-                    char          * db_args,
-                    krb5_kvno     * kvno,
-                    krb5_data     * salt,
-                    krb5_keyblock * key)
+krb5_db_fetch_mkey(krb5_context    context,
+                   krb5_principal  mname,
+                   krb5_enctype    etype,
+                   krb5_boolean    fromkeyboard,
+                   krb5_boolean    twice,
+                   char          * db_args,
+                   krb5_kvno     * kvno,
+                   krb5_data     * salt,
+                   krb5_keyblock * key)
 {
     krb5_error_code retval;
     char    password[BUFSIZ];
@@ -1365,10 +1365,10 @@ krb5_db_fetch_mkey( krb5_context    context,
 }
 
 krb5_error_code
-krb5_db_verify_master_key(  krb5_context     kcontext,
-                            krb5_principal   mprinc,
-                            krb5_kvno        kvno,
-                            krb5_keyblock  * mkey)
+krb5_db_verify_master_key(krb5_context     kcontext,
+                          krb5_principal   mprinc,
+                          krb5_kvno        kvno,
+                          krb5_keyblock  * mkey)
 {
     krb5_error_code status = 0;
     kdb5_dal_handle *dal_handle;

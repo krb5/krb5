@@ -175,7 +175,7 @@ krb5_def_store_mkey(krb5_context   context,
     /* Use temp keytab file name in case creation of keytab fails */
 
     /* create temp file template for use by mktemp() */
-    if ((retval = asprintf(&tmp_ktname, "WRFILE:%s_XXXXX", keyfile)) < 0) {
+    if ((retval = asprintf(&tmp_ktname, "WRFILE:%s_XXXXXX", keyfile)) < 0) {
         krb5_set_error_message (context, retval,
             "Could not create temp keytab file name.");
         goto out;
@@ -229,10 +229,10 @@ out:
 }
 
 static krb5_error_code
-krb5_db_def_fetch_mkey_stash( krb5_context   context,
-			const char *keyfile,
-			krb5_keyblock *key,
-			krb5_kvno     *kvno)
+krb5_db_def_fetch_mkey_stash(krb5_context   context,
+			     const char *keyfile,
+			     krb5_keyblock *key,
+			     krb5_kvno     *kvno)
 {
     krb5_error_code retval = 0;
     krb5_ui_2 enctype;
@@ -298,11 +298,11 @@ krb5_db_def_fetch_mkey_stash( krb5_context   context,
 }
 
 static krb5_error_code
-krb5_db_def_fetch_mkey_keytab(  krb5_context   context,
-                                const char     *keyfile,
-                                krb5_principal mname,
-                                krb5_keyblock  *key,
-                                krb5_kvno      *kvno)
+krb5_db_def_fetch_mkey_keytab(krb5_context   context,
+                              const char     *keyfile,
+                              krb5_principal mname,
+                              krb5_keyblock  *key,
+                              krb5_kvno      *kvno)
 {
     krb5_error_code retval = 0;
     krb5_keytab kt;
@@ -339,7 +339,7 @@ krb5_db_def_fetch_mkey_keytab(  krb5_context   context,
          * same as the one returned from the keytab.
          */
         if (kvno != NULL && *kvno == IGNORE_VNO)
-                *kvno = kt_ent.vno;
+            *kvno = kt_ent.vno;
 
         /*
          * kt_ent will be free'd so need to allocate and copy key contents for
@@ -359,11 +359,11 @@ errout:
 }
 
 krb5_error_code
-krb5_db_def_fetch_mkey( krb5_context   context,
-                        krb5_principal mname,
-                        krb5_keyblock *key,
-                        krb5_kvno     *kvno,
-                        char          *db_args)
+krb5_db_def_fetch_mkey(krb5_context   context,
+                       krb5_principal mname,
+                       krb5_keyblock *key,
+                       krb5_kvno     *kvno,
+                       char          *db_args)
 {
     krb5_error_code retval_ofs = 0, retval_kt = 0;
     char keyfile[MAXPATHLEN+1];
@@ -410,10 +410,10 @@ krb5_db_def_fetch_mkey( krb5_context   context,
 }
 
 krb5_error_code
-krb5_def_verify_master_key( krb5_context    context,
-                            krb5_principal  mprinc,
-                            krb5_kvno       kvno,
-                            krb5_keyblock   *mkey)
+krb5_def_verify_master_key(krb5_context    context,
+                           krb5_principal  mprinc,
+                           krb5_kvno       kvno,
+                           krb5_keyblock   *mkey)
 {
     krb5_error_code retval;
     krb5_db_entry master_entry;
