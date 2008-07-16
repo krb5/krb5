@@ -186,15 +186,17 @@ int main(argc, argv)
 
     set_com_err_hook(extended_com_err_fn);
 
+    /*
+     * Ensure that "progname" is set before calling com_err.
+     */
+    progname = (strrchr(argv[0], '/') ?
+	    strrchr(argv[0], '/') + 1 : argv[0]);
+
     retval = kadm5_init_krb5_context(&util_context);
     if (retval) {
 	    com_err (progname, retval, "while initializing Kerberos code");
 	    exit(1);
     }
-
-/*     initialize_adb_error_table(); */
-
-    progname = (strrchr(argv[0], '/') ? strrchr(argv[0], '/')+1 : argv[0]);
 
     cmd_argv = (char **) malloc(sizeof(char *)*argc);
     if (cmd_argv == NULL) {
