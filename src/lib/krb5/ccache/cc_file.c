@@ -1503,7 +1503,9 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
 	free(data->filename);
 	zap(data->buf, sizeof(data->buf));
 	if (data->file >= 0) {
-	    k5_mutex_lock(&data->lock);
+	    kerr = k5_mutex_lock(&data->lock);
+	    if (kerr)
+		return kerr;
 	    krb5_fcc_close_file(context, data);
 	    k5_mutex_unlock(&data->lock);
 	}

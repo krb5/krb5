@@ -75,7 +75,8 @@ void com_err_terminate(void)
 #endif
     k5_key_delete(K5_KEY_COM_ERR);
     k5_mutex_destroy(&com_err_hook_lock);
-    k5_mutex_lock(&et_list_lock);
+    if (k5_mutex_lock(&et_list_lock) != 0)
+	return;
     for (e = et_list_dynamic; e; e = enext) {
 	enext = e->next;
 	free(e);

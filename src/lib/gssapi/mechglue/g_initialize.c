@@ -101,7 +101,9 @@ gss_OID *oid;
 
 	*minor_status = 0;
 
-	k5_mutex_lock(&g_mechListLock);
+	minor_status = k5_mutex_lock(&g_mechListLock);
+	if (minor_status)
+		return GSS_S_FAILURE;
 	aMech = g_mechList;
 	while (aMech != NULL) {
 
@@ -179,7 +181,9 @@ gss_OID_set *mechSet;
 	 * need to lock the g_mechSet in case someone tries to update it while
 	 * I'm copying it.
 	 */
-	(void) k5_mutex_lock(&g_mechSetLock);
+	minorStatus = k5_mutex_lock(&g_mechSetLock);
+	if (minorStatus)
+		return GSS_S_FAILURE;
 
 	/* allocate space for the oid structures */
 	if (((*mechSet)->elements =
@@ -253,7 +257,8 @@ build_mechSet(void)
 	 * since we are accessing parts of the mechList which could be
 	 * modified.
 	 */
-	(void) k5_mutex_lock(&g_mechListLock);
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return GSS_S_FAILURE;
 
 	updateMechList();
 
@@ -261,7 +266,8 @@ build_mechSet(void)
 	 * we need to lock the mech set so that no one else will
 	 * try to read it as we are re-creating it
 	 */
-	(void) k5_mutex_lock(&g_mechSetLock);
+	if (k5_mutex_lock(&g_mechSetLock) != 0)
+		return GSS_S_FAILURE;
 
 	/* if the oid list already exists we must free it first */
 	free_mechSet();
@@ -339,7 +345,8 @@ const gss_OID oid;
 	char *modOptions = NULL;
 
 	/* make sure we have fresh data */
-	(void) k5_mutex_lock(&g_mechListLock);
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return NULL;
 	updateMechList();
 
 	if ((aMech = searchMechList(oid)) == NULL ||
@@ -373,7 +380,8 @@ gssint_mech_to_oid(const char *mechStr, gss_OID* oid)
 		return (GSS_S_COMPLETE);
 
 	/* ensure we have fresh data */
-	(void) k5_mutex_lock(&g_mechListLock);
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return GSS_S_FAILURE;
 	updateMechList();
 	(void) k5_mutex_unlock(&g_mechListLock);
 
@@ -406,7 +414,8 @@ gssint_oid_to_mech(const gss_OID oid)
 		return (M_DEFAULT);
 
 	/* ensure we have fresh data */
-	(void) k5_mutex_lock(&g_mechListLock);
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return GSS_S_FAILURE;
 	updateMechList();
 	aMech = searchMechList(oid);
 	(void) k5_mutex_unlock(&g_mechListLock);
@@ -434,7 +443,8 @@ gssint_get_mechanisms(char *mechArray[], int arrayLen)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	/* ensure we have fresh data */
-	(void) k5_mutex_lock(&g_mechListLock);
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return GSS_S_FAILURE;
 	updateMechList();
 	(void) k5_mutex_unlock(&g_mechListLock);
 
@@ -568,7 +578,8 @@ gssint_get_mechanism(gss_OID oid)
 	if (gssint_initialize_library())
 		return NULL;
 
-	(void) k5_mutex_lock(&g_mechListLock);
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return GSS_S_FAILURE;
 	/* check if the mechanism is already loaded */
 	if ((aMech = searchMechList(oid)) != NULL && aMech->mech) {
 		(void) k5_mutex_unlock(&g_mechListLock);
