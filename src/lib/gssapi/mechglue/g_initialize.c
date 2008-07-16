@@ -101,8 +101,8 @@ gss_OID *oid;
 
 	*minor_status = 0;
 
-	minor_status = k5_mutex_lock(&g_mechListLock);
-	if (minor_status)
+	*minor_status = k5_mutex_lock(&g_mechListLock);
+	if (*minor_status)
 		return GSS_S_FAILURE;
 	aMech = g_mechList;
 	while (aMech != NULL) {
@@ -181,8 +181,8 @@ gss_OID_set *mechSet;
 	 * need to lock the g_mechSet in case someone tries to update it while
 	 * I'm copying it.
 	 */
-	minorStatus = k5_mutex_lock(&g_mechSetLock);
-	if (minorStatus)
+	*minorStatus = k5_mutex_lock(&g_mechSetLock);
+	if (*minorStatus)
 		return GSS_S_FAILURE;
 
 	/* allocate space for the oid structures */
