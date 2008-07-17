@@ -54,8 +54,8 @@ extern "C" {
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Copy a string.
  */
-kim_error_t kim_string_copy (kim_string_t       *out_string,
-                             const kim_string_t  in_string);
+kim_error kim_string_copy (kim_string       *out_string,
+                             const kim_string  in_string);
 
 /*!
  * \param in_string            a string.
@@ -65,15 +65,15 @@ kim_error_t kim_string_copy (kim_string_t       *out_string,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Compare two strings.
  */
-kim_error_t kim_string_compare (kim_string_t      in_string, 
-                                kim_string_t      in_compare_to_string,
-                                kim_comparison_t *out_comparison);
+kim_error kim_string_compare (kim_string      in_string, 
+                                kim_string      in_compare_to_string,
+                                kim_comparison *out_comparison);
     
 /*!
  * \param io_string a string to be freed.  Set to NULL on exit.
  * \brief Free memory associated with a string.
  */
-void kim_string_free (kim_string_t *io_string);
+void kim_string_free (kim_string *io_string);
 
 /*!@}*/
 

@@ -37,13 +37,13 @@ extern "C" {
  * The kim_error_t returned when no error occurred. 
  * Does not need to be freed with kim_error_free().
  */
-#define KIM_NO_ERROR                  ((kim_error_t) NULL)
+#define KIM_NO_ERROR                  ((kim_error) NULL)
 
 /*!
  * \ingroup kim_types_reference
  * The kim_error_code_t for KIM_NO_ERROR. 
  */
-#define KIM_NO_ERROR_ECODE            ((kim_error_code_t) 0)
+#define KIM_NO_ERROR_ECODE            ((kim_error_code) 0)
     
 /*!
  * \page kim_error_overview KIM Error Overview
@@ -85,8 +85,8 @@ extern "C" {
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Copy an error.
  */
-kim_error_t kim_error_copy (kim_error_t *out_error,
-                            kim_error_t  in_error);
+kim_error kim_error_copy (kim_error *out_error,
+                            kim_error  in_error);
 
 /*!
  * \param in_error an error object.
@@ -94,7 +94,7 @@ kim_error_t kim_error_copy (kim_error_t *out_error,
  *         by \a in_error. On failure, #KIM_PARAMETER_ECODE.
  * \brief Get a numerical error code for an error.
  */
-kim_error_code_t kim_error_get_code (kim_error_t in_error);
+kim_error_code kim_error_get_code (kim_error in_error);
 
 /*!
  * \param in_error an error object.
@@ -103,13 +103,13 @@ kim_error_code_t kim_error_get_code (kim_error_t in_error);
  *         invalid.
  * \brief Get a text description of an error.
  */
-kim_string_t kim_error_get_display_string (kim_error_t in_error);
+kim_string kim_error_get_display_string (kim_error in_error);
 
 /*!
  * \param io_error the error object to be freed.  Set to NULL on exit.
  * \brief Free memory associated with an error.
  */
-void kim_error_free (kim_error_t *io_error);
+void kim_error_free (kim_error *io_error);
 
 /*!@}*/
 

@@ -37,7 +37,7 @@ extern "C" {
  * \ingroup kim_types_reference
  * Constant to specify any Kerberos identity is acceptable.
  */
-#define KIM_IDENTITY_ANY ((kim_identity_t) NULL)
+#define KIM_IDENTITY_ANY ((kim_identity) NULL)
     
 /*!
  * \page kim_identity_overview KIM Identity Overview
@@ -130,8 +130,8 @@ extern "C" {
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Create a identity from a string.
  */
-kim_error_t kim_identity_create_from_string (kim_identity_t *out_identity,
-                                             kim_string_t    in_string);
+kim_error kim_identity_create_from_string (kim_identity *out_identity,
+                                             kim_string    in_string);
 
 /*!
  * \param out_identity     on exit, a new identity object.  Must be freed with kim_identity_free().
@@ -145,9 +145,9 @@ kim_error_t kim_identity_create_from_string (kim_identity_t *out_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Create a identity from a realm and component strings.
  */
-kim_error_t kim_identity_create_from_components (kim_identity_t *out_identity,
-                                                 kim_string_t    in_realm, 
-                                                 kim_string_t    in_1st_component,
+kim_error kim_identity_create_from_components (kim_identity *out_identity,
+                                                 kim_string    in_realm, 
+                                                 kim_string    in_1st_component,
                                                  ...);
 
 /*!
@@ -158,7 +158,7 @@ kim_error_t kim_identity_create_from_components (kim_identity_t *out_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Create an identity object from a krb5_principal.
  */
-kim_error_t kim_identity_create_from_krb5_principal (kim_identity_t *out_identity,
+kim_error kim_identity_create_from_krb5_principal (kim_identity *out_identity,
                                                      krb5_context    in_krb5_context,
                                                      krb5_principal  in_krb5_principal);
 
@@ -169,8 +169,8 @@ kim_error_t kim_identity_create_from_krb5_principal (kim_identity_t *out_identit
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Copy an identity object.
  */
-kim_error_t kim_identity_copy (kim_identity_t *out_identity,
-                               kim_identity_t  in_identity);
+kim_error kim_identity_copy (kim_identity *out_identity,
+                               kim_identity  in_identity);
 
 
 /*!
@@ -183,9 +183,9 @@ kim_error_t kim_identity_copy (kim_identity_t *out_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Compare identity objects for equivalency.
  */
-kim_error_t kim_identity_compare (kim_identity_t    in_identity,
-                                  kim_identity_t    in_compare_to_identity,
-                                  kim_comparison_t *out_comparison);
+kim_error kim_identity_compare (kim_identity    in_identity,
+                                  kim_identity    in_compare_to_identity,
+                                  kim_comparison *out_comparison);
 /*!
  * \param in_identity  an identity object. 
  * \param out_string   on exit, a string representation of \a in_identity.  
@@ -194,8 +194,8 @@ kim_error_t kim_identity_compare (kim_identity_t    in_identity,
  * \brief Get the string representation of a identity.
  * \note  Special characters such as '@' and '/' will be escaped with '\'.
  */
-kim_error_t kim_identity_get_string (kim_identity_t   in_identity,
-                                     kim_string_t    *out_string);
+kim_error kim_identity_get_string (kim_identity   in_identity,
+                                     kim_string    *out_string);
 
 
 /*!
@@ -209,8 +209,8 @@ kim_error_t kim_identity_get_string (kim_identity_t   in_identity,
  *        because it does not uniquely specify a principal.
  *        The result of this function should \em only be used to display to the user.
  */
-kim_error_t kim_identity_get_display_string (kim_identity_t   in_identity,
-                                             kim_string_t    *out_display_string);
+kim_error kim_identity_get_display_string (kim_identity   in_identity,
+                                             kim_string    *out_display_string);
 
 /*!
  * \param in_identity     an identity object. 
@@ -219,8 +219,8 @@ kim_error_t kim_identity_get_display_string (kim_identity_t   in_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the realm string of an identity.
  */
-kim_error_t kim_identity_get_realm (kim_identity_t  in_identity,
-                                    kim_string_t   *out_realm_string);
+kim_error kim_identity_get_realm (kim_identity  in_identity,
+                                    kim_string   *out_realm_string);
 
 /*!
  * \param in_identity             an identity object. 
@@ -228,8 +228,8 @@ kim_error_t kim_identity_get_realm (kim_identity_t  in_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the number of components of an identity.
  */
-kim_error_t kim_identity_get_number_of_components (kim_identity_t  in_identity,
-                                                   kim_count_t    *out_number_of_components);
+kim_error kim_identity_get_number_of_components (kim_identity  in_identity,
+                                                   kim_count    *out_number_of_components);
 
 /*!
  * \param in_identity          an identity object.
@@ -239,9 +239,9 @@ kim_error_t kim_identity_get_number_of_components (kim_identity_t  in_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the Nth component of an identity.
  */
-kim_error_t kim_identity_get_component_at_index (kim_identity_t  in_identity,
-                                                 kim_count_t     in_index,
-                                                 kim_string_t   *out_component_string);
+kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
+                                                 kim_count     in_index,
+                                                 kim_string   *out_component_string);
 
 /*!
  * \param in_identity        an identity object.
@@ -252,7 +252,7 @@ kim_error_t kim_identity_get_component_at_index (kim_identity_t  in_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the krb5_principal representation of an identity.
  */
-kim_error_t kim_identity_get_krb5_principal (kim_identity_t  in_identity,
+kim_error kim_identity_get_krb5_principal (kim_identity  in_identity,
                                              krb5_context    in_krb5_context,
                                              krb5_principal *out_krb5_principal);
 
@@ -263,7 +263,7 @@ kim_error_t kim_identity_get_krb5_principal (kim_identity_t  in_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the gss_name_t representation of an identity.
  */
-kim_error_t kim_identity_get_gss_name (kim_identity_t  in_identity,
+kim_error kim_identity_get_gss_name (kim_identity  in_identity,
                                        gss_name_t     *out_gss_name);
 
 /*!
@@ -275,8 +275,8 @@ kim_error_t kim_identity_get_gss_name (kim_identity_t  in_identity,
  * the password.  It uses the \a in_options structure to obtain information about the desired 
  * prompter and current password.  
  */
-kim_error_t kim_identity_change_password (kim_identity_t  in_identity,
-                                          kim_options_t   in_options);
+kim_error kim_identity_change_password (kim_identity  in_identity,
+                                          kim_options   in_options);
 
 /*!
  * \param in_identity  an identity object whose password will be changed.
@@ -288,15 +288,15 @@ kim_error_t kim_identity_change_password (kim_identity_t  in_identity,
  * to change the password. It uses the \a in_options structure to obtain information about   
  * the desired prompter and current password.  
  */
-kim_error_t kim_identity_change_password_to_password (kim_identity_t in_identity,
-                                                      kim_options_t   in_options,
-                                                      kim_string_t    in_new_password);
+kim_error kim_identity_change_password_to_password (kim_identity in_identity,
+                                                      kim_options   in_options,
+                                                      kim_string    in_new_password);
 
 /*!
  * \param io_identity the identity object to be freed.  Set to NULL on exit.
  * \brief Free memory associated with an identity.
  */
-void kim_identity_free (kim_identity_t *io_identity);
+void kim_identity_free (kim_identity *io_identity);
 
 /*!@}*/
 

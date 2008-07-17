@@ -100,7 +100,7 @@ extern "C" {
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Create a new favorite identities list.
  */
-kim_error_t kim_favorite_identities_create (kim_favorite_identities_t *out_favorite_identities);
+kim_error kim_favorite_identities_create (kim_favorite_identities *out_favorite_identities);
 
 /*!
  * \param out_favorite_identities on exit, a new favorite identities object which is 
@@ -110,8 +110,8 @@ kim_error_t kim_favorite_identities_create (kim_favorite_identities_t *out_favor
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Copy a favorite identities list.
  */
-kim_error_t kim_favorite_identities_copy (kim_favorite_identities_t *out_favorite_identities,
-                                          kim_favorite_identities_t  in_favorite_identities);
+kim_error kim_favorite_identities_copy (kim_favorite_identities *out_favorite_identities,
+                                          kim_favorite_identities  in_favorite_identities);
 
 /*!
  * \param in_favorite_identities   a favorite identities object.
@@ -119,8 +119,8 @@ kim_error_t kim_favorite_identities_copy (kim_favorite_identities_t *out_favorit
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the number of identities in a favorite identities list.
  */
-kim_error_t kim_favorite_identities_get_number_of_identities (kim_favorite_identities_t  in_favorite_identities,
-                                                              kim_count_t               *out_number_of_identities);
+kim_error kim_favorite_identities_get_number_of_identities (kim_favorite_identities  in_favorite_identities,
+                                                              kim_count               *out_number_of_identities);
 
 /*!
  * \param in_favorite_identities a favorite identities object.
@@ -130,17 +130,17 @@ kim_error_t kim_favorite_identities_get_number_of_identities (kim_favorite_ident
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the Nth identity in a favorite identities list.
  */
-kim_error_t kim_favorite_identities_get_identity_at_index (kim_favorite_identities_t  in_favorite_identities,
-                                                           kim_count_t                in_index,
-                                                           kim_identity_t            *out_identity);
+kim_error kim_favorite_identities_get_identity_at_index (kim_favorite_identities  in_favorite_identities,
+                                                           kim_count                in_index,
+                                                           kim_identity            *out_identity);
 /*!
  * \param io_favorite_identities a favorite identities object.
  * \param in_identity            an identity string to add to \a in_favorite_identities.
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Add an identity to a favorite identities list.
  */
-kim_error_t kim_favorite_identities_add_identity (kim_favorite_identities_t io_favorite_identities,
-                                                  kim_identity_t            in_identity);
+kim_error kim_favorite_identities_add_identity (kim_favorite_identities io_favorite_identities,
+                                                  kim_identity            in_identity);
 
 /*!
  * \param io_favorite_identities a favorite identities object.
@@ -148,22 +148,22 @@ kim_error_t kim_favorite_identities_add_identity (kim_favorite_identities_t io_f
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Remove an identity from a identities list.
  */
-kim_error_t kim_favorite_identities_remove_identity (kim_favorite_identities_t io_favorite_identities,
-                                                     kim_identity_t            in_identity);
+kim_error kim_favorite_identities_remove_identity (kim_favorite_identities io_favorite_identities,
+                                                     kim_identity            in_identity);
 
 /*!
  * \param io_favorite_identities a favorite identities object.
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Empty a favorite identities list.
  */
-kim_error_t kim_favorite_identities_remove_all_identities (kim_favorite_identities_t io_favorite_identities);
+kim_error kim_favorite_identities_remove_all_identities (kim_favorite_identities io_favorite_identities);
 
 /*!
  * \param io_favorite_identities the favorite identities object to be freed.  Set to NULL on exit.
  * \brief Free memory associated with an identities list.
  */
 
-void kim_favorite_identities_free (kim_favorite_identities_t *io_favorite_identities);
+void kim_favorite_identities_free (kim_favorite_identities *io_favorite_identities);
 
 /*!@}*/
 
@@ -250,7 +250,7 @@ void kim_favorite_identities_free (kim_favorite_identities_t *io_favorite_identi
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Create a new preferences object from the current user's preferences.
  */
-kim_error_t kim_preferences_create (kim_preferences_t *out_preferences);
+kim_error kim_preferences_create (kim_preferences *out_preferences);
 
 /*!
  * \param out_preferences on exit, a new preferences object which is a copy of in_preferences.  
@@ -259,8 +259,8 @@ kim_error_t kim_preferences_create (kim_preferences_t *out_preferences);
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Copy a preferences object.
  */
-kim_error_t kim_preferences_copy (kim_preferences_t *out_preferences,
-                                  kim_preferences_t  in_preferences);
+kim_error kim_preferences_copy (kim_preferences *out_preferences,
+                                  kim_preferences  in_preferences);
 
 /*!
  * \param io_preferences a preferences object to modify.
@@ -269,8 +269,8 @@ kim_error_t kim_preferences_copy (kim_preferences_t *out_preferences,
  * \brief Set the user's preferred options.
  * \sa kim_preferences_get_options()
  */
-kim_error_t kim_preferences_set_options (kim_preferences_t io_preferences,
-                                         kim_options_t     in_options);
+kim_error kim_preferences_set_options (kim_preferences io_preferences,
+                                         kim_options     in_options);
 
 /*!
  * \param in_preferences a preferences object.
@@ -280,8 +280,8 @@ kim_error_t kim_preferences_set_options (kim_preferences_t io_preferences,
  * \brief Get the user's preferred options.
  * \sa kim_preferences_set_options()
  */
-kim_error_t kim_preferences_get_options (kim_preferences_t  in_preferences,
-                                         kim_options_t     *out_options);
+kim_error kim_preferences_get_options (kim_preferences  in_preferences,
+                                         kim_options     *out_options);
 
 /*!
  * \param io_preferences      a preferences object to modify.
@@ -291,8 +291,8 @@ kim_error_t kim_preferences_get_options (kim_preferences_t  in_preferences,
  * \brief Set whether or not to remember the last options the user used to acquire a credential.
  * \sa kim_preferences_get_remember_options()
  */
-kim_error_t kim_preferences_set_remember_options (kim_preferences_t io_preferences,
-                                                  kim_boolean_t     in_remember_options);
+kim_error kim_preferences_set_remember_options (kim_preferences io_preferences,
+                                                  kim_boolean     in_remember_options);
 
 /*!
  * \param in_preferences       a preferences object.
@@ -302,8 +302,8 @@ kim_error_t kim_preferences_set_remember_options (kim_preferences_t io_preferenc
  * \brief Get whether or not to remember the last options the user used to acquire a credential.
  * \sa kim_preferences_set_remember_options()
  */
-kim_error_t kim_preferences_get_remember_options (kim_preferences_t  in_preferences,
-                                                  kim_boolean_t     *out_remember_options);
+kim_error kim_preferences_get_remember_options (kim_preferences  in_preferences,
+                                                  kim_boolean     *out_remember_options);
 
 /*!
  * \param io_preferences      a preferences object to modify.
@@ -312,8 +312,8 @@ kim_error_t kim_preferences_get_remember_options (kim_preferences_t  in_preferen
  * \brief Set the user's preferred client identity.
  * \sa kim_preferences_get_client_identity()
  */
-kim_error_t kim_preferences_set_client_identity (kim_preferences_t io_preferences,
-                                                 kim_identity_t    in_client_identity);
+kim_error kim_preferences_set_client_identity (kim_preferences io_preferences,
+                                                 kim_identity    in_client_identity);
 
 /*!
  * \param in_preferences       a preferences object.
@@ -323,8 +323,8 @@ kim_error_t kim_preferences_set_client_identity (kim_preferences_t io_preference
  * \brief Get the user's preferred client identity.
  * \sa kim_preferences_set_client_identity()
  */
-kim_error_t kim_preferences_get_client_identity (kim_preferences_t  in_preferences,
-                                                 kim_identity_t    *out_client_identity);
+kim_error kim_preferences_get_client_identity (kim_preferences  in_preferences,
+                                                 kim_identity    *out_client_identity);
 
 /*!
  * \param io_preferences               a preferences object to modify.
@@ -334,8 +334,8 @@ kim_error_t kim_preferences_get_client_identity (kim_preferences_t  in_preferenc
  * \brief Set whether or not to remember the last client identity the user acquired a credential for.
  * \sa kim_preferences_get_remember_client_identity()
  */
-kim_error_t kim_preferences_set_remember_client_identity (kim_preferences_t io_preferences,
-                                                          kim_boolean_t     in_remember_client_identity);
+kim_error kim_preferences_set_remember_client_identity (kim_preferences io_preferences,
+                                                          kim_boolean     in_remember_client_identity);
 
 /*!
  * \param in_preferences                a preferences object.
@@ -345,8 +345,8 @@ kim_error_t kim_preferences_set_remember_client_identity (kim_preferences_t io_p
  * \brief Get whether or not to remember the last client identity the user acquired a credential for.
  * \sa kim_preferences_set_remember_client_identity()
  */
-kim_error_t kim_preferences_get_remember_client_identity (kim_preferences_t  in_preferences,
-                                                          kim_boolean_t     *out_remember_client_identity);
+kim_error kim_preferences_get_remember_client_identity (kim_preferences  in_preferences,
+                                                          kim_boolean     *out_remember_client_identity);
 
 /*!
  * \param io_preferences       a preferences object to modify.
@@ -356,8 +356,8 @@ kim_error_t kim_preferences_get_remember_client_identity (kim_preferences_t  in_
  * \brief Set the minimum credential lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_get_minimum_lifetime()
  */
-kim_error_t kim_preferences_set_minimum_lifetime (kim_preferences_t io_preferences,
-                                                  kim_lifetime_t    in_minimum_lifetime);
+kim_error kim_preferences_set_minimum_lifetime (kim_preferences io_preferences,
+                                                  kim_lifetime    in_minimum_lifetime);
 
 /*!
  * \param in_preferences        a preferences object.
@@ -367,8 +367,8 @@ kim_error_t kim_preferences_set_minimum_lifetime (kim_preferences_t io_preferenc
  * \brief Get the minimum credential lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_set_minimum_lifetime()
  */
-kim_error_t kim_preferences_get_minimum_lifetime (kim_preferences_t  in_preferences,
-                                                  kim_lifetime_t    *out_minimum_lifetime);
+kim_error kim_preferences_get_minimum_lifetime (kim_preferences  in_preferences,
+                                                  kim_lifetime    *out_minimum_lifetime);
 
 /*!
  * \param io_preferences       a preferences object to modify.
@@ -378,8 +378,8 @@ kim_error_t kim_preferences_get_minimum_lifetime (kim_preferences_t  in_preferen
  * \brief Set the maximum credential lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_get_maximum_lifetime()
  */
-kim_error_t kim_preferences_set_maximum_lifetime (kim_preferences_t io_preferences,
-                                                  kim_lifetime_t    in_maximum_lifetime);
+kim_error kim_preferences_set_maximum_lifetime (kim_preferences io_preferences,
+                                                  kim_lifetime    in_maximum_lifetime);
 
 /*!
  * \param in_preferences        a preferences object.
@@ -389,8 +389,8 @@ kim_error_t kim_preferences_set_maximum_lifetime (kim_preferences_t io_preferenc
  * \brief Get the maximum credential lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_set_maximum_lifetime()
  */
-kim_error_t kim_preferences_get_maximum_lifetime (kim_preferences_t  in_preferences,
-                                                  kim_lifetime_t    *out_maximum_lifetime);
+kim_error kim_preferences_get_maximum_lifetime (kim_preferences  in_preferences,
+                                                  kim_lifetime    *out_maximum_lifetime);
 
 /*!
  * \param io_preferences               a preferences object to modify.
@@ -401,8 +401,8 @@ kim_error_t kim_preferences_get_maximum_lifetime (kim_preferences_t  in_preferen
  * \brief Set the minimum credential renewal lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_get_minimum_renewal_lifetime()
  */
-kim_error_t kim_preferences_set_minimum_renewal_lifetime (kim_preferences_t io_preferences,
-                                                          kim_lifetime_t    in_minimum_renewal_lifetime);
+kim_error kim_preferences_set_minimum_renewal_lifetime (kim_preferences io_preferences,
+                                                          kim_lifetime    in_minimum_renewal_lifetime);
 
 /*!
  * \param in_preferences                a preferences object.
@@ -412,8 +412,8 @@ kim_error_t kim_preferences_set_minimum_renewal_lifetime (kim_preferences_t io_p
  * \brief Get the minimum credential renewal lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_set_minimum_renewal_lifetime()
  */
-kim_error_t kim_preferences_get_minimum_renewal_lifetime (kim_preferences_t  in_preferences,
-                                                          kim_lifetime_t    *out_minimum_renewal_lifetime);
+kim_error kim_preferences_get_minimum_renewal_lifetime (kim_preferences  in_preferences,
+                                                          kim_lifetime    *out_minimum_renewal_lifetime);
 
 /*!
  * \param io_preferences               a preferences object to modify.
@@ -424,8 +424,8 @@ kim_error_t kim_preferences_get_minimum_renewal_lifetime (kim_preferences_t  in_
  * \brief Set the maximum credential renewal lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_get_minimum_renewal_lifetime()
  */
-kim_error_t kim_preferences_set_maximum_renewal_lifetime (kim_preferences_t io_preferences,
-                                                          kim_lifetime_t    in_maximum_renewal_lifetime);
+kim_error kim_preferences_set_maximum_renewal_lifetime (kim_preferences io_preferences,
+                                                          kim_lifetime    in_maximum_renewal_lifetime);
 
 /*!
  * \param in_preferences                a preferences object.
@@ -435,8 +435,8 @@ kim_error_t kim_preferences_set_maximum_renewal_lifetime (kim_preferences_t io_p
  * \brief Get the maximum credential renewal lifetime for GUI credential lifetime controls.
  * \sa kim_preferences_set_minimum_renewal_lifetime()
  */
-kim_error_t kim_preferences_get_maximum_renewal_lifetime (kim_preferences_t  in_preferences,
-                                                          kim_lifetime_t    *out_maximum_renewal_lifetime);
+kim_error kim_preferences_get_maximum_renewal_lifetime (kim_preferences  in_preferences,
+                                                          kim_lifetime    *out_maximum_renewal_lifetime);
 
 /*!
  * \param io_preferences         a preferences object to modify.
@@ -447,8 +447,8 @@ kim_error_t kim_preferences_get_maximum_renewal_lifetime (kim_preferences_t  in_
  * \brief Set the user's preferred list of identities.
  * \sa kim_preferences_get_favorite_identities()
  */
-kim_error_t kim_preferences_set_favorite_identities (kim_preferences_t         io_preferences,
-                                                     kim_favorite_identities_t in_favorite_identities);
+kim_error kim_preferences_set_favorite_identities (kim_preferences         io_preferences,
+                                                     kim_favorite_identities in_favorite_identities);
 
 /*!
  * \param in_preferences          a preferences object.
@@ -459,8 +459,8 @@ kim_error_t kim_preferences_set_favorite_identities (kim_preferences_t         i
  * \brief Get the user's preferred list of identities.
  * \sa kim_preferences_set_favorite_identities()
  */
-kim_error_t kim_preferences_get_favorite_identities (kim_preferences_t          in_preferences,
-                                                     kim_favorite_identities_t *out_favorite_identities);
+kim_error kim_preferences_get_favorite_identities (kim_preferences          in_preferences,
+                                                     kim_favorite_identities *out_favorite_identities);
 
 /*!
  * \param in_preferences a preferences object.
@@ -468,13 +468,13 @@ kim_error_t kim_preferences_get_favorite_identities (kim_preferences_t          
  * \brief Synchronize a preferences object with the user's preferences, writing pending changes
  * and reading any changes applied by other processes.
  */
-kim_error_t kim_preferences_synchronize (kim_preferences_t in_preferences);
+kim_error kim_preferences_synchronize (kim_preferences in_preferences);
 
 /*!
  * \param io_preferences the preferences object to be freed.  Set to NULL on exit.
  * \brief Free memory associated with a preferences object.
  */
-void kim_preferences_free (kim_preferences_t *io_preferences);
+void kim_preferences_free (kim_preferences *io_preferences);
 
 /*!@}*/
 

@@ -262,7 +262,7 @@ extern "C" {
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get a ccache iterator to enumerate ccaches in the cache collection.
  */
-kim_error_t kim_ccache_iterator_create (kim_ccache_iterator_t *out_ccache_iterator);
+kim_error kim_ccache_iterator_create (kim_ccache_iterator *out_ccache_iterator);
 
 /*!
  * \param in_ccache_iterator a ccache iterator object.
@@ -272,14 +272,14 @@ kim_error_t kim_ccache_iterator_create (kim_ccache_iterator_t *out_ccache_iterat
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the next ccache in the cache collection.
  */
-kim_error_t kim_ccache_iterator_next (kim_ccache_iterator_t  in_ccache_iterator,
-                                      kim_ccache_t          *out_ccache);
+kim_error kim_ccache_iterator_next (kim_ccache_iterator  in_ccache_iterator,
+                                      kim_ccache          *out_ccache);
 
 /*!
  * \param io_ccache_iterator a ccache iterator object to be freed.  Set to NULL on exit.
  * \brief Free memory associated with a ccache iterator.
  */
-void kim_ccache_iterator_free (kim_ccache_iterator_t *io_ccache_iterator);
+void kim_ccache_iterator_free (kim_ccache_iterator *io_ccache_iterator);
 
 /*!@}*/
 
@@ -299,9 +299,9 @@ void kim_ccache_iterator_free (kim_ccache_iterator_t *io_ccache_iterator);
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Acquire a new initial credential and store it in a ccache.
  */
-kim_error_t kim_ccache_create_new (kim_ccache_t          *out_ccache,
-                                   kim_identity_t         in_client_identity,
-                                   kim_options_t          in_options);
+kim_error kim_ccache_create_new (kim_ccache          *out_ccache,
+                                   kim_identity         in_client_identity,
+                                   kim_options          in_options);
 
 /*!
  * \param out_ccache          on exit, a ccache object for a ccache containing a newly acquired   
@@ -314,9 +314,9 @@ kim_error_t kim_ccache_create_new (kim_ccache_t          *out_ccache,
  * \brief Find a ccache containing a valid initial credential in the cache collection, or if
  *        unavailable, acquire and store a new initial credential.
  */
-kim_error_t kim_ccache_create_new_if_needed (kim_ccache_t   *out_ccache,
-                                             kim_identity_t  in_client_identity,
-                                             kim_options_t   in_options);
+kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
+                                             kim_identity  in_client_identity,
+                                             kim_options   in_options);
 
 /*!
  * \param out_ccache          on exit, a ccache object for a ccache containing a TGT  
@@ -325,8 +325,8 @@ kim_error_t kim_ccache_create_new_if_needed (kim_ccache_t   *out_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Find a ccache for a client identity in the cache collection.
  */
-kim_error_t kim_ccache_create_from_client_identity (kim_ccache_t   *out_ccache,
-                                                    kim_identity_t  in_client_identity);
+kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
+                                                    kim_identity  in_client_identity);
 
 /*!
  * \param out_ccache      on exit, a new ccache object containing an initial credential 
@@ -339,10 +339,10 @@ kim_error_t kim_ccache_create_from_client_identity (kim_ccache_t   *out_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Acquire a new initial credential from a keytab and store it in a ccache.
  */
-kim_error_t kim_ccache_create_from_keytab (kim_ccache_t    *out_ccache,
-                                           kim_identity_t   in_identity,
-                                           kim_options_t    in_options,
-                                           kim_string_t     in_keytab);
+kim_error kim_ccache_create_from_keytab (kim_ccache    *out_ccache,
+                                           kim_identity   in_identity,
+                                           kim_options    in_options,
+                                           kim_string     in_keytab);
 
 /*!
  * \param out_ccache on exit, a ccache object for the default ccache.  
@@ -350,7 +350,7 @@ kim_error_t kim_ccache_create_from_keytab (kim_ccache_t    *out_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the default ccache.
  */
-kim_error_t kim_ccache_create_from_default (kim_ccache_t *out_ccache);
+kim_error kim_ccache_create_from_default (kim_ccache *out_ccache);
 
 /*!
  * \param out_ccache  on exit, a ccache object for the ccache identified by 
@@ -362,9 +362,9 @@ kim_error_t kim_ccache_create_from_default (kim_ccache_t *out_ccache);
  *       KIM-aware and should be avoided whenever possible.
  * \brief Get a ccache for a ccache type and name.
  */
-kim_error_t kim_ccache_create_from_type_and_name (kim_ccache_t  *out_ccache,
-                                                  kim_string_t   in_type,
-                                                  kim_string_t   in_name);
+kim_error kim_ccache_create_from_type_and_name (kim_ccache  *out_ccache,
+                                                  kim_string   in_type,
+                                                  kim_string   in_name);
 
 /*!
  * \param out_ccache      on exit, a new ccache object which is a copy of in_krb5_ccache.  
@@ -374,7 +374,7 @@ kim_error_t kim_ccache_create_from_type_and_name (kim_ccache_t  *out_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get a ccache for a krb5 ccache.
  */
-kim_error_t kim_ccache_create_from_krb5_ccache (kim_ccache_t  *out_ccache,
+kim_error kim_ccache_create_from_krb5_ccache (kim_ccache  *out_ccache,
                                                 krb5_context   in_krb5_context,
                                                 krb5_ccache    in_krb5_ccache);
 
@@ -385,8 +385,8 @@ kim_error_t kim_ccache_create_from_krb5_ccache (kim_ccache_t  *out_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Copy a ccache.
  */
-kim_error_t kim_ccache_copy (kim_ccache_t  *out_ccache,
-                             kim_ccache_t   in_ccache);
+kim_error kim_ccache_copy (kim_ccache  *out_ccache,
+                             kim_ccache   in_ccache);
 
 /*!
  * \param in_ccache        a ccache object. 
@@ -396,7 +396,7 @@ kim_error_t kim_ccache_copy (kim_ccache_t  *out_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get a krb5 ccache for a ccache.
  */
-kim_error_t kim_ccache_get_krb5_ccache (kim_ccache_t  in_ccache,
+kim_error kim_ccache_get_krb5_ccache (kim_ccache  in_ccache,
                                         krb5_context  in_krb5_context,
                                         krb5_ccache  *out_krb5_ccache);
 
@@ -406,8 +406,8 @@ kim_error_t kim_ccache_get_krb5_ccache (kim_ccache_t  in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the name of a ccache.
  */
-kim_error_t kim_ccache_get_name (kim_ccache_t  in_ccache,
-                                 kim_string_t *out_name);
+kim_error kim_ccache_get_name (kim_ccache  in_ccache,
+                                 kim_string *out_name);
 
 /*!
  * \param in_ccache  a ccache object. 
@@ -415,8 +415,8 @@ kim_error_t kim_ccache_get_name (kim_ccache_t  in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the type of a ccache.
  */
-kim_error_t kim_ccache_get_type (kim_ccache_t  in_ccache,
-                                 kim_string_t *out_type);
+kim_error kim_ccache_get_type (kim_ccache  in_ccache,
+                                 kim_string *out_type);
 
 /*!
  * \param in_ccache        a ccache object. 
@@ -427,8 +427,8 @@ kim_error_t kim_ccache_get_type (kim_ccache_t  in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the type and name for a ccache in display format.
  */
-kim_error_t kim_ccache_get_display_name (kim_ccache_t  in_ccache,
-                                         kim_string_t *out_display_name);
+kim_error kim_ccache_get_display_name (kim_ccache  in_ccache,
+                                         kim_string *out_display_name);
 
 /*!
  * \param in_ccache            a ccache object. 
@@ -437,8 +437,8 @@ kim_error_t kim_ccache_get_display_name (kim_ccache_t  in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the client identity for a ccache.
  */
-kim_error_t kim_ccache_get_client_identity (kim_ccache_t    in_ccache,
-                                            kim_identity_t *out_client_identity);
+kim_error kim_ccache_get_client_identity (kim_ccache    in_ccache,
+                                            kim_identity *out_client_identity);
 
 /*!
  * \param in_ccache       a ccache object. 
@@ -452,8 +452,8 @@ kim_error_t kim_ccache_get_client_identity (kim_ccache_t    in_ccache,
  *       TGTs at all, it will return the first valid non-TGT credential. If you only want 
  *       TGTs, use kim_credential_is_tgt() to verify that \a out_credential is a tgt.
  */
-kim_error_t kim_ccache_get_valid_credential (kim_ccache_t      in_ccache,
-                                             kim_credential_t *out_credential);
+kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
+                                             kim_credential *out_credential);
 
 /*!
  * \param in_ccache      a ccache object. 
@@ -462,8 +462,8 @@ kim_error_t kim_ccache_get_valid_credential (kim_ccache_t      in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the time when the credentials in the ccache become valid.
  */
-kim_error_t kim_ccache_get_start_time (kim_ccache_t  in_ccache,
-                                       kim_time_t   *out_start_time);
+kim_error kim_ccache_get_start_time (kim_ccache  in_ccache,
+                                       kim_time   *out_start_time);
 
 /*!
  * \param in_ccache           a ccache object. 
@@ -472,8 +472,8 @@ kim_error_t kim_ccache_get_start_time (kim_ccache_t  in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the time when the credentials in the ccache will expire.
  */
-kim_error_t kim_ccache_get_expiration_time (kim_ccache_t  in_ccache,
-                                            kim_time_t   *out_expiration_time);
+kim_error kim_ccache_get_expiration_time (kim_ccache  in_ccache,
+                                            kim_time   *out_expiration_time);
 
 /*!
  * \param in_ccache                   a ccache object. 
@@ -482,8 +482,8 @@ kim_error_t kim_ccache_get_expiration_time (kim_ccache_t  in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the time when the credentials in the ccache will no longer be renewable.
  */
-kim_error_t kim_ccache_get_renewal_expiration_time (kim_ccache_t  in_ccache,
-                                                    kim_time_t   *out_renewal_expiration_time);
+kim_error kim_ccache_get_renewal_expiration_time (kim_ccache  in_ccache,
+                                                    kim_time   *out_renewal_expiration_time);
 
 /*!
  * \param io_ccache a ccache object which will be set to the default ccache. 
@@ -492,7 +492,7 @@ kim_error_t kim_ccache_get_renewal_expiration_time (kim_ccache_t  in_ccache,
  *       KIM-aware and should be avoided whenever possible.
  * \brief Set a ccache to the default ccache.
  */
-kim_error_t kim_ccache_set_default (kim_ccache_t io_ccache);
+kim_error kim_ccache_set_default (kim_ccache io_ccache);
 
 /*!
  * \param in_ccache              a ccache object containing the TGT credential to be verified. 
@@ -507,10 +507,10 @@ kim_error_t kim_ccache_set_default (kim_ccache_t io_ccache);
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Verify the TGT in a ccache.
  */
-kim_error_t kim_ccache_verify (kim_ccache_t   in_ccache,
-                               kim_identity_t in_service_identity,
-                               kim_string_t   in_keytab,
-                               kim_boolean_t  in_fail_if_no_service_key);
+kim_error kim_ccache_verify (kim_ccache   in_ccache,
+                               kim_identity in_service_identity,
+                               kim_string   in_keytab,
+                               kim_boolean  in_fail_if_no_service_key);
 
 /*!
  * \param in_ccache  a ccache object containing a TGT to be renewed. 
@@ -518,8 +518,8 @@ kim_error_t kim_ccache_verify (kim_ccache_t   in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Renew the TGT in a ccache.
  */
-kim_error_t kim_ccache_renew (kim_ccache_t  in_ccache,
-                              kim_options_t in_options);
+kim_error kim_ccache_renew (kim_ccache  in_ccache,
+                              kim_options in_options);
 
 /*!
  * \param in_ccache  a ccache object containing a TGT to be validated. 
@@ -527,8 +527,8 @@ kim_error_t kim_ccache_renew (kim_ccache_t  in_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Validate the TGT in a ccache.
  */
-kim_error_t kim_ccache_validate (kim_ccache_t  in_ccache,
-                                 kim_options_t in_options);
+kim_error kim_ccache_validate (kim_ccache  in_ccache,
+                                 kim_options in_options);
 
 /*!
  * \param io_ccache  a ccache object to be destroyed.  Set to NULL on exit.
@@ -537,13 +537,13 @@ kim_error_t kim_ccache_validate (kim_ccache_t  in_ccache,
  * \note Frees memory associated with the ccache.  Do not call kim_ccache_free()
  *       after calling this function.
  */
-kim_error_t kim_ccache_destroy (kim_ccache_t *io_ccache);
+kim_error kim_ccache_destroy (kim_ccache *io_ccache);
 
 /*!
  * \param io_ccache a ccache object to be freed.  Set to NULL on exit.
  * \brief Free memory associated with a ccache.
  */
-void kim_ccache_free (kim_ccache_t *io_ccache);
+void kim_ccache_free (kim_ccache *io_ccache);
 
 /*!@}*/
 

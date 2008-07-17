@@ -227,8 +227,8 @@ extern "C" {
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Create a new selection hints object.
  */
-kim_error_t kim_selection_hints_create (kim_selection_hints_t *out_selection_hints,
-                                        kim_string_t           in_application_identifier);
+kim_error kim_selection_hints_create (kim_selection_hints *out_selection_hints,
+                                        kim_string           in_application_identifier);
 
 /*!
  * \param out_selection_hints on exit, a new selection hints object which is a copy of in_selection_hints.  
@@ -237,8 +237,8 @@ kim_error_t kim_selection_hints_create (kim_selection_hints_t *out_selection_hin
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Copy a selection hints object.
  */
-kim_error_t kim_selection_hints_copy (kim_selection_hints_t *out_selection_hints,
-                                      kim_selection_hints_t  in_selection_hints);
+kim_error kim_selection_hints_copy (kim_selection_hints *out_selection_hints,
+                                      kim_selection_hints  in_selection_hints);
 
 /*!
  * \param io_selection_hints   a selection hints object to modify.
@@ -247,8 +247,8 @@ kim_error_t kim_selection_hints_copy (kim_selection_hints_t *out_selection_hints
  * \brief Set the preferred service identity.
  * \sa kim_selection_hints_get_service_identity_hint()
  */
-kim_error_t kim_selection_hints_set_service_identity_hint (kim_selection_hints_t io_selection_hints,
-                                                           kim_identity_t        in_service_identity);
+kim_error kim_selection_hints_set_service_identity_hint (kim_selection_hints io_selection_hints,
+                                                           kim_identity        in_service_identity);
 
 /*!
  * \param in_selection_hints    a selection hints object.
@@ -258,8 +258,8 @@ kim_error_t kim_selection_hints_set_service_identity_hint (kim_selection_hints_t
  * \brief Get the preferred service identity.
  * \sa kim_selection_hints_set_service_identity_hint()
  */
-kim_error_t kim_selection_hints_get_service_identity_hint (kim_selection_hints_t  in_selection_hints,
-                                                           kim_identity_t        *out_service_identity);
+kim_error kim_selection_hints_get_service_identity_hint (kim_selection_hints  in_selection_hints,
+                                                           kim_identity        *out_service_identity);
 
 /*!
  * \param io_selection_hints a selection hints object to modify.
@@ -268,8 +268,8 @@ kim_error_t kim_selection_hints_get_service_identity_hint (kim_selection_hints_t
  * \brief Set the preferred client realm.
  * \sa kim_selection_hints_get_client_realm_hint()
  */
-kim_error_t kim_selection_hints_set_client_realm_hint (kim_selection_hints_t io_selection_hints,
-                                                       kim_string_t          in_client_realm);
+kim_error kim_selection_hints_set_client_realm_hint (kim_selection_hints io_selection_hints,
+                                                       kim_string          in_client_realm);
 
 /*!
  * \param in_selection_hints a selection hints object.
@@ -279,8 +279,8 @@ kim_error_t kim_selection_hints_set_client_realm_hint (kim_selection_hints_t io_
  * \brief Get the preferred client realm.
  * \sa kim_selection_hints_set_client_realm_hint()
  */
-kim_error_t kim_selection_hints_get_client_realm_hint (kim_selection_hints_t  in_selection_hints,
-                                                       kim_string_t          *out_client_realm);
+kim_error kim_selection_hints_get_client_realm_hint (kim_selection_hints  in_selection_hints,
+                                                       kim_string          *out_client_realm);
 
 /*!
  * \param io_selection_hints a selection hints object to modify.
@@ -289,8 +289,8 @@ kim_error_t kim_selection_hints_get_client_realm_hint (kim_selection_hints_t  in
  * \brief Set the preferred user name.
  * \sa kim_selection_hints_get_user_hint()
  */
-kim_error_t kim_selection_hints_set_user_hint (kim_selection_hints_t io_selection_hints,
-                                               kim_string_t          in_user);
+kim_error kim_selection_hints_set_user_hint (kim_selection_hints io_selection_hints,
+                                               kim_string          in_user);
 
 /*!
  * \param in_selection_hints a selection hints object.
@@ -300,8 +300,8 @@ kim_error_t kim_selection_hints_set_user_hint (kim_selection_hints_t io_selectio
  * \brief Get the preferred user name.
  * \sa kim_selection_hints_set_user_hint()
  */
-kim_error_t kim_selection_hints_get_user_hint (kim_selection_hints_t  in_selection_hints,
-                                               kim_string_t          *out_user);
+kim_error kim_selection_hints_get_user_hint (kim_selection_hints  in_selection_hints,
+                                               kim_string          *out_user);
 
 
 /*!
@@ -311,8 +311,8 @@ kim_error_t kim_selection_hints_get_user_hint (kim_selection_hints_t  in_selecti
  * \brief Set the preferred service realm.
  * \sa kim_selection_hints_get_service_realm_hint()
  */
-kim_error_t kim_selection_hints_set_service_realm_hint (kim_selection_hints_t io_selection_hints,
-                                                        kim_string_t          in_service_realm);
+kim_error kim_selection_hints_set_service_realm_hint (kim_selection_hints io_selection_hints,
+                                                        kim_string          in_service_realm);
 
 /*!
  * \param io_selection_hints a selection hints object.
@@ -322,8 +322,8 @@ kim_error_t kim_selection_hints_set_service_realm_hint (kim_selection_hints_t io
  * \brief Get the preferred service realm.
  * \sa kim_selection_hints_set_service_realm_hint()
  */
-kim_error_t kim_selection_hints_get_service_realm_hint (kim_selection_hints_t  io_selection_hints,
-                                                        kim_string_t          *out_service_realm);
+kim_error kim_selection_hints_get_service_realm_hint (kim_selection_hints  io_selection_hints,
+                                                        kim_string          *out_service_realm);
 
 /*!
  * \param io_selection_hints a selection hints object to modify.
@@ -332,8 +332,8 @@ kim_error_t kim_selection_hints_get_service_realm_hint (kim_selection_hints_t  i
  * \brief Set the preferred service name.
  * \sa kim_selection_hints_get_service_hint()
  */
-kim_error_t kim_selection_hints_set_service_hint (kim_selection_hints_t io_selection_hints,
-                                                  kim_string_t          in_service);
+kim_error kim_selection_hints_set_service_hint (kim_selection_hints io_selection_hints,
+                                                  kim_string          in_service);
 
 /*!
  * \param in_selection_hints a selection hints object.
@@ -343,8 +343,8 @@ kim_error_t kim_selection_hints_set_service_hint (kim_selection_hints_t io_selec
  * \brief Get the preferred service name.
  * \sa kim_selection_hints_set_service_hint()
  */
-kim_error_t kim_selection_hints_get_service_hint (kim_selection_hints_t  in_selection_hints,
-                                                  kim_string_t          *out_service);
+kim_error kim_selection_hints_get_service_hint (kim_selection_hints  in_selection_hints,
+                                                  kim_string          *out_service);
 
 /*!
  * \param io_selection_hints a selection hints object to modify.
@@ -353,8 +353,8 @@ kim_error_t kim_selection_hints_get_service_hint (kim_selection_hints_t  in_sele
  * \brief Set the preferred server host name.
  * \sa kim_selection_hints_get_server_hint()
  */
-kim_error_t kim_selection_hints_set_server_hint (kim_selection_hints_t io_selection_hints,
-                                                 kim_string_t          in_server);
+kim_error kim_selection_hints_set_server_hint (kim_selection_hints io_selection_hints,
+                                                 kim_string          in_server);
 
 /*!
  * \param in_selection_hints a selection hints object.
@@ -364,8 +364,8 @@ kim_error_t kim_selection_hints_set_server_hint (kim_selection_hints_t io_select
  * \brief Get the preferred server host name.
  * \sa kim_selection_hints_set_server_hint()
  */
-kim_error_t kim_selection_hints_get_server_hint (kim_selection_hints_t  in_selection_hints,
-                                                 kim_string_t          *out_server);
+kim_error kim_selection_hints_get_server_hint (kim_selection_hints  in_selection_hints,
+                                                 kim_string          *out_server);
 
 /*!
  * \param io_selection_hints  a selection hints object to modify.
@@ -377,8 +377,8 @@ kim_error_t kim_selection_hints_get_server_hint (kim_selection_hints_t  in_selec
  * \brief Set the application name for use in user interaction.
  * \sa kim_selection_hints_get_application_name()
  */
-kim_error_t kim_selection_hints_set_application_name (kim_selection_hints_t io_selection_hints,
-                                                      kim_string_t          in_application_name);
+kim_error kim_selection_hints_set_application_name (kim_selection_hints io_selection_hints,
+                                                      kim_string          in_application_name);
 
 /*!
  * \param in_selection_hints   a selection hints object.
@@ -388,8 +388,8 @@ kim_error_t kim_selection_hints_set_application_name (kim_selection_hints_t io_s
  * \brief Get the application name for use in user interaction.
  * \sa kim_selection_hints_set_application_name()
  */
-kim_error_t kim_selection_hints_get_application_name (kim_selection_hints_t  in_selection_hints,
-                                                      kim_string_t          *out_application_name);
+kim_error kim_selection_hints_get_application_name (kim_selection_hints  in_selection_hints,
+                                                      kim_string          *out_application_name);
 
 /*!
  * \param io_selection_hints  a selection hints object to modify.
@@ -401,8 +401,8 @@ kim_error_t kim_selection_hints_get_application_name (kim_selection_hints_t  in_
  * \brief Set the strings used to prompt the user to select the identity.
  * \sa kim_selection_hints_get_explanation()
  */
-kim_error_t kim_selection_hints_set_explanation (kim_selection_hints_t io_selection_hints,
-                                                 kim_string_t          in_explanation);
+kim_error kim_selection_hints_set_explanation (kim_selection_hints io_selection_hints,
+                                                 kim_string          in_explanation);
 
 /*!
  * \param in_selection_hints   a selection hints object.
@@ -413,8 +413,8 @@ kim_error_t kim_selection_hints_set_explanation (kim_selection_hints_t io_select
  * \brief Get the strings used to prompt the user to select the identity.
  * \sa kim_selection_hints_set_explanation()
  */
-kim_error_t kim_selection_hints_get_explanation (kim_selection_hints_t  in_selection_hints,
-                                                 kim_string_t          *out_explanation);
+kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection_hints,
+                                                 kim_string          *out_explanation);
 
 
 /*!
@@ -424,8 +424,8 @@ kim_error_t kim_selection_hints_get_explanation (kim_selection_hints_t  in_selec
  * \brief Set the options which will be used if credentials need to be acquired.
  * \sa kim_selection_hints_get_options()
  */
-kim_error_t kim_selection_hints_set_options (kim_selection_hints_t io_selection_hints,
-                                             kim_options_t         in_options);
+kim_error kim_selection_hints_set_options (kim_selection_hints io_selection_hints,
+                                             kim_options         in_options);
 
 /*!
  * \param in_selection_hints a selection hints object.
@@ -436,8 +436,8 @@ kim_error_t kim_selection_hints_set_options (kim_selection_hints_t io_selection_
  * \brief Get the options which will be used if credentials need to be acquired.
  * \sa kim_selection_hints_set_options()
  */
-kim_error_t kim_selection_hints_get_options (kim_selection_hints_t  in_selection_hints,
-                                             kim_options_t         *out_options);
+kim_error kim_selection_hints_get_options (kim_selection_hints  in_selection_hints,
+                                             kim_options         *out_options);
 
 /*!
  * \param in_selection_hints        a selection hints object to modify
@@ -448,8 +448,8 @@ kim_error_t kim_selection_hints_get_options (kim_selection_hints_t  in_selection
  * \brief Set whether or not KIM may interact with the user to select an identity.
  * \sa kim_selection_hints_get_allow_user_interaction
  */
-kim_error_t kim_selection_hints_set_allow_user_interaction (kim_selection_hints_t in_selection_hints,
-                                                            kim_boolean_t         in_allow_user_interaction);
+kim_error kim_selection_hints_set_allow_user_interaction (kim_selection_hints in_selection_hints,
+                                                            kim_boolean         in_allow_user_interaction);
 
 /*!
  * \param in_selection_hints         a selection hints object to modify
@@ -461,8 +461,8 @@ kim_error_t kim_selection_hints_set_allow_user_interaction (kim_selection_hints_
  * \brief Get whether or not KIM may interact with the user to select an identity.
  * \sa kim_selection_hints_set_allow_user_interaction
  */
-kim_error_t kim_selection_hints_get_allow_user_interaction (kim_selection_hints_t  in_selection_hints,
-                                                            kim_boolean_t         *out_allow_user_interaction);
+kim_error kim_selection_hints_get_allow_user_interaction (kim_selection_hints  in_selection_hints,
+                                                            kim_boolean         *out_allow_user_interaction);
 
 /*!
  * \param in_selection_hints    a selection hints object to modify
@@ -473,8 +473,8 @@ kim_error_t kim_selection_hints_get_allow_user_interaction (kim_selection_hints_
  * \brief Set whether or not KIM will use cached mappings for this selection hints object.
  * \sa kim_selection_hints_get_remember_identity
  */
-kim_error_t kim_selection_hints_set_remember_identity (kim_selection_hints_t in_selection_hints,
-                                                       kim_boolean_t         in_remember_identity);
+kim_error kim_selection_hints_set_remember_identity (kim_selection_hints in_selection_hints,
+                                                       kim_boolean         in_remember_identity);
 
 /*!
  * \param in_selection_hints     a selection hints object to modify
@@ -485,8 +485,8 @@ kim_error_t kim_selection_hints_set_remember_identity (kim_selection_hints_t in_
  * \brief Get whether or not KIM will use cache mappings for this selection hints object.
  * \sa kim_selection_hints_set_remember_identity
  */
-kim_error_t kim_selection_hints_get_remember_identity (kim_selection_hints_t  in_selection_hints,
-                                                       kim_boolean_t         *out_remember_identity);
+kim_error kim_selection_hints_get_remember_identity (kim_selection_hints  in_selection_hints,
+                                                       kim_boolean         *out_remember_identity);
 
 /*!
  * \param in_selection_hints the selection hints to add to the cache.
@@ -499,8 +499,8 @@ kim_error_t kim_selection_hints_get_remember_identity (kim_selection_hints_t  in
  * \brief Choose a client identity based on selection hints.
  */
 
-kim_error_t kim_selection_hints_get_identity (kim_selection_hints_t in_selection_hints,
-                                              kim_identity_t        *out_identity);
+kim_error kim_selection_hints_get_identity (kim_selection_hints in_selection_hints,
+                                              kim_identity        *out_identity);
 
 /*!
  * \param in_selection_hints the selection hints to add to the cache.
@@ -510,8 +510,8 @@ kim_error_t kim_selection_hints_get_identity (kim_selection_hints_t in_selection
  * replacing any existing entry.
  */
 
-kim_error_t kim_selection_hints_remember_identity (kim_selection_hints_t in_selection_hints,
-                                                   kim_identity_t        in_identity);
+kim_error kim_selection_hints_remember_identity (kim_selection_hints in_selection_hints,
+                                                   kim_identity        in_identity);
 
 /*!
  * \param in_selection_hints the selection hints to remove from the cache.
@@ -519,14 +519,14 @@ kim_error_t kim_selection_hints_remember_identity (kim_selection_hints_t in_sele
  * \brief Remove an entry for the selection hints from the selection hints cache.
  */
 
-kim_error_t kim_selection_hints_forget_identity (kim_selection_hints_t in_selection_hints);
+kim_error kim_selection_hints_forget_identity (kim_selection_hints in_selection_hints);
 
 /*!
  * \param io_selection_hints the selection hints object to be freed.  Set to NULL on exit.
  * \brief Free memory associated with a selection hints object.
  */
 
-void kim_selection_hints_free (kim_selection_hints_t *io_selection_hints);
+void kim_selection_hints_free (kim_selection_hints *io_selection_hints);
 
 /*!@}*/
 
