@@ -60,19 +60,16 @@ kdb5_destroy(argc, argv)
     retval1 = kadm5_init_krb5_context(&context);
     if( retval1 )
     {
-	com_err(argv[0], retval1, "while initializing krb5_context");
+	com_err(progname, retval1, "while initializing krb5_context");
 	exit(1);
     }
 
     if ((retval1 = krb5_set_default_realm(context,
 					  util_context->default_realm))) {
-	com_err(argv[0], retval1, "while setting default realm name");
+	com_err(progname, retval1, "while setting default realm name");
 	exit(1);
     }
     
-    if (strrchr(argv[0], '/'))
-	argv[0] = strrchr(argv[0], '/')+1;
-
     dbname = global_params.dbname;
 
     optind = 1;
@@ -102,7 +99,7 @@ kdb5_destroy(argc, argv)
 
     retval1 = krb5_db_destroy(context, db5util_db_args);
     if (retval1) {
-	com_err(argv[0], retval1, "deleting database '%s'",dbname);
+	com_err(progname, retval1, "deleting database '%s'",dbname);
 	exit_status++; return;
     }
 

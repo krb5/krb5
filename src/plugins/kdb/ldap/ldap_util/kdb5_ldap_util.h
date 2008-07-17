@@ -58,6 +58,8 @@
 #define DESTROY_POLICY        14
 #define LIST_POLICY           15
 
+extern char *progname;
+
 extern int exit_status;
 extern krb5_context util_context;
 
