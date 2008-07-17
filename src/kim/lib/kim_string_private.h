@@ -30,31 +30,31 @@
 #include <kim/kim.h>
 
 
-kim_error_t kim_string_create_from_format (kim_string_t *out_string, 
-                                           kim_string_t  in_format,
+kim_error kim_string_create_from_format (kim_string *out_string, 
+                                           kim_string  in_format,
                                            ...);
 
-kim_error_t kim_string_create_from_format_va_retcode (kim_string_t *out_string, 
-                                                      kim_string_t  in_format,
+kim_error kim_string_create_from_format_va_retcode (kim_string *out_string, 
+                                                      kim_string  in_format,
                                                       va_list       in_args);
 
-kim_error_t kim_string_create_from_format_va (kim_string_t *out_string, 
-                                              kim_string_t  in_format,
+kim_error kim_string_create_from_format_va (kim_string *out_string, 
+                                              kim_string  in_format,
                                               va_list       in_args);
 
-kim_error_t kim_string_create_from_buffer (kim_string_t *out_string, 
+kim_error kim_string_create_from_buffer (kim_string *out_string, 
                                            const char   *in_buffer, 
-                                           kim_count_t   in_length);
+                                           kim_count   in_length);
 
-kim_error_t kim_string_prepend (kim_string_t *io_string,
-                                kim_string_t  in_prefix);
+kim_error kim_string_prepend (kim_string *io_string,
+                                kim_string  in_prefix);
 
-kim_error_t kim_string_append (kim_string_t *io_string, 
-                               kim_string_t  in_suffix);
+kim_error kim_string_append (kim_string *io_string, 
+                               kim_string  in_suffix);
 
 /* OS-specific because it should use UTF8-safe sorting where possible */
-kim_error_t kim_os_string_compare (kim_string_t      in_string,
-                                   kim_string_t      in_compare_to_string,
-                                   kim_comparison_t *out_comparison);
+kim_error kim_os_string_compare (kim_string      in_string,
+                                   kim_string      in_compare_to_string,
+                                   kim_comparison *out_comparison);
 
 #endif /* KIM_STRING_PRIVATE_H */

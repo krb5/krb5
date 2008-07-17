@@ -34,8 +34,8 @@ void test_kim_preferences_create (kim_test_state_t state)
     start_test (state, "kim_preferences_create");
 
     {
-        kim_error_t err = NULL;
-        kim_preferences_t prefs = NULL;
+        kim_error err = NULL;
+        kim_preferences prefs = NULL;
 
         err = kim_preferences_create (&prefs);
         fail_if_error (state, "kim_preferences_create", err, 
@@ -56,9 +56,9 @@ void test_kim_preferences_copy (kim_test_state_t state)
     start_test (state, "test_kim_preferences_copy");
     
     {
-        kim_error_t err = NULL;
-        kim_preferences_t prefs = NULL;
-        kim_preferences_t prefs_copy = NULL;
+        kim_error err = NULL;
+        kim_preferences prefs = NULL;
+        kim_preferences prefs_copy = NULL;
         
         err = kim_preferences_create (&prefs);
         fail_if_error (state, "kim_preferences_create", err, 
@@ -86,11 +86,11 @@ void test_kim_preferences_set_options (kim_test_state_t state)
     start_test (state, "kim_preferences_set_options");
     
     {
-        kim_error_t err = NULL;
-        kim_preferences_t prefs = NULL;
-        kim_options_t old_options = NULL;
-        kim_options_t new_options = NULL;
-        kim_options_t verify_options = NULL;
+        kim_error err = NULL;
+        kim_preferences prefs = NULL;
+        kim_options old_options = NULL;
+        kim_options new_options = NULL;
+        kim_options verify_options = NULL;
         const char *custom_data = "Some custom data";
         const char *verify_custom_data = NULL;
         
@@ -163,9 +163,9 @@ void test_kim_preferences_set_remember_options (kim_test_state_t state)
     start_test (state, "kim_preferences_set_remember_options");
     
     {
-        kim_error_t err = NULL;
-        kim_preferences_t prefs = NULL;
-        kim_boolean_t remember_options = FALSE;
+        kim_error err = NULL;
+        kim_preferences prefs = NULL;
+        kim_boolean remember_options = FALSE;
         
         err = kim_preferences_create (&prefs);
         fail_if_error (state, "kim_preferences_create", err, 
@@ -220,13 +220,13 @@ void test_kim_preferences_set_client_identity (kim_test_state_t state)
     start_test (state, "kim_preferences_set_client_identity");
     
     {
-        kim_error_t err = NULL;
-        kim_preferences_t prefs = NULL;
-        kim_string_t test_string = "user@EXAMPLE.COM";
-        kim_identity_t test_identity = KIM_IDENTITY_ANY;
-        kim_string_t string = NULL;
-        kim_identity_t identity = KIM_IDENTITY_ANY;
-        kim_comparison_t comparison = 0;
+        kim_error err = NULL;
+        kim_preferences prefs = NULL;
+        kim_string test_string = "user@EXAMPLE.COM";
+        kim_identity test_identity = KIM_IDENTITY_ANY;
+        kim_string string = NULL;
+        kim_identity identity = KIM_IDENTITY_ANY;
+        kim_comparison comparison = 0;
         
         err = kim_preferences_create (&prefs);
         fail_if_error (state, "kim_preferences_create", err, 

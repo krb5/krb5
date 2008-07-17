@@ -49,7 +49,7 @@ void end_test (kim_test_state_t in_state);
 
 void fail_if_error (kim_test_state_t  in_state, 
                     const char       *in_function,
-                    kim_error_t       in_err, 
+                    kim_error       in_err, 
                     const char       *in_format,
                     ...)
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
@@ -59,7 +59,7 @@ __attribute__ ((__format__ (__printf__, 4, 5)))
 
 void fail_if_error_code (kim_test_state_t  in_state, 
                          const char       *in_function,
-                         kim_error_code_t  in_code, 
+                         kim_error_code  in_code, 
                          const char       *in_format,
                          ...)
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)

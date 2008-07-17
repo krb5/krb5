@@ -36,19 +36,19 @@ CFStringEncoding kim_os_string_get_encoding (void);
 CFStringRef kim_os_string_get_cfstring_for_key_and_dictionary (CFStringRef in_key,
                                                                CFBundleRef in_bundle);
 
-CFStringRef kim_os_string_get_cfstring_for_key (kim_string_t in_key_string);
+CFStringRef kim_os_string_get_cfstring_for_key (kim_string in_key_string);
 
-kim_error_t kim_os_string_create_from_cfstring (kim_string_t *out_string,
+kim_error kim_os_string_create_from_cfstring (kim_string *out_string,
                                                 CFStringRef   in_cfstring);
 
-kim_error_t kim_os_string_create_for_key (kim_string_t *out_string,
-                                          kim_string_t  in_key_string);
+kim_error kim_os_string_create_for_key (kim_string *out_string,
+                                          kim_string  in_key_string);
 
-kim_error_t kim_os_string_get_cfstring (kim_string_t  in_string,
+kim_error kim_os_string_get_cfstring (kim_string  in_string,
                                         CFStringRef  *out_cfstring);
 
-kim_error_t kim_os_string_compare_to_cfstring (kim_string_t      in_string,
+kim_error kim_os_string_compare_to_cfstring (kim_string      in_string,
                                                CFStringRef       in_compare_to_cfstring,
-                                               kim_comparison_t *out_comparison);
+                                               kim_comparison *out_comparison);
 
 #endif /* KIM_PRIVATE_H */

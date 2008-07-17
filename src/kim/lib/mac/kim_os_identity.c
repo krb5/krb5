@@ -31,9 +31,9 @@
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_identity_create_for_username (kim_identity_t *out_identity)
+kim_error kim_os_identity_create_for_username (kim_identity *out_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !out_identity) { err = param_error (1, "out_identity", "NULL"); }
     

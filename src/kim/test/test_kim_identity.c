@@ -29,9 +29,9 @@
 typedef struct test_identity_d {
     const char *string;
     const char *display_string;
-    kim_boolean_t is_tgt_service;
+    kim_boolean is_tgt_service;
     const char *realm;
-    kim_count_t component_count;
+    kim_count component_count;
     const char *components[5];
 } test_identity_t;
 
@@ -61,17 +61,17 @@ test_identity_t test_identities[] = {
 
 void test_kim_identity_create_from_krb5_principal (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
     
     start_test (state, "kim_identity_create_from_krb5_principal");
     
     for (i = 0; test_identities[i].string; i++) {
         krb5_error_code code = 0;
-        kim_error_t err = NULL;
+        kim_error err = NULL;
         krb5_context context = NULL;
         krb5_principal principal = NULL;
-        kim_identity_t identity = NULL;
-        kim_string_t string = NULL;
+        kim_identity identity = NULL;
+        kim_string string = NULL;
         
         printf (".");
         
@@ -122,14 +122,14 @@ void test_kim_identity_create_from_krb5_principal (kim_test_state_t state)
 
 void test_kim_identity_create_from_string (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
     
     start_test (state, "kim_identity_create_from_string");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
-        kim_identity_t identity = NULL;
-        kim_string_t string = NULL;
+        kim_error err = NULL;
+        kim_identity identity = NULL;
+        kim_string string = NULL;
         
         printf (".");
         
@@ -167,15 +167,15 @@ void test_kim_identity_create_from_string (kim_test_state_t state)
 
 void test_kim_identity_copy (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
     
     start_test (state, "kim_identity_copy");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
-        kim_identity_t identity = NULL;
-        kim_identity_t identity_copy = NULL;
-        kim_string_t string = NULL;
+        kim_error err = NULL;
+        kim_identity identity = NULL;
+        kim_identity identity_copy = NULL;
+        kim_string string = NULL;
         
         printf (".");
         
@@ -219,13 +219,13 @@ void test_kim_identity_copy (kim_test_state_t state)
 
 void test_kim_identity_compare (kim_test_state_t state)
 {
-    kim_count_t i, j = 0;
+    kim_count i, j = 0;
     
     start_test (state, "kim_identity_create_from_string");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
-        kim_identity_t identity = NULL;
+        kim_error err = NULL;
+        kim_identity identity = NULL;
         
         printf (".");
         
@@ -235,8 +235,8 @@ void test_kim_identity_compare (kim_test_state_t state)
                        test_identities[i].string);
         
         for (j = 0; !err && test_identities[j].string; j++) {
-            kim_identity_t compare_to_identity = NULL;
-            kim_comparison_t comparison = 0;
+            kim_identity compare_to_identity = NULL;
+            kim_comparison comparison = 0;
            
             err = kim_identity_create_from_string (&compare_to_identity, test_identities[j].string);
             fail_if_error (state, "kim_identity_create_from_string", err, 
@@ -277,14 +277,14 @@ void test_kim_identity_compare (kim_test_state_t state)
 
 void test_kim_identity_get_display_string (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
 
     start_test (state, "kim_identity_get_display_string");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
-        kim_identity_t identity = NULL;
-        kim_string_t string = NULL;
+        kim_error err = NULL;
+        kim_identity identity = NULL;
+        kim_string string = NULL;
         
         printf (".");
         
@@ -321,14 +321,14 @@ void test_kim_identity_get_display_string (kim_test_state_t state)
 
 void test_kim_identity_get_realm (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
 
     start_test (state, "kim_identity_get_realm");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
-        kim_identity_t identity = NULL;
-        kim_string_t realm = NULL;
+        kim_error err = NULL;
+        kim_identity identity = NULL;
+        kim_string realm = NULL;
         
         printf (".");
         
@@ -364,14 +364,14 @@ void test_kim_identity_get_realm (kim_test_state_t state)
 
 void test_kim_identity_get_number_of_components (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
 
     start_test (state, "kim_identity_get_number_of_components");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
-        kim_identity_t identity = NULL;
-        kim_count_t count = 0;
+        kim_error err = NULL;
+        kim_identity identity = NULL;
+        kim_count count = 0;
         
         printf (".");
         
@@ -407,14 +407,14 @@ void test_kim_identity_get_number_of_components (kim_test_state_t state)
 
 void test_kim_identity_get_component_at_index (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
     
     start_test (state, "kim_identity_get_component_at_index");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
-        kim_identity_t identity = NULL;
-        kim_count_t c = 0;
+        kim_error err = NULL;
+        kim_identity identity = NULL;
+        kim_count c = 0;
         
         printf (".");
         
@@ -426,7 +426,7 @@ void test_kim_identity_get_component_at_index (kim_test_state_t state)
         }
         
         for (c = 0; !err && c < test_identities[i].component_count; c++) {
-            kim_string_t component = NULL;
+            kim_string component = NULL;
             
             err = kim_identity_get_component_at_index (identity, c, &component);
             fail_if_error (state, "kim_identity_get_component_at_index", err, 
@@ -455,17 +455,17 @@ void test_kim_identity_get_component_at_index (kim_test_state_t state)
 
 void test_kim_identity_get_krb5_principal (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
     
     start_test (state, "kim_identity_get_krb5_principal");
     
     for (i = 0; test_identities[i].string; i++) {
         krb5_error_code code = 0;
-        kim_error_t err = NULL;
+        kim_error err = NULL;
         krb5_context context = NULL;
         krb5_principal principal = NULL;
         krb5_principal identity_principal = NULL;
-        kim_identity_t identity = NULL;
+        kim_identity identity = NULL;
         
         printf (".");
         
@@ -518,12 +518,12 @@ void test_kim_identity_get_krb5_principal (kim_test_state_t state)
 /*
 void test_kim_identity_is_tgt_service (kim_test_state_t state)
 {
-    kim_count_t i = 0;
+    kim_count i = 0;
     
     start_test (state, "kim_identity_is_tgt_service");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error_t err = NULL;
+        kim_error err = NULL;
         kim_identity_t identity = NULL;
         kim_boolean_t is_tgt_service = 0;
         

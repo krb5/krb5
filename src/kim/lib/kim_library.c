@@ -36,13 +36,13 @@
 
 /* ------------------------------------------------------------------------ */
 
-void __kim_library_debug_printf (kim_string_t in_function, 
-                                 kim_string_t in_format, 
+void __kim_library_debug_printf (kim_string in_function, 
+                                 kim_string in_format, 
                                  ...)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t format = NULL;
-    kim_string_t string = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string format = NULL;
+    kim_string string = NULL;
     
     if (!err && !in_function) { err = param_error (1, "in_function", "NULL"); }
     if (!err && !in_format  ) { err = param_error (2, "in_format", "NULL"); }
@@ -70,13 +70,13 @@ void __kim_library_debug_printf (kim_string_t in_function,
 #pragma mark -- Allow Home Directory Access --
 
 static pthread_mutex_t g_allow_home_directory_access_mutex = PTHREAD_MUTEX_INITIALIZER;
-kim_boolean_t g_allow_home_directory_access = TRUE;
+kim_boolean g_allow_home_directory_access = TRUE;
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_library_set_allow_home_directory_access (kim_boolean_t in_allow_access)
+kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     int mutex_err = pthread_mutex_lock (&g_allow_home_directory_access_mutex);
     if (mutex_err) { err = os_error (mutex_err); }
@@ -91,9 +91,9 @@ kim_error_t kim_library_set_allow_home_directory_access (kim_boolean_t in_allow_
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_library_get_allow_home_directory_access (kim_boolean_t *out_allow_access)
+kim_error kim_library_get_allow_home_directory_access (kim_boolean *out_allow_access)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     int mutex_err = 0;
     
     if (!err && !out_allow_access) { err = param_error (3, "out_allow_access", "NULL"); }
@@ -113,10 +113,10 @@ kim_error_t kim_library_get_allow_home_directory_access (kim_boolean_t *out_allo
 
 /* ------------------------------------------------------------------------ */
 
-kim_boolean_t kim_library_allow_home_directory_access (void)
+kim_boolean kim_library_allow_home_directory_access (void)
 {
-    kim_boolean_t allow_access = FALSE;
-    kim_error_t err = kim_library_get_allow_home_directory_access (&allow_access);
+    kim_boolean allow_access = FALSE;
+    kim_error err = kim_library_get_allow_home_directory_access (&allow_access);
     
     kim_error_free (&err);
     
@@ -127,13 +127,13 @@ kim_boolean_t kim_library_allow_home_directory_access (void)
 #pragma mark -- Allow Automatic Prompting --
 
 static pthread_mutex_t g_allow_automatic_prompting_mutex = PTHREAD_MUTEX_INITIALIZER;
-kim_boolean_t g_allow_automatic_prompting = TRUE;
+kim_boolean g_allow_automatic_prompting = TRUE;
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_library_set_allow_automatic_prompting (kim_boolean_t in_allow_automatic_prompting)
+kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automatic_prompting)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     int mutex_err = pthread_mutex_lock (&g_allow_automatic_prompting_mutex);
     if (mutex_err) { err = os_error (mutex_err); }
@@ -148,9 +148,9 @@ kim_error_t kim_library_set_allow_automatic_prompting (kim_boolean_t in_allow_au
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_library_get_allow_automatic_prompting (kim_boolean_t *out_allow_automatic_prompting)
+kim_error kim_library_get_allow_automatic_prompting (kim_boolean *out_allow_automatic_prompting)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     int mutex_err = 0;
     
     if (!err && !out_allow_automatic_prompting) { err = param_error (3, "out_allow_automatic_prompting", "NULL"); }
@@ -170,10 +170,10 @@ kim_error_t kim_library_get_allow_automatic_prompting (kim_boolean_t *out_allow_
 
 /* ------------------------------------------------------------------------ */
 
-kim_boolean_t kim_library_allow_automatic_prompting (void)
+kim_boolean kim_library_allow_automatic_prompting (void)
 {
-    kim_boolean_t allow_automatic_prompting = TRUE;
-    kim_error_t err = kim_library_get_allow_automatic_prompting (&allow_automatic_prompting);
+    kim_boolean allow_automatic_prompting = TRUE;
+    kim_error err = kim_library_get_allow_automatic_prompting (&allow_automatic_prompting);
     
     if (allow_automatic_prompting && getenv ("KERBEROSLOGIN_NEVER_PROMPT")) {
         kim_debug_printf ("KERBEROSLOGIN_NEVER_PROMPT is set.");
@@ -189,7 +189,7 @@ kim_boolean_t kim_library_allow_automatic_prompting (void)
         /* Make sure there is at least 1 config file. We don't support DNS 
          * domain-realm lookup, so if there is no config, Kerberos won't work. */
         
-        kim_boolean_t kerberos_config_exists = FALSE;
+        kim_boolean kerberos_config_exists = FALSE;
         char **files = NULL;
         profile_t profile = NULL;
         

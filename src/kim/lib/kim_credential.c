@@ -37,11 +37,11 @@ struct kim_credential_iterator_opaque kim_credential_iterator_initializer = { NU
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_iterator_create (kim_credential_iterator_t *out_credential_iterator,
-                                            kim_ccache_t               in_ccache)
+kim_error kim_credential_iterator_create (kim_credential_iterator *out_credential_iterator,
+                                          kim_ccache               in_ccache)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_credential_iterator_t credential_iterator = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_credential_iterator credential_iterator = NULL;
     
     if (!err && !out_credential_iterator) { err = param_error (1, "out_credential_iterator", "NULL"); }
     if (!err && !in_ccache              ) { err = param_error (2, "in_ccache", "NULL"); }
@@ -83,10 +83,10 @@ kim_error_t kim_credential_iterator_create (kim_credential_iterator_t *out_crede
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_iterator_next (kim_credential_iterator_t  in_credential_iterator,
-                                          kim_credential_t          *out_credential)
+kim_error kim_credential_iterator_next (kim_credential_iterator  in_credential_iterator,
+                                        kim_credential          *out_credential)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_credential_iterator) { err = param_error (1, "in_credential_iterator", "NULL"); }
     if (!err && !out_credential        ) { err = param_error (2, "out_credential", "NULL"); }
@@ -113,13 +113,13 @@ kim_error_t kim_credential_iterator_next (kim_credential_iterator_t  in_credenti
             err = krb5_error (terr);
         }
     }
-
+    
     return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-void kim_credential_iterator_free (kim_credential_iterator_t *io_credential_iterator)
+void kim_credential_iterator_free (kim_credential_iterator *io_credential_iterator)
 {
     if (io_credential_iterator && *io_credential_iterator) {
         if ((*io_credential_iterator)->context) { 
@@ -152,10 +152,10 @@ struct kim_credential_opaque kim_credential_initializer = { NULL, NULL };
 
 /* ------------------------------------------------------------------------ */
 
-static inline kim_error_t kim_credential_allocate (kim_credential_t *out_credential)
+static inline kim_error kim_credential_allocate (kim_credential *out_credential)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_credential_t credential = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
     
     if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
     
@@ -177,12 +177,12 @@ static inline kim_error_t kim_credential_allocate (kim_credential_t *out_credent
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_create_new (kim_credential_t *out_credential,
-                                       kim_identity_t    in_client_identity,
-                                       kim_options_t     in_options)
+kim_error kim_credential_create_new (kim_credential *out_credential,
+                                     kim_identity    in_client_identity,
+                                     kim_options     in_options)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_credential_t credential = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
     
     if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
     
@@ -208,19 +208,19 @@ kim_error_t kim_credential_create_new (kim_credential_t *out_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_create_from_keytab (kim_credential_t *out_credential,
-                                               kim_identity_t    in_identity,
-                                               kim_options_t     in_options,
-                                               kim_string_t      in_keytab)
+kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
+                                             kim_identity    in_identity,
+                                             kim_options     in_options,
+                                             kim_string      in_keytab)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_credential_t credential = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
     krb5_keytab keytab = NULL;
     krb5_creds creds;
-    kim_boolean_t free_creds = FALSE;
+    kim_boolean free_creds = FALSE;
     krb5_principal principal = NULL;
-    kim_time_t start_time = 0;
-    kim_string_t service_name = NULL;
+    kim_time start_time = 0;
+    kim_string service_name = NULL;
     krb5_get_init_creds_opt *init_cred_options = NULL;
     
     if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
@@ -234,8 +234,8 @@ kim_error_t kim_credential_create_from_keytab (kim_credential_t *out_credential,
     }
     
     if (!err) {
-        kim_options_t options = in_options;
-
+        kim_options options = in_options;
+        
         if (!options) {
             err = kim_options_create (&options);
         }
@@ -270,7 +270,7 @@ kim_error_t kim_credential_create_from_keytab (kim_credential_t *out_credential,
         } else {
             krb5_kt_cursor cursor = NULL;
             krb5_keytab_entry entry;
-            kim_boolean_t entry_allocated = FALSE;
+            kim_boolean entry_allocated = FALSE;
             
             err = krb5_error (krb5_kt_start_seq_get (credential->context, keytab, &cursor));
             
@@ -287,7 +287,7 @@ kim_error_t kim_credential_create_from_keytab (kim_credential_t *out_credential,
             if (cursor         ) { krb5_kt_end_seq_get (credential->context, keytab, &cursor); }
         }
     }
-
+    
     if (!err) {
         err = krb5_error (krb5_get_init_creds_keytab (credential->context, &creds, principal, keytab, 
                                                       start_time, (char *) service_name, init_cred_options));
@@ -314,12 +314,12 @@ kim_error_t kim_credential_create_from_keytab (kim_credential_t *out_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_create_from_krb5_creds (kim_credential_t *out_credential,
-                                                   krb5_context      in_krb5_context,
-                                                   krb5_creds       *in_krb5_creds)
+kim_error kim_credential_create_from_krb5_creds (kim_credential *out_credential,
+                                                 krb5_context      in_krb5_context,
+                                                 krb5_creds       *in_krb5_creds)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_credential_t credential = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
     
     if (!err && !out_credential ) { err = param_error (1, "out_credential", "NULL"); }
     if (!err && !in_krb5_creds  ) { err = param_error (2, "in_krb5_creds", "NULL"); }
@@ -347,11 +347,11 @@ kim_error_t kim_credential_create_from_krb5_creds (kim_credential_t *out_credent
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_copy (kim_credential_t *out_credential,
-                                 kim_credential_t  in_credential)
+kim_error kim_credential_copy (kim_credential *out_credential,
+                               kim_credential  in_credential)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_credential_t credential = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
     
     if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
     if (!err && !in_credential ) { err = param_error (2, "in_credential", "NULL"); }
@@ -378,11 +378,11 @@ kim_error_t kim_credential_copy (kim_credential_t *out_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_get_krb5_creds (kim_credential_t   in_credential,
-                                           krb5_context       in_krb5_context,
-                                           krb5_creds       **out_krb5_creds)
+kim_error kim_credential_get_krb5_creds (kim_credential   in_credential,
+                                         krb5_context       in_krb5_context,
+                                         krb5_creds       **out_krb5_creds)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_credential  ) { err = param_error (1, "in_credential", "NULL"); }
     if (!err && !in_krb5_context) { err = param_error (2, "in_krb5_context", "NULL"); }
@@ -397,10 +397,10 @@ kim_error_t kim_credential_get_krb5_creds (kim_credential_t   in_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_get_client_identity (kim_credential_t  in_credential,
-                                                kim_identity_t   *out_client_identity)
+kim_error kim_credential_get_client_identity (kim_credential  in_credential,
+                                              kim_identity   *out_client_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_credential      ) { err = param_error (1, "in_credential", "NULL"); }
     if (!err && !out_client_identity) { err = param_error (2, "out_client_identity", "NULL"); }
@@ -416,10 +416,10 @@ kim_error_t kim_credential_get_client_identity (kim_credential_t  in_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_get_service_identity (kim_credential_t  in_credential,
-                                                 kim_identity_t   *out_service_identity)
+kim_error kim_credential_get_service_identity (kim_credential  in_credential,
+                                               kim_identity   *out_service_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_credential       ) { err = param_error (1, "in_credential", "NULL"); }
     if (!err && !out_service_identity) { err = param_error (2, "out_service_identity", "NULL"); }
@@ -435,11 +435,11 @@ kim_error_t kim_credential_get_service_identity (kim_credential_t  in_credential
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_is_tgt (kim_credential_t  in_credential,
-                                   kim_boolean_t     *out_is_tgt)
+kim_error kim_credential_is_tgt (kim_credential  in_credential,
+                                 kim_boolean     *out_is_tgt)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_identity_t service = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity service = NULL;
     
     if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
     if (!err && !out_is_tgt   ) { err = param_error (2, "out_is_tgt", "NULL"); }
@@ -459,12 +459,12 @@ kim_error_t kim_credential_is_tgt (kim_credential_t  in_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_get_state (kim_credential_t           in_credential,
-                                      kim_credential_state_t    *out_state)
+kim_error kim_credential_get_state (kim_credential           in_credential,
+                                    kim_credential_state    *out_state)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_time_t expiration_time = 0;
-    kim_time_t start_time = 0;
+    kim_error err = KIM_NO_ERROR;
+    kim_time expiration_time = 0;
+    kim_time start_time = 0;
     krb5_timestamp now = 0;
     
     if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
@@ -489,7 +489,7 @@ kim_error_t kim_credential_get_state (kim_credential_t           in_credential,
         
         if (expiration_time <= now) {
             *out_state = kim_credentials_state_expired;
-        
+            
         } else if ((in_credential->creds->ticket_flags & TKT_FLG_POSTDATED) && 
                    (in_credential->creds->ticket_flags & TKT_FLG_INVALID)) {
             if (start_time > now) { 
@@ -505,8 +505,8 @@ kim_error_t kim_credential_get_state (kim_credential_t           in_credential,
             if (!code) { laddresses = NULL; }
             
             if (laddresses) { /* assume valid if the local host has no addresses */
-                kim_boolean_t found_match = FALSE;
-                kim_count_t i = 0;
+                kim_boolean found_match = FALSE;
+                kim_count i = 0;
                 
                 for (i = 0; in_credential->creds->addresses[0]; i++) {
                     if (krb5_address_search (in_credential->context, 
@@ -530,10 +530,10 @@ kim_error_t kim_credential_get_state (kim_credential_t           in_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_get_start_time (kim_credential_t  in_credential,
-                                           kim_time_t       *out_start_time)
+kim_error kim_credential_get_start_time (kim_credential  in_credential,
+                                         kim_time       *out_start_time)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
     
@@ -548,10 +548,10 @@ kim_error_t kim_credential_get_start_time (kim_credential_t  in_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_get_expiration_time (kim_credential_t  in_credential,
-                                                kim_time_t       *out_expiration_time)
+kim_error kim_credential_get_expiration_time (kim_credential  in_credential,
+                                              kim_time       *out_expiration_time)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
     
@@ -564,10 +564,10 @@ kim_error_t kim_credential_get_expiration_time (kim_credential_t  in_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_get_renewal_expiration_time (kim_credential_t  in_credential,
-                                                        kim_time_t       *out_renewal_expiration_time)
+kim_error kim_credential_get_renewal_expiration_time (kim_credential  in_credential,
+                                                      kim_time       *out_renewal_expiration_time)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
     
@@ -580,16 +580,16 @@ kim_error_t kim_credential_get_renewal_expiration_time (kim_credential_t  in_cre
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_store (kim_credential_t  in_credential,
-                                  kim_identity_t    in_client_identity,
-                                  kim_ccache_t     *out_ccache)
+kim_error kim_credential_store (kim_credential  in_credential,
+                                kim_identity    in_client_identity,
+                                kim_ccache     *out_ccache)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     krb5_context context = NULL;
     krb5_ccache k5ccache = NULL;
-    kim_string_t type = NULL;
+    kim_string type = NULL;
     krb5_principal client_principal = NULL;
-    kim_boolean_t destroy_ccache_on_error = FALSE;
+    kim_boolean destroy_ccache_on_error = FALSE;
     
     if (!err && !in_credential     ) { err = param_error (1, "in_credential", "NULL"); }
     if (!err && !in_client_identity) { err = param_error (2, "in_client_identity", "NULL"); }
@@ -605,12 +605,12 @@ kim_error_t kim_credential_store (kim_credential_t  in_credential,
     
     if (!err) {
         char *environment_ccache = getenv ("KRB5CCNAME");
-
+        
         if (environment_ccache) {
             err = krb5_error (krb5_cc_resolve (context, environment_ccache, &k5ccache));
             
         } else {
-            kim_ccache_t ccache = NULL;
+            kim_ccache ccache = NULL;
             
             err = kim_ccache_create_from_client_identity (&ccache, in_client_identity);
             
@@ -637,9 +637,9 @@ kim_error_t kim_credential_store (kim_credential_t  in_credential,
 	err = krb5_error (krb5_cc_store_cred (in_credential->context, 
                                               k5ccache, in_credential->creds));
     }
-
+    
 #warning Call plugins here
-
+    
     if (!err && out_ccache) {
         err = kim_ccache_create_from_krb5_ccache (out_ccache, context, k5ccache);
     }
@@ -654,18 +654,18 @@ kim_error_t kim_credential_store (kim_credential_t  in_credential,
     if (client_principal) { krb5_free_principal (context, client_principal); }
     if (context         ) { krb5_free_context (context); }
     kim_string_free (&type);
-
+    
     return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_verify (kim_credential_t in_credential,
-                                   kim_identity_t   in_service_identity,
-                                   kim_string_t     in_keytab,
-                                   kim_boolean_t    in_fail_if_no_service_key)
+kim_error kim_credential_verify (kim_credential in_credential,
+                                 kim_identity   in_service_identity,
+                                 kim_string     in_keytab,
+                                 kim_boolean    in_fail_if_no_service_key)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     krb5_context scontext = NULL;
     krb5_principal service_principal = NULL;
     krb5_keytab keytab = NULL;
@@ -686,11 +686,11 @@ kim_error_t kim_credential_verify (kim_credential_t in_credential,
     
     if (!err) {
 	krb5_verify_init_creds_opt options;
-
+        
 	/* That's "no key == fail" not "no fail" >.< */
         krb5_verify_init_creds_opt_init (&options);
         krb5_verify_init_creds_opt_set_ap_req_nofail (&options, in_fail_if_no_service_key);
-
+        
 	err = krb5_error (krb5_verify_init_creds (scontext, in_credential->creds, 
 						  service_principal,
 						  keytab,
@@ -699,15 +699,15 @@ kim_error_t kim_credential_verify (kim_credential_t in_credential,
 	
 	if (err && !service_principal && in_fail_if_no_service_key) {
 	    /* If the service principal wasn't specified but we are supposed to fail without a key
-               we should walk the keytab trying to find one that succeeds. */
+             we should walk the keytab trying to find one that succeeds. */
             krb5_error_code code = 0;
-            kim_boolean_t verified = 0;
+            kim_boolean verified = 0;
 	    krb5_kt_cursor cursor = NULL;
 	    krb5_keytab_entry entry;
-
+            
 	    
 	    if (!keytab) {
-		 code = krb5_kt_default (scontext, &keytab);
+                code = krb5_kt_default (scontext, &keytab);
 	    }
 	    
 	    if (!err) {
@@ -715,8 +715,8 @@ kim_error_t kim_credential_verify (kim_credential_t in_credential,
 	    }
 	    
 	    while (!code && !verified) {
-                kim_boolean_t free_entry = 0;
-
+                kim_boolean free_entry = 0;
+                
 		code = krb5_kt_next_entry (scontext, keytab, &entry, &cursor);
 		free_entry = !code; /* remember to free */
                 
@@ -731,7 +731,7 @@ kim_error_t kim_credential_verify (kim_credential_t in_credential,
                 if (!code) {
                     verified = 1;
                 }
-
+                
                 if (free_entry) { krb5_free_keytab_entry_contents (scontext, &entry); }
 	    }
             
@@ -753,22 +753,22 @@ kim_error_t kim_credential_verify (kim_credential_t in_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_renew (kim_credential_t *io_credential,
-                                  kim_options_t     in_options)
+kim_error kim_credential_renew (kim_credential *io_credential,
+                                kim_options     in_options)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t service_name = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string service_name = NULL;
     krb5_ccache ccache = NULL;
     
     if (!err && !io_credential) { err = param_error (1, "io_credential", "NULL"); }
     
     if (!err) {
-        kim_options_t options = in_options;
+        kim_options options = in_options;
 	
         if (!options) {
             err = kim_options_create (&options);
         }
-
+        
 	if (!err) {
 	    err = kim_options_get_service_name (options, &service_name);
 	}
@@ -786,7 +786,7 @@ kim_error_t kim_credential_renew (kim_credential_t *io_credential,
 	err = krb5_error (krb5_cc_initialize ((*io_credential)->context, ccache, 
 					      (*io_credential)->creds->client));
     }
-        
+    
     if (!err) {
 	err = krb5_error (krb5_cc_store_cred ((*io_credential)->context, ccache, 
 					      (*io_credential)->creds));
@@ -795,7 +795,7 @@ kim_error_t kim_credential_renew (kim_credential_t *io_credential,
     if (!err) {
 	krb5_creds creds;
 	krb5_creds *renewed_creds = NULL;
-	kim_boolean_t free_creds = 0;
+	kim_boolean free_creds = 0;
 	
 	err = krb5_error (krb5_get_renewed_creds ((*io_credential)->context, 
 						  &creds, (*io_credential)->creds->client,
@@ -814,7 +814,7 @@ kim_error_t kim_credential_renew (kim_credential_t *io_credential,
 	
 	if (free_creds) { krb5_free_cred_contents ((*io_credential)->context, &creds); }
     }
-
+    
     if (ccache) { krb5_cc_destroy ((*io_credential)->context, ccache); }
     kim_string_free (&service_name);
     
@@ -823,17 +823,17 @@ kim_error_t kim_credential_renew (kim_credential_t *io_credential,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_credential_validate (kim_credential_t *io_credential,
-                                     kim_options_t     in_options)
+kim_error kim_credential_validate (kim_credential *io_credential,
+                                   kim_options     in_options)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t service_name = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string service_name = NULL;
     krb5_ccache ccache = NULL;
     
     if (!err && !io_credential) { err = param_error (1, "io_credential", "NULL"); }
     
     if (!err) {
-        kim_options_t options = in_options;
+        kim_options options = in_options;
 	
         if (!options) {
             err = kim_options_create (&options);
@@ -865,7 +865,7 @@ kim_error_t kim_credential_validate (kim_credential_t *io_credential,
     if (!err) {
 	krb5_creds creds;
 	krb5_creds *validated_creds = NULL;
-	kim_boolean_t free_creds = 0;
+	kim_boolean free_creds = 0;
 	
         err = krb5_error (krb5_get_validated_creds ((*io_credential)->context, 
 						    &creds, (*io_credential)->creds->client, 
@@ -887,13 +887,13 @@ kim_error_t kim_credential_validate (kim_credential_t *io_credential,
     
     if (ccache) { krb5_cc_destroy ((*io_credential)->context, ccache); }
     kim_string_free (&service_name);
-
+    
     return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-void kim_credential_free (kim_credential_t *io_credential)
+void kim_credential_free (kim_credential *io_credential)
 {
     if (io_credential && *io_credential) {
         if ((*io_credential)->context) {

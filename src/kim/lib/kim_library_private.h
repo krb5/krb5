@@ -31,24 +31,24 @@
 
 
 #define kim_debug_printf(format, ...) __kim_library_debug_printf(__FUNCTION__, format, ## __VA_ARGS__)
-void __kim_library_debug_printf (kim_string_t in_function, 
-                                 kim_string_t in_format, 
+void __kim_library_debug_printf (kim_string in_function, 
+                                 kim_string in_format, 
                                  ...);
 
-kim_error_t kim_library_set_allow_home_directory_access (kim_boolean_t in_allow_access);
+kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access);
 
-kim_error_t kim_library_get_allow_home_directory_access (kim_boolean_t *out_allow_access);
+kim_error kim_library_get_allow_home_directory_access (kim_boolean *out_allow_access);
 
-kim_boolean_t kim_library_allow_home_directory_access (void);
+kim_boolean kim_library_allow_home_directory_access (void);
 
-kim_error_t kim_library_set_allow_automatic_prompting (kim_boolean_t in_allow_automatic_prompting);
+kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automatic_prompting);
 
-kim_error_t kim_library_get_allow_automatic_prompting (kim_boolean_t *out_allow_automatic_prompting);
+kim_error kim_library_get_allow_automatic_prompting (kim_boolean *out_allow_automatic_prompting);
 
-kim_boolean_t kim_library_allow_automatic_prompting (void);
+kim_boolean kim_library_allow_automatic_prompting (void);
 
-void kim_os_library_debug_print (kim_string_t in_string);
+void kim_os_library_debug_print (kim_string in_string);
 
-kim_boolean_t kim_os_library_caller_is_server (void);
+kim_boolean kim_os_library_caller_is_server (void);
 
 #endif /* KIM_LIBRARY_PRIVATE_H */

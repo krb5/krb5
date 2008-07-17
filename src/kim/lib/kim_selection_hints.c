@@ -27,41 +27,41 @@
 /* ------------------------------------------------------------------------ */
 
 struct kim_selection_hints_opaque {
-    kim_string_t application_identifier;
-    kim_string_t application_name;
-    kim_string_t explanation;
-    kim_options_t options;
-    kim_boolean_t allow_user_interaction;
-    kim_boolean_t use_cached_results;
-    kim_string_t service_identity;
-    kim_string_t client_realm;
-    kim_string_t user;
-    kim_string_t service_realm;
-    kim_string_t service;
-    kim_string_t server;
+    kim_string application_identifier;
+    kim_string application_name;
+    kim_string explanation;
+    kim_options options;
+    kim_boolean allow_user_interaction;
+    kim_boolean use_cached_results;
+    kim_string service_identity;
+    kim_string client_realm;
+    kim_string user;
+    kim_string service_realm;
+    kim_string service;
+    kim_string server;
 };
 
 struct kim_selection_hints_opaque kim_selection_hints_initializer = { 
-    NULL,
-    NULL,
-    NULL,
-    KIM_OPTIONS_DEFAULT,
-    TRUE,
-    TRUE,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+NULL,
+NULL,
+NULL,
+KIM_OPTIONS_DEFAULT,
+TRUE,
+TRUE,
+NULL,
+NULL,
+NULL,
+NULL,
+NULL,
+NULL
 };
 
 /* ------------------------------------------------------------------------ */
 
-static inline kim_error_t kim_selection_hints_allocate (kim_selection_hints_t *out_selection_hints)
+static inline kim_error kim_selection_hints_allocate (kim_selection_hints *out_selection_hints)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_selection_hints_t selection_hints = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_selection_hints selection_hints = NULL;
     
     if (!err && !out_selection_hints) { err = param_error (1, "out_selection_hints", "NULL"); }
     
@@ -83,11 +83,11 @@ static inline kim_error_t kim_selection_hints_allocate (kim_selection_hints_t *o
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_create (kim_selection_hints_t *out_selection_hints,
-                                        kim_string_t           in_application_identifier)
+kim_error kim_selection_hints_create (kim_selection_hints *out_selection_hints,
+                                      kim_string           in_application_identifier)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_selection_hints_t selection_hints = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_selection_hints selection_hints = NULL;
     
     if (!err && !out_selection_hints      ) { err = param_error (1, "out_selection_hints", "NULL"); }
     if (!err && !in_application_identifier) { err = param_error (1, "in_application_identifier", "NULL"); }
@@ -113,11 +113,11 @@ kim_error_t kim_selection_hints_create (kim_selection_hints_t *out_selection_hin
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_copy (kim_selection_hints_t *out_selection_hints,
-                                      kim_selection_hints_t  in_selection_hints)
+kim_error kim_selection_hints_copy (kim_selection_hints *out_selection_hints,
+                                    kim_selection_hints  in_selection_hints)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_selection_hints_t selection_hints = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_selection_hints selection_hints = NULL;
     
     if (!err && !out_selection_hints) { err = param_error (1, "out_selection_hints", "NULL"); }
     if (!err && !in_selection_hints ) { err = param_error (1, "in_selection_hints", "NULL"); }
@@ -191,10 +191,10 @@ kim_error_t kim_selection_hints_copy (kim_selection_hints_t *out_selection_hints
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_service_identity_hint (kim_selection_hints_t io_selection_hints,
-                                                           kim_identity_t        in_service_identity)
+kim_error kim_selection_hints_set_service_identity_hint (kim_selection_hints io_selection_hints,
+                                                         kim_identity        in_service_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints ) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_service_identity) { err = param_error (2, "in_service_identity", "KIM_IDENTITY_ANY"); }
@@ -208,10 +208,10 @@ kim_error_t kim_selection_hints_set_service_identity_hint (kim_selection_hints_t
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_service_identity_hint (kim_selection_hints_t  in_selection_hints,
-                                                           kim_identity_t        *out_service_identity)
+kim_error kim_selection_hints_get_service_identity_hint (kim_selection_hints  in_selection_hints,
+                                                         kim_identity        *out_service_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints  ) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_service_identity) { err = param_error (2, "out_service_identity", "NULL"); }
@@ -225,10 +225,10 @@ kim_error_t kim_selection_hints_get_service_identity_hint (kim_selection_hints_t
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_client_realm_hint (kim_selection_hints_t io_selection_hints,
-                                                       kim_string_t          in_client_realm)
+kim_error kim_selection_hints_set_client_realm_hint (kim_selection_hints io_selection_hints,
+                                                     kim_string          in_client_realm)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_client_realm   ) { err = param_error (2, "in_client_realm", "NULL"); }
@@ -242,10 +242,10 @@ kim_error_t kim_selection_hints_set_client_realm_hint (kim_selection_hints_t io_
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_client_realm_hint (kim_selection_hints_t  in_selection_hints,
-                                                       kim_string_t          *out_client_realm)
+kim_error kim_selection_hints_get_client_realm_hint (kim_selection_hints  in_selection_hints,
+                                                     kim_string          *out_client_realm)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_client_realm  ) { err = param_error (2, "out_client_realm", "NULL"); }
@@ -263,10 +263,10 @@ kim_error_t kim_selection_hints_get_client_realm_hint (kim_selection_hints_t  in
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_user_hint (kim_selection_hints_t io_selection_hints,
-                                               kim_string_t          in_user)
+kim_error kim_selection_hints_set_user_hint (kim_selection_hints io_selection_hints,
+                                             kim_string          in_user)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_user           ) { err = param_error (2, "in_user", "NULL"); }
@@ -280,10 +280,10 @@ kim_error_t kim_selection_hints_set_user_hint (kim_selection_hints_t io_selectio
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_user_hint (kim_selection_hints_t  in_selection_hints,
-                                               kim_string_t          *out_user)
+kim_error kim_selection_hints_get_user_hint (kim_selection_hints  in_selection_hints,
+                                             kim_string          *out_user)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_user          ) { err = param_error (2, "out_user", "NULL"); }
@@ -301,10 +301,10 @@ kim_error_t kim_selection_hints_get_user_hint (kim_selection_hints_t  in_selecti
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_service_realm_hint (kim_selection_hints_t io_selection_hints,
-                                                        kim_string_t          in_service_realm)
+kim_error kim_selection_hints_set_service_realm_hint (kim_selection_hints io_selection_hints,
+                                                      kim_string          in_service_realm)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_service_realm  ) { err = param_error (2, "in_service_realm", "NULL"); }
@@ -318,10 +318,10 @@ kim_error_t kim_selection_hints_set_service_realm_hint (kim_selection_hints_t io
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_service_realm_hint (kim_selection_hints_t  in_selection_hints,
-                                                        kim_string_t          *out_service_realm)
+kim_error kim_selection_hints_get_service_realm_hint (kim_selection_hints  in_selection_hints,
+                                                      kim_string          *out_service_realm)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_service_realm ) { err = param_error (2, "out_service_realm", "NULL"); }
@@ -339,10 +339,10 @@ kim_error_t kim_selection_hints_get_service_realm_hint (kim_selection_hints_t  i
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_service_hint (kim_selection_hints_t io_selection_hints,
-                                                  kim_string_t          in_service)
+kim_error kim_selection_hints_set_service_hint (kim_selection_hints io_selection_hints,
+                                                kim_string          in_service)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_service        ) { err = param_error (2, "in_service", "NULL"); }
@@ -356,10 +356,10 @@ kim_error_t kim_selection_hints_set_service_hint (kim_selection_hints_t io_selec
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_service_hint (kim_selection_hints_t  in_selection_hints,
-                                                  kim_string_t          *out_service)
+kim_error kim_selection_hints_get_service_hint (kim_selection_hints  in_selection_hints,
+                                                kim_string          *out_service)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_service       ) { err = param_error (2, "out_service", "NULL"); }
@@ -377,10 +377,10 @@ kim_error_t kim_selection_hints_get_service_hint (kim_selection_hints_t  in_sele
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_server_hint (kim_selection_hints_t io_selection_hints,
-                                                 kim_string_t          in_server_hostname)
+kim_error kim_selection_hints_set_server_hint (kim_selection_hints io_selection_hints,
+                                               kim_string          in_server_hostname)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_server_hostname) { err = param_error (2, "in_server_hostname", "NULL"); }
@@ -394,10 +394,10 @@ kim_error_t kim_selection_hints_set_server_hint (kim_selection_hints_t io_select
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_server_hint (kim_selection_hints_t  in_selection_hints,
-                                                 kim_string_t          *out_server_hostname)
+kim_error kim_selection_hints_get_server_hint (kim_selection_hints  in_selection_hints,
+                                               kim_string          *out_server_hostname)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints ) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_server_hostname) { err = param_error (2, "out_server_hostname", "NULL"); }
@@ -415,10 +415,10 @@ kim_error_t kim_selection_hints_get_server_hint (kim_selection_hints_t  in_selec
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_application_name (kim_selection_hints_t io_selection_hints,
-                                                      kim_string_t          in_application_name)
+kim_error kim_selection_hints_set_application_name (kim_selection_hints io_selection_hints,
+                                                    kim_string          in_application_name)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints ) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_application_name) { err = param_error (2, "in_application_name", "NULL"); }
@@ -432,10 +432,10 @@ kim_error_t kim_selection_hints_set_application_name (kim_selection_hints_t io_s
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_application_name (kim_selection_hints_t  in_selection_hints,
-                                                      kim_string_t          *out_application_name)
+kim_error kim_selection_hints_get_application_name (kim_selection_hints  in_selection_hints,
+                                                    kim_string          *out_application_name)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints  ) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_application_name) { err = param_error (2, "out_application_name", "NULL"); }
@@ -453,10 +453,10 @@ kim_error_t kim_selection_hints_get_application_name (kim_selection_hints_t  in_
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_explanation (kim_selection_hints_t io_selection_hints,
-                                                 kim_string_t          in_explanation)
+kim_error kim_selection_hints_set_explanation (kim_selection_hints io_selection_hints,
+                                               kim_string          in_explanation)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_explanation    ) { err = param_error (2, "in_explanation", "NULL"); }
@@ -470,10 +470,10 @@ kim_error_t kim_selection_hints_set_explanation (kim_selection_hints_t io_select
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_explanation (kim_selection_hints_t  in_selection_hints,
-                                                 kim_string_t          *out_explanation)
+kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection_hints,
+                                               kim_string          *out_explanation)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_explanation   ) { err = param_error (2, "out_explanation", "NULL"); }
@@ -491,10 +491,10 @@ kim_error_t kim_selection_hints_get_explanation (kim_selection_hints_t  in_selec
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_options (kim_selection_hints_t io_selection_hints,
-                                             kim_options_t         in_options)
+kim_error kim_selection_hints_set_options (kim_selection_hints io_selection_hints,
+                                           kim_options         in_options)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
     if (!err && !in_options        ) { err = param_error (2, "in_options", "NULL"); }
@@ -508,10 +508,10 @@ kim_error_t kim_selection_hints_set_options (kim_selection_hints_t io_selection_
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_options (kim_selection_hints_t  in_selection_hints,
-                                             kim_options_t         *out_options)
+kim_error kim_selection_hints_get_options (kim_selection_hints  in_selection_hints,
+                                           kim_options         *out_options)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_options       ) { err = param_error (2, "out_options", "NULL"); }
@@ -529,10 +529,10 @@ kim_error_t kim_selection_hints_get_options (kim_selection_hints_t  in_selection
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_allow_user_interaction (kim_selection_hints_t io_selection_hints,
-                                                            kim_boolean_t         in_allow_user_interaction)
+kim_error kim_selection_hints_set_allow_user_interaction (kim_selection_hints io_selection_hints,
+                                                          kim_boolean         in_allow_user_interaction)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints ) { err = param_error (1, "io_selection_hints", "NULL"); }
     
@@ -545,10 +545,10 @@ kim_error_t kim_selection_hints_set_allow_user_interaction (kim_selection_hints_
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_allow_user_interaction (kim_selection_hints_t  in_selection_hints,
-                                                            kim_boolean_t         *out_allow_user_interaction)
+kim_error kim_selection_hints_get_allow_user_interaction (kim_selection_hints  in_selection_hints,
+                                                          kim_boolean         *out_allow_user_interaction)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints        ) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_allow_user_interaction) { err = param_error (2, "out_allow_user_interaction", "NULL"); }
@@ -562,10 +562,10 @@ kim_error_t kim_selection_hints_get_allow_user_interaction (kim_selection_hints_
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_set_remember_identity (kim_selection_hints_t io_selection_hints,
-                                                       kim_boolean_t         in_use_cached_results)
+kim_error kim_selection_hints_set_remember_identity (kim_selection_hints io_selection_hints,
+                                                     kim_boolean         in_use_cached_results)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_selection_hints ) { err = param_error (1, "io_selection_hints", "NULL"); }
     
@@ -578,10 +578,10 @@ kim_error_t kim_selection_hints_set_remember_identity (kim_selection_hints_t io_
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_remember_identity (kim_selection_hints_t  in_selection_hints,
-                                                       kim_boolean_t         *out_use_cached_results)
+kim_error kim_selection_hints_get_remember_identity (kim_selection_hints  in_selection_hints,
+                                                     kim_boolean         *out_use_cached_results)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints    ) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_use_cached_results) { err = param_error (2, "out_use_cached_results", "NULL"); }
@@ -595,12 +595,12 @@ kim_error_t kim_selection_hints_get_remember_identity (kim_selection_hints_t  in
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_identity (kim_selection_hints_t  in_selection_hints,
-                                              kim_identity_t        *out_identity)
+kim_error kim_selection_hints_get_identity (kim_selection_hints  in_selection_hints,
+                                            kim_identity        *out_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_identity_t identity = NULL;
-    kim_ccache_t ccache = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
+    kim_ccache ccache = NULL;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !out_identity      ) { err = param_error (2, "out_identity", "NULL"); }
@@ -626,10 +626,10 @@ kim_error_t kim_selection_hints_get_identity (kim_selection_hints_t  in_selectio
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_remember_identity (kim_selection_hints_t in_selection_hints,
-                                                   kim_identity_t        in_identity)
+kim_error kim_selection_hints_remember_identity (kim_selection_hints in_selection_hints,
+                                                 kim_identity        in_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !in_identity       ) { err = param_error (2, "in_identity", "NULL"); }
@@ -644,9 +644,9 @@ kim_error_t kim_selection_hints_remember_identity (kim_selection_hints_t in_sele
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_forget_identity (kim_selection_hints_t in_selection_hints)
+kim_error kim_selection_hints_forget_identity (kim_selection_hints in_selection_hints)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     
@@ -659,14 +659,14 @@ kim_error_t kim_selection_hints_forget_identity (kim_selection_hints_t in_select
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_selection_hints_get_preference_strings (kim_selection_hints_t                   in_selection_hints,
-                                                        kim_selection_hints_preference_strings *io_preference_strings)
+kim_error kim_selection_hints_get_preference_strings (kim_selection_hints                   in_selection_hints,
+                                                      kim_selection_hints_preference_strings *io_preference_strings)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints   ) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !io_preference_strings) { err = param_error (2, "io_preference_strings", "NULL"); }
-        
+    
     if (!err) {
         io_preference_strings->application_identifier = in_selection_hints->application_identifier;
         io_preference_strings->service_identity       = in_selection_hints->service_identity;
@@ -682,7 +682,7 @@ kim_error_t kim_selection_hints_get_preference_strings (kim_selection_hints_t   
 
 /* ------------------------------------------------------------------------ */
 
-void kim_selection_hints_free (kim_selection_hints_t *io_selection_hints)
+void kim_selection_hints_free (kim_selection_hints *io_selection_hints)
 {
     if (io_selection_hints && *io_selection_hints) {
         kim_string_free  (&(*io_selection_hints)->application_identifier);

@@ -41,12 +41,12 @@
 
 void test_kim_selection_hints_set_service_identity_hint (kim_test_state_t state)
 {
-    kim_error_t err = NULL;
-    kim_selection_hints_t hints = NULL;
-    kim_identity_t service_identity = NULL;
-    kim_identity_t identity = KIM_IDENTITY_ANY;
-    kim_string_t string = NULL;
-    kim_comparison_t comparison = 0;
+    kim_error err = NULL;
+    kim_selection_hints hints = NULL;
+    kim_identity service_identity = NULL;
+    kim_identity identity = KIM_IDENTITY_ANY;
+    kim_string string = NULL;
+    kim_comparison comparison = 0;
 
     start_test (state, "kim_selection_hints_set_service_identity_hint");
 
@@ -108,10 +108,10 @@ void test_kim_selection_hints_set_service_identity_hint (kim_test_state_t state)
 
 void test_kim_selection_hints_set_client_realm_hint (kim_test_state_t state)
 {
-    kim_error_t err = NULL;
-    kim_selection_hints_t hints = NULL;
-    kim_string_t string = NULL;
-    kim_comparison_t comparison = 0;
+    kim_error err = NULL;
+    kim_selection_hints hints = NULL;
+    kim_string string = NULL;
+    kim_comparison comparison = 0;
     
     start_test (state, "kim_selection_hints_set_client_realm_hint");
     
@@ -157,10 +157,10 @@ void test_kim_selection_hints_set_client_realm_hint (kim_test_state_t state)
 
 void test_kim_selection_hints_set_user_hint (kim_test_state_t state)
 {
-    kim_error_t err = NULL;
-    kim_selection_hints_t hints = NULL;
-    kim_string_t string = NULL;
-    kim_comparison_t comparison = 0;
+    kim_error err = NULL;
+    kim_selection_hints hints = NULL;
+    kim_string string = NULL;
+    kim_comparison comparison = 0;
     
     start_test (state, "kim_selection_hints_set_user_hint");
     
@@ -206,10 +206,10 @@ void test_kim_selection_hints_set_user_hint (kim_test_state_t state)
 
 void test_kim_selection_hints_set_service_realm_hint (kim_test_state_t state)
 {
-    kim_error_t err = NULL;
-    kim_selection_hints_t hints = NULL;
-    kim_string_t string = NULL;
-    kim_comparison_t comparison = 0;
+    kim_error err = NULL;
+    kim_selection_hints hints = NULL;
+    kim_string string = NULL;
+    kim_comparison comparison = 0;
     
     start_test (state, "kim_selection_hints_set_service_realm_hint");
     
@@ -255,10 +255,10 @@ void test_kim_selection_hints_set_service_realm_hint (kim_test_state_t state)
 
 void test_kim_selection_hints_set_service_hint (kim_test_state_t state)
 {
-    kim_error_t err = NULL;
-    kim_selection_hints_t hints = NULL;
-    kim_string_t string = NULL;
-    kim_comparison_t comparison = 0;
+    kim_error err = NULL;
+    kim_selection_hints hints = NULL;
+    kim_string string = NULL;
+    kim_comparison comparison = 0;
     
     start_test (state, "kim_selection_hints_set_service_hint");
     
@@ -304,10 +304,10 @@ void test_kim_selection_hints_set_service_hint (kim_test_state_t state)
 
 void test_kim_selection_hints_set_server_hint (kim_test_state_t state)
 {
-    kim_error_t err = NULL;
-    kim_selection_hints_t hints = NULL;
-    kim_string_t string = NULL;
-    kim_comparison_t comparison = 0;
+    kim_error err = NULL;
+    kim_selection_hints hints = NULL;
+    kim_string string = NULL;
+    kim_comparison comparison = 0;
     
     start_test (state, "kim_selection_hints_set_server_hint");
     
@@ -353,13 +353,13 @@ void test_kim_selection_hints_set_server_hint (kim_test_state_t state)
 
 void test_kim_selection_hints_remember_identity (kim_test_state_t state)
 {
-    kim_error_t err = NULL;
-    kim_selection_hints_t hints = NULL;
-    kim_identity_t service_identity = NULL;
-    kim_identity_t client_identity = NULL;
-    kim_string_t string = NULL;
-    kim_identity_t identity = KIM_IDENTITY_ANY;
-    kim_comparison_t comparison = 0;
+    kim_error err = NULL;
+    kim_selection_hints hints = NULL;
+    kim_identity service_identity = NULL;
+    kim_identity client_identity = NULL;
+    kim_string string = NULL;
+    kim_identity identity = KIM_IDENTITY_ANY;
+    kim_comparison comparison = 0;
   
     start_test (state, "kim_selection_hints_remember_identity");
     

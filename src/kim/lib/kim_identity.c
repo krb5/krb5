@@ -39,10 +39,10 @@ struct kim_identity_opaque kim_identity_initializer = { NULL, NULL };
 
 /* ------------------------------------------------------------------------ */
 
-static inline kim_error_t kim_identity_allocate (kim_identity_t *out_identity)
+static inline kim_error kim_identity_allocate (kim_identity *out_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_identity_t identity = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
     
     if (!err && !out_identity) { err = param_error (1, "out_identity", "NULL"); }
     
@@ -64,11 +64,11 @@ static inline kim_error_t kim_identity_allocate (kim_identity_t *out_identity)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_create_from_string (kim_identity_t *out_identity,
-                                             kim_string_t    in_string)
+kim_error kim_identity_create_from_string (kim_identity *out_identity,
+                                             kim_string    in_string)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_identity_t identity = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
     
     if (!err && !out_identity) { err = param_error (1, "out_identity", "NULL"); }
     if (!err && !in_string   ) { err = param_error (2, "in_string", "NULL"); }
@@ -106,13 +106,13 @@ kim_error_t kim_identity_create_from_string (kim_identity_t *out_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_create_from_components (kim_identity_t *out_identity,
-                                                 kim_string_t    in_realm, 
-                                                 kim_string_t    in_1st_component,
+kim_error kim_identity_create_from_components (kim_identity *out_identity,
+                                                 kim_string    in_realm, 
+                                                 kim_string    in_1st_component,
                                                  ...)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_identity_t identity = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
     krb5_principal_data principal_data;  /* allocated by KIM so can't be returned */
     
     if (!err && !out_identity    ) { err = param_error (1, "out_identity", "NULL"); }
@@ -129,10 +129,10 @@ kim_error_t kim_identity_create_from_components (kim_identity_t *out_identity,
         
     if (!err) {
         va_list args;
-        kim_count_t component_count = 1;
+        kim_count component_count = 1;
 
         va_start (args, in_1st_component);
-        while (va_arg (args, kim_string_t)) { component_count++; }
+        while (va_arg (args, kim_string)) { component_count++; }
         va_end (args);
         
         principal_data.length = component_count;
@@ -149,11 +149,11 @@ kim_error_t kim_identity_create_from_components (kim_identity_t *out_identity,
         
         va_start (args, in_1st_component);
         for (i = 0; !err && (i < principal_data.length); i++) {
-            kim_string_t component = NULL;
+            kim_string component = NULL;
             if (i == 0) {
                 err = kim_string_copy (&component, in_1st_component);
             } else {
-                err = kim_string_copy (&component, va_arg (args, kim_string_t));
+                err = kim_string_copy (&component, va_arg (args, kim_string));
             }
             
             if (!err) {
@@ -183,7 +183,7 @@ kim_error_t kim_identity_create_from_components (kim_identity_t *out_identity,
         krb5_int32 i;
         
         for (i = 0; i < principal_data.length; i++) {
-            kim_string_t component = principal_data.data[i].data;
+            kim_string component = principal_data.data[i].data;
             kim_string_free (&component);
         }
         free (principal_data.data); 
@@ -195,12 +195,12 @@ kim_error_t kim_identity_create_from_components (kim_identity_t *out_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_create_from_krb5_principal (kim_identity_t *out_identity,
+kim_error kim_identity_create_from_krb5_principal (kim_identity *out_identity,
                                                      krb5_context    in_krb5_context,
                                                      krb5_principal  in_krb5_principal)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_identity_t identity = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
     
     if (!err && !out_identity     ) { err = param_error (1, "out_identity", "NULL"); }
     if (!err && !in_krb5_principal) { err = param_error (2, "in_krb5_principal", "NULL"); }
@@ -235,11 +235,11 @@ kim_error_t kim_identity_create_from_krb5_principal (kim_identity_t *out_identit
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_copy (kim_identity_t *out_identity,
-                               kim_identity_t  in_identity)
+kim_error kim_identity_copy (kim_identity *out_identity,
+                               kim_identity  in_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_identity_t identity = KIM_IDENTITY_ANY;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = KIM_IDENTITY_ANY;
     
     if (!err && !out_identity) { err = param_error (1, "out_identity", "NULL"); }
 
@@ -268,11 +268,11 @@ kim_error_t kim_identity_copy (kim_identity_t *out_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_compare (kim_identity_t    in_identity,
-                                  kim_identity_t    in_compare_to_identity,
-                                  kim_comparison_t *out_comparison)
+kim_error kim_identity_compare (kim_identity    in_identity,
+                                  kim_identity    in_compare_to_identity,
+                                  kim_comparison *out_comparison)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity           ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !in_compare_to_identity) { err = param_error (2, "in_compare_to_identity", "NULL"); }
@@ -284,8 +284,8 @@ kim_error_t kim_identity_compare (kim_identity_t    in_identity,
                                     in_compare_to_identity->principal)) {
             *out_comparison = 0;
         } else {
-            kim_string_t string = NULL;
-            kim_string_t compare_to_string = NULL;
+            kim_string string = NULL;
+            kim_string compare_to_string = NULL;
             
             err = kim_identity_get_string (in_identity, &string);
             
@@ -307,10 +307,10 @@ kim_error_t kim_identity_compare (kim_identity_t    in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_get_string (kim_identity_t   in_identity,
-                                     kim_string_t    *out_string)
+kim_error kim_identity_get_string (kim_identity   in_identity,
+                                     kim_string    *out_string)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     char *unparsed_name = NULL;
     
     if (!err && !in_identity) { err = param_error (1, "in_identity", "NULL"); }
@@ -333,11 +333,11 @@ kim_error_t kim_identity_get_string (kim_identity_t   in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_get_display_string (kim_identity_t   in_identity,
-                                             kim_string_t    *out_display_string)
+kim_error kim_identity_get_display_string (kim_identity   in_identity,
+                                             kim_string    *out_display_string)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t string = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string string = NULL;
     
     if (!err && !in_identity       ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !out_display_string) { err = param_error (2, "out_display_string", "NULL"); }
@@ -347,8 +347,8 @@ kim_error_t kim_identity_get_display_string (kim_identity_t   in_identity,
     }
     
     if (!err) {
-        kim_count_t i, j;
-        kim_count_t length = strlen (string) + 1; /* Copy the '\0' */
+        kim_count i, j;
+        kim_count length = strlen (string) + 1; /* Copy the '\0' */
         char *display_string = (char *) string; /* so we can modify it */
         
         /* In place copy, skipping escaped separators.
@@ -378,10 +378,10 @@ kim_error_t kim_identity_get_display_string (kim_identity_t   in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_get_realm (kim_identity_t  in_identity,
-                                    kim_string_t   *out_realm_string)
+kim_error kim_identity_get_realm (kim_identity  in_identity,
+                                    kim_string   *out_realm_string)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity     ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !out_realm_string) { err = param_error (2, "out_realm_string", "NULL"); }
@@ -397,10 +397,10 @@ kim_error_t kim_identity_get_realm (kim_identity_t  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_get_number_of_components (kim_identity_t  in_identity,
-                                                   kim_count_t    *out_number_of_components)
+kim_error kim_identity_get_number_of_components (kim_identity  in_identity,
+                                                   kim_count    *out_number_of_components)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity             ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !out_number_of_components) { err = param_error (2, "out_number_of_components", "NULL"); }
@@ -414,11 +414,11 @@ kim_error_t kim_identity_get_number_of_components (kim_identity_t  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_get_component_at_index (kim_identity_t  in_identity,
-                                                 kim_count_t     in_index,
-                                                 kim_string_t   *out_component_string)
+kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
+                                                 kim_count     in_index,
+                                                 kim_string   *out_component_string)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     krb5_data *component = NULL;
     
     if (!err && !in_identity         ) { err = param_error (1, "in_identity", "NULL"); }
@@ -439,11 +439,11 @@ kim_error_t kim_identity_get_component_at_index (kim_identity_t  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_get_krb5_principal (kim_identity_t  in_identity,
+kim_error kim_identity_get_krb5_principal (kim_identity  in_identity,
                                              krb5_context    in_krb5_context,
                                              krb5_principal *out_krb5_principal)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity       ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !in_krb5_context   ) { err = param_error (2, "in_krb5_context", "NULL"); }
@@ -460,10 +460,10 @@ kim_error_t kim_identity_get_krb5_principal (kim_identity_t  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_get_gss_name (kim_identity_t  in_identity,
+kim_error kim_identity_get_gss_name (kim_identity  in_identity,
                                        gss_name_t     *out_gss_name)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !out_gss_name) { err = param_error (2, "out_gss_name", "NULL"); }
@@ -477,16 +477,16 @@ kim_error_t kim_identity_get_gss_name (kim_identity_t  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_is_tgt_service (kim_identity_t  in_identity,
-                                         kim_boolean_t  *out_is_tgt_service)
+kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
+                                         kim_boolean  *out_is_tgt_service)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity       ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !out_is_tgt_service) { err = param_error (2, "out_is_tgt_service", "NULL"); }
     
     if (!err) {
-        kim_count_t count = krb5_princ_size (in_identity->context, in_identity->principal);
+        kim_count count = krb5_princ_size (in_identity->context, in_identity->principal);
         krb5_data *name = krb5_princ_name (in_identity->context, in_identity->principal);
         
         /* krbtgt/<REALM1>@<REALM2> (usually REALM1 == REALM2, but not always) */
@@ -500,10 +500,10 @@ kim_error_t kim_identity_is_tgt_service (kim_identity_t  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_change_password (kim_identity_t in_identity,
-                                          kim_options_t  in_options)
+kim_error kim_identity_change_password (kim_identity in_identity,
+                                          kim_options  in_options)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity) { err = param_error (1, "in_identity", "NULL"); }
     
@@ -512,11 +512,11 @@ kim_error_t kim_identity_change_password (kim_identity_t in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_identity_change_password_to_password (kim_identity_t in_identity,
-                                                      kim_options_t  in_options,
-                                                      kim_string_t   in_new_password)
+kim_error kim_identity_change_password_to_password (kim_identity in_identity,
+                                                      kim_options  in_options,
+                                                      kim_string   in_new_password)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_identity    ) { err = param_error (1, "in_identity", "NULL"); }
     if (!err && !in_new_password) { err = param_error (3, "in_new_password", "NULL"); }
@@ -526,10 +526,10 @@ kim_error_t kim_identity_change_password_to_password (kim_identity_t in_identity
 
 /* ------------------------------------------------------------------------ */
 
-void kim_identity_free (kim_identity_t *io_identity)
+void kim_identity_free (kim_identity *io_identity)
 {
     if (io_identity && *io_identity) { 
-        kim_identity_t identity = *io_identity;
+        kim_identity identity = *io_identity;
 
         if (identity->context) { 
             if (identity->principal) { 

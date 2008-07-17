@@ -29,13 +29,13 @@
 
 #include <kim/kim.h>
 
-kim_error_t kim_options_create_from_defaults (kim_options_t *out_options);
+kim_error kim_options_create_from_defaults (kim_options *out_options);
 
-kim_error_t kim_options_get_init_cred_options (kim_options_t              in_options, 
+kim_error kim_options_get_init_cred_options (kim_options              in_options, 
                                                krb5_context               in_context,
 					       krb5_get_init_creds_opt  **out_init_cred_options);
 
-kim_error_t kim_options_free_init_cred_options (krb5_context               in_context,
+kim_error kim_options_free_init_cred_options (krb5_context               in_context,
                                                 krb5_get_init_creds_opt  **io_init_cred_options);
 
 #endif /* KIM_OPTIONS_PRIVATE_H */

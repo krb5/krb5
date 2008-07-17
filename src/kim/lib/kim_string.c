@@ -29,11 +29,11 @@
 
 /* ------------------------------------------------------------------------ */
 
-static inline kim_error_t kim_string_allocate (kim_string_t *out_string,
-                                               kim_count_t   in_length)
+static inline kim_error kim_string_allocate (kim_string *out_string,
+                                             kim_count   in_length)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t string = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string string = NULL;
     
     if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
     
@@ -54,11 +54,11 @@ static inline kim_error_t kim_string_allocate (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_string_create_from_format (kim_string_t *out_string, 
-                                           kim_string_t  in_format,
-                                           ...)
+kim_error kim_string_create_from_format (kim_string *out_string, 
+                                         kim_string  in_format,
+                                         ...)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     va_list args;
     
     va_start (args, in_format);
@@ -70,11 +70,11 @@ kim_error_t kim_string_create_from_format (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_string_create_from_format_va_retcode (kim_string_t *out_string, 
-                                                      kim_string_t  in_format,
-                                                      va_list       in_args)
+kim_error kim_string_create_from_format_va_retcode (kim_string *out_string, 
+                                                    kim_string  in_format,
+                                                    va_list       in_args)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     int count = vasprintf ((char **) out_string, in_format, in_args);
     if (count < 0) { err = os_error (ENOMEM); }
@@ -84,12 +84,12 @@ kim_error_t kim_string_create_from_format_va_retcode (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_string_create_from_format_va (kim_string_t *out_string, 
-                                              kim_string_t  in_format,
-                                              va_list       in_args)
+kim_error kim_string_create_from_format_va (kim_string *out_string, 
+                                            kim_string  in_format,
+                                            va_list       in_args)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t string = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string string = NULL;
     
     if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
     if (!err && !in_format ) { err = param_error (2, "in_format", "NULL"); }
@@ -110,12 +110,12 @@ kim_error_t kim_string_create_from_format_va (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_string_create_from_buffer (kim_string_t *out_string, 
-                                           const char   *in_buffer, 
-                                           kim_count_t   in_length)
+kim_error kim_string_create_from_buffer (kim_string *out_string, 
+                                         const char   *in_buffer, 
+                                         kim_count   in_length)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t string = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string string = NULL;
     
     if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
     if (!err && !in_buffer ) { err = param_error (2, "in_buffer", "NULL"); }
@@ -137,15 +137,15 @@ kim_error_t kim_string_create_from_buffer (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_string_copy (kim_string_t *out_string, 
-                             kim_string_t  in_string)
+kim_error kim_string_copy (kim_string *out_string, 
+                           kim_string  in_string)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t string = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string string = NULL;
     
     if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
     if (!err && !in_string ) { err = param_error (2, "in_string", "NULL"); }
-        
+    
     if (!err) {
         err = kim_string_allocate (&string, strlen (in_string) + 1);
     }
@@ -163,16 +163,16 @@ kim_error_t kim_string_copy (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_string_compare (kim_string_t      in_string, 
-                                kim_string_t      in_compare_to_string,
-                                kim_comparison_t *out_comparison)
+kim_error kim_string_compare (kim_string      in_string, 
+                              kim_string      in_compare_to_string,
+                              kim_comparison *out_comparison)
 {
     return kim_os_string_compare (in_string, in_compare_to_string, out_comparison);
 }
 
 /* ------------------------------------------------------------------------ */
 
-void kim_string_free (kim_string_t *io_string)
+void kim_string_free (kim_string *io_string)
 {
     if (io_string && *io_string) { 
         free ((char *) *io_string);

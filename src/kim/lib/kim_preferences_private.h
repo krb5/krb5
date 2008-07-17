@@ -29,7 +29,7 @@
 
 #include <kim/kim.h>
 
-extern const kim_favorite_identities_t kim_empty_favorite_identities;
+extern const kim_favorite_identities kim_empty_favorite_identities;
 
 typedef enum kim_preference_key_enum {
     kim_preference_key_lifetime,
@@ -64,39 +64,39 @@ typedef enum kim_preference_key_enum {
 #define kim_default_maximum_renewal_lifetime   7*24*60*60
 
 
-kim_error_t kim_os_preferences_get_identity_for_key (kim_preference_key_t  in_key, 
-                                                     kim_identity_t        in_hardcoded_default,
-                                                     kim_identity_t       *out_identity);
+kim_error kim_os_preferences_get_identity_for_key (kim_preference_key_t  in_key, 
+                                                     kim_identity        in_hardcoded_default,
+                                                     kim_identity       *out_identity);
 
-kim_error_t kim_os_preferences_set_identity_for_key (kim_preference_key_t in_key, 
-                                                     kim_identity_t       in_identity);
+kim_error kim_os_preferences_set_identity_for_key (kim_preference_key_t in_key, 
+                                                     kim_identity       in_identity);
 
-kim_error_t kim_os_preferences_get_favorite_identities_for_key (kim_preference_key_t       in_key, 
-                                                                kim_favorite_identities_t  in_hardcoded_default,
-                                                                kim_favorite_identities_t *out_favorite_identities);
+kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key_t       in_key, 
+                                                                kim_favorite_identities  in_hardcoded_default,
+                                                                kim_favorite_identities *out_favorite_identities);
 
-kim_error_t kim_os_preferences_set_favorite_identities_for_key (kim_preference_key_t      in_key, 
-                                                                kim_favorite_identities_t in_favorite_identities);
+kim_error kim_os_preferences_set_favorite_identities_for_key (kim_preference_key_t      in_key, 
+                                                                kim_favorite_identities in_favorite_identities);
 
-kim_error_t kim_os_preferences_get_time_for_key (kim_preference_key_t  in_key, 
-                                                 kim_time_t            in_hardcoded_default,
-                                                 kim_time_t           *out_time);
+kim_error kim_os_preferences_get_time_for_key (kim_preference_key_t  in_key, 
+                                                 kim_time            in_hardcoded_default,
+                                                 kim_time           *out_time);
 
-kim_error_t kim_os_preferences_set_time_for_key (kim_preference_key_t in_key, 
-                                                 kim_time_t           in_time);
+kim_error kim_os_preferences_set_time_for_key (kim_preference_key_t in_key, 
+                                                 kim_time           in_time);
 
-kim_error_t kim_os_preferences_get_lifetime_for_key (kim_preference_key_t  in_key, 
-                                                     kim_lifetime_t        in_hardcoded_default,
-                                                     kim_lifetime_t       *out_lifetime);
+kim_error kim_os_preferences_get_lifetime_for_key (kim_preference_key_t  in_key, 
+                                                     kim_lifetime        in_hardcoded_default,
+                                                     kim_lifetime       *out_lifetime);
 
-kim_error_t kim_os_preferences_set_lifetime_for_key (kim_preference_key_t in_key, 
-                                                     kim_lifetime_t       in_lifetime);
+kim_error kim_os_preferences_set_lifetime_for_key (kim_preference_key_t in_key, 
+                                                     kim_lifetime       in_lifetime);
 
-kim_error_t kim_os_preferences_get_boolean_for_key (kim_preference_key_t  in_key, 
-                                                    kim_boolean_t         in_hardcoded_default,
-                                                    kim_boolean_t        *out_boolean);
+kim_error kim_os_preferences_get_boolean_for_key (kim_preference_key_t  in_key, 
+                                                    kim_boolean         in_hardcoded_default,
+                                                    kim_boolean        *out_boolean);
 
-kim_error_t kim_os_preferences_set_boolean_for_key (kim_preference_key_t in_key, 
-                                                    kim_boolean_t        in_boolean);
+kim_error kim_os_preferences_set_boolean_for_key (kim_preference_key_t in_key, 
+                                                    kim_boolean        in_boolean);
 
 #endif /* KIM_PREFERENCES_PRIVATE_H */

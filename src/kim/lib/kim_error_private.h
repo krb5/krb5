@@ -29,16 +29,16 @@
 
 #include <kim/kim.h>
 
-kim_error_t _kim_error_create_for_param (kim_string_t in_function, 
+kim_error _kim_error_create_for_param (kim_string in_function, 
                                          unsigned int in_argument_position,
-                                         kim_string_t in_argument_name,
-                                         kim_string_t in_invalid_value);
+                                         kim_string in_argument_name,
+                                         kim_string in_invalid_value);
 #define param_error(pos, name, value) _kim_error_create_for_param(__FUNCTION__, \
                                                                   pos, name, value)
 
-kim_error_t kim_error_create_from_code (kim_error_code_t in_code, 
+kim_error kim_error_create_from_code (kim_error_code in_code, 
                                         ...);
-kim_error_t kim_error_create_from_code_va (kim_error_code_t in_code, 
+kim_error kim_error_create_from_code_va (kim_error_code in_code, 
                                            va_list args);
 
 #define ccapi_error(code) kim_error_create_from_code(code)
@@ -46,9 +46,9 @@ kim_error_t kim_error_create_from_code_va (kim_error_code_t in_code,
 #define gss_error(code)   kim_error_create_from_code(code)
 #define os_error(code)    kim_error_create_from_code(code)
 
-kim_error_t _check_error (kim_error_t  in_err, 
-                          kim_string_t in_function, 
-                          kim_string_t in_file, 
+kim_error _check_error (kim_error  in_err, 
+                          kim_string in_function, 
+                          kim_string in_file, 
                           int          in_line);
 #define check_error(err) _check_error(err, __FUNCTION__, __FILE__, __LINE__)
 

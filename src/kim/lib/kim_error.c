@@ -29,21 +29,21 @@
 #include <CredentialsCache.h>
 
 struct kim_error_opaque {
-    kim_error_code_t code;
-    kim_string_t message;
+    kim_error_code code;
+    kim_string message;
 };
 
 struct kim_error_opaque kim_no_memory_error_struct = { KIM_OUT_OF_MEMORY_ECODE, NULL, };
-kim_error_t kim_no_memory_error = &kim_no_memory_error_struct;
+kim_error kim_no_memory_error = &kim_no_memory_error_struct;
 
 struct kim_error_opaque kim_error_initializer = { KIM_NO_ERROR_ECODE, NULL };
 
 /* ------------------------------------------------------------------------ */
 
-static inline kim_error_t kim_error_allocate (kim_error_t *out_error)
+static inline kim_error kim_error_allocate (kim_error *out_error)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_error_t error = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_error error = NULL;
     
     if (!err) {
         error = malloc (sizeof (*error));
@@ -70,10 +70,10 @@ static inline kim_error_t kim_error_allocate (kim_error_t *out_error)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t _kim_error_create_for_param (kim_string_t in_function, 
+kim_error _kim_error_create_for_param (kim_string in_function, 
                                          unsigned int in_argument_position,
-                                         kim_string_t in_argument_name,
-                                         kim_string_t in_invalid_value)
+                                         kim_string in_argument_name,
+                                         kim_string in_invalid_value)
 {
     return kim_error_create_from_code (KIM_PARAMETER_ECODE, 
                                        in_function, 
@@ -86,10 +86,10 @@ kim_error_t _kim_error_create_for_param (kim_string_t in_function,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_error_create_from_code (kim_error_code_t in_code, 
+kim_error kim_error_create_from_code (kim_error_code in_code, 
                                         ...)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     va_list args;
     
     va_start (args, in_code);
@@ -101,12 +101,12 @@ kim_error_t kim_error_create_from_code (kim_error_code_t in_code,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_error_create_from_code_va (kim_error_code_t in_code, 
+kim_error kim_error_create_from_code_va (kim_error_code in_code, 
                                            va_list          in_args)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_error_t error = KIM_NO_ERROR;
-    kim_string_t message = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_error error = KIM_NO_ERROR;
+    kim_string message = NULL;
     
     /* short circuit out of memory errors so we don't loop */
     switch (in_code) {
@@ -148,11 +148,11 @@ kim_error_t kim_error_create_from_code_va (kim_error_code_t in_code,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_error_copy (kim_error_t *out_error,
-                            kim_error_t  in_error)
+kim_error kim_error_copy (kim_error *out_error,
+                            kim_error  in_error)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_error_t error = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
+    kim_error error = KIM_NO_ERROR;
     
     if (!err && !out_error) { err = param_error (1, "out_error", "NULL"); }
     if (!err && !in_error ) { err = param_error (2, "in_error", "NULL"); }
@@ -185,7 +185,7 @@ kim_error_t kim_error_copy (kim_error_t *out_error,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_code_t kim_error_get_code (kim_error_t in_error)
+kim_error_code kim_error_get_code (kim_error in_error)
 {
     if (!in_error) {  /* KIM_NO_ERROR */
         return KIM_NO_ERROR_ECODE;
@@ -196,7 +196,7 @@ kim_error_code_t kim_error_get_code (kim_error_t in_error)
 
 /* ------------------------------------------------------------------------ */
 
-kim_string_t kim_error_get_display_string (kim_error_t in_error)
+kim_string kim_error_get_display_string (kim_error in_error)
 {
     if (!in_error) {  /* KIM_NO_ERROR */
         return error_message (KIM_NO_ERROR_ECODE);
@@ -212,7 +212,7 @@ kim_string_t kim_error_get_display_string (kim_error_t in_error)
 
 /* ------------------------------------------------------------------------ */
 
-void kim_error_free (kim_error_t *io_error)
+void kim_error_free (kim_error *io_error)
 {
     if (io_error && *io_error) {
         if (*io_error != kim_no_memory_error) {
@@ -227,14 +227,14 @@ void kim_error_free (kim_error_t *io_error)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t _check_error (kim_error_t  in_err, 
-                          kim_string_t in_function, 
-                          kim_string_t in_file, 
+kim_error _check_error (kim_error  in_err, 
+                          kim_string in_function, 
+                          kim_string in_file, 
                           int          in_line)
 {
     if (in_err) {
-        kim_error_code_t code = kim_error_get_code (in_err);
-        kim_string_t message = kim_error_get_display_string (in_err);
+        kim_error_code code = kim_error_get_code (in_err);
+        kim_string message = kim_error_get_display_string (in_err);
         
         kim_debug_printf ("%s(): got %d ('%s') at %s: %d", 
                           in_function, code, message, in_file, in_line);

@@ -29,11 +29,11 @@
 
 #include <kim/kim.h>
 
-kim_error_t kim_ccache_create_from_display_name (kim_ccache_t  *out_ccache,
-                                                 kim_string_t   in_display_name);
+kim_error kim_ccache_create_from_display_name (kim_ccache  *out_ccache,
+                                                 kim_string   in_display_name);
 
-kim_error_t kim_ccache_compare (kim_ccache_t   in_ccache,
-                                kim_ccache_t   in_compare_to_ccache,
-                                kim_boolean_t *out_equal);
+kim_error kim_ccache_compare (kim_ccache   in_ccache,
+                                kim_ccache   in_compare_to_ccache,
+                                kim_boolean *out_equal);
 
 #endif /* KIM_CCACHE_PRIVATE_H */

@@ -45,9 +45,9 @@
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error_t kim_os_selection_hints_get_selection_hints_array (CFArrayRef *out_selection_hints_array)
+static kim_error kim_os_selection_hints_get_selection_hints_array (CFArrayRef *out_selection_hints_array)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFPropertyListRef value = NULL;
     CFStringRef users[] = { kCFPreferencesCurrentUser, kCFPreferencesAnyUser, NULL };
     CFStringRef hosts[] = { kCFPreferencesCurrentHost, kCFPreferencesAnyHost, NULL };
@@ -55,7 +55,7 @@ static kim_error_t kim_os_selection_hints_get_selection_hints_array (CFArrayRef 
     if (!err && !out_selection_hints_array) { err = param_error (1, "out_selection_hints_array", "NULL"); }
     
     if (!err) {
-        kim_count_t u, h;
+        kim_count u, h;
         
         if (!kim_library_allow_home_directory_access()) {
             users[0] = kCFPreferencesAnyUser;
@@ -87,14 +87,14 @@ static kim_error_t kim_os_selection_hints_get_selection_hints_array (CFArrayRef 
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error_t kim_os_selection_hints_set_selection_hints_array (CFArrayRef in_selection_hints_array)
+static kim_error kim_os_selection_hints_set_selection_hints_array (CFArrayRef in_selection_hints_array)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_selection_hints_array) { err = param_error (1, "in_selection_hints_array", "NULL"); }
     
     if (!err) {
-        kim_boolean_t homedir_ok = kim_library_allow_home_directory_access();
+        kim_boolean homedir_ok = kim_library_allow_home_directory_access();
         CFStringRef user = homedir_ok ? kCFPreferencesCurrentUser : kCFPreferencesAnyUser;
         CFStringRef host = homedir_ok ? kCFPreferencesAnyHost : kCFPreferencesCurrentHost;
         
@@ -112,13 +112,13 @@ static kim_error_t kim_os_selection_hints_set_selection_hints_array (CFArrayRef 
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error_t kim_os_selection_hints_create_dictionary (kim_selection_hints_t  in_selection_hints,
-                                                             kim_identity_t         in_identity,
+static kim_error kim_os_selection_hints_create_dictionary (kim_selection_hints  in_selection_hints,
+                                                             kim_identity         in_identity,
                                                              CFDictionaryRef       *out_hints_dictionary)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     kim_selection_hints_preference_strings preference_strings = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-    kim_string_t identity_string = NULL;
+    kim_string identity_string = NULL;
     CFStringRef keys[KIM_MAX_HINTS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     CFStringRef values[KIM_MAX_HINTS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     CFIndex i = 0;
@@ -192,19 +192,19 @@ static kim_error_t kim_os_selection_hints_create_dictionary (kim_selection_hints
 
 /* ------------------------------------------------------------------------ */
 
-static kim_boolean_t kim_os_selection_hints_compare_hint (kim_string_t in_string,
+static kim_boolean kim_os_selection_hints_compare_hint (kim_string in_string,
                                                           CFStringRef  in_value)
 {
-    kim_boolean_t equal = 0;
+    kim_boolean equal = 0;
     
     if (!in_string && !in_value) { 
         equal = 1; 
         
     } else if (in_string && in_value) {
         if (CFGetTypeID (in_value) == CFStringGetTypeID ()) {
-            kim_comparison_t comparison;
+            kim_comparison comparison;
             
-            kim_error_t err = kim_os_string_compare_to_cfstring (in_string, in_value, 
+            kim_error err = kim_os_string_compare_to_cfstring (in_string, in_value, 
                                                                  &comparison);
             
             if (!err && kim_comparison_is_equal_to (comparison)) {
@@ -222,13 +222,13 @@ static kim_boolean_t kim_os_selection_hints_compare_hint (kim_string_t in_string
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error_t kim_os_selection_hints_compare_to_dictionary (kim_selection_hints_t  in_selection_hints,
+static kim_error kim_os_selection_hints_compare_to_dictionary (kim_selection_hints  in_selection_hints,
                                                                  CFDictionaryRef        in_hints_dictionary,
-                                                                 kim_boolean_t         *out_hints_equal)
+                                                                 kim_boolean         *out_hints_equal)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     kim_selection_hints_preference_strings preference_strings = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-    kim_boolean_t hints_equal = 1;
+    kim_boolean hints_equal = 1;
     
     if (!err && !in_selection_hints ) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !in_hints_dictionary) { err = param_error (2, "in_hints_dictionary", "NULL"); }
@@ -289,12 +289,12 @@ static kim_error_t kim_os_selection_hints_compare_to_dictionary (kim_selection_h
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error_t kim_os_selection_hints_get_dictionary_identity (CFDictionaryRef  in_dictionary,
-                                                                   kim_identity_t  *out_identity)
+static kim_error kim_os_selection_hints_get_dictionary_identity (CFDictionaryRef  in_dictionary,
+                                                                   kim_identity  *out_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFStringRef identity_cfstr = NULL;
-    kim_string_t identity_string = NULL;
+    kim_string identity_string = NULL;
     
     identity_cfstr = CFDictionaryGetValue (in_dictionary, KIM_IDENTITY_HINT);
     if (!identity_cfstr || CFGetTypeID (identity_cfstr) != CFStringGetTypeID ()) {
@@ -319,14 +319,14 @@ static kim_error_t kim_os_selection_hints_get_dictionary_identity (CFDictionaryR
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_selection_hints_lookup_identity (kim_selection_hints_t  in_selection_hints,
-                                                    kim_identity_t        *out_identity)
+kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_selection_hints,
+                                                    kim_identity        *out_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFArrayRef hints_array = NULL;
     CFIndex i = 0;
     CFIndex count = 0;
-    kim_boolean_t found = 0;
+    kim_boolean found = 0;
     CFDictionaryRef found_dictionary = NULL;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
@@ -374,16 +374,16 @@ kim_error_t kim_os_selection_hints_lookup_identity (kim_selection_hints_t  in_se
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_selection_hints_remember_identity (kim_selection_hints_t in_selection_hints,
-                                                      kim_identity_t        in_identity)
+kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selection_hints,
+                                                      kim_identity        in_identity)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFArrayRef old_hints_array = NULL;
     CFMutableArrayRef new_hints_array = NULL;
     CFIndex count = 0;
     CFIndex i = 0;
-    kim_boolean_t hint_already_exists = 0;
-    kim_boolean_t hints_array_changed = 0;
+    kim_boolean hint_already_exists = 0;
+    kim_boolean hints_array_changed = 0;
     
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     if (!err && !in_identity       ) { err = param_error (2, "in_identity", "NULL"); }
@@ -409,8 +409,8 @@ kim_error_t kim_os_selection_hints_remember_identity (kim_selection_hints_t in_s
     
     for (i = 0; !err && i < count; i++) {
         CFDictionaryRef dictionary = NULL;
-        kim_identity_t identity = NULL;
-        kim_boolean_t hints_equal = 0;
+        kim_identity identity = NULL;
+        kim_boolean hints_equal = 0;
         
         dictionary = CFArrayGetValueAtIndex (new_hints_array, i);
         if (!dictionary) { err = os_error (ENOMEM); }
@@ -427,7 +427,7 @@ kim_error_t kim_os_selection_hints_remember_identity (kim_selection_hints_t in_s
         }
         
         if (!err && hints_equal) {
-            kim_comparison_t comparison;
+            kim_comparison comparison;
             
             err = kim_os_selection_hints_get_dictionary_identity (dictionary,
                                                                   &identity);
@@ -478,9 +478,9 @@ kim_error_t kim_os_selection_hints_remember_identity (kim_selection_hints_t in_s
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_selection_hints_forget_identity (kim_selection_hints_t in_selection_hints)
+kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selection_hints)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFArrayRef old_hints_array = NULL;
     CFMutableArrayRef new_hints_array = NULL;
     CFIndex count = 0;
@@ -504,7 +504,7 @@ kim_error_t kim_os_selection_hints_forget_identity (kim_selection_hints_t in_sel
     
     for (i = 0; !err && i < count; i++) {
         CFDictionaryRef dictionary = NULL;
-        kim_boolean_t hints_equal = 0;
+        kim_boolean hints_equal = 0;
         
         dictionary = CFArrayGetValueAtIndex (new_hints_array, i);
         if (!dictionary) { err = os_error (ENOMEM); }

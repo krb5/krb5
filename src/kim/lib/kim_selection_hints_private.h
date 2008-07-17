@@ -30,26 +30,26 @@
 #include <kim/kim.h>
 
 typedef struct kim_selection_hints_preference_strings {
-    kim_string_t application_identifier;
-    kim_string_t service_identity;
-    kim_string_t client_realm;
-    kim_string_t user;
-    kim_string_t service_realm;
-    kim_string_t service;
-    kim_string_t server;
+    kim_string application_identifier;
+    kim_string service_identity;
+    kim_string client_realm;
+    kim_string user;
+    kim_string service_realm;
+    kim_string service;
+    kim_string server;
 } kim_selection_hints_preference_strings;
 
 
-kim_error_t kim_selection_hints_get_preference_strings (kim_selection_hints_t                   in_selection_hints,
+kim_error kim_selection_hints_get_preference_strings (kim_selection_hints                   in_selection_hints,
                                                         kim_selection_hints_preference_strings *io_preference_strings);
 
-kim_error_t kim_os_selection_hints_lookup_identity (kim_selection_hints_t  in_selection_hints,
-                                                    kim_identity_t        *out_identity);
+kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_selection_hints,
+                                                    kim_identity        *out_identity);
 
-kim_error_t kim_os_selection_hints_remember_identity (kim_selection_hints_t in_selection_hints,
-                                                      kim_identity_t        in_identity);
+kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selection_hints,
+                                                      kim_identity        in_identity);
 
-kim_error_t kim_os_selection_hints_forget_identity (kim_selection_hints_t in_selection_hints);
+kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selection_hints);
 
 
 #endif /* KIM_SELECTION_HINTS_PRIVATE_H */

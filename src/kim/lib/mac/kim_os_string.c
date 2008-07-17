@@ -83,7 +83,7 @@ CFStringRef kim_os_string_get_cfstring_for_key_and_dictionary (CFStringRef in_ke
 /* ------------------------------------------------------------------------ */
 /* WARNING: DO NOT CALL check_error() -- it is called by error_message()!!  */
 
-CFStringRef kim_os_string_get_cfstring_for_key (kim_string_t in_key_string)
+CFStringRef kim_os_string_get_cfstring_for_key (kim_string in_key_string)
 {
     CFStringRef key = NULL;
     CFStringRef value = NULL;
@@ -121,11 +121,11 @@ CFStringRef kim_os_string_get_cfstring_for_key (kim_string_t in_key_string)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_string_create_from_cfstring (kim_string_t *out_string,
+kim_error kim_os_string_create_from_cfstring (kim_string *out_string,
                                                 CFStringRef in_cfstring)
 {
-    kim_error_t err = KIM_NO_ERROR;
-    kim_string_t string = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_string string = NULL;
     CFStringEncoding encoding = kim_os_string_get_encoding ();
     CFIndex length = 0;
     
@@ -157,10 +157,10 @@ kim_error_t kim_os_string_create_from_cfstring (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_string_create_for_key (kim_string_t *out_string,
-                                          kim_string_t in_key_string)
+kim_error kim_os_string_create_for_key (kim_string *out_string,
+                                          kim_string in_key_string)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFStringRef value = NULL;
     
     if (!err && !out_string   ) { err = param_error (1, "out_string", "NULL"); }
@@ -181,10 +181,10 @@ kim_error_t kim_os_string_create_for_key (kim_string_t *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_string_get_cfstring (kim_string_t  in_string,
+kim_error kim_os_string_get_cfstring (kim_string  in_string,
                                         CFStringRef  *out_cfstring)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFStringRef cfstring = NULL;
     
     if (!err && !in_string   ) { err = param_error (1, "in_string", "NULL"); }
@@ -207,11 +207,11 @@ kim_error_t kim_os_string_get_cfstring (kim_string_t  in_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_string_compare (kim_string_t      in_string,
-                                   kim_string_t      in_compare_to_string,
-                                   kim_comparison_t *out_comparison)
+kim_error kim_os_string_compare (kim_string      in_string,
+                                   kim_string      in_compare_to_string,
+                                   kim_comparison *out_comparison)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFStringRef cfstring = NULL;
     CFStringRef compare_to_cfstring = NULL;
     
@@ -240,11 +240,11 @@ kim_error_t kim_os_string_compare (kim_string_t      in_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_t kim_os_string_compare_to_cfstring (kim_string_t      in_string,
+kim_error kim_os_string_compare_to_cfstring (kim_string      in_string,
                                                CFStringRef       in_compare_to_cfstring,
-                                               kim_comparison_t *out_comparison)
+                                               kim_comparison *out_comparison)
 {
-    kim_error_t err = KIM_NO_ERROR;
+    kim_error err = KIM_NO_ERROR;
     CFStringRef cfstring = NULL;
     
     if (!err && !in_string             ) { err = param_error (1, "in_string", "NULL"); }
