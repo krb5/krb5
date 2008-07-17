@@ -82,6 +82,7 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	(void) strcpy(d->fn, dir);
 	(void) strcat(d->fn, PATH_SEPARATOR);
 	(void) strcat(d->fn, *fn);
+	unlink(d->fn);
 	d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL |
 			       O_BINARY, 0600);
     } else {
@@ -418,7 +419,7 @@ krb5_rc_io_read(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
 				   strerror(errno));
 	    return KRB5_RC_IO_UNKNOWN;
 	}
-    if (count == 0)
+    if (count != num)
 	return KRB5_RC_IO_EOF;
     return 0;
 }
