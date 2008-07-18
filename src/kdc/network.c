@@ -386,11 +386,18 @@ delete_fd (struct connection *xconn)
     free(xconn);
 }
 
+static const int one = 1;
+
 static int
 setnbio(int sock)
 {
-    static const int one = 1;
     return ioctlsocket(sock, FIONBIO, (const void *)&one);
+}
+
+static int
+setkeepalive(int sock)
+{
+    return setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &one, sizeof(one));
 }
 
 static int
@@ -1251,7 +1258,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 	close(s);
 	return;
     }
-    setnbio(s), setnolinger(s);
+    setnbio(s), setnolinger(s), setkeepalive(s);
 
     sockdata.prog = prog;
     sockdata.retval = 0;
@@ -1570,7 +1577,8 @@ listen_and_process(const char *prog)
 
 	err = krb5int_cm_call_select(&sstate, &sout, &sret);
 	if (err) {
-	    com_err(prog, err, "while selecting for network input(1)");
+	    if (err != EINTR)
+		com_err(prog, err, "while selecting for network input(1)");
 	    continue;
 	}
 	if (sret == 0 && netchanged) {
@@ -1601,6 +1609,7 @@ listen_and_process(const char *prog)
 		service_conn(conns[i], prog, sflags);
 	}
     }
+    krb5_klog_syslog(LOG_INFO, "shutdown signal received");
     return 0;
 }
 
