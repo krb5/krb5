@@ -68,7 +68,6 @@ getdir(void)
 krb5_error_code
 krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 {
-    char *c;
     krb5_int16 rc_vno = htons(KRB5_RC_VNO);
     krb5_error_code retval = 0;
     int do_not_unlink = 0;
@@ -86,24 +85,29 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL |
 			       O_BINARY, 0600);
     } else {
-	if (asprintf(&d->fn, "%s%skrb5_RC%daaa",
-		     dir, PATH_SEPARATOR, (int) UNIQUE) < 0) {
+	if (asprintf(&d->fn, "%s%skrb5_RCXXXXXX",
+		     dir, PATH_SEPARATOR) < 0) {
 	    d->fn = NULL;
 	    return KRB5_RC_IO_MALLOC;
 	}
-	c = d->fn + strlen(d->fn) - 3;
-	while ((d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC |
-				       O_EXCL | O_BINARY, 0600)) == -1)	{
-	    if ((c[2]++) == 'z') {
-		c[2] = 'a';
-		if ((c[1]++) == 'z') {
-		    c[1] = 'a';
-		    if ((c[0]++) == 'z')
-			break; /* sigh */
-		}
+	d->fd = mkstemp(d->fn);
+	if (d->fd != -1) {
+#if defined(HAVE_FCHMOD) || defined(HAVE_CHMOD)
+#ifdef HAVE_FCHMOD
+	    retval = fchmod(d->fd, 0600);
+#else
+	    retval = chmod(d->fn, 0600);
+#endif
+	    if (retval == -1) {
+		retval = KRB5_RC_IO_UNKNOWN;
+		krb5_set_error_message(context, retval,
+				       "Cannot chmod replay cache file %s: %s",
+				       d->fn, strerror(errno));
+		goto cleanup;
 	    }
+#endif
 	}
-	if (fn) {
+	if (retval != 0 && d->fd != -1 && fn) {
 	    *fn = strdup(d->fn + dirlen);
 	    if (*fn == NULL) {
 		free(d->fn);
