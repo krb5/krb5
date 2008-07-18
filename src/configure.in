@@ -611,6 +611,11 @@ AC_CHECK_TYPES([struct cmsghdr, struct in_pktinfo, struct in6_pktinfo], , , [
 #include <sys/socket.h>
 #include <netinet/in.h>
 ])
+AC_CHECK_TYPES([struct rt_msghdr], , , [
+#include <sys/socket.h>
+#include <net/if.h>
+#include <net/route.h>
+])
 dnl
 dnl stuff for util/profile
 dnl

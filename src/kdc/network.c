@@ -175,7 +175,7 @@ static const char *paddr (struct sockaddr *sa)
 
 /* KDC data.  */
 
-enum kdc_conn_type { CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP };
+enum kdc_conn_type { CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP, CONN_ROUTING };
 
 /* Per-connection info.  */
 struct connection {
@@ -770,6 +770,127 @@ scan_for_newlines:
 }
 #endif
 
+static int network_reconfiguration_needed = 0;
+
+#ifdef HAVE_STRUCT_RT_MSGHDR
+#include <net/route.h>
+
+static char *rtm_type_name(int type)
+{
+    switch (type) {
+    case RTM_ADD: return "RTM_ADD";
+    case RTM_DELETE: return "RTM_DELETE";
+    case RTM_NEWADDR: return "RTM_NEWADDR";
+    case RTM_DELADDR: return "RTM_DELADDR";
+    case RTM_IFINFO: return "RTM_IFINFO";
+    case RTM_OLDADD: return "RTM_OLDADD";
+    case RTM_OLDDEL: return "RTM_OLDDEL";
+    case RTM_RESOLVE: return "RTM_RESOLVE";
+#ifdef RTM_NEWMADDR
+    case RTM_NEWMADDR: return "RTM_NEWMADDR";
+    case RTM_DELMADDR: return "RTM_DELMADDR";
+#endif
+    case RTM_MISS: return "RTM_MISS";
+    case RTM_REDIRECT: return "RTM_REDIRECT";
+    case RTM_LOSING: return "RTM_LOSING";
+    case RTM_GET: return "RTM_GET";
+    default: return "?";
+    }
+}
+
+static void process_routing_update(struct connection *conn, const char *prog,
+				   int selflags)
+{
+    static struct {
+	struct rt_msghdr rtm;
+	char scratchbuf[1024];
+    } s;
+    int n_read;
+
+    krb5_klog_syslog(LOG_INFO, "routing socket readable");
+    while ((n_read = read(conn->fd, &s, sizeof(s))) > 0) {
+	if (n_read < sizeof(s.rtm)) {
+	    krb5_klog_syslog(LOG_ERR, "short read (%d/%d) from routing socket",
+			     n_read, (int) sizeof(s.rtm));
+	    /* Quick hack to figure out if the interesting
+	       fields are present in a short read.  */
+#define RS(FIELD) (offsetof(struct rt_msghdr, FIELD) + sizeof(s.rtm.FIELD))
+	    if (n_read < RS(rtm_type) ||
+		n_read < RS(rtm_version) ||
+		n_read < RS(rtm_msglen))
+		return;
+	}
+	krb5_klog_syslog(LOG_INFO,
+			 "got routing msg type %d(%s) v%d",
+			 s.rtm.rtm_type, rtm_type_name(s.rtm.rtm_type),
+			 s.rtm.rtm_version);
+	if (s.rtm.rtm_msglen > sizeof(s)) {
+	    krb5_klog_syslog(LOG_ERR,
+			     "routing message bigger than buffer (%d/%d)",
+			     s.rtm.rtm_msglen, (int) sizeof(s));
+	    /* This will probably start spewing messages.  Slow it
+	       down.  */
+	    sleep(1);
+	    return;
+	}
+	if (s.rtm.rtm_msglen != n_read) {
+	    krb5_klog_syslog(LOG_ERR,
+			     "read %d from routing socket but msglen is %d",
+			     n_read, s.rtm.rtm_msglen);
+	    if (s.rtm.rtm_msglen < sizeof(s.rtm)) {
+		krb5_klog_syslog(LOG_ERR,
+				 "routing msglen shorter than header??");
+		return;
+	}
+	}
+	switch (s.rtm.rtm_type) {
+	case RTM_ADD:
+	case RTM_DELETE:
+	case RTM_NEWADDR:
+	case RTM_DELADDR:
+	case RTM_IFINFO:
+	case RTM_OLDADD:
+	case RTM_OLDDEL:
+	    krb5_klog_syslog(LOG_INFO, "reconfiguration needed");
+	    network_reconfiguration_needed = 1;
+	    break;
+	case RTM_RESOLVE:
+#ifdef RTM_NEWMADDR
+	case RTM_NEWMADDR:
+	case RTM_DELMADDR:
+#endif
+	case RTM_MISS:
+	case RTM_REDIRECT:
+	case RTM_LOSING:
+	case RTM_GET:
+	    /* Not interesting.  */
+	    krb5_klog_syslog(LOG_DEBUG, "routing msg not interesting");
+	    break;
+	default:
+	    krb5_klog_syslog(LOG_INFO, "unhandled routing message type, will reconfigure just for the fun of it");
+	    network_reconfiguration_needed = 1;
+	    break;
+	}
+    }
+}
+
+static void
+setup_routing_socket(struct socksetup *data)
+{
+    int sock = socket(PF_ROUTE, SOCK_RAW, 0);
+    if (sock < 0) {
+	int e = errno;
+	krb5_klog_syslog(LOG_INFO, "couldn't set up routing socket: %s",
+			 strerror(e));
+    } else {
+	krb5_klog_syslog(LOG_INFO, "routing socket is fd %d", sock);
+	add_fd(data, sock, CONN_ROUTING, process_routing_update);
+	setnbio(sock);
+	FD_SET(sock, &sstate.rfds);
+    }
+}
+#endif
+
 /* XXX */
 extern int krb5int_debug_sendto_kdc;
 extern void (*krb5int_sendtokdc_debug_handler)(const void*, size_t);
@@ -824,6 +945,9 @@ setup_network(const char *prog)
     setup_data.prog = prog;
     setup_data.retval = 0;
     krb5_klog_syslog (LOG_INFO, "setting up network...");
+#ifdef HAVE_STRUCT_RT_MSGHDR
+    setup_routing_socket(&setup_data);
+#endif
     /* To do: Use RFC 2292 interface (or follow-on) and IPV6_PKTINFO,
        so we might need only one UDP socket; fall back to binding
        sockets on each address only if IPV6_PKTINFO isn't
@@ -1395,6 +1519,20 @@ static void service_conn(struct connection *conn, const char *prog,
     conn->service(conn, prog, selflags);
 }
 
+/* from sendto_kdc.c */
+static int getcurtime(struct timeval *tvp)
+{
+#ifdef _WIN32
+    struct _timeb tb;
+    _ftime(&tb);
+    tvp->tv_sec = tb.time;
+    tvp->tv_usec = tb.millitm * 1000;
+    return 0;
+#else
+    return gettimeofday(tvp, 0) ? errno : 0;
+#endif
+}
+
 krb5_error_code
 listen_and_process(const char *prog)
 {
@@ -1403,7 +1541,7 @@ listen_and_process(const char *prog)
        can be rather large.  Making this static avoids putting all
        that junk on the stack.  */
     static struct select_state sout;
-    int			i, sret;
+    int			i, sret, netchanged = 0;
     krb5_error_code	err;
 
     if (conns == (struct connection **) NULL)
@@ -1414,11 +1552,36 @@ listen_and_process(const char *prog)
 	    krb5_klog_reopen(kdc_context);
 	    signal_requests_hup = 0;
 	}
-	sstate.end_time.tv_sec = sstate.end_time.tv_usec = 0;
+
+	if (network_reconfiguration_needed) {
+	    krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
+	    /* It might be tidier to add a timer-callback interface to
+	       the control loop here, but for this one use, it's not a
+	       big deal.  */
+	    err = getcurtime(&sstate.end_time);
+	    if (err) {
+		com_err(prog, err, "while getting the time");
+		continue;
+	    }
+	    sstate.end_time.tv_sec += 3;
+	    netchanged = 1;
+	} else
+	    sstate.end_time.tv_sec = sstate.end_time.tv_usec = 0;
+
 	err = krb5int_cm_call_select(&sstate, &sout, &sret);
 	if (err) {
 	    com_err(prog, err, "while selecting for network input(1)");
 	    continue;
+	}
+	if (sret == 0 && netchanged) {
+	    network_reconfiguration_needed = 0;
+	    closedown_network(prog);
+	    err = setup_network(prog);
+	    if (err) {
+		com_err(prog, err, "while reinitializing network");
+		return err;
+	    }
+	    netchanged = 0;
 	}
 	if (sret == -1) {
 	    if (errno != EINTR)
@@ -1451,8 +1614,10 @@ closedown_network(const char *prog)
 	return KDC5_NONET;
 
     FOREACH_ELT (connections, i, conn) {
-	if (conn->fd >= 0)
+	if (conn->fd >= 0) {
+	    krb5_klog_syslog(LOG_INFO, "closing down fd %d", conn->fd);
 	    (void) close(conn->fd);
+	}
 	DEL (connections, i);
 	/* There may also be per-connection data in the tcp structure
 	   (tcp.buffer, tcp.response) that we're not freeing here.
