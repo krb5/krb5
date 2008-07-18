@@ -1,7 +1,7 @@
 /*
  * kdc/main.c
  *
- * Copyright 1990,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2001,2008 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -154,6 +154,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     krb5_error_code	kret;
     krb5_boolean	manual;
     krb5_realm_params	*rparams;
+    int			kdb_open_flags;
 
     memset((char *) rdp, 0, sizeof(kdc_realm_t));
     if (!realm) {
@@ -239,13 +240,12 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     }
 
     /* first open the database  before doing anything */
-#ifdef KRBCONF_KDC_MODIFIES_KDB    
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
-			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC))) {
+#ifdef KRBCONF_KDC_MODIFIES_KDB
+    kdb_open_flags = KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC;
 #else
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
-			     KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC))) {
+    kdb_open_flags = KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC;
 #endif
+    if ((kret = krb5_db_open(rdp->realm_context, db_args, kdb_open_flags))) {
 	com_err(progname, kret,
 		"while initializing database for realm %s", realm);
 	goto whoops;
