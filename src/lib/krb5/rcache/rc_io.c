@@ -19,6 +19,9 @@
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
 
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #include "k5-int.h"
 #include <stdio.h> /* for P_tmpdir */
 #include "rc_base.h"
@@ -65,10 +68,62 @@ getdir(void)
     return dir;
 }
 
+/*
+ * Called from krb5_rc_io_creat(); calls mkstemp() and does some
+ * sanity checking on the file modes in case some broken mkstemp()
+ * implementation creates the file with overly permissive modes.  To
+ * avoid race conditions, do not fchmod() a file for which mkstemp set
+ * incorrect modes.
+ */
+static krb5_error_code
+krb5_rc_io_mkstemp(krb5_context context, krb5_rc_iostuff *d, char *dir)
+{
+    krb5_error_code retval = 0;
+#if HAVE_SYS_STAT_H
+    struct stat stbuf;
+#endif
+
+    memset(&stbuf, 0, sizeof(stbuf));
+    if (asprintf(&d->fn, "%s%skrb5_RCXXXXXX",
+		 dir, PATH_SEPARATOR) < 0) {
+	d->fn = NULL;
+	return KRB5_RC_IO_MALLOC;
+    }
+    d->fd = mkstemp(d->fn);
+    if (d->fd == -1) {
+	/*
+	 * This return value is deliberate because d->fd == -1 causes
+	 * caller to go into errno interpretation code.
+	 */
+	return 0;
+    }
+#if HAVE_SYS_STAT_H
+    /*
+     * Be paranoid and check that mkstemp made the file accessible
+     * only to the user.
+     */
+    retval = fstat(d->fd, &stbuf);
+    if (retval) {
+	krb5_set_error_message(context, retval,
+			       "Cannot fstat replay cache file %s: %s",
+			       d->fn, strerror(errno));
+	return KRB5_RC_IO_UNKNOWN;
+    }
+    if (stbuf.st_mode & 077) {
+	krb5_set_error_message(context, retval,
+			       "Insecure mkstemp() file mode "
+			       "for replay cache file %s; "
+			       "try running this program "
+			       "with umask 077 ", d->fn);
+	return KRB5_RC_IO_UNKNOWN;
+    }
+#endif
+    return 0;
+}
+
 krb5_error_code
 krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 {
-    char *c;
     krb5_int16 rc_vno = htons(KRB5_RC_VNO);
     krb5_error_code retval = 0;
     int do_not_unlink = 0;
@@ -86,24 +141,10 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL |
 			       O_BINARY, 0600);
     } else {
-	if (asprintf(&d->fn, "%s%skrb5_RC%daaa",
-		     dir, PATH_SEPARATOR, (int) UNIQUE) < 0) {
-	    d->fn = NULL;
-	    return KRB5_RC_IO_MALLOC;
-	}
-	c = d->fn + strlen(d->fn) - 3;
-	while ((d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC |
-				       O_EXCL | O_BINARY, 0600)) == -1)	{
-	    if ((c[2]++) == 'z') {
-		c[2] = 'a';
-		if ((c[1]++) == 'z') {
-		    c[1] = 'a';
-		    if ((c[0]++) == 'z')
-			break; /* sigh */
-		}
-	    }
-	}
-	if (fn) {
+	retval = krb5_rc_io_mkstemp(context, d, dir);
+	if (retval)
+	    goto cleanup;
+	if (d->fd != -1 && fn) {
 	    *fn = strdup(d->fn + dirlen);
 	    if (*fn == NULL) {
 		free(d->fn);
