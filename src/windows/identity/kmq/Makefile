@@ -46,4 +46,4 @@ $(OBJ)\kmqconfig.c: kmqconfig.csv $(CONFDIR)\csvschema.cfg
 all: mkdirs $(INCFILES) $(OBJFILES)
 
 clean::
-	if exist ..\obj $(RM) $(INCFILES)
+	if exist $(OBJ) $(RM) $(INCFILES)

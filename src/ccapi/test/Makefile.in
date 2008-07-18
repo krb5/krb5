@@ -8,6 +8,12 @@ CCAPI=$(BUILDTOP)$(S)CCAPI
 KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
 !endif
 
+!if ("$(CPU)"=="i386")
+CCLIB = krbcc32
+!else
+CCLIB = krbcc64
+!endif
+
 # Because all the sources are in ., 
 #  the only includes we need are to directories outside of ccapi.
 LOCALINCLUDES = /I$(BUILDTOP) /I$(BUILDTOP)$(S)include /I$(BUILDTOP)$(S)include$(S)krb5 $(KFWINC) \
@@ -138,7 +144,7 @@ MORE_TESTS =    test_cc_context_release \
 ##### Linker
 LINK	= link
 LIBS    = -lkrb5
-##DOS##LIBS = advapi32.lib rpcrt4.lib user32.lib ws2_32.lib krbcc32.lib
+##DOS##LIBS = advapi32.lib rpcrt4.lib user32.lib ws2_32.lib $(CCLIB).lib
 LFLAGS	= /nologo $(LOPTS)
 
 all-mac::     setup-test-dir pingtest simple_lock_test build-base build-tests link-tests copy-script success-message
@@ -228,3 +234,10 @@ success-message:
 
 clean::
 	-rm -rf "$(OBJDIR)"
+    if exist $(SRCTMP) del /s /q /f $(SRCTMP)\*.*
+    if exist ccs_request.h   rm ccs_request.h 
+    if exist ccs_request_c.c rm ccs_request_c.c 
+    if exist ccs_request_s.c rm ccs_request_s.c 
+    if exist ccs_reply.h     rm ccs_reply.h   
+    if exist ccs_reply_c.c   rm ccs_reply_c.c   
+    if exist ccs_reply_s.c   rm ccs_reply_s.c 

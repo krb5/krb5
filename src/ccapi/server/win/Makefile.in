@@ -76,7 +76,11 @@ DBGSYM = --nodebug
 DBGSYM = --debug
 !endif        
 
+!if ("$(CPU)"=="i386")
 TARGET = krbcc32s
+!else
+TARGET = krbcc64s
+!endif
 
 all:: Makefile copysrc midl $(OUTPRE)$(TARGET).exe finish
 
@@ -119,4 +123,10 @@ clean::
 	if exist $(OUTPRE)*.map del $(OUTPRE)*.map
 	if exist $(OUTPRE)*.pdb del $(OUTPRE)*.pdb
 	if exist *.err del *.err
-    if exist $(SRCTMP) rm -rf $(SRCTMP)
+    if exist $(SRCTMP) del /s /q /f $(SRCTMP)\*.*
+    if exist ccs_request.h   del ccs_request.h 
+    if exist ccs_request_c.c del ccs_request_c.c 
+    if exist ccs_request_s.c del ccs_request_s.c 
+    if exist ccs_reply.h     del ccs_reply.h   
+    if exist ccs_reply_c.c   del ccs_reply_c.c   
+    if exist ccs_reply_s.c   del ccs_reply_s.c 

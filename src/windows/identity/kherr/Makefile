@@ -41,4 +41,4 @@ SDKLIBFILES= \
 all: mkdirs $(INCFILES) $(OBJFILES)
 
 clean::
-	if exist ..\obj $(RM) $(INCFILES)
+	if exist $(OBJ) $(RM) $(INCFILES)

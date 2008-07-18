@@ -52,4 +52,4 @@ $(OBJ)\kmm_msgs.rc: lang\kmm_msgs.mc
 all: mkdirs $(INCFILES) $(MSGRESFILE) $(OBJFILES)
 
 clean::
-	if exist ..\obj $(RM) $(INCFILES)
+	if exist $(OBJ) $(RM) $(INCFILES)

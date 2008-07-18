@@ -356,6 +356,9 @@ clean-windows:: Makefile-windows
 	@echo Making clean in include
 	cd ..\include
 	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in ccapi
+	cd ..\ccapi
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib
 	cd ..\lib
 	$(MAKE) -$(MFLAGS) clean

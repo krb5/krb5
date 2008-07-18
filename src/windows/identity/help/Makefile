@@ -37,5 +37,5 @@ $(CHMFILE): netidmgr.hhp
 	$(CP) netidmgr.chm $(CHMFILE)
 
 clean::
-	if exist ..\obj $(RM) $(INCFILES)
+	if exist $(OBJ) $(RM) $(INCFILES)
 	if exist netidmgr.chm $(RM) netidmgr.chm

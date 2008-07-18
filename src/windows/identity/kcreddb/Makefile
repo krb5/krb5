@@ -50,4 +50,4 @@ $(OBJ)\kcredres.res: lang\en_us\kcredres.rc
 all: mkdirs $(INCFILES) $(OBJ)\kcredres.res $(OBJFILES)
 
 clean::
-	if exist ..\obj $(RM) $(INCFILES)
+	if exist $(OBJ) $(RM) $(INCFILES)

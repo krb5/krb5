@@ -4,9 +4,11 @@
 !define KFW_MINORVERSION %VERSION_MINOR%
 !define KFW_PATCHLEVEL %VERSION_PATCH%
 !define CL_1400
+!define X86
 
-!define RELEASE
-!define NOT_DEBUG
+;!define RELEASE
+;!define NOT_DEBUG
+!define DEBUG
 !define BETA 1
 !define SAMPLE_CONFIG_REALM "ATHENA.MIT.EDU"
 !define HTTP_CONFIG_URL     "[Obtain a URL from your Kerberos administrator]"

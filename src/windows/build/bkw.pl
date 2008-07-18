@@ -64,6 +64,8 @@ Usage: $0 [options] NMAKE-options
     /[no]package       Control the packaging step.
     /[no]sign          Control signing of executable files.
     /verbose /v        Debug mode - verbose output.
+    /vverbose          Debug mode - even more output.
+    /cpu cpu           Type of cpu - i386 or amd64.
     /logfile /l path   Where to write output.  Default is bkw.pl.log.
     /nolog             Don't save output.
   Other:
@@ -117,7 +119,8 @@ sub main {
     while (($sw, $val) = each %$odr) {
         local $arg  = $sw;
         if (exists $val->{abbr})    {$arg .= "|$val->{abbr}";}
-        if (exists $val->{value})   {       ## Can't do both negations and string values.
+        if (exists $val->{value} ||     
+            exists $val->{options})   {     ## Can't do both negations and string values.
             $arg .= ":s";
             }
         else {    
@@ -159,17 +162,17 @@ sub main {
         # If the switch is in the command line, override the stored value:
         if (exists $OPT->{$sw}) {
             if (exists $val->{value}) {
-                $val->{value}   = $OPT->{$sw};  
-                $val->{def}     = 1;
+                $val->{value} = $OPT->{$sw};  
+                $val->{def}   = 1;
                 }
             else {
-                $val->{def}   = $OPT->{$sw};  ## If -NO<switch>, value will be zero.
+                $val->{def}   = 0;
                 }
             }
         # If the switch can be negated, test that, too:
         if ( ! ($val->{def} =~ /A/)) {
             local $nosw = "no".$sw;
-            if (exists $OPT->{$sw}) {         ## -NO<environment variable> ?
+            if (exists $OPT->{$nosw}) {         ## -NO<environment variable> ?
                 if ($val->{env}) {              
                     if (!$val->{def}) {
                         print "Deleting environment variable $sw\n";
@@ -181,7 +184,7 @@ sub main {
             }
     
         # For any switch definition with fixed values ("options"), validate:
-        if (exists $val->{options}) {
+        if ( (exists $val->{options}) && ($val->{def})) {
             local $bValid   = 0;
             # options can be like value1|syn1 value2|syn2|syn3
             foreach $option (split(/ /, $val->{options})) {
@@ -213,6 +216,13 @@ sub main {
     our $clean      = $clean->{clean}->{def};
     local $src      = $odr->{src}->{value};
     local $out      = $odr->{out}->{value};
+
+    # /CPU interacts with CPU environment variable.
+    if (!$odr->{cpu}->{def}) {              ## If not defined locally,
+        $odr->{cpu}->{value} = $ENV{CPU};   ##   use environment variable value.
+        }
+	# /COMPONENTS can have a %CPU% substitution tag in it:
+    $odr->{components}->{value} =~ s/%cpu%/$odr->{cpu}->{value}/g;
 
     if ($clean && $odr->{package}->{def}) {
         print "Info -- /clean forces /nopackage.\n";
@@ -420,7 +430,7 @@ sub main {
     # ** Do this now (after repository update and before first zip) 
     #    because making zip files requires some configuration data be set up.
     local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
-    open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
+    open(DAT, "$src/$version_path")     or die "Could not open $src/$version_path.";
     @raw = <DAT>;
     close DAT;
     foreach $line (@raw) {
@@ -604,9 +614,12 @@ sub main {
         # Correct errors in files.wxi:
         !system("sed 's/WorkingDirectory=\"\\[dirbin\\]\"/WorkingDirectory=\"dirbin\"/g' files.wxi > a.tmp") or die "Fatal -- Couldn't modify files.wxi.";
         !system("mv a.tmp files.wxi") or die "Fatal -- Couldn't update files.wxi.";
-            
-        # Make sed script to run on the site-local configuration files:
-        local $tmpfile      = "site-local.sed" ;
+
+        ##++ -----------------------------------------------------------------------------
+        ##++ Transform -tagged files:
+                    
+        ## Make sed script to run on the site-local configuration files:
+        local $tmpfile			= "site-local.sed" ;
         if (-e $tmpfile) {system("del $tmpfile");}
         # Basic substitutions:
         local $dblback_wd   = $wd;
@@ -617,20 +630,25 @@ sub main {
         !system("echo s/%TARGETDIR%/$dblback_staging/ >> $tmpfile")         or die "Fatal -- Couldn't modify $tmpfile.";    
         local $dblback_sample   = "$wd\\staging\\sample";
         $dblback_sample         =~ s/\\/\\\\/g;
+
+		$ArchTag				= $prepackage->{CopyList}->{Config}->{ArchTag}->{value};
+		$ArchFragment			= ($odr->{cpu}->{value} =~ /386/) ? "32" : "64";
+
         !system("echo s/%CONFIGDIR-WIX%/$dblback_sample/ >> $tmpfile")      or die "Fatal -- Couldn't modify $tmpfile.";    
         !system("echo s/%CONFIGDIR-NSI%/$dblback_staging/ >> $tmpfile")     or die "Fatal -- Couldn't modify $tmpfile.";    
         !system("echo s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/ >> $tmpfile")  or die "Fatal -- Couldn't modify $tmpfile.";    
         !system("echo s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/ >> $tmpfile")  or die "Fatal -- Couldn't modify $tmpfile.";    
         !system("echo s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/ >> $tmpfile")    or die "Fatal -- Couldn't modify $tmpfile.";    
+        !system("echo s/$ArchTag/$ArchFragment/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";    
         # Strip out some defines so they can be replaced:  [used for site-local.nsi]
-        !system("echo /\^!define\.\*RELEASE\.\*\$/d >> $tmpfile")           or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo /\^!define\.\*DEBUG\.\*\$/d >> $tmpfile")             or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")              or die "Fatal -- Couldn't modify $tmpfile.";    
+        !system("echo /\^!define\.\*RELEASE\.\*\$/d >> $tmpfile")   or die "Fatal -- Couldn't modify $tmpfile.";    
+        !system("echo /\^!define\.\*DEBUG\.\*\$/d >> $tmpfile")     or die "Fatal -- Couldn't modify $tmpfile.";    
+        !system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")      or die "Fatal -- Couldn't modify $tmpfile.";    
 
         # Run the script on site-local.wxi:
         !system("sed -f $tmpfile site-local-tagged.wxi > $wd\\buildwix\\site-local.wxi")   or die "Fatal -- Couldn't modify site-local.wxi.";
 
-        # Now update site-local.nsi:
+        ## Now update site-local.nsi:
         chdir "..\\nsis";
         print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
         !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
@@ -645,12 +663,20 @@ sub main {
         if (exists $config->{Versions}->{'BETA_STR'}) {
             !system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp") or die "Fatal -- Couldn't modify b.tmp.";    
             }
-        !system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")                        or die "Fatal -- Couldn't replace site-local.nsi.";
+        !system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")	or die "Fatal -- Couldn't replace site-local.nsi.";
 
-        # Run the script on nsi-includes-tagged.nsi:
+        ## Run the script on nsi-includes-tagged.nsi:
         !system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > $wd\\buildnsi\\nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
-        !system("rm ..\\wix\\$tmpfile")                                     or die "Fatal -- Couldn't remove $tmpfile.";
 
+		## Run the script on kfw-fixed-tagged.nsi:
+        print "KPK -- work on kfw-fixed-tagged.nsi in ".`cd`."\n";
+        !system("sed -f ..\\wix\\$tmpfile kfw-fixed-tagged.nsi > $wd\\buildnsi\\kfw-fixed.nsi")  or die "Fatal -- Couldn't modify kfw_fixed.nsi.";
+
+        !system("rm ..\\wix\\$tmpfile")                or die "Fatal -- Couldn't remove $tmpfile.";
+
+        ##-- Transform -tagged files:
+        ##-- -----------------------------------------------------------------------------
+                    
         if ($verbose) {print "Info -- ***   End prepackage.\n";}
         
         if ($verbose) {print "Info -- *** Begin package.\n";}
