@@ -2,7 +2,7 @@ thisconfigdir=..
 myfulldir=kadmin
 mydir=kadmin
 BUILDTOP=$(REL)..
-LOCAL_SUBDIRS = cli dbutil passwd ktutil server testing
+SUBDIRS = cli dbutil passwd ktutil server testing
 
 all::
 

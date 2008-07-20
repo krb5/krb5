@@ -2,7 +2,7 @@ thisconfigdir=../..
 myfulldir=lib/gssapi
 mydir=lib/gssapi
 BUILDTOP=$(REL)..$(S)..
-LOCAL_SUBDIRS= generic mechglue krb5 spnego
+SUBDIRS= generic mechglue krb5 spnego
 DEFS=
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib

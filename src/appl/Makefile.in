@@ -3,6 +3,6 @@ myfulldir=appl
 mydir=appl
 BUILDTOP=$(REL)..
 
-LOCAL_SUBDIRS= sample simple user_user gss-sample \
+SUBDIRS= sample simple user_user gss-sample \
 	libpty bsd gssftp telnet
 

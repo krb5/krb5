@@ -9,7 +9,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 DEFS =
 MODULE_INSTALL_DIR = $(KRB5_DB_MODULE_DIR)
 
-LOCAL_SUBDIRS= libkdb_ldap ldap_util
+SUBDIRS= libkdb_ldap ldap_util
 
 LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb \
 	-I$(srcdir)/libkdb_ldap

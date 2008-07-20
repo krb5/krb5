@@ -3,7 +3,7 @@ myfulldir=ccapi
 mydir=ccapi
 BUILDTOP=$(REL)..
 
-LOCAL_SUBDIRS= lib server test
+SUBDIRS= lib server test
 
 all-windows:: 
 	@echo Making in ccapi\lib\win

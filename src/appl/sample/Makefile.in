@@ -1,5 +1,5 @@
 thisconfigdir=../..
 myfulldir=appl/sample
 mydir=appl/sample
-LOCAL_SUBDIRS = sclient sserver
+SUBDIRS = sclient sserver
 BUILDTOP=$(REL)..$(S)..

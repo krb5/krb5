@@ -2,7 +2,7 @@ thisconfigdir=../..
 myfulldir=ccapi/lib
 mydir=ccapi/lib
 BUILDTOP=$(REL)..$(S)..
-LOCAL_SUBDIRS=unix
+SUBDIRS=unix
 LOCALINCLUDES=-I$(srcdir)/../common
 
 SHLIB_EXPDEPS= $(COM_ERR_DEPLIB)

@@ -3,7 +3,7 @@ myfulldir=clients
 mydir=clients
 BUILDTOP=$(REL)..
 
-LOCAL_SUBDIRS= klist kinit kdestroy kpasswd ksu kvno kcpytkt kdeltkt
+SUBDIRS= klist kinit kdestroy kpasswd ksu kvno kcpytkt kdeltkt
 
 NO_OUTPRE=1
 all-windows::

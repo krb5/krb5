@@ -1,7 +1,7 @@
 thisconfigdir=..
 myfulldir=include
 mydir=include
-LOCAL_SUBDIRS=@maybe_kerberosIV@
+SUBDIRS=@maybe_kerberosIV@
 BUILDTOP=$(REL)..
 KRB5RCTMPDIR= @KRB5_RCTMPDIR@
 ##DOSBUILDTOP = ..

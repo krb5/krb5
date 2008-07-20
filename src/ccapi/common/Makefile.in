@@ -2,7 +2,7 @@ thisconfigdir=../..
 myfulldir=ccapi/common
 mydir=ccapi/common
 BUILDTOP=$(REL)..$(S)..
-LOCAL_SUBDIRS=unix
+SUBDIRS=unix
 
 SRCS= \
 	cci_array_internal.c \
