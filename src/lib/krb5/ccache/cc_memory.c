@@ -139,10 +139,18 @@ krb5_error_code KRB5_CALLCONV
 krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
     krb5_error_code ret; 
+    krb5_mcc_data *d;
+
+    d = (krb5_mcc_data *)id->data;
+    ret = k5_mutex_lock(&d->lock);
+    if (ret)
+        return ret;
 
     krb5_mcc_free(context, id);
     ret = krb5_copy_principal(context, princ,
 			      &((krb5_mcc_data *)id->data)->prin);
+
+    k5_mutex_unlock(&d->lock);
     if (ret == KRB5_OK)
         krb5_change_cache();
     return ret;
@@ -209,8 +217,13 @@ krb5_mcc_destroy(krb5_context context, krb5_ccache id)
     }
     k5_mutex_unlock(&krb5int_mcc_mutex);
 
+    err = k5_mutex_lock(&d->lock);
+    if (err)
+        return err;
+
     krb5_mcc_free(context, id);
     krb5_xfree(d->name);
+    k5_mutex_unlock(&d->lock);
     k5_mutex_destroy(&d->lock);
     krb5_xfree(d); 
     krb5_xfree(id);
