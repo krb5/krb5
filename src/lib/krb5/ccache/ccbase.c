@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/ccbase.c
  *
- * Copyright 1990,2004 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2004,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -184,6 +184,8 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
     krb5_error_code err;
     const krb5_cc_ops *ops;
 
+    if (name == NULL)
+	return KRB5_CC_BADNAME;
     pfx = NULL;
     cp = strchr (name, ':');
     if (!cp) {
