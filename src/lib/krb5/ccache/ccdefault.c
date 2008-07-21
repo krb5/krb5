@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/ccdefault.c
  *
- * Copyright 1990, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -45,22 +45,30 @@ static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
 krb5_error_code KRB5_CALLCONV
 krb5_cc_default(krb5_context context, krb5_ccache *ccache)
 {
-	krb5_os_context	os_ctx;
+	const char *default_name;
 
 	if (!context || context->magic != KV5M_CONTEXT)
 		return KV5M_CONTEXT;
+
+	default_name = krb5_cc_default_name(context);
+	if (default_name == NULL) {
+	    /* Could be a bogus context, or an allocation failure, or
+	       other things.  Unfortunately the API doesn't allow us
+	       to find out any specifics.  */
+	    return KRB5_FCC_INTERNAL;
+	}
 	
-	os_ctx = &context->os_context;
-	
-	return krb5_cc_resolve(context, krb5_cc_default_name(context), ccache);
+	return krb5_cc_resolve(context, default_name, ccache);
 }
 
-/* This is the internal function which opens the default ccache.  On platforms supporting
-   the login library's automatic popup dialog to get tickets, this function also updated the
-   library's internal view of the current principal associated with this cache. 
-   
-   All krb5 and GSS functions which need to open a cache to get a tgt to obtain service tickets
-   should call this function, not krb5_cc_default() */
+/* This is the internal function which opens the default ccache.  On
+   platforms supporting the login library's automatic popup dialog to
+   get tickets, this function also updated the library's internal view
+   of the current principal associated with this cache.
+
+   All krb5 and GSS functions which need to open a cache to get a tgt
+   to obtain service tickets should call this function, not
+   krb5_cc_default().  */
 
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
