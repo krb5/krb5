@@ -310,7 +310,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 	septmp = ksseplist;
 	for (sp = strchr(kp, (int) *septmp);
 	     *(++septmp) && !sp;
-	     ep = strchr(kp, (int) *septmp));
+	     sp = strchr(kp, (int) *septmp));
 
 	if (sp) {
 	    /* Separate enctype from salttype */
