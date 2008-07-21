@@ -1016,7 +1016,6 @@ dump_db(argc, argv)
 {
     FILE		*f;
     struct dump_args	arglist;
-    char		*programname;
     char		*ofile;
     krb5_error_code	kret, retval;
     dump_version	*dump;
@@ -1027,9 +1026,6 @@ dump_db(argc, argv)
     /*
      * Parse the arguments.
      */
-    programname = argv[0];
-    if (strrchr(programname, (int) '/'))
-	programname = strrchr(argv[0], (int) '/') + 1;
     ofile = (char *) NULL;
     dump = &r1_3_version;
     arglist.verbose = 0;
@@ -1081,7 +1077,7 @@ dump_db(argc, argv)
      * to be opened if we try a dump that uses it.
      */
     if (!dbactive) {
-	com_err(argv[0], 0, Err_no_database);
+	com_err(progname, 0, Err_no_database);
 	exit_status++;
 	return;
     }
@@ -1099,7 +1095,7 @@ dump_db(argc, argv)
 						(char *) NULL, 0,
 						&master_keyblock);
 		    if (retval) {
-			    com_err(argv[0], retval,
+			    com_err(progname, retval,
 				    "while reading master key");
 			    exit(1);
 		    }
@@ -1107,7 +1103,7 @@ dump_db(argc, argv)
 						       master_princ,
 						       &master_keyblock);
 		    if (retval) {
-			    com_err(argv[0], retval,
+			    com_err(progname, retval,
 				    "while verifying master key");
 			    exit(1);
 		    }
@@ -1124,7 +1120,7 @@ dump_db(argc, argv)
 					     TRUE, 
 					     new_mkey_file, 0,
 					     &new_master_keyblock))) { 
-		    com_err(argv[0], retval, "while reading new master key");
+		    com_err(progname, retval, "while reading new master key");
 		    exit(1);
 	    }
     }
@@ -1150,7 +1146,7 @@ dump_db(argc, argv)
 	unlink(ofile);
 	if (!(f = fopen(ofile, "w"))) {
 	    fprintf(stderr, ofopen_error,
-		    programname, ofile, error_message(errno));
+		    progname, ofile, error_message(errno));
 	    exit_status++;
 	    return;
        }
@@ -1158,7 +1154,7 @@ dump_db(argc, argv)
 				   fileno(f),
 				   KRB5_LOCKMODE_EXCLUSIVE))) {
 	    fprintf(stderr, oflock_error,
-		    programname, ofile, error_message(kret));
+		    progname, ofile, error_message(kret));
 	    exit_status++;
 	}
 	else
@@ -1167,7 +1163,7 @@ dump_db(argc, argv)
 	f = stdout;
     }
     if (f && !(kret)) {
-	arglist.programname = programname;
+	arglist.programname = progname;
 	arglist.ofile = f;
 	arglist.kcontext = util_context;
 	fprintf(arglist.ofile, "%s", dump->header);
@@ -1179,13 +1175,13 @@ dump_db(argc, argv)
 				    dump->dump_princ,
 				    (krb5_pointer) &arglist))) { /* TBD: backwards and recursive not supported */
 	     fprintf(stderr, dumprec_err,
-		     programname, dump->name, error_message(kret));
+		     progname, dump->name, error_message(kret));
 	     exit_status++;
 	}
 	if (dump->dump_policy &&
 	    (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
 					 &arglist))) { 
-	     fprintf(stderr, dumprec_err, programname, dump->name,
+	     fprintf(stderr, dumprec_err, progname, dump->name,
 		     error_message(kret));
 	     exit_status++;
 	}
@@ -2126,7 +2122,6 @@ load_db(argc, argv)
     FILE		*f;
     extern char		*optarg;
     extern int		optind;
-    char		*programname;
     char		*dumpfile;
     char		*dbname;
     char		*dbname_tmp;
@@ -2140,9 +2135,6 @@ load_db(argc, argv)
     /*
      * Parse the arguments.
      */
-    programname = argv[0];
-    if (strrchr(programname, (int) '/'))
-	programname = strrchr(argv[0], (int) '/') + 1;
     dumpfile = (char *) NULL;
     dbname = global_params.dbname;
     load = NULL;
@@ -2180,7 +2172,7 @@ load_db(argc, argv)
 
     if (!(dbname_tmp = (char *) malloc(strlen(dbname)+
 				       strlen(dump_tmptrail)+1))) {
-	fprintf(stderr, no_name_mem_fmt, argv[0]);
+	fprintf(stderr, no_name_mem_fmt, progname);
 	exit_status++;
 	return;
     }
@@ -2191,7 +2183,7 @@ load_db(argc, argv)
      * Initialize the Kerberos context and error tables.
      */
     if ((kret = kadm5_init_krb5_context(&kcontext))) {
-	fprintf(stderr, ctx_err_fmt, programname);
+	fprintf(stderr, ctx_err_fmt, progname);
 	free(dbname_tmp);
 	exit_status++;
 	return;
@@ -2199,7 +2191,7 @@ load_db(argc, argv)
 
     if( (kret = krb5_set_default_realm(kcontext, util_context->default_realm)) )
     {
-	fprintf(stderr, "%s: Unable to set the default realm\n", programname);
+	fprintf(stderr, "%s: Unable to set the default realm\n", progname);
 	free(dbname_tmp);
 	exit_status++;
 	return;
@@ -2210,14 +2202,14 @@ load_db(argc, argv)
      */
     if (dumpfile) {
 	if ((f = fopen(dumpfile, "r")) == NULL) {
-	     fprintf(stderr, dfile_err_fmt, programname, dumpfile,
+	     fprintf(stderr, dfile_err_fmt, progname, dumpfile,
 		     error_message(errno)); 
 	     exit_status++;
 	     return;
 	}
 	if ((kret = krb5_lock_file(kcontext, fileno(f),
 				   KRB5_LOCKMODE_SHARED))) {
-	     fprintf(stderr, "%s: Cannot lock %s: %s\n", programname,
+	     fprintf(stderr, "%s: Cannot lock %s: %s\n", progname,
 		     dumpfile, error_message(errno));
 	     exit_status++;
 	     return;
@@ -2233,7 +2225,7 @@ load_db(argc, argv)
     if (load) {
 	 /* only check what we know; some headers only contain a prefix */
 	 if (strncmp(buf, load->header, strlen(load->header)) != 0) {
-	      fprintf(stderr, head_bad_fmt, programname, dumpfile);
+	      fprintf(stderr, head_bad_fmt, progname, dumpfile);
 	      exit_status++;
 	      if (dumpfile) fclose(f);
 	      return;
@@ -2252,7 +2244,7 @@ load_db(argc, argv)
 			  strlen(ov_version.header)) == 0)
 	      load = &ov_version;
 	 else {
-	      fprintf(stderr, head_bad_fmt, programname, dumpfile);
+	      fprintf(stderr, head_bad_fmt, progname, dumpfile);
 	      exit_status++;
 	      if (dumpfile) fclose(f);
 	      return;
@@ -2260,7 +2252,7 @@ load_db(argc, argv)
     }
     if (load->updateonly && !update) {
 	 fprintf(stderr, "%s: dump version %s can only be loaded with the "
-		 "-update flag\n", programname, load->name);
+		 "-update flag\n", progname, load->name);
 	 exit_status++;
 	 return;
     }
@@ -2277,7 +2269,7 @@ load_db(argc, argv)
 
 	 if ((kret = kadm5_get_config_params(kcontext, 1,
 					     &newparams, &newparams))) {
-	      com_err(argv[0], kret,
+	      com_err(progname, kret,
 		      "while retreiving new configuration parameters");
 	      exit_status++;
 	      return;
@@ -2301,11 +2293,11 @@ load_db(argc, argv)
 	     */
 
 	    if (emsg != NULL) {
-		fprintf(stderr, "%s: %s\n", programname, emsg);
+		fprintf(stderr, "%s: %s\n", progname, emsg);
 		krb5_free_error_message (kcontext, emsg);
 	    } else {
 		fprintf(stderr, dbcreaterr_fmt,
-			programname, dbname, error_message(kret));
+			progname, dbname, error_message(kret));
 	    }
 	    exit_status++;
 	    kadm5_free_config_params(kcontext, &newparams);
@@ -2326,11 +2318,11 @@ load_db(argc, argv)
 		 */
 
 		if (emsg != NULL) {
-		    fprintf(stderr, "%s: %s\n", programname, emsg);
+		    fprintf(stderr, "%s: %s\n", progname, emsg);
 		    krb5_free_error_message (kcontext, emsg);
 		} else {
 		    fprintf(stderr, dbinit_err_fmt,
-			    programname, error_message(kret));
+			    progname, error_message(kret));
 		}
 		exit_status++;
 		goto error;
@@ -2349,7 +2341,7 @@ load_db(argc, argv)
 	 */
 	if (kret != KRB5_PLUGIN_OP_NOTSUPP) {
 	    fprintf(stderr, "%s: %s while permanently locking database\n",
-		    programname, error_message(kret));
+		    progname, error_message(kret));
 	    exit_status++;
 	    goto error;
 	}
@@ -2357,10 +2349,10 @@ load_db(argc, argv)
     else
 	db_locked = 1;
     
-    if (restore_dump(programname, kcontext, (dumpfile) ? dumpfile : stdin_name,
+    if (restore_dump(progname, kcontext, (dumpfile) ? dumpfile : stdin_name,
 		     f, verbose, load)) {
 	 fprintf(stderr, restfail_fmt,
-		 programname, load->name);
+		 progname, load->name);
 	 exit_status++;
     }
 
@@ -2373,14 +2365,14 @@ load_db(argc, argv)
     if (db_locked && (kret = krb5_db_unlock(kcontext))) {
 	 /* change this error? */
 	 fprintf(stderr, dbunlockerr_fmt,
-		 programname, dbname, error_message(kret));
+		 progname, dbname, error_message(kret));
 	 exit_status++;
     }
 
 #if 0
     if ((kret = krb5_db_fini(kcontext))) {
 	 fprintf(stderr, close_err_fmt,
-		 programname, error_message(kret));
+		 progname, error_message(kret));
 	 exit_status++;
     }
 #endif
@@ -2395,7 +2387,7 @@ load_db(argc, argv)
 	 */
 	if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
 	    fprintf(stderr, "%s: cannot make newly loaded database live (%s)\n",
-		    programname, error_message(kret));
+		    progname, error_message(kret));
 	    exit_status++;
 	}
     }
@@ -2416,7 +2408,7 @@ error:
 	       */
 	      if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
 		   fprintf(stderr, dbdelerr_fmt,
-			   programname, dbname, error_message(kret));
+			   progname, dbname, error_message(kret));
 		   exit_status++;
 	      }
 	 }

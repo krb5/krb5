@@ -247,7 +247,7 @@ int main(argc, argv)
 	    }
        } else if (strcmp(*argv, "-k") == 0 && ARG_VAL) {
 	    if (krb5_string_to_enctype(koptarg, &global_params.enctype))
-		 com_err(argv[0], 0, "%s is an invalid enctype", koptarg);
+		 com_err(progname, 0, "%s is an invalid enctype", koptarg);
 	    else
 		 global_params.mask |= KADM5_CONFIG_ENCTYPE;
        } else if (strcmp(*argv, "-M") == 0 && ARG_VAL) {
@@ -289,7 +289,7 @@ int main(argc, argv)
     retval = kadm5_get_config_params(util_context, 1,
 				     &global_params, &global_params);
     if (retval) {
-	 com_err(argv[0], retval, "while retreiving configuration parameters");
+	 com_err(progname, retval, "while retreiving configuration parameters");
 	 exit(1);
     }
 
@@ -302,7 +302,7 @@ int main(argc, argv)
     master_keyblock.enctype = global_params.enctype;
     if ((master_keyblock.enctype != ENCTYPE_UNKNOWN) &&
 	(!krb5_c_valid_enctype(master_keyblock.enctype))) {
-	com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+	com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
 		"while setting up enctype %d", master_keyblock.enctype);
     }
 
@@ -336,13 +336,13 @@ void set_dbname(argc, argv)
 
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: %s dbpathname realmname", argv[0]);
+	com_err(progname, 0, "Usage: %s dbpathname realmname", argv[0]);
 	exit_status++;
 	return;
     }
     if (dbactive) {
 	if ((retval = krb5_db_fini(util_context)) && retval!= KRB5_KDB_DBNOTINITED) {
-	    com_err(argv[0], retval, "while closing previous database");
+	    com_err(progname, retval, "while closing previous database");
 	    exit_status++;
 	    return;
 	}
@@ -355,7 +355,7 @@ void set_dbname(argc, argv)
 	dbactive = FALSE;
     }
 
-    (void) set_dbname_help(argv[0], argv[1]);
+    (void) set_dbname_help(progname, argv[1]);
     return;
 }
 #endif
@@ -427,6 +427,7 @@ static int open_db_and_mkey()
 	retval = krb5_principal2salt(util_context, master_princ, &scratch);
 	if (retval) {
 	    com_err(progname, retval, "while calculated master key salt");
+	    exit_status++;
 	    return(1);
 	}
 
@@ -444,6 +445,7 @@ static int open_db_and_mkey()
 	if (retval) {
 	    com_err(progname, retval,
 		    "while transforming master key from password");
+	    exit_status++;
 	    return(1);
 	}
 	free(scratch.data);
@@ -521,7 +523,7 @@ add_random_key(argc, argv)
     krb5_int32 num_keysalts = 0;
 
     int free_keysalts;
-    char *me = argv[0];
+    char *me = progname;
     char *ks_str = NULL;
     char *pr_str;
 

@@ -162,9 +162,6 @@ void kdb5_create(argc, argv)
     int do_stash = 0;
     krb5_data pwd, seed;
 	   
-    if (strrchr(argv[0], '/'))
-	argv[0] = strrchr(argv[0], '/')+1;
-
     while ((optchar = getopt(argc, argv, "s")) != -1) {
 	switch(optchar) {
 	case 's':
@@ -193,7 +190,7 @@ void kdb5_create(argc, argv)
     printf ("Loading random data\n");
     retval = krb5_c_random_os_entropy (util_context, 1, NULL);
     if (retval) {
-      com_err (argv[0], retval, "Loading random data");
+      com_err (progname, retval, "Loading random data");
       exit_status++; return;
     }
     
@@ -203,7 +200,7 @@ void kdb5_create(argc, argv)
 					  global_params.mkey_name,
 					  global_params.realm,  
 					  &mkey_fullname, &master_princ))) {
-	com_err(argv[0], retval, "while setting up master key name");
+	com_err(progname, retval, "while setting up master key name");
 	exit_status++; return;
     }
 
@@ -229,7 +226,7 @@ master key name '%s'\n",
 	retval = krb5_read_password(util_context, KRB5_KDC_MKEY_1, KRB5_KDC_MKEY_2,
 				    pw_str, &pw_size);
 	if (retval) {
-	    com_err(argv[0], retval, "while reading master key from keyboard");
+	    com_err(progname, retval, "while reading master key from keyboard");
 	    exit_status++; return;
 	}
 	mkey_password = pw_str;
@@ -239,14 +236,14 @@ master key name '%s'\n",
     pwd.length = strlen(mkey_password);
     retval = krb5_principal2salt(util_context, master_princ, &master_salt);
     if (retval) {
-	com_err(argv[0], retval, "while calculating master key salt");
+	com_err(progname, retval, "while calculating master key salt");
 	exit_status++; return;
     }
 
     retval = krb5_c_string_to_key(util_context, master_keyblock.enctype, 
 				  &pwd, &master_salt, &master_keyblock);
     if (retval) {
-	com_err(argv[0], retval, "while transforming master key from password");
+	com_err(progname, retval, "while transforming master key from password");
 	exit_status++; return;
     }
 
@@ -256,28 +253,28 @@ master key name '%s'\n",
     seed.data = master_keyblock.contents;
 
     if ((retval = krb5_c_random_seed(util_context, &seed))) {
-	com_err(argv[0], retval, "while initializing random key generator");
+	com_err(progname, retval, "while initializing random key generator");
 	exit_status++; return;
     }
     if ((retval = krb5_db_create(util_context,
 				 db5util_db_args))) {
-	com_err(argv[0], retval, "while creating database '%s'",
+	com_err(progname, retval, "while creating database '%s'",
 		global_params.dbname);
 	exit_status++; return;
     }
 /*     if ((retval = krb5_db_fini(util_context))) { */
-/*         com_err(argv[0], retval, "while closing current database"); */
+/*         com_err(progname, retval, "while closing current database"); */
 /*         exit_status++; return; */
 /*     } */
 /*     if ((retval = krb5_db_open(util_context, db5util_db_args, KRB5_KDB_OPEN_RW))) { */
-/* 	com_err(argv[0], retval, "while initializing the database '%s'", */
+/* 	com_err(progname, retval, "while initializing the database '%s'", */
 /* 		global_params.dbname); */
 /* 	exit_status++; return; */
 /*     } */
     if ((retval = add_principal(util_context, master_princ, MASTER_KEY, &rblock)) ||
 	(retval = add_principal(util_context, &tgt_princ, TGT_KEY, &rblock))) {
 	(void) krb5_db_fini(util_context);
-	com_err(argv[0], retval, "while adding entries to the database");
+	com_err(progname, retval, "while adding entries to the database");
 	exit_status++; return;
     }
     /*
@@ -291,7 +288,7 @@ master key name '%s'\n",
 				      &master_keyblock,
 				      mkey_password);
     if (retval) {
-	com_err(argv[0], errno, "while storing key");
+	com_err(progname, errno, "while storing key");
 	printf("Warning: couldn't stash master key.\n");
     }
     /* clean up */

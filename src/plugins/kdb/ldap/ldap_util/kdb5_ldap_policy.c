@@ -67,7 +67,7 @@ static krb5_error_code init_ldap_realm (int argc, char *argv[]) {
         retval = krb5_ldap_read_krbcontainer_params (util_context,
                 &(ldap_context->krbcontainer));
         if (retval != 0) {
-            com_err(argv[0], retval, "while reading kerberos container information");
+            com_err(progname, retval, "while reading kerberos container information");
             goto cleanup;
         }
     }
@@ -95,7 +95,7 @@ kdb5_ldap_create_policy(argc, argv)
     int argc;
     char *argv[];
 {
-    char *me = argv[0];
+    char *me = progname;
     krb5_error_code retval = 0;
     krb5_ldap_policy_params *policyparams = NULL;
     krb5_boolean print_usage = FALSE;
@@ -322,7 +322,7 @@ kdb5_ldap_destroy_policy(argc, argv)
     int argc;
     char *argv[];
 {
-    char *me = argv[0];
+    char *me = progname;
     krb5_error_code retval = 0;
     krb5_ldap_policy_params *policyparams = NULL;
     krb5_boolean print_usage = FALSE;
@@ -426,7 +426,7 @@ kdb5_ldap_modify_policy(argc, argv)
     int argc;
     char *argv[];
 {
-    char *me = argv[0];
+    char *me = progname;
     krb5_error_code retval = 0;
     krb5_ldap_policy_params *policyparams = NULL;
     krb5_boolean print_usage = FALSE;
@@ -683,7 +683,7 @@ kdb5_ldap_view_policy(argc, argv)
     int argc;
     char *argv[];
 {
-    char *me = argv[0];
+    char *me = progname;
     krb5_ldap_policy_params *policyparams = NULL;
     krb5_error_code retval = 0;
     krb5_boolean print_usage = FALSE;
@@ -804,7 +804,7 @@ void kdb5_ldap_list_policies(argc, argv)
     int argc;
     char *argv[];
 {
-    char *me = argv[0];
+    char *me = progname;
     krb5_error_code retval = 0;
     krb5_boolean print_usage = FALSE;
     char *basedn = NULL;
