@@ -73,10 +73,97 @@ struct plugin_file_handle {
 #if USE_DLOPEN
     void *dlhandle;
 #endif
-#if !defined (USE_DLOPEN)
+#ifdef _WIN32
+    HMODULE hinstPlugin;
+#endif
+#if !defined (USE_DLOPEN) && !defined (_WIN32)
     char dummy;
 #endif
 };
+
+#ifdef _WIN32
+struct dirent {
+    long d_ino;                 /* inode (always 1 in WIN32) */
+    off_t d_off;                /* offset to this dirent */
+    unsigned short d_reclen;    /* length of d_name */
+    char d_name[_MAX_FNAME+1];  /* filename (null terminated) */
+};
+
+typedef struct {
+    long handle;                /* _findfirst/_findnext handle */
+    short offset;               /* offset into directory */
+    short finished;             /* 1 if there are not more files */
+    struct _finddata_t fileinfo;/* from _findfirst/_findnext */
+    char *dir;                  /* the dir we are reading */
+    struct dirent dent;         /* the dirent to return */
+} DIR;
+
+DIR * opendir(const char *dir)
+{
+    DIR *dp;
+    char *filespec;
+    long handle;
+    int index;
+
+    filespec = malloc(strlen(dir) + 2 + 1);
+    strcpy(filespec, dir);
+    index = strlen(filespec) - 1;
+    if (index >= 0 && (filespec[index] == '/' || filespec[index] == '\\'))
+        filespec[index] = '\0';
+    strcat(filespec, "/*");
+
+    dp = (DIR *)malloc(sizeof(DIR));
+    dp->offset = 0;
+    dp->finished = 0;
+    dp->dir = strdup(dir);
+
+    if ((handle = _findfirst(filespec, &(dp->fileinfo))) < 0) {
+        if (errno == ENOENT)
+            dp->finished = 1;
+        else {
+            free(filespec);
+            free(dp->dir);
+            free(dp);
+            return NULL;
+        }
+    }
+
+    dp->handle = handle;
+    free(filespec);
+
+    return dp;
+}
+
+struct dirent * readdir(DIR *dp)
+{
+    if (!dp || dp->finished) return NULL;
+
+    if (dp->offset != 0) {
+        if (_findnext(dp->handle, &(dp->fileinfo)) < 0) {
+            dp->finished = 1;
+            return NULL;
+        }
+    }
+    dp->offset++;
+
+    strncpy(dp->dent.d_name, dp->fileinfo.name, _MAX_FNAME);
+    dp->dent.d_ino = 1;
+    dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
+    dp->dent.d_off = dp->offset;
+
+    return &(dp->dent);
+}
+
+int closedir(DIR *dp)
+{
+    if (!dp) return 0;
+    _findclose(dp->handle);
+    if (dp->dir) free(dp->dir);
+    if (dp) free(dp);
+
+    return 0;
+}
+#endif
 
 long KRB5_CALLCONV
 krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct errinfo *ep)
@@ -196,6 +283,28 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
     }
 #endif /* USE_DLOPEN */
         
+#ifdef _WIN32
+    if (!err && (statbuf.st_mode & S_IFMT) == S_IFREG) {
+        HMODULE handle = NULL;
+
+        handle = LoadLibrary(filepath);
+        if (handle == NULL) {
+            Tprintf ("Unable to load dll: %s\n", filepath);
+            err = ENOENT; /* XXX */
+            krb5int_set_error (ep, err, "%s", "unable to load dll");
+        }
+
+        if (!err) {
+            got_plugin = 1;
+            htmp->hinstPlugin = handle;
+            handle = NULL;
+        }
+
+        if (handle != NULL) 
+            FreeLibrary(handle); 
+    }
+#endif
+
     if (!err && !got_plugin) {
         err = ENOENT;  /* no plugin or no way to load plugins */
     }
@@ -232,6 +341,34 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
     }
 #endif
     
+#ifdef _WIN32
+    LPVOID lpMsgBuf;
+    DWORD dw;
+
+    if (!err && !sym && (h->hinstPlugin != NULL)) {
+        sym = GetProcAddress(h->hinstPlugin, csymname);
+        if (sym == NULL) {
+            const char *e = "unable to get dll symbol"; /* XXX copy and save away */
+            Tprintf ("GetProcAddress(%s): %s\n", csymname, GetLastError());
+            err = ENOENT; /* XXX */
+            krb5int_set_error(ep, err, "%s", e);
+
+            dw = GetLastError();
+            if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+                              FORMAT_MESSAGE_FROM_SYSTEM,
+                              NULL,
+                              dw,
+                              MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                              (LPTSTR) &lpMsgBuf,
+                              0, NULL )) {
+
+                 fprintf (stderr, "unable to get dll symbol, %s\n", (LPCTSTR)lpMsgBuf);
+                 LocalFree(lpMsgBuf);
+             }
+        }
+    }
+#endif
+
     if (!err && (sym == NULL)) {
         err = ENOENT;  /* unimplemented */
     }
@@ -269,6 +406,9 @@ krb5int_close_plugin (struct plugin_file_handle *h)
 #if USE_DLOPEN
     if (h->dlhandle != NULL) { dlclose(h->dlhandle); }
 #endif
+#ifdef _WIN32
+    if (h->hinstPlugin != NULL) { FreeLibrary(h->hinstPlugin); }
+#endif
     free (h);
 }
 
@@ -277,8 +417,12 @@ krb5int_close_plugin (struct plugin_file_handle *h)
 #include <dirent.h>
 #define NAMELEN(D) strlen((D)->d_name)
 #else
+#ifndef _WIN32
 #define dirent direct
 #define NAMELEN(D) ((D)->d->namlen)
+#else
+#define NAMELEN(D) strlen((D)->d_name)
+#endif
 #if HAVE_SYS_NDIR_H
 # include <sys/ndir.h>
 #elif HAVE_SYS_DIR_H
@@ -458,7 +602,6 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
             }
         } else {
             /* load all plugins in each directory */
-#ifndef _WIN32
 	    DIR *dir = opendir (dirnames[i]);
             
             while (dir != NULL && !err) {
@@ -494,10 +637,6 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
             }
             
             if (dir != NULL) { closedir (dir); }
-#else
-	    /* Until a Windows implementation of this code is implemented */
-	    err = ENOENT;
-#endif /* _WIN32 */
         }
     }
         
