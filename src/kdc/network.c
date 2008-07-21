@@ -1912,6 +1912,7 @@ static void *service_thread(void *_thread_num)
                 com_err(prog, retval, "while dispatching (udp)");
             else
                 abort();
+	    goto unlock_and_continue;
         }
 
         if (req->transport == UDP) {
