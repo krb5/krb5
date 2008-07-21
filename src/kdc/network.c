@@ -808,49 +808,41 @@ static char *rtm_type_name(int type)
 static void process_routing_update(struct connection *conn, const char *prog,
 				   int selflags)
 {
-    static struct {
-	struct rt_msghdr rtm;
-	char scratchbuf[1024];
-    } s;
     int n_read;
+    struct rt_msghdr rtm;
 
     krb5_klog_syslog(LOG_INFO, "routing socket readable");
-    while ((n_read = read(conn->fd, &s, sizeof(s))) > 0) {
-	if (n_read < sizeof(s.rtm)) {
-	    krb5_klog_syslog(LOG_ERR, "short read (%d/%d) from routing socket",
-			     n_read, (int) sizeof(s.rtm));
+    while ((n_read = read(conn->fd, &rtm, sizeof(rtm))) > 0) {
+	if (n_read < sizeof(rtm)) {
 	    /* Quick hack to figure out if the interesting
-	       fields are present in a short read.  */
-#define RS(FIELD) (offsetof(struct rt_msghdr, FIELD) + sizeof(s.rtm.FIELD))
+	       fields are present in a short read.
+
+	       A short read seems to be normal for some message types.
+	       Only complain if we don't have the critical initial
+	       header fields.  */
+#define RS(FIELD) (offsetof(struct rt_msghdr, FIELD) + sizeof(rtm.FIELD))
 	    if (n_read < RS(rtm_type) ||
 		n_read < RS(rtm_version) ||
-		n_read < RS(rtm_msglen))
+		n_read < RS(rtm_msglen)) {
+		krb5_klog_syslog(LOG_ERR,
+				 "short read (%d/%d) from routing socket",
+				 n_read, (int) sizeof(rtm));
 		return;
+	    }
 	}
 	krb5_klog_syslog(LOG_INFO,
 			 "got routing msg type %d(%s) v%d",
-			 s.rtm.rtm_type, rtm_type_name(s.rtm.rtm_type),
-			 s.rtm.rtm_version);
-	if (s.rtm.rtm_msglen > sizeof(s)) {
-	    krb5_klog_syslog(LOG_ERR,
-			     "routing message bigger than buffer (%d/%d)",
-			     s.rtm.rtm_msglen, (int) sizeof(s));
-	    /* This will probably start spewing messages.  Slow it
-	       down.  */
-	    sleep(1);
-	    return;
-	}
-	if (s.rtm.rtm_msglen != n_read) {
+			 rtm.rtm_type, rtm_type_name(rtm.rtm_type),
+			 rtm.rtm_version);
+	if (rtm.rtm_msglen > sizeof(rtm)) {
+	    /* It appears we get a partial message and the rest is
+	       thrown away?  */
+	} else if (rtm.rtm_msglen != n_read) {
 	    krb5_klog_syslog(LOG_ERR,
 			     "read %d from routing socket but msglen is %d",
-			     n_read, s.rtm.rtm_msglen);
-	    if (s.rtm.rtm_msglen < sizeof(s.rtm)) {
-		krb5_klog_syslog(LOG_ERR,
-				 "routing msglen shorter than header??");
-		return;
+			     n_read, rtm.rtm_msglen);
 	}
-	}
-	switch (s.rtm.rtm_type) {
+	switch (rtm.rtm_type) {
 	case RTM_ADD:
 	case RTM_DELETE:
 	case RTM_NEWADDR:
