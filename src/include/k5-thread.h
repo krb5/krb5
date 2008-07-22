@@ -688,20 +688,13 @@ static inline int k5_mutex_finish_init_1(k5_mutex_t *m, k5_debug_loc l)
 #define k5_mutex_destroy(M)			\
 	(k5_os_mutex_assert_unlocked(&(M)->os),	\
 	 krb5int_mutex_report_stats(M),		\
-	 k5_mutex_lock(M), (M)->loc_last = K5_DEBUG_LOC, k5_mutex_unlock(M), \
+	 k5_mutex_lock(M) && ((M)->loc_last = K5_DEBUG_LOC, k5_mutex_unlock(M)), \
 	 k5_os_mutex_destroy(&(M)->os))
-#ifdef __GNUC__
-#define k5_mutex_lock(M)						 \
-	__extension__ ({						 \
-	    int _err = 0;						 \
-	    k5_mutex_stats_tmp _stats = k5_mutex_stats_start();		 \
-	    k5_mutex_t *_m = (M);					 \
-	    _err = k5_os_mutex_lock(&_m->os);				 \
-	    if (_err == 0) _m->loc_last = K5_DEBUG_LOC;			 \
-	    if (_err == 0) k5_mutex_lock_update_stats(&_m->stats, _stats); \
-	    _err;							 \
-	})
-#else
+
+#if __GNUC__ >= 4
+static int k5_mutex_lock_1(k5_mutex_t *, k5_debug_loc)
+    __attribute__((warn_unused_result));
+#endif
 static inline int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
 {
     int err = 0;
@@ -714,7 +707,7 @@ static inline int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
     return err;
 }
 #define k5_mutex_lock(M)	k5_mutex_lock_1(M, K5_DEBUG_LOC)
-#endif
+
 #define k5_mutex_unlock(M)				\
 	(k5_mutex_assert_locked(M),			\
 	 k5_mutex_unlock_update_stats(&(M)->stats),	\
@@ -752,7 +745,11 @@ extern int k5_key_delete(k5_key_t);
 
 extern int  KRB5_CALLCONV krb5int_mutex_alloc  (k5_mutex_t **);
 extern void KRB5_CALLCONV krb5int_mutex_free   (k5_mutex_t *);
-extern int  KRB5_CALLCONV krb5int_mutex_lock   (k5_mutex_t *);
+extern int  KRB5_CALLCONV krb5int_mutex_lock   (k5_mutex_t *)
+#if __GNUC__ >= 4
+    __attribute__((warn_unused_result))
+#endif
+    ;
 extern int  KRB5_CALLCONV krb5int_mutex_unlock (k5_mutex_t *);
 
 /* In time, many of the definitions above should move into the support
