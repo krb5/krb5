@@ -85,9 +85,11 @@ krb5int_get_error (struct errinfo *ep, long code)
 	ep->msg = NULL;
 	return ep->scratch_buf;
     }
-    lock();
+    if (lock())
+	goto no_fptr;
     if (fptr == NULL) {
 	unlock();
+    no_fptr:
 #ifdef HAVE_STRERROR_R
 	if (strerror_r (code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0) {
 	    char *p = strdup(ep->scratch_buf);
@@ -157,7 +159,8 @@ void
 krb5int_set_error_info_callout_fn (const char *(KRB5_CALLCONV *f)(long))
 {
     initialize();
-    lock();
-    fptr = f;
-    unlock();
+    if (lock() == 0) {
+	fptr = f;
+	unlock();
+    }
 }

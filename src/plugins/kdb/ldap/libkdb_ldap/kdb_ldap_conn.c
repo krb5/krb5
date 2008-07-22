@@ -203,7 +203,9 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
     ldap_set_option(NULL, LDAP_X_OPT_CONNECT_TIMEOUT, &local_timelimit);
 #endif
 
-    HNDL_LOCK(ldap_context);
+    st = HNDL_LOCK(ldap_context);
+    if (st)
+	return st;
     while (ldap_context->server_info_list[cnt] != NULL) {
 	krb5_ldap_server_info *server_info=NULL;
 

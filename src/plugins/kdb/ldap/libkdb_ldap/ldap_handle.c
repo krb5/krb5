@@ -223,7 +223,9 @@ krb5_ldap_request_handle_from_pool(ldap_context, ldap_server_handle)
 
     *ldap_server_handle = NULL;
 
-    HNDL_LOCK(ldap_context);
+    st = HNDL_LOCK(ldap_context);
+    if (st)
+	return st;
     if (((*ldap_server_handle)=krb5_get_ldap_handle(ldap_context)) == NULL)
 	(*ldap_server_handle)=krb5_retry_get_ldap_handle(ldap_context, &st);
     HNDL_UNLOCK(ldap_context);
@@ -242,7 +244,9 @@ krb5_ldap_request_next_handle_from_pool(ldap_context, ldap_server_handle)
 {
     krb5_error_code            st=0;
 
-    HNDL_LOCK(ldap_context);
+    st = HNDL_LOCK(ldap_context);
+    if (st)
+	return st;
     (*ldap_server_handle)->server_info->server_status = OFF;
     time(&(*ldap_server_handle)->server_info->downtime);
     krb5_put_ldap_handle(*ldap_server_handle);
@@ -263,11 +267,11 @@ krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle)
     krb5_ldap_context          *ldap_context;
     krb5_ldap_server_handle    *ldap_server_handle;
 {
-
     if (ldap_server_handle != NULL) {
-	HNDL_LOCK(ldap_context);
-	krb5_put_ldap_handle(ldap_server_handle);
-	HNDL_UNLOCK(ldap_context);
+	if (HNDL_LOCK(ldap_context) == 0) {
+	    krb5_put_ldap_handle(ldap_server_handle);
+	    HNDL_UNLOCK(ldap_context);
+	}
     }
     return;
 }
