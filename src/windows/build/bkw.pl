@@ -621,29 +621,35 @@ sub main {
         ## Make sed script to run on the site-local configuration files:
         local $tmpfile			= "site-local.sed" ;
         if (-e $tmpfile) {system("del $tmpfile");}
+        open SEDFILE, ">>$tmpfile";
+		
         # Basic substitutions:
         local $dblback_wd   = $wd;
         $dblback_wd         =~ s/\\/\\\\/g;
-        !system("echo s/%BUILDDIR%/$dblback_wd/ >> $tmpfile")               or die "Fatal -- Couldn't modify $tmpfile.";    
+        print SEDFILE "s/%BUILDDIR%/$dblback_wd/\n"          or die "Fatal -- Couldn't modify $tmpfile.";    
         local $dblback_staging  = "$wd\\staging";
         $dblback_staging        =~ s/\\/\\\\/g;
-        !system("echo s/%TARGETDIR%/$dblback_staging/ >> $tmpfile")         or die "Fatal -- Couldn't modify $tmpfile.";    
+        print SEDFILE "s/%TARGETDIR%/$dblback_staging/\n"    or die "Fatal -- Couldn't modify $tmpfile.";    
         local $dblback_sample   = "$wd\\staging\\sample";
         $dblback_sample         =~ s/\\/\\\\/g;
 
 		$ArchTag				= $prepackage->{CopyList}->{Config}->{ArchTag}->{value};
 		$ArchFragment			= ($odr->{cpu}->{value} =~ /386/) ? "32" : "64";
+		$CpuTag				= $prepackage->{CopyList}->{Config}->{CpuTag}->{value};
+		$CpuFragment			= ($odr->{cpu}->{value} =~ /386/) ? "i386" : "AMD64";
 
-        !system("echo s/%CONFIGDIR-WIX%/$dblback_sample/ >> $tmpfile")      or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%CONFIGDIR-NSI%/$dblback_staging/ >> $tmpfile")     or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/ >> $tmpfile")  or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/ >> $tmpfile")  or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/ >> $tmpfile")    or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/$ArchTag/$ArchFragment/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%CONFIGDIR-WIX%/$dblback_sample/\n"  or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%CONFIGDIR-NSI%/$dblback_staging/\n" or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/\n" or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/\n" or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/\n"   or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/$ArchTag/$ArchFragment/\n"           or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/$CpuTag/$CpuFragment/\n"             or die "Fatal -- Couldn't modify $tmpfile.";    
         # Strip out some defines so they can be replaced:  [used for site-local.nsi]
-        !system("echo /\^!define\.\*RELEASE\.\*\$/d >> $tmpfile")   or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo /\^!define\.\*DEBUG\.\*\$/d >> $tmpfile")     or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")      or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "/\^!define\.\*RELEASE\.\*\$/d\n"       or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "/\^!define\.\*DEBUG\.\*\$/d\n"         or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "/\^!define\.\*BETA\.\*\$/d\n"          or die "Fatal -- Couldn't modify $tmpfile.";    
+       close SEDFILE;
 
         # Run the script on site-local.wxi:
         !system("sed -f $tmpfile site-local-tagged.wxi > $wd\\buildwix\\site-local.wxi")   or die "Fatal -- Couldn't modify site-local.wxi.";
@@ -668,12 +674,12 @@ sub main {
         ## Run the script on nsi-includes-tagged.nsi:
         !system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > $wd\\buildnsi\\nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
 
-		## Run the script on kfw-fixed-tagged.nsi:
-        print "KPK -- work on kfw-fixed-tagged.nsi in ".`cd`."\n";
+		 ## Run the script on kfw-fixed-tagged.nsi:
+        print "KPK -- work on kfw-fixed-tagged.nsi in ".`cd`."\n" if ($verbose);
+        !system("sed -f ..\\wix\\$tmpfile kfw-fixed-tagged.nsi > kfw-fixed.nsi")  or die "Fatal -- Couldn't modify kfw_fixed.nsi.";
         !system("sed -f ..\\wix\\$tmpfile kfw-fixed-tagged.nsi > $wd\\buildnsi\\kfw-fixed.nsi")  or die "Fatal -- Couldn't modify kfw_fixed.nsi.";
 
         !system("rm ..\\wix\\$tmpfile")                or die "Fatal -- Couldn't remove $tmpfile.";
-
         ##-- Transform -tagged files:
         ##-- -----------------------------------------------------------------------------
                     

@@ -29,7 +29,7 @@
         <package    def="1" />
         <repository def="A" abbr="r" value="skip" options="skip checkout|co export|ex update|up" />
         <sign       def="0" />
-        <verbose    def="0" abbr="v" />
+        <verbose    def="1" abbr="v" />
         <vverbose   def="0" />
         <cpu        def="0" value="i386" options="i386 amd64" />
         <components def="0" value="base %cpu%" />
@@ -131,7 +131,14 @@
                     <CommandTemplate    value="signtool sign /a /d &quot;MIT Kerberos for Windows&quot; /du &quot;http://web.mit.edu/kerberos&quot; /t TIMESTAMPSERVERGOESHERE %filename%" />
                     <FilePatterns       value="*.exe *.dll *.cpl *.msi" />
                     </Signing>
-                </Config>
+                <DebugArea   value="dbg" />
+                <ReleaseArea value="rel" />
+                <AlwaysTag   value="%bldtype%" />  <!-- Pick a string that won't appear in a path. -->
+                <ArchTag     value="%WL%" />       <!-- Pick a string that won't appear in a path. -->
+                <CpuTag      value="%cpu%" />      <!-- Pick a string that won't appear in a path. -->
+                <DebugTag    value="%debug%" />    <!-- Pick a string that won't appear in a path. -->
+                <ReleaseTag  value="%release%" />  <!-- Pick a string that won't appear in a path. -->
+            </Config>
             <Zips>
                 <Zip dummy="foo" /> <!-- To force desired XML::Simple behavior    -->
                 <!--    Files will be copied into directory <topdir>; <topdir> will appear in the paths of the files.    -->
@@ -152,16 +159,34 @@
                             <Include path="corebinaryfiles.xml" />  <!-- Included file is relative to location of bkw.pl. -->
                             </Files> 
                         </CopyList>
-                </Zip>
+                    </Zip>
                 <Zip name="SDK" filename="%filestem%-sdk.zip" topdir="%filestem%-final">
                     <CopyList>
-                        <Files>
+                      <Config>
+                          <DebugArea   value="dbg" />
+                          <ReleaseArea value="rel" />
+                          <AlwaysTag   value="%bldtype%" /> <!-- Pick a string that won't appear in a path. -->
+                          <ArchTag     value="%WL%" />      <!-- Pick a string that won't appear in a path. -->
+                          <CpuTag      value="%cpu%" />     <!-- Pick a string that won't appear in a path. -->
+                          <DebugTag    value="%debug%" />   <!-- Pick a string that won't appear in a path. -->
+                          <ReleaseTag  value="%release%" /> <!-- Pick a string that won't appear in a path. -->
+                          </Config>
+                      <Files>
                             <Include path="sdkfiles.xml" />         <!-- Included file is relative to location of bkw.pl. -->
                             </Files>
                         </CopyList>
                     </Zip>
                 </Zips>            
             <CopyList>            <!-- Copied at end of post-package step.  -->
+                <Config>
+                    <DebugArea   value="dbg" />
+                    <ReleaseArea value="rel" />
+                    <AlwaysTag   value="%bldtype%" /> <!-- Pick a string that won't appear in a path. -->
+                    <ArchTag     value="%WL%" />      <!-- Pick a string that won't appear in a path. -->
+                    <CpuTag      value="%cpu%" />     <!-- Pick a string that won't appear in a path. -->
+                    <DebugTag    value="%debug%" />   <!-- Pick a string that won't appear in a path. -->
+                    <ReleaseTag  value="%release%" /> <!-- Pick a string that won't appear in a path. -->
+                    </Config>
                 <Files>
                     <File dummy="foo" />
                     <!-- File from    paths are relative to <src/pismere>.  -->

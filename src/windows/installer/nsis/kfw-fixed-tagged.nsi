@@ -73,10 +73,10 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
   !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
   
   ;Where are the files?
-  !define KFW_BIN_DIR "${KFW_TARGETDIR}\bin\i386"
+  !define KFW_BIN_DIR "${KFW_TARGETDIR}\bin\%cpu%"
   !define KFW_DOC_DIR "${KFW_TARGETDIR}\doc"
   !define KFW_INC_DIR "${KFW_TARGETDIR}\inc"
-  !define KFW_LIB_DIR "${KFW_TARGETDIR}\lib\i386"
+  !define KFW_LIB_DIR "${KFW_TARGETDIR}\lib\%cpu%"
   !define KFW_SAMPLE_DIR "${KFW_TARGETDIR}\sample"
   !define KFW_INSTALL_DIR "${KFW_TARGETDIR}\install"
   !define SYSTEMDIR   "$%SystemRoot%\System32" 
@@ -189,7 +189,7 @@ Section "KfW Client" secClient
   File /oname=$R0 "Killer.exe"
   nsExec::Exec '$R0 netidmgr.exe'
   nsExec::Exec '$R0 leash32.exe'
-  nsExec::Exec '$R0 krbcc32s.exe'
+  nsExec::Exec '$R0 krbcc%WL%s.exe'
   nsExec::Exec '$R0 k95.exe'
   nsExec::Exec '$R0 k95g.exe'
   nsExec::Exec '$R0 krb5.exe'
@@ -200,42 +200,42 @@ Section "KfW Client" secClient
 
    ; Do client components
   SetOutPath "$INSTDIR\bin"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\comerr%WL%.dll"      "$INSTDIR\bin\comerr%WL%.dll"    "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss.exe"             "$INSTDIR\bin\gss.exe"           "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-client.exe"      "$INSTDIR\bin\gss-client.exe"    "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-server.exe"      "$INSTDIR\bin\gss-server.exe"    "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gssapi32.dll"        "$INSTDIR\bin\gssapi32.dll"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k524init.exe"        "$INSTDIR\bin\k524init.exe"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdestroy.exe"        "$INSTDIR\bin\kdestroy.exe"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kinit.exe"           "$INSTDIR\bin\kinit.exe"         "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\klist.exe"           "$INSTDIR\bin\klist.exe"         "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kpasswd.exe"         "$INSTDIR\bin\kpasswd.exe"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kvno.exe"            "$INSTDIR\bin\kvno.exe"          "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5_32.dll"         "$INSTDIR\bin\krb5_32.dll"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k5sprt32.dll"        "$INSTDIR\bin\k5sprt32.dll"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb524.dll"          "$INSTDIR\bin\krb524.dll"        "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32.dll"         "$INSTDIR\bin\krbcc32.dll"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.chm"         "$INSTDIR\bin\netidmgr.chm"     "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred.dll"         "$INSTDIR\bin\krb5cred.dll"     "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred_en_us.dll"   "$INSTDIR\bin\krb5cred_en_us.dll"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leashw32.dll"        "$INSTDIR\bin\leashw32.dll"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\ms2mit.exe"          "$INSTDIR\bin\ms2mit.exe"        "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\mit2ms.exe"          "$INSTDIR\bin\mit2ms.exe"        "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kcpytkt.exe"          "$INSTDIR\bin\kcpytkt.exe"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdeltkt.exe"          "$INSTDIR\bin\kdeltkt.exe"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\wshelp32.dll"        "$INSTDIR\bin\wshelp32.dll"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\xpprof32.dll"        "$INSTDIR\bin\xpprof32.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\comerr%WL%.dll"      "$INSTDIR\bin\comerr%WL%.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss.exe"             "$INSTDIR\bin\gss.exe"            "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-client.exe"      "$INSTDIR\bin\gss-client.exe"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-server.exe"      "$INSTDIR\bin\gss-server.exe"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gssapi%WL%.dll"      "$INSTDIR\bin\gssapi%WL%.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k524init.exe"        "$INSTDIR\bin\k524init.exe"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdestroy.exe"        "$INSTDIR\bin\kdestroy.exe"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kinit.exe"           "$INSTDIR\bin\kinit.exe"          "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\klist.exe"           "$INSTDIR\bin\klist.exe"          "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kpasswd.exe"         "$INSTDIR\bin\kpasswd.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kvno.exe"            "$INSTDIR\bin\kvno.exe"           "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5_%WL%.dll"       "$INSTDIR\bin\krb5_%WL%.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k5sprt%WL%.dll"      "$INSTDIR\bin\k5sprt%WL%.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb524.dll"          "$INSTDIR\bin\krb524.dll"         "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc%WL%.dll"       "$INSTDIR\bin\krbcc%WL%.dll"      "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc%WL%s.exe"      "$INSTDIR\bin\krbcc%WL%s.exe"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.chm"        "$INSTDIR\bin\netidmgr.chm"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred.dll"        "$INSTDIR\bin\krb5cred.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred_en_us.dll"  "$INSTDIR\bin\krb5cred_en_us.dll" "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leashw%WL%.dll"      "$INSTDIR\bin\leashw%WL%.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\ms2mit.exe"          "$INSTDIR\bin\ms2mit.exe"         "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\mit2ms.exe"          "$INSTDIR\bin\mit2ms.exe"         "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kcpytkt.exe"         "$INSTDIR\bin\kcpytkt.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdeltkt.exe"         "$INSTDIR\bin\kdeltkt.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\wshelp%WL%.dll"      "$INSTDIR\bin\wshelp%WL%.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\xpprof%WL%.dll"      "$INSTDIR\bin\xpprof%WL%.dll"     "$INSTDIR"
 
   Call GetWindowsVersion
   Pop $R0
   StrCmp $R0 "2000" nid_inst2000
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.exe"         "$INSTDIR\bin\netidmgr.exe"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\nidmgr32.dll"         "$INSTDIR\bin\nidmgr32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\nidmgr%WL%.dll"       "$INSTDIR\bin\nidmgr%WL%.dll"     "$INSTDIR"
   goto nid_done
 nid_inst2000:  
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\W2K\netidmgr.exe"     "$INSTDIR\bin\netidmgr.exe"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\W2K\nidmgr32.dll"     "$INSTDIR\bin\nidmgr32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\W2K\nidmgr%WL%.dll"   "$INSTDIR\bin\nidmgr%WL%.dll"     "$INSTDIR"
 nid_done:
 
 !ifdef DEBUG
@@ -295,11 +295,11 @@ nid_done:
 !ENDIF                                                                  
 !ENDIF
 !ELSE                                                                   
-!IFDEF CL_1400
-  GetTempFileName $R0
-  File /oname=$R0 '${REDISTDIR}\vcredist_x86.exe'
-  nsExec::Exec '$R0'
-!ELSE                                                                   
+;!IFDEF CL_1400
+;  GetTempFileName $R0
+;  File /oname=$R0 '${REDISTDIR}\vcredist_x86.exe'
+;  nsExec::Exec '$R0'
+;!ELSE                                                                   
 !IFDEF CL_1310                                                          
   !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc71.dll"       "$INSTDIR\bin\mfc71.dll"     "$INSTDIR"
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr71.dll"     "$INSTDIR\bin\msvcr71.dll"   "$INSTDIR"
@@ -333,7 +333,7 @@ nid_done:
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcrt.dll"      "$INSTDIR\bin\msvcrt.dll"    "$INSTDIR"
 !ENDIF                                                                  
 !ENDIF                                                                  
-!ENDIF
+;!ENDIF
 !ENDIF                                                                  
   !insertmacro ReplaceDLL "${SYSTEMDIR}\psapi.dll"       "$INSTDIR\bin\psapi.dll"     "$INSTDIR"
    
@@ -427,7 +427,7 @@ nostart:
 
 checkconflicts:
   Call GetSystemPath
-  Push "krb5_32.dll"
+  Push "krb5_%WL%.dll"
   Call SearchPath
   Pop  $R0
   StrCmp $R0 "" addpath
@@ -484,40 +484,40 @@ SectionEnd
 Section "Debug Symbols" secDebug
 
   SetOutPath "$INSTDIR\bin"
-  File "${KFW_BIN_DIR}\comerr32.pdb"
+  File "${KFW_BIN_DIR}\comerr%WL%.pdb"
   File "${KFW_BIN_DIR}\gss.pdb"
   File "${KFW_BIN_DIR}\gss-client.pdb"
   File "${KFW_BIN_DIR}\gss-server.pdb"
-  File "${KFW_BIN_DIR}\gssapi32.pdb"
+  File "${KFW_BIN_DIR}\gssapi%WL%.pdb"
   File "${KFW_BIN_DIR}\k524init.pdb"
   File "${KFW_BIN_DIR}\kdestroy.pdb"
   File "${KFW_BIN_DIR}\kinit.pdb"
   File "${KFW_BIN_DIR}\klist.pdb"
   File "${KFW_BIN_DIR}\kpasswd.pdb"
   File "${KFW_BIN_DIR}\kvno.pdb"
-  File "${KFW_BIN_DIR}\krb5_32.pdb"
-  File "${KFW_BIN_DIR}\k5sprt32.pdb"
+  File "${KFW_BIN_DIR}\krb5_%WL%.pdb"
+  File "${KFW_BIN_DIR}\k5sprt%WL%.pdb"
   File "${KFW_BIN_DIR}\krb524.pdb"
-  File "${KFW_BIN_DIR}\krbcc32.pdb"
-  File "${KFW_BIN_DIR}\krbcc32s.pdb"
-  File "${KFW_BIN_DIR}\leashw32.pdb"
+  File "${KFW_BIN_DIR}\krbcc%WL%.pdb"
+  File "${KFW_BIN_DIR}\krbcc%WL%s.pdb"
+  File "${KFW_BIN_DIR}\leashw%WL%.pdb"
   File "${KFW_BIN_DIR}\krb5cred.pdb"
   File "${KFW_BIN_DIR}\ms2mit.pdb"
   File "${KFW_BIN_DIR}\mit2ms.pdb"
   File "${KFW_BIN_DIR}\kcpytkt.pdb"
   File "${KFW_BIN_DIR}\kdeltkt.pdb"
-  File "${KFW_BIN_DIR}\wshelp32.pdb"
-  File "${KFW_BIN_DIR}\xpprof32.pdb"
+  File "${KFW_BIN_DIR}\wshelp%WL%.pdb"
+  File "${KFW_BIN_DIR}\xpprof%WL%.pdb"
 
   Call GetWindowsVersion
   Pop $R0
   StrCmp $R0 "2000" nidpdb_inst2000
   File "${KFW_BIN_DIR}\netidmgr.pdb"
-  File "${KFW_BIN_DIR}\nidmgr32.pdb"
+  File "${KFW_BIN_DIR}\nidmgr%WL%.pdb"
   goto nidpdb_done
 nidpdb_inst2000:
   File "${KFW_BIN_DIR}\W2K\netidmgr.pdb"
-  File "${KFW_BIN_DIR}\W2K\nidmgr32.pdb"
+  File "${KFW_BIN_DIR}\W2K\nidmgr%WL%.pdb"
 nidpdb_done:
 
 !IFDEF DEBUG
@@ -585,7 +585,7 @@ Section "KfW SDK" secSDK
   SetOutPath "$INSTDIR\inc\wshelper"
   File /r "${KFW_INC_DIR}\wshelper\*"  
 
-  SetOutPath "$INSTDIR\lib\i386"
+  SetOutPath "$INSTDIR\lib\%cpu%"
   File /r "${KFW_LIB_DIR}\*"
 
   SetOutPath "$INSTDIR\install"
@@ -1145,7 +1145,7 @@ StartRemove:
   GetTempFileName $R0
   File /oname=$R0 "Killer.exe"
   nsExec::Exec '$R0 netidmgr.exe'
-  nsExec::Exec '$R0 krbcc32s.exe'
+  nsExec::Exec '$R0 krbcc%WL%s.exe'
 
   Push "$INSTDIR\bin"
   Call un.RemoveFromSystemPath
@@ -1155,7 +1155,7 @@ StartRemove:
   Delete "$INSTDIR\doc\netidmgr_userdoc.pdf"
   Delete "$INSTDIR\doc\netiddev.chm"
  
-   Delete /REBOOTOK "$INSTDIR\bin\comerr32.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\comerr%WL%.dll"
    Delete /REBOOTOK "$INSTDIR\bin\gss.exe"
    Delete /REBOOTOK "$INSTDIR\bin\gss-client.exe"
    Delete /REBOOTOK "$INSTDIR\bin\gss-server.exe"
@@ -1166,27 +1166,27 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\klist.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\kpasswd.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.exe"   
-   Delete /REBOOTOK "$INSTDIR\bin\krb5_32.dll" 
-   Delete /REBOOTOK "$INSTDIR\bin\k5sprt32.dll" 
+   Delete /REBOOTOK "$INSTDIR\bin\krb5_%WL%.dll" 
+   Delete /REBOOTOK "$INSTDIR\bin\k5sprt%WL%.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.dll"  
-   Delete /REBOOTOK "$INSTDIR\bin\krbcc32.dll" 
-   Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.exe"
+   Delete /REBOOTOK "$INSTDIR\bin\krbcc%WL%.dll" 
+   Delete /REBOOTOK "$INSTDIR\bin\krbcc%WL%s.exe"
    Delete /REBOOTOK "$INSTDIR\bin\netidmgr.exe"      
    Delete /REBOOTOK "$INSTDIR\bin\netidmgr.chm"      
-   Delete /REBOOTOK "$INSTDIR\bin\nidmgr32.dll"      
+   Delete /REBOOTOK "$INSTDIR\bin\nidmgr%WL%.dll"      
    Delete /REBOOTOK "$INSTDIR\bin\krb5cred.dll"      
    Delete /REBOOTOK "$INSTDIR\bin\krb5cred_en_us.dll"
-   Delete /REBOOTOK "$INSTDIR\bin\leashw32.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\leashw%WL%.dll"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.exe"  
    Delete /REBOOTOK "$INSTDIR\bin\mit2ms.exe"  
    Delete /REBOOTOK "$INSTDIR\bin\kcpytkt.exe"  
    Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.exe"  
-   Delete /REBOOTOK "$INSTDIR\bin\wshelp32.dll"
-   Delete /REBOOTOK "$INSTDIR\bin\xpprof32.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\wshelp%WL%.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\xpprof%WL%.dll"
    Delete /REBOOTOK "$SYSDIR\bin\kfwlogon.dll"
    Delete /REBOOTOK "$SYSDIR\bin\kfwcpcc.exe"
 
-   Delete /REBOOTOK "$INSTDIR\bin\comerr32.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\comerr%WL%.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss-client.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss-server.pdb"
@@ -1198,20 +1198,20 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kpasswd.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.pdb" 
-   Delete /REBOOTOK "$INSTDIR\bin\k5sprt32.pdb" 
+   Delete /REBOOTOK "$INSTDIR\bin\k5sprt%WL%.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.pdb"  
-   Delete /REBOOTOK "$INSTDIR\bin\krbcc32.pdb" 
-   Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\krbcc%WL%.pdb" 
+   Delete /REBOOTOK "$INSTDIR\bin\krbcc%WL%s.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\netidmgr.pdb"      
-   Delete /REBOOTOK "$INSTDIR\bin\nidmgr32.pdb"      
+   Delete /REBOOTOK "$INSTDIR\bin\nidmgr%WL%.pdb"      
    Delete /REBOOTOK "$INSTDIR\bin\krb5cred.pdb"      
-   Delete /REBOOTOK "$INSTDIR\bin\leashw32.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\leashw%WL%.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\mit2ms.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\kcpytkt.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.pdb"  
-   Delete /REBOOTOK "$INSTDIR\bin\wshelp32.pdb"
-   Delete /REBOOTOK "$INSTDIR\bin\xpprof32.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\wshelp%WL%.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\xpprof%WL%.pdb"
    Delete /REBOOTOK "$SYSDIR\bin\kfwlogon.pdb"
    Delete /REBOOTOK "$SYSDIR\bin\kfwcpcc.pdb"
 
