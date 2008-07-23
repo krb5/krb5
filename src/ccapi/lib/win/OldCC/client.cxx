@@ -197,8 +197,8 @@ DWORD find_server(Init::InitInfo& info, LPSTR endpoint) {
                                        CREATE_NEW_PROCESS_GROUP | 
                                        CREATE_NEW_CONSOLE |
                                        NORMAL_PRIORITY_CLASS |
-                                       // CREATE_NO_WINDOW |
-                                       // DETACHED_PROCESS |    /* KPK TODO: was set - restore */
+                                       CREATE_NO_WINDOW |
+                                       DETACHED_PROCESS |
                                        0
                                        ,
                                        NULL,        // environment
