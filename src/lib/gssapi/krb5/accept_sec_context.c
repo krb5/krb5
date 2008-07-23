@@ -941,7 +941,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        krb5_ap_req 	* request;
 	   
        if (decode_krb5_ap_req(&ap_req, &request))
-	   goto exit;
+	   goto done;
 
        if (request->ap_options & AP_OPTS_MUTUAL_REQUIRED)
 	   gss_flags |= GSS_C_MUTUAL_FLAG;
