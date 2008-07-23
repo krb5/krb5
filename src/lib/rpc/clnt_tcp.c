@@ -60,6 +60,7 @@ static char sccsid[] = "@(#)clnt_tcp.c 1.37 87/10/05 Copyr 1984 Sun Micro";
 #include <gssrpc/pmap_clnt.h>
 /* FD_ZERO may need memset declaration (e.g., Solaris 9) */
 #include <string.h>
+#include <port-sockets.h>
 
 #define MCALL_MSG_SIZE 24
 
@@ -118,7 +119,7 @@ clnttcp_create(
 	struct sockaddr_in *raddr,
 	rpcprog_t prog,
 	rpcvers_t vers,
-	register int *sockp,
+        SOCKET *sockp,
 	u_int sendsz,
 	u_int recvsz)
 {
@@ -166,7 +167,7 @@ clnttcp_create(
 		    sizeof(*raddr)) < 0)) {
 			rpc_createerr.cf_stat = RPC_SYSTEMERROR;
 			rpc_createerr.cf_error.re_errno = errno;
-			(void)close(*sockp);
+                        (void)closesocket(*sockp);
 			goto fooy;
 		}
 		ct->ct_closeit = TRUE;
@@ -198,9 +199,8 @@ clnttcp_create(
 	xdrmem_create(&(ct->ct_xdrs), ct->ct_u.ct_mcall, MCALL_MSG_SIZE,
 	    XDR_ENCODE);
 	if (! xdr_callhdr(&(ct->ct_xdrs), &call_msg)) {
-		if (ct->ct_closeit) {
-			(void)close(*sockp);
-		}
+		if (ct->ct_closeit)
+                        (void)closesocket(*sockp);
 		goto fooy;
 	}
 	ct->ct_mpos = XDR_GETPOS(&(ct->ct_xdrs));
@@ -404,9 +404,8 @@ clnttcp_destroy(CLIENT *h)
 	register struct ct_data *ct =
 	    (struct ct_data *) h->cl_private;
 
-	if (ct->ct_closeit) {
-		(void)close(ct->ct_sock);
-	}
+	if (ct->ct_closeit)
+                (void)closesocket(ct->ct_sock);
 	XDR_DESTROY(&(ct->ct_xdrs));
 	mem_free((caddr_t)ct, sizeof(struct ct_data));
 	mem_free((caddr_t)h, sizeof(CLIENT));

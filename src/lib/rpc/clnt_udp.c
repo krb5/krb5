@@ -49,6 +49,7 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
 #include <errno.h>
 #include <string.h>
 #include <gssrpc/pmap_clnt.h>
+#include <port-sockets.h>
 #include <errno.h>
 
 
@@ -76,7 +77,7 @@ static struct clnt_ops udp_ops = {
  * Private data kept per client handle
  */
 struct cu_data {
-	int		   cu_sock;
+        SOCKET             cu_sock;
 	bool_t		   cu_closeit;
 	struct sockaddr_in cu_raddr;
 	int		   cu_rlen;
@@ -475,9 +476,8 @@ clntudp_destroy(CLIENT *cl)
 {
 	register struct cu_data *cu = (struct cu_data *)cl->cl_private;
 
-	if (cu->cu_closeit) {
-		(void)close(cu->cu_sock);
-	}
+	if (cu->cu_closeit)
+                (void)closesocket(cu->cu_sock);
 	XDR_DESTROY(&(cu->cu_outxdrs));
 	mem_free((caddr_t)cu, (sizeof(*cu) + cu->cu_sendsz + cu->cu_recvsz));
 	mem_free((caddr_t)cl, sizeof(CLIENT));

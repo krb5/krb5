@@ -45,11 +45,12 @@ static char sccsid[] = "@(#)clnt_simple.c 1.35 87/08/11 Copyr 1984 Sun Micro";
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
+#include <port-sockets.h>
 #include "autoconf.h"
 
 static struct callrpc_private {
 	CLIENT	*client;
-	int	socket;
+        SOCKET  socket;
 	int	oldprognum, oldversnum, valid;
 	char	*oldhost;
 } *callrpc_private;
@@ -89,7 +90,7 @@ callrpc(
 		/* reuse old client */		
 	} else {
 		crp->valid = 0;
-		(void)close(crp->socket);
+                (void)closesocket(crp->socket);
 		crp->socket = RPC_ANYSOCK;
 		if (crp->client) {
 			clnt_destroy(crp->client);

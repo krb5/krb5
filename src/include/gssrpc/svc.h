@@ -72,7 +72,11 @@ enum xprt_stat {
  * Server side transport handle
  */
 typedef struct SVCXPRT {
+#ifdef _WIN32
+        SOCKET          xp_sock;
+#else
 	int		xp_sock;
+#endif
 	u_short		xp_port;	 /* associated port number */
 	struct xp_ops {
 	    /* receive incomming requests */

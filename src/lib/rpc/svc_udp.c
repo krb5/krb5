@@ -49,6 +49,7 @@ static char sccsid[] = "@(#)svc_udp.c 1.24 87/08/11 Copyr 1984 Sun Micro";
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+#include <port-sockets.h>
 #include "k5-platform.h"
 
 
@@ -305,9 +306,9 @@ svcudp_destroy(register SVCXPRT *xprt)
 	register struct svcudp_data *su = su_data(xprt);
 
 	xprt_unregister(xprt);
-	if (xprt->xp_sock != -1)
-		(void)close(xprt->xp_sock);
-	xprt->xp_sock = -1;
+        if (xprt->xp_sock != INVALID_SOCKET)
+                (void)closesocket(xprt->xp_sock);
+        xprt->xp_sock = INVALID_SOCKET;
 	if (xprt->xp_auth != NULL) {
 		SVCAUTH_DESTROY(xprt->xp_auth);
 		xprt->xp_auth = NULL;

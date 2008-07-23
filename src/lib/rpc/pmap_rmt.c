@@ -59,6 +59,7 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 #include <arpa/inet.h>
 #define MAX_BROADCAST_SIZE 1400
 #include <string.h>
+#include <port-sockets.h>
 #include "k5-platform.h"	/* set_cloexec_fd */
 
 static struct timeval timeout = { 3, 0 };
@@ -84,7 +85,7 @@ pmap_rmtcall(
 	struct timeval tout,
 	rpcport_t *port_ptr)
 {
-	int sock = -1;
+        SOCKET sock = INVALID_SOCKET;
 	register CLIENT *client;
 	struct rmtcallargs a;
 	struct rmtcallres r;
@@ -107,7 +108,7 @@ pmap_rmtcall(
 	} else {
 		stat = RPC_FAILED;
 	}
-	(void)close(sock);
+        (void)closesocket(sock);
 	addr->sin_port = 0;
 	return (stat);
 }
@@ -245,7 +246,7 @@ clnt_broadcast(
 	XDR xdr_stream;
 	register XDR *xdrs = &xdr_stream;
 	int outlen, inlen, fromlen, nets;
-	register int sock;
+        SOCKET sock;
 	int on = 1;
 #ifdef FD_SETSIZE
 	fd_set mask;
@@ -412,7 +413,7 @@ clnt_broadcast(
 		}
 	}
 done_broad:
-	(void)close(sock);
+        (void)closesocket(sock);
 	AUTH_DESTROY(unix_auth);
 	return (stat);
 }
