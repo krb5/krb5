@@ -171,6 +171,7 @@ typedef struct _fiber_job_t {
     int     code;
     int     state;
     int     prompt_set;
+    wchar_t *error_message;
 
     BOOL    null_password;
     BOOL    valid_principal;
