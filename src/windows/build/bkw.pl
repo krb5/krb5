@@ -229,7 +229,7 @@ sub main {
         $odr->{package}->{def} = 0;
         }
 
-    if ($vverbose) {print "Debug -- Config: ".Dumper($config);}
+    if ($verbose) {print "Debug -- Config: ".Dumper($config);}
     
     # Test the unix find command:
     # List of directories where it might be:

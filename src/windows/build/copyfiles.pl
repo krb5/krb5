@@ -53,7 +53,7 @@ sub copyFiles {
     my $CpuTag              = $xml->{Config}->{CpuTag}->{value};
     my $DebugFragment       = ($odr->{debug}->{def})  ? "-DEBUG" : "";
     my $CpuFragment         = $odr->{cpu}->{value};
-	my $ArchFragment		= ($CpuFragment =~ /386/) ? "32" : "64";
+    my $ArchFragment        = ($CpuFragment =~ /386/) ? "32" : "64";
 
     $FileStemFragment       = $xml->{Config}->{FileStem}->{name};    
     $fromRoot               = $xml->{Config}->{From}->{root};    
