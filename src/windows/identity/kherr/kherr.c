@@ -474,7 +474,7 @@ add_event(kherr_context * c, kherr_event * e)
     }
 
     QPUT(c,e);
-    if(c->severity >= e->severity) {
+    if(c->severity > e->severity) {
         if (e->severity <= KHERR_ERROR)
             notify_ctx_event(KHERR_CTX_ERROR, c);
 
