@@ -272,6 +272,9 @@ extern DECL_FUNC_PTR(krb5_free_host_realm);
 extern DECL_FUNC_PTR(krb5_c_random_make_octets);
 extern DECL_FUNC_PTR(krb5_free_default_realm);
 extern DECL_FUNC_PTR(krb5_string_to_deltat);
+extern DECL_FUNC_PTR(krb5_get_error_message);
+extern DECL_FUNC_PTR(krb5_free_error_message);
+extern DECL_FUNC_PTR(krb5_clear_error_message);
 
 // Krb524 functions
 extern DECL_FUNC_PTR(krb524_init_ets);
