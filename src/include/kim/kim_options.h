@@ -28,9 +28,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 #include <kim/kim_types.h>
-
+    
 /*!
  * \addtogroup kim_types_reference
  * @{
@@ -51,7 +51,7 @@ extern "C" {
  * This value determines what type of user interface is displayed.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-typedef uint32_t kim_prompt_type_t;
+typedef uint32_t kim_prompt_type;
 
 enum kim_prompt_type_enum {
     kim_prompt_type_password = 0,
@@ -62,45 +62,45 @@ enum kim_prompt_type_enum {
  * The prompt callback used to display a prompt to the user.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-typedef kim_error_code (*kim_prompt_callback_t) (kim_options       *io_options, 
-                                                   kim_prompt_type_t    in_type,
-                                                   kim_string         in_title,
-                                                   kim_string         in_message,
-                                                   kim_string         in_description,
-                                                   void               **out_reply);
+typedef kim_error_code (*kim_prompt_callback) (kim_options       *io_options, 
+                                               kim_prompt_type    in_type,
+                                               kim_string         in_title,
+                                               kim_string         in_message,
+                                               kim_string         in_description,
+                                               void               **out_reply);
 
 /*!
  * The default prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
 kim_error_code kim_prompt_callback_default (kim_options       *io_options, 
-                                              kim_prompt_type_t    in_type,
-                                              kim_string         in_title,
-                                              kim_string         in_message,
-                                              kim_string         in_description,
-                                              void               **out_reply);
+                                            kim_prompt_type    in_type,
+                                            kim_string         in_title,
+                                            kim_string         in_message,
+                                            kim_string         in_description,
+                                            void             **out_reply);
 
 /*!
  * The graphical prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
 kim_error_code kim_prompt_callback_gui (kim_options       *io_options, 
-                                          kim_prompt_type_t    in_type,
-                                          kim_string         in_title,
-                                          kim_string         in_message,
-                                          kim_string         in_description,
-                                          void               **out_reply);
+                                        kim_prompt_type    in_type,
+                                        kim_string         in_title,
+                                        kim_string         in_message,
+                                        kim_string         in_description,
+                                        void             **out_reply);
 
 /*!
  * The command line prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
 kim_error_code kim_prompt_callback_cli (kim_options       *io_options, 
-                                          kim_prompt_type_t    in_type,
-                                          kim_string         in_title,
-                                          kim_string         in_message,
-                                          kim_string         in_description,
-                                          void               **out_reply);
+                                        kim_prompt_type    in_type,
+                                        kim_string         in_title,
+                                        kim_string         in_message,
+                                        kim_string         in_description,
+                                        void             **out_reply);
 
 /*!
  * The prompt callback which always returns an error.
@@ -109,11 +109,11 @@ kim_error_code kim_prompt_callback_cli (kim_options       *io_options,
  * See \ref kim_options_custom_prompt_callback for more information.
  */
 kim_error_code kim_prompt_callback_none (kim_options       *io_options, 
-                                           kim_prompt_type_t    in_type,
-                                           kim_string         in_title,
-                                           kim_string         in_message,
-                                           kim_string         in_description,
-                                           void               **out_reply);
+                                         kim_prompt_type    in_type,
+                                         kim_string         in_title,
+                                         kim_string         in_message,
+                                         kim_string         in_description,
+                                         void             **out_reply);
 
 /*! @} */
 
@@ -305,7 +305,7 @@ kim_error kim_options_create (kim_options *out_options);
  * \brief Copy options.
  */
 kim_error kim_options_copy (kim_options *out_options,
-                              kim_options  in_options);
+                            kim_options  in_options);
 
 /*!
  * \param io_options         an options object to modify.
@@ -317,7 +317,7 @@ kim_error kim_options_copy (kim_options *out_options,
  * \sa kim_options_get_prompt_callback()
  */
 kim_error kim_options_set_prompt_callback (kim_options         io_options,
-                                             kim_prompt_callback_t in_prompt_callback);
+                                           kim_prompt_callback in_prompt_callback);
 
 /*!
  * \param in_options          an options object.
@@ -331,7 +331,7 @@ kim_error kim_options_set_prompt_callback (kim_options         io_options,
  * \sa kim_options_set_prompt_callback()
  */
 kim_error kim_options_get_prompt_callback (kim_options          in_options,
-                                             kim_prompt_callback_t *out_prompt_callback);
+                                           kim_prompt_callback *out_prompt_callback);
 
 /*!
  * \param io_options  an options object to modify.
@@ -345,7 +345,7 @@ kim_error kim_options_get_prompt_callback (kim_options          in_options,
  * \sa kim_options_get_data()
  */
 kim_error kim_options_set_data (kim_options  io_options,
-                                  const void    *in_data);
+                                const void    *in_data);
 
 /*!
  * \param in_options  an options object.
@@ -360,7 +360,7 @@ kim_error kim_options_set_data (kim_options  io_options,
  * \sa kim_options_set_data()
  */
 kim_error kim_options_get_data (kim_options   in_options,
-                                  const void    **out_data);
+                                const void  **out_data);
 
 /*!
  * \param io_options     an options object to modify.
@@ -376,9 +376,9 @@ kim_error kim_options_get_data (kim_options   in_options,
  * NULL (no response is set by default)
  * \sa kim_options_get_prompt_response()
  */
-kim_error kim_options_set_prompt_response (kim_options     io_options,
-                                             kim_prompt_type_t in_prompt_type,
-                                             void             *in_response);
+kim_error kim_options_set_prompt_response (kim_options      io_options,
+                                           kim_prompt_type  in_prompt_type,
+                                           void            *in_response);
 
 /*!
  * \param in_options     an options object.
@@ -397,8 +397,8 @@ kim_error kim_options_set_prompt_response (kim_options     io_options,
  * \sa kim_options_set_prompt_response()
  */
 kim_error kim_options_get_prompt_response (kim_options       in_options,
-                                             kim_prompt_type_t   in_prompt_type,
-                                             void              **out_response);
+                                           kim_prompt_type   in_prompt_type,
+                                           void            **out_response);
 
 /*!
  * \param io_options    an options object to modify.
@@ -414,7 +414,7 @@ kim_error kim_options_get_prompt_response (kim_options       in_options,
  * \sa kim_options_get_start_time(), kim_credential_validate(), kim_ccache_validate(), kim_identity_validate()
  */
 kim_error kim_options_set_start_time (kim_options io_options,
-                                        kim_time    in_start_time);
+                                      kim_time    in_start_time);
 
 /*!
  * \param in_options     an options object.
@@ -430,7 +430,7 @@ kim_error kim_options_set_start_time (kim_options io_options,
  * \sa kim_options_set_start_time(), kim_credential_validate(), kim_ccache_validate(), kim_identity_validate()
  */
 kim_error kim_options_get_start_time (kim_options  in_options,
-                                        kim_time    *out_start_time);
+                                      kim_time    *out_start_time);
 
 /*!
  * \param io_options  an options object to modify.
@@ -445,7 +445,7 @@ kim_error kim_options_get_start_time (kim_options  in_options,
  * Read from the user's preferences and the Kerberos configuration. 10 hours if unspecified.
  */
 kim_error kim_options_set_lifetime (kim_options  io_options,
-                                      kim_lifetime in_lifetime);
+                                    kim_lifetime in_lifetime);
 
 /*!
  * \param in_options   an options object.
@@ -460,10 +460,10 @@ kim_error kim_options_set_lifetime (kim_options  io_options,
  * \sa kim_options_set_lifetime()
  */
 kim_error kim_options_get_lifetime (kim_options   in_options,
-                                      kim_lifetime *out_lifetime);
+                                    kim_lifetime *out_lifetime);
 
 /*!
-* \param io_options    an options object to modify.
+ * \param io_options    an options object to modify.
  * \param in_renewable a boolean value indicating whether or not to request a renewable 
  *                     credential.
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
@@ -473,10 +473,10 @@ kim_error kim_options_get_lifetime (kim_options   in_options,
  * \sa kim_options_get_renewable()
  */
 kim_error kim_options_set_renewable (kim_options io_options,
-                                       kim_boolean in_renewable);
+                                     kim_boolean in_renewable);
 
 /*!
-* \param in_options     an options object.
+ * \param in_options     an options object.
  * \param out_renewable on exit, a boolean value indicating whether or \a in_options will 
  *                      request a renewable credential.
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
@@ -486,7 +486,7 @@ kim_error kim_options_set_renewable (kim_options io_options,
  * \sa kim_options_set_renewable()
  */
 kim_error kim_options_get_renewable (kim_options  in_options,
-                                       kim_boolean *out_renewable);
+                                     kim_boolean *out_renewable);
 
 /*!
  * \param io_options          an options object to modify.
@@ -501,7 +501,7 @@ kim_error kim_options_get_renewable (kim_options  in_options,
  * \sa kim_options_get_renewal_lifetime(), kim_identity_renew(), kim_credential_renew(), kim_ccache_renew()
  */
 kim_error kim_options_set_renewal_lifetime (kim_options  io_options,
-                                              kim_lifetime in_renewal_lifetime);
+                                            kim_lifetime in_renewal_lifetime);
 
 /*!
  * \param in_options   an options object.
@@ -517,7 +517,7 @@ kim_error kim_options_set_renewal_lifetime (kim_options  io_options,
  * \sa kim_options_set_renewal_lifetime(), kim_identity_renew(), kim_credential_renew(), kim_ccache_renew()
  */
 kim_error kim_options_get_renewal_lifetime (kim_options   in_options,
-                                              kim_lifetime *out_renewal_lifetime);
+                                            kim_lifetime *out_renewal_lifetime);
 
 /*!
  * \param io_options     an options object to modify.
@@ -530,7 +530,7 @@ kim_error kim_options_get_renewal_lifetime (kim_options   in_options,
  * \sa kim_options_get_forwardable()
  */
 kim_error kim_options_set_forwardable (kim_options io_options,
-                                         kim_boolean in_forwardable);
+                                       kim_boolean in_forwardable);
 
 /*!
  * \param in_options      an options object.
@@ -543,7 +543,7 @@ kim_error kim_options_set_forwardable (kim_options io_options,
  * \sa kim_options_set_forwardable()
  */
 kim_error kim_options_get_forwardable (kim_options  in_options,
-                                         kim_boolean *out_forwardable);
+                                       kim_boolean *out_forwardable);
 
 /*!
  * \param io_options   an options object to modify.
@@ -556,7 +556,7 @@ kim_error kim_options_get_forwardable (kim_options  in_options,
  * \sa kim_options_get_proxiable()
  */
 kim_error kim_options_set_proxiable (kim_options io_options,
-                                       kim_boolean in_proxiable);
+                                     kim_boolean in_proxiable);
 
 /*!
  * \param in_options    an options object.
@@ -569,7 +569,7 @@ kim_error kim_options_set_proxiable (kim_options io_options,
  * \sa kim_options_set_proxiable()
  */
 kim_error kim_options_get_proxiable (kim_options  in_options,
-                                       kim_boolean *out_proxiable);
+                                     kim_boolean *out_proxiable);
 
 /*!
  * \param io_options     an options object to modify.
@@ -582,7 +582,7 @@ kim_error kim_options_get_proxiable (kim_options  in_options,
  * \sa kim_options_get_addressless()
  */
 kim_error kim_options_set_addressless (kim_options io_options,
-                                         kim_boolean in_addressless);
+                                       kim_boolean in_addressless);
 
 /*!
  * \param in_options      an options object.
@@ -595,7 +595,7 @@ kim_error kim_options_set_addressless (kim_options io_options,
  * \sa kim_options_set_addressless()
  */
 kim_error kim_options_get_addressless (kim_options  in_options,
-                                         kim_boolean *out_addressless);
+                                       kim_boolean *out_addressless);
 
 /*!
  * \param io_options       an options object to modify.
@@ -607,7 +607,7 @@ kim_error kim_options_get_addressless (kim_options  in_options,
  * \sa kim_options_get_service_name()
  */
 kim_error kim_options_set_service_name (kim_options io_options,
-					  kim_string  in_service_name);
+                                        kim_string  in_service_name);
 
 /*!
  * \param in_options        an options object.
@@ -620,7 +620,7 @@ kim_error kim_options_set_service_name (kim_options io_options,
  * \sa kim_options_set_service_name()
  */
 kim_error kim_options_get_service_name (kim_options  in_options,
-					  kim_string  *out_service_name);
+                                        kim_string  *out_service_name);
 
 /*!
  * \param io_options the options object to be freed.  Set to NULL on exit.

@@ -90,7 +90,7 @@ CFStringRef kim_os_string_get_cfstring_for_key (kim_string in_key_string)
     
     if (in_key_string) {     
         key = CFStringCreateWithCString (kCFAllocatorDefault, in_key_string, kCFStringEncodingASCII);
-
+        
         if (key) {
             // Try to find the key, first searching in the framework, then in the main bundle
             CFBundleRef frameworkBundle = CFBundleGetBundleWithIdentifier (CFSTR ("edu.mit.Kerberos"));
@@ -100,7 +100,7 @@ CFStringRef kim_os_string_get_cfstring_for_key (kim_string in_key_string)
             
             if (!value) {
                 CFBundleRef mainBundle = CFBundleGetMainBundle ();
-
+                
                 if (mainBundle) {
                     value = kim_os_string_get_cfstring_for_key_and_dictionary (key, mainBundle);
                 }
@@ -121,8 +121,8 @@ CFStringRef kim_os_string_get_cfstring_for_key (kim_string in_key_string)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_os_string_create_from_cfstring (kim_string *out_string,
-                                                CFStringRef in_cfstring)
+kim_error kim_os_string_create_from_cfstring (kim_string  *out_string,
+                                              CFStringRef  in_cfstring)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string string = NULL;
@@ -158,7 +158,7 @@ kim_error kim_os_string_create_from_cfstring (kim_string *out_string,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_string_create_for_key (kim_string *out_string,
-                                          kim_string in_key_string)
+                                        kim_string in_key_string)
 {
     kim_error err = KIM_NO_ERROR;
     CFStringRef value = NULL;
@@ -181,8 +181,8 @@ kim_error kim_os_string_create_for_key (kim_string *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_os_string_get_cfstring (kim_string  in_string,
-                                        CFStringRef  *out_cfstring)
+kim_error kim_os_string_get_cfstring (kim_string   in_string,
+                                      CFStringRef *out_cfstring)
 {
     kim_error err = KIM_NO_ERROR;
     CFStringRef cfstring = NULL;
@@ -208,8 +208,8 @@ kim_error kim_os_string_get_cfstring (kim_string  in_string,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_string_compare (kim_string      in_string,
-                                   kim_string      in_compare_to_string,
-                                   kim_comparison *out_comparison)
+                                 kim_string      in_compare_to_string,
+                                 kim_comparison *out_comparison)
 {
     kim_error err = KIM_NO_ERROR;
     CFStringRef cfstring = NULL;
@@ -222,7 +222,7 @@ kim_error kim_os_string_compare (kim_string      in_string,
     if (!err) {
         err = kim_os_string_get_cfstring (in_string, &cfstring);
     }
-
+    
     if (!err) {
         err = kim_os_string_get_cfstring (in_compare_to_string, &compare_to_cfstring);
     }
@@ -234,15 +234,15 @@ kim_error kim_os_string_compare (kim_string      in_string,
     
     if (cfstring           ) { CFRelease (cfstring); }
     if (compare_to_cfstring) { CFRelease (compare_to_cfstring); }
-
+    
     return check_error (err);    
 }
 
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_string_compare_to_cfstring (kim_string      in_string,
-                                               CFStringRef       in_compare_to_cfstring,
-                                               kim_comparison *out_comparison)
+                                             CFStringRef     in_compare_to_cfstring,
+                                             kim_comparison *out_comparison)
 {
     kim_error err = KIM_NO_ERROR;
     CFStringRef cfstring = NULL;

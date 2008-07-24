@@ -29,31 +29,6 @@
 
 /* ------------------------------------------------------------------------ */
 
-static inline kim_error kim_string_allocate (kim_string *out_string,
-                                             kim_count   in_length)
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_string string = NULL;
-    
-    if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
-    
-    if (!err) {
-        string = calloc (in_length, sizeof (char *));
-        if (!string) { err = os_error (errno); }
-    }
-    
-    if (!err) {
-        *out_string = string;
-        string = NULL;
-    }
-    
-    kim_string_free (&string);
-    
-    return check_error (err);    
-}
-
-/* ------------------------------------------------------------------------ */
-
 kim_error kim_string_create_from_format (kim_string *out_string, 
                                          kim_string  in_format,
                                          ...)
@@ -72,7 +47,7 @@ kim_error kim_string_create_from_format (kim_string *out_string,
 
 kim_error kim_string_create_from_format_va_retcode (kim_string *out_string, 
                                                     kim_string  in_format,
-                                                    va_list       in_args)
+                                                    va_list     in_args)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -86,7 +61,7 @@ kim_error kim_string_create_from_format_va_retcode (kim_string *out_string,
 
 kim_error kim_string_create_from_format_va (kim_string *out_string, 
                                             kim_string  in_format,
-                                            va_list       in_args)
+                                            va_list     in_args)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string string = NULL;
@@ -95,7 +70,9 @@ kim_error kim_string_create_from_format_va (kim_string *out_string,
     if (!err && !in_format ) { err = param_error (2, "in_format", "NULL"); }
     
     if (!err) {
-        err = kim_string_create_from_format_va_retcode (&string, in_format, in_args);
+        err = kim_string_create_from_format_va_retcode (&string, 
+                                                        in_format, 
+                                                        in_args);
     }
     
     if (!err) {
@@ -111,7 +88,7 @@ kim_error kim_string_create_from_format_va (kim_string *out_string,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_string_create_from_buffer (kim_string *out_string, 
-                                         const char   *in_buffer, 
+                                         const char *in_buffer, 
                                          kim_count   in_length)
 {
     kim_error err = KIM_NO_ERROR;
@@ -121,7 +98,8 @@ kim_error kim_string_create_from_buffer (kim_string *out_string,
     if (!err && !in_buffer ) { err = param_error (2, "in_buffer", "NULL"); }
     
     if (!err) {
-        err = kim_string_allocate (&string, in_length + 1);
+        string = calloc (in_length + 1, sizeof (char *));
+        if (!string) { err = os_error (ENOMEM); }
     }
     
     if (!err) {
@@ -147,7 +125,8 @@ kim_error kim_string_copy (kim_string *out_string,
     if (!err && !in_string ) { err = param_error (2, "in_string", "NULL"); }
     
     if (!err) {
-        err = kim_string_allocate (&string, strlen (in_string) + 1);
+        string = calloc (strlen (in_string) + 1, sizeof (char *));
+        if (!string) { err = os_error (ENOMEM); }
     }
     
     if (!err) {
@@ -167,7 +146,9 @@ kim_error kim_string_compare (kim_string      in_string,
                               kim_string      in_compare_to_string,
                               kim_comparison *out_comparison)
 {
-    return kim_os_string_compare (in_string, in_compare_to_string, out_comparison);
+    return kim_os_string_compare (in_string, 
+                                  in_compare_to_string, 
+                                  out_comparison);
 }
 
 /* ------------------------------------------------------------------------ */

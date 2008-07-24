@@ -40,14 +40,14 @@ typedef struct kim_selection_hints_preference_strings {
 } kim_selection_hints_preference_strings;
 
 
-kim_error kim_selection_hints_get_preference_strings (kim_selection_hints                   in_selection_hints,
-                                                        kim_selection_hints_preference_strings *io_preference_strings);
+kim_error kim_selection_hints_get_preference_strings (kim_selection_hints                     in_selection_hints,
+                                                      kim_selection_hints_preference_strings *io_preference_strings);
 
 kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_selection_hints,
-                                                    kim_identity        *out_identity);
+                                                  kim_identity        *out_identity);
 
 kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selection_hints,
-                                                      kim_identity        in_identity);
+                                                    kim_identity        in_identity);
 
 kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selection_hints);
 

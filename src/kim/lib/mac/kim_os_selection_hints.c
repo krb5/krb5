@@ -81,7 +81,7 @@ static kim_error kim_os_selection_hints_get_selection_hints_array (CFArrayRef *o
     }
     
     if (value) { CFRelease (value); }
-
+    
     return check_error (err);
 }
 
@@ -113,8 +113,8 @@ static kim_error kim_os_selection_hints_set_selection_hints_array (CFArrayRef in
 /* ------------------------------------------------------------------------ */
 
 static kim_error kim_os_selection_hints_create_dictionary (kim_selection_hints  in_selection_hints,
-                                                             kim_identity         in_identity,
-                                                             CFDictionaryRef       *out_hints_dictionary)
+                                                           kim_identity         in_identity,
+                                                           CFDictionaryRef     *out_hints_dictionary)
 {
     kim_error err = KIM_NO_ERROR;
     kim_selection_hints_preference_strings preference_strings = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
@@ -134,7 +134,7 @@ static kim_error kim_os_selection_hints_create_dictionary (kim_selection_hints  
     if (!err) {
         err = kim_identity_get_string (in_identity, &identity_string);
     }
-
+    
     if (!err) {
         keys[i] = KIM_APPLICATION_ID_HINT;
         err = kim_os_string_get_cfstring (preference_strings.application_identifier, &values[i]);
@@ -144,7 +144,7 @@ static kim_error kim_os_selection_hints_create_dictionary (kim_selection_hints  
         keys[++i] = KIM_IDENTITY_HINT;
         err = kim_os_string_get_cfstring (identity_string, &values[i]);
     }
-
+    
     if (!err && preference_strings.service_identity) {
         keys[++i] = KIM_SERVICE_IDENTITY_HINT;
         err = kim_os_string_get_cfstring (preference_strings.service_identity, &values[i]);
@@ -192,8 +192,8 @@ static kim_error kim_os_selection_hints_create_dictionary (kim_selection_hints  
 
 /* ------------------------------------------------------------------------ */
 
-static kim_boolean kim_os_selection_hints_compare_hint (kim_string in_string,
-                                                          CFStringRef  in_value)
+static kim_boolean kim_os_selection_hints_compare_hint (kim_string  in_string,
+                                                        CFStringRef in_value)
 {
     kim_boolean equal = 0;
     
@@ -205,7 +205,7 @@ static kim_boolean kim_os_selection_hints_compare_hint (kim_string in_string,
             kim_comparison comparison;
             
             kim_error err = kim_os_string_compare_to_cfstring (in_string, in_value, 
-                                                                 &comparison);
+                                                               &comparison);
             
             if (!err && kim_comparison_is_equal_to (comparison)) {
                 equal = 1;
@@ -216,15 +216,15 @@ static kim_boolean kim_os_selection_hints_compare_hint (kim_string in_string,
             kim_debug_printf ("%s: Malformed string in hints dictionary.", __FUNCTION__);
         }
     }
-
+    
     return equal;
 }
 
 /* ------------------------------------------------------------------------ */
 
 static kim_error kim_os_selection_hints_compare_to_dictionary (kim_selection_hints  in_selection_hints,
-                                                                 CFDictionaryRef        in_hints_dictionary,
-                                                                 kim_boolean         *out_hints_equal)
+                                                               CFDictionaryRef      in_hints_dictionary,
+                                                               kim_boolean         *out_hints_equal)
 {
     kim_error err = KIM_NO_ERROR;
     kim_selection_hints_preference_strings preference_strings = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
@@ -290,7 +290,7 @@ static kim_error kim_os_selection_hints_compare_to_dictionary (kim_selection_hin
 /* ------------------------------------------------------------------------ */
 
 static kim_error kim_os_selection_hints_get_dictionary_identity (CFDictionaryRef  in_dictionary,
-                                                                   kim_identity  *out_identity)
+                                                                 kim_identity    *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     CFStringRef identity_cfstr = NULL;
@@ -320,7 +320,7 @@ static kim_error kim_os_selection_hints_get_dictionary_identity (CFDictionaryRef
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_selection_hints,
-                                                    kim_identity        *out_identity)
+                                                  kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     CFArrayRef hints_array = NULL;
@@ -355,27 +355,27 @@ kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_select
             err = kim_os_selection_hints_compare_to_dictionary (in_selection_hints, 
                                                                 dictionary,
                                                                 &found);
-         }
-
+        }
+        
         if (!err && found) {
             found_dictionary = dictionary;
         }
     }
-        
+    
     if (!err && found) {
         err = kim_os_selection_hints_get_dictionary_identity (found_dictionary,
                                                               out_identity);
     }
     
     if (hints_array) { CFRelease (hints_array); }
-
+    
     return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selection_hints,
-                                                      kim_identity        in_identity)
+                                                    kim_identity        in_identity)
 {
     kim_error err = KIM_NO_ERROR;
     CFArrayRef old_hints_array = NULL;
@@ -391,7 +391,7 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
     if (!err) {
         err = kim_os_selection_hints_get_selection_hints_array (&old_hints_array);
     }
-
+    
     if (!err) {
         if (old_hints_array) {
             new_hints_array = CFArrayCreateMutableCopy (kCFAllocatorDefault, 0, 
@@ -431,7 +431,7 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
             
             err = kim_os_selection_hints_get_dictionary_identity (dictionary,
                                                                   &identity);
-
+            
             if (!err) {
                 err = kim_identity_compare (in_identity, identity, &comparison);
             }
@@ -457,12 +457,12 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
         err = kim_os_selection_hints_create_dictionary (in_selection_hints, 
                                                         in_identity,
                                                         &new_hint_dictionary);
-
+        
         if (!err) {
             CFArrayInsertValueAtIndex (new_hints_array, 0, new_hint_dictionary);
             hints_array_changed = 1;
         }
-
+        
         if (new_hint_dictionary) { CFRelease (new_hint_dictionary); }
     }
     
@@ -472,7 +472,7 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
     
     if (new_hints_array ) { CFRelease (new_hints_array); }
     if (old_hints_array ) { CFRelease (old_hints_array); }
-   
+    
     return check_error (err);
 }
 
@@ -485,7 +485,7 @@ kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selecti
     CFMutableArrayRef new_hints_array = NULL;
     CFIndex count = 0;
     CFIndex i = 0;
-   
+    
     if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
     
     if (!err) {
@@ -497,7 +497,7 @@ kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selecti
                                                     old_hints_array);
         if (!new_hints_array) { err = os_error (ENOMEM); }
     }
-
+    
     if (!err) {
         count = CFArrayGetCount (new_hints_array);
     }
@@ -532,7 +532,7 @@ kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selecti
     }
     
     if (new_hints_array) { CFRelease (new_hints_array); }
-
+    
     return check_error (err);
 }
 

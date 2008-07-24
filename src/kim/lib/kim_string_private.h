@@ -31,30 +31,30 @@
 
 
 kim_error kim_string_create_from_format (kim_string *out_string, 
-                                           kim_string  in_format,
-                                           ...);
+                                         kim_string  in_format,
+                                         ...);
 
 kim_error kim_string_create_from_format_va_retcode (kim_string *out_string, 
-                                                      kim_string  in_format,
-                                                      va_list       in_args);
+                                                    kim_string  in_format,
+                                                    va_list     in_args);
 
 kim_error kim_string_create_from_format_va (kim_string *out_string, 
-                                              kim_string  in_format,
-                                              va_list       in_args);
+                                            kim_string  in_format,
+                                            va_list       in_args);
 
 kim_error kim_string_create_from_buffer (kim_string *out_string, 
-                                           const char   *in_buffer, 
-                                           kim_count   in_length);
+                                         const char *in_buffer, 
+                                         kim_count   in_length);
 
 kim_error kim_string_prepend (kim_string *io_string,
-                                kim_string  in_prefix);
+                              kim_string  in_prefix);
 
 kim_error kim_string_append (kim_string *io_string, 
-                               kim_string  in_suffix);
+                             kim_string  in_suffix);
 
 /* OS-specific because it should use UTF8-safe sorting where possible */
 kim_error kim_os_string_compare (kim_string      in_string,
-                                   kim_string      in_compare_to_string,
-                                   kim_comparison *out_comparison);
+                                 kim_string      in_compare_to_string,
+                                 kim_comparison *out_comparison);
 
 #endif /* KIM_STRING_PRIVATE_H */

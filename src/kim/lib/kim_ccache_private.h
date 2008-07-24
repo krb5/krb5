@@ -30,10 +30,10 @@
 #include <kim/kim.h>
 
 kim_error kim_ccache_create_from_display_name (kim_ccache  *out_ccache,
-                                                 kim_string   in_display_name);
+                                               kim_string   in_display_name);
 
 kim_error kim_ccache_compare (kim_ccache   in_ccache,
-                                kim_ccache   in_compare_to_ccache,
-                                kim_boolean *out_equal);
+                              kim_ccache   in_compare_to_ccache,
+                              kim_boolean *out_equal);
 
 #endif /* KIM_CCACHE_PRIVATE_H */
