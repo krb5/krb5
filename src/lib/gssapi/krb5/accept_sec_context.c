@@ -1,5 +1,5 @@
 /*
- * Copyright 2000, 2004  by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2004, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -249,6 +249,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_data option;
    const gss_OID_desc *mech_used = NULL;
    OM_uint32 major_status = GSS_S_FAILURE;
+   OM_uint32 tmp_minor_status;
    krb5_error krb_error_data;
    krb5_data scratch;
    gss_cred_id_t cred_handle = NULL;
@@ -903,13 +904,14 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    if (!GSS_ERROR(major_status) && major_status != GSS_S_CONTINUE_NEEDED) {
        ctx->k5_context = context;
-       return(major_status);
+       context = NULL;
+       goto exit;
    }
 
    /* from here on is the real "fail" code */
 
    if (ctx)
-       (void) krb5_gss_delete_sec_context(minor_status, 
+       (void) krb5_gss_delete_sec_context(&tmp_minor_status, 
 					  (gss_ctx_id_t *) &ctx, NULL);
    if (deleg_cred) { /* free memory associated with the deleg credential */
        if (deleg_cred->ccache)
@@ -936,10 +938,9 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (decode_req_message) {
        krb5_ap_req 	* request;
 	   
-       if (decode_krb5_ap_req(&ap_req, &request)) {
-	   krb5_free_context(context);
-	   return (major_status);
-       }
+       if (decode_krb5_ap_req(&ap_req, &request))
+	   goto exit;
+
        if (request->ap_options & AP_OPTS_MUTUAL_REQUIRED)
 	   gss_flags |= GSS_C_MUTUAL_FLAG;
        krb5_free_ap_req(context, request);
@@ -967,20 +968,16 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        krb_error_data.server = cred->princ;
 
        code = krb5_mk_error(context, &krb_error_data, &scratch);
-       if (code) {
-	   krb5_free_context(context);
-	   return (major_status);
-       }
+       if (code)
+           goto exit;
 
        tmsglen = scratch.length;
        toktype = KG_TOK_CTX_ERROR;
 
        token.length = g_token_size(mech_used, tmsglen);
        token.value = (unsigned char *) xmalloc(token.length);
-       if (!token.value) {
-	   krb5_free_context(context);
-	   return (major_status);
-       }
+       if (!token.value) 
+           goto exit;
 
        ptr = token.value;
        g_make_token_header(mech_used, tmsglen, &ptr, toktype);
@@ -990,9 +987,13 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
        *output_token = token;
    }
+
+  exit:
    if (!verifier_cred_handle && cred_handle) {
-	   krb5_gss_release_cred(minor_status, &cred_handle);
+       krb5_gss_release_cred(&tmp_minor_status, &cred_handle);
    }
-   krb5_free_context(context);
+   if (context) {
+       krb5_free_context(context);
+   }
    return (major_status);
 }
