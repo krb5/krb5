@@ -905,7 +905,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (!GSS_ERROR(major_status) && major_status != GSS_S_CONTINUE_NEEDED) {
        ctx->k5_context = context;
        context = NULL;
-       goto exit;
+       goto done;
    }
 
    /* from here on is the real "fail" code */
@@ -969,7 +969,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
        code = krb5_mk_error(context, &krb_error_data, &scratch);
        if (code)
-           goto exit;
+           goto done;
 
        tmsglen = scratch.length;
        toktype = KG_TOK_CTX_ERROR;
@@ -977,7 +977,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        token.length = g_token_size(mech_used, tmsglen);
        token.value = (unsigned char *) xmalloc(token.length);
        if (!token.value) 
-           goto exit;
+           goto done;
 
        ptr = token.value;
        g_make_token_header(mech_used, tmsglen, &ptr, toktype);
@@ -988,7 +988,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        *output_token = token;
    }
 
-  exit:
+  done:
    if (!verifier_cred_handle && cred_handle) {
        krb5_gss_release_cred(&tmp_minor_status, &cred_handle);
    }
