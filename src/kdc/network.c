@@ -277,6 +277,12 @@ add_fd (struct socksetup *data, int sock, enum kdc_conn_type conntype,
     struct connection *newconn;
     void *tmp;
 
+    if (sock > FD_SETSIZE) {
+	data->retval = EMFILE;	/* XXX */
+	com_err(data->prog, 0,
+		"file descriptor number %d too high", sock);
+	return 0;
+    }
     newconn = malloc(sizeof(*newconn));
     if (newconn == 0) {
 	data->retval = errno;
@@ -358,6 +364,12 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
     if (sock == -1) {
 	com_err(data->prog, errno, "Cannot create TCP server socket on %s",
 		paddr(addr));
+	return -1;
+    }
+    if (sock > FD_SETSIZE) {
+	close(sock);
+	com_err(data->prog, 0, "TCP socket fd number %d (for %s) too high",
+		sock, paddr(addr));
 	return -1;
     }
     if (setreuseaddr(sock, 1) < 0)
@@ -791,6 +803,10 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
     s = accept(conn->fd, addr, &addrlen);
     if (s < 0)
 	return;
+    if (s > FD_SETSIZE) {
+	close(s);
+	return;
+    }
     setnbio(s), setnolinger(s);
 
     sockdata.prog = prog;
