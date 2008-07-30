@@ -631,25 +631,26 @@ kim_error kim_ccache_get_client_identity (kim_ccache    in_ccache,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
-                                           kim_credential *out_credential)
+static kim_error kim_ccache_get_dominant_credential (kim_ccache            in_ccache,
+                                                     kim_credential_state *out_state,
+                                                     kim_boolean          *out_is_tgt,
+                                                     kim_credential       *out_credential)
 {
     kim_error err = KIM_NO_ERROR;
     kim_credential_iterator iterator = NULL;
     kim_boolean out_of_credentials = FALSE;
     kim_boolean found_valid_tgt = FALSE;
-    kim_boolean found_invalid_tgt = FALSE;
-    kim_credential_state invalid_tgt_state = kim_credentials_state_valid;
-    kim_credential valid_credential = NULL;
+    kim_boolean dominant_is_tgt = FALSE;
+    kim_credential_state dominant_state = kim_credentials_state_valid;
+    kim_credential dominant_credential = NULL;
     
-    if (!err && !in_ccache     ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_credential) { err = param_error (2, "out_credential", "NULL"); }
+    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
     
     if (!err) {
         err = kim_credential_iterator_create (&iterator, in_ccache);
     }
     
-    while (!err && !found_valid_tgt && !out_of_credentials) {
+    while (!err && !out_of_credentials && !found_valid_tgt) {
         kim_credential credential = NULL;
         
         err = kim_credential_iterator_next (iterator, &credential);
@@ -658,46 +659,57 @@ kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
             out_of_credentials = TRUE;
             
         } else if (!err) {
-            kim_identity service_identity = NULL;
             kim_credential_state state = kim_credentials_state_valid;
             kim_boolean is_tgt = FALSE;
             
-            err = kim_credential_get_service_identity (credential, 
-                                                       &service_identity);
+            err = kim_credential_get_state (credential, &state);
             
             if (!err) {
-                err = kim_credential_get_state (credential, &state);
+                kim_identity service_identity = NULL;
+                
+                err = kim_credential_get_service_identity (credential, 
+                                                           &service_identity);
+                
+                if (!err) {
+                    err = kim_identity_is_tgt_service (service_identity, &is_tgt);
+                }
+                
+                kim_identity_free (&service_identity);
             }
             
             if (!err) {
-                err = kim_identity_is_tgt_service (service_identity, &is_tgt);
-            }
-            
-            if (!err) { 
-                if (state == kim_credentials_state_valid) {
-                    kim_credential_free (&valid_credential);
+                /* There are three cases where we replace: 
+                 * 1) We don't have a dominant yet
+                 * 2) This is a tgt and dominant isn't
+                 * 3) Both are tgts but this is valid and dominant isn't */
+                
+                if ((!dominant_credential)        /* 1 */ || 
+                    (is_tgt && !dominant_is_tgt)  /* 2 */ ||
+                    (is_tgt && dominant_is_tgt && /* 3 */ 
+                     state == kim_credentials_state_valid &&
+                     dominant_state != kim_credentials_state_valid)) {
+                    /* replace */
+                    kim_credential_free (&dominant_credential);
                     
-                    valid_credential = credential;
-                    credential = NULL;
+                    dominant_credential = credential;
+                    credential = NULL; /* take ownership */
                     
-                    if (is_tgt) { 
-                        found_valid_tgt = TRUE; 
-                    } 
-                } else {
-                    if (is_tgt && !found_invalid_tgt) { 
-                        found_invalid_tgt = TRUE; 
-                        invalid_tgt_state = state;
-                    }
+                    dominant_is_tgt = is_tgt;
+                    dominant_state = state;
+                }
+                
+                if (dominant_is_tgt && 
+                    dominant_state == kim_credentials_state_valid) {
+                    /* Since we will never replace a valid tgt, stop here */
+                    found_valid_tgt = TRUE;
                 }
             }
-            
-            kim_identity_free (&service_identity);
         }
         
         kim_credential_free (&credential);
-    }       
+    }
     
-    if (!err && (!valid_credential || found_invalid_tgt)) {
+    if (!err && !dominant_credential) {
         kim_identity identity = NULL;
         kim_string identity_string = NULL;
         
@@ -708,27 +720,83 @@ kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
                                                    &identity_string);
         }
         
-        if (!err && found_invalid_tgt) {
-            switch (invalid_tgt_state) {
-                case kim_credentials_state_expired:
-                    err = kim_error_create_from_code (KIM_CREDENTIALS_EXPIRED_ECODE, 
-                                                      identity_string);
-                    break;
-                case kim_credentials_state_not_yet_valid:
-                case kim_credentials_state_needs_validation:
-                    err = kim_error_create_from_code (KIM_NEEDS_VALIDATION_ECODE, 
-                                                      identity_string);
-                    break;
-                case kim_credentials_state_address_mismatch:
-                    err = kim_error_create_from_code (KIM_BAD_IP_ADDRESS_ECODE, 
-                                                      identity_string);
-                    break;
-            }
-        }
-        
-        if (!err && !valid_credential) {
+        if (!err) {
             err = kim_error_create_from_code (KIM_NO_CREDENTIALS_ECODE, 
                                               identity_string);
+        }    
+
+        kim_string_free (&identity_string);
+        kim_identity_free (&identity);
+    }
+        
+    if (!err) {
+        if (out_is_tgt) {
+            *out_is_tgt = dominant_is_tgt;
+        }
+        
+        if (out_state) {
+            *out_state = dominant_state;
+        }
+         
+        if (out_credential) {
+            *out_credential = dominant_credential;
+            dominant_credential = NULL;  /* take ownership */
+        }
+    }
+    
+    kim_credential_free (&dominant_credential);
+    kim_credential_iterator_free (&iterator);
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
+                                           kim_credential *out_credential)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_boolean is_tgt = FALSE;
+    kim_credential_state state = kim_credentials_state_valid;
+    kim_credential credential = NULL;
+    
+    if (!err && !in_ccache     ) { err = param_error (1, "in_ccache", "NULL"); }
+    if (!err && !out_credential) { err = param_error (2, "out_credential", "NULL"); }
+    
+    if (!err) {
+        err = kim_ccache_get_dominant_credential (in_ccache, 
+                                                  &state, &is_tgt, &credential);
+    }
+    
+    if (!err && state != kim_credentials_state_valid) {
+        kim_identity identity = NULL;
+        kim_string identity_string = NULL;
+        
+        err = kim_ccache_get_client_identity (in_ccache, &identity);
+        
+        if (!err) {
+            err = kim_identity_get_display_string (identity, 
+                                                   &identity_string);
+        }
+        
+        if (!err) {
+            if (state == kim_credentials_state_expired) {
+                err = kim_error_create_from_code (KIM_CREDENTIALS_EXPIRED_ECODE, 
+                                                  identity_string);
+                
+            } else if (state == kim_credentials_state_not_yet_valid ||
+                       state == kim_credentials_state_needs_validation) {
+                err = kim_error_create_from_code (KIM_NEEDS_VALIDATION_ECODE, 
+                                                  identity_string);
+                
+            } else if (state == kim_credentials_state_address_mismatch) {
+                err = kim_error_create_from_code (KIM_BAD_IP_ADDRESS_ECODE, 
+                                                  identity_string);                
+            } else {
+                /* just default to this */
+                err = kim_error_create_from_code (KIM_NEEDS_VALIDATION_ECODE, 
+                                                  identity_string);
+            }
         }
         
         kim_string_free (&identity_string);
@@ -736,14 +804,31 @@ kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
     }
     
     if (!err) {
-        *out_credential = valid_credential;
-        valid_credential = NULL;
+        *out_credential = credential;
+        credential = NULL;  /* take ownership */
     }
     
-    kim_credential_free (&valid_credential);
-    kim_credential_iterator_free (&iterator);
+    kim_credential_free (&credential);
     
     return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_ccache_get_state (kim_ccache            in_ccache,
+                                kim_credential_state *out_state)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
+    if (!err && !out_state) { err = param_error (2, "out_state", "NULL"); }
+    
+    if (!err) {
+        err = kim_ccache_get_dominant_credential (in_ccache, 
+                                                  out_state, NULL, NULL);
+    }
+    
+    return check_error (err);    
 }
 
 /* ------------------------------------------------------------------------ */
@@ -758,7 +843,8 @@ kim_error kim_ccache_get_start_time (kim_ccache  in_ccache,
     if (!err && !out_start_time) { err = param_error (2, "out_start_time", "NULL"); }
     
     if (!err) {
-        err = kim_ccache_get_valid_credential (in_ccache, &credential);
+        err = kim_ccache_get_dominant_credential (in_ccache, NULL, NULL, 
+                                                  &credential);
     }
     
     if (!err) {
@@ -782,7 +868,8 @@ kim_error kim_ccache_get_expiration_time (kim_ccache  in_ccache,
     if (!err && !out_expiration_time) { err = param_error (2, "out_expiration_time", "NULL"); }
     
     if (!err) {
-        err = kim_ccache_get_valid_credential (in_ccache, &credential);
+        err = kim_ccache_get_dominant_credential (in_ccache, NULL, NULL, 
+                                                  &credential);
     }
     
     if (!err) {
@@ -807,7 +894,8 @@ kim_error kim_ccache_get_renewal_expiration_time (kim_ccache  in_ccache,
     if (!err && !out_renewal_expiration_time) { err = param_error (2, "out_renewal_expiration_time", "NULL"); }
     
     if (!err) {
-        err = kim_ccache_get_valid_credential (in_ccache, &credential);
+        err = kim_ccache_get_dominant_credential (in_ccache, NULL, NULL, 
+                                                  &credential);
     }
     
     if (!err) {

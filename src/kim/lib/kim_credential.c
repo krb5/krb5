@@ -204,6 +204,8 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         credential = NULL;
     }
     
+    kim_credential_free (&credential);
+    
     return check_error (err);
 }
 

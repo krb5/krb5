@@ -428,7 +428,7 @@ kim_error kim_ccache_get_type (kim_ccache  in_ccache,
  * \brief Get the type and name for a ccache in display format.
  */
 kim_error kim_ccache_get_display_name (kim_ccache  in_ccache,
-                                         kim_string *out_display_name);
+                                       kim_string *out_display_name);
 
 /*!
  * \param in_ccache            a ccache object. 
@@ -438,7 +438,7 @@ kim_error kim_ccache_get_display_name (kim_ccache  in_ccache,
  * \brief Get the client identity for a ccache.
  */
 kim_error kim_ccache_get_client_identity (kim_ccache    in_ccache,
-                                            kim_identity *out_client_identity);
+                                          kim_identity *out_client_identity);
 
 /*!
  * \param in_ccache       a ccache object. 
@@ -447,14 +447,28 @@ kim_error kim_ccache_get_client_identity (kim_ccache    in_ccache,
  *                        if you only want return value, not the actual credential.
  * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
  * \brief Get the first valid credential in a ccache.
- * \note This function prefers TGT credentials.  If there are any non-valid TGTs
+ * \note This function prefers valid TGT credentials.  If there are only non-valid TGTs
  *       in the ccache, it will always return an error.  However, if there are no 
  *       TGTs at all, it will return the first valid non-TGT credential. If you only want 
  *       TGTs, use kim_credential_is_tgt() to verify that \a out_credential is a tgt.
  */
 kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
-                                             kim_credential *out_credential);
+                                           kim_credential *out_credential);
 
+/*!
+ * \param in_ccache     a ccache object.
+ * \param out_state     on exit, the state of the credentials in \a in_ccache.  
+ *                      See #kim_credential_state_enum for the possible values
+ *                      of \a out_state.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \brief Check the state of the credentials in a ccache (valid, expired, postdated, etc).
+ * \note This function prefers TGT credentials.  If there are any TGTs in the 
+ *       ccache, it will always return their state.  However, if there are no 
+ *       TGTs at all, it will return the state of the first non-TGT credential.
+ */
+kim_error kim_ccache_get_state (kim_ccache            in_ccache,
+                                kim_credential_state *out_state);
+    
 /*!
  * \param in_ccache      a ccache object. 
  * \param out_start_time on exit, the time when the credentials in \a in_ccache
@@ -463,7 +477,7 @@ kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
  * \brief Get the time when the credentials in the ccache become valid.
  */
 kim_error kim_ccache_get_start_time (kim_ccache  in_ccache,
-                                       kim_time   *out_start_time);
+                                     kim_time   *out_start_time);
 
 /*!
  * \param in_ccache           a ccache object. 
@@ -473,7 +487,7 @@ kim_error kim_ccache_get_start_time (kim_ccache  in_ccache,
  * \brief Get the time when the credentials in the ccache will expire.
  */
 kim_error kim_ccache_get_expiration_time (kim_ccache  in_ccache,
-                                            kim_time   *out_expiration_time);
+                                          kim_time   *out_expiration_time);
 
 /*!
  * \param in_ccache                   a ccache object. 
@@ -483,7 +497,7 @@ kim_error kim_ccache_get_expiration_time (kim_ccache  in_ccache,
  * \brief Get the time when the credentials in the ccache will no longer be renewable.
  */
 kim_error kim_ccache_get_renewal_expiration_time (kim_ccache  in_ccache,
-                                                    kim_time   *out_renewal_expiration_time);
+                                                  kim_time   *out_renewal_expiration_time);
 
 /*!
  * \param io_ccache a ccache object which will be set to the default ccache. 

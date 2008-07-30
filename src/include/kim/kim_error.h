@@ -107,9 +107,12 @@ kim_string kim_error_get_display_string (kim_error in_error);
 
 /*!
  * \param io_error the error object to be freed.  Set to NULL on exit.
+ * \return a machine-readable error code describing the error represented 
+ *         by \a io_error.  This is the same code returned by 
+ *         #kim_error_get_code.
  * \brief Free memory associated with an error.
  */
-void kim_error_free (kim_error *io_error);
+kim_error_code kim_error_free (kim_error *io_error);
 
 /*!@}*/
 

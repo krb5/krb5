@@ -246,15 +246,21 @@ kim_string kim_error_get_display_string (kim_error in_error)
 
 /* ------------------------------------------------------------------------ */
 
-void kim_error_free (kim_error *io_error)
+kim_error_code kim_error_free (kim_error *io_error)
 {
+    kim_error_code code = 0;
+    
     if (io_error && *io_error) {
+        code = (*io_error)->code;
+        
         if (kim_error_is_builtin (*io_error)) {
             kim_string_free (&(*io_error)->message);
             free (*io_error);
             *io_error = KIM_NO_ERROR;
         }
     }
+    
+    return code;
 }
 
 #pragma mark -- Debugging Functions --

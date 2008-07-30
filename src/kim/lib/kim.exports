@@ -138,6 +138,7 @@ kim_ccache_get_type
 kim_ccache_get_display_name
 kim_ccache_get_client_identity
 kim_ccache_get_valid_credential
+kim_ccache_get_state
 kim_ccache_get_start_time
 kim_ccache_get_expiration_time
 kim_ccache_get_renewal_expiration_time
