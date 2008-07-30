@@ -77,7 +77,6 @@ typedef struct _osa_policy_ent_t {
     uint32_t	policy_refcnt;
 } osa_policy_ent_rec, *osa_policy_ent_t;
 
-typedef	void	(*osa_adb_iter_princ_func) (void *, osa_princ_ent_t);
 typedef	void	(*osa_adb_iter_policy_func) (void *, osa_policy_ent_t);
   
 
@@ -115,35 +114,21 @@ osa_adb_ret_t	osa_adb_close_and_unlock(osa_adb_princ_t db);
 
 osa_adb_ret_t	osa_adb_create_policy_db(kadm5_config_params *params);
 osa_adb_ret_t	osa_adb_destroy_policy_db(kadm5_config_params *params);
-osa_adb_ret_t	osa_adb_open_princ(osa_adb_princ_t *db, char *filename);
 osa_adb_ret_t	osa_adb_open_policy(osa_adb_policy_t *db,
 				    kadm5_config_params *rparams);
-osa_adb_ret_t	osa_adb_close_princ(osa_adb_princ_t db);
 osa_adb_ret_t	osa_adb_close_policy(osa_adb_policy_t db);
-osa_adb_ret_t	osa_adb_create_princ(osa_adb_princ_t db,
-				 osa_princ_ent_t entry);
 osa_adb_ret_t	osa_adb_create_policy(osa_adb_policy_t db,
 				      osa_policy_ent_t entry);
-osa_adb_ret_t	osa_adb_destroy_princ(osa_adb_princ_t db,
-				      kadm5_princ_t name);
 osa_adb_ret_t	osa_adb_destroy_policy(osa_adb_policy_t db,
 				       kadm5_policy_t name);
-osa_adb_ret_t	osa_adb_get_princ(osa_adb_princ_t db,
-				  kadm5_princ_t name,
-				  osa_princ_ent_t *entry);
 osa_adb_ret_t	osa_adb_get_policy(osa_adb_policy_t db,
 				   kadm5_policy_t name,
 				   osa_policy_ent_t *entry);
-osa_adb_ret_t	osa_adb_put_princ(osa_adb_princ_t db,
-				  osa_princ_ent_t entry);
 osa_adb_ret_t	osa_adb_put_policy(osa_adb_policy_t db,
 				   osa_policy_ent_t entry);
 osa_adb_ret_t	osa_adb_iter_policy(osa_adb_policy_t db,
 				    osa_adb_iter_policy_func func,
 				    void * data);
-osa_adb_ret_t	osa_adb_iter_princ(osa_adb_princ_t db,
-				       osa_adb_iter_princ_func func,
-				       void *data);
 void		osa_free_policy_ent(osa_policy_ent_t val);
 void		osa_free_princ_ent(osa_princ_ent_t val);
 #endif /* __ADB_H__ */
