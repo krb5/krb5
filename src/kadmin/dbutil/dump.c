@@ -81,8 +81,6 @@ static krb5_error_code dump_k5beta6_iterator (krb5_pointer,
 static krb5_error_code dump_k5beta6_iterator_ext (krb5_pointer,
 						  krb5_db_entry *,
 						  int);
-static krb5_error_code dump_iprop_iterator (krb5_pointer,
-					    krb5_db_entry *);
 static krb5_error_code dump_k5beta7_princ (krb5_pointer,
 					   krb5_db_entry *);
 static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
@@ -90,8 +88,6 @@ static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
 					       int);
 static krb5_error_code dump_k5beta7_princ_withpolicy
 			(krb5_pointer, krb5_db_entry *);
-static krb5_error_code dump_iprop_princ (krb5_pointer,
-					 krb5_db_entry *);
 static krb5_error_code dump_ov_princ (krb5_pointer,
 				      krb5_db_entry *);
 static void dump_k5beta7_policy (void *, osa_policy_ent_t);
@@ -152,7 +148,7 @@ dump_version iprop_version = {
      "iprop",
      0,
      0,
-     dump_iprop_princ,
+     dump_k5beta7_princ_withpolicy,
      dump_k5beta7_policy,
      process_k5beta7_record,
 };
@@ -844,17 +840,6 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 }
 
 /*
- * dump_iprop_iterator()	- Output a dump record in iprop format.
- */
-static krb5_error_code
-dump_iprop_iterator(ptr, entry)
-    krb5_pointer	ptr;
-    krb5_db_entry	*entry;
-{
-    return dump_k5beta6_iterator_ext(ptr, entry, 1);
-}
-
-/*
  * dump_k5beta7_iterator()	- Output a dump record in krb5b7 format.
  */
 static krb5_error_code
@@ -914,51 +899,6 @@ dump_k5beta7_princ_withpolicy(ptr, entry)
     krb5_db_entry	*entry;
 {
     return dump_k5beta7_princ_ext(ptr, entry, 1);
-}
-
-/*
- * dump_iprop_princ()	- Output a dump record in iprop format.
- * This was created in order to dump more data, such as kadm5 tl
- */
-static krb5_error_code
-dump_iprop_princ(ptr, entry)
-    krb5_pointer	ptr;
-    krb5_db_entry	*entry;
-{
-     krb5_error_code retval;
-     struct dump_args *arg;
-     char *name;
-     int tmp_nnames;
-
-     /* Initialize */
-     arg = (struct dump_args *) ptr;
-     name = (char *) NULL;
-
-     /*
-      * Flatten the principal name.
-      */
-     if ((retval = krb5_unparse_name(arg->kcontext,
-				     entry->princ,
-				     &name))) {
-		fprintf(stderr, _(pname_unp_err),
-		  arg->programname, error_message(retval));
-	  return(retval);
-     }
-     /*
-      * If we don't have any match strings, or if our name matches, then
-      * proceed with the dump, otherwise, just forget about it.
-      */
-     if (!arg->nnames || name_matches(name, arg)) {
-	  fprintf(arg->ofile, "princ\t");
-	  
-	  /* save the callee from matching the name again */
-	  tmp_nnames = arg->nnames;
-	  arg->nnames = 0;
-	  retval = dump_iprop_iterator(ptr, entry);
-	  arg->nnames = tmp_nnames;
-     }
-     free(name);
-	return (retval);
 }
 
 void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
