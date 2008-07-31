@@ -10,6 +10,14 @@ for the kprop.  If the connection from the master never comes in for
 some reason, the slave side just blocks forever, and never resumes
 incremental propagation.
 
+The protocol does not currently pass policy database changes; this was
+an intentional decision on Sun's part.  The policy database is only
+relevant to the master KDC, and is usually fairly static (aside from
+refcount updates), but not propagating it does mean that a slave
+maintained via iprop can't simply be promoted to a master in disaster
+recovery or other cases without doing a full propagation or restoring
+a database from backups.
+
 Shawn had a good suggestion after I started the integration work, and
 which I haven't had a chance to implement: Make the update-log code
 fit in as a sort of pseudo-database layer via the DAL, being called
