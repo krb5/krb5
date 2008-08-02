@@ -60,14 +60,11 @@ mit_des_cbc_cksum(const krb5_octet *in, krb5_octet *out,
 		 * forward.  Otherwise we have to fart around.
 		 */
 		if (len >= 8) {
-			left  ^= ((*ip++) & FF_UINT32) << 24;
-			left  ^= ((*ip++) & FF_UINT32) << 16;
-			left  ^= ((*ip++) & FF_UINT32) <<  8;
-			left  ^=  (*ip++) & FF_UINT32;
-			right ^= ((*ip++) & FF_UINT32) << 24;
-			right ^= ((*ip++) & FF_UINT32) << 16;
-			right ^= ((*ip++) & FF_UINT32) <<  8;
-			right ^=  (*ip++) & FF_UINT32;
+			unsigned DES_INT32 temp;
+			GET_HALF_BLOCK(temp, ip);
+			left  ^= temp;
+			GET_HALF_BLOCK(temp, ip);
+			right ^= temp;
 			len -= 8;
 		} else {
 			/*

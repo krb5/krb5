@@ -84,14 +84,11 @@ krb5int_des3_cbc_encrypt(const mit_des_cblock *in,
 	 * forward.  Otherwise we have to fart around.
 	 */
 	if (length >= 8) {
-	    left  ^= ((*ip++) & FF_UINT32) << 24;
-	    left  ^= ((*ip++) & FF_UINT32) << 16;
-	    left  ^= ((*ip++) & FF_UINT32) <<  8;
-	    left  ^=  (*ip++) & FF_UINT32;
-	    right ^= ((*ip++) & FF_UINT32) << 24;
-	    right ^= ((*ip++) & FF_UINT32) << 16;
-	    right ^= ((*ip++) & FF_UINT32) <<  8;
-	    right ^=  (*ip++) & FF_UINT32;
+	    unsigned DES_INT32 temp;
+	    GET_HALF_BLOCK(temp, ip);
+	    left  ^= temp;
+	    GET_HALF_BLOCK(temp, ip);
+	    right ^= temp;
 	    length -= 8;
 	} else {
 	    /*
