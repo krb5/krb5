@@ -198,8 +198,9 @@ static krb5_error_code krb5_ktfileint_find_slot
  * initialized with file keytab routines.
  */
 
-static krb5_error_code KRB5_CALLCONV 
-krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
+static krb5_error_code
+ktfile_common_resolve(krb5_context context, const char *name,
+		      krb5_keytab *id, const struct _krb5_kt_ops *ops)
 {
     krb5_ktfile_data *data;
     krb5_error_code err;
@@ -207,7 +208,7 @@ krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
     if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
 	return(ENOMEM);
     
-    (*id)->ops = &krb5_ktf_ops;
+    (*id)->ops = ops;
     if ((data = (krb5_ktfile_data *)malloc(sizeof(krb5_ktfile_data))) == NULL) {
 	krb5_xfree(*id);
 	return(ENOMEM);
@@ -235,6 +236,12 @@ krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
     (*id)->data = (krb5_pointer)data;
     (*id)->magic = KV5M_KEYTAB;
     return(0);
+}
+
+static krb5_error_code KRB5_CALLCONV 
+krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
+{
+    return ktfile_common_resolve(context, name, id, &krb5_ktf_writable_ops);
 }
 
 
@@ -835,40 +842,7 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
 static krb5_error_code KRB5_CALLCONV
 krb5_ktfile_wresolve(krb5_context context, const char *name, krb5_keytab *id)
 {
-    krb5_ktfile_data *data;
-    krb5_error_code err;
-
-    if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
-	return(ENOMEM);
-    
-    (*id)->ops = &krb5_ktf_writable_ops;
-    if ((data = (krb5_ktfile_data *)malloc(sizeof(krb5_ktfile_data))) == NULL) {
-	krb5_xfree(*id);
-	return(ENOMEM);
-    }
-
-    err = k5_mutex_init(&data->lock);
-    if (err) {
-	krb5_xfree(data);
-	krb5_xfree(*id);
-	return err;
-    }
-
-    if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL) {
-	k5_mutex_destroy(&data->lock);
-	krb5_xfree(data);
-	krb5_xfree(*id);
-	return(ENOMEM);
-    }
-
-    (void) strcpy(data->name, name);
-    data->openf = 0;
-    data->version = 0;
-    data->iter_count = 0;
-
-    (*id)->data = (krb5_pointer)data;
-    (*id)->magic = KV5M_KEYTAB;
-    return(0);
+    return ktfile_common_resolve(context, name, id, &krb5_ktf_writable_ops);
 }
 
 
