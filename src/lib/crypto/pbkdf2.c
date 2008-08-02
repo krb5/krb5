@@ -93,10 +93,7 @@ F(char *output, char *u_tmp1, char *u_tmp2,
 #endif
 
     /* Compute U_1.  */
-    ibytes[3] = i & 0xff;
-    ibytes[2] = (i >> 8) & 0xff;
-    ibytes[1] = (i >> 16) & 0xff;
-    ibytes[0] = (i >> 24) & 0xff;
+    store_32_be(i, ibytes);
 
     tlen = salt->length;
     memcpy(u_tmp2, salt->data, tlen);

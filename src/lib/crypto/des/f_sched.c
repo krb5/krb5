@@ -242,10 +242,8 @@ mit_des_make_key_sched(mit_des_cblock key, mit_des_key_schedule schedule)
 		 * the right, while D0 gets 16 from the left and 12 from the
 		 * right.  The code knows which bits go where.
 		 */
-		tmp = ((unsigned DES_INT32)(*(k)++)) << 24;
-		tmp |= ((unsigned DES_INT32)(*(k)++)) << 16;
-		tmp |= ((unsigned DES_INT32)(*(k)++)) << 8;
-		tmp |= (unsigned DES_INT32)(*(k)++);		/* left part of key */
+		tmp = load_32_be(k), k += 4;
+
 		c =  PC1_CL[(tmp >> 29) & 0x7]
 		  | (PC1_CL[(tmp >> 21) & 0x7] << 1)
 		  | (PC1_CL[(tmp >> 13) & 0x7] << 2)
@@ -255,10 +253,8 @@ mit_des_make_key_sched(mit_des_cblock key, mit_des_key_schedule schedule)
 		  | (PC1_DL[(tmp >>  9) & 0xf] << 2)
 		  | (PC1_DL[(tmp >>  1) & 0xf] << 3);
 
-		tmp = ((unsigned DES_INT32)(*(k)++)) << 24;
-		tmp |= ((unsigned DES_INT32)(*(k)++)) << 16;
-		tmp |= ((unsigned DES_INT32)(*(k)++)) << 8;
-		tmp |= (unsigned DES_INT32)(*(k)++);		/* right part of key */
+		tmp = load_32_be(k), k += 4;
+
 		c |= PC1_CR[(tmp >> 28) & 0xf]
 		  | (PC1_CR[(tmp >> 20) & 0xf] << 1)
 		  | (PC1_CR[(tmp >> 12) & 0xf] << 2)

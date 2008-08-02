@@ -140,16 +140,10 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
   ms_usage=krb5int_arcfour_translate_usage(usage);
   if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
     strncpy(salt.data, l40, salt.length);
-    salt.data[10]=ms_usage & 0xff;
-    salt.data[11]=(ms_usage >> 8) & 0xff;
-    salt.data[12]=(ms_usage >> 16) & 0xff;
-    salt.data[13]=(ms_usage >> 24) & 0xff;
+    store_32_le(ms_usage, salt.data+10);
   } else {
     salt.length=4;
-    salt.data[0]=ms_usage & 0xff;
-    salt.data[1]=(ms_usage >> 8) & 0xff;
-    salt.data[2]=(ms_usage >> 16) & 0xff;
-    salt.data[3]=(ms_usage >> 24) & 0xff;
+    store_32_le(ms_usage, salt.data);
   }
   krb5_hmac(hash, key, 1, &salt, &d1);
 

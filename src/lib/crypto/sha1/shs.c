@@ -286,10 +286,8 @@ void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
 		count = 0;
 		break;		/* out of while loop */
 	    }
-	    *lp = (SHS_LONG) *buffer++ << 24;
-	    *lp |= (SHS_LONG) *buffer++ << 16;
-	    *lp |= (SHS_LONG) *buffer++ << 8;
-	    *lp++ |= (SHS_LONG) *buffer++;
+	    *lp++ = load_32_be(buffer);
+	    buffer += 4;
 	    count -= 4;
 	}
 	if (canfill) {
@@ -301,10 +299,8 @@ void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
     while (count >= SHS_DATASIZE) {
 	lp = shsInfo->data;
 	while (lp < shsInfo->data + 16) {
-	    *lp = ((SHS_LONG) *buffer++) << 24;
-	    *lp |= ((SHS_LONG) *buffer++) << 16;
-	    *lp |= ((SHS_LONG) *buffer++) << 8;
-	    *lp++ |= (SHS_LONG) *buffer++;
+	    *lp++ = load_32_be(buffer);
+	    buffer += 4;
 	}
 	SHSTransform(shsInfo->digest, shsInfo->data);
 	count -= SHS_DATASIZE;
@@ -313,10 +309,8 @@ void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
     if (count > 0) {
 	lp = shsInfo->data;
 	while (count > 4) {
-	    *lp = ((SHS_LONG) *buffer++) << 24;
-	    *lp |= ((SHS_LONG) *buffer++) << 16;
-	    *lp |= ((SHS_LONG) *buffer++) << 8;
-	    *lp++ |= (SHS_LONG) *buffer++;
+	    *lp++ = load_32_be(buffer);
+	    buffer += 4;
 	    count -= 4;
 	}
 	*lp = 0;
