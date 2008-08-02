@@ -79,16 +79,14 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 
 	/* Note: we assume the OID will be less than 128 bytes... */
 	*cp++ = 0x04; *cp++ = 0x01;
-	*cp++ = (gss_mech_krb5->length+2) >> 8;
-	*cp++ = (gss_mech_krb5->length+2) & 0xFF;
+	store_16_be(gss_mech_krb5->length+2, cp);
+	cp += 2;
 	*cp++ = 0x06;
 	*cp++ = (gss_mech_krb5->length) & 0xFF;
 	memcpy(cp, gss_mech_krb5->elements, gss_mech_krb5->length);
 	cp += gss_mech_krb5->length;
-	*cp++ = length >> 24;
-	*cp++ = length >> 16;
-	*cp++ = length >> 8;
-	*cp++ = length & 0xFF;
+	store_32_be(length, cp);
+	cp += 4;
 	memcpy(cp, str, length);
 
 	free(str);

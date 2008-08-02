@@ -286,10 +286,8 @@ importExportName(minor, unionName)
 	return (GSS_S_DEFECTIVE_TOKEN);
 
     /* next 4 bytes in the name are the name length */
-    nameLen = (*buf++) << 24;
-    nameLen |= (*buf++ << 16);
-    nameLen |= (*buf++ << 8);
-    nameLen |= (*buf++);
+    nameLen = load_32_be(buf);
+    buf += 4;
 
     /*
      * we use < here because bad code in rpcsec_gss rounds up exported
