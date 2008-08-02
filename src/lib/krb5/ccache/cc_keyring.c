@@ -817,44 +817,6 @@ krb5_krcc_new_data(const char *name, key_serial_t ring,
     return 0;
 }
 
-/* Utility routine: Creates a random memory ccache name. 
- * This algorithm was selected because it creates readable 
- * random ccache names in a fixed size buffer.  */
-
-static krb5_error_code
-random_string (krb5_context context, char *string, krb5_int32 length)
-{
-    static const unsigned char charlist[] =
-	"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    krb5_error_code err = 0;
-    unsigned char *bytes = NULL;
-    size_t bytecount = length - 1;
-
-    if (!err) {
-	bytes = malloc (bytecount);
-	if (bytes == NULL) { err = ENOMEM; }
-    }
-
-    if (!err) {
-	krb5_data data;
-	data.length = bytecount;
-	data.data = (char *) bytes;
-	err = krb5_c_random_make_octets (context, &data);
-    }
-
-    if (!err) {
-	krb5_int32 i;
-	for (i = 0; i < bytecount; i++) {
-	    string [i] = charlist[bytes[i] % (sizeof (charlist) - 1)];
-	}
-	string[length - 1] = '\0';
-    }
-
-    if (bytes != NULL) { free (bytes); }
-
-    return err;
-}
-
 /*
  * Effects:
  * Creates a new keyring cred cache whose name is guaranteed to be
@@ -912,7 +874,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
      * a unique name, or we get an error.
      */
     while (1) {
-	random_string(context, uniquename, sizeof(uniquename));
+	krb5int_random_string(context, uniquename, sizeof(uniquename));
 	DEBUG_PRINT(("krb5_krcc_generate_new: searching for name '%s'\n",
 		     uniquename));
 	key = keyctl_search(ring_id, KRCC_KEY_TYPE_KEYRING, uniquename, 0);
@@ -1510,16 +1472,11 @@ krb5_krcc_parse_int32(krb5_context context, krb5_ccache id, krb5_int32 * i,
 {
     krb5_error_code kret;
     unsigned char buf[4];
-    krb5_int32 val;
 
     kret = krb5_krcc_parse(context, id, buf, 4, bc);
     if (kret)
 	return kret;
-    val = buf[0];
-    val = (val << 8) | buf[1];
-    val = (val << 8) | buf[2];
-    val = (val << 8) | buf[3];
-    *i = val;
+    *i = load_32_be(buf);
     return 0;
 }
 
@@ -1719,7 +1676,7 @@ krb5_krcc_parse_ui_2(krb5_context context, krb5_ccache id, krb5_ui_2 * i,
     kret = krb5_krcc_parse(context, id, buf, 2, bc);
     if (kret)
 	return kret;
-    *i = (buf[0] << 8) + buf[1];
+    *i = load_16_be(buf);
     return 0;
 }
 
@@ -1824,16 +1781,7 @@ static  krb5_error_code
 krb5_krcc_unparse_int32(krb5_context context, krb5_ccache id, krb5_int32 i,
 			krb5_krcc_bc * bc)
 {
-    unsigned char buf[4];
-
-    buf[3] = (unsigned char) (i & 0xFF);
-    i >>= 8;
-    buf[2] = (unsigned char) (i & 0xFF);
-    i >>= 8;
-    buf[1] = (unsigned char) (i & 0xFF);
-    i >>= 8;
-    buf[0] = (unsigned char) (i & 0xFF);
-    return krb5_krcc_unparse(context, id, buf, 4, bc);
+    return krb5_krcc_unparse_ui_4(context, id, (krb5_ui_4) i, bc);
 }
 
 static  krb5_error_code
@@ -1927,13 +1875,7 @@ krb5_krcc_unparse_ui_4(krb5_context context, krb5_ccache id, krb5_ui_4 i,
 {
     unsigned char buf[4];
 
-    buf[3] = (unsigned char) (i & 0xFF);
-    i >>= 8;
-    buf[2] = (unsigned char) (i & 0xFF);
-    i >>= 8;
-    buf[1] = (unsigned char) (i & 0xFF);
-    i >>= 8;
-    buf[0] = (unsigned char) (i & 0xFF);
+    store_32_be(i, buf);
     return krb5_krcc_unparse(context, id, buf, 4, bc);
 }
 
@@ -1943,9 +1885,7 @@ krb5_krcc_unparse_ui_2(krb5_context context, krb5_ccache id, krb5_int32 i,
 {
     unsigned char buf[2];
 
-    buf[1] = (unsigned char) (i & 0xFF);
-    i >>= 8;
-    buf[0] = (unsigned char) (i & 0xFF);
+    store_16_be(i, buf);
     return krb5_krcc_unparse(context, id, buf, 2, bc);
 }
 
