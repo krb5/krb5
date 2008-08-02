@@ -57,38 +57,82 @@
 #define REALM_SEP	'@'
 #define	COMPONENT_SEP	'/'
 
-krb5_error_code KRB5_CALLCONV
-krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, register char **name, unsigned int *size)
+static int
+component_length_quoted(const krb5_data *src)
 {
-	register char *cp, *q;
-	register int i,j;
+    const char *cp = src->data;
+    int length = src->length;
+    int j;
+    int size = length;
+
+    for (j = 0; j < length; j++,cp++)
+	if (*cp == REALM_SEP  || *cp == COMPONENT_SEP ||
+	    *cp == '\0' || *cp == '\\' || *cp == '\t' ||
+	    *cp == '\n' || *cp == '\b')
+	    size++;
+    return size;
+}
+
+static int
+copy_component_quoting(char *dest, const krb5_data *src)
+{
+    int j;
+    const char *cp = src->data;
+    char *q = dest;
+    int length = src->length;
+
+    for (j=0; j < length; j++,cp++) {
+	switch (*cp) {
+	case COMPONENT_SEP:
+	case REALM_SEP:
+	case '\\':
+	    *q++ = '\\';
+	    *q++ = *cp;
+	    break;
+	case '\t':
+	    *q++ = '\\';
+	    *q++ = 't';
+	    break;
+	case '\n':
+	    *q++ = '\\';
+	    *q++ = 'n';
+	    break;
+	case '\b':
+	    *q++ = '\\';
+	    *q++ = 'b';
+	    break;
+	case '\0':
+	    *q++ = '\\';
+	    *q++ = '0';
+	    break;
+	default:
+	    *q++ = *cp;
+	}
+    }
+    return q - dest;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal,
+		      char **name, unsigned int *size)
+{
+	char *cp, *q;
+	int i;
 	int	length;
 	krb5_int32 nelem;
-	register unsigned int totalsize = 0;
+	unsigned int totalsize = 0;
 
 	if (!principal || !name)
 		return KRB5_PARSE_MALFORMED;
 
-	cp = krb5_princ_realm(context, principal)->data;
-	length = krb5_princ_realm(context, principal)->length;
-	totalsize += length;
-	for (j = 0; j < length; j++,cp++)
-		if (*cp == REALM_SEP  || *cp == COMPONENT_SEP ||
-		    *cp == '\0' || *cp == '\\' || *cp == '\t' ||
-		    *cp == '\n' || *cp == '\b')
-			totalsize++;
+	totalsize += component_length_quoted(krb5_princ_realm(context,
+							      principal));
 	totalsize++;		/* This is for the separator */
 
 	nelem = krb5_princ_size(context, principal);
 	for (i = 0; i < (int) nelem; i++) {
 		cp = krb5_princ_component(context, principal, i)->data;
-		length = krb5_princ_component(context, principal, i)->length;
-		totalsize += length;
-		for (j=0; j < length; j++,cp++)
-			if (*cp == REALM_SEP || *cp == COMPONENT_SEP ||
-			    *cp == '\0' || *cp == '\\' || *cp == '\t' ||
-			    *cp == '\n' || *cp == '\b')
-				totalsize++;
+		totalsize += component_length_quoted(krb5_princ_component(context, principal, i));
 		totalsize++;	/* This is for the separator */
 	}
 	if (nelem == 0)
@@ -120,71 +164,17 @@ krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, regi
 	for (i = 0; i < (int) nelem; i++) {
 		cp = krb5_princ_component(context, principal, i)->data;
 		length = krb5_princ_component(context, principal, i)->length;
-		for (j=0; j < length; j++,cp++) {
-		    switch (*cp) {
-		    case COMPONENT_SEP:
-		    case REALM_SEP:
-		    case '\\':
-			*q++ = '\\';
-			*q++ = *cp;
-			break;
-		    case '\t':
-			*q++ = '\\';
-			*q++ = 't';
-			break;
-		    case '\n':
-			*q++ = '\\';
-			*q++ = 'n';
-			break;
-		    case '\b':
-			*q++ = '\\';
-			*q++ = 'b';
-			break;
-		    case '\0':
-			*q++ = '\\';
-			*q++ = '0';
-			break;
-		    default:
-			*q++ = *cp;
-		    }
-		}
+		q += copy_component_quoting(q,
+					    krb5_princ_component(context,
+								 principal,
+								 i));
 		*q++ = COMPONENT_SEP;
 	}
 
 	if (i > 0)
 	    q--;		/* Back up last component separator */
 	*q++ = REALM_SEP;
-	
-	cp = krb5_princ_realm(context, principal)->data;
-	length = krb5_princ_realm(context, principal)->length;
-	for (j=0; j < length; j++,cp++) {
-		switch (*cp) {
-		case COMPONENT_SEP:
-		case REALM_SEP:
-		case '\\':
-			*q++ = '\\';
-			*q++ = *cp;
-			break;
-		case '\t':
-			*q++ = '\\';
-			*q++ = 't';
-			break;
-		case '\n':
-			*q++ = '\\';
-			*q++ = 'n';
-			break;
-		case '\b':
-			*q++ = '\\';
-			*q++ = 'b';
-			break;
-		case '\0':
-			*q++ = '\\';
-			*q++ = '0';
-			break;
-		default:
-			*q++ = *cp;
-		}
-	}
+	q += copy_component_quoting(q, krb5_princ_realm(context, principal));
 	*q++ = '\0';
 	
     return 0;
