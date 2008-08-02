@@ -181,10 +181,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_ser_pack_int32(krb5_int32 iarg, krb5_octet **bufp, size_t *remainp)
 {
     if (*remainp >= sizeof(krb5_int32)) {
-	(*bufp)[0] = (krb5_octet) ((iarg >> 24) & 0xff);
-	(*bufp)[1] = (krb5_octet) ((iarg >> 16) & 0xff);
-	(*bufp)[2] = (krb5_octet) ((iarg >> 8) & 0xff);
-	(*bufp)[3] = (krb5_octet) (iarg & 0xff);
+	store_32_be(iarg, *bufp);
 	*bufp += sizeof(krb5_int32);
 	*remainp -= sizeof(krb5_int32);
 	return(0);
@@ -233,10 +230,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_ser_unpack_int32(krb5_int32 *intp, krb5_octet **bufp, size_t *remainp)
 {
     if (*remainp >= sizeof(krb5_int32)) {
-	*intp = (((krb5_int32) ((unsigned char) (*bufp)[0]) << 24) |
-		 ((krb5_int32) ((unsigned char) (*bufp)[1]) << 16) |
-		 ((krb5_int32) ((unsigned char) (*bufp)[2]) << 8) |
-		 ((krb5_int32) ((unsigned char) (*bufp)[3])));
+	*intp = load_32_be(*bufp);
 	*bufp += sizeof(krb5_int32);
 	*remainp -= sizeof(krb5_int32);
 	return(0);

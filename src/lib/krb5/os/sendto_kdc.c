@@ -587,11 +587,7 @@ set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
 
     if (!state->is_udp) {
 
-	state->x.out.msg_len_buf[0] = (message->length >> 24) & 0xff;
-	state->x.out.msg_len_buf[1] = (message->length >> 16) & 0xff;
-	state->x.out.msg_len_buf[2] = (message->length >>  8) & 0xff;
-	state->x.out.msg_len_buf[3] =  message->length        & 0xff;
-
+	store_32_be(message->length, state->x.out.msg_len_buf);
 	SG_SET(&state->x.out.sgbuf[0], state->x.out.msg_len_buf, 4);
 	SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
    	state->x.out.sg_count = 2;
