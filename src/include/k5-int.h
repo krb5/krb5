@@ -1762,6 +1762,8 @@ krb5_error_code
 krb5int_generate_and_save_subkey (krb5_context, krb5_auth_context,
 				  krb5_keyblock * /* Old keyblock, not new!  */);
 
+krb5_error_code krb5int_random_string (krb5_context, char *, unsigned int);
+
 /* set and change password helpers */
 
 krb5_error_code krb5int_mk_chpw_req

@@ -431,8 +431,6 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     return 0;
 }
 
-static krb5_error_code random_string (krb5_context, char *, unsigned int);
- 
 /*
  * Effects:
  * Creates a new file cred cache whose name is guaranteed to be
@@ -473,7 +471,7 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
     while (1) {
         krb5_mcc_list_node *ptr;
 
-        random_string (context, uniquename, sizeof (uniquename));
+        krb5int_random_string (context, uniquename, sizeof (uniquename));
         
 	for (ptr = mcc_head; ptr; ptr=ptr->next) {
             if (!strcmp(ptr->cache->name, uniquename)) {
@@ -500,8 +498,8 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
  * This algorithm was selected because it creates readable 
  * random ccache names in a fixed size buffer.  */
 
-static krb5_error_code
-random_string (krb5_context context, char *string, unsigned int length)
+krb5_error_code
+krb5int_random_string (krb5_context context, char *string, unsigned int length)
 {
     static const unsigned char charlist[] =
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
