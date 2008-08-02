@@ -121,6 +121,43 @@ krb5_rc_io_mkstemp(krb5_context context, krb5_rc_iostuff *d, char *dir)
     return 0;
 }
 
+#if 0
+static krb5_error_code rc_map_errno (int) __attribute__((cold));
+#endif
+
+static krb5_error_code
+rc_map_errno (krb5_context context, int e, const char *fn,
+	      const char *operation)
+{
+    switch (e) {
+    case EFBIG:
+#ifdef EDQUOT
+    case EDQUOT:
+#endif
+    case ENOSPC:
+	return KRB5_RC_IO_SPACE;
+
+    case EIO:
+	return KRB5_RC_IO_IO;
+
+    case EPERM:
+    case EACCES:
+    case EROFS:
+    case EEXIST:
+	krb5_set_error_message(context, KRB5_RC_IO_PERM,
+			       "Cannot %s replay cache file %s: %s",
+			       operation, fn, strerror(e));
+	return KRB5_RC_IO_PERM;
+
+    default:
+	krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
+			       "Cannot %s replay cache: %s",
+			       operation, strerror(e));
+	return KRB5_RC_IO_UNKNOWN;
+    }
+}
+
+
 krb5_error_code
 krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 {
@@ -153,37 +190,10 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	}
     }
     if (d->fd == -1) {
-	switch(errno) {
-	case EFBIG:
-#ifdef EDQUOT
-	case EDQUOT:
-#endif
-	case ENOSPC:
-	    retval = KRB5_RC_IO_SPACE;
-	    goto cleanup;
-
-	case EIO:
-	    retval = KRB5_RC_IO_IO;
-	    goto cleanup;
-
-	case EPERM:
-	case EACCES:
-	case EROFS:
-	case EEXIST:
-	    retval = KRB5_RC_IO_PERM;
-	    krb5_set_error_message(context, retval,
-				   "Cannot create replay cache file %s: %s",
-				   d->fn, strerror(errno));
+	retval = rc_map_errno(context, errno, d->fn, "create");
+	if (retval == KRB5_RC_IO_PERM)
 	    do_not_unlink = 1;
-	    goto cleanup;
-
-	default:
-	    retval = KRB5_RC_IO_UNKNOWN;
-	    krb5_set_error_message(context, retval,
-				   "Cannot create replay cache: %s",
-				   strerror(errno));
-	    goto cleanup;
-	}
+	goto cleanup;
     }
     set_cloexec_fd(d->fd);
     retval = krb5_rc_io_write(context, d, (krb5_pointer)&rc_vno,
@@ -251,36 +261,8 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
     }
 #endif
     if (d->fd == -1) {
-	switch(errno)
-	{
-	case EFBIG:
-#ifdef EDQUOT
-	case EDQUOT:
-#endif
-	case ENOSPC:
-	    retval = KRB5_RC_IO_SPACE;
-	    goto cleanup;
-
-	case EIO:
-	    retval = KRB5_RC_IO_IO;
-	    goto cleanup;
-
-	case EPERM:
-	case EACCES:
-	case EROFS:
-	    retval = KRB5_RC_IO_PERM;
-	    krb5_set_error_message (context, retval,
-				    "Cannot open replay cache %s: %s",
-				    d->fn, strerror(errno));
-	    goto cleanup;
-
-	default:
-	    retval = KRB5_RC_IO_UNKNOWN;
-	    krb5_set_error_message (context, retval,
-				    "Cannot open replay cache %s: %s",
-				    d->fn, strerror(errno));
-	    goto cleanup;
-	}
+	retval = rc_map_errno(context, errno, d->fn, "open");
+	goto cleanup;
     }
     set_cloexec_fd(d->fd);
 
