@@ -272,10 +272,7 @@ errcode_t profile_ser_size(const char *unused, profile_t profile,
 
 static void pack_int32(prof_int32 oval, unsigned char **bufpp, size_t *remainp)
 {
-    (*bufpp)[0] = (unsigned char) ((oval >> 24) & 0xff);
-    (*bufpp)[1] = (unsigned char) ((oval >> 16) & 0xff);
-    (*bufpp)[2] = (unsigned char) ((oval >> 8) & 0xff);
-    (*bufpp)[3] = (unsigned char) (oval & 0xff);
+    store_32_be(oval, *bufpp);
     *bufpp += sizeof(prof_int32);
     *remainp -= sizeof(prof_int32);
 }
@@ -325,10 +322,7 @@ static int unpack_int32(prof_int32 *intp, unsigned char **bufpp,
 			size_t *remainp)
 {
     if (*remainp >= sizeof(prof_int32)) {
-	*intp = (((prof_int32) (*bufpp)[0] << 24) |
-		 ((prof_int32) (*bufpp)[1] << 16) |
-		 ((prof_int32) (*bufpp)[2] << 8) |
-		 ((prof_int32) (*bufpp)[3]));
+	*intp = load_32_be(*bufpp);
 	*bufpp += sizeof(prof_int32);
 	*remainp -= sizeof(prof_int32);
 	return 0;
