@@ -1033,24 +1033,7 @@ krb5_fcc_store_data(krb5_context context, krb5_ccache id, krb5_data *data)
 static krb5_error_code
 krb5_fcc_store_int32(krb5_context context, krb5_ccache id, krb5_int32 i)
 {
-    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
-    unsigned char buf[4];
-
-    k5_assert_locked(&((krb5_fcc_data *) id->data)->lock);
-
-    if ((data->version == KRB5_FCC_FVNO_1) ||
-	(data->version == KRB5_FCC_FVNO_2)) 
-	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
-    else {
-        buf[3] = (unsigned char) (i & 0xFF);
-	i >>= 8;
-        buf[2] = (unsigned char) (i & 0xFF);
-	i >>= 8;
-        buf[1] = (unsigned char) (i & 0xFF);
-	i >>= 8;
-        buf[0] = (unsigned char) (i & 0xFF);
-	return krb5_fcc_write(context, id, buf, 4);
-    }
+    return krb5_fcc_store_ui_4(context, id, (krb5_ui_4) i);
 }
 
 static krb5_error_code
