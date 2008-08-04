@@ -126,3 +126,15 @@ it in debug mode ("-d").  You'll still lose all output from the
 invocation of kdb5_util dump and kprop run out of kadmind.
 
 Other man page updates needed: Anything with new -x options.
+
+Comments from lha:
+
+Verify both client and server are demanding privacy from RPC.
+
+Authorization code in check_iprop_rpcsec_auth is weird.  Check realm
+checking, is it trusting the client realm length?
+
+What will happen if my realm is named "A" and I can get a cross realm
+(though multihop) to ATHENA.MIT.EDU's iprop server?
+
+Why is the ACL not applied before we get to the functions themselves?
