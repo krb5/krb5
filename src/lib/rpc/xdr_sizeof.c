@@ -107,7 +107,7 @@ x_inline(xdrs, len)
 	}
 }
 
-static
+static int
 harmless()
 {
 	/* Always return FALSE/NULL, as the case may be */
