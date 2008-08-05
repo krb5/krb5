@@ -322,12 +322,14 @@ add_fd (struct socksetup *data, int sock, enum kdc_conn_type conntype,
     struct connection *newconn;
     void *tmp;
 
-    if (sock > FD_SETSIZE) {
+#ifndef _WIN32
+    if (sock >= FD_SETSIZE) {
 	data->retval = EMFILE;	/* XXX */
 	com_err(data->prog, 0,
 		"file descriptor number %d too high", sock);
 	return 0;
     }
+#endif
     newconn = malloc(sizeof(*newconn));
     if (newconn == 0) {
 	data->retval = ENOMEM;
@@ -420,12 +422,14 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
 	return -1;
     }
     set_cloexec_fd(sock);
-    if (sock > FD_SETSIZE) {
+#ifndef _WIN32
+    if (sock >= FD_SETSIZE) {
 	close(sock);
 	com_err(data->prog, 0, "TCP socket fd number %d (for %s) too high",
 		sock, paddr(addr));
 	return -1;
     }
+#endif
     if (setreuseaddr(sock, 1) < 0)
 	com_err(data->prog, errno,
 		"Cannot enable SO_REUSEADDR on fd %d", sock);
@@ -1246,10 +1250,12 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
     if (s < 0)
 	return;
     set_cloexec_fd(s);
-    if (s > FD_SETSIZE) {
+#ifndef _WIN32
+    if (s >= FD_SETSIZE) {
 	close(s);
 	return;
     }
+#endif
     setnbio(s), setnolinger(s), setkeepalive(s);
 
     sockdata.prog = prog;
