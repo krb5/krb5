@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
+#define THREAD_SUPPORT_IMPL
 #include "k5-thread.h"
 #include "k5-platform.h"
 #include "supp-int.h"

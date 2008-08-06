@@ -761,7 +761,7 @@ extern int  KRB5_CALLCONV krb5int_mutex_unlock (k5_mutex_t *);
 
    For now, plugins should use the exported functions, and not the
    above macros, and use krb5int_mutex_alloc for allocations.  */
-#ifdef PLUGIN
+#if defined(PLUGIN) || (defined(CONFIG_SMALL) && !defined(THREAD_SUPPORT_IMPL))
 #undef k5_mutex_lock
 #define k5_mutex_lock krb5int_mutex_lock
 #undef k5_mutex_unlock
