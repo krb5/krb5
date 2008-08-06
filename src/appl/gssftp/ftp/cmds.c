@@ -1168,7 +1168,7 @@ void status(argc, argv)
 	if (!proxy) {
 		pswitch(1);
 		if (connected) putchar('\n');
-		cstatus(argc,argv);
+		cstatus();
 		if (connected) putchar('\n');
 		pswitch(0);
 	}
