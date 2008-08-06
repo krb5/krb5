@@ -538,7 +538,7 @@ int main(argc, argv)
 		int child_pid;
 
 		fd = accept(s, (struct sockaddr *) &from, &fromlen);
-		if (s < 0) {
+		if (fd < 0) {
 		    if (errno != EINTR)
 			syslog(LOG_ERR, "accept: %s", error_message(errno));
 		    continue;
