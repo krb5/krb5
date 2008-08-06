@@ -115,8 +115,10 @@ kadm5int_acl_get_line(fp, lnp)
     for (domore = 1; domore && !feof(fp); ) {
 	/* Copy in the line, with continuations */
 	for (i=0; ((i < sizeof acl_buf) && !feof(fp)); i++ ) {
-	    acl_buf[i] = fgetc(fp);
-	    if (acl_buf[i] == (char)EOF) {
+	    int byte;
+	    byte = fgetc(fp);
+	    acl_buf[i] = byte;
+	    if (byte == (char)EOF) {
 		if (i > 0 && acl_buf[i-1] == '\\')
 		    i--;
 		break;		/* it gets nulled-out below */
