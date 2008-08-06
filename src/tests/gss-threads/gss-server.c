@@ -20,7 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 /*
- * Copyright (C) 2004 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2004,2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -637,6 +637,7 @@ WaitAndIncrementThreadCounter(void)
     if (counter == max_threads) {
 	err = pthread_cond_wait(&counter_cond, &counter_mutex);
 	if (err) {
+	    pthread_mutex_unlock(&counter_mutex);
 	    perror("pthread_cond_wait");
 	    return 0;
 	}
