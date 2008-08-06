@@ -381,8 +381,10 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 						     dbprinc,
 						     &nentry);
 
-	    if (dbprinc)
+	    if (dbprinc) {
 		krb5_free_principal(context, dbprinc);
+		dbprinc = NULL;
+	    }
 
 	    if (retval)
 		goto cleanup;
