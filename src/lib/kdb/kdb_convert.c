@@ -625,18 +625,9 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 		   kdb_incr_update_t *updates,
 		   int nentries)
 {
-    int i, j, k, cnt, mod_time = 0, nattrs, nprincs;
-    krb5_principal mod_princ = NULL;
-    krb5_principal dbprinc;
-    char *dbprincstr = NULL;
-
+    int k;
     krb5_db_entry *ent;
     kdb_incr_update_t *upd;
-
-    krb5_tl_data *newtl = NULL;
-    krb5_error_code ret;
-    unsigned int more;
-    unsigned int prev_n_keys = 0;
 
     if ((updates == NULL) || (entries == NULL))
 	return (KRB5KRB_ERR_GENERIC);
@@ -645,7 +636,15 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
     upd = updates;
 
     for (k = 0; k < nentries; k++) {
-	cnt = nprincs = 0;
+	krb5_principal mod_princ = NULL;
+	int i, j, cnt = 0, mod_time = 0, nattrs, nprincs = 0;
+	krb5_principal dbprinc;
+	char *dbprincstr = NULL;
+
+	krb5_tl_data *newtl = NULL;
+	krb5_error_code ret;
+	unsigned int more;
+	unsigned int prev_n_keys = 0;
 
 	/*
 	 * If the ulog entry represents a DELETE update,
@@ -851,6 +850,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 	    ret = krb5_dbe_update_mod_princ_data(context, ent,
 						 mod_time, mod_princ);
 	    krb5_free_principal(context, mod_princ);
+	    mod_princ = NULL;
 	    if (ret)
 		return (ret);
 	}
