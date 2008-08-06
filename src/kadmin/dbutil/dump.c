@@ -2026,7 +2026,6 @@ process_k5beta7_policy(fname, kcontext, filep, verbose, linenop, pol_db)
     FILE		*filep;
     int			verbose;
     int			*linenop;
-    void *pol_db;
 {
     osa_policy_ent_rec rec;
     char namebuf[1024];
