@@ -189,6 +189,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      if (! (handle = malloc(sizeof(*handle)))) {
 	  return ENOMEM;
      }
+     memset(handle, 0, sizeof(*handle));
      if (! (handle->lhandle = malloc(sizeof(*handle)))) {
 	  free(handle);
 	  return ENOMEM;
@@ -200,6 +201,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      handle->clnt = 0;
      handle->cache_name = 0;
      handle->destroy_cache = 0;
+     handle->context = 0;
      *handle->lhandle = *handle;
      handle->lhandle->api_version = KADM5_API_VERSION_2;
      handle->lhandle->struct_version = KADM5_STRUCT_VERSION;
