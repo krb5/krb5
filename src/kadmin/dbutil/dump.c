@@ -2020,7 +2020,7 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
 }
 
 static int 
-process_k5beta7_policy(fname, kcontext, filep, verbose, linenop, pol_db)
+process_k5beta7_policy(fname, kcontext, filep, verbose, linenop)
     char		*fname;
     krb5_context	kcontext;
     FILE		*filep;
