@@ -363,6 +363,11 @@ chpwfail:
 
     rep->length = 6 + ap_rep.length + cipher.length;
     rep->data = (char *) malloc(rep->length);
+    if (rep->data == NULL) {
+	rep->length = 0;	/* checked by caller */
+	ret = ENOMEM;
+	goto bailout;
+    }
     ptr = rep->data;
 
     /* length */
