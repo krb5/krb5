@@ -143,8 +143,8 @@
 
    More to be added, perhaps.  */
 
-#define DEBUG_THREADS
-#define DEBUG_THREADS_LOC
+#undef DEBUG_THREADS
+#undef DEBUG_THREADS_LOC
 #undef DEBUG_THREADS_STATS
 
 #include <assert.h>
