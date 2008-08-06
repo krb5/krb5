@@ -1047,7 +1047,7 @@ krb5_db_put_principal(krb5_context kcontext,
     krb5_error_code status = 0;
     kdb5_dal_handle *dal_handle;
     char  **db_args = NULL;
-    kdb_incr_update_t *upd, *fupd;
+    kdb_incr_update_t *upd, *fupd = 0;
     char *princ_name = NULL;
     kdb_log_context *log_ctx;
     int i;
@@ -1101,7 +1101,7 @@ krb5_db_put_principal(krb5_context kcontext,
 	/*
 	 * We'll be sharing the same locks as db for logging
 	 */
-        if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
+        if (fupd) {
 		if ((status = krb5_unparse_name(kcontext, entries->princ,
 		    &princ_name)))
 			goto err_lock;
@@ -1111,15 +1111,15 @@ krb5_db_put_principal(krb5_context kcontext,
 
                 if (status = ulog_add_update(kcontext, upd))
 			goto err_lock;
+		upd++;
         }
-	upd++;
     }
 
     status = dal_handle->lib_handle->vftabl.db_put_principal(kcontext, entries,
 							     nentries,
 							     db_args);
     get_errmsg(kcontext, status);
-    if (status == 0 && log_ctx && log_ctx->iproprole == IPROP_MASTER) {
+    if (status == 0 && fupd) {
 	upd = fupd;
 	for (i = 0; i < *nentries; i++) {
 	    (void) ulog_finish_update(kcontext, upd);
