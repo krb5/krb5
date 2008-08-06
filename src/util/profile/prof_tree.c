@@ -32,8 +32,8 @@ struct profile_node {
 	char *name;
 	char *value;
 	int group_level;
-	int final:1;		/* Indicate don't search next file */
-	int deleted:1;
+	unsigned int final:1;		/* Indicate don't search next file */
+	unsigned int deleted:1;
 	struct profile_node *first_child;
 	struct profile_node *parent;
 	struct profile_node *next, *prev;
