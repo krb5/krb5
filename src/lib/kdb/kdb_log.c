@@ -590,7 +590,10 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
     }
 
     if (caller == FKPROPLOG) {
-	fstat(ulogfd, &st);
+	if (fstat(ulogfd, &st) < 0) {
+	    close(ulogfd);
+	    return errno;
+	}
 	ulog_filesize = st.st_size;
 
 	ulog = (kdb_hlog_t *)mmap(0, ulog_filesize,
@@ -607,6 +610,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
 	/*
 	 * Can't map update log file to memory
 	 */
+	close(ulogfd);
 	return (errno);
     }
 
