@@ -31,7 +31,7 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, enc)
 	des_cblock *ivec;
 	int enc;
 {
-	register unsigned DES_INT32 left, right;
+	unsigned DES_INT32 left, right;
 	const unsigned DES_INT32 *kp;
 	const unsigned char *ip;
 	unsigned char *op;
@@ -50,8 +50,8 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, enc)
 		   only case where these can be used uninitialized is
 		   to compute values that'll in turn be ignored
 		   because we won't go around the loop again.  */
-		register unsigned DES_INT32 plainl = 42;
-		register unsigned DES_INT32 plainr = 17;
+		unsigned DES_INT32 plainl = 42;
+		unsigned DES_INT32 plainr = 17;
 
 		/*
 		 * Initialize left and right with the contents of the initial
