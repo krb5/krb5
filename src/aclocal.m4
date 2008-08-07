@@ -1,5 +1,5 @@
 AC_PREREQ(2.52)
-AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
 Massachusetts Institute of Technology.
 ])
 dnl
@@ -610,11 +610,24 @@ if test "$GCC" = yes; then
     krb5_cv_prog_gnu_ld=yes
   fi
 fi])
+AC_ARG_WITH([size-optimizations],
+[  --with-size-optimizations enable a few optimizations to reduce code size
+                          possibly at some run-time cost],
+,
+withval=no)
+if test "$withval" = yes; then
+  AC_DEFINE(CONFIG_SMALL,1,[Define to reduce code size even if it means more cpu usage])
+fi
 # maybe add -Waggregate-return, or can we assume that actually works by now?
 # -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.
 extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wconversion -Wshadow"
 # -Wmissing-prototypes
 if test "$GCC" = yes ; then
+  # Putting this here means we get -Os after -O2, which works.
+  if test "$with_size_optimizations" = yes; then
+    AC_MSG_NOTICE(adding -Os optimization option)
+    CFLAGS="$CFLAGS -Os"
+  fi
   if test "x$krb5_ac_cflags_set" = xset ; then
     AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)
   else
@@ -629,7 +642,7 @@ if test "$GCC" = yes ; then
     fi
     if test "$ac_cv_cxx_compiler_gnu" = yes; then
       if test "x$krb5_ac_cxxflags_set" = xset ; then
-        AC_MSG_NOTICE(not adding extra g++ warnings because CXXFLAGS was sent)
+        AC_MSG_NOTICE(not adding extra g++ warnings because CXXFLAGS was set)
       else
         AC_MSG_NOTICE(adding extra warning flags for g++)
         CXXFLAGS="$CXXFLAGS $extra_gcc_warn_opts"
