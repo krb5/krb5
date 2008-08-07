@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/ser_eblk.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -192,9 +192,7 @@ krb5_encrypt_block_internalize(kcontext, argp, buffer, lenremain)
 	/* Get an encrypt_block */
 	if ((remain >= (3*sizeof(krb5_int32))) &&
 	    (encrypt_block = (krb5_encrypt_block *)
-	     malloc(sizeof(krb5_encrypt_block)))) {
-	    memset(encrypt_block, 0, sizeof(krb5_encrypt_block));
-
+	     calloc(1, sizeof(krb5_encrypt_block)))) {
 	    /* Get the enctype */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ktype = (krb5_enctype) ibuf;

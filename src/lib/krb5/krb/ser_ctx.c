@@ -343,10 +343,9 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 	return (EINVAL);
 
     /* Get memory for the context */
-    context = (krb5_context) malloc(sizeof(struct _krb5_context));
+    context = (krb5_context) calloc(1, sizeof(struct _krb5_context));
     if (!context)
 	return (ENOMEM);
-    memset(context, 0, sizeof(struct _krb5_context));
 
     /* Get the size of the default realm */
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
@@ -372,15 +371,13 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 	goto cleanup;
     
     context->in_tkt_ktype_count = (int) ibuf;
-    context->in_tkt_ktypes = (krb5_enctype *) malloc(sizeof(krb5_enctype) *
-				     (context->in_tkt_ktype_count+1));
+    context->in_tkt_ktypes = (krb5_enctype *) calloc(context->in_tkt_ktype_count+1,
+						     sizeof(krb5_enctype));
     if (!context->in_tkt_ktypes) {
 	kret = ENOMEM;
 	goto cleanup;
     }
-    memset(context->in_tkt_ktypes, 0, (sizeof(krb5_enctype) *
-				       (context->in_tkt_ktype_count + 1)));
-    
+
     for (i=0; i<context->in_tkt_ktype_count; i++) {
 	if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
 	    goto cleanup;
@@ -392,14 +389,12 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 	goto cleanup;
     
     context->tgs_ktype_count = (int) ibuf;
-    context->tgs_ktypes = (krb5_enctype *) malloc(sizeof(krb5_enctype) *
-				  (context->tgs_ktype_count+1));
+    context->tgs_ktypes = (krb5_enctype *) calloc(context->tgs_ktype_count+1,
+						  sizeof(krb5_enctype));
     if (!context->tgs_ktypes) {
 	kret = ENOMEM;
 	goto cleanup;
     }
-    memset(context->tgs_ktypes, 0, (sizeof(krb5_enctype) *
-				    (context->tgs_ktype_count + 1)));
     for (i=0; i<context->tgs_ktype_count; i++) {
 	if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
 	    goto cleanup;
@@ -576,9 +571,8 @@ krb5_oscontext_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet
 
 	/* Get memory for the context */
 	if ((os_ctx = (krb5_os_context) 
-	     malloc(sizeof(struct _krb5_os_context))) &&
+	     calloc(1, sizeof(struct _krb5_os_context))) &&
 	    (remain >= 4*sizeof(krb5_int32))) {
-	    memset(os_ctx, 0, sizeof(struct _krb5_os_context));
 	    os_ctx->magic = KV5M_OS_CONTEXT;
 
 	    /* Read out our context */

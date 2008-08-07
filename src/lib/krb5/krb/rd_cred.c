@@ -99,7 +99,7 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
         krb5_creds 	* pcur;
 	krb5_data	* pdata;
 
-        if ((pcur = (krb5_creds *)malloc(sizeof(krb5_creds))) == NULL) {
+        if ((pcur = (krb5_creds *)calloc(1, sizeof(krb5_creds))) == NULL) {
 	    retval = ENOMEM;
 	    goto cleanup;
         }
@@ -107,7 +107,6 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
         (*pppcreds)[i] = pcur;
         (*pppcreds)[i+1] = 0;
         pinfo = encpart.ticket_info[i++];
-        memset(pcur, 0, sizeof(krb5_creds));
 
         if ((retval = krb5_copy_principal(context, pinfo->client,
 					  &pcur->client)))

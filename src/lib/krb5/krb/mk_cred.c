@@ -87,11 +87,10 @@ krb5_mk_ncred_basic(krb5_context context,
 
     /* Get memory for creds and initialize it */
     size = sizeof(krb5_cred_info *) * (nppcreds + 1);
-    credenc.ticket_info = (krb5_cred_info **) malloc(size);
+    credenc.ticket_info = (krb5_cred_info **) calloc(1, size);
     if (credenc.ticket_info == NULL)
 	return ENOMEM;
-    memset(credenc.ticket_info, 0, size);
-    
+
     /*
      * For each credential in the list, initialize a cred info
      * structure and copy the ticket into the ticket list.
@@ -177,16 +176,14 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
      */
     for (ncred = 0; ppcreds[ncred]; ncred++);
 
-    if ((pcred = (krb5_cred *)malloc(sizeof(krb5_cred))) == NULL) 
+    if ((pcred = (krb5_cred *)calloc(1, sizeof(krb5_cred))) == NULL) 
         return ENOMEM;
-    memset(pcred, 0, sizeof(krb5_cred));
 
     if ((pcred->tickets 
-      = (krb5_ticket **)malloc(sizeof(krb5_ticket *) * (ncred + 1))) == NULL) {
+	 = (krb5_ticket **)calloc(ncred+1, sizeof(krb5_ticket *))) == NULL) {
 	free(pcred);
 	return ENOMEM;
     }
-    memset(pcred->tickets, 0, sizeof(krb5_ticket *) * (ncred +1));
 
     /* Get keyblock */
     if ((keyblock = auth_context->send_subkey) == NULL) 

@@ -281,10 +281,9 @@ krb5_rc_dfl_resolve(krb5_context context, krb5_rcache id, char *name)
     krb5_error_code retval;
 
     /* allocate id? no */
-    if (!(t = (struct dfl_data *) malloc(sizeof(struct dfl_data))))
+    if (!(t = (struct dfl_data *) calloc(1, sizeof(struct dfl_data))))
 	return KRB5_RC_MALLOC;
     id->data = (krb5_pointer) t;
-    memset(t, 0, sizeof(struct dfl_data));
     if (name) {
 	t->name = malloc(strlen(name)+1);
 	if (!t->name) {

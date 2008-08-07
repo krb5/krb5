@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/ser_addr.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -152,8 +152,7 @@ krb5_address_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 
 	/* Get a address */
 	if ((remain >= (2*sizeof(krb5_int32))) &&
-	    (address = (krb5_address *) malloc(sizeof(krb5_address)))) {
-	    memset(address, 0, sizeof(krb5_address));
+	    (address = (krb5_address *) calloc(1, sizeof(krb5_address)))) {
 
 	    address->magic = KV5M_ADDRESS;
 

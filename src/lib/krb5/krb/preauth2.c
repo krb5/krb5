@@ -1,5 +1,5 @@
 /*
- * Copyright 1995, 2003 by the Massachusetts Institute of Technology.  All
+ * Copyright 1995, 2003, 2008 by the Massachusetts Institute of Technology.  All
  * Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -127,13 +127,12 @@ krb5_init_preauth_context(krb5_context kcontext)
 	krb5int_free_plugin_dir_data(tables);
         return;
     }
-    context->modules = malloc(sizeof(context->modules[0]) * n_modules);
+    context->modules = calloc(n_modules, sizeof(context->modules[0]));
     if (context->modules == NULL) {
 	krb5int_free_plugin_dir_data(tables);
         free(context);
         return;
     }
-    memset(context->modules, 0, sizeof(context->modules[0]) * n_modules);
     context->n_modules = n_modules;
 
     /* fill in the structure */

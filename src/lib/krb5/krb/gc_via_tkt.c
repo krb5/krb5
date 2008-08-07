@@ -43,11 +43,9 @@ krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *con
     krb5_error_code retval;  
     krb5_data *pdata;
   
-    if ((*ppcreds = (krb5_creds *)malloc(sizeof(krb5_creds))) == NULL) {
+    if ((*ppcreds = (krb5_creds *)calloc(1,sizeof(krb5_creds))) == NULL) {
         return ENOMEM;
     }
-
-    memset(*ppcreds, 0, sizeof(krb5_creds));
 
     if ((retval = krb5_copy_principal(context, pkdcrep->client,
                                      &(*ppcreds)->client)))

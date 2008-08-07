@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/ser_auth.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -246,8 +246,7 @@ krb5_authenticator_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_o
 	/* Get memory for the authenticator */
 	if ((remain >= (3*sizeof(krb5_int32))) &&
 	    (authenticator = (krb5_authenticator *) 
-	     malloc(sizeof(krb5_authenticator)))) {
-	    memset(authenticator, 0, sizeof(krb5_authenticator));
+	     calloc(1, sizeof(krb5_authenticator)))) {
 
 	    /* Get ctime */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
@@ -304,10 +303,7 @@ krb5_authenticator_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_o
 
 		/* Get memory for the authorization data pointers */
 		if ((authenticator->authorization_data = (krb5_authdata **)
-		     malloc(sizeof(krb5_authdata *) * len))) {
-		    memset(authenticator->authorization_data, 0,
-			   sizeof(krb5_authdata *) * len);
-
+		     calloc(len, sizeof(krb5_authdata *)))) {
 		    for (i=0; !kret && (i<nadata); i++) {
 			kret = krb5_internalize_opaque(kcontext,
 						       KV5M_AUTHDATA,

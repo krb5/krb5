@@ -1207,20 +1207,16 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     reply->length = 0;
 
     n_conns = addrs->naddrs;
-    conns = malloc(n_conns * sizeof(struct conn_state));
+    conns = calloc(n_conns, sizeof(struct conn_state));
     if (conns == NULL) {
 	return ENOMEM;
     }
 
-    memset(conns, 0, n_conns * sizeof(struct conn_state));
-
     if (callback_info) {
-	callback_data = malloc(n_conns * sizeof(krb5_data));
+	callback_data = calloc(n_conns, sizeof(krb5_data));
 	if (callback_data == NULL) {
 	    return ENOMEM;
 	}
-
-	memset(callback_data, 0, n_conns * sizeof(krb5_data));
     }
 
     for (i = 0; i < n_conns; i++) {

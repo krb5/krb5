@@ -154,10 +154,9 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 
 	*context = 0;
 
-	ctx = malloc(sizeof(struct _krb5_context));
+	ctx = calloc(1, sizeof(struct _krb5_context));
 	if (!ctx)
 		return ENOMEM;
-	memset(ctx, 0, sizeof(struct _krb5_context));
 	ctx->magic = KV5M_CONTEXT;
 
 	ctx->profile_secure = secure;

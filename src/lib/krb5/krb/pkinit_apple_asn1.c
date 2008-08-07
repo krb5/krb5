@@ -323,10 +323,9 @@ krb5_error_code krb5int_pkinit_auth_pack_decode(
 		alg_ids++) {
 		num_types++;
 	    }
-	    *cms_types = kalg_ids = (krb5int_algorithm_id *)malloc(
-		sizeof(krb5int_algorithm_id) * num_types);
+	    *cms_types = kalg_ids = (krb5int_algorithm_id *)calloc(num_types,
+		sizeof(krb5int_algorithm_id));
 	    *num_cms_types = num_types;
-	    memset(kalg_ids, 0, sizeof(krb5int_algorithm_id) * num_types);
 	    alg_ids = localAuthPack.supportedCMSTypes;
 	    for(dex=0; dex<num_types; dex++) {
 		if(alg_ids[dex]->algorithm.Data) {

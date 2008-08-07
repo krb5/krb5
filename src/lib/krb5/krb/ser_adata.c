@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/ser_adata.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -151,8 +151,7 @@ krb5_authdata_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet 
 
 	/* Get a authdata */
 	if ((remain >= (2*sizeof(krb5_int32))) &&
-	    (authdata = (krb5_authdata *) malloc(sizeof(krb5_authdata)))) {
-	    memset(authdata, 0, sizeof(krb5_authdata));
+	    (authdata = (krb5_authdata *) calloc(1, sizeof(krb5_authdata)))) {
 
 	    /* Get the ad_type */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);

@@ -24,11 +24,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_init(krb5_context context, krb5_auth_context *auth_context)
 {
     *auth_context =
-            (krb5_auth_context)malloc(sizeof(struct _krb5_auth_context));
+	(krb5_auth_context)calloc(1, sizeof(struct _krb5_auth_context));
     if (!*auth_context)
-	    return ENOMEM;
-    
-    memset(*auth_context, 0, sizeof(struct _krb5_auth_context));
+	return ENOMEM;
 
     /* Default flags, do time not seq */
     (*auth_context)->auth_context_flags = 
@@ -271,8 +269,7 @@ krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context)
 	if ((ret = krb5_c_block_size(context, auth_context->keyblock->enctype,
 				    &blocksize)))
 	    return(ret);
-	if ((auth_context->i_vector = (krb5_pointer)malloc(blocksize))) {
-	    memset(auth_context->i_vector, 0, blocksize);
+	if ((auth_context->i_vector = (krb5_pointer)calloc(1,blocksize))) {
 	    return 0;
 	}
 	return ENOMEM;

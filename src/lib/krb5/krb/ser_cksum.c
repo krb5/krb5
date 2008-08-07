@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/ser_cksum.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -152,9 +152,7 @@ krb5_checksum_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet 
 
 	/* Get a checksum */
 	if ((remain >= (2*sizeof(krb5_int32))) &&
-	    (checksum = (krb5_checksum *) malloc(sizeof(krb5_checksum)))) {
-	    memset(checksum, 0, sizeof(krb5_checksum));
-
+	    (checksum = (krb5_checksum *) calloc(1, sizeof(krb5_checksum)))) {
 	    /* Get the checksum_type */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    checksum->checksum_type = (krb5_cksumtype) ibuf;

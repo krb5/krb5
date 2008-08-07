@@ -586,12 +586,11 @@ module_callback (void *cbdata, int socktype, struct sockaddr *sa)
 #endif
 	)
 	return 0;
-    x = malloc (sizeof (*x));
+    x = calloc (1, sizeof (*x));
     if (x == 0) {
 	d->out_of_mem = 1;
 	return 1;
     }
-    memset(x, 0, sizeof (*x));
     x->ai.ai_addr = (struct sockaddr *) &x->u;
     x->ai.ai_socktype = socktype;
     x->ai.ai_family = sa->sa_family;

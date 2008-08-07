@@ -408,10 +408,9 @@ get_linux_ipv6_addrs ()
 		continue;
 	    }
 #endif
-	    nw = malloc (sizeof (struct linux_ipv6_addr_list));
+	    nw = calloc (1, sizeof (struct linux_ipv6_addr_list));
 	    if (nw == 0)
 		continue;
-	    memset (nw, 0, sizeof (*nw));
 	    nw->addr.sin6_addr = a6;
 	    nw->addr.sin6_family = AF_INET6;
 	    /* Ignore other fields, we don't actually use them here.  */
@@ -1528,16 +1527,13 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
     for (count = 0; hostrec->h_addr_list[count]; count++);
 
 
-    paddr = (krb5_address **)malloc(sizeof(krb5_address *) * (count+1));
+    paddr = (krb5_address **)calloc(count+1, sizeof(krb5_address *));
     if (!paddr) {
         err = ENOMEM;
         goto cleanup;
     }
 
-    memset(paddr, 0, sizeof(krb5_address *) * (count+1));
-
-    for (i = 0; i < count; i++)
-    {
+    for (i = 0; i < count; i++) {
         paddr[i] = (krb5_address *)malloc(sizeof(krb5_address));
         if (paddr[i] == NULL) {
             err = ENOMEM;
