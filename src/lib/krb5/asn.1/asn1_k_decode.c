@@ -103,6 +103,15 @@
   next_tag()
 
 /*
+ * error_if_bad_tag
+ *
+ * Checks that the next tag is the expected one; returns with an error
+ * if not.
+ */
+#define error_if_bad_tag(tagexpect) \
+  if (tagnum != (tagexpect)) { return (tagnum < (tagexpect)) ? ASN1_MISPLACED_FIELD : ASN1_MISSING_FIELD; }
+
+/*
  * get_field
  *
  * Get field having an expected context specific tag.  This assumes
@@ -110,8 +119,7 @@
  * verification of tag numbers.
  */
 #define get_field(var, tagexpect, decoder)				\
-  if (tagnum > (tagexpect)) return ASN1_MISSING_FIELD;			\
-  if (tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;		\
+  error_if_bad_tag(tagexpect);						\
   if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)	\
       && (tagnum || taglen || asn1class != UNIVERSAL))			\
     return ASN1_BAD_ID;							\
@@ -146,8 +154,7 @@
 
 /* similar to get_field_body */
 #define get_lenfield(len, var, tagexpect, decoder)			\
-  if (tagnum > (tagexpect)) return ASN1_MISSING_FIELD;			\
-  if (tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;		\
+  error_if_bad_tag(tagexpect);						\
   if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)	\
       && (tagnum || taglen || asn1class != UNIVERSAL))			\
     return ASN1_BAD_ID;							\

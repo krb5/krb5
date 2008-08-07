@@ -39,10 +39,12 @@ asn1_error_code asn1buf_ensure_space
    effects  If buf has less than amount octets of free space, then it is
             expanded to have at least amount octets of free space.
             Returns ENOMEM memory is exhausted. */
+#ifndef CONFIG_SMALL
 #define asn1buf_ensure_space(buf,amount) \
   ((asn1buf_free(buf) < (amount)) \
    ? (asn1buf_expand((buf), (amount)-asn1buf_free(buf))) \
    : 0)
+#endif
 
 
 asn1_error_code asn1buf_expand
@@ -146,7 +148,7 @@ asn1_error_code asn1buf_insert_octet
 /* requires  *buf is allocated
    effects   Inserts o into the buffer *buf, expanding the buffer if
              necessary.  Returns ENOMEM memory is exhausted. */
-#if ((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS))
+#if ((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS)) && !defined(CONFIG_SMALL)
 extern __inline__ asn1_error_code asn1buf_insert_octet(asn1buf *buf, const int o)
 {
   asn1_error_code retval;

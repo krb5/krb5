@@ -206,8 +206,7 @@ last:
     asn1buf_destroy (&buf);
 
     if (ret != 0 && *code != NULL) {
-        if ((*code)->data != NULL)
-            free ((*code)->data);
+	free ((*code)->data);
         free (*code);
     }
 
@@ -301,7 +300,7 @@ decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag, int *len,
     *buf = tmp;
 
 last:
-    if (ret != 0 && *val != NULL)
+    if (ret != 0)
 	free (*val);
     return ret;
 }
@@ -379,14 +378,10 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 
 last:
     if (ret != 0) {
-	if (key->key_data_contents[0] != NULL) {
-	    free (key->key_data_contents[0]);
-	    key->key_data_contents[0] = NULL;
-	}
-	if (key->key_data_contents[1] != NULL) {
-	    free (key->key_data_contents[1]);
-	    key->key_data_contents[1] = NULL;
-	}
+	free (key->key_data_contents[0]);
+	key->key_data_contents[0] = NULL;
+	free (key->key_data_contents[1]);
+	key->key_data_contents[1] = NULL;
     }
     return ret;
 }
@@ -467,10 +462,8 @@ last:
     if (ret != 0) {
 	int i;
 	for (i = 0; i < *n_key_data; i++) {
-	    if ((*out)[i].key_data_contents[0] != NULL)
-		free ((*out)[i].key_data_contents[0]);
-	    if ((*out)[i].key_data_contents[1] != NULL)
-		free ((*out)[i].key_data_contents[1]);
+	    free ((*out)[i].key_data_contents[0]);
+	    free ((*out)[i].key_data_contents[1]);
 	}
 	free (*out);
 	*out = NULL;

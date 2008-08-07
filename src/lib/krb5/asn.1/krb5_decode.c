@@ -1,7 +1,7 @@
 /*
  * src/lib/krb5/asn.1/krb5_decode.c
  * 
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -130,13 +130,21 @@ if(retval) clean_return(retval);\
 if (indef) { get_eoc(); }\
 next_tag()
 
+/*
+ * error_if_bad_tag
+ *
+ * Checks that the next tag is the expected one; returns with an error
+ * if not.
+ */
+#define error_if_bad_tag(tagexpect) \
+  if (tagnum != (tagexpect)) { clean_return ((tagnum < (tagexpect)) ? ASN1_MISPLACED_FIELD : ASN1_MISSING_FIELD); }
+
 /* decode a field (<[UNIVERSAL id]> <length> <contents>)
     check that the id number == tagexpect then
     decode into var
     get the next tag */
 #define get_field(var,tagexpect,decoder)\
-if(tagnum > (tagexpect)) clean_return(ASN1_MISSING_FIELD);\
-if(tagnum < (tagexpect)) clean_return(ASN1_MISPLACED_FIELD);\
+error_if_bad_tag(tagexpect);\
 if(asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
   clean_return(ASN1_BAD_ID);\
 get_field_body(var,decoder)
@@ -160,8 +168,7 @@ next_tag()
 
 /* decode a field w/ its length (for string types) */
 #define get_lenfield(len,var,tagexpect,decoder)\
-if(tagnum > (tagexpect)) clean_return(ASN1_MISSING_FIELD);\
-if(tagnum < (tagexpect)) clean_return(ASN1_MISPLACED_FIELD);\
+error_if_bad_tag(tagexpect);\
 if(asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
   clean_return(ASN1_BAD_ID);\
 get_lenfield_body(len,var,decoder)
@@ -197,7 +204,7 @@ error_out: \
 #define cleanup_manual()\
    return 0;
 
-#define free_field(rep,f) if ((rep)->f) free((rep)->f)
+#define free_field(rep,f) free((rep)->f)
 #define clear_field(rep,f) (*(rep))->f = 0
 
 krb5_error_code decode_krb5_authenticator(const krb5_data *code, krb5_authenticator **rep)
@@ -1034,10 +1041,8 @@ krb5_error_code decode_krb5_reply_key_pack(const krb5_data *code, krb5_reply_key
   cleanup_manual();
 error_out:
   if (rep && *rep) {
-    if ((*rep)->replyKey.contents)
-	free((*rep)->replyKey.contents);
-    if ((*rep)->asChecksum.contents)
-      free((*rep)->asChecksum.contents);
+    free((*rep)->replyKey.contents);
+    free((*rep)->asChecksum.contents);
     free(*rep);
     *rep = NULL;
   }

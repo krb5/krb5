@@ -143,7 +143,7 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
 asn1_error_code asn1buf_destroy(asn1buf **buf)
 {
   if (*buf != NULL) {
-    if ((*buf)->base != NULL) free((*buf)->base);
+    free((*buf)->base);
     free(*buf);
     *buf = NULL;
   }
@@ -273,7 +273,7 @@ asn1_error_code asn12krb5_buf(const asn1buf *buf, krb5_data **code)
 
 asn1_error_code asn1buf_unparse(const asn1buf *buf, char **s)
 {
-  if(*s != NULL) free(*s);
+  free(*s);
   if(buf == NULL){
     *s = malloc(sizeof("<NULL>"));
     if(*s == NULL) return ENOMEM;
@@ -301,7 +301,7 @@ asn1_error_code asn1buf_hex_unparse(const asn1buf *buf, char **s)
 		    ((d)<=15 ? ('A'+(d)-10) :\
 		    'X'))
 
-  if(*s != NULL) free(*s);
+  free(*s);
 
   if(buf == NULL){
     *s = malloc(sizeof("<NULL>"));
