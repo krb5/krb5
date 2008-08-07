@@ -53,30 +53,24 @@
 }
 
 static asn1_error_code
-asn1_get_eoc_tag (asn1buf *buf, taginfo *tinfo)
+asn1_get_eoc_tag (asn1buf *buf)
 {
     asn1_error_code retval;
+    taginfo t;
 
-    retval = asn1_get_tag_2(buf, tinfo);
+    retval = asn1_get_tag_2(buf, &t);
     if (retval)
 	return retval;
-    if (tinfo->asn1class != UNIVERSAL || tinfo->tagnum || tinfo->indef)
+    if (t.asn1class != UNIVERSAL || t.tagnum || t.indef)
 	return ASN1_MISSING_EOC;
     return 0;
 }
 
 /* Force check for EOC tag. */
-#define get_eoc()									\
-    {											\
-	taginfo t3;									\
-	retval = asn1_get_eoc_tag(&subbuf, &t3);					\
-	if(retval) return retval;							\
-        /* Copy out to match previous functionality, until better integrated.  */	\
-	asn1class = UNIVERSAL;								\
-	construction = t3.construction;							\
-	tagnum = 0;									\
-	taglen = t3.length;								\
-	indef = 0;									\
+#define get_eoc()				\
+    {						\
+	retval = asn1_get_eoc_tag(&subbuf);	\
+	if(retval) return retval;		\
     }
 
 #define alloc_field(var, type)			\
