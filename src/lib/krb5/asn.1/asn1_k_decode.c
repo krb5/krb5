@@ -284,11 +284,6 @@ asn1_get_eoc_tag (asn1buf *buf)
  * than does sequence_of() to avoid shadowing.
  */
 #define sequence_of_no_tagvars(buf)		\
-  asn1_class eseqclass;				\
-  asn1_construction eseqconstr;			\
-  asn1_tagnum eseqnum;				\
-  unsigned int eseqlen;				\
-  int eseqindef;				\
   sequence_of_common(buf)
 
 /*
@@ -335,21 +330,22 @@ asn1_get_eoc_tag (asn1buf *buf)
  * Like end_sequence_of(), but uses the different (non-shadowing)
  * variable names.
  */
-#define end_sequence_of_no_tagvars(buf)						\
-  {										\
-      taginfo t5;								\
-      retval = asn1_get_tag_2(&seqbuf, &t5);					\
-      if (retval) return retval;						\
-      /* Copy out to match previous functionality, until better integrated.  */	\
-      eseqclass = t5.asn1class;							\
-      eseqconstr = t5.construction;						\
-      eseqnum = t5.tagnum;							\
-      eseqlen = t5.length;							\
-      eseqindef = t5.indef;							\
-  }										\
-  retval = asn1buf_sync(buf, &seqbuf, eseqclass, eseqnum,			\
-			eseqlen, eseqindef, seqofindef);			\
-  if (retval) return retval;
+static asn1_error_code
+end_sequence_of_no_tagvars_helper(asn1buf *buf, asn1buf *seqbufp,
+				  int seqofindef)
+{
+    taginfo t;
+    asn1_error_code retval;
+
+    retval = asn1_get_tag_2(seqbufp, &t);
+    if (retval)
+	return retval;
+    retval = asn1buf_sync(buf, seqbufp, t.asn1class, t.tagnum,
+			  t.length, t.indef, seqofindef);
+    return retval;
+}
+#define end_sequence_of_no_tagvars(buf) \
+    end_sequence_of_no_tagvars_helper(buf, &seqbuf, seqofindef)
 
 #define cleanup()				\
   return 0
