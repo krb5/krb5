@@ -370,8 +370,10 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 	}
 
 	if ((ret = krb5_db_get_principal(context, ent->princ, &curr,
-					 &nprincs, &more)))
+					 &nprincs, &more))) {
+	    free(attr_types);
 	    return (ret);
+	}
 
 	if (nprincs == 0) {
 	    /*
@@ -480,8 +482,10 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_PRINC;
 		    if ((ret = conv_princ_2ulog(ent->princ,
-						upd, final, REG_PRINC)))
+						upd, final, REG_PRINC))) {
+			free(attr_types);
 			return (ret);
+		    }
 		}
 		break;
 
@@ -493,8 +497,10 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		    ULOG_ENTRY(upd, final).av_keydata.av_keydata_len = ent->n_key_data;
 
 		    ULOG_ENTRY(upd, final).av_keydata.av_keydata_val = malloc(ent->n_key_data * sizeof (kdbe_key_t));
-		    if (ULOG_ENTRY(upd, final).av_keydata.av_keydata_val == NULL)
+		    if (ULOG_ENTRY(upd, final).av_keydata.av_keydata_val == NULL) {
+			free(attr_types);
 			return (ENOMEM);
+		    }
 
 		    for (j = 0; j < ent->n_key_data; j++) {
 			ULOG_ENTRY_KEYVAL(upd, final, j).k_ver = ent->key_data[j].key_data_ver;
@@ -503,19 +509,25 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 			ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_len = ent->key_data[j].key_data_ver;
 
 			ULOG_ENTRY_KEYVAL(upd, final, j).k_enctype.k_enctype_val = malloc(ent->key_data[j].key_data_ver * sizeof(int32_t));
-			if (ULOG_ENTRY_KEYVAL(upd, final, j).k_enctype.k_enctype_val == NULL)
+			if (ULOG_ENTRY_KEYVAL(upd, final, j).k_enctype.k_enctype_val == NULL) {
+			    free(attr_types);
 			    return (ENOMEM);
+			}
 
 			ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val = malloc(ent->key_data[j].key_data_ver * sizeof(utf8str_t));
-			if (ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val == NULL)
+			if (ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val == NULL) {
+			    free(attr_types);
 			    return (ENOMEM);
+			}
 
 			for (cnt = 0; cnt < ent->key_data[j].key_data_ver; cnt++) {
 			    ULOG_ENTRY_KEYVAL(upd, final, j).k_enctype.k_enctype_val[cnt] = ent->key_data[j].key_data_type[cnt];
 			    ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val[cnt].utf8str_t_len = ent->key_data[j].key_data_length[cnt];
 			    ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val[cnt].utf8str_t_val = malloc(ent->key_data[j].key_data_length[cnt] * sizeof (char));
-			    if (ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val[cnt].utf8str_t_val == NULL)
+			    if (ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val[cnt].utf8str_t_val == NULL) {
+				free(attr_types);
 				return (ENOMEM);
+			    }
 			    (void) memcpy(ULOG_ENTRY_KEYVAL(upd, final, j).k_contents.k_contents_val[cnt].utf8str_t_val, ent->key_data[j].key_data_contents[cnt], ent->key_data[j].key_data_length[cnt]);
 			}
 		    }
@@ -541,8 +553,10 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		    ret = conv_princ_2ulog(tmpprinc,
 					   upd, final, MOD_PRINC);
 		    krb5_free_principal(context, tmpprinc);
-		    if (ret)
+		    if (ret) {
+			free(attr_types);
 			return (ret);
+		    }
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_MOD_TIME;
 		    ULOG_ENTRY(upd, final).av_mod_time =
@@ -563,8 +577,10 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 			    ULOG_ENTRY(upd, final).av_tldata.av_tldata_len = 0;
 			    ULOG_ENTRY(upd, final).av_tldata.av_tldata_val = malloc(ent->n_tl_data * sizeof(kdbe_tl_t));
 
-			    if (ULOG_ENTRY(upd, final).av_tldata.av_tldata_val == NULL)
+			    if (ULOG_ENTRY(upd, final).av_tldata.av_tldata_val == NULL) {
+				free(attr_types);
 				return (ENOMEM);
+			    }
 			    kadm_data_yes = 1;
 			}
 
@@ -573,8 +589,10 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 			ULOG_ENTRY(upd, final).av_tldata.av_tldata_val[tmpint].tl_type = newtl->tl_data_type;
 			ULOG_ENTRY(upd, final).av_tldata.av_tldata_val[tmpint].tl_data.tl_data_len = newtl->tl_data_length;
 			ULOG_ENTRY(upd, final).av_tldata.av_tldata_val[tmpint].tl_data.tl_data_val = malloc(newtl->tl_data_length * sizeof (char));
-			if (ULOG_ENTRY(upd, final).av_tldata.av_tldata_val[tmpint].tl_data.tl_data_val == NULL)
+			if (ULOG_ENTRY(upd, final).av_tldata.av_tldata_val[tmpint].tl_data.tl_data_val == NULL) {
+			    free(attr_types);
 			    return (ENOMEM);
+			}
 			(void) memcpy(ULOG_ENTRY(upd, final).av_tldata.av_tldata_val[tmpint].tl_data.tl_data_val, newtl->tl_data_contents, newtl->tl_data_length);
 			break;
 		    }
