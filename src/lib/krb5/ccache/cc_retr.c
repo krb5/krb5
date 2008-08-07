@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/cc_retr.c
  *
- * Copyright 1990,1991,1999,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,1999,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -33,7 +33,15 @@
 
 #define set(bits) (whichfields & bits)
 #define flags_match(a,b) (((a) & (b)) == (a))
-#define times_match_exact(t1,t2) (memcmp((char *)(t1), (char *)(t2), sizeof(*(t1))) == 0)
+
+static int
+times_match_exact(const krb5_ticket_times *t1, const krb5_ticket_times *t2)
+{
+    return (t1->authtime == t2->authtime &&
+	    t1->starttime == t2->starttime &&
+	    t1->endtime == t2->endtime &&
+	    t1->renew_till == t2->renew_till);
+}
 
 static krb5_boolean
 times_match(const krb5_ticket_times *t1, const krb5_ticket_times *t2)
