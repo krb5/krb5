@@ -15,6 +15,8 @@
  * des_pcbc_encrypt.c - encrypt a string of characters in error propagation mode
  */
 
+#include "autoconf.h"		/* in case this defines CONFIG_SMALL */
+#undef CONFIG_SMALL		/* XXX needs non-exported crypto symbols */
 #include "des_int.h"
 #include "des.h"
 #include <f_tables.h>
