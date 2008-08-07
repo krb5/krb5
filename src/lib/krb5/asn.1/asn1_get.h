@@ -34,8 +34,15 @@
 #include "asn1buf.h"
 
 typedef struct {
+#if 1 /* Smaller run-time storage, and on x86 the compiler can use
+	 byte loads, stores, and compares, but on other platforms the
+	 compiler may need to load and widen before comparing... see
+	 how this works out. */
+    unsigned int asn1class : 8, construction : 8;
+#else
     asn1_class asn1class;
     asn1_construction construction;
+#endif
     asn1_tagnum tagnum;
     unsigned int length;
     int indef;
