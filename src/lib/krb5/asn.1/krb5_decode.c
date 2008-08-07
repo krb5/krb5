@@ -93,17 +93,28 @@ if((var) == NULL) clean_return(ENOMEM)
   taglen = t2.length;				\
 }
 
+static asn1_error_code
+asn1_get_eoc_tag (asn1buf *buf, taginfo *tinfo)
+{
+    asn1_error_code retval;
+
+    retval = asn1_get_tag_2(buf, tinfo);
+    if (retval)
+	return retval;
+    if (tinfo->asn1class != UNIVERSAL || tinfo->tagnum || tinfo->indef)
+	return ASN1_MISSING_EOC;
+    return 0;
+}
+
 #define get_eoc()						\
 {								\
     taginfo t3;							\
-    retval = asn1_get_tag_2(&subbuf, &t3);			\
+    retval = asn1_get_eoc_tag(&subbuf, &t3);			\
     if (retval) return retval;					\
-    if (t3.asn1class != UNIVERSAL || t3.tagnum || t3.indef)	\
-        return ASN1_MISSING_EOC;				\
-    asn1class = t3.asn1class;					\
+    asn1class = UNIVERSAL;					\
     construction = t3.construction;				\
-    tagnum = t3.tagnum;						\
-    indef = t3.indef;						\
+    tagnum = 0;							\
+    indef = 0;							\
 }
 
 /* decode sequence header and initialize tagnum with the first field */
