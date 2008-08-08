@@ -441,7 +441,12 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 # pragma weak pthread_mutex_init
 # pragma weak pthread_self
 # pragma weak pthread_equal
-extern int krb5int_pthread_loaded(void);
+extern int krb5int_pthread_loaded(void)
+#ifdef __GNUC__
+     /* We should always get the same answer for the life of the process.  */
+     __attribute__((const))
+#endif
+     ;
 # define K5_PTHREADS_LOADED	(krb5int_pthread_loaded())
 #else
 /* no pragma weak support */
