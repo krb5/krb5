@@ -2784,7 +2784,6 @@ cw_draw_header(HDC hdc,
 
 LRESULT 
 cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
-    RECT r;
     HDITEM hi;
 
     switch(ph->hdr.code) {
@@ -2807,13 +2806,10 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
 
     case HDN_ENDTRACK:
         {
-            int width;
             hi.mask = HDI_ORDER;
             Header_GetItem(ph->hdr.hwndFrom, ph->iItem, &hi);
-            Header_GetItemRect(ph->hdr.hwndFrom, ph->iItem, &r);
-            width = r.right - r.left;
-            if(width != tbl->cols[hi.iOrder].width) {
-                tbl->cols[hi.iOrder].width = width;
+            if(ph->pitem->cxy != tbl->cols[hi.iOrder].width) {
+                tbl->cols[hi.iOrder].width = ph->pitem->cxy;
                 cw_update_extents(tbl, TRUE);
                 InvalidateRect(tbl->hwnd, NULL, FALSE);
             }
