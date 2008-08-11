@@ -123,7 +123,8 @@ khm_krb5_kinit(krb5_context       alt_ctx,
                DWORD              addressless,
                DWORD              publicIP,
                krb5_prompter_fct  prompter,
-               void *             p_data);
+               void *             p_data,
+               char **            pp_error_message);
 
 long
 khm_krb5_changepwd(char * principal,

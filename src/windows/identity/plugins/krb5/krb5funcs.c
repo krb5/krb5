@@ -1357,7 +1357,8 @@ khm_krb5_kinit(krb5_context       alt_ctx,
                DWORD              addressless,
                DWORD              publicIP,
                krb5_prompter_fct  prompter,
-               void *             p_data)
+               void *             p_data,
+               char **            pp_error_message)
 {
     krb5_error_code		        code = 0;
     krb5_context		        ctx = NULL;
@@ -1386,6 +1387,8 @@ khm_krb5_kinit(krb5_context       alt_ctx,
         if (code)
             goto cleanup;
     }
+
+    pkrb5_clear_error_message(ctx);
 
     if (ccache) {
         _reportf(L"Using supplied ccache name %S", ccache);
@@ -1523,6 +1526,18 @@ khm_krb5_kinit(krb5_context       alt_ctx,
     if (code) goto cleanup;
 
 cleanup:
+    if (pp_error_message) {
+        const char * em;
+
+        em = pkrb5_get_error_message(ctx, code);
+        if (em == NULL) {
+            *pp_error_message = NULL;
+        } else {
+            *pp_error_message = _strdup(em);
+            pkrb5_free_error_message(ctx, em);
+        }
+    }
+
     if ( addrs ) {
         for ( i=0;i<addr_count;i++ ) {
             if ( addrs[i] ) {

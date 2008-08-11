@@ -633,7 +633,14 @@ k5_kinit_fiber_proc(PVOID lpParameter)
     while(TRUE)
     {
         if(g_fjob.command == FIBER_CMD_KINIT) {
+            char * error_msg = NULL;
+
             g_fjob.state = FIBER_STATE_KINIT;
+
+            if (g_fjob.error_message) {
+                PFREE(g_fjob.error_message);
+                g_fjob.error_message = NULL;
+            }
 
             g_fjob.prompt_set = 0;
 
@@ -670,6 +677,11 @@ k5_kinit_fiber_proc(PVOID lpParameter)
                                                g_fjob.renewable);
 
         retry_kinit:
+            if (error_msg) {
+                free(error_msg);
+                error_msg = NULL;
+            }
+
             g_fjob.code =
                 khm_krb5_kinit(0,
                                g_fjob.principal,
@@ -682,7 +694,8 @@ k5_kinit_fiber_proc(PVOID lpParameter)
                                g_fjob.addressless,
                                g_fjob.publicIP,
                                k5_kinit_prompter,
-                               &g_fjob);
+                               &g_fjob,
+                               &error_msg);
 
             /* If the principal was found to be valid, and if we
                restricted the options that were being passed to kinit,
@@ -694,6 +707,17 @@ k5_kinit_fiber_proc(PVOID lpParameter)
 #endif
                 g_fjob.state = FIBER_STATE_KINIT;
                 goto retry_kinit;
+            }
+
+            if (error_msg) {
+                wchar_t tmp[1024];
+
+                if (AnsiStrToUnicode(tmp, sizeof(tmp), error_msg)) {
+                    g_fjob.error_message = PWCSDUP(tmp);
+                }
+
+                free(error_msg);
+                error_msg = NULL;
             }
         }
 
@@ -1489,6 +1513,9 @@ k5_free_kinit_job(void)
     if (g_fjob.ccache)
         PFREE(g_fjob.ccache);
 
+    if (g_fjob.error_message)
+        PFREE(g_fjob.error_message);
+
     ZeroMemory(&g_fjob, sizeof(g_fjob));
 }
 
@@ -1625,7 +1652,7 @@ k5_find_tgt_filter(khm_handle cred,
     khm_int32 rv;
 
     if (KHM_SUCCEEDED(kcdb_cred_get_identity(cred,
-                                           &cident)) &&
+                                             &cident)) &&
         cident == ident &&
         KHM_SUCCEEDED(kcdb_cred_get_flags(cred, &f)) &&
         (f & KCDB_CRED_FLAG_INITIAL) &&
@@ -2108,6 +2135,11 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         d->cred_message = NULL;
                     }
 
+                    if (g_fjob.error_message) {
+                        StringCbCopy(msg, sizeof(msg), g_fjob.error_message);
+                        goto have_message;
+                    }
+
                     msg[0] = L'\0';
 
                     switch(g_fjob.code) {
@@ -2150,6 +2182,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                             StringCbPrintf(msg, sizeof(msg), fmt, desc);
                         }
                     }
+
+                have_message:
 
                     if (msg[0]) {
                         StringCbLength(msg, sizeof(msg), &cb);
@@ -2312,11 +2346,15 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                 if(g_fjob.code != 0) {
                     wchar_t tbuf[1024];
-                    DWORD suggestion;
+                    DWORD suggestion = 0;
                     kherr_suggestion suggest_code;
 
-                    khm_err_describe(g_fjob.code, tbuf, sizeof(tbuf),
-                                     &suggestion, &suggest_code);
+                    if (g_fjob.error_message) {
+                        StringCbCopy(tbuf, sizeof(tbuf), g_fjob.error_message);
+                    } else {
+                        khm_err_describe(g_fjob.code, tbuf, sizeof(tbuf),
+                                         &suggestion, &suggest_code);
+                    }
 
                     _report_cs0(KHERR_ERROR, tbuf);
                     if (suggestion != 0)
@@ -2691,7 +2729,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                               d->addressless, /* addressless */
                                               d->publicIP, /* public IP */
                                               NULL, /* prompter */
-                                              NULL /* prompter data */);
+                                              NULL, /* prompter data */
+                                              NULL  /* error message */);
 
                         if (code) {
                             rv = KHM_ERROR_UNKNOWN;
