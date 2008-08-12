@@ -42,6 +42,15 @@
 
 const krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_stdcc_ops;
 
+#elif defined(NO_FILE_CCACHE)
+
+/* Note that this version isn't likely to work very well for multiple
+   processes.  It's mostly a placeholder so we can experiment with
+   building the NO_FILE_CCACHE code on UNIX.  */
+
+extern const krb5_cc_ops krb5_mcc_ops;
+const krb5_cc_ops *krb5_cc_dfl_ops = &krb5_mcc_ops;
+
 #else
 
 #include "fcc.h"

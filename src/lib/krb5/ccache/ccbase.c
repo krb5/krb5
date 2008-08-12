@@ -44,43 +44,42 @@ struct krb5_cc_typecursor {
 /* typedef krb5_cc_typecursor in k5-int.h */
 
 extern const krb5_cc_ops krb5_mcc_ops;
-#ifdef USE_KEYRING_CCACHE
-extern const krb5_cc_ops krb5_krcc_ops;
-#endif
+
+#define NEXT NULL
 
 #ifdef _WIN32
 extern const krb5_cc_ops krb5_lcc_ops;
-static struct krb5_cc_typelist cc_lcc_entry = { &krb5_lcc_ops, NULL };
-static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, &cc_lcc_entry };
-#else
+static struct krb5_cc_typelist cc_lcc_entry = { &krb5_lcc_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_lcc_entry
+#endif
 
 #ifdef USE_CCAPI_V3
 extern const krb5_cc_ops krb5_cc_stdcc_ops;
-static struct krb5_cc_typelist cc_stdcc_entry = { &krb5_cc_stdcc_ops, NULL };
-static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, &cc_stdcc_entry };
-#else
+static struct krb5_cc_typelist cc_stdcc_entry = { &krb5_cc_stdcc_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_stdcc_entry
+#endif
 
-static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, NULL };
-#endif /* USE_CCAPI_V3 */
+static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_mcc_entry
+
+#ifndef NO_FILE_CCACHE
+static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_fcc_entry
+#endif
 
 #ifdef USE_KEYRING_CCACHE
-static struct krb5_cc_typelist cc_file_entry = { &krb5_cc_file_ops,
-						 &cc_mcc_entry };
-static struct krb5_cc_typelist cc_krcc_entry = { &krb5_krcc_ops,
-						 &cc_file_entry };
+extern const krb5_cc_ops krb5_krcc_ops;
+static struct krb5_cc_typelist cc_krcc_entry = { &krb5_krcc_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_krcc_entry
 #endif /* USE_KEYRING_CCACHE */
-#endif
 
-#ifndef USE_KEYRING_CCACHE
-static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
-						&cc_mcc_entry };
-#endif
 
-#ifdef USE_KEYRING_CCACHE
-#define INITIAL_TYPEHEAD (&cc_krcc_entry)
-#else
-#define INITIAL_TYPEHEAD (&cc_fcc_entry)
-#endif
+#define INITIAL_TYPEHEAD (NEXT)
 static struct krb5_cc_typelist *cc_typehead = INITIAL_TYPEHEAD;
 static k5_mutex_t cc_typelist_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
@@ -98,9 +97,11 @@ krb5int_cc_initialize(void)
     err = k5_mutex_finish_init(&cc_typelist_lock);
     if (err)
 	return err;
+#ifndef NO_FILE_CCACHE
     err = k5_mutex_finish_init(&krb5int_cc_file_mutex);
     if (err)
 	return err;
+#endif
 #ifdef USE_KEYRING_CCACHE
     err = k5_mutex_finish_init(&krb5int_krcc_mutex);
     if (err)
@@ -114,7 +115,9 @@ krb5int_cc_finalize(void)
 {
     struct krb5_cc_typelist *t, *t_next;
     k5_mutex_destroy(&cc_typelist_lock);
+#ifndef NO_FILE_CCACHE
     k5_mutex_destroy(&krb5int_cc_file_mutex);
+#endif
     k5_mutex_destroy(&krb5int_mcc_mutex);
 #ifdef USE_KEYRING_CCACHE
     k5_mutex_destroy(&krb5int_krcc_mutex);
