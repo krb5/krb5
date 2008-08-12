@@ -257,7 +257,7 @@ krb5int_des_cbc_decrypt(const mit_des_cblock *in,
 	}
 }
 
-#ifdef CONFIG_SMALL
+#if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
 void krb5int_des_do_encrypt_2 (unsigned DES_INT32 *left,
 			       unsigned DES_INT32 *right,
 			       const unsigned DES_INT32 *kp)

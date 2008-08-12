@@ -371,7 +371,7 @@
     unrolling.  The following options allow partial or full loop unrolling 
     to be set independently for encryption and decryption
 */
-#if !defined(CONFIG_SMALL)
+#if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)
 #define ENC_UNROLL  FULL
 #elif 0
 #define ENC_UNROLL  PARTIAL
@@ -379,7 +379,7 @@
 #define ENC_UNROLL  NONE
 #endif
 
-#if !defined(CONFIG_SMALL)
+#if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)
 #define DEC_UNROLL  FULL
 #elif 0
 #define DEC_UNROLL  PARTIAL
@@ -464,7 +464,7 @@
     of tables used by this implementation.
 */
 
-#if !defined(CONFIG_SMALL)   /* set tables for the normal encryption round */
+#if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)   /* set tables for the normal encryption round */
 #define ENC_ROUND   FOUR_TABLES
 #elif 0
 #define ENC_ROUND   ONE_TABLE
@@ -472,7 +472,7 @@
 #define ENC_ROUND   NO_TABLES
 #endif
 
-#if !defined(CONFIG_SMALL)       /* set tables for the last encryption round */
+#if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)       /* set tables for the last encryption round */
 #define LAST_ENC_ROUND  FOUR_TABLES
 #elif 0
 #define LAST_ENC_ROUND  ONE_TABLE
@@ -480,7 +480,7 @@
 #define LAST_ENC_ROUND  NO_TABLES
 #endif
 
-#if !defined(CONFIG_SMALL)   /* set tables for the normal decryption round */
+#if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)   /* set tables for the normal decryption round */
 #define DEC_ROUND   FOUR_TABLES
 #elif 0
 #define DEC_ROUND   ONE_TABLE
@@ -488,7 +488,7 @@
 #define DEC_ROUND   NO_TABLES
 #endif
 
-#if !defined(CONFIG_SMALL)       /* set tables for the last decryption round */
+#if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)       /* set tables for the last decryption round */
 #define LAST_DEC_ROUND  FOUR_TABLES
 #elif 0
 #define LAST_DEC_ROUND  ONE_TABLE
@@ -500,7 +500,7 @@
     way that the round functions can.  Include or exclude the following 
     defines to set this requirement.
 */
-#if !defined(CONFIG_SMALL)
+#if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)
 #define KEY_SCHED   FOUR_TABLES
 #elif 0
 #define KEY_SCHED   ONE_TABLE

@@ -156,7 +156,7 @@ static void Transform (krb5_ui_4 *buf, krb5_ui_4 *in)
 {
   register krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 
-#ifdef CONFIG_SMALL
+#if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
   int i;
 #define ROTATE { krb5_ui_4 temp; temp = d, d = c, c = b, b = a, a = temp; }
   for (i = 0; i < 16; i++) {

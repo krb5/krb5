@@ -251,7 +251,7 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
 		DES_FINAL_PERM((left), (right), (temp2)); \
 	} while (0)
 
-#ifdef CONFIG_SMALL
+#if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
 extern void krb5int_des_do_encrypt_2(unsigned DES_INT32 *l,
 				     unsigned DES_INT32 *r,
 				     const unsigned DES_INT32 *k);

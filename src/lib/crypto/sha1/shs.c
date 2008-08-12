@@ -112,7 +112,7 @@ void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
     E = digest[ 4 ];
     memcpy(eData, data, sizeof (eData));
 
-#ifdef CONFIG_SMALL
+#if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
 
     {
 	int i;
