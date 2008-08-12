@@ -1133,4 +1133,5 @@ V5_AC_OUTPUT_MAKEFILE(.
 	tests tests/resolve tests/asn.1 tests/create tests/hammer
 	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib
 	tests/gss-threads tests/misc
+	util/collected-client-lib
 )
