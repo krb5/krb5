@@ -1170,16 +1170,20 @@ void kadmin_addprinc(argc, argv)
     krb5_key_salt_tuple *ks_tuple;
     char *pass, *canon;
     krb5_error_code retval;
-    static char newpw[1024], dummybuf[256];
+    char newpw[1024], dummybuf[256];
     static char prompt1[1024], prompt2[1024];
 #if APPLE_PKINIT
     char *cert_hash = NULL;
 #endif /* APPLE_PKINIT */
 
-    if (dummybuf[0] == 0) {
-	for (i = 0; i < 256; i++)
-	    dummybuf[i] = (i+1) % 256;
-    }
+    /* 
+       dummybuf is used to give random key a password,
+       random key entires are created with DISALLOW_ALL_TIX
+       so lets give them a known password utf8 valid pasword
+    */
+    for (i = 0; i < sizeof(dummybuf) - 1; i++)
+ 	dummybuf[i] = 'a' + (random() % 25);
+    dummybuf[sizeof(dummybuf) - 1] = '\0';
 
     /* Zero all fields in request structure */
     memset(&princ, 0, sizeof(princ));

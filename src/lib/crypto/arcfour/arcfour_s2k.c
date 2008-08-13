@@ -55,7 +55,7 @@ krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
 			      const krb5_data *params, krb5_keyblock *key)
 {
   krb5_error_code err = 0;
-  size_t len,slen;
+  size_t len;
   unsigned char *copystr;
   krb5_MD4_CTX md4_context;
 
@@ -71,8 +71,10 @@ krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
      Since the password must be stored in unicode, we need to increase
      that number by 2x.
   */
-  slen = ((string->length)>128)?128:string->length;
-  len=(slen)*2;
+  if (string->length > (SIZE_MAX/2))
+      return (KRB5_BAD_MSIZE);
+
+  len= string->length * 2;
 
   copystr = malloc(len);
   if (copystr == NULL)
