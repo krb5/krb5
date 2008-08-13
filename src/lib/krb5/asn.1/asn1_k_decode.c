@@ -1185,6 +1185,7 @@ asn1_error_code asn1_decode_predicted_sam_response(asn1buf *buf, krb5_predicted_
   cleanup();
 }
 
+#ifndef DISABLE_PKINIT
 /* PKINIT */
 
 asn1_error_code asn1_decode_external_principal_identifier(asn1buf *buf, krb5_external_principal_identifier *val)
@@ -1589,3 +1590,4 @@ asn1_error_code asn1_decode_typed_data(asn1buf *buf, krb5_typed_data *val)
   }
   cleanup();
 }
+#endif /* DISABLE_PKINIT */

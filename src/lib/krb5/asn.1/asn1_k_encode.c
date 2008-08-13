@@ -1,7 +1,7 @@
 /*
  * src/lib/krb5/asn.1/asn1_k_encode.c
  * 
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -1004,6 +1004,7 @@ asn1_error_code asn1_encode_krb_saved_safe_body(asn1buf *buf, const krb5_data *b
   return 0;
 }
 
+#ifndef DISABLE_PKINIT
 /*
  * PKINIT
  */
@@ -1393,3 +1394,4 @@ asn1_error_code asn1_encode_typed_data(asn1buf *buf, const krb5_typed_data *val,
   asn1_makeseq();
   asn1_cleanup();
 }
+#endif /* DISABLE_PKINIT */
