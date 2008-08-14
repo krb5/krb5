@@ -108,6 +108,7 @@ krb5int_copy_creds_contents(krb5_context context, const krb5_creds *incred,
  cleanclient:
     krb5_free_principal(context, tempcred->client);
  cleanlast:
-    krb5_xfree(tempcred);
+    /* Do not free tempcred - we did not allocate it - its contents are 
+       garbage - but we should not free it */
     return retval;
 }
