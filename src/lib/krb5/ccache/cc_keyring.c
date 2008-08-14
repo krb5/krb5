@@ -874,7 +874,13 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
      * a unique name, or we get an error.
      */
     while (1) {
-	krb5int_random_string(context, uniquename, sizeof(uniquename));
+	kret = krb5int_random_string(context, uniquename, sizeof(uniquename));
+        if (kret) {
+            k5_mutex_unlock(&krb5int_krcc_mutex);
+            free(lid);
+            return kret;
+	}
+
 	DEBUG_PRINT(("krb5_krcc_generate_new: searching for name '%s'\n",
 		     uniquename));
 	key = keyctl_search(ring_id, KRCC_KEY_TYPE_KEYRING, uniquename, 0);

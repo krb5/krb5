@@ -471,7 +471,12 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
     while (1) {
         krb5_mcc_list_node *ptr;
 
-        krb5int_random_string (context, uniquename, sizeof (uniquename));
+        err = krb5int_random_string (context, uniquename, sizeof (uniquename));
+        if (err) {
+	    k5_mutex_unlock(&krb5int_mcc_mutex);
+	    free(lid);
+	    return err;
+        }
         
 	for (ptr = mcc_head; ptr; ptr=ptr->next) {
             if (!strcmp(ptr->cache->name, uniquename)) {
