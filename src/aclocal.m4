@@ -624,9 +624,13 @@ extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wconversion -Wshadow"
 # -Wmissing-prototypes
 if test "$GCC" = yes ; then
   # Putting this here means we get -Os after -O2, which works.
-  if test "$with_size_optimizations" = yes; then
+  if test "$with_size_optimizations" = yes && test "x$krb5_ac_cflags_set" != xset; then
     AC_MSG_NOTICE(adding -Os optimization option)
-    CFLAGS="$CFLAGS -Os"
+    case "$CFLAGS" in
+      "-g -O2") CFLAGS="-g -Os" ;;
+      "-O2")    CFLAGS="-Os" ;;
+      *)        CFLAGS="$CFLAGS -Os" ;;
+    esac
   fi
   if test "x$krb5_ac_cflags_set" = xset ; then
     AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)
