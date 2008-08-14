@@ -106,5 +106,8 @@ krb5_build_principal(krb5_context context,  krb5_principal * princ,
     va_end(ap);
     if (retval == 0)
 	*princ = pr_ret;
+    else
+        krb5_xfree(pr_ret);
+
     return retval;
 }
