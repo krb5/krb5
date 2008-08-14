@@ -1066,6 +1066,7 @@ if test -n "$OPENLDAP_PLUGIN"; then
       AC_ERROR("BER library missing - cannot build LDAP database module")
     fi
   fi
+  AC_DEFINE([ENABLE_LDAP], 1, [Define if LDAP KDB support within the Kerberos library (mainly ASN.1 code) should be enabled.])
   AC_SUBST(LDAP_LIBS)
 
   K5_GEN_MAKEFILE(plugins/kdb/ldap)

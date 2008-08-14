@@ -81,8 +81,15 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    S (krb5int_c_mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
 	    S (krb5_ser_pack_int64, krb5_ser_pack_int64),
 	    S (krb5_ser_unpack_int64, krb5_ser_unpack_int64),
-	    S (asn1_ldap_encode_sequence_of_keys, krb5int_ldap_encode_sequence_of_keys),
-	    S (asn1_ldap_decode_sequence_of_keys, krb5int_ldap_decode_sequence_of_keys),
+
+#ifdef ENABLE_LDAP
+#define SC(FIELD, VAL)	S(FIELD, VAL)
+#else
+#define SC(FIELD, VAL)	S(FIELD, 0)
+#endif
+	    SC (asn1_ldap_encode_sequence_of_keys, krb5int_ldap_encode_sequence_of_keys),
+	    SC (asn1_ldap_decode_sequence_of_keys, krb5int_ldap_decode_sequence_of_keys),
+#undef SC
 
 #ifndef DISABLE_PKINIT
 #define SC(FIELD, VAL)	S(FIELD, VAL)

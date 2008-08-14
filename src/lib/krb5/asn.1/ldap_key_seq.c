@@ -39,6 +39,8 @@
 #include "asn1_make.h"
 #include "asn1_get.h"
 
+#ifdef ENABLE_LDAP
+
 #define asn1_encode_sequence_of_keys krb5int_ldap_encode_sequence_of_keys
 #define asn1_decode_sequence_of_keys krb5int_ldap_decode_sequence_of_keys
 
@@ -471,3 +473,4 @@ last:
 
     return ret;
 }
+#endif
