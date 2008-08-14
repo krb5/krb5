@@ -539,6 +539,7 @@ krb5_fcc_read_addrs(krb5_context context, krb5_ccache id, krb5_address ***addrs)
 	  (*addrs)[i] = (krb5_address *) malloc(sizeof(krb5_address));
 	  if ((*addrs)[i] == NULL) {
 	      krb5_free_addresses(context, *addrs);
+	      *addrs = 0;
 	      return KRB5_CC_NOMEM;
 	  }
 	  (*addrs)[i]->contents = NULL;
