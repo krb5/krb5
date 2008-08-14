@@ -1734,6 +1734,7 @@ krb5_fcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 	 setptr = malloc(sizeof(struct fcc_set));
 	 if (setptr == NULL) {
 	     k5_mutex_unlock(&krb5int_cc_file_mutex);
+ 	     k5_mutex_unlock(&data->lock);
 	     k5_mutex_destroy(&data->lock);
 	     free(data->filename);
 	     free(data);
@@ -1984,7 +1985,6 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
 	  free(data);
 	  close(ret);
 	  unlink(scratch);
-	  k5_mutex_unlock(&krb5int_cc_file_mutex);
 	  return KRB5_CC_NOMEM;
      }
 
@@ -2056,6 +2056,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      setptr = malloc(sizeof(struct fcc_set));
      if (setptr == NULL) {
        k5_mutex_unlock(&krb5int_cc_file_mutex);
+       k5_mutex_unlock(&data->lock);
        k5_mutex_destroy(&data->lock);
        free(data->filename);
        free(data);
