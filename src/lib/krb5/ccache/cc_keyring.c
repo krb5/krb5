@@ -1360,6 +1360,7 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
   errout:
     while (--i >= 0)
 	free(krb5_princ_component(context, tmpprinc, i)->data);
+    krb5_xfree(krb5_princ_realm(context, tmpprinc)->data);
     free((char *) tmpprinc->data);
     free((char *) tmpprinc);
     return kret;

@@ -503,6 +503,7 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
  errout:
     while(--i >= 0)
 	free(krb5_princ_component(context, tmpprinc, i)->data);
+    krb5_xfree(krb5_princ_realm(context, tmpprinc)->data);
     free((char *)tmpprinc->data);
     free((char *)tmpprinc);
     return kret;
@@ -1807,9 +1808,15 @@ krb5_fcc_start_seq_get(krb5_context context, krb5_ccache id,
 
      /* Make sure we start reading right after the primary principal */
      kret = krb5_fcc_skip_header(context, id);
-     if (kret) goto done;
+     if (kret) {
+         krb5_xfree(fcursor);
+	 goto done;
+     }
      kret = krb5_fcc_skip_principal(context, id);
-     if (kret) goto done;
+     if (kret) {
+         krb5_xfree(fcursor);
+	 goto done;
+     }
 
      fcursor->pos = fcc_lseek(data, (off_t) 0, SEEK_CUR);
      *cursor = (krb5_cc_cursor) fcursor;
