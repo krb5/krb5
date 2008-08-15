@@ -5,6 +5,8 @@
  * Frank Dabek, July 1998
  */
 
+#if defined(_WIN32) || defined(USE_CCAPI)
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -1034,7 +1036,7 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base,
     if (((MATCH_SET(KRB5_TC_MATCH_SRV_NAMEONLY) &&
 	  srvname_match(context, match, base)) ||
 	 standard_fields_match(context, match, base))
-	&&
+        &&
 	(! MATCH_SET(KRB5_TC_MATCH_IS_SKEY) ||
 	 match->is_skey == base->is_skey)
 	&&
@@ -1063,4 +1065,4 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base,
     return FALSE;
 }
 
-
+#endif /* defined(_WIN32) || defined(USE_CCAPI) */

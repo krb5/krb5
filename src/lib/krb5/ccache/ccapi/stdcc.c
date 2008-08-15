@@ -29,6 +29,8 @@
  * 
  */
 
+#if defined(_WIN32) || defined(USE_CCAPI)
+
 #include "k5-int.h"
 #include "stdcc.h"
 #include "stdcc_util.h"
@@ -1586,7 +1588,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
     	int err;
 	stdccCacheDataPtr	ccapi_data = id->data;
 	krb5_error_code		retval;
-	
+        
 	if ((retval = stdcc_setup(context, ccapi_data))) {
 		if (retval == KRB5_FCC_NOFILE)
 			return 0;
@@ -1611,3 +1613,6 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
         return 0;
 }
 #endif /* !USE_CCAPI_V3 */
+
+#endif /* defined(_WIN32) || defined(USE_CCAPI) */
+

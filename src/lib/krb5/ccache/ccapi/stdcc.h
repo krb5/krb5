@@ -1,17 +1,16 @@
+#if defined(_WIN32) || defined(USE_CCAPI)
+
 #include "k5-int.h"	/* loads krb5.h */
-	
+
 #ifdef USE_CCAPI_V3
 #include <CredentialsCache.h>
 #else
-#ifdef USE_CCAPI
-#include <CredentialsCache2.h>
-#else
 #if defined(_WIN32)
 #include "cacheapi.h"
+#else
+#include <CredentialsCache2.h>
 #endif
 #endif
-#endif
-
 
 #define kStringLiteralLen 255
 
@@ -153,3 +152,5 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_get_flags
 krb5_error_code KRB5_CALLCONV krb5_stdcc_remove 
         (krb5_context, krb5_ccache id , krb5_flags flags, krb5_creds *creds);
 #endif
+
+#endif /* defined(_WIN32) || defined(USE_CCAPI) */

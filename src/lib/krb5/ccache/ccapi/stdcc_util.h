@@ -3,17 +3,17 @@
  * Frank Dabek, July 1998
  */
 
+#if defined(_WIN32) || defined(USE_CCAPI)
+
 #include "autoconf.h"
 
 #if USE_CCAPI_V3
 #include <CredentialsCache.h>
 #else
-#if USE_CCAPI
-#include <CredentialsCache2.h>
-#endif
-
 #if defined(_WIN32)
 #include "cacheapi.h"
+#else
+#include <CredentialsCache2.h>
 #endif
 #endif
 
@@ -45,3 +45,4 @@ int bitTst(int var, int mask);
 #define kAddressArray 4 
 #define kAuthDataArray 5
 
+#endif /* defined(_WIN32) || defined(USE_CCAPI) */
