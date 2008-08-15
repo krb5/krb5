@@ -25,7 +25,7 @@
  */
 
 #include <pwd.h>
-#include <Kerberos/kipc_session.h>
+#include <unistd.h>
 
 #include "kim_os_private.h"
 
@@ -38,7 +38,7 @@ kim_error kim_os_identity_create_for_username (kim_identity *out_identity)
     if (!err && !out_identity) { err = param_error (1, "out_identity", "NULL"); }
     
     if (!err) {
-        struct passwd *pw = getpwuid (kipc_session_get_session_uid ());
+        struct passwd *pw = getpwuid (getuid ());
         if (pw) {
             err =  kim_identity_create_from_string (out_identity, pw->pw_name);
         } else {

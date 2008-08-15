@@ -967,6 +967,7 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
                                                      environment_ccache); }
             
         } else {
+#ifdef USE_CCAPI
             kim_string type = NULL;
             kim_string name = NULL;
             cc_context_t cc_context = NULL;
@@ -975,6 +976,7 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
             err = kim_ccache_get_type (io_ccache, &type);
             
             if (!err && strcmp (type, "API")) {
+#endif
                 kim_string display_name = NULL;
                 /* Not a CCAPI ccache; can't set to default */
                 
@@ -986,6 +988,7 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
                 }
                 
                 kim_string_free (&display_name);
+#ifdef USE_CCAPI
             }
             
             if (!err) {
@@ -1011,6 +1014,7 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
             if (cc_ccache ) { cc_ccache_release (cc_ccache); }
             kim_string_free (&name);
             kim_string_free (&type);
+#endif
         }
     }
     
