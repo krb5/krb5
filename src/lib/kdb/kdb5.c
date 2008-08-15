@@ -1390,8 +1390,9 @@ krb5_db_get_mkey(krb5_context kcontext, krb5_keyblock ** key)
 
 krb5_error_code
 krb5_db_store_master_key(krb5_context kcontext,
-			 char *db_arg,
+			 char *keyfile,
 			 krb5_principal mname,
+			 krb5_kvno kvno,
 			 krb5_keyblock * key, char *master_pwd)
 {
     krb5_error_code status = 0;
@@ -1411,8 +1412,9 @@ krb5_db_store_master_key(krb5_context kcontext,
     }
 
     status = dal_handle->lib_handle->vftabl.store_master_key(kcontext,
-							     db_arg,
+							     keyfile,
 							     mname,
+							     kvno,
 							     key, master_pwd);
     get_errmsg(kcontext, status);
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
@@ -1425,18 +1427,20 @@ char   *krb5_mkey_pwd_prompt1 = KRB5_KDC_MKEY_1;
 char   *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
 
 krb5_error_code
-krb5_db_fetch_mkey(krb5_context context,
-		   krb5_principal mname,
-		   krb5_enctype etype,
-		   krb5_boolean fromkeyboard,
-		   krb5_boolean twice,
-		   char *db_args, krb5_data * salt, krb5_keyblock * key)
+krb5_db_fetch_mkey(krb5_context    context,
+                   krb5_principal  mname,
+                   krb5_enctype    etype,
+                   krb5_boolean    fromkeyboard,
+                   krb5_boolean    twice,
+                   char          * db_args,
+                   krb5_kvno     * kvno,
+                   krb5_data     * salt,
+                   krb5_keyblock * key)
 {
     krb5_error_code retval;
     char    password[BUFSIZ];
     krb5_data pwd;
     unsigned int size = sizeof(password);
-    int     kvno;
     krb5_keyblock tmp_key;
 
     memset(&tmp_key, 0, sizeof(tmp_key));
@@ -1460,6 +1464,30 @@ krb5_db_fetch_mkey(krb5_context context,
 	retval =
 	    krb5_c_string_to_key(context, etype, &pwd, salt ? salt : &scratch,
 				 key);
+        /*
+         * If a kvno pointer was passed in and it dereferences the IGNORE_VNO
+         * value then it should be assigned the value of the kvno associated
+         * with the current mkey princ key if that princ entry is available
+         * otherwise assign 1 which is the default kvno value for the mkey
+         * princ.
+         */
+        if (kvno != NULL && *kvno == IGNORE_VNO) {
+            int nentries = 1;
+            krb5_boolean more;
+            krb5_error_code rc;
+            krb5_db_entry master_entry;
+
+            rc = krb5_db_get_principal(context, mname,
+                &master_entry, &nentries, &more);
+
+            if (rc == 0 && nentries == 1 && more == FALSE) 
+                *kvno = (krb5_kvno) master_entry.key_data->key_data_kvno;
+            else
+                *kvno = 1;
+
+            if (rc == 0 && nentries)
+                krb5_db_free_principal(context, &master_entry, nentries);
+        }
 
 	if (!salt)
 	    krb5_xfree(scratch.data);
@@ -1485,7 +1513,7 @@ krb5_db_fetch_mkey(krb5_context context,
 	retval = dal_handle->lib_handle->vftabl.fetch_master_key(context,
 								 mname,
 								 &tmp_key,
-								 &kvno,
+								 kvno,
 								 db_args);
 	get_errmsg(context, retval);
 	kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
@@ -1515,8 +1543,10 @@ krb5_db_fetch_mkey(krb5_context context,
 }
 
 krb5_error_code
-krb5_db_verify_master_key(krb5_context kcontext,
-			  krb5_principal mprinc, krb5_keyblock * mkey)
+krb5_db_verify_master_key(krb5_context     kcontext,
+                          krb5_principal   mprinc,
+                          krb5_kvno        kvno,
+                          krb5_keyblock  * mkey)
 {
     krb5_error_code status = 0;
     kdb5_dal_handle *dal_handle;
@@ -1535,7 +1565,9 @@ krb5_db_verify_master_key(krb5_context kcontext,
     }
 
     status = dal_handle->lib_handle->vftabl.verify_master_key(kcontext,
-							      mprinc, mkey);
+                                                              mprinc,
+                                                              kvno,
+                                                              mkey);
     get_errmsg(kcontext, status);
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 

@@ -139,6 +139,7 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_POLL_TIME		0x04000000
 #define KADM5_CONFIG_IPROP_LOGFILE	0x08000000
 #define KADM5_CONFIG_IPROP_PORT		0x10000000
+#define KADM5_CONFIG_KVNO           0x20000000
 /*
  * permission bits
  */
@@ -256,7 +257,7 @@ typedef struct _kadm5_config_params {
      krb5_flags		flags;
      krb5_key_salt_tuple *keysalts;
      krb5_int32		num_keysalts;
-
+     krb5_kvno          kvno;
     bool_t		iprop_enabled;
     uint32_t		iprop_ulogsize;
     krb5_deltat		iprop_poll_time;

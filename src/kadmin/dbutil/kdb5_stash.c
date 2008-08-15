@@ -81,6 +81,7 @@ kdb5_stash(argc, argv)
     char *mkey_fullname;
     char *keyfile = 0;
     krb5_context context;
+    krb5_kvno mkey_kvno;
 
     retval = kadm5_init_krb5_context(&context);
     if( retval )
@@ -139,11 +140,17 @@ kdb5_stash(argc, argv)
 	exit_status++; return; 
     }
 
+    if (global_params.mask & KADM5_CONFIG_KVNO)
+        mkey_kvno = global_params.kvno; /* user specified */
+    else
+        mkey_kvno = IGNORE_VNO; /* use whatever krb5_db_fetch_mkey finds */
+
     /* TRUE here means read the keyboard, but only once */
     retval = krb5_db_fetch_mkey(context, master_princ,
 				master_keyblock.enctype,
 				TRUE, FALSE, (char *) NULL,
-				0, &master_keyblock);
+                                &mkey_kvno,
+				NULL, &master_keyblock);
     if (retval) {
 	com_err(progname, retval, "while reading master key");
 	(void) krb5_db_fini(context);
@@ -151,6 +158,7 @@ kdb5_stash(argc, argv)
     }
 
     retval = krb5_db_verify_master_key(context, master_princ, 
+                                       mkey_kvno,
 				       &master_keyblock);
     if (retval) {
 	com_err(progname, retval, "while verifying master key");
@@ -159,7 +167,7 @@ kdb5_stash(argc, argv)
     }	
 
     retval = krb5_db_store_master_key(context, keyfile, master_princ, 
-				      &master_keyblock, NULL);
+                                      mkey_kvno, &master_keyblock, NULL);
     if (retval) {
 	com_err(progname, errno, "while storing key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);

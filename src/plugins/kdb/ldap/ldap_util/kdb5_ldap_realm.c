@@ -845,9 +845,20 @@ void kdb5_ldap_create(argc, argv)
 
     /* Stash the master key only if '-s' option is specified */
     if (do_stash || global_params.mask & KADM5_CONFIG_STASH_FILE) {
+        krb5_kvno mkey_kvno;
+        /*
+         * Determine the kvno to use, it must be that used to create the master
+         * key princ.
+         */
+        if (global_params.mask & KADM5_CONFIG_KVNO)
+            mkey_kvno = global_params.kvno; /* user specified */
+        else
+            mkey_kvno = 1;  /* Default */
+
 	retval = krb5_def_store_mkey(util_context,
 				     global_params.stash_file,
 				     master_princ,
+                                     mkey_kvno,
 				     &master_keyblock, NULL);
 	if (retval) {
 	    com_err(progname, errno, "while storing key");

@@ -275,8 +275,9 @@ krb5_error_code krb5_db_get_mkey ( krb5_context kcontext,
 krb5_error_code krb5_db_free_master_key ( krb5_context kcontext,
 					  krb5_keyblock *key );
 krb5_error_code krb5_db_store_master_key  ( krb5_context kcontext, 
-					    char *db_arg, 
+					    char *keyfile, 
 					    krb5_principal mname,
+					    krb5_kvno kvno,
 					    krb5_keyblock *key,
 					    char *master_pwd);
 krb5_error_code krb5_db_fetch_mkey  ( krb5_context   context,
@@ -285,11 +286,13 @@ krb5_error_code krb5_db_fetch_mkey  ( krb5_context   context,
 				      krb5_boolean   fromkeyboard,
 				      krb5_boolean   twice,
 				      char          *db_args,
+                                      krb5_kvno     *kvno,
 				      krb5_data     *salt,
 				      krb5_keyblock *key);
-krb5_error_code krb5_db_verify_master_key ( krb5_context kcontext,
+krb5_error_code krb5_db_verify_master_key ( krb5_context   kcontext,
 					    krb5_principal mprinc,
-					    krb5_keyblock *mkey );
+                                            krb5_kvno      kvno,
+					    krb5_keyblock  *mkey );
 krb5_error_code
 krb5_dbe_find_enctype( krb5_context	kcontext,
 		       krb5_db_entry	*dbentp,
@@ -432,6 +435,7 @@ krb5_error_code
 krb5_def_store_mkey( krb5_context context,
 		     char *keyfile,
 		     krb5_principal mname,
+		     krb5_kvno kvno,
 		     krb5_keyblock *key,
 		     char *master_pwd);
 
@@ -440,12 +444,13 @@ krb5_error_code
 krb5_db_def_fetch_mkey( krb5_context   context,
 			krb5_principal mname,
 			krb5_keyblock *key,
-			int           *kvno,
+			krb5_kvno     *kvno,
 			char          *db_args);
 
 krb5_error_code
-krb5_def_verify_master_key( krb5_context context,
+krb5_def_verify_master_key( krb5_context   context,
 			    krb5_principal mprinc,
+			    krb5_kvno      kvno,
 			    krb5_keyblock *mkey);
 
 krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,

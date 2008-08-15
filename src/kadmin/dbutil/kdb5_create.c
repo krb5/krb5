@@ -166,6 +166,7 @@ void kdb5_create(argc, argv)
     int do_stash = 0;
     krb5_data pwd, seed;
     kdb_log_context *log_ctx;
+    krb5_kvno mkey_kvno;
 	   
     while ((optchar = getopt(argc, argv, "s")) != -1) {
 	switch(optchar) {
@@ -319,9 +320,20 @@ master key name '%s'\n",
      * it; delete the file below if it was not requested.  DO NOT EXIT
      * BEFORE DELETING THE KEYFILE if do_stash is not set.
      */
+
+    /*
+     * Determine the kvno to use, it must be that used to create the master key
+     * princ.
+     */
+    if (global_params.mask & KADM5_CONFIG_KVNO)
+        mkey_kvno = global_params.kvno; /* user specified */
+    else
+        mkey_kvno = 1;  /* Default */
+
     retval = krb5_db_store_master_key(util_context,
 				      global_params.stash_file,
 				      master_princ,
+				      mkey_kvno,
 				      &master_keyblock,
 				      mkey_password);
     if (retval) {
@@ -401,6 +413,7 @@ add_principal(context, princ, op, pblock)
 {
     krb5_error_code 	  retval;
     krb5_db_entry 	  entry;
+    krb5_kvno             mkey_kvno;
 
     krb5_timestamp	  now;
     struct iterate_args	  iargs;
@@ -433,10 +446,14 @@ add_principal(context, princ, op, pblock)
 	memset((char *) entry.key_data, 0, sizeof(krb5_key_data));
 	entry.n_key_data = 1;
 
+        if (global_params.mask & KADM5_CONFIG_KVNO)
+            mkey_kvno = global_params.kvno; /* user specified */
+        else
+            mkey_kvno = 1;  /* Default */
 	entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
 	if ((retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
 						  &master_keyblock, NULL, 
-						  1, entry.key_data)))
+						  mkey_kvno, entry.key_data)))
 	    return retval;
 	break;
     case TGT_KEY:

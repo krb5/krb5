@@ -267,7 +267,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     if ((kret = krb5_db_fetch_mkey(rdp->realm_context, rdp->realm_mprinc,
 				   rdp->realm_mkey.enctype, manual,
 				   FALSE, rdp->realm_stash,
-				   0, &rdp->realm_mkey))) {
+				   NULL, NULL, &rdp->realm_mkey))) {
 	com_err(progname, kret,
 		"while fetching master key %s for realm %s",
 		rdp->realm_mpname, realm);
@@ -277,6 +277,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     /* Verify the master key */
     if ((kret = krb5_db_verify_master_key(rdp->realm_context,
 					  rdp->realm_mprinc,
+                                          IGNORE_VNO,
 					  &rdp->realm_mkey))) {
 	com_err(progname, kret,
 		"while verifying master key for realm %s", realm);

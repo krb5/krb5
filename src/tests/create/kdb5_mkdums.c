@@ -360,7 +360,8 @@ char *dbname;
     } else {
 	if ((retval = krb5_db_fetch_mkey(test_context, master_princ, 
 					master_keyblock.enctype, manual_mkey, 
-					FALSE, 0, NULL, &master_keyblock))) {
+					FALSE, 0, NULL, NULL,
+                                        &master_keyblock))) {
 	    com_err(pname, retval, "while reading master key");
 	    return(1);
 	}
@@ -389,7 +390,7 @@ char *dbname;
     free(args[0]);
 
     if ((retval = krb5_db_verify_master_key(test_context, master_princ, 
-					   &master_keyblock))){
+					   IGNORE_VNO, &master_keyblock))){
 	com_err(pname, retval, "while verifying master key");
 	(void) krb5_db_fini(test_context);
 	return(1);

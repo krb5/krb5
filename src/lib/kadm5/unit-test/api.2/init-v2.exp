@@ -147,7 +147,7 @@ proc test108 {} {
 		[config_params {KADM5_CONFIG_MKEY_NAME} does/not/exist] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
-    } "KDB_NOMASTERKEY"
+    } "KRB5_KDB_CANTREAD_STORED"
 }
 if {! $RPC} test108
 
