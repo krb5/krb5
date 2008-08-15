@@ -42,6 +42,8 @@ krb5int_cc_initialize(void);
 void
 krb5int_cc_finalize(void);
 
+krb5_error_code krb5int_random_string (krb5_context, char *, unsigned int);
+
 extern k5_mutex_t krb5int_mcc_mutex;
 extern k5_mutex_t krb5int_krcc_mutex;
 extern k5_mutex_t krb5int_cc_file_mutex;

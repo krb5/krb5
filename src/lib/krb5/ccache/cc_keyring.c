@@ -70,7 +70,7 @@
  *	  special key, which is not counted in the 'numkeys' count
  */
 
-#include "k5-int.h"
+#include "cc-int.h"
 
 #ifdef USE_KEYRING_CCACHE
 

@@ -26,7 +26,7 @@
  *
  * implementation of memory-based credentials cache
  */
-#include "k5-int.h"
+#include "cc-int.h"
 #include <errno.h>
 
 static krb5_error_code KRB5_CALLCONV krb5_mcc_close
