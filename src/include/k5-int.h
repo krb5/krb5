@@ -2039,26 +2039,6 @@ extern const krb5_cc_ops *krb5_cc_dfl_ops;
 krb5_error_code
 krb5int_cc_os_default_name(krb5_context context, char **name);
 
-/*
- * Cursor for iterating over ccache types
- */
-struct krb5_cc_typecursor;
-typedef struct krb5_cc_typecursor *krb5_cc_typecursor;
-
-krb5_error_code
-krb5int_cc_typecursor_new(krb5_context context, krb5_cc_typecursor *cursor);
-
-krb5_error_code
-krb5int_cc_typecursor_next(
-    krb5_context context,
-    krb5_cc_typecursor cursor,
-    const struct _krb5_cc_ops **ops);
-
-krb5_error_code
-krb5int_cc_typecursor_free(
-    krb5_context context,
-    krb5_cc_typecursor *cursor);
-
 typedef struct _krb5_donot_replay {
     krb5_magic magic;
     krb5_ui_4 hash;

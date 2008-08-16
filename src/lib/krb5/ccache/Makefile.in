@@ -144,7 +144,7 @@ cccursor.so cccursor.po $(OUTPRE)cccursor.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h cccursor.c
+  $(SRCTOP)/include/socket-utils.h cc-int.h cccursor.c
 ccdefault.so ccdefault.po $(OUTPRE)ccdefault.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

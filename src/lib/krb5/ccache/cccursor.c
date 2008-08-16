@@ -26,7 +26,7 @@
  * cursor for sequential traversal of ccaches
  */
 
-#include "k5-int.h"
+#include "cc-int.h"
 
 #include <assert.h>
 
