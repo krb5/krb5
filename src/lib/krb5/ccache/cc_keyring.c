@@ -1287,7 +1287,7 @@ krb5_krcc_parse_cred(krb5_context context, krb5_ccache id, krb5_creds * creds,
     memset(creds->ticket.data, 0, (unsigned) creds->ticket.length);
     krb5_xfree(creds->ticket.data);
   cleanauthdata:
-    /* XXX ??? */
+    krb5_free_authdata(context, creds->authdata);
   cleanaddrs:
     krb5_free_addresses(context, creds->addresses);
   cleanblock:
@@ -1616,6 +1616,7 @@ krb5_krcc_parse_authdata(krb5_context context, krb5_ccache id,
 	(*a)[i] = (krb5_authdata *) malloc(sizeof(krb5_authdata));
 	if ((*a)[i] == NULL) {
 	    krb5_free_authdata(context, *a);
+	    *a = NULL;
 	    return KRB5_CC_NOMEM;
 	}
 	kret = krb5_krcc_parse_authdatum(context, id, (*a)[i], bc);
@@ -1624,8 +1625,10 @@ krb5_krcc_parse_authdata(krb5_context context, krb5_ccache id,
 
     return KRB5_OK;
   errout:
-    if (*a)
+    if (*a) {
 	krb5_free_authdata(context, *a);
+	*a = NULL;
+    }
     return kret;
 }
 

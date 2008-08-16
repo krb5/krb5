@@ -816,6 +816,7 @@ krb5_fcc_read_authdata(krb5_context context, krb5_ccache id, krb5_authdata ***a)
 	  (*a)[i] = (krb5_authdata *) malloc(sizeof(krb5_authdata));
 	  if ((*a)[i] == NULL) {
 	      krb5_free_authdata(context, *a);
+	      *a = NULL;
 	      return KRB5_CC_NOMEM;
 	  }
 	  (*a)[i]->contents = NULL;
