@@ -84,20 +84,22 @@ krb5int_copy_creds_contents(krb5_context context, const krb5_creds *incred,
     krb5_xfree(scratch);
     retval = krb5_copy_data(context, &incred->second_ticket, &scratch);
     if (retval)
-	goto cleanticket;
+	goto clearticket;
 
     tempcred->second_ticket = *scratch;
     krb5_xfree(scratch);
 
     retval = krb5_copy_authdata(context, incred->authdata,&tempcred->authdata);
     if (retval)
-        goto clearticket;
+        goto clearsecondticket;
 
     return 0;
 
+ clearsecondticket:    
+    memset(tempcred->second_ticket.data,0,tempcred->second_ticket.length);
+    free(tempcred->second_ticket.data);
  clearticket:    
     memset(tempcred->ticket.data,0,tempcred->ticket.length);
- cleanticket:
     free(tempcred->ticket.data);
  cleanaddrs:
     krb5_free_addresses(context, tempcred->addresses);
