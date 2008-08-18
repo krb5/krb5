@@ -8,6 +8,7 @@
 		<string key="IBDocument.HIToolboxVersion">352.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<integer value="6"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -39,7 +40,7 @@
 				<string key="NSWindowContentMaxSize">{600, 600}</string>
 				<string key="NSWindowContentMinSize">{419, 298}</string>
 				<object class="NSView" key="NSWindowView" id="928852707">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -384,25 +385,22 @@
 						</object>
 					</object>
 					<string key="NSFrameSize">{491, 315}</string>
+					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1920, 1178}}</string>
 				<string key="NSMinSize">{419, 320}</string>
 				<string key="NSMaxSize">{600, 622}</string>
 			</object>
-			<object class="NSArrayController" id="297584252">
+			<object class="NSObjectController" id="597809582">
 				<object class="NSMutableArray" key="NSDeclaredKeys">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>servicePrincipalString</string>
-					<string>shortTimeRemainingString</string>
+					<string>cachesArray</string>
 				</object>
-				<string key="NSObjectClassName">KerberosCredential</string>
-				<bool key="NSEditable">YES</bool>
+				<string key="NSObjectClassName">KerberosCacheCollection</string>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
-				<bool key="NSAvoidsEmptySelection">YES</bool>
-				<bool key="NSPreservesSelection">YES</bool>
-				<bool key="NSSelectsInsertedObjects">YES</bool>
-				<bool key="NSFilterRestrictsInsertion">YES</bool>
-				<bool key="NSClearsFilterPredicateOnInsertion">YES</bool>
+			</object>
+			<object class="NSCustomObject" id="692063328">
+				<string key="NSClassName">KerberosCacheCollection</string>
 			</object>
 			<object class="NSArrayController" id="950399944">
 				<object class="NSMutableArray" key="NSDeclaredKeys">
@@ -419,16 +417,20 @@
 				<bool key="NSFilterRestrictsInsertion">YES</bool>
 				<bool key="NSClearsFilterPredicateOnInsertion">YES</bool>
 			</object>
-			<object class="NSCustomObject" id="692063328">
-				<string key="NSClassName">KerberosCacheCollection</string>
-			</object>
-			<object class="NSObjectController" id="597809582">
+			<object class="NSArrayController" id="297584252">
 				<object class="NSMutableArray" key="NSDeclaredKeys">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>cachesArray</string>
+					<string>servicePrincipalString</string>
+					<string>shortTimeRemainingString</string>
 				</object>
-				<string key="NSObjectClassName">KerberosCacheCollection</string>
+				<string key="NSObjectClassName">KerberosCredential</string>
+				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
+				<bool key="NSAvoidsEmptySelection">YES</bool>
+				<bool key="NSPreservesSelection">YES</bool>
+				<bool key="NSSelectsInsertedObjects">YES</bool>
+				<bool key="NSFilterRestrictsInsertion">YES</bool>
+				<bool key="NSClearsFilterPredicateOnInsertion">YES</bool>
 			</object>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
@@ -629,10 +631,10 @@
 							<reference ref="818868322"/>
 							<reference ref="774532696"/>
 							<reference ref="675887072"/>
-							<reference ref="147207906"/>
 							<reference ref="505388869"/>
 							<reference ref="700535463"/>
 							<reference ref="426244837"/>
+							<reference ref="147207906"/>
 						</object>
 						<reference key="parent" ref="224590347"/>
 					</object>
@@ -753,30 +755,6 @@
 						<reference key="parent" ref="1004662124"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">300021</int>
-						<reference key="object" ref="297584252"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">CredentialsController</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">300022</int>
-						<reference key="object" ref="950399944"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">CachesController</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">300023</int>
-						<reference key="object" ref="692063328"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">KerberosCacheCollection</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">300024</int>
-						<reference key="object" ref="597809582"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">CacheCollectionController</string>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">300118</int>
 						<reference key="object" ref="675887072"/>
 						<object class="NSMutableArray" key="children">
@@ -822,6 +800,30 @@
 						<int key="objectID">300156</int>
 						<reference key="object" ref="700535463"/>
 						<reference key="parent" ref="928852707"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300024</int>
+						<reference key="object" ref="597809582"/>
+						<reference key="parent" ref="0"/>
+						<string key="objectName">CacheCollectionController</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300023</int>
+						<reference key="object" ref="692063328"/>
+						<reference key="parent" ref="0"/>
+						<string key="objectName">KerberosCacheCollection</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300022</int>
+						<reference key="object" ref="950399944"/>
+						<reference key="parent" ref="0"/>
+						<string key="objectName">CachesController</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300021</int>
+						<reference key="object" ref="297584252"/>
+						<reference key="parent" ref="0"/>
+						<string key="objectName">CredentialsController</string>
 					</object>
 				</object>
 			</object>
@@ -912,9 +914,9 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{778, 710}, {491, 315}}</string>
+					<string>{{623, 643}, {491, 315}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{778, 710}, {491, 315}}</string>
+					<string>{{623, 643}, {491, 315}}</string>
 					<reference ref="5"/>
 					<reference ref="5"/>
 					<string>{{503, 256}, {419, 465}}</string>
