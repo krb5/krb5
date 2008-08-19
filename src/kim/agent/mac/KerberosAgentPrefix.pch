@@ -8,6 +8,7 @@
 
 #include <Kerberos/Kerberos.h>
 #include <Kerberos/KerberosLoginPrivate.h>
+#include <Kerberos/kim.h>
 #include <Kerberos/KerberosDebug.h>
 #include <nameser.h>
 #include <netinet/in.h>

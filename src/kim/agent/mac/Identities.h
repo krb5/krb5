@@ -22,8 +22,6 @@
  * or implied warranty.
  */
 
-#import <Cocoa/Cocoa.h>
-
 @interface Identity : NSObject {
     kim_identity kimIdentity;
     int state;
@@ -31,13 +29,18 @@
     
 }
 
+@end
+
 
 @interface Identities : NSObject {
     NSArray *identitiesArray;
+    NSMutableArray *favoriteIdentitiesArray;
+    NSMutableArray *ccacheIdentitiesArray;
     NSConnection *threadConnection;
 
 }
 
+- (int) update;
 - (NSArray *) identities;
 
 @end

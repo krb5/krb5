@@ -37,9 +37,6 @@
     return self;
 }
 
-
-
-
 @end
 
 @implementation Identities
@@ -92,7 +89,7 @@
 
     threadConnection = NULL;
     favoriteIdentitiesArray = NULL;
-    ccacheIdentitiesArray = NULL:
+    ccacheIdentitiesArray = NULL;
     
     if (!err) {
         self = [super init];
@@ -106,9 +103,10 @@
     
     if (!err) {
         kim_favorite_identities favoriteIdentities = NULL;
+        kim_count i;
         kim_count count = 0;
         
-        err = kim_favorite_identities_create (&favorite_identities);
+        err = kim_favorite_identities_create (&favoriteIdentities);
         
         if (!err) {
             err = kim_favorite_identities_get_number_of_identities (favoriteIdentities,
@@ -117,13 +115,13 @@
         
         for (i = 0; !err && i < count; i++) {
             kim_identity kimIdentity = NULL;
-            Identity *identity = NULL:
+            Identity *identity = NULL;
             
             err = kim_favorite_identities_get_identity_at_index (favoriteIdentities, 
                                                                  i, &kimIdentity);
             
             if (!err) {
-                Identity *identity = [[[Identity alloc] initWithIdentity: kimIdentity] autorelease];
+                identity = [[[Identity alloc] initWithIdentity: kimIdentity] autorelease];
                 if (!identity) { err = ENOMEM; }
             }
              
@@ -179,7 +177,7 @@
 
 - (NSArray *) identities
 {
-    return identities;
+    return identitiesArray;
 }
 
 // ---------------------------------------------------------------------------
@@ -235,14 +233,14 @@
             err = KIM_NO_ERROR;
         }
         
-        kim_identity_free (&identity);
+        kim_identity_free (&kimIdentity);
         kim_ccache_free (&ccache);
     }
     
     kim_ccache_iterator_free (&iterator);
     
     if (err) {
-        NSLog (@"Got error %s", kim_error_message (err));
+        NSLog (@"Got error %s", error_message (err));
     }
     
     return err;
