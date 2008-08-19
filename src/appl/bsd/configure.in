@@ -46,15 +46,7 @@ dnl krshd does not use krb524...
 dnl
 KRSHDLIBS="$LOGINLIBS"
 dnl 
-dnl After beta6 this functionality will be integrated with aclocal.m4
-AC_ARG_WITH([krb4],
-[  --without-krb4          don't include Kerberos V4 backwards compatibility
-  --with-krb4             use V4 libraries included with V5 (default)
-  --with-krb4=KRB4DIR     use preinstalled V4 libraries],
-,
-withval=yes
-)dnl
-if test $withval = no; then
+if test "$with_krb4" = "" || test "$with_krb4" = no; then
 	AC_MSG_RESULT(no krb4 support)
 	V4RCP=
 	V4RCPO=
