@@ -84,7 +84,8 @@ kim_error kim_identity_create_from_string (kim_identity *out_identity,
     if (!err) {
         krb5_error_code code = krb5_parse_name (identity->context, in_string, &identity->principal);
         if (code == KRB5_PARSE_MALFORMED) {
-            err = kim_error_create_from_code (KIM_BAD_PRINCIPAL_STRING_ECODE, in_string);
+            err = kim_error_set_message_for_code (KIM_BAD_PRINCIPAL_STRING_ECODE, 
+                                                  in_string);
         } else if (code) {
             err = krb5_error (identity->context, code);
         }
@@ -435,7 +436,9 @@ kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
     if (!err) {
         krb5_int32 i = in_index;
         component = krb5_princ_component (in_identity->context, in_identity->principal, i);
-        if (!component) { err = kim_error_create_from_code (KIM_BAD_COMPONENT_INDEX_ECODE, i); }
+        if (!component) { 
+            err = kim_error_set_message_for_code (KIM_BAD_COMPONENT_INDEX_ECODE, i); 
+        }
     }
     
     if (!err) {

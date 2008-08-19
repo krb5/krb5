@@ -983,8 +983,8 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
                 err = kim_ccache_get_display_name (io_ccache, &display_name);
                 
                 if (!err) {
-                    err = kim_error_create_from_code (KIM_CANT_BECOME_DEFAULT_ECODE, 
-                                                      display_name);
+                    err = kim_error_set_message_for_code (KIM_CANT_BECOME_DEFAULT_ECODE, 
+                                                          display_name);
                 }
                 
                 kim_string_free (&display_name);
