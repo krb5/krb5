@@ -192,7 +192,8 @@ kim_error kim_favorite_identities_get_identity_at_index (kim_favorite_identities
     
     if (!err) {
         if (in_index >= in_favorite_identities->count) {
-            err = kim_error_create_from_code (KIM_BAD_IDENTITY_INDEX_ECODE, in_index);
+            err = kim_error_set_message_for_code (KIM_BAD_IDENTITY_INDEX_ECODE, 
+                                                  in_index);
         }
     }
     
@@ -238,8 +239,8 @@ kim_error kim_favorite_identities_add_identity (kim_favorite_identities io_favor
                     err = kim_identity_get_display_string (in_identity, &display_string);
                     
                     if (!err) {
-                        err = kim_error_create_from_code (KIM_IDENTITY_ALREADY_IN_IDENTITIES_LIST, 
-                                                          display_string);
+                        err = kim_error_set_message_for_code (KIM_IDENTITY_ALREADY_IN_IDENTITIES_LIST, 
+                                                              display_string);
                     }
                     
                     kim_string_free (&display_string);
@@ -296,7 +297,6 @@ kim_error kim_favorite_identities_remove_identity (kim_favorite_identities io_fa
                 kim_error terr = kim_favorite_identities_resize (io_favorite_identities, new_count);
                 if (terr) {
                     kim_debug_printf ("failed to resize list to %d.  Continuing.", new_count);
-                    kim_error_free (&terr);
                 }
                 
                 kim_identity_free (&identity);
@@ -310,7 +310,8 @@ kim_error kim_favorite_identities_remove_identity (kim_favorite_identities io_fa
         err = kim_identity_get_display_string (in_identity, &display_string);
         
         if (!err) {
-            err = kim_error_create_from_code (KIM_IDENTITY_NOT_IN_IDENTITIES_LIST, display_string);
+            err = kim_error_set_message_for_code (KIM_IDENTITY_NOT_IN_IDENTITIES_LIST, 
+                                                  display_string);
         }
         
         kim_string_free (&display_string);

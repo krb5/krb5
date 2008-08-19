@@ -101,8 +101,7 @@ void fail_if_error (kim_test_state_t  in_state,
         
         printf ("\tFAILURE: ");
         printf ("%s() got %d (%s) ",
-                in_function, kim_error_get_code (in_err), 
-                kim_error_get_display_string (in_err));
+                in_function, in_err, kim_error_message (in_err));
         
         va_start (args, in_format);
         vprintf (in_format, args);

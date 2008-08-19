@@ -71,7 +71,7 @@ static kim_error kim_os_selection_hints_get_selection_hints_array (CFArrayRef *o
         }        
         
         if (value && CFGetTypeID (value) != CFArrayGetTypeID ()) {
-            err = kim_error_create_from_code (KIM_PREFERENCES_READ_ECODE);
+            err = check_error (KIM_PREFERENCES_READ_ECODE);
         }
     }
     
@@ -101,7 +101,7 @@ static kim_error kim_os_selection_hints_set_selection_hints_array (CFArrayRef in
         CFPreferencesSetValue (KIM_SELECTION_HINTS_ARRAY, in_selection_hints_array, 
                                KIM_SELECTION_HINTS_FILE, user, host);
         if (!CFPreferencesSynchronize (KIM_SELECTION_HINTS_FILE, user, host)) {
-            err = kim_error_create_from_code (KIM_PREFERENCES_WRITE_ECODE);
+            err = check_error (KIM_PREFERENCES_WRITE_ECODE);
         }
     }
     
@@ -210,8 +210,6 @@ static kim_boolean kim_os_selection_hints_compare_hint (kim_string  in_string,
             if (!err && kim_comparison_is_equal_to (comparison)) {
                 equal = 1;
             }
-            
-            kim_error_free (&err);
         } else {
             kim_debug_printf ("%s: Malformed string in hints dictionary.", __FUNCTION__);
         }
@@ -299,7 +297,7 @@ static kim_error kim_os_selection_hints_get_dictionary_identity (CFDictionaryRef
     identity_cfstr = CFDictionaryGetValue (in_dictionary, KIM_IDENTITY_HINT);
     if (!identity_cfstr || CFGetTypeID (identity_cfstr) != CFStringGetTypeID ()) {
         kim_debug_printf ("%s: Malformed hints dictionary (invalid identity).", __FUNCTION__);
-        err = kim_error_create_from_code (KIM_PREFERENCES_READ_ECODE);
+        err = check_error (KIM_PREFERENCES_READ_ECODE);
     }
     
     if (!err) {

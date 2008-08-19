@@ -30,11 +30,6 @@
 #include <kim/kim.h>
 
 
-#define kim_debug_printf(format, ...) __kim_library_debug_printf(__FUNCTION__, format, ## __VA_ARGS__)
-void __kim_library_debug_printf (kim_string in_function, 
-                                 kim_string in_format, 
-                                 ...);
-
 kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access);
 
 kim_error kim_library_get_allow_home_directory_access (kim_boolean *out_allow_access);

@@ -219,12 +219,19 @@ extern "C" {
  * @{
  */
 
+#define kim_hint_key_client_realm     "kim_hint_key_client_realm"
+#define kim_hint_key_user             "kim_hint_key_user"
+#define kim_hint_key_service_realm    "kim_hint_key_service_realm"
+#define kim_hint_key_service          "kim_hint_key_service"
+#define kim_hint_key_server           "kim_hint_key_server"
+#define kim_hint_key_service_identity "kim_hint_key_service_identity"
+    
 /*!
  * \param out_selection_hints       on exit, a new selection hints object.  
  *                                  Must be freed with kim_selection_hints_free().
  * \param in_application_identifier an application identifier string.  Java-style identifiers are recommended 
  *                                  to avoid cache entry collisions (eg: "com.example.MyApplication")
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Create a new selection hints object.
  */
 kim_error kim_selection_hints_create (kim_selection_hints *out_selection_hints,
@@ -234,138 +241,39 @@ kim_error kim_selection_hints_create (kim_selection_hints *out_selection_hints,
  * \param out_selection_hints on exit, a new selection hints object which is a copy of in_selection_hints.  
  *                            Must be freed with kim_selection_hints_free().
  * \param in_selection_hints  a selection hints object. 
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Copy a selection hints object.
  */
 kim_error kim_selection_hints_copy (kim_selection_hints *out_selection_hints,
                                       kim_selection_hints  in_selection_hints);
 
 /*!
- * \param io_selection_hints   a selection hints object to modify.
- * \param in_service_identity  a service identity.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Set the preferred service identity.
- * \sa kim_selection_hints_get_service_identity_hint()
+ * \param io_selection_hints    a selection hints object to modify.
+ * \param in_hint_key           A string representing the type of hint to set.
+ * \param in_hint_string        A string representation of a hint for
+ *                              \a in_hint_key to set in \a in_selection_hints.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Set the string value of a hint used for identity selection.
+ * \sa kim_selection_hints_get_hint()
  */
-kim_error kim_selection_hints_set_service_identity_hint (kim_selection_hints io_selection_hints,
-                                                           kim_identity        in_service_identity);
+kim_error kim_selection_hints_set_hint (kim_selection_hints io_selection_hints,
+                                        kim_string          in_hint_key,
+                                        kim_string          in_hint_string);
 
 /*!
  * \param in_selection_hints    a selection hints object.
- * \param out_service_identity  on exit, the service identity specified in \a in_selection_hints.
- *                              Must be freed with kim_identity_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Get the preferred service identity.
- * \sa kim_selection_hints_set_service_identity_hint()
+ * \param in_hint_key           A string representing the type of hint to 
+ *                              obtain.
+ * \param out_hint_string       A string representation of the hint 
+ *                              \a in_hint_key in \a in_selection_hints.
+ *                              Must be freed with kim_string_free().
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Get the string value of a hint used for identity selection.
+ * \sa kim_selection_hints_set_hint()
  */
-kim_error kim_selection_hints_get_service_identity_hint (kim_selection_hints  in_selection_hints,
-                                                           kim_identity        *out_service_identity);
-
-/*!
- * \param io_selection_hints a selection hints object to modify.
- * \param in_client_realm    a client realm string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Set the preferred client realm.
- * \sa kim_selection_hints_get_client_realm_hint()
- */
-kim_error kim_selection_hints_set_client_realm_hint (kim_selection_hints io_selection_hints,
-                                                       kim_string          in_client_realm);
-
-/*!
- * \param in_selection_hints a selection hints object.
- * \param out_client_realm   on exit, the client realm string specified in \a in_selection_hints.
- *                           Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Get the preferred client realm.
- * \sa kim_selection_hints_set_client_realm_hint()
- */
-kim_error kim_selection_hints_get_client_realm_hint (kim_selection_hints  in_selection_hints,
-                                                       kim_string          *out_client_realm);
-
-/*!
- * \param io_selection_hints a selection hints object to modify.
- * \param in_user            a user name string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Set the preferred user name.
- * \sa kim_selection_hints_get_user_hint()
- */
-kim_error kim_selection_hints_set_user_hint (kim_selection_hints io_selection_hints,
-                                               kim_string          in_user);
-
-/*!
- * \param in_selection_hints a selection hints object.
- * \param out_user           on exit, the user name string specified in \a in_selection_hints.
- *                           Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Get the preferred user name.
- * \sa kim_selection_hints_set_user_hint()
- */
-kim_error kim_selection_hints_get_user_hint (kim_selection_hints  in_selection_hints,
-                                               kim_string          *out_user);
-
-
-/*!
- * \param io_selection_hints a selection hints object to modify.
- * \param in_service_realm    a service realm string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Set the preferred service realm.
- * \sa kim_selection_hints_get_service_realm_hint()
- */
-kim_error kim_selection_hints_set_service_realm_hint (kim_selection_hints io_selection_hints,
-                                                        kim_string          in_service_realm);
-
-/*!
- * \param io_selection_hints a selection hints object.
- * \param out_service_realm  on exit, the service realm string specified in \a in_selection_hints.
- *                           Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Get the preferred service realm.
- * \sa kim_selection_hints_set_service_realm_hint()
- */
-kim_error kim_selection_hints_get_service_realm_hint (kim_selection_hints  io_selection_hints,
-                                                        kim_string          *out_service_realm);
-
-/*!
- * \param io_selection_hints a selection hints object to modify.
- * \param in_service         a service name string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Set the preferred service name.
- * \sa kim_selection_hints_get_service_hint()
- */
-kim_error kim_selection_hints_set_service_hint (kim_selection_hints io_selection_hints,
-                                                  kim_string          in_service);
-
-/*!
- * \param in_selection_hints a selection hints object.
- * \param out_service        on exit, the service name string specified in \a in_selection_hints.
- *                           Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Get the preferred service name.
- * \sa kim_selection_hints_set_service_hint()
- */
-kim_error kim_selection_hints_get_service_hint (kim_selection_hints  in_selection_hints,
-                                                  kim_string          *out_service);
-
-/*!
- * \param io_selection_hints a selection hints object to modify.
- * \param in_server          a server host name string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Set the preferred server host name.
- * \sa kim_selection_hints_get_server_hint()
- */
-kim_error kim_selection_hints_set_server_hint (kim_selection_hints io_selection_hints,
-                                                 kim_string          in_server);
-
-/*!
- * \param in_selection_hints a selection hints object.
- * \param out_server         on exit, the server host name string specified in \a in_selection_hints.
- *                           Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Get the preferred server host name.
- * \sa kim_selection_hints_set_server_hint()
- */
-kim_error kim_selection_hints_get_server_hint (kim_selection_hints  in_selection_hints,
-                                                 kim_string          *out_server);
+kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
+                                        kim_string           in_hint_key,
+                                        kim_string          *out_hint_string);
 
 /*!
  * \param io_selection_hints  a selection hints object to modify.
@@ -373,7 +281,7 @@ kim_error kim_selection_hints_get_server_hint (kim_selection_hints  in_selection
  * \note If you do not call this function KIM will attempt to determine the application
  * name at runtime.  If that fails (the functionality is only available on some platforms)
  * then KIM will use the application identity string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the application name for use in user interaction.
  * \sa kim_selection_hints_get_application_name()
  */
@@ -384,7 +292,7 @@ kim_error kim_selection_hints_set_application_name (kim_selection_hints io_selec
  * \param in_selection_hints   a selection hints object.
  * \param out_application_name on exit, the localized full name of the application specified 
  *                             in \a in_selection_hints. Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the application name for use in user interaction.
  * \sa kim_selection_hints_set_application_name()
  */
@@ -397,7 +305,7 @@ kim_error kim_selection_hints_get_application_name (kim_selection_hints  in_sele
  * \note If the application only does one thing (the reason it needs an identity is obvious) 
  * then you may not need to call this function.  You may still need to call 
  * #kim_selection_hints_set_application_name()
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the strings used to prompt the user to select the identity.
  * \sa kim_selection_hints_get_explanation()
  */
@@ -409,7 +317,7 @@ kim_error kim_selection_hints_set_explanation (kim_selection_hints io_selection_
  * \param out_explanation      on exit, the localized string specified in \a in_selection_hints
  *                             which describes why the caller needs the identity.  May be NULL.
  *                             If non-NULL, must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the strings used to prompt the user to select the identity.
  * \sa kim_selection_hints_set_explanation()
  */
@@ -420,7 +328,7 @@ kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection
 /*!
  * \param io_selection_hints  a selection hints object to modify.
  * \param in_options          options to control credential acquisition. 
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the options which will be used if credentials need to be acquired.
  * \sa kim_selection_hints_get_options()
  */
@@ -432,7 +340,7 @@ kim_error kim_selection_hints_set_options (kim_selection_hints io_selection_hint
  * \param out_options        on exit, the options to control credential acquisition  
  *                           specified in \a in_selection_hints.  May be KIM_OPTIONS_DEFAULT.
  *                           If not, must be freed with kim_options_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the options which will be used if credentials need to be acquired.
  * \sa kim_selection_hints_set_options()
  */
@@ -443,7 +351,7 @@ kim_error kim_selection_hints_get_options (kim_selection_hints  in_selection_hin
  * \param in_selection_hints        a selection hints object to modify
  * \param in_allow_user_interaction a boolean value specifying whether or not KIM should ask
  *                                  the user to select an identity for \a in_selection_hints.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \note This setting defaults to TRUE.
  * \brief Set whether or not KIM may interact with the user to select an identity.
  * \sa kim_selection_hints_get_allow_user_interaction
@@ -456,7 +364,7 @@ kim_error kim_selection_hints_set_allow_user_interaction (kim_selection_hints in
  * \param out_allow_user_interaction on exit, a boolean value specifying whether or not KIM 
  *                                   should ask the user to select an identity for 
  *                                   \a in_selection_hints.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \note This setting defaults to TRUE.
  * \brief Get whether or not KIM may interact with the user to select an identity.
  * \sa kim_selection_hints_set_allow_user_interaction
@@ -468,7 +376,7 @@ kim_error kim_selection_hints_get_allow_user_interaction (kim_selection_hints  i
  * \param in_selection_hints    a selection hints object to modify
  * \param in_remember_identity  a boolean value specifying whether or not KIM should use a cached
  *                              mapping between \a in_selection_hints and a Kerberos identity.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \note This setting defaults to TRUE.
  * \brief Set whether or not KIM will use cached mappings for this selection hints object.
  * \sa kim_selection_hints_get_remember_identity
@@ -480,7 +388,7 @@ kim_error kim_selection_hints_set_remember_identity (kim_selection_hints in_sele
  * \param in_selection_hints     a selection hints object to modify
  * \param out_remember_identity on exit, a boolean value specifying whether or not KIM will use a 
  *                               cached mapping between \a in_selection_hints and a Kerberos identity.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \note This setting defaults to TRUE.
  * \brief Get whether or not KIM will use cache mappings for this selection hints object.
  * \sa kim_selection_hints_set_remember_identity
@@ -492,7 +400,7 @@ kim_error kim_selection_hints_get_remember_identity (kim_selection_hints  in_sel
  * \param in_selection_hints the selection hints to add to the cache.
  * \param out_identity       the Kerberos identity \a in_selection_hints maps to.
  *                           Must be freed with kim_identity_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \note \a out_identity is the identity mapped to by the current state of \a in_selection_hints.
  * This function may prompt the user via a GUI to choose that identity.
  * Subsequent modifications to \a in_selection_hints will not change \a out_identity.
@@ -505,7 +413,7 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints in_selection_hin
 /*!
  * \param in_selection_hints the selection hints to add to the cache.
  * \param in_identity the Kerberos identity \a in_selection_hints maps to.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Add an entry for the selection hints to the selection hints cache, 
  * replacing any existing entry.
  */
@@ -515,7 +423,7 @@ kim_error kim_selection_hints_remember_identity (kim_selection_hints in_selectio
 
 /*!
  * \param in_selection_hints the selection hints to remove from the cache.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Remove an entry for the selection hints from the selection hints cache.
  */
 

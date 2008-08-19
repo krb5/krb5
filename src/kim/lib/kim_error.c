@@ -24,61 +24,93 @@
  * or implied warranty.
  */
 
+#include "k5-int.h"
 #include "kim_private.h"
 #include <com_err.h>
 #include <CredentialsCache.h>
 
-struct kim_error_opaque {
-    kim_error_code code;
-    kim_string message;
-};
+static k5_mutex_t kim_error_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
-struct kim_error_opaque kim_no_memory_error_struct = { KIM_OUT_OF_MEMORY_ECODE, NULL, };
-kim_error kim_no_memory_error = &kim_no_memory_error_struct;
-
-struct kim_error_opaque kim_error_initializer = { KIM_NO_ERROR_ECODE, NULL };
+MAKE_INIT_FUNCTION(kim_error_initialize);
+MAKE_FINI_FUNCTION(kim_error_terminate);
 
 /* ------------------------------------------------------------------------ */
 
-static inline kim_error kim_error_allocate (kim_error      *out_error,
-                                            kim_error_code  in_code)
+typedef struct kim_last_error {
+    kim_error code;
+    char message[1024];
+} *kim_last_error;
+
+/* ------------------------------------------------------------------------ */
+
+static kim_error kim_error_set_message (kim_error  in_error,
+                                        kim_string in_message)
 {
+    int lock_err = 0;
     kim_error err = KIM_NO_ERROR;
-    kim_error error = NULL;
+    kim_last_error last_error = NULL; 
     
-    /* short circuit out of memory errors so we don't loop */
-    switch (in_code) {
-        case 0:
-            return KIM_NO_ERROR;
-            
-        case KIM_OUT_OF_MEMORY_ECODE:
-        case ENOMEM:
-        case KRB5_CC_NOMEM:
-        case ccErrNoMem:
-            //        case klMemFullErr:
-            //        case memFullErr:
-            return kim_no_memory_error;
-    }
+    err = lock_err = k5_mutex_lock (&kim_error_lock);
     
     if (!err) {
-        error = malloc (sizeof (*error));
-        if (!error) {
-            err = kim_no_memory_error;
-        } else {
-            *error = kim_error_initializer;
+        last_error = k5_getspecific (K5_KEY_KIM_ERROR_MESSAGE);
+        
+        if (!last_error) {
+            last_error = malloc (sizeof (*last_error));
+            if (!last_error) {
+                err = KIM_OUT_OF_MEMORY_ECODE;
+            } else {
+                last_error->code = KIM_NO_ERROR;
+                err = k5_setspecific (K5_KEY_KIM_ERROR_MESSAGE, last_error);
+            }
         }
     }
     
     if (!err) {
-        error->code = in_code;
-        
-        *out_error = error;
-        error = NULL;
+        strncpy (last_error->message, in_message, sizeof (last_error->message));
+        last_error->message[sizeof (last_error->message)-1] = '\0';
+        last_error->code = in_error;
     }
     
-    kim_error_free (&error);
+    if (!lock_err) { k5_mutex_unlock (&kim_error_lock); }
     
-    return check_error (err);    
+    return err;
+}
+
+/* ------------------------------------------------------------------------ */
+
+static void kim_error_free_message (void *io_error)
+{
+    kim_last_error error = io_error;
+    
+    if (error) {
+        if (error->message) {
+            free (error->message);
+        }
+        free (error);
+    }
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_string kim_error_message (kim_error in_error)
+{
+    int lock_err = 0;
+    kim_last_error last_error = NULL; 
+    kim_string message = NULL;
+    
+    lock_err = k5_mutex_lock (&kim_error_lock);
+    
+    if (!lock_err) {
+        last_error = k5_getspecific (K5_KEY_KIM_ERROR_MESSAGE);
+        if (last_error && last_error->code == in_error) {
+            message = last_error->message;
+         }
+    }
+    
+    if (!lock_err) { k5_mutex_unlock (&kim_error_lock); }
+    
+    return message ? message : error_message (in_error);    
 }
 
 /* ------------------------------------------------------------------------ */
@@ -86,7 +118,7 @@ static inline kim_error kim_error_allocate (kim_error      *out_error,
 static kim_boolean kim_error_is_builtin (kim_error in_error)
 {
     return (in_error == KIM_NO_ERROR ||
-            in_error == kim_no_memory_error);
+            in_error == KIM_OUT_OF_MEMORY_ECODE);
 }
 
 #pragma mark -- Helper Functions --
@@ -95,30 +127,30 @@ static kim_boolean kim_error_is_builtin (kim_error in_error)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error _kim_error_create_for_param (kim_string in_function, 
-                                       unsigned int in_argument_position,
-                                       kim_string in_argument_name,
-                                       kim_string in_invalid_value)
+kim_error _kim_error_set_message_for_param (kim_string in_function, 
+                                            unsigned int in_argument_position,
+                                            kim_string in_argument_name,
+                                            kim_string in_invalid_value)
 {
-    return kim_error_create_from_code (KIM_PARAMETER_ECODE, 
-                                       in_function, 
-                                       in_argument_position, 
-                                       in_argument_name,
-                                       in_invalid_value);
+    return kim_error_set_message_for_code (KIM_PARAMETER_ECODE, 
+                                           in_function, 
+                                           in_argument_position, 
+                                           in_argument_name,
+                                           in_invalid_value);
 }
 
 #pragma mark -- Generic Functions --
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_error_create_from_code (kim_error_code in_code, 
-                                      ...)
+kim_error kim_error_set_message_for_code (kim_error in_error, 
+                                          ...)
 {
     kim_error err = KIM_NO_ERROR;
     va_list args;
     
-    va_start (args, in_code);
-    err = kim_error_create_from_code_va (in_code, args);
+    va_start (args, in_error);
+    err = kim_error_set_message_for_code_va (in_error, args);
     va_end (args);
     
     return check_error (err);    
@@ -126,159 +158,84 @@ kim_error kim_error_create_from_code (kim_error_code in_code,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_error_create_from_code_va (kim_error_code in_code, 
-                                         va_list        in_args)
+kim_error kim_error_set_message_for_code_va (kim_error in_error, 
+                                             va_list   in_args)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_error error = KIM_NO_ERROR;
     
-    if (!err) {
-        err = kim_error_allocate (&error, in_code);
-    }
-    
-    if (!err && !kim_error_is_builtin (error)) {
-        err = kim_string_create_from_format_va_retcode (&error->message, 
-                                                        error_message (in_code), 
+    if (!err && !kim_error_is_builtin (in_error)) {
+        kim_string message = NULL;
+
+        err = kim_string_create_from_format_va_retcode (&message, 
+                                                        error_message (in_error), 
                                                         in_args);
+        
+        if (!err) {
+            err = kim_error_set_message (in_error, message);
+        }
+        
+        kim_string_free (&message);
     }
     
-    if (!err) {
-        err = error;
-        error = NULL;  /* take ownership */
-    }
-    
-    kim_error_free (&error);
-    
-    return err;
+    return err ? err : in_error;
 }
 
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_error_create_from_krb5_error (krb5_context    in_context, 
-                                            krb5_error_code in_code)
+kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context, 
+                                                krb5_error_code in_code)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_error error = KIM_NO_ERROR;
     
-    if (!err) {
-        err = kim_error_allocate (&error, in_code);
-    }
-    
-    if (!err && !kim_error_is_builtin (error)) {
+    if (!err && !kim_error_is_builtin (in_code)) {
         const char *message = krb5_get_error_message (in_context, in_code);
         
-        err = kim_string_copy (&error->message, message);
-        
-        if (message) { krb5_free_error_message (in_context, message); }
+        err = kim_error_set_message (in_code, message);
     }
     
-    if (!err) {
-        err = error;
-        error = NULL;  /* take ownership */
-    }
-    
-    kim_error_free (&error);
-    
-    return err;
-}
-        
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_error_copy (kim_error *out_error,
-                          kim_error  in_error)
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_error error = KIM_NO_ERROR;
-    
-    if (!err && !out_error) { err = param_error (1, "out_error", "NULL"); }
-    if (!err && !in_error ) { err = param_error (2, "in_error", "NULL"); }
-    
-    if (!err) { 
-        if (kim_error_is_builtin (in_error)) {
-            error = in_error;
-            
-        } else {
-            err = kim_error_allocate (&error, in_error->code);
-            
-            if (!err && in_error->message) {
-                err = kim_string_copy (&error->message, in_error->message);
-            }
-        }
-    }
-    
-    if (!err) {
-        *out_error = error;
-        error = KIM_NO_ERROR;
-    }
-    
-    kim_error_free (&error);
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error_code kim_error_get_code (kim_error in_error)
-{
-    if (!in_error) {  /* KIM_NO_ERROR */
-        return KIM_NO_ERROR_ECODE;
-    } else {
-        return in_error->code;
-    }
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_string kim_error_get_display_string (kim_error in_error)
-{
-    if (!in_error) {  /* KIM_NO_ERROR */
-        return error_message (KIM_NO_ERROR_ECODE);
-        
-    } else if (in_error->message) {
-        return in_error->message;
-        
-    } else {
-        /* Note: kim_no_memory_error will get here because its string is NULL */
-        return error_message (in_error->code);
-    }
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error_code kim_error_free (kim_error *io_error)
-{
-    kim_error_code code = 0;
-    
-    if (io_error && *io_error) {
-        code = (*io_error)->code;
-        
-        if (kim_error_is_builtin (*io_error)) {
-            kim_string_free (&(*io_error)->message);
-            free (*io_error);
-            *io_error = KIM_NO_ERROR;
-        }
-    }
-    
-    return code;
+    return err ? err : in_code;
 }
 
 #pragma mark -- Debugging Functions --
 
 /* ------------------------------------------------------------------------ */
 
-kim_error _check_error (kim_error  in_err, 
-                        kim_string in_function, 
-                        kim_string in_file, 
-                        int        in_line)
+int kim_error_initialize (void)
 {
-    if (in_err) {
-        kim_error_code code = kim_error_get_code (in_err);
-        kim_string message = kim_error_get_display_string (in_err);
-        
-        kim_debug_printf ("%s(): got %d ('%s') at %s: %d", 
-                          in_function, code, message, in_file, in_line);
+    int err = 0;
+    
+    if (!err) {
+	err = k5_mutex_finish_init (&kim_error_lock);
     }
     
-    return in_err;
+    if (!err) {
+	err = k5_key_register (K5_KEY_KIM_ERROR_MESSAGE, 
+                               kim_error_free_message);
+    }
+    
+    return err;
+}
+
+/* ------------------------------------------------------------------------ */
+
+void kim_error_terminate (void)
+{
+    if (!INITIALIZER_RAN (kim_error_initialize) || PROGRAM_EXITING ()) {
+	return;
+    }
+    
+    k5_key_delete (K5_KEY_KIM_ERROR_MESSAGE);
+    k5_mutex_destroy (&kim_error_lock);
+}
+
+#pragma mark -- Public API --
+
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_string_get_last_error_message (kim_string *out_string,
+                                             kim_error   in_error)
+{
+    return kim_string_copy (out_string, kim_error_message (in_error));
 }

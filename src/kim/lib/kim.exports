@@ -1,7 +1,4 @@
-kim_error_copy
-kim_error_get_code
-kim_error_get_display_string
-kim_error_free
+kim_string_get_last_error_message
 
 kim_string_copy
 kim_string_compare

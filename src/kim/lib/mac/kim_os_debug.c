@@ -1,14 +1,14 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- *
+ * 
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -24,23 +24,14 @@
  * or implied warranty.
  */
 
-#ifndef KIM_PRIVATE_H
-#define KIM_PRIVATE_H
+#include <CoreServices/CoreServices.h>
+#include <Kerberos/KerberosDebug.h>
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
+#include "kim_os_private.h"
 
-#include <kim/kim.h>
+/* ------------------------------------------------------------------------ */
 
-#include "kim_library_private.h"
-#include "kim_debug_private.h"
-#include "kim_error_private.h"
-#include "kim_identity_private.h"
-#include "kim_ccache_private.h"
-#include "kim_options_private.h"
-#include "kim_preferences_private.h"
-#include "kim_selection_hints_private.h"
-#include "kim_string_private.h"
-
-#endif /* KIM_PRIVATE_H */
+void kim_os_debug_print (kim_string in_string)
+{
+    dprintf (in_string);
+}

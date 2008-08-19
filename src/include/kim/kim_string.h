@@ -48,26 +48,40 @@ extern "C" {
  */
 
 /*!
+ * \param out_string on exit, a human-readable UTF-8 string describing the 
+ *                   error represented by \a in_error.  Must be freed with 
+ *                   kim_string_free().
+ * \param in_error   an error code.
+ * \return On success, #KIM_NO_ERROR.  On failure, 
+ * \note If the caller needs an error string, this API should be called 
+ * immediately after a KIM API returns an error. 
+ * \brief Get a text description of an error.
+ */
+kim_error kim_string_create_for_error (kim_string *out_string,
+                                       kim_error   in_error);
+
+    
+/*!
  * \param out_string on exit, a new string object which is a copy of \a in_string.  
                      Must be freed with kim_string_free().
  * \param in_string  the string to copy.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Copy a string.
  */
 kim_error kim_string_copy (kim_string       *out_string,
-                             const kim_string  in_string);
+                           const kim_string  in_string);
 
 /*!
  * \param in_string            a string.
  * \param in_compare_to_string a string to be compared to \a in_string.
  * \param out_comparison       on exit, a comparison result indicating whether \a in_string
  *                             is greater than, less than or equal to \a in_compare_to_string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Compare two strings.
  */
 kim_error kim_string_compare (kim_string      in_string, 
-                                kim_string      in_compare_to_string,
-                                kim_comparison *out_comparison);
+                              kim_string      in_compare_to_string,
+                              kim_comparison *out_comparison);
     
 /*!
  * \param io_string a string to be freed.  Set to NULL on exit.

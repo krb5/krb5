@@ -147,7 +147,7 @@ static kim_error kim_os_preferences_get_value (kim_preference_key  in_key,
         }        
         
         if (value && CFGetTypeID (value) != in_type) {
-            err = kim_error_create_from_code (KIM_PREFERENCES_READ_ECODE);
+            err = check_error (KIM_PREFERENCES_READ_ECODE);
         }
     }
     
@@ -184,7 +184,7 @@ static kim_error kim_os_preferences_set_value (kim_preference_key in_key,
         
         CFPreferencesSetValue (kim_key, in_value, KIM_PREFERENCES_FILE, user, host);
         if (!CFPreferencesSynchronize (KIM_PREFERENCES_FILE, user, host)) {
-            err = kim_error_create_from_code (KIM_PREFERENCES_WRITE_ECODE);
+            err = check_error (KIM_PREFERENCES_WRITE_ECODE);
         }
     }
     
@@ -301,7 +301,7 @@ kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key
                 
                 cfstring = (CFStringRef) CFArrayGetValueAtIndex (value, i);
                 if (!cfstring || CFGetTypeID (cfstring) != CFStringGetTypeID ()) {
-                    err = kim_error_create_from_code (KIM_PREFERENCES_READ_ECODE);
+                    err = check_error (KIM_PREFERENCES_READ_ECODE);
                 }
                 
                 if (!err) {

@@ -42,7 +42,6 @@ void test_kim_preferences_create (kim_test_state_t state)
                        "while creating preferences");
         
         kim_preferences_free (&prefs);
-        kim_error_free (&err);
     }
     
     end_test (state);
@@ -72,7 +71,6 @@ void test_kim_preferences_copy (kim_test_state_t state)
         
         kim_preferences_free (&prefs_copy);
         kim_preferences_free (&prefs);
-        kim_error_free (&err);
     }
     
     end_test (state);
@@ -149,7 +147,6 @@ void test_kim_preferences_set_options (kim_test_state_t state)
         kim_options_free (&new_options);
         kim_options_free (&verify_options);
         kim_preferences_free (&prefs);
-        kim_error_free (&err);
     }
     
      end_test (state);
@@ -206,7 +203,6 @@ void test_kim_preferences_set_remember_options (kim_test_state_t state)
         }
         
         kim_preferences_free (&prefs);
-        kim_error_free (&err);
     }
     
     end_test (state);
@@ -291,7 +287,6 @@ void test_kim_preferences_set_client_identity (kim_test_state_t state)
         kim_identity_free (&identity);
         kim_identity_free (&test_identity);
         kim_preferences_free (&prefs);
-        kim_error_free (&err);
     }
     
     end_test (state);

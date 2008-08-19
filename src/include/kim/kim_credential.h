@@ -272,7 +272,7 @@ extern "C" {
      * \param out_credential_iterator on exit, a credential iterator object for \a in_ccache.
      *                                Must be freed with kim_credential_iterator_free().
      * \param in_ccache               a ccache object.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get a credential iterator to enumerate credentials in a ccache.
      */
     
@@ -285,7 +285,7 @@ extern "C" {
      *                               \a in_credential_iterator.   Must be freed with 
      *                               kim_credential_free(). If there are no more credentials
      *                               this argument will be set to NULL.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get the next credential in a ccache.
      */
     
@@ -313,7 +313,7 @@ extern "C" {
      * \param in_options          options to control credential acquisition. 
      * \note Depending on the kim_options specified, #kim_credential_create_new() may 
      * present a GUI or command line prompt to obtain information from the user. 
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Acquire a new initial credential.
      * \sa kim_ccache_create_new
      */
@@ -329,7 +329,7 @@ extern "C" {
      *                        the first identity in the keytab.
      * \param in_options      options to control credential acquisition. 
      * \param in_keytab       a path to a keytab.  Specify NULL for the default keytab location. 
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Acquire a new initial credential from a keytab.
      * \sa kim_ccache_create_from_keytab
      */
@@ -343,7 +343,7 @@ extern "C" {
      *                        Must be freed with kim_credential_free().
      * \param in_krb5_context the krb5 context used to create \a in_krb5_creds. 
      * \param in_krb5_creds   a krb5 credential object. 
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Copy a credential from a krb5 credential object.
      */
     kim_error kim_credential_create_from_krb5_creds (kim_credential *out_credential,
@@ -354,7 +354,7 @@ extern "C" {
      * \param out_credential  on exit, a new credential object which is a copy of \a in_credential.  
      *                        Must be freed with kim_credential_free().
      * \param in_credential   a credential object. 
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Copy a credential object.
      */
     kim_error kim_credential_copy (kim_credential *out_credential,
@@ -365,7 +365,7 @@ extern "C" {
      * \param in_krb5_context  a krb5 context which will be used to create \a out_krb5_creds. 
      * \param out_krb5_creds   on exit, a new krb5 creds object which is a copy of \a in_credential.  
      *                         Must be freed with krb5_free_creds().
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get a krb5 credentials object for a credential object.
      */
     kim_error kim_credential_get_krb5_creds (kim_credential   in_credential,
@@ -376,7 +376,7 @@ extern "C" {
      * \param in_credential        a credential object. 
      * \param out_client_identity  on exit, an identity object containing the client identity of   
      *                             \a in_credential. Must be freed with kim_identity_free().
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get the client identity of a credential object.
      */
     kim_error kim_credential_get_client_identity (kim_credential  in_credential,
@@ -386,7 +386,7 @@ extern "C" {
      * \param in_credential         a credential object. 
      * \param out_service_identity  on exit, an identity object containing the service identity of   
      *                              \a in_credential. Must be freed with kim_identity_free().
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get the service identity of a credential object.
      */
     kim_error kim_credential_get_service_identity (kim_credential  in_credential,
@@ -395,7 +395,7 @@ extern "C" {
     /*!
      * \param in_credential a credential object. 
      * \param out_is_tgt    on exit, whether or not the credential is a TGT.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Check if a credential is a ticket granting ticket.
      */
     kim_error kim_credential_is_tgt (kim_credential  in_credential,
@@ -405,7 +405,7 @@ extern "C" {
      * \param in_credential a credential object. 
      * \param out_state     on exit, the state of the credential.  See #kim_credential_state_enum
      *                      for the possible values of \a out_state.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Check the state of a credential (valid, expired, postdated, etc).
      */
     kim_error kim_credential_get_state (kim_credential        in_credential,
@@ -415,7 +415,7 @@ extern "C" {
      * \param in_credential  a credential object. 
      * \param out_start_time on exit, the time when \a in_credential becomes valid.
      *                       May be in the past or future.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get the time when the credentials become valid.
      * \sa kim_ccache_get_start_time
      */
@@ -426,7 +426,7 @@ extern "C" {
      * \param in_credential       a credential object. 
      * \param out_expiration_time on exit, the time when \a in_credential will expire.
      *                            May be in the past or future.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get the time when the credentials will expire.
      * \sa kim_ccache_get_expiration_time
      */
@@ -437,7 +437,7 @@ extern "C" {
      * \param in_credential               a credential object. 
      * \param out_renewal_expiration_time on exit, the time when \a in_credential will no longer 
      *                                    be renewable. May be in the past or future.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Get the time when the credentials will no longer be renewable.
      * \sa kim_ccache_get_renewal_expiration_time
      */
@@ -451,7 +451,7 @@ extern "C" {
      * \param out_ccache          on exit, a ccache object containing \a in_credential with the client  
      *      		      identity \a in_client_identity.  Must be freed with kim_ccache_free().
      *                            Specify NULL if you don't want this return value.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Store a credential in a ccache in the cache collection.
      */
     kim_error kim_credential_store (kim_credential  in_credential,
@@ -468,7 +468,7 @@ extern "C" {
      *                                  in the host's keytab will cause a failure. 
      * \note specifying FALSE for \a in_fail_if_no_service_key may expose the calling program to 
      * the Zanarotti attack if the host has no keytab installed.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Verify a TGT credential.
      * \sa kim_ccache_verify
      */
@@ -483,7 +483,7 @@ extern "C" {
      *                       with a new renewed credential.  The new credential must be freed 
      *                       with kim_credential_free().
      * \param in_options     initial credential options.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Renew a TGT credential.
      * \sa kim_ccache_renew
      */
@@ -496,7 +496,7 @@ extern "C" {
      *                       with a new validated credential.  The new credential must be freed 
      *                       with kim_credential_free().
      * \param in_options     initial credential options.
-     * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+     * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
      * \brief Validate a TGT credential.
      * \sa kim_ccache_validate
      */

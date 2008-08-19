@@ -105,26 +105,22 @@
     }
     
     if (!err) {
-        kim_error kimErr = KIM_NO_ERROR;
         kim_favorite_identities favoriteIdentities = NULL;
         kim_count count = 0;
         
-        kimErr = kim_favorite_identities_create (&favorite_identities);
-        err = kim_error_free (&kimErr);
+        err = kim_favorite_identities_create (&favorite_identities);
         
         if (!err) {
-            kimErr = kim_favorite_identities_get_number_of_identities (favoriteIdentities,
-                                                                       &count);
-            err = kim_error_free (&kimErr);
+            err = kim_favorite_identities_get_number_of_identities (favoriteIdentities,
+                                                                    &count);
         }
         
         for (i = 0; !err && i < count; i++) {
             kim_identity kimIdentity = NULL;
             Identity *identity = NULL:
             
-            kimErr = kim_favorite_identities_get_identity_at_index (favoriteIdentities, 
-                                                                    i, &kimIdentity);
-            err = kim_error_free (&kimErr);
+            err = kim_favorite_identities_get_identity_at_index (favoriteIdentities, 
+                                                                 i, &kimIdentity);
             
             if (!err) {
                 Identity *identity = [[[Identity alloc] initWithIdentity: kimIdentity] autorelease];
@@ -234,9 +230,8 @@
             }
         }
         
-        if (kim_error_get_code (err) == KIM_NO_CREDENTIALS_ECODE) {
+        if (err == KIM_NO_CREDENTIALS_ECODE) {
             /* ccache is empty, just ignore it */
-            kim_error_free (&err);
             err = KIM_NO_ERROR;
         }
         
@@ -247,10 +242,10 @@
     kim_ccache_iterator_free (&iterator);
     
     if (err) {
-        NSLog (@"Got error %s", kim_error_get_display_string (err));
+        NSLog (@"Got error %s", kim_error_message (err));
     }
     
-    return kim_error_free (&err);
+    return err;
 }
 
 

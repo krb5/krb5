@@ -248,7 +248,7 @@ kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
         err = kim_ccache_create_from_client_identity (out_ccache, in_client_identity);
         
         if (err) {
-            kim_error_free (&err);  /* toss error since we don't care */
+            /* ccache does not already exist, create a new one */
             err = kim_ccache_create_new (out_ccache, in_client_identity, in_options);
         }
     }
@@ -284,8 +284,8 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
             err = kim_identity_get_display_string (in_client_identity, &string);
             
             if (!err) {
-                err = kim_error_create_from_code (KIM_NO_SUCH_PRINCIPAL_ECODE, 
-                                                  string);
+                err = kim_error_set_message_for_code (KIM_NO_SUCH_PRINCIPAL_ECODE, 
+                                                      string);
             }
             
             kim_string_free (&string);
@@ -721,8 +721,8 @@ static kim_error kim_ccache_get_dominant_credential (kim_ccache            in_cc
         }
         
         if (!err) {
-            err = kim_error_create_from_code (KIM_NO_CREDENTIALS_ECODE, 
-                                              identity_string);
+            err = kim_error_set_message_for_code (KIM_NO_CREDENTIALS_ECODE, 
+                                                  identity_string);
         }    
 
         kim_string_free (&identity_string);
@@ -781,21 +781,21 @@ kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
         
         if (!err) {
             if (state == kim_credentials_state_expired) {
-                err = kim_error_create_from_code (KIM_CREDENTIALS_EXPIRED_ECODE, 
+                err = kim_error_set_message_for_code (KIM_CREDENTIALS_EXPIRED_ECODE, 
                                                   identity_string);
                 
             } else if (state == kim_credentials_state_not_yet_valid ||
                        state == kim_credentials_state_needs_validation) {
-                err = kim_error_create_from_code (KIM_NEEDS_VALIDATION_ECODE, 
-                                                  identity_string);
+                err = kim_error_set_message_for_code (KIM_NEEDS_VALIDATION_ECODE, 
+                                                      identity_string);
                 
             } else if (state == kim_credentials_state_address_mismatch) {
-                err = kim_error_create_from_code (KIM_BAD_IP_ADDRESS_ECODE, 
-                                                  identity_string);                
+                err = kim_error_set_message_for_code (KIM_BAD_IP_ADDRESS_ECODE, 
+                                                      identity_string);                
             } else {
                 /* just default to this */
-                err = kim_error_create_from_code (KIM_NEEDS_VALIDATION_ECODE, 
-                                                  identity_string);
+                err = kim_error_set_message_for_code (KIM_NEEDS_VALIDATION_ECODE, 
+                                                      identity_string);
             }
         }
         

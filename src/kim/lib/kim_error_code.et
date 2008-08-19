@@ -28,6 +28,7 @@ error_code KIM_PARAMETER_ECODE,                     "%s(): argument %d (%s) may 
 error_code KIM_KRB5_INIT_FAILED_ECODE,              "Unable to initialize Kerberos v5"
 error_code KIM_NO_REALMS_ECODE,                     "There are no Kerberos realms configured"
 error_code KIM_NO_SUCH_REALM_ECODE,                 "The realm '%s' is not in your configuration file or does not exist"
+error_code KIM_UNSUPPORTED_HINT_ECODE,              "The hint '%s' is not supported by this version of KIM"
 
 index 25
 # Principal Errors
@@ -61,9 +62,9 @@ error_code KIM_BAD_IDENTITY_INDEX_ECODE,            "No identity at index %d in 
 index 125
 # Cache Collection Errors
 error_code KIM_NO_SUCH_PRINCIPAL_ECODE,             "Principal '%s' does not exist in the cache collection"
-error_code KIM_CANT_BECOME_DEFAULT_ECODE,           "The credentials cache '%s' cannot become the system default cache."
+error_code KIM_CANT_BECOME_DEFAULT_ECODE,           "The credentials cache '%s' cannot become the system default cache"
 error_code KIM_CREDENTIALS_EXPIRED_ECODE,           "The Kerberos credentials for '%s' have expired"
-error_code KIM_NO_CREDENTIALS_ECODE,                "You do not have Kerberos credentials for principal '%s'"
+error_code KIM_NO_CREDENTIALS_ECODE,                "No Kerberos credentials for '%s' available"
 error_code KIM_BAD_IP_ADDRESS_ECODE,                "The IP addresses in the Kerberos credentials for '%s' do not match any of your computer's IP addresses"
 error_code KIM_NO_SUCH_CCACHE_ECODE,                "The credentials cache '%s' does not exist"
 error_code KIM_BAD_HOST_CONFIGURATION_ECODE,        "Unable to get local hostname or address information"

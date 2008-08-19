@@ -31,13 +31,6 @@
 
 /* ------------------------------------------------------------------------ */
 
-void kim_os_library_debug_print (kim_string in_string)
-{
-    dprintf (in_string);
-}
-
-/* ------------------------------------------------------------------------ */
-
 kim_boolean kim_os_library_caller_is_server (void)
 {
     CFBundleRef mainBundle = CFBundleGetMainBundle ();

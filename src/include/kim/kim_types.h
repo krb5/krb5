@@ -37,9 +37,9 @@ extern "C" {
  */
 
 /*!
- * The KIM String type.  See \ref kim_string_overview for more information.
+ * The KIM Error type.  See \ref kim_error_overview for more information.
  */
-typedef int32_t     kim_error_code;
+typedef int32_t     kim_error;
 
 /*!
  * A time value represented in seconds since January 1, 1970.
@@ -89,15 +89,20 @@ typedef int         kim_comparison;
 #define kim_comparison_is_greater_than(c) (c > 0)
 
 /*!
+ * The KIM Context type.  See \ref kim_context_overview for more information.
+ */
+typedef const char *kim_context;
+
+/*!
  * The KIM String type.  See \ref kim_string_overview for more information.
  */
 typedef const char *kim_string;
 
-struct kim_error_opaque;
+//struct kim_error_opaque;
 /*!
  * A KIM Error object.  See \ref kim_error_overview for more information.
  */
-typedef struct kim_error_opaque *kim_error;
+//typedef struct kim_error_opaque *kim_error;
 
 struct kim_identity_opaque;
 /*!

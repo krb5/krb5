@@ -35,40 +35,36 @@ extern "C" {
 /*!
  * \ingroup kim_types_reference
  * The kim_error_t returned when no error occurred. 
- * Does not need to be freed with kim_error_free().
  */
-#define KIM_NO_ERROR                  ((kim_error) NULL)
-
-/*!
- * \ingroup kim_types_reference
- * The kim_error_code_t for KIM_NO_ERROR. 
- */
-#define KIM_NO_ERROR_ECODE            ((kim_error_code) 0)
+#define KIM_NO_ERROR                  ((kim_error) 0)
     
 /*!
  * \page kim_error_overview KIM Error Overview
  *
- * An error object.  Error objects consist of a machine readable error code for 
- * for programmatic error handling and a string describing the error.  All KIM APIs
- * return kim_errors with the exception of memory deallocation functions and the
- * kim_error_t APIs which return pieces of a kim_error_t object.  
+ * Like most C APIs, the KIM API returns numeric error codes.  These error
+ * codes may come from KIM, krb5 or GSS APIs.  In most cases the caller will
+ * want to handle these error programmatically.  However, in some circumstances 
+ * the caller may wish to print an error string to the user.  
  *
- * Functions which return successfully will return #KIM_NO_ERROR (NULL).  Because
- * #KIM_NO_ERROR does not need to be freed, you may use if-ladders or goto-style 
- * error handling when calling the KIM APIs.  In addition, kim_error_free() may 
- * be called on #KIM_NO_ERROR.
+ * One problem with just printing the error code to the user is that frequently
+ * the context behind the error has been lost.  For example if KIM is trying to 
+ * obtain credentials via referrals, it may fail partway through the process.
+ * In this case the error code will be KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN, which
+ * maps to "Client not found in Kerberos database".  Unfortunately this error
+ * isn't terribly helpful because it doesn't tell the user whether they typoed
+ * their principal name or if referrals failed.  
  *
- * \note Certain kim_error_t objects are preallocated by the libraries avoid 
- * exacerbating existing problems while trying to report an error.  For example,
- * the out of memory error object is preallocated.  It is safe to call 
- * #kim_error_free() on these errors, although the function may not actually free
- * the object.
- *
- * By providing an error object rather than a numeric code, the KIM APIs can 
- * tailor error strings to the circumstances of the error.  So rather than returning 
- * error strings like "Client not found in Kerberos database", we can report 
- * "'user@REALM' not found in Kerberos database" while still providing the machine
- * readable error KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN.
+ * To avoid this problem, KIM maintains an explanatory string for the last 
+ * error seen in each thread calling into KIM.  If a caller wishes to display
+ * an error to the user, immediately after getting the error the caller should
+ * call #kim_string_get_last_error_message() to obtain a copy of the  
+ * descriptive error message.
+ * 
+ * Note that because this string is stored in thread-specific data, callers 
+ * must call #kim_string_get_last_error_message() before calling any KIM APIs
+ * or any other APIs which might call into KIM.  Callers who are not going
+ * to display this error string immediately should also make a copy of it
+ * so that it is not overwritten by the next call into KIM.
  *
  * See \ref kim_error_reference for information on specific APIs.
  */
@@ -79,40 +75,18 @@ extern "C" {
  */
 
 /*!
- * \param out_error on exit, a new error object which is a copy of \a in_error.  
- *      	    Must be freed with kim_error_free().
- * \param in_error  the error to copy.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
- * \brief Copy an error.
+ * \param out_string On success, a human-readable UTF-8 string describing the 
+ *                   error representedby \a in_error.  Must be freed with
+ *                   kim_string_free()
+ * \param in_error   an error code.
+ * \return On success, KIM_NO_ERROR.  
+ * \note This API returns thread local storage.  It should be called 
+ * immediately after a KIM API returns an error so that the correct string
+ * is returned.
+ * \brief Get a text description of an error suitable for display to the user.
  */
-kim_error kim_error_copy (kim_error *out_error,
-                            kim_error  in_error);
-
-/*!
- * \param in_error an error object.
- * \return On success, a machine-readable error code describing the error represented 
- *         by \a in_error. On failure, #KIM_PARAMETER_ECODE.
- * \brief Get a numerical error code for an error.
- */
-kim_error_code kim_error_get_code (kim_error in_error);
-
-/*!
- * \param in_error an error object.
- * \return On success, a human-readable error string describing the error represented 
- *         by \a in_error.  On failure, NULL, indicating that the kim_error_t object was
- *         invalid.
- * \brief Get a text description of an error.
- */
-kim_string kim_error_get_display_string (kim_error in_error);
-
-/*!
- * \param io_error the error object to be freed.  Set to NULL on exit.
- * \return a machine-readable error code describing the error represented 
- *         by \a io_error.  This is the same code returned by 
- *         #kim_error_get_code.
- * \brief Free memory associated with an error.
- */
-kim_error_code kim_error_free (kim_error *io_error);
+kim_error kim_string_get_last_error_message (kim_string *out_string,
+                                             kim_error   in_error);
 
 /*!@}*/
 

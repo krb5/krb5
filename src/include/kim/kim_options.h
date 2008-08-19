@@ -62,45 +62,45 @@ enum kim_prompt_type_enum {
  * The prompt callback used to display a prompt to the user.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-typedef kim_error_code (*kim_prompt_callback) (kim_options       *io_options, 
-                                               kim_prompt_type    in_type,
-                                               kim_string         in_title,
-                                               kim_string         in_message,
-                                               kim_string         in_description,
-                                               void               **out_reply);
+typedef kim_error (*kim_prompt_callback) (kim_options       *io_options, 
+                                          kim_prompt_type    in_type,
+                                          kim_string         in_title,
+                                          kim_string         in_message,
+                                          kim_string         in_description,
+                                          void               **out_reply);
 
 /*!
  * The default prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error_code kim_prompt_callback_default (kim_options       *io_options, 
-                                            kim_prompt_type    in_type,
-                                            kim_string         in_title,
-                                            kim_string         in_message,
-                                            kim_string         in_description,
-                                            void             **out_reply);
-
+kim_error kim_prompt_callback_default (kim_options       *io_options, 
+                                       kim_prompt_type    in_type,
+                                       kim_string         in_title,
+                                       kim_string         in_message,
+                                       kim_string         in_description,
+                                       void             **out_reply);
+    
 /*!
  * The graphical prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error_code kim_prompt_callback_gui (kim_options       *io_options, 
-                                        kim_prompt_type    in_type,
-                                        kim_string         in_title,
-                                        kim_string         in_message,
-                                        kim_string         in_description,
-                                        void             **out_reply);
+kim_error kim_prompt_callback_gui (kim_options       *io_options, 
+                                   kim_prompt_type    in_type,
+                                   kim_string         in_title,
+                                   kim_string         in_message,
+                                   kim_string         in_description,
+                                   void             **out_reply);
 
 /*!
  * The command line prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error_code kim_prompt_callback_cli (kim_options       *io_options, 
-                                        kim_prompt_type    in_type,
-                                        kim_string         in_title,
-                                        kim_string         in_message,
-                                        kim_string         in_description,
-                                        void             **out_reply);
+kim_error kim_prompt_callback_cli (kim_options       *io_options, 
+                                   kim_prompt_type    in_type,
+                                   kim_string         in_title,
+                                   kim_string         in_message,
+                                   kim_string         in_description,
+                                   void             **out_reply);
 
 /*!
  * The prompt callback which always returns an error.
@@ -108,12 +108,12 @@ kim_error_code kim_prompt_callback_cli (kim_options       *io_options,
  * \note Using this callback may prevent the user from authenicating.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error_code kim_prompt_callback_none (kim_options       *io_options, 
-                                         kim_prompt_type    in_type,
-                                         kim_string         in_title,
-                                         kim_string         in_message,
-                                         kim_string         in_description,
-                                         void             **out_reply);
+kim_error kim_prompt_callback_none (kim_options       *io_options, 
+                                    kim_prompt_type    in_type,
+                                    kim_string         in_title,
+                                    kim_string         in_message,
+                                    kim_string         in_description,
+                                    void             **out_reply);
 
 /*! @} */
 
@@ -292,7 +292,7 @@ kim_error_code kim_prompt_callback_none (kim_options       *io_options,
 
 /*!
  * \param out_options on exit, a new options object.  Must be freed with kim_options_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Create new options with default values.
  */
 kim_error kim_options_create (kim_options *out_options);
@@ -301,7 +301,7 @@ kim_error kim_options_create (kim_options *out_options);
  * \param out_options on exit, a new options object which is a copy of \a in_options.  
  *                    Must be freed with kim_options_free().
  * \param in_options  a options object. 
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Copy options.
  */
 kim_error kim_options_copy (kim_options *out_options,
@@ -310,7 +310,7 @@ kim_error kim_options_copy (kim_options *out_options,
 /*!
  * \param io_options         an options object to modify.
  * \param in_prompt_callback a prompt callback function.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the prompt callback for obtaining information from the user.
  * \par Default value
  * #kim_prompt_callback_default
@@ -324,7 +324,7 @@ kim_error kim_options_set_prompt_callback (kim_options         io_options,
  * \param out_prompt_callback on exit, the prompt callback specified by in_options. 
  *                            Does not need to be freed but may become invalid when 
  *                            \a in_options is freed.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the prompt callback for obtaining information from the user.
  * \par Default value
  * #kim_prompt_callback_default
@@ -336,7 +336,7 @@ kim_error kim_options_get_prompt_callback (kim_options          in_options,
 /*!
  * \param io_options  an options object to modify.
  * \param in_data     a pointer to caller-specific data.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set caller-specific data for use in library callbacks.
  * \note This option can be used by the caller to store a pointer to data needed when handling a 
  *       callback.  The KIM library does not use this options data in any way.
@@ -351,7 +351,7 @@ kim_error kim_options_set_data (kim_options  io_options,
  * \param in_options  an options object.
  * \param out_data    on exit, the pointer to caller specific data specified by in_options.
  *                    Does not need to be freed but may become invalid when \a in_options is freed.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get caller-specific data for use in library callbacks.
  * \note This option can be used by the caller to store a pointer to data needed when handling a 
  *       callback.  The KIM library does not use this options data in any way.
@@ -366,7 +366,7 @@ kim_error kim_options_get_data (kim_options   in_options,
  * \param io_options     an options object to modify.
  * \param in_prompt_type a type of prompt.
  * \param in_response    a response to prompts of \a in_prompt_type.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set a response for a prompt for use when acquiring credentials.
  * \note Each response only overrides the first prompt of a given prompt type.  If multiple
  * prompts of the same type are required, or if a prompt of a different type is requested, 
@@ -386,7 +386,7 @@ kim_error kim_options_set_prompt_response (kim_options      io_options,
  * \param out_response   on exit, the response to prompts of type \a in_prompt_type specified 
  *                       by \a in_options.  Does not need to be freed but may become invalid
  *                       when \a in_options is freed.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the response for a prompt for use when acquiring credentials.
  * \note Each response only overrides the first prompt of a given prompt type.  If multiple
  * prompts of the same type are required, or if a prompt of a different type is requested, 
@@ -405,7 +405,7 @@ kim_error kim_options_get_prompt_response (kim_options       in_options,
  * \param in_start_time a start date (in seconds since January 1, 1970).  Set to  
  *                      #KIM_OPTIONS_START_IMMEDIATELY for the acquired credential to be valid 
  *                      immediately.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the date when a credential should become valid.
  * \note When using a start time in the future, once the start time has been reached the credential 
  *       must be validated before it can be used. 
@@ -421,7 +421,7 @@ kim_error kim_options_set_start_time (kim_options io_options,
  * \param out_start_time on exit, the start date (in seconds since January 1, 1970) specified by 
  *                       \a in_options. #KIM_OPTIONS_START_IMMEDIATELY indicates the credential
  *                       will be valid immediately.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the date when a credential should become valid.
  * \note When using a start time in the future, once the start time has been reached the credential 
  *       must be validated before it can be used.
@@ -435,7 +435,7 @@ kim_error kim_options_get_start_time (kim_options  in_options,
 /*!
  * \param io_options  an options object to modify.
  * \param in_lifetime a lifetime duration (in seconds).
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the duration during which a credential should be valid.
  * \note KDCs have a maximum allowed lifetime per identity (usually 10 to 21 hours).
  *       As a result the credential will actually have a lifetime which is the minimum of
@@ -450,7 +450,7 @@ kim_error kim_options_set_lifetime (kim_options  io_options,
 /*!
  * \param in_options   an options object.
  * \param out_lifetime on exit, the lifetime duration (in seconds) specified in \a in_options.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the duration during which an acquired credential should be valid.
  * \note KDCs have a maximum allowed lifetime per identity (usually 10 to 21 hours).
  *       As a result the credential will actually have a lifetime which is the minimum of
@@ -466,7 +466,7 @@ kim_error kim_options_get_lifetime (kim_options   in_options,
  * \param io_options    an options object to modify.
  * \param in_renewable a boolean value indicating whether or not to request a renewable 
  *                     credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set whether or not to request a renewable credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -479,7 +479,7 @@ kim_error kim_options_set_renewable (kim_options io_options,
  * \param in_options     an options object.
  * \param out_renewable on exit, a boolean value indicating whether or \a in_options will 
  *                      request a renewable credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get whether or not to request a renewable credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -491,7 +491,7 @@ kim_error kim_options_get_renewable (kim_options  in_options,
 /*!
  * \param io_options          an options object to modify.
  * \param in_renewal_lifetime a renewal lifetime duration (in seconds).
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the duration during which a valid credential should be renewable.
  * \note KDCs have a maximum allowed renewal lifetime per identity (usually 10 to 21 hours).
  *       As a result the credential will actually have a lifetime which is the minimum of
@@ -507,7 +507,7 @@ kim_error kim_options_set_renewal_lifetime (kim_options  io_options,
  * \param in_options   an options object.
  * \param out_renewal_lifetime on exit, the renewal lifetime duration (in seconds) specified  
  *                             in \a in_options.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the duration during which a valid credential should be renewable.
  * \note KDCs have a maximum allowed lifetime per identity (usually 10 to 21 hours).
  *       As a result the credential will actually have a lifetime which is the minimum of
@@ -523,7 +523,7 @@ kim_error kim_options_get_renewal_lifetime (kim_options   in_options,
  * \param io_options     an options object to modify.
  * \param in_forwardable a boolean value indicating whether or not to request a forwardable 
  *                       credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set whether or not to request a forwardable credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -536,7 +536,7 @@ kim_error kim_options_set_forwardable (kim_options io_options,
  * \param in_options      an options object.
  * \param out_forwardable on exit, a boolean value indicating whether or \a in_options will 
  *                        request a forwardable credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get whether or not to request a forwardable credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -549,7 +549,7 @@ kim_error kim_options_get_forwardable (kim_options  in_options,
  * \param io_options   an options object to modify.
  * \param in_proxiable a boolean value indicating whether or not to request a proxiable 
  *                     credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set whether or not to request a proxiable credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -562,7 +562,7 @@ kim_error kim_options_set_proxiable (kim_options io_options,
  * \param in_options    an options object.
  * \param out_proxiable on exit, a boolean value indicating whether or \a in_options will 
  *                      request a proxiable credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get whether or not to request a proxiable credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -575,7 +575,7 @@ kim_error kim_options_get_proxiable (kim_options  in_options,
  * \param io_options     an options object to modify.
  * \param in_addressless a boolean value indicating whether or not to request an addressless 
  *                       credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set whether or not to request an addressless credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -588,7 +588,7 @@ kim_error kim_options_set_addressless (kim_options io_options,
  * \param in_options      an options object.
  * \param out_addressless on exit, a boolean value indicating whether or \a in_options will 
  *                        request an addressless credential.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get whether or not to request an addressless credential.
  * \par Default value
  * Read from the user's preferences and the Kerberos configuration. TRUE if unspecified.
@@ -600,7 +600,7 @@ kim_error kim_options_get_addressless (kim_options  in_options,
 /*!
  * \param io_options       an options object to modify.
  * \param in_service_name  a service name.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the service name to request a credential for.
  * \par Default value
  * NULL, indicating "krbtgt@<REALM>", the ticket granting ticket (TGT) service.
@@ -613,7 +613,7 @@ kim_error kim_options_set_service_name (kim_options io_options,
  * \param in_options        an options object.
  * \param out_service_name  on exit, the service name specified in \a in_options.
  *                          Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the service name to request a credential for.
  * \par Default value
  * NULL, indicating "krbtgt@<REALM>", the ticket granting ticket (TGT) service.

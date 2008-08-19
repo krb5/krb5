@@ -662,9 +662,8 @@ kim_error kim_credential_store (kim_credential  in_credential,
             if (!err) {
                 err = kim_ccache_get_krb5_ccache (ccache, context, &k5ccache);
                 
-            } else if (kim_error_get_code (err) == KIM_NO_SUCH_PRINCIPAL_ECODE) {
-                /* Nothing to replace, toss error and create a new ccache */
-                kim_error_free (&err); 
+            } else if (err == KIM_NO_SUCH_PRINCIPAL_ECODE) {
+                /* Nothing to replace, create a new ccache */
                 err = krb5_error (context,
                                   krb5_cc_new_unique (context, "API", NULL, 
                                                       &k5ccache));
@@ -749,46 +748,47 @@ kim_error kim_credential_verify (kim_credential in_credential,
 						  &options));
 	
 	if (err && !service_principal && in_fail_if_no_service_key) {
-	    /* If the service principal wasn't specified but we are supposed to fail without a key
-             we should walk the keytab trying to find one that succeeds. */
-            krb5_error_code code = 0;
+	    /* If the service principal wasn't specified but we are supposed to
+             * fail without a key we should walk the keytab trying to find one 
+             * that succeeds. */
+            krb5_error_code terr = 0;
             kim_boolean verified = 0;
 	    krb5_kt_cursor cursor = NULL;
 	    krb5_keytab_entry entry;
             
 	    
 	    if (!keytab) {
-                code = krb5_kt_default (scontext, &keytab);
+                terr = krb5_kt_default (scontext, &keytab);
 	    }
 	    
-	    if (!err) {
-		code = krb5_kt_start_seq_get (scontext, keytab, &cursor);
+	    if (!terr) {
+		terr = krb5_kt_start_seq_get (scontext, keytab, &cursor);
 	    }
 	    
-	    while (!code && !verified) {
+	    while (!terr && !verified) {
                 kim_boolean free_entry = 0;
                 
-		code = krb5_kt_next_entry (scontext, keytab, &entry, &cursor);
-		free_entry = !code; /* remember to free */
+		terr = krb5_kt_next_entry (scontext, keytab, &entry, &cursor);
+		free_entry = !terr; /* remember to free */
                 
-                if (!code) {
-                    code = krb5_verify_init_creds (scontext, in_credential->creds,
+                if (!terr) {
+                    terr = krb5_verify_init_creds (scontext, in_credential->creds,
                                                    entry.principal /* get principal for the 1st entry */, 
                                                    keytab,
                                                    NULL /* don't store creds in ccache */,
                                                    &options);
                 }
                 
-                if (!code) {
+                if (!terr) {
                     verified = 1;
                 }
                 
                 if (free_entry) { krb5_free_keytab_entry_contents (scontext, &entry); }
 	    }
             
-            if (!code && verified) {
+            if (!terr && verified) {
                 /* We found a key that verified! */
-                kim_error_free (&err);
+                err = KIM_NO_ERROR;
             }
             
 	    if (cursor) { krb5_kt_end_seq_get (scontext, keytab, &cursor); }

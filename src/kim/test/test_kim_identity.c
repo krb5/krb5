@@ -109,8 +109,6 @@ void test_kim_identity_create_from_krb5_principal (kim_test_state_t state)
         kim_identity_free (&identity);
         if (principal) { krb5_free_principal (context, principal); }
         if (context  ) { krb5_free_context (context); }
-        
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -154,7 +152,6 @@ void test_kim_identity_create_from_string (kim_test_state_t state)
         
         kim_string_free (&string);
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -207,7 +204,6 @@ void test_kim_identity_copy (kim_test_state_t state)
         kim_string_free (&string);
         kim_identity_free (&identity_copy);
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -265,7 +261,6 @@ void test_kim_identity_compare (kim_test_state_t state)
         }
          
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -309,7 +304,6 @@ void test_kim_identity_get_display_string (kim_test_state_t state)
         
         kim_string_free (&string);
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -352,7 +346,6 @@ void test_kim_identity_get_realm (kim_test_state_t state)
         
         kim_string_free (&realm);
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -395,7 +388,6 @@ void test_kim_identity_get_number_of_components (kim_test_state_t state)
         }
         
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -443,7 +435,6 @@ void test_kim_identity_get_component_at_index (kim_test_state_t state)
         }
         
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -505,8 +496,6 @@ void test_kim_identity_get_krb5_principal (kim_test_state_t state)
         if (identity_principal) { krb5_free_principal (context, identity_principal); }
         if (principal         ) { krb5_free_principal (context, principal); }
         if (context           ) { krb5_free_context (context); }
-
-        kim_error_free (&err);
     }
     
     printf ("\n");
@@ -549,7 +538,6 @@ void test_kim_identity_is_tgt_service (kim_test_state_t state)
         }
         
         kim_identity_free (&identity);
-        kim_error_free (&err);
     }
     
      printf ("\n");

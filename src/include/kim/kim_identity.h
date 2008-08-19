@@ -127,7 +127,7 @@ extern "C" {
  * \param out_identity  on exit, a new identity object. Must be freed with kim_identity_free().
  * \param in_string     a string representation of a Kerberos identity.  
  *                      Special characters such as '/' and '@' must be escaped with '\'.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Create a identity from a string.
  */
 kim_error kim_identity_create_from_string (kim_identity *out_identity,
@@ -142,7 +142,7 @@ kim_error kim_identity_create_from_string (kim_identity *out_identity,
  *                         order (ie: the 4th argument to kim_identity_create_from_components() will be  
  *                         the 2nd component of the identity).
  * \note The last argument must be a NULL or kim_identity_create_from_components() may crash.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Create a identity from a realm and component strings.
  */
 kim_error kim_identity_create_from_components (kim_identity *out_identity,
@@ -155,7 +155,7 @@ kim_error kim_identity_create_from_components (kim_identity *out_identity,
  *                          Must be freed with kim_identity_free().
  * \param in_krb5_context   the krb5 context used to create \a in_krb5_principal.
  * \param in_krb5_principal a krb5 principal object. 
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Create an identity object from a krb5_principal.
  */
 kim_error kim_identity_create_from_krb5_principal (kim_identity *out_identity,
@@ -166,7 +166,7 @@ kim_error kim_identity_create_from_krb5_principal (kim_identity *out_identity,
  * \param out_identity  on exit, a new identity object which is a copy of \a in_identity.  
  *                      Must be freed with kim_identity_free().
  * \param in_identity  an identity object. 
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Copy an identity object.
  */
 kim_error kim_identity_copy (kim_identity *out_identity,
@@ -180,7 +180,7 @@ kim_error kim_identity_copy (kim_identity *out_identity,
  *                                \a in_compare_to_identity which determines whether
  *                                or not the two identities are equivalent and their
  *                                sort order (for display to the user) if they are not.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Compare identity objects for equivalency.
  */
 kim_error kim_identity_compare (kim_identity    in_identity,
@@ -190,7 +190,7 @@ kim_error kim_identity_compare (kim_identity    in_identity,
  * \param in_identity  an identity object. 
  * \param out_string   on exit, a string representation of \a in_identity.  
  *                     Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the string representation of a identity.
  * \note  Special characters such as '@' and '/' will be escaped with '\'.
  */
@@ -202,7 +202,7 @@ kim_error kim_identity_get_string (kim_identity   in_identity,
  * \param in_identity        an identity object. 
  * \param out_display_string on exit, a string representation of \a in_identity appropriate for
  *                           display to the user.  Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get a human-readable string representation of an identity.
  * \note Special characters such as '/' and '@' are \em not escaped with '\'.  As a result the
  *        string returned from this function cannot be used with kim_identity_create_from_string()
@@ -216,7 +216,7 @@ kim_error kim_identity_get_display_string (kim_identity   in_identity,
  * \param in_identity     an identity object. 
  * \param out_realm_string on exit, a string representation of \a in_identity's realm.
  *                         Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the realm string of an identity.
  */
 kim_error kim_identity_get_realm (kim_identity  in_identity,
@@ -225,7 +225,7 @@ kim_error kim_identity_get_realm (kim_identity  in_identity,
 /*!
  * \param in_identity             an identity object. 
  * \param out_number_of_components on exit the number of components in \a in_identity.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the number of components of an identity.
  */
 kim_error kim_identity_get_number_of_components (kim_identity  in_identity,
@@ -236,7 +236,7 @@ kim_error kim_identity_get_number_of_components (kim_identity  in_identity,
  * \param in_index             the index of the desired component.  Component indexes start at 0.
  * \param out_component_string on exit, a string representation of the component in \a in_identity 
  *                             specified by \a in_index.  Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the Nth component of an identity.
  */
 kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
@@ -249,7 +249,7 @@ kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
  * \param out_krb5_principal on exit, a krb5_principal representation of \a in_identity
  *                           allocated with \a in_krb5_context. Must be freed with 
  *                           krb5_free_principal() using \a in_krb5_context.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the krb5_principal representation of an identity.
  */
 kim_error kim_identity_get_krb5_principal (kim_identity  in_identity,
@@ -260,7 +260,7 @@ kim_error kim_identity_get_krb5_principal (kim_identity  in_identity,
  * \param in_identity   an identity object.
  * \param out_gss_name  on exit, a gss_name_t representation of \a in_identity.
  *                      Must be freed with gss_release_name().
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the gss_name_t representation of an identity.
  */
 kim_error kim_identity_get_gss_name (kim_identity  in_identity,
@@ -269,7 +269,7 @@ kim_error kim_identity_get_gss_name (kim_identity  in_identity,
 /*!
  * \param in_identity  an identity object whose password will be changed.
  * \param in_options   initial credential options to be used if a new credential is obtained.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Change the password for an identity.
  * \note kim_identity_change_password() will acquire a temporary credential to change 
  * the password.  It uses the \a in_options structure to obtain information about the desired 
@@ -282,7 +282,7 @@ kim_error kim_identity_change_password (kim_identity  in_identity,
  * \param in_identity  an identity object whose password will be changed.
  * \param in_options   initial credential options to be used if a new credential is obtained.
  * \param in_new_password a string representation of the identity's new password.
- * \return On success, #KIM_NO_ERROR.  On failure, an error object representing the failure.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Change the password for an identity to a caller-provided new password.
  * \note kim_identity_change_password_with_passwords() will acquire a temporary credential 
  * to change the password. It uses the \a in_options structure to obtain information about   

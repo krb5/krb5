@@ -615,15 +615,14 @@ void kim_options_free (kim_options *io_options)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_code kim_prompt_callback_default (kim_options       *io_options, 
-                                            kim_prompt_type    in_type,
-                                            kim_string         in_title,
-                                            kim_string         in_message,
-                                            kim_string         in_description,
-                                            void               **out_reply)
+kim_error kim_prompt_callback_default (kim_options       *io_options, 
+                                       kim_prompt_type    in_type,
+                                       kim_string         in_title,
+                                       kim_string         in_message,
+                                       kim_string         in_description,
+                                       void               **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_error_code code = KIM_NO_ERROR_ECODE;
     
     if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
     if (!err && !out_reply ) { err = param_error (6, "out_reply", "NULL"); }
@@ -631,22 +630,19 @@ kim_error_code kim_prompt_callback_default (kim_options       *io_options,
     if (!err) {
     }
     
-    code = kim_error_get_code (check_error (err));
-    kim_error_free (&err);
-    return code;
+    return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_code kim_prompt_callback_gui (kim_options       *io_options, 
-                                        kim_prompt_type    in_type,
-                                        kim_string         in_title,
-                                        kim_string         in_message,
-                                        kim_string         in_description,
-                                        void               **out_reply)
+kim_error kim_prompt_callback_gui (kim_options       *io_options, 
+                                   kim_prompt_type    in_type,
+                                   kim_string         in_title,
+                                   kim_string         in_message,
+                                   kim_string         in_description,
+                                   void               **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_error_code code = KIM_NO_ERROR_ECODE;
     
     if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
     if (!err && !out_reply ) { err = param_error (6, "out_reply", "NULL"); }
@@ -654,22 +650,19 @@ kim_error_code kim_prompt_callback_gui (kim_options       *io_options,
     if (!err) {
     }
     
-    code = kim_error_get_code (check_error (err));
-    kim_error_free (&err);
-    return code;
+    return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_code kim_prompt_callback_cli (kim_options       *io_options, 
-                                        kim_prompt_type    in_type,
-                                        kim_string         in_title,
-                                        kim_string         in_message,
-                                        kim_string         in_description,
-                                        void               **out_reply)
+kim_error kim_prompt_callback_cli (kim_options       *io_options, 
+                                   kim_prompt_type    in_type,
+                                   kim_string         in_title,
+                                   kim_string         in_message,
+                                   kim_string         in_description,
+                                   void               **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_error_code code = KIM_NO_ERROR_ECODE;
     
     if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
     if (!err && !out_reply ) { err = param_error (6, "out_reply", "NULL"); }
@@ -677,19 +670,17 @@ kim_error_code kim_prompt_callback_cli (kim_options       *io_options,
     if (!err) {
     }
     
-    code = kim_error_get_code (check_error (err));
-    kim_error_free (&err);
-    return code;
+    return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error_code kim_prompt_callback_none (kim_options       *io_options, 
-                                         kim_prompt_type    in_type,
-                                         kim_string         in_title,
-                                         kim_string         in_message,
-                                         kim_string         in_description,
-                                         void               **out_reply)
+kim_error kim_prompt_callback_none (kim_options       *io_options, 
+                                    kim_prompt_type    in_type,
+                                    kim_string         in_title,
+                                    kim_string         in_message,
+                                    kim_string         in_description,
+                                    void               **out_reply)
 {
     return KIM_USER_CANCELED_ECODE;
 }

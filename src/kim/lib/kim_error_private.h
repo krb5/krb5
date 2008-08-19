@@ -29,29 +29,25 @@
 
 #include <kim/kim.h>
 
-kim_error _kim_error_create_for_param (kim_string in_function, 
-                                       unsigned int in_argument_position,
-                                       kim_string in_argument_name,
-                                       kim_string in_invalid_value);
-#define param_error(pos, name, value) _kim_error_create_for_param(__FUNCTION__,\
-                                                                  pos, name, \
-                                                                  value)
+kim_error _kim_error_set_message_for_param (kim_string in_function, 
+                                            unsigned int in_argument_position,
+                                            kim_string in_argument_name,
+                                            kim_string in_invalid_value);
+#define param_error(pos, name, value) _kim_error_set_message_for_param(__FUNCTION__,\
+                                                                       pos, name, \
+                                                                       value)
 
-kim_error kim_error_create_from_code (kim_error_code in_code, 
-                                        ...);
-kim_error kim_error_create_from_code_va (kim_error_code in_code, 
-                                           va_list args);
-kim_error kim_error_create_from_krb5_error (krb5_context    in_context, 
-                                            krb5_error_code in_code);
+kim_error kim_error_set_message_for_code (kim_error in_code, 
+                                          ...);
+kim_error kim_error_set_message_for_code_va (kim_error in_code, 
+                                             va_list   in_args);
+kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context, 
+                                                krb5_error_code in_code);
 
-#define krb5_error(context,code) kim_error_create_from_krb5_error(context, code)
-#define ccapi_error(code)        kim_error_create_from_code(code)
-#define os_error(code)           kim_error_create_from_code(code)
+#define krb5_error(context,code) kim_error_set_message_for_krb5_error(context, code)
+#define ccapi_error(code)        kim_error_set_message_for_code(code)
+#define os_error(code)           kim_error_set_message_for_code(code)
 
-kim_error _check_error (kim_error  in_err, 
-                        kim_string in_function, 
-                        kim_string in_file, 
-                        int          in_line);
-#define check_error(err) _check_error(err, __FUNCTION__, __FILE__, __LINE__)
+kim_string kim_error_message (kim_error in_error);
 
 #endif /* KIM_ERROR_PRIVATE_H */

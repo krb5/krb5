@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006-2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -33,39 +33,6 @@
 
 #include "kim_private.h"
 #include "kim_os_private.h"
-
-/* ------------------------------------------------------------------------ */
-
-void __kim_library_debug_printf (kim_string in_function, 
-                                 kim_string in_format, 
-                                 ...)
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_string format = NULL;
-    kim_string string = NULL;
-    
-    if (!err && !in_function) { err = param_error (1, "in_function", "NULL"); }
-    if (!err && !in_format  ) { err = param_error (2, "in_format", "NULL"); }
-   
-    if (!err) {
-        err = kim_string_create_from_format (&format, "%s(): %s", in_function, in_format);
-    }
-    
-    if (!err) {
-        va_list args;
-        va_start (args, in_format);
-        err = kim_string_create_from_format_va (&string, format, args);
-        va_end (args);
-    }
-    
-    if (!err) {
-        kim_os_library_debug_print (string);
-    }
-    
-    kim_string_free (&format);
-    kim_string_free (&string);
-    kim_error_free (&err);
-}
 
 #pragma mark -- Allow Home Directory Access --
 
@@ -117,8 +84,6 @@ kim_boolean kim_library_allow_home_directory_access (void)
 {
     kim_boolean allow_access = FALSE;
     kim_error err = kim_library_get_allow_home_directory_access (&allow_access);
-    
-    kim_error_free (&err);
     
     return allow_access;
 }
@@ -208,7 +173,5 @@ kim_boolean kim_library_allow_automatic_prompting (void)
         if (files  ) { krb5_free_config_files (files); }        
     }
     
-    kim_error_free (&err);
-
     return allow_automatic_prompting;
 }
