@@ -1,7 +1,7 @@
 /*
  * src/lib/krb5/asn.1/krb5_encode.c
  * 
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -905,6 +905,7 @@ krb5_error_code encode_krb5_setpw_req(const krb5_principal target,
   krb5_cleanup();
 }
 
+#ifndef DISABLE_PKINIT
 krb5_error_code encode_krb5_pa_pk_as_req(const krb5_pa_pk_as_req *rep, krb5_data **code)
 {
   krb5_setup();
@@ -1012,3 +1013,4 @@ krb5_error_code encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **r
   sum += length;
   krb5_cleanup();
 }
+#endif /* DISABLE_PKINIT */

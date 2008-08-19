@@ -948,6 +948,7 @@ krb5_error_code decode_krb5_predicted_sam_response(const krb5_data *code, krb5_p
   cleanup(free);
 }
 
+#ifndef DISABLE_PKINIT
 krb5_error_code decode_krb5_pa_pk_as_req(const krb5_data *code, krb5_pa_pk_as_req **rep)
 {
   setup_buf_only();
@@ -1093,3 +1094,4 @@ krb5_error_code decode_krb5_td_dh_parameters(const krb5_data *code, krb5_algorit
 
   cleanup(free);
 }
+#endif /* DISABLE_PKINIT */
