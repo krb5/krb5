@@ -536,11 +536,11 @@ dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
 AC_DEFUN(WITH_KRB4,[
 AC_ARG_WITH([krb4],
-[  --without-krb4          don't include Kerberos V4 backwards compatibility
-  --with-krb4             use V4 libraries included with V5 (default)
+[  --without-krb4          omit Kerberos V4 backwards compatibility (default)
+  --with-krb4             use V4 libraries included with V5
   --with-krb4=KRB4DIR     use preinstalled V4 libraries],
 ,
-withval=yes
+withval=no
 )dnl
 if test $withval = no; then
 	AC_MSG_NOTICE(no krb4 support)
