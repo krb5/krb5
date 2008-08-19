@@ -310,7 +310,7 @@ static int need_double_quotes(char *str)
 {
 	if (!str)
                 return 0;
-        if (*str)
+	if (str[0] == '\0')
 		return 1;
 	if (isspace((int) (*str)) ||isspace((int) (*(str + strlen(str) - 1))))
 		return 1;
