@@ -87,15 +87,19 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 
     enctype = req->ticket->enc_part.enctype;
 
+#ifndef LEAN_CLIENT 
     if ((retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
 				    req->ticket->enc_part.kvno,
 				    enctype, &ktent)))
 	return retval;
+#endif /* LEAN_CLIENT */
 
     retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
     /* Upon error, Free keytab entry first, then return */
 
+#ifndef LEAN_CLIENT 
     (void) krb5_kt_free_entry(context, &ktent);
+#endif /* LEAN_CLIENT */
     return retval;
 }
 

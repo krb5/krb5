@@ -30,9 +30,6 @@ profile_update_relation
 profile_clear_relation
 profile_rename_section
 profile_add_relation
-profile_ser_internalize
-profile_ser_externalize
-profile_ser_size
 krb5_is_referral_realm
 krb5_c_encrypt
 krb5_c_decrypt
@@ -210,9 +207,6 @@ krb5_get_init_creds_opt_set_salt
 krb5_get_init_creds_opt_set_change_password_prompt
 krb5_get_init_creds_opt_set_pa
 krb5_get_init_creds_password
-krb5_get_init_creds_keytab
-krb5_verify_init_creds_opt_init
-krb5_verify_init_creds
 krb5_get_validated_creds
 krb5_get_renewed_creds
 krb5_decode_ticket
@@ -247,8 +241,6 @@ gss_add_cred
 gss_inquire_cred_by_mech
 gss_inquire_context
 gss_wrap_size_limit
-gss_export_sec_context
-gss_import_sec_context
 gss_release_oid
 gss_create_empty_oid_set
 gss_add_oid_set_member

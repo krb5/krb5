@@ -28,6 +28,8 @@
 #include "kt-int.h"
 #include <stdio.h>
 
+#ifndef LEAN_CLIENT
+
 #define HEIMDAL_COMPATIBLE
 
 /*
@@ -673,4 +675,6 @@ const struct _krb5_kt_ops krb5_mkt_ops = {
     krb5_mkt_remove,
     NULL
 };
+
+#endif /* LEAN_CLIENT */
 

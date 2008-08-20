@@ -31,9 +31,11 @@ int gssint_lib_init(void)
     err = gssint_mechglue_init();
     if (err)
 	return err;
+#ifndef LEAN_CLIENT
     err = k5_mutex_finish_init(&gssint_krb5_keytab_lock);
     if (err)
 	return err;
+#endif /* LEAN_CLIENT */
     err = k5_key_register(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME, free);
     if (err)
 	return err;
@@ -76,7 +78,9 @@ void gssint_lib_fini(void)
 #ifndef _WIN32
     k5_mutex_destroy(&kg_kdc_flag_mutex);
 #endif
+#ifndef LEAN_CLIENT
     k5_mutex_destroy(&gssint_krb5_keytab_lock);
+#endif /* LEAN_CLIENT */
     gssint_mecherrmap_destroy();
     gssint_mechglue_fini();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -209,7 +209,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    krb5_free_context(context);
 	    return(GSS_S_FAILURE);
 	}
-	    
+#ifndef LEAN_CLIENT 
 	if (cred->keytab) {
 	    kttype = krb5_kt_get_type(context, cred->keytab);
 	    if ((strlen(kttype)+2) > sizeof(ktboth)) {
@@ -252,16 +252,21 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		return(GSS_S_FAILURE);
 	    }
 	} else {
+#endif /* LEAN_CLIENT */
 	    new_cred->keytab = NULL;
+#ifndef LEAN_CLIENT 
 	}
+#endif /* LEAN_CLIENT */
 		
 	if (cred->rcache) {
 	    /* Open the replay cache for this principal. */
 	    if ((code = krb5_get_server_rcache(context,
 					       krb5_princ_component(context, cred->princ, 0),
 					       &new_cred->rcache))) {
+#ifndef LEAN_CLIENT 
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
+#endif /* LEAN_CLIENT */
 		if (new_cred->princ)
 		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
@@ -282,8 +287,10 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    if ((strlen(cctype)+strlen(ccname)+2) > sizeof(ccboth)) {
 		if (new_cred->rcache)
 		    krb5_rc_close(context, new_cred->rcache);
+#ifndef LEAN_CLIENT 
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
+#endif /* LEAN_CLIENT */
 		if (new_cred->princ)
 		krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
@@ -302,8 +309,10 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    if (code) {
 		if (new_cred->rcache)
 		    krb5_rc_close(context, new_cred->rcache);
+#ifndef LEAN_CLIENT 
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
+#endif /* LEAN_CLIENT */
 		if (new_cred->princ)
 		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
@@ -324,8 +333,10 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		krb5_cc_close(context, new_cred->ccache);
 	    if (new_cred->rcache)
 		krb5_rc_close(context, new_cred->rcache);
+#ifndef LEAN_CLIENT 
 	    if (new_cred->keytab)
 		krb5_kt_close(context, new_cred->keytab);
+#endif /* LEAN_CLIENT */
 	    if (new_cred->princ)
 	    krb5_free_principal(context, new_cred->princ);
 	    xfree(new_cred);

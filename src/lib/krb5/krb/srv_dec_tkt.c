@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/srv_dec_tkt.c
  *
- * Copyright 2006 by the Massachusetts Institute of Technology.
+ * Copyright 2006, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -38,6 +38,7 @@
 
 #include <k5-int.h>
 
+#ifndef LEAN_CLIENT 
 krb5_error_code KRB5_CALLCONV
 krb5int_server_decrypt_ticket_keyblock(krb5_context context,
 				       const krb5_keyblock *key,
@@ -92,3 +93,5 @@ krb5_server_decrypt_ticket_keytab(krb5_context context,
     (void) krb5_kt_free_entry(context, &ktent);
     return retval;
 }
+#endif /* LEAN_CLIENT */
+

@@ -33,6 +33,7 @@
 #include <string.h>
 #include <errno.h>
 
+#ifndef LEAN_CLIENT
 static OM_uint32
 val_acc_sec_ctx_args(
     OM_uint32 *minor_status,
@@ -83,7 +84,6 @@ val_acc_sec_ctx_args(
 
     return (GSS_S_COMPLETE);
 }
-
 
 OM_uint32 KRB5_CALLCONV
 gss_accept_sec_context (minor_status,
@@ -361,4 +361,5 @@ error_out:
 
     return (status);
 }
+#endif /* LEAN_CLIENT */
 

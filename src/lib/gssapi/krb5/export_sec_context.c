@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/export_sec_context.c
  *
- * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -29,7 +29,7 @@
  * export_sec_context.c	- Externalize the security context.
  */
 #include "gssapiP_krb5.h"
-
+#ifndef LEAN_CLIENT
 OM_uint32
 krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
     OM_uint32		*minor_status;
@@ -103,3 +103,4 @@ error_out:
 	    *minor_status = (OM_uint32) kret;
     return(retval);
 }
+#endif /* LEAN_CLIENT */

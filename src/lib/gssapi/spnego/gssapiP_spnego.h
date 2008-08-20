@@ -167,6 +167,7 @@ OM_uint32 spnego_gss_init_sec_context
 	OM_uint32 *		/* time_rec */
 );
 
+#ifndef LEAN_CLIENT
 OM_uint32 spnego_gss_accept_sec_context
 (
 	void *,			/* spnego context */
@@ -183,6 +184,7 @@ OM_uint32 spnego_gss_accept_sec_context
 	/* CSTYLED */
 	gss_cred_id_t *		/* delegated_cred_handle */
 );
+#endif /* LEAN_CLIENT */
 
 OM_uint32 spnego_gss_display_name
 (
@@ -276,7 +278,7 @@ OM_uint32 spnego_gss_context_time
 	const gss_ctx_id_t context_handle,
 	OM_uint32	*time_rec
 );
-
+#ifndef LEAN_CLIENT
 OM_uint32 spnego_gss_export_sec_context
 (
 	void *context,
@@ -292,6 +294,7 @@ OM_uint32 spnego_gss_import_sec_context
 	const gss_buffer_t	interprocess_token,
 	gss_ctx_id_t		*context_handle
 );
+#endif /* LEAN_CLIENT */
 
 OM_uint32 spnego_gss_inquire_context
 (

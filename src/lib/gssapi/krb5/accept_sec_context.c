@@ -1,5 +1,5 @@
 /*
- * Copyright 2000, 2004, 2007  by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2004, 2007, 2008  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -77,11 +77,14 @@
 #endif
 #include <assert.h>
 
+
 #ifdef CFX_EXERCISE
 #define CFX_ACCEPTOR_SUBKEY (time(0) & 1)
 #else
 #define CFX_ACCEPTOR_SUBKEY 1
 #endif
+
+#ifndef LEAN_CLIENT 
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
@@ -205,6 +208,7 @@ cleanup:
 
     return retval;
 }
+
 
 OM_uint32
 krb5_gss_accept_sec_context(minor_status, context_handle, 
@@ -1001,3 +1005,5 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
    return (major_status);
 }
+#endif /* LEAN_CLIENT */
+

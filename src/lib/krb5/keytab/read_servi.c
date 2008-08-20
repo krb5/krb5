@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/read_servi.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -29,6 +29,7 @@
  * It handles all of the opening and closing of the keytab 
  * internally. 
  */
+#ifndef LEAN_CLIENT 
 
 #include "k5-int.h"
 
@@ -79,3 +80,5 @@ krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg, krb5_pri
 
     return (KSUCCESS);
 }
+#endif /* LEAN_CLIENT */
+

@@ -25,6 +25,7 @@
 /*
  *  glue routine for gss_export_sec_context
  */
+#ifndef LEAN_CLIENT
 
 #include "mglueP.h"
 #include <stdio.h>
@@ -135,3 +136,4 @@ gss_buffer_t		interprocess_token;
     
     return(GSS_S_COMPLETE);
 }
+#endif /*LEAN_CLIENT */

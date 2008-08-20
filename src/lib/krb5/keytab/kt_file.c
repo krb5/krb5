@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/kt_file.c
  *
- * Copyright 1990,1991,1995,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,1995,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,6 +24,8 @@
  * or implied warranty.
  * 
  */
+
+#ifndef LEAN_CLIENT
 
 #include "k5-int.h"
 #include <stdio.h>
@@ -1768,3 +1770,5 @@ krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_
 
     return 0;
 }
+#endif /* LEAN_CLIENT */
+

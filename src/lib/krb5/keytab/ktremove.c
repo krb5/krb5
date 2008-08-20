@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/ktremove.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -26,6 +26,7 @@
  *
  * krb5_kt_remove_entry()
  */
+#ifndef LEAN_CLIENT 
 
 #include "k5-int.h"
 
@@ -37,3 +38,5 @@ krb5_kt_remove_entry (krb5_context context, krb5_keytab id, krb5_keytab_entry *e
     else
 	return KRB5_KT_NOWRITE;
 }
+#endif /* LEAN_CLIENT  */
+

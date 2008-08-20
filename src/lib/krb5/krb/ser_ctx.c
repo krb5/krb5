@@ -62,12 +62,14 @@ static krb5_error_code krb5_oscontext_externalize
 	(krb5_context, krb5_pointer, krb5_octet **, size_t *);
 static krb5_error_code krb5_oscontext_internalize
 	(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
+#ifndef LEAN_CLIENT
 krb5_error_code profile_ser_size
 	(krb5_context, krb5_pointer, size_t *);
 krb5_error_code profile_ser_externalize
 	(krb5_context, krb5_pointer, krb5_octet **, size_t *);
 krb5_error_code profile_ser_internalize
 	(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
+#endif /* LEAN_CLIENT */
 
 /* Local data */
 static const krb5_ser_entry krb5_context_ser_entry = {
@@ -82,13 +84,14 @@ static const krb5_ser_entry krb5_oscontext_ser_entry = {
     krb5_oscontext_externalize,		/* Externalize routine	*/
     krb5_oscontext_internalize		/* Internalize routine	*/
 };
+#ifndef LEAN_CLIENT
 static const krb5_ser_entry krb5_profile_ser_entry = {
     PROF_MAGIC_PROFILE,			/* Type			*/
     profile_ser_size,			/* Sizer routine	*/
     profile_ser_externalize,		/* Externalize routine	*/
     profile_ser_internalize		/* Internalize routine	*/
 };
-
+#endif /* LEAN_CLIENT */
 /*
  * krb5_context_size()	- Determine the size required to externalize the
  *			  krb5_context.
@@ -610,7 +613,9 @@ krb5_ser_context_init(krb5_context kcontext)
     kret = krb5_register_serializer(kcontext, &krb5_context_ser_entry);
     if (!kret)
 	kret = krb5_register_serializer(kcontext, &krb5_oscontext_ser_entry);
+#ifndef LEAN_CLIENT
     if (!kret)
 	kret = krb5_register_serializer(kcontext, &krb5_profile_ser_entry);
+#endif /* LEAN_CLIENT */
     return(kret);
 }

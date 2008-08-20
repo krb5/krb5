@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/ktdefault.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -30,6 +30,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 
+#ifndef LEAN_CLIENT
 krb5_error_code KRB5_CALLCONV
 krb5_kt_default(krb5_context context, krb5_keytab *id)
 {
@@ -41,5 +42,5 @@ krb5_kt_default(krb5_context context, krb5_keytab *id)
     return krb5_kt_resolve(context, defname, id);
 }
 
-
+#endif /* LEAN_CLIENT */
 

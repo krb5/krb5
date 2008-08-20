@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/srvtab/kts_resolv.c
  *
- * Copyright 1990,1991,2002,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2002,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -26,6 +26,8 @@
 
 #include "k5-int.h"
 #include <stdio.h>
+
+#ifndef LEAN_CLIENT 
 
 /*
  * Constants
@@ -472,3 +474,5 @@ krb5_ktsrvint_read_entry(krb5_context context, krb5_keytab id, krb5_keytab_entry
 
     return 0;
 }
+#endif /* LEAN_CLIENT */
+

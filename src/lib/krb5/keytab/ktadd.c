@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/ktadd.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -29,6 +29,8 @@
 
 #include "k5-int.h"
 
+#ifndef LEAN_CLIENT
+
 krb5_error_code KRB5_CALLCONV
 krb5_kt_add_entry (krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
 {
@@ -37,3 +39,5 @@ krb5_kt_add_entry (krb5_context context, krb5_keytab id, krb5_keytab_entry *entr
     else
 	return KRB5_KT_NOWRITE;
 }
+#endif /* LEAN_CLIENT */
+

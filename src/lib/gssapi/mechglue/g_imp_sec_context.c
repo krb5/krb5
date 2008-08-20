@@ -26,6 +26,8 @@
  *  glue routine gss_export_sec_context
  */
 
+#ifndef LEAN_CLIENT
+
 #include "mglueP.h"
 #include <stdio.h>
 #include <errno.h>
@@ -162,3 +164,4 @@ error_out:
     }
     return status;
 }
+#endif /* LEAN_CLIENT */

@@ -27,6 +27,7 @@
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
 
+
 /** mechglue wrappers **/
 
 static OM_uint32 k5glue_acquire_cred
@@ -61,7 +62,8 @@ static OM_uint32 k5glue_init_sec_context
             OM_uint32*,       /* ret_flags */
             OM_uint32*        /* time_rec */
            );
-
+		   
+#ifndef LEAN_CLIENT
 static OM_uint32 k5glue_accept_sec_context
 (void *, OM_uint32*,       /* minor_status */
             gss_ctx_id_t*,    /* context_handle */
@@ -76,6 +78,7 @@ static OM_uint32 k5glue_accept_sec_context
             OM_uint32*,       /* time_rec */
             gss_cred_id_t*    /* delegated_cred_handle */
            );
+#endif   /* LEAN_CLIENT */
 
 static OM_uint32 k5glue_process_context_token
 (void *, OM_uint32*,       /* minor_status */
@@ -94,7 +97,7 @@ static OM_uint32 k5glue_context_time
             gss_ctx_id_t,     /* context_handle */
             OM_uint32*        /* time_rec */
            );
-
+		   
 static OM_uint32 k5glue_sign
 (void *, OM_uint32*,       /* minor_status */
             gss_ctx_id_t,     /* context_handle */
@@ -156,7 +159,7 @@ static OM_uint32 k5glue_display_name
             gss_name_t,      /* input_name */
             gss_buffer_t,    /* output_name_buffer */
             gss_OID*         /* output_name_type */
-           );
+          );
 
 static OM_uint32 k5glue_import_name
 (void *, OM_uint32*,       /* minor_status */
@@ -278,6 +281,7 @@ static OM_uint32 k5glue_inquire_cred_by_mech
 	    gss_cred_usage_t * 		/* cred_usage */
 	   );
 
+#ifndef LEAN_CLIENT
 static OM_uint32 k5glue_export_sec_context
 (void *, OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t *,		/* context_handle */
@@ -289,6 +293,7 @@ static OM_uint32 k5glue_import_sec_context
 	    gss_buffer_t,		/* interprocess_token */
 	    gss_ctx_id_t *		/* context_handle */
 	    );
+#endif /* LEAN_CLIENT */
 
 krb5_error_code k5glue_ser_init(krb5_context);
 
@@ -338,13 +343,14 @@ static OM_uint32 k5glue_validate_cred
  * ensure that both dispatch tables contain identical function
  * pointers.
  */
+#ifndef LEAN_CLIENT	
 #define KRB5_GSS_CONFIG_INIT				\
     NULL,						\
     k5glue_acquire_cred,				\
     k5glue_release_cred,				\
     k5glue_init_sec_context,				\
     k5glue_accept_sec_context,				\
-    k5glue_process_context_token,			\
+	k5glue_process_context_token,			\
     k5glue_delete_sec_context,				\
     k5glue_context_time,				\
     k5glue_sign,					\
@@ -368,6 +374,42 @@ static OM_uint32 k5glue_validate_cred
     k5glue_wrap_size_limit,				\
     k5glue_export_name,					\
     NULL			/* store_cred */
+
+#else	/* LEAN_CLIENT */
+
+#define KRB5_GSS_CONFIG_INIT				\
+    NULL,						\
+    k5glue_acquire_cred,				\
+    k5glue_release_cred,				\
+    k5glue_init_sec_context,				\
+    NULL,						\
+	k5glue_process_context_token,			\
+    k5glue_delete_sec_context,				\
+    k5glue_context_time,				\
+    k5glue_sign,					\
+    k5glue_verify,					\
+    k5glue_seal,					\
+    k5glue_unseal,					\
+    k5glue_display_status,				\
+    k5glue_indicate_mechs,				\
+    k5glue_compare_name,				\
+    k5glue_display_name,				\
+    k5glue_import_name,					\
+    k5glue_release_name,				\
+    k5glue_inquire_cred,				\
+    k5glue_add_cred,					\
+    NULL,						\
+    NULL,						\
+    k5glue_inquire_cred_by_mech,			\
+    k5glue_inquire_names_for_mech,			\
+    k5glue_inquire_context,				\
+    k5glue_internal_release_oid,			\
+    k5glue_wrap_size_limit,				\
+    k5glue_export_name,					\
+    NULL			/* store_cred */
+
+#endif /* LEAN_CLIENT */	
+
 
 static struct gss_config krb5_mechanism = {
     100, "kerberos_v5",
@@ -414,6 +456,7 @@ gssint_get_mech_configs(void)
     return krb5_mech_configs;
 }
 
+#ifndef LEAN_CLIENT
 static OM_uint32
 k5glue_accept_sec_context(ctx, minor_status, context_handle, verifier_cred_handle,
 		       input_token, input_chan_bindings, src_name, mech_type, 
@@ -443,6 +486,7 @@ k5glue_accept_sec_context(ctx, minor_status, context_handle, verifier_cred_handl
 				      time_rec,
 				      delegated_cred_handle));
 }
+#endif /* LEAN_CLIENT */
 
 static OM_uint32
 k5glue_acquire_cred(ctx, minor_status, desired_name, time_req, desired_mechs,
@@ -579,7 +623,7 @@ k5glue_display_status(ctx, minor_status, status_value, status_type,
 				  status_type, mech_type, message_context,
 				  status_string));
 }
-
+#ifndef LEAN_CLIENT
 /* V2 */
 static OM_uint32
 k5glue_export_sec_context(ctx, minor_status, context_handle, interprocess_token)
@@ -592,7 +636,7 @@ k5glue_export_sec_context(ctx, minor_status, context_handle, interprocess_token)
 				      context_handle,
 				      interprocess_token));
 }
-
+#endif /* LEAN_CLIENT */
 #if 0
 /* V2 */
 static OM_uint32
@@ -630,6 +674,7 @@ k5glue_import_name(ctx, minor_status, input_name_buffer, input_name_type, output
 				input_name_type, output_name));
 }
 
+#ifndef LEAN_CLIENT
 /* V2 */
 static OM_uint32
 k5glue_import_sec_context(ctx, minor_status, interprocess_token, context_handle)
@@ -642,6 +687,7 @@ k5glue_import_sec_context(ctx, minor_status, interprocess_token, context_handle)
 				      interprocess_token,
 				      context_handle));
 }
+#endif /* LEAN_CLIENT */
 
 static OM_uint32
 k5glue_indicate_mechs(ctx, minor_status, mech_set)

@@ -1,7 +1,7 @@
 /*
  * lib/kdb/kdb_helper.c
  *
- * Copyright 1995, 2007 by the Massachusetts Institute of Technology. 
+ * Copyright 1995, 2008 by the Massachusetts Institute of Technology. 
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -144,8 +144,10 @@ krb5_def_store_mkey(krb5_context   context,
     char defkeyfile[MAXPATHLEN+1];
     char *tmp_ktname = NULL, *tmp_ktpath;
     krb5_data *realm = krb5_princ_realm(context, mname);
+#ifndef LEAN_CLIENT 
     krb5_keytab kt;
     krb5_keytab_entry new_entry;
+#endif /* LEAN_CLIENT */
     struct stat stb;
     int statrc;
 
@@ -190,6 +192,7 @@ krb5_def_store_mkey(krb5_context   context,
         goto out;
     }
 
+#ifndef LEAN_CLIENT 
     /* create new stash keytab using temp file name */
     retval = krb5_kt_resolve(context, tmp_ktname, &kt);
     if (retval != 0)
@@ -199,7 +202,7 @@ krb5_def_store_mkey(krb5_context   context,
     new_entry.principal = mname;
     new_entry.key = *key;
     new_entry.vno = kvno;
-
+#endif /* LEAN_CLIENT */
     /*
      * Set tmp_ktpath to point to the keyfile path (skip WRFILE:).  Subtracting
      * 1 to account for NULL terminator in sizeof calculation of a string
@@ -207,6 +210,7 @@ krb5_def_store_mkey(krb5_context   context,
      */
     tmp_ktpath = tmp_ktname + (sizeof("WRFILE:") - 1);
 
+#ifndef LEAN_CLIENT 
     retval = krb5_kt_add_entry(context, kt, &new_entry);
     if (retval != 0) {
         /* delete tmp keyfile if it exists and an error occurrs */
@@ -221,6 +225,7 @@ krb5_def_store_mkey(krb5_context   context,
                 tmp_ktpath, keyfile, error_message(errno));
         }
     }
+#endif /* LEAN_CLIENT */
 
 out:
     if (tmp_ktname != NULL)
@@ -309,6 +314,7 @@ krb5_db_def_fetch_mkey_stash(krb5_context   context,
     return retval;
 }
 
+#ifndef LEAN_CLIENT 
 static krb5_error_code
 krb5_db_def_fetch_mkey_keytab(krb5_context   context,
                               const char     *keyfile,
@@ -369,6 +375,7 @@ krb5_db_def_fetch_mkey_keytab(krb5_context   context,
 errout:
     return retval;
 }
+#endif /* LEAN_CLIENT */
 
 krb5_error_code
 krb5_db_def_fetch_mkey(krb5_context   context,
@@ -394,15 +401,19 @@ krb5_db_def_fetch_mkey(krb5_context   context,
     /* null terminate no matter what */
     keyfile[sizeof(keyfile) - 1] = '\0';
 
+#ifndef LEAN_CLIENT 
     /* assume the master key is in a keytab */
     retval_kt = krb5_db_def_fetch_mkey_keytab(context, keyfile, mname, key, kvno);
     if (retval_kt != 0) {
+#endif /* LEAN_CLIENT */
         /*
          * If it's not in a keytab, fall back and try getting the mkey from the
          * older stash file format.
          */
         retval_ofs = krb5_db_def_fetch_mkey_stash(context, keyfile, key, kvno);
+#ifndef LEAN_CLIENT 
     }
+#endif /* LEAN_CLIENT */
 
     if (retval_kt != 0 && retval_ofs != 0) {
         /*

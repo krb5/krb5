@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/ktfr_entry.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -26,6 +26,7 @@
  *
  * krb5_kt_free_entry()
  */
+#ifndef LEAN_CLIENT 
 
 #include "k5-int.h"
 
@@ -48,3 +49,5 @@ krb5_kt_free_entry (krb5_context context, krb5_keytab_entry *entry)
 {
     return krb5_free_keytab_entry_contents (context, entry);
 }
+#endif /* LEAN_CLIENT */
+

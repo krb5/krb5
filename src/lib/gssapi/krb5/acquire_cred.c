@@ -1,5 +1,5 @@
 /*
- * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -91,6 +91,7 @@ static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal,
 static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
 #endif
 
+#ifndef LEAN_CLIENT
 k5_mutex_t gssint_krb5_keytab_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static char *krb5_gss_keytab = NULL;
 
@@ -204,6 +205,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
 
    return(GSS_S_COMPLETE);
 }
+#endif /* LEAN_CLIENT */
 
 /* get credentials corresponding to the default credential cache.
    If the default name is requested, return the name in output_princ.
@@ -507,7 +509,9 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    cred->prerfc_mech = req_old;
    cred->rfc_mech = req_new;
 
+#ifndef LEAN_CLIENT
    cred->keytab = NULL;
+#endif /* LEAN_CLIENT */
    cred->ccache = NULL;
 
    code = k5_mutex_init(&cred->lock);
@@ -532,7 +536,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
    /* if requested, acquire credentials for accepting */
    /* this will fill in cred->princ if the desired_name is not specified */
-
+#ifndef LEAN_CLIENT
    if ((cred_usage == GSS_C_ACCEPT) ||
        (cred_usage == GSS_C_BOTH))
       if ((ret = acquire_accept_cred(context, minor_status, desired_name,
@@ -547,6 +551,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	 krb5_free_context(context);
 	 return(ret);
       }
+#endif /* LEAN_CLIENT */
 
    /* if requested, acquire credentials for initiation */
    /* this will fill in cred->princ if it wasn't set above, and
@@ -559,8 +564,10 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 			     cred->princ?(gss_name_t)cred->princ:desired_name,
 			     &(cred->princ), cred))
 	  != GSS_S_COMPLETE) {
+#ifndef LEAN_CLIENT
 	 if (cred->keytab)
 	    krb5_kt_close(context, cred->keytab);
+#endif /* LEAN_CLIENT */
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
          k5_mutex_destroy(&cred->lock);
@@ -578,8 +585,10 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 				      &(cred->princ)))) {
 	 if (cred->ccache)
 	    (void)krb5_cc_close(context, cred->ccache);
+#ifndef LEAN_CLIENT
 	 if (cred->keytab)
 	    (void)krb5_kt_close(context, cred->keytab);
+#endif /* LEAN_CLIENT */
          k5_mutex_destroy(&cred->lock);
          xfree(cred);
 	 *minor_status = code;
@@ -601,8 +610,10 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       if ((code = krb5_timeofday(context, &now))) {
 	 if (cred->ccache)
 	    (void)krb5_cc_close(context, cred->ccache);
+#ifndef LEAN_CLIENT
 	 if (cred->keytab)
 	    (void)krb5_kt_close(context, cred->keytab);
+#endif /* LEAN_CLIENT */
 	 if (cred->princ)
 	    krb5_free_principal(context, cred->princ);
          k5_mutex_destroy(&cred->lock);
@@ -632,8 +643,10 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 							   &ret_mechs)))) {
 	   if (cred->ccache)
 	       (void)krb5_cc_close(context, cred->ccache);
+#ifndef LEAN_CLIENT
 	   if (cred->keytab)
 	       (void)krb5_kt_close(context, cred->keytab);
+#endif /* LEAN_CLIENT */
 	   if (cred->princ)
 	       krb5_free_principal(context, cred->princ);
            k5_mutex_destroy(&cred->lock);
@@ -651,8 +664,10 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       free(ret_mechs);
       if (cred->ccache)
 	 (void)krb5_cc_close(context, cred->ccache);
+#ifndef LEAN_CLIENT
       if (cred->keytab)
 	 (void)krb5_kt_close(context, cred->keytab);
+#endif /* LEAN_CLIENT */
       if (cred->princ)
 	 krb5_free_principal(context, cred->princ);
       k5_mutex_destroy(&cred->lock);

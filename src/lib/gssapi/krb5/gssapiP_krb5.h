@@ -1,5 +1,5 @@
 /*
- * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -211,7 +211,9 @@ typedef struct _krb5_gss_ctx_id_rec {
 
 extern g_set kg_vdb;
 
+#ifndef LEAN_CLIENT
 extern k5_mutex_t gssint_krb5_keytab_lock;
+#endif /* LEAN_CLIENT */
 
 /* helper macros */
 
@@ -363,6 +365,7 @@ OM_uint32 krb5_gss_init_sec_context
             OM_uint32*        /* time_rec */
            );
 
+#ifndef LEAN_CLIENT
 OM_uint32 krb5_gss_accept_sec_context
 (OM_uint32*,       /* minor_status */
             gss_ctx_id_t*,    /* context_handle */
@@ -377,6 +380,7 @@ OM_uint32 krb5_gss_accept_sec_context
             OM_uint32*,       /* time_rec */
             gss_cred_id_t*    /* delegated_cred_handle */
            );
+#endif /* LEAN_CLIENT */
 
 OM_uint32 krb5_gss_process_context_token
 (OM_uint32*,       /* minor_status */
@@ -458,6 +462,7 @@ OM_uint32 krb5_gss_display_name
             gss_buffer_t,    /* output_name_buffer */
             gss_OID*         /* output_name_type */
            );
+
 
 OM_uint32 krb5_gss_import_name
 (OM_uint32*,       /* minor_status */
@@ -574,7 +579,7 @@ OM_uint32 krb5_gss_inquire_cred_by_mech
 	    OM_uint32 *,		/* acceptor_lifetime */
 	    gss_cred_usage_t * 		/* cred_usage */
 	   );
-
+#ifndef LEAN_CLIENT
 OM_uint32 krb5_gss_export_sec_context
 (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t *,		/* context_handle */
@@ -586,6 +591,7 @@ OM_uint32 krb5_gss_import_sec_context
 	    gss_buffer_t,		/* interprocess_token */
 	    gss_ctx_id_t *		/* context_handle */
 	    );
+#endif /* LEAN_CLIENT */
 
 krb5_error_code krb5_gss_ser_init(krb5_context);
 

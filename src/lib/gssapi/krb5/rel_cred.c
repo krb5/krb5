@@ -59,9 +59,11 @@ krb5_gss_release_cred(minor_status, cred_handle)
    else
       code1 = 0;
 
+#ifndef LEAN_CLIENT 
    if (cred->keytab)
       code2 = krb5_kt_close(context, cred->keytab);
    else
+#endif /* LEAN_CLIENT */
       code2 = 0;
 
    if (cred->rcache)

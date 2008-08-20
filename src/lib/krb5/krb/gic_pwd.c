@@ -378,7 +378,6 @@ cleanup:
 		  break;
 
 	       delta = (*last_req)->value - now;
-
 	       if (delta < 3600)
 		   snprintf(banner, sizeof(banner),
 			    "Warning: Your password will expire in less than one hour on %s",

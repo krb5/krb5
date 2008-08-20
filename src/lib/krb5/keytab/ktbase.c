@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/ktbase.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -52,6 +52,8 @@
 #include "k5-int.h"
 #include "k5-thread.h"
 #include "kt-int.h"
+
+#ifndef LEAN_CLIENT
 
 extern const krb5_kt_ops krb5_ktf_ops;
 extern const krb5_kt_ops krb5_ktf_writable_ops;
@@ -283,3 +285,5 @@ krb5_ser_keytab_init(krb5_context kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_keytab_ser_entry));
 }
+#endif /* LEAN_CLIENT */
+

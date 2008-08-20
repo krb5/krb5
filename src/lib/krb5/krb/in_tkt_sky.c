@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/in_tkt_sky.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -98,8 +98,10 @@ krb5_get_in_tkt_with_skey(krb5_context context, krb5_flags options,
 			       skey_keyproc, (krb5_const_pointer)key,
 			       krb5_kdc_rep_decrypt_proc, 0, creds,
 			       ccache, ret_as_reply);
+#ifndef LEAN_CLIENT 
     else 
 	return krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes,
 					   pre_auth_types, NULL, ccache,
 					   creds, ret_as_reply);
+#endif /* LEAN_CLIENT */
 }

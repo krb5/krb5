@@ -79,8 +79,14 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #undef SC
 
 	    S (krb5int_c_mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
-	    S (krb5_ser_pack_int64, krb5_ser_pack_int64),
-	    S (krb5_ser_unpack_int64, krb5_ser_unpack_int64),
+#ifndef LEAN_CLIENT
+#define SC(FIELD, VAL)	S(FIELD, VAL)
+#else /* disable */
+#define SC(FIELD, VAL)	S(FIELD, 0)
+#endif
+	    SC (krb5_ser_pack_int64, krb5_ser_pack_int64),
+	    SC (krb5_ser_unpack_int64, krb5_ser_unpack_int64),
+#undef SC
 
 #ifdef ENABLE_LDAP
 #define SC(FIELD, VAL)	S(FIELD, VAL)

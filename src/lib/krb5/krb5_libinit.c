@@ -44,9 +44,11 @@ int krb5int_lib_init(void)
     err = krb5int_rc_finish_init();
     if (err)
 	return err;
+#ifndef LEAN_CLIENT
     err = krb5int_kt_initialize();
     if (err)
 	return err;
+#endif /* LEAN_CLIENT */
     err = krb5int_cc_initialize();
     if (err)
 	return err;
@@ -83,7 +85,9 @@ void krb5int_lib_fini(void)
     k5_mutex_destroy(&krb5int_us_time_mutex);
 
     krb5int_cc_finalize();
+#ifndef LEAN_CLIENT
     krb5int_kt_finalize();
+#endif /* LEAN_CLIENT */
     krb5int_rc_terminate();
 
 #if defined(_WIN32) || defined(USE_CCAPI)

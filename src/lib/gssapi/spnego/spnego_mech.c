@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006,2007 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2006,2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -44,6 +44,7 @@
 #include	<mglueP.h>
 #include	"gssapiP_spnego.h"
 #include	<gssapi_err_generic.h>
+
 
 #undef g_token_size
 #undef g_verify_token_header
@@ -164,7 +165,11 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_acquire_cred,
 	spnego_gss_release_cred,
 	spnego_gss_init_sec_context,
+#ifndef LEAN_CLIENT
 	spnego_gss_accept_sec_context,
+#else
+	NULL,				
+#endif  /* LEAN_CLIENT */
 	NULL,				/* gss_process_context_token */
 	spnego_gss_delete_sec_context,	/* gss_delete_sec_context */
 	spnego_gss_context_time,	/* gss_context_time */
@@ -180,8 +185,13 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_release_name,
 	NULL,				/* gss_inquire_cred */
 	NULL,				/* gss_add_cred */
-	spnego_gss_export_sec_context,	/* gss_export_sec_context */
-	spnego_gss_import_sec_context,	/* gss_import_sec_context */
+#ifndef LEAN_CLIENT
+	spnego_gss_export_sec_context,		/* gss_export_sec_context */
+	spnego_gss_import_sec_context,		/* gss_import_sec_context */
+#else
+	NULL,				/* gss_export_sec_context */
+	NULL,				/* gss_import_sec_context */
+#endif /* LEAN_CLIENT */
 	NULL, 				/* gss_inquire_cred_by_mech */
 	spnego_gss_inquire_names_for_mech,
 	spnego_gss_inquire_context,	/* gss_inquire_context */
@@ -1091,7 +1101,7 @@ cleanup:
 	gss_release_oid_set(&tmpmin, &mech_set);
 	return ret;
 }
-
+#ifndef LEAN_CLIENT
 /*
  * Wrap call to gss_accept_sec_context() and update state
  * accordingly.
@@ -1290,6 +1300,7 @@ cleanup:
 	}
 	return ret;
 }
+#endif /*  LEAN_CLIENT */
 
 
 /*ARGSUSED*/
@@ -1335,6 +1346,7 @@ spnego_gss_display_status(void *ctx,
 	dsyslog("Leaving display_status\n");
 	return (GSS_S_COMPLETE);
 }
+
 
 /*ARGSUSED*/
 OM_uint32
@@ -1388,6 +1400,7 @@ spnego_gss_display_name(void *ctx,
 	dsyslog("Leaving display_name\n");
 	return (status);
 }
+
 
 /*ARGSUSED*/
 OM_uint32
@@ -1529,7 +1542,7 @@ spnego_gss_context_time(void *context,
 			    time_rec);
 	return (ret);
 }
-
+#ifndef LEAN_CLIENT
 OM_uint32
 spnego_gss_export_sec_context(void *context,
 			    OM_uint32	  *minor_status,
@@ -1555,6 +1568,7 @@ spnego_gss_import_sec_context(void *context,
 				    context_handle);
 	return (ret);
 }
+#endif /* LEAN_CLIENT */
 
 OM_uint32
 spnego_gss_inquire_context(void *context,

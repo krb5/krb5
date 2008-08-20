@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/gic_keytab.c
  *
- * Copyright (C) 2002, 2003 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2002, 2003, 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -23,6 +23,7 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
+#ifndef LEAN_CLIENT 
 
 #include "k5-int.h"
 
@@ -216,4 +217,6 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
      krb5_kt_close(context, keytab);
     return retval;
 }
+
+#endif /* LEAN_CLIENT */
 
