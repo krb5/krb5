@@ -46,6 +46,9 @@ cc_int32 ccs_ccache_swap_contents (ccs_ccache_t           io_source_ccache,
 
 cc_int32 ccs_ccache_release (ccs_ccache_t io_ccache);
 
+cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
+                             ccs_cache_collection_t io_cache_collection);
+
 cc_int32 ccs_ccache_compare_identifier (ccs_ccache_t      in_ccache,
                                         cci_identifier_t  in_identifier,
                                         cc_uint32        *out_equal);

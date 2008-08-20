@@ -320,15 +320,28 @@ cc_int32 ccs_cache_collection_destroy_ccache (ccs_cache_collection_t  io_cache_c
                                               cci_identifier_t        in_identifier)
 {
     cc_int32 err = ccNoError;
+    ccs_ccache_t ccache = NULL;
     
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
     if (!in_identifier      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
+        err = ccs_cache_collection_find_ccache (io_cache_collection,
+                                                in_identifier, 
+                                                &ccache);
+    }
+    
+    if (!err) {
+        /* Notify before deletion because after deletion the ccache
+         * will no longer exist (and won't know about its clients) */
+        err = ccs_ccache_changed (ccache, io_cache_collection);
+    }
+
+    if (!err) {
         err = ccs_ccache_list_remove (io_cache_collection->ccaches,
                                       in_identifier);
     }
-    
+
     return cci_check_error (err);
 }
 

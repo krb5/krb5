@@ -45,9 +45,6 @@ struct ccs_ccache_d {
 
 struct ccs_ccache_d ccs_ccache_initializer = { NULL, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL };
 
-static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
-                                    ccs_cache_collection_t io_cache_collection);
-
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_ccache_new (ccs_ccache_t      *out_ccache,
@@ -313,8 +310,8 @@ cc_int32 ccs_ccache_compare_name (ccs_ccache_t  in_ccache,
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
-                                    ccs_cache_collection_t io_cache_collection)
+cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
+                             ccs_cache_collection_t io_cache_collection)
 {
     cc_int32 err = ccNoError;
     cci_stream_t reply_data = NULL;
@@ -361,7 +358,7 @@ static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
 	    }
         }
     }
-
+    
     cci_stream_release (reply_data);
     
     return cci_check_error (err);
