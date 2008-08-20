@@ -25,6 +25,7 @@
  */
 
 #include "ccs_common.h"
+#include "ccs_os_notify.h"
 
 struct ccs_ccache_d {
     cci_identifier_t identifier;
@@ -357,6 +358,11 @@ cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
 		break;
 	    }
         }
+    }
+    
+    if (!err) {
+        err = ccs_os_notify_ccache_changed (io_cache_collection, 
+                                            io_ccache->name);
     }
     
     cci_stream_release (reply_data);

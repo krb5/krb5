@@ -29,6 +29,16 @@
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 #include <TargetConditionals.h>
+
+/* Notifications which are sent when the ccache collection or a ccache change.
+ * Notifications are sent to the distributed notification center.
+ * The object for kCCAPICacheCollectionChangedNotification is NULL.
+ * The object for kCCAPICCacheChangedNotification is a CFString containing the
+ * name of the ccache.
+ * 
+ * Note: Notifications are not sent if the CCacheServer crashes.  */
+#define kCCAPICacheCollectionChangedNotification CFSTR ("CCAPICacheCollectionChangedNotification")
+#define kCCAPICCacheChangedNotification          CFSTR ("CCAPICCacheChangedNotification")
 #endif
 
 #if defined(_WIN32)

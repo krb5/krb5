@@ -26,6 +26,7 @@
 
 #include "k5-platform.h"	/* pull in asprintf decl/defn */
 #include "ccs_common.h"
+#include "ccs_os_notify.h"
 
 struct ccs_cache_collection_d {
     cc_time_t last_changed_time;
@@ -174,6 +175,10 @@ cc_int32 ccs_cache_collection_changed (ccs_cache_collection_t io_cache_collectio
 		break;
 	    }
         }
+    }
+    
+    if (!err) {
+        err = ccs_os_notify_cache_collection_changed (io_cache_collection);
     }
     
     cci_stream_release (reply_data);
