@@ -191,7 +191,9 @@ kim_error kim_os_string_get_cfstring (kim_string   in_string,
     if (!err && !out_cfstring) { err = param_error (2, "out_cfstring", "NULL"); }
     
     if (!err) {
-        cfstring = CFStringCreateWithCString (kCFAllocatorDefault, in_string, kCFStringEncodingUTF8);
+        cfstring = CFStringCreateWithCString (kCFAllocatorDefault, 
+                                              in_string, 
+                                              kCFStringEncodingUTF8);
         if (!cfstring) { err = os_error (ENOMEM); }
     }
     
