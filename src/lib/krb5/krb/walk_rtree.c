@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/walk_rtree.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -82,7 +82,6 @@
  * will work together.
  * DEE - 5/23/95
  */
-#define CONFIGURABLE_AUTHENTICATION_PATH
 #include "k5-int.h"
 #include "int-proto.h"
 
@@ -127,12 +126,10 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     krb5_data tmpcrealm, tmpsrealm;
     int nocommon = 1;
 
-#ifdef CONFIGURABLE_AUTHENTICATION_PATH
     const char *cap_names[4];
     char *cap_client, *cap_server;
     char **cap_nodes;
     krb5_error_code cap_code;
-#endif
 
 #ifdef DEBUG_REFERRALS
     printf("krb5_walk_realm_tree starting\n");
@@ -142,7 +139,6 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 
     if (!(client->data &&server->data))
       return KRB5_NO_TKT_IN_RLM;
-#ifdef CONFIGURABLE_AUTHENTICATION_PATH
     if ((cap_client = (char *)malloc(client->length + 1)) == NULL)
 	return ENOMEM;
     strncpy(cap_client, client->data, client->length);
@@ -177,7 +173,7 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     } else {			/* no path use hierarchical method */
 	krb5_xfree(cap_server); /* failed, don't need server string */
 	cap_names[2] = 0;
-#endif
+
 	clen = client->length;
 	slen = server->length;
 
@@ -250,9 +246,7 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 	    if(com_sdot == server->data + server->length -1)
 		com_sdot = server->data - 1 ;
 	}
-#ifdef CONFIGURABLE_AUTHENTICATION_PATH
     }		/* end of if use hierarchical method */
-#endif
 
     if (!(rettree = (krb5_principal *)calloc(links+2,
 					     sizeof(krb5_principal)))) {
@@ -263,7 +257,6 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 	krb5_xfree(rettree);
 	return retval;
     }
-#ifdef CONFIGURABLE_AUTHENTICATION_PATH
     links--;				/* dont count the null entry on end */
     if (cap_code == 0) {    /* found a path above */
 	tmpcrealm.data = client->data;
@@ -299,7 +292,6 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 	}
 	krb5_xfree((char *)cap_nodes);
     } else {  /* if not cap then use hierarchical method */
-#endif
 	for (prevccp = ccp = client->data;
 	     ccp <= com_cdot;
 	     ccp++) {
@@ -386,9 +378,7 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 		return retval;
 	    }
 	}
-#ifdef CONFIGURABLE_AUTHENTICATION_PATH
     }
-#endif
     *tree = rettree;
 
 #ifdef DEBUG_REFERRALS
