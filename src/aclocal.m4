@@ -564,6 +564,22 @@ krb5_ac_cflags_set=${CFLAGS+set}
 krb5_ac_cxxflags_set=${CXXFLAGS+set}
 ])
 dnl
+AC_DEFUN(TRY_CC_FLAG,[dnl
+  cachevar=`echo "krb5_cv_cc_flag_$1" | sed s/[[^a-zA-Z0-9_]]/_/g`
+  AC_CACHE_CHECK([if C compiler supports $1], [$cachevar],
+  [# first try without, then with
+  AC_TRY_COMPILE([], 1;,
+    [old_cflags="$CFLAGS"
+     CFLAGS="$CFLAGS $1"
+     AC_TRY_COMPILE([], 1;, eval $cachevar=yes, eval $cachevar=no)
+     CFLAGS="$old_cflags"],
+    [AC_MSG_ERROR(compiling simple test program with $CFLAGS failed)])])
+  if eval test '"${'$cachevar'}"' = yes; then
+    CFLAGS="$CFLAGS $1"
+  fi
+  eval flag_supported='${'$cachevar'}'
+])dnl
+dnl
 AC_DEFUN(WITH_CC,[dnl
 AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])dnl
 AC_REQUIRE([AC_PROG_CC])dnl
@@ -589,7 +605,6 @@ withval=no)
 if test "$withval" = yes; then
   AC_DEFINE(CONFIG_SMALL,1,[Define to reduce code size even if it means more cpu usage])
 fi
-# maybe add -Waggregate-return, or can we assume that actually works by now?
 # -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.
 extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wconversion -Wshadow"
 # -Wmissing-prototypes
@@ -624,20 +639,33 @@ if test "$GCC" = yes ; then
       fi
     fi
     # Currently, G++ does not support -Wno-format-zero-length.
-    # So only add it to CFLAGS.
-    AC_CACHE_CHECK([if GCC supports -Wno-format-zero-length],
-    		   krb5_cv_gcc_Wno_format_zero_length,
-    [# first try without, then with
-    AC_TRY_COMPILE([], 1;,
-      [old_cflags="$CFLAGS"
-       CFLAGS="$CFLAGS -Wno-format-zero-length"
-       AC_TRY_COMPILE([], 1;, krb5_cv_gcc_Wno_format_zero_length=yes,
-       krb5_cv_gcc_Wno_format_zero_length=no)
-       CFLAGS="$old_cflags"],
-      [AC_MSG_ERROR(compiling simple test program with $CFLAGS failed)])])
-    if test "$krb5_cv_gcc_Wno_format_zero_length" = yes; then
-      CFLAGS="$CFLAGS -Wno-format-zero-length"
-    fi
+    TRY_CC_FLAG(-Wno-format-zero-length)
+    # Other flags here may not be supported on some versions of
+    # gcc that people want to use.
+    for flag in overflow strict-overflow missing-format-attribute ; do
+      TRY_CC_FLAG(-W$flag)
+    done
+    #  old-style-definition? generates many, many warnings
+    #
+    # Warnings that we'd like to turn into errors on versions of gcc
+    # that support promoting only specific warnings to errors, but
+    # we'll take as warnings on older compilers.  (If such a warning
+    # is added after the -Werror=foo feature, you can just put
+    # error=foo in the above list, and skip the test for the
+    # warning-only form.)  At least in some versions, -Werror= doesn't
+    # seem to make the conditions actual errors, but still issues
+    # warnings; I guess we'll take what we can get.
+    #
+    # We're currently targeting C89+, not C99, so disallow some
+    # constructs.
+    for flag in declaration-after-statement variadic-macros ; do
+      TRY_CC_FLAG(-Werror=$flag)
+      if test "$flag_supported" = no; then
+        TRY_CC_FLAG(-W$flag)
+      fi
+    done
+    #  missing-prototypes? maybe someday
+    #
   fi
   if test "`uname -s`" = Darwin ; then
     # Someday this should be a feature test.
