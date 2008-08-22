@@ -77,12 +77,15 @@ extern "C" {
 /*!
  * \param out_string On success, a human-readable UTF-8 string describing the 
  *                   error representedby \a in_error.  Must be freed with
- *                   kim_string_free()
- * \param in_error   an error code.
+ *                   kim_string_free().
+ * \param in_error   an error code.  Used to verify that the correct error
+ *                   string will be returned (see note below).
  * \return On success, KIM_NO_ERROR.  
- * \note This API returns thread local storage.  It should be called 
- * immediately after a KIM API returns an error so that the correct string
- * is returned.
+ * \note This API is implemented using thread local storage.  It should be 
+ * called immediately after a KIM API returns an error code so that the correct
+ * string is returned.  The returned copy may then be held by the caller until 
+ * needed.  If \a in_error does not match the last saved error KIM may return
+ * a less descriptive string.
  * \brief Get a text description of an error suitable for display to the user.
  */
 kim_error kim_string_get_last_error_message (kim_string *out_string,
