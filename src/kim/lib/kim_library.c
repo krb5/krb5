@@ -28,6 +28,7 @@
 
 #include <pthread.h>
 #include <stdarg.h>
+#include <k5-int.h>
 #include <krb5/krb5.h>
 #include <profile.h>
 
@@ -85,7 +86,7 @@ kim_boolean kim_library_allow_home_directory_access (void)
     kim_boolean allow_access = FALSE;
     kim_error err = kim_library_get_allow_home_directory_access (&allow_access);
     
-    return allow_access;
+    return !err ? allow_access : FALSE;
 }
 
 
@@ -139,6 +140,7 @@ kim_boolean kim_library_allow_automatic_prompting (void)
 {
     kim_boolean allow_automatic_prompting = TRUE;
     kim_error err = kim_library_get_allow_automatic_prompting (&allow_automatic_prompting);
+    if (err) { allow_automatic_prompting = TRUE; }
     
     if (allow_automatic_prompting && getenv ("KERBEROSLOGIN_NEVER_PROMPT")) {
         kim_debug_printf ("KERBEROSLOGIN_NEVER_PROMPT is set.");
