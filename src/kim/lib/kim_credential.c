@@ -209,6 +209,8 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     return check_error (err);
 }
 
+#ifndef LEAN_CLIENT
+
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
@@ -339,6 +341,8 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     
     return check_error (err);
 }
+
+#endif /* LEAN_CLIENT */
 
 /* ------------------------------------------------------------------------ */
 
@@ -706,6 +710,8 @@ kim_error kim_credential_store (kim_credential  in_credential,
     return check_error (err);
 }
 
+#ifndef LEAN_CLIENT
+
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_credential_verify (kim_credential in_credential,
@@ -801,6 +807,8 @@ kim_error kim_credential_verify (kim_credential in_credential,
     
     return check_error (err);
 }
+
+#endif /* LEAN_CLIENT */
 
 /* ------------------------------------------------------------------------ */
 

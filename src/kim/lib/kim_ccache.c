@@ -313,6 +313,8 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
     return check_error (err);
 }
 
+#ifndef LEAN_CLIENT
+
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_ccache_create_from_keytab (kim_ccache    *out_ccache,
@@ -344,6 +346,8 @@ kim_error kim_ccache_create_from_keytab (kim_ccache    *out_ccache,
     
     return check_error (err);
 }
+
+#endif /* LEAN_CLIENT */
 
 /* ------------------------------------------------------------------------ */
 
@@ -1021,6 +1025,8 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
     return check_error (err);
 }
 
+#ifndef LEAN_CLIENT
+
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_ccache_verify (kim_ccache   in_ccache,
@@ -1046,6 +1052,8 @@ kim_error kim_ccache_verify (kim_ccache   in_ccache,
     
     return check_error (err);
 }
+
+#endif /* LEAN_CLIENT */
 
 /* ------------------------------------------------------------------------ */
 
