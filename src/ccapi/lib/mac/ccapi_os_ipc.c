@@ -240,7 +240,11 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
         err = mach_port_request_notification (mach_task_self (), reply_port, 
                                               MACH_NOTIFY_NO_SENDERS, 1, reply_port, 
                                               MACH_MSG_TYPE_MAKE_SEND_ONCE, 
-                                              &old_notification_target );
+                                              &old_notification_target);
+        
+        if (!err && old_notification_target != MACH_PORT_NULL) {
+            mach_port_deallocate (mach_task_self (), old_notification_target);
+        }
     }
     
     if (!err) {
@@ -263,7 +267,7 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
     
     pthread_setspecific (g_reply_stream_key, NULL);
     pthread_setspecific (g_server_died_key, NULL);
-    if (MACH_PORT_VALID (reply_port)) { mach_port_deallocate (mach_task_self (), reply_port); }
+    if (reply_port != MACH_PORT_NULL) { mach_port_destroy (mach_task_self (), reply_port); }
     if (ool_request_length          ) { vm_deallocate (mach_task_self (), (vm_address_t) ool_request, ool_request_length); }
     if (reply_stream                ) { cci_stream_release (reply_stream); }
     
