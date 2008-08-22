@@ -606,7 +606,7 @@ AC_CHECK_TYPES([uint32_t, int32_t, uint64_t, int64_t, uint_least32_t, uintptr_t,
 # include <inttypes.h>
 #endif
 ])
-AC_CHECK_TYPES([struct cmsghdr, struct in_pktinfo, struct in6_pktinfo], , , [
+AC_CHECK_TYPES([struct cmsghdr, struct in_pktinfo, struct in6_pktinfo, struct sockaddr_storage], , , [
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

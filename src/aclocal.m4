@@ -411,35 +411,6 @@ fi
 dnl
 AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])dnl
 AC_ARG_ENABLE([ipv6], , AC_MSG_WARN(enable/disable-ipv6 option is deprecated))dnl
-KRB5_AC_CHECK_INET6
-])dnl
-dnl
-AC_DEFUN(KRB5_AC_CHECK_TYPE_WITH_HEADERS,[
-AC_MSG_CHECKING(for type $1)
-changequote(<<,>>)dnl
-varname=`echo $1 | sed 's,[ -],_,g'`
-changequote([,])dnl
-AC_CACHE_VAL(krb5_cv_$varname,[
-AC_TRY_COMPILE([$2],[ $1 foo; ], eval krb5_cv_$varname=yes, eval krb5_cv_$varname=no)])
-eval x="\$krb5_cv_$varname"
-AC_MSG_RESULT($x)
-if eval test "$x" = yes ; then
-  AC_DEFINE_UNQUOTED(HAVE_`echo $varname | tr '[[[a-z]]]' '[[[A-Z]]]'`)
-fi])
-dnl
-dnl
-AC_DEFUN(KRB5_AC_CHECK_SOCKADDR_STORAGE,[
-KRB5_AC_CHECK_TYPE_WITH_HEADERS(struct sockaddr_storage, [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#include <sys/socket.h>
-#include <netinet/in.h>
-])])dnl
-dnl
-dnl
-AC_DEFUN(KRB5_AC_CHECK_INET6,[
-AC_REQUIRE([KRB5_AC_CHECK_SOCKADDR_STORAGE])dnl
 AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
 if test "$ac_cv_func_inet_ntop" != "yes" ; then
