@@ -1,6 +1,7 @@
 /*
  * kdc/do_as_req.c
  *
+ * Portions Copyright (C) 2007 Apple Inc.
  * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -312,6 +313,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	errcode = KRB5KDC_ERR_PREAUTH_REQUIRED;
 	get_preauth_hint_list(request, &client, &server, &e_data);
 	goto errout;
+    }
+
+    errcode = handle_authdata(kdc_context, &client, req_pkt, request, &enc_tkt_reply);
+    if (errcode) {
+	krb5_klog_syslog(LOG_INFO,  "AS_REQ : handle_authdata (%d)", errcode);
     }
 
     ticket_reply.enc_part2 = &enc_tkt_reply;

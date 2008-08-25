@@ -52,6 +52,7 @@
 #define DEFAULT_PROFILE_PATH        ("~/Library/Preferences/edu.mit.Kerberos" ":" DEFAULT_SECURE_PROFILE_PATH)
 #define KRB5_PLUGIN_BUNDLE_DIR       "/System/Library/KerberosPlugins/KerberosFrameworkPlugins"
 #define KDB5_PLUGIN_BUNDLE_DIR       "/System/Library/KerberosPlugins/KerberosDatabasePlugins"
+#define KRB5_AUTHDATA_PLUGIN_BUNDLE_DIR  "/System/Library/KerberosPlugins/KerberosAuthDataPlugins"
 #else
 #define DEFAULT_SECURE_PROFILE_PATH	"/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
 #define DEFAULT_PROFILE_PATH        DEFAULT_SECURE_PROFILE_PATH

@@ -1,6 +1,7 @@
 /*
  * kdc/kdc_util.h
  *
+ * Portions Copyright (C) 2007 Apple Inc.
  * Copyright 1990, 2007 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -162,6 +163,14 @@ krb5_error_code return_padata
     
 krb5_error_code free_padata_context
     (krb5_context context, void **padata_context);
+
+/* kdc_authdata.c */
+krb5_error_code load_authdata_plugins(krb5_context context);
+krb5_error_code unload_authdata_plugins(krb5_context context);
+
+krb5_error_code handle_authdata (krb5_context context, krb5_db_entry *client,
+				 krb5_data *req_pkt, krb5_kdc_req *request,
+				 krb5_enc_tkt_part *enc_tkt_reply);
 
 /* replay.c */
 krb5_boolean kdc_check_lookaside (krb5_data *, krb5_data **);

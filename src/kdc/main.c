@@ -1,6 +1,7 @@
 /*
  * kdc/main.c
  *
+ * Portions Copyright (C) 2007 Apple Inc.
  * Copyright 1990,2001,2008 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -713,6 +714,7 @@ int main(int argc, char **argv)
     setup_signal_handlers();
 
     load_preauth_plugins(kcontext);
+    load_authdata_plugins(kcontext);
 
     retval = setup_sam();
     if (retval) {
@@ -742,6 +744,7 @@ int main(int argc, char **argv)
     }
     krb5_klog_syslog(LOG_INFO, "shutting down");
     unload_preauth_plugins(kcontext);
+    unload_authdata_plugins(kcontext);
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
     if (kdc_realmlist) 

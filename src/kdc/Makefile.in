@@ -33,6 +33,7 @@ SRCS= \
 	$(srcdir)/policy.c \
 	$(srcdir)/extern.c \
 	$(srcdir)/replay.c \
+	$(srcdir)/kdc_authdata.c \
 	$(srcdir)/kerberos_v4.c
 
 OBJS= \
@@ -47,6 +48,7 @@ OBJS= \
 	policy.o \
 	extern.o \
 	replay.o \
+	kdc_authdata.o \
 	kerberos_v4.o
 
 RT_OBJS= rtest.o \
