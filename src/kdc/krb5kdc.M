@@ -1,6 +1,6 @@
 .\" kdc/krb5kdc.M
 .\"
-.\" Copyright 1990 by the Massachusetts Institute of Technology.
+.\" Copyright 1990, 2008 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may
 .\"   require a specific license from the United States Government.
@@ -106,8 +106,8 @@ This option does not apply to the LDAP database.
 The
 .B \-k
 .I keytype
-option specifies the key type of the master key in the database; the default
-is KEYTYPE_DES.
+option specifies the key type of the master key to be entered manually
+as a password when -m is given; the default is "des-cbc-crc".
 .PP
 The
 .B \-M
