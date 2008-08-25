@@ -693,7 +693,7 @@ static inline int k5_mutex_finish_init_1(k5_mutex_t *m, k5_debug_loc l)
 #define k5_mutex_destroy(M)			\
 	(k5_os_mutex_assert_unlocked(&(M)->os),	\
 	 krb5int_mutex_report_stats(M),		\
-	 k5_mutex_lock(M) && ((M)->loc_last = K5_DEBUG_LOC, k5_mutex_unlock(M)), \
+	 !k5_mutex_lock(M) && ((M)->loc_last = K5_DEBUG_LOC, k5_mutex_unlock(M)), \
 	 k5_os_mutex_destroy(&(M)->os))
 
 #if __GNUC__ >= 4
