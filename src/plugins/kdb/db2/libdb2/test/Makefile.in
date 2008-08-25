@@ -9,7 +9,7 @@ TMPDIR=.
 LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
 		-I$(srcdir)/../btree -I$(srcdir)/../hash -I$(srcdir)/../db
 
-PROG_LIBPATH=-L..
+PROG_LIBPATH=-L.. -L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
