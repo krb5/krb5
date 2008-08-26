@@ -169,7 +169,7 @@ static inline k5_debug_loc k5_debug_make_loc(const char *file, int line)
 #define K5_DEBUG_LOC		(k5_debug_make_loc(__FILE__,__LINE__))
 #endif
 #else /* ! DEBUG_THREADS_LOC */
-typedef char k5_debug_loc;
+typedef int k5_debug_loc;
 #define K5_DEBUG_LOC_INIT	0
 #define K5_DEBUG_LOC		0
 #endif
