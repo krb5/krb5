@@ -139,7 +139,7 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_POLL_TIME		0x04000000
 #define KADM5_CONFIG_IPROP_LOGFILE	0x08000000
 #define KADM5_CONFIG_IPROP_PORT		0x10000000
-#define KADM5_CONFIG_KVNO           0x20000000
+#define KADM5_CONFIG_KVNO		0x20000000
 /*
  * permission bits
  */
