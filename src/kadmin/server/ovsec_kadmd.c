@@ -115,7 +115,9 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 int schpw;
 void do_schpw(int s, kadm5_config_params *params);
 
+#ifndef DISABLE_IPROP
 int ipropfd;
+#endif
 
 #ifdef USE_PASSWORD_SERVER
 void kadm5_set_use_password_server (void);
@@ -390,6 +392,7 @@ int main(int argc, char *argv[])
      }
      set_cloexec_fd(schpw);
 
+#ifndef DISABLE_IPROP
      if ((ipropfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 	 const char *e_txt;
 	 ret = SOCKET_ERRNO;
@@ -404,6 +407,7 @@ int main(int argc, char *argv[])
 	 exit(1);
      }
      set_cloexec_fd(ipropfd);
+#endif
 
 #ifdef SO_REUSEADDR
      /* the old admin server turned on SO_REUSEADDR for non-default
@@ -421,9 +425,11 @@ int main(int argc, char *argv[])
 	 if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
 			(char *) &allowed, sizeof(allowed)) < 0 ||
 	     setsockopt(schpw, SOL_SOCKET, SO_REUSEADDR,
-			(char *) &allowed, sizeof(allowed)) < 0 ||
-	     setsockopt(ipropfd, SOL_SOCKET, SO_REUSEADDR,
 			(char *) &allowed, sizeof(allowed)) < 0
+#ifndef DISABLE_IPROP
+	     || setsockopt(ipropfd, SOL_SOCKET, SO_REUSEADDR,
+			(char *) &allowed, sizeof(allowed)) < 0
+#endif
 	     ) {
 	     const char *e_txt;
 	     ret = SOCKET_ERRNO;
@@ -512,6 +518,7 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
+#ifndef DISABLE_IPROP
      memset(&addr, 0, sizeof(addr));
      addr.sin_family = AF_INET;
      addr.sin_addr.s_addr = INADDR_ANY;
@@ -545,6 +552,7 @@ int main(int argc, char *argv[])
  	  krb5_klog_close(context);
 	  exit(1);
      }
+#endif
 
      transp = svctcp_create(s, 0, 0);
      if(transp == NULL) {
@@ -562,6 +570,7 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
+#ifndef DISABLE_IPROP
      iproptransp = svctcp_create(ipropfd, 0, 0);
      if (iproptransp == NULL) {
 	  fprintf(stderr, "%s: Cannot create RPC service.\n", whoami);
@@ -579,7 +588,7 @@ int main(int argc, char *argv[])
 	  exit(1);
 #endif
      }
-
+#endif
 
      names[0].name = build_princ_name(KADM5_ADMIN_SERVICE, params.realm);
      names[1].name = build_princ_name(KADM5_CHANGEPW_SERVICE, params.realm);
