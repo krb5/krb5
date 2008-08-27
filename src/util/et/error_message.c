@@ -321,12 +321,6 @@ remove_error_table(const struct error_table * et)
 
     if (CALL_INIT_FUNCTION(com_err_initialize))
 	return 0;
-#if !defined(ENABLE_THREADS) && defined(DEBUG_THREADS)
-    if (et_list_lock.os.initialized == 0 && terminated != 0) {
-	fprintf(stderr, "\n\n *** Function remove_error_table called after com_err library termination. ***\n *** Shared library termination code executed in incorrect order?          ***\n\n");
-	abort();
-    }
-#endif
     merr = k5_mutex_lock(&et_list_lock);
     if (merr)
 	return merr;

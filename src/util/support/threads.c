@@ -412,26 +412,12 @@ int krb5int_call_thread_support_init (void)
 
 #include "cache-addrinfo.h"
 
-#ifdef DEBUG_THREADS_STATS
-#include <stdio.h>
-static FILE *stats_logfile;
-#endif
-
 int krb5int_thread_support_init (void)
 {
     int err;
 
 #ifdef SHOW_INITFINI_FUNCS
     printf("krb5int_thread_support_init\n");
-#endif
-
-#ifdef DEBUG_THREADS_STATS
-    /*    stats_logfile = stderr; */
-    stats_logfile = fopen("/dev/tty", "w+");
-    if (stats_logfile == NULL)
-	stats_logfile = stderr;
-    else
-	set_cloexec_file(stats_logfile);
 #endif
 
 #ifndef ENABLE_THREADS
@@ -498,126 +484,8 @@ void krb5int_thread_support_fini (void)
 
 #endif
 
-#ifdef DEBUG_THREADS_STATS
-    fflush(stats_logfile);
-    /* XXX Should close if not stderr, in case unloading library but
-       not exiting.  */
-#endif
-
     krb5int_fini_fac();
 }
-
-#ifdef DEBUG_THREADS_STATS
-void KRB5_CALLCONV
-k5_mutex_lock_update_stats(k5_debug_mutex_stats *m,
-			   k5_mutex_stats_tmp startwait)
-{
-  k5_debug_time_t now;
-  k5_debug_timediff_t tdiff, tdiff2;
-
-  now = get_current_time();
-  (void) krb5int_call_thread_support_init();
-  m->count++;
-  m->time_acquired = now;
-  tdiff = timediff(now, startwait);
-  tdiff2 = tdiff * tdiff;
-  if (m->count == 1 || m->lockwait.valmin > tdiff)
-    m->lockwait.valmin = tdiff;
-  if (m->count == 1 || m->lockwait.valmax < tdiff)
-    m->lockwait.valmax = tdiff;
-  m->lockwait.valsum += tdiff;
-  m->lockwait.valsqsum += tdiff2;
-}
-
-void KRB5_CALLCONV
-krb5int_mutex_unlock_update_stats(k5_debug_mutex_stats *m)
-{
-  k5_debug_time_t now = get_current_time();
-  k5_debug_timediff_t tdiff, tdiff2;
-  tdiff = timediff(now, m->time_acquired);
-  tdiff2 = tdiff * tdiff;
-  if (m->count == 1 || m->lockheld.valmin > tdiff)
-    m->lockheld.valmin = tdiff;
-  if (m->count == 1 || m->lockheld.valmax < tdiff)
-    m->lockheld.valmax = tdiff;
-  m->lockheld.valsum += tdiff;
-  m->lockheld.valsqsum += tdiff2;
-}
-
-#include <math.h>
-static inline double
-get_stddev(struct k5_timediff_stats sp, int count)
-{
-  long double mu, mu_squared, rho_squared;
-  mu = (long double) sp.valsum / count;
-  mu_squared = mu * mu;
-  /* SUM((x_i - mu)^2)
-     = SUM(x_i^2 - 2*mu*x_i + mu^2)
-     = SUM(x_i^2) - 2*mu*SUM(x_i) + N*mu^2
-
-     Standard deviation rho^2 = SUM(...) / N.  */
-  rho_squared = (sp.valsqsum - 2 * mu * sp.valsum + count * mu_squared) / count;
-  return sqrt(rho_squared);
-}
-
-void KRB5_CALLCONV
-krb5int_mutex_report_stats(k5_mutex_t *m)
-{
-  char *p;
-
-  /* Tweak this to only record data on "interesting" locks.  */
-  if (m->stats.count < 10)
-    return;
-  if (m->stats.lockwait.valsum < 10 * m->stats.count)
-    return;
-
-  p = strrchr(m->loc_created.filename, '/');
-  if (p == NULL)
-    p = m->loc_created.filename;
-  else
-    p++;
-  fprintf(stats_logfile, "mutex @%p: created at line %d of %s\n",
-	  (void *) m, m->loc_created.lineno, p);
-  if (m->stats.count == 0)
-    fprintf(stats_logfile, "\tnever locked\n");
-  else {
-    double sd_wait, sd_hold;
-    sd_wait = get_stddev(m->stats.lockwait, m->stats.count);
-    sd_hold = get_stddev(m->stats.lockheld, m->stats.count);
-    fprintf(stats_logfile,
-	    "\tlocked %d time%s; wait %lu/%f/%lu/%fus, hold %lu/%f/%lu/%fus\n",
-	    m->stats.count, m->stats.count == 1 ? "" : "s",
-	    (unsigned long) m->stats.lockwait.valmin,
-	    (double) m->stats.lockwait.valsum / m->stats.count,
-	    (unsigned long) m->stats.lockwait.valmax,
-	    sd_wait,
-	    (unsigned long) m->stats.lockheld.valmin,
-	    (double) m->stats.lockheld.valsum / m->stats.count,
-	    (unsigned long) m->stats.lockheld.valmax,
-	    sd_hold);
-  }
-}
-#else
-/* On Windows, everything defined in the export list must be defined.
-   The UNIX systems where we're using the export list don't seem to
-   care.  */
-#undef krb5int_mutex_lock_update_stats
-void KRB5_CALLCONV
-krb5int_mutex_lock_update_stats(k5_debug_mutex_stats *m,
-				k5_mutex_stats_tmp startwait)
-{
-}
-#undef krb5int_mutex_unlock_update_stats
-void KRB5_CALLCONV
-krb5int_mutex_unlock_update_stats(k5_debug_mutex_stats *m)
-{
-}
-#undef krb5int_mutex_report_stats
-void KRB5_CALLCONV
-krb5int_mutex_report_stats(k5_mutex_t *m)
-{
-}
-#endif
 
 /* Mutex allocation functions, for use in plugins that may not know
    what options a given set of libraries was compiled with.  */
