@@ -632,3 +632,33 @@ krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
 check-unix:: krb5-config
 	$(SHELL) $(srcdir)/t_krbconf
 check-prerecurse: fake-install
+
+COV_BUILD=	cov-build
+COV_ANALYZE=	cov-analyze
+COV_COMMIT=	cov-commit-defects --product "$(COV_PRODUCT)" --user "$(COV_USER)" --target "$(COV_TARGET)" --description "$(COV_DESC)"
+COV_MAKE_LIB=	cov-make-library
+
+COV_PRODUCT=	krb5
+COV_USER=	admin
+COV_DATADIR=
+COV_TARGET=	$(host)
+COV_DESC=
+
+# Set to, e.g., "--all" or "--security".
+COV_ANALYSES=
+# Temporary directory, might as well put it in the build tree.
+COV_TEMPDIR=	cov-temp
+# Sources modeling some functions or macros confusing Prevent.
+COV_MODELS=\
+	$(SRCTOP)/util/coverity-models/threads.c
+
+# Depend on Makefiles to ensure that (in maintainer mode) the configure
+# scripts won't get rerun under cov-build.
+coverity prevent cov: Makefiles
+	$(COV_BUILD) --dir $(COV_TEMPDIR) $(MAKE) all
+	$(COV_ANALYZE) $(COV_ANALYSES) --dir $(COV_TEMPDIR)
+	if test "$(COV_DATADIR)" != ""; then \
+		$(COV_COMMIT) --dir $(COV_TEMPDIR) --datadir $(COV_DATADIR); \
+	else \
+		echo "** Coverity Prevent analysis results not commit to Defect Manager"; \
+	fi
