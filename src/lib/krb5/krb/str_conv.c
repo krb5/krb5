@@ -251,7 +251,7 @@ krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen
 	"%x %X",		/* locale-dependent short format	*/
 	"%d/%m/%Y %R"		/* dd/mm/yyyy hh:mm			*/
     };
-    static const int sftime_format_table_nents =
+    static const unsigned int sftime_format_table_nents =
 	sizeof(sftime_format_table)/sizeof(sftime_format_table[0]);
 
 #ifdef HAVE_LOCALTIME_R

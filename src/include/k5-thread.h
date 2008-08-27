@@ -245,6 +245,12 @@ typedef k5_os_nothread_mutex k5_os_mutex;
    If we find a platform with non-functional stubs and no weak
    references, we may have to resort to some hack like dlsym on the
    symbol tables of the current process.  */
+extern int krb5int_pthread_loaded(void)
+#ifdef __GNUC__
+     /* We should always get the same answer for the life of the process.  */
+     __attribute__((const))
+#endif
+     ;
 #if defined(HAVE_PRAGMA_WEAK_REF) && !defined(NO_WEAK_PTHREADS)
 # pragma weak pthread_once
 # pragma weak pthread_mutex_lock
@@ -253,12 +259,6 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 # pragma weak pthread_mutex_init
 # pragma weak pthread_self
 # pragma weak pthread_equal
-extern int krb5int_pthread_loaded(void)
-#ifdef __GNUC__
-     /* We should always get the same answer for the life of the process.  */
-     __attribute__((const))
-#endif
-     ;
 # define K5_PTHREADS_LOADED	(krb5int_pthread_loaded())
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
 

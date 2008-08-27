@@ -788,7 +788,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_creds tgtq, cc_tgt, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean old_use_conf_ktypes;
     char **hrealms;
-    int referral_count, i;
+    unsigned int referral_count, i;
 
     /* 
      * Set up client and server pointers.  Make a fresh and modifyable

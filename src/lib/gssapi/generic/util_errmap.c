@@ -102,7 +102,7 @@ mecherror_print(struct mecherror value, FILE *f)
 	{ "{ 1 2 840 48018 1 2 2 }", "krb5-microsoft" },
 	{ "{ 1 3 6 1 5 5 2 }", "spnego" },
     };
-    int i;
+    unsigned int i;
 
     fprintf(f, "%lu@", (unsigned long) value.code);
 

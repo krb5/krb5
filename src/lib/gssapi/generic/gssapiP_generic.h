@@ -255,6 +255,8 @@ OM_uint32 generic_gss_str_to_oid
 	    gss_OID *		/* oid */
 	   );
 
+int gssint_mecherrmap_init(void);
+void gssint_mecherrmap_destroy(void);
 OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc *oid);
 int gssint_mecherrmap_get(OM_uint32 minor, gss_OID mech_oid,
 			  OM_uint32 *mech_minor);

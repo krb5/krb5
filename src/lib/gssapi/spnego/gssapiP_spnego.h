@@ -307,7 +307,7 @@ OM_uint32 spnego_gss_inquire_context
 	gss_OID		*mech_type,
 	OM_uint32	*ctx_flags,
 	int		*locally_initiated,
-	int		*open
+	int		*opened
 );
 
 OM_uint32 spnego_gss_wrap_size_limit

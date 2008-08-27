@@ -439,9 +439,7 @@ static gss_mechanism krb5_mech_configs_hack[] = {
 };
 #endif
 
-#if 1
 #define gssint_get_mech_configs krb5_gss_get_mech_configs
-#endif
 
 gss_mechanism *
 gssint_get_mech_configs(void)
@@ -729,7 +727,7 @@ k5glue_init_sec_context(ctx, minor_status, claimant_cred_handle, context_handle,
 static OM_uint32
 k5glue_inquire_context(ctx, minor_status, context_handle, initiator_name, acceptor_name,
 		    lifetime_rec, mech_type, ret_flags,
-		    locally_initiated, open)
+		    locally_initiated, opened)
     void *ctx;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
@@ -739,12 +737,12 @@ k5glue_inquire_context(ctx, minor_status, context_handle, initiator_name, accept
      gss_OID *mech_type;
      OM_uint32 *ret_flags;
      int *locally_initiated;
-     int *open;
+     int *opened;
 {
    return(krb5_gss_inquire_context(minor_status, context_handle,
 				   initiator_name, acceptor_name, lifetime_rec,
 				   mech_type, ret_flags, locally_initiated,
-				   open));
+				   opened));
 }
 
 static OM_uint32

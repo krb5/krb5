@@ -15,6 +15,8 @@
 #include <time.h>
 #endif
 
+#include "k5-gmt_mktime.h"
+
 /* take a struct tm, return seconds from GMT epoch */
 /* like mktime, this ignores tm_wday and tm_yday. */
 /* unlike mktime, this does not set them... it only passes a return value. */

@@ -48,7 +48,7 @@ k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
     krb5_MD5_CTX ctx;
     unsigned char conf[CONFLENGTH];
     unsigned char xorkey[8];
-    int i;
+    unsigned int i;
     mit_des_key_schedule schedule;
 
     if (key->length != 8)
@@ -110,7 +110,7 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
     krb5_MD5_CTX ctx;
     unsigned char plaintext[CONFLENGTH+RSA_MD5_CKSUM_LENGTH];
     unsigned char xorkey[8];
-    int i;
+    unsigned int i;
     mit_des_key_schedule schedule;
     int compathash = 0;
 

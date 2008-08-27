@@ -32,7 +32,7 @@ krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
 		       krb5_keyusage usage, const krb5_data *data,
 		       const krb5_checksum *cksum, krb5_boolean *valid)
 {
-    int i;
+    unsigned int i;
     size_t hashsize;
     krb5_error_code ret;
     krb5_data indata;

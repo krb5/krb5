@@ -27,8 +27,7 @@
  * Return the protocol addresses supported by this host.
  * Exports from this file:
  *   krb5int_foreach_localaddr (does callbacks)
- *   krb5int_local_addresses (includes krb5.conf extra_addresses)
- *   krb5_os_localaddr (doesn't)
+ *   krb5_os_localaddr (doesn't include krb5.conf extra_addresses)
  *
  * XNS support is untested, but "Should just work".  (Hah!)
  */
@@ -1334,11 +1333,13 @@ krb5_os_localaddr(krb5_context context, krb5_address ***addr)
     return get_localaddrs(context, addr, 1);
 }
 
+#if 0 /* not actually used anywhere currently */
 krb5_error_code
 krb5int_local_addresses(krb5_context context, krb5_address ***addr)
 {
     return get_localaddrs(context, addr, 0);
 }
+#endif
 
 static krb5_error_code
 get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)

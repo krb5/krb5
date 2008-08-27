@@ -35,12 +35,13 @@ CFStringEncoding kim_os_string_get_encoding (void)
 {
     typedef TextEncoding (*GetApplicationTextEncodingProcPtr) (void);
     GetApplicationTextEncodingProcPtr GetApplicationTextEncodingPtr = NULL;
+    CFBundleRef carbonBundle = NULL;
     
     if (kim_os_library_caller_is_server ()) {
         return kCFStringEncodingUTF8;  /* server only does UTF8 */
     }
     
-    CFBundleRef carbonBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.Carbon"));
+    carbonBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.Carbon"));
     if (carbonBundle != NULL && CFBundleIsExecutableLoaded (carbonBundle)) {
         GetApplicationTextEncodingPtr = (GetApplicationTextEncodingProcPtr) CFBundleGetFunctionPointerForName (carbonBundle,
                                                                                                                CFSTR ("GetApplicationTextEncoding"));

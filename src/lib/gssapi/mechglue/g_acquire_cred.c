@@ -145,7 +145,7 @@ OM_uint32 *		time_rec;
     gss_OID_set mechs;
     gss_OID_desc default_OID;
     gss_mechanism mech;
-    int i;
+    unsigned int i;
     gss_union_cred_t creds;
 
     major = val_acq_cred_args(minor_status,

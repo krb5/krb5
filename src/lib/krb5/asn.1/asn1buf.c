@@ -167,7 +167,7 @@ asn1_error_code asn1buf_insert_octet(asn1buf *buf, const int o)
 asn1_error_code asn1buf_insert_octetstring(asn1buf *buf, const unsigned int len, const krb5_octet *s)
 {
   asn1_error_code retval;
-  int length;
+  unsigned int length;
 
   retval = asn1buf_ensure_space(buf,len);
   if(retval) return retval;
@@ -179,7 +179,7 @@ asn1_error_code asn1buf_insert_octetstring(asn1buf *buf, const unsigned int len,
 asn1_error_code asn1buf_insert_charstring(asn1buf *buf, const unsigned int len, const char *s)
 {
   asn1_error_code retval;
-  int length;
+  unsigned int length;
 
   retval = asn1buf_ensure_space(buf,len);
   if(retval) return retval;
@@ -198,7 +198,7 @@ asn1_error_code asn1buf_remove_octet(asn1buf *buf, asn1_octet *o)
 
 asn1_error_code asn1buf_remove_octetstring(asn1buf *buf, const unsigned int len, asn1_octet **s)
 {
-  int i;
+  unsigned int i;
 
   if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
   if (len == 0) {
@@ -216,7 +216,7 @@ asn1_error_code asn1buf_remove_octetstring(asn1buf *buf, const unsigned int len,
 
 asn1_error_code asn1buf_remove_charstring(asn1buf *buf, const unsigned int len, char **s)
 {
-  int i;
+  unsigned int i;
 
   if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
   if (len == 0) {
@@ -247,7 +247,7 @@ int asn1buf_remains(asn1buf *buf, int indef)
 
 asn1_error_code asn12krb5_buf(const asn1buf *buf, krb5_data **code)
 {
-  int i;
+  unsigned int i;
   *code = (krb5_data*)calloc(1,sizeof(krb5_data));
   if(*code == NULL) return ENOMEM;
   (*code)->magic = KV5M_DATA;
@@ -284,7 +284,7 @@ asn1_error_code asn1buf_unparse(const asn1buf *buf, char **s)
     strcpy(*s,"<EMPTY>");
   }else{
     unsigned int length = asn1buf_len(buf);
-    int i;
+    unsigned int i;
 
     *s = calloc(length+1, sizeof(char));
     if(*s == NULL) return ENOMEM;
@@ -338,7 +338,7 @@ int asn1buf_size(const asn1buf *buf)
 }
 
 #undef asn1buf_free
-int asn1buf_free(const asn1buf *buf)
+unsigned int asn1buf_free(const asn1buf *buf)
 {
   if(buf == NULL || buf->base == NULL) return 0;
   else return buf->bound - buf->next + 1;

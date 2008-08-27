@@ -33,7 +33,7 @@ k5_md4_hash(unsigned int icount, const krb5_data *input,
 	    krb5_data *output)
 {
     krb5_MD4_CTX ctx;
-    int i;
+    unsigned int i;
 
     if (output->length != RSA_MD4_CKSUM_LENGTH)
 	return(KRB5_CRYPTO_INTERNAL);

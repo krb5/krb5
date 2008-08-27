@@ -469,6 +469,8 @@ extern char *strdup (const char *);
 
 #include <stdio.h>
 
+#include "k5-gmt_mktime.h"
+
 struct addrlist;
 struct sendto_callback_info;
 
@@ -732,8 +734,6 @@ krb5_error_code krb5_crypto_os_localaddr
 krb5_error_code krb5_crypto_us_timeofday
 	(krb5_int32 *,
 		krb5_int32 *);
-
-time_t krb5int_gmt_mktime (struct tm *);
 
 #endif /* KRB5_OLD_CRYPTO */
 
@@ -2194,6 +2194,13 @@ krb5_error_code krb5_decrypt_data
 	(krb5_context context, krb5_keyblock *key, 
 		krb5_pointer ivec, krb5_enc_data *data, 
 		krb5_data *enc_data);
+
+krb5_error_code
+krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+		    const krb5_data *input, krb5_data *output);
+krb5_error_code
+krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+		    const krb5_data *input, krb5_data *output);
 
 struct _krb5_kt_ops;
 struct _krb5_kt {	/* should move into k5-int.h */

@@ -41,7 +41,7 @@ val_inq_ctx_args(
     gss_OID *mech_type,
     OM_uint32 *ctx_flags,
     int *locally_initiated,
-    int *open)
+    int *opened)
 {
 
     /* Initialize outputs. */
@@ -73,27 +73,15 @@ val_inq_ctx_args(
 /* Last argument new for V2 */
 OM_uint32 KRB5_CALLCONV
 gss_inquire_context(
-	    minor_status,
-	    context_handle,
-	    src_name,
-	    targ_name,
-	    lifetime_rec,
-	    mech_type,
-	    ctx_flags,
-	    locally_initiated,
-	    open)
-
-OM_uint32 *	minor_status;
-gss_ctx_id_t	context_handle;
-gss_name_t *	src_name;
-gss_name_t *	targ_name;
-OM_uint32 *	lifetime_rec;
-gss_OID *	mech_type;
-OM_uint32 *	ctx_flags;
-int *           locally_initiated;
-int *		open;
-
-
+	    OM_uint32 *minor_status,
+	    gss_ctx_id_t context_handle,
+	    gss_name_t *src_name,
+	    gss_name_t *targ_name,
+	    OM_uint32 *lifetime_rec,
+	    gss_OID *mech_type,
+	    OM_uint32 *ctx_flags,
+	    int *locally_initiated,
+	    int *opened)
 {
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
@@ -105,7 +93,7 @@ int *		open;
 			      src_name, targ_name,
 			      lifetime_rec,
 			      mech_type, ctx_flags,
-			      locally_initiated, open);
+			      locally_initiated, opened);
     if (status != GSS_S_COMPLETE)
 	return (status);
 
@@ -132,7 +120,7 @@ int *		open;
 			NULL,
 			ctx_flags,
 			locally_initiated,
-			open);
+			opened);
 
     if (status != GSS_S_COMPLETE) {
 	map_error(minor_status, mech);

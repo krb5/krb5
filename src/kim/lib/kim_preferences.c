@@ -289,12 +289,14 @@ kim_error kim_favorite_identities_remove_identity (kim_favorite_identities io_fa
             err = kim_identity_compare (in_identity, identity, &found);
             
             if (!err && found) {
+                kim_error terr = KIM_NO_ERROR;
                 kim_count new_count = io_favorite_identities->count - 1;
+                
                 memmove (&io_favorite_identities->identities[i], 
                          &io_favorite_identities->identities[i + 1],
                          (new_count - i) * sizeof (*io_favorite_identities->identities));
                 
-                kim_error terr = kim_favorite_identities_resize (io_favorite_identities, new_count);
+                terr = kim_favorite_identities_resize (io_favorite_identities, new_count);
                 if (terr) {
                     kim_debug_printf ("failed to resize list to %d.  Continuing.", new_count);
                 }

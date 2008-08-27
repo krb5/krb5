@@ -502,7 +502,7 @@ asn1_error_code asn1_decode_krb5_flags(asn1buf *buf, krb5_flags *val)
   asn1_error_code retval;
   asn1_octet unused, o;
   taginfo t;
-  int i;
+  unsigned int i;
   krb5_flags f=0;
   unsigned int length;
 

@@ -25,6 +25,7 @@
  */
 
 /* ASN.1 primitive decoders */
+#include "k5-int.h" /* for krb5int_gmt_mktime */
 #include "asn1_decode.h"
 #include "asn1_get.h"
 #include <stdio.h>
@@ -55,14 +56,12 @@ if(asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
 #define cleanup()\
 return 0
 
-extern time_t krb5int_gmt_mktime (struct tm *);
-
 asn1_error_code asn1_decode_integer(asn1buf *buf, long int *val)
 {
   setup();
   asn1_octet o;
   long n = 0; /* initialize to keep gcc happy */
-  int i;
+  unsigned int i;
 
   tag(ASN1_INTEGER);
 
@@ -87,7 +86,7 @@ asn1_error_code asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *va
   setup();
   asn1_octet o;
   unsigned long n;
-  int i;
+  unsigned int i;
 
   tag(ASN1_INTEGER);
 

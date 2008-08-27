@@ -170,7 +170,7 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
     size_t		required;
     krb5_octet		*bp;
     size_t		remain;
-    int			i;
+    unsigned int	i;
 
     required = 0;
     bp = *buffer;
@@ -333,7 +333,7 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
     krb5_int32		ibuf;
     krb5_octet		*bp;
     size_t		remain;
-    int			i;
+    unsigned int	i;
 
     bp = *buffer;
     remain = *lenremain;

@@ -146,7 +146,7 @@ gss_indicate_mechs(minorStatus, mechSet)
 OM_uint32 *minorStatus;
 gss_OID_set *mechSet;
 {
-	int i, j;
+	unsigned int i, j;
 	gss_OID curItem;
 
 	/* Initialize outputs. */
@@ -232,7 +232,7 @@ gss_OID_set *mechSet;
 static void
 free_mechSet(void)
 {
-	int i;
+	unsigned int i;
 
 	if (g_mechSet.count != 0) {
 		for (i = 0; i < g_mechSet.count; i++)
@@ -415,7 +415,7 @@ gssint_oid_to_mech(const gss_OID oid)
 
 	/* ensure we have fresh data */
 	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return GSS_S_FAILURE;
+		return NULL;
 	updateMechList();
 	aMech = searchMechList(oid);
 	(void) k5_mutex_unlock(&g_mechListLock);
@@ -539,8 +539,6 @@ register_mech(gss_mechanism mech, const char *namestr, void *dl_handle)
 static void
 init_hardcoded(void)
 {
-	extern gss_mechanism *krb5_gss_get_mech_configs(void);
-	extern gss_mechanism *spnego_gss_get_mech_configs(void);
 	gss_mechanism *cflist;
 	static int inited;
 
@@ -579,7 +577,7 @@ gssint_get_mechanism(gss_OID oid)
 		return NULL;
 
 	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return GSS_S_FAILURE;
+		return NULL;
 	/* check if the mechanism is already loaded */
 	if ((aMech = searchMechList(oid)) != NULL && aMech->mech) {
 		(void) k5_mutex_unlock(&g_mechListLock);

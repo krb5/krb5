@@ -205,9 +205,7 @@ static gss_mechanism spnego_mech_configs[] = {
 	&spnego_mechanism, NULL
 };
 
-#if 1
 #define gssint_get_mech_configs spnego_gss_get_mech_configs
-#endif
 
 gss_mechanism *
 gssint_get_mech_configs(void)
@@ -1580,7 +1578,7 @@ spnego_gss_inquire_context(void *context,
 			gss_OID		*mech_type,
 			OM_uint32	*ctx_flags,
 			int		*locally_initiated,
-			int		*open)
+			int		*opened)
 {
 	OM_uint32 ret = GSS_S_COMPLETE;
 
@@ -1592,7 +1590,7 @@ spnego_gss_inquire_context(void *context,
 				mech_type,
 				ctx_flags,
 				locally_initiated,
-				open);
+				opened);
 
 	return (ret);
 }
@@ -1696,35 +1694,35 @@ get_available_mechs(OM_uint32 *minor_status,
 	gss_name_t name, gss_cred_usage_t usage,
 	gss_cred_id_t *creds, gss_OID_set *rmechs)
 {
-	int		i;
+	unsigned int	i;
 	int		found = 0;
-	OM_uint32 stat = GSS_S_COMPLETE, tmpmin;
+	OM_uint32 major_status = GSS_S_COMPLETE, tmpmin;
 	gss_OID_set mechs, goodmechs;
 
-	stat = gss_indicate_mechs(minor_status, &mechs);
+	major_status = gss_indicate_mechs(minor_status, &mechs);
 
-	if (stat != GSS_S_COMPLETE) {
-		return (stat);
+	if (major_status != GSS_S_COMPLETE) {
+		return (major_status);
 	}
 
-	stat = gss_create_empty_oid_set(minor_status, rmechs);
+	major_status = gss_create_empty_oid_set(minor_status, rmechs);
 
-	if (stat != GSS_S_COMPLETE) {
+	if (major_status != GSS_S_COMPLETE) {
 		(void) gss_release_oid_set(minor_status, &mechs);
-		return (stat);
+		return (major_status);
 	}
 
-	for (i = 0; i < mechs->count && stat == GSS_S_COMPLETE; i++) {
+	for (i = 0; i < mechs->count && major_status == GSS_S_COMPLETE; i++) {
 		if ((mechs->elements[i].length
 		    != spnego_mechanism.mech_type.length) ||
 		    memcmp(mechs->elements[i].elements,
 			spnego_mechanism.mech_type.elements,
 			spnego_mechanism.mech_type.length)) {
 
-			stat = gss_add_oid_set_member(minor_status,
-					    &mechs->elements[i],
-					    rmechs);
-			if (stat == GSS_S_COMPLETE)
+			major_status = gss_add_oid_set_member(minor_status,
+							      &mechs->elements[i],
+							      rmechs);
+			if (major_status == GSS_S_COMPLETE)
 				found++;
 		}
 	}
@@ -1734,17 +1732,18 @@ get_available_mechs(OM_uint32 *minor_status,
 	 * trim the list of mechanisms down to only those
 	 * for which the creds are valid.
 	 */
-	if (found > 0 && stat == GSS_S_COMPLETE && creds != NULL) {
-		stat = gss_acquire_cred(minor_status,
-			name, GSS_C_INDEFINITE, *rmechs, usage, creds,
-			&goodmechs, NULL);
+	if (found > 0 && major_status == GSS_S_COMPLETE && creds != NULL) {
+		major_status = gss_acquire_cred(minor_status,
+						name, GSS_C_INDEFINITE, 
+						*rmechs, usage, creds,
+						&goodmechs, NULL);
 
 		/*
 		 * Drop the old list in favor of the new
 		 * "trimmed" list.
 		 */
 		(void) gss_release_oid_set(&tmpmin, rmechs);
-		if (stat == GSS_S_COMPLETE) {
+		if (major_status == GSS_S_COMPLETE) {
 			(void) gssint_copy_oid_set(&tmpmin,
 					goodmechs, rmechs);
 			(void) gss_release_oid_set(&tmpmin, &goodmechs);
@@ -1752,14 +1751,14 @@ get_available_mechs(OM_uint32 *minor_status,
 	}
 
 	(void) gss_release_oid_set(&tmpmin, &mechs);
-	if (found == 0 || stat != GSS_S_COMPLETE) {
+	if (found == 0 || major_status != GSS_S_COMPLETE) {
 		*minor_status = ERR_SPNEGO_NO_MECHS_AVAILABLE;
 		map_errcode(minor_status);
-		if (stat == GSS_S_COMPLETE)
-			stat = GSS_S_FAILURE;
+		if (major_status == GSS_S_COMPLETE)
+			major_status = GSS_S_FAILURE;
 	}
 
-	return (stat);
+	return (major_status);
 }
 
 /* following are token creation and reading routines */
@@ -1939,7 +1938,7 @@ static int
 put_mech_set(gss_OID_set mechSet, gss_buffer_t buf)
 {
 	unsigned char *ptr;
-	int i;
+	unsigned int i;
 	unsigned int tlen, ilen;
 
 	tlen = ilen = 0;
@@ -2236,7 +2235,7 @@ negotiate_mech_type(OM_uint32 *minor_status,
 	gss_OID returned_mech;
 	OM_uint32 status;
 	int present;
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < mechset->count; i++) {
 		gss_test_oid_set_member(minor_status, &mechset->elements[i],

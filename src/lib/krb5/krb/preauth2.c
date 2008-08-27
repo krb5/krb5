@@ -1773,7 +1773,8 @@ krb5_do_preauth(krb5_context context,
 		krb5_preauth_client_rock *get_data_rock,
 		krb5_gic_opt_ext *opte)
 {
-    int h, i, j, out_pa_list_size;
+    unsigned int h;
+    int i, j, out_pa_list_size;
     int seen_etype_info2 = 0;
     krb5_pa_data *out_pa = NULL, **out_pa_list = NULL;
     krb5_data scratch;

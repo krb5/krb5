@@ -90,7 +90,7 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
             /* This function tries to get tickets and put them in the specified 
             cache, however, if the cache does not exist, it may choose to put 
             them elsewhere (ie: the system default) so we set that here */
-            char * ccdefname = krb5_cc_default_name (context);
+            const char * ccdefname = krb5_cc_default_name (context);
             if (!ccdefname || strcmp (ccdefname, outCacheName) != 0) {
                 krb5_cc_set_default_name (context, outCacheName);
             }

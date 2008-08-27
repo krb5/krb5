@@ -42,7 +42,7 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 static int debug_hmac = 0;
 
 static void printd (const char *descr, krb5_data *d) {
-    int i, j;
+    unsigned int i, j;
     const int r = 16;
 
     printf("%s:", descr);
@@ -77,7 +77,7 @@ F(char *output, char *u_tmp1, char *u_tmp2,
 {
     unsigned char ibytes[4];
     size_t tlen;
-    int j, k;
+    unsigned int j, k;
     krb5_keyblock pdata;
     krb5_data sdata;
     krb5_data out;

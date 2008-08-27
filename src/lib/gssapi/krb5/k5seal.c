@@ -61,7 +61,7 @@ make_seal_token_v1 (krb5_context context,
 		    int signalg,
 		    size_t cksum_size,
 		    int sealalg,
-		    int encrypt,
+		    int do_encrypt,
 		    int toktype,
 		    int bigend,
 		    gss_OID oid)
@@ -85,10 +85,10 @@ make_seal_token_v1 (krb5_context context,
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
 
-    assert((!encrypt) || (toktype == KG_TOK_SEAL_MSG));
+    assert((!do_encrypt) || (toktype == KG_TOK_SEAL_MSG));
     /* create the token buffer */
     /* Do we need confounder? */
-    if (encrypt || (!bigend && (toktype == KG_TOK_SEAL_MSG)))
+    if (do_encrypt || (!bigend && (toktype == KG_TOK_SEAL_MSG)))
       conflen = kg_confounder_size(context, enc);
     else conflen = 0;
 
@@ -124,7 +124,7 @@ make_seal_token_v1 (krb5_context context,
     ptr[1] = (signalg >> 8) & 0xff;
 
     /* 2..3 SEAL_ALG or Filler */
-    if ((toktype == KG_TOK_SEAL_MSG) && encrypt) {
+    if ((toktype == KG_TOK_SEAL_MSG) && do_encrypt) {
       ptr[2] = sealalg & 0xff;
       ptr[3] = (sealalg >> 8) & 0xff;
     } else {
@@ -252,7 +252,7 @@ make_seal_token_v1 (krb5_context context,
       return(code);
     }
 
-    if (encrypt) {
+    if (do_encrypt) {
       switch(sealalg) {
       case SEAL_ALG_MICROSOFT_RC4:
 	{

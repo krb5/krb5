@@ -35,7 +35,7 @@ kg_make_seed(context, key, seed)
 {
    krb5_error_code code;
    krb5_keyblock *tmpkey;
-   int i;
+   unsigned int i;
 
    code = krb5_copy_keyblock(context, key, &tmpkey);
    if (code)

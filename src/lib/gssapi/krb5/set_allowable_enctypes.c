@@ -64,7 +64,7 @@ gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
 				   OM_uint32 num_ktypes,
 				   krb5_enctype *ktypes)
 {
-    int i;
+    unsigned int i;
     krb5_enctype * new_ktypes;
     OM_uint32 major_status;
     krb5_gss_cred_id_t cred;

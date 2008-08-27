@@ -310,7 +310,7 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     long	numbuf;
     long	onumbuf;
     OM_uint32	nbytes;
-    int		index;
+    int		i;
     unsigned char *op;
 
     if (minor_status != NULL)
@@ -412,12 +412,12 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 		}
 		numbuf = onumbuf;
 		op += nbytes;
-		index = -1;
+		i = -1;
 		while (numbuf) {
-		    op[index] = (unsigned char) numbuf & 0x7f;
-		    if (index != -1)
-			op[index] |= 0x80;
-		    index--;
+		    op[i] = (unsigned char) numbuf & 0x7f;
+		    if (i != -1)
+			op[i] |= 0x80;
+		    i--;
 		    numbuf >>= 7;
 		}
 		while (isdigit(*bp))
@@ -466,7 +466,7 @@ gssint_copy_oid_set(
     gss_OID_set_desc *copy;
     OM_uint32 minor = 0;
     OM_uint32 major = GSS_S_COMPLETE;
-    OM_uint32 index;
+    OM_uint32 i;
 
     if (minor_status != NULL)
 	*minor_status = 0;
@@ -492,9 +492,9 @@ gssint_copy_oid_set(
     }
     copy->count = oidset->count;
 
-    for (index = 0; index < copy->count; index++) {
-	gss_OID_desc *out = &copy->elements[index];
-	gss_OID_desc *in = &oidset->elements[index];
+    for (i = 0; i < copy->count; i++) {
+	gss_OID_desc *out = &copy->elements[i];
+	gss_OID_desc *in = &oidset->elements[i];
 
 	if ((out->elements = (void *) malloc(in->length)) == NULL) {
 	    major = GSS_S_FAILURE;

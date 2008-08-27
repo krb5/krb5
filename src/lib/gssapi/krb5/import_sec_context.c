@@ -60,7 +60,7 @@ krb5_gss_ser_init (krb5_context context)
 	krb5_ser_context_init, krb5_ser_auth_context_init,
 	krb5_ser_ccache_init, krb5_ser_rcache_init, krb5_ser_keytab_init,
     };
-    int i;
+    unsigned int i;
 
     for (i = 0; i < sizeof(fns)/sizeof(fns[0]); i++)
 	if ((code = (fns[i])(context)) != 0)

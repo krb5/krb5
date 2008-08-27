@@ -219,7 +219,7 @@ last:
 /* Decode the Principal's keys						*/
 /************************************************************************/
 
-#define safe_syncbuf(outer,inner)					\
+#define safe_syncbuf(outer,inner,buflen)				\
 	if (! ((inner)->next == (inner)->bound + 1 &&			\
 	       (inner)->next == (outer)->next + buflen))		\
 	    cleanup (ASN1_BAD_LENGTH);					\
@@ -243,7 +243,7 @@ decode_tagged_integer (asn1buf *buf, asn1_tagnum expectedtag, long *val)
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
     ret = asn1_decode_integer(&subbuf, val); checkerr;
 
-    safe_syncbuf(&tmp, &subbuf);
+    safe_syncbuf(&tmp, &subbuf, buflen);
     *buf = tmp;
 
 last:
@@ -269,7 +269,7 @@ decode_tagged_unsigned_integer (asn1buf *buf, int expectedtag, unsigned long *va
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
     ret = asn1_decode_unsigned_integer(&subbuf, val); checkerr;
 
-    safe_syncbuf(&tmp, &subbuf);
+    safe_syncbuf(&tmp, &subbuf, buflen);
     *buf = tmp;
 
 last:
@@ -298,7 +298,7 @@ decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag, int *len,
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
     ret = asn1_decode_octetstring (&subbuf, len, val); checkerr;
 
-    safe_syncbuf(&tmp, &subbuf);
+    safe_syncbuf(&tmp, &subbuf, buflen);
     *buf = tmp;
 
 last:
@@ -309,7 +309,7 @@ last:
 
 static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 {
-    int buflen, seqindef;
+    int full_buflen, seqindef;
     unsigned int length;
     asn1_error_code ret;
     asn1buf subbuf;
@@ -319,20 +319,20 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
     key->key_data_contents[1] = NULL;
 
     ret = asn1_get_sequence(buf, &length, &seqindef); checkerr;
-    buflen = length;
+    full_buflen = length;
     ret = asn1buf_imbed(&subbuf, buf, length, seqindef); checkerr;
 
     asn1_get_tag_2(&subbuf, &t);
     /* Salt */
     if (t.tagnum == 0) {
-	int buflen;
+	int salt_buflen;
 	asn1buf slt;
 	unsigned long keytype;
 	int keylen;
 
 	key->key_data_ver = 2;
 	asn1_get_sequence(&subbuf, &length, &seqindef);
-	buflen = length;
+	salt_buflen = length;
 	asn1buf_imbed(&slt, &subbuf, length, seqindef);
 
 	ret = decode_tagged_integer (&slt, 0, &keytype);
@@ -344,7 +344,7 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 		    &key->key_data_contents[1]); checkerr;
 	} else
 	    keylen = 0;
-	safe_syncbuf (&subbuf, &slt);
+	safe_syncbuf (&subbuf, &slt, salt_buflen);
 	key->key_data_length[1] = keylen; /* XXX range check?? */
 
 	ret = asn1_get_tag_2(&subbuf, &t); checkerr;
@@ -353,7 +353,7 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 
     /* Key */
     {
-	int buflen;
+	int key_buflen;
 	asn1buf kbuf;
 	long lval;
 	int ival;
@@ -362,7 +362,7 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 	    cleanup (ASN1_MISSING_FIELD);
 
 	ret = asn1_get_sequence(&subbuf, &length, &seqindef); checkerr;
-	buflen = length;
+	key_buflen = length;
 	ret = asn1buf_imbed(&kbuf, &subbuf, length, seqindef); checkerr;
 
 	ret = decode_tagged_integer (&kbuf, 0, &lval);
@@ -373,10 +373,10 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 					 &key->key_data_contents[0]); checkerr;
 	key->key_data_length[0] = ival;	/* XXX range check? */
 
-	safe_syncbuf (&subbuf, &kbuf);
+	safe_syncbuf (&subbuf, &kbuf, key_buflen);
     }
 
-    safe_syncbuf (buf, &subbuf);
+    safe_syncbuf (buf, &subbuf, full_buflen);
 
 last:
     if (ret != 0) {
@@ -433,12 +433,12 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
 
     /* Sequence of keys */
     {
-	int i, buflen;
+	int i, seq_buflen;
 	asn1buf keyseq;
 	if (t.tagnum != 4)
 	    cleanup (ASN1_MISSING_FIELD);
 	ret = asn1_get_sequence(&subbuf, &length, &seqindef); checkerr;
-	buflen = length;
+	seq_buflen = length;
 	ret = asn1buf_imbed(&keyseq, &subbuf, length, seqindef); checkerr;
 	for (i = 1, *out = NULL; ; i++) {
 	    krb5_key_data *tmp;
@@ -452,7 +452,7 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
 	    if (asn1buf_remains(&keyseq, 0) == 0)
 		break; /* Not freeing the last key structure */
 	}
-	safe_syncbuf (&subbuf, &keyseq);
+	safe_syncbuf (&subbuf, &keyseq, seq_buflen);
     }
 
     /*

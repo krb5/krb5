@@ -33,7 +33,7 @@ k5_sha1_hash(unsigned int icount, const krb5_data *input,
 	     krb5_data *output)
 {
     SHS_INFO ctx;
-    int i;
+    unsigned int i;
 
     if (output->length != SHS_DIGESTSIZE)
 	return(KRB5_CRYPTO_INTERNAL);

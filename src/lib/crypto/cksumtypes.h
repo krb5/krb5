@@ -27,4 +27,4 @@
 #include "k5-int.h"
 
 extern const struct krb5_cksumtypes krb5_cksumtypes_list[];
-extern const int krb5_cksumtypes_length;
+extern const unsigned int krb5_cksumtypes_length;

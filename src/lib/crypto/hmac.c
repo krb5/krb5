@@ -44,7 +44,7 @@ krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
 {
     size_t hashsize, blocksize;
     unsigned char *xorkey, *ihash;
-    int i;
+    unsigned int i;
     krb5_data *hashin, hashout;
     krb5_error_code ret;
 

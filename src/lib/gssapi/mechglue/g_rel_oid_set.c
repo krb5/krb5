@@ -39,19 +39,19 @@ gss_release_oid_set (minor_status,
 OM_uint32 *		minor_status;
 gss_OID_set *		set;
 {
-    OM_uint32 index;
+    OM_uint32 i;
     gss_OID oid;
     if (minor_status)
 	*minor_status = 0;
 
-    if (set ==NULL)
+    if (set == NULL)
 	return GSS_S_COMPLETE;
 
     if (*set == GSS_C_NULL_OID_SET)
 	return(GSS_S_COMPLETE);
 
-    for (index=0; index<(*set)->count; index++) {
-      oid = &(*set)->elements[index];
+    for (i=0; i<(*set)->count; i++) {
+      oid = &(*set)->elements[i];
       free(oid->elements);
     }
     free((*set)->elements);

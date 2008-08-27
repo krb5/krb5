@@ -22,14 +22,14 @@ int asn1buf_size
    ? 0 \
    : ((buf)->bound - (buf)->base + 1))
 
-int asn1buf_free
+unsigned int asn1buf_free
 	(const asn1buf *buf);
 /* requires  *buf is allocated
    effects   Returns the number of unused, allocated octets in *buf. */
 #define asn1buf_free(buf) \
   (((buf) == NULL || (buf)->base == NULL) \
-   ? 0 \
-   : ((buf)->bound - (buf)->next + 1))
+   ? 0U \
+   : (unsigned int)((buf)->bound - (buf)->next + 1))
 
 
 asn1_error_code asn1buf_ensure_space

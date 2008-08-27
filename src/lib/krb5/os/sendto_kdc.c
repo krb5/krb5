@@ -1087,7 +1087,7 @@ service_fds (krb5_context context,
 
     e = 0;
     while (selstate->nfds > 0) {
-	int i;
+	unsigned int i;
 
 	e = krb5int_cm_call_select(selstate, seltemp, &selret);
 	if (e == EINTR)
@@ -1102,7 +1102,7 @@ service_fds (krb5_context context,
 	    return 0;
 
 	/* Got something on a socket, process it.  */
-	for (i = 0; i <= selstate->max && selret > 0 && i < n_conns; i++) {
+	for (i = 0; i <= (unsigned int)selstate->max && selret > 0 && i < n_conns; i++) {
 	    int ssflags;
 
 	    if (conns[i].fd == INVALID_SOCKET)
@@ -1185,7 +1185,8 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 		int (*msg_handler)(krb5_context, const krb5_data *, void *),
 		void *msg_handler_data)
 {
-    int i, pass;
+    unsigned int i;
+    int pass;
     int delay_this_pass = 2;
     krb5_error_code retval;
     struct conn_state *conns;

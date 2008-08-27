@@ -1,7 +1,7 @@
 /*
- * lib/krb5/os/gen_rname.c
+ * include/k5-gmt_mktime.h
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -16,7 +16,7 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
+ * permission.	Furthermore if you modify this software you must label
  * your software as modified software and not distribute it in such a
  * fashion that it might be confused with the original M.I.T. software.
  * M.I.T. makes no representations about the suitability of
@@ -24,29 +24,28 @@
  * or implied warranty.
  * 
  *
- * take a port-style address and unique string, and return
- * a replay cache tag string.
+ * GMT struct tm conversion
+ *
+ * Because of ordering of things in the UNIX build, we can't just keep
+ * the declaration in k5-int.h and include it in
+ * util/support/gmt_mktime.c, since k5-int.h includes krb5.h which
+ * hasn't been built when gmt_mktime.c gets compiled.  Hence this
+ * silly little helper header.
  */
 
-#include "k5-int.h"
-#include "os-proto.h"
+#ifndef K5_GMT_MKTIME_H
+#define K5_GMT_MKTIME_H
 
-krb5_error_code
-krb5_gen_replay_name(krb5_context context, const krb5_address *address, const char *uniq, char **string)
-{
-    char * tmp;
-    unsigned int i;
-    unsigned int len;
+#include "autoconf.h"
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#include <time.h>
+#endif
 
-    len = strlen(uniq) + (address->length * 2) + 1;
-    if ((*string = malloc(len)) == NULL)
-	return ENOMEM;
+time_t krb5int_gmt_mktime (struct tm *);
 
-    snprintf(*string, len, "%s", uniq);
-    tmp = *string + strlen(uniq);
-    for (i = 0; i < address->length; i++) {
-	snprintf(tmp, len - (tmp-*string), "%.2x", address->contents[i] & 0xff);
-	tmp += 2;
-    }
-    return 0;
-}
+#endif /* K5_GMT_MKTIME_H */

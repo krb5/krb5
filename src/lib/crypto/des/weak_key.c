@@ -73,7 +73,7 @@ static const mit_des_cblock weak[16] = {
 int
 mit_des_is_weak_key(mit_des_cblock key)
 {
-    int i;
+    unsigned int i;
     const mit_des_cblock *weak_p = weak;
 
     for (i = 0; i < (sizeof(weak)/sizeof(mit_des_cblock)); i++) {

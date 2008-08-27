@@ -642,7 +642,7 @@ if test "$GCC" = yes ; then
     TRY_CC_FLAG(-Wno-format-zero-length)
     # Other flags here may not be supported on some versions of
     # gcc that people want to use.
-    for flag in overflow strict-overflow missing-format-attribute ; do
+    for flag in overflow strict-overflow missing-format-attribute missing-prototypes return-type missing-braces parentheses switch unused-function unused-label unused-variable unused-value unknown-pragmas sign-compare newline-eof ; do
       TRY_CC_FLAG(-W$flag)
     done
     #  old-style-definition? generates many, many warnings

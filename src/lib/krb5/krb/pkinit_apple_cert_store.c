@@ -261,6 +261,7 @@ krb5_error_code krb5_pkinit_get_client_cert(
     SecIdentityRef idRef = NULL;
     OSStatus ortn;
     CFDictionaryRef theDict = NULL;
+    CFStringRef cfPrinc = NULL;
     krb5_error_code ourRtn = 0;
     
     if(principal == NULL) {
@@ -274,8 +275,8 @@ krb5_error_code krb5_pkinit_get_client_cert(
     }
     
     /* Entry in the dictionary for specified principal? */
-    CFStringRef cfPrinc = CFStringCreateWithCString(NULL, principal, 
-	kCFStringEncodingASCII);
+    cfPrinc = CFStringCreateWithCString(NULL, principal, 
+                                        kCFStringEncodingASCII);
     issuerSerial = (CFDataRef)CFDictionaryGetValue(theDict, cfPrinc);
     CFRelease(cfPrinc);
     if(issuerSerial == NULL) {

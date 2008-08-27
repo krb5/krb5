@@ -390,6 +390,11 @@ typedef struct gss_mech_config {
 	struct gss_mech_config *next;	/* next element in the list */
 } *gss_mech_info;
 
+/* Mechanisms defined within our library */
+
+extern gss_mechanism *krb5_gss_get_mech_configs(void);
+extern gss_mechanism *spnego_gss_get_mech_configs(void);
+
 /********************************************************/
 /* Internal mechglue routines */
 

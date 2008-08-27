@@ -3,6 +3,7 @@
 #include "gssapi_err_generic.h"
 #include "gssapi_err_krb5.h"
 #include "gssapiP_krb5.h"
+#include "gssapiP_generic.h"
 
 #include "gss_libinit.h"
 #include "k5-platform.h"

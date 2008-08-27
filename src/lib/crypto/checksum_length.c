@@ -31,7 +31,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_checksum_length(krb5_context context, krb5_cksumtype cksumtype,
 		       size_t *length)
 {
-    int i;
+    unsigned int i;
 
     for (i=0; i<krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == cksumtype)

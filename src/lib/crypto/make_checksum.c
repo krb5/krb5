@@ -34,7 +34,8 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 		     const krb5_keyblock *key, krb5_keyusage usage,
 		     const krb5_data *input, krb5_checksum *cksum)
 {
-    int i, e1, e2;
+    unsigned int i;
+    int e1, e2;
     krb5_data data;
     krb5_error_code ret;
     size_t cksumlen;

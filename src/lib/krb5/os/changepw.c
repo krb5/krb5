@@ -50,7 +50,6 @@ struct sendto_callback_context {
     krb5_data 		ap_req;
 };
 
-
 /*
  * Wrapper function for the two backends
  */
@@ -190,7 +189,7 @@ cleanup:
 **	if set_password_for is NULL, then a password change is performed,
 **  otherwise, the password is set for the principal indicated in set_password_for
 */
-krb5_error_code KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_change_set_password(krb5_context context, krb5_creds *creds, char *newpw,
 			 krb5_principal set_password_for,
 			 int *result_code, krb5_data *result_code_string,

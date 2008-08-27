@@ -94,5 +94,5 @@ const struct krb5_cksumtypes krb5_cksumtypes_list[] = {
       &krb5int_hash_sha1, 12 },
 };
 
-const int krb5_cksumtypes_length =
+const unsigned int krb5_cksumtypes_length =
 sizeof(krb5_cksumtypes_list)/sizeof(struct krb5_cksumtypes);

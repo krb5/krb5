@@ -158,6 +158,7 @@ krb5_error_code pkiDataToInt(
     krb5_ui_4 len;
     krb5_int32 rtn = 0;
     krb5_ui_4 dex;
+    uint8 *cp = NULL;
     
     if((cdata->Length == 0) || (cdata->Data == NULL)) {
 	*i = 0;
@@ -168,7 +169,7 @@ krb5_error_code pkiDataToInt(
 	return ASN1_BAD_LENGTH;
     }
     
-    uint8 *cp = cdata->Data;
+    cp = cdata->Data;
     for(dex=0; dex<len; dex++) {
 	rtn = (rtn << 8) | *cp++;
     }
@@ -291,6 +292,7 @@ krb5_error_code pkiKrbTimestampToStr(
     krb5_timestamp kts,
     char **str)		    /* mallocd and RETURNED */
 {
+    char *outStr = NULL;
     time_t gmt_time = kts;
     struct tm *utc = gmtime(&gmt_time);
     if (utc == NULL ||
@@ -299,7 +301,7 @@ krb5_error_code pkiKrbTimestampToStr(
 	utc->tm_min > 59 || utc->tm_sec > 59) {
 	return ASN1_BAD_GMTIME;
     }
-    char *outStr = (char *)malloc(16);
+    outStr = (char *)malloc(16);
     if(outStr == NULL) {
 	return ENOMEM;
     }

@@ -359,7 +359,7 @@ setup_enc(
    krb5_context context)
 {
    krb5_error_code code;
-   int i;
+   unsigned int i;
    krb5int_access kaccess;
 
    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);

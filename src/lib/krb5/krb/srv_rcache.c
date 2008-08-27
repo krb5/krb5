@@ -41,7 +41,7 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
     char *cachename = 0, *cachetype;
     char tmp[4];
     krb5_error_code retval;
-    int p, i;
+    unsigned int p, i;
     unsigned int len;
 
 #ifdef HAVE_GETEUID

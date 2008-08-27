@@ -236,7 +236,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    int bigend;
    krb5_gss_cred_id_t cred = 0;
    krb5_data ap_rep, ap_req;
-   int i;
+   unsigned int i;
    krb5_error_code code;
    krb5_address addr, *paddr;
    krb5_authenticator *authdat = 0;

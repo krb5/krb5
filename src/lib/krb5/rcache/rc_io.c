@@ -442,7 +442,7 @@ krb5_rc_io_read(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
 				   strerror(errno));
 	    return KRB5_RC_IO_UNKNOWN;
 	}
-    if (count != num)
+    if (count < 0 || (unsigned int)count != num)
 	return KRB5_RC_IO_EOF;
     return 0;
 }

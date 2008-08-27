@@ -23,7 +23,7 @@
 void
 mit_des_fixup_key_parity(mit_des_cblock key)
 {
-    int i;
+    unsigned int i;
     for (i=0; i<sizeof(mit_des_cblock); i++) 
       {
 	key[i] &= 0xfe;
@@ -41,7 +41,7 @@ mit_des_fixup_key_parity(mit_des_cblock key)
 int
 mit_des_check_key_parity(mit_des_cblock key)
 {
-    int i;
+    unsigned int i;
     
     for (i=0; i<sizeof(mit_des_cblock); i++) 
       {

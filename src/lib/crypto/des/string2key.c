@@ -40,7 +40,7 @@ mit_des_string_to_key_int (krb5_keyblock *key,
 	krb5_ui_4 ui[4];
 	mit_des_cblock cb;
     } temp;
-    int i;
+    unsigned int i;
     krb5_ui_4 x, y, z;
     unsigned char *p;
     des_key_schedule sched;

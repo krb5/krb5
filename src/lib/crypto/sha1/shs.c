@@ -243,7 +243,8 @@ void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
 void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
 {
     SHS_LONG tmp;
-    int dataCount, canfill;
+    unsigned int dataCount;
+    int canfill;
     SHS_LONG *lp;
 
     /* Update bitcount */
@@ -254,7 +255,7 @@ void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
     shsInfo->countHi += count >> 29;
 
     /* Get count of bytes already in data */
-    dataCount = (int) (tmp >> 3) & 0x3F;
+    dataCount = (tmp >> 3) & 0x3F;
 
     /* Handle any leading odd-sized chunks */
     if (dataCount) {

@@ -6,7 +6,7 @@ gss_krb5int_copy_ccache(minor_status, cred_handle, out_ccache)
      gss_cred_id_t cred_handle;
      krb5_ccache out_ccache;
 {
-   OM_uint32 stat;
+   OM_uint32 major_status;
    krb5_gss_cred_id_t k5creds;
    krb5_cc_cursor cursor;
    krb5_creds creds;
@@ -14,9 +14,9 @@ gss_krb5int_copy_ccache(minor_status, cred_handle, out_ccache)
    krb5_context context;
 
    /* validate the cred handle */
-   stat = krb5_gss_validate_cred(minor_status, cred_handle);
-   if (stat)
-       return(stat);
+   major_status = krb5_gss_validate_cred(minor_status, cred_handle);
+   if (major_status)
+       return(major_status);
    
    k5creds = (krb5_gss_cred_id_t) cred_handle;
    code = k5_mutex_lock(&k5creds->lock);
