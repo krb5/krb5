@@ -238,6 +238,7 @@ load_authdata_plugins(krb5_context context)
 	    authdata_systems[k].plugin_context = pctx;
 	    k++;
 	}
+	krb5int_free_plugin_dir_data(authdata_plugins_ftables);
     }
     n_authdata_systems = k;
     /* Add the end-of-list marker. */
