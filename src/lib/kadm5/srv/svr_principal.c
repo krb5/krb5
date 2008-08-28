@@ -1205,32 +1205,29 @@ kadm5_set_use_password_server (void)
 static kadm5_ret_t
 kadm5_launch_task (krb5_context context,
                    const char *task_path, char * const task_argv[],
-                   const char *data_buffer) 
+                   const char *buffer) 
 {
-    kadm5_ret_t ret = 0;
+    kadm5_ret_t ret;
     int data_pipe[2];
     
-    if (data_buffer != NULL) {
-        ret = pipe (data_pipe);
-        if (ret) { ret = errno; }
-    }
+    ret = pipe (data_pipe);
+    if (ret)
+	ret = errno;
 
     if (!ret) {
         pid_t pid = fork ();
         if (pid == -1) {
             ret = errno;
+	    close (data_pipe[0]);
+	    close (data_pipe[1]);
         } else if (pid == 0) {
             /* The child: */
             
-            if (data_buffer != NULL) {
-                if (dup2 (data_pipe[0], STDIN_FILENO) == -1) {
-                    _exit (1);
-                }
-            } else {
-                close (data_pipe[0]);
-            }
+            if (dup2 (data_pipe[0], STDIN_FILENO) == -1)
+		_exit (1);
 
-            close (data_pipe[1]);
+	    close (data_pipe[0]);
+	    close (data_pipe[1]);
             
             execv (task_path, task_argv);
             
@@ -1239,18 +1236,21 @@ kadm5_launch_task (krb5_context context,
             /* The parent: */
             int status;
                        
-            if (data_buffer != NULL) {
-                /* Write out the buffer to the child */
-                if (krb5_net_write (context, data_pipe[1],
-                                    data_buffer, strlen (data_buffer)) < 0) {
-                    /* kill the child to make sure waitpid() won't hang later */
-                    ret = errno;
-                    kill (pid, SIGKILL);
-                }
-            }
+	    ret = 0;
 
-            close (data_buffer[0]);
-            close (data_buffer[1]);
+	    close (data_pipe[0]);
+
+	    /* Write out the buffer to the child, add \n */
+	    if (buffer) {
+		if (krb5_net_write (context, data_pipe[1], buffer, strlen (buffer)) < 0
+		    || krb5_net_write (context, data_pipe[1], "\n", 1) < 0)
+		{
+		    /* kill the child to make sure waitpid() won't hang later */
+		    ret = errno;
+		    kill (pid, SIGKILL);
+		}
+	    }
+	    close (data_pipe[1]);
 
             waitpid (pid, &status, 0);
 
@@ -1410,13 +1410,6 @@ kadm5_chpass_principal_3(void *server_handle,
         const char *path = "/usr/sbin/mkpassdb";
         char *argv[] = { "mkpassdb", "-setpassword", NULL, NULL };
         char *pstring = NULL;
-        char pwbuf[256];
-        int pwlen = strlen (password);
-
-        if (pwlen > 254) pwlen = 254;
-        strncpy (pwbuf, password, pwlen);
-        pwbuf[pwlen] = '\n';
-        pwbuf[pwlen + 1] = '\0';
 
         if (!ret) {
             pstring = malloc ((princ->length + 1) * sizeof (char));
@@ -1428,7 +1421,7 @@ kadm5_chpass_principal_3(void *server_handle,
             pstring [princ->length] = '\0';
             argv[2] = pstring;
 
-            ret = kadm5_launch_task (handle->context, path, argv, pwbuf);
+            ret = kadm5_launch_task (handle->context, path, argv, password);
         }
         
         if (pstring != NULL)
