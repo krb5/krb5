@@ -391,75 +391,10 @@
 				<string key="NSMinSize">{419, 320}</string>
 				<string key="NSMaxSize">{600, 622}</string>
 			</object>
-			<object class="NSObjectController" id="597809582">
-				<object class="NSMutableArray" key="NSDeclaredKeys">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>cachesArray</string>
-				</object>
-				<string key="NSObjectClassName">KerberosCacheCollection</string>
-				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
-			</object>
-			<object class="NSCustomObject" id="692063328">
-				<string key="NSClassName">KerberosCacheCollection</string>
-			</object>
-			<object class="NSArrayController" id="950399944">
-				<object class="NSMutableArray" key="NSDeclaredKeys">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>credentialsArray</string>
-					<string>principalString</string>
-					<string>shortTimeRemainingString</string>
-				</object>
-				<string key="NSObjectClassName">KerberosCache</string>
-				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
-				<bool key="NSAvoidsEmptySelection">YES</bool>
-				<bool key="NSPreservesSelection">YES</bool>
-				<bool key="NSSelectsInsertedObjects">YES</bool>
-				<bool key="NSFilterRestrictsInsertion">YES</bool>
-				<bool key="NSClearsFilterPredicateOnInsertion">YES</bool>
-			</object>
-			<object class="NSArrayController" id="297584252">
-				<object class="NSMutableArray" key="NSDeclaredKeys">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>servicePrincipalString</string>
-					<string>shortTimeRemainingString</string>
-				</object>
-				<string key="NSObjectClassName">KerberosCredential</string>
-				<bool key="NSEditable">YES</bool>
-				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
-				<bool key="NSAvoidsEmptySelection">YES</bool>
-				<bool key="NSPreservesSelection">YES</bool>
-				<bool key="NSSelectsInsertedObjects">YES</bool>
-				<bool key="NSFilterRestrictsInsertion">YES</bool>
-				<bool key="NSClearsFilterPredicateOnInsertion">YES</bool>
-			</object>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
 			<object class="NSMutableArray" key="connectionRecords">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">content</string>
-						<reference key="source" ref="297584252"/>
-						<reference key="destination" ref="950399944"/>
-					</object>
-					<int key="connectionID">300042</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">content</string>
-						<reference key="source" ref="597809582"/>
-						<reference key="destination" ref="692063328"/>
-					</object>
-					<int key="connectionID">300043</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">content</string>
-						<reference key="source" ref="950399944"/>
-						<reference key="destination" ref="597809582"/>
-					</object>
-					<int key="connectionID">300044</int>
-				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">identityTableColumn</string>
@@ -801,30 +736,6 @@
 						<reference key="object" ref="700535463"/>
 						<reference key="parent" ref="928852707"/>
 					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">300024</int>
-						<reference key="object" ref="597809582"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">CacheCollectionController</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">300023</int>
-						<reference key="object" ref="692063328"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">KerberosCacheCollection</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">300022</int>
-						<reference key="object" ref="950399944"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">CachesController</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">300021</int>
-						<reference key="object" ref="297584252"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">CredentialsController</string>
-					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -848,14 +759,6 @@
 					<string>300009.IBShouldRemoveOnLegacySave</string>
 					<string>300018.IBPluginDependency</string>
 					<string>300019.IBPluginDependency</string>
-					<string>300021.IBPluginDependency</string>
-					<string>300021.ImportedFromIB2</string>
-					<string>300022.IBPluginDependency</string>
-					<string>300022.ImportedFromIB2</string>
-					<string>300023.IBPluginDependency</string>
-					<string>300023.ImportedFromIB2</string>
-					<string>300024.IBPluginDependency</string>
-					<string>300024.ImportedFromIB2</string>
 					<string>300118.IBPluginDependency</string>
 					<string>300118.ImportedFromIB2</string>
 					<string>300152.IBPluginDependency</string>
@@ -902,21 +805,13 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="5"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>{{606, 810}, {491, 315}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{623, 643}, {491, 315}}</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{623, 643}, {491, 315}}</string>
+					<string>{{606, 810}, {491, 315}}</string>
 					<reference ref="5"/>
 					<reference ref="5"/>
 					<string>{{503, 256}, {419, 465}}</string>
@@ -971,14 +866,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">KerberosCacheCollection</string>
-					<string key="superclassName">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">../../../Common/Headers/KerberosCacheCollection.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

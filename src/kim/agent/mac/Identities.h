@@ -25,22 +25,30 @@
 @interface Identity : NSObject {
     kim_identity kimIdentity;
     int state;
-    cc_time_t *expirationTime;
+    cc_time_t expirationTime;
+    int favorite;
     
 }
+@property           int       state;
+@property           cc_time_t expirationTime;
+@property(readonly) int       favorite;
+
+- (id) initWithIdentity: (kim_identity) identity;
+- (id) initWithFavoriteIdentity: (kim_identity) identity;
+
+- (BOOL) isEqualToKIMIdentity: (kim_identity) identity;
 
 @end
 
 
 @interface Identities : NSObject {
-    NSArray *identitiesArray;
-    NSMutableArray *favoriteIdentitiesArray;
-    NSMutableArray *ccacheIdentitiesArray;
+    NSArray *favoriteIdentities;
+    NSArray *identities;
     NSConnection *threadConnection;
 
 }
+@property(readonly) NSArray *identities;
 
 - (int) update;
-- (NSArray *) identities;
 
 @end

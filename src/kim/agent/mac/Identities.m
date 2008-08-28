@@ -26,20 +26,52 @@
 
 @implementation Identity
 
+@synthesize state;
+@synthesize expirationTime;
+@synthesize favorite;
+
+// ---------------------------------------------------------------------------
+
 - (id) initWithIdentity: (kim_identity) identity
 {
     if ((self = [super init])) {
         kimIdentity = identity;
         state = kim_credentials_state_not_yet_valid;
         expirationTime = 0;
+        favorite = FALSE;
     }
     
     return self;
 }
 
+// ---------------------------------------------------------------------------
+
+- (id) initWithFavoriteIdentity: (kim_identity) identity
+{
+    if ((self = [self initWithIdentity: identity])) {
+        favorite = TRUE;
+    }
+    
+    return self;
+}
+
+// ---------------------------------------------------------------------------
+
+- (BOOL) isEqualToKIMIdentity: (kim_identity) identity
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_comparison comparison;
+    
+    err = kim_identity_compare (kimIdentity, identity, &comparison);
+    
+    return (!err && kim_comparison_is_equal_to (comparison));
+}
+
 @end
 
 @implementation Identities
+
+@synthesize identities;
 
 // ---------------------------------------------------------------------------
 
@@ -85,99 +117,101 @@
 
 - (id) init
 {
-    int err = 0;
+    if ((self = [super init])) {
+        int err = 0;
+        NSMutableArray *newFavoriteIdentities = NULL;
+        
+        threadConnection = NULL;
+        identities = NULL;
+        favoriteIdentities = NULL;
+    
+        if (!err) {
+            newFavoriteIdentities = [[[NSMutableArray alloc] init] autorelease];
+            if (!newFavoriteIdentities) { err = ENOMEM; }
+        }
+        
+        if (!err) {
+            kim_favorite_identities kimFavoriteIdentities = NULL;
+            kim_count i;
+            kim_count count = 0;
+            
+            err = kim_favorite_identities_create (&kimFavoriteIdentities);
+            
+            if (!err) {
+                err = kim_favorite_identities_get_number_of_identities (kimFavoriteIdentities,
+                                                                        &count);
+            }
+            
+            for (i = 0; !err && i < count; i++) {
+                kim_identity kimIdentity = NULL;
+                Identity *identity = NULL;
+                
+                err = kim_favorite_identities_get_identity_at_index (kimFavoriteIdentities, 
+                                                                     i, &kimIdentity);
+                
+                if (!err) {
+                    identity = [[[Identity alloc] initWithFavoriteIdentity: kimIdentity] autorelease];
+                    if (!identity) { err = ENOMEM; }
+                }
+                
+                if (!err) {
+                    kimIdentity = NULL; /* take ownership */ 
+                    [newFavoriteIdentities addObject: identity];
+                }
+                
+                kim_identity_free (&kimIdentity);
+            }
+        
+            kim_favorite_identities_free (&kimFavoriteIdentities);
+        }
+        
+        if (!err) {
+            favoriteIdentities = [[NSArray alloc] initWithArray: newFavoriteIdentities];
+            if (!favoriteIdentities) { err = ENOMEM; }            
+        }
 
-    threadConnection = NULL;
-    favoriteIdentitiesArray = NULL;
-    ccacheIdentitiesArray = NULL;
-    
-    if (!err) {
-        self = [super init];
-        if (!self) { err = ENOMEM; }
-    }
-    
-    if (!err) {
-        favoriteIdentitiesArray = [[NSMutableArray alloc] init];
-        if (!favoriteIdentitiesArray) { err = ENOMEM; }
-    }
-    
-    if (!err) {
-        kim_favorite_identities favoriteIdentities = NULL;
-        kim_count i;
-        kim_count count = 0;
-        
-        err = kim_favorite_identities_create (&favoriteIdentities);
-        
         if (!err) {
-            err = kim_favorite_identities_get_number_of_identities (favoriteIdentities,
-                                                                    &count);
+            err = [self update];
         }
         
-        for (i = 0; !err && i < count; i++) {
-            kim_identity kimIdentity = NULL;
-            Identity *identity = NULL;
-            
-            err = kim_favorite_identities_get_identity_at_index (favoriteIdentities, 
-                                                                 i, &kimIdentity);
+        if (!err) {
+            NSPort *port1 = [NSPort port];
+            NSPort *port2 = [NSPort port];
+            if (!port1 || !port2) { err = ENOMEM; }
             
             if (!err) {
-                identity = [[[Identity alloc] initWithIdentity: kimIdentity] autorelease];
-                if (!identity) { err = ENOMEM; }
+                threadConnection = [[NSConnection alloc] initWithReceivePort: port1
+                                                                    sendPort: port2];
+                if (!threadConnection) { err = ENOMEM; }
             }
-             
+            
             if (!err) {
-                kimIdentity = NULL; /* take ownership */ 
-                [favoriteIdentitiesArray addObject: identity];
+                [threadConnection setRootObject: self];
+                
+                [NSThread detachNewThreadSelector: @selector(waitForChange:) 
+                                         toTarget: [self class] 
+                                       withObject: [NSArray arrayWithObjects: port2, port1, NULL]];            
             }
-            
-            kim_identity_free (&kimIdentity);
         }
         
-        kim_favorite_identities_free (&favoriteIdentities);
-    }
-    
-    if (!err) {
-        err = [self update];
-    }
-    
-    if (!err) {
-	NSPort *port1 = [NSPort port];
-	NSPort *port2 = [NSPort port];
-        if (!port1 || !port2) { err = ENOMEM; }
-        
-        if (!err) {
-            threadConnection = [[NSConnection alloc] initWithReceivePort: port1
-                                                                sendPort: port2];
-            if (!threadConnection) { err = ENOMEM; }
-        }
-        
-        if (!err) {
-            [threadConnection setRootObject: self];
-            
-            [NSThread detachNewThreadSelector: @selector(waitForChange:) 
-                                     toTarget: [self class] 
-                                   withObject: [NSArray arrayWithObjects: port2, port1, NULL]];            
+        if (err) {
+            [self release];
+            return NULL;
         }
     }
-    
-    return err ? NULL : self;
+        
+    return self;
 }
 
 // ---------------------------------------------------------------------------
 
 - (void) dealloc
 {
-    if (identitiesArray ) { [identitiesArray release]; }
-    if (threadConnection) { [threadConnection release]; }
+    if (identities        ) { [identities release]; }
+    if (favoriteIdentities) { [favoriteIdentities release]; }
+    if (threadConnection  ) { [threadConnection release]; }
     
     [super dealloc];
-}
-
-// ---------------------------------------------------------------------------
-
-- (NSArray *) identities
-{
-    return identitiesArray;
 }
 
 // ---------------------------------------------------------------------------
@@ -185,9 +219,17 @@
 - (int) update
 {
     kim_error err = KIM_NO_ERROR;
+    NSMutableArray *newIdentities = NULL;
     kim_ccache_iterator iterator = NULL;
     
-    err = kim_ccache_iterator_create (&iterator);
+    if (!err) {
+        newIdentities = [NSMutableArray arrayWithArray: favoriteIdentities];
+        if (!newIdentities) { err = ENOMEM; }            
+    }
+
+    if (!err) {
+        err = kim_ccache_iterator_create (&iterator);
+    }
     
     while (!err) {
         kim_ccache ccache = NULL;
@@ -213,18 +255,23 @@
         if (!err) {
             Identity *identity = NULL;
             
-            identity = [self findIdentity: kimIdentity];
-            if (identity) {
-                [identity updateWithState: state
-                           expirationTime: expirationTime];
-            } else {
-                identity = [[Identity alloc] initWithIdentity: kimIdentity
-                                                        state: state
-                                               expirationTime: expirationTime];
+            for (Identity *i in newIdentities) {
+                if ([i isEqualToKIMIdentity: kimIdentity]) { identity = i; }
+            }
+
+            if (!identity) {
+                identity = [[[Identity alloc] initWithIdentity: kimIdentity] autorelease];
+                if (!identity) { err = ENOMEM; }
+                
+                if (!err) {
+                    kimIdentity = NULL; /* take ownership */ 
+                    [newIdentities addObject: identity];
+                }
             }
             
-            if (identity) {
-                
+            if (!err) {
+                [identity setState: state];
+                [identity setExpirationTime: expirationTime];
             }
         }
         
@@ -236,6 +283,14 @@
         kim_identity_free (&kimIdentity);
         kim_ccache_free (&ccache);
     }
+
+    if (!err) {
+        if (identities) { [identities release]; }
+        
+        identities = [[NSArray alloc] initWithArray: newIdentities];
+        if (!identities) { err = ENOMEM; }            
+    }
+    
     
     kim_ccache_iterator_free (&iterator);
     
