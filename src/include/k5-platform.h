@@ -911,40 +911,54 @@ vasprintf(char **ret, const char *format, va_list ap)
 {
     va_list ap2;
     char *str = NULL, *nstr;
-    int len = 80, len2;
+    size_t len = 80;
+    int len2;
 
     while (1) {
-	if (len < 0 || (size_t) len != len) {
-	    free(str);
-	    return -1;
-	}
-	nstr = realloc(str, (size_t) len);
-	if (nstr == NULL) {
-	    free(str);
-	    return -1;
-	}
+	if (len >= INT_MAX || len == 0)
+	    goto fail;
+	nstr = realloc(str, len);
+	if (nstr == NULL)
+	    goto fail;
 	str = nstr;
 	va_copy(ap2, ap);
-	len2 = vsnprintf(str, (size_t) len, format, ap2);
+	len2 = vsnprintf(str, len, format, ap2);
 	va_end(ap2);
-	if (len2 >= 0 && len2 < len) {
-	    if (len2 < len-1) {
-		/* In a lot of cases, 80 will be quite a lot more than
-		   we need.  */
-		nstr = realloc(str, (size_t) len2+1);
-		if (nstr)
-		    str = nstr;
-	    }
-	    *ret = str;
-	    return len2;
-	}
 	/* ISO C vsnprintf returns the needed length.  Some old
 	   vsnprintf implementations return -1 on truncation.  */
-	if (len2 >= len)
-	    len = len2 + 1;
-	else
-	    len *= 2;
+	if (len2 < 0) {
+	    /* Don't know how much space we need, just that we didn't
+	       supply enough; get a bigger buffer and try again.  */
+	    if (len <= SIZE_MAX/2)
+		len *= 2;
+	    else if (len < SIZE_MAX)
+		len = SIZE_MAX;
+	    else
+		goto fail;
+	} else if ((unsigned int) len2 >= SIZE_MAX) {
+	    /* Need more space than we can request.  */
+	    goto fail;
+	} else if ((size_t) len2 >= len) {
+	    /* Need more space, but we know how much.  */
+	    len = (size_t) len2 + 1;
+	} else {
+	    /* Success!  */
+	    break;
+	}
     }
+    /* We might've allocated more than we need, if we're still using
+       the initial guess, or we got here by doubling.  */
+    if ((size_t) len2 < len - 1) {
+	nstr = realloc(str, (size_t) len2 + 1);
+	if (nstr)
+	    str = nstr;
+    }
+    *ret = str;
+    return len2;
+
+fail:
+    free(str);
+    return -1;
 }
 /* Assume HAVE_ASPRINTF iff HAVE_VASPRINTF.  */
 #define asprintf k5_asprintf
