@@ -103,7 +103,7 @@ gss_buffer_t		status_string;
 	if (err) {
 	    *minor_status = err;
 	    map_errcode(minor_status);
-	    return GSS_S_FAILURE;
+	    return GSS_S_BAD_STATUS;
 	}
 	if (m_oid.length == 0) {
 	    /* Magic flag for com_err values.  */
