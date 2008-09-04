@@ -80,6 +80,7 @@ static cc_int32 cci_context_sync (cci_context_t in_context,
 #endif
 
 MAKE_INIT_FUNCTION(cci_thread_init);
+MAKE_FINI_FUNCTION(cci_thread_fini);
 
 /* ------------------------------------------------------------------------ */
 
@@ -97,6 +98,19 @@ static int cci_thread_init (void)
     
     return err;
 }
+
+/* ------------------------------------------------------------------------ */
+
+static void cci_thread_fini (void)
+{
+    if (!INITIALIZER_RAN (cci_thread_init) || PROGRAM_EXITING ()) {
+	return;
+    }
+    
+    cci_context_change_time_thread_fini ();
+    cci_ipc_thread_fini ();
+}
+
 
 #ifdef TARGET_OS_MAC
 #pragma mark -

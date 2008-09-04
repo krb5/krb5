@@ -42,6 +42,13 @@ cc_int32 cci_context_change_time_thread_init (void)
 }
 
 /* ------------------------------------------------------------------------ */
+
+void cci_context_change_time_thread_fini (void)
+{
+    k5_mutex_destroy(&g_change_time_mutex);
+}
+
+/* ------------------------------------------------------------------------ */
 /* WARNING!  Mutex must be locked when calling this!                        */
 
 static cc_int32 cci_context_change_time_update_identifier (cci_identifier_t  in_new_identifier,

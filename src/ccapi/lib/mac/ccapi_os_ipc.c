@@ -34,27 +34,32 @@
 #define cci_server_bundle_id "edu.mit.Kerberos.CCacheServer"
 #define cci_server_path "/System/Library/CoreServices/CCacheServer.app/Contents/MacOS/CCacheServer"
 
-static pthread_key_t g_request_port_key = 0;
-static pthread_key_t g_reply_stream_key = 0;
-static pthread_key_t g_server_died_key = 0;
-
 /* ------------------------------------------------------------------------ */
 
 cc_int32 cci_os_ipc_thread_init (void)
 {
     cc_int32 err = ccNoError;
 
-    err = pthread_key_create (&g_request_port_key, free);
+    err = k5_key_register (K5_KEY_CCAPI_REQUEST_PORT, free);
     
     if (!err) {
-        err = pthread_key_create (&g_reply_stream_key, NULL);
+        err = k5_key_register (K5_KEY_CCAPI_REPLY_STREAM, NULL);
     }
     
     if (!err) {
-        err = pthread_key_create (&g_server_died_key, NULL);
+        err = k5_key_register (K5_KEY_CCAPI_SERVER_DIED, NULL);
     }
     
     return err;
+}
+
+/* ------------------------------------------------------------------------ */
+
+void cci_os_ipc_thread_fini (void)
+{    
+    k5_key_delete (K5_KEY_CCAPI_REQUEST_PORT);
+    k5_key_delete (K5_KEY_CCAPI_REPLY_STREAM);
+    k5_key_delete (K5_KEY_CCAPI_SERVER_DIED);
 }
 
 #pragma mark -
@@ -67,7 +72,7 @@ static boolean_t cci_server_demux (mach_msg_header_t *request,
     boolean_t handled = false;
     
     if (!handled && request->msgh_id == MACH_NOTIFY_NO_SENDERS) {
-        cc_int32 *server_died = pthread_getspecific (g_server_died_key);
+        cc_int32 *server_died = k5_getspecific (K5_KEY_CCAPI_SERVER_DIED);
         if (!server_died) { 
             *server_died = 1;
         }
@@ -94,7 +99,7 @@ kern_return_t cci_mipc_reply (mach_port_t             in_reply_port,
     cci_stream_t reply_stream = NULL;
     
     if (!err) {
-        reply_stream = pthread_getspecific (g_reply_stream_key);
+        reply_stream = k5_getspecific (K5_KEY_CCAPI_REPLY_STREAM);
         if (!reply_stream) { err = cci_check_error (ccErrBadInternalMessage); }
     }
     
@@ -161,7 +166,7 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
     }
 
     if (!err) {
-        request_port = pthread_getspecific (g_request_port_key);
+        request_port = k5_getspecific (K5_KEY_CCAPI_REQUEST_PORT);
         
         if (!request_port) {
             request_port = malloc (sizeof (mach_port_t));
@@ -169,7 +174,7 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
             
             if (!err) {
                 *request_port = MACH_PORT_NULL;
-                err = pthread_setspecific (g_request_port_key, request_port);
+                err = k5_setspecific (K5_KEY_CCAPI_REQUEST_PORT, request_port);
             }
         }
     }
@@ -226,11 +231,11 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
     }
     
     if (!err) {
-        err = pthread_setspecific (g_reply_stream_key, reply_stream);
+        err = k5_setspecific (K5_KEY_CCAPI_REPLY_STREAM, reply_stream);
     }
     
     if (!err) {
-        err = pthread_setspecific (g_server_died_key, &server_died);
+        err = k5_setspecific (K5_KEY_CCAPI_SERVER_DIED, &server_died);
     }
     
     if (!err) {
@@ -265,8 +270,8 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
         reply_stream = NULL;
     }
     
-    pthread_setspecific (g_reply_stream_key, NULL);
-    pthread_setspecific (g_server_died_key, NULL);
+    k5_setspecific (K5_KEY_CCAPI_REPLY_STREAM, NULL);
+    k5_setspecific (K5_KEY_CCAPI_SERVER_DIED, NULL);
     if (reply_port != MACH_PORT_NULL) { mach_port_destroy (mach_task_self (), reply_port); }
     if (ool_request_length          ) { vm_deallocate (mach_task_self (), (vm_address_t) ool_request, ool_request_length); }
     if (reply_stream                ) { cci_stream_release (reply_stream); }

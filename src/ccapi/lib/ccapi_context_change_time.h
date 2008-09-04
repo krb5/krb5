@@ -30,6 +30,7 @@
 #include "cci_common.h"
 
 cc_int32 cci_context_change_time_thread_init (void);
+void cci_context_change_time_thread_fini (void);
 
 cc_int32 cci_context_change_time_get (cc_time_t *out_change_time);
 
