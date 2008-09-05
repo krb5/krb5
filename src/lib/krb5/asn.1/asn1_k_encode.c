@@ -766,11 +766,13 @@ asn1_error_code asn1_encode_etype_info_entry(asn1buf *buf, const krb5_etype_info
 	asn1_addlenfield(val->s2kparams.length, val->s2kparams.data, 2,
 			 asn1_encode_octetstring);
     if (val->length >= 0 && val->length != KRB5_ETYPE_NO_SALT) {
-	if (etype_info2)
+	if (etype_info2) {
 	    asn1_addlenfield(val->length,val->salt,1,
-			     asn1_encode_generalstring)
-	    else 	  asn1_addlenfield(val->length,val->salt,1,
-					   asn1_encode_octetstring);
+			     asn1_encode_generalstring);
+	} else {
+	    asn1_addlenfield(val->length,val->salt,1,
+			     asn1_encode_octetstring);
+	}
     }
     asn1_addfield(val->etype,0,asn1_encode_integer);
     asn1_makeseq();
