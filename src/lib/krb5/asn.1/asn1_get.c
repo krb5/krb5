@@ -55,7 +55,7 @@ asn1_get_tag_2(asn1buf *buf, taginfo *t)
 
 	t->asn1class = (asn1_class)(o&ASN1_CLASS_MASK);
 	t->construction = (asn1_construction)(o&ASN1_CONSTRUCTION_MASK);
-	if ((o&ASN1_TAG_NUMBER_MASK) != ASN1_TAG_NUMBER_MASK){
+	if ((o&ASN1_TAG_NUMBER_MASK) != ASN1_TAG_NUMBER_MASK) {
 	    /* low-tag-number form */
 	    t->tagnum = (asn1_tagnum)(o&ASN1_TAG_NUMBER_MASK);
 	} else {
@@ -64,7 +64,7 @@ asn1_get_tag_2(asn1buf *buf, taginfo *t)
 		retval = asn1buf_remove_octet(buf,&o);
 		if (retval) return retval;
 		tn = (tn<<7) + (asn1_tagnum)(o&0x7F);
-	    }while(o&0x80);
+	    } while (o&0x80);
 	    t->tagnum = tn;
 	}
     }
@@ -84,7 +84,7 @@ asn1_get_tag_2(asn1buf *buf, taginfo *t)
     
 	    for (num = (int)(o&0x7F); num>0; num--) {
 		retval = asn1buf_remove_octet(buf,&o);
-		if(retval) return retval;
+		if (retval) return retval;
 		len = (len<<8) + (int)o;
 	    }
 	    if (len < 0)
