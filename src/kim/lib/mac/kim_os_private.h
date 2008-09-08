@@ -30,19 +30,15 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include "kim_private.h"
 
+kim_error kim_os_library_lock_for_bundle_lookup (void);
+kim_error kim_os_library_unlock_for_bundle_lookup (void);
 
-CFStringEncoding kim_os_string_get_encoding (void);
-
-CFStringRef kim_os_string_get_cfstring_for_key_and_dictionary (CFStringRef in_key,
-                                                               CFBundleRef in_bundle);
-
-CFStringRef kim_os_string_get_cfstring_for_key (kim_string in_key_string);
-
-kim_error kim_os_string_create_from_cfstring (kim_string *out_string,
-                                              CFStringRef   in_cfstring);
 
 kim_error kim_os_string_create_for_key (kim_string *out_string,
                                         kim_string  in_key_string);
+
+kim_error kim_os_string_create_from_cfstring (kim_string *out_string,
+                                              CFStringRef   in_cfstring);
 
 kim_error kim_os_string_get_cfstring (kim_string  in_string,
                                       CFStringRef  *out_cfstring);

@@ -60,11 +60,11 @@ static inline kim_error kim_options_allocate (kim_options *out_options)
     kim_error err = KIM_NO_ERROR;
     kim_options options = NULL;
     
-    if (!err && !out_options) { err = param_error (1, "out_options", "NULL"); }
+    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         options = malloc (sizeof (*options));
-        if (!options) { err = os_error (errno); }
+        if (!options) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -85,7 +85,7 @@ kim_error kim_options_create_from_defaults (kim_options *out_options)
     kim_error err = KIM_NO_ERROR;
     kim_options options = NULL;
     
-    if (!err && !out_options) { err = param_error (1, "out_options", "NULL"); }
+    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_options_allocate (&options);
@@ -108,7 +108,7 @@ kim_error kim_options_create (kim_options *out_options)
     kim_error err = KIM_NO_ERROR;
     kim_preferences preferences = NULL;
     
-    if (!err && !out_options) { err = param_error (1, "out_options", "NULL"); }
+    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_preferences_create (&preferences);
@@ -131,8 +131,8 @@ kim_error kim_options_copy (kim_options *out_options,
     kim_error err = KIM_NO_ERROR;
     kim_options options = NULL;
     
-    if (!err && !out_options) { err = param_error (1, "out_options", "NULL"); }
-    if (!err && !in_options ) { err = param_error (2, "in_options", "NULL"); }
+    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_options ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_options_allocate (&options);
@@ -175,7 +175,7 @@ kim_error kim_options_set_prompt_callback (kim_options         io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->prompt_callback = in_prompt_callback;
@@ -191,8 +191,8 @@ kim_error kim_options_get_prompt_callback (kim_options          in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options         ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_prompt_callback) { err = param_error (2, "out_prompt_callback", "NULL"); }
+    if (!err && !in_options         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_prompt_callback) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_prompt_callback = in_options->prompt_callback;
@@ -209,7 +209,7 @@ kim_error kim_options_set_data (kim_options  io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->prompt_callback_data = in_data;
@@ -225,8 +225,8 @@ kim_error kim_options_get_data (kim_options   in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_data  ) { err = param_error (2, "out_data", "NULL"); }
+    if (!err && !in_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_data  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_data = in_options->prompt_callback_data;
@@ -243,8 +243,8 @@ kim_error kim_options_set_prompt_response (kim_options      io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options ) { err = param_error (1, "io_options", "NULL"); }
-    if (!err && !in_response) { err = param_error (2, "in_response", "NULL"); }
+    if (!err && !io_options ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_response) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
 #warning kim_options_set_prompt_response unimplemented
@@ -261,8 +261,8 @@ kim_error kim_options_get_prompt_response (kim_options       in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options  ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_response) { err = param_error (2, "out_response", "NULL"); }
+    if (!err && !in_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_response) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
 #warning kim_options_get_prompt_response unimplemented
@@ -278,7 +278,7 @@ kim_error kim_options_set_start_time (kim_options io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->start_time = in_start_time;
@@ -294,8 +294,8 @@ kim_error kim_options_get_start_time (kim_options  in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options    ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_start_time) { err = param_error (2, "out_start_time", "NULL"); }
+    if (!err && !in_options    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_start_time) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_start_time = in_options->start_time;
@@ -311,7 +311,7 @@ kim_error kim_options_set_lifetime (kim_options  io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->lifetime = in_lifetime;
@@ -327,8 +327,8 @@ kim_error kim_options_get_lifetime (kim_options   in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options  ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_lifetime) { err = param_error (2, "out_lifetime", "NULL"); }
+    if (!err && !in_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_lifetime) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_lifetime = in_options->lifetime;
@@ -344,7 +344,7 @@ kim_error kim_options_set_renewable (kim_options io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->renewable = in_renewable;
@@ -360,8 +360,8 @@ kim_error kim_options_get_renewable (kim_options  in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options   ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_renewable) { err = param_error (2, "out_renewable", "NULL"); }
+    if (!err && !in_options   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_renewable) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_renewable = in_options->renewable;
@@ -377,7 +377,7 @@ kim_error kim_options_set_renewal_lifetime (kim_options  io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->renewal_lifetime = in_renewal_lifetime;
@@ -393,8 +393,8 @@ kim_error kim_options_get_renewal_lifetime (kim_options   in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options          ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_renewal_lifetime) { err = param_error (2, "out_renewal_lifetime", "NULL"); }
+    if (!err && !in_options          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_renewal_lifetime) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_renewal_lifetime = in_options->renewal_lifetime;
@@ -410,7 +410,7 @@ kim_error kim_options_set_forwardable (kim_options io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->forwardable = in_forwardable;
@@ -426,8 +426,8 @@ kim_error kim_options_get_forwardable (kim_options  in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options     ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_forwardable) { err = param_error (2, "out_forwardable", "NULL"); }
+    if (!err && !in_options     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_forwardable) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_forwardable = in_options->forwardable;
@@ -443,7 +443,7 @@ kim_error kim_options_set_proxiable (kim_options io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->proxiable = in_proxiable;
@@ -459,8 +459,8 @@ kim_error kim_options_get_proxiable (kim_options  in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options   ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_proxiable) { err = param_error (2, "out_proxiable", "NULL"); }
+    if (!err && !in_options   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_proxiable) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_proxiable = in_options->proxiable;
@@ -476,7 +476,7 @@ kim_error kim_options_set_addressless (kim_options io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_options->addressless = in_addressless;
@@ -492,8 +492,8 @@ kim_error kim_options_get_addressless (kim_options  in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options     ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_addressless) { err = param_error (2, "out_addressless", "NULL"); }
+    if (!err && !in_options     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_addressless) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_addressless = in_options->addressless;
@@ -510,8 +510,8 @@ kim_error kim_options_set_service_name (kim_options  io_options,
     kim_error err = KIM_NO_ERROR;
     kim_string service_name = NULL;
     
-    if (!err && !io_options     ) { err = param_error (1, "io_options", "NULL"); }
-    if (!err && !in_service_name) { err = param_error (2, "in_service_name", "NULL"); }
+    if (!err && !io_options     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_service_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_copy (&service_name, in_service_name);
@@ -532,8 +532,8 @@ kim_error kim_options_get_service_name (kim_options  in_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_options      ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !out_service_name) { err = param_error (2, "out_service_name", "NULL"); }
+    if (!err && !in_options      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_service_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_copy (out_service_name, in_options->service_name);
@@ -552,9 +552,9 @@ kim_error kim_options_get_init_cred_options (kim_options               in_option
     krb5_get_init_creds_opt *init_cred_options;
     krb5_address **addresses = NULL;
     
-    if (!err && !in_options           ) { err = param_error (1, "in_options", "NULL"); }
-    if (!err && !in_context           ) { err = param_error (2, "in_context", "NULL"); }
-    if (!err && !out_init_cred_options) { err = param_error (3, "out_init_cred_options", "NULL"); }
+    if (!err && !in_options           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_context           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_init_cred_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && !in_options->addressless) {
         err = krb5_error (in_context, 
@@ -587,7 +587,7 @@ kim_error kim_options_free_init_cred_options (krb5_context              in_conte
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_context) { err = param_error (1, "in_context", "NULL"); }
+    if (!err && !in_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && io_init_cred_options && *io_init_cred_options) {
 	if ((*io_init_cred_options)->address_list) {
@@ -624,8 +624,8 @@ kim_error kim_prompt_callback_default (kim_options       *io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
-    if (!err && !out_reply ) { err = param_error (6, "out_reply", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_reply ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
     }
@@ -644,8 +644,8 @@ kim_error kim_prompt_callback_gui (kim_options       *io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
-    if (!err && !out_reply ) { err = param_error (6, "out_reply", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_reply ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
     }
@@ -664,8 +664,8 @@ kim_error kim_prompt_callback_cli (kim_options       *io_options,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = param_error (1, "io_options", "NULL"); }
-    if (!err && !out_reply ) { err = param_error (6, "out_reply", "NULL"); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_reply ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
     }
@@ -682,5 +682,5 @@ kim_error kim_prompt_callback_none (kim_options       *io_options,
                                     kim_string         in_description,
                                     void               **out_reply)
 {
-    return KIM_USER_CANCELED_ECODE;
+    return KIM_USER_CANCELED_ERR;
 }

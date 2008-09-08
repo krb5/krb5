@@ -29,14 +29,6 @@
 
 #include <kim/kim.h>
 
-kim_error _kim_error_set_message_for_param (kim_string in_function, 
-                                            unsigned int in_argument_position,
-                                            kim_string in_argument_name,
-                                            kim_string in_invalid_value);
-#define param_error(pos, name, value) _kim_error_set_message_for_param(__FUNCTION__,\
-                                                                       pos, name, \
-                                                                       value)
-
 kim_error kim_error_set_message_for_code (kim_error in_code, 
                                           ...);
 kim_error kim_error_set_message_for_code_va (kim_error in_code, 
@@ -45,8 +37,6 @@ kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context,
                                                 krb5_error_code in_code);
 
 #define krb5_error(context,code) kim_error_set_message_for_krb5_error(context, code)
-#define ccapi_error(code)        kim_error_set_message_for_code(code)
-#define os_error(code)           kim_error_set_message_for_code(code)
 
 kim_string kim_error_message (kim_error in_error);
 

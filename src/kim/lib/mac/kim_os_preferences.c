@@ -35,14 +35,14 @@
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error kim_os_preferences_cfstring_for_key (kim_preference_key in_key,
-                                                      CFStringRef          *out_kim_string_key,
-                                                      CFStringRef          *out_kll_string_key)
+static kim_error kim_os_preferences_cfstring_for_key (kim_preference_key  in_key,
+                                                      CFStringRef        *out_kim_string_key,
+                                                      CFStringRef        *out_kll_string_key)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !out_kim_string_key) { err = param_error (2, "out_kim_string_key", "NULL"); }
-    if (!err && !out_kll_string_key) { err = param_error (3, "out_kll_string_key", "NULL"); }
+    if (!err && !out_kim_string_key) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_kll_string_key) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         if (in_key == kim_preference_key_lifetime) {
@@ -102,7 +102,10 @@ static kim_error kim_os_preferences_cfstring_for_key (kim_preference_key in_key,
             *out_kll_string_key = CFSTR ("KLMaximumRenewableLifetime");
             
         } else {
-            err = param_error (1, "in_key", "not in kim_preference_key_enum");
+            /* ignore unsupported keys */
+            kim_debug_printf ("Unsupported preference key %d", in_key);
+            *out_kim_string_key = NULL;
+            *out_kll_string_key = NULL;
         }
     }
     
@@ -112,8 +115,8 @@ static kim_error kim_os_preferences_cfstring_for_key (kim_preference_key in_key,
 /* ------------------------------------------------------------------------ */
 
 static kim_error kim_os_preferences_get_value (kim_preference_key  in_key, 
-                                               CFTypeID              in_type, 
-                                               CFPropertyListRef    *out_value)
+                                               CFTypeID            in_type, 
+                                               CFPropertyListRef  *out_value)
 {
     
     kim_error err = KIM_NO_ERROR;
@@ -123,7 +126,7 @@ static kim_error kim_os_preferences_get_value (kim_preference_key  in_key,
     CFStringRef hosts[] = { kCFPreferencesCurrentHost, kCFPreferencesAnyHost, NULL };
     CFStringRef keys[] = { NULL, NULL, NULL };
     
-    if (!err && !out_value) { err = param_error (3, "out_value", "NULL"); }
+    if (!err && !out_value) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         /* Index must correspond to the appropriate file */
@@ -139,7 +142,7 @@ static kim_error kim_os_preferences_get_value (kim_preference_key  in_key,
         }
         
         for (u = 0; !value && users[u]; u++) {
-            for (f = 0; !value && files[f]; f++) {
+            for (f = 0; !value && files[f] && keys[f]; f++) {
                 for (h = 0; !value && hosts[h]; h++) {
                     value = CFPreferencesCopyValue (keys[f], files[f], users[u], hosts[h]);
                 }
@@ -147,7 +150,7 @@ static kim_error kim_os_preferences_get_value (kim_preference_key  in_key,
         }        
         
         if (value && CFGetTypeID (value) != in_type) {
-            err = check_error (KIM_PREFERENCES_READ_ECODE);
+            err = check_error (KIM_PREFERENCES_READ_ERR);
         }
     }
     
@@ -171,20 +174,20 @@ static kim_error kim_os_preferences_set_value (kim_preference_key in_key,
     CFStringRef kim_key = NULL;
     CFStringRef kll_key = NULL;
     
-    if (!err && !in_value) { err = param_error (2, "in_value", "NULL"); }
+    if (!err && !in_value) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_preferences_cfstring_for_key (in_key, &kim_key, &kll_key);
     }
     
-    if (!err) {
+    if (!err && kim_key) {
         kim_boolean homedir_ok = kim_library_allow_home_directory_access();
         CFStringRef user = homedir_ok ? kCFPreferencesCurrentUser : kCFPreferencesAnyUser;
         CFStringRef host = homedir_ok ? kCFPreferencesAnyHost : kCFPreferencesCurrentHost;
         
         CFPreferencesSetValue (kim_key, in_value, KIM_PREFERENCES_FILE, user, host);
         if (!CFPreferencesSynchronize (KIM_PREFERENCES_FILE, user, host)) {
-            err = check_error (KIM_PREFERENCES_WRITE_ECODE);
+            err = check_error (KIM_PREFERENCES_WRITE_ERR);
         }
     }
     
@@ -203,7 +206,7 @@ kim_error kim_os_preferences_get_identity_for_key (kim_preference_key  in_key,
     kim_string string = NULL;
     CFStringRef value = NULL;
     
-    if (!err && !out_identity) { err = param_error (2, "out_identity", "NULL"); }
+    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_preferences_get_value (in_key, CFStringGetTypeID (), 
@@ -276,7 +279,7 @@ kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key
     kim_error err = KIM_NO_ERROR;
     CFArrayRef value = NULL;
     
-    if (!err && !out_favorite_identities) { err = param_error (2, "out_favorite_identities", "NULL"); }
+    if (!err && !out_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_preferences_get_value (in_key, CFArrayGetTypeID (), 
@@ -301,7 +304,7 @@ kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key
                 
                 cfstring = (CFStringRef) CFArrayGetValueAtIndex (value, i);
                 if (!cfstring || CFGetTypeID (cfstring) != CFStringGetTypeID ()) {
-                    err = check_error (KIM_PREFERENCES_READ_ECODE);
+                    err = check_error (KIM_PREFERENCES_READ_ERR);
                 }
                 
                 if (!err) {
@@ -343,7 +346,7 @@ kim_error kim_os_preferences_set_favorite_identities_for_key (kim_preference_key
     kim_count count = 0;
     CFMutableArrayRef value = NULL;
     
-    if (!err && !in_favorite_identities) { err = param_error (2, "in_favorite_identities", "NULL"); }
+    if (!err && !in_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_favorite_identities_get_number_of_identities (in_favorite_identities, &count);
@@ -351,7 +354,7 @@ kim_error kim_os_preferences_set_favorite_identities_for_key (kim_preference_key
     
     if (!err) {
         value = CFArrayCreateMutable (kCFAllocatorDefault, count, &kCFTypeArrayCallBacks);
-        if (!value) { err = os_error (ENOMEM); }
+        if (!value) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -400,7 +403,7 @@ kim_error kim_os_preferences_get_time_for_key (kim_preference_key  in_key,
     kim_error err = KIM_NO_ERROR;
     CFNumberRef value = NULL;
     
-    if (!err && !out_time) { err = param_error (2, "out_time", "NULL"); }
+    if (!err && !out_time) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_preferences_get_value (in_key, CFNumberGetTypeID (), 
@@ -411,7 +414,7 @@ kim_error kim_os_preferences_get_time_for_key (kim_preference_key  in_key,
         if (value) {
             SInt32 number; // CFNumbers are signed so we need to cast
             if (CFNumberGetValue (value, kCFNumberSInt32Type, &number) != TRUE) {
-                err = os_error (ENOMEM);
+                err = KIM_OUT_OF_MEMORY_ERR;
             } else {
                 *out_time = number;
             }
@@ -436,7 +439,7 @@ kim_error kim_os_preferences_set_time_for_key (kim_preference_key in_key,
     
     if (!err) {
         value = CFNumberCreate (kCFAllocatorDefault, kCFNumberSInt32Type, &number);
-        if (!value) { err = os_error (ENOMEM); }
+        if (!value) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -457,7 +460,7 @@ kim_error kim_os_preferences_get_lifetime_for_key (kim_preference_key  in_key,
     kim_error err = KIM_NO_ERROR;
     CFNumberRef value = NULL;
     
-    if (!err && !out_lifetime) { err = param_error (2, "out_lifetime", "NULL"); }
+    if (!err && !out_lifetime) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_preferences_get_value (in_key, CFNumberGetTypeID (), 
@@ -468,7 +471,7 @@ kim_error kim_os_preferences_get_lifetime_for_key (kim_preference_key  in_key,
         if (value) {
             SInt32 number; // CFNumbers are signed so we need to cast
             if (CFNumberGetValue (value, kCFNumberSInt32Type, &number) != TRUE) {
-                err = os_error (ENOMEM);
+                err = KIM_OUT_OF_MEMORY_ERR;
             } else {
                 *out_lifetime = number;
             }
@@ -493,7 +496,7 @@ kim_error kim_os_preferences_set_lifetime_for_key (kim_preference_key in_key,
     
     if (!err) {
         value = CFNumberCreate (kCFAllocatorDefault, kCFNumberSInt32Type, &number);
-        if (!value) { err = os_error (ENOMEM); }
+        if (!value) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -514,7 +517,7 @@ kim_error kim_os_preferences_get_boolean_for_key (kim_preference_key  in_key,
     kim_error err = KIM_NO_ERROR;
     CFBooleanRef value = NULL;
     
-    if (!err && !out_boolean) { err = param_error (2, "out_boolean", "NULL"); }
+    if (!err && !out_boolean) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_preferences_get_value (in_key, CFBooleanGetTypeID (), 

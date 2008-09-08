@@ -45,11 +45,11 @@ static inline kim_error kim_favorite_identities_allocate (kim_favorite_identitie
     kim_error err = KIM_NO_ERROR;
     kim_favorite_identities favorite_identities = NULL;
     
-    if (!err && !out_favorite_identities) { err = param_error (1, "out_favorite_identities", "NULL"); }
+    if (!err && !out_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         favorite_identities = malloc (sizeof (*favorite_identities));
-        if (!favorite_identities) { err = os_error (errno); }
+        if (!favorite_identities) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -70,7 +70,7 @@ static inline kim_error kim_favorite_identities_resize (kim_favorite_identities 
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_favorite_identities) { err = param_error (1, "io_favorite_identities", "NULL"); }
+    if (!err && !io_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && io_favorite_identities->count != in_new_count) {
         kim_identity *identities = NULL;
@@ -86,7 +86,7 @@ static inline kim_error kim_favorite_identities_resize (kim_favorite_identities 
                 identities = realloc (io_favorite_identities->identities, 
                                       sizeof (*identities) * in_new_count);
             }
-            if (!identities) { err = os_error (errno); }
+            if (!identities) { err = KIM_OUT_OF_MEMORY_ERR; }
         }
         
         if (!err) {
@@ -108,7 +108,7 @@ kim_error kim_favorite_identities_create (kim_favorite_identities *out_favorite_
     kim_error err = KIM_NO_ERROR;
     kim_favorite_identities favorite_identities = NULL;
     
-    if (!err && !out_favorite_identities) { err = param_error (1, "out_favorite_identities", "NULL"); }
+    if (!err && !out_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_favorite_identities_allocate (&favorite_identities);
@@ -132,8 +132,8 @@ kim_error kim_favorite_identities_copy (kim_favorite_identities *out_favorite_id
     kim_error err = KIM_NO_ERROR;
     kim_favorite_identities favorite_identities = NULL;
     
-    if (!err && !out_favorite_identities) { err = param_error (1, "out_favorite_identities", "NULL"); }
-    if (!err && !in_favorite_identities ) { err = param_error (2, "in_favorite_identities", "NULL"); }
+    if (!err && !out_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_favorite_identities ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_favorite_identities_allocate (&favorite_identities);
@@ -169,8 +169,8 @@ kim_error kim_favorite_identities_get_number_of_identities (kim_favorite_identit
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_favorite_identities  ) { err = param_error (1, "in_favorite_identities", "NULL"); }
-    if (!err && !out_number_of_identities) { err = param_error (2, "out_number_of_identities", "NULL"); }
+    if (!err && !in_favorite_identities  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_number_of_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_number_of_identities = in_favorite_identities->count;
@@ -187,12 +187,12 @@ kim_error kim_favorite_identities_get_identity_at_index (kim_favorite_identities
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_favorite_identities) { err = param_error (1, "in_favorite_identities", "NULL"); }
-    if (!err && !out_identity          ) { err = param_error (3, "out_identity", "NULL"); }
+    if (!err && !in_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         if (in_index >= in_favorite_identities->count) {
-            err = kim_error_set_message_for_code (KIM_BAD_IDENTITY_INDEX_ECODE, 
+            err = kim_error_set_message_for_code (KIM_BAD_IDENTITY_INDEX_ERR, 
                                                   in_index);
         }
     }
@@ -213,8 +213,8 @@ kim_error kim_favorite_identities_add_identity (kim_favorite_identities io_favor
     kim_identity identity = NULL;
     kim_count insert_at = 0;
     
-    if (!err && !io_favorite_identities) { err = param_error (1, "io_favorite_identities", "NULL"); }
-    if (!err && !in_identity           ) { err = param_error (2, "in_identity", "NULL"); }
+    if (!err && !io_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_identity_copy (&identity, in_identity);
@@ -239,7 +239,7 @@ kim_error kim_favorite_identities_add_identity (kim_favorite_identities io_favor
                     err = kim_identity_get_display_string (in_identity, &display_string);
                     
                     if (!err) {
-                        err = kim_error_set_message_for_code (KIM_IDENTITY_ALREADY_IN_IDENTITIES_LIST, 
+                        err = kim_error_set_message_for_code (KIM_IDENTITY_ALREADY_IN_LIST_ERR, 
                                                               display_string);
                     }
                     
@@ -279,8 +279,8 @@ kim_error kim_favorite_identities_remove_identity (kim_favorite_identities io_fa
     kim_boolean found = FALSE;
     kim_count i;
     
-    if (!err && !io_favorite_identities) { err = param_error (1, "io_favorite_identities", "NULL"); }
-    if (!err && !in_identity           ) { err = param_error (2, "in_identity", "NULL"); }
+    if (!err && !io_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         for (i = 0; !err && !found && i < io_favorite_identities->count; i++) {
@@ -312,7 +312,7 @@ kim_error kim_favorite_identities_remove_identity (kim_favorite_identities io_fa
         err = kim_identity_get_display_string (in_identity, &display_string);
         
         if (!err) {
-            err = kim_error_set_message_for_code (KIM_IDENTITY_NOT_IN_IDENTITIES_LIST, 
+            err = kim_error_set_message_for_code (KIM_IDENTITY_NOT_IN_LIST_ERR, 
                                                   display_string);
         }
         
@@ -328,7 +328,7 @@ kim_error kim_favorite_identities_remove_all_identities (kim_favorite_identities
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_favorite_identities) { err = param_error (1, "io_favorite_identities", "NULL"); }
+    if (!err && !io_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_count i;
@@ -407,7 +407,7 @@ static kim_error kim_preferences_read (kim_preferences in_preferences)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences) { err = param_error (1, "in_preferences", "NULL"); }
+    if (!err && !in_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_lifetime lifetime = kim_default_lifetime;
@@ -546,7 +546,7 @@ static kim_error kim_preferences_write (kim_preferences in_preferences)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences) { err = param_error (1, "in_preferences", "NULL"); }
+    if (!err && !in_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && in_preferences->remember_options && in_preferences->options_changed) {
         kim_lifetime lifetime = kim_default_lifetime;
@@ -672,11 +672,11 @@ static inline kim_error kim_preferences_allocate (kim_preferences *out_preferenc
     kim_error err = KIM_NO_ERROR;
     kim_preferences preferences = NULL;
     
-    if (!err && !out_preferences) { err = param_error (1, "out_preferences", "NULL"); }
+    if (!err && !out_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         preferences = malloc (sizeof (*preferences));
-        if (!preferences) { err = os_error (errno); }
+        if (!preferences) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -697,7 +697,7 @@ kim_error kim_preferences_create (kim_preferences *out_preferences)
     kim_error err = KIM_NO_ERROR;
     kim_preferences preferences = NULL;
     
-    if (!err && !out_preferences) { err = param_error (1, "out_preferences", "NULL"); }
+    if (!err && !out_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_preferences_allocate (&preferences);
@@ -730,8 +730,8 @@ kim_error kim_preferences_copy (kim_preferences *out_preferences,
     kim_error err = KIM_NO_ERROR;
     kim_preferences preferences = NULL;
     
-    if (!err && !out_preferences) { err = param_error (1, "out_preferences", "NULL"); }
-    if (!err && !in_preferences ) { err = param_error (2, "in_preferences", "NULL"); }
+    if (!err && !out_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_preferences ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_preferences_allocate (&preferences);
@@ -770,8 +770,8 @@ kim_error kim_preferences_set_options (kim_preferences io_preferences,
     kim_error err = KIM_NO_ERROR;
     kim_options options = NULL;
     
-    if (!err && !io_preferences) { err = param_error (1, "io_preferences", "NULL"); }
-    if (!err && !in_options    ) { err = param_error (2, "in_options", "NULL"); }
+    if (!err && !io_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_options    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_options_copy (&options, in_options);
@@ -793,8 +793,8 @@ kim_error kim_preferences_get_options (kim_preferences  in_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_options   ) { err = param_error (2, "out_options", "NULL"); }
+    if (!err && !in_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_options   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_options_copy (out_options, in_preferences->options);
@@ -810,7 +810,7 @@ kim_error kim_preferences_set_remember_options (kim_preferences io_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_preferences) { err = param_error (1, "io_preferences", "NULL"); }
+    if (!err && !io_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_preferences->remember_options = in_remember_options;
@@ -827,8 +827,8 @@ kim_error kim_preferences_get_remember_options (kim_preferences  in_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences      ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_remember_options) { err = param_error (2, "out_remember_options", "NULL"); }
+    if (!err && !in_preferences      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_remember_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_remember_options = in_preferences->remember_options;
@@ -845,7 +845,7 @@ kim_error kim_preferences_set_client_identity (kim_preferences io_preferences,
     kim_error err = KIM_NO_ERROR;
     kim_identity identity = KIM_IDENTITY_ANY;
     
-    if (!err && !io_preferences    ) { err = param_error (1, "io_preferences", "NULL"); }
+    if (!err && !io_preferences    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     /* in_client_identity may be KIM_IDENTITY_ANY */
     
     if (!err && in_client_identity) {
@@ -868,8 +868,8 @@ kim_error kim_preferences_get_client_identity (kim_preferences  in_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences     ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_client_identity) { err = param_error (2, "out_client_identity", "NULL"); }
+    if (!err && !in_preferences     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_identity_copy (out_client_identity, in_preferences->client_identity);
@@ -885,7 +885,7 @@ kim_error kim_preferences_set_remember_client_identity (kim_preferences io_prefe
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_preferences) { err = param_error (1, "io_preferences", "NULL"); }
+    if (!err && !io_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_preferences->remember_client_identity = in_remember_client_identity;
@@ -902,8 +902,8 @@ kim_error kim_preferences_get_remember_client_identity (kim_preferences  in_pref
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences              ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_remember_client_identity) { err = param_error (2, "out_remember_client_identity", "NULL"); }
+    if (!err && !in_preferences              ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_remember_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_remember_client_identity = in_preferences->remember_client_identity;
@@ -919,7 +919,7 @@ kim_error kim_preferences_set_minimum_lifetime (kim_preferences io_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_preferences) { err = param_error (1, "io_preferences", "NULL"); }
+    if (!err && !io_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_preferences->minimum_lifetime = in_minimum_lifetime;
@@ -936,8 +936,8 @@ kim_error kim_preferences_get_minimum_lifetime (kim_preferences  in_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences      ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_minimum_lifetime) { err = param_error (2, "out_minimum_lifetime", "NULL"); }
+    if (!err && !in_preferences      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_minimum_lifetime) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_minimum_lifetime = in_preferences->minimum_lifetime;
@@ -953,7 +953,7 @@ kim_error kim_preferences_set_maximum_lifetime (kim_preferences io_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_preferences) { err = param_error (1, "io_preferences", "NULL"); }
+    if (!err && !io_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_preferences->maximum_lifetime = in_maximum_lifetime;
@@ -970,8 +970,8 @@ kim_error kim_preferences_get_maximum_lifetime (kim_preferences  in_preferences,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences      ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_maximum_lifetime) { err = param_error (2, "out_maximum_lifetime", "NULL"); }
+    if (!err && !in_preferences      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_maximum_lifetime) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_maximum_lifetime = in_preferences->maximum_lifetime;
@@ -987,7 +987,7 @@ kim_error kim_preferences_set_minimum_renewal_lifetime (kim_preferences io_prefe
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_preferences) { err = param_error (1, "io_preferences", "NULL"); }
+    if (!err && !io_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_preferences->minimum_renewal_lifetime = in_minimum_renewal_lifetime;
@@ -1004,8 +1004,8 @@ kim_error kim_preferences_get_minimum_renewal_lifetime (kim_preferences  in_pref
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences              ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_minimum_renewal_lifetime) { err = param_error (2, "out_minimum_renewal_lifetime", "NULL"); }
+    if (!err && !in_preferences              ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_minimum_renewal_lifetime) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_minimum_renewal_lifetime = in_preferences->minimum_renewal_lifetime;
@@ -1021,7 +1021,7 @@ kim_error kim_preferences_set_maximum_renewal_lifetime (kim_preferences io_prefe
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_preferences) { err = param_error (1, "io_preferences", "NULL"); }
+    if (!err && !io_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_preferences->maximum_renewal_lifetime = in_maximum_renewal_lifetime;
@@ -1038,8 +1038,8 @@ kim_error kim_preferences_get_maximum_renewal_lifetime (kim_preferences  in_pref
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences              ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_maximum_renewal_lifetime) { err = param_error (2, "out_maximum_renewal_lifetime", "NULL"); }
+    if (!err && !in_preferences              ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_maximum_renewal_lifetime) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_maximum_renewal_lifetime = in_preferences->maximum_renewal_lifetime;
@@ -1056,8 +1056,8 @@ kim_error kim_preferences_set_favorite_identities (kim_preferences         io_pr
     kim_error err = KIM_NO_ERROR;
     kim_favorite_identities favorite_identities = NULL;
     
-    if (!err && !io_preferences        ) { err = param_error (1, "io_preferences", "NULL"); }
-    if (!err && !in_favorite_identities) { err = param_error (2, "in_favorite_identities", "NULL"); }
+    if (!err && !io_preferences        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_favorite_identities_copy (&favorite_identities, in_favorite_identities);
@@ -1079,8 +1079,8 @@ kim_error kim_preferences_get_favorite_identities (kim_preferences          in_p
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences         ) { err = param_error (1, "in_preferences", "NULL"); }
-    if (!err && !out_favorite_identities) { err = param_error (2, "out_favorite_identities", "NULL"); }
+    if (!err && !in_preferences         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_favorite_identities_copy (out_favorite_identities, in_preferences->favorite_identities);
@@ -1095,7 +1095,7 @@ kim_error kim_preferences_synchronize (kim_preferences in_preferences)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_preferences) { err = param_error (1, "in_preferences", "NULL"); }
+    if (!err && !in_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_preferences_write (in_preferences);

@@ -43,15 +43,15 @@ kim_error kim_credential_iterator_create (kim_credential_iterator *out_credentia
     kim_error err = KIM_NO_ERROR;
     kim_credential_iterator credential_iterator = NULL;
     
-    if (!err && !out_credential_iterator) { err = param_error (1, "out_credential_iterator", "NULL"); }
-    if (!err && !in_ccache              ) { err = param_error (2, "in_ccache", "NULL"); }
+    if (!err && !out_credential_iterator) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_ccache              ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         credential_iterator = malloc (sizeof (*credential_iterator));
         if (credential_iterator) { 
             *credential_iterator = kim_credential_iterator_initializer;
         } else {
-            err = os_error (errno); 
+            err = KIM_OUT_OF_MEMORY_ERR; 
         }
     }
     
@@ -89,8 +89,8 @@ kim_error kim_credential_iterator_next (kim_credential_iterator  in_credential_i
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential_iterator) { err = param_error (1, "in_credential_iterator", "NULL"); }
-    if (!err && !out_credential        ) { err = param_error (2, "out_credential", "NULL"); }
+    if (!err && !in_credential_iterator) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_credential        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         krb5_creds creds;
@@ -158,11 +158,11 @@ static inline kim_error kim_credential_allocate (kim_credential *out_credential)
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
+    if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         credential = malloc (sizeof (*credential));
-        if (!credential) { err = os_error (errno); }
+        if (!credential) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -185,7 +185,7 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
+    if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_allocate (&credential);
@@ -228,7 +228,7 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     kim_string service_name = NULL;
     krb5_get_init_creds_opt *init_cred_options = NULL;
     
-    if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
+    if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_allocate (&credential);
@@ -353,9 +353,9 @@ kim_error kim_credential_create_from_krb5_creds (kim_credential *out_credential,
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !out_credential ) { err = param_error (1, "out_credential", "NULL"); }
-    if (!err && !in_krb5_creds  ) { err = param_error (2, "in_krb5_creds", "NULL"); }
-    if (!err && !in_krb5_context) { err = param_error (3, "in_krb5_context", "NULL"); }
+    if (!err && !out_credential ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_krb5_creds  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_krb5_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_allocate (&credential);
@@ -388,8 +388,8 @@ kim_error kim_credential_copy (kim_credential *out_credential,
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !out_credential) { err = param_error (1, "out_credential", "NULL"); }
-    if (!err && !in_credential ) { err = param_error (2, "in_credential", "NULL"); }
+    if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_credential ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_allocate (&credential);
@@ -422,9 +422,9 @@ kim_error kim_credential_get_krb5_creds (kim_credential   in_credential,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential  ) { err = param_error (1, "in_credential", "NULL"); }
-    if (!err && !in_krb5_context) { err = param_error (2, "in_krb5_context", "NULL"); }
-    if (!err && !out_krb5_creds ) { err = param_error (3, "out_krb5_creds", "NULL"); }
+    if (!err && !in_credential  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_krb5_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_krb5_creds ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = krb5_error (in_krb5_context,
@@ -443,8 +443,8 @@ kim_error kim_credential_get_client_identity (kim_credential  in_credential,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential      ) { err = param_error (1, "in_credential", "NULL"); }
-    if (!err && !out_client_identity) { err = param_error (2, "out_client_identity", "NULL"); }
+    if (!err && !in_credential      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_identity_create_from_krb5_principal (out_client_identity,
@@ -462,8 +462,8 @@ kim_error kim_credential_get_service_identity (kim_credential  in_credential,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential       ) { err = param_error (1, "in_credential", "NULL"); }
-    if (!err && !out_service_identity) { err = param_error (2, "out_service_identity", "NULL"); }
+    if (!err && !in_credential       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_service_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_identity_create_from_krb5_principal (out_service_identity,
@@ -482,8 +482,8 @@ kim_error kim_credential_is_tgt (kim_credential  in_credential,
     kim_error err = KIM_NO_ERROR;
     kim_identity service = NULL;
     
-    if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
-    if (!err && !out_is_tgt   ) { err = param_error (2, "out_is_tgt", "NULL"); }
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_is_tgt   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_get_service_identity (in_credential, &service);
@@ -508,8 +508,8 @@ kim_error kim_credential_get_state (kim_credential           in_credential,
     kim_time start_time = 0;
     krb5_timestamp now = 0;
     
-    if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
-    if (!err && !out_state    ) { err = param_error (2, "out_state", "NULL"); }
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_state    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_get_expiration_time (in_credential, &expiration_time);
@@ -581,7 +581,7 @@ kim_error kim_credential_get_start_time (kim_credential  in_credential,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_start_time = (in_credential->creds->times.starttime ? 
@@ -599,7 +599,7 @@ kim_error kim_credential_get_expiration_time (kim_credential  in_credential,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_expiration_time = in_credential->creds->times.endtime;
@@ -615,7 +615,7 @@ kim_error kim_credential_get_renewal_expiration_time (kim_credential  in_credent
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_renewal_expiration_time = in_credential->creds->times.renew_till;
@@ -637,8 +637,8 @@ kim_error kim_credential_store (kim_credential  in_credential,
     krb5_principal client_principal = NULL;
     kim_boolean destroy_ccache_on_error = FALSE;
     
-    if (!err && !in_credential     ) { err = param_error (1, "in_credential", "NULL"); }
-    if (!err && !in_client_identity) { err = param_error (2, "in_client_identity", "NULL"); }
+    if (!err && !in_credential     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = krb5_error (NULL, krb5_init_context (&context));
@@ -666,7 +666,7 @@ kim_error kim_credential_store (kim_credential  in_credential,
             if (!err) {
                 err = kim_ccache_get_krb5_ccache (ccache, context, &k5ccache);
                 
-            } else if (err == KIM_NO_SUCH_PRINCIPAL_ECODE) {
+            } else if (err == KIM_NO_SUCH_PRINCIPAL_ERR) {
                 /* Nothing to replace, create a new ccache */
                 err = krb5_error (context,
                                   krb5_cc_new_unique (context, "API", NULL, 
@@ -724,7 +724,7 @@ kim_error kim_credential_verify (kim_credential in_credential,
     krb5_principal service_principal = NULL;
     krb5_keytab keytab = NULL;
     
-    if (!err && !in_credential) { err = param_error (1, "in_credential", "NULL"); }
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
 	err = krb5_error (NULL, krb5_init_secure_context (&scontext));
@@ -819,7 +819,7 @@ kim_error kim_credential_renew (kim_credential *io_credential,
     kim_string service_name = NULL;
     krb5_ccache ccache = NULL;
     
-    if (!err && !io_credential) { err = param_error (1, "io_credential", "NULL"); }
+    if (!err && !io_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_options options = in_options;
@@ -895,7 +895,7 @@ kim_error kim_credential_validate (kim_credential *io_credential,
     kim_string service_name = NULL;
     krb5_ccache ccache = NULL;
     
-    if (!err && !io_credential) { err = param_error (1, "io_credential", "NULL"); }
+    if (!err && !io_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_options options = in_options;

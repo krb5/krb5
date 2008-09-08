@@ -40,14 +40,14 @@ kim_error kim_ccache_iterator_create (kim_ccache_iterator *out_ccache_iterator)
     kim_error err = KIM_NO_ERROR;
     kim_ccache_iterator ccache_iterator = NULL;
     
-    if (!err && !out_ccache_iterator) { err = param_error (1, "out_ccache_iterator", "NULL"); }
+    if (!err && !out_ccache_iterator) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         ccache_iterator = malloc (sizeof (*ccache_iterator));
         if (ccache_iterator) { 
             *ccache_iterator = kim_ccache_iterator_initializer;
         } else {
-            err = os_error (errno); 
+            err = KIM_OUT_OF_MEMORY_ERR; 
         }
     }
     
@@ -79,8 +79,8 @@ kim_error kim_ccache_iterator_next (kim_ccache_iterator  in_ccache_iterator,
     kim_error err = KIM_NO_ERROR;
     krb5_ccache ccache = NULL;
     
-    if (!err && !in_ccache_iterator) { err = param_error (1, "in_ccache_iterator", "NULL"); }
-    if (!err && !out_ccache        ) { err = param_error (2, "out_ccache", "NULL"); }
+    if (!err && !in_ccache_iterator) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_ccache        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         krb5_error_code terr = krb5_cccol_cursor_next (in_ccache_iterator->context, 
@@ -140,9 +140,9 @@ static kim_error kim_ccache_create_resolve_name (kim_string *out_resolve_name,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !out_resolve_name) { err = param_error (1, "out_resolve_name", "NULL"); }
-    if (!err && !in_name         ) { err = param_error (2, "in_name", "NULL"); }
-    if (!err && !in_type         ) { err = param_error (2, "in_type", "NULL"); }
+    if (!err && !out_resolve_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_name         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_type         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_create_from_format (out_resolve_name, "%s:%s", 
@@ -185,11 +185,11 @@ static inline kim_error kim_ccache_allocate (kim_ccache *out_ccache)
     kim_error err = KIM_NO_ERROR;
     kim_ccache ccache = NULL;
     
-    if (!err && !out_ccache) { err = param_error (1, "out_ccache", "NULL"); }
+    if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         ccache = malloc (sizeof (*ccache));
-        if (!ccache) { err = os_error (errno); }
+        if (!ccache) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -213,7 +213,7 @@ kim_error kim_ccache_create_new (kim_ccache          *out_ccache,
     kim_credential credential = NULL;
     kim_identity client_identity = NULL;
     
-    if (!err && !out_ccache) { err = param_error (1, "out_ccache", "NULL"); }
+    if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_create_new (&credential, in_client_identity, in_options);
@@ -241,8 +241,8 @@ kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !out_ccache        ) { err = param_error (1, "out_ccache", "NULL"); }
-    if (!err && !in_client_identity) { err = param_error (2, "in_client_identity", "NULL"); }
+    if (!err && !out_ccache        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_create_from_client_identity (out_ccache, in_client_identity);
@@ -265,8 +265,8 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
     kim_ccache_iterator iterator = NULL;
     kim_boolean found = FALSE;
     
-    if (!err && !out_ccache        ) { err = param_error (1, "out_ccache", "NULL"); }
-    if (!err && !in_client_identity) { err = param_error (2, "in_client_identity", "NULL"); }
+    if (!err && !out_ccache        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_iterator_create (&iterator);
@@ -284,7 +284,7 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
             err = kim_identity_get_display_string (in_client_identity, &string);
             
             if (!err) {
-                err = kim_error_set_message_for_code (KIM_NO_SUCH_PRINCIPAL_ECODE, 
+                err = kim_error_set_message_for_code (KIM_NO_SUCH_PRINCIPAL_ERR, 
                                                       string);
             }
             
@@ -326,7 +326,7 @@ kim_error kim_ccache_create_from_keytab (kim_ccache    *out_ccache,
     kim_credential credential = NULL;
     kim_identity client_identity = NULL;
     
-    if (!err && !out_ccache) { err = param_error (1, "out_ccache", "NULL"); }
+    if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_create_from_keytab (&credential, in_identity, 
@@ -356,7 +356,7 @@ kim_error kim_ccache_create_from_default (kim_ccache *out_ccache)
     kim_error err = KIM_NO_ERROR;
     kim_ccache ccache = NULL;
     
-    if (!err && !out_ccache) { err = param_error (1, "out_ccache", "NULL"); }
+    if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_allocate (&ccache);
@@ -389,8 +389,8 @@ kim_error kim_ccache_create_from_display_name (kim_ccache  *out_ccache,
     kim_error err = KIM_NO_ERROR;
     kim_ccache ccache = NULL;
     
-    if (!err && !out_ccache     ) { err = param_error (1, "out_ccache", "NULL"); }
-    if (!err && !in_display_name) { err = param_error (2, "in_display_name", "NULL"); }
+    if (!err && !out_ccache     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_display_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_allocate (&ccache);
@@ -425,9 +425,9 @@ kim_error kim_ccache_create_from_type_and_name (kim_ccache  *out_ccache,
     kim_error err = KIM_NO_ERROR;
     kim_string resolve_name = NULL;
     
-    if (!err && !out_ccache) { err = param_error (1, "out_ccache", "NULL"); }
-    if (!err && !in_name   ) { err = param_error (2, "in_name", "NULL"); }
-    if (!err && !in_type   ) { err = param_error (2, "in_type", "NULL"); }
+    if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_name   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_type   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_create_resolve_name (&resolve_name, in_name, in_type);
@@ -450,9 +450,9 @@ kim_error kim_ccache_create_from_krb5_ccache (kim_ccache  *out_ccache,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !out_ccache     ) { err = param_error (1, "out_ccache", "NULL"); }
-    if (!err && !in_krb5_ccache ) { err = param_error (2, "in_krb5_ccache", "NULL"); }
-    if (!err && !in_krb5_context) { err = param_error (3, "in_krb5_context", "NULL"); }
+    if (!err && !out_ccache     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_krb5_ccache ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_krb5_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_string type = krb5_cc_get_type (in_krb5_context, in_krb5_ccache);
@@ -473,8 +473,8 @@ kim_error kim_ccache_copy (kim_ccache  *out_ccache,
     kim_string name = NULL;
     kim_string type = NULL;
     
-    if (!err && !out_ccache) { err = param_error (1, "out_ccache", "NULL"); }
-    if (!err && !in_ccache ) { err = param_error (2, "in_ccache", "NULL"); }
+    if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_ccache ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_name (in_ccache, &name);
@@ -504,9 +504,9 @@ kim_error kim_ccache_compare (kim_ccache   in_ccache,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_ccache           ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !in_compare_to_ccache) { err = param_error (2, "in_compare_to_ccache", "NULL"); }
-    if (!err && !out_equal           ) { err = param_error (3, "out_equal", "NULL"); }
+    if (!err && !in_ccache           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_compare_to_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_equal           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_equal = kim_ccache_k5ccaches_are_equal (in_ccache->context, 
@@ -527,9 +527,9 @@ kim_error kim_ccache_get_krb5_ccache (kim_ccache  in_ccache,
     kim_error err = KIM_NO_ERROR;
     kim_string resolve_name = NULL;
     
-    if (!err && !in_ccache      ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !in_krb5_context) { err = param_error (2, "in_krb5_context", "NULL"); }
-    if (!err && !out_krb5_ccache) { err = param_error (2, "out_krb5_ccache", "NULL"); }
+    if (!err && !in_ccache      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_krb5_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_krb5_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_display_name (in_ccache, &resolve_name);
@@ -553,8 +553,8 @@ kim_error kim_ccache_get_type (kim_ccache  in_ccache,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_type ) { err = param_error (2, "out_type", "NULL"); }
+    if (!err && !in_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_type ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_copy (out_type, krb5_cc_get_type (in_ccache->context, 
@@ -571,8 +571,8 @@ kim_error kim_ccache_get_name (kim_ccache  in_ccache,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_name ) { err = param_error (2, "out_name", "NULL"); }
+    if (!err && !in_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_name ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_copy (out_name, krb5_cc_get_name (in_ccache->context, 
@@ -589,8 +589,8 @@ kim_error kim_ccache_get_display_name (kim_ccache  in_ccache,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_ccache       ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_display_name) { err = param_error (2, "out_display_name", "NULL"); }
+    if (!err && !in_ccache       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_display_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_string type = krb5_cc_get_type (in_ccache->context, 
@@ -612,8 +612,8 @@ kim_error kim_ccache_get_client_identity (kim_ccache    in_ccache,
     kim_error err = KIM_NO_ERROR;
     krb5_principal principal = NULL;
     
-    if (!err && !in_ccache          ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_client_identity) { err = param_error (2, "out_client_identity", "NULL"); }
+    if (!err && !in_ccache          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = krb5_error (in_ccache->context,
@@ -648,7 +648,7 @@ static kim_error kim_ccache_get_dominant_credential (kim_ccache            in_cc
     kim_credential_state dominant_state = kim_credentials_state_valid;
     kim_credential dominant_credential = NULL;
     
-    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
+    if (!err && !in_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_iterator_create (&iterator, in_ccache);
@@ -725,7 +725,7 @@ static kim_error kim_ccache_get_dominant_credential (kim_ccache            in_cc
         }
         
         if (!err) {
-            err = kim_error_set_message_for_code (KIM_NO_CREDENTIALS_ECODE, 
+            err = kim_error_set_message_for_code (KIM_NO_CREDENTIALS_ERR, 
                                                   identity_string);
         }    
 
@@ -764,8 +764,8 @@ kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
     kim_credential_state state = kim_credentials_state_valid;
     kim_credential credential = NULL;
     
-    if (!err && !in_ccache     ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_credential) { err = param_error (2, "out_credential", "NULL"); }
+    if (!err && !in_ccache     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_dominant_credential (in_ccache, 
@@ -785,20 +785,20 @@ kim_error kim_ccache_get_valid_credential (kim_ccache      in_ccache,
         
         if (!err) {
             if (state == kim_credentials_state_expired) {
-                err = kim_error_set_message_for_code (KIM_CREDENTIALS_EXPIRED_ECODE, 
+                err = kim_error_set_message_for_code (KIM_CREDENTIALS_EXPIRED_ERR, 
                                                   identity_string);
                 
             } else if (state == kim_credentials_state_not_yet_valid ||
                        state == kim_credentials_state_needs_validation) {
-                err = kim_error_set_message_for_code (KIM_NEEDS_VALIDATION_ECODE, 
+                err = kim_error_set_message_for_code (KIM_NEEDS_VALIDATION_ERR, 
                                                       identity_string);
                 
             } else if (state == kim_credentials_state_address_mismatch) {
-                err = kim_error_set_message_for_code (KIM_BAD_IP_ADDRESS_ECODE, 
+                err = kim_error_set_message_for_code (KIM_BAD_IP_ADDRESS_ERR, 
                                                       identity_string);                
             } else {
                 /* just default to this */
-                err = kim_error_set_message_for_code (KIM_NEEDS_VALIDATION_ECODE, 
+                err = kim_error_set_message_for_code (KIM_NEEDS_VALIDATION_ERR, 
                                                       identity_string);
             }
         }
@@ -824,8 +824,8 @@ kim_error kim_ccache_get_state (kim_ccache            in_ccache,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_state) { err = param_error (2, "out_state", "NULL"); }
+    if (!err && !in_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_state) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_dominant_credential (in_ccache, 
@@ -843,8 +843,8 @@ kim_error kim_ccache_get_start_time (kim_ccache  in_ccache,
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !in_ccache     ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_start_time) { err = param_error (2, "out_start_time", "NULL"); }
+    if (!err && !in_ccache     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_start_time) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_dominant_credential (in_ccache, NULL, NULL, 
@@ -868,8 +868,8 @@ kim_error kim_ccache_get_expiration_time (kim_ccache  in_ccache,
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !in_ccache          ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_expiration_time) { err = param_error (2, "out_expiration_time", "NULL"); }
+    if (!err && !in_ccache          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_expiration_time) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_dominant_credential (in_ccache, NULL, NULL, 
@@ -894,8 +894,8 @@ kim_error kim_ccache_get_renewal_expiration_time (kim_ccache  in_ccache,
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !in_ccache                  ) { err = param_error (1, "in_ccache", "NULL"); }
-    if (!err && !out_renewal_expiration_time) { err = param_error (2, "out_renewal_expiration_time", "NULL"); }
+    if (!err && !in_ccache                  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_renewal_expiration_time) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_dominant_credential (in_ccache, NULL, NULL, 
@@ -920,7 +920,7 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_ccache) { err = param_error (1, "io_ccache", "NULL"); }
+    if (!err && !io_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         char *environment_ccache_name = getenv ("KRB5CCNAME");
@@ -987,7 +987,7 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
                 err = kim_ccache_get_display_name (io_ccache, &display_name);
                 
                 if (!err) {
-                    err = kim_error_set_message_for_code (KIM_CANT_BECOME_DEFAULT_ECODE, 
+                    err = kim_error_set_message_for_code (KIM_CANT_BECOME_DEFAULT_ERR, 
                                                           display_name);
                 }
                 
@@ -1001,17 +1001,15 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
             
             /* get a CCAPI ccache for this cache */
             if (!err) {
-                err = ccapi_error (cc_initialize (&cc_context, ccapi_version_4, 
-                                                  NULL, NULL));
+                err = cc_initialize (&cc_context, ccapi_version_4, NULL, NULL);
             }
             
             if (!err) {
-                err = ccapi_error (cc_context_open_ccache (cc_context, name,
-                                                           &cc_ccache));
+                err = cc_context_open_ccache (cc_context, name, &cc_ccache);
             }
             
             if (!err) {
-                err = ccapi_error (cc_ccache_set_default (cc_ccache));
+                err = cc_ccache_set_default (cc_ccache);
             }
             
             if (cc_context) { cc_context_release (cc_context); }
@@ -1037,7 +1035,7 @@ kim_error kim_ccache_verify (kim_ccache   in_ccache,
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     
-    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
+    if (!err && !in_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_valid_credential (in_ccache, &credential);
@@ -1064,7 +1062,7 @@ kim_error kim_ccache_renew (kim_ccache  in_ccache,
     kim_credential credential = NULL;
     kim_identity client_identity = NULL;
     
-    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
+    if (!err && !in_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_valid_credential (in_ccache, &credential);
@@ -1097,7 +1095,7 @@ kim_error kim_ccache_validate (kim_ccache  in_ccache,
     kim_credential credential = NULL;
     kim_identity client_identity = NULL;
     
-    if (!err && !in_ccache) { err = param_error (1, "in_ccache", "NULL"); }
+    if (!err && !in_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ccache_get_valid_credential (in_ccache, &credential);

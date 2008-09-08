@@ -52,8 +52,8 @@ void __kim_debug_printf (kim_string in_function,
     kim_string format = NULL;
     kim_string string = NULL;
     
-    if (!err && !in_function) { err = param_error (1, "in_function", "NULL"); }
-    if (!err && !in_format  ) { err = param_error (2, "in_format", "NULL"); }
+    if (!err && !in_function) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_format  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_create_from_format (&format, "%s(): %s", 

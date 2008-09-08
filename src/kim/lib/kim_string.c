@@ -52,7 +52,7 @@ kim_error kim_string_create_from_format_va_retcode (kim_string *out_string,
     kim_error err = KIM_NO_ERROR;
     
     int count = vasprintf ((char **) out_string, in_format, in_args);
-    if (count < 0) { err = os_error (ENOMEM); }
+    if (count < 0) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
     
     return err;
 }
@@ -66,8 +66,8 @@ kim_error kim_string_create_from_format_va (kim_string *out_string,
     kim_error err = KIM_NO_ERROR;
     kim_string string = NULL;
     
-    if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
-    if (!err && !in_format ) { err = param_error (2, "in_format", "NULL"); }
+    if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_format ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_create_from_format_va_retcode (&string, 
@@ -94,12 +94,12 @@ kim_error kim_string_create_from_buffer (kim_string *out_string,
     kim_error err = KIM_NO_ERROR;
     kim_string string = NULL;
     
-    if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
-    if (!err && !in_buffer ) { err = param_error (2, "in_buffer", "NULL"); }
+    if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_buffer ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         string = calloc (in_length + 1, sizeof (char *));
-        if (!string) { err = os_error (ENOMEM); }
+        if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
     }
     
     if (!err) {
@@ -121,12 +121,12 @@ kim_error kim_string_copy (kim_string *out_string,
     kim_error err = KIM_NO_ERROR;
     kim_string string = NULL;
     
-    if (!err && !out_string) { err = param_error (1, "out_string", "NULL"); }
-    if (!err && !in_string ) { err = param_error (2, "in_string", "NULL"); }
+    if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_string ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         string = calloc (strlen (in_string) + 1, sizeof (char *));
-        if (!string) { err = os_error (ENOMEM); }
+        if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
     }
     
     if (!err) {

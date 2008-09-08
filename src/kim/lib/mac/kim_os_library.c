@@ -24,10 +24,71 @@
  * or implied warranty.
  */
 
-#include <CoreServices/CoreServices.h>
-#include <Kerberos/KerberosDebug.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include "k5-int.h"
+#include "k5-thread.h"
+#include <krb5/krb5.h>
 
 #include "kim_os_private.h"
+
+
+static k5_mutex_t g_bundle_lookup_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+
+MAKE_INIT_FUNCTION(kim_os_library_thread_init);
+MAKE_FINI_FUNCTION(kim_os_library_thread_fini);
+
+/* ------------------------------------------------------------------------ */
+
+static int kim_os_library_thread_init (void)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err) {
+        err = k5_mutex_finish_init (&g_bundle_lookup_mutex);
+    }
+    
+    return err;
+}
+
+/* ------------------------------------------------------------------------ */
+
+static void kim_os_library_thread_fini (void)
+{
+    if (!INITIALIZER_RAN (kim_os_library_thread_init) || PROGRAM_EXITING ()) {
+	return;
+    }
+    k5_mutex_destroy (&g_bundle_lookup_mutex);
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_os_library_lock_for_bundle_lookup (void)
+{
+    kim_error err = CALL_INIT_FUNCTION (kim_os_library_thread_init);
+    
+    if (!err) {
+        err = k5_mutex_lock (&g_bundle_lookup_mutex);
+    }
+    
+    return err;
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_os_library_unlock_for_bundle_lookup (void)
+{
+    kim_error err = CALL_INIT_FUNCTION (kim_os_library_thread_init);
+    
+    if (!err) {
+        err = k5_mutex_unlock (&g_bundle_lookup_mutex);
+    }
+    
+    return err;
+}
+
+#pragma mark -
 
 /* ------------------------------------------------------------------------ */
 

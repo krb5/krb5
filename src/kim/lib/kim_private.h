@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <kim/kim.h>
+#include <kim/kim_library.h>
 
 #include "kim_library_private.h"
 #include "kim_debug_private.h"

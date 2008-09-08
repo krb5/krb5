@@ -26,56 +26,93 @@
 
 #define KRB5_PRIVATE 1
 
-#include <pthread.h>
-#include <stdarg.h>
-#include <k5-int.h>
+#include "k5-int.h"
+#include "k5-thread.h"
 #include <krb5/krb5.h>
 #include <profile.h>
 
 #include "kim_private.h"
 #include "kim_os_private.h"
 
-#pragma mark -- Allow Home Directory Access --
+static k5_mutex_t g_allow_home_directory_access_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+static k5_mutex_t g_allow_automatic_prompting_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 
-static pthread_mutex_t g_allow_home_directory_access_mutex = PTHREAD_MUTEX_INITIALIZER;
 kim_boolean g_allow_home_directory_access = TRUE;
+kim_boolean g_allow_automatic_prompting = TRUE;
+
+MAKE_INIT_FUNCTION(kim_thread_init);
+MAKE_FINI_FUNCTION(kim_thread_fini);
+
+/* ------------------------------------------------------------------------ */
+
+static int kim_thread_init (void)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err) {
+        err = k5_mutex_finish_init (&g_allow_home_directory_access_mutex);
+    }
+    
+    if (!err) {
+        err = k5_mutex_finish_init (&g_allow_automatic_prompting_mutex);
+    }
+    
+    return err;
+}
+
+/* ------------------------------------------------------------------------ */
+
+static void kim_thread_fini (void)
+{
+    if (!INITIALIZER_RAN (kim_thread_init) || PROGRAM_EXITING ()) {
+	return;
+    }
+    
+    k5_mutex_destroy (&g_allow_home_directory_access_mutex);
+    k5_mutex_destroy (&g_allow_automatic_prompting_mutex);
+}
+
+#pragma mark -- Allow Home Directory Access --
 
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
+    kim_error mutex_err = KIM_NO_ERROR;
     
-    int mutex_err = pthread_mutex_lock (&g_allow_home_directory_access_mutex);
-    if (mutex_err) { err = os_error (mutex_err); }
+    if (!err) {
+        mutex_err = k5_mutex_lock (&g_allow_home_directory_access_mutex);
+        if (mutex_err) { err = mutex_err; }
+    }
     
     if (!err) {
         g_allow_home_directory_access = in_allow_access;
     }
     
-    if (!mutex_err) { pthread_mutex_unlock (&g_allow_home_directory_access_mutex); }
+    if (!mutex_err) { k5_mutex_unlock (&g_allow_home_directory_access_mutex); }
     return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_library_get_allow_home_directory_access (kim_boolean *out_allow_access)
+static kim_error kim_library_get_allow_home_directory_access (kim_boolean *out_allow_access)
 {
-    kim_error err = KIM_NO_ERROR;
-    int mutex_err = 0;
+    kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
+    kim_error mutex_err = KIM_NO_ERROR;
     
-    if (!err && !out_allow_access) { err = param_error (3, "out_allow_access", "NULL"); }
+    if (!err && !out_allow_access) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        mutex_err = pthread_mutex_lock (&g_allow_home_directory_access_mutex);;
-        if (mutex_err) { err = os_error (mutex_err); }
+        mutex_err = k5_mutex_lock (&g_allow_home_directory_access_mutex);;
+        if (mutex_err) { err = mutex_err; }
     }
     
     if (!err) {
         *out_allow_access = g_allow_home_directory_access;
     }
     
-    if (!mutex_err) { pthread_mutex_unlock (&g_allow_home_directory_access_mutex); }
+    if (!mutex_err) { k5_mutex_unlock (&g_allow_home_directory_access_mutex); }
     return check_error (err);
 }
 
@@ -92,45 +129,46 @@ kim_boolean kim_library_allow_home_directory_access (void)
 
 #pragma mark -- Allow Automatic Prompting --
 
-static pthread_mutex_t g_allow_automatic_prompting_mutex = PTHREAD_MUTEX_INITIALIZER;
-kim_boolean g_allow_automatic_prompting = TRUE;
 
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automatic_prompting)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
+    kim_error mutex_err = KIM_NO_ERROR;
     
-    int mutex_err = pthread_mutex_lock (&g_allow_automatic_prompting_mutex);
-    if (mutex_err) { err = os_error (mutex_err); }
+    if (!err) {
+        mutex_err = k5_mutex_lock (&g_allow_automatic_prompting_mutex);
+        if (mutex_err) { err = mutex_err; }
+    }
     
     if (!err) {
         g_allow_automatic_prompting = in_allow_automatic_prompting;
     }
     
-    if (!mutex_err) { pthread_mutex_unlock (&g_allow_automatic_prompting_mutex); }
+    if (!mutex_err) { k5_mutex_unlock (&g_allow_automatic_prompting_mutex); }
     return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_library_get_allow_automatic_prompting (kim_boolean *out_allow_automatic_prompting)
+static kim_error kim_library_get_allow_automatic_prompting (kim_boolean *out_allow_automatic_prompting)
 {
-    kim_error err = KIM_NO_ERROR;
-    int mutex_err = 0;
+    kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
+    kim_error mutex_err = KIM_NO_ERROR;
     
-    if (!err && !out_allow_automatic_prompting) { err = param_error (3, "out_allow_automatic_prompting", "NULL"); }
+    if (!err && !out_allow_automatic_prompting) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        mutex_err = pthread_mutex_lock (&g_allow_automatic_prompting_mutex);;
-        if (mutex_err) { err = os_error (mutex_err); }
+        mutex_err = k5_mutex_lock (&g_allow_automatic_prompting_mutex);;
+        if (mutex_err) { err = mutex_err; }
     }
     
     if (!err) {
         *out_allow_automatic_prompting = g_allow_automatic_prompting;
     }
     
-    if (!mutex_err) { pthread_mutex_unlock (&g_allow_automatic_prompting_mutex); }
+    if (!mutex_err) { k5_mutex_unlock (&g_allow_automatic_prompting_mutex); }
     return check_error (err);
 }
 

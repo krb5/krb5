@@ -275,7 +275,7 @@
             }
         }
         
-        if (err == KIM_NO_CREDENTIALS_ECODE) {
+        if (err == KIM_NO_CREDENTIALS_ERR) {
             /* ccache is empty, just ignore it */
             err = KIM_NO_ERROR;
         }

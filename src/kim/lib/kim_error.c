@@ -58,7 +58,7 @@ static kim_error kim_error_set_message (kim_error  in_error,
         if (!last_error) {
             last_error = malloc (sizeof (*last_error));
             if (!last_error) {
-                err = KIM_OUT_OF_MEMORY_ECODE;
+                err = KIM_OUT_OF_MEMORY_ERR;
             } else {
                 last_error->code = KIM_NO_ERROR;
                 err = k5_setspecific (K5_KEY_KIM_ERROR_MESSAGE, last_error);
@@ -118,25 +118,7 @@ kim_string kim_error_message (kim_error in_error)
 static kim_boolean kim_error_is_builtin (kim_error in_error)
 {
     return (in_error == KIM_NO_ERROR ||
-            in_error == KIM_OUT_OF_MEMORY_ECODE);
-}
-
-#pragma mark -- Helper Functions --
-
-/* These helper functions exist so we get type checking on common errors */
-
-/* ------------------------------------------------------------------------ */
-
-kim_error _kim_error_set_message_for_param (kim_string in_function, 
-                                            unsigned int in_argument_position,
-                                            kim_string in_argument_name,
-                                            kim_string in_invalid_value)
-{
-    return kim_error_set_message_for_code (KIM_PARAMETER_ECODE, 
-                                           in_function, 
-                                           in_argument_position, 
-                                           in_argument_name,
-                                           in_invalid_value);
+            in_error == KIM_OUT_OF_MEMORY_ERR);
 }
 
 #pragma mark -- Generic Functions --

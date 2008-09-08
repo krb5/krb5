@@ -42,18 +42,18 @@ struct kim_selection_hints_opaque {
 };
 
 struct kim_selection_hints_opaque kim_selection_hints_initializer = { 
-NULL,
-NULL,
-NULL,
-KIM_OPTIONS_DEFAULT,
-TRUE,
-TRUE,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL,
-NULL
+    NULL,
+    NULL,
+    NULL,
+    KIM_OPTIONS_DEFAULT,
+    TRUE,
+    TRUE,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
 };
 
 /* ------------------------------------------------------------------------ */
@@ -63,11 +63,11 @@ static inline kim_error kim_selection_hints_allocate (kim_selection_hints *out_s
     kim_error err = KIM_NO_ERROR;
     kim_selection_hints selection_hints = NULL;
     
-    if (!err && !out_selection_hints) { err = param_error (1, "out_selection_hints", "NULL"); }
+    if (!err && !out_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         selection_hints = malloc (sizeof (*selection_hints));
-        if (!selection_hints) { err = os_error (errno); }
+        if (!selection_hints) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -89,8 +89,8 @@ kim_error kim_selection_hints_create (kim_selection_hints *out_selection_hints,
     kim_error err = KIM_NO_ERROR;
     kim_selection_hints selection_hints = NULL;
     
-    if (!err && !out_selection_hints      ) { err = param_error (1, "out_selection_hints", "NULL"); }
-    if (!err && !in_application_identifier) { err = param_error (1, "in_application_identifier", "NULL"); }
+    if (!err && !out_selection_hints      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_application_identifier) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_selection_hints_allocate (&selection_hints);
@@ -119,8 +119,8 @@ kim_error kim_selection_hints_copy (kim_selection_hints *out_selection_hints,
     kim_error err = KIM_NO_ERROR;
     kim_selection_hints selection_hints = NULL;
     
-    if (!err && !out_selection_hints) { err = param_error (1, "out_selection_hints", "NULL"); }
-    if (!err && !in_selection_hints ) { err = param_error (1, "in_selection_hints", "NULL"); }
+    if (!err && !out_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_selection_hints ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_selection_hints_allocate (&selection_hints);
@@ -197,9 +197,9 @@ kim_error kim_selection_hints_set_hint (kim_selection_hints io_selection_hints,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
-    if (!err && !in_hint_key       ) { err = param_error (2, "in_hint_key", "NULL"); }
-    if (!err && !in_hint_string    ) { err = param_error (3, "in_hint_string", "NULL"); }
+    if (!err && !io_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_hint_key       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_hint_string    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         if (!strcmp (in_hint_key, kim_hint_key_client_realm)) {
@@ -227,7 +227,7 @@ kim_error kim_selection_hints_set_hint (kim_selection_hints io_selection_hints,
                                    in_hint_string);
             
         } else {
-            err = kim_error_set_message_for_code (KIM_UNSUPPORTED_HINT_ECODE,
+            err = kim_error_set_message_for_code (KIM_UNSUPPORTED_HINT_ERR,
                                                   in_hint_key);
         }
     }
@@ -243,9 +243,9 @@ kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !in_hint_key       ) { err = param_error (2, "in_hint_key", "NULL"); }
-    if (!err && !out_hint_string   ) { err = param_error (3, "out_hint_string", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_hint_key       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_hint_string   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         if (!strcmp (in_hint_key, kim_hint_key_client_realm)) {
@@ -273,7 +273,7 @@ kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
                                    in_selection_hints->service_identity);
             
         } else {
-            err = kim_error_set_message_for_code (KIM_UNSUPPORTED_HINT_ECODE,
+            err = kim_error_set_message_for_code (KIM_UNSUPPORTED_HINT_ERR,
                                                   in_hint_key);
         }
     }
@@ -288,8 +288,8 @@ kim_error kim_selection_hints_set_application_name (kim_selection_hints io_selec
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_selection_hints ) { err = param_error (1, "io_selection_hints", "NULL"); }
-    if (!err && !in_application_name) { err = param_error (2, "in_application_name", "NULL"); }
+    if (!err && !io_selection_hints ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_application_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_copy (&io_selection_hints->application_name, in_application_name);
@@ -305,8 +305,8 @@ kim_error kim_selection_hints_get_application_name (kim_selection_hints  in_sele
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints  ) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !out_application_name) { err = param_error (2, "out_application_name", "NULL"); }
+    if (!err && !in_selection_hints  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_application_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         if (in_selection_hints->application_name) {
@@ -326,8 +326,8 @@ kim_error kim_selection_hints_set_explanation (kim_selection_hints io_selection_
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
-    if (!err && !in_explanation    ) { err = param_error (2, "in_explanation", "NULL"); }
+    if (!err && !io_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_explanation    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_string_copy (&io_selection_hints->explanation, in_explanation);
@@ -343,8 +343,8 @@ kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !out_explanation   ) { err = param_error (2, "out_explanation", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_explanation   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         if (in_selection_hints->explanation) {
@@ -364,8 +364,8 @@ kim_error kim_selection_hints_set_options (kim_selection_hints io_selection_hint
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_selection_hints) { err = param_error (1, "io_selection_hints", "NULL"); }
-    if (!err && !in_options        ) { err = param_error (2, "in_options", "NULL"); }
+    if (!err && !io_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_options        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_options_copy (&io_selection_hints->options, in_options);
@@ -381,8 +381,8 @@ kim_error kim_selection_hints_get_options (kim_selection_hints  in_selection_hin
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !out_options       ) { err = param_error (2, "out_options", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_options       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         if (in_selection_hints->options) {
@@ -402,7 +402,7 @@ kim_error kim_selection_hints_set_allow_user_interaction (kim_selection_hints io
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_selection_hints ) { err = param_error (1, "io_selection_hints", "NULL"); }
+    if (!err && !io_selection_hints ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_selection_hints->allow_user_interaction = in_allow_user_interaction;
@@ -418,8 +418,8 @@ kim_error kim_selection_hints_get_allow_user_interaction (kim_selection_hints  i
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints        ) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !out_allow_user_interaction) { err = param_error (2, "out_allow_user_interaction", "NULL"); }
+    if (!err && !in_selection_hints        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_allow_user_interaction) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_allow_user_interaction = in_selection_hints->allow_user_interaction;
@@ -435,7 +435,7 @@ kim_error kim_selection_hints_set_remember_identity (kim_selection_hints io_sele
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_selection_hints ) { err = param_error (1, "io_selection_hints", "NULL"); }
+    if (!err && !io_selection_hints ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_selection_hints->use_cached_results = in_use_cached_results;
@@ -451,8 +451,8 @@ kim_error kim_selection_hints_get_remember_identity (kim_selection_hints  in_sel
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints    ) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !out_use_cached_results) { err = param_error (2, "out_use_cached_results", "NULL"); }
+    if (!err && !in_selection_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_use_cached_results) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_use_cached_results = in_selection_hints->use_cached_results;
@@ -470,8 +470,8 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints  in_selection_hi
     kim_identity identity = NULL;
     kim_ccache ccache = NULL;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !out_identity      ) { err = param_error (2, "out_identity", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && in_selection_hints->use_cached_results) {
         err = kim_os_selection_hints_lookup_identity (in_selection_hints, &identity);
@@ -499,8 +499,8 @@ kim_error kim_selection_hints_remember_identity (kim_selection_hints in_selectio
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !in_identity       ) { err = param_error (2, "in_identity", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_selection_hints_remember_identity (in_selection_hints, 
@@ -516,7 +516,7 @@ kim_error kim_selection_hints_forget_identity (kim_selection_hints in_selection_
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_selection_hints_forget_identity (in_selection_hints);
@@ -532,8 +532,8 @@ kim_error kim_selection_hints_get_preference_strings (kim_selection_hints       
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints   ) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !io_preference_strings) { err = param_error (2, "io_preference_strings", "NULL"); }
+    if (!err && !in_selection_hints   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_preference_strings) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         io_preference_strings->application_identifier = in_selection_hints->application_identifier;

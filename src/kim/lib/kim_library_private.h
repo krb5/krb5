@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006-2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -28,21 +28,6 @@
 #define KIM_LIBRARY_PRIVATE_H
 
 #include <kim/kim.h>
-
-
-kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access);
-
-kim_error kim_library_get_allow_home_directory_access (kim_boolean *out_allow_access);
-
-kim_boolean kim_library_allow_home_directory_access (void);
-
-kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automatic_prompting);
-
-kim_error kim_library_get_allow_automatic_prompting (kim_boolean *out_allow_automatic_prompting);
-
-kim_boolean kim_library_allow_automatic_prompting (void);
-
-void kim_os_library_debug_print (kim_string in_string);
 
 kim_boolean kim_os_library_caller_is_server (void);
 

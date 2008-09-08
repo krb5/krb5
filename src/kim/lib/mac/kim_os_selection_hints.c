@@ -52,7 +52,7 @@ static kim_error kim_os_selection_hints_get_selection_hints_array (CFArrayRef *o
     CFStringRef users[] = { kCFPreferencesCurrentUser, kCFPreferencesAnyUser, NULL };
     CFStringRef hosts[] = { kCFPreferencesCurrentHost, kCFPreferencesAnyHost, NULL };
     
-    if (!err && !out_selection_hints_array) { err = param_error (1, "out_selection_hints_array", "NULL"); }
+    if (!err && !out_selection_hints_array) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_count u, h;
@@ -71,7 +71,7 @@ static kim_error kim_os_selection_hints_get_selection_hints_array (CFArrayRef *o
         }        
         
         if (value && CFGetTypeID (value) != CFArrayGetTypeID ()) {
-            err = check_error (KIM_PREFERENCES_READ_ECODE);
+            err = check_error (KIM_PREFERENCES_READ_ERR);
         }
     }
     
@@ -91,7 +91,7 @@ static kim_error kim_os_selection_hints_set_selection_hints_array (CFArrayRef in
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_selection_hints_array) { err = param_error (1, "in_selection_hints_array", "NULL"); }
+    if (!err && !in_selection_hints_array) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_boolean homedir_ok = kim_library_allow_home_directory_access();
@@ -101,7 +101,7 @@ static kim_error kim_os_selection_hints_set_selection_hints_array (CFArrayRef in
         CFPreferencesSetValue (KIM_SELECTION_HINTS_ARRAY, in_selection_hints_array, 
                                KIM_SELECTION_HINTS_FILE, user, host);
         if (!CFPreferencesSynchronize (KIM_SELECTION_HINTS_FILE, user, host)) {
-            err = check_error (KIM_PREFERENCES_WRITE_ECODE);
+            err = check_error (KIM_PREFERENCES_WRITE_ERR);
         }
     }
     
@@ -123,9 +123,9 @@ static kim_error kim_os_selection_hints_create_dictionary (kim_selection_hints  
     CFStringRef values[KIM_MAX_HINTS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     CFIndex i = 0;
     
-    if (!err && !in_selection_hints  ) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !in_identity         ) { err = param_error (2, "in_selection_hints", "NULL"); }
-    if (!err && !out_hints_dictionary) { err = param_error (3, "out_hints_dictionary", "NULL"); }
+    if (!err && !in_selection_hints  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_hints_dictionary) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_selection_hints_get_preference_strings (in_selection_hints, &preference_strings);
@@ -228,9 +228,9 @@ static kim_error kim_os_selection_hints_compare_to_dictionary (kim_selection_hin
     kim_selection_hints_preference_strings preference_strings = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     kim_boolean hints_equal = 1;
     
-    if (!err && !in_selection_hints ) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !in_hints_dictionary) { err = param_error (2, "in_hints_dictionary", "NULL"); }
-    if (!err && !out_hints_equal    ) { err = param_error (3, "out_hints_equal", "NULL"); }
+    if (!err && !in_selection_hints ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_hints_dictionary) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_hints_equal    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_selection_hints_get_preference_strings (in_selection_hints, &preference_strings);
@@ -297,7 +297,7 @@ static kim_error kim_os_selection_hints_get_dictionary_identity (CFDictionaryRef
     identity_cfstr = CFDictionaryGetValue (in_dictionary, KIM_IDENTITY_HINT);
     if (!identity_cfstr || CFGetTypeID (identity_cfstr) != CFStringGetTypeID ()) {
         kim_debug_printf ("%s: Malformed hints dictionary (invalid identity).", __FUNCTION__);
-        err = check_error (KIM_PREFERENCES_READ_ECODE);
+        err = check_error (KIM_PREFERENCES_READ_ERR);
     }
     
     if (!err) {
@@ -327,8 +327,8 @@ kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_select
     kim_boolean found = 0;
     CFDictionaryRef found_dictionary = NULL;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !out_identity      ) { err = param_error (2, "out_identity", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_selection_hints_get_selection_hints_array (&hints_array);
@@ -342,7 +342,7 @@ kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_select
         CFDictionaryRef dictionary = NULL;
         
         dictionary = CFArrayGetValueAtIndex (hints_array, i);
-        if (!dictionary) { err = os_error (ENOMEM); }
+        if (!dictionary) { err = KIM_OUT_OF_MEMORY_ERR; }
         
         if (!err && CFGetTypeID (dictionary) != CFDictionaryGetTypeID ()) {
             kim_debug_printf ("%s: Malformed entry in hints array.", __FUNCTION__);
@@ -383,8 +383,8 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
     kim_boolean hint_already_exists = 0;
     kim_boolean hints_array_changed = 0;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
-    if (!err && !in_identity       ) { err = param_error (2, "in_identity", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_selection_hints_get_selection_hints_array (&old_hints_array);
@@ -398,7 +398,7 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
             new_hints_array = CFArrayCreateMutable (kCFAllocatorDefault, 0, 
                                                     &kCFTypeArrayCallBacks);            
         }
-        if (!new_hints_array) { err = os_error (ENOMEM); }
+        if (!new_hints_array) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -411,7 +411,7 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
         kim_boolean hints_equal = 0;
         
         dictionary = CFArrayGetValueAtIndex (new_hints_array, i);
-        if (!dictionary) { err = os_error (ENOMEM); }
+        if (!dictionary) { err = KIM_OUT_OF_MEMORY_ERR; }
         
         if (!err && CFGetTypeID (dictionary) != CFDictionaryGetTypeID ()) {
             kim_debug_printf ("%s: Malformed entry in hints array.", __FUNCTION__);
@@ -484,7 +484,7 @@ kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selecti
     CFIndex count = 0;
     CFIndex i = 0;
     
-    if (!err && !in_selection_hints) { err = param_error (1, "in_selection_hints", "NULL"); }
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_selection_hints_get_selection_hints_array (&old_hints_array);
@@ -493,7 +493,7 @@ kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selecti
     if (!err) {
         new_hints_array = CFArrayCreateMutableCopy (kCFAllocatorDefault, 0, 
                                                     old_hints_array);
-        if (!new_hints_array) { err = os_error (ENOMEM); }
+        if (!new_hints_array) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
     if (!err) {
@@ -505,7 +505,7 @@ kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selecti
         kim_boolean hints_equal = 0;
         
         dictionary = CFArrayGetValueAtIndex (new_hints_array, i);
-        if (!dictionary) { err = os_error (ENOMEM); }
+        if (!dictionary) { err = KIM_OUT_OF_MEMORY_ERR; }
         
         if (!err && CFGetTypeID (dictionary) != CFDictionaryGetTypeID ()) {
             kim_debug_printf ("%s: Malformed entry in hints array.", __FUNCTION__);

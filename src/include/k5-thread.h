@@ -414,6 +414,7 @@ typedef enum {
     K5_KEY_CCAPI_REQUEST_PORT,
     K5_KEY_CCAPI_REPLY_STREAM,
     K5_KEY_CCAPI_SERVER_DIED,
+    K5_KEY_COM_ERR_REENTER,
 #endif
     K5_KEY_MAX
 } k5_key_t;

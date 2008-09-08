@@ -1,7 +1,5 @@
 /*
- * $Header$
- *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2005-2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,27 +22,19 @@
  * or implied warranty.
  */
 
-#include <pwd.h>
-#include <unistd.h>
 
-#include "kim_os_private.h"
+#ifndef KIM_LIBRARY_H
+#define KIM_LIBRARY_H
 
-/* ------------------------------------------------------------------------ */
+#include <kim/kim.h>
 
-kim_error kim_os_identity_create_for_username (kim_identity *out_identity)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        struct passwd *pw = getpwuid (getuid ());
-        if (pw) {
-            err =  kim_identity_create_from_string (out_identity, pw->pw_name);
-        } else {
-            *out_identity = KIM_IDENTITY_ANY;
-        }
-    }
 
-    return check_error (err);    
-}
+kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access);
+
+kim_boolean kim_library_allow_home_directory_access (void);
+
+kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automatic_prompting);
+
+kim_boolean kim_library_allow_automatic_prompting (void);
+
+#endif /* KIM_LIBRARY_H */
