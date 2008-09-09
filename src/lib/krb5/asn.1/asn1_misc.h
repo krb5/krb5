@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_misc.h
- * 
+ *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -31,7 +32,7 @@
 #include "krbasn1.h"
 
 asn1_error_code asn1_krb5_realm_copy
-	(krb5_principal target, krb5_principal source);
+        (krb5_principal target, krb5_principal source);
 /* requires  target, source, and source->realm are allocated
    effects   Copies source->realm into target->realm.
              Returns ENOMEM if memory is exhausted. */

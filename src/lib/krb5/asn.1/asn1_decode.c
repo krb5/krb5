@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_decode.c
- * 
+ *
  * Copyright 1994, 2003 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -42,17 +43,17 @@
 asn1_error_code retval;\
 taginfo tinfo
 
-#define asn1class	(tinfo.asn1class)
-#define construction	(tinfo.construction)
-#define tagnum		(tinfo.tagnum)
-#define length		(tinfo.length)
+#define asn1class       (tinfo.asn1class)
+#define construction    (tinfo.construction)
+#define tagnum          (tinfo.tagnum)
+#define length          (tinfo.length)
 
 #define tag(type)\
 retval = asn1_get_tag_2(buf,&tinfo);\
 if (retval) return retval;\
 if (asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
   return ASN1_BAD_ID
-  
+
 #define cleanup()\
 return 0
 
@@ -66,16 +67,16 @@ asn1_error_code asn1_decode_integer(asn1buf *buf, long int *val)
     tag(ASN1_INTEGER);
 
     for (i = 0; i < length; i++) {
-	retval = asn1buf_remove_octet(buf, &o);
-	if (retval) return retval;
-	if (!i) {
-	    n = (0x80 & o) ? -1 : 0;	/* grab sign bit */
-	    if (n < 0 && length > sizeof (long))
-		return ASN1_OVERFLOW;
-	    else if (length > sizeof (long) + 1) /* allow extra octet for positive */
-		return ASN1_OVERFLOW;
-	}
-	n = (n << 8) | o;
+        retval = asn1buf_remove_octet(buf, &o);
+        if (retval) return retval;
+        if (!i) {
+            n = (0x80 & o) ? -1 : 0;    /* grab sign bit */
+            if (n < 0 && length > sizeof (long))
+                return ASN1_OVERFLOW;
+            else if (length > sizeof (long) + 1) /* allow extra octet for positive */
+                return ASN1_OVERFLOW;
+        }
+        n = (n << 8) | o;
     }
     *val = n;
     cleanup();
@@ -91,15 +92,15 @@ asn1_error_code asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *va
     tag(ASN1_INTEGER);
 
     for (i = 0, n = 0; i < length; i++) {
-	retval = asn1buf_remove_octet(buf, &o);
-	if (retval) return retval;
-	if (!i) {
-	    if (0x80 & o)
-		return ASN1_OVERFLOW;
-	    else if (length > sizeof (long) + 1)
-		return ASN1_OVERFLOW;
-	}
-	n = (n << 8) | o;
+        retval = asn1buf_remove_octet(buf, &o);
+        if (retval) return retval;
+        if (!i) {
+            if (0x80 & o)
+                return ASN1_OVERFLOW;
+            else if (length > sizeof (long) + 1)
+                return ASN1_OVERFLOW;
+        }
+        n = (n << 8) | o;
     }
     *val = n;
     cleanup();
@@ -127,23 +128,23 @@ asn1_error_code asn1_decode_maybe_unsigned(asn1buf *buf, unsigned long *val)
     n = 0;
     bitsremain = ~0UL;
     for (i = 0; i < length; i++) {
-	/* Accounts for u_long width not being a multiple of 8. */
-	if (bitsremain < 0xff) return ASN1_OVERFLOW;
-	retval = asn1buf_remove_octet(buf, &o);
-	if (retval) return retval;
-	if (bitsremain == ~0UL) {
-	    if (i == 0)
-		n = (o & 0x80) ? ~0UL : 0UL; /* grab sign bit */
-	    /*
-	     * Skip leading zero or 0xFF octets to humor non-compliant encoders.
-	     */
-	    if (n == 0 && o == 0)
-		continue;
-	    if (n == ~0UL && o == 0xff)
-		continue;
-	}
-	n = (n << 8) | o;
-	bitsremain >>= 8;
+        /* Accounts for u_long width not being a multiple of 8. */
+        if (bitsremain < 0xff) return ASN1_OVERFLOW;
+        retval = asn1buf_remove_octet(buf, &o);
+        if (retval) return retval;
+        if (bitsremain == ~0UL) {
+            if (i == 0)
+                n = (o & 0x80) ? ~0UL : 0UL; /* grab sign bit */
+            /*
+             * Skip leading zero or 0xFF octets to humor non-compliant encoders.
+             */
+            if (n == 0 && o == 0)
+                continue;
+            if (n == ~0UL && o == 0xff)
+                continue;
+        }
+        n = (n << 8) | o;
+        bitsremain >>= 8;
     }
     *val = n;
     cleanup();
@@ -232,17 +233,17 @@ asn1_error_code asn1_decode_generaltime(asn1buf *buf, time_t *val)
     retval = asn1buf_remove_charstring(buf,15,&s);
     /* Time encoding: YYYYMMDDhhmmssZ */
     if (s[14] != 'Z') {
-	free(s);
-	return ASN1_BAD_FORMAT;
+        free(s);
+        return ASN1_BAD_FORMAT;
     }
     if (s[0] == '1' && !memcmp("19700101000000Z", s, 15)) {
-	t = 0;
-	free(s);
-	goto done;
+        t = 0;
+        free(s);
+        goto done;
     }
 #define c2i(c) ((c)-'0')
     ts.tm_year = 1000*c2i(s[0]) + 100*c2i(s[1]) + 10*c2i(s[2]) + c2i(s[3])
-	- 1900;
+        - 1900;
     ts.tm_mon = 10*c2i(s[4]) + c2i(s[5]) - 1;
     ts.tm_mday = 10*c2i(s[6]) + c2i(s[7]);
     ts.tm_hour = 10*c2i(s[8]) + c2i(s[9]);

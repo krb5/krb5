@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_encode.c
- * 
+ *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -30,30 +31,30 @@
 #include "asn1_make.h"
 
 static asn1_error_code asn1_encode_integer_internal(asn1buf *buf,  long val,
-						    unsigned int *retlen)
+                                                    unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
     long valcopy;
     int digit;
-  
+
     valcopy = val;
     do {
-	digit = (int) (valcopy&0xFF);
-	retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
-	if (retval) return retval;
-	length++;
-	valcopy = valcopy >> 8;
+        digit = (int) (valcopy&0xFF);
+        retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
+        if (retval) return retval;
+        length++;
+        valcopy = valcopy >> 8;
     } while (valcopy != 0 && valcopy != ~0);
 
     if ((val > 0) && ((digit&0x80) == 0x80)) { /* make sure the high bit is */
-	retval = asn1buf_insert_octet(buf,0); /* of the proper signed-ness */
-	if (retval) return retval;
-	length++;
+        retval = asn1buf_insert_octet(buf,0); /* of the proper signed-ness */
+        if (retval) return retval;
+        length++;
     } else if ((val < 0) && ((digit&0x80) != 0x80)) {
-	retval = asn1buf_insert_octet(buf,0xFF);
-	if (retval) return retval;
-	length++;
+        retval = asn1buf_insert_octet(buf,0xFF);
+        if (retval) return retval;
+        length++;
     }
 
 
@@ -62,7 +63,7 @@ static asn1_error_code asn1_encode_integer_internal(asn1buf *buf,  long val,
 }
 
 asn1_error_code asn1_encode_integer(asn1buf * buf,  long val,
-				    unsigned int *retlen)
+                                    unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
@@ -71,7 +72,7 @@ asn1_error_code asn1_encode_integer(asn1buf * buf,  long val,
     if (retval) return retval;
 
     length = partlen;
-    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_INTEGER,length, &partlen); 
+    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_INTEGER,length, &partlen);
     if (retval) return retval;
     length += partlen;
 
@@ -81,7 +82,7 @@ asn1_error_code asn1_encode_integer(asn1buf * buf,  long val,
 
 asn1_error_code
 asn1_encode_enumerated(asn1buf * buf, long val,
-		       unsigned int *retlen)
+                       unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
@@ -90,7 +91,7 @@ asn1_encode_enumerated(asn1buf * buf, long val,
     if (retval) return retval;
 
     length = partlen;
-    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_ENUMERATED,length, &partlen); 
+    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_ENUMERATED,length, &partlen);
     if (retval) return retval;
     length += partlen;
 
@@ -99,30 +100,30 @@ asn1_encode_enumerated(asn1buf * buf, long val,
 }
 
 asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, unsigned long val,
-					     unsigned int *retlen)
+                                             unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
     unsigned int partlen;
     unsigned long valcopy;
     int digit;
-  
+
     valcopy = val;
     do {
-	digit = (int) (valcopy&0xFF);
-	retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
-	if (retval) return retval;
-	length++;
-	valcopy = valcopy >> 8;
+        digit = (int) (valcopy&0xFF);
+        retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
+        if (retval) return retval;
+        length++;
+        valcopy = valcopy >> 8;
     } while (valcopy != 0 && valcopy != ~0);
 
-    if (digit&0x80) {		          /* make sure the high bit is */
-	retval = asn1buf_insert_octet(buf,0); /* of the proper signed-ness */
-	if (retval) return retval;
-	length++;
+    if (digit&0x80) {                     /* make sure the high bit is */
+        retval = asn1buf_insert_octet(buf,0); /* of the proper signed-ness */
+        if (retval) return retval;
+        length++;
     }
 
-    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_INTEGER,length, &partlen); 
+    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_INTEGER,length, &partlen);
     if (retval) return retval;
     length += partlen;
 
@@ -131,8 +132,8 @@ asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, unsigned long val,
 }
 
 asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
-				const asn1_octet *val,
-				unsigned int *retlen)
+                                const asn1_octet *val,
+                                unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length;
@@ -140,7 +141,7 @@ asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
     retval = asn1buf_insert_octetstring(buf, len, val);
     if (retval) return retval;
     retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE, ASN1_OBJECTIDENTIFIER,
-			   len, &length);
+                           len, &length);
     if (retval) return retval;
 
     *retlen = len + length;
@@ -148,8 +149,8 @@ asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
 }
 
 asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
-					const asn1_octet *val,
-					unsigned int *retlen)
+                                        const asn1_octet *val,
+                                        unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length;
@@ -164,7 +165,7 @@ asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
 }
 
 asn1_error_code asn1_encode_charstring(asn1buf *buf, unsigned int len,
-				       const char *val, unsigned int *retlen)
+                                       const char *val, unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length;
@@ -181,7 +182,7 @@ asn1_error_code asn1_encode_charstring(asn1buf *buf, unsigned int len,
 asn1_error_code asn1_encode_null(asn1buf *buf, int *retlen)
 {
     asn1_error_code retval;
-  
+
     retval = asn1buf_insert_octet(buf,0x00);
     if (retval) return retval;
     retval = asn1buf_insert_octet(buf,0x05);
@@ -192,14 +193,14 @@ asn1_error_code asn1_encode_null(asn1buf *buf, int *retlen)
 }
 
 asn1_error_code asn1_encode_printablestring(asn1buf *buf, unsigned int len,
-					    const char *val, int *retlen)
+                                            const char *val, int *retlen)
 {
     asn1_error_code retval;
     unsigned int length;
 
     retval = asn1buf_insert_charstring(buf,len,val);
     if (retval) return retval;
-    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_PRINTABLESTRING,len,			 &length);
+    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_PRINTABLESTRING,len,                     &length);
     if (retval) return retval;
 
     *retlen = len + length;
@@ -207,14 +208,14 @@ asn1_error_code asn1_encode_printablestring(asn1buf *buf, unsigned int len,
 }
 
 asn1_error_code asn1_encode_ia5string(asn1buf *buf, unsigned int len,
-				      const char *val, int *retlen)
+                                      const char *val, int *retlen)
 {
     asn1_error_code retval;
     unsigned int length;
 
     retval = asn1buf_insert_charstring(buf,len,val);
     if (retval) return retval;
-    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_IA5STRING,len,			 &length);
+    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_IA5STRING,len,                   &length);
     if (retval) return retval;
 
     *retlen = len + length;
@@ -222,7 +223,7 @@ asn1_error_code asn1_encode_ia5string(asn1buf *buf, unsigned int len,
 }
 
 asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
-					unsigned int *retlen)
+                                        unsigned int *retlen)
 {
     asn1_error_code retval;
     struct tm *gtime, gtimebuf;
@@ -234,40 +235,40 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
      * Time encoding: YYYYMMDDhhmmssZ
      */
     if (gmt_time == 0) {
-	sp = "19700101000000Z";
+        sp = "19700101000000Z";
     } else {
 
-	/*
-	 * Sanity check this just to be paranoid, as gmtime can return NULL,
-	 * and some bogus implementations might overrun on the sprintf.
-	 */
+        /*
+         * Sanity check this just to be paranoid, as gmtime can return NULL,
+         * and some bogus implementations might overrun on the sprintf.
+         */
 #ifdef HAVE_GMTIME_R
 # ifdef GMTIME_R_RETURNS_INT
-	if (gmtime_r(&gmt_time, &gtimebuf) != 0)
-	    return ASN1_BAD_GMTIME;
+        if (gmtime_r(&gmt_time, &gtimebuf) != 0)
+            return ASN1_BAD_GMTIME;
 # else
-	if (gmtime_r(&gmt_time, &gtimebuf) == NULL)
-	    return ASN1_BAD_GMTIME;
+        if (gmtime_r(&gmt_time, &gtimebuf) == NULL)
+            return ASN1_BAD_GMTIME;
 # endif
 #else
-	gtime = gmtime(&gmt_time);
-	if (gtime == NULL)
-	    return ASN1_BAD_GMTIME;
-	memcpy(&gtimebuf, gtime, sizeof(gtimebuf));
+        gtime = gmtime(&gmt_time);
+        if (gtime == NULL)
+            return ASN1_BAD_GMTIME;
+        memcpy(&gtimebuf, gtime, sizeof(gtimebuf));
 #endif
-	gtime = &gtimebuf;
+        gtime = &gtimebuf;
 
-	if (gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
-	    gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
-	    gtime->tm_min > 59 || gtime->tm_sec > 59)
-	    return ASN1_BAD_GMTIME;
-	if (snprintf(s, sizeof(s), "%04d%02d%02d%02d%02d%02dZ",
-		     1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
-		     gtime->tm_hour, gtime->tm_min, gtime->tm_sec)
-	    >= sizeof(s))
-	    /* Shouldn't be possible given above tests.  */
-	    return ASN1_BAD_GMTIME;
-	sp = s;
+        if (gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
+            gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
+            gtime->tm_min > 59 || gtime->tm_sec > 59)
+            return ASN1_BAD_GMTIME;
+        if (snprintf(s, sizeof(s), "%04d%02d%02d%02d%02d%02dZ",
+                     1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
+                     gtime->tm_hour, gtime->tm_min, gtime->tm_sec)
+            >= sizeof(s))
+            /* Shouldn't be possible given above tests.  */
+            return ASN1_BAD_GMTIME;
+        sp = s;
     }
 
     retval = asn1buf_insert_charstring(buf,15,sp);
@@ -283,8 +284,8 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
 }
 
 asn1_error_code asn1_encode_generalstring(asn1buf *buf, unsigned int len,
-					  const char *val,
-					  unsigned int *retlen)
+                                          const char *val,
+                                          unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length;
@@ -292,7 +293,7 @@ asn1_error_code asn1_encode_generalstring(asn1buf *buf, unsigned int len,
     retval = asn1buf_insert_charstring(buf,len,val);
     if (retval) return retval;
     retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_GENERALSTRING,len,
-			   &length);
+                           &length);
     if (retval) return retval;
 
     *retlen = len + length;

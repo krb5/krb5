@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /* ... copyright ... */
 
 /* Novell key-format scheme:
@@ -44,80 +45,80 @@
 #define asn1_encode_sequence_of_keys krb5int_ldap_encode_sequence_of_keys
 #define asn1_decode_sequence_of_keys krb5int_ldap_decode_sequence_of_keys
 
-#define cleanup(err)							\
-	{								\
-		ret = err;						\
-		goto last;						\
-	}
+#define cleanup(err)                                                    \
+        {                                                               \
+                ret = err;                                              \
+                goto last;                                              \
+        }
 
-#define checkerr							\
-		if (ret != 0)						\
-			goto last
+#define checkerr                                                        \
+                if (ret != 0)                                           \
+                        goto last
 
 /************************************************************************/
-/* Encode the Principal's keys						*/
+/* Encode the Principal's keys                                          */
 /************************************************************************/
 
 static asn1_error_code
 asn1_encode_key(asn1buf *buf,
-		krb5_key_data key_data,
-		unsigned int *retlen)
+                krb5_key_data key_data,
+                unsigned int *retlen)
 {
     asn1_error_code ret = 0;
     unsigned int length, sum = 0;
 
     /* Encode the key type and value.  */
     {
-	unsigned int key_len = 0;
-	/* key value */
-	ret = asn1_encode_octetstring (buf,
-				       key_data.key_data_length[0],
-				       key_data.key_data_contents[0],
-				       &length); checkerr;
-	key_len += length;
-	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, length, &length); checkerr;
-	key_len += length;
-	/* key type */
-	ret = asn1_encode_integer (buf, key_data.key_data_type[0], &length);
-	checkerr;
-	key_len += length;
-	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, length, &length); checkerr;
-	key_len += length;
+        unsigned int key_len = 0;
+        /* key value */
+        ret = asn1_encode_octetstring (buf,
+                                       key_data.key_data_length[0],
+                                       key_data.key_data_contents[0],
+                                       &length); checkerr;
+        key_len += length;
+        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, length, &length); checkerr;
+        key_len += length;
+        /* key type */
+        ret = asn1_encode_integer (buf, key_data.key_data_type[0], &length);
+        checkerr;
+        key_len += length;
+        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, length, &length); checkerr;
+        key_len += length;
 
-	ret = asn1_make_sequence(buf, key_len, &length); checkerr;
-	key_len += length;
-	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, key_len, &length); checkerr;
-	key_len += length;
+        ret = asn1_make_sequence(buf, key_len, &length); checkerr;
+        key_len += length;
+        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, key_len, &length); checkerr;
+        key_len += length;
 
-	sum += key_len;
+        sum += key_len;
     }
     /* Encode the salt type and value (optional) */
     if (key_data.key_data_ver > 1) {
-	unsigned int salt_len = 0;
-	/* salt value (optional) */
-	if (key_data.key_data_length[1] > 0) {
-	    ret = asn1_encode_octetstring (buf,
-					   key_data.key_data_length[1],
-					   key_data.key_data_contents[1],
-					   &length); checkerr;
-	    salt_len += length;
-	    ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, length, &length);
-	    checkerr;
-	    salt_len += length;
-	}
-	/* salt type */
-	ret = asn1_encode_integer (buf, key_data.key_data_type[1], &length);
-	checkerr;
-	salt_len += length;
-	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, length, &length); checkerr;
-	salt_len += length;
+        unsigned int salt_len = 0;
+        /* salt value (optional) */
+        if (key_data.key_data_length[1] > 0) {
+            ret = asn1_encode_octetstring (buf,
+                                           key_data.key_data_length[1],
+                                           key_data.key_data_contents[1],
+                                           &length); checkerr;
+            salt_len += length;
+            ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, length, &length);
+            checkerr;
+            salt_len += length;
+        }
+        /* salt type */
+        ret = asn1_encode_integer (buf, key_data.key_data_type[1], &length);
+        checkerr;
+        salt_len += length;
+        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, length, &length); checkerr;
+        salt_len += length;
 
-	ret = asn1_make_sequence(buf, salt_len, &length); checkerr;
-	salt_len += length;
-	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, salt_len, &length); checkerr;
-	salt_len += length;
+        ret = asn1_make_sequence(buf, salt_len, &length); checkerr;
+        salt_len += length;
+        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, salt_len, &length); checkerr;
+        salt_len += length;
 
-	sum += salt_len;
+        sum += salt_len;
     }
 
     ret = asn1_make_sequence(buf, sum, &length); checkerr;
@@ -133,9 +134,9 @@ last:
 /* asn1_error_code asn1_encode_sequence_of_keys (krb5_key_data *key_data, */
 krb5_error_code
 asn1_encode_sequence_of_keys (krb5_key_data *key_data,
-			      krb5_int16 n_key_data,
-			      krb5_int32 mkvno,	/* Master key version number */
-			      krb5_data **code)
+                              krb5_int16 n_key_data,
+                              krb5_int32 mkvno, /* Master key version number */
+                              krb5_data **code)
 {
     asn1_error_code ret = 0;
     asn1buf *buf = NULL;
@@ -152,24 +153,24 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data,
 
     /* Sequence of keys */
     {
-	int i;
-	unsigned int seq_len = 0;
+        int i;
+        unsigned int seq_len = 0;
 
-	for (i = n_key_data - 1; i >= 0; i--) {
-	    ret = asn1_encode_key (buf, key_data[i], &length); checkerr;
-	    seq_len += length;
-	}
-	ret = asn1_make_sequence(buf, seq_len, &length); checkerr;
-	seq_len += length;
-	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 4, seq_len, &length); checkerr;
-	seq_len += length;
+        for (i = n_key_data - 1; i >= 0; i--) {
+            ret = asn1_encode_key (buf, key_data[i], &length); checkerr;
+            seq_len += length;
+        }
+        ret = asn1_make_sequence(buf, seq_len, &length); checkerr;
+        seq_len += length;
+        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 4, seq_len, &length); checkerr;
+        seq_len += length;
 
-	sum += seq_len;
+        sum += seq_len;
     }
 
     /* mkvno */
     if (mkvno < 0)
-	cleanup (ASN1_BAD_FORMAT);
+        cleanup (ASN1_BAD_FORMAT);
     tmp_ul = (unsigned long)mkvno;
     ret = asn1_encode_unsigned_integer (buf, tmp_ul, &length); checkerr;
     sum += length;
@@ -178,7 +179,7 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data,
 
     /* kvno (assuming all keys in array have same version) */
     if (key_data[0].key_data_kvno < 0)
-	cleanup (ASN1_BAD_FORMAT);
+        cleanup (ASN1_BAD_FORMAT);
     tmp_ul = (unsigned long)key_data[0].key_data_kvno;
     ret = asn1_encode_unsigned_integer (buf, tmp_ul, &length);
     checkerr;
@@ -208,7 +209,7 @@ last:
     asn1buf_destroy (&buf);
 
     if (ret != 0 && *code != NULL) {
-	free ((*code)->data);
+        free ((*code)->data);
         free (*code);
     }
 
@@ -216,14 +217,14 @@ last:
 }
 
 /************************************************************************/
-/* Decode the Principal's keys						*/
+/* Decode the Principal's keys                                          */
 /************************************************************************/
 
-#define safe_syncbuf(outer,inner,buflen)				\
-	if (! ((inner)->next == (inner)->bound + 1 &&			\
-	       (inner)->next == (outer)->next + buflen))		\
-	    cleanup (ASN1_BAD_LENGTH);					\
-	asn1buf_sync((outer), (inner), 0, 0, 0, 0, 0);
+#define safe_syncbuf(outer,inner,buflen)                                \
+        if (! ((inner)->next == (inner)->bound + 1 &&                   \
+               (inner)->next == (outer)->next + buflen))                \
+            cleanup (ASN1_BAD_LENGTH);                                  \
+        asn1buf_sync((outer), (inner), 0, 0, 0, 0, 0);
 
 static asn1_error_code
 decode_tagged_integer (asn1buf *buf, asn1_tagnum expectedtag, long *val)
@@ -237,7 +238,7 @@ decode_tagged_integer (asn1buf *buf, asn1_tagnum expectedtag, long *val)
     ret = asn1buf_imbed(&tmp, buf, 0, 1); checkerr;
     ret = asn1_get_tag_2(&tmp, &t); checkerr;
     if (t.tagnum != expectedtag)
-	cleanup (ASN1_MISSING_FIELD);
+        cleanup (ASN1_MISSING_FIELD);
 
     buflen = t.length;
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
@@ -263,7 +264,7 @@ decode_tagged_unsigned_integer (asn1buf *buf, int expectedtag, unsigned long *va
     ret = asn1buf_imbed(&tmp, buf, 0, 1); checkerr;
     ret = asn1_get_tag_2(&tmp, &t); checkerr;
     if (t.tagnum != expectedtag)
-	cleanup (ASN1_MISSING_FIELD);
+        cleanup (ASN1_MISSING_FIELD);
 
     buflen = t.length;
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
@@ -279,7 +280,7 @@ last:
 
 static asn1_error_code
 decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag, int *len,
-			   asn1_octet **val)
+                           asn1_octet **val)
 {
     int buflen;
     asn1_error_code ret = 0;
@@ -292,7 +293,7 @@ decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag, int *len,
     ret = asn1buf_imbed(&tmp, buf, 0, 1); checkerr;
     ret = asn1_get_tag_2(&tmp, &t); checkerr;
     if (t.tagnum != expectedtag)
-	cleanup (ASN1_MISSING_FIELD);
+        cleanup (ASN1_MISSING_FIELD);
 
     buflen = t.length;
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
@@ -303,7 +304,7 @@ decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag, int *len,
 
 last:
     if (ret != 0)
-	free (*val);
+        free (*val);
     return ret;
 }
 
@@ -325,75 +326,75 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
     asn1_get_tag_2(&subbuf, &t);
     /* Salt */
     if (t.tagnum == 0) {
-	int salt_buflen;
-	asn1buf slt;
-	unsigned long keytype;
-	int keylen;
+        int salt_buflen;
+        asn1buf slt;
+        unsigned long keytype;
+        int keylen;
 
-	key->key_data_ver = 2;
-	asn1_get_sequence(&subbuf, &length, &seqindef);
-	salt_buflen = length;
-	asn1buf_imbed(&slt, &subbuf, length, seqindef);
+        key->key_data_ver = 2;
+        asn1_get_sequence(&subbuf, &length, &seqindef);
+        salt_buflen = length;
+        asn1buf_imbed(&slt, &subbuf, length, seqindef);
 
-	ret = decode_tagged_integer (&slt, 0, &keytype);
-	key->key_data_type[1] = keytype; /* XXX range check?? */
-	checkerr;
+        ret = decode_tagged_integer (&slt, 0, &keytype);
+        key->key_data_type[1] = keytype; /* XXX range check?? */
+        checkerr;
 
-	if (asn1buf_remains(&slt, 0) != 0) { /* Salt value is optional */
-	    ret = decode_tagged_octetstring (&slt, 1, &keylen,
-					     &key->key_data_contents[1]);
-	    checkerr;
-	} else
-	    keylen = 0;
-	safe_syncbuf (&subbuf, &slt, salt_buflen);
-	key->key_data_length[1] = keylen; /* XXX range check?? */
+        if (asn1buf_remains(&slt, 0) != 0) { /* Salt value is optional */
+            ret = decode_tagged_octetstring (&slt, 1, &keylen,
+                                             &key->key_data_contents[1]);
+            checkerr;
+        } else
+            keylen = 0;
+        safe_syncbuf (&subbuf, &slt, salt_buflen);
+        key->key_data_length[1] = keylen; /* XXX range check?? */
 
-	ret = asn1_get_tag_2(&subbuf, &t); checkerr;
+        ret = asn1_get_tag_2(&subbuf, &t); checkerr;
     } else
-	key->key_data_ver = 1;
+        key->key_data_ver = 1;
 
     /* Key */
     {
-	int key_buflen;
-	asn1buf kbuf;
-	long lval;
-	int ival;
+        int key_buflen;
+        asn1buf kbuf;
+        long lval;
+        int ival;
 
-	if (t.tagnum != 1)
-	    cleanup (ASN1_MISSING_FIELD);
+        if (t.tagnum != 1)
+            cleanup (ASN1_MISSING_FIELD);
 
-	ret = asn1_get_sequence(&subbuf, &length, &seqindef); checkerr;
-	key_buflen = length;
-	ret = asn1buf_imbed(&kbuf, &subbuf, length, seqindef); checkerr;
+        ret = asn1_get_sequence(&subbuf, &length, &seqindef); checkerr;
+        key_buflen = length;
+        ret = asn1buf_imbed(&kbuf, &subbuf, length, seqindef); checkerr;
 
-	ret = decode_tagged_integer (&kbuf, 0, &lval);
-	checkerr;
-	key->key_data_type[0] = lval; /* XXX range check? */
+        ret = decode_tagged_integer (&kbuf, 0, &lval);
+        checkerr;
+        key->key_data_type[0] = lval; /* XXX range check? */
 
-	ret = decode_tagged_octetstring (&kbuf, 1, &ival,
-					 &key->key_data_contents[0]); checkerr;
-	key->key_data_length[0] = ival;	/* XXX range check? */
+        ret = decode_tagged_octetstring (&kbuf, 1, &ival,
+                                         &key->key_data_contents[0]); checkerr;
+        key->key_data_length[0] = ival; /* XXX range check? */
 
-	safe_syncbuf (&subbuf, &kbuf, key_buflen);
+        safe_syncbuf (&subbuf, &kbuf, key_buflen);
     }
 
     safe_syncbuf (buf, &subbuf, full_buflen);
 
 last:
     if (ret != 0) {
-	free (key->key_data_contents[0]);
-	key->key_data_contents[0] = NULL;
-	free (key->key_data_contents[1]);
-	key->key_data_contents[1] = NULL;
+        free (key->key_data_contents[0]);
+        key->key_data_contents[0] = NULL;
+        free (key->key_data_contents[1]);
+        key->key_data_contents[1] = NULL;
     }
     return ret;
 }
 
 /* asn1_error_code asn1_decode_sequence_of_keys (krb5_data *in, */
 krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
-					      krb5_key_data **out,
-					      krb5_int16 *n_key_data,
-					      int *mkvno)
+                                              krb5_key_data **out,
+                                              krb5_int16 *n_key_data,
+                                              int *mkvno)
 {
     asn1_error_code ret;
     asn1buf buf, subbuf;
@@ -413,47 +414,47 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
 
     /* attribute-major-vno */
     ret = decode_tagged_integer (&subbuf, 0, &lval); checkerr;
-    maj = lval;			/* XXX range check? */
+    maj = lval;                 /* XXX range check? */
 
     /* attribute-minor-vno */
     ret = decode_tagged_integer (&subbuf, 1, &lval); checkerr;
-    min = lval;			/* XXX range check? */
+    min = lval;                 /* XXX range check? */
 
     if (maj != 1 || min != 1)
-	cleanup (ASN1_BAD_FORMAT);
+        cleanup (ASN1_BAD_FORMAT);
 
     /* kvno (assuming all keys in array have same version) */
     ret = decode_tagged_integer (&subbuf, 2, &lval); checkerr;
-    kvno = lval;		/* XXX range check? */
+    kvno = lval;                /* XXX range check? */
 
     /* mkvno (optional) */
     ret = decode_tagged_integer (&subbuf, 3, &lval); checkerr;
-    *mkvno = lval;		/* XXX range check? */
+    *mkvno = lval;              /* XXX range check? */
 
     ret = asn1_get_tag_2(&subbuf, &t); checkerr;
 
     /* Sequence of keys */
     {
-	int i, seq_buflen;
-	asn1buf keyseq;
-	if (t.tagnum != 4)
-	    cleanup (ASN1_MISSING_FIELD);
-	ret = asn1_get_sequence(&subbuf, &length, &seqindef); checkerr;
-	seq_buflen = length;
-	ret = asn1buf_imbed(&keyseq, &subbuf, length, seqindef); checkerr;
-	for (i = 1, *out = NULL; ; i++) {
-	    krb5_key_data *tmp;
-	    tmp = (krb5_key_data *) realloc (*out, i * sizeof (krb5_key_data));
-	    if (tmp == NULL)
-		cleanup (ENOMEM);
-	    *out = tmp;
-	    (*out)[i - 1].key_data_kvno = kvno;
-	    ret = asn1_decode_key(&keyseq, &(*out)[i - 1]); checkerr;
-	    (*n_key_data)++;
-	    if (asn1buf_remains(&keyseq, 0) == 0)
-		break; /* Not freeing the last key structure */
-	}
-	safe_syncbuf (&subbuf, &keyseq, seq_buflen);
+        int i, seq_buflen;
+        asn1buf keyseq;
+        if (t.tagnum != 4)
+            cleanup (ASN1_MISSING_FIELD);
+        ret = asn1_get_sequence(&subbuf, &length, &seqindef); checkerr;
+        seq_buflen = length;
+        ret = asn1buf_imbed(&keyseq, &subbuf, length, seqindef); checkerr;
+        for (i = 1, *out = NULL; ; i++) {
+            krb5_key_data *tmp;
+            tmp = (krb5_key_data *) realloc (*out, i * sizeof (krb5_key_data));
+            if (tmp == NULL)
+                cleanup (ENOMEM);
+            *out = tmp;
+            (*out)[i - 1].key_data_kvno = kvno;
+            ret = asn1_decode_key(&keyseq, &(*out)[i - 1]); checkerr;
+            (*n_key_data)++;
+            if (asn1buf_remains(&keyseq, 0) == 0)
+                break; /* Not freeing the last key structure */
+        }
+        safe_syncbuf (&subbuf, &keyseq, seq_buflen);
     }
 
     /*
@@ -463,13 +464,13 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
 
 last:
     if (ret != 0) {
-	int i;
-	for (i = 0; i < *n_key_data; i++) {
-	    free ((*out)[i].key_data_contents[0]);
-	    free ((*out)[i].key_data_contents[1]);
-	}
-	free (*out);
-	*out = NULL;
+        int i;
+        for (i = 0; i < *n_key_data; i++) {
+            free ((*out)[i].key_data_contents[0]);
+            free ((*out)[i].key_data_contents[1]);
+        }
+        free (*out);
+        *out = NULL;
     }
 
     return ret;

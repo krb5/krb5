@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_get.h
- * 
+ *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -35,9 +36,9 @@
 
 typedef struct {
 #if 1 /* Smaller run-time storage, and on x86 the compiler can use
-	 byte loads, stores, and compares, but on other platforms the
-	 compiler may need to load and widen before comparing... see
-	 how this works out. */
+         byte loads, stores, and compares, but on other platforms the
+         compiler may need to load and widen before comparing... see
+         how this works out. */
     unsigned int asn1class : 8, construction : 8;
 #else
     asn1_class asn1class;
@@ -52,33 +53,33 @@ asn1_error_code asn1_get_tag_2 (asn1buf *buf, taginfo *tinfo);
 
 #if 0
 asn1_error_code asn1_get_tag_indef
-	(asn1buf *buf,
-		   asn1_class *Class,
-		   asn1_construction *construction,
-		   asn1_tagnum *tagnum,
-		   unsigned int *retlen, int *indef);
+        (asn1buf *buf,
+                   asn1_class *Class,
+                   asn1_construction *construction,
+                   asn1_tagnum *tagnum,
+                   unsigned int *retlen, int *indef);
 
 asn1_error_code asn1_get_tag
-	(asn1buf *buf,
-		   asn1_class *Class,
-		   asn1_construction *construction,
-		   asn1_tagnum *tagnum,
-		   unsigned int *retlen);
+        (asn1buf *buf,
+                   asn1_class *Class,
+                   asn1_construction *construction,
+                   asn1_tagnum *tagnum,
+                   unsigned int *retlen);
 /* requires  *buf is allocated
    effects   Decodes the tag in *buf.  If class != NULL, returns
               the class in *Class.  Similarly, the construction,
-	      tag number, and length are returned in *construction,
-	      *tagnum, and *retlen, respectively.
-	     If *buf is empty to begin with,
-	      *tagnum is set to ASN1_TAGNUM_CEILING.
-	     Returns ASN1_OVERRUN if *buf is exhausted during the parse. */
+              tag number, and length are returned in *construction,
+              *tagnum, and *retlen, respectively.
+             If *buf is empty to begin with,
+              *tagnum is set to ASN1_TAGNUM_CEILING.
+             Returns ASN1_OVERRUN if *buf is exhausted during the parse. */
 #endif
 
 asn1_error_code asn1_get_sequence
-	(asn1buf *buf, unsigned int *retlen, int *indef);
+        (asn1buf *buf, unsigned int *retlen, int *indef);
 /* requires  *buf is allocated
    effects   Decodes a tag from *buf and returns ASN1_BAD_ID if it
               doesn't have a sequence ID.  If retlen != NULL, the
-	      associated length is returned in *retlen. */
+              associated length is returned in *retlen. */
 
 #endif

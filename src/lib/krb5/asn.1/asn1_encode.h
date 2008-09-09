@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_encode.h
- * 
+ *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -50,10 +51,10 @@
 */
 
 asn1_error_code asn1_encode_integer
-	(asn1buf *buf, long val, unsigned int *retlen);
+        (asn1buf *buf, long val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
@@ -62,81 +63,81 @@ asn1_error_code asn1_encode_enumerated
 (asn1buf *buf, long val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_unsigned_integer
-	(asn1buf *buf, unsigned long val, 
-		   unsigned int *retlen);
+        (asn1buf *buf, unsigned long val,
+                   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
 asn1_error_code asn1_encode_octetstring
-	(asn1buf *buf,
-		   unsigned int len, const asn1_octet *val,
-		   unsigned int *retlen);
+        (asn1buf *buf,
+                   unsigned int len, const asn1_octet *val,
+                   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
 asn1_error_code asn1_encode_oid
-	(asn1buf *buf,
-		   unsigned int len, const asn1_octet *val,
-		   unsigned int *retlen);
+        (asn1buf *buf,
+                   unsigned int len, const asn1_octet *val,
+                   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
 asn1_error_code asn1_encode_charstring
-	(asn1buf *buf,
-		   unsigned int len, const char *val,
-		   unsigned int *retlen);
+        (asn1buf *buf,
+                   unsigned int len, const char *val,
+                   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
 asn1_error_code asn1_encode_null
-	(asn1buf *buf, int *retlen);
+        (asn1buf *buf, int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of NULL into *buf and returns 
+   effects   Inserts the encoding of NULL into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
 asn1_error_code asn1_encode_printablestring
-	(asn1buf *buf,
-		   unsigned int len, const char *val,
-		   int *retlen);
+        (asn1buf *buf,
+                   unsigned int len, const char *val,
+                   int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
 asn1_error_code asn1_encode_ia5string
-	(asn1buf *buf,
-		   unsigned int len, const char *val,
-		   int *retlen);
+        (asn1buf *buf,
+                   unsigned int len, const char *val,
+                   int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
 asn1_error_code asn1_encode_generaltime
-	(asn1buf *buf, time_t val, unsigned int *retlen);
+        (asn1buf *buf, time_t val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns
@@ -146,12 +147,12 @@ asn1_error_code asn1_encode_generaltime
    Note: The encoding of GeneralizedTime is YYYYMMDDhhmmZ */
 
 asn1_error_code asn1_encode_generalstring
-	(asn1buf *buf,
-		   unsigned int len, const char *val,
-		   unsigned int *retlen);
+        (asn1buf *buf,
+                   unsigned int len, const char *val,
+                   unsigned int *retlen);
 /* requires  *buf is allocated,  val has a length of len characters
    modifies  *buf, *retlen
-   effects   Inserts the encoding of val into *buf and returns 
+   effects   Inserts the encoding of val into *buf and returns
               the length of the encoding in *retlen.
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */

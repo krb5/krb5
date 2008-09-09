@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_make.c
- * 
+ *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -27,17 +28,17 @@
 #include "asn1_make.h"
 
 asn1_error_code asn1_make_etag(asn1buf *buf, asn1_class asn1class,
-			       asn1_tagnum tagnum, unsigned int in_len,
-			       unsigned int *retlen)
+                               asn1_tagnum tagnum, unsigned int in_len,
+                               unsigned int *retlen)
 {
     return asn1_make_tag(buf,asn1class,CONSTRUCTED,tagnum,in_len,retlen);
 }
 
 
 asn1_error_code asn1_make_tag(asn1buf *buf, asn1_class asn1class,
-			      asn1_construction construction,
-			      asn1_tagnum tagnum, unsigned int in_len,
-			      unsigned int *retlen)
+                              asn1_construction construction,
+                              asn1_tagnum tagnum, unsigned int in_len,
+                              unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int sumlen=0, length;
@@ -60,57 +61,57 @@ asn1_error_code asn1_make_length(asn1buf *buf, const unsigned int in_len, unsign
     asn1_error_code retval;
 
     if (in_len < 128) {
-	retval = asn1buf_insert_octet(buf, (asn1_octet)(in_len&0x7F));
-	if (retval) return retval;
-	*retlen = 1;
+        retval = asn1buf_insert_octet(buf, (asn1_octet)(in_len&0x7F));
+        if (retval) return retval;
+        *retlen = 1;
     } else {
-	int in_copy=in_len, length=0;
+        int in_copy=in_len, length=0;
 
-	while (in_copy != 0) {
-	    retval = asn1buf_insert_octet(buf, (asn1_octet)(in_copy&0xFF));
-	    if (retval) return retval;
-	    in_copy = in_copy >> 8;
-	    length++;
-	}
-	retval = asn1buf_insert_octet(buf, (asn1_octet) (0x80 | (asn1_octet)(length&0x7F)));
-	if (retval) return retval;
-	length++;
-	*retlen = length;
+        while (in_copy != 0) {
+            retval = asn1buf_insert_octet(buf, (asn1_octet)(in_copy&0xFF));
+            if (retval) return retval;
+            in_copy = in_copy >> 8;
+            length++;
+        }
+        retval = asn1buf_insert_octet(buf, (asn1_octet) (0x80 | (asn1_octet)(length&0x7F)));
+        if (retval) return retval;
+        length++;
+        *retlen = length;
     }
 
     return 0;
 }
 
 asn1_error_code asn1_make_id(asn1buf *buf, asn1_class asn1class,
-			     asn1_construction construction,
-			     asn1_tagnum tagnum, unsigned int *retlen)
+                             asn1_construction construction,
+                             asn1_tagnum tagnum, unsigned int *retlen)
 {
     asn1_error_code retval;
 
     if (tagnum < 31) {
-	retval = asn1buf_insert_octet(buf, (asn1_octet) (asn1class | construction |
-							 (asn1_octet)tagnum));
-	if (retval) return retval;
-	*retlen = 1;
+        retval = asn1buf_insert_octet(buf, (asn1_octet) (asn1class | construction |
+                                                         (asn1_octet)tagnum));
+        if (retval) return retval;
+        *retlen = 1;
     } else {
-	asn1_tagnum tagcopy = tagnum;
-	int length = 0;
+        asn1_tagnum tagcopy = tagnum;
+        int length = 0;
 
-	retval = asn1buf_insert_octet(buf, (asn1_octet)(tagcopy&0x7F));
-	if (retval) return retval;
-	tagcopy >>= 7;
-	length++;
+        retval = asn1buf_insert_octet(buf, (asn1_octet)(tagcopy&0x7F));
+        if (retval) return retval;
+        tagcopy >>= 7;
+        length++;
 
-	for (; tagcopy != 0; tagcopy >>= 7) {
-	    retval = asn1buf_insert_octet(buf, (asn1_octet) (0x80 | (asn1_octet)(tagcopy&0x7F)));
-	    if (retval) return retval;
-	    length++;
-	}
+        for (; tagcopy != 0; tagcopy >>= 7) {
+            retval = asn1buf_insert_octet(buf, (asn1_octet) (0x80 | (asn1_octet)(tagcopy&0x7F)));
+            if (retval) return retval;
+            length++;
+        }
 
-	retval = asn1buf_insert_octet(buf, (asn1_octet) (asn1class | construction | 0x1F));
-	if (retval) return retval;
-	length++;
-	*retlen = length;
+        retval = asn1buf_insert_octet(buf, (asn1_octet) (asn1class | construction | 0x1F));
+        if (retval) return retval;
+        length++;
+        *retlen = length;
     }
 
     return 0;
