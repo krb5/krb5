@@ -129,35 +129,36 @@ kim_error kim_options_copy (kim_options *out_options,
                             kim_options  in_options)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_options options = NULL;
+    kim_options options = KIM_OPTIONS_DEFAULT;
     
     if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_options ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err) {
+    if (!err && in_options != KIM_OPTIONS_DEFAULT) {
         err = kim_options_allocate (&options);
-    }
-    
-    if (!err) {
-        options->prompt_callback = in_options->prompt_callback;
-        options->prompt_callback_data = in_options->prompt_callback_data;
-#warning copy prompt responses here
-    }
-    
-    if (!err) {
-        options->start_time = in_options->start_time;
-        options->lifetime = in_options->lifetime;
-        options->renewable = in_options->renewable;
-        options->renewal_lifetime = in_options->renewal_lifetime;
-        options->forwardable = in_options->forwardable;
-        options->proxiable = in_options->proxiable;
-        options->addressless = in_options->addressless;
         
-        if (in_options->service_name) {
-            err = kim_string_copy (&options->service_name, in_options->service_name);
+        if (!err) {
+            options->prompt_callback = in_options->prompt_callback;
+            options->prompt_callback_data = in_options->prompt_callback_data;
+#warning copy prompt responses here
+        }
+        
+        if (!err) {
+            options->start_time = in_options->start_time;
+            options->lifetime = in_options->lifetime;
+            options->renewable = in_options->renewable;
+            options->renewal_lifetime = in_options->renewal_lifetime;
+            options->forwardable = in_options->forwardable;
+            options->proxiable = in_options->proxiable;
+            options->addressless = in_options->addressless;
+            
+            if (in_options->service_name) {
+                err = kim_string_copy (&options->service_name, 
+                                       in_options->service_name);
+            }
         }
     }
-    
+        
     if (!err) {
         *out_options = options;
         options = NULL;

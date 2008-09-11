@@ -33,10 +33,10 @@ typedef struct test_identity_d {
     const char *realm;
     kim_count component_count;
     const char *components[5];
-} test_identity_t;
+} test_identity;
 
 
-test_identity_t test_identities[] = {
+test_identity test_identities[] = {
     {"a@B",                            "a@B",                            0, "B",           1, { "a",              NULL,          NULL, NULL, NULL } },
     {"user@EXAMPLE.COM",               "user@EXAMPLE.COM",               0, "EXAMPLE.COM", 1, { "user",           NULL,          NULL, NULL, NULL } },
     {"krbtgt@EXAMPLE.COM",             "krbtgt@EXAMPLE.COM",             0, "EXAMPLE.COM", 1, { "krbtgt",         NULL,          NULL, NULL, NULL } },
@@ -66,8 +66,7 @@ void test_kim_identity_create_from_krb5_principal (kim_test_state_t state)
     start_test (state, "kim_identity_create_from_krb5_principal");
     
     for (i = 0; test_identities[i].string; i++) {
-        krb5_error_code code = 0;
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         krb5_context context = NULL;
         krb5_principal principal = NULL;
         kim_identity identity = NULL;
@@ -75,32 +74,32 @@ void test_kim_identity_create_from_krb5_principal (kim_test_state_t state)
         
         printf (".");
         
-        code = krb5_init_context (&context);
-        fail_if_error_code (state, "krb5_init_context", code, 
-                            "while initializing context");
+        err = krb5_init_context (&context);
+        fail_if_error (state, "krb5_init_context", err, 
+                       "while initializing context");
         
-        if (!code) {
-            code = krb5_parse_name (context, test_identities[i].string, &principal);
-            fail_if_error_code (state, "krb5_parse_name", code, 
-                                "while creating krb5_principal for %s", 
-                                test_identities[i].string);
+        if (!err) {
+            err = krb5_parse_name (context, test_identities[i].string, &principal);
+            fail_if_error (state, "krb5_parse_name", err, 
+                           "while creating krb5_principal for %s", 
+                           test_identities[i].string);
         }
         
-        if (!code && !err) {
+        if (!err) {
             err = kim_identity_create_from_krb5_principal (&identity, context, principal);
             fail_if_error (state, "kim_identity_create_from_string", err, 
                            "while creating the identity for %s", 
                            test_identities[i].string);
         }
         
-        if (!code && !err) {
+        if (!err) {
             err = kim_identity_get_string (identity, &string);
             fail_if_error (state, "kim_identity_get_string", err, 
                            "while getting the string for %s", 
                            test_identities[i].string);
         }
         
-        if (!code && !err && strcmp (string, test_identities[i].string)) {
+        if (!err && strcmp (string, test_identities[i].string)) {
             log_failure (state, "Unexpected string (got '%s', expected '%s')", 
                          string, test_identities[i].string);
         }
@@ -125,7 +124,7 @@ void test_kim_identity_create_from_string (kim_test_state_t state)
     start_test (state, "kim_identity_create_from_string");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity identity = NULL;
         kim_string string = NULL;
         
@@ -169,7 +168,7 @@ void test_kim_identity_copy (kim_test_state_t state)
     start_test (state, "kim_identity_copy");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity identity = NULL;
         kim_identity identity_copy = NULL;
         kim_string string = NULL;
@@ -188,7 +187,7 @@ void test_kim_identity_copy (kim_test_state_t state)
             fail_if_error (state, "kim_identity_copy", err, 
                            "while copying %s", test_identities[i].string);
         }
-
+        
         if (!err) {
             err = kim_identity_get_string (identity_copy, &string);
             fail_if_error (state, "kim_identity_get_string", err, 
@@ -207,7 +206,7 @@ void test_kim_identity_copy (kim_test_state_t state)
     }
     
     printf ("\n");
-
+    
     end_test (state);
 }
 
@@ -220,7 +219,7 @@ void test_kim_identity_compare (kim_test_state_t state)
     start_test (state, "kim_identity_create_from_string");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity identity = NULL;
         
         printf (".");
@@ -233,7 +232,7 @@ void test_kim_identity_compare (kim_test_state_t state)
         for (j = 0; !err && test_identities[j].string; j++) {
             kim_identity compare_to_identity = NULL;
             kim_comparison comparison = 0;
-           
+            
             err = kim_identity_create_from_string (&compare_to_identity, test_identities[j].string);
             fail_if_error (state, "kim_identity_create_from_string", err, 
                            "while creating the identity for %s", 
@@ -250,21 +249,21 @@ void test_kim_identity_compare (kim_test_state_t state)
                 if (i == j && !kim_comparison_is_equal_to (comparison)) {
                     log_failure (state, "Expected %s and %s to be equal but kim_identity_compare returned %d", 
                                  test_identities[i].string, test_identities[j].string, comparison);
-
+                    
                 } else if (i != j && kim_comparison_is_equal_to (comparison)) {
                     log_failure (state, "Expected %s and %s to be NOT equal but kim_identity_compare returned %d", 
                                  test_identities[i].string, test_identities[j].string, comparison);
                 }
             }
-
+            
             kim_identity_free (&compare_to_identity);
         }
-         
+        
         kim_identity_free (&identity);
     }
     
     printf ("\n");
-
+    
     end_test (state);
 }
 
@@ -273,11 +272,11 @@ void test_kim_identity_compare (kim_test_state_t state)
 void test_kim_identity_get_display_string (kim_test_state_t state)
 {
     kim_count i = 0;
-
+    
     start_test (state, "kim_identity_get_display_string");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity identity = NULL;
         kim_string string = NULL;
         
@@ -307,7 +306,7 @@ void test_kim_identity_get_display_string (kim_test_state_t state)
     }
     
     printf ("\n");
-
+    
     end_test (state);
 }
 
@@ -316,11 +315,11 @@ void test_kim_identity_get_display_string (kim_test_state_t state)
 void test_kim_identity_get_realm (kim_test_state_t state)
 {
     kim_count i = 0;
-
+    
     start_test (state, "kim_identity_get_realm");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity identity = NULL;
         kim_string realm = NULL;
         
@@ -349,7 +348,7 @@ void test_kim_identity_get_realm (kim_test_state_t state)
     }
     
     printf ("\n");
-
+    
     end_test (state);
 }
 
@@ -358,11 +357,11 @@ void test_kim_identity_get_realm (kim_test_state_t state)
 void test_kim_identity_get_number_of_components (kim_test_state_t state)
 {
     kim_count i = 0;
-
+    
     start_test (state, "kim_identity_get_number_of_components");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity identity = NULL;
         kim_count count = 0;
         
@@ -384,17 +383,17 @@ void test_kim_identity_get_number_of_components (kim_test_state_t state)
         
         if (!err && (count != test_identities[i].component_count)) {
             log_failure (state, "Unexpected component count of %s (got %d, expected %d)", 
-                        test_identities[i].string, (int) count, (int) test_identities[i].component_count);
+                         test_identities[i].string, (int) count, (int) test_identities[i].component_count);
         }
         
         kim_identity_free (&identity);
     }
     
     printf ("\n");
-
+    
     end_test (state);
 }
-            
+
 /* ------------------------------------------------------------------------ */
 
 void test_kim_identity_get_component_at_index (kim_test_state_t state)
@@ -404,7 +403,7 @@ void test_kim_identity_get_component_at_index (kim_test_state_t state)
     start_test (state, "kim_identity_get_component_at_index");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity identity = NULL;
         kim_count c = 0;
         
@@ -438,7 +437,7 @@ void test_kim_identity_get_component_at_index (kim_test_state_t state)
     }
     
     printf ("\n");
-
+    
     end_test (state);
 }
 
@@ -451,8 +450,7 @@ void test_kim_identity_get_krb5_principal (kim_test_state_t state)
     start_test (state, "kim_identity_get_krb5_principal");
     
     for (i = 0; test_identities[i].string; i++) {
-        krb5_error_code code = 0;
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         krb5_context context = NULL;
         krb5_principal principal = NULL;
         krb5_principal identity_principal = NULL;
@@ -460,36 +458,36 @@ void test_kim_identity_get_krb5_principal (kim_test_state_t state)
         
         printf (".");
         
-        code = krb5_init_context (&context);
-        fail_if_error_code (state, "krb5_init_context", code, 
-                            "while initializing context");
+        err = krb5_init_context (&context);
+        fail_if_error (state, "krb5_init_context", err, 
+                       "while initializing context");
         
-        if (!code) {
-            code = krb5_parse_name (context, test_identities[i].string, &principal);
-            fail_if_error_code (state, "krb5_parse_name", code, 
-                                "while creating krb5_principal for %s", 
-                                test_identities[i].string);
+        if (!err) {
+            err = krb5_parse_name (context, test_identities[i].string, &principal);
+            fail_if_error (state, "krb5_parse_name", err, 
+                           "while creating krb5_principal for %s", 
+                           test_identities[i].string);
         }
         
-         if (!code && !err) {
+        if (!err && !err) {
             err = kim_identity_create_from_string (&identity, test_identities[i].string);
             fail_if_error (state, "kim_identity_create_from_string", err, 
                            "while creating the identity for %s", 
                            test_identities[i].string);
         }
         
-        if (!code && !err) {
+        if (!err && !err) {
             err = kim_identity_get_krb5_principal (identity, context, &identity_principal);
             fail_if_error (state, "kim_identity_get_krb5_principal", err, 
                            "while getting the krb5_principal for %s", 
                            test_identities[i].string);
         }
         
-        if (!code && !err) {
+        if (!err && !err) {
             if (!krb5_principal_compare (context, principal, identity_principal)) {
                 log_failure (state, "Principal and identity principal for %s do not match", 
                              test_identities[i].string);
-           }
+            }
         }
         
         kim_identity_free (&identity);
@@ -499,7 +497,7 @@ void test_kim_identity_get_krb5_principal (kim_test_state_t state)
     }
     
     printf ("\n");
-
+    
     end_test (state);
 }
 
@@ -512,7 +510,7 @@ void test_kim_identity_is_tgt_service (kim_test_state_t state)
     start_test (state, "kim_identity_is_tgt_service");
     
     for (i = 0; test_identities[i].string; i++) {
-        kim_error err = NULL;
+        kim_error err = KIM_NO_ERROR;
         kim_identity_t identity = NULL;
         kim_boolean_t is_tgt_service = 0;
         

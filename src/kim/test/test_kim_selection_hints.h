@@ -29,17 +29,7 @@
 
 #include "test_kim_common.h"
 
-void test_kim_selection_hints_set_service_identity_hint (kim_test_state_t state);
-
-void test_kim_selection_hints_set_client_realm_hint (kim_test_state_t state);
-
-void test_kim_selection_hints_set_user_hint (kim_test_state_t state);
-
-void test_kim_selection_hints_set_service_realm_hint (kim_test_state_t state);
-
-void test_kim_selection_hints_set_service_hint (kim_test_state_t state);
-
-void test_kim_selection_hints_set_server_hint (kim_test_state_t state);
+void test_kim_selection_hints_set_hint (kim_test_state_t state);
 
 void test_kim_selection_hints_remember_identity (kim_test_state_t state);
 

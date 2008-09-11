@@ -92,16 +92,19 @@ void end_test (kim_test_state_t in_state)
 
 void fail_if_error (kim_test_state_t  in_state, 
                     const char       *in_function,
-                    kim_error       in_err, 
+                    kim_error         in_err, 
                     const char       *in_format,
                     ...)
 {
     if (in_err) {
         va_list args;
+        kim_string message = NULL;
+        
+        kim_error err = kim_string_get_last_error_message (&message, err);
         
         printf ("\tFAILURE: ");
         printf ("%s() got %d (%s) ",
-                in_function, in_err, kim_error_message (in_err));
+                in_function, in_err, !err ? message : "Unknown");
         
         va_start (args, in_format);
         vprintf (in_format, args);
@@ -110,31 +113,8 @@ void fail_if_error (kim_test_state_t  in_state,
         printf ("\n");
         
         in_state->test_fail_count++;
-    }
-}
-
-/* ------------------------------------------------------------------------ */
-
-void fail_if_error_code (kim_test_state_t  in_state, 
-                         const char       *in_function,
-                         kim_error_code  in_code, 
-                         const char       *in_format,
-                         ...)
-{
-    if (in_code) {
-        va_list args;
         
-        printf ("\tFAILURE: ");
-        printf ("%s() got %d (%s) ",
-                in_function, in_code, error_message (in_code));
-        
-        va_start (args, in_format);
-        vprintf (in_format, args);
-        va_end (args);
-        
-        printf ("\n");
-        
-        in_state->test_fail_count++;
+        kim_string_free (&message);
     }
 }
 

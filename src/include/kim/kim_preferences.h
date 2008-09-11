@@ -32,142 +32,6 @@ extern "C" {
 #include <kim/kim_types.h>
     
 /*!
- * \page kim_favorite_identities_overview KIM Favorite Identities Overview
- *
- * \section kim_favorite_identities_introduction Introduction
- *
- * As Kerberos becomes more widespread, the number of possible Kerberos
- * identities and realms a user might want to use will become very large.
- * Sites may list hundreds of realms in their Kerberos configuration files. 
- * In addition, sites may wish to use DNS SRV records to avoid having to list
- * all the realms they use in their Kerberos configuration.  As a result, the 
- * list of realms in the Kerberos configuration may be exceedingly large and/or 
- * incomplete.  Users may also use multiple identities from the same realm.
- *
- * On platforms which use a GUI to acquire credentials, the KIM would like
- * to to display a list of identities for the user to select from.  Depending on 
- * what is appropriate for the platform, identities may be displayed in a popup 
- * menu or other list.  
- *
- * To solve this problem, the KIM maintains a list of favorite identities 
- * specifically for identity selection.  This list is a set of unique identities 
- * in alphabetical order (as appropriate for the user's language localization).  
- *
- * On most platforms the list of favorite identities has both an administrator 
- * preference and a user preference which overrides it.  The administrator 
- * preference exists only to initialize the favorite identities for new user 
- * accounts.  Once the user modifies the list their favorite identities may  
- * diverge from the site favorite identities preference.
- *
- * \note The location of user preferences and the semantics of
- * preference synchronization is platform-specific.  Where possible KIM will use
- * platform-specific preference mechanisms.
- *
- * Most callers will not need to use the favorite identities APIs.  However if you
- * are implementing your own graphical prompt callback or a credential management 
- * application, you may to view and/or edit the user's favorite identities.
- *
- * \section kim_favorite_identities_edit Viewing and Editing the Favorite Identities
- * 
- * First, you need to acquire the Favorite Identities stored in the user's
- * preferences using #kim_preferences_create() and 
- * #kim_preferences_get_favorite_identities().  Or you can use 
- * #kim_favorite_identities_create() to get an empty identities list if you want to 
- * overwrite the user's identities list entirely.  See \ref kim_preferences_overview 
- * for more information on modifying the user's preferences.
- * 
- * Then use #kim_favorite_identities_get_number_of_identities() and 
- * #kim_favorite_identities_get_identity_at_index() to display the identities list.  
- * Use #kim_favorite_identities_add_identity() and #kim_favorite_identities_remove_identity() 
- * to change which identities are in the identities list.  Identities are always stored in
- * alphabetical order and duplicate identities are not permitted, so when you add or remove a
- * identity you should redisplay the entire list.
- *
- * Once you are done editing the identities list, store changes in the user's preference file
- * using #kim_preferences_set_favorite_identities() and #kim_preferences_synchronize().
- *
- * See \ref kim_favorite_identities_reference for information on specific APIs.
- */
-
-/*!
- * \defgroup kim_favorite_identities_reference KIM Favorite Identities Documentation
- * @{
- */
-
-/*!
- * \param out_favorite_identities on exit, a new favorite identities object.  
- *                            Must be freed with kim_favorite_identities_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Create a new favorite identities list.
- */
-kim_error kim_favorite_identities_create (kim_favorite_identities *out_favorite_identities);
-
-/*!
- * \param out_favorite_identities on exit, a new favorite identities object which is 
- *                            a copy of in_favorite_identities.  
- *                            Must be freed with kim_favorite_identities_free().
- * \param in_favorite_identities  a favorite identities object. 
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Copy a favorite identities list.
- */
-kim_error kim_favorite_identities_copy (kim_favorite_identities *out_favorite_identities,
-                                          kim_favorite_identities  in_favorite_identities);
-
-/*!
- * \param in_favorite_identities   a favorite identities object.
- * \param out_number_of_identities on exit, the number of identities in \a in_favorite_identities.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the number of identities in a favorite identities list.
- */
-kim_error kim_favorite_identities_get_number_of_identities (kim_favorite_identities  in_favorite_identities,
-                                                              kim_count               *out_number_of_identities);
-
-/*!
- * \param in_favorite_identities a favorite identities object.
- * \param in_index           a index into the identities list (starting at 0).
- * \param out_realm          on exit, the identity at \a in_index in \a in_favorite_identities.
- *                           Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the Nth identity in a favorite identities list.
- */
-kim_error kim_favorite_identities_get_identity_at_index (kim_favorite_identities  in_favorite_identities,
-                                                           kim_count                in_index,
-                                                           kim_identity            *out_identity);
-/*!
- * \param io_favorite_identities a favorite identities object.
- * \param in_identity            an identity string to add to \a in_favorite_identities.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Add an identity to a favorite identities list.
- */
-kim_error kim_favorite_identities_add_identity (kim_favorite_identities io_favorite_identities,
-                                                  kim_identity            in_identity);
-
-/*!
- * \param io_favorite_identities a favorite identities object.
- * \param in_identity            an identity to remove from \a in_favorite_identities.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Remove an identity from a identities list.
- */
-kim_error kim_favorite_identities_remove_identity (kim_favorite_identities io_favorite_identities,
-                                                     kim_identity            in_identity);
-
-/*!
- * \param io_favorite_identities a favorite identities object.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Empty a favorite identities list.
- */
-kim_error kim_favorite_identities_remove_all_identities (kim_favorite_identities io_favorite_identities);
-
-/*!
- * \param io_favorite_identities the favorite identities object to be freed.  Set to NULL on exit.
- * \brief Free memory associated with an identities list.
- */
-
-void kim_favorite_identities_free (kim_favorite_identities *io_favorite_identities);
-
-/*!@}*/
-
-/*!
  * \page kim_preferences_overview KIM Preferences Overview
  *
  * \section kim_preferences_introduction Introduction
@@ -228,13 +92,51 @@ void kim_favorite_identities_free (kim_favorite_identities *io_favorite_identiti
  * 
  * \section kim_preferences_favorite_identities Favorite Identities Preferences
  *
- * When presenting a graphical interface for credential acquisition, KIM 
- * may need to display a list of identities for the user to select from.  
- * This list is generated by the user's favorite identities preference.  
- * You can view and edit the favorite identities preference using 
- * #kim_preferences_get_favorite_identities() and 
- * #kim_preferences_set_favorite_identities().  Please see the
- * \ref kim_favorite_identities_overview for more information.
+ * As Kerberos becomes more widespread, the number of possible Kerberos
+ * identities and realms a user might want to use will become very large.
+ * Sites may list hundreds of realms in their Kerberos configuration files. 
+ * In addition, sites may wish to use DNS SRV records to avoid having to list
+ * all the realms they use in their Kerberos configuration.  As a result, the 
+ * list of realms in the Kerberos configuration may be exceedingly large and/or 
+ * incomplete.  Users may also use multiple identities from the same realm.
+ *
+ * On platforms which use a GUI to acquire credentials, the KIM would like
+ * to to display a list of identities for the user to select from.  Depending on 
+ * what is appropriate for the platform, identities may be displayed in a popup 
+ * menu or other list.  
+ *
+ * To solve this problem, the KIM maintains a list of favorite identities 
+ * specifically for identity selection.  This list is a set of unique identities 
+ * in alphabetical order (as appropriate for the user's language localization).  
+ *
+ * Each identity may optionally have its own options for ticket acquisition.
+ * This allows KIM UIs to remember what ticket options worked for a specific
+ * identity.  For example if the user normally wants renewable tickets but
+ * they have one identity at a KDC which rejects requests for renewable tickets,
+ * the "not renewable" option can be associated with that identity without 
+ * changing the user's default preference to get renewable tickets.  If an
+ * identity should use the default options, just pass KIM_OPTIONS_DEFAULT.
+ *
+ * Most callers will not need to use the favorite identities APIs.  However if you
+ * are implementing your own graphical prompt callback or a credential management 
+ * application, you may to view and/or edit the user's favorite identities.
+ *
+ * \section kim_favorite_identities_edit Viewing and Editing the Favorite Identities
+ * 
+ * First, you need to acquire the Favorite Identities stored in the user's
+ * preferences using #kim_preferences_create().
+ * 
+ * Then use #kim_preferences_get_number_of_favorite_identities() and 
+ * #kim_preferences_get_favorite_identity_at_index() to display the identities list.  
+ * Use #kim_preferences_add_favorite_identity() and #kim_preferences_remove_favorite_identity() 
+ * to change which identities are in the identities list.  Identities are always stored in
+ * alphabetical order and duplicate identities are not permitted, so when you add or remove a
+ * identity you should redisplay the entire list.  If you wish to replace the
+ * identities list entirely, use #kim_preferences_remove_all_favorite_identities()
+ * to clear the list before adding your identities.
+ *
+ * Once you are done editing the favorite identities list, store changes in the 
+ * user's preference file using #kim_preferences_synchronize().
  * 
  * See \ref kim_preferences_reference for information on specific APIs.
  */
@@ -439,28 +341,59 @@ kim_error kim_preferences_get_maximum_renewal_lifetime (kim_preferences  in_pref
                                                           kim_lifetime    *out_maximum_renewal_lifetime);
 
 /*!
- * \param io_preferences         a preferences object to modify.
- * \param in_favorite_identities a favorite identities object.
- *                           See \ref kim_favorite_identities_overview for more information on KIM
- *                           Favorite Identities. 
+ * \param in_preferences           a preferences object.
+ * \param out_number_of_identities on exit, the number of identities in \a in_preferences.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Set the user's preferred list of identities.
- * \sa kim_preferences_get_favorite_identities()
+ * \brief Get the number of favorite identities in a preferences object.
  */
-kim_error kim_preferences_set_favorite_identities (kim_preferences         io_preferences,
-                                                     kim_favorite_identities in_favorite_identities);
+kim_error kim_preferences_get_number_of_favorite_identities (kim_preferences  in_preferences,
+                                                             kim_count       *out_number_of_identities);
 
 /*!
- * \param in_preferences          a preferences object.
- * \param out_favorite_identities on exit, a copy of the favorite identities specified in \a in_preferences.
- *                                See \ref kim_favorite_identities_overview for more information on KIM
- *                                Favorite Identities.  Must be freed with kim_favorite_identities_free().
+ * \param kim_preferences    a preferences object.
+ * \param in_index           a index into the identities list (starting at 0).
+ * \param out_identity       on exit, the identity at \a in_index in \a in_preferences.
+ *                           Must be freed with kim_string_free().
+ * \param out_options        on exit, the options associated with identity at \a in_index 
+ *                           in \a in_favorite_identities.  May be KIM_OPTIONS_DEFAULT.
+ *                           Pass NULL if you do not want the options associated with the identity.
+ *                           Must be freed with kim_options_free().
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the user's preferred list of identities.
- * \sa kim_preferences_set_favorite_identities()
+ * \brief Get the Nth favorite identity in a preferences object.
  */
-kim_error kim_preferences_get_favorite_identities (kim_preferences          in_preferences,
-                                                     kim_favorite_identities *out_favorite_identities);
+kim_error kim_preferences_get_favorite_identity_at_index (kim_preferences  in_preferences,
+                                                          kim_count        in_index,
+                                                          kim_identity    *out_identity,
+                                                          kim_options     *out_options);
+
+/*!
+ * \param io_preferences   a preferences object.
+ * \param in_identity      an identity to add to \a io_preferences.
+ * \param in_options       options which will be associated with that identity.
+ *                         Use KIM_OPTIONS_DEFAULT if the identity should use
+ *                         the user's default options.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Add a favorite identity to a preferences object.
+ */
+kim_error kim_preferences_add_favorite_identity (kim_preferences io_preferences,
+                                                 kim_identity    in_identity,
+                                                 kim_options     in_options);
+
+/*!
+ * \param io_preferences    a preferences object.
+ * \param in_identity       an identity to remove from \a io_preferences.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Remove a favorite identity from a preferences object.
+ */
+kim_error kim_preferences_remove_favorite_identity (kim_preferences io_preferences,
+                                                    kim_identity    in_identity);
+
+/*!
+ * \param io_preferences    a preferences object.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Remove all favorite identities in a preferences object.
+ */
+kim_error kim_preferences_remove_all_favorite_identities (kim_preferences io_preferences);
 
 /*!
  * \param in_preferences a preferences object.

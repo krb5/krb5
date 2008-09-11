@@ -64,17 +64,7 @@ int main (int argc, const char * argv[])
     
     test_kim_preferences_set_client_identity (state);
     
-    test_kim_selection_hints_set_service_identity_hint (state);
-    
-    test_kim_selection_hints_set_client_realm_hint (state);
-    
-    test_kim_selection_hints_set_user_hint (state);
-    
-    test_kim_selection_hints_set_service_realm_hint (state);
-    
-    test_kim_selection_hints_set_service_hint (state);
-    
-    test_kim_selection_hints_set_server_hint (state);
+    test_kim_selection_hints_set_hint (state);
     
     test_kim_selection_hints_remember_identity (state);
     

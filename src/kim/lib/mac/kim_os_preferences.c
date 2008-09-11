@@ -81,7 +81,7 @@ static kim_error kim_os_preferences_cfstring_for_key (kim_preference_key  in_key
             *out_kim_string_key = CFSTR ("RememberClientIdentity");
             *out_kll_string_key = CFSTR ("KLRememberPrincipal");
             
-        } else if (in_key == kim_preference_key_favorite_identities) {
+        } else if (in_key == kim_preference_key_favorites) {
             *out_kim_string_key = CFSTR ("FavoriteIdentities");
             *out_kll_string_key = CFSTR ("KLFavoriteIdentities");
             
@@ -272,14 +272,13 @@ kim_error kim_os_preferences_set_identity_for_key (kim_preference_key in_key,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key       in_key, 
-                                                              kim_favorite_identities  in_hardcoded_default,
-                                                              kim_favorite_identities *out_favorite_identities)
+kim_error kim_os_preferences_get_favorites_for_key (kim_preference_key in_key, 
+                                                    kim_favorites      io_favorites)
 {
     kim_error err = KIM_NO_ERROR;
     CFArrayRef value = NULL;
     
-    if (!err && !out_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_preferences_get_value (in_key, CFArrayGetTypeID (), 
@@ -288,14 +287,11 @@ kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key
     
     if (!err) {
         if (!value || CFArrayGetCount (value) < 1) {
-            err = kim_favorite_identities_copy (out_favorite_identities, in_hardcoded_default);
+            err =  kim_favorites_remove_all_identities (io_favorites);
             
         } else {
-            kim_favorite_identities favorite_identities = NULL;
             CFIndex count = CFArrayGetCount (value);
             CFIndex i;
-            
-            err = kim_favorite_identities_create (&favorite_identities);
             
             for (i = 0; !err && i < count; i++) {
                 CFStringRef cfstring = NULL;
@@ -316,20 +312,18 @@ kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key
                 }
                 
                 if (!err) {
-                    err = kim_favorite_identities_add_identity (favorite_identities, identity);
+                    err = kim_favorites_add_identity (io_favorites, identity,
+                                                      KIM_OPTIONS_DEFAULT);
                 }
                 
                 kim_identity_free (&identity);
                 kim_string_free (&string);
             }
-            
-            if (!err) {
-                *out_favorite_identities = favorite_identities;
-                favorite_identities = NULL;
-            }
-            
-            kim_favorite_identities_free (&favorite_identities);
         }
+    }
+    
+    if (err) {
+        kim_favorites_remove_all_identities (io_favorites);
     }
     
     if (value) { CFRelease (value); }
@@ -338,22 +332,22 @@ kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key
 }
 
 /* ------------------------------------------------------------------------ */
-
-kim_error kim_os_preferences_set_favorite_identities_for_key (kim_preference_key      in_key, 
-                                                              kim_favorite_identities in_favorite_identities)
+kim_error kim_os_preferences_set_favorites_for_key (kim_preference_key in_key, 
+                                                    kim_favorites      in_favorites)
 {
     kim_error err = KIM_NO_ERROR;
     kim_count count = 0;
     CFMutableArrayRef value = NULL;
     
-    if (!err && !in_favorite_identities) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_favorite_identities_get_number_of_identities (in_favorite_identities, &count);
+        err = kim_favorites_get_number_of_identities (in_favorites, &count);
     }
     
     if (!err) {
-        value = CFArrayCreateMutable (kCFAllocatorDefault, count, &kCFTypeArrayCallBacks);
+        value = CFArrayCreateMutable (kCFAllocatorDefault, count, 
+                                      &kCFTypeArrayCallBacks);
         if (!value) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
     
@@ -362,10 +356,13 @@ kim_error kim_os_preferences_set_favorite_identities_for_key (kim_preference_key
         
         for (i = 0; !err && i < count; i++) {
             kim_identity identity = NULL;
+            kim_options options = NULL;
             kim_string string = NULL;
             CFStringRef cfstring = NULL;
             
-            err = kim_favorite_identities_get_identity_at_index (in_favorite_identities, i, &identity);
+            err = kim_favorites_get_identity_at_index (in_favorites, i, 
+                                                       &identity,
+                                                       &options);
             
             if (!err) {
                 err = kim_identity_get_string (identity, &string);
@@ -381,6 +378,7 @@ kim_error kim_os_preferences_set_favorite_identities_for_key (kim_preference_key
             
             if (cfstring) { CFRelease (cfstring); }
             kim_string_free (&string);
+            kim_options_free (&options);
             kim_identity_free (&identity);
         }
     }

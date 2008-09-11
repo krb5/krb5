@@ -29,7 +29,7 @@
 
 #include <kim/kim.h>
 
-extern const kim_favorite_identities kim_empty_favorite_identities;
+typedef struct kim_favorites_opaque *kim_favorites;
 
 typedef enum kim_preference_key_enum {
     kim_preference_key_lifetime,
@@ -41,12 +41,13 @@ typedef enum kim_preference_key_enum {
     kim_preference_key_remember_options,
     kim_preference_key_client_identity,
     kim_preference_key_remember_client_identity,
-    kim_preference_key_favorite_identities,
+    kim_preference_key_favorites,
     kim_preference_key_minimum_lifetime,
     kim_preference_key_maximum_lifetime,
     kim_preference_key_minimum_renewal_lifetime,
     kim_preference_key_maximum_renewal_lifetime
 } kim_preference_key;
+
 
 #define kim_default_lifetime                   10*60*60
 #define kim_default_renewable                  TRUE
@@ -57,12 +58,36 @@ typedef enum kim_preference_key_enum {
 #define kim_default_remember_options           TRUE
 #define kim_default_client_identity            KIM_IDENTITY_ANY
 #define kim_default_remember_client_identity   TRUE
-#define kim_default_favorite_identities        kim_empty_favorite_identities
 #define kim_default_minimum_lifetime           10*60
 #define kim_default_maximum_lifetime           10*60*60
 #define kim_default_minimum_renewal_lifetime   10*60
 #define kim_default_maximum_renewal_lifetime   7*24*60*60
 
+extern const struct kim_favorites_opaque kim_default_favorites;
+
+
+/* Helper functions for use by kim_os_preferences_get_favorites_for_key
+ * and kim_os_preferences_set_favorites_for_key */
+
+kim_error kim_favorites_get_number_of_identities (kim_favorites  in_favorites,
+                                                  kim_count     *out_number_of_identities);
+
+kim_error kim_favorites_get_identity_at_index (kim_favorites  in_favorites,
+                                               kim_count      in_index,
+                                               kim_identity  *out_identity,
+                                               kim_options   *out_options);
+
+kim_error kim_favorites_add_identity (kim_favorites io_favorites,
+                                      kim_identity  in_identity,
+                                      kim_options   in_options);
+
+kim_error kim_favorites_remove_identity (kim_favorites io_favorites,
+                                         kim_identity  in_identity);
+
+kim_error kim_favorites_remove_all_identities (kim_favorites io_favorites);
+
+
+/* OS-specific functions to be implemented per-platform */
 
 kim_error kim_os_preferences_get_identity_for_key (kim_preference_key  in_key, 
                                                    kim_identity        in_hardcoded_default,
@@ -71,12 +96,11 @@ kim_error kim_os_preferences_get_identity_for_key (kim_preference_key  in_key,
 kim_error kim_os_preferences_set_identity_for_key (kim_preference_key in_key, 
                                                    kim_identity       in_identity);
 
-kim_error kim_os_preferences_get_favorite_identities_for_key (kim_preference_key       in_key, 
-                                                              kim_favorite_identities  in_hardcoded_default,
-                                                              kim_favorite_identities *out_favorite_identities);
+kim_error kim_os_preferences_get_favorites_for_key (kim_preference_key in_key, 
+                                                    kim_favorites      io_favorites);
 
-kim_error kim_os_preferences_set_favorite_identities_for_key (kim_preference_key      in_key, 
-                                                              kim_favorite_identities in_favorite_identities);
+kim_error kim_os_preferences_set_favorites_for_key (kim_preference_key in_key, 
+                                                    kim_favorites      in_favorites);
 
 kim_error kim_os_preferences_get_time_for_key (kim_preference_key  in_key, 
                                                kim_time            in_hardcoded_default,

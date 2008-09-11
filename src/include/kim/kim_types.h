@@ -122,12 +122,6 @@ struct kim_selection_hints_opaque;
  */
 typedef struct kim_selection_hints_opaque *kim_selection_hints;
 
-struct kim_favorite_identities_opaque;
-/*!
- * A KIM Favorite Realms object.  See \ref kim_favorite_identities_overview for more information.
- */
-typedef struct kim_favorite_identities_opaque *kim_favorite_identities;
-
 struct kim_preferences_opaque;
 /*!
  * A KIM Preferences object.  See \ref kim_preferences_overview for more information.
