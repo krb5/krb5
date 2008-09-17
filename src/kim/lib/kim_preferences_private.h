@@ -32,6 +32,7 @@
 typedef struct kim_favorites_opaque *kim_favorites;
 
 typedef enum kim_preference_key_enum {
+    kim_preference_key_options,
     kim_preference_key_lifetime,
     kim_preference_key_renewable,
     kim_preference_key_renewal_lifetime,
@@ -89,6 +90,12 @@ kim_error kim_favorites_remove_all_identities (kim_favorites io_favorites);
 
 /* OS-specific functions to be implemented per-platform */
 
+kim_error kim_os_preferences_get_options_for_key (kim_preference_key  in_key, 
+                                                   kim_options       *out_options);
+
+kim_error kim_os_preferences_set_options_for_key (kim_preference_key in_key, 
+                                                  kim_options        in_options);
+
 kim_error kim_os_preferences_get_identity_for_key (kim_preference_key  in_key, 
                                                    kim_identity        in_hardcoded_default,
                                                    kim_identity       *out_identity);
@@ -101,13 +108,6 @@ kim_error kim_os_preferences_get_favorites_for_key (kim_preference_key in_key,
 
 kim_error kim_os_preferences_set_favorites_for_key (kim_preference_key in_key, 
                                                     kim_favorites      in_favorites);
-
-kim_error kim_os_preferences_get_time_for_key (kim_preference_key  in_key, 
-                                               kim_time            in_hardcoded_default,
-                                               kim_time           *out_time);
-
-kim_error kim_os_preferences_set_time_for_key (kim_preference_key in_key, 
-                                               kim_time           in_time);
 
 kim_error kim_os_preferences_get_lifetime_for_key (kim_preference_key  in_key, 
                                                    kim_lifetime        in_hardcoded_default,

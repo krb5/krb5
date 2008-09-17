@@ -31,7 +31,6 @@
 struct kim_options_opaque {
     kim_prompt_callback prompt_callback;
     const void *prompt_callback_data;
-#warning add prompt responses here
     kim_time start_time;
     kim_lifetime lifetime;
     kim_boolean renewable;
@@ -80,25 +79,9 @@ static inline kim_error kim_options_allocate (kim_options *out_options)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_options_create_from_defaults (kim_options *out_options)
+kim_error kim_options_create_empty (kim_options *out_options)
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_options options = NULL;
-    
-    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        err = kim_options_allocate (&options);
-    }
-    
-    if (!err) {
-        *out_options = options;
-        options = NULL;
-    }
-    
-    kim_options_free (&options);
-    
-    return check_error (err);
+    return check_error (kim_options_allocate (out_options));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -140,7 +123,6 @@ kim_error kim_options_copy (kim_options *out_options,
         if (!err) {
             options->prompt_callback = in_options->prompt_callback;
             options->prompt_callback_data = in_options->prompt_callback_data;
-#warning copy prompt responses here
         }
         
         if (!err) {
@@ -231,42 +213,6 @@ kim_error kim_options_get_data (kim_options   in_options,
     
     if (!err) {
         *out_data = in_options->prompt_callback_data;
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_options_set_prompt_response (kim_options      io_options,
-                                           kim_prompt_type  in_prompt_type,
-                                           void            *in_response)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !io_options ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_response) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-#warning kim_options_set_prompt_response unimplemented
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_options_get_prompt_response (kim_options       in_options,
-                                           kim_prompt_type   in_prompt_type,
-                                           void            **out_response)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !in_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_response) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-#warning kim_options_get_prompt_response unimplemented
     }
     
     return check_error (err);
@@ -514,7 +460,7 @@ kim_error kim_options_set_service_name (kim_options  io_options,
     if (!err && !io_options     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_service_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err) {
+    if (!err && in_service_name) {
         err = kim_string_copy (&service_name, in_service_name);
     }
     
@@ -537,7 +483,11 @@ kim_error kim_options_get_service_name (kim_options  in_options,
     if (!err && !out_service_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_string_copy (out_service_name, in_options->service_name);
+        if (in_options->service_name) {
+            err = kim_string_copy (out_service_name, in_options->service_name);
+        } else {
+            *out_service_name = NULL;
+        }
     }
     
     return check_error (err);
@@ -616,17 +566,15 @@ void kim_options_free (kim_options *io_options)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_prompt_callback_default (kim_options       *io_options, 
-                                       kim_prompt_type    in_type,
+kim_error kim_prompt_callback_default (kim_prompt_type    in_type,
                                        kim_string         in_title,
                                        kim_string         in_message,
                                        kim_string         in_description,
-                                       void               **out_reply)
+                                       char              **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_reply ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_reply) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
     }
@@ -636,17 +584,15 @@ kim_error kim_prompt_callback_default (kim_options       *io_options,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_prompt_callback_gui (kim_options       *io_options, 
-                                   kim_prompt_type    in_type,
+kim_error kim_prompt_callback_gui (kim_prompt_type    in_type,
                                    kim_string         in_title,
                                    kim_string         in_message,
                                    kim_string         in_description,
-                                   void               **out_reply)
+                                   char              **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_reply ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_reply) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
     }
@@ -656,17 +602,15 @@ kim_error kim_prompt_callback_gui (kim_options       *io_options,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_prompt_callback_cli (kim_options       *io_options, 
-                                   kim_prompt_type    in_type,
+kim_error kim_prompt_callback_cli (kim_prompt_type    in_type,
                                    kim_string         in_title,
                                    kim_string         in_message,
                                    kim_string         in_description,
-                                   void               **out_reply)
+                                   char              **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_reply ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_reply) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
     }
@@ -676,12 +620,11 @@ kim_error kim_prompt_callback_cli (kim_options       *io_options,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_prompt_callback_none (kim_options       *io_options, 
-                                    kim_prompt_type    in_type,
+kim_error kim_prompt_callback_none (kim_prompt_type    in_type,
                                     kim_string         in_title,
                                     kim_string         in_message,
                                     kim_string         in_description,
-                                    void               **out_reply)
+                                    char              **out_reply)
 {
     return KIM_USER_CANCELED_ERR;
 }

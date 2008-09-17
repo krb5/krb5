@@ -54,7 +54,7 @@ struct kim_preferences_opaque {
 const struct kim_favorites_opaque kim_default_favorites = { 0, NULL, NULL };
 
 struct kim_preferences_opaque kim_preferences_initializer = { 
-NULL, 
+KIM_OPTIONS_DEFAULT, 
 FALSE,
 kim_default_remember_options, 
 FALSE,
@@ -184,6 +184,8 @@ kim_error kim_favorites_get_identity_at_index (kim_favorites  in_favorites,
                                                kim_options   *out_options)
 {
     kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
+    kim_options options = KIM_OPTIONS_DEFAULT;
     
     if (!err && !in_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -197,9 +199,25 @@ kim_error kim_favorites_get_identity_at_index (kim_favorites  in_favorites,
     }
     
     if (!err) {
-        err = kim_identity_copy (out_identity, 
-                                 in_favorites->identities[in_index]);
+        err = kim_identity_copy (&identity, in_favorites->identities[in_index]);
     }
+    
+    if (!err && in_favorites->options[in_index]) {
+        err = kim_options_copy (&options, in_favorites->options[in_index]);
+    }
+    
+    if (!err) {
+        *out_identity = identity;
+        identity = NULL;
+        
+        if (out_options) {
+            *out_options = options;
+            options = NULL;
+        }
+    }
+    
+    kim_identity_free (&identity);
+    kim_options_free (&options);
     
     return check_error (err);
 }
@@ -233,13 +251,14 @@ kim_error kim_favorites_add_identity (kim_favorites io_favorites,
         for (i = 0; !err && i < io_favorites->count; i++) {
             kim_comparison identity_comparison = 0;
             
-            err = kim_identity_compare (in_identity, 
-                                        io_favorites->identities[i], 
+            err = kim_identity_compare (io_favorites->identities[i],
+                                        in_identity, 
                                         &identity_comparison);
             
             if (!err) {
                 if (kim_comparison_is_greater_than (identity_comparison)) {
-                    break; /* found the first greater one so insert here */
+                    /* insert before the first entry that is greater than us */
+                    break; 
                     
                 } else if (kim_comparison_is_equal_to (identity_comparison)) {
                     /* already in list */
@@ -396,74 +415,14 @@ static kim_error kim_preferences_read (kim_preferences in_preferences)
     if (!err && !in_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        kim_lifetime lifetime = kim_default_lifetime;
+        kim_options options = NULL;
         
-        err = kim_os_preferences_get_lifetime_for_key (kim_preference_key_lifetime,
-                                                       kim_default_lifetime,
-                                                       &lifetime);
-        
-        if (!err) {
-            err = kim_options_set_lifetime (in_preferences->options, lifetime);
-        }
-    }
-    
-    if (!err) {
-        kim_boolean renewable = kim_default_renewable;
-        
-        err = kim_os_preferences_get_boolean_for_key (kim_preference_key_renewable,
-                                                      kim_default_renewable,
-                                                      &renewable);
+        err = kim_os_preferences_get_options_for_key (kim_preference_key_options,
+                                                      &options);
         
         if (!err) {
-            err = kim_options_set_renewable (in_preferences->options, renewable);
-        }
-    }
-    
-    if (!err) {
-        kim_lifetime renewal_lifetime = kim_default_renewal_lifetime;
-        
-        err = kim_os_preferences_get_lifetime_for_key (kim_preference_key_renewal_lifetime,
-                                                       kim_default_renewal_lifetime,
-                                                       &renewal_lifetime);
-        
-        if (!err) {
-            err = kim_options_set_renewal_lifetime (in_preferences->options, renewal_lifetime);
-        }
-    }
-    
-    if (!err) {
-        kim_boolean forwardable = kim_default_forwardable;
-        
-        err = kim_os_preferences_get_boolean_for_key (kim_preference_key_forwardable,
-                                                      kim_default_forwardable,
-                                                      &forwardable);
-        
-        if (!err) {
-            err = kim_options_set_forwardable (in_preferences->options, forwardable);
-        }
-    }
-    
-    if (!err) {
-        kim_boolean proxiable = kim_default_proxiable;
-        
-        err = kim_os_preferences_get_boolean_for_key (kim_preference_key_proxiable,
-                                                      kim_default_proxiable,
-                                                      &proxiable);
-        
-        if (!err) {
-            err = kim_options_set_proxiable (in_preferences->options, proxiable);
-        }
-    }
-    
-    if (!err) {
-        kim_boolean addressless = kim_default_addressless;
-        
-        err = kim_os_preferences_get_boolean_for_key (kim_preference_key_addressless,
-                                                      kim_default_addressless,
-                                                      &addressless);
-        
-        if (!err) {
-            err = kim_options_set_addressless (in_preferences->options, addressless);
+            kim_options_free (&in_preferences->options);
+            in_preferences->options = options;
         }
     }
     
@@ -545,69 +504,8 @@ static kim_error kim_preferences_write (kim_preferences in_preferences)
     if (!err && !in_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && in_preferences->remember_options && in_preferences->options_changed) {
-        kim_lifetime lifetime = kim_default_lifetime;
-        
-        err = kim_options_get_lifetime (in_preferences->options, &lifetime);
-        
-        if (!err) {
-            err = kim_os_preferences_set_lifetime_for_key (kim_preference_key_lifetime, 
-                                                           lifetime);
-        }
-        
-        if (!err) {
-            kim_boolean renewable = kim_default_renewable;
-            
-            err = kim_options_get_renewable (in_preferences->options, &renewable);
-            
-            if (!err) {
-                err = kim_os_preferences_set_boolean_for_key (kim_preference_key_renewable, 
-                                                              renewable);
-            }
-        }
-        
-        if (!err) {
-            kim_lifetime renewal_lifetime = kim_default_renewal_lifetime;
-            
-            err = kim_options_get_renewal_lifetime (in_preferences->options, &renewal_lifetime);
-            
-            if (!err) {
-                err = kim_os_preferences_set_lifetime_for_key (kim_preference_key_renewal_lifetime, 
-                                                               renewal_lifetime);
-            }
-        }
-        
-        if (!err) {
-            kim_boolean forwardable = kim_default_forwardable;
-            
-            err = kim_options_get_forwardable (in_preferences->options, &forwardable);
-            
-            if (!err) {
-                err = kim_os_preferences_set_boolean_for_key (kim_preference_key_forwardable, 
-                                                              forwardable);
-            }
-        }
-        
-        if (!err) {
-            kim_boolean proxiable = kim_default_proxiable;
-            
-            err = kim_options_get_proxiable (in_preferences->options, &proxiable);
-            
-            if (!err) {
-                err = kim_os_preferences_set_boolean_for_key (kim_preference_key_proxiable, 
-                                                              proxiable);
-            }
-        }
-        
-        if (!err) {
-            kim_boolean addressless = kim_default_addressless;
-            
-            err = kim_options_get_addressless (in_preferences->options, &addressless);
-            
-            if (!err) {
-                err = kim_os_preferences_set_boolean_for_key (kim_preference_key_addressless, 
-                                                              addressless);
-            }
-        }
+        err = kim_os_preferences_set_options_for_key (kim_preference_key_options,
+                                                      in_preferences->options);        
     }
     
     if (!err && in_preferences->remember_options_changed) {
@@ -707,10 +605,6 @@ kim_error kim_preferences_create (kim_preferences *out_preferences)
     
     if (!err) {
         err = kim_preferences_allocate (&preferences);
-    }
-    
-    if (!err) {
-        err = kim_options_create_from_defaults (&preferences->options);
     }
     
     if (!err) {

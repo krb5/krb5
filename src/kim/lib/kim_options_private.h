@@ -29,7 +29,7 @@
 
 #include <kim/kim.h>
 
-kim_error kim_options_create_from_defaults (kim_options *out_options);
+kim_error kim_options_create_empty (kim_options *out_options);
 
 kim_error kim_options_get_init_cred_options (kim_options               in_options, 
                                              krb5_context              in_context,

@@ -62,45 +62,41 @@ enum kim_prompt_type_enum {
  * The prompt callback used to display a prompt to the user.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-typedef kim_error (*kim_prompt_callback) (kim_options       *io_options, 
-                                          kim_prompt_type    in_type,
+typedef kim_error (*kim_prompt_callback) (kim_prompt_type    in_type,
                                           kim_string         in_title,
                                           kim_string         in_message,
                                           kim_string         in_description,
-                                          void               **out_reply);
+                                          char              **out_reply);
 
 /*!
  * The default prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error kim_prompt_callback_default (kim_options       *io_options, 
-                                       kim_prompt_type    in_type,
+kim_error kim_prompt_callback_default (kim_prompt_type    in_type,
                                        kim_string         in_title,
                                        kim_string         in_message,
                                        kim_string         in_description,
-                                       void             **out_reply);
+                                       char              **out_reply);
     
 /*!
  * The graphical prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error kim_prompt_callback_gui (kim_options       *io_options, 
-                                   kim_prompt_type    in_type,
+kim_error kim_prompt_callback_gui (kim_prompt_type    in_type,
                                    kim_string         in_title,
                                    kim_string         in_message,
                                    kim_string         in_description,
-                                   void             **out_reply);
+                                   char              **out_reply);
 
 /*!
  * The command line prompt callback.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error kim_prompt_callback_cli (kim_options       *io_options, 
-                                   kim_prompt_type    in_type,
+kim_error kim_prompt_callback_cli (kim_prompt_type    in_type,
                                    kim_string         in_title,
                                    kim_string         in_message,
                                    kim_string         in_description,
-                                   void             **out_reply);
+                                   char              **out_reply);
 
 /*!
  * The prompt callback which always returns an error.
@@ -108,12 +104,11 @@ kim_error kim_prompt_callback_cli (kim_options       *io_options,
  * \note Using this callback may prevent the user from authenicating.
  * See \ref kim_options_custom_prompt_callback for more information.
  */
-kim_error kim_prompt_callback_none (kim_options       *io_options, 
-                                    kim_prompt_type    in_type,
+kim_error kim_prompt_callback_none (kim_prompt_type    in_type,
                                     kim_string         in_title,
                                     kim_string         in_message,
                                     kim_string         in_description,
-                                    void             **out_reply);
+                                    char              **out_reply);
 
 /*! @} */
 
@@ -143,7 +138,7 @@ kim_error kim_prompt_callback_none (kim_options       *io_options,
  * \subsection kim_options_custom_prompt_callback Providing a Custom Prompt Callback
  *
  * All secrets are obtained from the user through a #kim_prompt_callback_t.  By default, 
- * options use #kim_prompt_callback_default, which presents an expanding dialog to request
+ * options use #kim_prompt_callback_default, which presents a dialog to request
  * information from the user, or if no graphical access is available, a command line prompt.
  * 
  * KIM also provides three other callbacks: #kim_prompt_callback_gui only presents
@@ -154,28 +149,11 @@ kim_error kim_prompt_callback_none (kim_options       *io_options,
  * Using #kim_options_set_prompt_callback(), you can change the prompt callback to one of 
  * the above callbacks or a callback you have defined yourself.  Callbacks are called in a
  * loop, one for each prompt.  Because network traffic may occur between calls to the prompt
- * callback, your prompt interface should support time passing between calls to the prompter.  
+ * callback, your prompt interface should support time passing between calls to the prompter.
  * If you are defining a callback yourself, you should also set your own options data with 
  * #kim_options_set_data() for storing state between calls.  Options data is a caller
  * defined pointer value -- the Kerberos libaries make no use of it.
  *
- * \subsection kim_options_preset_prompts Prefetching Prompt Responses
- * 
- * Sometimes you may have already collected some of the information needed to acquire 
- * Kerberos credentials.  Rather than creating a prompt callback, you may also prefetch 
- * responses to the options directly with #kim_options_set_prompt_response().  Once you 
- * have associated your response with a given prompt type, the Kerberos libraries will 
- * use this response for the first prompt of that type rather than calling the prompt 
- * callback to obtain it.
- *
- * Note that even if you prefetch responses, the prompt callback may still be called if
- * you did not provide all the information required for the identity.  You may specify 
- * the #kim_prompt_callback_none prompt callback to prevent prompting from occuring entirely,
- * however, doing so will tie your application to a particular Kerberos configuration.  
- * For example, if your application assumes that all identities only require a password, 
- * it will not be able to acquire credentials at sites using SecurID pins.  
- *
- * 
  * \section kim_options_credential_properties Options for Controlling Credential Properties
  *
  * Kerberos credentials have a number of different properties which can be requested
@@ -361,44 +339,6 @@ kim_error kim_options_set_data (kim_options  io_options,
  */
 kim_error kim_options_get_data (kim_options   in_options,
                                 const void  **out_data);
-
-/*!
- * \param io_options     an options object to modify.
- * \param in_prompt_type a type of prompt.
- * \param in_response    a response to prompts of \a in_prompt_type.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Set a response for a prompt for use when acquiring credentials.
- * \note Each response only overrides the first prompt of a given prompt type.  If multiple
- * prompts of the same type are required, or if a prompt of a different type is requested, 
- * the prompt callback will be called to obtain user input.  If you want to turn off prompting 
- * entirely, call #kim_options_set_prompt_callback() with #kim_prompt_callback_none.
- * \par Default value
- * NULL (no response is set by default)
- * \sa kim_options_get_prompt_response()
- */
-kim_error kim_options_set_prompt_response (kim_options      io_options,
-                                           kim_prompt_type  in_prompt_type,
-                                           void            *in_response);
-
-/*!
- * \param in_options     an options object.
- * \param in_prompt_type a type of prompt.
- * \param out_response   on exit, the response to prompts of type \a in_prompt_type specified 
- *                       by \a in_options.  Does not need to be freed but may become invalid
- *                       when \a in_options is freed.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the response for a prompt for use when acquiring credentials.
- * \note Each response only overrides the first prompt of a given prompt type.  If multiple
- * prompts of the same type are required, or if a prompt of a different type is requested, 
- * the prompt callback will be called to obtain user input.  If you want to turn off prompting 
- * entirely, call #kim_options_set_prompt_callback() with #kim_prompt_callback_none.
- * \par Default value
- * NULL (no response is set by default)
- * \sa kim_options_set_prompt_response()
- */
-kim_error kim_options_get_prompt_response (kim_options       in_options,
-                                           kim_prompt_type   in_prompt_type,
-                                           void            **out_response);
 
 /*!
  * \param io_options    an options object to modify.

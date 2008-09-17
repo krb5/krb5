@@ -31,8 +31,6 @@ kim_options_set_prompt_callback
 kim_options_get_prompt_callback
 kim_options_set_data
 kim_options_get_data
-kim_options_set_prompt_response
-kim_options_get_prompt_response
 kim_options_set_start_time
 kim_options_get_start_time
 kim_options_set_lifetime

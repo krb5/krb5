@@ -39,4 +39,6 @@ void test_kim_preferences_set_remember_options (kim_test_state_t state);
 
 void test_kim_preferences_set_client_identity (kim_test_state_t state);
 
+void test_kim_preferences_add_favorite_identity (kim_test_state_t state);
+
 #endif /* TEST_KIM_PREFERENCES_H */

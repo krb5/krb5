@@ -68,5 +68,7 @@ int main (int argc, const char * argv[])
     
     test_kim_selection_hints_remember_identity (state);
     
+    test_kim_preferences_add_favorite_identity (state);
+    
     return test_cleanup (state);
 }
