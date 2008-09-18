@@ -83,8 +83,6 @@ extern "C" {
  * \li #kim_identity_create_from_krb5_principal() generates an identity object from a krb5_principal object.
  * \li #kim_identity_get_krb5_principal() returns a krb5_principal object for an identity object.
  *
- * \li #kim_identity_get_gss_name() returns a gss_name_t object for use with gss_acquire_cred().
- *
  * \note If you need to know if two identity objects refer to the same entity, use #kim_identity_compare().
  *
  *
@@ -255,16 +253,6 @@ kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
 kim_error kim_identity_get_krb5_principal (kim_identity  in_identity,
                                              krb5_context    in_krb5_context,
                                              krb5_principal *out_krb5_principal);
-
-/*!
- * \param in_identity   an identity object.
- * \param out_gss_name  on exit, a gss_name_t representation of \a in_identity.
- *                      Must be freed with gss_release_name().
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the gss_name_t representation of an identity.
- */
-kim_error kim_identity_get_gss_name (kim_identity  in_identity,
-                                       gss_name_t     *out_gss_name);
 
 /*!
  * \param in_identity  an identity object whose password will be changed.

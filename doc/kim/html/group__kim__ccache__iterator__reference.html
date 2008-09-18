@@ -9,19 +9,19 @@
 <p>
 <h2>Functions</h2>
 <ul>
-<li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__ccache__iterator__reference.html#g2f116eaf59776453db578c9342b8c3e1">kim_ccache_iterator_create</a> (<a class="el" href="group__kim__types__reference.html#gf19042fb689c87bfbe381654f75af5b9">kim_ccache_iterator_t</a> *out_ccache_iterator)
-<dl class="el"><dd class="mdescRight">Get a ccache iterator to enumerate ccaches in the cache collection.  <a href="#g2f116eaf59776453db578c9342b8c3e1"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__ccache__iterator__reference.html#g71dc66abc8b357e318c48debd2cb7916">kim_ccache_iterator_next</a> (<a class="el" href="group__kim__types__reference.html#gf19042fb689c87bfbe381654f75af5b9">kim_ccache_iterator_t</a> in_ccache_iterator, <a class="el" href="group__kim__types__reference.html#g9fd49877bb2360ab487ffbbbe3342393">kim_ccache_t</a> *out_ccache)
-<dl class="el"><dd class="mdescRight">Get the next ccache in the cache collection.  <a href="#g71dc66abc8b357e318c48debd2cb7916"></a><br></dl><li>void <a class="el" href="group__kim__ccache__iterator__reference.html#ged070acdb8996a34c622675369733d12">kim_ccache_iterator_free</a> (<a class="el" href="group__kim__types__reference.html#gf19042fb689c87bfbe381654f75af5b9">kim_ccache_iterator_t</a> *io_ccache_iterator)
-<dl class="el"><dd class="mdescRight">Free memory associated with a ccache iterator.  <a href="#ged070acdb8996a34c622675369733d12"></a><br></dl></ul>
+<li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__iterator__reference.html#g3201595a767a17da00f511bf4bb31632">kim_ccache_iterator_create</a> (<a class="el" href="group__kim__types__reference.html#gdf94e85294f9f42293bfb6a4ec35817c">kim_ccache_iterator</a> *out_ccache_iterator)
+<dl class="el"><dd class="mdescRight">Get a ccache iterator to enumerate ccaches in the cache collection.  <a href="#g3201595a767a17da00f511bf4bb31632"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__iterator__reference.html#gf695d88e8be91330f23aaf765f3d19bc">kim_ccache_iterator_next</a> (<a class="el" href="group__kim__types__reference.html#gdf94e85294f9f42293bfb6a4ec35817c">kim_ccache_iterator</a> in_ccache_iterator, <a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache)
+<dl class="el"><dd class="mdescRight">Get the next ccache in the cache collection.  <a href="#gf695d88e8be91330f23aaf765f3d19bc"></a><br></dl><li>void <a class="el" href="group__kim__ccache__iterator__reference.html#g2af38d7f654d6cd513fb4bf7cf35ce21">kim_ccache_iterator_free</a> (<a class="el" href="group__kim__types__reference.html#gdf94e85294f9f42293bfb6a4ec35817c">kim_ccache_iterator</a> *io_ccache_iterator)
+<dl class="el"><dd class="mdescRight">Free memory associated with a ccache iterator.  <a href="#g2af38d7f654d6cd513fb4bf7cf35ce21"></a><br></dl></ul>
 <hr><h2>Function Documentation</h2>
-<a class="anchor" name="g2f116eaf59776453db578c9342b8c3e1"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_iterator_create" ref="g2f116eaf59776453db578c9342b8c3e1" args="(kim_ccache_iterator_t *out_ccache_iterator)" -->
+<a class="anchor" name="g3201595a767a17da00f511bf4bb31632"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_iterator_create" ref="g3201595a767a17da00f511bf4bb31632" args="(kim_ccache_iterator *out_ccache_iterator)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_ccache_iterator_create           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_ccache_iterator_create           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gf19042fb689c87bfbe381654f75af5b9">kim_ccache_iterator_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gdf94e85294f9f42293bfb6a4ec35817c">kim_ccache_iterator</a> *&nbsp;</td>
           <td class="paramname"> <em>out_ccache_iterator</em>          </td>
           <td>&nbsp;)&nbsp;</td>
           <td width="100%"></td>
@@ -38,24 +38,24 @@ Get a ccache iterator to enumerate ccaches in the cache collection.
     <tr><td valign="top"></td><td valign="top"><em>out_ccache_iterator</em>&nbsp;</td><td>on exit, a ccache iterator object for the cache collection. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g71dc66abc8b357e318c48debd2cb7916"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_iterator_next" ref="g71dc66abc8b357e318c48debd2cb7916" args="(kim_ccache_iterator_t in_ccache_iterator, kim_ccache_t *out_ccache)" -->
+<a class="anchor" name="gf695d88e8be91330f23aaf765f3d19bc"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_iterator_next" ref="gf695d88e8be91330f23aaf765f3d19bc" args="(kim_ccache_iterator in_ccache_iterator, kim_ccache *out_ccache)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_ccache_iterator_next           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_ccache_iterator_next           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gf19042fb689c87bfbe381654f75af5b9">kim_ccache_iterator_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gdf94e85294f9f42293bfb6a4ec35817c">kim_ccache_iterator</a>&nbsp;</td>
           <td class="paramname"> <em>in_ccache_iterator</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g9fd49877bb2360ab487ffbbbe3342393">kim_ccache_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *&nbsp;</td>
           <td class="paramname"> <em>out_ccache</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -76,18 +76,18 @@ Get the next ccache in the cache collection.
     <tr><td valign="top"></td><td valign="top"><em>out_ccache</em>&nbsp;</td><td>on exit, the next ccache in the cache collection. If there are no more ccaches in the cache collection this argument will be set to NULL. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="ged070acdb8996a34c622675369733d12"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_iterator_free" ref="ged070acdb8996a34c622675369733d12" args="(kim_ccache_iterator_t *io_ccache_iterator)" -->
+<a class="anchor" name="g2af38d7f654d6cd513fb4bf7cf35ce21"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_iterator_free" ref="g2af38d7f654d6cd513fb4bf7cf35ce21" args="(kim_ccache_iterator *io_ccache_iterator)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void kim_ccache_iterator_free           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gf19042fb689c87bfbe381654f75af5b9">kim_ccache_iterator_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gdf94e85294f9f42293bfb6a4ec35817c">kim_ccache_iterator</a> *&nbsp;</td>
           <td class="paramname"> <em>io_ccache_iterator</em>          </td>
           <td>&nbsp;)&nbsp;</td>
           <td width="100%"></td>
@@ -107,7 +107,7 @@ Free memory associated with a ccache iterator.
 
 </div>
 </div><p>
-<hr size="1"><address style="text-align: right;"><small>Generated on Wed May 7 15:22:19 2008 for Kerberos Identity Management by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Thu Sep 18 10:55:28 2008 for Kerberos Identity Management by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

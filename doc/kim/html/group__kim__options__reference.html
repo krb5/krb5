@@ -9,41 +9,39 @@
 <p>
 <h2>Functions</h2>
 <ul>
-<li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g4d00f4d070409ea90aa69a8ac5cb47cf">kim_options_create</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> *out_options)
-<dl class="el"><dd class="mdescRight">Create new options with default values.  <a href="#g4d00f4d070409ea90aa69a8ac5cb47cf"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g9581098fcec4c67e4504d90c98dd8d06">kim_options_copy</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> *out_options, <a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options)
-<dl class="el"><dd class="mdescRight">Copy options.  <a href="#g9581098fcec4c67e4504d90c98dd8d06"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#gb3342e60ebb03f901307fd605af5a684">kim_options_set_prompt_callback</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g3dc87ed0aa0847e5af0e4f410ba6d7dd">kim_prompt_callback_t</a> in_prompt_callback)
-<dl class="el"><dd class="mdescRight">Set the prompt callback for obtaining information from the user.  <a href="#gb3342e60ebb03f901307fd605af5a684"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g33ef5b43db39436f16f0c7d80d1860d1">kim_options_get_prompt_callback</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g3dc87ed0aa0847e5af0e4f410ba6d7dd">kim_prompt_callback_t</a> *out_prompt_callback)
-<dl class="el"><dd class="mdescRight">Get the prompt callback for obtaining information from the user.  <a href="#g33ef5b43db39436f16f0c7d80d1860d1"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#gf8836b9f6f8a8d4350a781b85f4017e5">kim_options_set_data</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, const void *in_data)
-<dl class="el"><dd class="mdescRight">Set caller-specific data for use in library callbacks.  <a href="#gf8836b9f6f8a8d4350a781b85f4017e5"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g4adbc1e7656c45991f07533798132e4b">kim_options_get_data</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, const void **out_data)
-<dl class="el"><dd class="mdescRight">Get caller-specific data for use in library callbacks.  <a href="#g4adbc1e7656c45991f07533798132e4b"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g55acd6378c0bdf5c534b9535a534c9bd">kim_options_set_prompt_response</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g8d58b8d10d34b30675b1402a12d9fdd1">kim_prompt_type_t</a> in_prompt_type, void *in_response)
-<dl class="el"><dd class="mdescRight">Set a response for a prompt for use when acquiring credentials.  <a href="#g55acd6378c0bdf5c534b9535a534c9bd"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g7e45337c11734b040c74038f8c2ab21c">kim_options_get_prompt_response</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g8d58b8d10d34b30675b1402a12d9fdd1">kim_prompt_type_t</a> in_prompt_type, void **out_response)
-<dl class="el"><dd class="mdescRight">Get the response for a prompt for use when acquiring credentials.  <a href="#g7e45337c11734b040c74038f8c2ab21c"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g2193de68adcec22df88069d86e2a145c">kim_options_set_start_time</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g22f06b0741ccb68b739e6395774a53c6">kim_time_t</a> in_start_time)
-<dl class="el"><dd class="mdescRight">Set the date when a credential should become valid.  <a href="#g2193de68adcec22df88069d86e2a145c"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g587539ca61a06b5730ed688f914e9fa6">kim_options_get_start_time</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g22f06b0741ccb68b739e6395774a53c6">kim_time_t</a> *out_start_time)
-<dl class="el"><dd class="mdescRight">Get the date when a credential should become valid.  <a href="#g587539ca61a06b5730ed688f914e9fa6"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#ga6058acd016b6387be19e0127606fcb1">kim_options_set_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a> in_lifetime)
-<dl class="el"><dd class="mdescRight">Set the duration during which a credential should be valid.  <a href="#ga6058acd016b6387be19e0127606fcb1"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#gc179cfff2a29eb0bbe4ac0b6dab8afad">kim_options_get_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a> *out_lifetime)
-<dl class="el"><dd class="mdescRight">Get the duration during which an acquired credential should be valid.  <a href="#gc179cfff2a29eb0bbe4ac0b6dab8afad"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g47a49dca419a7d7f1d79c5acd1f16b7a">kim_options_set_renewable</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> in_renewable)
-<dl class="el"><dd class="mdescRight">Set whether or not to request a renewable credential.  <a href="#g47a49dca419a7d7f1d79c5acd1f16b7a"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#gefc2785f119f04379b20d381a79a45af">kim_options_get_renewable</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *out_renewable)
-<dl class="el"><dd class="mdescRight">Get whether or not to request a renewable credential.  <a href="#gefc2785f119f04379b20d381a79a45af"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g035bd3841ff3581922cba91b043cd945">kim_options_set_renewal_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a> in_renewal_lifetime)
-<dl class="el"><dd class="mdescRight">Set the duration during which a valid credential should be renewable.  <a href="#g035bd3841ff3581922cba91b043cd945"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g2a49d92912b6270357788436d2c6fd8f">kim_options_get_renewal_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a> *out_renewal_lifetime)
-<dl class="el"><dd class="mdescRight">Get the duration during which a valid credential should be renewable.  <a href="#g2a49d92912b6270357788436d2c6fd8f"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#gc055fb95bb39e93b276dc2380632cd6d">kim_options_set_forwardable</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> in_forwardable)
-<dl class="el"><dd class="mdescRight">Set whether or not to request a forwardable credential.  <a href="#gc055fb95bb39e93b276dc2380632cd6d"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g6dc2e2ec0448d28ce847fc8880ce8561">kim_options_get_forwardable</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *out_forwardable)
-<dl class="el"><dd class="mdescRight">Get whether or not to request a forwardable credential.  <a href="#g6dc2e2ec0448d28ce847fc8880ce8561"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g4ab6093bff1c28196e2886e146d5e0d0">kim_options_set_proxiable</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> in_proxiable)
-<dl class="el"><dd class="mdescRight">Set whether or not to request a proxiable credential.  <a href="#g4ab6093bff1c28196e2886e146d5e0d0"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#ga36c948940f89e1cca4477b3d1869c84">kim_options_get_proxiable</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *out_proxiable)
-<dl class="el"><dd class="mdescRight">Get whether or not to request a proxiable credential.  <a href="#ga36c948940f89e1cca4477b3d1869c84"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g673640ffd337c815cbc71cbef32b4156">kim_options_set_addressless</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> in_addressless)
-<dl class="el"><dd class="mdescRight">Set whether or not to request an addressless credential.  <a href="#g673640ffd337c815cbc71cbef32b4156"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g8308f996ae22cad938ec4a4782a01322">kim_options_get_addressless</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *out_addressless)
-<dl class="el"><dd class="mdescRight">Get whether or not to request an addressless credential.  <a href="#g8308f996ae22cad938ec4a4782a01322"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#g5914bd9caf4ba781c723d152bf5ddc05">kim_options_set_service_name</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> io_options, <a class="el" href="group__kim__types__reference.html#g6015e25c120b236938e23290177f5dce">kim_string_t</a> in_service_name)
-<dl class="el"><dd class="mdescRight">Set the service name to request a credential for.  <a href="#g5914bd9caf4ba781c723d152bf5ddc05"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> <a class="el" href="group__kim__options__reference.html#ge74278a56626df2ad5a60ed61d8a1836">kim_options_get_service_name</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> in_options, <a class="el" href="group__kim__types__reference.html#g6015e25c120b236938e23290177f5dce">kim_string_t</a> *out_service_name)
-<dl class="el"><dd class="mdescRight">Get the service name to request a credential for.  <a href="#ge74278a56626df2ad5a60ed61d8a1836"></a><br></dl><li>void <a class="el" href="group__kim__options__reference.html#g06130689189d5ba4f9e518c8ed68eb7d">kim_options_free</a> (<a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> *io_options)
-<dl class="el"><dd class="mdescRight">Free memory associated with an options object.  <a href="#g06130689189d5ba4f9e518c8ed68eb7d"></a><br></dl></ul>
+<li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#ge36eb288b38f18491e4c903f008b1379">kim_options_create</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *out_options)
+<dl class="el"><dd class="mdescRight">Create new options with default values.  <a href="#ge36eb288b38f18491e4c903f008b1379"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g17fc17a04097c42afab7a6b1a3f8d7fb">kim_options_copy</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *out_options, <a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options)
+<dl class="el"><dd class="mdescRight">Copy options.  <a href="#g17fc17a04097c42afab7a6b1a3f8d7fb"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g645bfc7ee5e4d17e53d34964dee2a7d7">kim_options_set_prompt_callback</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#gded2c3c2de01d94299b65fb8df64bdcc">kim_prompt_callback</a> in_prompt_callback)
+<dl class="el"><dd class="mdescRight">Set the prompt callback for obtaining information from the user.  <a href="#g645bfc7ee5e4d17e53d34964dee2a7d7"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g5bde52591259c4598530553ea2719181">kim_options_get_prompt_callback</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#gded2c3c2de01d94299b65fb8df64bdcc">kim_prompt_callback</a> *out_prompt_callback)
+<dl class="el"><dd class="mdescRight">Get the prompt callback for obtaining information from the user.  <a href="#g5bde52591259c4598530553ea2719181"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g4b061cf6dc57624b91560b5d511a7c43">kim_options_set_data</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, const void *in_data)
+<dl class="el"><dd class="mdescRight">Set caller-specific data for use in library callbacks.  <a href="#g4b061cf6dc57624b91560b5d511a7c43"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#gf81e50923e7b4604950a5aec8a3676d7">kim_options_get_data</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, const void **out_data)
+<dl class="el"><dd class="mdescRight">Get caller-specific data for use in library callbacks.  <a href="#gf81e50923e7b4604950a5aec8a3676d7"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#gf7f6a8a82fedc547c8502ce09a419f91">kim_options_set_start_time</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a> in_start_time)
+<dl class="el"><dd class="mdescRight">Set the date when a credential should become valid.  <a href="#gf7f6a8a82fedc547c8502ce09a419f91"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#gca63b972b41530c52bbe83bd974e6f9b">kim_options_get_start_time</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a> *out_start_time)
+<dl class="el"><dd class="mdescRight">Get the date when a credential should become valid.  <a href="#gca63b972b41530c52bbe83bd974e6f9b"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g392369e80bea0ea9c920d6de55e080ed">kim_options_set_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a> in_lifetime)
+<dl class="el"><dd class="mdescRight">Set the duration during which a credential should be valid.  <a href="#g392369e80bea0ea9c920d6de55e080ed"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#gd7a886d6c0a33d0d872bf40420023ee2">kim_options_get_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a> *out_lifetime)
+<dl class="el"><dd class="mdescRight">Get the duration during which an acquired credential should be valid.  <a href="#gd7a886d6c0a33d0d872bf40420023ee2"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#gcfa20d97d1643714a62b81077c1722ba">kim_options_set_renewable</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> in_renewable)
+<dl class="el"><dd class="mdescRight">Set whether or not to request a renewable credential.  <a href="#gcfa20d97d1643714a62b81077c1722ba"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g073245936d6086da6f1d3572872ecfe6">kim_options_get_renewable</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *out_renewable)
+<dl class="el"><dd class="mdescRight">Get whether or not to request a renewable credential.  <a href="#g073245936d6086da6f1d3572872ecfe6"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g604ed101fa538a6f042fe612d74b5ed2">kim_options_set_renewal_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a> in_renewal_lifetime)
+<dl class="el"><dd class="mdescRight">Set the duration during which a valid credential should be renewable.  <a href="#g604ed101fa538a6f042fe612d74b5ed2"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g34bcb26ba38f691c6f5d48ec97a49392">kim_options_get_renewal_lifetime</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a> *out_renewal_lifetime)
+<dl class="el"><dd class="mdescRight">Get the duration during which a valid credential should be renewable.  <a href="#g34bcb26ba38f691c6f5d48ec97a49392"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#gc787d6b18febc22c86299d2668818513">kim_options_set_forwardable</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> in_forwardable)
+<dl class="el"><dd class="mdescRight">Set whether or not to request a forwardable credential.  <a href="#gc787d6b18febc22c86299d2668818513"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g649b9ded186ec13915196a6f8ded7565">kim_options_get_forwardable</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *out_forwardable)
+<dl class="el"><dd class="mdescRight">Get whether or not to request a forwardable credential.  <a href="#g649b9ded186ec13915196a6f8ded7565"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g15ffe61f06334f4071e5b1ea6be62117">kim_options_set_proxiable</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> in_proxiable)
+<dl class="el"><dd class="mdescRight">Set whether or not to request a proxiable credential.  <a href="#g15ffe61f06334f4071e5b1ea6be62117"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g0193dda96349a6e8d98d6154540a364e">kim_options_get_proxiable</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *out_proxiable)
+<dl class="el"><dd class="mdescRight">Get whether or not to request a proxiable credential.  <a href="#g0193dda96349a6e8d98d6154540a364e"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g4706fb2cc57109b8593f0b030218261a">kim_options_set_addressless</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> in_addressless)
+<dl class="el"><dd class="mdescRight">Set whether or not to request an addressless credential.  <a href="#g4706fb2cc57109b8593f0b030218261a"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g50495f13e53c49a11729904038e7cdf9">kim_options_get_addressless</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *out_addressless)
+<dl class="el"><dd class="mdescRight">Get whether or not to request an addressless credential.  <a href="#g50495f13e53c49a11729904038e7cdf9"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#g6e31c69a65efe32a5860125083d0b803">kim_options_set_service_name</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> io_options, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_service_name)
+<dl class="el"><dd class="mdescRight">Set the service name to request a credential for.  <a href="#g6e31c69a65efe32a5860125083d0b803"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__options__reference.html#gdf70addbc8221c252b1223b5e99dfa94">kim_options_get_service_name</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *out_service_name)
+<dl class="el"><dd class="mdescRight">Get the service name to request a credential for.  <a href="#gdf70addbc8221c252b1223b5e99dfa94"></a><br></dl><li>void <a class="el" href="group__kim__options__reference.html#gd8de9ea0a4eb9e0ffb8e3056a3899f55">kim_options_free</a> (<a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *io_options)
+<dl class="el"><dd class="mdescRight">Free memory associated with an options object.  <a href="#gd8de9ea0a4eb9e0ffb8e3056a3899f55"></a><br></dl></ul>
 <hr><h2>Function Documentation</h2>
-<a class="anchor" name="g4d00f4d070409ea90aa69a8ac5cb47cf"></a><!-- doxytag: member="kim_options.h::kim_options_create" ref="g4d00f4d070409ea90aa69a8ac5cb47cf" args="(kim_options_t *out_options)" -->
+<a class="anchor" name="ge36eb288b38f18491e4c903f008b1379"></a><!-- doxytag: member="kim_options.h::kim_options_create" ref="ge36eb288b38f18491e4c903f008b1379" args="(kim_options *out_options)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_create           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_create           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *&nbsp;</td>
           <td class="paramname"> <em>out_options</em>          </td>
           <td>&nbsp;)&nbsp;</td>
           <td width="100%"></td>
@@ -57,27 +55,27 @@ Create new options with default values.
 <p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>out_options</em>&nbsp;</td><td>on exit, a new options object. Must be freed with <a class="el" href="group__kim__options__reference.html#g06130689189d5ba4f9e518c8ed68eb7d" title="Free memory associated with an options object.">kim_options_free()</a>. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>out_options</em>&nbsp;</td><td>on exit, a new options object. Must be freed with <a class="el" href="group__kim__options__reference.html#gd8de9ea0a4eb9e0ffb8e3056a3899f55" title="Free memory associated with an options object.">kim_options_free()</a>. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g9581098fcec4c67e4504d90c98dd8d06"></a><!-- doxytag: member="kim_options.h::kim_options_copy" ref="g9581098fcec4c67e4504d90c98dd8d06" args="(kim_options_t *out_options, kim_options_t in_options)" -->
+<a class="anchor" name="g17fc17a04097c42afab7a6b1a3f8d7fb"></a><!-- doxytag: member="kim_options.h::kim_options_copy" ref="g17fc17a04097c42afab7a6b1a3f8d7fb" args="(kim_options *out_options, kim_options in_options)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_copy           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_copy           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *&nbsp;</td>
           <td class="paramname"> <em>out_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -94,28 +92,28 @@ Copy options.
 <p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>out_options</em>&nbsp;</td><td>on exit, a new options object which is a copy of <em>in_options</em>. Must be freed with <a class="el" href="group__kim__options__reference.html#g06130689189d5ba4f9e518c8ed68eb7d" title="Free memory associated with an options object.">kim_options_free()</a>. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>out_options</em>&nbsp;</td><td>on exit, a new options object which is a copy of <em>in_options</em>. Must be freed with <a class="el" href="group__kim__options__reference.html#gd8de9ea0a4eb9e0ffb8e3056a3899f55" title="Free memory associated with an options object.">kim_options_free()</a>. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>in_options</em>&nbsp;</td><td>a options object. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="gb3342e60ebb03f901307fd605af5a684"></a><!-- doxytag: member="kim_options.h::kim_options_set_prompt_callback" ref="gb3342e60ebb03f901307fd605af5a684" args="(kim_options_t io_options, kim_prompt_callback_t in_prompt_callback)" -->
+<a class="anchor" name="g645bfc7ee5e4d17e53d34964dee2a7d7"></a><!-- doxytag: member="kim_options.h::kim_options_set_prompt_callback" ref="g645bfc7ee5e4d17e53d34964dee2a7d7" args="(kim_options io_options, kim_prompt_callback in_prompt_callback)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_prompt_callback           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_prompt_callback           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g3dc87ed0aa0847e5af0e4f410ba6d7dd">kim_prompt_callback_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gded2c3c2de01d94299b65fb8df64bdcc">kim_prompt_callback</a>&nbsp;</td>
           <td class="paramname"> <em>in_prompt_callback</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -136,26 +134,26 @@ Set the prompt callback for obtaining information from the user.
     <tr><td valign="top"></td><td valign="top"><em>in_prompt_callback</em>&nbsp;</td><td>a prompt callback function. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
-<dl class="user" compact><dt><b>Default value</b></dt><dd><a class="el" href="group__kim__types__reference.html#gd9cfd6a66e9bdcde30a285dc350eb370">kim_prompt_callback_default</a> </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g33ef5b43db39436f16f0c7d80d1860d1" title="Get the prompt callback for obtaining information from the user.">kim_options_get_prompt_callback()</a> </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
+<dl class="user" compact><dt><b>Default value</b></dt><dd><a class="el" href="group__kim__types__reference.html#gbacd03bffb1ba46e4d8e36d19d91a170">kim_prompt_callback_default</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g5bde52591259c4598530553ea2719181" title="Get the prompt callback for obtaining information from the user.">kim_options_get_prompt_callback()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g33ef5b43db39436f16f0c7d80d1860d1"></a><!-- doxytag: member="kim_options.h::kim_options_get_prompt_callback" ref="g33ef5b43db39436f16f0c7d80d1860d1" args="(kim_options_t in_options, kim_prompt_callback_t *out_prompt_callback)" -->
+<a class="anchor" name="g5bde52591259c4598530553ea2719181"></a><!-- doxytag: member="kim_options.h::kim_options_get_prompt_callback" ref="g5bde52591259c4598530553ea2719181" args="(kim_options in_options, kim_prompt_callback *out_prompt_callback)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_prompt_callback           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_prompt_callback           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g3dc87ed0aa0847e5af0e4f410ba6d7dd">kim_prompt_callback_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gded2c3c2de01d94299b65fb8df64bdcc">kim_prompt_callback</a> *&nbsp;</td>
           <td class="paramname"> <em>out_prompt_callback</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -176,20 +174,20 @@ Get the prompt callback for obtaining information from the user.
     <tr><td valign="top"></td><td valign="top"><em>out_prompt_callback</em>&nbsp;</td><td>on exit, the prompt callback specified by in_options. Does not need to be freed but may become invalid when <em>in_options</em> is freed. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
-<dl class="user" compact><dt><b>Default value</b></dt><dd><a class="el" href="group__kim__types__reference.html#gd9cfd6a66e9bdcde30a285dc350eb370">kim_prompt_callback_default</a> </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gb3342e60ebb03f901307fd605af5a684" title="Set the prompt callback for obtaining information from the user.">kim_options_set_prompt_callback()</a> </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
+<dl class="user" compact><dt><b>Default value</b></dt><dd><a class="el" href="group__kim__types__reference.html#gbacd03bffb1ba46e4d8e36d19d91a170">kim_prompt_callback_default</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g645bfc7ee5e4d17e53d34964dee2a7d7" title="Set the prompt callback for obtaining information from the user.">kim_options_set_prompt_callback()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="gf8836b9f6f8a8d4350a781b85f4017e5"></a><!-- doxytag: member="kim_options.h::kim_options_set_data" ref="gf8836b9f6f8a8d4350a781b85f4017e5" args="(kim_options_t io_options, const void *in_data)" -->
+<a class="anchor" name="g4b061cf6dc57624b91560b5d511a7c43"></a><!-- doxytag: member="kim_options.h::kim_options_set_data" ref="g4b061cf6dc57624b91560b5d511a7c43" args="(kim_options io_options, const void *in_data)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_data           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_data           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
@@ -216,21 +214,21 @@ Set caller-specific data for use in library callbacks.
     <tr><td valign="top"></td><td valign="top"><em>in_data</em>&nbsp;</td><td>a pointer to caller-specific data. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>This option can be used by the caller to store a pointer to data needed when handling a callback. The KIM library does not use this options data in any way. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>NULL (no data is set by default) </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g4adbc1e7656c45991f07533798132e4b" title="Get caller-specific data for use in library callbacks.">kim_options_get_data()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gf81e50923e7b4604950a5aec8a3676d7" title="Get caller-specific data for use in library callbacks.">kim_options_get_data()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g4adbc1e7656c45991f07533798132e4b"></a><!-- doxytag: member="kim_options.h::kim_options_get_data" ref="g4adbc1e7656c45991f07533798132e4b" args="(kim_options_t in_options, const void **out_data)" -->
+<a class="anchor" name="gf81e50923e7b4604950a5aec8a3676d7"></a><!-- doxytag: member="kim_options.h::kim_options_get_data" ref="gf81e50923e7b4604950a5aec8a3676d7" args="(kim_options in_options, const void **out_data)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_data           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_data           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
@@ -257,123 +255,27 @@ Get caller-specific data for use in library callbacks.
     <tr><td valign="top"></td><td valign="top"><em>out_data</em>&nbsp;</td><td>on exit, the pointer to caller specific data specified by in_options. Does not need to be freed but may become invalid when <em>in_options</em> is freed. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>This option can be used by the caller to store a pointer to data needed when handling a callback. The KIM library does not use this options data in any way. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>NULL (no data is set by default) </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gf8836b9f6f8a8d4350a781b85f4017e5" title="Set caller-specific data for use in library callbacks.">kim_options_set_data()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g4b061cf6dc57624b91560b5d511a7c43" title="Set caller-specific data for use in library callbacks.">kim_options_set_data()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g55acd6378c0bdf5c534b9535a534c9bd"></a><!-- doxytag: member="kim_options.h::kim_options_set_prompt_response" ref="g55acd6378c0bdf5c534b9535a534c9bd" args="(kim_options_t io_options, kim_prompt_type_t in_prompt_type, void *in_response)" -->
+<a class="anchor" name="gf7f6a8a82fedc547c8502ce09a419f91"></a><!-- doxytag: member="kim_options.h::kim_options_set_start_time" ref="gf7f6a8a82fedc547c8502ce09a419f91" args="(kim_options io_options, kim_time in_start_time)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_prompt_response           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_start_time           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g8d58b8d10d34b30675b1402a12d9fdd1">kim_prompt_type_t</a>&nbsp;</td>
-          <td class="paramname"> <em>in_prompt_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&nbsp;</td>
-          <td class="paramname"> <em>in_response</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-Set a response for a prompt for use when acquiring credentials. 
-<p>
-<dl compact><dt><b>Parameters:</b></dt><dd>
-  <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>io_options</em>&nbsp;</td><td>an options object to modify. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>in_prompt_type</em>&nbsp;</td><td>a type of prompt. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>in_response</em>&nbsp;</td><td>a response to prompts of <em>in_prompt_type</em>. </td></tr>
-  </table>
-</dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
-<dl class="note" compact><dt><b>Note:</b></dt><dd>Each response only overrides the first prompt of a given prompt type. If multiple prompts of the same type are required, or if a prompt of a different type is requested, the prompt callback will be called to obtain user input. If you want to turn off prompting entirely, call <a class="el" href="group__kim__options__reference.html#gb3342e60ebb03f901307fd605af5a684" title="Set the prompt callback for obtaining information from the user.">kim_options_set_prompt_callback()</a> with <a class="el" href="group__kim__types__reference.html#g9699effd6079690c8b744ff96dff1914">kim_prompt_callback_none</a>. </dd></dl>
-<dl class="user" compact><dt><b>Default value</b></dt><dd>NULL (no response is set by default) </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g7e45337c11734b040c74038f8c2ab21c" title="Get the response for a prompt for use when acquiring credentials.">kim_options_get_prompt_response()</a> </dd></dl>
-
-</div>
-</div><p>
-<a class="anchor" name="g7e45337c11734b040c74038f8c2ab21c"></a><!-- doxytag: member="kim_options.h::kim_options_get_prompt_response" ref="g7e45337c11734b040c74038f8c2ab21c" args="(kim_options_t in_options, kim_prompt_type_t in_prompt_type, void **out_response)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_prompt_response           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
-          <td class="paramname"> <em>in_options</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g8d58b8d10d34b30675b1402a12d9fdd1">kim_prompt_type_t</a>&nbsp;</td>
-          <td class="paramname"> <em>in_prompt_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void **&nbsp;</td>
-          <td class="paramname"> <em>out_response</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-Get the response for a prompt for use when acquiring credentials. 
-<p>
-<dl compact><dt><b>Parameters:</b></dt><dd>
-  <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>in_options</em>&nbsp;</td><td>an options object. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>in_prompt_type</em>&nbsp;</td><td>a type of prompt. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>out_response</em>&nbsp;</td><td>on exit, the response to prompts of type <em>in_prompt_type</em> specified by <em>in_options</em>. Does not need to be freed but may become invalid when <em>in_options</em> is freed. </td></tr>
-  </table>
-</dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
-<dl class="note" compact><dt><b>Note:</b></dt><dd>Each response only overrides the first prompt of a given prompt type. If multiple prompts of the same type are required, or if a prompt of a different type is requested, the prompt callback will be called to obtain user input. If you want to turn off prompting entirely, call <a class="el" href="group__kim__options__reference.html#gb3342e60ebb03f901307fd605af5a684" title="Set the prompt callback for obtaining information from the user.">kim_options_set_prompt_callback()</a> with <a class="el" href="group__kim__types__reference.html#g9699effd6079690c8b744ff96dff1914">kim_prompt_callback_none</a>. </dd></dl>
-<dl class="user" compact><dt><b>Default value</b></dt><dd>NULL (no response is set by default) </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g55acd6378c0bdf5c534b9535a534c9bd" title="Set a response for a prompt for use when acquiring credentials.">kim_options_set_prompt_response()</a> </dd></dl>
-
-</div>
-</div><p>
-<a class="anchor" name="g2193de68adcec22df88069d86e2a145c"></a><!-- doxytag: member="kim_options.h::kim_options_set_start_time" ref="g2193de68adcec22df88069d86e2a145c" args="(kim_options_t io_options, kim_time_t in_start_time)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_start_time           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
-          <td class="paramname"> <em>io_options</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g22f06b0741ccb68b739e6395774a53c6">kim_time_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a>&nbsp;</td>
           <td class="paramname"> <em>in_start_time</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -394,27 +296,27 @@ Set the date when a credential should become valid.
     <tr><td valign="top"></td><td valign="top"><em>in_start_time</em>&nbsp;</td><td>a start date (in seconds since January 1, 1970). Set to <a class="el" href="group__kim__types__reference.html#g88d98fa3bd4ca00913bff414d65c3590">KIM_OPTIONS_START_IMMEDIATELY</a> for the acquired credential to be valid immediately. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>When using a start time in the future, once the start time has been reached the credential must be validated before it can be used. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>0, indicating "now". The credential will be valid immediately. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g587539ca61a06b5730ed688f914e9fa6" title="Get the date when a credential should become valid.">kim_options_get_start_time()</a>, <a class="el" href="group__kim__credential__reference.html#g9cd6ba59236babb4e79a680fa54b5037" title="Validate a TGT credential.">kim_credential_validate()</a>, <a class="el" href="group__kim__ccache__reference.html#g8bb7d46268621e73629dceefd15ff639" title="Validate the TGT in a ccache.">kim_ccache_validate()</a>, kim_identity_validate() </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gca63b972b41530c52bbe83bd974e6f9b" title="Get the date when a credential should become valid.">kim_options_get_start_time()</a>, <a class="el" href="group__kim__credential__reference.html#g63a591ef509219ae83d11b635065984d" title="Validate a TGT credential.">kim_credential_validate()</a>, <a class="el" href="group__kim__ccache__reference.html#g73f5b201d24a58936244fc4e43cd3d59" title="Validate the TGT in a ccache.">kim_ccache_validate()</a>, kim_identity_validate() </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g587539ca61a06b5730ed688f914e9fa6"></a><!-- doxytag: member="kim_options.h::kim_options_get_start_time" ref="g587539ca61a06b5730ed688f914e9fa6" args="(kim_options_t in_options, kim_time_t *out_start_time)" -->
+<a class="anchor" name="gca63b972b41530c52bbe83bd974e6f9b"></a><!-- doxytag: member="kim_options.h::kim_options_get_start_time" ref="gca63b972b41530c52bbe83bd974e6f9b" args="(kim_options in_options, kim_time *out_start_time)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_start_time           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_start_time           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g22f06b0741ccb68b739e6395774a53c6">kim_time_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a> *&nbsp;</td>
           <td class="paramname"> <em>out_start_time</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -435,27 +337,27 @@ Get the date when a credential should become valid.
     <tr><td valign="top"></td><td valign="top"><em>out_start_time</em>&nbsp;</td><td>on exit, the start date (in seconds since January 1, 1970) specified by <em>in_options</em>. <a class="el" href="group__kim__types__reference.html#g88d98fa3bd4ca00913bff414d65c3590">KIM_OPTIONS_START_IMMEDIATELY</a> indicates the credential will be valid immediately. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>When using a start time in the future, once the start time has been reached the credential must be validated before it can be used. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>0, indicating "now". The credential will be valid immediately. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g2193de68adcec22df88069d86e2a145c" title="Set the date when a credential should become valid.">kim_options_set_start_time()</a>, <a class="el" href="group__kim__credential__reference.html#g9cd6ba59236babb4e79a680fa54b5037" title="Validate a TGT credential.">kim_credential_validate()</a>, <a class="el" href="group__kim__ccache__reference.html#g8bb7d46268621e73629dceefd15ff639" title="Validate the TGT in a ccache.">kim_ccache_validate()</a>, kim_identity_validate() </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gf7f6a8a82fedc547c8502ce09a419f91" title="Set the date when a credential should become valid.">kim_options_set_start_time()</a>, <a class="el" href="group__kim__credential__reference.html#g63a591ef509219ae83d11b635065984d" title="Validate a TGT credential.">kim_credential_validate()</a>, <a class="el" href="group__kim__ccache__reference.html#g73f5b201d24a58936244fc4e43cd3d59" title="Validate the TGT in a ccache.">kim_ccache_validate()</a>, kim_identity_validate() </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="ga6058acd016b6387be19e0127606fcb1"></a><!-- doxytag: member="kim_options.h::kim_options_set_lifetime" ref="ga6058acd016b6387be19e0127606fcb1" args="(kim_options_t io_options, kim_lifetime_t in_lifetime)" -->
+<a class="anchor" name="g392369e80bea0ea9c920d6de55e080ed"></a><!-- doxytag: member="kim_options.h::kim_options_set_lifetime" ref="g392369e80bea0ea9c920d6de55e080ed" args="(kim_options io_options, kim_lifetime in_lifetime)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_lifetime           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_lifetime           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a>&nbsp;</td>
           <td class="paramname"> <em>in_lifetime</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -476,27 +378,27 @@ Set the duration during which a credential should be valid.
     <tr><td valign="top"></td><td valign="top"><em>in_lifetime</em>&nbsp;</td><td>a lifetime duration (in seconds). </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>KDCs have a maximum allowed lifetime per identity (usually 10 to 21 hours). As a result the credential will actually have a lifetime which is the minimum of <em>in_lifetime</em> and the KDC's maximum allowed lifetime. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gc179cfff2a29eb0bbe4ac0b6dab8afad" title="Get the duration during which an acquired credential should be valid.">kim_options_get_lifetime()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gd7a886d6c0a33d0d872bf40420023ee2" title="Get the duration during which an acquired credential should be valid.">kim_options_get_lifetime()</a> </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. 10 hours if unspecified. </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="gc179cfff2a29eb0bbe4ac0b6dab8afad"></a><!-- doxytag: member="kim_options.h::kim_options_get_lifetime" ref="gc179cfff2a29eb0bbe4ac0b6dab8afad" args="(kim_options_t in_options, kim_lifetime_t *out_lifetime)" -->
+<a class="anchor" name="gd7a886d6c0a33d0d872bf40420023ee2"></a><!-- doxytag: member="kim_options.h::kim_options_get_lifetime" ref="gd7a886d6c0a33d0d872bf40420023ee2" args="(kim_options in_options, kim_lifetime *out_lifetime)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_lifetime           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_lifetime           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a> *&nbsp;</td>
           <td class="paramname"> <em>out_lifetime</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -517,27 +419,27 @@ Get the duration during which an acquired credential should be valid.
     <tr><td valign="top"></td><td valign="top"><em>out_lifetime</em>&nbsp;</td><td>on exit, the lifetime duration (in seconds) specified in <em>in_options</em>. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>KDCs have a maximum allowed lifetime per identity (usually 10 to 21 hours). As a result the credential will actually have a lifetime which is the minimum of <em>in_lifetime</em> and the KDC's maximum allowed lifetime. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. 10 hours if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#ga6058acd016b6387be19e0127606fcb1" title="Set the duration during which a credential should be valid.">kim_options_set_lifetime()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g392369e80bea0ea9c920d6de55e080ed" title="Set the duration during which a credential should be valid.">kim_options_set_lifetime()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g47a49dca419a7d7f1d79c5acd1f16b7a"></a><!-- doxytag: member="kim_options.h::kim_options_set_renewable" ref="g47a49dca419a7d7f1d79c5acd1f16b7a" args="(kim_options_t io_options, kim_boolean_t in_renewable)" -->
+<a class="anchor" name="gcfa20d97d1643714a62b81077c1722ba"></a><!-- doxytag: member="kim_options.h::kim_options_set_renewable" ref="gcfa20d97d1643714a62b81077c1722ba" args="(kim_options io_options, kim_boolean in_renewable)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_renewable           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_renewable           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a>&nbsp;</td>
           <td class="paramname"> <em>in_renewable</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -558,26 +460,26 @@ Set whether or not to request a renewable credential.
     <tr><td valign="top"></td><td valign="top"><em>in_renewable</em>&nbsp;</td><td>a boolean value indicating whether or not to request a renewable credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gefc2785f119f04379b20d381a79a45af" title="Get whether or not to request a renewable credential.">kim_options_get_renewable()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g073245936d6086da6f1d3572872ecfe6" title="Get whether or not to request a renewable credential.">kim_options_get_renewable()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="gefc2785f119f04379b20d381a79a45af"></a><!-- doxytag: member="kim_options.h::kim_options_get_renewable" ref="gefc2785f119f04379b20d381a79a45af" args="(kim_options_t in_options, kim_boolean_t *out_renewable)" -->
+<a class="anchor" name="g073245936d6086da6f1d3572872ecfe6"></a><!-- doxytag: member="kim_options.h::kim_options_get_renewable" ref="g073245936d6086da6f1d3572872ecfe6" args="(kim_options in_options, kim_boolean *out_renewable)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_renewable           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_renewable           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *&nbsp;</td>
           <td class="paramname"> <em>out_renewable</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -598,26 +500,26 @@ Get whether or not to request a renewable credential.
     <tr><td valign="top"></td><td valign="top"><em>out_renewable</em>&nbsp;</td><td>on exit, a boolean value indicating whether or <em>in_options</em> will request a renewable credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g47a49dca419a7d7f1d79c5acd1f16b7a" title="Set whether or not to request a renewable credential.">kim_options_set_renewable()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gcfa20d97d1643714a62b81077c1722ba" title="Set whether or not to request a renewable credential.">kim_options_set_renewable()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g035bd3841ff3581922cba91b043cd945"></a><!-- doxytag: member="kim_options.h::kim_options_set_renewal_lifetime" ref="g035bd3841ff3581922cba91b043cd945" args="(kim_options_t io_options, kim_lifetime_t in_renewal_lifetime)" -->
+<a class="anchor" name="g604ed101fa538a6f042fe612d74b5ed2"></a><!-- doxytag: member="kim_options.h::kim_options_set_renewal_lifetime" ref="g604ed101fa538a6f042fe612d74b5ed2" args="(kim_options io_options, kim_lifetime in_renewal_lifetime)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_renewal_lifetime           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_renewal_lifetime           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a>&nbsp;</td>
           <td class="paramname"> <em>in_renewal_lifetime</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -638,27 +540,27 @@ Set the duration during which a valid credential should be renewable.
     <tr><td valign="top"></td><td valign="top"><em>in_renewal_lifetime</em>&nbsp;</td><td>a renewal lifetime duration (in seconds). </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>KDCs have a maximum allowed renewal lifetime per identity (usually 10 to 21 hours). As a result the credential will actually have a lifetime which is the minimum of <em>in_lifetime</em> and the KDC's maximum allowed lifetime. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. 7 days if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g2a49d92912b6270357788436d2c6fd8f" title="Get the duration during which a valid credential should be renewable.">kim_options_get_renewal_lifetime()</a>, kim_identity_renew(), <a class="el" href="group__kim__credential__reference.html#g99ac2c178bec484311cd7fc2cbb7e05e" title="Renew a TGT credential.">kim_credential_renew()</a>, <a class="el" href="group__kim__ccache__reference.html#gafb44675df9d05af5b899996be14e2b4" title="Renew the TGT in a ccache.">kim_ccache_renew()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g34bcb26ba38f691c6f5d48ec97a49392" title="Get the duration during which a valid credential should be renewable.">kim_options_get_renewal_lifetime()</a>, kim_identity_renew(), <a class="el" href="group__kim__credential__reference.html#g18f43112f7ae046b2a5918b061a2072d" title="Renew a TGT credential.">kim_credential_renew()</a>, <a class="el" href="group__kim__ccache__reference.html#g574a0ef674116589dcf57460af81de39" title="Renew the TGT in a ccache.">kim_ccache_renew()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g2a49d92912b6270357788436d2c6fd8f"></a><!-- doxytag: member="kim_options.h::kim_options_get_renewal_lifetime" ref="g2a49d92912b6270357788436d2c6fd8f" args="(kim_options_t in_options, kim_lifetime_t *out_renewal_lifetime)" -->
+<a class="anchor" name="g34bcb26ba38f691c6f5d48ec97a49392"></a><!-- doxytag: member="kim_options.h::kim_options_get_renewal_lifetime" ref="g34bcb26ba38f691c6f5d48ec97a49392" args="(kim_options in_options, kim_lifetime *out_renewal_lifetime)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_renewal_lifetime           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_renewal_lifetime           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g1dccbe315455ed55fd34045e3a3e5086">kim_lifetime_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a> *&nbsp;</td>
           <td class="paramname"> <em>out_renewal_lifetime</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -679,27 +581,27 @@ Get the duration during which a valid credential should be renewable.
     <tr><td valign="top"></td><td valign="top"><em>out_renewal_lifetime</em>&nbsp;</td><td>on exit, the renewal lifetime duration (in seconds) specified in <em>in_options</em>. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="note" compact><dt><b>Note:</b></dt><dd>KDCs have a maximum allowed lifetime per identity (usually 10 to 21 hours). As a result the credential will actually have a lifetime which is the minimum of <em>in_lifetime</em> and the KDC's maximum allowed lifetime. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. 7 days if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g035bd3841ff3581922cba91b043cd945" title="Set the duration during which a valid credential should be renewable.">kim_options_set_renewal_lifetime()</a>, kim_identity_renew(), <a class="el" href="group__kim__credential__reference.html#g99ac2c178bec484311cd7fc2cbb7e05e" title="Renew a TGT credential.">kim_credential_renew()</a>, <a class="el" href="group__kim__ccache__reference.html#gafb44675df9d05af5b899996be14e2b4" title="Renew the TGT in a ccache.">kim_ccache_renew()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g604ed101fa538a6f042fe612d74b5ed2" title="Set the duration during which a valid credential should be renewable.">kim_options_set_renewal_lifetime()</a>, kim_identity_renew(), <a class="el" href="group__kim__credential__reference.html#g18f43112f7ae046b2a5918b061a2072d" title="Renew a TGT credential.">kim_credential_renew()</a>, <a class="el" href="group__kim__ccache__reference.html#g574a0ef674116589dcf57460af81de39" title="Renew the TGT in a ccache.">kim_ccache_renew()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="gc055fb95bb39e93b276dc2380632cd6d"></a><!-- doxytag: member="kim_options.h::kim_options_set_forwardable" ref="gc055fb95bb39e93b276dc2380632cd6d" args="(kim_options_t io_options, kim_boolean_t in_forwardable)" -->
+<a class="anchor" name="gc787d6b18febc22c86299d2668818513"></a><!-- doxytag: member="kim_options.h::kim_options_set_forwardable" ref="gc787d6b18febc22c86299d2668818513" args="(kim_options io_options, kim_boolean in_forwardable)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_forwardable           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_forwardable           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a>&nbsp;</td>
           <td class="paramname"> <em>in_forwardable</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -720,26 +622,26 @@ Set whether or not to request a forwardable credential.
     <tr><td valign="top"></td><td valign="top"><em>in_forwardable</em>&nbsp;</td><td>a boolean value indicating whether or not to request a forwardable credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g6dc2e2ec0448d28ce847fc8880ce8561" title="Get whether or not to request a forwardable credential.">kim_options_get_forwardable()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g649b9ded186ec13915196a6f8ded7565" title="Get whether or not to request a forwardable credential.">kim_options_get_forwardable()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g6dc2e2ec0448d28ce847fc8880ce8561"></a><!-- doxytag: member="kim_options.h::kim_options_get_forwardable" ref="g6dc2e2ec0448d28ce847fc8880ce8561" args="(kim_options_t in_options, kim_boolean_t *out_forwardable)" -->
+<a class="anchor" name="g649b9ded186ec13915196a6f8ded7565"></a><!-- doxytag: member="kim_options.h::kim_options_get_forwardable" ref="g649b9ded186ec13915196a6f8ded7565" args="(kim_options in_options, kim_boolean *out_forwardable)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_forwardable           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_forwardable           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *&nbsp;</td>
           <td class="paramname"> <em>out_forwardable</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -760,26 +662,26 @@ Get whether or not to request a forwardable credential.
     <tr><td valign="top"></td><td valign="top"><em>out_forwardable</em>&nbsp;</td><td>on exit, a boolean value indicating whether or <em>in_options</em> will request a forwardable credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gc055fb95bb39e93b276dc2380632cd6d" title="Set whether or not to request a forwardable credential.">kim_options_set_forwardable()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gc787d6b18febc22c86299d2668818513" title="Set whether or not to request a forwardable credential.">kim_options_set_forwardable()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g4ab6093bff1c28196e2886e146d5e0d0"></a><!-- doxytag: member="kim_options.h::kim_options_set_proxiable" ref="g4ab6093bff1c28196e2886e146d5e0d0" args="(kim_options_t io_options, kim_boolean_t in_proxiable)" -->
+<a class="anchor" name="g15ffe61f06334f4071e5b1ea6be62117"></a><!-- doxytag: member="kim_options.h::kim_options_set_proxiable" ref="g15ffe61f06334f4071e5b1ea6be62117" args="(kim_options io_options, kim_boolean in_proxiable)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_proxiable           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_proxiable           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a>&nbsp;</td>
           <td class="paramname"> <em>in_proxiable</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -800,26 +702,26 @@ Set whether or not to request a proxiable credential.
     <tr><td valign="top"></td><td valign="top"><em>in_proxiable</em>&nbsp;</td><td>a boolean value indicating whether or not to request a proxiable credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#ga36c948940f89e1cca4477b3d1869c84" title="Get whether or not to request a proxiable credential.">kim_options_get_proxiable()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g0193dda96349a6e8d98d6154540a364e" title="Get whether or not to request a proxiable credential.">kim_options_get_proxiable()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="ga36c948940f89e1cca4477b3d1869c84"></a><!-- doxytag: member="kim_options.h::kim_options_get_proxiable" ref="ga36c948940f89e1cca4477b3d1869c84" args="(kim_options_t in_options, kim_boolean_t *out_proxiable)" -->
+<a class="anchor" name="g0193dda96349a6e8d98d6154540a364e"></a><!-- doxytag: member="kim_options.h::kim_options_get_proxiable" ref="g0193dda96349a6e8d98d6154540a364e" args="(kim_options in_options, kim_boolean *out_proxiable)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_proxiable           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_proxiable           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *&nbsp;</td>
           <td class="paramname"> <em>out_proxiable</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -840,26 +742,26 @@ Get whether or not to request a proxiable credential.
     <tr><td valign="top"></td><td valign="top"><em>out_proxiable</em>&nbsp;</td><td>on exit, a boolean value indicating whether or <em>in_options</em> will request a proxiable credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g4ab6093bff1c28196e2886e146d5e0d0" title="Set whether or not to request a proxiable credential.">kim_options_set_proxiable()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g15ffe61f06334f4071e5b1ea6be62117" title="Set whether or not to request a proxiable credential.">kim_options_set_proxiable()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g673640ffd337c815cbc71cbef32b4156"></a><!-- doxytag: member="kim_options.h::kim_options_set_addressless" ref="g673640ffd337c815cbc71cbef32b4156" args="(kim_options_t io_options, kim_boolean_t in_addressless)" -->
+<a class="anchor" name="g4706fb2cc57109b8593f0b030218261a"></a><!-- doxytag: member="kim_options.h::kim_options_set_addressless" ref="g4706fb2cc57109b8593f0b030218261a" args="(kim_options io_options, kim_boolean in_addressless)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_addressless           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_addressless           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a>&nbsp;</td>
           <td class="paramname"> <em>in_addressless</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -880,26 +782,26 @@ Set whether or not to request an addressless credential.
     <tr><td valign="top"></td><td valign="top"><em>in_addressless</em>&nbsp;</td><td>a boolean value indicating whether or not to request an addressless credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g8308f996ae22cad938ec4a4782a01322" title="Get whether or not to request an addressless credential.">kim_options_get_addressless()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g50495f13e53c49a11729904038e7cdf9" title="Get whether or not to request an addressless credential.">kim_options_get_addressless()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g8308f996ae22cad938ec4a4782a01322"></a><!-- doxytag: member="kim_options.h::kim_options_get_addressless" ref="g8308f996ae22cad938ec4a4782a01322" args="(kim_options_t in_options, kim_boolean_t *out_addressless)" -->
+<a class="anchor" name="g50495f13e53c49a11729904038e7cdf9"></a><!-- doxytag: member="kim_options.h::kim_options_get_addressless" ref="g50495f13e53c49a11729904038e7cdf9" args="(kim_options in_options, kim_boolean *out_addressless)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_addressless           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_addressless           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g5a14ff972cd96679e00120c506202d3e">kim_boolean_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> *&nbsp;</td>
           <td class="paramname"> <em>out_addressless</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -920,26 +822,26 @@ Get whether or not to request an addressless credential.
     <tr><td valign="top"></td><td valign="top"><em>out_addressless</em>&nbsp;</td><td>on exit, a boolean value indicating whether or <em>in_options</em> will request an addressless credential. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>Read from the user's preferences and the Kerberos configuration. TRUE if unspecified. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g673640ffd337c815cbc71cbef32b4156" title="Set whether or not to request an addressless credential.">kim_options_set_addressless()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g4706fb2cc57109b8593f0b030218261a" title="Set whether or not to request an addressless credential.">kim_options_set_addressless()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g5914bd9caf4ba781c723d152bf5ddc05"></a><!-- doxytag: member="kim_options.h::kim_options_set_service_name" ref="g5914bd9caf4ba781c723d152bf5ddc05" args="(kim_options_t io_options, kim_string_t in_service_name)" -->
+<a class="anchor" name="g6e31c69a65efe32a5860125083d0b803"></a><!-- doxytag: member="kim_options.h::kim_options_set_service_name" ref="g6e31c69a65efe32a5860125083d0b803" args="(kim_options io_options, kim_string in_service_name)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_set_service_name           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_set_service_name           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>io_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6015e25c120b236938e23290177f5dce">kim_string_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
           <td class="paramname"> <em>in_service_name</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -960,26 +862,26 @@ Set the service name to request a credential for.
     <tr><td valign="top"></td><td valign="top"><em>in_service_name</em>&nbsp;</td><td>a service name. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>NULL, indicating "krbtgt@&lt;REALM&gt;", the ticket granting ticket (TGT) service. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#ge74278a56626df2ad5a60ed61d8a1836" title="Get the service name to request a credential for.">kim_options_get_service_name()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#gdf70addbc8221c252b1223b5e99dfa94" title="Get the service name to request a credential for.">kim_options_get_service_name()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="ge74278a56626df2ad5a60ed61d8a1836"></a><!-- doxytag: member="kim_options.h::kim_options_get_service_name" ref="ge74278a56626df2ad5a60ed61d8a1836" args="(kim_options_t in_options, kim_string_t *out_service_name)" -->
+<a class="anchor" name="gdf70addbc8221c252b1223b5e99dfa94"></a><!-- doxytag: member="kim_options.h::kim_options_get_service_name" ref="gdf70addbc8221c252b1223b5e99dfa94" args="(kim_options in_options, kim_string *out_service_name)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g9e10dd2df80df19496dab049a47514cc">kim_error_t</a> kim_options_get_service_name           </td>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_options_get_service_name           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a>&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a>&nbsp;</td>
           <td class="paramname"> <em>in_options</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g6015e25c120b236938e23290177f5dce">kim_string_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *&nbsp;</td>
           <td class="paramname"> <em>out_service_name</em></td><td>&nbsp;</td>
         </tr>
         <tr>
@@ -997,23 +899,23 @@ Get the service name to request a credential for.
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>in_options</em>&nbsp;</td><td>an options object. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>out_service_name</em>&nbsp;</td><td>on exit, the service name specified in <em>in_options</em>. Must be freed with <a class="el" href="group__kim__string__reference.html#ga3e9ac5bcab38b089adfeebd8ba56ded" title="Free memory associated with a string.">kim_string_free()</a>. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>out_service_name</em>&nbsp;</td><td>on exit, the service name specified in <em>in_options</em>. Must be freed with <a class="el" href="group__kim__string__reference.html#g7e7207329022e97473ec71574e52a1fc" title="Free memory associated with a string.">kim_string_free()</a>. </td></tr>
   </table>
 </dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error object representing the failure. </dd></dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="user" compact><dt><b>Default value</b></dt><dd>NULL, indicating "krbtgt@&lt;REALM&gt;", the ticket granting ticket (TGT) service. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g5914bd9caf4ba781c723d152bf5ddc05" title="Set the service name to request a credential for.">kim_options_set_service_name()</a> </dd></dl>
+<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__options__reference.html#g6e31c69a65efe32a5860125083d0b803" title="Set the service name to request a credential for.">kim_options_set_service_name()</a> </dd></dl>
 
 </div>
 </div><p>
-<a class="anchor" name="g06130689189d5ba4f9e518c8ed68eb7d"></a><!-- doxytag: member="kim_options.h::kim_options_free" ref="g06130689189d5ba4f9e518c8ed68eb7d" args="(kim_options_t *io_options)" -->
+<a class="anchor" name="gd8de9ea0a4eb9e0ffb8e3056a3899f55"></a><!-- doxytag: member="kim_options.h::kim_options_free" ref="gd8de9ea0a4eb9e0ffb8e3056a3899f55" args="(kim_options *io_options)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void kim_options_free           </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae2b9068386ddb47eb075f8a21823d2e">kim_options_t</a> *&nbsp;</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *&nbsp;</td>
           <td class="paramname"> <em>io_options</em>          </td>
           <td>&nbsp;)&nbsp;</td>
           <td width="100%"></td>
@@ -1033,7 +935,7 @@ Free memory associated with an options object.
 
 </div>
 </div><p>
-<hr size="1"><address style="text-align: right;"><small>Generated on Wed May 7 15:22:19 2008 for Kerberos Identity Management by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Thu Sep 18 10:55:28 2008 for Kerberos Identity Management by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

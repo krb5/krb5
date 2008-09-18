@@ -471,7 +471,16 @@ kim_error kim_identity_get_krb5_principal (kim_identity    in_identity,
 }
 
 /* ------------------------------------------------------------------------ */
-
+/*!
+ * \param in_identity   an identity object.
+ * \param out_gss_name  on exit, a gss_name_t representation of \a in_identity.
+ *                      Must be freed with gss_release_name().
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Get the gss_name_t representation of an identity.
+ */
+/*kim_error kim_identity_get_gss_name (kim_identity  in_identity,
+                                       gss_name_t     *out_gss_name);*/
+/*
 kim_error kim_identity_get_gss_name (kim_identity  in_identity,
                                      gss_name_t   *out_gss_name)
 {
@@ -485,7 +494,7 @@ kim_error kim_identity_get_gss_name (kim_identity  in_identity,
     }
     
     return check_error (err);
-}
+}*/
 
 /* ------------------------------------------------------------------------ */
 
