@@ -127,7 +127,8 @@ errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h errors.c supp-int.h
 gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h gmt_mktime.c
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  gmt_mktime.c
 fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

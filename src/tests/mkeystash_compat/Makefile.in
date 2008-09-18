@@ -47,3 +47,9 @@ mkeystash_check: kdc.conf krb5.conf bigendian
 clean::
 	$(RM) kdc.conf
 
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)bigendian.$(OBJEXT): bigendian.c
