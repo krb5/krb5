@@ -26,8 +26,160 @@
 
 #include <pwd.h>
 #include <unistd.h>
+#include <Security/Security.h>
 
 #include "kim_os_private.h"
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
+                                              kim_string   *out_password)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string realm = NULL;
+    kim_string name = NULL;
+    void *buffer = NULL;
+    UInt32 length = 0;
+    
+    if (!err && !in_identity ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_identity_get_components (in_identity, &name);
+    }
+    
+    if (!err) {
+        err = kim_identity_get_realm (in_identity, &realm);
+    }
+    
+    if (!err) {
+        err = SecKeychainFindGenericPassword (nil, 
+                                              strlen (realm), realm,
+                                              strlen (name), name,
+                                              &length, &buffer, 
+                                              nil);
+        
+        if (!err && !buffer) { err = check_error (ENOENT); }
+    }
+    
+    if (!err) {
+        err = kim_string_create_from_buffer (out_password, buffer, length);
+    }
+    
+    if (name  ) { kim_string_free (&name); }
+    if (realm ) { kim_string_free (&realm); }
+    if (buffer) { SecKeychainItemFreeContent (NULL, buffer); }
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
+                                              kim_string   in_password)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string realm = NULL;
+    kim_string name = NULL;
+    
+    if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_identity_get_components (in_identity, &name);
+    }
+    
+    if (!err) {
+        err = kim_identity_get_realm (in_identity, &realm);
+    }
+    
+    if (!err) {
+        SecKeychainItemRef itemRef = NULL;
+        UInt32 namelen = strlen (name);
+        UInt32 realmlen = strlen (realm);
+        
+        // Add the password to the keychain
+        err = SecKeychainAddGenericPassword (nil, 
+                                             realmlen, realm,
+                                             namelen, name,
+                                             strlen (in_password), in_password,
+                                             &itemRef); 
+        
+        if (err == errSecDuplicateItem) {
+            // We've already stored a password for this principal
+            // but it might have changed so update it
+            void *buffer = NULL;
+            UInt32 length = 0;
+            
+            err = SecKeychainFindGenericPassword (nil, 
+                                                  realmlen, realm,
+                                                  namelen, name,
+                                                  &length, &buffer, 
+                                                  &itemRef);
+            
+            if (!err) {
+                SecKeychainAttribute attrs[] = {
+                    { kSecAccountItemAttr, namelen,  (char *) name },
+                    { kSecServiceItemAttr, realmlen, (char *) realm } };
+                UInt32 count = sizeof(attrs) / sizeof(attrs[0]);
+                const SecKeychainAttributeList attrList = { count, attrs };
+                
+                err = SecKeychainItemModifyAttributesAndData (itemRef,
+                                                              &attrList,
+                                                              strlen (in_password), 
+                                                              in_password);
+            }
+            
+        } else if (!err) {
+            // We added a new entry, add a descriptive label
+            SecKeychainAttributeList *copiedAttrs = NULL;
+            SecKeychainAttributeInfo attrInfo;
+            UInt32 tag = 7;
+            UInt32 format = CSSM_DB_ATTRIBUTE_FORMAT_STRING;
+            kim_string label = NULL;
+            
+            attrInfo.count = 1;
+            attrInfo.tag = &tag;
+            attrInfo.format = &format;
+            
+            err = SecKeychainItemCopyAttributesAndData (itemRef, &attrInfo, NULL, 
+                                                        &copiedAttrs, 0, NULL);
+            
+            if (!err) {
+                /* Label format used by Apple patches */
+                err = kim_string_create_from_format (&label, "%s (%s)", 
+                                                     realm, name);
+            }
+            
+            if (!err) {
+                SecKeychainAttributeList attrList;
+                SecKeychainAttribute attr;
+                
+                /* Copy the tag they gave us and copy in our label */
+                attr.tag = copiedAttrs->attr->tag;
+                attr.length = strlen (label);
+                attr.data = (char *) label;
+                
+                attrList.count = 1;
+                attrList.attr = &attr;
+                
+                /* And modify. */
+                err = SecKeychainItemModifyAttributesAndData (itemRef, &attrList, 
+                                                              0, NULL);
+            }
+            
+            if (label      ) { kim_string_free (&label); }
+            if (copiedAttrs) { SecKeychainItemFreeAttributesAndData (copiedAttrs, NULL); }            
+        }
+        
+        if (itemRef) { CFRelease (itemRef); }
+    }
+    
+    if (name ) { kim_string_free (&name); }
+    if (realm) { kim_string_free (&realm); }
+    
+    return check_error (err);
+}    
 
 /* ------------------------------------------------------------------------ */
 

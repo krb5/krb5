@@ -450,6 +450,57 @@ kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
+kim_error kim_identity_get_components (kim_identity  in_identity,
+                                       kim_string   *out_components)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string components = NULL;
+    kim_count count, i;
+    
+    if (!err && !in_identity   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_components) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_identity_get_number_of_components (in_identity, &count);
+    }
+    
+    if (!err) {
+        err = kim_identity_get_component_at_index (in_identity, 0, &components);
+    }
+    
+    for (i = 1; !err && i < count; i++) {
+        kim_string new_components = NULL;
+        kim_string component = NULL;
+        
+        err = kim_identity_get_component_at_index (in_identity, 0, &component);
+        
+        if (!err) {
+            err = kim_string_create_from_format (&new_components, "%s/%s",
+                                                 components, component);
+        }
+        
+        if (!err) {
+            kim_string_free (&components);
+            components = new_components;
+            new_components = NULL;
+        }
+        
+        if (component     ) { kim_string_free (&component); }
+        if (new_components) { kim_string_free (&new_components); }
+    }
+    
+    if (!err) {
+        *out_components = components;
+        components = NULL;
+    }
+    
+    if (components) { kim_string_free (&components); }
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_identity_get_krb5_principal (kim_identity    in_identity,
                                            krb5_context    in_krb5_context,
                                            krb5_principal *out_krb5_principal)
@@ -469,32 +520,6 @@ kim_error kim_identity_get_krb5_principal (kim_identity    in_identity,
     
     return check_error (err);
 }
-
-/* ------------------------------------------------------------------------ */
-/*!
- * \param in_identity   an identity object.
- * \param out_gss_name  on exit, a gss_name_t representation of \a in_identity.
- *                      Must be freed with gss_release_name().
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the gss_name_t representation of an identity.
- */
-/*kim_error kim_identity_get_gss_name (kim_identity  in_identity,
-                                       gss_name_t     *out_gss_name);*/
-/*
-kim_error kim_identity_get_gss_name (kim_identity  in_identity,
-                                     gss_name_t   *out_gss_name)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !in_identity ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_gss_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-#warning kim_identity_get_gss_name not implemented
-    }
-    
-    return check_error (err);
-}*/
 
 /* ------------------------------------------------------------------------ */
 
@@ -528,6 +553,10 @@ kim_error kim_identity_change_password (kim_identity in_identity,
     
     if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
+    if (!err) {
+#warning Implement change password GUI support
+    }
+
     return check_error (err);
 }
 
@@ -541,6 +570,10 @@ kim_error kim_identity_change_password_to_password (kim_identity in_identity,
     
     if (!err && !in_identity    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_new_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+#warning Implement change password support
+    }
     
     return check_error (err);
 }

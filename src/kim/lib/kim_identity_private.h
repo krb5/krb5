@@ -30,9 +30,19 @@
 #include <kim/kim.h>
 #include "kim_library_private.h"
 
-kim_error kim_os_identity_create_for_username (kim_identity *out_identity);
+kim_error kim_identity_get_components (kim_identity  in_identity,
+                                       kim_string   *out_components);
 
 kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
                                        kim_boolean  *out_is_tgt_service);
+
+
+kim_error kim_os_identity_create_for_username (kim_identity *out_identity);
+
+kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
+                                              kim_string   *out_password);
+
+kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
+                                              kim_string   in_password);
 
 #endif /* KIM_IDENTITY_PRIVATE_H */
