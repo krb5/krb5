@@ -15,7 +15,6 @@ kim_identity_get_realm
 kim_identity_get_number_of_components
 kim_identity_get_component_at_index
 kim_identity_get_krb5_principal
-kim_identity_get_gss_name
 kim_identity_change_password
 kim_identity_change_password_to_password
 kim_identity_free
