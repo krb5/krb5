@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006-2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -33,6 +33,7 @@
 
 #include <kim/kim.h>
 #include <kim/kim_library.h>
+#include <kim/kim_ui_plugin.h>
 
 #include "kim_library_private.h"
 #include "kim_debug_private.h"
@@ -43,5 +44,9 @@
 #include "kim_preferences_private.h"
 #include "kim_selection_hints_private.h"
 #include "kim_string_private.h"
+#include "kim_ui_private.h"
+#include "kim_ui_gui_private.h"
+#include "kim_ui_cli_private.h"
+#include "kim_ui_plugin_private.h"
 
 #endif /* KIM_PRIVATE_H */

@@ -28,10 +28,23 @@
 
 #include <kim/kim.h>
 
+#define KIM_UI_ENVIRONMENT_NONE 0
+#define KIM_UI_ENVIRONMENT_AUTO 1
+#define KIM_UI_ENVIRONMENT_GUI  2
+#define KIM_UI_ENVIRONMENT_CLI  3
+
+typedef int kim_ui_environment;
+
+
+kim_error kim_library_set_ui_environment (kim_ui_environment in_ui_environment);
+
+kim_ui_environment kim_library_ui_environment (void);
+
 
 kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access);
 
 kim_boolean kim_library_allow_home_directory_access (void);
+
 
 kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automatic_prompting);
 

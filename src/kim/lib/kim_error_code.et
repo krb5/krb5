@@ -48,8 +48,7 @@ index 75
 error_code KIM_CAPS_LOCK_ERR,                     "Password Incorrect (check your Caps Lock)"
 error_code KIM_USER_CANCELED_ERR,                 "The user cancelled the operation"
 error_code KIM_NO_SERVER_ERR,                     "KerberosAgent is not responding"
-error_code KIM_NO_GUI_ERR,                        "Unable to display a graphical user interface from this environment"
-error_code KIM_NO_CLI_ERR,                        "Unable to display a command line user interface from this environment"
+error_code KIM_NO_UI_ERR,                         "Unable to display a user interface from this environment"
 
 index 100
 # Preferences Errors

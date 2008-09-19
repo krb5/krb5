@@ -29,6 +29,8 @@
 
 #include <kim/kim.h>
 
+kim_ui_environment kim_os_library_get_ui_environment (void);
+
 kim_boolean kim_os_library_caller_is_server (void);
 
 #endif /* KIM_LIBRARY_PRIVATE_H */

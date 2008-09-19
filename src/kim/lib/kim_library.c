@@ -36,9 +36,11 @@
 
 static k5_mutex_t g_allow_home_directory_access_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 static k5_mutex_t g_allow_automatic_prompting_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+static k5_mutex_t g_ui_environment_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 
 kim_boolean g_allow_home_directory_access = TRUE;
 kim_boolean g_allow_automatic_prompting = TRUE;
+kim_ui_environment g_ui_environment = KIM_UI_ENVIRONMENT_AUTO;
 
 MAKE_INIT_FUNCTION(kim_thread_init);
 MAKE_FINI_FUNCTION(kim_thread_fini);
@@ -57,6 +59,10 @@ static int kim_thread_init (void)
         err = k5_mutex_finish_init (&g_allow_automatic_prompting_mutex);
     }
     
+    if (!err) {
+        err = k5_mutex_finish_init (&g_ui_environment_mutex);
+    }
+    
     return err;
 }
 
@@ -70,6 +76,7 @@ static void kim_thread_fini (void)
     
     k5_mutex_destroy (&g_allow_home_directory_access_mutex);
     k5_mutex_destroy (&g_allow_automatic_prompting_mutex);
+    k5_mutex_destroy (&g_ui_environment_mutex);
 }
 
 #pragma mark -- Allow Home Directory Access --
@@ -214,4 +221,64 @@ kim_boolean kim_library_allow_automatic_prompting (void)
     }
     
     return allow_automatic_prompting;
+}
+
+#pragma mark -- UI Environment --
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_library_set_ui_environment (kim_ui_environment in_ui_environment)
+{
+    kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
+    kim_error mutex_err = KIM_NO_ERROR;
+    
+    if (!err) {
+        mutex_err = k5_mutex_lock (&g_ui_environment_mutex);
+        if (mutex_err) { err = mutex_err; }
+    }
+    
+    if (!err) {
+        g_ui_environment = in_ui_environment;
+    }
+    
+    if (!mutex_err) { k5_mutex_unlock (&g_ui_environment_mutex); }
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+static kim_error kim_library_get_ui_environment (kim_ui_environment *out_ui_environment)
+{
+    kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
+    kim_error mutex_err = KIM_NO_ERROR;
+    
+    if (!err && !out_ui_environment) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        mutex_err = k5_mutex_lock (&g_ui_environment_mutex);;
+        if (mutex_err) { err = mutex_err; }
+    }
+    
+    if (!err) {
+        *out_ui_environment = g_ui_environment;
+    }
+    
+    if (!mutex_err) { k5_mutex_unlock (&g_ui_environment_mutex); }
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_ui_environment kim_library_ui_environment (void)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ui_environment ui_environment = KIM_UI_ENVIRONMENT_AUTO;
+    
+    err = kim_library_get_ui_environment (&ui_environment);
+    
+    if (!err && ui_environment == KIM_UI_ENVIRONMENT_AUTO) {
+        ui_environment = kim_os_library_get_ui_environment ();
+    }
+    
+    return !err ? ui_environment : KIM_UI_ENVIRONMENT_NONE;
 }

@@ -29,28 +29,41 @@
 extern "C" {
 #endif
 
-typedef struct kim_ui_plugin_ftable_v1 {
+/*
+ * The function table / structure which a KIM ui plugin module must export 
+ * as "kim_ui_0".  If the interfaces work correctly, future versions of the 
+ * table will add either more callbacks or more arguments to callbacks, and 
+ * in both cases we'll be able to wrap the v0 functions.
+ */
+/* extern kim_ui_plugin_ftable_v0 kim_ui_0; */
+
+    
+typedef struct kim_ui_plugin_ftable_v0 {
     int minor_version;		/* currently 0 */
     
     /* Called before other calls to allow the UI to initialize.
-     * Return an error if you can't display your UI in this environment. */
-    kim_error (*init)(void         **out_context,
-                      kim_identity   in_identity);
+     * Return an error if you can't display your UI in this environment. 
+     * To allow your plugin to be called from multiple threads, pass back
+     * state associated with this instance of your UI in out_context.  
+     * The same context pointer will be provided to all plugin calls for
+     * this ui. */
+    kim_error (*init) (void **out_context);
     
     /* Present UI to select which identity to use.
      * If this UI calls into KIM to get new credentials it may 
      * call acquire_new_credentials below. */
-    kim_error (*select_identity)(void                *in_context,
-                                 kim_selection_hints  in_hints,
-                                 kim_identity_t      *out_identity);
+    kim_error (*select_identity) (void                *in_context,
+                                  kim_selection_hints  in_hints,
+                                  kim_identity        *out_identity);
     
     /* Present UI to display authentication to the user */
-    typedef kim_error (*auth_prompt) (void              *in_context,
-                                      kim_prompt_type    in_type,
-                                      kim_string         in_title,
-                                      kim_string         in_message,
-                                      kim_string         in_description,
-                                      char             **out_reply);
+    kim_error (*auth_prompt) (void              *in_context,
+                              kim_identity       in_identity,
+                              kim_prompt_type    in_type,
+                              kim_string         in_title,
+                              kim_string         in_message,
+                              kim_string         in_description,
+                              char             **out_reply);
     
     /* Prompt to change the identity's password. 
      * May be combined with an auth prompt if additional auth is required,
@@ -58,29 +71,29 @@ typedef struct kim_ui_plugin_ftable_v1 {
      * If in_old_password_expired is true, this callback is in response
      * to an expired password error.  If this is the case the same context
      * which generated the error will be used for this callback. */
-    kim_error (*change_password)(void          *in_context,
-                                 kim_identity   in_identity,
-                                 kim_boolean    in_old_password_expired,
-                                 char         **out_old_password,
-                                 char         **out_new_password,
-                                 char         **out_verify_password);
+    kim_error (*change_password) (void          *in_context,
+                                  kim_identity   in_identity,
+                                  kim_boolean    in_old_password_expired,
+                                  char         **out_old_password,
+                                  char         **out_new_password,
+                                  char         **out_verify_password);
     
     /* Display an error to the user; may be called after any of the prompts */
-    kim_error (*display_error)(void       *in_context,
-                               kim_error   in_error,
-                               kim_string  in_error_message,
-                               kim_string  in_error_description);
+    kim_error (*display_error) (void         *in_context,
+                                kim_identity  in_identity,
+                                kim_error     in_error,
+                                kim_string    in_error_message,
+                                kim_string    in_error_description);
     
     /* Free strings returned by the UI */
-    void (*free_string)(void *in_context,
-                        char *io_string);
+    void (*free_string) (void *in_context,
+                         char *io_string);
     
     /* Called after the last prompt (even on error) to allow the UI to
-     * free allocated resources. */
-    kim_error (*fini)(void         *io_context,
-                      kim_identity  in_identity);
+     * free allocated resources associated with its context. */
+    kim_error (*fini) (void *io_context);
 
-} kim_ui_plugin_ftable_v1;
+} kim_ui_plugin_ftable_v0;
 
     
 #ifdef __cplusplus

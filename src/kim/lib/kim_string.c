@@ -26,7 +26,6 @@
 
 #include "kim_private.h"
 
-
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_string_create_from_format (kim_string *out_string, 

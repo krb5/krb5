@@ -25,6 +25,7 @@
  */
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <Kerberos/kipc_session.h>
 #include "k5-int.h"
 #include "k5-thread.h"
 #include <krb5/krb5.h>
@@ -89,6 +90,24 @@ kim_error kim_os_library_unlock_for_bundle_lookup (void)
 }
 
 #pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+kim_ui_environment kim_os_library_get_ui_environment (void)
+{
+    kipc_session_attributes_t attributes = kipc_session_get_attributes ();
+    
+    if (attributes & kkipc_session_caller_uses_gui) {
+        return KIM_UI_ENVIRONMENT_GUI;
+    } else if (attributes & kkipc_session_has_cli_access) {
+        return KIM_UI_ENVIRONMENT_CLI;
+    } else if (attributes & kkipc_session_has_gui_access) {
+        return KIM_UI_ENVIRONMENT_GUI;
+    }
+    
+    kim_debug_printf ("kim_os_library_get_ui_environment(): no way to talk to the user.");
+    return KIM_UI_ENVIRONMENT_NONE;
+}
 
 /* ------------------------------------------------------------------------ */
 
