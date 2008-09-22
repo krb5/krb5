@@ -166,3 +166,23 @@ krb5_cc_get_type (krb5_context context, krb5_ccache cache)
 {
     return cache->ops->prefix;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_last_change_time (krb5_context context, krb5_ccache ccache, 
+            krb5_timestamp *change_time)
+{
+    return ccache->ops->lastchange(context, ccache, change_time);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_lock (krb5_context context, krb5_ccache ccache)
+{
+    return ccache->ops->lock(context, ccache);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_unlock (krb5_context context, krb5_ccache ccache)
+{
+    return ccache->ops->unlock(context, ccache);
+}
+

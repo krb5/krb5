@@ -65,8 +65,22 @@ krb5int_cc_typecursor_free(
     krb5_cc_typecursor *cursor);
 
 
-extern k5_mutex_t krb5int_mcc_mutex;
-extern k5_mutex_t krb5int_krcc_mutex;
-extern k5_mutex_t krb5int_cc_file_mutex;
+extern k5_cc_mutex krb5int_mcc_mutex;
+extern k5_cc_mutex krb5int_krcc_mutex;
+extern k5_cc_mutex krb5int_cc_file_mutex;
+
+#ifdef USE_CCAPI_V3
+extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_lock
+(krb5_context context); 
+
+extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
+(krb5_context context);
+#endif
+
+krb5_error_code
+k5_cc_mutex_force_unlock(k5_cc_mutex *m);
+
+krb5_error_code
+k5_cccol_force_unlock(void);
 
 #endif /* __KRB5_CCACHE_H__ */

@@ -1,3 +1,6 @@
+#ifndef __KRB5_STDCC_H__
+#define __KRB5_STDCC_H__
+
 #if defined(_WIN32) || defined(USE_CCAPI)
 
 #include "k5-int.h"	/* loads krb5.h */
@@ -97,6 +100,21 @@ krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_next
 krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_free
 		(krb5_context context, krb5_cc_ptcursor *cursor);
 
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_last_change_time
+		(krb5_context context, krb5_ccache id,
+           krb5_timestamp *change_time);
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_lock 
+        (krb5_context, krb5_ccache id);
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_unlock
+        (krb5_context, krb5_ccache id);
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_lock
+        (krb5_context context); 
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
+        (krb5_context context);
 
 #else
 
@@ -154,3 +172,5 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
 #endif
 
 #endif /* defined(_WIN32) || defined(USE_CCAPI) */
+
+#endif

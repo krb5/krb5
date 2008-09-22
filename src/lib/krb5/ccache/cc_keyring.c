@@ -177,12 +177,13 @@ typedef struct _krb5_krcc_cursor
 typedef struct _krb5_krcc_data
 {
     char   *name;		/* Name for this credentials cache */
-    k5_mutex_t lock;		/* synchronization */
+    k5_cc_mutex lock;		/* synchronization */
     key_serial_t parent_id;	/* parent keyring of this ccache keyring */
     key_serial_t ring_id;	/* keyring representing ccache */
     key_serial_t princ_id;	/* key holding principal info */
     int     numkeys;		/* # of keys in this ring
 				 * (does NOT include principal info) */
+    krb5_timestamp changetime;
 } krb5_krcc_data;
 
 /* Passed internally to assure we don't go past the bounds of our buffer */
@@ -193,7 +194,7 @@ typedef struct _krb5_krcc_buffer_cursor
 } krb5_krcc_bc;
 
 /* Global mutex */
-k5_mutex_t krb5int_krcc_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+k5_cc_mutex krb5int_krcc_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
 
 /*
  * Internal functions (exported via the krb5_krcc_ops)
@@ -248,6 +249,15 @@ static krb5_error_code KRB5_CALLCONV krb5_krcc_set_flags
 
 static krb5_error_code KRB5_CALLCONV krb5_krcc_get_flags
     (krb5_context context, krb5_ccache id, krb5_flags * flags);
+
+static krb5_error_code KRB5_CALLCONV krb5_krcc_last_change_time
+    (krb5_context, krb5_ccache, krb5_timestamp *);
+
+static krb5_error_code KRB5_CALLCONV krb5_krcc_lock
+    (krb5_context context, krb5_ccache id);
+
+static krb5_error_code KRB5_CALLCONV krb5_krcc_unlock
+    (krb5_context context, krb5_ccache id);
 
 /*
  * Internal utility functions
@@ -339,6 +349,8 @@ static krb5_error_code krb5_krcc_unparse_ui_4
     (krb5_context, krb5_ccache id, krb5_ui_4 i, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_ui_2
     (krb5_context, krb5_ccache id, krb5_int32 i, krb5_krcc_bc * bc);
+static void krb5_krcc_update_change_time
+    (krb5_krcc_data *);
 
 /* Note the following is a stub function for Linux */
 extern krb5_error_code krb5_change_cache(void);
@@ -381,7 +393,7 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
 
     DEBUG_PRINT(("krb5_krcc_initialize: entered\n"));
 
-    kret = k5_mutex_lock(&((krb5_krcc_data *) id->data)->lock);
+    kret = k5_cc_mutex_lock(context, &((krb5_krcc_data *) id->data)->lock);
     if (kret)
 	return kret;
 
@@ -394,7 +406,7 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
 	krb5_change_cache();
 
 out:
-    k5_mutex_unlock(&((krb5_krcc_data *) id->data)->lock);
+    k5_cc_mutex_unlock(context, &((krb5_krcc_data *) id->data)->lock);
     return kret;
 }
 
@@ -416,7 +428,7 @@ krb5_krcc_close(krb5_context context, krb5_ccache id)
     d = (krb5_krcc_data *) id->data;
 
     krb5_xfree(d->name);
-    k5_mutex_destroy(&d->lock);
+    k5_cc_mutex_destroy(&d->lock);
     krb5_xfree(d);
 
     krb5_xfree(id);
@@ -445,7 +457,7 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
     krb5_krcc_data *d;
     int     res;
 
-    k5_assert_locked(&((krb5_krcc_data *) id->data)->lock);
+    k5_cc_mutex_assert_locked(context, &((krb5_krcc_data *) id->data)->lock);
 
     d = (krb5_krcc_data *) id->data;
 
@@ -458,6 +470,7 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
     }
     d->numkeys = 0;
     d->princ_id = 0;
+    krb5_krcc_update_change_time(d);
 
     return KRB5_OK;
 }
@@ -480,7 +493,7 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 
     d = (krb5_krcc_data *) id->data;
 
-    kret = k5_mutex_lock(&d->lock);
+    kret = k5_cc_mutex_lock(context, &d->lock);
     if (kret)
 	return kret;
 
@@ -494,8 +507,8 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 	goto cleanup;
     }
 cleanup:
-    k5_mutex_unlock(&d->lock);
-    k5_mutex_destroy(&d->lock);
+    k5_cc_mutex_unlock(context, &d->lock);
+    k5_cc_mutex_destroy(&d->lock);
     krb5_xfree(d);
     krb5_xfree(id);
 
@@ -649,7 +662,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     DEBUG_PRINT(("krb5_krcc_start_seq_get: entered\n"));
 
     d = id->data;
-    kret = k5_mutex_lock(&d->lock);
+    kret = k5_cc_mutex_lock(context, &d->lock);
     if (kret)
 	return kret;
 
@@ -664,7 +677,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
 
     krcursor = (krb5_krcc_cursor) malloc(size);
     if (krcursor == NULL) {
-	k5_mutex_unlock(&d->lock);
+	k5_cc_mutex_unlock(context, &d->lock);
 	return KRB5_CC_NOMEM;
     }
 
@@ -675,7 +688,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
 	DEBUG_PRINT(("Read %d bytes from keyring, numkeys %d: %s\n",
 		     res, d->numkeys, strerror(errno)));
 	free(krcursor);
-	k5_mutex_unlock(&d->lock);
+	k5_cc_mutex_unlock(context, &d->lock);
 	return KRB5_CC_IO;
     }
 
@@ -683,7 +696,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     krcursor->currkey = 0;
     krcursor->princ_id = d->princ_id;
 
-    k5_mutex_unlock(&d->lock);
+    k5_cc_mutex_unlock(context, &d->lock);
     *cursor = (krb5_cc_cursor) krcursor;
     return KRB5_OK;
 }
@@ -796,7 +809,7 @@ krb5_krcc_new_data(const char *name, key_serial_t ring,
     if (d == NULL)
 	return KRB5_CC_NOMEM;
 
-    kret = k5_mutex_init(&d->lock);
+    kret = k5_cc_mutex_init(&d->lock);
     if (kret) {
 	krb5_xfree(d);
 	return kret;
@@ -804,7 +817,7 @@ krb5_krcc_new_data(const char *name, key_serial_t ring,
 
     d->name = strdup(name);
     if (d->name == NULL) {
-	k5_mutex_destroy(&d->lock);
+	k5_cc_mutex_destroy(&d->lock);
 	krb5_xfree(d);
 	return KRB5_CC_NOMEM;
     }
@@ -812,6 +825,8 @@ krb5_krcc_new_data(const char *name, key_serial_t ring,
     d->ring_id = ring;
     d->parent_id = parent_ring;
     d->numkeys = 0;
+    d->changetime = 0;
+    krb5_krcc_update_change_time(d);
 
     *datapp = d;
     return 0;
@@ -848,7 +863,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
 
     lid->ops = &krb5_krcc_ops;
 
-    kret = k5_mutex_lock(&krb5int_krcc_mutex);
+    kret = k5_cc_mutex_lock(context, &krb5int_krcc_mutex);
     if (kret) {
 	free(lid);
 	return kret;
@@ -876,7 +891,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
     while (1) {
 	kret = krb5int_random_string(context, uniquename, sizeof(uniquename));
         if (kret) {
-            k5_mutex_unlock(&krb5int_krcc_mutex);
+            k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
             free(lid);
             return kret;
 	}
@@ -892,7 +907,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
 		kret = errno;
 		DEBUG_PRINT(("krb5_krcc_generate_new: '%s' trying to "
 			     "create '%s'\n", strerror(errno), uniquename));
-		k5_mutex_unlock(&krb5int_krcc_mutex);
+		k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
 		return kret;
 	    }
 	    break;
@@ -900,7 +915,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
     }
 	    
     kret = krb5_krcc_new_data(uniquename, key, ring_id, &d);
-    k5_mutex_unlock(&krb5int_krcc_mutex);
+    k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
     if (kret) {
 	krb5_xfree(lid);
 	return kret;
@@ -1014,7 +1029,7 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
 
     DEBUG_PRINT(("krb5_krcc_store: entered\n"));
 
-    kret = k5_mutex_lock(&d->lock);
+    kret = k5_cc_mutex_lock(context, &d->lock);
     if (kret)
 	return kret;
 
@@ -1042,6 +1057,7 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     } else {
 	d->numkeys++;
 	kret = KRB5_OK;
+	krb5_krcc_update_change_time(d);
     }
 
   errout:
@@ -1050,9 +1066,46 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     if (payload)
 	free(payload);
 
-    k5_mutex_unlock(&d->lock);
+    k5_cc_mutex_unlock(context, &d->lock);
     return kret;
 }
+
+static krb5_error_code KRB5_CALLCONV 
+krb5_krcc_last_change_time(krb5_context context, krb5_ccache id, 
+			   krb5_timestamp *change_time)
+{
+    krb5_error_code ret = 0;
+    krb5_krcc_data *data = (krb5_krcc_data *) id->data;
+    
+    *change_time = 0;
+    
+    ret = k5_cc_mutex_lock(context, &data->lock);
+    if (!ret) {
+        *change_time = data->changetime;
+        k5_cc_mutex_unlock(context, &data->lock);
+    }
+
+    return ret;
+}
+
+static krb5_error_code KRB5_CALLCONV 
+krb5_krcc_lock(krb5_context context, krb5_ccache id)
+{
+    krb5_error_code ret = 0;
+    krb5_krcc_data *data = (krb5_krcc_data *) id->data;
+    ret = k5_cc_mutex_lock(context, &data->lock);
+    return ret;
+}
+
+static krb5_error_code KRB5_CALLCONV 
+krb5_krcc_unlock(krb5_context context, krb5_ccache id)
+{
+    krb5_error_code ret = 0;
+    krb5_krcc_data *data = (krb5_krcc_data *) id->data;
+    ret = k5_cc_mutex_unlock(context, &data->lock);
+    return ret;
+}
+
 
 static  krb5_error_code
 krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
@@ -1065,7 +1118,7 @@ krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
     unsigned int payloadsize;
     krb5_krcc_bc bc;
 
-    k5_assert_locked(&((krb5_krcc_data *) id->data)->lock);
+    k5_cc_mutex_assert_locked(context, &((krb5_krcc_data *) id->data)->lock);
 
     d = (krb5_krcc_data *) id->data;
 
@@ -1102,6 +1155,7 @@ krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
     } else {
 	d->princ_id = newkey;
 	kret = KRB5_OK;
+	krb5_krcc_update_change_time(d);
     }
 
   errout:
@@ -1119,7 +1173,7 @@ krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
     int     psize;
     krb5_krcc_bc bc;
 
-    kret = k5_mutex_lock(&d->lock);
+    kret = k5_cc_mutex_lock(context, &d->lock);
     if (kret)
 	return kret;
 
@@ -1143,7 +1197,7 @@ krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
   errout:
     if (payload)
 	free(payload);
-    k5_mutex_unlock(&d->lock);
+    k5_cc_mutex_unlock(context, &d->lock);
     return kret;
 }
 
@@ -1973,6 +2027,22 @@ krb5_krcc_unparse_cred(krb5_context context, krb5_ccache id,
 }
 
 /*
+ * Utility routine: called by krb5_krcc_* functions to keep 
+ * result of krb5_krcc_last_change_time up to date.
+ * Value monotonically increases -- based on but not guaranteed to be actual 
+ * system time.
+ */
+
+static void
+krb5_krcc_update_change_time(krb5_krcc_data *d)
+{
+	krb5_timestamp now_time = time(NULL);
+	d->changetime = (d->changetime >= now_time) ? 
+	d->changetime + 1 : now_time;
+}
+
+
+/*
  * ccache implementation storing credentials in the Linux keyring facility
  * The default is to put them at the session keyring level.
  * If "KEYRING:process:" or "KEYRING:thread:" is specified, then they will
@@ -1995,7 +2065,15 @@ const krb5_cc_ops krb5_krcc_ops = {
     krb5_krcc_end_seq_get,
     krb5_krcc_remove_cred,
     krb5_krcc_set_flags,
-    krb5_krcc_get_flags		/* added after 1.4 release */
+    krb5_krcc_get_flags,	/* added after 1.4 release */
+    NULL,
+    NULL,
+    NULL,
+    NULL, /* move */
+    krb5_krcc_last_change_time, /* lastchange */
+    NULL, /* wasdefault */
+    krb5_krcc_lock,
+    krb5_krcc_unlock,
 };
 
 #else /* !USE_KEYRING_CCACHE */
@@ -2020,6 +2098,14 @@ const krb5_cc_ops krb5_krcc_ops = {
     NULL,
     NULL,
     NULL,
-    NULL			/* added after 1.4 release */
+    NULL,			/* added after 1.4 release */
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
 };
 #endif	/* USE_KEYRING_CCACHE */

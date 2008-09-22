@@ -90,9 +90,11 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdccv3_ptcursor_new,
       krb5_stdccv3_ptcursor_next,
       krb5_stdccv3_ptcursor_free,
-      NULL,
-      NULL,
-      NULL,
+      NULL, /* move */
+      krb5_stdccv3_last_change_time, /* lastchange */
+      NULL, /* wasdefault */
+      krb5_stdccv3_lock,
+      krb5_stdccv3_unlock,
 #else
       krb5_stdcc_get_name,
       krb5_stdcc_resolve,
@@ -908,7 +910,6 @@ krb5_stdccv3_ptcursor_next(
 	cc_string_t ccstring = NULL;
 	char *name = NULL;
 	
-	// TODO set proper errors, check context param
 	if (!cursor || !cursor->data) {
 		err = ccErrInvalidContext;
 	}
@@ -982,6 +983,87 @@ krb5_stdccv3_ptcursor_free(
 	    *cursor = NULL;
 	}
     return 0;
+}
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_last_change_time
+		(krb5_context context, krb5_ccache id,
+           krb5_timestamp *change_time)
+{
+    krb5_error_code err = 0;
+    stdccCacheDataPtr ccapi_data = id->data;
+    cc_time_t ccapi_change_time = 0;
+
+    *change_time = 0;
+    
+    if (!err) {
+        err = stdccv3_setup(context, ccapi_data);
+    }
+    if (!err) {
+        err = cc_ccache_get_change_time (ccapi_data->NamedCache, &ccapi_change_time);
+    }
+    if (!err) {
+        *change_time = ccapi_change_time;
+    }
+    
+    return cc_err_xlate (err);
+}
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_lock
+(krb5_context context, krb5_ccache id)
+{
+    krb5_error_code err = 0;
+    stdccCacheDataPtr ccapi_data = id->data;
+    
+    if (!err) {
+        err = stdccv3_setup(context, ccapi_data);
+    }
+    if (!err) {
+        err = cc_ccache_lock(ccapi_data->NamedCache, cc_lock_write, cc_lock_block);
+    }
+    return cc_err_xlate(err);    
+}
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_unlock
+(krb5_context context, krb5_ccache id)
+{
+    krb5_error_code err = 0;
+    stdccCacheDataPtr ccapi_data = id->data;
+    
+    if (!err) {
+        err = stdccv3_setup(context, ccapi_data);
+    }
+    if (!err) {
+        err = cc_ccache_unlock(ccapi_data->NamedCache);
+    }
+    return cc_err_xlate(err);    
+}
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_lock
+(krb5_context context)
+{
+    krb5_error_code err = 0;
+
+    if (!err && !gCntrlBlock) {
+        err = cc_initialize (&gCntrlBlock, ccapi_version_max, &gCCVersion, NULL);
+    }
+    if (!err) {
+        err = cc_context_lock(gCntrlBlock, cc_lock_write, cc_lock_block);
+    }
+    return cc_err_xlate(err);    
+}
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
+(krb5_context context)
+{
+    krb5_error_code err = 0;
+
+    if (!err && !gCntrlBlock) {
+        err = cc_initialize (&gCntrlBlock, ccapi_version_max, &gCCVersion, NULL);
+    }
+    if (!err) {
+        err = cc_context_unlock(gCntrlBlock);
+    }
+    return cc_err_xlate(err);    
 }
 
 #else /* !USE_CCAPI_V3 */

@@ -75,18 +75,24 @@ static krb5_error_code KRB5_CALLCONV krb5_mcc_store
 static krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags 
 	(krb5_context, krb5_ccache id , krb5_flags flags );
 
-static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_new(
-    krb5_context,
-    krb5_cc_ptcursor *);
+static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_new
+	(krb5_context, krb5_cc_ptcursor *);
 
-static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_next(
-    krb5_context,
-    krb5_cc_ptcursor,
-    krb5_ccache *);
+static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_next
+	(krb5_context, krb5_cc_ptcursor, krb5_ccache *);
 
-static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_free(
-    krb5_context,
-    krb5_cc_ptcursor *);
+static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_free
+	(krb5_context, krb5_cc_ptcursor *);
+
+static krb5_error_code KRB5_CALLCONV krb5_mcc_last_change_time
+	(krb5_context, krb5_ccache, krb5_timestamp *);
+
+static krb5_error_code KRB5_CALLCONV krb5_mcc_lock
+	(krb5_context context, krb5_ccache id);
+
+static krb5_error_code KRB5_CALLCONV krb5_mcc_unlock
+	(krb5_context context, krb5_ccache id);
+
 
 extern const krb5_cc_ops krb5_mcc_ops;
 extern krb5_error_code krb5_change_cache (void);
@@ -102,9 +108,10 @@ typedef struct _krb5_mcc_link {
 /* Per-cache data header.  */
 typedef struct _krb5_mcc_data {
     char *name;
-    k5_mutex_t lock;
+    k5_cc_mutex lock;
     krb5_principal prin;
     krb5_mcc_cursor link;
+    krb5_timestamp changetime;
 } krb5_mcc_data;
 
 /* List of memory caches.  */
@@ -118,8 +125,10 @@ struct krb5_mcc_ptcursor_data {
     struct krb5_mcc_list_node *cur;
 };
 
-k5_mutex_t krb5int_mcc_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+k5_cc_mutex krb5int_mcc_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
 static krb5_mcc_list_node *mcc_head = 0;
+
+static void update_mcc_change_time(krb5_mcc_data *);
 
 /*
  * Modifies:
@@ -142,15 +151,18 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     krb5_mcc_data *d;
 
     d = (krb5_mcc_data *)id->data;
-    ret = k5_mutex_lock(&d->lock);
+    ret = k5_cc_mutex_lock(context, &d->lock);
     if (ret)
         return ret;
 
     krb5_mcc_free(context, id);
+	
+    d = (krb5_mcc_data *)id->data;
     ret = krb5_copy_principal(context, princ,
-			      &((krb5_mcc_data *)id->data)->prin);
+			      &d->prin);
+    update_mcc_change_time(d);
 
-    k5_mutex_unlock(&d->lock);
+    k5_cc_mutex_unlock(context, &d->lock);
     if (ret == KRB5_OK)
         krb5_change_cache();
     return ret;
@@ -202,7 +214,7 @@ krb5_mcc_destroy(krb5_context context, krb5_ccache id)
     krb5_mcc_data *d;
     krb5_error_code err;
 
-    err = k5_mutex_lock(&krb5int_mcc_mutex);
+    err = k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
     if (err)
 	return err;
 
@@ -215,16 +227,16 @@ krb5_mcc_destroy(krb5_context context, krb5_ccache id)
 	    break;
 	}
     }
-    k5_mutex_unlock(&krb5int_mcc_mutex);
+    k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
 
-    err = k5_mutex_lock(&d->lock);
+    err = k5_cc_mutex_lock(context, &d->lock);
     if (err)
         return err;
 
     krb5_mcc_free(context, id);
     krb5_xfree(d->name);
-    k5_mutex_unlock(&d->lock);
-    k5_mutex_destroy(&d->lock);
+    k5_cc_mutex_unlock(context, &d->lock);
+    k5_cc_mutex_destroy(&d->lock);
     krb5_xfree(d); 
     krb5_xfree(id);
 
@@ -261,7 +273,7 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     krb5_error_code err;
     krb5_mcc_data *d;
 
-    err = k5_mutex_lock(&krb5int_mcc_mutex);
+    err = k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
     if (err)
 	return err;
     for (ptr = mcc_head; ptr; ptr=ptr->next)
@@ -272,11 +284,11 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     else {
 	err = new_mcc_data(residual, &d);
 	if (err) {
-	    k5_mutex_unlock(&krb5int_mcc_mutex);
+	    k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
 	    return err;
 	}
     }
-    k5_mutex_unlock(&krb5int_mcc_mutex);
+    k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
 
     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
     if (lid == NULL)
@@ -310,11 +322,11 @@ krb5_mcc_start_seq_get(krb5_context context, krb5_ccache id,
      krb5_mcc_data *d;
 
      d = id->data;
-     err = k5_mutex_lock(&d->lock);
+     err = k5_cc_mutex_lock(context, &d->lock);
      if (err)
 	 return err;
      mcursor = d->link;
-     k5_mutex_unlock(&d->lock);
+     k5_cc_mutex_unlock(context, &d->lock);
      *cursor = (krb5_cc_cursor) mcursor;
      return KRB5_OK;
 }
@@ -396,8 +408,8 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     d = malloc(sizeof(krb5_mcc_data));
     if (d == NULL)
 	return KRB5_CC_NOMEM;
-
-    err = k5_mutex_init(&d->lock);
+        
+    err = k5_cc_mutex_init(&d->lock);
     if (err) {
 	krb5_xfree(d);
 	return err;
@@ -405,12 +417,14 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
 
     d->name = malloc(strlen(name) + 1);
     if (d->name == NULL) {
-	k5_mutex_destroy(&d->lock);
+	k5_cc_mutex_destroy(&d->lock);
 	krb5_xfree(d);
 	return KRB5_CC_NOMEM;
     }
     d->link = NULL;
     d->prin = NULL;
+    d->changetime = 0;
+    update_mcc_change_time(d);
 
     /* Set up the filename */
     strcpy(d->name, name);
@@ -418,7 +432,7 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     n = malloc(sizeof(krb5_mcc_list_node));
     if (n == NULL) {
 	free(d->name);
-	k5_mutex_destroy(&d->lock);
+	k5_cc_mutex_destroy(&d->lock);
 	free(d);
 	return KRB5_CC_NOMEM;
     }
@@ -461,7 +475,7 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 
     lid->ops = &krb5_mcc_ops;
     
-    err = k5_mutex_lock(&krb5int_mcc_mutex);
+    err = k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
     if (err) {
 	free(lid);
 	return err;
@@ -473,7 +487,7 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 
         err = krb5int_random_string (context, uniquename, sizeof (uniquename));
         if (err) {
-	    k5_mutex_unlock(&krb5int_mcc_mutex);
+	    k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
 	    free(lid);
 	    return err;
         }
@@ -488,7 +502,7 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
     
     err = new_mcc_data(uniquename, &d);
 
-    k5_mutex_unlock(&krb5int_mcc_mutex);
+    k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
     if (err) {
 	krb5_xfree(lid);
 	return err;
@@ -636,12 +650,13 @@ krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
 	free(new_node);
 	return err;
     }
-    err = k5_mutex_lock(&mptr->lock);
+    err = k5_cc_mutex_lock(ctx, &mptr->lock);
     if (err)
 	return err;
     new_node->next = mptr->link;
     mptr->link = new_node;
-    k5_mutex_unlock(&mptr->lock);
+    update_mcc_change_time(mptr);
+    k5_cc_mutex_unlock(ctx, &mptr->lock);
     return 0;
 }
 
@@ -666,11 +681,11 @@ krb5_mcc_ptcursor_new(
 	goto errout;
     }
     n->data = cdata;
-    ret = k5_mutex_lock(&krb5int_mcc_mutex);
+    ret = k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
     if (ret)
 	goto errout;
     cdata->cur = mcc_head;
-    ret = k5_mutex_unlock(&krb5int_mcc_mutex);
+    ret = k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
     if (ret)
 	goto errout;
 
@@ -702,11 +717,11 @@ krb5_mcc_ptcursor_next(
 
     (*ccache)->ops = &krb5_mcc_ops;
     (*ccache)->data = cdata->cur->cache;
-    ret = k5_mutex_lock(&krb5int_mcc_mutex);
+    ret = k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
     if (ret)
 	goto errout;
     cdata->cur = cdata->cur->next;
-    ret = k5_mutex_unlock(&krb5int_mcc_mutex);
+    ret = k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
     if (ret)
 	goto errout;
 errout:
@@ -731,6 +746,57 @@ krb5_mcc_ptcursor_free(
     return 0;
 }
 
+static krb5_error_code KRB5_CALLCONV 
+krb5_mcc_last_change_time(
+    krb5_context context,
+    krb5_ccache id, 
+    krb5_timestamp *change_time)
+{
+    krb5_error_code ret = 0;
+    krb5_mcc_data *data = (krb5_mcc_data *) id->data;
+    
+    *change_time = 0;
+    
+    ret = k5_cc_mutex_lock(context, &data->lock);
+    if (!ret) {
+        *change_time = data->changetime;
+        k5_cc_mutex_unlock(context, &data->lock);
+    }
+
+    return ret;
+}
+
+/*
+ Utility routine: called by krb5_mcc_* functions to keep 
+ result of krb5_mcc_last_change_time up to date
+ */
+
+static void
+update_mcc_change_time(krb5_mcc_data *d)
+{
+    krb5_timestamp now_time = time(NULL);
+    d->changetime = (d->changetime >= now_time) ? 
+	d->changetime + 1 : now_time;
+}
+
+static krb5_error_code KRB5_CALLCONV 
+krb5_mcc_lock(krb5_context context, krb5_ccache id)
+{
+    krb5_error_code ret = 0;
+    krb5_mcc_data *data = (krb5_mcc_data *) id->data;
+    ret = k5_cc_mutex_lock(context, &data->lock);
+    return ret;
+}
+
+static krb5_error_code KRB5_CALLCONV 
+krb5_mcc_unlock(krb5_context context, krb5_ccache id)
+{
+    krb5_error_code ret = 0;
+    krb5_mcc_data *data = (krb5_mcc_data *) id->data;
+    ret = k5_cc_mutex_unlock(context, &data->lock);
+    return ret;
+}
+
 const krb5_cc_ops krb5_mcc_ops = {
      0,
      "MEMORY",
@@ -752,7 +818,9 @@ const krb5_cc_ops krb5_mcc_ops = {
      krb5_mcc_ptcursor_new,
      krb5_mcc_ptcursor_next,
      krb5_mcc_ptcursor_free,
-     NULL,
-     NULL,
-     NULL,
+     NULL, /* move */
+     krb5_mcc_last_change_time,
+     NULL, /* wasdefault */
+     krb5_mcc_lock,
+     krb5_mcc_unlock,
 };

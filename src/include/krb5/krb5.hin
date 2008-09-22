@@ -1297,6 +1297,22 @@ const char * KRB5_CALLCONV
 krb5_cc_get_type (krb5_context context, krb5_ccache cache);
 
 krb5_error_code KRB5_CALLCONV
+krb5_cc_move (krb5_context context, krb5_ccache src, krb5_ccache dst);
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_last_change_time (
+    krb5_context context, 
+    krb5_ccache ccache, 
+    krb5_timestamp *change_time);
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_lock (krb5_context context, krb5_ccache ccache);
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_unlock (krb5_context context, krb5_ccache ccache);
+
+
+krb5_error_code KRB5_CALLCONV
 krb5_cccol_cursor_new(krb5_context context, krb5_cccol_cursor *cursor);
 
 krb5_error_code KRB5_CALLCONV
@@ -1307,6 +1323,15 @@ krb5_cccol_cursor_next(
 
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_cursor_free(krb5_context context, krb5_cccol_cursor *cursor);
+
+krb5_error_code KRB5_CALLCONV
+krb5_cccol_last_change_time(krb5_context context, krb5_timestamp *change_time);
+
+krb5_error_code KRB5_CALLCONV
+krb5_cccol_lock(krb5_context context);
+
+krb5_error_code KRB5_CALLCONV
+krb5_cccol_unlock(krb5_context context);
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_new_unique(
