@@ -33,6 +33,7 @@ krb5_ldap_free_password_policy
 krb5_ldap_iterate_password_policy
 krb5_dbe_free_contents
 krb5_ldap_free_server_params
+krb5_ldap_free_server_context_params
 krb5_ldap_free_krbcontainer_params
 krb5_ldap_alloc
 krb5_ldap_free

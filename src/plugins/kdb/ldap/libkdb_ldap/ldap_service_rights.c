@@ -38,48 +38,35 @@
 
 static char *kdcrights_subtree[][2] = {
     {"1#subtree#","#[Entry Rights]"},
-    {"2#subtree#","#CN"},
-    {"6#subtree#","#ObjectClass"},
+    {"2#subtree#","#ObjectClass"},
     {"2#subtree#","#krbTicketPolicyReference"},
     {"2#subtree#","#krbUPEnabled"},
     {"2#subtree#","#krbHostServer"},
-    {"2#subtree#","#krbServiceFlags"},
     {"2#subtree#","#krbRealmReferences"},
     {"2#subtree#","#krbTicketFlags"},
     {"2#subtree#","#krbMaxTicketLife"},
     {"2#subtree#","#krbMaxRenewableAge"},
     {"2#subtree#","#krbPrincipalName"},
-    {"6#subtree#","#krbPrincipalKey"},
+    {"2#subtree#","#krbPrincipalKey"},
     {"2#subtree#","#krbPrincipalExpiration"},
     {"2#subtree#","#krbPwdPolicyReference"},
     {"2#subtree#","#krbMaxPwdLife"},
-    {"6#subtree#","#ModifiersName"},
-    {"2#subtree#","#PasswordExpirationTime"},
-    {"2#subtree#","#PasswordExpirationInterval"},
-    {"2#subtree#","#PasswordMinimumLength"},
-    {"2#subtree#","#PasswordAllowChange"},
-    {"2#subtree#","#LoginDisabled"},
-    {"6#subtree#","#LastLoginTime"},
-    {"2#subtree#","#LoginExpirationTime"},
-    {"6#subtree#","#LoginIntruderAttempts"},
-    {"2#subtree#","#IntruderAttemptResetInterval"},
-    {"2#subtree#","#LoginIntruderLimit"},
-    {"6#subtree#","#LoginIntruderResetTime"},
-    {"2#subtree#","#DetectIntruder"},
-    {"2#subtree#","#LockoutAfterDetection"},
-    {"6#subtree#","#LockedByIntruder"},
-    {"2#subtree#","#krbPrincipalReferences"},
+    {"2#subtree#","#krbObjectReferences"},
+    {"2#subtree#","#krbLastPwdChange"},
+    {"6#subtree#","#krbExtraData"},
+    {"2#subtree#","#krbPasswordExpiration"},
+    {"6#subtree#","#krbLastFailedAuth"},
+    {"6#subtree#","#krbLoginFailedCount"},
+    {"6#subtree#","#krbLastSuccessfulAuth"},
     { "", "" }
 };
 
 static char *adminrights_subtree[][2]={
     {"15#subtree#","#[Entry Rights]"},
-    {"6#subtree#","#CN"},
     {"6#subtree#","#ObjectClass"},
     {"6#subtree#","#krbTicketPolicyReference"},
     {"6#subtree#","#krbUPEnabled"},
     {"2#subtree#","#krbHostServer"},
-    {"2#subtree#","#krbServiceFlags"},
     {"2#subtree#","#krbRealmReferences"},
     {"6#subtree#","#krbTicketFlags"},
     {"6#subtree#","#krbMaxTicketLife"},
@@ -87,41 +74,28 @@ static char *adminrights_subtree[][2]={
     {"6#subtree#","#krbPrincipalName"},
     {"6#subtree#","#krbPrincipalKey"},
     {"6#subtree#","#krbPrincipalExpiration"},
-    {"6#subtree#","#ModifiersName"},
-    {"6#subtree#","#PasswordExpirationTime"},
-    {"2#subtree#","#PasswordExpirationInterval"},
-    {"6#subtree#","#PasswordMinimumLength"},
-    {"6#subtree#","#PasswordAllowChange"},
-    {"6#subtree#","#LoginDisabled"},
-    {"2#subtree#","#LastLoginTime"},
-    {"2#subtree#","#LoginExpirationTime"},
-    {"2#subtree#","#LoginIntruderAttempts"},
-    {"6#subtree#","#IntruderAttemptResetInterval"},
-    {"6#subtree#","#LoginIntruderLimit"},
-    {"6#subtree#","#LoginIntruderResetTime"},
-    {"6#subtree#","#DetectIntruder"},
-    {"6#subtree#","#LockoutAfterDetection"},
-    {"2#subtree#","#LockedByIntruder"},
-    {"2#subtree#","#krbPrincipalReferences"},
-    {"6#subtree#","#Surname"},
-    {"4#subtree#","#passwordManagement"},
     {"6#subtree#","#krbPwdHistoryLength"},
     {"6#subtree#","#krbMinPwdLife"},
     {"6#subtree#","#krbMaxPwdLife"},
     {"6#subtree#","#krbPwdMinDiffChars"},
     {"6#subtree#","#krbPwdMinLength"},
     {"6#subtree#","#krbPwdPolicyReference"},
+    {"6#subtree#","#krbLastPwdChange"},
+    {"6#subtree#","#krbObjectReferences"},
+    {"6#subtree#","#krbExtraData"},
+    {"6#subtree#","#krbPasswordExpiration"},
+    {"2#subtree#","#krbLastFailedAuth"},
+    {"2#subtree#","#krbLoginFailedCount"},
+    {"2#subtree#","#krbLastSuccessfulAuth"},
     { "","" }
 };
 
 static char *pwdrights_subtree[][2] = {
     {"1#subtree#","#[Entry Rights]"},
-    {"2#subtree#","#CN"},
     {"2#subtree#","#ObjectClass"},
     {"2#subtree#","#krbTicketPolicyReference"},
     {"2#subtree#","#krbUPEnabled"},
     {"2#subtree#","#krbHostServer"},
-    {"2#subtree#","#krbServiceFlags"},
     {"2#subtree#","#krbRealmReferences"},
     {"6#subtree#","#krbTicketFlags"},
     {"2#subtree#","#krbMaxTicketLife"},
@@ -129,21 +103,26 @@ static char *pwdrights_subtree[][2] = {
     {"2#subtree#","#krbPrincipalName"},
     {"6#subtree#","#krbPrincipalKey"},
     {"2#subtree#","#krbPrincipalExpiration"},
-    {"4#subtree#","#passwordManagement"},
-    {"6#subtree#","#ModifiersName"},
     {"2#subtree#","#krbPwdHistoryLength"},
     {"2#subtree#","#krbMinPwdLife"},
     {"2#subtree#","#krbMaxPwdLife"},
     {"2#subtree#","#krbPwdMinDiffChars"},
     {"2#subtree#","#krbPwdMinLength"},
     {"2#subtree#","#krbPwdPolicyReference"},
+    {"6#subtree#","#krbLastPwdChange"},
+    {"2#subtree#","#krbObjectReferences"},
+    {"6#subtree#","#krbExtraData"},
+    {"6#subtree#","#krbPasswordExpiration"},
+    {"2#subtree#","#krbLastFailedAuth"},
+    {"2#subtree#","#krbLoginFailedCount"},
+    {"2#subtree#","#krbLastSuccessfulAuth"},
     { "", "" }
 };
 
 static char *kdcrights_realmcontainer[][2]={
     {"1#subtree#","#[Entry Rights]"},
     {"2#subtree#","#CN"},
-    {"6#subtree#","#ObjectClass"},
+    {"2#subtree#","#ObjectClass"},
     {"2#subtree#","#krbTicketPolicyReference"},
     {"2#subtree#","#krbMKey"},
     {"2#subtree#","#krbUPEnabled"},
@@ -151,33 +130,25 @@ static char *kdcrights_realmcontainer[][2]={
     {"2#subtree#","#krbPrincContainerRef"}, 
     {"2#subtree#","#krbSearchScope"},
     {"2#subtree#","#krbLdapServers"},
-    {"2#subtree#","#krbSupportedEncSaltTypes"},
-    {"2#subtree#","#krbDefaultEncSaltTypes"},
     {"2#subtree#","#krbKdcServers"},
+    {"2#subtree#","#krbAdmServers"},
     {"2#subtree#","#krbPwdServers"},
     {"2#subtree#","#krbTicketFlags"},
     {"2#subtree#","#krbMaxTicketLife"},
     {"2#subtree#","#krbMaxRenewableAge"},
     {"2#subtree#","#krbPrincipalName"},
-    {"6#subtree#","#krbPrincipalKey"},
+    {"2#subtree#","#krbPrincipalKey"},
     {"2#subtree#","#krbPrincipalExpiration"},
     {"2#subtree#","#krbPwdPolicyReference"},
     {"2#subtree#","#krbMaxPwdLife"},
-    {"6#subtree#","#ModifiersName"},
-    {"2#subtree#","#PasswordExpirationTime"},
-    {"2#subtree#","#PasswordExpirationInterval"},
-    {"2#subtree#","#PasswordMinimumLength"},
-    {"2#subtree#","#PasswordAllowChange"},
-    {"2#subtree#","#LoginDisabled"},
-    {"6#subtree#","#LastLoginTime"},
-    {"2#subtree#","#LoginExpirationTime"},
-    {"6#subtree#","#LoginIntruderAttempts"},
-    {"2#subtree#","#IntruderAttemptResetInterval"},
-    {"2#subtree#","#LoginIntruderLimit"},
-    {"6#subtree#","#LoginIntruderResetTime"},
-    {"2#subtree#","#DetectIntruder"},
-    {"2#subtree#","#LockoutAfterDetection"},
-    {"6#subtree#","#LockedByIntruder"},
+    {"2#subtree#","#krbObjectReferences"},
+    {"2#subtree#","#krbLastPwdChange"},
+    {"6#subtree#","#krbExtraData"},
+    {"2#subtree#","#krbPasswordExpiration"},
+    {"2#subtree#","#krbDefaultEncSaltTypes"},
+    {"6#subtree#","#krbLastFailedAuth"},
+    {"6#subtree#","#krbLoginFailedCount"},
+    {"6#subtree#","#krbLastSuccessfulAuth"},
     { "", "" }
 };
 
@@ -193,9 +164,8 @@ static char *adminrights_realmcontainer[][2]={
     {"2#subtree#","#krbPrincContainerRef"}, 
     {"2#subtree#","#krbSearchScope"},
     {"2#subtree#","#krbLdapServers"},
-    {"2#subtree#","#krbSupportedEncSaltTypes"},
-    {"2#subtree#","#krbDefaultEncSaltTypes"},
     {"2#subtree#","#krbKdcServers"},
+    {"2#subtree#","#krbAdmServers"},
     {"2#subtree#","#krbPwdServers"},
     {"6#subtree#","#krbTicketFlags"},
     {"6#subtree#","#krbMaxTicketLife"},
@@ -203,28 +173,20 @@ static char *adminrights_realmcontainer[][2]={
     {"6#subtree#","#krbPrincipalName"},
     {"6#subtree#","#krbPrincipalKey"},
     {"6#subtree#","#krbPrincipalExpiration"},
-    {"6#subtree#","#ModifiersName"},
-    {"6#subtree#","#PasswordExpirationTime"},
-    {"2#subtree#","#PasswordExpirationInterval"},
-    {"6#subtree#","#PasswordMinimumLength"},
-    {"6#subtree#","#PasswordAllowChange"},
-    {"6#subtree#","#LoginDisabled"},
-    {"2#subtree#","#LastLoginTime"},
-    {"2#subtree#","#LoginExpirationTime"},
-    {"2#subtree#","#LoginIntruderAttempts"},
-    {"6#subtree#","#IntruderAttemptResetInterval"},
-    {"6#subtree#","#LoginIntruderLimit"},
-    {"6#subtree#","#LoginIntruderResetTime"},
-    {"6#subtree#","#DetectIntruder"},
-    {"6#subtree#","#LockoutAfterDetection"},
-    {"2#subtree#","#LockedByIntruder"},
-    {"6#subtree#","#Surname"},
     {"6#subtree#","#krbPwdHistoryLength"},
     {"6#subtree#","#krbMinPwdLife"},
     {"6#subtree#","#krbMaxPwdLife"},
     {"6#subtree#","#krbPwdMinDiffChars"},
     {"6#subtree#","#krbPwdMinLength"},
     {"6#subtree#","#krbPwdPolicyReference"},
+    {"6#subtree#","#krbLastPwdChange"},
+    {"6#subtree#","#krbObjectReferences"},
+    {"6#subtree#","#krbExtraData"},
+    {"6#subtree#","#krbPasswordExpiration"},
+    {"6#subtree#","#krbDefaultEncSaltTypes"},
+    {"2#subtree#","#krbLastFailedAuth"},
+    {"2#subtree#","#krbLoginFailedCount"},
+    {"2#subtree#","#krbLastSuccessfulAuth"},
     { "","" }
 };
 
@@ -240,9 +202,8 @@ static char *pwdrights_realmcontainer[][2]={
     {"2#subtree#","#krbPrincContainerRef"}, 
     {"2#subtree#","#krbSearchScope"},
     {"2#subtree#","#krbLdapServers"},
-    {"2#subtree#","#krbSupportedEncSaltTypes"},
-    {"2#subtree#","#krbDefaultEncSaltTypes"},
     {"2#subtree#","#krbKdcServers"},
+    {"2#subtree#","#krbAdmServers"},
     {"2#subtree#","#krbPwdServers"},
     {"6#subtree#","#krbTicketFlags"},
     {"2#subtree#","#krbMaxTicketLife"},
@@ -250,13 +211,20 @@ static char *pwdrights_realmcontainer[][2]={
     {"2#subtree#","#krbPrincipalName"},
     {"6#subtree#","#krbPrincipalKey"},
     {"2#subtree#","#krbPrincipalExpiration"},
-    {"6#subtree#","#ModifiersName"},
     {"2#subtree#","#krbPwdHistoryLength"},
     {"2#subtree#","#krbMinPwdLife"},
     {"2#subtree#","#krbMaxPwdLife"},
     {"2#subtree#","#krbPwdMinDiffChars"},
     {"2#subtree#","#krbPwdMinLength"},
     {"2#subtree#","#krbPwdPolicyReference"},
+    {"2#subtree#","#krbLastPwdChange"},
+    {"2#subtree#","#krbObjectReferences"},
+    {"6#subtree#","#krbExtraData"},
+    {"6#subtree#","#krbPasswordExpiration"},
+    {"2#subtree#","#krbDefaultEncSaltTypes"},
+    {"2#subtree#","#krbLastFailedAuth"},
+    {"2#subtree#","#krbLoginFailedCount"},
+    {"2#subtree#","#krbLastSuccessfulAuth"},
     { "", "" }
 };
 
@@ -286,16 +254,17 @@ static char *kerberos_container[][2] = {
  */
 
 krb5_error_code
-krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subtreeparam, mask)
+krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subtreeparam, contref, mask)
     krb5_context	context;
     int                 servicetype;
     char                *serviceobjdn;
     char                *realmname;
     char                **subtreeparam;                         
+    char                *contref;                         
     int                 mask;
 {
 
-    int                    st=0,i=0;
+    int                    st=0,i=0,j=0;
     char                   *realmacls[2]={NULL}, *subtreeacls[2]={NULL}, *seccontacls[2]={NULL}, *krbcontacls[2]={NULL};
     LDAP                   *ld;
     LDAPMod                realmclass, subtreeclass, seccontclass, krbcontclass;
@@ -315,23 +284,23 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 	goto cleanup;
     }
 
-    subtreecount=ldap_context->lrparams->subtreecount;
-    subtree = (char **) malloc(sizeof(char *) * (subtreecount + 1));
-    if(subtree == NULL) {
-        st = ENOMEM;
-        goto cleanup;
+    if (subtreeparam != NULL) {
+        while(subtreeparam[subtreecount])
+            subtreecount++;
+    }
+    if (contref != NULL) {
+        subtreecount++;
     }
 
-    /* If the subtree is null, set the value to root */
-    if(subtreeparam == NULL) {
-        subtree[0] = strdup("");
-        if(subtree[0] == NULL) {
+    if (subtreecount) {
+        subtree = (char **) malloc(sizeof(char *) * (subtreecount + 1));
+        if(subtree == NULL) {
             st = ENOMEM;
             goto cleanup;
         }
-    }
-    else {
-        for (i=0; subtree[i] != NULL && i<subtreecount; i++) {
+        memset(subtree, 0, sizeof(char *) * (subtreecount + 1));
+        if (subtreeparam != NULL) {
+            for(i=0; subtreeparam[i]!=NULL; i++) {
             subtree[i] = strdup(subtreeparam[i]);
             if(subtree[i] == NULL) {
                 st = ENOMEM;
@@ -339,6 +308,13 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
             }
         }
     }
+        if (contref != NULL) {
+            subtree[i] = strdup(contref);
+        }
+    }
+
+    /* Set the rights for the realm */
+    if (mask & LDAP_REALM_RIGHTS) {
 
     /* Set the rights for the service object on the security container */
     seccontclass.mod_op = LDAP_MOD_ADD;
@@ -395,9 +371,6 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 	}
 	free(krbcontacls[0]);
     }
-
-    /* Set the rights for the realm */
-    if (mask & LDAP_REALM_RIGHTS) {
 
 	/* Construct the realm dn from realm name */
 	realmdn = (char *)malloc(strlen("cn=") + strlen(realmname) +
@@ -482,7 +455,7 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 
 
     /* Subtree rights to be set */
-    if (mask & LDAP_SUBTREE_RIGHTS) {
+    if ((mask & LDAP_SUBTREE_RIGHTS) && (subtree != NULL)) {
 	/* Populate the acl data to be added to the subtree */
 	subtreeclass.mod_op = LDAP_MOD_ADD;
 	subtreeclass.mod_type = "ACL";
@@ -499,9 +472,9 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 		subtreearr[0] = &subtreeclass;
 
                 /* set rights to a list of subtrees */
-                for(i=0; subtree[i]!=NULL && i<subtreecount;i++) {
+                for(j=0; subtree[j]!=NULL && j<subtreecount;j++) {
 		    st = ldap_modify_ext_s(ld,
-                                            subtree[i],
+                                            subtree[j],
                                             subtreearr,
                                             NULL,
                                             NULL);
@@ -525,9 +498,9 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 		subtreearr[0] = &subtreeclass;
 
                 /* set rights to a list of subtrees */
-                for(i=0; subtree[i]!=NULL && i<subtreecount;i++) {
+                for(j=0; subtree[j]!=NULL && j<subtreecount;j++) {
 		    st = ldap_modify_ext_s(ld,
-                                            subtree[i],
+                                            subtree[j],
                                             subtreearr,
                                             NULL,
                                             NULL);
@@ -551,9 +524,9 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 		subtreearr[0] = &subtreeclass;
 
                 /* set rights to a list of subtrees */
-                for(i=0; subtree[i]!=NULL && i<subtreecount;i++) {
+                for(j=0; subtree[j]!=NULL && j<subtreecount;j++) {
 		    st = ldap_modify_ext_s(ld,
-                                            subtree[i],
+                                            subtree[j],
                                             subtreearr,
                                             NULL,
                                             NULL);
@@ -595,16 +568,17 @@ cleanup:
 */
 
 krb5_error_code
-krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, subtreeparam, mask)
+krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, subtreeparam, contref, mask)
     krb5_context	context;
     int             servicetype;
     char            *serviceobjdn;
     char            *realmname;
     char            **subtreeparam; 
+    char            *contref;
     int             mask;
 {
 
-    int                    st=0,i=0;
+    int                    st=0,i=0,j=0;
     char                   *realmacls[2] = { NULL }, *subtreeacls[2] = { NULL };
     LDAP                   *ld;
     LDAPMod                realmclass, subtreeclass;
@@ -625,29 +599,32 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 	goto cleanup;
     }
 
-    subtreecount = 1;
+    if (subtreeparam != NULL) {
     while(subtreeparam[subtreecount])
         subtreecount++;
-    subtree = (char **) malloc(sizeof(char *) * subtreecount + 1);
-    if(subtree == NULL) {
-        st = ENOMEM;
-        goto cleanup;
+    }
+    if (contref != NULL) {
+        subtreecount++;
     }
 
-    /* If the subtree is null, set the value to root */
-    if(subtreeparam == NULL) {
-        subtree[0] = strdup("");
-        if(subtree[0] == NULL) {
+    if (subtreecount) {
+        subtree = (char **) malloc(sizeof(char *) * (subtreecount + 1));
+        if(subtree == NULL) {
             st = ENOMEM;
             goto cleanup;
         }
-    }
-    else {
-        for(i=0; subtreeparam[i]!=NULL && i<subtreecount; i++)
+        memset(subtree, 0, sizeof(char *) * (subtreecount + 1));
+        if (subtreeparam != NULL) {
+            for(i=0; subtreeparam[i]!=NULL; i++) {
         subtree[i] = strdup(subtreeparam[i]);
         if(subtree[i] == NULL) {
             st = ENOMEM;
             goto cleanup;
+        }
+    }
+        }
+        if (contref != NULL) {
+            subtree[i] = strdup(contref);
         }
     }
 
@@ -738,7 +715,7 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 
 
     /* Set the rights for the subtree */
-    if (mask & LDAP_SUBTREE_RIGHTS) {
+    if ((mask & LDAP_SUBTREE_RIGHTS) && (subtree != NULL)) {
 
 	/* Populate the acl data to be added to the subtree */
 	subtreeclass.mod_op=LDAP_MOD_DELETE;
@@ -755,9 +732,9 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 
 		subtreearr[0]=&subtreeclass;
 
-                for(i=0; subtree[i]!=NULL && i<subtreecount; i++) {
+                for(j=0; subtree[j]!=NULL && j<subtreecount; j++) {
 		    st = ldap_modify_ext_s(ld,
-                                            subtree[i],
+                                            subtree[j],
                                             subtreearr,
                                             NULL,
                                             NULL);
@@ -780,9 +757,9 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 
 		subtreearr[0]=&subtreeclass;
 
-                for(i=0; subtree[i]!=NULL && i<subtreecount; i++) {
+                for(j=0; subtree[j]!=NULL && j<subtreecount; j++) {
 		    st = ldap_modify_ext_s(ld,
-                                            subtree[i],
+                                            subtree[j],
                                             subtreearr,
                                             NULL,
                                             NULL);
@@ -805,9 +782,9 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 
 		subtreearr[0]=&subtreeclass;
 
-                for(i=0; subtree[i]!=NULL && i<subtreecount; i++) {
+                for(j=0; subtree[j]!=NULL && j<subtreecount; j++) {
 		    st = ldap_modify_ext_s(ld,
-                                            subtree[i],
+                                            subtree[j],
                                             subtreearr,
                                             NULL,
                                             NULL);

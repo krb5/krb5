@@ -435,7 +435,7 @@ void kdb5_ldap_create_service(argc, argv)
 
 		if ((retval = krb5_ldap_add_service_rights(util_context,
 							   srvparams->servicetype, srvparams->servicedn,
-							   realmName, rparams->subtree, rightsmask))) {
+							   realmName, rparams->subtree, rparams->containerref, rightsmask))) {
 		    printf("failed\n");
 		    com_err(me, retval, "while assigning rights '%s'",
 			    srvparams->servicedn);
@@ -940,7 +940,7 @@ void kdb5_ldap_modify_service(argc, argv)
 
 		if ((retval = krb5_ldap_delete_service_rights(util_context,
 							      srvparams->servicetype, srvparams->servicedn,
-							      realmName, rparams->subtree, rightsmask))) {
+							      realmName, rparams->subtree, rparams->containerref, rightsmask))) {
 		    printf("failed\n");
 		    com_err(me, retval, "while assigning rights '%s'",
 			    srvparams->servicedn);
@@ -991,7 +991,7 @@ void kdb5_ldap_modify_service(argc, argv)
 
 		if ((retval = krb5_ldap_add_service_rights(util_context,
 							   srvparams->servicetype, srvparams->servicedn,
-							   realmName, rparams->subtree, rightsmask))) {
+							   realmName, rparams->subtree, rparams->containerref, rightsmask))) {
 		    printf("failed\n");
 		    com_err(me, retval, "while assigning rights '%s'",
 			    srvparams->servicedn);
@@ -1717,7 +1717,7 @@ kdb5_ldap_set_service_password(argc, argv)
 	    memset(passwd, 0, passwd_len);
 	    goto cleanup;
 	}
-	/* Password = {CRYPT}<encrypted password>:<encrypted key> */
+	/* Password = {HEX}<encrypted password>:<encrypted key> */
 	encrypted_passwd.value = (unsigned char *)malloc(strlen(service_object) +
 							 1 + 5 + hex.length + 2);
 	if (encrypted_passwd.value == NULL) {

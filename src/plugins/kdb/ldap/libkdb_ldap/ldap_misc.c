@@ -318,7 +318,7 @@ cleanup:
  */
 
 krb5_error_code
-krb5_ldap_free_server_params(ldap_context)
+krb5_ldap_free_server_context_params(ldap_context)
     krb5_ldap_context           *ldap_context;
 {
     int                         i=0;
@@ -366,6 +366,7 @@ krb5_ldap_free_server_params(ldap_context)
     }
 
     if (ldap_context->bind_pwd != NULL) {
+	memset(ldap_context->bind_pwd, 0, strlen(ldap_context->bind_pwd));
 	krb5_xfree(ldap_context->bind_pwd);
 	ldap_context->bind_pwd = NULL;
     }
@@ -402,12 +403,22 @@ krb5_ldap_free_server_params(ldap_context)
 	krb5_xfree(ldap_context->certificates);
     }
 
-    k5_mutex_destroy(&ldap_context->hndl_lock);
-
-    krb5_xfree(ldap_context);
     return(0);
 }
 
+krb5_error_code
+krb5_ldap_free_server_params(ldap_context)
+    krb5_ldap_context           *ldap_context;
+{
+    if (ldap_context == NULL)
+        return 0;
+
+    krb5_ldap_free_server_context_params(ldap_context);
+
+    k5_mutex_destroy(&ldap_context->hndl_lock);
+    krb5_xfree(ldap_context);
+    return(0);
+}
 
 /*
  * check to see if the principal belongs to the default realm.

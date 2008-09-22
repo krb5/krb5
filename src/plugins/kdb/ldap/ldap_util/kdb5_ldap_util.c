@@ -520,7 +520,7 @@ int main(argc, argv)
 		exit_status++;
 		goto cleanup;
 	    }
-	    memset(passwd, 0, sizeof(passwd));
+	    memset(passwd, 0, MAX_PASSWD_LEN);
 	    passwd_len = MAX_PASSWD_LEN - 1;
 	    snprintf(prompt, MAX_PASSWD_PROMPT_LEN, "Password for \"%s\"", bind_dn);
 
@@ -536,6 +536,7 @@ int main(argc, argv)
 	}
 
 	ldap_context->bind_pwd = passwd;
+	passwd = NULL;
     }
 
     /* If ldaphost is specified, release entry filled by configuration & use this */
@@ -593,6 +594,7 @@ int main(argc, argv)
     }
     dal_handle->db_context = ldap_context;
     util_context->dal_handle = dal_handle;
+    ldap_context = NULL;
 
     db_retval = krb5_ldap_read_server_params(util_context, conf_section, KRB5_KDB_SRV_TYPE_OTHER);
     if (db_retval) {
@@ -602,7 +604,7 @@ int main(argc, argv)
     }
 
     if (cmd->opendb) {
-	db_retval = krb5_ldap_db_init(util_context, ldap_context);
+	db_retval = krb5_ldap_db_init(util_context, (krb5_ldap_context *)dal_handle->db_context);
 	if (db_retval) {
 	    com_err(progname, db_retval, "while initializing database");
 	    exit_status++;
@@ -615,10 +617,15 @@ int main(argc, argv)
     goto cleanup;
 
 cleanup:
-    if (passwd)
-	memset(passwd, 0, sizeof(passwd));
-    if (ldap_context && ldap_context->bind_pwd)
-	memset(ldap_context->bind_pwd, 0, sizeof(ldap_context->bind_pwd));
+    if (passwd) {
+	memset(passwd, 0, strlen(passwd));
+	free(passwd);
+    }
+
+    if (ldap_context) {
+	krb5_ldap_free_server_context_params(ldap_context);
+	free(ldap_context);
+    }
 
     if (util_context) {
 	if (gp_is_static == 0)

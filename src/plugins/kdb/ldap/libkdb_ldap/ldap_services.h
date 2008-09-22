@@ -88,10 +88,10 @@ krb5_error_code
 krb5_ldap_set_service_passwd( krb5_context, char *, char *);
 
 krb5_error_code 
-krb5_ldap_add_service_rights( krb5_context, int, char *, char *, char **, int);
+krb5_ldap_add_service_rights( krb5_context, int, char *, char *, char **, char *, int);
 
 krb5_error_code
-krb5_ldap_delete_service_rights( krb5_context, int, char *, char *, char **, int);
+krb5_ldap_delete_service_rights( krb5_context, int, char *, char *, char **, char *, int);
 #endif
 
 #endif
