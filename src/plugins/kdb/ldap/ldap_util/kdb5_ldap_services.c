@@ -235,7 +235,7 @@ void kdb5_ldap_create_service(argc, argv)
 	goto cleanup;
     }
 
-    dal_handle = (kdb5_dal_handle *) util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     /* Allocate memory for extra arguments to be used for setting
@@ -531,7 +531,7 @@ void kdb5_ldap_modify_service(argc, argv)
 	goto err_usage;
     }
 
-    dal_handle = (kdb5_dal_handle *) util_context->db_context;
+    dal_handle = util_context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     /* Parse all arguments, only to pick up service DN (Pass 1) */
@@ -1561,7 +1561,7 @@ kdb5_ldap_set_service_password(argc, argv)
 	goto cleanup;
     }
 
-    dal_handle = (kdb5_dal_handle *)util_context->db_context;
+    dal_handle = util_context->dal_handle;
     lparams = (krb5_ldap_context *) dal_handle->db_context;
 
     if (lparams == NULL) {
