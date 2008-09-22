@@ -46,70 +46,6 @@ extern "C" {
  */
 #define KIM_OPTIONS_START_IMMEDIATELY ((kim_time_t) 0)
 
-/*!
- * The type of prompt which needs to be displayed.
- * This value determines what type of user interface is displayed.
- * See \ref kim_options_custom_prompt_callback for more information.
- */
-typedef uint32_t kim_prompt_type;
-
-enum kim_prompt_type_enum {
-    kim_prompt_type_password = 0,
-    kim_prompt_type_challenge = 1
-};
-
-/*!
- * The prompt callback used to display a prompt to the user.
- * See \ref kim_options_custom_prompt_callback for more information.
- */
-typedef kim_error (*kim_prompt_callback) (kim_prompt_type    in_type,
-                                          kim_string         in_title,
-                                          kim_string         in_message,
-                                          kim_string         in_description,
-                                          char              **out_reply);
-
-/*!
- * The default prompt callback.
- * See \ref kim_options_custom_prompt_callback for more information.
- */
-kim_error kim_prompt_callback_default (kim_prompt_type    in_type,
-                                       kim_string         in_title,
-                                       kim_string         in_message,
-                                       kim_string         in_description,
-                                       char              **out_reply);
-    
-/*!
- * The graphical prompt callback.
- * See \ref kim_options_custom_prompt_callback for more information.
- */
-kim_error kim_prompt_callback_gui (kim_prompt_type    in_type,
-                                   kim_string         in_title,
-                                   kim_string         in_message,
-                                   kim_string         in_description,
-                                   char              **out_reply);
-
-/*!
- * The command line prompt callback.
- * See \ref kim_options_custom_prompt_callback for more information.
- */
-kim_error kim_prompt_callback_cli (kim_prompt_type    in_type,
-                                   kim_string         in_title,
-                                   kim_string         in_message,
-                                   kim_string         in_description,
-                                   char              **out_reply);
-
-/*!
- * The prompt callback which always returns an error.
- * Use to turn off prompting entirely.
- * \note Using this callback may prevent the user from authenicating.
- * See \ref kim_options_custom_prompt_callback for more information.
- */
-kim_error kim_prompt_callback_none (kim_prompt_type    in_type,
-                                    kim_string         in_title,
-                                    kim_string         in_message,
-                                    kim_string         in_description,
-                                    char              **out_reply);
-
 /*! @} */
 
 /*!
@@ -125,34 +61,6 @@ kim_error kim_prompt_callback_none (kim_prompt_type    in_type,
  * 
  * KIM options fall into two major categories: options for controlling how credentials are 
  * acquired and options for controlling what properties the newly acquired credentials will have:
- *
- * \section kim_options_credential_acquisition Options for Controlling Credential Acquisition
- * 
- * In order to acquire credentials, Kerberos needs to obtain one or more secrets from the user.
- * These secrets may be a certificate, password, SecurID pin, or information from a smart card.  
- * If obtaining the secret requires interaction with the user, the Kerberos libraries call a
- * "prompter callback" to display a dialog or command line prompt to request information from
- * the user.  If you want to provide your own custom dialogs or command line prompts, 
- * the KIM APIs provide a mechanism for replacing the default prompt callbacks with your own.  
- *
- * \subsection kim_options_custom_prompt_callback Providing a Custom Prompt Callback
- *
- * All secrets are obtained from the user through a #kim_prompt_callback_t.  By default, 
- * options use #kim_prompt_callback_default, which presents a dialog to request
- * information from the user, or if no graphical access is available, a command line prompt.
- * 
- * KIM also provides three other callbacks: #kim_prompt_callback_gui only presents
- * a dialog and returns an error if there is no graphical access. #kim_prompt_callback_cli
- * only presents a command line interface and returns an error if there is no controlling
- * terminal available.  #kim_prompt_callback_none always returns an error.
- *
- * Using #kim_options_set_prompt_callback(), you can change the prompt callback to one of 
- * the above callbacks or a callback you have defined yourself.  Callbacks are called in a
- * loop, one for each prompt.  Because network traffic may occur between calls to the prompt
- * callback, your prompt interface should support time passing between calls to the prompter.
- * If you are defining a callback yourself, you should also set your own options data with 
- * #kim_options_set_data() for storing state between calls.  Options data is a caller
- * defined pointer value -- the Kerberos libaries make no use of it.
  *
  * \section kim_options_credential_properties Options for Controlling Credential Properties
  *
@@ -284,61 +192,6 @@ kim_error kim_options_create (kim_options *out_options);
  */
 kim_error kim_options_copy (kim_options *out_options,
                             kim_options  in_options);
-
-/*!
- * \param io_options         an options object to modify.
- * \param in_prompt_callback a prompt callback function.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Set the prompt callback for obtaining information from the user.
- * \par Default value
- * #kim_prompt_callback_default
- * \sa kim_options_get_prompt_callback()
- */
-kim_error kim_options_set_prompt_callback (kim_options         io_options,
-                                           kim_prompt_callback in_prompt_callback);
-
-/*!
- * \param in_options          an options object.
- * \param out_prompt_callback on exit, the prompt callback specified by in_options. 
- *                            Does not need to be freed but may become invalid when 
- *                            \a in_options is freed.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the prompt callback for obtaining information from the user.
- * \par Default value
- * #kim_prompt_callback_default
- * \sa kim_options_set_prompt_callback()
- */
-kim_error kim_options_get_prompt_callback (kim_options          in_options,
-                                           kim_prompt_callback *out_prompt_callback);
-
-/*!
- * \param io_options  an options object to modify.
- * \param in_data     a pointer to caller-specific data.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Set caller-specific data for use in library callbacks.
- * \note This option can be used by the caller to store a pointer to data needed when handling a 
- *       callback.  The KIM library does not use this options data in any way.
- * \par Default value
- * NULL (no data is set by default)
- * \sa kim_options_get_data()
- */
-kim_error kim_options_set_data (kim_options  io_options,
-                                const void    *in_data);
-
-/*!
- * \param in_options  an options object.
- * \param out_data    on exit, the pointer to caller specific data specified by in_options.
- *                    Does not need to be freed but may become invalid when \a in_options is freed.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get caller-specific data for use in library callbacks.
- * \note This option can be used by the caller to store a pointer to data needed when handling a 
- *       callback.  The KIM library does not use this options data in any way.
- * \par Default value
- * NULL (no data is set by default)
- * \sa kim_options_set_data()
- */
-kim_error kim_options_get_data (kim_options   in_options,
-                                const void  **out_data);
 
 /*!
  * \param io_options    an options object to modify.

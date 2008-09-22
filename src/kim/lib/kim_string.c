@@ -147,6 +147,7 @@ kim_error kim_string_compare (kim_string      in_string,
 {
     return kim_os_string_compare (in_string, 
                                   in_compare_to_string, 
+                                  0, /* case sensitive */
                                   out_comparison);
 }
 

@@ -179,12 +179,19 @@ static inline kim_error kim_credential_allocate (kim_credential *out_credential)
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_credential_create_new (kim_credential *out_credential,
-                                     kim_identity    in_client_identity,
+                                     kim_identity    in_identity,
                                      kim_options     in_options)
 {
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
-    
+    kim_options options = NULL;
+    kim_ui_context context;
+    kim_string service = NULL;
+    krb5_principal principal = NULL;
+    krb5_get_init_creds_opt *init_cred_options = NULL;
+    kim_boolean ui_inited = 0;
+    kim_boolean done = 0;
+
     if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
@@ -196,7 +203,82 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     }
     
     if (!err) {
-#warning Get tickets here
+        if (in_options) {
+            options = in_options;
+        } else {
+            err = kim_options_create (&options);
+        }
+    }
+    
+    if (!err) {
+        err = kim_options_get_init_cred_options (options, 
+                                                 credential->context,
+                                                 &init_cred_options);
+    }
+    
+    if (!err) {
+        kim_options_get_service_name (options, &service);
+    }
+    
+    if (!err) {
+        err = kim_identity_get_krb5_principal (in_identity, 
+                                               credential->context, 
+                                               &principal);
+    }
+    
+    if (!err) {
+        err = kim_ui_init (&context);
+        if (!err) {
+            context.identity = in_identity; /* used by kim_ui_prompter */
+            ui_inited = 1; 
+        }
+    }
+    
+    while (!err && !done) { 
+        krb5_creds creds;
+        kim_boolean free_creds = 0;
+
+        err = krb5_error (credential->context,
+                          krb5_get_init_creds_password (credential->context, 
+                                                        &creds,
+                                                        principal,
+                                                        NULL, 
+                                                        kim_ui_prompter, 
+                                                        &context, 0, 
+                                                        (char *) service, 
+                                                        init_cred_options));
+        
+        if (!err) { free_creds = 1; }
+        
+        if (!err) {
+            err = krb5_error (credential->context,
+                              krb5_copy_creds (credential->context,
+                                               &creds, 
+                                               &credential->creds));
+        }
+        
+        if (!err || err == KIM_USER_CANCELED_ERR) {
+            /* new creds obtained or the user gave up */
+            done = 1;
+            
+        } else { 
+            /*  new creds failed, report error to user */
+            err = kim_ui_handle_kim_error (&context, in_identity, 
+                                           kim_ui_error_type_authentication,
+                                           err);
+        }
+        
+        if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
+    }
+    
+    if (ui_inited) {
+        kim_error fini_err = kim_ui_fini (&context);
+        if (!err) { err = check_error (fini_err); }
+    }
+    
+    /* free before credential is passed back to caller */
+    if (credential && init_cred_options) {
+        kim_options_free_init_cred_options (credential->context, &init_cred_options);
     }
     
     if (!err) {
@@ -204,6 +286,9 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         credential = NULL;
     }
     
+    if (principal ) { krb5_free_principal (credential->context, principal); }
+    if (!in_options) { kim_options_free (&options); }
+    kim_string_free (&service);
     kim_credential_free (&credential);
     
     return check_error (err);
@@ -362,7 +447,9 @@ kim_error kim_credential_create_from_krb5_creds (kim_credential *out_credential,
     }
     
     if (!err) {
-        err = krb5_error (NULL, krb5_init_context (&credential->context));
+        err = krb5_error (in_krb5_context, 
+                          krb5_copy_context (in_krb5_context,
+                                             &credential->context));
     }
     
     if (!err) {
@@ -376,6 +463,117 @@ kim_error kim_credential_create_from_krb5_creds (kim_credential *out_credential,
         *out_credential = credential;
         credential = NULL;
     }
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_credential_create_for_change_password (kim_credential *out_credential,
+                                                     kim_identity    in_identity,
+                                                     kim_string      in_old_password)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
+    kim_string realm = NULL;
+    kim_string service = NULL;
+    kim_ui_context context;
+    krb5_principal principal = NULL;
+    kim_string service_format = "kadmin/changepw@%s";
+    kim_boolean ui_inited = 0;
+    kim_boolean done = 0;
+    
+    if (!err && !out_credential ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_old_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_credential_allocate (&credential);
+    }
+    
+    if (!err) {
+        err = krb5_error (NULL, krb5_init_context (&credential->context));
+    }
+    
+    if (!err) {
+        err = kim_identity_get_krb5_principal (in_identity, 
+                                               credential->context, 
+                                               &principal);
+    }
+    
+    if (!err) {
+        err = kim_identity_get_realm (in_identity, &realm);
+    }
+    
+    if (!err) {
+        err = kim_string_create_from_format (&service, service_format, realm);
+    }
+    
+    if (!err) {
+        err = kim_ui_init (&context);
+        if (!err) {
+            context.identity = in_identity; /* used by kim_ui_prompter */
+            ui_inited = 1; 
+        }
+    }
+    
+    while (!err && !done) {
+        krb5_creds creds;
+        kim_boolean free_creds = 0;
+        krb5_get_init_creds_opt	opts;
+        
+        krb5_get_init_creds_opt_init (&opts);
+        krb5_get_init_creds_opt_set_tkt_life (&opts, 5*60);
+        krb5_get_init_creds_opt_set_renew_life (&opts, 0);
+        krb5_get_init_creds_opt_set_forwardable (&opts, 0);
+        krb5_get_init_creds_opt_set_proxiable (&opts, 0);
+        
+        err = krb5_error (credential->context,
+                          krb5_get_init_creds_password (credential->context, 
+                                                        &creds,
+                                                        principal,
+                                                        (char *) in_old_password, 
+                                                        kim_ui_prompter, 
+                                                        &context, 0, (char *) service, 
+                                                        &opts));        
+        if (!err) { free_creds = 1; }
+        
+        if (!err) {
+            err = krb5_error (credential->context,
+                              krb5_copy_creds (credential->context,
+                                               &creds, 
+                                               &credential->creds));
+        }
+        
+        if (!err || err == KIM_USER_CANCELED_ERR) {
+            /* new creds obtained or the user gave up */
+            done = 1;
+            
+        } else { 
+            /*  new creds failed, report error to user */
+            err = kim_ui_handle_kim_error (&context, in_identity, 
+                                           kim_ui_error_type_change_password,
+                                           err);
+        }
+        
+        if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
+    }
+    
+    if (ui_inited) {
+        kim_error fini_err = kim_ui_fini (&context);
+        if (!err) { err = check_error (fini_err); }
+    }
+    
+    if (!err) {
+        *out_credential = credential;
+        credential = NULL;
+    }
+    
+    if (principal ) { krb5_free_principal (credential->context, principal); }
+    
+    kim_string_free (&realm);
+    kim_string_free (&service);
+    kim_credential_free (&credential);
     
     return check_error (err);
 }
@@ -396,7 +594,9 @@ kim_error kim_credential_copy (kim_credential *out_credential,
     }
     
     if (!err) {
-        err = krb5_error (NULL, krb5_init_context (&credential->context));
+        err = krb5_error (in_credential->context, 
+                          krb5_copy_context (in_credential->context,
+                                             &credential->context));
     }
     
     if (!err) {
@@ -690,8 +890,6 @@ kim_error kim_credential_store (kim_credential  in_credential,
                                               k5ccache, in_credential->creds));
     }
     
-#warning Call plugins here
-    
     if (!err && out_ccache) {
         err = kim_ccache_create_from_krb5_ccache (out_ccache, context, k5ccache);
     }
@@ -960,6 +1158,130 @@ kim_error kim_credential_validate (kim_credential *io_credential,
     
     if (ccache) { krb5_cc_destroy ((*io_credential)->context, ccache); }
     kim_string_free (&service_name);
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_credential_change_password (kim_credential  in_credential,
+                                          kim_identity    in_identity,
+                                          kim_string      in_new_password,
+                                          kim_error      *out_rejected_err,
+                                          kim_string     *out_rejected_message,
+                                          kim_string     *out_rejected_description)
+{
+    kim_error err = KIM_NO_ERROR;
+    krb5_principal principal = NULL;
+    int rejected_code = 0;
+    krb5_data message_data;
+    krb5_data description_data;
+    
+    if (!err && !in_credential   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_new_password ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_rejected_err) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    /* out_rejected_message and out_rejected_description may be NULL */
+    
+    if (!err) {
+        err = kim_identity_get_krb5_principal (in_identity, 
+                                               in_credential->context, 
+                                               &principal);
+    }
+
+    if (!err) {
+        err = krb5_error (in_credential->context,
+                          krb5_principal_compare (in_credential->context,
+                                                  in_credential->creds->client, 
+                                                  principal));
+    }
+    
+    if (!err) {
+        if (krb5_principal_compare (in_credential->context, 
+                                    in_credential->creds->client, 
+                                    principal)) {
+            /* Same principal, change the password normally */
+            err = krb5_error (in_credential->context,
+                              krb5_change_password (in_credential->context, 
+                                                    in_credential->creds, 
+                                                    (char *) in_new_password, 
+                                                    &rejected_code, 
+                                                    &message_data, 
+                                                    &description_data));
+        } else {
+            /* Different principal, use set change password protocol */
+            err = krb5_error (in_credential->context,
+                              krb5_set_password (in_credential->context, 
+                                                 in_credential->creds, 
+                                                 (char *) in_new_password, 
+                                                 principal,
+                                                 &rejected_code, 
+                                                 &message_data, 
+                                                 &description_data));
+        }
+        
+    }
+    
+    if (!err && rejected_code) {
+        kim_string rejected_message = NULL;
+        kim_string rejected_description = NULL;
+        
+        if (!err) {
+            if (message_data.data && message_data.length > 0) {
+                err = kim_string_create_from_buffer (&rejected_message, 
+                                                     message_data.data, 
+                                                     message_data.length);
+            } else {
+                err = kim_os_string_create_localized (&rejected_message,
+                                                      "KLStringChangePasswordFailed");
+            }
+        }
+        
+        if (!err) {
+            if (description_data.data && description_data.length > 0) {
+                err = kim_string_create_from_buffer (&rejected_description,
+                                                     description_data.data, 
+                                                     description_data.length);
+            } else {
+                err = kim_os_string_create_localized (&rejected_description,
+                                                      "KLStringPasswordRejected");
+            }
+        }
+        
+        if (!err) {
+            char *c;
+            
+            // replace all \n and \r characters with spaces
+            for (c = (char *) rejected_message; *c != '\0'; c++) {
+                if ((*c == '\n') || (*c == '\r')) { *c = ' '; }
+            }
+            
+            for (c = (char *) rejected_description; *c != '\0'; c++) {
+                if ((*c == '\n') || (*c == '\r')) { *c = ' '; }
+            }
+        }
+        
+        if (!err) {
+            if (out_rejected_message) {
+                *out_rejected_message = rejected_message;
+                rejected_message = NULL;
+            }
+            
+            if (out_rejected_description) {
+                *out_rejected_description = rejected_description;
+                rejected_description = NULL;
+            }
+        }
+        
+        kim_string_free (&rejected_message);
+        kim_string_free (&rejected_description);
+        
+        krb5_free_data_contents (in_credential->context, &message_data);
+        krb5_free_data_contents (in_credential->context, &description_data);
+    }
+    
+    if (!err) {
+        *out_rejected_err = rejected_code;
+    }
     
     return check_error (err);
 }

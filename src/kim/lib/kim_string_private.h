@@ -55,6 +55,10 @@ kim_error kim_string_append (kim_string *io_string,
 /* OS-specific because it should use UTF8-safe sorting where possible */
 kim_error kim_os_string_compare (kim_string      in_string,
                                  kim_string      in_compare_to_string,
+                                 kim_boolean     in_case_insensitive,
                                  kim_comparison *out_comparison);
+
+kim_error kim_os_string_create_localized (kim_string *out_string,
+                                          kim_string  in_string);
 
 #endif /* KIM_STRING_PRIVATE_H */

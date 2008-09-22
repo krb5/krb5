@@ -256,29 +256,12 @@ kim_error kim_identity_get_krb5_principal (kim_identity  in_identity,
 
 /*!
  * \param in_identity  an identity object whose password will be changed.
- * \param in_options   initial credential options to be used if a new credential is obtained.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Change the password for an identity.
  * \note kim_identity_change_password() will acquire a temporary credential to change 
- * the password.  It uses the \a in_options structure to obtain information about the desired 
- * prompter and current password.  
+ * the password.    
  */
-kim_error kim_identity_change_password (kim_identity  in_identity,
-                                          kim_options   in_options);
-
-/*!
- * \param in_identity  an identity object whose password will be changed.
- * \param in_options   initial credential options to be used if a new credential is obtained.
- * \param in_new_password a string representation of the identity's new password.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Change the password for an identity to a caller-provided new password.
- * \note kim_identity_change_password_with_passwords() will acquire a temporary credential 
- * to change the password. It uses the \a in_options structure to obtain information about   
- * the desired prompter and current password.  
- */
-kim_error kim_identity_change_password_to_password (kim_identity in_identity,
-                                                      kim_options   in_options,
-                                                      kim_string    in_new_password);
+kim_error kim_identity_change_password (kim_identity  in_identity);
 
 /*!
  * \param io_identity the identity object to be freed.  Set to NULL on exit.

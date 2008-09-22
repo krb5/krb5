@@ -92,10 +92,6 @@ kim_error kim_identity_create_from_string (kim_identity *out_identity,
     }
     
     if (!err) {
-#warning Run translator here
-    }
-    
-    if (!err) {
         *out_identity = identity;
         identity = NULL;
     }
@@ -175,10 +171,6 @@ kim_error kim_identity_create_from_components (kim_identity *out_identity,
     }    
     
     if (!err) {
-#warning Run translator here
-    }
-    
-    if (!err) {
         *out_identity = identity;
         identity = NULL;
     }
@@ -226,10 +218,6 @@ kim_error kim_identity_create_from_krb5_principal (kim_identity  *out_identity,
     }
     
     if (!err) {
-#warning Run translator here
-    }
-    
-    if (!err) {
         *out_identity = identity;
         identity = NULL;
     }
@@ -253,7 +241,9 @@ kim_error kim_identity_copy (kim_identity *out_identity,
         err = kim_identity_allocate (&identity);
         
         if (!err) {
-            err = krb5_error (NULL, krb5_init_context (&identity->context));
+            err = krb5_error (in_identity->context, 
+                              krb5_copy_context (in_identity->context,
+                                                 &identity->context));
         }
         
         if (!err) {
@@ -546,33 +536,97 @@ kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_identity_change_password (kim_identity in_identity,
-                                        kim_options  in_options)
+kim_error kim_identity_change_password (kim_identity in_identity)
 {
     kim_error err = KIM_NO_ERROR;
+    kim_ui_context context;
+    kim_boolean ui_inited = 0;
+    kim_boolean done = 0;
     
     if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-#warning Implement change password GUI support
+        err = kim_ui_init (&context);
+        if (!err) { ui_inited = 1; }
     }
-
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_identity_change_password_to_password (kim_identity in_identity,
-                                                    kim_options  in_options,
-                                                    kim_string   in_new_password)
-{
-    kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_identity    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_new_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    while (!err && !done) {
+        char *old_password = NULL;
+        char *new_password = NULL;
+        char *verify_password = NULL;
+        kim_error rejected_err = KIM_NO_ERROR;
+        kim_string rejected_message = NULL;
+        kim_string rejected_description = NULL;
+        
+        err = kim_ui_change_password (&context,
+                                      in_identity,
+                                      0 /* old password not expired */,
+                                      &old_password,
+                                      &new_password,
+                                      &verify_password);
+        
+        if (!err) {
+            kim_comparison comparison;
+            
+            err = kim_string_compare (new_password, verify_password, &comparison);
+            if (!err && !kim_comparison_is_equal_to (comparison)) {
+                err = check_error (KIM_PASSWORD_MISMATCH_ERR);
+            }
+        }
+        
+        if (!err) {
+            kim_credential credential = NULL;
+            
+            if (context.type == kim_ui_type_cli && context.tcontext) {
+                /* command line has already gotten the credentials for us */
+                credential = (kim_credential) context.tcontext;
+            } else {
+                err = kim_credential_create_for_change_password (&credential,
+                                                                 in_identity,
+                                                                 old_password);
+            }
+            
+            if (!err) {
+                err = kim_credential_change_password (credential, 
+                                                      in_identity,
+                                                      new_password,
+                                                      &rejected_err,
+                                                      &rejected_message,
+                                                      &rejected_description);
+                
+            }  
+            
+            kim_credential_free (&credential);
+        }
+        
+        if (!err || err == KIM_USER_CANCELED_ERR) {
+            /* password change succeeded or the user gave up */
+            done = 1;
+            
+        } else if (!err && rejected_err) {
+            /* Password rejected, report it to the user */
+            err = kim_ui_handle_error (&context, in_identity,
+                                       rejected_err,
+                                       rejected_message, 
+                                       rejected_description);
+            
+        } else {
+            /* Password change failed, report error to user */
+            err = kim_ui_handle_kim_error (&context, in_identity, 
+                                           kim_ui_error_type_change_password,
+                                           err);                                        
+        }
+        
+        kim_string_free (&rejected_message);
+        kim_string_free (&rejected_description);
+        kim_ui_free_string (&context, &old_password);
+        kim_ui_free_string (&context, &new_password);
+        kim_ui_free_string (&context, &verify_password);         
+    }
     
-    if (!err) {
-#warning Implement change password support
+    if (ui_inited) {
+        kim_error fini_err = kim_ui_fini (&context);
+        if (!err) { err = check_error (fini_err); }
     }
     
     return check_error (err);

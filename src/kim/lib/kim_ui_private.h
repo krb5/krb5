@@ -36,22 +36,41 @@ enum kim_ui_type {
     kim_ui_type_none
 };
 
+enum kim_ui_error_type {
+    kim_ui_error_type_authentication,
+    kim_ui_error_type_change_password,
+    kim_ui_error_type_selection,
+    kim_ui_error_type_generic
+};
+
 /* declare struct on stack.  Deep contents will be freed by kim_ui_fini. */
 typedef struct kim_ui_context {
     enum kim_ui_type type;
     void *tcontext;
+    kim_identity identity;
 } kim_ui_context;
+
+krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
+                                 void         *in_context,
+                                 const char   *in_name,
+                                 const char   *in_banner,
+                                 int           in_num_prompts,
+                                 krb5_prompt   in_prompts[]);
 
 
 kim_error kim_ui_init (kim_ui_context *io_context);
 
+kim_error kim_ui_enter_identity (kim_ui_context *in_context,
+                                 kim_identity   *out_identity);
+
 kim_error kim_ui_select_identity (kim_ui_context       *in_context,
                                   kim_selection_hints   in_hints,
-                                  kim_identity        *out_identity);
+                                  kim_identity         *out_identity);
 
 kim_error kim_ui_auth_prompt (kim_ui_context    *in_context,
                               kim_identity       in_identity,
                               kim_prompt_type    in_type,
+                              kim_boolean        in_hide_reply, 
                               kim_string         in_title,
                               kim_string         in_message,
                               kim_string         in_description,
@@ -64,14 +83,20 @@ kim_error kim_ui_change_password (kim_ui_context  *in_context,
                                   char           **out_new_password,
                                   char           **out_verify_password);
 
-kim_error kim_ui_display_error (kim_ui_context *in_context,
-                                kim_identity    in_identity,
-                                kim_error       in_error,
-                                kim_string      in_error_message,
-                                kim_string      in_error_description);
+/* Helper function */
+kim_error kim_ui_handle_kim_error (kim_ui_context         *in_context,
+                                   kim_identity            in_identity,
+                                   enum kim_ui_error_type  in_type,
+                                   kim_error               in_error);
+
+kim_error kim_ui_handle_error (kim_ui_context *in_context,
+                               kim_identity    in_identity,
+                               kim_error       in_error,
+                               kim_string      in_error_message,
+                               kim_string      in_error_description);
 
 void kim_ui_free_string (kim_ui_context  *in_context,
-                         char            *io_string);
+                         char           **io_string);
 
 kim_error kim_ui_fini (kim_ui_context *io_context);
 

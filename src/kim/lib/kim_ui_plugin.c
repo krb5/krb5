@@ -156,6 +156,24 @@ kim_error kim_ui_plugin_init (kim_ui_plugin_context *out_context)
 
 /* ------------------------------------------------------------------------ */
 
+kim_error kim_ui_plugin_enter_identity (kim_ui_plugin_context  in_context,
+                                        kim_identity          *out_identity)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err && !in_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = in_context->ftable->enter_identity (in_context->plugin_context,
+                                                  out_identity);
+    }
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_ui_plugin_select_identity (kim_ui_plugin_context  in_context,
                                          kim_selection_hints    in_hints,
                                          kim_identity          *out_identity)
@@ -180,6 +198,7 @@ kim_error kim_ui_plugin_select_identity (kim_ui_plugin_context  in_context,
 kim_error kim_ui_plugin_auth_prompt (kim_ui_plugin_context  in_context,
                                      kim_identity           in_identity,
                                      kim_prompt_type        in_type,
+                                     kim_boolean            in_hide_reply, 
                                      kim_string             in_title,
                                      kim_string             in_message,
                                      kim_string             in_description,
@@ -196,6 +215,7 @@ kim_error kim_ui_plugin_auth_prompt (kim_ui_plugin_context  in_context,
         err = in_context->ftable->auth_prompt (in_context->plugin_context,
                                                in_identity, 
                                                in_type,
+                                               in_hide_reply,
                                                in_title,
                                                in_message,
                                                in_description,
@@ -236,11 +256,11 @@ kim_error kim_ui_plugin_change_password (kim_ui_plugin_context  in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_display_error (kim_ui_plugin_context in_context,
-                                       kim_identity          in_identity,
-                                       kim_error             in_error,
-                                       kim_string            in_error_message,
-                                       kim_string            in_error_description)
+kim_error kim_ui_plugin_handle_error (kim_ui_plugin_context in_context,
+                                      kim_identity          in_identity,
+                                      kim_error             in_error,
+                                      kim_string            in_error_message,
+                                      kim_string            in_error_description)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -249,11 +269,11 @@ kim_error kim_ui_plugin_display_error (kim_ui_plugin_context in_context,
     if (!err && !in_error_description) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = in_context->ftable->display_error (in_context->plugin_context,
-                                                 in_identity, 
-                                                 in_error,
-                                                 in_error_message,
-                                                 in_error_description);
+        err = in_context->ftable->handle_error (in_context->plugin_context,
+                                                in_identity, 
+                                                in_error,
+                                                in_error_message,
+                                                in_error_description);
     }
     
     return check_error (err);
@@ -261,8 +281,8 @@ kim_error kim_ui_plugin_display_error (kim_ui_plugin_context in_context,
 
 /* ------------------------------------------------------------------------ */
 
-void kim_ui_plugin_free_string (kim_ui_plugin_context  in_context,
-                                char                  *io_string)
+void kim_ui_plugin_free_string (kim_ui_plugin_context   in_context,
+                                char                  **io_string)
 {
     kim_error err = KIM_NO_ERROR;
     

@@ -33,8 +33,7 @@ static kim_error kim_os_string_for_key_in_bundle (CFBundleRef  in_bundle,
                                                   CFStringRef  in_key,
                                                   kim_string  *out_string)
 {
-    kim_error lock_err = kim_os_library_lock_for_bundle_lookup ();
-    kim_error err = lock_err;
+    kim_error err = KIM_NO_ERROR;
     kim_string string = NULL;
     
     if (!err && !in_bundle ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -100,9 +99,7 @@ static kim_error kim_os_string_for_key_in_bundle (CFBundleRef  in_bundle,
     }
     
     kim_string_free (&string);
-
-    if (!lock_err) { kim_os_library_unlock_for_bundle_lookup (); }
-
+    
     return check_error (err);
 }
 
@@ -110,10 +107,40 @@ static kim_error kim_os_string_for_key_in_bundle (CFBundleRef  in_bundle,
 
 /* ------------------------------------------------------------------------ */
 
+kim_error kim_os_string_create_localized (kim_string *out_string,
+                                          kim_string in_string)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string string = NULL;
+    
+    if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_string ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+   
+    if (!err) {
+        err = kim_os_string_create_for_key (&string, in_string);
+    }
+    
+    if (!err && !string) {
+        err = kim_string_copy (&string, in_string);
+    }
+    
+    if (!err) {
+        *out_string = string;
+        string = NULL;
+    }
+    
+    kim_string_free (&string);
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_os_string_create_for_key (kim_string *out_string,
                                         kim_string in_key_string)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error lock_err = kim_os_library_lock_for_bundle_lookup ();
+    kim_error err = lock_err;
     CFStringRef key = NULL;
     kim_string string = NULL;
     
@@ -147,6 +174,8 @@ kim_error kim_os_string_create_for_key (kim_string *out_string,
     
     kim_string_free (&string);
     if (key) { CFRelease (key); }
+    
+    if (!lock_err) { kim_os_library_unlock_for_bundle_lookup (); }
     
     return check_error (err);
 }
@@ -222,6 +251,7 @@ kim_error kim_os_string_get_cfstring (kim_string   in_string,
 
 kim_error kim_os_string_compare (kim_string      in_string,
                                  kim_string      in_compare_to_string,
+                                 kim_boolean     in_case_insensitive,
                                  kim_comparison *out_comparison)
 {
     kim_error err = KIM_NO_ERROR;
@@ -243,8 +273,13 @@ kim_error kim_os_string_compare (kim_string      in_string,
     }
     
     if (!err) {
+        CFOptionFlags options = (in_case_insensitive ? 
+                                 1 : kCFCompareCaseInsensitive);
+        
         /* Returned CFComparisonResult is compatible with kim_comparison_t */
-        *out_comparison = CFStringCompare (cfstring, compare_to_cfstring, 0);            
+        *out_comparison = CFStringCompare (cfstring, 
+                                           compare_to_cfstring, 
+                                           options);            
     }
     
     if (cfstring           ) { CFRelease (cfstring); }

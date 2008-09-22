@@ -16,13 +16,7 @@ kim_identity_get_number_of_components
 kim_identity_get_component_at_index
 kim_identity_get_krb5_principal
 kim_identity_change_password
-kim_identity_change_password_to_password
 kim_identity_free
-
-kim_prompt_callback_default
-kim_prompt_callback_gui
-kim_prompt_callback_cli
-kim_prompt_callback_none
 
 kim_options_create
 kim_options_copy
@@ -88,6 +82,7 @@ kim_credential_iterator_free
 kim_credential_create_new
 kim_credential_create_from_keytab
 kim_credential_create_from_krb5_creds
+kim_credential_create_for_change_password
 kim_credential_copy
 kim_credential_get_krb5_creds
 kim_credential_get_client_identity
@@ -101,6 +96,7 @@ kim_credential_store
 kim_credential_verify
 kim_credential_renew
 kim_credential_validate
+kim_credential_change_password
 kim_credential_free
 
 kim_ccache_iterator_create

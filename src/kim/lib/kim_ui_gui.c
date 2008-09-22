@@ -24,6 +24,8 @@
  * or implied warranty.
  */
 
+#ifndef LEAN_CLIENT
+
 #include "kim_private.h"
 
 
@@ -95,6 +97,22 @@ kim_error kim_ui_gui_init (kim_ui_gui_context *out_context)
 
 /* ------------------------------------------------------------------------ */
 
+kim_error kim_ui_gui_enter_identity (kim_ui_gui_context   in_context,
+                                     kim_identity        *out_identity)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err && !in_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+    }
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_ui_gui_select_identity (kim_ui_gui_context   in_context,
                                       kim_selection_hints  in_hints,
                                       kim_identity        *out_identity)
@@ -116,6 +134,7 @@ kim_error kim_ui_gui_select_identity (kim_ui_gui_context   in_context,
 kim_error kim_ui_gui_auth_prompt (kim_ui_gui_context   in_context,
                                   kim_identity         in_identity,
                                   kim_prompt_type      in_type,
+                                  kim_boolean          in_hide_reply, 
                                   kim_string           in_title,
                                   kim_string           in_message,
                                   kim_string           in_description,
@@ -159,11 +178,11 @@ kim_error kim_ui_gui_change_password (kim_ui_gui_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_display_error (kim_ui_gui_context in_context,
-                                    kim_identity       in_identity,
-                                    kim_error          in_error,
-                                    kim_string         in_error_message,
-                                    kim_string         in_error_description)
+kim_error kim_ui_gui_handle_error (kim_ui_gui_context in_context,
+                                   kim_identity       in_identity,
+                                   kim_error          in_error,
+                                   kim_string         in_error_message,
+                                   kim_string         in_error_description)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -179,17 +198,10 @@ kim_error kim_ui_gui_display_error (kim_ui_gui_context in_context,
 
 /* ------------------------------------------------------------------------ */
 
-void kim_ui_gui_free_string (kim_ui_gui_context  in_context,
-                             char               *io_string)
+void kim_ui_gui_free_string (kim_ui_gui_context   in_context,
+                             char               **io_string)
 {
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !in_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !io_string ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        kim_string_free ((kim_string *) io_string);
-    }
+    kim_string_free ((kim_string *) io_string);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -210,3 +222,5 @@ kim_error kim_ui_gui_fini (kim_ui_gui_context *io_context)
     
     return check_error (err);
 }
+
+#endif /* LEAN_CLIENT */

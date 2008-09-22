@@ -20,8 +20,6 @@
 <h2>Typedefs</h2>
 <ul>
 <li>typedef int <a class="el" href="group__kim__types__reference.html#g48e19d7e4aec7dc6662149cab39bbe20">kim_credential_state</a>
-<li>typedef uint32_t <a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a>
-<li>typedef <a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a>(* <a class="el" href="group__kim__types__reference.html#gded2c3c2de01d94299b65fb8df64bdcc">kim_prompt_callback</a> )(<a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_title, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_message, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_description, char **out_reply)
 <li>typedef int32_t <a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a>
 <li>typedef int64_t <a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a>
 <li>typedef int64_t <a class="el" href="group__kim__types__reference.html#g245934c4ef7f94ff7960e20e0cc01123">kim_lifetime</a>
@@ -58,16 +56,6 @@ kim_credential_opaque * <a class="el" href="group__kim__types__reference.html#ge
 &nbsp;&nbsp;<b>kim_credentials_state_address_mismatch</b> =  4
 <br>
  }
-<li>enum <b>kim_prompt_type_enum</b> { <b>kim_prompt_type_password</b> =  0, 
-<b>kim_prompt_type_challenge</b> =  1
- }
-</ul>
-<h2>Functions</h2>
-<ul>
-<li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__types__reference.html#gbacd03bffb1ba46e4d8e36d19d91a170">kim_prompt_callback_default</a> (<a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_title, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_message, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_description, char **out_reply)
-<li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__types__reference.html#g5dc825b3083c371b1cd697efc19a1c22">kim_prompt_callback_gui</a> (<a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_title, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_message, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_description, char **out_reply)
-<li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__types__reference.html#g7e046e29e68cee691ac652e6b9c0ce93">kim_prompt_callback_cli</a> (<a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_title, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_message, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_description, char **out_reply)
-<li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__types__reference.html#gcc03830f3eece78fae04b722ca0687c3">kim_prompt_callback_none</a> (<a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_title, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_message, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_description, char **out_reply)
 </ul>
 <hr><h2>Define Documentation</h2>
 <a class="anchor" name="g8712727bab9e6b02712a8a01285441d1"></a><!-- doxytag: member="kim_error.h::KIM_NO_ERROR" ref="g8712727bab9e6b02712a8a01285441d1" args="" -->
@@ -204,36 +192,6 @@ Convenience macro for interpreting kim_comparison_t.
 
 <p>
 The state of a credential. See <a class="el" href="group__kim__types__reference.html#g6e5c2c986359589562c83f1da2cf0ca0">kim_credential_state_enum</a> for possible values. 
-</div>
-</div><p>
-<a class="anchor" name="g91894d96e0196e25424084eccdc04eb8"></a><!-- doxytag: member="kim_options.h::kim_prompt_type" ref="g91894d96e0196e25424084eccdc04eb8" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef uint32_t <a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a>          </td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-The type of prompt which needs to be displayed. This value determines what type of user interface is displayed. See <a class="el" href="kim_options_overview.html#kim_options_custom_prompt_callback">Providing a Custom Prompt Callback</a> for more information. 
-</div>
-</div><p>
-<a class="anchor" name="gded2c3c2de01d94299b65fb8df64bdcc"></a><!-- doxytag: member="kim_options.h::kim_prompt_callback" ref="gded2c3c2de01d94299b65fb8df64bdcc" args=")(kim_prompt_type in_type, kim_string in_title, kim_string in_message, kim_string in_description, char **out_reply)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef <a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a>(* <a class="el" href="group__kim__types__reference.html#gded2c3c2de01d94299b65fb8df64bdcc">kim_prompt_callback</a>)(<a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_title, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_message, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_description, char **out_reply)          </td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-The prompt callback used to display a prompt to the user. See <a class="el" href="kim_options_overview.html#kim_options_custom_prompt_callback">Providing a Custom Prompt Callback</a> for more information. 
 </div>
 </div><p>
 <a class="anchor" name="g40f5fe10ab395bddc34286e0c2ff76eb"></a><!-- doxytag: member="kim_types.h::kim_error" ref="g40f5fe10ab395bddc34286e0c2ff76eb" args="" -->
@@ -505,197 +463,7 @@ Possible credential states. Credentials may be: <ul>
 
 </div>
 </div><p>
-<hr><h2>Function Documentation</h2>
-<a class="anchor" name="gbacd03bffb1ba46e4d8e36d19d91a170"></a><!-- doxytag: member="kim_options.h::kim_prompt_callback_default" ref="gbacd03bffb1ba46e4d8e36d19d91a170" args="(kim_prompt_type in_type, kim_string in_title, kim_string in_message, kim_string in_description, char **out_reply)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_prompt_callback_default           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a>&nbsp;</td>
-          <td class="paramname"> <em>in_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_title</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_message</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_description</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&nbsp;</td>
-          <td class="paramname"> <em>out_reply</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-The default prompt callback. See <a class="el" href="kim_options_overview.html#kim_options_custom_prompt_callback">Providing a Custom Prompt Callback</a> for more information. 
-</div>
-</div><p>
-<a class="anchor" name="g5dc825b3083c371b1cd697efc19a1c22"></a><!-- doxytag: member="kim_options.h::kim_prompt_callback_gui" ref="g5dc825b3083c371b1cd697efc19a1c22" args="(kim_prompt_type in_type, kim_string in_title, kim_string in_message, kim_string in_description, char **out_reply)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_prompt_callback_gui           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a>&nbsp;</td>
-          <td class="paramname"> <em>in_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_title</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_message</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_description</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&nbsp;</td>
-          <td class="paramname"> <em>out_reply</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-The graphical prompt callback. See <a class="el" href="kim_options_overview.html#kim_options_custom_prompt_callback">Providing a Custom Prompt Callback</a> for more information. 
-</div>
-</div><p>
-<a class="anchor" name="g7e046e29e68cee691ac652e6b9c0ce93"></a><!-- doxytag: member="kim_options.h::kim_prompt_callback_cli" ref="g7e046e29e68cee691ac652e6b9c0ce93" args="(kim_prompt_type in_type, kim_string in_title, kim_string in_message, kim_string in_description, char **out_reply)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_prompt_callback_cli           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a>&nbsp;</td>
-          <td class="paramname"> <em>in_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_title</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_message</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_description</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&nbsp;</td>
-          <td class="paramname"> <em>out_reply</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-The command line prompt callback. See <a class="el" href="kim_options_overview.html#kim_options_custom_prompt_callback">Providing a Custom Prompt Callback</a> for more information. 
-</div>
-</div><p>
-<a class="anchor" name="gcc03830f3eece78fae04b722ca0687c3"></a><!-- doxytag: member="kim_options.h::kim_prompt_callback_none" ref="gcc03830f3eece78fae04b722ca0687c3" args="(kim_prompt_type in_type, kim_string in_title, kim_string in_message, kim_string in_description, char **out_reply)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_prompt_callback_none           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#g91894d96e0196e25424084eccdc04eb8">kim_prompt_type</a>&nbsp;</td>
-          <td class="paramname"> <em>in_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_title</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_message</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_description</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&nbsp;</td>
-          <td class="paramname"> <em>out_reply</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-The prompt callback which always returns an error. Use to turn off prompting entirely. <dl class="note" compact><dt><b>Note:</b></dt><dd>Using this callback may prevent the user from authenicating. See <a class="el" href="kim_options_overview.html#kim_options_custom_prompt_callback">Providing a Custom Prompt Callback</a> for more information. </dd></dl>
-
-</div>
-</div><p>
-<hr size="1"><address style="text-align: right;"><small>Generated on Thu Sep 18 10:55:28 2008 for Kerberos Identity Management by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Mon Sep 22 18:09:05 2008 for Kerberos Identity Management by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

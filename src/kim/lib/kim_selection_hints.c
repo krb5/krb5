@@ -478,7 +478,19 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints  in_selection_hi
     }
     
     if (!err && !identity && in_selection_hints->allow_user_interaction) {
-#warning GUI to let user pick identity here   
+        kim_ui_context context;
+        
+        err = kim_ui_init (&context);
+        
+        if (!err) {
+            err = kim_ui_select_identity (&context, 
+                                          in_selection_hints, 
+                                          &identity);
+        }
+        
+        if (!err) {
+            err = kim_ui_fini (&context);
+        }
     }
     
     if (!err) {

@@ -29,8 +29,6 @@
 /* ------------------------------------------------------------------------ */
 
 struct kim_options_opaque {
-    kim_prompt_callback prompt_callback;
-    const void *prompt_callback_data;
     kim_time start_time;
     kim_lifetime lifetime;
     kim_boolean renewable;
@@ -42,7 +40,6 @@ struct kim_options_opaque {
 };
 
 struct kim_options_opaque kim_options_initializer = { 
-NULL, NULL, 
 0, 
 kim_default_lifetime, 
 kim_default_renewable, 
@@ -121,11 +118,6 @@ kim_error kim_options_copy (kim_options *out_options,
         err = kim_options_allocate (&options);
         
         if (!err) {
-            options->prompt_callback = in_options->prompt_callback;
-            options->prompt_callback_data = in_options->prompt_callback_data;
-        }
-        
-        if (!err) {
             options->start_time = in_options->start_time;
             options->lifetime = in_options->lifetime;
             options->renewable = in_options->renewable;
@@ -147,73 +139,6 @@ kim_error kim_options_copy (kim_options *out_options,
     }
     
     kim_options_free (&options);
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_options_set_prompt_callback (kim_options         io_options,
-                                           kim_prompt_callback in_prompt_callback)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        io_options->prompt_callback = in_prompt_callback;
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_options_get_prompt_callback (kim_options          in_options,
-                                           kim_prompt_callback *out_prompt_callback)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !in_options         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_prompt_callback) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        *out_prompt_callback = in_options->prompt_callback;
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_options_set_data (kim_options  io_options,
-                                const void  *in_data)
-
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        io_options->prompt_callback_data = in_data;
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_options_get_data (kim_options   in_options,
-                                const void  **out_data)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !in_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_data  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        *out_data = in_options->prompt_callback_data;
-    }
     
     return check_error (err);
 }
@@ -507,22 +432,29 @@ kim_error kim_options_get_init_cred_options (kim_options               in_option
     if (!err && !in_context           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_init_cred_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err && !in_options->addressless) {
-        err = krb5_error (in_context, 
-                          krb5_os_localaddr (in_context, &addresses));
-    }
-    
     if (!err) {
         krb5_get_init_creds_opt_alloc (in_context, &init_cred_options);
-        krb5_get_init_creds_opt_set_tkt_life (init_cred_options, in_options->lifetime);
-        krb5_get_init_creds_opt_set_renew_life (init_cred_options, in_options->renewable ? in_options->renewal_lifetime : 0);
-        krb5_get_init_creds_opt_set_forwardable (init_cred_options, in_options->forwardable);
-        krb5_get_init_creds_opt_set_proxiable (init_cred_options, in_options->proxiable);
-        krb5_get_init_creds_opt_set_address_list (init_cred_options, addresses);
+    }
+    
+    if (!err && in_options) {
+        if (!in_options->addressless) {
+            err = krb5_error (in_context, 
+                              krb5_os_localaddr (in_context, &addresses));
+        }
         
-	*out_init_cred_options = init_cred_options;
-	init_cred_options = NULL;
-	addresses = NULL;
+        if (!err) {
+            krb5_get_init_creds_opt_set_tkt_life (init_cred_options, in_options->lifetime);
+            krb5_get_init_creds_opt_set_renew_life (init_cred_options, in_options->renewable ? in_options->renewal_lifetime : 0);
+            krb5_get_init_creds_opt_set_forwardable (init_cred_options, in_options->forwardable);
+            krb5_get_init_creds_opt_set_proxiable (init_cred_options, in_options->proxiable);
+            krb5_get_init_creds_opt_set_address_list (init_cred_options, addresses);
+            addresses = NULL;
+        }
+    }
+     
+    if (!err) {
+        *out_init_cred_options = init_cred_options;
+        init_cred_options = NULL;
     }
     
     if (init_cred_options) { krb5_get_init_creds_opt_free (in_context, init_cred_options); }
@@ -543,6 +475,7 @@ kim_error kim_options_free_init_cred_options (krb5_context              in_conte
     if (!err && io_init_cred_options && *io_init_cred_options) {
 	if ((*io_init_cred_options)->address_list) {
 	    krb5_free_addresses (in_context, (*io_init_cred_options)->address_list);
+            (*io_init_cred_options)->address_list = NULL;
 	}
 	krb5_get_init_creds_opt_free (in_context, *io_init_cred_options);
 	*io_init_cred_options = NULL;
@@ -560,71 +493,4 @@ void kim_options_free (kim_options *io_options)
         free (*io_options);
         *io_options = NULL;
     }
-}
-
-#pragma mark -
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_prompt_callback_default (kim_prompt_type    in_type,
-                                       kim_string         in_title,
-                                       kim_string         in_message,
-                                       kim_string         in_description,
-                                       char              **out_reply)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !out_reply) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_prompt_callback_gui (kim_prompt_type    in_type,
-                                   kim_string         in_title,
-                                   kim_string         in_message,
-                                   kim_string         in_description,
-                                   char              **out_reply)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !out_reply) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_prompt_callback_cli (kim_prompt_type    in_type,
-                                   kim_string         in_title,
-                                   kim_string         in_message,
-                                   kim_string         in_description,
-                                   char              **out_reply)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !out_reply) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_prompt_callback_none (kim_prompt_type    in_type,
-                                    kim_string         in_title,
-                                    kim_string         in_message,
-                                    kim_string         in_description,
-                                    char              **out_reply)
-{
-    return KIM_USER_CANCELED_ERR;
 }

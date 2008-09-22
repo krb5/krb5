@@ -95,6 +95,7 @@ kim_error kim_os_library_unlock_for_bundle_lookup (void)
 
 kim_ui_environment kim_os_library_get_ui_environment (void)
 {
+#ifndef LEAN_CLIENT
     kipc_session_attributes_t attributes = kipc_session_get_attributes ();
     
     if (attributes & kkipc_session_caller_uses_gui) {
@@ -106,6 +107,7 @@ kim_ui_environment kim_os_library_get_ui_environment (void)
     }
     
     kim_debug_printf ("kim_os_library_get_ui_environment(): no way to talk to the user.");
+#endif
     return KIM_UI_ENVIRONMENT_NONE;
 }
 
