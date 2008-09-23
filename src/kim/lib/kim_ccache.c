@@ -87,14 +87,14 @@ kim_error kim_ccache_iterator_next (kim_ccache_iterator  in_ccache_iterator,
                                                        in_ccache_iterator->cursor,
                                                        &ccache);
         
-        if (!terr) {
+        if (ccache) {
             err = kim_ccache_create_from_krb5_ccache (out_ccache,
                                                       in_ccache_iterator->context, 
                                                       ccache);
-        } else if (terr == KRB5_CC_END) {
-            *out_ccache = NULL; /* no more ccaches */
-            
         } else {
+            *out_ccache = NULL; /* no more ccaches */
+        }
+        if (terr && terr != KRB5_CC_END) {
             err = krb5_error (in_ccache_iterator->context, terr);
         }
     }
@@ -598,7 +598,7 @@ kim_error kim_ccache_get_display_name (kim_ccache  in_ccache,
         kim_string name = krb5_cc_get_name (in_ccache->context, 
                                             in_ccache->ccache);
         
-        err = kim_ccache_create_resolve_name (out_display_name, type, name);
+        err = kim_ccache_create_resolve_name (out_display_name, name, type);
     }
     
     return check_error (err);
