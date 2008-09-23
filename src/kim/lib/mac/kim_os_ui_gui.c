@@ -35,7 +35,7 @@ struct kim_ui_gui_context {
 
 /* ------------------------------------------------------------------------ */
 
-static void kim_ui_gui_context_free (kim_ui_gui_context *io_context)
+static void kim_os_ui_gui_context_free (kim_ui_gui_context *io_context)
 {
     if (io_context && *io_context) { 
         free (*io_context);
@@ -45,7 +45,7 @@ static void kim_ui_gui_context_free (kim_ui_gui_context *io_context)
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error kim_ui_gui_context_allocate (kim_ui_gui_context *out_context)
+static kim_error kim_os_ui_gui_context_allocate (kim_ui_gui_context *out_context)
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_gui_context context = NULL;
@@ -62,7 +62,7 @@ static kim_error kim_ui_gui_context_allocate (kim_ui_gui_context *out_context)
         context = NULL;
     }
     
-    kim_ui_gui_context_free (&context);
+    kim_os_ui_gui_context_free (&context);
     
     return check_error (err);    
 }
@@ -71,7 +71,7 @@ static kim_error kim_ui_gui_context_allocate (kim_ui_gui_context *out_context)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_init (kim_ui_gui_context *out_context)
+kim_error kim_os_ui_gui_init (kim_ui_gui_context *out_context)
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_gui_context context = NULL;
@@ -79,7 +79,7 @@ kim_error kim_ui_gui_init (kim_ui_gui_context *out_context)
     if (!err && !out_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_ui_gui_context_allocate (&context);
+        err = kim_os_ui_gui_context_allocate (&context);
     }
     
     if (!err) {
@@ -90,15 +90,15 @@ kim_error kim_ui_gui_init (kim_ui_gui_context *out_context)
         context = NULL;
     }
     
-    kim_ui_gui_context_free (&context);
+    kim_os_ui_gui_context_free (&context);
     
     return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_enter_identity (kim_ui_gui_context   in_context,
-                                     kim_identity        *out_identity)
+kim_error kim_os_ui_gui_enter_identity (kim_ui_gui_context   in_context,
+                                        kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -113,9 +113,9 @@ kim_error kim_ui_gui_enter_identity (kim_ui_gui_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_select_identity (kim_ui_gui_context   in_context,
-                                      kim_selection_hints  in_hints,
-                                      kim_identity        *out_identity)
+kim_error kim_os_ui_gui_select_identity (kim_ui_gui_context   in_context,
+                                         kim_selection_hints  in_hints,
+                                         kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -131,14 +131,14 @@ kim_error kim_ui_gui_select_identity (kim_ui_gui_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_auth_prompt (kim_ui_gui_context   in_context,
-                                  kim_identity         in_identity,
-                                  kim_prompt_type      in_type,
-                                  kim_boolean          in_hide_reply, 
-                                  kim_string           in_title,
-                                  kim_string           in_message,
-                                  kim_string           in_description,
-                                  char               **out_reply)
+kim_error kim_os_ui_gui_auth_prompt (kim_ui_gui_context   in_context,
+                                     kim_identity         in_identity,
+                                     kim_prompt_type      in_type,
+                                     kim_boolean          in_hide_reply, 
+                                     kim_string           in_title,
+                                     kim_string           in_message,
+                                     kim_string           in_description,
+                                     char               **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -155,12 +155,12 @@ kim_error kim_ui_gui_auth_prompt (kim_ui_gui_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_change_password (kim_ui_gui_context   in_context,
-                                      kim_identity         in_identity,
-                                      kim_boolean          in_old_password_expired,
-                                      char               **out_old_password,
-                                      char               **out_new_password,
-                                      char               **out_verify_password)
+kim_error kim_os_ui_gui_change_password (kim_ui_gui_context   in_context,
+                                         kim_identity         in_identity,
+                                         kim_boolean          in_old_password_expired,
+                                         char               **out_old_password,
+                                         char               **out_new_password,
+                                         char               **out_verify_password)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -178,11 +178,11 @@ kim_error kim_ui_gui_change_password (kim_ui_gui_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_handle_error (kim_ui_gui_context in_context,
-                                   kim_identity       in_identity,
-                                   kim_error          in_error,
-                                   kim_string         in_error_message,
-                                   kim_string         in_error_description)
+kim_error kim_os_ui_gui_handle_error (kim_ui_gui_context in_context,
+                                      kim_identity       in_identity,
+                                      kim_error          in_error,
+                                      kim_string         in_error_message,
+                                      kim_string         in_error_description)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -198,15 +198,15 @@ kim_error kim_ui_gui_handle_error (kim_ui_gui_context in_context,
 
 /* ------------------------------------------------------------------------ */
 
-void kim_ui_gui_free_string (kim_ui_gui_context   in_context,
-                             char               **io_string)
+void kim_os_ui_gui_free_string (kim_ui_gui_context   in_context,
+                                char               **io_string)
 {
     kim_string_free ((kim_string *) io_string);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_gui_fini (kim_ui_gui_context *io_context)
+kim_error kim_os_ui_gui_fini (kim_ui_gui_context *io_context)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -216,7 +216,7 @@ kim_error kim_ui_gui_fini (kim_ui_gui_context *io_context)
     }
     
     if (!err) {
-        kim_ui_gui_context_free (io_context);
+        kim_os_ui_gui_context_free (io_context);
     }
     
     

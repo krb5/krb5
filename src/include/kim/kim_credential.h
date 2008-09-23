@@ -451,7 +451,8 @@ kim_error kim_credential_get_expiration_time (kim_credential  in_credential,
 /*!
  * \param in_credential               a credential object. 
  * \param out_renewal_expiration_time on exit, the time when \a in_credential will no longer 
- *                                    be renewable. May be in the past or future.
+ *                                    be renewable. May be in the past or future.  If 
+ *                                    credentials are not renewable at all, returns 0.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the time when the credentials will no longer be renewable.
  * \sa kim_ccache_get_renewal_expiration_time
@@ -459,7 +460,17 @@ kim_error kim_credential_get_expiration_time (kim_credential  in_credential,
 kim_error kim_credential_get_renewal_expiration_time (kim_credential  in_credential,
                                                       kim_time       *out_renewal_expiration_time);
 
+/*!
+ * \param in_credential       a credential object. 
+ * \param out_ticket_flags    on exit, the krb5 ticket flags for \a in_credential.
+ *                            See krb5 API documentation for the meaning of these flags.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Get the krb5 ticket_flags for a credential.
+ */
+kim_error kim_credential_get_krb5_ticket_flags (kim_credential  in_credential,
+                                                krb5_flags     *out_ticket_flags);
 
+    
 /*!
  * \param in_credential       a credential object. 
  * \param in_client_identity  a client identity.
@@ -521,7 +532,7 @@ kim_error kim_credential_validate (kim_credential *io_credential,
 /*!
  * \param in_credential            a credential object containing a change
  *                                 password credential.  Use 
- *                                 #kim_credential_change_password to obtain
+ *                                 #kim_credential_create_for_change_password to obtain
  *                                 a change password credential.
  * \param in_identity              an identity to change the password for.  May
  *                                 be different than the identity the credential

@@ -41,6 +41,8 @@ extern "C" {
  */
 typedef int32_t     kim_error;
 
+#define KIM_NO_ERROR ((kim_error) 0)
+
 /*!
  * A time value represented in seconds since January 1, 1970.
  */

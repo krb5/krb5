@@ -1,5 +1,4 @@
-kim_string_get_last_error_message
-
+kim_string_create_for_last_error
 kim_string_copy
 kim_string_compare
 kim_string_free
@@ -91,6 +90,7 @@ kim_credential_get_state
 kim_credential_get_start_time
 kim_credential_get_expiration_time
 kim_credential_get_renewal_expiration_time
+kim_credential_get_krb5_ticket_flags
 kim_credential_store
 kim_credential_renew
 kim_credential_validate

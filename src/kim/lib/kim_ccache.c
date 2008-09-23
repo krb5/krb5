@@ -29,9 +29,10 @@
 struct kim_ccache_iterator_opaque {
     krb5_context context;
     krb5_cccol_cursor cursor;
+    kim_boolean first;
 };
 
-struct kim_ccache_iterator_opaque kim_ccache_iterator_initializer = { NULL, NULL };
+struct kim_ccache_iterator_opaque kim_ccache_iterator_initializer = { NULL, NULL, 1 };
 
 /* ------------------------------------------------------------------------ */
 
@@ -83,9 +84,34 @@ kim_error kim_ccache_iterator_next (kim_ccache_iterator  in_ccache_iterator,
     if (!err && !out_ccache        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        krb5_error_code terr = krb5_cccol_cursor_next (in_ccache_iterator->context, 
-                                                       in_ccache_iterator->cursor,
-                                                       &ccache);
+        err = krb5_cccol_cursor_next (in_ccache_iterator->context, 
+                                      in_ccache_iterator->cursor,
+                                      &ccache);
+        if (err == KRB5_CC_END) {
+            ccache = NULL; /* out of ccaches */
+            err = KIM_NO_ERROR;
+        }        
+    }
+    
+    if (!err && ccache && in_ccache_iterator->first) {
+        krb5_principal principal = NULL;
+        
+        /* krb5 API is sneaky and returns a single empty ccache if the
+         * cache collection is empty.  Check for it: */
+        err = krb5_error (in_ccache_iterator->context,
+                           krb5_cc_get_principal (in_ccache_iterator->context, 
+                                                  ccache, 
+                                                  &principal));
+        
+        if (err) {
+            krb5_cc_close (in_ccache_iterator->context, ccache);
+            ccache = NULL;
+            err = KIM_NO_ERROR;
+        }
+    }
+    
+    if (!err) {
+        in_ccache_iterator->first = 0;
         
         if (ccache) {
             err = kim_ccache_create_from_krb5_ccache (out_ccache,
@@ -93,10 +119,7 @@ kim_error kim_ccache_iterator_next (kim_ccache_iterator  in_ccache_iterator,
                                                       ccache);
         } else {
             *out_ccache = NULL; /* no more ccaches */
-        }
-        if (terr && terr != KRB5_CC_END) {
-            err = krb5_error (in_ccache_iterator->context, terr);
-        }
+        }        
     }
     
     if (ccache) { krb5_cc_close (in_ccache_iterator->context, ccache); }
@@ -275,6 +298,7 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
     while (!err && !found) {
         kim_ccache ccache = NULL;
         kim_identity identity = NULL;
+        kim_comparison comparison;
         
         err = kim_ccache_iterator_next (iterator, &ccache);
         
@@ -296,10 +320,11 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
         }
         
         if (!err) {
-            err = kim_identity_compare (in_client_identity, identity, &found);
+            err = kim_identity_compare (in_client_identity, identity, &comparison);
         }
         
-        if (!err && found) {
+        if (!err && kim_comparison_is_equal_to (comparison)) {
+            found = 1;
             *out_ccache = ccache;
             ccache = NULL;
         }

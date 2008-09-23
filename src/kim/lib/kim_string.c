@@ -114,6 +114,14 @@ kim_error kim_string_create_from_buffer (kim_string *out_string,
 
 /* ------------------------------------------------------------------------ */
 
+kim_error kim_string_create_for_last_error (kim_string *out_string,
+                                            kim_error   in_error)
+{
+    return kim_string_copy (out_string, kim_error_message (in_error));
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_string_copy (kim_string *out_string, 
                            kim_string  in_string)
 {

@@ -281,12 +281,13 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         kim_options_free_init_cred_options (credential->context, &init_cred_options);
     }
     
+    if (credential && principal) { krb5_free_principal (credential->context, principal); }
+
     if (!err) {
         *out_credential = credential;
         credential = NULL;
     }
     
-    if (principal ) { krb5_free_principal (credential->context, principal); }
     if (!in_options) { kim_options_free (&options); }
     kim_string_free (&service);
     kim_credential_free (&credential);
@@ -781,7 +782,8 @@ kim_error kim_credential_get_start_time (kim_credential  in_credential,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_credential ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_start_time) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         *out_start_time = (in_credential->creds->times.starttime ? 
@@ -815,10 +817,32 @@ kim_error kim_credential_get_renewal_expiration_time (kim_credential  in_credent
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_credential              ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_renewal_expiration_time) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        *out_renewal_expiration_time = in_credential->creds->times.renew_till;
+        if (in_credential->creds->ticket_flags & TKT_FLG_RENEWABLE) {
+            *out_renewal_expiration_time = in_credential->creds->times.renew_till;
+        } else {
+            *out_renewal_expiration_time = 0;
+        }
+    }
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_credential_get_krb5_ticket_flags (kim_credential  in_credential,
+                                                krb5_flags     *out_ticket_flags)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err && !in_credential   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_ticket_flags) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        *out_ticket_flags = in_credential->creds->ticket_flags;
     }
     
     return check_error (err);

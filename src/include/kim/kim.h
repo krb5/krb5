@@ -30,8 +30,8 @@ extern "C" {
 #endif
 
 #include <kim/kim_types.h>
+#include <kim/kim_errors.h>
 #include <kim/kim_string.h>
-#include <kim/kim_error.h>
 #include <kim/kim_identity.h>
 #include <kim/kim_options.h>
 #include <kim/kim_selection_hints.h>

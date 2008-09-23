@@ -211,13 +211,3 @@ void kim_error_terminate (void)
     k5_mutex_destroy (&kim_error_lock);
 }
 
-#pragma mark -- Public API --
-
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_string_get_last_error_message (kim_string *out_string,
-                                             kim_error   in_error)
-{
-    return kim_string_copy (out_string, kim_error_message (in_error));
-}

@@ -50,12 +50,6 @@ typedef struct kim_ui_context {
     kim_identity identity;
 } kim_ui_context;
 
-krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
-                                 void         *in_context,
-                                 const char   *in_name,
-                                 const char   *in_banner,
-                                 int           in_num_prompts,
-                                 krb5_prompt   in_prompts[]);
 
 
 kim_error kim_ui_init (kim_ui_context *io_context);
@@ -67,14 +61,12 @@ kim_error kim_ui_select_identity (kim_ui_context       *in_context,
                                   kim_selection_hints   in_hints,
                                   kim_identity         *out_identity);
 
-kim_error kim_ui_auth_prompt (kim_ui_context    *in_context,
-                              kim_identity       in_identity,
-                              kim_prompt_type    in_type,
-                              kim_boolean        in_hide_reply, 
-                              kim_string         in_title,
-                              kim_string         in_message,
-                              kim_string         in_description,
-                              char             **out_reply);
+krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
+                                 void         *in_context,
+                                 const char   *in_name,
+                                 const char   *in_banner,
+                                 int           in_num_prompts,
+                                 krb5_prompt   in_prompts[]);
 
 kim_error kim_ui_change_password (kim_ui_context  *in_context,
                                   kim_identity     in_identity,
