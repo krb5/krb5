@@ -33,7 +33,12 @@
 {
     if ((self = [super initWithWindowNibName: windowNibName])) {
         NSLog (@"SelectIdentityController initializing");
-        
+        identities = [[Identities alloc] init];
+        [identities addObserver:self 
+                     forKeyPath:@"identities" 
+                        options:NSKeyValueObservingOptionNew 
+                        context:@"SelectIdentityController"];
+        refreshTimer = [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(timedRefresh:) userInfo:nil repeats:true];
     }
     
     return self;
@@ -50,6 +55,9 @@
 
 - (void) dealloc
 {
+    [refreshTimer release];
+    [identities removeObserver:self forKeyPath:@"identities"];
+    [identities release];
     [super dealloc];
 }
 
@@ -64,31 +72,37 @@
 
 - (void) windowDidLoad
 {
-    [explanationTextField setStringValue: @"Some explanation text"];    
+    
+    [explanationTextField setStringValue: @"Some explanation text"];
+    
 }    
 
 // ---------------------------------------------------------------------------
 
 - (IBAction) add: (id) sender
 {
+    NSLog(@"Add identity");
 }
 
 // ---------------------------------------------------------------------------
 
 - (IBAction) remove: (id) sender
 {
+    NSLog(@"Remove identity");
 }
 
 // ---------------------------------------------------------------------------
 
 - (IBAction) select: (id) sender
 {
+    NSLog(@"Select identity: %@", identityArrayController.selectedObjects.description);
 }
 
 // ---------------------------------------------------------------------------
 
 - (IBAction) cancel: (id) sender
 {
+    NSLog(@"Cancel identity selection");
 }
 
 // ---------------------------------------------------------------------------
@@ -106,6 +120,24 @@
     //[[NSApp delegate] removeActiveWindow: [self window]];
     
     return 0;
+}
+
+// ---------------------------------------------------------------------------
+
+- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if ([(NSString *)context isEqualToString:@"SelectIdentityController"]) {
+        NSLog(@"========== identities array changed ==========");
+        identityArrayController.content = [[identities.identities mutableCopy] autorelease];
+    }
+    else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+- (void) timedRefresh:(NSTimer *)timer
+{
+    [identityArrayController rearrangeObjects];
 }
 
 

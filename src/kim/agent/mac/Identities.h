@@ -22,6 +22,8 @@
  * or implied warranty.
  */
 
+#import <Cocoa/Cocoa.h>
+
 @interface Identity : NSObject {
     kim_identity kimIdentity;
     int state;
@@ -29,6 +31,8 @@
     int favorite;
     
 }
+@property(readonly) NSString *principal;
+@property(readonly) NSString *timeRemaining;
 @property           int       state;
 @property           cc_time_t expirationTime;
 @property(readonly) int       favorite;
@@ -47,7 +51,7 @@
     NSConnection *threadConnection;
 
 }
-@property(readonly) NSArray *identities;
+@property(readonly, copy) NSArray *identities;
 
 - (int) update;
 

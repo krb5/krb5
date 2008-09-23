@@ -24,10 +24,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BadgedImageView.h"
-
+#import "Identities.h"
 
 @interface SelectIdentityController : NSWindowController {
 
+    IBOutlet NSArrayController *identityArrayController;
+    
     IBOutlet BadgedImageView *kerberosIconImageView;
     IBOutlet NSTextField *headerTextField;
     IBOutlet NSTextField *explanationTextField;
@@ -39,6 +41,9 @@
     IBOutlet NSButton *removeIdentityButton;
     IBOutlet NSButton *selectIdentityButton;
     IBOutlet NSButton *cancelButton;
+    
+    Identities *identities;
+    NSTimer *refreshTimer;
 }
 
 - (IBAction) add: (id) sender;
@@ -48,5 +53,7 @@
 - (IBAction) cancel: (id) sender;
 
 - (int) runWindow;
+
+- (void) timedRefresh:(NSTimer *)timer;
 
 @end

@@ -22,22 +22,19 @@
  * or implied warranty.
  */
 
-#import "KerberosAgentController.h"
-#import "SelectIdentityController.h"
+#import <Cocoa/Cocoa.h>
 
 
-@implementation KerberosAgentController
-
-// ---------------------------------------------------------------------------
-
-- (void) applicationDidFinishLaunching: (NSNotification *) notification
-{
-    SelectIdentityController *controller = [[SelectIdentityController alloc] init];
-    int result = [controller runWindow];
-    if (result != 0) {
-	NSLog(@"SelectIdentityController -runWindow result was %d", result);
-    }
+@interface KerberosTimeFormatter : NSFormatter {
 
 }
 
+- (NSString *)stringForObjectValue:(id)anObject;
+
+- (BOOL)getObjectValue:(id *)anObject 
+	     forString:(NSString *)string 
+      errorDescription:(NSString **)error;
+
+- (NSAttributedString *)attributedStringForObjectValue:(id)anObject 
+				 withDefaultAttributes:(NSDictionary *)attributes;
 @end

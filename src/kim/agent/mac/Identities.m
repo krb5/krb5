@@ -23,6 +23,7 @@
  */
 
 #import "Identities.h"
+#import <Kerberos/kim.h>
 
 @implementation Identity
 
@@ -66,6 +67,80 @@
     
     return (!err && kim_comparison_is_equal_to (comparison));
 }
+
+// ---------------------------------------------------------------------------
+
+- (NSString *)principal
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string display_string = NULL;
+    NSString *result = nil;
+    
+    err = kim_identity_get_display_string(kimIdentity, &display_string);
+    
+    if (!err) {
+        result = [NSString stringWithCString:display_string encoding:NSUTF8StringEncoding];
+    }
+    else {
+        result = @"-";
+    }
+    return result;
+}
+
+// ---------------------------------------------------------------------------
+
+- (NSDate *)expirationDate
+{
+    return [NSDate dateWithTimeIntervalSince1970:expirationTime];
+}
+
+// ---------------------------------------------------------------------------
+
+- (NSString *)timeRemaining
+{
+    NSString *result = nil;
+    
+    if (expirationTime > 0) {
+	time_t now = time(NULL);
+	time_t lifetime = expirationTime - now;
+	time_t seconds  = (lifetime % 60);
+	time_t minutes  = (lifetime / 60 % 60);
+	time_t hours    = (lifetime / 3600 % 24);
+	time_t days     = (lifetime / 86400);
+	
+	if (seconds >  0) { seconds = 0; minutes++; }
+	if (minutes > 59) { minutes = 0; hours++; }
+	if (hours   > 23) { hours   = 0; days++; }
+	
+	result = [NSString stringWithFormat:@"%02ld:%02ld", hours, minutes];
+    } else {
+	result = @"Expired";
+    }
+    
+    
+    NSLog(@"timeRemaining = %@ (expirationTime == %ld)", result, expirationTime);
+    return result;
+}
+
+- (NSString *)description
+{
+    NSString *result = nil;
+    kim_error err = KIM_NO_ERROR;
+    kim_string display_name = NULL;
+
+    err = kim_identity_get_display_string(kimIdentity, &display_name);
+    
+    if (!err) {
+        result = [NSString stringWithCString:display_name encoding:NSUTF8StringEncoding];
+    }
+    return result;
+}
+
+@end
+
+@interface Identities ()
+
+@property(readwrite, copy) NSArray *identities;
 
 @end
 
@@ -131,14 +206,15 @@
         }
         
         if (!err) {
-            kim_favorite_identities kimFavoriteIdentities = NULL;
+            kim_preferences kimPreferences = NULL;
+            kim_options kimOptions = NULL;
             kim_count i;
             kim_count count = 0;
             
-            err = kim_favorite_identities_create (&kimFavoriteIdentities);
+            err = kim_preferences_create(&kimPreferences);
             
             if (!err) {
-                err = kim_favorite_identities_get_number_of_identities (kimFavoriteIdentities,
+                err = kim_preferences_get_number_of_favorite_identities(kimPreferences,
                                                                         &count);
             }
             
@@ -146,8 +222,10 @@
                 kim_identity kimIdentity = NULL;
                 Identity *identity = NULL;
                 
-                err = kim_favorite_identities_get_identity_at_index (kimFavoriteIdentities, 
-                                                                     i, &kimIdentity);
+                err = kim_preferences_get_favorite_identity_at_index(kimPreferences,
+                                                                     i,
+                                                                     &kimIdentity,
+                                                                     &kimOptions);
                 
                 if (!err) {
                     identity = [[[Identity alloc] initWithFavoriteIdentity: kimIdentity] autorelease];
@@ -162,7 +240,7 @@
                 kim_identity_free (&kimIdentity);
             }
         
-            kim_favorite_identities_free (&kimFavoriteIdentities);
+            kim_preferences_free(&kimPreferences);
         }
         
         if (!err) {
@@ -270,8 +348,8 @@
             }
             
             if (!err) {
-                [identity setState: state];
-                [identity setExpirationTime: expirationTime];
+                identity.state = state;
+                identity.expirationTime = expirationTime;
             }
         }
         
@@ -285,9 +363,8 @@
     }
 
     if (!err) {
-        if (identities) { [identities release]; }
-        
-        identities = [[NSArray alloc] initWithArray: newIdentities];
+        /* Use @property setter to trigger KVO notifications */
+        self.identities = newIdentities;
         if (!identities) { err = ENOMEM; }            
     }
     
