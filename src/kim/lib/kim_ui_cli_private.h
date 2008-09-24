@@ -34,16 +34,16 @@
 typedef kim_credential kim_ui_cli_context;
 
 
-kim_error kim_ui_cli_init (kim_ui_cli_context *out_context);
+kim_error kim_ui_cli_init (kim_ui_context *io_context);
 
-kim_error kim_ui_cli_enter_identity (kim_ui_cli_context  in_context,
-                                     kim_identity       *out_identity);
+kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
+                                     kim_identity   *out_identity);
 
-kim_error kim_ui_cli_select_identity (kim_ui_cli_context   in_context,
+kim_error kim_ui_cli_select_identity (kim_ui_context      *in_context,
                                       kim_selection_hints  in_hints,
                                       kim_identity        *out_identity);
 
-kim_error kim_ui_cli_auth_prompt (kim_ui_cli_context   in_context,
+kim_error kim_ui_cli_auth_prompt (kim_ui_context      *in_context,
                                   kim_identity         in_identity,
                                   kim_prompt_type      in_type,
                                   kim_boolean          in_hide_reply, 
@@ -52,23 +52,23 @@ kim_error kim_ui_cli_auth_prompt (kim_ui_cli_context   in_context,
                                   kim_string           in_description,
                                   char               **out_reply);
 
-kim_error kim_ui_cli_change_password (kim_ui_cli_context    in_context,
-                                      kim_identity          in_identity,
-                                      kim_boolean           in_old_password_expired,
-                                      char                **out_old_password,
-                                      char                **out_new_password,
-                                      char                **out_verify_password);
+kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
+                                      kim_identity     in_identity,
+                                      kim_boolean      in_old_password_expired,
+                                      char           **out_old_password,
+                                      char           **out_new_password,
+                                      char           **out_verify_password);
 
-kim_error kim_ui_cli_handle_error (kim_ui_cli_context   in_context,
-                                   kim_identity         in_identity,
-                                   kim_error            in_error,
-                                   kim_string           in_error_message,
-                                   kim_string           in_error_description);
+kim_error kim_ui_cli_handle_error (kim_ui_context *in_context,
+                                   kim_identity    in_identity,
+                                   kim_error       in_error,
+                                   kim_string      in_error_message,
+                                   kim_string      in_error_description);
 
-void kim_ui_cli_free_string (kim_ui_cli_context   in_context,
-                             char               **io_string);
+void kim_ui_cli_free_string (kim_ui_context  *in_context,
+                             char           **io_string);
 
-kim_error kim_ui_cli_fini (kim_ui_cli_context *io_context);
+kim_error kim_ui_cli_fini (kim_ui_context *in_context);
 
 #endif /* LEAN_CLIENT */
 

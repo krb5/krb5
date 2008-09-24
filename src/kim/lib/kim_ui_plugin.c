@@ -95,13 +95,13 @@ static kim_error kim_ui_plugin_context_allocate (kim_ui_plugin_context *out_cont
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_init (kim_ui_plugin_context *out_context)
+kim_error kim_ui_plugin_init (kim_ui_context *io_context)
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_plugin_context context = NULL;
     struct errinfo einfo;
     
-    if (!err && !out_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_ui_plugin_context_allocate (&context);
@@ -145,7 +145,7 @@ kim_error kim_ui_plugin_init (kim_ui_plugin_context *out_context)
     }
         
     if (!err) {
-        *out_context = context;
+        io_context->tcontext = context;
         context = NULL;
     }
     
@@ -156,8 +156,8 @@ kim_error kim_ui_plugin_init (kim_ui_plugin_context *out_context)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_enter_identity (kim_ui_plugin_context  in_context,
-                                        kim_identity          *out_identity)
+kim_error kim_ui_plugin_enter_identity (kim_ui_context *in_context,
+                                        kim_identity   *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -165,8 +165,10 @@ kim_error kim_ui_plugin_enter_identity (kim_ui_plugin_context  in_context,
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = in_context->ftable->enter_identity (in_context->plugin_context,
-                                                  out_identity);
+        kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
+
+        err = context->ftable->enter_identity (context->plugin_context,
+                                               out_identity);
     }
     
     return check_error (err);
@@ -174,9 +176,9 @@ kim_error kim_ui_plugin_enter_identity (kim_ui_plugin_context  in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_select_identity (kim_ui_plugin_context  in_context,
-                                         kim_selection_hints    in_hints,
-                                         kim_identity          *out_identity)
+kim_error kim_ui_plugin_select_identity (kim_ui_context      *in_context,
+                                         kim_selection_hints  in_hints,
+                                         kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -185,9 +187,11 @@ kim_error kim_ui_plugin_select_identity (kim_ui_plugin_context  in_context,
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = in_context->ftable->select_identity (in_context->plugin_context,
-                                                   in_hints, 
-                                                   out_identity);
+        kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
+        
+        err = context->ftable->select_identity (context->plugin_context,
+                                                in_hints, 
+                                                out_identity);
     }
     
     return check_error (err);
@@ -195,14 +199,14 @@ kim_error kim_ui_plugin_select_identity (kim_ui_plugin_context  in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_auth_prompt (kim_ui_plugin_context  in_context,
-                                     kim_identity           in_identity,
-                                     kim_prompt_type        in_type,
-                                     kim_boolean            in_hide_reply, 
-                                     kim_string             in_title,
-                                     kim_string             in_message,
-                                     kim_string             in_description,
-                                     char                 **out_reply)
+kim_error kim_ui_plugin_auth_prompt (kim_ui_context      *in_context,
+                                     kim_identity         in_identity,
+                                     kim_prompt_type      in_type,
+                                     kim_boolean          in_hide_reply, 
+                                     kim_string           in_title,
+                                     kim_string           in_message,
+                                     kim_string           in_description,
+                                     char               **out_reply)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -212,14 +216,16 @@ kim_error kim_ui_plugin_auth_prompt (kim_ui_plugin_context  in_context,
     /* in_title, in_message or in_description may be NULL */
     
     if (!err) {
-        err = in_context->ftable->auth_prompt (in_context->plugin_context,
-                                               in_identity, 
-                                               in_type,
-                                               in_hide_reply,
-                                               in_title,
-                                               in_message,
-                                               in_description,
-                                               out_reply);
+        kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
+        
+        err = context->ftable->auth_prompt (context->plugin_context,
+                                            in_identity, 
+                                            in_type,
+                                            in_hide_reply,
+                                            in_title,
+                                            in_message,
+                                            in_description,
+                                            out_reply);
     }
     
     return check_error (err);
@@ -227,12 +233,12 @@ kim_error kim_ui_plugin_auth_prompt (kim_ui_plugin_context  in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_change_password (kim_ui_plugin_context  in_context,
-                                         kim_identity           in_identity,
-                                         kim_boolean            in_old_password_expired,
-                                         char                 **out_old_password,
-                                         char                 **out_new_password,
-                                         char                 **out_verify_password)
+kim_error kim_ui_plugin_change_password (kim_ui_context  *in_context,
+                                         kim_identity     in_identity,
+                                         kim_boolean      in_old_password_expired,
+                                         char           **out_old_password,
+                                         char           **out_new_password,
+                                         char           **out_verify_password)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -243,12 +249,14 @@ kim_error kim_ui_plugin_change_password (kim_ui_plugin_context  in_context,
     if (!err && !out_verify_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = in_context->ftable->change_password (in_context->plugin_context,
-                                                   in_identity, 
-                                                   in_old_password_expired,
-                                                   out_old_password,
-                                                   out_new_password,
-                                                   out_verify_password);
+        kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
+        
+        err = context->ftable->change_password (context->plugin_context,
+                                                in_identity, 
+                                                in_old_password_expired,
+                                                out_old_password,
+                                                out_new_password,
+                                                out_verify_password);
     }
     
     return check_error (err);
@@ -256,11 +264,11 @@ kim_error kim_ui_plugin_change_password (kim_ui_plugin_context  in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_handle_error (kim_ui_plugin_context in_context,
-                                      kim_identity          in_identity,
-                                      kim_error             in_error,
-                                      kim_string            in_error_message,
-                                      kim_string            in_error_description)
+kim_error kim_ui_plugin_handle_error (kim_ui_context *in_context,
+                                      kim_identity    in_identity,
+                                      kim_error       in_error,
+                                      kim_string      in_error_message,
+                                      kim_string      in_error_description)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -269,11 +277,13 @@ kim_error kim_ui_plugin_handle_error (kim_ui_plugin_context in_context,
     if (!err && !in_error_description) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = in_context->ftable->handle_error (in_context->plugin_context,
-                                                in_identity, 
-                                                in_error,
-                                                in_error_message,
-                                                in_error_description);
+        kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
+        
+        err = context->ftable->handle_error (context->plugin_context,
+                                             in_identity, 
+                                             in_error,
+                                             in_error_message,
+                                             in_error_description);
     }
     
     return check_error (err);
@@ -281,8 +291,8 @@ kim_error kim_ui_plugin_handle_error (kim_ui_plugin_context in_context,
 
 /* ------------------------------------------------------------------------ */
 
-void kim_ui_plugin_free_string (kim_ui_plugin_context   in_context,
-                                char                  **io_string)
+void kim_ui_plugin_free_string (kim_ui_context  *in_context,
+                                char           **io_string)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -290,27 +300,33 @@ void kim_ui_plugin_free_string (kim_ui_plugin_context   in_context,
     if (!err && !io_string ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        in_context->ftable->free_string (in_context->plugin_context, 
-                                         io_string);
+        kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
+        
+        context->ftable->free_string (context->plugin_context, 
+                                      io_string);
     }
  }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_plugin_fini (kim_ui_plugin_context *io_context)
+kim_error kim_ui_plugin_fini (kim_ui_context *io_context)
 {
     kim_error err = KIM_NO_ERROR;
     
     if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err && *io_context) {
-        err = (*io_context)->ftable->fini (&(*io_context)->plugin_context);
-    }
-    
     if (!err) {
-        kim_ui_plugin_context_free (io_context);
+        kim_ui_plugin_context context = (kim_ui_plugin_context) io_context->tcontext;
+        
+        if (context) {
+            err = context->ftable->fini (&context->plugin_context);
+        }
+
+        if (!err) {
+            kim_ui_plugin_context_free (&context);
+            io_context->tcontext = NULL;
+        }
     }
-    
     
     return check_error (err);
 }

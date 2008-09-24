@@ -24,10 +24,15 @@
  * or implied warranty.
  */
 
-#ifndef KIM_CCACHE_PRIVATE_H
-#define KIM_CCACHE_PRIVATE_H
+#ifndef KIM_CREDENTIAL_PRIVATE_H
+#define KIM_CREDENTIAL_PRIVATE_H
 
 #include <kim/kim.h>
+#include "kim_ui_private.h"
 
+kim_error kim_credential_create_for_change_password (kim_credential  *out_credential,
+                                                     kim_identity     in_identity,
+                                                     kim_string       in_old_password,
+                                                     kim_ui_context  *in_ui_context);
 
-#endif /* KIM_CCACHE_PRIVATE_H */
+#endif /* KIM_CREDENTIAL_PRIVATE_H */

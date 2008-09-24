@@ -353,6 +353,17 @@ kim_error kim_ccache_create_from_keytab (kim_ccache    *out_ccache,
 kim_error kim_ccache_create_from_default (kim_ccache *out_ccache);
 
 /*!
+ * \param out_ccache      on exit, a ccache object for the ccache identified by 
+ *                        \a in_display_name.  Must be freed with kim_ccache_free().
+ * \param in_display_name a ccache display name string (ie: "TYPE:NAME").
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \note This API is used to obtain a kim_ccache for a ccache name entered by the user.
+ * \brief Get a ccache for a ccache display name.
+ */
+kim_error kim_ccache_create_from_display_name (kim_ccache  *out_ccache,
+                                               kim_string   in_display_name);
+
+/*!
  * \param out_ccache  on exit, a ccache object for the ccache identified by 
  *                    \a in_type and \a in_name.  Must be freed with kim_ccache_free().
  * \param in_type     a ccache type string. 
@@ -389,6 +400,19 @@ kim_error kim_ccache_copy (kim_ccache  *out_ccache,
                              kim_ccache   in_ccache);
 
 /*!
+ * \param in_ccache             a ccache object.
+ * \param in_compare_to_ccache  a ccache object.
+ * \param out_comparison        on exit, a comparison of \a in_ccache and 
+ *                              \a in_compare_to_ccache which determines whether
+ *                              or not the two ccache objects refer to the same ccache.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Compare ccache objects.
+ */
+kim_error kim_ccache_compare (kim_ccache   in_ccache,
+                              kim_ccache   in_compare_to_ccache,
+                              kim_boolean *out_equal);
+    
+/*!
  * \param in_ccache        a ccache object. 
  * \param in_krb5_context  a krb5 context which will be used to create out_krb5_ccache. 
  * \param out_krb5_ccache  on exit, a new krb5 ccache object which is a copy of in_ccache.  
@@ -397,8 +421,8 @@ kim_error kim_ccache_copy (kim_ccache  *out_ccache,
  * \brief Get a krb5 ccache for a ccache.
  */
 kim_error kim_ccache_get_krb5_ccache (kim_ccache  in_ccache,
-                                        krb5_context  in_krb5_context,
-                                        krb5_ccache  *out_krb5_ccache);
+                                      krb5_context  in_krb5_context,
+                                      krb5_ccache  *out_krb5_ccache);
 
 /*!
  * \param in_ccache  a ccache object. 

@@ -33,40 +33,40 @@ struct kim_ui_plugin_context;
 typedef struct kim_ui_plugin_context *kim_ui_plugin_context;
 
 
-kim_error kim_ui_plugin_init (kim_ui_plugin_context *out_context);
+kim_error kim_ui_plugin_init (kim_ui_context *io_context);
 
-kim_error kim_ui_plugin_enter_identity (kim_ui_plugin_context  in_context,
-                                        kim_identity          *out_identity);
+kim_error kim_ui_plugin_enter_identity (kim_ui_context *in_context,
+                                        kim_identity   *out_identity);
 
-kim_error kim_ui_plugin_select_identity (kim_ui_plugin_context  in_context,
-                                         kim_selection_hints    in_hints,
-                                         kim_identity          *out_identity);
+kim_error kim_ui_plugin_select_identity (kim_ui_context      *in_context,
+                                         kim_selection_hints  in_hints,
+                                         kim_identity        *out_identity);
 
-kim_error kim_ui_plugin_auth_prompt (kim_ui_plugin_context   in_context,
-                                     kim_identity            in_identity,
-                                     kim_prompt_type         in_type,
-                                     kim_boolean             in_hide_reply, 
-                                     kim_string              in_title,
-                                     kim_string              in_message,
-                                     kim_string              in_description,
-                                     char                  **out_reply);
+kim_error kim_ui_plugin_auth_prompt (kim_ui_context      *in_context,
+                                     kim_identity         in_identity,
+                                     kim_prompt_type      in_type,
+                                     kim_boolean          in_hide_reply, 
+                                     kim_string           in_title,
+                                     kim_string           in_message,
+                                     kim_string           in_description,
+                                     char               **out_reply);
 
-kim_error kim_ui_plugin_change_password (kim_ui_plugin_context    in_context,
-                                         kim_identity             in_identity,
-                                         kim_boolean              in_old_password_expired,
-                                         char                   **out_old_password,
-                                         char                   **out_new_password,
-                                         char                   **out_verify_password);
+kim_error kim_ui_plugin_change_password (kim_ui_context  *in_context,
+                                         kim_identity     in_identity,
+                                         kim_boolean      in_old_password_expired,
+                                         char           **out_old_password,
+                                         char           **out_new_password,
+                                         char           **out_verify_password);
 
-kim_error kim_ui_plugin_handle_error (kim_ui_plugin_context   in_context,
-                                      kim_identity            in_identity,
-                                      kim_error               in_error,
-                                      kim_string              in_error_message,
-                                      kim_string              in_error_description);
+kim_error kim_ui_plugin_handle_error (kim_ui_context *in_context,
+                                      kim_identity    in_identity,
+                                      kim_error       in_error,
+                                      kim_string      in_error_message,
+                                      kim_string      in_error_description);
 
-void kim_ui_plugin_free_string (kim_ui_plugin_context   in_context,
-                                char                  **io_string);
+void kim_ui_plugin_free_string (kim_ui_context  *in_context,
+                                char           **io_string);
 
-kim_error kim_ui_plugin_fini (kim_ui_plugin_context *io_context);
+kim_error kim_ui_plugin_fini (kim_ui_context *in_context);
 
 #endif /* KIM_UI_PLUGIN_PRIVATE_H */

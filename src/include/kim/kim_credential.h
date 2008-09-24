@@ -256,7 +256,7 @@ typedef int kim_credential_state;
  *     Valid credentials may be renewed up until their renewal expiration time.  
  *     Renewing credentials acquires a fresh set of credentials with a full lifetime 
  *     without resending secrets to the KDC (such as a password).  If credentials are 
- *     not renewable, this function will return an error.
+ *     not renewable, this function will return a renewal expiration time of 0.
  *
  *
  * See \ref kim_credential_reference and \ref kim_credential_iterator_reference for 
@@ -349,21 +349,6 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
 kim_error kim_credential_create_from_krb5_creds (kim_credential *out_credential,
                                                  krb5_context      in_krb5_context,
                                                  krb5_creds       *in_krb5_creds);
-
-/*!
- * \param out_credential  on exit, a new credential object containing a change
- *                        password credential for \a in_identity.
- *                        Must be freed with kim_credential_free().
- * \param in_identity     a client identity to obtain a change password credential for. 
- * \param in_old_password the current password for \a in_identity.  May be 
- *                        an expired password.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Obtain a credential for changing an identity's password.
- * \sa kim_credential_change_password
- */    
-kim_error kim_credential_create_for_change_password (kim_credential *out_credential,
-                                                     kim_identity    in_identity,
-                                                     kim_string      in_old_password);
 
 /*!
  * \param out_credential  on exit, a new credential object which is a copy of \a in_credential.  
@@ -462,17 +447,6 @@ kim_error kim_credential_get_renewal_expiration_time (kim_credential  in_credent
 
 /*!
  * \param in_credential       a credential object. 
- * \param out_ticket_flags    on exit, the krb5 ticket flags for \a in_credential.
- *                            See krb5 API documentation for the meaning of these flags.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the krb5 ticket_flags for a credential.
- */
-kim_error kim_credential_get_krb5_ticket_flags (kim_credential  in_credential,
-                                                krb5_flags     *out_ticket_flags);
-
-    
-/*!
- * \param in_credential       a credential object. 
  * \param in_client_identity  a client identity.
  * \param out_ccache          on exit, a ccache object containing \a in_credential with the client  
  *      		      identity \a in_client_identity.  Must be freed with kim_ccache_free().
@@ -528,39 +502,6 @@ kim_error kim_credential_renew (kim_credential *io_credential,
  */
 kim_error kim_credential_validate (kim_credential *io_credential,
                                    kim_options     in_options);
-
-/*!
- * \param in_credential            a credential object containing a change
- *                                 password credential.  Use 
- *                                 #kim_credential_create_for_change_password to obtain
- *                                 a change password credential.
- * \param in_identity              an identity to change the password for.  May
- *                                 be different than the identity the credential
- *                                 is for.  
- * \param in_new_password          the password to change the identity to.
- * \param out_rejected_err         on exit, 0 if the password change was
- *                                 successful or an error describing why the
- *                                 new password was rejected.
- * \param out_rejected_message     on exit, if \a out_rejected_err is non-zero
- *                                 this argument will contain an error message
- *                                 for \a out_rejected_err.  Pass NULL if you
- *                                 do not want this error string.  Must be
- *                                 freed with #kim_string_free();
- * \param out_rejected_description on exit, if \a out_rejected_err is non-zero
- *                                 this argument will contain an string describing
- *                                 why \a in_new_password was rejected. Pass NULL 
- *                                 if you do not want this error string.  Must be
- *                                 freed with #kim_string_free();
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Change an identity's password.
- * \sa kim_credential_create_for_change_password
- */    
-kim_error kim_credential_change_password (kim_credential  in_credential,
-                                          kim_identity    in_identity,
-                                          kim_string      in_new_password,
-                                          kim_error      *out_rejected_err,
-                                          kim_string     *out_rejected_message,
-                                          kim_string     *out_rejected_description);
 
 /*!
  * \param io_credential the credential object to be freed.  Set to NULL on exit.

@@ -89,23 +89,24 @@ static kim_error kim_ui_cli_read_string (kim_string   *out_string,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_cli_init (kim_ui_cli_context *out_context)
+kim_error kim_ui_cli_init (kim_ui_context *io_context)
 {
-    *out_context = NULL;
+    if (io_context) {
+        io_context->tcontext = NULL;
+    }
     
     return KIM_NO_ERROR;
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_cli_enter_identity (kim_ui_cli_context   in_context,
-                                     kim_identity        *out_identity)
+kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
+                                     kim_identity   *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string enter_identity_string = NULL;
     kim_string identity_string = NULL;
     
-    if (!err && !in_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
@@ -130,13 +131,12 @@ kim_error kim_ui_cli_enter_identity (kim_ui_cli_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_cli_select_identity (kim_ui_cli_context   in_context,
+kim_error kim_ui_cli_select_identity (kim_ui_context      *in_context,
                                       kim_selection_hints  in_hints,
                                       kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
@@ -149,7 +149,7 @@ kim_error kim_ui_cli_select_identity (kim_ui_cli_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_cli_auth_prompt (kim_ui_cli_context   in_context,
+kim_error kim_ui_cli_auth_prompt (kim_ui_context      *in_context,
                                   kim_identity         in_identity,
                                   kim_prompt_type      in_type,
                                   kim_boolean          in_hide_reply, 
@@ -160,7 +160,6 @@ kim_error kim_ui_cli_auth_prompt (kim_ui_cli_context   in_context,
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_context ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_reply  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     /* in_title, in_message or in_description may be NULL */
@@ -304,12 +303,12 @@ static kim_error kim_ui_cli_ask_change_password (kim_string in_identity_string)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_cli_change_password (kim_ui_cli_context   in_context,
-                                      kim_identity         in_identity,
-                                      kim_boolean          in_old_password_expired,
-                                      char               **out_old_password,
-                                      char               **out_new_password,
-                                      char               **out_verify_password)
+kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
+                                      kim_identity     in_identity,
+                                      kim_boolean      in_old_password_expired,
+                                      char           **out_old_password,
+                                      char           **out_new_password,
+                                      char           **out_verify_password)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string enter_old_password_format = NULL;
@@ -319,8 +318,8 @@ kim_error kim_ui_cli_change_password (kim_ui_cli_context   in_context,
     kim_string old_password = NULL;
     kim_string new_password = NULL;
     kim_string verify_password = NULL;
+    kim_boolean done = 0;
     
-    if (!err && !in_context         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_identity        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_old_password   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_new_password   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -349,16 +348,28 @@ kim_error kim_ui_cli_change_password (kim_ui_cli_context   in_context,
                                               "KLStringEnterVerifyPassword");
     }
     
-    if (!err) {
+    while (!err && !done) {
+        kim_string_free (&old_password);
+
         err = kim_ui_cli_read_string (&old_password, 
                                       1, enter_old_password_format, 
                                       identity_string);
-    } 
-    
-    if (!err) {
-        err = kim_credential_create_for_change_password (&in_context,
-                                                         in_identity,
-                                                         old_password);
+        
+        if (!err) {
+            err = kim_credential_create_for_change_password ((kim_credential *) &in_context->tcontext,
+                                                             in_identity,
+                                                             old_password,
+                                                             in_context);
+        }
+        
+        if (err && err != KIM_USER_CANCELED_ERR) {
+            /* new creds failed, report error to user */
+            err = kim_ui_handle_kim_error (in_context, in_identity, 
+                                           kim_ui_error_type_change_password,
+                                           err);
+        } else {
+            done = 1;
+       }
     }
     
     if (!err) {
@@ -395,20 +406,19 @@ kim_error kim_ui_cli_change_password (kim_ui_cli_context   in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_cli_handle_error (kim_ui_cli_context in_context,
-                                   kim_identity       in_identity,
-                                   kim_error          in_error,
-                                   kim_string         in_error_message,
-                                   kim_string         in_error_description)
+kim_error kim_ui_cli_handle_error (kim_ui_context *in_context,
+                                   kim_identity    in_identity,
+                                   kim_error       in_error,
+                                   kim_string      in_error_message,
+                                   kim_string      in_error_description)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_context          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_error_message    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_error_description) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        fprintf (stdout, "%s: %s\n", in_error_message, in_error_description);
+        fprintf (stdout, "%s\n%s\n\n", in_error_message, in_error_description);
     }
     
     return check_error (err);
@@ -416,18 +426,18 @@ kim_error kim_ui_cli_handle_error (kim_ui_cli_context in_context,
 
 /* ------------------------------------------------------------------------ */
 
-void kim_ui_cli_free_string (kim_ui_cli_context   in_context,
-                             char               **io_string)
+void kim_ui_cli_free_string (kim_ui_context  *in_context,
+                             char           **io_string)
 {
     kim_string_free ((kim_string *) io_string);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ui_cli_fini (kim_ui_cli_context *io_context)
+kim_error kim_ui_cli_fini (kim_ui_context *io_context)
 {
-    if (io_context && *io_context) {
-        kim_credential_free (io_context);
+    if (io_context) {
+        kim_credential_free ((kim_credential *) &io_context->tcontext);
     }
     
     return KIM_NO_ERROR;

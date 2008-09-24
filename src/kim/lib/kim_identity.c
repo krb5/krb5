@@ -534,6 +534,123 @@ kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
     return check_error (err);
 }
 
+
+/* ------------------------------------------------------------------------ */
+
+static kim_error kim_identity_change_password_with_credential (kim_identity    in_identity,
+                                                               kim_credential  in_credential,
+                                                               kim_string      in_new_password,
+                                                               kim_ui_context *in_ui_context,
+                                                               kim_error      *out_rejected_err,
+                                                               kim_string     *out_rejected_message,
+                                                               kim_string     *out_rejected_description)
+{
+    kim_error err = KIM_NO_ERROR;
+    krb5_creds *creds = NULL;
+    int rejected_err = 0;
+    krb5_data message_data;
+    krb5_data description_data;
+    
+    if (!err && !in_credential   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_new_password ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_ui_context   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_rejected_err) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_credential_get_krb5_creds (in_credential,
+                                             in_identity->context,
+                                             &creds);
+    }
+
+    if (!err) {
+        if (krb5_principal_compare (in_identity->context, 
+                                    in_identity->principal,
+                                    creds->client)) {
+            /* Same principal, change the password normally */
+            err = krb5_error (in_identity->context,
+                              krb5_change_password (in_identity->context, 
+                                                    creds, 
+                                                    (char *) in_new_password, 
+                                                    &rejected_err, 
+                                                    &message_data, 
+                                                    &description_data));
+        } else {
+            /* Different principal, use set change password protocol */
+            err = krb5_error (in_identity->context,
+                              krb5_set_password (in_identity->context, 
+                                                 creds, 
+                                                 (char *) in_new_password, 
+                                                 in_identity->principal,
+                                                 &rejected_err, 
+                                                 &message_data, 
+                                                 &description_data));
+        }
+        
+    }
+    
+    if (!err && rejected_err) {
+        kim_string rejected_message = NULL;
+        kim_string rejected_description = NULL;
+        
+        if (message_data.data && message_data.length > 0) {
+            err = kim_string_create_from_buffer (&rejected_message, 
+                                                 message_data.data, 
+                                                 message_data.length);
+        } else {
+            err = kim_os_string_create_localized (&rejected_message,
+                                                  "KLStringChangePasswordFailed");
+        }
+        
+        if (!err) {
+            if (description_data.data && description_data.length > 0) {
+                err = kim_string_create_from_buffer (&rejected_description,
+                                                     description_data.data, 
+                                                     description_data.length);
+            } else {
+                err = kim_os_string_create_localized (&rejected_description,
+                                                      "KLStringPasswordRejected");
+            }
+        }
+        
+        if (!err && in_ui_context->type != kim_ui_type_cli) {
+            char *c;
+            
+            // replace all \n and \r characters with spaces
+            for (c = (char *) rejected_message; *c != '\0'; c++) {
+                if ((*c == '\n') || (*c == '\r')) { *c = ' '; }
+            }
+            
+            for (c = (char *) rejected_description; *c != '\0'; c++) {
+                if ((*c == '\n') || (*c == '\r')) { *c = ' '; }
+            }
+        }
+        
+        if (!err) {
+            if (out_rejected_message) {
+                *out_rejected_message = rejected_message;
+                rejected_message = NULL;
+            }
+            if (out_rejected_description) {
+                *out_rejected_description = rejected_description;
+                rejected_description = NULL;
+            }
+        }
+        
+        kim_string_free (&rejected_message);
+        kim_string_free (&rejected_description);
+        
+        krb5_free_data_contents (in_identity->context, &message_data);
+        krb5_free_data_contents (in_identity->context, &description_data);
+    }
+    
+    if (!err) {
+        /* do this after reporting errors so we don't double report rejection */
+        *out_rejected_err = rejected_err;
+    }
+    
+    return check_error (err);
+}
+
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_identity_change_password (kim_identity in_identity)
@@ -583,38 +700,39 @@ kim_error kim_identity_change_password (kim_identity in_identity)
             } else {
                 err = kim_credential_create_for_change_password (&credential,
                                                                  in_identity,
-                                                                 old_password);
+                                                                 old_password,
+                                                                 &context);
             }
             
             if (!err) {
-                err = kim_credential_change_password (credential, 
-                                                      in_identity,
-                                                      new_password,
-                                                      &rejected_err,
-                                                      &rejected_message,
-                                                      &rejected_description);
-                
+                err = kim_identity_change_password_with_credential (in_identity,
+                                                                    credential, 
+                                                                    new_password,
+                                                                    &context,
+                                                                    &rejected_err,
+                                                                    &rejected_message,
+                                                                    &rejected_description);
             }  
             
             kim_credential_free (&credential);
         }
         
-        if (!err || err == KIM_USER_CANCELED_ERR) {
-            /* password change succeeded or the user gave up */
-            done = 1;
-            
-        } else if (!err && rejected_err) {
+        if (!err && rejected_err) {
             /* Password rejected, report it to the user */
             err = kim_ui_handle_error (&context, in_identity,
                                        rejected_err,
                                        rejected_message, 
                                        rejected_description);
-            
-        } else {
-            /* Password change failed, report error to user */
+
+        } else if (err && err != KIM_USER_CANCELED_ERR) {
+            /* new creds failed, report error to user */
             err = kim_ui_handle_kim_error (&context, in_identity, 
                                            kim_ui_error_type_change_password,
-                                           err);                                        
+                                           err);
+            
+        } else {
+            /* password change succeeded or the user gave up */
+            done = 1;
         }
         
         kim_string_free (&rejected_message);
