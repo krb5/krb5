@@ -249,18 +249,18 @@ kim_error kim_favorites_add_identity (kim_favorites io_favorites,
         kim_count i;
         
         for (i = 0; !err && i < io_favorites->count; i++) {
-            kim_comparison identity_comparison = 0;
+            kim_comparison comparison = 0;
             
             err = kim_identity_compare (io_favorites->identities[i],
                                         in_identity, 
-                                        &identity_comparison);
+                                        &comparison);
             
             if (!err) {
-                if (kim_comparison_is_greater_than (identity_comparison)) {
+                if (kim_comparison_is_greater_than (comparison)) {
                     /* insert before the first entry that is greater than us */
                     break; 
                     
-                } else if (kim_comparison_is_equal_to (identity_comparison)) {
+                } else if (kim_comparison_is_equal_to (comparison)) {
                     /* already in list */
                     kim_string display_string = NULL;
                     
@@ -313,7 +313,7 @@ kim_error kim_favorites_remove_identity (kim_favorites io_favorites,
                                          kim_identity  in_identity)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_boolean found = FALSE;
+    kim_boolean found = 0;
     kim_count i;
     
     if (!err && !io_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -323,12 +323,15 @@ kim_error kim_favorites_remove_identity (kim_favorites io_favorites,
         for (i = 0; !err && !found && i < io_favorites->count; i++) {
             kim_identity identity = io_favorites->identities[i];
             kim_options options = io_favorites->options[i];
+            kim_comparison comparison;
             
-            err = kim_identity_compare (in_identity, identity, &found);
+            err = kim_identity_compare (in_identity, identity, &comparison);
             
-            if (!err && found) {
+            if (!err && kim_comparison_is_equal (comparison)) {
                 kim_error terr = KIM_NO_ERROR;
                 kim_count new_count = io_favorites->count - 1;
+                
+                found = 1;
                 
                 memmove (&io_favorites->identities[i], 
                          &io_favorites->identities[i + 1],
