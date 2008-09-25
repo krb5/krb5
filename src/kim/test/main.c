@@ -70,5 +70,7 @@ int main (int argc, const char * argv[])
     
     test_kim_preferences_add_favorite_identity (state);
     
+    test_kim_preferences_remove_favorite_identity(state);
+    
     return test_cleanup (state);
 }

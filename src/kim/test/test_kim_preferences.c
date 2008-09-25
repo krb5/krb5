@@ -28,6 +28,107 @@
 
 #define TEST_LIFETIME 7777
 
+void print_favorites(kim_test_state_t state);
+kim_boolean favorites_contains_identity(kim_test_state_t state, kim_identity identity);
+
+/* ------------------------------------------------------------------------ */
+
+void print_favorites(kim_test_state_t state)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_preferences prefs = NULL;
+    kim_count count, j;
+    kim_string string;
+    
+    err = kim_preferences_create (&prefs);
+    fail_if_error (state, "kim_preferences_create", err, 
+                   "while creating preferences");
+    
+    if (!err) {
+        err = kim_preferences_get_number_of_favorite_identities (prefs, &count);
+        fail_if_error (state, "kim_preferences_get_number_of_favorite_identities", err, 
+                       "while getting number of favorite identities");
+        printf("%qu favorites...\n", count);
+    }
+    
+    
+    for (j = 0; j < count; j++) {
+        kim_identity compare_identity = NULL;
+        kim_options compare_options = NULL;
+        err = kim_preferences_get_favorite_identity_at_index (prefs, j, 
+                                                              &compare_identity, 
+                                                              &compare_options);
+        fail_if_error (state, "kim_preferences_get_favorite_identity_at_index", err, 
+                       "while getting favorite identity %d", (int) j);
+        
+        if (!err)
+        {
+            kim_identity_get_display_string(compare_identity, &string);
+            printf("  %2qu: %s\n", j, string);
+        }
+        
+        kim_identity_free (&compare_identity);
+        kim_options_free (&compare_options);
+    }
+    
+    kim_preferences_free (&prefs);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_boolean favorites_contains_identity(kim_test_state_t state, kim_identity identity)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_preferences prefs = NULL;
+    kim_count count, j;
+    kim_boolean found = 0;
+    
+    err = kim_preferences_create (&prefs);
+    fail_if_error (state, "kim_preferences_create", err, 
+                   "while creating preferences");
+    
+    if (!err) {
+        err = kim_preferences_get_number_of_favorite_identities (prefs, &count);
+        fail_if_error (state, "kim_preferences_get_number_of_favorite_identities", err, 
+                       "while getting number of favorite identities");
+    }
+    
+    for (j = 0; j < count; j++) {
+        kim_identity compare_identity = NULL;
+        kim_options compare_options = NULL;
+        kim_comparison comparison = 0;
+        
+        err = kim_preferences_get_favorite_identity_at_index (prefs, j, 
+                                                              &compare_identity, 
+                                                              &compare_options);
+        fail_if_error (state, "kim_preferences_get_favorite_identity_at_index", err, 
+                       "while getting favorite identity %d", (int) j);
+        
+        if (!err) {
+            kim_string display_string = NULL;
+            err = kim_identity_compare (identity, compare_identity, 
+                                        &comparison);
+            if (err) {
+                kim_identity_get_display_string(identity, &display_string);
+                fail_if_error (state, "kim_identity_compare", err, 
+                               "while comparing %s to favorite identity %d", 
+                               display_string, (int) j);
+            }
+        }
+        
+        if (!err && kim_comparison_is_equal_to (comparison)) {
+            found = 1;
+        }
+        
+        kim_identity_free (&compare_identity);
+        kim_options_free (&compare_options);
+    }
+    
+    kim_preferences_free (&prefs);
+    
+    return found;
+}
+
 /* ------------------------------------------------------------------------ */
 
 void test_kim_preferences_create (kim_test_state_t state)
@@ -570,3 +671,239 @@ void test_kim_preferences_add_favorite_identity (kim_test_state_t state)
     end_test (state);
 }
 
+/* ------------------------------------------------------------------------ */
+
+void test_kim_preferences_remove_favorite_identity (kim_test_state_t state)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    start_test (state, "kim_preferences_remove_favorite_identity");
+    /*
+     * 1. Remove all favorites to start with a clean slate
+     * 2. Add some favorites
+     * 3. Verify added favorites
+     * 4. Remove those favorites one by one, checking each time to make sure they were removed
+     */
+    
+    // Remove old and add new
+    if (!err) {
+        kim_preferences prefs = NULL;
+        kim_options options = NULL;
+        kim_count i;
+        
+        err = kim_preferences_create (&prefs);
+        fail_if_error (state, "kim_preferences_create", err, 
+                       "while creating preferences");
+        
+        if (!err) {
+            err = kim_preferences_remove_all_favorite_identities (prefs);
+            fail_if_error (state, "kim_preferences_remove_all_favorite_identities", err, 
+                           "while removing all favorite identities");
+        }
+        
+        if (!err) {
+            err = kim_preferences_get_number_of_favorite_identities (prefs, &i);
+            fail_if_error (state, "kim_preferences_get_number_of_favorite_identities", err, 
+                           "while getting number of favorite identities after clearing");
+        }        
+        
+        if (!err) {
+            err = kim_options_create (&options);
+            fail_if_error (state, "kim_options_create", err, 
+                           "while creating options");
+        }        
+        
+        for (i = 0; !err && fids[i].identity; i++) {
+            kim_identity identity = NULL;
+            
+            err = kim_identity_create_from_string (&identity, fids[i].identity);
+            fail_if_error (state, "kim_identity_create_from_string", err, 
+                           "while creating the identity for %s", 
+                           fids[i].identity);
+            
+            if (!err) {
+                err = kim_options_set_lifetime (options, fids[i].lifetime);
+                fail_if_error (state, "kim_options_set_lifetime", err, 
+                               "while setting the lifetime to %d", 
+                               (int) fids[i].lifetime);            
+            }
+            
+            if (!err) {
+                err = kim_options_set_renewal_lifetime (options, fids[i].renewal_lifetime);
+                fail_if_error (state, "kim_options_set_renewal_lifetime", err, 
+                               "while setting the renewal lifetime to %d", 
+                               (int) fids[i].renewal_lifetime);            
+            }
+            
+            if (!err) {
+                err = kim_preferences_add_favorite_identity (prefs, identity, options);
+                fail_if_error (state, "kim_preferences_add_favorite_identity", err, 
+                               "while adding %s to the favorite identities", 
+                               fids[i].identity);            
+            }
+            
+            kim_identity_free (&identity);
+        }
+        
+        if (!err) {
+            err = kim_preferences_synchronize (prefs);
+            fail_if_error (state, "kim_preferences_synchronize", err, 
+                           "while setting the favorite identities");
+        }
+        
+        kim_options_free (&options);
+        kim_preferences_free (&prefs);
+    }
+    
+    // Verify add
+    if (!err) {
+        kim_preferences prefs = NULL;
+        kim_count count, i;
+        
+        err = kim_preferences_create (&prefs);
+        fail_if_error (state, "kim_preferences_create", err, 
+                       "while creating preferences");
+        
+        if (!err) {
+            err = kim_preferences_get_number_of_favorite_identities (prefs, &count);
+            fail_if_error (state, "kim_preferences_get_number_of_favorite_identities", err, 
+                           "while getting number of favorite identities");
+        }
+        
+        
+        for (i = 0; !err && fids[i].identity; i++) {
+            kim_identity identity = NULL;
+            kim_count j;
+            kim_boolean found = 0;
+            
+            err = kim_identity_create_from_string (&identity, fids[i].identity);
+            fail_if_error (state, "kim_identity_create_from_string", err, 
+                           "while creating the identity for %s", 
+                           fids[i].identity);
+            
+            for (j = 0; j < count; j++) {
+                kim_identity compare_identity = NULL;
+                kim_options compare_options = NULL;
+                kim_comparison comparison;
+                
+                err = kim_preferences_get_favorite_identity_at_index (prefs, j, 
+                                                                      &compare_identity, 
+                                                                      &compare_options);
+                fail_if_error (state, "kim_preferences_get_favorite_identity_at_index", err, 
+                               "while getting favorite identity %d", (int) j);
+                
+                if (!err) {
+                    err = kim_identity_compare (identity, compare_identity, 
+                                                &comparison);
+                    fail_if_error (state, "kim_identity_compare", err, 
+                                   "while comparing %s to favorite identity %d", 
+                                   fids[i].identity, (int) i);
+                }
+                
+                if (!err && kim_comparison_is_equal_to (comparison)) {
+                    kim_lifetime compare_lifetime;
+                    kim_lifetime compare_renewal_lifetime;
+                    
+                    found = 1;
+                    
+                    err = kim_options_get_lifetime (compare_options, &compare_lifetime);
+                    fail_if_error (state, "kim_options_get_lifetime", err, 
+                                   "while getting the lifetime for %s", 
+                                   fids[i].identity);            
+                    
+                    if (!err && fids[i].lifetime != compare_lifetime) {
+                        log_failure (state, "Unexpected lifetime for %s (got %d, expected %d)", 
+                                     fids[i].identity, (int) compare_lifetime,
+                                     (int) fids[i].lifetime);                
+                    }
+                    
+                    if (!err) {
+                        err = kim_options_get_renewal_lifetime (compare_options, 
+                                                                &compare_renewal_lifetime);
+                        fail_if_error (state, "kim_options_get_renewal_lifetime", err, 
+                                       "while getting the lifetime for %s", 
+                                       fids[i].identity);            
+                    }
+                    
+                    if (!err && fids[i].renewal_lifetime != compare_renewal_lifetime) {
+                        log_failure (state, "Unexpected renewal lifetime for %s (got %d, expected %d)", 
+                                     fids[i].identity, 
+                                     (int) compare_renewal_lifetime,
+                                     (int) fids[i].renewal_lifetime);                
+                    }
+                }
+                
+                kim_identity_free (&compare_identity);
+                kim_options_free (&compare_options);
+            }
+            
+            if (!err && !found) {
+                log_failure (state, "Favorite identity %s not found in favorite identities list", 
+                             fids[i].identity);
+            }
+        }
+        
+        if (!err && i != count) {
+            log_failure (state, "Unexpected number of favorite identities (got %d, expected %d)", 
+                         (int) count, (int) i);
+        }
+        
+        kim_preferences_free (&prefs);
+    }
+    
+    // Remove one by one
+    if (!err) {
+        kim_preferences prefs = NULL;
+        kim_count count, j;
+        kim_string string;
+        
+        err = kim_preferences_create (&prefs);
+        fail_if_error (state, "kim_preferences_create", err, 
+                       "while creating preferences");
+        
+        if (!err) {
+            err = kim_preferences_get_number_of_favorite_identities (prefs, &count);
+            fail_if_error (state, "kim_preferences_get_number_of_favorite_identities", err, 
+                           "while getting number of favorite identities");
+        }
+        
+        for (j = 0; j < count; j++) {
+            kim_identity compare_identity = NULL;
+            kim_options compare_options = NULL;
+            
+            err = kim_preferences_get_favorite_identity_at_index (prefs, 0, 
+                                                                  &compare_identity, 
+                                                                  &compare_options);
+            fail_if_error (state, "kim_preferences_get_favorite_identity_at_index", err, 
+                           "while getting favorite identity %d", (int) j);
+            
+            if (!err)
+            {
+                kim_identity_get_display_string(compare_identity, &string);
+                err = kim_preferences_remove_favorite_identity(prefs, compare_identity);
+                fail_if_error (state, "kim_preferences_remove_favorite_identity", err, 
+                               "while removing favorite identity %d \"%s\"", (int) j, string);
+            }
+
+            if (!err) {
+                err = kim_preferences_synchronize (prefs);
+                fail_if_error (state, "kim_preferences_synchronize", err, 
+                               "while removing favorite %qu: %s", j, string);
+            }
+            
+            if (!err && favorites_contains_identity(state, compare_identity)) {
+                kim_string display_string = NULL;
+                kim_identity_get_display_string(compare_identity, &display_string);
+                log_failure (state, "Favorite identities still contains %s after removal", 
+                             display_string);
+            }
+            
+            kim_identity_free (&compare_identity);
+            kim_options_free (&compare_options);
+        }
+        
+        kim_preferences_free (&prefs);
+    }
+    
+    end_test (state);
+}
