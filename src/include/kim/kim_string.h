@@ -69,19 +69,6 @@ extern "C" {
  */
 
 /*!
- * \param out_string on exit, a human-readable UTF-8 string describing the 
- *                   error represented by \a in_error.  Must be freed with 
- *                   kim_string_free().
- * \param in_error   an error code.
- * \return On success, #KIM_NO_ERROR.  On failure, 
- * \note If the caller needs an error string, this API should be called 
- * immediately after a KIM API returns an error. 
- * \brief Get a text description of an error.
- */
-kim_error kim_string_create_for_error (kim_string *out_string,
-                                       kim_error   in_error);
-
-/*!
  * \param out_string On success, a human-readable UTF-8 string describing the 
  *                   error representedby \a in_error.  Must be freed with
  *                   kim_string_free().
