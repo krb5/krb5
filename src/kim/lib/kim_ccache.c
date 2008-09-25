@@ -175,30 +175,6 @@ static kim_error kim_ccache_create_resolve_name (kim_string *out_resolve_name,
     return check_error (err);
 }
 
-/* ------------------------------------------------------------------------ */
-
-static kim_boolean kim_ccache_k5ccaches_are_equal (krb5_context in_context,
-                                                   krb5_ccache  in_ccache,
-                                                   krb5_context in_compare_to_context,
-                                                   krb5_ccache  io_compare_to_ccache)
-{
-    kim_boolean equal = FALSE;
-    
-    if (in_context && in_ccache && in_compare_to_context && io_compare_to_ccache) {
-        const char *type            = krb5_cc_get_type (in_context, in_ccache);
-        const char *compare_to_type = krb5_cc_get_type (in_compare_to_context, 
-                                                        io_compare_to_ccache);
-        const char *name            = krb5_cc_get_name (in_context, in_ccache);
-        const char *compare_to_name = krb5_cc_get_name (in_compare_to_context, 
-                                                        io_compare_to_ccache);
-        
-        equal = (!strcmp (type, compare_to_type) && 
-                 !strcmp (name, compare_to_name));
-    }
-    
-    return equal;
-}
-
 #pragma mark -
 
 /* ------------------------------------------------------------------------ */
@@ -523,21 +499,31 @@ kim_error kim_ccache_copy (kim_ccache  *out_ccache,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_ccache_compare (kim_ccache   in_ccache,
-                              kim_ccache   in_compare_to_ccache,
-                              kim_boolean *out_equal)
+kim_error kim_ccache_compare (kim_ccache      in_ccache,
+                              kim_ccache      in_compare_to_ccache,
+                              kim_comparison *out_comparison)
 {
     kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_ccache           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_compare_to_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_equal           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_comparison      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        *out_equal = kim_ccache_k5ccaches_are_equal (in_ccache->context, 
-                                                     in_ccache->ccache,
-                                                     in_compare_to_ccache->context, 
-                                                     in_compare_to_ccache->ccache);
+        const char *type            = krb5_cc_get_type (in_ccache->context, 
+                                                        in_ccache->ccache);
+        const char *compare_to_type = krb5_cc_get_type (in_compare_to_ccache->context, 
+                                                        in_compare_to_ccache->ccache);
+        const char *name            = krb5_cc_get_name (in_ccache->context, 
+                                                        in_ccache->ccache);
+        const char *compare_to_name = krb5_cc_get_name (in_compare_to_ccache->context, 
+                                                        in_compare_to_ccache->ccache);
+        
+        *out_comparison = strcmp (type, compare_to_type);
+        
+        if (*out_comparison == 0) {
+            *out_comparison = strcmp (name, compare_to_name);
+        }
     }
     
     return check_error (err);
@@ -951,18 +937,21 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
         char *environment_ccache_name = getenv ("KRB5CCNAME");
         
         if (environment_ccache_name) {
-            krb5_ccache environment_ccache = NULL;
-            krb5_principal client_principal = NULL;
+            kim_ccache environment_ccache = NULL;
+            kim_comparison comparison;
             
-            err = krb5_error (io_ccache->context,
-                              krb5_cc_resolve (io_ccache->context, 
-                                               environment_ccache_name, 
-                                               &environment_ccache));
+            err = kim_ccache_create_from_display_name (&environment_ccache,
+                                                       environment_ccache_name);
             
-            if (!err && !kim_ccache_k5ccaches_are_equal (io_ccache->context, 
-                                                         io_ccache->ccache,
-                                                         io_ccache->context, 
-                                                         environment_ccache)) {
+            if (!err) {
+                err = kim_ccache_compare (io_ccache, 
+                                          environment_ccache,
+                                          &comparison);
+            }
+            
+            if (!err && !kim_comparison_is_equal_to (comparison)) {
+                krb5_principal client_principal = NULL;
+
                 /* KRB5CCNAME is set and does not point to this ccache.  
                  * Move the creds and make this kim_ccache_t object refer to that ccache.  */
                 
@@ -973,8 +962,8 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
                 
                 if (!err) {
                     err = krb5_error (io_ccache->context,
-                                      krb5_cc_initialize (io_ccache->context, 
-                                                          environment_ccache, 
+                                      krb5_cc_initialize (environment_ccache->context, 
+                                                          environment_ccache->ccache, 
                                                           client_principal));
                 }
                 
@@ -982,18 +971,20 @@ kim_error kim_ccache_set_default (kim_ccache io_ccache)
                     err = krb5_error (io_ccache->context,
                                       krb5_cc_copy_creds (io_ccache->context, 
                                                           io_ccache->ccache, 
-                                                          environment_ccache));
+                                                          environment_ccache->ccache));
                 }
                 
+                if (client_principal) { krb5_free_principal (io_ccache->context, 
+                                                             client_principal); }
+                
                 if (!err) {
-                    krb5_cc_destroy (io_ccache->context, io_ccache->ccache);
-                    io_ccache->ccache = environment_ccache;
+                    kim_ccache_destroy (&io_ccache);
+                    io_ccache = environment_ccache;
                     environment_ccache = NULL; /* take ownership */
                 }
             }
             
-            if (environment_ccache) { krb5_cc_close (io_ccache->context, 
-                                                     environment_ccache); }
+            kim_ccache_free (&environment_ccache);
             
         } else {
 #ifdef USE_CCAPI
