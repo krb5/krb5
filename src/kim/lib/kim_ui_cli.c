@@ -349,6 +349,8 @@ kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
     }
     
     while (!err && !done) {
+        kim_boolean was_prompted = 0;  /* ignore because we always prompt */
+        
         kim_string_free (&old_password);
 
         err = kim_ui_cli_read_string (&old_password, 
@@ -359,14 +361,16 @@ kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
             err = kim_credential_create_for_change_password ((kim_credential *) &in_context->tcontext,
                                                              in_identity,
                                                              old_password,
-                                                             in_context);
+                                                             in_context,
+                                                             &was_prompted);
         }
         
         if (err && err != KIM_USER_CANCELED_ERR) {
-            /* new creds failed, report error to user */
+            /*  new creds failed, report error to user */
             err = kim_ui_handle_kim_error (in_context, in_identity, 
-                                           kim_ui_error_type_change_password,
+                                           kim_ui_error_type_authentication,
                                            err);
+
         } else {
             done = 1;
        }

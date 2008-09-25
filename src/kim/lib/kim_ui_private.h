@@ -48,6 +48,7 @@ typedef struct kim_ui_context {
     enum kim_ui_type type;
     void *tcontext;
     kim_identity identity;
+    kim_count prompt_count;
 } kim_ui_context;
 
 

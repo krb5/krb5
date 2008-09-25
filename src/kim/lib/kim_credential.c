@@ -260,7 +260,11 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     while (!err && !done) { 
         krb5_creds creds;
         kim_boolean free_creds = 0;
-
+        kim_count prompt_count;
+ 
+        /* set counter to zero so we can tell if we got prompted */
+        context.prompt_count = 0;
+        
         err = krb5_error (credential->context,
                           krb5_get_init_creds_password (credential->context, 
                                                         &creds,
@@ -271,6 +275,7 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
                                                         (char *) service, 
                                                         init_cred_options));
         
+        prompt_count = context.prompt_count; /* remember if we got prompts */
         if (!err) { free_creds = 1; }
         
         if (!err) {
@@ -280,15 +285,27 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
                                                &credential->creds));
         }
         
+        
+        if (err == KRB5KDC_ERR_KEY_EXP) {
+            err = kim_identity_change_password_common (in_identity, 1, 
+                                                       &context);
+        }
+        
         if (!err || err == KIM_USER_CANCELED_ERR) {
             /* new creds obtained or the user gave up */
             done = 1;
             
-        } else { 
+        } else {
             /*  new creds failed, report error to user */
-            err = kim_ui_handle_kim_error (&context, in_identity, 
-                                           kim_ui_error_type_authentication,
-                                           err);
+            kim_error terr = kim_ui_handle_kim_error (&context, in_identity, 
+                                                      kim_ui_error_type_authentication,
+                                                      err);
+            
+            if (prompt_count) {
+                 /* User was prompted and might have entered bad info 
+                  * so let them try again. */
+                err = terr;
+            }
         }
         
         if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
@@ -495,7 +512,8 @@ kim_error kim_credential_create_from_krb5_creds (kim_credential *out_credential,
 kim_error kim_credential_create_for_change_password (kim_credential  *out_credential,
                                                      kim_identity     in_identity,
                                                      kim_string       in_old_password,
-                                                     kim_ui_context  *in_ui_context)
+                                                     kim_ui_context  *in_ui_context,
+                                                     kim_boolean     *out_user_was_prompted)
 {
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
@@ -504,9 +522,10 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
     krb5_principal principal = NULL;
     kim_string service_format = "kadmin/changepw@%s";
     
-    if (!err && !out_credential ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_identity    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_old_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_credential       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_old_password      ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_user_was_prompted) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_credential_allocate (&credential);
@@ -541,6 +560,9 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
         krb5_get_init_creds_opt_set_forwardable (&opts, 0);
         krb5_get_init_creds_opt_set_proxiable (&opts, 0);
         
+        /* set counter to zero so we can tell if we got prompted */
+        in_ui_context->prompt_count = 0; 
+
         err = krb5_error (credential->context,
                           krb5_get_init_creds_password (credential->context, 
                                                         &creds,
@@ -549,8 +571,9 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
                                                         kim_ui_prompter, 
                                                         in_ui_context, 0, 
                                                         (char *) service, 
-                                                        &opts));        
-        if (!err) { free_creds = 1; }
+                                                        &opts));  
+        
+       if (!err) { free_creds = 1; }
         
         if (!err) {
             err = krb5_error (credential->context,
@@ -565,6 +588,7 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
     if (principal) { krb5_free_principal (credential->context, principal); }
 
     if (!err) {
+        *out_user_was_prompted = (in_ui_context->prompt_count > 0);
         *out_credential = credential;
         credential = NULL;
     }

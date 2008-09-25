@@ -82,6 +82,7 @@ kim_error kim_ui_init (kim_ui_context *io_context)
     
     if (!err) {
         io_context->identity = NULL;
+        io_context->prompt_count = 0;
     }
     
     return check_error (err);
@@ -199,6 +200,8 @@ krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
         }
         
         if (!got_saved_password) {
+            context->prompt_count++;
+            
             if (context->type == kim_ui_type_gui_plugin) {
                 err = kim_ui_plugin_auth_prompt (context, 
                                                  context->identity, 
