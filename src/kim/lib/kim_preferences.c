@@ -327,7 +327,7 @@ kim_error kim_favorites_remove_identity (kim_favorites io_favorites,
             
             err = kim_identity_compare (in_identity, identity, &comparison);
             
-            if (!err && kim_comparison_is_equal (comparison)) {
+            if (!err && kim_comparison_is_equal_to (comparison)) {
                 kim_error terr = KIM_NO_ERROR;
                 kim_count new_count = io_favorites->count - 1;
                 
