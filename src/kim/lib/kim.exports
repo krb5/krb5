@@ -41,8 +41,6 @@ kim_selection_hints_create
 kim_selection_hints_copy
 kim_selection_hints_set_hint
 kim_selection_hints_get_hint
-kim_selection_hints_set_application_name
-kim_selection_hints_get_application_name
 kim_selection_hints_set_explanation
 kim_selection_hints_get_explanation
 kim_selection_hints_set_options
@@ -126,3 +124,8 @@ kim_ccache_renew
 kim_ccache_validate
 kim_ccache_destroy
 kim_ccache_free
+
+kim_library_set_ui_environment
+kim_library_set_allow_home_directory_access
+kim_library_set_allow_automatic_prompting
+kim_library_set_application_name

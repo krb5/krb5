@@ -877,8 +877,7 @@ void test_kim_preferences_remove_favorite_identity (kim_test_state_t state)
             fail_if_error (state, "kim_preferences_get_favorite_identity_at_index", err, 
                            "while getting favorite identity %d", (int) j);
             
-            if (!err)
-            {
+            if (!err) {
                 kim_identity_get_display_string(compare_identity, &string);
                 err = kim_preferences_remove_favorite_identity(prefs, compare_identity);
                 fail_if_error (state, "kim_preferences_remove_favorite_identity", err, 

@@ -26,10 +26,19 @@
 
 #ifndef LEAN_CLIENT
 
-#include "kim_private.h"
+#include "kim_os_private.h"
+#include "kim_mig_types.h"
+#include "kim_mig.h"
 
+#define kKerberosAgentBundleID "edu.mit.Kerberos.KerberosAgent"
+#define kKerberosAgentPath "/System/Library/CoreServices/KerberosAgent.app/Contents/MacOS/KerberosAgent"
+
+#include <Kerberos/kipc_client.h>
+#include <mach/mach.h>
+#include <mach/mach_error.h>
 
 struct kim_ui_gui_context {
+    mach_port_t port;
 };
 
 
@@ -58,6 +67,8 @@ static kim_error kim_os_ui_gui_context_allocate (kim_ui_gui_context *out_context
     }
     
     if (!err) {
+        context->port = MACH_PORT_NULL;
+        
         *out_context = context;
         context = NULL;
     }
@@ -75,6 +86,7 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_gui_context context = NULL;
+    kim_string path = NULL;
     
     if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
@@ -83,6 +95,31 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
     }
     
     if (!err) {
+        err = kipc_client_lookup_server (kim_os_agent_bundle_id, 
+                                         1 /* launch */, 
+                                         0 /* don't use cached port */, 
+                                         &context->port);
+    }
+    
+    if (!err) {
+        err = kim_os_library_get_application_path (&path);
+    }
+    
+    if (!err) {
+        kim_mipc_in_string application_name = NULL;
+        mach_msg_type_number_t application_name_len = 0;
+        kim_mipc_in_string application_path = path;
+        mach_msg_type_number_t application_path_len = strlen (path) + 1;
+        kim_mipc_error result = 0;
+        
+        err = kim_mipc_cli_init (context->port,
+                                 mach_task_self (),
+                                 application_name,
+                                 application_name_len,
+                                 application_path,
+                                 application_path_len,
+                                 &result);
+        if (!err) { err = check_error (result); }
     }
     
     if (!err) {
@@ -90,6 +127,7 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
         context = NULL;
     }
     
+    kim_string_free (&path);
     kim_os_ui_gui_context_free (&context);
     
     return check_error (err);
@@ -107,6 +145,7 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
     
     if (!err) {
         kim_ui_gui_context context = (kim_ui_gui_context) in_context->tcontext;
+        
         
     }
     
@@ -136,7 +175,7 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_ui_gui_auth_prompt (kim_ui_context     *in_context,
-                                    kim_identity         in_identity,
+                                     kim_identity        in_identity,
                                      kim_prompt_type     in_type,
                                      kim_boolean         in_hide_reply, 
                                      kim_string          in_title,

@@ -197,7 +197,7 @@ kim_error kim_os_string_create_from_cfstring (kim_string  *out_string,
                                                     kCFStringEncodingUTF8) + 1;
         
         string = (char *) calloc (length, sizeof (char));
-        if (!string) { err = KIM_OUT_OF_MEMORY_ERR; }
+        if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
     }
     
     if (!err) {

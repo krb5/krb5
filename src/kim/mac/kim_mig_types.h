@@ -24,24 +24,17 @@
  * or implied warranty.
  */
 
-#ifndef KIM_LIBRARY_PRIVATE_H
-#define KIM_LIBRARY_PRIVATE_H
+#ifndef KIM_MIG_H
+#define KIM_MIG_H
 
 #include <kim/kim.h>
 
-kim_ui_environment kim_os_library_get_ui_environment (void);
+typedef const char *kim_mipc_in_string;
+typedef char       *kim_mipc_out_string;
+typedef int32_t     kim_mipc_error;
+typedef boolean_t   kim_mipc_boolean;
+typedef uint32_t    kim_mipc_lifetime;
+typedef uint32_t    kim_mipc_time;
+typedef uint32_t    kim_mipc_prompt_type;
 
-kim_ui_environment kim_library_ui_environment (void);
-
-kim_boolean kim_library_allow_home_directory_access (void);
-
-kim_boolean kim_library_allow_automatic_prompting (void);
-
-kim_error kim_library_get_application_name (kim_string *out_application_name);
-
-/* OS-specific.  Call kim_library_get_application_name */
-kim_error kim_os_library_get_caller_name (kim_string *out_application_name);
-
-kim_boolean kim_os_library_caller_is_server (void);
-
-#endif /* KIM_LIBRARY_PRIVATE_H */
+#endif /* KIM_MIG_H */

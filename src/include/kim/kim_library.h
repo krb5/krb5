@@ -38,16 +38,11 @@ typedef int kim_ui_environment;
 
 kim_error kim_library_set_ui_environment (kim_ui_environment in_ui_environment);
 
-kim_ui_environment kim_library_ui_environment (void);
-
-
 kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_access);
-
-kim_boolean kim_library_allow_home_directory_access (void);
-
 
 kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automatic_prompting);
 
-kim_boolean kim_library_allow_automatic_prompting (void);
+kim_error kim_library_set_application_name (kim_string in_application_name);
+
 
 #endif /* KIM_LIBRARY_H */

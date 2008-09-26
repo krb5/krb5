@@ -231,7 +231,7 @@ static kim_error kim_ui_cli_ask_change_password (kim_string in_identity_string)
     kim_string unknown_response = NULL;
     kim_boolean done = 0;
     kim_comparison no_comparison, yes_comparison;
-
+    
     if (!err) {
         err = kim_os_string_create_localized (&ask_change_password, 
                                               "KLStringPasswordExpired");        
@@ -324,7 +324,7 @@ kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
     if (!err && !out_old_password   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_new_password   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_verify_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         err = kim_identity_get_display_string (in_identity, &identity_string);
     }

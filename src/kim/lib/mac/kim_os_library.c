@@ -25,6 +25,8 @@
  */
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <ApplicationServices/ApplicationServices.h>
+#include <mach-o/dyld.h>
 #include <Kerberos/kipc_session.h>
 #include "k5-int.h"
 #include "k5-thread.h"
@@ -120,7 +122,7 @@ kim_boolean kim_os_library_caller_is_server (void)
         CFStringRef mainBundleID = CFBundleGetIdentifier (mainBundle);
         if (mainBundleID) {
             CFComparisonResult result;
-            result = CFStringCompare (mainBundleID, CFSTR("edu.mit.Kerberos.KerberosAgent"), 0);
+            result = CFStringCompare (mainBundleID, CFSTR(kim_os_agent_bundle_id), 0);
             if (result == kCFCompareEqualTo) {
                 return TRUE;
             }
@@ -128,4 +130,149 @@ kim_boolean kim_os_library_caller_is_server (void)
     }
     
     return FALSE;
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_os_library_get_application_path (kim_string *out_path)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string path = NULL;
+    CFBundleRef bundle = CFBundleGetMainBundle ();
+    
+    if (!err && !out_path) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+
+    /* Check if the caller is a bundle */
+    if (!err && bundle) {
+        CFURLRef bundle_url = CFBundleCopyBundleURL (bundle);
+        CFURLRef resources_url = CFBundleCopyResourcesDirectoryURL (bundle);
+        CFURLRef executable_url = CFBundleCopyExecutableURL (bundle);
+        CFURLRef absolute_url = NULL;
+        CFStringRef cfpath = NULL;
+        
+        if (bundle_url && resources_url && !CFEqual (bundle_url, resources_url)) {
+            absolute_url = CFURLCopyAbsoluteURL (bundle_url);
+        } else if (executable_url) {
+            absolute_url = CFURLCopyAbsoluteURL (executable_url);
+        }
+        
+        if (absolute_url) {
+            cfpath = CFURLCopyFileSystemPath (absolute_url, 
+                                              kCFURLPOSIXPathStyle);
+            if (!cfpath) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+        }
+        
+        if (!err && cfpath) {
+            err = kim_os_string_create_from_cfstring (&path, cfpath);
+        }
+        
+        if (cfpath        ) { CFRelease (cfpath); }        
+        if (absolute_url  ) { CFRelease (bundle_url); }
+        if (bundle_url    ) { CFRelease (bundle_url); }
+        if (resources_url ) { CFRelease (resources_url); }
+        if (executable_url) { CFRelease (executable_url); }
+    }
+    
+    /* Caller is not a bundle, try _NSGetExecutablePath */
+    /* Note: this does not work on CFM applications */
+    if (!err && !path) {
+        char *buffer = NULL;
+        uint32_t len = 0;
+        
+        /* Tiny stupid buffer to get the length of the path */
+        if (!err) {
+            buffer = malloc (1);
+            if (!buffer) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+        }
+        
+        /* Get the length of the path */
+        if (!err) {
+            if (_NSGetExecutablePath (buffer, &len) != 0) {
+                char *temp = realloc (buffer, len + 1);
+                if (!temp) {
+                    err = check_error (KIM_OUT_OF_MEMORY_ERR);
+                } else {
+                    buffer = temp;
+                }
+            }
+        }
+        
+        /* Get the path */
+        if (!err) {
+            if (_NSGetExecutablePath (buffer, &len) != 0) {
+                err = check_error (KIM_OUT_OF_MEMORY_ERR);
+            } else {
+                err = kim_string_copy (&path, buffer);
+            }
+        }
+        
+        if (buffer) { free (buffer); }
+    }
+    
+    if (!err) {
+        *out_path = path;
+        path = NULL;
+    }
+    
+    kim_string_free (&path);
+    
+    return check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_os_library_get_caller_name (kim_string *out_application_name)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string name = NULL;
+    CFBundleRef bundle = CFBundleGetMainBundle ();
+    CFStringRef cfname = NULL;
+    
+    if (!err && !out_application_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err && bundle) {
+        CFURLRef bundle_url = CFBundleCopyBundleURL (bundle);
+        
+        if (bundle_url) {
+            err = LSCopyDisplayNameForURL (bundle_url, &cfname);
+        }
+        
+        if (bundle_url) { CFRelease (bundle_url); }
+    }
+    
+    if (!err && !name) {
+        kim_string path = NULL;
+        CFURLRef cfpath = NULL;
+        
+        err = kim_os_library_get_application_path (&path);
+        
+        if (!err) {
+            cfpath = CFURLCreateFromFileSystemRepresentation (kCFAllocatorDefault,
+                                                              (const UInt8 *) path,
+                                                              strlen (path),
+                                                              0);
+            if (cfpath) {
+                cfname = CFURLCopyLastPathComponent (cfpath);
+            }
+        }
+        
+        if (cfpath) { CFRelease (cfpath); }
+    }
+    
+    if (!err && cfname) {
+        err = kim_os_string_create_from_cfstring (&name, cfname);
+    }
+    
+    if (!err) {
+        *out_application_name = name;
+        name = NULL;
+        
+    }
+
+    if (cfname) { CFRelease (cfname); }
+    kim_string_free (&name);
+    
+    return check_error (err);
 }

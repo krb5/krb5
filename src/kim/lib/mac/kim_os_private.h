@@ -30,8 +30,12 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include "kim_private.h"
 
+#define kim_os_agent_bundle_id "edu.mit.Kerberos.KerberosAgent"
+
 kim_error kim_os_library_lock_for_bundle_lookup (void);
 kim_error kim_os_library_unlock_for_bundle_lookup (void);
+
+kim_error kim_os_library_get_application_path (kim_string *out_path);
 
 
 kim_error kim_os_string_create_for_key (kim_string *out_string,
@@ -46,5 +50,7 @@ kim_error kim_os_string_get_cfstring (kim_string  in_string,
 kim_error kim_os_string_compare_to_cfstring (kim_string      in_string,
                                              CFStringRef       in_compare_to_cfstring,
                                              kim_comparison *out_comparison);
+
+kim_error kim_os_library_get_application_path (kim_string *out_path);
 
 #endif /* KIM_PRIVATE_H */

@@ -1,0 +1,106 @@
+/*
+ * $Header$
+ *
+ * Copyright 2006-2008 Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ * require a specific license from the United States Government.
+ * It is the responsibility of any person or organization contemplating
+ * export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+ 
+#include <mach/std_types.defs>
+#include <mach/mach_types.defs>
+
+import "kim_mig_types.h";
+
+subsystem kim 100;
+
+serverprefix kim_mipc_srv_;
+userprefix kim_mipc_cli_;
+
+type kim_mipc_in_string   = array [] of char;
+type kim_mipc_out_string  = array [] of char;
+type kim_mipc_error       = int32_t;
+type kim_mipc_boolean     = boolean_t;
+type kim_mipc_time        = uint32_t;
+type kim_mipc_lifetime    = uint32_t;
+type kim_mipc_prompt_type = uint32_t;
+
+routine init (in_server_port : mach_port_t;
+         in_application_task : task_t;
+         in_application_name : kim_mipc_in_string;
+         in_application_path : kim_mipc_in_string;
+               out out_error : kim_mipc_error);
+
+routine fini (in_server_port : mach_port_t;
+               out out_error : kim_mipc_error);
+
+
+routine enter_identity (in_server_port : mach_port_t;
+                      out out_identity : kim_mipc_out_string;
+                         out out_error : kim_mipc_error);
+
+routine select_identity (in_server_port : mach_port_t;
+                         in_explanation : kim_mipc_in_string;
+                         
+                          in_start_time : kim_mipc_time;
+                            in_lifetime : kim_mipc_lifetime;
+                           in_renewable : kim_mipc_boolean;
+                    in_renewal_lifetime : kim_mipc_lifetime;
+                         in_forwardable : kim_mipc_boolean;
+                           in_proxiable : kim_mipc_boolean;
+                         in_addressless : kim_mipc_boolean;
+                        in_service_name : kim_mipc_in_string;
+
+               in_service_identity_hint : kim_mipc_in_string;
+                   in_client_realm_hint : kim_mipc_in_string;
+                           in_user_hint : kim_mipc_in_string;
+                  in_service_realm_hint : kim_mipc_in_string;
+                        in_service_hint : kim_mipc_in_string;
+                         in_server_hint : kim_mipc_in_string;
+
+                       out out_identity : kim_mipc_out_string;
+                          out out_error : kim_mipc_error);
+                         
+routine auth_prompt (in_server_port : mach_port_t;
+                        in_identity : kim_mipc_in_string;
+                     in_prompt_type : kim_mipc_prompt_type;
+                          in_hidden : kim_mipc_boolean;
+                           in_title : kim_mipc_in_string;
+                         in_message : kim_mipc_in_string;
+                     in_description : kim_mipc_in_string;
+                   out out_response : kim_mipc_out_string;
+                      out out_error : kim_mipc_error);
+
+routine change_password (in_server_port : mach_port_t;
+                            in_identity : kim_mipc_in_string;
+                in_old_password_expired : kim_mipc_boolean;
+                   out out_old_password : kim_mipc_out_string;
+                   out out_new_password : kim_mipc_out_string;
+                out out_verify_password : kim_mipc_out_string;
+                          out out_error : kim_mipc_error);
+                   
+ routine handle_error (in_server_port : mach_port_t;
+                          in_identity : kim_mipc_in_string;
+                             in_error : kim_mipc_error;
+                           in_message : kim_mipc_in_string;
+                       in_description : kim_mipc_in_string;
+                        out out_error : kim_mipc_error);
+                       
+                          

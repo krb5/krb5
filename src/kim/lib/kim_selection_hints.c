@@ -28,7 +28,6 @@
 
 struct kim_selection_hints_opaque {
     kim_string application_identifier;
-    kim_string application_name;
     kim_string explanation;
     kim_options options;
     kim_boolean allow_user_interaction;
@@ -42,7 +41,6 @@ struct kim_selection_hints_opaque {
 };
 
 struct kim_selection_hints_opaque kim_selection_hints_initializer = { 
-    NULL,
     NULL,
     NULL,
     KIM_OPTIONS_DEFAULT,
@@ -129,11 +127,6 @@ kim_error kim_selection_hints_copy (kim_selection_hints *out_selection_hints,
     if (!err) {
         err = kim_string_copy (&selection_hints->application_identifier, 
                                in_selection_hints->application_identifier);
-    }
-    
-    if (!err && in_selection_hints->application_name) {
-        err = kim_string_copy (&selection_hints->application_name, 
-                               in_selection_hints->application_name);
     }
     
     if (!err && in_selection_hints->explanation) {
@@ -275,44 +268,6 @@ kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
         } else {
             err = kim_error_set_message_for_code (KIM_UNSUPPORTED_HINT_ERR,
                                                   in_hint_key);
-        }
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_selection_hints_set_application_name (kim_selection_hints io_selection_hints,
-                                                    kim_string          in_application_name)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !io_selection_hints ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_application_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        err = kim_string_copy (&io_selection_hints->application_name, in_application_name);
-    }
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_selection_hints_get_application_name (kim_selection_hints  in_selection_hints,
-                                                    kim_string          *out_application_name)
-{
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !in_selection_hints  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_application_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        if (in_selection_hints->application_name) {
-            err = kim_string_copy (out_application_name, in_selection_hints->application_name);
-        } else {
-            *out_application_name = NULL;
         }
     }
     
@@ -566,7 +521,6 @@ void kim_selection_hints_free (kim_selection_hints *io_selection_hints)
 {
     if (io_selection_hints && *io_selection_hints) {
         kim_string_free  (&(*io_selection_hints)->application_identifier);
-        kim_string_free  (&(*io_selection_hints)->application_name);
         kim_string_free  (&(*io_selection_hints)->explanation);
         kim_options_free (&(*io_selection_hints)->options);
         kim_string_free  (&(*io_selection_hints)->service_identity);
