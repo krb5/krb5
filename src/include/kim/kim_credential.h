@@ -258,6 +258,13 @@ typedef int kim_credential_state;
  *     without resending secrets to the KDC (such as a password).  If credentials are 
  *     not renewable, this function will return a renewal expiration time of 0.
  *
+ * \li #kim_credential_get_options() 
+ *     returns a kim_options object with the credential options of the 
+ *     credential.  This function is intended to be used when adding 
+ *     an identity with existing credentials to the favorite identities list.
+ *     By passing in the options returned by this call, future requests for the
+ *     favorite identity will use the same credential options.
+ *
  *
  * See \ref kim_credential_reference and \ref kim_credential_iterator_reference for 
  * information on specific APIs.
@@ -445,6 +452,16 @@ kim_error kim_credential_get_expiration_time (kim_credential  in_credential,
 kim_error kim_credential_get_renewal_expiration_time (kim_credential  in_credential,
                                                       kim_time       *out_renewal_expiration_time);
 
+/*!
+ * \param in_credential  a credential object. 
+ * \param out_options    on exit, an options object reflecting the ticket
+ *                       options of \a in_credential.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Get a kim_options object based on a credential's attributes.
+ */
+kim_error kim_credential_get_options (kim_credential  in_credential,
+                                      kim_options    *out_options);
+    
 /*!
  * \param in_credential       a credential object. 
  * \param in_client_identity  a client identity.

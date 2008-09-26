@@ -247,6 +247,13 @@ extern "C" {
  * without resending secrets to the KDC (such as a password).  If credentials are 
  * not renewable, this function will return an error.
  *
+ * \li #kim_ccache_get_options() 
+ * returns a kim_options object with the credential options of the credentials
+ * in the ccache.  This function is intended to be used when adding 
+ * an identity with existing credentials to the favorite identities list.
+ * By passing in the options returned by this call, future requests for the
+ * favorite identity will use the same credential options.
+ *
  * See \ref kim_ccache_reference and \ref kim_ccache_iterator_reference for 
  * information on specific APIs.
  */
@@ -522,6 +529,16 @@ kim_error kim_ccache_get_expiration_time (kim_ccache  in_ccache,
  */
 kim_error kim_ccache_get_renewal_expiration_time (kim_ccache  in_ccache,
                                                   kim_time   *out_renewal_expiration_time);
+
+/*!
+ * \param kim_ccache     a ccache object. 
+ * \param out_options    on exit, an options object reflecting the ticket
+ *                       options of the credentials in \a in_ccache.
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Get a kim_options object based on a ccache's credential attributes.
+ */
+kim_error kim_ccache_get_options (kim_ccache   in_ccache,
+                                  kim_options *out_options);
 
 /*!
  * \param io_ccache a ccache object which will be set to the default ccache. 

@@ -854,6 +854,103 @@ kim_error kim_credential_get_renewal_expiration_time (kim_credential  in_credent
 
 /* ------------------------------------------------------------------------ */
 
+kim_error kim_credential_get_options (kim_credential  in_credential,
+                                      kim_options    *out_options)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_options options = NULL;
+    krb5_creds *creds = NULL;
+    
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        creds = in_credential->creds;
+        
+        err = kim_options_create (&options);
+    }
+    
+    if (!err) {
+        err = kim_options_set_start_time (options, creds->times.starttime);
+    }
+    
+    if (!err) {
+        kim_lifetime lifetime = (creds->times.endtime -
+                                 (creds->times.starttime ?
+                                  creds->times.starttime :
+                                  creds->times.authtime));
+        
+        err = kim_options_set_lifetime (options, lifetime);
+    }
+    
+    if (!err) {
+        kim_boolean renewable = (creds->ticket_flags & TKT_FLG_RENEWABLE);
+        
+        err = kim_options_set_renewable (options, renewable);
+    }
+    
+    if (!err) {
+        kim_lifetime rlifetime = (creds->ticket_flags & TKT_FLG_RENEWABLE ?
+                                  creds->times.renew_till : 0);
+        
+        err = kim_options_set_lifetime (options, rlifetime);
+    }
+    
+    if (!err) {
+        kim_boolean forwardable = (creds->ticket_flags & TKT_FLG_FORWARDABLE);
+        
+        err = kim_options_set_forwardable (options, forwardable);
+    }
+    
+    if (!err) {
+        kim_boolean proxiable = (creds->ticket_flags & TKT_FLG_PROXIABLE);
+        
+        err = kim_options_set_proxiable (options, proxiable);
+    }
+    
+    if (!err) {
+        kim_boolean addressless = (!creds->addresses || !creds->addresses[0]);
+
+        err = kim_options_set_addressless (options, addressless);
+    }
+    
+    if (!err) {
+        kim_boolean is_tgt = 0;
+        kim_string service = NULL; /* tgt service */
+        
+        err = kim_credential_is_tgt (in_credential, &is_tgt);
+        
+        if (!err && !is_tgt) {
+            kim_identity identity = NULL;
+            
+            err = kim_credential_get_service_identity (in_credential, &identity);
+            
+            if (!err) {
+                err = kim_identity_get_string (identity, &service);
+            }
+
+            kim_identity_free (&identity);
+        }
+         
+        if (!err) {
+            err = kim_options_set_service_name (options, service);
+        }
+        
+        kim_string_free (&service);
+    }
+    
+    if (!err) {
+        *out_options = options;
+        options = NULL;
+    }
+    
+    kim_options_free (&options);
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_credential_store (kim_credential  in_credential,
                                 kim_identity    in_client_identity,
                                 kim_ccache     *out_ccache)

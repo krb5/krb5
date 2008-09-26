@@ -923,6 +923,31 @@ kim_error kim_ccache_get_renewal_expiration_time (kim_ccache  in_ccache,
     return check_error (err);
 }
 
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_ccache_get_options (kim_ccache   in_ccache,
+                                  kim_options *out_options)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
+    
+    if (!err && !in_ccache  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_ccache_get_dominant_credential (in_ccache, NULL, NULL, 
+                                                  &credential);
+    }
+    
+    if (!err) {
+        err = kim_credential_get_options (credential, out_options);
+    }
+    
+    kim_credential_free (&credential);
+    
+    return check_error (err);
+}
+
 #pragma mark -
 
 /* ------------------------------------------------------------------------ */

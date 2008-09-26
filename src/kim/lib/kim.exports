@@ -88,6 +88,7 @@ kim_credential_get_state
 kim_credential_get_start_time
 kim_credential_get_expiration_time
 kim_credential_get_renewal_expiration_time
+kim_credential_get_options
 kim_credential_store
 kim_credential_verify
 kim_credential_renew
@@ -118,6 +119,7 @@ kim_ccache_get_state
 kim_ccache_get_start_time
 kim_ccache_get_expiration_time
 kim_ccache_get_renewal_expiration_time
+kim_ccache_get_options
 kim_ccache_set_default
 kim_ccache_verify
 kim_ccache_renew
