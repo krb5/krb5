@@ -382,8 +382,7 @@ kim_error kim_options_set_service_name (kim_options  io_options,
     kim_error err = KIM_NO_ERROR;
     kim_string service_name = NULL;
     
-    if (!err && !io_options     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_service_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && in_service_name) {
         err = kim_string_copy (&service_name, in_service_name);
