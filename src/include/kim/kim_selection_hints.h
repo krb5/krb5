@@ -190,8 +190,7 @@ extern "C" {
  * mechanism for determining the name of the calling process.  If your 
  * application runs on one of these platforms (or is cross-platform) 
  * you should provide a localized version of its name with 
- * #kim_selection_hints_set_application_name().  You can check what name 
- * will be used with #kim_selection_hints_get_application_name().
+ * #kim_library_set_application_name().
  *
  * In many cases a single application may select different identities for 
  * different purposes.  For example an email application might use different 
@@ -277,34 +276,9 @@ kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
 
 /*!
  * \param io_selection_hints  a selection hints object to modify.
- * \param in_application_name a localized string containing the full name of the application.
- * \note If you do not call this function KIM will attempt to determine the application
- * name at runtime.  If that fails (the functionality is only available on some platforms)
- * then KIM will use the application identity string.
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Set the application name for use in user interaction.
- * \sa kim_selection_hints_get_application_name()
- */
-kim_error kim_selection_hints_set_application_name (kim_selection_hints io_selection_hints,
-                                                      kim_string          in_application_name);
-
-/*!
- * \param in_selection_hints   a selection hints object.
- * \param out_application_name on exit, the localized full name of the application specified 
- *                             in \a in_selection_hints. Must be freed with kim_string_free().
- * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
- * \brief Get the application name for use in user interaction.
- * \sa kim_selection_hints_set_application_name()
- */
-kim_error kim_selection_hints_get_application_name (kim_selection_hints  in_selection_hints,
-                                                      kim_string          *out_application_name);
-
-/*!
- * \param io_selection_hints  a selection hints object to modify.
  * \param in_explanation      a localized string describing why the caller needs the identity.
  * \note If the application only does one thing (the reason it needs an identity is obvious) 
- * then you may not need to call this function.  You may still need to call 
- * #kim_selection_hints_set_application_name()
+ * then you may not need to call this function.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Set the strings used to prompt the user to select the identity.
  * \sa kim_selection_hints_get_explanation()
