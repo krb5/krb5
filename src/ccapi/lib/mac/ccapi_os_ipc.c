@@ -32,7 +32,6 @@
 #include "k5-thread.h"
 
 #define cci_server_bundle_id "edu.mit.Kerberos.CCacheServer"
-#define cci_server_path "/System/Library/CoreServices/CCacheServer.app/Contents/MacOS/CCacheServer"
 
 /* ------------------------------------------------------------------------ */
 
@@ -184,7 +183,7 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
     }
 
     if (!err) {
-        err = kipc_client_lookup_server (cci_server_bundle_id, cci_server_path, 
+        err = kipc_client_lookup_server (cci_server_bundle_id, 
                                          in_launch_server, TRUE, &server_port);
     }
     
@@ -212,7 +211,7 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
             }    
             
             /* Look up server name again without using the cached copy */
-            err = kipc_client_lookup_server (cci_server_bundle_id, cci_server_path, 
+            err = kipc_client_lookup_server (cci_server_bundle_id,  
                                              in_launch_server, FALSE, &server_port);
             
         } else {
