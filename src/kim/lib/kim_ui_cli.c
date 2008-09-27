@@ -111,7 +111,7 @@ kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
     
     if (!err) {
         err = kim_os_string_create_localized (&enter_identity_string, 
-                                              "KLStringEnterPrincipal");
+                                              "Please enter your Kerberos identity");
     }
     
     if (!err) {
@@ -170,7 +170,7 @@ kim_error kim_ui_cli_auth_prompt (kim_ui_context      *in_context,
             kim_string identity_string = NULL;
             
             err = kim_os_string_create_localized (&enter_password_format, 
-                                                  "KLStringEnterPassword");
+                                                  "Please enter the password for %s");
             
             if (!err) {
                 err = kim_identity_get_display_string (in_identity, 
@@ -234,35 +234,26 @@ static kim_error kim_ui_cli_ask_change_password (kim_string in_identity_string)
     
     if (!err) {
         err = kim_os_string_create_localized (&ask_change_password, 
-                                              "KLStringPasswordExpired");        
+                                              "Your password has expired, would you like to change it? (yes/no)");        
     }
     
     if (!err) {
-        err = kim_os_string_create_localized (&answer_options, 
-                                              "KLStringYesOrNoAnswerOptions");        
+        err = kim_os_string_create_localized (&yes, "yes");        
     }
     
     if (!err) {
-        err = kim_os_string_create_localized (&yes, 
-                                              "KLStringYes");        
-    }
-    
-    if (!err) {
-        err = kim_os_string_create_localized (&no, 
-                                              "KLStringNo");        
+        err = kim_os_string_create_localized (&no, "no");        
     }
     
     if (!err) {
         err = kim_os_string_create_localized (&unknown_response, 
-                                              "KLStringUnknownResponse");        
+                                              "%s is not a response I understand.  Please try again.");        
     }
     
     while (!err && !done) {
         kim_string answer = NULL;
         
-        err = kim_ui_cli_read_string (&answer, 
-                                      0, "%s %s", 
-                                      ask_change_password, answer_options);
+        err = kim_ui_cli_read_string (&answer, 0, ask_change_password);
     
         if (!err) {
             err = kim_os_string_compare (answer, no, 
@@ -335,17 +326,17 @@ kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
     
     if (!err) {
         err = kim_os_string_create_localized (&enter_old_password_format, 
-                                              "KLStringEnterOldPassword");
+                                              "Please enter the old password for %s");
     }
     
     if (!err) {
         err = kim_os_string_create_localized (&enter_new_password_format, 
-                                              "KLStringEnterNewPassword");
+                                              "Please enter the new password for %s");
     }
     
     if (!err) {
         err = kim_os_string_create_localized (&enter_verify_password_format, 
-                                              "KLStringEnterVerifyPassword");
+                                              "Verifying, please re-enter the new password for %s again");
     }
     
     while (!err && !done) {

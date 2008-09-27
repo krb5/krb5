@@ -13,6 +13,7 @@ kim_identity_get_display_string
 kim_identity_get_realm
 kim_identity_get_number_of_components
 kim_identity_get_component_at_index
+kim_identity_get_components
 kim_identity_get_krb5_principal
 kim_identity_change_password
 kim_identity_free

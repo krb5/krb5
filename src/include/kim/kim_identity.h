@@ -242,6 +242,16 @@ kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
                                                  kim_string   *out_component_string);
 
 /*!
+ * \param in_identity      an identity object.
+ * \param out_components   on exit, a string of the non-realm components of \a in_identity 
+ *                         separated by '/' characters.  Must be freed with kim_string_free().
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Get a display string of the non-realm components of an identity.
+ */
+kim_error kim_identity_get_components (kim_identity  in_identity,
+                                       kim_string   *out_components);
+    
+/*!
  * \param in_identity        an identity object.
  * \param in_krb5_context    a krb5 context object.  
  * \param out_krb5_principal on exit, a krb5_principal representation of \a in_identity

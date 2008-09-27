@@ -31,9 +31,6 @@
 #include "kim_library_private.h"
 #include "kim_ui_private.h"
 
-kim_error kim_identity_get_components (kim_identity  in_identity,
-                                       kim_string   *out_components);
-
 kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
                                        kim_boolean  *out_is_tgt_service);
 

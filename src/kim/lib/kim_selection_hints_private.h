@@ -39,6 +39,8 @@ typedef struct kim_selection_hints_preference_strings {
     kim_string server;
 } kim_selection_hints_preference_strings;
 
+kim_error kim_selection_hints_get_application_id (kim_selection_hints  in_selection_hints,
+                                                  kim_string          *out_application_id);
 
 kim_error kim_selection_hints_get_preference_strings (kim_selection_hints                     in_selection_hints,
                                                       kim_selection_hints_preference_strings *io_preference_strings);

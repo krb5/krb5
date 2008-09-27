@@ -57,6 +57,7 @@ routine enter_identity (in_server_port : mach_port_t;
                          out out_error : kim_mipc_error);
 
 routine select_identity (in_server_port : mach_port_t;
+                      in_application_id : kim_mipc_in_string;
                          in_explanation : kim_mipc_in_string;
                          
                           in_start_time : kim_mipc_time;
@@ -81,7 +82,7 @@ routine select_identity (in_server_port : mach_port_t;
 routine auth_prompt (in_server_port : mach_port_t;
                         in_identity : kim_mipc_in_string;
                      in_prompt_type : kim_mipc_prompt_type;
-                          in_hidden : kim_mipc_boolean;
+                      in_hide_reply : kim_mipc_boolean;
                            in_title : kim_mipc_in_string;
                          in_message : kim_mipc_in_string;
                      in_description : kim_mipc_in_string;

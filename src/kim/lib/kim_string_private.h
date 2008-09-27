@@ -29,6 +29,14 @@
 
 #include <kim/kim.h>
 
+/* ------------------------------------------------------------------------ */
+
+static inline kim_count kim_string_buflen (kim_string in_string)
+{
+    return in_string ? strlen (in_string) + 1 : 0;
+}
+
+/* ------------------------------------------------------------------------ */
 
 kim_error kim_string_create_from_format (kim_string *out_string, 
                                          kim_string  in_format,

@@ -314,6 +314,28 @@ kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection
 
 /* ------------------------------------------------------------------------ */
 
+kim_error kim_selection_hints_get_application_id (kim_selection_hints  in_selection_hints,
+                                                  kim_string          *out_application_id)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_application_id) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        if (in_selection_hints->application_identifier) {
+            err = kim_string_copy (out_application_id, 
+                                   in_selection_hints->application_identifier);
+        } else {
+            *out_application_id = NULL;
+        }
+    }
+    
+    return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_selection_hints_set_options (kim_selection_hints io_selection_hints,
                                            kim_options         in_options)
 {

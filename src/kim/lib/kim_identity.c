@@ -598,7 +598,7 @@ static kim_error kim_identity_change_password_with_credential (kim_identity    i
                                                  message_data.length);
         } else {
             err = kim_os_string_create_localized (&rejected_message,
-                                                  "KLStringChangePasswordFailed");
+                                                  "Kerberos Change Password Failed:");
         }
         
         if (!err) {
@@ -608,7 +608,7 @@ static kim_error kim_identity_change_password_with_credential (kim_identity    i
                                                      description_data.length);
             } else {
                 err = kim_os_string_create_localized (&rejected_description,
-                                                      "KLStringPasswordRejected");
+                                                      "New password rejected.");
             }
         }
         

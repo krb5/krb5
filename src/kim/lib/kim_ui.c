@@ -343,17 +343,17 @@ kim_error kim_ui_handle_kim_error (kim_ui_context         *in_context,
         
         switch (in_type) {
             case kim_ui_error_type_authentication:
-                key = "KLStringLoginFailed";
+                key = "Kerberos Login Failed:";
                 break;
                 
             case kim_ui_error_type_change_password:
-                key = "KLStringChangePasswordFailed";
+                key = "Kerberos Change Password Failed:";
                 break;
                 
             case kim_ui_error_type_selection:
             case kim_ui_error_type_generic:
             default:
-                key = "KLStringKerberosOperationFailed";
+                key = "Kerberos Operation Failed:";
                 break;
         }
         
