@@ -32,19 +32,20 @@
 - (void) mouseDown: (NSEvent *) event
 {
     if([self isEnabled] && ([self menu] != NULL)) {
+        NSEvent *menuEvent = NULL;
         NSPoint menuPoint = { 3, [self frame].size.height + 1 };
         
         [self highlight: YES];
         
-        NSEvent *menuEvent = [NSEvent mouseEventWithType: [event type]
-                                                location: [self convertPoint: menuPoint toView: NULL]
-                                           modifierFlags: [event modifierFlags]
-                                               timestamp: [event timestamp]
-                                            windowNumber: [[event window] windowNumber]
-                                                 context: [event context]
-                                             eventNumber: [event eventNumber]
-                                              clickCount: [event clickCount]
-                                                pressure: [event pressure]];
+        menuEvent = [NSEvent mouseEventWithType: [event type]
+                                       location: [self convertPoint: menuPoint toView: NULL]
+                                  modifierFlags: [event modifierFlags]
+                                      timestamp: [event timestamp]
+                                   windowNumber: [[event window] windowNumber]
+                                        context: [event context]
+                                    eventNumber: [event eventNumber]
+                                     clickCount: [event clickCount]
+                                       pressure: [event pressure]];
         
         [NSMenu popUpContextMenu: [self menu] withEvent: menuEvent forView: self];
         
