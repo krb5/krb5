@@ -48,17 +48,11 @@ kim_error kim_string_create_from_format_va_retcode (kim_string *out_string,
 
 kim_error kim_string_create_from_format_va (kim_string *out_string, 
                                             kim_string  in_format,
-                                            va_list       in_args);
+                                            va_list     in_args);
 
 kim_error kim_string_create_from_buffer (kim_string *out_string, 
                                          const char *in_buffer, 
                                          kim_count   in_length);
-
-kim_error kim_string_prepend (kim_string *io_string,
-                              kim_string  in_prefix);
-
-kim_error kim_string_append (kim_string *io_string, 
-                             kim_string  in_suffix);
 
 /* OS-specific because it should use UTF8-safe sorting where possible */
 kim_error kim_os_string_compare (kim_string      in_string,

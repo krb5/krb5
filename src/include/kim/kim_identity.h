@@ -248,8 +248,8 @@ kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get a display string of the non-realm components of an identity.
  */
-kim_error kim_identity_get_components (kim_identity  in_identity,
-                                       kim_string   *out_components);
+kim_error kim_identity_get_components_string (kim_identity  in_identity,
+                                              kim_string   *out_components);
     
 /*!
  * \param in_identity        an identity object.

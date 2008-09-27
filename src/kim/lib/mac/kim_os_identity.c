@@ -45,7 +45,7 @@ kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
     if (!err && !out_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_identity_get_components (in_identity, &name);
+        err = kim_identity_get_components_string (in_identity, &name);
     }
     
     if (!err) {
@@ -86,7 +86,7 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
     if (!err && !in_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_identity_get_components (in_identity, &name);
+        err = kim_identity_get_components_string (in_identity, &name);
     }
     
     if (!err) {
@@ -142,8 +142,9 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
             attrInfo.tag = &tag;
             attrInfo.format = &format;
             
-            err = SecKeychainItemCopyAttributesAndData (itemRef, &attrInfo, NULL, 
-                                                        &copiedAttrs, 0, NULL);
+            err = SecKeychainItemCopyAttributesAndData (itemRef, &attrInfo, 
+                                                        NULL, &copiedAttrs, 
+                                                        0, NULL);
             
             if (!err) {
                 /* Label format used by Apple patches */
@@ -172,6 +173,53 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
             if (copiedAttrs) { SecKeychainItemFreeAttributesAndData (copiedAttrs, NULL); }            
         }
         
+        if (itemRef) { CFRelease (itemRef); }
+    }
+    
+    if (name ) { kim_string_free (&name); }
+    if (realm) { kim_string_free (&realm); }
+    
+    return check_error (err);
+}    
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_os_identity_remove_saved_password (kim_identity in_identity)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_string realm = NULL;
+    kim_string name = NULL;
+    
+    if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_identity_get_components_string (in_identity, &name);
+    }
+    
+    if (!err) {
+        err = kim_identity_get_realm (in_identity, &realm);
+    }
+    
+    if (!err) {
+        SecKeychainItemRef itemRef = NULL;
+        UInt32 namelen = strlen (name);
+        UInt32 realmlen = strlen (realm);
+        void *buffer = NULL;
+        UInt32 length = 0;
+        
+        err = SecKeychainFindGenericPassword (nil, 
+                                              realmlen, realm,
+                                              namelen, name,
+                                              &length, &buffer, 
+                                              &itemRef);
+        
+        if (!err) {
+            err = SecKeychainItemDelete (itemRef);
+            
+        } else if (err == errSecItemNotFound) {
+            err = KIM_NO_ERROR; /* No password not an error */
+        }
+    
         if (itemRef) { CFRelease (itemRef); }
     }
     

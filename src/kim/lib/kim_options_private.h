@@ -31,11 +31,10 @@
 
 kim_error kim_options_create_empty (kim_options *out_options);
 
-kim_error kim_options_get_init_cred_options (kim_options               in_options, 
-                                             krb5_context              in_context,
-                                             krb5_get_init_creds_opt **out_init_cred_options);
+krb5_get_init_creds_opt *kim_options_init_cred_options (kim_options in_options);
 
-kim_error kim_options_free_init_cred_options (krb5_context              in_context,
-                                              krb5_get_init_creds_opt **io_init_cred_options);
+char *kim_options_service_name (kim_options in_options);
+
+kim_time kim_options_start_time (kim_options in_options);
 
 #endif /* KIM_OPTIONS_PRIVATE_H */

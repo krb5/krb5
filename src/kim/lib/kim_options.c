@@ -37,6 +37,8 @@ struct kim_options_opaque {
     kim_boolean proxiable;
     kim_boolean addressless;
     kim_string service_name;
+    krb5_context init_cred_context;
+    krb5_get_init_creds_opt *init_cred_options;
 };
 
 struct kim_options_opaque kim_options_initializer = { 
@@ -47,6 +49,8 @@ kim_default_renewal_lifetime,
 kim_default_forwardable,
 kim_default_proxiable,
 kim_default_addressless,
+NULL,
+NULL,
 NULL };
 
 /* ------------------------------------------------------------------------ */
@@ -417,70 +421,74 @@ kim_error kim_options_get_service_name (kim_options  in_options,
     return check_error (err);
 }
 
+#pragma mark -
+
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_options_get_init_cred_options (kim_options               in_options, 
-                                             krb5_context              in_context,
-                                             krb5_get_init_creds_opt **out_init_cred_options)
+char *kim_options_service_name (kim_options in_options)
 {
-    kim_error err = KIM_NO_ERROR;
-    krb5_get_init_creds_opt *init_cred_options;
-    krb5_address **addresses = NULL;
-    
-    if (!err && !in_options           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_context           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_init_cred_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        krb5_get_init_creds_opt_alloc (in_context, &init_cred_options);
+    if (in_options) {
+        return (char *) in_options->service_name;
     }
-    
-    if (!err && in_options) {
-        if (!in_options->addressless) {
-            err = krb5_error (in_context, 
-                              krb5_os_localaddr (in_context, &addresses));
-        }
-        
-        if (!err) {
-            krb5_get_init_creds_opt_set_tkt_life (init_cred_options, in_options->lifetime);
-            krb5_get_init_creds_opt_set_renew_life (init_cred_options, in_options->renewable ? in_options->renewal_lifetime : 0);
-            krb5_get_init_creds_opt_set_forwardable (init_cred_options, in_options->forwardable);
-            krb5_get_init_creds_opt_set_proxiable (init_cred_options, in_options->proxiable);
-            krb5_get_init_creds_opt_set_address_list (init_cred_options, addresses);
-            addresses = NULL;
-        }
-    }
-     
-    if (!err) {
-        *out_init_cred_options = init_cred_options;
-        init_cred_options = NULL;
-    }
-    
-    if (init_cred_options) { krb5_get_init_creds_opt_free (in_context, init_cred_options); }
-    if (addresses        ) { krb5_free_addresses (in_context, addresses); }
-    
-    return check_error (err);    
+    check_error (KIM_NULL_PARAMETER_ERR);  /* log bad options input */
+    return NULL;
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_options_free_init_cred_options (krb5_context              in_context,
-                                              krb5_get_init_creds_opt **io_init_cred_options)
+kim_time kim_options_start_time (kim_options in_options)
+{
+    if (in_options) {
+        return in_options->start_time;
+    }
+    check_error (KIM_NULL_PARAMETER_ERR);  /* log bad options input */
+    return 0;
+}
+
+/* ------------------------------------------------------------------------ */
+
+krb5_get_init_creds_opt *kim_options_init_cred_options (kim_options in_options)
 {
     kim_error err = KIM_NO_ERROR;
+    krb5_address **addresses = NULL;
     
-    if (!err && !in_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err && io_init_cred_options && *io_init_cred_options) {
-	if ((*io_init_cred_options)->address_list) {
-	    krb5_free_addresses (in_context, (*io_init_cred_options)->address_list);
-            (*io_init_cred_options)->address_list = NULL;
-	}
-	krb5_get_init_creds_opt_free (in_context, *io_init_cred_options);
-	*io_init_cred_options = NULL;
+    if (!err && !in_options->addressless) {
+        err = krb5_error (in_options->init_cred_context, 
+                          krb5_os_localaddr (in_options->init_cred_context, 
+                                             &addresses));
     }
     
-    return check_error (err);    
+    if (!err && !in_options->init_cred_context) {
+        err = krb5_error (NULL,
+                          krb5_init_context (&in_options->init_cred_context));
+    }
+    
+    if (!err && !in_options->init_cred_options) {
+        err = krb5_error (in_options->init_cred_context,
+                          krb5_get_init_creds_opt_alloc (in_options->init_cred_context, 
+                                                         &in_options->init_cred_options));
+    }
+    
+    if (!err) {
+        krb5_get_init_creds_opt_set_tkt_life (in_options->init_cred_options, 
+                                              in_options->lifetime);
+        krb5_get_init_creds_opt_set_renew_life (in_options->init_cred_options, 
+                                                in_options->renewable ? in_options->renewal_lifetime : 0);
+        krb5_get_init_creds_opt_set_forwardable (in_options->init_cred_options, 
+                                                 in_options->forwardable);
+        krb5_get_init_creds_opt_set_proxiable (in_options->init_cred_options, 
+                                               in_options->proxiable);
+        krb5_get_init_creds_opt_set_address_list (in_options->init_cred_options, 
+                                                  addresses);
+        addresses = NULL;
+    }
+
+    if (addresses) { krb5_free_addresses (in_options->init_cred_context, 
+                                          addresses); }
+    
+    return !check_error (err) ? in_options->init_cred_options : NULL;    
 }
 
 /* ------------------------------------------------------------------------ */
@@ -489,6 +497,18 @@ void kim_options_free (kim_options *io_options)
 {
     if (io_options && *io_options) { 
         kim_string_free (&(*io_options)->service_name); 
+        if ((*io_options)->init_cred_context) {
+            if ((*io_options)->init_cred_options) {
+                if ((*io_options)->init_cred_options->address_list) {
+                    krb5_free_addresses ((*io_options)->init_cred_context, 
+                                         (*io_options)->init_cred_options->address_list);
+                }
+                krb5_get_init_creds_opt_free ((*io_options)->init_cred_context, 
+                                              (*io_options)->init_cred_options);
+            }
+            krb5_free_context ((*io_options)->init_cred_context);
+        }
+
         free (*io_options);
         *io_options = NULL;
     }

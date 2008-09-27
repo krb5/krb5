@@ -200,14 +200,21 @@ kim_error kim_identity_create_from_krb5_principal (kim_identity  *out_identity,
     
     if (!err && !out_identity     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_krb5_principal) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_krb5_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    /* KLCreatePrincipalFromKerberos5Principal passes NULL in_krb5_context */
     
     if (!err) {
         err = kim_identity_allocate (&identity);
     }
     
     if (!err) {
-        err = krb5_error (NULL, krb5_init_context (&identity->context));
+        if (in_krb5_context) {
+            err = krb5_error (in_krb5_context, 
+                              krb5_copy_context (in_krb5_context,
+                                                 &identity->context));
+        } else {
+            err = krb5_error (NULL, 
+                              krb5_init_context (&identity->context));
+        }
     }
     
     if (!err) {
@@ -440,8 +447,8 @@ kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_identity_get_components (kim_identity  in_identity,
-                                       kim_string   *out_components)
+kim_error kim_identity_get_components_string (kim_identity  in_identity,
+                                              kim_string   *out_components)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string components = NULL;
@@ -502,13 +509,24 @@ kim_error kim_identity_get_krb5_principal (kim_identity    in_identity,
     if (!err && !out_krb5_principal) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = krb5_error (in_identity->context,
-                          krb5_copy_principal (in_identity->context, 
+        err = krb5_error (in_krb5_context,
+                          krb5_copy_principal (in_krb5_context, 
                                                in_identity->principal, 
                                                out_krb5_principal));
     }    
     
     return check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+krb5_principal kim_identity_krb5_principal (kim_identity in_identity)
+{
+    if (in_identity) {
+        return in_identity->principal;
+    }
+    check_error (KIM_NULL_PARAMETER_ERR); /* log error */
+    return NULL;
 }
 
 /* ------------------------------------------------------------------------ */

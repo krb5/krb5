@@ -209,9 +209,6 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     kim_credential credential = NULL;
     kim_options options = NULL;
     kim_ui_context context;
-    kim_string service = NULL;
-    krb5_principal principal = NULL;
-    krb5_get_init_creds_opt *init_cred_options = NULL;
     kim_boolean ui_inited = 0;
     kim_boolean done = 0;
 
@@ -234,22 +231,6 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     }
     
     if (!err) {
-        err = kim_options_get_init_cred_options (options, 
-                                                 credential->context,
-                                                 &init_cred_options);
-    }
-    
-    if (!err) {
-        kim_options_get_service_name (options, &service);
-    }
-    
-    if (!err) {
-        err = kim_identity_get_krb5_principal (in_identity, 
-                                               credential->context, 
-                                               &principal);
-    }
-    
-    if (!err) {
         err = kim_ui_init (&context);
         if (!err) {
             context.identity = in_identity; /* used by kim_ui_prompter */
@@ -261,6 +242,10 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         krb5_creds creds;
         kim_boolean free_creds = 0;
         kim_count prompt_count;
+        krb5_principal principal = kim_identity_krb5_principal (in_identity);
+        krb5_get_init_creds_opt *opts = kim_options_init_cred_options (options);
+        char *service = kim_options_service_name (options);
+        kim_time start_time = kim_options_start_time (options);
  
         /* set counter to zero so we can tell if we got prompted */
         context.prompt_count = 0;
@@ -271,9 +256,10 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
                                                         principal,
                                                         NULL, 
                                                         kim_ui_prompter, 
-                                                        &context, 0, 
-                                                        (char *) service, 
-                                                        init_cred_options));
+                                                        &context,
+                                                        start_time, 
+                                                        service, 
+                                                        opts));
         
         prompt_count = context.prompt_count; /* remember if we got prompts */
         if (!err) { free_creds = 1; }
@@ -316,20 +302,12 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         if (!err) { err = check_error (fini_err); }
     }
     
-    /* free before credential is passed back to caller */
-    if (credential && init_cred_options) {
-        kim_options_free_init_cred_options (credential->context, &init_cred_options);
-    }
-    
-    if (credential && principal) { krb5_free_principal (credential->context, principal); }
-
     if (!err) {
         *out_credential = credential;
         credential = NULL;
     }
     
-    if (!in_options) { kim_options_free (&options); }
-    kim_string_free (&service);
+    if (options != in_options) { kim_options_free (&options); }
     kim_credential_free (&credential);
     
     return check_error (err);
@@ -350,9 +328,7 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     krb5_creds creds;
     kim_boolean free_creds = FALSE;
     krb5_principal principal = NULL;
-    kim_time start_time = 0;
-    kim_string service_name = NULL;
-    krb5_get_init_creds_opt *init_cred_options = NULL;
+    kim_options options = in_options;
     
     if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
@@ -364,28 +340,8 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
         err = krb5_error (NULL, krb5_init_context (&credential->context));
     }
     
-    if (!err) {
-        kim_options options = in_options;
-        
-        if (!options) {
-            err = kim_options_create (&options);
-        }
-	
-	if (!err) {
-	    err = kim_options_get_start_time (options, &start_time);
-	}
-        
-	if (!err) {
-	    err = kim_options_get_service_name (options, &service_name);
-	}
-	
-        if (!err) {
-            err = kim_options_get_init_cred_options (options, 
-                                                     credential->context,
-                                                     &init_cred_options);
-        }
-        
-        if (options != in_options) { kim_options_free (&options); }
+    if (!err && !options) {
+        err = kim_options_create (&options);
     }
     
     if (!err) {
@@ -436,14 +392,18 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     }
     
     if (!err) {
+        krb5_get_init_creds_opt *opts = kim_options_init_cred_options (options);
+        char *service = kim_options_service_name (options);
+        kim_time start_time = kim_options_start_time (options);
+        
         err = krb5_error (credential->context,
                           krb5_get_init_creds_keytab (credential->context, 
                                                       &creds, 
                                                       principal, 
                                                       keytab, 
                                                       start_time, 
-                                                      (char *) service_name, 
-                                                      init_cred_options));
+                                                      service, 
+                                                      opts));
         if (!err) { free_creds = TRUE; }
     }
     
@@ -454,15 +414,15 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
                                            &credential->creds));
     }
     
+    if (principal ) { krb5_free_principal (credential->context, principal); }
+
     if (!err) {
         *out_credential = credential;
         credential = NULL;
     }
     
-    if (principal ) { krb5_free_principal (credential->context, principal); }
+    if (options != in_options) { kim_options_free (&options); }
     if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
-    kim_options_free_init_cred_options (credential->context, &init_cred_options);
-    kim_string_free (&service_name);
     kim_credential_free (&credential);
     
     return check_error (err);
@@ -519,7 +479,6 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
     kim_credential credential = NULL;
     kim_string realm = NULL;
     kim_string service = NULL;
-    krb5_principal principal = NULL;
     kim_string service_format = "kadmin/changepw@%s";
     
     if (!err && !out_credential       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -536,12 +495,6 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
     }
     
     if (!err) {
-        err = kim_identity_get_krb5_principal (in_identity, 
-                                               credential->context, 
-                                               &principal);
-    }
-    
-    if (!err) {
         err = kim_identity_get_realm (in_identity, &realm);
     }
     
@@ -552,6 +505,7 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
     if (!err) {
         krb5_creds creds;
         kim_boolean free_creds = 0;
+        krb5_principal principal = kim_identity_krb5_principal (in_identity);
         krb5_get_init_creds_opt	opts;
         
         krb5_get_init_creds_opt_init (&opts);
@@ -585,8 +539,6 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
         if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
     }
     
-    if (principal) { krb5_free_principal (credential->context, principal); }
-
     if (!err) {
         *out_user_was_prompted = (in_ui_context->prompt_count > 0);
         *out_credential = credential;
@@ -952,50 +904,41 @@ kim_error kim_credential_get_options (kim_credential  in_credential,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_credential_store (kim_credential  in_credential,
-                                kim_identity    in_client_identity,
+                                kim_identity    in_identity,
                                 kim_ccache     *out_ccache)
 {
     kim_error err = KIM_NO_ERROR;
-    krb5_context context = NULL;
     krb5_ccache k5ccache = NULL;
-    kim_string type = NULL;
-    krb5_principal client_principal = NULL;
     kim_boolean destroy_ccache_on_error = FALSE;
     
-    if (!err && !in_credential     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        err = krb5_error (NULL, krb5_init_context (&context));
-    }
-    
-    if (!err) {
-        err = kim_identity_get_krb5_principal (in_client_identity, context, 
-                                               &client_principal);
-    }
+    if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_identity  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         char *environment_ccache = getenv ("KRB5CCNAME");
         
         if (environment_ccache) {
-            err = krb5_error (context,
-                              krb5_cc_resolve (context, environment_ccache, 
+            err = krb5_error (in_credential->context,
+                              krb5_cc_resolve (in_credential->context, 
+                                               environment_ccache, 
                                                &k5ccache));
             
         } else {
             kim_ccache ccache = NULL;
             
             err = kim_ccache_create_from_client_identity (&ccache, 
-                                                          in_client_identity);
+                                                          in_identity);
             
             if (!err) {
-                err = kim_ccache_get_krb5_ccache (ccache, context, &k5ccache);
+                err = kim_ccache_get_krb5_ccache (ccache, 
+                                                  in_credential->context, 
+                                                  &k5ccache);
                 
             } else if (err == KIM_NO_SUCH_PRINCIPAL_ERR) {
                 /* Nothing to replace, create a new ccache */
-                err = krb5_error (context,
-                                  krb5_cc_new_unique (context, "API", NULL, 
-                                                      &k5ccache));
+                err = krb5_error (in_credential->context,
+                                  krb5_cc_new_unique (in_credential->context, 
+                                                      "API", NULL, &k5ccache));
                 if (!err) { destroy_ccache_on_error = TRUE; }
             }
             
@@ -1004,9 +947,11 @@ kim_error kim_credential_store (kim_credential  in_credential,
     }
     
     if (!err) {
+        krb5_principal principal = kim_identity_krb5_principal (in_identity);
+        
 	err = krb5_error (in_credential->context,
                           krb5_cc_initialize (in_credential->context, 
-                                              k5ccache, client_principal));
+                                              k5ccache, principal));
     }
     
     if (!err) {
@@ -1016,7 +961,9 @@ kim_error kim_credential_store (kim_credential  in_credential,
     }
     
     if (!err && out_ccache) {
-        err = kim_ccache_create_from_krb5_ccache (out_ccache, context, k5ccache);
+        err = kim_ccache_create_from_krb5_ccache (out_ccache, 
+                                                  in_credential->context, 
+                                                  k5ccache);
     }
     
     if (k5ccache) { 
@@ -1026,9 +973,6 @@ kim_error kim_credential_store (kim_credential  in_credential,
             krb5_cc_close (in_credential->context, k5ccache); 
         }
     }
-    if (client_principal) { krb5_free_principal (context, client_principal); }
-    if (context         ) { krb5_free_context (context); }
-    kim_string_free (&type);
     
     return check_error (err);
 }
@@ -1044,7 +988,6 @@ kim_error kim_credential_verify (kim_credential in_credential,
 {
     kim_error err = KIM_NO_ERROR;
     krb5_context scontext = NULL;
-    krb5_principal service_principal = NULL;
     krb5_keytab keytab = NULL;
     
     if (!err && !in_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -1053,30 +996,32 @@ kim_error kim_credential_verify (kim_credential in_credential,
 	err = krb5_error (NULL, krb5_init_secure_context (&scontext));
     }
     
-    if (!err && in_service_identity) {
-	err = kim_identity_get_krb5_principal (in_service_identity, scontext, &service_principal);
-    }
-    
     if (in_keytab) {
 	err = krb5_error (scontext, 
                           krb5_kt_resolve (scontext, in_keytab, &keytab));
     }
     
     if (!err) {
+        krb5_principal sprincipal = NULL;
 	krb5_verify_init_creds_opt options;
         
 	/* That's "no key == fail" not "no fail" >.< */
         krb5_verify_init_creds_opt_init (&options);
         krb5_verify_init_creds_opt_set_ap_req_nofail (&options, in_fail_if_no_service_key);
         
+        if (in_service_identity) { 
+            sprincipal = kim_identity_krb5_principal (in_service_identity); 
+        }
+        
 	err = krb5_error (scontext,
-                          krb5_verify_init_creds (scontext, in_credential->creds, 
-						  service_principal,
+                          krb5_verify_init_creds (scontext, 
+                                                  in_credential->creds, 
+						  sprincipal,
 						  keytab,
 						  NULL /* don't store creds in ccache */,
 						  &options));
 	
-	if (err && !service_principal && in_fail_if_no_service_key) {
+	if (err && !in_service_identity && in_fail_if_no_service_key) {
 	    /* If the service principal wasn't specified but we are supposed to
              * fail without a key we should walk the keytab trying to find one 
              * that succeeds. */
@@ -1124,9 +1069,8 @@ kim_error kim_credential_verify (kim_credential in_credential,
 	}
     }
     
-    if (keytab           ) { krb5_kt_close (scontext, keytab); }
-    if (service_principal) { krb5_free_principal (scontext, service_principal); }
-    if (scontext         ) { krb5_free_context (scontext); }
+    if (keytab  ) { krb5_kt_close (scontext, keytab); }
+    if (scontext) { krb5_free_context (scontext); }
     
     return check_error (err);
 }

@@ -31,6 +31,8 @@
 #include "kim_library_private.h"
 #include "kim_ui_private.h"
 
+krb5_principal kim_identity_krb5_principal (kim_identity in_identity);
+
 kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
                                        kim_boolean  *out_is_tgt_service);
 
@@ -46,5 +48,7 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
 kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                                kim_boolean     in_old_password_expired,
                                                kim_ui_context *in_ui_context);
+
+kim_error kim_os_identity_remove_saved_password (kim_identity in_identity);
 
 #endif /* KIM_IDENTITY_PRIVATE_H */
