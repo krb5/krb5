@@ -1,0 +1,10 @@
+{
+	Label = "edu.mit.Kerberos.KerberosAgent";
+	Program = "/System/Library/CoreServices/KerberosAgent.app/Contents/MacOS/KerberosAgent";
+	MachServices = {
+		"edu.mit.Kerberos.KerberosAgent.ipcLookup" = YES;
+		"edu.mit.Kerberos.KerberosAgent.ipcService" = YES;
+	};
+	EnableTransactions = YES;
+	OnDemand = YES;
+}
