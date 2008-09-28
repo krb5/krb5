@@ -512,8 +512,7 @@
     kim_string display_string = NULL;
     NSString *result = @"";
     
-    err = kim_identity_get_display_string(kimIdentity, &display_string);
-    // err = kim_identity_get_components(kimIdentity, &display_string);
+    err = kim_identity_get_components_string(kimIdentity, &display_string);
     
     if (!err) {
         NSRange atRange;
