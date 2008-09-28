@@ -35,6 +35,18 @@
 #include <mach/mach_error.h>
 #include <unistd.h>
 
+/* ------------------------------------------------------------------------ */
+
+static inline int32_t kim_os_ui_gui_send_request (int32_t        in_launch_server,
+                                                  k5_ipc_stream  in_request_stream,
+                                                  k5_ipc_stream *out_reply_stream)
+{
+    return k5_ipc_send_request (kim_os_agent_bundle_id,
+                                in_launch_server,
+                                in_request_stream,
+                                out_reply_stream);
+}
+
 
 /* ------------------------------------------------------------------------ */
 
@@ -75,9 +87,9 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
     }
     
     if (!err) {
-        err = k5_ipc_send_request (1 /* launch server */,
-                                   request,
-                                   &reply);
+        err = kim_os_ui_gui_send_request (1 /* launch server */,
+                                          request,
+                                          &reply);
     }
     
     if (!err) {
@@ -121,9 +133,9 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
 
     
     if (!err) {
-        err = k5_ipc_send_request (0 /* don't launch server */,
-                                   request,
-                                   &reply);
+        err = kim_os_ui_gui_send_request (0 /* don't launch server */,
+                                          request,
+                                          &reply);
         if (!reply) { err = check_error (KIM_NO_SERVER_ERR); }
     }
     
@@ -176,9 +188,9 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
     }
     
     if (!err) {
-        err = k5_ipc_send_request (0 /* don't launch server */,
-                                   request,
-                                   &reply);
+        err = kim_os_ui_gui_send_request (0 /* don't launch server */,
+                                          request,
+                                          &reply);
         if (!reply) { err = check_error (KIM_NO_SERVER_ERR); }
     }
     
@@ -264,9 +276,9 @@ kim_error kim_os_ui_gui_auth_prompt (kim_ui_context     *in_context,
     }
     
     if (!err) {
-        err = k5_ipc_send_request (0 /* don't launch server */,
-                                   request,
-                                   &reply);
+        err = kim_os_ui_gui_send_request (0 /* don't launch server */,
+                                          request,
+                                          &reply);
         if (!reply) { err = check_error (KIM_NO_SERVER_ERR); }
     }
     
@@ -333,9 +345,9 @@ kim_error kim_os_ui_gui_change_password (kim_ui_context      *in_context,
     }
     
     if (!err) {
-        err = k5_ipc_send_request (0 /* don't launch server */,
-                                   request,
-                                   &reply);
+        err = kim_os_ui_gui_send_request (0 /* don't launch server */,
+                                          request,
+                                          &reply);
         if (!reply) { err = check_error (KIM_NO_SERVER_ERR); }
     }
     
@@ -423,9 +435,9 @@ kim_error kim_os_ui_gui_handle_error (kim_ui_context    *in_context,
     }
     
     if (!err) {
-        err = k5_ipc_send_request (0 /* don't launch server */,
-                                   request,
-                                   &reply);
+        err = kim_os_ui_gui_send_request (0 /* don't launch server */,
+                                          request,
+                                          &reply);
         if (!reply) { err = check_error (KIM_NO_SERVER_ERR); }
     }
     
@@ -469,9 +481,9 @@ kim_error kim_os_ui_gui_fini (kim_ui_context *io_context)
     }
     
     if (!err) {
-        err = k5_ipc_send_request (0 /* don't launch server */,
-                                   request,
-                                   &reply);
+        err = kim_os_ui_gui_send_request (0 /* don't launch server */,
+                                          request,
+                                          &reply);
         if (!reply) { err = check_error (KIM_NO_SERVER_ERR); }
     }
     

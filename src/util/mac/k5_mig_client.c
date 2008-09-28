@@ -31,6 +31,18 @@
 #include "k5_mig_replyServer.h"
 #include "k5-thread.h"
 
+#define KIPC_SERVICE_COUNT 3
+
+typedef struct k5_ipc_request_port {
+    char *service_id;
+    mach_port_t port;
+} k5_ipc_request_port;
+
+static k5_ipc_request_port k5_ipc_known_ports[KIPC_SERVICE_COUNT] = { 
+{ "edu.mit.Kerberos.CCacheServer", MACH_PORT_NULL },
+{ "edu.mit.Kerberos.KerberosAgent", MACH_PORT_NULL },
+{ "edu.mit.Kerberos.OldKerberosAgent", MACH_PORT_NULL } };
+
 MAKE_INIT_FUNCTION(k5_cli_ipc_thread_init);
 MAKE_FINI_FUNCTION(k5_cli_ipc_thread_fini);
 
@@ -132,7 +144,8 @@ kern_return_t k5_ipc_client_reply (mach_port_t             in_reply_port,
 
 /* ------------------------------------------------------------------------ */
 
-int32_t k5_ipc_send_request (int32_t        in_launch_server,
+int32_t k5_ipc_send_request (const char    *in_service_id,
+                             int32_t        in_launch_server,
                              k5_ipc_stream  in_request_stream,
                              k5_ipc_stream *out_reply_stream)
 {
@@ -178,16 +191,39 @@ int32_t k5_ipc_send_request (int32_t        in_launch_server,
     }
 
     if (!err) {
-        request_port = k5_getspecific (K5_KEY_IPC_REQUEST_PORT);
+        k5_ipc_request_port *request_ports = NULL;
         
-        if (!request_port) {
-            request_port = malloc (sizeof (mach_port_t));
+        request_ports = k5_getspecific (K5_KEY_IPC_REQUEST_PORT);
+
+        if (!request_ports) {
+            int size = sizeof (*request_ports) * KIPC_SERVICE_COUNT;
+            
+            request_ports = malloc (size);
             if (!request_port) { err = ENOMEM; }
             
             if (!err) {
-                *request_port = MACH_PORT_NULL;
-                err = k5_setspecific (K5_KEY_IPC_REQUEST_PORT, request_port);
+                int i;
+                
+                for (i = 0; i < KIPC_SERVICE_COUNT; i++) {
+                    request_ports[i].service_id = k5_ipc_known_ports [i].service_id;
+                    request_ports[i].port = k5_ipc_known_ports [i].port;
+                }
+                
+                err = k5_setspecific (K5_KEY_IPC_REQUEST_PORT, request_ports);
             }
+        }
+        
+        if (!err) {
+            int i, found = 0;
+
+            for (i = 0; i < KIPC_SERVICE_COUNT; i++) {
+                if (!strcmp (in_service_id, request_ports[i].service_id)) {
+                    found = 1;
+                    request_port = &request_ports[i].port;
+                }
+            }
+            
+            if (!found) { err = EINVAL; }
         }
     }
     
@@ -196,8 +232,8 @@ int32_t k5_ipc_send_request (int32_t        in_launch_server,
     }
 
     if (!err) {
-        err = kipc_client_lookup_server (K5_IPC_SERVER_ID, 
-                                         in_launch_server, TRUE, &server_port);
+        err = kipc_client_lookup_server (in_service_id, in_launch_server, 
+                                         TRUE, &server_port);
     }
     
     while (!err && !done) {
@@ -224,8 +260,9 @@ int32_t k5_ipc_send_request (int32_t        in_launch_server,
             }    
             
             /* Look up server name again without using the cached copy */
-            err = kipc_client_lookup_server (K5_IPC_SERVER_ID,  
-                                             in_launch_server, FALSE, &server_port);
+            err = kipc_client_lookup_server (in_service_id,  
+                                             in_launch_server, 
+                                             FALSE, &server_port);
             
         } else {
             /* Talked to server, though we may have gotten an error */

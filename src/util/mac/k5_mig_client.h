@@ -29,7 +29,8 @@
 
 #include "k5-ipc_stream.h"
 
-int32_t k5_ipc_send_request (int32_t        in_launch_server,
+int32_t k5_ipc_send_request (const char    *in_service_id,
+                             int32_t        in_launch_server,
                              k5_ipc_stream  in_request_stream,
                              k5_ipc_stream *out_reply_stream);
 
