@@ -296,7 +296,7 @@
     }
     
     if (err) {
-        NSLog(@"%s got error %s", _cmd, error_message(err));
+        log_kim_error_to_console(err);
     }
 }
 
@@ -496,7 +496,7 @@
     }
     
     if (err) {
-        NSLog(@"%s got error %s", _cmd, error_message(err));
+        log_kim_error_to_console(err);
     }
     
     kim_string_free(&display_string);
@@ -512,14 +512,16 @@
     kim_string display_string = NULL;
     NSString *result = @"";
     
-    err = kim_identity_get_components_string(kimIdentity, &display_string);
+    if (self.kimIdentity) {
+        err = kim_identity_get_components_string(self.kimIdentity, &display_string);
+    }
     
-    if (!err) {
-        NSRange atRange;
-        
+    if (!err && display_string) {
         result = [NSString stringWithUTF8String:display_string];
-        atRange = [result rangeOfString:@"@" options:NSBackwardsSearch];
-        result = [result substringToIndex:atRange.location];
+    }
+    
+    if (err) {
+        log_kim_error_to_console(err);
     }
     
     kim_string_free(&display_string);
@@ -535,10 +537,16 @@
     kim_string display_string = NULL;
     NSString *result = @"";
     
-    err = kim_identity_get_realm(kimIdentity, &display_string);
+    if (self.kimIdentity) {
+        err = kim_identity_get_realm(self.kimIdentity, &display_string);
+    }
     
-    if (!err) {
+    if (!err && display_string) {
         result = [NSString stringWithUTF8String:display_string];
+    }
+    
+    if (err) {
+        log_kim_error_to_console(err);
     }
     
     kim_string_free(&display_string);
@@ -689,7 +697,7 @@
 	    if (!err) {
 		NSLog (@"%s thread noticed update", __FUNCTION__);
 	    } else {
-		NSLog (@"%s thread got error %d (%s)", __FUNCTION__, err, error_message (err));
+		NSLog (@"%s thread got error %d (%s)", __FUNCTION__, err, [NSString stringForLastKIMError:err]);
                 err = 0; /* The server quit unexpectedly -- just try again */
             }
             
@@ -904,7 +912,7 @@
         }
         
         if (err) {
-            NSLog(@"%s got error %s", _cmd, error_message(err));
+            log_kim_error_to_console(err);
         }
         
         kim_options_free (&kimOptions);
@@ -935,7 +943,7 @@
         self.identities = [[newIdentities allObjects] sortedArrayUsingSelector:@selector(compare:)];
         if (!identities) { err = ENOMEM; }            
     } else {
-        NSLog (@"Got error %s", error_message (err));
+        log_kim_error_to_console(err);
     }
     
     return err;
@@ -988,9 +996,9 @@
     kim_preferences_free(&prefs);
 
     if (err) {
-        NSLog(@"%s received error %s", _cmd, error_message(err));
+        log_kim_error_to_console(err);
     }
-
+    
     if (!err) {
         [self reload];
     }

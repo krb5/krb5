@@ -185,8 +185,8 @@
     
     //[window center];
     [self showWindow: self];
-    [NSApp run];
-    [self close];
+//    [NSApp run];
+//    [self close];
     
     //[[NSApp delegate] removeActiveWindow: [self window]];
     

@@ -9,6 +9,11 @@
 #import <Cocoa/Cocoa.h>
 #import <Kerberos/kim.h>
 
+#define log_kim_error_to_console(err)\
+{\
+NSLog(@"%s got error %@", _cmd, [NSString stringForLastKIMError:err]);\
+} while (0);
+
 @interface NSString (KIMUtilities)
 
 + (NSString *) stringForLastKIMError: (kim_error) in_err;

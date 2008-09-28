@@ -8,7 +8,6 @@
 
 #import "KIMUtilities.h"
 
-
 @implementation NSString (KIMUtilities)
 
 + (NSString *) stringForLastKIMError: (kim_error) in_err
