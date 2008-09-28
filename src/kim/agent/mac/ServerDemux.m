@@ -23,6 +23,7 @@
  */
 
 #import "ServerDemux.h"
+#import "kim_selection_hints_private.h"
 
 // ---------------------------------------------------------------------------
 
@@ -189,7 +190,8 @@ static int32_t kim_handle_request_select_identity (mach_port_t   in_client_port,
     kim_selection_hints hints = NULL;
     
     if (!err) {
-        //err = kim_os_selection_hints_read (out_hints, in_request_stream);
+        err = kim_selection_hints_create_from_stream (&hints, 
+                                                      in_request_stream);
     }    
     
     if (!err) {

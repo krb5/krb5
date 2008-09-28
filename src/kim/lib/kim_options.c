@@ -136,7 +136,7 @@ kim_error kim_options_copy (kim_options *out_options,
             }
         }
     }
-        
+    
     if (!err) {
         *out_options = options;
         options = NULL;
@@ -484,7 +484,7 @@ krb5_get_init_creds_opt *kim_options_init_cred_options (kim_options in_options)
                                                   addresses);
         addresses = NULL;
     }
-
+    
     if (addresses) { krb5_free_addresses (in_options->init_cred_context, 
                                           addresses); }
     
@@ -508,8 +508,125 @@ void kim_options_free (kim_options *io_options)
             }
             krb5_free_context ((*io_options)->init_cred_context);
         }
-
+        
         free (*io_options);
         *io_options = NULL;
     }
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_options_write_to_stream (kim_options   in_options,
+                                       k5_ipc_stream io_stream)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err && !in_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_stream ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int64 (io_stream, in_options->start_time);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int64 (io_stream, in_options->lifetime);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (io_stream, in_options->renewable);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int64 (io_stream, 
+                                         in_options->renewal_lifetime);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (io_stream, in_options->forwardable);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (io_stream, in_options->proxiable);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (io_stream, in_options->addressless);
+    }
+    
+    if (!err) {
+        kim_string service_name = (in_options->service_name ?
+                                   in_options->service_name : "");
+        err = k5_ipc_stream_write_string (io_stream, service_name);
+    }
+    
+    
+    
+    return check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_options_create_from_stream (kim_options   *out_options,
+                                          k5_ipc_stream  io_stream)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_options options = NULL;
+    
+    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_stream  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_options_allocate (&options);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int64 (io_stream, &options->start_time);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int64 (io_stream, &options->lifetime);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (io_stream, &options->renewable);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int64 (io_stream, 
+                                        &options->renewal_lifetime);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (io_stream, &options->forwardable);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (io_stream, &options->proxiable);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (io_stream, &options->addressless);
+    }
+    
+    if (!err) {
+        char *service_name = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &service_name);
+        
+        if (!err) {
+            err = kim_string_copy (&options->service_name, service_name);
+        }
+        
+        k5_ipc_stream_free_string (service_name);
+    }
+    
+    if (!err) {
+        *out_options = options;
+        options = NULL;
+    }
+    
+    kim_options_free (&options);
+    
+    return check_error (err);    
 }

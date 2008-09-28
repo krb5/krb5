@@ -172,7 +172,7 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
     }
     
     if (!err) {
-        //err = kim_os_selection_hints_write (in_hints, request);
+        err = kim_selection_hints_write_to_stream (in_hints, request);
     }
     
     if (!err) {

@@ -556,3 +556,191 @@ void kim_selection_hints_free (kim_selection_hints *io_selection_hints)
     }
 }
 
+#pragma mark - 
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_selection_hints_write_to_stream (kim_selection_hints in_selection_hints,
+                                               k5_ipc_stream       io_stream)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_stream         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+
+    if (!err) {
+        err = k5_ipc_stream_write_string (io_stream, 
+                                          in_selection_hints->application_identifier);
+    }
+    
+    if (!err) {
+        kim_string explanation = (in_selection_hints->explanation ?
+                                  in_selection_hints->explanation : "");
+        err = k5_ipc_stream_write_string (io_stream, explanation);
+    }
+    
+    if (!err) {
+        err = kim_options_write_to_stream (in_selection_hints->options, io_stream);
+    }
+    
+    if (!err) {
+        kim_string service_identity = (in_selection_hints->service_identity ?
+                                       in_selection_hints->service_identity : "");
+        err = k5_ipc_stream_write_string (io_stream, service_identity);
+    }
+    
+    if (!err) {
+        kim_string client_realm = (in_selection_hints->client_realm ?
+                                   in_selection_hints->client_realm : "");
+        err = k5_ipc_stream_write_string (io_stream, client_realm);
+    }
+    
+    if (!err) {
+        kim_string user = (in_selection_hints->user ?
+                           in_selection_hints->user : "");
+        err = k5_ipc_stream_write_string (io_stream, user);
+    }
+    
+    if (!err) {
+        kim_string service_realm = (in_selection_hints->service_realm ?
+                                    in_selection_hints->service_realm : "");
+        err = k5_ipc_stream_write_string (io_stream, service_realm);
+    }
+    
+    if (!err) {
+        kim_string service = (in_selection_hints->service ?
+                              in_selection_hints->service : "");
+        err = k5_ipc_stream_write_string (io_stream, service);
+    }
+    
+    if (!err) {
+        kim_string server = (in_selection_hints->server ?
+                             in_selection_hints->server : "");
+        err = k5_ipc_stream_write_string (io_stream, server);
+    }
+    
+    return check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_selection_hints_create_from_stream (kim_selection_hints *out_selection_hints,
+                                                  k5_ipc_stream        io_stream)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_selection_hints selection_hints = NULL;
+    
+    if (!err && !out_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_stream          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err) {
+        err = kim_selection_hints_allocate (&selection_hints);
+    }
+    
+    if (!err) {
+        char *application_identifier = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &application_identifier);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->application_identifier, 
+                                   application_identifier);
+        }
+        
+        k5_ipc_stream_free_string (application_identifier);
+    }
+    
+    if (!err) {
+        char *explanation = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &explanation);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->explanation, explanation);
+        }
+        
+        k5_ipc_stream_free_string (explanation);
+    }
+    
+    if (!err) {
+        err = kim_options_create_from_stream (&selection_hints->options, 
+                                              io_stream);
+    }
+    
+    if (!err) {
+        char *service_identity = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &service_identity);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->service_identity, 
+                                   service_identity);
+        }
+        
+        k5_ipc_stream_free_string (service_identity);
+    }
+    
+    if (!err) {
+        char *client_realm = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &client_realm);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->client_realm, 
+                                   client_realm);
+        }
+        
+        k5_ipc_stream_free_string (client_realm);
+    }
+    
+    if (!err) {
+        char *user = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &user);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->user, user);
+        }
+        
+        k5_ipc_stream_free_string (user);
+    }
+    
+    if (!err) {
+        char *service_realm = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &service_realm);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->service_realm, 
+                                   service_realm);
+        }
+        
+        k5_ipc_stream_free_string (service_realm);
+    }
+    
+    if (!err) {
+        char *service = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &service);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->service, service);
+        }
+        
+        k5_ipc_stream_free_string (service);
+    }
+    
+    if (!err) {
+        char *server = NULL;
+        err = k5_ipc_stream_read_string (io_stream, &server);
+        
+        if (!err) {
+            err = kim_string_copy (&selection_hints->server, server);
+        }
+        
+         k5_ipc_stream_free_string (server);
+    }
+    
+    if (!err) {
+        *out_selection_hints = selection_hints;
+        selection_hints = NULL;
+    }
+    
+    kim_selection_hints_free (&selection_hints);
+    
+    return check_error (err);    
+}
+

@@ -28,6 +28,7 @@
 #define KIM_OPTIONS_PRIVATE_H
 
 #include <kim/kim.h>
+#include "k5-ipc_stream.h"
 
 kim_error kim_options_create_empty (kim_options *out_options);
 
@@ -36,5 +37,12 @@ krb5_get_init_creds_opt *kim_options_init_cred_options (kim_options in_options);
 char *kim_options_service_name (kim_options in_options);
 
 kim_time kim_options_start_time (kim_options in_options);
+
+
+kim_error kim_options_write_to_stream (kim_options   in_options,
+                                       k5_ipc_stream io_stream);
+
+kim_error kim_options_create_from_stream (kim_options   *out_options,
+                                          k5_ipc_stream  io_stream);
 
 #endif /* KIM_OPTIONS_PRIVATE_H */

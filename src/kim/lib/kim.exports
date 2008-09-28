@@ -55,6 +55,9 @@ kim_selection_hints_remember_identity
 kim_selection_hints_forget_identity
 kim_selection_hints_free
 
+# Used by KerberosAgent
+kim_selection_hints_create_from_stream
+
 kim_preferences_create
 kim_preferences_copy
 kim_preferences_set_options

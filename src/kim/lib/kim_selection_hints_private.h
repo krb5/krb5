@@ -28,6 +28,7 @@
 #define KIM_SELECTION_HINTS_PRIVATE_H
 
 #include <kim/kim.h>
+#include "k5-ipc_stream.h"
 
 typedef struct kim_selection_hints_preference_strings {
     kim_string application_identifier;
@@ -53,5 +54,10 @@ kim_error kim_os_selection_hints_remember_identity (kim_selection_hints in_selec
 
 kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selection_hints);
 
+kim_error kim_selection_hints_write_to_stream (kim_selection_hints in_selection_hints,
+                                               k5_ipc_stream       io_stream);
+
+kim_error kim_selection_hints_create_from_stream (kim_selection_hints *out_selection_hints,
+                                                  k5_ipc_stream        in_stream);
 
 #endif /* KIM_SELECTION_HINTS_PRIVATE_H */
