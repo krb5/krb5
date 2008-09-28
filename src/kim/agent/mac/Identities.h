@@ -23,24 +23,51 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <Kerberos/kim.h>
+#import "KIMUtilities.h"
 
 @interface Identity : NSObject {
     kim_identity kimIdentity;
-    int state;
-    cc_time_t expirationTime;
-    int favorite;
-    
+    kim_options kimOptions;
+    kim_credential_state state;
+    cc_time_t expiration_time;
+    BOOL favorite;
 }
-@property(readonly) NSString *principal;
-@property(readonly) NSString *timeRemaining;
-@property           int       state;
-@property           cc_time_t expirationTime;
-@property(readonly) int       favorite;
 
-- (id) initWithIdentity: (kim_identity) identity;
-- (id) initWithFavoriteIdentity: (kim_identity) identity;
+@property	    kim_identity         kimIdentity;
+@property	    kim_options          kimOptions;
+@property           kim_credential_state state;
+@property           BOOL	         favorite;
+@property           cc_time_t		 expiration_time;
+
+// derived properties
+@property(readonly) NSString    *principalString;
+@property(readonly) NSString    *componentsString;
+@property(readonly) NSString    *realmString;
+@property(readonly) NSDate      *expirationDate;
+@property(readonly) NSString    *expirationString;
+@property(readonly) NSString    *validLifetimeString;
+@property(readonly) NSString    *renewableLifetimeString;
+@property(readonly) BOOL        hasCCache;
+@property(readwrite) BOOL       isRenewable;
+@property(readwrite) BOOL       isForwardable;
+@property(readwrite) BOOL       isAddressless;
+@property(readwrite) BOOL       isProxiable;
+@property(readwrite) NSUInteger validLifetime;
+@property(readwrite) NSUInteger renewableLifetime;
+
+- (id) initWithIdentity: (kim_identity) identity options: (kim_options) options;
+- (id) initWithFavoriteIdentity: (kim_identity) identity options: (kim_options) options;
 
 - (BOOL) isEqualToKIMIdentity: (kim_identity) identity;
+- (BOOL) isEqual: (Identity *)otherIdentity;
+
+- (kim_error) setPrincipalComponents: (NSString *) componentsString realm: (NSString *) realmString;
+
+- (void) resetOptions;
+- (void) toggleFavorite;
+- (BOOL) addToFavorites;
+- (BOOL) removeFromFavorites;
 
 @end
 
@@ -49,10 +76,17 @@
     NSArray *favoriteIdentities;
     NSArray *identities;
     NSConnection *threadConnection;
-
 }
-@property(readonly, copy) NSArray *identities;
 
+@property(readonly, retain) NSArray *identities;
+@property(readonly) NSUInteger minimumValidLifetime;
+@property(readonly) NSUInteger maximumValidLifetime;
+@property(readonly) NSUInteger minimumRenewableLifetime;
+@property(readonly) NSUInteger maximumRenewableLifetime;
+
+- (void) reload;
 - (int) update;
+- (kim_error) addIdentity: (Identity *) anIdentity;
+- (void) synchronizePreferences;
 
 @end

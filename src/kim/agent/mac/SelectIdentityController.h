@@ -28,31 +28,48 @@
 
 @interface SelectIdentityController : NSWindowController {
 
+    IBOutlet NSObjectController *identitiesController;
     IBOutlet NSArrayController *identityArrayController;
-    
+
     IBOutlet BadgedImageView *kerberosIconImageView;
     IBOutlet NSTextField *headerTextField;
     IBOutlet NSTextField *explanationTextField;
     
     IBOutlet NSTableView *identityTableView;
     IBOutlet NSTableColumn *identityTableColumn;
-    IBOutlet NSTableColumn *timeRemainingTableColumn;
     IBOutlet NSButton *addIdentityButton;
-    IBOutlet NSButton *removeIdentityButton;
+    IBOutlet NSPopUpButton *actionPopupButton;
     IBOutlet NSButton *selectIdentityButton;
     IBOutlet NSButton *cancelButton;
-    
+
     Identities *identities;
     NSTimer *refreshTimer;
+    
+    IBOutlet NSWindow *identityOptionsWindow;
+    IBOutlet NSObjectController *identityOptionsController;
+    IBOutlet NSTextField *nameField;
+    IBOutlet NSTextField *realmField;
 }
 
-- (IBAction) add: (id) sender;
-- (IBAction) remove: (id) sender;
+- (IBAction) newIdentity: (id) sender;
+- (IBAction) addToFavorites: (id) sender;
+- (IBAction) removeFromFavorites: (id) sender;
+
+- (IBAction) editOptions: (id) sender;
+- (IBAction) resetOptions: (id) sender;
+- (IBAction) cancelOptions: (id) sender;
+- (IBAction) doneOptions: (id) sender;
 
 - (IBAction) select: (id) sender;
 - (IBAction) cancel: (id) sender;
 
 - (int) runWindow;
+- (void) showOptions: (NSString *) contextInfo;
+- (void) didEndSheet: (NSWindow *) sheet returnCode: (int) returnCode contextInfo: (void *) contextInfo;
+- (void) saveOptions;
+
+- (void) reloadData;
+- (void) refreshTable;
 
 - (void) timedRefresh:(NSTimer *)timer;
 

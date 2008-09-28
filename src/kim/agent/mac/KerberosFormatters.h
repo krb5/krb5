@@ -26,14 +26,27 @@
 
 
 @interface KerberosTimeFormatter : NSFormatter {
-
+    BOOL displaySeconds;
+    BOOL displayShortFormat;
 }
+
+@property BOOL displaySeconds;
+@property BOOL displayShortFormat;
 
 - (NSString *)stringForObjectValue:(id)anObject;
 
-- (BOOL)getObjectValue:(id *)anObject 
-	     forString:(NSString *)string 
-      errorDescription:(NSString **)error;
+- (NSAttributedString *)attributedStringForObjectValue:(id)anObject 
+				 withDefaultAttributes:(NSDictionary *)attributes;
+
+- (NSString *) stringForLifetime: (time_t) lifetime;
+
+@end
+
+@interface KerberosFavoriteFormatter : NSFormatter {
+    
+}
+
+- (NSString *)stringForObjectValue:(id)anObject;
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)anObject 
 				 withDefaultAttributes:(NSDictionary *)attributes;

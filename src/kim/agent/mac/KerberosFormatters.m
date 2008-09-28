@@ -24,9 +24,21 @@
 
 #import "KerberosFormatters.h"
 
-#define EXPIRED_STRING @"Expired"
-
 @implementation KerberosTimeFormatter
+
+@synthesize displaySeconds;
+@synthesize displayShortFormat;
+
+- (id) init
+{
+    self = [super init];
+    if (self != nil) {
+        // default to --:-- style
+        self.displaySeconds = NO;
+        self.displayShortFormat = YES;
+    }
+    return self;
+}
 
 /*
  * For display of Kerberos expiration times.
@@ -36,75 +48,125 @@
 - (NSString *)stringForObjectValue:(id)anObject
 {
     NSString *result = nil;
-    if (anObject == nil || ![anObject respondsToSelector:@selector(timeIntervalSince1970)]) {
-	result = [NSString stringWithFormat:@"%s given invalid object %@", 
-                  _cmd, NSStringFromClass([anObject class])];
+    
+    if (anObject == nil || ![anObject respondsToSelector:@selector(timeIntervalSinceNow)]) {
+	result = @"";
     }
     else {
-	time_t lifetime = [(NSDate *)anObject timeIntervalSince1970] - time(NULL);
-	
-	if (lifetime > 0) {
-	    time_t seconds  = (lifetime % 60);
-	    time_t minutes  = (lifetime / 60 % 60);
-	    time_t hours    = (lifetime / 3600 % 24);
-	    time_t days     = (lifetime / 86400);
-	    
-	    if (seconds >  0) { seconds = 0; minutes++; }
-	    if (minutes > 59) { minutes = 0; hours++; }
-	    if (hours   > 23) { hours   = 0; days++; }
-	    
-	    result = [NSString stringWithFormat:@"%02ld:%02ld", hours, minutes];
-	} else {
-	    result = EXPIRED_STRING;
-	}
+        result = [self stringForLifetime:(time_t)[(NSDate *)anObject timeIntervalSinceNow]];
     }
     
     return result;
 }
 
-/*
- * Converts NSStrings like @"09:53" into NSDate representation of that point 
- * in the future. If string is @"Expired", NSDate is set to 1970.
- */
-
-- (BOOL)getObjectValue:(id *)anObject 
-	     forString:(NSString *)string 
-      errorDescription:(NSString **)error
+- (NSAttributedString *)attributedStringForObjectValue:(id)anObject 
+				 withDefaultAttributes:(NSDictionary *)attributes
 {
-    NSArray *tokens = [string componentsSeparatedByString:@":"];
-    *anObject = nil;
+    return [[[NSAttributedString alloc] initWithString:[self stringForObjectValue:anObject] 
+                                            attributes:attributes] autorelease];
+}
+
+- (NSString *) stringForLifetime: (time_t) lifetime
+{
+    NSMutableString *string = [NSMutableString string];
+    NSString *separatorKey = (self.displayShortFormat) ? @"LifetimeStringSeparatorShortFormat" : 
+    @"LifetimeStringSeparatorLongFormat";
+    NSString *separator = NSLocalizedStringFromTable (separatorKey, @"KerberosFormatters", NULL);
+    NSString *key = NULL;
     
-    if ([tokens count] == 2) {
-	NSInteger hours = [[tokens objectAtIndex:0] longValue];
-	NSInteger minutes = [[tokens objectAtIndex:1] longValue];
-	*anObject = [NSDate dateWithTimeIntervalSince1970:(hours * 60 * 60) + (minutes * 60)];
-    } else if ([string isEqualToString:EXPIRED_STRING]) {
-	*anObject = [NSDate dateWithTimeIntervalSince1970:0];
+    // Break the lifetime up into time units
+    time_t days     = (lifetime / 86400);
+    time_t hours    = (lifetime / 3600 % 24);
+    time_t minutes  = (lifetime / 60 % 60);
+    time_t seconds  = (lifetime % 60);
+    
+    if (lifetime > 0) {
+        // If we aren't going to display seconds, round up
+        if (!self.displaySeconds) {
+            if (seconds >  0) { seconds = 0; minutes++; }
+            if (minutes > 59) { minutes = 0; hours++; }
+            if (hours   > 23) { hours   = 0; days++; }
+        }
+        
+        if (days > 0 && !self.displayShortFormat) {
+            if (self.displayShortFormat) { 
+                key = (days > 1) ? @"LifetimeStringDaysShortFormat" : @"LifetimeStringDayShortFormat"; 
+            } else { 
+                key = (days > 1) ? @"LifetimeStringDaysLongFormat" : @"LifetimeStringDayLongFormat";
+            }
+            [string appendFormat: NSLocalizedStringFromTable (key, @"KerberosFormatters", NULL), days];
+        }
+        
+        if ((hours > 0) || self.displayShortFormat) {
+            if (self.displayShortFormat) { 
+                key = (hours > 1) ? @"LifetimeStringHoursShortFormat" : @"LifetimeStringHourShortFormat"; 
+                hours += days * 24;
+                days = 0;
+            } else { 
+                key = (hours > 1) ? @"LifetimeStringHoursLongFormat" : @"LifetimeStringHourLongFormat";
+            }
+            if ([string length] > 0) { [string appendString: separator]; }
+            [string appendFormat: NSLocalizedStringFromTable (key, @"KerberosFormatters", NULL), hours];
+        }
+        
+        if ((minutes > 0) || self.displayShortFormat) {
+            if (self.displayShortFormat) { 
+                key = (minutes > 1) ? @"LifetimeStringMinutesShortFormat" : @"LifetimeStringMinuteShortFormat"; 
+            } else { 
+                key = (minutes > 1) ? @"LifetimeStringMinutesLongFormat" : @"LifetimeStringMinuteLongFormat";
+            }
+            if ([string length] > 0) { [string appendString: separator]; }
+            [string appendFormat: NSLocalizedStringFromTable (key, @"KerberosFormatters", NULL), minutes];
+        }
+        
+        if (self.displaySeconds && ((seconds > 0) || self.displayShortFormat)) {
+            if (self.displayShortFormat) { 
+                key = (seconds > 1) ? @"LifetimeStringSecondsShortFormat" : @"LifetimeStringSecondShortFormat"; 
+            } else { 
+                key = (seconds > 1) ? @"LifetimeStringSecondsLongFormat" : @"LifetimeStringSecondLongFormat";
+            }
+            if ([string length] > 0) { [string appendString: separator]; }
+            [string appendFormat: NSLocalizedStringFromTable (key, @"KerberosFormatters", NULL), seconds];
+        }
+    } else {
+        key = @"LifetimeStringExpired";
+        [string appendString: NSLocalizedStringFromTable (key, @"KerberosFormatters", NULL)];
     }
     
-    if (*anObject == nil) {
-	return false;
+    // Return an NSString (non-mutable) from our mutable temporary
+    return [NSString stringWithString: string];
+}
+
+@end
+
+@implementation KerberosFavoriteFormatter
+
+/*
+ * For displaying favorite status of KIM identities.
+ * Converts an NSNumber containing a boolean value into an NSString.
+ * If true, returns a heart character, /u2665.
+ * If false, returns empty string @"".
+ */
+- (NSString *)stringForObjectValue:(id)anObject
+{
+    NSString *key = nil;
+    if (anObject == nil || 
+        ![anObject respondsToSelector:@selector(boolValue)] ||
+        ([(NSNumber *)anObject boolValue] == FALSE)) {
+        key = @"FavoriteStringNotFavorite";
     }
-    return true;
+    else {
+        key = @"FavoriteStringIsFavorite";
+    }
+    
+    return NSLocalizedStringFromTable (key, @"KerberosFormatters", NULL);
 }
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)anObject 
 				 withDefaultAttributes:(NSDictionary *)attributes
 {
-    NSAttributedString *resultString = nil;
-    NSString *plainString = [self stringForObjectValue:anObject];
-    NSMutableDictionary *newAttributes = [attributes mutableCopy];
-    
-    if ([plainString isEqualToString:EXPIRED_STRING]) {
-	[newAttributes setObject:[NSColor redColor] 
-			  forKey:NSForegroundColorAttributeName];
-	[newAttributes setObject: [NSNumber numberWithFloat: 0.3]
-			  forKey: NSObliquenessAttributeName];
-    }
-    
-    resultString = [[NSAttributedString alloc] initWithString:plainString attributes:newAttributes];
-    [newAttributes release];
-    
-    return [resultString autorelease];
+    return [[[NSAttributedString alloc] initWithString:[self stringForObjectValue:anObject] 
+                                            attributes:attributes] autorelease];
 }
+
 @end
