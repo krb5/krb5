@@ -1,14 +1,14 @@
 /*
  * $Header$
  *
- * Copyright 2006-2008 Massachusetts Institute of Technology.
+ * Copyright 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -24,17 +24,13 @@
  * or implied warranty.
  */
 
-#ifndef KIM_MIG_H
-#define KIM_MIG_H
+#ifndef K5_MIG_CLIENT_H
+#define K5_MIG_CLIENT_H
 
-#include <kim/kim.h>
+#include "k5-ipc_stream.h"
 
-typedef const char *kim_mipc_in_string;
-typedef char       *kim_mipc_out_string;
-typedef int32_t     kim_mipc_error;
-typedef boolean_t   kim_mipc_boolean;
-typedef uint32_t    kim_mipc_lifetime;
-typedef uint32_t    kim_mipc_time;
-typedef uint32_t    kim_mipc_prompt_type;
+int32_t k5_ipc_send_request (int32_t        in_launch_server,
+                             k5_ipc_stream  in_request_stream,
+                             k5_ipc_stream *out_reply_stream);
 
-#endif /* KIM_MIG_H */
+#endif /* K5_MIG_CLIENT_H */

@@ -22,18 +22,16 @@
  * or implied warranty.
  */
 
-#import "kim_migServer.h"
-#import "ServerThread.h"
+#import "ServerDemux.h"
 
 // ---------------------------------------------------------------------------
 
-static kim_boolean caller_is_front_process (task_t    in_task, 
+static kim_boolean caller_is_front_process (pid_t    in_pid, 
                                             NSString *in_path)
 {
     kim_error err = KIM_NO_ERROR;
-    Boolean is_front_process;
-    pid_t task_pid;
-    ProcessSerialNumber task_psn, front_psn;
+    kim_boolean is_front_process = FALSE;
+    NSNumber *active_pid = NULL;
     
     NSBundle *bundle = [NSBundle bundleWithPath: in_path];
     if (bundle) {
@@ -46,573 +44,553 @@ static kim_boolean caller_is_front_process (task_t    in_task,
     }
     
     if (!err) {
-        err = pid_for_task (in_task, &task_pid);
+        NSDictionary *activeApplication = [[NSWorkspace sharedWorkspace] activeApplication];
+        if (activeApplication) {
+            active_pid = [activeApplication objectForKey: @"NSApplicationProcessIdentifier"];
+        }
     }
     
-    if (!err) {
-        err = GetProcessForPID (task_pid, &task_psn);
+    if (!err && active_pid) {
+        is_front_process = ([active_pid intValue] == in_pid);
     }
     
-    if (!err) {
-        err = GetFrontProcess (&front_psn);
-    }
-    
-    if (!err) {
-        err = SameProcess (&task_psn, &front_psn, &is_front_process);
-    }
-    
-    return !err ? is_front_process : FALSE;
+    return is_front_process;
 }
 
 #pragma mark -
 
 /* ------------------------------------------------------------------------ */
 
-kern_return_t kim_mipc_srv_init (mach_port_t             in_server_port,
-                                 task_t                  in_application_task,
-                                 kim_mipc_in_string      in_application_name,
-                                 mach_msg_type_number_t  in_application_nameCnt,
-                                 kim_mipc_in_string      in_application_path,
-                                 mach_msg_type_number_t  in_application_pathCnt,
-                                 kim_mipc_error         *out_error)
+static int32_t kim_handle_request_init (mach_port_t   in_client_port, 
+                                        mach_port_t   in_reply_port, 
+                                        k5_ipc_stream in_request_stream)
 {
-    kern_return_t err = 0;
-    ServerThread *sthread = NULL;
-    
+    int32_t err = 0;
+    int32_t pid = 0;
+    char *name = NULL;
+    char *path = NULL;
+    bool isFrontProcess = 0;
+
     if (!err) {
-        sthread = [ServerThread sharedServerThread];
-        if (!sthread) { err = KIM_OUT_OF_MEMORY_ERR; }
+        err = k5_ipc_stream_read_int32 (in_request_stream, &pid);
     }
     
     if (!err) {
-        kim_mipc_error result = KIM_NO_ERROR;
-        NSString *name = NULL;
-        NSString *path = NULL;
-
-        if (in_application_name) {
-            name = [NSString stringWithUTF8String: in_application_name];
-        }
-
-        if (in_application_path) {
-            path = [NSString stringWithUTF8String: in_application_path];
-        }
-        
-        [sthread addConnectionWithPort: in_server_port
-                                  name: name
-                                  path: path
-                          frontProcess: caller_is_front_process (in_application_task, 
-                                                                 path)];
-        *out_error = result;
+        err = k5_ipc_stream_read_string (in_request_stream, &name);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &path);
+    } 
+    
+    
+    if (!err) {
+        isFrontProcess = caller_is_front_process (pid, 
+                                                  [NSString stringWithUTF8String: path]);
     }
     
-    return err;
+    if (!err) {
+#warning Send init message to main thread with 2 ports, name and path
+    }
+    
+    k5_ipc_stream_free_string (name);    
+    k5_ipc_stream_free_string (path);
+
+    return err;   
 }
 
 /* ------------------------------------------------------------------------ */
 
-kern_return_t kim_mipc_srv_enter_identity (mach_port_t             in_server_port,
-                                           kim_mipc_out_string    *out_identity,
-                                           mach_msg_type_number_t *out_identityCnt,
-                                           kim_mipc_error         *out_error)
+int32_t kim_handle_reply_init (mach_port_t   in_reply_port, 
+                               int32_t       in_error)
 {
-    kern_return_t err = 0;
-    kim_error result = KIM_NO_ERROR;
-    ClientConnection *client = NULL;
-    kim_identity identity = NULL;
+    int32_t err = 0;
+    k5_ipc_stream reply = NULL;
+    
+    if (!err) {
+        err = k5_ipc_stream_new (&reply);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (reply, in_error);
+    }
+    
+    if (!err) {
+        err = k5_ipc_server_send_reply (in_reply_port, reply);
+    }
+    
+    k5_ipc_stream_release (reply);
+    
+    return err;   
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static int32_t kim_handle_request_enter_identity (mach_port_t   in_client_port, 
+                                                  mach_port_t   in_reply_port, 
+                                                  k5_ipc_stream in_request_stream)
+{
+    int32_t err = 0;
+    
+    if (!err) {
+#warning Send enter identity message to main thread with 2 ports
+    }
+    
+    return err;   
+}
+
+/* ------------------------------------------------------------------------ */
+
+int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port, 
+                                         kim_identity  in_identity,
+                                         int32_t       in_error)
+{
+    int32_t err = 0;
+    k5_ipc_stream reply = NULL;
     kim_string identity_string = NULL;
-    mach_msg_type_number_t identity_len = 0;
-    kim_mipc_out_string identity_buf = NULL;
     
     if (!err) {
-        ServerThread *sthread = [ServerThread sharedServerThread];
-        if (!sthread) { err = KIM_OUT_OF_MEMORY_ERR; }
-
-        if (!err) {
-            client = [sthread connectionForPort: in_server_port];
-            if (!client) { err = KIM_OUT_OF_MEMORY_ERR; }
-        }
+        err = kim_identity_get_string (in_identity, &identity_string);
     }
     
     if (!err) {
-        identity = [client enterIdentityWithError: &result];
-    }
-    
-    if (!err && !result) {
-        err = kim_identity_get_string (identity, &identity_string);
-    }
-    
-    if (!err && !result && identity_string) {
-        identity_len = strlen (identity_string) + 1;
-        err = vm_allocate (mach_task_self (), 
-                           (vm_address_t *) &identity_buf, identity_len, TRUE);
-        
-    }
-    
-    if (!err && !result) {
-        memmove (identity_buf, identity_string, identity_len);
-        *out_identity = identity_buf;
-        *out_identityCnt = identity_len;
-        identity_buf = NULL;
+        err = k5_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        *out_error = result;
+        err = k5_ipc_stream_write_int32 (reply, in_error);
     }
     
-    if (identity_buf) { vm_deallocate (mach_task_self (), (vm_address_t) identity_buf, identity_len); }
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_string (reply, identity_string);
+    }
+    
+    if (!err) {
+        err = k5_ipc_server_send_reply (in_reply_port, reply);
+    }
+    
     kim_string_free (&identity_string);
-    kim_identity_free (&identity);
+    k5_ipc_stream_release (reply);
     
-    return err;
+    return err;   
 }
+
+#pragma mark -
 
 /* ------------------------------------------------------------------------ */
 
-kern_return_t kim_mipc_srv_select_identity (mach_port_t             in_server_port,
-                                            kim_mipc_in_string      in_application_id,
-                                            mach_msg_type_number_t  in_application_idCnt,
-                                            kim_mipc_in_string      in_explanation,
-                                            mach_msg_type_number_t  in_explanationCnt,
-                                            kim_mipc_time           in_start_time,
-                                            kim_mipc_lifetime       in_lifetime,
-                                            kim_mipc_boolean        in_renewable,
-                                            kim_mipc_lifetime       in_renewal_lifetime,
-                                            kim_mipc_boolean        in_forwardable,
-                                            kim_mipc_boolean        in_proxiable,
-                                            kim_mipc_boolean        in_addressless,
-                                            kim_mipc_in_string      in_service_name,
-                                            mach_msg_type_number_t  in_service_nameCnt,
-                                            kim_mipc_in_string      in_service_identity_hint,
-                                            mach_msg_type_number_t  in_service_identity_hintCnt,
-                                            kim_mipc_in_string      in_client_realm_hint,
-                                            mach_msg_type_number_t  in_client_realm_hintCnt,
-                                            kim_mipc_in_string      in_user_hint,
-                                            mach_msg_type_number_t  in_user_hintCnt,
-                                            kim_mipc_in_string      in_service_realm_hint,
-                                            mach_msg_type_number_t  in_service_realm_hintCnt,
-                                            kim_mipc_in_string      in_service_hint,
-                                            mach_msg_type_number_t  in_service_hintCnt,
-                                            kim_mipc_in_string      in_server_hint,
-                                            mach_msg_type_number_t  in_server_hintCnt,
-                                            kim_mipc_out_string    *out_identity,
-                                            mach_msg_type_number_t *out_identityCnt,
-                                            kim_mipc_error         *out_error)
+static int32_t kim_handle_request_select_identity (mach_port_t   in_client_port, 
+                                                   mach_port_t   in_reply_port, 
+                                                   k5_ipc_stream in_request_stream)
 {
-    kern_return_t err = 0;
-    kim_error result = KIM_NO_ERROR;
-    ClientConnection *client = NULL;
+    int32_t err = 0;
     kim_selection_hints hints = NULL;
-    kim_identity identity = NULL;
-    kim_string identity_string = NULL;
-    mach_msg_type_number_t identity_len = 0;
-    kim_mipc_out_string identity_buf = NULL;
     
     if (!err) {
-        err = kim_selection_hints_create (&hints, in_application_id);
-    }
+        //err = kim_os_selection_hints_read (out_hints, in_request_stream);
+    }    
     
     if (!err) {
-        kim_options options = NULL;
-        
-        err = kim_options_create (&options);
-        
-        if (!err) {
-            err = kim_options_set_start_time (options, in_start_time);
-        }
-        
-        if (!err) {
-            err = kim_options_set_lifetime (options, in_lifetime);
-        }
-        
-        if (!err) {
-            err = kim_options_set_renewable (options, in_renewable);
-        }
-        
-        if (!err) {
-            err = kim_options_set_renewal_lifetime (options, in_renewal_lifetime);
-        }
-        
-        if (!err) {
-            err = kim_options_set_forwardable (options, in_forwardable);
-        }
-        
-        if (!err) {
-            err = kim_options_set_proxiable (options, in_proxiable);
-        }
-        
-        if (!err) {
-            err = kim_options_set_addressless (options, in_addressless);
-        }
-        
-        if (!err) {
-            err = kim_options_set_service_name (options, in_service_name);
-        }
-        
-        if (!err) {
-            err = kim_selection_hints_set_options (hints, options);
-        }
-        
-        kim_options_free (&options);
+#warning Send select identity message to main thread with 2 ports
     }
     
-    if (!err) {
-        err = kim_selection_hints_set_explanation (hints, in_explanation);
-    }
-    
-    if (!err && in_service_identity_hint) {
-        err = kim_selection_hints_set_hint (hints, 
-                                            kim_hint_key_service_identity,
-                                            in_service_identity_hint);
-    }
-    
-    if (!err && in_client_realm_hint) {
-        err = kim_selection_hints_set_hint (hints, 
-                                            kim_hint_key_client_realm,
-                                            in_client_realm_hint);
-    }
-    
-    if (!err && in_user_hint) {
-        err = kim_selection_hints_set_hint (hints, 
-                                            kim_hint_key_user,
-                                            in_user_hint);
-    }
-    
-    if (!err && in_service_realm_hint) {
-        err = kim_selection_hints_set_hint (hints, 
-                                            kim_hint_key_service_realm,
-                                            in_service_realm_hint);
-    }
-    
-    if (!err && in_service_hint) {
-        err = kim_selection_hints_set_hint (hints, 
-                                            kim_hint_key_service,
-                                            in_service_hint);
-    }
-    
-    if (!err && in_server_hint) {
-        err = kim_selection_hints_set_hint (hints, 
-                                            kim_hint_key_server,
-                                            in_server_hint);
-    }
-    
-    if (!err) {
-        ServerThread *sthread = [ServerThread sharedServerThread];
-        if (!sthread) { err = KIM_OUT_OF_MEMORY_ERR; }
-        
-        if (!err) {
-            client = [sthread connectionForPort: in_server_port];
-            if (!client) { err = KIM_OUT_OF_MEMORY_ERR; }
-        }
-    }
-    
-    if (!err) {
-        identity = [client selectIdentityWithHints: hints
-                                             error: &result];
-    }
-    
-    if (!err && !result) {
-        err = kim_identity_get_string (identity, &identity_string);
-    }
-
-    if (!err && !result && identity_string) {
-        identity_len = strlen (identity_string) + 1;
-        err = vm_allocate (mach_task_self (), 
-                           (vm_address_t *) &identity_buf, identity_len, TRUE);
-    }
-    
-    if (!err && !result) {
-        memmove (identity_buf, identity_string, identity_len);
-        *out_identity = identity_buf;
-        *out_identityCnt = identity_len;
-        identity_buf = NULL;
-    }
-        
-    if (!err) {
-        *out_error = result;
-    }
-    
-    if (identity_buf) { vm_deallocate (mach_task_self (), 
-                                       (vm_address_t) identity_buf, 
-                                       identity_len); }
-    kim_string_free (&identity_string);
-    kim_identity_free (&identity);
     kim_selection_hints_free (&hints);
+    
+    return err;   
+}
 
+/* ------------------------------------------------------------------------ */
+
+int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port, 
+                                          kim_identity  in_identity,
+                                          int32_t       in_error)
+{
+    int32_t err = 0;
+    k5_ipc_stream reply = NULL;
+    kim_string identity_string = NULL;
+    
+    if (!err) {
+        err = kim_identity_get_string (in_identity, &identity_string);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_new (&reply);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (reply, in_error);
+    }
+    
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_string (reply, identity_string);
+    }
+    
+    if (!err) {
+        err = k5_ipc_server_send_reply (in_reply_port, reply);
+    }
+    
+    kim_string_free (&identity_string);
+    k5_ipc_stream_release (reply);
+    
+    return err;   
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port, 
+                                               mach_port_t   in_reply_port, 
+                                               k5_ipc_stream in_request_stream)
+{
+    int32_t err = 0;
+    char *identity_string = NULL;
+    int32_t type = 0;
+    int32_t hide_reply = 0;
+    char *title = NULL;
+    char *message = NULL;
+    char *description = NULL;
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &identity_string);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (in_request_stream, &type);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (in_request_stream, &hide_reply);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &title);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &message);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &description);
+    }    
+    
+    if (!err) {
+#warning Send auth prompt message to main thread with 2 ports and arguments
+    }
+    
+    k5_ipc_stream_free_string (identity_string);    
+    k5_ipc_stream_free_string (title);    
+    k5_ipc_stream_free_string (message);    
+    k5_ipc_stream_free_string (description);    
+    
+    return err;   
+}
+
+/* ------------------------------------------------------------------------ */
+
+int32_t kim_handle_reply_auth_prompt (mach_port_t   in_reply_port, 
+                                      kim_string    in_prompt_response,
+                                      int32_t       in_error)
+{
+    int32_t err = 0;
+    k5_ipc_stream reply = NULL;
+    
+    if (!err) {
+        err = k5_ipc_stream_new (&reply);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (reply, in_error);
+    }
+    
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_string (reply, in_prompt_response);
+    }
+    
+    if (!err) {
+        err = k5_ipc_server_send_reply (in_reply_port, reply);
+    }
+    
+    k5_ipc_stream_release (reply);
+    
+    return err;   
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static int32_t kim_handle_request_change_password (mach_port_t   in_client_port, 
+                                                   mach_port_t   in_reply_port, 
+                                                   k5_ipc_stream in_request_stream)
+{
+    int32_t err = 0;
+    char *identity_string = NULL;
+    int32_t old_password_expired = 0;
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &identity_string);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (in_request_stream, 
+                                        &old_password_expired);
+    }    
+    
+    if (!err) {
+#warning Send change password message to main thread with 2 ports and arguments
+    }
+    
+    k5_ipc_stream_free_string (identity_string);   
+    
+    return err;   
+}
+
+/* ------------------------------------------------------------------------ */
+
+int32_t kim_handle_reply_change_password (mach_port_t   in_reply_port, 
+                                          kim_string    in_old_password,
+                                          kim_string    in_new_password,
+                                          kim_string    in_vfy_password,
+                                          int32_t       in_error)
+{
+    int32_t err = 0;
+    k5_ipc_stream reply = NULL;
+    
+    if (!err) {
+        err = k5_ipc_stream_new (&reply);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (reply, in_error);
+    }
+    
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_string (reply, in_old_password);
+    }
+    
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_string (reply, in_new_password);
+    }
+    
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_string (reply, in_vfy_password);
+    }
+    
+    if (!err) {
+        err = k5_ipc_server_send_reply (in_reply_port, reply);
+    }
+    
+    k5_ipc_stream_release (reply);
+    
+    return err;   
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static int32_t kim_handle_request_handle_error (mach_port_t   in_client_port, 
+                                                mach_port_t   in_reply_port, 
+                                                k5_ipc_stream in_request_stream)
+{
+    int32_t err = 0;
+    char *identity_string = NULL;
+    int32_t error = 0;
+    char *message = NULL;
+    char *description = NULL;
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &identity_string);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (in_request_stream, &error);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &message);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_string (in_request_stream, &description);
+    }    
+    
+    if (!err) {
+#warning Send handle error message to main thread with 2 ports and arguments
+    }
+    
+    k5_ipc_stream_free_string (identity_string);   
+    k5_ipc_stream_free_string (message);   
+    k5_ipc_stream_free_string (description);   
+    
+    return err;   
+}
+
+/* ------------------------------------------------------------------------ */
+
+int32_t kim_handle_reply_handle_error (mach_port_t   in_reply_port, 
+                                       int32_t       in_error)
+{
+    int32_t err = 0;
+    k5_ipc_stream reply = NULL;
+    
+    if (!err) {
+        err = k5_ipc_stream_new (&reply);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (reply, in_error);
+    }
+
+    if (!err) {
+        err = k5_ipc_server_send_reply (in_reply_port, reply);
+    }
+    
+    k5_ipc_stream_release (reply);
+    
+    return err;   
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static int32_t kim_handle_request_fini (mach_port_t   in_client_port, 
+                                        mach_port_t   in_reply_port, 
+                                        k5_ipc_stream in_request_stream)
+{
+    int32_t err = 0;
+    
+    if (!err) {
+#warning Send fini message to main thread with 2 ports
+    }
+    
+    return err;   
+}
+
+/* ------------------------------------------------------------------------ */
+
+int32_t kim_handle_reply_fini (mach_port_t   in_reply_port, 
+                               int32_t       in_error)
+{
+    int32_t err = 0;
+    k5_ipc_stream reply = NULL;
+    
+    if (!err) {
+        err = k5_ipc_stream_new (&reply);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (reply, in_error);
+    }
+    
+    if (!err) {
+        err = k5_ipc_server_send_reply (in_reply_port, reply);
+    }
+    
+    k5_ipc_stream_release (reply);
+    
+    return err;   
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+int32_t k5_ipc_server_add_client (mach_port_t in_client_port)
+{
+    int32_t err = 0;
+    
+    if (!err) {
+        /* Don't need to do anything here since we have an init message */
+    }
+    
     return err;
 }
 
 /* ------------------------------------------------------------------------ */
 
-kern_return_t kim_mipc_srv_auth_prompt (mach_port_t             in_server_port,
-                                        kim_mipc_in_string      in_identity,
-                                        mach_msg_type_number_t  in_identityCnt,
-                                        kim_mipc_prompt_type    in_prompt_type,
-                                        kim_mipc_boolean        in_hide_reply,
-                                        kim_mipc_in_string      in_title,
-                                        mach_msg_type_number_t  in_titleCnt,
-                                        kim_mipc_in_string      in_message,
-                                        mach_msg_type_number_t  in_messageCnt,
-                                        kim_mipc_in_string      in_description,
-                                        mach_msg_type_number_t  in_descriptionCnt,
-                                        kim_mipc_out_string    *out_response,
-                                        mach_msg_type_number_t *out_responseCnt,
-                                        kim_mipc_error         *out_error)
+int32_t k5_ipc_server_remove_client (mach_port_t in_client_port)
 {
-    kern_return_t err = 0;
-    kim_error result = KIM_NO_ERROR;
-    ClientConnection *client = NULL;
-    kim_identity identity = NULL;
-    const char *response_string = NULL;
-    mach_msg_type_number_t response_len = 0;
-    kim_mipc_out_string response_buf = NULL;
+    int32_t err = 0;    
     
     if (!err) {
-        ServerThread *sthread = [ServerThread sharedServerThread];
-        if (!sthread) { err = KIM_OUT_OF_MEMORY_ERR; }
-        
-        if (!err) {
-            client = [sthread connectionForPort: in_server_port];
-            if (!client) { err = KIM_OUT_OF_MEMORY_ERR; }
-        }
+        /* Client exited.  Main thread should check for windows belonging to
+         * in_client_port and close any it finds. */
+#warning Insert code to handle client death here
     }
-    
-    if (!err) {
-        err = kim_identity_create_from_string (&identity, in_identity);
-    }
-    
-    if (!err) {
-        NSString *title = NULL;
-        NSString *message = NULL;
-        NSString *description = NULL;
-        
-        if (in_title) {
-            title = [NSString stringWithUTF8String: in_title];
-        }
-        
-        if (in_message) {
-            message = [NSString stringWithUTF8String: in_message];
-        }
-        
-        if (in_description) {
-            description = [NSString stringWithUTF8String: in_description];
-        }
-        
-        response_string = [[client authPromptWithIdentity: identity
-                                                     type: in_prompt_type
-                                                hideReply: in_hide_reply
-                                                    title: title
-                                                  message: message
-                                              description: description
-                                                    error: &result] UTF8String];
-    }
-    
-    if (!err && !result && response_string) {
-        response_len = strlen (response_string) + 1;
-        err = vm_allocate (mach_task_self (), 
-                           (vm_address_t *) &response_buf, response_len, TRUE);
-        
-    }
-    
-    if (!err && !result) {
-        memmove (response_buf, response_string, response_len);
-        *out_response = response_buf;
-        *out_responseCnt = response_len;
-        response_buf = NULL;
-    }
-    
-    if (!err) {
-        *out_error = result;
-    }
-    
-    if (response_buf) { vm_deallocate (mach_task_self (), 
-                                       (vm_address_t) response_buf, 
-                                       response_len); }
-    kim_identity_free (&identity);
     
     return err;
 }
 
 /* ------------------------------------------------------------------------ */
 
-kern_return_t kim_mipc_srv_change_password (mach_port_t             in_server_port,
-                                            kim_mipc_in_string      in_identity,
-                                            mach_msg_type_number_t  in_identityCnt,
-                                            kim_mipc_boolean        in_old_password_expired,
-                                            kim_mipc_out_string    *out_old_password,
-                                            mach_msg_type_number_t *out_old_passwordCnt,
-                                            kim_mipc_out_string    *out_new_password,
-                                            mach_msg_type_number_t *out_new_passwordCnt,
-                                            kim_mipc_out_string    *out_vfy_password,
-                                            mach_msg_type_number_t *out_vfy_passwordCnt,
-                                            kim_mipc_error         *out_error)
+int32_t k5_ipc_server_handle_request (mach_port_t   in_client_port, 
+                                      mach_port_t   in_reply_port, 
+                                      k5_ipc_stream in_request_stream)
 {
-    kern_return_t err = 0;
-    kim_error result = KIM_NO_ERROR;
-    ClientConnection *client = NULL;
-    kim_identity identity = NULL;
-    NSArray *passwords = NULL;
-    const char *old_password_string = NULL;
-    const char *new_password_string = NULL;
-    const char *vfy_password_string = NULL;
-    mach_msg_type_number_t old_password_len = 0;
-    mach_msg_type_number_t new_password_len = 0;
-    mach_msg_type_number_t vfy_password_len = 0;
-    kim_mipc_out_string old_password_buf = NULL;
-    kim_mipc_out_string new_password_buf = NULL;
-    kim_mipc_out_string vfy_password_buf = NULL;
+    int32_t err = 0;
+    char *message_type = NULL;
     
     if (!err) {
-        ServerThread *sthread = [ServerThread sharedServerThread];
-        if (!sthread) { err = KIM_OUT_OF_MEMORY_ERR; }
-        
-        if (!err) {
-            client = [sthread connectionForPort: in_server_port];
-            if (!client) { err = KIM_OUT_OF_MEMORY_ERR; }
-        }
+        err = k5_ipc_stream_read_string (in_request_stream, &message_type);
     }
     
     if (!err) {
-        err = kim_identity_create_from_string (&identity, in_identity);
-    }
-    
-    if (!err) {
-        passwords = [client changePasswordWithIdentity: identity
-                                   oldPasswordIsExpired: in_old_password_expired
-                                                  error: &result];
-    }
-    
-    if (!err && !result) {
-        if (passwords && [passwords count] == 3) {
-            old_password_string = [[passwords objectAtIndex: 1] UTF8String];
-            new_password_string = [[passwords objectAtIndex: 2] UTF8String];
-            vfy_password_string = [[passwords objectAtIndex: 3] UTF8String];
+        if (!strcmp (message_type, "init")) {
+            err = kim_handle_request_init (in_client_port,
+                                           in_reply_port,
+                                           in_request_stream);
+            
+        } else if (!strcmp (message_type, "enter_identity")) {
+            err = kim_handle_request_enter_identity (in_client_port,
+                                                     in_reply_port,
+                                                     in_request_stream);
+            
+        } else if (!strcmp (message_type, "select_identity")) {
+            err = kim_handle_request_select_identity (in_client_port,
+                                                      in_reply_port,
+                                                      in_request_stream);
+            
+        } else if (!strcmp (message_type, "auth_prompt")) {
+            err = kim_handle_request_auth_prompt (in_client_port,
+                                                  in_reply_port,
+                                                  in_request_stream);
+            
+        } else if (!strcmp (message_type, "change_password")) {
+            err = kim_handle_request_change_password (in_client_port,
+                                                      in_reply_port,
+                                                      in_request_stream);
+            
+        } else if (!strcmp (message_type, "handle_error")) {
+            err = kim_handle_request_handle_error (in_client_port,
+                                                   in_reply_port,
+                                                   in_request_stream);
+            
+        } else if (!strcmp (message_type, "fini")) {
+            err = kim_handle_request_fini (in_client_port,
+                                           in_reply_port,
+                                           in_request_stream);
+            
         } else {
-            err = KIM_OUT_OF_MEMORY_ERR;
+            err = EINVAL;
         }
     }
-        
-    if (!err && !result && old_password_string) {
-        old_password_len = strlen (old_password_string) + 1;
-        err = vm_allocate (mach_task_self (), (vm_address_t *) &old_password_buf, old_password_len, TRUE);
-        
-    }
-
-    if (!err && !result && new_password_string) {
-        new_password_len = strlen (new_password_string) + 1;
-        err = vm_allocate (mach_task_self (), (vm_address_t *) &new_password_buf, new_password_len, TRUE);
-        
-    }
     
-    if (!err && !result && vfy_password_string) {
-        vfy_password_len = strlen (vfy_password_string) + 1;
-        err = vm_allocate (mach_task_self (), (vm_address_t *) &vfy_password_buf, vfy_password_len, TRUE);
-    }
-    
-    if (!err && !result) {
-        memmove (old_password_buf, old_password_string, old_password_len);
-        memmove (new_password_buf, new_password_string, new_password_len);
-        memmove (vfy_password_buf, vfy_password_string, vfy_password_len);
-        *out_old_password = old_password_buf;
-        *out_new_password = new_password_buf;
-        *out_vfy_password = vfy_password_buf;
-        *out_old_passwordCnt = old_password_len;
-        *out_new_passwordCnt = new_password_len;
-        *out_vfy_passwordCnt = vfy_password_len;
-        old_password_buf = NULL;
-        new_password_buf = NULL;
-        vfy_password_buf = NULL;
-    }
-    
-    if (!err) {
-        *out_error = result;
-    }
-    
-    if (old_password_buf) { vm_deallocate (mach_task_self (), (vm_address_t) old_password_buf, old_password_len); }
-    if (new_password_buf) { vm_deallocate (mach_task_self (), (vm_address_t) new_password_buf, new_password_len); }
-    if (vfy_password_buf) { vm_deallocate (mach_task_self (), (vm_address_t) vfy_password_buf, vfy_password_len); }
-    kim_identity_free (&identity);
+    k5_ipc_stream_free_string (message_type);
     
     return err;
 }
 
-/* ------------------------------------------------------------------------ */
-
-kern_return_t kim_mipc_srv_handle_error (mach_port_t             in_server_port,
-                                         kim_mipc_in_string      in_identity,
-                                         mach_msg_type_number_t  in_identityCnt,
-                                         kim_mipc_error          in_error,
-                                         kim_mipc_in_string      in_message,
-                                         mach_msg_type_number_t  in_messageCnt,
-                                         kim_mipc_in_string      in_description,
-                                         mach_msg_type_number_t  in_descriptionCnt,
-                                         kim_mipc_error         *out_error)
-{
-    kern_return_t err = 0;
-    kim_error result = KIM_NO_ERROR;
-    ClientConnection *client = NULL;
-    kim_identity identity = NULL;
-    
-    if (!err) {
-        ServerThread *sthread = [ServerThread sharedServerThread];
-        if (!sthread) { err = KIM_OUT_OF_MEMORY_ERR; }
-        
-        if (!err) {
-            client = [sthread connectionForPort: in_server_port];
-            if (!client) { err = KIM_OUT_OF_MEMORY_ERR; }
-        }
-    }
-    
-    if (!err) {
-        err = kim_identity_create_from_string (&identity, in_identity);
-    }
-    
-    if (!err) {
-        NSString *message = NULL;
-        NSString *description = NULL;
-        
-        if (in_message) {
-            message = [NSString stringWithUTF8String: in_message];
-        }
-        
-        if (in_description) {
-            description = [NSString stringWithUTF8String: in_description];
-        }
-        
-        result = [client handleError: in_error
-                            identity: identity
-                             message: message
-                         description: description];
-    }
-    
-    if (!err) {
-        *out_error = result;
-    }
-    
-    kim_identity_free (&identity);
-    
-    return err;
-}
+#pragma mark -
 
 /* ------------------------------------------------------------------------ */
 
-kern_return_t kim_mipc_srv_fini (mach_port_t     in_server_port,
-                                 kim_mipc_error *out_error)
+int32_t kim_agent_listen_loop (void)
 {
-    kern_return_t err = 0;
-    ServerThread *sthread = NULL;
-    
-    if (!err) {
-        sthread = [ServerThread sharedServerThread];
-        if (!sthread) { err = KIM_OUT_OF_MEMORY_ERR; }
-    }
-
-    if (!err) {
-        [sthread removeConnectionWithPort: in_server_port];
-    }
-    
-    if (!err) {
-        *out_error = KIM_NO_ERROR;
-    }
-    
-    return err;
+    return k5_ipc_server_listen_loop ();
 }

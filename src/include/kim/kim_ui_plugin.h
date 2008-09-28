@@ -40,7 +40,7 @@ enum kim_prompt_type_enum {
     kim_prompt_type_password = 0,
     kim_prompt_type_preauth = 1
 };
-    
+
 /*
  * Plugins for Controlling Identity Selection and Credential Acquisition
  * 
