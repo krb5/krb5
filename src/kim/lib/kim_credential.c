@@ -843,7 +843,10 @@ kim_error kim_credential_get_options (kim_credential  in_credential,
     
     if (!err) {
         kim_lifetime rlifetime = (creds->ticket_flags & TKT_FLG_RENEWABLE ?
-                                  creds->times.renew_till : 0);
+                                  creds->times.renew_till -
+                                  (creds->times.starttime ?
+                                   creds->times.starttime :
+                                   creds->times.authtime) : 0);
         
         err = kim_options_set_renewal_lifetime (options, rlifetime);
     }
