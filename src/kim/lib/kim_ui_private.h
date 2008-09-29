@@ -45,6 +45,7 @@ enum kim_ui_error_type {
 
 /* declare struct on stack.  Deep contents will be freed by kim_ui_fini. */
 typedef struct kim_ui_context {
+    kim_boolean initialized;
     enum kim_ui_type type;
     void *tcontext;
     kim_identity identity;

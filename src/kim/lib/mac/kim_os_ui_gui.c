@@ -58,6 +58,8 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
     k5_ipc_stream request = NULL;
     k5_ipc_stream reply = NULL;
     
+    if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
     if (!err) {
         err = kim_library_get_application_name (&name);
     }
