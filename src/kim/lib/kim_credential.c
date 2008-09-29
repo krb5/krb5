@@ -249,7 +249,7 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         krb5_creds creds;
         kim_boolean free_creds = 0;
         kim_count prompt_count;
-        krb5_principal principal = kim_identity_krb5_principal (in_identity);
+        krb5_principal principal = kim_identity_krb5_principal (identity);
         krb5_get_init_creds_opt *opts = kim_options_init_cred_options (options);
         char *service = kim_options_service_name (options);
         kim_time start_time = kim_options_start_time (options);
@@ -280,7 +280,7 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         
         
         if (err == KRB5KDC_ERR_KEY_EXP) {
-            err = kim_identity_change_password_common (in_identity, 1, 
+            err = kim_identity_change_password_common (identity, 1, 
                                                        &context);
         }
         
@@ -290,7 +290,7 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
             
         } else {
             /*  new creds failed, report error to user */
-            kim_error terr = kim_ui_handle_kim_error (&context, in_identity, 
+            kim_error terr = kim_ui_handle_kim_error (&context, identity, 
                                                       kim_ui_error_type_authentication,
                                                       err);
             
