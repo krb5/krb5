@@ -38,16 +38,30 @@ kim_boolean kim_os_identity_allow_save_password (void)
     CFPropertyListRef disable_pref = NULL;
     
     disable_pref = CFPreferencesCopyValue (CFSTR ("SavePasswordDisabled"), 
-                                           CFSTR ("edu.mit.Kerberos.KerberosAgent"),
+                                           KIM_PREFERENCES_FILE,
                                            kCFPreferencesAnyUser,
                                            kCFPreferencesAnyHost);
     if (!disable_pref) {
         disable_pref = CFPreferencesCopyValue (CFSTR ("SavePasswordDisabled"), 
-                                               CFSTR ("edu.mit.Kerberos.KerberosAgent"),
+                                               KIM_PREFERENCES_FILE,
                                                kCFPreferencesAnyUser,
                                                kCFPreferencesCurrentHost);        
     }
     
+    if (!disable_pref) {
+        disable_pref = CFPreferencesCopyValue (CFSTR ("SavePasswordDisabled"), 
+                                               KA_PREFERENCES_FILE,
+                                               kCFPreferencesAnyUser,
+                                               kCFPreferencesAnyHost);        
+    }
+    
+    if (!disable_pref) {
+        disable_pref = CFPreferencesCopyValue (CFSTR ("SavePasswordDisabled"), 
+                                               KA_PREFERENCES_FILE,
+                                               kCFPreferencesAnyUser,
+                                               kCFPreferencesCurrentHost);        
+    }
+
     disabled = (disable_pref && 
                 CFGetTypeID (disable_pref) == CFBooleanGetTypeID () &&
                 CFBooleanGetValue (disable_pref));

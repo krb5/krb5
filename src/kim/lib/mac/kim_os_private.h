@@ -32,6 +32,10 @@
 
 #define kim_os_agent_bundle_id "edu.mit.Kerberos.KerberosAgent"
 
+#define KIM_PREFERENCES_FILE CFSTR("edu.mit.Kerberos.IdentityManagement")
+#define KLL_PREFERENCES_FILE CFSTR("edu.mit.Kerberos.KerberosLogin")
+#define KA_PREFERENCES_FILE  CFSTR("edu.mit.Kerberos.KerberosAgent")
+
 kim_error kim_os_library_lock_for_bundle_lookup (void);
 kim_error kim_os_library_unlock_for_bundle_lookup (void);
 

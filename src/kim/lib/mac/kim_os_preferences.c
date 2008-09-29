@@ -28,9 +28,6 @@
 
 #include "kim_os_private.h"
 
-#define KIM_PREFERENCES_FILE CFSTR("edu.mit.Kerberos.IdentityManagement")
-#define KLL_PREFERENCES_FILE CFSTR("edu.mit.Kerberos.KerberosLogin")
-
 #define kim_os_preference_any_identity "KIM_IDENTITY_ANY"
 
 #pragma mark -
