@@ -39,16 +39,20 @@ kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
 
 kim_error kim_os_identity_create_for_username (kim_identity *out_identity);
 
+
+kim_boolean kim_os_identity_allow_save_password (void);
+
 kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
                                               kim_string   *out_password);
 
 kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
                                               kim_string   in_password);
 
+kim_error kim_os_identity_remove_saved_password (kim_identity in_identity);
+
 kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                                kim_boolean     in_old_password_expired,
-                                               kim_ui_context *in_ui_context);
-
-kim_error kim_os_identity_remove_saved_password (kim_identity in_identity);
+                                               kim_ui_context *in_ui_context,
+                                               kim_string     *out_new_password);
 
 #endif /* KIM_IDENTITY_PRIVATE_H */

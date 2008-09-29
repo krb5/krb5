@@ -267,6 +267,7 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
     int32_t err = 0;
     char *identity_string = NULL;
     int32_t type = 0;
+    int32_t allow_save_reply = 0;
     int32_t hide_reply = 0;
     char *title = NULL;
     char *message = NULL;
@@ -278,6 +279,10 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
     
     if (!err) {
         err = k5_ipc_stream_read_int32 (in_request_stream, &type);
+    }    
+    
+    if (!err) {
+        err = k5_ipc_stream_read_int32 (in_request_stream, &allow_save_reply);
     }    
     
     if (!err) {
@@ -299,7 +304,7 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
     if (!err) {
         NSLog (@"Got auth prompt with identity '%s', type '%d', hide '%d', title '%s', message '%s', description '%s'",
                identity_string, type, hide_reply, title, message, description);
-        err = kim_handle_reply_auth_prompt (in_reply_port, "ydobon", 0);
+        err = kim_handle_reply_auth_prompt (in_reply_port, "ydobon", 0, 0);
 #warning Send auth prompt message to main thread with 2 ports and arguments
     }
     
@@ -315,6 +320,7 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
 
 int32_t kim_handle_reply_auth_prompt (mach_port_t   in_reply_port, 
                                       kim_string    in_prompt_response,
+                                      kim_boolean   in_allow_save_response,
                                       int32_t       in_error)
 {
     int32_t err = 0;
@@ -330,6 +336,10 @@ int32_t kim_handle_reply_auth_prompt (mach_port_t   in_reply_port,
     
     if (!err && !in_error) {
         err = k5_ipc_stream_write_string (reply, in_prompt_response);
+    }
+    
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_int32 (reply, in_allow_save_response);
     }
     
     if (!err) {

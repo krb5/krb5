@@ -103,6 +103,7 @@ kim_error kim_ui_init (kim_ui_context *io_context)
         io_context->initialized = 0;
         io_context->identity = NULL;
         io_context->prompt_count = 0;
+        io_context->password_to_save = NULL;
     }
     
     return check_error (err);
@@ -228,6 +229,9 @@ krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
         }
         
         if (!got_saved_password) {
+            kim_boolean save_reply = FALSE;
+            kim_boolean allow_save_password = kim_os_identity_allow_save_password ();
+            
             context->prompt_count++;
 
             err = kim_ui_init_lazy (in_context);
@@ -237,36 +241,50 @@ krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
                     err = kim_ui_plugin_auth_prompt (context, 
                                                      context->identity, 
                                                      type,
+                                                     allow_save_password,
                                                      in_prompts[i].hidden,
                                                      in_name,
                                                      in_banner,
                                                      in_prompts[i].prompt,
-                                                     &reply);
+                                                     &reply,
+                                                     &save_reply);
                     
 #ifndef LEAN_CLIENT
                 } else if (context->type == kim_ui_type_gui_builtin) {
                     err = kim_os_ui_gui_auth_prompt (context, 
                                                      context->identity, 
                                                      type,
+                                                     allow_save_password,
                                                      in_prompts[i].hidden,
                                                      in_name,
                                                      in_banner,
                                                      in_prompts[i].prompt,
-                                                     &reply);
+                                                     &reply,
+                                                     &save_reply);
                     
                 } else if (context->type == kim_ui_type_cli) {
                     err = kim_ui_cli_auth_prompt (context, 
                                                   context->identity, 
                                                   type,
+                                                  allow_save_password,
                                                   in_prompts[i].hidden,
                                                   in_name,
                                                   in_banner,
                                                   in_prompts[i].prompt,
-                                                  &reply);
+                                                  &reply,
+                                                  &save_reply);
 #endif /* LEAN_CLIENT */
                     
                 } else {
                     err = check_error (KIM_NO_UI_ERR);
+                }
+            }
+            
+            if (!err && type == kim_prompt_type_password) {
+                kim_string_free (&context->password_to_save);
+
+                if (allow_save_password && save_reply) {
+                    err = kim_string_copy (&context->password_to_save, reply);
                 }
             }
         }
@@ -453,6 +471,8 @@ kim_error kim_ui_fini (kim_ui_context *io_context)
         } else {
             err = check_error (KIM_NO_UI_ERR);
         }
+        
+         kim_string_free (&io_context->password_to_save);
     }
     
     return check_error (err);

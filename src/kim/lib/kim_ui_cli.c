@@ -152,11 +152,13 @@ kim_error kim_ui_cli_select_identity (kim_ui_context      *in_context,
 kim_error kim_ui_cli_auth_prompt (kim_ui_context      *in_context,
                                   kim_identity         in_identity,
                                   kim_prompt_type      in_type,
+                                  kim_boolean          in_allow_save_reply, 
                                   kim_boolean          in_hide_reply, 
                                   kim_string           in_title,
                                   kim_string           in_message,
                                   kim_string           in_description,
-                                  char               **out_reply)
+                                  char               **out_reply,
+                                  kim_boolean         *out_save_reply)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -210,6 +212,11 @@ kim_error kim_ui_cli_auth_prompt (kim_ui_context      *in_context,
                 err = kim_string_create_from_buffer ((kim_string *) out_reply, 
                                                      prompts[0].reply->data, 
                                                      prompts[0].reply->length);
+                if (!err) {
+                    /* always allow password saving */
+                    *out_save_reply = (in_allow_save_reply && 
+                                       in_type == kim_prompt_type_password);
+                }
             }
             
             if (k5context) { krb5_free_context (k5context); }

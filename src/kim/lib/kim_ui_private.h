@@ -50,6 +50,7 @@ typedef struct kim_ui_context {
     void *tcontext;
     kim_identity identity;
     kim_count prompt_count;
+    kim_string password_to_save;
 } kim_ui_context;
 
 

@@ -278,10 +278,41 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
                                                &credential->creds));
         }
         
+        if (!err && context.password_to_save) {
+            /* If we were successful, save any password we got */
+            err = kim_os_identity_set_saved_password (identity,
+                                                      context.password_to_save);
+            
+           
+        }        
         
         if (err == KRB5KDC_ERR_KEY_EXP) {
+            kim_string new_password = NULL;
+            
             err = kim_identity_change_password_common (identity, 1, 
-                                                       &context);
+                                                       &context, 
+                                                       &new_password);
+            
+            if (!err) {
+                /* set counter to zero so we can tell if we got prompted */
+                context.prompt_count = 0;
+                
+                err = krb5_error (credential->context,
+                                  krb5_get_init_creds_password (credential->context, 
+                                                                &creds,
+                                                                principal,
+                                                                (char *) new_password, 
+                                                                kim_ui_prompter, 
+                                                                &context,
+                                                                start_time, 
+                                                                service, 
+                                                                opts));
+                
+                prompt_count = context.prompt_count; /* remember if we got prompts */
+                if (!err) { free_creds = 1; }
+            }
+            
+            kim_string_free (&new_password);
         }
         
         if (!err || err == KIM_USER_CANCELED_ERR) {

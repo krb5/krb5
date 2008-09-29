@@ -673,7 +673,8 @@ static kim_error kim_identity_change_password_with_credential (kim_identity    i
 
 kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                                kim_boolean     in_old_password_expired,
-                                               kim_ui_context *in_ui_context)
+                                               kim_ui_context *in_ui_context,
+                                               kim_string     *out_new_password)
 {
     kim_error err = KIM_NO_ERROR;
     kim_boolean done = 0;
@@ -700,7 +701,9 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
         if (!err) {
             kim_comparison comparison;
             
-            err = kim_string_compare (new_password, verify_password, &comparison);
+            err = kim_string_compare (new_password, 
+                                      verify_password, 
+                                      &comparison);
             if (!err && !kim_comparison_is_equal_to (comparison)) {
                 err = check_error (KIM_PASSWORD_MISMATCH_ERR);
             }
@@ -748,15 +751,18 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                             kim_ui_error_type_change_password,
                                             err);
             
-            if (was_prompted) {
-                /* User was prompted and might have entered bad info 
-                 * so let them try again. */
+            if (was_prompted || err == KIM_PASSWORD_MISMATCH_ERR) {
+                /* User could have entered bad info so let them try again. */
                 err = terr;
             }
             
         } else {
             /* password change succeeded or the user gave up */
             done = 1;
+            
+            if (!err && out_new_password) {
+                err = kim_string_copy (out_new_password, new_password);
+            }
             
             if (!err) {
                 kim_error terr = KIM_NO_ERROR;
@@ -801,7 +807,8 @@ kim_error kim_identity_change_password (kim_identity in_identity)
     }
     
     if (!err) {
-        err = kim_identity_change_password_common (in_identity, 0, &context);
+        err = kim_identity_change_password_common (in_identity, 0, 
+                                                   &context, NULL);
     }
     
     if (ui_inited) {

@@ -220,14 +220,16 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_os_ui_gui_auth_prompt (kim_ui_context     *in_context,
-                                     kim_identity        in_identity,
-                                     kim_prompt_type     in_type,
-                                     kim_boolean         in_hide_reply, 
-                                     kim_string          in_title,
-                                     kim_string          in_message,
-                                     kim_string          in_description,
-                                     char              **out_reply)
+kim_error kim_os_ui_gui_auth_prompt (kim_ui_context      *in_context,
+                                     kim_identity         in_identity,
+                                     kim_prompt_type      in_type,
+                                     kim_boolean          in_allow_save_reply, 
+                                     kim_boolean          in_hide_reply, 
+                                     kim_string           in_title,
+                                     kim_string           in_message,
+                                     kim_string           in_description,
+                                     char               **out_reply,
+                                     kim_boolean         *out_save_reply)
 {
     kim_error err = KIM_NO_ERROR;
     k5_ipc_stream request = NULL;
@@ -256,6 +258,10 @@ kim_error kim_os_ui_gui_auth_prompt (kim_ui_context     *in_context,
     
     if (!err) {
         err = k5_ipc_stream_write_int32 (request, in_type);
+    }
+    
+    if (!err) {
+        err = k5_ipc_stream_write_int32 (request, in_allow_save_reply);
     }
     
     if (!err) {
@@ -293,6 +299,10 @@ kim_error kim_os_ui_gui_auth_prompt (kim_ui_context     *in_context,
     
     if (!err) {
         err  = k5_ipc_stream_read_string (reply, out_reply);
+    } 
+    
+    if (!err) {
+        err  = k5_ipc_stream_read_int32 (reply, out_save_reply);
     } 
     
     kim_string_free (&identity_string);

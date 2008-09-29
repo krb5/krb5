@@ -32,6 +32,33 @@
 
 /* ------------------------------------------------------------------------ */
 
+kim_boolean kim_os_identity_allow_save_password (void)
+{
+    kim_boolean disabled = 0;
+    CFPropertyListRef disable_pref = NULL;
+    
+    disable_pref = CFPreferencesCopyValue (CFSTR ("SavePasswordDisabled"), 
+                                           CFSTR ("edu.mit.Kerberos.KerberosAgent"),
+                                           kCFPreferencesAnyUser,
+                                           kCFPreferencesAnyHost);
+    if (!disable_pref) {
+        disable_pref = CFPreferencesCopyValue (CFSTR ("SavePasswordDisabled"), 
+                                               CFSTR ("edu.mit.Kerberos.KerberosAgent"),
+                                               kCFPreferencesAnyUser,
+                                               kCFPreferencesCurrentHost);        
+    }
+    
+    disabled = (disable_pref && 
+                CFGetTypeID (disable_pref) == CFBooleanGetTypeID () &&
+                CFBooleanGetValue (disable_pref));
+    
+    if (disable_pref) { CFRelease (disable_pref); }
+    
+    return !disabled;
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
                                               kim_string   *out_password)
 {
@@ -43,6 +70,11 @@ kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
     
     if (!err && !in_identity ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    /* Short circuit if password saving is disabled */
+    if (!err && !kim_os_identity_allow_save_password ()) {
+        return kim_os_identity_remove_saved_password (in_identity);
+    }
     
     if (!err) {
         err = kim_identity_get_components_string (in_identity, &name);
@@ -84,6 +116,11 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
     
     if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    /* Short circuit if password saving is disabled */
+    if (!err && !kim_os_identity_allow_save_password ()) {
+        return kim_os_identity_remove_saved_password (in_identity);
+    }
     
     if (!err) {
         err = kim_identity_get_components_string (in_identity, &name);

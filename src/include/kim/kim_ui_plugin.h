@@ -88,14 +88,19 @@ typedef struct kim_ui_plugin_ftable_v0 {
                                   kim_identity        *out_identity);
     
     /* Present UI to display authentication to the user */
+    /* If in_allow_save_reply is FALSE do not display UI to allow the user
+     * to save their password. In this case the value of out_save_reply will
+     * be ignored. */
     kim_error (*auth_prompt) (void              *in_context,
                               kim_identity       in_identity,
                               kim_prompt_type    in_type,
+                              kim_boolean        in_allow_save_reply, 
                               kim_boolean        in_hide_reply, 
                               kim_string         in_title,
                               kim_string         in_message,
                               kim_string         in_description,
-                              char             **out_reply);
+                              char             **out_reply,
+                              kim_boolean       *out_save_reply);
     
     /* Prompt to change the identity's password. 
      * May be combined with an auth_prompt if additional auth is required,

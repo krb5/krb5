@@ -43,6 +43,7 @@ int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port,
 
 int32_t kim_handle_reply_auth_prompt (mach_port_t   in_reply_port, 
                                       kim_string    in_prompt_response,
+                                      kim_boolean   in_allow_save_response,
                                       int32_t       in_error);
 
 int32_t kim_handle_reply_change_password (mach_port_t   in_reply_port, 

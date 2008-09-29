@@ -202,11 +202,13 @@ kim_error kim_ui_plugin_select_identity (kim_ui_context      *in_context,
 kim_error kim_ui_plugin_auth_prompt (kim_ui_context      *in_context,
                                      kim_identity         in_identity,
                                      kim_prompt_type      in_type,
+                                     kim_boolean          in_allow_save_reply, 
                                      kim_boolean          in_hide_reply, 
                                      kim_string           in_title,
                                      kim_string           in_message,
                                      kim_string           in_description,
-                                     char               **out_reply)
+                                     char               **out_reply,
+                                     kim_boolean         *out_save_reply)
 {
     kim_error err = KIM_NO_ERROR;
     
@@ -221,11 +223,13 @@ kim_error kim_ui_plugin_auth_prompt (kim_ui_context      *in_context,
         err = context->ftable->auth_prompt (context->plugin_context,
                                             in_identity, 
                                             in_type,
+                                            in_allow_save_reply,
                                             in_hide_reply,
                                             in_title,
                                             in_message,
                                             in_description,
-                                            out_reply);
+                                            out_reply,
+                                            out_save_reply);
     }
     
     return check_error (err);
