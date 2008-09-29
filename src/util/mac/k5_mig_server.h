@@ -41,10 +41,6 @@ int32_t k5_ipc_server_handle_request (mach_port_t   in_connection_port,
 
 /* Server control functions */
 
-int32_t k5_ipc_server_initialize (int argc, const char *argv[]);
-
-int32_t k5_ipc_server_cleanup (int argc, const char *argv[]);
-
 int32_t k5_ipc_server_listen_loop (void);
 
 int32_t k5_ipc_server_send_reply (mach_port_t   in_reply_pipe,

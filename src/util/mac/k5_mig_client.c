@@ -52,7 +52,7 @@ static int k5_cli_ipc_thread_init (void)
 {
     int err = 0;
 
-    err = k5_key_register (K5_KEY_IPC_REQUEST_PORT, free);
+    err = k5_key_register (K5_KEY_IPC_REQUEST_PORTS, free);
     
     if (!err) {
         err = k5_key_register (K5_KEY_IPC_REPLY_STREAM, NULL);
@@ -69,7 +69,7 @@ static int k5_cli_ipc_thread_init (void)
 
 static void k5_cli_ipc_thread_fini (void)
 {    
-    k5_key_delete (K5_KEY_IPC_REQUEST_PORT);
+    k5_key_delete (K5_KEY_IPC_REQUEST_PORTS);
     k5_key_delete (K5_KEY_IPC_REPLY_STREAM);
     k5_key_delete (K5_KEY_IPC_SERVER_DIED);
 }
@@ -191,25 +191,25 @@ int32_t k5_ipc_send_request (const char    *in_service_id,
     }
 
     if (!err) {
-        k5_ipc_request_port *request_ports = NULL;
+        k5_ipc_request_port *port_list = NULL;
         
-        request_ports = k5_getspecific (K5_KEY_IPC_REQUEST_PORT);
+        port_list = k5_getspecific (K5_KEY_IPC_REQUEST_PORTS);
 
-        if (!request_ports) {
-            int size = sizeof (*request_ports) * KIPC_SERVICE_COUNT;
+        if (!port_list) {
+            int size = sizeof (*port_list) * KIPC_SERVICE_COUNT;
             
-            request_ports = malloc (size);
-            if (!request_port) { err = ENOMEM; }
+            port_list = malloc (size);
+            if (!port_list) { err = ENOMEM; }
             
             if (!err) {
                 int i;
                 
                 for (i = 0; i < KIPC_SERVICE_COUNT; i++) {
-                    request_ports[i].service_id = k5_ipc_known_ports [i].service_id;
-                    request_ports[i].port = k5_ipc_known_ports [i].port;
+                    port_list[i].service_id = k5_ipc_known_ports[i].service_id;
+                    port_list[i].port = k5_ipc_known_ports[i].port;
                 }
                 
-                err = k5_setspecific (K5_KEY_IPC_REQUEST_PORT, request_ports);
+                err = k5_setspecific (K5_KEY_IPC_REQUEST_PORTS, port_list);
             }
         }
         
@@ -217,9 +217,10 @@ int32_t k5_ipc_send_request (const char    *in_service_id,
             int i, found = 0;
 
             for (i = 0; i < KIPC_SERVICE_COUNT; i++) {
-                if (!strcmp (in_service_id, request_ports[i].service_id)) {
+                if (!strcmp (in_service_id, port_list[i].service_id)) {
                     found = 1;
-                    request_port = &request_ports[i].port;
+                    request_port = &port_list[i].port;
+                    break;
                 }
             }
             

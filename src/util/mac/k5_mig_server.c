@@ -142,34 +142,6 @@ kern_return_t k5_ipc_server_request (mach_port_t             in_connection_port,
 
 /* ------------------------------------------------------------------------ */
 
-int32_t k5_ipc_server_initialize (int argc, const char *argv[])
-{
-    int32_t err = 0;
-    
-    openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
-    syslog (LOG_INFO, "Starting up.");   
-    
-    syslog (LOG_NOTICE, "Exiting: %s (%d)", kipc_error_string (err), err);
-    
-    return err;
-}
-
-/* ------------------------------------------------------------------------ */
-
-int32_t k5_ipc_server_cleanup (int argc, const char *argv[])
-{
-    int32_t err = 0;
-    
-    openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
-    syslog (LOG_INFO, "Starting up.");   
-    
-    syslog (LOG_NOTICE, "Exiting: %s (%d)", kipc_error_string (err), err);
-    
-    return err;
-}
-
-/* ------------------------------------------------------------------------ */
-
 int32_t k5_ipc_server_listen_loop (void)
 {
     /* Run the Mach IPC listen loop.  
