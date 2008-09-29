@@ -211,6 +211,7 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     kim_ui_context context;
     kim_boolean ui_inited = 0;
     kim_boolean done = 0;
+    kim_identity identity = in_identity;
 
     if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
@@ -232,10 +233,16 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
     
     if (!err) {
         err = kim_ui_init (&context);
-        if (!err) {
-            context.identity = in_identity; /* used by kim_ui_prompter */
-            ui_inited = 1; 
-        }
+        if (!err) { ui_inited = 1; }
+    }
+    
+    if (!err && !in_identity) {
+        err = kim_ui_enter_identity (&context, &identity);
+        
+    }
+    
+    if (!err) {
+        context.identity = identity; /* used by kim_ui_prompter */
     }
     
     while (!err && !done) { 
@@ -307,7 +314,8 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
         credential = NULL;
     }
     
-    if (options != in_options) { kim_options_free (&options); }
+    if (options  != in_options ) { kim_options_free (&options); }
+    if (identity != in_identity) { kim_identity_free (&identity); }
     kim_credential_free (&credential);
     
     return check_error (err);
