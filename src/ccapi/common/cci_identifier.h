@@ -57,9 +57,9 @@ cc_int32 cci_identifier_is_initialized (cci_identifier_t  in_identifier,
                                         cc_uint32        *out_is_initialized);
 
 cc_uint32 cci_identifier_read (cci_identifier_t *out_identifier,
-                               cci_stream_t      io_stream);
+                               k5_ipc_stream      io_stream);
 
 cc_uint32 cci_identifier_write (cci_identifier_t in_identifier,
-                                cci_stream_t     io_stream);
+                                k5_ipc_stream     io_stream);
 
 #endif /* CCI_IDENTIFIER_H */

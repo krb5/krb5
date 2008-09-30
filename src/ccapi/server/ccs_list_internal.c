@@ -477,7 +477,7 @@ static cc_int32 ccs_list_iterator_new (ccs_list_iterator_t *out_list_iterator,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_list_iterator_write (ccs_list_iterator_t in_list_iterator,
-                                  cci_stream_t        in_stream)
+                                  k5_ipc_stream        in_stream)
 {
     cc_int32 err = ccNoError;
     

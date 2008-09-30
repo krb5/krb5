@@ -47,17 +47,17 @@ void ccs_rpc_request_reply(
     HANDLE          hEvent  = openThreadEvent(uuid, REPLY_SUFFIX);
     DWORD*          p       = (DWORD*)(tspHandle);
     struct tspdata* tsp     = (struct tspdata*)*p;
-    cci_stream_t    stream;
+    k5_ipc_stream    stream;
     long            status  = 0;
 #if 0
     cci_debug_printf("%s! msg#:%d SST:%ld uuid:%s", __FUNCTION__, rpcmsg, srvStartTime, uuid);
 #endif
     if (!status) {                         
-        status = cci_stream_new (&stream);  /* Create a stream for the request data */
+        status = k5_ipc_stream_new (&stream);  /* Create a stream for the request data */
         }
 
     if (!status) {                          /* Put the data into the stream */
-        status = cci_stream_write (stream, chIn, cbIn);
+        status = k5_ipc_stream_write (stream, chIn, cbIn);
         }
 
     if (!status) {                          /* Put the data into the stream */

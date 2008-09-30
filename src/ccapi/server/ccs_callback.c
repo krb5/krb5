@@ -156,7 +156,7 @@ cc_int32 ccs_callback_invalidate (ccs_callback_t io_callback)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_callback_reply_to_client (ccs_callback_t io_callback,
-				       cci_stream_t   in_stream)
+				       k5_ipc_stream   in_stream)
 {
     cc_int32 err = ccNoError;
     

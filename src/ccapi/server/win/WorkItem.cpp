@@ -47,28 +47,28 @@ void deleteBuffer(char** buf) {
 
 // WorkItem contains a CountedBuffer which must be deleted, 
 //  so each WorkItem must be deleted.
-WorkItem::WorkItem(cci_stream_t buf, WIN_PIPE* pipe, const long type, const long sst) 
+WorkItem::WorkItem(k5_ipc_stream buf, WIN_PIPE* pipe, const long type, const long sst) 
 : _buf(buf), _rpcmsg(type), _pipe(pipe), _sst(sst) { }
 
 WorkItem::WorkItem(const WorkItem& item) : _buf(NULL), _rpcmsg(0), _pipe(NULL), _sst(0) {
 
-    cci_stream_t    _buf = NULL;
-    cci_stream_new(&_buf);
-    cci_stream_write(_buf, 
-                     cci_stream_data(item.payload()),
-                     cci_stream_size(item.payload()) );
+    k5_ipc_stream    _buf = NULL;
+    k5_ipc_stream_new(&_buf);
+    k5_ipc_stream_write(_buf, 
+                     k5_ipc_stream_data(item.payload()),
+                     k5_ipc_stream_size(item.payload()) );
     WorkItem(_buf, item._pipe, item._rpcmsg, item._sst);
     }
 
 WorkItem::WorkItem() : _buf(NULL), _rpcmsg(CCMSG_INVALID), _pipe(NULL), _sst(0) { }
 
 WorkItem::~WorkItem() {
-    if (_buf)   cci_stream_release(_buf);
+    if (_buf)   k5_ipc_stream_release(_buf);
     if (_pipe)  ccs_win_pipe_release(_pipe);
     }
 
-const cci_stream_t WorkItem::take_payload() {
-    cci_stream_t  temp  = payload();
+const k5_ipc_stream WorkItem::take_payload() {
+    k5_ipc_stream temp  = payload();
     _buf                = NULL;
     return temp;
     }

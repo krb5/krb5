@@ -28,9 +28,7 @@
 #define CCI_TYPES_H
 
 #include <CredentialsCache.h>
-
-struct cci_stream_d;
-typedef struct cci_stream_d *cci_stream_t;
+#include <k5-ipc_stream.h>
 
 typedef char *cci_uuid_string_t;
 

@@ -68,9 +68,9 @@ static DWORD    handle_exception(DWORD code);
 
 extern "C" {
 cc_int32        cci_os_ipc_msg( cc_int32        in_launch_server,
-                                cci_stream_t    in_request_stream,
+                                k5_ipc_stream    in_request_stream,
                                 cc_int32        in_msg,
-                                cci_stream_t*   out_reply_stream);
+                                k5_ipc_stream*   out_reply_stream);
     }
 
 /* ------------------------------------------------------------------------ */
@@ -128,8 +128,8 @@ void cci_os_ipc_thread_fini (void)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 cci_os_ipc (cc_int32      in_launch_server,
-                     cci_stream_t  in_request_stream,
-                     cci_stream_t* out_reply_stream) {
+                     k5_ipc_stream in_request_stream,
+                     k5_ipc_stream* out_reply_stream) {
     return cci_os_ipc_msg(  in_launch_server, 
                             in_request_stream, 
                             CCMSG_REQUEST, 
@@ -137,9 +137,9 @@ cc_int32 cci_os_ipc (cc_int32      in_launch_server,
     }
 
 extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
-                                    cci_stream_t    in_request_stream,
+                                    k5_ipc_stream    in_request_stream,
                                     cc_int32        in_msg,
-                                    cci_stream_t*   out_reply_stream) {
+                                    k5_ipc_stream*   out_reply_stream) {
 
     cc_int32        err             = ccNoError;
     cc_int32        done            = FALSE;
@@ -207,8 +207,8 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
                 in_msg,                         /* Message type */
                 (unsigned char*)&ptspdata,      /* Our tspdata* will be sent back to the reply proc. */
                 (unsigned char*)uuid,
-                cci_stream_size(in_request_stream),
-                (unsigned char*)cci_stream_data(in_request_stream), /* Data buffer */
+                k5_ipc_stream_size(in_request_stream),
+                (unsigned char*)k5_ipc_stream_data(in_request_stream), /* Data buffer */
                 sst,                            /* session start time */
                 (long*)(&err) );                /* Return code */
             }

@@ -242,7 +242,7 @@ cc_int32 cci_identifier_is_initialized (cci_identifier_t  in_identifier,
 /* ------------------------------------------------------------------------ */
 
 cc_uint32 cci_identifier_read (cci_identifier_t *out_identifier,
-                               cci_stream_t      io_stream)
+                               k5_ipc_stream      io_stream)
 {
     cc_int32 err = ccNoError;
     cci_uuid_string_t server_id = NULL;
@@ -252,19 +252,19 @@ cc_uint32 cci_identifier_read (cci_identifier_t *out_identifier,
     if (!io_stream     ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_string (io_stream, &server_id);
+        err = k5_ipc_stream_read_string (io_stream, &server_id);
     }
 
     if (!err) {
-        err = cci_stream_read_string (io_stream, &object_id);
+        err = k5_ipc_stream_read_string (io_stream, &object_id);
     }    
      
     if (!err) {
         err = cci_identifier_alloc (out_identifier, server_id, object_id);
     }
     
-    if (server_id) { free (server_id); }
-    if (object_id) { free (object_id); }
+    k5_ipc_stream_free_string (server_id);
+    k5_ipc_stream_free_string (object_id);
     
     return cci_check_error (err);
 }
@@ -272,7 +272,7 @@ cc_uint32 cci_identifier_read (cci_identifier_t *out_identifier,
 /* ------------------------------------------------------------------------ */
 
 cc_uint32 cci_identifier_write (cci_identifier_t in_identifier,
-                                cci_stream_t     io_stream)
+                                k5_ipc_stream     io_stream)
 {
     cc_int32 err = ccNoError;
     
@@ -280,11 +280,11 @@ cc_uint32 cci_identifier_write (cci_identifier_t in_identifier,
     if (!io_stream    ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_string (io_stream, in_identifier->server_id);
+        err = k5_ipc_stream_write_string (io_stream, in_identifier->server_id);
     }
     
     if (!err) {
-        err = cci_stream_write_string (io_stream, in_identifier->object_id);
+        err = k5_ipc_stream_write_string (io_stream, in_identifier->object_id);
     }
     
     return cci_check_error (err);

@@ -30,10 +30,10 @@
 #include "cci_common.h"
 
 cc_int32 cci_credentials_read (cc_credentials_t *out_credentials,
-                               cci_stream_t      in_stream);
+                               k5_ipc_stream      in_stream);
 
 cc_int32 cci_credentials_write (cc_credentials_t in_credentials,
-                                cci_stream_t     in_stream);
+                                k5_ipc_stream     in_stream);
 
 cc_int32 ccapi_credentials_compare (cc_credentials_t  in_credentials,
                                     cc_credentials_t  in_compare_to_credentials,

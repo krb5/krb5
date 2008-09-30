@@ -11,12 +11,12 @@ extern "C" {
 
 class WorkItem {
 private:
-          cci_stream_t    _buf;
+          k5_ipc_stream    _buf;
           WIN_PIPE*       _pipe;
     const long            _rpcmsg;
     const long            _sst;
 public:
-    WorkItem(   cci_stream_t  buf, 
+    WorkItem(   k5_ipc_stream buf, 
                 WIN_PIPE*     pipe, 
                 const long    type, 
                 const long    serverStartTime);
@@ -24,8 +24,8 @@ public:
     WorkItem();
     ~WorkItem();
 
-    const cci_stream_t  payload()       const   {return _buf;}
-    const cci_stream_t  take_payload();
+    const k5_ipc_stream payload()       const   {return _buf;}
+    const k5_ipc_stream take_payload();
           WIN_PIPE*     take_pipe();
           WIN_PIPE*     pipe()          const   {return _pipe;}
     const long          type()          const   {return _rpcmsg;}

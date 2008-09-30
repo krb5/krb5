@@ -77,7 +77,7 @@ cc_int32 ccs_list_push_front (ccs_list_t       io_list,
 
 
 cc_int32 ccs_list_iterator_write (ccs_list_iterator_t in_list_iterator,
-                                  cci_stream_t        in_stream);
+                                  k5_ipc_stream        in_stream);
 
 cc_int32 ccs_list_iterator_clone (ccs_list_iterator_t  in_list_iterator,
                                   ccs_list_iterator_t *out_list_iterator);

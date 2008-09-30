@@ -74,9 +74,4 @@ uint32_t k5_ipc_stream_read_uint64 (k5_ipc_stream  io_stream,
 uint32_t k5_ipc_stream_write_uint64 (k5_ipc_stream io_stream, 
                                      uint64_t      in_uint64);
 
-uint32_t k5_ipc_stream_read_time (k5_ipc_stream  io_stream, 
-                                  time_t        *out_time);
-uint32_t k5_ipc_stream_write_time (k5_ipc_stream io_stream, 
-                                   time_t        in_time);
-
 #endif /* K5_IPC_STREAM_H */

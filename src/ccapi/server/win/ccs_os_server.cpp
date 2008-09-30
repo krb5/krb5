@@ -231,12 +231,12 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
             SleepEx(1000, TRUE);
             }
         else if (TRUE) {      // Take next WorkItem from the queue:
-            cci_stream_t    buf             = NULL;
+            k5_ipc_stream    buf             = NULL;
             long            rpcmsg          = CCMSG_INVALID;
             time_t          serverStartTime = 0xDEADDEAD;
             RPC_STATUS      status          = 0;
             char*           uuid            = NULL;
-            cci_stream_t    stream          = NULL;
+            k5_ipc_stream    stream          = NULL;
             ccs_pipe_t     pipe             = NULL;
             ccs_pipe_t     pipe2            = NULL;
 
@@ -279,8 +279,8 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
                             break;
                         case CCMSG_PING:
                             cci_debug_printf("  Processing PING");
-                            err = cci_stream_new  (&stream);
-                            err = cci_stream_write(stream, "This is a test of the emergency broadcasting system", 52);
+                            err = k5_ipc_stream_new  (&stream);
+                            err = k5_ipc_stream_write(stream, "This is a test of the emergency broadcasting system", 52);
                             err = ccs_os_server_send_reply(pipe, stream);
                             break;
                         default:
@@ -288,7 +288,7 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
                                 rpcmsg, uuid);
                             break;
                         }
-                    if (buf)        cci_stream_release(buf);
+                    if (buf)        k5_ipc_stream_release(buf);
                     /* Don't free uuid, which was allocated here.  A pointer to it is in the 
                        rpcargs struct which was passed to connectionListener which will be
                        received by ccapi_listen when the client exits.  ccapi_listen needs 
@@ -311,10 +311,10 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_pipe,
-                                   cci_stream_t in_reply_stream) {
+                                   k5_ipc_stream in_reply_stream) {
 
     /* ccs_pipe_t in_reply_pipe     is a char* reply endpoint.
-       cci_stream_t in_reply_stream is the data to be sent.
+       k5_ipc_stream in_reply_stream is the data to be sent.
      */
 
     cc_int32    err     = 0;
@@ -333,8 +333,8 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_pipe,
                 (unsigned char*)&h,                 /* client's tspdata* */
                 (unsigned char*)uuid,
                 getMySST(),
-                cci_stream_size(in_reply_stream),   /* Length of buffer */
-                (const unsigned char*)cci_stream_data(in_reply_stream),   /* Data buffer */
+                k5_ipc_stream_size(in_reply_stream),   /* Length of buffer */
+                (const unsigned char*)k5_ipc_stream_data(in_reply_stream),   /* Data buffer */
                 &status );                          /* Return code */
             }
         RpcExcept(1) {

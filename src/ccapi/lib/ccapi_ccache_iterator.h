@@ -33,7 +33,7 @@ cc_int32 cci_ccache_iterator_new (cc_ccache_iterator_t *out_ccache_iterator,
                                   cci_identifier_t      in_identifier);
 
 cc_int32 cci_ccache_iterator_write (cc_ccache_iterator_t in_ccache_iterator,
-                                    cci_stream_t          in_stream);
+                                    k5_ipc_stream          in_stream);
 
 cc_int32 ccapi_ccache_iterator_release (cc_ccache_iterator_t io_ccache_iterator);
 

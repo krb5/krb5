@@ -32,7 +32,7 @@
  cc_int32 ccs_credentials_iterator_handle_message (ccs_credentials_iterator_t  io_credentials_iterator,
                                                    ccs_ccache_t                io_ccache,
                                                    enum cci_msg_id_t           in_request_name,
-                                                   cci_stream_t                in_request_data,
-                                                   cci_stream_t               *out_reply_data);
+                                                   k5_ipc_stream                in_request_data,
+                                                   k5_ipc_stream               *out_reply_data);
 
 #endif /* CCS_CREDENTIALS_ITERATOR_H */

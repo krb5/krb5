@@ -36,6 +36,6 @@ cc_int32 ccs_os_server_cleanup (int argc, const char *argv[]);
 cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]);
 
 cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
-                                   cci_stream_t in_reply_stream);
+                                   k5_ipc_stream in_reply_stream);
 
 #endif /* CCS_OS_SERVER_H */

@@ -43,10 +43,10 @@ cc_int32 ccs_server_client_is_valid (ccs_pipe_t  in_client_pipe,
 
 cc_int32 ccs_server_handle_request (ccs_pipe_t     in_client_pipe,
                                     ccs_pipe_t     in_reply_pipe,
-                                    cci_stream_t   in_request);
+                                    k5_ipc_stream   in_request);
 
 cc_int32 ccs_server_send_reply (ccs_pipe_t     in_reply_pipe,
                                 cc_int32       in_reply_err,
-                                cci_stream_t   in_reply_data);
+                                k5_ipc_stream   in_reply_data);
 
 #endif /* CCS_SERVER_H */

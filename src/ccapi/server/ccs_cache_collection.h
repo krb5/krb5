@@ -66,8 +66,8 @@ cc_int32 ccs_cache_collection_handle_message (ccs_pipe_t              in_client_
                                               ccs_pipe_t              in_reply_pipe,
                                               ccs_cache_collection_t  io_cache_collection,
                                               enum cci_msg_id_t       in_request_name,
-                                              cci_stream_t            in_request_data,
+                                              k5_ipc_stream            in_request_data,
                                               cc_uint32              *out_will_block,
-                                              cci_stream_t           *out_reply_data);
+                                              k5_ipc_stream           *out_reply_data);
 
 #endif /* CCS_CACHE_COLLECTION_H */

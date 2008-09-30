@@ -49,7 +49,7 @@ static cc_uint32 cci_credentials_v4_release (cc_credentials_v4_t *io_v4creds)
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_credentials_v4_read (cc_credentials_v4_t **out_v4creds,
-                                          cci_stream_t          io_stream)
+                                          k5_ipc_stream          io_stream)
 {
     cc_int32 err = ccNoError;
     cc_credentials_v4_t *v4creds = NULL;
@@ -63,59 +63,59 @@ static cc_uint32 cci_credentials_v4_read (cc_credentials_v4_t **out_v4creds,
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &v4creds->version);
+        err = k5_ipc_stream_read_uint32 (io_stream, &v4creds->version);
     }
     
     if (!err) {
-        err = cci_stream_read (io_stream, v4creds->principal, cc_v4_name_size);
+        err = k5_ipc_stream_read (io_stream, v4creds->principal, cc_v4_name_size);
     }
     
     if (!err) {
-        err = cci_stream_read (io_stream, v4creds->principal_instance, cc_v4_instance_size);
+        err = k5_ipc_stream_read (io_stream, v4creds->principal_instance, cc_v4_instance_size);
     }
     
     if (!err) {
-        err = cci_stream_read (io_stream, v4creds->service, cc_v4_name_size);
+        err = k5_ipc_stream_read (io_stream, v4creds->service, cc_v4_name_size);
     }
     
     if (!err) {
-        err = cci_stream_read (io_stream, v4creds->service_instance, cc_v4_instance_size);
+        err = k5_ipc_stream_read (io_stream, v4creds->service_instance, cc_v4_instance_size);
     }
     
     if (!err) {
-        err = cci_stream_read (io_stream, v4creds->realm, cc_v4_realm_size);
+        err = k5_ipc_stream_read (io_stream, v4creds->realm, cc_v4_realm_size);
     }
     
     if (!err) {
-        err = cci_stream_read (io_stream, v4creds->session_key, cc_v4_key_size);
+        err = k5_ipc_stream_read (io_stream, v4creds->session_key, cc_v4_key_size);
     }
     
     if (!err) {
-        err = cci_stream_read_int32 (io_stream, &v4creds->kvno);
+        err = k5_ipc_stream_read_int32 (io_stream, &v4creds->kvno);
     }
     
     if (!err) {
-        err = cci_stream_read_int32 (io_stream, &v4creds->string_to_key_type);
+        err = k5_ipc_stream_read_int32 (io_stream, &v4creds->string_to_key_type);
     }
     
     if (!err) {
-        err = cci_stream_read_time (io_stream, &v4creds->issue_date);
+        err = k5_ipc_stream_read_time (io_stream, &v4creds->issue_date);
     }
     
     if (!err) {
-        err = cci_stream_read_int32 (io_stream, &v4creds->lifetime);
+        err = k5_ipc_stream_read_int32 (io_stream, &v4creds->lifetime);
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &v4creds->address);
+        err = k5_ipc_stream_read_uint32 (io_stream, &v4creds->address);
     }
     
     if (!err) {
-        err = cci_stream_read_int32 (io_stream, &v4creds->ticket_size);
+        err = k5_ipc_stream_read_int32 (io_stream, &v4creds->ticket_size);
     }
     
     if (!err) {
-        err = cci_stream_read (io_stream, v4creds->ticket, cc_v4_ticket_size);
+        err = k5_ipc_stream_read (io_stream, v4creds->ticket, cc_v4_ticket_size);
     }
     
     if (!err) {
@@ -131,7 +131,7 @@ static cc_uint32 cci_credentials_v4_read (cc_credentials_v4_t **out_v4creds,
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_credentials_v4_write (cc_credentials_v4_t *in_v4creds,
-                                           cci_stream_t         io_stream)
+                                           k5_ipc_stream         io_stream)
 {
     cc_int32 err = ccNoError;
     
@@ -139,59 +139,59 @@ static cc_uint32 cci_credentials_v4_write (cc_credentials_v4_t *in_v4creds,
     if (!in_v4creds) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_stream, in_v4creds->version);
+        err = k5_ipc_stream_write_uint32 (io_stream, in_v4creds->version);
     }
     
     if (!err) {
-        err = cci_stream_write (io_stream, in_v4creds->principal, cc_v4_name_size);
+        err = k5_ipc_stream_write (io_stream, in_v4creds->principal, cc_v4_name_size);
     }
     
     if (!err) {
-        err = cci_stream_write (io_stream, in_v4creds->principal_instance, cc_v4_instance_size);
+        err = k5_ipc_stream_write (io_stream, in_v4creds->principal_instance, cc_v4_instance_size);
     }
     
     if (!err) {
-        err = cci_stream_write (io_stream, in_v4creds->service, cc_v4_name_size);
+        err = k5_ipc_stream_write (io_stream, in_v4creds->service, cc_v4_name_size);
     }
     
     if (!err) {
-        err = cci_stream_write (io_stream, in_v4creds->service_instance, cc_v4_instance_size);
+        err = k5_ipc_stream_write (io_stream, in_v4creds->service_instance, cc_v4_instance_size);
     }
     
     if (!err) {
-        err = cci_stream_write (io_stream, in_v4creds->realm, cc_v4_realm_size);
+        err = k5_ipc_stream_write (io_stream, in_v4creds->realm, cc_v4_realm_size);
     }
     
     if (!err) {
-        err = cci_stream_write (io_stream, in_v4creds->session_key, cc_v4_key_size);
+        err = k5_ipc_stream_write (io_stream, in_v4creds->session_key, cc_v4_key_size);
     }
     
     if (!err) {
-        err = cci_stream_write_int32 (io_stream, in_v4creds->kvno);
+        err = k5_ipc_stream_write_int32 (io_stream, in_v4creds->kvno);
     }
     
     if (!err) {
-        err = cci_stream_write_int32 (io_stream, in_v4creds->string_to_key_type);
+        err = k5_ipc_stream_write_int32 (io_stream, in_v4creds->string_to_key_type);
     }
     
     if (!err) {
-        err = cci_stream_write_time (io_stream, in_v4creds->issue_date);
+        err = k5_ipc_stream_write_time (io_stream, in_v4creds->issue_date);
     }
     
     if (!err) {
-        err = cci_stream_write_int32 (io_stream, in_v4creds->lifetime);
+        err = k5_ipc_stream_write_int32 (io_stream, in_v4creds->lifetime);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_stream, in_v4creds->address);
+        err = k5_ipc_stream_write_uint32 (io_stream, in_v4creds->address);
     }
     
     if (!err) {
-        err = cci_stream_write_int32 (io_stream, in_v4creds->ticket_size);
+        err = k5_ipc_stream_write_int32 (io_stream, in_v4creds->ticket_size);
     }
     
     if (!err) {
-        err = cci_stream_write (io_stream, in_v4creds->ticket, cc_v4_ticket_size);
+        err = k5_ipc_stream_write (io_stream, in_v4creds->ticket, cc_v4_ticket_size);
     }
     
     return cci_check_error (err);
@@ -238,7 +238,7 @@ static cc_uint32 cci_cc_data_release (cc_data *io_ccdata)
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_cc_data_read (cc_data      *io_ccdata,
-                                   cci_stream_t  io_stream)
+                                   k5_ipc_stream io_stream)
 {
     cc_int32 err = ccNoError;
     cc_uint32 type = 0;
@@ -249,11 +249,11 @@ static cc_uint32 cci_cc_data_read (cc_data      *io_ccdata,
     if (!io_ccdata) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &type);
+        err = k5_ipc_stream_read_uint32 (io_stream, &type);
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &length);
+        err = k5_ipc_stream_read_uint32 (io_stream, &length);
     }
     
     if (!err && length > 0) {
@@ -261,7 +261,7 @@ static cc_uint32 cci_cc_data_read (cc_data      *io_ccdata,
         if (!data) { err = cci_check_error (ccErrNoMem); }
 
         if (!err) {
-            err = cci_stream_read (io_stream, data, length);
+            err = k5_ipc_stream_read (io_stream, data, length);
         }
     }
     
@@ -280,7 +280,7 @@ static cc_uint32 cci_cc_data_read (cc_data      *io_ccdata,
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_cc_data_write (cc_data      *in_ccdata,
-                                    cci_stream_t  io_stream)
+                                    k5_ipc_stream io_stream)
 {
     cc_int32 err = ccNoError;
     
@@ -288,15 +288,15 @@ static cc_uint32 cci_cc_data_write (cc_data      *in_ccdata,
     if (!in_ccdata) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_stream, in_ccdata->type);
+        err = k5_ipc_stream_write_uint32 (io_stream, in_ccdata->type);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_stream, in_ccdata->length);
+        err = k5_ipc_stream_write_uint32 (io_stream, in_ccdata->length);
     }
     
     if (!err && in_ccdata->length > 0) {
-        err = cci_stream_write (io_stream, in_ccdata->data, in_ccdata->length);
+        err = k5_ipc_stream_write (io_stream, in_ccdata->data, in_ccdata->length);
     }
     
     return cci_check_error (err);
@@ -329,7 +329,7 @@ static cc_uint32 cci_cc_data_array_release (cc_data **io_ccdata_array)
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_cc_data_array_read (cc_data      ***io_ccdata_array,
-                                         cci_stream_t    io_stream)
+                                         k5_ipc_stream    io_stream)
 {
     cc_int32 err = ccNoError;
     cc_uint32 count = 0;
@@ -340,7 +340,7 @@ static cc_uint32 cci_cc_data_array_read (cc_data      ***io_ccdata_array,
     if (!io_ccdata_array) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &count);
+        err = k5_ipc_stream_read_uint32 (io_stream, &count);
     }
     
     if (!err && count > 0) {
@@ -376,7 +376,7 @@ static cc_uint32 cci_cc_data_array_read (cc_data      ***io_ccdata_array,
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_cc_data_array_write (cc_data      **in_ccdata_array,
-                                          cci_stream_t   io_stream)
+                                          k5_ipc_stream   io_stream)
 {
     cc_int32 err = ccNoError;
     cc_uint32 count = 0;
@@ -387,7 +387,7 @@ static cc_uint32 cci_cc_data_array_write (cc_data      **in_ccdata_array,
     if (!err) {
         for (count = 0; in_ccdata_array && in_ccdata_array[count]; count++);
         
-        err = cci_stream_write_uint32 (io_stream, count);
+        err = k5_ipc_stream_write_uint32 (io_stream, count);
     }
     
     if (!err) {
@@ -443,7 +443,7 @@ static cc_uint32 cci_credentials_v5_release (cc_credentials_v5_t *io_v5creds)
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_credentials_v5_read (cc_credentials_v5_t **out_v5creds,
-                                          cci_stream_t          io_stream)
+                                          k5_ipc_stream          io_stream)
 {
     cc_int32 err = ccNoError;
     cc_credentials_v5_t *v5creds = NULL;
@@ -461,11 +461,11 @@ static cc_uint32 cci_credentials_v5_read (cc_credentials_v5_t **out_v5creds,
     }
     
     if (!err) {
-        err = cci_stream_read_string (io_stream, &v5creds->client);
+        err = k5_ipc_stream_read_string (io_stream, &v5creds->client);
     }
     
     if (!err) {
-        err = cci_stream_read_string (io_stream, &v5creds->server);
+        err = k5_ipc_stream_read_string (io_stream, &v5creds->server);
     }
     
     if (!err) {
@@ -473,27 +473,27 @@ static cc_uint32 cci_credentials_v5_read (cc_credentials_v5_t **out_v5creds,
     }
     
     if (!err) {
-        err = cci_stream_read_time (io_stream, &v5creds->authtime);
+        err = k5_ipc_stream_read_time (io_stream, &v5creds->authtime);
     }
     
     if (!err) {
-        err = cci_stream_read_time (io_stream, &v5creds->starttime);
+        err = k5_ipc_stream_read_time (io_stream, &v5creds->starttime);
     }
     
     if (!err) {
-        err = cci_stream_read_time (io_stream, &v5creds->endtime);
+        err = k5_ipc_stream_read_time (io_stream, &v5creds->endtime);
     }
     
     if (!err) {
-        err = cci_stream_read_time (io_stream, &v5creds->renew_till);
+        err = k5_ipc_stream_read_time (io_stream, &v5creds->renew_till);
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &v5creds->is_skey);
+        err = k5_ipc_stream_read_uint32 (io_stream, &v5creds->is_skey);
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &v5creds->ticket_flags);
+        err = k5_ipc_stream_read_uint32 (io_stream, &v5creds->ticket_flags);
     }
     
     if (!err) {
@@ -525,7 +525,7 @@ static cc_uint32 cci_credentials_v5_read (cc_credentials_v5_t **out_v5creds,
 /* ------------------------------------------------------------------------ */
 
 static cc_uint32 cci_credentials_v5_write (cc_credentials_v5_t *in_v5creds,
-                                           cci_stream_t         io_stream)
+                                           k5_ipc_stream         io_stream)
 {
     cc_int32 err = ccNoError;
     
@@ -533,11 +533,11 @@ static cc_uint32 cci_credentials_v5_write (cc_credentials_v5_t *in_v5creds,
     if (!in_v5creds) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_string (io_stream, in_v5creds->client);
+        err = k5_ipc_stream_write_string (io_stream, in_v5creds->client);
     }
     
     if (!err) {
-        err = cci_stream_write_string (io_stream, in_v5creds->server);
+        err = k5_ipc_stream_write_string (io_stream, in_v5creds->server);
     }
     
     if (!err) {
@@ -545,27 +545,27 @@ static cc_uint32 cci_credentials_v5_write (cc_credentials_v5_t *in_v5creds,
     }
     
     if (!err) {
-        err = cci_stream_write_time (io_stream, in_v5creds->authtime);
+        err = k5_ipc_stream_write_time (io_stream, in_v5creds->authtime);
     }
     
     if (!err) {
-        err = cci_stream_write_time (io_stream, in_v5creds->starttime);
+        err = k5_ipc_stream_write_time (io_stream, in_v5creds->starttime);
     }
     
     if (!err) {
-        err = cci_stream_write_time (io_stream, in_v5creds->endtime);
+        err = k5_ipc_stream_write_time (io_stream, in_v5creds->endtime);
     }
     
     if (!err) {
-        err = cci_stream_write_time (io_stream, in_v5creds->renew_till);
+        err = k5_ipc_stream_write_time (io_stream, in_v5creds->renew_till);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_stream, in_v5creds->is_skey);
+        err = k5_ipc_stream_write_uint32 (io_stream, in_v5creds->is_skey);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_stream, in_v5creds->ticket_flags);
+        err = k5_ipc_stream_write_uint32 (io_stream, in_v5creds->ticket_flags);
     }
     
     if (!err) {
@@ -615,7 +615,7 @@ cc_uint32 cci_credentials_union_release (cc_credentials_union *io_cred_union)
 /* ------------------------------------------------------------------------ */
 
 cc_uint32 cci_credentials_union_read (cc_credentials_union **out_credentials_union,
-                                      cci_stream_t           io_stream)
+                                      k5_ipc_stream           io_stream)
 {
     cc_int32 err = ccNoError;
     cc_credentials_union *credentials_union = NULL;
@@ -629,7 +629,7 @@ cc_uint32 cci_credentials_union_read (cc_credentials_union **out_credentials_uni
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (io_stream, &credentials_union->version);
+        err = k5_ipc_stream_read_uint32 (io_stream, &credentials_union->version);
     }
     
     if (!err) {
@@ -660,7 +660,7 @@ cc_uint32 cci_credentials_union_read (cc_credentials_union **out_credentials_uni
 /* ------------------------------------------------------------------------ */
 
 cc_uint32 cci_credentials_union_write (const cc_credentials_union *in_credentials_union,
-                                       cci_stream_t                io_stream)
+                                       k5_ipc_stream                io_stream)
 {
     cc_int32 err = ccNoError;
     
@@ -668,7 +668,7 @@ cc_uint32 cci_credentials_union_write (const cc_credentials_union *in_credential
     if (!in_credentials_union) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_stream, in_credentials_union->version);
+        err = k5_ipc_stream_write_uint32 (io_stream, in_credentials_union->version);
     }
     
     if (!err) {

@@ -199,7 +199,7 @@ cc_int32 ccs_ccache_list_release (ccs_ccache_list_t io_list)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_ccache_list_iterator_write (ccs_ccache_list_iterator_t in_list_iterator,
-                                         cci_stream_t               in_stream)
+                                         k5_ipc_stream               in_stream)
 {
     return ccs_list_iterator_write (in_list_iterator, in_stream);    
 }
@@ -322,7 +322,7 @@ cc_int32 ccs_credentials_list_release (ccs_credentials_list_t io_list)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_credentials_list_iterator_write (ccs_credentials_list_iterator_t in_list_iterator,
-                                              cci_stream_t                    in_stream)
+                                              k5_ipc_stream                    in_stream)
 {
     return ccs_list_iterator_write (in_list_iterator, in_stream);    
 }

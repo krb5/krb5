@@ -51,6 +51,7 @@
 #include "cci_debugging.h"
 #include "cci_identifier.h"
 #include "cci_message.h"
-#include "cci_stream.h"
+
+#include "k5-ipc_stream.h"
 
 #endif /* CCI_COMMON_H */

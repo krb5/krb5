@@ -46,12 +46,12 @@ void cci_ipc_thread_fini (void)
 static cc_int32 _cci_ipc_send (enum cci_msg_id_t  in_request_name,
                                cc_int32           in_launch_server,
                                cci_identifier_t   in_identifier,
-                               cci_stream_t       in_request_data,
-                               cci_stream_t      *out_reply_data)
+                               k5_ipc_stream       in_request_data,
+                               k5_ipc_stream      *out_reply_data)
 {
     cc_int32 err = ccNoError;
-    cci_stream_t request = NULL;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream request = NULL;
+    k5_ipc_stream reply = NULL;
     cc_int32 reply_error = 0;
     
     if (!in_identifier) { err = cci_check_error (ccErrBadParam); }
@@ -65,15 +65,15 @@ static cc_int32 _cci_ipc_send (enum cci_msg_id_t  in_request_name,
     }
     
     if (!err && in_request_data) {
-        err = cci_stream_write (request, 
-                                cci_stream_data (in_request_data), 
-                                cci_stream_size (in_request_data));
+        err = k5_ipc_stream_write (request, 
+                                k5_ipc_stream_data (in_request_data), 
+                                k5_ipc_stream_size (in_request_data));
     }
     
     if (!err) {
         err = cci_os_ipc (in_launch_server, request, &reply);
 
-        if (!err && cci_stream_size (reply) > 0) {
+        if (!err && k5_ipc_stream_size (reply) > 0) {
             err = cci_message_read_reply_header (reply, &reply_error);
         }
     }
@@ -87,8 +87,8 @@ static cc_int32 _cci_ipc_send (enum cci_msg_id_t  in_request_name,
         reply = NULL; /* take ownership */
     }
     
-    cci_stream_release (request);
-    cci_stream_release (reply);
+    k5_ipc_stream_release (request);
+    k5_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }
@@ -97,8 +97,8 @@ static cc_int32 _cci_ipc_send (enum cci_msg_id_t  in_request_name,
 
 cc_int32 cci_ipc_send (enum cci_msg_id_t  in_request_name,
                        cci_identifier_t   in_identifier,
-                       cci_stream_t       in_request_data,
-                       cci_stream_t      *out_reply_data)
+                       k5_ipc_stream       in_request_data,
+                       k5_ipc_stream      *out_reply_data)
 {
     return cci_check_error (_cci_ipc_send (in_request_name, 1,
                                            in_identifier,
@@ -110,8 +110,8 @@ cc_int32 cci_ipc_send (enum cci_msg_id_t  in_request_name,
 
 cc_int32 cci_ipc_send_no_launch (enum cci_msg_id_t  in_request_name,
                                  cci_identifier_t   in_identifier,
-                                 cci_stream_t       in_request_data,
-                                 cci_stream_t      *out_reply_data)
+                                 k5_ipc_stream       in_request_data,
+                                 k5_ipc_stream      *out_reply_data)
 {
     return cci_check_error (_cci_ipc_send (in_request_name, 0,
                                            in_identifier,

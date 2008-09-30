@@ -57,7 +57,7 @@ void         tspdata_setRpcAState (struct tspdata* p, RPC_ASYNC_STATE* rpcState)
 
 void         tspdata_setSST       (struct tspdata* p, time_t t)         {p->_sst = t;}
 
-void         tspdata_setStream    (struct tspdata* p, cci_stream_t s)   {p->_stream = s;}
+void         tspdata_setStream    (struct tspdata* p, k5_ipc_stream s)   {p->_stream = s;}
 
 
 BOOL         tspdata_getConnected (const struct tspdata* p)         {return p->_CCAPI_Connected;}
@@ -66,7 +66,7 @@ HANDLE       tspdata_getReplyEvent(const struct tspdata* p)         {return p->_
 
 time_t       tspdata_getSST       (const struct tspdata* p)         {return p->_sst;}
 
-cci_stream_t tspdata_getStream    (const struct tspdata* p)         {return p->_stream;}
+k5_ipc_stream tspdata_getStream    (const struct tspdata* p)         {return p->_stream;}
 
 char*        tspdata_getUUID      (const struct tspdata* p)         {return p->_uuid;}
 

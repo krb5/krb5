@@ -43,7 +43,7 @@ void ccs_rpc_request(
     long*       return_status ) {   /* Return code */
 
     cc_int32        status  = 0;
-    cci_stream_t    stream;
+    k5_ipc_stream    stream;
     DWORD*          p       = (DWORD*)(tspHandle);
     WIN_PIPE*       pipe    = NULL;
 #if 0
@@ -52,11 +52,11 @@ void ccs_rpc_request(
     status = (rpcmsg != CCMSG_REQUEST) && (rpcmsg != CCMSG_PING);
     
     if (!status) {                         
-        status = cci_stream_new (&stream);  /* Create a stream for the request data */
+        status = k5_ipc_stream_new (&stream);  /* Create a stream for the request data */
         }
 
     if (!status) {                          /* Put the data into the stream */
-        status = cci_stream_write (stream, pbRequest, lenRequest);
+        status = k5_ipc_stream_write (stream, pbRequest, lenRequest);
         }
 
     pipe = ccs_win_pipe_new(pszUUID, *p);    

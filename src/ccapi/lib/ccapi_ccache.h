@@ -35,7 +35,7 @@ cc_int32 cci_ccache_new (cc_ccache_t      *out_ccache,
 cc_int32 ccapi_ccache_release (cc_ccache_t io_ccache);
 
 cc_int32 cci_ccache_write (cc_ccache_t  in_ccache,
-                           cci_stream_t in_stream);
+                           k5_ipc_stream in_stream);
 
 cc_int32 ccapi_ccache_destroy (cc_ccache_t io_ccache);
 

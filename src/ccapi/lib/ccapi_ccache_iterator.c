@@ -100,7 +100,7 @@ cc_int32 cci_ccache_iterator_new (cc_ccache_iterator_t *out_ccache_iterator,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 cci_ccache_iterator_write (cc_ccache_iterator_t in_ccache_iterator,
-                                   cci_stream_t          in_stream)
+                                   k5_ipc_stream          in_stream)
 {
     cc_int32 err = ccNoError;
     cci_ccache_iterator_t ccache_iterator = (cci_ccache_iterator_t) in_ccache_iterator;
@@ -160,7 +160,7 @@ cc_int32 ccapi_ccache_iterator_next (cc_ccache_iterator_t  in_ccache_iterator,
 {
     cc_int32 err = ccNoError;
     cci_ccache_iterator_t ccache_iterator = (cci_ccache_iterator_t) in_ccache_iterator;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
     
     if (!in_ccache_iterator) { err = cci_check_error (ccErrBadParam); }
@@ -193,7 +193,7 @@ cc_int32 ccapi_ccache_iterator_next (cc_ccache_iterator_t  in_ccache_iterator,
         err = cci_ccache_new (out_ccache, identifier);
     }
     
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     cci_identifier_release (identifier);
     
     return cci_check_error (err);
@@ -206,7 +206,7 @@ cc_int32 ccapi_ccache_iterator_clone (cc_ccache_iterator_t  in_ccache_iterator,
 {
     cc_int32 err = ccNoError;
     cci_ccache_iterator_t ccache_iterator = (cci_ccache_iterator_t) in_ccache_iterator;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     cc_uint32 initialized = 0;
     cci_identifier_t identifier = NULL;
     
@@ -240,7 +240,7 @@ cc_int32 ccapi_ccache_iterator_clone (cc_ccache_iterator_t  in_ccache_iterator,
     }
 
     cci_identifier_release (identifier);
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }

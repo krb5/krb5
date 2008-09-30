@@ -33,10 +33,10 @@
 cc_uint32 cci_credentials_union_release (cc_credentials_union *io_credentials);
 
 cc_uint32 cci_credentials_union_read (cc_credentials_union **out_credentials_union,
-                                      cci_stream_t           io_stream);
+                                      k5_ipc_stream           io_stream);
 
 cc_uint32 cci_credentials_union_write (const cc_credentials_union *in_credentials_union,
-                                       cci_stream_t                io_stream);
+                                       k5_ipc_stream                io_stream);
 
 cc_uint32 cci_cred_union_release (cred_union *io_cred_union);
 

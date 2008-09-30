@@ -233,7 +233,7 @@ cc_int32 ccapi_context_get_change_time (cc_context_t  in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     
     if (!in_context     ) { err = cci_check_error (ccErrBadParam); }
     if (!out_change_time) { err = cci_check_error (ccErrBadParam); }
@@ -248,11 +248,11 @@ cc_int32 ccapi_context_get_change_time (cc_context_t  in_context,
                                        NULL, &reply);
     }
     
-    if (!err && cci_stream_size (reply) > 0) {
+    if (!err && k5_ipc_stream_size (reply) > 0) {
         cc_time_t change_time = 0;
         
         /* got a response from the server */
-        err = cci_stream_read_time (reply, &change_time);
+        err = k5_ipc_stream_read_time (reply, &change_time);
         
         if (!err) {
             err = cci_context_change_time_update (context->identifier,
@@ -264,7 +264,7 @@ cc_int32 ccapi_context_get_change_time (cc_context_t  in_context,
         err = cci_context_change_time_get (out_change_time);
     }
     
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }
@@ -275,17 +275,17 @@ cc_int32 ccapi_context_wait_for_change (cc_context_t  in_context)
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t request = NULL;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream request = NULL;
+    k5_ipc_stream reply = NULL;
     
     if (!in_context) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&request);
+        err = k5_ipc_stream_new (&request);
     }
     
     if (!err) {
-        err = cci_stream_write_time (request, context->last_wait_for_change_time);
+        err = k5_ipc_stream_write_time (request, context->last_wait_for_change_time);
     }
 
     if (!err) {
@@ -300,11 +300,11 @@ cc_int32 ccapi_context_wait_for_change (cc_context_t  in_context)
     }
 
     if (!err) {
-        err = cci_stream_read_time (reply, &context->last_wait_for_change_time);
+        err = k5_ipc_stream_read_time (reply, &context->last_wait_for_change_time);
     }
     
-    cci_stream_release (request);
-    cci_stream_release (reply);
+    k5_ipc_stream_release (request);
+    k5_ipc_stream_release (reply);
 
     return cci_check_error (err);
 }
@@ -316,7 +316,7 @@ cc_int32 ccapi_context_get_default_ccache_name (cc_context_t  in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     char *reply_name = NULL;
     char *name = NULL;
     
@@ -335,9 +335,9 @@ cc_int32 ccapi_context_get_default_ccache_name (cc_context_t  in_context,
     }
     
     if (!err) {
-        if (cci_stream_size (reply) > 0) {
+        if (k5_ipc_stream_size (reply) > 0) {
             /* got a response from the server */
-            err = cci_stream_read_string (reply, &reply_name);
+            err = k5_ipc_stream_read_string (reply, &reply_name);
             
             if (!err) {
                 name = reply_name;
@@ -351,8 +351,8 @@ cc_int32 ccapi_context_get_default_ccache_name (cc_context_t  in_context,
         err = cci_string_new (out_name, name);
     }
     
-    cci_stream_release (reply);
-    free (reply_name);
+    k5_ipc_stream_release (reply);
+    k5_ipc_stream_free_string (reply_name);
     
     return cci_check_error (err);
 }
@@ -365,8 +365,8 @@ cc_int32 ccapi_context_open_ccache (cc_context_t  in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t request = NULL;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream request = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
     
     if (!in_context  ) { err = cci_check_error (ccErrBadParam); }
@@ -374,11 +374,11 @@ cc_int32 ccapi_context_open_ccache (cc_context_t  in_context,
     if (!out_ccache  ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&request);
+        err = k5_ipc_stream_new (&request);
     }
     
     if (!err) {
-        err = cci_stream_write_string (request, in_name);
+        err = k5_ipc_stream_write_string (request, in_name);
     }
     
     if (!err) {
@@ -392,7 +392,7 @@ cc_int32 ccapi_context_open_ccache (cc_context_t  in_context,
                                        &reply);
     }
     
-    if (!err && !(cci_stream_size (reply) > 0)) {
+    if (!err && !(k5_ipc_stream_size (reply) > 0)) {
         err = ccErrCCacheNotFound;
     }
     
@@ -405,8 +405,8 @@ cc_int32 ccapi_context_open_ccache (cc_context_t  in_context,
     }
     
     cci_identifier_release (identifier);
-    cci_stream_release (reply);
-    cci_stream_release (request);
+    k5_ipc_stream_release (reply);
+    k5_ipc_stream_release (request);
     
     return cci_check_error (err);
 }
@@ -418,7 +418,7 @@ cc_int32 ccapi_context_open_default_ccache (cc_context_t  in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
     
     if (!in_context) { err = cci_check_error (ccErrBadParam); }
@@ -435,7 +435,7 @@ cc_int32 ccapi_context_open_default_ccache (cc_context_t  in_context,
                                        &reply);
     }
     
-    if (!err && !(cci_stream_size (reply) > 0)) {
+    if (!err && !(k5_ipc_stream_size (reply) > 0)) {
         err = ccErrCCacheNotFound;
     }
     
@@ -448,7 +448,7 @@ cc_int32 ccapi_context_open_default_ccache (cc_context_t  in_context,
     }
     
     cci_identifier_release (identifier);
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }
@@ -463,8 +463,8 @@ cc_int32 ccapi_context_create_ccache (cc_context_t  in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t request = NULL;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream request = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
     
     if (!in_context  ) { err = cci_check_error (ccErrBadParam); }
@@ -473,19 +473,19 @@ cc_int32 ccapi_context_create_ccache (cc_context_t  in_context,
     if (!out_ccache  ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&request);
+        err = k5_ipc_stream_new (&request);
     }
     
     if (!err) {
-        err = cci_stream_write_string (request, in_name);
+        err = k5_ipc_stream_write_string (request, in_name);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (request, in_cred_vers);
+        err = k5_ipc_stream_write_uint32 (request, in_cred_vers);
     }
     
     if (!err) {
-        err = cci_stream_write_string (request, in_principal);
+        err = k5_ipc_stream_write_string (request, in_principal);
     }
     
     if (!err) {
@@ -508,8 +508,8 @@ cc_int32 ccapi_context_create_ccache (cc_context_t  in_context,
     }
     
     cci_identifier_release (identifier);
-    cci_stream_release (reply);
-    cci_stream_release (request);
+    k5_ipc_stream_release (reply);
+    k5_ipc_stream_release (request);
     
     return cci_check_error (err);
 }
@@ -523,8 +523,8 @@ cc_int32 ccapi_context_create_default_ccache (cc_context_t  in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t request = NULL;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream request = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
     
     if (!in_context  ) { err = cci_check_error (ccErrBadParam); }
@@ -532,15 +532,15 @@ cc_int32 ccapi_context_create_default_ccache (cc_context_t  in_context,
     if (!out_ccache  ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&request);
+        err = k5_ipc_stream_new (&request);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (request, in_cred_vers);
+        err = k5_ipc_stream_write_uint32 (request, in_cred_vers);
     }
     
     if (!err) {
-        err = cci_stream_write_string (request, in_principal);
+        err = k5_ipc_stream_write_string (request, in_principal);
     }
     
     if (!err) {
@@ -563,8 +563,8 @@ cc_int32 ccapi_context_create_default_ccache (cc_context_t  in_context,
     }
     
     cci_identifier_release (identifier);
-    cci_stream_release (reply);
-    cci_stream_release (request);
+    k5_ipc_stream_release (reply);
+    k5_ipc_stream_release (request);
     
     return cci_check_error (err);
 }
@@ -578,8 +578,8 @@ cc_int32 ccapi_context_create_new_ccache (cc_context_t in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t request = NULL;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream request = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
     
     if (!in_context  ) { err = cci_check_error (ccErrBadParam); }
@@ -587,15 +587,15 @@ cc_int32 ccapi_context_create_new_ccache (cc_context_t in_context,
     if (!out_ccache  ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&request);
+        err = k5_ipc_stream_new (&request);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (request, in_cred_vers);
+        err = k5_ipc_stream_write_uint32 (request, in_cred_vers);
     }
     
     if (!err) {
-        err = cci_stream_write_string (request, in_principal);
+        err = k5_ipc_stream_write_string (request, in_principal);
     }
     
     if (!err) {
@@ -618,8 +618,8 @@ cc_int32 ccapi_context_create_new_ccache (cc_context_t in_context,
     }
     
     cci_identifier_release (identifier);
-    cci_stream_release (reply);
-    cci_stream_release (request);
+    k5_ipc_stream_release (reply);
+    k5_ipc_stream_release (request);
     
     return cci_check_error (err);
 }
@@ -631,7 +631,7 @@ cc_int32 ccapi_context_new_ccache_iterator (cc_context_t          in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
     
     if (!in_context  ) { err = cci_check_error (ccErrBadParam); }
@@ -649,7 +649,7 @@ cc_int32 ccapi_context_new_ccache_iterator (cc_context_t          in_context,
     }
     
     if (!err) {
-        if (cci_stream_size (reply) > 0) {
+        if (k5_ipc_stream_size (reply) > 0) {
             err = cci_identifier_read (&identifier, reply);
         } else {
             identifier = cci_identifier_uninitialized;
@@ -660,7 +660,7 @@ cc_int32 ccapi_context_new_ccache_iterator (cc_context_t          in_context,
         err = cci_ccache_iterator_new (out_iterator, identifier);
     }
 
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     cci_identifier_release (identifier);
 
     return cci_check_error (err);
@@ -674,20 +674,20 @@ cc_int32 ccapi_context_lock (cc_context_t in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t request = NULL;
+    k5_ipc_stream request = NULL;
     
     if (!in_context) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&request);
+        err = k5_ipc_stream_new (&request);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (request, in_lock_type);
+        err = k5_ipc_stream_write_uint32 (request, in_lock_type);
     }
     
     if (!err) {
-        err = cci_stream_write_uint32 (request, in_block);
+        err = k5_ipc_stream_write_uint32 (request, in_block);
     }
     
     if (!err) {
@@ -701,7 +701,7 @@ cc_int32 ccapi_context_lock (cc_context_t in_context,
                              NULL);
     }
     
-    cci_stream_release (request);
+    k5_ipc_stream_release (request);
     
     return cci_check_error (err);
 }
@@ -773,7 +773,7 @@ static cc_int32 cci_context_sync (cci_context_t in_context,
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t new_identifier = NULL;
     
     if (!in_context) { err = cci_check_error (ccErrBadParam); }
@@ -796,7 +796,7 @@ static cc_int32 cci_context_sync (cci_context_t in_context,
     }
     
     if (!err) {
-        if (cci_stream_size (reply) > 0) {
+        if (k5_ipc_stream_size (reply) > 0) {
             err = cci_identifier_read (&new_identifier, reply);
         } else {
             new_identifier = cci_identifier_uninitialized;
@@ -828,7 +828,7 @@ static cc_int32 cci_context_sync (cci_context_t in_context,
     }
         
     cci_identifier_release (new_identifier);
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }

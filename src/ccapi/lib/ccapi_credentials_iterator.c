@@ -100,7 +100,7 @@ cc_int32 cci_credentials_iterator_new (cc_credentials_iterator_t *out_credential
 /* ------------------------------------------------------------------------ */
 
 cc_int32 cci_credentials_iterator_write (cc_credentials_iterator_t in_credentials_iterator,
-                                         cci_stream_t              in_stream)
+                                         k5_ipc_stream              in_stream)
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
@@ -152,7 +152,7 @@ cc_int32 ccapi_credentials_iterator_next (cc_credentials_iterator_t  in_credenti
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     
     if (!in_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
     if (!out_credentials        ) { err = cci_check_error (ccErrBadParam); }
@@ -168,7 +168,7 @@ cc_int32 ccapi_credentials_iterator_next (cc_credentials_iterator_t  in_credenti
         err = cci_credentials_read (out_credentials, reply);
     }
     
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }
@@ -180,7 +180,7 @@ cc_int32 ccapi_credentials_iterator_clone (cc_credentials_iterator_t  in_credent
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
-    cci_stream_t reply = NULL;
+    k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
         
     if (!in_credentials_iterator ) { err = cci_check_error (ccErrBadParam); }
@@ -201,7 +201,7 @@ cc_int32 ccapi_credentials_iterator_clone (cc_credentials_iterator_t  in_credent
         err = cci_credentials_iterator_new (out_credentials_iterator, identifier);
     }
     
-    cci_stream_release (reply);
+    k5_ipc_stream_release (reply);
     cci_identifier_release (identifier);
     
     return cci_check_error (err);

@@ -66,18 +66,18 @@ cc_int32 ccs_ccache_find_credentials_iterator (ccs_ccache_t                in_cc
                                                ccs_credentials_iterator_t *out_credentials_iterator);
 
 cc_int32 ccs_ccache_write (ccs_ccache_t in_ccache,
-                           cci_stream_t io_stream);
+                           k5_ipc_stream io_stream);
 
 cc_int32 ccs_ccache_write_name (ccs_ccache_t in_ccache,
-                                cci_stream_t io_stream);
+                                k5_ipc_stream io_stream);
 
 cc_int32 ccs_ccache_handle_message (ccs_pipe_t              in_client_pipe,
                                     ccs_pipe_t              in_reply_pipe,
                                     ccs_ccache_t            io_ccache,
                                     ccs_cache_collection_t  io_cache_collection,
                                     enum cci_msg_id_t       in_request_name,
-                                    cci_stream_t            in_request_data,
+                                    k5_ipc_stream            in_request_data,
                                     cc_uint32              *out_will_block,
-                                    cci_stream_t           *out_reply_data);
+                                    k5_ipc_stream           *out_reply_data);
 
 #endif /* CCS_CCACHE_H */

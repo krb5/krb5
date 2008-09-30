@@ -61,7 +61,7 @@ cc_credentials_union cci_credentials_union_initializer = {
 /* ------------------------------------------------------------------------ */
 
 cc_int32 cci_credentials_read (cc_credentials_t *out_credentials,
-                               cci_stream_t      in_stream)
+                               k5_ipc_stream      in_stream)
 {
     cc_int32 err = ccNoError;
     cci_credentials_t credentials = NULL;
@@ -108,7 +108,7 @@ cc_int32 cci_credentials_read (cc_credentials_t *out_credentials,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 cci_credentials_write (cc_credentials_t in_credentials,
-                                cci_stream_t     in_stream)
+                                k5_ipc_stream     in_stream)
 {
     cc_int32 err = ccNoError;
     cci_credentials_t credentials = (cci_credentials_t) in_credentials;

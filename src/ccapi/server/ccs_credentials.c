@@ -36,7 +36,7 @@ struct ccs_credentials_d ccs_credentials_initializer = { NULL, NULL };
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
-                              cci_stream_t            in_stream,
+                              k5_ipc_stream            in_stream,
                               cc_uint32               in_ccache_version,
                               ccs_credentials_list_t  io_credentials_list)
 {
@@ -100,7 +100,7 @@ cc_int32 ccs_credentials_release (ccs_credentials_t io_credentials)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_credentials_write (ccs_credentials_t in_credentials,
-                                cci_stream_t      io_stream)
+                                k5_ipc_stream      io_stream)
 {
     cc_int32 err = ccNoError;
     

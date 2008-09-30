@@ -39,14 +39,14 @@ EXTERN_C    bool worklist_isEmpty() {
 
 EXTERN_C    int worklist_add(   const long          rpcmsg, 
                                 const ccs_pipe_t    pipe, 
-                                const cci_stream_t  stream, 
+                                const k5_ipc_stream stream, 
                                 const time_t        serverStartTime) {
         return worklist.add(new WorkItem(stream, pipe, rpcmsg, serverStartTime) );
         }
 
 EXTERN_C    int  worklist_remove(long*              rpcmsg,
                                  ccs_pipe_t*        pipe,
-                                 cci_stream_t*      stream,
+                                 k5_ipc_stream*      stream,
                                  time_t*            sst) {
         WorkItem*   item    = NULL;
         cc_int32    err     = worklist.remove(&item);

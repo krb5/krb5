@@ -137,7 +137,7 @@ cc_int32 ccs_cache_collection_compare_identifier (ccs_cache_collection_t  in_cac
 cc_int32 ccs_cache_collection_changed (ccs_cache_collection_t io_cache_collection)
 {
     cc_int32 err = ccNoError;
-    cci_stream_t reply_data = NULL;
+    k5_ipc_stream reply_data = NULL;
     
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
 
@@ -152,11 +152,11 @@ cc_int32 ccs_cache_collection_changed (ccs_cache_collection_t io_cache_collectio
     }
     
     if (!err) {
-        err = cci_stream_new (&reply_data);
+        err = k5_ipc_stream_new (&reply_data);
     }
 
     if (!err) {
-	err = cci_stream_write_time (reply_data, io_cache_collection->last_changed_time);
+	err = k5_ipc_stream_write_time (reply_data, io_cache_collection->last_changed_time);
     }
     
     if (!err) {
@@ -181,7 +181,7 @@ cc_int32 ccs_cache_collection_changed (ccs_cache_collection_t io_cache_collectio
         err = ccs_os_notify_cache_collection_changed (io_cache_collection);
     }
     
-    cci_stream_release (reply_data);
+    k5_ipc_stream_release (reply_data);
     
     return cci_check_error (err);
 }
@@ -572,8 +572,8 @@ cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  io_cac
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_context_release (ccs_cache_collection_t io_cache_collection,
-                                                       cci_stream_t           in_request_data,
-                                                       cci_stream_t           io_reply_data)
+                                                       k5_ipc_stream           in_request_data,
+                                                       k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     
@@ -591,8 +591,8 @@ static cc_int32 ccs_cache_collection_context_release (ccs_cache_collection_t io_
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_sync (ccs_cache_collection_t io_cache_collection,
-                                            cci_stream_t           in_request_data,
-                                            cci_stream_t           io_reply_data)
+                                            k5_ipc_stream           in_request_data,
+                                            k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     
@@ -610,8 +610,8 @@ static cc_int32 ccs_cache_collection_sync (ccs_cache_collection_t io_cache_colle
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_get_change_time (ccs_cache_collection_t io_cache_collection,
-                                                       cci_stream_t           in_request_data,
-                                                       cci_stream_t           io_reply_data)
+                                                       k5_ipc_stream           in_request_data,
+                                                       k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     
@@ -620,7 +620,7 @@ static cc_int32 ccs_cache_collection_get_change_time (ccs_cache_collection_t io_
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_time (io_reply_data, io_cache_collection->last_changed_time);
+        err = k5_ipc_stream_write_time (io_reply_data, io_cache_collection->last_changed_time);
     }
     
     return cci_check_error (err);    
@@ -631,8 +631,8 @@ static cc_int32 ccs_cache_collection_get_change_time (ccs_cache_collection_t io_
 static cc_int32 ccs_cache_collection_wait_for_change (ccs_pipe_t              in_client_pipe,
 						      ccs_pipe_t              in_reply_pipe,
 						      ccs_cache_collection_t  io_cache_collection,
-						      cci_stream_t            in_request_data,
-						      cci_stream_t            io_reply_data,
+						      k5_ipc_stream            in_request_data,
+						      k5_ipc_stream            io_reply_data,
 						      cc_uint32              *out_will_block)
 {
     cc_int32 err = ccNoError;
@@ -646,12 +646,12 @@ static cc_int32 ccs_cache_collection_wait_for_change (ccs_pipe_t              in
     if (!out_will_block                 ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_time (in_request_data, &last_wait_for_change_time);
+        err = k5_ipc_stream_read_time (in_request_data, &last_wait_for_change_time);
     }
     
     if (!err) {
 	if (last_wait_for_change_time < io_cache_collection->last_changed_time) {
-	    err = cci_stream_write_time (io_reply_data, io_cache_collection->last_changed_time);
+	    err = k5_ipc_stream_write_time (io_reply_data, io_cache_collection->last_changed_time);
 	
 	} else {
 	    ccs_callback_t callback = NULL;
@@ -685,8 +685,8 @@ static cc_int32 ccs_cache_collection_wait_for_change (ccs_pipe_t              in
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_get_default_ccache_name (ccs_cache_collection_t io_cache_collection,
-                                                               cci_stream_t           in_request_data,
-                                                               cci_stream_t           io_reply_data)
+                                                               k5_ipc_stream           in_request_data,
+                                                               k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     cc_uint64 count = 0;
@@ -709,7 +709,7 @@ static cc_int32 ccs_cache_collection_get_default_ccache_name (ccs_cache_collecti
                 err = ccs_ccache_write_name (ccache, io_reply_data);
             }
         } else {
-            err = cci_stream_write_string (io_reply_data, 
+            err = k5_ipc_stream_write_string (io_reply_data, 
                                            k_cci_context_initial_ccache_name);
         }
     }
@@ -720,8 +720,8 @@ static cc_int32 ccs_cache_collection_get_default_ccache_name (ccs_cache_collecti
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_open_ccache (ccs_cache_collection_t io_cache_collection,
-                                                   cci_stream_t           in_request_data,
-                                                   cci_stream_t           io_reply_data)
+                                                   k5_ipc_stream           in_request_data,
+                                                   k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     char *name = NULL;
@@ -732,7 +732,7 @@ static cc_int32 ccs_cache_collection_open_ccache (ccs_cache_collection_t io_cach
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_string (in_request_data, &name);
+        err = k5_ipc_stream_read_string (in_request_data, &name);
     }
     
     if (!err) {
@@ -744,7 +744,7 @@ static cc_int32 ccs_cache_collection_open_ccache (ccs_cache_collection_t io_cach
         err = ccs_ccache_write (ccache, io_reply_data);
     }
     
-    free (name);
+    k5_ipc_stream_free_string (name);
         
     return cci_check_error (err);    
 }
@@ -752,8 +752,8 @@ static cc_int32 ccs_cache_collection_open_ccache (ccs_cache_collection_t io_cach
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_open_default_ccache (ccs_cache_collection_t io_cache_collection,
-                                                           cci_stream_t           in_request_data,
-                                                           cci_stream_t           io_reply_data)
+                                                           k5_ipc_stream           in_request_data,
+                                                           k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     ccs_ccache_t ccache = NULL;
@@ -777,8 +777,8 @@ static cc_int32 ccs_cache_collection_open_default_ccache (ccs_cache_collection_t
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_create_ccache (ccs_cache_collection_t io_cache_collection,
-                                                    cci_stream_t           in_request_data,
-                                                    cci_stream_t           io_reply_data)
+                                                    k5_ipc_stream           in_request_data,
+                                                    k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     char *name = NULL;
@@ -791,15 +791,15 @@ static cc_int32 ccs_cache_collection_create_ccache (ccs_cache_collection_t io_ca
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_string (in_request_data, &name);
+        err = k5_ipc_stream_read_string (in_request_data, &name);
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (in_request_data, &cred_vers);
+        err = k5_ipc_stream_read_uint32 (in_request_data, &cred_vers);
     }
     
     if (!err) {
-        err = cci_stream_read_string (in_request_data, &principal);
+        err = k5_ipc_stream_read_string (in_request_data, &principal);
     }
     
     if (!err) {
@@ -824,8 +824,8 @@ static cc_int32 ccs_cache_collection_create_ccache (ccs_cache_collection_t io_ca
         err = ccs_cache_collection_changed (io_cache_collection);
     }
     
-    free (name);
-    free (principal);
+    k5_ipc_stream_free_string (name);
+    k5_ipc_stream_free_string (principal);
     
     return cci_check_error (err);    
 }
@@ -833,8 +833,8 @@ static cc_int32 ccs_cache_collection_create_ccache (ccs_cache_collection_t io_ca
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_create_default_ccache (ccs_cache_collection_t io_cache_collection,
-                                                            cci_stream_t           in_request_data,
-                                                            cci_stream_t           io_reply_data)
+                                                            k5_ipc_stream           in_request_data,
+                                                            k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     cc_uint32 cred_vers;
@@ -846,11 +846,11 @@ static cc_int32 ccs_cache_collection_create_default_ccache (ccs_cache_collection
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_uint32 (in_request_data, &cred_vers);
+        err = k5_ipc_stream_read_uint32 (in_request_data, &cred_vers);
     }
     
     if (!err) {
-        err = cci_stream_read_string (in_request_data, &principal);
+        err = k5_ipc_stream_read_string (in_request_data, &principal);
     }
     
     if (!err) {
@@ -883,7 +883,7 @@ static cc_int32 ccs_cache_collection_create_default_ccache (ccs_cache_collection
         err = ccs_cache_collection_changed (io_cache_collection);
     }
     
-    free (principal);
+    k5_ipc_stream_free_string (principal);
     
     return cci_check_error (err);    
 }
@@ -891,8 +891,8 @@ static cc_int32 ccs_cache_collection_create_default_ccache (ccs_cache_collection
 /* ------------------------------------------------------------------------ */
 
 static cc_int32 ccs_cache_collection_create_new_ccache (ccs_cache_collection_t io_cache_collection,
-                                                        cci_stream_t           in_request_data,
-                                                        cci_stream_t           io_reply_data)
+                                                        k5_ipc_stream           in_request_data,
+                                                        k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     cc_uint32 cred_vers;
@@ -905,11 +905,11 @@ static cc_int32 ccs_cache_collection_create_new_ccache (ccs_cache_collection_t i
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_uint32 (in_request_data, &cred_vers);
+        err = k5_ipc_stream_read_uint32 (in_request_data, &cred_vers);
     }
     
     if (!err) {
-        err = cci_stream_read_string (in_request_data, &principal);
+        err = k5_ipc_stream_read_string (in_request_data, &principal);
     }
     
     if (!err) {
@@ -931,7 +931,7 @@ static cc_int32 ccs_cache_collection_create_new_ccache (ccs_cache_collection_t i
     }
     
     free (name);
-    free (principal);
+    k5_ipc_stream_free_string (principal);
     
     return cci_check_error (err);    
 }
@@ -940,8 +940,8 @@ static cc_int32 ccs_cache_collection_create_new_ccache (ccs_cache_collection_t i
 
 static  cc_int32 ccs_cache_collection_new_ccache_iterator (ccs_cache_collection_t io_cache_collection,
                                                            ccs_pipe_t             in_client_pipe,
-                                                           cci_stream_t           in_request_data,
-                                                           cci_stream_t           io_reply_data)
+                                                           k5_ipc_stream           in_request_data,
+                                                           k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     ccs_ccache_iterator_t ccache_iterator = NULL;
@@ -968,9 +968,9 @@ static  cc_int32 ccs_cache_collection_new_ccache_iterator (ccs_cache_collection_
 static cc_int32 ccs_cache_collection_lock (ccs_pipe_t              in_client_pipe,
                                            ccs_pipe_t              in_reply_pipe,
                                            ccs_cache_collection_t  io_cache_collection,
-                                           cci_stream_t            in_request_data,
+                                           k5_ipc_stream            in_request_data,
                                            cc_uint32              *out_will_block,
-                                           cci_stream_t            io_reply_data)
+                                           k5_ipc_stream            io_reply_data)
 {
     cc_int32 err = ccNoError;
     cc_uint32 lock_type;
@@ -983,11 +983,11 @@ static cc_int32 ccs_cache_collection_lock (ccs_pipe_t              in_client_pip
     if (!io_reply_data                  ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_uint32 (in_request_data, &lock_type);
+        err = k5_ipc_stream_read_uint32 (in_request_data, &lock_type);
     }
     
     if (!err) {
-        err = cci_stream_read_uint32 (in_request_data, &block);
+        err = k5_ipc_stream_read_uint32 (in_request_data, &block);
     }
     
     if (!err) {
@@ -1003,8 +1003,8 @@ static cc_int32 ccs_cache_collection_lock (ccs_pipe_t              in_client_pip
 
 static cc_int32 ccs_cache_collection_unlock (ccs_pipe_t             in_client_pipe,
                                              ccs_cache_collection_t io_cache_collection,
-                                             cci_stream_t           in_request_data,
-                                             cci_stream_t           io_reply_data)
+                                             k5_ipc_stream           in_request_data,
+                                             k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
     
@@ -1031,13 +1031,13 @@ static cc_int32 ccs_cache_collection_unlock (ccs_pipe_t             in_client_pi
                                                ccs_pipe_t              in_reply_pipe,
                                                ccs_cache_collection_t  io_cache_collection,
                                                enum cci_msg_id_t       in_request_name,
-                                               cci_stream_t            in_request_data,
+                                               k5_ipc_stream            in_request_data,
                                                cc_uint32              *out_will_block,
-                                               cci_stream_t           *out_reply_data)
+                                               k5_ipc_stream           *out_reply_data)
 {
     cc_int32 err = ccNoError;
     cc_uint32 will_block = 0;
-    cci_stream_t reply_data = NULL;
+    k5_ipc_stream reply_data = NULL;
      
     if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_reply_pipe) ) { err = cci_check_error (ccErrBadParam); }
@@ -1047,7 +1047,7 @@ static cc_int32 ccs_cache_collection_unlock (ccs_pipe_t             in_client_pi
     if (!out_reply_data                 ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&reply_data);
+        err = k5_ipc_stream_new (&reply_data);
     }
     
     if (!err) {
@@ -1124,7 +1124,7 @@ static cc_int32 ccs_cache_collection_unlock (ccs_pipe_t             in_client_pi
         }
     }
     
-    cci_stream_release (reply_data);
+    k5_ipc_stream_release (reply_data);
     
     return cci_check_error (err);
 }

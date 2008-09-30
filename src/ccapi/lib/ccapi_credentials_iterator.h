@@ -33,7 +33,7 @@ cc_int32 cci_credentials_iterator_new (cc_credentials_iterator_t *out_credential
                                        cci_identifier_t           in_identifier);
 
 cc_int32 cci_credentials_iterator_write (cc_credentials_iterator_t in_credentials_iterator,
-                                         cci_stream_t              in_stream);
+                                         k5_ipc_stream              in_stream);
 
 cc_int32 ccapi_credentials_iterator_release (cc_credentials_iterator_t io_credentials_iterator);
 

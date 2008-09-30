@@ -31,18 +31,23 @@
 
 cc_int32 cci_message_invalid_object_err (enum cci_msg_id_t in_request_name);
 
-cc_int32 cci_message_new_request_header (cci_stream_t     *out_request,
+cc_int32 cci_message_new_request_header (k5_ipc_stream     *out_request,
                                          enum cci_msg_id_t in_request_name,
                                          cci_identifier_t  in_identifier);
 
-cc_int32 cci_message_read_request_header (cci_stream_t       in_request,
+cc_int32 cci_message_read_request_header (k5_ipc_stream       in_request,
                                           enum cci_msg_id_t *out_request_name,
                                           cci_identifier_t  *out_identifier);
 
-cc_int32 cci_message_new_reply_header (cci_stream_t     *out_reply,
+cc_int32 cci_message_new_reply_header (k5_ipc_stream     *out_reply,
                                        cc_int32          in_error);
 
-cc_int32 cci_message_read_reply_header (cci_stream_t  in_reply,
+cc_int32 cci_message_read_reply_header (k5_ipc_stream in_reply,
                                         cc_int32     *out_reply_error);
+
+uint32_t k5_ipc_stream_read_time (k5_ipc_stream  io_stream, 
+                               cc_time_t     *out_time);
+uint32_t k5_ipc_stream_write_time (k5_ipc_stream io_stream, 
+                                cc_time_t     in_time);
 
 #endif /* CCI_MESSAGE_H */

@@ -30,8 +30,8 @@
 
 static cc_int32 ccs_credentials_iterator_release (ccs_credentials_iterator_t io_credentials_iterator,
 						  ccs_ccache_t               io_ccache,
-						  cci_stream_t               in_request_data,
-						  cci_stream_t               io_reply_data)
+						  k5_ipc_stream               in_request_data,
+						  k5_ipc_stream               io_reply_data)
 {
     cc_int32 err = ccNoError;
     
@@ -51,8 +51,8 @@ static cc_int32 ccs_credentials_iterator_release (ccs_credentials_iterator_t io_
 
 static cc_int32 ccs_credentials_iterator_next (ccs_credentials_iterator_t io_credentials_iterator,
 					       ccs_ccache_t               io_ccache,
-					       cci_stream_t               in_request_data,
-					       cci_stream_t               io_reply_data)
+					       k5_ipc_stream               in_request_data,
+					       k5_ipc_stream               io_reply_data)
 {
     cc_int32 err = ccNoError;
     ccs_credentials_t credentials = NULL;
@@ -78,8 +78,8 @@ static cc_int32 ccs_credentials_iterator_next (ccs_credentials_iterator_t io_cre
 
 static  cc_int32 ccs_credentials_iterator_clone (ccs_credentials_iterator_t io_credentials_iterator,
                                                  ccs_ccache_t               io_ccache,
-                                                 cci_stream_t               in_request_data,
-                                                 cci_stream_t               io_reply_data)
+                                                 k5_ipc_stream               in_request_data,
+                                                 k5_ipc_stream               io_reply_data)
 {
     cc_int32 err = ccNoError;
     ccs_credentials_iterator_t credentials_iterator = NULL;
@@ -111,17 +111,17 @@ static  cc_int32 ccs_credentials_iterator_clone (ccs_credentials_iterator_t io_c
  cc_int32 ccs_credentials_iterator_handle_message (ccs_credentials_iterator_t  io_credentials_iterator,
                                                    ccs_ccache_t                io_ccache,
                                                    enum cci_msg_id_t           in_request_name,
-                                                   cci_stream_t                in_request_data,
-                                                   cci_stream_t               *out_reply_data)
+                                                   k5_ipc_stream                in_request_data,
+                                                   k5_ipc_stream               *out_reply_data)
 {
     cc_int32 err = ccNoError;
-    cci_stream_t reply_data = NULL;
+    k5_ipc_stream reply_data = NULL;
     
     if (!in_request_data) { err = cci_check_error (ccErrBadParam); }
     if (!out_reply_data ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_new (&reply_data);
+        err = k5_ipc_stream_new (&reply_data);
     }
     
     if (!err) {
@@ -153,7 +153,7 @@ static  cc_int32 ccs_credentials_iterator_clone (ccs_credentials_iterator_t io_c
         reply_data = NULL; /* take ownership */
     }
     
-    cci_stream_release (reply_data);
+    k5_ipc_stream_release (reply_data);
     
     return cci_check_error (err);
 }

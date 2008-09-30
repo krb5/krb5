@@ -32,7 +32,7 @@
  cc_int32 ccs_ccache_iterator_handle_message (ccs_ccache_iterator_t  io_ccache_iterator,
                                               ccs_cache_collection_t io_cache_collection,
                                               enum cci_msg_id_t      in_request_name,
-                                              cci_stream_t           in_request_data,
-                                              cci_stream_t          *out_reply_data);
+                                              k5_ipc_stream           in_request_data,
+                                              k5_ipc_stream          *out_reply_data);
 
 #endif /* CCS_CCACHE_ITERATOR_H */

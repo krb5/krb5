@@ -46,7 +46,7 @@ struct tspdata {
     RPC_ASYNC_STATE*    _rpcState;
     HANDLE              _replyEvent;
     time_t              _sst;
-    cci_stream_t        _stream;
+    k5_ipc_stream        _stream;
     char                _uuid[UUID_SIZE];
     };
 
@@ -57,14 +57,14 @@ void            tspdata_setConnected (struct tspdata* p, BOOL b);
 void            tspdata_setReplyEvent(struct tspdata* p, HANDLE h);
 void            tspdata_setRpcAState (struct tspdata* p, RPC_ASYNC_STATE* rpcState);
 void            tspdata_setSST       (struct tspdata* p, time_t t);
-void            tspdata_setStream    (struct tspdata* p, cci_stream_t s);
+void            tspdata_setStream    (struct tspdata* p, k5_ipc_stream s);
 void            tspdata_setUUID      (struct tspdata* p, unsigned char __RPC_FAR* uuidString);
 HANDLE          tspdata_getReplyEvent(const struct tspdata* p);
 
 BOOL             tspdata_getConnected(const struct tspdata* p);
 RPC_ASYNC_STATE* tspdata_getRpcAState(const struct tspdata* p);
 time_t           tspdata_getSST      (const struct tspdata* p);
-cci_stream_t     tspdata_getStream   (const struct tspdata* p);
+k5_ipc_stream     tspdata_getStream   (const struct tspdata* p);
 char*            tspdata_getUUID     (const struct tspdata* p);
 
 BOOL WINAPI PutTspData(DWORD tlsIndex, struct tspdata*  dw);
