@@ -87,7 +87,11 @@ kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
     
     /* Short circuit if password saving is disabled */
     if (!err && !kim_os_identity_allow_save_password ()) {
-        return kim_os_identity_remove_saved_password (in_identity);
+        err = kim_os_identity_remove_saved_password (in_identity);
+        if (!err) {
+            /* simulate no password found */
+            err = check_error (ENOENT);
+        }
     }
     
     if (!err) {
