@@ -57,7 +57,7 @@ NULL };
 
 static inline kim_error kim_options_allocate (kim_options *out_options)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_options options = NULL;
     
     if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }

@@ -41,10 +41,6 @@ kim_error kim_os_library_unlock_for_bundle_lookup (void);
 
 kim_error kim_os_library_get_application_path (kim_string *out_path);
 
-
-kim_error kim_os_string_create_for_key (kim_string *out_string,
-                                        kim_string  in_key_string);
-
 kim_error kim_os_string_create_from_cfstring (kim_string *out_string,
                                               CFStringRef   in_cfstring);
 

@@ -303,7 +303,7 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
     
     if (!err) {
         NSLog (@"Got auth prompt with identity '%s', type '%d', allow_save_reply '%d', hide '%d', title '%s', message '%s', description '%s'",
-               identity_string, type, hide_reply, title, message, description);
+               identity_string, type, allow_save_reply, hide_reply, title, message, description);
         err = kim_handle_reply_auth_prompt (in_reply_port, "ydobon", 0, 0);
 #warning Send auth prompt message to main thread with 2 ports and arguments
     }

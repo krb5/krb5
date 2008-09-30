@@ -29,95 +29,44 @@
 #include "kim_os_private.h"
 
 /* ------------------------------------------------------------------------ */
-static kim_error kim_os_string_for_key_in_bundle (CFBundleRef  in_bundle, 
-                                                  CFStringRef  in_key,
-                                                  kim_string  *out_string)
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_string string = NULL;
-    
-    if (!err && !in_bundle ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_key    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        CFDictionaryRef dictionary = NULL;
-        int release_dictionary = 0;
-        CFStringRef cfstring = NULL;
-        
-#if !KERBEROS_LITE
-        if (kim_library_allow_home_directory_access ()) {
-#endif
-            /* Accesses user's homedir to get localization information */
-            dictionary = CFBundleGetLocalInfoDictionary (in_bundle);
-            
-#if !KERBEROS_LITE
-        } else {
-            CFURLRef url = NULL;
-            CFDataRef data = NULL;
-            CFAllocatorRef allocator = CFGetAllocator (in_bundle);
-            SInt32 code = 0;
-            
-            url = CFBundleCopyResourceURLForLocalization (in_bundle,
-                                                          CFSTR("InfoPlist"),
-                                                          CFSTR("strings"),
-                                                          NULL,
-                                                          CFSTR("English"));
-            
-            if (url && CFURLCreateDataAndPropertiesFromResource (allocator, 
-                                                                 url, &data, 
-                                                                 NULL, NULL, 
-                                                                 &code)) {
-                
-                dictionary = CFPropertyListCreateFromXMLData (allocator, 
-                                                              data, 
-                                                              kCFPropertyListImmutable, 
-                                                              NULL);
-                release_dictionary = 1;
-            }
-            
-            if (data) { CFRelease (data); }
-            if (url ) { CFRelease (url); }
-        }
-#endif
-        
-        if (dictionary && (CFGetTypeID(dictionary) == CFDictionaryGetTypeID())) {
-            cfstring = (CFStringRef) CFDictionaryGetValue (dictionary, in_key);
-        }
-        
-        if (cfstring && (CFGetTypeID (cfstring) == CFStringGetTypeID ())) {
-            err = kim_os_string_create_from_cfstring (&string, cfstring);
-        }
-        
-        if (dictionary && release_dictionary) { CFRelease (dictionary); }
-    }
-    
-    if (!err) {
-        /* set to NULL if no string found */
-        *out_string = string;
-        string = NULL;
-    }
-    
-    kim_string_free (&string);
-    
-    return check_error (err);
-}
-
-#pragma mark -
-
-/* ------------------------------------------------------------------------ */
 
 kim_error kim_os_string_create_localized (kim_string *out_string,
                                           kim_string in_string)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error lock_err = kim_os_library_lock_for_bundle_lookup ();
+    kim_error err = lock_err;
     kim_string string = NULL;
+    CFStringRef cfkey = NULL;
     
     if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_string ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
    
     if (!err) {
-        err = kim_os_string_create_for_key (&string, in_string);
+        err = kim_os_string_get_cfstring (in_string, &cfkey);
+    }
+    
+    if (!err && kim_library_allow_home_directory_access ()) {
+        CFStringRef cfstring = NULL;
+        CFBundleRef framework = CFBundleGetBundleWithIdentifier (CFSTR ("edu.mit.Kerberos"));
+        CFBundleRef main_bundle = CFBundleGetMainBundle ();
+
+        if (framework) {
+            cfstring = CFCopyLocalizedStringFromTableInBundle (cfkey,
+                                                               CFSTR ("InfoPlist"),
+                                                               framework,
+                                                               "");
+        }
+        
+        if (main_bundle && !cfstring) {
+            cfstring = CFCopyLocalizedStringFromTableInBundle (cfkey,
+                                                                CFSTR ("InfoPlist"),
+                                                               main_bundle,
+                                                               "");
+        }        
+        
+        if (!err && cfstring) {
+            err = kim_os_string_create_from_cfstring (&string, cfstring);
+        }
     }
     
     if (!err && !string) {
@@ -129,51 +78,8 @@ kim_error kim_os_string_create_localized (kim_string *out_string,
         string = NULL;
     }
     
+    if (cfkey) { CFRelease (cfkey); }
     kim_string_free (&string);
-    
-    return check_error (err);
-}
-
-/* ------------------------------------------------------------------------ */
-
-kim_error kim_os_string_create_for_key (kim_string *out_string,
-                                        kim_string in_key_string)
-{
-    kim_error lock_err = kim_os_library_lock_for_bundle_lookup ();
-    kim_error err = lock_err;
-    CFStringRef key = NULL;
-    kim_string string = NULL;
-    
-    if (!err && !out_string   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_key_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
-    if (!err) {
-        err = kim_os_string_get_cfstring (in_key_string, &key);
-    }
-    
-    if (!err) {
-        /* Try to find the key, first searching in the framework */
-        CFBundleRef framework = CFBundleGetBundleWithIdentifier (CFSTR ("edu.mit.Kerberos"));
-        if (framework) {
-            err = kim_os_string_for_key_in_bundle (framework, key, &string);
-        }
-    }
-    
-    if (!err && !string) {
-        /* If we didn't find it in the framwork, try in the main bundle */
-        CFBundleRef main_bundle = CFBundleGetMainBundle ();
-        if (main_bundle) {
-            err = kim_os_string_for_key_in_bundle (main_bundle, key, &string);
-        }
-    }
-    
-    if (!err) {
-        *out_string = string;
-        string = NULL;
-    }
-    
-    kim_string_free (&string);
-    if (key) { CFRelease (key); }
     
     if (!lock_err) { kim_os_library_unlock_for_bundle_lookup (); }
     

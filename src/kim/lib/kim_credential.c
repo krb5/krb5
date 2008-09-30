@@ -41,7 +41,7 @@ struct kim_credential_iterator_opaque kim_credential_iterator_initializer = { NU
 kim_error kim_credential_iterator_create (kim_credential_iterator *out_credential_iterator,
                                           kim_ccache               in_ccache)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_credential_iterator credential_iterator = NULL;
     
     if (!err && !out_credential_iterator) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -178,7 +178,7 @@ struct kim_credential_opaque kim_credential_initializer = { NULL, NULL };
 
 static inline kim_error kim_credential_allocate (kim_credential *out_credential)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_credential credential = NULL;
     
     if (!err && !out_credential) { err = check_error (KIM_NULL_PARAMETER_ERR); }

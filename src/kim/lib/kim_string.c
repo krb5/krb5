@@ -32,7 +32,7 @@ kim_error kim_string_create_from_format (kim_string *out_string,
                                          kim_string  in_format,
                                          ...)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     va_list args;
     
     va_start (args, in_format);
@@ -48,7 +48,7 @@ kim_error kim_string_create_from_format_va_retcode (kim_string *out_string,
                                                     kim_string  in_format,
                                                     va_list     in_args)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     
     int count = vasprintf ((char **) out_string, in_format, in_args);
     if (count < 0) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
@@ -62,7 +62,7 @@ kim_error kim_string_create_from_format_va (kim_string *out_string,
                                             kim_string  in_format,
                                             va_list     in_args)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_string string = NULL;
     
     if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -90,7 +90,7 @@ kim_error kim_string_create_from_buffer (kim_string *out_string,
                                          const char *in_buffer, 
                                          kim_count   in_length)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_string string = NULL;
     
     if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -117,7 +117,11 @@ kim_error kim_string_create_from_buffer (kim_string *out_string,
 kim_error kim_string_create_for_last_error (kim_string *out_string,
                                             kim_error   in_error)
 {
-    return kim_string_copy (out_string, kim_error_message (in_error));
+    kim_error err = kim_library_init ();
+
+    err = kim_string_copy (out_string, kim_error_message (in_error));
+
+    return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -125,7 +129,7 @@ kim_error kim_string_create_for_last_error (kim_string *out_string,
 kim_error kim_string_copy (kim_string *out_string, 
                            kim_string  in_string)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_string string = NULL;
     
     if (!err && !out_string) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -137,7 +141,7 @@ kim_error kim_string_copy (kim_string *out_string,
     }
     
     if (!err) {
-        strcpy ((char *) string, in_string);
+        strncpy ((char *) string, in_string, strlen (in_string) + 1);
         *out_string = string;
         string = NULL;
     }

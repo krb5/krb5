@@ -24,6 +24,8 @@
  * or implied warranty.
  */
 
+#ifndef LEAN_CLIENT
+
 #include "k5_mig_client.h"
 
 #include <Kerberos/kipc_client.h>
@@ -328,3 +330,5 @@ int32_t k5_ipc_send_request (const char    *in_service_id,
     
     return err;    
 }
+
+#endif /* LEAN CLIENT */

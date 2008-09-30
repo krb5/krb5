@@ -33,6 +33,7 @@
 #include "ccapi_string.h"
 #include "ccapi_ipc.h"
 #include "ccapi_context_change_time.h"
+#include "ccapi_err.h"
 
 #include <CredentialsCache2.h>
 
@@ -96,6 +97,10 @@ static int cci_thread_init (void)
         err = cci_ipc_thread_init ();
     }
     
+    if (!err) {
+        add_error_table (&et_CAPI_error_table);
+    }
+    
     return err;
 }
 
@@ -107,6 +112,7 @@ static void cci_thread_fini (void)
 	return;
     }
     
+    remove_error_table(&et_CAPI_error_table);
     cci_context_change_time_thread_fini ();
     cci_ipc_thread_fini ();
 }

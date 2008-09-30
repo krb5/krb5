@@ -34,6 +34,38 @@
 #include "kim_private.h"
 #include "kim_os_private.h"
 
+
+MAKE_INIT_FUNCTION(kim_error_init);
+MAKE_FINI_FUNCTION(kim_error_fini);
+
+/* ------------------------------------------------------------------------ */
+
+static int kim_error_init (void)
+{
+    add_error_table (&et_KIM_error_table);    
+    return 0;
+}
+
+/* ------------------------------------------------------------------------ */
+
+static void kim_error_fini (void)
+{
+    if (!INITIALIZER_RAN (kim_error_init) || PROGRAM_EXITING ()) {
+	return;
+    }
+
+    remove_error_table (&et_KIM_error_table);
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_library_init (void)
+{
+    return CALL_INIT_FUNCTION (kim_error_init);
+}
+
+#pragma mark -
+
 static k5_mutex_t g_allow_home_directory_access_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 static k5_mutex_t g_allow_automatic_prompting_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 static k5_mutex_t g_ui_environment_mutex = K5_MUTEX_PARTIAL_INITIALIZER;

@@ -58,7 +58,7 @@ struct kim_selection_hints_opaque kim_selection_hints_initializer = {
 
 static inline kim_error kim_selection_hints_allocate (kim_selection_hints *out_selection_hints)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_selection_hints selection_hints = NULL;
     
     if (!err && !out_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }

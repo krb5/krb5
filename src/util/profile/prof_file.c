@@ -52,9 +52,8 @@ int profile_library_initializer(void)
 #ifdef SHOW_INITFINI_FUNCS
     printf("profile_library_initializer\n");
 #endif
-#if !USE_BUNDLE_ERROR_STRINGS
     add_error_table(&et_prof_error_table);
-#endif
+
     return k5_mutex_finish_init(&g_shared_trees_mutex);
 }
 void profile_library_finalizer(void)
@@ -69,9 +68,8 @@ void profile_library_finalizer(void)
     printf("profile_library_finalizer\n");
 #endif
     k5_mutex_destroy(&g_shared_trees_mutex);
-#if !USE_BUNDLE_ERROR_STRINGS
+
     remove_error_table(&et_prof_error_table);
-#endif
 }
 
 static void profile_free_file_data(prf_data_t);

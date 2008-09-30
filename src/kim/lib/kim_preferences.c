@@ -136,7 +136,7 @@ static kim_error kim_favorites_copy (kim_favorites in_favorites,
     kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !io_favorites ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_favorites_resize (io_favorites, in_favorites->count);
@@ -491,10 +491,6 @@ static kim_error kim_preferences_read (kim_preferences in_preferences)
                                                        &in_preferences->maximum_renewal_lifetime);
     }
     
-    if (!err) {
-        
-    }
-    
     return check_error (err);
 }
 
@@ -576,7 +572,7 @@ static kim_error kim_preferences_write (kim_preferences in_preferences)
 
 static inline kim_error kim_preferences_allocate (kim_preferences *out_preferences)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_preferences preferences = NULL;
     
     if (!err && !out_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }

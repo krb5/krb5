@@ -33,13 +33,11 @@ int krb5int_lib_init(void)
     printf("krb5int_lib_init\n");
 #endif
 
-#if !USE_BUNDLE_ERROR_STRINGS
     add_error_table(&et_krb5_error_table);
     add_error_table(&et_kv5m_error_table);
     add_error_table(&et_kdb5_error_table);
     add_error_table(&et_asn1_error_table);
     add_error_table(&et_k524_error_table);
-#endif
 
     err = krb5int_rc_finish_init();
     if (err)
@@ -94,13 +92,12 @@ void krb5int_lib_fini(void)
     krb5_stdcc_shutdown();
 #endif
 
-#if !USE_BUNDLE_ERROR_STRINGS
     remove_error_table(&et_krb5_error_table);
     remove_error_table(&et_kv5m_error_table);
     remove_error_table(&et_kdb5_error_table);
     remove_error_table(&et_asn1_error_table);
     remove_error_table(&et_k524_error_table);
-#endif
+
     krb5int_set_error_info_callout_fn (0);
 }
 

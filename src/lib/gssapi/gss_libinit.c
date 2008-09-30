@@ -25,10 +25,9 @@ int gssint_lib_init(void)
     printf("gssint_lib_init\n");
 #endif
 
-#if !USE_BUNDLE_ERROR_STRINGS
     add_error_table(&et_k5g_error_table);
     add_error_table(&et_ggss_error_table);
-#endif
+
     err = gssint_mechglue_init();
     if (err)
 	return err;
@@ -69,10 +68,9 @@ void gssint_lib_fini(void)
 #ifdef SHOW_INITFINI_FUNCS
     printf("gssint_lib_fini\n");
 #endif
-#if !USE_BUNDLE_ERROR_STRINGS
     remove_error_table(&et_k5g_error_table);
     remove_error_table(&et_ggss_error_table);
-#endif
+
     k5_key_delete(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
     k5_key_delete(K5_KEY_GSS_KRB5_CCACHE_NAME);
     k5_mutex_destroy(&kg_vdb.mutex);

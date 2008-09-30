@@ -41,7 +41,7 @@ struct kim_identity_opaque kim_identity_initializer = { NULL, NULL };
 
 static inline kim_error kim_identity_allocate (kim_identity *out_identity)
 {
-    kim_error err = KIM_NO_ERROR;
+    kim_error err = kim_library_init ();
     kim_identity identity = NULL;
     
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
