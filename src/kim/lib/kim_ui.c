@@ -225,7 +225,7 @@ krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
             
             terr = kim_os_identity_get_saved_password (context->identity, 
                                                        (kim_string *) &reply);
-            if (!terr) { got_saved_password = 1; }
+            if (!terr && reply) { got_saved_password = 1; }
         }
         
         if (!got_saved_password) {
