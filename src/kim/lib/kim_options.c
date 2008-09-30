@@ -454,15 +454,15 @@ krb5_get_init_creds_opt *kim_options_init_cred_options (kim_options in_options)
     
     if (!err && !in_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
+    if (!err && !in_options->init_cred_context) {
+        err = krb5_error (NULL,
+                          krb5_init_context (&in_options->init_cred_context));
+    }
+    
     if (!err && !in_options->addressless) {
         err = krb5_error (in_options->init_cred_context, 
                           krb5_os_localaddr (in_options->init_cred_context, 
                                              &addresses));
-    }
-    
-    if (!err && !in_options->init_cred_context) {
-        err = krb5_error (NULL,
-                          krb5_init_context (&in_options->init_cred_context));
     }
     
     if (!err && !in_options->init_cred_options) {
