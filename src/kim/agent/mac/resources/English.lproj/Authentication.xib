@@ -8,11 +8,12 @@
 		<string key="IBDocument.HIToolboxVersion">352.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="300157"/>
-			<integer value="300274"/>
-			<integer value="300193"/>
 			<integer value="20"/>
+			<integer value="300314"/>
+			<integer value="300193"/>
 			<integer value="300175"/>
+			<integer value="300274"/>
+			<integer value="300420"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -58,6 +59,21 @@
 					<string>max_renewal_lifetime</string>
 					<string>max_valid_lifetime</string>
 					<string>min_valid_lifetime</string>
+				</object>
+				<bool key="NSEditable">YES</bool>
+				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
+			</object>
+			<object class="NSObjectController" id="633725892">
+				<object class="NSMutableArray" key="NSDeclaredKeys">
+					<bool key="EncodedWithXMLCoder">YES</bool>
+					<string>maxValidLifetime</string>
+					<string>minValidLifetime</string>
+					<string>validLifetime</string>
+					<string>valid_lifetime</string>
+					<string>minRenewableLifetime</string>
+					<string>maxRenewableLifetime</string>
+					<string>renewa</string>
+					<string>renewal_lifetime</string>
 				</object>
 				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -309,7 +325,7 @@
 					</object>
 					<object class="NSPopUpButton" id="1016187493">
 						<reference key="NSNextResponder" ref="92892041"/>
-						<int key="NSvFlags">-2147483356</int>
+						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{20, 17}, {38, 26}}</string>
 						<reference key="NSSuperview" ref="92892041"/>
 						<bool key="NSEnabled">YES</bool>
@@ -355,6 +371,16 @@
 									<object class="NSMenuItem" id="452996455">
 										<reference key="NSMenu" ref="594991555"/>
 										<string type="base64-UTF8" key="NSTitle">VGlja2V0IE9wdGlvbnPigKY</string>
+										<string key="NSKeyEquiv"/>
+										<int key="NSMnemonicLoc">2147483647</int>
+										<reference key="NSOnImage" ref="530784694"/>
+										<reference key="NSMixedImage" ref="790891323"/>
+										<string key="NSAction">_popUpItemAction:</string>
+										<reference key="NSTarget" ref="690863814"/>
+									</object>
+									<object class="NSMenuItem" id="744766544">
+										<reference key="NSMenu" ref="594991555"/>
+										<string type="base64-UTF8" key="NSTitle">Q2hhbmdlIFBhc3N3b3Jk4oCmA</string>
 										<string key="NSKeyEquiv"/>
 										<int key="NSMnemonicLoc">2147483647</int>
 										<reference key="NSOnImage" ref="530784694"/>
@@ -964,7 +990,7 @@
 				<string key="NSWindowContentMaxSize">{3.40282e+38, 3.40282e+38}</string>
 				<string key="NSWindowContentMinSize">{430, 283}</string>
 				<object class="NSView" key="NSWindowView" id="389112266">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1178,6 +1204,7 @@
 						</object>
 					</object>
 					<string key="NSFrameSize">{430, 283}</string>
+					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{430, 305}</string>
@@ -1853,200 +1880,238 @@
 					<int key="connectionID">300417</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">takeObjectValueFrom:</string>
-						<reference key="source" ref="332956369"/>
-						<reference key="destination" ref="594182616"/>
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">ticketOptionsSheet</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="102029948"/>
 					</object>
-					<int key="connectionID">300441</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">takeObjectValueFrom:</string>
-						<reference key="source" ref="523287828"/>
-						<reference key="destination" ref="486016405"/>
-					</object>
-					<int key="connectionID">300442</int>
+					<int key="connectionID">300468</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">delegate</string>
-						<reference key="source" ref="523287828"/>
-						<reference key="destination" ref="486016405"/>
+						<string key="label">ticketOptionsController</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="633725892"/>
 					</object>
-					<int key="connectionID">300443</int>
+					<int key="connectionID">300470</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">delegate</string>
-						<reference key="source" ref="332956369"/>
-						<reference key="destination" ref="594182616"/>
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">maxValue: selection.maxValidLifetime</string>
+						<reference key="source" ref="486016405"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector" id="132072575">
+							<reference key="NSSource" ref="486016405"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">maxValue: selection.maxValidLifetime</string>
+							<string key="NSBinding">maxValue</string>
+							<string key="NSKeyPath">selection.maxValidLifetime</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
 					</object>
-					<int key="connectionID">300444</int>
+					<int key="connectionID">300472</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">minValue: selection.minValidLifetime</string>
+						<reference key="source" ref="486016405"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="486016405"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">minValue: selection.minValidLifetime</string>
+							<string key="NSBinding">minValue</string>
+							<string key="NSKeyPath">selection.minValidLifetime</string>
+							<reference key="NSPreviousConnector" ref="132072575"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300478</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">value: selection.forwardable</string>
 						<reference key="source" ref="964499406"/>
-						<reference key="destination" ref="57033499"/>
+						<reference key="destination" ref="633725892"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="964499406"/>
-							<reference key="NSDestination" ref="57033499"/>
+							<reference key="NSDestination" ref="633725892"/>
 							<string key="NSLabel">value: selection.forwardable</string>
 							<string key="NSBinding">value</string>
 							<string key="NSKeyPath">selection.forwardable</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">300445</int>
+					<int key="connectionID">300481</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">value: selection.addressless</string>
 						<reference key="source" ref="198913348"/>
-						<reference key="destination" ref="57033499"/>
+						<reference key="destination" ref="633725892"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="198913348"/>
-							<reference key="NSDestination" ref="57033499"/>
+							<reference key="NSDestination" ref="633725892"/>
 							<string key="NSLabel">value: selection.addressless</string>
 							<string key="NSBinding">value</string>
 							<string key="NSKeyPath">selection.addressless</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">300446</int>
+					<int key="connectionID">300482</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">value: selection.renewable</string>
 						<reference key="source" ref="368169141"/>
-						<reference key="destination" ref="57033499"/>
+						<reference key="destination" ref="633725892"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="368169141"/>
-							<reference key="NSDestination" ref="57033499"/>
+							<reference key="NSDestination" ref="633725892"/>
 							<string key="NSLabel">value: selection.renewable</string>
 							<string key="NSBinding">value</string>
 							<string key="NSKeyPath">selection.renewable</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">300447</int>
+					<int key="connectionID">300483</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">maxValue: selection.maxRenewableLifetime</string>
+						<reference key="source" ref="594182616"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector" id="728670834">
+							<reference key="NSSource" ref="594182616"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">maxValue: selection.maxRenewableLifetime</string>
+							<string key="NSBinding">maxValue</string>
+							<string key="NSKeyPath">selection.maxRenewableLifetime</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300494</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">minValue: selection.minRenewableLifetime</string>
+						<reference key="source" ref="594182616"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="594182616"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">minValue: selection.minRenewableLifetime</string>
+							<string key="NSBinding">minValue</string>
+							<string key="NSKeyPath">selection.minRenewableLifetime</string>
+							<reference key="NSPreviousConnector" ref="728670834"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300495</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">enabled: selection.renewable</string>
 						<reference key="source" ref="594182616"/>
-						<reference key="destination" ref="57033499"/>
+						<reference key="destination" ref="633725892"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="594182616"/>
-							<reference key="NSDestination" ref="57033499"/>
+							<reference key="NSDestination" ref="633725892"/>
 							<string key="NSLabel">enabled: selection.renewable</string>
 							<string key="NSBinding">enabled</string>
 							<string key="NSKeyPath">selection.renewable</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">300450</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">maxValue: selection.max_renewal_lifetime</string>
-						<reference key="source" ref="594182616"/>
-						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector" id="970138044">
-							<reference key="NSSource" ref="594182616"/>
-							<reference key="NSDestination" ref="57033499"/>
-							<string key="NSLabel">maxValue: selection.max_renewal_lifetime</string>
-							<string key="NSBinding">maxValue</string>
-							<string key="NSKeyPath">selection.max_renewal_lifetime</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">300453</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">minValue: selection.min_renewal_lifetime</string>
-						<reference key="source" ref="594182616"/>
-						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector" id="564091763">
-							<reference key="NSSource" ref="594182616"/>
-							<reference key="NSDestination" ref="57033499"/>
-							<string key="NSLabel">minValue: selection.min_renewal_lifetime</string>
-							<string key="NSBinding">minValue</string>
-							<string key="NSKeyPath">selection.min_renewal_lifetime</string>
-							<reference key="NSPreviousConnector" ref="970138044"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">300454</int>
+					<int key="connectionID">300497</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">value: selection.renewal_lifetime</string>
-						<reference key="source" ref="594182616"/>
-						<reference key="destination" ref="57033499"/>
+						<reference key="source" ref="332956369"/>
+						<reference key="destination" ref="633725892"/>
 						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="594182616"/>
-							<reference key="NSDestination" ref="57033499"/>
+							<reference key="NSSource" ref="332956369"/>
+							<reference key="NSDestination" ref="633725892"/>
 							<string key="NSLabel">value: selection.renewal_lifetime</string>
 							<string key="NSBinding">value</string>
 							<string key="NSKeyPath">selection.renewal_lifetime</string>
-							<reference key="NSPreviousConnector" ref="564091763"/>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">300455</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">maxValue: selection.max_valid_lifetime</string>
-						<reference key="source" ref="486016405"/>
-						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector" id="72846604">
-							<reference key="NSSource" ref="486016405"/>
-							<reference key="NSDestination" ref="57033499"/>
-							<string key="NSLabel">maxValue: selection.max_valid_lifetime</string>
-							<string key="NSBinding">maxValue</string>
-							<string key="NSKeyPath">selection.max_valid_lifetime</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">300456</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">minValue: selection.min_valid_lifetime</string>
-						<reference key="source" ref="486016405"/>
-						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector" id="337570750">
-							<reference key="NSSource" ref="486016405"/>
-							<reference key="NSDestination" ref="57033499"/>
-							<string key="NSLabel">minValue: selection.min_valid_lifetime</string>
-							<string key="NSBinding">minValue</string>
-							<string key="NSKeyPath">selection.min_valid_lifetime</string>
-							<reference key="NSPreviousConnector" ref="72846604"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">300458</int>
+					<int key="connectionID">300500</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">value: selection.valid_lifetime</string>
-						<reference key="source" ref="486016405"/>
-						<reference key="destination" ref="57033499"/>
+						<reference key="source" ref="523287828"/>
+						<reference key="destination" ref="633725892"/>
 						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="486016405"/>
-							<reference key="NSDestination" ref="57033499"/>
+							<reference key="NSSource" ref="523287828"/>
+							<reference key="NSDestination" ref="633725892"/>
 							<string key="NSLabel">value: selection.valid_lifetime</string>
 							<string key="NSBinding">value</string>
 							<string key="NSKeyPath">selection.valid_lifetime</string>
-							<reference key="NSPreviousConnector" ref="337570750"/>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">300459</int>
+					<int key="connectionID">300501</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">showTicketOptions:</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="452996455"/>
+					</object>
+					<int key="connectionID">300503</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">saveTicketOptions:</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="681646907"/>
+					</object>
+					<int key="connectionID">300504</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">cancelTicketOptions:</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="284195308"/>
+					</object>
+					<int key="connectionID">300505</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">validLifetimeSlider</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="486016405"/>
+					</object>
+					<int key="connectionID">300506</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">renewableLifetimeSlider</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="594182616"/>
+					</object>
+					<int key="connectionID">300507</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">sliderDidChange:</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="594182616"/>
+					</object>
+					<int key="connectionID">300508</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">sliderDidChange:</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="486016405"/>
+					</object>
+					<int key="connectionID">300509</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2573,6 +2638,7 @@
 							<reference ref="8728780"/>
 							<reference ref="917012637"/>
 							<reference ref="452996455"/>
+							<reference ref="744766544"/>
 						</object>
 						<reference key="parent" ref="690863814"/>
 					</object>
@@ -2876,6 +2942,17 @@
 						<reference key="object" ref="452996455"/>
 						<reference key="parent" ref="594991555"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300469</int>
+						<reference key="object" ref="633725892"/>
+						<reference key="parent" ref="0"/>
+						<string key="objectName">Ticket Options Controller</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300502</int>
+						<reference key="object" ref="744766544"/>
+						<reference key="parent" ref="594991555"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -3019,6 +3096,8 @@
 					<string>300430.IBPluginDependency</string>
 					<string>300430.ImportedFromIB2</string>
 					<string>300464.IBPluginDependency</string>
+					<string>300469.IBPluginDependency</string>
+					<string>300502.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -3104,7 +3183,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{611, 402}, {176, 73}}</string>
+					<string>{{611, 382}, {189, 93}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3128,9 +3207,9 @@
 					<reference ref="9"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
-					<string>{{579, 449}, {430, 283}}</string>
+					<string>{{979, 209}, {430, 283}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{579, 449}, {430, 283}}</string>
+					<string>{{979, 209}, {430, 283}}</string>
 					<reference ref="9"/>
 					<reference ref="8"/>
 					<reference ref="9"/>
@@ -3159,6 +3238,8 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -3181,7 +3262,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">300467</int>
+			<int key="maxID">300509</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -3195,12 +3276,20 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>answerAuthPrompt:</string>
 							<string>cancel:</string>
+							<string>cancelTicketOptions:</string>
 							<string>changePassword:</string>
 							<string>enterIdentity:</string>
+							<string>saveTicketOptions:</string>
+							<string>showTicketOptions:</string>
 							<string>showedError:</string>
+							<string>sliderDidChange:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -3226,10 +3315,14 @@
 							<string>passwordField</string>
 							<string>passwordView</string>
 							<string>rememberPasswordInKeychainCheckBox</string>
+							<string>renewableLifetimeSlider</string>
 							<string>samBadge</string>
 							<string>samPromptField</string>
 							<string>samView</string>
+							<string>ticketOptionsController</string>
+							<string>ticketOptionsSheet</string>
 							<string>usernameField</string>
+							<string>validLifetimeSlider</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -3247,10 +3340,14 @@
 							<string>NSTextField</string>
 							<string>NSView</string>
 							<string>NSButton</string>
+							<string>NSSlider</string>
 							<string>BadgedImageView</string>
 							<string>NSTextField</string>
 							<string>NSView</string>
+							<string>NSObjectController</string>
+							<string>NSWindow</string>
 							<string>NSTextField</string>
+							<string>NSSlider</string>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">

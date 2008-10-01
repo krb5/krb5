@@ -131,10 +131,12 @@ static KerberosAgentListener *sharedListener = nil;
 
 + (void) enterIdentityWithClientPort: (mach_port_t) client_port
                            replyPort: (mach_port_t) reply_port
+                             options: (kim_options) options
 {
     NSDictionary *info = [[NSDictionary alloc] initWithObjectsAndKeys:
                           [NSNumber numberWithInteger:client_port], @"client_port",
                           [NSNumber numberWithInteger:reply_port], @"reply_port",
+                          [KIMUtilities dictionaryForKimOptions:options], @"options",
                           nil];
     [[NSApp delegate] performSelectorOnMainThread:@selector(enterIdentity:) 
                                        withObject:info
@@ -149,16 +151,15 @@ static KerberosAgentListener *sharedListener = nil;
     mach_port_t reply_port = [[info objectForKey:@"reply_port"] integerValue];
     kim_identity identity = NULL;
     kim_options options = NULL;
+    NSString *identityString = [info objectForKey:@"identity_string"];
     
-    if (!err) {
-        err = kim_identity_create_from_string (&identity, [[info objectForKey:@"identity_string"] UTF8String]);
+    if (identityString) {
+        err = kim_identity_create_from_string (&identity, [identityString UTF8String]);
     }
     
     if (!err) {
-#warning Placeholder for returning options
-        err = kim_options_create (&options);
-    }
-    
+        options = [KIMUtilities kimOptionsForDictionary:[info objectForKey:@"options"]];
+    }    
     if (!err) {
         err = kim_handle_reply_enter_identity(reply_port, identity, options, error);
     }
@@ -198,13 +199,18 @@ static KerberosAgentListener *sharedListener = nil;
     mach_port_t reply_port = [portNumber integerValue];
     kim_identity identity = NULL;
     kim_options options = NULL;
-    
-    err = kim_identity_create_from_string(&identity, (identityString) ? [identityString UTF8String] : "");
+    NSLog(@"%s", __FUNCTION__);
+
+    if (identityString) {
+        err = kim_identity_create_from_string(&identity, [identityString UTF8String]);
+    }
 
     if (!err) {
-#warning Placeholder for returning options
-        err = kim_options_create (&options);
+        options = [KIMUtilities kimOptionsForDictionary:[info objectForKey:@"options"]];
     }
+
+    log_kim_error_to_console(err);
+    log_kim_error_to_console(error);
     
     if (!err) {
         err = kim_handle_reply_select_identity(reply_port, identity, options, error);

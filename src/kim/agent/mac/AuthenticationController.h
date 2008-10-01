@@ -54,6 +54,12 @@
     IBOutlet NSButton *rememberPasswordInKeychainCheckBox;
     
     IBOutlet NSObjectController *glueController;
+
+    IBOutlet NSWindow *ticketOptionsSheet;
+    IBOutlet NSObjectController *ticketOptionsController;
+    
+    IBOutlet NSSlider *validLifetimeSlider;
+    IBOutlet NSSlider *renewableLifetimeSlider;
 }
 
 @property (readwrite, retain) IPCClient *associatedClient;
@@ -72,5 +78,15 @@
 - (IBAction) answerAuthPrompt: (id) sender;
 - (IBAction) changePassword: (id) sender;
 - (IBAction) showedError: (id) sender;
+
+- (IBAction) sliderDidChange: (id) sender;
+
+- (IBAction) showTicketOptions: (id) sender;
+- (IBAction) cancelTicketOptions: (id) sender;
+- (IBAction) saveTicketOptions: (id) sender;
+
+- (void) sheetDidEnd: (NSWindow *) sheet 
+          returnCode: (int) returnCode 
+         contextInfo: (void *) contextInfo;
 
 @end

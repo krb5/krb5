@@ -33,7 +33,8 @@
                 error: (int32_t) error;
 
 + (void) enterIdentityWithClientPort: (mach_port_t) client_port
-                           replyPort: (mach_port_t) reply_port;
+                           replyPort: (mach_port_t) reply_port
+                             options: (kim_options) options;
 
 // contains reply_port, kim_identity
 + (void) didEnterIdentity: (NSDictionary *) info 

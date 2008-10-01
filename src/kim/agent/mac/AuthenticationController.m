@@ -72,17 +72,18 @@
 #define enable_prompt_ok_keypath     @"content.isPromptValid"
 #define change_password_ok_keypath   @"content.isChangePasswordValid"
 
+#define options_keypath              @"content.options"
+
 #define valid_lifetime_keypath       @"content.valid_lifetime"
 #define renewal_lifetime_keypath     @"content.renewal_lifetime"
 #define renewable_keypath            @"content.renewable"
 #define addressless_keypath          @"content.addressless"
 #define forwardable_keypath          @"content.forwardable"
 
-#define max_valid_lifetime_keypath   @"content.max_valid_lifetime"
-#define min_valid_lifetime_keypath   @"content.min_valid_lifetime"
-#define max_renewal_lifetime_keypath @"content.max_renewal_lifetime"
-#define min_renewal_lifetime_keypath @"content.min_renewal_lifetime"
-
+#define min_valid_keypath            @"content.minValidLifetime"
+#define max_valid_keypath            @"content.maxValidLifetime"
+#define min_renewable_keypath        @"content.minRenewableLifetime"
+#define max_renewable_keypath        @"content.maxRenewableLifetime"
 
 #define ACKVOContext                 @"authenticationController"
 
@@ -109,6 +110,10 @@
 
 - (void) awakeFromNib
 {
+    [[self window] center];
+    // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
+    [[self window] setLevel:2003];
+    
     [glueController addObserver:self 
                      forKeyPath:username_keypath 
                         options:NSKeyValueObservingOptionNew 
@@ -134,9 +139,6 @@
                         options:NSKeyValueObservingOptionNew
                         context:ACKVOContext];
     
-    [[self window] center];
-    // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
-    [[self window] setLevel:2003];
 }
 
 - (void) dealloc
@@ -336,6 +338,79 @@
     [self showWindow:nil];
 }
 
+- (IBAction) sliderDidChange: (id) sender
+{
+    NSInteger increment = 0;
+    NSInteger newValue = 0;
+    NSString *keyPath = nil;
+    if ([sender isEqual:validLifetimeSlider]) {
+        increment = VALID_LIFETIME_INCREMENT;
+        keyPath = valid_lifetime_keypath;
+    }
+    else if ([sender isEqual:renewableLifetimeSlider]) {
+        increment = RENEWABLE_LIFETIME_INCREMENT;
+        keyPath = renewal_lifetime_keypath;
+    }
+    if (increment > 0) {
+        newValue = ([sender integerValue] / increment) * increment;
+        [ticketOptionsController setValue:[NSNumber numberWithInteger:newValue] 
+                               forKeyPath:keyPath];
+    }
+}
+
+- (IBAction) showTicketOptions: (id) sender
+{
+    // use a copy of the current options
+    [ticketOptionsController setContent:
+     [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease]];
+    
+    [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minValidLifetime]]
+                           forKeyPath:min_valid_keypath];
+    [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities maxValidLifetime]]
+                           forKeyPath:max_valid_keypath];
+    [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minRenewableLifetime]]
+                           forKeyPath:min_renewable_keypath];
+    [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities maxRenewableLifetime]]
+                           forKeyPath:max_renewable_keypath];
+
+    [validLifetimeSlider setIntegerValue:
+     [[ticketOptionsController valueForKeyPath:valid_lifetime_keypath] integerValue]];
+    [renewableLifetimeSlider setIntegerValue:
+     [[ticketOptionsController valueForKeyPath:renewal_lifetime_keypath] integerValue]];
+    [self sliderDidChange:validLifetimeSlider];
+    [self sliderDidChange:renewableLifetimeSlider];
+    
+    [NSApp beginSheet:ticketOptionsSheet
+       modalForWindow:[self window]
+        modalDelegate:self 
+       didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)
+          contextInfo:NULL];
+}
+
+- (IBAction) cancelTicketOptions: (id) sender
+{
+    [NSApp endSheet:ticketOptionsSheet returnCode:NSUserCancelledError];
+}
+
+- (IBAction) saveTicketOptions: (id) sender
+{
+    [NSApp endSheet:ticketOptionsSheet];
+}
+
+- (void) sheetDidEnd: (NSWindow *) sheet 
+          returnCode: (int) returnCode 
+         contextInfo: (void *) contextInfo
+{
+    if (returnCode == NSUserCancelledError) {
+        // discard new options
+        [ticketOptionsController setContent:nil];
+    } else {
+        // replace existing options with new
+        [glueController setValue:[ticketOptionsController content] forKeyPath:options_keypath];
+    }
+    [ticketOptionsSheet orderOut:nil];
+}
+
 - (IBAction) cancel: (id) sender
 {
     [associatedClient didCancel];
@@ -347,9 +422,11 @@
     NSString *usernameString = [glueController valueForKeyPath:username_keypath];
     NSString *realmString = [glueController valueForKeyPath:realm_keypath];
     NSString *identityString = [NSString stringWithFormat:@"%@@%@", usernameString, realmString];
+    NSDictionary *options = [glueController valueForKeyPath:options_keypath];
+    NSLog(@"%s options == %@", __FUNCTION__, options);
     
     // the principal must already be valid to get this far
-    [associatedClient didEnterIdentity:identityString];
+    [associatedClient didEnterIdentity:identityString options:options];
 }
 
 - (IBAction) answerAuthPrompt: (id) sender

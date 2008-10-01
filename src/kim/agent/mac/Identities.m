@@ -25,9 +25,6 @@
 #import "Identities.h"
 #import <Kerberos/Kerberos.h>
 
-#define VALID_LIFETIME_INCREMENT (5 * 60)
-#define RENEWABLE_LIFETIME_INCREMENT (15 * 60)
-
 @interface Identity ()
 
 - (NSString *)stringForLifetime:(NSUInteger)lifetime;

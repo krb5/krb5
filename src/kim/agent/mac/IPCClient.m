@@ -124,9 +124,10 @@ enum krb_agent_client_state {
     return 0;
 }
 
-- (void) didEnterIdentity: (NSString *) identityString
+- (void) didEnterIdentity: (NSString *) identityString options: (NSDictionary *) options
 {
     [self.currentInfo setObject:identityString forKey:@"identity_string"];
+    [self.currentInfo setObject:options forKey:@"options"];
     [KerberosAgentListener didEnterIdentity:self.currentInfo error:0];
 }
 

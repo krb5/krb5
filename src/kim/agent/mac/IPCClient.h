@@ -41,7 +41,7 @@
 
 - (void) didCancel;
 - (void) didSelectIdentity: (NSString *) identityString;
-- (void) didEnterIdentity: (NSString *) identityString;
+- (void) didEnterIdentity: (NSString *) identityString options: (NSDictionary *) options;
 - (void) didPromptForAuth: (NSString *) responseString saveResponse: (NSNumber *) saveResponse;
 - (void) didChangePassword: (NSString *) oldPassword
                newPassword: (NSString *) newPassword

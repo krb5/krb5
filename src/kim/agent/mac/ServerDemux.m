@@ -26,6 +26,7 @@
 #import "kim_selection_hints_private.h"
 #import "kim_options_private.h"
 #import "KerberosAgentListener.h"
+#import "KIMUtilities.h"
 
 // ---------------------------------------------------------------------------
 
@@ -149,7 +150,8 @@ static int32_t kim_handle_request_enter_identity (mach_port_t   in_client_port,
     if (!err) {
         // performs selector on main thread
         [KerberosAgentListener enterIdentityWithClientPort:in_client_port 
-                                                 replyPort:in_reply_port];
+                                                 replyPort:in_reply_port
+                                                   options:options];
     }
     
     return err;   
