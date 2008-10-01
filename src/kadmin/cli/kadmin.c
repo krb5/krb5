@@ -45,8 +45,8 @@
 #include <time.h>
 #include "kadmin.h"
 
-#if defined(USE_LOGIN_LIBRARY)
-#include <Kerberos/KerberosLoginPrivate.h>
+#if defined(USE_KIM)
+#include <kim/kim.h>
 #endif
 
 /* special struct to convert flag names for principals
@@ -219,11 +219,12 @@ char *kadmin_startup(argc, argv)
 
     memset((char *) &params, 0, sizeof(params));
 
-#if defined(USE_LOGIN_LIBRARY)
+#if defined(USE_KIM)
     /* Turn off all password prompting from the KLL */
-    retval = __KLSetPromptMechanism (klPromptMechanism_None);
+    retval = kim_library_set_allow_automatic_prompting (0);
     if (retval) {
-	com_err(whoami, retval, "while calling __KLSetPromptMechanism()");
+	com_err(whoami, retval, 
+                "while calling kim_library_set_allow_automatic_prompting()");
 	exit(1);
     }
 #endif

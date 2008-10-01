@@ -255,18 +255,41 @@ kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
                                            kim_options   in_options)
 {
     kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
     
     if (!err && !out_ccache        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_ccache_create_from_client_identity (out_ccache, in_client_identity);
+        kim_credential_state state;
         
-        if (err) {
-            /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new (out_ccache, in_client_identity, in_options);
+        err = kim_ccache_create_from_client_identity (&ccache, in_client_identity);
+        
+        if (!err) {
+            err = kim_ccache_get_state (ccache, &state);
         }
+        
+        if (!err && state != kim_credentials_state_valid) {
+            if (state == kim_credentials_state_needs_validation) {
+                err = kim_ccache_validate (ccache, in_options);
+            } else {
+                kim_ccache_free (&ccache);
+                ccache = NULL;
+            }
+        }
+        
+        if (!ccache) {
+            /* ccache does not already exist, create a new one */
+            err = kim_ccache_create_new (&ccache, in_client_identity, in_options);
+        }        
     }
+    
+    if (!err) {
+        *out_ccache = ccache;
+        ccache = NULL;
+    }
+    
+    kim_ccache_free (&ccache);
     
     return check_error (err);
 }

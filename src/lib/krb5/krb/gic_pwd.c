@@ -186,7 +186,7 @@ krb5_get_init_creds_password(krb5_context context,
 	   use_master = 0;
    }
 
-#ifdef USE_LOGIN_LIBRARY
+#ifdef USE_KIM
 	if (ret == KRB5KDC_ERR_KEY_EXP)
 		goto cleanup;	/* Login library will deal appropriately with this error */
 #endif

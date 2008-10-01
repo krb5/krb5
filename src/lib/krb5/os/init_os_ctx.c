@@ -32,8 +32,8 @@
 #include "os-proto.h"
 #include "prof_int.h"		/* XXX for profile_copy, not public yet */
 
-#ifdef USE_LOGIN_LIBRARY
-#include "KerberosLoginPrivate.h"
+#ifdef USE_KIM
+#include "kim/kim_library.h"
 #endif
 
 #if defined(_WIN32)
@@ -240,10 +240,10 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
     unsigned int ent_len;
     const char *s, *t;
 
-#ifdef USE_LOGIN_LIBRARY
-    /* If __KLAllowHomeDirectoryAccess() == FALSE, we are probably
+#ifdef USE_KIM
+    /* If kim_library_allow_home_directory_access() == FALSE, we are probably
         trying to authenticate to a fileserver for the user's homedir. */
-    if (!__KLAllowHomeDirectoryAccess ())
+    if (!kim_library_allow_home_directory_access ())
 	secure = 1;
 #endif
     if (secure) {

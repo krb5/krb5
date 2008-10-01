@@ -79,8 +79,8 @@
 #include <strings.h>
 #endif
 
-#if defined(USE_LOGIN_LIBRARY)
-#include <Kerberos/KerberosLoginPrivate.h>
+#if defined(USE_KIM)
+#include <kim/kim.h>
 #elif defined(USE_LEASH)
 #ifdef _WIN64
 #define LEASH_DLL "leashw64.dll"
@@ -244,31 +244,34 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
        return(GSS_S_FAILURE);
    }
 
-#if defined(USE_LOGIN_LIBRARY) || defined(USE_LEASH)
+#if defined(USE_KIM) || defined(USE_LEASH)
    if (desired_name && !caller_provided_ccache_name) {
-#if defined(USE_LOGIN_LIBRARY)
-       KLStatus err = klNoErr;
-       char *ccache_name = NULL;
-       KLPrincipal kl_desired_princ = NULL;
+#if defined(USE_KIM)
+       kim_error err = KIM_NO_ERROR;
+       kim_ccache kimccache = NULL;
+       kim_identity identity = NULL;
 
-       err = __KLCreatePrincipalFromKerberos5Principal ((krb5_principal) desired_name,
-                                                        &kl_desired_princ);
+       err = kim_identity_create_from_krb5_principal (&identity,
+                                                      context, 
+                                                      (krb5_principal) desired_name);
        
        if (!err) {
-           err = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name);
+           err = kim_ccache_create_new_if_needed (&kimccache, 
+                                                  identity, 
+                                                  KIM_OPTIONS_DEFAULT);
        }
-
+       
        if (!err) {
-           err = krb5_cc_resolve (context, ccache_name, &ccache);
+           err = kim_ccache_get_krb5_ccache (kimccache, context, &ccache);
        }
+       
+       kim_ccache_free (&kimccache);
+       kim_identity_free (&identity);
        
        if (err) {
            *minor_status = err;
            return(GSS_S_CRED_UNAVAIL);
        }
-       
-       if (kl_desired_princ != NULL) { KLDisposePrincipal (kl_desired_princ); }
-       if (ccache_name      != NULL) { KLDisposeString (ccache_name); }
        
 #elif defined(USE_LEASH)
        if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
@@ -301,7 +304,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
        }
 #endif /* USE_LEASH */
    } else
-#endif /* USE_LOGIN_LIBRARY || USE_LEASH */
+#endif /* USE_KIM || USE_LEASH */
    {
        /* open the default credential cache */
    

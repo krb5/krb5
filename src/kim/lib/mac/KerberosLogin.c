@@ -24,14 +24,87 @@
  * or implied warranty.
  */
 
+#ifndef LEAN_CLIENT
+
 #define KERBEROSLOGIN_DEPRECATED
 
 #include "CredentialsCache.h"
 #include "KerberosLogin.h"
+#include "KerberosLoginPrivate.h"
 #include <kim/kim.h>
 #include "kim_private.h"
 
-#define kl_check_error(x) (x)
+krb5_get_init_creds_opt *__KLLoginOptionsGetKerberos5Options (KLLoginOptions ioOptions);
+KLTime __KLLoginOptionsGetStartTime (KLLoginOptions ioOptions);
+char *__KLLoginOptionsGetServiceName (KLLoginOptions ioOptions);
+
+/* ------------------------------------------------------------------------ */
+
+static KLStatus kl_check_error_ (kim_error inError, const char *function, const char *file, int line)
+{
+    kim_error err = inError;
+    
+    switch (err) {
+        case ccNoError:
+            err = klNoErr;
+            break;
+            
+        case ccErrBadName:
+            err = klPrincipalDoesNotExistErr;
+            break;
+            
+        case ccErrCCacheNotFound:
+            err = klCacheDoesNotExistErr;
+            break;
+            
+        case ccErrCredentialsNotFound:
+            err = klNoCredentialsErr;
+            break;
+            
+        case KIM_OUT_OF_MEMORY_ERR:
+        case ccErrNoMem:
+            err = klMemFullErr;
+            break;
+            
+        case ccErrBadCredentialsVersion:
+            err = klInvalidVersionErr;
+            break;
+            
+        case KIM_NULL_PARAMETER_ERR:
+        case ccErrBadParam:
+        case ccIteratorEnd:
+        case ccErrInvalidContext:
+        case ccErrInvalidCCache:
+        case ccErrInvalidString:
+        case ccErrInvalidCredentials:
+        case ccErrInvalidCCacheIterator:
+        case ccErrInvalidCredentialsIterator:
+        case ccErrInvalidLock:
+        case ccErrBadAPIVersion:
+        case ccErrContextLocked:
+        case ccErrContextUnlocked:
+        case ccErrCCacheLocked:
+        case ccErrCCacheUnlocked:
+        case ccErrBadLockType:
+        case ccErrNeverDefault:
+            err = klParameterErr;
+            break;
+            
+        case KIM_USER_CANCELED_ERR:
+        case KRB5_LIBOS_PWDINTR:
+            err = klUserCanceledErr;
+            break;
+    }
+    
+    if (err) {
+        kim_debug_printf ("%s() remapped %d to %d ('%s') at %s: %d", 
+                          function, inError, err, kim_error_message (err), 
+                          file, line);
+    }
+    
+    return err;
+}
+#define kl_check_error(err) kl_check_error_(err, __FUNCTION__, __FILE__, __LINE__)
 
 /* ------------------------------------------------------------------------ */
 
@@ -1051,7 +1124,7 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         kim_string_free (&new_identity_string);
         kim_identity_free (&old_identity);
         kim_identity_free (&new_identity);
-         
+        
     } else if (!err && inOption == loginOption_LoginInstance) {
         /* Ignored */
         
@@ -1536,11 +1609,192 @@ KLStatus KLDisposeLoginOptions(KLLoginOptions ioOptions)
 
 /* ------------------------------------------------------------------------ */
 
-
-/* Misc function */
-
 KLStatus KLDisposeString (char *inStringToDispose)
 {
     kim_string_free ((kim_string *)&inStringToDispose);
     return klNoErr;
 }
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLSetApplicationPrompter (KLPrompterProcPtr inPrompter)
+{
+    /* Deprecated */
+    return klNoErr;
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLSetHomeDirectoryAccess (KLBoolean inAllowHomeDirectoryAccess)
+{
+    return kl_check_error (kim_library_set_allow_home_directory_access (inAllowHomeDirectoryAccess));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLBoolean __KLAllowHomeDirectoryAccess (void)
+{
+    return kim_library_allow_home_directory_access ();
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLSetAutomaticPrompting (KLBoolean inAllowAutomaticPrompting)
+{
+    return kl_check_error (kim_library_set_allow_automatic_prompting (inAllowAutomaticPrompting));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLBoolean __KLAllowAutomaticPrompting (void)
+{
+    return kl_check_error (kim_library_allow_automatic_prompting ());
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLSetPromptMechanism (KLPromptMechanism inPromptMechanism)
+{
+    kim_error err = KIM_NO_ERROR;
+
+    if (inPromptMechanism == klPromptMechanism_None) {
+        err = kim_library_set_allow_automatic_prompting (0);
+    } else {
+        err = kim_library_set_allow_automatic_prompting (1);
+    }
+
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLPromptMechanism __KLPromptMechanism (void)
+{
+    kim_ui_environment environment = kim_library_ui_environment ();
+    
+    if (environment == KIM_UI_ENVIRONMENT_GUI) {
+        return klPromptMechanism_GUI;
+    } else if (environment == KIM_UI_ENVIRONMENT_CLI) {
+        return klPromptMechanism_CLI;
+    }
+    return klPromptMechanism_None;
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLBoolean __KLAllowRememberPassword (void)
+{
+    return kl_check_error (kim_os_identity_allow_save_password ());
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLCreatePrincipalFromTriplet (const char  *inName,
+                                         const char  *inInstance,
+                                         const char  *inRealm,
+                                         KLKerberosVersion  inKerberosVersion,
+                                         KLPrincipal *outPrincipal)
+{
+    return kl_check_error (kim_identity_create_from_components (outPrincipal,
+                                                                inRealm,
+                                                                inName, 
+                                                                inInstance,
+                                                                NULL));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLGetTripletFromPrincipal (KLPrincipal         inPrincipal,
+                                      KLKerberosVersion   inKerberosVersion,
+                                      char              **outName,
+                                      char              **outInstance,
+                                      char              **outRealm)
+{
+    return KLGetTripletFromPrincipal (inPrincipal, 
+                                      outName, outInstance, outRealm);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLCreatePrincipalFromKerberos5Principal (krb5_principal inPrincipal,
+                                                    KLPrincipal *outPrincipal)
+{
+    return KLCreatePrincipalFromKerberos5Principal (inPrincipal, outPrincipal);
+    
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLGetKerberos5PrincipalFromPrincipal (KLPrincipal     inPrincipal, 
+                                                 krb5_context    inContext, 
+                                                 krb5_principal *outKrb5Principal)
+{
+    return kl_check_error (kim_identity_get_krb5_principal (inPrincipal, 
+                                                            inContext, 
+                                                            outKrb5Principal));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLBoolean __KLPrincipalIsTicketGrantingService (KLPrincipal inPrincipal)
+{
+    kim_boolean is_tgt = FALSE;
+    kim_error err = kim_identity_is_tgt_service (inPrincipal, &is_tgt);
+    
+    return !err ? is_tgt : FALSE; 
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLGetKeychainPasswordForPrincipal (KLPrincipal   inPrincipal,
+                                              char        **outPassword)
+{
+    return kl_check_error (kim_os_identity_get_saved_password (inPrincipal,
+                                                               (kim_string *) outPassword));
+}
+
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLPrincipalSetKeychainPassword (KLPrincipal  inPrincipal,
+                                           const char  *inPassword)
+{
+    return kl_check_error (kim_os_identity_set_saved_password (inPrincipal,
+                                                               inPassword));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus __KLRemoveKeychainPasswordForPrincipal (KLPrincipal inPrincipal)
+{
+    return kl_check_error (kim_os_identity_remove_saved_password (inPrincipal));
+}
+
+#pragma mark -
+
+// ---------------------------------------------------------------------------
+
+krb5_get_init_creds_opt *__KLLoginOptionsGetKerberos5Options (KLLoginOptions ioOptions)
+{
+    return kim_options_init_cred_options (ioOptions);
+}
+
+// ---------------------------------------------------------------------------
+
+KLTime __KLLoginOptionsGetStartTime (KLLoginOptions ioOptions)
+{
+    return kim_options_start_time (ioOptions);
+}
+
+// ---------------------------------------------------------------------------
+
+char *__KLLoginOptionsGetServiceName (KLLoginOptions ioOptions)
+{
+    return kim_options_service_name (ioOptions);
+}
+
+
+
+#endif /* LEAN_CLIENT */
