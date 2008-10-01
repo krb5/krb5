@@ -469,7 +469,7 @@ kim_error kim_identity_get_components_string (kim_identity  in_identity,
         kim_string new_components = NULL;
         kim_string component = NULL;
         
-        err = kim_identity_get_component_at_index (in_identity, 0, &component);
+        err = kim_identity_get_component_at_index (in_identity, i, &component);
         
         if (!err) {
             err = kim_string_create_from_format (&new_components, "%s/%s",
