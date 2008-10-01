@@ -555,13 +555,13 @@ kim_error kim_identity_is_tgt_service (kim_identity  in_identity,
 
 /* ------------------------------------------------------------------------ */
 
-static kim_error kim_identity_change_password_with_credential (kim_identity    in_identity,
-                                                               kim_credential  in_credential,
-                                                               kim_string      in_new_password,
-                                                               kim_ui_context *in_ui_context,
-                                                               kim_error      *out_rejected_err,
-                                                               kim_string     *out_rejected_message,
-                                                               kim_string     *out_rejected_description)
+kim_error kim_identity_change_password_with_credential (kim_identity    in_identity,
+                                                        kim_credential  in_credential,
+                                                        kim_string      in_new_password,
+                                                        kim_ui_context *in_ui_context,
+                                                        kim_error      *out_rejected_err,
+                                                        kim_string     *out_rejected_message,
+                                                        kim_string     *out_rejected_description)
 {
     kim_error err = KIM_NO_ERROR;
     krb5_creds *creds = NULL;
@@ -734,6 +734,9 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
             }  
             
             kim_credential_free (&credential);
+            if (in_ui_context->type == kim_ui_type_cli) { 
+                in_ui_context->tcontext = NULL; /* just freed our creds */
+            }
         }
         
         if (!err && rejected_err) {

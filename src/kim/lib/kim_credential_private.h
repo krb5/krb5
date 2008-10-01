@@ -36,4 +36,9 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
                                                      kim_ui_context  *in_ui_context,
                                                      kim_boolean     *out_user_was_prompted);
 
+kim_error kim_credential_create_new_with_password (kim_credential *out_credential,
+                                                   kim_identity    in_identity,
+                                                   kim_options     in_options,
+                                                   kim_string      in_password);
+
 #endif /* KIM_CREDENTIAL_PRIVATE_H */

@@ -50,6 +50,14 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
 
 kim_error kim_os_identity_remove_saved_password (kim_identity in_identity);
 
+kim_error kim_identity_change_password_with_credential (kim_identity    in_identity,
+                                                        kim_credential  in_credential,
+                                                        kim_string      in_new_password,
+                                                        kim_ui_context *in_ui_context,
+                                                        kim_error      *out_rejected_err,
+                                                        kim_string     *out_rejected_message,
+                                                        kim_string     *out_rejected_description);
+
 kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                                kim_boolean     in_old_password_expired,
                                                kim_ui_context *in_ui_context,

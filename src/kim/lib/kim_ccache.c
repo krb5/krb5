@@ -208,6 +208,19 @@ kim_error kim_ccache_create_new (kim_ccache          *out_ccache,
                                  kim_identity         in_client_identity,
                                  kim_options          in_options)
 {
+    return check_error (kim_ccache_create_new_with_password (out_ccache,
+                                                             in_client_identity,
+                                                             in_options,
+                                                             NULL));
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_ccache_create_new_with_password (kim_ccache   *out_ccache,
+                                               kim_identity  in_client_identity,
+                                               kim_options   in_options,
+                                               kim_string    in_password)
+{
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     kim_identity client_identity = NULL;
@@ -215,7 +228,10 @@ kim_error kim_ccache_create_new (kim_ccache          *out_ccache,
     if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_credential_create_new (&credential, in_client_identity, in_options);
+        err = kim_credential_create_new_with_password (&credential, 
+                                                       in_client_identity, 
+                                                       in_options,
+                                                       in_password);
     }
     
     if (!err) {

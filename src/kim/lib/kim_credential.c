@@ -205,6 +205,19 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
                                      kim_identity    in_identity,
                                      kim_options     in_options)
 {
+    return check_error (kim_credential_create_new_with_password (out_credential,
+                                                                 in_identity,
+                                                                 in_options,
+                                                                 NULL));
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_credential_create_new_with_password (kim_credential *out_credential,
+                                                   kim_identity    in_identity,
+                                                   kim_options     in_options,
+                                                   kim_string      in_password)
+{
     kim_error err = KIM_NO_ERROR;
     kim_credential credential = NULL;
     kim_options options = NULL;
@@ -261,7 +274,7 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
                           krb5_get_init_creds_password (credential->context, 
                                                         &creds,
                                                         principal,
-                                                        NULL, 
+                                                        (char *) in_password, 
                                                         kim_ui_prompter, 
                                                         &context,
                                                         start_time, 

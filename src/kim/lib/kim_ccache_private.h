@@ -29,5 +29,9 @@
 
 #include <kim/kim.h>
 
+kim_error kim_ccache_create_new_with_password (kim_ccache   *out_ccache,
+                                               kim_identity  in_client_identity,
+                                               kim_options   in_options,
+                                               kim_string    in_password);
 
 #endif /* KIM_CCACHE_PRIVATE_H */

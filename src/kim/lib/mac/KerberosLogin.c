@@ -1,0 +1,1546 @@
+/*
+ * $Header$
+ *
+ * Copyright 2006 Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ * require a specific license from the United States Government.
+ * It is the responsibility of any person or organization contemplating
+ * export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+
+#define KERBEROSLOGIN_DEPRECATED
+
+#include "CredentialsCache.h"
+#include "KerberosLogin.h"
+#include <kim/kim.h>
+#include "kim_private.h"
+
+#define kl_check_error(x) (x)
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireTickets (KLPrincipal   inPrincipal,
+                           KLPrincipal  *outPrincipal,
+                           char        **outCredCacheName)
+{
+    return kl_check_error (KLAcquireInitialTickets (inPrincipal, 
+                                                    NULL, 
+                                                    outPrincipal, 
+                                                    outCredCacheName));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireNewTickets (KLPrincipal  inPrincipal,
+                              KLPrincipal  *outPrincipal,
+                              char        **outCredCacheName)
+{
+    return kl_check_error (KLAcquireNewInitialTickets (inPrincipal, 
+                                                       NULL, 
+                                                       outPrincipal, 
+                                                       outCredCacheName));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireTicketsWithPassword (KLPrincipal      inPrincipal,
+                                       KLLoginOptions   inLoginOptions,
+                                       const char      *inPassword,
+                                       char           **outCredCacheName)
+{
+    return kl_check_error (KLAcquireInitialTicketsWithPassword (inPrincipal, 
+                                                                inLoginOptions, 
+                                                                inPassword, 
+                                                                outCredCacheName));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireNewTicketsWithPassword (KLPrincipal      inPrincipal,
+                                          KLLoginOptions   inLoginOptions,
+                                          const char      *inPassword,
+                                          char           **outCredCacheName)
+{
+    return kl_check_error (KLAcquireNewInitialTicketsWithPassword (inPrincipal, 
+                                                                   inLoginOptions, 
+                                                                   inPassword, 
+                                                                   outCredCacheName));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLSetApplicationOptions (const KLApplicationOptions *inAppOptions)
+{
+    /* Deprecated */
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetApplicationOptions (KLApplicationOptions *outAppOptions)
+{
+    /* Deprecated */
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireInitialTickets (KLPrincipal      inPrincipal,
+                                  KLLoginOptions   inLoginOptions,
+                                  KLPrincipal     *outPrincipal,
+                                  char           **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    kim_string name = NULL;
+    kim_identity identity = NULL;
+    
+    if (!err) {
+        err = kim_ccache_create_from_client_identity (&ccache, 
+                                                      inPrincipal);
+        
+        if (err) {
+            /* ccache does not already exist, create a new one */
+            err = kim_ccache_create_new (&ccache, inPrincipal, inLoginOptions);
+        }
+    }
+    
+    if (!err && outPrincipal) {
+        err = kim_ccache_get_client_identity (ccache, &identity);
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, &name);
+    }
+    
+    if (!err) {
+        if (outPrincipal) {
+            *outPrincipal = identity;
+            identity = NULL;
+        }
+        if (outCredCacheName) {
+            *outCredCacheName = (char *) name;
+            name = NULL;
+        }
+    }
+    
+    kim_string_free (&name);
+    kim_identity_free (&identity);    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireNewInitialTickets (KLPrincipal      inPrincipal,
+                                     KLLoginOptions   inLoginOptions,
+                                     KLPrincipal     *outPrincipal,
+                                     char           **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    kim_string name = NULL;
+    kim_identity identity = NULL;
+    
+    err = kim_ccache_create_new (&ccache, inPrincipal, inLoginOptions);
+    
+    if (!err && outPrincipal) {
+        err = kim_ccache_get_client_identity (ccache, &identity);
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, &name);
+    }
+    
+    if (!err) {
+        if (outPrincipal) {
+            *outPrincipal = identity;
+            identity = NULL;
+        }
+        if (outCredCacheName) {
+            *outCredCacheName = (char *) name;
+            name = NULL;
+        }
+    }
+    
+    kim_string_free (&name);
+    kim_identity_free (&identity);    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLDestroyTickets (KLPrincipal inPrincipal)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    
+    err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    
+    if (!err) {
+        err = kim_ccache_destroy (&ccache);
+    }
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLChangePassword (KLPrincipal inPrincipal)
+{
+    return kl_check_error (kim_identity_change_password (inPrincipal));
+}
+
+/* ------------------------------------------------------------------------ */
+
+
+/* Kerberos Login dialog low level functions */
+
+KLStatus KLAcquireInitialTicketsWithPassword (KLPrincipal      inPrincipal,
+                                              KLLoginOptions   inLoginOptions,
+                                              const char      *inPassword,
+                                              char           **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    
+    if (!err) {
+        err = kim_ccache_create_from_client_identity (&ccache, 
+                                                      inPrincipal);
+        
+        if (err) {
+            /* ccache does not already exist, create a new one */
+            err = kim_ccache_create_new_with_password (&ccache, 
+                                                       inPrincipal,
+                                                       inLoginOptions,
+                                                       inPassword);
+        }
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, 
+                                           (kim_string *) outCredCacheName);
+    }    
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireNewInitialTicketsWithPassword (KLPrincipal      inPrincipal,
+                                                 KLLoginOptions   inLoginOptions,
+                                                 const char      *inPassword,
+                                                 char           **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    
+    err = kim_ccache_create_new_with_password (&ccache, 
+                                               inPrincipal, 
+                                               inLoginOptions,
+                                               inPassword);
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, 
+                                           (kim_string *) outCredCacheName);
+    }    
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireNewInitialTicketCredentialsWithPassword (KLPrincipal      inPrincipal,
+                                                           KLLoginOptions   inLoginOptions,
+                                                           const char      *inPassword,
+                                                           krb5_context     inV5Context,
+                                                           KLBoolean       *outGotV4Credentials,
+                                                           KLBoolean       *outGotV5Credentials,
+                                                           void            *outV4Credentials,
+                                                           krb5_creds      *outV5Credentials)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
+    krb5_creds *creds = NULL;
+    
+    if (!err) {
+        err = kim_credential_create_new_with_password (&credential,
+                                                       inPrincipal,
+                                                       inLoginOptions,
+                                                       inPassword);
+    }
+    
+    if (!err) {
+        err = kim_credential_get_krb5_creds (credential, 
+                                             inV5Context,
+                                             &creds);
+    }
+    
+    if (!err) {
+        *outGotV5Credentials = 1;
+        *outGotV4Credentials = 0;
+        *outV5Credentials = *creds;
+        free (creds); /* eeeew */
+        creds = NULL;
+    }
+    
+    kim_credential_free (&credential);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLStoreNewInitialTicketCredentials (KLPrincipal     inPrincipal,
+                                             krb5_context    inV5Context,
+                                             void           *inV4Credentials,
+                                             krb5_creds     *inV5Credentials,
+                                             char          **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
+    kim_ccache ccache = NULL;
+    
+    err = kim_credential_create_from_krb5_creds (&credential,
+                                                 inV5Context, 
+                                                 inV5Credentials);
+    
+    if (!err) {
+        err = kim_credential_store (credential, inPrincipal, &ccache);
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, 
+                                           (kim_string *) outCredCacheName);
+    }    
+    
+    kim_ccache_free (&ccache);
+    kim_credential_free (&credential);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLVerifyInitialTickets (KLPrincipal   inPrincipal,
+                                 KLBoolean     inFailIfNoHostKey,
+                                 char        **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    
+    err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    
+    if (!err) {
+        err = kim_ccache_verify (ccache, 
+                                 KIM_IDENTITY_ANY, 
+                                 NULL, 
+                                 inFailIfNoHostKey);
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, 
+                                           (kim_string *) outCredCacheName);
+    }    
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLVerifyInitialTicketCredentials (void        *inV4Credentials,
+                                           krb5_creds  *inV5Credentials,
+                                           KLBoolean    inFailIfNoHostKey)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
+    krb5_context context = NULL;
+    
+    err = krb5_error (NULL, krb5_init_context (&context));
+    
+    if (!err) {
+        err = kim_credential_create_from_krb5_creds (&credential,
+                                                     context, 
+                                                     inV5Credentials);
+    }
+    
+    if (!err) {
+        err = kim_credential_verify (credential, KIM_IDENTITY_ANY, 
+                                     NULL, inFailIfNoHostKey);
+    }
+    
+    if (context) { krb5_free_context (context); }
+    kim_credential_free (&credential);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLAcquireNewInitialTicketsWithKeytab (KLPrincipal      inPrincipal,
+                                               KLLoginOptions   inLoginOptions,
+                                               const char      *inKeytabName,
+                                               char           **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    
+    err = kim_ccache_create_from_keytab (&ccache, 
+                                         inPrincipal, 
+                                         inLoginOptions,
+                                         inKeytabName);
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, 
+                                           (kim_string *) outCredCacheName);
+    }    
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLRenewInitialTickets (KLPrincipal      inPrincipal,
+                                KLLoginOptions   inLoginOptions,
+                                KLPrincipal     *outPrincipal,
+                                char           **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    kim_string name = NULL;
+    kim_identity identity = NULL;
+    
+    err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    
+    if (!err) {
+        err = kim_ccache_renew (ccache, inLoginOptions);
+    }
+    
+    if (!err && outPrincipal) {
+        err = kim_ccache_get_client_identity (ccache, &identity);
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, &name);
+    }
+    
+    if (!err) {
+        if (outPrincipal) {
+            *outPrincipal = identity;
+            identity = NULL;
+        }
+        if (outCredCacheName) {
+            *outCredCacheName = (char *) name;
+            name = NULL;
+        }
+    }
+    
+    kim_string_free (&name);
+    kim_identity_free (&identity);
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLValidateInitialTickets (KLPrincipal      inPrincipal,
+                                   KLLoginOptions   inLoginOptions,
+                                   char           **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    
+    err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    
+    if (!err) {
+        err = kim_ccache_validate (ccache, inLoginOptions);
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, 
+                                           (kim_string *) outCredCacheName);
+    }    
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLastChangedTime (KLTime *outLastChangedTime)
+{
+    KLStatus     err = klNoErr;
+    cc_context_t context = NULL;
+    cc_time_t    ccChangeTime = 0;
+    
+    if (!outLastChangedTime) { err = kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        err = cc_initialize (&context, ccapi_version_4, NULL, NULL);
+    }
+    
+    if (!err) {
+        err = cc_context_get_change_time (context, &ccChangeTime);
+    }
+    
+    if (!err) {
+        *outLastChangedTime = ccChangeTime;
+    }
+    
+    if (context) { cc_context_release (context); }
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLCacheHasValidTickets (KLPrincipal         inPrincipal,
+                                 KLKerberosVersion   inKerberosVersion,
+                                 KLBoolean          *outFoundValidTickets,
+                                 KLPrincipal        *outPrincipal,
+                                 char              **outCredCacheName)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    kim_credential_state state = kim_credentials_state_valid;
+    kim_identity identity = NULL;
+    kim_string name = NULL;
+    
+    if (!outFoundValidTickets) { err = kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        if (inPrincipal) {
+            err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+        } else {
+            err = kim_ccache_create_from_default (&ccache);
+        }
+    }
+    
+    if (!err) {
+        err = kim_ccache_get_state (ccache, &state);
+    }
+    
+    if (!err && outPrincipal) {
+        err = kim_ccache_get_client_identity (ccache, &identity);
+    }
+    
+    if (!err && outCredCacheName) {
+        err = kim_ccache_get_display_name (ccache, &name);
+    }
+    
+    if (!err) {
+        *outFoundValidTickets = (state == kim_credentials_state_valid);
+        if (outPrincipal) {
+            *outPrincipal = identity;
+            identity = NULL;
+        }
+        if (outCredCacheName) {
+            *outCredCacheName = (char *) name;
+            name = NULL;
+        }
+    }
+    
+    kim_string_free (&name);
+    kim_identity_free (&identity);
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLTicketStartTime (KLPrincipal        inPrincipal,
+                            KLKerberosVersion  inKerberosVersion,
+                            KLTime            *outStartTime)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    kim_time start_time = 0;
+    
+    if (!err) {
+        err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    }
+    
+    if (!err) {
+        err = kim_ccache_get_start_time (ccache, &start_time);
+    }
+    
+    if (!err) {
+        *outStartTime = start_time;
+    }
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLTicketExpirationTime (KLPrincipal        inPrincipal,
+                                 KLKerberosVersion  inKerberosVersion,
+                                 KLTime            *outExpirationTime)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    kim_time expiration_time = 0;
+    
+    if (!err) {
+        err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    }
+    
+    if (!err) {
+        err = kim_ccache_get_expiration_time (ccache, &expiration_time);
+    }
+    
+    if (!err) {
+        *outExpirationTime = expiration_time;
+    }
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLSetSystemDefaultCache (KLPrincipal inPrincipal)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ccache ccache = NULL;
+    
+    if (!err) {
+        err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    }
+    
+    if (!err) {
+        err = kim_ccache_set_default (ccache);
+    }
+    
+    kim_ccache_free (&ccache);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLHandleError (KLStatus           inError,
+                        KLDialogIdentifier inDialogIdentifier,
+                        KLBoolean          inShowAlert)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_ui_context context;
+    kim_boolean ui_inited = 0;
+    
+    if (!err) {
+        err = kim_ui_init (&context);
+        if (!err) { ui_inited = 1; }
+    }
+    
+    if (!err) {
+        int type = kim_ui_error_type_generic;
+        
+        switch (inDialogIdentifier) {
+            case loginLibrary_LoginDialog:
+                type = kim_ui_error_type_authentication;
+                break;
+            case loginLibrary_ChangePasswordDialog:
+                type = kim_ui_error_type_change_password;
+                break;
+            default:
+                type = kim_ui_error_type_generic;
+                break;
+        }
+        
+        err = kim_ui_handle_kim_error (&context, 
+                                       KIM_IDENTITY_ANY, type, inError);
+    }
+    
+    if (ui_inited) {
+        kim_error fini_err = kim_ui_fini (&context);
+        if (!err) { err = kl_check_error (fini_err); }
+    }
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetErrorString (KLStatus   inError,
+                           char     **outErrorString)
+{
+    return kl_check_error (kim_string_create_for_last_error ((kim_string *) outErrorString,
+                                                             inError));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLCancelAllDialogs (void)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+/* Kerberos change password dialog low level functions */
+
+KLStatus KLChangePasswordWithPasswords (KLPrincipal   inPrincipal,
+                                        const char   *inOldPassword,
+                                        const char   *inNewPassword,
+                                        KLBoolean    *outRejected,
+                                        char        **outRejectionError,
+                                        char        **outRejectionDescription)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_credential credential = NULL;
+    kim_ui_context context;
+    kim_boolean ui_inited = 0;
+    kim_error rejected_err = KIM_NO_ERROR;
+    kim_string rejected_message = NULL;
+    kim_string rejected_description = NULL;
+    
+    if (!inOldPassword) { err = kl_check_error (klParameterErr); }
+    if (!inNewPassword) { err = kl_check_error (klParameterErr); }
+    if (!outRejected  ) { err = kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        err = kim_ui_init (&context);
+        if (!err) { ui_inited = 1; }
+    }
+    
+    if (!err) {
+        kim_boolean was_prompted = 0;
+        
+        err = kim_credential_create_for_change_password (&credential,
+                                                         inPrincipal,
+                                                         inOldPassword,
+                                                         &context,
+                                                         &was_prompted);
+    }
+    
+    if (!err) {
+        err = kim_identity_change_password_with_credential (inPrincipal,
+                                                            credential, 
+                                                            inNewPassword,
+                                                            &context,
+                                                            &rejected_err,
+                                                            &rejected_message,
+                                                            &rejected_description);
+    }  
+    
+    if (!err) {
+        *outRejected = (rejected_err != 0);
+        if (rejected_err) {
+            if (outRejectionError) {
+                *outRejectionError = (char *) rejected_message;
+                rejected_message = NULL;
+            }
+            if (outRejectionDescription) {
+                *outRejectionDescription = (char *) rejected_description;
+                rejected_description = NULL;
+            }
+        }
+    }
+    
+    if (ui_inited) {
+        kim_error fini_err = kim_ui_fini (&context);
+        if (!err) { err = kl_check_error (fini_err); }
+    }
+    
+    kim_string_free (&rejected_message);
+    kim_string_free (&rejected_description);
+    kim_credential_free (&credential);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+/* Application Configuration functions */
+
+KLStatus KLSetIdleCallback (const KLIdleCallback inCallback,
+                            const KLRefCon inRefCon)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetIdleCallback (KLIdleCallback* inCallback,
+                            KLRefCon* inRefCon)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+/* Library configuration functions */
+/* Deprecated options which we now ignore */
+enum {
+    loginOption_ShowOptions                = 'sopt',
+    loginOption_RememberShowOptions        = 'ropt',
+    loginOption_LongTicketLifetimeDisplay  = 'hms ',
+    loginOption_RememberPassword           = 'pass'
+};
+
+
+KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
+                                  void                       *ioBuffer,
+                                  KLSize                     *ioBufferSize)
+{
+    KLStatus  err = klNoErr;
+    kim_preferences prefs = NULL;
+    KLSize targetSize = 0;
+    KLBoolean returnSizeOnly = (ioBuffer == NULL);
+    
+    if (!ioBufferSize) { err = kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        err = kim_preferences_create (&prefs);
+    }
+    
+    if (!err && inOption == loginOption_LoginName) {
+        kim_identity identity = NULL;
+        kim_string string = "";
+        
+        err = kim_preferences_get_client_identity (prefs, &identity);
+        
+        if (!err && identity) {
+            err = kim_identity_get_components_string (identity, &string);
+        }
+        
+        if (!err) {
+            targetSize = strlen (string);
+            if (!returnSizeOnly) {
+                if (*ioBufferSize < targetSize) {
+                    err = kl_check_error (klBufferTooSmallErr);
+                } else if (targetSize > 0) {
+                    memmove (ioBuffer, string, targetSize);
+                }
+            }
+        }
+        
+        if (string && string[0]) { kim_string_free (&string); }
+        
+    } else if (!err && inOption == loginOption_LoginInstance) {
+        targetSize = 0; /* Deprecated */
+        
+    } else if (!err && (inOption == loginOption_ShowOptions &&
+                        inOption == loginOption_RememberShowOptions &&
+                        inOption == loginOption_LongTicketLifetimeDisplay &&
+                        inOption == loginOption_RememberPrincipal &&
+                        inOption == loginOption_RememberExtras &&
+                        inOption == loginOption_RememberPassword)) {
+        targetSize = sizeof(KLBoolean);
+        
+        if (!returnSizeOnly) {
+            kim_boolean boolean = 0;
+            
+            if (inOption == loginOption_ShowOptions ||
+                inOption == loginOption_RememberShowOptions ||
+                inOption == loginOption_LongTicketLifetimeDisplay) {
+                boolean = 1; /* Deprecated */
+                
+            } else if (inOption == loginOption_RememberPrincipal) {
+                err = kim_preferences_get_remember_client_identity (prefs, &boolean);
+                
+            } else if (inOption == loginOption_RememberExtras) {
+                err = kim_preferences_get_remember_options (prefs, &boolean);
+                
+            } else if (inOption == loginOption_RememberPassword) {
+                boolean = kim_os_identity_allow_save_password ();
+            }
+            
+            if (!err) {
+                if (*ioBufferSize < targetSize) {
+                    err = kl_check_error (klBufferTooSmallErr);
+                } else {
+                    *(KLBoolean *)ioBuffer = boolean;
+                }
+            }
+        }
+        
+    } else if (!err && (inOption == loginOption_MinimalTicketLifetime &&
+                        inOption == loginOption_MaximalTicketLifetime &&
+                        inOption == loginOption_LongTicketLifetimeDisplay &&
+                        inOption == loginOption_RememberPrincipal &&
+                        inOption == loginOption_RememberExtras)) {
+        targetSize = sizeof(KLLifetime);
+        
+        if (!returnSizeOnly) {
+            kim_lifetime lifetime = 0;
+            
+            if (inOption == loginOption_MinimalTicketLifetime) {
+                err = kim_preferences_get_minimum_lifetime (prefs, &lifetime);
+                
+            } else if (inOption == loginOption_MaximalTicketLifetime) {
+                err = kim_preferences_get_maximum_lifetime (prefs, &lifetime);
+                
+            } else if (inOption == loginOption_MinimalRenewableLifetime) {
+                err = kim_preferences_get_minimum_renewal_lifetime (prefs, &lifetime);
+                
+            } else if (inOption == loginOption_MaximalRenewableLifetime) {
+                err = kim_preferences_get_maximum_renewal_lifetime (prefs, &lifetime);
+            }   
+            
+            if (!err) {
+                if (*ioBufferSize < targetSize) {
+                    err = kl_check_error (klBufferTooSmallErr);
+                } else {
+                    *(KLLifetime *)ioBuffer = lifetime;
+                }
+            }
+        }
+        
+    } else if (!err && (inOption == loginOption_DefaultRenewableTicket &&
+                        inOption == loginOption_DefaultForwardableTicket &&
+                        inOption == loginOption_DefaultProxiableTicket &&
+                        inOption == loginOption_DefaultAddresslessTicket)) {
+        targetSize = sizeof(KLBoolean);
+        
+        if (!returnSizeOnly) {
+            kim_options options = NULL;
+            kim_boolean boolean = 0;
+            
+            err = kim_preferences_get_options (prefs, &options);
+            
+            if (!err && inOption == loginOption_DefaultRenewableTicket) {
+                err = kim_options_get_renewable (options, &boolean);
+                
+            } else if (!err && inOption == loginOption_DefaultForwardableTicket) {
+                err = kim_options_get_forwardable (options, &boolean);
+                
+            } else if (!err && inOption == loginOption_DefaultProxiableTicket) {
+                err = kim_options_get_proxiable (options, &boolean);
+                
+            } else if (!err && inOption == loginOption_DefaultAddresslessTicket) {
+                err = kim_options_get_addressless (options, &boolean);
+            }   
+            
+            if (!err) {
+                if (*ioBufferSize < targetSize) {
+                    err = kl_check_error (klBufferTooSmallErr);
+                } else {
+                    *(KLBoolean *)ioBuffer = boolean;
+                }
+            }
+            
+            kim_options_free (&options);
+        }
+        
+        
+    } else if (!err && (inOption == loginOption_DefaultTicketLifetime &&
+                        inOption == loginOption_DefaultRenewableLifetime)) {
+        targetSize = sizeof(KLLifetime);
+        
+        if (!returnSizeOnly) {
+            kim_options options = NULL;
+            kim_lifetime lifetime = 0;
+            
+            err = kim_preferences_get_options (prefs, &options);
+            
+            if (!err && inOption == loginOption_DefaultTicketLifetime) {
+                err = kim_options_get_lifetime (options, &lifetime);
+                
+            } else if (!err && inOption == loginOption_DefaultRenewableLifetime) {
+                err = kim_options_get_renewal_lifetime (options, &lifetime);
+            }   
+            
+            if (!err) {
+                if (*ioBufferSize < targetSize) {
+                    err = kl_check_error (klBufferTooSmallErr);
+                } else {
+                    *(KLLifetime *)ioBuffer = lifetime;
+                }
+            }
+            
+            kim_options_free (&options);
+        }
+        
+    } else { 
+        err = kl_check_error (klInvalidOptionErr);
+    }
+    
+    if (!err) {
+        *ioBufferSize = targetSize;
+    }
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
+                                  const void                 *inBuffer,
+                                  const KLSize                inBufferSize)
+{
+    KLStatus err = klNoErr;
+    kim_preferences prefs = NULL;
+    
+    if (inBuffer == NULL) { err = kl_check_error (klParameterErr); }
+    if (inBufferSize < 0) { err = kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        err = kim_preferences_create (&prefs);
+    }
+    
+    if (!err && inOption == loginOption_LoginName) {
+        kim_identity old_identity = NULL;
+        kim_identity new_identity = NULL;
+        kim_string new_identity_string = NULL;
+        kim_string realm = NULL;
+        kim_string components = NULL;
+        
+        err = kim_string_create_from_buffer (&components, inBuffer, inBufferSize);
+        
+        if (!err) {
+            err = kim_preferences_get_client_identity (prefs, &old_identity);
+            
+            if (!err && old_identity) {
+                err = kim_identity_get_realm (old_identity, &realm);
+            }
+        }
+        
+        if (!err && realm) {
+            err = kim_string_create_from_format (&new_identity_string, 
+                                                 "%s@%s", components, realm);
+        }
+        
+        if (!err) {
+            err = kim_identity_create_from_string (&new_identity,
+                                                   (new_identity_string ?
+                                                    new_identity_string :
+                                                    components));
+        }
+        
+        if (!err) {
+            err = kim_preferences_set_client_identity (prefs, new_identity);
+        }
+        
+        kim_string_free (&components);
+        kim_string_free (&realm);
+        kim_string_free (&new_identity_string);
+        kim_identity_free (&old_identity);
+        kim_identity_free (&new_identity);
+         
+    } else if (!err && inOption == loginOption_LoginInstance) {
+        /* Ignored */
+        
+    } else if (!err && (inOption == loginOption_ShowOptions &&
+                        inOption == loginOption_RememberShowOptions &&
+                        inOption == loginOption_LongTicketLifetimeDisplay &&
+                        inOption == loginOption_RememberPrincipal &&
+                        inOption == loginOption_RememberExtras &&
+                        inOption == loginOption_RememberPassword)) {
+        if (inBufferSize > sizeof (KLBoolean)) {
+            err = kl_check_error (klBufferTooLargeErr);
+        } else if (inBufferSize < sizeof (KLBoolean)) {
+            err = kl_check_error (klBufferTooSmallErr);
+        }
+        
+        if (!err && inOption == loginOption_RememberPrincipal) {
+            err = kim_preferences_set_remember_client_identity (prefs, *(kim_boolean *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_RememberExtras) {
+            err = kim_preferences_set_remember_options (prefs, *(kim_boolean *)inBuffer);
+        }
+        
+    } else if (!err && (inOption == loginOption_MinimalTicketLifetime &&
+                        inOption == loginOption_MaximalTicketLifetime &&
+                        inOption == loginOption_LongTicketLifetimeDisplay &&
+                        inOption == loginOption_RememberPrincipal &&
+                        inOption == loginOption_RememberExtras)) {
+        if (inBufferSize > sizeof (KLLifetime)) {
+            err = kl_check_error (klBufferTooLargeErr);
+        } else if (inBufferSize < sizeof (KLLifetime)) {
+            err = kl_check_error (klBufferTooSmallErr);
+        }
+        
+        if (!err && inOption == loginOption_MinimalTicketLifetime) {
+            err = kim_preferences_set_minimum_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_MaximalTicketLifetime) {
+            err = kim_preferences_set_maximum_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_MinimalRenewableLifetime) {
+            err = kim_preferences_set_minimum_renewal_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_MaximalRenewableLifetime) {
+            err = kim_preferences_set_maximum_renewal_lifetime (prefs, *(kim_lifetime *)inBuffer);
+        }   
+        
+    } else if (!err && (inOption == loginOption_DefaultRenewableTicket &&
+                        inOption == loginOption_DefaultForwardableTicket &&
+                        inOption == loginOption_DefaultProxiableTicket &&
+                        inOption == loginOption_DefaultAddresslessTicket)) {
+        kim_options options = NULL;
+        
+        if (inBufferSize > sizeof (KLBoolean)) {
+            err = kl_check_error (klBufferTooLargeErr);
+        } else if (inBufferSize < sizeof (KLBoolean)) {
+            err = kl_check_error (klBufferTooSmallErr);
+        }
+        
+        if (!err) {
+            err = kim_preferences_get_options (prefs, &options);
+        }
+        
+        if (!err && inOption == loginOption_DefaultRenewableTicket) {
+            err = kim_options_set_renewable (options, *(kim_boolean *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_DefaultForwardableTicket) {
+            err = kim_options_set_forwardable (options, *(kim_boolean *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_DefaultProxiableTicket) {
+            err = kim_options_set_proxiable (options, *(kim_boolean *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_DefaultAddresslessTicket) {
+            err = kim_options_set_addressless (options, *(kim_boolean *)inBuffer);
+        }   
+        
+        if (!err) {
+            err = kim_preferences_set_options (prefs, options);
+        }
+        
+        kim_options_free (&options);
+        
+    } else if (!err && (inOption == loginOption_DefaultTicketLifetime &&
+                        inOption == loginOption_DefaultRenewableLifetime)) {
+        kim_options options = NULL;
+        
+        if (inBufferSize > sizeof (KLLifetime)) {
+            err = kl_check_error (klBufferTooLargeErr);
+        } else if (inBufferSize < sizeof (KLLifetime)) {
+            err = kl_check_error (klBufferTooSmallErr);
+        }
+        
+        if (!err) {
+            err = kim_preferences_get_options (prefs, &options);
+        }
+        
+        if (!err && inOption == loginOption_DefaultTicketLifetime) {
+            err = kim_options_set_lifetime (options, *(kim_lifetime *)inBuffer);
+            
+        } else if (!err && inOption == loginOption_DefaultRenewableLifetime) {
+            err = kim_options_set_renewal_lifetime (options, *(kim_lifetime *)inBuffer);
+        }   
+        
+        if (!err) {
+            err = kim_preferences_set_options (prefs, options);
+        }
+        
+        kim_options_free (&options);
+        
+    } else { 
+        err = kl_check_error (klInvalidOptionErr);
+    }
+    
+    if (!err) {
+        err = kim_preferences_synchronize (prefs);
+    }    
+    
+    kim_preferences_free (&prefs);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+/* Realm configuration functions */
+
+KLStatus KLFindKerberosRealmByName (const char *inRealmName,
+                                    KLIndex    *outIndex)
+{
+    kim_error err = KIM_NO_ERROR;
+    char *realm = NULL;
+    
+    if (!err) {
+        err = KLGetKerberosDefaultRealmByName (&realm);
+    }
+    
+    if (!err) {
+        if (!strcmp (inRealmName, realm)) {
+            *outIndex = 0;
+        } else {
+            err = kl_check_error (klRealmDoesNotExistErr);
+        }
+    }
+    
+    kim_string_free ((kim_string *) &realm);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetKerberosRealm (KLIndex   inIndex,
+                             char    **outRealmName)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!outRealmName) { err = kl_check_error (klParameterErr); }
+    if (!err && inIndex != 0) { err = kl_check_error (klRealmDoesNotExistErr); }
+    
+    if (!err) {
+        err = KLGetKerberosDefaultRealmByName (outRealmName);
+    }
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLSetKerberosRealm (KLIndex     inIndex,
+                             const char *inRealmName)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLRemoveKerberosRealm (KLIndex inIndex)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLInsertKerberosRealm (KLIndex     inInsertBeforeIndex,
+                                const char *inRealmName)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLRemoveAllKerberosRealms (void)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLSize KLCountKerberosRealms (void)
+{
+    return 1;
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetKerberosDefaultRealm(KLIndex *outIndex)
+{
+    kim_error err = KIM_NO_ERROR;
+    
+    if (!outIndex) { err = kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        *outIndex = 0;
+    }
+    
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetKerberosDefaultRealmByName (char **outRealmName)
+{
+    kim_error err = KIM_NO_ERROR;
+    krb5_context context = NULL;
+    char *realm = NULL;
+    
+    if (!outRealmName) { err = kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        err = krb5_init_context (&context);
+    }
+    
+    if (!err) {
+    	err = krb5_get_default_realm(context, &realm);
+    }
+    
+    if (!err) {
+        err = kim_string_copy ((kim_string *) outRealmName, realm);
+    }
+    
+    if (realm  ) { krb5_free_default_realm (context, realm); }
+    if (context) { krb5_free_context (context); }
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLSetKerberosDefaultRealm (KLIndex inIndex)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLSetKerberosDefaultRealmByName (const char *inRealm)
+{
+    return kl_check_error (klNoErr);
+}
+
+/* ------------------------------------------------------------------------ */
+
+/* KLPrincipal functions */
+
+KLStatus KLCreatePrincipalFromTriplet (const char  *inName,
+                                       const char  *inInstance,
+                                       const char  *inRealm,
+                                       KLPrincipal *outPrincipal)
+{
+    return kl_check_error (kim_identity_create_from_components (outPrincipal,
+                                                                inRealm,
+                                                                inName, 
+                                                                inInstance,
+                                                                NULL));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLCreatePrincipalFromString (const char        *inFullPrincipal,
+                                      KLKerberosVersion  inKerberosVersion,
+                                      KLPrincipal       *outPrincipal)
+{
+    return kl_check_error (kim_identity_create_from_string (outPrincipal, 
+                                                            inFullPrincipal));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLCreatePrincipalFromKerberos5Principal (krb5_principal  inKerberos5Principal,
+                                                  KLPrincipal    *outPrincipal)
+{
+    return kl_check_error (kim_identity_create_from_krb5_principal (outPrincipal, 
+                                                                    NULL, /* context */
+                                                                    inKerberos5Principal));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLCreatePrincipalFromPrincipal (KLPrincipal inPrincipal,
+                                         KLPrincipal *outPrincipal)
+{
+    return kl_check_error (kim_identity_copy (outPrincipal, inPrincipal));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetTripletFromPrincipal (KLPrincipal   inPrincipal,
+                                    char        **outName,
+                                    char        **outInstance,
+                                    char        **outRealm)
+{
+    KLStatus err = klNoErr;
+    kim_string name = NULL;
+    kim_string instance = NULL;
+    kim_string realm = NULL;
+    kim_count count = 0;
+    
+    if (!inPrincipal) { return kl_check_error (klBadPrincipalErr); }
+    if (!outName    ) { return kl_check_error (klParameterErr); }
+    if (!outInstance) { return kl_check_error (klParameterErr); }
+    if (!outRealm   ) { return kl_check_error (klParameterErr); }
+    
+    if (!err) {
+        err = kim_identity_get_number_of_components (inPrincipal, &count);
+        if (!err && count > 2) { err = kl_check_error (klBadPrincipalErr); }
+    }
+    
+    if (!err) {
+        err = kim_identity_get_realm (inPrincipal, &realm);
+    }
+    
+    if (!err) {
+        err = kim_identity_get_component_at_index (inPrincipal, 0, &name);
+    }
+    
+    if (!err && count > 1) {
+        err = kim_identity_get_component_at_index (inPrincipal, 1, &instance);
+    }
+    
+    if (!err) {
+        *outName = (char *) name;
+        name = NULL;
+        *outInstance = (char *) instance;
+        instance = NULL;
+        *outRealm = (char *) realm;
+        realm = NULL;
+    }
+    
+    kim_string_free (&name);
+    kim_string_free (&instance);
+    kim_string_free (&realm);
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetStringFromPrincipal (KLPrincipal         inPrincipal,
+                                   KLKerberosVersion   inKerberosVersion,
+                                   char              **outFullPrincipal)
+{
+    return kl_check_error (kim_identity_get_string (inPrincipal, 
+                                                    (kim_string *) outFullPrincipal));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLGetDisplayStringFromPrincipal (KLPrincipal         inPrincipal,
+                                          KLKerberosVersion   inKerberosVersion,
+                                          char              **outFullPrincipal)
+{
+    return kl_check_error (kim_identity_get_display_string (inPrincipal, 
+                                                            (kim_string *) outFullPrincipal));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLComparePrincipal (KLPrincipal  inFirstPrincipal,
+                             KLPrincipal  inSecondPrincipal,
+                             KLBoolean   *outAreEquivalent)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_comparison comparison;
+    
+    err = kim_identity_compare (inFirstPrincipal, inSecondPrincipal, 
+                                &comparison);
+    
+    if (!err) {
+        *outAreEquivalent = kim_comparison_is_equal_to (comparison);
+    }
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLDisposePrincipal (KLPrincipal inPrincipal)
+{
+    kim_identity_free (&inPrincipal);
+    return klNoErr;
+}
+
+/* ------------------------------------------------------------------------ */
+
+/* KLLoginOptions functions */
+
+KLStatus KLCreateLoginOptions (KLLoginOptions *outOptions)
+{
+    return kl_check_error (kim_options_create (outOptions));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLoginOptionsSetTicketLifetime (KLLoginOptions ioOptions,
+                                          KLLifetime     inTicketLifetime)
+{
+    return kl_check_error (kim_options_set_lifetime (ioOptions, inTicketLifetime));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLoginOptionsSetForwardable (KLLoginOptions ioOptions,
+                                       KLBoolean      inForwardable)
+{
+    return kl_check_error (kim_options_set_forwardable (ioOptions, inForwardable));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLoginOptionsSetProxiable (KLLoginOptions ioOptions,
+                                     KLBoolean      inProxiable)
+{
+    return kl_check_error (kim_options_set_proxiable (ioOptions, inProxiable));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLoginOptionsSetRenewableLifetime (KLLoginOptions ioOptions,
+                                             KLLifetime     inRenewableLifetime)
+{
+    KLStatus err = klNoErr;
+    
+    err = kim_options_set_renewable (ioOptions, inRenewableLifetime > 0);
+    
+    if (!err && inRenewableLifetime > 0) {
+        err = kim_options_set_renewal_lifetime (ioOptions, inRenewableLifetime);
+    } 
+    
+    return kl_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLoginOptionsSetAddressless (KLLoginOptions ioOptions,
+                                       KLBoolean      inAddressless)
+{
+    return kl_check_error (kim_options_set_addressless (ioOptions, inAddressless));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLoginOptionsSetTicketStartTime (KLLoginOptions ioOptions,
+                                           KLTime         inStartTime)
+{
+    return kl_check_error (kim_options_set_start_time (ioOptions, inStartTime));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLLoginOptionsSetServiceName (KLLoginOptions  ioOptions,
+                                       const char     *inServiceName)
+{
+    return kl_check_error (kim_options_set_service_name (ioOptions, inServiceName));
+}
+
+/* ------------------------------------------------------------------------ */
+
+KLStatus KLDisposeLoginOptions(KLLoginOptions ioOptions)
+{
+    kim_options_free (&ioOptions);
+    return klNoErr;
+}
+
+/* ------------------------------------------------------------------------ */
+
+
+/* Misc function */
+
+KLStatus KLDisposeString (char *inStringToDispose)
+{
+    kim_string_free ((kim_string *)&inStringToDispose);
+    return klNoErr;
+}
