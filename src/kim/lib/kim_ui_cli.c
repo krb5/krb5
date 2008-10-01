@@ -382,7 +382,7 @@ kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
     
     if (!err) {
         err = kim_ui_cli_read_string (&verify_password, 
-                                      1, enter_new_password_format, 
+                                      1, enter_verify_password_format, 
                                       identity_string);
     }    
     
