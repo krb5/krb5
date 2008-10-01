@@ -20,6 +20,8 @@
 	</dict>
 	<key>EnableTransactions</key>
 	<true/>
+	<key>ThrottleInterval</key>
+	<integer>1</integer>
 	<key>OnDemand</key>
 	<true/>
 </dict>
