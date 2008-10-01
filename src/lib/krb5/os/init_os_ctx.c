@@ -33,7 +33,7 @@
 #include "prof_int.h"		/* XXX for profile_copy, not public yet */
 
 #ifdef USE_KIM
-#include "kim/kim_library.h"
+#include "kim_library_private.h"
 #endif
 
 #if defined(_WIN32)

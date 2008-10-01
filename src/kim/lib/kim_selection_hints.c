@@ -42,16 +42,16 @@ struct kim_selection_hints_opaque {
 
 struct kim_selection_hints_opaque kim_selection_hints_initializer = { 
     NULL,
-    NULL,
+    kim_empty_string,
     KIM_OPTIONS_DEFAULT,
     TRUE,
     TRUE,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    kim_empty_string,
+    kim_empty_string,
+    kim_empty_string,
+    kim_empty_string,
+    kim_empty_string,
+    kim_empty_string
 };
 
 /* ------------------------------------------------------------------------ */
@@ -196,26 +196,32 @@ kim_error kim_selection_hints_set_hint (kim_selection_hints io_selection_hints,
     
     if (!err) {
         if (!strcmp (in_hint_key, kim_hint_key_client_realm)) {
+            kim_string_free (&io_selection_hints->client_realm);
             err = kim_string_copy (&io_selection_hints->client_realm, 
                                    in_hint_string);
             
         } else if (!strcmp (in_hint_key, kim_hint_key_user)) {
+            kim_string_free (&io_selection_hints->user);
             err = kim_string_copy (&io_selection_hints->user, 
                                    in_hint_string);
             
         } else if (!strcmp (in_hint_key, kim_hint_key_service_realm)) {
+            kim_string_free (&io_selection_hints->service_realm);
             err = kim_string_copy (&io_selection_hints->service_realm, 
                                    in_hint_string);
             
         } else if (!strcmp (in_hint_key, kim_hint_key_service)) {
+            kim_string_free (&io_selection_hints->service);
             err = kim_string_copy (&io_selection_hints->service, 
                                    in_hint_string);
             
         } else if (!strcmp (in_hint_key, kim_hint_key_server)) {
+            kim_string_free (&io_selection_hints->server);
             err = kim_string_copy (&io_selection_hints->server, 
                                    in_hint_string);
             
         } else if (!strcmp (in_hint_key, kim_hint_key_service_identity)) {
+            kim_string_free (&io_selection_hints->service_identity);
             err = kim_string_copy (&io_selection_hints->service_identity, 
                                    in_hint_string);
             
@@ -235,6 +241,7 @@ kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
                                         kim_string          *out_hint_string)
 {
     kim_error err = KIM_NO_ERROR;
+    kim_string hint = NULL;
     
     if (!err && !in_selection_hints) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_hint_key       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -242,32 +249,34 @@ kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
     
     if (!err) {
         if (!strcmp (in_hint_key, kim_hint_key_client_realm)) {
-            err = kim_string_copy (out_hint_string, 
-                                   in_selection_hints->client_realm);
+            hint = in_selection_hints->client_realm;
             
         } else if (!strcmp (in_hint_key, kim_hint_key_user)) {
-            err = kim_string_copy (out_hint_string, 
-                                   in_selection_hints->user);
+            hint = in_selection_hints->user;
             
         } else if (!strcmp (in_hint_key, kim_hint_key_service_realm)) {
-            err = kim_string_copy (out_hint_string, 
-                                   in_selection_hints->service_realm);
+            hint = in_selection_hints->service_realm;
             
         } else if (!strcmp (in_hint_key, kim_hint_key_service)) {
-            err = kim_string_copy (out_hint_string, 
-                                   in_selection_hints->service);
-            
+            hint = in_selection_hints->service;
+           
         } else if (!strcmp (in_hint_key, kim_hint_key_server)) {
-            err = kim_string_copy (out_hint_string, 
-                                   in_selection_hints->server);
+            hint = in_selection_hints->server;
             
         } else if (!strcmp (in_hint_key, kim_hint_key_service_identity)) {
-            err = kim_string_copy (out_hint_string, 
-                                   in_selection_hints->service_identity);
+            hint = in_selection_hints->service_identity;
             
         } else {
             err = kim_error_set_message_for_code (KIM_UNSUPPORTED_HINT_ERR,
                                                   in_hint_key);
+        }
+    }
+    
+    if (!err) {
+        if (hint && hint != kim_empty_string) {
+            err = kim_string_copy (out_hint_string, hint);
+        } else {
+            *out_hint_string = NULL;
         }
     }
     
@@ -302,7 +311,8 @@ kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection
     if (!err && !out_explanation   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        if (in_selection_hints->explanation) {
+        if (in_selection_hints->explanation && 
+            in_selection_hints->explanation != kim_empty_string) {
             err = kim_string_copy (out_explanation, in_selection_hints->explanation);
         } else {
             *out_explanation = NULL;
@@ -576,49 +586,43 @@ kim_error kim_selection_hints_write_to_stream (kim_selection_hints in_selection_
     }
     
     if (!err) {
-        kim_string explanation = (in_selection_hints->explanation ?
-                                  in_selection_hints->explanation : "");
-        err = k5_ipc_stream_write_string (io_stream, explanation);
+        err = k5_ipc_stream_write_string (io_stream, 
+                                          in_selection_hints->explanation);
     }
     
     if (!err) {
-        err = kim_options_write_to_stream (in_selection_hints->options, io_stream);
+        err = kim_options_write_to_stream (in_selection_hints->options, 
+                                           io_stream);
     }
     
     if (!err) {
-        kim_string service_identity = (in_selection_hints->service_identity ?
-                                       in_selection_hints->service_identity : "");
-        err = k5_ipc_stream_write_string (io_stream, service_identity);
+        err = k5_ipc_stream_write_string (io_stream, 
+                                          in_selection_hints->service_identity);
     }
     
     if (!err) {
-        kim_string client_realm = (in_selection_hints->client_realm ?
-                                   in_selection_hints->client_realm : "");
-        err = k5_ipc_stream_write_string (io_stream, client_realm);
+        err = k5_ipc_stream_write_string (io_stream, 
+                                          in_selection_hints->client_realm);
     }
     
     if (!err) {
-        kim_string user = (in_selection_hints->user ?
-                           in_selection_hints->user : "");
-        err = k5_ipc_stream_write_string (io_stream, user);
+        err = k5_ipc_stream_write_string (io_stream, 
+                                          in_selection_hints->user);
     }
     
     if (!err) {
-        kim_string service_realm = (in_selection_hints->service_realm ?
-                                    in_selection_hints->service_realm : "");
-        err = k5_ipc_stream_write_string (io_stream, service_realm);
+        err = k5_ipc_stream_write_string (io_stream, 
+                                          in_selection_hints->service_realm);
     }
     
     if (!err) {
-        kim_string service = (in_selection_hints->service ?
-                              in_selection_hints->service : "");
-        err = k5_ipc_stream_write_string (io_stream, service);
+       err = k5_ipc_stream_write_string (io_stream, 
+                                         in_selection_hints->service);
     }
     
     if (!err) {
-        kim_string server = (in_selection_hints->server ?
-                             in_selection_hints->server : "");
-        err = k5_ipc_stream_write_string (io_stream, server);
+        err = k5_ipc_stream_write_string (io_stream, 
+                                          in_selection_hints->server);
     }
     
     return check_error (err);    
@@ -651,13 +655,8 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
         err = k5_ipc_stream_read_string (io_stream, &explanation);
         
         if (!err) {
-            if (!explanation[0]) {
-                err = kim_string_copy (&io_selection_hints->explanation, 
-                                       explanation);
-            } else {
-                err = kim_selection_hints_set_explanation (io_selection_hints, 
-                                                           NULL);
-            }
+            err = kim_string_copy (&io_selection_hints->explanation, 
+                                   explanation);
         }
         
         k5_ipc_stream_free_string (explanation);
@@ -678,14 +677,8 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
         err = k5_ipc_stream_read_string (io_stream, &service_identity);
         
         if (!err) {
-            if (!service_identity[0]) {
-                err = kim_string_copy (&io_selection_hints->service_identity, 
-                                       service_identity);
-            } else {
-                err = kim_selection_hints_set_hint (io_selection_hints, 
-                                                    kim_hint_key_service_identity,
-                                                    NULL);
-            }
+            err = kim_string_copy (&io_selection_hints->service_identity, 
+                                   service_identity);
         }
         
         k5_ipc_stream_free_string (service_identity);
@@ -696,14 +689,8 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
         err = k5_ipc_stream_read_string (io_stream, &client_realm);
         
         if (!err) {
-            if (!client_realm[0]) {
-                err = kim_string_copy (&io_selection_hints->client_realm, 
-                                       client_realm);
-            } else {
-                err = kim_selection_hints_set_hint (io_selection_hints, 
-                                                    kim_hint_key_client_realm,
-                                                    NULL);
-            }
+            err = kim_string_copy (&io_selection_hints->client_realm, 
+                                   client_realm);
         }
         
         k5_ipc_stream_free_string (client_realm);
@@ -714,13 +701,7 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
         err = k5_ipc_stream_read_string (io_stream, &user);
         
         if (!err) {
-            if (!user[0]) {
-                err = kim_string_copy (&io_selection_hints->user, user);
-            } else {
-                err = kim_selection_hints_set_hint (io_selection_hints,
-                                                    kim_hint_key_user,
-                                                    NULL);
-            }
+            err = kim_string_copy (&io_selection_hints->user, user);
         }
         
         k5_ipc_stream_free_string (user);
@@ -731,14 +712,8 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
         err = k5_ipc_stream_read_string (io_stream, &service_realm);
         
         if (!err) {
-            if (!service_realm[0]) {
-                err = kim_string_copy (&io_selection_hints->service_realm, 
-                                       service_realm);
-            } else {
-                err = kim_selection_hints_set_hint (io_selection_hints,
-                                                    kim_hint_key_service_realm,
-                                                    NULL);
-            }
+            err = kim_string_copy (&io_selection_hints->service_realm, 
+                                   service_realm);
         }
         
         k5_ipc_stream_free_string (service_realm);
@@ -749,13 +724,7 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
         err = k5_ipc_stream_read_string (io_stream, &service);
         
         if (!err) {
-            if (!service[0]) {
-                err = kim_string_copy (&io_selection_hints->service, service);
-            } else {
-                err = kim_selection_hints_set_hint (io_selection_hints,
-                                                    kim_hint_key_service,
-                                                    NULL);
-            }
+            err = kim_string_copy (&io_selection_hints->service, service);
         }
         
         k5_ipc_stream_free_string (service);
@@ -766,16 +735,10 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
         err = k5_ipc_stream_read_string (io_stream, &server);
         
         if (!err) {
-            if (!server[0]) {
-                err = kim_string_copy (&io_selection_hints->server, server);
-            } else {
-                err = kim_selection_hints_set_hint (io_selection_hints,
-                                                    kim_hint_key_server,
-                                                    NULL);
-            }
+            err = kim_string_copy (&io_selection_hints->server, server);
         }
         
-         k5_ipc_stream_free_string (server);
+        k5_ipc_stream_free_string (server);
     }
     
     return check_error (err);    

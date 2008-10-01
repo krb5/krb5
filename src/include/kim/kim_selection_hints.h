@@ -263,8 +263,10 @@ kim_error kim_selection_hints_set_hint (kim_selection_hints io_selection_hints,
  * \param in_selection_hints    a selection hints object.
  * \param in_hint_key           A string representing the type of hint to 
  *                              obtain.
- * \param out_hint_string       A string representation of the hint 
+ * \param out_hint_string       On exit, a string representation of the hint 
  *                              \a in_hint_key in \a in_selection_hints.
+ *                              If the hint is not set, sets the value pointed
+ *                              to by \a out_hint_string to NULL;
  *                              Must be freed with kim_string_free().
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the string value of a hint used for identity selection.

@@ -26,6 +26,8 @@
 
 #include "kim_private.h"
 
+const char kim_empty_string[1] = "";
+
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_string_create_from_format (kim_string *out_string, 
@@ -136,12 +138,19 @@ kim_error kim_string_copy (kim_string *out_string,
     if (!err && !in_string ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        string = calloc (strlen (in_string) + 1, sizeof (char *));
-        if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+        if (in_string[0]) {
+            string = calloc (strlen (in_string) + 1, sizeof (char *));
+            if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+            
+            if (!err) {
+                strncpy ((char *) string, in_string, strlen (in_string) + 1);
+            }
+        } else {
+            string = kim_empty_string;
+        }
     }
     
     if (!err) {
-        strncpy ((char *) string, in_string, strlen (in_string) + 1);
         *out_string = string;
         string = NULL;
     }
@@ -167,7 +176,7 @@ kim_error kim_string_compare (kim_string      in_string,
 
 void kim_string_free (kim_string *io_string)
 {
-    if (io_string && *io_string) { 
+    if (io_string && *io_string && *io_string != kim_empty_string) { 
         free ((char *) *io_string);
         *io_string = NULL;
     }

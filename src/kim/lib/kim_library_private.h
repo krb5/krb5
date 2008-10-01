@@ -28,6 +28,7 @@
 #define KIM_LIBRARY_PRIVATE_H
 
 #include <kim/kim.h>
+#include <kim/kim_library.h>
 
 kim_error kim_library_init (void);
 

@@ -29,6 +29,8 @@
 
 #include <kim/kim.h>
 
+extern const char kim_empty_string[1];
+
 /* ------------------------------------------------------------------------ */
 
 static inline kim_count kim_string_buflen (kim_string in_string)

@@ -49,7 +49,7 @@ kim_default_renewal_lifetime,
 kim_default_forwardable,
 kim_default_proxiable,
 kim_default_addressless,
-NULL,
+kim_empty_string,
 NULL,
 NULL };
 
@@ -384,17 +384,16 @@ kim_error kim_options_set_service_name (kim_options  io_options,
                                         kim_string   in_service_name)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_string service_name = NULL;
     
     if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err && in_service_name) {
-        err = kim_string_copy (&service_name, in_service_name);
-    }
-    
     if (!err) {
 	kim_string_free (&io_options->service_name);
-	io_options->service_name = service_name;
+        if (in_service_name) {
+            err = kim_string_copy (&io_options->service_name, in_service_name);
+        } else {
+            io_options->service_name = kim_empty_string;
+        }
     }
     
     return check_error (err);
@@ -411,7 +410,8 @@ kim_error kim_options_get_service_name (kim_options  in_options,
     if (!err && !out_service_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        if (in_options->service_name) {
+        if (in_options->service_name && 
+            in_options->service_name != kim_empty_string) {
             err = kim_string_copy (out_service_name, in_options->service_name);
         } else {
             *out_service_name = NULL;
@@ -428,7 +428,11 @@ kim_error kim_options_get_service_name (kim_options  in_options,
 char *kim_options_service_name (kim_options in_options)
 {
     if (in_options) {
-        return (char *) in_options->service_name;
+        if (in_options->service_name == kim_empty_string) {
+            return NULL;
+        } else {
+            return (char *) in_options->service_name;
+        }
     }
     check_error (KIM_NULL_PARAMETER_ERR);  /* log bad options input */
     return NULL;
@@ -560,9 +564,7 @@ kim_error kim_options_write_to_stream (kim_options   in_options,
     }
     
     if (!err) {
-        kim_string service_name = (options->service_name ?
-                                   options->service_name : "");
-        err = k5_ipc_stream_write_string (io_stream, service_name);
+        err = k5_ipc_stream_write_string (io_stream,  options->service_name);
     }
     
     if (options != in_options) { kim_options_free (&options); }
@@ -618,7 +620,7 @@ kim_error kim_options_read_from_stream (kim_options    io_options,
             if (service_name[0]) {
                 err = kim_string_copy (&io_options->service_name, service_name);
             } else {
-                io_options->service_name = NULL;
+                io_options->service_name = kim_empty_string;
             }
         }
         
