@@ -204,7 +204,7 @@
 	self.favorite = true;
     } else {
 	kim_string_create_for_last_error(&error_string, err);
-	NSLog(@"%s failed with %s", _cmd, error_string);
+	NSLog(@"%s failed with %s", __FUNCTION__, error_string);
     }
     return (err != KIM_NO_ERROR);
 }
@@ -237,7 +237,7 @@
 	self.favorite = false;
     } else {
 	kim_string_create_for_last_error(&error_string, err);
-	NSLog(@"%s failed with %s", _cmd, error_string);
+	NSLog(@"%s failed with %s", __FUNCTION__, error_string);
     }
     return (err != KIM_NO_ERROR);
 }
@@ -695,12 +695,13 @@
 	    err = cc_context_wait_for_change (context);
             
 	    if (!err) {
-		NSLog (@"%s thread noticed update", __FUNCTION__);
+	//	NSLog (@"%s thread noticed update", __FUNCTION__);
 	    } else {
-		NSLog (@"%s thread got error %d (%s)", __FUNCTION__, err, [NSString stringForLastKIMError:err]);
+	//	NSLog (@"%s thread got error %d (%s)", __FUNCTION__, err, [KIMUtilities stringForLastKIMError:err]);
                 err = 0; /* The server quit unexpectedly -- just try again */
             }
-            
+
+            //NSLog(@"waited %@", [[NSThread currentThread] description]);
             [(Identities *) [connection rootProxy] update];
 	    sleep (1);
         }
@@ -708,7 +709,7 @@
 	if (context) { cc_context_release (context); }
     }
     
-    NSLog (@"%s thread exiting", __FUNCTION__);
+//    NSLog (@"%s thread exiting", __FUNCTION__);
     [pool release];
 }
 
@@ -856,7 +857,7 @@
     }
     
     // Build list of identities with existing ccaches
-    
+//    NSLog(@"updating %@", [[NSThread currentThread] description]);
     while (!err) {
         kim_ccache ccache = NULL;
         kim_identity kimIdentity = NULL;

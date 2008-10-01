@@ -23,22 +23,19 @@
  */
 
 #import "SelectIdentityController.h"
+#import "IPCClient.h"
 
 #define identities_key_path @"identities"
 
 @implementation SelectIdentityController
+
+@synthesize associatedClient;
 
 // ---------------------------------------------------------------------------
 
 - (id) initWithWindowNibName: (NSString *) windowNibName
 {
     if ((self = [super initWithWindowNibName: windowNibName])) {
-        identities = [[Identities alloc] init];
-        [identities addObserver:self 
-                     forKeyPath:identities_key_path 
-                        options:NSKeyValueObservingOptionNew 
-                        context:@"selectIdentityController"];
-        refreshTimer = [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(timedRefresh:) userInfo:nil repeats:true];
     }
     
     return self;
@@ -56,7 +53,6 @@
 - (void) dealloc
 {
     [refreshTimer release];
-    [identities removeObserver:self forKeyPath:identities_key_path];
     [identities release];
     [super dealloc];
 }
@@ -65,19 +61,35 @@
 
 - (void) awakeFromNib 
 {
-    [headerTextField setStringValue: @"Some header text"];
+    NSString *key = nil;
+    NSString *message = nil;
+
+    // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
+    [[self window] center];
+    [[self window] setLevel:2003];
+
     [identityTableView setDoubleAction:@selector(select:)];
+    identities = [[Identities alloc] init];
+    [identitiesController setContent:identities];
+    refreshTimer = [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(timedRefresh:) userInfo:nil repeats:true];    
+
+    [kerberosIconImageView setBadgePath:associatedClient.path];
+    
+    if ([associatedClient.name isEqualToString:[[NSBundle mainBundle] bundlePath]]) {
+        key = @"SelectIdentityRequest";
+        message = NSLocalizedStringFromTable(key, @"SelectIdentity", NULL);
+    }
+    else {
+        key = @"SelectIdentityApplicationRequest";
+        message = [NSString stringWithFormat:
+                   NSLocalizedStringFromTable(key, @"SelectIdentity", NULL),
+                   associatedClient.name];
+    }
+    [headerTextField setStringValue:message];
 }
 
 // ---------------------------------------------------------------------------
 
-- (void) windowDidLoad
-{
-    [explanationTextField setStringValue: @"Some explanation text"];
-    [identitiesController setContent:identities];
-}    
-
-// ---------------------------------------------------------------------------
 
 - (IBAction) newIdentity: (id) sender
 {
@@ -87,7 +99,6 @@
     identityOptionsController.content = newIdentity;
     [newIdentity release];
 
-    NSLog(@"New identity %@", [newIdentity description]);
     [self showOptions:@"new"];
 }
 
@@ -97,7 +108,7 @@
 {
     Identity *anIdentity = [identityArrayController.selectedObjects lastObject];
     identityOptionsController.content = nil;
-    NSLog(@"Add %@ to favorites", [anIdentity description]);
+
     anIdentity.favorite = TRUE;
     
     [self saveOptions];
@@ -109,7 +120,7 @@
 {
     Identity *anIdentity = [identityArrayController.selectedObjects lastObject];
     identityOptionsController.content = anIdentity;
-    NSLog(@"Remove %@ from favorites", [anIdentity description]);
+
     anIdentity.favorite = FALSE;
     
     [self saveOptions];
@@ -119,18 +130,22 @@
 
 - (IBAction) select: (id) sender
 {
+    Identity *selectedIdentity = nil;
+    
     // ignore double-click on header
     if ([sender respondsToSelector:@selector(clickedRow)] && [sender clickedRow] < 0) {
         return;
     }
-    NSLog(@"Select identity: %@", identityArrayController.selectedObjects.description);
+    selectedIdentity = [[identityArrayController selectedObjects] lastObject];
+
+    [associatedClient didSelectIdentity: selectedIdentity.principalString];
 }
 
 // ---------------------------------------------------------------------------
 
 - (IBAction) cancel: (id) sender
 {
-    NSLog(@"Cancel identity selection");
+    [associatedClient didCancel];
 }
 
 // ---------------------------------------------------------------------------
@@ -176,21 +191,12 @@
     [NSApp endSheet: identityOptionsWindow];
 }
 
-// ---------------------------------------------------------------------------
-
-- (int) runWindow
+- (void)controlTextDidChange:(NSNotification *)aNotification
 {
-    //[[NSApp delegate] addActiveWindow: [self window]];
-    //NSWindow *window = [self window];
-    
-    //[window center];
-    [self showWindow: self];
-//    [NSApp run];
-//    [self close];
-    
-    //[[NSApp delegate] removeActiveWindow: [self window]];
-    
-    return 0;
+    BOOL valid = [KIMUtilities validatePrincipalWithName:[nameField stringValue] 
+                                                   realm:[realmField stringValue]];
+    [ticketOptionsOkButton setEnabled:valid];
+    [ticketOptionsOkButton setNeedsDisplay];
 }
 
 // ---------------------------------------------------------------------------
@@ -219,9 +225,8 @@
             Identity *newIdentity = identityOptionsController.content;
             err = [identities addIdentity:newIdentity];
             
-#warning Add validation to prevent the addition of existing principals and invalid principals
             if (err) {
-                NSLog(@"%s received error %@ trying to add identity %@", _cmd, [NSString stringForLastKIMError:err], [newIdentity description]);
+                NSLog(@"%s received error %@ trying to add identity %@", _cmd, [KIMUtilities stringForLastKIMError:err], [newIdentity description]);
             }
             [self saveOptions];
         }
@@ -258,52 +263,10 @@
 
 // ---------------------------------------------------------------------------
 
-- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    if ([(NSString *) context isEqualToString:@"selectIdentityController"]) {
-	if ([keyPath isEqualToString:identities_key_path]) {
-//            [self reloadData];
-	}
-    }
-    else {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
-}
-
-// ---------------------------------------------------------------------------
-
-- (void) reloadData
-{
-    // Preserve selection
-    Identity *selectedIdentity = [[identityArrayController.selectedObjects lastObject] retain];
-    NSUInteger a, b, c;
-    a = [identityArrayController selectionIndex];
-    b = [[identityArrayController content] count];
-    c = NSNotFound;
-    
-    NSLog(@"== updating table == %s", _cmd);
-    identityArrayController.content = identities.identities;
-
-    c = [identityArrayController.content indexOfObject:selectedIdentity];
-    if ([[identityArrayController content] count] >= a)
-        [identityArrayController setSelectionIndex:(c == NSNotFound) ? (a > b) ? b : a : c];
-    
-    [selectedIdentity release];
-}
-
-// ---------------------------------------------------------------------------
-
-- (void) refreshTable
-{
-    [identityArrayController rearrangeObjects];
-}
-
-// ---------------------------------------------------------------------------
-
 - (void) timedRefresh:(NSTimer *)timer
 {
     // refetch data to update expiration times
-    [self refreshTable];
+    [identityArrayController rearrangeObjects];
 }
 
 @end

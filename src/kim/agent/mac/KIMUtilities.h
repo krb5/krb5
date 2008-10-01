@@ -11,11 +11,14 @@
 
 #define log_kim_error_to_console(err)\
 {\
-NSLog(@"%s got error %@", _cmd, [NSString stringForLastKIMError:err]);\
+NSLog(@"%s got error %@", _cmd, [KIMUtilities stringForLastKIMError:err]);\
 } while (0);
 
-@interface NSString (KIMUtilities)
+@interface KIMUtilities : NSObject
 
 + (NSString *) stringForLastKIMError: (kim_error) in_err;
+
++ (BOOL) validatePrincipalWithName: (NSString *) name
+                             realm: (NSString *) realm;
 
 @end

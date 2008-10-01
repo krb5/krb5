@@ -26,8 +26,11 @@
 #import "BadgedImageView.h"
 #import "Identities.h"
 
-@interface SelectIdentityController : NSWindowController {
+@class IPCClient;
 
+@interface SelectIdentityController : NSWindowController {
+    IPCClient *associatedClient;
+    
     IBOutlet NSObjectController *identitiesController;
     IBOutlet NSArrayController *identityArrayController;
 
@@ -49,7 +52,11 @@
     IBOutlet NSObjectController *identityOptionsController;
     IBOutlet NSTextField *nameField;
     IBOutlet NSTextField *realmField;
+    
+    IBOutlet NSButton *ticketOptionsOkButton;
 }
+
+@property (readwrite, retain) IPCClient *associatedClient;
 
 - (IBAction) newIdentity: (id) sender;
 - (IBAction) addToFavorites: (id) sender;
@@ -63,13 +70,11 @@
 - (IBAction) select: (id) sender;
 - (IBAction) cancel: (id) sender;
 
-- (int) runWindow;
+- (void)controlTextDidChange:(NSNotification *)aNotification;
+
 - (void) showOptions: (NSString *) contextInfo;
 - (void) didEndSheet: (NSWindow *) sheet returnCode: (int) returnCode contextInfo: (void *) contextInfo;
 - (void) saveOptions;
-
-- (void) reloadData;
-- (void) refreshTable;
 
 - (void) timedRefresh:(NSTimer *)timer;
 

@@ -33,6 +33,7 @@
 - (id) initWithFrame: (NSRect) frameRect;
 - (void) dealloc;
 - (void) setBadgeImage: (NSImage *) image;
+- (void) setBadgePath: (NSString *) path;
 - (void) drawRect: (NSRect) rect;
 
 @end

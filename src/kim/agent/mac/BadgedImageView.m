@@ -60,6 +60,14 @@
 
 // ---------------------------------------------------------------------------
 
+- (void) setBadgePath: (NSString *) path
+{
+    NSImage *newImage = [[NSWorkspace sharedWorkspace] iconForFile: path];
+    [self setBadgeImage: newImage];
+}
+
+// ---------------------------------------------------------------------------
+
 - (void) drawRect: (NSRect) rect
 {
     float frameSize = [self frame].size.width;

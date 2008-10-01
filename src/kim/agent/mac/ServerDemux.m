@@ -24,6 +24,7 @@
 
 #import "ServerDemux.h"
 #import "kim_selection_hints_private.h"
+#import "KerberosAgentListener.h"
 
 // ---------------------------------------------------------------------------
 
@@ -91,10 +92,11 @@ static int32_t kim_handle_request_init (mach_port_t   in_client_port,
     }
     
     if (!err) {
-#warning Send init message to main thread with 2 ports, name and path
-        NSLog (@"Got init message with pid '%d', name '%s', path '%s'", 
-               pid, name, path);
-        err = kim_handle_reply_init (in_reply_port, 0);
+        // performs selector on main thread
+        [KerberosAgentListener addClientWithPort:in_client_port 
+                                       replyPort:in_reply_port 
+                                            name:name 
+                                            path:path];
     }
     
     k5_ipc_stream_free_string (name);    
@@ -139,14 +141,9 @@ static int32_t kim_handle_request_enter_identity (mach_port_t   in_client_port,
     int32_t err = 0;
     
     if (!err) {
-#warning Send enter identity message to main thread with 2 ports
-        kim_identity identity = NULL;
-        NSLog (@"Got enter identity message");
-        err = kim_identity_create_from_string (&identity, "nobody@TEST-KERBEROS-1.3.1");
-        if (!err) {
-            err = kim_handle_reply_enter_identity (in_reply_port, identity, 0);
-        }
-        kim_identity_free (&identity);
+        // performs selector on main thread
+        [KerberosAgentListener enterIdentityWithClientPort:in_client_port 
+                                                 replyPort:in_reply_port];
     }
     
     return err;   
@@ -162,7 +159,7 @@ int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port,
     k5_ipc_stream reply = NULL;
     kim_string identity_string = NULL;
     
-    if (!err) {
+    if (!err && !in_error) {
         err = kim_identity_get_string (in_identity, &identity_string);
     }
     
@@ -198,21 +195,17 @@ static int32_t kim_handle_request_select_identity (mach_port_t   in_client_port,
 {
     int32_t err = 0;
     kim_selection_hints hints = NULL;
-    
+
     if (!err) {
         err = kim_selection_hints_create_from_stream (&hints, 
                                                       in_request_stream);
     }    
     
     if (!err) {
-#warning Send select identity message to main thread with 2 ports
-        kim_identity identity = NULL;
-        NSLog (@"Got select identity message");
-        err = kim_identity_create_from_string (&identity, "nobody@TEST-KERBEROS-1.3.1");
-        if (!err) {
-            err = kim_handle_reply_select_identity (in_reply_port, identity, 0);
-        }
-        kim_identity_free (&identity);
+        // performs selector on main thread
+        [KerberosAgentListener selectIdentityWithClientPort:in_client_port 
+                                                  replyPort:in_reply_port
+                                                      hints:hints];
     }
     
     kim_selection_hints_free (&hints);
@@ -230,7 +223,7 @@ int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port,
     k5_ipc_stream reply = NULL;
     kim_string identity_string = NULL;
     
-    if (!err) {
+    if (!err && !in_error) {
         err = kim_identity_get_string (in_identity, &identity_string);
     }
     
@@ -302,10 +295,16 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
     }    
     
     if (!err) {
-        NSLog (@"Got auth prompt with identity '%s', type '%d', allow_save_reply '%d', hide '%d', title '%s', message '%s', description '%s'",
-               identity_string, type, allow_save_reply, hide_reply, title, message, description);
-        err = kim_handle_reply_auth_prompt (in_reply_port, "ydobon", 0, 0);
-#warning Send auth prompt message to main thread with 2 ports and arguments
+        // performs selector on main thread
+        [KerberosAgentListener promptForAuthWithClientPort:in_client_port
+                                                 replyPort:in_reply_port 
+                                                  identity:identity_string 
+                                                promptType:type 
+                                                 allowSave:allow_save_reply
+                                                 hideReply:hide_reply
+                                                     title:title
+                                                   message:message
+                                               description:description];
     }
     
     k5_ipc_stream_free_string (identity_string);    
@@ -373,13 +372,11 @@ static int32_t kim_handle_request_change_password (mach_port_t   in_client_port,
     }    
     
     if (!err) {
-#warning Send change password message to main thread with 2 ports and arguments
-        NSLog (@"Got change password with identity '%s', old_password_expired '%d'",
-               identity_string, old_password_expired);
-        err = kim_handle_reply_change_password (in_reply_port, 
-                                                "ydobon",
-                                                "foo",
-                                                "bar", 0);
+        // performs selector on main thread
+        [KerberosAgentListener changePasswordWithClientPort:in_client_port
+                                                 replyPort:in_reply_port 
+                                                  identity:identity_string 
+                                                    expired:old_password_expired];
     }
     
     k5_ipc_stream_free_string (identity_string);   
@@ -458,10 +455,13 @@ static int32_t kim_handle_request_handle_error (mach_port_t   in_client_port,
     }    
     
     if (!err) {
-#warning Send handle error message to main thread with 2 ports and arguments
-        NSLog (@"Got handle error with identity '%s', error '%d', message '%s', description '%s'",
-               identity_string, error, message, description);
-        err = kim_handle_reply_handle_error (in_reply_port, 0);
+        // performs selector on main thread
+        [KerberosAgentListener handleErrorWithClientPort:in_client_port
+                                                 replyPort:in_reply_port 
+                                                  identity:identity_string 
+                                                     error:error
+                                                   message:message
+                                               description:description];
     }
     
     k5_ipc_stream_free_string (identity_string);   
@@ -505,12 +505,8 @@ static int32_t kim_handle_request_fini (mach_port_t   in_client_port,
                                         k5_ipc_stream in_request_stream)
 {
     int32_t err = 0;
-    
-    if (!err) {
-#warning Send fini message to main thread with 2 ports
-        NSLog (@"Got fini message");
-        err = kim_handle_reply_fini (in_reply_port, 0);
-    }
+
+    [KerberosAgentListener removeClientMatchingPort:in_client_port replyPort:in_reply_port];
     
     return err;   
 }
@@ -564,7 +560,7 @@ int32_t k5_ipc_server_remove_client (mach_port_t in_client_port)
     if (!err) {
         /* Client exited.  Main thread should check for windows belonging to
          * in_client_port and close any it finds. */
-#warning Insert code to handle client death here
+        [KerberosAgentListener removeClientMatchingPort:in_client_port replyPort:0];
     }
     
     return err;

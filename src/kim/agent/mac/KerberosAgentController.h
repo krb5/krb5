@@ -24,9 +24,29 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class IPCClient;
+@class AuthenticationController;
 
 @interface KerberosAgentController : NSObject {
-
+    NSMutableArray *clients;
+    NSTimer *autoQuitTimer;
 }
+
+@property (readwrite, retain) NSMutableArray *clients;
+
+- (void) quitIfIdle: (NSTimer *) timer;
+
+- (IPCClient *)clientForPort:(mach_port_t)client_port;
+- (IPCClient *)clientForInfo:(NSDictionary *)info;
+
+- (IBAction) fakeANewClient: (id) sender;
+
+- (void) addClient: (NSDictionary *) info;
+- (void) enterIdentity: (NSDictionary *) info;
+- (void) selectIdentity: (NSDictionary *) info;
+- (void) promptForAuth: (NSDictionary *) info;
+- (void) changePassword: (NSDictionary *) info;
+- (void) handleError: (NSDictionary *) info;
+- (void) removeClient: (NSDictionary *) info;
 
 @end

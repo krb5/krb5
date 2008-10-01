@@ -8,8 +8,8 @@
 		<string key="IBDocument.HIToolboxVersion">352.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="300428"/>
 			<integer value="300295"/>
+			<integer value="6"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -464,7 +464,6 @@
 										</object>
 									</object>
 								</object>
-								<int key="NSSelectedIndex">1</int>
 								<bool key="NSPullDown">YES</bool>
 								<int key="NSPreferredEdge">2</int>
 								<bool key="NSUsesItemFromMenu">YES</bool>
@@ -818,7 +817,7 @@
 							<reference key="NSSuperview" ref="1019868804"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="870649207">
-								<int key="NSCellFlags">67239424</int>
+								<int key="NSCellFlags">604110336</int>
 								<int key="NSCellFlags2">134217728</int>
 								<string key="NSContents">OK</string>
 								<reference key="NSSupport" ref="604532625"/>
@@ -1653,6 +1652,30 @@
 					</object>
 					<int key="connectionID">300455</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">ticketOptionsOkButton</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="932240937"/>
+					</object>
+					<int key="connectionID">300459</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="623163777"/>
+						<reference key="destination" ref="262677138"/>
+					</object>
+					<int key="connectionID">300460</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="485004197"/>
+						<reference key="destination" ref="262677138"/>
+					</object>
+					<int key="connectionID">300461</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -2373,10 +2396,10 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{360, 291}, {427, 378}}</string>
+					<string>{{553, 305}, {427, 378}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{360, 291}, {427, 378}}</string>
-					<integer value="0"/>
+					<string>{{553, 305}, {427, 378}}</string>
+					<reference ref="75542549"/>
 					<reference ref="75542549"/>
 					<string>{10000, 354}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2464,7 +2487,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">300455</int>
+			<int key="maxID">300461</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2547,6 +2570,7 @@
 							<string>nameField</string>
 							<string>realmField</string>
 							<string>selectIdentityButton</string>
+							<string>ticketOptionsOkButton</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2564,6 +2588,7 @@
 							<string>BadgedImageView</string>
 							<string>NSTextField</string>
 							<string>NSTextField</string>
+							<string>NSButton</string>
 							<string>NSButton</string>
 						</object>
 					</object>
