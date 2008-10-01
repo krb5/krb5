@@ -106,9 +106,7 @@ extern "C" {
  * password when it has expired.
  *
  * #kim_identity_change_password() presents a user interface to obtain the old and 
- * new passwords from the user.  #kim_identity_change_password_with_passwords() takes 
- * the old and new passwords as input, but may still present a user interface if it 
- * needs to obtain additional information to authenticate.  
+ * new passwords from the user.   
  *
  * \note Not all identities have a password. Some sites use certificates (pkinit) 
  * and in the future there may be other authentication mechanisms (eg: smart cards).

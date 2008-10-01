@@ -9,18 +9,12 @@
 <p>
 <h2>Defines</h2>
 <ul>
-<li><a class="anchor" name="g56c0b2760fef0565b0fe955164171ea9"></a><!-- doxytag: member="kim_selection_hints_reference::kim_hint_key_client_realm" ref="g56c0b2760fef0565b0fe955164171ea9" args="" -->
-#define <b>kim_hint_key_client_realm</b>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_client_realm&quot;
-<li><a class="anchor" name="g41fb9619b728af091ef298e1d4a085ed"></a><!-- doxytag: member="kim_selection_hints_reference::kim_hint_key_user" ref="g41fb9619b728af091ef298e1d4a085ed" args="" -->
-#define <b>kim_hint_key_user</b>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_user&quot;
-<li><a class="anchor" name="g71c0a4d5ca46193689deda51878fc6a9"></a><!-- doxytag: member="kim_selection_hints_reference::kim_hint_key_service_realm" ref="g71c0a4d5ca46193689deda51878fc6a9" args="" -->
-#define <b>kim_hint_key_service_realm</b>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service_realm&quot;
-<li><a class="anchor" name="g60bccf17408f6026cd07106b14bd8231"></a><!-- doxytag: member="kim_selection_hints_reference::kim_hint_key_service" ref="g60bccf17408f6026cd07106b14bd8231" args="" -->
-#define <b>kim_hint_key_service</b>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service&quot;
-<li><a class="anchor" name="g6e2d527be39beced1739b092362a1e9b"></a><!-- doxytag: member="kim_selection_hints_reference::kim_hint_key_server" ref="g6e2d527be39beced1739b092362a1e9b" args="" -->
-#define <b>kim_hint_key_server</b>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_server&quot;
-<li><a class="anchor" name="g616972df29e427085479c0c94133916e"></a><!-- doxytag: member="kim_selection_hints_reference::kim_hint_key_service_identity" ref="g616972df29e427085479c0c94133916e" args="" -->
-#define <b>kim_hint_key_service_identity</b>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service_identity&quot;
+<li>#define <a class="el" href="group__kim__selection__hints__reference.html#g56c0b2760fef0565b0fe955164171ea9">kim_hint_key_client_realm</a>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_client_realm&quot;
+<li>#define <a class="el" href="group__kim__selection__hints__reference.html#g41fb9619b728af091ef298e1d4a085ed">kim_hint_key_user</a>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_user&quot;
+<li>#define <a class="el" href="group__kim__selection__hints__reference.html#g71c0a4d5ca46193689deda51878fc6a9">kim_hint_key_service_realm</a>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service_realm&quot;
+<li>#define <a class="el" href="group__kim__selection__hints__reference.html#g60bccf17408f6026cd07106b14bd8231">kim_hint_key_service</a>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service&quot;
+<li>#define <a class="el" href="group__kim__selection__hints__reference.html#g6e2d527be39beced1739b092362a1e9b">kim_hint_key_server</a>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_server&quot;
+<li>#define <a class="el" href="group__kim__selection__hints__reference.html#g616972df29e427085479c0c94133916e">kim_hint_key_service_identity</a>&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service_identity&quot;
 </ul>
 <h2>Functions</h2>
 <ul>
@@ -28,9 +22,7 @@
 <dl class="el"><dd class="mdescRight">Create a new selection hints object.  <a href="#g261c1e59de5576e3782e7d45bc9a8bac"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#g879d7f73cd4644a9f5a9693acea55e02">kim_selection_hints_copy</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> *out_selection_hints, <a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> in_selection_hints)
 <dl class="el"><dd class="mdescRight">Copy a selection hints object.  <a href="#g879d7f73cd4644a9f5a9693acea55e02"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#gf9b194c40cd569bfe6b37b7f54fc5ed8">kim_selection_hints_set_hint</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> io_selection_hints, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_hint_key, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_hint_string)
 <dl class="el"><dd class="mdescRight">Set the string value of a hint used for identity selection.  <a href="#gf9b194c40cd569bfe6b37b7f54fc5ed8"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#g6dbcdbaae154f490ae313d30f7fc51b3">kim_selection_hints_get_hint</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> in_selection_hints, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_hint_key, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *out_hint_string)
-<dl class="el"><dd class="mdescRight">Get the string value of a hint used for identity selection.  <a href="#g6dbcdbaae154f490ae313d30f7fc51b3"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#g8fe2f3a8723cacff9241d81a71f4532f">kim_selection_hints_set_application_name</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> io_selection_hints, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_application_name)
-<dl class="el"><dd class="mdescRight">Set the application name for use in user interaction.  <a href="#g8fe2f3a8723cacff9241d81a71f4532f"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#g21e88d5a8168ec7f7023faf171adb621">kim_selection_hints_get_application_name</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> in_selection_hints, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *out_application_name)
-<dl class="el"><dd class="mdescRight">Get the application name for use in user interaction.  <a href="#g21e88d5a8168ec7f7023faf171adb621"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#gcc6ec35aa53cad7a2eca07ceea66a3c6">kim_selection_hints_set_explanation</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> io_selection_hints, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_explanation)
+<dl class="el"><dd class="mdescRight">Get the string value of a hint used for identity selection.  <a href="#g6dbcdbaae154f490ae313d30f7fc51b3"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#gcc6ec35aa53cad7a2eca07ceea66a3c6">kim_selection_hints_set_explanation</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> io_selection_hints, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_explanation)
 <dl class="el"><dd class="mdescRight">Set the strings used to prompt the user to select the identity.  <a href="#gcc6ec35aa53cad7a2eca07ceea66a3c6"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#g8fce520fbadcdd10f8928fbea43083ee">kim_selection_hints_get_explanation</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> in_selection_hints, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *out_explanation)
 <dl class="el"><dd class="mdescRight">Get the strings used to prompt the user to select the identity.  <a href="#g8fce520fbadcdd10f8928fbea43083ee"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#g2cbc1a52c6fa4c94aa85acf7abb205c4">kim_selection_hints_set_options</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> io_selection_hints, <a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options)
 <dl class="el"><dd class="mdescRight">Set the options which will be used if credentials need to be acquired.  <a href="#g2cbc1a52c6fa4c94aa85acf7abb205c4"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#gb8c6aea4ac6b55d77585a5f3047dd3e7">kim_selection_hints_get_options</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> in_selection_hints, <a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *out_options)
@@ -43,6 +35,97 @@
 <dl class="el"><dd class="mdescRight">Add an entry for the selection hints to the selection hints cache, replacing any existing entry.  <a href="#ge33ab4dcf213c7fcb43eea3f35aeef09"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__selection__hints__reference.html#g8bc79c133df171182813ca2a8773d19c">kim_selection_hints_forget_identity</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> in_selection_hints)
 <dl class="el"><dd class="mdescRight">Remove an entry for the selection hints from the selection hints cache.  <a href="#g8bc79c133df171182813ca2a8773d19c"></a><br></dl><li>void <a class="el" href="group__kim__selection__hints__reference.html#gb8e8fb20d4726f293d6185c11c78b0aa">kim_selection_hints_free</a> (<a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a> *io_selection_hints)
 <dl class="el"><dd class="mdescRight">Free memory associated with a selection hints object.  <a href="#gb8e8fb20d4726f293d6185c11c78b0aa"></a><br></dl></ul>
+<hr><h2>Define Documentation</h2>
+<a class="anchor" name="g56c0b2760fef0565b0fe955164171ea9"></a><!-- doxytag: member="kim_selection_hints.h::kim_hint_key_client_realm" ref="g56c0b2760fef0565b0fe955164171ea9" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define kim_hint_key_client_realm&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_client_realm&quot;          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+A client identity in this realm. See <a class="el" href="kim_selection_hints_overview.html">KIM Selection Hints Overview</a> for more information 
+</div>
+</div><p>
+<a class="anchor" name="g41fb9619b728af091ef298e1d4a085ed"></a><!-- doxytag: member="kim_selection_hints.h::kim_hint_key_user" ref="g41fb9619b728af091ef298e1d4a085ed" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define kim_hint_key_user&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_user&quot;          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+A client identity whose first component is this user string. See <a class="el" href="kim_selection_hints_overview.html">KIM Selection Hints Overview</a> for more information 
+</div>
+</div><p>
+<a class="anchor" name="g71c0a4d5ca46193689deda51878fc6a9"></a><!-- doxytag: member="kim_selection_hints.h::kim_hint_key_service_realm" ref="g71c0a4d5ca46193689deda51878fc6a9" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define kim_hint_key_service_realm&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service_realm&quot;          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+A client identity which has obtained a service credential for this realm. See <a class="el" href="kim_selection_hints_overview.html">KIM Selection Hints Overview</a> for more information 
+</div>
+</div><p>
+<a class="anchor" name="g60bccf17408f6026cd07106b14bd8231"></a><!-- doxytag: member="kim_selection_hints.h::kim_hint_key_service" ref="g60bccf17408f6026cd07106b14bd8231" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define kim_hint_key_service&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service&quot;          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+A client identity which has obtained a service credential for this service. See <a class="el" href="kim_selection_hints_overview.html">KIM Selection Hints Overview</a> for more information 
+</div>
+</div><p>
+<a class="anchor" name="g6e2d527be39beced1739b092362a1e9b"></a><!-- doxytag: member="kim_selection_hints.h::kim_hint_key_server" ref="g6e2d527be39beced1739b092362a1e9b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define kim_hint_key_server&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_server&quot;          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+A client identity which has obtained a service credential for this server. See <a class="el" href="kim_selection_hints_overview.html">KIM Selection Hints Overview</a> for more information 
+</div>
+</div><p>
+<a class="anchor" name="g616972df29e427085479c0c94133916e"></a><!-- doxytag: member="kim_selection_hints.h::kim_hint_key_service_identity" ref="g616972df29e427085479c0c94133916e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define kim_hint_key_service_identity&nbsp;&nbsp;&nbsp;&quot;kim_hint_key_service_identity&quot;          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+The client identity which has obtained a service credential for this service identity. See <a class="el" href="kim_selection_hints_overview.html">KIM Selection Hints Overview</a> for more information 
+</div>
+</div><p>
 <hr><h2>Function Documentation</h2>
 <a class="anchor" name="g261c1e59de5576e3782e7d45bc9a8bac"></a><!-- doxytag: member="kim_selection_hints.h::kim_selection_hints_create" ref="g261c1e59de5576e3782e7d45bc9a8bac" args="(kim_selection_hints *out_selection_hints, kim_string in_application_identifier)" -->
 <div class="memitem">
@@ -204,90 +287,11 @@ Get the string value of a hint used for identity selection.
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>in_selection_hints</em>&nbsp;</td><td>a selection hints object. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>in_hint_key</em>&nbsp;</td><td>A string representing the type of hint to obtain. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>out_hint_string</em>&nbsp;</td><td>A string representation of the hint <em>in_hint_key</em> in <em>in_selection_hints</em>. Must be freed with <a class="el" href="group__kim__string__reference.html#g7e7207329022e97473ec71574e52a1fc" title="Free memory associated with a string.">kim_string_free()</a>. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>out_hint_string</em>&nbsp;</td><td>On exit, a string representation of the hint <em>in_hint_key</em> in <em>in_selection_hints</em>. If the hint is not set, sets the value pointed to by <em>out_hint_string</em> to NULL; Must be freed with <a class="el" href="group__kim__string__reference.html#g7e7207329022e97473ec71574e52a1fc" title="Free memory associated with a string.">kim_string_free()</a>. </td></tr>
   </table>
 </dl>
 <dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__selection__hints__reference.html#gf9b194c40cd569bfe6b37b7f54fc5ed8" title="Set the string value of a hint used for identity selection.">kim_selection_hints_set_hint()</a> </dd></dl>
-
-</div>
-</div><p>
-<a class="anchor" name="g8fe2f3a8723cacff9241d81a71f4532f"></a><!-- doxytag: member="kim_selection_hints.h::kim_selection_hints_set_application_name" ref="g8fe2f3a8723cacff9241d81a71f4532f" args="(kim_selection_hints io_selection_hints, kim_string in_application_name)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_selection_hints_set_application_name           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a>&nbsp;</td>
-          <td class="paramname"> <em>io_selection_hints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
-          <td class="paramname"> <em>in_application_name</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-Set the application name for use in user interaction. 
-<p>
-<dl compact><dt><b>Parameters:</b></dt><dd>
-  <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>io_selection_hints</em>&nbsp;</td><td>a selection hints object to modify. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>in_application_name</em>&nbsp;</td><td>a localized string containing the full name of the application. </td></tr>
-  </table>
-</dl>
-<dl class="note" compact><dt><b>Note:</b></dt><dd>If you do not call this function KIM will attempt to determine the application name at runtime. If that fails (the functionality is only available on some platforms) then KIM will use the application identity string. </dd></dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__selection__hints__reference.html#g21e88d5a8168ec7f7023faf171adb621" title="Get the application name for use in user interaction.">kim_selection_hints_get_application_name()</a> </dd></dl>
-
-</div>
-</div><p>
-<a class="anchor" name="g21e88d5a8168ec7f7023faf171adb621"></a><!-- doxytag: member="kim_selection_hints.h::kim_selection_hints_get_application_name" ref="g21e88d5a8168ec7f7023faf171adb621" args="(kim_selection_hints in_selection_hints, kim_string *out_application_name)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_selection_hints_get_application_name           </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gda34b5ed23fb7cc4e4db533edec4e942">kim_selection_hints</a>&nbsp;</td>
-          <td class="paramname"> <em>in_selection_hints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *&nbsp;</td>
-          <td class="paramname"> <em>out_application_name</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td width="100%"></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>
-Get the application name for use in user interaction. 
-<p>
-<dl compact><dt><b>Parameters:</b></dt><dd>
-  <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>in_selection_hints</em>&nbsp;</td><td>a selection hints object. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>out_application_name</em>&nbsp;</td><td>on exit, the localized full name of the application specified in <em>in_selection_hints</em>. Must be freed with <a class="el" href="group__kim__string__reference.html#g7e7207329022e97473ec71574e52a1fc" title="Free memory associated with a string.">kim_string_free()</a>. </td></tr>
-  </table>
-</dl>
-<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
-<dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__selection__hints__reference.html#g8fe2f3a8723cacff9241d81a71f4532f" title="Set the application name for use in user interaction.">kim_selection_hints_set_application_name()</a> </dd></dl>
 
 </div>
 </div><p>
@@ -325,7 +329,7 @@ Set the strings used to prompt the user to select the identity.
     <tr><td valign="top"></td><td valign="top"><em>in_explanation</em>&nbsp;</td><td>a localized string describing why the caller needs the identity. </td></tr>
   </table>
 </dl>
-<dl class="note" compact><dt><b>Note:</b></dt><dd>If the application only does one thing (the reason it needs an identity is obvious) then you may not need to call this function. You may still need to call <a class="el" href="group__kim__selection__hints__reference.html#g8fe2f3a8723cacff9241d81a71f4532f" title="Set the application name for use in user interaction.">kim_selection_hints_set_application_name()</a> </dd></dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>If the application only does one thing (the reason it needs an identity is obvious) then you may not need to call this function. </dd></dl>
 <dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
 <dl class="see" compact><dt><b>See also:</b></dt><dd><a class="el" href="group__kim__selection__hints__reference.html#g8fce520fbadcdd10f8928fbea43083ee" title="Get the strings used to prompt the user to select the identity.">kim_selection_hints_get_explanation()</a> </dd></dl>
 
@@ -740,7 +744,7 @@ Free memory associated with a selection hints object.
 
 </div>
 </div><p>
-<hr size="1"><address style="text-align: right;"><small>Generated on Mon Sep 22 18:09:05 2008 for Kerberos Identity Management by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Wed Oct 1 18:42:06 2008 for Kerberos Identity Management by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

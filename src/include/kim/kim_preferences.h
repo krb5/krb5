@@ -350,7 +350,7 @@ kim_error kim_preferences_get_number_of_favorite_identities (kim_preferences  in
                                                              kim_count       *out_number_of_identities);
 
 /*!
- * \param kim_preferences    a preferences object.
+ * \param in_preferences     a preferences object.
  * \param in_index           a index into the identities list (starting at 0).
  * \param out_identity       on exit, the identity at \a in_index in \a in_preferences.
  *                           Must be freed with kim_string_free().

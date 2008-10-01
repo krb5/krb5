@@ -115,10 +115,10 @@ extern "C" {
  *
  * Once you have provided search criteria for selecting an identity, use
  * #kim_selection_hints_get_identity() to obtain an identity object.  
- * You can then use #kim_identity_get_gss_name() to obtain a gss_name_t 
- * for use in gss_acquire_cred() or use 
- * #kim_ccache_create_from_client_identity() to obtain a ccache containing 
- * credentials for the identity.
+ * You can then use #kim_identity_get_string() to obtain a krb5 principal
+ * string for use with gss_import_name() and gss_acquire_cred().  Alternatively, 
+ * you can use #kim_ccache_create_from_client_identity() to obtain a ccache  
+ * containing credentials for the identity.
  *
  * \note #kim_selection_hints_get_identity() obtains an identity based on
  * the current state of the selection hints object.  If you change the 
@@ -190,7 +190,7 @@ extern "C" {
  * mechanism for determining the name of the calling process.  If your 
  * application runs on one of these platforms (or is cross-platform) 
  * you should provide a localized version of its name with 
- * #kim_library_set_application_name().
+ * the private function #kim_library_set_application_name().
  *
  * In many cases a single application may select different identities for 
  * different purposes.  For example an email application might use different 
@@ -218,11 +218,28 @@ extern "C" {
  * @{
  */
 
+/*! A client identity in this realm. 
+ * See \ref kim_selection_hints_overview for more information */
 #define kim_hint_key_client_realm     "kim_hint_key_client_realm"
+
+/*! A client identity whose first component is this user string. 
+ * See \ref kim_selection_hints_overview for more information */
 #define kim_hint_key_user             "kim_hint_key_user"
+
+/*! A client identity which has obtained a service credential for this realm.
+ * See \ref kim_selection_hints_overview for more information */
 #define kim_hint_key_service_realm    "kim_hint_key_service_realm"
+
+/*! A client identity which has obtained a service credential for this service. 
+ * See \ref kim_selection_hints_overview for more information */
 #define kim_hint_key_service          "kim_hint_key_service"
+
+/*! A client identity which has obtained a service credential for this server.
+ * See \ref kim_selection_hints_overview for more information */
 #define kim_hint_key_server           "kim_hint_key_server"
+
+/*! The client identity which has obtained a service credential for this service identity. 
+ * See \ref kim_selection_hints_overview for more information */
 #define kim_hint_key_service_identity "kim_hint_key_service_identity"
     
 /*!

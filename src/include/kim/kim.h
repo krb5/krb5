@@ -141,10 +141,6 @@ extern "C" {
  * - \subpage kim_options_overview
  * - \subpage kim_options_reference
  * 
- * <B>KIM Realms List (kim_favorite_identities_t)</B> views and edits the current user's favorite realms list:
- * - \subpage kim_favorite_identities_overview
- * - \subpage kim_favorite_identities_reference
- *
  * <B>KIM Preferences (kim_preferences_t)</B> views and edits the current user's preferences:
  * - \subpage kim_preferences_overview
  * - \subpage kim_preferences_reference
@@ -159,9 +155,6 @@ extern "C" {
  * - \subpage kim_string_overview
  * - \subpage kim_string_reference
  *
- * <B>KIM Error (kim_error_t)</B> provides a machine and user-readable error message:
- * - \subpage kim_error_overview
- * - \subpage kim_error_reference
  *
  *
  * \section types Types and Constants

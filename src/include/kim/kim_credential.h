@@ -235,8 +235,14 @@ typedef int kim_credential_state;
  *     additional service credentials without resending shared secrets (such as a password)
  *     to the KDC. Kerberos uses TGTs to provide single sign-on authentication.
  *
- * \li #kim_credential_is_valid() 
- *     returns whether the credential is valid and if not why the credential is not valid.
+ * \li #kim_credential_get_state() 
+ *     returns a #kim_credential_state containing the state of the credential.
+ *     Possible values are:
+ *     * kim_credentials_state_valid
+ *     * kim_credentials_state_expired
+ *     * kim_credentials_state_not_yet_valid
+ *     * kim_credentials_state_needs_validation
+ *     * kim_credentials_state_address_mismatch
  *
  * \li #kim_credential_get_start_time() 
  *     returns when the credential will become valid.  

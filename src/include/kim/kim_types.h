@@ -37,10 +37,13 @@ extern "C" {
  */
 
 /*!
- * The KIM Error type.  See \ref kim_error_overview for more information.
+ * The KIM Error type.
  */
 typedef int32_t     kim_error;
 
+/*!
+ * No error value for the kim_error type.  
+ */
 #define KIM_NO_ERROR ((kim_error) 0)
 
 /*!
@@ -68,43 +71,32 @@ typedef int         kim_boolean;
  * \li Less than 0 means the first object is less than the second.
  * \li 0 means the two objects are identical.
  * \li Greater than 0 means the first object is greater than the second.
- * \note Convenience macros are provided for interpreting kim_comparison_ts
- * to improve code readability.
- * See #kim_comparison_is_less_than(), #kim_comparison_is_equal() and 
+ * \note Convenience macros are provided for interpreting #kim_comparison
+ * values to improve code readability.
+ * See #kim_comparison_is_less_than(), #kim_comparison_is_equal_to() and 
  * #kim_comparison_is_greater_than()
  */
 typedef int         kim_comparison;
 
 /*!
- * Convenience macro for interpreting #kim_comparison_t.
+ * Convenience macro for interpreting #kim_comparison.
  */
 #define kim_comparison_is_less_than(c)    (c < 0)
 
 /*!
- * Convenience macro for interpreting #kim_comparison_t.
+ * Convenience macro for interpreting #kim_comparison.
  */
 #define kim_comparison_is_equal_to(c)        (c == 0) 
 
 /*!
- * Convenience macro for interpreting #kim_comparison_t.
+ * Convenience macro for interpreting #kim_comparison.
  */
 #define kim_comparison_is_greater_than(c) (c > 0)
-
-/*!
- * The KIM Context type.  See \ref kim_context_overview for more information.
- */
-typedef const char *kim_context;
 
 /*!
  * The KIM String type.  See \ref kim_string_overview for more information.
  */
 typedef const char *kim_string;
-
-//struct kim_error_opaque;
-/*!
- * A KIM Error object.  See \ref kim_error_overview for more information.
- */
-//typedef struct kim_error_opaque *kim_error;
 
 struct kim_identity_opaque;
 /*!
@@ -144,7 +136,7 @@ typedef struct kim_ccache_opaque *kim_ccache;
 
 struct kim_credential_iterator_opaque;
 /*!
- * A KIM Credential Iterator object.  See \ref kim_credential_iterator_t for more information.
+ * A KIM Credential Iterator object.  See \ref kim_credential_iterator for more information.
  */
 typedef struct kim_credential_iterator_opaque *kim_credential_iterator;
 

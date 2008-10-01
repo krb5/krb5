@@ -57,7 +57,7 @@ extern "C" {
  * To avoid this problem, KIM maintains an explanatory string for the last 
  * error seen in each thread calling into KIM.  If a caller wishes to display
  * an error to the user, immediately after getting the error the caller should
- * call #kim_string_create_for_error() to obtain a copy of the  
+ * call #kim_string_create_for_last_error() to obtain a copy of the  
  * descriptive error message.
  *
  * See \ref kim_string_reference for information on specific APIs.

@@ -415,9 +415,9 @@ kim_error kim_ccache_copy (kim_ccache  *out_ccache,
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Compare ccache objects.
  */
-kim_error kim_ccache_compare (kim_ccache   in_ccache,
-                              kim_ccache   in_compare_to_ccache,
-                              kim_boolean *out_equal);
+kim_error kim_ccache_compare (kim_ccache      in_ccache,
+                              kim_ccache      in_compare_to_ccache,
+                              kim_comparison *out_comparison);
     
 /*!
  * \param in_ccache        a ccache object. 
@@ -531,7 +531,7 @@ kim_error kim_ccache_get_renewal_expiration_time (kim_ccache  in_ccache,
                                                   kim_time   *out_renewal_expiration_time);
 
 /*!
- * \param kim_ccache     a ccache object. 
+ * \param in_ccache      a ccache object. 
  * \param out_options    on exit, an options object reflecting the ticket
  *                       options of the credentials in \a in_ccache.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.

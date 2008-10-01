@@ -14,10 +14,12 @@
 <dl class="el"><dd class="mdescRight">Find a ccache containing a valid initial credential in the cache collection, or if unavailable, acquire and store a new initial credential.  <a href="#g52fa72130f4ba6de8cce1224578102ce"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g6ecc14b94ffb57ca8008d0a407bb9c7d">kim_ccache_create_from_client_identity</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache, <a class="el" href="group__kim__types__reference.html#gf96cafc394b0d02327b4df8ff669d589">kim_identity</a> in_client_identity)
 <dl class="el"><dd class="mdescRight">Find a ccache for a client identity in the cache collection.  <a href="#g6ecc14b94ffb57ca8008d0a407bb9c7d"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g15cb7e1b9069a610030211cecc5e6232">kim_ccache_create_from_keytab</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache, <a class="el" href="group__kim__types__reference.html#gf96cafc394b0d02327b4df8ff669d589">kim_identity</a> in_identity, <a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_keytab)
 <dl class="el"><dd class="mdescRight">Acquire a new initial credential from a keytab and store it in a ccache.  <a href="#g15cb7e1b9069a610030211cecc5e6232"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g137761ce872ca756c08e7c31e4101df5">kim_ccache_create_from_default</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache)
-<dl class="el"><dd class="mdescRight">Get the default ccache.  <a href="#g137761ce872ca756c08e7c31e4101df5"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g4c532da378a5bc222eeaa8ecbabecb72">kim_ccache_create_from_type_and_name</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_name)
+<dl class="el"><dd class="mdescRight">Get the default ccache.  <a href="#g137761ce872ca756c08e7c31e4101df5"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#geeb02fbd667cfb75455653cf9b8b4a5a">kim_ccache_create_from_display_name</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_display_name)
+<dl class="el"><dd class="mdescRight">Get a ccache for a ccache display name.  <a href="#geeb02fbd667cfb75455653cf9b8b4a5a"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g4c532da378a5bc222eeaa8ecbabecb72">kim_ccache_create_from_type_and_name</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_type, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_name)
 <dl class="el"><dd class="mdescRight">Get a ccache for a ccache type and name.  <a href="#g4c532da378a5bc222eeaa8ecbabecb72"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g1d5c688dd5fae7e722ee7dd3e335fe34">kim_ccache_create_from_krb5_ccache</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache, krb5_context in_krb5_context, krb5_ccache in_krb5_ccache)
 <dl class="el"><dd class="mdescRight">Get a ccache for a krb5 ccache.  <a href="#g1d5c688dd5fae7e722ee7dd3e335fe34"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#gc56dbcf51cddbe0e08b695e649c4a4de">kim_ccache_copy</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *out_ccache, <a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache)
-<dl class="el"><dd class="mdescRight">Copy a ccache.  <a href="#gc56dbcf51cddbe0e08b695e649c4a4de"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g2c141d7d829dfcf4b761cd04f71a5443">kim_ccache_get_krb5_ccache</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, krb5_context in_krb5_context, krb5_ccache *out_krb5_ccache)
+<dl class="el"><dd class="mdescRight">Copy a ccache.  <a href="#gc56dbcf51cddbe0e08b695e649c4a4de"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g7e855e7c8410154fb0aa9b755d97a0c3">kim_ccache_compare</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_compare_to_ccache, <a class="el" href="group__kim__types__reference.html#gae48569e847ff6af9d10add42a4338e7">kim_comparison</a> *out_comparison)
+<dl class="el"><dd class="mdescRight">Compare ccache objects.  <a href="#g7e855e7c8410154fb0aa9b755d97a0c3"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g2c141d7d829dfcf4b761cd04f71a5443">kim_ccache_get_krb5_ccache</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, krb5_context in_krb5_context, krb5_ccache *out_krb5_ccache)
 <dl class="el"><dd class="mdescRight">Get a krb5 ccache for a ccache.  <a href="#g2c141d7d829dfcf4b761cd04f71a5443"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g18d612eddf05b4deb11e97071b5ad17b">kim_ccache_get_name</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *out_name)
 <dl class="el"><dd class="mdescRight">Get the name of a ccache.  <a href="#g18d612eddf05b4deb11e97071b5ad17b"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#ge49fc64af74ad437de6becdbee876117">kim_ccache_get_type</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *out_type)
 <dl class="el"><dd class="mdescRight">Get the type of a ccache.  <a href="#ge49fc64af74ad437de6becdbee876117"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#ga89f6bfa35c436621ff324b805a7c669">kim_ccache_get_display_name</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> *out_display_name)
@@ -27,7 +29,8 @@
 <dl class="el"><dd class="mdescRight">Check the state of the credentials in a ccache (valid, expired, postdated, etc).  <a href="#gb838921f1d2db46468ea14d9e7572c03"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#gb2165acd652eddaeb61c8f6b8c3a16f7">kim_ccache_get_start_time</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a> *out_start_time)
 <dl class="el"><dd class="mdescRight">Get the time when the credentials in the ccache become valid.  <a href="#gb2165acd652eddaeb61c8f6b8c3a16f7"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g52693fc485cf2e3bd5cf0c0a3d414d8a">kim_ccache_get_expiration_time</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a> *out_expiration_time)
 <dl class="el"><dd class="mdescRight">Get the time when the credentials in the ccache will expire.  <a href="#g52693fc485cf2e3bd5cf0c0a3d414d8a"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g01b4cbb88abf6aafd2efdaad91d74f0f">kim_ccache_get_renewal_expiration_time</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#g3da22452677b45753d40e07f3904dff5">kim_time</a> *out_renewal_expiration_time)
-<dl class="el"><dd class="mdescRight">Get the time when the credentials in the ccache will no longer be renewable.  <a href="#g01b4cbb88abf6aafd2efdaad91d74f0f"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#ga9f694b7c3dea5cc3422604571419f80">kim_ccache_set_default</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> io_ccache)
+<dl class="el"><dd class="mdescRight">Get the time when the credentials in the ccache will no longer be renewable.  <a href="#g01b4cbb88abf6aafd2efdaad91d74f0f"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g9ad7a15bf94420675c17bc61e83e47da">kim_ccache_get_options</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *out_options)
+<dl class="el"><dd class="mdescRight">Get a kim_options object based on a ccache's credential attributes.  <a href="#g9ad7a15bf94420675c17bc61e83e47da"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#ga9f694b7c3dea5cc3422604571419f80">kim_ccache_set_default</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> io_ccache)
 <dl class="el"><dd class="mdescRight">Set a ccache to the default ccache.  <a href="#ga9f694b7c3dea5cc3422604571419f80"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g8836113dd86a0dc3cf60df0d76280de6">kim_ccache_verify</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#gf96cafc394b0d02327b4df8ff669d589">kim_identity</a> in_service_identity, <a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a> in_keytab, <a class="el" href="group__kim__types__reference.html#g6f8afd4047c4fe420c05f940f89ffba0">kim_boolean</a> in_fail_if_no_service_key)
 <dl class="el"><dd class="mdescRight">Verify the TGT in a ccache.  <a href="#g8836113dd86a0dc3cf60df0d76280de6"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g574a0ef674116589dcf57460af81de39">kim_ccache_renew</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options)
 <dl class="el"><dd class="mdescRight">Renew the TGT in a ccache.  <a href="#g574a0ef674116589dcf57460af81de39"></a><br></dl><li><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> <a class="el" href="group__kim__ccache__reference.html#g73f5b201d24a58936244fc4e43cd3d59">kim_ccache_validate</a> (<a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> in_ccache, <a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> in_options)
@@ -245,6 +248,45 @@ Get the default ccache.
 
 </div>
 </div><p>
+<a class="anchor" name="geeb02fbd667cfb75455653cf9b8b4a5a"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_create_from_display_name" ref="geeb02fbd667cfb75455653cf9b8b4a5a" args="(kim_ccache *out_ccache, kim_string in_display_name)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_ccache_create_from_display_name           </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a> *&nbsp;</td>
+          <td class="paramname"> <em>out_ccache</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#geea99aa292876e06003b7480087eecb0">kim_string</a>&nbsp;</td>
+          <td class="paramname"> <em>in_display_name</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Get a ccache for a ccache display name. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>out_ccache</em>&nbsp;</td><td>on exit, a ccache object for the ccache identified by <em>in_display_name</em>. Must be freed with <a class="el" href="group__kim__ccache__reference.html#g6c6be543e0ea2b518612be4255e15b9a" title="Free memory associated with a ccache.">kim_ccache_free()</a>. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>in_display_name</em>&nbsp;</td><td>a ccache display name string (ie: "TYPE:NAME"). </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>This API is used to obtain a kim_ccache for a ccache name entered by the user. </dd></dl>
+
+</div>
+</div><p>
 <a class="anchor" name="g4c532da378a5bc222eeaa8ecbabecb72"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_create_from_type_and_name" ref="g4c532da378a5bc222eeaa8ecbabecb72" args="(kim_ccache *out_ccache, kim_string in_type, kim_string in_name)" -->
 <div class="memitem">
 <div class="memproto">
@@ -368,6 +410,51 @@ Copy a ccache.
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>out_ccache</em>&nbsp;</td><td>on exit, the new ccache object which is a copy of in_ccache. Must be freed with <a class="el" href="group__kim__ccache__reference.html#g6c6be543e0ea2b518612be4255e15b9a" title="Free memory associated with a ccache.">kim_ccache_free()</a>. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>in_ccache</em>&nbsp;</td><td>a ccache object. </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="g7e855e7c8410154fb0aa9b755d97a0c3"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_compare" ref="g7e855e7c8410154fb0aa9b755d97a0c3" args="(kim_ccache in_ccache, kim_ccache in_compare_to_ccache, kim_comparison *out_comparison)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_ccache_compare           </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a>&nbsp;</td>
+          <td class="paramname"> <em>in_ccache</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a>&nbsp;</td>
+          <td class="paramname"> <em>in_compare_to_ccache</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gae48569e847ff6af9d10add42a4338e7">kim_comparison</a> *&nbsp;</td>
+          <td class="paramname"> <em>out_comparison</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Compare ccache objects. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>in_ccache</em>&nbsp;</td><td>a ccache object. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>in_compare_to_ccache</em>&nbsp;</td><td>a ccache object. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>out_comparison</em>&nbsp;</td><td>on exit, a comparison of <em>in_ccache</em> and <em>in_compare_to_ccache</em> which determines whether or not the two ccache objects refer to the same ccache. </td></tr>
   </table>
 </dl>
 <dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
@@ -763,6 +850,44 @@ Get the time when the credentials in the ccache will no longer be renewable.
 
 </div>
 </div><p>
+<a class="anchor" name="g9ad7a15bf94420675c17bc61e83e47da"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_get_options" ref="g9ad7a15bf94420675c17bc61e83e47da" args="(kim_ccache in_ccache, kim_options *out_options)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__kim__types__reference.html#g40f5fe10ab395bddc34286e0c2ff76eb">kim_error</a> kim_ccache_get_options           </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gaecf0d1ae48c995038dd20b21e3781c2">kim_ccache</a>&nbsp;</td>
+          <td class="paramname"> <em>in_ccache</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__kim__types__reference.html#gc61f3242847e46c14c73e423829888ab">kim_options</a> *&nbsp;</td>
+          <td class="paramname"> <em>out_options</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Get a kim_options object based on a ccache's credential attributes. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>in_ccache</em>&nbsp;</td><td>a ccache object. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>out_options</em>&nbsp;</td><td>on exit, an options object reflecting the ticket options of the credentials in <em>in_ccache</em>. </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>On success, <a class="el" href="group__kim__types__reference.html#g8712727bab9e6b02712a8a01285441d1">KIM_NO_ERROR</a>. On failure, an error code representing the failure. </dd></dl>
+
+</div>
+</div><p>
 <a class="anchor" name="ga9f694b7c3dea5cc3422604571419f80"></a><!-- doxytag: member="kim_ccache.h::kim_ccache_set_default" ref="ga9f694b7c3dea5cc3422604571419f80" args="(kim_ccache io_ccache)" -->
 <div class="memitem">
 <div class="memproto">
@@ -977,7 +1102,7 @@ Free memory associated with a ccache.
 
 </div>
 </div><p>
-<hr size="1"><address style="text-align: right;"><small>Generated on Mon Sep 22 18:09:05 2008 for Kerberos Identity Management by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Wed Oct 1 18:42:06 2008 for Kerberos Identity Management by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>
