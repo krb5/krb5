@@ -459,7 +459,7 @@ static int32_t kim_handle_request_handle_error (mach_port_t   in_client_port,
     if (!err) {
         err = k5_ipc_stream_read_string (in_request_stream, &identity_string);
         /* Can be empty string "" if there is no identity */
-        if (!err && identity_string[0]) {
+        if (!err && !identity_string[0]) {
             k5_ipc_stream_free_string (identity_string);   
             identity_string = KIM_IDENTITY_ANY;
         }
