@@ -58,10 +58,11 @@ typedef struct kim_ui_context {
 kim_error kim_ui_init (kim_ui_context *io_context);
 
 kim_error kim_ui_enter_identity (kim_ui_context *in_context,
+                                 kim_options     io_options,
                                  kim_identity   *out_identity);
 
 kim_error kim_ui_select_identity (kim_ui_context       *in_context,
-                                  kim_selection_hints   in_hints,
+                                  kim_selection_hints   io_hints,
                                   kim_identity         *out_identity);
 
 krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,

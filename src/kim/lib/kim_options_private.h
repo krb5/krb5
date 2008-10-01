@@ -42,6 +42,9 @@ kim_time kim_options_start_time (kim_options in_options);
 kim_error kim_options_write_to_stream (kim_options   in_options,
                                        k5_ipc_stream io_stream);
 
+kim_error kim_options_read_from_stream (kim_options    io_options,
+                                        k5_ipc_stream  io_stream);
+
 kim_error kim_options_create_from_stream (kim_options   *out_options,
                                           k5_ipc_stream  io_stream);
 

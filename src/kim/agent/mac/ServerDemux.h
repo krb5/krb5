@@ -35,10 +35,12 @@ int32_t kim_handle_reply_init (mach_port_t   in_reply_port,
 
 int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port, 
                                          kim_identity  in_identity,
+                                         kim_options   in_options,
                                          int32_t       in_error);
 
 int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port, 
                                           kim_identity  in_identity,
+                                          kim_options   in_options,
                                           int32_t       in_error);
 
 int32_t kim_handle_reply_auth_prompt (mach_port_t   in_reply_port, 

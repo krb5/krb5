@@ -37,10 +37,11 @@ typedef kim_credential kim_ui_cli_context;
 kim_error kim_ui_cli_init (kim_ui_context *io_context);
 
 kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
+                                     kim_options     io_options,
                                      kim_identity   *out_identity);
 
 kim_error kim_ui_cli_select_identity (kim_ui_context      *in_context,
-                                      kim_selection_hints  in_hints,
+                                      kim_selection_hints  io_hints,
                                       kim_identity        *out_identity);
 
 kim_error kim_ui_cli_auth_prompt (kim_ui_context      *in_context,

@@ -148,12 +148,22 @@ static KerberosAgentListener *sharedListener = nil;
     kim_error err = KIM_NO_ERROR;
     mach_port_t reply_port = [[info objectForKey:@"reply_port"] integerValue];
     kim_identity identity = NULL;
+    kim_options options = NULL;
     
     if (!err) {
-        err = kim_identity_create_from_string(&identity, [[info objectForKey:@"identity_string"] UTF8String]);
+        err = kim_identity_create_from_string (&identity, [[info objectForKey:@"identity_string"] UTF8String]);
     }
     
-    err = kim_handle_reply_enter_identity(reply_port, identity, error);
+    if (!err) {
+#warning Placeholder for returning options
+        err = kim_options_create (&options);
+    }
+    
+    if (!err) {
+        err = kim_handle_reply_enter_identity(reply_port, identity, options, error);
+    }
+    
+    kim_options_free (&options);
 }
 
 + (void) selectIdentityWithClientPort: (mach_port_t) client_port
@@ -187,9 +197,20 @@ static KerberosAgentListener *sharedListener = nil;
     NSString *identityString = [info objectForKey:@"identity_string"];
     mach_port_t reply_port = [portNumber integerValue];
     kim_identity identity = NULL;
-    kim_identity_create_from_string(&identity, (identityString) ? [identityString UTF8String] : "");
+    kim_options options = NULL;
+    
+    err = kim_identity_create_from_string(&identity, (identityString) ? [identityString UTF8String] : "");
 
-    err = kim_handle_reply_select_identity(reply_port, identity, error);
+    if (!err) {
+#warning Placeholder for returning options
+        err = kim_options_create (&options);
+    }
+    
+    if (!err) {
+        err = kim_handle_reply_select_identity(reply_port, identity, options, error);
+    }
+    
+    kim_options_free (&options);
 }
 
 + (void) promptForAuthWithClientPort: (mach_port_t) client_port

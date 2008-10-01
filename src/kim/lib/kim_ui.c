@@ -112,6 +112,7 @@ kim_error kim_ui_init (kim_ui_context *io_context)
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_ui_enter_identity (kim_ui_context      *in_context,
+                                 kim_options          io_options,
                                  kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
@@ -126,15 +127,18 @@ kim_error kim_ui_enter_identity (kim_ui_context      *in_context,
     if (!err) {
         if (in_context->type == kim_ui_type_gui_plugin) {
             err = kim_ui_plugin_enter_identity (in_context, 
+                                                io_options,
                                                 out_identity);
             
 #ifndef LEAN_CLIENT
         } else if (in_context->type == kim_ui_type_gui_builtin) {
             err = kim_os_ui_gui_enter_identity (in_context, 
+                                                io_options,
                                                 out_identity);
             
         } else if (in_context->type == kim_ui_type_cli) {
             err = kim_ui_cli_enter_identity (in_context, 
+                                             io_options,
                                              out_identity);
             
 #endif /* LEAN_CLIENT */
@@ -150,13 +154,13 @@ kim_error kim_ui_enter_identity (kim_ui_context      *in_context,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_ui_select_identity (kim_ui_context      *in_context,
-                                  kim_selection_hints  in_hints,
+                                  kim_selection_hints  io_hints,
                                   kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     
     if (!err && !in_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
@@ -166,18 +170,18 @@ kim_error kim_ui_select_identity (kim_ui_context      *in_context,
     if (!err) {
         if (in_context->type == kim_ui_type_gui_plugin) {
             err = kim_ui_plugin_select_identity (in_context, 
-                                                 in_hints,
+                                                 io_hints,
                                                  out_identity);
             
 #ifndef LEAN_CLIENT
         } else if (in_context->type == kim_ui_type_gui_builtin) {
             err = kim_os_ui_gui_select_identity (in_context, 
-                                                 in_hints,
+                                                 io_hints,
                                                  out_identity);
             
         } else if (in_context->type == kim_ui_type_cli) {
             err = kim_ui_cli_select_identity (in_context, 
-                                              in_hints,
+                                              io_hints,
                                               out_identity);
             
 #endif /* LEAN_CLIENT */

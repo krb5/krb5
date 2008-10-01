@@ -57,6 +57,9 @@ kim_error kim_os_selection_hints_forget_identity (kim_selection_hints in_selecti
 kim_error kim_selection_hints_write_to_stream (kim_selection_hints in_selection_hints,
                                                k5_ipc_stream       io_stream);
 
+kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection_hints,
+                                                k5_ipc_stream       io_stream);
+
 kim_error kim_selection_hints_create_from_stream (kim_selection_hints *out_selection_hints,
                                                   k5_ipc_stream        in_stream);
 

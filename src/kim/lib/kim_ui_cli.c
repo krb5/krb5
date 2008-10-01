@@ -101,12 +101,14 @@ kim_error kim_ui_cli_init (kim_ui_context *io_context)
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
+                                     kim_options     io_options,
                                      kim_identity   *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string enter_identity_string = NULL;
     kim_string identity_string = NULL;
     
+    if (!err && !io_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
@@ -132,17 +134,28 @@ kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_ui_cli_select_identity (kim_ui_context      *in_context,
-                                      kim_selection_hints  in_hints,
+                                      kim_selection_hints  io_hints,
                                       kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
+    kim_options options = NULL;
     
-    if (!err && !in_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_ui_cli_enter_identity (in_context, out_identity);
+        err = kim_selection_hints_get_options (io_hints, &options);
     }
+    
+    if (!err) {
+        err = kim_ui_cli_enter_identity (in_context, options, out_identity);
+    }
+    
+    if (!err) {
+        err = kim_selection_hints_set_options (io_hints, options);
+    }
+    
+    kim_options_free (&options);
     
     return check_error (err);
 }

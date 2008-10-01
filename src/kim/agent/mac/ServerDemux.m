@@ -24,6 +24,7 @@
 
 #import "ServerDemux.h"
 #import "kim_selection_hints_private.h"
+#import "kim_options_private.h"
 #import "KerberosAgentListener.h"
 
 // ---------------------------------------------------------------------------
@@ -139,6 +140,11 @@ static int32_t kim_handle_request_enter_identity (mach_port_t   in_client_port,
                                                   k5_ipc_stream in_request_stream)
 {
     int32_t err = 0;
+    kim_options options = NULL;
+    
+    if (!err) {
+        err = kim_options_create_from_stream (&options, in_request_stream);
+    }
     
     if (!err) {
         // performs selector on main thread
@@ -153,6 +159,7 @@ static int32_t kim_handle_request_enter_identity (mach_port_t   in_client_port,
 
 int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port, 
                                          kim_identity  in_identity,
+                                         kim_options   in_options,
                                          int32_t       in_error)
 {
     int32_t err = 0;
@@ -173,6 +180,10 @@ int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port,
     
     if (!err && !in_error) {
         err = k5_ipc_stream_write_string (reply, identity_string);
+    }
+    
+    if (!err && !in_error) {
+        err = kim_options_write_to_stream (in_options, reply);
     }
     
     if (!err) {
@@ -217,6 +228,7 @@ static int32_t kim_handle_request_select_identity (mach_port_t   in_client_port,
 
 int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port, 
                                           kim_identity  in_identity,
+                                          kim_options   in_options,
                                           int32_t       in_error)
 {
     int32_t err = 0;
@@ -239,6 +251,10 @@ int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port,
         err = k5_ipc_stream_write_string (reply, identity_string);
     }
     
+    if (!err && !in_error) {
+        err = kim_options_write_to_stream (in_options, reply);
+    }
+
     if (!err) {
         err = k5_ipc_server_send_reply (in_reply_port, reply);
     }

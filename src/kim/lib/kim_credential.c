@@ -250,7 +250,7 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
     }
     
     if (!err && !in_identity) {
-        err = kim_ui_enter_identity (&context, &identity);
+        err = kim_ui_enter_identity (&context, options, &identity);
         
     }
     

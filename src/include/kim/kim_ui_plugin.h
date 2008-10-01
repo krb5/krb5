@@ -76,6 +76,7 @@ typedef struct kim_ui_plugin_ftable_v0 {
      * If this UI calls into KIM to get new credentials it may 
      * call auth_prompt below. */
     kim_error (*enter_identity) (void         *in_context,
+                                 kim_options   io_options,
                                  kim_identity *out_identity);
     
     /* Present UI to select which identity to use.
@@ -84,7 +85,7 @@ typedef struct kim_ui_plugin_ftable_v0 {
      * If this UI calls into KIM to get new credentials it may 
      * call auth_prompt below. */
     kim_error (*select_identity) (void                *in_context,
-                                  kim_selection_hints  in_hints,
+                                  kim_selection_hints  io_hints,
                                   kim_identity        *out_identity);
     
     /* Present UI to display authentication to the user */

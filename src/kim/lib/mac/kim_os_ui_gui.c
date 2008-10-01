@@ -116,6 +116,7 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
+                                        kim_options     io_options,
                                         kim_identity   *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
@@ -123,6 +124,7 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
     k5_ipc_stream reply = NULL;
     char *identity_string = NULL;
     
+    if (!err && !io_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
@@ -133,6 +135,9 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
         err = k5_ipc_stream_write_string (request, "enter_identity");
     }
 
+    if (!err) {
+        err = kim_options_write_to_stream (io_options, request);
+    }
     
     if (!err) {
         err = kim_os_ui_gui_send_request (0 /* don't launch server */,
@@ -150,6 +155,10 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
     
     if (!err) {
         err  = k5_ipc_stream_read_string (reply, &identity_string);
+    }
+    
+    if (!err) {
+        err  = kim_options_read_from_stream (io_options, reply);
     }
     
     if (!err) {
@@ -166,15 +175,16 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
 /* ------------------------------------------------------------------------ */
 
 kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
-                                         kim_selection_hints  in_hints,
+                                         kim_selection_hints  io_hints,
                                          kim_identity        *out_identity)
 {
     kim_error err = KIM_NO_ERROR;
     k5_ipc_stream request = NULL;
     k5_ipc_stream reply = NULL;
     char *identity_string = NULL;
+    kim_options options = NULL;
     
-    if (!err && !in_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
@@ -186,7 +196,7 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
     }
     
     if (!err) {
-        err = kim_selection_hints_write_to_stream (in_hints, request);
+        err = kim_selection_hints_write_to_stream (io_hints, request);
     }
     
     if (!err) {
@@ -211,6 +221,15 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
         err = kim_identity_create_from_string (out_identity, identity_string);
     }
     
+    if (!err) {
+        err = kim_options_create_from_stream (&options, reply);
+    }
+    
+    if (!err) {
+        err = kim_selection_hints_set_options (io_hints, options);
+    }
+    
+    kim_options_free (&options);
     k5_ipc_stream_free_string (identity_string);    
     k5_ipc_stream_release (request);
     k5_ipc_stream_release (reply);

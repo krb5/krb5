@@ -574,46 +574,41 @@ kim_error kim_options_write_to_stream (kim_options   in_options,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_options_create_from_stream (kim_options   *out_options,
-                                          k5_ipc_stream  io_stream)
+kim_error kim_options_read_from_stream (kim_options    io_options,
+                                        k5_ipc_stream  io_stream)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_options options = NULL;
     
-    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !io_stream  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_stream ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = kim_options_allocate (&options);
+        err = k5_ipc_stream_read_int64 (io_stream, &io_options->start_time);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int64 (io_stream, &options->start_time);
+        err = k5_ipc_stream_read_int64 (io_stream, &io_options->lifetime);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int64 (io_stream, &options->lifetime);
-    }
-    
-    if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &options->renewable);
+        err = k5_ipc_stream_read_int32 (io_stream, &io_options->renewable);
     }
     
     if (!err) {
         err = k5_ipc_stream_read_int64 (io_stream, 
-                                        &options->renewal_lifetime);
+                                        &io_options->renewal_lifetime);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &options->forwardable);
+        err = k5_ipc_stream_read_int32 (io_stream, &io_options->forwardable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &options->proxiable);
+        err = k5_ipc_stream_read_int32 (io_stream, &io_options->proxiable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &options->addressless);
+        err = k5_ipc_stream_read_int32 (io_stream, &io_options->addressless);
     }
     
     if (!err) {
@@ -621,10 +616,37 @@ kim_error kim_options_create_from_stream (kim_options   *out_options,
         err = k5_ipc_stream_read_string (io_stream, &service_name);
         
         if (!err) {
-            err = kim_string_copy (&options->service_name, service_name);
+            kim_string_free (&io_options->service_name);
+            if (service_name[0]) {
+                err = kim_string_copy (&io_options->service_name, service_name);
+            } else {
+                io_options->service_name = NULL;
+            }
         }
         
         k5_ipc_stream_free_string (service_name);
+    }
+    
+    return check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_options_create_from_stream (kim_options   *out_options,
+                                          k5_ipc_stream  io_stream) 
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_options options = NULL;
+    
+    if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_stream  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+
+    if (!err) {
+        err = kim_options_allocate (&options);
+    }
+
+    if (!err) {
+        kim_options_read_from_stream (options, io_stream);
     }
     
     if (!err) {
@@ -632,7 +654,7 @@ kim_error kim_options_create_from_stream (kim_options   *out_options,
         options = NULL;
     }
     
-    kim_options_free (&options);
+    kim_options_free (&options); 
     
-    return check_error (err);    
+    return check_error (err);
 }
