@@ -334,7 +334,7 @@ kim_error kim_os_selection_hints_lookup_identity (kim_selection_hints  in_select
         err = kim_os_selection_hints_get_selection_hints_array (&hints_array);
     }
     
-    if (!err) {
+    if (!err && hints_array) {
         count = CFArrayGetCount (hints_array);
     }
     
