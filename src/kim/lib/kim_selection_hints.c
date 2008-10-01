@@ -465,8 +465,10 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints  in_selection_hi
                                           &identity);
         }
         
-        if (!err) {
-            err = kim_ui_fini (&context);
+        if (context.initialized) {
+            kim_error terr = KIM_NO_ERROR;
+            terr = kim_ui_fini (&context);
+            err = (terr != KIM_NO_ERROR) ? terr : err;
         }
     }
     
