@@ -323,6 +323,13 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                 
                 prompt_count = context.prompt_count; /* remember if we got prompts */
                 if (!err) { free_creds = 1; }
+                
+                if (!err) {
+                    err = krb5_error (credential->context,
+                                      krb5_copy_creds (credential->context,
+                                                       &creds, 
+                                                       &credential->creds));
+                }                
             }
             
             kim_string_free (&new_password);
