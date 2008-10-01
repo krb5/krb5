@@ -522,9 +522,15 @@ kim_error kim_options_write_to_stream (kim_options   in_options,
                                        k5_ipc_stream io_stream)
 {
     kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !in_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    kim_options options = NULL;
+
     if (!err && !io_stream ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err && !in_options) {
+        err = kim_options_create(&options);
+    } else {
+        err = kim_options_copy(&options, in_options);
+    }
     
     if (!err) {
         err = k5_ipc_stream_write_int64 (io_stream, in_options->start_time);
@@ -561,7 +567,7 @@ kim_error kim_options_write_to_stream (kim_options   in_options,
         err = k5_ipc_stream_write_string (io_stream, service_name);
     }
     
-    
+    kim_options_free(&options);
     
     return check_error (err);    
 }
