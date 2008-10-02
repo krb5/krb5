@@ -56,7 +56,7 @@
 
     // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
     [[self window] center];
-    [[self window] setLevel:2003];
+    [[self window] setLevel:NSScreenSaverWindowLevel];
 
     [identityTableView setDoubleAction:@selector(select:)];
     identities = [[Identities alloc] init];

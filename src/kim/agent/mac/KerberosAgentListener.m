@@ -166,9 +166,10 @@ static KerberosAgentListener *sharedListener = nil;
 {
     kim_error err = KIM_NO_ERROR;
     mach_port_t reply_port = [[info objectForKey:@"reply_port"] integerValue];
+    NSString *identityString = [info objectForKey:@"identity_string"];
     kim_identity identity = NULL;
     kim_options options = NULL;
-    NSString *identityString = [info objectForKey:@"identity_string"];
+    BOOL wants_change_password = [[info objectForKey:@"wants_change_password"] boolValue];
     
     if (identityString) {
         err = kim_identity_create_from_string (&identity, [identityString UTF8String]);
@@ -176,9 +177,10 @@ static KerberosAgentListener *sharedListener = nil;
     
     if (!err) {
         options = [KIMUtilities kimOptionsForDictionary:[info objectForKey:@"options"]];
-    }    
+        
+    }
     if (!err) {
-        err = kim_handle_reply_enter_identity(reply_port, identity, options, error);
+        err = kim_handle_reply_enter_identity(reply_port, identity, options, wants_change_password, error);
     }
     
     kim_options_free (&options);
@@ -211,6 +213,7 @@ static KerberosAgentListener *sharedListener = nil;
     mach_port_t reply_port = [portNumber integerValue];
     kim_identity identity = NULL;
     kim_options options = NULL;
+    BOOL wants_change_password = [[info objectForKey:@"wants_change_password"] boolValue];
     NSLog(@"%s", __FUNCTION__);
 
     if (identityString) {
@@ -222,7 +225,7 @@ static KerberosAgentListener *sharedListener = nil;
     }
 
     if (!err) {
-        err = kim_handle_reply_select_identity(reply_port, identity, options, error);
+        err = kim_handle_reply_select_identity(reply_port, identity, options, wants_change_password, error);
     }
     
     kim_options_free (&options);
