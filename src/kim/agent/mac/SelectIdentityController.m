@@ -24,6 +24,7 @@
 
 #import "SelectIdentityController.h"
 #import "IPCClient.h"
+#import "KerberosFormatters.h"
 
 #define identities_key_path @"identities"
 
@@ -42,6 +43,7 @@
 
 - (void) dealloc
 {
+    [identityOptionsController removeObserver:self forKeyPath:identity_string_keypath];
     [refreshTimer release];
     [identities release];
     [super dealloc];
@@ -57,6 +59,9 @@
     // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
     [[self window] center];
     [[self window] setLevel:NSScreenSaverWindowLevel];
+    
+    longTimeFormatter.displaySeconds = NO;
+    longTimeFormatter.displayShortFormat = NO;
 
     [identityTableView setDoubleAction:@selector(select:)];
     identities = [[Identities alloc] init];
@@ -76,7 +81,20 @@
                    associatedClient.name];
     }
     [headerTextField setStringValue:message];
-    [explanationTextField setStringValue:@"explanation!"];
+    
+    [identityOptionsController addObserver:self
+                                forKeyPath:identity_string_keypath
+                                   options:NSKeyValueObservingOptionNew
+                                   context:NULL];
+}
+
+- (void)  observeValueForKeyPath:(NSString *) keyPath ofObject: (id) object change: (NSDictionary *) change context:(void *) context
+{
+    if ([keyPath isEqualToString:identity_string_keypath]) {
+        BOOL enabled = [KIMUtilities validateIdentity:[identityOptionsController valueForKeyPath:identity_string_keypath]];
+        [identityOptionsController setValue:[NSNumber numberWithBool:enabled] 
+                                 forKeyPath:@"content.canClickOK"];
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -84,18 +102,15 @@
 - (void) setContent: (NSMutableDictionary *) newContent
 {
     [self window]; // wake up the nib connections
-//    [glueController setContent:newContent];
+    [glueController setContent:newContent];
 }
 
 // ---------------------------------------------------------------------------
 
 - (IBAction) newIdentity: (id) sender
 {
-    Identity *newIdentity = [[Identity alloc] init];
-
-    newIdentity.favorite = TRUE;
-    identityOptionsController.content = newIdentity;
-    [newIdentity release];
+    identityOptionsController.content = [[[glueController valueForKeyPath:@"content.hints.options"] 
+                                          mutableCopy] autorelease];
 
     [self showOptions:@"new"];
 }
@@ -117,7 +132,7 @@
 - (IBAction) removeFromFavorites: (id) sender
 {
     Identity *anIdentity = [identityArrayController.selectedObjects lastObject];
-    identityOptionsController.content = anIdentity;
+    identityOptionsController.content = nil;
 
     anIdentity.favorite = FALSE;
     
@@ -128,7 +143,17 @@
 
 - (IBAction) changePassword: (id) sender
 {
+    Identity *selectedIdentity = nil;
     
+    // ignore double-click on header
+    if ([sender respondsToSelector:@selector(clickedRow)] && [sender clickedRow] < 0) {
+        return;
+    }
+    selectedIdentity = [[identityArrayController selectedObjects] lastObject];
+    
+    [associatedClient didSelectIdentity: selectedIdentity.identity
+                                options: [identityOptionsController valueForKeyPath:@"content.options"]
+                    wantsChangePassword: YES];
 }
 
 // ---------------------------------------------------------------------------
@@ -162,7 +187,8 @@
 {
     Identity *anIdentity = [identityArrayController.selectedObjects lastObject];
     anIdentity.favorite = TRUE;
-    [identityOptionsController setContent: anIdentity];
+    
+    [identityOptionsController setContent:anIdentity.options];
     
     [self showOptions:@"edit"];
 }
@@ -171,9 +197,8 @@
 
 - (IBAction) resetOptions: (id) sender
 {
-    Identity *anIdentity = identityOptionsController.content;
-    // reset options to default settings
-    [anIdentity resetOptions];
+    Identity *anIdentity = [identityArrayController.selectedObjects lastObject];
+    [identityOptionsController setContent:anIdentity.options];
 }
 
 // ---------------------------------------------------------------------------
@@ -197,16 +222,27 @@
     [NSApp endSheet: identityOptionsWindow];
 }
 
+// ---------------------------------------------------------------------------
+
 - (IBAction) sliderDidChange: (id) sender
 {
-    
-}
-
-- (void)controlTextDidChange:(NSNotification *)aNotification
-{
-//    BOOL valid = [KIMUtilities validateIdentity:];
-    [ticketOptionsOkButton setEnabled:false];
-    [ticketOptionsOkButton setNeedsDisplay];
+    NSInteger increment = 0;
+    NSInteger newValue = 0;
+    NSString *keyPath = nil;
+    if ([sender isEqual:validLifetimeSlider]) {
+        increment = VALID_LIFETIME_INCREMENT;
+        keyPath = valid_lifetime_keypath;
+    }
+    else if ([sender isEqual:renewableLifetimeSlider]) {
+        increment = RENEWABLE_LIFETIME_INCREMENT;
+        keyPath = renewal_lifetime_keypath;
+    }
+    if (increment > 0) {
+        newValue = ([sender integerValue] / increment) * increment;
+        [identityOptionsController setValue:[NSNumber numberWithInteger:
+                                             (newValue < increment) ? increment : newValue] 
+                                 forKeyPath:keyPath];
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -214,16 +250,11 @@
 - (void) showOptions: (NSString *) contextInfo
 {
     Identity *anIdentity = [[identityArrayController selectedObjects] lastObject];
-    // use a copy of the current options
-    [identityOptionsController setContent:
-     [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease]];
-
-    [identityField setStringValue:anIdentity.identity];
-    [staticIdentityField setStringValue:anIdentity.identity];
+    BOOL isIdentityNameNotEditable = (!anIdentity.hasCCache || [contextInfo isEqualToString:@"new"]);
+    NSString *identityString = ([contextInfo isEqualToString:@"new"]) ? @"" : anIdentity.identity;
     
-    [identityOptionsController setContent:
-     [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease]];
-    
+    [identityOptionsController setValue:identityString
+                             forKeyPath:identity_string_keypath];    
     [identityOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minValidLifetime]]
                            forKeyPath:min_valid_keypath];
     [identityOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities maxValidLifetime]]
@@ -232,6 +263,8 @@
                            forKeyPath:min_renewable_keypath];
     [identityOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities maxRenewableLifetime]]
                            forKeyPath:max_renewable_keypath];
+    [identityOptionsController setValue:[NSNumber numberWithBool:!isIdentityNameNotEditable]
+                             forKeyPath:@"content.hasCCache"];
     
     [validLifetimeSlider setIntegerValue:
      [[identityOptionsController valueForKeyPath:valid_lifetime_keypath] integerValue]];
@@ -254,19 +287,34 @@
     kim_error err = KIM_NO_ERROR;
     if (returnCode != NSUserCancelledError) {
         if ([(NSString *)contextInfo isEqualToString:@"new"]) {
-            Identity *newIdentity = identityOptionsController.content;
+            Identity *newIdentity = [[Identity alloc] 
+                                     initWithIdentity:[identityOptionsController valueForKeyPath:identity_string_keypath] 
+                                     options:identityOptionsController.content];
+            newIdentity.favorite = YES;
+
             err = [identities addIdentity:newIdentity];
-            
+
             if (err) {
                 NSLog(@"%s received error %@ trying to add identity %@", _cmd, [KIMUtilities stringForLastKIMError:err], [newIdentity description]);
             }
+            [newIdentity release];
             [self saveOptions];
+
         }
         else if ([(NSString *)contextInfo isEqualToString:@"edit"]) {
+            Identity *editedIdentity = [[identityArrayController selectedObjects] lastObject];
+            editedIdentity.favorite = YES;
+            editedIdentity.identity = [identityOptionsController valueForKeyPath:identity_string_keypath];
+            editedIdentity.options = identityOptionsController.content;
+
             [self saveOptions];
+            
         }
+    } else {
+        [identityOptionsController setContent:nil];
     }
     [sheet orderOut:self];
+
 }
 
 // ---------------------------------------------------------------------------
@@ -289,7 +337,8 @@
     
     b = [identityArrayController.content indexOfObject:anIdentity];
     c = [identityArrayController.content count] - 1;
-    
+
+
     [identityArrayController setSelectionIndex: (b == NSNotFound) ? (a > c) ? c : a : b];
 }
 

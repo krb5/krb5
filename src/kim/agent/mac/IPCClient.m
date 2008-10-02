@@ -113,7 +113,8 @@ enum krb_agent_client_state {
 {
     self.currentInfo = [[info mutableCopy] autorelease];
     self.state = ipc_client_state_select;
-
+    
+    [self.selectController setContent:self.currentInfo];
     [self.selectController showWindow:nil];
     
     return 0;
@@ -123,7 +124,6 @@ enum krb_agent_client_state {
                    options: (NSDictionary *) options 
        wantsChangePassword: (BOOL) wantsChangePassword
 {
-    NSLog(@"%s %@ %@", __FUNCTION__, identityString, options);
     [self.currentInfo setObject:identityString forKey:@"identity_string"];
     // if the user set custom options, use those
     if (options) {

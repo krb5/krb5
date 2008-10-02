@@ -27,9 +27,13 @@
 #import "Identities.h"
 
 @class IPCClient;
+@class KerberosTimeFormatter;
 
 @interface SelectIdentityController : NSWindowController {
     IPCClient *associatedClient;
+    
+    IBOutlet KerberosTimeFormatter *shortTimeFormatter;
+    IBOutlet KerberosTimeFormatter *longTimeFormatter;
     
     IBOutlet NSObjectController *identitiesController;
     IBOutlet NSArrayController *identityArrayController;
@@ -79,7 +83,6 @@
 - (IBAction) cancel: (id) sender;
 
 - (IBAction) sliderDidChange: (id) sender;
-- (void)controlTextDidChange:(NSNotification *)aNotification;
 
 - (void) showOptions: (NSString *) contextInfo;
 - (void) didEndSheet: (NSWindow *) sheet returnCode: (int) returnCode contextInfo: (void *) contextInfo;

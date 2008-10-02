@@ -179,6 +179,7 @@ static KerberosAgentListener *sharedListener = nil;
         options = [KIMUtilities kimOptionsForDictionary:[info objectForKey:@"options"]];
         
     }
+
     if (!err) {
         err = kim_handle_reply_enter_identity(reply_port, identity, options, wants_change_password, error);
     }
@@ -214,7 +215,6 @@ static KerberosAgentListener *sharedListener = nil;
     kim_identity identity = NULL;
     kim_options options = NULL;
     BOOL wants_change_password = [[info objectForKey:@"wants_change_password"] boolValue];
-    NSLog(@"%s", __FUNCTION__);
 
     if (identityString) {
         err = kim_identity_create_from_string(&identity, [identityString UTF8String]);

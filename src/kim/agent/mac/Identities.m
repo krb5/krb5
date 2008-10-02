@@ -616,7 +616,6 @@
             }
             
             if (!err) {
-                kimIdentity = NULL; /* take ownership */ 
                 [newFavoriteIdentities addObject: identity];
             }
             
@@ -625,17 +624,20 @@
                 identity = nil;
             }
             
+            kim_options_free(&kimOptions);
             kim_identity_free (&kimIdentity);
         }
         
         kim_preferences_free(&preferences);
     }
     
+    
     if (!err) {
         self.favoriteIdentities = newFavoriteIdentities;
         if (!favoriteIdentities) { err = ENOMEM; }
     }
-    
+
+
     if (newFavoriteIdentities) {
         [newFavoriteIdentities release];
         newFavoriteIdentities = nil;
@@ -666,7 +668,7 @@
     }
     
     // Build list of identities with existing ccaches
-//    NSLog(@"updating %@", [[NSThread currentThread] description]);
+    //NSLog(@"updating %@", [[NSThread currentThread] description]);
     while (!err) {
         kim_ccache ccache = NULL;
         kim_identity an_identity = NULL;
@@ -723,6 +725,7 @@
     
     kim_ccache_iterator_free (&iterator);
     
+    
     // Copy ccache state to favorites
     for (Identity *identity in self.favoriteIdentities) {
         Identity *matchingIdentity = [newIdentities member:identity];
@@ -735,14 +738,18 @@
             identity.expirationDate = [NSDate distantPast];
         }
     }
-        
+
+
     // Add unused favorites
     [newIdentities unionSet:[NSSet setWithArray:self.favoriteIdentities]];
     
     if (!err) {
-        [self.identities removeAllObjects];
-        [self.identities addObjectsFromArray:[newIdentities allObjects]];
-        [self.identities sortUsingSelector:@selector(compare:)];
+//        [self.identities removeAllObjects];
+//        [self.identities addObjectsFromArray:[newIdentities allObjects]];
+//        [self.identities sortUsingSelector:@selector(compare:)];
+
+        self.identities = [[[[newIdentities allObjects] sortedArrayUsingSelector:@selector(compare:)] mutableCopy] autorelease];
+        
 
         if (!identities) { err = ENOMEM; }            
     } else {
@@ -759,7 +766,9 @@
     kim_error err = KIM_NO_ERROR;
 
     if (![self.identities containsObject:anIdentity]) {
-        [self.identities addObject:anIdentity];
+        NSMutableArray *newArray = [[self.identities mutableCopy] autorelease];
+        [newArray addObject:anIdentity];
+        self.identities = newArray;
     } else {
         err = KIM_IDENTITY_ALREADY_IN_LIST_ERR;
     }
