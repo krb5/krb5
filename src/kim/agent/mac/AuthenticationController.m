@@ -218,8 +218,8 @@
     [glueController setValue:message
                   forKeyPath:message_keypath];
 
-    [theWindow setFrame:[theWindow frameRectForContentRect:[identityView frame]] display:NO];
     [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [theWindow setFrame:[theWindow frameRectForContentRect:[identityView frame]] display:NO];
     [containerView addSubview:identityView];
 
     [enterSpinny stopAnimation:nil];
@@ -271,8 +271,8 @@
     [passwordBadge setBadgePath:associatedClient.path];
 
     frame = [passwordView frame];
-    [theWindow setFrame:[theWindow frameRectForContentRect:frame] display:NO];
     [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [theWindow setFrame:[theWindow frameRectForContentRect:frame] display:NO];
     [containerView addSubview:passwordView];
 
     // adjust for checkbox visibility
@@ -299,8 +299,8 @@
     [glueController setValue:[NSNumber numberWithBool:NO]
                    forKeyPath:allow_save_password_keypath];
     
-    [theWindow setFrame:[theWindow frameRectForContentRect:[samView frame]] display:NO];
     [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [theWindow setFrame:[theWindow frameRectForContentRect:[samView frame]] display:NO];
     [containerView addSubview:samView];
     
     [self showWindow:nil];
@@ -334,15 +334,17 @@
         // %@ requires that you change the Kerberos password for \"%@\"
     } else {
         key = ACPasswordChangeExpired;
-        message = NSLocalizedStringFromTable(key, ACLocalizationTable, NULL);
+        message = [NSString stringWithFormat:
+                   NSLocalizedStringFromTable(key, ACLocalizationTable, NULL), 
+                   [glueController valueForKeyPath:identity_string_keypath]];
         // Your password has expired, would you like to change it?
     }
     [glueController setValue:message forKeyPath:message_keypath];
                      
     // wake up the nib connections and adjust window size
+    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [theWindow setFrame:[theWindow frameRectForContentRect:[changePasswordView frame]] display:NO];
     // set up controls with info from associatedClient
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [containerView addSubview:changePasswordView];
     // set badge
     [changePasswordBadge setBadgePath:associatedClient.path];
