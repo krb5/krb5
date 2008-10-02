@@ -401,7 +401,6 @@ send_again:
 		reply_xdrs.x_op = XDR_FREE;
 		xdr_replymsg(&reply_xdrs, &reply_msg);
 		reply_xdrs.x_op = op;
-		return (RPC_CANTDECODERES);
 		cu->cu_error.re_status = RPC_CANTDECODERES;
 	}
 	return (cu->cu_error.re_status);
