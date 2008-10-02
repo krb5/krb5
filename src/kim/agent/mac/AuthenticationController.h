@@ -97,4 +97,7 @@
           returnCode: (int) returnCode 
          contextInfo: (void *) contextInfo;
 
+- (IBAction) changePasswordGearAction: (id) sender;
+- (void) changePasswordThread: (NSString *) identityString;
+
 @end

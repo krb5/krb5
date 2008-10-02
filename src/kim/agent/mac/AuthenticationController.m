@@ -370,17 +370,23 @@
 - (IBAction) showTicketOptions: (id) sender
 {
     NSDictionary *options = nil;
+    NSString *expandedString = nil;
     // if this is a favorite, try to load its default options
     [identityField validateEditing];
 
-    options = [favoriteOptions valueForKey:[identityField stringValue]];
-    
-    if (!options) {
-        options = [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease];
+    expandedString = [KIMUtilities expandedIdentity:[identityField stringValue]];
+
+    // edit the favorite options for this favorite identity
+    if (expandedString) {
+        options = [favoriteOptions objectForKey:expandedString];
     }
     
     // else fallback to options passed from client
     // use a copy of the current options
+    if (!options) {
+        options = [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease];
+    }
+    
     [ticketOptionsController setContent:options];
     
     [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minValidLifetime]]
@@ -424,26 +430,31 @@
         // discard new options
         [ticketOptionsController setContent:nil];
     } else {
-        // replace existing options with new
-        // add to favorites if not already in list
-        
-        // replace options of existing if already in list
         kim_error err = KIM_NO_ERROR;
         kim_preferences prefs = NULL;
         kim_identity identity = NULL;
         kim_options options = NULL;
+        NSString *expandedString = [KIMUtilities expandedIdentity:[identityField stringValue]];;
 
-        [glueController setValue:[ticketOptionsController content] 
-                      forKeyPath:options_keypath];
-        
-        err = kim_preferences_create(&prefs);
-        
+        // replace options if favorite exists
+        // add to favorites if not already in list
+        if (!expandedString) {
+            err = KIM_BAD_PRINCIPAL_STRING_ERR;
+        }
+        if (!err) {
+            [favoriteOptions setObject:[ticketOptionsController content] 
+                                forKey:expandedString];
+        }
+        if (!err) {
+            err = kim_preferences_create(&prefs);
+        }
         if (!err) {
             err = kim_identity_create_from_string(&identity, [[identityField stringValue] UTF8String]);
         }
         if (!err) {
             options = [KIMUtilities kimOptionsForDictionary:[ticketOptionsController content]];
         }
+        
         if (!identity) { err = KIM_BAD_PRINCIPAL_STRING_ERR; }
         if (!options) { err = KIM_BAD_OPTIONS_ERR; }
         
@@ -453,7 +464,6 @@
         if (!err && identity && options) {
             err = kim_preferences_add_favorite_identity(prefs, identity, options);
         }
-                
         if (!err) {
             err = kim_preferences_synchronize(prefs);
         }
@@ -465,6 +475,40 @@
     [ticketOptionsSheet orderOut:nil];
 }
 
+- (IBAction) changePasswordGearAction: (id) sender
+{
+    NSString *expandedString = [KIMUtilities expandedIdentity:[identityField stringValue]];
+    NSLog(@"%s", __FUNCTION__);
+    if (expandedString && [expandedString length] > 0) {
+        [expandedString retain];
+        [NSThread detachNewThreadSelector:@selector(changePasswordThread:)
+                                 toTarget:self 
+                               withObject:expandedString];
+    }
+}
+
+- (void) changePasswordThread: (NSString *) identityString
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
+    
+    NSLog(@"%s %@", __FUNCTION__, identityString);
+    if (!err) {
+        err = kim_identity_create_from_string(&identity, [identityString UTF8String]);
+    }
+    if (!err) {
+        err = kim_identity_change_password(identity);
+    }
+
+    NSLog(@"%s %d", __FUNCTION__, err);
+
+    kim_identity_free(&identity);
+    
+    [identityString release];
+    [pool release];
+}
+
 - (IBAction) cancel: (id) sender
 {
     [associatedClient didCancel];
@@ -473,11 +517,14 @@
 
 - (IBAction) enterIdentity: (id) sender
 {
-    NSString *identityString = [glueController valueForKeyPath:identity_string_keypath];
-    NSDictionary *options = [glueController valueForKeyPath:options_keypath];
+    NSString *expandedString = [KIMUtilities expandedIdentity:[identityField stringValue]];
+    NSDictionary *options = [favoriteOptions objectForKey:expandedString];   
     
+    if (!options) {
+        options = [glueController valueForKeyPath:options_keypath];
+    }
     // the principal must already be valid to get this far
-    [associatedClient didEnterIdentity:identityString options:options];
+    [associatedClient didEnterIdentity:expandedString options:options];
 }
 
 - (IBAction) answerAuthPrompt: (id) sender

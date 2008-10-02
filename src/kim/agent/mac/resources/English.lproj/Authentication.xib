@@ -341,6 +341,7 @@
 									</object>
 									<object class="NSMenuItem" id="744766544">
 										<reference key="NSMenu" ref="594991555"/>
+										<bool key="NSIsHidden">YES</bool>
 										<string type="base64-UTF8" key="NSTitle">Q2hhbmdlIFBhc3N3b3Jk4oCmA</string>
 										<string key="NSKeyEquiv"/>
 										<int key="NSMnemonicLoc">2147483647</int>
@@ -373,6 +374,7 @@
 									</object>
 								</object>
 							</object>
+							<int key="NSSelectedIndex">2</int>
 							<bool key="NSPullDown">YES</bool>
 							<int key="NSPreferredEdge">1</int>
 							<bool key="NSUsesItemFromMenu">YES</bool>
@@ -386,7 +388,7 @@
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="866582848">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">274</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -395,7 +397,6 @@
 						<int key="NSvFlags">266</int>
 						<string key="NSFrame">{{104, 82}, {376, 22}}</string>
 						<reference key="NSSuperview" ref="866582848"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="508869457">
 							<int key="NSCellFlags">-1804468671</int>
@@ -418,7 +419,6 @@
 						<int key="NSvFlags">289</int>
 						<string key="NSFrame">{{388, 12}, {98, 32}}</string>
 						<reference key="NSSuperview" ref="866582848"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="200893597">
 							<int key="NSCellFlags">67239424</int>
@@ -440,7 +440,6 @@
 						<int key="NSvFlags">289</int>
 						<string key="NSFrame">{{295, 12}, {93, 32}}</string>
 						<reference key="NSSuperview" ref="866582848"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="935364959">
 							<int key="NSCellFlags">67239424</int>
@@ -462,7 +461,6 @@
 						<int key="NSvFlags">266</int>
 						<string key="NSFrame">{{101, 126}, {382, 41}}</string>
 						<reference key="NSSuperview" ref="866582848"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="999660494">
 							<int key="NSCellFlags">67239424</int>
@@ -479,7 +477,6 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{17, 84}, {80, 17}}</string>
 						<reference key="NSSuperview" ref="866582848"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="916263740">
 							<int key="NSCellFlags">68288064</int>
@@ -496,7 +493,6 @@
 						<int key="NSvFlags">290</int>
 						<string key="NSFrame">{{102, 58}, {380, 18}}</string>
 						<reference key="NSSuperview" ref="866582848"/>
-						<reference key="NSWindow"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="883697888">
 							<int key="NSCellFlags">-2080244224</int>
@@ -524,13 +520,10 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{20, 126}, {64, 64}}</string>
 						<reference key="NSSuperview" ref="866582848"/>
-						<reference key="NSWindow"/>
 						<string key="NSClassName">BadgedImageView</string>
 					</object>
 				</object>
 				<string key="NSFrameSize">{500, 210}</string>
-				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="898191415">
@@ -2019,7 +2012,7 @@
 							<string key="NSKeyPath">selection.identity_string</string>
 							<object class="NSDictionary" key="NSOptions">
 								<string key="NS.key.0">NSContinuouslyUpdatesValue</string>
-								<integer value="1" key="NS.object.0" id="5"/>
+								<reference key="NS.object.0" ref="9"/>
 							</object>
 							<reference key="NSPreviousConnector" ref="407856422"/>
 							<int key="NSNibBindingConnectorVersion">2</int>
@@ -2040,7 +2033,7 @@
 							<string key="NSKeyPath">selection.valid_lifetime</string>
 							<object class="NSDictionary" key="NSOptions">
 								<string key="NS.key.0">NSContinuouslyUpdatesValue</string>
-								<reference key="NS.object.0" ref="5"/>
+								<reference key="NS.object.0" ref="9"/>
 							</object>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
@@ -2060,7 +2053,7 @@
 							<string key="NSKeyPath">selection.renewal_lifetime</string>
 							<object class="NSDictionary" key="NSOptions">
 								<string key="NS.key.0">NSContinuouslyUpdatesValue</string>
-								<reference key="NS.object.0" ref="5"/>
+								<reference key="NS.object.0" ref="9"/>
 							</object>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
@@ -2082,6 +2075,14 @@
 						<reference key="destination" ref="752049494"/>
 					</object>
 					<int key="connectionID">300520</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">changePasswordGearAction:</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="744766544"/>
+					</object>
+					<int key="connectionID">300522</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -3121,7 +3122,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{611, 382}, {189, 93}}</string>
+					<string>{{611, 408}, {189, 93}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3201,7 +3202,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">300520</int>
+			<int key="maxID">300522</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -3217,6 +3218,7 @@
 							<string>cancel:</string>
 							<string>cancelTicketOptions:</string>
 							<string>changePassword:</string>
+							<string>changePasswordGearAction:</string>
 							<string>enterIdentity:</string>
 							<string>saveTicketOptions:</string>
 							<string>showTicketOptions:</string>
@@ -3225,6 +3227,7 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>

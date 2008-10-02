@@ -82,6 +82,8 @@ NSLog(@"%s got error %@", __FUNCTION__, [KIMUtilities stringForLastKIMError:err]
 
 + (BOOL) validateIdentity: (NSString *) identityString;
 
++ (NSString *) expandedIdentity: (NSString *) identityString;
+
 + (NSDictionary *) dictionaryForKimOptions: (kim_options) options;
 + (kim_options) kimOptionsForDictionary: (NSDictionary *) aDict;
 

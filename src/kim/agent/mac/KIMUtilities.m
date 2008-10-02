@@ -63,6 +63,7 @@
 {
     kim_error err = KIM_NO_ERROR;
     kim_identity identity = NULL;
+    
     if (!identityString || [identityString length] <= 1) {
         err = KIM_BAD_PRINCIPAL_STRING_ERR;
     }
@@ -75,6 +76,34 @@
     kim_identity_free(&identity);
     
     return (err == KIM_NO_ERROR);
+}
+
++ (NSString *) expandedIdentity: (NSString *) identityString
+{
+    NSString *result = nil;
+    kim_error err = KIM_NO_ERROR;
+    kim_identity identity = NULL;
+    kim_string validated_string = NULL;
+    
+    // convert to how it will actually be
+    // e.g. foo becomes foo@ATHENA.MIT.EDU
+    // for the purpose of matching to a favorite
+    if (!identityString) {
+        err = KIM_BAD_PRINCIPAL_STRING_ERR;
+    }
+    if (!err) {
+        err = kim_identity_create_from_string(&identity, [identityString UTF8String]);
+    }
+    if (!err && identity) {
+        err = kim_identity_get_display_string(identity, &validated_string);
+    }
+    if (!err && validated_string) {
+        result = [NSString stringWithUTF8String:validated_string];
+    }
+    kim_identity_free(&identity);
+    kim_string_free(&validated_string);
+    
+    return result;
 }
 
 + (NSDictionary *) dictionaryForKimOptions: (kim_options) options
