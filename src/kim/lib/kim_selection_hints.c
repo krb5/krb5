@@ -478,7 +478,7 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints  in_selection_hi
                                           &user_wants_change_password);
             
             if (!err && user_wants_change_password) {
-                err = kim_identity_change_password_common (identity, 1, 
+                err = kim_identity_change_password_common (identity, 0, 
                                                            &context, 
                                                            NULL);
                 

@@ -263,7 +263,7 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                                          &user_wants_change_password);
             
             if (!err && user_wants_change_password) {
-                err = kim_identity_change_password_common (identity, 1, 
+                err = kim_identity_change_password_common (identity, 0, 
                                                            &context, 
                                                            NULL);
                 
