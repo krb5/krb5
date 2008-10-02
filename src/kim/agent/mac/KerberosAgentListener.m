@@ -1,10 +1,27 @@
-//
-//  KerberosAgentListener.m
-//  Kerberos5
-//
-//  Created by Justin Anderson on 9/28/08.
-//  Copyright 2008 MIT. All rights reserved.
-//
+/*
+ * Copyright 2008 Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ * require a specific license from the United States Government.
+ * It is the responsibility of any person or organization contemplating
+ * export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+
 
 #import "KerberosAgentListener.h"
 #import "KIMUtilities.h"
@@ -171,17 +188,12 @@ static KerberosAgentListener *sharedListener = nil;
                             replyPort: (mach_port_t) reply_port
                                 hints: (kim_selection_hints) hints
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_selection_hints new_hints = NULL;
     NSDictionary *info = nil;
-    
-    // new hints will be freed by main thread
-    err = kim_selection_hints_copy(&new_hints, hints);
     
     info = [[NSDictionary alloc] initWithObjectsAndKeys:
             [NSNumber numberWithInteger:client_port], @"client_port",
             [NSNumber numberWithInteger:reply_port], @"reply_port",
-            [NSValue valueWithPointer:new_hints], @"hints", 
+            [KIMUtilities dictionaryForKimSelectionHints:hints], @"hints", 
             nil];
     
     [[NSApp delegate] performSelectorOnMainThread:@selector(selectIdentity:) 
@@ -209,9 +221,6 @@ static KerberosAgentListener *sharedListener = nil;
         options = [KIMUtilities kimOptionsForDictionary:[info objectForKey:@"options"]];
     }
 
-    log_kim_error_to_console(err);
-    log_kim_error_to_console(error);
-    
     if (!err) {
         err = kim_handle_reply_select_identity(reply_port, identity, options, error);
     }

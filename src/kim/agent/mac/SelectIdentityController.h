@@ -39,7 +39,6 @@
     IBOutlet NSTextField *explanationTextField;
     
     IBOutlet NSTableView *identityTableView;
-    IBOutlet NSTableColumn *identityTableColumn;
     IBOutlet NSButton *addIdentityButton;
     IBOutlet NSPopUpButton *actionPopupButton;
     IBOutlet NSButton *selectIdentityButton;
@@ -48,15 +47,22 @@
     Identities *identities;
     NSTimer *refreshTimer;
     
+    IBOutlet NSObjectController *glueController;
+    
     IBOutlet NSWindow *identityOptionsWindow;
     IBOutlet NSObjectController *identityOptionsController;
-    IBOutlet NSTextField *nameField;
-    IBOutlet NSTextField *realmField;
+    IBOutlet NSTextField *identityField;
+    IBOutlet NSTextField *staticIdentityField;
+
+    IBOutlet NSSlider *validLifetimeSlider;
+    IBOutlet NSSlider *renewableLifetimeSlider;
     
     IBOutlet NSButton *ticketOptionsOkButton;
 }
 
 @property (readwrite, retain) IPCClient *associatedClient;
+
+- (void) setContent: (NSMutableDictionary *) newContent;
 
 - (IBAction) newIdentity: (id) sender;
 - (IBAction) addToFavorites: (id) sender;
@@ -70,6 +76,7 @@
 - (IBAction) select: (id) sender;
 - (IBAction) cancel: (id) sender;
 
+- (IBAction) sliderDidChange: (id) sender;
 - (void)controlTextDidChange:(NSNotification *)aNotification;
 
 - (void) showOptions: (NSString *) contextInfo;

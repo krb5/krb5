@@ -25,10 +25,13 @@
 #import <Cocoa/Cocoa.h>
 
 @class IPCClient;
+@class KerberosTimeFormatter;
 @class BadgedImageView;
 
 @interface AuthenticationController : NSWindowController {
     IPCClient *associatedClient;
+    
+    IBOutlet KerberosTimeFormatter *lifetimeFormatter;
     
     IBOutlet NSView *containerView;
     IBOutlet NSView *identityView;
@@ -45,7 +48,7 @@
     IBOutlet BadgedImageView *errorBadge;
     
     // Controls that need to be made key
-    IBOutlet NSTextField *usernameField;
+    IBOutlet NSTextField *identityField;
     IBOutlet NSTextField *passwordField;
     IBOutlet NSTextField *samPromptField;
     IBOutlet NSTextField *oldPasswordField;
@@ -60,9 +63,14 @@
     
     IBOutlet NSSlider *validLifetimeSlider;
     IBOutlet NSSlider *renewableLifetimeSlider;
+    
+    NSMutableArray *favoriteIdentities;
+    NSMutableDictionary *favoriteOptions;
 }
 
 @property (readwrite, retain) IPCClient *associatedClient;
+@property (readwrite, retain) NSMutableArray *favoriteIdentities;
+@property (readwrite, retain) NSMutableDictionary *favoriteOptions;
 
 - (void) setContent: (NSMutableDictionary *) newContent;
 

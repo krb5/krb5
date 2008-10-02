@@ -24,6 +24,7 @@
 
 #import "AuthenticationController.h"
 #import "IPCClient.h"
+#import "KerberosFormatters.h"
 #import "BadgedImageView.h"
 
 // to get kim_prompt_type enum
@@ -47,46 +48,6 @@
  * verify_password = "
  */
 
-#define client_name_keypath          @"content.name"
-#define client_path_keypath          @"content.path"
-
-#define identity_string_keypath      @"content.identity_string"
-#define title_keypath                @"content.title"
-#define message_keypath              @"content.message"
-#define description_keypath          @"content.description"
-
-#define username_keypath             @"content.username"
-#define realm_keypath                @"content.realm"
-#define realm_history_keypath        @"content.realm_history"
-
-#define prompt_response_keypath      @"content.prompt_response"
-#define allow_save_password_keypath  @"content.allow_save"
-#define should_save_password_keypath @"content.save_response"
-
-#define password_expired_keypath     @"content.expired"
-#define old_password_keypath         @"content.old_password"
-#define new_password_keypath         @"content.new_password"
-#define verify_password_keypath      @"content.verify_password"
-
-#define enable_identity_ok_keypath   @"content.isPrincipalValid"
-#define enable_prompt_ok_keypath     @"content.isPromptValid"
-#define change_password_ok_keypath   @"content.isChangePasswordValid"
-
-#define options_keypath              @"content.options"
-
-#define valid_lifetime_keypath       @"content.valid_lifetime"
-#define renewal_lifetime_keypath     @"content.renewal_lifetime"
-#define renewable_keypath            @"content.renewable"
-#define addressless_keypath          @"content.addressless"
-#define forwardable_keypath          @"content.forwardable"
-
-#define min_valid_keypath            @"content.minValidLifetime"
-#define max_valid_keypath            @"content.maxValidLifetime"
-#define min_renewable_keypath        @"content.minRenewableLifetime"
-#define max_renewable_keypath        @"content.maxRenewableLifetime"
-
-#define ACKVOContext                 @"authenticationController"
-
 // localization keys and tables
 
 #define ACLocalizationTable          @"AuthenticationController"
@@ -102,6 +63,8 @@
 @implementation AuthenticationController
 
 @synthesize associatedClient;
+@synthesize favoriteIdentities;
+@synthesize favoriteOptions;
 
 - (id) init
 {
@@ -114,13 +77,12 @@
     // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
     [[self window] setLevel:2003];
     
+    lifetimeFormatter.displaySeconds = NO;
+    lifetimeFormatter.displayShortFormat = NO;
+    
     [glueController addObserver:self 
-                     forKeyPath:username_keypath 
+                     forKeyPath:identity_string_keypath 
                         options:NSKeyValueObservingOptionNew 
-                        context:ACKVOContext];
-    [glueController addObserver:self
-                     forKeyPath:realm_keypath
-                        options:NSKeyValueObservingOptionNew
                         context:ACKVOContext];
     [glueController addObserver:self
                      forKeyPath:prompt_response_keypath
@@ -143,23 +105,23 @@
 
 - (void) dealloc
 {
-    [glueController removeObserver:self forKeyPath:username_keypath];
-    [glueController removeObserver:self forKeyPath:realm_keypath];
+    [glueController removeObserver:self forKeyPath:identity_string_keypath];
     [glueController removeObserver:self forKeyPath:prompt_response_keypath];
     [super dealloc];
 }
 
 - (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+    BOOL valid = NO;
+    
     if ([(NSString *) context isEqualToString:ACKVOContext]) {
-	if ([keyPath isEqualToString:username_keypath] || [keyPath isEqualToString:realm_keypath]) {
-            BOOL valid = [KIMUtilities validatePrincipalWithName:[glueController valueForKeyPath:username_keypath] 
-                                                           realm:[glueController valueForKeyPath:realm_keypath]];
+	if ([keyPath isEqualToString:identity_string_keypath]) {
+            valid = [KIMUtilities validateIdentity:[glueController valueForKeyPath:identity_string_keypath]];
             [glueController setValue:[NSNumber numberWithBool:valid] 
                           forKeyPath:enable_identity_ok_keypath];
 	}
         else if ([keyPath isEqualToString:prompt_response_keypath]) {
-            BOOL valid = ([[glueController valueForKeyPath:prompt_response_keypath] length] > 0);
+            valid = ([[glueController valueForKeyPath:prompt_response_keypath] length] > 0);
             [glueController setValue:[NSNumber numberWithBool:valid] 
                           forKeyPath:enable_prompt_ok_keypath];
 	}
@@ -169,10 +131,8 @@
             NSString *oldString = [glueController valueForKeyPath:old_password_keypath];
             NSString *newString = [glueController valueForKeyPath:new_password_keypath];
             NSString *verifyString = [glueController valueForKeyPath:verify_password_keypath];
-            BOOL valid = ([oldString length] > 0 &&
-                          [newString length] > 0 &&
-                          [verifyString length] > 0 &&
-                          [newString isEqualToString:verifyString]);
+            valid = ([oldString length] > 0 && [newString length] > 0 &&
+                     [verifyString length] > 0 && [newString isEqualToString:verifyString]);
             [glueController setValue:[NSNumber numberWithBool:valid] 
                           forKeyPath:change_password_ok_keypath];
         }
@@ -190,10 +150,59 @@
 
 - (void) showEnterIdentity
 {
+    kim_error err = KIM_NO_ERROR;
     NSString *key = (associatedClient.name) ? ACAppPrincReqKey : ACPrincReqKey;
     NSString *message = [NSString stringWithFormat:
                          NSLocalizedStringFromTable(key, ACLocalizationTable, NULL),
                          associatedClient.name];
+    
+    self.favoriteIdentities = [NSMutableArray array];
+    self.favoriteOptions = [NSMutableDictionary dictionary];
+    // get array of favorite identity strings and associated options
+    
+    if (!err) {
+        kim_preferences preferences = NULL;
+        kim_options kimOptions = NULL;
+        kim_count i;
+        kim_count count = 0;
+        
+        err = kim_preferences_create(&preferences);
+        
+        if (!err) {
+            err = kim_preferences_get_number_of_favorite_identities(preferences,
+                                                                    &count);
+        }
+        
+        for (i = 0; !err && i < count; i++) {
+            kim_identity kimIdentity = NULL;
+            kim_string display_string = NULL;
+            NSString *identityString = nil;
+            
+            err = kim_preferences_get_favorite_identity_at_index(preferences,
+                                                                 i,
+                                                                 &kimIdentity,
+                                                                 &kimOptions);
+            if (!err) {
+                err = kim_identity_get_display_string(kimIdentity, &display_string);
+            }
+            if (!err && display_string) {
+                identityString = [NSString stringWithUTF8String:display_string];
+                [favoriteIdentities addObject:identityString];
+            }
+            if (!err) {
+                [favoriteOptions setObject:[KIMUtilities dictionaryForKimOptions:kimOptions]
+                                    forKey:identityString];
+            }
+            
+            kim_options_free(&kimOptions);
+            kim_string_free (&display_string);
+            kim_identity_free (&kimIdentity);
+        }
+        
+        kim_preferences_free(&preferences);
+    }
+    
+    [glueController setValue:favoriteIdentities forKeyPath:favorite_strings_keypath];
     
     // wake up the nib connections and adjust window size
     [self window];
@@ -204,7 +213,7 @@
     [glueController setValue:message
                   forKeyPath:message_keypath];
     [self showWindow:nil];
-    [[self window] makeFirstResponder:usernameField];
+    [[self window] makeFirstResponder:identityField];
 }
 
 - (void) showAuthPrompt
@@ -360,9 +369,19 @@
 
 - (IBAction) showTicketOptions: (id) sender
 {
+    NSDictionary *options = nil;
+    // if this is a favorite, try to load its default options
+    [identityField validateEditing];
+
+    options = [favoriteOptions valueForKey:[identityField stringValue]];
+    
+    if (!options) {
+        options = [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease];
+    }
+    
+    // else fallback to options passed from client
     // use a copy of the current options
-    [ticketOptionsController setContent:
-     [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease]];
+    [ticketOptionsController setContent:options];
     
     [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minValidLifetime]]
                            forKeyPath:min_valid_keypath];
@@ -406,7 +425,42 @@
         [ticketOptionsController setContent:nil];
     } else {
         // replace existing options with new
-        [glueController setValue:[ticketOptionsController content] forKeyPath:options_keypath];
+        // add to favorites if not already in list
+        
+        // replace options of existing if already in list
+        kim_error err = KIM_NO_ERROR;
+        kim_preferences prefs = NULL;
+        kim_identity identity = NULL;
+        kim_options options = NULL;
+
+        [glueController setValue:[ticketOptionsController content] 
+                      forKeyPath:options_keypath];
+        
+        err = kim_preferences_create(&prefs);
+        
+        if (!err) {
+            err = kim_identity_create_from_string(&identity, [[identityField stringValue] UTF8String]);
+        }
+        if (!err) {
+            options = [KIMUtilities kimOptionsForDictionary:[ticketOptionsController content]];
+        }
+        if (!identity) { err = KIM_BAD_PRINCIPAL_STRING_ERR; }
+        if (!options) { err = KIM_BAD_OPTIONS_ERR; }
+        
+        if (!err && identity) {
+            err = kim_preferences_remove_favorite_identity(prefs, identity);
+        }
+        if (!err && identity && options) {
+            err = kim_preferences_add_favorite_identity(prefs, identity, options);
+        }
+                
+        if (!err) {
+            err = kim_preferences_synchronize(prefs);
+        }
+        
+        kim_preferences_free(&prefs);
+        kim_options_free(&options);
+        kim_identity_free(&identity);
     }
     [ticketOptionsSheet orderOut:nil];
 }
@@ -419,11 +473,8 @@
 
 - (IBAction) enterIdentity: (id) sender
 {
-    NSString *usernameString = [glueController valueForKeyPath:username_keypath];
-    NSString *realmString = [glueController valueForKeyPath:realm_keypath];
-    NSString *identityString = [NSString stringWithFormat:@"%@@%@", usernameString, realmString];
+    NSString *identityString = [glueController valueForKeyPath:identity_string_keypath];
     NSDictionary *options = [glueController valueForKeyPath:options_keypath];
-    NSLog(@"%s options == %@", __FUNCTION__, options);
     
     // the principal must already be valid to get this far
     [associatedClient didEnterIdentity:identityString options:options];

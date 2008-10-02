@@ -29,7 +29,7 @@
 #import "IPCClient.h"
 #import "ServerDemux.h"
 
-#define SECONDS_BEFORE_AUTO_QUIT_ON_START 5
+#define SECONDS_BEFORE_AUTO_QUIT_ON_START 600
 #define SECONDS_BEFORE_AUTO_QUIT_ON_NO_CLIENTS 1
 
 @implementation KerberosAgentController

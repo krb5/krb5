@@ -512,7 +512,7 @@
     if (self.kimIdentity) {
         err = kim_identity_get_components_string(self.kimIdentity, &display_string);
     }
-    
+
     if (!err && display_string) {
         result = [NSString stringWithUTF8String:display_string];
     }
@@ -643,7 +643,7 @@
         [parts addObject:[NSString stringWithFormat:@"%d minutes", minutes]];
     }
     if ([parts count] == 0) {
-        [parts addObject:@"0 lifetime"];
+        [parts addObject:@"0"];
     }
     return [parts componentsJoinedByString:@", "];
 }

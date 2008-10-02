@@ -33,16 +33,6 @@
 
 // ---------------------------------------------------------------------------
 
-- (id) initWithWindowNibName: (NSString *) windowNibName
-{
-    if ((self = [super initWithWindowNibName: windowNibName])) {
-    }
-    
-    return self;
-}
-
-// ---------------------------------------------------------------------------
-
 - (id) init
 {
     return [self initWithWindowNibName: @"SelectIdentity"];
@@ -86,10 +76,18 @@
                    associatedClient.name];
     }
     [headerTextField setStringValue:message];
+    [explanationTextField setStringValue:@"explanation!"];
 }
 
 // ---------------------------------------------------------------------------
 
+- (void) setContent: (NSMutableDictionary *) newContent
+{
+    [self window]; // wake up the nib connections
+//    [glueController setContent:newContent];
+}
+
+// ---------------------------------------------------------------------------
 
 - (IBAction) newIdentity: (id) sender
 {
@@ -138,7 +136,8 @@
     }
     selectedIdentity = [[identityArrayController selectedObjects] lastObject];
 
-    [associatedClient didSelectIdentity: selectedIdentity.principalString];
+    [associatedClient didSelectIdentity: selectedIdentity.principalString
+                                options: [identityOptionsController valueForKeyPath:@"content.options"]];
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +145,7 @@
 - (IBAction) cancel: (id) sender
 {
     [associatedClient didCancel];
+    [self close];
 }
 
 // ---------------------------------------------------------------------------
@@ -183,19 +183,21 @@
 
 - (IBAction) doneOptions: (id) sender
 {
-    Identity *anIdentity = identityOptionsController.content;
+//    Identity *anIdentity = identityOptionsController.content;
     
-    [anIdentity setPrincipalComponents: [nameField stringValue] 
-                                 realm: [realmField stringValue]];
     
     [NSApp endSheet: identityOptionsWindow];
 }
 
+- (IBAction) sliderDidChange: (id) sender
+{
+    
+}
+
 - (void)controlTextDidChange:(NSNotification *)aNotification
 {
-    BOOL valid = [KIMUtilities validatePrincipalWithName:[nameField stringValue] 
-                                                   realm:[realmField stringValue]];
-    [ticketOptionsOkButton setEnabled:valid];
+//    BOOL valid = [KIMUtilities validateIdentity:];
+    [ticketOptionsOkButton setEnabled:false];
     [ticketOptionsOkButton setNeedsDisplay];
 }
 
@@ -205,8 +207,28 @@
 {
     Identity *anIdentity = identityOptionsController.content;
     
-    [nameField setStringValue:anIdentity.componentsString];
-    [realmField setStringValue:anIdentity.realmString];
+    [identityField setStringValue:anIdentity.principalString];
+    [staticIdentityField setStringValue:anIdentity.principalString];
+    
+    // use a copy of the current options
+    [identityOptionsController setContent:
+     [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease]];
+    
+    [identityOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minValidLifetime]]
+                           forKeyPath:min_valid_keypath];
+    [identityOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities maxValidLifetime]]
+                           forKeyPath:max_valid_keypath];
+    [identityOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minRenewableLifetime]]
+                           forKeyPath:min_renewable_keypath];
+    [identityOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities maxRenewableLifetime]]
+                           forKeyPath:max_renewable_keypath];
+    
+    [validLifetimeSlider setIntegerValue:
+     [[identityOptionsController valueForKeyPath:valid_lifetime_keypath] integerValue]];
+    [renewableLifetimeSlider setIntegerValue:
+     [[identityOptionsController valueForKeyPath:renewal_lifetime_keypath] integerValue]];
+    [self sliderDidChange:validLifetimeSlider];
+    [self sliderDidChange:renewableLifetimeSlider];
     
     [NSApp beginSheet: identityOptionsWindow 
        modalForWindow: [self window] 

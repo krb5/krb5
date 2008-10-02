@@ -49,11 +49,13 @@
 {
     NSString *result = nil;
     
-    if (anObject == nil || ![anObject respondsToSelector:@selector(timeIntervalSinceNow)]) {
-	result = @"";
-    }
-    else {
-        result = [self stringForLifetime:(time_t)[(NSDate *)anObject timeIntervalSinceNow]];
+    if (anObject) {
+        if ([anObject respondsToSelector:@selector(timeIntervalSinceNow)]) {
+            result = [self stringForLifetime:(time_t)[(NSDate *)anObject timeIntervalSinceNow]];
+        }
+        else if ([anObject respondsToSelector:@selector(unsignedIntegerValue)]) {
+            result = [self stringForLifetime:(time_t)[(NSNumber *)anObject unsignedIntegerValue]];
+        }
     }
     
     return result;
