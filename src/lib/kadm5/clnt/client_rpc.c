@@ -7,7 +7,7 @@
 #endif
 
 /* Default timeout can be changed using clnt_control() */
-static struct timeval TIMEOUT = { 25, 0 };
+static struct timeval TIMEOUT = { 120, 0 };
 
 generic_ret *
 create_principal_2(cprinc_arg *argp, CLIENT *clnt)

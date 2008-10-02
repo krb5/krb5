@@ -94,7 +94,7 @@ clnt_create(
 		if (client == NULL) {
 			return (NULL);
 		}
-		tv.tv_sec = 25;
+		tv.tv_sec = 120;
 		clnt_control(client, CLSET_TIMEOUT, &tv);
 		break;
 	case IPPROTO_TCP:
@@ -102,7 +102,7 @@ clnt_create(
 		if (client == NULL) {
 			return (NULL);
 		}
-		tv.tv_sec = 25;
+		tv.tv_sec = 120;
 		tv.tv_usec = 0;
 		clnt_control(client, CLSET_TIMEOUT, &tv);
 		break;
