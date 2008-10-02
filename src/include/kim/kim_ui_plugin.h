@@ -74,19 +74,27 @@ typedef struct kim_ui_plugin_ftable_v0 {
      * This is typically called when the user selects a "new tickets" 
      * control or menu item from a ticket management utility.
      * If this UI calls into KIM to get new credentials it may 
-     * call auth_prompt below. */
+     * call auth_prompt below. 
+     * If out_change_password is set to TRUE, KIM will call change_password
+     * on the identity and then call enter_identity again, allowing you
+     * to have a change password option on your UI. */
     kim_error (*enter_identity) (void         *in_context,
                                  kim_options   io_options,
-                                 kim_identity *out_identity);
+                                 kim_identity *out_identity,
+                                 kim_boolean  *out_change_password);
     
     /* Present UI to select which identity to use.
      * This is typically called the first time an application tries to use
      * Kerberos and is used to establish a hints preference for the application.
      * If this UI calls into KIM to get new credentials it may 
-     * call auth_prompt below. */
+     * call auth_prompt below. 
+     * If out_change_password is set to TRUE, KIM will call change_password
+     * on the identity and then call select_identity again, allowing you
+     * to have a change password option on your UI. */
     kim_error (*select_identity) (void                *in_context,
                                   kim_selection_hints  io_hints,
-                                  kim_identity        *out_identity);
+                                  kim_identity        *out_identity,
+                                  kim_boolean         *out_change_password);
     
     /* Present UI to display authentication to the user */
     /* If in_allow_save_reply is FALSE do not display UI to allow the user

@@ -254,8 +254,25 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
 
         if (identity) {
             done_with_identity = 1;
-        } else {
-            err = kim_ui_enter_identity (&context, options, &identity);
+            
+        } else while (!err && !identity) {
+            kim_boolean user_wants_change_password = 0;
+            
+            err = kim_ui_enter_identity (&context, options, 
+                                         &identity, 
+                                         &user_wants_change_password);
+            
+            if (!err && user_wants_change_password) {
+                err = kim_identity_change_password_common (identity, 1, 
+                                                           &context, 
+                                                           NULL);
+                
+                /* reenter enter_identity so just forget this identity
+                 * even if we got an error */
+                if (err == KIM_USER_CANCELED_ERR) { err = KIM_NO_ERROR; }
+                kim_identity_free (&identity);
+            }
+            
         }
         
         if (!err) {

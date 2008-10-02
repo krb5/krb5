@@ -162,6 +162,7 @@ static int32_t kim_handle_request_enter_identity (mach_port_t   in_client_port,
 int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port, 
                                          kim_identity  in_identity,
                                          kim_options   in_options,
+                                         kim_boolean   in_change_password,
                                          int32_t       in_error)
 {
     int32_t err = 0;
@@ -182,6 +183,10 @@ int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port,
     
     if (!err && !in_error) {
         err = k5_ipc_stream_write_string (reply, identity_string);
+    }
+
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_uint32 (reply, in_change_password);
     }
     
     if (!err && !in_error) {
@@ -231,6 +236,7 @@ static int32_t kim_handle_request_select_identity (mach_port_t   in_client_port,
 int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port, 
                                           kim_identity  in_identity,
                                           kim_options   in_options,
+                                          kim_boolean   in_change_password,
                                           int32_t       in_error)
 {
     int32_t err = 0;
@@ -253,6 +259,10 @@ int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port,
         err = k5_ipc_stream_write_string (reply, identity_string);
     }
     
+    if (!err && !in_error) {
+        err = k5_ipc_stream_write_uint32 (reply, in_change_password);
+    }
+
     if (!err && !in_error) {
         err = kim_options_write_to_stream (in_options, reply);
     }

@@ -469,10 +469,25 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints  in_selection_hi
         
         err = kim_ui_init (&context);
         
-        if (!err) {
+        while (!err && !identity) {
+            kim_boolean user_wants_change_password = 0;
+
             err = kim_ui_select_identity (&context, 
                                           in_selection_hints, 
-                                          &identity);
+                                          &identity,
+                                          &user_wants_change_password);
+            
+            if (!err && user_wants_change_password) {
+                err = kim_identity_change_password_common (identity, 1, 
+                                                           &context, 
+                                                           NULL);
+                
+                /* reenter select_identity so just forget this identity
+                 * even if we got an error */
+                if (err == KIM_USER_CANCELED_ERR) { err = KIM_NO_ERROR; }
+                kim_identity_free (&identity);
+            }
+                
         }
         
         if (context.initialized) {

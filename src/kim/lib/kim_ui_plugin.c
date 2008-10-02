@@ -158,20 +158,23 @@ kim_error kim_ui_plugin_init (kim_ui_context *io_context)
 
 kim_error kim_ui_plugin_enter_identity (kim_ui_context *in_context,
                                         kim_options     io_options,
-                                        kim_identity   *out_identity)
+                                        kim_identity   *out_identity,
+                                        kim_boolean    *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !io_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_context         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_options         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
 
         err = context->ftable->enter_identity (context->plugin_context,
                                                io_options,
-                                               out_identity);
+                                               out_identity,
+                                               out_change_password);
     }
     
     return check_error (err);
@@ -181,20 +184,23 @@ kim_error kim_ui_plugin_enter_identity (kim_ui_context *in_context,
 
 kim_error kim_ui_plugin_select_identity (kim_ui_context      *in_context,
                                          kim_selection_hints  io_hints,
-                                         kim_identity        *out_identity)
+                                         kim_identity        *out_identity,
+                                         kim_boolean         *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
     
-    if (!err && !in_context  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !io_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !in_context         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_hints           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
         
         err = context->ftable->select_identity (context->plugin_context,
                                                 io_hints, 
-                                                out_identity);
+                                                out_identity,
+                                                out_change_password);
     }
     
     return check_error (err);

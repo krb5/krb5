@@ -117,15 +117,19 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
 
 kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
                                         kim_options     io_options,
-                                        kim_identity   *out_identity)
+                                        kim_identity   *out_identity,
+                                        kim_boolean    *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
     k5_ipc_stream request = NULL;
     k5_ipc_stream reply = NULL;
     char *identity_string = NULL;
+    kim_identity identity = NULL;
+    uint32_t change_password = 0;
     
-    if (!err && !io_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_options         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = k5_ipc_stream_new (&request);
@@ -156,15 +160,26 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
     if (!err) {
         err  = k5_ipc_stream_read_string (reply, &identity_string);
     }
+
+    if (!err) {
+        err  = k5_ipc_stream_read_uint32 (reply, &change_password);
+    }
     
     if (!err) {
         err  = kim_options_read_from_stream (io_options, reply);
     }
     
     if (!err) {
-        err = kim_identity_create_from_string (out_identity, identity_string);
+        err = kim_identity_create_from_string (&identity, identity_string);
     }
     
+    if (!err) {
+        *out_identity = identity;
+        identity = NULL;
+        *out_change_password = change_password;
+    }
+    
+    kim_identity_free (&identity);
     k5_ipc_stream_free_string (identity_string);
     k5_ipc_stream_release (request);
     k5_ipc_stream_release (reply);
@@ -176,16 +191,20 @@ kim_error kim_os_ui_gui_enter_identity (kim_ui_context *in_context,
 
 kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
                                          kim_selection_hints  io_hints,
-                                         kim_identity        *out_identity)
+                                         kim_identity        *out_identity,
+                                         kim_boolean         *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
     k5_ipc_stream request = NULL;
     k5_ipc_stream reply = NULL;
     char *identity_string = NULL;
     kim_options options = NULL;
+    kim_identity identity = NULL;
+    uint32_t change_password = 0;
     
-    if (!err && !io_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_hints           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = k5_ipc_stream_new (&request);
@@ -218,9 +237,13 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
     }
     
     if (!err) {
-        err = kim_identity_create_from_string (out_identity, identity_string);
+        err = kim_identity_create_from_string (&identity, identity_string);
     }
     
+    if (!err) {
+        err  = k5_ipc_stream_read_uint32 (reply, &change_password);
+    }
+
     if (!err) {
         err = kim_options_create_from_stream (&options, reply);
     }
@@ -229,6 +252,13 @@ kim_error kim_os_ui_gui_select_identity (kim_ui_context      *in_context,
         err = kim_selection_hints_set_options (io_hints, options);
     }
     
+    if (!err) {
+        *out_identity = identity;
+        identity = NULL;
+        *out_change_password = change_password;
+    }
+    
+    kim_identity_free (&identity);    
     kim_options_free (&options);
     k5_ipc_stream_free_string (identity_string);    
     k5_ipc_stream_release (request);

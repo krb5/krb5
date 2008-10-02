@@ -102,14 +102,16 @@ kim_error kim_ui_cli_init (kim_ui_context *io_context)
 
 kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
                                      kim_options     io_options,
-                                     kim_identity   *out_identity)
+                                     kim_identity   *out_identity,
+                                     kim_boolean    *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string enter_identity_string = NULL;
     kim_string identity_string = NULL;
     
-    if (!err && !io_options  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_options         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_os_string_create_localized (&enter_identity_string, 
@@ -125,6 +127,10 @@ kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
         err = kim_identity_create_from_string (out_identity, identity_string);
     }
     
+    if (!err) {
+        *out_change_password = 0;
+    }
+    
     kim_string_free (&identity_string);
     kim_string_free (&enter_identity_string);
     
@@ -135,20 +141,24 @@ kim_error kim_ui_cli_enter_identity (kim_ui_context *in_context,
 
 kim_error kim_ui_cli_select_identity (kim_ui_context      *in_context,
                                       kim_selection_hints  io_hints,
-                                      kim_identity        *out_identity)
+                                      kim_identity        *out_identity,
+                                      kim_boolean         *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
     kim_options options = NULL;
     
-    if (!err && !io_hints    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !out_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !io_hints           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
         err = kim_selection_hints_get_options (io_hints, &options);
     }
     
     if (!err) {
-        err = kim_ui_cli_enter_identity (in_context, options, out_identity);
+        err = kim_ui_cli_enter_identity (in_context, options, 
+                                         out_identity,
+                                         out_change_password);
     }
     
     if (!err) {
