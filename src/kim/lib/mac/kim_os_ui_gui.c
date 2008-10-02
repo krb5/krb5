@@ -81,11 +81,11 @@ kim_error kim_os_ui_gui_init (kim_ui_context *io_context)
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (request, name);
+        err = k5_ipc_stream_write_string (request, name ? name : "");
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (request, path);
+        err = k5_ipc_stream_write_string (request, path ? path : "");
     }
     
     if (!err) {
