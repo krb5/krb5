@@ -73,6 +73,8 @@
 - (IBAction) cancelOptions: (id) sender;
 - (IBAction) doneOptions: (id) sender;
 
+- (IBAction) changePassword: (id) sender;
+
 - (IBAction) select: (id) sender;
 - (IBAction) cancel: (id) sender;
 

@@ -119,11 +119,23 @@ enum krb_agent_client_state {
     return 0;
 }
 
-- (void) didSelectIdentity: (NSString *) identityString options: (NSDictionary *) options
+- (void) didSelectIdentity: (NSString *) identityString 
+                   options: (NSDictionary *) options 
+       wantsChangePassword: (BOOL) wantsChangePassword
 {
+    NSLog(@"%s %@ %@", __FUNCTION__, identityString, options);
     [self.currentInfo setObject:identityString forKey:@"identity_string"];
-    [self.currentInfo setObject:options forKey:@"options"];
-    
+    // if the user set custom options, use those
+    if (options) {
+        [self.currentInfo setObject:options forKey:@"options"];
+    }
+    // else use the options in the hints
+    else {
+        [self.currentInfo setObject:[self.currentInfo valueForKeyPath:@"hints.options"]
+                             forKey:@"options"];
+    }
+    [self.currentInfo setObject:[NSNumber numberWithBool:wantsChangePassword] forKey:@"wants_change_password"];
+
     [KerberosAgentListener didSelectIdentity:self.currentInfo error:0];
     
     // clean up state
@@ -142,10 +154,13 @@ enum krb_agent_client_state {
     return 0;
 }
 
-- (void) didEnterIdentity: (NSString *) identityString options: (NSDictionary *) options
+- (void) didEnterIdentity: (NSString *) identityString 
+                  options: (NSDictionary *) options
+      wantsChangePassword: (BOOL) wantsChangePassword
 {
     [self.currentInfo setObject:identityString forKey:@"identity_string"];
     [self.currentInfo setObject:options forKey:@"options"];
+    [self.currentInfo setObject:[NSNumber numberWithBool:wantsChangePassword] forKey:@"wants_change_password"];
     [KerberosAgentListener didEnterIdentity:self.currentInfo error:0];
 }
 

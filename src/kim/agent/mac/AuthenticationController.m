@@ -142,6 +142,12 @@
     }
 }
 
+- (IBAction) showWindow: (id) sender
+{
+    [[self window] center];
+    [super showWindow:sender];
+}
+
 - (void) setContent: (NSMutableDictionary *) newContent
 {
     [self window]; // wake up the nib connections
@@ -151,6 +157,7 @@
 - (void) showEnterIdentity
 {
     kim_error err = KIM_NO_ERROR;
+    NSWindow *theWindow = [self window];
     NSString *key = (associatedClient.name) ? ACAppPrincReqKey : ACPrincReqKey;
     NSString *message = [NSString stringWithFormat:
                          NSLocalizedStringFromTable(key, ACLocalizationTable, NULL),
@@ -207,19 +214,27 @@
     // wake up the nib connections and adjust window size
     [self window];
     // set up controls with info from associatedClient
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [containerView addSubview:identityView];
     [enterBadge setBadgePath:associatedClient.path];
     [glueController setValue:message
                   forKeyPath:message_keypath];
+
+    [theWindow setFrame:[theWindow frameRectForContentRect:[identityView frame]] display:NO];
+    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [containerView addSubview:identityView];
+
+    [enterSpinny stopAnimation:nil];
+    
+    [theWindow makeFirstResponder:identityField];
     [self showWindow:nil];
-    [[self window] makeFirstResponder:identityField];
 }
 
 - (void) showAuthPrompt
 {
     uint32_t type = [[glueController valueForKeyPath:@"content.prompt_type"] unsignedIntegerValue];
     
+    [passwordSpinny stopAnimation:nil];
+    [samSpinny stopAnimation:nil];
+
     switch (type) {
         case kim_prompt_type_password :
             [self showEnterPassword]; break;
@@ -235,8 +250,7 @@
     NSRect frame;
     NSString *key = nil;
     NSString *message = nil;
-    
-    [self window];
+    NSWindow *theWindow = [self window];
 
     if ([associatedClient.name isEqualToString:[[NSBundle mainBundle] bundlePath]]) {
         key = ACPasswordReqKey;
@@ -253,39 +267,41 @@
     [glueController setValue:message
                   forKeyPath:message_keypath];
 
-    // wake up the nib connections and adjust window size
-    // set up controls with info from associatedClient
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [containerView addSubview:passwordView];
     // set badge
     [passwordBadge setBadgePath:associatedClient.path];
-    
+
+    frame = [passwordView frame];
+    [theWindow setFrame:[theWindow frameRectForContentRect:frame] display:NO];
+    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [containerView addSubview:passwordView];
+
     // adjust for checkbox visibility
     if (![[glueController valueForKeyPath:allow_save_password_keypath] boolValue]) {
+        frame = [theWindow frame];
         shrinkBy = ([passwordField frame].origin.y - 
                     [rememberPasswordInKeychainCheckBox frame].origin.y);
-        frame = [[self window] frame];
         frame.origin.y += shrinkBy;
         frame.size.height -= shrinkBy;
-        [[self window] setFrame:frame display:NO animate:NO];
+        [theWindow setFrame:frame display:NO];
     }
     
+    [theWindow makeFirstResponder:passwordField];
     [self showWindow:nil];
-    [[self window] makeFirstResponder:passwordField];
 }
 
 - (void) showSAM
 {
-    // wake up the nib connections and adjust window size
-    [self window];
-    // set up controls with info from associatedClient
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [containerView addSubview:samView];
+    NSWindow *theWindow = [self window];
+
     // set badge
     [samBadge setBadgePath:associatedClient.path];
 
     [glueController setValue:[NSNumber numberWithBool:NO]
                    forKeyPath:allow_save_password_keypath];
+    
+    [theWindow setFrame:[theWindow frameRectForContentRect:[samView frame]] display:NO];
+    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [containerView addSubview:samView];
     
     [self showWindow:nil];
     [[self window] makeFirstResponder:samPromptField];
@@ -297,6 +313,7 @@
     NSString *message = [NSString stringWithFormat:
                          NSLocalizedStringFromTable(key, ACLocalizationTable, NULL),
                          associatedClient.name];
+    NSWindow *theWindow = [self window];
 
                      
     BOOL expired = [[glueController valueForKeyPath:password_expired_keypath] boolValue];
@@ -323,15 +340,17 @@
     [glueController setValue:message forKeyPath:message_keypath];
                      
     // wake up the nib connections and adjust window size
-    [self window];
+    [theWindow setFrame:[theWindow frameRectForContentRect:[changePasswordView frame]] display:NO];
     // set up controls with info from associatedClient
     [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [containerView addSubview:changePasswordView];
     // set badge
     [changePasswordBadge setBadgePath:associatedClient.path];
     
+    [changePasswordSpinny stopAnimation:nil];
+    
     [self showWindow:nil];
-    [[self window] makeFirstResponder:oldPasswordField];
+    [theWindow makeFirstResponder:oldPasswordField];
 }
 
 - (void) showError
@@ -478,35 +497,16 @@
 - (IBAction) changePasswordGearAction: (id) sender
 {
     NSString *expandedString = [KIMUtilities expandedIdentity:[identityField stringValue]];
-    NSLog(@"%s", __FUNCTION__);
-    if (expandedString && [expandedString length] > 0) {
-        [expandedString retain];
-        [NSThread detachNewThreadSelector:@selector(changePasswordThread:)
-                                 toTarget:self 
-                               withObject:expandedString];
-    }
-}
-
-- (void) changePasswordThread: (NSString *) identityString
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    kim_error err = KIM_NO_ERROR;
-    kim_identity identity = NULL;
+    NSDictionary *options = [favoriteOptions objectForKey:expandedString];
     
-    NSLog(@"%s %@", __FUNCTION__, identityString);
-    if (!err) {
-        err = kim_identity_create_from_string(&identity, [identityString UTF8String]);
+    if (!options) {
+        options = [glueController valueForKeyPath:options_keypath];
     }
-    if (!err) {
-        err = kim_identity_change_password(identity);
-    }
-
-    NSLog(@"%s %d", __FUNCTION__, err);
-
-    kim_identity_free(&identity);
     
-    [identityString release];
-    [pool release];
+    [enterSpinny startAnimation:nil];
+    
+    // the principal must already be valid to get this far
+    [associatedClient didEnterIdentity:expandedString options:options wantsChangePassword:YES];
 }
 
 - (IBAction) cancel: (id) sender
@@ -518,13 +518,16 @@
 - (IBAction) enterIdentity: (id) sender
 {
     NSString *expandedString = [KIMUtilities expandedIdentity:[identityField stringValue]];
-    NSDictionary *options = [favoriteOptions objectForKey:expandedString];   
-    
+    NSDictionary *options = [favoriteOptions objectForKey:expandedString];
+
     if (!options) {
         options = [glueController valueForKeyPath:options_keypath];
     }
+    
+    [enterSpinny startAnimation:nil];
+
     // the principal must already be valid to get this far
-    [associatedClient didEnterIdentity:expandedString options:options];
+    [associatedClient didEnterIdentity:expandedString options:options wantsChangePassword:NO];
 }
 
 - (IBAction) answerAuthPrompt: (id) sender
@@ -535,6 +538,8 @@
     if (!saveResponse) {
         saveResponse = [NSNumber numberWithBool:NO];
     }
+    [passwordSpinny startAnimation:nil];
+    [samSpinny startAnimation:nil];
     [associatedClient didPromptForAuth:responseString
                           saveResponse:saveResponse];
 }
@@ -544,6 +549,8 @@
     NSString *oldString = [glueController valueForKeyPath:old_password_keypath];
     NSString *newString = [glueController valueForKeyPath:new_password_keypath];
     NSString *verifyString = [glueController valueForKeyPath:verify_password_keypath];
+    
+    [changePasswordSpinny startAnimation:nil];
     
     [associatedClient didChangePassword:oldString
                             newPassword:newString

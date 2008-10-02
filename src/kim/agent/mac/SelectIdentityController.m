@@ -126,6 +126,13 @@
 
 // ---------------------------------------------------------------------------
 
+- (IBAction) changePassword: (id) sender
+{
+    
+}
+
+// ---------------------------------------------------------------------------
+
 - (IBAction) select: (id) sender
 {
     Identity *selectedIdentity = nil;
@@ -136,8 +143,9 @@
     }
     selectedIdentity = [[identityArrayController selectedObjects] lastObject];
 
-    [associatedClient didSelectIdentity: selectedIdentity.principalString
-                                options: [identityOptionsController valueForKeyPath:@"content.options"]];
+    [associatedClient didSelectIdentity: selectedIdentity.identity
+                                options: [identityOptionsController valueForKeyPath:@"content.options"]
+                    wantsChangePassword: NO];
 }
 
 // ---------------------------------------------------------------------------
@@ -205,12 +213,14 @@
 
 - (void) showOptions: (NSString *) contextInfo
 {
-    Identity *anIdentity = identityOptionsController.content;
-    
-    [identityField setStringValue:anIdentity.principalString];
-    [staticIdentityField setStringValue:anIdentity.principalString];
-    
+    Identity *anIdentity = [[identityArrayController selectedObjects] lastObject];
     // use a copy of the current options
+    [identityOptionsController setContent:
+     [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease]];
+
+    [identityField setStringValue:anIdentity.identity];
+    [staticIdentityField setStringValue:anIdentity.identity];
+    
     [identityOptionsController setContent:
      [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease]];
     

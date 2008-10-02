@@ -27,42 +27,39 @@
 #import "KIMUtilities.h"
 
 @interface Identity : NSObject {
-    kim_identity kimIdentity;
-    kim_options kimOptions;
+    NSString *identity;
+    NSDictionary *options;
     kim_credential_state state;
-    cc_time_t expiration_time;
+    NSDate *expirationDate;
     BOOL favorite;
 }
 
-@property	    kim_identity         kimIdentity;
-@property	    kim_options          kimOptions;
-@property           kim_credential_state state;
-@property           BOOL	         favorite;
-@property           cc_time_t		 expiration_time;
+@property (readwrite, retain) NSString *identity;
+@property (readwrite, retain) NSDictionary *options;
+@property (assign) kim_credential_state state;
+@property (assign) BOOL favorite;
+@property (readwrite, retain) NSDate *expirationDate;
 
 // derived properties
-@property(readonly) NSString    *principalString;
-@property(readonly) NSString    *componentsString;
-@property(readonly) NSString    *realmString;
-@property(readonly) NSDate      *expirationDate;
-@property(readonly) NSString    *expirationString;
-@property(readonly) NSString    *validLifetimeString;
-@property(readonly) NSString    *renewableLifetimeString;
-@property(readonly) BOOL        hasCCache;
-@property(readwrite) BOOL       isRenewable;
-@property(readwrite) BOOL       isForwardable;
-@property(readwrite) BOOL       isAddressless;
-@property(readwrite) BOOL       isProxiable;
-@property(readwrite) NSUInteger validLifetime;
-@property(readwrite) NSUInteger renewableLifetime;
+@property (readonly) kim_identity kimIdentity;
+@property (readonly) kim_options kimOptions;
+@property (readonly) NSString    *expirationString;
+@property (readonly) NSString    *validLifetimeString;
+@property (readonly) NSString    *renewableLifetimeString;
+@property (readonly) BOOL        hasCCache;
+@property (readwrite) BOOL       isRenewable;
+@property (readwrite) BOOL       isForwardable;
+@property (readwrite) BOOL       isAddressless;
+@property (readwrite) BOOL       isProxiable;
+@property (readwrite) NSUInteger validLifetime;
+@property (readwrite) NSUInteger renewableLifetime;
 
-- (id) initWithIdentity: (kim_identity) identity options: (kim_options) options;
-- (id) initWithFavoriteIdentity: (kim_identity) identity options: (kim_options) options;
+- (id) initWithKimIdentity: (kim_identity) an_identity kimOptions: (kim_options) some_options;
+- (id) initWithFavoriteIdentity: (kim_identity) an_identity options: (kim_options) some_options;
+- (id) initWithIdentity: (NSString *) anIdentity options: (NSDictionary *) someOptions;
 
 - (BOOL) isEqualToKIMIdentity: (kim_identity) identity;
 - (BOOL) isEqual: (Identity *)otherIdentity;
-
-- (kim_error) setPrincipalComponents: (NSString *) componentsString realm: (NSString *) realmString;
 
 - (void) resetOptions;
 - (void) toggleFavorite;
@@ -73,12 +70,12 @@
 
 
 @interface Identities : NSObject {
-    NSArray *favoriteIdentities;
-    NSArray *identities;
+    NSMutableArray *favoriteIdentities;
+    NSMutableArray *identities;
     NSConnection *threadConnection;
 }
 
-@property(readonly, retain) NSArray *identities;
+@property(readonly, retain) NSMutableArray *identities;
 @property(readonly) NSUInteger minimumValidLifetime;
 @property(readonly) NSUInteger maximumValidLifetime;
 @property(readonly) NSUInteger minimumRenewableLifetime;

@@ -57,8 +57,12 @@
 - (kim_error) handleError: (NSDictionary *) info;
 
 - (void) didCancel;
-- (void) didSelectIdentity: (NSString *) identityString options: (NSDictionary *) options;
-- (void) didEnterIdentity: (NSString *) identityString options: (NSDictionary *) options;
+- (void) didSelectIdentity: (NSString *) identityString 
+                   options: (NSDictionary *) options 
+       wantsChangePassword: (BOOL) wantsChangePassword;
+- (void) didEnterIdentity: (NSString *) identityString 
+                  options: (NSDictionary *) options 
+      wantsChangePassword: (BOOL) wantsChangePassword;
 - (void) didPromptForAuth: (NSString *) responseString saveResponse: (NSNumber *) saveResponse;
 - (void) didChangePassword: (NSString *) oldPassword
                newPassword: (NSString *) newPassword

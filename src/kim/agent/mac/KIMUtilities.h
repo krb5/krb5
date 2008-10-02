@@ -64,6 +64,8 @@
 #define min_renewable_keypath        @"content.minRenewableLifetime"
 #define max_renewable_keypath        @"content.maxRenewableLifetime"
 
+#define wants_change_password_keypath @"content.wants_change_password"
+
 #define ACKVOContext                 @"authenticationController"
 
 

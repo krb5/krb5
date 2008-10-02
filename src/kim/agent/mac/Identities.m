@@ -34,8 +34,10 @@
 
 @implementation Identity
 
+@synthesize identity;
+@synthesize options;
+@synthesize expirationDate;
 @synthesize state;
-@synthesize expiration_time;
 @synthesize favorite;
 
 #pragma mark Initialization & Comparison
@@ -47,39 +49,39 @@
     NSMutableSet *result = [[super keyPathsForValuesAffectingValueForKey:key] mutableCopy];
     NSSet *otherKeys = nil;
     
-    if ([key isEqualToString:@"principalString"]) {
-        otherKeys = [NSSet setWithObjects:@"kimIdentity", nil];
-    } 
-    else if ([key isEqualToString:@"expirationDate"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", @"state", @"expirationTime", nil];
-    } 
-    else if ([key isEqualToString:@"expirationString"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", @"state", @"expirationTime", nil];
-    }
-    else if ([key isEqualToString:@"isProxiable"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-    }
-    else if ([key isEqualToString:@"isForwardable"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-    }
-    else if ([key isEqualToString:@"isAddressless"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-    }
-    else if ([key isEqualToString:@"isRenewable"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-    }
-    else if ([key isEqualToString:@"validLifetime"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-    }
-    else if ([key isEqualToString:@"renewableLifetime"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-    }
-    else if ([key isEqualToString:@"validLifetimeString"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", @"validLifetime", nil];
-    }
-    else if ([key isEqualToString:@"renewableLifetimeString"]) {
-        otherKeys = [NSSet setWithObjects:@"kimOptions", @"renewableLifetime", nil];
-    }
+//    if ([key isEqualToString:@"principalString"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimIdentity", nil];
+//    } 
+//    else if ([key isEqualToString:@"expirationDate"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"state", @"expirationTime", nil];
+//    } 
+//    else if ([key isEqualToString:@"expirationString"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"state", @"expirationTime", nil];
+//    }
+//    else if ([key isEqualToString:@"isProxiable"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
+//    }
+//    else if ([key isEqualToString:@"isForwardable"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
+//    }
+//    else if ([key isEqualToString:@"isAddressless"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
+//    }
+//    else if ([key isEqualToString:@"isRenewable"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
+//    }
+//    else if ([key isEqualToString:@"validLifetime"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
+//    }
+//    else if ([key isEqualToString:@"renewableLifetime"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
+//    }
+//    else if ([key isEqualToString:@"validLifetimeString"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"validLifetime", nil];
+//    }
+//    else if ([key isEqualToString:@"renewableLifetimeString"]) {
+//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"renewableLifetime", nil];
+//    }
     
     [result unionSet:otherKeys];
     
@@ -90,29 +92,28 @@
 
 - (id) init
 {
-    return [self initWithIdentity: NULL options: NULL];
+    return [self initWithIdentity: @"" options: [NSDictionary dictionary]];
 }
 
 // ---------------------------------------------------------------------------
 
-- (id) initWithIdentity: (kim_identity) identity options: (kim_options) options
+- (id) initWithKimIdentity: (kim_identity) an_identity kimOptions: (kim_options) some_options
 {
-    if ((self = [super init])) {
-        self.kimIdentity = identity;
-        self.kimOptions = options;
-        self.state = kim_credentials_state_not_yet_valid;
-        self.expiration_time = 0;
-        self.favorite = FALSE;
-    }
+    kim_error err = KIM_NO_ERROR;
+    kim_string identity_string = NULL;
     
-    return self;
+    if (!err) {
+        err = kim_identity_get_display_string(an_identity, &identity_string);
+    }
+    return [self initWithIdentity:[NSString stringWithUTF8String:identity_string] 
+                          options:[KIMUtilities dictionaryForKimOptions:some_options]];
 }
 
 // ---------------------------------------------------------------------------
 
-- (id) initWithFavoriteIdentity: (kim_identity) identity options: (kim_options) options
+- (id) initWithFavoriteIdentity: (kim_identity) an_identity options: (kim_options) some_options
 {
-    if ((self = [self initWithIdentity: identity options: options])) {
+    if ((self = [self initWithKimIdentity: an_identity kimOptions: some_options])) {
         self.favorite = TRUE;
     }
     
@@ -121,12 +122,30 @@
 
 // ---------------------------------------------------------------------------
 
-- (BOOL) isEqualToKIMIdentity: (kim_identity) identity
+- (id) initWithIdentity: (NSString *) anIdentity options: (NSDictionary *) someOptions
+{
+    self = [super init];
+    if (self != nil) {
+        self.identity = anIdentity;
+        self.options = someOptions;
+        self.state = kim_credentials_state_not_yet_valid;
+        self.expirationDate = [NSDate dateWithTimeIntervalSince1970:0];
+        self.favorite = NO;
+    }
+    return self;
+}
+
+// ---------------------------------------------------------------------------
+
+- (BOOL) isEqualToKIMIdentity: (kim_identity) comparison_identity
 {
     kim_error err = KIM_NO_ERROR;
     kim_comparison comparison;
+    kim_identity an_identity = self.kimIdentity;
     
-    err = kim_identity_compare (kimIdentity, identity, &comparison);
+    err = kim_identity_compare (an_identity, comparison_identity, &comparison);
+
+    kim_identity_free(&an_identity);
     
     return (!err && kim_comparison_is_equal_to (comparison));
 }
@@ -142,14 +161,14 @@
 
 - (NSUInteger)hash
 {
-    return [self.principalString hash];
+    return [self.identity hash];
 }
 
 // ---------------------------------------------------------------------------
 
 - (NSComparisonResult) compare: (Identity *)otherIdentity
 {
-    return ([self.principalString compare:otherIdentity.principalString]);
+    return ([self.identity compare:otherIdentity.identity]);
 }
 
 #pragma mark Actions
@@ -159,7 +178,18 @@
 - (void) resetOptions
 {
     // property setter converts NULL into actual kim_options with default settings
-    self.kimOptions = NULL;
+    kim_error err = KIM_NO_ERROR;
+    kim_options some_options = NULL;
+    
+    err = kim_options_create(&some_options);
+    
+    if (!err) {
+        self.options = [KIMUtilities dictionaryForKimOptions:some_options];
+    }
+    
+    log_kim_error_to_console(err);
+    
+    kim_options_free(&some_options);
 }
 
 // ---------------------------------------------------------------------------
@@ -179,30 +209,28 @@
 {
     kim_error err = KIM_NO_ERROR;
     kim_preferences preferences = NULL;
-    kim_options options = NULL;
-    kim_string error_string = NULL;
+    kim_identity an_identity = self.kimIdentity;
+    kim_options some_options = self.kimOptions;
+    
     err = kim_preferences_create(&preferences);
     
     if (!err) {
-	err = kim_options_create(&options);
-    }
-    
-    if (!err) {
-	err = kim_preferences_add_favorite_identity(preferences, self.kimIdentity, options);
+	err = kim_preferences_add_favorite_identity(preferences, an_identity, some_options);
     }
     if (!err) {
 	err = kim_preferences_synchronize(preferences);
     }
-    if (options) {
-	kim_options_free(&options);
-    }
-    kim_preferences_free(&preferences);
+
     if (!err) {
 	self.favorite = true;
     } else {
-	kim_string_create_for_last_error(&error_string, err);
-	NSLog(@"%s failed with %s", __FUNCTION__, error_string);
+        log_kim_error_to_console(err);
     }
+
+    kim_preferences_free(&preferences);
+    kim_identity_free(&an_identity);
+    kim_options_free(&some_options);
+    
     return (err != KIM_NO_ERROR);
 }
 
@@ -212,41 +240,29 @@
 {
     kim_error err = KIM_NO_ERROR;
     kim_preferences preferences = NULL;
-    kim_options options = NULL;
-    kim_string error_string = NULL;
+    kim_identity an_identity = self.kimIdentity;
+
     err = kim_preferences_create(&preferences);
     
     if (!err) {
-	err = kim_options_create(&options);
-    }
-    
-    if (!err) {
-	err = kim_preferences_remove_favorite_identity(preferences, self.kimIdentity);
+	err = kim_preferences_remove_favorite_identity(preferences, an_identity);
     }
     if (!err) {
 	err = kim_preferences_synchronize(preferences);
     }
-    if (options) {
-	kim_options_free(&options);
-    }
-    kim_preferences_free(&preferences);
     if (!err) {
 	self.favorite = false;
     } else {
-	kim_string_create_for_last_error(&error_string, err);
-	NSLog(@"%s failed with %s", __FUNCTION__, error_string);
+        log_kim_error_to_console(err);
     }
+
+    kim_preferences_free(&preferences);
+    kim_identity_free(&an_identity);
+    
     return (err != KIM_NO_ERROR);
 }
 
 #pragma mark Accessors
-
-// ---------------------------------------------------------------------------
-
-- (NSDate *) expirationDate
-{
-    return [NSDate dateWithTimeIntervalSince1970:expiration_time];
-}
 
 // ---------------------------------------------------------------------------
 
@@ -269,326 +285,122 @@
 
 - (kim_identity) kimIdentity
 {
-    return kimIdentity;
-}
-
-// ---------------------------------------------------------------------------
-
-- (void) setKimIdentity:(kim_identity)newKimIdentity
-{
     kim_error err = KIM_NO_ERROR;
-    kim_string string = NULL;
-
-    if (!kimIdentity || kimIdentity != newKimIdentity) {
-        [self willChangeValueForKey:@"kimOptions"];
-
-        kim_identity_free(&kimIdentity);
-        kimIdentity = NULL;
-        if (newKimIdentity != NULL) {
-            kim_identity_get_display_string(newKimIdentity, &string);
-            err = kim_identity_copy(&kimIdentity, newKimIdentity);
-        }
-        
-        [self didChangeValueForKey:@"kimOptions"];
-    }
-    
-    if (err) {
-        log_kim_error_to_console(err);
-    }
+    kim_identity an_identity = NULL;
+    err = kim_identity_create_from_string(&an_identity, [self.identity UTF8String]);
+    return an_identity;
 }
 
 // ---------------------------------------------------------------------------
 
 - (kim_options) kimOptions
 {
-    return kimOptions;
-}
-
-// ---------------------------------------------------------------------------
-
-- (void) setKimOptions:(kim_options)newKimOptions
-{
-    // Passing NULL resets to default options
-    kim_error err = KIM_NO_ERROR;
-    
-    if (!kimOptions || kimOptions != newKimOptions) {
-        [self willChangeValueForKey:@"kimOptions"];
-        
-        kim_options_free(&kimOptions);
-        kimOptions = NULL;
-
-        if (newKimOptions == NULL) {
-            err = kim_options_create(&kimOptions);
-        } else {
-            err = kim_options_copy(&kimOptions, newKimOptions);
-        }
-
-        [self didChangeValueForKey:@"kimOptions"];
-    }
+    return [KIMUtilities kimOptionsForDictionary:self.options];
 }
 
 // ---------------------------------------------------------------------------
 
 - (BOOL) isRenewable
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_boolean result = FALSE;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_get_renewable(options, &result);
-    
-    return (result != 0);
+    return [[self.options valueForKey:@"renewable"] boolValue];
 }
 
 // ---------------------------------------------------------------------------
 
 - (void) setIsRenewable: (BOOL) value
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_set_renewable(options, value);
+    [self.options setValue:[NSNumber numberWithBool:value]
+                    forKey:@"renewable"];
 }
 
 // ---------------------------------------------------------------------------
 
 - (BOOL) isForwardable
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_boolean result = FALSE;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_get_forwardable(options, &result);
-    
-    return (result != 0);
+    return [[self.options valueForKey:@"forwardable"] boolValue];
 }
 
 // ---------------------------------------------------------------------------
 
 - (void) setIsForwardable: (BOOL) value
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_set_forwardable(options, value);
+    [self.options setValue:[NSNumber numberWithBool:value]
+                    forKey:@"forwardable"];
 }
 
 // ---------------------------------------------------------------------------
 
 - (BOOL) isAddressless
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_boolean result = FALSE;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_get_addressless(options, &result);
-    
-    return (result != 0);
+    return [[self.options valueForKey:@"addressless"] boolValue];
 }
 
 // ---------------------------------------------------------------------------
 
 - (void) setIsAddressless: (BOOL) value
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_set_addressless(options, value);
+    [self.options setValue:[NSNumber numberWithBool:value]
+                    forKey:@"addressless"];
 }
 
 // ---------------------------------------------------------------------------
 
 - (BOOL) isProxiable
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_boolean result = FALSE;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_get_proxiable(options, &result);
-    
-    return (result != 0);
+    return [[self.options valueForKey:@"proxiable"] boolValue];
 }
 
 // ---------------------------------------------------------------------------
 
 - (void) setIsProxiable: (BOOL) value
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_set_proxiable(options, value);
+    [self.options setValue:[NSNumber numberWithBool:value]
+                    forKey:@"proxiable"];
 }
 
 // ---------------------------------------------------------------------------
 
 - (NSUInteger) validLifetime
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_lifetime value = 0;
-    kim_options options = self.kimOptions;
-
-    err = kim_options_get_lifetime(options, &value);
-    
-    return (NSUInteger) value;
+    return [[self.options valueForKey:@"valid_lifetime"] unsignedIntegerValue];
 }
 
 // ---------------------------------------------------------------------------
 
 - (void) setValidLifetime: (NSUInteger) newLifetime
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_options options = self.kimOptions;
-    
-    // round to nearest five minutes
-    newLifetime = (newLifetime / VALID_LIFETIME_INCREMENT) * VALID_LIFETIME_INCREMENT;
-    
-    err = kim_options_set_lifetime(options, (kim_lifetime) newLifetime);
+    [self.options setValue:[NSNumber numberWithUnsignedInteger:newLifetime]
+                    forKey:@"valid_lifetime"];
 }
 
 // ---------------------------------------------------------------------------
 
 - (NSUInteger) renewableLifetime
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_lifetime value = 0;
-    kim_options options = self.kimOptions;
-    
-    err = kim_options_get_renewal_lifetime(options, &value);
-
-    return (NSUInteger) value;
+    return [[self.options valueForKey:@"renewable_lifetime"] unsignedIntegerValue];
 }
 
 // ---------------------------------------------------------------------------
 
 - (void) setRenewableLifetime: (NSUInteger) newLifetime
 {
-    kim_error err = KIM_NO_ERROR;
-    kim_options options = self.kimOptions;
-
-    // round to nearest five minutes
-    newLifetime = (newLifetime / RENEWABLE_LIFETIME_INCREMENT) * RENEWABLE_LIFETIME_INCREMENT;
-    
-    err = kim_options_set_renewal_lifetime(options, (kim_lifetime) newLifetime);
+    [self.options setValue:[NSNumber numberWithUnsignedInteger:newLifetime]
+                    forKey:@"renewable_lifetime"];
 }
 
 #pragma mark String representations
 
 // ---------------------------------------------------------------------------
 
-- (NSString *) principalString
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_string display_string = NULL;
-    NSString *result = nil;
-    
-    if (self.kimIdentity) {
-        err = kim_identity_get_display_string(self.kimIdentity, &display_string);
-    }
-    
-    if (!err && display_string) {
-        result = [NSString stringWithUTF8String:display_string];
-    }
-    else {
-        result = @"-";
-    }
-    
-    if (err) {
-        log_kim_error_to_console(err);
-    }
-    
-    kim_string_free(&display_string);
-    
-    return result;
-}
-
-// ---------------------------------------------------------------------------
-
-- (NSString *) componentsString
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_string display_string = NULL;
-    NSString *result = @"";
-    
-    if (self.kimIdentity) {
-        err = kim_identity_get_components_string(self.kimIdentity, &display_string);
-    }
-
-    if (!err && display_string) {
-        result = [NSString stringWithUTF8String:display_string];
-    }
-    
-    if (err) {
-        log_kim_error_to_console(err);
-    }
-    
-    kim_string_free(&display_string);
-    
-    return result;
-}
-
-// ---------------------------------------------------------------------------
-
-- (NSString *) realmString
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_string display_string = NULL;
-    NSString *result = @"";
-    
-    if (self.kimIdentity) {
-        err = kim_identity_get_realm(self.kimIdentity, &display_string);
-    }
-    
-    if (!err && display_string) {
-        result = [NSString stringWithUTF8String:display_string];
-    }
-    
-    if (err) {
-        log_kim_error_to_console(err);
-    }
-    
-    kim_string_free(&display_string);
-    
-    return result;
-}
-
-// ---------------------------------------------------------------------------
-
-- (kim_error) setPrincipalComponents: (NSString *) componentsString realm: (NSString *) realmString
-{
-    kim_error err = KIM_NO_ERROR;
-    kim_identity new_identity = NULL;
-    char *principal_string = NULL;
-    
-    asprintf(&principal_string, "%s@%s", 
-             [componentsString UTF8String], [realmString UTF8String]);
-    
-    if (principal_string) {
-        err = kim_identity_create_from_string(&new_identity, principal_string);
-    }
-        
-    self.kimIdentity = new_identity;
-    
-    kim_identity_free(&new_identity);
-    if (principal_string) {
-        free(principal_string);
-    }
-    
-    return err;
-}
-
-// ---------------------------------------------------------------------------
-
 - (NSString *) expirationString
 {
     NSString *result = nil;
-    
-    if (expiration_time > 0) {
-	time_t now = time(NULL);
-	time_t lifetime = expiration_time - now;
-	time_t seconds  = (lifetime % 60);
-	time_t minutes  = (lifetime / 60 % 60);
-	time_t hours    = (lifetime / 3600 % 24);
-	time_t days     = (lifetime / 86400);
+    NSTimeInterval lifetime = [self.expirationDate timeIntervalSinceNow];
+    if (lifetime > 0) {
+	NSTimeInterval seconds  = fmod(lifetime, 60);
+	NSTimeInterval minutes  = fmod(lifetime, 60 % 60);
+	NSTimeInterval hours    = fmod(lifetime, 3600 % 24);
+	NSTimeInterval days     = fmod(lifetime, 86400);
 	
 	if (seconds >  0) { seconds = 0; minutes++; }
 	if (minutes > 59) { minutes = 0; hours++; }
@@ -652,15 +464,15 @@
 
 - (NSString *) description
 {
-    return [NSString stringWithFormat:@"%@ (%@) %@", self.principalString, self.expirationString, super.description];
+    return [NSString stringWithFormat:@"%@ (%@) %@", self.identity, self.expirationString, [super description]];
 }
 
 @end
 
 @interface Identities ()
 
-@property(readwrite, retain) NSArray *favoriteIdentities;
-@property(readwrite, retain) NSArray *identities;
+@property(readwrite, retain) NSMutableArray *favoriteIdentities;
+@property(readwrite, retain) NSMutableArray *identities;
 
 @end
 
@@ -857,17 +669,16 @@
 //    NSLog(@"updating %@", [[NSThread currentThread] description]);
     while (!err) {
         kim_ccache ccache = NULL;
-        kim_identity kimIdentity = NULL;
-        kim_options kimOptions = NULL;
+        kim_identity an_identity = NULL;
+        kim_options some_options = NULL;
         kim_credential_state state = kim_credentials_state_valid;
-        kim_time expirationTime = 0;
-        kim_lifetime lifetime = 0;
+        kim_time expiration_time = 0;
         
         err = kim_ccache_iterator_next (iterator, &ccache);
         if (!err && !ccache) { break; }
         
         if (!err) {
-            err = kim_ccache_get_client_identity (ccache, &kimIdentity);
+            err = kim_ccache_get_client_identity (ccache, &an_identity);
         }
         
         if (!err) {
@@ -875,33 +686,25 @@
         }
         
         if (!err && state == kim_credentials_state_valid) {
-            err = kim_ccache_get_expiration_time (ccache, &expirationTime);
+            err = kim_ccache_get_expiration_time (ccache, &expiration_time);
         }
         
         if (!err) { 
-            err = kim_ccache_get_options(ccache, &kimOptions);
+            err = kim_ccache_get_options(ccache, &some_options);
         }
         
         if (!err) {
-            err = kim_options_get_lifetime(kimOptions, &lifetime);
-        }
-        
-        if (!err) {
-            Identity *identity = [[Identity alloc] initWithIdentity: kimIdentity options: kimOptions];
+            Identity *identity = [[Identity alloc] initWithKimIdentity:an_identity kimOptions:some_options];
             if (!identity) { err = ENOMEM; }
             
             if (!err) {
-                kimIdentity = NULL; /* take ownership */ 
-                identity.kimOptions = kimOptions;
                 identity.state = state;
-                identity.expiration_time = expirationTime;
+                identity.expirationDate = [NSDate dateWithTimeIntervalSince1970:expiration_time];
                 [newIdentities addObject: identity];
             }
             
-            if (identity) {
-                [identity release];
-                identity = nil;
-            }
+            [identity release];
+            identity = nil;
         }
         
         if (err == KIM_NO_CREDENTIALS_ERR) {
@@ -913,8 +716,8 @@
             log_kim_error_to_console(err);
         }
         
-        kim_options_free (&kimOptions);
-        kim_identity_free (&kimIdentity);
+        kim_options_free (&some_options);
+        kim_identity_free (&an_identity);
         kim_ccache_free (&ccache);
     }
     
@@ -925,11 +728,11 @@
         Identity *matchingIdentity = [newIdentities member:identity];
         if (matchingIdentity) {
             identity.state = matchingIdentity.state;
-            identity.expiration_time = matchingIdentity.expiration_time;
+            identity.expirationDate = matchingIdentity.expirationDate;
             [newIdentities removeObject:matchingIdentity];
         } else {
             identity.state = kim_credentials_state_expired;
-            identity.expiration_time = 0;
+            identity.expirationDate = [NSDate distantPast];
         }
     }
         
@@ -937,8 +740,10 @@
     [newIdentities unionSet:[NSSet setWithArray:self.favoriteIdentities]];
     
     if (!err) {
-        /* Use @property setter to trigger KVO notifications */
-        self.identities = [[newIdentities allObjects] sortedArrayUsingSelector:@selector(compare:)];
+        [self.identities removeAllObjects];
+        [self.identities addObjectsFromArray:[newIdentities allObjects]];
+        [self.identities sortUsingSelector:@selector(compare:)];
+
         if (!identities) { err = ENOMEM; }            
     } else {
         log_kim_error_to_console(err);
@@ -952,13 +757,9 @@
 - (kim_error) addIdentity: (Identity *) anIdentity
 {
     kim_error err = KIM_NO_ERROR;
-    NSMutableArray *newIdentities = nil;
-    
+
     if (![self.identities containsObject:anIdentity]) {
-        newIdentities = [self.identities mutableCopy];
-        [newIdentities addObject:anIdentity];
-        self.identities = newIdentities;
-        [newIdentities release];        
+        [self.identities addObject:anIdentity];
     } else {
         err = KIM_IDENTITY_ALREADY_IN_LIST_ERR;
     }

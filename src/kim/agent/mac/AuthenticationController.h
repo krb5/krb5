@@ -47,6 +47,11 @@
     IBOutlet BadgedImageView *changePasswordBadge;
     IBOutlet BadgedImageView *errorBadge;
     
+    IBOutlet NSProgressIndicator *enterSpinny;
+    IBOutlet NSProgressIndicator *passwordSpinny;
+    IBOutlet NSProgressIndicator *samSpinny;
+    IBOutlet NSProgressIndicator *changePasswordSpinny;
+    
     // Controls that need to be made key
     IBOutlet NSTextField *identityField;
     IBOutlet NSTextField *passwordField;
@@ -98,6 +103,5 @@
          contextInfo: (void *) contextInfo;
 
 - (IBAction) changePasswordGearAction: (id) sender;
-- (void) changePasswordThread: (NSString *) identityString;
 
 @end
