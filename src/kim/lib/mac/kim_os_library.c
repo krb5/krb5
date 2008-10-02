@@ -237,14 +237,16 @@ kim_error kim_os_library_get_caller_name (kim_string *out_application_name)
         
         if (bundle_url) {
             err = LSCopyDisplayNameForURL (bundle_url, &cfname);
+            check_error (err);
         }
         
         if (bundle_url) { CFRelease (bundle_url); }
     }
     
-    if (!err && !name) {
+    if (!err && !cfname) {
         kim_string path = NULL;
         CFURLRef cfpath = NULL;
+        CFURLRef cfpathnoext = NULL;
         
         err = kim_os_library_get_application_path (&path);
         
@@ -253,12 +255,21 @@ kim_error kim_os_library_get_caller_name (kim_string *out_application_name)
                                                               (const UInt8 *) path,
                                                               strlen (path),
                                                               0);
+            
             if (cfpath) {
+                cfpathnoext = CFURLCreateCopyDeletingPathExtension (kCFAllocatorDefault,
+                                                                    cfpath);
+            }
+            
+            if (cfpathnoext) {
+                cfname = CFURLCopyLastPathComponent (cfpathnoext);
+            } else {
                 cfname = CFURLCopyLastPathComponent (cfpath);
             }
         }
         
-        if (cfpath) { CFRelease (cfpath); }
+        if (cfpathnoext) { CFRelease (cfpathnoext); }
+        if (cfpath     ) { CFRelease (cfpath); }
     }
     
     if (!err && cfname) {
