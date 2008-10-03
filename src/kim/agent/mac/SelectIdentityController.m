@@ -178,7 +178,6 @@
 - (IBAction) cancel: (id) sender
 {
     [associatedClient didCancel];
-    [self close];
 }
 
 // ---------------------------------------------------------------------------

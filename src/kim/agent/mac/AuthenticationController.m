@@ -144,7 +144,7 @@
 
 - (IBAction) showWindow: (id) sender
 {
-    [[self window] center];
+
     [super showWindow:sender];
 }
 
@@ -218,14 +218,13 @@
     [glueController setValue:message
                   forKeyPath:message_keypath];
 
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [theWindow setFrame:[theWindow frameRectForContentRect:[identityView frame]] display:NO];
-    [containerView addSubview:identityView];
-
     [enterSpinny stopAnimation:nil];
-    
+
+    [self swapView:identityView];
+
     [theWindow makeFirstResponder:identityField];
-    [self showWindow:nil];
+
+    [[self window] makeKeyAndOrderFront:nil];
 }
 
 - (void) showAuthPrompt
@@ -269,39 +268,54 @@
 
     // set badge
     [passwordBadge setBadgePath:associatedClient.path];
-
-    frame = [passwordView frame];
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [theWindow setFrame:[theWindow frameRectForContentRect:frame] display:NO];
-    [containerView addSubview:passwordView];
-
+    
     // adjust for checkbox visibility
-    if (![[glueController valueForKeyPath:allow_save_password_keypath] boolValue]) {
-        frame = [theWindow frame];
+    if (![[glueController valueForKeyPath:allow_save_password_keypath] boolValue] &&
+        ![rememberPasswordInKeychainCheckBox isHidden]) {
+        [rememberPasswordInKeychainCheckBox setHidden:YES];
+        frame = [passwordView frame];
         shrinkBy = ([passwordField frame].origin.y - 
                     [rememberPasswordInKeychainCheckBox frame].origin.y);
-        frame.origin.y += shrinkBy;
         frame.size.height -= shrinkBy;
-        [theWindow setFrame:frame display:NO];
+        [passwordView setFrame:frame];
     }
+    
+    [self swapView:passwordView];
     
     [theWindow makeFirstResponder:passwordField];
     [self showWindow:nil];
 }
 
-- (void) showSAM
+- (void) swapView: (NSView *) aView
 {
     NSWindow *theWindow = [self window];
+    NSRect windowFrame;
+    NSRect viewFrame;
+    
+    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    
+    windowFrame = [theWindow frame];
+    viewFrame = [theWindow frameRectForContentRect:[aView frame]];
+    windowFrame.origin.y -= viewFrame.size.height - windowFrame.size.height;
+    
+    windowFrame.size.width = viewFrame.size.width;
+    windowFrame.size.height = viewFrame.size.height;
+    
+    [theWindow setFrame:windowFrame display:YES animate:YES];
+    
+    [containerView addSubview:aView];
+    
+}
 
+- (void) showSAM
+{
     // set badge
     [samBadge setBadgePath:associatedClient.path];
 
     [glueController setValue:[NSNumber numberWithBool:NO]
                    forKeyPath:allow_save_password_keypath];
     
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [theWindow setFrame:[theWindow frameRectForContentRect:[samView frame]] display:NO];
-    [containerView addSubview:samView];
+    [self swapView:samView];
     
     [self showWindow:nil];
     [[self window] makeFirstResponder:samPromptField];
@@ -340,16 +354,13 @@
         // Your password has expired, would you like to change it?
     }
     [glueController setValue:message forKeyPath:message_keypath];
-                     
-    // wake up the nib connections and adjust window size
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [theWindow setFrame:[theWindow frameRectForContentRect:[changePasswordView frame]] display:NO];
-    // set up controls with info from associatedClient
-    [containerView addSubview:changePasswordView];
+    
     // set badge
     [changePasswordBadge setBadgePath:associatedClient.path];
     
     [changePasswordSpinny stopAnimation:nil];
+    
+    [self swapView:changePasswordView];
     
     [self showWindow:nil];
     [theWindow makeFirstResponder:oldPasswordField];
@@ -359,11 +370,10 @@
 {
     // wake up the nib connections and adjust window size
     [self window];
-    // set up controls with info from associatedClient
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [containerView addSubview:errorView];
     // set badge
     [errorBadge setBadgePath:associatedClient.path];
+
+    [self swapView:errorView];
     
     [self showWindow:nil];
 }
@@ -514,7 +524,6 @@
 - (IBAction) cancel: (id) sender
 {
     [associatedClient didCancel];
-    [self close];
 }
 
 - (IBAction) enterIdentity: (id) sender

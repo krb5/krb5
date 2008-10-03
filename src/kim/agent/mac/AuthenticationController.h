@@ -104,4 +104,6 @@
 
 - (IBAction) changePasswordGearAction: (id) sender;
 
+- (void) swapView: (NSView *) aView;
+
 @end

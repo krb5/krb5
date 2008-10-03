@@ -10,6 +10,7 @@
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<integer value="300288"/>
 			<integer value="19"/>
+			<integer value="300175"/>
 			<integer value="300420"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
@@ -375,7 +376,7 @@
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="866582848">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">274</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -521,6 +522,7 @@
 					</object>
 				</object>
 				<string key="NSFrameSize">{500, 208}</string>
+				<reference key="NSSuperview"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="898191415">
@@ -1684,26 +1686,6 @@
 						</object>
 					</object>
 					<int key="connectionID">300416</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">hidden: selection.allow_save</string>
-						<reference key="source" ref="645528597"/>
-						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="645528597"/>
-							<reference key="NSDestination" ref="57033499"/>
-							<string key="NSLabel">hidden: selection.allow_save</string>
-							<string key="NSBinding">hidden</string>
-							<string key="NSKeyPath">selection.allow_save</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">NSNegateBoolean</string>
-							</object>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">300417</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -3087,7 +3069,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>{{628, 646}, {500, 210}}</string>
 					<reference ref="9"/>
-					<reference ref="9"/>
+					<integer value="0"/>
 					<string>{{932, 664}, {484, 199}}</string>
 					<reference ref="9"/>
 					<reference ref="9"/>

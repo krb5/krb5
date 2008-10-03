@@ -104,8 +104,6 @@ enum krb_agent_client_state {
     else if (self.state == ipc_client_state_change_password) {
         [KerberosAgentListener didChangePassword:self.currentInfo error:err];
     }
-    [self.selectController close];
-    [self.authController close];
     self.state = ipc_client_state_idle;
 }
 
