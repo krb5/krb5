@@ -145,7 +145,7 @@ int trval(fin, fout)
 	p = (unsigned char *)malloc(maxlen);
 	len = 0;
 	while ((cc = fgetc(fin)) != EOF) {
-		if (len == maxlen) {
+		if ((unsigned int) len == maxlen) {
 			maxlen += BUFSIZ;
 			p = (unsigned char *)realloc(p, maxlen);
 		}

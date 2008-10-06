@@ -21,7 +21,7 @@ asn1_error_code asn1_krb5_data_unparse(code, s)
     if(*s==NULL) return ENOMEM;
     strcpy(*s,"<EMPTY>");
   }else{
-    int i;
+    unsigned int i;
 
     *s = (char*)calloc((size_t) 3*(code->length), sizeof(char));
     if(*s == NULL) return ENOMEM;

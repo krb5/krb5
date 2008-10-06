@@ -28,7 +28,7 @@ static void encoder_print_results(code, typestring, description)
 		printf("encode_krb5_%s%s:\n", typestring, description);
 		r = trval2(stdout, code->data, code->length, 0, &rlen);
 		printf("\n\n");
-		if (rlen != code->length) {
+		if (rlen < 0 || (unsigned int) rlen != code->length) {
 			printf("Error: length mismatch: was %d, parsed %d\n",
 			       code->length, rlen);
 			exit(1);

@@ -564,7 +564,7 @@ int ktest_equal_array_of_octet(length, ref, var)
      krb5_octet * ref;
      krb5_octet * var;
 {
-  int i, p=TRUE;
+  unsigned int i, p=TRUE;
 
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
@@ -578,7 +578,7 @@ int ktest_equal_array_of_char(length, ref, var)
      char * ref;
      char * var;
 {
-  int i, p=TRUE;
+  unsigned int i, p=TRUE;
 
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
