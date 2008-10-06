@@ -34,6 +34,9 @@
 #include "kim_private.h"
 #include "kim_os_private.h"
 
+#if KIM_TO_KLL_SHIM
+#include "KerberosLoginErrors.h"
+#endif
 
 MAKE_INIT_FUNCTION(kim_error_init);
 MAKE_FINI_FUNCTION(kim_error_fini);
