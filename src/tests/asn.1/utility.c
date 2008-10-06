@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
+krb5int_access acc;
+
 char hexchar (const unsigned int digit);
 
 asn1_error_code asn1_krb5_data_unparse(code, s)
@@ -123,3 +125,13 @@ void asn1buf_print(buf)
     free(s);
 }
 #endif
+
+void init_access(const char *progname)
+{
+    krb5_error_code ret;
+    ret = krb5int_accessor(&acc, KRB5INT_ACCESS_VERSION);
+    if (ret) {
+	com_err(progname, ret, "while initializing accessor");
+	exit(1);
+    }
+}

@@ -779,8 +779,40 @@ krb5_error_code ktest_make_sample_sam_response(p)
     return 0;
 }
 
+#ifdef ENABLE_LDAP
+static krb5_error_code ktest_make_sample_key_data(krb5_key_data *p, int i)
+{
+    char buf[10];
+    p->key_data_ver = 2;
+    p->key_data_kvno = 42;
+    sprintf(buf, "key%d", i);
+    p->key_data_type[0] = 2;
+    p->key_data_length[0] = strlen(buf);
+    p->key_data_contents[0] = strdup(buf);
+    sprintf(buf, "salt%d", i);
+    p->key_data_type[1] = i;
+    p->key_data_length[1] = strlen(buf);
+    p->key_data_contents[1] = strdup(buf);
+    if (p->key_data_contents[0] == NULL || p->key_data_contents[1] == NULL)
+	return ENOMEM;
+    return 0;
+}
 
-
+krb5_error_code ktest_make_sample_ldap_seqof_key_data(p)
+    ldap_seqof_key_data *p;
+{
+    int i;
+    p->mkvno = 14;
+    p->n_key_data = 3;
+    p->key_data = calloc(3,sizeof(krb5_key_data));
+    for (i = 0; i < 3; i++) {
+	krb5_error_code ret;
+	ret = ktest_make_sample_key_data(&p->key_data[i], i);
+	if (ret) return ret;
+    }
+    return 0;
+}
+#endif
 
 
 /****************************************************************/
@@ -1289,3 +1321,16 @@ void ktest_empty_sam_response(p)
     ktest_empty_data(&(p->sam_enc_key.ciphertext));
     ktest_empty_data(&(p->sam_enc_nonce_or_ts.ciphertext));
 }
+
+#ifdef ENABLE_LDAP
+void ktest_empty_ldap_seqof_key_data(ctx, p)
+    krb5_context ctx;
+    ldap_seqof_key_data *p;
+{
+    int i;
+    for (i = 0; i < p->n_key_data; i++) {
+	free(p->key_data[i].key_data_contents[0]);
+	free(p->key_data[i].key_data_contents[1]);
+    }
+}
+#endif

@@ -542,6 +542,45 @@ int ktest_equal_sam_response(ref, var)
     return p;
 }
 
+#ifdef ENABLE_LDAP
+static int equal_key_data(ref, var)
+    krb5_key_data *ref;
+    krb5_key_data *var;
+{
+    int p=TRUE;
+    if (ref==var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&scalar_equal(key_data_ver);
+    p=p&&scalar_equal(key_data_kvno);
+    p=p&&scalar_equal(key_data_type[0]);
+    p=p&&scalar_equal(key_data_type[1]);
+    p=p&&len_equal(key_data_length[0],key_data_contents[0],
+		   ktest_equal_array_of_octet);
+    p=p&&len_equal(key_data_length[1],key_data_contents[1],
+		   ktest_equal_array_of_octet);
+    return p;
+}
+static int equal_key_data_array(int n, krb5_key_data *ref, krb5_key_data *val)
+{
+    int i, p=TRUE;
+    for (i = 0; i < n; i++) {
+	p=p&&equal_key_data(ref+i, val+i);
+    }
+    return p;
+}
+int ktest_equal_ldap_sequence_of_keys(ref, var)
+    ldap_seqof_key_data *ref;
+    ldap_seqof_key_data *var;
+{
+    int p=TRUE;
+    if (ref==var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&scalar_equal(mkvno);
+    p=p&&len_equal(n_key_data,key_data,equal_key_data_array);
+    return p;
+}
+#endif
+
 /**** arrays ****************************************************************/
 
 int ktest_equal_array_of_data(length, ref, var)

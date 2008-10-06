@@ -101,6 +101,7 @@ main(argc, argv)
 	com_err(argv[0], retval, "while initializing krb5");
 	exit(1);
     }
+    init_access(argv[0]);
   
 #define setup(value,type,typestring,constructor)			\
     retval = constructor(&(value));					\
@@ -672,10 +673,19 @@ main(argc, argv)
 		   encode_krb5_predicted_sam_response);
     }
 #endif
+#ifdef ENABLE_LDAP
+    {
+	ldap_seqof_key_data skd;
+
+	setup(skd, ldap_seqof_key_data, "ldap_seqof_key_data",
+	      ktest_make_sample_ldap_seqof_key_data);
+	encode_run(skd, ldap_seqof_key_data, "ldap_seqof_key_data", "",
+		   acc.asn1_ldap_encode_sequence_of_keys);
+	ktest_empty_ldap_seqof_key_data(test_context, &skd);
+    }
+#endif
 
     krb5_free_context(test_context);
     exit(error_count);
     return(error_count);
 }
-
-

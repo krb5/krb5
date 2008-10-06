@@ -4,6 +4,7 @@ mydir=tests/asn.1
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+LDAP=@LDAP@
 
 RUN_SETUP = @KRB5_RUN_ENV@
 
@@ -28,25 +29,43 @@ krb5_decode_test: $(DECOBJS) $(KRB5_BASE_DEPLIBS)
 t_trval: t_trval.o
 	$(CC) -o t_trval $(ALL_CFLAGS) t_trval.o
 
-check:: krb5_decode_test krb5_encode_test
+check:: check-encode check-decode
+
+check-decode: krb5_decode_test
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_test
+
+expected_encode.out: reference_encode.out ldap_encode.out
+	if test "$(LDAP)" = yes; then \
+	  cat $(srcdir)/reference_encode.out $(srcdir)/ldap_encode.out > expected_encode.out; \
+	else \
+	  cat $(srcdir)/reference_encode.out > expected_encode.out; \
+	fi
+
+expected_trval.out: trval_reference.out ldap_trval.out
+	if test "$(LDAP)" = yes; then \
+	  cat $(srcdir)/trval_reference.out $(srcdir)/ldap_trval.out > expected_trval.out; \
+	else \
+	  cat $(srcdir)/trval_reference.out > expected_trval.out; \
+	fi
+
+check-encode: krb5_encode_test expected_encode.out expected_trval.out
 	$(RM) test.out
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test > test.out
-	cmp test.out $(srcdir)/reference_encode.out
+	cmp test.out expected_encode.out
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > test.out
-	cmp test.out $(srcdir)/trval_reference.out
+	cmp test.out expected_trval.out
 	$(RM) test.out	
 
 install::
 
 clean::
-	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval t_trval
+	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval t_trval expected_encode.out expected_trval.out
 
 
 ################ Dependencies ################

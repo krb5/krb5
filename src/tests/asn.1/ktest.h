@@ -2,6 +2,7 @@
 #define __KTEST_H__
 
 #include "k5-int.h"
+#include "kdb.h"
 
 #define SAMPLE_USEC 123456
 #define SAMPLE_TIME 771228197  /* Fri Jun 10  6:03:17 GMT 1994 */
@@ -97,7 +98,9 @@ krb5_error_code ktest_make_sample_sam_challenge
 	(krb5_sam_challenge * p);
 krb5_error_code ktest_make_sample_sam_response
 	(krb5_sam_response * p);
-
+#ifdef ENABLE_LDAP
+krb5_error_code ktest_make_sample_ldap_seqof_key_data(ldap_seqof_key_data * p);
+#endif
 /*----------------------------------------------------------------------*/
 
 void ktest_empty_authorization_data
@@ -197,6 +200,9 @@ void ktest_empty_sam_challenge
 	(krb5_sam_challenge * p);
 void ktest_empty_sam_response
 	(krb5_sam_response * p);
+#ifdef ENABLE_LDAP
+void ktest_empty_ldap_seqof_key_data(krb5_context, ldap_seqof_key_data *p);
+#endif
 
 extern krb5_context test_context;
 extern char *sample_principal_name;

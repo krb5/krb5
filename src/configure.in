@@ -1074,8 +1074,12 @@ if test -n "$OPENLDAP_PLUGIN"; then
   K5_GEN_MAKEFILE(plugins/kdb/ldap/ldap_util)
   K5_GEN_MAKEFILE(plugins/kdb/ldap/libkdb_ldap)
   ldap_plugin_dir=plugins/kdb/ldap
+  LDAP=yes
+else
+  LDAP=no
 fi
 AC_SUBST(ldap_plugin_dir)
+AC_SUBST(LDAP)
 
 AC_CHECK_HEADERS(Python.h python2.3/Python.h)
 
