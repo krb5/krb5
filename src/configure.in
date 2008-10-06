@@ -100,6 +100,7 @@ KRB5_NEED_PROTO([#include <string.h>
 /* Solaris 8 declares swab in stdlib.h.  */
 #include <stdlib.h>
 ],swab,1)
+KRB5_NEED_PROTO([#include <ctype.h>],isblank,1)
 dnl
 AC_PROG_AWK
 KRB5_AC_INET6
