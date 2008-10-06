@@ -285,6 +285,10 @@ krb5_ldap_read_startup_information(krb5_context );
 int
 has_sasl_external_mech(krb5_context, char *);
 
+krb5_error_code
+krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context);
+
+
 /* DAL functions */
 
 

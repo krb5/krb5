@@ -319,7 +319,6 @@ cleanup:
 }
 
 krb5int_access accessor;
-extern int kldap_ensure_initialized (void);
 
 static krb5_error_code
 asn1_encode_sequence_of_keys (krb5_key_data *key_data, krb5_int16 n_key_data,

@@ -150,4 +150,6 @@ populate_krb5_db_entry(krb5_context context,
     krb5_const_principal princ,
     krb5_db_entry *entry);
 
+int kldap_ensure_initialized (void);
+
 #endif

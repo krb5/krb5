@@ -39,6 +39,10 @@
 #include <kdb5.h>
 #include <kadm5/admin.h>
 
+#if defined(NEED_ISBLANK_PROTO) && !defined(isblank)
+extern int isblank();
+#endif
+
 krb5_error_code
 krb5_ldap_get_db_opt(char *input, char **opt, char **val)
 {

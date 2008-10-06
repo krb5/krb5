@@ -203,7 +203,7 @@ krb5_ldap_list_realm(context, realms)
 	goto cleanup;
     }
 
-    *realms = calloc(count+1, sizeof (char *));
+    *realms = calloc((unsigned int) count+1, sizeof (char *));
     CHECK_NULL(*realms);
 
     for (ent = ldap_first_entry(ld, result), count = 0; ent != NULL;
@@ -297,7 +297,8 @@ krb5_ldap_delete_realm (context, lrealm)
 	if ((st=krb5_get_subtree_info(&lcontext, &subtrees, &ntree)) != 0)
 	    goto cleanup;
 
-        result_arr = (LDAPMessage **)  calloc(ntree+1, sizeof(LDAPMessage *));
+        result_arr = (LDAPMessage **)  calloc((unsigned int)ntree+1,
+					      sizeof(LDAPMessage *));
         if (result_arr == NULL) {
             st = ENOMEM;
             goto cleanup;
