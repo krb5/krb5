@@ -1462,7 +1462,8 @@ AC_DEFUN([KRB5_NEED_PROTO], [
 ifelse([$3], ,[if test "x$ac_cv_func_$2" = xyes; then])
 AC_CACHE_CHECK([if $2 needs a prototype provided], krb5_cv_func_$2_noproto,
 AC_TRY_COMPILE([$1],
-[struct k5foo {int foo; } xx;
+[#undef $2
+struct k5foo {int foo; } xx;
 extern int $2 (struct k5foo*);
 $2(&xx);
 ],
