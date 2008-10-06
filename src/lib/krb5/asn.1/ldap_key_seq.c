@@ -133,11 +133,11 @@ last:
 /* Major version and minor version are both '1' - first version */
 /* asn1_error_code asn1_encode_sequence_of_keys (krb5_key_data *key_data, */
 krb5_error_code
-asn1_encode_sequence_of_keys (krb5_key_data *key_data,
-                              krb5_int16 n_key_data,
-                              krb5_int32 mkvno, /* Master key version number */
-                              krb5_data **code)
+asn1_encode_sequence_of_keys (ldap_seqof_key_data *val, krb5_data **code)
 {
+    krb5_key_data *key_data = val->key_data;
+    krb5_int16 n_key_data = val->n_key_data;
+    krb5_int32 mkvno = val->mkvno;
     asn1_error_code ret = 0;
     asn1buf *buf = NULL;
     unsigned int length, sum = 0;
@@ -392,10 +392,13 @@ last:
 
 /* asn1_error_code asn1_decode_sequence_of_keys (krb5_data *in, */
 krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
-                                              krb5_key_data **out,
-                                              krb5_int16 *n_key_data,
-                                              int *mkvno)
+                                              ldap_seqof_key_data **rep)
 {
+    ldap_seqof_key_data *repval;
+    krb5_key_data **out;
+    krb5_int16 *n_key_data;
+    int *mkvno;
+
     asn1_error_code ret;
     asn1buf buf, subbuf;
     int seqindef;
@@ -403,6 +406,12 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
     taginfo t;
     int kvno, maj, min;
     long lval;
+
+    repval = calloc(1,sizeof(ldap_seqof_key_data));
+    *rep = repval;
+    out = &repval->key_data;
+    n_key_data = &repval->n_key_data;
+    mkvno = &repval->mkvno;
 
     *n_key_data = 0;
     *out = NULL;
