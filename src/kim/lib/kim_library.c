@@ -42,7 +42,10 @@ MAKE_FINI_FUNCTION(kim_error_fini);
 
 static int kim_error_init (void)
 {
-    add_error_table (&et_KIM_error_table);    
+    add_error_table (&et_KIM_error_table);
+#if KIM_TO_KLL_SHIM
+    add_error_table (&et_KLL_error_table);    
+#endif
     return 0;
 }
 
@@ -55,6 +58,9 @@ static void kim_error_fini (void)
     }
 
     remove_error_table (&et_KIM_error_table);
+#if KIM_TO_KLL_SHIM
+    remove_error_table (&et_KLL_error_table);
+#endif
 }
 
 /* ------------------------------------------------------------------------ */

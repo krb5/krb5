@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#ifndef LEAN_CLIENT
+#ifdef KIM_TO_KLL_SHIM
 
 #define KERBEROSLOGIN_DEPRECATED
 
@@ -1797,4 +1797,4 @@ char *__KLLoginOptionsGetServiceName (KLLoginOptions ioOptions)
 
 
 
-#endif /* LEAN_CLIENT */
+#endif /* KIM_TO_KLL_SHIM */
