@@ -33,10 +33,13 @@
 #include "KerberosLoginPrivate.h"
 #include <kim/kim.h>
 #include "kim_private.h"
+#include "k5-thread.h"
+#include <time.h>
 
 krb5_get_init_creds_opt *__KLLoginOptionsGetKerberos5Options (KLLoginOptions ioOptions);
 KLTime __KLLoginOptionsGetStartTime (KLLoginOptions ioOptions);
 char *__KLLoginOptionsGetServiceName (KLLoginOptions ioOptions);
+
 
 /* ------------------------------------------------------------------------ */
 
@@ -567,17 +570,49 @@ KLStatus KLValidateInitialTickets (KLPrincipal      inPrincipal,
     return kl_check_error (err);
 }
 
+static cc_time_t g_cc_change_time = 0;
+static KLTime g_kl_change_time = 0;
+static k5_mutex_t g_change_time_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+
+MAKE_INIT_FUNCTION(kim_change_time_init);
+MAKE_FINI_FUNCTION(kim_change_time_fini);
+
+/* ------------------------------------------------------------------------ */
+
+static int kim_change_time_init (void)
+{
+    g_kl_change_time = time (NULL);
+    
+    return k5_mutex_finish_init(&g_change_time_mutex);
+}
+
+/* ------------------------------------------------------------------------ */
+
+static void kim_change_time_fini (void)
+{
+    if (!INITIALIZER_RAN (kim_change_time_init) || PROGRAM_EXITING ()) {
+	return;
+    }
+    
+    k5_mutex_destroy(&g_change_time_mutex);
+}
 
 /* ------------------------------------------------------------------------ */
 
 KLStatus KLLastChangedTime (KLTime *outLastChangedTime)
 {
-    KLStatus     err = klNoErr;
+    KLStatus     err = CALL_INIT_FUNCTION (kim_change_time_init);
+    kim_error mutex_err = KIM_NO_ERROR;
     cc_context_t context = NULL;
     cc_time_t    ccChangeTime = 0;
     
-    if (!outLastChangedTime) { err = kl_check_error (klParameterErr); }
-    
+    if (!err && !outLastChangedTime) { err = kl_check_error (klParameterErr); }
+        
+    if (!err) {
+        mutex_err = k5_mutex_lock (&g_change_time_mutex);
+        if (mutex_err) { err = mutex_err; }
+    }
+
     if (!err) {
         err = cc_initialize (&context, ccapi_version_4, NULL, NULL);
     }
@@ -587,10 +622,24 @@ KLStatus KLLastChangedTime (KLTime *outLastChangedTime)
     }
     
     if (!err) {
-        *outLastChangedTime = ccChangeTime;
+        /* cc_context_get_change_time returns 0 if there are no tickets
+         * but KLLastChangedTime always returned the current time.  So
+         * fake the current time if cc_context_get_change_time returns 0. */
+        if (ccChangeTime > g_cc_change_time) {
+            /* changed, make sure g_kl_change_time increases in value */
+            if (ccChangeTime > g_kl_change_time) {
+                g_kl_change_time = ccChangeTime;
+            } else {
+                g_kl_change_time++; /* we got ahead of the ccapi, just increment */
+            }
+            g_cc_change_time = ccChangeTime;
+        }
+        
+        *outLastChangedTime = g_kl_change_time;
     }
     
-    if (context) { cc_context_release (context); }
+    if (context   ) { cc_context_release (context); }
+    if (!mutex_err) { k5_mutex_unlock (&g_change_time_mutex); }
     
     return kl_check_error (err);
 }
