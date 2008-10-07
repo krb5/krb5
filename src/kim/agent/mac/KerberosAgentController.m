@@ -120,6 +120,7 @@
     }
     
     [autoQuitTimer invalidate];
+    autoQuitTimer = nil;
     
     [KerberosAgentListener didAddClient:info error:err];
     [info release];
@@ -213,6 +214,7 @@
         if ([self.clients count] == 0) {
             // the client removes itself after select identity,
             // but might come back shortly afterward in need of an auth prompt
+            [autoQuitTimer invalidate];
             autoQuitTimer = [NSTimer scheduledTimerWithTimeInterval:SECONDS_BEFORE_AUTO_QUIT_ON_NO_CLIENTS
                                                              target:self
                                                            selector:@selector(quitIfIdle:)
