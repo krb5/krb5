@@ -213,6 +213,46 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
 
 /* ------------------------------------------------------------------------ */
 
+static void kim_credential_remember_prefs (kim_identity in_identity,
+                                           kim_options  in_options)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_preferences prefs = NULL;
+    kim_boolean remember_identity = 0;
+    kim_boolean remember_options = 0;
+    
+    err = kim_preferences_create (&prefs);
+    
+    if (!err && in_options) {
+        err = kim_preferences_get_remember_options (prefs, 
+                                                    &remember_options);
+    }
+    
+    if (!err && in_identity) {
+        err = kim_preferences_get_remember_client_identity (prefs, 
+                                                            &remember_identity);
+    }
+    
+    if (!err && remember_options) {
+        err = kim_preferences_set_options (prefs, in_options);
+    }
+    
+    if (!err && remember_identity) {
+        err = kim_preferences_set_client_identity (prefs, in_identity);
+        
+    }        
+    
+    if (!err && (remember_options || remember_identity)) {
+        err = kim_preferences_synchronize (prefs);
+    }
+    
+    kim_preferences_free (&prefs);
+    
+    check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_credential_create_new_with_password (kim_credential *out_credential,
                                                    kim_identity    in_identity,
                                                    kim_options     in_options,
@@ -360,6 +400,9 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                 /* new creds obtained or the user gave up */
                 done_with_credentials = 1;
                 
+                /* remember identity and options if the user wanted to */
+                kim_credential_remember_prefs (identity, options);
+                
             } else {
                 /*  new creds failed, report error to user */
                 kim_error terr = kim_ui_handle_kim_error (&context, identity, 
@@ -399,13 +442,13 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
         kim_error fini_err = kim_ui_fini (&context);
         if (!err) { err = check_error (fini_err); }
     }
-    
+        
     if (!err) {
         *out_credential = credential;
         credential = NULL;
     }
     
-    if (options != in_options ) { kim_options_free (&options); }
+    if (options != in_options) { kim_options_free (&options); }
     kim_credential_free (&credential);
     
     return check_error (err);
