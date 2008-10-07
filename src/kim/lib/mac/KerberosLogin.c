@@ -935,6 +935,8 @@ enum {
 };
 
 
+/* ------------------------------------------------------------------------ */
+
 KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
                                   void                       *ioBuffer,
                                   KLSize                     *ioBufferSize)
@@ -976,11 +978,11 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
     } else if (!err && inOption == loginOption_LoginInstance) {
         targetSize = 0; /* Deprecated */
         
-    } else if (!err && (inOption == loginOption_ShowOptions &&
-                        inOption == loginOption_RememberShowOptions &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras &&
+    } else if (!err && (inOption == loginOption_ShowOptions ||
+                        inOption == loginOption_RememberShowOptions ||
+                        inOption == loginOption_LongTicketLifetimeDisplay ||
+                        inOption == loginOption_RememberPrincipal ||
+                        inOption == loginOption_RememberExtras ||
                         inOption == loginOption_RememberPassword)) {
         targetSize = sizeof(KLBoolean);
         
@@ -1011,11 +1013,10 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
             }
         }
         
-    } else if (!err && (inOption == loginOption_MinimalTicketLifetime &&
-                        inOption == loginOption_MaximalTicketLifetime &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras)) {
+    } else if (!err && (inOption == loginOption_MinimalTicketLifetime ||
+                        inOption == loginOption_MaximalTicketLifetime ||
+                        inOption == loginOption_MinimalRenewableLifetime ||
+                        inOption == loginOption_MaximalRenewableLifetime)) {
         targetSize = sizeof(KLLifetime);
         
         if (!returnSizeOnly) {
@@ -1043,9 +1044,9 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
             }
         }
         
-    } else if (!err && (inOption == loginOption_DefaultRenewableTicket &&
-                        inOption == loginOption_DefaultForwardableTicket &&
-                        inOption == loginOption_DefaultProxiableTicket &&
+    } else if (!err && (inOption == loginOption_DefaultRenewableTicket ||
+                        inOption == loginOption_DefaultForwardableTicket ||
+                        inOption == loginOption_DefaultProxiableTicket ||
                         inOption == loginOption_DefaultAddresslessTicket)) {
         targetSize = sizeof(KLBoolean);
         
@@ -1080,7 +1081,7 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         
-    } else if (!err && (inOption == loginOption_DefaultTicketLifetime &&
+    } else if (!err && (inOption == loginOption_DefaultTicketLifetime ||
                         inOption == loginOption_DefaultRenewableLifetime)) {
         targetSize = sizeof(KLLifetime);
         
@@ -1177,11 +1178,11 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
     } else if (!err && inOption == loginOption_LoginInstance) {
         /* Ignored */
         
-    } else if (!err && (inOption == loginOption_ShowOptions &&
-                        inOption == loginOption_RememberShowOptions &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras &&
+    } else if (!err && (inOption == loginOption_ShowOptions ||
+                        inOption == loginOption_RememberShowOptions ||
+                        inOption == loginOption_LongTicketLifetimeDisplay ||
+                        inOption == loginOption_RememberPrincipal ||
+                        inOption == loginOption_RememberExtras ||
                         inOption == loginOption_RememberPassword)) {
         if (inBufferSize > sizeof (KLBoolean)) {
             err = kl_check_error (klBufferTooLargeErr);
@@ -1190,17 +1191,16 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_RememberPrincipal) {
-            err = kim_preferences_set_remember_client_identity (prefs, *(kim_boolean *)inBuffer);
+            err = kim_preferences_set_remember_client_identity (prefs, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_RememberExtras) {
-            err = kim_preferences_set_remember_options (prefs, *(kim_boolean *)inBuffer);
+            err = kim_preferences_set_remember_options (prefs, *(KLBoolean *)inBuffer);
         }
         
-    } else if (!err && (inOption == loginOption_MinimalTicketLifetime &&
-                        inOption == loginOption_MaximalTicketLifetime &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras)) {
+    } else if (!err && (inOption == loginOption_MinimalTicketLifetime ||
+                        inOption == loginOption_MaximalTicketLifetime ||
+                        inOption == loginOption_MinimalRenewableLifetime ||
+                        inOption == loginOption_MaximalRenewableLifetime)) {
         if (inBufferSize > sizeof (KLLifetime)) {
             err = kl_check_error (klBufferTooLargeErr);
         } else if (inBufferSize < sizeof (KLLifetime)) {
@@ -1208,21 +1208,21 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_MinimalTicketLifetime) {
-            err = kim_preferences_set_minimum_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_minimum_lifetime (prefs, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_MaximalTicketLifetime) {
-            err = kim_preferences_set_maximum_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_maximum_lifetime (prefs, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_MinimalRenewableLifetime) {
-            err = kim_preferences_set_minimum_renewal_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_minimum_renewal_lifetime (prefs, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_MaximalRenewableLifetime) {
-            err = kim_preferences_set_maximum_renewal_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_maximum_renewal_lifetime (prefs, *(KLLifetime *)inBuffer);
         }   
         
-    } else if (!err && (inOption == loginOption_DefaultRenewableTicket &&
-                        inOption == loginOption_DefaultForwardableTicket &&
-                        inOption == loginOption_DefaultProxiableTicket &&
+    } else if (!err && (inOption == loginOption_DefaultRenewableTicket ||
+                        inOption == loginOption_DefaultForwardableTicket ||
+                        inOption == loginOption_DefaultProxiableTicket ||
                         inOption == loginOption_DefaultAddresslessTicket)) {
         kim_options options = NULL;
         
@@ -1237,16 +1237,16 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_DefaultRenewableTicket) {
-            err = kim_options_set_renewable (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_renewable (options, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultForwardableTicket) {
-            err = kim_options_set_forwardable (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_forwardable (options, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultProxiableTicket) {
-            err = kim_options_set_proxiable (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_proxiable (options, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultAddresslessTicket) {
-            err = kim_options_set_addressless (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_addressless (options, *(KLBoolean *)inBuffer);
         }   
         
         if (!err) {
@@ -1255,7 +1255,7 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         
         kim_options_free (&options);
         
-    } else if (!err && (inOption == loginOption_DefaultTicketLifetime &&
+    } else if (!err && (inOption == loginOption_DefaultTicketLifetime ||
                         inOption == loginOption_DefaultRenewableLifetime)) {
         kim_options options = NULL;
         
@@ -1270,10 +1270,10 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_DefaultTicketLifetime) {
-            err = kim_options_set_lifetime (options, *(kim_lifetime *)inBuffer);
+            err = kim_options_set_lifetime (options, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultRenewableLifetime) {
-            err = kim_options_set_renewal_lifetime (options, *(kim_lifetime *)inBuffer);
+            err = kim_options_set_renewal_lifetime (options, *(KLLifetime *)inBuffer);
         }   
         
         if (!err) {
