@@ -26,8 +26,6 @@
 
 #ifdef KIM_TO_KLL_SHIM
 
-#define KERBEROSLOGIN_DEPRECATED
-
 #include "CredentialsCache.h"
 #include "KerberosLogin.h"
 #include "KerberosLoginPrivate.h"
@@ -35,6 +33,19 @@
 #include "kim_private.h"
 #include "k5-thread.h"
 #include <time.h>
+
+/* 
+ * Deprecated Error codes 
+ */
+enum {
+    /* Carbon Dialog errors */
+    klDialogDoesNotExistErr             = 19676,
+    klDialogAlreadyExistsErr,
+    klNotInForegroundErr,
+    klNoAppearanceErr,
+    klFatalDialogErr,
+    klCarbonUnavailableErr    
+};
 
 krb5_get_init_creds_opt *__KLLoginOptionsGetKerberos5Options (KLLoginOptions ioOptions);
 KLTime __KLLoginOptionsGetStartTime (KLLoginOptions ioOptions);
@@ -161,7 +172,7 @@ KLStatus KLAcquireNewTicketsWithPassword (KLPrincipal      inPrincipal,
 
 /* ------------------------------------------------------------------------ */
 
-KLStatus KLSetApplicationOptions (const KLApplicationOptions *inAppOptions)
+KLStatus KLSetApplicationOptions (const void *inAppOptions)
 {
     /* Deprecated */
     return kl_check_error (klNoErr);
@@ -169,10 +180,14 @@ KLStatus KLSetApplicationOptions (const KLApplicationOptions *inAppOptions)
 
 /* ------------------------------------------------------------------------ */
 
-KLStatus KLGetApplicationOptions (KLApplicationOptions *outAppOptions)
+KLStatus KLGetApplicationOptions (void *outAppOptions)
 {
-    /* Deprecated */
-    return kl_check_error (klNoErr);
+    /* Deprecated -- this function took a struct declared on the caller's
+     * stack.  It used to fill in the struct with information about the
+     * Mac OS 9 dialog used for automatic prompting.  Since there is no
+     * way for us provide valid values, just leave the struct untouched
+     * and return a reasonable error. */
+    return kl_check_error (klDialogDoesNotExistErr);
 }
 
 /* ------------------------------------------------------------------------ */

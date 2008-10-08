@@ -34,6 +34,12 @@
 #    endif
 #endif
 
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 30203
+# define KERBEROSLOGIN_DEPRECATED __attribute__((deprecated))
+#else
+# define KERBEROSLOGIN_DEPRECATED
+#endif
+
 #include <sys/types.h>
 #include <krb5.h>
 
@@ -152,16 +158,6 @@ enum {
     klInsecurePasswordErr,
     klPasswordChangeFailedErr,
     
-#ifdef KERBEROSLOGIN_DEPRECATED
-    /* Dialog errors -- deprecated */
-    klDialogDoesNotExistErr             = 19676,
-    klDialogAlreadyExistsErr,
-    klNotInForegroundErr,
-    klNoAppearanceErr,
-    klFatalDialogErr,
-    klCarbonUnavailableErr,
-#endif
-    
     /* Login IPC errors */
     klCantContactServerErr              = 19776,
     klCantDisplayUIErr,
@@ -191,18 +187,6 @@ typedef	int16_t   KLSInt16;               /* used for Darwin-compat for KLApplic
 typedef void (*KLIdleCallback) (KLRefCon appData);
 #define CallKLIdleCallback(userRoutine, appData) ((userRoutine) (appData))
 
-#ifdef KERBEROSLOGIN_DEPRECATED
-
-/* Application options */
-typedef struct {
-    void *   deprecatedEventFilter;
-    KLRefCon deprecatedEventFilterAppData;
-    KLSInt16 deprecatedRealmsPopupMenuID;
-    KLSInt16 deprecatedLoginModeMenuID;
-} KLApplicationOptions;
-
-#endif
-
 /* Principal information */
 typedef kim_identity KLPrincipal;
 
@@ -216,31 +200,35 @@ typedef kim_options KLLoginOptions;
  */
 
 /* Deprecated functions -- provided for compatibility with KfM 4.0 */
-#ifdef KERBEROSLOGIN_DEPRECATED
 
 KLStatus KLAcquireTickets (KLPrincipal   inPrincipal,
                            KLPrincipal  *outPrincipal,
-                           char        **outCredCacheName);
+                           char        **outCredCacheName) 
+    KERBEROSLOGIN_DEPRECATED;
 
 KLStatus KLAcquireNewTickets (KLPrincipal  inPrincipal,
                               KLPrincipal  *outPrincipal,
-                              char        **outCredCacheName);
+                              char        **outCredCacheName) 
+    KERBEROSLOGIN_DEPRECATED;
 
 KLStatus KLAcquireTicketsWithPassword (KLPrincipal      inPrincipal,
                                        KLLoginOptions   inLoginOptions,
                                        const char      *inPassword,
-                                       char           **outCredCacheName);
+                                       char           **outCredCacheName) 
+    KERBEROSLOGIN_DEPRECATED;
 
 KLStatus KLAcquireNewTicketsWithPassword (KLPrincipal      inPrincipal,
                                           KLLoginOptions   inLoginOptions,
                                           const char      *inPassword,
-                                          char           **outCredCacheName);
+                                          char           **outCredCacheName) 
+    KERBEROSLOGIN_DEPRECATED;
 
-KLStatus KLSetApplicationOptions (const KLApplicationOptions *inAppOptions);
+KLStatus KLSetApplicationOptions (const void *inAppOptions) 
+    KERBEROSLOGIN_DEPRECATED;
 
-KLStatus KLGetApplicationOptions (KLApplicationOptions *outAppOptions);
+KLStatus KLGetApplicationOptions (void *outAppOptions) 
+    KERBEROSLOGIN_DEPRECATED;
 
-#endif
 
 /* Kerberos Login high-level API */
 KLStatus KLAcquireInitialTickets (KLPrincipal      inPrincipal,
