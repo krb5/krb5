@@ -42,6 +42,7 @@
     IBOutlet NSTextField *headerTextField;
     IBOutlet NSTextField *explanationTextField;
     
+    IBOutlet NSScrollView *identityTableScrollView;
     IBOutlet NSTableView *identityTableView;
     IBOutlet NSButton *addIdentityButton;
     IBOutlet NSPopUpButton *actionPopupButton;

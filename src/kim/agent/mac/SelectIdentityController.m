@@ -99,6 +99,22 @@
 
 // ---------------------------------------------------------------------------
 
+- (NSRect) windowWillUseStandardFrame: (NSWindow *) window defaultFrame: (NSRect) defaultFrame
+{
+    NSRect newFrame = [window frame];
+    CGFloat oldHeight = [[identityTableScrollView contentView] frame].size.height;
+    CGFloat newHeight = [identityTableView numberOfRows] * 
+                        ([identityTableView rowHeight] + [identityTableView intercellSpacing].height);
+    CGFloat yDelta = newHeight - oldHeight;
+    
+    newFrame.origin.y -= yDelta;
+    newFrame.size.height += yDelta;
+    
+    return newFrame;
+}
+
+// ---------------------------------------------------------------------------
+
 - (void) setContent: (NSMutableDictionary *) newContent
 {
     [self window]; // wake up the nib connections
