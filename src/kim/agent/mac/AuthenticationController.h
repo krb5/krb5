@@ -105,5 +105,7 @@
 - (IBAction) changePasswordGearAction: (id) sender;
 
 - (void) swapView: (NSView *) aView;
+- (void) showSpinny;
+- (void) hideSpinny;
 
 @end

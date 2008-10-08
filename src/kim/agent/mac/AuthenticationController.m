@@ -218,7 +218,7 @@
     [glueController setValue:message
                   forKeyPath:message_keypath];
 
-    [enterSpinny stopAnimation:nil];
+    [self hideSpinny];
 
     [self swapView:identityView];
 
@@ -231,8 +231,7 @@
 {
     uint32_t type = [[glueController valueForKeyPath:@"content.prompt_type"] unsignedIntegerValue];
     
-    [passwordSpinny stopAnimation:nil];
-    [samSpinny stopAnimation:nil];
+    [self hideSpinny];
 
     switch (type) {
         case kim_prompt_type_password :
@@ -307,6 +306,24 @@
     
 }
 
+- (void) showSpinny
+{
+    [enterSpinny          startAnimation: nil];
+    [passwordSpinny       startAnimation: nil];
+    [samSpinny            startAnimation: nil];
+    [changePasswordSpinny startAnimation: nil];
+    [[self window] setIgnoresMouseEvents:YES];
+}
+
+- (void) hideSpinny
+{
+    [enterSpinny          stopAnimation: nil];
+    [passwordSpinny       stopAnimation: nil];
+    [samSpinny            stopAnimation: nil];
+    [changePasswordSpinny stopAnimation: nil];    
+    [[self window] setIgnoresMouseEvents:NO];
+}
+
 - (void) showSAM
 {
     // set badge
@@ -358,7 +375,7 @@
     // set badge
     [changePasswordBadge setBadgePath:associatedClient.path];
     
-    [changePasswordSpinny stopAnimation:nil];
+    [self hideSpinny];
     
     [self swapView:changePasswordView];
     
@@ -515,7 +532,7 @@
         options = [glueController valueForKeyPath:options_keypath];
     }
     
-    [enterSpinny startAnimation:nil];
+    [self showSpinny];
     
     // the principal must already be valid to get this far
     [associatedClient didEnterIdentity:expandedString options:options wantsChangePassword:YES];
@@ -535,7 +552,7 @@
         options = [glueController valueForKeyPath:options_keypath];
     }
     
-    [enterSpinny startAnimation:nil];
+    [self showSpinny];
 
     // the principal must already be valid to get this far
     [associatedClient didEnterIdentity:expandedString options:options wantsChangePassword:NO];
@@ -549,8 +566,8 @@
     if (!saveResponse) {
         saveResponse = [NSNumber numberWithBool:NO];
     }
-    [passwordSpinny startAnimation:nil];
-    [samSpinny startAnimation:nil];
+
+    [self showSpinny];
     [associatedClient didPromptForAuth:responseString
                           saveResponse:saveResponse];
 }
@@ -561,7 +578,7 @@
     NSString *newString = [glueController valueForKeyPath:new_password_keypath];
     NSString *verifyString = [glueController valueForKeyPath:verify_password_keypath];
     
-    [changePasswordSpinny startAnimation:nil];
+    [self showSpinny];
     
     [associatedClient didChangePassword:oldString
                             newPassword:newString
