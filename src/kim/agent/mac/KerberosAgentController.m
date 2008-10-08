@@ -64,7 +64,6 @@
 - (void) quitIfIdle: (NSTimer *) timer
 {
     if ([self.clients count] == 0) {
-        NSLog(@"No active clients. Terminating.");
         [NSApp terminate:nil];
     }
     autoQuitTimer = nil;
