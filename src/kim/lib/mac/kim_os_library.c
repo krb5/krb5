@@ -25,7 +25,6 @@
  */
 
 #include <CoreFoundation/CoreFoundation.h>
-#include <ApplicationServices/ApplicationServices.h>
 #include <mach-o/dyld.h>
 #include <Kerberos/kipc_session.h>
 #include "k5-int.h"
