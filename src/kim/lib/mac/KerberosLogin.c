@@ -203,13 +203,9 @@ KLStatus KLAcquireInitialTickets (KLPrincipal      inPrincipal,
     kim_identity identity = NULL;
     
     if (!err) {
-        err = kim_ccache_create_from_client_identity (&ccache, 
-                                                      inPrincipal);
-        
-        if (err) {
-            /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new (&ccache, inPrincipal, inLoginOptions);
-        }
+        err = kim_ccache_create_new_if_needed (&ccache, 
+                                               inPrincipal,
+                                               inLoginOptions);
     }
     
     if (!err && outPrincipal) {
@@ -285,7 +281,9 @@ KLStatus KLDestroyTickets (KLPrincipal inPrincipal)
     kim_error err = KIM_NO_ERROR;
     kim_ccache ccache = NULL;
     
-    err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    if (!err) {
+        err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    }
     
     if (!err) {
         err = kim_ccache_destroy (&ccache);
@@ -303,9 +301,6 @@ KLStatus KLChangePassword (KLPrincipal inPrincipal)
 
 /* ------------------------------------------------------------------------ */
 
-
-/* Kerberos Login dialog low level functions */
-
 KLStatus KLAcquireInitialTicketsWithPassword (KLPrincipal      inPrincipal,
                                               KLLoginOptions   inLoginOptions,
                                               const char      *inPassword,
@@ -315,16 +310,10 @@ KLStatus KLAcquireInitialTicketsWithPassword (KLPrincipal      inPrincipal,
     kim_ccache ccache = NULL;
     
     if (!err) {
-        err = kim_ccache_create_from_client_identity (&ccache, 
-                                                      inPrincipal);
-        
-        if (err) {
-            /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new_with_password (&ccache, 
-                                                       inPrincipal,
-                                                       inLoginOptions,
-                                                       inPassword);
-        }
+        err = kim_ccache_create_new_if_needed_with_password (&ccache, 
+                                                             inPrincipal,
+                                                             inLoginOptions,
+                                                             inPassword);
     }
     
     if (!err && outCredCacheName) {
@@ -676,11 +665,7 @@ KLStatus KLCacheHasValidTickets (KLPrincipal         inPrincipal,
     if (!outFoundValidTickets) { err = kl_check_error (klParameterErr); }
     
     if (!err) {
-        if (inPrincipal) {
-            err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
-        } else {
-            err = kim_ccache_create_from_default (&ccache);
-        }
+        err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
     }
     
     if (!err) {
@@ -689,6 +674,10 @@ KLStatus KLCacheHasValidTickets (KLPrincipal         inPrincipal,
     
     if (!err && outPrincipal) {
         err = kim_ccache_get_client_identity (ccache, &identity);
+        if (err) {
+            err = KIM_NO_ERROR;
+            identity = NULL;
+        } 
     }
     
     if (!err && outCredCacheName) {

@@ -254,6 +254,19 @@ kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
                                            kim_identity  in_client_identity,
                                            kim_options   in_options)
 {
+    return check_error (kim_ccache_create_new_if_needed_with_password (out_ccache,
+                                                                       in_client_identity,
+                                                                       in_options,
+                                                                       NULL));
+}
+
+/* ------------------------------------------------------------------------ */
+
+kim_error kim_ccache_create_new_if_needed_with_password (kim_ccache   *out_ccache,
+                                                         kim_identity  in_client_identity,
+                                                         kim_options   in_options,
+                                                         kim_string    in_password)
+{
     kim_error err = KIM_NO_ERROR;
     kim_ccache ccache = NULL;
     
@@ -263,7 +276,8 @@ kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
     if (!err) {
         kim_credential_state state;
         
-        err = kim_ccache_create_from_client_identity (&ccache, in_client_identity);
+        err = kim_ccache_create_from_client_identity (&ccache, 
+                                                      in_client_identity);
         
         if (!err) {
             err = kim_ccache_get_state (ccache, &state);
@@ -280,7 +294,10 @@ kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
         
         if (!ccache) {
             /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new (&ccache, in_client_identity, in_options);
+            err = kim_ccache_create_new_with_password (&ccache, 
+                                                       in_client_identity, 
+                                                       in_options, 
+                                                       in_password);
         }        
     }
     
@@ -300,55 +317,61 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
                                                   kim_identity  in_client_identity)
 {
     kim_error err = KIM_NO_ERROR;
-    kim_ccache_iterator iterator = NULL;
-    kim_boolean found = FALSE;
     
-    if (!err && !out_ccache        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_client_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    if (!err && !out_ccache) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err) {
+    if (!err && in_client_identity) {
+        kim_ccache_iterator iterator = NULL;
+        kim_boolean found = FALSE;
+
         err = kim_ccache_iterator_create (&iterator);
-    }
-    
-    while (!err && !found) {
-        kim_ccache ccache = NULL;
-        kim_identity identity = NULL;
-        kim_comparison comparison;
         
-        err = kim_ccache_iterator_next (iterator, &ccache);
-        
-        if (!err && !ccache) {
-            kim_string string = NULL;
+        while (!err && !found) {
+            kim_ccache ccache = NULL;
+            kim_identity identity = NULL;
+            kim_comparison comparison;
             
-            err = kim_identity_get_display_string (in_client_identity, &string);
+            err = kim_ccache_iterator_next (iterator, &ccache);
             
-            if (!err) {
-                err = kim_error_set_message_for_code (KIM_NO_SUCH_PRINCIPAL_ERR, 
-                                                      string);
+            if (!err && !ccache) {
+                kim_string string = NULL;
+                
+                err = kim_identity_get_display_string (in_client_identity, 
+                                                       &string);
+                
+                if (!err) {
+                    err = kim_error_set_message_for_code (KIM_NO_SUCH_PRINCIPAL_ERR, 
+                                                          string);
+                }
+                
+                kim_string_free (&string);
             }
             
-            kim_string_free (&string);
+            if (!err) {
+                err = kim_ccache_get_client_identity (ccache, &identity);
+            }
+            
+            if (!err) {
+                err = kim_identity_compare (in_client_identity, identity, 
+                                            &comparison);
+            }
+            
+            if (!err && kim_comparison_is_equal_to (comparison)) {
+                found = 1;
+                *out_ccache = ccache;
+                ccache = NULL;
+            }
+            
+            kim_identity_free (&identity);
+            kim_ccache_free (&ccache);
         }
         
-        if (!err) {
-            err = kim_ccache_get_client_identity (ccache, &identity);
-        }
+        kim_ccache_iterator_free (&iterator);
         
-        if (!err) {
-            err = kim_identity_compare (in_client_identity, identity, &comparison);
-        }
-        
-        if (!err && kim_comparison_is_equal_to (comparison)) {
-            found = 1;
-            *out_ccache = ccache;
-            ccache = NULL;
-        }
-        
-        kim_identity_free (&identity);
-        kim_ccache_free (&ccache);
+    } else if (!err) {
+        /* in_client_identity is NULL, get default ccache */
+        err = kim_ccache_create_from_default (out_ccache);
     }
-    
-    kim_ccache_iterator_free (&iterator);
     
     return check_error (err);
 }
