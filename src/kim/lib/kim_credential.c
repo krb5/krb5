@@ -556,6 +556,7 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     }
     
     if (principal ) { krb5_free_principal (credential->context, principal); }
+    if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
 
     if (!err) {
         *out_credential = credential;
@@ -563,7 +564,6 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     }
     
     if (options != in_options) { kim_options_free (&options); }
-    if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
     kim_credential_free (&credential);
     
     return check_error (err);
