@@ -91,6 +91,7 @@ kim_error kim_options_create (kim_options *out_options)
 {
     kim_error err = KIM_NO_ERROR;
     kim_preferences preferences = NULL;
+    kim_options options = KIM_OPTIONS_DEFAULT;
     
     if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
@@ -99,9 +100,19 @@ kim_error kim_options_create (kim_options *out_options)
     }
     
     if (!err) {
-        err = kim_preferences_get_options (preferences, out_options);
+        err = kim_preferences_get_options (preferences, &options);
     }
     
+    if (!err && !options) {
+        err = kim_options_allocate (&options);
+    }
+    
+    if (!err) {
+        *out_options = options;
+        options = NULL; /* caller takes ownership */
+    }
+    
+    kim_options_free (&options);
     kim_preferences_free (&preferences);
     
     return check_error (err);
