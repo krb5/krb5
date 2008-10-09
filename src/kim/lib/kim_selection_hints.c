@@ -372,11 +372,7 @@ kim_error kim_selection_hints_get_options (kim_selection_hints  in_selection_hin
     if (!err && !out_options       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        if (in_selection_hints->options) {
-            err = kim_options_copy (out_options, in_selection_hints->options);
-        } else {
-            *out_options = KIM_OPTIONS_DEFAULT;
-        }
+        err = kim_options_copy (out_options, in_selection_hints->options);
     }
     
     return check_error (err);

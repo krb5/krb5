@@ -177,7 +177,8 @@ kim_error kim_preferences_set_options (kim_preferences io_preferences,
 /*!
  * \param in_preferences a preferences object.
  * \param out_options    on exit, the options specified in \a in_preferences.
- *                        Must be freed with kim_options_free().
+ *                       May be KIM_OPTIONS_DEFAULT.
+ *                       If not, must be freed with kim_options_free().
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the user's preferred options.
  * \sa kim_preferences_set_options()

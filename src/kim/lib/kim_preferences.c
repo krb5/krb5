@@ -230,7 +230,7 @@ kim_error kim_favorites_add_identity (kim_favorites io_favorites,
 {
     kim_error err = KIM_NO_ERROR;
     kim_identity identity = NULL;
-    kim_options options = NULL;
+    kim_options options = KIM_OPTIONS_DEFAULT;
     kim_count insert_at = 0;
     
     if (!err && !io_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }

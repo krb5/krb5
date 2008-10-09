@@ -185,7 +185,8 @@ kim_error kim_options_create (kim_options *out_options);
 
 /*!
  * \param out_options on exit, a new options object which is a copy of \a in_options.  
- *                    Must be freed with kim_options_free().
+ *                    Must be freed with kim_options_free().  If passed KIM_OPTIONS_DEFAULT
+ *                    will set \a out_options to KIM_OPTIONS_DEFAULT.
  * \param in_options  a options object. 
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Copy options.
