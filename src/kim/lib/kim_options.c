@@ -116,7 +116,6 @@ kim_error kim_options_copy (kim_options *out_options,
     kim_options options = KIM_OPTIONS_DEFAULT;
     
     if (!err && !out_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    if (!err && !in_options ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && in_options != KIM_OPTIONS_DEFAULT) {
         err = kim_options_allocate (&options);
