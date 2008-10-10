@@ -67,6 +67,8 @@ kim_error kim_os_string_create_localized (kim_string *out_string,
         if (!err && cfstring) {
             err = kim_os_string_create_from_cfstring (&string, cfstring);
         }
+        
+        if (cfstring) { CFRelease (cfstring); }
     }
     
     if (!err && !string) {
