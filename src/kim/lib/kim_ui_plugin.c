@@ -29,11 +29,10 @@
 #include "kim_private.h"
 
 
+const char * const *kim_ui_plugin_files = NULL;
 #if TARGET_OS_MAC
-const char * const kim_ui_plugin_files[] = { "KerberosUI", NULL };
 static const char *kim_ui_plugin_dirs[] = { KRB5_KIM_UI_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/kimui", NULL };
 #else
-const char * const *kim_ui_plugin_files = NULL;
 static const char *kim_ui_plugin_dirs[] = { LIBDIR "/krb5/plugins/kimui", NULL };
 #endif
 
