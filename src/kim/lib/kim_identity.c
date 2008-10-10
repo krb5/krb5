@@ -689,7 +689,7 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
         kim_error rejected_err = KIM_NO_ERROR;
         kim_string rejected_message = NULL;
         kim_string rejected_description = NULL;
-        kim_boolean was_prompted = 0;
+        kim_boolean was_prompted = 0;   /* ignore because we always prompt */
         
         err = kim_ui_change_password (in_ui_context,
                                       in_identity,
@@ -747,17 +747,12 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                        rejected_description);
             
         } else if (err && err != KIM_USER_CANCELED_ERR) {
-            /*  new creds failed, report error to user */
-            kim_error terr = KIM_NO_ERROR;
-            
-            terr = kim_ui_handle_kim_error (in_ui_context, in_identity, 
-                                            kim_ui_error_type_change_password,
-                                            err);
-            
-            if (was_prompted || err == KIM_PASSWORD_MISMATCH_ERR) {
-                /* User could have entered bad info so let them try again. */
-                err = terr;
-            }
+            /* New creds failed, report error to user.
+             * Overwrite error so we loop and let the user try again.
+             * The user always gets prompted so we always loop. */
+            err = kim_ui_handle_kim_error (in_ui_context, in_identity, 
+                                           kim_ui_error_type_change_password,
+                                           err);
             
         } else {
             /* password change succeeded or the user gave up */
@@ -786,6 +781,7 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
         
         kim_string_free (&rejected_message);
         kim_string_free (&rejected_description);
+        
         kim_ui_free_string (in_ui_context, &old_password);
         kim_ui_free_string (in_ui_context, &new_password);
         kim_ui_free_string (in_ui_context, &verify_password);         
