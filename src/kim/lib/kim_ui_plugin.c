@@ -331,7 +331,7 @@ kim_error kim_ui_plugin_fini (kim_ui_context *io_context)
         kim_ui_plugin_context context = (kim_ui_plugin_context) io_context->tcontext;
         
         if (context) {
-            err = context->ftable->fini (&context->plugin_context);
+            err = context->ftable->fini (context->plugin_context);
         }
 
         if (!err) {
