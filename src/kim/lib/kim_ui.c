@@ -319,9 +319,9 @@ krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
         
         /* Clean up reply buffer.  Saved passwords are allocated by KIM. */
         if (reply) {
-            memset (reply, '\0', strlen (reply));
-            if (got_saved_password) {
-                kim_string_free ((kim_string *) &reply);
+           if (got_saved_password) {
+               memset (reply, '\0', strlen (reply));
+               kim_string_free ((kim_string *) &reply);
              } else {
                 kim_ui_free_string (context, &reply);
             }
@@ -445,6 +445,9 @@ void kim_ui_free_string (kim_ui_context  *in_context,
     kim_error err = kim_ui_init_lazy (in_context);
     
     if (!err && in_context && io_string && *io_string) {
+        /* most ui strings are auth information so zero before freeing */
+        memset (*io_string, '\0', strlen (*io_string));
+        
         if (in_context->type == kim_ui_type_gui_plugin) {
             kim_ui_plugin_free_string (in_context, 
                                        io_string);
