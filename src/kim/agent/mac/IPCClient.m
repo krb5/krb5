@@ -76,6 +76,7 @@ enum krb_agent_client_state {
         self.authController = [[[AuthenticationController alloc] init] autorelease];
         self.selectController.associatedClient = self;
         self.authController.associatedClient = self;
+        self.currentInfo = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -84,6 +85,9 @@ enum krb_agent_client_state {
 {
     [self.selectController close];
     [self.authController close];
+    self.selectController = nil;
+    self.authController = nil;
+    self.currentInfo = nil;
 }
 
 - (void) didCancel
@@ -109,7 +113,7 @@ enum krb_agent_client_state {
 
 - (kim_error) selectIdentity: (NSDictionary *) info
 {
-    self.currentInfo = [[info mutableCopy] autorelease];
+    [self.currentInfo addEntriesFromDictionary:info];
     self.state = ipc_client_state_select;
     
     [self.selectController setContent:self.currentInfo];
@@ -137,13 +141,12 @@ enum krb_agent_client_state {
     [KerberosAgentListener didSelectIdentity:self.currentInfo error:0];
     
     // clean up state
-    self.currentInfo = nil;
     self.state = ipc_client_state_idle;
 }
 
 - (kim_error) enterIdentity: (NSDictionary *) info
 {
-    self.currentInfo = [[info mutableCopy] autorelease];
+    [self.currentInfo addEntriesFromDictionary:info];
     self.state = ipc_client_state_enter;
 
     [self.authController setContent:self.currentInfo];
@@ -164,7 +167,7 @@ enum krb_agent_client_state {
 
 - (kim_error) promptForAuth: (NSDictionary *) info
 {
-    self.currentInfo = [[info mutableCopy] autorelease];
+    [self.currentInfo addEntriesFromDictionary:info];
     self.state = ipc_client_state_auth_prompt;
     
     [self.authController setContent:self.currentInfo];
@@ -182,7 +185,7 @@ enum krb_agent_client_state {
 
 - (kim_error) changePassword: (NSDictionary *) info
 {
-    self.currentInfo = [[info mutableCopy] autorelease];
+    [self.currentInfo addEntriesFromDictionary:info];
     self.state = ipc_client_state_change_password;
     
     [self.authController setContent:self.currentInfo];
@@ -204,7 +207,7 @@ enum krb_agent_client_state {
 
 - (kim_error) handleError: (NSDictionary *) info
 {
-    self.currentInfo = [[info mutableCopy] autorelease];
+    [self.currentInfo addEntriesFromDictionary:info];
     self.state = ipc_client_state_handle_error;
     
     [self.authController setContent:self.currentInfo];
