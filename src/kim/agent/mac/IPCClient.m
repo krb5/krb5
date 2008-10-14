@@ -71,12 +71,34 @@ enum krb_agent_client_state {
 {
     self = [super init];
     if (self != nil) {
+        kim_error err = KIM_NO_ERROR;
+        kim_preferences prefs = NULL;
+        kim_identity identity = NULL;
+        kim_string identity_string = NULL;
+        
         self.state = ipc_client_state_init;
         self.selectController = [[[SelectIdentityController alloc] init] autorelease];
         self.authController = [[[AuthenticationController alloc] init] autorelease];
         self.selectController.associatedClient = self;
         self.authController.associatedClient = self;
         self.currentInfo = [NSMutableDictionary dictionary];
+        
+        // pre-populate the identity_string if there's a default identity
+        err = kim_preferences_create(&prefs);
+        if (!err && prefs) {
+            err = kim_preferences_get_client_identity(prefs, &identity);
+        }
+        if (!err && identity) {
+            err = kim_identity_get_display_string(identity, &identity_string);
+        }
+        if (!err && identity_string) {
+            [self.currentInfo setObject:[NSString stringWithUTF8String:identity_string]
+                                 forKey:@"identity_string"];
+        }
+        
+        kim_string_free(&identity_string);
+        kim_identity_free(&identity);
+        kim_preferences_free(&prefs);
     }
     return self;
 }
