@@ -174,6 +174,8 @@ kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context,
         const char *message = krb5_get_error_message (in_context, in_code);
         
         err = kim_error_set_message (in_code, message);
+        
+        if (message) { krb5_free_error_message (in_context, message); }
     }
     
     return err ? err : in_code;
