@@ -41,9 +41,12 @@ int32_t k5_ipc_server_handle_request (mach_port_t   in_connection_port,
 
 /* Server control functions */
 
+/* WARNING: Currently only supports running server loop on a single thread! */
 int32_t k5_ipc_server_listen_loop (void);
 
 int32_t k5_ipc_server_send_reply (mach_port_t   in_reply_pipe,
                                   k5_ipc_stream in_reply_stream);
+
+void k5_ipc_server_quit (void);
 
 #endif /* K5_MIG_SERVER */
