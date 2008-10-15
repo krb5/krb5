@@ -25,8 +25,8 @@
  */
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <Security/AuthSession.h>
 #include <mach-o/dyld.h>
-#include <Kerberos/kipc_session.h>
 #include "k5-int.h"
 #include "k5-thread.h"
 #include <krb5/krb5.h>
@@ -96,14 +96,45 @@ kim_error kim_os_library_unlock_for_bundle_lookup (void)
 
 kim_ui_environment kim_os_library_get_ui_environment (void)
 {
-#ifndef LEAN_CLIENT
-    kipc_session_attributes_t attributes = kipc_session_get_attributes ();
+#ifdef KIM_BUILTIN_UI
+    kim_boolean has_gui_access = 0;
+    SessionAttributeBits sattrs = 0L;    
     
-    if (attributes & kkipc_session_caller_uses_gui) {
-        return KIM_UI_ENVIRONMENT_GUI;
-    } else if (attributes & kkipc_session_has_cli_access) {
-        return KIM_UI_ENVIRONMENT_CLI;
-    } else if (attributes & kkipc_session_has_gui_access) {
+    has_gui_access = ((SessionGetInfo (callerSecuritySession, 
+                                       NULL, &sattrs) == noErr) && 
+                      (sattrs & sessionHasGraphicAccess));
+    
+    if (has_gui_access) {
+        /* Check for the HIToolbox (Carbon) or AppKit (Cocoa).  
+         * If either is loaded, we are a GUI app! */
+        CFBundleRef appKitBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.AppKit"));
+        CFBundleRef hiToolBoxBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.HIToolbox"));
+        
+        if (hiToolBoxBundle && CFBundleIsExecutableLoaded (hiToolBoxBundle)) {
+            /* Using Carbon */
+            return KIM_UI_ENVIRONMENT_GUI;
+        }
+        
+        if (appKitBundle && CFBundleIsExecutableLoaded (appKitBundle)) {
+            /* Using Cocoa */
+            return KIM_UI_ENVIRONMENT_GUI;
+        }
+    }
+    
+    {
+        int fd_stdin = fileno (stdin);
+        int fd_stdout = fileno (stdout);
+        char *fd_stdin_name = ttyname (fd_stdin);
+        
+        /* Session info isn't reliable for remote sessions.
+         * Check manually for terminal access with file descriptors */
+        if (isatty (fd_stdin) && isatty (fd_stdout) && fd_stdin_name) {
+            return KIM_UI_ENVIRONMENT_CLI;
+        }
+    }
+    
+    /* If we don't have a CLI but can talk to the GUI, use that */
+    if (has_gui_access) {
         return KIM_UI_ENVIRONMENT_GUI;
     }
     
