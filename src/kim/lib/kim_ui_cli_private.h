@@ -27,7 +27,7 @@
 #ifndef KIM_UI_CLI_PRIVATE_H
 #define KIM_UI_CLI_PRIVATE_H
 
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
 
 #include <kim/kim.h>
 
@@ -75,6 +75,6 @@ void kim_ui_cli_free_string (kim_ui_context  *in_context,
 
 kim_error kim_ui_cli_fini (kim_ui_context *in_context);
 
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
 
 #endif /* KIM_UI_CLI_PRIVATE_H */

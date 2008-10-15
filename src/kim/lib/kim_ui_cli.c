@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
 
 #include "kim_private.h"
 
@@ -468,4 +468,4 @@ kim_error kim_ui_cli_fini (kim_ui_context *io_context)
     return KIM_NO_ERROR;
 }
 
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */

@@ -51,15 +51,15 @@ static kim_error kim_ui_init_lazy (kim_ui_context *io_context)
     if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err && !io_context->initialized) {
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
         kim_ui_environment environment = kim_library_ui_environment ();
         
         if (environment == KIM_UI_ENVIRONMENT_GUI) {
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
             io_context->type = kim_ui_type_gui_plugin;
             
             err = kim_ui_plugin_init (io_context);
-#ifndef LEAN_CLIENT        
+#ifdef KIM_BUILTIN_UI        
             if (err) { 
                 io_context->type = kim_ui_type_gui_builtin;
                 
@@ -76,7 +76,7 @@ static kim_error kim_ui_init_lazy (kim_ui_context *io_context)
             
             err = check_error (KIM_NO_UI_ERR);
         }
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
 
         if (!err) {
             io_context->initialized = 1;
@@ -133,7 +133,7 @@ kim_error kim_ui_enter_identity (kim_ui_context      *in_context,
                                                 out_identity,
                                                 out_change_password);
             
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
         } else if (in_context->type == kim_ui_type_gui_builtin) {
             err = kim_os_ui_gui_enter_identity (in_context, 
                                                 io_options,
@@ -146,7 +146,7 @@ kim_error kim_ui_enter_identity (kim_ui_context      *in_context,
                                              out_identity,
                                              out_change_password);
             
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
             
         } else {
             err = check_error (KIM_NO_UI_ERR);
@@ -181,7 +181,7 @@ kim_error kim_ui_select_identity (kim_ui_context      *in_context,
                                                  out_identity,
                                                  out_change_password);
             
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
         } else if (in_context->type == kim_ui_type_gui_builtin) {
             err = kim_os_ui_gui_select_identity (in_context, 
                                                  io_hints,
@@ -194,7 +194,7 @@ kim_error kim_ui_select_identity (kim_ui_context      *in_context,
                                               out_identity,
                                               out_change_password);
             
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
             
         } else {
             err = check_error (KIM_NO_UI_ERR);
@@ -263,7 +263,7 @@ krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
                                                      &reply,
                                                      &save_reply);
                     
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
                 } else if (context->type == kim_ui_type_gui_builtin) {
                     err = kim_os_ui_gui_auth_prompt (context, 
                                                      context->identity, 
@@ -287,7 +287,7 @@ krb5_error_code kim_ui_prompter (krb5_context  in_krb5_context,
                                                   in_prompts[i].prompt,
                                                   &reply,
                                                   &save_reply);
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
                     
                 } else {
                     err = check_error (KIM_NO_UI_ERR);
@@ -361,7 +361,7 @@ kim_error kim_ui_change_password (kim_ui_context  *in_context,
                                                  out_new_password,
                                                  out_verify_password);
             
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
         } else if (in_context->type == kim_ui_type_gui_builtin) {
             err = kim_os_ui_gui_change_password (in_context, 
                                                  in_identity, 
@@ -377,7 +377,7 @@ kim_error kim_ui_change_password (kim_ui_context  *in_context,
                                               out_old_password,
                                               out_new_password,
                                               out_verify_password);
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
             
         } else {
             err = check_error (KIM_NO_UI_ERR);
@@ -413,7 +413,7 @@ kim_error kim_ui_handle_error (kim_ui_context *in_context,
                                               in_error_message,
                                               in_error_description);
             
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
         } else if (in_context->type == kim_ui_type_gui_builtin) {
             err = kim_os_ui_gui_handle_error (in_context, 
                                               in_identity, 
@@ -427,7 +427,7 @@ kim_error kim_ui_handle_error (kim_ui_context *in_context,
                                            in_error,
                                            in_error_message,
                                            in_error_description);
-#endif /* LEAN_CLIENT */  
+#endif /* KIM_BUILTIN_UI */  
             
         } else {
             err = check_error (KIM_NO_UI_ERR);
@@ -452,7 +452,7 @@ void kim_ui_free_string (kim_ui_context  *in_context,
             kim_ui_plugin_free_string (in_context, 
                                        io_string);
             
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
         } else if (in_context->type == kim_ui_type_gui_builtin) {
             kim_os_ui_gui_free_string (in_context, 
                                        io_string);
@@ -460,7 +460,7 @@ void kim_ui_free_string (kim_ui_context  *in_context,
         } else if (in_context->type == kim_ui_type_cli) {
             kim_ui_cli_free_string (in_context, 
                                     io_string);
-#endif /* LEAN_CLIENT */    
+#endif /* KIM_BUILTIN_UI */    
         }
     }
 }
@@ -477,13 +477,13 @@ kim_error kim_ui_fini (kim_ui_context *io_context)
         if (io_context->type == kim_ui_type_gui_plugin) {
             err = kim_ui_plugin_fini (io_context);
             
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
         } else if (io_context->type == kim_ui_type_gui_builtin) {
             err = kim_os_ui_gui_fini (io_context);
             
         } else if (io_context->type == kim_ui_type_cli) {
             err = kim_ui_cli_fini (io_context);
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */
             
         } else {
             err = check_error (KIM_NO_UI_ERR);
