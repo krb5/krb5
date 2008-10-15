@@ -829,7 +829,9 @@ proc setup_kerberos_files { } {
 #	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "		admin_database_name = $tmppwd/adb"
 	puts $conffile "		admin_database_lockfile = $tmppwd/adb.lock"
-	puts $conffile "		key_stash_file = $tmppwd/stash"
+	# Testing with a colon in the name exercises default handling
+	# for pathnames.
+	puts $conffile "		key_stash_file = $tmppwd/stash:foo"
 	puts $conffile "		acl_file = $tmppwd/acl"
 	puts $conffile "		kadmind_port = [expr 4 + $portbase]"
 	puts $conffile "		kpasswd_port = [expr 5 + $portbase]"

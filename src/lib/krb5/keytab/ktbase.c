@@ -181,6 +181,11 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
             return ENOMEM;
 
         resid = name;
+    } else if (name[0] == '/') {
+	pfx = strdup("FILE");
+	if (!pfx)
+	    return ENOMEM;
+	resid = name;
     } else {
         resid = name + pfxlen + 1;
 	
