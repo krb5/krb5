@@ -255,7 +255,6 @@ static kim_error kim_ui_cli_ask_change_password (kim_string in_identity_string)
 {
     kim_error err = KIM_NO_ERROR;
     kim_string ask_change_password = NULL;
-    kim_string answer_options = NULL;
     kim_string yes = NULL;
     kim_string no = NULL;
     kim_string unknown_response = NULL;
@@ -314,7 +313,6 @@ static kim_error kim_ui_cli_ask_change_password (kim_string in_identity_string)
     }
     
     kim_string_free (&ask_change_password);
-    kim_string_free (&answer_options);
     kim_string_free (&yes);
     kim_string_free (&no);
     kim_string_free (&unknown_response);
