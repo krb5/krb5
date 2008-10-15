@@ -892,87 +892,18 @@ snprintf(char *str, size_t size, const char *format, ...)
 #endif /* win32? */
 #endif /* no vsnprintf */
 
-#ifndef HAVE_VASPRINTF
-
 #if !defined(__cplusplus) && (__GNUC__ > 2)
-static inline int k5_vasprintf(char **, const char *, va_list)
+extern int krb5int_vasprintf(char **, const char *, va_list)
     __attribute__((__format__(__printf__, 2, 0)));
-static inline int k5_asprintf(char **, const char *, ...)
+extern int krb5int_asprintf(char **, const char *, ...)
     __attribute__((__format__(__printf__, 2, 3)));
 #endif
 
-#define vasprintf k5_vasprintf
-/* On error: BSD: Set *ret to NULL.  GNU: *ret is undefined.
+#ifndef HAVE_VASPRINTF
 
-   Since we want to be able to use the GNU version directly, we need
-   provide only the weaker guarantee in this version.  */
-static inline int
-vasprintf(char **ret, const char *format, va_list ap)
-{
-    va_list ap2;
-    char *str = NULL, *nstr;
-    size_t len = 80;
-    int len2;
-
-    while (1) {
-	if (len >= INT_MAX || len == 0)
-	    goto fail;
-	nstr = realloc(str, len);
-	if (nstr == NULL)
-	    goto fail;
-	str = nstr;
-	va_copy(ap2, ap);
-	len2 = vsnprintf(str, len, format, ap2);
-	va_end(ap2);
-	/* ISO C vsnprintf returns the needed length.  Some old
-	   vsnprintf implementations return -1 on truncation.  */
-	if (len2 < 0) {
-	    /* Don't know how much space we need, just that we didn't
-	       supply enough; get a bigger buffer and try again.  */
-	    if (len <= SIZE_MAX/2)
-		len *= 2;
-	    else if (len < SIZE_MAX)
-		len = SIZE_MAX;
-	    else
-		goto fail;
-	} else if ((unsigned int) len2 >= SIZE_MAX) {
-	    /* Need more space than we can request.  */
-	    goto fail;
-	} else if ((size_t) len2 >= len) {
-	    /* Need more space, but we know how much.  */
-	    len = (size_t) len2 + 1;
-	} else {
-	    /* Success!  */
-	    break;
-	}
-    }
-    /* We might've allocated more than we need, if we're still using
-       the initial guess, or we got here by doubling.  */
-    if ((size_t) len2 < len - 1) {
-	nstr = realloc(str, (size_t) len2 + 1);
-	if (nstr)
-	    str = nstr;
-    }
-    *ret = str;
-    return len2;
-
-fail:
-    free(str);
-    return -1;
-}
+#define vasprintf krb5int_vasprintf
 /* Assume HAVE_ASPRINTF iff HAVE_VASPRINTF.  */
-#define asprintf k5_asprintf
-static inline int
-k5_asprintf(char **ret, const char *format, ...)
-{
-    va_list ap;
-    int n;
-
-    va_start(ap, format);
-    n = vasprintf(ret, format, ap);
-    va_end(ap);
-    return n;
-}
+#define asprintf krb5int_asprintf
 
 #elif defined(NEED_VASPRINTF_PROTO)
 
