@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
@@ -11,13 +12,13 @@ static int eltcp(elt *dest, elt src)
 static int eltcmp(elt left, elt right)
 {
     if (left.a < right.a)
-	return -1;
+        return -1;
     if (left.a > right.a)
-	return 1;
+        return 1;
     if (left.b < right.b)
-	return -1;
+        return -1;
     if (left.b > right.b)
-	return 1;
+        return 1;
     return 0;
 }
 static void eltprt(elt v, FILE *f)
@@ -27,9 +28,9 @@ static void eltprt(elt v, FILE *f)
 static int intcmp(int left, int right)
 {
     if (left < right)
-	return -1;
+        return -1;
     if (left > right)
-	return 1;
+        return 1;
     return 0;
 }
 static void intprt(int v, FILE *f)

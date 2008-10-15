@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +11,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -28,81 +29,81 @@
 /* Checksumming the channel bindings always uses plain MD5.  */
 krb5_error_code
 kg_checksum_channel_bindings(context, cb, cksum, bigend)
-     krb5_context context;
-     gss_channel_bindings_t cb;
-     krb5_checksum *cksum;
-     int bigend;
+    krb5_context context;
+    gss_channel_bindings_t cb;
+    krb5_checksum *cksum;
+    int bigend;
 {
-   size_t len;
-   char *buf = 0;
-   char *ptr;
-   size_t sumlen;
-   krb5_data plaind;
-   krb5_error_code code;
-   void *temp;
+    size_t len;
+    char *buf = 0;
+    char *ptr;
+    size_t sumlen;
+    krb5_data plaind;
+    krb5_error_code code;
+    void *temp;
 
-   /* initialize the the cksum */
-   code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen);
-   if (code)
-       return(code);
+    /* initialize the the cksum */
+    code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen);
+    if (code)
+        return(code);
 
-   cksum->checksum_type = CKSUMTYPE_RSA_MD5;
-   cksum->length = sumlen;
- 
-   /* generate a buffer full of zeros if no cb specified */
+    cksum->checksum_type = CKSUMTYPE_RSA_MD5;
+    cksum->length = sumlen;
 
-   if (cb == GSS_C_NO_CHANNEL_BINDINGS) {
-       if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
-	   return(ENOMEM);
-       }
-       memset(cksum->contents, '\0', cksum->length);
-       return(0);
-   }
+    /* generate a buffer full of zeros if no cb specified */
 
-   /* create the buffer to checksum into */
+    if (cb == GSS_C_NO_CHANNEL_BINDINGS) {
+        if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
+            return(ENOMEM);
+        }
+        memset(cksum->contents, '\0', cksum->length);
+        return(0);
+    }
 
-   len = (sizeof(krb5_int32)*5+
-	  cb->initiator_address.length+
-	  cb->acceptor_address.length+
-	  cb->application_data.length);
+    /* create the buffer to checksum into */
 
-   if ((buf = (char *) xmalloc(len)) == NULL)
-      return(ENOMEM);
+    len = (sizeof(krb5_int32)*5+
+           cb->initiator_address.length+
+           cb->acceptor_address.length+
+           cb->application_data.length);
 
-   /* helper macros.  This code currently depends on a long being 32
-      bits, and htonl dtrt. */
+    if ((buf = (char *) xmalloc(len)) == NULL)
+        return(ENOMEM);
 
-   ptr = buf;
+    /* helper macros.  This code currently depends on a long being 32
+       bits, and htonl dtrt. */
 
-   TWRITE_INT(ptr, cb->initiator_addrtype, bigend);
-   TWRITE_BUF(ptr, cb->initiator_address, bigend);
-   TWRITE_INT(ptr, cb->acceptor_addrtype, bigend);
-   TWRITE_BUF(ptr, cb->acceptor_address, bigend);
-   TWRITE_BUF(ptr, cb->application_data, bigend);
+    ptr = buf;
 
-   /* checksum the data */
+    TWRITE_INT(ptr, cb->initiator_addrtype, bigend);
+    TWRITE_BUF(ptr, cb->initiator_address, bigend);
+    TWRITE_INT(ptr, cb->acceptor_addrtype, bigend);
+    TWRITE_BUF(ptr, cb->acceptor_address, bigend);
+    TWRITE_BUF(ptr, cb->application_data, bigend);
 
-   plaind.length = len;
-   plaind.data = buf;
+    /* checksum the data */
 
-   code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
-			       &plaind, cksum);
-   if (code)
-       goto cleanup;
+    plaind.length = len;
+    plaind.data = buf;
 
-   if ((temp = xmalloc(cksum->length)) == NULL) {
-       krb5_free_checksum_contents(context, cksum);
-       code = ENOMEM;
-       goto cleanup;
-   }
+    code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
+                                &plaind, cksum);
+    if (code)
+        goto cleanup;
 
-   memcpy(temp, cksum->contents, cksum->length);
-   krb5_free_checksum_contents(context, cksum);
-   cksum->contents = (krb5_octet *)temp;
+    if ((temp = xmalloc(cksum->length)) == NULL) {
+        krb5_free_checksum_contents(context, cksum);
+        code = ENOMEM;
+        goto cleanup;
+    }
 
-   /* success */
- cleanup:
-   if (buf)
-       xfree(buf);
-   return code;
+    memcpy(temp, cksum->contents, cksum->length);
+    krb5_free_checksum_contents(context, cksum);
+    cksum->contents = (krb5_octet *)temp;
+
+    /* success */
+cleanup:
+    if (buf)
+        xfree(buf);
+    return code;
 }

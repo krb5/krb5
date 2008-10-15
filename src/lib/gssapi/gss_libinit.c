@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 #include <assert.h>
 
 #include "gssapi_err_generic.h"
@@ -30,29 +31,29 @@ int gssint_lib_init(void)
 
     err = gssint_mechglue_init();
     if (err)
-	return err;
+        return err;
 #ifndef LEAN_CLIENT
     err = k5_mutex_finish_init(&gssint_krb5_keytab_lock);
     if (err)
-	return err;
+        return err;
 #endif /* LEAN_CLIENT */
     err = k5_key_register(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME, free);
     if (err)
-	return err;
+        return err;
     err = k5_key_register(K5_KEY_GSS_KRB5_CCACHE_NAME, free);
     if (err)
-	return err;
+        return err;
     err = k5_key_register(K5_KEY_GSS_KRB5_ERROR_MESSAGE,
-			  krb5_gss_delete_error_info);
+                          krb5_gss_delete_error_info);
     if (err)
-	return err;
+        return err;
     err = gssint_mecherrmap_init();
     if (err)
-	return err;
+        return err;
 #ifndef _WIN32
     err = k5_mutex_finish_init(&kg_kdc_flag_mutex);
     if (err)
-	return err;
+        return err;
 #endif
     return k5_mutex_finish_init(&kg_vdb.mutex);
 }
@@ -61,9 +62,9 @@ void gssint_lib_fini(void)
 {
     if (!INITIALIZER_RAN(gssint_lib_init) || PROGRAM_EXITING()) {
 #ifdef SHOW_INITFINI_FUNCS
-	printf("gssint_lib_fini: skipping\n");
+        printf("gssint_lib_fini: skipping\n");
 #endif
-	return;
+        return;
     }
 #ifdef SHOW_INITFINI_FUNCS
     printf("gssint_lib_fini\n");

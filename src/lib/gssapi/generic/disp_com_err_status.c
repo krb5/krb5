@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +11,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -37,30 +38,30 @@ static const char * const no_error = "No error";
 /**/
 
 /* if status_type == GSS_C_GSS_CODE, return up to three error messages,
-     for routine errors, call error, and status, in that order.
-     message_context == 0 : print the routine error
-     message_context == 1 : print the calling error
-     message_context > 2  : print supplementary info bit (message_context-2)
+   for routine errors, call error, and status, in that order.
+   message_context == 0 : print the routine error
+   message_context == 1 : print the calling error
+   message_context > 2  : print supplementary info bit (message_context-2)
    if status_type == GSS_C_MECH_CODE, return the output from error_message()
-   */
+*/
 
 OM_uint32
 g_display_com_err_status(minor_status, status_value, status_string)
-     OM_uint32 *minor_status;
-     OM_uint32 status_value;
-     gss_buffer_t status_string;
+    OM_uint32 *minor_status;
+    OM_uint32 status_value;
+    gss_buffer_t status_string;
 {
-   status_string->length = 0;
-   status_string->value = NULL;
+    status_string->length = 0;
+    status_string->value = NULL;
 
-   (void) gssint_initialize_library();
+    (void) gssint_initialize_library();
 
-   if (! g_make_string_buffer(((status_value == 0)?no_error:
-			       error_message(status_value)),
-			      status_string)) {
-      *minor_status = ENOMEM;
-      return(GSS_S_FAILURE);
-   }
-   *minor_status = 0;
-   return(GSS_S_COMPLETE);
+    if (! g_make_string_buffer(((status_value == 0)?no_error:
+                                error_message(status_value)),
+                               status_string)) {
+        *minor_status = ENOMEM;
+        return(GSS_S_FAILURE);
+    }
+    *minor_status = 0;
+    return(GSS_S_COMPLETE);
 }

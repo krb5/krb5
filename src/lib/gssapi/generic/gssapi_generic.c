@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +11,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -37,37 +38,37 @@
 static const gss_OID_desc const_oids[] = {
     /*
      * The implementation must reserve static storage for a
-	 * gss_OID_desc object containing the value */
+     * gss_OID_desc object containing the value */
     {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x01"},
     /* corresponding to an object-identifier value of
-	 * {iso(1) member-body(2) United States(840) mit(113554)
-	 * infosys(1) gssapi(2) generic(1) user_name(1)}.  The constant
-	 * GSS_C_NT_USER_NAME should be initialized to point
-	 * to that gss_OID_desc.
-	 */                                
-    
+     * {iso(1) member-body(2) United States(840) mit(113554)
+     * infosys(1) gssapi(2) generic(1) user_name(1)}.  The constant
+     * GSS_C_NT_USER_NAME should be initialized to point
+     * to that gss_OID_desc.
+     */
+
     /*
-	 * The implementation must reserve static storage for a
-	 * gss_OID_desc object containing the value */
+     * The implementation must reserve static storage for a
+     * gss_OID_desc object containing the value */
     {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x02"},
     /* corresponding to an object-identifier value of
-	 * {iso(1) member-body(2) United States(840) mit(113554)
-	 * infosys(1) gssapi(2) generic(1) machine_uid_name(2)}.
-	 * The constant GSS_C_NT_MACHINE_UID_NAME should be
-	 * initialized to point to that gss_OID_desc.
-	 */
-     
+     * {iso(1) member-body(2) United States(840) mit(113554)
+     * infosys(1) gssapi(2) generic(1) machine_uid_name(2)}.
+     * The constant GSS_C_NT_MACHINE_UID_NAME should be
+     * initialized to point to that gss_OID_desc.
+     */
+
     /*
-    * The implementation must reserve static storage for a
-    * gss_OID_desc object containing the value */
+     * The implementation must reserve static storage for a
+     * gss_OID_desc object containing the value */
     {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x03"},
     /* corresponding to an object-identifier value of
-    * {iso(1) member-body(2) United States(840) mit(113554)
-    * infosys(1) gssapi(2) generic(1) string_uid_name(3)}.
-    * The constant GSS_C_NT_STRING_UID_NAME should be
-    * initialized to point to that gss_OID_desc.
-    */
-    
+     * {iso(1) member-body(2) United States(840) mit(113554)
+     * infosys(1) gssapi(2) generic(1) string_uid_name(3)}.
+     * The constant GSS_C_NT_STRING_UID_NAME should be
+     * initialized to point to that gss_OID_desc.
+     */
+
     /*
      * The implementation must reserve static storage for a
      * gss_OID_desc object containing the value */
@@ -85,15 +86,15 @@ static const gss_OID_desc const_oids[] = {
      * parameter, but should not be emitted by GSS-API
      * implementations
      */
-    
+
     /*
      * The implementation must reserve static storage for a
      * gss_OID_desc object containing the value */
-    {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x04"}, 
-    /* corresponding to an object-identifier value of 
-     * {iso(1) member-body(2) Unites States(840) mit(113554) 
-     * infosys(1) gssapi(2) generic(1) service_name(4)}.  
-     * The constant GSS_C_NT_HOSTBASED_SERVICE should be 
+    {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x04"},
+    /* corresponding to an object-identifier value of
+     * {iso(1) member-body(2) Unites States(840) mit(113554)
+     * infosys(1) gssapi(2) generic(1) service_name(4)}.
+     * The constant GSS_C_NT_HOSTBASED_SERVICE should be
      * initialized to point to that gss_OID_desc.
      */
 
@@ -107,7 +108,7 @@ static const gss_OID_desc const_oids[] = {
      * and GSS_C_NT_ANONYMOUS should be initialized to point
      * to that gss_OID_desc.
      */
-    
+
     /*
      * The implementation must reserve static storage for a
      * gss_OID_desc object containing the value */
@@ -124,8 +125,8 @@ static const gss_OID_desc const_oids[] = {
  *
  * Constants of the form GSS_C_NT_* are specified by rfc 2744.
  *
- * Constants of the form gss_nt_* are the original MIT krb5 names 
- * found in gssapi_generic.h.  They are provided for compatibility. */ 
+ * Constants of the form gss_nt_* are the original MIT krb5 names
+ * found in gssapi_generic.h.  They are provided for compatibility. */
 
 GSS_DLLIMP gss_OID GSS_C_NT_USER_NAME           = oids+0;
 GSS_DLLIMP gss_OID gss_nt_user_name             = oids+0;
@@ -137,7 +138,7 @@ GSS_DLLIMP gss_OID GSS_C_NT_STRING_UID_NAME     = oids+2;
 GSS_DLLIMP gss_OID gss_nt_string_uid_name       = oids+2;
 
 GSS_DLLIMP gss_OID GSS_C_NT_HOSTBASED_SERVICE_X = oids+3;
-gss_OID gss_nt_service_name_v2       = oids+3;
+gss_OID gss_nt_service_name_v2                  = oids+3;
 
 GSS_DLLIMP gss_OID GSS_C_NT_HOSTBASED_SERVICE   = oids+4;
 GSS_DLLIMP gss_OID gss_nt_service_name          = oids+4;
@@ -145,4 +146,4 @@ GSS_DLLIMP gss_OID gss_nt_service_name          = oids+4;
 GSS_DLLIMP gss_OID GSS_C_NT_ANONYMOUS           = oids+5;
 
 GSS_DLLIMP gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
-gss_OID gss_nt_exported_name         = oids+6;
+gss_OID gss_nt_exported_name                    = oids+6;

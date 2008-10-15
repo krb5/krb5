@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1995 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +11,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -27,79 +28,79 @@
 #include "gssapiP_generic.h"
 
 struct _g_set_elt {
-   void *key;
-   void *value;
-   struct _g_set_elt *next;
+    void *key;
+    void *value;
+    struct _g_set_elt *next;
 };
 
 int g_set_init(g_set_elt *s)
 {
-   *s = NULL;
+    *s = NULL;
 
-   return(0);
+    return(0);
 }
 
 #if 0
 int g_set_destroy(g_set_elt *s)
 {
-   g_set next;
+    g_set next;
 
-   while (*s) {
-      next = (*s)->next;
-      free(*s);
-      *s = next;
-   }
+    while (*s) {
+        next = (*s)->next;
+        free(*s);
+        *s = next;
+    }
 
-   return(0);
+    return(0);
 }
 #endif
 
 int g_set_entry_add(g_set_elt *s, void *key, void *value)
 {
-   g_set_elt first;
+    g_set_elt first;
 
-   if ((first = (struct _g_set_elt *) malloc(sizeof(struct _g_set_elt))) == NULL)
-      return(ENOMEM);
+    if ((first = (struct _g_set_elt *) malloc(sizeof(struct _g_set_elt))) == NULL)
+        return(ENOMEM);
 
-   first->key = key;
-   first->value = value;
-   first->next = *s;
+    first->key = key;
+    first->value = value;
+    first->next = *s;
 
-   *s = first;
+    *s = first;
 
-   return(0);
+    return(0);
 }
 
 int g_set_entry_delete(g_set_elt *s, void *key)
 {
-   g_set_elt *p;
+    g_set_elt *p;
 
-   for (p=s; *p; p = &((*p)->next)) {
-      if ((*p)->key == key) {
-	 g_set_elt next = (*p)->next;
-	 free(*p);
-	 *p = next;
+    for (p=s; *p; p = &((*p)->next)) {
+        if ((*p)->key == key) {
+            g_set_elt next = (*p)->next;
+            free(*p);
+            *p = next;
 
-	 return(0);
-      }
-   }
+            return(0);
+        }
+    }
 
-   return(-1);
+    return(-1);
 }
 
 int g_set_entry_get(g_set_elt *s, void *key, void **value)
 {
-   g_set_elt p;
+    g_set_elt p;
 
-   for (p = *s; p; p = p->next) {
-      if (p->key == key) {
-	 *value = p->value;
+    for (p = *s; p; p = p->next) {
+        if (p->key == key) {
+            *value = p->value;
 
-	 return(0);
-      }
-   }
+            return(0);
+        }
+    }
 
-   *value = NULL;
+    *value = NULL;
 
-   return(-1);
+    return(-1);
 }

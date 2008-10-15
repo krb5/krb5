@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +11,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -37,35 +38,34 @@
 #include <string.h>
 
 char *
-g_canonicalize_host(hostname)
-     char *hostname;
+g_canonicalize_host(char *hostname)
 {
-   struct hostent *hent;
-   char *haddr;
-   char *canon, *str;
+    struct hostent *hent;
+    char *haddr;
+    char *canon, *str;
 
-   if ((hent = gethostbyname(hostname)) == NULL)
-      return(NULL);
-
-   if (! (haddr = (char *) xmalloc(hent->h_length))) {
+    if ((hent = gethostbyname(hostname)) == NULL)
 	return(NULL);
-   }
 
-   memcpy(haddr, hent->h_addr_list[0], hent->h_length);
-
-   if (! (hent = gethostbyaddr(haddr, hent->h_length, hent->h_addrtype))) {
+    if (! (haddr = (char *) xmalloc(hent->h_length))) {
 	return(NULL);
-   }
+    }
 
-   xfree(haddr);
+    memcpy(haddr, hent->h_addr_list[0], hent->h_length);
 
-   if ((canon = (char *) xmalloc(strlen(hent->h_name)+1)) == NULL)
-      return(NULL);
+    if (! (hent = gethostbyaddr(haddr, hent->h_length, hent->h_addrtype))) {
+	return(NULL);
+    }
 
-   strcpy(canon, hent->h_name);
+    xfree(haddr);
 
-   for (str = canon; *str; str++)
-      if (isupper(*str)) *str = tolower(*str);
+    if ((canon = (char *) xmalloc(strlen(hent->h_name)+1)) == NULL)
+	return(NULL);
 
-   return(canon);
+    strcpy(canon, hent->h_name);
+
+    for (str = canon; *str; str++)
+	if (isupper(*str)) *str = tolower(*str);
+
+    return(canon);
 }

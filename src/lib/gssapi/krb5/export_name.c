@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/export_name.c
  *
@@ -28,68 +29,68 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
-			       const gss_name_t input_name,
-			       gss_buffer_t exported_name)
+                               const gss_name_t input_name,
+                               gss_buffer_t exported_name)
 {
-	krb5_context context;
-	krb5_error_code code;
-	size_t length;
-	char *str, *cp;
+    krb5_context context;
+    krb5_error_code code;
+    size_t length;
+    char *str, *cp;
 
-	if (minor_status)
-		*minor_status = 0;
+    if (minor_status)
+        *minor_status = 0;
 
-	code = krb5_gss_init_context(&context);
-	if (code) {
-	    if (minor_status)
-		*minor_status = code;
-	    return GSS_S_FAILURE;
-	}
+    code = krb5_gss_init_context(&context);
+    if (code) {
+        if (minor_status)
+            *minor_status = code;
+        return GSS_S_FAILURE;
+    }
 
-	exported_name->length = 0;
-	exported_name->value = NULL;
-	
-	if (! kg_validate_name(input_name)) {
-		if (minor_status)
-			*minor_status = (OM_uint32) G_VALIDATE_FAILED;
-		krb5_free_context(context);
-		return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
-	}
+    exported_name->length = 0;
+    exported_name->value = NULL;
 
-	if ((code = krb5_unparse_name(context, (krb5_principal) input_name, 
-				      &str))) {
-		if (minor_status)
-			*minor_status = code;
-		save_error_info(code, context);
-		krb5_free_context(context);
-		return(GSS_S_FAILURE);
-	}
+    if (! kg_validate_name(input_name)) {
+        if (minor_status)
+            *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+        krb5_free_context(context);
+        return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
+    }
 
-	krb5_free_context(context);
-	length = strlen(str);
-	exported_name->length = 10 + length + gss_mech_krb5->length;
-	exported_name->value = malloc(exported_name->length);
-	if (!exported_name->value) {
-		free(str);
-		if (minor_status)
-			*minor_status = ENOMEM;
-		return(GSS_S_FAILURE);
-	}
-	cp = exported_name->value;
+    if ((code = krb5_unparse_name(context, (krb5_principal) input_name,
+                                  &str))) {
+        if (minor_status)
+            *minor_status = code;
+        save_error_info(code, context);
+        krb5_free_context(context);
+        return(GSS_S_FAILURE);
+    }
 
-	/* Note: we assume the OID will be less than 128 bytes... */
-	*cp++ = 0x04; *cp++ = 0x01;
-	store_16_be(gss_mech_krb5->length+2, cp);
-	cp += 2;
-	*cp++ = 0x06;
-	*cp++ = (gss_mech_krb5->length) & 0xFF;
-	memcpy(cp, gss_mech_krb5->elements, gss_mech_krb5->length);
-	cp += gss_mech_krb5->length;
-	store_32_be(length, cp);
-	cp += 4;
-	memcpy(cp, str, length);
+    krb5_free_context(context);
+    length = strlen(str);
+    exported_name->length = 10 + length + gss_mech_krb5->length;
+    exported_name->value = malloc(exported_name->length);
+    if (!exported_name->value) {
+        free(str);
+        if (minor_status)
+            *minor_status = ENOMEM;
+        return(GSS_S_FAILURE);
+    }
+    cp = exported_name->value;
 
-	free(str);
+    /* Note: we assume the OID will be less than 128 bytes... */
+    *cp++ = 0x04; *cp++ = 0x01;
+    store_16_be(gss_mech_krb5->length+2, cp);
+    cp += 2;
+    *cp++ = 0x06;
+    *cp++ = (gss_mech_krb5->length) & 0xFF;
+    memcpy(cp, gss_mech_krb5->elements, gss_mech_krb5->length);
+    cp += gss_mech_krb5->length;
+    store_32_be(length, cp);
+    cp += 4;
+    memcpy(cp, str, length);
 
-	return(GSS_S_COMPLETE);
+    free(str);
+
+    return(GSS_S_COMPLETE);
 }

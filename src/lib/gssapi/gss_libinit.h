@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 #ifndef GSSAPI_LIBINIT_H
 #define GSSAPI_LIBINIT_H
 
