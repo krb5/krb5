@@ -29,11 +29,11 @@ test_getsockname: $(OUTPRE)test_getsockname.$(OBJEXT)
 	$(CC_LINK) $(ALL_CFLAGS) -o test_getsockname $(OUTPRE)test_getsockname.$(OBJEXT) $(LIBS)
 
 test_cxx_krb5: $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_DEPLIB)
-	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_krb5 $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_LIB) $(LIBS)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_krb5 $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_BASE_LIBS) $(LIBS)
 test_cxx_gss: $(OUTPRE)test_cxx_gss.$(OBJEXT)
 	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_gss $(OUTPRE)test_cxx_gss.$(OBJEXT) $(LIBS)
 test_cxx_rpc: $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_DEPLIBS)
-	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_rpc $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_LIBS) $(LIBS)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_rpc $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_LIBS) $(KRB5_BASE_LIBS) $(LIBS)
 
 test_cxx_krb5.$(OBJEXT): test_cxx_krb5.cpp
 test_cxx_gss.$(OBJEXT): test_cxx_gss.cpp
