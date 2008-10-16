@@ -338,7 +338,7 @@
     [[self window] makeFirstResponder:samPromptField];
 }
 
-- (void) showChangePassword
+- (void) showChangePassword: (NSWindow *) parentWindow
 {
     NSString *key = ([glueController valueForKeyPath:password_expired_keypath]) ? ACAppPrincReqKey : ACPrincReqKey;
     NSString *message = [NSString stringWithFormat:
@@ -378,8 +378,19 @@
     [self hideSpinny];
     
     [self swapView:changePasswordView];
-    
-    [self showWindow:nil];
+
+    // attach as sheet if given a parentWindow
+    if (parentWindow) {
+        [NSApp beginSheet:theWindow 
+           modalForWindow:parentWindow
+            modalDelegate:self
+           didEndSelector:@selector(changePasswordSheetDidEnd:returnCode:contextInfo:)
+              contextInfo:NULL];
+    }
+    // else, display as normal
+    else {
+        [self showWindow:nil];
+    }
     [theWindow makeFirstResponder:oldPasswordField];
 }
 
@@ -468,7 +479,7 @@
     [NSApp beginSheet:ticketOptionsSheet
        modalForWindow:[self window]
         modalDelegate:self 
-       didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)
+       didEndSelector:@selector(ticketOptionsSheetDidEnd:returnCode:contextInfo:)
           contextInfo:NULL];
 }
 
@@ -482,9 +493,17 @@
     [NSApp endSheet:ticketOptionsSheet];
 }
 
-- (void) sheetDidEnd: (NSWindow *) sheet 
-          returnCode: (int) returnCode 
-         contextInfo: (void *) contextInfo
+- (void) changePasswordSheetDidEnd: (NSWindow *) sheet 
+                        returnCode: (int) returnCode 
+                       contextInfo: (void *) contextInfo
+{
+    [sheet orderOut:nil];
+}
+        
+        
+- (void) ticketOptionsSheetDidEnd: (NSWindow *) sheet 
+                       returnCode: (int) returnCode 
+                      contextInfo: (void *) contextInfo
 {
     if (returnCode == NSUserCancelledError) {
         // discard new options
@@ -551,6 +570,7 @@
 
 - (IBAction) cancel: (id) sender
 {
+    [NSApp endSheet:[self window]];
     [associatedClient didCancel];
 }
 
@@ -594,6 +614,7 @@
     [associatedClient didChangePassword:oldString
                             newPassword:newString
                          verifyPassword:verifyString];
+    [NSApp endSheet:[self window]];
 }
 
 - (IBAction) showedError: (id) sender

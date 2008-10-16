@@ -83,7 +83,7 @@
 - (void) showAuthPrompt;
 - (void) showEnterPassword;
 - (void) showSAM;
-- (void) showChangePassword;
+- (void) showChangePassword: (NSWindow *) parentWindow;
 - (void) showError;
 
 - (IBAction) cancel: (id) sender;
@@ -99,7 +99,10 @@
 - (IBAction) cancelTicketOptions: (id) sender;
 - (IBAction) saveTicketOptions: (id) sender;
 
-- (void) sheetDidEnd: (NSWindow *) sheet 
+- (void) changePasswordSheetDidEnd: (NSWindow *) sheet 
+                        returnCode: (int) returnCode 
+                       contextInfo: (void *) contextInfo;
+- (void) ticketOptionsSheetDidEnd: (NSWindow *) sheet 
           returnCode: (int) returnCode 
          contextInfo: (void *) contextInfo;
 

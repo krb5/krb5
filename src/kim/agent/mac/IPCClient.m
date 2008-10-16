@@ -33,6 +33,7 @@ enum krb_agent_client_state {
     ipc_client_state_init,
     ipc_client_state_enter,
     ipc_client_state_select,
+    ipc_client_state_select_change_password,
     ipc_client_state_auth_prompt,
     ipc_client_state_change_password,
     ipc_client_state_handle_error,
@@ -127,10 +128,17 @@ enum krb_agent_client_state {
     else if (self.state == ipc_client_state_auth_prompt) {
         [KerberosAgentListener didPromptForAuth:self.currentInfo error:err];
     }
-    else if (self.state == ipc_client_state_change_password) {
+    else if (self.state == ipc_client_state_change_password ||
+             self.state == ipc_client_state_select_change_password) {
         [KerberosAgentListener didChangePassword:self.currentInfo error:err];
     }
-    self.state = ipc_client_state_idle;
+    
+    if (self.state == ipc_client_state_select_change_password) {
+        self.state = ipc_client_state_select;
+    }
+    else {
+        self.state = ipc_client_state_idle;
+    }
 }
 
 - (kim_error) selectIdentity: (NSDictionary *) info
@@ -163,7 +171,9 @@ enum krb_agent_client_state {
     [KerberosAgentListener didSelectIdentity:self.currentInfo error:0];
     
     // clean up state
-    self.state = ipc_client_state_idle;
+    if (!wantsChangePassword) {
+        self.state = ipc_client_state_idle;
+    }
 }
 
 - (kim_error) enterIdentity: (NSDictionary *) info
@@ -185,6 +195,13 @@ enum krb_agent_client_state {
     [self.currentInfo setObject:options forKey:@"options"];
     [self.currentInfo setObject:[NSNumber numberWithBool:wantsChangePassword] forKey:@"wants_change_password"];
     [KerberosAgentListener didEnterIdentity:self.currentInfo error:0];
+    
+    if (self.state == ipc_client_state_select_change_password) {
+        self.state = ipc_client_state_select;
+    }
+    else {
+        self.state = ipc_client_state_idle;
+    }
 }
 
 - (kim_error) promptForAuth: (NSDictionary *) info
@@ -207,11 +224,20 @@ enum krb_agent_client_state {
 
 - (kim_error) changePassword: (NSDictionary *) info
 {
+    NSWindow *parentWindow = nil;
+    
     [self.currentInfo addEntriesFromDictionary:info];
-    self.state = ipc_client_state_change_password;
+    
+    if (self.state == ipc_client_state_select) {
+        self.state = ipc_client_state_select_change_password;
+        parentWindow = [selectController window];
+    }
+    else {
+        self.state = ipc_client_state_change_password;
+    }
     
     [self.authController setContent:self.currentInfo];
-    [self.authController showChangePassword];
+    [self.authController showChangePassword:parentWindow];
     
     return 0;
 }
