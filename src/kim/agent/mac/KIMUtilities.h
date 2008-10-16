@@ -53,6 +53,7 @@
 
 #define options_keypath              @"content.options"
 
+#define uses_default_options_keypath @"content.usesDefaultTicketOptions"
 #define valid_lifetime_keypath       @"content.valid_lifetime"
 #define renewal_lifetime_keypath     @"content.renewal_lifetime"
 #define renewable_keypath            @"content.renewable"

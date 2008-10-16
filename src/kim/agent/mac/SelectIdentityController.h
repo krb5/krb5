@@ -54,7 +54,7 @@
     
     IBOutlet NSObjectController *glueController;
     
-    IBOutlet NSWindow *identityOptionsWindow;
+    IBOutlet NSWindow *ticketOptionsWindow;
     IBOutlet NSObjectController *identityOptionsController;
     IBOutlet NSTextField *identityField;
     IBOutlet NSTextField *staticIdentityField;
@@ -62,7 +62,10 @@
     IBOutlet NSSlider *validLifetimeSlider;
     IBOutlet NSSlider *renewableLifetimeSlider;
     
+    IBOutlet NSBox *ticketOptionsBox;
     IBOutlet NSButton *ticketOptionsOkButton;
+    IBOutlet NSButton *ticketOptionsToggleButton;
+    CGFloat optionsBoxHeight;
 }
 
 @property (readwrite, retain) IPCClient *associatedClient;
@@ -83,11 +86,13 @@
 - (IBAction) select: (id) sender;
 - (IBAction) cancel: (id) sender;
 
+- (IBAction) checkboxDidChange: (id) sender;
 - (IBAction) sliderDidChange: (id) sender;
 
 - (void) showOptions: (NSString *) contextInfo;
 - (void) didEndSheet: (NSWindow *) sheet returnCode: (int) returnCode contextInfo: (void *) contextInfo;
 - (void) saveOptions;
+- (IBAction) toggleOptionsVisibility: (id) sender;
 
 - (void) timedRefresh:(NSTimer *)timer;
 

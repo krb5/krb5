@@ -92,6 +92,7 @@
 - (IBAction) changePassword: (id) sender;
 - (IBAction) showedError: (id) sender;
 
+- (IBAction) checkboxDidChange: (id) sender;
 - (IBAction) sliderDidChange: (id) sender;
 
 - (IBAction) showTicketOptions: (id) sender;

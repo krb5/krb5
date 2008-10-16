@@ -109,6 +109,7 @@
 + (NSDictionary *) dictionaryForKimOptions: (kim_options) options
 {
     kim_error err = KIM_NO_ERROR;
+    kim_preferences prefs = NULL;
     NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithCapacity:8];
     kim_boolean addressless = FALSE;
     kim_boolean forwardable = FALSE;
@@ -118,6 +119,15 @@
     kim_lifetime renewal_lifetime = 0;
     kim_string service_name = NULL;
     kim_time start_time = 0;
+    
+    if (options == KIM_OPTIONS_DEFAULT) {
+        [newDict setObject:[NSNumber numberWithBool:YES]
+                    forKey:@"usesDefaultTicketOptions"];
+        err = kim_preferences_create(&prefs);
+        if (!err) {
+            err = kim_preferences_get_options(prefs, &options);
+        }
+    }
     
     if (!err) {
         err = kim_options_get_addressless(options, &addressless);
@@ -177,6 +187,12 @@
                    forKey:@"start_time"];
     }
 
+    // only free options if it was allocated by this method
+    if (prefs) {
+        kim_options_free(&options);
+        kim_preferences_free(&prefs);
+    }
+
     return newDict;
 }
 
@@ -184,15 +200,28 @@
 {
     kim_error err = KIM_NO_ERROR;
     kim_options options = NULL;
-    kim_boolean addressless = [[aDict valueForKey:@"addressless"] boolValue];
-    kim_boolean forwardable = [[aDict valueForKey:@"forwardable"] boolValue];
-    kim_boolean proxiable = [[aDict valueForKey:@"proxiable"] boolValue];
-    kim_boolean renewable = [[aDict valueForKey:@"renewable"] boolValue];
-    kim_lifetime valid_lifetime = [[aDict valueForKey:@"valid_lifetime"] integerValue];
-    kim_lifetime renewal_lifetime = [[aDict valueForKey:@"renewal_lifetime"] integerValue];
-    kim_string service_name = ([[aDict valueForKey:@"service_name"] length] > 0) ?
-                               [[aDict valueForKey:@"service_name"] UTF8String] : NULL;
-    kim_time start_time = [[aDict valueForKey:@"start_time"] integerValue];
+    kim_boolean addressless;
+    kim_boolean forwardable;
+    kim_boolean proxiable;
+    kim_boolean renewable;
+    kim_lifetime valid_lifetime;
+    kim_lifetime renewal_lifetime;
+    kim_string service_name;
+    kim_time start_time;
+
+    if (!aDict || [[aDict objectForKey:@"usesDefaultTicketOptions"] boolValue]) {
+        return KIM_OPTIONS_DEFAULT;
+    }
+    
+    addressless = [[aDict valueForKey:@"addressless"] boolValue];
+    forwardable = [[aDict valueForKey:@"forwardable"] boolValue];
+    proxiable = [[aDict valueForKey:@"proxiable"] boolValue];
+    renewable = [[aDict valueForKey:@"renewable"] boolValue];
+    valid_lifetime = [[aDict valueForKey:@"valid_lifetime"] integerValue];
+    renewal_lifetime = [[aDict valueForKey:@"renewal_lifetime"] integerValue];
+    service_name = ([[aDict valueForKey:@"service_name"] length] > 0) ?
+    [[aDict valueForKey:@"service_name"] UTF8String] : NULL;
+    start_time = [[aDict valueForKey:@"start_time"] integerValue];
     
     if (!err) {
         err = kim_options_create (&options);

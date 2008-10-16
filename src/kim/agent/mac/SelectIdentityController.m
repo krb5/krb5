@@ -26,8 +26,6 @@
 #import "IPCClient.h"
 #import "KerberosFormatters.h"
 
-#define identities_key_path @"identities"
-
 @implementation SelectIdentityController
 
 @synthesize associatedClient;
@@ -43,7 +41,8 @@
 
 - (void) dealloc
 {
-    [identityOptionsController removeObserver:self forKeyPath:identity_string_keypath];
+    [identityArrayController removeObserver:self forKeyPath:@"selectedObjects"];
+    [identityOptionsController removeObserver:self forKeyPath:uses_default_options_keypath];
     [refreshTimer release];
     [identities release];
     [super dealloc];
@@ -55,14 +54,13 @@
 {
     NSString *key = nil;
     NSString *message = nil;
-
-    // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
+    
     [[self window] center];
     [[self window] setLevel:NSScreenSaverWindowLevel];
     
     longTimeFormatter.displaySeconds = NO;
     longTimeFormatter.displayShortFormat = NO;
-
+    
     [identityTableView setDoubleAction:@selector(select:)];
     identities = [[Identities alloc] init];
     [identitiesController setContent:identities];
@@ -82,18 +80,29 @@
     }
     [headerTextField setStringValue:message];
     
+    optionsBoxHeight = [ticketOptionsBox frame].size.height + [ticketOptionsBox frame].origin.y - [ticketOptionsToggleButton frame].origin.y - [ticketOptionsToggleButton frame].size.height;
+    [self toggleOptionsVisibility:nil];
+    
     [identityOptionsController addObserver:self
                                 forKeyPath:identity_string_keypath
                                    options:NSKeyValueObservingOptionNew
                                    context:NULL];
+    [identityArrayController addObserver:self
+                              forKeyPath:@"selectedObjects"
+                                 options:NSKeyValueObservingOptionNew
+                                 context:NULL];
 }
 
 - (void)  observeValueForKeyPath:(NSString *) keyPath ofObject: (id) object change: (NSDictionary *) change context:(void *) context
 {
-    if ([keyPath isEqualToString:identity_string_keypath]) {
+    if (object == identityOptionsController && [keyPath isEqualToString:identity_string_keypath]) {
         BOOL enabled = [KIMUtilities validateIdentity:[identityOptionsController valueForKeyPath:identity_string_keypath]];
         [identityOptionsController setValue:[NSNumber numberWithBool:enabled] 
                                  forKeyPath:@"content.canClickOK"];
+    }
+    // clear options on selection change
+    else if (object == identityArrayController && [keyPath isEqualToString:@"selectedObjects"]) {
+        [identityOptionsController setContent:nil];
     }
 }
 
@@ -185,7 +194,7 @@
     selectedIdentity = [[identityArrayController selectedObjects] lastObject];
 
     [associatedClient didSelectIdentity: selectedIdentity.identity
-                                options: [identityOptionsController valueForKeyPath:@"content.options"]
+                                options: [identityOptionsController content]
                     wantsChangePassword: NO];
 }
 
@@ -221,7 +230,7 @@
 - (IBAction) cancelOptions: (id) sender
 {
     identityOptionsController.content = nil;
-    [NSApp endSheet:identityOptionsWindow returnCode:NSUserCancelledError];
+    [NSApp endSheet:ticketOptionsWindow returnCode:NSUserCancelledError];
     
     // dump changed settings
     [identities reload];
@@ -234,7 +243,23 @@
 //    Identity *anIdentity = identityOptionsController.content;
     
     
-    [NSApp endSheet: identityOptionsWindow];
+    [NSApp endSheet: ticketOptionsWindow];
+}
+
+// ---------------------------------------------------------------------------
+
+- (IBAction) checkboxDidChange: (id) sender
+{
+    if ([[identityOptionsController valueForKeyPath:uses_default_options_keypath] boolValue]) {
+        // merge defaults onto current options
+        NSMutableDictionary *currentOptions = [identityOptionsController content];
+        NSDictionary *defaultOptions = [KIMUtilities dictionaryForKimOptions:NULL];
+        NSLog(@"using default ticket options");
+        [currentOptions addEntriesFromDictionary:defaultOptions];
+        // update the sliders, since their values aren't bound
+        [validLifetimeSlider setDoubleValue:[[identityOptionsController valueForKeyPath:valid_lifetime_keypath] doubleValue]];
+        [renewableLifetimeSlider setDoubleValue:[[identityOptionsController valueForKeyPath:renewal_lifetime_keypath] doubleValue]];
+    }    
 }
 
 // ---------------------------------------------------------------------------
@@ -288,7 +313,7 @@
     [self sliderDidChange:validLifetimeSlider];
     [self sliderDidChange:renewableLifetimeSlider];
     
-    [NSApp beginSheet: identityOptionsWindow 
+    [NSApp beginSheet: ticketOptionsWindow 
        modalForWindow: [self window] 
         modalDelegate: self 
        didEndSelector: @selector(didEndSheet:returnCode:contextInfo:)
@@ -355,6 +380,37 @@
 
 
     [identityArrayController setSelectionIndex: (b == NSNotFound) ? (a > c) ? c : a : b];
+}
+
+// ---------------------------------------------------------------------------
+
+- (IBAction) toggleOptionsVisibility: (id) sender
+{
+    NSRect newFrame = [NSWindow contentRectForFrameRect:[ticketOptionsWindow frame] styleMask:[ticketOptionsWindow styleMask]];
+    CGFloat newHeight;
+    
+    if ([ticketOptionsBox isHidden]) {
+        newHeight = newFrame.size.height + optionsBoxHeight;
+        newFrame.origin.y += newFrame.size.height;
+        newFrame.origin.y -= newHeight;
+        newFrame.size.height = newHeight;
+        newFrame = [NSWindow frameRectForContentRect:newFrame styleMask:[ticketOptionsWindow styleMask]];
+
+        [ticketOptionsWindow setFrame:newFrame display:YES animate:YES];
+        [ticketOptionsBox setHidden:NO];
+        [sender setTitle:NSLocalizedStringFromTable(@"SelectIdentityHideOptions", @"SelectIdentity", NULL)];
+    }
+    else {
+        newHeight = newFrame.size.height - optionsBoxHeight;
+        newFrame.origin.y += newFrame.size.height;
+        newFrame.origin.y -= newHeight;
+        newFrame.size.height = newHeight;
+        newFrame = [NSWindow frameRectForContentRect:newFrame styleMask:[ticketOptionsWindow styleMask]];
+        
+        [ticketOptionsBox setHidden:YES];
+        [ticketOptionsWindow setFrame:newFrame display:YES animate:YES];
+        [sender setTitle:NSLocalizedStringFromTable(@"SelectIdentityShowOptions", @"SelectIdentity", NULL)];
+    }
 }
 
 // ---------------------------------------------------------------------------

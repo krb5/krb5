@@ -8,10 +8,10 @@
 		<string key="IBDocument.HIToolboxVersion">352.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="300288"/>
 			<integer value="19"/>
-			<integer value="300175"/>
 			<integer value="300420"/>
+			<integer value="300274"/>
+			<integer value="300175"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -75,6 +75,7 @@
 					<string>maxRenewableLifetime</string>
 					<string>renewa</string>
 					<string>renewal_lifetime</string>
+					<string>usesDefaultTicketOptions</string>
 				</object>
 				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -950,7 +951,7 @@
 			<object class="NSWindowTemplate" id="102029948">
 				<int key="NSWindowStyleMask">1</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{21, 50}, {430, 283}}</string>
+				<string key="NSWindowRect">{{21, 28}, {430, 305}}</string>
 				<int key="NSWTFlags">1886912512</int>
 				<string key="NSWindowTitle">Kerberos Ticket Options</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -1172,8 +1173,30 @@
 								<int key="NSPeriodicInterval">25</int>
 							</object>
 						</object>
+						<object class="NSButton" id="453888690">
+							<reference key="NSNextResponder" ref="389112266"/>
+							<int key="NSvFlags">268</int>
+							<string key="NSFrame">{{18, 269}, {184, 18}}</string>
+							<reference key="NSSuperview" ref="389112266"/>
+							<bool key="NSEnabled">YES</bool>
+							<object class="NSButtonCell" key="NSCell" id="505343782">
+								<int key="NSCellFlags">-2080244224</int>
+								<int key="NSCellFlags2">0</int>
+								<string key="NSContents">Use default ticket options</string>
+								<reference key="NSSupport" ref="604532625"/>
+								<reference key="NSControlView" ref="453888690"/>
+								<int key="NSButtonFlags">1211912703</int>
+								<int key="NSButtonFlags2">130</int>
+								<reference key="NSNormalImage" ref="375544883"/>
+								<reference key="NSAlternateImage" ref="875913500"/>
+								<string key="NSAlternateContents"/>
+								<string key="NSKeyEquivalent"/>
+								<int key="NSPeriodicDelay">200</int>
+								<int key="NSPeriodicInterval">25</int>
+							</object>
+						</object>
 					</object>
-					<string key="NSFrameSize">{430, 283}</string>
+					<string key="NSFrameSize">{430, 305}</string>
 					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
@@ -1822,7 +1845,7 @@
 						<string key="label">enabled: selection.renewable</string>
 						<reference key="source" ref="594182616"/>
 						<reference key="destination" ref="633725892"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="252907861">
 							<reference key="NSSource" ref="594182616"/>
 							<reference key="NSDestination" ref="633725892"/>
 							<string key="NSLabel">enabled: selection.renewable</string>
@@ -2105,6 +2128,146 @@
 						</object>
 					</object>
 					<int key="connectionID">300540</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">value: selection.usesDefaultTicketOptions</string>
+						<reference key="source" ref="453888690"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="453888690"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">value: selection.usesDefaultTicketOptions</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">selection.usesDefaultTicketOptions</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300545</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.usesDefaultTicketOptions</string>
+						<reference key="source" ref="486016405"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="486016405"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">enabled: selection.usesDefaultTicketOptions</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.usesDefaultTicketOptions</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300547</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.usesDefaultTicketOptions</string>
+						<reference key="source" ref="964499406"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="964499406"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">enabled: selection.usesDefaultTicketOptions</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.usesDefaultTicketOptions</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300549</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.usesDefaultTicketOptions</string>
+						<reference key="source" ref="198913348"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="198913348"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">enabled: selection.usesDefaultTicketOptions</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.usesDefaultTicketOptions</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300551</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.usesDefaultTicketOptions</string>
+						<reference key="source" ref="368169141"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="368169141"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">enabled: selection.usesDefaultTicketOptions</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.usesDefaultTicketOptions</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300553</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: selection.usesDefaultTicketOptions</string>
+						<reference key="source" ref="594182616"/>
+						<reference key="destination" ref="633725892"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="594182616"/>
+							<reference key="NSDestination" ref="633725892"/>
+							<string key="NSLabel">enabled2: selection.usesDefaultTicketOptions</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">selection.usesDefaultTicketOptions</string>
+							<object class="NSDictionary" key="NSOptions">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMutableArray" key="dict.sortedKeys">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<string>NSMultipleValuesPlaceholder</string>
+									<string>NSNoSelectionPlaceholder</string>
+									<string>NSNotApplicablePlaceholder</string>
+									<string>NSNullPlaceholder</string>
+									<string>NSValueTransformerName</string>
+								</object>
+								<object class="NSMutableArray" key="dict.values">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<integer value="-1" id="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<string>NSNegateBoolean</string>
+								</object>
+							</object>
+							<reference key="NSPreviousConnector" ref="252907861"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300555</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">checkboxDidChange:</string>
+						<reference key="source" ref="262677138"/>
+						<reference key="destination" ref="453888690"/>
+					</object>
+					<int key="connectionID">300556</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2710,16 +2873,17 @@
 						<reference key="object" ref="389112266"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="284195308"/>
-							<reference ref="681646907"/>
-							<reference ref="332956369"/>
-							<reference ref="368169141"/>
-							<reference ref="964499406"/>
-							<reference ref="198913348"/>
-							<reference ref="594182616"/>
-							<reference ref="318596865"/>
 							<reference ref="486016405"/>
+							<reference ref="318596865"/>
 							<reference ref="523287828"/>
+							<reference ref="594182616"/>
+							<reference ref="198913348"/>
+							<reference ref="964499406"/>
+							<reference ref="368169141"/>
+							<reference ref="332956369"/>
+							<reference ref="681646907"/>
+							<reference ref="284195308"/>
+							<reference ref="453888690"/>
 						</object>
 						<reference key="parent" ref="102029948"/>
 					</object>
@@ -2918,6 +3082,20 @@
 						<reference key="object" ref="314932147"/>
 						<reference key="parent" ref="60326189"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300543</int>
+						<reference key="object" ref="453888690"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="505343782"/>
+						</object>
+						<reference key="parent" ref="389112266"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">300544</int>
+						<reference key="object" ref="505343782"/>
+						<reference key="parent" ref="453888690"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -3060,6 +3238,8 @@
 					<string>300533.IBPluginDependency</string>
 					<string>300534.IBPluginDependency</string>
 					<string>300536.IBPluginDependency</string>
+					<string>300543.IBPluginDependency</string>
+					<string>300544.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -3069,7 +3249,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>{{628, 646}, {500, 210}}</string>
 					<reference ref="9"/>
-					<integer value="0"/>
+					<reference ref="8"/>
 					<string>{{932, 664}, {484, 199}}</string>
 					<reference ref="9"/>
 					<reference ref="9"/>
@@ -3159,9 +3339,9 @@
 					<reference ref="9"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
-					<string>{{647, 412}, {430, 283}}</string>
+					<string>{{647, 390}, {430, 305}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{647, 412}, {430, 283}}</string>
+					<string>{{647, 390}, {430, 305}}</string>
 					<reference ref="9"/>
 					<reference ref="8"/>
 					<reference ref="9"/>
@@ -3199,6 +3379,8 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -3221,7 +3403,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">300540</int>
+			<int key="maxID">300556</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -3238,6 +3420,7 @@
 							<string>cancelTicketOptions:</string>
 							<string>changePassword:</string>
 							<string>changePasswordGearAction:</string>
+							<string>checkboxDidChange:</string>
 							<string>enterIdentity:</string>
 							<string>saveTicketOptions:</string>
 							<string>showTicketOptions:</string>
@@ -3246,6 +3429,7 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>

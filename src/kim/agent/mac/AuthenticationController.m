@@ -395,6 +395,19 @@
     [self showWindow:nil];
 }
 
+- (IBAction) checkboxDidChange: (id) sender
+{
+    if ([[ticketOptionsController valueForKeyPath:uses_default_options_keypath] boolValue]) {
+        // merge defaults onto current options
+        NSMutableDictionary *currentOptions = [ticketOptionsController content];
+        NSDictionary *defaultOptions = [KIMUtilities dictionaryForKimOptions:NULL];
+        [currentOptions addEntriesFromDictionary:defaultOptions];
+        // update the sliders, since their values aren't bound
+        [validLifetimeSlider setDoubleValue:[[ticketOptionsController valueForKeyPath:valid_lifetime_keypath] doubleValue]];
+        [renewableLifetimeSlider setDoubleValue:[[ticketOptionsController valueForKeyPath:renewal_lifetime_keypath] doubleValue]];
+    }    
+}
+
 - (IBAction) sliderDidChange: (id) sender
 {
     NSInteger increment = 0;
@@ -429,13 +442,12 @@
         options = [favoriteOptions objectForKey:expandedString];
     }
     
-    // else fallback to options passed from client
-    // use a copy of the current options
+    // else, it's not a favorite identity. use default options
     if (!options) {
-        options = [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease];
+        options = [KIMUtilities dictionaryForKimOptions:KIM_OPTIONS_DEFAULT];
     }
     
-    [ticketOptionsController setContent:options];
+    [ticketOptionsController setContent:[[options mutableCopy] autorelease]];
     
     [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minValidLifetime]]
                            forKeyPath:min_valid_keypath];
@@ -504,12 +516,11 @@
         }
         
         if (!identity) { err = KIM_BAD_PRINCIPAL_STRING_ERR; }
-        if (!options) { err = KIM_BAD_OPTIONS_ERR; }
         
-        if (!err && identity) {
+        if (!err) {
             err = kim_preferences_remove_favorite_identity(prefs, identity);
         }
-        if (!err && identity && options) {
+        if (!err) {
             err = kim_preferences_add_favorite_identity(prefs, identity, options);
         }
         if (!err) {
