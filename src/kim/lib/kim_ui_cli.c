@@ -73,7 +73,9 @@ static kim_error kim_ui_cli_read_string (kim_string   *out_string,
         prompts[0].reply->length = sizeof (reply_string);
         
         err = krb5_prompter_posix (k5context, NULL, NULL, NULL, 1, prompts);
-        if (err == KRB5_LIBOS_PWDINTR) { err = check_error (KIM_USER_CANCELED_ERR); }
+        if (err == KRB5_LIBOS_PWDINTR || err == KRB5_LIBOS_CANTREADPWD) { 
+            err = check_error (KIM_USER_CANCELED_ERR); 
+        }
     }
     
     if (!err) {
@@ -228,7 +230,9 @@ kim_error kim_ui_cli_auth_prompt (kim_ui_context      *in_context,
             if (!err) {
                 err = krb5_prompter_posix (k5context, in_context, in_title, 
                                            in_message, 1, prompts);
-                if (err == KRB5_LIBOS_PWDINTR) { err = check_error (KIM_USER_CANCELED_ERR); }
+                if (err == KRB5_LIBOS_PWDINTR || err == KRB5_LIBOS_CANTREADPWD) { 
+                    err = check_error (KIM_USER_CANCELED_ERR); 
+                }
             }
             
             if (!err) {
@@ -376,6 +380,11 @@ kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
                                       1, enter_old_password_format, 
                                       identity_string);
         
+        if (!err && strlen (old_password) < 1) {
+            /* Empty password: Synthesize bad password err */
+            err = KRB5KRB_AP_ERR_BAD_INTEGRITY; 
+        }
+        
         if (!err) {
             err = kim_credential_create_for_change_password ((kim_credential *) &in_context->tcontext,
                                                              in_identity,
@@ -387,7 +396,7 @@ kim_error kim_ui_cli_change_password (kim_ui_context  *in_context,
         if (err && err != KIM_USER_CANCELED_ERR) {
             /*  new creds failed, report error to user */
             err = kim_ui_handle_kim_error (in_context, in_identity, 
-                                           kim_ui_error_type_authentication,
+                                           kim_ui_error_type_change_password,
                                            err);
 
         } else {
