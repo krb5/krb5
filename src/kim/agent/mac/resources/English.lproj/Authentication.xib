@@ -9,9 +9,6 @@
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<integer value="19"/>
-			<integer value="300420"/>
-			<integer value="300274"/>
-			<integer value="300175"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -60,6 +57,7 @@
 					<string>identity_string</string>
 					<string>favorite_identity_strings</string>
 					<string>isBusy</string>
+					<string>acceptingInput</string>
 				</object>
 				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -377,7 +375,7 @@
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="866582848">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">274</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -523,7 +521,6 @@
 					</object>
 				</object>
 				<string key="NSFrameSize">{500, 208}</string>
-				<reference key="NSSuperview"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="898191415">
@@ -668,7 +665,7 @@
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="60326189">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">286</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -848,7 +845,6 @@
 					</object>
 				</object>
 				<string key="NSFrameSize">{500, 230}</string>
-				<reference key="NSSuperview"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="861423802">
@@ -961,7 +957,7 @@
 				<string key="NSWindowContentMaxSize">{3.40282e+38, 3.40282e+38}</string>
 				<string key="NSWindowContentMinSize">{430, 283}</string>
 				<object class="NSView" key="NSWindowView" id="389112266">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1197,7 +1193,6 @@
 						</object>
 					</object>
 					<string key="NSFrameSize">{430, 305}</string>
-					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{430, 305}</string>
@@ -1343,7 +1338,7 @@
 						<string key="label">enabled: selection.isPrincipalValid</string>
 						<reference key="source" ref="207178735"/>
 						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="243297891">
 							<reference key="NSSource" ref="207178735"/>
 							<reference key="NSDestination" ref="57033499"/>
 							<string key="NSLabel">enabled: selection.isPrincipalValid</string>
@@ -1407,7 +1402,7 @@
 						<string key="label">enabled: selection.isPromptValid</string>
 						<reference key="source" ref="133507311"/>
 						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="6001298">
 							<reference key="NSSource" ref="133507311"/>
 							<reference key="NSDestination" ref="57033499"/>
 							<string key="NSLabel">enabled: selection.isPromptValid</string>
@@ -1495,7 +1490,7 @@
 						<string key="label">enabled: selection.isPromptValid</string>
 						<reference key="source" ref="499090485"/>
 						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="723183973">
 							<reference key="NSSource" ref="499090485"/>
 							<reference key="NSDestination" ref="57033499"/>
 							<string key="NSLabel">enabled: selection.isPromptValid</string>
@@ -1615,7 +1610,7 @@
 						<string key="label">enabled: selection.isChangePasswordValid</string>
 						<reference key="source" ref="105446308"/>
 						<reference key="destination" ref="57033499"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="145342680">
 							<reference key="NSSource" ref="105446308"/>
 							<reference key="NSDestination" ref="57033499"/>
 							<string key="NSLabel">enabled: selection.isChangePasswordValid</string>
@@ -2268,6 +2263,334 @@
 						<reference key="destination" ref="453888690"/>
 					</object>
 					<int key="connectionID">300556</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="441176528"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="441176528"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300560</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="158061"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="158061"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300561</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="576133689"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="576133689"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300562</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: selection.acceptingInput</string>
+						<reference key="source" ref="105446308"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="105446308"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled2: selection.acceptingInput</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<object class="NSDictionary" key="NSOptions">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMutableArray" key="dict.sortedKeys">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<string>NSMultipleValuesPlaceholder</string>
+									<string>NSNoSelectionPlaceholder</string>
+									<string>NSNotApplicablePlaceholder</string>
+									<string>NSNullPlaceholder</string>
+								</object>
+								<object class="NSMutableArray" key="dict.values">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+								</object>
+							</object>
+							<reference key="NSPreviousConnector" ref="145342680"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300563</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="288995352"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="288995352"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300564</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="225475172"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="225475172"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300565</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="645528597"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="645528597"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300566</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="494687042"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="494687042"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300567</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: selection.acceptingInput</string>
+						<reference key="source" ref="133507311"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="133507311"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled2: selection.acceptingInput</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<object class="NSDictionary" key="NSOptions">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMutableArray" key="dict.sortedKeys">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<string>NSMultipleValuesPlaceholder</string>
+									<string>NSNoSelectionPlaceholder</string>
+									<string>NSNotApplicablePlaceholder</string>
+									<string>NSNullPlaceholder</string>
+								</object>
+								<object class="NSMutableArray" key="dict.values">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+								</object>
+							</object>
+							<reference key="NSPreviousConnector" ref="6001298"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300568</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="529434335"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="529434335"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300569</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="523041784"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="523041784"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300570</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: selection.acceptingInput</string>
+						<reference key="source" ref="207178735"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="207178735"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled2: selection.acceptingInput</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<object class="NSDictionary" key="NSOptions">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMutableArray" key="dict.sortedKeys">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<string>NSMultipleValuesPlaceholder</string>
+									<string>NSNoSelectionPlaceholder</string>
+									<string>NSNotApplicablePlaceholder</string>
+									<string>NSNullPlaceholder</string>
+								</object>
+								<object class="NSMutableArray" key="dict.values">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+								</object>
+							</object>
+							<reference key="NSPreviousConnector" ref="243297891"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300571</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="1016187493"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="1016187493"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300572</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="270897371"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="270897371"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300573</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.acceptingInput</string>
+						<reference key="source" ref="907069022"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="907069022"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled: selection.acceptingInput</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300574</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled2: selection.acceptingInput</string>
+						<reference key="source" ref="499090485"/>
+						<reference key="destination" ref="57033499"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="499090485"/>
+							<reference key="NSDestination" ref="57033499"/>
+							<string key="NSLabel">enabled2: selection.acceptingInput</string>
+							<string key="NSBinding">enabled2</string>
+							<string key="NSKeyPath">selection.acceptingInput</string>
+							<object class="NSDictionary" key="NSOptions">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMutableArray" key="dict.sortedKeys">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<string>NSMultipleValuesPlaceholder</string>
+									<string>NSNoSelectionPlaceholder</string>
+									<string>NSNotApplicablePlaceholder</string>
+									<string>NSNullPlaceholder</string>
+								</object>
+								<object class="NSMutableArray" key="dict.values">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+									<reference ref="7"/>
+								</object>
+							</object>
+							<reference key="NSPreviousConnector" ref="723183973"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300575</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -3403,7 +3726,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">300556</int>
+			<int key="maxID">300575</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

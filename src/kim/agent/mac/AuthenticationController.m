@@ -312,7 +312,8 @@
     [passwordSpinny       startAnimation: nil];
     [samSpinny            startAnimation: nil];
     [changePasswordSpinny startAnimation: nil];
-    [[self window] setIgnoresMouseEvents:YES];
+    [glueController setValue:[NSNumber numberWithBool:NO]
+                  forKeyPath:accepting_input_keypath];
 }
 
 - (void) hideSpinny
@@ -321,7 +322,8 @@
     [passwordSpinny       stopAnimation: nil];
     [samSpinny            stopAnimation: nil];
     [changePasswordSpinny stopAnimation: nil];    
-    [[self window] setIgnoresMouseEvents:NO];
+    [glueController setValue:[NSNumber numberWithBool:YES]
+                  forKeyPath:accepting_input_keypath];
 }
 
 - (void) showSAM
