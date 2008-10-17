@@ -401,6 +401,7 @@
     // set badge
     [errorBadge setBadgePath:associatedClient.path];
 
+    [self hideSpinny];
     [self swapView:errorView];
     
     [self showWindow:nil];
