@@ -20,13 +20,18 @@ int main(void)
 {
     KLTime t;
     KLStatus err;
+    KLPrincipal principal;
     
     /* force use of UI */
-    fclose (stdin);
+    fclose (stdin);    
     
-    KLAcquireNewInitialTickets (NULL, NULL, NULL, NULL);
-    KLAcquireNewInitialTickets (NULL, NULL, NULL, NULL);
-    
+    err = KLCreatePrincipalFromTriplet ("nobody", "", "TEST-KERBEROS-1.3.1", &principal);
+    printf ("KLCreatePrincipalFromTriplet(nobody@TEST-KERBEROS-1.3.1) (err = %d)\n", err);
+    if (err == klNoErr) {
+        err = KLChangePassword (principal);
+        printf ("KLChangePassword() (err = %d)\n", err);
+        KLDisposePrincipal (principal);
+    }
     
     err = KLLastChangedTime(&t);
     printf ("KLLastChangedTime returned %d (err = %d)\n", t, err);
@@ -96,7 +101,6 @@ void TestHighLevelAPI (void)
         }
         KLDisposePrincipal (inPrincipal);
     }
-    exit (1);
     
     err = KLCreatePrincipalFromTriplet ("nobody", "", "TEST-KERBEROS-1.3.1", &inPrincipal);
     printf ("KLCreatePrincipalFromTriplet(nobody@TEST-KERBEROS-1.3.1) (err = %d)\n", err);
