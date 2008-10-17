@@ -657,6 +657,7 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
         
         /* set counter to zero so we can tell if we got prompted */
         in_ui_context->prompt_count = 0; 
+        in_ui_context->identity = in_identity;
 
         err = krb5_error (credential->context,
                           krb5_get_init_creds_password (credential->context, 
