@@ -38,6 +38,7 @@ static const char *kim_ui_plugin_dirs[] = { LIBDIR "/krb5/plugins/kimui", NULL }
 
 
 struct kim_ui_plugin_context {
+    krb5_context kcontext;
     struct plugin_dir_handle plugins;
     struct kim_ui_plugin_ftable_v0 *ftable;
     void **ftables;
@@ -56,6 +57,9 @@ static void kim_ui_plugin_context_free (kim_ui_plugin_context *io_context)
         if (PLUGIN_DIR_OPEN (&(*io_context)->plugins)) { 
             krb5int_close_plugin_dirs (&(*io_context)->plugins); 
         }
+        if ((*io_context)->kcontext) { 
+            krb5_free_context ((*io_context)->kcontext); 
+        }
         free (*io_context);
         *io_context = NULL;
     }
@@ -73,6 +77,10 @@ static kim_error kim_ui_plugin_context_allocate (kim_ui_plugin_context *out_cont
     if (!err) {
         context = malloc (sizeof (*context));
         if (!context) { err = KIM_OUT_OF_MEMORY_ERR; }
+    }
+    
+    if (!err) {
+        err = krb5_error (NULL, krb5_init_context (&context->kcontext));
     }
     
     if (!err) {
@@ -98,7 +106,6 @@ kim_error kim_ui_plugin_init (kim_ui_context *io_context)
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_plugin_context context = NULL;
-    struct errinfo einfo;
     
     if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
@@ -109,16 +116,19 @@ kim_error kim_ui_plugin_init (kim_ui_context *io_context)
     if (!err) {
         PLUGIN_DIR_INIT(&context->plugins);
 
-        err = krb5int_open_plugin_dirs (kim_ui_plugin_dirs, 
-                                        kim_ui_plugin_files, 
-                                        &context->plugins, &einfo);
+        err = krb5_error (context->kcontext,
+                          krb5int_open_plugin_dirs (kim_ui_plugin_dirs, 
+                                                    kim_ui_plugin_files, 
+                                                    &context->plugins, 
+                                                    &context->kcontext->err));
     }
     
     if (!err) {
-        err = krb5int_get_plugin_dir_data (&context->plugins,
-                                           "kim_ui_0",
-                                           &context->ftables, 
-                                           &einfo);
+        err = krb5_error (context->kcontext,
+                          krb5int_get_plugin_dir_data (&context->plugins,
+                                                       "kim_ui_0",
+                                                       &context->ftables, 
+                                                       &context->kcontext->err));
     }
     
     if (!err && context->ftables) {
