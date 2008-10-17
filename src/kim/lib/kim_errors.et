@@ -29,6 +29,7 @@ error_code KIM_KRB5_INIT_FAILED_ERR,              "Unable to initialize Kerberos
 error_code KIM_NO_REALMS_ERR,                     "There are no Kerberos realms configured"
 error_code KIM_NO_SUCH_REALM_ERR,                 "The realm '%s' is not in your configuration file or does not exist"
 error_code KIM_UNSUPPORTED_HINT_ERR,              "The hint '%s' is not supported by this version of KIM"
+error_code KIM_CLOCK_SKEW_ERR,                    "Clock skew too big: please check your time, time zone and daylight savings settings"
 
 index 25
 # Principal Errors
@@ -37,6 +38,8 @@ error_code KIM_BAD_COMPONENT_INDEX_ERR,           "Principal does not have a com
 error_code KIM_PASSWORD_MISMATCH_ERR,             "New and verify passwords do not match"
 error_code KIM_INSECURE_PASSWORD_ERR,             "Your new password for '%s' is insecure; please pick another one"
 error_code KIM_PASSWORD_CHANGE_FAILED_ERR,        "Unable to change password for %s"
+error_code KIM_BAD_PASSWORD_ERR,                  "Password incorrect"
+error_code KIM_PREAUTH_FAILED_ERR,                "Password incorrect or preauthentication failed"
 
 index 50
 # Options Errors

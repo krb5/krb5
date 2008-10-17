@@ -38,7 +38,7 @@ MAKE_FINI_FUNCTION(kim_error_terminate);
 
 typedef struct kim_last_error {
     kim_error code;
-    char message[1024];
+    char message[2048];
 } *kim_last_error;
 
 /* ------------------------------------------------------------------------ */
@@ -91,6 +91,36 @@ static void kim_error_free_message (void *io_error)
     }
 }
 
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static kim_boolean kim_error_is_builtin (kim_error in_error)
+{
+    return (in_error == KIM_NO_ERROR ||
+            in_error == KIM_OUT_OF_MEMORY_ERR);
+}
+
+/* ------------------------------------------------------------------------ */
+/* Warning: only remap to error strings with the same format!               */
+
+static kim_error kim_error_remap (kim_error in_error)
+{
+    /* some krb5 errors are confusing.  remap to better ones */
+    switch (in_error) {
+        case KRB5KRB_AP_ERR_BAD_INTEGRITY:
+            return KIM_BAD_PASSWORD_ERR;
+            
+        case KRB5KDC_ERR_PREAUTH_FAILED:
+            return KIM_PREAUTH_FAILED_ERR;
+            
+        case KRB5KRB_AP_ERR_SKEW:
+            return KIM_CLOCK_SKEW_ERR;
+    }
+    
+    return in_error;
+}
+
 /* ------------------------------------------------------------------------ */
 
 kim_string kim_error_message (kim_error in_error)
@@ -110,15 +140,7 @@ kim_string kim_error_message (kim_error in_error)
     
     if (!lock_err) { k5_mutex_unlock (&kim_error_lock); }
     
-    return message ? message : error_message (in_error);    
-}
-
-/* ------------------------------------------------------------------------ */
-
-static kim_boolean kim_error_is_builtin (kim_error in_error)
-{
-    return (in_error == KIM_NO_ERROR ||
-            in_error == KIM_OUT_OF_MEMORY_ERR);
+    return message ? message : error_message (kim_error_remap (in_error));    
 }
 
 #pragma mark -- Generic Functions --
@@ -140,26 +162,27 @@ kim_error kim_error_set_message_for_code (kim_error in_error,
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_error_set_message_for_code_va (kim_error in_error, 
+kim_error kim_error_set_message_for_code_va (kim_error in_code, 
                                              va_list   in_args)
 {
     kim_error err = KIM_NO_ERROR;
-    
-    if (!err && !kim_error_is_builtin (in_error)) {
-        kim_string message = NULL;
+    kim_error code = kim_error_remap (in_code);
 
+    if (!kim_error_is_builtin (code)) {
+        kim_string message = NULL;
+        
         err = kim_string_create_from_format_va_retcode (&message, 
-                                                        error_message (in_error), 
+                                                        error_message (code), 
                                                         in_args);
         
         if (!err) {
-            err = kim_error_set_message (in_error, message);
+            err = kim_error_set_message (code, message);
         }
         
         kim_string_free (&message);
     }
     
-    return err ? err : in_error;
+    return err ? err : code;
 }
 
 
@@ -169,16 +192,23 @@ kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context,
                                                 krb5_error_code in_code)
 {
     kim_error err = KIM_NO_ERROR;
+    krb5_error_code code = kim_error_remap (in_code);
     
-    if (!err && !kim_error_is_builtin (in_code)) {
-        const char *message = krb5_get_error_message (in_context, in_code);
+    if (code != in_code) {
+        /* error was remapped to a KIM error */
+        err = kim_error_set_message (code, error_message (code));
+
+    } else if (!kim_error_is_builtin (code)) {
+        const char *message = krb5_get_error_message (in_context, code);
         
-        err = kim_error_set_message (in_code, message);
-        
-        if (message) { krb5_free_error_message (in_context, message); }
+        if (message) {
+            err = kim_error_set_message (code, message);
+            
+            krb5_free_error_message (in_context, message);
+        }
     }
     
-    return err ? err : in_code;
+    return err ? err : code;
 }
 
 #pragma mark -- Debugging Functions --
