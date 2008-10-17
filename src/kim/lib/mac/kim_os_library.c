@@ -199,7 +199,7 @@ kim_error kim_os_library_get_application_path (kim_string *out_path)
         }
         
         if (cfpath        ) { CFRelease (cfpath); }        
-        if (absolute_url  ) { CFRelease (bundle_url); }
+        if (absolute_url  ) { CFRelease (absolute_url); }
         if (bundle_url    ) { CFRelease (bundle_url); }
         if (resources_url ) { CFRelease (resources_url); }
         if (executable_url) { CFRelease (executable_url); }
