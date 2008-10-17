@@ -77,6 +77,8 @@
     // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
     [[self window] setLevel:NSScreenSaverWindowLevel];
     
+    visibleAsSheet = NO;
+    
     lifetimeFormatter.displaySeconds = NO;
     lifetimeFormatter.displayShortFormat = NO;
     
@@ -148,13 +150,80 @@
     [super showWindow:sender];
 }
 
+- (void) showWithParent: (NSWindow *) parentWindow
+{
+    // attach as sheet if given a parentWindow
+    if (parentWindow && !visibleAsSheet) {
+        [NSApp beginSheet:[self window] 
+           modalForWindow:parentWindow
+            modalDelegate:self
+           didEndSelector:@selector(authSheetDidEnd:returnCode:contextInfo:)
+              contextInfo:NULL];
+    }
+    // else, display as normal
+    else {
+        [self showWindow:nil];
+    }
+}
+
+- (void) windowWillBeginSheet: (NSNotification *) notification
+{
+    visibleAsSheet = YES;
+}
+
+- (void) windowDidEndSheet: (NSNotification *) notification
+{
+    visibleAsSheet = NO;
+}
+
 - (void) setContent: (NSMutableDictionary *) newContent
 {
     [self window]; // wake up the nib connections
     [glueController setContent:newContent];
 }
 
-- (void) showEnterIdentity
+- (void) swapView: (NSView *) aView
+{
+    NSWindow *theWindow = [self window];
+    NSRect windowFrame;
+    NSRect viewFrame;
+    
+    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    
+    windowFrame = [theWindow frame];
+    viewFrame = [theWindow frameRectForContentRect:[aView frame]];
+    windowFrame.origin.y -= viewFrame.size.height - windowFrame.size.height;
+    
+    windowFrame.size.width = viewFrame.size.width;
+    windowFrame.size.height = viewFrame.size.height;
+    
+    [theWindow setFrame:windowFrame display:YES animate:YES];
+    
+    [containerView addSubview:aView];
+    
+}
+
+- (void) showSpinny
+{
+    [enterSpinny          startAnimation: nil];
+    [passwordSpinny       startAnimation: nil];
+    [samSpinny            startAnimation: nil];
+    [changePasswordSpinny startAnimation: nil];
+    [glueController setValue:[NSNumber numberWithBool:NO]
+                  forKeyPath:accepting_input_keypath];
+}
+
+- (void) hideSpinny
+{
+    [enterSpinny          stopAnimation: nil];
+    [passwordSpinny       stopAnimation: nil];
+    [samSpinny            stopAnimation: nil];
+    [changePasswordSpinny stopAnimation: nil];    
+    [glueController setValue:[NSNumber numberWithBool:YES]
+                  forKeyPath:accepting_input_keypath];
+}
+
+- (void) showEnterIdentity: (NSWindow *) parentWindow
 {
     kim_error err = KIM_NO_ERROR;
     NSWindow *theWindow = [self window];
@@ -224,10 +293,10 @@
 
     [theWindow makeFirstResponder:identityField];
 
-    [[self window] makeKeyAndOrderFront:nil];
+    [self showWithParent: parentWindow];
 }
 
-- (void) showAuthPrompt
+- (void) showAuthPrompt: (NSWindow *) parentWindow
 {
     uint32_t type = [[glueController valueForKeyPath:@"content.prompt_type"] unsignedIntegerValue];
     
@@ -235,14 +304,14 @@
 
     switch (type) {
         case kim_prompt_type_password :
-            [self showEnterPassword]; break;
+            [self showEnterPassword: parentWindow]; break;
         case kim_prompt_type_preauth :
         default :
-            [self showSAM]; break;
+            [self showSAM: parentWindow]; break;
     }
 }
 
-- (void) showEnterPassword
+- (void) showEnterPassword: (NSWindow *) parentWindow
 {
     CGFloat shrinkBy;
     NSRect frame;
@@ -282,51 +351,10 @@
     [self swapView:passwordView];
     
     [theWindow makeFirstResponder:passwordField];
-    [self showWindow:nil];
+    [self showWithParent:parentWindow];
 }
 
-- (void) swapView: (NSView *) aView
-{
-    NSWindow *theWindow = [self window];
-    NSRect windowFrame;
-    NSRect viewFrame;
-    
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    
-    windowFrame = [theWindow frame];
-    viewFrame = [theWindow frameRectForContentRect:[aView frame]];
-    windowFrame.origin.y -= viewFrame.size.height - windowFrame.size.height;
-    
-    windowFrame.size.width = viewFrame.size.width;
-    windowFrame.size.height = viewFrame.size.height;
-    
-    [theWindow setFrame:windowFrame display:YES animate:YES];
-    
-    [containerView addSubview:aView];
-    
-}
-
-- (void) showSpinny
-{
-    [enterSpinny          startAnimation: nil];
-    [passwordSpinny       startAnimation: nil];
-    [samSpinny            startAnimation: nil];
-    [changePasswordSpinny startAnimation: nil];
-    [glueController setValue:[NSNumber numberWithBool:NO]
-                  forKeyPath:accepting_input_keypath];
-}
-
-- (void) hideSpinny
-{
-    [enterSpinny          stopAnimation: nil];
-    [passwordSpinny       stopAnimation: nil];
-    [samSpinny            stopAnimation: nil];
-    [changePasswordSpinny stopAnimation: nil];    
-    [glueController setValue:[NSNumber numberWithBool:YES]
-                  forKeyPath:accepting_input_keypath];
-}
-
-- (void) showSAM
+- (void) showSAM: (NSWindow *) parentWindow
 {
     // set badge
     [samBadge setBadgePath:associatedClient.path];
@@ -336,8 +364,8 @@
     
     [self swapView:samView];
     
-    [self showWindow:nil];
     [[self window] makeFirstResponder:samPromptField];
+    [self showWithParent:parentWindow];
 }
 
 - (void) showChangePassword: (NSWindow *) parentWindow
@@ -381,22 +409,12 @@
     
     [self swapView:changePasswordView];
 
-    // attach as sheet if given a parentWindow
-    if (parentWindow) {
-        [NSApp beginSheet:theWindow 
-           modalForWindow:parentWindow
-            modalDelegate:self
-           didEndSelector:@selector(changePasswordSheetDidEnd:returnCode:contextInfo:)
-              contextInfo:NULL];
-    }
-    // else, display as normal
-    else {
-        [self showWindow:nil];
-    }
+    [self showWithParent:parentWindow];
+
     [theWindow makeFirstResponder:oldPasswordField];
 }
 
-- (void) showError
+- (void) showError: (NSWindow *) parentWindow
 {
     // wake up the nib connections and adjust window size
     [self window];
@@ -406,7 +424,7 @@
     [self hideSpinny];
     [self swapView:errorView];
     
-    [self showWindow:nil];
+    [self showWithParent:parentWindow];
 }
 
 - (IBAction) checkboxDidChange: (id) sender
@@ -496,9 +514,9 @@
     [NSApp endSheet:ticketOptionsSheet];
 }
 
-- (void) changePasswordSheetDidEnd: (NSWindow *) sheet 
-                        returnCode: (int) returnCode 
-                       contextInfo: (void *) contextInfo
+- (void) authSheetDidEnd: (NSWindow *) sheet 
+              returnCode: (int) returnCode 
+             contextInfo: (void *) contextInfo
 {
     [sheet orderOut:nil];
 }

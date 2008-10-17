@@ -2665,7 +2665,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>{{495, 457}, {500, 273}}</string>
 					<reference ref="9"/>
-					<reference ref="9"/>
+					<integer value="0"/>
 					<string>{{503, 256}, {419, 465}}</string>
 					<reference ref="9"/>
 					<reference ref="9"/>

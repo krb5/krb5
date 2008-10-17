@@ -33,7 +33,6 @@ enum krb_agent_client_state {
     ipc_client_state_init,
     ipc_client_state_enter,
     ipc_client_state_select,
-    ipc_client_state_select_change_password,
     ipc_client_state_auth_prompt,
     ipc_client_state_change_password,
     ipc_client_state_handle_error,
@@ -128,12 +127,11 @@ enum krb_agent_client_state {
     else if (self.state == ipc_client_state_auth_prompt) {
         [KerberosAgentListener didPromptForAuth:self.currentInfo error:err];
     }
-    else if (self.state == ipc_client_state_change_password ||
-             self.state == ipc_client_state_select_change_password) {
+    else if (self.state == ipc_client_state_change_password) {
         [KerberosAgentListener didChangePassword:self.currentInfo error:err];
     }
     
-    if (self.state == ipc_client_state_select_change_password) {
+    if ([[self.selectController window] isVisible]) {
         self.state = ipc_client_state_select;
     }
     else {
@@ -178,11 +176,18 @@ enum krb_agent_client_state {
 
 - (kim_error) enterIdentity: (NSDictionary *) info
 {
+    NSWindow *parentWindow = nil;
+    
     [self.currentInfo addEntriesFromDictionary:info];
+
+    if ([[self.selectController window] isVisible]) {
+        parentWindow = [selectController window];
+    }
+    
     self.state = ipc_client_state_enter;
 
     [self.authController setContent:self.currentInfo];
-    [self.authController showEnterIdentity];
+    [self.authController showEnterIdentity:parentWindow];
     
     return 0;
 }
@@ -196,7 +201,7 @@ enum krb_agent_client_state {
     [self.currentInfo setObject:[NSNumber numberWithBool:wantsChangePassword] forKey:@"wants_change_password"];
     [KerberosAgentListener didEnterIdentity:self.currentInfo error:0];
     
-    if (self.state == ipc_client_state_select_change_password) {
+    if ([[self.selectController window] isVisible]) {
         self.state = ipc_client_state_select;
     }
     else {
@@ -206,11 +211,18 @@ enum krb_agent_client_state {
 
 - (kim_error) promptForAuth: (NSDictionary *) info
 {
+    NSWindow *parentWindow = nil;
+    
     [self.currentInfo addEntriesFromDictionary:info];
+    
+    if ([[self.selectController window] isVisible]) {
+        parentWindow = [selectController window];
+    }
+    
     self.state = ipc_client_state_auth_prompt;
     
     [self.authController setContent:self.currentInfo];
-    [self.authController showAuthPrompt];
+    [self.authController showAuthPrompt:parentWindow];
     
     return 0;
 }
@@ -220,6 +232,13 @@ enum krb_agent_client_state {
     [self.currentInfo setObject:responseString forKey:@"prompt_response"];
     [self.currentInfo setObject:saveResponse forKey:@"save_response"];
     [KerberosAgentListener didPromptForAuth:self.currentInfo error:0];
+
+    if ([[self.selectController window] isVisible]) {
+        self.state = ipc_client_state_select;
+    }
+    else {
+        self.state = ipc_client_state_idle;
+    }
 }
 
 - (kim_error) changePassword: (NSDictionary *) info
@@ -228,13 +247,11 @@ enum krb_agent_client_state {
     
     [self.currentInfo addEntriesFromDictionary:info];
     
-    if (self.state == ipc_client_state_select) {
-        self.state = ipc_client_state_select_change_password;
+    if ([[self.selectController window] isVisible]) {
         parentWindow = [selectController window];
     }
-    else {
-        self.state = ipc_client_state_change_password;
-    }
+    
+    self.state = ipc_client_state_change_password;
     
     [self.authController setContent:self.currentInfo];
     [self.authController showChangePassword:parentWindow];
@@ -249,23 +266,45 @@ enum krb_agent_client_state {
     [self.currentInfo setObject:oldPassword forKey:@"old_password"];
     [self.currentInfo setObject:newPassword forKey:@"new_password"];
     [self.currentInfo setObject:verifyPassword forKey:@"verify_password"];
+
+    if ([[self.selectController window] isVisible]) {
+        self.state = ipc_client_state_select;
+    }
+    else {
+        self.state = ipc_client_state_idle;
+    }    
+    
     [KerberosAgentListener didChangePassword:self.currentInfo error:0];
 }
 
 
 - (kim_error) handleError: (NSDictionary *) info
 {
+    NSWindow *parentWindow = nil;
+
     [self.currentInfo addEntriesFromDictionary:info];
+
+    if ([[self.selectController window] isVisible]) {
+        parentWindow = [selectController window];
+    }
+    
     self.state = ipc_client_state_handle_error;
     
     [self.authController setContent:self.currentInfo];
-    [self.authController showError];
+    [self.authController showError:parentWindow];
     
     return 0;
 }
 
 - (void) didHandleError
 {
+    if ([[self.selectController window] isVisible]) {
+        self.state = ipc_client_state_select;
+    }
+    else {
+        self.state = ipc_client_state_idle;
+    }
+    
     [KerberosAgentListener didHandleError:self.currentInfo error:0];
 }
 

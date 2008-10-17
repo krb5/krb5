@@ -65,6 +65,7 @@
 
     IBOutlet NSWindow *ticketOptionsSheet;
     IBOutlet NSObjectController *ticketOptionsController;
+    BOOL visibleAsSheet;
     
     IBOutlet NSSlider *validLifetimeSlider;
     IBOutlet NSSlider *renewableLifetimeSlider;
@@ -79,12 +80,12 @@
 
 - (void) setContent: (NSMutableDictionary *) newContent;
 
-- (void) showEnterIdentity;
-- (void) showAuthPrompt;
-- (void) showEnterPassword;
-- (void) showSAM;
+- (void) showEnterIdentity: (NSWindow *) parentWindow;
+- (void) showAuthPrompt: (NSWindow *) parentWindow;
+- (void) showEnterPassword: (NSWindow *) parentWindow;
+- (void) showSAM: (NSWindow *) parentWindow;
 - (void) showChangePassword: (NSWindow *) parentWindow;
-- (void) showError;
+- (void) showError: (NSWindow *) parentWindow;
 
 - (IBAction) cancel: (id) sender;
 - (IBAction) enterIdentity: (id) sender;
@@ -99,9 +100,9 @@
 - (IBAction) cancelTicketOptions: (id) sender;
 - (IBAction) saveTicketOptions: (id) sender;
 
-- (void) changePasswordSheetDidEnd: (NSWindow *) sheet 
-                        returnCode: (int) returnCode 
-                       contextInfo: (void *) contextInfo;
+- (void) authSheetDidEnd: (NSWindow *) sheet 
+              returnCode: (int) returnCode 
+             contextInfo: (void *) contextInfo;
 - (void) ticketOptionsSheetDidEnd: (NSWindow *) sheet 
           returnCode: (int) returnCode 
          contextInfo: (void *) contextInfo;
