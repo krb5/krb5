@@ -1446,11 +1446,18 @@ KLStatus KLCreatePrincipalFromTriplet (const char  *inName,
                                        const char  *inRealm,
                                        KLPrincipal *outPrincipal)
 {
-    return kl_check_error (kim_identity_create_from_components (outPrincipal,
-                                                                inRealm,
-                                                                inName, 
-                                                                inInstance,
-                                                                NULL));
+    if (inInstance && strlen (inInstance) > 0) {
+        return kl_check_error (kim_identity_create_from_components (outPrincipal,
+                                                                    inRealm,
+                                                                    inName, 
+                                                                    inInstance,
+                                                                    NULL));
+    } else {
+        return kl_check_error (kim_identity_create_from_components (outPrincipal,
+                                                                    inRealm,
+                                                                    inName, 
+                                                                    NULL));        
+    }
 }
 
 /* ------------------------------------------------------------------------ */
