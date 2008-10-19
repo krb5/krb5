@@ -184,7 +184,14 @@ krb5_def_store_mkey(krb5_context   context,
         goto out;
     }
 
-    if (mktemp(tmp_ktname) == NULL) {
+    /*
+     * Set tmp_ktpath to point to the keyfile path (skip WRFILE:).  Subtracting
+     * 1 to account for NULL terminator in sizeof calculation of a string
+     * constant.  Used further down.
+     */
+    tmp_ktpath = tmp_ktname + (sizeof("WRFILE:") - 1);
+
+    if (mktemp(tmp_ktpath) == NULL) {
         retval = errno;
         krb5_set_error_message (context, retval,
             "Could not create temp stash file: %s",
@@ -202,15 +209,7 @@ krb5_def_store_mkey(krb5_context   context,
     new_entry.principal = mname;
     new_entry.key = *key;
     new_entry.vno = kvno;
-#endif /* LEAN_CLIENT */
-    /*
-     * Set tmp_ktpath to point to the keyfile path (skip WRFILE:).  Subtracting
-     * 1 to account for NULL terminator in sizeof calculation of a string
-     * constant.  Used further down.
-     */
-    tmp_ktpath = tmp_ktname + (sizeof("WRFILE:") - 1);
 
-#ifndef LEAN_CLIENT 
     retval = krb5_kt_add_entry(context, kt, &new_entry);
     if (retval != 0) {
         /* delete tmp keyfile if it exists and an error occurrs */
