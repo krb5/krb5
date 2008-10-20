@@ -154,6 +154,17 @@ get_negTokenResp(OM_uint32 *, unsigned char *, unsigned int,
 static int
 is_kerb_mech(gss_OID oid);
 
+/* SPNEGO oid structure */
+static const gss_OID_desc spnego_oids[] = {
+	{SPNEGO_OID_LENGTH, SPNEGO_OID},
+};
+
+const gss_OID_desc * const gss_mech_spnego = spnego_oids+0;
+static const gss_OID_set_desc spnego_oidsets[] = {
+	{1, (gss_OID) spnego_oids+0},
+};
+const gss_OID_set_desc * const gss_mech_set_spnego = spnego_oidsets+0;
+
 /*
  * The Mech OID for SPNEGO:
  * { iso(1) org(3) dod(6) internet(1) security(5)

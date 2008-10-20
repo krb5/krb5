@@ -106,16 +106,9 @@ typedef struct {
  */
 #define	SPNEGO_MAGIC_ID  0x00000fed
 
-/* SPNEGO oid structure */
-static const gss_OID_desc spnego_oids[] = {
-	{SPNEGO_OID_LENGTH, SPNEGO_OID},
-};
-
-const gss_OID_desc * const gss_mech_spnego = spnego_oids+0;
-static const gss_OID_set_desc spnego_oidsets[] = {
-	{1, (gss_OID) spnego_oids+0},
-};
-const gss_OID_set_desc * const gss_mech_set_spnego = spnego_oidsets+0;
+/* SPNEGO oid declarations */
+const gss_OID_desc * const gss_mech_spnego;
+const gss_OID_set_desc * const gss_mech_set_spnego;
 
 #ifdef DEBUG
 #define	dsyslog(a) syslog(LOG_DEBUG, a)

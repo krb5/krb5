@@ -27,6 +27,7 @@
 
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
+#include "../spnego/gssapiP_spnego.h"
 
 
 /** mechglue wrappers **/
@@ -1141,7 +1142,6 @@ gss_krb5_copy_ccache(
     return GSS_S_DEFECTIVE_CREDENTIAL;
 }
 
-/* XXX need to delete mechglue ctx too */
 OM_uint32 KRB5_CALLCONV
 gss_krb5_export_lucid_sec_context(
     OM_uint32 *minor_status,
@@ -1149,15 +1149,40 @@ gss_krb5_export_lucid_sec_context(
     OM_uint32 version,
     void **kctx)
 {
-    gss_union_ctx_id_t uctx;
+    gss_union_ctx_id_t uctx = (gss_union_ctx_id_t)*context_handle;
+    gss_union_ctx_id_t kerb_ctx;
+    OM_uint32 major = GSS_S_COMPLETE, minor = 0;
+    int is_spnego = 0;
 
-    uctx = (gss_union_ctx_id_t)*context_handle;
-    if (!g_OID_equal(uctx->mech_type, &krb5_mechanism.mech_type) &&
-        !g_OID_equal(uctx->mech_type, &krb5_mechanism_old.mech_type))
-        return GSS_S_BAD_MECH;
-    return gss_krb5int_export_lucid_sec_context(minor_status,
-                                                &uctx->internal_ctx_id,
-                                                version, kctx);
+    if (minor_status != NULL)
+        *minor_status = 0;
+    if (minor_status == NULL || context_handle == NULL || kctx == NULL)
+        return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    *kctx = GSS_C_NO_CONTEXT;
+
+    if (uctx == GSS_C_NO_CONTEXT)
+        return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (g_OID_equal(uctx->mech_type, gss_mech_spnego)) {
+        kerb_ctx = uctx->internal_ctx_id;
+        is_spnego = 1;
+    }
+    else
+        kerb_ctx = uctx;
+
+    major =  gss_krb5int_export_lucid_sec_context(minor_status,
+                                                  &kerb_ctx->internal_ctx_id,
+                                                  version, kctx);
+
+    if (major == GSS_S_COMPLETE) {
+        if (is_spnego) {
+            uctx->internal_ctx_id = GSS_C_NO_CONTEXT;
+            (void) gss_delete_sec_context(&minor, (gss_ctx_id_t *)&kerb_ctx, NULL);
+        }
+        (void) gss_delete_sec_context(&minor, context_handle, NULL);
+    }
+
+    return (major);
 }
 
 OM_uint32 KRB5_CALLCONV
