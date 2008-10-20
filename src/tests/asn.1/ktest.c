@@ -652,10 +652,9 @@ krb5_error_code ktest_make_sample_etype_info(p)
 	info[i]->etype = i;
 	sprintf(buf, "Morton's #%d", i);
 	info[i]->length = strlen(buf);
-	info[i]->salt = malloc((size_t) (info[i]->length+1));
+	info[i]->salt = (unsigned char *) strdup(buf);
 	if (info[i]->salt == 0)
 	    goto memfail;
-	strcpy((char *) info[i]->salt, buf);
 	info[i]->s2kparams.data = NULL;
 	info[i]->s2kparams.length = 0;
 	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
@@ -690,10 +689,9 @@ krb5_error_code ktest_make_sample_etype_info2(p)
 	info[i]->etype = i;
 	sprintf(buf, "Morton's #%d", i);
 	info[i]->length = strlen(buf);
-	info[i]->salt = malloc((size_t) (info[i]->length+1));
+	info[i]->salt = (unsigned char *) strdup(buf);
 	if (info[i]->salt == 0)
 	    goto memfail;
-	strcpy((char *) info[i]->salt, buf);
 	sprintf(buf, "s2k: %d", i);
 	info[i]->s2kparams.data = malloc(strlen(buf)+1);
 	if (info[i]->s2kparams.data == NULL)

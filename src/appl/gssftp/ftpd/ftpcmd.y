@@ -1438,10 +1438,9 @@ copy(s)
 {
 	char *p;
 
-	p = malloc((unsigned) strlen(s) + 1);
+	p = strdup(s);
 	if (p == NULL)
 		fatal("Ran out of memory.");
-	(void) strcpy(p, s);
 	return (p);
 }
 

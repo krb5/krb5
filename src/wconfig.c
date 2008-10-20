@@ -104,13 +104,12 @@ int main(int argc, char *argv[])
 				if (islower(*cp))
 					*cp = toupper(*cp);
 			}
-			cp = malloc(strlen(tmp)+1);
+			cp = strdup(tmp);
 			if (!cp) {
 				fprintf(stderr,
 					"wconfig: malloc failed!\n");
 				exit(1);
 			}
-			strcpy(cp, tmp);
 			add_ignore_list(cp);
 			argc--; argv++;
 			continue;

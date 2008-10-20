@@ -1441,9 +1441,8 @@ send_error(context, fd, err_code, err_text)
 		}
 	} 
 	error.text.length = strlen(text) + 1;
-	error.text.data = malloc(error.text.length);
+	error.text.data = strdup(text);
 	if (error.text.data) {
-		strcpy(error.text.data, text);
 		if (!krb5_mk_error(context, &error, &outbuf)) {
 			(void) krb5_write_message(context, (void *)&fd,&outbuf);
 			krb5_free_data_contents(context, &outbuf);

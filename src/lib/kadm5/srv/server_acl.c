@@ -217,9 +217,8 @@ kadm5int_acl_parse_line(lp)
 		}
 	    }
 	    if (opok) {
-		acle->ae_name = (char *) malloc(strlen(acle_principal)+1);
+		acle->ae_name = strdup(acle_principal);
 		if (acle->ae_name) {
-		    strcpy(acle->ae_name, acle_principal);
 		    acle->ae_principal = (krb5_principal) NULL;
 		    acle->ae_name_bad = 0;
 		    DPRINT(DEBUG_ACL, acl_debug_level,

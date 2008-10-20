@@ -45,8 +45,5 @@ g_local_host_name(void)
 
     buf[sizeof(buf)-1] = '\0';
 
-    if (! (ptr = xmalloc(strlen(buf) + 1)))
-	return 0;
-
-    return strcpy(ptr, buf);
+    return strdup(buf);
 }

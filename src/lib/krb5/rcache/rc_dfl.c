@@ -285,12 +285,11 @@ krb5_rc_dfl_resolve(krb5_context context, krb5_rcache id, char *name)
 	return KRB5_RC_MALLOC;
     id->data = (krb5_pointer) t;
     if (name) {
-	t->name = malloc(strlen(name)+1);
+	t->name = strdup(name);
 	if (!t->name) {
 	    retval = KRB5_RC_MALLOC;
 	    goto cleanup;
 	}
-	strcpy(t->name, name);
     } else
 	t->name = 0;
     t->numhits = t->nummisses = 0;

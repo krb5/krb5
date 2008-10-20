@@ -1513,12 +1513,11 @@ void doit(f, fromp)
 	struct stat s2;
 	int offst = 0;
 
-	copy = malloc(strlen(cmdbuf) + 1);
+	copy = strdup(cmdbuf);
 	if (copy == NULL) {
 	    perror("malloc");
 	    _exit(1);
 	}
-	strcpy(copy, cmdbuf);
 	if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
 		offst = 3;
 	}

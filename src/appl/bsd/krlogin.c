@@ -483,11 +483,10 @@ main(argc, argv)
 		    "rlogin: -k flag must be followed with a realm name.\n");
 	    exit (1);
 	}
-	if(!(krb_realm = (char *)malloc(strlen(*argv) + 1))){
+	if(!(krb_realm = strdup(*argv))){
 	    fprintf(stderr, "rlogin: Cannot malloc.\n");
 	    exit(1);
 	}
-	strcpy(krb_realm, *argv);
 	argv++, argc--;
 	goto another;
     }

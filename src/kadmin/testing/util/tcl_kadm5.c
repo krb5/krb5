@@ -961,8 +961,7 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
 	       retcode = TCL_ERROR;
 	       goto finished;
 	  }
-	  tl->tl_data_contents = (krb5_octet *) malloc(tmp+1);
-	  strcpy((char *) tl->tl_data_contents, argv1[2]);
+	  tl->tl_data_contents = (krb5_octet *) strdup(argv1[2]);
 
 	  Tcl_Free((char *) argv1);
 	  argv1 = NULL;

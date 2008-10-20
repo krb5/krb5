@@ -246,12 +246,11 @@ kg_set_ccache_name (OM_uint32 *minor_status, const char *name)
     krb5_error_code kerr;
 
     if (name) {
-        new_name = malloc(strlen(name) + 1);
+        new_name = strdup(name);
         if (new_name == NULL) {
             *minor_status = ENOMEM;
             return GSS_S_FAILURE;
         }
-        strcpy(new_name, name);
     }
 
     kg_ccache_name = k5_getspecific(K5_KEY_GSS_KRB5_CCACHE_NAME);

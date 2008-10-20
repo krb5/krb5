@@ -128,8 +128,7 @@ void ss_add_info_dir(sci_idx, info_dir, code_ptr)
     }
     info->info_dirs = dirs;
     dirs[n_dirs + 1] = (char *)NULL;
-    dirs[n_dirs] = malloc((unsigned)strlen(info_dir)+1);
-    strcpy(dirs[n_dirs], info_dir);
+    dirs[n_dirs] = strdup(info_dir);
     *code_ptr = 0;
 }
 

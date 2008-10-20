@@ -72,7 +72,6 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_default_realm(krb5_context context, char **lrealm)
 {
     char *realm = 0;
-    char *cp;
     krb5_error_code retval;
 
     if (!context || (context->magic != KV5M_CONTEXT)) 
@@ -90,12 +89,11 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
                                         &realm);
 
             if (!retval && realm) {
-                context->default_realm = malloc(strlen(realm) + 1);
+                context->default_realm = strdup(realm);
                 if (!context->default_realm) {
                     profile_release_string(realm);
                     return ENOMEM;
                 }
-                strcpy(context->default_realm, realm);
                 profile_release_string(realm);
             }
         }
@@ -155,9 +153,8 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
 
     realm = context->default_realm;
     
-    if (!(*lrealm = cp = malloc((unsigned int) strlen(realm) + 1)))
+    if (!(*lrealm = strdup(realm)))
         return ENOMEM;
-    strcpy(cp, realm);
     return(0);
 }
 
@@ -176,12 +173,11 @@ krb5_set_default_realm(krb5_context context, const char *lrealm)
        NULL */
     if (!lrealm) return 0;
 
-    context->default_realm = malloc(strlen (lrealm) + 1);
+    context->default_realm = strdup(lrealm);
 
     if (!context->default_realm)
 	    return ENOMEM;
 
-    strcpy(context->default_realm, lrealm);
     return(0);
 
 }

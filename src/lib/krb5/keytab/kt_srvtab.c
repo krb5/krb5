@@ -127,14 +127,13 @@ krb5_ktsrvtab_resolve(krb5_context context, const char *name, krb5_keytab *id)
 	return(ENOMEM);
     }
 
-    data->name = (char *)malloc(strlen(name) + 1);
+    data->name = strdup(name);
     if (data->name == NULL) {
 	krb5_xfree(data);
 	krb5_xfree(*id);
 	return(ENOMEM);
     }
 
-    (void) strcpy(data->name, name);
     data->openf = 0;
 
     (*id)->data = (krb5_pointer)data;

@@ -664,10 +664,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 	log_control.log_nentries = 1;
     }
     if (log_control.log_nentries) {
-	log_control.log_whoami = (char *) malloc(strlen(whoami)+1);
-	if (log_control.log_whoami)
-	    strcpy(log_control.log_whoami, whoami);
-
+	log_control.log_whoami = strdup(whoami);
 	log_control.log_hostname = (char *) malloc(MAXHOSTNAMELEN + 1);
 	if (log_control.log_hostname) {
 	    gethostname(log_control.log_hostname, MAXHOSTNAMELEN);

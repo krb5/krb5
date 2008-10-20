@@ -2448,11 +2448,10 @@ char *strsave(sp)
 {
     register char *ret;
     
-    if ((ret = (char *) malloc((unsigned) strlen(sp)+1)) == NULL) {
+    if ((ret = strdup(sp)) == NULL) {
 	fprintf(stderr, "no memory for saving args\n");
 	exit(1);
     }
-    (void) strcpy(ret,sp);
     return(ret);
 }
 #endif

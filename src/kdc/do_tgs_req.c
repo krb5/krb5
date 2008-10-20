@@ -741,9 +741,8 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
     else
 	errpkt.client = 0;
     errpkt.text.length = strlen(status) + 1;
-    if (!(errpkt.text.data = malloc(errpkt.text.length)))
+    if (!(errpkt.text.data = strdup(status)))
 	return ENOMEM;
-    (void) strcpy(errpkt.text.data, status);
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
 	free(errpkt.text.data);

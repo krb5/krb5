@@ -788,11 +788,9 @@ goodbye:
     if (!nameval[0]) {
         retval = ENOENT;
     } else {
-        *ret_value = malloc(strlen(nameval[0]) + 1);
+        *ret_value = strdup(nameval[0]);
         if (!*ret_value)
             retval = ENOMEM;
-        else
-            strcpy(*ret_value, nameval[0]);
     }
 
     profile_free_list(nameval);

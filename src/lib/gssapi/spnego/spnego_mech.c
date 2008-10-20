@@ -2260,14 +2260,7 @@ negotiate_mech_type(OM_uint32 *minor_status,
 static spnego_token_t
 make_spnego_token(char *name)
 {
-	spnego_token_t token;
-
-	token = (spnego_token_t)malloc(strlen(name)+1);
-
-	if (token == NULL)
-		return (NULL);
-	strcpy(token, name);
-	return (token);
+	return (spnego_token_t)strdup(name);
 }
 
 static gss_buffer_desc

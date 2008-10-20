@@ -250,19 +250,17 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 #ifdef DEBUG_REFERRALS
     printf("  temp_realm is %s\n",temp_realm);
 #endif
-        realm = malloc(strlen(temp_realm) + 1);
+        realm = strdup(temp_realm);
         if (!realm) {
             profile_release_string(temp_realm);
             return ENOMEM;
         }
-        strcpy(realm, temp_realm);
         profile_release_string(temp_realm);
     }
 
     if (realm == (char *)NULL) {
-        if (!(cp = (char *)malloc(strlen(KRB5_REFERRAL_REALM)+1)))
+        if (!(cp = strdup(KRB5_REFERRAL_REALM)))
 	    return ENOMEM;
-	strcpy(cp, KRB5_REFERRAL_REALM);
 	realm = cp;
     }
     
@@ -400,9 +398,8 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
     if (realm == (char *)NULL) {
         if (default_realm != (char *)NULL) {
             /* We are defaulting to the realm of the host */
-            if (!(cp = (char *)malloc(strlen(default_realm)+1)))
+            if (!(cp = strdup(default_realm)))
                 return ENOMEM;
-            strcpy(cp, default_realm);
             realm = cp;
 
             /* Assume the realm name is upper case */

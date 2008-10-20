@@ -221,14 +221,13 @@ ktfile_common_resolve(krb5_context context, const char *name,
 	return err;
     }
 
-    if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL) {
+    if ((data->name = strdup(name)) == NULL) {
 	k5_mutex_destroy(&data->lock);
 	krb5_xfree(data);
 	krb5_xfree(*id);
 	return(ENOMEM);
     }
 
-    (void) strcpy(data->name, name);
     data->openf = 0;
     data->version = 0;
     data->iter_count = 0;

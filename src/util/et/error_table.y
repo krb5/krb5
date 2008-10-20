@@ -100,10 +100,7 @@ char *
 ds(string)
 	char const *string;
 {
-	char *rv;
-	rv = malloc(strlen(string)+1);
-	strcpy(rv, string);
-	return(rv);
+	return strdup(string);
 }
 
 char *

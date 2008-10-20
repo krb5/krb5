@@ -252,7 +252,7 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 	goto done;
     }
 
-    if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL) {
+    if ((data->name = strdup(name)) == NULL) {
 	k5_mutex_destroy(&data->lock);
 	krb5_xfree(data);
 	krb5_xfree(list->keytab);
@@ -260,8 +260,6 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 	err = ENOMEM;
 	goto done;
     }
-
-    (void) strcpy(data->name, name);
 
     data->link = NULL;
     data->refcount = 0;

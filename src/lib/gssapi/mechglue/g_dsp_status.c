@@ -358,12 +358,11 @@ gss_buffer_t outStr;
 
 	/* now copy the status code and return to caller */
 	outStr->length = strlen(errStr);
-	outStr->value = malloc((size_t)outStr->length+1);
+	outStr->value = strdup(errStr);
 	if (outStr->value == NULL) {
 		outStr->length = 0;
 		return (GSS_S_FAILURE);
 	}
 
-	(void) strcpy((char *)outStr->value, errStr);
 	return (GSS_S_COMPLETE);
 } /* displayMajor */

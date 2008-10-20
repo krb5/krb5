@@ -276,13 +276,11 @@ asn1_error_code asn1buf_unparse(const asn1buf *buf, char **s)
 {
     free(*s);
     if (buf == NULL) {
-        *s = malloc(sizeof("<NULL>"));
+        *s = strdup("<NULL>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<NULL>");
     } else if (buf->base == NULL) {
-        *s = malloc(sizeof("<EMPTY>"));
+        *s = strdup("<EMPTY>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<EMPTY>");
     } else {
         unsigned int length = asn1buf_len(buf);
         unsigned int i;
@@ -305,13 +303,11 @@ asn1_error_code asn1buf_hex_unparse(const asn1buf *buf, char **s)
     free(*s);
 
     if (buf == NULL) {
-        *s = malloc(sizeof("<NULL>"));
+        *s = strdup("<NULL>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<NULL>");
     } else if (buf->base == NULL) {
-        *s = malloc(sizeof("<EMPTY>"));
+        *s = strdup("<EMPTY>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<EMPTY>");
     } else {
         unsigned int length = asn1buf_len(buf);
         int i;

@@ -572,14 +572,13 @@ static char *
 sgetsave(s)
 	char *s;
 {
-	char *new = malloc((unsigned) strlen(s) + 1);
+	char *new = strdup(s);
 
 	if (new == NULL) {
 		perror_reply(421, "Local resource failure: malloc");
 		dologout(1);
 		/* NOTREACHED */
 	}
-	(void) strcpy(new, s);
 	return (new);
 }
 

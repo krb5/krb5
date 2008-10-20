@@ -233,9 +233,8 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 
     GETDIR;
     if (full_pathname) {
-	if (!(d->fn = malloc(strlen(full_pathname) + 1)))
+	if (!(d->fn = strdup(full_pathname)))
 	    return KRB5_RC_IO_MALLOC;
-	(void) strcpy(d->fn, full_pathname);
     } else {
 	if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
 	    return KRB5_RC_IO_MALLOC;

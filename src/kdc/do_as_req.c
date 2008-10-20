@@ -553,9 +553,8 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
     errpkt.server = request->server;
     errpkt.client = request->client;
     errpkt.text.length = strlen(status)+1;
-    if (!(errpkt.text.data = malloc(errpkt.text.length)))
+    if (!(errpkt.text.data = strdup(status)))
 	return ENOMEM;
-    (void) strcpy(errpkt.text.data, status);
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
 	free(errpkt.text.data);

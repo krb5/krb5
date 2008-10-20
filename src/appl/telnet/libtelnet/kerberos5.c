@@ -266,12 +266,11 @@ kerberos5_send(ap)
 
 	    rdata.magic = 0;
 	    rdata.length = strlen(telnet_krb5_realm);
-	    rdata.data = (char *) malloc(rdata.length + 1);
+	    rdata.data = strdup(telnet_krb5_realm);
 	    if (rdata.data == NULL) {
 	        fprintf(stderr, "malloc failed\n");
 		return(0);
 	    }
-	    strcpy(rdata.data, telnet_krb5_realm);
 	    krb5_princ_set_realm(telnet_context, creds.server, &rdata);
 	}
 

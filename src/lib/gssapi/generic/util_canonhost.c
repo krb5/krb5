@@ -59,10 +59,8 @@ g_canonicalize_host(char *hostname)
 
     xfree(haddr);
 
-    if ((canon = (char *) xmalloc(strlen(hent->h_name)+1)) == NULL)
+    if ((canon = (char *) strdup(hent->h_name)) == NULL)
 	return(NULL);
-
-    strcpy(canon, hent->h_name);
 
     for (str = canon; *str; str++)
 	if (isupper(*str)) *str = tolower(*str);

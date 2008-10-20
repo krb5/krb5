@@ -206,31 +206,28 @@ int main(argc, argv)
 	    argc--, argv++;
 	    if (argc == 0) 
 	      usage();
-	    if(!(krb_realm = (char *)malloc(strlen(*argv) + 1))){
+	    if(!(krb_realm = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
 		exit(1);
 	    }
-	    strcpy(krb_realm, *argv);	
 	    goto next_arg;
 	  case 'c':		/* Change default ccache file */
 	    argc--, argv++;
 	    if (argc == 0) 
 	      usage();
-	    if(!(krb_cache = (char *)malloc(strlen(*argv) + 1))){
+	    if(!(krb_cache = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
 		exit(1);
 	    }
-	    strcpy(krb_cache, *argv);	
 	    goto next_arg;
 	  case 'C':		/* Change default config file */
 	    argc--, argv++;
 	    if (argc == 0) 
 	      usage();
-	    if(!(krb_config = (char *)malloc(strlen(*argv) + 1))){
+	    if(!(krb_config = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
 		exit(1);
 	    }
-	    strcpy(krb_config, *argv);	
 	    goto next_arg;
 	  case 'P':
 	    if (!strcmp (*argv, "O"))

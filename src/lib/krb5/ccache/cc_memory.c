@@ -415,7 +415,7 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
 	return err;
     }
 
-    d->name = malloc(strlen(name) + 1);
+    d->name = strdup(name);
     if (d->name == NULL) {
 	k5_cc_mutex_destroy(&d->lock);
 	krb5_xfree(d);
@@ -425,9 +425,6 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     d->prin = NULL;
     d->changetime = 0;
     update_mcc_change_time(d);
-
-    /* Set up the filename */
-    strcpy(d->name, name);
 
     n = malloc(sizeof(krb5_mcc_list_node));
     if (n == NULL) {

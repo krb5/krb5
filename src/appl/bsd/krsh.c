@@ -202,11 +202,10 @@ main(argc, argv0)
 	    fprintf(stderr, "rsh(kerberos): -k flag must have a realm after it.\n");
 	    exit (1);
 	}
-	if(!(krb_realm = (char *)malloc(strlen(*argv) + 1))){
+	if(!(krb_realm = strdup(*argv))){
 	    fprintf(stderr, "rsh(kerberos): Cannot malloc.\n");
 	    exit(1);
 	}
-	strcpy(krb_realm, *argv);
 	argv++, argc--;
 	goto another;
     }

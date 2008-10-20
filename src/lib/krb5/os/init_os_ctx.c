@@ -198,9 +198,8 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
         char *env = getenv("KRB5_CONFIG");
         if (env)
         {
-            name = malloc(strlen(env) + 1);
+            name = strdup(env);
             if (!name) return ENOMEM;
-            strcpy(name, env);
         }
     }
     if (!name && !secure)
