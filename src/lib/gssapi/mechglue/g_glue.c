@@ -29,6 +29,7 @@
 #endif
 #include <string.h>
 #include <errno.h>
+#include "../spnego/gssapiP_spnego.h"
 
 #define	MSO_BIT (8*(sizeof (int) - 1))  /* Most significant octet bit */
 
@@ -557,6 +558,18 @@ gssint_get_mechanism_cred(union_cred, mech_type)
     for (i=0; i < union_cred->count; i++) {
 	if (g_OID_equal(mech_type, &union_cred->mechs_array[i]))
 	    return union_cred->cred_array[i];
+
+	/* for SPNEGO, check the next-lower set of creds */
+	if (g_OID_equal(gss_mech_spnego, &union_cred->mechs_array[i])) {
+	    gss_union_cred_t candidate_cred;
+	    gss_cred_id_t    sub_cred;
+
+	    candidate_cred = (gss_union_cred_t)union_cred->cred_array[i];
+	    sub_cred = gssint_get_mechanism_cred(candidate_cred, mech_type);
+
+	    if(sub_cred != GSS_C_NO_CREDENTIAL)
+		return sub_cred;
+	}
     }
     return GSS_C_NO_CREDENTIAL;
 }
