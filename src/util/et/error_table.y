@@ -108,10 +108,7 @@ quote(string)
 	char const *string;
 {
 	char *rv;
-	rv = malloc(strlen(string)+3);
-	strcpy(rv, "\"");
-	strcat(rv, string);
-	strcat(rv, "\"");
+	asprintf(&rv, "\"%s\"", string);
 	return(rv);
 }
 

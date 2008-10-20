@@ -279,14 +279,9 @@ char *kadmin_startup(argc, argv)
 	    break;
 	case 'd':
 	    /* now db_name is not a seperate argument. It has to be passed as part of the db_args */
-	    if (!db_name) {
-		db_name = malloc(strlen(optarg) + sizeof("dbname="));
-	    } else {
-		db_name = realloc(db_name, strlen(optarg) + sizeof("dbname="));
-	    }
-
-	    strcpy(db_name, "dbname=");
-	    strcat(db_name, optarg);
+	    if (db_name)
+		free(db_name);
+	    asprintf(&db_name, "dbname=%s", optarg);
 
 	    db_args_size++;
 	    {
@@ -437,43 +432,27 @@ char *kadmin_startup(argc, argv)
 	    }
 	    if (cp != NULL)
 		*cp = '\0';
-	    princstr = (char*)malloc(strlen(canon) + 6 /* "/admin" */ +
-				     (realm ? 1 + strlen(realm) : 0) + 1);
-	    if (princstr == NULL) {
+	    if (asprintf(&princstr, "%s/admin%s%s", canon,
+			 (realm) ? "@" : "",
+			 (realm) ? realm : "") < 0) {
 		fprintf(stderr, "%s: out of memory\n", whoami);
 		exit(1);
-	    }
-	    strcpy(princstr, canon);
-	    strcat(princstr, "/admin");
-	    if (realm) {
-		strcat(princstr, "@");
-		strcat(princstr, realm);
 	    }
 	    free(canon);
 	    krb5_free_principal(context, princ);
 	    freeprinc++;
 	} else if ((luser = getenv("USER"))) {
-	    princstr = (char *) malloc(strlen(luser) + 7 /* "/admin@" */
-				       + strlen(def_realm) + 1);
-	    if (princstr == NULL) {
+	    if (asprintf(&princstr, "%s/admin@%s", luser, def_realm) < 0) {
 		fprintf(stderr, "%s: out of memory\n", whoami);
 		exit(1);
 	    }
-	    strcpy(princstr, luser);
-	    strcat(princstr, "/admin");
-	    strcat(princstr, "@");
-	    strcat(princstr, def_realm);
 	    freeprinc++;
 	} else if ((pw = getpwuid(getuid()))) {
-	    princstr = (char *) malloc(strlen(pw->pw_name) + 7 /* "/admin@" */
-				       + strlen(def_realm) + 1);
-	    if (princstr == NULL) {
+	    if (asprintf(&princstr, "%s/admin@%s", pw->pw_name,
+			 def_realm) < 0) {
 		fprintf(stderr, "%s: out of memory\n", whoami);
 		exit(1);
 	    }
-	    strcpy(princstr, pw->pw_name);
-	    strcat(princstr, "/admin@");
-	    strcat(princstr, def_realm);
 	    freeprinc++;
 	} else {
 	    fprintf(stderr, "%s: unable to figure out a principal name\n",

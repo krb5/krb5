@@ -267,16 +267,11 @@ load_v4db(argc, argv)
 	}
 	tempdbname = dbname;
     } else {
-	size_t dbnamelen = strlen(dbname);
-	tempdbname = malloc(dbnamelen + 2);
-	if (tempdbname == 0) {
+	if (asprintf(&tempdbname, "%s~", dbname) < 0)
 	    com_err(PROGNAME, ENOMEM, "allocating temporary filename");
 	    krb5_free_context(context);
 	    return;
 	}
-	strcpy(tempdbname, dbname);
-	tempdbname[dbnamelen] = '~';
-	tempdbname[dbnamelen+1] = 0;
 	(void) krb5_db_destroy(context, tempdbname);
     }
 	

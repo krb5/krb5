@@ -198,7 +198,6 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	prf_file_t	prf;
 	errcode_t	retval;
 	char		*home_env = 0;
-	unsigned int	len;
 	prf_data_t	data;
 	char		*expanded_filename;
 
@@ -214,7 +213,6 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	memset(prf, 0, sizeof(struct _prf_file_t));
 	prf->magic = PROF_MAGIC_FILE;
 
-	len = strlen(filespec)+1;
 	if (filespec[0] == '~' && filespec[1] == '/') {
 		home_env = getenv("HOME");
 #ifdef HAVE_PWD_H
@@ -229,19 +227,17 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 			home_env = pw->pw_dir;
 		}
 #endif
-		if (home_env)
-			len += strlen(home_env);
 	}
-	expanded_filename = malloc(len);
+	if (home_env) {
+	    if (asprintf(&expanded_filename, "%s%s", home_env,
+			 filespec + 1) < 0)
+		expanded_filename = 0;
+	} else
+	    expanded_filename = strdup(filespec);
 	if (expanded_filename == 0) {
 	    free(prf);
 	    return ENOMEM;
 	}
-	if (home_env) {
-	    strcpy(expanded_filename, home_env);
-	    strcat(expanded_filename, filespec+1);
-	} else
-	    memcpy(expanded_filename, filespec, len);
 
 	retval = k5_mutex_lock(&g_shared_trees_mutex);
 	if (retval) {

@@ -1082,14 +1082,11 @@ void PRS(argv)
 	/*
 	 * Construct the name of the temporary file.
 	 */
-	if ((temp_file_name = (char *) malloc(strlen(file) +
-					       strlen(tmp) + 1)) == NULL) {
+	if (asprintf(&temp_file_name, "%s%s", file, tmp) < 0) {
 		com_err(progname, ENOMEM,
 			"while allocating filename for temp file");
 		exit(1);
 	}
-	strcpy(temp_file_name, file);
-	strcat(temp_file_name, tmp);
 
 	retval = kadm5_get_config_params(kpropd_context, 1, &params, &params);
 	if (retval) {

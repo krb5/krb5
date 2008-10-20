@@ -1478,15 +1478,11 @@ recvauth(valid_checksum)
       if (authenticator->checksum) {
 	struct sockaddr_in adr;
 	socklen_t adr_length = sizeof(adr);
-	char * chksumbuf = (char *) malloc(strlen(term)+strlen(lusername)+32);
+	char * chksumbuf;
 	if (getsockname(netf, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;
-	if (chksumbuf == 0)
+	if (asprintf(&chksumbuf, "%u:%s%s", ntohs(adr.sin_port), term, lusername) < 0)
 	    goto error_cleanup;
-
-	sprintf(chksumbuf,"%u:", ntohs(adr.sin_port));
-	strcat(chksumbuf,term);
-	strcat(chksumbuf,lusername);
 
 	status = krb5_verify_checksum(bsd_context,
 				      authenticator->checksum->checksum_type,

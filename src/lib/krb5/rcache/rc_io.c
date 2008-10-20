@@ -169,11 +169,8 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 
     GETDIR;
     if (fn && *fn) {
-	if (!(d->fn = malloc(strlen(*fn) + dirlen + 1)))
+	if (asprintf(&d->fn, "%s%s%s", dir, PATH_SEPARATOR, *fn) < 0)
 	    return KRB5_RC_IO_MALLOC;
-	(void) strcpy(d->fn, dir);
-	(void) strcat(d->fn, PATH_SEPARATOR);
-	(void) strcat(d->fn, *fn);
 	unlink(d->fn);
 	d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL |
 			       O_BINARY, 0600);
@@ -236,11 +233,8 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 	if (!(d->fn = strdup(full_pathname)))
 	    return KRB5_RC_IO_MALLOC;
     } else {
-	if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
+	if (asprintf(&d->fn, "%s%s%s", dir, PATH_SEPARATOR, fn) < 0)
 	    return KRB5_RC_IO_MALLOC;
-	(void) strcpy(d->fn, dir);
-	(void) strcat(d->fn, PATH_SEPARATOR);
-	(void) strcat(d->fn, fn);
     }
 
 #ifdef NO_USERID

@@ -1678,22 +1678,13 @@ krb5_db_setup_mkey_name(krb5_context context,
 			char **fullname, krb5_principal * principal)
 {
     krb5_error_code retval;
-    size_t  keylen;
-    size_t  rlen = strlen(realm);
     char   *fname;
 
     if (!keyname)
 	keyname = KRB5_KDB_M_NAME;	/* XXX external? */
 
-    keylen = strlen(keyname);
-
-    fname = malloc(keylen + rlen + strlen(REALM_SEP_STRING) + 1);
-    if (!fname)
+    if (asprintf(&fname, "%s%s%s", keyname, REALM_SEP_STRING, realm) < 0)
 	return ENOMEM;
-
-    strcpy(fname, keyname);
-    strcat(fname, REALM_SEP_STRING);
-    strcat(fname, realm);
 
     if ((retval = krb5_parse_name(context, fname, principal)))
 	return retval;

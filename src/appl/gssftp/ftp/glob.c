@@ -57,6 +57,8 @@ static char sccsid[] = "@(#)glob.c	5.9 (Berkeley) 2/25/91";
 #include <limits.h>
 #endif
 
+#include <k5-platform.h>
+
 #include "ftp_var.h"
 
 #ifdef ARG_MAX
@@ -258,10 +260,7 @@ matchdir(pattern)
 	char *base = *gpath ? gpath : ".";
 	char *buffer = 0;
 
-	buffer = malloc(strlen(base) + strlen("\\*") + 1);
-	if (!buffer) return;
-	strcpy(buffer, base);
-	strcat(buffer, "\\*");
+	if (asprintf(&buffer, "%s\\*", base) < 0) return;
 	hFile = FindFirstFile(buffer, &file_data);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		if (!globbed)
@@ -732,12 +731,10 @@ char *
 strspl(cp, dp)
 	register char *cp, *dp;
 {
-	register char *ep = malloc((unsigned)(strlen(cp) + strlen(dp) + 1));
+	char *ep;
 
-	if (ep == (char *)0)
+	if (asprintf(&ep, "%s%s", cp, dp) < 0)
 		fatal("Out of memory");
-	(void) strcpy(ep, cp);
-	(void) strcat(ep, dp);
 	return (ep);
 }
 

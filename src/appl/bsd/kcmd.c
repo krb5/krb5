@@ -424,13 +424,10 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     enum kcmd_proto protonum = *protonump;
     int addrfamily = /* AF_INET */0;
 
-    if ((cksumbuf = malloc(strlen(cmd)+strlen(remuser)+64)) == 0 ) {
+    if (asprintf(&cksumbuf, "%u:%s%s", ntohs(rport), cmd, remuser) < 0) {
 	fprintf(stderr, "Unable to allocate memory for checksum buffer.\n");
 	return(-1);
     }
-    sprintf(cksumbuf, "%u:", ntohs(rport));
-    strcat(cksumbuf, cmd);
-    strcat(cksumbuf, remuser);
     cksumdat.data = cksumbuf;
     cksumdat.length = strlen(cksumbuf);
 	

@@ -492,13 +492,10 @@ open_database(context, data_fn, size)
 			data_fn);
 		exit(1);
 	}
-	if ((data_ok_fn = (char *) malloc(strlen(data_fn)+strlen(ok)+1))
-	    == NULL) {
+	if (asprintf(&data_ok_fn, "%s%s", data_fn, ok) < 0) {
 		com_err(progname, ENOMEM, "while trying to malloc data_ok_fn");
 		exit(1);
 	}
-	strcpy(data_ok_fn, data_fn);
-	strcat(data_ok_fn, ok);
 	if (stat(data_ok_fn, &stbuf_ok)) {
 		com_err(progname, errno, "while trying to stat %s",
 			data_ok_fn);
@@ -730,17 +727,12 @@ void update_last_prop_file(hostname, file_name)
 	int fd;
 	static char last_prop[]=".last_prop";
 
-	if ((file_last_prop = (char *)malloc(strlen(file_name) +
-					     strlen(hostname) + 1 +
-					     strlen(last_prop) + 1)) == NULL) {
+	if (asprintf(&file_last_prop, "%s.%s%s", file_name, hostname,
+		     last_prop) < 0) {
 		com_err(progname, ENOMEM,
 			"while allocating filename for update_last_prop_file");
 		return;
 	}
-	strcpy(file_last_prop, file_name);
-	strcat(file_last_prop, ".");
-	strcat(file_last_prop, hostname);
-	strcat(file_last_prop, last_prop);
 	if ((fd = THREEPARAMOPEN(file_last_prop, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
 		com_err(progname, errno,
 			"while creating 'last_prop' file, '%s'",

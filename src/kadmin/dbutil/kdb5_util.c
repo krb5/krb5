@@ -215,15 +215,11 @@ int main(argc, argv)
 	    global_params.dbname = koptarg;
 	    global_params.mask |= KADM5_CONFIG_DBNAME;
 
-	    db_name_tmp = malloc( strlen(global_params.dbname) + sizeof("dbname="));
-	    if( db_name_tmp == NULL )
+	    if (asprintf(&db_name_tmp, "dbname=%s", global_params.dbname) < 0)
 	    {
 		com_err(progname, ENOMEM, "while parsing command arguments");
 		exit(1);
 	    }
-
-	    strcpy( db_name_tmp, "dbname=");
-	    strcat( db_name_tmp, global_params.dbname );
 
 	    if (!add_db_arg(db_name_tmp)) {
 		com_err(progname, ENOMEM, "while parsing command arguments\n");
