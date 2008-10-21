@@ -303,6 +303,7 @@ kim_error kim_os_library_get_caller_name (kim_string *out_application_name)
         
         if (cfpathnoext) { CFRelease (cfpathnoext); }
         if (cfpath     ) { CFRelease (cfpath); }
+        kim_string_free (&path);
     }
     
     if (!err && cfname) {
