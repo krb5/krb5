@@ -55,28 +55,36 @@ void TestErrorHandling (void)
     char*	errorString;
     
     err = KLGetErrorString (KRB5KRB_AP_ERR_BAD_INTEGRITY, &errorString);
-    printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);
+    if (!err) { KLDisposeString (errorString); }
     
     err = KLGetErrorString (klCredentialsBadAddressErr, &errorString);
     printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    if (!err) { KLDisposeString (errorString); }
     
     err = KLGetErrorString (klCacheDoesNotExistErr, &errorString);
     printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    if (!err) { KLDisposeString (errorString); }
     
     err = KLGetErrorString (klPasswordMismatchErr, &errorString);
     printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    if (!err) { KLDisposeString (errorString); }
     
     err = KLGetErrorString (klInsecurePasswordErr, &errorString);
     printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    if (!err) { KLDisposeString (errorString); }
     
     err = KLGetErrorString (klPasswordChangeFailedErr, &errorString);
     printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    if (!err) { KLDisposeString (errorString); }
         
     err = KLGetErrorString (klCantContactServerErr, &errorString);
     printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    if (!err) { KLDisposeString (errorString); }
     
     err = KLGetErrorString (klCantDisplayUIErr, &errorString);
     printf ("KLGetErrorString() returned %s (err = %ld)\n", errorString, err);       
+    if (!err) { KLDisposeString (errorString); }
 }
 
 void TestHighLevelAPI (void)
