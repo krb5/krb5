@@ -208,6 +208,7 @@ krb5_change_set_password(krb5_context context, krb5_creds *creds, char *newpw,
     struct sockaddr_storage	remote_addr;
     struct addrlist 		al = ADDRLIST_INIT;
 
+    memset(&chpw_rep, 0, sizeof(krb5_data));
     memset( &callback_ctx, 0, sizeof(struct sendto_callback_context));
     callback_ctx.context = context;
     callback_ctx.newpw = newpw;
@@ -330,6 +331,7 @@ cleanup:
 
     krb5int_free_addrlist (&al);
     krb5_free_data_contents(callback_ctx.context, &callback_ctx.ap_req);
+    krb5_free_data_contents(callback_ctx.context, &chpw_rep);
 
     return(code);
 }
