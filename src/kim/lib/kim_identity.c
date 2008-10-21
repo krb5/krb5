@@ -569,6 +569,7 @@ kim_error kim_identity_change_password_with_credential (kim_identity    in_ident
     krb5_data message_data;
     krb5_data description_data;
     
+    if (!err && !in_identity     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_credential   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_new_password ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_ui_context   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -665,6 +666,8 @@ kim_error kim_identity_change_password_with_credential (kim_identity    in_ident
         /* do this after reporting errors so we don't double report rejection */
         *out_rejected_err = rejected_err;
     }
+    
+    if (creds) { krb5_free_creds (in_identity->context, creds); }
     
     return check_error (err);
 }
