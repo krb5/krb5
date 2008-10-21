@@ -108,6 +108,9 @@ kim_error kim_ccache_iterator_next (kim_ccache_iterator  in_ccache_iterator,
             ccache = NULL;
             err = KIM_NO_ERROR;
         }
+        
+        if (principal) { krb5_free_principal (in_ccache_iterator->context, 
+                                              principal); }
     }
     
     if (!err) {
