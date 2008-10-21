@@ -437,16 +437,24 @@ static kim_error kim_preferences_read (kim_preferences in_preferences)
     
     if (!err) {
         kim_identity default_identity = kim_default_client_identity;
+        kim_identity identity = NULL;
         
         err = kim_os_identity_create_for_username (&default_identity);
         
         if (!err) {
             err = kim_os_preferences_get_identity_for_key (kim_preference_key_client_identity,
                                                            default_identity,
-                                                           &in_preferences->client_identity);
+                                                           &identity);
+        }
+        
+        if (!err) {
+            kim_identity_free (&in_preferences->client_identity);
+            in_preferences->client_identity = identity;
+            identity = NULL;
         }
         
         kim_identity_free (&default_identity);
+        kim_identity_free (&identity);
     }
     
     if (!err) {
