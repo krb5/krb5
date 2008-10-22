@@ -403,17 +403,12 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                 /* remember identity and options if the user wanted to */
                 kim_credential_remember_prefs (identity, options);
                 
-            } else {
-                /*  new creds failed, report error to user */
-                kim_error terr = kim_ui_handle_kim_error (&context, identity, 
-                                                          kim_ui_error_type_authentication,
-                                                          err);
-                
-                if (prompt_count) {
-                    /* User was prompted and might have entered bad info 
-                     * so let them try again. */
-                    err = terr;
-                }
+            } else if (prompt_count) {
+                /* User was prompted and might have entered bad info 
+                 * so report error and try again. */
+                err = kim_ui_handle_kim_error (&context, identity, 
+                                               kim_ui_error_type_authentication,
+                                               err);
             }
             
             if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
@@ -423,16 +418,11 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
             /* identity obtained or the user gave up */
             done_with_identity = 1;
             
-        } else {
-            /*  new creds failed, report error to user */
-            kim_error terr = kim_ui_handle_kim_error (&context, identity, 
-                                                      kim_ui_error_type_authentication,
-                                                      err);
-            
-            if (!in_identity) {
-                /* User entered an identity so let them try again */
-                err = terr;
-            }
+        } else if (!in_identity) {
+            /* User entered an identity so report error and try again */
+            err = kim_ui_handle_kim_error (&context, identity, 
+                                           kim_ui_error_type_authentication,
+                                           err);
         }            
     
         if (identity != in_identity) { kim_identity_free (&identity); }
