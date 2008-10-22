@@ -39,7 +39,7 @@ enum cci_msg_id_t {
     /* cc_context_t */
     cci_context_first_msg_id,
     
-    cci_context_release_msg_id,
+    cci_context_unused_release_msg_id,  /* Unused. Handle for old clients. */
     cci_context_sync_msg_id,
     cci_context_get_change_time_msg_id,
     cci_context_wait_for_change_msg_id,

@@ -29,6 +29,10 @@
 
 #include "cci_common.h"
 
+/* Used for freeing ccapi context in thread fini calls 
+ * Does not tell the server you are exiting. */
+cc_int32 cci_context_destroy (cc_context_t in_context);
+
 cc_int32 ccapi_context_release (cc_context_t in_context);
 
 cc_int32 ccapi_context_get_change_time (cc_context_t  in_context,

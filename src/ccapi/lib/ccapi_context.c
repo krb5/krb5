@@ -198,6 +198,16 @@ cc_int32 cc_initialize (cc_context_t  *out_context,
 #endif
 
 /* ------------------------------------------------------------------------ */
+/* 
+ * Currently does not need to talk to the server since the server must 
+ * handle cleaning up resources from crashed clients anyway.  
+ * 
+ * NOTE: if server communication is ever added here, make sure that 
+ * krb5_stdcc_shutdown calls an internal function which does not talk to the
+ * server.  krb5_stdcc_shutdown is called from thread fini functions and may 
+ * crash talking to the server depending on what order the OS calls the fini 
+ * functions (ie: if the ipc layer fini function is called first). 
+ */
 
 cc_int32 ccapi_context_release (cc_context_t in_context)
 {
@@ -205,17 +215,6 @@ cc_int32 ccapi_context_release (cc_context_t in_context)
     cci_context_t context = (cci_context_t) in_context;
     
     if (!in_context) { err = ccErrBadParam; }
-    
-    if (!err) {
-        err = cci_context_sync (context, 0);
-    }
-    
-    if (!err) {
-        err =  cci_ipc_send_no_launch (cci_context_release_msg_id,
-                                       context->identifier,
-                                       NULL,
-                                       NULL);
-    }
     
     if (!err) {
         cci_identifier_release (context->identifier);
