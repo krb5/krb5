@@ -107,8 +107,8 @@ typedef struct {
 #define	SPNEGO_MAGIC_ID  0x00000fed
 
 /* SPNEGO oid declarations */
-const gss_OID_desc * const gss_mech_spnego;
-const gss_OID_set_desc * const gss_mech_set_spnego;
+extern const gss_OID_desc * const gss_mech_spnego;
+extern const gss_OID_set_desc * const gss_mech_set_spnego;
 
 #ifdef DEBUG
 #define	dsyslog(a) syslog(LOG_DEBUG, a)
