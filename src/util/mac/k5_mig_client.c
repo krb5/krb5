@@ -144,14 +144,14 @@ MAKE_FINI_FUNCTION(k5_cli_ipc_thread_fini);
 static int k5_cli_ipc_thread_init (void)
 {
     int err = 0;
-
+    
     err = k5_key_register (K5_KEY_IPC_CONNECTION_INFO, 
                            k5_ipc_client_cinfo_free);
     
     if (!err) {
         err = k5_mutex_finish_init (&g_service_ports_mutex);
     }
-
+    
     return err;
 }
 
@@ -159,6 +159,23 @@ static int k5_cli_ipc_thread_init (void)
 
 static void k5_cli_ipc_thread_fini (void)
 {    
+    int err = 0;
+    
+    err = k5_mutex_lock (&g_service_ports_mutex);
+
+    if (!err) {
+        int i;
+        
+        for (i = 0; i < KIPC_SERVICE_COUNT; i++) {
+            if (MACH_PORT_VALID (g_service_ports[i].service_port)) {
+                mach_port_destroy (mach_task_self (), 
+                                   g_service_ports[i].service_port); 
+                g_service_ports[i].service_port = MACH_PORT_NULL;
+            }
+        }
+        k5_mutex_unlock (&g_service_ports_mutex);
+    }
+    
     k5_key_delete (K5_KEY_IPC_CONNECTION_INFO);
     k5_mutex_destroy (&g_service_ports_mutex);
 }
