@@ -317,11 +317,11 @@ krb5_error_code ktutil_write_keytab(context, list, name)
     krb5_keytab kt;
     char ktname[MAXPATHLEN+sizeof("WRFILE:")+1];
     krb5_error_code retval = 0;
+    int result;
 
-    strcpy(ktname, "WRFILE:");
-    if (strlen (name) >= MAXPATHLEN)
+    result = snprintf(ktname, sizeof(ktname), "WRFILE:%s", name);
+    if (SNPRINTF_OVERFLOW(result, sizeof(ktname)))
 	return ENAMETOOLONG;
-    strncat (ktname, name, MAXPATHLEN);
     retval = krb5_kt_resolve(context, ktname, &kt);
     if (retval)
 	return retval;

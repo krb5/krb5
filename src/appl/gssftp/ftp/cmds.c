@@ -66,6 +66,8 @@ static char sccsid[] = "@(#)cmds.c	5.26 (Berkeley) 3/5/91";
 #include <ctype.h>
 #include <time.h>
 
+#include <k5-platform.h>
+
 #ifdef HAVE_GETCWD
 #define getwd(x) getcwd(x,MAXPATHLEN)
 #endif
@@ -1615,9 +1617,7 @@ void shell(argc, argv)
 		namep = strrchr(shellprog,'/');
 		if (namep == NULL)
 			namep = shellprog;
-		(void) strcpy(shellnam,"-");
-		(void) strncat(shellnam, ++namep, sizeof(shellnam) - 1 - strlen(shellnam));
-		shellnam[sizeof(shellnam) - 1] = '\0';
+		(void) snprintf(shellnam, sizeof(shellnam), "-%s", ++namep);
 		if (strcmp(namep, "sh") != 0)
 			shellnam[0] = '+';
 		if (debug) {

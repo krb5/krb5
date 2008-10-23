@@ -440,21 +440,12 @@ krb5_ktfile_get_name(krb5_context context, krb5_keytab id, char *name, unsigned 
    * trt will happen if the name is passed back to resolve.
    */
 {
+    int result;
+
     memset(name, 0, len);
-
-    if (len < strlen(id->ops->prefix)+2)
+    result = snprintf(name, len, "%s:%s", id->ops->prefix, KTFILENAME(id));
+    if (SNPRINTF_OVERFLOW(result, len))
 	return(KRB5_KT_NAME_TOOLONG);
-    strcpy(name, id->ops->prefix);
-    name += strlen(id->ops->prefix);
-    name[0] = ':';
-    name++;
-    len -= strlen(id->ops->prefix)+1;
-
-    if (len < strlen(KTFILENAME(id))+1)
-	return(KRB5_KT_NAME_TOOLONG);
-    strcpy(name, KTFILENAME(id));
-    /* strcpy will NUL-terminate the destination */
-
     return(0);
 }
 

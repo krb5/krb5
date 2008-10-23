@@ -114,9 +114,8 @@ des_read_pw_string(s, max, prompt, verify)
     char prompt2[BUFSIZ];
 
     if (verify) {
-	strcpy(prompt2, "Verifying, please re-enter ");
-	strncat(prompt2, prompt, sizeof(prompt2)-(strlen(prompt2)+1));
-	prompt2[sizeof(prompt2)-1] = '\0';
+	snprintf(prompt2, sizeof(prompt2), "Verifying, please re-enter %s",
+		 prompt);
     }
     ok = des_rd_pwstr_2prompt(s, max, prompt, verify ? prompt2 : 0);
     return ok;

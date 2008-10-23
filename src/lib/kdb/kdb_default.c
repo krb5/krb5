@@ -152,11 +152,8 @@ krb5_def_store_mkey(krb5_context   context,
     int statrc;
 
     if (!keyfile) {
-        (void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
-        (void) strncat(defkeyfile, realm->data,
-            min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
-                realm->length));
-        defkeyfile[sizeof(defkeyfile) - 1] = '\0';
+        (void) snprintf(defkeyfile, sizeof(defkeyfile), "%s%s",
+                        DEFAULT_KEYFILE_STUB, realm->data);
         keyfile = defkeyfile;
     }
 
@@ -392,10 +389,8 @@ krb5_db_def_fetch_mkey(krb5_context   context,
     if (db_args != NULL) {
         (void) strncpy(keyfile, db_args, sizeof(keyfile));
     } else {
-        (void) strcpy(keyfile, DEFAULT_KEYFILE_STUB);
-        (void) strncat(keyfile, realm->data,
-            min(sizeof(keyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
-                realm->length));
+        (void) snprintf(keyfile, sizeof(keyfile), "%s%s",
+                        DEFAULT_KEYFILE_STUB, realm->data);
     }
     /* null terminate no matter what */
     keyfile[sizeof(keyfile) - 1] = '\0';

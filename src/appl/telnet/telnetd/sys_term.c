@@ -1255,9 +1255,7 @@ start_login(host, autologin, name)
 		if (term == NULL || term[0] == 0) {
 			term = "-";
 		} else {
-			strcpy(termbuf, "TERM=");
-			strncat(termbuf, term, sizeof(termbuf) - 6);
-			termbuf[sizeof(termbuf) - 1] = '\0';
+			snprintf(termbuf, sizeof(termbuf), "TERM=%s", term);
 			term = termbuf;
 		}
 		argv = addarg(argv, term);

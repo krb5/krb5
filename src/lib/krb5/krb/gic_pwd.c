@@ -45,10 +45,7 @@ krb5_get_as_key_password(
 	if ((ret = krb5_unparse_name(context, client, &clientstr)))
 	  return(ret);
 
-	strcpy(promptstr, "Password for ");
-	strncat(promptstr, clientstr, sizeof(promptstr)-strlen(promptstr)-1);
-	promptstr[sizeof(promptstr)-1] = '\0';
-
+	snprintf(promptstr, sizeof(promptstr), "Password for %s", clientstr);
 	free(clientstr);
 
 	prompt.prompt = promptstr;

@@ -66,6 +66,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include "krb5.h"
+#include "k5-platform.h"
 
 #include "com_err.h"
 #include <netdb.h>
@@ -439,9 +440,9 @@ kerberos5_is(ap, data, cnt)
 		    r = krb5_rd_req(telnet_context, &auth_context, &auth,
 				    NULL, keytabid, NULL, &ticket);
 		if (r) {
-			(void) strcpy(errbuf, "krb5_rd_req failed: ");
-			errbuf[sizeof(errbuf) - 1] = '\0';
-			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
+			(void) snprintf(errbuf, sizeof(errbuf),
+					"krb5_rd_req failed: %s",
+					error_message(r));
 			goto errout;
 		}
 
@@ -479,11 +480,10 @@ kerberos5_is(ap, data, cnt)
 						   auth_context,
 						   &authenticator);
 		if (r) {
-		    (void) strcpy(errbuf,
-				  "krb5_auth_con_getauthenticator failed: ");
-		    errbuf[sizeof(errbuf) - 1] = '\0';
-		    (void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
-		    goto errout;
+			(void) snprintf(errbuf, sizeof(errbuf),
+					"krb5_auth_con_getauthenticator failed: %s",
+					error_message(r));
+			goto errout;
 		}
 		if ((ap->way & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON &&
 		    !authenticator->checksum) {
@@ -502,9 +502,9 @@ kerberos5_is(ap, data, cnt)
 		    r = krb5_auth_con_getkey(telnet_context, auth_context,
 					     &key);
 		    if (r) {
-			(void) strcpy(errbuf, "krb5_auth_con_getkey failed: ");
-			errbuf[sizeof(errbuf) - 1] = '\0';
-			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
+			(void) snprintf(errbuf, sizeof(errbuf),
+					"krb5_auth_con_getkey failed: %s",
+					error_message(r));
 			goto errout;
 		    }
 		    r = krb5_verify_checksum(telnet_context,
@@ -521,10 +521,9 @@ kerberos5_is(ap, data, cnt)
 		 * present at this time.
 		 */
 		    if (r) {
-			(void) strcpy(errbuf,
-				      "checksum verification failed: ");
-		        errbuf[sizeof(errbuf) - 1] = '\0';
-			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
+			(void) snprintf(errbuf, sizeof(errbuf),
+					"checksum verification failed: %s",
+					error_message(r));
 			goto errout;
 		    }
 		    krb5_free_keyblock(telnet_context, key);
@@ -534,9 +533,9 @@ kerberos5_is(ap, data, cnt)
 		    /* do ap_rep stuff here */
 		    if ((r = krb5_mk_rep(telnet_context, auth_context,
 					 &outbuf))) {
-			(void) strcpy(errbuf, "Make reply failed: ");
-		        errbuf[sizeof(errbuf) - 1] = '\0';
-			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
+			(void) snprintf(errbuf, sizeof(errbuf),
+					"Make reply failed: %s",
+					error_message(r));
 			goto errout;
 		    }
 
@@ -588,11 +587,10 @@ kerberos5_is(ap, data, cnt)
 			   &inbuf, ticket))) {
 
 		    char kerrbuf[128];
-		    
-		    (void) strcpy(kerrbuf, "Read forwarded creds failed: ");
-		    kerrbuf[sizeof(kerrbuf) - 1] = '\0';
-		    (void) strncat(kerrbuf, error_message(r), 
-			sizeof(kerrbuf) - 1 - strlen(kerrbuf));
+
+		    (void) snprintf(kerrbuf, sizeof(kerrbuf),
+				    "Read forwarded creds failed: %s",
+				    error_message(r));
 		    Data(ap, KRB_FORWARD_REJECT, kerrbuf, -1);
 		    if (auth_debug_mode)
 		      printf(
@@ -617,9 +615,7 @@ kerberos5_is(ap, data, cnt)
 	{
 	    char eerrbuf[329];
 
-	    strcpy(eerrbuf, "telnetd: ");
-	    eerrbuf[sizeof(eerrbuf) - 1] = '\0';
-	    strncat(eerrbuf, errbuf, sizeof(eerrbuf) - 1 - strlen(eerrbuf));
+	    snprintf(eerrbuf, sizeof(eerrbuf), "telnetd: %s", errbuf);
 	    Data(ap, KRB_REJECT, eerrbuf, -1);
 	}
 	if (auth_debug_mode)

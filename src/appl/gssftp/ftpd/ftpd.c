@@ -102,6 +102,8 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include "pathnames.h"
 #include <libpty.h>
 
+#include <k5-platform.h>
+
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);
 #endif
@@ -1752,14 +1754,14 @@ statcmd()
 		sin4 = &pasv_addr;
 		goto printaddr;
 	} else if (usedefault == 0) {
-		strcpy(str, "     PORT");
 		sin4 = &data_dest;
 printaddr:
 		a = (u_char *) &sin4->sin_addr;
 		p = (u_char *) &sin4->sin_port;
 #define UC(b) (((int) b) & 0xff)
-		sprintf(&str[strlen(str)], " (%d,%d,%d,%d,%d,%d)", UC(a[0]),
-			UC(a[1]), UC(a[2]), UC(a[3]), UC(p[0]), UC(p[1]));
+		snprintf(str, sizeof(str), "     PORT (%d,%d,%d,%d,%d,%d)",
+			 UC(a[0]), UC(a[1]), UC(a[2]), UC(a[3]), UC(p[0]),
+			 UC(p[1]));
 #undef UC
 	} else
 		strcpy(str, "     No data connection");

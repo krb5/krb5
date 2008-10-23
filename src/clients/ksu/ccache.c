@@ -373,7 +373,7 @@ krb5_get_login_princ(luser, princ_list)
     FILE *fp;
     char * linebuf;
     char *newline;
-    int gobble;
+    int gobble, result;
     char ** buf_out;
     struct stat st_temp;
     int count = 0, chunk_count = 1; 
@@ -383,12 +383,11 @@ krb5_get_login_princ(luser, princ_list)
     if ((pwd = getpwnam(luser)) == NULL) {
 	return 0;
     }
-    if (strlen(pwd->pw_dir) + sizeof("/.k5login") > MAXPATHLEN) {
+    result = snprintf(pbuf, sizeof(pbuf), "%s/.k5login", pwd->pw_dir);
+    if (SNPRINTF_OVERFLOW(result, sizeof(pbuf))) {
 	fprintf (stderr, "home directory path for %s too long\n", luser);
 	exit (1);
     }
-    (void) strcpy(pbuf, pwd->pw_dir);
-    (void) strcat(pbuf, "/.k5login");
 
     if (stat(pbuf, &st_temp)) {	 /* not accessible */
 	return 0;

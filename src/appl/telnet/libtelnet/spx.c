@@ -71,6 +71,7 @@
 #include <arpa/telnet.h>
 #include <stdio.h>
 #include "gssapi_defs.h"
+#include "k5-platform.h"
 #ifdef	__STDC__
 #include <stdlib.h>
 #endif
@@ -172,9 +173,8 @@ spx_init(ap, server)
 	if (server) {
 		str_data[3] = TELQUAL_REPLY;
 		gethostname(lhostname, sizeof(lhostname));
-		strcpy(targ_printable, "SERVICE:rcmd@");
-		strncat(targ_printable, lhostname, sizeof(targ_printable) - 1 - 13);
-		targ_printable[sizeof(targ_printable) - 1] = '\0';
+		snprintf(targ_printable, sizeof(targ_printable),
+			 "SERVICE:rcmd@%s", lhostname);
 		input_name_buffer.length = strlen(targ_printable);
 		input_name_buffer.value = targ_printable;
 		major_status = gss_import_name(&status,
@@ -216,9 +216,8 @@ spx_send(ap)
 	char *address;
 
 	printf("[ Trying SPX ... ]\n");
-	strcpy(targ_printable, "SERVICE:rcmd@");
-	strncat(targ_printable, RemoteHostName, sizeof(targ_printable) - 1 - 13);
-	targ_printable[sizeof(targ_printable) - 1] = '\0';
+	snprintf(targ_printable, sizeof(targ_printable), "SERVICE:rcmd@%s",
+		 RemoteHostName);
 
 	input_name_buffer.length = strlen(targ_printable);
 	input_name_buffer.value = targ_printable;
@@ -325,9 +324,8 @@ spx_is(ap, data, cnt)
 
 		gethostname(lhostname, sizeof(lhostname));
 
-		strcpy(targ_printable, "SERVICE:rcmd@");
-		strncat(targ_printable, lhostname, sizeof(targ_printable) - 1 - 13);
-		targ_printable[sizeof(targ_printable) - 1] = '\0';
+		snprintf(targ_printable, sizeof(targ_printable),
+			 "SERVICE:rcmd@%s", lhostname);
 
 		input_name_buffer.length = strlen(targ_printable);
 		input_name_buffer.value = targ_printable;
