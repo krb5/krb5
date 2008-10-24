@@ -30,6 +30,9 @@ MKSTEMP_OBJ= @MKSTEMP_OBJ@
 ##DOS##MKSTEMP_ST_OBJ= mkstemp.o
 ##DOS##MKSTEMP_OBJ= $(OUTPRE)mkstemp.$(OBJEXT)
 
+STRLCPY_ST_OBJ=@STRLCPY_ST_OBJ@
+STRLCPY_OBJ=@STRLCPY_OBJ@
+
 PRINTF_ST_OBJ= @PRINTF_ST_OBJ@
 PRINTF_OBJ= @PRINTF_OBJ@
 
@@ -40,6 +43,7 @@ STLIBOBJS= \
 	errors.o \
 	gmt_mktime.o \
 	fake-addrinfo.o \
+	$(STRLCPY_ST_OBJ) \
 	$(PRINTF_ST_OBJ) \
 	$(MKSTEMP_ST_OBJ)
 
@@ -50,6 +54,7 @@ LIBOBJS= \
 	$(OUTPRE)errors.$(OBJEXT) \
 	$(OUTPRE)gmt_mktime.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
+	$(STRLCPY_OBJ) \
 	$(PRINTF_OBJ) \
 	$(MKSTEMP_OBJ)
 
@@ -65,6 +70,7 @@ SRCS=\
 	$(srcdir)/errors.c \
 	$(srcdir)/gmt_mktime.c \
 	$(srcdir)/fake-addrinfo.c \
+	$(srcdir)/strlcpy.c \
 	$(srcdir)/printf.c \
 	$(srcdir)/mkstemp.c
 
@@ -140,6 +146,9 @@ fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   cache-addrinfo.h fake-addrinfo.c supp-int.h
+strlcpy.so strlcpy.po $(OUTPRE)strlcpy.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h strlcpy.c
 printf.so printf.po $(OUTPRE)printf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   printf.c

@@ -860,6 +860,14 @@ set_cloexec_file(FILE *f)
 #define va_copy(dest, src)	memcmp(dest, src, sizeof(va_list))
 #endif
 
+/* Provide strlcpy/strlcat interfaces. */
+#ifndef HAVE_STRLCPY
+#define strlcpy krb5int_strlcpy
+#define strlcat krb5int_strlcat
+extern size_t krb5int_strlcpy(char *dst, const char *src, size_t siz);
+extern size_t krb5int_strlcat(char *dst, const char *src, size_t siz);
+#endif
+
 /* Provide [v]asprintf interfaces.  */
 #ifndef HAVE_VSNPRINTF
 #ifdef _WIN32
