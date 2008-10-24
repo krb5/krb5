@@ -600,9 +600,7 @@ rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, cons
 	    kret = aname_replacer(selstring, &current, &outstring);
 	    if (outstring) {
 		/* Copy out the value if there's enough room */
-		if (strlen(outstring)+1 <= (size_t) lnsize)
-		    strcpy(lname, outstring);
-		else
+		if (strlcpy(lname, outstring, lnsize) >= lnsize)
 		    kret = KRB5_CONFIG_NOTENUFSPACE;
 		free(outstring);
 	    }
@@ -728,9 +726,8 @@ krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, int ln
 		    }
 
 		    /* Copy out the value if there's enough room */
-		    if (strlen(mapping_values[nvalid-1])+1 <= (size_t) lnsize)
-			strcpy(lname, mapping_values[nvalid-1]);
-		    else
+		    if (strlcpy(lname, mapping_values[nvalid-1],
+				lnsize) >= lnsize)
 			kret = KRB5_CONFIG_NOTENUFSPACE;
 
 		    /* Free residue */

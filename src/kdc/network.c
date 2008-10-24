@@ -160,7 +160,7 @@ static const char *paddr (struct sockaddr *sa)
     if (getnameinfo(sa, socklen(sa),
 		    buf, sizeof(buf), portbuf, sizeof(portbuf),
 		    NI_NUMERICHOST|NI_NUMERICSERV))
-	strcpy(buf, "<unprintable>");
+	strlcpy(buf, "<unprintable>", sizeof(buf));
     else {
 	unsigned int len = sizeof(buf) - strlen(buf);
 	char *p = buf + strlen(buf);
@@ -695,7 +695,7 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
     err = getnameinfo(addr, socklen(addr), haddrbuf, sizeof(haddrbuf),
 		      0, 0, NI_NUMERICHOST);
     if (err)
-	strcpy(haddrbuf, "<unprintable>");
+	strlcpy(haddrbuf, "<unprintable>", sizeof(haddrbuf));
 
     switch (addr->sa_family) {
     case AF_INET:
@@ -1192,7 +1192,7 @@ static void process_packet(struct connection *conn, const char *prog,
 	char addrbuf[100];
 	if (getnameinfo(ss2sa(&daddr), daddr_len, addrbuf, sizeof(addrbuf),
 			0, 0, NI_NUMERICHOST))
-	    strcpy(addrbuf, "?");
+	    strlcpy(addrbuf, "?", sizeof(addrbuf));
 	com_err(prog, 0, "pktinfo says local addr is %s", addrbuf);
     }
 #endif
@@ -1216,7 +1216,7 @@ static void process_packet(struct connection *conn, const char *prog,
         krb5_free_data(kdc_context, response);
 	if (inet_ntop(((struct sockaddr *)&saddr)->sa_family,
 		      addr.contents, addrbuf, sizeof(addrbuf)) == 0) {
-	    strcpy(addrbuf, "?");
+	    strlcpy(addrbuf, "?", sizeof(addrbuf));
 	}
 	com_err(prog, errno, "while sending reply to %s/%d",
 		addrbuf, faddr.port);
@@ -1269,7 +1269,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 		    newconn->u.tcp.addrbuf, sizeof(newconn->u.tcp.addrbuf),
 		    tmpbuf, sizeof(tmpbuf),
 		    NI_NUMERICHOST | NI_NUMERICSERV))
-	strcpy(newconn->u.tcp.addrbuf, "???");
+	strlcpy(newconn->u.tcp.addrbuf, "???", sizeof(newconn->u.tcp.addrbuf));
     else {
 	char *p, *end;
 	p = newconn->u.tcp.addrbuf;
@@ -1277,7 +1277,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 	p += strlen(p);
 	if (end - p > 2 + strlen(tmpbuf)) {
 	    *p++ = '.';
-	    strcpy(p, tmpbuf);
+	    strlcpy(p, tmpbuf, end - p);
 	}
     }
 #if 0

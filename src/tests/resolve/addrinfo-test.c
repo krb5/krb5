@@ -44,6 +44,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h> /* needed for IPPROTO_* on NetBSD */
+#include <k5-platform.h>
 #ifdef USE_FAKE_ADDRINFO
 #include "fake-addrinfo.h"
 #endif
@@ -284,8 +285,10 @@ int main (int argc, char *argv[])
 	    ap2->ai_addr->sa_family = ap2->ai_family;
 	}
 	if (getnameinfo(ap2->ai_addr, ap2->ai_addrlen, hbuf, sizeof(hbuf),
-			pbuf, sizeof(pbuf), NI_NUMERICHOST | NI_NUMERICSERV))
-	    strcpy(hbuf, "..."), strcpy(pbuf, "...");
+			pbuf, sizeof(pbuf), NI_NUMERICHOST | NI_NUMERICSERV)) {
+	    strlcpy(hbuf, "...", sizeof(hbuf));
+	    strlcpy(pbuf, "...", sizeof(pbuf));
+	}
 	printf("%p:\n"
 	       "\tfamily = %s\tproto = %-4s\tsocktype = %s\n",
 	       ap2, familyname(ap2->ai_family),

@@ -132,7 +132,8 @@ krb5int_get_error (struct errinfo *ep, long code)
     if (code == ep->code && ep->msg) {
 	r = strdup(ep->msg);
 	if (r == NULL) {
-	    strcpy(ep->scratch_buf, _("Out of memory"));
+	    strlcpy(ep->scratch_buf, _("Out of memory"),
+		    sizeof(ep->scratch_buf));
 	    r = ep->scratch_buf;
 	}
 	return r;

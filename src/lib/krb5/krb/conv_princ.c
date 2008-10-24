@@ -169,9 +169,8 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
 		    * It is, so set the new name now, and chop off
 		    * instance's domain name if requested.
 		    */
-		   if (strlen (p->v4_str) > ANAME_SZ - 1)
+		   if (strlcpy(name, p->v4_str, ANAME_SZ) >= ANAME_SZ)
 		       return KRB5_INVALID_PRINCIPAL;
-		   strcpy(name, p->v4_str);
 		   if (p->flags & DO_REALM_CONVERSION) {
 		       compo = krb5_princ_component(context, princ, 1);
 		       c = strnchr(compo->data, '.', compo->length);

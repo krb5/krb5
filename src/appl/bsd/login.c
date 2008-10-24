@@ -2258,7 +2258,7 @@ int do_krb_login(host, strict)
     kdata = (AUTH_DAT *)malloc( sizeof(AUTH_DAT) );
     ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
 
-    (void) strcpy(instance, "*");
+    (void) strlcpy(instance, "*", sizeof(instance));
     if ((rc=krb_recvauth(authoptions, 0, ticket, "rcmd",
 			 instance, &sin,
 			 (struct sockaddr_in *)0,

@@ -184,7 +184,7 @@ void setpeer(argc, argv)
 		form = FORM_N;
 		mode = MODE_S;
 		stru = STRU_F;
-		(void) strcpy(bytename, "8"), bytesize = 8;
+		(void) strlcpy(bytename, "8", sizeof(bytename)), bytesize = 8;
 		if (autoauth) {
 			if (do_auth() && autoencrypt) {
  				clevel = PROT_P;

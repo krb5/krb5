@@ -222,9 +222,9 @@ krb5int_debug_fprint (const char *fmt, ...)
 	    /* %A => addrinfo */
 	    ai = va_arg(args, struct addrinfo *);
 	    if (ai->ai_socktype == SOCK_DGRAM)
-		strcpy(tmpbuf, "dgram");
+		strlcpy(tmpbuf, "dgram", sizeof(tmpbuf));
 	    else if (ai->ai_socktype == SOCK_STREAM)
-		strcpy(tmpbuf, "stream");
+		strlcpy(tmpbuf, "stream", sizeof(tmpbuf));
 	    else
 		snprintf(tmpbuf, sizeof(tmpbuf), "socktype%d", ai->ai_socktype);
 	    if (0 != getnameinfo (ai->ai_addr, ai->ai_addrlen,

@@ -229,9 +229,8 @@ getclhoststr(char *clprinc, char *cl, int len)
 	/* XXX "!++s"?  */
 	if (!++s)
 	    return NULL;
-	if (strlen(s) >= len)
+	if (strlcpy(cl, s, len) >= len)
 	    return NULL;
-	strcpy(cl, s);
 	/* XXX Copy with @REALM first, with bounds check, then
 	   chop off the realm??  */
 	if ((s = strchr(cl, '@')) != NULL) {

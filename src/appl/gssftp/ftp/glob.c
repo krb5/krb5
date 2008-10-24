@@ -772,10 +772,12 @@ static int gethdir(mhome)
 	char *mhome;
 {
 	register struct passwd *pp = getpwnam(mhome);
+	size_t bufsize = lastgpathp - mhome;
 
-	if (!pp || ((mhome + strlen(pp->pw_dir)) >= lastgpathp))
+	if (!pp)
 		return (1);
-	(void) strcpy(mhome, pp->pw_dir);
+	if (strlcpy(mhome, pp->pw_dir, bufsize) >= bufsize)
+		return (1);
 	return (0);
 }
 #endif

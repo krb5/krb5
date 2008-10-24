@@ -58,7 +58,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	   or the caller passed in garbage */
 	ret = KRB5KRB_AP_ERR_MODIFIED;
 	numresult = KRB5_KPASSWD_MALFORMED;
-	strcpy(strresult, "Request was truncated");
+	strlcpy(strresult, "Request was truncated", sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -93,7 +93,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     if (ptr + ap_req.length >= req->data + req->length) {
 	ret = KRB5KRB_AP_ERR_MODIFIED;
 	numresult = KRB5_KPASSWD_MALFORMED;
-	strcpy(strresult, "Request was truncated in AP-REQ");
+	strlcpy(strresult, "Request was truncated in AP-REQ",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -105,7 +106,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     ret = krb5_auth_con_init(context, &auth_context);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed initializing auth context");
+	strlcpy(strresult, "Failed initializing auth context",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -113,7 +115,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 				 KRB5_AUTH_CONTEXT_DO_SEQUENCE);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed initializing auth context");
+	strlcpy(strresult, "Failed initializing auth context",
+		sizeof(strresult));
 	goto chpwfail;
     }
 	
@@ -121,7 +124,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 			       "kadmin", "changepw", NULL);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed building kadmin/changepw principal");
+	strlcpy(strresult, "Failed building kadmin/changepw principal",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -130,7 +134,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 
     if (ret) {
 	numresult = KRB5_KPASSWD_AUTHERROR;
-	strcpy(strresult, "Failed reading application request");
+	strlcpy(strresult, "Failed reading application request",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -141,7 +146,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     if (getsockname(s, &local_addr, &addrlen) < 0) {
 	ret = errno;
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed getting server internet address");
+	strlcpy(strresult, "Failed getting server internet address",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -173,7 +179,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     if (getpeername(s, &remote_addr, &addrlen) < 0) {
 	ret = errno;
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed getting client internet address");
+	strlcpy(strresult, "Failed getting client internet address",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -205,7 +212,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 			     &remote_kaddr);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed storing client internet address");
+	strlcpy(strresult, "Failed storing client internet address",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -213,7 +221,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 
     if (!(ticket->enc_part2->flags & TKT_FLG_INITIAL)) {
 	numresult = KRB5_KPASSWD_AUTHERROR;
-	strcpy(strresult, "Ticket must be derived from a password");
+	strlcpy(strresult, "Ticket must be derived from a password",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -222,7 +231,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     ret = krb5_mk_rep(context, auth_context, &ap_rep);
     if (ret) {
 	numresult = KRB5_KPASSWD_AUTHERROR;
-	strcpy(strresult, "Failed replying to application request");
+	strlcpy(strresult, "Failed replying to application request",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -234,14 +244,15 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     ret = krb5_rd_priv(context, auth_context, &cipher, &clear, &replay);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed decrypting request");
+	strlcpy(strresult, "Failed decrypting request", sizeof(strresult));
 	goto chpwfail;
     }
 
     ret = krb5_unparse_name(context, ticket->enc_part2->client, &clientstr);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed unparsing client name for log");
+	strlcpy(strresult, "Failed unparsing client name for log",
+		sizeof(strresult));
 	goto chpwfail;
     }
     /* change the password */
@@ -282,7 +293,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     /* success! */
 
     numresult = KRB5_KPASSWD_SUCCESS;
-    strcpy(strresult, "");
+    strlcpy(strresult, "", sizeof(strresult));
 
 chpwfail:
 
@@ -303,14 +314,16 @@ chpwfail:
 				     NULL);
 	if (ret) {
 	    numresult = KRB5_KPASSWD_HARDERROR;
-	    strcpy(strresult,
-		   "Failed storing client and server internet addresses");
+	    strlcpy(strresult,
+		    "Failed storing client and server internet addresses",
+		    sizeof(strresult));
 	} else {
 	    ret = krb5_mk_priv(context, auth_context, &clear, &cipher,
 			       &replay);
 	    if (ret) {
 		numresult = KRB5_KPASSWD_HARDERROR;
-		strcpy(strresult, "Failed encrypting reply");
+		strlcpy(strresult, "Failed encrypting reply",
+			sizeof(strresult));
 	    }
 	}
     }

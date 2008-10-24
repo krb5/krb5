@@ -251,7 +251,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	goto clean_n_exit;
     }
 
-    strcpy((*lib)->name, lib_name);
+    strlcpy((*lib)->name, lib_name, sizeof((*lib)->name));
 
 #if !defined(KDB5_USE_LIB_KDB_DB2) && !defined(KDB5_USE_LIB_TEST)
 #error No database module defined
@@ -341,7 +341,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	goto clean_n_exit;
     }
 
-    strcpy((*lib)->name, lib_name);
+    strlcpy((*lib)->name, lib_name, sizeof((*lib)->name));
 
     /* Fetch the list of directories specified in the config
        file(s) first.  */

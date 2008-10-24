@@ -99,9 +99,8 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
      */
 
     if (name == NULL || name[0] == '\0') {
-	if (strlen (prefix) >= sizeof(host)-1)
+        if (strlcpy(host, prefix, sizeof(host)) >= sizeof(host))
 	    return KRB5_ERR_HOST_REALM_UNKNOWN;
-        strcpy(host,prefix);
     } else {
         if ( strlen(prefix) + strlen(name) + 3 > MAXDNAME )
             return KRB5_ERR_HOST_REALM_UNKNOWN;

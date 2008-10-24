@@ -23,6 +23,7 @@
 #include "com_err.h"
 #include "libpty.h"
 #include "pty-int.h"
+#include "k5-platform.h"
 
 long
 ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
@@ -59,12 +60,11 @@ ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
 	*fd = -1;
 	return PTY_GETPTY_NOPTY;
     }
-    if (strlen(slaveret) > slavelength - 1) {
+    if (strlcpy(slave, slaveret, slavelength) >= slavelength) {
 	close(*fd);
 	*fd = -1;
 	return PTY_GETPTY_SLAVE_TOOLONG;
     }
-    else strcpy(slave, slaveret);
     return 0;
 #else /*HAVE__GETPTY*/
     
@@ -92,12 +92,11 @@ ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
 #endif
 #endif
 	if (p) {
-	    if (strlen(p) > slavelength - 1) {
+	    if (strlcpy(slave, p, slavelength) >= slavelength) {
 		    close (*fd);
 		    *fd = -1;
 		    return PTY_GETPTY_SLAVE_TOOLONG;
 	    }
-	    strcpy(slave, p);
 	    return 0;
 	}
 

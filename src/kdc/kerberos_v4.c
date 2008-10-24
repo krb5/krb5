@@ -288,7 +288,7 @@ static char * v4_klog( int type, const char *format, ...)
     case L_NTGT_INTK:
     case L_TKT_REQ:
     case L_APPL_REQ:
-	strcpy(log_text, "PROCESS_V4:");
+	strlcpy(log_text, "PROCESS_V4:", sizeof(log_text));
 	vsnprintf(log_text+strlen(log_text),
 		  sizeof(log_text) - strlen(log_text),
 		  format, pvar);

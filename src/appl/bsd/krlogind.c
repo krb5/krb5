@@ -1383,7 +1383,7 @@ recvauth(valid_checksum)
     }
 
 #ifdef KRB5_KRB4_COMPAT
-    strcpy(v4_instance, "*");
+    strlcpy(v4_instance, "*", sizeof(v4_instance));
 #endif
 
     if ((status = krb5_auth_con_init(bsd_context, &auth_context)))

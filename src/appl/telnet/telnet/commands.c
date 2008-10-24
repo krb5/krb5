@@ -117,6 +117,8 @@ static	unsigned long sourceroute(char *, char **, int *);
 
 #include "fake-addrinfo.h"
 
+#include <k5-platform.h>
+
 char	*hostname;
 static char _hostname[MAXDNAME];
 static char hostaddrstring[NI_MAXHOST];
@@ -2431,7 +2433,7 @@ tn(argc, argv)
 	return 0;
     }
     if (argc < 2) {
-	(void) strcpy(line, "open ");
+	(void) strlcpy(line, "open ", sizeof(line));
 	printf("(to) ");
 	(void) fgets(&line[strlen(line)], (int) (sizeof(line) - strlen(line)),
 		     stdin);
@@ -2580,7 +2582,8 @@ tn(argc, argv)
 	if (error) {
 	    fprintf (stderr, "getnameinfo() error printing address: %s\n",
 		     gai_strerror (error));
-	    strcpy (hostaddrstring, "[address unprintable]");
+	    strlcpy (hostaddrstring, "[address unprintable]",
+		     sizeof(hostaddrstring));
 	}
 	printf("Trying %s...\r\n", hostaddrstring);
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)

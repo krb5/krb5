@@ -16,7 +16,7 @@ resolve: resolve.o
 	$(CC_LINK) -o $@ resolve.o $(LIBS)
 
 addrinfo-test: addrinfo-test.o
-	$(CC_LINK) -o $@ addrinfo-test.o $(LIBS)
+	$(CC_LINK) -o $@ addrinfo-test.o $(SUPPORT_LIB) $(LIBS)
 
 fake-addrinfo-test: fake-addrinfo-test.o
 	$(CC_LINK) -o $@ fake-addrinfo-test.o $(SUPPORT_LIB) $(LIBS)

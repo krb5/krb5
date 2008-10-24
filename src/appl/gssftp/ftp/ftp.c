@@ -124,6 +124,8 @@ int gettimeofday(struct timeval *tv, void *tz);
 #define L_INCR 1
 #endif
 
+#include <k5-platform.h>
+
 #ifdef KRB5_KRB4_COMPAT
 #include <krb.h>
 
@@ -411,7 +413,7 @@ int login(char *host)
 		return(1);
 	for (n = 0; n < macnum; ++n) {
 		if (!strcmp("init", macros[n].mac_name)) {
-			(void) strcpy(line, "$init");
+			(void) strlcpy(line, "$init", sizeof(line));
 			makeargv();
 			domacro(margc, margv);
 			break;

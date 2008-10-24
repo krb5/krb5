@@ -1403,7 +1403,7 @@ dataconn(name, size, fmode)
 		/* cast size to long in case sizeof(off_t) > sizeof(long) */
 		(void) sprintf (sizebuf, " (%ld bytes)", (long)size);
 	else
-		(void) strcpy(sizebuf, "");
+		sizebuf[0] = '\0';
 	if (pdata >= 0) {
 		int s, fromlen = sizeof(data_dest);
 
@@ -1748,9 +1748,9 @@ statcmd()
 	    strunames[stru], modenames[mode]);
 	reply(0, "%s", str);
 	if (data != -1)
-		strcpy(str, "     Data connection open");
+		strlcpy(str, "     Data connection open", sizeof(str));
 	else if (pdata != -1) {
-		strcpy(str, "     in Passive mode");
+		strlcpy(str, "     in Passive mode", sizeof(str));
 		sin4 = &pasv_addr;
 		goto printaddr;
 	} else if (usedefault == 0) {
@@ -1764,7 +1764,7 @@ printaddr:
 			 UC(p[1]));
 #undef UC
 	} else
-		strcpy(str, "     No data connection");
+		strlcpy(str, "     No data connection", sizeof(str));
 	reply(0, "%s", str);
 	reply(211, "End of status");
 }
@@ -2321,7 +2321,7 @@ char *adata;
 			return(0);
 		}
 		(void) memcpy((char *)ticket.dat, (char *)out_buf, ticket.length = length);
-		strcpy(instance, "*");
+		strlcpy(instance, "*", sizeof(instance));
 
 		kerror = 255;
 		for (service = krb4_services; *service; service++) {

@@ -761,7 +761,7 @@ static int confirm_death ()
     if (!confirm) return (1);	/* no confirm, just die */
     
     if (gethostname (hostname, sizeof(hostname)-1) != 0)
-      strcpy (hostname, "???");
+      strlcpy (hostname, "???", sizeof(hostname));
     else
       hostname[sizeof(hostname)-1] = '\0';
     

@@ -118,11 +118,9 @@ krb5_salttype_to_string(krb5_int32 salttype, char *buffer, size_t buflen)
 	}
     }
     if (out) {
-	if (buflen > strlen(out))
-	    strcpy(buffer, out);
-	else
-	    out = (char *) NULL;
-	return((out) ? 0 : ENOMEM);
+	if (strlcpy(buffer, out, buflen) >= buflen)
+	    return(ENOMEM);
+	return(0);
     }
     else
 	return(EINVAL);

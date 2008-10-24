@@ -221,8 +221,8 @@ krb5_input_flag_to_string(flag, buffer, buflen)
     size_t	buflen;
 {
     if(flag < 0 || flag >= flags_table_nents) return ENOENT; /* End of list */
-    if(strlen(flags_table[flag].fl_specifier) > buflen) return ENOMEM;
-    strcpy(buffer, flags_table[flag].fl_specifier);
+    if(strlcpy(buffer, flags_table[flag].fl_specifier, buflen) >= buflen)
+	return ENOMEM;
     return  0;
 }
 

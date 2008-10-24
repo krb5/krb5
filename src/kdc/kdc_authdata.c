@@ -101,7 +101,7 @@ greet_authdata(krb5_context ctx, krb5_db_entry *client,
 	free(a);
 	return ENOMEM;
     }
-    strcpy(p, "hello");
+    strlcpy(p, "hello", GREET_SIZE);
     a->magic = KV5M_AUTHDATA;
     a->ad_type = -42;
     a->length = GREET_SIZE;

@@ -34,10 +34,9 @@ krb5_enctype_to_string(krb5_enctype enctype, char *buffer, size_t buflen)
 
     for (i=0; i<krb5_enctypes_length; i++) {
 	if (krb5_enctypes_list[i].etype == enctype) {
-	    if ((strlen(krb5_enctypes_list[i].out_string)+1) > buflen)
+	    if (strlcpy(buffer, krb5_enctypes_list[i].out_string,
+			buflen) >= buflen)
 		return(ENOMEM);
-
-	    strcpy(buffer, krb5_enctypes_list[i].out_string);
 	    return(0);
 	}
     }

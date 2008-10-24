@@ -51,6 +51,7 @@
 #include <com_err.h>
 #include <kerberosIV/krb.h>
 #include <kerberosIV/des.h>
+#include <k5-platform.h>
 
 #ifndef LINT
 static char rcsid[]=
@@ -778,14 +779,14 @@ packet_t req, reply;
      * Initialize these so we don't crash trying to print them in
      * case they don't get filled in.
      */
-    strcpy(rname, "Unknown");
-    strcpy(rinst, "Unknown");
-    strcpy(sname, "Unknown");
-    strcpy(sinst, "Unknown");
-    strcpy(cname, "Unknown");
-    strcpy(cinst, "Unknown");
-    strcpy(cell, "Unknown");
-    strcpy(realm, "Unknown");
+    strlcpy(rname, "Unknown", sizeof(rname));
+    strlcpy(rinst, "Unknown", sizeof(rinst));
+    strlcpy(sname, "Unknown", sizeof(sname));
+    strlcpy(sinst, "Unknown", sizeof(sinst));
+    strlcpy(cname, "Unknown", sizeof(cname));
+    strlcpy(cinst, "Unknown", sizeof(cinst));
+    strlcpy(cell, "Unknown", sizeof(cell));
+    strlcpy(realm, "Unknown", sizeof(realm));
     
     p = req->base;
     maxn = req->len;
@@ -797,7 +798,7 @@ packet_t req, reply;
 
     GET_PSTR(cell);
     if (!cell[0])
-	strcpy(cell, localcell);
+      strlcpy(cell, localcell, sizeof(cell));
 
     if (debug)
 	fprintf(stderr, "Cell is %s\n", cell);
@@ -963,7 +964,7 @@ packet_t req, reply;
 	(strcasecmp(cell, localcell) == 0)) {
 	char *c;
 
-	strcpy(rinst, localcell);
+	strlcpy(rinst, localcell, sizeof(rinst));
 
 	for (c = rinst; *c != NULL; c++)
 	    *c = (char) tolower( (int) *c);

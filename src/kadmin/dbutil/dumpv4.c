@@ -183,7 +183,7 @@ dump_v4_iterator(ptr, entry)
     if (! principal->name[0])
 	return 0;
     if (! principal->instance[0])
-	strcpy(principal->instance, "*");
+	strlcpy(principal->instance, "*", sizeof(principal->instance));
 
     /* Now move to mod princ */
     if ((retval = krb5_dbe_lookup_mod_princ_data(util_context,entry,
@@ -202,9 +202,9 @@ dump_v4_iterator(ptr, entry)
     }
 
     if (! principal->mod_name[0])
-	strcpy(principal->mod_name, "*");
+	strlcpy(principal->mod_name, "*", sizeof(principal->mod_name));
     if (! principal->mod_instance[0])
-	strcpy(principal->mod_instance, "*");
+	strlcpy(principal->mod_instance, "*", sizeof(principal->mod_instance));
     
     /* OK deal with the key now. */
     for (max_kvno = i = 0; i < entry->n_key_data; i++) {

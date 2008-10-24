@@ -1829,7 +1829,7 @@ recvauth(netfd, peersin, valid_checksum)
 #endif
 
 #ifdef KRB5_KRB4_COMPAT
-    strcpy(v4_instance, "*");
+    strlcpy(v4_instance, "*", sizeof(v4_instance));
 #endif
 
     status = krb5_auth_con_init(bsd_context, &auth_context);
@@ -1908,7 +1908,7 @@ recvauth(netfd, peersin, valid_checksum)
          * Assume it to be the same as the first component of the
 	 * principal's name. 
          */
-	strcpy(remuser, v4_kdata->pname);
+	strlcpy(remuser, v4_kdata->pname, sizeof(remuser));
 
 	status = krb5_425_conv_principal(bsd_context, v4_kdata->pname,
 					 v4_kdata->pinst, v4_kdata->prealm,

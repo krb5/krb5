@@ -1735,7 +1735,7 @@ krb5_db2_db_rename(context, from, to)
 	    retval = errno;
 	    goto errout;
 	}
-	strcat(new_policy, ".lock");
+	strlcat(new_policy, ".lock",sizeof(new_policy));
 	(void) unlink(new_policy);
     }
 

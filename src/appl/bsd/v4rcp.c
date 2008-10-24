@@ -1071,7 +1071,7 @@ answer_auth()
 	}
 
 #endif
-	strcpy(instance, "*");
+	strlcpy(instance, "*", sizeof(instance));
 
 	/* If rshd was invoked with the -s argument, it will set the
            environment variable KRB_SRVTAB.  We use that to get the

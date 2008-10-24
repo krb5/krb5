@@ -452,7 +452,8 @@ kerberos5_is(ap, data, cnt)
 		 * the default is of length 4.
 		 */
 		if (krb5_princ_size(telnet_context,ticket->server) < 1) {
-		    (void) strcpy(errbuf, "malformed service name");
+		    (void) strlcpy(errbuf, "malformed service name",
+				   sizeof(errbuf));
 		    goto errout;
 		}
 		if (krb5_princ_component(telnet_context,ticket->server,0)->length < 256) {
@@ -472,7 +473,8 @@ kerberos5_is(ap, data, cnt)
 			goto errout;
 		    }
 		} else {
-		    (void) strcpy(errbuf, "service name too long");
+		    (void) strlcpy(errbuf, "service name too long",
+				   sizeof(errbuf));
 		    goto errout;
 		}
 
@@ -487,8 +489,9 @@ kerberos5_is(ap, data, cnt)
 		}
 		if ((ap->way & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON &&
 		    !authenticator->checksum) {
-			(void) strcpy(errbuf,
-				"authenticator is missing required checksum");
+			(void) strlcpy(errbuf,
+				"authenticator is missing required checksum",
+				       sizeof(errbuf));
 			goto errout;
 		}
 		if (authenticator->checksum) {
