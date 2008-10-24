@@ -1599,9 +1599,15 @@ krb5_error_code KRB5_CALLCONV_C krb5_build_principal
     __attribute__ ((sentinel))
 #endif
     ;
-krb5_error_code KRB5_CALLCONV krb5_build_principal_va
+#if KRB5_DEPRECATED
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_build_principal_va
 	(krb5_context,
 		krb5_principal, unsigned int, const char *, va_list);
+#endif
+
+/* Version of krb5_build_principal_va which allocates krb5_principal_data */
+krb5_error_code KRB5_CALLCONV krb5_build_principal_alloc_va
+        (krb5_context, krb5_principal *, unsigned int, const char *, va_list);
 
 krb5_error_code KRB5_CALLCONV krb5_425_conv_principal
 	(krb5_context,

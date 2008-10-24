@@ -2518,6 +2518,15 @@ void KRB5_CALLCONV krb5_realm_iterator_free
 void KRB5_CALLCONV krb5_free_realm_string
 	(krb5_context context, char *str);
 
+/* Internal principal function used by KIM to avoid code duplication */
+krb5_error_code KRB5_CALLCONV
+krb5int_build_principal_alloc_va(krb5_context context, 
+                                 krb5_principal *princ, 
+                                 unsigned int rlen, 
+                                 const char *realm, 
+                                 const char *first,
+                                 va_list ap);
+
 /* Some data comparison and conversion functions.  */
 #if 0
 static inline int data_cmp(krb5_data d1, krb5_data d2)

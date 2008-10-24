@@ -24,8 +24,8 @@
  * or implied warranty.
  */
 
+#include "k5-int.h"
 #include <krb5.h>
-#include <gssapi/gssapi.h>
 #include "kim_private.h"
 
 /* ------------------------------------------------------------------------ */
@@ -110,7 +110,6 @@ kim_error kim_identity_create_from_components (kim_identity *out_identity,
 {
     kim_error err = KIM_NO_ERROR;
     kim_identity identity = NULL;
-    krb5_principal_data principal_data;  /* allocated by KIM so can't be returned */
     
     if (!err && !out_identity    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_realm        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -126,64 +125,23 @@ kim_error kim_identity_create_from_components (kim_identity *out_identity,
     
     if (!err) {
         va_list args;
-        kim_count component_count = 1;
-        
+
         va_start (args, in_1st_component);
-        while (va_arg (args, kim_string)) { component_count++; }
-        va_end (args);
-        
-        principal_data.length = component_count;
-        principal_data.data = (krb5_data *) malloc (component_count * sizeof (krb5_data));
-        if (!principal_data.data) { err = KIM_OUT_OF_MEMORY_ERR; }
-    }   
-    
-    if (!err) {
-        va_list args;
-        krb5_int32 i;
-        
-        krb5_princ_set_realm_length (context, &principal_data, strlen (in_realm));
-        krb5_princ_set_realm_data (context, &principal_data, (char *) in_realm);
-        
-        va_start (args, in_1st_component);
-        for (i = 0; !err && (i < principal_data.length); i++) {
-            kim_string component = NULL;
-            if (i == 0) {
-                err = kim_string_copy (&component, in_1st_component);
-            } else {
-                err = kim_string_copy (&component, va_arg (args, kim_string));
-            }
-            
-            if (!err) {
-                principal_data.data[i].data = (char *) component;
-                principal_data.data[i].length = strlen (component);
-            }
-        }            
-        va_end (args);
-    }
-    
-    if (!err) {
-        /* make a copy that has actually been allocated by the krb5 
-         * library so krb5_free_principal can be called on it */
         err = krb5_error (identity->context,
-                          krb5_copy_principal (identity->context, 
-                                               &principal_data, 
-                                               &identity->principal));
-    }    
-    
+                          krb5int_build_principal_alloc_va (identity->context,
+                                                            &identity->principal,
+                                                            strlen(in_realm),
+                                                            in_realm,
+                                                            in_1st_component,
+                                                            args));
+        va_end (args);
+    }   
+
     if (!err) {
         *out_identity = identity;
         identity = NULL;
     }
     
-    if (principal_data.data) { 
-        krb5_int32 i;
-        
-        for (i = 0; i < principal_data.length; i++) {
-            kim_string component = principal_data.data[i].data;
-            kim_string_free (&component);
-        }
-        free (principal_data.data); 
-    }
     kim_identity_free (&identity);
     
     return check_error (err);
