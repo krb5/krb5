@@ -11,6 +11,11 @@
 #include "k5-platform.h"
 #include "supp-int.h"
 
+#ifdef __APPLE__
+#import <CoreFoundation/CoreFoundation.h>
+#include "kim_library_private.h"
+#endif
+
 /* It would be nice to just use error_message() always.  Pity that
    it's defined in a library that depends on this one, and we're not
    allowed to make circular dependencies.  */
@@ -48,7 +53,7 @@ krb5int_vset_error (struct errinfo *ep, long code,
     va_list args2;
 
     if (ep->msg && ep->msg != ep->scratch_buf) {
-	free (ep->msg);
+	free ((char *) ep->msg);
 	ep->msg = NULL;
     }
     ep->code = code;
@@ -64,6 +69,60 @@ krb5int_vset_error (struct errinfo *ep, long code,
     /* Try again, just in case.  */
     p = strdup(ep->scratch_buf);
     ep->msg = p ? p : ep->scratch_buf;
+}
+
+static inline char * 
+krb5int_get_localized_error (const char *string) 
+{
+    char *loc_string = NULL;
+    
+#ifdef __APPLE__
+    if (kim_library_allow_home_directory_access ()) {
+        CFStringRef cfstring = NULL;
+        
+        cfstring = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault,
+                                                   string, 
+                                                   kCFStringEncodingUTF8,
+                                                   kCFAllocatorNull);
+        if (cfstring) {
+            CFStringRef loc_cfstring = NULL;
+            
+            loc_cfstring = CFCopyLocalizedString(cfstring, "");
+            if (loc_cfstring) {
+                char *loc_ptr = NULL;
+                
+                /* check if loc_cfstring is a UTF8 string internally 
+                 * so we can avoid using CFStringGetMaximumSizeForEncoding */
+                loc_ptr = (char *) CFStringGetCStringPtr(loc_cfstring, 
+                                                         kCFStringEncodingUTF8);
+                if (loc_ptr) {
+                    loc_string = strdup(loc_ptr);
+                    
+                } else {
+                    CFIndex len = 0;
+                    
+                    len = CFStringGetMaximumSizeForEncoding(CFStringGetLength(loc_cfstring),
+                                                            kCFStringEncodingUTF8) + 1;
+                    
+                    loc_string = malloc(len);
+                    if (loc_string) {
+                        if (!CFStringGetCString(loc_cfstring, loc_string, 
+                                                len, kCFStringEncodingUTF8)) {
+                            /* Conversion to C string failed. */
+                            free (loc_string);
+                            loc_string = NULL;
+                        }
+                    }
+                }
+                
+                CFRelease(loc_cfstring);
+            }
+            
+            CFRelease(cfstring);
+        }
+    }
+#endif
+    return loc_string;
 }
 
 const char *
@@ -130,7 +189,13 @@ krb5int_get_error (struct errinfo *ep, long code)
 	unlock();
 	goto format_number;
     }
-    r2 = strdup (r);
+
+    r2 = krb5int_get_localized_error(r);
+    
+    if (r2 == NULL) {
+        r2 = strdup(r);
+    }
+
     if (r2 == NULL) {
 	strncpy(ep->scratch_buf, r, sizeof(ep->scratch_buf));
 	unlock();
