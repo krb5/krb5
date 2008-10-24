@@ -33,6 +33,8 @@ void test_kim_identity_create_from_krb5_principal (kim_test_state_t state);
 
 void test_kim_identity_create_from_string (kim_test_state_t state);
 
+void test_kim_identity_create_from_components (kim_test_state_t state);
+
 void test_kim_identity_copy (kim_test_state_t state);
 
 void test_kim_identity_compare (kim_test_state_t state);

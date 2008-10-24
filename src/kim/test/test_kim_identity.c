@@ -161,6 +161,56 @@ void test_kim_identity_create_from_string (kim_test_state_t state)
 
 /* ------------------------------------------------------------------------ */
 
+void test_kim_identity_create_from_components (kim_test_state_t state)
+{
+    kim_count i = 0;
+    
+    start_test (state, "kim_identity_create_from_components");
+    
+    for (i = 0; test_identities[i].string; i++) {
+        kim_error err = KIM_NO_ERROR;
+        kim_identity identity = NULL;
+        kim_string string = NULL;
+        
+        printf (".");
+        
+        if (!err) {
+            err = kim_identity_create_from_components (&identity, 
+                                                       test_identities[i].realm, 
+                                                       test_identities[i].components[0], 
+                                                       test_identities[i].components[1], 
+                                                       test_identities[i].components[2], 
+                                                       test_identities[i].components[3], 
+                                                       test_identities[i].components[4],
+                                                       NULL);
+            fail_if_error (state, "kim_identity_create_from_components", err, 
+                           "while creating the identity for %s", 
+                           test_identities[i].string);
+        }
+        
+        if (!err) {
+            err = kim_identity_get_string (identity, &string);
+            fail_if_error (state, "kim_identity_get_string", err, 
+                           "while getting the string for %s", 
+                           test_identities[i].string);
+        }
+        
+        if (!err && strcmp (string, test_identities[i].string)) {
+            log_failure (state, "Unexpected string (got '%s', expected '%s')", 
+                         string, test_identities[i].string);
+        }
+        
+        kim_string_free (&string);
+        kim_identity_free (&identity);
+    }
+    
+    printf ("\n");
+    
+    end_test (state);
+}
+
+/* ------------------------------------------------------------------------ */
+
 void test_kim_identity_copy (kim_test_state_t state)
 {
     kim_count i = 0;
