@@ -29,7 +29,7 @@ krb5_decode_test: $(DECOBJS) $(KRB5_BASE_DEPLIBS)
 t_trval: t_trval.o
 	$(CC) -o t_trval $(ALL_CFLAGS) t_trval.o
 
-check:: check-encode check-decode
+check:: check-encode check-encode-trval check-decode
 
 check-decode: krb5_decode_test
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
@@ -50,22 +50,22 @@ expected_trval.out: trval_reference.out ldap_trval.out
 	  cat $(srcdir)/trval_reference.out > expected_trval.out; \
 	fi
 
-check-encode: krb5_encode_test expected_encode.out expected_trval.out
-	$(RM) test.out
+check-encode: krb5_encode_test expected_encode.out
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test > test.out
 	cmp test.out expected_encode.out
+
+check-encode-trval: krb5_encode_test expected_trval.out
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > test.out
-	cmp test.out expected_trval.out
-	$(RM) test.out	
+		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > trval.out
+	cmp trval.out expected_trval.out
 
 install::
 
 clean::
-	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval t_trval expected_encode.out expected_trval.out
+	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval t_trval expected_encode.out expected_trval.out trval.out
 
 
 ################ Dependencies ################

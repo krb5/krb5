@@ -39,11 +39,75 @@
 #include "asn1_decode.h"
 #include "asn1_make.h"
 #include "asn1_get.h"
+#include "asn1_k_encode.h"
 
 #ifdef ENABLE_LDAP
 
-#define asn1_encode_sequence_of_keys krb5int_ldap_encode_sequence_of_keys
-#define asn1_decode_sequence_of_keys krb5int_ldap_decode_sequence_of_keys
+/************************************************************************/
+/* Encode the Principal's keys                                          */
+/************************************************************************/
+
+/* Imports from asn1_k_encode.c.
+   XXX Must be manually synchronized for now.  */
+IMPORT_TYPE(octetstring, unsigned char *);
+IMPORT_TYPE(int32, krb5_int32);
+
+DEFINTTYPE(int16, krb5_int16);
+DEFINTTYPE(ui_2, krb5_ui_2);
+
+static const struct field_info krbsalt_fields[] = {
+    FIELDOF_NORM(krb5_key_data, int16, key_data_type[1], 0),
+    FIELDOF_OPTSTRINGL(krb5_key_data, octetstring, key_data_contents[1],
+                       ui_2, key_data_length[1], 1, 1),
+};
+static unsigned int optional_krbsalt (const void *p)
+{
+    const krb5_key_data *k = p;
+    unsigned int optional = 0;
+
+    if (k->key_data_length[1] > 0)
+        optional |= (1u << 1);
+
+    return optional;
+}
+DEFSEQTYPE(krbsalt, krb5_key_data, krbsalt_fields, optional_krbsalt);
+static const struct field_info encryptionkey_fields[] = {
+    FIELDOF_NORM(krb5_key_data, int16, key_data_type[0], 0),
+    FIELDOF_STRINGL(krb5_key_data, octetstring, key_data_contents[0],
+                    ui_2, key_data_length[0], 1),
+};
+DEFSEQTYPE(encryptionkey, krb5_key_data, encryptionkey_fields, 0);
+
+static const struct field_info key_data_fields[] = {
+    FIELDOF_ENCODEAS(krb5_key_data, krbsalt, 0),
+    FIELDOF_ENCODEAS(krb5_key_data, encryptionkey, 1),
+#if 0 /* We don't support this field currently.  */
+    FIELDOF_blah(krb5_key_data, s2kparams, ...),
+#endif
+};
+DEFSEQTYPE(key_data, krb5_key_data, key_data_fields, 0);
+DEFPTRTYPE(ptr_key_data, key_data);
+
+DEFFIELDTYPE(key_data_kvno, krb5_key_data,
+             FIELDOF_NORM(krb5_key_data, int16, key_data_kvno, -1));
+DEFPTRTYPE(ptr_key_data_kvno, key_data_kvno);
+
+static const struct field_info ldap_key_seq_fields[] = {
+    FIELD_INT_IMM(1, 0),
+    FIELD_INT_IMM(1, 1),
+    FIELDOF_NORM(ldap_seqof_key_data, ptr_key_data_kvno, key_data, 2),
+    FIELDOF_NORM(ldap_seqof_key_data, int32, mkvno, 3), /* mkvno */
+    FIELDOF_SEQOF_LEN(ldap_seqof_key_data, ptr_key_data, key_data, n_key_data,
+                      int16, 4),
+};
+DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields, 0);
+
+/* Export a function to do the whole encoding.  */
+MAKE_FULL_ENCODER(krb5int_ldap_encode_sequence_of_keys, ldap_key_seq);
+
+/************************************************************************/
+/* Decode the Principal's keys                                          */
+/************************************************************************/
 
 #define cleanup(err)                                                    \
         {                                                               \
@@ -54,171 +118,6 @@
 #define checkerr                                                        \
                 if (ret != 0)                                           \
                         goto last
-
-/************************************************************************/
-/* Encode the Principal's keys                                          */
-/************************************************************************/
-
-static asn1_error_code
-asn1_encode_key(asn1buf *buf,
-                krb5_key_data key_data,
-                unsigned int *retlen)
-{
-    asn1_error_code ret = 0;
-    unsigned int length, sum = 0;
-
-    /* Encode the key type and value.  */
-    {
-        unsigned int key_len = 0;
-        /* key value */
-        ret = asn1_encode_octetstring (buf,
-                                       key_data.key_data_length[0],
-                                       key_data.key_data_contents[0],
-                                       &length); checkerr;
-        key_len += length;
-        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, length, &length); checkerr;
-        key_len += length;
-        /* key type */
-        ret = asn1_encode_integer (buf, key_data.key_data_type[0], &length);
-        checkerr;
-        key_len += length;
-        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, length, &length); checkerr;
-        key_len += length;
-
-        ret = asn1_make_sequence(buf, key_len, &length); checkerr;
-        key_len += length;
-        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, key_len, &length); checkerr;
-        key_len += length;
-
-        sum += key_len;
-    }
-    /* Encode the salt type and value (optional) */
-    if (key_data.key_data_ver > 1) {
-        unsigned int salt_len = 0;
-        /* salt value (optional) */
-        if (key_data.key_data_length[1] > 0) {
-            ret = asn1_encode_octetstring (buf,
-                                           key_data.key_data_length[1],
-                                           key_data.key_data_contents[1],
-                                           &length); checkerr;
-            salt_len += length;
-            ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, length, &length);
-            checkerr;
-            salt_len += length;
-        }
-        /* salt type */
-        ret = asn1_encode_integer (buf, key_data.key_data_type[1], &length);
-        checkerr;
-        salt_len += length;
-        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, length, &length); checkerr;
-        salt_len += length;
-
-        ret = asn1_make_sequence(buf, salt_len, &length); checkerr;
-        salt_len += length;
-        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, salt_len, &length); checkerr;
-        salt_len += length;
-
-        sum += salt_len;
-    }
-
-    ret = asn1_make_sequence(buf, sum, &length); checkerr;
-    sum += length;
-
-    *retlen = sum;
-
-last:
-    return ret;
-}
-
-/* Major version and minor version are both '1' - first version */
-/* asn1_error_code asn1_encode_sequence_of_keys (krb5_key_data *key_data, */
-krb5_error_code
-asn1_encode_sequence_of_keys (ldap_seqof_key_data *val, krb5_data **code)
-{
-    krb5_key_data *key_data = val->key_data;
-    krb5_int16 n_key_data = val->n_key_data;
-    krb5_int32 mkvno = val->mkvno;
-    asn1_error_code ret = 0;
-    asn1buf *buf = NULL;
-    unsigned int length, sum = 0;
-    unsigned long tmp_ul;
-
-    *code = NULL;
-
-    if (n_key_data == 0) cleanup (ASN1_MISSING_FIELD);
-
-    /* Allocate the buffer */
-    ret = asn1buf_create(&buf);
-    checkerr;
-
-    /* Sequence of keys */
-    {
-        int i;
-        unsigned int seq_len = 0;
-
-        for (i = n_key_data - 1; i >= 0; i--) {
-            ret = asn1_encode_key (buf, key_data[i], &length); checkerr;
-            seq_len += length;
-        }
-        ret = asn1_make_sequence(buf, seq_len, &length); checkerr;
-        seq_len += length;
-        ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 4, seq_len, &length); checkerr;
-        seq_len += length;
-
-        sum += seq_len;
-    }
-
-    /* mkvno */
-    if (mkvno < 0)
-        cleanup (ASN1_BAD_FORMAT);
-    tmp_ul = (unsigned long)mkvno;
-    ret = asn1_encode_unsigned_integer (buf, tmp_ul, &length); checkerr;
-    sum += length;
-    ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 3, length, &length); checkerr;
-    sum += length;
-
-    /* kvno (assuming all keys in array have same version) */
-    if (key_data[0].key_data_kvno < 0)
-        cleanup (ASN1_BAD_FORMAT);
-    tmp_ul = (unsigned long)key_data[0].key_data_kvno;
-    ret = asn1_encode_unsigned_integer (buf, tmp_ul, &length);
-    checkerr;
-    sum += length;
-    ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 2, length, &length); checkerr;
-    sum += length;
-
-    /* attribute-minor-vno == 1 */
-    ret = asn1_encode_unsigned_integer (buf, 1, &length); checkerr;
-    sum += length;
-    ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, length, &length); checkerr;
-    sum += length;
-
-    /* attribute-major-vno == 1 */
-    ret = asn1_encode_unsigned_integer (buf, 1, &length); checkerr;
-    sum += length;
-    ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, length, &length); checkerr;
-    sum += length;
-
-    ret = asn1_make_sequence(buf, sum, &length); checkerr;
-    sum += length;
-
-    /* The reverse encoding is straightened out here */
-    ret = asn12krb5_buf (buf, code); checkerr;
-
-last:
-    asn1buf_destroy (&buf);
-
-    if (ret != 0 && *code != NULL) {
-        free ((*code)->data);
-        free (*code);
-    }
-
-    return ret;
-}
-
-/************************************************************************/
-/* Decode the Principal's keys                                          */
-/************************************************************************/
 
 #define safe_syncbuf(outer,inner,buflen)                                \
         if (! ((inner)->next == (inner)->bound + 1 &&                   \
@@ -279,7 +178,8 @@ last:
 #endif
 
 static asn1_error_code
-decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag, int *len,
+decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag,
+                           unsigned int *len,
                            asn1_octet **val)
 {
     int buflen;
@@ -328,8 +228,8 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
     if (t.tagnum == 0) {
         int salt_buflen;
         asn1buf slt;
-        unsigned long keytype;
-        int keylen;
+        long keytype;
+        unsigned int keylen;
 
         key->key_data_ver = 2;
         asn1_get_sequence(&subbuf, &length, &seqindef);
@@ -358,7 +258,7 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
         int key_buflen;
         asn1buf kbuf;
         long lval;
-        int ival;
+        unsigned int ival;
 
         if (t.tagnum != 1)
             cleanup (ASN1_MISSING_FIELD);
@@ -390,9 +290,8 @@ last:
     return ret;
 }
 
-/* asn1_error_code asn1_decode_sequence_of_keys (krb5_data *in, */
-krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
-                                              ldap_seqof_key_data **rep)
+krb5_error_code krb5int_ldap_decode_sequence_of_keys (krb5_data *in,
+                                                      ldap_seqof_key_data **rep)
 {
     ldap_seqof_key_data *repval;
     krb5_key_data **out;

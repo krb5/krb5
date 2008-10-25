@@ -741,12 +741,12 @@ array_expand (void *array, int n_elts, size_t elt_size)
 
     if (n_elts <= 0)
         return NULL;
-    if (n_elts > SIZE_MAX / elt_size)
+    if ((unsigned int) n_elts > SIZE_MAX / elt_size)
         return NULL;
     new_size = n_elts * elt_size;
     if (new_size == 0)
         return NULL;
-    if (new_size / elt_size != n_elts)
+    if (new_size / elt_size != (unsigned int) n_elts)
         return NULL;
     new_array = realloc(array, new_size);
     return new_array;
@@ -1374,7 +1374,8 @@ asn1_error_code asn1_decode_algorithm_identifier(asn1buf *buf,  krb5_algorithm_i
         val->parameters.length = 0;
         val->parameters.data = NULL;
 
-        if (length > subbuf.next - subbuf.base) {
+        assert(subbuf.next >= subbuf.base);
+        if (length > (size_t)(subbuf.next - subbuf.base)) {
             unsigned int size = length - (subbuf.next - subbuf.base);
             retval = asn1buf_remove_octetstring(&subbuf, size,
                                                 &val->parameters.data);

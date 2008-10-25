@@ -899,8 +899,7 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
 			  "%spreauth required but hint list is empty",
 			  hw_only ? "hw" : "");
     }
-    retval = encode_krb5_padata_sequence((const krb5_pa_data **) pa_data,
-					 &edat);
+    retval = encode_krb5_padata_sequence(pa_data, &edat);
     if (retval)
 	goto errout;
     *e_data = *edat;
@@ -1503,10 +1502,9 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
 	}
     }
     if (etype_info2)
-	retval = encode_krb5_etype_info2((const krb5_etype_info_entry **) entry,
-				    &scratch);
-    else 	retval = encode_krb5_etype_info((const krb5_etype_info_entry **) entry,
-				    &scratch);
+	retval = encode_krb5_etype_info2(entry, &scratch);
+    else
+ 	retval = encode_krb5_etype_info(entry, &scratch);
     if (retval)
 	goto cleanup;
     pa_data->contents = (unsigned char *)scratch->data;
@@ -1598,9 +1596,9 @@ etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata,
 	goto cleanup;
 
     if (etype_info2)
-	retval = encode_krb5_etype_info2((const krb5_etype_info_entry **) entry, &scratch);
+	retval = encode_krb5_etype_info2(entry, &scratch);
     else
-	retval = encode_krb5_etype_info((const krb5_etype_info_entry **) entry, &scratch);
+	retval = encode_krb5_etype_info(entry, &scratch);
 
     if (retval)
 	goto cleanup;

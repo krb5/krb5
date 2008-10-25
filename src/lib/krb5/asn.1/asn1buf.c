@@ -117,7 +117,7 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
 
     nestlevel = 1 + indef;
     if (!indef) {
-        if (length <= buf->bound - buf->next + 1)
+        if (length <= (size_t)(buf->bound - buf->next + 1))
             buf->next += length;
         else
             return ASN1_OVERRUN;
@@ -128,7 +128,7 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
         retval = asn1_get_tag_2(buf, &t);
         if (retval) return retval;
         if (!t.indef) {
-            if (t.length <= buf->bound - buf->next + 1)
+            if (t.length <= (size_t)(buf->bound - buf->next + 1))
                 buf->next += t.length;
             else
                 return ASN1_OVERRUN;
@@ -165,29 +165,20 @@ asn1_error_code asn1buf_insert_octet(asn1buf *buf, const int o)
     return 0;
 }
 
-asn1_error_code asn1buf_insert_octetstring(asn1buf *buf, const unsigned int len, const krb5_octet *s)
+asn1_error_code
+asn1buf_insert_bytestring(asn1buf *buf, const unsigned int len, const void *sv)
 {
     asn1_error_code retval;
     unsigned int length;
+    const char *s = sv;
 
     retval = asn1buf_ensure_space(buf,len);
     if (retval) return retval;
     for (length=1; length<=len; length++,(buf->next)++)
-        *(buf->next) = (char)(s[len-length]);
+        *(buf->next) = (s[len-length]);
     return 0;
 }
 
-asn1_error_code asn1buf_insert_charstring(asn1buf *buf, const unsigned int len, const char *s)
-{
-    asn1_error_code retval;
-    unsigned int length;
-
-    retval = asn1buf_ensure_space(buf,len);
-    if (retval) return retval;
-    for (length=1; length<=len; length++,(buf->next)++)
-        *(buf->next) = (char)(s[len-length]);
-    return 0;
-}
 
 #undef asn1buf_remove_octet
 asn1_error_code asn1buf_remove_octet(asn1buf *buf, asn1_octet *o)
@@ -201,7 +192,7 @@ asn1_error_code asn1buf_remove_octetstring(asn1buf *buf, const unsigned int len,
 {
     unsigned int i;
 
-    if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
+    if (len > (size_t)(buf->bound + 1 - buf->next)) return ASN1_OVERRUN;
     if (len == 0) {
         *s = 0;
         return 0;
@@ -219,7 +210,7 @@ asn1_error_code asn1buf_remove_charstring(asn1buf *buf, const unsigned int len, 
 {
     unsigned int i;
 
-    if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
+    if (len > (size_t)(buf->bound + 1 - buf->next)) return ASN1_OVERRUN;
     if (len == 0) {
         *s = 0;
         return 0;
@@ -344,7 +335,7 @@ unsigned int asn1buf_free(const asn1buf *buf)
 #undef asn1buf_ensure_space
 asn1_error_code asn1buf_ensure_space(asn1buf *buf, const unsigned int amount)
 {
-    int avail = asn1buf_free(buf);
+    unsigned int avail = asn1buf_free(buf);
     if (avail < amount) {
         asn1_error_code retval = asn1buf_expand(buf, amount-avail);
         if (retval) return retval;

@@ -58,6 +58,7 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
     krb5_octet zero_octet = 0;
     krb5_data *scratch;
     krb5_boolean valid;
+    struct krb5_safe_with_body swb;
 
     if (!krb5_is_krb_safe(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -116,7 +117,9 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
 
     message->checksum = &our_cksum;
 
-    retval = encode_krb5_safe_with_body(message, &safe_body, &scratch);
+    swb.body = &safe_body;
+    swb.safe = message;
+    retval = encode_krb5_safe_with_body(&swb, &scratch);
     message->checksum = his_cksum;
     if (retval)
 	goto cleanup;

@@ -1376,8 +1376,12 @@ krb5_error_code encode_krb5_kdc_req_body
 krb5_error_code encode_krb5_safe
 	(const krb5_safe *rep, krb5_data **code);
 
+struct krb5_safe_with_body {
+    krb5_safe *safe;
+    krb5_data *body;
+};
 krb5_error_code encode_krb5_safe_with_body
-	(const krb5_safe *rep, const krb5_data *body, krb5_data **code);
+	(const struct krb5_safe_with_body *rep, krb5_data **code);
 
 krb5_error_code encode_krb5_priv
 	(const krb5_priv *rep, krb5_data **code);
@@ -1395,7 +1399,7 @@ krb5_error_code encode_krb5_error
 	(const krb5_error *rep, krb5_data **code);
 
 krb5_error_code encode_krb5_authdata
-	(const krb5_authdata **rep, krb5_data **code);
+	(krb5_authdata *const *rep, krb5_data **code);
 
 krb5_error_code encode_krb5_authdata_elt
 	(const krb5_authdata *rep, krb5_data **code);
@@ -1407,15 +1411,15 @@ krb5_error_code encode_krb5_pwd_data
 	(const krb5_pwd_data *rep, krb5_data **code);
 
 krb5_error_code encode_krb5_padata_sequence
-	(const krb5_pa_data ** rep, krb5_data **code);
+	(krb5_pa_data *const *rep, krb5_data **code);
 
 krb5_error_code encode_krb5_alt_method
 	(const krb5_alt_method *, krb5_data **code);
 
 krb5_error_code encode_krb5_etype_info
-	(const krb5_etype_info_entry **, krb5_data **code);
+	(krb5_etype_info_entry *const *, krb5_data **code);
 krb5_error_code encode_krb5_etype_info2
-	(const krb5_etype_info_entry **, krb5_data **code);
+	(krb5_etype_info_entry *const *, krb5_data **code);
 
 krb5_error_code encode_krb5_enc_data
     	(const krb5_enc_data *, krb5_data **);
@@ -1435,11 +1439,13 @@ krb5_error_code encode_krb5_enc_sam_response_enc
 krb5_error_code encode_krb5_sam_response
 	(const krb5_sam_response * , krb5_data **);
 
+#if 0 /* currently not compiled because we never use them */
 krb5_error_code encode_krb5_sam_challenge_2
 	(const krb5_sam_challenge_2 * , krb5_data **);
 
 krb5_error_code encode_krb5_sam_challenge_2_body
 	(const krb5_sam_challenge_2_body * , krb5_data **);
+#endif
 
 krb5_error_code encode_krb5_enc_sam_response_enc_2
 	(const krb5_enc_sam_response_enc_2 * , krb5_data **);
@@ -1450,8 +1456,12 @@ krb5_error_code encode_krb5_sam_response_2
 krb5_error_code encode_krb5_predicted_sam_response
 	(const krb5_predicted_sam_response * , krb5_data **);
 
+struct krb5_setpw_req {
+    krb5_principal target;
+    krb5_data password;
+};
 krb5_error_code encode_krb5_setpw_req
-(const krb5_principal target, char *password, krb5_data **code);
+(const struct krb5_setpw_req *rep, krb5_data **code);
 
 /*************************************************************************
  * End of prototypes for krb5_encode.c
@@ -1604,7 +1614,7 @@ struct ldap_seqof_key_data {
 typedef struct ldap_seqof_key_data ldap_seqof_key_data;
 
 krb5_error_code
-krb5int_ldap_encode_sequence_of_keys (ldap_seqof_key_data *val,
+krb5int_ldap_encode_sequence_of_keys (const ldap_seqof_key_data *val,
 				      krb5_data **code);
 
 krb5_error_code
