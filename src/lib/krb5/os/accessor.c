@@ -134,6 +134,9 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    SC (encode_krb5_authdata_elt, encode_krb5_authdata_elt),
 #undef SC
 
+	    S (encode_krb5_sam_response_2, encode_krb5_sam_response_2),
+	    S (encode_krb5_enc_sam_response_enc_2, encode_krb5_enc_sam_response_enc_2),
+
 #if DESIGNATED_INITIALIZERS
 	};
 #else

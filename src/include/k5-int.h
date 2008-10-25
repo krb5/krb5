@@ -1941,6 +1941,11 @@ typedef struct _krb5int_access {
     krb5_error_code (*encode_krb5_authdata_elt)
 	(const krb5_authdata *rep, krb5_data **code);
 
+    /* Exported for testing only!  */
+    krb5_error_code (*encode_krb5_sam_response_2)
+        (const krb5_sam_response_2 *rep, krb5_data **code);
+    krb5_error_code (*encode_krb5_enc_sam_response_enc_2)
+        (const krb5_enc_sam_response_enc_2 *rep, krb5_data **code);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \

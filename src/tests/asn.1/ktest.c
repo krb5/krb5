@@ -776,6 +776,56 @@ krb5_error_code ktest_make_sample_sam_response(p)
 
     return 0;
 }
+krb5_error_code ktest_make_sample_sam_response_2(p)
+    krb5_sam_response_2 * p;
+{
+    p->magic = KV5M_SAM_RESPONSE;
+    p->sam_type = 43; /* information */
+    p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
+    p->sam_track_id.data = strdup("track data");
+    if (p->sam_track_id.data == NULL) return ENOMEM;
+    p->sam_track_id.length = strlen(p->sam_track_id.data);
+    p->sam_enc_nonce_or_sad.ciphertext.data = strdup("nonce or sad");
+    if (p->sam_enc_nonce_or_sad.ciphertext.data == NULL) return ENOMEM;
+    p->sam_enc_nonce_or_sad.ciphertext.length = 
+	strlen(p->sam_enc_nonce_or_sad.ciphertext.data);
+    p->sam_enc_nonce_or_sad.enctype = ENCTYPE_DES_CBC_CRC;
+    p->sam_enc_nonce_or_sad.kvno = 3382;
+    p->sam_nonce = 0x543210;
+
+    return 0;
+}
+
+krb5_error_code ktest_make_sample_sam_key(p)
+    krb5_sam_key *p;
+{
+    p->magic = 99;
+    return ktest_make_sample_keyblock(&p->sam_key);
+}
+
+krb5_error_code ktest_make_sample_enc_sam_response_enc(p)
+    krb5_enc_sam_response_enc *p;
+{
+    p->magic = 78;
+    p->sam_nonce = 78634;
+    p->sam_timestamp = 99999;
+    p->sam_usec = 399;
+    p->sam_sad.data = strdup("enc_sam_response_enc");
+    if (p->sam_sad.data == NULL) return ENOMEM;
+    p->sam_sad.length = strlen(p->sam_sad.data);
+    return 0;
+}
+
+krb5_error_code ktest_make_sample_enc_sam_response_enc_2(p)
+    krb5_enc_sam_response_enc_2 *p;
+{
+    p->magic = 83;
+    p->sam_nonce = 88;
+    p->sam_sad.data = strdup("enc_sam_response_enc_2");
+    if (p->sam_sad.data == NULL) return ENOMEM;
+    p->sam_sad.length = strlen(p->sam_sad.data);
+    return 0;
+}
 
 #ifdef ENABLE_LDAP
 static krb5_error_code ktest_make_sample_key_data(krb5_key_data *p, int i)
@@ -811,6 +861,24 @@ krb5_error_code ktest_make_sample_ldap_seqof_key_data(p)
     return 0;
 }
 #endif
+
+krb5_error_code ktest_make_sample_predicted_sam_response(p)
+    krb5_predicted_sam_response *p;
+{
+    krb5_error_code retval;
+
+    p->magic = 79;
+    retval = ktest_make_sample_keyblock(&p->sam_key);
+    if (retval) return retval;
+    p->sam_flags = 9;
+    p->stime = 17;
+    p->susec = 18;
+    retval = ktest_make_sample_principal(&p->client);
+    if (retval) return retval;
+    retval = krb5_data_parse(&p->msd, "hello");
+    if (retval) return retval;
+    return 0;
+}
 
 
 /****************************************************************/
@@ -1318,6 +1386,22 @@ void ktest_empty_sam_response(p)
     ktest_empty_data(&(p->sam_track_id));
     ktest_empty_data(&(p->sam_enc_key.ciphertext));
     ktest_empty_data(&(p->sam_enc_nonce_or_ts.ciphertext));
+}
+
+void ktest_empty_sam_key(p)
+    krb5_sam_key *p;
+{
+    if (p->sam_key.contents)
+	free(p->sam_key.contents);
+}
+
+void ktest_empty_sam_response_2(p)
+    krb5_sam_response_2 *p;
+{
+}
+void ktest_empty_enc_sam_response_enc_2(p)
+    krb5_enc_sam_response_enc_2 *p;
+{
 }
 
 #ifdef ENABLE_LDAP

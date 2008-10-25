@@ -644,7 +644,6 @@ main(argc, argv)
 		   encode_krb5_sam_response);
 	ktest_empty_sam_response(&sam_ch);
     }
-#if 0
     /****************************************************************/
     /* encode_krb5_sam_key */
     {
@@ -653,6 +652,7 @@ main(argc, argv)
 	      ktest_make_sample_sam_key);
 	encode_run(sam_ch,krb5_sam_key,"sam_key","",
 		   encode_krb5_sam_key);
+	ktest_empty_sam_key(&sam_ch);
     }
     /****************************************************************/
     /* encode_krb5_enc_sam_response_enc */
@@ -672,7 +672,27 @@ main(argc, argv)
 	encode_run(sam_ch,krb5_predicted_sam_response,"predicted_sam_response","",
 		   encode_krb5_predicted_sam_response);
     }
-#endif
+  /****************************************************************/
+  /* encode_krb5_sam_response_2 */
+    {
+	krb5_sam_response_2 sam_ch2;
+	setup(sam_ch2,krb5_sam_response_2,"sam_response_2",
+	      ktest_make_sample_sam_response_2);
+	encode_run(sam_ch2,krb5_sam_response_2,"sam_response_2","",
+		   acc.encode_krb5_sam_response_2);
+	ktest_empty_sam_response_2(&sam_ch2);
+    }
+    /****************************************************************/
+    /* encode_krb5_sam_response_enc_2 */
+    {
+	krb5_enc_sam_response_enc_2 sam_ch2;
+	setup(sam_ch2,krb5_enc_sam_response_enc_2,"enc_sam_response_enc_2",
+	      ktest_make_sample_enc_sam_response_enc_2);
+	encode_run(sam_ch2,krb5_enc_sam_response_enc_2,
+		   "enc_sam_response_enc_2","",
+		   acc.encode_krb5_enc_sam_response_enc_2);
+	ktest_empty_enc_sam_response_enc_2(&sam_ch2);
+    }
 #ifdef ENABLE_LDAP
     {
 	ldap_seqof_key_data skd;
