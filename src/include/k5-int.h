@@ -2251,7 +2251,6 @@ krb5_error_code
 krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);
 
-struct _krb5_kt_ops;
 struct _krb5_kt {	/* should move into k5-int.h */
     krb5_magic magic;
     const struct _krb5_kt_ops *ops;
