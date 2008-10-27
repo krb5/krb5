@@ -38,10 +38,10 @@ install::
 	done
 
 clean::
-	$(RM) $(CLIENTOBJS) $(SERVEROBJS)
+	$(RM) $(CLIENTOBJS) $(SERVEROBJS) $(LOGOBJS)
 
 clean::
-	$(RM) kprop kpropd
+	$(RM) kprop kpropd kproplog
 
 # +++ Dependency line eater +++
 # 
