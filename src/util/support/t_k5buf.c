@@ -81,7 +81,8 @@ static void test_realloc()
 {
     struct k5buf buf;
     char data[1024], *s;
-    ssize_t i, len;
+    ssize_t len;
+    size_t i;
 
     for (i = 0; i < sizeof(data); i++)
 	data[i] = 'a';
@@ -176,8 +177,7 @@ static void test_overflow()
 static void test_error()
 {
     struct k5buf buf;
-    char storage[1], *s;
-    ssize_t len;
+    char storage[1];
 
     /* Cause an overflow and then perform actions afterwards. */
     krb5int_buf_init_fixed(&buf, storage, sizeof(storage));
@@ -226,6 +226,51 @@ static void test_binary()
     fail_if(s[3] != 'a' || s[4] != 0 || s[5] != 'b', "binary");
 }
 
+static void test_fmt()
+{
+    struct k5buf buf;
+    char *s, storage[10], data[1024];
+    ssize_t len;
+    size_t i;
+
+    for (i = 0; i < sizeof(data) - 1; i++)
+	data[i] = 'a';
+    data[i] = '\0';
+
+    /* Format some text into a non-empty fixed buffer. */
+    krb5int_buf_init_fixed(&buf, storage, sizeof(storage));
+    krb5int_buf_add(&buf, "foo");
+    krb5int_buf_add_fmt(&buf, " %d ", 3);
+    check_buf(&buf, "fmt 1");
+    s = krb5int_buf_cstr(&buf);
+    len = krb5int_buf_len(&buf);
+    fail_if(!s || len != 6 || strcmp(s, "foo 3 ") != 0, "fmt 1");
+
+    /* Overflow the same buffer with formatted text. */
+    krb5int_buf_add_fmt(&buf, "%d%d%d%d", 1, 2, 3, 4);
+    check_buf(&buf, "fmt 2");
+    s = krb5int_buf_cstr(&buf);
+    len = krb5int_buf_len(&buf);
+    fail_if(buf.buftype != ERROR || s != NULL || len != -1, "fmt 2");
+
+    /* Format some text into a non-empty dynamic buffer. */
+    krb5int_buf_init_dynamic(&buf);
+    krb5int_buf_add(&buf, "foo");
+    krb5int_buf_add_fmt(&buf, " %d ", 3);
+    check_buf(&buf, "fmt 3");
+    s = krb5int_buf_cstr(&buf);
+    len = krb5int_buf_len(&buf);
+    fail_if(!s || len != 6 || strcmp(s, "foo 3 ") != 0, "fmt 3");
+
+    /* Format more text into the same buffer, causing a big resize. */
+    krb5int_buf_add_fmt(&buf, "%s", data);
+    check_buf(&buf, "fmt 4");
+    fail_if(buf.space != 2048, "fmt 4");
+    s = krb5int_buf_cstr(&buf);
+    len = krb5int_buf_len(&buf);
+    fail_if(!s || len != 1029 || strcmp(s + 6, data) != 0, "fmt 4");
+}
+
 int main()
 {
     test_basic();
@@ -234,5 +279,6 @@ int main()
     test_error();
     test_truncate();
     test_binary();
+    test_fmt();
     return 0;
 }

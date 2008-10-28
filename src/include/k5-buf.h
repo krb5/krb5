@@ -39,6 +39,7 @@
 #define KRB5_CALLCONV_C
 #endif
 
+#include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -80,6 +81,13 @@ void krb5int_buf_add(struct k5buf *buf, const char *data);
    to contain null bytes if you are prepared to deal with that in the
    output (use krb5int_buf_len to retrieve the length of the output). */
 void krb5int_buf_add_len(struct k5buf *buf, const char *data, size_t len);
+
+/* Add sprintf-style formatted data to BUF. */
+void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 3)))
+#endif
+    ;
 
 /* Truncate BUF.  LEN must be between 0 and the existing buffer
    length, or an assertion failure will result. */

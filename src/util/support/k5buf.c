@@ -115,6 +115,71 @@ void krb5int_buf_add_len(struct k5buf *buf, const char *data, size_t len)
     buf->data[buf->len] = '\0';
 }
 
+void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
+{
+    va_list ap;
+    int r;
+    size_t remaining;
+    char *tmp;
+
+    if (buf->buftype == ERROR)
+        return;
+    remaining = buf->space - buf->len;
+
+    if (buf->buftype == FIXED) {
+        /* Format the data directly into the fixed buffer. */
+        va_start(ap, fmt);
+        r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
+        va_end(ap);
+        if (SNPRINTF_OVERFLOW(r, remaining))
+            buf->buftype = ERROR;
+        else
+            buf->len += (unsigned int) r;
+        return;
+    }
+
+    /* Optimistically format the data directly into the dynamic buffer. */
+    assert(buf->buftype == DYNAMIC);
+    va_start(ap, fmt);
+    r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
+    va_end(ap);
+    if (!SNPRINTF_OVERFLOW(r, remaining)) {
+        buf->len += (unsigned int) r;
+        return;
+    }
+
+    if (r >= 0) {
+        /* snprintf correctly told us how much space is required. */
+        if (!ensure_space(buf, r))
+            return;
+        remaining = buf->space - buf->len;
+        va_start(ap, fmt);
+        r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
+        va_end(ap);
+        if (SNPRINTF_OVERFLOW(r, remaining))  /* Shouldn't ever happen. */
+            buf->buftype = ERROR;
+        else
+            buf->len += (unsigned int) r;
+        return;
+    }
+
+    /* It's a pre-C99 snprintf implementation, or something else went
+       wrong.  Fall back to asprintf. */
+    va_start(ap, fmt);
+    r = vasprintf(&tmp, fmt, ap);
+    va_end(ap);
+    if (r < 0) {
+        buf->buftype = ERROR;
+        return;
+    }
+    if (ensure_space(buf, r)) {
+        /* Copy the temporary string into buf, including terminator. */
+        memcpy(buf->data + buf->len, tmp, r + 1);
+        buf->len += r;
+    }
+    free(tmp);
+}
+
 void krb5int_buf_truncate(struct k5buf *buf, size_t len)
 {
     if (buf->buftype == ERROR)
