@@ -28,8 +28,8 @@
 
 struct profile_string_list {
 	char	**list;
-	int	num;
-	int	max;
+	unsigned int	num;
+	unsigned int	max;
 };
 
 /*
@@ -75,7 +75,7 @@ static void end_list(struct profile_string_list *list, char ***ret_list)
 static errcode_t add_to_list(struct profile_string_list *list, const char *str)
 {
 	char 	*newstr, **newlist;
-	int	newmax;
+	unsigned int	newmax;
 	
 	if (list->num+1 >= list->max) {
 		newmax = list->max + 10;
