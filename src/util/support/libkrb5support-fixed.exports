@@ -33,6 +33,7 @@ krb5int_buf_init_fixed
 krb5int_buf_init_dynamic
 krb5int_buf_add
 krb5int_buf_add_len
+krb5int_buf_add_fmt
 krb5int_buf_truncate
 krb5int_buf_cstr
 krb5int_buf_len
