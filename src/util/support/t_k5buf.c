@@ -207,6 +207,7 @@ static void test_truncate()
     s = krb5int_buf_cstr(&buf);
     len = krb5int_buf_len(&buf);
     fail_if(!s || len != 7 || strcmp(s, "abcdefg") != 0, "truncate");
+    krb5int_free_buf(&buf);
 }
 
 static void test_binary()
@@ -224,6 +225,7 @@ static void test_binary()
     fail_if(!s || len != 6, "binary");
     fail_if(s[0] != 'a' || s[1] != 0 || s[2] != 'b', "binary");
     fail_if(s[3] != 'a' || s[4] != 0 || s[5] != 'b', "binary");
+    krb5int_free_buf(&buf);
 }
 
 static void test_fmt()
@@ -269,6 +271,7 @@ static void test_fmt()
     s = krb5int_buf_cstr(&buf);
     len = krb5int_buf_len(&buf);
     fail_if(!s || len != 1029 || strcmp(s + 6, data) != 0, "fmt 4");
+    krb5int_free_buf(&buf);
 }
 
 int main()
