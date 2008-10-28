@@ -176,6 +176,9 @@ typedef INT64_TYPE krb5_int64;
 /* Get error info support.  */
 #include "k5-err.h"
 
+/* Get string buffer support. */
+#include "k5-buf.h"
+
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
    (which allows non-ambiguous error codes between subsystems) */

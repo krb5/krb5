@@ -41,6 +41,7 @@ STLIBOBJS= \
 	init-addrinfo.o \
 	plugins.o \
 	errors.o \
+	k5buf.o \
 	gmt_mktime.o \
 	fake-addrinfo.o \
 	$(STRLCPY_ST_OBJ) \
@@ -52,6 +53,7 @@ LIBOBJS= \
 	$(OUTPRE)init-addrinfo.$(OBJEXT) \
 	$(OUTPRE)plugins.$(OBJEXT) \
 	$(OUTPRE)errors.$(OBJEXT) \
+	$(OUTPRE)k5buf.$(OBJEXT) \
 	$(OUTPRE)gmt_mktime.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
 	$(STRLCPY_OBJ) \
@@ -68,11 +70,13 @@ SRCS=\
 	$(srcdir)/threads.c \
 	$(srcdir)/init-addrinfo.c \
 	$(srcdir)/errors.c \
+	$(srcdir)/k5buf.c \
 	$(srcdir)/gmt_mktime.c \
 	$(srcdir)/fake-addrinfo.c \
 	$(srcdir)/strlcpy.c \
 	$(srcdir)/printf.c \
-	$(srcdir)/mkstemp.c
+	$(srcdir)/mkstemp.c \
+	$(srcdir)/t_k5buf.c
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
@@ -117,6 +121,19 @@ libkrb5support.exports: $(srcdir)/libkrb5support-fixed.exports Makefile
 ##DOS##	$(RM) libkrb5support.exports
 ##DOS##	$(MV) new-exports libkrb5support.exports
 
+T_K5BUF_OBJS= t_k5buf.o k5buf.o
+
+t_k5buf: $(T_K5BUF_OBJS)
+	$(CC_LINK) -o t_k5buf $(T_K5BUF_OBJS)
+
+TEST_PROGS= t_k5buf
+
+check-unix:: $(TEST_PROGS)
+	./t_k5buf
+
+clean::
+	$(RM) t_k5buf.o t_k5buf
+
 @lib_frag@
 @libobj_frag@
 
@@ -138,6 +155,9 @@ init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
 errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h errors.c supp-int.h
+k5buf.so k5buf.po $(OUTPRE)k5buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h k5buf-int.h k5buf.c
 gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-gmt_mktime.h \
   gmt_mktime.c
@@ -155,3 +175,6 @@ printf.so printf.po $(OUTPRE)printf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 mkstemp.so mkstemp.po $(OUTPRE)mkstemp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   mkstemp.c
+t_k5buf.so t_k5buf.po $(OUTPRE)t_k5buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h k5buf-int.h t_k5buf.c

@@ -29,3 +29,11 @@ krb5int_free_error
 krb5int_clear_error
 krb5int_set_error_info_callout_fn
 krb5int_gmt_mktime
+krb5int_buf_init_fixed
+krb5int_buf_init_dynamic
+krb5int_buf_add
+krb5int_buf_add_len
+krb5int_buf_truncate
+krb5int_buf_cstr
+krb5int_buf_len
+krb5int_free_buf
