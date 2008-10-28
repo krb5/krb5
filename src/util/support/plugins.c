@@ -618,7 +618,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                 }
                 
 		if (!err) {
-                    size_t len = NAMELEN (d);
+                    int len = NAMELEN (d);
 		    if (asprintf(&filepath, "%s/%*s", dirnames[i], len, d->d_name) < 0) {
 			filepath = NULL;
 			err = ENOMEM;
