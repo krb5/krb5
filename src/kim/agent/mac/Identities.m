@@ -477,7 +477,7 @@
             }
 
             //NSLog(@"waited %@", [[NSThread currentThread] description]);
-            [(Identities *) [connection rootProxy] update];
+            [(Identities *) [connection rootProxy] reload];
 	    sleep (1);
         }
 	

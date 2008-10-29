@@ -28,6 +28,7 @@
 
 @class SelectIdentityController;
 @class AuthenticationController;
+@class Identities;
 
 @interface IPCClient : NSObject {
     mach_port_t port;
@@ -49,6 +50,7 @@
 @property (readonly, retain) AuthenticationController *authController;
 
 - (void) cleanup;
+- (void) saveIdentityToFavoritesIfSuccessful;
 
 - (kim_error) selectIdentity: (NSDictionary *) info;
 - (kim_error) enterIdentity: (NSDictionary *) info;

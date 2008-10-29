@@ -27,6 +27,7 @@
 #import "SelectIdentityController.h"
 #import "AuthenticationController.h"
 #import "KerberosAgentListener.h"
+#import "Identities.h"
 
 enum krb_agent_client_state {
     ipc_client_state_idle,
@@ -105,11 +106,33 @@ enum krb_agent_client_state {
 
 - (void) cleanup
 {
+    if (![[self.selectController window] isVisible]) {
+        [self saveIdentityToFavoritesIfSuccessful];
+    }
     [self.selectController close];
     [self.authController close];
     self.selectController = nil;
     self.authController = nil;
     self.currentInfo = nil;
+}
+
+- (void) saveIdentityToFavoritesIfSuccessful
+{
+    NSString *identityString = [self.currentInfo valueForKeyPath:@"identity_string"];
+    NSDictionary *options = [self.currentInfo valueForKeyPath:@"options"];
+    
+    Identities *identities = [[Identities alloc] init];
+    Identity *theIdentity = [[Identity alloc] initWithIdentity:identityString 
+                                                       options:options];
+    for (Identity *anIdentity in [identities identities]) {
+        if ([anIdentity isEqual:theIdentity]) {
+            if (!anIdentity.favorite) {
+                anIdentity.favorite = YES;
+                [identities synchronizePreferences];
+            }
+            break;
+        }
+    }
 }
 
 - (void) didCancel
