@@ -100,6 +100,8 @@
 - (IBAction) cancelTicketOptions: (id) sender;
 - (IBAction) saveTicketOptions: (id) sender;
 
+- (IBAction) cancelAuthSheet: (id) sender;
+
 - (void) authSheetDidEnd: (NSWindow *) sheet 
               returnCode: (int) returnCode 
              contextInfo: (void *) contextInfo;

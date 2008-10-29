@@ -514,6 +514,11 @@
     [NSApp endSheet:ticketOptionsSheet];
 }
 
+- (IBAction) cancelAuthSheet: (id) sender
+{
+    [NSApp endSheet:[self window]];
+}
+
 - (void) authSheetDidEnd: (NSWindow *) sheet 
               returnCode: (int) returnCode 
              contextInfo: (void *) contextInfo

@@ -144,6 +144,10 @@ enum krb_agent_client_state {
     [self.currentInfo addEntriesFromDictionary:info];
     self.state = ipc_client_state_select;
     
+    if ([[self.authController window] isVisible]) {
+        [self.authController cancelAuthSheet:nil];
+    }
+    
     [self.selectController setContent:self.currentInfo];
     [self.selectController showWindow:nil];
     
