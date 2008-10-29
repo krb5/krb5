@@ -41,7 +41,6 @@
 
 - (void) dealloc
 {
-    [identityArrayController removeObserver:self forKeyPath:@"selectedObjects"];
     [identityOptionsController removeObserver:self forKeyPath:uses_default_options_keypath];
     [refreshTimer release];
     [identities release];
@@ -87,10 +86,6 @@
                                 forKeyPath:identity_string_keypath
                                    options:NSKeyValueObservingOptionNew
                                    context:NULL];
-    [identityArrayController addObserver:self
-                              forKeyPath:@"selectedObjects"
-                                 options:NSKeyValueObservingOptionNew
-                                 context:NULL];
 }
 
 - (void)  observeValueForKeyPath:(NSString *) keyPath ofObject: (id) object change: (NSDictionary *) change context:(void *) context
@@ -99,10 +94,6 @@
         BOOL enabled = [KIMUtilities validateIdentity:[identityOptionsController valueForKeyPath:identity_string_keypath]];
         [identityOptionsController setValue:[NSNumber numberWithBool:enabled] 
                                  forKeyPath:@"content.canClickOK"];
-    }
-    // clear options on selection change
-    else if (object == identityArrayController && [keyPath isEqualToString:@"selectedObjects"]) {
-        [identityOptionsController setContent:nil];
     }
 }
 
@@ -215,14 +206,6 @@
     [identityOptionsController setContent:anIdentity.options];
     
     [self showOptions:@"edit"];
-}
-
-// ---------------------------------------------------------------------------
-
-- (IBAction) resetOptions: (id) sender
-{
-    Identity *anIdentity = [identityArrayController.selectedObjects lastObject];
-    [identityOptionsController setContent:anIdentity.options];
 }
 
 // ---------------------------------------------------------------------------

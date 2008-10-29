@@ -77,7 +77,6 @@
 - (IBAction) removeFromFavorites: (id) sender;
 
 - (IBAction) editOptions: (id) sender;
-- (IBAction) resetOptions: (id) sender;
 - (IBAction) cancelOptions: (id) sender;
 - (IBAction) doneOptions: (id) sender;
 
