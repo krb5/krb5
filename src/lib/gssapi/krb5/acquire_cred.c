@@ -82,6 +82,7 @@
 
 #if defined(USE_KIM)
 #include <kim/kim.h>
+#include "kim_library_private.h"
 #elif defined(USE_LEASH)
 #ifdef _WIN64
 #define LEASH_DLL "leashw64.dll"
@@ -251,17 +252,36 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
         kim_error err = KIM_NO_ERROR;
         kim_ccache kimccache = NULL;
         kim_identity identity = NULL;
+        kim_credential_state state;
+        krb5_principal desired_princ = (krb5_principal) desired_name;
 
         err = kim_identity_create_from_krb5_principal (&identity,
                                                        context,
-                                                       (krb5_principal) desired_name);
+                                                       desired_princ);
 
         if (!err) {
-            err = kim_ccache_create_new_if_needed (&kimccache,
-                                                   identity,
-                                                   KIM_OPTIONS_DEFAULT);
+            err = kim_ccache_create_from_client_identity (&kimccache, identity);
         }
-
+        
+        if (!err) {
+            err = kim_ccache_get_state (kimccache, &state);
+        }
+        
+        if (!err && state != kim_credentials_state_valid) {
+            if (state == kim_credentials_state_needs_validation) {
+                err = kim_ccache_validate (kimccache, KIM_OPTIONS_DEFAULT);
+            } else {
+                kim_ccache_free (&kimccache);
+                ccache = NULL;
+            }
+        }
+        
+        if (!kimccache && kim_library_allow_automatic_prompting ()) {
+            /* ccache does not already exist, create a new one */
+            err = kim_ccache_create_new (&kimccache, identity, 
+                                         KIM_OPTIONS_DEFAULT);
+        }        
+        
         if (!err) {
             err = kim_ccache_get_krb5_ccache (kimccache, context, &ccache);
         }

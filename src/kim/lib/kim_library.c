@@ -244,6 +244,11 @@ kim_boolean kim_library_allow_automatic_prompting (void)
         kim_debug_printf ("KIM_NEVER_PROMPT is set.");
         allow_automatic_prompting = FALSE;
     }
+    
+    if (allow_automatic_prompting && !kim_os_library_caller_uses_gui ()) {
+        kim_debug_printf ("Caller is not using gui.");
+        allow_automatic_prompting = FALSE;
+    }
 
     if (allow_automatic_prompting) {
         /* Make sure there is at least 1 config file. We don't support DNS 

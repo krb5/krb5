@@ -94,6 +94,28 @@ kim_error kim_os_library_unlock_for_bundle_lookup (void)
 
 /* ------------------------------------------------------------------------ */
 
+kim_boolean kim_os_library_caller_uses_gui (void)
+{
+    kim_boolean caller_uses_gui = 0;
+    
+    /* Check for the HIToolbox (Carbon) or AppKit (Cocoa).  
+     * If either is loaded, we are a GUI app! */
+    CFBundleRef appKitBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.AppKit"));
+    CFBundleRef hiToolBoxBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.HIToolbox"));
+    
+    if (hiToolBoxBundle && CFBundleIsExecutableLoaded (hiToolBoxBundle)) {
+        caller_uses_gui = 1; /* Using Carbon */
+    }
+    
+    if (appKitBundle && CFBundleIsExecutableLoaded (appKitBundle)) {
+        caller_uses_gui = 1; /* Using Cocoa */
+    }    
+    
+    return caller_uses_gui;
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_ui_environment kim_os_library_get_ui_environment (void)
 {
 #ifdef KIM_BUILTIN_UI
@@ -104,21 +126,8 @@ kim_ui_environment kim_os_library_get_ui_environment (void)
                                        NULL, &sattrs) == noErr) && 
                       (sattrs & sessionHasGraphicAccess));
     
-    if (has_gui_access) {
-        /* Check for the HIToolbox (Carbon) or AppKit (Cocoa).  
-         * If either is loaded, we are a GUI app! */
-        CFBundleRef appKitBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.AppKit"));
-        CFBundleRef hiToolBoxBundle = CFBundleGetBundleWithIdentifier (CFSTR ("com.apple.HIToolbox"));
-        
-        if (hiToolBoxBundle && CFBundleIsExecutableLoaded (hiToolBoxBundle)) {
-            /* Using Carbon */
-            return KIM_UI_ENVIRONMENT_GUI;
-        }
-        
-        if (appKitBundle && CFBundleIsExecutableLoaded (appKitBundle)) {
-            /* Using Cocoa */
-            return KIM_UI_ENVIRONMENT_GUI;
-        }
+    if (has_gui_access && kim_os_library_caller_uses_gui ()) {
+        return KIM_UI_ENVIRONMENT_GUI;
     }
     
     {
