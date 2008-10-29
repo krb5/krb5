@@ -223,6 +223,23 @@
                   forKeyPath:accepting_input_keypath];
 }
 
+- (void) clearSensitiveInputs
+{
+    [glueController setValue:@"" 
+                  forKeyPath:prompt_response_keypath];
+}
+
+- (void) clearAllInputs
+{
+    [glueController setValue:@"" 
+                  forKeyPath:old_password_keypath];
+    [glueController setValue:@"" 
+                  forKeyPath:new_password_keypath];
+    [glueController setValue:@"" 
+                  forKeyPath:verify_password_keypath];
+    [self clearSensitiveInputs];
+}
+
 - (void) showEnterIdentity: (NSWindow *) parentWindow
 {
     kim_error err = KIM_NO_ERROR;
@@ -288,6 +305,7 @@
                   forKeyPath:message_keypath];
 
     [self hideSpinny];
+    [self clearAllInputs];
 
     [self swapView:identityView];
 
@@ -301,6 +319,8 @@
     uint32_t type = [[glueController valueForKeyPath:@"content.prompt_type"] unsignedIntegerValue];
     
     [self hideSpinny];
+
+    [self clearSensitiveInputs];
 
     switch (type) {
         case kim_prompt_type_password :
@@ -406,6 +426,10 @@
     [changePasswordBadge setBadgePath:associatedClient.path];
     
     [self hideSpinny];
+    
+    if (![[self window] isVisible]) {
+        [self clearAllInputs];
+    }
     
     [self swapView:changePasswordView];
 
