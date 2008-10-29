@@ -330,6 +330,7 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
             
             /* set counter to zero so we can tell if we got prompted */
             context.prompt_count = 0;
+            context.password_to_save = NULL;
             
             err = krb5_error (credential->context,
                               krb5_get_init_creds_password (credential->context, 
@@ -406,9 +407,18 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
             } else if (prompt_count) {
                 /* User was prompted and might have entered bad info 
                  * so report error and try again. */
+ 
                 err = kim_ui_handle_kim_error (&context, identity, 
                                                kim_ui_error_type_authentication,
                                                err);
+            }
+            
+            if (err == KRB5KRB_AP_ERR_BAD_INTEGRITY || 
+                err == KRB5KDC_ERR_PREAUTH_FAILED ||
+                err == KIM_BAD_PASSWORD_ERR || err == KIM_PREAUTH_FAILED_ERR) {
+                /* if the password could have failed, remove any saved ones
+                 * or the user will get stuck. */
+                kim_os_identity_remove_saved_password (identity);
             }
             
             if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
