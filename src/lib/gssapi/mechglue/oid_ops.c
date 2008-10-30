@@ -219,13 +219,11 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
     const gss_OID_desc * const oid;
     gss_buffer_t	oid_str;
 {
-    char		numstr[128];
     OM_uint32		number;
-    int			numshift;
-    OM_uint32 string_length;
     OM_uint32 i;
     unsigned char	*cp;
     char		*bp;
+    struct k5buf	buf;
 
     if (minor_status != NULL)
 	*minor_status = 0;
@@ -243,60 +241,29 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
 
     /* Decoded according to krb5/gssapi_krb5.c */
 
-    /* First determine the size of the string */
-    string_length = 0;
-    number = 0;
-    numshift = 0;
     cp = (unsigned char *) oid->elements;
     number = (unsigned long) cp[0];
-    snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number/40);
-    string_length += strlen(numstr);
-    snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number%40);
-    string_length += strlen(numstr);
+    krb5int_buf_init_dynamic(&buf);
+    krb5int_buf_add_fmt(&buf, "{ %lu %lu ", (unsigned long)number/40,
+			(unsigned long)number%40);
+    number = 0;
+    cp = (unsigned char *) oid->elements;
     for (i=1; i<oid->length; i++) {
-	if ((OM_uint32) (numshift+7) < (sizeof (OM_uint32)*8)) {/* XXX */
-	    number = (number << 7) | (cp[i] & 0x7f);
-	    numshift += 7;
-	}
-	else {
-	    return(GSS_S_FAILURE);
-	}
+	number = (number << 7) | (cp[i] & 0x7f);
 	if ((cp[i] & 0x80) == 0) {
-	    snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number);
-	    string_length += strlen(numstr);
+	    krb5int_buf_add_fmt(&buf, "%lu ", (unsigned long)number);
 	    number = 0;
-	    numshift = 0;
 	}
     }
-    /*
-     * If we get here, we've calculated the length of "n n n ... n ".  Add 4
-     * here for "{ " and "}\0".
-     */
-    string_length += 4;
-    if ((bp = (char *) malloc(string_length))) {
-	strcpy(bp, "{ ");
-	number = (OM_uint32) cp[0];
-	snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number/40);
-	strcat(bp, numstr);
-	snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number%40);
-	strcat(bp, numstr);
-	number = 0;
-	cp = (unsigned char *) oid->elements;
-	for (i=1; i<oid->length; i++) {
-	    number = (number << 7) | (cp[i] & 0x7f);
-	    if ((cp[i] & 0x80) == 0) {
-		snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number);
-		strcat(bp, numstr);
-		number = 0;
-	    }
-	}
-	strcat(bp, "}");
-	oid_str->length = strlen(bp)+1;
-	oid_str->value = (void *) bp;
-	return(GSS_S_COMPLETE);
+    krb5int_buf_add(&buf, "}");
+    bp = krb5int_buf_cstr(&buf);
+    if (bp == NULL) {
+	*minor_status = ENOMEM;
+	return(GSS_S_FAILURE);
     }
-    *minor_status = ENOMEM;
-    return(GSS_S_FAILURE);
+    oid_str->length = krb5int_buf_len(&buf)+1;
+    oid_str->value = (void *) bp;
+    return(GSS_S_COMPLETE);
 }
 
 OM_uint32

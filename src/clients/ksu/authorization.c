@@ -498,13 +498,9 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
     int i = 0;
     krb5_boolean retbool= FALSE;
     int j =0;
-    char * err;
-    unsigned int max_ln=0;
-    unsigned int tln=0;
+    struct k5buf buf;
 
     while(fcmd_arr[i]){
-	tln = strlen(fcmd_arr[i]);
-	if ( tln > max_ln) max_ln = tln;
 	if (!stat (fcmd_arr[i], &st_temp )){
 	    *cmd_out = xstrdup(fcmd_arr[i]);
 	    retbool = TRUE;
@@ -514,15 +510,16 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
     }
 
     if (retbool == FALSE ){
-	err = (char *) xcalloc((80 + (max_ln+2)*i) ,sizeof(char));
-	strcpy(err,"Error: not found -> ");
-	for(j= 0; j < i; j ++){
-	    strcat(err, " ");
-	    strcat(err, fcmd_arr[j]);
-	    strcat(err, " ");
+	krb5int_buf_init_dynamic(&buf);
+	krb5int_buf_add(&buf, "Error: not found -> ");
+	for(j= 0; j < i; j ++)
+	    krb5int_buf_add_fmt(&buf, " %s ", fcmd_arr[j]);
+	krb5int_buf_add(&buf, "\n");
+	*err_out = krb5int_buf_cstr(&buf);
+	if (*err_out == NULL) {
+	    perror(prog_name);
+	    exit(1);
 	}
-	strcat(err, "\n");
-	*err_out = err;
     }
 
 

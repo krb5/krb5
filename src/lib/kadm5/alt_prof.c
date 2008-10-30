@@ -73,42 +73,28 @@ krb5_aprof_init(fname, envname, acontextp)
     krb5_error_code	kret;
     profile_t		profile;
     const char *kdc_config;
-    size_t krb5_config_len, kdc_config_len;
     char *profile_path;
     char **filenames;
     int i;
+    struct k5buf buf;
 
     kret = krb5_get_default_config_files (&filenames);
     if (kret)
 	return kret;
-    krb5_config_len = 0;
-    for (i = 0; filenames[i] != NULL; i++)
-	krb5_config_len += strlen(filenames[i]) + 1;
-    if (i > 0)
-	krb5_config_len--;
-    if (envname == NULL
-	|| (kdc_config = getenv(envname)) == NULL)
+    if (envname == NULL || (kdc_config = getenv(envname)) == NULL)
 	kdc_config = fname;
-    if (kdc_config == NULL)
-	kdc_config_len = 0;
-    else
-	kdc_config_len = strlen(kdc_config);
-    profile_path = malloc(2 + krb5_config_len + kdc_config_len);
-    if (profile_path == NULL) {
-	krb5_free_config_files(filenames);
-	return ENOMEM;
+    krb5int_buf_init_dynamic(&buf);
+    if (kdc_config)
+	krb5int_buf_add(&buf, kdc_config);
+    for (i = 0; filenames[i] != NULL; i++) {
+	if (krb5int_buf_len(&buf) > 0)
+	    krb5int_buf_add(&buf, ":");
+	krb5int_buf_add(&buf, filenames[i]);
     }
-    if (kdc_config_len)
-	strcpy(profile_path, kdc_config);
-    else
-	profile_path[0] = 0;
-    if (krb5_config_len)
-	for (i = 0; filenames[i] != NULL; i++) {
-	    if (kdc_config_len || i)
-		strcat(profile_path, ":");
-	    strcat(profile_path, filenames[i]);
-	}
     krb5_free_config_files(filenames);
+    profile_path = krb5int_buf_cstr(&buf);
+    if (profile_path == NULL)
+	return ENOMEM;
     profile = (profile_t) NULL;
     kret = profile_init_path(profile_path, &profile);
     free(profile_path);

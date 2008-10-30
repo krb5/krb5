@@ -173,45 +173,29 @@ krb5_flags_to_string(flags, sep, buffer, buflen)
     int			i;
     krb5_flags		pflags;
     const char		*sepstring;
-    char		*op;
-    int			initial;
-    krb5_error_code	retval;
+    struct k5buf	buf;
 
-    retval = 0;
-    op = buffer;
     pflags = 0;
-    initial = 1;
     sepstring = (sep) ? sep : flags_default_sep;
+    krb5int_buf_init_fixed(&buf, buffer, buflen);
     /* Blast through the table matching all we can */
     for (i=0; i<flags_table_nents; i++) {
 	if (flags & flags_table[i].fl_flags) {
-	    /* Found a match, see if it'll fit into the output buffer */
-	    if ((op+strlen(flags_table[i].fl_output)+strlen(sepstring)) <
-		(buffer + buflen)) {
-		if (!initial) {
-		    strcpy(op, sep);
-		    op += strlen(sep);
-		}
-		initial = 0;
-		strcpy(op, flags_table[i].fl_output);
-		op += strlen(flags_table[i].fl_output);
-	    }
-	    else {
-		retval = ENOMEM;
-		break;
-	    }
+	    if (krb5int_buf_len(&buf) > 0)
+		krb5int_buf_add(&buf, sepstring);
+	    krb5int_buf_add(&buf, flags_table[i].fl_output);
 	    /* Keep track of what we matched */
 	    pflags |= flags_table[i].fl_flags;
 	}
     }
-    if (!retval) {
-	/* See if there's any leftovers */
-	if (flags & ~pflags)
-	    retval = EINVAL;
-	else if (initial)
-	    *buffer = '\0';
-    }
-    return(retval);
+    if (krb5int_buf_cstr(&buf) == NULL)
+	return(ENOMEM);
+
+    /* See if there's any leftovers */
+    if (flags & ~pflags)
+	return(EINVAL);
+
+    return(0);
 }
 
 krb5_error_code

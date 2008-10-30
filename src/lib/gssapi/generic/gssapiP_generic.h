@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include "k5-platform.h"
+#include "k5-buf.h"
 typedef UINT64_TYPE gssint_uint64;
 
 /** helper macros **/

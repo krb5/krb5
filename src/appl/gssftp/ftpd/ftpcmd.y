@@ -66,6 +66,7 @@ static char sccsid[] = "@(#)ftpcmd.y	5.24 (Berkeley) 2/25/91";
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <k5-buf.h>
 
 #include "ftpd_var.h"
 
@@ -1470,6 +1471,7 @@ help(ctab, s)
 	if (s == 0) {
 		register int i, j, w;
 		int columns, lines;
+		struct k5buf buf;
 
 		lreply(214, "The following %scommands are recognized %s.",
 		    ftype, "(* =>'s unimplemented)");
@@ -1478,16 +1480,18 @@ help(ctab, s)
 			columns = 1;
 		lines = (NCMDS + columns - 1) / columns;
 		for (i = 0; i < lines; i++) {
-			strcpy(str, "   ");
+			krb5int_buf_init_fixed(&buf, str, sizeof(str));
+			krb5int_buf_add(&buf, "   ");
 			for (j = 0; j < columns; j++) {
 				c = ctab + j * lines + i;
-				sprintf(&str[strlen(str)], "%s%c", c->name,
-					c->implemented ? ' ' : '*');
+				krb5int_buf_add_fmt(&buf, "%s%c", c->name,
+						    c->implemented ? ' '
+						    : '*');
 				if (c + lines >= &ctab[NCMDS])
 					break;
 				w = strlen(c->name) + 1;
 				while (w < width) {
-					strcat(str, " ");
+					krb5int_buf_add(&buf, " ");
 					w++;
 				}
 			}

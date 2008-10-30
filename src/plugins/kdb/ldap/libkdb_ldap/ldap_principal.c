@@ -452,62 +452,25 @@ krb5_ldap_parse_principal_name(i_princ_name, o_princ_name)
     char              *i_princ_name;
     char              **o_princ_name;
 {
-    char *tmp_princ_name = NULL, *princ_name = NULL, *at_rlm_name = NULL;
-    int l = 0, m = 0, tmp_princ_name_len = 0, princ_name_len = 0, at_count = 0;
-    krb5_error_code st = 0;
+    const char *at_rlm_name, *p;
+    struct k5buf buf;
 
     at_rlm_name = strrchr(i_princ_name, '@');
-
     if (!at_rlm_name) {
 	*o_princ_name = strdup(i_princ_name);
-	if (!o_princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
-	}
+	if (!o_princ_name)
+	    return ENOMEM;
     } else {
-	tmp_princ_name_len = at_rlm_name - i_princ_name;
-
-	tmp_princ_name = (char *) malloc ((unsigned) tmp_princ_name_len + 1);
-	if (!tmp_princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
+	krb5int_buf_init_dynamic(&buf);
+	for (p = i_princ_name; p < at_rlm_name; p++) {
+	    if (*p == '@')
+		krb5int_buf_add(&buf, "\\");
+	    krb5int_buf_add_len(&buf, p, 1);
 	}
-	memset(tmp_princ_name, 0, (unsigned) tmp_princ_name_len + 1);
-	memcpy(tmp_princ_name, i_princ_name, (unsigned) tmp_princ_name_len);
-
-	l = 0;
-	while (tmp_princ_name[l]) {
-	    if (tmp_princ_name[l++] == '@')
-		at_count++;
-	}
-
-	princ_name_len = strlen(i_princ_name) + at_count + 1;
-	princ_name = (char *) malloc ((unsigned) princ_name_len);
-	if (!princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
-	}
-	memset(princ_name, 0, (unsigned) princ_name_len);
-
-	l = 0;
-	m = 0;
-	while (tmp_princ_name[l]) {
-	    if (tmp_princ_name[l] == '@') {
-		princ_name[m++]='\\';
-	    }
-	    princ_name[m++]=tmp_princ_name[l++];
-	}
-	strcat(princ_name, at_rlm_name);
-
-	*o_princ_name = princ_name;
+	krb5int_buf_add(&buf, at_rlm_name);
+	*o_princ_name = krb5int_buf_cstr(&buf);
+	if (!*o_princ_name)
+	    return ENOMEM;
     }
-
-cleanup:
-
-    if (tmp_princ_name) {
-	free(tmp_princ_name);
-	tmp_princ_name = NULL;
-    }
-
-    return st;
+    return 0;
 }
