@@ -480,7 +480,8 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints  in_selection_hi
                 
                 /* reenter select_identity so just forget this identity
                  * even if we got an error */
-                if (err == KIM_USER_CANCELED_ERR) { err = KIM_NO_ERROR; }
+                if (err == KIM_USER_CANCELED_ERR || 
+                    err == KIM_DUPLICATE_UI_REQUEST_ERR) { err = KIM_NO_ERROR; }
                 kim_identity_free (&identity);
             }
                 

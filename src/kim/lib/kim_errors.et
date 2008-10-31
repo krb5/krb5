@@ -52,6 +52,7 @@ error_code KIM_CAPS_LOCK_ERR,                     "Password Incorrect (check you
 error_code KIM_USER_CANCELED_ERR,                 "The user cancelled the operation"
 error_code KIM_NO_SERVER_ERR,                     "KerberosAgent is not responding"
 error_code KIM_NO_UI_ERR,                         "Unable to display a user interface from this environment"
+error_code KIM_DUPLICATE_UI_REQUEST_ERR,          "UI just handled this request."
 
 index 100
 # Preferences Errors

@@ -309,7 +309,11 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                 
                 /* reenter enter_identity so just forget this identity
                  * even if we got an error */
-                if (err == KIM_USER_CANCELED_ERR) { err = KIM_NO_ERROR; }
+                if (err == KIM_USER_CANCELED_ERR || 
+                    err == KIM_DUPLICATE_UI_REQUEST_ERR) { 
+                    err = KIM_NO_ERROR; 
+                }
+                
                 kim_identity_free (&identity);
             }
             
@@ -397,12 +401,31 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                 kim_string_free (&new_password);
             }
             
-            if (!err || err == KIM_USER_CANCELED_ERR) {
+            if (!err || err == KIM_USER_CANCELED_ERR || 
+                        err == KIM_DUPLICATE_UI_REQUEST_ERR) {
                 /* new creds obtained or the user gave up */
                 done_with_credentials = 1;
                 
-                /* remember identity and options if the user wanted to */
-                kim_credential_remember_prefs (identity, options);
+                if (!err) {
+                    /* remember identity and options if the user wanted to */
+                    kim_credential_remember_prefs (identity, options);
+                }
+                
+                if (err == KIM_DUPLICATE_UI_REQUEST_ERR) { 
+                    kim_ccache ccache = NULL;
+                    /* credential for this identity was obtained, but via a different 
+                     * dialog.  Find it.  */
+                    
+                    err = kim_ccache_create_from_client_identity (&ccache, 
+                                                                  identity);
+                    
+                    if (!err) {
+                        err = kim_ccache_get_valid_credential (ccache, 
+                                                               &credential);
+                    }
+                    
+                    kim_ccache_free (&ccache);
+                }                
                 
             } else if (prompt_count) {
                 /* User was prompted and might have entered bad info 

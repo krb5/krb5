@@ -707,7 +707,8 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                        rejected_message, 
                                        rejected_description);
             
-        } else if (err && err != KIM_USER_CANCELED_ERR) {
+        } else if (err && err != KIM_USER_CANCELED_ERR && 
+                          err != KIM_DUPLICATE_UI_REQUEST_ERR) {
             /* New creds failed, report error to user.
              * Overwrite error so we loop and let the user try again.
              * The user always gets prompted so we always loop. */
@@ -738,6 +739,8 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
                 
                 kim_string_free (&saved_password);
             }
+
+            if (err == KIM_DUPLICATE_UI_REQUEST_ERR) { err = KIM_NO_ERROR; }
         }
         
         kim_string_free (&rejected_message);
