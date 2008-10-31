@@ -72,8 +72,10 @@ static int ensure_space(struct k5buf *buf, size_t len)
     return 1;
 
  error_exit:
-    if (buf->buftype == DYNAMIC)
+    if (buf->buftype == DYNAMIC) {
         free(buf->data);
+        buf->data = NULL;
+    }
     buf->buftype = ERROR;
     return 0;
 }
@@ -206,4 +208,6 @@ void krb5int_free_buf(struct k5buf *buf)
         return;
     assert(buf->buftype == DYNAMIC);
     free(buf->data);
+    buf->data = NULL;
+    buf->buftype = ERROR;
 }
