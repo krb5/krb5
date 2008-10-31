@@ -41,7 +41,7 @@
 
 - (void) dealloc
 {
-    [identityOptionsController removeObserver:self forKeyPath:uses_default_options_keypath];
+    [identityOptionsController removeObserver:self forKeyPath:identity_string_keypath];
     [refreshTimer release];
     [identities release];
     [super dealloc];
@@ -94,6 +94,9 @@
         BOOL enabled = [KIMUtilities validateIdentity:[identityOptionsController valueForKeyPath:identity_string_keypath]];
         [identityOptionsController setValue:[NSNumber numberWithBool:enabled] 
                                  forKeyPath:@"content.canClickOK"];
+    }
+    else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 

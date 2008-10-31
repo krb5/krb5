@@ -917,6 +917,7 @@
 					<string>usesDefaultTicketOptions</string>
 				</object>
 				<bool key="NSEditable">YES</bool>
+				<bool key="NSAutomaticallyPreparesContent">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
 			</object>
 			<object class="NSObjectController" id="252123121">
@@ -937,6 +938,7 @@
 					<string>favorite</string>
 					<string>identities</string>
 					<string>minRenewableLifetime</string>
+					<string>content.identities</string>
 				</object>
 				<string key="NSObjectClassName">Identities</string>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -1289,22 +1291,6 @@
 						<reference key="destination" ref="778570067"/>
 					</object>
 					<int key="connectionID">300442</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">contentArray: selection.identities</string>
-						<reference key="source" ref="333357907"/>
-						<reference key="destination" ref="1031761104"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="333357907"/>
-							<reference key="NSDestination" ref="1031761104"/>
-							<string key="NSLabel">contentArray: selection.identities</string>
-							<string key="NSBinding">contentArray</string>
-							<string key="NSKeyPath">selection.identities</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">300444</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -1705,22 +1691,6 @@
 					<int key="connectionID">300509</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.canClickOK</string>
-						<reference key="source" ref="932240937"/>
-						<reference key="destination" ref="196152721"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="932240937"/>
-							<reference key="NSDestination" ref="196152721"/>
-							<string key="NSLabel">enabled: selection.canClickOK</string>
-							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.canClickOK</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">300510</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">identityTableScrollView</string>
 						<reference key="source" ref="262677138"/>
@@ -1899,6 +1869,57 @@
 						<reference key="destination" ref="46228658"/>
 					</object>
 					<int key="connectionID">300536</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">contentArray: content.identities</string>
+						<reference key="source" ref="333357907"/>
+						<reference key="destination" ref="1031761104"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="333357907"/>
+							<reference key="NSDestination" ref="1031761104"/>
+							<string key="NSLabel">contentArray: content.identities</string>
+							<string key="NSBinding">contentArray</string>
+							<string key="NSKeyPath">content.identities</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300539</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.canClickOK</string>
+						<reference key="source" ref="932240937"/>
+						<reference key="destination" ref="196152721"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="932240937"/>
+							<reference key="NSDestination" ref="196152721"/>
+							<string key="NSLabel">enabled: selection.canClickOK</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.canClickOK</string>
+							<object class="NSDictionary" key="NSOptions">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMutableArray" key="dict.sortedKeys">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<string>NSMultipleValuesPlaceholder</string>
+									<string>NSNoSelectionPlaceholder</string>
+									<string>NSNotApplicablePlaceholder</string>
+									<string>NSNullPlaceholder</string>
+									<string>NSRaisesForNotApplicableKeys</string>
+								</object>
+								<object class="NSMutableArray" key="dict.values">
+									<bool key="EncodedWithXMLCoder">YES</bool>
+									<integer value="0" id="8"/>
+									<reference ref="8"/>
+									<reference ref="8"/>
+									<reference ref="8"/>
+									<integer value="0"/>
+								</object>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">300546</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2665,7 +2686,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>{{495, 457}, {500, 273}}</string>
 					<reference ref="9"/>
-					<integer value="0"/>
+					<reference ref="75542549"/>
 					<string>{{503, 256}, {419, 465}}</string>
 					<reference ref="9"/>
 					<reference ref="9"/>
@@ -2697,7 +2718,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">300536</int>
+			<int key="maxID">300546</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2747,14 +2768,12 @@
 							<string>editOptions:</string>
 							<string>newIdentity:</string>
 							<string>removeFromFavorites:</string>
-							<string>resetOptions:</string>
 							<string>select:</string>
 							<string>sliderDidChange:</string>
 							<string>toggleOptionsVisibility:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>

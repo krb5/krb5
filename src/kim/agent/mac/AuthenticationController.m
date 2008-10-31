@@ -138,6 +138,9 @@
             [glueController setValue:[NSNumber numberWithBool:valid] 
                           forKeyPath:change_password_ok_keypath];
         }
+        else {
+            [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        }
     }
     else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
