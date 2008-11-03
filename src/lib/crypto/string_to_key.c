@@ -93,6 +93,8 @@ krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
     if (ret) {
 	memset(key->contents, 0, keylength);
 	free(key->contents);
+	key->length = 0;
+	key->contents = NULL;
     }
 
     return(ret);
