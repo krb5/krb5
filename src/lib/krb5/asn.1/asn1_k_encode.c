@@ -155,7 +155,7 @@ asn1_encode_krb5_flags_at(asn1buf *buf, const krb5_flags *val,
                           unsigned int *retlen)
 {
     unsigned char cbuf[4];
-    store_32_be(*val, cbuf);
+    store_32_be((krb5_ui_4) *val, cbuf);
     return asn1_encode_bitstring(buf, 4, cbuf, retlen);
 }
 DEFFNXTYPE(krb5_flags, krb5_flags, asn1_encode_krb5_flags_at);

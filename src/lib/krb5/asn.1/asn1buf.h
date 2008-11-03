@@ -13,16 +13,7 @@ typedef struct code_buffer_rep {
 
 /**************** Private Procedures ****************/
 
-int asn1buf_size
-        (const asn1buf *buf);
-/* requires  *buf has been created and not destroyed
-   effects   Returns the total size
-        (in octets) of buf's octet buffer. */
-#define asn1buf_size(buf) \
-  (((buf) == NULL || (buf)->base == NULL) \
-   ? 0 \
-   : ((buf)->bound - (buf)->base + 1))
-
+#if ((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS)) && !defined(CONFIG_SMALL)
 unsigned int asn1buf_free
         (const asn1buf *buf);
 /* requires  *buf is allocated
@@ -40,13 +31,10 @@ asn1_error_code asn1buf_ensure_space
    effects  If buf has less than amount octets of free space, then it is
             expanded to have at least amount octets of free space.
             Returns ENOMEM memory is exhausted. */
-#ifndef CONFIG_SMALL
 #define asn1buf_ensure_space(buf,amount) \
   ((asn1buf_free(buf) < (amount)) \
    ? (asn1buf_expand((buf), (amount)-asn1buf_free(buf))) \
    : 0)
-#endif
-
 
 asn1_error_code asn1buf_expand
         (asn1buf *buf, unsigned int inc);
@@ -54,6 +42,7 @@ asn1_error_code asn1buf_expand
    modifies  *buf
    effects   Expands *buf by allocating space for inc more octets.
              Returns ENOMEM if memory is exhausted. */
+#endif
 
 int asn1buf_len
         (const asn1buf *buf);
