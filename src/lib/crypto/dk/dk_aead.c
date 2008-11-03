@@ -29,6 +29,8 @@
 #include "dk.h"
 #include "aead.h"
 
+#define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
+
 /* AEAD */
 
 static krb5_error_code
@@ -40,8 +42,6 @@ krb5int_dk_crypto_length(const struct krb5_aead_provider *aead,
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
-	*length = 8;
-	break;
     case KRB5_CRYPTO_TYPE_PADDING:
 	*length = enc->block_size;
 	break;
@@ -57,10 +57,284 @@ krb5int_dk_crypto_length(const struct krb5_aead_provider *aead,
     return 0;
 }
 
+static krb5_error_code
+krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
+		       const struct krb5_enc_provider *enc,
+		       const struct krb5_hash_provider *hash,
+		       const krb5_keyblock *key,
+		       krb5_keyusage usage,
+		       const krb5_data *ivec,
+		       krb5_crypto_iov *data,
+		       size_t num_data)
+{
+    krb5_error_code ret;
+    unsigned char constantdata[K5CLENGTH];
+    krb5_data d1, d2;
+    krb5_crypto_iov *header, *trailer;
+    krb5_keyblock ke, ki;
+    size_t i;
+    size_t blocksize = 0; /* careful, this is enc block size not confounder len */
+    size_t plainlen = 0;
+    size_t hmacsize = 0;
+    unsigned char *cksum = NULL;
+
+    ke.contents = ki.contents = NULL;
+    ke.length = ki.length = 0;
+
+    /* E(Confounder | Plaintext | Pad) | Checksum */
+
+    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING, &blocksize);
+    if (ret != 0)
+	return ret;
+
+    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER, &hmacsize);
+    if (ret != 0)
+	return ret;
+
+    for (i = 0; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+
+	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
+	    iov->flags == KRB5_CRYPTO_TYPE_PADDING)
+	    plainlen += iov->data.length;
+    }
+
+    /* Check that the input data is correctly padded */
+
+    if (blocksize != 0 &&
+        plainlen % blocksize != 0) {
+	return KRB5_BAD_MSIZE;
+    }
+
+    /* Validate header and trailer lengths. */
+
+    header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
+    if (header == NULL || header->data.length < enc->block_size)
+	return KRB5_BAD_MSIZE;
+
+    trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
+    if (trailer == NULL || trailer->data.length < hash->hashsize)
+	return KRB5_BAD_MSIZE;
+
+    ke.contents = malloc(enc->keylength);
+    if (ke.contents == NULL) {
+	ret = ENOMEM;
+	goto cleanup;
+    }
+    ki.contents = malloc(enc->keylength);
+    if (ki.contents == NULL) {
+	ret = ENOMEM;
+	goto cleanup;
+    }
+    cksum = malloc(hash->hashsize);
+    if (cksum == NULL) {
+	ret = ENOMEM;
+	goto cleanup;
+    }
+
+    /* derive the keys */
+
+    d1.data = (char *)constantdata;
+    d1.length = K5CLENGTH;
+
+    d1.data[0] = (usage >> 24) & 0xFF;
+    d1.data[1] = (usage >> 16) & 0xFF;
+    d1.data[2] = (usage >> 8 ) & 0xFF;
+    d1.data[3] = (usage      ) & 0xFF;
+
+    d1.data[4] = 0xAA;
+
+    ret = krb5_derive_key(enc, key, &ke, &d1);
+    if (ret != 0)
+	goto cleanup;
+
+    d1.data[4] = 0x55;
+
+    ret = krb5_derive_key(enc, key, &ki, &d1);
+    if (ret != 0)
+	goto cleanup;
+
+    /* put together the confounder */
+
+    header->data.length = enc->block_size;
+
+    ret = krb5_c_random_make_octets(/* XXX */ 0, &header->data);
+    if (ret != 0)
+	goto cleanup;
+
+    /* encrypt the plaintext (header | data | padding) */
+    /* note that encrypt_iov by design will update the ivec itself */
+    ret = enc->encrypt_iov(&ke, ivec, data, num_data);
+    if (ret != 0)
+	goto cleanup;
+
+    /* hash the plaintext */
+    d2.length = hash->hashsize;
+    d2.data = (char *)cksum;
+
+    ret = krb5_hmac_iov(hash, &ki, data, num_data, &d2);
+    if (ret != 0)
+	goto cleanup;
+
+    /* possibly truncate the hash */
+    assert(hmacsize <= d2.length);
+
+    memcpy(trailer->data.data, cksum, hmacsize);
+    trailer->data.length = hmacsize;
+
+cleanup:
+    if (ke.contents != NULL) {
+	memset(ke.contents, 0, ke.length);
+	free(ke.contents);
+    }
+    if (ki.contents != NULL) {
+	memset(ki.contents, 0, ki.length);
+	free(ki.contents);
+    }
+    if (cksum != NULL) {
+	free(cksum);
+    }
+
+    return ret;
+}
+
+static krb5_error_code
+krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
+		       const struct krb5_enc_provider *enc,
+		       const struct krb5_hash_provider *hash,
+		       const krb5_keyblock *key,
+		       krb5_keyusage usage,
+		       const krb5_data *ivec,
+		       krb5_crypto_iov *data,
+		       size_t num_data)
+{
+    krb5_error_code ret;
+    unsigned char constantdata[K5CLENGTH];
+    krb5_data d1;
+    krb5_crypto_iov *header, *trailer;
+    krb5_keyblock ke, ki;
+    size_t i;
+    size_t blocksize = 0; /* careful, this is enc block size not confounder len */
+    size_t plainlen = 0;
+    size_t hmacsize = 0;
+    unsigned char *cksum = NULL;
+
+    ke.contents = ki.contents = NULL;
+    ke.length = ki.length = 0;
+
+    /* E(Confounder | Plaintext | Pad) | Checksum */
+
+    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING, &blocksize);
+    if (ret != 0)
+	return ret;
+
+    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER, &hmacsize);
+    if (ret != 0)
+	return ret;
+
+    for (i = 0; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+
+	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
+	    iov->flags == KRB5_CRYPTO_TYPE_PADDING)
+	    plainlen += iov->data.length;
+    }
+
+    /* Check that the input data is correctly padded */
+
+    if (blocksize != 0 &&
+        plainlen % blocksize != 0) {
+	return KRB5_BAD_MSIZE;
+    }
+
+    /* Validate header and trailer lengths. */
+
+    header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
+    if (header == NULL || header->data.length != enc->block_size)
+	return KRB5_BAD_MSIZE;
+
+    trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
+    if (trailer == NULL || trailer->data.length != hmacsize)
+	return KRB5_BAD_MSIZE;
+
+    ke.contents = malloc(enc->keylength);
+    if (ke.contents == NULL) {
+	ret = ENOMEM;
+	goto cleanup;
+    }
+    ki.contents = malloc(enc->keylength);
+    if (ki.contents == NULL) {
+	ret = ENOMEM;
+	goto cleanup;
+    }
+    cksum = (unsigned char *)malloc(hmacsize);
+    if (cksum == NULL) {
+	ret = ENOMEM;
+	goto cleanup;
+    }
+
+    /* derive the keys */
+
+    d1.data = (char *)constantdata;
+    d1.length = K5CLENGTH;
+
+    d1.data[0] = (usage >> 24) & 0xFF;
+    d1.data[1] = (usage >> 16) & 0xFF;
+    d1.data[2] = (usage >> 8 ) & 0xFF;
+    d1.data[3] = (usage      ) & 0xFF;
+
+    d1.data[4] = 0xAA;
+
+    ret = krb5_derive_key(enc, key, &ke, &d1);
+    if (ret != 0)
+	goto cleanup;
+
+    d1.data[4] = 0x55;
+
+    ret = krb5_derive_key(enc, key, &ki, &d1);
+    if (ret != 0)
+	goto cleanup;
+
+    /* decrypt the plaintext (header | data | padding) */
+    /* note that decrypt_iov by design will update the ivec itself */
+    ret = enc->decrypt_iov(&ke, ivec, data, num_data);
+    if (ret != 0)
+	goto cleanup;
+
+    /* verify the hash */
+    d1.length = hash->hashsize; /* non-truncated length */
+    d1.data = (char *)cksum;
+
+    ret = krb5_hmac_iov(hash, &ki, data, num_data, &d1);
+    if (ret != 0)
+	goto cleanup;
+
+    /* just compare the possibly truncated length */
+    if (memcmp(cksum, trailer->data.data, hmacsize) != 0) {
+	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+	goto cleanup;
+    }
+
+cleanup:
+    if (ke.contents != NULL) {
+	memset(ke.contents, 0, ke.length);
+	free(ke.contents);
+    }
+    if (ki.contents != NULL) {
+	memset(ki.contents, 0, ki.length);
+	free(ki.contents);
+    }
+    if (cksum != NULL) {
+	free(cksum);
+    }
+
+    return ret;
+}
+
 const struct krb5_aead_provider krb5int_aead_dk = {
     krb5int_dk_crypto_length,
-    NULL,
-    NULL
+    krb5int_dk_encrypt_iov,
+    krb5int_dk_decrypt_iov
 };
 
 static krb5_error_code
@@ -78,6 +352,8 @@ krb5int_aes_crypto_length(const struct krb5_aead_provider *aead,
 	*length = 0;
 	break;
     case KRB5_CRYPTO_TYPE_TRAILER:
+	*length = 96 / 8;
+	break;
     case KRB5_CRYPTO_TYPE_CHECKSUM:
 	*length = hash->hashsize;
 	break;
@@ -91,7 +367,7 @@ krb5int_aes_crypto_length(const struct krb5_aead_provider *aead,
 
 const struct krb5_aead_provider krb5int_aead_aes = {
     krb5int_aes_crypto_length,
-    NULL,
-    NULL
+    krb5int_dk_encrypt_iov,
+    krb5int_dk_decrypt_iov
 };
 

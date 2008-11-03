@@ -198,7 +198,8 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
     for (i = 0; i < num_data; i++) {
 	krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
+	if (iov->flags == KRB5_CRYPTO_TYPE_HEADER ||
+	    iov->flags == KRB5_CRYPTO_TYPE_DATA ||
 	    iov->flags == KRB5_CRYPTO_TYPE_PADDING) {
 	    k5_arcfour_crypt(arcfour_ctx, (unsigned char *)iov->data.data,
 			     (const unsigned char *)iov->data.data, iov->data.length);
