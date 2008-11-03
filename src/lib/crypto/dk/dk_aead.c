@@ -113,7 +113,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
 	return KRB5_BAD_MSIZE;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || trailer->data.length < hash->hashsize)
+    if (trailer == NULL || trailer->data.length < hmacsize)
 	return KRB5_BAD_MSIZE;
 
     ke.contents = malloc(enc->keylength);
@@ -154,17 +154,18 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    /* put together the confounder */
+    /* generate confounder */
 
     header->data.length = enc->block_size;
 
-    ret = krb5_c_random_make_octets(/* XXX */ 0, &header->data);
+    ret = krb5_c_random_make_octets(/* XXX */ NULL, &header->data);
     if (ret != 0)
 	goto cleanup;
 
     /* encrypt the plaintext (header | data | padding) */
-    /* note that encrypt_iov by design will update the ivec itself */
-    ret = enc->encrypt_iov(&ke, ivec, data, num_data);
+    assert(enc->encrypt_iov != NULL);
+
+    ret = enc->encrypt_iov(&ke, ivec, data, num_data); /* will update ivec */
     if (ret != 0)
 	goto cleanup;
 
@@ -247,7 +248,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
 	return KRB5_BAD_MSIZE;
     }
 
-    /* Validate header and trailer lengths. */
+    /* Validate header and trailer lengths */
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
     if (header == NULL || header->data.length != enc->block_size)
@@ -296,8 +297,9 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
 
     /* decrypt the plaintext (header | data | padding) */
-    /* note that decrypt_iov by design will update the ivec itself */
-    ret = enc->decrypt_iov(&ke, ivec, data, num_data);
+    assert(enc->decrypt_iov != NULL);
+
+    ret = enc->decrypt_iov(&ke, ivec, data, num_data); /* will update ivec */
     if (ret != 0)
 	goto cleanup;
 
@@ -309,7 +311,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    /* just compare the possibly truncated length */
+    /* compare only the possibly truncated length */
     if (memcmp(cksum, trailer->data.data, hmacsize) != 0) {
 	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	goto cleanup;
