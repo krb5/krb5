@@ -4,8 +4,6 @@
 #define CacheCollectionDidChangeNotification @"CacheCollectionDidChange"
 #endif
 
-#define BIND_8_COMPAT
-
 #include <Kerberos/Kerberos.h>
 #include <Kerberos/KerberosLoginPrivate.h>
 #include <Kerberos/kim.h>
