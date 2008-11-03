@@ -33,3 +33,11 @@ krb5int_c_locate_iov(krb5_crypto_iov *data,
 		     size_t num_data,
 		     krb5_cryptotype type);
 
+krb5_error_code KRB5_CALLCONV
+krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
+			    const krb5_keyblock *key,
+			    krb5_keyusage usage,
+			    const krb5_crypto_iov *data,
+			    size_t num_data,
+			    krb5_data *cksum_data);
+

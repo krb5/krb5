@@ -25,15 +25,69 @@
  */
 
 #include "k5-int.h"
-#include "etypes.h"
+#include "cksumtypes.h"
+#include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_verify_checksum_iov(krb5_context context, 
+			   krb5_cksumtype checksum_type,
 			   const krb5_keyblock *key,
 			   krb5_keyusage usage,
 			   const krb5_crypto_iov *data,
 			   size_t num_data,
 			   krb5_boolean *valid)
 {
-}
+    unsigned int i;
+    size_t hashsize;
+    krb5_error_code ret;
+    krb5_data indata;
+    krb5_data computed;
+    krb5_crypto_iov *checksum;
 
+    for (i=0; i<krb5_cksumtypes_length; i++) {
+	if (krb5_cksumtypes_list[i].ctype == checksum_type)
+	    break;
+    }
+
+    if (i == krb5_cksumtypes_length)
+	return(KRB5_BAD_ENCTYPE);
+
+    checksum = krb5int_c_locate_iov((krb5_crypto_iov *)data, num_data, KRB5_CRYPTO_TYPE_CHECKSUM);
+    if (checksum == NULL)
+	return(KRB5_BAD_MSIZE);
+
+    /* if there's actually a verify function, call it */
+
+    if (krb5_cksumtypes_list[i].keyhash &&
+	krb5_cksumtypes_list[i].keyhash->verify_iov)
+	return((*(krb5_cksumtypes_list[i].keyhash->verify_iov))(key, usage, 0,
+								&checksum->data,
+								data, num_data,
+								valid));
+
+    /* otherwise, make the checksum again, and compare */
+
+    if ((ret = krb5_c_checksum_length(context, checksum_type, &hashsize)))
+	return(ret);
+
+    if (checksum->data.length != hashsize)
+	return(KRB5_BAD_MSIZE);
+
+    computed.data = malloc(hashsize);
+    if (computed.data == NULL) {
+	return(ENOMEM);
+    }
+    computed.length = hashsize;
+
+    if ((ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i], key, usage,
+					data, num_data, &computed))) {
+	free(computed.data);
+	return(ret);
+    }
+
+    *valid = (memcmp(computed.data, &checksum->data, hashsize) == 0);
+
+    free(computed.data);
+
+    return(0);
+}

@@ -181,7 +181,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 
     krb5_hmac(hash, &k1, 1, &trailer->data, &d3);
 
-    ret = enc->encrypt_iov(&k3, ivec, data);
+    ret = enc->encrypt_iov(&k3, ivec, data, num_data);
 
 cleanup:
     if (d1.data != NULL) {
