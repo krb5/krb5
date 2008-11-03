@@ -34,16 +34,20 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS=\
+	aead.o		 	\
 	block_size.o		\
 	checksum_length.o	\
 	cksumtype_to_string.o	\
 	cksumtypes.o		\
 	coll_proof_cksum.o	\
 	combine_keys.o	\
+	crypto_length.o		\
 	crypto_libinit.o	\
 	default_state.o \
 	decrypt.o		\
+	decrypt_iov.o		\
 	encrypt.o		\
+	encrypt_iov.o		\
 	encrypt_length.o	\
 	enctype_compare.o	\
 	enctype_to_string.o	\
@@ -54,6 +58,7 @@ STLIBOBJS=\
 	keyed_checksum_types.o	\
 	keylengths.o		\
 	make_checksum.o		\
+	make_checksum_iov.o	\
 	make_random_key.o	\
 	mandatory_sumtype.o	\
 	nfold.o			\
@@ -68,19 +73,24 @@ STLIBOBJS=\
 	string_to_key.o		\
 	valid_cksumtype.o	\
 	valid_enctype.o		\
-	verify_checksum.o
+	verify_checksum.o	\
+	verify_checksum_iov.o
 
 OBJS=\
+	$(OUTPRE)aead.$(OBJEXT)		 	\
 	$(OUTPRE)block_size.$(OBJEXT)		\
 	$(OUTPRE)checksum_length.$(OBJEXT)	\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
 	$(OUTPRE)combine_keys.$(OBJEXT)	\
+	$(OUTPRE)crypto_length.$(OBJEXT)	\
 	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) \
 	$(OUTPRE)decrypt.$(OBJEXT)		\
+	$(OUTPRE)decrypt_iov.$(OBJEXT)		\
 	$(OUTPRE)encrypt.$(OBJEXT)		\
+	$(OUTPRE)encrypt_iov.$(OBJEXT)		\
 	$(OUTPRE)encrypt_length.$(OBJEXT)	\
 	$(OUTPRE)enctype_compare.$(OBJEXT)	\
 	$(OUTPRE)enctype_to_string.$(OBJEXT)	\
@@ -91,6 +101,7 @@ OBJS=\
 	$(OUTPRE)keyed_checksum_types.$(OBJEXT)	\
 	$(OUTPRE)keylengths.$(OBJEXT)	\
 	$(OUTPRE)make_checksum.$(OBJEXT)	\
+	$(OUTPRE)make_checksum_iov.$(OBJEXT)	\
 	$(OUTPRE)make_random_key.$(OBJEXT)	\
 	$(OUTPRE)mandatory_sumtype.$(OBJEXT)	\
 	$(OUTPRE)nfold.$(OBJEXT)		\
@@ -105,19 +116,24 @@ OBJS=\
 	$(OUTPRE)string_to_key.$(OBJEXT)	\
 	$(OUTPRE)valid_cksumtype.$(OBJEXT)	\
 	$(OUTPRE)valid_enctype.$(OBJEXT)	\
-	$(OUTPRE)verify_checksum.$(OBJEXT)
+	$(OUTPRE)verify_checksum.$(OBJEXT)	\
+	$(OUTPRE)verify_checksum_iov.$(OBJEXT)
 
 SRCS=\
+	$(srcdir)/aead.c		\
 	$(srcdir)/block_size.c		\
 	$(srcdir)/checksum_length.c	\
 	$(srcdir)/cksumtype_to_string.c	\
 	$(srcdir)/cksumtypes.c		\
 	$(srcdir)/coll_proof_cksum.c	\
 	$(srcdir)/combine_keys.c	\
+	$(srcdir)/crypto_length.c	\
 	$(srcdir)/crypto_libinit.c	\
 	$(srcdir)/default_state.c \
 	$(srcdir)/decrypt.c		\
+	$(srcdir)/decrypt_iov.c		\
 	$(srcdir)/encrypt.c		\
+	$(srcdir)/encrypt_iov.c		\
 	$(srcdir)/encrypt_length.c	\
 	$(srcdir)/enctype_compare.c	\
 	$(srcdir)/enctype_to_string.c	\
@@ -128,6 +144,7 @@ SRCS=\
 	$(srcdir)/keyed_checksum_types.c\
 	$(srcdir)/keylengths.c		\
 	$(srcdir)/make_checksum.c	\
+	$(srcdir)/make_checksum_iov.c	\
 	$(srcdir)/make_random_key.c	\
 	$(srcdir)/mandatory_sumtype.c	\
 	$(srcdir)/nfold.c		\
@@ -142,7 +159,8 @@ SRCS=\
 	$(srcdir)/string_to_key.c	\
 	$(srcdir)/valid_cksumtype.c	\
 	$(srcdir)/valid_enctype.c	\
-	$(srcdir)/verify_checksum.c
+	$(srcdir)/verify_checksum.c	\
+	$(srcdir)/verify_checksum_iov.c
 
 
 LIBBASE=k5crypto
@@ -368,6 +386,16 @@ check-windows::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
+aead.so aead.po $(OUTPRE)aead.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  aead.c etypes.h aead.h
 block_size.so block_size.po $(OUTPRE)block_size.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -429,6 +457,16 @@ combine_keys.so combine_keys.po $(OUTPRE)combine_keys.$(OBJEXT): \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/dk/dk.h combine_keys.c etypes.h
+crypto_length.so crypto_length.po $(OUTPRE)crypto_length.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  crypto_length.c aead.h
 crypto_libinit.so crypto_libinit.po $(OUTPRE)crypto_libinit.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -458,6 +496,15 @@ decrypt.so decrypt.po $(OUTPRE)decrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h decrypt.c etypes.h
+decrypt_iov.so decrypt_iov.po $(OUTPRE)decrypt_iov.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h decrypt_iov.c etypes.h aead.h
 encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
@@ -467,6 +514,15 @@ encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h encrypt.c etypes.h
+encrypt_iov.so encrypt_iov.po $(OUTPRE)encrypt_iov.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h encrypt_iov.c etypes.h aead.h
 encrypt_length.so encrypt_length.po $(OUTPRE)encrypt_length.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -568,6 +624,16 @@ make_checksum.so make_checksum.po $(OUTPRE)make_checksum.$(OBJEXT): \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/dk/dk.h cksumtypes.h etypes.h make_checksum.c
+make_checksum_iov.so make_checksum_iov.po $(OUTPRE)make_checksum_iov.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(srcdir)/dk/dk.h cksumtypes.h etypes.h make_checksum_iov.c aead.h
 make_random_key.so make_random_key.po $(OUTPRE)make_random_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -717,6 +783,16 @@ verify_checksum.so verify_checksum.po $(OUTPRE)verify_checksum.$(OBJEXT): \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   cksumtypes.h verify_checksum.c
+verify_checksum_iov.so verify_checksum_iov.po $(OUTPRE)verify_checksum_iov.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cksumtypes.h verify_checksum_iov.c aead.h
 t_nfold.so t_nfold.po $(OUTPRE)t_nfold.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \

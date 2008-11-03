@@ -1,7 +1,7 @@
 /*
- * lib/crypto/enc_provider/aes.h
+ * lib/crypto/enc_provider/aes.c
  *
- * Copyright (C) 2003, 2007 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2003, 2007, 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -242,3 +242,4 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     krb5int_aes_init_state,
     krb5int_default_free_state
 };
+

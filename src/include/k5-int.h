@@ -590,6 +590,30 @@ struct krb5_keyhash_provider {
 			       krb5_boolean *valid);
 };
 
+struct krb5_aead_provider {
+    krb5_error_code (*crypto_length) (const struct krb5_aead_provider *aead,
+				      const struct krb5_enc_provider *enc,
+				      const struct krb5_hash_provider *hash,
+				      krb5_cryptotype type,
+				      size_t *length);
+    krb5_error_code (*encrypt_iov) (const struct krb5_aead_provider *aead,
+				    const struct krb5_enc_provider *enc,
+				    const struct krb5_hash_provider *hash,
+				    const krb5_keyblock *key,
+				    krb5_keyusage keyusage,
+				    const krb5_data *ivec,
+				    krb5_crypto_iov *data,
+				    size_t num_data);
+    krb5_error_code (*decrypt_iov) (const struct krb5_aead_provider *aead,
+				    const struct krb5_enc_provider *enc,
+				    const struct krb5_hash_provider *hash,
+				    const krb5_keyblock *key,
+				    krb5_keyusage keyusage,
+				    const krb5_data *ivec,
+				    krb5_crypto_iov *data,
+				    size_t num_data);
+};
+
 typedef void (*krb5_encrypt_length_func) (const struct krb5_enc_provider *enc,
   const struct krb5_hash_provider *hash,
   size_t inputlen, size_t *length);
@@ -615,13 +639,14 @@ struct krb5_keytypes {
     char *out_string;
     const struct krb5_enc_provider *enc;
     const struct krb5_hash_provider *hash;
-  size_t prf_length;
+    size_t prf_length;
     krb5_encrypt_length_func encrypt_len;
     krb5_crypt_func encrypt;
     krb5_crypt_func decrypt;
     krb5_str2key_func str2key;
-  krb5_prf_func prf;
+    krb5_prf_func prf;
     krb5_cksumtype required_ctype;
+    const struct krb5_aead_provider *aead;
 };
 
 struct krb5_cksumtypes {

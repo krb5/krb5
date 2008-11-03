@@ -195,6 +195,7 @@ typedef krb5_int32 krb5_enctype;
 typedef krb5_int32 krb5_cksumtype;
 typedef krb5_int32 krb5_authdatatype;
 typedef krb5_int32 krb5_keyusage;
+typedef krb5_int32 krb5_cryptotype;
 
 typedef krb5_int32	krb5_preauthtype; /* This may change, later on */
 typedef	krb5_int32	krb5_flags;
@@ -357,6 +358,11 @@ typedef struct _krb5_enc_data {
     krb5_kvno kvno;
     krb5_data ciphertext;
 } krb5_enc_data;
+
+typedef struct _krb5_crypto_iov {
+    krb5_cryptotype flags;
+    krb5_data data;
+} krb5_crypto_iov;
 
 /* per Kerberos v5 protocol spec */
 #define	ENCTYPE_NULL		0x0000
@@ -605,6 +611,45 @@ krb5_boolean KRB5_CALLCONV krb5_c_is_coll_proof_cksum
 	(krb5_cksumtype ctype);
 krb5_boolean KRB5_CALLCONV krb5_c_is_keyed_cksum
 	(krb5_cksumtype ctype);
+
+/* AEAD APIs */
+#define KRB5_CRYPTO_TYPE_EMPTY	    0	/* [in] ignored */
+#define KRB5_CRYPTO_TYPE_HEADER	    1	/* [out] header */
+#define KRB5_CRYPTO_TYPE_DATA	    2	/* [in, out] plaintext */
+#define KRB5_CRYPTO_TYPE_SIGN_ONLY  3	/* [in] associated data */
+#define KRB5_CRYPTO_TYPE_PADDING    4	/* [out] padding */
+#define KRB5_CRYPTO_TYPE_TRAILER    5	/* [out] checksum for encrypt */
+#define KRB5_CRYPTO_TYPE_CHECKSUM   6	/* [out] checksum for MIC */
+
+krb5_error_code KRB5_CALLCONV
+    krb5_c_make_checksum_iov
+    (krb5_context context, krb5_cksumtype cksumtype,
+		    const krb5_keyblock *key, krb5_keyusage usage,
+		    krb5_crypto_iov *data, size_t num_data);
+
+krb5_error_code KRB5_CALLCONV
+    krb5_c_verify_checksum_iov
+    (krb5_context context, 
+		    const krb5_keyblock *key, krb5_keyusage usage,
+		    const krb5_crypto_iov *data, size_t num_data,
+		    krb5_boolean *valid);
+
+krb5_error_code KRB5_CALLCONV
+    krb5_c_encrypt_iov
+    (krb5_context context, const krb5_keyblock *key,
+		    krb5_keyusage usage, const krb5_data *cipher_state,
+		    krb5_crypto_iov *data, size_t num_data);
+
+krb5_error_code KRB5_CALLCONV
+    krb5_c_decrypt_iov
+    (krb5_context context, const krb5_keyblock *key,
+		    krb5_keyusage usage, const krb5_data *cipher_state,
+		    krb5_crypto_iov *data, size_t num_data);
+
+krb5_error_code KRB5_CALLCONV
+    krb5_c_crypto_length
+    (krb5_context context, krb5_enctype enctype,
+		    krb5_cryptotype type, size_t *size);
 
 #ifdef KRB5_OLD_CRYPTO
 /*
