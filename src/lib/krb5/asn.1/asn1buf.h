@@ -13,7 +13,7 @@ typedef struct code_buffer_rep {
 
 /**************** Private Procedures ****************/
 
-#if ((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS)) && !defined(CONFIG_SMALL)
+#if (__GNUC__ >= 2) && !defined(CONFIG_SMALL)
 unsigned int asn1buf_free
         (const asn1buf *buf);
 /* requires  *buf is allocated

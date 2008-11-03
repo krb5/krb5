@@ -55,7 +55,7 @@
 #include <stdio.h>
 #include "asn1_get.h"
 
-#if !((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS)) || defined(CONFIG_SMALL)
+#if !defined(__GNUC__) || defined(CONFIG_SMALL)
 /* Declare private procedures as static if they're not used for inline
    expansion of other stuff elsewhere.  */
 static unsigned int asn1buf_free(const asn1buf *);
