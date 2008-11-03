@@ -321,7 +321,6 @@ static struct plugin_dir_handle preauth_plugins;
 krb5_error_code
 load_preauth_plugins(krb5_context context)
 {
-    struct errinfo err;
     void **preauth_plugins_ftables;
     struct krb5plugin_preauth_server_ftable_v1 *ftable;
     int module_count, i, j, k;
@@ -329,13 +328,11 @@ load_preauth_plugins(krb5_context context)
     preauth_server_init_proc server_init_proc = NULL;
     char **kdc_realm_names = NULL;
 
-    memset(&err, 0, sizeof(err));
-
     /* Attempt to load all of the preauth plugins we can find. */
     PLUGIN_DIR_INIT(&preauth_plugins);
     if (PLUGIN_DIR_OPEN(&preauth_plugins) == 0) {
 	if (krb5int_open_plugin_dirs(objdirs, NULL,
-				     &preauth_plugins, &err) != 0) {
+				     &preauth_plugins, &context->err) != 0) {
 	    return KRB5_PLUGIN_NO_HANDLE;
 	}
     }
@@ -344,7 +341,7 @@ load_preauth_plugins(krb5_context context)
     preauth_plugins_ftables = NULL;
     if (krb5int_get_plugin_dir_data(&preauth_plugins,
 				    "preauthentication_server_1",
-				    &preauth_plugins_ftables, &err) != 0) {
+				    &preauth_plugins_ftables, &context->err) != 0) {
 	return KRB5_PLUGIN_NO_HANDLE;
     }
 
