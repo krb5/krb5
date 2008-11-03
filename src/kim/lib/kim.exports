@@ -93,6 +93,7 @@ kim_credential_iterator_next
 kim_credential_iterator_free
 
 kim_credential_create_new
+kim_credential_create_new_with_password
 kim_credential_create_from_keytab
 kim_credential_create_from_krb5_creds
 kim_credential_copy
@@ -116,7 +117,9 @@ kim_ccache_iterator_next
 kim_ccache_iterator_free
 
 kim_ccache_create_new
+kim_ccache_create_new_with_password
 kim_ccache_create_new_if_needed
+kim_ccache_create_new_if_needed_with_password
 kim_ccache_create_from_client_identity
 kim_ccache_create_from_keytab
 kim_ccache_create_from_default

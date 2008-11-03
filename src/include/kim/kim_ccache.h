@@ -114,6 +114,12 @@ extern "C" {
  * It can be trivially implemented using 
  * #kim_ccache_create_from_client_identity() and #kim_ccache_create_new().  
  *
+ * For legacy password-based Kerberos environments KIM also provides
+ * #kim_ccache_create_new_with_password() and 
+ * #kim_ccache_create_new_if_needed_with_password().  You should not use these 
+ * functions unless you know that they will only be used in environments using 
+ * passwords.  Otherwise users without passwords may be prompted for them.
+ *
  * KIM provides the #kim_ccache_create_from_keytab() to create credentials 
  * using a keytab and store them in the cache collection. A keytab is an 
  * on-disk copy of a client identity's secret key.  Typically sites use 
@@ -301,7 +307,7 @@ void kim_ccache_iterator_free (kim_ccache_iterator *io_ccache_iterator);
  * \param in_client_identity  a client identity to obtain a credential for.   Specify KIM_IDENTITY_ANY to 
  *                            allow the user to choose.
  * \param in_options          options to control credential acquisition. 
- * \note Depending on the kim_options specified, #kim_ccache_create_new() may 
+ * \note #kim_ccache_create_new() may 
  * present a GUI or command line prompt to obtain information from the user. 
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Acquire a new initial credential and store it in a ccache.
@@ -311,11 +317,32 @@ kim_error kim_ccache_create_new (kim_ccache          *out_ccache,
                                  kim_options          in_options);
 
 /*!
+ * \param out_ccache          on exit, a new cache object for a ccache containing a newly acquired 
+ *      		      initial credential.  Must be freed with kim_ccache_free().
+ * \param in_client_identity  a client identity to obtain a credential for.   Specify KIM_IDENTITY_ANY to 
+ *                            allow the user to choose.
+ * \param in_options          options to control credential acquisition. 
+ * \param in_password         a password to be used while obtaining credentials. 
+ * \note #kim_ccache_create_new_with_password() exists to support
+ * legacy password-based Kerberos environments.  You should not use this 
+ * function unless you know that it will only be used in environments using passwords.
+ * This function may also present a GUI or command line prompt to obtain
+ * additional information needed to obtain credentials (eg: SecurID pin).
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Acquire a new initial credential and store it in a ccache
+ * using the provided password..
+ */
+kim_error kim_ccache_create_new_with_password (kim_ccache   *out_ccache,
+                                               kim_identity  in_client_identity,
+                                               kim_options   in_options,
+                                               kim_string    in_password);
+
+/*!
  * \param out_ccache          on exit, a ccache object for a ccache containing a newly acquired   
  *                            initial credential. Must be freed with kim_ccache_free().
  * \param in_client_identity  a client identity to obtain a credential for.
  * \param in_options          options to control credential acquisition (if a credential is acquired). 
- * \note Depending on the kim_options specified, #kim_ccache_create_new_if_needed() may 
+ * \note #kim_ccache_create_new_if_needed() may 
  * present a GUI or command line prompt to obtain information from the user. 
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Find a ccache containing a valid initial credential in the cache collection, or if
@@ -324,6 +351,26 @@ kim_error kim_ccache_create_new (kim_ccache          *out_ccache,
 kim_error kim_ccache_create_new_if_needed (kim_ccache   *out_ccache,
                                            kim_identity  in_client_identity,
                                            kim_options   in_options);
+
+/*!
+ * \param out_ccache          on exit, a ccache object for a ccache containing a newly acquired   
+ *                            initial credential. Must be freed with kim_ccache_free().
+ * \param in_client_identity  a client identity to obtain a credential for.
+ * \param in_options          options to control credential acquisition (if a credential is acquired). 
+ * \param in_password         a password to be used while obtaining credentials. 
+ * \note #kim_ccache_create_new_if_needed_with_password() exists to support
+ * legacy password-based Kerberos environments.  You should not use this 
+ * function unless you know that it will only be used in environments using passwords.
+ * This function may also present a GUI or command line prompt to obtain
+ * additional information needed to obtain credentials (eg: SecurID pin).
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Find a ccache containing a valid initial credential in the cache collection, or if
+ *        unavailable, acquire and store a new initial credential using the provided password.
+ */
+kim_error kim_ccache_create_new_if_needed_with_password (kim_ccache   *out_ccache,
+                                                         kim_identity  in_client_identity,
+                                                         kim_options   in_options,
+                                                         kim_string    in_password);
 
 /*!
  * \param out_ccache          on exit, a ccache object for a ccache containing a TGT  

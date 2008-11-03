@@ -39,7 +39,6 @@
 #include "kim_debug_private.h"
 #include "kim_error_private.h"
 #include "kim_identity_private.h"
-#include "kim_ccache_private.h"
 #include "kim_credential_private.h"
 #include "kim_options_private.h"
 #include "kim_preferences_private.h"
