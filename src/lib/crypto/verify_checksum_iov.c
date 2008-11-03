@@ -40,7 +40,6 @@ krb5_c_verify_checksum_iov(krb5_context context,
     unsigned int i;
     size_t hashsize;
     krb5_error_code ret;
-    krb5_data indata;
     krb5_data computed;
     krb5_crypto_iov *checksum;
 

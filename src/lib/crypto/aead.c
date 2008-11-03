@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "etypes.h"
 #include "cksumtypes.h"
+#include "dk.h"
 #include "aead.h"
 
 krb5_crypto_iov * KRB5_CALLCONV
@@ -53,8 +54,8 @@ krb5int_c_locate_iov(krb5_crypto_iov *data,
 }
 
 static krb5_error_code
-make_unkeyed_checksum_iov(struct krb5_hash_provider *hash_provider,
-			  krb5_crypto_iov *data,
+make_unkeyed_checksum_iov(const struct krb5_hash_provider *hash_provider,
+			  const krb5_crypto_iov *data,
 			  size_t num_data,
 			  krb5_data *output)
 {
@@ -101,7 +102,6 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
 			    size_t num_data,
 			    krb5_data *cksum_data)
 {
-    unsigned int i;
     int e1, e2;
     krb5_error_code ret;
 
