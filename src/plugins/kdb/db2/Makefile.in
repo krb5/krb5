@@ -100,11 +100,12 @@ depend-verify-db-sys:
 #
 kdb_xdr.so kdb_xdr.po $(OUTPRE)kdb_xdr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h kdb_xdr.c kdb_xdr.h
 adb_openclose.so adb_openclose.po $(OUTPRE)adb_openclose.$(OBJEXT): \
@@ -112,11 +113,12 @@ adb_openclose.so adb_openclose.po $(OUTPRE)adb_openclose.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/lib/kdb/adb_err.h \
   $(COM_ERR_DEPS) $(DB_DEPS) $(SRCTOP)/include/gssrpc/rename.h \
-  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h adb_openclose.c policy_db.h
 adb_policy.so adb_policy.po $(OUTPRE)adb_policy.$(OBJEXT): \
@@ -131,11 +133,11 @@ kdb_db2.so kdb_db2.po $(OUTPRE)kdb_db2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/lib/kdb/adb_err.h $(COM_ERR_DEPS) $(DB_DEPS) \
   $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/xdr.h \
-  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_db2.c kdb_db2.h kdb_xdr.h policy_db.h
@@ -155,11 +157,11 @@ db2_exp.so db2_exp.po $(OUTPRE)db2_exp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/lib/kdb/adb_err.h $(COM_ERR_DEPS) $(DB_DEPS) \
   $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/xdr.h \
-  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   db2_exp.c kdb_db2.h kdb_xdr.h policy_db.h

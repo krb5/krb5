@@ -106,15 +106,14 @@ genget.so genget.po $(OUTPRE)genget.$(OBJEXT): genget.c \
 misc.so misc.po $(OUTPRE)misc.$(OBJEXT): auth-proto.h \
   auth.h enc-proto.h encrypt.h misc-proto.h misc.c misc.h
 kerberos.so kerberos.po $(OUTPRE)kerberos.$(OBJEXT): \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
-  $(srcdir)/../arpa/telnet.h auth-proto.h auth.h enc-proto.h \
-  encrypt.h kerberos.c misc-proto.h misc.h
-kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
-  $(srcdir)/../arpa/telnet.h auth-proto.h auth.h enc-proto.h \
-  encrypt.h kerberos5.c krb5forw.h misc-proto.h misc.h
+  kerberos.c
+kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(srcdir)/../arpa/telnet.h \
+  auth-proto.h auth.h enc-proto.h encrypt.h kerberos5.c \
+  krb5forw.h misc-proto.h misc.h
 forward.so forward.po $(OUTPRE)forward.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h forward.c \
   krb5forw.h

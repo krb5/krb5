@@ -121,8 +121,9 @@ cleanup.so cleanup.po $(OUTPRE)cleanup.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h cleanup.c \
   libpty.h pty-int.h pty_err.h
 getpty.so getpty.po $(OUTPRE)getpty.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h getpty.c \
-  libpty.h pty-int.h pty_err.h
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h getpty.c libpty.h \
+  pty-int.h pty_err.h
 init_slave.so init_slave.po $(OUTPRE)init_slave.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
   init_slave.c libpty.h pty-int.h pty_err.h
@@ -133,7 +134,8 @@ open_slave.so open_slave.po $(OUTPRE)open_slave.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
   libpty.h open_slave.c pty-int.h pty_err.h
 update_utmp.so update_utmp.po $(OUTPRE)update_utmp.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
   libpty.h pty-int.h pty_err.h update_utmp.c
 update_wtmp.so update_wtmp.po $(OUTPRE)update_wtmp.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \

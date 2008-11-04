@@ -45,7 +45,5 @@ install-unix::
 # the Makefile.in file
 #
 $(OUTPRE)kdestroy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
   kdestroy.c
