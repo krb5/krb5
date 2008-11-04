@@ -16,6 +16,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 STLIBOBJS=\
 	afsstring2key.o	\
 	d3_cbc.o	\
+	d3_aead.o	\
 	d3_kysched.o	\
 	f_cbc.o 	\
 	f_cksum.o	\
@@ -28,6 +29,7 @@ STLIBOBJS=\
 
 OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
 	$(OUTPRE)d3_cbc.$(OBJEXT)	\
+	$(OUTPRE)d3_aead.$(OBJEXT)	\
 	$(OUTPRE)d3_kysched.$(OBJEXT)	\
 	$(OUTPRE)f_cbc.$(OBJEXT) 	\
 	$(OUTPRE)f_cksum.$(OBJEXT)	\
@@ -40,6 +42,7 @@ OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
 
 SRCS=	$(srcdir)/afsstring2key.c	\
 	$(srcdir)/d3_cbc.c	\
+	$(srcdir)/d3_aead.c	\
 	$(srcdir)/d3_kysched.c	\
 	$(srcdir)/f_cbc.c	\
 	$(srcdir)/f_cksum.c	\
@@ -118,6 +121,16 @@ d3_cbc.so d3_cbc.po $(OUTPRE)d3_cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   d3_cbc.c des_int.h f_tables.h
+d3_aead.so d3_aead.po $(OUTPRE)d3_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  d3_aead.c des_int.h f_tables.h
 d3_kysched.so d3_kysched.po $(OUTPRE)d3_kysched.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
