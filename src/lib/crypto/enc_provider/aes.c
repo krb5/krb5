@@ -342,7 +342,7 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
 	/* Encrypt second last block */
 	xorblock(tmp, blockN2);
 	enc(tmp2, tmp, &ctx);
-	memcpy(blockN2, tmp2, BLOCK_SIZE);
+	memcpy(blockN2, tmp2, BLOCK_SIZE); /* blockN2 now contains first block */
 	memcpy(tmp, tmp2, BLOCK_SIZE);
 
 	/* Encrypt last block */
@@ -352,7 +352,7 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
 	if (ivec != NULL)
 	    memcpy(ivec->data, tmp2, BLOCK_SIZE);
 
-	/* Put the last two blocks back into the ivec, in reverse order */
+	/* Put the last two blocks back into the ivec (reverse order) */
 	iov_put_block(data, num_data, blockN1, &output_iov_pos, &output_block_pos);
 	iov_put_block(data, num_data, blockN2, &output_iov_pos, &output_block_pos);
     }
@@ -440,9 +440,9 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 	    memcpy(ivec->data, blockN2, BLOCK_SIZE);
 	memcpy(blockN2, tmp3, BLOCK_SIZE);
 
-	/* Put the last two blocks back into the ivec, in reverse order */
-	iov_put_block(data, num_data, blockN1, &output_iov_pos, &output_block_pos);
+	/* Put the last two blocks back into the ivec */
 	iov_put_block(data, num_data, blockN2, &output_iov_pos, &output_block_pos);
+	iov_put_block(data, num_data, blockN1, &output_iov_pos, &output_block_pos);
     }
 
     return 0;

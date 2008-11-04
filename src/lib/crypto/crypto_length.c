@@ -32,7 +32,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_crypto_length(krb5_context context,
 		     krb5_enctype enctype,
 		     krb5_cryptotype type,
-		     size_t *size)
+		     unsigned int *size)
 {
     int i;
     const struct krb5_keytypes *ktp = NULL;

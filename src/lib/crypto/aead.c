@@ -81,7 +81,7 @@ make_unkeyed_checksum_iov(const struct krb5_hash_provider *hash_provider,
 	const krb5_crypto_iov *iov = &data[i];
 
 	if (SIGN_IOV(iov))
-	    sign_data[j++] = iov[i].data;
+	    sign_data[j++] = iov->data;
     }
 
     ret = hash_provider->hash(num_sign_data, sign_data, output);

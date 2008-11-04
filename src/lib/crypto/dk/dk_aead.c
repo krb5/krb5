@@ -116,17 +116,19 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     if (trailer == NULL || trailer->data.length < hmacsize)
 	return KRB5_BAD_MSIZE;
 
-    ke.contents = malloc(enc->keylength);
+    ke.length = enc->keylength;
+    ke.contents = malloc(ke.length);
     if (ke.contents == NULL) {
 	ret = ENOMEM;
 	goto cleanup;
     }
-    ki.contents = malloc(enc->keylength);
+    ki.length = enc->keylength;
+    ki.contents = malloc(ki.length);
     if (ki.contents == NULL) {
 	ret = ENOMEM;
 	goto cleanup;
     }
-    cksum = malloc(hash->hashsize);
+    cksum = (unsigned char *)malloc(hash->hashsize);
     if (cksum == NULL) {
 	ret = ENOMEM;
 	goto cleanup;
@@ -162,18 +164,18 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    /* encrypt the plaintext (header | data | padding) */
-    assert(enc->encrypt_iov != NULL);
-
-    ret = enc->encrypt_iov(&ke, ivec, data, num_data); /* will update ivec */
-    if (ret != 0)
-	goto cleanup;
-
     /* hash the plaintext */
     d2.length = hash->hashsize;
     d2.data = (char *)cksum;
 
     ret = krb5_hmac_iov(hash, &ki, data, num_data, &d2);
+    if (ret != 0)
+	goto cleanup;
+
+    /* encrypt the plaintext (header | data | padding) */
+    assert(enc->encrypt_iov != NULL);
+
+    ret = enc->encrypt_iov(&ke, ivec, data, num_data); /* will update ivec */
     if (ret != 0)
 	goto cleanup;
 
@@ -258,17 +260,19 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     if (trailer == NULL || trailer->data.length != hmacsize)
 	return KRB5_BAD_MSIZE;
 
-    ke.contents = malloc(enc->keylength);
+    ke.length = enc->keylength;
+    ke.contents = malloc(ke.length);
     if (ke.contents == NULL) {
 	ret = ENOMEM;
 	goto cleanup;
     }
-    ki.contents = malloc(enc->keylength);
+    ki.length = enc->keylength;
+    ki.contents = malloc(ki.length);
     if (ki.contents == NULL) {
 	ret = ENOMEM;
 	goto cleanup;
     }
-    cksum = (unsigned char *)malloc(hmacsize);
+    cksum = (unsigned char *)malloc(hash->hashsize);
     if (cksum == NULL) {
 	ret = ENOMEM;
 	goto cleanup;
