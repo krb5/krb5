@@ -198,12 +198,9 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
     for (i = 0; i < num_data; i++) {
 	krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_HEADER ||
-	    iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_PADDING) {
+	if (ENCRYPT_IOV(iov))
 	    k5_arcfour_crypt(arcfour_ctx, (unsigned char *)iov->data.data,
 			     (const unsigned char *)iov->data.data, iov->data.length);
-	}
     }
 
     if (state == NULL) {
@@ -268,6 +265,6 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_init_state, /*xxx not implemented yet*/
     krb5int_default_free_state,
     k5_arcfour_docrypt_iov,
-    k5_arcfour_docrypt_iov,
+    k5_arcfour_docrypt_iov
 };
 

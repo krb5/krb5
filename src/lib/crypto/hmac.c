@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "aead.h"
 
 /*
  * the HMAC transform looks like:
@@ -139,8 +140,7 @@ krb5_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
     for (i = 0, num_sign_data = 0; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	if (SIGN_IOV(iov))
 	    num_sign_data++;
     }
     /* XXX cleanup to avoid alloc */
@@ -151,10 +151,8 @@ krb5_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
     for (i = 0, j = 0; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY) {
+	if (SIGN_IOV(iov))
 	    sign_data[j++] = iov[i].data;
-	}
     }
 
     /* caller must store checksum in iov as it may be TYPE_TRAILER or TYPE_CHECKSUM */
