@@ -359,10 +359,90 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
 
 static krb5_error_code
 krb5int_aes_decrypt_iov(const krb5_keyblock *key,
-		        const krb5_data *state,
+		        const krb5_data *ivec,
 		        krb5_crypto_iov *data,
 		        size_t num_data)
 {
+    aes_ctx ctx;
+    char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
+    int nblocks = 0, blockno;
+    size_t input_length, i;
+
+    CHECK_SIZES;
+
+    if (aes_dec_key(key->contents, key->length, &ctx) != aes_good)
+	abort();
+
+    if (ivec != NULL)
+	memcpy(tmp, ivec->data, BLOCK_SIZE);
+    else
+	memset(tmp, 0, BLOCK_SIZE);
+
+    for (i = 0, input_length = 0; i < num_data; i++) {
+	krb5_crypto_iov *iov = &data[i];
+
+	if (ENCRYPT_IOV(iov))
+	    input_length += iov->data.length;
+    }
+
+    nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    if (nblocks == 1) {
+	/* XXX Used for DK function, probably will be never used with IOV API,
+	 * so it's safe to make some arbitrary restrictions here */
+	assert(num_data == 1);
+	assert(data[0].flags == KRB5_CRYPTO_TYPE_HEADER);
+	assert(data[0].data.length == BLOCK_SIZE);
+
+	dec(data[0].data.data, data[0].data.data, &ctx);
+    } else {
+	char blockN2[BLOCK_SIZE];   /* second last */
+	char blockN1[BLOCK_SIZE];   /* last block */
+	size_t input_iov_pos = 0, input_block_pos = 0;
+	size_t output_iov_pos = 0, output_block_pos = 0;
+
+	for (blockno = 0; blockno < nblocks - 2; blockno++) {
+	    char blockN[BLOCK_SIZE];
+
+	    iov_get_block(blockN, data, num_data, &input_iov_pos, &input_block_pos);
+	    dec(tmp2, blockN, &ctx);
+	    xorblock(tmp2, tmp);
+	    iov_put_block(data, num_data, tmp2, &output_iov_pos, &output_block_pos);
+	    memcpy(tmp, blockN, BLOCK_SIZE);
+	}
+
+	/* Do last two blocks, the second of which (next-to-last block
+	   of plaintext) may be incomplete.  */
+
+	/* First, get the last two encrypted blocks */
+	memset(blockN1, 0, sizeof(blockN1)); /* pad last block with zeros */
+	iov_get_block(blockN2, data, num_data, &input_iov_pos, &input_block_pos);
+	iov_get_block(blockN1, data, num_data, &input_iov_pos, &input_block_pos);
+
+	/* Decrypt second last block */
+	dec(tmp2, blockN2, &ctx);
+	/* Set tmp3 to last ciphertext block (already padded) */
+	memcpy(tmp3, blockN1, BLOCK_SIZE);
+	/* Set tmp2 to last (possibly partial) plaintext block, and
+	   save it.  */
+	xorblock(tmp2, tmp3);
+	memcpy(blockN1, tmp2, BLOCK_SIZE);
+	/* Maybe keep the trailing part, and copy in the last
+	   ciphertext block.  */
+	memcpy(tmp2, tmp3, BLOCK_SIZE);
+	dec(tmp3, tmp2, &ctx);
+	xorblock(tmp3, tmp);
+	/* Copy out ivec first before we clobber blockN2 with plaintext */
+	if (ivec != NULL)
+	    memcpy(ivec->data, blockN2, BLOCK_SIZE);
+	memcpy(blockN2, tmp3, BLOCK_SIZE);
+
+	/* Put the last two blocks back into the ivec, in reverse order */
+	iov_put_block(data, num_data, blockN1, &output_iov_pos, &output_block_pos);
+	iov_put_block(data, num_data, blockN2, &output_iov_pos, &output_block_pos);
+    }
+
+    return 0;
 }
 
 static krb5_error_code
