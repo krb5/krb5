@@ -99,11 +99,14 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
 	    plainlen += iov->data.length;
     }
 
-    /* Check that the input data is correctly padded */
-
-    if (blocksize != 0 &&
-        plainlen % blocksize != 0) {
-	return KRB5_BAD_MSIZE;
+    if (blocksize == 0) {
+	/* Check for correct input length in CTS mode */
+        if (enc->block_size != 0 && plainlen < enc->block_size)
+	    return KRB5_BAD_MSIZE;
+    } else {
+	/* Check that the input data is correctly padded */
+	if (plainlen % blocksize != 0)
+	    return KRB5_BAD_MSIZE;
     }
 
     /* Validate header and trailer lengths. */
@@ -218,7 +221,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_keyblock ke, ki;
     size_t i;
     size_t blocksize = 0; /* careful, this is enc block size not confounder len */
-    size_t plainlen = 0;
+    size_t cipherlen = 0;
     size_t hmacsize = 0;
     unsigned char *cksum = NULL;
 
@@ -240,14 +243,17 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
 
 	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
 	    iov->flags == KRB5_CRYPTO_TYPE_PADDING)
-	    plainlen += iov->data.length;
+	    cipherlen += iov->data.length;
     }
 
-    /* Check that the input data is correctly padded */
-
-    if (blocksize != 0 &&
-        plainlen % blocksize != 0) {
-	return KRB5_BAD_MSIZE;
+    if (blocksize == 0) {
+	/* Check for correct input length in CTS mode */
+        if (enc->block_size != 0 && cipherlen < enc->block_size)
+	    return KRB5_BAD_MSIZE;
+    } else {
+	/* Check that the input data is correctly padded */
+	if (cipherlen % blocksize != 0)
+	    return KRB5_BAD_MSIZE;
     }
 
     /* Validate header and trailer lengths */
