@@ -94,8 +94,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     for (i = 0; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_PADDING)
+	if (ENCRYPT_DATA_IOV(iov))
 	    plainlen += iov->data.length;
     }
 
@@ -241,8 +240,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     for (i = 0; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_PADDING)
+	if (ENCRYPT_DATA_IOV(iov))
 	    cipherlen += iov->data.length;
     }
 
