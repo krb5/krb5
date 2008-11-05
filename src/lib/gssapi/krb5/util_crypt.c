@@ -239,18 +239,98 @@ cleanup_arcfour:
     return (code);
 }
 
+/* AEAD */
 krb5_error_code
-kg_encrypt_iov(context, key, usage, iv, data, num_data)
+kg_translate_iov(context, token_offset, iov_count, iov, pkiov_count, pkiov)
+    krb5_context context;
+    size_t token_offset; /* Offset to confounder from start of token */
+    size_t iov_count;
+    gss_iov_buffer_desc *iov;
+    size_t *pkiov_count;
+    krb5_crypto_iov **pkiov;
+{
+    gss_iov_buffer_desc *token;
+    size_t i = 0, j;
+    size_t kiov_count;
+    krb5_crypto_iov *kiov;
+
+    *pkiov_count = 0;
+    *pkiov = NULL;
+
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    assert(token != NULL);
+
+    kiov_count = 3 + iov_count;
+    kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
+    if (kiov == NULL)
+	return ENOMEM;
+
+    kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
+    kiov[i].data.length = 0;
+    kiov[i].data.data = NULL;
+    i++;
+
+    kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
+    kiov[i].data.length = 0;
+    kiov[i].data.data = NULL;
+    i++;
+
+    kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
+    kiov[i].data.length = token->buffer.length - token_offset;
+    kiov[i].data.data = (char *)token->buffer.value + token_offset;
+    i++;
+
+    for (j = 0; j < iov_count; j++) {
+	krb5_cryptotype ktype;
+
+	switch (iov[j].type){
+	case GSS_IOV_BUFFER_TYPE_IGNORE:
+	case GSS_IOV_BUFFER_TYPE_TOKEN:
+	    ktype = KRB5_CRYPTO_TYPE_EMPTY;
+	    break;
+	case GSS_IOV_BUFFER_TYPE_PADDING:
+	    ktype = KRB5_CRYPTO_TYPE_PADDING;
+	    break;
+	case GSS_IOV_BUFFER_TYPE_DATA:
+	    if (iov[j].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
+		ktype = KRB5_CRYPTO_TYPE_SIGN_ONLY;
+	    else
+		ktype = KRB5_CRYPTO_TYPE_DATA;
+	    break;
+	default:
+	    free(kiov);
+	    return EINVAL;
+	}
+
+	kiov[i].flags = ktype;
+	kiov[i].data.length = iov[j].buffer.length;
+	kiov[i].data.data = (char *)iov[j].buffer.value;
+
+	i++;
+    }
+
+
+    *pkiov_count = kiov_count;
+    *pkiov = kiov;
+
+    return 0;
+}
+
+krb5_error_code
+kg_encrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
     krb5_context context;
     krb5_keyblock *key;
     int usage;
     krb5_pointer iv;
-    krb5_crypto_iov *data;
-    size_t num_data;
+    size_t token_offset;
+    size_t iov_count;
+    gss_iov_buffer_desc *iov;
 {
     krb5_error_code code;
     size_t blocksize;
     krb5_data ivd, *pivd;
+    size_t kiov_count;
+    krb5_crypto_iov *kiov;
 
     if (iv) {
         code = krb5_c_block_size(context, key->enctype, &blocksize);
@@ -267,7 +347,12 @@ kg_encrypt_iov(context, key, usage, iv, data, num_data)
         pivd = NULL;
     }
 
-    code = krb5_c_encrypt_iov(context, key, usage, pivd, data, num_data);
+    code = kg_translate_iov(context, token_offset, iov_count, iov, &kiov_count, &kiov);
+    if (code == 0) {
+	code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
+	free(kiov);
+    }
+
     if (pivd != NULL)
         free(pivd->data);
     return code;
@@ -276,17 +361,20 @@ kg_encrypt_iov(context, key, usage, iv, data, num_data)
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt_iov(context, key, usage, iv, data, num_data)
+kg_decrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
     krb5_context context;
     krb5_keyblock *key;
     int usage;
     krb5_pointer iv;
-    krb5_crypto_iov *data;
-    size_t num_data;
+    size_t token_offset;
+    size_t iov_count;
+    gss_iov_buffer_desc *iov;
 {
     krb5_error_code code;
     size_t blocksize;
     krb5_data ivd, *pivd;
+    size_t kiov_count;
+    krb5_crypto_iov *kiov;
 
     if (iv) {
         code = krb5_c_block_size(context, key->enctype, &blocksize);
@@ -303,22 +391,31 @@ kg_decrypt_iov(context, key, usage, iv, data, num_data)
         pivd = NULL;
     }
 
-    code = krb5_c_decrypt_iov(context, key, usage, pivd, data, num_data);
+    code = kg_translate_iov(context, token_offset, iov_count, iov, &kiov_count, &kiov);
+    if (code == 0) {
+	code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
+	free(kiov);
+    }
+
     if (pivd != NULL)
         free(pivd->data);
 
     return code;
 }
+
 krb5_error_code
 kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
                         const unsigned char *kd_data, size_t kd_data_len,
-                        krb5_crypto_iov *data, size_t num_data)
+                        size_t token_offset,
+                        size_t iov_count, gss_iov_buffer_desc *iov)
 {
     krb5_error_code code;
     krb5_data input, output;
     krb5int_access kaccess;
     krb5_keyblock seq_enc_key, usage_key;
     unsigned char t[4];
+    size_t kiov_count = 0;
+    krb5_crypto_iov *kiov = NULL;
 
     usage_key.length = longterm_key->length;
     usage_key.contents = malloc(usage_key.length);
@@ -343,7 +440,7 @@ kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
     output.data = (void *) usage_key.contents;
     output.length = usage_key.length;
     code = (*kaccess.krb5_hmac_iov) (kaccess.md5_hash_provider,
-                                     longterm_key, data, num_data, &output);
+                                     longterm_key, kiov, kiov_count, &output);
     if (code)
         goto cleanup_arcfour;
 
@@ -351,16 +448,23 @@ kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
     input.length = kd_data_len;
     output.data = (void *) seq_enc_key.contents;
     code = (*kaccess.krb5_hmac_iov) (kaccess.md5_hash_provider,
-                                     &usage_key, data, num_data, &output);
+                                     &usage_key, kiov, kiov_count, &output);
     if (code)
         goto cleanup_arcfour;
+
+    code = kg_translate_iov(NULL /* XXX */, token_offset, iov_count, iov, &kiov_count, &kiov);
+    if (code)
+	goto cleanup_arcfour;
+
     code =  ((*kaccess.arcfour_enc_provider->encrypt_iov)(
                  &seq_enc_key, 0,
-                 data, num_data));
+                 kiov, kiov_count));
 cleanup_arcfour:
     memset ((void *) seq_enc_key.contents, 0, seq_enc_key.length);
     memset ((void *) usage_key.contents, 0, usage_key.length);
     free ((void *) usage_key.contents);
     free ((void *) seq_enc_key.contents);
+    if (kiov != NULL)
+	free(kiov);
     return (code);
 }

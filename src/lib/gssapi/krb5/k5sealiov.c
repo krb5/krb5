@@ -359,6 +359,25 @@ make_seal_token_v1_iov(krb5_context context,
     if (conf_req_flag) {
 	switch (ctx->sealalg) {
 	case SEAL_ALG_MICROSOFT_RC4:
+	{
+	    unsigned char bigend_seqnum[4];
+	    krb5_keyblock *enc_key;
+	    int i;
+
+	    bigend_seqnum[0] = (ctx->seq_send >> 24) & 0xFF;
+	    bigend_seqnum[1] = (ctx->seq_send >> 16) & 0xFF;
+	    bigend_seqnum[2] = (ctx->seq_send >> 8 ) & 0xFF;
+	    bigend_seqnum[3] = (ctx->seq_send      ) & 0xFF;
+
+	    code = krb5_copy_keyblock(context, enc, &enc_key);
+	    if (code != 0)
+		goto cleanup;
+
+	    assert(enc_key->length == 16);
+
+	    for (i = 0; i < enc_key->length; i++)
+		((char *)enc_key->contents)[i] ^= 0xF0;
+
 	default:
 	    break;
 	}
