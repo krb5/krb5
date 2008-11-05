@@ -424,6 +424,8 @@ OM_uint32 kg_fixup_padding_iov(OM_uint32 *minor_status,
 
 int kg_map_toktype(int proto, int toktype);
 
+krb5_boolean kg_integ_only_iov(size_t iov_count, gss_iov_buffer_desc *iov);
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred

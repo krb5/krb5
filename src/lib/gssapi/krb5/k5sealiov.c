@@ -37,12 +37,14 @@ static krb5_error_code
 make_seal_token_v1_iov(krb5_context context,
 		       krb5_gss_ctx_id_rec *ctx,
 		       int conf_req_flag,
+		       int *conf_state,
 		       size_t iov_count,
 		       gss_iov_buffer_desc *iov,
 		       int toktype)
 {
     krb5_error_code code;
-    gss_iov_buffer_t token;
+    gss_iov_buffer_t header;
+    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
     krb5_checksum md5cksum;
     krb5_checksum cksum;
@@ -59,15 +61,22 @@ make_seal_token_v1_iov(krb5_context context,
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    if (token == NULL)
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    if (header == NULL)
 	return EINVAL;
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL)
 	return EINVAL;
 
-    assert(kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM) == NULL);
+    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    if (trailer != NULL)
+	trailer->buffer.length = 0;
+    else if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
+	return EINVAL;
+
+    if (kg_integ_only_iov(iov_count, iov) && conf_req_flag)
+	conf_req_flag = FALSE;
 
     /* Determine confounder length */
     if (conf_req_flag)
@@ -112,17 +121,17 @@ make_seal_token_v1_iov(krb5_context context,
     /* Determine token size */
     tlen = g_token_size(ctx->mech_used, 14 + ctx->cksum_size + tmsglen);
 
-    if (token->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-	token->buffer.value = xmalloc(tlen);
-	if (token->buffer.value == NULL)
+    if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+	header->buffer.value = xmalloc(tlen);
+	if (header->buffer.value == NULL)
 	    return ENOMEM;
-	token->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
-    } if (token->buffer.length < tlen) {
+	header->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
+    } if (header->buffer.length < tlen) {
 	return ERANGE;
     }
-    token->buffer.length = tlen;
+    header->buffer.length = tlen;
 
-    ptr = (unsigned char *)token->buffer.value;
+    ptr = (unsigned char *)header->buffer.value;
     g_make_token_header(ctx->mech_used, 14 + ctx->cksum_size + tmsglen, &ptr, toktype);
 
     /* 0..1 SIGN_ALG */
@@ -260,6 +269,9 @@ make_seal_token_v1_iov(krb5_context context,
 
     code = 0;
 
+    if (conf_state != NULL)
+	*conf_state = conf_req_flag;
+
 cleanup:
     kg_release_iov(iov_count, iov);
     krb5_free_checksum_contents(context, &md5cksum);
@@ -308,7 +320,7 @@ kg_seal_iov(OM_uint32 *minor_status,
 
     switch (ctx->proto) {
     case 0:
-	code = make_seal_token_v1_iov(context, ctx, conf_req_flag, iov_count, iov, toktype);
+	code = make_seal_token_v1_iov(context, ctx, conf_req_flag, conf_state, iov_count, iov, toktype);
 	break;
     case 1:
     default:
@@ -321,9 +333,6 @@ kg_seal_iov(OM_uint32 *minor_status,
 	save_error_info(*minor_status, context);
 	return GSS_S_FAILURE;
     }
-
-    if (conf_state != NULL)
-	*conf_state = conf_req_flag;
 
     *minor_status = 0;
 
@@ -341,11 +350,13 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		   gss_iov_buffer_desc *iov)
 {
     krb5_gss_ctx_id_rec *ctx;
-    gss_iov_buffer_t token;
+    gss_iov_buffer_t header;
+    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
-    size_t textlen, assoclen, tokenlen;
+    size_t textlen, assoclen, headerlen;
     krb5_error_code code;
     krb5_context context;
+    int dce_style;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
 	*minor_status = G_UNKNOWN_QOP;
@@ -362,14 +373,15 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	*minor_status = KG_CTX_INCOMPLETE;
 	return GSS_S_NO_CONTEXT;
     }
+    dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    if (token == NULL) {
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    if (header == NULL) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
-    token->buffer.length = 0;
-    token->buffer.value = NULL;
+    header->buffer.length = 0;
+    header->buffer.value = NULL;
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
@@ -378,6 +390,15 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     }
     padding->buffer.length = 0;
     padding->buffer.value = NULL;
+
+    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    if (trailer != NULL) {
+	trailer->buffer.length = 0;
+	trailer->buffer.value = NULL;
+    } else if (!dce_style) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
 
     kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
 
@@ -399,21 +420,21 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	 * else
 	 *     Header | H(Data | Header) | Data
 	 */
-	size_t headerlen = 0;
-	size_t padlen = 0;
-	size_t trailerlen = 0;
+	size_t k5_headerlen = 0;
+	size_t k5_padlen = 0;
+	size_t k5_trailerlen = 0;
 	krb5_enctype enctype = ctx->enc->enctype;
 
 	code = krb5_c_crypto_length(context, enctype,
 				    conf_req_flag ?
-					KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM, &trailerlen);
+					KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM, &k5_trailerlen);
 	if (code != 0) {
 	    *minor_status = code;
 	    return GSS_S_FAILURE;
 	}
 
 	if (conf_req_flag) {
-	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &headerlen);
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_FAILURE;
@@ -422,9 +443,9 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    /* RC4-HMAC DCE always pads even though it is a stream cipher, assume similar
 	     * weirdness for AES until we see otherwise */
 	    if (ctx->gss_flags & GSS_C_DCE_STYLE)
-		padlen = headerlen; /* assume this to be the block size */
+		k5_padlen = k5_headerlen; /* assume this to be the block size */
 	    else {
-		code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &padlen);
+		code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
 		if (code != 0) {
 		    *minor_status = code;
 		    return GSS_S_FAILURE;
@@ -433,11 +454,16 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
 	    /* Note because the GSS header is encrypted, it needs to be included when
 	     * calculating the pad.  */
-	    if (padlen != 0)
-		padding->buffer.length = padlen - ((16 + textlen - assoclen) % padlen);
+	    if (k5_padlen != 0)
+		padding->buffer.length = k5_padlen - ((16 + textlen - assoclen) % k5_padlen);
 	}
 
-	tokenlen = 16 /* Header */ + headerlen + 16 /* E(Header) */ + trailerlen;
+	if (dce_style) {
+	    headerlen = 16 /* Header */ + k5_headerlen + 16 /* E(Header) */ + k5_trailerlen;
+	} else {
+	    headerlen = 16 /* Header */ + k5_headerlen;
+	    trailer->buffer.length = 16 /* E(Header) */ + k5_trailerlen;
+	}
     } else {
 	/* Header | Checksum | Confounder | Data | Pad */
 	size_t conflen;
@@ -461,15 +487,15 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
 	    data_size += textlen;
 
-	tokenlen = g_token_size(ctx->mech_used, data_size);
+	headerlen = g_token_size(ctx->mech_used, data_size);
 
 	/* g_token_size() will include data_size as well as the overhead, so
 	 * subtract textlen just to get the overhead (ie. token size) */
 	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	    tokenlen -= textlen;
+	    headerlen -= textlen;
     }
 
-    token->buffer.length = tokenlen;
+    header->buffer.length = headerlen;
 
     if (conf_state != NULL)
 	*conf_state = conf_req_flag;

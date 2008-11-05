@@ -44,7 +44,7 @@ kg_unseal_v1_iov(krb5_context context,
 		 int toktype)
 {
     OM_uint32 code;
-    gss_iov_buffer_t token;
+    gss_iov_buffer_t header;
     unsigned char *ptr;
     int sealalg;
     int signalg;
@@ -62,17 +62,15 @@ kg_unseal_v1_iov(krb5_context context,
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    assert(token != NULL);
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    assert(header != NULL);
 
-    assert(kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM) == NULL);
-
-    if (token->buffer.length < 16) {
+    if (header->buffer.length < 16) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    ptr = ((unsigned char *)token->buffer.value) + 2; /* skip past TOK_ID */
+    ptr = ((unsigned char *)header->buffer.value) + 2; /* skip past TOK_ID */
    
     signalg  = ptr[0];
     signalg |= ptr[1] << 8;
@@ -188,7 +186,7 @@ kg_unseal_v1_iov(krb5_context context,
 	}
     }
 
-    if (token->buffer.length != 16 + cksum_len + conflen) {
+    if (header->buffer.length != 16 + cksum_len + conflen) {
 	retval = GSS_S_DEFECTIVE_TOKEN;
 	goto cleanup;
     }
@@ -314,7 +312,8 @@ kg_unseal_iov(OM_uint32 *minor_status,
     krb5_context context;
     unsigned char *ptr;
     int toktype2;
-    gss_iov_buffer_t token;
+    gss_iov_buffer_t header;
+    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
     size_t input_length;
     unsigned int bodysize;
@@ -330,20 +329,26 @@ kg_unseal_iov(OM_uint32 *minor_status,
 	return GSS_S_NO_CONTEXT;
     }
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    if (token == NULL) {
-	*minor_status = 0;
-	return GSS_S_DEFECTIVE_TOKEN;
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    if (header == NULL) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
     }
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
-	*minor_status = 0;
-	return GSS_S_DEFECTIVE_TOKEN;
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
     }
 
-    ptr = (unsigned char *)token->buffer.value;
-    input_length = token->buffer.length;
+    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    if (trailer == NULL && ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    ptr = (unsigned char *)header->buffer.value;
+    input_length = header->buffer.length;
 
     toktype2 = kg_map_toktype(ctx->proto, toktype);
 
@@ -378,6 +383,10 @@ kg_unseal_iov(OM_uint32 *minor_status,
     return code;
 }
 
+/*
+ * Split a STREAM into HEADER | DATA | PAD | TRAILER. All buffers
+ * must be supplied but only STREAM need be valid.
+ */
 OM_uint32
 kg_unseal_iov_length(OM_uint32 *minor_status,
 		     gss_ctx_id_t context_handle,
@@ -388,9 +397,11 @@ kg_unseal_iov_length(OM_uint32 *minor_status,
 		     int toktype)
 {
     krb5_gss_ctx_id_rec *ctx;
-    gss_iov_buffer_t token;
+    gss_iov_buffer_t header;
+    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
     gss_iov_buffer_t stream;
+    gss_iov_buffer_t data;
     unsigned char *ptr;
     unsigned int bodysize;
     krb5_error_code code;
@@ -409,18 +420,6 @@ kg_unseal_iov_length(OM_uint32 *minor_status,
 	return GSS_S_NO_CONTEXT;
     }
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    if (token == NULL) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    }
-
-    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-    if (padding == NULL) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    }
-
     stream = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM);
     if (stream == NULL) {
 	/* nothing to do, caller can just call kg_unseal_iov() */
@@ -429,6 +428,16 @@ kg_unseal_iov_length(OM_uint32 *minor_status,
     }
 
     if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    header  = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    data    = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_DATA);
+    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+
+    if (header == NULL || data == NULL || padding == NULL || trailer == NULL) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
@@ -452,33 +461,56 @@ kg_unseal_iov_length(OM_uint32 *minor_status,
 	conf_req_flag = (ptr[2] != 0xFF && ptr[3] != 0xFF);
     }
 
-    token->buffer.value = stream->buffer.value;
-    token->buffer.length = 16;
+    header->buffer.value = stream->buffer.value;
+    header->buffer.length = 16;
 
     if (ctx->proto) {
 	krb5_enctype enctype = ctx->enc->enctype;
 
 	if (conf_req_flag) {
-	    size_t headerlen = 0;
+	    size_t k5_headerlen = 0;
+	    size_t k5_trailerlen = 0;
 
-	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &headerlen);
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_FAILURE;
 	    }
-	    token->buffer.length += headerlen;
+	    header->buffer.length += k5_headerlen;
+
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
+	    if (code != 0) {
+		*minor_status = code;
+		return GSS_S_FAILURE;
+	    }
+	    trailer->buffer.length = 16 /* E(Header) */ + k5_trailerlen;
+	} else {
+	    size_t k5_cksumlen = 0;
+
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_CHECKSUM, &k5_cksumlen);
+	    if (code != 0) {
+		*minor_status = code;
+		return GSS_S_FAILURE;
+	    }
+
+	    trailer->buffer.length = k5_cksumlen;
 	}
     } else {
-	token->buffer.length += ctx->cksum_size;
+	header->buffer.length += ctx->cksum_size;
   
 	if (conf_req_flag)
-	    token->buffer.length += kg_confounder_size(context, ctx->enc);
+	    header->buffer.length += kg_confounder_size(context, ctx->enc);
+
+	trailer->buffer.length = 0;
     }
 
-    if (stream->buffer.length < token->buffer.length) {
+    if (stream->buffer.length < header->buffer.length + trailer->buffer.length) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
+
+    data->buffer.value = (unsigned char *)stream->buffer.value + header->buffer.length;
+    data->buffer.length = stream->buffer.length - trailer->buffer.length - header->buffer.length;
 
     padding->buffer.value = NULL;
     padding->buffer.length = 0; /* set on unwrap */

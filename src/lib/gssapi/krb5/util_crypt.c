@@ -249,7 +249,7 @@ kg_translate_iov(context, key, iov_count, iov, pkiov_count, pkiov)
     size_t *pkiov_count;
     krb5_crypto_iov **pkiov;
 {
-    gss_iov_buffer_desc *token;
+    gss_iov_buffer_desc *header;
     size_t i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
@@ -257,8 +257,8 @@ kg_translate_iov(context, key, iov_count, iov, pkiov_count, pkiov)
     *pkiov_count = 0;
     *pkiov = NULL;
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    assert(token != NULL);
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    assert(header != NULL);
 
     kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
@@ -277,7 +277,7 @@ kg_translate_iov(context, key, iov_count, iov, pkiov_count, pkiov)
 
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
     kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)key);
-    kiov[i].data.data = (char *)token->buffer.value + token->buffer.length - kiov[i].data.length;
+    kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - kiov[i].data.length;
     i++;
 
     for (j = 0; j < iov_count; j++) {
@@ -460,8 +460,9 @@ kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags)
 	else
 	    ktype = KRB5_CRYPTO_TYPE_DATA;
 	break;
-    case GSS_IOV_BUFFER_TYPE_IGNORE:
-    case GSS_IOV_BUFFER_TYPE_TOKEN:
+    case GSS_IOV_BUFFER_TYPE_EMPTY:
+    case GSS_IOV_BUFFER_TYPE_HEADER:
+    case GSS_IOV_BUFFER_TYPE_TRAILER:
     default:
 	ktype = KRB5_CRYPTO_TYPE_EMPTY;
 	break;
@@ -608,3 +609,19 @@ int kg_map_toktype(int proto, int toktype)
     return toktype2;
 }
 
+krb5_boolean kg_integ_only_iov(size_t iov_count, gss_iov_buffer_desc *iov)
+{
+    size_t i;
+    krb5_boolean integ_only = FALSE;
+
+    for (i = 0; i < iov_count; i++) {
+	if (iov[i].type != GSS_IOV_BUFFER_TYPE_DATA)
+	    continue;
+	if ((iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == FALSE) {
+	    integ_only = TRUE;
+	    break;
+	}
+    }
+
+    return integ_only;
+}
