@@ -88,9 +88,16 @@ make_seal_token_v1_iov(krb5_context context,
 	    break;
 	}
 
-	/* The caller must correctly pad the input buffer */
-	if ((textlen + padding->buffer.length) % blocksize != 0)
+	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+	    padding->buffer.length = blocksize - (textlen % blocksize);
+	    padding->buffer.value = xmalloc(padding->buffer.length);
+	    if (padding->buffer.value == NULL)
+		return ENOMEM;
+	    padding->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
+	} else if ((textlen + padding->buffer.length) % blocksize != 0) {
+	    /* The caller must correctly pad the input buffer */
 	    return KRB5_BAD_MSIZE;
+	}
 
 	if (ctx->gss_flags & GSS_C_DCE_STYLE)
 	    tmsglen = 0;
