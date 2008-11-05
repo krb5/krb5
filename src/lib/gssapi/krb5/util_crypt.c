@@ -86,7 +86,7 @@ kg_make_confounder(context, key, buf)
         return(code);
 
     lrandom.length = blocksize;
-    lrandom.data = buf;
+    lrandom.data = (char *)buf;
 
     return(krb5_c_random_make_octets(context, &lrandom));
 }
@@ -122,7 +122,7 @@ kg_encrypt(context, key, usage, iv, in, out, length)
     }
 
     inputd.length = length;
-    inputd.data = in;
+    inputd.data = (char *)in;
 
     outputd.ciphertext.length = length;
     outputd.ciphertext.data = out;
@@ -167,7 +167,7 @@ kg_decrypt(context, key, usage, iv, in, out, length)
 
     inputd.enctype = ENCTYPE_UNKNOWN;
     inputd.ciphertext.length = length;
-    inputd.ciphertext.data = in;
+    inputd.ciphertext.data = (char *)in;
 
     outputd.length = length;
     outputd.data = out;
@@ -239,6 +239,76 @@ cleanup_arcfour:
     return (code);
 }
 
+krb5_error_code
+kg_encrypt_iov(context, key, usage, iv, data, num_data)
+    krb5_context context;
+    krb5_keyblock *key;
+    int usage;
+    krb5_pointer iv;
+    krb5_crypto_iov *data;
+    size_t num_data;
+{
+    krb5_error_code code;
+    size_t blocksize;
+    krb5_data ivd, *pivd;
+
+    if (iv) {
+        code = krb5_c_block_size(context, key->enctype, &blocksize);
+        if (code)
+            return(code);
+
+        ivd.length = blocksize;
+        ivd.data = malloc(ivd.length);
+        if (ivd.data == NULL)
+            return ENOMEM;
+        memcpy(ivd.data, iv, ivd.length);
+        pivd = &ivd;
+    } else {
+        pivd = NULL;
+    }
+
+    code = krb5_c_encrypt_iov(context, key, usage, pivd, data, num_data);
+    if (pivd != NULL)
+        free(pivd->data);
+    return code;
+}
+
+/* length is the length of the cleartext. */
+
+krb5_error_code
+kg_decrypt_iov(context, key, usage, iv, data, num_data)
+    krb5_context context;
+    krb5_keyblock *key;
+    int usage;
+    krb5_pointer iv;
+    krb5_crypto_iov *data;
+    size_t num_data;
+{
+    krb5_error_code code;
+    size_t blocksize;
+    krb5_data ivd, *pivd;
+
+    if (iv) {
+        code = krb5_c_block_size(context, key->enctype, &blocksize);
+        if (code)
+            return(code);
+
+        ivd.length = blocksize;
+        ivd.data = malloc(ivd.length);
+        if (ivd.data == NULL)
+            return ENOMEM;
+        memcpy(ivd.data, iv, ivd.length);
+        pivd = &ivd;
+    } else {
+        pivd = NULL;
+    }
+
+    code = krb5_c_decrypt_iov(context, key, usage, pivd, data, num_data);
+    if (pivd != NULL)
+        free(pivd->data);
+
+    return code;
+}
 krb5_error_code
 kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
                         const unsigned char *kd_data, size_t kd_data_len,
