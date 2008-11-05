@@ -389,14 +389,13 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	 *     Header | ( Kerb-Header | E(Data | Pad | Header) | Kerb-Trailer )
 	 * else
 	 *     Header | Data | H(Data | Header)
-	 *
 	 */
 	size_t headerlen = 0;
 	size_t padlen = 0;
 	size_t trailerlen = 0;
-	krb5_enctype etype = ctx->enc->enctype;
+	krb5_enctype enctype = ctx->enc->enctype;
 
-	code = krb5_c_crypto_length(context, etype,
+	code = krb5_c_crypto_length(context, enctype,
 				    conf_req_flag ?
 					KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM, &trailerlen);
 	if (code != 0) {
@@ -405,7 +404,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	}
 
 	if (conf_req_flag) {
-	    code = krb5_c_crypto_length(context, etype, KRB5_CRYPTO_TYPE_HEADER, &headerlen);
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &headerlen);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_FAILURE;
@@ -414,12 +413,13 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    /* RC4-HMAC DCE always pads even though it is a stream cipher, assume similar
 	     * weirdness for AES until we see otherwise */
 	    if (ctx->gss_flags & GSS_C_DCE_STYLE)
-		code = krb5_c_block_size(context, etype, &padlen);
-	    else
-		code = krb5_c_crypto_length(context, etype, KRB5_CRYPTO_TYPE_PADDING, &padlen);
-	    if (code != 0) {
-		*minor_status = code;
-		return GSS_S_FAILURE;
+		padlen = headerlen; /* assume this to be the block size */
+	    else {
+		code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &padlen);
+		if (code != 0) {
+		    *minor_status = code;
+		    return GSS_S_FAILURE;
+		}
 	    }
 
 	    /* Note because the GSS header is encrypted, it needs to be included when
