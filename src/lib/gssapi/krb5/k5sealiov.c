@@ -343,6 +343,8 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     gss_iov_buffer_t token;
     gss_iov_buffer_t padding;
     size_t textlen, assoclen, tokenlen;
+    krb5_error_code code;
+    krb5_context context;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
 	*minor_status = G_UNKNOWN_QOP;
@@ -365,31 +367,77 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
+    token->buffer.length = 0;
+    token->buffer.value = NULL;
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
+    padding->buffer.length = 0;
+    padding->buffer.value = NULL;
 
     kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
 
+    context = ctx->k5_context;
+
     if (ctx->proto == 1) {
-	/* Header | SND_SEQ | Kerb-Header | Kerb-Trailer | Data | Pad */
+	/*
+	 * Token layout:
+	 * if (conf_req_flag)
+	 *     Header | ( Kerb-Header | E(Data | Pad | Header) | Kerb-Trailer )
+	 * else
+	 *     Header | Data | H(Data | Header)
+	 *
+	 */
+	size_t headerlen = 0;
+	size_t padlen = 0;
+	size_t trailerlen = 0;
+	krb5_enctype etype = ctx->enc->enctype;
+
+	code = krb5_c_crypto_length(context, etype,
+				    conf_req_flag ?
+					KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM, &trailerlen);
+	if (code != 0) {
+	    *minor_status = code;
+	    return GSS_S_FAILURE;
+	}
+
+	if (conf_req_flag) {
+	    code = krb5_c_crypto_length(context, etype, KRB5_CRYPTO_TYPE_HEADER, &headerlen);
+	    if (code == 0)
+		code = krb5_c_crypto_length(context, etype, KRB5_CRYPTO_TYPE_PADDING, &padlen);
+	    if (code != 0) {
+		*minor_status = code;
+		return GSS_S_FAILURE;
+	    }
+	    /* Note because the GSS header is encrypted, it needs to be included when
+	     * calculating the pad */
+	    if (padlen != 0)
+		padding->buffer.length = padlen - ((16 + textlen - assoclen) % padlen);
+	}
+
+	tokenlen = 16 /* Header */ + headerlen + 16 /* E(Header) */ + trailerlen;
     } else {
-	/* Header | SND_SEQ | Checksum | Confounder | Data | Pad */
-	size_t conflen = kg_confounder_size(ctx->k5_context, ctx->enc);
+	/* Header | Checksum | Confounder | Data | Pad */
+	size_t conflen;
 	size_t data_size;
 
-	/* For some reason, DCE uses 8 bytes padding for rc4-hmac */
-	if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4 &&
-	    (ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	    padding->buffer.length = 1;
-	else
-	    padding->buffer.length = 8 - ((textlen - assoclen) % 8);
-	padding->buffer.value = NULL;
+	if (conf_req_flag) {
+	    /* For some reason, DCE uses 8 bytes padding for rc4-hmac */
+	    if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4 &&
+		(ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
+		padding->buffer.length = 1;
+	    else
+		padding->buffer.length = 8 - ((textlen - assoclen) % 8);
+	    conflen = kg_confounder_size(context, ctx->enc);
+	} else {
+	    padding->buffer.length = 0;
+	    conflen = 0;
+	}
 
-	data_size = 6 /* Header */ + 8 /* SND_SEQ */ + ctx->cksum_size + conflen;
+	data_size = 14 /* Header */ + ctx->cksum_size + conflen;
 
 	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
 	    data_size += textlen;
@@ -403,7 +451,6 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     }
 
     token->buffer.length = tokenlen;
-    token->buffer.value = NULL;
 
     return 0;
 }
