@@ -121,16 +121,16 @@ typedef struct gss_iov_buffer_desc_struct {
 /*
  * AEAD extensions
  */
-#define GSS_IOV_BUFFER_TYPE_IGNORE	0
-#define GSS_IOV_BUFFER_TYPE_TOKEN	1
-#define GSS_IOV_BUFFER_TYPE_PADDING	2
-#define GSS_IOV_BUFFER_TYPE_STREAM	3
-#define GSS_IOV_BUFFER_TYPE_DATA	6
+#define GSS_IOV_BUFFER_TYPE_EMPTY	    0	/* ignore */
+#define GSS_IOV_BUFFER_TYPE_DATA	    1	/* data to be encrypted/signed */
+#define GSS_IOV_BUFFER_TYPE_TRAILER	    6
+#define GSS_IOV_BUFFER_TYPE_HEADER	    7
+#define GSS_IOV_BUFFER_TYPE_PADDING	    9
+#define GSS_IOV_BUFFER_TYPE_STREAM	    10
 
-#define GSS_IOV_BUFFER_FLAG_ALLOCATE	1
-#define GSS_IOV_BUFFER_FLAG_ALLOCATED	2
-#define GSS_IOV_BUFFER_FLAG_SIGN_ONLY	4
-#define GSS_IOV_BUFFER_FLAG_WRAPPED	8
+#define GSS_IOV_BUFFER_FLAG_ALLOCATE	    1
+#define GSS_IOV_BUFFER_FLAG_ALLOCATED	    2
+#define GSS_IOV_BUFFER_FLAG_SIGN_ONLY	    4
 
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (
@@ -161,6 +161,7 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
     size_t,		/* iov_count */
     gss_iov_buffer_desc *); /* iov */
 
+#if 0
 OM_uint32 KRB5_CALLCONV gss_unwrap_iov_length
 (
     OM_uint32 *,	/* minor_status */
@@ -169,6 +170,7 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_iov_length
     gss_qop_t *,	/* qop_req */
     size_t,		/* iov_count */
     gss_iov_buffer_desc *); /* iov */
+#endif
 
 #ifdef __cplusplus
 }
