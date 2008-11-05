@@ -406,14 +406,24 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
 	if (conf_req_flag) {
 	    code = krb5_c_crypto_length(context, etype, KRB5_CRYPTO_TYPE_HEADER, &headerlen);
-	    if (code == 0)
+	    if (code != 0) {
+		*minor_status = code;
+		return GSS_S_FAILURE;
+	    }
+
+	    /* RC4-HMAC DCE always pads even though it is a stream cipher, assume similar
+	     * weirdness for AES until we see otherwise */
+	    if (ctx->gss_flags & GSS_C_DCE_STYLE)
+		code = krb5_c_block_size(context, etype, &padlen);
+	    else
 		code = krb5_c_crypto_length(context, etype, KRB5_CRYPTO_TYPE_PADDING, &padlen);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_FAILURE;
 	    }
+
 	    /* Note because the GSS header is encrypted, it needs to be included when
-	     * calculating the pad */
+	     * calculating the pad.  */
 	    if (padlen != 0)
 		padding->buffer.length = padlen - ((16 + textlen - assoclen) % padlen);
 	}
