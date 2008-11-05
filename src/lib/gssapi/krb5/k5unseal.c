@@ -515,23 +515,8 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
 
     ptr = (unsigned char *) input_token_buffer->value;
 
-    if (ctx->proto)
-        switch (toktype) {
-        case KG_TOK_SIGN_MSG:
-            toktype2 = 0x0404;
-            break;
-        case KG_TOK_SEAL_MSG:
-            toktype2 = 0x0504;
-            break;
-        case KG_TOK_DEL_CTX:
-            toktype2 = 0x0405;
-            break;
-        default:
-            toktype2 = toktype;
-            break;
-        }
-    else
-        toktype2 = toktype;
+    toktype2 = kg_map_toktype(ctx->proto, toktype);
+
     err = g_verify_token_header(ctx->mech_used,
                                 &bodysize, &ptr, toktype2,
                                 input_token_buffer->length,

@@ -336,8 +336,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		   gss_qop_t qop_req,
 		   int *conf_state,
 		   size_t iov_count,
-		   gss_iov_buffer_desc *iov,
-		   int toktype)
+		   gss_iov_buffer_desc *iov)
 {
     krb5_gss_ctx_id_rec *ctx;
     gss_iov_buffer_t token;
@@ -464,8 +463,6 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     if (conf_state != NULL)
 	*conf_state = conf_req_flag;
-
-    *minor_status = 0;
 
     return GSS_S_COMPLETE;
 }

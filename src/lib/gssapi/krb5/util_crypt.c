@@ -583,3 +583,28 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     return GSS_S_COMPLETE;
 }
 
+int kg_map_toktype(int proto, int toktype)
+{
+    int toktype2;
+
+    if (proto)
+        switch (toktype) {
+        case KG_TOK_SIGN_MSG:
+            toktype2 = 0x0404;
+            break;
+        case KG_TOK_SEAL_MSG:
+            toktype2 = 0x0504;
+            break;
+        case KG_TOK_DEL_CTX:
+            toktype2 = 0x0405;
+            break;
+        default:
+            toktype2 = toktype;
+            break;
+        }
+    else
+        toktype2 = toktype;
+
+    return toktype2;
+}
+

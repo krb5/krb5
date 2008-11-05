@@ -341,25 +341,9 @@ kg_unseal_iov(OM_uint32 *minor_status,
     }
 
     ptr = (unsigned char *)token->buffer.value;
-    if (ctx->proto) {
-	switch (toktype) {
-	case KG_TOK_SIGN_MSG:
-	    toktype2 = 0x0404;
-	    break;
-	case KG_TOK_SEAL_MSG:
-	    toktype2 = 0x0504;
-	    break;
-	case KG_TOK_DEL_CTX:
-	    toktype2 = 0x040f;
-	    break;
-	default:
-	    toktype2 = toktype;
-	    break;
-	}
-    } else
-	toktype2 = toktype;
-
     input_length = token->buffer.length;
+
+    toktype2 = kg_map_toktype(ctx->proto, toktype);
 
     if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
 	size_t data_length, assoc_data_length;
@@ -390,5 +374,121 @@ kg_unseal_iov(OM_uint32 *minor_status,
 	save_error_info(*minor_status, context);
 
     return code;
+}
+
+OM_uint32
+kg_unseal_iov_length(OM_uint32 *minor_status,
+		     gss_ctx_id_t context_handle,
+		     int *conf_state,
+		     gss_qop_t *qop_state,
+		     size_t iov_count,
+		     gss_iov_buffer_desc *iov,
+		     int toktype)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    gss_iov_buffer_t token;
+    gss_iov_buffer_t padding;
+    gss_iov_buffer_t stream;
+    unsigned char *ptr;
+    unsigned int bodysize;
+    krb5_error_code code;
+    int toktype2;
+    krb5_context context;
+    int conf_req_flag;
+
+    if (!kg_validate_ctx_id(context_handle)) {
+	*minor_status = G_VALIDATE_FAILED;
+	return GSS_S_NO_CONTEXT;
+    }
+
+    ctx = (krb5_gss_ctx_id_rec *)context_handle;
+    if (!ctx->established) {
+	*minor_status = KG_CTX_INCOMPLETE;
+	return GSS_S_NO_CONTEXT;
+    }
+
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    if (token == NULL) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    if (padding == NULL) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    stream = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM);
+    if (stream == NULL) {
+	/* nothing to do, caller can just call kg_unseal_iov() */
+	*minor_status = 0;
+	return GSS_S_COMPLETE;
+    }
+
+    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    ptr = (unsigned char *)stream->buffer.value;
+
+    toktype2 = kg_map_toktype(ctx->proto, toktype);
+
+    code = g_verify_token_header(ctx->mech_used,
+				 &bodysize, &ptr, toktype2,
+				 stream->buffer.length,
+				 !ctx->proto);
+    if (code != 0 || stream->buffer.length < 16) {
+	*minor_status = code;
+	return GSS_S_DEFECTIVE_TOKEN;
+    }
+
+    if (ctx->proto) {
+	conf_req_flag = ((ptr[0] & 1) != 0); /* Sealed */
+    } else {
+	conf_req_flag = (ptr[2] != 0xFF && ptr[3] != 0xFF);
+    }
+
+    token->buffer.value = stream->buffer.value;
+    token->buffer.length = 16;
+
+    if (ctx->proto) {
+	krb5_enctype enctype = ctx->enc->enctype;
+
+	if (conf_req_flag) {
+	    size_t headerlen = 0;
+
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &headerlen);
+	    if (code != 0) {
+		*minor_status = code;
+		return GSS_S_FAILURE;
+	    }
+	    token->buffer.length += headerlen;
+	}
+    } else {
+	token->buffer.length += ctx->cksum_size;
+  
+	if (conf_req_flag)
+	    token->buffer.length += kg_confounder_size(context, ctx->enc);
+    }
+
+    if (stream->buffer.length < token->buffer.length) {
+	*minor_status = 0;
+	return GSS_S_DEFECTIVE_TOKEN;
+    }
+
+    padding->buffer.value = NULL;
+    padding->buffer.length = 0; /* set on unwrap */
+
+    if (conf_state != NULL)
+	*conf_state = conf_req_flag;
+
+    if (qop_state != NULL)
+	*qop_state = GSS_C_QOP_DEFAULT;
+
+    *minor_status = 0;
+
+    return GSS_S_COMPLETE;
 }
 

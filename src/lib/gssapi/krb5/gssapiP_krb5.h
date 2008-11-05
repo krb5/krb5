@@ -399,11 +399,30 @@ OM_uint32 kg_unseal_iov (OM_uint32 *minor_status,
 	    gss_iov_buffer_desc *iov,
 	    int toktype);
 
+OM_uint32 kg_seal_iov_length(OM_uint32 *minor_status,
+	   gss_ctx_id_t context_handle,
+	   int conf_req_flag,
+	   gss_qop_t qop_req,
+	   int *conf_state,
+	   size_t iov_count,
+	   gss_iov_buffer_desc *iov);
+
+OM_uint32
+kg_unseal_iov_length(OM_uint32 *minor_status,
+	   gss_ctx_id_t context_handle,
+	   int *conf_state,
+	   gss_qop_t *qop_req,
+	   size_t iov_count,
+	   gss_iov_buffer_desc *iov,
+	   int toktype);
+
 krb5_cryptotype kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags);
 
 OM_uint32 kg_fixup_padding_iov(OM_uint32 *minor_status,
 	size_t iov_count,
 	gss_iov_buffer_desc *iov);
+
+int kg_map_toktype(int proto, int toktype);
 
 /** declarations of internal name mechanism functions **/
 
