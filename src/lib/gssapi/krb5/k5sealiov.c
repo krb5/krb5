@@ -179,7 +179,7 @@ make_seal_token_v1_iov(krb5_context context,
 
     switch (ctx->signalg) {
     case SGN_ALG_DES_MAC_MD5:
-    case 3:
+    case SGN_ALG_3:
 	code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
 			  (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
 			   ctx->seq->contents : NULL),

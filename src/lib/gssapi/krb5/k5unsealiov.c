@@ -172,16 +172,13 @@ kg_unseal_v1_iov(krb5_context context,
 	assert(ctx->big_endian == 0);
 
 	conflen = kg_confounder_size(context, ctx->enc);
-
-	if (token->buffer.length != 16 + cksum_len + conflen) {
-	    retval = GSS_S_DEFECTIVE_TOKEN;
-	    goto cleanup;
-	}
     } else {
-	if (token->buffer.length != 16 + cksum_len) {
-	    retval = GSS_S_DEFECTIVE_TOKEN;
-	    goto cleanup;
-	}
+	conflen = 0;
+    }
+
+    if (token->buffer.length != 16 + cksum_len + conflen) {
+	retval = GSS_S_DEFECTIVE_TOKEN;
+	goto cleanup;
     }
 
     /* compute the checksum of the message */
@@ -210,20 +207,19 @@ kg_unseal_v1_iov(krb5_context context,
 	retval = GSS_S_FAILURE;
 	goto cleanup;
     }
-
     md5cksum.length = sumlen;
+
+    /* compute the checksum of the message */
+    code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
+			   sign_usage, iov_count, iov, &md5cksum);
+    if (code != 0) {
+	retval = GSS_S_FAILURE;
+	goto cleanup;
+    }
 
     switch (signalg) {
     case SGN_ALG_DES_MAC_MD5:
     case SGN_ALG_3:
-	/* compute the checksum of the message */
-	code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
-			       sign_usage, iov_count, iov, &md5cksum);
-	if (code != 0) {
-	    retval = GSS_S_FAILURE;
-	    goto cleanup;
-	}
-
 	code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
 			  (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
 			   ctx->seq->contents : NULL),
@@ -233,47 +229,13 @@ kg_unseal_v1_iov(krb5_context context,
 	    goto cleanup;
 	}
 
-	if (signalg == 0)
-	    cksum.length = 8;
-	else
-	    cksum.length = 16;
+	cksum.length = signalg == 0 ? 8 : 16;
 	cksum.contents = md5cksum.contents + 16 - cksum.length;
 
 	code = memcmp(cksum.contents, ptr + 14, cksum.length);
 	break;
-    case SGN_ALG_MD2_5: {
-	unsigned char tmp[16];
-
-	if (!ctx->seed_init &&
-	    (code = kg_make_seed(context, ctx->subkey, ctx->seed))) {
-	    *minor_status = code;
-	    retval = GSS_S_FAILURE;
-	}
-
-	memcpy(tmp, (unsigned char *)token->buffer.value + 8, 16);
-	memcpy((unsigned char *)token->buffer.value + 8, ctx->seed, sizeof(ctx->seed));
-
-	code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
-			       sign_usage, iov_count, iov, &md5cksum);
-
-	memcpy((unsigned char *)token->buffer.value + 8, tmp, 16);
-
-	if (code != 0) {
-	    retval = GSS_S_FAILURE;
-	    goto cleanup;
-	}
-	code = memcmp(cksum.contents, ptr + 14, cksum.length);
-	break;
-	}
     case SGN_ALG_HMAC_SHA1_DES3_KD:
     case SGN_ALG_HMAC_MD5:
-	/* compute the checksum of the message */
-	code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
-			       sign_usage, iov_count, iov, &md5cksum);
-	if (code != 0) {
-	    retval = GSS_S_FAILURE;
-	    goto cleanup;
-	}
 	code = memcmp(md5cksum.contents, ptr + 14, cksum_len);
 	break;
     default:
@@ -283,7 +245,8 @@ kg_unseal_v1_iov(krb5_context context,
 	break;
     }
 
-    if (code) {
+    if (code != 0) {
+	code = 0;
 	retval = GSS_S_BAD_SIG;
 	goto cleanup;
     }
