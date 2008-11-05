@@ -69,6 +69,7 @@
  */
 #include "gssapi_krb5.h"
 #include "gssapi_err_krb5.h"
+#include "gssapi_ext.h"
 
 /* for debugging */
 #undef CFX_EXERCISE
@@ -330,6 +331,37 @@ OM_uint32 kg_get_ccache_name (OM_uint32 *minor_status,
 
 OM_uint32 kg_set_ccache_name (OM_uint32 *minor_status,
                               const char *name);
+
+/* AEAD */
+
+gss_iov_buffer_t kg_locate_iov (size_t iov_count,
+	      gss_iov_buffer_desc *iov,
+	      OM_uint32 type);
+
+size_t kg_iov_msglen(size_t iov_count,
+	      gss_iov_buffer_desc *iov,
+	      int conf_only_flag);
+
+void kg_release_iov(size_t iov_count,
+	       gss_iov_buffer_desc *iov);
+
+krb5_error_code kg_checksum_iov(krb5_context context,
+		krb5_cksumtype tpye,
+		krb5_keyblock *seq,
+		krb5_keyusage sign_usage,
+		size_t token_cksum_size,
+		size_t iov_count,
+		gss_iov_buffer_desc *iov,
+		krb5_checksum *checksum);
+
+OM_uint32 kg_seal_iov (OM_uint32 *minor_status,
+	    gss_ctx_id_t context_handle,
+	    int conf_req_flag,
+	    gss_qop_t qop_req,
+	    int *conf_state,
+	    size_t iov_count,
+	    gss_iov_buffer_desc *iov,
+	    int toktype);
 
 /** declarations of internal name mechanism functions **/
 

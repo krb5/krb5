@@ -98,9 +98,10 @@ kg_checksum_iov(krb5_context context,
 		krb5_cksumtype type,
 		krb5_keyblock *seq,
 		krb5_keyusage sign_usage,
+		size_t token_cksum_size,
 		size_t iov_count,
 		gss_iov_buffer_desc *iov,
-		krb5_checksum *checksum) /* length must be initialized on input */
+		krb5_checksum *checksum)
 {
     krb5_error_code code;
     gss_iov_buffer_desc *token;
@@ -111,32 +112,42 @@ kg_checksum_iov(krb5_context context,
     token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
     assert(token != NULL);
 
-    kiov_count = 1 /* Header */ + 1 /* Confounder */ + iov_count; /* Token | Data | Pad */
+    kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)xmalloc(kiov_count * sizeof(krb5_crypto_iov));
     if (kiov == NULL)
 	return ENOMEM;
 
     /* Checksum over ( Token.Header | Confounder | Data | Pad ) */
 
+    /* Checksum output */
+    kiov[i].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
+    kiov[i].data.length = checksum->length;
+    kiov[i].data.data = xmalloc(checksum->length);
+    if (kiov[i].data.data == NULL) {
+	xfree(kiov);
+	return ENOMEM;
+    }
+    i++;
+
     /* Token.Header */
     kiov[i].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     kiov[i].data.length = 8;
-    kiov[i++].data.data = (char *)token->buffer.value;
+    kiov[i].data.data = (char *)token->buffer.value;
+    i++;
 
     /* Confounder */
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
     kiov[i].data.length = 8;
-    kiov[i++].data.data = (char *)token->buffer.value + 16 + checksum->length;
+    kiov[i].data.data = (char *)token->buffer.value + 16 + token_cksum_size;
+    i++;
 
     for (j = 0; j < iov_count; j++) {
 	krb5_cryptotype ktype;
 
 	switch (iov[j].type) {
 	case GSS_IOV_BUFFER_TYPE_IGNORE:
-	    ktype = KRB5_CRYPTO_TYPE_EMPTY;
-	    break;
 	case GSS_IOV_BUFFER_TYPE_TOKEN:
-	    ktype = KRB5_CRYPTO_TYPE_CHECKSUM;
+	    ktype = KRB5_CRYPTO_TYPE_EMPTY;
 	    break;
 	case GSS_IOV_BUFFER_TYPE_PADDING:
 	    ktype = KRB5_CRYPTO_TYPE_PADDING;
@@ -153,22 +164,17 @@ kg_checksum_iov(krb5_context context,
 	}
 
 	kiov[i].flags = ktype;
-
-	if (iov[j].type == GSS_IOV_BUFFER_TYPE_TOKEN) {
-	    assert(token == &iov[j]);
-
-	    /* K5 checksum should be 16 bytes after token start */
-	    kiov[i].data.length = checksum->length;
-	    kiov[i].data.data = (char *)token->buffer.value + 16;
-	} else {
-	    kiov[i].data.length = iov[j].buffer.length;
-	    kiov[i].data.data = (char *)iov[j].buffer.value;
-        }
+	kiov[i].data.length = iov[j].buffer.length;
+	kiov[i].data.data = (char *)iov[j].buffer.value;
 
 	i++;
     }
 
     code = krb5_c_make_checksum_iov(context, type, seq, sign_usage, kiov, kiov_count);
+    if (code == 0) {
+	checksum->length = kiov[0].data.length;
+	checksum->contents = (unsigned char *)kiov[0].data.data;
+    }
 
     xfree(kiov);
 
@@ -197,6 +203,9 @@ make_seal_token_v1_iov(krb5_context context,
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
     assert(!conf_req_flag || toktype == KG_TOK_SEAL_MSG);
+
+    md5cksum.length = cksum.length = 0;
+    md5cksum.contents = cksum.contents = NULL;
 
     token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
     if (token == NULL) {
@@ -312,12 +321,40 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* compute the checksum */
     code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq,
-			   sign_usage, iov_count, iov, &md5cksum);
+			   sign_usage, ctx->cksum_size, iov_count, iov, &md5cksum);
     if (code != 0)
 	goto cleanup;
 
+    /* encrypt the data */
+    switch (ctx->signalg) {
+    case SGN_ALG_DES_MAC_MD5:
+    case 3:
+	code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
+			  (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
+			   ctx->seq->contents : NULL),
+			  md5cksum.contents, md5cksum.contents, 16);
+	if (code != 0)
+	    goto cleanup;
+	break;
+
+	cksum.length = ctx->cksum_size;
+	cksum.contents = md5cksum.contents + 16 - cksum.length;
+
+	memcpy(ptr + 14, cksum.contents, cksum.length);
+    case SGN_ALG_HMAC_SHA1_DES3_KD:
+	assert(md5cksum.length == ctx->cksum_size);
+	memcpy(ptr + 14, md5cksum.contents, md5cksum.length);
+	break;
+    case SGN_ALG_HMAC_MD5:
+	memcpy(ptr + 14, md5cksum.contents, ctx->cksum_size);
+	break;
+    }
+
+
+
 cleanup:
     kg_release_iov(iov_count, iov);
+    krb5_free_checksum_contents(context, &md5cksum);
 
     return code;
 }
