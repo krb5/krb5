@@ -362,8 +362,14 @@ kg_unseal_iov(OM_uint32 *minor_status,
     input_length = token->buffer.length;
 
     if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-	input_length += kg_iov_msglen(iov_count, iov, 0);
-	input_length += padding->buffer.length;
+	size_t data_length, assoc_data_length;
+
+	kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
+
+	if (padding->buffer.length != 0)
+	    return GSS_S_DEFECTIVE_TOKEN;
+
+	input_length += data_length;
     }
 
     code = g_verify_token_header(ctx->mech_used,

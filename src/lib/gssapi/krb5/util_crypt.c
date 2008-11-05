@@ -491,26 +491,31 @@ kg_locate_iov(size_t iov_count,
     return p;
 }
 
-size_t
+void
 kg_iov_msglen(size_t iov_count,
 	      gss_iov_buffer_desc *iov,
-	      int conf_only_flag)
+	      size_t *data_length_p,
+	      size_t *assoc_data_length_p)
 {
     size_t i;
-    size_t len = 0;
+    size_t data_length = 0, assoc_data_length = 0;
 
     assert(iov != NULL);
+
+    *data_length_p = *assoc_data_length_p = 0;
 
     for (i = 0; i < iov_count; i++) {
 	if (iov[i].type != GSS_IOV_BUFFER_TYPE_DATA)
 	    continue;
-	if (conf_only_flag &&
-	    (iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY))
-	    continue;
-	len += iov[i].buffer.length;
+
+	if (iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
+	    assoc_data_length += iov[i].buffer.length;
+
+	data_length += iov[i].buffer.length;
     }
 
-    return len;
+    *data_length_p = data_length;
+    *assoc_data_length_p = assoc_data_length;
 }
 
 void

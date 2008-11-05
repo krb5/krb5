@@ -365,9 +365,10 @@ gss_iov_buffer_t kg_locate_iov (size_t iov_count,
 	      gss_iov_buffer_desc *iov,
 	      OM_uint32 type);
 
-size_t kg_iov_msglen(size_t iov_count,
+void kg_iov_msglen(size_t iov_count,
 	      gss_iov_buffer_desc *iov,
-	      int conf_only_flag);
+	      size_t *data_length,
+	      size_t *assoc_data_length);
 
 void kg_release_iov(size_t iov_count,
 	       gss_iov_buffer_desc *iov);
