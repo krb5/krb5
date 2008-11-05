@@ -381,12 +381,25 @@ make_seal_token_v1_iov(krb5_context context,
 	    code = kg_arcfour_docrypt_iov(context, enc_key, 0,
 					  bigend_seqnum, 4,
 					  iov_count, iov);
+	    krb5_free_keyblock(context, enc_key);
+	    if (code != 0)
+		goto cleanup;
+
 	    break;
 	default:
+	    code = kg_encrypt_iov(context, ctx->enc, KG_USAGE_SEAL, NULL,
+				  iov_count, iov);
+	    if (code != 0)
+		goto cleanup;
 	    break;
 	}
 	}
     }
+
+    ctx->seq_send++;
+    ctx->seq_send &= 0xFFFFFFFFL;
+
+    code = 0;
 
 cleanup:
     kg_release_iov(iov_count, iov);
@@ -436,6 +449,8 @@ kg_seal_iov(OM_uint32 *minor_status,
 
     switch (ctx->proto) {
     case 0:
+	code = make_seal_token_v1_iov(context, ctx, conf_req_flag, iov_count, iov, toktype);
+	break;
     case 1:
     default:
 	code = G_UNKNOWN_QOP;
