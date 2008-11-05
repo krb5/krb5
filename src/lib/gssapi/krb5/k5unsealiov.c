@@ -43,7 +43,7 @@ kg_unseal_v1_iov(krb5_context context,
 		 gss_qop_t *qop_state,
 		 int toktype)
 {
-    krb5_error_code code;
+    OM_uint32 code;
     gss_iov_buffer_t token;
     unsigned char *ptr;
     int sealalg;
@@ -52,7 +52,7 @@ kg_unseal_v1_iov(krb5_context context,
     krb5_checksum md5cksum;
     krb5_timestamp now;
     size_t cksum_len = 0;
-    size_t conflen;
+    size_t conflen = 0;
     int direction;
     krb5_ui_4 seqnum;
     OM_uint32 retval;
@@ -131,6 +131,8 @@ kg_unseal_v1_iov(krb5_context context,
 	return GSS_S_BAD_SIG;
     }
 
+    assert(ctx->big_endian == 0);
+
     /* decode the message, if SEAL */
     if (toktype == KG_TOK_SEAL_MSG) {
 	if (sealalg != 0xFFFF) {
@@ -167,13 +169,21 @@ kg_unseal_v1_iov(krb5_context context,
 		retval = GSS_S_FAILURE;
 		goto cleanup;
 	    }
+	    conflen = kg_confounder_size(context, ctx->enc);
+
+	    /*
+	     * For GSS_C_DCE_STYLE, the caller manages the padding, because the
+	     * pad length is in the RPC PDU. The value of the padding may be
+	     * uninitialized. For normal GSS, the last bytes of the decrypted
+	     * data contain the pad length. kg_fixup_padding_iov() will find
+	     * this and fixup the last data IOV and padding IOV appropriately.
+	     */
+	    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+		retval = kg_fixup_padding_iov(&code, iov_count, iov);
+		if (retval != GSS_S_COMPLETE)
+		    goto cleanup;
+	    }
 	}
-
-	assert(ctx->big_endian == 0);
-
-	conflen = kg_confounder_size(context, ctx->enc);
-    } else {
-	conflen = 0;
     }
 
     if (token->buffer.length != 16 + cksum_len + conflen) {

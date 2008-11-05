@@ -400,6 +400,10 @@ OM_uint32 kg_unseal_iov (OM_uint32 *minor_status,
 
 krb5_cryptotype kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags);
 
+OM_uint32 kg_fixup_padding_iov(OM_uint32 *minor_status,
+	size_t iov_count,
+	gss_iov_buffer_desc *iov);
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred

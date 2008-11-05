@@ -60,13 +60,12 @@ make_seal_token_v1_iov(krb5_context context,
     md5cksum.contents = cksum.contents = NULL;
 
     token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    if (token == NULL) {
+    if (token == NULL)
 	return EINVAL;
-    }
+
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-    if (padding == NULL) {
+    if (padding == NULL)
 	return EINVAL;
-    }
 
     /* Determine confounder length */
     if (conf_req_flag)
@@ -328,5 +327,51 @@ kg_seal_iov(OM_uint32 *minor_status,
     *minor_status = 0;
 
     return (ctx->endtime < now) ? GSS_S_CONTEXT_EXPIRED : GSS_S_COMPLETE;
+}
+
+
+OM_uint32
+kg_seal_iov_length(OM_uint32 *minor_status,
+		   gss_ctx_id_t context_handle,
+		   int conf_req_flag,
+		   gss_qop_t qop_req,
+		   int *conf_state,
+		   size_t iov_count,
+		   gss_iov_buffer_desc *iov,
+		   int toktype)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    gss_iov_buffer_t token;
+    gss_iov_buffer_t padding;
+
+    if (qop_req != GSS_C_QOP_DEFAULT) {
+	*minor_status = G_UNKNOWN_QOP;
+	return GSS_S_FAILURE;
+    }
+
+    if (!kg_validate_ctx_id(context_handle)) {
+	*minor_status = G_VALIDATE_FAILED;
+	return GSS_S_NO_CONTEXT;
+    }
+
+    ctx = (krb5_gss_ctx_id_rec *)context_handle;
+    if (!ctx->established) {
+	*minor_status = KG_CTX_INCOMPLETE;
+	return GSS_S_NO_CONTEXT;
+    }
+
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    if (token == NULL) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    if (ctx->proto == 1) {
+	/* Header | SND_SEQ | Kerb-Header | Kerb-Trailer | Data | Pad */
+    } else {
+	/* Header | SND_SEQ | Checksum | Confounder | Data | Pad */
+    }
+
+    return 0;
 }
 

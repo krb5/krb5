@@ -529,4 +529,52 @@ kg_release_iov(size_t iov_count,
 	}
     }
 }
-   
+
+OM_uint32
+kg_fixup_padding_iov(OM_uint32 *minor_status,
+		     size_t iov_count,
+		     gss_iov_buffer_desc *iov)
+{
+    size_t i;
+    gss_iov_buffer_t padding = NULL;
+    gss_iov_buffer_t data = NULL;
+    unsigned char *p, padlength;
+
+    for (i = iov_count - 1; i >= 0; i--) {
+	gss_iov_buffer_t piov = &iov[i];
+
+	if (piov->type == GSS_IOV_BUFFER_TYPE_PADDING) {
+	    if (padding != NULL) {
+		*minor_status = EINVAL;
+		return GSS_S_FAILURE;
+	    }
+
+	    padding = piov;
+	} else if (data == NULL &&
+	    piov->type == GSS_IOV_BUFFER_TYPE_DATA &&
+	    (piov->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0) {
+	    data = piov; /* last data that was encrypted */
+	}
+    }
+
+    if (padding == NULL || data == NULL) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    p = (unsigned char *)data->buffer.value;
+    padlength = p[data->buffer.length - 1];
+
+    if (data->buffer.length < padlength) {
+	*minor_status = ERANGE;
+	return GSS_S_DEFECTIVE_TOKEN;
+    }
+
+    data->buffer.length -= padlength;
+
+    padding->buffer.length = padlength;
+    padding->buffer.value = (unsigned char *)data->buffer.value + data->buffer.length;
+
+    return GSS_S_COMPLETE;
+}
+
