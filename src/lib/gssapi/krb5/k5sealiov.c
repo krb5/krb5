@@ -89,7 +89,7 @@ make_seal_token_v1_iov(krb5_context context,
 	}
 
 	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-	    padding->buffer.length = blocksize - (textlen % blocksize);
+	    padding->buffer.length = (blocksize == 1) ? 1 : blocksize - (textlen % blocksize);
 	    padding->buffer.value = xmalloc(padding->buffer.length);
 	    if (padding->buffer.value == NULL)
 		return ENOMEM;
