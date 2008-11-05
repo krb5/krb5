@@ -18,7 +18,8 @@ ETHDRS= gssapi_err_generic.h
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 
 HDRS=	$(EHDRDIR)$(S)gssapi.h \
-	$(EHDRDIR)$(S)gssapi_generic.h
+	$(EHDRDIR)$(S)gssapi_generic.h \
+	$(EHDRDIR)$(S)gssapi_ext.h
 
 MK_EHDRDIR=if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)); fi
 ##DOS##MK_EHDRDIR=rem
@@ -29,6 +30,8 @@ $(EHDRDIR)$(S)gssapi.h: $(EHDRDIR)$(S)timestamp gssapi.h
 	$(CP) gssapi.h $@
 $(EHDRDIR)$(S)gssapi_generic.h: $(EHDRDIR)$(S)timestamp $(srcdir)$(S)gssapi_generic.h
 	$(CP) $(srcdir)$(S)gssapi_generic.h $@
+$(EHDRDIR)$(S)gssapi_ext.h: $(EHDRDIR)$(S)timestamp $(srcdir)$(S)gssapi_ext.h
+	$(CP) $(srcdir)$(S)gssapi_ext.h $@
 
 $(EHDRDIR)$(S)timestamp:
 	$(MK_EHDRDIR)
@@ -105,7 +108,7 @@ STLIBOBJS = \
 	util_validate.o \
 	gssapi_err_generic.o
 
-EXPORTED_HEADERS= gssapi_generic.h
+EXPORTED_HEADERS= gssapi_generic.h gssapi_ext.h
 EXPORTED_BUILT_HEADERS= gssapi.h
 
 $(OBJS): $(EXPORTED_HEADERS) $(ETHDRS)
