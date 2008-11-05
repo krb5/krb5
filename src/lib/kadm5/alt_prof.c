@@ -92,7 +92,7 @@ krb5_aprof_init(fname, envname, acontextp)
 	krb5int_buf_add(&buf, filenames[i]);
     }
     krb5_free_config_files(filenames);
-    profile_path = krb5int_buf_cstr(&buf);
+    profile_path = krb5int_buf_data(&buf);
     if (profile_path == NULL)
 	return ENOMEM;
     profile = (profile_t) NULL;

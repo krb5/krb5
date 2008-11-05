@@ -188,7 +188,7 @@ krb5_flags_to_string(flags, sep, buffer, buflen)
 	    pflags |= flags_table[i].fl_flags;
 	}
     }
-    if (krb5int_buf_cstr(&buf) == NULL)
+    if (krb5int_buf_data(&buf) == NULL)
 	return(ENOMEM);
 
     /* See if there's any leftovers */

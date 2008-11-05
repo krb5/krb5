@@ -245,7 +245,7 @@ static void test_hmac()
 	krb5int_buf_add(&buf, "0x");
 	for (j = 0; j < out.length; j++)
 	    krb5int_buf_add_fmt(&buf, "%02x", 0xff & outbuf[j]);
-	if (krb5int_buf_cstr(&buf) == NULL)
+	if (krb5int_buf_data(&buf) == NULL)
 	    abort();
 	if (strcmp(stroutbuf, md5tests[i].hexdigest)) {
 	    printf("*** CHECK FAILED!\n"

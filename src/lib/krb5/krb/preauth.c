@@ -444,7 +444,7 @@ char *handle_sam_labels(krb5_sam_challenge *sc)
     }
     krb5int_buf_add_len(&buf, prompt, prompt_len);
     krb5int_buf_add(&buf, ": ");
-    return krb5int_buf_cstr(&buf);
+    return krb5int_buf_data(&buf);
 }
 
 /*

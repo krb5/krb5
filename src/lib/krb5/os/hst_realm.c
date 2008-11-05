@@ -119,7 +119,7 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
 	if (len > 0 && host[len - 1] != '.')
 	    krb5int_buf_add(&buf, ".");
     }
-    if (krb5int_buf_cstr(&buf) == NULL)
+    if (krb5int_buf_data(&buf) == NULL)
 	return KRB5_ERR_HOST_REALM_UNKNOWN;
     ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
     if (ret < 0)

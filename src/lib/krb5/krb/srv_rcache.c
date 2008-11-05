@@ -66,7 +66,7 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
     krb5int_buf_add_fmt(&buf, "_%lu", uid);
 #endif
 
-    cachename = krb5int_buf_cstr(&buf);
+    cachename = krb5int_buf_data(&buf);
     if (cachename == NULL)
 	return ENOMEM;
 

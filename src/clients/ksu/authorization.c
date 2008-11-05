@@ -515,7 +515,7 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
 	for(j= 0; j < i; j ++)
 	    krb5int_buf_add_fmt(&buf, " %s ", fcmd_arr[j]);
 	krb5int_buf_add(&buf, "\n");
-	*err_out = krb5int_buf_cstr(&buf);
+	*err_out = krb5int_buf_data(&buf);
 	if (*err_out == NULL) {
 	    perror(prog_name);
 	    exit(1);

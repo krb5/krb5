@@ -99,7 +99,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
     if (len > 0 && host[len - 1] != '.')
 	krb5int_buf_add(&buf, ".");
 
-    if (krb5int_buf_cstr(&buf) == NULL)
+    if (krb5int_buf_data(&buf) == NULL)
 	return 0;
 
 #ifdef TEST

@@ -256,7 +256,7 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
 	}
     }
     krb5int_buf_add(&buf, "}");
-    bp = krb5int_buf_cstr(&buf);
+    bp = krb5int_buf_data(&buf);
     if (bp == NULL) {
 	*minor_status = ENOMEM;
 	return(GSS_S_FAILURE);
