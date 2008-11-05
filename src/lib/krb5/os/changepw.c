@@ -64,11 +64,12 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
     int sockType = (useTcp ? SOCK_STREAM : SOCK_DGRAM);
 
     code = krb5int_locate_server (context, realm, addrlist,
-				  locate_service_kpasswd, sockType, 0);
+				  locate_service_kpasswd, sockType, AF_INET);
 
     if (code == KRB5_REALM_CANT_RESOLVE || code == KRB5_REALM_UNKNOWN) {
 	code = krb5int_locate_server (context, realm, addrlist,
-				      locate_service_kadmin, SOCK_STREAM, 0);
+				      locate_service_kadmin, SOCK_STREAM,
+				      AF_INET);
 	if (!code) {
 	    /* Success with admin_server but now we need to change the
 	       port number to use DEFAULT_KPASSWD_PORT and the socktype.  */
