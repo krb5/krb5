@@ -462,6 +462,11 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     token->buffer.length = tokenlen;
 
-    return 0;
+    if (conf_state != NULL)
+	*conf_state = conf_req_flag;
+
+    *minor_status = 0;
+
+    return GSS_S_COMPLETE;
 }
 
