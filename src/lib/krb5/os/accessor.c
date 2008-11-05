@@ -53,6 +53,7 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #endif
 	    S (free_addrlist, krb5int_free_addrlist),
 	    S (krb5_hmac, krb5_hmac),
+	    S (krb5_hmac_iov, krb5_hmac_iov),
 	    S (md5_hash_provider, &krb5int_hash_md5),
 	    S (arcfour_enc_provider, &krb5int_enc_arcfour),
 	    S (sendto_udp, &krb5int_sendto),

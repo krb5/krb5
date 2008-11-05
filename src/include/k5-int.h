@@ -1906,6 +1906,10 @@ typedef struct _krb5int_access {
 				   const krb5_keyblock *key,
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
+    krb5_error_code (* krb5_hmac_iov) (const struct krb5_hash_provider *hash,
+				       const krb5_keyblock *key,
+				       const krb5_crypto_iov *data, size_t num_data,
+				       krb5_data *output);
     /* service location and communication */
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, struct sendto_callback_info*, krb5_data *reply,
