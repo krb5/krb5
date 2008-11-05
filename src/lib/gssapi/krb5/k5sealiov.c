@@ -49,7 +49,7 @@ make_seal_token_v1_iov(krb5_context context,
     size_t conflen;
     size_t textlen;
     size_t blocksize;
-    size_t cksumlen;
+    size_t sumlen;
     size_t tmsglen, tlen;
     unsigned char *ptr;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
@@ -157,10 +157,10 @@ make_seal_token_v1_iov(krb5_context context,
 	abort ();
     }
 
-    code = krb5_c_checksum_length(context, md5cksum.checksum_type, &cksumlen);
+    code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen);
     if (code != 0)
 	goto cleanup;
-    md5cksum.length = cksumlen;
+    md5cksum.length = sumlen;
 
     if (conflen != 0) {
 	code = kg_make_confounder(context, ctx->enc, ptr + 14 + ctx->cksum_size);
@@ -172,8 +172,8 @@ make_seal_token_v1_iov(krb5_context context,
     memset(padding->buffer.value, blocksize, padding->buffer.length);
 
     /* compute the checksum */
-    code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq,
-			   sign_usage, ctx->cksum_size, iov_count, iov, &md5cksum);
+    code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
+			   sign_usage, iov_count, iov, &md5cksum);
     if (code != 0)
 	goto cleanup;
 

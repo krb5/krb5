@@ -375,8 +375,8 @@ void kg_release_iov(size_t iov_count,
 krb5_error_code kg_checksum_iov(krb5_context context,
 		krb5_cksumtype tpye,
 		krb5_keyblock *seq,
+		krb5_keyblock *enc, /* for conf len */
 		krb5_keyusage sign_usage,
-		size_t token_cksum_size,
 		size_t iov_count,
 		gss_iov_buffer_desc *iov,
 		krb5_checksum *checksum);
