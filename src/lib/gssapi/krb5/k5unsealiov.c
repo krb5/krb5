@@ -1,6 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * lib/gssapi/krb5/k5sealiov.c
+ * lib/gssapi/krb5/k5unsealiov.c
  *
  * Copyright 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

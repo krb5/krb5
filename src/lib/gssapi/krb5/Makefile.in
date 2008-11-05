@@ -45,8 +45,10 @@ SRCS = \
 	$(srcdir)/inq_cred.c \
 	$(srcdir)/inq_names.c \
 	$(srcdir)/k5seal.c \
+	$(srcdir)/k5sealiov.c \
 	$(srcdir)/k5sealv3.c \
 	$(srcdir)/k5unseal.c \
+	$(srcdir)/k5unsealiov.c \
 	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/lucid_context.c \
 	$(srcdir)/process_context_token.c \
@@ -95,8 +97,10 @@ OBJS = \
 	$(OUTPRE)inq_cred.$(OBJEXT) \
 	$(OUTPRE)inq_names.$(OBJEXT) \
 	$(OUTPRE)k5seal.$(OBJEXT) \
+	$(OUTPRE)k5sealiov.$(OBJEXT) \
 	$(OUTPRE)k5sealv3.$(OBJEXT) \
 	$(OUTPRE)k5unseal.$(OBJEXT) \
+	$(OUTPRE)k5unsealiov.$(OBJEXT) \
 	$(OUTPRE)krb5_gss_glue.$(OBJEXT) \
 	$(OUTPRE)lucid_context.$(OBJEXT) \
 	$(OUTPRE)process_context_token.$(OBJEXT) \
@@ -145,8 +149,10 @@ STLIBOBJS = \
 	inq_cred.o \
 	inq_names.o \
 	k5seal.o \
+	k5sealiov.o \
 	k5sealv3.o \
 	k5unseal.o \
+	k5unsealiov.o \
 	krb5_gss_glue.o \
 	lucid_context.o \
 	process_context_token.o \
@@ -537,6 +543,18 @@ k5seal.so k5seal.po $(OUTPRE)k5seal.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h gssapiP_krb5.h gssapi_err_krb5.h \
   gssapi_krb5.h k5seal.c
+k5sealiov.so k5sealiov.po $(OUTPRE)k5sealiov.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h gssapiP_krb5.h gssapi_err_krb5.h \
+  gssapi_krb5.h k5sealiov.c
 k5sealv3.so k5sealv3.po $(OUTPRE)k5sealv3.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
@@ -561,6 +579,18 @@ k5unseal.so k5unseal.po $(OUTPRE)k5unseal.$(OBJEXT): \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
   gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h k5unseal.c
+k5unsealiov.so k5unsealiov.po $(OUTPRE)k5unsealiov.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h gssapiP_krb5.h gssapi_err_krb5.h \
+  gssapi_krb5.h k5unsealiov.c
 krb5_gss_glue.so krb5_gss_glue.po $(OUTPRE)krb5_gss_glue.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
