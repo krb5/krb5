@@ -129,11 +129,9 @@ kg_checksum_iov(krb5_context context,
     kiov[i++].data.data = (char *)token->buffer.value + 16 + checksum->length;
 
     for (j = 0; j < iov_count; j++) {
-	krb5_crypto_iov *pkiov = &kiov[i];
-	gss_iov_buffer_t piov = &iov[j];
 	krb5_cryptotype ktype;
 
-	switch (piov->type) {
+	switch (iov[j].type) {
 	case GSS_IOV_BUFFER_TYPE_IGNORE:
 	    ktype = KRB5_CRYPTO_TYPE_EMPTY;
 	    break;
@@ -144,7 +142,7 @@ kg_checksum_iov(krb5_context context,
 	    ktype = KRB5_CRYPTO_TYPE_PADDING;
 	    break;
 	case GSS_IOV_BUFFER_TYPE_DATA:
-	    if (piov->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
+	    if (iov[j].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
 		ktype = KRB5_CRYPTO_TYPE_SIGN_ONLY;
 	    else
 		ktype = KRB5_CRYPTO_TYPE_DATA;
@@ -156,12 +154,15 @@ kg_checksum_iov(krb5_context context,
 
 	kiov[i].flags = ktype;
 
-	if (piov->type == GSS_IOV_BUFFER_TYPE_TOKEN) {
+	if (iov[j].type == GSS_IOV_BUFFER_TYPE_TOKEN) {
+	    assert(token == &iov[j]);
+
+	    /* K5 checksum should be 16 bytes after token start */
 	    kiov[i].data.length = checksum->length;
 	    kiov[i].data.data = (char *)token->buffer.value + 16;
 	} else {
-	    kiov[i].data.length = token->buffer.length;
-	    kiov[i].data.data = (char *)token->buffer.value;
+	    kiov[i].data.length = iov[j].buffer.length;
+	    kiov[i].data.data = (char *)iov[j].buffer.value;
         }
 
 	i++;
@@ -310,6 +311,10 @@ make_seal_token_v1_iov(krb5_context context,
     memset(padding->buffer.value, blocksize, padding->buffer.length);
 
     /* compute the checksum */
+    code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq,
+			   sign_usage, iov_count, iov, &md5cksum);
+    if (code != 0)
+	goto cleanup;
 
 cleanup:
     kg_release_iov(iov_count, iov);
