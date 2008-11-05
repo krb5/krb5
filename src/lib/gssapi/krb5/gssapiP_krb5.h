@@ -276,6 +276,11 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
                     const unsigned char *input_buf, size_t input_len,
                     unsigned char *output_buf);
 
+krb5_error_code
+kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
+                        const unsigned char *kd_data, size_t kd_data_len,
+                        krb5_crypto_iov *data, size_t num_data);
+
 krb5_error_code kg_decrypt (krb5_context context,
                             krb5_keyblock *key,  int usage,
                             krb5_pointer iv,

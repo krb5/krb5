@@ -238,3 +238,59 @@ cleanup_arcfour:
     free ((void *) seq_enc_key.contents);
     return (code);
 }
+
+krb5_error_code
+kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
+                        const unsigned char *kd_data, size_t kd_data_len,
+                        krb5_crypto_iov *data, size_t num_data)
+{
+    krb5_error_code code;
+    krb5_data input, output;
+    krb5int_access kaccess;
+    krb5_keyblock seq_enc_key, usage_key;
+    unsigned char t[4];
+
+    usage_key.length = longterm_key->length;
+    usage_key.contents = malloc(usage_key.length);
+    if (usage_key.contents == NULL)
+        return (ENOMEM);
+    seq_enc_key.length = longterm_key->length;
+    seq_enc_key.contents = malloc(seq_enc_key.length);
+    if (seq_enc_key.contents == NULL) {
+        free ((void *) usage_key.contents);
+        return (ENOMEM);
+    }
+    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
+    if (code)
+        goto cleanup_arcfour;
+
+    t[0] = ms_usage &0xff;
+    t[1] = (ms_usage>>8) & 0xff;
+    t[2] = (ms_usage>>16) & 0xff;
+    t[3] = (ms_usage>>24) & 0xff;
+    input.data = (void *) &t;
+    input.length = 4;
+    output.data = (void *) usage_key.contents;
+    output.length = usage_key.length;
+    code = (*kaccess.krb5_hmac_iov) (kaccess.md5_hash_provider,
+                                     longterm_key, data, num_data, &output);
+    if (code)
+        goto cleanup_arcfour;
+
+    input.data = ( void *) kd_data;
+    input.length = kd_data_len;
+    output.data = (void *) seq_enc_key.contents;
+    code = (*kaccess.krb5_hmac_iov) (kaccess.md5_hash_provider,
+                                     &usage_key, data, num_data, &output);
+    if (code)
+        goto cleanup_arcfour;
+    code =  ((*kaccess.arcfour_enc_provider->encrypt_iov)(
+                 &seq_enc_key, 0,
+                 data, num_data));
+cleanup_arcfour:
+    memset ((void *) seq_enc_key.contents, 0, seq_enc_key.length);
+    memset ((void *) usage_key.contents, 0, usage_key.length);
+    free ((void *) usage_key.contents);
+    free ((void *) seq_enc_key.contents);
+    return (code);
+}

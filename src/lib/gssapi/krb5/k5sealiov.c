@@ -325,7 +325,6 @@ make_seal_token_v1_iov(krb5_context context,
     if (code != 0)
 	goto cleanup;
 
-    /* encrypt the data */
     switch (ctx->signalg) {
     case SGN_ALG_DES_MAC_MD5:
     case 3:
@@ -350,7 +349,20 @@ make_seal_token_v1_iov(krb5_context context,
 	break;
     }
 
+    /* create the seq_num */
 
+    code = kg_make_seq_num(context, ctx->seq, ctx->initiate ? 0 : 0xFF, ctx->seq_send,
+			   ptr + 14, ptr + 6);
+    if (code != 0)
+	goto cleanup;
+
+    if (conf_req_flag) {
+	switch (ctx->sealalg) {
+	case SEAL_ALG_MICROSOFT_RC4:
+	default:
+	    break;
+	}
+    }
 
 cleanup:
     kg_release_iov(iov_count, iov);
