@@ -274,7 +274,6 @@ krb5_error_code kg_encrypt (krb5_context context,
 krb5_error_code kg_encrypt_iov (krb5_context context,
                                 krb5_keyblock *key, int usage,
                                 krb5_pointer iv,
-                                size_t token_offset,
                                 size_t iov_count,
 				gss_iov_buffer_desc *iov);
 
@@ -285,9 +284,9 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
                     unsigned char *output_buf);
 
 krb5_error_code
-kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
+kg_arcfour_docrypt_iov (krb5_context context,
+			const krb5_keyblock *longterm_key , int ms_usage,
                         const unsigned char *kd_data, size_t kd_data_len,
-                        size_t token_offset,
                         size_t iov_count,
 			gss_iov_buffer_desc *iov);
 
@@ -301,12 +300,11 @@ krb5_error_code kg_decrypt (krb5_context context,
 krb5_error_code kg_decrypt_iov (krb5_context context,
                                 krb5_keyblock *key,  int usage,
                                 krb5_pointer iv,
-                                size_t token_offset,
                                 size_t iov_count,
 				gss_iov_buffer_desc *iov);
 
 krb5_error_code kg_translate_iov(krb5_context context,
-				 size_t token_offset,
+				 const krb5_keyblock *key,
 				 size_t iov_count,
 				 gss_iov_buffer_desc *iov,
 				 size_t *pkiov_count,

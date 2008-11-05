@@ -241,9 +241,9 @@ cleanup_arcfour:
 
 /* AEAD */
 krb5_error_code
-kg_translate_iov(context, token_offset, iov_count, iov, pkiov_count, pkiov)
+kg_translate_iov(context, key, iov_count, iov, pkiov_count, pkiov)
     krb5_context context;
-    size_t token_offset; /* Offset to confounder from start of token */
+    const krb5_keyblock *key;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
     size_t *pkiov_count;
@@ -276,8 +276,8 @@ kg_translate_iov(context, token_offset, iov_count, iov, pkiov_count, pkiov)
     i++;
 
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-    kiov[i].data.length = token->buffer.length - token_offset;
-    kiov[i].data.data = (char *)token->buffer.value + token_offset;
+    kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)key);
+    kiov[i].data.data = (char *)token->buffer.value + token->buffer.length - kiov[i].data.length;
     i++;
 
     for (j = 0; j < iov_count; j++) {
@@ -317,12 +317,11 @@ kg_translate_iov(context, token_offset, iov_count, iov, pkiov_count, pkiov)
 }
 
 krb5_error_code
-kg_encrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
+kg_encrypt_iov(context, key, usage, iv, iov_count, iov)
     krb5_context context;
     krb5_keyblock *key;
     int usage;
     krb5_pointer iv;
-    size_t token_offset;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
 {
@@ -347,7 +346,7 @@ kg_encrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, token_offset, iov_count, iov, &kiov_count, &kiov);
+    code = kg_translate_iov(context, key, iov_count, iov, &kiov_count, &kiov);
     if (code == 0) {
 	code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);
@@ -361,12 +360,11 @@ kg_encrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
+kg_decrypt_iov(context, key, usage, iv, iov_count, iov)
     krb5_context context;
     krb5_keyblock *key;
     int usage;
     krb5_pointer iv;
-    size_t token_offset;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
 {
@@ -391,7 +389,7 @@ kg_decrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, token_offset, iov_count, iov, &kiov_count, &kiov);
+    code = kg_translate_iov(context, key, iov_count, iov, &kiov_count, &kiov);
     if (code == 0) {
 	code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);
@@ -404,9 +402,9 @@ kg_decrypt_iov(context, key, usage, iv, token_offset, iov_count, iov)
 }
 
 krb5_error_code
-kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
+kg_arcfour_docrypt_iov (krb5_context context,
+			const krb5_keyblock *longterm_key , int ms_usage,
                         const unsigned char *kd_data, size_t kd_data_len,
-                        size_t token_offset,
                         size_t iov_count, gss_iov_buffer_desc *iov)
 {
     krb5_error_code code;
@@ -452,7 +450,7 @@ kg_arcfour_docrypt_iov (const krb5_keyblock *longterm_key , int ms_usage,
     if (code)
         goto cleanup_arcfour;
 
-    code = kg_translate_iov(NULL /* XXX */, token_offset, iov_count, iov, &kiov_count, &kiov);
+    code = kg_translate_iov(context, longterm_key, iov_count, iov, &kiov_count, &kiov);
     if (code)
 	goto cleanup_arcfour;
 

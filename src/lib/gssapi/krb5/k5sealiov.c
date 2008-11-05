@@ -369,7 +369,7 @@ make_seal_token_v1_iov(krb5_context context,
 	    bigend_seqnum[2] = (ctx->seq_send >> 8 ) & 0xFF;
 	    bigend_seqnum[3] = (ctx->seq_send      ) & 0xFF;
 
-	    code = krb5_copy_keyblock(context, enc, &enc_key);
+	    code = krb5_copy_keyblock(context, ctx->enc, &enc_key);
 	    if (code != 0)
 		goto cleanup;
 
@@ -378,8 +378,13 @@ make_seal_token_v1_iov(krb5_context context,
 	    for (i = 0; i < enc_key->length; i++)
 		((char *)enc_key->contents)[i] ^= 0xF0;
 
+	    code = kg_arcfour_docrypt_iov(context, enc_key, 0,
+					  bigend_seqnum, 4,
+					  iov_count, iov);
+	    break;
 	default:
 	    break;
+	}
 	}
     }
 
