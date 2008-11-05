@@ -33,14 +33,15 @@ extern gss_name_t rqst2name(struct svc_req *rqstp);
 
 extern int setup_gss_names(struct svc_req *, gss_buffer_desc *,
 			   gss_buffer_desc *);
-extern char *client_addr(struct svc_req *, char *);
 extern void *global_server_handle;
 extern int nofork;
 extern short l_port;
 static char abuf[33];
 
-char *client_addr(struct svc_req *svc, char *buf) {
-    return strcpy(buf, inet_ntoa(svc->rq_xprt->xp_raddr.sin_addr));
+/* Result is stored in a static buffer and is invalidated by the next call. */
+static const char *client_addr(struct svc_req *svc) {
+    strlcpy(abuf, inet_ntoa(svc->rq_xprt->xp_raddr.sin_addr), sizeof(abuf));
+    return abuf;
 }
 
 static char *reply_ok_str	= "UPDATE_OK";
@@ -183,7 +184,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
 			 "<null>", client_name, service_name,
-			 client_addr(rqstp, abuf));
+			 client_addr(rqstp));
 	goto out;
     }
 
@@ -206,7 +207,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 		     obuf,
 		     ((kret == 0) ? "success" : error_message(kret)),
 		     client_name, service_name,
-		     client_addr(rqstp, abuf));
+		     client_addr(rqstp));
 
 out:
     if (nofork)
@@ -222,7 +223,7 @@ out:
  * Return arg cl str ptr on success, else NULL.
  */
 static char *
-getclhoststr(char *clprinc, char *cl, int len)
+getclhoststr(char *clprinc, char *cl, size_t len)
 {
     char *s;
     if ((s = strchr(clprinc, '/')) != NULL) {
@@ -301,7 +302,7 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
 			 "<null>", client_name, service_name,
-			 client_addr(rqstp, abuf));
+			 client_addr(rqstp));
 	goto out;
     }
 
@@ -406,7 +407,7 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
 			 "<null>",
 			 "success",
 			 client_name, service_name,
-			 client_addr(rqstp, abuf));
+			 client_addr(rqstp));
 
 	goto out;
     }

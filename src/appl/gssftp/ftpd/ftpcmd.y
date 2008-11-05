@@ -1108,7 +1108,7 @@ ftpd_getline(s, n, iop)
 		    return(s);
 		}
 		(void) memcpy(s, msg_data.app_data, msg_data.app_length);
-		(void) strcpy(s+msg_data.app_length, "\r\n");
+		(void) memcpy(s+msg_data.app_length, "\r\n", 3);
 	    }
 #endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
@@ -1140,7 +1140,7 @@ ftpd_getline(s, n, iop)
 		}
 
 		memcpy(s, msg_buf.value, msg_buf.length);
-		strcpy(s+msg_buf.length-(s[msg_buf.length-1]?0:1), "\r\n");
+		memcpy(s+msg_buf.length-(s[msg_buf.length-1]?0:1), "\r\n", 3);
 		gss_release_buffer(&min_stat, &msg_buf);
 	    }
 #endif /* GSSAPI */

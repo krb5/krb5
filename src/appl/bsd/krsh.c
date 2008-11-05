@@ -128,7 +128,7 @@ main(argc, argv0)
      char **argv0;
 {
     int rem, pid = 0;
-    char *host=0, *cp, **ap, buf[RCMD_BUFSIZ], *args, **argv = argv0, *user = 0;
+    char *host=0, **ap, buf[RCMD_BUFSIZ], *args, **argv = argv0, *user = 0;
     register int cc;
     struct passwd *pwd;
     fd_set readfrom, ready;
@@ -320,17 +320,13 @@ main(argc, argv0)
       cc += strlen(*ap) + 1;
     if (encrypt_flag)
       cc += 3;
-    cp = args = (char *) malloc((unsigned) cc);
-    if (encrypt_flag) {
-      strcpy(args, "-x ");
-      cp += 3;
-    }
+    args = (char *) malloc((unsigned) cc);
+    if (encrypt_flag)
+      strlcpy(args, "-x ", cc);
     for (ap = argv; *ap; ap++) {
-	(void) strcpy(cp, *ap);
-	while (*cp)
-	  cp++;
+      (void) strlcat(args, *ap, cc);
 	if (ap[1])
-	  *cp++ = ' ';
+	  strlcat(args, " ", cc);
     }
 
     if(debug_port == 0) {

@@ -719,7 +719,8 @@ int getreply(int expecteof)
 				if(msg_data.app_length < sizeof(ibuf) - 2) {
 				    memmove(ibuf, msg_data.app_data,
 					    msg_data.app_length);
-				    strcpy(&ibuf[msg_data.app_length], "\r\n");
+				    memcpy(&ibuf[msg_data.app_length], "\r\n",
+					   3);
 				} else {
 			            printf("Message too long!");
 				}
@@ -747,7 +748,7 @@ int getreply(int expecteof)
 				  if(msg_buf.length < sizeof(ibuf) - 2 - 1) {
 				    memcpy(ibuf, msg_buf.value, 
 					   msg_buf.length);
-				    strcpy(&ibuf[msg_buf.length], "\r\n");
+				    memcpy(&ibuf[msg_buf.length], "\r\n", 3);
 				  } else {
 				    user_gss_error(maj_stat, min_stat, 
 						   "reply was too long");

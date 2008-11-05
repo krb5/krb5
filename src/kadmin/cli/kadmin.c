@@ -161,23 +161,22 @@ kadmin_parse_name(name, principal)
 {
     char *cp, *fullname;
     krb5_error_code retval;
+    int result;
 
     /* assumes def_realm is initialized! */
-    fullname = (char *)malloc(strlen(name) + 1 + strlen(def_realm) + 1);
-    if (fullname == NULL)
-	return ENOMEM;
-    strcpy(fullname, name);
-    cp = strchr(fullname, '@');
+    cp = strchr(name, '@');
     while (cp) {
-	if (cp - fullname && *(cp - 1) != '\\')
+	if (cp - name && *(cp - 1) != '\\')
 	    break;
 	else
 	    cp = strchr(cp + 1, '@');
     }
-    if (cp == NULL) {
-	strcat(fullname, "@");
-	strcat(fullname, def_realm);
-    }
+    if (cp == NULL)
+	result = asprintf(&fullname, "%s@%s", name, def_realm);
+    else
+	fullname = strdup(name);
+    if (result < 0)
+	return ENOMEM;
     retval = krb5_parse_name(context, fullname, principal);
     free(fullname);
     return retval;

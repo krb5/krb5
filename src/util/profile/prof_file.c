@@ -182,7 +182,7 @@ profile_make_prf_data(const char *filename)
     memset(d, 0, len);
     fcopy = (char *) d + slen;
     assert(fcopy == d->filespec);
-    strcpy(fcopy, filename);
+    strlcpy(fcopy, filename, flen + 1);
     d->refcount = 1;
     d->comment = NULL;
     d->magic = PROF_MAGIC_FILE_DATA;

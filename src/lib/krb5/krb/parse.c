@@ -270,7 +270,7 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
 	}
 	*q++ = '\0';
 	if (!parsed_realm)
-		strcpy(krb5_princ_realm(context, principal)->data, default_realm);
+		strlcpy(krb5_princ_realm(context, principal)->data, default_realm, realmsize + 1);
 	/*
 	 * Alright, we're done.  Now stuff a pointer to this monstrosity
 	 * into the return variable, and let's get out of here.

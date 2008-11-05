@@ -60,10 +60,11 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 			     struct srv_dns_entry **answers)
 {
     const unsigned char *p = NULL, *base = NULL;
-    char host[MAXDNAME], *h;
-    int size, ret, rdlen, nlen;
+    char host[MAXDNAME];
+    int size, ret, rdlen, nlen, len;
     unsigned short priority, weight, port;
     struct krb5int_dns_state *ds = NULL;
+    struct k5buf buf;
 
     struct srv_dns_entry *head = NULL;
     struct srv_dns_entry *srv = NULL, *entry = NULL;
@@ -81,13 +82,9 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 
     if (memchr(realm->data, 0, realm->length))
 	return 0;
-    if ( strlen(service) + strlen(protocol) + realm->length + 6 
-         > MAXDNAME )
-	return 0;
-    if (snprintf(host, sizeof(host), "%s.%s.%.*s",
-		 service, protocol, (int) realm->length,
-		 realm->data) >= sizeof(host))
-	return 0;
+    krb5int_buf_init_fixed(&buf, host, sizeof(host));
+    krb5int_buf_add_fmt(&buf, "%s.%s.", service, protocol);
+    krb5int_buf_add_len(&buf, realm->data, realm->length);
 
     /* Realm names don't (normally) end with ".", but if the query
        doesn't end with "." and doesn't get an answer as is, the
@@ -98,9 +95,12 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
        a search on the prefix alone then the intention is to allow
        the local domain or domain search lists to be expanded.  */
 
-    h = host + strlen (host);
-    if ((h[-1] != '.') && ((h - host + 1) < sizeof(host)))
-        strcpy (h, ".");
+    len = krb5int_buf_len(&buf);
+    if (len > 0 && host[len - 1] != '.')
+	krb5int_buf_add(&buf, ".");
+
+    if (krb5int_buf_cstr(&buf) == NULL)
+	return 0;
 
 #ifdef TEST
     fprintf (stderr, "sending DNS SRV query for %s\n", host);
@@ -144,10 +144,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 	srv->port = port;
 	/* The returned names are fully qualified.  Don't let the
 	   local resolver code do domain search path stuff.  */
-	if (strlen(host) + 2 < sizeof(host))
-	    strcat(host, ".");
-	srv->host = strdup(host);
-	if (srv->host == NULL) {
+	if (asprintf(&srv->host, "%s.", host) < 0) {
 	    free(srv);
 	    goto out;
 	}

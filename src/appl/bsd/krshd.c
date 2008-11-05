@@ -1522,19 +1522,18 @@ void doit(f, fromp)
 		offst = 3;
 	}
 
-        strcpy((char *) cmdbuf + offst, kprogdir);
+        strlcpy(cmdbuf + offst, kprogdir, sizeof(cmdbuf) - offst);
 	cp = copy + 3 + offst;
 
-	cmdbuf[sizeof(cmdbuf) - 1] = '\0';
-	if (auth_sys == KRB5_RECVAUTH_V4) {
-	  strncat(cmdbuf, "/v4rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
-	} else {
-	  strncat(cmdbuf, "/rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
-	}
-	if (stat((char *)cmdbuf + offst, &s2) >= 0)
-	  strncat(cmdbuf, cp, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
+	if (auth_sys == KRB5_RECVAUTH_V4)
+	  strlcat(cmdbuf, "/v4rcp", sizeof(cmdbuf));
 	else
-	  strncpy(cmdbuf, copy, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
+	  strlcat(cmdbuf, "/rcp", sizeof(cmdbuf));
+
+	if (stat((char *)cmdbuf + offst, &s2) >= 0)
+	  strlcat(cmdbuf, cp, sizeof(cmdbuf));
+	else
+	  strlcpy(cmdbuf, copy, sizeof(cmdbuf));
 	free(copy);
     }
 #endif
@@ -1948,27 +1947,17 @@ recvauth(netfd, peersin, valid_checksum)
 	struct sockaddr_storage adr;
 	unsigned int adr_length = sizeof(adr);
 	int e;
-	unsigned int buflen = strlen(cmdbuf)+strlen(locuser)+32;
-	char * chksumbuf = (char *) malloc(buflen);
+	char namebuf[32], *chksumbuf = NULL;
 
-	if (chksumbuf == 0)
-	    goto error_cleanup;
 	if (getsockname(netfd, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;
 
 	e = getnameinfo((struct sockaddr *)&adr, adr_length, 0, 0,
-			chksumbuf, buflen, NI_NUMERICSERV);
-	if (e) {
-	    free(chksumbuf);
+			namebuf, sizeof(namebuf), NI_NUMERICSERV);
+	if (e)
 	    fatal(netfd, "local error: can't examine port number");
-	}
-	if (strlen(chksumbuf) > 30) {
-	    free(chksumbuf);
-	    fatal(netfd, "wacky local port number?!");
-	}
-	strcat(chksumbuf, ":");
-	strcat(chksumbuf,cmdbuf);
-	strcat(chksumbuf,locuser);
+	if (asprintf(&chksumbuf, "%s:%s%s", namebuf, cmdbuf, locuser) < 0)
+	    goto error_cleanup;
 
 	status = krb5_verify_checksum(bsd_context,
 				      authenticator->checksum->checksum_type,
