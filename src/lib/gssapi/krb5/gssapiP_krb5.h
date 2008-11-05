@@ -390,6 +390,8 @@ OM_uint32 kg_seal_iov (OM_uint32 *minor_status,
 	    gss_iov_buffer_desc *iov,
 	    int toktype);
 
+krb5_cryptotype kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags);
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred
