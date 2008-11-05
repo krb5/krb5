@@ -67,6 +67,8 @@ make_seal_token_v1_iov(krb5_context context,
     if (padding == NULL)
 	return EINVAL;
 
+    assert(kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM) == NULL);
+
     /* Determine confounder length */
     if (conf_req_flag)
 	conflen = kg_confounder_size(context, ctx->enc);
@@ -383,11 +385,19 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     if (ctx->proto == 1) {
 	/*
-	 * Token layout:
+	 * Before rotation:
+	 *
 	 * if (conf_req_flag)
 	 *     Header | ( Kerb-Header | E(Data | Pad | Header) | Kerb-Trailer )
 	 * else
 	 *     Header | Data | H(Data | Header)
+	 *
+	 * After rotation by a suitable value of RRC:
+	 *
+	 * if (conf_req_flag)
+	 *     Header | ( Kerb-Header | E(Header) | Kerb-Trailer | E(Data | Pad)
+	 * else
+	 *     Header | H(Data | Header) | Data
 	 */
 	size_t headerlen = 0;
 	size_t padlen = 0;

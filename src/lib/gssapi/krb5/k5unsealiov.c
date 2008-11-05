@@ -65,6 +65,8 @@ kg_unseal_v1_iov(krb5_context context,
     token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
     assert(token != NULL);
 
+    assert(kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM) == NULL);
+
     if (token->buffer.length < 16) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
