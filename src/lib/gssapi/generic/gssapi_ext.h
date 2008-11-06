@@ -120,7 +120,9 @@ typedef struct gss_iov_buffer_desc_struct {
     gss_buffer_desc buffer;
 } gss_iov_buffer_desc, *gss_iov_buffer_t;
 
-#define GSS_IOV_BUFFER_TYPE_EMPTY	    0	/* ignore */
+#define GSS_C_NO_IOV_BUFFER		((gss_iov_buffer_t)0)
+
+#define GSS_IOV_BUFFER_TYPE_EMPTY	    0	/* replaced by mech */
 #define GSS_IOV_BUFFER_TYPE_DATA	    1	/* data to be encrypted/signed */
 #define GSS_IOV_BUFFER_TYPE_TRAILER	    6
 #define GSS_IOV_BUFFER_TYPE_HEADER	    7
