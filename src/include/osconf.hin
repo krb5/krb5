@@ -138,4 +138,10 @@
 #define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
 #define KPROPD_ACL_FILE "@LOCALSTATEDIR/krb5kdc/kpropd.acl"
 
+/*
+ * GSS mechglue
+ */
+#define MECH_CONF "@SYSCONFDIR/gss/mech"
+#define MECH_LIB_PREFIX "@GSSMODULEDIR/"
+
 #endif /* KRB5_OSCONF__ */
