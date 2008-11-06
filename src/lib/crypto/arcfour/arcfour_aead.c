@@ -87,9 +87,10 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 			    size_t num_data)
 {
     krb5_error_code ret;
-    krb5_crypto_iov *header, *trailer, *padding;
+    krb5_crypto_iov *header, *trailer;
     krb5_keyblock k1, k2, k3;
     krb5_data d1, d2, d3;
+    krb5_data checksum, confounder;
     krb5_keyusage ms_usage;
     char salt_data[14];
     krb5_data salt;
@@ -102,22 +103,15 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
      * and trailer; per RFC 4757 we will arrange it as:
      *
      *	    Checksum | E(Confounder | Plaintext) 
-     *
-     * There is no pad required, but if one is provided we will
-     * set it to the pad value as would be done in GSS.
      */
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header->data.length < CONFOUNDERLENGTH)
+    if (header == NULL || header->data.length < hash->hashsize + CONFOUNDERLENGTH)
 	return KRB5_BAD_MSIZE;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || trailer->data.length < hash->hashsize)
-	return KRB5_BAD_MSIZE;
-
-    padding = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_PADDING);
-    if (padding != NULL)
-	memset(padding->data.data, padding->data.length & 0xFF, padding->data.length);
+    if (trailer != NULL)
+	trailer->data.length = 0;
 
     ret = alloc_derived_key(enc, &k1, &d1, key);
     if (ret != 0)
@@ -153,17 +147,23 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
 	memset(k1.contents + 7, 0xAB, 9);
 
-    header->data.length = CONFOUNDERLENGTH;
+    header->data.length = hash->hashsize + CONFOUNDERLENGTH;
 
-    ret = krb5_c_random_make_octets(0, &header->data);
+    confounder.data = header->data.data + hash->hashsize;
+    confounder.length = CONFOUNDERLENGTH;
+
+    ret = krb5_c_random_make_octets(0, &confounder);
     if (ret != 0)
 	goto cleanup;
 
-    ret = krb5_hmac_iov(hash, &k2, data, num_data, &trailer->data);
+    checksum.data = header->data.data;
+    checksum.length = hash->hashsize;
+
+    ret = krb5_hmac_iov(hash, &k2, data, num_data, &checksum);
     if (ret != 0)
 	goto cleanup;
 
-    ret = krb5_hmac(hash, &k1, 1, &trailer->data, &d3);
+    ret = krb5_hmac(hash, &k1, 1, &checksum, &d3);
     if (ret != 0)
 	goto cleanup;
 
@@ -202,6 +202,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock k1, k2, k3;
     krb5_data d1, d2, d3;
+    krb5_data checksum;
     krb5_keyusage ms_usage;
     char salt_data[14];
     krb5_data salt;
@@ -210,11 +211,11 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     d1.data = d2.data = d3.data = NULL;
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header->data.length != CONFOUNDERLENGTH)
+    if (header == NULL || header->data.length != hash->hashsize + CONFOUNDERLENGTH)
 	return KRB5_BAD_MSIZE;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || header->data.length != hash->hashsize)
+    if (trailer == NULL || trailer->data.length != 0)
 	return KRB5_BAD_MSIZE;
     
     ret = alloc_derived_key(enc, &k1, &d1, key);
@@ -251,11 +252,23 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
 	memset(k1.contents + 7, 0xAB, 9);
 
-    ret = krb5_hmac(hash, &k1, 1, &trailer->data, &d3);
+    checksum.data = header->data.data;
+    checksum.length = hash->hashsize;
+
+    ret = krb5_hmac(hash, &k1, 1, &checksum, &d3);
     if (ret != 0)
 	goto cleanup;
 
+    /* Adjust pointers so confounder is at start of header */
+
+    header->data.length -= hash->hashsize;
+    header->data.data   += hash->hashsize;
+
     ret = enc->decrypt_iov(&k3, ivec, data, num_data);
+
+    header->data.length += hash->hashsize;
+    header->data.data   -= hash->hashsize;
+
     if (ret != 0)
 	goto cleanup;
 
@@ -263,7 +276,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    if (memcmp(trailer->data.data, d1.data, hash->hashsize) != 0) {
+    if (memcmp(header->data.data, d1.data, hash->hashsize) != 0) {
 	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	goto cleanup;
     }
