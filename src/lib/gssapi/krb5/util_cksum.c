@@ -109,14 +109,14 @@ cleanup:
 }
 
 krb5_error_code
-kg_checksum_iov_v1(krb5_context context,
-		   krb5_cksumtype type,
-		   krb5_keyblock *seq,
-		   krb5_keyblock *enc,
-		   krb5_keyusage sign_usage,
-		   size_t iov_count,
-		   gss_iov_buffer_desc *iov,
-		   krb5_checksum *checksum)
+kg_make_checksum_iov_v1(krb5_context context,
+			krb5_cksumtype type,
+			krb5_keyblock *seq,
+			krb5_keyblock *enc,
+			krb5_keyusage sign_usage,
+			size_t iov_count,
+			gss_iov_buffer_desc *iov,
+			krb5_checksum *checksum)
 {
     krb5_error_code code;
     gss_iov_buffer_desc *header;
@@ -152,7 +152,7 @@ kg_checksum_iov_v1(krb5_context context,
 
     /* Confounder */
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-    kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)enc);;
+    kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)enc);
     kiov[i].data.data = (char *)header->buffer.value +header->buffer.length - kiov[i].data.length;
     i++;
 
@@ -176,13 +176,15 @@ kg_checksum_iov_v1(krb5_context context,
 }
 
 krb5_error_code
-kg_checksum_iov_v3(krb5_context context,
-		   krb5_cksumtype type,
-		   int rrc,
-		   krb5_keyblock *key,
-		   krb5_keyusage sign_usage,
-		   size_t iov_count,
-		   gss_iov_buffer_desc *iov)
+checksum_iov_v3(krb5_context context,
+		krb5_cksumtype type,
+		int rrc,
+		krb5_keyblock *key,
+		krb5_keyusage sign_usage,
+		size_t iov_count,
+		gss_iov_buffer_desc *iov,
+		krb5_boolean verify,
+		krb5_boolean *valid)
 {
     krb5_error_code code;
     gss_iov_buffer_desc *header;
@@ -191,6 +193,9 @@ kg_checksum_iov_v3(krb5_context context,
     size_t kiov_count;
     size_t i = 0, j;
     size_t k5_checksumlen;
+
+    if (verify)
+	*valid = 0;
 
     code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_CHECKSUM, &k5_checksumlen);
     if (code != 0)
@@ -223,25 +228,56 @@ kg_checksum_iov_v3(krb5_context context,
     kiov[i].data.data = (char *)header->buffer.value;
     i++;
 
-    /* Checksum output */
+    /* Checksum input/output; caller must specify correct buffer size upon
+     * creation */
     kiov[i].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
     if (rrc) {
 	assert(rrc == k5_checksumlen);
-	assert(header->buffer.length == 16 + k5_checksumlen);
+	assert(verify || header->buffer.length == 16 + k5_checksumlen);
 
-	kiov[i].data.length = k5_checksumlen;
+	kiov[i].data.length = header->buffer.length - 16;
 	kiov[i].data.data = (char *)header->buffer.value + 16;
     } else {
-	assert(trailer->buffer.length  == k5_checksumlen);
+	assert(verify || trailer->buffer.length == k5_checksumlen);
 
-	kiov[i].data.length = k5_checksumlen;
+	kiov[i].data.length = trailer->buffer.length;
 	kiov[i].data.data = (char *)trailer->buffer.value;
     }
     i++;
 
-    code = krb5_c_make_checksum_iov(context, type, key, sign_usage, kiov, kiov_count);
+    if (verify)
+	code = krb5_c_verify_checksum_iov(context, type, key, sign_usage, kiov, kiov_count, valid);
+    else
+	code = krb5_c_make_checksum_iov(context, type, key, sign_usage, kiov, kiov_count);
 
     xfree(kiov);
 
     return code;
+}
+
+krb5_error_code
+kg_make_checksum_iov_v3(krb5_context context,
+			krb5_cksumtype type,
+			int rrc,
+			krb5_keyblock *key,
+			krb5_keyusage sign_usage,
+			size_t iov_count,
+			gss_iov_buffer_desc *iov)
+{
+    return checksum_iov_v3(context, type, rrc, key,
+			   sign_usage, iov_count, iov, 0, NULL);
+}
+
+krb5_error_code
+kg_verify_checksum_iov_v3(krb5_context context,
+			  krb5_cksumtype type,
+			  int rrc,
+			  krb5_keyblock *key,
+			  krb5_keyusage sign_usage,
+			  size_t iov_count,
+			  gss_iov_buffer_desc *iov,
+			  krb5_boolean *valid)
+{
+    return checksum_iov_v3(context, type, rrc, key,
+			   sign_usage, iov_count, iov, 1, valid);
 }

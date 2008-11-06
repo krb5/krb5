@@ -180,7 +180,7 @@ kg_unseal_v1_iov(krb5_context context,
 	     * this and fixup the last data IOV and padding IOV appropriately.
 	     */
 	    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-		retval = kg_fixup_padding_iov(&code, iov_count, iov);
+		retval = kg_fixup_padding_iov(&code, ctx->proto, 0, iov_count, iov);
 		if (retval != GSS_S_COMPLETE)
 		    goto cleanup;
 	    }
@@ -221,8 +221,8 @@ kg_unseal_v1_iov(krb5_context context,
     md5cksum.length = sumlen;
 
     /* compute the checksum of the message */
-    code = kg_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
-			      sign_usage, iov_count, iov, &md5cksum);
+    code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
+				   sign_usage, iov_count, iov, &md5cksum);
     if (code != 0) {
 	retval = GSS_S_FAILURE;
 	goto cleanup;
@@ -376,7 +376,8 @@ kg_unseal_iov(OM_uint32 *minor_status,
 	code = kg_unseal_v1_iov(context, minor_status, ctx, iov_count, iov,
 			        conf_state, qop_state, toktype);
     else
-	;
+	code = gss_krb5int_unseal_v3_iov(context, minor_status, ctx, iov_count, iov,
+					 conf_state, qop_state, toktype);
 
     if (code != 0)
 	save_error_info(*minor_status, context);
@@ -384,6 +385,7 @@ kg_unseal_iov(OM_uint32 *minor_status,
     return code;
 }
 
+#if 0
 /*
  * Split a STREAM into HEADER | DATA | PAD | TRAILER. All buffers
  * must be supplied but only STREAM need be valid. Output buffers
@@ -527,4 +529,5 @@ kg_unseal_iov_length(OM_uint32 *minor_status,
 
     return GSS_S_COMPLETE;
 }
+#endif
 

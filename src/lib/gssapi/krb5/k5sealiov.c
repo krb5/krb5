@@ -188,8 +188,8 @@ make_seal_token_v1_iov(krb5_context context,
     memset(padding->buffer.value, blocksize, padding->buffer.length);
 
     /* compute the checksum */
-    code = kg_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
-			      sign_usage, iov_count, iov, &md5cksum);
+    code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
+				   sign_usage, iov_count, iov, &md5cksum);
     if (code != 0)
 	goto cleanup;
 
@@ -324,6 +324,8 @@ kg_seal_iov(OM_uint32 *minor_status,
 	code = make_seal_token_v1_iov(context, ctx, conf_req_flag, conf_state, iov_count, iov, toktype);
 	break;
     case 1:
+	code = gss_krb5int_make_seal_token_v3_iov(context, ctx, conf_req_flag, conf_state, iov_count, iov, toktype);
+	break;
     default:
 	code = G_UNKNOWN_QOP;
 	break;

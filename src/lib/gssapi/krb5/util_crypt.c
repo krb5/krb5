@@ -596,13 +596,15 @@ kg_release_iov(size_t iov_count,
 
 OM_uint32
 kg_fixup_padding_iov(OM_uint32 *minor_status,
+		     int proto,
+		     int ec,
 		     size_t iov_count,
 		     gss_iov_buffer_desc *iov)
 {
     size_t i;
     gss_iov_buffer_t padding = NULL;
     gss_iov_buffer_t data = NULL;
-    unsigned char *p, padlength;
+    size_t padlength;
 
     for (i = iov_count - 1; i >= 0; i--) {
 	gss_iov_buffer_t piov = &iov[i];
@@ -626,8 +628,12 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 	return GSS_S_FAILURE;
     }
 
-    p = (unsigned char *)data->buffer.value;
-    padlength = p[data->buffer.length - 1];
+    if (proto) {
+	padlength = ec;
+    } else {
+	unsigned char *p = (unsigned char *)data->buffer.value;
+	padlength = p[data->buffer.length - 1];
+    }
 
     if (data->buffer.length < padlength) {
 	*minor_status = ERANGE;

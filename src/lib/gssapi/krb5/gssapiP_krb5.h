@@ -370,6 +370,23 @@ OM_uint32 kg_set_ccache_name (OM_uint32 *minor_status,
 
 /* AEAD */
 
+krb5_error_code gss_krb5int_make_seal_token_v3_iov(krb5_context context,
+			   krb5_gss_ctx_id_rec *ctx,
+			   int conf_req_flag,
+			   int *conf_state,
+			   size_t iov_count,
+			   gss_iov_buffer_desc *iov,
+			   int toktype);
+
+OM_uint32 gss_krb5int_unseal_v3_iov(krb5_context context,
+			  OM_uint32 *minor_status,
+			  krb5_gss_ctx_id_rec *ctx,
+			  size_t iov_count,
+			  gss_iov_buffer_desc *iov,
+			  int *conf_state,
+			  gss_qop_t *qop_state,
+			  int toktype);
+
 gss_iov_buffer_t kg_locate_iov (size_t iov_count,
 	      gss_iov_buffer_desc *iov,
 	      OM_uint32 type);
@@ -382,7 +399,7 @@ void kg_iov_msglen(size_t iov_count,
 void kg_release_iov(size_t iov_count,
 	       gss_iov_buffer_desc *iov);
 
-krb5_error_code kg_checksum_iov_v1(krb5_context context,
+krb5_error_code kg_make_checksum_iov_v1(krb5_context context,
 		krb5_cksumtype type,
 		krb5_keyblock *seq,
 		krb5_keyblock *enc, /* for conf len */
@@ -391,13 +408,22 @@ krb5_error_code kg_checksum_iov_v1(krb5_context context,
 		gss_iov_buffer_desc *iov,
 		krb5_checksum *checksum);
 
-krb5_error_code kg_checksum_iov_v3(krb5_context context,
+krb5_error_code kg_make_checksum_iov_v3(krb5_context context,
 		krb5_cksumtype type,
 		int rrc,
 		krb5_keyblock *key,
 		krb5_keyusage sign_usage,
 		size_t iov_count,
 		gss_iov_buffer_desc *iov);
+
+krb5_error_code kg_verify_checksum_iov_v3(krb5_context context,
+		krb5_cksumtype type,
+		int rrc,
+		krb5_keyblock *key,
+		krb5_keyusage sign_usage,
+		size_t iov_count,
+		gss_iov_buffer_desc *iov,
+		krb5_boolean *valid);
 
 OM_uint32 kg_seal_iov (OM_uint32 *minor_status,
 	    gss_ctx_id_t context_handle,
@@ -435,6 +461,8 @@ OM_uint32 kg_unseal_iov_length(OM_uint32 *minor_status,
 krb5_cryptotype kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags);
 
 OM_uint32 kg_fixup_padding_iov(OM_uint32 *minor_status,
+	int proto,
+	int ec,
 	size_t iov_count,
 	gss_iov_buffer_desc *iov);
 
@@ -798,6 +826,8 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                                       gss_buffer_t message_buffer,
                                       int *conf_state, int *qop_state,
                                       int toktype);
+
+int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 
 /*
  * These take unglued krb5-mech-specific contexts.

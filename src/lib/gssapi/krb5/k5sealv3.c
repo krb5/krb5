@@ -34,8 +34,8 @@
 #include "gssapiP_krb5.h"
 #include <stdarg.h>
 
-static int
-rotate_left (void *ptr, size_t bufsiz, size_t rc)
+int
+gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc)
 {
     /* Optimize for receiving.  After some debugging is done, the MIT
        implementation won't do any rotates on sending, and while
@@ -174,7 +174,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 
 #ifdef CFX_EXERCISE
         rrc = rand() & 0xffff;
-        if (rotate_left(outbuf+16, bufsize-16,
+        if (gss_krb5int_rotate_left(outbuf+16, bufsize-16,
                         (bufsize-16) - (rrc % (bufsize - 16))))
             store_16_be(rrc, outbuf+6);
         /* If the rotate fails, don't worry about it.  */
@@ -259,7 +259,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #ifdef CFX_EXERCISE
             rrc = rand() & 0xffff;
             /* If the rotate fails, don't worry about it.  */
-            if (rotate_left(outbuf+16, bufsize-16,
+            if (gss_krb5int_rotate_left(outbuf+16, bufsize-16,
                             (bufsize-16) - (rrc % (bufsize - 16))))
                 store_16_be(rrc, outbuf+6);
 #endif
@@ -372,7 +372,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         ec = load_16_be(ptr+4);
         rrc = load_16_be(ptr+6);
         seqnum = load_64_be(ptr+8);
-        if (!rotate_left(ptr+16, bodysize-16, rrc)) {
+        if (!gss_krb5int_rotate_left(ptr+16, bodysize-16, rrc)) {
         no_mem:
             *minor_status = ENOMEM;
             return GSS_S_FAILURE;
@@ -434,7 +434,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             store_16_be(0, ptr+6);
             plain.length = bodysize-ec;
             plain.data = ptr;
-            if (!rotate_left(ptr, bodysize-ec, 16))
+            if (!gss_krb5int_rotate_left(ptr, bodysize-ec, 16))
                 goto no_mem;
             sum.length = ec;
             if (sum.length != ctx->cksum_size) {
