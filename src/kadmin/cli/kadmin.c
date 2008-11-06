@@ -174,7 +174,7 @@ kadmin_parse_name(name, principal)
     if (cp == NULL)
 	result = asprintf(&fullname, "%s@%s", name, def_realm);
     else
-	fullname = strdup(name);
+	result = asprintf(&fullname, "%s", name);
     if (result < 0)
 	return ENOMEM;
     retval = krb5_parse_name(context, fullname, principal);
