@@ -370,6 +370,40 @@ typedef struct gss_config {
 		gss_OID_set *,		/* elements_stored */
 		gss_cred_usage_t *	/* cred_usage_stored */
 	/* */);
+
+
+	/* AEAD extensions */
+	OM_uint32	(*gss_wrap_iov)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int,			/* conf_req_flag */
+	    gss_qop_t,			/* qop_req */
+	    int *,			/* conf_state */
+	    size_t,			/* iov_count */
+	    gss_iov_buffer_desc *	/* iov */
+	/* */);
+
+	OM_uint32	(*gss_unwrap_iov)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int *,			/* conf_state */
+	    gss_qop_t *,		/* qop_state */
+	    size_t,			/* iov_count */
+	    gss_iov_buffer_desc *	/* iov */
+	/* */);
+
+	OM_uint32	(*gss_wrap_iov_length)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int,			/* conf_req_flag*/
+	    gss_qop_t, 			/* qop_req */
+	    int *, 			/* conf_state */
+	    size_t,			/* iov_count */
+	    gss_iov_buffer_desc *	/* iov */
+	/* */);
 } *gss_mechanism;
 
 /*
