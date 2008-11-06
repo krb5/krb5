@@ -162,7 +162,8 @@ kg_unseal_v1_iov(krb5_context context,
 					      iov_count, iov);
 		krb5_free_keyblock(context, enc_key);
 	    } else {
-		code = kg_decrypt_iov(context, ctx->enc, KG_USAGE_SEAL, NULL,
+		code = kg_decrypt_iov(context, ctx->proto, 0, 
+				      ctx->enc, KG_USAGE_SEAL, NULL,
 				      iov_count, iov);
 	    }
 	    if (code != 0) {
@@ -220,8 +221,8 @@ kg_unseal_v1_iov(krb5_context context,
     md5cksum.length = sumlen;
 
     /* compute the checksum of the message */
-    code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
-			   sign_usage, iov_count, iov, &md5cksum);
+    code = kg_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
+			      sign_usage, iov_count, iov, &md5cksum);
     if (code != 0) {
 	retval = GSS_S_FAILURE;
 	goto cleanup;

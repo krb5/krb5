@@ -109,6 +109,11 @@
 #define KG2_RESP_FLAG_ERROR             0x0001
 #define KG2_RESP_FLAG_DELEG_OK          0x0002
 
+/** CFX flags **/
+#define FLAG_SENDER_IS_ACCEPTOR 0x01
+#define FLAG_WRAP_CONFIDENTIAL  0x02
+#define FLAG_ACCEPTOR_SUBKEY    0x04
+
 /* These are to be stored in little-endian order, i.e., des-mac is
    stored as 02 00.  */
 enum sgn_alg {
@@ -272,7 +277,8 @@ krb5_error_code kg_encrypt (krb5_context context,
                             unsigned int length);
 
 krb5_error_code kg_encrypt_iov (krb5_context context,
-                                krb5_keyblock *key, int usage,
+                                int proto, int rrc,
+				krb5_keyblock *key, int usage,
                                 krb5_pointer iv,
                                 size_t iov_count,
 				gss_iov_buffer_desc *iov);
@@ -298,12 +304,15 @@ krb5_error_code kg_decrypt (krb5_context context,
                             unsigned int length);
 
 krb5_error_code kg_decrypt_iov (krb5_context context,
+                                int proto, int rrc,
                                 krb5_keyblock *key,  int usage,
                                 krb5_pointer iv,
                                 size_t iov_count,
 				gss_iov_buffer_desc *iov);
 
 krb5_error_code kg_translate_iov(krb5_context context,
+				 int proto,
+				 int rotate,
 				 const krb5_keyblock *key,
 				 size_t iov_count,
 				 gss_iov_buffer_desc *iov,
@@ -373,14 +382,22 @@ void kg_iov_msglen(size_t iov_count,
 void kg_release_iov(size_t iov_count,
 	       gss_iov_buffer_desc *iov);
 
-krb5_error_code kg_checksum_iov(krb5_context context,
-		krb5_cksumtype tpye,
+krb5_error_code kg_checksum_iov_v1(krb5_context context,
+		krb5_cksumtype type,
 		krb5_keyblock *seq,
 		krb5_keyblock *enc, /* for conf len */
 		krb5_keyusage sign_usage,
 		size_t iov_count,
 		gss_iov_buffer_desc *iov,
 		krb5_checksum *checksum);
+
+krb5_error_code kg_checksum_iov_v3(krb5_context context,
+		krb5_cksumtype type,
+		int rrc,
+		krb5_keyblock *key,
+		krb5_keyusage sign_usage,
+		size_t iov_count,
+		gss_iov_buffer_desc *iov);
 
 OM_uint32 kg_seal_iov (OM_uint32 *minor_status,
 	    gss_ctx_id_t context_handle,

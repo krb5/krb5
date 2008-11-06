@@ -188,8 +188,8 @@ make_seal_token_v1_iov(krb5_context context,
     memset(padding->buffer.value, blocksize, padding->buffer.length);
 
     /* compute the checksum */
-    code = kg_checksum_iov(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
-			   sign_usage, iov_count, iov, &md5cksum);
+    code = kg_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
+			      sign_usage, iov_count, iov, &md5cksum);
     if (code != 0)
 	goto cleanup;
 
@@ -255,7 +255,8 @@ make_seal_token_v1_iov(krb5_context context,
 
 	    break;
 	default:
-	    code = kg_encrypt_iov(context, ctx->enc, KG_USAGE_SEAL, NULL,
+	    code = kg_encrypt_iov(context, ctx->proto, 0, 
+				  ctx->enc, KG_USAGE_SEAL, NULL,
 				  iov_count, iov);
 	    if (code != 0)
 		goto cleanup;

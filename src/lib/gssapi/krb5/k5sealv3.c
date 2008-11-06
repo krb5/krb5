@@ -62,10 +62,6 @@ rotate_left (void *ptr, size_t bufsiz, size_t rc)
 
 static const gss_buffer_desc empty_message = { 0, 0 };
 
-#define FLAG_SENDER_IS_ACCEPTOR 0x01
-#define FLAG_WRAP_CONFIDENTIAL  0x02
-#define FLAG_ACCEPTOR_SUBKEY    0x04
-
 krb5_error_code
 gss_krb5int_make_seal_token_v3 (krb5_context context,
                                 krb5_gss_ctx_id_rec *ctx,
