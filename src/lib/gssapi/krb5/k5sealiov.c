@@ -89,11 +89,7 @@ make_seal_token_v1_iov(krb5_context context,
     if (toktype == KG_TOK_SEAL_MSG) {
 	kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
 
-	if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4 &&
-	    (ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	    blocksize = 1;
-	else
-	    blocksize = 8;
+	blocksize = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
 
 	/* Padding is only on encrypted data, not associated data */
 	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
@@ -255,7 +251,7 @@ make_seal_token_v1_iov(krb5_context context,
 
 	    break;
 	default:
-	    code = kg_encrypt_iov(context, ctx->proto, 0, 
+	    code = kg_encrypt_iov(context, ctx->proto, 0, 0,
 				  ctx->enc, KG_USAGE_SEAL, NULL,
 				  iov_count, iov);
 	    if (code != 0)
@@ -473,9 +469,9 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	size_t data_size;
 
 	if (conf_req_flag) {
-	    /* For some reason, DCE uses 8 bytes padding for rc4-hmac */
-	    if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4 &&
-		(ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
+	    /* Note that DCE always pads to 16 bytes, but we can let the caller
+	     * increase the pad size. */
+	    if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4)
 		padding->buffer.length = 1;
 	    else
 		padding->buffer.length = 8 - ((textlen - assoclen) % 8);

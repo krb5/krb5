@@ -277,7 +277,7 @@ krb5_error_code kg_encrypt (krb5_context context,
                             unsigned int length);
 
 krb5_error_code kg_encrypt_iov (krb5_context context,
-                                int proto, int rrc,
+                                int proto, int ec, int rrc,
 				krb5_keyblock *key, int usage,
                                 krb5_pointer iv,
                                 size_t iov_count,
@@ -304,20 +304,11 @@ krb5_error_code kg_decrypt (krb5_context context,
                             unsigned int length);
 
 krb5_error_code kg_decrypt_iov (krb5_context context,
-                                int proto, int rrc,
+                                int proto, int ec, int rrc,
                                 krb5_keyblock *key,  int usage,
                                 krb5_pointer iv,
                                 size_t iov_count,
 				gss_iov_buffer_desc *iov);
-
-krb5_error_code kg_translate_iov(krb5_context context,
-				 int proto,
-				 int rotate,
-				 const krb5_keyblock *key,
-				 size_t iov_count,
-				 gss_iov_buffer_desc *iov,
-				 size_t *pkiov_count,
-				 krb5_crypto_iov **pkiov);
 
 OM_uint32 kg_seal (OM_uint32 *minor_status,
                    gss_ctx_id_t context_handle,

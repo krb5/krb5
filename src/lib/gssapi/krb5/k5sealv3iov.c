@@ -96,25 +96,21 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	size_t k5_headerlen, k5_padlen, k5_trailerlen;
-
+	
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
 	if (code != 0)
 	    goto cleanup;
 
-	if (dce_style) {
-	    k5_padlen = k5_headerlen; /* assume this to be the block size */
-	} else {
-	    code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
-	    if (code != 0)
-		goto cleanup;
-	}
+	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
+	if (code != 0)
+	    goto cleanup;
 
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
 	if (code != 0)
 	    goto cleanup;
 
 	headerlen = 16 /* Header */ + k5_headerlen;
-	if (!dce_style)
+	if (dce_style)
 	    headerlen += 16 /* E(Header) */ + k5_trailerlen;
 
 	if ((header->buffer.length < headerlen) ||
@@ -123,17 +119,26 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    goto cleanup;
 	}
 
-	if (trailer != NULL) {
+	if (trailer != NULL)
 	    trailer->buffer.length = dce_style ? 0 : 16 /* E(Header) */ + k5_trailerlen;
-	}
 
-	ec = k5_padlen - ((16 + data_length - assoc_data_length) % k5_padlen);
-	if (padding->buffer.length < ec) {
-	    code = ERANGE;
+	/* For DCE compat, allow the caller to specify more padding than necessary */
+	if (k5_padlen != 0 &&
+	    ((16 + data_length - assoc_data_length + padding->buffer.length) % k5_padlen) != 0) {
+	    code = EINVAL;
 	    goto cleanup;
 	}
-	padding->buffer.length = ec;
-	memset(padding->buffer.value, 'x', ec);
+	memset(padding->buffer.value, 'x', padding->buffer.length);
+
+	/*
+	 * Windows has a bug where it rotates by EC + RRC instead of RRC as
+	 * specified in the RFC. The simplest workaround is to always send
+	 * EC == 0, which means that Windows will rotate by the correct
+	 * amount. The side-effect is that the receiver will think there is
+	 * no padding, but DCE should correct for this because the padding
+	 * length is also carried at the RPC layer.
+	 */
+	ec = dce_style ? 0 : padding->buffer.length;
 
 	if (dce_style)
 	    rrc = 16 /* E(Header) */ + k5_trailerlen;
@@ -154,7 +159,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	store_16_be(rrc, outbuf + 6);
 	store_64_be(ctx->seq_send, outbuf + 8);
 
-	code = kg_encrypt_iov(context, ctx->proto, rrc, key, key_usage, 0, iov_count, iov);
+	code = kg_encrypt_iov(context, ctx->proto, 0 /*EC*/, rrc, key, key_usage, 0, iov_count, iov);
 	if (code != 0)
 	    goto cleanup;
 
@@ -318,7 +323,6 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     OM_uint32 code;
     gss_iov_buffer_t header;
     gss_iov_buffer_t trailer;
-    gss_iov_buffer_t padding = NULL;
     unsigned char acceptor_flag;
     unsigned char *ptr = NULL;
     int key_usage, dce_style;
@@ -396,7 +400,8 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	if (ptr[2] & FLAG_WRAP_CONFIDENTIAL) {
 	    /* Decrypt */
-	    code = kg_decrypt_iov(context, ctx->proto, dce_style ? rrc : 0,
+	    code = kg_decrypt_iov(context, ctx->proto,
+				  ec, dce_style ? rrc : 0,
 				  key, key_usage, 0, iov_count, iov);
 	    if (code != 0) {
 		*minor_status = code;
@@ -404,10 +409,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    }
 
 	    /* For DCE, caller manages padding. Otherwise, trim data appropriately */
-	    if (dce_style) {
-		if (padding->buffer.length != ec)
-		    goto defective;
-	    } else {
+	    if (!dce_style) {
 		code = kg_fixup_padding_iov(minor_status, ctx->proto, ec, iov_count, iov);
 		if (code != 0) {
 		    *minor_status = code;

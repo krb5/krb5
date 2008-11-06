@@ -162,7 +162,7 @@ kg_unseal_v1_iov(krb5_context context,
 					      iov_count, iov);
 		krb5_free_keyblock(context, enc_key);
 	    } else {
-		code = kg_decrypt_iov(context, ctx->proto, 0, 
+		code = kg_decrypt_iov(context, ctx->proto, 0, 0,
 				      ctx->enc, KG_USAGE_SEAL, NULL,
 				      iov_count, iov);
 	    }

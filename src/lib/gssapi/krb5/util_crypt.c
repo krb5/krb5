@@ -241,9 +241,10 @@ cleanup_arcfour:
 
 /* AEAD */
 krb5_error_code
-kg_translate_iov(context, proto, rrc, key, iov_count, iov, pkiov_count, pkiov)
+kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
     krb5_context context;
     int proto;
+    int ec;
     int rrc;
     const krb5_keyblock *key;
     size_t iov_count;
@@ -273,7 +274,7 @@ kg_translate_iov(context, proto, rrc, key, iov_count, iov, pkiov_count, pkiov)
     if (kiov == NULL)
 	return ENOMEM;
 
-    if (proto) {
+    if (proto == 1) {
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
 	if (code != 0)
 	    return code;
@@ -289,9 +290,12 @@ kg_translate_iov(context, proto, rrc, key, iov_count, iov, pkiov_count, pkiov)
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
     if (proto) {
 	/* For CFX, place the krb5 header after the GSS header, offset
-	 * by the rotation count */
+	 * by the real rotation count which, owing to a bug in Windows,
+	 * is actually EC + RRC */
+	assert(header->buffer.length >= 16 + ec + rrc + k5_headerlen);
+
 	kiov[i].data.length = k5_headerlen;
-	kiov[i].data.data = (char *)header->buffer.value + 16 + rrc;
+	kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc;
     } else {
 	kiov[i].data.length = 0;
 	kiov[i].data.data = NULL;
@@ -303,9 +307,10 @@ kg_translate_iov(context, proto, rrc, key, iov_count, iov, pkiov_count, pkiov)
 	/* For CFX, place the krb5 trailer in the GSS trailer, or if
 	 * rotating, after the encrypted copy of the krb5 header. */
 	kiov[i].data.length = k5_trailerlen;
-	if (rrc)
-	    kiov[i].data.data = (char *)header->buffer.value + 32; /* Header | E(Header) */
-	else
+	if (rrc) {
+	    assert(ec + rrc >= k5_trailerlen);
+	    kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc - k5_trailerlen;
+	} else
 	    kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */
     } else {
 	kiov[i].data.length = 0;
@@ -335,7 +340,7 @@ kg_translate_iov(context, proto, rrc, key, iov_count, iov, pkiov_count, pkiov)
 	kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
 	kiov[i].data.length = 16; /* E(Header) */
 	if (rrc)
-	    kiov[i].data.data = (char *)header->buffer.value + 16; /* Header */
+	    kiov[i].data.data = (char *)header->buffer.value + 16 + ec;
 	else
 	    kiov[i].data.data = (char *)trailer->buffer.value;
 	memcpy(kiov[i].data.data, header->buffer.value, 16);
@@ -349,9 +354,10 @@ kg_translate_iov(context, proto, rrc, key, iov_count, iov, pkiov_count, pkiov)
 }
 
 krb5_error_code
-kg_encrypt_iov(context, proto, rrc, key, usage, iv, iov_count, iov)
+kg_encrypt_iov(context, proto, ec, rrc, key, usage, iv, iov_count, iov)
     krb5_context context;
     int proto;
+    int ec;
     int rrc;
     krb5_keyblock *key;
     int usage;
@@ -380,7 +386,7 @@ kg_encrypt_iov(context, proto, rrc, key, usage, iv, iov_count, iov)
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, rrc, key, iov_count, iov, &kiov_count, &kiov);
+    code = kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, &kiov_count, &kiov);
     if (code == 0) {
 	code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);
@@ -394,9 +400,10 @@ kg_encrypt_iov(context, proto, rrc, key, usage, iv, iov_count, iov)
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt_iov(context, proto, rrc, key, usage, iv, iov_count, iov)
+kg_decrypt_iov(context, proto, ec, rrc, key, usage, iv, iov_count, iov)
     krb5_context context;
     int proto;
+    int ec;
     int rrc;
     krb5_keyblock *key;
     int usage;
@@ -425,7 +432,7 @@ kg_decrypt_iov(context, proto, rrc, key, usage, iv, iov_count, iov)
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, rrc, key, iov_count, iov, &kiov_count, &kiov);
+    code = kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, &kiov_count, &kiov);
     if (code == 0) {
 	code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);
