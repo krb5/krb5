@@ -497,8 +497,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     header->buffer.length = headerlen;
 
-    if (conf_state != NULL)
-	*conf_state = conf_req_flag;
+    if (conf_state != NULL) {
+	if (conf_req_flag)
+	    *conf_state = kg_integ_only_iov(iov_count, iov) ? FALSE : TRUE;
+	else
+	    *conf_state = FALSE;
+    }
 
     return GSS_S_COMPLETE;
 }

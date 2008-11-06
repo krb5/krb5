@@ -385,7 +385,8 @@ kg_unseal_iov(OM_uint32 *minor_status,
 
 /*
  * Split a STREAM into HEADER | DATA | PAD | TRAILER. All buffers
- * must be supplied but only STREAM need be valid.
+ * must be supplied but only STREAM need be valid. Output buffers
+ * are all pointers into STREAM.
  */
 OM_uint32
 kg_unseal_iov_length(OM_uint32 *minor_status,

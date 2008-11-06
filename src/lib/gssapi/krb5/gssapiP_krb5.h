@@ -407,8 +407,7 @@ OM_uint32 kg_seal_iov_length(OM_uint32 *minor_status,
 	   size_t iov_count,
 	   gss_iov_buffer_desc *iov);
 
-OM_uint32
-kg_unseal_iov_length(OM_uint32 *minor_status,
+OM_uint32 kg_unseal_iov_length(OM_uint32 *minor_status,
 	   gss_ctx_id_t context_handle,
 	   int *conf_state,
 	   gss_qop_t *qop_req,
@@ -620,6 +619,27 @@ OM_uint32 krb5_gss_wrap
  gss_buffer_t                /* output_message_buffer */
 );
 
+OM_uint32 krb5_gss_wrap_iov
+(OM_uint32 *,		/* minor_status */
+ gss_ctx_id_t,		    /* context_handle */
+ int,			    /* conf_req_flag */
+ gss_qop_t,		    /* qop_req */
+ int *,			    /* conf_state */
+ size_t,		    /* iov_count */
+ gss_iov_buffer_desc *	    /* iov */
+);
+
+OM_uint32
+krb5_gss_wrap_iov_length
+(OM_uint32 *,		/* minor_status */
+ gss_ctx_id_t,		    /* context_handle */
+ int,			    /* conf_req_flag */
+ gss_qop_t,		    /* qop_req */
+ int *,			    /* conf_state */
+ size_t,		    /* iov_count */
+ gss_iov_buffer_desc *	    /* iov */
+);
+
 OM_uint32 krb5_gss_unwrap
 (OM_uint32 *,           /* minor_status */
  gss_ctx_id_t,               /* context_handle */
@@ -627,6 +647,15 @@ OM_uint32 krb5_gss_unwrap
  gss_buffer_t,               /* output_message_buffer */
  int *,                      /* conf_state */
  gss_qop_t *                 /* qop_state */
+);
+
+OM_uint32 krb5_gss_unwrap_iov
+(OM_uint32 *,		/* minor_status */
+ gss_ctx_id_t,		    /* context_handle */
+ int *,			    /* conf_state */
+ gss_qop_t *,		    /* qop_state */
+ size_t,		    /* iov_count */
+ gss_iov_buffer_desc *	    /* iov */
 );
 
 OM_uint32 krb5_gss_wrap_size_limit
