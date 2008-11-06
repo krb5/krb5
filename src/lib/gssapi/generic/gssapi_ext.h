@@ -107,7 +107,9 @@ OM_uint32 KRB5_CALLCONV gssspi_mech_invoke
 	 const gss_OID /*desired_object*/,
 	 gss_buffer_t /*value*/);
 
-/* RFC 4757 */
+/*
+ * SSPI extensions
+ */
 #define GSS_C_DCE_STYLE			0x1000 
 #define GSS_C_IDENTIFY_FLAG		0x2000 
 #define GSS_C_EXTENDED_ERROR_FLAG	0x4000 
@@ -118,9 +120,6 @@ typedef struct gss_iov_buffer_desc_struct {
     gss_buffer_desc buffer;
 } gss_iov_buffer_desc, *gss_iov_buffer_t;
 
-/*
- * AEAD extensions
- */
 #define GSS_IOV_BUFFER_TYPE_EMPTY	    0	/* ignore */
 #define GSS_IOV_BUFFER_TYPE_DATA	    1	/* data to be encrypted/signed */
 #define GSS_IOV_BUFFER_TYPE_TRAILER	    6
