@@ -313,29 +313,32 @@ kg_translate_iov(context, proto, rrc, key, iov_count, iov, pkiov_count, pkiov)
     }
     i++;
 
-    kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-    if (proto) {
-	/* For CFX, encrypt in-place the GSS header. If rotating, this
-	 * is found immediately after the unencrypted header; if not
-	 * rotating, this is in the GSS trailer. */
+    if (proto == 0) {
+	/* For pre-CFX, the confounder is encrypted before the data */
+	kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
+	kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)key);
+	kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - kiov[i].data.length;
+	i++;
+    }
+
+    for (j = 0; j < iov_count; j++) {
+	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
+	kiov[i].data.length = iov[j].buffer.length;
+	kiov[i].data.data = (char *)iov[j].buffer.value;
+	i++;
+    }
+
+    if (proto == 1) {
+	/* CFX will insert the confounder into the header, but we do need
+	 * to add the header to the end of the plaintext such that it will
+	 * be integrity protected.  */
+	kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
 	kiov[i].data.length = 16; /* E(Header) */
 	if (rrc)
 	    kiov[i].data.data = (char *)header->buffer.value + 16; /* Header */
 	else
 	    kiov[i].data.data = (char *)trailer->buffer.value;
 	memcpy(kiov[i].data.data, header->buffer.value, 16);
-    } else {
-	/* For non-CFX, handle the confounder explicitly */
-	kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)key);
-	kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - kiov[i].data.length;
-    }
-    i++;
-
-    for (j = 0; j < iov_count; j++) {
-	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
-	kiov[i].data.length = iov[j].buffer.length;
-	kiov[i].data.data = (char *)iov[j].buffer.value;
-
 	i++;
     }
 

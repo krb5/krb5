@@ -202,7 +202,7 @@ kg_checksum_iov_v3(krb5_context context,
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(rrc || trailer != NULL);
 
-    kiov_count = 3 + iov_count;
+    kiov_count = 2 + iov_count;
     kiov = (krb5_crypto_iov *)xmalloc(kiov_count * sizeof(krb5_crypto_iov));
     if (kiov == NULL)
 	return ENOMEM;
