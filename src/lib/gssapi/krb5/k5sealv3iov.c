@@ -399,12 +399,25 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	}
 
 	if (ptr[2] & FLAG_WRAP_CONFIDENTIAL) {
+	    unsigned char *althdr;
+
 	    /* Decrypt */
 	    code = kg_decrypt_iov(context, ctx->proto,
 				  ec, dce_style ? rrc : 0,
 				  key, key_usage, 0, iov_count, iov);
 	    if (code != 0) {
 		*minor_status = code;
+		return GSS_S_BAD_SIG;
+	    }
+
+	    /* Validate header integrity */
+	    althdr = (unsigned char *)header->buffer.value;
+
+	    if (load_16_be(althdr) != 0x0504
+		|| althdr[2] != ptr[2]
+		|| althdr[3] != ptr[3]
+		|| memcmp(althdr + 8, ptr + 8, 8) != 0) {
+		*minor_status = 0;
 		return GSS_S_BAD_SIG;
 	    }
 
