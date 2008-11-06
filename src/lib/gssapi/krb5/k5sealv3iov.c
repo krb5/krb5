@@ -429,7 +429,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    }
 	} else {
 	    /* Verify checksum: note EC is checksum size here, not padding */
-	    if (ec > data_length)
+	    if (ec != ctx->cksum_size)
 		goto defective;
 
 	    /* Zero EC, RRC before computing checksum */

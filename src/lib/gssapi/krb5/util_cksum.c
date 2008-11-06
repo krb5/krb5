@@ -207,6 +207,9 @@ checksum_iov_v3(krb5_context context,
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(rrc || trailer != NULL);
 
+    if (rrc != 0 && rrc != k5_checksumlen)
+	return KRB5_BAD_MSIZE;
+
     kiov_count = 2 + iov_count;
     kiov = (krb5_crypto_iov *)xmalloc(kiov_count * sizeof(krb5_crypto_iov));
     if (kiov == NULL)
@@ -232,7 +235,6 @@ checksum_iov_v3(krb5_context context,
      * creation */
     kiov[i].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
     if (rrc) {
-	assert(rrc == k5_checksumlen);
 	assert(verify || header->buffer.length == 16 + k5_checksumlen);
 
 	kiov[i].data.length = header->buffer.length - 16;
