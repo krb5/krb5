@@ -174,7 +174,6 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
 
     ret = enc->encrypt_iov(&k3, ivec, data, num_data);
-
     if (ret != 0)
 	goto cleanup;
 
