@@ -44,7 +44,7 @@ krb5int_arcfour_crypto_length(const struct krb5_aead_provider *aead,
 	*length = CONFOUNDERLENGTH;
 	break;
     case KRB5_CRYPTO_TYPE_PADDING:
-	*length = enc->block_size;
+	*length = 0;
 	break;
     case KRB5_CRYPTO_TYPE_TRAILER:
     case KRB5_CRYPTO_TYPE_CHECKSUM:
