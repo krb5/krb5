@@ -240,7 +240,7 @@ cleanup_arcfour:
 }
 
 /* AEAD */
-krb5_error_code
+static krb5_error_code
 kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
     krb5_context context;
     int proto;
@@ -269,12 +269,12 @@ kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkio
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
 
-    kiov_count = 3 + iov_count;
-    kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
-    if (kiov == NULL)
-	return ENOMEM;
+    /* Check we are V1, DCE, or have a trailer */
+    assert(proto == 0 || rrc != 0 || trailer != NULL);
 
     if (proto == 1) {
+	size_t req_headerlen, req_trailerlen;
+
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
 	if (code != 0)
 	    return code;
@@ -282,18 +282,39 @@ kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkio
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
 	if (code != 0)
 	    return code;
+
+	/*
+	 * Sanity check header size, allowing for Windows bug where the
+	 * real rotation count is EC + RRC.
+	 */
+	req_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
+	req_trailerlen = 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
+
+	if (trailer != NULL) {
+	    if (trailer->buffer.length != req_trailerlen)
+		return KRB5_BAD_MSIZE;
+	} else {
+	    /* No trailer, must be rotating with DCE */
+	    if (rrc != 16 + k5_trailerlen)
+		return KRB5_BAD_MSIZE;
+
+	    req_headerlen += req_trailerlen; /* because trailer is rotated */
+	    req_headerlen += ec;
+	}
+	if (header->buffer.length != req_headerlen)
+	    return KRB5_BAD_MSIZE;
     }
 
-    assert(proto == 0 || rrc || trailer != NULL);
-    assert(trailer == NULL || trailer->buffer.length == k5_trailerlen);
+    kiov_count = 3 + iov_count;
+    kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
+    if (kiov == NULL)
+	return ENOMEM;
 
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
     if (proto) {
 	/* For CFX, place the krb5 header after the GSS header, offset
 	 * by the real rotation count which, owing to a bug in Windows,
 	 * is actually EC + RRC */
-	assert(header->buffer.length >= 16 + ec + rrc + k5_headerlen);
-
 	kiov[i].data.length = k5_headerlen;
 	kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc;
     } else {
@@ -307,10 +328,9 @@ kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkio
 	/* For CFX, place the krb5 trailer in the GSS trailer, or if
 	 * rotating, after the encrypted copy of the krb5 header. */
 	kiov[i].data.length = k5_trailerlen;
-	if (rrc) {
-	    assert(ec + rrc >= k5_trailerlen);
+	if (rrc)
 	    kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc - k5_trailerlen;
-	} else
+	else
 	    kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */
     } else {
 	kiov[i].data.length = 0;

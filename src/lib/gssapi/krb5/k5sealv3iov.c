@@ -385,10 +385,8 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	/* Deal with RRC */
 	if (dce_style) {
+	    /* According to MS, we only need to deal with a fixed RRC for DCE */
 	    if (rrc != (ptr[2] & FLAG_WRAP_CONFIDENTIAL) ? 16 + ctx->cksum_size : ctx->cksum_size)
-		goto defective;
-
-	    if (trailer->buffer.length != 0)
 		goto defective;
 	} else if (rrc) {
 	    code = rotate_left_iov(iov_count, iov, rrc);
