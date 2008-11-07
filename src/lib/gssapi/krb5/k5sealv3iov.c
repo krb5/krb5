@@ -50,7 +50,6 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     unsigned short tok_id;
     unsigned char *outbuf = NULL;
     int key_usage;
-    krb5_boolean dce_style;
     size_t rrc, ec;
     size_t data_length, assoc_data_length;
     size_t gss_headerlen;
@@ -84,11 +83,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     } else
 	padding = NULL;
 
-    dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
-
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (dce_style == 0 && trailer == NULL)
-	return EINVAL;
 
     kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
 
@@ -159,7 +154,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	 * no padding, but DCE should correct for this because the padding
 	 * length is also carried at the RPC layer.
 	 */
-	ec = dce_style ? 0 : gss_padlen;
+	ec = (ctx->gss_flags & GSS_C_DCE_STYLE) ? 0 : gss_padlen;
 
 	if (trailer == NULL)
 	    rrc = gss_trailerlen;
@@ -273,7 +268,6 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     unsigned char acceptor_flag;
     unsigned char *ptr = NULL;
     int key_usage;
-    krb5_boolean dce_style;
     size_t rrc, ec;
     size_t data_length, assoc_data_length;
     krb5_keyblock *key;
@@ -287,16 +281,10 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     if (qop_state != NULL)
 	*qop_state = GSS_C_QOP_DEFAULT;
 
-    dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
-
     header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (dce_style == 0 && trailer == NULL) {
-	*minor_status = 0;
-	return GSS_S_DEFECTIVE_TOKEN;
-    }
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG

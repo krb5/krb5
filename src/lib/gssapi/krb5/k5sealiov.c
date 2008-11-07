@@ -355,7 +355,6 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     size_t k5_headerlen = 0, k5_padlen = 0, k5_trailerlen = 0;
     krb5_error_code code;
     krb5_context context;
-    krb5_boolean dce_style;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
 	*minor_status = G_UNKNOWN_QOP;
@@ -372,7 +371,6 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	*minor_status = KG_CTX_INCOMPLETE;
 	return GSS_S_NO_CONTEXT;
     }
-    dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
 
     header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL) {
@@ -389,10 +387,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     INIT_IOV_DATA(padding);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (trailer == NULL && !dce_style) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    } else {
+    if (trailer != NULL) {
 	INIT_IOV_DATA(trailer);
     }
 
@@ -467,8 +462,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    gss_headerlen -= textlen;
     }
 
-    /* If DCE_STYLE is specified, GSS header and trailer are adjacent */
-    if (dce_style)
+    if (trailer == NULL)
 	gss_headerlen += gss_trailerlen;
     else
 	trailer->buffer.length = gss_trailerlen;

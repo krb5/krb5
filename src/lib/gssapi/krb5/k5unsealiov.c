@@ -341,10 +341,6 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     }
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0 && ctx->proto && trailer == NULL) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    }
 
     ptr = (unsigned char *)header->buffer.value;
     input_length = header->buffer.length;
