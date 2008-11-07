@@ -124,14 +124,14 @@ typedef struct gss_iov_buffer_desc_struct {
 
 #define GSS_IOV_BUFFER_TYPE_EMPTY	    0	/* may be replaced by mech */
 #define GSS_IOV_BUFFER_TYPE_DATA	    1	/* data to be encrypted/signed */
-#define GSS_IOV_BUFFER_TYPE_TOKEN	    2	/* mechanism token header */
+#define GSS_IOV_BUFFER_TYPE_TOKEN	    2	/* GSS mechanism header */
 #define GSS_IOV_BUFFER_TYPE_TRAILER	    6
-#define GSS_IOV_BUFFER_TYPE_PADDING	    9
-#define GSS_IOV_BUFFER_TYPE_STREAM	    10
+#define GSS_IOV_BUFFER_TYPE_PADDING	    9	/* padding bytes */
+#define GSS_IOV_BUFFER_TYPE_STREAM	    10	/* complete GSS message */
 
-#define GSS_IOV_BUFFER_FLAG_ALLOCATE	    1
-#define GSS_IOV_BUFFER_FLAG_ALLOCATED	    2
-#define GSS_IOV_BUFFER_FLAG_SIGN_ONLY	    4
+#define GSS_IOV_BUFFER_FLAG_ALLOCATE	    1	/* indicates GSS can allocate */
+#define GSS_IOV_BUFFER_FLAG_ALLOCATED	    2	/* indicates caller should free */
+#define GSS_IOV_BUFFER_FLAG_SIGN_ONLY	    4	/* indicates associated data */
 
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (
