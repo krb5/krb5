@@ -55,7 +55,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     size_t headerlen;
     krb5_keyblock *key;
 
-    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
+    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != NULL);
     assert(ctx->big_endian == 0);
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
@@ -113,22 +113,39 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (dce_style)
 	    headerlen += 16 /* E(Header) */ + k5_trailerlen;
 
-	if ((header->buffer.length < headerlen) ||
-	    (!dce_style && trailer->buffer.length < 16 /* E(Header) */ + k5_trailerlen)) {
-	    code = ERANGE;
+	if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	    code = kg_allocate_iov(header, headerlen);
+	else if (header->buffer.length < headerlen)
+	    code = KRB5_BAD_MSIZE;
+	if (code != 0)
 	    goto cleanup;
+
+	if (!dce_style) {
+	    if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+		code = kg_allocate_iov(trailer, 16 + k5_trailerlen);
+	    else if (trailer->buffer.length < 16 /* E(Header) */ + k5_trailerlen)
+		code = KRB5_BAD_MSIZE;
+	    if (code != 0)
+		goto cleanup;
 	}
 
-	if (trailer != NULL)
-	    trailer->buffer.length = dce_style ? 0 : 16 /* E(Header) */ + k5_trailerlen;
+	if (k5_padlen != 0) {
+	    /*
+	     * DCE always pads to at least 16 bytes, so only check data pads correctly
+	     * rather than insisting on minimum padding.
+	     */
+	    if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+		size_t padlen = k5_padlen - ((16 + data_length - assoc_data_length) % k5_padlen);
 
-	/* For DCE compat, allow the caller to specify more padding than necessary */
-	if (k5_padlen != 0 &&
-	    ((16 + data_length - assoc_data_length + padding->buffer.length) % k5_padlen) != 0) {
-	    code = EINVAL;
-	    goto cleanup;
+		code = kg_allocate_iov(padding, padlen);
+	    } else if (((16 + data_length - assoc_data_length + padding->buffer.length) % k5_padlen) != 0) {
+		code = KRB5_BAD_MSIZE;
+	    }
+	    if (code != 0)
+		goto cleanup;
+
+	    memset(padding->buffer.value, 'x', padding->buffer.length);
 	}
-	memset(padding->buffer.value, 'x', padding->buffer.length);
 
 	/*
 	 * Windows has a bug where it rotates by EC + RRC instead of RRC as
@@ -225,6 +242,8 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     code = 0;
 
 cleanup:
+    kg_release_iov(iov_count, iov);
+
     return code;
 }
 

@@ -91,15 +91,13 @@ make_seal_token_v1_iov(krb5_context context,
 	    else
 		padding->buffer.length = blocksize - ((textlen - assoclen) % blocksize);
 
-	    padding->buffer.value = xmalloc(padding->buffer.length);
-	    if (padding->buffer.value == NULL)
-		return ENOMEM;
-
-	    padding->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
+	    code = kg_allocate_iov(padding, padding->buffer.length);
 	} else if ((textlen + padding->buffer.length) % blocksize != 0) {
 	    /* The caller must pad the input buffer */
-	    return KRB5_BAD_MSIZE;
+	    code = KRB5_BAD_MSIZE;
 	}
+	if (code != 0)
+	    goto cleanup;
 
 	if (ctx->gss_flags & GSS_C_DCE_STYLE)
 	    tmsglen = 0;
@@ -110,14 +108,13 @@ make_seal_token_v1_iov(krb5_context context,
     /* Determine token size */
     tlen = g_token_size(ctx->mech_used, 14 + ctx->cksum_size + tmsglen);
 
-    if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-	header->buffer.value = xmalloc(tlen);
-	if (header->buffer.value == NULL)
-	    return ENOMEM;
-	header->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
-    } if (header->buffer.length < tlen) {
-	return ERANGE;
-    }
+    if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	code = kg_allocate_iov(header, tlen);
+    else if (header->buffer.length < tlen)
+	code = KRB5_BAD_MSIZE;
+    if (code != 0)
+	goto cleanup;
+
     header->buffer.length = tlen;
 
     ptr = (unsigned char *)header->buffer.value;

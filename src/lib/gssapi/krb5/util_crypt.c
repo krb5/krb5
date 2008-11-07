@@ -716,3 +716,19 @@ krb5_boolean kg_integ_only_iov(size_t iov_count, gss_iov_buffer_desc *iov)
 
     return integ_only;
 }
+
+krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
+{
+    assert(iov->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE);
+
+    iov->buffer.length = size;
+    iov->buffer.value = xmalloc(size);
+    if (iov->buffer.value == NULL) {
+	iov->buffer.length = 0;
+	return ENOMEM;
+    }
+
+    iov->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
+
+    return 0;
+}
