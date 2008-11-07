@@ -299,6 +299,11 @@ cleanup:
     return retval;
 }
 
+/*
+ * Caller must provide HEADER, DATA and PADDING. TRAILER should be provided
+ * unless the caller has negotiated DCE_STYLE or can guarantee that CFX will
+ * not be used (such knowledge likely being an abstraction violation).
+ */
 OM_uint32
 kg_unseal_iov(OM_uint32 *minor_status,
 	      gss_ctx_id_t context_handle,
@@ -314,7 +319,6 @@ kg_unseal_iov(OM_uint32 *minor_status,
     unsigned char *ptr;
     int toktype2;
     gss_iov_buffer_t header;
-    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
     size_t input_length;
     unsigned int bodysize;
@@ -338,12 +342,6 @@ kg_unseal_iov(OM_uint32 *minor_status,
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    }
-
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (trailer == NULL && ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }

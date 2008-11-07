@@ -301,8 +301,10 @@ rotate_left_iov(size_t iov_count,
     memcpy(p, (unsigned char *)header->buffer.value + 16, header->buffer.length - 16);
     p += header->buffer.length - 16;
 
-    memcpy(p, data->buffer.value, data->buffer.length);
-    p += data->buffer.length;
+    if (data != NULL) {
+	memcpy(p, data->buffer.value, data->buffer.length);
+	p += data->buffer.length;
+    }
 
     memcpy(p, trailer->buffer.value, trailer->buffer.length);
     p += trailer->buffer.length;
@@ -318,8 +320,10 @@ rotate_left_iov(size_t iov_count,
     memcpy((unsigned char *)header->buffer.value + 16, p, header->buffer.length - 16);
     p += header->buffer.length - 16;
 
-    memcpy(data->buffer.value, p, data->buffer.length);
-    p += data->buffer.length;
+    if (data != NULL) {
+	memcpy(data->buffer.value, p, data->buffer.length);
+	p += data->buffer.length;
+    }
 
     memcpy(trailer->buffer.value, p, trailer->buffer.length);
     p += trailer->buffer.length;
@@ -362,7 +366,12 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
-    assert(dce_style || trailer != NULL);
+
+    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    if (trailer != NULL && dce_style == 0) {
+	*minor_status = KRB5_BAD_MSIZE;
+	return GSS_S_BAD_SIG;
+    }
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG

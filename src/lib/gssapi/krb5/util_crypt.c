@@ -650,12 +650,15 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 	}
     }
 
-    if (padding == NULL || data == NULL) {
+    if (data == NULL)
+	return GSS_S_COMPLETE;
+
+    if (padding == NULL) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
 
-    if (proto) {
+    if (proto == 1) {
 	padlength = ec;
     } else {
 	unsigned char *p = (unsigned char *)data->buffer.value;
@@ -663,7 +666,7 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     }
 
     if (data->buffer.length < padlength) {
-	*minor_status = ERANGE;
+	*minor_status = KRB5_BAD_MSIZE;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
