@@ -408,7 +408,7 @@ if ![info exists KEY] {
 # Clear away any files left over from a previous run.
 # We can't use them now because we don't know the right KEY.
 # krb5.conf might change if running tests on another host
-catch "exec rm -f $tmppwd/db.ok $tmppwd/srvtab $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/cpw_srvtab $tmppwd/krb.realms $tmppwd/krb.conf"
+file delete $tmppwd/db.ok $tmppwd/srvtab $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/cpw_srvtab $tmppwd/krb.realms $tmppwd/krb.conf
 
 # Put the installed kerberos directories on PATH.
 # This needs to be fixed for V5.
@@ -734,7 +734,7 @@ proc get_hostname { } {
 	return 0
     }
     close $file
-    catch "exec rm -f $tmppwd/hostname" exec_output
+    file delete $tmppwd/hostname
     regexp "^(\[^.\]*)\\.(.*)$" $hostname foo localhostname domain
 
     set hostname [string tolower $hostname]
@@ -1129,10 +1129,10 @@ proc setup_kerberos_db { standalone } {
 	return 1
     }
 
-    catch "exec rm -f [glob -nocomplain $tmppwd/db* $tmppwd/adb*]"
+    catch "file delete [glob -nocomplain $tmppwd/db* $tmppwd/adb*]"
 
     # Creating a new database means we need a new srvtab.
-    catch "exec rm -f $tmppwd/srvtab"
+    file delete $tmppwd/srvtab
 
     envstack_push
     if { ![setup_kerberos_files] || ![setup_kerberos_env kdc] } {
@@ -1221,7 +1221,7 @@ proc setup_kerberos_db { standalone } {
 	if $standalone {
 	    fail $test
 	} else {
-	    catch "exec rm -f $tmppwd/db.ok $tmppwd/adb.db"
+	    file delete $tmppwd/db.ok $tmppwd/adb.db
 	}
     } else {
 	if $standalone {
@@ -1269,7 +1269,7 @@ proc setup_kerberos_db { standalone } {
 	if $standalone {
 	    fail $test
 	} else {
-	    catch "exec rm -f $tmppwd/db.ok $tmppwd/adb.db"
+	    file delete $tmppwd/db.ok $tmppwd/adb.db
 	}
     } else {
 	if $standalone {
@@ -1311,7 +1311,7 @@ proc setup_kerberos_db { standalone } {
 	    if $standalone {
 		fail $test
 	    } else {
-		catch "exec rm -f $tmppwd/db.ok $tmppwd/adb.db"
+		file delete $tmppwd/db.ok $tmppwd/adb.db
 	    }
 	} else {
 	    if $standalone {
@@ -1353,7 +1353,7 @@ proc setup_kerberos_db { standalone } {
 	    if $standalone {
 		fail $test
 	    } else {
-		catch "exec rm -f $tmppwd/db.ok $tmppwd/adb.db"
+		file delete $tmppwd/db.ok $tmppwd/adb.db
 	    }
 	} else {
 	    if $standalone {
@@ -1460,9 +1460,7 @@ proc start_kerberos_daemons { standalone } {
     }
 
     if {$standalone} {
-        catch "exec rm -f $tmppwd/krb.log"
-	catch "exec rm -f $tmppwd/kadmind.log"
-	catch "exec rm -f $tmppwd/krb5kdc_rcache"
+        file delete $tmppwd/krb.log $tmppwd/kadmind.log $tmppwd/krb5kdc_rcache
     }
 
     # Start up the kerberos daemon
@@ -1831,13 +1829,13 @@ proc setup_srvtab { standalone {id host} } {
 	return 1
     }
 
-    catch "exec rm -f $tmppwd/srvtab $tmppwd/srvtab.old"
+    file delete $tmppwd/srvtab $tmppwd/srvtab.old
 
     if ![get_hostname] {
 	return 0
     }
 
-    catch "exec rm -f $hostname-new-srvtab"
+    file delete $hostname-new-srvtab
 
     envstack_push
     setup_kerberos_env kdc
@@ -1847,7 +1845,7 @@ proc setup_srvtab { standalone {id host} } {
 	-re "(.*)\r\nkadmin.local:  " {
 	    fail "kadmin.local srvtab (unmatched output: $expect_out(1,string))"
 	    if {!$standalone} {
-		catch "exec rm -f $tmppwd/srvtab"
+		file delete $tmppwd/srvtab
 	    }
 	    catch "expect_after"
 	    return 0
@@ -1855,7 +1853,7 @@ proc setup_srvtab { standalone {id host} } {
 	timeout {
 	    fail "kadmin.local srvtab"
 	    if {!$standalone} {
-		catch "exec rm -f $tmppwd/srvtab"
+		file delete $tmppwd/srvtab
 	    }
 	    catch "expect_after"
 	    return 0
@@ -1863,7 +1861,7 @@ proc setup_srvtab { standalone {id host} } {
 	eof {
 	    fail "kadmin.local srvtab"
 	    if {!$standalone} {
-		catch "exec rm -f $tmppwd/srvtab"
+		file delete $tmppwd/srvtab
 	    }
 	    catch "expect_after"
 	    return 0
@@ -1878,7 +1876,7 @@ proc setup_srvtab { standalone {id host} } {
 	    if {$standalone} {
 		fail "kadmin.local srvtab"
 	    } else {
-		catch "exec rm -f $tmppwd/srvtab"
+		file delete $tmppwd/srvtab
 	    }
 	    catch expect_after
 	    return 0
@@ -1890,7 +1888,7 @@ proc setup_srvtab { standalone {id host} } {
     catch expect_after
     if ![check_exit_status "kadmin.local srvtab"] {
 	if {!$standalone} {
-	    catch "exec rm -f $tmppwd/srvtab"
+	    file delete $tmppwd/srvtab"
 	}
 	return 0
     }
@@ -2670,7 +2668,7 @@ proc setup_wrapper { file command } {
     global krb5_init_vars
 
     # We will start with a BINSH script
-    catch "exec rm -f $file"
+    file delete $file
 
     set f [open $file "w" 0777]
     puts $f "#!$BINSH"
