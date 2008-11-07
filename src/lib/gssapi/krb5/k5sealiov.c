@@ -397,6 +397,9 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     context = ctx->k5_context;
 
+    if (conf_req_flag && kg_integ_only_iov(iov_count, iov))
+	conf_req_flag = FALSE;
+
     if (ctx->proto == 1) {
 	/*
 	 * Before rotation:
@@ -406,7 +409,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	 * else
 	 *     Header | Data | H(Data | Header)
 	 *
-	 * After rotation by a suitable value of RRC:
+	 * After rotation by a suitable value of RRC
 	 *
 	 * if (conf_req_flag)
 	 *     Header | ( Kerb-Header | E(Header) | Kerb-Trailer | E(Data | Pad)
@@ -433,22 +436,14 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		return GSS_S_FAILURE;
 	    }
 
-	    /* RC4-HMAC DCE always pads even though it is a stream cipher, assume similar
-	     * weirdness for AES until we see otherwise */
-	    if (ctx->gss_flags & GSS_C_DCE_STYLE)
-		k5_padlen = k5_headerlen; /* assume this to be the block size */
-	    else {
-		code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
-		if (code != 0) {
-		    *minor_status = code;
-		    return GSS_S_FAILURE;
-		}
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
+	    if (code != 0) {
+		*minor_status = code;
+		return GSS_S_FAILURE;
 	    }
 
-	    /* Note because the GSS header is encrypted, it needs to be included when
-	     * calculating the pad.  */
 	    if (k5_padlen != 0)
-		padding->buffer.length = k5_padlen - ((16 + textlen - assoclen) % k5_padlen);
+		padding->buffer.length = k5_padlen - ((textlen - assoclen + 16 /* Header */) % k5_padlen);
 	}
 
 	if (dce_style) {
@@ -463,12 +458,11 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	size_t data_size;
 
 	if (conf_req_flag) {
-	    /* Note that DCE always pads to 16 bytes, but we can let the caller
-	     * increase the pad size. */
 	    if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4)
 		padding->buffer.length = 1;
 	    else
 		padding->buffer.length = 8 - ((textlen - assoclen) % 8);
+
 	    conflen = kg_confounder_size(context, ctx->enc);
 	} else {
 	    padding->buffer.length = 0;
@@ -490,12 +484,8 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     header->buffer.length = headerlen;
 
-    if (conf_state != NULL) {
-	if (conf_req_flag)
-	    *conf_state = kg_integ_only_iov(iov_count, iov) ? FALSE : TRUE;
-	else
-	    *conf_state = FALSE;
-    }
+    if (conf_state != NULL)
+	*conf_state = conf_req_flag;
 
     return GSS_S_COMPLETE;
 }
