@@ -66,6 +66,80 @@ val_seal_args(
     return (GSS_S_COMPLETE);
 }
 
+static OM_uint32
+gssint_seal_iov_shim(OM_uint32 *minor_status,
+		     gss_ctx_id_t context_handle,
+		     int conf_req_flag,
+		     int qop_req,
+		     gss_buffer_t input_message_buffer,
+		     int *conf_state,
+		     gss_buffer_t output_message_buffer)
+{
+    gss_iov_buffer_desc	iov[4];
+    OM_uint32		status;
+    size_t		offset;
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER;
+    iov[0].flags = 0;
+    iov[0].buffer.value = NULL;
+    iov[0].buffer.length = 0;
+
+    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[1].flags = 0;
+    iov[1].buffer = *input_message_buffer;
+
+    iov[2].type = GSS_IOV_BUFFER_TYPE_PADDING;
+    iov[2].flags = 0;
+    iov[2].buffer.value = NULL;
+    iov[2].buffer.length = 0;
+
+    iov[3].type = GSS_IOV_BUFFER_TYPE_TRAILER;
+    iov[3].flags = 0;
+    iov[3].buffer.value = NULL;
+    iov[3].buffer.length = 0;
+
+    status = gss_wrap_iov_length(minor_status, context_handle,
+				 conf_req_flag, qop_req,
+				 NULL,
+				 sizeof(iov)/sizeof(iov[0]),
+				 iov);
+    if (status != GSS_S_COMPLETE)
+	return status;
+
+    output_message_buffer->length = iov[0].buffer.length +
+				    iov[1].buffer.length +
+				    iov[2].buffer.length +
+				    iov[3].buffer.length;
+    output_message_buffer->value = malloc(output_message_buffer->length);
+    if (output_message_buffer->value == NULL) {
+	*minor_status = ENOMEM;
+	return GSS_S_FAILURE;
+    }
+
+    offset = 0;
+
+    iov[0].buffer.value = output_message_buffer->value + offset;
+    offset += iov[0].buffer.length;
+
+    iov[1].buffer.value = (unsigned char *)output_message_buffer->value + offset;
+    offset += iov[1].buffer.length;
+
+    iov[2].buffer.value = (unsigned char *)output_message_buffer->value + offset;
+    offset += iov[2].buffer.length;
+
+    iov[3].buffer.value = (unsigned char *)output_message_buffer->value + offset;
+
+    status = gss_wrap_iov(minor_status, context_handle,
+			  conf_req_flag, qop_req, conf_state,
+			  sizeof(iov)/sizeof(iov[0]), iov);
+    if (status != GSS_S_COMPLETE) {
+	OM_uint32 minor;
+
+	gss_release_buffer(&minor, output_message_buffer);
+    }
+
+    return status;
+}
 
 OM_uint32 KRB5_CALLCONV
 gss_seal (minor_status,
@@ -118,6 +192,14 @@ gss_buffer_t		output_message_buffer;
 				    output_message_buffer);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
+	} else if (mech->gss_wrap_iov) {
+	    status = gssint_seal_iov_shim(minor_status,
+					  ctx->internal_ctx_id,
+					  conf_req_flag,
+					  qop_req,
+					  input_message_buffer,
+					  conf_state,
+					  output_message_buffer);
 	} else
 	    status = GSS_S_UNAVAILABLE;
 	
