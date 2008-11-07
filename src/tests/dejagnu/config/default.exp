@@ -1888,7 +1888,7 @@ proc setup_srvtab { standalone {id host} } {
     catch expect_after
     if ![check_exit_status "kadmin.local srvtab"] {
 	if {!$standalone} {
-	    file delete $tmppwd/srvtab"
+	    file delete $tmppwd/srvtab
 	}
 	return 0
     }
