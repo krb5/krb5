@@ -50,13 +50,12 @@ make_seal_token_v1_iov(krb5_context context,
     krb5_checksum cksum;
     size_t conflen = 0;
     size_t textlen = 0, assoclen = 0;
-    size_t blocksize = 0;
     size_t sumlen;
     size_t tmsglen = 0, tlen;
     unsigned char *ptr;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
-    assert(!conf_req_flag || toktype == KG_TOK_SEAL_MSG);
+    assert(conf_req_flag == 0 || toktype == KG_TOK_SEAL_MSG);
 
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
@@ -72,11 +71,6 @@ make_seal_token_v1_iov(krb5_context context,
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL)
 	trailer->buffer.length = 0;
-    else if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	return EINVAL;
-
-    if (kg_integ_only_iov(iov_count, iov) && conf_req_flag)
-	conf_req_flag = FALSE;
 
     /* Determine confounder length */
     if (conf_req_flag)
@@ -85,13 +79,12 @@ make_seal_token_v1_iov(krb5_context context,
 	conflen = 0;
 
     /* Check padding length */
-
     if (toktype == KG_TOK_SEAL_MSG) {
+	size_t blocksize = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+
 	kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
 
-	blocksize = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
-
-	/* Padding is only on encrypted data, not associated data */
+	/* Padding applies to the encrypted data only */
 	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
 	    if (blocksize == 1)
 		padding->buffer.length = 1; /* one byte to say one byte of padding */
@@ -104,7 +97,7 @@ make_seal_token_v1_iov(krb5_context context,
 
 	    padding->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
 	} else if ((textlen + padding->buffer.length) % blocksize != 0) {
-	    /* The caller must correctly pad the input buffer */
+	    /* The caller must pad the input buffer */
 	    return KRB5_BAD_MSIZE;
 	}
 
@@ -181,7 +174,7 @@ make_seal_token_v1_iov(krb5_context context,
     }
 
     /* initialize the pad */
-    memset(padding->buffer.value, blocksize, padding->buffer.length);
+    memset(padding->buffer.value, padding->buffer.length, padding->buffer.length);
 
     /* compute the checksum */
     code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
@@ -214,7 +207,6 @@ make_seal_token_v1_iov(krb5_context context,
     }
 
     /* create the seq_num */
-
     code = kg_make_seq_num(context, ctx->seq, ctx->initiate ? 0 : 0xFF, ctx->seq_send,
 			   ptr + 14, ptr + 6);
     if (code != 0)
@@ -313,6 +305,11 @@ kg_seal_iov(OM_uint32 *minor_status,
 	*minor_status = code;
 	save_error_info(*minor_status, context);
 	return GSS_S_FAILURE;
+    }
+
+    if (conf_req_flag && kg_integ_only_iov(iov_count, iov)) {
+	/* may be more sensible to return an error here */
+	conf_req_flag = FALSE;
     }
 
     switch (ctx->proto) {
