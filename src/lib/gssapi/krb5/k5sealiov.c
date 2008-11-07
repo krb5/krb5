@@ -311,10 +311,12 @@ kg_seal_iov(OM_uint32 *minor_status,
 
     switch (ctx->proto) {
     case 0:
-	code = make_seal_token_v1_iov(context, ctx, conf_req_flag, conf_state, iov_count, iov, toktype);
+	code = make_seal_token_v1_iov(context, ctx, conf_req_flag,
+				      conf_state, iov_count, iov, toktype);
 	break;
     case 1:
-	code = gss_krb5int_make_seal_token_v3_iov(context, ctx, conf_req_flag, conf_state, iov_count, iov, toktype);
+	code = gss_krb5int_make_seal_token_v3_iov(context, ctx, conf_req_flag,
+						  conf_state, iov_count, iov, toktype);
 	break;
     default:
 	code = G_UNKNOWN_QOP;
@@ -332,6 +334,9 @@ kg_seal_iov(OM_uint32 *minor_status,
     return (ctx->endtime < now) ? GSS_S_CONTEXT_EXPIRED : GSS_S_COMPLETE;
 }
 
+#define INIT_IOV_DATA(_iov)	do { (_iov)->buffer.value = NULL; \
+				     (_iov)->buffer.length = 0; } \
+				while (0)
 
 OM_uint32
 kg_seal_iov_length(OM_uint32 *minor_status,
@@ -373,21 +378,18 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
-    header->buffer.length = 0;
-    header->buffer.value = NULL;
+    INIT_IOV_DATA(header);
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
-    padding->buffer.length = 0;
-    padding->buffer.value = NULL;
+    INIT_IOV_DATA(padding);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL) {
-	trailer->buffer.length = 0;
-	trailer->buffer.value = NULL;
+	INIT_IOV_DATA(trailer);
     } else if (!dce_style) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
