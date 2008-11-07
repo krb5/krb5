@@ -44,7 +44,6 @@ make_seal_token_v1_iov(krb5_context context,
 {
     krb5_error_code code;
     gss_iov_buffer_t token;
-    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
     krb5_checksum md5cksum;
     krb5_checksum cksum;
@@ -67,10 +66,6 @@ make_seal_token_v1_iov(krb5_context context,
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL)
 	return EINVAL;
-
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (trailer != NULL)
-	trailer->buffer.length = 0;
 
     /* Determine confounder length */
     if (conf_req_flag)
@@ -349,12 +344,11 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 {
     krb5_gss_ctx_id_rec *ctx;
     gss_iov_buffer_t token;
-    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
-    size_t textlen, assoclen, headerlen;
+    size_t textlen, assoclen, gss_headerlen, gss_trailerlen;
     krb5_error_code code;
     krb5_context context;
-    int dce_style;
+    krb5_boolean dce_style;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
 	*minor_status = G_UNKNOWN_QOP;
@@ -387,20 +381,14 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     }
     INIT_IOV_DATA(padding);
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (trailer != NULL) {
-	INIT_IOV_DATA(trailer);
-    } else if (!dce_style) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    }
-
     kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
 
     context = ctx->k5_context;
 
     if (conf_req_flag && kg_integ_only_iov(iov_count, iov))
 	conf_req_flag = FALSE;
+
+    gss_headerlen = gss_trailerlen = 0;
 
     if (ctx->proto == 1) {
 	/*
@@ -445,18 +433,19 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    }
 
 	    if (k5_padlen != 0)
-		padding->buffer.length = k5_padlen - ((textlen - assoclen + 16 /* Header */) % k5_padlen);
+		padding->buffer.length = k5_padlen - ((textlen - assoclen + 16 /* E(Header) */) % k5_padlen);
 	}
 
-	if (dce_style) {
-	    headerlen = 16 /* Header */ + k5_headerlen + 16 /* E(Header) */ + k5_trailerlen;
+	gss_headerlen = 16; /* Header */
+	if (conf_req_flag) {
+	    gss_headerlen += k5_headerlen; /* Kerb-Header */
+	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
 	} else {
-	    headerlen = 16 /* Header */ + k5_headerlen;
-	    trailer->buffer.length = 16 /* E(Header) */ + k5_trailerlen;
+	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}
     } else {
 	/* Header | Checksum | Confounder | Data | Pad */
-	size_t conflen;
+	size_t conflen = 0;
 	size_t data_size;
 
 	if (conf_req_flag) {
@@ -466,9 +455,6 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		padding->buffer.length = 8 - ((textlen - assoclen) % 8);
 
 	    conflen = kg_confounder_size(context, ctx->enc);
-	} else {
-	    padding->buffer.length = 0;
-	    conflen = 0;
 	}
 
 	data_size = 14 /* Header */ + ctx->cksum_size + conflen;
@@ -476,15 +462,21 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
 	    data_size += textlen;
 
-	headerlen = g_token_size(ctx->mech_used, data_size);
+	gss_headerlen = g_token_size(ctx->mech_used, data_size);
 
 	/* g_token_size() will include data_size as well as the overhead, so
 	 * subtract textlen just to get the overhead (ie. token size) */
 	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	    headerlen -= textlen;
+	    gss_headerlen -= textlen;
     }
 
-    token->buffer.length = headerlen;
+    /* If DCE_STYLE is specified, GSS header and trailer are adjacent */
+    if (dce_style)
+	gss_headerlen += gss_trailerlen;
+    else
+	padding->buffer.length += gss_trailerlen;
+
+    token->buffer.length = gss_headerlen;
 
     if (conf_state != NULL)
 	*conf_state = conf_req_flag;

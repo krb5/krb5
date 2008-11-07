@@ -241,110 +241,51 @@ cleanup_arcfour:
 
 /* AEAD */
 static krb5_error_code
-kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
+kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov)
     krb5_context context;
-    int proto;
-    int ec;
-    int rrc;
     const krb5_keyblock *key;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
     size_t *pkiov_count;
     krb5_crypto_iov **pkiov;
 {
-    gss_iov_buffer_desc *header;
-    gss_iov_buffer_desc *trailer;
+    gss_iov_buffer_desc *token;
+    gss_iov_buffer_desc *padding;
     size_t i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
-    size_t k5_headerlen = 0;
-    size_t k5_trailerlen = 0;
-    krb5_error_code code;
+    size_t confsize;
 
     *pkiov_count = 0;
     *pkiov = NULL;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    assert(header != NULL);
+    confsize = kg_confounder_size(context, (krb5_keyblock *)key);
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    assert(token != NULL);
 
-    /* Check we are V1, DCE, or have a trailer */
-    assert(proto == 0 || rrc != 0 || trailer != NULL);
+    if (token->buffer.length < confsize)
+	return KRB5_BAD_MSIZE;
 
-    if (proto == 1) {
-	size_t req_headerlen, req_trailerlen;
-
-	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
-	if (code != 0)
-	    return code;
-
-	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
-	if (code != 0)
-	    return code;
-
-	/*
-	 * Sanity check header size, allowing for Windows bug where the
-	 * real rotation count is EC + RRC.
-	 */
-	req_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
-	req_trailerlen = 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
-
-	if (trailer != NULL) {
-	    if (trailer->buffer.length != req_trailerlen)
-		return KRB5_BAD_MSIZE;
-	} else {
-	    /* No trailer, must be rotating with DCE */
-	    if (rrc != 16 + k5_trailerlen)
-		return KRB5_BAD_MSIZE;
-
-	    req_headerlen += req_trailerlen; /* because trailer is rotated */
-	    req_headerlen += ec;
-	}
-	if (header->buffer.length != req_headerlen)
-	    return KRB5_BAD_MSIZE;
-    }
+    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    assert(padding != NULL);
 
     kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
     if (kiov == NULL)
 	return ENOMEM;
 
+    /* For pre-CFX (raw enctypes) there is no krb5 header */
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
-    if (proto) {
-	/* For CFX, place the krb5 header after the GSS header, offset
-	 * by the real rotation count which, owing to a bug in Windows,
-	 * is actually EC + RRC */
-	kiov[i].data.length = k5_headerlen;
-	kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc;
-    } else {
-	kiov[i].data.length = 0;
-	kiov[i].data.data = NULL;
-    }
+    kiov[i].data.length = 0;
+    kiov[i].data.data = NULL;
     i++;
 
-    kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
-    if (proto) {
-	/* For CFX, place the krb5 trailer in the GSS trailer, or if
-	 * rotating, after the encrypted copy of the krb5 header. */
-	kiov[i].data.length = k5_trailerlen;
-	if (rrc)
-	    kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc - k5_trailerlen;
-	else
-	    kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */
-    } else {
-	kiov[i].data.length = 0;
-	kiov[i].data.data = NULL;
-    }
+    /* For pre-CFX, the confounder is at the end of the GSS header */
+    kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
+    kiov[i].data.length = confsize;
+    kiov[i].data.data = (char *)token->buffer.value + token->buffer.length - confsize;
     i++;
-
-    if (proto == 0) {
-	/* For pre-CFX, the confounder is encrypted before the data */
-	kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-	kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)key);
-	kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - kiov[i].data.length;
-	i++;
-    }
 
     for (j = 0; j < iov_count; j++) {
 	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
@@ -353,24 +294,159 @@ kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkio
 	i++;
     }
 
-    if (proto == 1) {
-	/* CFX will insert the confounder into the header, but we do need
-	 * to add the header to the end of the plaintext such that it will
-	 * be integrity protected.  */
-	kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-	kiov[i].data.length = 16; /* E(Header) */
-	if (rrc)
-	    kiov[i].data.data = (char *)header->buffer.value + 16 + ec;
-	else
-	    kiov[i].data.data = (char *)trailer->buffer.value;
-	memcpy(kiov[i].data.data, header->buffer.value, 16);
-	i++;
-    }
+    kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
+    kiov[i].data.length = 0;
+    kiov[i].data.data = NULL;
+    i++;
 
     *pkiov_count = kiov_count;
     *pkiov = kiov;
 
     return 0;
+}
+
+static krb5_error_code
+kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
+    krb5_context context;
+    int proto;			/* 1 if CFX, 0 for pre-CFX */
+    int ec;			/* EC, for buggy Windows compat */
+    int rrc;			/* rotate count, for DCE */
+    const krb5_keyblock *key;
+    size_t iov_count;
+    gss_iov_buffer_desc *iov;
+    size_t *pkiov_count;
+    krb5_crypto_iov **pkiov;
+{
+    gss_iov_buffer_desc *token;
+    gss_iov_buffer_desc *padding;
+    size_t i = 0, j;
+    size_t kiov_count;
+    krb5_crypto_iov *kiov;
+    size_t k5_headerlen = 0, k5_trailerlen = 0;
+    size_t req_headerlen, req_trailerlen;
+    krb5_error_code code;
+    krb5_boolean dce_style = (rrc != 0);
+
+    *pkiov_count = 0;
+    *pkiov = NULL;
+
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    assert(token != NULL);
+
+    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    assert(padding != NULL);
+
+    code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
+    if (code != 0)
+	return code;
+
+    code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
+    if (code != 0)
+	return code;
+
+    /*
+     * Sanity check header size, allowing for Windows bug where the
+     * real rotation count is EC + RRC. Note we are only ever called
+     * with RRC for DCE.
+     */
+    req_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
+    req_trailerlen = ec + 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
+
+    if (dce_style) {
+	/*
+	 * Some very brittle assumptions about RRC and EC for DCE,
+	 * in part owing to the Windows bug workaround.
+	 */
+	if (rrc != 16 /* E(GSS-Header) */ + k5_trailerlen)
+	    return KRB5_BAD_MSIZE;
+
+	req_headerlen += req_trailerlen;
+	req_trailerlen = 0;
+    } else if (padding->buffer.length != req_trailerlen) {
+	return KRB5_BAD_MSIZE;
+    }
+
+    if (token->buffer.length != req_headerlen) {
+	return KRB5_BAD_MSIZE;
+    }
+
+    kiov_count = 3 + iov_count;
+    kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
+    if (kiov == NULL)
+	return ENOMEM;
+
+    /*
+     * For CFX, place the krb5 header after the GSS header, offset
+     * by the real rotation count which, owing to a bug in Windows,
+     * is actually EC + RRC.
+     */
+    kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
+    kiov[i].data.length = k5_headerlen;
+    kiov[i].data.data = (char *)token->buffer.value + 16;
+    if (dce_style)
+	kiov[i].data.data += ec + rrc;
+    i++;
+
+    for (j = 0; j < iov_count; j++) {
+	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
+	kiov[i].data.length = iov[j].buffer.length;
+	kiov[i].data.data = (char *)iov[j].buffer.value;
+
+	/* Trim E(Header) and Kerb-Trailer from padding */
+	if (!dce_style && iov[j].type == GSS_IOV_BUFFER_TYPE_PADDING) {
+	    assert(padding == &iov[j]);
+	    kiov[i].data.length = ec;
+	}
+
+	i++;
+    }
+
+    /*
+     * For DCE, deal with the fact that PADDING only contains the
+     * real (DCE managed) padding and that the EC and encrypted
+     * copy of the header are in the token header.
+     */
+    if (dce_style) {
+        kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
+	kiov[i].data.length = ec + 16; /* E(Header) */
+	kiov[i].data.data = (char *)token->buffer.value + 16;
+	i++;
+    }
+
+    /*
+     * For CFX, place the krb5 trailer in the GSS trailer (aka.
+     * "padding") or, if rotating, after the encrypted copy of
+     * the krb5 header.
+     */
+    kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
+    kiov[i].data.length = k5_trailerlen;
+    if (dce_style)
+	kiov[i].data.data = (char *)token->buffer.value + 16 + ec + rrc - k5_trailerlen;
+    else
+	kiov[i].data.data = (char *)padding->buffer.value + ec + 16; /* E(Header) */
+    i++;
+
+    *pkiov_count = kiov_count;
+    *pkiov = kiov;
+
+    return 0;
+}
+
+static krb5_error_code
+kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
+    krb5_context context;
+    int proto;			/* 1 if CFX, 0 for pre-CFX */
+    int ec;			/* EC, for buggy Windows compat */
+    int rrc;			/* rotate count, for DCE */
+    const krb5_keyblock *key;
+    size_t iov_count;
+    gss_iov_buffer_desc *iov;
+    size_t *pkiov_count;
+    krb5_crypto_iov **pkiov;
+{
+    return proto ?
+	kg_translate_iov_v3(context, ec, rrc, key, iov_count, pkiov_count, pkiov) :
+	kg_translate_iov_v1(context, key, iov_count, pkiov_count, pkiov);
 }
 
 krb5_error_code
@@ -545,9 +621,6 @@ kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags)
 	else
 	    ktype = KRB5_CRYPTO_TYPE_DATA;
 	break;
-    case GSS_IOV_BUFFER_TYPE_EMPTY:
-    case GSS_IOV_BUFFER_TYPE_TOKEN:
-    case GSS_IOV_BUFFER_TYPE_TRAILER:
     default:
 	ktype = KRB5_CRYPTO_TYPE_EMPTY;
 	break;
@@ -623,15 +696,14 @@ kg_release_iov(size_t iov_count,
 
 OM_uint32
 kg_fixup_padding_iov(OM_uint32 *minor_status,
-		     int proto,
-		     int ec,
 		     size_t iov_count,
 		     gss_iov_buffer_desc *iov)
 {
     size_t i;
     gss_iov_buffer_t padding = NULL;
     gss_iov_buffer_t data = NULL;
-    size_t padlength;
+    size_t padlength, relative_padlength;
+    unsigned char *p;
 
     for (i = iov_count - 1; i >= 0; i--) {
 	gss_iov_buffer_t piov = &iov[i];
@@ -650,30 +722,49 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 	}
     }
 
-    if (data == NULL)
+    if (data == NULL) {
+	*minor_status = 0;
 	return GSS_S_COMPLETE;
+    }
 
-    if (padding == NULL) {
+    if (padding == NULL || padding->buffer.length == 0) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
 
-    if (proto == 1) {
-	padlength = ec;
-    } else {
-	unsigned char *p = (unsigned char *)data->buffer.value;
-	padlength = p[data->buffer.length - 1];
-    }
+    p = (unsigned char *)padding->buffer.value;
+    padlength = p[0];
 
-    if (data->buffer.length < padlength) {
+    if (data->buffer.length + padding->buffer.length < padlength ||
+        padlength == 0) {
 	*minor_status = KRB5_BAD_MSIZE;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    data->buffer.length -= padlength;
+    /*
+     * kg_tokenize_stream_iov() will place one byte of padding in the
+     * padding buffer, because its true value is unknown until decryption
+     * time. relative_padlength contains the number of bytes to compensate
+     * the padding and data buffers by.
+     *
+     * eg. if the buffers are structured as follows:
+     *
+     *	    +---DATA---+-PAD-+
+     *	    | ABCDE444 | 4   |
+     *	    +----------+-----+
+     *
+     * after compensation they would look like:
+     *
+     *	    +-DATA--+-PAD--+
+     *	    | ABCDE | 4444 |
+     *	    +-------+------+
+     */
+    relative_padlength = padlength - padding->buffer.length;
 
-    padding->buffer.length = padlength;
-    padding->buffer.value = (unsigned char *)data->buffer.value + data->buffer.length;
+    data->buffer.length -= relative_padlength;
+
+    padding->buffer.length += relative_padlength;
+    padding->buffer.value = p - relative_padlength;
 
     return GSS_S_COMPLETE;
 }

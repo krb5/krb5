@@ -444,8 +444,6 @@ OM_uint32 kg_seal_iov_length(OM_uint32 *minor_status,
 krb5_cryptotype kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags);
 
 OM_uint32 kg_fixup_padding_iov(OM_uint32 *minor_status,
-	int proto,
-	int ec,
 	size_t iov_count,
 	gss_iov_buffer_desc *iov);
 

@@ -44,15 +44,15 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 {
     krb5_error_code code;
     gss_iov_buffer_t token;
-    gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding = NULL;
     unsigned char acceptor_flag;
     unsigned short tok_id;
     unsigned char *outbuf = NULL;
-    int key_usage, dce_style;
+    int key_usage;
+    krb5_boolean dce_style;
     size_t rrc, ec;
     size_t data_length, assoc_data_length;
-    size_t headerlen;
+    size_t gss_headerlen;
     krb5_keyblock *key;
 
     assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != NULL);
@@ -84,19 +84,14 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
     dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (trailer != NULL)
-	trailer->buffer.length = 0;
-    else if (!dce_style)
-	return EINVAL;
-
     kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
 
     outbuf = (unsigned char *)token->buffer.value;
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	size_t k5_headerlen, k5_padlen, k5_trailerlen;
-	
+	size_t gss_padlen = 0, gss_trailerlen = 0;
+
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
 	if (code != 0)
 	    goto cleanup;
@@ -109,43 +104,45 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	headerlen = 16 /* Header */ + k5_headerlen;
+	gss_headerlen = 16 /* Header */ + k5_headerlen;
 	if (dce_style)
-	    headerlen += 16 /* E(Header) */ + k5_trailerlen;
+	    gss_headerlen += 16 /* E(Header) */ + k5_trailerlen;
+        else
+	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen;
 
 	if (token->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-	    code = kg_allocate_iov(token, headerlen);
-	else if (token->buffer.length < headerlen)
+	    code = kg_allocate_iov(token, gss_headerlen);
+	else if (token->buffer.length < gss_headerlen)
 	    code = KRB5_BAD_MSIZE;
 	if (code != 0)
 	    goto cleanup;
-
-	if (!dce_style) {
-	    if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-		code = kg_allocate_iov(trailer, 16 + k5_trailerlen);
-	    else if (trailer->buffer.length < 16 /* E(Header) */ + k5_trailerlen)
-		code = KRB5_BAD_MSIZE;
-	    if (code != 0)
-		goto cleanup;
-	}
 
 	if (k5_padlen != 0) {
 	    /*
 	     * DCE always pads to at least 16 bytes, so only check data pads correctly
 	     * rather than insisting on minimum padding.
 	     */
-	    if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-		size_t padlen = k5_padlen - ((16 + data_length - assoc_data_length) % k5_padlen);
+	    size_t conf_data_length = 16 /* Header */ + data_length - assoc_data_length;
 
-		code = kg_allocate_iov(padding, padlen);
-	    } else if (((16 + data_length - assoc_data_length + padding->buffer.length) % k5_padlen) != 0) {
+	    if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+		gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
+	    } else if (padding->buffer.length < gss_trailerlen ||
+		       (conf_data_length + padding->buffer.length - gss_trailerlen) % k5_padlen) {
 		code = KRB5_BAD_MSIZE;
+	    } else {
+		gss_padlen = padding->buffer.length - gss_trailerlen;
 	    }
 	    if (code != 0)
 		goto cleanup;
-
-	    memset(padding->buffer.value, 'x', padding->buffer.length);
 	}
+
+	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	    code = kg_allocate_iov(token, gss_trailerlen + gss_padlen);
+	else if (padding->buffer.length < gss_trailerlen + gss_padlen)
+	    code = KRB5_BAD_MSIZE;
+	if (code != 0)
+	    goto cleanup;
+	memset(padding->buffer.value, 'x', gss_padlen);
 
 	/*
 	 * Windows has a bug where it rotates by EC + RRC instead of RRC as
@@ -155,10 +152,10 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	 * no padding, but DCE should correct for this because the padding
 	 * length is also carried at the RPC layer.
 	 */
-	ec = dce_style ? 0 : padding->buffer.length;
+	ec = dce_style ? 0 : gss_padlen;
 
 	if (dce_style)
-	    rrc = 16 /* E(Header) */ + k5_trailerlen;
+	    rrc = gss_trailerlen;
 	else
 	    rrc = 0;
 
@@ -176,7 +173,13 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	store_16_be(rrc, outbuf + 6);
 	store_64_be(ctx->seq_send, outbuf + 8);
 
-	code = kg_encrypt_iov(context, ctx->proto, 0 /*EC*/, rrc, key, key_usage, 0, iov_count, iov);
+	/* Copy of header to be encrypted */
+	if (dce_style)
+	    memcpy((unsigned char *)token->buffer.value + 16 + ec, token->buffer.value, 16);
+	else
+	    memcpy((unsigned char *)padding->buffer.value + gss_padlen, token->buffer.value, 16);
+
+	code = kg_encrypt_iov(context, ctx->proto, ec, rrc, key, key_usage, 0, iov_count, iov);
 	if (code != 0)
 	    goto cleanup;
 
@@ -259,10 +262,10 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 {
     OM_uint32 code;
     gss_iov_buffer_t token;
-    gss_iov_buffer_t trailer;
     unsigned char acceptor_flag;
     unsigned char *ptr = NULL;
-    int key_usage, dce_style;
+    int key_usage;
+    krb5_boolean dce_style;
     size_t rrc, ec;
     size_t data_length, assoc_data_length;
     krb5_keyblock *key;
@@ -280,12 +283,6 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
     assert(token != NULL);
-
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    if (trailer != NULL && dce_style == 0) {
-	*minor_status = KRB5_BAD_MSIZE;
-	return GSS_S_BAD_SIG;
-    }
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG
@@ -330,7 +327,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    /* According to MS, we only need to deal with a fixed RRC for DCE */
 	    if (rrc != (ptr[2] & FLAG_WRAP_CONFIDENTIAL) ? 16 + ctx->cksum_size : ctx->cksum_size)
 		goto defective;
-	} else if (rrc) {
+	} else if (rrc != 0) {
 	    /* Should have been rotated by kg_tokenize_stream_iov() */
 	    goto defective;
 	}
@@ -358,13 +355,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 		return GSS_S_BAD_SIG;
 	    }
 
-	    if (!dce_style) {
-		code = kg_fixup_padding_iov(minor_status, ctx->proto, ec, iov_count, iov);
-		if (code != 0) {
-		    *minor_status = code;
-		    return GSS_S_BAD_SIG;
-		}
-	    }
+	    /* caller should have fixed up padding */
 	} else {
 	    /* Verify checksum: note EC is checksum size here, not padding */
 	    if (ec != ctx->cksum_size)

@@ -188,7 +188,7 @@ checksum_iov_v3(krb5_context context,
 {
     krb5_error_code code;
     gss_iov_buffer_desc *token;
-    gss_iov_buffer_desc *trailer;
+    gss_iov_buffer_desc *padding;
     krb5_crypto_iov *kiov;
     size_t kiov_count;
     size_t i = 0, j;
@@ -204,8 +204,8 @@ checksum_iov_v3(krb5_context context,
     token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
     assert(token != NULL);
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    assert(rrc || trailer != NULL);
+    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    assert(rrc || padding != NULL);
 
     if (rrc != 0 && rrc != k5_checksumlen)
 	return KRB5_BAD_MSIZE;
@@ -240,10 +240,10 @@ checksum_iov_v3(krb5_context context,
 	kiov[i].data.length = token->buffer.length - 16;
 	kiov[i].data.data = (char *)token->buffer.value + 16;
     } else {
-	assert(verify || trailer->buffer.length == k5_checksumlen);
+	assert(verify || padding->buffer.length == k5_checksumlen);
 
-	kiov[i].data.length = trailer->buffer.length;
-	kiov[i].data.data = (char *)trailer->buffer.value;
+	kiov[i].data.length = padding->buffer.length;
+	kiov[i].data.data = (char *)padding->buffer.value;
     }
     i++;
 
