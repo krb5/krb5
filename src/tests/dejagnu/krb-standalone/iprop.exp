@@ -1,0 +1,112 @@
+# Password-changing Kerberos test.
+# This is a DejaGnu test script.
+
+# Set up the Kerberos files and environment.
+if {![get_hostname] || ![setup_kerberos_files] || ![setup_kerberos_env]} {
+    return
+}
+
+# We are about to start up a couple of daemon processes.  We do all
+# the rest of the tests inside a proc, so that we can easily kill the
+# processes when the procedure ends.
+
+proc doit { } {
+    global REALMNAME
+    global KLIST
+    global KDESTROY
+    global KEY
+    global KADMIN_LOCAL
+    global KTUTIL
+    global hostname
+    global tmppwd
+    global spawn_id
+    global supported_enctypes
+    global KRBIV
+    global portbase
+    global mode
+    global KPROPLOG
+    global ulog
+
+    # Delete any db, ulog files
+    file delete $tmppwd/adb $tmppwd/adb.ok $tmppwd/adb.ulog
+
+    # Update config file
+    set ulog 1
+    reset_kerberos_files
+
+    # Initialize the Kerberos database.  The argument tells
+    # setup_kerberos_db that it is being called from here.
+    if ![setup_kerberos_db 0] {
+	return
+    }
+    if ![start_kerberos_daemons 0] {
+	return
+    }
+
+    # Check that ulog file does exist
+    if [file exists $tmppwd/db.ulog] {
+	pass "create update log"
+    } else {
+	fail "create update log"
+    }
+
+    # Use kadmin to add a key.
+    if ![add_kerberos_key wakawaka 0] {
+	return
+    }
+
+    # Run kproplog, look at output.
+    spawn $KPROPLOG
+    expect_after {
+	timeout {
+	    fail "kproplog output"
+	    break
+	}
+	eof {
+	    fail "kproplog output"
+	    break
+	}
+    }
+    catch {
+	expect -re "Kerberos update log"
+	expect -re "Update log dump"
+	expect -re "First serial \# : 1"
+	expect -re "Last serial \# : 2"
+	expect -re "Update Entry"
+	expect -re "Update serial \# : 1"
+	expect -re "Attributes changed : 15"
+	expect -re "Update Entry"
+	expect -re "Update serial \# : 2"
+	expect -re "Update operation : Add"
+	expect -re "Update principal : wakawaka@KRBTEST.COM"
+	expect_after {
+	    timeout {
+		fail "kproplog output"
+		break
+	    }
+	}
+	expect -re "Attributes changed : 15"
+	expect eof
+    } foo
+    pass "kproplog output"
+    catch expect_after
+    if [check_exit_status kproplog] {
+	pass "kproplog exit status"
+    } else {
+	fail "kproplog exit status"
+    }
+}
+
+set status [catch doit msg]
+
+stop_kerberos_daemons
+
+set ulog 0
+reset_kerberos_files
+file delete $tmppwd/adb $tmppwd/adb.ok $tmppwd/db.ulog
+
+if { $status != 0 } {
+    send_error "ERROR: error in iprop.exp\n"
+    send_error "$msg\n"
+    exit 1
+}

@@ -450,6 +450,7 @@ foreach i {
     {KDESTROY $objdir/../../clients/kdestroy/kdestroy}
     {RESOLVE $objdir/../resolve/resolve}
     {T_INETD $objdir/t_inetd}
+    {KPROPLOG $objdir/../../slave/kproplog}
 } {
     set varname [lindex $i 0]
     if ![info exists $varname] {
@@ -781,11 +782,14 @@ proc modify_principal { name args } {
 # kpasswd +5
 # krb524 +7
 # application servers (krlogind, telnetd, krshd, ftpd, etc) +8
+# iprop +9
 if [info exists PORTBASE] {
     set portbase $PORTBASE
 } else {
     set portbase 3085
 }
+
+set ulog 0
 
 # setup_kerberos_files
 # This procedure will create some Kerberos files which must be created
@@ -804,6 +808,7 @@ proc setup_kerberos_files { } {
     global master_key_type
     global mode
     global portbase
+    global ulog
 
     if ![get_hostname] { 
 	return 0
@@ -851,6 +856,13 @@ proc setup_kerberos_files { } {
 	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
 	puts $conffile "		dict_file = $tmppwd/dictfile"
+	if { $ulog != 0 } {
+	    puts $conffile "		iprop_enable = true"
+	    puts $conffile "		iprop_port = [expr 9 + $portbase]"
+	    puts $conffile "		iprop_logfile = $tmppwd/db.ulog"
+	} else {
+	    puts $conffile "# no ulog"
+	}
 	puts $conffile "	\}"
 	puts $conffile ""
 	close $conffile
@@ -888,6 +900,13 @@ proc setup_kerberos_files { } {
 
     set last_passname_conf $multipass_name
     return 1
+}
+
+proc reset_kerberos_files { } {
+    global tmppwd
+    file delete $tmppwd/kdc.conf $tmppwd/krb5.client.conf \
+	$tmppwd/krb5.server.conf $tmppwd/krb5.kdc.conf
+    setup_kerberos_files
 }
 
 proc setup_krb5_conf { {type client} } {
