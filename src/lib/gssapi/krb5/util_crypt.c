@@ -249,8 +249,9 @@ kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov)
     size_t *pkiov_count;
     krb5_crypto_iov **pkiov;
 {
-    gss_iov_buffer_desc *token;
+    gss_iov_buffer_desc *header;
     gss_iov_buffer_desc *padding;
+    gss_iov_buffer_desc *trailer;
     size_t i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
@@ -261,14 +262,17 @@ kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov)
 
     confsize = kg_confounder_size(context, (krb5_keyblock *)key);
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    assert(token != NULL);
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    assert(header != NULL);
 
-    if (token->buffer.length < confsize)
+    if (header->buffer.length < confsize)
 	return KRB5_BAD_MSIZE;
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     assert(padding != NULL);
+
+    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    assert(trailer == NULL || trailer->buffer.length == 0);
 
     kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
@@ -284,7 +288,7 @@ kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov)
     /* For pre-CFX, the confounder is at the end of the GSS header */
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
     kiov[i].data.length = confsize;
-    kiov[i].data.data = (char *)token->buffer.value + token->buffer.length - confsize;
+    kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - confsize;
     i++;
 
     for (j = 0; j < iov_count; j++) {
@@ -317,24 +321,28 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     size_t *pkiov_count;
     krb5_crypto_iov **pkiov;
 {
-    gss_iov_buffer_desc *token;
+    gss_iov_buffer_desc *header;
     gss_iov_buffer_desc *padding;
+    gss_iov_buffer_desc *trailer;
     size_t i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
     size_t k5_headerlen = 0, k5_trailerlen = 0;
-    size_t req_headerlen, req_trailerlen;
+    size_t gss_headerlen, gss_trailerlen;
     krb5_error_code code;
     krb5_boolean dce_style = (rrc != 0);
 
     *pkiov_count = 0;
     *pkiov = NULL;
 
-    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
-    assert(token != NULL);
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    assert(header != NULL);
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     assert(padding != NULL);
+
+    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    assert(rrc != 0 || trailer != NULL);
 
     code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
     if (code != 0)
@@ -349,8 +357,8 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
      * real rotation count is EC + RRC. Note we are only ever called
      * with RRC for DCE.
      */
-    req_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
-    req_trailerlen = ec + 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
+    gss_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
+    gss_trailerlen = 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
     if (dce_style) {
 	/*
@@ -360,15 +368,18 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
 	if (rrc != 16 /* E(GSS-Header) */ + k5_trailerlen)
 	    return KRB5_BAD_MSIZE;
 
-	req_headerlen += req_trailerlen;
-	req_trailerlen = 0;
-    } else if (padding->buffer.length != req_trailerlen) {
-	return KRB5_BAD_MSIZE;
+	gss_headerlen += gss_trailerlen;
+	gss_trailerlen = 0;
+    } else {
+	if (padding->buffer.length != ec)
+	    return KRB5_BAD_MSIZE;
+
+	if (trailer->buffer.length != gss_trailerlen)
+	    return KRB5_BAD_MSIZE;
     }
 
-    if (token->buffer.length != req_headerlen) {
+    if (header->buffer.length != gss_headerlen)
 	return KRB5_BAD_MSIZE;
-    }
 
     kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
@@ -382,7 +393,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
      */
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
     kiov[i].data.length = k5_headerlen;
-    kiov[i].data.data = (char *)token->buffer.value + 16;
+    kiov[i].data.data = (char *)header->buffer.value + 16;
     if (dce_style)
 	kiov[i].data.data += ec + rrc;
     i++;
@@ -391,27 +402,18 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
 	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
 	kiov[i].data.length = iov[j].buffer.length;
 	kiov[i].data.data = (char *)iov[j].buffer.value;
-
-	/* Trim E(Header) and Kerb-Trailer from padding */
-	if (!dce_style && iov[j].type == GSS_IOV_BUFFER_TYPE_PADDING) {
-	    assert(padding == &iov[j]);
-	    kiov[i].data.length = ec;
-	}
-
 	i++;
     }
 
-    /*
-     * For DCE, deal with the fact that PADDING only contains the
-     * real (DCE managed) padding and that the EC and encrypted
-     * copy of the header are in the token header.
-     */
+    kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
     if (dce_style) {
-        kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-	kiov[i].data.length = ec + 16; /* E(Header) */
-	kiov[i].data.data = (char *)token->buffer.value + 16;
-	i++;
+	kiov[i].data.length = ec + 16; /* EC | E(Header) */
+	kiov[i].data.data = (char *)header->buffer.value + 16;
+    } else {
+	kiov[i].data.length = 16; /* E(Header) */
+	kiov[i].data.data = (char *)trailer->buffer.value;
     }
+    i++;
 
     /*
      * For CFX, place the krb5 trailer in the GSS trailer (aka.
@@ -421,9 +423,9 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
     kiov[i].data.length = k5_trailerlen;
     if (dce_style)
-	kiov[i].data.data = (char *)token->buffer.value + 16 + ec + rrc - k5_trailerlen;
+	kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc - k5_trailerlen;
     else
-	kiov[i].data.data = (char *)padding->buffer.value + ec + 16; /* E(Header) */
+	kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */
     i++;
 
     *pkiov_count = kiov_count;

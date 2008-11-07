@@ -124,8 +124,9 @@ typedef struct gss_iov_buffer_desc_struct {
 
 #define GSS_IOV_BUFFER_TYPE_EMPTY	    0
 #define GSS_IOV_BUFFER_TYPE_DATA	    1	/* User data */
-#define GSS_IOV_BUFFER_TYPE_TOKEN	    2	/* GSS header */
-#define GSS_IOV_BUFFER_TYPE_PADDING	    9	/* GSS trailer */
+#define GSS_IOV_BUFFER_TYPE_HEADER	    2	/* GSS header */
+#define GSS_IOV_BUFFER_TYPE_TRAILER	    3	/* GSS trailer */
+#define GSS_IOV_BUFFER_TYPE_PADDING	    9	/* GSS padding */
 #define GSS_IOV_BUFFER_TYPE_STREAM	    10	/* GSS message */
 
 #define GSS_IOV_BUFFER_FLAG_ALLOCATE	    1	/* indicates GSS can allocate */
@@ -160,17 +161,6 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
     int *,		/* conf_state */
     size_t,		/* iov_count */
     gss_iov_buffer_desc *); /* iov */
-
-#if 0
-OM_uint32 KRB5_CALLCONV gss_unwrap_iov_length
-(
-    OM_uint32 *,	/* minor_status */
-    gss_ctx_id_t,	/* context_handle */
-    int *,		/* conf_state */
-    gss_qop_t *,	/* qop_req */
-    size_t,		/* iov_count */
-    gss_iov_buffer_desc *); /* iov */
-#endif
 
 #ifdef __cplusplus
 }
