@@ -59,7 +59,7 @@ gss_krb5_ccache_name(minor_status, name, out_name)
         }
         if (!err) {
             old_name = gss_out_name;
-            gss_out_name = tmp_name;
+            gss_out_name = (char *)tmp_name;
         }
     }
     /* If out_name was NULL, we keep the same gss_out_name value, and
