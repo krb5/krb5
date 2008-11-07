@@ -111,7 +111,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    goto cleanup;
 
 	gss_headerlen = 16 /* Header */ + k5_headerlen;
-	if (dce_style)
+	if (trailer == NULL)
 	    gss_headerlen += 16 /* E(Header) */ + k5_trailerlen;
         else
 	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen;
@@ -161,7 +161,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	 */
 	ec = dce_style ? 0 : gss_padlen;
 
-	if (dce_style)
+	if (trailer == NULL)
 	    rrc = gss_trailerlen;
 	else
 	    rrc = 0;
@@ -181,7 +181,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	store_64_be(ctx->seq_send, outbuf + 8);
 
 	/* Copy of header to be encrypted */
-	if (dce_style)
+	if (trailer == NULL)
 	    memcpy((unsigned char *)header->buffer.value + 16, header->buffer.value, 16);
 	else
 	    memcpy((unsigned char *)trailer->buffer.value, header->buffer.value, 16);
@@ -198,7 +198,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
     wrap_with_checksum:
 
-	if (dce_style)
+	if (trailer == NULL)
 	    rrc = ctx->cksum_size;
 	else
 	    rrc = 0;
@@ -337,7 +337,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	seqnum = load_64_be(ptr + 8);
 
 	/* Deal with RRC */
-	if (dce_style) {
+	if (trailer == NULL) {
 	    /* According to MS, we only need to deal with a fixed RRC for DCE */
 	    if (rrc != (ptr[2] & FLAG_WRAP_CONFIDENTIAL) ? 16 + ctx->cksum_size : ctx->cksum_size)
 		goto defective;

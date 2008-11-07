@@ -330,7 +330,6 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     size_t k5_headerlen = 0, k5_trailerlen = 0;
     size_t gss_headerlen, gss_trailerlen;
     krb5_error_code code;
-    krb5_boolean dce_style = (rrc != 0);
 
     *pkiov_count = 0;
     *pkiov = NULL;
@@ -342,7 +341,6 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     assert(padding != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    assert(rrc != 0 || trailer != NULL);
 
     code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
     if (code != 0)
@@ -360,7 +358,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     gss_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
     gss_trailerlen = 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
-    if (dce_style) {
+    if (trailer == NULL) {
 	/*
 	 * Some very brittle assumptions about RRC and EC for DCE,
 	 * in part owing to the Windows bug workaround.
@@ -394,7 +392,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
     kiov[i].data.length = k5_headerlen;
     kiov[i].data.data = (char *)header->buffer.value + 16;
-    if (dce_style)
+    if (trailer == NULL)
 	kiov[i].data.data += ec + rrc;
     i++;
 
@@ -406,7 +404,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     }
 
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-    if (dce_style) {
+    if (trailer == NULL) {
 	kiov[i].data.length = ec + 16; /* EC | E(Header) */
 	kiov[i].data.data = (char *)header->buffer.value + 16;
     } else {
@@ -422,7 +420,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
      */
     kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
     kiov[i].data.length = k5_trailerlen;
-    if (dce_style)
+    if (trailer == NULL)
 	kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc - k5_trailerlen;
     else
 	kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */

@@ -193,7 +193,6 @@ checksum_iov_v3(krb5_context context,
     size_t kiov_count;
     size_t i = 0, j;
     size_t k5_checksumlen;
-    int dce_style = (rrc != 0);
 
     if (verify)
 	*valid = 0;
@@ -206,9 +205,9 @@ checksum_iov_v3(krb5_context context,
     assert(header != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    assert(dce_style || trailer != NULL);
+    assert(rrc != 0 || trailer != NULL);
 
-    if (dce_style) {
+    if (trailer == NULL) {
 	if (rrc != k5_checksumlen)
 	    return KRB5_BAD_MSIZE;
 	if (header->buffer.length != 16 + k5_checksumlen)
@@ -239,7 +238,7 @@ checksum_iov_v3(krb5_context context,
 
     /* Checksum */
     kiov[i].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
-    if (dce_style) {
+    if (trailer == NULL) {
 	kiov[i].data.length = header->buffer.length - 16;
 	kiov[i].data.data = (char *)header->buffer.value + 16;
     } else {
