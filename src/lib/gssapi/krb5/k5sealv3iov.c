@@ -43,7 +43,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 				   int toktype)
 {
     krb5_error_code code;
-    gss_iov_buffer_t header;
+    gss_iov_buffer_t token;
     gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding = NULL;
     unsigned char acceptor_flag;
@@ -72,8 +72,8 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	key = ctx->enc;
     }
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
-    if (header == NULL)
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    if (token == NULL)
 	return EINVAL;
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
@@ -92,7 +92,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
     kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
 
-    outbuf = (unsigned char *)header->buffer.value;
+    outbuf = (unsigned char *)token->buffer.value;
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	size_t k5_headerlen, k5_padlen, k5_trailerlen;
@@ -113,9 +113,9 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (dce_style)
 	    headerlen += 16 /* E(Header) */ + k5_trailerlen;
 
-	if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-	    code = kg_allocate_iov(header, headerlen);
-	else if (header->buffer.length < headerlen)
+	if (token->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	    code = kg_allocate_iov(token, headerlen);
+	else if (token->buffer.length < headerlen)
 	    code = KRB5_BAD_MSIZE;
 	if (code != 0)
 	    goto cleanup;
@@ -247,92 +247,6 @@ cleanup:
     return code;
 }
 
-/*
- * For now, imposing the arbitrary limitation that the RRC is
- * mutually exclusive with AEAD (except for DCE_STYLE where it
- * must be fixed to 16 + cksum_size or cksum_size, depending
- * on conf_state). No need to deal with padding here.
- */
-static krb5_error_code
-rotate_left_iov(size_t iov_count,
-		gss_iov_buffer_desc *iov,
-		int rrc)
-{
-    size_t i, len;
-    unsigned char *tmp, *p;
-    gss_iov_buffer_t header = NULL;
-    gss_iov_buffer_t data = NULL;
-    gss_iov_buffer_t trailer = NULL;
-
-    assert(rrc);
-
-    for (i = iov_count - 1; i >= 0; i--) {
-	gss_iov_buffer_t piov = &iov[i];
-
-	switch (piov->type) {
-	case GSS_IOV_BUFFER_TYPE_HEADER:
-	    header = piov;
-	    break;
-	case GSS_IOV_BUFFER_TYPE_DATA:
-	    if (data != NULL)
-		return EINVAL;
-	    else if ((piov->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0)
-		data = piov;
-	    break;
-	case GSS_IOV_BUFFER_TYPE_TRAILER:
-	    trailer = piov;
-	    break;
-	}
-    }
-
-    assert(header != NULL && trailer != NULL);
-
-    len = header->buffer.length - 16;
-    if (data != NULL)
-	len += data->buffer.length;
-    len += trailer->buffer.length;
-
-    tmp = (unsigned char *)malloc(len);
-    if (tmp == NULL)
-	return ENOMEM;
-
-    p = tmp;
-
-    memcpy(p, (unsigned char *)header->buffer.value + 16, header->buffer.length - 16);
-    p += header->buffer.length - 16;
-
-    if (data != NULL) {
-	memcpy(p, data->buffer.value, data->buffer.length);
-	p += data->buffer.length;
-    }
-
-    memcpy(p, trailer->buffer.value, trailer->buffer.length);
-    p += trailer->buffer.length;
-
-    /* rotate */
-    if (!gss_krb5int_rotate_left(tmp, len, rrc)) {
-	free(tmp);
-	return ENOMEM;
-    }
-
-    p = tmp;
-
-    memcpy((unsigned char *)header->buffer.value + 16, p, header->buffer.length - 16);
-    p += header->buffer.length - 16;
-
-    if (data != NULL) {
-	memcpy(data->buffer.value, p, data->buffer.length);
-	p += data->buffer.length;
-    }
-
-    memcpy(trailer->buffer.value, p, trailer->buffer.length);
-    p += trailer->buffer.length;
-
-    free(tmp);
-
-    return 0;
-}
-
 OM_uint32
 gss_krb5int_unseal_v3_iov(krb5_context context,
 			  OM_uint32 *minor_status,
@@ -344,7 +258,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 			  int toktype)
 {
     OM_uint32 code;
-    gss_iov_buffer_t header;
+    gss_iov_buffer_t token;
     gss_iov_buffer_t trailer;
     unsigned char acceptor_flag;
     unsigned char *ptr = NULL;
@@ -364,8 +278,8 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
-    assert(header != NULL);
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    assert(token != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL && dce_style == 0) {
@@ -384,9 +298,9 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
 
-    ptr = (unsigned char *)header->buffer.value;
+    ptr = (unsigned char *)token->buffer.value;
 
-    if (header->buffer.length < 16) {
+    if (token->buffer.length < 16) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
@@ -417,11 +331,8 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    if (rrc != (ptr[2] & FLAG_WRAP_CONFIDENTIAL) ? 16 + ctx->cksum_size : ctx->cksum_size)
 		goto defective;
 	} else if (rrc) {
-	    code = rotate_left_iov(iov_count, iov, rrc);
-	    if (code != 0) {
-		*minor_status = code;
-		return GSS_S_FAILURE;
-	    }
+	    /* Should have been rotated by kg_tokenize_stream_iov() */
+	    goto defective;
 	}
 
 	if (ptr[2] & FLAG_WRAP_CONFIDENTIAL) {
@@ -429,7 +340,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	    /* Decrypt */
 	    code = kg_decrypt_iov(context, ctx->proto,
-				  ec, dce_style ? rrc : 0,
+				  ec, rrc,
 				  key, key_usage, 0, iov_count, iov);
 	    if (code != 0) {
 		*minor_status = code;
@@ -437,7 +348,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    }
 
 	    /* Validate header integrity */
-	    althdr = (unsigned char *)header->buffer.value;
+	    althdr = (unsigned char *)token->buffer.value;
 
 	    if (load_16_be(althdr) != 0x0504
 		|| althdr[2] != ptr[2]
@@ -447,7 +358,6 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 		return GSS_S_BAD_SIG;
 	    }
 
-	    /* For DCE, caller manages padding. Otherwise, trim data appropriately */
 	    if (!dce_style) {
 		code = kg_fixup_padding_iov(minor_status, ctx->proto, ec, iov_count, iov);
 		if (code != 0) {
@@ -464,7 +374,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    store_16_be(0, ptr + 4);
 	    store_16_be(0, ptr + 6);
 
-	    code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, dce_style ? rrc : 0,
+	    code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, rrc,
 					     key, key_usage, iov_count, iov, &valid);
 	    if (code != 0 || valid == 0) {
 		*minor_status = code;

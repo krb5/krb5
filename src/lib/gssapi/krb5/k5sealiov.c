@@ -43,7 +43,7 @@ make_seal_token_v1_iov(krb5_context context,
 		       int toktype)
 {
     krb5_error_code code;
-    gss_iov_buffer_t header;
+    gss_iov_buffer_t token;
     gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
     krb5_checksum md5cksum;
@@ -60,8 +60,8 @@ make_seal_token_v1_iov(krb5_context context,
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
-    if (header == NULL)
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    if (token == NULL)
 	return EINVAL;
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
@@ -108,16 +108,16 @@ make_seal_token_v1_iov(krb5_context context,
     /* Determine token size */
     tlen = g_token_size(ctx->mech_used, 14 + ctx->cksum_size + tmsglen);
 
-    if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-	code = kg_allocate_iov(header, tlen);
-    else if (header->buffer.length < tlen)
+    if (token->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	code = kg_allocate_iov(token, tlen);
+    else if (token->buffer.length < tlen)
 	code = KRB5_BAD_MSIZE;
     if (code != 0)
 	goto cleanup;
 
-    header->buffer.length = tlen;
+    token->buffer.length = tlen;
 
-    ptr = (unsigned char *)header->buffer.value;
+    ptr = (unsigned char *)token->buffer.value;
     g_make_token_header(ctx->mech_used, 14 + ctx->cksum_size + tmsglen, &ptr, toktype);
 
     /* 0..1 SIGN_ALG */
@@ -348,7 +348,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		   gss_iov_buffer_desc *iov)
 {
     krb5_gss_ctx_id_rec *ctx;
-    gss_iov_buffer_t header;
+    gss_iov_buffer_t token;
     gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
     size_t textlen, assoclen, headerlen;
@@ -373,12 +373,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     }
     dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
-    if (header == NULL) {
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    if (token == NULL) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
-    INIT_IOV_DATA(header);
+    INIT_IOV_DATA(token);
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
@@ -484,7 +484,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    headerlen -= textlen;
     }
 
-    header->buffer.length = headerlen;
+    token->buffer.length = headerlen;
 
     if (conf_state != NULL)
 	*conf_state = conf_req_flag;

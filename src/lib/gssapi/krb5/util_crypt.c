@@ -264,7 +264,7 @@ kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkio
     *pkiov_count = 0;
     *pkiov = NULL;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
     assert(header != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
@@ -546,7 +546,7 @@ kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags)
 	    ktype = KRB5_CRYPTO_TYPE_DATA;
 	break;
     case GSS_IOV_BUFFER_TYPE_EMPTY:
-    case GSS_IOV_BUFFER_TYPE_HEADER:
+    case GSS_IOV_BUFFER_TYPE_TOKEN:
     case GSS_IOV_BUFFER_TYPE_TRAILER:
     default:
 	ktype = KRB5_CRYPTO_TYPE_EMPTY;

@@ -119,13 +119,13 @@ kg_make_checksum_iov_v1(krb5_context context,
 			krb5_checksum *checksum)
 {
     krb5_error_code code;
-    gss_iov_buffer_desc *header;
+    gss_iov_buffer_desc *token;
     krb5_crypto_iov *kiov;
     size_t kiov_count;
     size_t i = 0, j;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
-    assert(header != NULL);
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    assert(token != NULL);
 
     kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)xmalloc(kiov_count * sizeof(krb5_crypto_iov));
@@ -147,13 +147,13 @@ kg_make_checksum_iov_v1(krb5_context context,
     /* Header */
     kiov[i].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     kiov[i].data.length = 8;
-    kiov[i].data.data = (char *)header->buffer.value;
+    kiov[i].data.data = (char *)token->buffer.value;
     i++;
 
     /* Confounder */
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
     kiov[i].data.length = kg_confounder_size(context, (krb5_keyblock *)enc);
-    kiov[i].data.data = (char *)header->buffer.value +header->buffer.length - kiov[i].data.length;
+    kiov[i].data.data = (char *)token->buffer.value +token->buffer.length - kiov[i].data.length;
     i++;
 
     for (j = 0; j < iov_count; j++) {
@@ -187,7 +187,7 @@ checksum_iov_v3(krb5_context context,
 		krb5_boolean *valid)
 {
     krb5_error_code code;
-    gss_iov_buffer_desc *header;
+    gss_iov_buffer_desc *token;
     gss_iov_buffer_desc *trailer;
     krb5_crypto_iov *kiov;
     size_t kiov_count;
@@ -201,8 +201,8 @@ checksum_iov_v3(krb5_context context,
     if (code != 0)
 	return code;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
-    assert(header != NULL);
+    token = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TOKEN);
+    assert(token != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(rrc || trailer != NULL);
@@ -228,17 +228,17 @@ checksum_iov_v3(krb5_context context,
     /* Header */
     kiov[i].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     kiov[i].data.length = 16;
-    kiov[i].data.data = (char *)header->buffer.value;
+    kiov[i].data.data = (char *)token->buffer.value;
     i++;
 
     /* Checksum input/output; caller must specify correct buffer size upon
      * creation */
     kiov[i].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
     if (rrc) {
-	assert(verify || header->buffer.length == 16 + k5_checksumlen);
+	assert(verify || token->buffer.length == 16 + k5_checksumlen);
 
-	kiov[i].data.length = header->buffer.length - 16;
-	kiov[i].data.data = (char *)header->buffer.value + 16;
+	kiov[i].data.length = token->buffer.length - 16;
+	kiov[i].data.data = (char *)token->buffer.value + 16;
     } else {
 	assert(verify || trailer->buffer.length == k5_checksumlen);
 
