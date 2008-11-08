@@ -364,7 +364,7 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
 	if (rrc != gss_trailerlen)
 	    return KRB5_BAD_MSIZE;
 
-	/* Owing to a bug in Windows, for DCE the EC is placed in the hedaer */
+	/* Owing to a bug in Windows, for DCE the EC is placed in the header */
 	gss_headerlen += actual_rrc;
 	gss_trailerlen = 0;
     } else {

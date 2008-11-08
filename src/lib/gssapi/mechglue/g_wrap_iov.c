@@ -175,3 +175,31 @@ gss_iov_buffer_desc  *	iov;
     return (GSS_S_BAD_MECH);
 }
 
+OM_uint32 KRB5_CALLCONV
+gss_release_iov_buffer (minor_status,
+			iov_count,
+			iov)
+OM_uint32 *		minor_status;
+size_t			iov_count;
+gss_iov_buffer_desc *	iov;
+{
+    OM_uint32		status = GSS_S_COMPLETE;
+    size_t		i;
+
+    if (minor_status)
+	*minor_status = 0;
+
+    if (iov == GSS_C_NO_IOV_BUFFER)
+	return GSS_S_COMPLETE;
+
+    for (i = 0; i < iov_count; i++) {
+	if (iov[i].flags & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
+	    status = gss_release_buffer(minor_status, &iov[i].buffer);
+	    if (status)
+		break;
+	}
+    }
+
+    return status;
+}
+

@@ -133,6 +133,13 @@ typedef struct gss_iov_buffer_desc_struct {
 #define GSS_IOV_BUFFER_FLAG_ALLOCATED	    2	/* indicates caller should free */
 #define GSS_IOV_BUFFER_FLAG_SIGN_ONLY	    4	/* indicates associated data */
 
+/*
+ * Sign and optionally encrypt a sequence of buffers. The buffers
+ * should be ordered HEADER | DATA | PADDING | TRAILER. Suitable
+ * space for the header, padding and trailer should be provided
+ * by calling gss_wrap_iov_length(), or the ALLOCATE flag should
+ * be set on those buffers.
+ */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (
     OM_uint32 *,	/* minor_status */
@@ -143,6 +150,13 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov
     size_t,		/* iov_count */
     gss_iov_buffer_desc *);    /* iov */
 
+/*
+ * Verify and optionally decrypt a sequence of buffers. To process
+ * a GSS-API message without buffers separated, pass STREAM | DATA.
+ * Upon return DATA will contain the decrypted or integrity
+ * protected message. Only a single DATA buffer may be provided
+ * with this usage.
+ */
 OM_uint32 KRB5_CALLCONV gss_unwrap_iov
 (
     OM_uint32 *,	/* minor_status */
@@ -152,6 +166,10 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_iov
     size_t,		/* iov_count */
     gss_iov_buffer_desc *);    /* iov */
 
+/*
+ * Inquire HEADER, PADDING and TRAILER buffer lengths. DATA buffers
+ * should be provided so the correct padding length can be determined.
+ */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
 (
     OM_uint32 *,	/* minor_status */
@@ -159,6 +177,15 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
     int,		/* conf_req_flag */
     gss_qop_t,		/* qop_req */
     int *,		/* conf_state */
+    size_t,		/* iov_count */
+    gss_iov_buffer_desc *); /* iov */
+
+/*
+ * Release buffers that have the ALLOCATED flag set.
+ */
+OM_uint32 KRB5_CALLCONV gss_release_iov_buffer
+(
+    OM_uint32 *,	/* minor_status */
     size_t,		/* iov_count */
     gss_iov_buffer_desc *); /* iov */
 
