@@ -181,7 +181,9 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	else
 	    memcpy((unsigned char *)trailer->buffer.value, header->buffer.value, 16);
 
-	code = kg_encrypt_iov(context, ctx->proto, ec, rrc, key, key_usage, 0, iov_count, iov);
+	code = kg_encrypt_iov(context, ctx->proto,
+			      ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
+			      ec, rrc, key, key_usage, 0, iov_count, iov);
 	if (code != 0)
 	    goto cleanup;
 
@@ -339,6 +341,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	    /* Decrypt */
 	    code = kg_decrypt_iov(context, ctx->proto,
+				  ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
 				  ec, rrc,
 				  key, key_usage, 0, iov_count, iov);
 	    if (code != 0) {

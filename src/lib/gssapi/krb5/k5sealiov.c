@@ -247,7 +247,9 @@ make_seal_token_v1_iov(krb5_context context,
 
 	    break;
 	default:
-	    code = kg_encrypt_iov(context, ctx->proto, 0, 0,
+	    code = kg_encrypt_iov(context, ctx->proto,
+				  ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
+				  0 /*EC*/, 0 /*RRC*/,
 				  ctx->enc, KG_USAGE_SEAL, NULL,
 				  iov_count, iov);
 	    if (code != 0)

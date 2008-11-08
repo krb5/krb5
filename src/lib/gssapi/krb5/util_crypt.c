@@ -310,11 +310,11 @@ kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov)
 }
 
 static krb5_error_code
-kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
+kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
     krb5_context context;
-    int proto;			/* 1 if CFX, 0 for pre-CFX */
-    int ec;			/* EC, for buggy Windows compat */
-    int rrc;			/* rotate count, for DCE */
+    int dce_style;		/* DCE_STYLE indicates actual RRC is EC + RRC */
+    int ec;			/* Extra rotate count for DCE_STYLE, pad length otherwise */
+    int rrc;			/* Rotate count */
     const krb5_keyblock *key;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
@@ -330,6 +330,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     size_t k5_headerlen = 0, k5_trailerlen = 0;
     size_t gss_headerlen, gss_trailerlen;
     krb5_error_code code;
+    size_t actual_rrc;
 
     *pkiov_count = 0;
     *pkiov = NULL;
@@ -341,6 +342,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     assert(padding != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    assert(trailer == NULL || rrc == 0);
 
     code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
     if (code != 0)
@@ -350,23 +352,20 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     if (code != 0)
 	return code;
 
-    /*
-     * Sanity check header size, allowing for Windows bug where the
-     * real rotation count is EC + RRC. Note we are only ever called
-     * with RRC for DCE.
-     */
+    /* Determine the actual RRC after compensating for Windows bug */
+    actual_rrc = dce_style ? ec + rrc : rrc;
+
+    /* Check header and trailer sizes */
     gss_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
     gss_trailerlen = 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
+    /* If we're caller without a trailer, we must rotate by trailer length */
     if (trailer == NULL) {
-	/*
-	 * Some very brittle assumptions about RRC and EC for DCE,
-	 * in part owing to the Windows bug workaround.
-	 */
-	if (rrc != 16 /* E(GSS-Header) */ + k5_trailerlen)
+	if (rrc != gss_trailerlen)
 	    return KRB5_BAD_MSIZE;
 
-	gss_headerlen += gss_trailerlen;
+	/* Owing to a bug in Windows, for DCE the EC is placed in the hedaer */
+	gss_headerlen += actual_rrc;
 	gss_trailerlen = 0;
     } else {
 	if (padding->buffer.length != ec)
@@ -387,13 +386,13 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     /*
      * For CFX, place the krb5 header after the GSS header, offset
      * by the real rotation count which, owing to a bug in Windows,
-     * is actually EC + RRC.
+     * is actually EC + RRC for DCE_STYLE.
      */
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
     kiov[i].data.length = k5_headerlen;
     kiov[i].data.data = (char *)header->buffer.value + 16;
     if (trailer == NULL)
-	kiov[i].data.data += ec + rrc;
+	kiov[i].data.data += actual_rrc;
     i++;
 
     for (j = 0; j < iov_count; j++) {
@@ -405,7 +404,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
 
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
     if (trailer == NULL) {
-	kiov[i].data.length = ec + 16; /* EC | E(Header) */
+	kiov[i].data.length = (actual_rrc - rrc) + 16; /* EC for DCE | E(Header) */
 	kiov[i].data.data = (char *)header->buffer.value + 16;
     } else {
 	kiov[i].data.length = 16; /* E(Header) */
@@ -421,7 +420,7 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
     kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
     kiov[i].data.length = k5_trailerlen;
     if (trailer == NULL)
-	kiov[i].data.data = (char *)header->buffer.value + 16 + ec + rrc - k5_trailerlen;
+	kiov[i].data.data = (char *)header->buffer.value + 16 + actual_rrc - k5_trailerlen;
     else
 	kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */
     i++;
@@ -433,11 +432,12 @@ kg_translate_iov_v3(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, p
 }
 
 static krb5_error_code
-kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
+kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
     krb5_context context;
     int proto;			/* 1 if CFX, 0 for pre-CFX */
-    int ec;			/* EC, for buggy Windows compat */
-    int rrc;			/* rotate count, for DCE */
+    int dce_style;
+    int ec;
+    int rrc;
     const krb5_keyblock *key;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
@@ -445,14 +445,15 @@ kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, pkiov_count, pkio
     krb5_crypto_iov **pkiov;
 {
     return proto ?
-	kg_translate_iov_v3(context, ec, rrc, key, iov_count, pkiov_count, pkiov) :
+	kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, pkiov_count, pkiov) :
 	kg_translate_iov_v1(context, key, iov_count, pkiov_count, pkiov);
 }
 
 krb5_error_code
-kg_encrypt_iov(context, proto, ec, rrc, key, usage, iv, iov_count, iov)
+kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov_count, iov)
     krb5_context context;
     int proto;
+    int dce_style;
     int ec;
     int rrc;
     krb5_keyblock *key;
@@ -482,7 +483,7 @@ kg_encrypt_iov(context, proto, ec, rrc, key, usage, iv, iov_count, iov)
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, &kiov_count, &kiov);
+    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov_count, iov, &kiov_count, &kiov);
     if (code == 0) {
 	code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);
@@ -496,9 +497,10 @@ kg_encrypt_iov(context, proto, ec, rrc, key, usage, iv, iov_count, iov)
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt_iov(context, proto, ec, rrc, key, usage, iv, iov_count, iov)
+kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov_count, iov)
     krb5_context context;
     int proto;
+    int dce_style;
     int ec;
     int rrc;
     krb5_keyblock *key;
@@ -528,7 +530,7 @@ kg_decrypt_iov(context, proto, ec, rrc, key, usage, iv, iov_count, iov)
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, ec, rrc, key, iov_count, iov, &kiov_count, &kiov);
+    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov_count, iov, &kiov_count, &kiov);
     if (code == 0) {
 	code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);

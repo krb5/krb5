@@ -277,7 +277,8 @@ krb5_error_code kg_encrypt (krb5_context context,
                             unsigned int length);
 
 krb5_error_code kg_encrypt_iov (krb5_context context,
-                                int proto, int ec, int rrc,
+                                int proto, int dce_style,
+				int ec, int rrc,
 				krb5_keyblock *key, int usage,
                                 krb5_pointer iv,
                                 size_t iov_count,
@@ -304,7 +305,8 @@ krb5_error_code kg_decrypt (krb5_context context,
                             unsigned int length);
 
 krb5_error_code kg_decrypt_iov (krb5_context context,
-                                int proto, int ec, int rrc,
+                                int proto, int dce_style,
+				int ec, int rrc,
                                 krb5_keyblock *key,  int usage,
                                 krb5_pointer iv,
                                 size_t iov_count,
