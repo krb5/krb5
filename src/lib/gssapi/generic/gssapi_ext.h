@@ -135,7 +135,7 @@ typedef struct gss_iov_buffer_desc_struct {
 
 /*
  * Sign and optionally encrypt a sequence of buffers. The buffers
- * should be ordered HEADER | DATA | PADDING | TRAILER. Suitable
+ * shall be ordered HEADER | DATA | PADDING | TRAILER. Suitable
  * space for the header, padding and trailer should be provided
  * by calling gss_wrap_iov_length(), or the ALLOCATE flag should
  * be set on those buffers.
@@ -145,7 +145,7 @@ typedef struct gss_iov_buffer_desc_struct {
  * buffers in memory does not matter. Buffers in the IOV should
  * be arranged in the order above, and in the case of multiple
  * DATA buffers the sender and receiver should agree on the
- * layout.
+ * order.
  *
  * With GSS_C_DCE_STYLE it is acceptable to not provide PADDING
  * and TRAILER, but the caller must guarantee the plaintext data

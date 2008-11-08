@@ -154,7 +154,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	 * Windows has a bug where it rotates by EC + RRC instead of RRC as
 	 * specified in the RFC. The simplest workaround is to always send
 	 * EC == 0, which means that Windows will rotate by the correct
-	 * amount.
+	 * amount. (And, because DCE pads on our behalf, EC will be 0 anyway.)
 	 */
 	ec = gss_padlen;
 
