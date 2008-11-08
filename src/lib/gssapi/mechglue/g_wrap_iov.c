@@ -195,8 +195,10 @@ gss_iov_buffer_desc *	iov;
     for (i = 0; i < iov_count; i++) {
 	if (iov[i].flags & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
 	    status = gss_release_buffer(minor_status, &iov[i].buffer);
-	    if (status)
+	    if (status != GSS_S_COMPLETE)
 		break;
+
+	    iov[i].flags &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
 	}
     }
 

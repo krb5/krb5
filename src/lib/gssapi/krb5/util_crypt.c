@@ -638,7 +638,7 @@ kg_locate_iov(size_t iov_count,
     size_t i;
     gss_iov_buffer_desc *p = NULL;
 
-    if (iov == NULL)
+    if (iov == GSS_C_NO_IOV_BUFFER)
 	return NULL;
 
     for (i = 0; i < iov_count; i++) {

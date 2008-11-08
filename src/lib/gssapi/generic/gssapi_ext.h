@@ -140,9 +140,14 @@ typedef struct gss_iov_buffer_desc_struct {
  * by calling gss_wrap_iov_length(), or the ALLOCATE flag should
  * be set on those buffers.
  *
+ * Encryption is in-place. SIGN_ONLY buffers are untouched. Only
+ * a single PADDING buffer should be provided, immediately prior
+ * to TRAILER.
+ *
  * With GSS_C_DCE_STYLE it is acceptable not to provide PADDING
  * and TRAILER, but the caller must guarantee the plaintext data
- * buffer (for encryption) is correctly padded.
+ * being encrypted is correctly padded, otherwise an error will
+ * be returned.
  */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (
@@ -156,10 +161,14 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov
 
 /*
  * Verify and optionally decrypt a sequence of buffers. To process
- * a GSS-API message without buffers separated, pass STREAM | DATA.
+ * a GSS-API message without separate buffer, pass STREAM | DATA.
  * Upon return DATA will contain the decrypted or integrity
  * protected message. Only a single DATA buffer may be provided
- * with this usage.
+ * with this usage. DATA by default will point into STREAM, but if
+ * the ALLOCATE flag is set a copy will be returned.
+ *
+ * Otherwise, decryption is in-place. SIGN_ONLY buffers are
+ * untouched.
  */
 OM_uint32 KRB5_CALLCONV gss_unwrap_iov
 (
@@ -171,7 +180,7 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_iov
     gss_iov_buffer_desc *);    /* iov */
 
 /*
- * Inquire HEADER, PADDING and TRAILER buffer lengths. DATA buffers
+ * Query HEADER, PADDING and TRAILER buffer lengths. DATA buffers
  * should be provided so the correct padding length can be determined.
  */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
