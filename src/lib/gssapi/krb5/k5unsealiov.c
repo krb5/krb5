@@ -472,6 +472,10 @@ kg_tokenize_stream_iov(OM_uint32 *minor_status,
 	if (conf_req_flag)
 	    iov[0].buffer.length += kg_confounder_size(context, ctx->enc);
 
+	/* no trailer */
+	iov[3].buffer.length = 0;
+	iov[3].buffer.value = NUILL;
+
 	/*
 	 * we can't set the padding accurately until decryption;
 	 * kg_fixup_padding_iov() will take care of this
