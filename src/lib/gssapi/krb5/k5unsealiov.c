@@ -474,7 +474,7 @@ kg_tokenize_stream_iov(OM_uint32 *minor_status,
 
 	/* no trailer */
 	iov[3].buffer.length = 0;
-	iov[3].buffer.value = NUILL;
+	iov[3].buffer.value = NULL;
 
 	/*
 	 * we can't set the padding accurately until decryption;
