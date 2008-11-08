@@ -48,6 +48,7 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
 
 #define ENCRYPT_IOV(_iov)	(ENCRYPT_CONF_IOV(_iov) || ENCRYPT_DATA_IOV(_iov))
 
-#define SIGN_IOV(_iov)		(ENCRYPT_IOV(_iov) || \
+#define SIGN_IOV(_iov)		((_iov)->flags == KRB5_CRYPTO_TYPE_HEADER || \
+				 (_iov)->flags == KRB5_CRYPTO_TYPE_DATA || \
 				 (_iov)->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY )
 

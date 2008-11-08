@@ -614,7 +614,7 @@ kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags)
 
     switch (type) {
     case GSS_IOV_BUFFER_TYPE_PADDING:
-	ktype = KRB5_CRYPTO_TYPE_PADDING;
+	ktype = KRB5_CRYPTO_TYPE_DATA;
 	break;
     case GSS_IOV_BUFFER_TYPE_DATA:
 	if (flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
