@@ -81,20 +81,27 @@ make_seal_token_v1_iov(krb5_context context,
     /* Check padding length */
     if (toktype == KG_TOK_SEAL_MSG) {
 	size_t blocksize = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
-
-	kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
+	size_t padlen;
 
 	/* Padding applies to the encrypted data only */
-	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-	    if (blocksize == 1)
-		padding->buffer.length = 1; /* one byte to say one byte of padding */
-	    else
-		padding->buffer.length = blocksize - ((textlen - assoclen) % blocksize);
+	kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
 
-	    code = kg_allocate_iov(padding, padding->buffer.length);
-	} else if ((textlen + padding->buffer.length) % blocksize != 0) {
-	    /* The caller must pad the input buffer */
+	if (blocksize == 1)
+	    padlen = 1; /* one byte to say one byte of padding */
+	else
+	    padlen = blocksize - ((textlen - assoclen) % blocksize);
+
+	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+	    code = kg_allocate_iov(padding, padlen);
+	} else if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+	    /* DCE manages its own padding, but check pads correctly */
+	    if ((textlen - assoclen + padding->buffer.length) % blocksize != 0)
+		code = KRB5_BAD_MSIZE;
+	} else if (padding->buffer.length < padlen) {
 	    code = KRB5_BAD_MSIZE;
+	} else {
+	    /* Careful to emit GSS compatible tokens */
+	    padding->buffer.length = padlen;
 	}
 	if (code != 0)
 	    goto cleanup;
