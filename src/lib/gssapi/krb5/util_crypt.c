@@ -250,7 +250,6 @@ kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov)
     krb5_crypto_iov **pkiov;
 {
     gss_iov_buffer_desc *header;
-    gss_iov_buffer_desc *padding;
     gss_iov_buffer_desc *trailer;
     size_t i = 0, j;
     size_t kiov_count;
@@ -267,9 +266,6 @@ kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov)
 
     if (header->buffer.length < confsize)
 	return KRB5_BAD_MSIZE;
-
-    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-    assert(padding != NULL);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(trailer == NULL || trailer->buffer.length == 0);
@@ -338,8 +334,9 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
     header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
+    /* separate padding buffer is optional for DCE because caller pads data */
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-    assert(padding != NULL);
+    assert(padding != NULL || dce_style);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(trailer == NULL || rrc == 0);
@@ -368,6 +365,8 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
 	gss_headerlen += actual_rrc;
 	gss_trailerlen = 0;
     } else {
+	assert(padding != NULL); /* should only happen for DCE, which is trailer-less */
+
 	if (padding->buffer.length != ec)
 	    return KRB5_BAD_MSIZE;
 

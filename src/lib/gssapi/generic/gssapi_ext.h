@@ -139,6 +139,10 @@ typedef struct gss_iov_buffer_desc_struct {
  * space for the header, padding and trailer should be provided
  * by calling gss_wrap_iov_length(), or the ALLOCATE flag should
  * be set on those buffers.
+ *
+ * With GSS_C_DCE_STYLE it is acceptable not to provide PADDING
+ * and TRAILER, but the caller must guarantee the plaintext data
+ * buffer (for encryption) is correctly padded.
  */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (

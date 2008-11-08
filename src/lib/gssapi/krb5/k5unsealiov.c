@@ -309,7 +309,9 @@ cleanup:
 }
 
 /*
- * Caller must provide TOKEN | DATA | PADDING | TRAILER
+ * Caller must provide TOKEN | DATA | PADDING | TRAILER, except
+ * for DCE in which case it can just provide TOKEN | DATA (must
+ * guarantee that DATA is padded)
  */
 static OM_uint32
 kg_unseal_iov_token(OM_uint32 *minor_status,
@@ -337,7 +339,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     }
 
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-    if (padding == NULL) {
+    if (padding == NULL && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }

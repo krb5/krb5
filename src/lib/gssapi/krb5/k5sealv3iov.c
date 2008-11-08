@@ -78,7 +78,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-	if (padding == NULL)
+	if (padding == NULL && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
 	    return EINVAL;
     } else
 	padding = NULL;
@@ -119,17 +119,17 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    goto cleanup;
 
 	if (k5_padlen != 0) {
-	    /*
-	     * DCE always pads to at least 16 bytes, so only check data pads correctly
-	     * rather than insisting on minimum padding.
-	     */
+	    /* DCE guarantees the data to be padded, padding buffer is optional */
 	    size_t conf_data_length = 16 /* Header */ + data_length - assoc_data_length;
 
-	    if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+	    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+		if ((conf_data_length + (padding != NULL ? padding->buffer.length : 0) % k5_padlen) != 0)
+		    code = KRB5_BAD_MSIZE;
+		else
+		    gss_padlen = 0;
+	    } else if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
 		gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
 		code = kg_allocate_iov(padding, gss_padlen);
-	    } else if ((conf_data_length + padding->buffer.length) % k5_padlen) {
-		code = KRB5_BAD_MSIZE;
 	    } else {
 		gss_padlen = padding->buffer.length;
 	    }
@@ -137,7 +137,8 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 		goto cleanup;
 	}
 
-	memset(padding->buffer.value, 'x', padding->buffer.length);
+	if (padding != NULL)
+	    memset(padding->buffer.value, 'x', padding->buffer.length);
 
 	if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 	    code = kg_allocate_iov(trailer, gss_trailerlen);
@@ -150,9 +151,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	 * Windows has a bug where it rotates by EC + RRC instead of RRC as
 	 * specified in the RFC. The simplest workaround is to always send
 	 * EC == 0, which means that Windows will rotate by the correct
-	 * amount. The side-effect is that the receiver will think there is
-	 * no padding, but DCE should correct for this because the padding
-	 * length is also carried at the RPC layer.
+	 * amount.
 	 */
 	ec = (ctx->gss_flags & GSS_C_DCE_STYLE) ? 0 : gss_padlen;
 
