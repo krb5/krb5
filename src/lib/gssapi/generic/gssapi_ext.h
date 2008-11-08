@@ -39,14 +39,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* GGF extension data types */
-typedef struct gss_buffer_set_desc_struct {
-    size_t count;
-    gss_buffer_desc *elements;
-} gss_buffer_set_desc, *gss_buffer_set_t;
-
-#define GSS_C_NO_BUFFER_SET ((gss_buffer_set_t) 0)
-
 /*
  * Solaris extensions
  */
@@ -63,6 +55,13 @@ int KRB5_CALLCONV __gss_userok
 /*
  * GGF extensions
  */
+typedef struct gss_buffer_set_desc_struct {
+    size_t count;
+    gss_buffer_desc *elements;
+} gss_buffer_set_desc, *gss_buffer_set_t;
+
+#define GSS_C_NO_BUFFER_SET ((gss_buffer_set_t) 0)
+
 OM_uint32 KRB5_CALLCONV gss_create_empty_buffer_set
 	(OM_uint32 * /*minor_status*/,
 	 gss_buffer_set_t * /*buffer_set*/);
@@ -110,9 +109,9 @@ OM_uint32 KRB5_CALLCONV gssspi_mech_invoke
 /*
  * SSPI extensions
  */
-#define GSS_C_DCE_STYLE			0x1000 
-#define GSS_C_IDENTIFY_FLAG		0x2000 
-#define GSS_C_EXTENDED_ERROR_FLAG	0x4000 
+#define GSS_C_DCE_STYLE			0x1000
+#define GSS_C_IDENTIFY_FLAG		0x2000
+#define GSS_C_EXTENDED_ERROR_FLAG	0x4000
 
 typedef struct gss_iov_buffer_desc_struct {
     OM_uint32 type;
@@ -123,11 +122,12 @@ typedef struct gss_iov_buffer_desc_struct {
 #define GSS_C_NO_IOV_BUFFER		    ((gss_iov_buffer_t)0)
 
 #define GSS_IOV_BUFFER_TYPE_EMPTY	    0
-#define GSS_IOV_BUFFER_TYPE_DATA	    1	/* User data */
-#define GSS_IOV_BUFFER_TYPE_HEADER	    2	/* GSS header */
-#define GSS_IOV_BUFFER_TYPE_TRAILER	    3	/* GSS trailer */
-#define GSS_IOV_BUFFER_TYPE_PADDING	    9	/* GSS padding */
-#define GSS_IOV_BUFFER_TYPE_STREAM	    10	/* GSS message */
+#define GSS_IOV_BUFFER_TYPE_DATA	    1	/* Packet data */
+#define GSS_IOV_BUFFER_TYPE_HEADER	    2	/* Mechanism header */
+#define GSS_IOV_BUFFER_TYPE_MECH_PARAMS	    3	/* Mechanism specific parameters */
+#define GSS_IOV_BUFFER_TYPE_TRAILER	    7	/* Mechanism trailer */
+#define GSS_IOV_BUFFER_TYPE_PADDING	    9	/* Padding */
+#define GSS_IOV_BUFFER_TYPE_STREAM	    10	/* Complete wrap token */
 
 #define GSS_IOV_BUFFER_FLAG_ALLOCATE	    1	/* indicates GSS can allocate */
 #define GSS_IOV_BUFFER_FLAG_ALLOCATED	    2	/* indicates caller should free */
@@ -141,10 +141,13 @@ typedef struct gss_iov_buffer_desc_struct {
  * be set on those buffers.
  *
  * Encryption is in-place. SIGN_ONLY buffers are untouched. Only
- * a single PADDING buffer should be provided, immediately prior
- * to TRAILER.
+ * a single PADDING buffer should be provided. The order of the
+ * buffers in memory does not matter. Buffers in the IOV should
+ * be arranged in the order above, and in the case of multiple
+ * DATA buffers the sender and receiver should agree on the
+ * layout.
  *
- * With GSS_C_DCE_STYLE it is acceptable not to provide PADDING
+ * With GSS_C_DCE_STYLE it is acceptable to not provide PADDING
  * and TRAILER, but the caller must guarantee the plaintext data
  * being encrypted is correctly padded, otherwise an error will
  * be returned.
@@ -154,8 +157,8 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov
     OM_uint32 *,	/* minor_status */
     gss_ctx_id_t,       /* context_handle */
     int,		/* conf_req_flag */
-    gss_qop_t,	  /* qop_req */
-    int *,	      /* conf_state */
+    gss_qop_t,		/* qop_req */
+    int *,		/* conf_state */
     size_t,		/* iov_count */
     gss_iov_buffer_desc *);    /* iov */
 

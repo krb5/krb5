@@ -660,7 +660,7 @@ kg_iov_msglen(size_t iov_count,
     size_t i;
     size_t data_length = 0, assoc_data_length = 0;
 
-    assert(iov != NULL);
+    assert(iov != GSS_C_NO_IOV_BUFFER);
 
     *data_length_p = *assoc_data_length_p = 0;
 
@@ -685,7 +685,7 @@ kg_release_iov(size_t iov_count,
     size_t i;
     OM_uint32 min_stat;
 
-    assert(iov != NULL);
+    assert(iov != GSS_C_NO_IOV_BUFFER);
 
     for (i = 0; i < iov_count; i++) {
 	if (iov[i].flags & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
