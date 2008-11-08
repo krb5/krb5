@@ -119,26 +119,29 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    goto cleanup;
 
 	if (k5_padlen != 0) {
-	    /* DCE guarantees the data to be padded, padding buffer is optional */
 	    size_t conf_data_length = 16 /* Header */ + data_length - assoc_data_length;
 
+	    gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
+
 	    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
-		if ((conf_data_length + (padding != NULL ? padding->buffer.length : 0) % k5_padlen) != 0)
+		/* DCE guarantees the data to be padded, padding buffer is optional and will be zeroed */
+		gss_padlen = 0;
+
+		if (conf_data_length % k5_padlen)
 		    code = KRB5_BAD_MSIZE;
-		else
-		    gss_padlen = 0;
 	    } else if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-		gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
 		code = kg_allocate_iov(padding, gss_padlen);
-	    } else {
-		gss_padlen = padding->buffer.length;
+	    } else if (padding->buffer.length < gss_padlen) {
+		code = KRB5_BAD_MSIZE;
 	    }
 	    if (code != 0)
 		goto cleanup;
 	}
 
-	if (padding != NULL)
-	    memset(padding->buffer.value, 'x', padding->buffer.length);
+	if (padding != NULL) {
+	    padding->buffer.length = gss_padlen;
+	    memset(padding->buffer.value, 'x', gss_padlen);
+	}
 
 	if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 	    code = kg_allocate_iov(trailer, gss_trailerlen);
@@ -153,7 +156,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	 * EC == 0, which means that Windows will rotate by the correct
 	 * amount.
 	 */
-	ec = (ctx->gss_flags & GSS_C_DCE_STYLE) ? 0 : gss_padlen;
+	ec = gss_padlen;
 
 	if (trailer == NULL)
 	    rrc = gss_trailerlen;
