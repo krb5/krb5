@@ -83,19 +83,19 @@ make_seal_token_v1_iov(krb5_context context,
 	size_t blocksize = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
 	size_t padlen;
 
-	/* Padding applies to the encrypted data only */
+	/* Padding applies to confounder | encrypted data */
 	kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
 
 	if (blocksize == 1)
 	    padlen = 1; /* one byte to say one byte of padding */
 	else
-	    padlen = blocksize - ((textlen - assoclen) % blocksize);
+	    padlen = blocksize - ((8 + textlen - assoclen) % blocksize);
 
 	if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
 	    code = kg_allocate_iov(padding, padlen);
 	} else if (ctx->gss_flags & GSS_C_DCE_STYLE) {
 	    /* DCE manages its own padding, but check pads correctly */
-	    if ((textlen - assoclen + padding->buffer.length) % blocksize != 0)
+	    if ((8 + textlen - assoclen + padding->buffer.length) % blocksize != 0)
 		code = KRB5_BAD_MSIZE;
 	} else if (padding->buffer.length < padlen) {
 	    code = KRB5_BAD_MSIZE;
