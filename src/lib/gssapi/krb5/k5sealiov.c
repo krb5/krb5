@@ -48,9 +48,8 @@ make_seal_token_v1_iov(krb5_context context,
     gss_iov_buffer_t trailer;
     krb5_checksum md5cksum;
     krb5_checksum cksum;
-    size_t conflen = 0;
-    size_t textlen = 0, assoclen = 0;
-    size_t sumlen;
+    size_t k5_headerlen = 0, k5_trailerlen = 0;
+    size_t data_length = 0, assoc_data_length = 0;
     size_t tmsglen = 0, tlen;
     unsigned char *ptr;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
@@ -74,46 +73,48 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* Determine confounder length */
     if (conf_req_flag)
-	conflen = kg_confounder_size(context, ctx->enc);
+	k5_headerlen = kg_confounder_size(context, ctx->enc);
     else
-	conflen = 0;
+	k5_headerlen = 0;
 
     /* Check padding length */
     if (toktype == KG_TOK_SEAL_MSG) {
-	size_t blocksize = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
-	size_t padlen;
-	size_t encdatalen;
+	size_t k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+	size_t gss_padlen;
+	size_t conf_data_length;
 
-	kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
-	encdatalen = 8 /* Confounder */ + textlen - assoclen;
+	kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
+	conf_data_length = k5_headerlen + data_length - assoc_data_length;
 
-	if (blocksize == 1)
-	    padlen = 1; /* one byte to say one byte of padding */
+	if (k5_padlen == 1)
+	    gss_padlen = 1; /* one byte to say one byte of padding */
 	else
-	    padlen = blocksize - (encdatalen % blocksize);
+	    gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
 
 	if (ctx->gss_flags & GSS_C_DCE_STYLE) {
-	    /* DCE will pad the actual data itself, padding buffer optional */
-	    if (padding != NULL)
-		encdatalen += padding->buffer.length;
+	    /* DCE will pad the actual data itself; padding buffer optional and will be zeroed */
+	    gss_padlen = 0;
 
-	    if (encdatalen % blocksize)
+	    if (conf_data_length % k5_padlen)
 		code = KRB5_BAD_MSIZE;
 	} else if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-	    code = kg_allocate_iov(padding, padlen);
-	} else if (padding->buffer.length < padlen) {
+	    code = kg_allocate_iov(padding, gss_padlen);
+	} else if (padding->buffer.length < gss_padlen) {
 	    code = KRB5_BAD_MSIZE;
-	} else {
-	    /* Careful to emit GSS compatible tokens */
-	    padding->buffer.length = padlen;
 	}
 	if (code != 0)
 	    goto cleanup;
 
+	/* Initialize padding buffer to pad itself */
+	if (padding != NULL) {
+	    padding->buffer.length = gss_padlen;
+	    memset(padding->buffer.value, gss_padlen, gss_padlen);
+	}
+
 	if (ctx->gss_flags & GSS_C_DCE_STYLE)
 	    tmsglen = 0;
 	else
-	    tmsglen = textlen + padding->buffer.length;
+	    tmsglen = data_length + padding->buffer.length;
     }
 
     /* Determine token size */
@@ -170,20 +171,16 @@ make_seal_token_v1_iov(krb5_context context,
 	abort ();
     }
 
-    code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen);
+    code = krb5_c_checksum_length(context, md5cksum.checksum_type, &k5_trailerlen);
     if (code != 0)
 	goto cleanup;
-    md5cksum.length = sumlen;
+    md5cksum.length = k5_trailerlen;
 
-    if (conflen != 0) {
+    if (k5_headerlen != 0) {
 	code = kg_make_confounder(context, ctx->enc, ptr + 14 + ctx->cksum_size);
 	if (code != 0)
 	    goto cleanup;
     }
-
-    /* initialize the pad */
-    if (padding != NULL)
-	memset(padding->buffer.value, padding->buffer.length, padding->buffer.length);
 
     /* compute the checksum */
     code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
@@ -365,7 +362,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     gss_iov_buffer_t header;
     gss_iov_buffer_t padding;
     gss_iov_buffer_t trailer;
-    size_t textlen, assoclen, gss_headerlen, gss_trailerlen;
+    size_t data_length, assoc_data_length, gss_headerlen, gss_trailerlen;
     size_t k5_headerlen = 0, k5_padlen = 0, k5_trailerlen = 0;
     krb5_error_code code;
     krb5_context context;
@@ -406,7 +403,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	INIT_IOV_DATA(trailer);
     }
 
-    kg_iov_msglen(iov_count, iov, &textlen, &assoclen);
+    kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
 
     if (conf_req_flag && kg_integ_only_iov(iov_count, iov))
 	conf_req_flag = FALSE;
@@ -441,7 +438,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    }
 
 	    if (k5_padlen != 0 && padding != NULL)
-		padding->buffer.length = k5_padlen - ((textlen - assoclen + 16 /* E(Header) */) % k5_padlen);
+		padding->buffer.length = k5_padlen - ((data_length - assoc_data_length + 16 /* E(Header) */) % k5_padlen);
 	}
 
 	gss_headerlen = 16; /* Header */
@@ -460,7 +457,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4)
 		    padding->buffer.length = 1;
 		else
-		    padding->buffer.length = 8 - ((textlen - assoclen) % 8);
+		    padding->buffer.length = 8 - ((data_length - assoc_data_length) % 8);
 	    }
 
 	    k5_headerlen = kg_confounder_size(context, ctx->enc);
@@ -469,14 +466,14 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	data_size = 14 /* Header */ + ctx->cksum_size + k5_headerlen;
 
 	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	    data_size += textlen;
+	    data_size += data_length;
 
 	gss_headerlen = g_token_size(ctx->mech_used, data_size);
 
 	/* g_token_size() will include data_size as well as the overhead, so
-	 * subtract textlen just to get the overhead (ie. token size) */
+	 * subtract data_length just to get the overhead (ie. token size) */
 	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	    gss_headerlen -= textlen;
+	    gss_headerlen -= data_length;
     }
 
     if (trailer == NULL)

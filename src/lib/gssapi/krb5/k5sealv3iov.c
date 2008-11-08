@@ -124,7 +124,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
 
 	    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
-		/* DCE guarantees the data to be padded, padding buffer is optional and will be zeroed */
+		/* DCE will pad the actual data itself; padding buffer optional and will be zeroed */
 		gss_padlen = 0;
 
 		if (conf_data_length % k5_padlen)
