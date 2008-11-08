@@ -320,7 +320,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     }
 
     if (toktype == KG_TOK_WRAP_MSG) {
-	if (load_16_be(ptr) != 0x0505)
+	if (load_16_be(ptr) != 0x0504)
 	    goto defective;
 	if (ptr[3] != 0xFF)
 	    goto defective;
