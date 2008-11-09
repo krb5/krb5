@@ -360,12 +360,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 {
     krb5_gss_ctx_id_rec *ctx;
     gss_iov_buffer_t header;
-    gss_iov_buffer_t padding;
     gss_iov_buffer_t trailer;
     size_t data_length, assoc_data_length, gss_headerlen, gss_trailerlen;
     size_t k5_headerlen = 0, k5_padlen = 0, k5_trailerlen = 0;
     krb5_error_code code;
     krb5_context context;
+    size_t i;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
 	*minor_status = G_UNKNOWN_QOP;
@@ -389,14 +389,6 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	return GSS_S_FAILURE;
     }
     INIT_IOV_DATA(header);
-
-    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-    if (padding != NULL) {
-	INIT_IOV_DATA(padding);
-    } else if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    }
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL) {
@@ -430,15 +422,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		*minor_status = code;
 		return GSS_S_FAILURE;
 	    }
+	}
 
-	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
-	    if (code != 0) {
-		*minor_status = code;
-		return GSS_S_FAILURE;
-	    }
-
-	    if (k5_padlen != 0 && padding != NULL)
-		padding->buffer.length = k5_padlen - ((data_length - assoc_data_length + 16 /* E(Header) */) % k5_padlen);
+	code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
+	if (code != 0) {
+	    *minor_status = code;
+	    return GSS_S_FAILURE;
 	}
 
 	gss_headerlen = 16; /* Header */
@@ -449,17 +438,34 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}
     } else {
+	if (conf_req_flag)
+	    k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+    }
+
+    for (i = 0; i < iov_count; i++) {
+	gss_iov_buffer_t data = &iov[i];
+	gss_iov_buffer_t padding;
+
+	if (data->type == GSS_IOV_BUFFER_TYPE_DATA &&
+	    i < iov_count - 1 &&
+	    iov[i + 1].type == GSS_IOV_BUFFER_TYPE_PADDING)
+	{
+	    padding = &iov[i - 1];
+
+	    if (k5_padlen == 0 || (ctx->proto == 0 && data->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY))
+		padding->buffer.length = 0;
+	    else
+		padding->buffer.length = k5_padlen - (data->buffer.length % k5_padlen);
+
+	    data_length += padding->buffer.length;
+	}
+    }
+
+    if (ctx->proto == 0) {
 	/* Header | Checksum | Confounder | Data | Pad */
 	size_t data_size;
 
 	if (conf_req_flag) {
-	    if (padding != NULL) {
-		if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4)
-		    padding->buffer.length = 1;
-		else
-		    padding->buffer.length = 8 - ((data_length - assoc_data_length) % 8);
-	    }
-
 	    k5_headerlen = kg_confounder_size(context, ctx->enc);
 	}
 

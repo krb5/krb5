@@ -317,9 +317,9 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
     size_t *pkiov_count;
     krb5_crypto_iov **pkiov;
 {
-    gss_iov_buffer_desc *header;
-    gss_iov_buffer_desc *padding;
-    gss_iov_buffer_desc *trailer;
+    gss_iov_buffer_t header;
+    gss_iov_buffer_t trailer;
+    gss_iov_buffer_t padding;
     size_t i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
@@ -334,9 +334,8 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
     header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
-    /* separate padding buffer is optional for DCE because caller pads data */
+    /* This will return the last PADDING buffer which has EC */
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-    assert(padding != NULL || dce_style);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(trailer == NULL || rrc == 0);
@@ -365,9 +364,7 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
 	gss_headerlen += actual_rrc;
 	gss_trailerlen = 0;
     } else {
-	assert(padding != NULL); /* should only happen for DCE, which is trailer-less */
-
-	if (padding->buffer.length != ec)
+	if (padding == NULL || padding->buffer.length != ec)
 	    return KRB5_BAD_MSIZE;
 
 	if (trailer->buffer.length != gss_trailerlen)
@@ -715,19 +712,17 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     unsigned char *p;
 
     for (i = iov_count - 1; i >= 0; i--) {
-	gss_iov_buffer_t piov = &iov[i];
+	if (iov[i].type == GSS_IOV_BUFFER_TYPE_PADDING &&
+	    i > 0 &&
+	    iov[i - 1].type == GSS_IOV_BUFFER_TYPE_DATA)
+	{
+	    if (iov[i - 1].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
+		continue;
 
-	if (piov->type == GSS_IOV_BUFFER_TYPE_PADDING) {
-	    if (padding != NULL) {
-		*minor_status = EINVAL;
-		return GSS_S_FAILURE;
+	    if (padding == NULL) {
+		padding = &iov[i];
+		data = &iov[i - 1];
 	    }
-
-	    padding = piov;
-	} else if (data == NULL &&
-	    piov->type == GSS_IOV_BUFFER_TYPE_DATA &&
-	    (piov->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0) {
-	    data = piov; /* last data that was encrypted */
 	}
     }
 

@@ -145,12 +145,30 @@ typedef struct gss_iov_buffer_desc_struct {
  * buffers in memory does not matter. Buffers in the IOV should
  * be arranged in the order above, and in the case of multiple
  * DATA buffers the sender and receiver should agree on the
- * order.
+ * order and each buffer should have a trailing PADDING.
  *
  * With GSS_C_DCE_STYLE it is acceptable to not provide PADDING
  * and TRAILER, but the caller must guarantee the plaintext data
  * being encrypted is correctly padded, otherwise an error will
  * be returned.
+ *
+ * While applications that have knowledge of the underlying
+ * cryptosystem may request a specific configuration of data
+ * buffers, the only generally supported configurations are:
+ *
+ *  HEADER | DATA | PADDING | TRAILER
+ *
+ * which will emit GSS_Wrap() compatible tokens, and:
+ *
+ *  HEADER | SIGN_ONLY_DATA | PADDING | DATA | PADDING | TRAILER
+ *
+ * for AEAD. This guarantees interoperability with modes such
+ * as CCM that only allow a single buffer of associated data and
+ * require it be padded.
+ *
+ * The typical (special cased) usage for DCE is as follows:
+ *
+ *  HEADER | SIGN_ONLY_DATA_1 | DATA | SIGN_ONLY_DATA_2
  */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (

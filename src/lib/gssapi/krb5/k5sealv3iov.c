@@ -44,14 +44,13 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 {
     krb5_error_code code;
     gss_iov_buffer_t header;
-    gss_iov_buffer_t padding;
     gss_iov_buffer_t trailer;
     unsigned char acceptor_flag;
     unsigned short tok_id;
     unsigned char *outbuf = NULL;
     int key_usage;
-    size_t rrc, ec;
-    size_t data_length, assoc_data_length;
+    size_t rrc, ec = 0;
+    size_t i;
     size_t gss_headerlen;
     krb5_keyblock *key;
 
@@ -76,16 +75,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     if (header == NULL)
 	return EINVAL;
 
-    if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
-	padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
-	if (padding == NULL && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	    return EINVAL;
-    } else
-	padding = NULL;
-
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-
-    kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
 
     outbuf = (unsigned char *)header->buffer.value;
 
@@ -118,30 +108,46 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	if (k5_padlen != 0) {
-	    size_t conf_data_length = 16 /* Header */ + data_length - assoc_data_length;
+	/*
+	 * We support multiple padding buffers for modes such as CCM that
+	 * require associated data to be padded.
+	 */
+	for (i = 0; i < iov_count; i++) {
+	    gss_iov_buffer_t data = &iov[i];
+	    gss_iov_buffer_t padding;
 
-	    gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
+	    if (data->type != GSS_IOV_BUFFER_TYPE_DATA)
+		continue;
 
-	    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
-		/* DCE will pad the actual data itself; padding buffer optional and will be zeroed */
-		gss_padlen = 0;
+	    if (i < iov_count - 1 &&
+		iov[i + 1].type == GSS_IOV_BUFFER_TYPE_PADDING)
+	    {
+		padding = &iov[i + 1];
 
-		if (conf_data_length % k5_padlen)
+		if (conf_req_flag == 0 || k5_padlen == 0) {
+		    padding->buffer.length = 0;
+		    continue;
+		}
+
+		gss_padlen = k5_padlen - (data->buffer.length % k5_padlen);
+
+		if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+		    code = kg_allocate_iov(padding, gss_padlen);
+		} else if (padding->buffer.length < gss_padlen) {
 		    code = KRB5_BAD_MSIZE;
-	    } else if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-		code = kg_allocate_iov(padding, gss_padlen);
-	    } else if (padding->buffer.length < gss_padlen) {
+		}
+		if (code != 0)
+		    break;
+		padding->buffer.length = gss_padlen;
+		memset(padding->buffer.value, 0, gss_padlen);
+	    } else if (k5_padlen != 0 && (data->buffer.length % k5_padlen) != 0) {
+		/* If subsequent data buffer was not PADDING, DATA must be padded */
 		code = KRB5_BAD_MSIZE;
+		break;
 	    }
-	    if (code != 0)
-		goto cleanup;
 	}
-
-	if (padding != NULL) {
-	    padding->buffer.length = gss_padlen;
-	    memset(padding->buffer.value, 'x', gss_padlen);
-	}
+	if (code != 0)
+	    goto cleanup;
 
 	if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 	    code = kg_allocate_iov(trailer, gss_trailerlen);
@@ -150,13 +156,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	/*
-	 * Windows has a bug where it rotates by EC + RRC instead of RRC as
-	 * specified in the RFC. The simplest workaround is to always send
-	 * EC == 0, which means that Windows will rotate by the correct
-	 * amount. (And, because DCE pads on our behalf, EC will be 0 anyway.)
-	 */
-	ec = gss_padlen;
+	ec = gss_padlen; /* set to last pad length in case of multiple pads */
 
 	if (trailer == NULL)
 	    rrc = gss_trailerlen;
