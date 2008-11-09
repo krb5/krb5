@@ -636,16 +636,24 @@ kg_locate_iov(size_t iov_count,
 	      OM_uint32 type)
 {
     size_t i;
-    gss_iov_buffer_desc *p = NULL;
+    gss_iov_buffer_t p = GSS_C_NO_IOV_BUFFER;
 
     if (iov == GSS_C_NO_IOV_BUFFER)
-	return NULL;
+	return GSS_C_NO_IOV_BUFFER;
 
-    for (i = 0; i < iov_count; i++) {
-	if (iov[i].type == type)
-	    p = &iov[i];
-	else
-	    return NULL;
+    /*
+     * Any buffer types we call kg_locate_iov() with can only appear
+     * once, with the exception of PADDING which we will allow to
+     * appear multiple times in case the underlying cryptosystem
+     * requires padding on associated data.
+     */
+    for (i = iov_count - 1; i >= 0; i--) {
+	if (iov[i].type == type) {
+	    if (p == GSS_C_NO_IOV_BUFFER)
+		p = &iov[i];
+	    else if (iov[i].type != GSS_IOV_BUFFER_TYPE_PADDING)
+		return GSS_C_NO_IOV_BUFFER;
+	}
     }
 
     return p;
@@ -800,6 +808,8 @@ krb5_boolean kg_integ_only_iov(size_t iov_count, gss_iov_buffer_desc *iov)
     size_t i;
     krb5_boolean integ_only = FALSE;
 
+    assert(iov != GSS_C_NO_IOV_BUFFER);
+
     for (i = 0; i < iov_count; i++) {
 	if (iov[i].type != GSS_IOV_BUFFER_TYPE_DATA)
 	    continue;
@@ -814,6 +824,7 @@ krb5_boolean kg_integ_only_iov(size_t iov_count, gss_iov_buffer_desc *iov)
 
 krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
 {
+    assert(iov != GSS_C_NO_IOV_BUFFER);
     assert(iov->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE);
 
     iov->buffer.length = size;
