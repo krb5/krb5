@@ -321,6 +321,7 @@ main(argc, argv0)
     if (encrypt_flag)
       cc += 3;
     args = (char *) malloc((unsigned) cc);
+    *args = '\0';
     if (encrypt_flag)
       strlcpy(args, "-x ", cc);
     for (ap = argv; *ap; ap++) {
