@@ -23,7 +23,7 @@
  */
 
 /*
- *  glue routine for gss_wrap_iov
+ *  glue routine for gss_unwrap_iov
  */
 
 #include "mglueP.h"
