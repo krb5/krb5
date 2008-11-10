@@ -991,6 +991,8 @@ krb5_error_code pa_sam(krb5_context context,
 
     *out_padata = pa;
 
+    krb5_xfree(scratch);
+
     return(0);
 }
 
