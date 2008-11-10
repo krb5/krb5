@@ -180,18 +180,6 @@ set passes {
 	{dummy=[verbose -log "AES + DES enctypes"]}
     }
     {
-	aes-tcp
-	mode=tcp
-	des3_krbtgt=0
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
-	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES via TCP"]}
-    }
-    {
 	aes-des3
 	mode=udp
 	des3_krbtgt=0
@@ -351,6 +339,18 @@ set unused_passes {
 	}
 	{dummy=[verbose -log "DES3 TGT, default enctypes"]}
     }
+    {
+	aes-tcp
+	mode=tcp
+	des3_krbtgt=0
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES via TCP"]}
+    }
 }
 #	{supported_enctypes=des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal }
 #	{kdc_supported_enctypes= des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal}
@@ -488,6 +488,23 @@ exit -onexit [concat {
     verbose "calling stop_kerberos_daemons (onexit handler)"
     stop_kerberos_daemons;
 } [exit -onexit]]
+
+# run_once
+
+# Many tests are independent of the actual enctypes used, which is
+# what our passes are (currently) all about.  Use this to prevent
+# multiple invocations.  If a test depends on, say, the master key
+# type but nothing else, you could also use the master key type in the
+# tag name, and avoid redundant tests in additional passes using the
+# same master key type.
+
+proc run_once { tag body } {
+    global run_once_tags
+    if ![info exists run_once_tags($tag)] {
+	set run_once_tags($tag) 1
+	uplevel 1 $body
+    }
+}
 
 # check_k5login
 

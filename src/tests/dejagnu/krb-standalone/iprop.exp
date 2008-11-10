@@ -1,11 +1,6 @@
 # Password-changing Kerberos test.
 # This is a DejaGnu test script.
 
-# Set up the Kerberos files and environment.
-if {![get_hostname] || ![setup_kerberos_files] || ![setup_kerberos_env]} {
-    return
-}
-
 # We are about to start up a couple of daemon processes.  We do all
 # the rest of the tests inside a proc, so that we can easily kill the
 # processes when the procedure ends.
@@ -109,16 +104,23 @@ proc doit { } {
     }
 }
 
-set status [catch doit msg]
+run_once iprop {
+    # Set up the Kerberos files and environment.
+    if {![get_hostname] || ![setup_kerberos_files] || ![setup_kerberos_env]} {
+	return
+    }
 
-stop_kerberos_daemons
+    set status [catch doit msg]
 
-set ulog 0
-reset_kerberos_files
-file delete $tmppwd/adb $tmppwd/adb.ok $tmppwd/db.ulog
+    stop_kerberos_daemons
 
-if { $status != 0 } {
-    send_error "ERROR: error in iprop.exp\n"
-    send_error "$msg\n"
-    exit 1
+    set ulog 0
+    reset_kerberos_files
+    file delete $tmppwd/adb $tmppwd/adb.ok $tmppwd/db.ulog
+
+    if { $status != 0 } {
+	send_error "ERROR: error in iprop.exp\n"
+	send_error "$msg\n"
+	exit 1
+    }
 }
