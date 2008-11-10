@@ -408,7 +408,18 @@ if ![info exists KEY] {
 # Clear away any files left over from a previous run.
 # We can't use them now because we don't know the right KEY.
 # krb5.conf might change if running tests on another host
-file delete $tmppwd/db.ok $tmppwd/srvtab $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/cpw_srvtab $tmppwd/krb.realms $tmppwd/krb.conf
+file delete $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/krb.realms $tmppwd/krb.conf
+
+proc delete_db {} {
+    global tmppwd
+    file delete $tmppwd/kdc-db $tmppwd/kdc-db.ok $tmppwd/kdc-db.kadm5 \
+	$tmppwd/kdc-db.ulog \
+	$tmppwd/kdc-db.kadm5.lock \
+	$tmppwd/slave-db \
+	$tmppwd/srvtab $tmppwd/cpw_srvtab
+}
+
+delete_db
 
 # Put the installed kerberos directories on PATH.
 # This needs to be fixed for V5.
@@ -451,6 +462,7 @@ foreach i {
     {RESOLVE $objdir/../resolve/resolve}
     {T_INETD $objdir/t_inetd}
     {KPROPLOG $objdir/../../slave/kproplog}
+    {KPASSWD $objdir/../../clients/kpasswd/kpasswd}
 } {
     set varname [lindex $i 0]
     if ![info exists $varname] {
@@ -769,7 +781,10 @@ proc modify_principal { name args } {
     global KADMIN_LOCAL
     global REALMNAME
 
+    envstack_push
+    setup_kerberos_env kdc
     spawn $KADMIN_LOCAL -r $REALMNAME
+    envstack_pop
     expect_after {
 	eof {
 	    fail "modprinc (kadmin.local)"
@@ -799,7 +814,8 @@ proc modify_principal { name args } {
 # kpasswd +5
 # krb524 +7
 # application servers (krlogind, telnetd, krshd, ftpd, etc) +8
-# iprop +9
+# iprop +9 (if enabled)
+# kpropd +10
 if [info exists PORTBASE] {
     set portbase $PORTBASE
 } else {
@@ -834,6 +850,7 @@ proc setup_kerberos_files { } {
     setup_krb5_conf client
     setup_krb5_conf server
     setup_krb5_conf kdc
+    setup_krb5_conf slave
 
     # Create a kdc.conf file.
     if { ![file exists $tmppwd/kdc.conf] \
@@ -877,6 +894,57 @@ proc setup_kerberos_files { } {
 	    puts $conffile "		iprop_enable = true"
 	    puts $conffile "		iprop_port = [expr 9 + $portbase]"
 	    puts $conffile "		iprop_logfile = $tmppwd/db.ulog"
+	} else {
+	    puts $conffile "# no ulog"
+	}
+	puts $conffile "	\}"
+	puts $conffile ""
+	close $conffile
+    }
+
+    # Create a config file for the slave KDC (kpropd only, no normal
+    # KDC processes).
+    if { ![file exists $tmppwd/slave.conf] \
+	    || $last_passname_conf != $multipass_name } {
+	if ![info exists master_key_type] {
+	    set master_key_type des-cbc-md5
+	}
+	set conffile [open $tmppwd/slave.conf w]
+	puts $conffile "\[kdcdefaults\]"
+	puts $conffile "	kdc_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
+	puts $conffile "	kdc_tcp_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
+	puts $conffile ""
+	puts $conffile "\[realms\]"
+	puts $conffile "	$REALMNAME = \{"
+#	puts $conffile "		database_name = $tmppwd/slave-db"
+	puts $conffile "		admin_database_name = $tmppwd/slave-adb"
+	puts $conffile "		admin_database_lockfile = $tmppwd/slave-adb.lock"
+	# Testing with a colon in the name exercises default handling
+	# for pathnames.
+	puts $conffile "		key_stash_file = $tmppwd/slave-stash"
+	puts $conffile "		acl_file = $tmppwd/slave-acl"
+	puts $conffile "		kadmind_port = [expr 4 + $portbase]"
+	puts $conffile "		kpasswd_port = [expr 5 + $portbase]"
+	puts $conffile "		max_life = 1:00:00"
+	puts $conffile "		max_renewable_life = 3:00:00"
+	puts $conffile "		master_key_type = $master_key_type"
+	puts $conffile "		master_key_name = master/key"
+	puts $conffile "		supported_enctypes = $supported_enctypes"
+	puts $conffile "		kdc_supported_enctypes = $kdc_supported_enctypes"
+	if { $mode == "tcp" } {
+	    puts $conffile "		kdc_ports = [expr 3 + $portbase]"
+	    puts $conffile "		kdc_tcp_ports = [expr 1 + $portbase],[expr 3 + $portbase]"
+	} else {
+	    puts $conffile "		kdc_ports = [expr 1 + $portbase]"
+	    puts $conffile "		kdc_tcp_ports = [expr 3 + $portbase]"
+	}
+	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
+	puts $conffile "		default_principal_flags = -postdateable forwardable"
+	puts $conffile "		dict_file = $tmppwd/dictfile"
+	if { $ulog != 0 } {
+	    puts $conffile "		iprop_enable = true"
+	    puts $conffile "		iprop_port = [expr 9 + $portbase]"
+	    puts $conffile "		iprop_logfile = $tmppwd/slave-db.ulog"
 	} else {
 	    puts $conffile "# no ulog"
 	}
@@ -997,7 +1065,7 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "	db_module_dir = $tmppwd/../../../util/fakedest$KRB5_DB_MODULE_DIR"
 	puts $conffile "	foo_db2 = {"
 	puts $conffile "		db_library = db2"
-	puts $conffile "		database_name = $tmppwd/db"
+	puts $conffile "		database_name = $tmppwd/$type-db"
 	puts $conffile "	}"
 	close $conffile
     }
@@ -1160,12 +1228,13 @@ proc setup_kerberos_db { standalone } {
 
     set failall 0
 
-    if {!$standalone && [file exists $tmppwd/db.ok] \
+    if {!$standalone && [file exists $tmppwd/kdc-db.ok] \
 	&& $last_passname_db == $multipass_name} {
 	return 1
     }
 
-    catch "file delete [glob -nocomplain $tmppwd/db* $tmppwd/adb*]"
+#    catch "file delete [glob -nocomplain $tmppwd/db* $tmppwd/adb*]"
+    delete_db
 
     # Creating a new database means we need a new srvtab.
     file delete $tmppwd/srvtab
@@ -1257,7 +1326,7 @@ proc setup_kerberos_db { standalone } {
 	if $standalone {
 	    fail $test
 	} else {
-	    file delete $tmppwd/db.ok $tmppwd/adb.db
+	    delete_db
 	}
     } else {
 	if $standalone {
@@ -1305,7 +1374,8 @@ proc setup_kerberos_db { standalone } {
 	if $standalone {
 	    fail $test
 	} else {
-	    file delete $tmppwd/db.ok $tmppwd/adb.db
+#	    file delete $tmppwd/db.ok $tmppwd/adb.db
+	    delete_db
 	}
     } else {
 	if $standalone {
@@ -1347,7 +1417,8 @@ proc setup_kerberos_db { standalone } {
 	    if $standalone {
 		fail $test
 	    } else {
-		file delete $tmppwd/db.ok $tmppwd/adb.db
+#		file delete $tmppwd/db.ok $tmppwd/adb.db
+		delete_db
 	    }
 	} else {
 	    if $standalone {
@@ -1389,7 +1460,8 @@ proc setup_kerberos_db { standalone } {
 	    if $standalone {
 		fail $test
 	    } else {
-		file delete $tmppwd/db.ok $tmppwd/adb.db
+#		file delete $tmppwd/db.ok $tmppwd/adb.db
+		delete_db
 	    }
 	} else {
 	    if $standalone {

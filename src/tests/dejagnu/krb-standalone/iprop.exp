@@ -23,7 +23,7 @@ proc doit { } {
     global ulog des3_krbtgt
 
     # Delete any db, ulog files
-    file delete $tmppwd/db $tmppwd/db.ok $tmppwd/db.ulog
+    delete_db
 
     # Update config file
     set ulog 1
