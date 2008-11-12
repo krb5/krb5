@@ -56,10 +56,10 @@ krb5int_c_find_checksum_type(krb5_cksumtype cksumtype);
 				 (_iov)->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY )
 
 struct iov_block_state {
-    size_t iov_pos;
-    size_t data_pos;
-    unsigned int got_header : 1;
-    unsigned int include_sign_only : 1;
+    size_t iov_pos;			/* index into iov array */
+    size_t data_pos;			/* index into iov contents */
+    unsigned int got_header : 1;	/* have/should we process HEADER */
+    unsigned int include_sign_only : 1;	/* should we process SIGN_ONLY blocks */
 };
 
 #define IOV_BLOCK_STATE_INIT(_state)	((_state)->iov_pos = \
