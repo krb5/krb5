@@ -41,6 +41,9 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
 			    size_t num_data,
 			    krb5_data *cksum_data);
 
+const struct krb5_cksumtypes * KRB5_CALLCONV
+krb5int_c_find_checksum_type(krb5_cksumtype cksumtype);
+
 #define ENCRYPT_CONF_IOV(_iov)	((_iov)->flags == KRB5_CRYPTO_TYPE_HEADER)
 
 #define ENCRYPT_DATA_IOV(_iov)	((_iov)->flags == KRB5_CRYPTO_TYPE_DATA || \
@@ -51,4 +54,36 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
 #define SIGN_IOV(_iov)		((_iov)->flags == KRB5_CRYPTO_TYPE_HEADER || \
 				 (_iov)->flags == KRB5_CRYPTO_TYPE_DATA || \
 				 (_iov)->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY )
+
+struct iov_block_state {
+    size_t iov_pos;
+    size_t data_pos;
+    krb5_boolean got_header;
+};
+
+#define IOV_BLOCK_STATE_INIT(_state)	((_state)->iov_pos = (_state)->data_pos = (_state)->got_header = 0)
+
+void KRB5_CALLCONV
+krb5int_c_iov_get_block(unsigned char *block,
+			size_t block_size,
+			const krb5_crypto_iov *data,
+			size_t num_data,
+			struct iov_block_state *iov_state);
+
+void KRB5_CALLCONV
+krb5int_c_iov_put_block(const krb5_crypto_iov *data,
+			size_t num_data,
+			unsigned char *block,
+			size_t block_size,
+			struct iov_block_state *iov_state);
+
+krb5_error_code KRB5_CALLCONV
+krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
+			     const struct krb5_enc_provider *enc,
+			     const struct krb5_hash_provider *hash,
+			     const krb5_keyblock *key,
+			     krb5_keyusage keyusage,
+			     const krb5_data *ivec,
+			     krb5_crypto_iov *data,
+			     size_t num_data);
 

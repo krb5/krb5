@@ -116,7 +116,6 @@ krb5_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
     krb5_data datain;
     unsigned char *kcdata;
     krb5_keyblock kc;
-    krb5_crypto_iov *checksum;
 
     for (i=0; i<krb5_enctypes_length; i++) {
 	if (krb5_enctypes_list[i].etype == key->enctype)
