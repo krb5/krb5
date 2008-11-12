@@ -64,7 +64,8 @@ krb5int_ccm_crypto_length(const struct krb5_aead_provider *aead,
     return 0;
 }
 
-static krb5_error_code encode_a_len(krb5_data *header, size_t *a_len, size_t adata_len)
+static krb5_error_code
+encode_a_len(krb5_data *header, size_t *a_len, size_t adata_len)
 {
     size_t len;
     unsigned char *p;
@@ -103,7 +104,8 @@ static krb5_error_code encode_a_len(krb5_data *header, size_t *a_len, size_t ada
     return 0;
 }
 
-static krb5_error_code decode_a_len(krb5_data *header, size_t *a_len, size_t *adata_len)
+static krb5_error_code
+decode_a_len(krb5_data *header, size_t *a_len, size_t *adata_len)
 {
     size_t len, len_len;
     unsigned char *p;
@@ -427,8 +429,10 @@ k5_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_cksumtype cksumtype;
     const struct krb5_cksumtypes *keyhash;
 
-    if (krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM) != NULL)
-	return krb5int_c_iov_decrypt_stream(aead, enc, hash, key, usage, iv, data, num_data);
+    if (krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM) != NULL) {
+	return krb5int_c_iov_decrypt_stream(aead, enc, hash, key,
+					    usage, iv, data, num_data);
+    }
 
     kc.contents = NULL;
     kc.length = 0;
@@ -684,7 +688,9 @@ k5_ccm_decrypt_iov_stream(const struct krb5_aead_provider *aead,
     iov[5].data.data = iov[4].data.data + iov[4].data.length;
     iov[5].data.length = enc->block_size;
 
-    ret = k5_ccm_decrypt_iov(&krb5int_aead_ccm, enc, hash, key, usage, iv, iov, sizeof(iov)/sizeof(iov[0]));
+    ret = k5_ccm_decrypt_iov(&krb5int_aead_ccm, enc, hash, key,
+			     usage, iv,
+			     iov, sizeof(iov)/sizeof(iov[0]));
 
     if (ret == 0) {
 	if (adata != NULL)
@@ -719,9 +725,11 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 			size_t num_data)
 {
     if (krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM) != NULL)
-	return k5_ccm_decrypt_iov_stream(aead, enc, hash, key, usage, iv, data, num_data);
+	return k5_ccm_decrypt_iov_stream(aead, enc, hash, key,
+					 usage, iv, data, num_data);
     else
-	return k5_ccm_decrypt_iov(aead, enc, hash, key, usage, iv, data, num_data);
+	return k5_ccm_decrypt_iov(aead, enc, hash, key,
+				  usage, iv, data, num_data);
 }
 
 const struct krb5_aead_provider krb5int_aead_ccm = {
@@ -782,7 +790,9 @@ krb5int_ccm_encrypt(const struct krb5_enc_provider *enc,
     iov[3].data.data = iov[2].data.data + iov[2].data.length;
     iov[3].data.length = enc->block_size;
 
-    ret = krb5int_ccm_encrypt_iov(&krb5int_aead_ccm, enc, hash, key, usage, ivec, iov, sizeof(iov)/sizeof(iov[0]));
+    ret = krb5int_ccm_encrypt_iov(&krb5int_aead_ccm, enc, hash, key,
+				  usage, ivec,
+				  iov, sizeof(iov)/sizeof(iov[0]));
 
     if (ret != 0)
 	zap(output->data, output->length);
@@ -807,7 +817,9 @@ krb5int_ccm_decrypt(const struct krb5_enc_provider *enc,
     iov[1].data.data = NULL;
     iov[1].data.length = 0;
 
-    ret = k5_ccm_decrypt_iov_stream(&krb5int_aead_ccm, enc, hash, key, usage, ivec, iov, sizeof(iov)/sizeof(iov[0]));
+    ret = k5_ccm_decrypt_iov_stream(&krb5int_aead_ccm, enc, hash, key,
+				    usage, ivec,
+				    iov, sizeof(iov)/sizeof(iov[0]));
     if (ret != 0)
 	return ret;
 
