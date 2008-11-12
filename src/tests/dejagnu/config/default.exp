@@ -413,9 +413,10 @@ file delete $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/krb.realms $tmppwd/krb.co
 proc delete_db {} {
     global tmppwd
     file delete $tmppwd/kdc-db $tmppwd/kdc-db.ok $tmppwd/kdc-db.kadm5 \
-	$tmppwd/kdc-db.ulog \
 	$tmppwd/kdc-db.kadm5.lock \
-	$tmppwd/slave-db \
+	$tmppwd/kdc-db.ulog \
+	$tmppwd/slave-db $tmppwd/slave-db.ok $tmppwd/slave-db.kadm5 $tmppwd/slave-db.kadm5.lock \
+	$tmppwd/slave-db~ $tmppwd/slave-db~.ok $tmppwd/slave-db~.kadm5 $tmppwd/slave-db~.kadm5.lock \
 	$tmppwd/srvtab $tmppwd/cpw_srvtab
 }
 
@@ -463,6 +464,8 @@ foreach i {
     {T_INETD $objdir/t_inetd}
     {KPROPLOG $objdir/../../slave/kproplog}
     {KPASSWD $objdir/../../clients/kpasswd/kpasswd}
+    {KPROPD $objdir/../../slave/kpropd}
+    {KPROP $objdir/../../slave/kprop}
 } {
     set varname [lindex $i 0]
     if ![info exists $varname] {
@@ -812,6 +815,7 @@ proc modify_principal { name args } {
 # client tries +1 and +6
 # kadmind +4
 # kpasswd +5
+# (nothing) +6
 # krb524 +7
 # application servers (krlogind, telnetd, krshd, ftpd, etc) +8
 # iprop +9 (if enabled)
@@ -2798,11 +2802,19 @@ proc krb_exit { } {
 }
 
 # helpful sometimes for debugging the test suite
-proc spawn_xterm { } {
+proc export_debug_envvars { } {
     global env
     foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME GSSCLIENT} {
 	global $i
 	if [info exists $i] { set env($i) [set $i] }
     }
+}
+proc spawn_xterm { } {
+    export_debug_envvars
     exec "xterm"
+}
+proc spawn_shell { } {
+    export_debug_envvars
+    spawn "sh"
+    exp_interact
 }
