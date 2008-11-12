@@ -388,6 +388,10 @@ typedef struct _krb5_crypto_iov {
 #define ENCTYPE_AES256_CTS_HMAC_SHA1_96	0x0012
 #define ENCTYPE_ARCFOUR_HMAC	0x0017
 #define ENCTYPE_ARCFOUR_HMAC_EXP 0x0018
+#define ENCTYPE_AES128_CCM_128	0x0021
+#define ENCTYPE_AES256_CCM_128	0x0022
+#define ENCTYPE_AES128_GCM_128	0x0023
+#define ENCTYPE_AES256_GCM_128	0x0024
 #define ENCTYPE_UNKNOWN		0x01ff
 
 #define	CKSUMTYPE_CRC32		0x0001
@@ -402,6 +406,8 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_HMAC_SHA1_DES3	0x000c
 #define CKSUMTYPE_HMAC_SHA1_96_AES128	0x000f
 #define CKSUMTYPE_HMAC_SHA1_96_AES256	0x0010
+#define CKSUMTYPE_AES128_CBC	0x0021
+#define CKSUMTYPE_AES256_CBC	0x0022
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 
 /* The following are entropy source designations. Whenever
@@ -620,6 +626,7 @@ krb5_boolean KRB5_CALLCONV krb5_c_is_keyed_cksum
 #define KRB5_CRYPTO_TYPE_PADDING    4	/* [out] padding */
 #define KRB5_CRYPTO_TYPE_TRAILER    5	/* [out] checksum for encrypt */
 #define KRB5_CRYPTO_TYPE_CHECKSUM   6	/* [out] checksum for MIC */
+#define KRB5_CRYPTO_TYPE_STREAM	    7	/* [in] entire message */
 
 krb5_error_code KRB5_CALLCONV
     krb5_c_make_checksum_iov
