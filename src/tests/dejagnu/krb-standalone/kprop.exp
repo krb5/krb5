@@ -36,22 +36,26 @@ proc start_kpropd {} {
 }
 
 proc scan_kpropd_output {} {
-    global timeout kpropd_spawn_id
+    global kpropd_spawn_id kpropd_pid
 
     # See if kpropd logged anything.
-    set timeout 1
     expect {
 	-i $kpropd_spawn_id
 	eof {
-	    fail "kprop (server exited)"
-	    return
+	    # I think kpropd is supposed to run a loop in standalone
+	    # mode, but exiting seems to be normal behavior.
+#	    fail "kprop (server exited)"
+	    wait -i $kpropd_spawn_id
+	    unset kpropd_spawn_id kpropd_pid
 	}
 	timeout { }
-	-re "Connection from \[a-zA-Z.-\]*" { }
-	-re "krb5_recvauth" { }
+	-re "Connection from \[a-zA-Z.-\]*" { exp_continue }
+	-re "krb5_recvauth" { exp_continue }
+	-re "authenticated client" { exp_continue }
+	-re "calling kdb5_util to load database\r\n" { exp_continue }
+	-re "Child PID is \[0-9\]*\r\n" { exp_continue }
 	-re "Rejected connection" {
 	    fail "kprop (rejected)"
-	    return
 	}
     }
 }
@@ -151,6 +155,7 @@ run_once kprop {
 	    exec kill $kpropd_pid
 	    expect -i $kpropd_spawn_id eof
 	    wait -i $kpropd_spawn_id
+	    unset kpropd_pid kpropd_spawn_id
 	}
     }
 
