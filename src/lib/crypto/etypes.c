@@ -228,6 +228,26 @@ krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
       krb5int_dk_prf,
       CKSUMTYPE_HMAC_SHA1_96_AES256,
       &krb5int_aead_aes },
+    { ENCTYPE_AES128_CCM_128,
+      "aes128-ccm-128", "AES-128 CCM mode with 128-bit CBC MAC",
+      &krb5int_enc_aes128_ctr, NULL,
+      16,
+      krb5int_ccm_encrypt_length, krb5int_ccm_encrypt, krb5int_ccm_decrypt,
+      krb5int_aes_string_to_key,
+      krb5int_dk_prf,
+      CKSUMTYPE_AES128_CBC,
+      &krb5int_aead_ccm
+    },
+    { ENCTYPE_AES256_CCM_128,
+      "aes256-ccm-128", "AES-256 CCM mode with 128-bit CBC MAC",
+      &krb5int_enc_aes256_ctr, NULL,
+      16,
+      krb5int_ccm_encrypt_length, krb5int_ccm_encrypt, krb5int_ccm_decrypt,
+      krb5int_aes_string_to_key,
+      krb5int_dk_prf,
+      CKSUMTYPE_AES128_CBC,
+      &krb5int_aead_ccm
+    }
 };
 
 const int krb5_enctypes_length =
