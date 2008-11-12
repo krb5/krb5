@@ -144,8 +144,40 @@ static krb5_error_code decode_a_len(krb5_data *header, size_t *a_len, size_t *ad
     return 0;
 }
 
-/* ENCTYPE_AES128_CCM_128 and ENCTYPE_AES256_CCM_128 */
-
+/*
+ * Implement AEAD_AES_{128,256}_CCM as described in section 5.3 of RFC 5116.
+ *
+ * This is the CCM mode as described in NIST 800-38C, with a 12 byte nonce
+ * and 16 byte checksum. Only a single associated data buffer and a single
+ * payload buffer are supported, in that order, if the output token is to
+ * be compatible with RFC 5116. Multiple buffers will not return an error,
+ * but the length will no longer be self-describing, and this usage is not
+ * recommended.
+ *
+ * To emit compatible tokens, the IOV should be laid out as follows:
+ *
+ *    HEADER | SIGN_DATA | PADDING | DATA | PADDING | TRAILER
+ *
+ * SIGN_DATA and its padding may be absent. With this layout, the buffers
+ * can be concatenated together and transmitted as a single self-describing
+ * token, which can be parsed with the following usage:
+ *
+ *    STREAM | SIGN_DATA | DATA
+ *
+ * On input, STREAM should be sent to the complete token; SIGN_DATA and
+ * DATA will upon return contain pointers in to the STREAM buffer with
+ * associated data and payload buffers.
+ *
+ * For compatibility with RFC 5116, a single key is used both for encryption
+ * and checksumming. The key derivation function is as follows:
+ *
+ *    Kc = DK(base-key, usage | 0xCC)
+ *
+ * Because the base keys are compatible with RFC 3962, the two encryption
+ * types defined here (ENCTYPE_AES128_CCM_128 and ENCTYPE_AES256_CCM_128)
+ * are most useful in conjunction with a cryptosystem negotiation protocol
+ * such as RFC 4537.
+ */
 static krb5_error_code
 k5_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 		   const struct krb5_enc_provider *enc,
@@ -703,12 +735,14 @@ krb5int_ccm_encrypt_length(const struct krb5_enc_provider *enc,
 			   const struct krb5_hash_provider *hash,
 			   size_t inputlen, size_t *length)
 {
+    size_t pad_len;
+
     /* pad */
     if ((inputlen % enc->block_size) != 0)
-	inputlen += enc->block_size - (inputlen % enc->block_size);
+	pad_len = enc->block_size - (inputlen % enc->block_size);
 
-    /* header | data | trailer */
-    *length = enc->block_size + inputlen + enc->block_size;
+    /* HEADER | DATA | PADDING | TRAILER */
+    *length = enc->block_size + inputlen + pad_len + enc->block_size;
 }
 
 krb5_error_code
