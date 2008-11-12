@@ -804,11 +804,18 @@ krb5int_ccm_decrypt(const struct krb5_enc_provider *enc,
     iov[0].data = *input;
 
     iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[1].data = *output;
+    iov[1].data.data = NULL;
+    iov[1].data.length = 0;
 
     ret = k5_ccm_decrypt_iov_stream(&krb5int_aead_ccm, enc, hash, key, usage, ivec, iov, sizeof(iov)/sizeof(iov[0]));
-    if (ret == 0)
-	*output = iov[1].data;
+    if (ret != 0)
+	return ret;
+
+    if (output->length < iov[1].data.length)
+	return KRB5_BAD_MSIZE;
+
+    memcpy(output->data, iov[1].data.data, iov[1].data.length);
+    output->length = iov[1].data.length;
 
     return ret;
 }
