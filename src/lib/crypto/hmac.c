@@ -128,7 +128,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
+krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
 	      const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
     krb5_data *sign_data;

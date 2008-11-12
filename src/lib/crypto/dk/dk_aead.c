@@ -170,7 +170,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     d2.length = hash->hashsize;
     d2.data = (char *)cksum;
 
-    ret = krb5_hmac_iov(hash, &ki, data, num_data, &d2);
+    ret = krb5int_hmac_iov(hash, &ki, data, num_data, &d2);
     if (ret != 0)
 	goto cleanup;
 
@@ -315,7 +315,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     d1.length = hash->hashsize; /* non-truncated length */
     d1.data = (char *)cksum;
 
-    ret = krb5_hmac_iov(hash, &ki, data, num_data, &d1);
+    ret = krb5int_hmac_iov(hash, &ki, data, num_data, &d1);
     if (ret != 0)
 	goto cleanup;
 

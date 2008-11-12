@@ -67,7 +67,6 @@ krb5_finish_key
 krb5_finish_random_key
 krb5_free_cksumtypes
 krb5_hmac
-krb5_hmac_iov
 krb5_init_random_key
 krb5_nfold
 krb5_old_decrypt

@@ -717,7 +717,7 @@ krb5_error_code krb5_hmac
 		const krb5_keyblock *key, unsigned int icount,
 		const krb5_data *input, krb5_data *output);
 
-krb5_error_code krb5_hmac_iov
+krb5_error_code krb5int_hmac_iov
 (const struct krb5_hash_provider *hash,
 		const krb5_keyblock *key,
 		const krb5_crypto_iov *data, size_t num_data,
@@ -1906,7 +1906,7 @@ typedef struct _krb5int_access {
 				   const krb5_keyblock *key,
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
-    krb5_error_code (* krb5_hmac_iov) (const struct krb5_hash_provider *hash,
+    krb5_error_code (* krb5int_hmac_iov) (const struct krb5_hash_provider *hash,
 				       const krb5_keyblock *key,
 				       const krb5_crypto_iov *data, size_t num_data,
 				       krb5_data *output);
