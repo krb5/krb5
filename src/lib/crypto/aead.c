@@ -203,12 +203,45 @@ process_block_p(const krb5_crypto_iov *data,
 #define HEADER_STATE_COMPLETE	2
 
 /*
+ * Returns TRUE if, having reached the end of the current buffer,
+ * we should pad the rest of the block with zeros.
+ */
+static int
+pad_to_boundary_p(const krb5_crypto_iov *data,
+		  size_t num_data,
+		  struct iov_block_state *iov_state,
+		  size_t i,
+		  size_t j)
+{
+    /* If the pad_to_boundary flag is unset, return FALSE */
+    if (iov_state->pad_to_boundary == 0)
+	return 0;
+
+    /* If we haven't got any data, we need to get some */
+    if (j == 0)
+	return 0;
+
+    /* Don't consider the header as a boundary */
+    if (iov_state->got_header != HEADER_STATE_COMPLETE)
+	return 0;
+
+    /* Don't consider adjacent buffers of the same type as a boundary */
+    if (i < num_data - 1 &&
+	data[i].flags == data[i + 1].flags)
+	return 0;
+
+    return 1;
+}
+
+/*
  * This somewhat hairy code is designed to allow the HEADER to
  * appear after the DATA or SIGN_DATA, even though it may need
  * to be encrypted or signed first (respectively). Unfortunately
- * this makes the code somewhat unreadable. It may be better to
- * require the caller to place the HEADER first, and return an
- * error if this is not the case.
+ * this makes the code somewhat unreadable.
+ *
+ * It may be better to require the caller to place the HEADER
+ * first, and return an error if this is not the case. Then we
+ * can eliminate the gotos and HEADER_STATE rubbish below.
  */
 void KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,
@@ -225,7 +258,7 @@ retry:
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
 
-	if (j && iov_state->pad_to_boundary && iov_state->got_header == HEADER_STATE_COMPLETE)
+	if (pad_to_boundary_p(data, num_data, iov_state, i, j))
 	    break;
 
 	if (!process_block_p(data, num_data, iov_state, i))
@@ -282,7 +315,7 @@ retry:
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
 
-	if (j && iov_state->pad_to_boundary && iov_state->got_header == HEADER_STATE_COMPLETE)
+	if (pad_to_boundary_p(data, num_data, iov_state, i, j))
 	    break;
 
 	if (!process_block_p(data, num_data, iov_state, i))
