@@ -73,7 +73,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock ke, ki;
     size_t i;
-    size_t blocksize = 0; /* careful, this is enc block size not confounder len */
+    size_t blocksize = 0;
     size_t plainlen = 0;
     size_t hmacsize = 0;
     unsigned char *cksum = NULL;
@@ -92,10 +92,27 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
 	return ret;
 
     for (i = 0; i < num_data; i++) {
-	const krb5_crypto_iov *iov = &data[i];
+	krb5_crypto_iov *iov = &data[i];
 
-	if (ENCRYPT_DATA_IOV(iov))
-	    plainlen += iov->data.length;
+	if (!ENCRYPT_DATA_IOV(iov)) /* DATA | PADDING */
+	    continue;
+
+	if (iov->flags == KRB5_CRYPTO_TYPE_PADDING && i > 0) {
+	    const krb5_crypto_iov *data_to_pad = &data[i - 1];
+	    size_t padlen = 0;
+
+	    if (blocksize != 0) {
+		padlen = blocksize - (data_to_pad->data.length % blocksize);
+
+		if (iov->data.length < padlen)
+		    return KRB5_BAD_MSIZE;
+	    }
+
+	    memset(iov->data.data, 0, padlen);
+	    iov->data.length = padlen;
+	}
+
+	plainlen += iov->data.length;
     }
 
     if (blocksize == 0) {
@@ -250,7 +267,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
 	    return KRB5_BAD_MSIZE;
     } else {
 	/* Check that the input data is correctly padded */
-	if (cipherlen % blocksize != 0)
+	if ((cipherlen % blocksize) != 0)
 	    return KRB5_BAD_MSIZE;
     }
 

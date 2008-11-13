@@ -94,6 +94,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_keyusage ms_usage;
     char salt_data[14];
     krb5_data salt;
+    size_t i;
 
     d1.length = d2.length = d3.length = 0;
     d1.data = d2.data = d3.data = NULL;
@@ -114,6 +115,12 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer != NULL)
 	trailer->data.length = 0;
+
+    /* Ensure that there is no padding */
+    for (i = 0; i < num_data; i++) {
+	if (data[i].flags == KRB5_CRYPTO_TYPE_PADDING)
+	    data[i].data.length = 0;
+    }
 
     ret = alloc_derived_key(enc, &k1, &d1, key);
     if (ret != 0)
