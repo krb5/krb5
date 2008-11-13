@@ -334,7 +334,6 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
     header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
-    /* This will return the last PADDING buffer which has EC */
     padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
@@ -364,7 +363,7 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
 	gss_headerlen += actual_rrc;
 	gss_trailerlen = 0;
     } else {
-	if (padding == NULL || padding->buffer.length != ec)
+	if (ec != (padding != NULL ? padding->buffer.length : 0))
 	    return KRB5_BAD_MSIZE;
 
 	if (trailer->buffer.length != gss_trailerlen)
@@ -710,26 +709,13 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 		     size_t iov_count,
 		     gss_iov_buffer_desc *iov)
 {
-    size_t i;
     gss_iov_buffer_t padding = NULL;
     gss_iov_buffer_t data = NULL;
     size_t padlength, relative_padlength;
     unsigned char *p;
 
-    for (i = iov_count - 1; i >= 0; i--) {
-	if (iov[i].type == GSS_IOV_BUFFER_TYPE_PADDING &&
-	    i > 0 &&
-	    iov[i - 1].type == GSS_IOV_BUFFER_TYPE_DATA)
-	{
-	    if (iov[i - 1].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
-		continue;
-
-	    if (padding == NULL) {
-		padding = &iov[i];
-		data = &iov[i - 1];
-	    }
-	}
-    }
+    data = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_DATA);
+    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
 
     if (data == NULL) {
 	*minor_status = 0;

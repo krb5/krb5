@@ -359,13 +359,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		   gss_iov_buffer_desc *iov)
 {
     krb5_gss_ctx_id_rec *ctx;
-    gss_iov_buffer_t header;
-    gss_iov_buffer_t trailer;
-    size_t data_length, assoc_data_length, gss_headerlen, gss_trailerlen;
+    gss_iov_buffer_t header, trailer, padding;
+    size_t data_length, assoc_data_length;
+    size_t gss_headerlen, gss_padlen, gss_trailerlen;
     size_t k5_headerlen = 0, k5_padlen = 0, k5_trailerlen = 0;
     krb5_error_code code;
     krb5_context context;
-    size_t i;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
 	*minor_status = G_UNKNOWN_QOP;
@@ -395,6 +394,16 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	INIT_IOV_DATA(trailer);
     }
 
+    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    if (padding == NULL) {
+	if (conf_req_flag && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+	    *minor_status = EINVAL;
+	    return GSS_S_FAILURE;
+	}
+    } else {
+	INIT_IOV_DATA(padding);
+    }
+
     kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
 
     if (conf_req_flag && kg_integ_only_iov(iov_count, iov))
@@ -402,7 +411,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     context = ctx->k5_context;
 
-    gss_headerlen = gss_trailerlen = 0;
+    gss_headerlen = gss_padlen = gss_trailerlen = 0;
 
     if (ctx->proto == 1) {
 	krb5_enctype enctype = ctx->enc->enctype;
@@ -424,42 +433,33 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    }
 	}
 
-	code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
-	if (code != 0) {
-	    *minor_status = code;
-	    return GSS_S_FAILURE;
-	}
-
 	gss_headerlen = 16; /* Header */
 	if (conf_req_flag) {
+	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
+	    if (code != 0) {
+		*minor_status = code;
+		return GSS_S_FAILURE;
+	    }
+
 	    gss_headerlen += k5_headerlen; /* Kerb-Header */
 	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
+
+	    if (k5_padlen != 0 && ((data_length - assoc_data_length) % k5_padlen) != 0)
+		gss_padlen = k5_padlen - ((data_length - assoc_data_length) % k5_padlen);
 	} else {
 	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}
     } else {
-	if (conf_req_flag)
+	if (conf_req_flag) {
 	    k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
-    }
-
-    for (i = 0; i < iov_count; i++) {
-	gss_iov_buffer_t data = &iov[i];
-	gss_iov_buffer_t padding;
-
-	if (data->type == GSS_IOV_BUFFER_TYPE_DATA &&
-	    i < iov_count - 1 &&
-	    iov[i + 1].type == GSS_IOV_BUFFER_TYPE_PADDING)
-	{
-	    padding = &iov[i - 1];
-
-	    if (k5_padlen == 0 || (data->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY))
-		padding->buffer.length = 0;
+	    if (k5_padlen == 1)
+		gss_padlen = 1;
 	    else
-		padding->buffer.length = k5_padlen - (data->buffer.length % k5_padlen);
-
-	    data_length += padding->buffer.length;
+		gss_padlen = k5_padlen - ((data_length - assoc_data_length) % k5_padlen);
 	}
     }
+
+    data_length += gss_padlen;
 
     if (ctx->proto == 0) {
 	/* Header | Checksum | Confounder | Data | Pad */
@@ -482,10 +482,16 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    gss_headerlen -= data_length;
     }
 
+    if (minor_status != NULL)
+	*minor_status = 0;
+
     if (trailer == NULL)
 	gss_headerlen += gss_trailerlen;
     else
 	trailer->buffer.length = gss_trailerlen;
+
+    if (padding != NULL)
+	padding->buffer.length = gss_padlen;
 
     header->buffer.length = gss_headerlen;
 
