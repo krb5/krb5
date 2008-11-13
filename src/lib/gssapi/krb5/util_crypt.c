@@ -638,17 +638,11 @@ kg_locate_iov(size_t iov_count,
     if (iov == GSS_C_NO_IOV_BUFFER)
 	return GSS_C_NO_IOV_BUFFER;
 
-    /*
-     * Any buffer types we call kg_locate_iov() with can only appear
-     * once, with the exception of PADDING which we will allow to
-     * appear multiple times in case the underlying cryptosystem
-     * requires padding on associated data.
-     */
     for (i = iov_count - 1; i >= 0; i--) {
 	if (iov[i].type == type) {
 	    if (p == GSS_C_NO_IOV_BUFFER)
 		p = &iov[i];
-	    else if (iov[i].type != GSS_IOV_BUFFER_TYPE_PADDING)
+	    else
 		return GSS_C_NO_IOV_BUFFER;
 	}
     }

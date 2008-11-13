@@ -108,21 +108,16 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	/*
-	 * We support multiple padding buffers for modes such as CCM that
-	 * require associated data to be padded.
-	 */
 	for (i = 0; i < iov_count; i++) {
 	    gss_iov_buffer_t data = &iov[i];
-	    gss_iov_buffer_t padding;
 
-	    if (data->type != GSS_IOV_BUFFER_TYPE_DATA)
+	    if (data->type != GSS_IOV_BUFFER_TYPE_DATA ||
+		(data->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0)
 		continue;
 
 	    if (i < iov_count - 1 &&
-		iov[i + 1].type == GSS_IOV_BUFFER_TYPE_PADDING)
-	    {
-		padding = &iov[i + 1];
+		iov[i + 1].type == GSS_IOV_BUFFER_TYPE_PADDING) {
+		gss_iov_buffer_t padding = &iov[i + 1];
 
 		if (conf_req_flag == 0 || k5_padlen == 0) {
 		    padding->buffer.length = 0;

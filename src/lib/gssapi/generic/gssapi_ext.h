@@ -160,11 +160,9 @@ typedef struct gss_iov_buffer_desc_struct {
  *
  * which will emit GSS_Wrap() compatible tokens, and:
  *
- *  HEADER | SIGN_ONLY_DATA | PADDING | DATA | PADDING | TRAILER
+ *  HEADER | SIGN_ONLY_DATA | DATA | PADDING | TRAILER
  *
- * for AEAD. This guarantees interoperability with modes such
- * as CCM that only allow a single buffer of associated data and
- * require it be padded.
+ * for AEAD.
  *
  * The typical (special cased) usage for DCE is as follows:
  *

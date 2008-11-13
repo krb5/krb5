@@ -95,3 +95,4 @@ krb5_gss_wrap_iov_length(OM_uint32 *minor_status,
 				      qop_req, conf_state, iov_count, iov);
     return major_status;
 }
+

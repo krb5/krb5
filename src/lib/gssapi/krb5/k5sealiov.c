@@ -452,7 +452,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	{
 	    padding = &iov[i - 1];
 
-	    if (k5_padlen == 0 || (ctx->proto == 0 && data->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY))
+	    if (k5_padlen == 0 || (data->flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY))
 		padding->buffer.length = 0;
 	    else
 		padding->buffer.length = k5_padlen - (data->buffer.length % k5_padlen);
