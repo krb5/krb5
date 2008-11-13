@@ -168,10 +168,6 @@ krb5int_c_find_checksum_type(krb5_cksumtype cksumtype)
     return &krb5_cksumtypes_list[i];
 }
 
-#define HEADER_STATE_NONE	0
-#define HEADER_STATE_PARTIAL	1
-#define HEADER_STATE_COMPLETE	2
-
 static int
 process_block_p(const krb5_crypto_iov *data,
 		size_t num_data,
@@ -182,17 +178,17 @@ process_block_p(const krb5_crypto_iov *data,
     int process_block;
 
     switch (iov->flags) {
-    case KRB5_CRYPTO_TYPE_HEADER:
-	process_block = (iov_state->got_header == HEADER_STATE_NONE);
-	break;
     case KRB5_CRYPTO_TYPE_SIGN_ONLY:
-	process_block = (iov_state->include_sign_only && iov_state->got_header);
+	process_block = iov_state->include_sign_only;
 	break;
     case KRB5_CRYPTO_TYPE_PADDING:
 	process_block = (iov_state->pad_to_boundary == 0);
 	break;
+    case KRB5_CRYPTO_TYPE_HEADER:
+	process_block = (iov_state->ignore_header == 0);
+	break;
     case KRB5_CRYPTO_TYPE_DATA:
-	process_block = (iov_state->got_header != HEADER_STATE_NONE);
+	process_block = 1;
 	break;
     default:
 	process_block = 0;
@@ -222,27 +218,18 @@ pad_to_boundary_p(const krb5_crypto_iov *data,
 	return 0;
 
     /* Don't consider the header as a boundary */
-    if (iov_state->got_header != HEADER_STATE_COMPLETE)
+    if (iov_state->ignore_header == 0)
 	return 0;
 
     /* Don't consider adjacent buffers of the same type as a boundary */
     if (i < num_data - 1 &&
-	data[i].flags == data[i + 1].flags)
+	(data[i].flags == data[i + 1].flags ||
+	 data[i].flags == KRB5_CRYPTO_TYPE_HEADER && SIGN_IOV(&data[i])))
 	return 0;
 
     return 1;
 }
 
-/*
- * This somewhat hairy code is designed to allow the HEADER to
- * appear after the DATA or SIGN_DATA, even though it may need
- * to be encrypted or signed first (respectively). Unfortunately
- * this makes the code somewhat unreadable.
- *
- * It may be better to require the caller to place the HEADER
- * first, and return an error if this is not the case. Then we
- * can eliminate the gotos and HEADER_STATE rubbish below.
- */
 void KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,
 			size_t block_size,
@@ -251,8 +238,6 @@ krb5int_c_iov_get_block(unsigned char *block,
 			struct iov_block_state *iov_state)
 {
     size_t i, j = 0;
-
-retry:
 
     for (i = iov_state->iov_pos; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
@@ -275,14 +260,6 @@ retry:
 
 	assert(j <= block_size);
 
-	if (iov_state->got_header == HEADER_STATE_NONE &&
-	    iov_state->data_pos == iov->data.length &&
-	    iov->flags == KRB5_CRYPTO_TYPE_HEADER) {
-	    iov_state->got_header = HEADER_STATE_PARTIAL;
-	    iov_state->iov_pos = iov_state->data_pos = 0;
-	    goto retry;
-	}
-
 	if (j == block_size)
 	    break;
 
@@ -295,9 +272,6 @@ retry:
 
     if (j != block_size)
 	memset(block + j, 0, block_size - j);
-
-    if (iov_state->got_header == HEADER_STATE_PARTIAL)
-	iov_state->got_header = HEADER_STATE_COMPLETE;
 }
 
 void KRB5_CALLCONV
@@ -308,8 +282,6 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 			struct iov_block_state *iov_state)
 {
     size_t i, j = 0;
-
-retry:
 
     for (i = iov_state->iov_pos; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
@@ -332,14 +304,6 @@ retry:
 
 	assert(j <= block_size);
 
-	if (iov_state->got_header == HEADER_STATE_NONE &&
-	    iov_state->data_pos == iov->data.length &&
-	    iov->flags == KRB5_CRYPTO_TYPE_HEADER) {
-	    iov_state->got_header = HEADER_STATE_PARTIAL;
-	    i = iov_state->iov_pos = iov_state->data_pos = 0;
-	    goto retry;
-	}
-
 	if (j == block_size)
 	    break;
 
@@ -349,9 +313,6 @@ retry:
     }
 
     iov_state->iov_pos = i;
-
-    if (iov_state->got_header == HEADER_STATE_PARTIAL)
-	iov_state->got_header = HEADER_STATE_COMPLETE;
 }
 
 krb5_error_code KRB5_CALLCONV

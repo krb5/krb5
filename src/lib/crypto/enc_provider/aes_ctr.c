@@ -54,7 +54,7 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
     IOV_BLOCK_STATE_INIT(&output_pos);
 
     /* Don't encrypt the header (B0), and use zero instead of IOV padding */
-    input_pos.got_header = output_pos.got_header = 2;
+    input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
     if (ivec != NULL)
@@ -114,7 +114,7 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
     IOV_BLOCK_STATE_INIT(&output_pos);
 
     /* Don't encrypt the header (B0), and use zero instead of IOV padding */
-    input_pos.got_header = output_pos.got_header = 2;
+    input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
     if (ivec != NULL)
