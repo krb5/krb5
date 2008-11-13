@@ -41,7 +41,7 @@ krb5int_arcfour_crypto_length(const struct krb5_aead_provider *aead,
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
-	*length = CONFOUNDERLENGTH + hash->hashsize;
+	*length = hash->hashsize + CONFOUNDERLENGTH;
 	break;
     case KRB5_CRYPTO_TYPE_PADDING:
 	*length = 0;
@@ -115,6 +115,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 
     header_data = header->data;
 
+    /* Trailer may be absent */
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer != NULL)
 	trailer->data.length = 0;
@@ -240,7 +241,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     header_data = header->data;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || trailer->data.length != 0)
+    if (trailer != NULL && trailer->data.length != 0)
 	return KRB5_BAD_MSIZE;
     
     ret = alloc_derived_key(enc, &k1, &d1, key);
