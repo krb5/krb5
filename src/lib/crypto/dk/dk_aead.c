@@ -70,12 +70,13 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1, d2;
-    krb5_crypto_iov *header, *trailer;
+    krb5_crypto_iov *header, *trailer, *padding;
     krb5_keyblock ke, ki;
     size_t i;
     size_t blocksize = 0;
     size_t plainlen = 0;
     size_t hmacsize = 0;
+    size_t padsize = 0;
     unsigned char *cksum = NULL;
 
     ke.contents = ki.contents = NULL;
@@ -94,36 +95,8 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     for (i = 0; i < num_data; i++) {
 	krb5_crypto_iov *iov = &data[i];
 
-	if (!ENCRYPT_DATA_IOV(iov)) /* DATA | PADDING */
-	    continue;
-
-	if (iov->flags == KRB5_CRYPTO_TYPE_PADDING) {
-	    size_t padlen = 0;
-
-	    if (i > 0 && blocksize != 0) {
-		const krb5_crypto_iov *data_to_pad = &data[i - 1];
-
-		padlen = blocksize - (data_to_pad->data.length % blocksize);
-
-		if (iov->data.length < padlen)
-		    return KRB5_BAD_MSIZE;
-	    }
-
-	    memset(iov->data.data, 0, padlen);
-	    iov->data.length = padlen;
-	}
-
-	plainlen += iov->data.length;
-    }
-
-    if (blocksize == 0) {
-	/* Check for correct input length in CTS mode */
-        if (enc->block_size != 0 && plainlen < enc->block_size)
-	    return KRB5_BAD_MSIZE;
-    } else {
-	/* Check that the input data is correctly padded */
-	if (plainlen % blocksize != 0)
-	    return KRB5_BAD_MSIZE;
+	if (iov->flags == KRB5_CRYPTO_TYPE_DATA)
+	    plainlen += iov->data.length;
     }
 
     /* Validate header and trailer lengths. */
@@ -135,6 +108,24 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer == NULL || trailer->data.length < hmacsize)
 	return KRB5_BAD_MSIZE;
+
+    if (blocksize == 0) {
+	/* Check for correct input length in CTS mode */
+        if (enc->block_size != 0 && plainlen < enc->block_size)
+	    return KRB5_BAD_MSIZE;
+    } else {
+	/* Check that the input data is correctly padded */
+	padsize = blocksize - (plainlen % blocksize);
+    }
+
+    padding = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_PADDING);
+    if (padsize && (padding == NULL || padding->data.length < padsize))
+	return KRB5_BAD_MSIZE;
+
+    if (padding != NULL) {
+	memset(padding->data.data, 0, padsize);
+	padding->data.length = padsize;
+    }
 
     ke.length = enc->keylength;
     ke.contents = malloc(ke.length);
