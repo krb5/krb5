@@ -574,16 +574,16 @@ kg_arcfour_docrypt_iov (krb5_context context,
     input.length = 4;
     output.data = (void *) usage_key.contents;
     output.length = usage_key.length;
-    code = (*kaccess.krb5_hmac_iov) (kaccess.md5_hash_provider,
-                                     longterm_key, kiov, kiov_count, &output);
+    code = (*kaccess.krb5int_hmac_iov) (kaccess.md5_hash_provider,
+                                        longterm_key, kiov, kiov_count, &output);
     if (code)
         goto cleanup_arcfour;
 
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
     output.data = (void *) seq_enc_key.contents;
-    code = (*kaccess.krb5_hmac_iov) (kaccess.md5_hash_provider,
-                                     &usage_key, kiov, kiov_count, &output);
+    code = (*kaccess.krb5int_hmac_iov) (kaccess.md5_hash_provider,
+                                        &usage_key, kiov, kiov_count, &output);
     if (code)
         goto cleanup_arcfour;
 
