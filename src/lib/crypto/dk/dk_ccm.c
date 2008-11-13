@@ -389,11 +389,6 @@ k5_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_cksumtype cksumtype;
     const struct krb5_cksumtypes *keyhash;
 
-    if (krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM) != NULL) {
-	return krb5int_c_iov_decrypt_stream(aead, enc, hash, key,
-					    usage, iv, data, num_data);
-    }
-
     kc.contents = NULL;
     kc.length = 0;
 
