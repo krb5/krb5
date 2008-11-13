@@ -103,7 +103,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
+krb5int_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
 		          const krb5_keyblock *key, krb5_keyusage usage,
 			  const krb5_crypto_iov *data, size_t num_data,
 			  krb5_data *output)
