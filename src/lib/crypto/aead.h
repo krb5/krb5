@@ -58,14 +58,16 @@ krb5int_c_find_checksum_type(krb5_cksumtype cksumtype);
 struct iov_block_state {
     size_t iov_pos;			/* index into iov array */
     size_t data_pos;			/* index into iov contents */
-    unsigned int got_header : 1;	/* have/should we process HEADER */
+    unsigned int got_header : 2;	/* have/should we process HEADER */
     unsigned int include_sign_only : 1;	/* should we process SIGN_ONLY blocks */
+    unsigned int pad_to_boundary : 1;	/* should we zero fill blocks until next buffer */
 };
 
 #define IOV_BLOCK_STATE_INIT(_state)	((_state)->iov_pos = \
 					 (_state)->data_pos = \
 					 (_state)->got_header = \
-					 (_state)->include_sign_only = 0)
+					 (_state)->include_sign_only = \
+					 (_state)->pad_to_boundary = 0)
 
 void KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,

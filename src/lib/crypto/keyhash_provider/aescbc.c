@@ -66,8 +66,8 @@ k5_aescbc_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
      * length encoding of the associated data length. This encoding plus the
      * associated data itself is padded to the block size.
      */
-    iov_pos.got_header = 1;
     iov_pos.include_sign_only = 1;
+    iov_pos.pad_to_boundary = 1;
 
     for (;;) {
 	unsigned char blockB[BLOCK_SIZE];

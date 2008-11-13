@@ -177,32 +177,18 @@ process_block_p(const krb5_crypto_iov *data,
     const krb5_crypto_iov *iov = &data[i];
     int process_block;
 
-    /* got_header is not used for include_sign_only */
-    assert(iov_state->include_sign_only ? iov_state->got_header == 1 : 1);
-
     switch (iov->flags) {
     case KRB5_CRYPTO_TYPE_HEADER:
-	/* Because SIGN_ONLY headers share padding with SIGN_ONLY data */
-	process_block = iov_state->include_sign_only ? 1 : (iov_state->got_header == 0);
+	process_block = (iov_state->got_header == 0);
 	break;
-    case KRB5_CRYPTO_TYPE_PADDING: {
-	const krb5_crypto_iov *data_to_pad;
-
-	if (i > 0) {
-	    data_to_pad = &data[i - 1];
-
-	    if (data_to_pad->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
-		process_block = iov_state->include_sign_only;
-	    else if (data_to_pad->flags == KRB5_CRYPTO_TYPE_DATA)
-		process_block = 1;
-	}
-	break;
-	}
     case KRB5_CRYPTO_TYPE_SIGN_ONLY:
-	process_block = iov_state->include_sign_only;
+	process_block = (iov_state->include_sign_only && iov_state->got_header);
+	break;
+    case KRB5_CRYPTO_TYPE_PADDING:
+	process_block = (iov_state->pad_to_boundary == 0);
 	break;
     case KRB5_CRYPTO_TYPE_DATA:
-	process_block = 1;
+	process_block = (iov_state->got_header != 0);
 	break;
     default:
 	process_block = 0;
@@ -211,6 +197,10 @@ process_block_p(const krb5_crypto_iov *data,
 
     return process_block;
 }
+
+#define HEADER_STATE_NONE	0
+#define HEADER_STATE_PARTIAL	1
+#define HEADER_STATE_COMPLETE	2
 
 void KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,
@@ -221,9 +211,14 @@ krb5int_c_iov_get_block(unsigned char *block,
 {
     size_t i, j = 0;
 
+retry:
+
     for (i = iov_state->iov_pos; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
+
+	if (j && iov_state->pad_to_boundary && iov_state->got_header == HEADER_STATE_COMPLETE)
+	    break;
 
 	if (!process_block_p(data, num_data, iov_state, i))
 	    continue;
@@ -239,6 +234,14 @@ krb5int_c_iov_get_block(unsigned char *block,
 
 	assert(j <= block_size);
 
+	if (iov_state->got_header == HEADER_STATE_NONE &&
+	    iov_state->data_pos == iov->data.length &&
+	    iov->flags == KRB5_CRYPTO_TYPE_HEADER) {
+	    iov_state->got_header = HEADER_STATE_PARTIAL;
+	    iov_state->iov_pos = iov_state->data_pos = 0;
+	    goto retry;
+	}
+
 	if (j == block_size)
 	    break;
 
@@ -247,18 +250,13 @@ krb5int_c_iov_get_block(unsigned char *block,
 	iov_state->data_pos = 0;
     }
 
-    if (iov_state->got_header == 0 &&
-	data[i].data.length == iov_state->data_pos) {
-	/* Once we have consumed the header, return to start */
-	iov_state->iov_pos = 0;
-	iov_state->data_pos = 0;
-	iov_state->got_header = 1;
-    } else
-	iov_state->iov_pos = i;
+    iov_state->iov_pos = i;
 
     if (j != block_size)
 	memset(block + j, 0, block_size - j);
 
+    if (iov_state->got_header == HEADER_STATE_PARTIAL)
+	iov_state->got_header = HEADER_STATE_COMPLETE;
 }
 
 void KRB5_CALLCONV
@@ -270,9 +268,14 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 {
     size_t i, j = 0;
 
+retry:
+
     for (i = iov_state->iov_pos; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
+
+	if (j && iov_state->pad_to_boundary && iov_state->got_header == HEADER_STATE_COMPLETE)
+	    break;
 
 	if (!process_block_p(data, num_data, iov_state, i))
 	    continue;
@@ -288,6 +291,14 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 
 	assert(j <= block_size);
 
+	if (iov_state->got_header == HEADER_STATE_NONE &&
+	    iov_state->data_pos == iov->data.length &&
+	    iov->flags == KRB5_CRYPTO_TYPE_HEADER) {
+	    iov_state->got_header = HEADER_STATE_PARTIAL;
+	    i = iov_state->iov_pos = iov_state->data_pos = 0;
+	    goto retry;
+	}
+
 	if (j == block_size)
 	    break;
 
@@ -296,14 +307,10 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 	iov_state->data_pos = 0;
     }
 
-    if (iov_state->got_header == 0 &&
-	data[i].data.length == iov_state->data_pos) {
-	/* Once we have consumed the header, return to start */
-	iov_state->iov_pos = 0;
-	iov_state->data_pos = 0;
-	iov_state->got_header = 1;
-    } else
-	iov_state->iov_pos = i;
+    iov_state->iov_pos = i;
+
+    if (iov_state->got_header == HEADER_STATE_PARTIAL)
+	iov_state->got_header = HEADER_STATE_COMPLETE;
 }
 
 krb5_error_code KRB5_CALLCONV

@@ -52,6 +52,8 @@ krb5int_ccm_crypto_length(const struct krb5_aead_provider *aead,
 	*length = enc->block_size + 6; /* this is a variable length header */
 	break;
     case KRB5_CRYPTO_TYPE_PADDING:
+	*length = 0; /* CTR mode requires no padding */
+	break;
     case KRB5_CRYPTO_TYPE_TRAILER:
     case KRB5_CRYPTO_TYPE_CHECKSUM:
 	*length = enc->block_size;
@@ -158,9 +160,9 @@ decode_a_len(krb5_data *header, size_t *a_len, size_t *adata_len)
  *
  * To emit compatible messages, the IOV should be laid out as follows:
  *
- *    HEADER | SIGN_DATA | PADDING | DATA | PADDING | TRAILER
+ *    HEADER | SIGN_DATA | DATA | PADDING | TRAILER
  *
- * SIGN_DATA and its padding may be absent. With this layout, the buffers
+ * SIGN_DATA and PADDING may be absent. With this layout, the buffers
  * can be concatenated together and transmitted as a single self-describing
  * message, which can be parsed with the following usage:
  *
@@ -193,10 +195,10 @@ k5_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1;
-    krb5_crypto_iov *header, *trailer, *adata = NULL, *adata_pad = NULL;
+    krb5_crypto_iov *header, *trailer;
     krb5_keyblock kc;
     size_t i;
-    size_t header_len = 0, blocksize = 0;
+    size_t header_len = 0;
     size_t mac_len = 0;
     size_t a_len = 0, adata_len = 0, payload_len = 0;
     unsigned char flags = 0;
@@ -229,10 +231,6 @@ k5_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	return ret;
 
-    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING, &blocksize);
-    if (ret != 0)
-	return ret;
-
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer == NULL || trailer->data.length < mac_len)
 	return KRB5_BAD_MSIZE;
@@ -244,38 +242,8 @@ k5_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	    payload_len += iov->data.length;
 	else if (iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
 	    adata_len += iov->data.length;
-	else if (i > 0 &&
-	    iov->flags == KRB5_CRYPTO_TYPE_PADDING &&
-	    (data[i - 1].flags == KRB5_CRYPTO_TYPE_DATA ||
-	     data[i - 1].flags == KRB5_CRYPTO_TYPE_SIGN_ONLY))
-	{
-	    krb5_crypto_iov *data_to_pad = &data[i - 1];
-	    size_t pad_len = 0;
-
-	    /* We may need to adjust the pad once the adata length is known to
-	     * account for the adata length encoding
-	     */
-	    if (data_to_pad->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY &&
-		adata_pad == NULL) {
-		if (iov->data.length < blocksize - 1)
-		    return KRB5_BAD_MSIZE;
-
-		adata = data_to_pad;
-		adata_pad = iov;
-	    }
-
-	    /* Trim padding length */
-	    if (data_to_pad->data.length % blocksize) {
-		pad_len = blocksize - (data_to_pad->data.length % blocksize);
-
-		if (iov->data.length < pad_len)
-		    return KRB5_BAD_MSIZE;
-
-		memset(iov->data.data, 0, pad_len);
-	    }
-
-	    iov->data.length = pad_len;
-	}
+	else if (iov->flags == KRB5_CRYPTO_TYPE_PADDING)
+	    iov->data.length = 0;
     }
 
     if (header->data.length < enc->block_size)
@@ -305,22 +273,6 @@ k5_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     ret = encode_a_len(&header->data, &a_len, adata_len);
     if (ret != 0)
 	return ret;
-
-    /* Adjust first AData padding if necessary to account for encoding of adata length */
-    if (flags & CCM_FLAG_ADATA) {
-	size_t pad_len = 0;
-
-	assert(adata != NULL);
-
-	if (adata_pad == NULL)
-	    return KRB5_BAD_MSIZE;
-
-	if ((a_len + adata->data.length) % blocksize) {
-	    pad_len = blocksize - ((a_len + adata->data.length) % blocksize);
-	    memset(adata_pad->data.data, 0, pad_len);
-	}
-	adata_pad->data.length = pad_len;
-    }
 
     d1.data = (char *)constantdata;
     d1.length = K5CLENGTH;
@@ -401,6 +353,7 @@ cleanup:
 	zap(ivec.data, ivec.length);
 	free(ivec.data);
     }
+
     return ret;
 }
 
@@ -470,6 +423,8 @@ k5_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	    actual_payload_len += iov->data.length;
 	else if (iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
 	    actual_adata_len += iov->data.length;
+	else if (iov->flags == KRB5_CRYPTO_TYPE_PADDING && iov->data.length != 0)
+	    return KRB5_BAD_MSIZE;
     }
 
     if (actual_payload_len > 0xFFFFFF)
@@ -613,7 +568,6 @@ k5_ccm_decrypt_iov_stream(const struct krb5_aead_provider *aead,
     unsigned char flags;
     size_t a_len = 0, adata_len = 0;
     size_t payload_len = 0;
-    size_t adata_pad = 0, payload_pad = 0;
 
     stream = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM);
     assert(stream != NULL);
@@ -658,35 +612,25 @@ k5_ccm_decrypt_iov_stream(const struct krb5_aead_provider *aead,
     payload_len |= (iov[0].data.data[14] << 8 );
     payload_len |= (iov[0].data.data[15]      );
 
-    if ((a_len + adata_len) % enc->block_size)
-	adata_pad = enc->block_size - ((a_len + adata_len) % enc->block_size);
-    if (payload_len % enc->block_size)
-	payload_pad = enc->block_size - (payload_len % enc->block_size);
-
     if (stream->data.length < iov[0].data.length +
-	adata_len + adata_pad +
-	payload_len + payload_pad + enc->block_size)
+	adata_len + payload_len + enc->block_size)
 	return KRB5_BAD_MSIZE;
 
     iov[1].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     iov[1].data.data = iov[0].data.data + iov[0].data.length;
     iov[1].data.length = adata_len;
 
-    iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
+    iov[2].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[2].data.data = iov[1].data.data + iov[1].data.length;
-    iov[2].data.length = adata_pad;
+    iov[2].data.length = payload_len;
 
-    iov[3].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[3].flags = KRB5_CRYPTO_TYPE_PADDING;
     iov[3].data.data = iov[2].data.data + iov[2].data.length;
-    iov[3].data.length = payload_len;
+    iov[3].data.length = 0;
 
-    iov[4].flags = KRB5_CRYPTO_TYPE_PADDING;
+    iov[4].flags = KRB5_CRYPTO_TYPE_TRAILER;
     iov[4].data.data = iov[3].data.data + iov[3].data.length;
-    iov[4].data.length = payload_pad;
-
-    iov[5].flags = KRB5_CRYPTO_TYPE_TRAILER;
-    iov[5].data.data = iov[4].data.data + iov[4].data.length;
-    iov[5].data.length = enc->block_size;
+    iov[4].data.length = enc->block_size;
 
     ret = k5_ccm_decrypt_iov(&krb5int_aead_ccm, enc, hash, key,
 			     usage, iv,
@@ -695,7 +639,7 @@ k5_ccm_decrypt_iov_stream(const struct krb5_aead_provider *aead,
     if (ret == 0) {
 	if (adata != NULL)
 	    *adata = iov[1];
-	*payload = iov[3];
+	*payload = iov[2];
     }
 
     return ret;
@@ -743,14 +687,8 @@ krb5int_ccm_encrypt_length(const struct krb5_enc_provider *enc,
 			   const struct krb5_hash_provider *hash,
 			   size_t inputlen, size_t *length)
 {
-    size_t pad_len;
-
-    /* pad */
-    if ((inputlen % enc->block_size) != 0)
-	pad_len = enc->block_size - (inputlen % enc->block_size);
-
-    /* HEADER | DATA | PADDING | TRAILER */
-    *length = enc->block_size + inputlen + pad_len + enc->block_size;
+    /* HEADER | DATA | TRAILER */
+    *length = enc->block_size + inputlen + enc->block_size;
 }
 
 krb5_error_code
@@ -779,12 +717,8 @@ krb5int_ccm_encrypt(const struct krb5_enc_provider *enc,
     memcpy(iov[1].data.data, input->data, input->length);
 
     iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
-    iov[2].data.data = iov[1].data.data + iov[1].data.length;
-    if (iov[1].data.length % enc->block_size)
-	iov[2].data.length = enc->block_size - (iov[1].data.length % enc->block_size);
-    else
-	iov[2].data.length = 0;
-    memset(iov[2].data.data, 0, iov[2].data.length);
+    iov[2].data.data = NULL;
+    iov[2].data.length = 0;
 
     iov[3].flags = KRB5_CRYPTO_TYPE_TRAILER;
     iov[3].data.data = iov[2].data.data + iov[2].data.length;
