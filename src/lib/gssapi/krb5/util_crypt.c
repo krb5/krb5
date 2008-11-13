@@ -485,8 +485,19 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov_count, io
 	free(kiov);
     }
 
+    if (proto == 1) {
+	/* Fixup header length in case it was variable length */
+	gss_iov_buffer_t header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+
+	assert(header != NULL);
+	assert(kiov[0].flags == KRB5_CRYPTO_TYPE_HEADER);
+	assert(kiov[0].data.length <= header->buffer.length);
+	header->buffer.length = kiov[0].data.length;
+    }
+
     if (pivd != NULL)
         free(pivd->data);
+
     return code;
 }
 
