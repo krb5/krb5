@@ -160,7 +160,7 @@ krb5_error_code
 krb5int_aes_encrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
 		        const krb5_data *input, krb5_data *output)
 {
-    krb5_crypto_iov iov[2];
+    krb5_crypto_iov iov[1];
     krb5_error_code ret;
 
     assert(output->data != NULL);
@@ -168,12 +168,8 @@ krb5int_aes_encrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
     memcpy(output->data, input->data, input->length);
     output->length = input->length;
 
-    iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
-    iov[0].data.length = 0;
-    iov[0].data.data = NULL;
-
-    iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[1].data = *output;
+    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[0].data = *output;
 
     ret = krb5int_aes_encrypt_ctr_iov(key, ivec, iov, sizeof(iov)/sizeof(iov[0]));
     if (ret != 0) {
@@ -187,7 +183,7 @@ krb5_error_code
 krb5int_aes_decrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
 		        const krb5_data *input, krb5_data *output)
 {
-    krb5_crypto_iov iov[2];
+    krb5_crypto_iov iov[1];
     krb5_error_code ret;
 
     assert(output->data != NULL);
@@ -195,12 +191,8 @@ krb5int_aes_decrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
     memcpy(output->data, input->data, input->length);
     output->length = input->length;
 
-    iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
-    iov[0].data.length = 0;
-    iov[0].data.data = NULL;
-
-    iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[1].data = *output;
+    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[0].data = *output;
 
     ret = krb5int_aes_decrypt_ctr_iov(key, ivec, iov, sizeof(iov)/sizeof(iov[0]));
     if (ret != 0) {
