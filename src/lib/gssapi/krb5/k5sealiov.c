@@ -362,7 +362,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     gss_iov_buffer_t header, trailer, padding;
     size_t data_length, assoc_data_length;
     size_t gss_headerlen, gss_padlen, gss_trailerlen;
-    size_t k5_headerlen = 0, k5_padlen = 0, k5_trailerlen = 0;
+    size_t k5_headerlen = 0, k5_trailerlen = 0;
     krb5_error_code code;
     krb5_context context;
 
@@ -435,23 +435,21 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
 	gss_headerlen = 16; /* Header */
 	if (conf_req_flag) {
-	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
+	    gss_headerlen += k5_headerlen; /* Kerb-Header */
+	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
+
+	    code = krb5_c_padding_length(context, enctype, data_length - assoc_data_length, &gss_padlen);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_FAILURE;
 	    }
-
-	    gss_headerlen += k5_headerlen; /* Kerb-Header */
-	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
-
-	    if (k5_padlen != 0 && ((data_length - assoc_data_length) % k5_padlen) != 0)
-		gss_padlen = k5_padlen - ((data_length - assoc_data_length) % k5_padlen);
 	} else {
 	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}
     } else {
 	if (conf_req_flag) {
-	    k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+	    size_t k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+
 	    if (k5_padlen == 1)
 		gss_padlen = 1;
 	    else

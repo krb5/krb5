@@ -84,7 +84,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     outbuf = (unsigned char *)header->buffer.value;
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
-	size_t k5_headerlen, k5_padlen, k5_trailerlen;
+	size_t k5_headerlen, k5_trailerlen;
 	size_t gss_padlen = 0, gss_trailerlen = 0;
 	size_t conf_data_length = data_length - assoc_data_length;
 
@@ -92,7 +92,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_PADDING, &k5_padlen);
+	code = krb5_c_padding_length(context, key->enctype, conf_data_length, &gss_padlen);
 	if (code != 0)
 	    goto cleanup;
 
@@ -112,9 +112,6 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    code = KRB5_BAD_MSIZE;
 	if (code != 0)
 	    goto cleanup;
-
-	if (k5_padlen != 0 && (conf_data_length % k5_padlen))
-	    gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
 
 	if (padding == NULL) {
 	    if (gss_padlen != 0) {
