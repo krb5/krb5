@@ -572,29 +572,22 @@ k5_ccm_decrypt_iov_stream(const struct krb5_aead_provider *aead,
 		          krb5_crypto_iov *data,
 		          size_t num_data)
 {
-    krb5_crypto_iov iov[6];
-    krb5_crypto_iov *stream, *payload, *adata;
+    krb5_crypto_iov *iov;
+    krb5_crypto_iov *stream;
     krb5_error_code ret;
     unsigned char flags;
     size_t a_len = 0, adata_len = 0;
     size_t payload_len = 0;
+    size_t i, j;
+    int got_data = 0;
 
     stream = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM);
     assert(stream != NULL);
 
-    payload = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_DATA);
-    if (payload == NULL)
-	return EINVAL;
-
-    adata = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_SIGN_ONLY);
-
     if (stream->data.length < enc->block_size /* B0 */ + enc->block_size /* MAC */)
 	return KRB5_BAD_MSIZE;
 
-    iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
-    iov[0].data = stream->data;
-
-    flags = iov[0].data.data[0];
+    flags = stream->data.data[0];
 
     if ((flags & CCM_FLAG_MASK_Q) != 2) {
 	/* Check q=3 */
@@ -606,51 +599,65 @@ k5_ccm_decrypt_iov_stream(const struct krb5_aead_provider *aead,
     }
 
     if (flags & CCM_FLAG_ADATA) {
-	ret = decode_a_len(&iov[0].data, &a_len, &adata_len);
+	ret = decode_a_len(&stream->data, &a_len, &adata_len);
 	if (ret != 0)
 	    return ret;
     }
 
     assert(a_len < enc->block_size);
 
-    if (adata_len && adata == NULL)
+    iov = (krb5_crypto_iov *)calloc(num_data + 2, sizeof(krb5_crypto_iov));
+    if (iov == NULL)
 	return KRB5_BAD_MSIZE;
 
-    iov[0].data.length = enc->block_size /* B0 */ + a_len; /* length of adata_len field */
+    i = 0;
+
+    iov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
+    iov[i].data = stream->data;
+    iov[i].data.length = enc->block_size /* B0 */ + a_len; /* length of adata_len field */
 
     payload_len  = (iov[0].data.data[13] << 16);
     payload_len |= (iov[0].data.data[14] << 8 );
     payload_len |= (iov[0].data.data[15]      );
 
-    if (stream->data.length < iov[0].data.length +
-	adata_len + payload_len + enc->block_size)
+    if (stream->data.length < iov[i].data.length + payload_len + enc->block_size)
 	return KRB5_BAD_MSIZE;
 
-    iov[1].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-    iov[1].data.data = iov[0].data.data + iov[0].data.length;
-    iov[1].data.length = adata_len;
+    i++;
 
-    iov[2].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[2].data.data = iov[1].data.data + iov[1].data.length;
-    iov[2].data.length = payload_len;
+    for (j = 0; j < num_data; j++) {
+	if (data[j].flags == KRB5_CRYPTO_TYPE_DATA) {
+	    if (got_data) {
+		free(iov);
+		return KRB5_BAD_MSIZE;
+	    }
 
-    iov[3].flags = KRB5_CRYPTO_TYPE_PADDING;
-    iov[3].data.data = iov[2].data.data + iov[2].data.length;
-    iov[3].data.length = 0;
+	    got_data++;
 
-    iov[4].flags = KRB5_CRYPTO_TYPE_TRAILER;
-    iov[4].data.data = iov[3].data.data + iov[3].data.length;
-    iov[4].data.length = enc->block_size;
+	    data[j].data.data = stream->data.data + iov[0].data.length;
+	    data[j].data.length = payload_len;
+	}
+	if (data[j].flags == KRB5_CRYPTO_TYPE_SIGN_ONLY ||
+	    data[j].flags == KRB5_CRYPTO_TYPE_DATA)
+	    iov[i++] = data[j];
+    }
+
+    iov[i].flags = KRB5_CRYPTO_TYPE_PADDING;
+    iov[i].data.data = NULL;
+    iov[i].data.length = 0;
+    i++;
+
+    iov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
+    iov[i].data.data = stream->data.data + stream->data.length - enc->block_size;
+    iov[i].data.length = enc->block_size;
+    i++;
+
+    assert(i <= num_data + 2);
 
     ret = k5_ccm_decrypt_iov(&krb5int_aead_ccm, enc, hash, key,
-			     usage, iv,
-			     iov, sizeof(iov)/sizeof(iov[0]));
+			     usage, iv, iov, i);
 
-    if (ret == 0) {
-	if (adata != NULL)
-	    *adata = iov[1];
-	*payload = iov[2];
-    }
+    free(iov);
 
     return ret;
 }
