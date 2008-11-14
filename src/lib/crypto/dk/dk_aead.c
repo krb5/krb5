@@ -115,7 +115,8 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
 	    return KRB5_BAD_MSIZE;
     } else {
 	/* Check that the input data is correctly padded */
-	padsize = blocksize - (plainlen % blocksize);
+	if (plainlen % blocksize)
+	    padsize = blocksize - (plainlen % blocksize);
     }
 
     padding = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_PADDING);
