@@ -226,10 +226,6 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     char salt_data[14];
     krb5_data salt;
 
-    if (krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM) != NULL)
-	return krb5int_c_iov_decrypt_stream(aead, enc, hash, key,
-					    usage, ivec, data, num_data);
-
     d1.length = d2.length = d3.length = 0;
     d1.data = d2.data = d3.data = NULL;
 
