@@ -29,14 +29,43 @@
 #include "dk.h"
 #include "aead.h"
 
+/*
+ * Implement AEAD_AES_{128,256}_CCM as described in section 5.3 of RFC 5116.
+ *
+ * This is the CCM mode as described in NIST 800-38C, with a 12 byte nonce
+ * and 16 byte checksum. Multiple buffers of the same type are logically
+ * concatenated.
+ *
+ * The IOV should be laid out as follows:
+ *
+ *    HEADER | SIGN_DATA | DATA | PADDING | TRAILER
+ *
+ * SIGN_DATA and PADDING may be absent.
+ *
+ *    STREAM | SIGN_DATA | DATA
+ *
+ * STREAM should be set to the header and ciphertext (HEADER | DATA | TRAILER).
+ * Upon output, DATA will contain a pointer into the STREAM buffer with the
+ * decrypted payload. SIGN_DATA should be ordered relative to the output DATA
+ * buffer as it was upon encryption.
+ *
+ * For compatibility with RFC 5116, a single key is used both for encryption
+ * and checksumming. The key derivation function is as follows:
+ *
+ *    Kc = DK(base-key, usage | 0xCC)
+ *
+ * Because the base keys are compatible with RFC 3962, the two encryption
+ * types defined here (ENCTYPE_AES128_CCM_128 and ENCTYPE_AES256_CCM_128)
+ * are most useful in conjunction with a cryptosystem negotiation protocol
+ * such as RFC 4537.
+ */
+
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
 #define CCM_FLAG_MASK_Q		0x07
 #define CCM_FLAG_MASK_T		0x38
 #define CCM_FLAG_ADATA		0x40
 #define CCM_FLAG_RESERVED	0x80
-
-/* AEAD */
 
 static krb5_error_code
 krb5int_ccm_crypto_length(const struct krb5_aead_provider *aead,
@@ -101,37 +130,6 @@ encode_a_len(krb5_data *a, unsigned int adata_len)
 
     return 0;
 }
-
-/*
- * Implement AEAD_AES_{128,256}_CCM as described in section 5.3 of RFC 5116.
- *
- * This is the CCM mode as described in NIST 800-38C, with a 12 byte nonce
- * and 16 byte checksum. Multiple buffers of the same type are logically
- * concatenated.
- *
- * The IOV should be laid out as follows:
- *
- *    HEADER | SIGN_DATA | DATA | PADDING | TRAILER
- *
- * SIGN_DATA and PADDING may be absent.
- *
- *    STREAM | SIGN_DATA | DATA
- *
- * STREAM should be set to the header and ciphertext (HEADER | DATA | TRAILER).
- * Upon output, DATA will contain a pointer into the STREAM buffer with the
- * decrypted payload. SIGN_DATA should be ordered relative to the output DATA
- * buffer as it was upon encryption.
- *
- * For compatibility with RFC 5116, a single key is used both for encryption
- * and checksumming. The key derivation function is as follows:
- *
- *    Kc = DK(base-key, usage | 0xCC)
- *
- * Because the base keys are compatible with RFC 3962, the two encryption
- * types defined here (ENCTYPE_AES128_CCM_128 and ENCTYPE_AES256_CCM_128)
- * are most useful in conjunction with a cryptosystem negotiation protocol
- * such as RFC 4537.
- */
 
 static krb5_error_code
 krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
@@ -553,8 +551,15 @@ krb5int_ccm_encrypt_length(const struct krb5_enc_provider *enc,
 			   const struct krb5_hash_provider *hash,
 			   size_t inputlen, size_t *length)
 {
-    /* HEADER | DATA | TRAILER */
-    *length = enc->block_size + inputlen + enc->block_size;
+    size_t header_len = 0;
+    size_t mac_len = 0;
+
+    krb5int_ccm_crypto_length(&krb5int_aead_ccm, enc, hash,
+			      KRB5_CRYPTO_TYPE_HEADER, &header_len);
+    krb5int_ccm_crypto_length(&krb5int_aead_ccm, enc, hash,
+			      KRB5_CRYPTO_TYPE_TRAILER, &mac_len);
+
+    *length = header_len + inputlen + mac_len;
 }
 
 krb5_error_code
