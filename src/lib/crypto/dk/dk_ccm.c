@@ -42,9 +42,11 @@
  *
  * SIGN_DATA and PADDING may be absent.
  *
+ * Upon decryption, one can pass in explicit buffers as for encryption, or
+ * one can pass in STREAM, being the concatenation of HEADER | DATA | TRAILER.
+ *
  *    STREAM | SIGN_DATA | DATA
  *
- * STREAM should be set to the header and ciphertext (HEADER | DATA | TRAILER).
  * Upon output, DATA will contain a pointer into the STREAM buffer with the
  * decrypted payload. SIGN_DATA should be ordered relative to the output DATA
  * buffer as it was upon encryption.
