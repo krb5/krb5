@@ -46,7 +46,7 @@ k5_aescbc_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
 {
     aes_ctx ctx;
     unsigned char blockY[BLOCK_SIZE];
-    struct iov_block_state iov_pos;
+    struct iov_block_state iov_state;
 
     if (output->length < BLOCK_SIZE)
 	return KRB5_BAD_MSIZE;
@@ -59,22 +59,22 @@ k5_aescbc_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
     else
 	memset(blockY, 0, BLOCK_SIZE);
 
-    IOV_BLOCK_STATE_INIT(&iov_pos);
+    IOV_BLOCK_STATE_INIT(&iov_state);
 
     /*
      * The CCM header may not fit in a block, because it includes a variable
      * length encoding of the associated data length. This encoding plus the
      * associated data itself is padded to the block size.
      */
-    iov_pos.include_sign_only = 1;
-    iov_pos.pad_to_boundary = 1;
+    iov_state.include_sign_only = 1;
+    iov_state.pad_to_boundary = 1;
 
     for (;;) {
 	unsigned char blockB[BLOCK_SIZE];
 
-	krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data, &iov_pos);
+	krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data, &iov_state);
 
-	if (iov_pos.iov_pos == num_data)
+	if (iov_state.iov_pos == num_data)
 	    break;
 
 	xorblock(blockB, blockY);
