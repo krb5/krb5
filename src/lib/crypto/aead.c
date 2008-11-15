@@ -168,6 +168,25 @@ krb5int_c_find_checksum_type(krb5_cksumtype cksumtype)
     return &krb5_cksumtypes_list[i];
 }
 
+#ifdef DEBUG_IOV
+static void
+dump_block(const char *tag,
+	   size_t i,
+	   size_t j,
+	   unsigned char *block,
+	   size_t block_size)
+{
+    size_t k;
+
+    printf("[%s: %d.%d] ", tag, i, j);
+
+    for (k = 0; k < block_size; k++)
+	printf("%02x ", block[k] & 0xFF);
+
+    printf("\n");
+}
+#endif
+
 static int
 process_block_p(const krb5_crypto_iov *data,
 		size_t num_data,
@@ -217,14 +236,8 @@ pad_to_boundary_p(const krb5_crypto_iov *data,
     if (j == 0)
 	return 0;
 
-    /* Don't consider the header as a boundary */
-    if (iov_state->ignore_header == 0)
-	return 0;
-
-    /* Don't consider adjacent buffers of the same type as a boundary */
-    if (i < num_data - 1 &&
-	(data[i].flags == data[i + 1].flags ||
-	 (data[i].flags == KRB5_CRYPTO_TYPE_HEADER && SIGN_IOV(&data[i + 1]))))
+    /* No boundary between adjacent buffers marked for processing */
+    if (data[iov_state->iov_pos].flags == data[i].flags)
 	return 0;
 
     return 1;
@@ -243,11 +256,13 @@ krb5int_c_iov_get_block(unsigned char *block,
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
 
+	if (!process_block_p(data, num_data, iov_state, i))
+	    continue;
+
 	if (pad_to_boundary_p(data, num_data, iov_state, i, j))
 	    break;
 
-	if (!process_block_p(data, num_data, iov_state, i))
-	    continue;
+	iov_state->iov_pos = i;
 
 	nbytes = iov->data.length - iov_state->data_pos;
 	if (nbytes > block_size - j)
@@ -272,6 +287,11 @@ krb5int_c_iov_get_block(unsigned char *block,
 
     if (j != block_size)
 	memset(block + j, 0, block_size - j);
+
+#ifdef DEBUG_IOV
+    if (iov_state->iov_pos < num_data)
+	dump_block("get_block", i, j, block, block_size);
+#endif
 }
 
 void KRB5_CALLCONV
@@ -287,11 +307,13 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
 
+	if (!process_block_p(data, num_data, iov_state, i))
+	    continue;
+
 	if (pad_to_boundary_p(data, num_data, iov_state, i, j))
 	    break;
 
-	if (!process_block_p(data, num_data, iov_state, i))
-	    continue;
+	iov_state->iov_pos = i;
 
 	nbytes = iov->data.length - iov_state->data_pos;
 	if (nbytes > block_size - j)
@@ -313,6 +335,11 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
     }
 
     iov_state->iov_pos = i;
+
+#ifdef DEBUG_IOV
+    if (iov_state->iov_pos < num_data)
+	dump_block("put_block", i, j, block, block_size);
+#endif
 }
 
 krb5_error_code KRB5_CALLCONV
