@@ -216,7 +216,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     /* RFC 5116 5.3, format flags octet */
     flags = 2; /* q=3 */
     flags |= (((mac_len - 2) / 2) << 3);
-    if (adata_len > 0)
+    if (adata_len != 0)
 	flags |= CCM_FLAG_ADATA;
 
     header->data.data[0] = flags;
@@ -426,6 +426,10 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     }
     if ((flags & CCM_FLAG_MASK_T) >> 3 != (trailer->data.length - 2) / 2) {
 	/* Check bits 3-5 contain (mac_len-2)/2 */
+	return KRB5_BAD_MSIZE;
+    }
+    if ((flags & CCM_FLAG_ADATA) != (actual_adata_len ? CCM_FLAG_ADATA : 0)) {
+	/* Check that AData flag matches presence of associated data */
 	return KRB5_BAD_MSIZE;
     }
 
