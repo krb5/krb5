@@ -221,11 +221,11 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 
     if (iv != NULL) {
 	/* iv should be NONCE | COUNTER */
-	if (iv->length != nonce.length + CCM_COUNTER_LENGTH) {
+	if (iv->length != nonce.length) {
 	    ret = KRB5_BAD_MSIZE;
 	    goto cleanup;
 	}
-	memcpy(nonce.data, iv->data, nonce.length);
+	memcpy(nonce.data, iv->data, iv->length);
     } else {
 	ret = krb5_c_random_make_octets(/* XXX */ NULL, &nonce);
 	if (ret != 0)
@@ -312,12 +312,8 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     ivec.length = enc->block_size;
 
     ivec.data[0] = flags;
-    if (iv != NULL) {
-	memcpy(&ivec.data[1], iv->data, iv->length);
-    } else {
-	memcpy(&ivec.data[1], nonce.data, nonce.length); /* Copy in nonce */
-	memset(&ivec.data[1 + nonce.length], 0, CCM_COUNTER_LENGTH); /* Set counter to zero */
-    }
+    memcpy(&ivec.data[1], nonce.data, nonce.length); /* Copy in nonce */
+    memset(&ivec.data[1 + nonce.length], 0, CCM_COUNTER_LENGTH); /* Set counter to zero */
 
     trailer->data.length = trailer_len;
 
@@ -507,15 +503,14 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 
     ivec.data[0] = flags;
     if (iv != NULL) {
-	if (iv->length != CCM_NONCE_LENGTH + CCM_COUNTER_LENGTH) {
+	if (iv->length != CCM_NONCE_LENGTH) {
 	    ret = KRB5_BAD_MSIZE;
 	    goto cleanup;
 	}
 	memcpy(&ivec.data[1], iv->data, iv->length);
-    } else {
+    } else
 	memcpy(&ivec.data[1], &header->data.data[1], CCM_NONCE_LENGTH); /* Copy in nonce */
-	memset(&ivec.data[1 + CCM_NONCE_LENGTH], 0, CCM_COUNTER_LENGTH); /* Set counter to zero */
-    }
+    memset(&ivec.data[1 + CCM_NONCE_LENGTH], 0, CCM_COUNTER_LENGTH); /* Set counter to zero */
 
     /* Decrypt checksum from trailer */
     ret = enc->decrypt(&kc, &ivec, &trailer->data, &trailer->data);
