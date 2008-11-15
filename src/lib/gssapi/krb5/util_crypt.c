@@ -1,6 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Copyright2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2008 by the Massachusetts Institute of Technology.
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software
