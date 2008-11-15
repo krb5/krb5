@@ -243,7 +243,7 @@ pad_to_boundary_p(const krb5_crypto_iov *data,
     return 1;
 }
 
-void KRB5_CALLCONV
+krb5_boolean KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,
 			size_t block_size,
 			const krb5_crypto_iov *data,
@@ -292,9 +292,11 @@ krb5int_c_iov_get_block(unsigned char *block,
     if (iov_state->iov_pos < num_data)
 	dump_block("get_block", i, j, block, block_size);
 #endif
+
+    return (iov_state->iov_pos < num_data);
 }
 
-void KRB5_CALLCONV
+krb5_boolean KRB5_CALLCONV
 krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 			size_t num_data,
 			unsigned char *block,
@@ -340,6 +342,8 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
     if (iov_state->iov_pos < num_data)
 	dump_block("put_block", i, j, block, block_size);
 #endif
+
+    return (iov_state->iov_pos < num_data);
 }
 
 krb5_error_code KRB5_CALLCONV

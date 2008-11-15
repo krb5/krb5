@@ -68,14 +68,14 @@ struct iov_block_state {
 					 (_state)->include_sign_only = \
 					 (_state)->pad_to_boundary = 0)
 
-void KRB5_CALLCONV
+krb5_boolean KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,
 			size_t block_size,
 			const krb5_crypto_iov *data,
 			size_t num_data,
 			struct iov_block_state *iov_state);
 
-void KRB5_CALLCONV
+krb5_boolean KRB5_CALLCONV
 krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 			size_t num_data,
 			unsigned char *block,

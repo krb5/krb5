@@ -72,9 +72,7 @@ k5_aescbc_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
     for (;;) {
 	unsigned char blockB[BLOCK_SIZE];
 
-	krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data, &iov_state);
-
-	if (iov_state.iov_pos == num_data)
+	if (!krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data, &iov_state))
 	    break;
 
 	xorblock(blockB, blockY);

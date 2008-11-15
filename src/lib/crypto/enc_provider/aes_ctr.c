@@ -72,9 +72,7 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 	unsigned char plain[BLOCK_SIZE];
 	unsigned char ectr[BLOCK_SIZE];
 
-	krb5int_c_iov_get_block((unsigned char *)plain, BLOCK_SIZE, data, num_data, &input_pos);
-
-	if (input_pos.iov_pos == num_data)
+	if (!krb5int_c_iov_get_block((unsigned char *)plain, BLOCK_SIZE, data, num_data, &input_pos))
 	    break;
 
 	if (aes_enc_blk(ctr, ectr, &ctx) != aes_good)
@@ -132,9 +130,7 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 	unsigned char ectr[BLOCK_SIZE];
 	unsigned char cipher[BLOCK_SIZE];
 
-	krb5int_c_iov_get_block((unsigned char *)cipher, BLOCK_SIZE, data, num_data, &input_pos);
-
-	if (input_pos.iov_pos == num_data)
+	if (!krb5int_c_iov_get_block((unsigned char *)cipher, BLOCK_SIZE, data, num_data, &input_pos))
 	    break;
 
 	if (aes_enc_blk(ctr, ectr, &ctx) != aes_good)
