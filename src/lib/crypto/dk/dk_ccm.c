@@ -106,25 +106,21 @@ encode_a_len(krb5_data *a, unsigned int adata_len)
  * Implement AEAD_AES_{128,256}_CCM as described in section 5.3 of RFC 5116.
  *
  * This is the CCM mode as described in NIST 800-38C, with a 12 byte nonce
- * and 16 byte checksum. Only a single associated data buffer and a single
- * payload buffer are supported, in that order, if the output message is to
- * be compatible with RFC 5116. Multiple buffers will not return an error,
- * but the length will no longer be self-describing, and this usage is not
- * recommended.
+ * and 16 byte checksum. Multiple buffers of the same type are logically
+ * concatenated.
  *
- * To emit compatible messages, the IOV should be laid out as follows:
+ * The IOV should be laid out as follows:
  *
  *    HEADER | SIGN_DATA | DATA | PADDING | TRAILER
  *
- * SIGN_DATA and PADDING may be absent. With this layout, the buffers
- * can be concatenated together and transmitted as a single self-describing
- * message, which can be parsed with the following usage:
+ * SIGN_DATA and PADDING may be absent.
  *
  *    STREAM | SIGN_DATA | DATA
  *
- * On input, STREAM should be sent to the complete message; SIGN_DATA and
- * DATA will upon return contain pointers in to the STREAM buffer with
- * associated data and payload buffers.
+ * STREAM should be set to the header and ciphertext (HEADER | DATA | TRAILER).
+ * Upon output, DATA will contain a pointer into the STREAM buffer with the
+ * decrypted payload. SIGN_DATA should be ordered relative to the output DATA
+ * buffer as it was upon encryption.
  *
  * For compatibility with RFC 5116, a single key is used both for encryption
  * and checksumming. The key derivation function is as follows:
