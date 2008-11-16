@@ -93,7 +93,7 @@ krb5_c_padding_length(krb5_context context,
 	return KRB5_BAD_ENCTYPE;
     }
 
-    return krb5int_padding_length(ktp->aead, ktp->enc, ktp->hash, data_length, pad_length);
+    return krb5int_c_padding_length(ktp->aead, ktp->enc, ktp->hash, data_length, pad_length);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -155,7 +155,7 @@ krb5_c_crypto_length_iov(krb5_context context,
     if (ret != 0)
 	return ret;
 
-    ret = krb5int_padding_length(ktp->aead, ktp->enc, ktp->hash, data_length, &pad_length);
+    ret = krb5int_c_padding_length(ktp->aead, ktp->enc, ktp->hash, data_length, &pad_length);
     if (ret != 0)
 	return ret;
 

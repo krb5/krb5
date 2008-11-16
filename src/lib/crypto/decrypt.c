@@ -54,11 +54,11 @@ krb5_c_decrypt(krb5_context context, const krb5_keyblock *key,
     if (krb5_enctypes_list[i].decrypt == NULL) {
 	assert(krb5_enctypes_list[i].aead != NULL);
 
-	return krb5int_decrypt_aead_compat(krb5_enctypes_list[i].aead,
-					   krb5_enctypes_list[i].enc,
-					   krb5_enctypes_list[i].hash,
-					   key, usage, ivec,
-					   &input->ciphertext, output);
+	return krb5int_c_decrypt_aead_compat(krb5_enctypes_list[i].aead,
+					     krb5_enctypes_list[i].enc,
+					     krb5_enctypes_list[i].hash,
+					     key, usage, ivec,
+					     &input->ciphertext, output);
     }
 
     return((*(krb5_enctypes_list[i].decrypt))
