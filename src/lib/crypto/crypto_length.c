@@ -73,28 +73,6 @@ krb5_c_crypto_length(krb5_context context,
     return ret;
 }
 
-static krb5_error_code
-k5_padding_length(const struct krb5_keytypes *ktp,
-		  size_t data_length,
-		  unsigned int *pad_length)
-{
-    unsigned int padding;
-    krb5_error_code ret;
-
-    ret = ktp->aead->crypto_length(ktp->aead, ktp->enc, ktp->hash,
-				   KRB5_CRYPTO_TYPE_PADDING, &padding);
-    if (ret != 0)
-	return ret;
-
-    if (padding == 0 || (data_length % padding) == 0)
-	*pad_length = 0;
-    else
-	*pad_length = padding - (data_length % padding);
-
-    return 0;
-}
-
-
 krb5_error_code KRB5_CALLCONV
 krb5_c_padding_length(krb5_context context,
 		      krb5_enctype enctype,
@@ -115,7 +93,7 @@ krb5_c_padding_length(krb5_context context,
 	return KRB5_BAD_ENCTYPE;
     }
 
-    return k5_padding_length(ktp, data_length, pad_length);
+    return krb5int_padding_length(ktp->aead, ktp->enc, ktp->hash, data_length, pad_length);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -177,7 +155,7 @@ krb5_c_crypto_length_iov(krb5_context context,
     if (ret != 0)
 	return ret;
 
-    ret = k5_padding_length(ktp, data_length, &pad_length);
+    ret = krb5int_padding_length(ktp->aead, ktp->enc, ktp->hash, data_length, &pad_length);
     if (ret != 0)
 	return ret;
 
