@@ -243,13 +243,14 @@ krb5_auth_con_getlocalseqnumber(krb5_context context, krb5_auth_context auth_con
     *seqnumber = auth_context->local_seq_number;
     return 0;
 }
-
+#ifndef LEAN_CLIENT
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getauthenticator(krb5_context context, krb5_auth_context auth_context, krb5_authenticator **authenticator)
 {
     return (krb5_copy_authenticator(context, auth_context->authentp,
 				    authenticator));
 }
+#endif
 
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getremoteseqnumber(krb5_context context, krb5_auth_context auth_context, krb5_int32 *seqnumber)

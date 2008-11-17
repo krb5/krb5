@@ -178,10 +178,12 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     /* XXX this is an evil hack.  check_valid_flag is set iff the call
        is not from inside the kdc.  we can use this to determine which
        key usage to use */
+#ifndef LEAN_CLIENT
     if ((retval = decrypt_authenticator(context, req, 
 					&((*auth_context)->authentp),
 					check_valid_flag)))
 	goto cleanup;
+#endif
     if (!krb5_principal_compare(context, (*auth_context)->authentp->client,
 				req->ticket->enc_part2->client)) {
 	retval = KRB5KRB_AP_ERR_BADMATCH;
@@ -491,6 +493,8 @@ krb5_rd_req_decoded_anyflag(krb5_context context,
 				   0); /* don't check_valid_flag */
   return retval;
 }
+
+#ifndef LEAN_CLIENT
 static krb5_error_code
 decrypt_authenticator(krb5_context context, const krb5_ap_req *request,
 		      krb5_authenticator **authpp, int is_ap_req)
@@ -525,5 +529,5 @@ free(scratch.data);}
     clean_scratch();
     return retval;
 }
-
+#endif
 

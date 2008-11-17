@@ -215,6 +215,7 @@ error_out: \
 #define free_field(rep,f) free((rep)->f)
 #define clear_field(rep,f) (*(rep))->f = 0
 
+#ifndef LEAN_CLIENT
 krb5_error_code decode_krb5_authenticator(const krb5_data *code, krb5_authenticator **rep)
 {
     setup();
@@ -254,6 +255,7 @@ error_out:
     }
     return retval;
 }
+#endif
 
 krb5_error_code
 KRB5_CALLCONV
