@@ -285,10 +285,12 @@ conv_princ_2db(krb5_context context, krb5_principal *dbprinc,
 		free(princ->data[i].data);
 		princ->data[i].data = NULL;
 	    }
-	} else
+	} else {
 	    princ->data = NULL;
+	    princ->length = 0;
+	}
 	princ->data = (krb5_data *)realloc(princ->data,
-					   (princ->length * sizeof (krb5_data)));
+					   (kdbe_princ->k_components.k_components_len * sizeof (krb5_data)));
 	if (princ->data == NULL)
 	    /* XXX Memory leak: old storage not freed.  */
 	    goto error;
