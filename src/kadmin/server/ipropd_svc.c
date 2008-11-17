@@ -52,10 +52,8 @@ static char *reply_nil_str	= "UPDATE_NIL";
 static char *reply_perm_str	= "UPDATE_PERM_DENIED";
 static char *reply_unknown_str	= "<UNKNOWN_CODE>";
 
-#define	LOG_UNAUTH  _("Unauthorized request: %s, %s, "	\
-		      "client=%s, service=%s, addr=%s")
-#define	LOG_DONE    _("Request: %s, %s, %s, client=%s, "	\
-		      "service=%s, addr=%s")
+#define	LOG_UNAUTH  _("Unauthorized request: %s, client=%s, service=%s, addr=%s")
+#define	LOG_DONE    _("Request: %s, %s, %s, client=%s, service=%s, addr=%s")
 
 #ifdef	DPRINT
 #undef	DPRINT
@@ -183,7 +181,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 	ret.ret = UPDATE_PERM_DENIED;
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
-			 "<null>", client_name, service_name,
+			 client_name, service_name,
 			 client_addr(rqstp));
 	goto out;
     }
@@ -203,7 +201,9 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 			(unsigned long)arg->last_sno);
     }
 
-    krb5_klog_syslog(LOG_NOTICE, LOG_DONE, whoami,
+    krb5_klog_syslog(LOG_NOTICE,
+		     _("Request: %s, %s, %s, client=%s, service=%s, addr=%s"),
+		     whoami,
 		     obuf,
 		     ((kret == 0) ? "success" : error_message(kret)),
 		     client_name, service_name,
@@ -301,7 +301,7 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
 	ret.ret = UPDATE_PERM_DENIED;
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
-			 "<null>", client_name, service_name,
+			 client_name, service_name,
 			 client_addr(rqstp));
 	goto out;
     }
@@ -327,8 +327,8 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
      * note the -i; modified version of kdb5_util dump format
      * to include sno (serial number)
      */
-    if (asprintf(&ubuf, "%s dump -i %s", KPROPD_DEFAULT_KDB5_UTIL,
-		 tmpf) < 0) {
+    if (asprintf(&ubuf, "%s dump -i %s </dev/null 2>&1",
+		 KPROPD_DEFAULT_KDB5_UTIL, tmpf) < 0) {
 	krb5_klog_syslog(LOG_ERR,
 			 _("%s: cannot construct kdb5 util dump string too long; out of memory"),
 			 whoami);
@@ -403,9 +403,9 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
 	ret.lastentry.last_time.seconds = 0;
 	ret.lastentry.last_time.useconds = 0;
 
-	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, whoami,
-			 "<null>",
-			 "success",
+	krb5_klog_syslog(LOG_NOTICE,
+			 _("Request: %s, spawned resync process %d, client=%s, service=%s, addr=%s"),
+			 whoami, fret,
 			 client_name, service_name,
 			 client_addr(rqstp));
 
