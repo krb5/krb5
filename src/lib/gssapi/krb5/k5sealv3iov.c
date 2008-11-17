@@ -297,7 +297,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     }
 
     if ((ptr[2] & FLAG_SENDER_IS_ACCEPTOR) != acceptor_flag) {
-	*minor_status = G_BAD_DIRECTION;
+	*minor_status = (OM_uint32)G_BAD_DIRECTION;
 	return GSS_S_BAD_SIG;
     }
 

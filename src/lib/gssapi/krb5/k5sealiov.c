@@ -213,8 +213,8 @@ make_seal_token_v1_iov(krb5_context context,
     }
 
     /* create the seq_num */
-    code = kg_make_seq_num(context, ctx->seq, ctx->initiate ? 0 : 0xFF, ctx->seq_send,
-			   ptr + 14, ptr + 6);
+    code = kg_make_seq_num(context, ctx->seq, ctx->initiate ? 0 : 0xFF,
+			   (OM_uint32)ctx->seq_send, ptr + 14, ptr + 6);
     if (code != 0)
 	goto cleanup;
 
@@ -367,12 +367,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     krb5_context context;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
-	*minor_status = G_UNKNOWN_QOP;
+	*minor_status = (OM_uint32)G_UNKNOWN_QOP;
 	return GSS_S_FAILURE;
     }
 
     if (!kg_validate_ctx_id(context_handle)) {
-	*minor_status = G_VALIDATE_FAILED;
+	*minor_status = (OM_uint32)G_VALIDATE_FAILED;
 	return GSS_S_NO_CONTEXT;
     }
 

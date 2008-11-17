@@ -722,7 +722,7 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 
     if (data->buffer.length + padding->buffer.length < padlength ||
         padlength == 0) {
-	*minor_status = KRB5_BAD_MSIZE;
+	*minor_status = (OM_uint32)KRB5_BAD_MSIZE;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 

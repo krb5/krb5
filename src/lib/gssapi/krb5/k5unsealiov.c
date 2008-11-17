@@ -68,7 +68,7 @@ kg_unseal_v1_iov(krb5_context context,
 
     trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL && trailer->buffer.length != 0) {
-	*minor_status = KRB5_BAD_MSIZE;
+	*minor_status = (OM_uint32)KRB5_BAD_MSIZE;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
@@ -146,7 +146,7 @@ kg_unseal_v1_iov(krb5_context context,
 	    if (ctx->enc->enctype == ENCTYPE_ARCFOUR_HMAC) {
 		unsigned char bigend_seqnum[4];
 		krb5_keyblock *enc_key;
-		int i;
+		size_t i;
 
 		bigend_seqnum[0] = (seqnum >> 24) & 0xFF;
 		bigend_seqnum[1] = (seqnum >> 16) & 0xFF;
@@ -292,12 +292,12 @@ kg_unseal_v1_iov(krb5_context context,
 
     if ((ctx->initiate && direction != 0xff) ||
 	(!ctx->initiate && direction != 0)) {
-	*minor_status = G_BAD_DIRECTION;
+	*minor_status = (OM_uint32)G_BAD_DIRECTION;
 	retval = GSS_S_BAD_SIG;
     }
 
     code = 0;
-    retval = g_order_check(&ctx->seqstate, seqnum);
+    retval = g_order_check(&ctx->seqstate, (gssint_uint64)seqnum);
 
 cleanup:
     kg_release_iov(iov_count, iov);
@@ -530,7 +530,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     if (2 + bodysize < theader->buffer.length +
 		       tpadding->buffer.length +
 		       ttrailer->buffer.length) {
-	code = KRB5_BAD_MSIZE;
+	code = (OM_uint32)KRB5_BAD_MSIZE;
 	major_status = GSS_S_DEFECTIVE_TOKEN;
 	goto cleanup;
     }
@@ -582,7 +582,7 @@ kg_unseal_iov(OM_uint32 *minor_status,
     int toktype2;
 
     if (!kg_validate_ctx_id(context_handle)) {
-	*minor_status = G_VALIDATE_FAILED;
+	*minor_status = (OM_uint32)G_VALIDATE_FAILED;
 	return GSS_S_NO_CONTEXT;
     }
 
