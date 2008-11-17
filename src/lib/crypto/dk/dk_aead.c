@@ -38,7 +38,7 @@ krb5int_dk_crypto_length(const struct krb5_aead_provider *aead,
 			 const struct krb5_enc_provider *enc,
 			 const struct krb5_hash_provider *hash,
 			 krb5_cryptotype type,
-			 size_t *length)
+			 unsigned int *length)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
@@ -73,10 +73,10 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer, *padding;
     krb5_keyblock ke, ki;
     size_t i;
-    size_t blocksize = 0;
-    size_t plainlen = 0;
-    size_t hmacsize = 0;
-    size_t padsize = 0;
+    unsigned int blocksize = 0;
+    unsigned int plainlen = 0;
+    unsigned int hmacsize = 0;
+    unsigned int padsize = 0;
     unsigned char *cksum = NULL;
 
     ke.contents = ki.contents = NULL;
@@ -229,9 +229,9 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock ke, ki;
     size_t i;
-    size_t blocksize = 0; /* careful, this is enc block size not confounder len */
-    size_t cipherlen = 0;
-    size_t hmacsize = 0;
+    unsigned int blocksize = 0; /* careful, this is enc block size not confounder len */
+    unsigned int cipherlen = 0;
+    unsigned int hmacsize = 0;
     unsigned char *cksum = NULL;
 
     ke.contents = ki.contents = NULL;
@@ -362,7 +362,7 @@ krb5int_aes_crypto_length(const struct krb5_aead_provider *aead,
 			 const struct krb5_enc_provider *enc,
 			 const struct krb5_hash_provider *hash,
 			 krb5_cryptotype type,
-			 size_t *length)
+			 unsigned int *length)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
