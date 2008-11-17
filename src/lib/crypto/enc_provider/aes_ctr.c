@@ -152,7 +152,7 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
     return 0;
 }
 
-krb5_error_code
+static krb5_error_code
 krb5int_aes_encrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
 		        const krb5_data *input, krb5_data *output)
 {
@@ -175,7 +175,7 @@ krb5int_aes_encrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
     return ret;
 }
 
-krb5_error_code
+static krb5_error_code
 krb5int_aes_decrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
 		        const krb5_data *input, krb5_data *output)
 {

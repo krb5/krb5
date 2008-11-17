@@ -77,7 +77,7 @@ krb5int_ccm_crypto_length(const struct krb5_aead_provider *aead,
 			  const struct krb5_enc_provider *enc,
 			  const struct krb5_hash_provider *hash,
 			  krb5_cryptotype type,
-			  size_t *length)
+			  unsigned int *length)
 {
     assert(enc->block_size >= 16);
 
@@ -154,10 +154,10 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
     size_t i;
-    size_t header_len = 0;
-    size_t trailer_len = 0;
-    size_t payload_len = 0;
-    size_t adata_len = 0;
+    unsigned int header_len = 0;
+    unsigned int trailer_len = 0;
+    unsigned int payload_len = 0;
+    unsigned int adata_len = 0;
     unsigned char flags = 0;
     krb5_data nonce, cksum, ivec;
     krb5_cksumtype cksumtype;
@@ -364,10 +364,10 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
     size_t i;
-    size_t header_len = 0;
-    size_t trailer_len = 0;
-    size_t actual_adata_len = 0, actual_payload_len = 0;
-    size_t payload_len = 0;
+    unsigned int header_len = 0;
+    unsigned int trailer_len = 0;
+    unsigned int actual_adata_len = 0, actual_payload_len = 0;
+    unsigned int payload_len = 0;
     unsigned char flags = 0;
     krb5_data cksum, ivec;
     krb5_cksumtype cksumtype;
@@ -433,7 +433,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	/* Check q=3 */
 	return KRB5_BAD_MSIZE;
     }
-    if ((flags & CCM_FLAG_MASK_T) >> 3 != (trailer->data.length - 2) / 2) {
+    if ((unsigned int)(flags & CCM_FLAG_MASK_T) >> 3 != (trailer->data.length - 2) / 2) {
 	/* Check bits 3-5 contain (trailer_len-2)/2 */
 	return KRB5_BAD_MSIZE;
     }
