@@ -42,7 +42,7 @@ make_seal_token_v1_iov(krb5_context context,
 		       gss_iov_buffer_desc *iov,
 		       int toktype)
 {
-    krb5_error_code code;
+    krb5_error_code code = 0;
     gss_iov_buffer_t header;
     gss_iov_buffer_t padding;
     gss_iov_buffer_t trailer;
@@ -108,7 +108,7 @@ make_seal_token_v1_iov(krb5_context context,
 	/* Initialize padding buffer to pad itself */
 	if (padding != NULL) {
 	    padding->buffer.length = gss_padlen;
-	    memset(padding->buffer.value, gss_padlen, gss_padlen);
+	    memset(padding->buffer.value, (int)gss_padlen, gss_padlen);
 	}
 
 	if (ctx->gss_flags & GSS_C_DCE_STYLE)
@@ -224,7 +224,7 @@ make_seal_token_v1_iov(krb5_context context,
 	{
 	    unsigned char bigend_seqnum[4];
 	    krb5_keyblock *enc_key;
-	    int i;
+	    size_t i;
 
 	    bigend_seqnum[0] = (ctx->seq_send >> 24) & 0xFF;
 	    bigend_seqnum[1] = (ctx->seq_send >> 16) & 0xFF;
@@ -362,7 +362,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     gss_iov_buffer_t header, trailer, padding;
     size_t data_length, assoc_data_length;
     size_t gss_headerlen, gss_padlen, gss_trailerlen;
-    size_t k5_headerlen = 0, k5_trailerlen = 0;
+    unsigned int k5_headerlen = 0, k5_trailerlen = 0, k5_padlen = 0;
     krb5_error_code code;
     krb5_context context;
 
@@ -438,17 +438,18 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    gss_headerlen += k5_headerlen; /* Kerb-Header */
 	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
-	    code = krb5_c_padding_length(context, enctype, data_length - assoc_data_length, &gss_padlen);
+	    code = krb5_c_padding_length(context, enctype, data_length - assoc_data_length, &k5_padlen);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_FAILURE;
 	    }
+	    gss_padlen = k5_padlen;
 	} else {
 	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}
     } else {
 	if (conf_req_flag) {
-	    size_t k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+	    k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
 
 	    if (k5_padlen == 1)
 		gss_padlen = 1;

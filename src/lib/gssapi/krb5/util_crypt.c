@@ -309,8 +309,8 @@ static krb5_error_code
 kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_count, pkiov)
     krb5_context context;
     int dce_style;		/* DCE_STYLE indicates actual RRC is EC + RRC */
-    int ec;			/* Extra rotate count for DCE_STYLE, pad length otherwise */
-    int rrc;			/* Rotate count */
+    size_t ec;			/* Extra rotate count for DCE_STYLE, pad length otherwise */
+    size_t rrc;			/* Rotate count */
     const krb5_keyblock *key;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
@@ -323,7 +323,7 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_coun
     size_t i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
-    size_t k5_headerlen = 0, k5_trailerlen = 0;
+    unsigned int k5_headerlen = 0, k5_trailerlen = 0;
     size_t gss_headerlen, gss_trailerlen;
     krb5_error_code code;
     size_t actual_rrc;
@@ -431,8 +431,8 @@ kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov_count, iov, pkiov_
     krb5_context context;
     int proto;			/* 1 if CFX, 0 for pre-CFX */
     int dce_style;
-    int ec;
-    int rrc;
+    size_t ec;
+    size_t rrc;
     const krb5_keyblock *key;
     size_t iov_count;
     gss_iov_buffer_desc *iov;
@@ -440,8 +440,8 @@ kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov_count, iov, pkiov_
     krb5_crypto_iov **pkiov;
 {
     return proto ?
-	kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, pkiov_count, pkiov) :
-	kg_translate_iov_v1(context, key, iov_count, pkiov_count, pkiov);
+	kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov_count, iov, pkiov_count, pkiov) :
+	kg_translate_iov_v1(context, key, iov_count, iov, pkiov_count, pkiov);
 }
 
 krb5_error_code
@@ -449,8 +449,8 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov_count, io
     krb5_context context;
     int proto;
     int dce_style;
-    int ec;
-    int rrc;
+    size_t ec;
+    size_t rrc;
     krb5_keyblock *key;
     int usage;
     krb5_pointer iv;
@@ -497,8 +497,8 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov_count, io
     krb5_context context;
     int proto;
     int dce_style;
-    int ec;
-    int rrc;
+    size_t ec;
+    size_t rrc;
     krb5_keyblock *key;
     int usage;
     krb5_pointer iv;

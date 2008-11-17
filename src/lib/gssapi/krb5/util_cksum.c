@@ -175,10 +175,10 @@ kg_make_checksum_iov_v1(krb5_context context,
     return code;
 }
 
-krb5_error_code
+static krb5_error_code
 checksum_iov_v3(krb5_context context,
 		krb5_cksumtype type,
-		int rrc,
+		size_t rrc,
 		krb5_keyblock *key,
 		krb5_keyusage sign_usage,
 		size_t iov_count,
@@ -192,7 +192,7 @@ checksum_iov_v3(krb5_context context,
     krb5_crypto_iov *kiov;
     size_t kiov_count;
     size_t i = 0, j;
-    size_t k5_checksumlen;
+    unsigned int k5_checksumlen;
 
     if (verify)
 	*valid = 0;
@@ -260,7 +260,7 @@ checksum_iov_v3(krb5_context context,
 krb5_error_code
 kg_make_checksum_iov_v3(krb5_context context,
 			krb5_cksumtype type,
-			int rrc,
+			size_t rrc,
 			krb5_keyblock *key,
 			krb5_keyusage sign_usage,
 			size_t iov_count,
@@ -273,7 +273,7 @@ kg_make_checksum_iov_v3(krb5_context context,
 krb5_error_code
 kg_verify_checksum_iov_v3(krb5_context context,
 			  krb5_cksumtype type,
-			  int rrc,
+			  size_t rrc,
 			  krb5_keyblock *key,
 			  krb5_keyusage sign_usage,
 			  size_t iov_count,

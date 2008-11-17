@@ -324,7 +324,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 		    int toktype2)
 {
     krb5_error_code code;
-    krb5_context context;
+    krb5_context context = ctx->k5_context;
     unsigned char *ptr;
     gss_iov_buffer_t header;
     gss_iov_buffer_t padding;
@@ -400,7 +400,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     unsigned char *ptr;
     unsigned int bodysize;
     OM_uint32 code = 0, major_status = GSS_S_FAILURE;
-    krb5_context context;
+    krb5_context context = ctx->k5_context;
     int conf_req_flag;
     size_t i = 0, j;
     gss_iov_buffer_desc *tiov = NULL;
@@ -461,8 +461,8 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     if (ctx->proto == 1) {
 	size_t ec, rrc;
 	krb5_enctype enctype = ctx->enc->enctype;
-	size_t k5_headerlen = 0;
-	size_t k5_trailerlen = 0;
+	unsigned int k5_headerlen = 0;
+	unsigned int k5_trailerlen = 0;
 
 	conf_req_flag = ((ptr[0] & FLAG_WRAP_CONFIDENTIAL) != 0);
 	ec = load_16_be(ptr + 2);
