@@ -512,7 +512,6 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	void *server_handle = NULL;
 	char *iprop_svc_princstr = NULL;
 	char *master_svc_princstr = NULL;
-	char *keytab_name = NULL;
 	unsigned int pollin, backoff_time;
 	int backoff_cnt = 0;
 	int reinit_cnt = 0;
@@ -609,7 +608,7 @@ reinit:
 	/*
 	 * Authentication, initialize rpcsec_gss handle etc.
 	 */
-	retval = kadm5_init_with_skey(iprop_svc_princstr, keytab_name,
+	retval = kadm5_init_with_skey(iprop_svc_princstr, srvtab,
 				      master_svc_princstr,
 				      &params,
 				      KADM5_STRUCT_VERSION,
@@ -783,9 +782,12 @@ reinit:
 					     db_args);
 
 			if (retval) {
-				syslog(LOG_ERR, _("kpropd: ulog_replay"
-					" failed, updates not registered."));
-				break;
+			    char *msg = krb5_get_error_message(kpropd_context,
+							       retval);
+			    syslog(LOG_ERR,
+				   _("kpropd: ulog_replay failed (%s), updates not registered."), msg);
+			    krb5_free_error_message(kpropd_context, msg);
+			    break;
 			}
 
 			if (debug)
