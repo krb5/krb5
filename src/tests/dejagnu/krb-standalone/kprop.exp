@@ -21,20 +21,6 @@ proc setup_slave {} {
     }
 }
 
-proc start_kpropd {} {
-    global kpropd_pid kpropd_spawn_id KPROPD T_INETD KDB5_UTIL portbase tmppwd
-    global spawn_id
-
-    envstack_push
-    setup_kerberos_env slave
-#    spawn $T_INETD [expr 10 + $portbase] $KPROPD -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL
-    spawn $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
-#    spawn strace -o /tmp/3 -f $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
-    set kpropd_pid [exp_pid]
-    set kpropd_spawn_id $spawn_id
-    envstack_pop
-}
-
 proc scan_kpropd_output {} {
     global kpropd_spawn_id kpropd_pid
 

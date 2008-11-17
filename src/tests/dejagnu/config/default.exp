@@ -408,16 +408,21 @@ if ![info exists KEY] {
 # Clear away any files left over from a previous run.
 # We can't use them now because we don't know the right KEY.
 # krb5.conf might change if running tests on another host
-file delete $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/krb.realms $tmppwd/krb.conf
+file delete $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/slave.conf \
+    $tmppwd/krb.realms $tmppwd/krb.conf \
+    $tmppwd/krb5.client.conf $tmppwd/krb5.server.conf \
+    $tmppwd/krb5.kdc.conf $tmppwd/krb5.slave.conf
 
 proc delete_db {} {
     global tmppwd
+    # Master and slave db files
     file delete $tmppwd/kdc-db $tmppwd/kdc-db.ok $tmppwd/kdc-db.kadm5 \
 	$tmppwd/kdc-db.kadm5.lock \
 	$tmppwd/kdc-db.ulog \
 	$tmppwd/slave-db $tmppwd/slave-db.ok $tmppwd/slave-db.kadm5 $tmppwd/slave-db.kadm5.lock \
-	$tmppwd/slave-db~ $tmppwd/slave-db~.ok $tmppwd/slave-db~.kadm5 $tmppwd/slave-db~.kadm5.lock \
-	$tmppwd/srvtab $tmppwd/cpw_srvtab
+	$tmppwd/slave-db~ $tmppwd/slave-db~.ok $tmppwd/slave-db~.kadm5 $tmppwd/slave-db~.kadm5.lock
+    # Creating a new database means we need a new srvtab.
+    file delete $tmppwd/srvtab $tmppwd/cpw_srvtab
 }
 
 delete_db
@@ -961,6 +966,7 @@ proc setup_kerberos_files { } {
     if ![file exists $tmppwd/acl] {
 	set aclfile [open $tmppwd/acl w]
 	puts $aclfile "krbtest/admin@$REALMNAME *"
+	puts $aclfile "kiprop/$hostname@$REALMNAME p"
 	close $aclfile
     }
 
@@ -993,7 +999,7 @@ proc setup_kerberos_files { } {
 
 proc reset_kerberos_files { } {
     global tmppwd
-    file delete $tmppwd/kdc.conf $tmppwd/krb5.client.conf \
+    file delete $tmppwd/kdc.conf $tmppwd/slave.conf $tmppwd/krb5.client.conf \
 	$tmppwd/krb5.server.conf $tmppwd/krb5.kdc.conf
     setup_kerberos_files
 }
@@ -1141,18 +1147,30 @@ proc setup_kerberos_env { {type client} } {
     # Get the run time environment variables... (including LD_LIBRARY_PATH)
     setup_runtime_env
 
-    # Set our kdc config file.
-    set env(KRB5_KDC_PROFILE) $tmppwd/kdc.conf
-    verbose "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
+    # Set our kdc config file, if needed.
+    switch $type {
+	client	-
+	server	{ catch {unset env(KRB5_KDC_PROFILE)} }
+	kdc	{ set env(KRB5_KDC_PROFILE) $tmppwd/kdc.conf }
+	slave	{ set env(KRB5_KDC_PROFILE) $tmppwd/slave.conf }
+	default	{ error "unknown config file type $type" }
+    }
+    if [info exists env(KRB5_KDC_PROFILE)] {
+	verbose "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
+    }
 
     # Create an environment setup script.  (For convenience)
-    if ![file exists $tmppwd/env.sh] {
-	set envfile [open $tmppwd/env.sh w]
+    if ![file exists $tmppwd/$type-env.sh] {
+	set envfile [open $tmppwd/$type-env.sh w]
 	puts $envfile "KRB5_CONFIG=$env(KRB5_CONFIG)"
 	puts $envfile "KRB5CCNAME=$env(KRB5CCNAME)"
 	puts $envfile "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
 	puts $envfile "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
-	puts $envfile "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
+	if [info exists env(KRB5_KDC_PROFILE)] {
+	    puts $envfile "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
+	} else {
+	    puts $envfile "unset KRB5_KDC_PROFILE"
+	}
 	puts $envfile "export KRB5_CONFIG KRB5CCNAME KRB5RCACHEDIR"
 	puts $envfile "export KERBEROS_SERVER KRB5_KDC_PROFILE"
 	foreach i $krb5_init_vars {
@@ -1162,13 +1180,17 @@ proc setup_kerberos_env { {type client} } {
 	}
 	close $envfile
     }
-    if ![file exists $tmppwd/env.csh] {
-	set envfile [open $tmppwd/env.csh w]
+    if ![file exists $tmppwd/$type-env.csh] {
+	set envfile [open $tmppwd/$type-env.csh w]
 	puts $envfile "setenv KRB5_CONFIG $env(KRB5_CONFIG)"
 	puts $envfile "setenv KRB5CCNAME $env(KRB5CCNAME)"
 	puts $envfile "setenv KRB5RCACHEDIR $env(KRB5RCACHEDIR)"
 	puts $envfile "setenv KERBEROS_SERVER $env(KERBEROS_SERVER)"
-	puts $envfile "setenv KRB5_KDC_PROFILE $env(KRB5_KDC_PROFILE)"
+	if [info exists env(KRB5_KDC_PROFILE)] {
+	    puts $envfile "setenv KRB5_KDC_PROFILE $env(KRB5_KDC_PROFILE)"
+	} else {
+	    puts $envfile "unsetenv KRB5_KDC_PROFILE"
+	}
 	foreach i $krb5_init_vars {
 		regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
 		puts $envfile "setenv $evar $env($evar)"
@@ -1219,16 +1241,11 @@ proc restore_kerberos_env { } {
 # pass at relevant points.  Returns 1 on success, 0 on failure.
 
 proc setup_kerberos_db { standalone } {
-    global REALMNAME
-    global KDB5_UTIL
-    global KADMIN_LOCAL
-    global KEY
-    global tmppwd
+    global REALMNAME KDB5_UTIL KADMIN_LOCAL KEY
+    global tmppwd hostname
     global spawn_id
-    global des3_krbtgt
-    global tgt_support_desmd5
-    global multipass_name
-    global last_passname_db
+    global des3_krbtgt tgt_support_desmd5
+    global multipass_name last_passname_db
 
     set failall 0
 
@@ -1237,11 +1254,7 @@ proc setup_kerberos_db { standalone } {
 	return 1
     }
 
-#    catch "file delete [glob -nocomplain $tmppwd/db* $tmppwd/adb*]"
     delete_db
-
-    # Creating a new database means we need a new srvtab.
-    file delete $tmppwd/srvtab
 
     envstack_push
     if { ![setup_kerberos_files] || ![setup_kerberos_env kdc] } {
@@ -1339,8 +1352,6 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Add an admin user.
-#send_user "will run: $KADMIN_LOCAL -r $REALMNAME\n"
-#exec xterm
     set test "kadmin.local ank krbtest/admin"
     set body {
 	if $failall {
@@ -1378,7 +1389,52 @@ proc setup_kerberos_db { standalone } {
 	if $standalone {
 	    fail $test
 	} else {
-#	    file delete $tmppwd/db.ok $tmppwd/adb.db
+	    delete_db
+	}
+    } else {
+	if $standalone {
+	    pass $test
+	}
+    }
+
+    # Add an incremental-propagation service.
+    set test "kadmin.local ank kiprop/$hostname"
+    set body {
+	if $failall {
+	    break
+	}
+	spawn $KADMIN_LOCAL -r $REALMNAME
+	verbose "starting $test"
+	expect_after $def_exp_after
+
+	expect "kadmin.local: "
+	send "ank kiprop/$hostname@$REALMNAME\r"
+	# It echos...
+	expect "ank kiprop/$hostname@$REALMNAME\r"
+	expect "Enter password for principal \"kiprop/$hostname@$REALMNAME\":"
+	send "kiproppass$KEY\r"
+	expect "Re-enter password for principal \"kiprop/$hostname@$REALMNAME\":"
+	send "kiproppass$KEY\r"
+	expect {
+	    "Principal \"kiprop/$hostname@$REALMNAME\" created" { }
+	    "Principal or policy already exists while creating*" { }
+	}
+	expect "kadmin.local: "
+	send "quit\r"
+	expect eof
+	catch expect_after
+	if ![check_exit_status kadmin_local] {
+	    break
+	}
+    }
+    set ret [catch $body]
+    catch "expect eof"
+    catch expect_after
+    if $ret {
+	set failall 1
+	if $standalone {
+	    fail $test
+	} else {
 	    delete_db
 	}
     } else {
@@ -1421,7 +1477,6 @@ proc setup_kerberos_db { standalone } {
 	    if $standalone {
 		fail $test
 	    } else {
-#		file delete $tmppwd/db.ok $tmppwd/adb.db
 		delete_db
 	    }
 	} else {
@@ -1464,7 +1519,6 @@ proc setup_kerberos_db { standalone } {
 	    if $standalone {
 		fail $test
 	    } else {
-#		file delete $tmppwd/db.ok $tmppwd/adb.db
 		delete_db
 	    }
 	} else {
@@ -1480,6 +1534,122 @@ proc setup_kerberos_db { standalone } {
 
     set last_passname_db $multipass_name
     return 1
+}
+
+# setup_slave_db
+# Initialize the slave Kerberos database.  Returns 1 on success, 0 on
+# failure.
+
+proc setup_slave_db { } {
+    global REALMNAME
+    global KDB5_UTIL
+    global KADMIN_LOCAL
+    global KEY
+    global tmppwd
+    global spawn_id
+
+    set failall 0
+
+    envstack_push
+    if { ![setup_kerberos_files] || ![setup_kerberos_env slave] } {
+	set failall 1
+    }
+
+    # Set up a common expect_after for use in multiple places.
+    set def_exp_after {
+	timeout {
+	    set test "$test (timeout)"
+	    break
+	}
+	eof {
+	    set test "$test (eof)"
+	    break
+	}
+    }
+
+    set test "slave kdb5_util create "
+    set body {
+	if $failall {
+	    break
+	}
+	#exec xterm
+	verbose "starting $test"
+	spawn $KDB5_UTIL -r $REALMNAME create
+	expect_after $def_exp_after
+
+	expect "Enter KDC database master key:"
+
+	set test "slave kdb5_util create (verify)"
+	send "masterkey$KEY\r"
+	expect "Re-enter KDC database master key to verify:"
+
+	set test "slave kdb5_util create"
+	send "masterkey$KEY\r"
+	expect {
+	    -re "\[Cc\]ouldn't" {
+		expect eof
+		break
+	    }
+	    "Cannot find/read stored" exp_continue
+	    "Warning: proceeding without master key" exp_continue
+	    eof { }
+	}
+	catch expect_after
+	if ![check_exit_status kdb5_util] {
+	    break
+	}
+    }
+    set ret [catch $body]
+    catch expect_after
+    if $ret {
+	set failall 1
+    }
+
+    # Stash the master key in a file.
+    set test "slave kdb5_util stash"
+    set body {
+	if $failall {
+	    break
+	}
+	spawn $KDB5_UTIL  -r $REALMNAME stash
+	verbose "starting $test"
+	expect_after $def_exp_after
+	expect "Enter KDC database master key:"
+	send "masterkey$KEY\r"
+	expect eof
+	catch expect_after
+	if ![check_exit_status kdb5_util] {
+	    break
+	}
+    }
+    set ret [catch $body]
+    catch "expect eof"
+    catch expect_after
+    if $ret {
+	set failall 1
+	delete_db
+    }
+
+    if !$failall {
+	# create the admin database lock file
+	catch "exec touch $tmppwd/slave-adb.lock"
+    }
+
+    return [expr !$failall]
+}
+
+proc start_kpropd {} {
+    global kpropd_pid kpropd_spawn_id KPROPD T_INETD KDB5_UTIL portbase tmppwd
+    global spawn_id
+
+    envstack_push
+    setup_kerberos_env slave
+    spawn $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
+    set kpropd_pid [exp_pid]
+    set kpropd_spawn_id $spawn_id
+#    send_user [list $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl]\n
+#    spawn_shell
+    envstack_pop
 }
 
 proc start_tail { fname spawnid_var pid_var which standalone } {
@@ -1980,8 +2150,8 @@ proc setup_srvtab { standalone {id host} } {
 	}
     }
     expect "kadmin.local:  "
-    send "xst -k $hostname-new-srvtab $id/$hostname\r"
-    expect "xst -k $hostname-new-srvtab $id/$hostname\r\n"
+    send "xst -k $hostname-new-srvtab $id/$hostname kiprop/$hostname\r"
+    expect "xst -k $hostname-new-srvtab $id/$hostname kiprop/$hostname\r\n"
     expect {
 	-re ".*Entry for principal $id/$hostname.* added to keytab WRFILE:$hostname-new-srvtab." { }
 	-re "\r\nkadmin.local:  " {
@@ -2804,7 +2974,7 @@ proc krb_exit { } {
 # helpful sometimes for debugging the test suite
 proc export_debug_envvars { } {
     global env
-    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME GSSCLIENT} {
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME GSSCLIENT KPROPLOG} {
 	global $i
 	if [info exists $i] { set env($i) [set $i] }
     }
