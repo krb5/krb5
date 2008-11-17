@@ -182,7 +182,6 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 					&((*auth_context)->authentp),
 					check_valid_flag)))
 	goto cleanup;
-
     if (!krb5_principal_compare(context, (*auth_context)->authentp->client,
 				req->ticket->enc_part2->client)) {
 	retval = KRB5KRB_AP_ERR_BADMATCH;
@@ -301,6 +300,26 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	/* no etype check needed */;
     } else if ((*auth_context)->permitted_etypes == NULL) {
 	int etype;
+        size_t size_etype_enc = 3 * sizeof(krb5_enctype); /*  upto three types */
+        size_t size_etype_bool = 3 * sizeof(krb5_boolean);
+        krb5_etypes_permitted etypes;
+        memset(&etypes, 0, sizeof etypes);
+
+        etypes.etype = (krb5_enctype*) malloc( size_etype_enc );
+        etypes.etype_ok = (krb5_boolean*) malloc( size_etype_bool );
+        memset(etypes.etype, 0, size_etype_enc );
+        memset(etypes.etype_ok, 0, size_etype_bool );
+
+        etypes.etype[etypes.etype_count++] = req->ticket->enc_part.enctype;
+        etypes.etype[etypes.etype_count++] = req->ticket->enc_part2->session->enctype;
+        if ( (*auth_context)->authentp->subkey) {
+            etypes.etype[etypes.etype_count++] = (*auth_context)->authentp->subkey->enctype;
+        }
+
+        retval = krb5_is_permitted_enctype_ext(context, &etypes);
+
+
+#if 0
 	/* check against the default set */
 	if ((!krb5_is_permitted_enctype(context,
 					etype = req->ticket->enc_part.enctype)) ||
@@ -309,8 +328,27 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	    (((*auth_context)->authentp->subkey) &&
 	     !krb5_is_permitted_enctype(context,
 					etype = (*auth_context)->authentp->subkey->enctype))) {
-	    char enctype_name[30];
-	    retval = KRB5_NOPERM_ETYPE;
+#endif
+        if  ( retval == 0  /* all etypes  are not permitted */ ||  
+              ( !etypes.etype_ok[0] || !etypes.etype_ok[1] ||
+              (((*auth_context)->authentp->subkey) && !etypes.etype_ok[etypes.etype_count-1])))
+        {
+            char enctype_name[30];
+            retval = KRB5_NOPERM_ETYPE;
+
+            if (  !etypes.etype_ok[0] )
+            {
+                etype =  etypes.etype[1];
+            }
+            else if (  !etypes.etype_ok[1] )
+            {
+                etype =  etypes.etype[1];
+            }
+            else
+            {
+                etype =  etypes.etype[2];
+            }
+
 	    if (krb5_enctype_to_string(etype, enctype_name, sizeof(enctype_name)) == 0)
 		krb5_set_error_message(context, retval,
 				       "Encryption type %s not permitted",
@@ -453,7 +491,6 @@ krb5_rd_req_decoded_anyflag(krb5_context context,
 				   0); /* don't check_valid_flag */
   return retval;
 }
-
 static krb5_error_code
 decrypt_authenticator(krb5_context context, const krb5_ap_req *request,
 		      krb5_authenticator **authpp, int is_ap_req)
@@ -488,3 +525,5 @@ free(scratch.data);}
     clean_scratch();
     return retval;
 }
+
+
