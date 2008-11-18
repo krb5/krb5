@@ -1124,6 +1124,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os
+	lib/krb5/unicode
 
 	lib/gssapi lib/gssapi/generic lib/gssapi/krb5
 	lib/gssapi/mechglue lib/gssapi/spnego
