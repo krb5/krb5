@@ -445,7 +445,7 @@ int krb5int_utf8_isupper(const char * p)
 char *krb5int_utf8_strchr(const char *str, const char *chr)
 {
     for ( ; *str != '\0'; KRB5_UTF8_INCR(str)) {
-	if (krb5int_utf8_to_ucs2(str) == krb5int_utf8_to_ucs2(chr)) {
+	if (krb5int_utf8_to_ucs4(str) == krb5int_utf8_to_ucs4(chr)) {
 	    return (char *)str;
 	} 
     }
@@ -461,7 +461,7 @@ size_t krb5int_utf8_strcspn(const char *str, const char *set)
 
     for (cstr = str; *cstr != '\0'; KRB5_UTF8_INCR(cstr)) {
 	for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
-	    if (krb5int_utf8_to_ucs2(cstr) == krb5int_utf8_to_ucs2(cset)) {
+	    if (krb5int_utf8_to_ucs4(cstr) == krb5int_utf8_to_ucs4(cset)) {
 		return cstr - str;
 	    } 
 	}
@@ -482,7 +482,7 @@ size_t krb5int_utf8_strspn(const char *str, const char *set)
 		return cstr - str;
 	    }
 
-	    if (krb5int_utf8_to_ucs2(cstr) == krb5int_utf8_to_ucs2(cset)) {
+	    if (krb5int_utf8_to_ucs4(cstr) == krb5int_utf8_to_ucs4(cset)) {
 		break;
 	    } 
 	}
@@ -498,7 +498,7 @@ char *krb5int_utf8_strpbrk(const char *str, const char *set)
 	const char *cset;
 
 	for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
-	   if (krb5int_utf8_to_ucs2(str) == krb5int_utf8_to_ucs2(cset)) {
+	   if (krb5int_utf8_to_ucs4(str) == krb5int_utf8_to_ucs4(cset)) {
 		return (char *)str;
 	    } 
 	}
