@@ -221,6 +221,20 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 			    &tmp);
 	ctx->library_options = tmp ? KRB5_LIBOPT_SYNC_KDCTIME : 0;
 
+#define DEFAULT_CASE_SENSITIVE 1
+	profile_get_boolean(ctx->profile, "libdefaults",
+			    "case_sensitive", 0, DEFAULT_CASE_SENSITIVE,
+			    &tmp);
+	if (tmp == 0)
+	    ctx->library_options |= KRB5_LIBOPT_CASE_INSENSITIVE;
+
+#define DEFAULT_UTF8 0
+	profile_get_boolean(ctx->profile, "libdefaults",
+			    "utf8", 0, DEFAULT_UTF8,
+			    &tmp);
+	if (tmp != 0)
+	    ctx->library_options |= KRB5_LIBOPT_UTF8;
+
 	/*
 	 * We use a default file credentials cache of 3.  See
 	 * lib/krb5/krb/ccache/file/fcc.h for a description of the
