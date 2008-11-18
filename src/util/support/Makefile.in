@@ -44,6 +44,8 @@ STLIBOBJS= \
 	k5buf.o \
 	gmt_mktime.o \
 	fake-addrinfo.o \
+	utf8.o \
+	utf8_conv.o \
 	$(STRLCPY_ST_OBJ) \
 	$(PRINTF_ST_OBJ) \
 	$(MKSTEMP_ST_OBJ)
@@ -56,6 +58,8 @@ LIBOBJS= \
 	$(OUTPRE)k5buf.$(OBJEXT) \
 	$(OUTPRE)gmt_mktime.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
+	$(OUTPRE)utf8.$(OBJEXT) \
+	$(OUTPRE)utf8_conv.$(OBJEXT) \
 	$(STRLCPY_OBJ) \
 	$(PRINTF_OBJ) \
 	$(MKSTEMP_OBJ)
@@ -73,6 +77,8 @@ SRCS=\
 	$(srcdir)/k5buf.c \
 	$(srcdir)/gmt_mktime.c \
 	$(srcdir)/fake-addrinfo.c \
+	$(srcdir)/utf8.c \
+	$(srcdir)/utf8_conv.c \
 	$(srcdir)/strlcpy.c \
 	$(srcdir)/printf.c \
 	$(srcdir)/mkstemp.c \
