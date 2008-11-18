@@ -123,8 +123,8 @@ krb5_data * krb5int_utf8_normalize(
     unsigned);
 
 int krb5int_utf8_normcmp(
-    krb5_data *,
-    krb5_data *,
+    const krb5_data *,
+    const krb5_data *,
     unsigned);
 
 #endif /* K5_UNICODE_H */

@@ -305,8 +305,8 @@ krb5int_utf8_normalize(
 /* slow, should be optimized */
 int 
 krb5int_utf8_normcmp(
-		     krb5_data * data1,
-		     krb5_data * data2,
+		     const krb5_data * data1,
+		     const krb5_data * data2,
 		     unsigned flags)
 {
     int i, l1, l2, len, ulen, res = 0;
