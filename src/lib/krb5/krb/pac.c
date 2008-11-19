@@ -648,8 +648,9 @@ k5_insert_client_info(krb5_context context,
 	princ_name[len - 1] = '\0';
     }
 
-    ret = krb5int_utf8cs_to_ucs2les(princ_name, strlen(princ_name),
-				    &princ_name_ucs2, &princ_name_ucs2_len);
+    ret = krb5int_utf8s_to_ucs2les(princ_name,
+				   &princ_name_ucs2,
+				   &princ_name_ucs2_len);
     if (ret != 0)
 	goto cleanup;
 
