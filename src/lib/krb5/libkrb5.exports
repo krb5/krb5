@@ -349,6 +349,7 @@ krb5_os_init_context
 krb5_os_localaddr
 krb5_overridekeyname
 krb5_parse_name
+krb5_parse_name_flags
 krb5_principal2salt
 krb5_principal2salt_norealm
 krb5_principal_compare
@@ -462,6 +463,7 @@ krb5_unlock_file
 krb5_unpack_full_ipaddr
 krb5_unparse_name
 krb5_unparse_name_ext
+krb5_unparse_name_flags
 krb5_us_timeofday
 krb5_use_natural_time
 krb5_validate_times
