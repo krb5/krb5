@@ -68,6 +68,12 @@ struct krb5_pac_data {
 
 #define PAC_SIGNATURE_DATA_LENGTH   4
 
+static krb5_error_code
+k5_pac_locate_buffer(krb5_context context,
+		     const krb5_pac pac,
+		     krb5_ui_4 type,
+		     krb5_data *data);
+
 /*
  * Add a buffer to the provided PAC and update header.
  */
@@ -82,6 +88,11 @@ k5_pac_add_buffer(krb5_context context,
     PACTYPE *header;
     size_t header_len, i, pad = 0;
     char *pac_data;
+
+    /* Check there isn't already a buffer of this type */
+    if (k5_pac_locate_buffer(context, pac, type, NULL) == 0) {
+	return EINVAL;
+    }
 
     header = (PACTYPE *)realloc(pac->pac,
 				sizeof(PACTYPE) +
@@ -175,14 +186,15 @@ k5_pac_locate_buffer(krb5_context context,
 
     for (i = 0; i < pac->pac->cBuffers; i++) {
 	if (pac->pac->Buffers[i].ulType == type) {
-	    buffer = &pac->pac->Buffers[i];
-	    break;
+	    if (buffer == NULL)
+		buffer = &pac->pac->Buffers[i];
+	    else
+		return EINVAL;
 	}
     }
 
-    if (buffer == NULL) {
+    if (buffer == NULL)
 	return ENOENT;
-    }
 
     assert(buffer->Offset + buffer->cbBufferSize <= pac->data.length);
 
@@ -783,6 +795,9 @@ krb5int_pac_sign(krb5_context context,
     krb5_cksumtype server_cksumtype, privsvr_cksumtype;
     krb5_crypto_iov iov[2];
 
+    data->length = 0;
+    data->data = NULL;
+
     if (principal != NULL) {
 	ret = k5_insert_client_info(context, pac, authtime, principal);
 	if (ret != 0)
@@ -809,7 +824,7 @@ krb5int_pac_sign(krb5_context context,
     if (ret != 0)
 	return ret;
 
-    /* Ggenerate the server checksum over the entire PAC */
+    /* Generate the server checksum over the entire PAC */
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data = pac->data;
 
