@@ -118,17 +118,21 @@ krb5int_ucs2s_to_utf8s(const krb5_ucs2 *ucs2s,
 		       size_t *utf8slen);
 
 int
+krb5int_ucs2cs_to_utf8s(const krb5_ucs2 *ucs2s,
+			size_t ucs2slen,
+		        char **utf8s,
+		        size_t *utf8slen);
+
+int
 krb5int_ucs2les_to_utf8s(const unsigned char *ucs2les,
 			 char **utf8s,
 			 size_t *utf8slen);
 
-#if 0
 int
 krb5int_ucs2lecs_to_utf8s(const unsigned char *ucs2les,
 			  size_t ucs2leslen,
 			  char **utf8s,
 			  size_t *utf8slen);
-#endif
 
 int
 krb5int_utf8s_to_ucs2s(const char *utf8s,

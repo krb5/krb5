@@ -242,10 +242,13 @@ krb5int_utf8cs_to_ucs2les(const char *utf8s,
    Convert a wide char string to a UTF-8 string.
    No more than 'count' bytes will be written to the output buffer.
    Return the # of bytes written to the output buffer, excl null terminator.
+
+   ucs2len is -1 if the UCS-2 string is NUL terminated, otherwise it is the
+   length of the UCS-2 string in characters
 */
 static ssize_t
 k5_ucs2s_to_utf8s(char *utf8str, const krb5_ucs2 *ucs2str,
-		  size_t count, int little_endian)
+		  size_t count, ssize_t ucs2len, int little_endian)
 {
     int len = 0;
     int n;
@@ -257,7 +260,7 @@ k5_ucs2s_to_utf8s(char *utf8str, const krb5_ucs2 *ucs2str,
 
     if (utf8str == NULL)	/* Just compute size of output, excl null */
     {
-	while (*ucs2str) {
+	while (ucs2len == -1 ? *ucs2str : --ucs2len >= 0) {
 	    /* Get UTF-8 size of next wide char */
 #ifdef K5_BE
 	    if (little_endian)
@@ -280,7 +283,7 @@ k5_ucs2s_to_utf8s(char *utf8str, const krb5_ucs2 *ucs2str,
     /* Do the actual conversion. */
 
     n = 1;					/* In case of empty ucs2str */
-    while (*ucs2str != 0) {
+    while (ucs2len == -1 ? *ucs2str != 0 : --ucs2len >= 0) {
 #ifdef K5_BE
 	if (little_endian)
 	    ch = SWAP16(*ucs2str++);
@@ -321,7 +324,7 @@ krb5int_ucs2s_to_utf8s(const krb5_ucs2 *ucs2s,
 {
     ssize_t len;
 
-    len = k5_ucs2s_to_utf8s(NULL, ucs2s, 0, 0);
+    len = k5_ucs2s_to_utf8s(NULL, ucs2s, 0, -1, 0);
     if (len < 0) {
 	return EINVAL;
     }
@@ -331,7 +334,7 @@ krb5int_ucs2s_to_utf8s(const krb5_ucs2 *ucs2s,
 	return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, ucs2s, len + 1, 0);
+    len = k5_ucs2s_to_utf8s(*utf8s, ucs2s, len + 1, -1, 0);
     if (len < 0) {
 	free(*utf8s);
 	*utf8s = NULL;
@@ -339,7 +342,7 @@ krb5int_ucs2s_to_utf8s(const krb5_ucs2 *ucs2s,
     }
 
     if (utf8slen != NULL) {
-	*utf8slen = len + 1;
+	*utf8slen = len;
     }
 
     return 0;
@@ -352,7 +355,7 @@ krb5int_ucs2les_to_utf8s(const unsigned char *ucs2les,
 {
     ssize_t len;
 
-    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2les, 0, 1);
+    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2les, 0, -1, 1);
     if (len < 0)
 	return EINVAL;
 
@@ -361,7 +364,7 @@ krb5int_ucs2les_to_utf8s(const unsigned char *ucs2les,
 	return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les, len + 1, 1);
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les, len + 1, -1, 1);
     if (len < 0) {
 	free(*utf8s);
 	*utf8s = NULL;
@@ -369,7 +372,69 @@ krb5int_ucs2les_to_utf8s(const unsigned char *ucs2les,
     }
 
     if (utf8slen != NULL) {
-	*utf8slen = len + 1;
+	*utf8slen = len;
+    }
+
+    return 0;
+}
+
+int
+krb5int_ucs2cs_to_utf8s(const krb5_ucs2 *ucs2s,
+                        size_t ucs2slen,
+                        char **utf8s,
+                        size_t *utf8slen)
+{
+    ssize_t len;
+
+    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2s, 0, ucs2slen, 0);
+    if (len < 0)
+	return EINVAL;
+
+    *utf8s = (char *)malloc(len + 1);
+    if (*utf8s == NULL) {
+	return ENOMEM;
+    }
+
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2s, len + 1, ucs2slen, 0);
+    if (len < 0) {
+	free(*utf8s);
+	*utf8s = NULL;
+	return EINVAL;
+    }
+
+    if (utf8slen != NULL) {
+	*utf8slen = len;
+    }
+
+    return 0;
+}
+
+int
+krb5int_ucs2lecs_to_utf8s(const unsigned char *ucs2les,
+                          size_t ucs2leslen,
+                          char **utf8s,
+                          size_t *utf8slen)
+{
+    ssize_t len;
+
+    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2les, 0, ucs2leslen, 1);
+    if (len < 0)
+	return EINVAL;
+
+    *utf8s = (char *)malloc(len + 1);
+    if (*utf8s == NULL) {
+	return ENOMEM;
+    }
+
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les, len + 1, ucs2leslen, 1);
+    if (len < 0) {
+	free(*utf8s);
+	*utf8s = NULL;
+	return EINVAL;
+    }
+
+    if (utf8slen != NULL) {
+	*utf8slen = len;
     }
 
     return 0;
