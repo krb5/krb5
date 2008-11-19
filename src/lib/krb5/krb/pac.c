@@ -768,7 +768,7 @@ k5_pac_encode_header(krb5_context context, krb5_pac pac)
     return 0;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5int_pac_sign(krb5_context context,
 		 krb5_pac pac,
 		 time_t authtime,
