@@ -64,6 +64,7 @@ STLIBOBJS= \
 	mk_req.o	\
 	mk_req_ext.o	\
 	mk_safe.o	\
+	pac.o		\
 	parse.o		\
 	pr_to_salt.o	\
 	preauth.o	\
@@ -151,7 +152,8 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)mk_req.$(OBJEXT)	\
 	$(OUTPRE)mk_req_ext.$(OBJEXT)	\
 	$(OUTPRE)mk_safe.$(OBJEXT)	\
-	$(OUTPRE)parse.$(OBJEXT)		\
+	$(OUTPRE)pac.$(OBJEXT)		\
+	$(OUTPRE)parse.$(OBJEXT)	\
 	$(OUTPRE)pr_to_salt.$(OBJEXT)	\
 	$(OUTPRE)preauth.$(OBJEXT)	\
 	$(OUTPRE)preauth2.$(OBJEXT)	\
@@ -239,6 +241,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/mk_req.c	\
 	$(srcdir)/mk_req_ext.c	\
 	$(srcdir)/mk_safe.c	\
+	$(srcdir)/pac.c		\
 	$(srcdir)/parse.c	\
 	$(srcdir)/pr_to_salt.c	\
 	$(srcdir)/preauth.c	\
@@ -876,6 +879,15 @@ mk_safe.so mk_safe.po $(OUTPRE)mk_safe.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h auth_con.h cleanup.h \
   mk_safe.c
+pac.so pac.po $(OUTPRE)pac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h pac.c
 parse.so parse.po $(OUTPRE)parse.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
