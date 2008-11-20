@@ -249,3 +249,10 @@ krb5_unparse_name_flags(krb5_context context, krb5_const_principal principal,
     return k5_unparse_name(context, principal, flags, name, NULL);
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_unparse_name_flags_ext(krb5_context context, krb5_const_principal principal,
+			    int flags, char **name, unsigned int *size)
+{
+    return k5_unparse_name(context, principal, flags, name, size);
+}
+

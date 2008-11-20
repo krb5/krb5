@@ -1606,6 +1606,12 @@ krb5_error_code KRB5_CALLCONV krb5_unparse_name_flags
 		krb5_const_principal,
 		int,
 		char **);
+krb5_error_code KRB5_CALLCONV krb5_unparse_name_flags_ext
+	(krb5_context,
+		krb5_const_principal,
+		int,
+		char **,
+		unsigned int *);
 
 /* Novell compat macros */
 #define krb5_unparse_name_short(_context, _principal, _name)	\
