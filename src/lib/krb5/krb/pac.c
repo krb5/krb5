@@ -56,17 +56,15 @@ typedef struct _PACTYPE {
     PAC_INFO_BUFFER Buffers[1];
 } PACTYPE;
 
-#define PACTYPE_LENGTH		8
 #define PAC_ALIGNMENT		8
+#define PACTYPE_LENGTH		8
+#define PAC_SIGNATURE_DATA_LENGTH   4
+#define PAC_CLIENT_INFO_LENGTH	10
 
 struct krb5_pac_data {
     PACTYPE *pac;	/* PAC header + info buffer array */
     krb5_data data;	/* PAC data (including uninitialised header) */
 };
-
-#define PAC_CLIENT_INFO_LENGTH	10
-
-#define PAC_SIGNATURE_DATA_LENGTH   4
 
 static krb5_error_code
 k5_pac_locate_buffer(krb5_context context,
@@ -88,6 +86,8 @@ k5_pac_add_buffer(krb5_context context,
     PACTYPE *header;
     size_t header_len, i, pad = 0;
     char *pac_data;
+
+    assert((data->data == NULL) == zerofill);
 
     /* Check there isn't already a buffer of this type */
     if (k5_pac_locate_buffer(context, pac, type, NULL) == 0) {
@@ -166,8 +166,10 @@ krb5_pac_free(krb5_context context,
 	      krb5_pac pac)
 {
     if (pac != NULL) {
-	if (pac->data.data != NULL)
+	if (pac->data.data != NULL) {
+	    memset(pac->data.data, 0, pac->data.length);
 	    free(pac->data.data);
+	}
 	if (pac->pac != NULL)
 	    free(pac->pac);
 	memset(pac, 0, sizeof(*pac));
@@ -615,10 +617,7 @@ k5_insert_client_info(krb5_context context,
 {
     krb5_error_code ret;
     krb5_data client_info;
-    char *princ_name = NULL;
-    char *default_realm = NULL;
-    krb5_boolean local;
-    krb5_principal_data canon_principal;
+    char *princ_name_utf8 = NULL;
     unsigned char *princ_name_ucs2 = NULL, *p;
     size_t princ_name_ucs2_len = 0;
     krb5_ui_8 nt_authtime;
@@ -629,38 +628,12 @@ k5_insert_client_info(krb5_context context,
 	goto cleanup;
     }
 
-    ret = krb5_get_default_realm(context, &default_realm);
+    ret = krb5_unparse_name_flags(context, principal,
+				  KRB5_PRINCIPAL_UNPARSE_SHORT, &princ_name_utf8);
     if (ret != 0)
 	goto cleanup;
 
-    memset(&canon_principal, 0, sizeof(canon_principal));
-
-    krb5_princ_realm(context, &canon_principal)->length = strlen(default_realm);
-    krb5_princ_realm(context, &canon_principal)->data = default_realm;
-
-    local = krb5_realm_compare(context, &canon_principal, principal);
-    if (local) {
-	/* realm is not included in PAC */
-	krb5_princ_realm(context, &canon_principal)->length = 0;
-	krb5_princ_realm(context, &canon_principal)->data = "";
-    }
-
-    /* XXX really need to use krb5_unparse_name_short */
-    ret = krb5_unparse_name(context, principal, &princ_name);
-    if (ret != 0)
-	goto cleanup;
-
-    if (local) {
-	size_t len = strlen(princ_name);
-
-	if (princ_name[len] != '@') {
-	    ret = EINVAL;
-	    goto cleanup;
-	}
-	princ_name[len - 1] = '\0';
-    }
-
-    ret = krb5int_utf8s_to_ucs2les(princ_name,
+    ret = krb5int_utf8s_to_ucs2les(princ_name_utf8,
 				   &princ_name_ucs2,
 				   &princ_name_ucs2_len);
     if (ret != 0)
@@ -688,12 +661,10 @@ k5_insert_client_info(krb5_context context,
     memcpy(p, princ_name_ucs2, 2 * princ_name_ucs2_len);
  
 cleanup:
-    if (princ_name != NULL)
-	free(princ_name);
+    if (princ_name_utf8 != NULL)
+	free(princ_name_utf8);
     if (princ_name_ucs2 != NULL)
 	free(princ_name_ucs2);
-    if (default_realm != NULL)
-	krb5_free_default_realm(context, default_realm);
 
     return ret;
 }
