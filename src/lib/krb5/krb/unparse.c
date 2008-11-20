@@ -109,8 +109,8 @@ copy_component_quoting(char *dest, const krb5_data *src, int flags)
 	    *q++ = '\\';
 	    *q++ = 'b';
 	    break;
-#if 1
-	/* XXX Heimdal escapes spaces in principal names upon unparsing */
+#if 0
+	/* Heimdal escapes spaces in principal names upon unparsing */
 	case ' ':
 	    *q++ = '\\';
 	    *q++ = ' ';
