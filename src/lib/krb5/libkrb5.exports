@@ -472,6 +472,7 @@ krb5_unpack_full_ipaddr
 krb5_unparse_name
 krb5_unparse_name_ext
 krb5_unparse_name_flags
+krb5_unparse_name_flags_ext
 krb5_us_timeofday
 krb5_use_natural_time
 krb5_validate_times
