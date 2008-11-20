@@ -250,7 +250,7 @@ size_t krb5int_ucs4_to_utf8(krb5_ucs4 c, char *buf)
 
 size_t krb5int_ucs2_to_utf8(krb5_ucs2 c, char *buf)
 {
-    return krb5int_ucs2_to_utf8((krb5_ucs4)c, buf);
+    return krb5int_ucs4_to_utf8((krb5_ucs4)c, buf);
 }
 
 #define KRB5_UCS_UTF8LEN(c)	\
