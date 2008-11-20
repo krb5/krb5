@@ -1644,6 +1644,10 @@ krb5_boolean KRB5_CALLCONV krb5_principal_compare
 	(krb5_context,
 		krb5_const_principal,
 		krb5_const_principal);
+krb5_boolean KRB5_CALLCONV krb5_principal_compare_any_realm
+	(krb5_context,
+		krb5_const_principal,
+		krb5_const_principal);
 krb5_error_code KRB5_CALLCONV  krb5_init_keyblock
 		(krb5_context, krb5_enctype enctype,
 		size_t length, krb5_keyblock **out); 

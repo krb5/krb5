@@ -29,34 +29,56 @@
  */
 
 #include "k5-int.h"
+#include "k5-unicode.h"
 
 krb5_boolean KRB5_CALLCONV
 krb5_realm_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
 {
-    if (!data_eq(*krb5_princ_realm(context, princ1),
-		 *krb5_princ_realm(context, princ2)))
+    const krb5_data *realm1 = krb5_princ_realm(context, princ1);
+    const krb5_data *realm2 = krb5_princ_realm(context, princ2);
+
+    if (realm1->length != realm2->length)
 	return FALSE;
 
-    return TRUE;
+    return (context->library_options & KRB5_LIBOPT_CASE_INSENSITIVE) ?
+	(strncasecmp(realm1->data, realm2->data, realm2->length) == 0) :
+	(memcmp(realm1->data, realm2->data, realm2->length)== 0);
 }
 
-krb5_boolean KRB5_CALLCONV
-krb5_principal_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
+static krb5_boolean
+k5_principal_compare(krb5_context context,
+		     krb5_const_principal princ1,
+		     krb5_const_principal princ2,
+		     krb5_boolean ignore_realm)
 {
     register int i;
     krb5_int32 nelem;
+    unsigned int casefold = (context->library_options & KRB5_LIBOPT_CASE_INSENSITIVE);
+    unsigned int utf8 = (context->library_options & KRB5_LIBOPT_UTF8);
 
     nelem = krb5_princ_size(context, princ1);
     if (nelem != krb5_princ_size(context, princ2))
 	return FALSE;
 
-    if (! krb5_realm_compare(context, princ1, princ2))
+    if (!ignore_realm && !krb5_realm_compare(context, princ1, princ2))
 	return FALSE;
 
     for (i = 0; i < (int) nelem; i++) {
 	register const krb5_data *p1 = krb5_princ_component(context, princ1, i);
 	register const krb5_data *p2 = krb5_princ_component(context, princ2, i);
-	if (!data_eq(*p1, *p2))
+	int cmp;
+
+	if (casefold) {
+	    if (utf8)
+		cmp = krb5int_utf8_normcmp(p1, p2, KRB5_UTF8_CASEFOLD);
+	    else
+		cmp = p1->length == p2->length ?
+			strncasecmp(p1->data, p2->data, p2->length) :
+			p1->length - p2->length;
+	} else
+	    cmp = !data_eq(*p1, *p2);
+
+	if (cmp != 0)
 	    return FALSE;
     }
     return TRUE;
@@ -81,3 +103,20 @@ krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *r)
     else
         return FALSE;
 }
+
+krb5_boolean KRB5_CALLCONV
+krb5_principal_compare(krb5_context context,
+		       krb5_const_principal princ1,
+		       krb5_const_principal princ2)
+{
+    return k5_principal_compare(context, princ1, princ2, FALSE);
+}
+
+krb5_boolean KRB5_CALLCONV
+krb5_principal_compare_any_realm(krb5_context context,
+				 krb5_const_principal princ1,
+				 krb5_const_principal princ2)
+{
+    return k5_principal_compare(context, princ1, princ2, TRUE);
+}
+

@@ -353,6 +353,7 @@ krb5_parse_name_flags
 krb5_principal2salt
 krb5_principal2salt_norealm
 krb5_principal_compare
+krb5_principal_compare_any_realm
 krb5_process_padata
 krb5_prompter_posix
 krb5_rc_close
