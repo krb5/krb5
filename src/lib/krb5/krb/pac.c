@@ -789,14 +789,10 @@ krb5int_pac_sign(krb5_context context,
     if (ret != 0)
 	return ret;
 
-    assert(server_cksum.length > PAC_SIGNATURE_DATA_LENGTH);
-
     ret = k5_insert_checksum(context, pac, PAC_PRIVSVR_CHECKSUM,
 			     privsvr_key, &privsvr_cksumtype);
     if (ret != 0)
 	return ret;
-
-    assert(privsvr_cksum.length > PAC_SIGNATURE_DATA_LENGTH);
 
     /* Now, encode the PAC header so that the checksums will include it */
     ret = k5_pac_encode_header(context, pac);
@@ -807,6 +803,8 @@ krb5int_pac_sign(krb5_context context,
     ret = k5_pac_locate_buffer(context, pac, PAC_SERVER_CHECKSUM, &server_cksum);
     if (ret != 0)
 	return ret;
+
+    assert(server_cksum.length > PAC_SIGNATURE_DATA_LENGTH);
 
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data = pac->data;
@@ -825,6 +823,8 @@ krb5int_pac_sign(krb5_context context,
     ret = k5_pac_locate_buffer(context, pac, PAC_PRIVSVR_CHECKSUM, &privsvr_cksum);
     if (ret != 0)
 	return ret;
+
+    assert(privsvr_cksum.length > PAC_SIGNATURE_DATA_LENGTH);
 
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data.data = server_cksum.data + PAC_SIGNATURE_DATA_LENGTH;
