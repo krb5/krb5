@@ -61,6 +61,8 @@ typedef struct _PACTYPE {
 #define PAC_SIGNATURE_DATA_LENGTH   4
 #define PAC_CLIENT_INFO_LENGTH	    10
 
+#define NT_TIME_EPOCH		    11644473600LL
+
 struct krb5_pac_data {
     PACTYPE *pac;	/* PAC header + info buffer array */
     krb5_data data;	/* PAC data (including uninitialised header) */
@@ -381,7 +383,7 @@ k5_time_to_seconds_since_1970(krb5_ui_8 time, time_t *elapsedSeconds)
     time /= 10000000;
 
     if (time > 0)
-	time -= 11644473600LL;
+	time -= NT_TIME_EPOCH;
 
     /* XXX depends on size of time_t */
     if (abs(time) > KRB5_INT32_MAX)
@@ -390,7 +392,20 @@ k5_time_to_seconds_since_1970(krb5_ui_8 time, time_t *elapsedSeconds)
     *elapsedSeconds = abs(time);
 
     return 0;
-}       
+}    
+
+static krb5_error_code
+k5_seconds_since_1970_to_time(time_t elapsedSeconds, krb5_ui_8 *time)
+{
+    *time = elapsedSeconds;
+
+    if (elapsedSeconds > 0)
+	*time += NT_TIME_EPOCH;
+
+    *time *= 10000000;
+   
+    return 0;
+}
 
 static krb5_error_code
 k5_pac_validate_client(krb5_context context,
@@ -657,7 +672,7 @@ k5_insert_client_info(krb5_context context,
     p = (unsigned char *)client_info.data;
 
     /* copy in authtime converted to a 64-bit NT time */
-    nt_authtime = (11644473600LL + authtime) * 10000000;
+    k5_seconds_since_1970_to_time(authtime, &nt_authtime);
     store_64_le(nt_authtime, p);
     p += 8;
 
