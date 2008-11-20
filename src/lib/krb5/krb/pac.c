@@ -56,10 +56,10 @@ typedef struct _PACTYPE {
     PAC_INFO_BUFFER Buffers[1];
 } PACTYPE;
 
-#define PAC_ALIGNMENT		8
-#define PACTYPE_LENGTH		8
+#define PAC_ALIGNMENT		    8
+#define PACTYPE_LENGTH		    8
 #define PAC_SIGNATURE_DATA_LENGTH   4
-#define PAC_CLIENT_INFO_LENGTH	10
+#define PAC_CLIENT_INFO_LENGTH	    10
 
 struct krb5_pac_data {
     PACTYPE *pac;	/* PAC header + info buffer array */
