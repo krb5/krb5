@@ -101,8 +101,8 @@ typedef short	krb5_ucs4;
 #error: undefined 32 bit type
 #endif
 
-#define KRB5_UCS2_INVALID   (0x8000U)
-#define KRB5_UCS4_INVALID   (0x80000000U)
+#define KRB5_UCS2_INVALID   ((krb5_ucs2)0x8000)
+#define KRB5_UCS4_INVALID   ((krb5_ucs4)0x80000000)
 
 #define KRB5_MAX_UTF8_LEN   (sizeof(krb5_ucs2) * 3/2)
 

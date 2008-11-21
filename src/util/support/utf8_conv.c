@@ -71,11 +71,11 @@ k5_utf8s_to_ucs2s(krb5_ucs2 *ucs2str,
 		  int little_endian)
 {
     size_t ucs2len = 0;
-    int utflen, i;
+    size_t utflen, i;
     krb5_ucs2 ch;
 
     /* If input ptr is NULL or empty... */
-    if (utf8str == NULL || !*utf8str) {
+    if (utf8str == NULL || *utf8str == '\0') {
 	*ucs2str = 0;
 
 	return 0;
@@ -86,7 +86,7 @@ k5_utf8s_to_ucs2s(krb5_ucs2 *ucs2str,
 	/* Get UTF-8 sequence length from 1st byte */
 	utflen = KRB5_UTF8_CHARLEN2(utf8str, utflen);
 		
-	if (utflen == 0 || utflen > (size_t)KRB5_MAX_UTF8_LEN)
+	if (utflen == 0 || utflen > KRB5_MAX_UTF8_LEN)
 	    return -1;
 
 	/* First byte minus length tag */
@@ -329,12 +329,12 @@ krb5int_ucs2s_to_utf8s(const krb5_ucs2 *ucs2s,
 	return EINVAL;
     }
 
-    *utf8s = (char *)malloc(len + 1);
+    *utf8s = (char *)malloc((size_t)len + 1);
     if (*utf8s == NULL) {
 	return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, ucs2s, len + 1, -1, 0);
+    len = k5_ucs2s_to_utf8s(*utf8s, ucs2s, (size_t)len + 1, -1, 0);
     if (len < 0) {
 	free(*utf8s);
 	*utf8s = NULL;
@@ -359,12 +359,12 @@ krb5int_ucs2les_to_utf8s(const unsigned char *ucs2les,
     if (len < 0)
 	return EINVAL;
 
-    *utf8s = (char *)malloc(len + 1);
+    *utf8s = (char *)malloc((size_t)len + 1);
     if (*utf8s == NULL) {
 	return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les, len + 1, -1, 1);
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les, (size_t)len + 1, -1, 1);
     if (len < 0) {
 	free(*utf8s);
 	*utf8s = NULL;
@@ -386,16 +386,21 @@ krb5int_ucs2cs_to_utf8s(const krb5_ucs2 *ucs2s,
 {
     ssize_t len;
 
-    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2s, 0, ucs2slen, 0);
+    if (ucs2slen > SSIZE_MAX)
+	return ERANGE;
+
+    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2s, 0,
+			    (ssize_t)ucs2slen, 0);
     if (len < 0)
 	return EINVAL;
 
-    *utf8s = (char *)malloc(len + 1);
+    *utf8s = (char *)malloc((size_t)len + 1);
     if (*utf8s == NULL) {
 	return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2s, len + 1, ucs2slen, 0);
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2s,
+			    (size_t)len + 1, (ssize_t)ucs2slen, 0);
     if (len < 0) {
 	free(*utf8s);
 	*utf8s = NULL;
@@ -417,16 +422,21 @@ krb5int_ucs2lecs_to_utf8s(const unsigned char *ucs2les,
 {
     ssize_t len;
 
-    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2les, 0, ucs2leslen, 1);
+    if (ucs2leslen > SSIZE_MAX)
+	return ERANGE;
+
+    len = k5_ucs2s_to_utf8s(NULL, (krb5_ucs2 *)ucs2les, 0,
+			    (ssize_t)ucs2leslen, 1);
     if (len < 0)
 	return EINVAL;
 
-    *utf8s = (char *)malloc(len + 1);
+    *utf8s = (char *)malloc((size_t)len + 1);
     if (*utf8s == NULL) {
 	return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les, len + 1, ucs2leslen, 1);
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les,
+			    (size_t)len + 1, (ssize_t)ucs2leslen, 1);
     if (len < 0) {
 	free(*utf8s);
 	*utf8s = NULL;
