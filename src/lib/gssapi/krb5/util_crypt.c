@@ -782,20 +782,21 @@ int kg_map_toktype(int proto, int toktype)
 krb5_boolean kg_integ_only_iov(size_t iov_count, gss_iov_buffer_desc *iov)
 {
     size_t i;
-    krb5_boolean integ_only = FALSE;
+    krb5_boolean has_conf_data = FALSE;
 
     assert(iov != GSS_C_NO_IOV_BUFFER);
 
     for (i = 0; i < iov_count; i++) {
 	if (iov[i].type != GSS_IOV_BUFFER_TYPE_DATA)
 	    continue;
-	if ((iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == FALSE) {
-	    integ_only = TRUE;
+
+	if ((iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0) {
+	    has_conf_data = TRUE;
 	    break;
 	}
     }
 
-    return integ_only;
+    return (has_conf_data == FALSE);
 }
 
 krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
