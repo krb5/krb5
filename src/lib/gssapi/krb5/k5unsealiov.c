@@ -230,7 +230,8 @@ kg_unseal_v1_iov(krb5_context context,
     md5cksum.length = sumlen;
 
     /* compute the checksum of the message */
-    code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type, ctx->seq, ctx->enc,
+    code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type,
+				   conflen != 0, ctx->seq, ctx->enc,
 				   sign_usage, iov_count, iov, &md5cksum);
     if (code != 0) {
 	retval = GSS_S_FAILURE;

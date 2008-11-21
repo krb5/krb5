@@ -394,6 +394,7 @@ void kg_release_iov(size_t iov_count,
 
 krb5_error_code kg_make_checksum_iov_v1(krb5_context context,
 		krb5_cksumtype type,
+		int conf_req_flag,
 		krb5_keyblock *seq,
 		krb5_keyblock *enc, /* for conf len */
 		krb5_keyusage sign_usage,
