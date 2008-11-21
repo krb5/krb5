@@ -92,7 +92,8 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	code = krb5_c_padding_length(context, key->enctype, conf_data_length, &k5_padlen);
+	code = krb5_c_padding_length(context, key->enctype,
+				     conf_data_length + 16 /* E(Header) */, &k5_padlen);
 	if (code != 0)
 	    goto cleanup;
 
@@ -117,7 +118,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
 	if (padding == NULL) {
 	    if (gss_padlen != 0) {
-		code = KRB5_BAD_MSIZE;
+		code = EINVAL;
 		goto cleanup;
 	    }
 	} else {
@@ -319,7 +320,8 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	/* Deal with RRC */
 	if (trailer == NULL) {
 	    /* According to MS, we only need to deal with a fixed RRC for DCE */
-	    if (rrc != (ptr[2] & FLAG_WRAP_CONFIDENTIAL) ? 16 + ctx->cksum_size : ctx->cksum_size)
+	    if (rrc != (ptr[2] & FLAG_WRAP_CONFIDENTIAL) ?
+		16 /* E(Header) */ + ctx->cksum_size : ctx->cksum_size)
 		goto defective;
 	} else if (rrc != 0) {
 	    /* Should have been rotated by kg_tokenize_stream_iov() */
@@ -361,8 +363,9 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    store_16_be(0, ptr + 6);
 
 	    code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, rrc,
-					     key, key_usage, iov_count, iov, &valid);
-	    if (code != 0 || valid == 0) {
+					     key, key_usage,
+					     iov_count, iov, &valid);
+	    if (code != 0 || valid == FALSE) {
 		*minor_status = code;
 		return GSS_S_BAD_SIG;
 	    }
@@ -379,8 +382,9 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	seqnum = load_64_be(ptr + 8);
 
 	code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, 0,
-					 key, key_usage, iov_count, iov, &valid);
-	if (code != 0 || valid == 0) {
+					 key, key_usage,
+					 iov_count, iov, &valid);
+	if (code != 0 || valid == FALSE) {
 	    *minor_status = code;
 	    return GSS_S_BAD_SIG;
 	}

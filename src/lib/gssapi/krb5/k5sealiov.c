@@ -87,7 +87,7 @@ make_seal_token_v1_iov(krb5_context context,
 	conf_data_length = k5_headerlen + data_length - assoc_data_length;
 
 	if (k5_padlen == 1)
-	    gss_padlen = 1; /* one byte to say one byte of padding */
+	    gss_padlen = 1; /* one byte to indicate one byte of padding */
 	else
 	    gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
 
@@ -438,7 +438,8 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	    gss_headerlen += k5_headerlen; /* Kerb-Header */
 	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
-	    code = krb5_c_padding_length(context, enctype, data_length - assoc_data_length, &k5_padlen);
+	    code = krb5_c_padding_length(context, enctype,
+					 data_length - assoc_data_length + 16 /* E(Header) */, &k5_padlen);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_FAILURE;
