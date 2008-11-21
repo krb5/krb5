@@ -57,9 +57,9 @@ typedef struct _PACTYPE {
 } PACTYPE;
 
 #define PAC_ALIGNMENT		    8
-#define PACTYPE_LENGTH		    8
-#define PAC_SIGNATURE_DATA_LENGTH   4
-#define PAC_CLIENT_INFO_LENGTH	    10
+#define PACTYPE_LENGTH		    8U
+#define PAC_SIGNATURE_DATA_LENGTH   4U
+#define PAC_CLIENT_INFO_LENGTH	    10U
 
 #define NT_TIME_EPOCH		    11644473600LL
 
@@ -380,16 +380,16 @@ krb5_pac_parse(krb5_context context,
 static krb5_error_code
 k5_time_to_seconds_since_1970(krb5_ui_8 time, time_t *elapsedSeconds)
 {
+    krb5_ui_8 abstime;
+
     time /= 10000000;
 
-    if (time > 0)
-	time -= NT_TIME_EPOCH;
+    abstime = time > 0 ? time - NT_TIME_EPOCH : -time;
 
-    /* XXX depends on size of time_t */
-    if (abs(time) > KRB5_INT32_MAX)
+    if (abstime > KRB5_INT32_MAX)
 	return ERANGE;
 
-    *elapsedSeconds = abs(time);
+    *elapsedSeconds = abstime;
 
     return 0;
 }    
@@ -443,7 +443,7 @@ k5_pac_validate_client(krb5_context context,
         pac_princname_length % 2)
 	return ERANGE;
 
-    ret = krb5int_ucs2lecs_to_utf8s(p, pac_princname_length / 2, &pac_princname, NULL);
+    ret = krb5int_ucs2lecs_to_utf8s(p, (size_t)pac_princname_length / 2, &pac_princname, NULL);
     if (ret != 0)
 	return ret;
 
@@ -729,7 +729,7 @@ k5_insert_checksum(krb5_context context,
     }
 
     /* Encode checksum type into buffer */
-    store_32_le(*cksumtype, (unsigned char *)cksumdata.data);
+    store_32_le((krb5_ui_4)*cksumtype, (unsigned char *)cksumdata.data);
 
     return 0;
 }
