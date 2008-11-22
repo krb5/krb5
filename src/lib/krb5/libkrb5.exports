@@ -27,6 +27,7 @@ decode_krb5_pwd_sequence
 decode_krb5_safe
 decode_krb5_sam_challenge
 decode_krb5_sam_response
+decode_krb5_setpw_req
 decode_krb5_tgs_rep
 decode_krb5_tgs_req
 decode_krb5_ticket

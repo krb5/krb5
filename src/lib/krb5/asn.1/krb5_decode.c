@@ -949,6 +949,20 @@ krb5_error_code decode_krb5_predicted_sam_response(const krb5_data *code, krb5_p
     cleanup(free);
 }
 
+krb5_error_code decode_krb5_setpw_req(const krb5_data *code,
+				      krb5_data **rep,
+				      krb5_principal *principal)
+{
+    setup_buf_only();
+    alloc_field(*rep, krb5_data);
+    *principal = NULL;
+
+    retval = asn1_decode_setpw_req(&buf, *rep, principal);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
 #ifndef DISABLE_PKINIT
 krb5_error_code decode_krb5_pa_pk_as_req(const krb5_data *code, krb5_pa_pk_as_req **rep)
 {

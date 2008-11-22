@@ -1186,6 +1186,23 @@ asn1_error_code asn1_decode_predicted_sam_response(asn1buf *buf, krb5_predicted_
     cleanup();
 }
 
+asn1_error_code asn1_decode_setpw_req(asn1buf *buf, krb5_data *rep, krb5_principal *principal)
+{
+    setup();
+    *principal = NULL;
+
+    { begin_structure();
+	get_lenfield(rep->length, rep->data, 0, asn1_decode_charstring);
+	if (tagnum == 1) {
+	    alloc_field(*principal, krb5_principal_data);
+	    opt_field(*principal, 1, asn1_decode_principal_name, 0);
+	    opt_field(*principal, 2, asn1_decode_realm, 0);
+	}
+	end_structure();
+    }
+    cleanup();
+}
+
 #ifndef DISABLE_PKINIT
 /* PKINIT */
 

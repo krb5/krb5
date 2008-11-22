@@ -1668,6 +1668,9 @@ krb5_error_code decode_krb5_pa_enc_ts
 krb5_error_code decode_krb5_sam_key
 	(const krb5_data *, krb5_sam_key **);
 
+krb5_error_code decode_krb5_setpw_req
+	(const krb5_data *, krb5_data **, krb5_principal *);
+
 struct _krb5_key_data;		/* kdb.h */
 
 struct ldap_seqof_key_data {
