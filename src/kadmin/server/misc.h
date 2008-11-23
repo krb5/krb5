@@ -21,7 +21,7 @@ randkey_principal_wrapper_3(void *server_handle,
 
 kadm5_ret_t
 schpw_util_wrapper(void *server_handle, krb5_principal client,
-		   krb5_principal target,
+		   krb5_principal target, int initial_flag,
 		   char *new_pw, char **ret_pw,
 		   char *msg_ret, unsigned int msg_len);
 

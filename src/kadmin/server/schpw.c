@@ -282,10 +282,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     }
 
     /* for cpw, verify that this is an AS_REQ ticket */
-    if ((target == NULL ||
-	 krb5_principal_compare(context, client, target) == TRUE) &&
-	(ticket->enc_part2->flags & TKT_FLG_INITIAL) == 0 &&
-	vno != RFC3244_VERSION) {
+    if (vno == 1 &&
+	(ticket->enc_part2->flags & TKT_FLG_INITIAL) == 0) {
 	numresult = KRB5_KPASSWD_INITIAL_FLAG_NEEDED;
 	strlcpy(strresult, "Ticket must be derived from a password",
 		sizeof(strresult));
@@ -299,6 +297,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     ptr[clear.length] = '\0';
 
     ret = schpw_util_wrapper(server_handle, client, target,
+			     (ticket->enc_part2->flags & TKT_FLG_INITIAL) != 0,
 			     ptr, NULL, strresult, sizeof(strresult));
 
     /* zap the password */
