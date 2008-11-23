@@ -317,8 +317,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 
 	krb5_klog_syslog(LOG_NOTICE, "setpw request from %s by %.*s%s for %.*s%s: %s",
 			 inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
-			 (int) tlen, targetstr, tdots,
 			 (int) clen, clientstr, cdots,
+			 (int) tlen, targetstr, tdots,
 			 ret ? krb5_get_error_message (context, ret) : "success");
     } else {
 	krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
