@@ -736,6 +736,42 @@ kadm5int_acl_finish(kcontext, debug_level)
 }
 
 /*
+ * kadm5int_acl_check_krb()	- Is this operation permitted for this principal?
+ */
+krb5_boolean
+kadm5int_acl_check_krb(kcontext, caller_princ, opmask, principal, restrictions)
+    krb5_context	 kcontext;
+    krb5_const_principal caller_princ;
+    krb5_int32		 opmask;
+    krb5_const_principal principal;
+    restriction_t	 **restrictions;
+{
+    krb5_boolean	retval;
+    aent_t		*aentry;
+
+    DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_op_permitted()\n"));
+
+    retval = FALSE;
+
+    aentry = kadm5int_acl_find_entry(kcontext, caller_princ, principal);
+    if (aentry) {
+	if ((aentry->ae_op_allowed & opmask) == opmask) {
+	    retval = TRUE;
+	    if (restrictions) {
+		*restrictions =
+		    (aentry->ae_restrictions && aentry->ae_restrictions->mask)
+		    ? aentry->ae_restrictions
+		    : (restriction_t *) NULL;
+	    }
+	}
+    }
+
+    DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_op_permitted()=%d\n",
+					  retval));
+    return retval;
+}
+
+/*
  * kadm5int_acl_check()	- Is this operation permitted for this principal?
  *			this code used not to be based on gssapi.  In order
  *			to minimize porting hassles, I've put all the
@@ -752,47 +788,30 @@ kadm5int_acl_check(kcontext, caller, opmask, principal, restrictions)
     restriction_t	**restrictions;
 {
     krb5_boolean	retval;
-    aent_t		*aentry;
     gss_buffer_desc	caller_buf;
     gss_OID		caller_oid;
     OM_uint32		emaj, emin;
     krb5_error_code	code;
     krb5_principal	caller_princ;
 
-    DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_op_permitted()\n"));
-
     if (GSS_ERROR(emaj = gss_display_name(&emin, caller, &caller_buf,
 					  &caller_oid)))
-       return(0);
+       return FALSE;
 
     code = krb5_parse_name(kcontext, (char *) caller_buf.value,
 			   &caller_princ);
 
     gss_release_buffer(&emin, &caller_buf);
 
-    if (code)
-       return(code);
+    if (code != 0)
+       return FALSE;
 
-    retval = 0;
-
-    aentry = kadm5int_acl_find_entry(kcontext, caller_princ, principal);
-    if (aentry) {
-	if ((aentry->ae_op_allowed & opmask) == opmask) {
-	    retval = 1;
-	    if (restrictions) {
-		*restrictions =
-		    (aentry->ae_restrictions && aentry->ae_restrictions->mask)
-		    ? aentry->ae_restrictions
-		    : (restriction_t *) NULL;
-	    }
-	}
-    }
+    retval = kadm5int_acl_check_krb(kcontext, caller_princ,
+				    opmask, principal, restrictions);
 
     krb5_free_principal(kcontext, caller_princ);
 
-    DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_op_permitted()=%d\n",
-					  retval));
-    return(retval);
+    return retval;
 }
 
 kadm5_ret_t
