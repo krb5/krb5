@@ -20,7 +20,8 @@ randkey_principal_wrapper_3(void *server_handle,
 			    krb5_keyblock **keys, int *n_keys);
 
 kadm5_ret_t
-schpw_util_wrapper(void *server_handle, krb5_principal princ,
+schpw_util_wrapper(void *server_handle, krb5_principal client,
+		   krb5_principal target,
 		   char *new_pw, char **ret_pw,
 		   char *msg_ret, unsigned int msg_len);
 

@@ -11,6 +11,8 @@
 #define GETSOCKNAME_ARG3_TYPE int
 #endif
 
+#define RFC3244_VERSION	0xff80
+
 krb5_error_code
 process_chpw_request(context, server_handle, realm, s, keytab, sockin, 
 		     req, rep)
@@ -31,6 +33,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     krb5_data ap_req, ap_rep;
     krb5_auth_context auth_context;
     krb5_principal changepw;
+    krb5_principal client, target = NULL;
     krb5_ticket *ticket;
     krb5_data cipher, clear;
     struct sockaddr local_addr, remote_addr;
@@ -39,7 +42,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     krb5_error krberror;
     int numresult;
     char strresult[1024];
-    char *clientstr;
+    char *clientstr = NULL, *targetstr = NULL;
     size_t clen;
     char *cdots;
 
@@ -77,7 +80,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     vno = (*ptr++ & 0xff) ;
     vno = (vno<<8) | (*ptr++ & 0xff);
 
-    if (vno != 1) {
+    if (vno != 1 && vno != RFC3244_VERSION) {
 	ret = KRB5KDC_ERR_BAD_PVNO;
 	numresult = KRB5_KPASSWD_BAD_VERSION;
 	snprintf(strresult, sizeof(strresult),
@@ -217,15 +220,6 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	goto chpwfail;
     }
 
-    /* verify that this is an AS_REQ ticket */
-
-    if (!(ticket->enc_part2->flags & TKT_FLG_INITIAL)) {
-	numresult = KRB5_KPASSWD_AUTHERROR;
-	strlcpy(strresult, "Ticket must be derived from a password",
-		sizeof(strresult));
-	goto chpwfail;
-    }
-
     /* construct the ap-rep */
 
     ret = krb5_mk_rep(context, auth_context, &ap_rep);
@@ -236,7 +230,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	goto chpwfail;
     }
 
-    /* decrypt the new password */
+    /* decrypt the ChangePasswdData */
 
     cipher.length = (req->data + req->length) - ptr;
     cipher.data = ptr;
@@ -248,20 +242,61 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	goto chpwfail;
     }
 
-    ret = krb5_unparse_name(context, ticket->enc_part2->client, &clientstr);
+    client = ticket->enc_part2->client;
+
+    /* decode ChangePasswdData for setpw requests */
+    if (vno == RFC3244_VERSION) {
+	krb5_data *clear_data;
+
+	ret = decode_krb5_setpw_req(&clear, &clear_data, &target);
+	if (ret != 0) {
+	    numresult = KRB5_KPASSWD_MALFORMED;
+	    strlcpy(strresult, "Failed decoding ChangePasswdData",
+		    sizeof(strresult));
+	    goto chpwfail;
+	}
+
+	memset(clear.data, 0, clear.length);
+	free(clear.data);
+
+	clear = *clear_data;
+	free(clear_data);
+
+	ret = krb5_unparse_name(context, target, &targetstr);
+	if (ret != 0) {
+	    numresult = KRB5_KPASSWD_HARDERROR;
+	    strlcpy(strresult, "Failed unparsing target name for log",
+		    sizeof(strresult));
+	    goto chpwfail;
+	}
+    }
+
+    ret = krb5_unparse_name(context, client, &clientstr);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
 	strlcpy(strresult, "Failed unparsing client name for log",
 		sizeof(strresult));
 	goto chpwfail;
     }
+
+    /* for cpw, verify that this is an AS_REQ ticket */
+    if ((target == NULL ||
+	 krb5_principal_compare(context, client, target) == TRUE) &&
+	(ticket->enc_part2->flags & TKT_FLG_INITIAL) == 0 &&
+	vno != RFC3244_VERSION) {
+	numresult = KRB5_KPASSWD_INITIAL_FLAG_NEEDED;
+	strlcpy(strresult, "Ticket must be derived from a password",
+		sizeof(strresult));
+	goto chpwfail;
+    }
+
     /* change the password */
 
     ptr = (char *) malloc(clear.length+1);
     memcpy(ptr, clear.data, clear.length);
     ptr[clear.length] = '\0';
 
-    ret = schpw_util_wrapper(server_handle, ticket->enc_part2->client,
+    ret = schpw_util_wrapper(server_handle, client, target,
 			     ptr, NULL, strresult, sizeof(strresult));
 
     /* zap the password */
@@ -273,27 +308,43 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 
     clen = strlen(clientstr);
     trunc_name(&clen, &cdots);
-    krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
-		     inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
-		     (int) clen, clientstr, cdots,
-		     ret ? krb5_get_error_message (context, ret) : "success");
-    krb5_free_unparsed_name(context, clientstr);
 
-    if (ret) {
-	if ((ret != KADM5_PASS_Q_TOOSHORT) && 
-	    (ret != KADM5_PASS_REUSE) && (ret != KADM5_PASS_Q_CLASS) && 
-	    (ret != KADM5_PASS_Q_DICT) && (ret != KADM5_PASS_TOOSOON))
-	    numresult = KRB5_KPASSWD_HARDERROR;
-	else
-	    numresult = KRB5_KPASSWD_SOFTERROR;
-	/* strresult set by kadb5_chpass_principal_util() */
-	goto chpwfail;
+    if (vno == RFC3244_VERSION) {
+	size_t tlen;
+	char *tdots;
+
+	trunc_name(&tlen, &tdots);
+
+	krb5_klog_syslog(LOG_NOTICE, "setpw request from %s by %.*s%s for %.*s%s: %s",
+			 inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
+			 (int) tlen, targetstr, tdots,
+			 (int) clen, clientstr, cdots,
+			 ret ? krb5_get_error_message (context, ret) : "success");
+    } else {
+	krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
+			 inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
+			 (int) clen, clientstr, cdots,
+			 ret ? krb5_get_error_message (context, ret) : "success");
     }
-
-    /* success! */
-
-    numresult = KRB5_KPASSWD_SUCCESS;
-    strlcpy(strresult, "", sizeof(strresult));
+    switch (ret) {
+    case KADM5_AUTH_CHANGEPW:
+	numresult = KRB5_KPASSWD_ACCESSDENIED;
+	break;
+    case KADM5_PASS_Q_TOOSHORT:
+    case KADM5_PASS_REUSE:
+    case KADM5_PASS_Q_CLASS:
+    case KADM5_PASS_Q_DICT:
+    case KADM5_PASS_TOOSOON:
+	numresult = KRB5_KPASSWD_HARDERROR;
+	break;
+    case 0:
+	numresult = KRB5_KPASSWD_SUCCESS;
+	strlcpy(strresult, "", sizeof(strresult));
+	break;
+    default:
+	numresult = KRB5_KPASSWD_SOFTERROR;
+	break;
+    }
 
 chpwfail:
 
@@ -424,6 +475,12 @@ bailout:
 	krb5_xfree(cipher.data);
     if (allocated_mem) 
         krb5_xfree(local_kaddr.contents);
+    if (target)
+	krb5_free_principal(context, target);
+    if (targetstr)
+	krb5_free_unparsed_name(context, targetstr);
+    if (clientstr)
+	krb5_free_unparsed_name(context, clientstr);
 
     return(ret);
 }
