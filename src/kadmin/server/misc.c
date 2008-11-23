@@ -109,10 +109,12 @@ schpw_util_wrapper(void *server_handle,
     if (ret)
 	return ret;
 
-    if (krb5_principal_compare(handle->context, client, target) ||
+    if (target == NULL ||
+	krb5_principal_compare(handle->context, client, target) ||
 	kadm5int_acl_check_krb(handle->context, client,
 			       ACL_CHANGEPW, target, NULL)) {
-	ret = kadm5_chpass_principal_util(server_handle, target,
+	ret = kadm5_chpass_principal_util(server_handle,
+					  target != NULL ? target : client,
 					  new_pw, ret_pw,
 					  msg_ret, msg_len);
     } else {

@@ -262,12 +262,14 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	clear = *clear_data;
 	free(clear_data);
 
-	ret = krb5_unparse_name(context, target, &targetstr);
-	if (ret != 0) {
-	    numresult = KRB5_KPASSWD_HARDERROR;
-	    strlcpy(strresult, "Failed unparsing target name for log",
-		    sizeof(strresult));
-	    goto chpwfail;
+	if (target != NULL) {
+	    ret = krb5_unparse_name(context, target, &targetstr);
+	    if (ret != 0) {
+		numresult = KRB5_KPASSWD_HARDERROR;
+		strlcpy(strresult, "Failed unparsing target name for log",
+			sizeof(strresult));
+		goto chpwfail;
+	    }
 	}
     }
 
@@ -312,13 +314,22 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     if (vno == RFC3244_VERSION) {
 	size_t tlen;
 	char *tdots;
+	const char *targetp;
 
-	trunc_name(&tlen, &tdots);
+	if (target == NULL) {
+	    tlen = clen;
+	    tdots = cdots;
+	    targetp = targetstr;
+	} else {
+	    tlen = strlen(targetstr);
+	    trunc_name(&tlen, &tdots);
+	    targetp = clientstr;
+	}
 
 	krb5_klog_syslog(LOG_NOTICE, "setpw request from %s by %.*s%s for %.*s%s: %s",
 			 inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
 			 (int) clen, clientstr, cdots,
-			 (int) tlen, targetstr, tdots,
+			 (int) tlen, targetp, tdots,
 			 ret ? krb5_get_error_message (context, ret) : "success");
     } else {
 	krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
