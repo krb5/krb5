@@ -70,6 +70,23 @@ proc doit { } {
     if ![add_kerberos_key wakawaka 0] {
 	return
     }
+    set c chocolate-flavored-school-bus
+    # Long enough to make realloc likely, but not enough to grow
+    # basic ulog entry size.
+    set longname $c/$c/$c/$c/$c/$c/$c/$c/$c/$c/$c/$c/$c
+    if ![add_kerberos_key $longname 0] {
+	return
+    }
+    if ![add_kerberos_key w 0] {
+	return
+    }
+    if ![modify_principal w -allow_tix] {
+	return
+    }
+    if ![modify_principal w +allow_tix] {
+	return
+    }
+    # Should test rename_principal once we have that.
 
     # Run kproplog, look at output.
     setup_kerberos_env kdc
@@ -89,7 +106,7 @@ proc doit { } {
 	expect -re "Update log dump"
 	expect -re "First serial \# : 1"
 	if $des3_krbtgt {
-	    expect -re "Last serial \# : 4"
+	    expect -re "Last serial \# : 8"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 1"
 	    expect -re "Attributes changed : 15"
@@ -102,7 +119,7 @@ proc doit { } {
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 4"
 	} else {
-	    expect -re "Last serial \# : 3"
+	    expect -re "Last serial \# : 7"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 1"
 	    expect -re "Attributes changed : 15"
