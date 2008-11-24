@@ -178,6 +178,7 @@ krb5_aprof_get_boolean(krb5_pointer acontext, const char **hierarchy,
     }
     valp = values[idx];
     kret = string_to_boolean (valp, &val);
+    profile_free_list(values);
     if (kret)
 	return kret;
     *retdata = val;
@@ -221,9 +222,7 @@ krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
 	kret = krb5_string_to_deltat(valp, deltatp);
 
 	/* Free the string storage */
-	for (idx=0; values[idx]; idx++)
-	    krb5_xfree(values[idx]);
-	krb5_xfree(values);
+	profile_free_list(values);
     }
     return(kret);
 }
@@ -251,22 +250,25 @@ krb5_aprof_get_string(acontext, hierarchy, uselast, stringp)
 {
     krb5_error_code	kret;
     char		**values;
-    int			idx, i;
+    int			i, lastidx;
 
     if (!(kret = krb5_aprof_getvals(acontext, hierarchy, &values))) {
-	idx = 0;
+	for (lastidx=0; values[lastidx]; lastidx++);
+	lastidx--;
+
+	/* Excise the entry we want from the null-terminated list,
+	   and free up the rest.  */
 	if (uselast) {
-	    for (idx=0; values[idx]; idx++);
-	    idx--;
+	    *stringp = values[lastidx];
+	    values[lastidx] = NULL;
+	} else {
+	    *stringp = values[0];
+	    values[0] = values[lastidx];
+	    values[lastidx] = NULL;
 	}
 
-	*stringp = values[idx];
-
 	/* Free the string storage */
-	for (i=0; values[i]; i++)
-	    if (i != idx)
-		krb5_xfree(values[i]);
-	krb5_xfree(values);
+	profile_free_list(values);
     }
     return(kret);
 }
@@ -308,9 +310,7 @@ krb5_aprof_get_int32(acontext, hierarchy, uselast, intp)
 	    kret = EINVAL;
 
 	/* Free the string storage */
-	for (idx=0; values[idx]; idx++)
-	    krb5_xfree(values[idx]);
-	krb5_xfree(values);
+	profile_free_list(values);
     }
     return(kret);
 }
@@ -784,15 +784,16 @@ kadm5_free_config_params(context, params)
     kadm5_config_params	*params;
 {
     if (params) {
-	krb5_xfree(params->dbname);
-	krb5_xfree(params->mkey_name);
-	krb5_xfree(params->stash_file);
-	krb5_xfree(params->keysalts);
+	free(params->dbname);
+	free(params->mkey_name);
+	free(params->stash_file);
+	free(params->keysalts);
 	free(params->admin_server);
 	free(params->admin_keytab);
 	free(params->dict_file);
 	free(params->acl_file);
 	free(params->realm);
+	free(params->iprop_logfile);
     }
     return(0);
 }
