@@ -140,7 +140,7 @@ krb5_c_crypto_length_iov(krb5_context context,
 	case KRB5_CRYPTO_TYPE_HEADER:
 	case KRB5_CRYPTO_TYPE_TRAILER:
 	case KRB5_CRYPTO_TYPE_CHECKSUM:
-	    ret = ktp->aead->crypto_length(ktp->aead, ktp->enc, ktp->hash, enctype, &iov->data.length);
+	    ret = ktp->aead->crypto_length(ktp->aead, ktp->enc, ktp->hash, iov->flags, &iov->data.length);
 	    break;
 	case KRB5_CRYPTO_TYPE_EMPTY:
 	case KRB5_CRYPTO_TYPE_SIGN_ONLY:
