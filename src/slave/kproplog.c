@@ -161,7 +161,7 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, bool_t verbose)
 	    exit(1);
 	}
 	(void) strncpy(dbprinc, upd.kdb_princ_name.utf8str_t_val,
-		       (upd.kdb_princ_name.utf8str_t_len + 1));
+		       upd.kdb_princ_name.utf8str_t_len);
 	dbprinc[upd.kdb_princ_name.utf8str_t_len] = 0;
 	(void) printf(_("\tUpdate principal : %s\n"), dbprinc);
 
