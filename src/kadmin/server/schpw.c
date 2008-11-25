@@ -14,30 +14,26 @@
 #define RFC3244_VERSION	0xff80
 
 krb5_error_code
-process_chpw_request(context, server_handle, realm, s, keytab, sockin, 
-		     req, rep)
+process_chpw_request(context, server_handle, realm, keytab,
+		     local_faddr, remote_faddr, req, rep)
      krb5_context context;
      void *server_handle;
      char *realm;
-     int s;
      krb5_keytab keytab;
-     struct sockaddr_in *sockin;
+     krb5_fulladdr *local_faddr;
+     krb5_fulladdr *remote_faddr;
      krb5_data *req;
      krb5_data *rep;
 {
     krb5_error_code ret;
     char *ptr;
     int plen, vno;
-    krb5_address local_kaddr, remote_kaddr;
-    int allocated_mem = 0;  
     krb5_data ap_req, ap_rep;
     krb5_auth_context auth_context;
     krb5_principal changepw;
     krb5_principal client, target = NULL;
     krb5_ticket *ticket;
     krb5_data cipher, clear;
-    struct sockaddr local_addr, remote_addr;
-    GETSOCKNAME_ARG3_TYPE addrlen;
     krb5_replay_data replay;
     krb5_error krberror;
     int numresult;
@@ -45,6 +41,10 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     char *clientstr = NULL, *targetstr = NULL;
     size_t clen;
     char *cdots;
+    struct sockaddr_storage ss;
+    socklen_t salen;
+    char addrbuf[100];
+    krb5_address *addr = remote_faddr->address;
 
     ret = 0;
     rep->length = 0;
@@ -142,61 +142,6 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	goto chpwfail;
     }
 
-    /* set up address info */
-
-    addrlen = sizeof(local_addr);
-
-    if (getsockname(s, &local_addr, &addrlen) < 0) {
-	ret = errno;
-	numresult = KRB5_KPASSWD_HARDERROR;
-	strlcpy(strresult, "Failed getting server internet address",
-		sizeof(strresult));
-	goto chpwfail;
-    }
-
-    /* some brain-dead OS's don't return useful information from
-     * the getsockname call.  Namely, windows and solaris.  */
-
-    if (((struct sockaddr_in *)&local_addr)->sin_addr.s_addr != 0) {
-	local_kaddr.addrtype = ADDRTYPE_INET;
-	local_kaddr.length =
-	    sizeof(((struct sockaddr_in *) &local_addr)->sin_addr);
-	local_kaddr.contents = 
-	    (krb5_octet *) &(((struct sockaddr_in *) &local_addr)->sin_addr);
-    } else {
-	krb5_address **addrs;
-
-	krb5_os_localaddr(context, &addrs);
-	local_kaddr.magic = addrs[0]->magic;
-	local_kaddr.addrtype = addrs[0]->addrtype;
-	local_kaddr.length = addrs[0]->length;
-	local_kaddr.contents = malloc(addrs[0]->length);
-	memcpy(local_kaddr.contents, addrs[0]->contents, addrs[0]->length);
-	allocated_mem++;
-
-	krb5_free_addresses(context, addrs);
-    }
-
-    addrlen = sizeof(remote_addr);
-
-    if (getpeername(s, &remote_addr, &addrlen) < 0) {
-	ret = errno;
-	numresult = KRB5_KPASSWD_HARDERROR;
-	strlcpy(strresult, "Failed getting client internet address",
-		sizeof(strresult));
-	goto chpwfail;
-    }
-
-    remote_kaddr.addrtype = ADDRTYPE_INET;
-    remote_kaddr.length =
-	sizeof(((struct sockaddr_in *) &remote_addr)->sin_addr);
-    remote_kaddr.contents = 
-	(krb5_octet *) &(((struct sockaddr_in *) &remote_addr)->sin_addr);
-    
-    remote_kaddr.addrtype = ADDRTYPE_INET;
-    remote_kaddr.length = sizeof(sockin->sin_addr);
-    remote_kaddr.contents = (krb5_octet *) &sockin->sin_addr;
-    
     /* mk_priv requires that the local address be set.
        getsockname is used for this.  rd_priv requires that the
        remote address be set.  recvfrom is used for this.  If
@@ -212,7 +157,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
        is specified.  Are we having fun yet?  */
 
     ret = krb5_auth_con_setaddrs(context, auth_context, NULL,
-			     &remote_kaddr);
+			         remote_faddr->address);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
 	strlcpy(strresult, "Failed storing client internet address",
@@ -310,6 +255,39 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     clen = strlen(clientstr);
     trunc_name(&clen, &cdots);
 
+    switch (addr->addrtype) {
+    case ADDRTYPE_INET: {
+	struct sockaddr_in *sin = ss2sin(&ss);
+
+	sin->sin_family = AF_INET;
+	memcpy(&sin->sin_addr, addr->contents, addr->length);
+	sin->sin_port = htons(remote_faddr->port);
+	salen = sizeof(*sin);
+	break;
+    }
+    case ADDRTYPE_INET6: {
+	struct sockaddr_in6 *sin6 = ss2sin6(&ss);
+
+	sin6->sin6_family = AF_INET6;
+	memcpy(&sin6->sin6_addr, addr->contents, addr->length);
+	sin6->sin6_port = htons(remote_faddr->port);
+	salen = sizeof(*sin6);
+	break;
+    }
+    default: {
+	struct sockaddr *sa = ss2sa(&ss);
+
+	sa->sa_family = AF_UNSPEC;
+	salen = sizeof(*sa);
+	break;
+    }
+    }
+
+    if (getnameinfo(ss2sa(&ss), salen,
+		    addrbuf, sizeof(addrbuf), NULL, 0,
+		    NI_NUMERICHOST | NI_NUMERICSERV) != 0)
+	strlcpy(addrbuf, "<unprintable>", sizeof(addrbuf));
+
     if (vno == RFC3244_VERSION) {
 	size_t tlen;
 	char *tdots;
@@ -326,13 +304,13 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	}
 
 	krb5_klog_syslog(LOG_NOTICE, "setpw request from %s by %.*s%s for %.*s%s: %s",
-			 inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
+			 addrbuf,
 			 (int) clen, clientstr, cdots,
 			 (int) tlen, targetp, tdots,
 			 ret ? krb5_get_error_message (context, ret) : "success");
     } else {
 	krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
-			 inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
+			 addrbuf,
 			 (int) clen, clientstr, cdots,
 			 ret ? krb5_get_error_message (context, ret) : "success");
     }
@@ -371,8 +349,8 @@ chpwfail:
     cipher.length = 0;
 
     if (ap_rep.length) {
-	ret = krb5_auth_con_setaddrs(context, auth_context, &local_kaddr,
-				     NULL);
+	ret = krb5_auth_con_setaddrs(context, auth_context,
+				     local_faddr->address, NULL);
 	if (ret) {
 	    numresult = KRB5_KPASSWD_HARDERROR;
 	    strlcpy(strresult,
@@ -483,8 +461,6 @@ bailout:
 	krb5_xfree(clear.data);
     if (cipher.length)
 	krb5_xfree(cipher.data);
-    if (allocated_mem) 
-        krb5_xfree(local_kaddr.contents);
     if (target)
 	krb5_free_principal(context, target);
     if (targetstr)

@@ -77,7 +77,6 @@ void	request_exit(int);
 void	request_hup(int);
 void	reset_db(void);
 void	sig_pipe(int);
-void	kadm_svc_run(kadm5_config_params *params);
 
 #ifdef POSIX_SIGNALS
 static struct sigaction s_action;
@@ -214,15 +213,12 @@ int nofork = 0;
 
 int main(int argc, char *argv[])
 {
-    register	SVCXPRT *transp, *iproptransp;
      extern	char *optarg;
      extern	int optind, opterr;
      int ret, oldnames = 0;
      OM_uint32 OMret, major_status, minor_status;
      char *whoami;
      gss_buffer_desc in_buf;
-     struct sockaddr_in addr;
-     int s;
      auth_gssapi_name names[4];
      gss_buffer_desc gssbuf;
      gss_OID nt_krb5_name_oid;
@@ -230,8 +226,8 @@ int main(int argc, char *argv[])
      char **db_args      = NULL;
      int    db_args_size = 0;
      char *errmsg;
+     int i;
 
-     char *kiprop_name = NULL;	/* iprop svc name */
      kdb_log_context *log_ctx;
 
      setvbuf(stderr, NULL, _IONBF, 0);
@@ -358,237 +354,16 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-     memset(&addr, 0, sizeof(addr));
-     addr.sin_family = AF_INET;
-     addr.sin_addr.s_addr = INADDR_ANY;
-     addr.sin_port = htons(params.kadmind_port);
-
-     if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	 const char *e_txt;
-	 ret = SOCKET_ERRNO;
-	 e_txt = krb5_get_error_message (context, ret);
-	 krb5_klog_syslog(LOG_ERR, "Cannot create TCP socket: %s",
-			  e_txt);
-	 fprintf(stderr, "Cannot create TCP socket: %s",
-		 e_txt);
-	 kadm5_destroy(global_server_handle);
-	 krb5_klog_close(context);	  
-	 exit(1);
-     }
-     set_cloexec_fd(s);
-
-     if ((schpw = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	 const char *e_txt;
-	 ret = SOCKET_ERRNO;
-	 e_txt = krb5_get_error_message (context, ret);
-	 krb5_klog_syslog(LOG_ERR,
-			  "cannot create simple chpw socket: %s",
-			  e_txt);
-	 fprintf(stderr, "Cannot create simple chpw socket: %s",
-		 e_txt);
-	 kadm5_destroy(global_server_handle);
-	 krb5_klog_close(context);
-	 exit(1);
-     }
-     set_cloexec_fd(schpw);
-
-#ifndef DISABLE_IPROP
-     if ((ipropfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	 const char *e_txt;
-	 ret = SOCKET_ERRNO;
-	 e_txt = krb5_get_error_message (context, ret);
-	 krb5_klog_syslog(LOG_ERR,
-			  "cannot create iprop listening socket: %s",
-			  e_txt);
-	 fprintf(stderr, "cannot create iprop listening socket: %s",
-		 e_txt);
-	 kadm5_destroy(global_server_handle);
-	 krb5_klog_close(context);
-	 exit(1);
-     }
-     set_cloexec_fd(ipropfd);
-#endif
-
-#ifdef SO_REUSEADDR
-     /* the old admin server turned on SO_REUSEADDR for non-default
-	port numbers.  this was necessary, on solaris, for the tests
-	to work.  jhawk argues that the debug and production modes
-	should be the same.  I think I agree, so I'm always going to set
-	SO_REUSEADDR.  The other option is to have the unit tests wait
-	until the port is useable, or use a different port each time.  
-	--marc */
-
-     {
-	 int	allowed;
-
-	 allowed = 1;
-	 if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
-			(char *) &allowed, sizeof(allowed)) < 0 ||
-	     setsockopt(schpw, SOL_SOCKET, SO_REUSEADDR,
-			(char *) &allowed, sizeof(allowed)) < 0
-#ifndef DISABLE_IPROP
-	     || setsockopt(ipropfd, SOL_SOCKET, SO_REUSEADDR,
-			(char *) &allowed, sizeof(allowed)) < 0
-#endif
-	     ) {
-	     const char *e_txt;
-	     ret = SOCKET_ERRNO;
-	     e_txt = krb5_get_error_message (context, ret);
-	     krb5_klog_syslog(LOG_ERR, "Cannot set SO_REUSEADDR: %s",
-			      e_txt);
-	     fprintf(stderr, "Cannot set SO_REUSEADDR: %s", e_txt);
-	     kadm5_destroy(global_server_handle);
-	     krb5_klog_close(context);	  
-	     exit(1);
-	 }
-     }
-#endif /* SO_REUSEADDR */
-     memset(&addr, 0, sizeof(addr));
-     addr.sin_family = AF_INET;
-     addr.sin_addr.s_addr = INADDR_ANY;
-     addr.sin_port = htons(params.kadmind_port);
-
-     if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-	  int oerrno = errno;
-	  const char *e_txt = krb5_get_error_message (context, errno);
-	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
-	  fprintf(stderr, "bind: %s\n", e_txt);
-	  errno = oerrno;
-	  krb5_klog_syslog(LOG_ERR, "Cannot bind socket: %s", e_txt);
-	  if(oerrno == EADDRINUSE) {
-	       char *w = strrchr(whoami, '/');
-	       if (w) {
-		    w++;
-	       }
-	       else {
-		    w = whoami;
-	       }
-	       fprintf(stderr,
-"This probably means that another %s process is already\n"
-"running, or that another program is using the server port (number %d)\n"
-"after being assigned it by the RPC portmap daemon.  If another\n"
-"%s is already running, you should kill it before\n"
-"restarting the server.  If, on the other hand, another program is\n"
-"using the server port, you should kill it before running\n"
-"%s, and ensure that the conflict does not occur in the\n"
-"future by making sure that %s is started on reboot\n"
-		       "before portmap.\n", w, ntohs(addr.sin_port), w, w, w);
-	       krb5_klog_syslog(LOG_ERR, "Check for already-running %s or for "
-		      "another process using port %d", w,
-		      htons(addr.sin_port));
-	  }
+     if ((ret = setup_network(global_server_handle, whoami))) {
+	  const char *e_txt = krb5_get_error_message (context, ret);
+	  krb5_klog_syslog(LOG_ERR, "%s: %s while initializing network, aborting",
+			   whoami, e_txt);
+	  fprintf(stderr, "%s: %s while initializing network, aborting\n",
+		  whoami, e_txt);
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close(context);
 	  exit(1);
      }
-
-     memset(&addr, 0, sizeof(addr));
-     addr.sin_family = AF_INET;
-     addr.sin_addr.s_addr = INADDR_ANY;
-     /* XXX */
-     addr.sin_port = htons(params.kpasswd_port);
-
-     if (bind(schpw, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-	  char portbuf[32];
-	  int oerrno = errno;
-	  const char *e_txt = krb5_get_error_message (context, errno);
-	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
-	  fprintf(stderr, "bind: %s\n", e_txt);
-	  errno = oerrno;
-	  snprintf(portbuf, sizeof(portbuf), "%d", ntohs(addr.sin_port));
-	  krb5_klog_syslog(LOG_ERR, "cannot bind simple chpw socket: %s",
-			   e_txt);
-	  if(oerrno == EADDRINUSE) {
-	       char *w = strrchr(whoami, '/');
-	       if (w) {
-		    w++;
-	       }
-	       else {
-		    w = whoami;
-	       }
-	       fprintf(stderr,
-"This probably means that another %s process is already\n"
-"running, or that another program is using the server port (number %d).\n"
-"If another %s is already running, you should kill it before\n"
-"restarting the server.\n",
-		       w, ntohs(addr.sin_port), w);
- 	  }
- 	  kadm5_destroy(global_server_handle);
- 	  krb5_klog_close(context);
-	  exit(1);
-     }
-
-#ifndef DISABLE_IPROP
-     memset(&addr, 0, sizeof(addr));
-     addr.sin_family = AF_INET;
-     addr.sin_addr.s_addr = INADDR_ANY;
-     addr.sin_port = htons(params.iprop_port);
-     if (bind(ipropfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-	  char portbuf[32];
-	  int oerrno = errno;
-	  const char *e_txt = krb5_get_error_message (context, errno);
-	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
-	  fprintf(stderr, "bind: %s\n", e_txt);
-	  errno = oerrno;
-	  snprintf(portbuf, sizeof(portbuf), "%d", ntohs(addr.sin_port));
-	  krb5_klog_syslog(LOG_ERR, "cannot bind iprop socket: %s",
-			   e_txt);
-	  if(oerrno == EADDRINUSE) {
-	       char *w = strrchr(whoami, '/');
-	       if (w) {
-		    w++;
-	       }
-	       else {
-		    w = whoami;
-	       }
-	       fprintf(stderr,
-"This probably means that another %s process is already\n"
-"running, or that another program is using the server port (number %d).\n"
-"If another %s is already running, you should kill it before\n"
-"restarting the server.\n",
-		       w, ntohs(addr.sin_port), w);
- 	  }
- 	  kadm5_destroy(global_server_handle);
- 	  krb5_klog_close(context);
-	  exit(1);
-     }
-#endif
-
-     transp = svctcp_create(s, 0, 0);
-     if(transp == NULL) {
-	  fprintf(stderr, "%s: Cannot create RPC service.\n", whoami);
-	  krb5_klog_syslog(LOG_ERR, "Cannot create RPC service: %m");
-	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close(context);	  
-	  exit(1);
-     }
-     if(!svc_register(transp, KADM, KADMVERS, kadm_1, 0)) {
-	  fprintf(stderr, "%s: Cannot register RPC service.\n", whoami);
-	  krb5_klog_syslog(LOG_ERR, "Cannot register RPC service, failing.");
-	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close(context);	  
-	  exit(1);
-     }
-
-#ifndef DISABLE_IPROP
-     iproptransp = svctcp_create(ipropfd, 0, 0);
-     if (iproptransp == NULL) {
-	  fprintf(stderr, "%s: Cannot create RPC service.\n", whoami);
-	  krb5_klog_syslog(LOG_ERR, "Cannot create RPC service: %m");
-	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close(context);	  
-	  exit(1);
-     }
-     if (!svc_register(iproptransp, KRB5_IPROP_PROG, KRB5_IPROP_VERS, krb5_iprop_prog_1, IPPROTO_TCP)) {
-	  fprintf(stderr, "%s: Cannot register RPC service.\n", whoami);
-	  krb5_klog_syslog(LOG_ERR, "Cannot register RPC service, continuing.");
-#if 0
-	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close(context);	  
-	  exit(1);
-#endif
-     }
-#endif
 
      names[0].name = build_princ_name(KADM5_ADMIN_SERVICE, params.realm);
      names[1].name = build_princ_name(KADM5_CHANGEPW_SERVICE, params.realm);
@@ -827,13 +602,13 @@ kterr:
     if (nofork)
 	fprintf(stderr, "%s: starting...\n", whoami);
 
-     kadm_svc_run(&params);
+     listen_and_process(global_server_handle, whoami);
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
 
      /* Clean up memory, etc */
      svcauth_gssapi_unset_names();
      kadm5_destroy(global_server_handle);
-     close(s);
+     closedown_network(global_server_handle, whoami);
      kadm5int_acl_finish(context, 0);
      if(gss_changepw_name) {
           (void) gss_release_name(&OMret, &gss_changepw_name);
@@ -841,9 +616,9 @@ kterr:
      if(gss_oldchangepw_name) {
           (void) gss_release_name(&OMret, &gss_oldchangepw_name);
      }
-     for(s = 0 ; s < 4; s++) {
-          if (names[s].name) {
-	        free(names[s].name);
+     for(i = 0 ; i < 4; i++) {
+          if (names[i].name) {
+	        free(names[i].name);
 	  }
      }
 
@@ -903,68 +678,6 @@ void setup_signal_handlers(iprop_role iproprole) {
      if (iproprole == IPROP_MASTER)
 	 (void) signal(SIGCHLD, SIG_IGN);
 #endif /* POSIX_SIGNALS */
-}
-
-/*
- * Function: kadm_svc_run
- * 
- * Purpose: modified version of sunrpc svc_run.
- *	    which closes the database every TIMEOUT seconds.
- *
- * Arguments:
- * Requires:
- * Effects:
- * Modifies:
- */
-
-void kadm_svc_run(params)
-kadm5_config_params *params;
-{
-     fd_set	rfd;
-     struct	timeval	    timeout;
-     
-     while(signal_request_exit == 0) {
-	  if (signal_request_hup) {
-	      reset_db();
-	      krb5_klog_reopen(context);
-	      signal_request_hup = 0;
-	  }
-#ifdef PURIFY
-	  if (signal_pure_report)	/* check to see if a report */
-					/* should be dumped... */
-	    {
-	      purify_new_reports();
-	      signal_pure_report = 0;
-	    }
-	  if (signal_pure_clear)	/* ...before checking whether */
-					/* the info should be cleared. */
-	    {
-	      purify_clear_new_reports();
-	      signal_pure_clear = 0;
-	    }
-#endif /* PURIFY */
-	  timeout.tv_sec = TIMEOUT;
-	  timeout.tv_usec = 0;
-	  rfd = svc_fdset;
-	  FD_SET(schpw, &rfd);
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-	  switch(select(max(schpw, svc_maxfd) + 1,
-			(fd_set *) &rfd, NULL, NULL, &timeout)) {
-	  case -1:
-	       if(errno == EINTR)
-		    continue;
-	       perror("select");
-	       return;
-	  case 0:
-	       reset_db();
-	       break;
-	  default:
-	      if (FD_ISSET(schpw, &rfd))
-		  do_schpw(schpw, params);
-	      else
-		  svc_getreqset(&rfd);
-	  }
-     }
 }
 
 #ifdef PURIFY
@@ -1338,99 +1051,3 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
      }
 }
 
-void do_schpw(int s1, kadm5_config_params *params)
-{
-    krb5_error_code ret;
-    /* XXX buffer = ethernet mtu */
-    char req[1500];
-    int len;
-    struct sockaddr_in from;
-    socklen_t fromlen;
-    krb5_keytab kt;
-    krb5_data reqdata, repdata;
-    int s2;
-
-    fromlen = sizeof(from);
-    if ((len = recvfrom(s1, req, sizeof(req), 0, (struct sockaddr *)&from,
-			&fromlen)) < 0) {
-	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't receive request: %s",
-			 krb5_get_error_message (context, errno));
-	return;
-    }
-
-    if ((ret = krb5_kt_resolve(context, "KDB:", &kt))) {
-	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't open admin keytab %s",
-			 krb5_get_error_message (context, ret));
-	return;
-    }
-
-    reqdata.length = len;
-    reqdata.data = req;
-
-    /* this is really obscure.  s1 is used for all communications.  it
-       is left unconnected in case the server is multihomed and routes
-       are asymmetric.  s2 is connected to resolve routes and get
-       addresses.  this is the *only* way to get proper addresses for
-       multihomed hosts if routing is asymmetric.  
-
-       A related problem in the server, but not the client, is that
-       many os's have no way to disconnect a connected udp socket, so
-       the s2 socket needs to be closed and recreated for each
-       request.  The s1 socket must not be closed, or else queued
-       requests will be lost.
-
-       A "naive" client implementation (one socket, no connect,
-       hostname resolution to get the local ip addr) will work and
-       interoperate if the client is single-homed. */
-
-    if ((s2 = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	const char *errmsg = krb5_get_error_message (context, errno);
-	krb5_klog_syslog(LOG_ERR, "cannot create connecting socket: %s",
-			 errmsg);
-	fprintf(stderr, "Cannot create connecting socket: %s",
-		errmsg);
-	svcauth_gssapi_unset_names();
-	kadm5_destroy(global_server_handle);
-	krb5_klog_close(context);	  
-	exit(1);
-    }
-    set_cloexec_fd(s2);
-
-    if (connect(s2, (struct sockaddr *) &from, sizeof(from)) < 0) {
-	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't connect to client: %s",
-			 krb5_get_error_message (context, errno));
-	goto cleanup;
-    }
-
-    if ((ret = process_chpw_request(context, global_server_handle,
-				    params->realm, s2, kt, &from,
-				    &reqdata, &repdata))) {
-	krb5_klog_syslog(LOG_ERR, "chpw: Error processing request: %s", 
-			 krb5_get_error_message (context, ret));
-    }
-
-    close(s2);
-
-    if (repdata.length == 0) {
-	/* just return.  This means something really bad happened */
-        goto cleanup;
-    }
-
-    len = sendto(s1, repdata.data, (int) repdata.length, 0,
-		 (struct sockaddr *) &from, sizeof(from));
-
-    if (len < (int) repdata.length) {
-	krb5_xfree(repdata.data);
-
-	krb5_klog_syslog(LOG_ERR, "chpw: Error sending reply: %s", 
-			 krb5_get_error_message (context, errno));
-	goto cleanup;
-    }
-
-    krb5_xfree(repdata.data);
-
-cleanup:
-    krb5_kt_close(context, kt);
-
-    return;
-}
