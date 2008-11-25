@@ -1557,7 +1557,10 @@ kill_tcp_or_rpc_connection(void *handle, struct connection *conn, int isForcedCl
 	    )
 	    sstate.max--;
 
-    close(conn->fd);
+    /* In the non-forced case, the RPC runtime will close the descriptor for us */
+    if (conn->type == CONN_TCP || isForcedClose) {
+	close(conn->fd);
+    }
 
     /* For RPC connections, call into RPC runtime to flush out any internal state */
     if (conn->type == CONN_RPC && isForcedClose) {
