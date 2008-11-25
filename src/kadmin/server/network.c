@@ -1803,7 +1803,16 @@ listen_and_process(void *handle, const char *prog)
 	    reset_db();
 	    signal_request_hup = 0;
 	}
-
+#ifdef PURIFY
+	if (signal_pure_report) {
+	    purify_new_reports();
+	    signal_pure_report = 0;
+	}
+	if (signal_pure_clear) {
+	    purify_clear_new_reports();
+	    signal_pure_clear = 0;
+	}
+#endif /* PURIFY */
 	if (network_reconfiguration_needed) {
 	    krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
 	    /* It might be tidier to add a timer-callback interface to
