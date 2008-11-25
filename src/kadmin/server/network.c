@@ -1421,8 +1421,8 @@ static void process_packet(void *handle,
     return;
 }
 
-static int tcp_data_counter;
-static int max_tcp_data_connections = 30;
+static int tcp_or_rpc_data_counter;
+static int max_tcp_or_rpc_data_connections = 45;
 
 static void kill_tcp_or_rpc_connection(void *, struct connection *, int isForcedClose);
 
@@ -1513,7 +1513,7 @@ static void accept_tcp_connection(void *handle,
     newconn->u.tcp.buffer = malloc(newconn->u.tcp.bufsiz);
     newconn->u.tcp.start_time = time(0);
 
-    if (++tcp_data_counter > max_tcp_data_connections)
+    if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
 	kill_lru_tcp_or_rpc_connection(handle, newconn);
 
     if (newconn->u.tcp.buffer == 0) {
@@ -1521,7 +1521,7 @@ static void accept_tcp_connection(void *handle,
 		newconn->u.tcp.addrbuf);
 	delete_fd(newconn);
 	close(s);
-	tcp_data_counter--;
+	tcp_or_rpc_data_counter--;
 	return;
     }
     newconn->u.tcp.offset = 0;
@@ -1576,7 +1576,7 @@ kill_tcp_or_rpc_connection(void *handle, struct connection *conn, int isForcedCl
 
     conn->fd = -1;
     delete_fd(conn);
-    tcp_data_counter--;
+    tcp_or_rpc_data_counter--;
 }
 
 static krb5_error_code
@@ -1933,7 +1933,7 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
 	    if (newconn == NULL)
 		continue;
 
-	    if (++tcp_data_counter > max_tcp_data_connections)
+	    if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
 		kill_lru_tcp_or_rpc_connection(handle, newconn);
 
 	    FD_SET(s, &sstate.rfds);
