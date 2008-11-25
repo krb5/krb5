@@ -948,8 +948,8 @@ static char *rtm_type_name(int type)
     }
 }
 
-static void process_routing_update(struct connection *conn, const char *prog,
-				   int selflags)
+static void process_routing_update(void *handle, struct connection *conn,
+				   const char *prog, int selflags)
 {
     int n_read;
     struct rt_msghdr rtm;
