@@ -138,7 +138,7 @@ typedef struct gss_iov_buffer_desc_struct {
  * buffers in memory does not matter. Buffers in the IOV should
  * be arranged in the order above, and in the case of multiple
  * DATA buffers the sender and receiver should agree on the
- * order and each buffer should have a trailing PADDING.
+ * order.
  *
  * With GSS_C_DCE_STYLE it is acceptable to not provide PADDING
  * and TRAILER, but the caller must guarantee the plaintext data
