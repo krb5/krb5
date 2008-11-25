@@ -1898,14 +1898,10 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
     sockdata.retval = 0;
 
     /*
-     * Service the logical intersection of RPC listener descriptors and
-     * descriptors available for reading.
+     * Service the woken RPC listener descriptor.
      */
     FD_ZERO(&fds);
-
-    for (s = 0; s < howmany(sstate.max, NFDBITS); s++)
-	__FDS_BITS(&fds)[s] = __FDS_BITS(&rpc_listenfds)[s] &
-			      __FDS_BITS(&sstate.rfds)[s];
+    FD_SET(conn->fd, &fds);
 
     svc_getreqset(&fds);
 
@@ -1913,12 +1909,12 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
      * Scan svc_fdset for any new connections.
      */
     for (s = 0; s < FD_SETSIZE; s++) {
-	if (FD_ISSET(s, &svc_fdset)) {
+	/* Only add svc_fdset & ~(rpc_listenfds | sstate.rfds) */
+	if (FD_ISSET(s, &svc_fdset)
+	    && !FD_ISSET(s, &rpc_listenfds)
+	    && !FD_ISSET(s, &sstate.rfds))
+	{
 	    struct connection *newconn;
-
-	    /* Don't add listeners or anything we're already reading */
-	    if (FD_ISSET(s, &rpc_listenfds) || FD_ISSET(s, &sstate.rfds))
-		continue;
 
 	    newconn = add_rpc_data_fd(&sockdata, s);
 	    if (newconn == NULL)
