@@ -1894,6 +1894,11 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
     fd_set fds;
     register int s;
 
+    assert(selflags & SSF_READ);
+
+    if ((selflags & SSF_READ) == 0)
+	return;
+
     sockdata.prog = prog;
     sockdata.retval = 0;
 
@@ -1928,8 +1933,6 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
 		sstate.max = s + 1;
 	}
     }
-
-    return;
 }
 
 static void process_rpc_connection(void *handle, struct connection *conn,
@@ -1939,15 +1942,16 @@ static void process_rpc_connection(void *handle, struct connection *conn,
 
     assert(selflags & SSF_READ);
 
-    if (selflags & SSF_READ) {
-	FD_ZERO(&fds);
-	FD_SET(conn->fd, &fds);
+    if ((selflags & SSF_READ) == 0)
+	return;
 
-	svc_getreqset(&fds);
+    FD_ZERO(&fds);
+    FD_SET(conn->fd, &fds);
 
-	if (!FD_ISSET(conn->fd, &svc_fdset))
-	    kill_tcp_or_rpc_connection(handle, conn, 0);
-    }
+    svc_getreqset(&fds);
+
+    if (!FD_ISSET(conn->fd, &svc_fdset))
+	kill_tcp_or_rpc_connection(handle, conn, 0);
 }
 
 #endif /* INET */
