@@ -1864,13 +1864,21 @@ closedown_network(void *handle, const char *prog)
 	return KDC5_NONET;
 
     FOREACH_ELT (connections, i, conn) {
-	if (conn->type == CONN_RPC_LISTENER) {
-	    if (conn->u.rpc.transp != NULL)
-		svc_destroy(conn->u.rpc.transp);
-	}
 	if (conn->fd >= 0) {
 	    krb5_klog_syslog(LOG_INFO, "closing down fd %d", conn->fd);
 	    (void) close(conn->fd);
+	    if (conn->type == CONN_RPC) {
+		fd_set fds;
+
+		FD_ZERO(&fds);
+		FD_SET(conn->fd, &fds);
+
+		svc_getreqset(&fds);
+	    }
+	}
+	if (conn->type == CONN_RPC_LISTENER) {
+	    if (conn->u.rpc.transp != NULL)
+		svc_destroy(conn->u.rpc.transp);
 	}
 	DEL (connections, i);
 	/* There may also be per-connection data in the tcp structure
