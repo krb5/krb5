@@ -1934,7 +1934,7 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
      * Scan svc_fdset for any new connections.
      */
     for (s = 0; s < FD_SETSIZE; s++) {
-	/* Only add svc_fdset & ~(rpc_listenfds | sstate.rfds) */
+	/* sstate.rfds |= svc_fdset & ~(rpc_listenfds | sstate.rfds) */
 	if (FD_ISSET(s, &svc_fdset)
 	    && !FD_ISSET(s, &rpc_listenfds)
 	    && !FD_ISSET(s, &sstate.rfds))
