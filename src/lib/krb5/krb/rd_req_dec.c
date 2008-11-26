@@ -2,7 +2,7 @@
  * lib/krb5/krb/rd_req_dec.c
  *
  * Copyright (c) 1994 CyberSAFE Corporation.
- * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -79,27 +79,52 @@ krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
 
 static krb5_error_code
 krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
-			     krb5_keytab keytab)
+			     krb5_const_principal server, krb5_keytab keytab)
 {
     krb5_error_code 	  retval;
-    krb5_enctype 	  enctype;
     krb5_keytab_entry 	  ktent;
 
-    enctype = req->ticket->enc_part.enctype;
+    retval = KRB5_KT_NOTFOUND;
 
 #ifndef LEAN_CLIENT 
-    if ((retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
-				    req->ticket->enc_part.kvno,
-				    enctype, &ktent)))
-	return retval;
+    if (server != NULL || keytab->ops->start_seq_get == NULL) {
+	retval = krb5_kt_get_entry(context, keytab,
+				   server != NULL ? server : req->ticket->server,
+				   req->ticket->enc_part.kvno,
+				   req->ticket->enc_part.enctype, &ktent);
+	if (retval != 0)
+	    return retval;
+
+	retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
+
+	(void) krb5_free_keytab_entry_contents(context, &ktent);
+    } else {
+	krb5_error_code code;
+	krb5_kt_cursor cursor;
+
+	code = krb5_kt_start_seq_get(context, keytab, &cursor);
+	if (code != 0)
+	    return code;
+
+	while ((code = krb5_kt_next_entry(context, keytab,
+					  &ktent, &cursor)) == 0) {
+	    if (ktent.key.enctype == req->ticket->enc_part.enctype) {
+		retval = krb5_decrypt_tkt_part(context, &ktent.key,
+					       req->ticket);
+	    }
+
+	    (void) krb5_free_keytab_entry_contents(context, &ktent);
+
+	    if (retval == 0)
+		break;
+	}
+
+	code = krb5_kt_end_seq_get(context, keytab, &cursor);
+	if (code != 0)
+	    retval = code;
+    }
 #endif /* LEAN_CLIENT */
 
-    retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
-    /* Upon error, Free keytab entry first, then return */
-
-#ifndef LEAN_CLIENT 
-    (void) krb5_kt_free_entry(context, &ktent);
-#endif /* LEAN_CLIENT */
     return retval;
 }
 
@@ -147,6 +172,11 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	princ_data.realm.data = realm;
 	princ_data.realm.length = strlen(realm);
     }
+    /*
+     * The following code is commented out now that match based on
+     * key rather than name.
+     */
+#if 0
     if (server && !krb5_principal_compare(context, server, req->ticket->server)) {
 	char *found_name = 0, *wanted_name = 0;
 	if (krb5_unparse_name(context, server, &wanted_name) == 0
@@ -159,6 +189,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	retval =  KRB5KRB_AP_WRONG_PRINC;
 	goto cleanup;
     }
+#endif
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
        do we need special processing here ?	*/
@@ -171,7 +202,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	krb5_free_keyblock(context, (*auth_context)->keyblock);
 	(*auth_context)->keyblock = NULL;
     } else {
-    	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, keytab)))
+    	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, server, keytab)))
 	    goto cleanup;
     }
 
