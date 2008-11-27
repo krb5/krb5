@@ -142,7 +142,7 @@ schpw_util_wrapper(void *server_handle,
 
     if (access_granted) {
 	ret = kadm5_chpass_principal_util(server_handle,
-					  target != NULL ? target : client,
+					  target,
 					  new_pw, ret_pw,
 					  msg_ret, msg_len);
     } else {
