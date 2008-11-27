@@ -99,30 +99,40 @@ kadm5_ret_t
 schpw_util_wrapper(void *server_handle,
 		   krb5_principal client,
 		   krb5_principal target,
-		   int initial_flag,
+		   krb5_boolean initial_flag,
 		   char *new_pw, char **ret_pw,
 		   char *msg_ret, unsigned int msg_len)
 {
     kadm5_ret_t			ret;
     kadm5_server_handle_t	handle = server_handle;
     krb5_boolean		access_granted;
+    krb5_boolean		self;
 
-    ret = check_min_life(server_handle, target, msg_ret, msg_len);
-    if (ret != 0)
-	return ret;
+    /*
+     * If no target is explicitly provided, then the target principal
+     * is the client principal.
+     */
+    if (target == NULL)
+	target = client;
 
-    access_granted = FALSE;
+    /*
+     * A principal can always change its own password, as long as it
+     * has an initial ticket and meets the minimum password lifetime
+     * requirement.
+     */
+    self = krb5_principal_compare(handle->context, client, target);
+    if (self) {
+	ret = check_min_life(server_handle, target, msg_ret, msg_len);
+	if (ret != 0)
+	    return ret;
 
-    if (initial_flag &&
-	(target == NULL ||
-	 krb5_principal_compare(handle->context, client, target))) {
-	/*
-	 * A principal can always change their own password, as long as
-	 * they have an initial ticket
-	 */
-	access_granted = TRUE;
-    } else if (kadm5int_acl_check_krb(handle->context, client,
-			       ACL_CHANGEPW, target, NULL) == TRUE) {
+	access_granted = initial_flag;
+    } else
+	access_granted = FALSE;
+
+    if (!access_granted &&
+	kadm5int_acl_check_krb(handle->context, client,
+			       ACL_CHANGEPW, target, NULL)) {
 	/*
 	 * Otherwise, principals with appropriate privileges can change
 	 * any password
