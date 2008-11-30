@@ -1448,7 +1448,8 @@ static int kill_lru_tcp_or_rpc_connection(void *handle, struct connection *newco
 	    oldest_tcp = c;
     }
     if (oldest_tcp != NULL) {
-	krb5_klog_syslog(LOG_INFO, "dropping tcp fd %d from %s",
+	krb5_klog_syslog(LOG_INFO, "dropping %s fd %d from %s",
+			 c->type == CONN_RPC ? "rpc" : "tcp",
 			 oldest_tcp->fd, oldest_tcp->u.tcp.addrbuf);
 	fd = oldest_tcp->fd;
 	kill_tcp_or_rpc_connection(handle, oldest_tcp, 1);
@@ -1940,13 +1941,50 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
 	    && !FD_ISSET(s, &sstate.rfds))
 	{
 	    struct connection *newconn;
+	    struct sockaddr_storage addr_s;
+	    struct sockaddr *addr = (struct sockaddr *)&addr_s;
+	    socklen_t addrlen = sizeof(addr_s);
+	    char tmpbuf[10];
 
 	    newconn = add_rpc_data_fd(&sockdata, s);
 	    if (newconn == NULL)
 		continue;
 
+	    set_cloexec_fd(s);
+#if 0
+	    setnbio(s), setnolinger(s), setkeepalive(s);
+#endif
+
+	    if (getpeername(s, addr, &addrlen) ||
+		getnameinfo(addr, addrlen,
+			    newconn->u.tcp.addrbuf, sizeof(newconn->u.tcp.addrbuf),
+			    tmpbuf, sizeof(tmpbuf),
+			    NI_NUMERICHOST | NI_NUMERICSERV))
+		strlcpy(newconn->u.tcp.addrbuf, "???", sizeof(newconn->u.tcp.addrbuf));
+	    else {
+		char *p, *end;
+		p = newconn->u.tcp.addrbuf;
+		end = p + sizeof(newconn->u.tcp.addrbuf);
+		p += strlen(p);
+		if (end - p > 2 + strlen(tmpbuf)) {
+		    *p++ = '.';
+		    strlcpy(p, tmpbuf, end - p);
+		}
+	    }
+#if 0
+	    krb5_klog_syslog(LOG_INFO, "accepted RPC connection on socket %d from %s", 
+			     s, newconn->u.tcp.addrbuf);
+#endif
+
+	    newconn->u.tcp.addr_s = addr_s;
+	    newconn->u.tcp.addrlen = addrlen;
+	    newconn->u.tcp.start_time = time(0);
+
 	    if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
 		kill_lru_tcp_or_rpc_connection(handle, newconn);
+
+	    newconn->u.tcp.faddr.address = &newconn->u.tcp.kaddr;
+	    init_addr(&newconn->u.tcp.faddr, ss2sa(&newconn->u.tcp.addr_s));
 
 	    FD_SET(s, &sstate.rfds);
 	    if (sstate.max <= s)
