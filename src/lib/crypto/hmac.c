@@ -152,7 +152,7 @@ krb5_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
 	const krb5_crypto_iov *iov = &data[i];
 
 	if (SIGN_IOV(iov))
-	    sign_data[j++] = iov[i].data;
+	    sign_data[j++] = iov->data;
     }
 
     /* caller must store checksum in iov as it may be TYPE_TRAILER or TYPE_CHECKSUM */
