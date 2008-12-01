@@ -620,6 +620,7 @@ krb5_boolean KRB5_CALLCONV krb5_c_is_keyed_cksum
 #define KRB5_CRYPTO_TYPE_PADDING    4	/* [out] padding */
 #define KRB5_CRYPTO_TYPE_TRAILER    5	/* [out] checksum for encrypt */
 #define KRB5_CRYPTO_TYPE_CHECKSUM   6	/* [out] checksum for MIC */
+#define KRB5_CRYPTO_TYPE_STREAM	    7	/* [in] entire message */
 
 krb5_error_code KRB5_CALLCONV
     krb5_c_make_checksum_iov
