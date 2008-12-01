@@ -109,11 +109,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     if (trailer == NULL || trailer->data.length < hmacsize)
 	return KRB5_BAD_MSIZE;
 
-    if (blocksize == 0) {
-	/* Check for correct input length in CTS mode */
-        if (enc->block_size != 0 && plainlen < enc->block_size)
-	    return KRB5_BAD_MSIZE;
-    } else {
+    if (blocksize != 0) {
 	/* Check that the input data is correctly padded */
 	if (plainlen % blocksize)
 	    padsize = blocksize - (plainlen % blocksize);
