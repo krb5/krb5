@@ -211,12 +211,12 @@ krb5int_c_iov_get_block(unsigned char *block,
 	iov_state->iov_pos = 0;
 	iov_state->data_pos = 0;
 	iov_state->got_header = 1;
-    }
+    } else
+	iov_state->iov_pos = i;
 
     if (j != block_size)
 	memset(block + j, 0, block_size - j);
 
-    iov_state->iov_pos = i;
 }
 
 void KRB5_CALLCONV
@@ -262,9 +262,8 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 	iov_state->iov_pos = 0;
 	iov_state->data_pos = 0;
 	iov_state->got_header = 1;
-    }
-
-    iov_state->iov_pos = i;
+    } else
+	iov_state->iov_pos = i;
 }
 
 krb5_error_code KRB5_CALLCONV
