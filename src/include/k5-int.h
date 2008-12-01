@@ -562,7 +562,19 @@ struct krb5_enc_provider {
   krb5_error_code (*init_state) (const krb5_keyblock *key,
 				 krb5_keyusage keyusage, krb5_data *out_state);
   krb5_error_code (*free_state) (krb5_data *state);
-  
+
+    /* In-place encryption/decryption of multiple buffers */
+    krb5_error_code (*encrypt_iov) (const krb5_keyblock *key,
+				    const krb5_data *cipher_state,
+				    krb5_crypto_iov *data,
+				    size_t num_data);
+
+
+    krb5_error_code (*decrypt_iov) (const krb5_keyblock *key,
+				    const krb5_data *cipher_state,
+				    krb5_crypto_iov *data,
+				    size_t num_data);
+
 };
 
 struct krb5_hash_provider {

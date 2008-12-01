@@ -28,11 +28,6 @@
 #include "etypes.h"
 #include "aead.h"
 
-/*
- * RC4: Checksum | E(Confounder | Plaintext)
- * DK:  E(Confounder | Plaintext | Pad) | Checksum
- */
-
 krb5_error_code KRB5_CALLCONV
 krb5_c_crypto_length(krb5_context context,
 		     krb5_enctype enctype,

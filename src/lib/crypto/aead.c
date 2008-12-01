@@ -27,27 +27,26 @@
 #include "k5-int.h"
 #include "aead.h"
 
-krb5_error_code KRB5_CALLCONV
-krb5int_c_locate_iov(krb5_context context,
-		     krb5_crypto_iov *data,
+krb5_crypto_iov * KRB5_CALLCONV
+krb5int_c_locate_iov(krb5_crypto_iov *data,
 		     size_t num_data,
-		     krb5_cryptotype type,
-		     krb5_crypto_iov **iov)
+		     krb5_cryptotype type)
 {
     size_t i;
-
-    *iov = NULL;
+    krb5_crypto_iov *iov = NULL;
 
     if (data == NULL)
-	return KRB5_BAD_MSIZE;
+	return NULL;
 
     for (i = 0; i < num_data; i++) {
 	if (data[i].flags == type) {
-	    *iov = &data[i];
-	    return 0;
+	    if (iov == NULL)
+		iov = &data[i];
+	    else
+		return NULL; /* can't appear twice */
 	}
     }
 
-    return KRB5_BAD_MSIZE;
+    return iov;
 }
 

@@ -28,10 +28,8 @@
 
 /* AEAD helpers */
 
-krb5_error_code KRB5_CALLCONV
-krb5int_c_locate_iov(krb5_context context,
-		     krb5_crypto_iov *data,
+krb5_crypto_iov * KRB5_CALLCONV
+krb5int_c_locate_iov(krb5_crypto_iov *data,
 		     size_t num_data,
-		     krb5_cryptotype type,
-		     krb5_crypto_iov **iov);
+		     krb5_cryptotype type);
 
