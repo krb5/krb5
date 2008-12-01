@@ -202,6 +202,14 @@ process_block_p(const krb5_crypto_iov *data,
 #define HEADER_STATE_PARTIAL	1
 #define HEADER_STATE_COMPLETE	2
 
+/*
+ * This somewhat hairy code is designed to allow the HEADER to
+ * appear after the DATA or SIGN_DATA, even though it may need
+ * to be encrypted or signed first (respectively). Unfortunately
+ * this makes the code somewhat unreadable. It may be better to
+ * require the caller to place the HEADER first, and return an
+ * error if this is not the case.
+ */
 void KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,
 			size_t block_size,
