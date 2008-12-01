@@ -139,12 +139,15 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
 	strncpy(salt.data, krb5int_arcfour_l40, salt.length);
-	store_32_le(ms_usage, salt.data + 10);
+	store_32_le(ms_usage, (unsigned char *)salt.data + 10);
     } else {
 	salt.length = 4;
-	store_32_le(ms_usage, salt.data);
+	store_32_le(ms_usage, (unsigned char *)salt.data);
     }
-    krb5_hmac(hash, key, 1, &salt, &d1);
+    ret = krb5_hmac(hash, key, 1, &salt, &d1);
+    if (ret != 0)
+	goto cleanup;
+
     memcpy(k2.contents, k1.contents, k2.length);
 
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
@@ -154,11 +157,17 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    krb5_hmac_iov(hash, &k2, data, num_data, &trailer->data);
+    ret = krb5_hmac_iov(hash, &k2, data, num_data, &trailer->data);
+    if (ret != 0)
+	goto cleanup;
 
-    krb5_hmac(hash, &k1, 1, &trailer->data, &d3);
+    ret = krb5_hmac(hash, &k1, 1, &trailer->data, &d3);
+    if (ret != 0)
+	goto cleanup;
 
     ret = enc->encrypt_iov(&k3, ivec, data, num_data);
+    if (ret != 0)
+	goto cleanup;
 
 cleanup:
     if (d1.data != NULL) {
@@ -182,11 +191,96 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
 			    const struct krb5_enc_provider *enc,
 			    const struct krb5_hash_provider *hash,
 			    const krb5_keyblock *key,
-			    krb5_keyusage keyusage,
+			    krb5_keyusage usage,
 			    const krb5_data *ivec,
 			    krb5_crypto_iov *data,
 			    size_t num_data)
 {
+    krb5_error_code ret;
+    krb5_crypto_iov *header, *trailer;
+    krb5_keyblock k1, k2, k3;
+    krb5_data d1, d2, d3;
+    krb5_keyusage ms_usage;
+    char salt_data[14];
+    krb5_data salt;
+
+    d1.length = d2.length = d3.length = 0;
+    d1.data = d2.data = d3.data = NULL;
+
+    header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
+    if (header == NULL || header->data.length != CONFOUNDERLENGTH)
+	return KRB5_BAD_MSIZE;
+
+    trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
+    if (trailer == NULL || header->data.length != hash->hashsize)
+	return KRB5_BAD_MSIZE;
+    
+    ret = alloc_derived_key(enc, &k1, &d1, key);
+    if (ret != 0)
+	goto cleanup;
+
+    ret = alloc_derived_key(enc, &k2, &d2, key);
+    if (ret != 0)
+	goto cleanup;
+
+    ret = alloc_derived_key(enc, &k3, &d3, key);
+    if (ret != 0)
+	goto cleanup;
+
+    /* Begin the decryption, compute K1 */
+    salt.data = salt_data;
+    salt.length = sizeof(salt_data);
+
+    ms_usage = krb5int_arcfour_translate_usage(usage);
+
+    if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+	strncpy(salt.data, krb5int_arcfour_l40, salt.length);
+	store_32_le(ms_usage, (unsigned char *)salt.data + 10);
+    } else {
+	salt.length = 4;
+	store_32_le(ms_usage, (unsigned char *)salt.data);
+    }
+    ret = krb5_hmac(hash, key, 1, &salt, &d1);
+    if (ret != 0)
+	goto cleanup;
+
+    memcpy(k2.contents, k1.contents, k2.length);
+
+    if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
+	memset(k1.contents + 7, 0xAB, 9);
+
+    ret = krb5_hmac(hash, &k1, 1, &trailer->data, &d3);
+    if (ret != 0)
+	goto cleanup;
+
+    ret = enc->decrypt_iov(&k3, ivec, data, num_data);
+    if (ret != 0)
+	goto cleanup;
+
+    ret = krb5_hmac_iov(hash, &k2, data, num_data, &d1);
+    if (ret != 0)
+	goto cleanup;
+
+    if (memcmp(trailer->data.data, d1.data, hash->hashsize) != 0) {
+	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+	goto cleanup;
+    }
+
+cleanup:
+    if (d1.data != NULL) {
+	memset(d1.data, 0, d1.length);
+	free(d1.data);
+    }
+    if (d2.data != NULL) {
+	memset(d2.data, 0, d2.length);
+	free(d2.data);
+    }
+    if (d3.data != NULL) {
+	memset(d3.data, 0, d3.length);
+	free(d3.data);
+    }
+
+    return ret;
 }
 
 const struct krb5_aead_provider krb5int_aead_arcfour = {
