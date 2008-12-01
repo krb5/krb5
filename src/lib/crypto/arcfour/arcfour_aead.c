@@ -41,12 +41,14 @@ krb5int_arcfour_crypto_length(const struct krb5_aead_provider *aead,
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
-	*length = CONFOUNDERLENGTH;
+	*length = CONFOUNDERLENGTH + hash->hashsize;
 	break;
     case KRB5_CRYPTO_TYPE_PADDING:
 	*length = 0;
 	break;
     case KRB5_CRYPTO_TYPE_TRAILER:
+	*length = 0;
+	break;
     case KRB5_CRYPTO_TYPE_CHECKSUM:
 	*length = hash->hashsize;
 	break;
