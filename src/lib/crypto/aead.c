@@ -168,6 +168,10 @@ krb5int_c_find_checksum_type(krb5_cksumtype cksumtype)
     return &krb5_cksumtypes_list[i];
 }
 
+#define HEADER_STATE_NONE	0
+#define HEADER_STATE_PARTIAL	1
+#define HEADER_STATE_COMPLETE	2
+
 static int
 process_block_p(const krb5_crypto_iov *data,
 		size_t num_data,
@@ -179,7 +183,7 @@ process_block_p(const krb5_crypto_iov *data,
 
     switch (iov->flags) {
     case KRB5_CRYPTO_TYPE_HEADER:
-	process_block = (iov_state->got_header == 0);
+	process_block = (iov_state->got_header == HEADER_STATE_NONE);
 	break;
     case KRB5_CRYPTO_TYPE_SIGN_ONLY:
 	process_block = (iov_state->include_sign_only && iov_state->got_header);
@@ -188,7 +192,7 @@ process_block_p(const krb5_crypto_iov *data,
 	process_block = (iov_state->pad_to_boundary == 0);
 	break;
     case KRB5_CRYPTO_TYPE_DATA:
-	process_block = (iov_state->got_header != 0);
+	process_block = (iov_state->got_header != HEADER_STATE_NONE);
 	break;
     default:
 	process_block = 0;
@@ -197,10 +201,6 @@ process_block_p(const krb5_crypto_iov *data,
 
     return process_block;
 }
-
-#define HEADER_STATE_NONE	0
-#define HEADER_STATE_PARTIAL	1
-#define HEADER_STATE_COMPLETE	2
 
 /*
  * Returns TRUE if, having reached the end of the current buffer,
