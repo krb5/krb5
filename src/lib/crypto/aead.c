@@ -168,6 +168,47 @@ krb5int_c_find_checksum_type(krb5_cksumtype cksumtype)
     return &krb5_cksumtypes_list[i];
 }
 
+static int
+process_block_p(const krb5_crypto_iov *data,
+		size_t num_data,
+		struct iov_block_state *iov_state,
+		size_t i)
+{
+    const krb5_crypto_iov *iov = &data[i];
+    int process_block;
+
+    switch (iov->flags) {
+    case KRB5_CRYPTO_TYPE_HEADER:
+	/* Because SIGN_ONLY headers share padding with SIGN_ONLY data */
+	process_block = iov_state->include_sign_only ? 1 : (iov_state->got_header == 0);
+	break;
+    case KRB5_CRYPTO_TYPE_PADDING: {
+	const krb5_crypto_iov *data_to_pad;
+
+	if (i > 0) {
+	    data_to_pad = &data[i - 1];
+
+	    if (data_to_pad->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
+		process_block = iov_state->include_sign_only;
+	    else if (data_to_pad->flags == KRB5_CRYPTO_TYPE_DATA)
+		process_block = 1;
+	}
+	break;
+	}
+    case KRB5_CRYPTO_TYPE_SIGN_ONLY:
+	process_block = iov_state->include_sign_only;
+	break;
+    case KRB5_CRYPTO_TYPE_DATA:
+	process_block = 1;
+	break;
+    default:
+	process_block = 0;
+	break;
+    }
+
+    return process_block;
+}
+
 void KRB5_CALLCONV
 krb5int_c_iov_get_block(unsigned char *block,
 			size_t block_size,
@@ -181,9 +222,7 @@ krb5int_c_iov_get_block(unsigned char *block,
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
 
-	if (iov_state->got_header ?
-	    !ENCRYPT_DATA_IOV(iov) :
-	    !ENCRYPT_CONF_IOV(iov))
+	if (!process_block_p(data, num_data, iov_state, i))
 	    continue;
 
 	nbytes = iov->data.length - iov_state->data_pos;
@@ -232,9 +271,7 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 	const krb5_crypto_iov *iov = &data[i];
 	size_t nbytes;
 
-	if (iov_state->got_header ?
-	    !ENCRYPT_DATA_IOV(iov) :
-	    !ENCRYPT_CONF_IOV(iov))
+	if (!process_block_p(data, num_data, iov_state, i))
 	    continue;
 
 	nbytes = iov->data.length - iov_state->data_pos;

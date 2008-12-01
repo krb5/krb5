@@ -38,6 +38,8 @@ krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
     const unsigned char *ip;
     unsigned char *op;
     struct iov_block_state input_pos, output_pos;
+    unsigned char iblock[MIT_DES_BLOCK_LENGTH];
+    unsigned char oblock[MIT_DES_BLOCK_LENGTH];
 
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
@@ -64,15 +66,16 @@ krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
      * Suitably initialized, now work the length down 8 bytes
      * at a time.
      */
-    do {
+    for (;;) {
 	unsigned DES_INT32 temp;
-	unsigned char iblock[MIT_DES_BLOCK_LENGTH];
-	unsigned char oblock[MIT_DES_BLOCK_LENGTH];
 
 	ip = iblock;
 	op = oblock;
 
 	krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos);
+
+	if (input_pos.iov_pos == num_data)
+	    break;
 
 	GET_HALF_BLOCK(temp, ip);
 	left  ^= temp;
@@ -93,10 +96,10 @@ krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
 	PUT_HALF_BLOCK(right, op);
 
 	krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
+    }
 
-	if (input_pos.iov_pos == num_data && ivec != NULL)
-	    memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
-    } while (input_pos.iov_pos != num_data);
+    if (ivec != NULL)
+	memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
 }
 
 void
@@ -114,6 +117,8 @@ krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
     unsigned DES_INT32 cipherl, cipherr;
     unsigned char *op;
     struct iov_block_state input_pos, output_pos;
+    unsigned char iblock[MIT_DES_BLOCK_LENGTH];
+    unsigned char oblock[MIT_DES_BLOCK_LENGTH];
 
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
@@ -147,15 +152,16 @@ krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
     /*
      * Now do this in earnest until we run out of length.
      */
-    do {
+    for (;;) {
 	/*
 	 * Read a block from the input into left and
 	 * right.  Save this cipher block for later.
 	 */
-	unsigned char iblock[MIT_DES_BLOCK_LENGTH];
-	unsigned char oblock[MIT_DES_BLOCK_LENGTH];
 
 	krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos);
+
+	if (input_pos.iov_pos == num_data)
+	    break;
 
 	ip = iblock;
 	op = oblock;
@@ -189,8 +195,8 @@ krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
 	ocipherr = cipherr;
 
 	krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
+    }
 
-	if (input_pos.iov_pos == num_data && ivec != NULL)
-	    memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
-    } while (input_pos.iov_pos != num_data);
+    if (ivec != NULL)
+	memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
 }
