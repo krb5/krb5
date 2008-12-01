@@ -198,7 +198,7 @@ tohex(in, ret)
     ret->data[ret->length] = 0;
 
     for (i = 0; i < in.length; i++)
-	sprintf(ret->data + 2 * i, "%02x", in.data[i] & 0xff);
+	snprintf(ret->data + 2 * i, 3, "%02x", in.data[i] & 0xff);
 
 cleanup:
 

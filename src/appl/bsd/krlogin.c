@@ -599,7 +599,8 @@ main(argc, argv)
 		if (ospeed >= 50)
 			/* On some systems, ospeed is the baud rate itself,
 			   not a table index.  */
-			sprintf (term + strlen (term), "%d", ospeed);
+			snprintf (term + strlen (term),
+				  sizeof(term) - strlen(term), "%d", ospeed);
 		else if (ospeed >= sizeof(speeds)/sizeof(char*))
 			/* Past end of table, but not high enough to
 			   look like a real speed.  */

@@ -139,7 +139,7 @@ main(argc, argv)
       */
      echo_arg = buf;
      for (i = 0; i < 3; i++) {
-	  sprintf(buf, "testing %d\n", i);
+	  snprintf(buf, sizeof(buf), "testing %d\n", i);
 
 	  echo_resp = rpc_test_echo_1(&echo_arg, clnt);
 	  if (echo_resp == NULL) {

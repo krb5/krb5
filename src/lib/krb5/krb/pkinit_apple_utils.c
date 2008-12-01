@@ -301,13 +301,11 @@ krb5_error_code pkiKrbTimestampToStr(
 	utc->tm_min > 59 || utc->tm_sec > 59) {
 	return ASN1_BAD_GMTIME;
     }
-    outStr = (char *)malloc(16);
-    if(outStr == NULL) {
+    if (asprintf(&outStr, "%04d%02d%02d%02d%02d%02dZ",
+		 utc->tm_year + 1900, utc->tm_mon + 1,
+		 utc->tm_mday, utc->tm_hour, utc->tm_min, utc->tm_sec) < 0) {
 	return ENOMEM;
     }
-    sprintf(outStr, "%04d%02d%02d%02d%02d%02dZ",
-	utc->tm_year + 1900, utc->tm_mon + 1,
-	utc->tm_mday, utc->tm_hour, utc->tm_min, utc->tm_sec);
     *str = outStr;
     return 0;
 }

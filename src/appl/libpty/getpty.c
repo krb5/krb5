@@ -105,7 +105,7 @@ ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
 	    return PTY_GETPTY_FSTAT;
 	}
 	ptynum = (int)(stb.st_rdev&0xFF);
-	sprintf(slavebuf, "/dev/ttyp%x", ptynum);
+	snprintf(slavebuf, sizeof(slavebuf), "/dev/ttyp%x", ptynum);
 	if (strlen(slavebuf) > slavelength - 1) {
 	    close(*fd);
 	    *fd = -1;
@@ -115,7 +115,7 @@ ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
 	return 0;
     } else {
     	for (cp = "pqrstuvwxyzPQRST";*cp; cp++) {
-	    sprintf(slavebuf,"/dev/ptyXX");
+	    snprintf(slavebuf,sizeof(slavebuf),"/dev/ptyXX");
 	    slavebuf[sizeof("/dev/pty") - 1] = *cp;
 	    slavebuf[sizeof("/dev/ptyp") - 1] = '0';
 	    if (stat(slavebuf, &stb) < 0)

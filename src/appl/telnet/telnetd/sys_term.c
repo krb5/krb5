@@ -1133,7 +1133,8 @@ startslave(host, autologin, autoname)
 	 */
 	if ((i = open(INIT_FIFO, O_WRONLY)) < 0) {
 		char tbuf[128];
-		(void) sprintf(tbuf, "Can't open %s\n", INIT_FIFO);
+		(void) snprintf(tbuf, sizeof(tbuf), "Can't open %s\n",
+				INIT_FIFO);
 		fatalperror(net, tbuf);
 	}
 	memset((char *)&request, 0, sizeof(request));
@@ -1156,7 +1157,8 @@ startslave(host, autologin, autoname)
 #endif /* BFTPDAEMON */
 	if (write(i, (char *)&request, sizeof(request)) < 0) {
 		char tbuf[128];
-		(void) sprintf(tbuf, "Can't write to %s\n", INIT_FIFO);
+		(void) snprintf(tbuf, sizeof(tbuf), "Can't write to %s\n",
+				INIT_FIFO);
 		fatalperror(net, tbuf);
 	}
 	(void) close(i);
@@ -1168,7 +1170,7 @@ startslave(host, autologin, autoname)
 		if (i == 3 || n >= 0 || !gotalarm)
 			break;
 		gotalarm = 0;
-		sprintf(tbuf, "telnetd: waiting for /etc/init to start login process on %s\r\n", line);
+		snprintf(tbuf, sizeof(tbuf), "telnetd: waiting for /etc/init to start login process on %s\r\n", line);
 		(void) write(net, tbuf, strlen(tbuf));
 	}
 	if (n < 0 && gotalarm)
@@ -1355,13 +1357,9 @@ start_login(host, autologin, name)
 			write(xpty, name, len);
 			write(xpty, name, len);
 			memset(speed, 0, sizeof(speed));
-			strncpy(speed,
-				(cp = getenv("TERM")) ? cp : "",
-				sizeof(speed)-1-(10*sizeof(def_rspeed)/4)-1);
-			/* 1 for /, () for the number, 1 for trailing 0. */
-			sprintf(speed + strlen(speed),
-				"/%d",
-				(def_rspeed > 0) ? def_rspeed : 9600);
+			snprintf(speed, sizeof(speed), "%s/%d",
+				 (cp = getenv("TERM")) ? cp : "",
+				 (def_rspeed > 0) ? def_rspeed : 9600);
 			len = strlen(speed)+1;
 			write(xpty, speed, len);
 

@@ -73,7 +73,7 @@ pty_logwtmp(const char *tty, const char *user, const char *host)
 	cp = tty + len - 2;
     else
 	cp = tty;
-    sprintf(utmp_id, "kr%s", cp);
+    snprintf(utmp_id, sizeof(utmp_id), "kr%s", cp);
     strncpy(utx.ut_id, utmp_id, sizeof(utx.ut_id));
 
 #ifdef HAVE_SETUTXENT

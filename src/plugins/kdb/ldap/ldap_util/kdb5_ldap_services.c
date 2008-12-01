@@ -85,9 +85,11 @@ static int process_host_list(char **host_list, int servicetype)
 	    /* Parse for the protocol string and translate to number */
 	    strncpy (proto_str, pchr + 1, PROTOCOL_STR_LEN);
 	    if (!strcmp(proto_str, "udp"))
-		sprintf (proto_str, "%d", PROTOCOL_NUM_UDP);
+		snprintf (proto_str, sizeof(proto_str), "%d",
+			  PROTOCOL_NUM_UDP);
 	    else if (!strcmp(proto_str, "tcp"))
-		sprintf (proto_str, "%d", PROTOCOL_NUM_TCP);
+		snprintf (proto_str, sizeof(proto_str), "%d",
+			  PROTOCOL_NUM_TCP);
 	    else
 		proto_str[0] = '\0'; /* Make the string null if invalid */
 
@@ -109,27 +111,32 @@ static int process_host_list(char **host_list, int servicetype)
 	   and port values if they are absent or not matching */
 	if (servicetype == LDAP_KDC_SERVICE) {
 	    if (proto_str[0] == '\0')
-		sprintf (proto_str, "%d", PROTOCOL_DEFAULT_KDC);
+		snprintf (proto_str, sizeof(proto_str), "%d",
+			  PROTOCOL_DEFAULT_KDC);
 
 	    if (port_str[0] == '\0')
-		sprintf (port_str, "%d", PORT_DEFAULT_KDC);
+		snprintf (port_str, sizeof(port_str), "%d", PORT_DEFAULT_KDC);
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    if (proto_str[0] == '\0')
-		sprintf (proto_str, "%d", PROTOCOL_DEFAULT_ADM);
+		snprintf (proto_str, sizeof(proto_str), "%d",
+			  PROTOCOL_DEFAULT_ADM);
 	    else if (strcmp(proto_str, "1")) {
-		sprintf (proto_str, "%d", PROTOCOL_DEFAULT_ADM);
+		snprintf (proto_str, sizeof(proto_str), "%d",
+			  PROTOCOL_DEFAULT_ADM);
 
 		/* Print warning message */
 		printf ("Admin Server supports only TCP protocol, hence setting that\n");
 	    }
 
 	    if (port_str[0] == '\0')
-		sprintf (port_str, "%d", PORT_DEFAULT_ADM);
+		snprintf (port_str, sizeof(port_str), "%d", PORT_DEFAULT_ADM);
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    if (proto_str[0] == '\0')
-		sprintf (proto_str, "%d", PROTOCOL_DEFAULT_PWD);
+		snprintf (proto_str, sizeof(proto_str), "%d",
+			  PROTOCOL_DEFAULT_PWD);
 	    else if (strcmp(proto_str, "0")) {
-		sprintf (proto_str, "%d", PROTOCOL_DEFAULT_PWD);
+		snprintf (proto_str, sizeof(proto_str), "%d",
+			  PROTOCOL_DEFAULT_PWD);
 
 		/* Print warning message */
 		printf ("Password Server supports only UDP protocol, hence setting that\n");
@@ -1538,7 +1545,6 @@ kdb5_ldap_set_service_password(argc, argv)
     unsigned int passwd_len = 0;
     krb5_error_code errcode = -1;
     int retval = 0, i = 0;
-    unsigned int len = 0;
     krb5_boolean print_usage = FALSE;
     FILE *pfile = NULL;
     char *str = NULL;
@@ -1667,23 +1673,17 @@ kdb5_ldap_set_service_password(argc, argv)
 	memset(passwd, 0, MAX_SERVICE_PASSWD_LEN + 1);
 	passwd_len = MAX_SERVICE_PASSWD_LEN;
 
-	len = strlen(service_object);
-	/* size of allocation=strlen of servicedn + strlen("Password for \" \"")=20 */
-	prompt1 = (char *)malloc(len + 20);
-	if (prompt1 == NULL) {
+	if (asprintf(&prompt1, "Password for \"%s\"", service_object) < 0) {
 	    com_err(me, ENOMEM, "while setting service object password");
 	    goto cleanup;
 	}
-	sprintf(prompt1, "Password for \"%s\"", service_object);
 
-	/* size of allocation=strlen of servicedn + strlen("Re-enter Password for \" \"")=30 */
-	prompt2 = (char *)malloc(len + 30);
-	if (prompt2 == NULL) {
+	if (asprintf(&prompt2, "Re-enter password for \"%s\"",
+		     service_object) < 0) {
 	    com_err(me, ENOMEM, "while setting service object password");
 	    free(prompt1);
 	    goto cleanup;
 	}
-	sprintf(prompt2, "Re-enter password for \"%s\"", service_object);
 
 	retval = krb5_read_password(util_context, prompt1, prompt2, passwd, &passwd_len);
 	free(prompt1);
@@ -1718,19 +1718,15 @@ kdb5_ldap_set_service_password(argc, argv)
 	    goto cleanup;
 	}
 	/* Password = {HEX}<encrypted password>:<encrypted key> */
-	encrypted_passwd.value = (unsigned char *)malloc(strlen(service_object) +
-							 1 + 5 + hex.length + 2);
-	if (encrypted_passwd.value == NULL) {
+	if (asprintf(&str, "%s#{HEX}%s\n", service_object, hex.data) < 0) {
 	    com_err(me, ENOMEM, "while setting service object password");
 	    memset(passwd, 0, passwd_len);
 	    memset(hex.data, 0, hex.length);
 	    free(hex.data);
 	    goto cleanup;
 	}
-	encrypted_passwd.value[strlen(service_object) +
-			       1 + 5 + hex.length + 1] = '\0';
-	sprintf((char *)encrypted_passwd.value, "%s#{HEX}%s\n", service_object, hex.data);
-	encrypted_passwd.len = strlen((char *)encrypted_passwd.value);
+	encrypted_passwd.data = (unsigned char *)str;
+	encrypted_passwd.len = strlen(str);
 	memset(hex.data, 0, hex.length);
 	free(hex.data);
     }
@@ -1806,12 +1802,10 @@ kdb5_ldap_set_service_password(argc, argv)
 	mode_t omask;
 
 	/* Create a new file with the extension .tmp */
-	tmp_file = (char *) malloc(sizeof(char) * (strlen(file_name) + 4 + 1));
-	if (tmp_file == NULL) {
+	if (asprintf(&tmp_file,"%s.tmp",file_name) < 0) {
 	    com_err(me, ENOMEM, "while setting service object password");
 	    goto cleanup;
 	}
-	sprintf(tmp_file,"%s.%s",file_name,"tmp");
 
 	omask = umask(077);
 	newfile = fopen(tmp_file, "w+");
@@ -1832,7 +1826,6 @@ kdb5_ldap_set_service_password(argc, argv)
 		    goto cleanup;
 		}
 	    } else {
-		len = strlen(line);
 		if (fprintf(newfile, "%s", line) < 0) {
 		    com_err(me, errno, "Failed to write service object password to file");
 		    fclose(newfile);
@@ -1998,12 +1991,12 @@ done:
 	/* size of prompt = strlen of servicedn + strlen("Password for \" \"") */
 	assert (sizeof (prompt1) > (strlen (service_object)
 				    + sizeof ("Password for \" \"")));
-	sprintf(prompt1, "Password for \"%s\"", service_object);
+	snprintf(prompt1, sizeof(prompt1), "Password for \"%s\"", service_object);
 
 	/* size of prompt = strlen of servicedn + strlen("Re-enter Password for \" \"") */
 	assert (sizeof (prompt2) > (strlen (service_object)
 				    + sizeof ("Re-enter Password for \" \"")));
-	sprintf(prompt2, "Re-enter password for \"%s\"", service_object);
+	snprintf(prompt2, sizeof(prompt2), "Re-enter password for \"%s\"", service_object);
 
 	ret = krb5_read_password(util_context, prompt1, prompt2, passwd, &passwd_len);
 	if (ret != 0) {
@@ -2082,13 +2075,11 @@ done:
 	mode_t omask;
 
 	/* Create a new file with the extension .tmp */
-	tmp_file = (char *) malloc(sizeof(char) * (strlen(file_name) + 4 + 1));
-	if (tmp_file == NULL) {
+	if (asprintf(&tmp_file,"%s.tmp",file_name) < 0) {
 	    com_err(me, ENOMEM, "while setting service object password");
 	    fclose(pfile);
 	    goto cleanup;
 	}
-	sprintf(tmp_file,"%s.%s",file_name,"tmp");
 
 	omask = umask(077);
 	newfile = fopen(tmp_file, "w");

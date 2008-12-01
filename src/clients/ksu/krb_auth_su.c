@@ -407,7 +407,7 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     krb5_timestamp now;
     unsigned int pwsize;
     char password[255], *client_name, prompt[255];
-
+    int result;
 
     *zero_password = FALSE;	
     
@@ -442,13 +442,14 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     } else
 	my_creds.times.renew_till = 0;
 
-    if (strlen (client_name) + 80 > sizeof (prompt)) {
+    result = snprintf(prompt, sizeof(prompt), "Kerberos password for %s: ",
+		      client_name);
+    if (SNPRINTF_OVERFLOW(result, sizeof(prompt))) {
 	fprintf (stderr,
 		 "principal name %s too long for internal buffer space\n",
 		 client_name);
 	return FALSE;
     }
-    (void) sprintf(prompt,"Kerberos password for %s: ", client_name);
     
     pwsize = sizeof(password);
     

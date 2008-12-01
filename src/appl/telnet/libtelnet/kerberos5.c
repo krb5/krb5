@@ -465,10 +465,10 @@ kerberos5_is(ap, data, cnt)
 					       ticket->server,0)->length] = '\0';
 		    if (strcmp("host", princ)) {
                         if(strlen(princ) < sizeof(errbuf) - 39) {
-                            (void) sprintf(errbuf, "incorrect service name: \"%s\" != \"host\"",
+			    (void) snprintf(errbuf, sizeof(errbuf), "incorrect service name: \"%s\" != \"host\"",
                                            princ);
                         } else {
-                            (void) sprintf(errbuf, "incorrect service name: principal != \"host\"");
+                            (void) snprintf(errbuf, sizeof(errbuf), "incorrect service name: principal != \"host\"");
                         }
 			goto errout;
 		    }
@@ -811,12 +811,12 @@ kerberos5_printsub(data, cnt, buf, buflen)
 #endif	/* FORWARD */
 
 	default:
-		sprintf(lbuf, " %d (unknown)", data[3]);
+		snprintf(lbuf, sizeof(lbuf), " %d (unknown)", data[3]);
 		strncpy((char *)buf, lbuf, buflen);
 	common2:
 		BUMP(buf, buflen);
 		for (i = 4; i < cnt; i++) {
-			sprintf(lbuf, " %d", data[i]);
+			snprintf(lbuf, sizeof(lbuf), " %d", data[i]);
 			strncpy((char *)buf, lbuf, buflen);
 			BUMP(buf, buflen);
 		}

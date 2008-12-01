@@ -148,8 +148,9 @@ krb5_ldap_create_service(context, service, mask)
 	for (i=0; service->krbrealmreferences[i]; ++i) {
 	    if ((st=updateAttribute(ld, service->krbrealmreferences[i], realmattr,
 				    service->servicedn)) != 0) {
-		sprintf (errbuf, "Error adding 'krbRealmReferences' to %s: ",
-			 service->krbrealmreferences[i]);
+		snprintf (errbuf, sizeof(errbuf),
+			  "Error adding 'krbRealmReferences' to %s: ",
+			  service->krbrealmreferences[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete service object, status ignored intentionally */
 		ldap_delete_ext_s(ld, service->servicedn, NULL, NULL);

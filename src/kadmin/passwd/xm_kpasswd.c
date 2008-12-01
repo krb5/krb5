@@ -116,7 +116,7 @@ motif_com_err (whoami, code, fmt, args)
     }
   if (fmt)
     {
-      vsprintf(buf + strlen(buf), fmt, args);
+      vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, args);
     }
 
   XtVaSetValues(scroll_text, XmNvalue, buf, NULL);
@@ -321,7 +321,7 @@ display_intro_message(fmt_string, arg_string)
   XmString xmstr;
   char buf[1024];
 
-  sprintf(buf, fmt_string, arg_string);
+  snprintf(buf, sizeof(buf), fmt_string, arg_string);
 
   xmstr = XmStringCreateLtoR(buf, XmSTRING_DEFAULT_CHARSET);
   XtVaSetValues(main_lbl, XmNlabelString, xmstr, NULL);

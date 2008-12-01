@@ -1432,7 +1432,7 @@ recv_database(context, fd, database_fd, confmsg)
 	while (received_size < database_size) {
 	        retval = krb5_read_message(context, (void *) &fd, &inbuf);
 		if (retval) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"while reading database block starting at offset %d",
 				received_size);
 			com_err(progname, retval, buf);
@@ -1444,7 +1444,7 @@ recv_database(context, fd, database_fd, confmsg)
 		retval = krb5_rd_priv(context, auth_context, &inbuf, 
 				      &outbuf, NULL);
 		if (retval) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"while decoding database block starting at offset %d",
 				received_size);
 			com_err(progname, retval, buf);
@@ -1456,12 +1456,12 @@ recv_database(context, fd, database_fd, confmsg)
 		krb5_free_data_contents(context, &inbuf);
 		krb5_free_data_contents(context, &outbuf);
 		if (n < 0) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"while writing database block starting at offset %d",
 				received_size);
 			send_error(context, fd, errno, buf);
 		} else if (n != outbuf.length) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"incomplete write while writing database block starting at \noffset %d (%d written, %d expected)",
 				received_size, n, outbuf.length);
 			send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
@@ -1472,7 +1472,7 @@ recv_database(context, fd, database_fd, confmsg)
 	 * OK, we've seen the entire file.  Did we get too many bytes?
 	 */
 	if (received_size > database_size) {
-		sprintf(buf,
+		snprintf(buf, sizeof(buf),
 			"Received %d bytes, expected %d bytes for database file",
 			received_size, database_size);
 		send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
@@ -1521,8 +1521,8 @@ send_error(context, fd, err_code, err_text)
 	if (error.error > 127) {
 		error.error = KRB_ERR_GENERIC;
 		if (err_text) {
-			sprintf(buf, "%s %s", error_message(err_code),
-				err_text);
+			snprintf(buf, sizeof(buf), "%s %s",
+				 error_message(err_code), err_text);
 			text = buf;
 		}
 	} 
@@ -1674,12 +1674,10 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 
 	host = params.admin_server; /* XXX */
 
-	name = malloc(strlen(KADM5_KIPROP_HOST_SERVICE) + strlen(host) + 2);
-	if (name == NULL) {
+	if (asprintf(&name, "%s/%s", KADM5_KIPROP_HOST_SERVICE, host) < 0) {
 		free(host);
 		return (ENOMEM);
 	}
-	sprintf(name, "%s/%s", KADM5_KIPROP_HOST_SERVICE, host);
 	*host_service_name = name;
 
 	return (KADM5_OK);

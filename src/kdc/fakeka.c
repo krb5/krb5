@@ -208,7 +208,7 @@ int e;
     case KAINTERNALERROR:
 	return "internal error in fakeka, help!";
     default:
-	sprintf(buf, "impossible error code %d, help!", e);
+	snprintf(buf, sizeof(buf), "impossible error code %d, help!", e);
 	return buf;
     }
     /*NOTREACHED*/

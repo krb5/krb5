@@ -5613,6 +5613,6 @@ pkinit_pkcs11_code_to_text(int err)
 	    break;
     if (pkcs11_errstrings[i].text != NULL)
 	return (pkcs11_errstrings[i].text);
-    sprintf(uc, "unknown code 0x%x", err);
+    snprintf(uc, sizeof(uc), "unknown code 0x%x", err);
     return (uc);
 }

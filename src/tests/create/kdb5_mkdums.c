@@ -96,6 +96,7 @@ main(argc, argv)
     int num_to_create;
     char principal_string[BUFSIZ];
     char *suffix = 0;
+    size_t suffix_size;
     int depth;
 
     krb5_init_context(&test_context);
@@ -121,6 +122,8 @@ main(argc, argv)
 	    strncpy(principal_string, optarg, sizeof(principal_string) - 1);
 	    principal_string[sizeof(principal_string) - 1] = '\0';
 	    suffix = principal_string + strlen(principal_string);
+	    suffix_size = sizeof(principal_string) -
+	      (suffix - principal_string);
 	    break;
 	case 'n':                        /* how many to create */
 	    num_to_create = atoi(optarg);
@@ -175,14 +178,15 @@ main(argc, argv)
       /* build the new principal name */
       /* we can't pick random names because we need to generate all the names 
 	 again given a prefix and count to test the db lib and kdb */
-      (void) sprintf(suffix, "%d", n);
-      (void) sprintf(tmp, "%s-DEPTH-1", principal_string);
+      (void) snprintf(suffix, suffix_size, "%d", n);
+      (void) snprintf(tmp, sizeof(tmp), "%s-DEPTH-1", principal_string);
       tmp[sizeof(tmp) - 1] = '\0';
       str_newprinc = tmp;
       add_princ(test_context, str_newprinc);
 
       for (i = 2; i <= depth; i++) {
-	(void) sprintf(tmp2, "/%s-DEPTH-%d", principal_string, i);
+	(void) snprintf(tmp2, sizeof(tmp2), "/%s-DEPTH-%d",
+			principal_string, i);
 	tmp2[sizeof(tmp2) - 1] = '\0';
 	strncat(tmp, tmp2, sizeof(tmp) - 1 - strlen(tmp));
 	str_newprinc = tmp;
@@ -215,7 +219,7 @@ add_princ(context, str_newprinc)
     char 		  princ_name[4096];
 
     memset((char *)&newentry, 0, sizeof(newentry));
-    sprintf(princ_name, "%s@%s", str_newprinc, cur_realm);
+    snprintf(princ_name, sizeof(princ_name), "%s@%s", str_newprinc, cur_realm);
     if ((retval = krb5_parse_name(context, princ_name, &newprinc))) {
       com_err(progname, retval, "while parsing '%s'", princ_name);
       return;
@@ -375,12 +379,10 @@ char *dbname;
     }
     /* Pathname is passed to db2 via 'args' parameter.  */
     args[1] = NULL;
-    args[0] = malloc(sizeof("dbname=") + strlen(dbname));
-    if (args[0] == NULL) {
+    if (asprintf(&args[0], "dbname=%s", dbname) < 0) {
 	com_err(pname, errno, "while setting up db parameters");
 	return 1;
     }
-    sprintf(args[0], "dbname=%s", dbname);
 
     if ((retval = krb5_db_open(test_context, args, KRB5_KDB_OPEN_RO))) {
 	com_err(pname, retval, "while initializing database");

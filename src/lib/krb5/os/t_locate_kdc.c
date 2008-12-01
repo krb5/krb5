@@ -37,7 +37,7 @@ static const char *stypename (int stype)
     case SOCK_RAW:
 	return "raw";
     default:
-	sprintf(buf, "?%d", stype);
+	snprintf(buf, sizeof(buf), "?%d", stype);
 	return buf;
     }
 }

@@ -109,7 +109,7 @@ static void do_close_1(void *libhandle, int line)
 {
     if (verbose) {
 	char pbuf[3*sizeof(libhandle)+4];
-	sprintf(pbuf, "%p", libhandle);
+	snprintf(pbuf, sizeof(pbuf), "%p", libhandle);
 	printf("from line %d: do_close(%s)...%*s", line, pbuf,
 	       HORIZ-1-strlen(pbuf), "");
     }

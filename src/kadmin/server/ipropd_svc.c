@@ -601,12 +601,10 @@ kiprop_get_adm_host_srv_name(krb5_context context,
     if (ret = kadm5_get_master(context, realm, &host))
 	return (ret);
 
-    name = malloc(strlen(KIPROP_SVC_NAME)+ strlen(host) + 2);
-    if (name == NULL) {
+    if (asprintf(&name, "%s@%s", KIPROP_SVC_NAME, host) < 0) {
 	free(host);
 	return (ENOMEM);
     }
-    (void) sprintf(name, "%s@%s", KIPROP_SVC_NAME, host);
     free(host);
     *host_service_name = name;
 

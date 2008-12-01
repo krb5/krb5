@@ -164,6 +164,7 @@ char copyright[] =
 Key_schedule v4_schedule;
 #endif
 #include <k5-util.h>
+#include <k5-platform.h>
 
 #ifdef HAVE_PATHS_H
 #include <paths.h>
@@ -940,7 +941,7 @@ void doit(f, fromp)
        privileges. */
     if (port) {
 	/* Place entry into wtmp */
-	sprintf(ttyn,"krsh%ld",(long) (getpid() % 9999999));
+	snprintf(ttyn,sizeof(ttyn),"krsh%ld",(long) (getpid() % 9999999));
 	pty_logwtmp(ttyn,locuser,sane_host);
     }
     /*      We are simply execing a program over rshd : log entry into wtmp,
@@ -1422,12 +1423,10 @@ void doit(f, fromp)
     strncat(homedir, pwd->pw_dir, sizeof(homedir)-6);
     strncat(shell, pwd->pw_shell, sizeof(shell)-7);
     strncat(username, pwd->pw_name, sizeof(username)-6);
-    path = (char *) malloc(strlen(kprogdir) + strlen(path_rest) + 7);
-    if (path == NULL) {
+    if (asprintf(&path, "PATH=%s:%s", kprogdir, path_rest) < 0) {
         perror("malloc");
 	_exit(1);
     }
-    sprintf(path, "PATH=%s:%s", kprogdir, path_rest);
     envinit[PATHENV] = path;
 
     /* If we have KRB5CCNAME set, then copy into the
@@ -1436,10 +1435,8 @@ void doit(f, fromp)
      */
     if (getenv("KRB5CCNAME")) {
 	int i;
-	char *buf2 = (char *)malloc(strlen(getenv("KRB5CCNAME"))
-			 		   +strlen("KRB5CCNAME=")+1);
-	if (buf2) {
-	  sprintf(buf2, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
+	char *buf2;
+	if (asprintf(&buf2, "KRB5CCNAME=%s",getenv("KRB5CCNAME")) >= 0) {
 
 	  for (i = 0; envinit[i]; i++);
 	  envinit[i] = buf2;
@@ -1459,10 +1456,10 @@ void doit(f, fromp)
 			  NI_NUMERICHOST | NI_NUMERICSERV);
       if (aierr)
 	  goto skip_localaddr_env;
-      sprintf(local_addr,  "KRB5LOCALADDR=%s", hbuf);
+      snprintf(local_addr, sizeof(local_addr), "KRB5LOCALADDR=%s", hbuf);
       envinit[i++] =local_addr;
 
-      sprintf(local_port,  "KRB5LOCALPORT=%s", sbuf);
+      snprintf(local_port, sizeof(local_port), "KRB5LOCALPORT=%s", sbuf);
       envinit[i++] =local_port;
     skip_localaddr_env:
 
@@ -1471,10 +1468,10 @@ void doit(f, fromp)
 			  NI_NUMERICHOST | NI_NUMERICSERV);
       if (aierr)
 	  goto skip_remoteaddr_env;
-      sprintf(remote_addr, "KRB5REMOTEADDR=%s", hbuf);
+      snprintf(remote_addr, sizeof(remote_addr), "KRB5REMOTEADDR=%s", hbuf);
       envinit[i++] =remote_addr;
 
-      sprintf(remote_port, "KRB5REMOTEPORT=%s", sbuf);
+      snprintf(remote_port, sizeof(remote_port), "KRB5REMOTEPORT=%s", sbuf);
       envinit[i++] =remote_port;
 
     skip_remoteaddr_env:
@@ -1488,11 +1485,8 @@ void doit(f, fromp)
 	    char *buf2;
 
 	    if(getenv(save_env[cnt])) {
-		    buf2 = (char *)malloc(strlen(getenv(save_env[cnt]))
-					 +strlen(save_env[cnt])+2);
-		    if (buf2) {
-			    sprintf(buf2, "%s=%s", save_env[cnt], 
-				    getenv(save_env[cnt]));
+		    if (asprintf(&buf2, "%s=%s", save_env[cnt], 
+				 getenv(save_env[cnt])) >= 0) {
 			    for (i = 0; envinit[i]; i++);
 			    envinit[i] = buf2;
 		    }
@@ -1583,8 +1577,8 @@ error(fmt, va_alist)
 #endif
 
     *cp++ = 1;
-    (void) sprintf(cp, "%s: ", progname);
-    (void) vsprintf(buf+strlen(buf), fmt, ap);
+    (void) snprintf(cp, sizeof(buf) - (cp - buf), "%s: ", progname);
+    (void) vsnprintf(buf+strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
     va_end(ap);
     (void) write(2, buf, strlen(buf));
     syslog(LOG_ERR ,"%s",buf+1);
@@ -1617,7 +1611,8 @@ char *makejtmp(uid, gid, jid)
     register char *endc, *tdp = &tmpdir[strlen(tmpdir)];
     register int i;
     
-    sprintf(tdp, "%s/jtmp.%06d", JTMPDIR, jid);
+    snprintf(tdp, sizeof(tmpdir) - (tdp - tmpdir), "%s/jtmp.%06d",
+	     JTMPDIR, jid);
     endc = &tmpdir[strlen(tmpdir)];
     
     endc[1] = '\0';
@@ -2048,7 +2043,7 @@ void fatal(f, msg)
 #endif
 
     buf[0] = '\01';             /* error indicator */
-    (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
+    (void) snprintf(buf + 1, sizeof(buf) - 1, "%s: %s.\r\n",progname, msg);
     if ((f == netf) && (pid > 0))
       (void) rcmd_stream_write(f, buf, strlen(buf), 0);
     else

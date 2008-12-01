@@ -261,7 +261,7 @@ lookup (void *blob, enum locate_service_type svc, const char *realm,
 	if (PyString_Check (field)) {
 	    portstr = PyString_AsString (field);
 	} else if (PyInt_Check (field)) {
-	    sprintf(portbuf, "%ld", PyInt_AsLong (field));
+	    snprintf(portbuf, sizeof(portbuf), "%ld", PyInt_AsLong (field));
 	    portstr = portbuf;
 	} else {
 	    krb5_set_error_message(blob, -1,

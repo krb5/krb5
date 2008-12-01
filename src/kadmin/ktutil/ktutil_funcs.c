@@ -161,7 +161,8 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
 	    goto cleanup;
 	}
 
-	sprintf(promptstr, "Password for %.1000s", princ_str);
+	snprintf(promptstr, sizeof(promptstr), "Password for %.1000s",
+		 princ_str);
         retval = krb5_read_password(context, promptstr, NULL, password.data,
 				    &password.length);
 	if (retval)

@@ -205,7 +205,7 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	fprintf(stderr, "can't connect to %s port 0\n", hname);
 	return -1;
     }
-    sprintf(rport_buf, "%d", ntohs(rport));
+    snprintf(rport_buf, sizeof(rport_buf), "%d", ntohs(rport));
     memset(&aihints, 0, sizeof(aihints));
     aihints.ai_socktype = SOCK_STREAM;
     aihints.ai_flags = AI_CANONNAME;
@@ -334,7 +334,7 @@ setup_secondary_channel (int s, int *fd2p, int *lportp, int *addrfamilyp,
 	FD_SET(s, &xfds);
 	listen(s2, 1);
 	FD_SET(s2, &rfds);
-    	(void) sprintf(num, "%d", *lportp);
+    	(void) snprintf(num, sizeof(num), "%d", *lportp);
 	slen = strlen(num)+1;
     	if (write(s, num, slen) != slen) {
 	    perror("write: setting up stderr");

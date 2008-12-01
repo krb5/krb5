@@ -210,12 +210,15 @@ main(argc, argv)
     }
 
     /* Get client name */
+    repbuf[sizeof(repbuf) - 1] = '\0';
     retval = krb5_unparse_name(context, ticket->enc_part2->client, &cname);
     if (retval){
 	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
-        sprintf(repbuf, "You are <unparse error>\n");
+	strncpy(repbuf, "You are <unparse error>\n", sizeof(repbuf) - 1);
     } else {
-        sprintf(repbuf, "You are %s\n", cname);
+	strncpy(repbuf, "You are ", sizeof(repbuf) - 1);
+	strncat(repbuf, cname, sizeof(repbuf) - 1 - strlen(repbuf));
+	strncat(repbuf, "\n", sizeof(repbuf) - 1 - strlen(repbuf));
 	free(cname);
     }
     xmitlen = htons(strlen(repbuf));

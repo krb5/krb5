@@ -57,7 +57,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket)
     if ((retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)))
 	return(retval);
 
-    sprintf(ccname, "FILE:/tmp/krb5cc_p%ld", (long) getpid());
+    snprintf(ccname, sizeof(ccname), "FILE:/tmp/krb5cc_p%ld", (long) getpid());
     setenv("KRB5CCNAME", ccname, 1);
 
     if ((retval = krb5_cc_resolve(context, ccname, &ccache)))

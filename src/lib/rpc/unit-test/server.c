@@ -158,8 +158,7 @@ char **rpc_test_echo_1_svc(char **arg, struct svc_req *h)
 
      if (res)
 	  free(res);
-     res = (char *) malloc(strlen(*arg) + strlen("Echo: ") + 1);
-     sprintf(res, "Echo: %s", *arg);
+     asprintf(&res, "Echo: %s", *arg);
      return &res;
 }
 

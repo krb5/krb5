@@ -66,6 +66,7 @@
 #include "gss-misc.h"
 #include "port-sockets.h"
 #include "fake-addrinfo.h"
+#include "k5-platform.h"
 
 static int verbose = 1;
 
@@ -606,12 +607,10 @@ static void parse_oid(char *mechanism, gss_OID *oid)
     OM_uint32 maj_stat, min_stat;
     
     if (isdigit((int) mechanism[0])) {
-	mechstr = malloc(strlen(mechanism)+5);
-	if (!mechstr) {
+	if (asprintf(&mechstr, "{ %s }", mechanism) < 0) {
 	    fprintf(stderr, "Couldn't allocate mechanism scratch!\n");
 	    return;
 	}
-	sprintf(mechstr, "{ %s }", mechanism);
 	for (cp = mechstr; *cp; cp++)
 	    if (*cp == '.')
 		*cp = ' ';

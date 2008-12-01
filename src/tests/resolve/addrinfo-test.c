@@ -71,7 +71,7 @@ static const char *protoname (int p) {
     X(COMP);
 #endif
 
-    sprintf(buf, " %-2d", p);
+    snprintf(buf, sizeof(buf), " %-2d", p);
     return buf;
 }	
 
@@ -84,7 +84,7 @@ static const char *socktypename (int t) {
     case SOCK_RDM: return "RDM";
     case SOCK_SEQPACKET: return "SEQPACKET";
     }
-    sprintf(buf, " %-2d", t);
+    snprintf(buf, sizeof(buf), " %-2d", t);
     return buf;
 }
 
@@ -125,7 +125,7 @@ static const char *familyname (int f) {
     static char buf[30];
     switch (f) {
     default:
-	sprintf(buf, "AF %d", f);
+	snprintf(buf, sizeof(buf), "AF %d", f);
 	return buf;
     case AF_INET: return "AF_INET";
 #ifdef AF_INET6
