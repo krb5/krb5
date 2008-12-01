@@ -358,10 +358,8 @@ krb5int_aes_crypto_length(const struct krb5_aead_provider *aead,
 	*length = 0;
 	break;
     case KRB5_CRYPTO_TYPE_TRAILER:
-	*length = 96 / 8;
-	break;
     case KRB5_CRYPTO_TYPE_CHECKSUM:
-	*length = hash->hashsize;
+	*length = 96 / 8;
 	break;
     default:
 	assert(0 && "invalid cryptotype passed to krb5int_aes_crypto_length");
