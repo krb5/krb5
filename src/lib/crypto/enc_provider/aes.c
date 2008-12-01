@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "enc_provider.h"
 #include "aes.h"
+#include "../aead.h"
 
 #if 0
 aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1]);
@@ -197,6 +198,173 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
     return 0;
 }
 
+static void
+iov_get_block(char block[BLOCK_SIZE],
+	      const krb5_crypto_iov *data,
+              size_t num_data,
+              size_t *x,
+              size_t *y)
+{
+    size_t i, j = 0;
+
+    for (i = *x; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+	size_t nbytes;
+
+	if (!ENCRYPT_IOV(iov))
+	    continue;
+
+	nbytes = iov->data.length - *y;
+	if (nbytes > BLOCK_SIZE - j)
+	    nbytes = BLOCK_SIZE - j;
+
+	memcpy(block + j, iov->data.data + *y, nbytes);
+
+	*y += nbytes;
+	j += nbytes;
+
+	assert(j <= BLOCK_SIZE);
+
+	if (j == BLOCK_SIZE)
+	    break;
+
+	assert(*y == iov->data.length);
+
+	*y = 0;
+    }
+
+    *x = i;
+}
+
+static void
+iov_put_block(const krb5_crypto_iov *data,
+	      size_t num_data,
+	      char block[BLOCK_SIZE],
+	      size_t *x,
+	      size_t *y)
+{
+    size_t i, j = 0;
+
+    for (i = *x; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+	size_t nbytes;
+
+	if (!ENCRYPT_IOV(iov))
+	    continue;
+
+	nbytes = iov->data.length - *y;
+	if (nbytes > BLOCK_SIZE - j)
+	    nbytes = BLOCK_SIZE - j;
+
+	memcpy(iov->data.data + *y, block + j, nbytes);
+
+	*y += nbytes;
+	j += nbytes;
+
+	assert(j <= BLOCK_SIZE);
+
+	if (j == BLOCK_SIZE)
+	    break;
+
+	assert(*y == iov->data.length);
+
+	*y = 0;
+    }
+
+    *x = i;
+}
+
+static krb5_error_code
+krb5int_aes_encrypt_iov(const krb5_keyblock *key,
+		        const krb5_data *ivec,
+		        krb5_crypto_iov *data,
+		        size_t num_data)
+{
+    aes_ctx ctx;
+    char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE];
+    int nblocks = 0, blockno;
+    size_t input_length, i;
+
+    if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
+	abort();
+
+    if (ivec != NULL)
+	memcpy(tmp, ivec->data, BLOCK_SIZE);
+    else
+	memset(tmp, 0, BLOCK_SIZE);
+
+    for (i = 0, input_length = 0; i < num_data; i++) {
+	krb5_crypto_iov *iov = &data[i];
+
+	if (ENCRYPT_IOV(iov))
+	    input_length += iov->data.length;
+    }
+
+    nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    if (nblocks == 1) {
+	/* XXX Used for DK function, probably will be never used with IOV API,
+	 * so it's safe to make some arbitrary restrictions here */
+	assert(num_data == 1);
+	assert(data[0].flags == KRB5_CRYPTO_TYPE_HEADER);
+	assert(data[0].data.length == BLOCK_SIZE);
+
+	enc(data[0].data.data, data[0].data.data, &ctx);
+    } else {
+	char blockN2[BLOCK_SIZE];   /* second last */
+	char blockN1[BLOCK_SIZE];   /* last block */
+	size_t input_iov_pos = 0, input_block_pos = 0;
+	size_t output_iov_pos = 0, output_block_pos = 0;
+
+	for (blockno = 0; blockno < nblocks - 2; blockno++) {
+	    char blockN[BLOCK_SIZE];
+
+	    iov_get_block(blockN, data, num_data, &input_iov_pos, &input_block_pos);
+	    xorblock(tmp, blockN);
+	    enc(tmp2, tmp, &ctx);
+	    iov_put_block(data, num_data, tmp2, &output_iov_pos, &output_block_pos);
+
+	    /* Set up for next block.  */
+	    memcpy(tmp, tmp2, BLOCK_SIZE);
+	}
+
+	/* Do final CTS step for last two blocks (the second of which
+	   may or may not be incomplete).  */
+
+	/* First, get the last two blocks */
+	memset(blockN1, 0, sizeof(blockN1)); /* pad last block with zeros */
+	iov_get_block(blockN2, data, num_data, &input_iov_pos, &input_block_pos);
+	iov_get_block(blockN1, data, num_data, &input_iov_pos, &input_block_pos);
+
+	/* Encrypt second last block */
+	xorblock(tmp, blockN2);
+	enc(tmp2, tmp, &ctx);
+	memcpy(blockN2, tmp2, BLOCK_SIZE);
+	memcpy(tmp, tmp2, BLOCK_SIZE);
+
+	/* Encrypt last block */
+	xorblock(tmp, blockN1);
+	enc(tmp2, tmp, &ctx);
+	memcpy(blockN1, tmp2, BLOCK_SIZE);
+	if (ivec != NULL)
+	    memcpy(ivec->data, tmp2, BLOCK_SIZE);
+
+	/* Put the last two blocks back into the ivec, in reverse order */
+	iov_put_block(data, num_data, blockN1, &output_iov_pos, &output_block_pos);
+	iov_put_block(data, num_data, blockN2, &output_iov_pos, &output_block_pos);
+    }
+
+    return 0;
+}
+
+static krb5_error_code
+krb5int_aes_decrypt_iov(const krb5_keyblock *key,
+		        const krb5_data *state,
+		        krb5_crypto_iov *data,
+		        size_t num_data)
+{
+}
+
 static krb5_error_code
 k5_aes_make_key(const krb5_data *randombits, krb5_keyblock *key)
 {
@@ -230,7 +398,9 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
     krb5int_aes_decrypt,
     k5_aes_make_key,
     krb5int_aes_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    krb5int_aes_encrypt_iov,
+    krb5int_aes_decrypt_iov
 };
 
 const struct krb5_enc_provider krb5int_enc_aes256 = {
@@ -240,6 +410,8 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     krb5int_aes_decrypt,
     k5_aes_make_key,
     krb5int_aes_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    krb5int_aes_encrypt_iov,
+    krb5int_aes_decrypt_iov
 };
 

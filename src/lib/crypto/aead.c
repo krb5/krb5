@@ -68,8 +68,7 @@ make_unkeyed_checksum_iov(const struct krb5_hash_provider *hash_provider,
     for (i = 0, num_sign_data = 0; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	if (SIGN_IOV(iov))
 	    num_sign_data++;
     }
 
@@ -81,10 +80,8 @@ make_unkeyed_checksum_iov(const struct krb5_hash_provider *hash_provider,
     for (i = 0, j = 0; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY) {
+	if (SIGN_IOV(iov))
 	    sign_data[j++] = iov[i].data;
-	}
     }
 
     ret = hash_provider->hash(num_sign_data, sign_data, output);
@@ -105,7 +102,7 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
     int e1, e2;
     krb5_error_code ret;
 
-    if (cksum_type->keyhash) {
+    if (cksum_type->keyhash != NULL) {
 	/* check if key is compatible */
 
 	if (cksum_type->keyed_etype) {
@@ -141,16 +138,16 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
 					cksum_data);
     }
 
-    if (!ret) {
+    if (ret == 0) {
 	if (cksum_type->trunc_size) {
 	    cksum_data->length = cksum_type->trunc_size;
 	}
     }
 
 cleanup:
-    if (ret) {
+    if (ret != 0) {
 	memset(cksum_data->data, 0, cksum_data->length);
     }
 
-    return(ret);
+    return ret;
 }

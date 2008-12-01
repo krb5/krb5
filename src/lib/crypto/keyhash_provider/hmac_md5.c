@@ -125,11 +125,9 @@ k5_hmac_md5_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
   for (i = 0; i < num_data; i++) {
     const krb5_crypto_iov *iov = &data[i];
 
-    if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY) {
+    if (SIGN_IOV(iov))
       krb5_MD5Update (&ctx, (unsigned char *)iov->data.data,
 		      (unsigned int)iov->data.length);
-    }
   }
   krb5_MD5Final(&ctx);
   md5tmp.data = (void *) ctx.digest;
