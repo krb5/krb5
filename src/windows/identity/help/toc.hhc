@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+	<param name="Category" value="Concepts">
+	<param name="CategoryDesc" value="Authentication, authorization and related concepts.">
+	<param name="Category" value="Usage">
+	<param name="CategoryDesc" value="Usage instructions for Network Identity Manager">
+	<param name="Window Styles" value="0x800025">
+</OBJECT>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Welcome to Network Identity Manager">
+		<param name="Local" value="html\welcome.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="How do I ...">
+		<param name="Local" value="html\howdoi.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="About NetIDMgr">
+		<param name="Local" value="html\about_netidmgr.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Reporting bugs">
+			<param name="Local" value="html\bugs.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="License agreement">
+			<param name="Local" value="html\copyright.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Concepts">
+		<param name="Local" value="html\concepts.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Identities">
+			<param name="Local" value="html\concept_identity.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Identity Provider">
+			<param name="Local" value="html\concept_ident_pro.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Credentials Provider">
+			<param name="Local" value="html\concept_cred_pro.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Using NetIDMgr">
+		<param name="Local" value="html\using.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Starting">
+			<param name="Local" value="html\use_start.htm">
+			</OBJECT>
+                <LI> <OBJECT type="text/sitemap">
+                        <param name="Name" value="Notification icon">
+                        <param name="Local" value="html\use_icon.htm">
+                        </OBJECT>
+
+                <LI> <OBJECT type="text/sitemap">
+                        <param name="Name" value="Managing the credentials view layout">
+                        <param name="Local" value="html\use_layout.htm">
+                        </OBJECT>
+
+                <LI> <OBJECT type="text/sitemap">
+                        <param name="Name" value="Configuring NetIDMgr and identities">
+                        <param name="Local" value="html\use_config.htm">
+                        </OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Menus and Toolbars">
+		<param name="Local" value="html\menu_all.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="File Menu">
+			<param name="Local" value="html\menu_file.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Credential menu">
+			<param name="Local" value="html\menu_credential.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="View Menu">
+			<param name="Local" value="html\menu_view.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Options Menu">
+			<param name="Local" value="html\menu_options.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Help Menu">
+			<param name="Local" value="html\menu_help.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Standard Toolbar">
+			<param name="Local" value="html\tb_standard.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Actions">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="New Credentials">
+			<param name="Local" value="html\act_new_creds.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Renew Credentials">
+			<param name="Local" value="html\act_renew_creds.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Destroy Credentials">
+			<param name="Local" value="html\act_destroy_creds.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Set As Default">
+			<param name="Local" value="html\act_set_default.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Change Password">
+			<param name="Local" value="html\act_chpw.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Windows and dialogs">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Main Window">
+			<param name="Local" value="html\wnd_main.htm">
+			</OBJECT>
+	</UL>
+</UL>
+</BODY></HTML>

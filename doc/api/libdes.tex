@@ -1,0 +1,38 @@
+\documentstyle[fixunder,functions,twoside]{article}
+\setlength{\oddsidemargin}{0.25in}
+\setlength{\evensidemargin}{-0.25in}
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9in}
+\setlength{\parskip}{.1in}
+\setlength{\parindent}{2em}
+\setlength{\textwidth}{6.25in}
+
+\pagestyle{headings}
+\begin{document}
+\begin{center}
+{\Huge Kerberos V5 Data Encryption Standard library} \\
+{\Large DRAFT}
+\end{center}
+\section{DES functions}
+The DES functions conform to the encryption interface required by the
+Kerberos version 5 library, and provide an encryption mechanism based on
+the DES Cipher-block chaining mode (CBC), with the addition of a
+cyclical redundancy check (CRC-32) for integrity checking upon
+decryption.
+
+The functions have the same signatures as those described by the main
+library document; the names are:
+{\obeylines
+\funcname{mit_des_encrypt_func}
+\funcname{mit_des_decrypt_func}
+\funcname{mit_des_process_key}
+\funcname{mit_des_finish_key}
+\funcname{mit_des_string_to_key}
+\funcname{mit_des_init_random_key}
+\funcname{mit_des_finish_random_key}
+\funcname{mit_des_random_key}
+}
+The \datatype{krb5_cryptosystem_entry} for this cryptosystem is
+\globalname{mit_des_cryptosystem_entry}.
+
+\end{document}

@@ -1,0 +1,32 @@
+<html>
+<head>
+  <title>Network Identity Manager Concepts: Identity Provider</title>
+  <meta name="description" content="NetIDMgr Concepts: Identity Provider">
+  <meta name="keywords" content="identity provider, concepts">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Network Identity Manager Concepts: Identity Provider</h1>
+
+<p>
+Network Identity Manager relies on plug-ins to provide the majority 
+of its functionality.  One of the requirements is that there be at 
+least one plug-in that is registered as an <strong>identity provider</strong>.  The identity 
+provider:</p>
+
+<ul>
+	<li>defines the identity</li>
+	<li>provides the engine that drives the <i>Obtain New Credentials</i> dialog</li>
+	<li>performs the initial authentication which results in a network credential that 
+	    can be used in conjunction with subsequent credential providers</li>
+</ul>
+
+<p>Naturally, the identity provider plug-in that is distributed with MIT Kerberos for Windows
+is Kerberos v5 based and obtains Kerberos v5 ticket granting tickets as the network credential 
+that represents the identity.</p>
+<img src="images/screen_config_ident_provider.png">
+<p></p>
+
+</body>
+</html>

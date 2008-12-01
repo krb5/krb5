@@ -1,0 +1,70 @@
+%
+% definitions related to function declarations/displays
+%
+\ifx\undefined\@psfonts
+\def\argfont{\tt}
+\else
+\font\argfont = pcrb
+\hyphenchar\argfont = -1
+\fi
+\let\funcfont=\bf
+\newcount\argc@ount
+%\setlength{\marginparsep}{0.05in}
+%\setlength{\marginparwidth}{1.45in}
+%
+%  This function fixes up the function name to be displayed in the
+%  margin so that the krb5_, if any, is stripped.
+%
+%  Note: this is a hack; what's really happening is that name beginning with
+%	krb5 will have its first five characters stripped from it.
+%	This means that 'Krb5abc' will get rewritten to be 'bc'.
+%	Unfortunately, we can't do better because of the underscore
+%	hacks that are going on elsewhere.
+%
+%  WARNING: This is ugly; don't look at it too soon after lunch!
+%     [tytso:19900920.2231EDT]
+\newif\if@krbfunc
+\def\endkrb{}
+\def\fix@parname#1{\expandafter\parse@krb#1\endkrb%
+\endkrb\endkrb\endkrb\endkrb}%  In case the argument is less
+%				than five letters, we don't want to 
+%				lose on the argument parsing.
+\def\parse@krb#1#2#3#4#5#6\endkrb{\@krbfuncfalse%
+\if#1k\if#2r\if#3b\if#45\@krbfunctrue\fi\fi\fi\fi%
+\if@krbfunc#6\else#1#2#3#4#5#6\fi}
+%
+% funcdecl is used as \begin{funcdecl}{funcname}{return type}{firstline}
+%
+% see fixunder.sty for comments on why the \underrealtrue & \underrealfalse
+% stuff is here.
+\newenvironment{funcdecl}[3]{\underrealtrue\index{#1}\underrealfalse%
+\medbreak
+\gdef\funcn@me{#1}
+\argc@ount=0\noindent%
+%the \mbox{} is to prevent the line/paragraph breaking from eating the
+%fill space.
+\marginpar[{{\sloppy \hfil\fix@parname{\funcn@me}\hfill\mbox{}}}]%
+{{\sloppy \hfill\fix@parname{\funcn@me}\hfil\mbox{}}}%
+\vbox\bgroup\begin{minipage}[t]{\textwidth}\begin{tabbing}
+#2 \\
+{\bf #1}(\= \+ #3%
+}{)
+\end{tabbing}\vfil\end{minipage}\egroup\par\nopagebreak
+}
+\newcommand{\docomm@}{\ifnum\argc@ount >0, \\\fi}
+\newcommand{\funcvoid}{\argc@ount=0}
+\newcommand{\funcin}{\docomm@\argc@ount=0{\sl /* IN */}\\}
+\newcommand{\funcinout}{\docomm@\argc@ount=0{\sl /* IN/OUT */}\\}
+\newcommand{\funcout}{\docomm@\argc@ount=0{\sl /* OUT */}\\}
+\newcommand{\funcarg}[2]{\docomm@#1 {\argfont #2}\advance\argc@ount by1}
+\newcommand{\funcparam}[1]{{\argfont #1}}
+\newcommand{\funcfuncarg}[2]{\docomm@#1 {\argfont #2}(\= \+ \argc@ount=0}
+\newcommand{\funcendfuncarg}{), \- \\ \argc@ount=0}
+\newcommand{\libname}[1]{{\argfont #1}}
+\newcommand{\globalname}[1]{{\argfont #1}}
+\newcommand{\ptsto}{->\discretionary{}{}{}}
+\newcommand{\datatype}[1]{{\bf #1}}
+\newcommand{\filename}[1]{{\sl #1\/}}
+
+\newcommand{\funcname}[1]{\underrealtrue\index{#1}\underrealfalse{\funcfont #1}()}
+\newcommand{\funcnamenoparens}[1]{\underrealtrue\index{#1}\underrealfalse{\funcfont #1}}

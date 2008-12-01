@@ -1,0 +1,19 @@
+thisconfigdir=../../..
+myfulldir=appl/sample/sserver
+mydir=appl/sample/sserver
+
+BUILDTOP=$(REL)..$(S)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+all:: sserver
+
+sserver: sserver.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o sserver sserver.o $(KRB5_BASE_LIBS)
+
+clean::
+	$(RM) sserver.o sserver
+
+install::
+	$(INSTALL_PROGRAM) sserver ${DESTDIR}$(SERVER_BINDIR)/sserver
+	$(INSTALL_DATA) $(srcdir)/sserver.M ${DESTDIR}$(SERVER_MANDIR)/sserver.8

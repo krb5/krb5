@@ -1,0 +1,197 @@
+thisconfigdir=../..
+myfulldir=util/profile
+mydir=util/profile
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH) -L.
+PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
+KRB5_RUN_ENV=@KRB5_RUN_ENV@
+DEFS=
+##DOS##BUILDTOP = ..\..
+##DOS##OBJFILE=$(OUTPRE)profile.lst
+##DOS##LIBNAME=$(OUTPRE)profile.lib
+
+LOCALINCLUDES=-I. $(TCL_INCLUDES)
+# for tcl.h
+DEFINES=-DHAS_STDARG
+
+STLIBOBJS = \
+	prof_tree.o \
+	prof_file.o \
+	prof_parse.o \
+	prof_get.o \
+	prof_set.o \
+	prof_err.o \
+	prof_init.o
+
+OBJS = $(OUTPRE)prof_tree.$(OBJEXT) \
+	$(OUTPRE)prof_file.$(OBJEXT) \
+	$(OUTPRE)prof_parse.$(OBJEXT) \
+	$(OUTPRE)prof_get.$(OBJEXT) \
+	$(OUTPRE)prof_set.$(OBJEXT) \
+	$(OUTPRE)prof_err.$(OBJEXT) \
+	$(OUTPRE)prof_init.$(OBJEXT)
+
+SRCS = $(srcdir)/prof_tree.c \
+	$(srcdir)/prof_file.c \
+	$(srcdir)/prof_parse.c \
+	$(srcdir)/prof_get.c \
+	$(srcdir)/prof_set.c \
+	prof_err.c \
+	$(srcdir)/prof_init.c
+
+EXTRADEPSRCS=$(srcdir)/test_parse.c $(srcdir)/test_profile.c \
+	$(srcdir)/profile_tcl.c
+
+DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
+
+LIBBASE=profile
+LIBMAJOR=1
+LIBMINOR=1
+SHLIB_EXPDEPS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+SHLIB_EXPLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
+SHLIB_DIRS = -L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+STOBJLISTS=OBJS.ST
+
+PROFILE_HDR=$(BUILDTOP)$(S)include$(S)profile.h
+
+all-unix:: includes 
+all-unix:: all-libs
+all-windows:: $(PROFILE_HDR)
+
+install-headers-unix:: includes
+
+generate-files-mac: profile.h
+
+$(PROFILE_HDR):: profile.h
+	$(CP) profile.h "$@"
+
+includes:: profile.h
+	if cmp profile.h \
+	$(BUILDTOP)/include/profile.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/profile.h; \
+		 $(CP) profile.h $(BUILDTOP)/include/profile.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/profile.h test2.ini test3.ini test2.ini.bak
+
+##DOS##LIBOBJS = $(OBJS)
+
+
+awk-windows:
+	$(AWK) -f $(BUILDTOP)/util/et/et_h.awk outfile=prof_err.h prof_err.et
+	$(AWK) -f $(BUILDTOP)/util/et/et_c.awk outfile=prof_err.c prof_err.et
+	if exist prof_err.h copy profile.hin+prof_err.h profile.h
+	if exist profile.h copy profile.h $(BUILDTOP)\include\profile.h
+
+test_parse: test_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
+	$(CC_LINK) -o test_parse test_parse.$(OBJEXT) $(OBJS) $(MLIBS)
+
+test_profile: test_profile.$(OBJEXT) argv_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
+	$(CC_LINK) -o test_profile test_profile.$(OBJEXT) \
+		argv_parse.$(OBJEXT) $(OBJS) $(MLIBS)
+
+.d: includes
+
+# NEED TO FIX!!
+$(OUTPRE)test_parse.exe: 
+	$(CC) $(CFLAGS2) -o test_parse.exe test_parse.c \
+		prof_parse.c prof_tree.c /link /stack:16384
+
+# NEED TO FIX!!
+$(OUTPRE)test_profile.exe: 
+	$(CC) $(CFLAGS2) -o test_profile.exe test_profile.c prof_init.c \
+		prof_file.c prof_parse.c prof_tree.c /link /stack:16384
+
+profile.h: prof_err.h profile.hin
+	cat $(srcdir)/profile.hin prof_err.h > $@
+
+prof_err.h: $(srcdir)/prof_err.et
+
+prof_err.c: $(srcdir)/prof_err.et
+
+prof_err.o: prof_err.c
+
+# not built by default, but may be useful for testing
+$(srcdir)/profile_tcl.c: profile.swg
+#	(cd $(srcdir) && swig -tcl8 -o profile_tcl.c profile.swg)
+profile_tcl.o: $(srcdir)/profile_tcl.c profile.h
+profile_tcl: profile_tcl.o $(PROF_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o profile_tcl profile_tcl.o \
+		$(TCL_MAYBE_RPATH) \
+		-L../et -L../.. -lprofile $(TCL_LIBS) $(MLIBS)
+
+clean-unix:: clean-libs clean-libobjs
+	$(RM) $(PROGS) *.o *~ test_parse core prof_err.h \
+		prof_err.c test_profile profile.h profile_tcl
+
+clean-windows::
+	$(RM) $(PROFILE_HDR)
+
+check-unix:: test_parse test_profile
+
+DO_TCL=@DO_TCL@
+check-unix:: check-unix-tcl-$(DO_TCL)
+
+check-unix-tcl-:
+	@echo "+++"
+	@echo "+++ Tcl not available, some profile tests not run."
+	@echo "+++"
+
+check-unix-tcl-ok: profile_tcl
+	cp $(srcdir)/test.ini test2.ini
+	$(KRB5_RUN_ENV) $(VALGRIND) ./profile_tcl $(srcdir)/prof_test1
+
+check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
+	$(RM) $(OUTPRE)*.obj
+	$(OUTPRE)test_parse test.ini
+
+
+@lib_frag@
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+prof_tree.so prof_tree.po $(OUTPRE)prof_tree.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  prof_int.h prof_tree.c
+prof_file.so prof_file.po $(OUTPRE)prof_file.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  prof_file.c prof_int.h
+prof_parse.so prof_parse.po $(OUTPRE)prof_parse.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  prof_int.h prof_parse.c
+prof_get.so prof_get.po $(OUTPRE)prof_get.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  prof_get.c prof_int.h
+prof_set.so prof_set.po $(OUTPRE)prof_set.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  prof_int.h prof_set.c
+prof_err.so prof_err.po $(OUTPRE)prof_err.$(OBJEXT): \
+  $(COM_ERR_DEPS) prof_err.c
+prof_init.so prof_init.po $(OUTPRE)prof_init.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  prof_init.c prof_int.h
+test_parse.so test_parse.po $(OUTPRE)test_parse.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  prof_int.h test_parse.c
+test_profile.so test_profile.po $(OUTPRE)test_profile.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  argv_parse.h prof_int.h test_profile.c
+profile_tcl.so profile_tcl.po $(OUTPRE)profile_tcl.$(OBJEXT): \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) profile_tcl.c

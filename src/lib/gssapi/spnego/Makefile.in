@@ -1,0 +1,43 @@
+thisconfigdir=../../..
+myfulldir=lib/gssapi/spnego
+mydir=lib/gssapi/spnego
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=spnego
+##DOS##OBJFILE = ..\$(OUTPRE)spnego.lst
+
+##DOS##DLL_EXP_TYPE=GSS
+
+SRCS = $(srcdir)/spnego_mech.c
+
+OBJS = $(OUTPRE)spnego_mech.$(OBJEXT)
+
+STLIBOBJS = spnego_mech.o
+
+all-unix:: all-libobjs
+
+##DOS##LIBOBJS = $(OBJS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+spnego_mech.so spnego_mech.po $(OUTPRE)spnego_mech.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  $(srcdir)/../mechglue/mechglue.h $(srcdir)/../mechglue/mglueP.h \
+  ../generic/gssapi_err_generic.h gssapiP_spnego.h spnego_mech.c

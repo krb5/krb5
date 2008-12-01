@@ -1,0 +1,335 @@
+thisconfigdir=../../..
+myfulldir=lib/gssapi/mechglue
+mydir=lib/gssapi/mechglue
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic
+DEFS=
+
+##DOSBUILDTOP = ..\..\..
+##DOS##PREFIXDIR=mechglue
+##DOS##OBJFILE=..\$(OUTPRE)mechglue.lst
+
+##DOS##DLL_EXP_TYPE=GSS
+
+SRCS = \
+	$(srcdir)/g_accept_sec_context.c \
+	$(srcdir)/g_acquire_cred.c \
+	$(srcdir)/g_canon_name.c \
+	$(srcdir)/g_compare_name.c \
+	$(srcdir)/g_context_time.c \
+	$(srcdir)/g_delete_sec_context.c \
+	$(srcdir)/g_dsp_name.c \
+	$(srcdir)/g_dsp_status.c \
+	$(srcdir)/g_dup_name.c \
+	$(srcdir)/g_exp_sec_context.c \
+	$(srcdir)/g_export_name.c \
+	$(srcdir)/g_glue.c \
+	$(srcdir)/g_imp_name.c \
+	$(srcdir)/g_imp_sec_context.c \
+	$(srcdir)/g_init_sec_context.c \
+	$(srcdir)/g_initialize.c \
+	$(srcdir)/g_inq_context.c \
+	$(srcdir)/g_inq_cred.c \
+	$(srcdir)/g_inq_names.c \
+	$(srcdir)/g_mechname.c \
+	$(srcdir)/g_oid_ops.c \
+	$(srcdir)/g_process_context.c \
+	$(srcdir)/g_rel_buffer.c \
+	$(srcdir)/g_rel_cred.c \
+	$(srcdir)/g_rel_name.c \
+	$(srcdir)/g_rel_oid_set.c \
+	$(srcdir)/g_seal.c \
+	$(srcdir)/g_sign.c \
+	$(srcdir)/g_store_cred.c \
+	$(srcdir)/g_unseal.c \
+	$(srcdir)/g_verify.c \
+	$(srcdir)/oid_ops.c
+
+OBJS = \
+	$(OUTPRE)g_accept_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_acquire_cred.$(OBJEXT) \
+	$(OUTPRE)g_canon_name.$(OBJEXT) \
+	$(OUTPRE)g_compare_name.$(OBJEXT) \
+	$(OUTPRE)g_context_time.$(OBJEXT) \
+	$(OUTPRE)g_delete_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_dsp_name.$(OBJEXT) \
+	$(OUTPRE)g_dsp_status.$(OBJEXT) \
+	$(OUTPRE)g_dup_name.$(OBJEXT) \
+	$(OUTPRE)g_exp_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_export_name.$(OBJEXT) \
+	$(OUTPRE)g_glue.$(OBJEXT) \
+	$(OUTPRE)g_imp_name.$(OBJEXT) \
+	$(OUTPRE)g_imp_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_init_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_initialize.$(OBJEXT) \
+	$(OUTPRE)g_inq_context.$(OBJEXT) \
+	$(OUTPRE)g_inq_cred.$(OBJEXT) \
+	$(OUTPRE)g_inq_names.$(OBJEXT) \
+	$(OUTPRE)g_mechname.$(OBJEXT) \
+	$(OUTPRE)g_oid_ops.$(OBJEXT) \
+	$(OUTPRE)g_process_context.$(OBJEXT) \
+	$(OUTPRE)g_rel_buffer.$(OBJEXT) \
+	$(OUTPRE)g_rel_cred.$(OBJEXT) \
+	$(OUTPRE)g_rel_name.$(OBJEXT) \
+	$(OUTPRE)g_rel_oid_set.$(OBJEXT) \
+	$(OUTPRE)g_seal.$(OBJEXT) \
+	$(OUTPRE)g_sign.$(OBJEXT) \
+	$(OUTPRE)g_store_cred.$(OBJEXT) \
+	$(OUTPRE)g_unseal.$(OBJEXT) \
+	$(OUTPRE)g_verify.$(OBJEXT) \
+	$(OUTPRE)oid_ops.$(OBJEXT)
+
+STLIBOBJS = \
+	g_accept_sec_context.o \
+	g_acquire_cred.o \
+	g_canon_name.o \
+	g_compare_name.o \
+	g_context_time.o \
+	g_delete_sec_context.o \
+	g_dsp_name.o \
+	g_dsp_status.o \
+	g_dup_name.o \
+	g_exp_sec_context.o \
+	g_export_name.o \
+	g_glue.o \
+	g_imp_name.o \
+	g_imp_sec_context.o \
+	g_init_sec_context.o \
+	g_initialize.o \
+	g_inq_context.o \
+	g_inq_cred.o \
+	g_inq_names.o \
+	g_mechname.o \
+	g_oid_ops.o \
+	g_process_context.o \
+	g_rel_buffer.o \
+	g_rel_cred.o \
+	g_rel_name.o \
+	g_rel_oid_set.o \
+	g_seal.o \
+	g_sign.o \
+	g_store_cred.o \
+	g_unseal.o \
+	g_verify.o \
+	oid_ops.o
+
+EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
+EXPORTED_HEADERS = mechglue.h
+
+$(OBJS): $(EXPORTED_HEADERS)
+
+all-unix:: all-libobjs
+
+##DOS##LIBOBJS = $(OBJS)
+
+clean-unix:: clean-libobjs
+
+# Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
+install::
+	@set -x; for f in $(EXPORTED_HEADERS) ; \
+	do $(INSTALL_DATA) $(srcdir)$(S)$$f     \
+		$(DESTDIR)$(KRB5_INCDIR)$(S)gssapi$(S)$$f ; \
+	done
+
+includes::
+
+@libobj_frag@
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+g_accept_sec_context.so g_accept_sec_context.po $(OUTPRE)g_accept_sec_context.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_accept_sec_context.c mechglue.h mglueP.h
+g_acquire_cred.so g_acquire_cred.po $(OUTPRE)g_acquire_cred.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_acquire_cred.c mechglue.h mglueP.h
+g_canon_name.so g_canon_name.po $(OUTPRE)g_canon_name.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_canon_name.c mechglue.h mglueP.h
+g_compare_name.so g_compare_name.po $(OUTPRE)g_compare_name.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_compare_name.c mechglue.h mglueP.h
+g_context_time.so g_context_time.po $(OUTPRE)g_context_time.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_context_time.c mechglue.h mglueP.h
+g_delete_sec_context.so g_delete_sec_context.po $(OUTPRE)g_delete_sec_context.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_delete_sec_context.c mechglue.h mglueP.h
+g_dsp_name.so g_dsp_name.po $(OUTPRE)g_dsp_name.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_dsp_name.c mechglue.h mglueP.h
+g_dsp_status.so g_dsp_status.po $(OUTPRE)g_dsp_status.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_dsp_status.c mechglue.h mglueP.h
+g_dup_name.so g_dup_name.po $(OUTPRE)g_dup_name.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_dup_name.c mechglue.h mglueP.h
+g_exp_sec_context.so g_exp_sec_context.po $(OUTPRE)g_exp_sec_context.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_exp_sec_context.c mechglue.h mglueP.h
+g_export_name.so g_export_name.po $(OUTPRE)g_export_name.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_export_name.c mechglue.h mglueP.h
+g_glue.so g_glue.po $(OUTPRE)g_glue.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(COM_ERR_DEPS) \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../spnego/gssapiP_spnego.h \
+  ../generic/gssapi_err_generic.h g_glue.c mechglue.h \
+  mglueP.h
+g_imp_name.so g_imp_name.po $(OUTPRE)g_imp_name.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_imp_name.c mechglue.h mglueP.h
+g_imp_sec_context.so g_imp_sec_context.po $(OUTPRE)g_imp_sec_context.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_imp_sec_context.c mechglue.h mglueP.h
+g_init_sec_context.so g_init_sec_context.po $(OUTPRE)g_init_sec_context.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_init_sec_context.c mechglue.h mglueP.h
+g_initialize.so g_initialize.po $(OUTPRE)g_initialize.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssapi.h $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  $(srcdir)/../gss_libinit.h ../generic/gssapi_err_generic.h \
+  g_initialize.c mechglue.h mglueP.h
+g_inq_context.so g_inq_context.po $(OUTPRE)g_inq_context.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_inq_context.c mechglue.h mglueP.h
+g_inq_cred.so g_inq_cred.po $(OUTPRE)g_inq_cred.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_inq_cred.c mechglue.h mglueP.h
+g_inq_names.so g_inq_names.po $(OUTPRE)g_inq_names.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_inq_names.c mechglue.h mglueP.h
+g_mechname.so g_mechname.po $(OUTPRE)g_mechname.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_mechname.c mechglue.h mglueP.h
+g_oid_ops.so g_oid_ops.po $(OUTPRE)g_oid_ops.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_oid_ops.c mechglue.h mglueP.h
+g_process_context.so g_process_context.po $(OUTPRE)g_process_context.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_process_context.c mechglue.h mglueP.h
+g_rel_buffer.so g_rel_buffer.po $(OUTPRE)g_rel_buffer.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_rel_buffer.c mechglue.h mglueP.h
+g_rel_cred.so g_rel_cred.po $(OUTPRE)g_rel_cred.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_rel_cred.c mechglue.h mglueP.h
+g_rel_name.so g_rel_name.po $(OUTPRE)g_rel_name.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_rel_name.c mechglue.h mglueP.h
+g_rel_oid_set.so g_rel_oid_set.po $(OUTPRE)g_rel_oid_set.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_rel_oid_set.c mechglue.h mglueP.h
+g_seal.so g_seal.po $(OUTPRE)g_seal.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(COM_ERR_DEPS) \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_seal.c mechglue.h mglueP.h
+g_sign.so g_sign.po $(OUTPRE)g_sign.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(COM_ERR_DEPS) \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_sign.c mechglue.h mglueP.h
+g_store_cred.so g_store_cred.po $(OUTPRE)g_store_cred.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_store_cred.c mechglue.h mglueP.h
+g_unseal.so g_unseal.po $(OUTPRE)g_unseal.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_unseal.c mechglue.h mglueP.h
+g_verify.so g_verify.po $(OUTPRE)g_verify.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  g_verify.c mechglue.h mglueP.h
+oid_ops.so oid_ops.po $(OUTPRE)oid_ops.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  mechglue.h mglueP.h oid_ops.c

@@ -1,0 +1,69 @@
+thisconfigdir=../../../../..
+myfulldir=plugins/kdb/db2/libdb2/recno
+mydir=plugins/kdb/db2/libdb2/recno
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+STLIBOBJS=	rec_close.o rec_delete.o rec_get.o rec_open.o rec_put.o \
+		rec_search.o rec_seq.o rec_utils.o
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
+		-I$(srcdir)/../db
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
+@libobj_frag@
+
+SRCS= $(STLIBOBJS:.o=.c)
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+rec_close.so rec_close.po $(OUTPRE)rec_close.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(srcdir)/../btree/btree.h \
+  $(srcdir)/../btree/extern.h $(srcdir)/../include/config.h \
+  $(srcdir)/../include/db-config.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \
+  $(srcdir)/../mpool/mpool.h extern.h rec_close.c recno.h
+rec_delete.so rec_delete.po $(OUTPRE)rec_delete.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(srcdir)/../btree/btree.h \
+  $(srcdir)/../btree/extern.h $(srcdir)/../include/config.h \
+  $(srcdir)/../include/db-config.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \
+  $(srcdir)/../mpool/mpool.h extern.h rec_delete.c recno.h
+rec_get.so rec_get.po $(OUTPRE)rec_get.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(srcdir)/../btree/btree.h $(srcdir)/../btree/extern.h \
+  $(srcdir)/../include/config.h $(srcdir)/../include/db-config.h \
+  $(srcdir)/../include/db-int.h $(srcdir)/../include/db-queue.h \
+  $(srcdir)/../include/db.h $(srcdir)/../mpool/mpool.h \
+  extern.h rec_get.c recno.h
+rec_open.so rec_open.po $(OUTPRE)rec_open.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(srcdir)/../btree/btree.h \
+  $(srcdir)/../btree/extern.h $(srcdir)/../include/config.h \
+  $(srcdir)/../include/db-config.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \
+  $(srcdir)/../mpool/mpool.h extern.h rec_open.c recno.h
+rec_put.so rec_put.po $(OUTPRE)rec_put.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(srcdir)/../btree/btree.h $(srcdir)/../btree/extern.h \
+  $(srcdir)/../include/config.h $(srcdir)/../include/db-config.h \
+  $(srcdir)/../include/db-int.h $(srcdir)/../include/db-queue.h \
+  $(srcdir)/../include/db.h $(srcdir)/../mpool/mpool.h \
+  extern.h rec_put.c recno.h
+rec_search.so rec_search.po $(OUTPRE)rec_search.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(srcdir)/../btree/btree.h \
+  $(srcdir)/../btree/extern.h $(srcdir)/../include/config.h \
+  $(srcdir)/../include/db-config.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \
+  $(srcdir)/../mpool/mpool.h extern.h rec_search.c recno.h
+rec_seq.so rec_seq.po $(OUTPRE)rec_seq.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(srcdir)/../btree/btree.h $(srcdir)/../btree/extern.h \
+  $(srcdir)/../include/config.h $(srcdir)/../include/db-config.h \
+  $(srcdir)/../include/db-int.h $(srcdir)/../include/db-queue.h \
+  $(srcdir)/../include/db.h $(srcdir)/../mpool/mpool.h \
+  extern.h rec_seq.c recno.h
+rec_utils.so rec_utils.po $(OUTPRE)rec_utils.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(srcdir)/../btree/btree.h \
+  $(srcdir)/../btree/extern.h $(srcdir)/../include/config.h \
+  $(srcdir)/../include/db-config.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \
+  $(srcdir)/../mpool/mpool.h extern.h rec_utils.c recno.h

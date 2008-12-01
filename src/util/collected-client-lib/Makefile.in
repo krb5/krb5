@@ -1,0 +1,84 @@
+thisconfigdir=../..
+myfulldir=util/collected-client-lib
+mydir=util/collected-client-lib
+BUILDTOP=$(REL)..$(S)..
+RELDIR=../util/collected-client-lib
+DEFS=
+
+##DOS##BUILDTOP = ..\..
+##DOS##LIBNAME=$(OUTPRE)k5sprt32.lib
+##DOS##WIN64LIBNAME=$(OUTPRE)k5sprt64.lib
+##DOS##XTRA=
+##DOS##OBJFILE=$(OUTPRE)k5sprt32.lst
+##DOS##WIN64OBJFILE=$(OUTPRE)k5sprt64.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+LIBBASE=collected
+LIBMAJOR=1
+LIBMINOR=0
+
+LIBINITFUNC=
+LIBFINIFUNC=
+
+STLIBOBJS=
+LIBOBJS=
+STOBJLISTS= \
+	../../lib/gssapi/OBJS.ST \
+	../../lib/gssapi/generic/OBJS.ST \
+	../../lib/gssapi/mechglue/OBJS.ST \
+	../../lib/gssapi/krb5/OBJS.ST \
+	../../lib/gssapi/spnego/OBJS.ST \
+	../../lib/krb5/OBJS.ST \
+	../../lib/krb5/error_tables/OBJS.ST \
+	../../lib/krb5/asn.1/OBJS.ST \
+	../../lib/krb5/ccache/OBJS.ST \
+	../../lib/krb5/keytab/OBJS.ST \
+	../../lib/krb5/krb/OBJS.ST \
+	../../lib/krb5/rcache/OBJS.ST \
+	../../lib/krb5/os/OBJS.ST \
+	../profile/OBJS.ST \
+	../../lib/crypto/crc32/OBJS.ST \
+	../../lib/crypto/des/OBJS.ST \
+	../../lib/crypto/dk/OBJS.ST \
+	../../lib/crypto/enc_provider/OBJS.ST \
+	../../lib/crypto/hash_provider/OBJS.ST \
+	../../lib/crypto/keyhash_provider/OBJS.ST \
+	../../lib/crypto/md4/OBJS.ST \
+	../../lib/crypto/md5/OBJS.ST \
+	../../lib/crypto/old/OBJS.ST \
+	../../lib/crypto/raw/OBJS.ST \
+	../../lib/crypto/sha1/OBJS.ST \
+	../../lib/crypto/arcfour/OBJS.ST \
+	../../lib/crypto/aes/OBJS.ST \
+	../../lib/crypto/yarrow/OBJS.ST \
+	../../lib/crypto/OBJS.ST \
+	../et/OBJS.ST \
+	../support/OBJS.ST
+
+SRCS=
+
+SHLIB_EXPDEPS =
+# Add -lm if dumping thread stats, for sqrt.
+SHLIB_EXPLIBS= @CRYPTO_LIBS@ $(LIBS) $(DL_LIB)
+SHLIB_DIRS=
+SHLIB_RDIRS=
+
+DEPLIBS=
+
+#
+all-unix:: lib$(LIBBASE)$(SHLIBVEXT)
+
+clean-unix:: clean-libs
+
+#SHLIB_EXPORT_FILE=libcollected.exports
+
+@lib_frag@
+#@#libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#

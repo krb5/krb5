@@ -1,0 +1,17 @@
+Name,Type,Value,Description
+Krb4Cred,KC_SPACE,0,"Kerberos IV Credentials Provider"
+  Module,KC_STRING,"MITKrb4",
+  Description,KC_STRING,"Kerberos IV Credentials Provider",
+  Dependencies,KC_STRING,Krb5Cred,
+  Type,KC_INT32,1,
+  Flags,KC_INT32,0,
+  Parameters,KC_SPACE,0,Parameters for KrbCred
+    Krb4NewCreds,KC_INT32,1,Obtain Kerberos 4 tickets (Boolean)
+    Krb4Method,KC_INT32,0,Method for acquiring K4 tix. 0-Auto;1-Password;2-K524
+    CreateMissingConfig,KC_INT32,0,Create missing configuration files
+    DefaultLifetime,KC_INT32,36000,Default ticket lifetime
+    MaxLifetime,KC_INT32,86400,Maximum lifetime
+    MinLifetime,KC_INT32,60,Minimum lifetime
+    TktString,KC_STRING,,Ticket string.  Use default if NULL
+  Parameters,KC_ENDSPACE,0,
+Krb4Cred,KC_ENDSPACE,0,

@@ -1,0 +1,57 @@
+thisconfigdir=../..
+myfulldir=kadmin/passwd
+mydir=kadmin/passwd
+BUILDTOP=$(REL)..$(S)..
+LOCALINCLUDES = -I.
+DEFINES = -DUSE_KADM5_API_VERSION=1
+DEFS=
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+SUBDIRS = unit-test
+
+PROG = kpasswd
+OBJS = tty_kpasswd.o kpasswd.o kpasswd_strings.o
+SRCS = tty_kpasswd.c kpasswd.c kpasswd_strings.c
+
+all:: $(PROG)
+
+kpasswd_strings.c kpasswd_strings.h: $(srcdir)/kpasswd_strings.et
+
+$(OBJS): kpasswd_strings.h
+
+$(PROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
+
+clean::
+	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG) $(OBJS)
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)tty_kpasswd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
+  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
+  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
+  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
+  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h kpasswd.h \
+  kpasswd_strings.h tty_kpasswd.c
+$(OUTPRE)kpasswd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
+  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
+  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
+  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
+  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h kpasswd.c \
+  kpasswd.h kpasswd_strings.h
+$(OUTPRE)kpasswd_strings.$(OBJEXT): $(COM_ERR_DEPS) \
+  kpasswd_strings.c

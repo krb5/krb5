@@ -1,0 +1,20 @@
+The \libname{libcrc32.a} library provides an implementation of the
+CRC-32 checksum algorithm which conforms to the interface required by
+the Kerberos library.
+
+\begin{funcdecl}{crc32_sum_func}{static krb5_error_code}{\funcin}
+\funcarg{krb5_pointer}{in}
+\funcarg{size_t}{in_length}
+\funcarg{krb5_pointer}{seed}
+\funcarg{size_t}{seed_length}
+\funcout
+\funcarg{krb5_checksum *}{outcksum}
+\end{funcdecl}
+
+This routine computes a CRC-32 checksum over \funcparam{in_length} bytes
+at \funcparam{in}, and places the resulting value into
+\funcparam{outcksum{\ptsto}contents}.  \funcparam{seed} is ignored.
+
+\funcparam{outcksum{\ptsto}contents} must be set by the caller to point
+to at least 4 bytes of storage.
+

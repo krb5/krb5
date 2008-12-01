@@ -1,0 +1,56 @@
+thisconfigdir=../../..
+myfulldir=lib/crypto/crc32
+mydir=lib/crypto/crc32
+BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=crc32
+##DOS##OBJFILE=..\$(OUTPRE)crc32.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS= crc32.o
+
+OBJS= $(OUTPRE)crc32.$(OBJEXT) 
+
+SRCS= $(srcdir)/crc32.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+	$(RM) t_crc.o t_crc
+
+check-unix:: t_crc
+	$(RUN_SETUP) $(VALGRIND) ./t_crc
+
+t_crc: t_crc.o crc32.o $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_crc.o crc32.o $(SUPPORT_LIB)
+
+
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+crc32.so crc32.po $(OUTPRE)crc32.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  crc-32.h crc32.c

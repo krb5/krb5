@@ -1,0 +1,28 @@
+-*- text -*-
+
+* unix_time.c also exists in ../krb4, and they're different; both
+  should probably call into the krb5 support anyways to avoid
+  duplicating code.
+
+* namespace intrusions
+
+* Check include/kerberosIV/des.h and see if all the prototyped
+  functions really are necessary to retain; if not, delete some of
+  these source files.
+
+* Much of this code requires that DES_INT32 be *exactly* 32 bits, and
+  4 bytes.
+
+* Array types are used in function call signatures, which is unclean.
+  It makes trying to add "const" qualifications in the right places
+  really, um, interesting.  But we're probably stuck with them.
+
+* quad_cksum is totally broken.  I have no idea whether the author
+  actually believed it implemented the documented algorithm, but I'm
+  certain it doesn't.  The only question is, is it still reasonably
+  secure, when the plaintext and checksum are visible to an attacker
+  as in the mk_safe message?
+
+* des_read_password and des_read_pw_string are not thread-safe.  Also,
+  they should be calling into the k5crypto library instead of
+  duplicating functionality.

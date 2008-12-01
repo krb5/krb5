@@ -1,0 +1,147 @@
+thisconfigdir=../..
+myfulldir=lib/krb5
+mydir=lib/krb5
+BUILDTOP=$(REL)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os
+SUBDIRS= error_tables asn.1 ccache keytab krb os rcache
+DEFS=
+
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=$(OUTPRE)krb5.lib
+##DOSOBJFILEDEP=$(OUTPRE)asn1.lst $(OUTPRE)ccache.lst $(OUTPRE)err_tbls.lst $(OUTPRE)keytab.lst $(OUTPRE)krb.lst $(OUTPRE)os.lst $(OUTPRE)posix.lst $(OUTPRE)rcache.lst $(OUTPRE)krb5.lst
+##DOSOBJFILELIST=@$(OUTPRE)asn1.lst @$(OUTPRE)ccache.lst @$(OUTPRE)err_tbls.lst @$(OUTPRE)keytab.lst @$(OUTPRE)krb.lst @$(OUTPRE)os.lst @$(OUTPRE)posix.lst @$(OUTPRE)rcache.lst @$(OUTPRE)krb5.lst
+##DOSOBJFILE=$(OUTPRE)krb5.lst
+##DOSLIBOBJS=$(OBJS)
+##DOSLOCALINCLUDES=-Iccache\ccapi -I..\..\windows\lib -Iccache -Ikeytab -Ircache -Ios
+
+TST=if test -n "`cat DONE`" ; then
+
+STLIBOBJS=krb5_libinit.o
+
+LIBBASE=krb5
+LIBMAJOR=3
+LIBMINOR=3
+LIBINITFUNC=profile_library_initializer krb5int_lib_init
+LIBFINIFUNC=profile_library_finalizer krb5int_lib_fini
+
+STOBJLISTS= \
+	OBJS.ST \
+	error_tables/OBJS.ST \
+	asn.1/OBJS.ST \
+	ccache/OBJS.ST \
+	keytab/OBJS.ST \
+	krb/OBJS.ST \
+	rcache/OBJS.ST \
+	os/OBJS.ST \
+	$(BUILDTOP)/util/profile/OBJS.ST
+
+SUBDIROBJLISTS= \
+	error_tables/OBJS.ST \
+	asn.1/OBJS.ST \
+	ccache/OBJS.ST \
+	keytab/OBJS.ST \
+	krb/OBJS.ST \
+	rcache/OBJS.ST \
+	os/OBJS.ST \
+	$(BUILDTOP)/util/profile/OBJS.ST
+
+OBJS=\
+	$(OUTPRE)krb5_libinit.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/krb5_libinit.c
+
+RELDIR=krb5
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+SHLIB_EXPLIBS=-lk5crypto -lcom_err $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+all-unix:: all-liblinks
+
+all-windows::
+
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+
+clean-windows::
+	$(RM) $(OUTPRE)krb5.lib krb5.bak
+
+all-windows::
+	cd asn.1
+	@echo Making in krb5\asn.1
+	$(MAKE) -$(MFLAGS)
+	cd ..\ccache
+	@echo Making in krb5\ccache
+	$(MAKE) -$(MFLAGS)
+	cd ..\error_tables
+	@echo Making in krb5\error_tables
+	$(MAKE) -$(MFLAGS)
+	cd ..\keytab
+	@echo Making in krb5\keytab
+	$(MAKE) -$(MFLAGS)
+	cd ..\krb
+	@echo Making in krb5\krb
+	$(MAKE) -$(MFLAGS)
+	cd ..\os
+	@echo Making in krb5\os
+	$(MAKE) -$(MFLAGS)
+	cd ..\posix
+	@echo Making in krb5\posix
+	$(MAKE) -$(MFLAGS)
+	cd ..\rcache
+	@echo Making in krb5\rcache
+	$(MAKE) -$(MFLAGS)
+	cd ..
+
+clean-windows::
+	cd asn.1
+	@echo Making clean in krb5\asn.1
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\ccache
+	@echo Making clean in krb5\ccache
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\error_tables
+	@echo Making clean in krb5\error_tables
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\keytab
+	@echo Making clean in krb5\keytab
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\krb
+	@echo Making clean in krb5\krb
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\os
+	@echo Making clean in krb5\os
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\posix
+	@echo Making clean in krb5\posix
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\rcache
+	@echo Making clean in krb5\rcache
+	$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean locally
+
+install-unix:: install-libs
+
+@lib_frag@
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+krb5_libinit.so krb5_libinit.po $(OUTPRE)krb5_libinit.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/ccache/cc-int.h \
+  $(srcdir)/keytab/kt-int.h $(srcdir)/os/os-proto.h $(srcdir)/rcache/rc-int.h \
+  krb5_libinit.c krb5_libinit.h

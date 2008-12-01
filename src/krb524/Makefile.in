@@ -1,0 +1,175 @@
+thisconfigdir=..
+myfulldir=krb524
+mydir=krb524
+BUILDTOP=$(REL)..
+KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
+DEFS=
+
+# Copyright 1994 by OpenVision Technologies, Inc.
+# 
+# Permission to use, copy, modify, distribute, and sell this software
+# and its documentation for any purpose is hereby granted without fee,
+# provided that the above copyright notice appears in all copies and
+# that both that copyright notice and this permission notice appear in
+# supporting documentation, and that the name of OpenVision not be used
+# in advertising or publicity pertaining to distribution of the software
+# without specific, written prior permission. OpenVision makes no
+# representations about the suitability of this software for any
+# purpose.  It is provided "as is" without express or implied warranty.
+# 
+# OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+# INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+# EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+# CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+# USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+# 
+
+DEFINES = -DUSE_MASTER -DKRB524_PRIVATE=1
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+##WIN32##!if ("$(CPU)" == "i386") && defined(USE_ALTERNATE_KRB4_INCLUDES)
+##WIN32##KRB4_INCLUDES=-I$(USE_ALTERNATE_KRB4_INCLUDES)
+##WIN32##!endif
+
+##WIN32##!if ("$(CPU)" == "i386") && defined(USE_ALTERNATE_KRB4_LIB)
+##WIN32##K4LIB=$(USE_ALTERNATE_KRB4_LIB)
+##WIN32##!endif
+
+K524EXE = $(OUTPRE)k524init.exe
+K524LIB = $(OUTPRE)krb524.lib
+K524DEP = $(K524LIB)
+K524DEF = krb524.def
+WINLIBS = kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib \
+	version.lib advapi32.lib gdi32.lib
+
+LOCALINCLUDES= $(KRB4_INCLUDES) -I. -I$(srcdir)
+
+# Library sources
+SRCS	= \
+	$(srcdir)/cnv_tkt_skey.c \
+	$(srcdir)/libinit.c	\
+    $(srcdir)/krb524.c
+
+EXTRADEPSRCS = \
+	$(srcdir)/test.c \
+	$(srcdir)/k524init.c \
+	$(srcdir)/krb524d.c
+
+##WIN32##!ifdef KRB524_STATIC_HACK
+##WIN32##LPREFIX=..\lib
+##WIN32##K5_GLUE=$(LPREFIX)\$(OUTPRE)k5_glue.obj
+##WIN32##KLIBS = $(LPREFIX)\krb5\$(OUTPRE)krb5.lib \
+##WIN32##	$(LPREFIX)\crypto\$(OUTPRE)crypto.lib \
+##WIN32##	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib \
+##WIN32##	$(LPREFIX)\des425\$(OUTPRE)des425.lib
+##WIN32##KLIB=$(KLIBS) $(DNSLIBS) $(K5_GLUE) $(CLIB)
+##WIN32##STLIBOBJS=$(STLIBOBJS:libinit=globals)
+##WIN32##K524DEP=$(STLIBOBJS)
+##WIN32##!endif
+
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##EXERES=$(K524EXE:.exe=.res)
+##WIN32##LIBRES=$(K524LIB:.lib=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKRB524_INIT -fo $@ -r $**
+##WIN32##$(LIBRES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKRB524_LIB -fo $@ -r $**
+
+all-unix:: krb524d krb524test k524init
+
+##WIN32##all-windows:: $(K524EXE) $(K524LIB)
+
+krb524test: test.o $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o krb524test test.o $(KRB5_LIB) $(KRB4COMPAT_LIBS)
+
+SERVER_OBJS= krb524d.o cnv_tkt_skey.o
+CLIENT_OBJS= $(OUTPRE)k524init.$(OBJEXT)
+
+krb524d: $(SERVER_OBJS) $(KADMSRV_DEPLIBS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o krb524d $(SERVER_OBJS) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_LIB) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
+
+k524init: $(CLIENT_OBJS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o k524init $(CLIENT_OBJS) $(KRB5_LIB) $(KRB4COMPAT_LIBS)
+
+##WIN32##$(K524LIB): $(OUTPRE)krb524.$(OBJEXT) $(OUTPRE)libinit.$(OBJEXT) $(KLIB) $(CLIB) $(LIBRES)
+##WIN32##	link $(DLL_LINKOPTS) -def:$(K524DEF) -out:$*.dll $** $(WINLIBS)
+##WIN32##	$(_VC_MANIFEST_EMBED_DLL)
+
+##WIN32##$(K524EXE): $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(CLIB) $(EXERES) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib
+##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** $(WINLIBS) $(SCLIB)
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
+
+install-unix::
+	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
+	$(INSTALL_PROGRAM) k524init $(DESTDIR)$(CLIENT_BINDIR)/krb524init
+	$(INSTALL_DATA) $(srcdir)/krb524d.M $(DESTDIR)$(SERVER_MANDIR)/krb524d.8
+	$(INSTALL_DATA) $(srcdir)/k524init.M \
+		$(DESTDIR)$(CLIENT_MANDIR)/krb524init.1
+
+clean-unix::
+	$(RM) $(OBJS) core *~ *.bak #*
+	$(RM) krb524test krb524d k524init test.o $(CLIENT_OBJS) $(SERVER_OBJS)
+
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)cnv_tkt_skey.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h cnv_tkt_skey.c krb524d.h
+$(OUTPRE)libinit.$(OBJEXT): libinit.c
+$(OUTPRE)krb524.$(OBJEXT): krb524.c
+$(OUTPRE)test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h test.c
+$(OUTPRE)k524init.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h k524init.c
+$(OUTPRE)krb524d.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(KRB_ERR_H_DEP) \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
+  $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
+  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
+  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
+  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
+  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h krb524d.c krb524d.h

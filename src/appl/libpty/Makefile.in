@@ -1,0 +1,159 @@
+thisconfigdir=.
+myfulldir=appl/libpty
+mydir=.
+BUILDTOP=$(REL)..$(S)..
+RELDIR=../appl/libpty
+
+SED = sed
+
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+LIBBASE=pty
+LIBMAJOR=1
+LIBMINOR=2
+
+STLIBOBJS= cleanup.o getpty.o init_slave.o open_ctty.o open_slave.o \
+	update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o \
+	logwtmp.o init.o sane_hostname.o
+
+STOBJLISTS=OBJS.ST
+
+INSTALLFILE = cp
+
+# for pty-int.h
+LOCALINCLUDES=-I. -I$(srcdir)
+
+FILES= Makefile cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.h pty_err.c\
+logwtmp.c init.c
+
+CFILES=$(srcdir)/cleanup.c $(srcdir)/getpty.c $(srcdir)/init_slave.c \
+	$(srcdir)/open_ctty.c $(srcdir)/open_slave.c \
+	$(srcdir)/update_utmp.c $(srcdir)/update_wtmp.c $(srcdir)/vhangup.c \
+	$(srcdir)/void_assoc.c $(srcdir)/logwtmp.c \
+	$(srcdir)/init.c $(srcdir)/sane_hostname.c
+
+
+SRCS=pty_err.c $(CFILES)
+SHLIB_EXPDEPS = \
+	$(COM_ERR_DEPLIB)
+SHLIB_EXPLIBS= -lcom_err 
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+DEPLIBS=
+
+#
+all-unix:: includes pty_err.h
+
+all-unix:: all-liblinks
+
+dump-utmp: dump-utmp.o
+	$(CC) $(LDFLAGS) -o dump-utmp dump-utmp.o
+dump-utmp.o: dump-utmp.c
+
+pty_paranoia: pty_paranoia.o $(COM_ERR_DEPLIB) $(PTY_DEPLIB)
+	$(CC_LINK) -o pty_paranoia pty_paranoia.o $(PTY_LIB) $(COM_ERR_LIB) $(LIBS)
+
+check-paranoia: pty_paranoia
+	$(KRB5_RUN_ENV) $(VALGRIND) ./pty_paranoia
+
+install-unix:: install-libs
+
+clean-unix::
+	$(RM) libpty.a $(BUILDTOP)/include/libpty.h pty_err.c pty_err.h
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+
+depend::  pty_err.h
+
+#install:: libpty.h
+#	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h
+
+includes:: libpty.h
+	if cmp $(srcdir)/libpty.h \
+	$(BUILDTOP)/include/libpty.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/libpty.h; \
+		 $(CP) $(srcdir)/libpty.h \
+			$(BUILDTOP)/include/libpty.h) ; \
+	fi
+
+includes:: $(BUILDTOP)/include/autoconf.h
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/libpty.h
+
+
+
+clean-unix:: clean-liblinks clean-libs clean-libobjs clean-files
+
+clean-files::
+	rm -f *~ \#* *.bak \
+		*.otl *.aux *.toc *.PS *.dvi *.x9700 *.ps \
+		*.cp *.fn *.ky *.log *.pg *.tp *.vr \
+		*.o profiled/?*.o libcom_err.a libcom_err_p.a \
+		com_err.o compile_et \
+		et.ar TAGS y.tab.c lex.yy.c error_table.c \
+		et_lex.lex.c \
+		test1.h test1.c test2.h test2.c test_et \
+		eddep makedep *.ln
+
+pty_err.o: pty_err.c
+pty_err.h: pty_err.et
+pty_err.c: pty_err.et
+
+$(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
+	(cd $(BUILDTOP)/include; $(MAKE) autoconf.h)
+
+@libpriv_frag@
+@lib_frag@
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+pty_err.so pty_err.po $(OUTPRE)pty_err.$(OBJEXT): $(COM_ERR_DEPS) \
+  pty_err.c
+cleanup.so cleanup.po $(OUTPRE)cleanup.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h cleanup.c \
+  libpty.h pty-int.h pty_err.h
+getpty.so getpty.po $(OUTPRE)getpty.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h getpty.c libpty.h \
+  pty-int.h pty_err.h
+init_slave.so init_slave.po $(OUTPRE)init_slave.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  init_slave.c libpty.h pty-int.h pty_err.h
+open_ctty.so open_ctty.po $(OUTPRE)open_ctty.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h open_ctty.c pty-int.h pty_err.h
+open_slave.so open_slave.po $(OUTPRE)open_slave.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h open_slave.c pty-int.h pty_err.h
+update_utmp.so update_utmp.po $(OUTPRE)update_utmp.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  libpty.h pty-int.h pty_err.h update_utmp.c
+update_wtmp.so update_wtmp.po $(OUTPRE)update_wtmp.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h pty-int.h pty_err.h update_wtmp.c
+vhangup.so vhangup.po $(OUTPRE)vhangup.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h libpty.h \
+  pty-int.h pty_err.h vhangup.c
+void_assoc.so void_assoc.po $(OUTPRE)void_assoc.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h pty-int.h pty_err.h void_assoc.c
+logwtmp.so logwtmp.po $(OUTPRE)logwtmp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h libpty.h \
+  logwtmp.c pty-int.h pty_err.h
+init.so init.po $(OUTPRE)init.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h init.c \
+  libpty.h pty-int.h pty_err.h
+sane_hostname.so sane_hostname.po $(OUTPRE)sane_hostname.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  libpty.h pty-int.h pty_err.h sane_hostname.c

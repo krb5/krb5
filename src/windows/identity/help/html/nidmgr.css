@@ -1,0 +1,122 @@
+  body {
+    font-family: helvetica,sans-serif;
+    font-size: 9pt;
+    font-style: normal;
+    background-color: white;
+    margin-top: 0pt;
+    margin-left: 0pt;
+    margin-right: 0pt;
+    }
+
+  h1 { border-bottom: 1px solid black;
+    padding: 1em;
+    font-size: 12pt;
+    background-color: rgb(247, 247, 247);
+    }
+
+  h2 {  }
+
+  h3 { border-bottom: 1px solid lightgrey;
+    padding: 1em;
+    font-size: 11pt;
+    }
+
+  h4 { border-bottom: 1px dashed lightgrey;
+    font-size: 10pt;
+    font-style: italic;
+    margin-left: 2em;
+    }
+
+  p { margin-left: 1em;
+    margin-right: 1em;
+    }
+
+  p.caption { margin-left: 1em;
+    margin-right: 1em;
+    font-style: italic;
+    }
+
+  div.inline { float: left;
+    }
+
+  div.sidebar { border: 1px solid rgb(255, 255, 0);
+    float: right;
+    background-color: rgb(255, 255, 185);
+    }
+
+  a.external {  }
+
+  a.mail {  }
+
+  img { border: 0pt none ;
+    }
+
+  span.pre { font-family: monospace;
+    }
+
+  span.title { font-weight: bold;
+    }
+
+  div.schema-space { border-left: 1px solid rgb(230, 206, 142);
+    padding: 0pt;
+    margin-left: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    }
+
+  div.schema-templ { border-left: 1px solid rgb(98, 161, 143);
+    background-color: rgb(208, 242, 233);
+    }
+
+  div.schema-space-doc { margin: 1em 3em;
+    }
+
+  p.schema-space { border-top: 1px solid rgb(230, 206, 142);
+    margin: 0pt;
+    padding: 1em;
+    font-weight: bold;
+    font-size: 10pt;
+    background-color: rgb(242, 233, 208);
+    }
+
+  p.schema-reg { margin: 0pt;
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
+    background-color: rgb(247, 247, 247);
+    }
+
+  span.schema-label { display: block;
+    float: left;
+    margin-left: 2em;
+    width: 10em;
+    }
+
+  span.schema-value { width: 100%;
+    background-color: rgb(255, 255, 255);
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    }
+
+  div.schema-value { border: 1px solid rgb(153, 171, 94);
+    background-color: rgb(234, 242, 208);
+    margin-left: 1em;
+    margin-right: 1em;
+    margin-bottom: 1em;
+    }
+
+  p.schema-value-name { margin: 0.5em 1em;
+    padding: 0.5em 1em;
+    }
+
+  span.schema-value-name { font-size: 10pt;
+    font-weight: bold;
+    }
+
+  p.schema-value-type {  }
+
+  p.schema-value-def {  }
+
+  div.schema-value-doc { padding: 1em;
+    }
+
+

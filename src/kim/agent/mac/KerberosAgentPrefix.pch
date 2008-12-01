@@ -1,0 +1,19 @@
+#ifdef __OBJC__
+#import <Cocoa/Cocoa.h>
+
+#define CacheCollectionDidChangeNotification @"CacheCollectionDidChange"
+#endif
+
+#include <Kerberos/Kerberos.h>
+#include <Kerberos/KerberosLoginPrivate.h>
+#include <Kerberos/kim.h>
+#include <Kerberos/KerberosDebug.h>
+#include <nameser.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>

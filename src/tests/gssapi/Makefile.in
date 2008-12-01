@@ -1,0 +1,27 @@
+thisconfigdir=../..
+myfulldir=tests/gssapi
+mydir=tests/gssapi
+BUILDTOP=$(REL)..$(S)..
+DEFINES = -DUSE_AUTOCONF_H
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+SRCS= $(srcdir)/t_imp_name.c
+
+OBJS= t_imp_name.o
+
+all:: t_imp_name
+
+t_imp_name: t_imp_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_imp_name t_imp_name.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
+
+clean::
+	$(RM) t_imp_name
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)t_imp_name.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h t_imp_name.c

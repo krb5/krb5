@@ -1,0 +1,68 @@
+thisconfigdir=..
+mydir=tests
+myfulldir=tests
+BUILDTOP=$(REL)..
+SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
+	gss-threads misc mkeystash_compat
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+TEST_DB = ./testdb
+TEST_REALM = FOO.TEST.REALM
+TEST_MKEY = footes
+TEST_NUM = 65
+TEST_DEPTH = 5
+TEST_PREFIX = "foo bar"
+
+KADMIN_OPTS= -d $(TEST_DB) -r $(TEST_REALM) -P $(TEST_MKEY)
+KTEST_OPTS= $(KADMIN_OPTS) -p $(TEST_PREFIX) -n $(TEST_NUM) -D $(TEST_DEPTH)
+
+check-unix:: kdb_check
+
+kdc.conf: Makefile
+	rm -rf kdc.conf
+	@echo "[realms]" > kdc.conf
+	@echo "$(TEST_REALM) = {" >> kdc.conf
+	@echo "  key_stash_file = `pwd`/stash_file" >> kdc.conf
+	@echo "}" >> kdc.conf
+
+krb5.conf: Makefile
+	cat $(SRCTOP)/config-files/krb5.conf > krb5.new
+	echo "[dbmodules]" >> krb5.new
+	echo " db_module_dir = `pwd`/../util/fakedest$(KRB5_DB_MODULE_DIR)" >> krb5.new
+	mv krb5.new krb5.conf
+
+kdb_check: kdc.conf krb5.conf
+	$(RM) $(TEST_DB)*
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create
+	$(RUN_SETUP) $(VALGRIND) ../tests/create/kdb5_mkdums $(KTEST_OPTS) 
+	$(RUN_SETUP) $(VALGRIND) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
+	@echo "====> NOTE!"
+	@echo "The following 'create' command is needed due to a change"
+	@echo "in functionality caused by DAL integration.  See ticket 3973."
+	@echo ====
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load $(TEST_DB).dump 
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -update -ov $(TEST_DB).ovdump 
+	$(RUN_SETUP) $(VALGRIND) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump2
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump2
+	sort $(TEST_DB).dump > $(TEST_DB).sort
+	sort $(TEST_DB).dump2 > $(TEST_DB).sort2
+	sort $(TEST_DB).ovdump > $(TEST_DB).ovsort
+	sort $(TEST_DB).ovdump2 > $(TEST_DB).ovsort2
+	cmp $(TEST_DB).sort $(TEST_DB).sort2
+	cmp $(TEST_DB).ovsort $(TEST_DB).ovsort2
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
+	$(RM) $(TEST_DB)* stash_file
+
+clean::
+	$(RM) kdc.conf
+
+

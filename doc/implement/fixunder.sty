@@ -1,0 +1,48 @@
+% fixunder.sty,  31 May 1990, John T. Kohl
+%
+% The contents of this file are in the public domain.
+%
+%
+% play games with _ to make it active and to provide a reasonable _
+% character (from \tt in most cases), and a discretionary word-break point.
+
+%
+% Some \makeunder... macros for convenience in setting catcodes.
+%
+\def\makeunderactive{\catcode`\_=\active\relax}
+\def\makeunderother{\catcode`\_=12\relax}
+\def\makeunderletter{\catcode`\_=11\relax}
+\def\makeundernormal{\catcode`\_=8\relax}
+\makeunderother
+\def\cctwlunder{_}
+
+%
+% The hair here is to allow things like \index to work reasonably with
+% the new definition of underscore when the argument to index is part of
+% a macro replacement and as such gets tokenized before \index is
+% evaluated.
+% [in the normal case at top-level, \index{foo_bar} works since \index
+% does some hair to make _ into a reasonable character code, and \index
+% does NOT use a macro expansion.  If you have something like
+% \def\foo#1#2{\index{#1} bar #2}
+% then \foo{baz_quux}{frobnitz} will result in baz_quux getting
+% tokenized BEFORE \foo is expanded, so that the catcode hair in \index
+% is to no avail.]
+%
+% \underrealfalse declares that you want to replace with the \tt _;
+% \underrealtrue declares that you want to replace with \char95 (ASCII _).
+%
+% for things like \index which write things out to files, set
+% \underrealfalse before evaluating the \index macro, and what actually
+% gets written to the file is an _, rather than something like
+% {\leavemode \kern... } (the typical definition of \_).
+%
+% the above example would then be
+% \def\foo#1#2{\underrealfalse\index{#1}\underrealtrue bar #2}
+%
+
+\newif\ifunderreal
+\underrealfalse
+\makeunderactive
+\def_{\ifunderreal\cctwlunder\else\leavevmode {\tt \cctwlunder}\discretionary{}{}{}\fi}
+\let\_=_

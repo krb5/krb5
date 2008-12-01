@@ -1,0 +1,73 @@
+thisconfigdir=../../..
+myfulldir=lib/crypto/md4
+mydir=lib/crypto/md4
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=md4
+##DOS##OBJFILE=..\$(OUTPRE)md4.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS= md4.o
+
+OBJS= $(OUTPRE)md4.$(OBJEXT) 
+
+SRCS= $(srcdir)/md4.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
+	$(CP) $(srcdir)/../md5/t_mddriver.c t_mddriver.c
+
+t_mddriver.o: t_mddriver.c
+	$(CC) -DMD=4 $(ALL_CFLAGS) -c  t_mddriver.c
+
+t_mddriver: t_mddriver.o md4.o $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_mddriver t_mddriver.o md4.o $(SUPPORT_LIB)
+
+$(OUTPRE)t_mddriver.obj: t_mddriver.c
+	$(CC) -DMD=4 $(ALL_CFLAGS) -Fo$@ -c $**
+
+$(OUTPRE)t_mddriver.exe: $(OUTPRE)t_mddriver.obj $(OUTPRE)md4.obj
+	link -out:$@ $**
+
+check-unix:: t_mddriver
+	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
+
+check-windows:: $(OUTPRE)t_mddriver.exe
+	$(OUTPRE)$(C)t_mddriver.exe -x
+
+clean:: 
+	$(RM) $(OUTPRE)t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) t_mddriver.c
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+md4.so md4.po $(OUTPRE)md4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  md4.c rsa-md4.h

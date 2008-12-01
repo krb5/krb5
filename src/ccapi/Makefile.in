@@ -1,0 +1,37 @@
+thisconfigdir=..
+myfulldir=ccapi
+mydir=ccapi
+BUILDTOP=$(REL)..
+
+SUBDIRS= lib server test
+
+all-windows:: 
+	@echo Making in ccapi\lib\win
+    @echo buildtop: $(BUILDTOP)
+	cd lib\win
+	cd
+	$(MAKE) -$(MFLAGS)
+	@echo Making in ccapi\server\win
+	cd ..\..\server\win
+	cd
+	$(MAKE) -$(MFLAGS)
+	@echo Making in ccapi\test
+	cd ..\..\test
+	cd
+	$(MAKE) -$(MFLAGS)
+
+clean-windows:: 
+	@echo Making clean in ccapi\lib\win
+	cd lib\win
+	cd
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in ccapi\server\win
+	cd ..\..\server\win
+	cd
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in ccapi\test
+	cd ..\..\test
+	cd
+	$(MAKE) -$(MFLAGS) clean
+
+# +++ Dependency line eater +++

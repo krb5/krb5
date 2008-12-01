@@ -1,0 +1,57 @@
+<html>
+
+<head>
+<title>About Network Identity Manager</title>
+<meta name="description" content="About NetIDMgr">
+<meta name="keywords" content>
+<link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+
+<body>
+
+<h1>About Network Identity Manager</h1>
+<p>This is strictly an informative page about the origins of Network Identity Manager.
+</p>
+<h3>In the beginning</h3>
+<p>Network Identity Manager was conceived as an identity management solution to 
+make up for the shortcomings of Leash32 (distributed with MIT Kerberos for Windows) 
+and AFSCreds (distributed with OpenAFS). </p>
+<p>The work started as Unified Credentials Manager, a final project for the MIT 
+course 6.831 : User Interface Design and Implementation, taught by
+<a href="http://people.csail.mit.edu/rcm/">Professor Rob Miller</a>. By the time 
+actual code was written, it was named Khimaira (which was later changed to Network 
+Identity Manager around October, 2005). Traces of the name Khimaira might still 
+exist in the source code. </p>
+<p><a href="http://workshop.openafs.org/afsbpw05/talks/khimaira.html">Khimaira: 
+A Unified Interface for AFS and Kerberos</a> was presented at the
+<a href="http://workshop.openafs.org/afsbpw05/">AFS and 
+Kerberos Best Practices Workshop 2005</a>. </p>
+<p>A second talk, 
+<a href="http://workshop.openafs.org/afsbpw06/talks/asanka.html">Developing 
+plug-ins for Network Identity Manager</a>, was presented at
+<a href="http://workshop.openafs.org/afsbpw06/">AFS and Kerberos Best Practice 
+Workshop 2006</a>.</p>
+<p>The development of Network Identity Manager has been financially supported 
+(in alphabetical order) by <a href="http://www.fnal.gov/">Fermi National 
+Accelerator Laboratory</a>,
+<a href="http://web.mit.edu">MIT</a> <a href="http://web.mit.edu/ist/">Information 
+Services and Technology</a>, <a href="http://www.jpl.nasa.gov">NASA Jet Propulsion 
+Laboratory</a>, <a href="http://www.secure-endpoints.com">Secure Endpoints Inc.</a>, 
+and <a href="http://www.stanford.edu/">Stanford University</a>.
+</p>
+<h3>Design</h3>
+<p>A plug-in based architecture was chosen so that support for additional credential 
+types and features could be added without making changes to the mainline code. In 
+addition to making the application easily extensible, this also allows the AFS plug-in 
+to be maintained within the OpenAFS code base and separates the code supporting 
+Kerberos v5 and Kerberos v4 permitting Kerberos v4 to be easily removed from the 
+Kerberos for Windows distribution. Furthermore, it is anticipated that this would encourage 
+third party developers to develop plug-ins for Network Identity Manager.&nbsp; 
+As of September 2007, a Kerberized Certificate Authority credential provider and 
+a Grid credential provider are available from third parties.</p>
+<p>More information about the concepts used in the design of Network Identity Manager 
+can be found  <a href="concepts.htm">here</a>. </p>
+
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+.\" appl/bsd/rcp.M
+.\"
+.\" Copyright (c) 1983 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms are permitted
+.\" provided that the above copyright notice and this paragraph are
+.\" duplicated in all such forms and that any documentation,
+.\" advertising materials, and other materials related to such
+.\" distribution and use acknowledge that the software was developed
+.\" by the University of California, Berkeley.  The name of the
+.\" University may not be used to endorse or promote products derived
+.\" from this software without specific prior written permission.
+.\" THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+.\" IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+.\" WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+.\"
+.\"	@(#)rcp.1	6.6 (Berkeley) 9/20/88
+.\"
+.TH RCP 1
+.SH NAME
+rcp \- remote file copy
+.SH SYNOPSIS
+.B rcp
+[\fB\-p\fP] [\fB\-x\fP] [\fB\-k\fP \fIrealm\fP ] [\fB-c\fP \fIccachefile\fP] [\fB-C\fP \fIconfigfile\fP] [\fB\-D\fP \fIport\fP]
+[\fB\-N\fP]
+[\fB\-PN | \-PO\fP]
+.I file1 file2
+.sp
+.B rcp
+[\fB\-p\fB] [\fB\-x\fP] [\fP\-k\fP \fIrealm\fP] [\fB\-r\fP] [\fB\-D\fP
+\fIport\fP] [\fB\-N\fP]
+[\fB\-PN | \-PO\fP]
+.I file ... directory
+.sp
+.B rcp
+[\fB\-f | \-t\fP]
+.I ...
+.SH DESCRIPTION
+.B Rcp
+copies files between machines.  Each
+.I file
+or
+.I directory
+argument is either a remote file name of the form ``rhost:path'', or a
+local file name (containing no `:' characters, or a `/' before any
+`:'s).
+.PP
+By default, the mode and owner of
+.I file2
+are preserved if it already existed; otherwise the mode of the source
+file modified by the
+.IR umask (2)
+on the destination host is used.
+.PP
+If
+.I path
+is not a full path name, it is interpreted relative to your login
+directory on
+.IR rhost .
+A 
+.I path
+on a remote host may be quoted (using \e, ", or \(aa) so that the
+metacharacters are interpreted remotely.
+.PP
+.B Rcp
+does not prompt for passwords; it uses Kerberos authentication when
+connecting to
+.IR rhost .
+Each user may have a private authorization list in a file \&.k5login in
+his login directory.  Each line in this file should contain a Kerberos
+principal name of the form
+.IR principal/instance@realm .
+If there is a ~/.k5login file, then access is granted to the account if
+and only if the originater user is authenticated to one of the
+principals named in the ~/.k5login file.  Otherwise, the originating
+user will be granted access to the account if and only if the
+authenticated principal name of the user can be mapped to the local
+account name using the aname -> lname mapping rules (see
+.IR krb5_anadd (8)
+for more details).
+.SH OPTIONS
+.TP
+.B \-p
+attempt to preserve (duplicate) the modification times and modes of the
+source files in the copies, ignoring the
+.IR umask .
+.TP
+\fB\-x\fP
+encrypt all information transferring between hosts.
+.TP
+\fB\-k\fP \fIrealm\fP
+obtain tickets for the remote host in
+.I realm
+instead of the remote host's realm as determined by
+.IR krb_realmofhost (3).
+.TP
+\fB\-c\fP \fIccachefile\fP
+change the default credentials cache file to 
+.I ccachefile
+.TP
+\fB\-C\fP \fIconfigfile\fP
+change the default configuation file to
+.I configfile
+.TP
+.B \-r
+if any of the source files are directories, copy each subtree rooted at
+that name; in this case the destination must be a directory.
+.TP
+\fB-PN\fP
+.TP
+\fB-PO\fP
+Explicitly request new or old version of the Kerberos ``rcmd''
+protocol.  The new protocol avoids many security problems found in the
+old one, but is not interoperable with older servers.  (An
+"input/output error" and a closed connection is the most likely result
+of attempting this combination.)  If neither option is specified, some
+simple heuristics are used to guess which to try.
+.TP
+\fB\-D\fP \fIport\fP
+connect to port
+.I port
+on the remote machine.  
+.TP
+.B \-N
+use a network connection, even when copying files on the local machine
+(used for testing purposes).
+.TP
+.B \-f \-t
+These options are for internal use only.  They tell the
+remotely-running rcp process (started via the Kerberos remote shell
+daemon) which direction files are being sent.  These options should
+not be used by the user.  In particular, \fB-f\fP does \fBnot\fP mean
+that the user's Kerberos ticket should be forwarded!
+.PP
+.B Rcp
+handles third party copies, where neither source nor target files are on
+the current machine.  Hostnames may also take the form ``rname@rhost''
+to use
+.I rname
+rather than the current user name on the remote host.
+.SH FILES
+.TP "\w'~/.k5login\ \ 'u"
+~/.k5login
+(on remote host) - file containing Kerberos principals that are allowed
+access.
+.SH SEE ALSO
+cp(1), ftp(1), rsh(1), rlogin(1), kerberos(3), krb_getrealm(3), kshd(8), rcp(1) 
+[UCB version]
+.SH BUGS
+.B Rcp
+doesn't detect all cases where the target of a copy might be a file in
+cases where only a directory should be legal.
+.PP
+.B Rcp
+is confused by any output generated by commands in a \&.login,
+\&.profile, or \&.cshrc file on the remote host.
+.PP
+Kerberos is only used for the first connection of a third-party copy;
+the second connection uses the standard Berkeley rcp protocol.

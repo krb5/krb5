@@ -1,0 +1,112 @@
+thisconfigdir=..
+myfulldir=appl/telnet/telnet
+mydir=telnet
+BUILDTOP=$(REL)..$(S)..$(S)..
+# derived from the original Makefile.generic
+#
+# Copyright (c) 1991 The Regents of the University of California.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms are permitted provided
+# that: (1) source distributions retain this entire copyright notice and
+# comment, and (2) distributions including binaries display the following
+# acknowledgement:  ``This product includes software developed by the
+# University of California, Berkeley and its contributors'' in the
+# documentation or other materials provided with the distribution and in
+# all advertising materials mentioning features or use of this software.
+# Neither the name of the University nor the names of its contributors may
+# be used to endorse or promote products derived from this software without
+# specific prior written permission.
+# THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#	@(#)Makefile.generic	5.5 (Berkeley) 3/1/91
+#
+
+AUTH_DEF=-DAUTHENTICATION -DENCRYPTION -DKRB5 -DFORWARD -UNO_LOGIN_F -DLOGIN_CAP_F -DLOGIN_PROGRAM=KRB5_PATH_LOGIN
+OTHERDEFS=-DLINEMODE -DKLUDGELINEMODE -DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON
+LOCALINCLUDES=-I.. -I$(srcdir)/..
+DEFINES = -DTELNET_BUFSIZE=65535 $(AUTH_DEF) $(OTHERDEFS)
+ARPA_TELNET= $(srcdir)/../arpa/telnet.h
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+LIBS=	@TELNET_LIBS@
+
+SRCS=	$(srcdir)/authenc.c $(srcdir)/commands.c $(srcdir)/main.c $(srcdir)/network.c $(srcdir)/ring.c \
+	$(srcdir)/sys_bsd.c $(srcdir)/telnet.c $(srcdir)/terminal.c \
+	$(srcdir)/utilities.c $(GETOPT_SRC)
+ALLHC=	$(SRCS) \
+	defines.h externs.h fdset.h general.h \
+	ring.h types.h
+
+OBJS=	authenc.o commands.o main.o network.o ring.o sys_bsd.o \
+	telnet.o terminal.o utilities.o $(GETOPT_OBJ)
+
+all:: telnet
+
+telnet:	$(OBJS) $(KRB4COMPAT_DEPLIBS) ../libtelnet/libtelnet.a
+	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(KRB4COMPAT_LIBS)
+
+clean::
+	$(RM) telnet
+
+install::
+	for f in telnet; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.1 \
+		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done
+	$(INSTALL_DATA) $(srcdir)/tmac.doc ${DESTDIR}$(CLIENT_MANDIR)/tmac.doc
+
+authenc.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)
+commands.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)
+main.o: defines.h externs.h ring.h
+network.o: defines.h externs.h fdset.h ring.h $(ARPA_TELNET)
+ring.o: general.h ring.h
+sys_bsd.o: defines.h externs.h fdset.h ring.h types.h $(ARPA_TELNET)
+telnet.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)
+terminal.o: externs.h ring.h types.h $(ARPA_TELNET)
+tn3270.o: defines.h externs.h fdset.h general.h ring.h $(ARPA_TELNET)
+utilities.o: defines.h externs.h fdset.h general.h ring.h $(ARPA_TELNET)
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)authenc.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/misc-proto.h $(srcdir)/../libtelnet/misc.h \
+  authenc.c defines.h externs.h general.h ring.h types.h
+$(OUTPRE)commands.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/misc-proto.h commands.c defines.h \
+  externs.h general.h ring.h types.h
+$(OUTPRE)main.$(OBJEXT): $(srcdir)/../libtelnet/auth-proto.h \
+  $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/enc-proto.h \
+  $(srcdir)/../libtelnet/encrypt.h defines.h externs.h \
+  main.c ring.h
+$(OUTPRE)network.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  defines.h externs.h fdset.h network.c ring.h
+$(OUTPRE)ring.$(OBJEXT): general.h ring.c ring.h
+$(OUTPRE)sys_bsd.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  defines.h externs.h fdset.h ring.h sys_bsd.c types.h
+$(OUTPRE)telnet.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/misc-proto.h defines.h externs.h \
+  general.h ring.h telnet.c types.h
+$(OUTPRE)terminal.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  externs.h ring.h terminal.c types.h
+$(OUTPRE)utilities.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  defines.h externs.h fdset.h general.h ring.h utilities.c

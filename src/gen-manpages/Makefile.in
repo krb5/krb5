@@ -1,0 +1,9 @@
+thisconfigdir=./..
+myfulldir=gen-manpages
+mydir=gen-manpages
+BUILDTOP=$(REL)..
+all::
+
+install::
+	$(INSTALL_DATA) $(srcdir)/kerberos.M ${DESTDIR}$(CLIENT_MANDIR)/kerberos.1
+	$(INSTALL_DATA) $(srcdir)/k5login.M ${DESTDIR}$(FILE_MANDIR)/.k5login.5

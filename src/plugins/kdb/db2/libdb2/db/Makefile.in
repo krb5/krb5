@@ -1,0 +1,23 @@
+thisconfigdir=../../../../..
+myfulldir=plugins/kdb/db2/libdb2/db
+mydir=plugins/kdb/db2/libdb2/db
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+STLIBOBJS=db.o
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
+@libobj_frag@
+
+SRCS= $(STLIBOBJS:.o=.c)
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+db.so db.po $(OUTPRE)db.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(srcdir)/../include/config.h $(srcdir)/../include/db-config.h \
+  $(srcdir)/../include/db-int.h $(srcdir)/../include/db.h \
+  db.c

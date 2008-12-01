@@ -1,0 +1,36 @@
+BUILDTOP=..\..
+
+OBJS=	$(OUTPRE)ginastub.$(OBJEXT)
+
+# Set NODEBUG if building release instead of debug
+
+LOCALINCLUDES = -I$(BUILDTOP)\include
+
+WINLIBS = advapi32.lib comctl32.lib \
+	libcmt.lib kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib
+
+WINDLLFLAGS = /nodefaultlib /incremental:no /release \
+	/nologo /base:0x1c000000 /dll $(LOPTS)
+
+DEFINES = -DUNICODE -D_UNICODE
+!ifdef NODEBUG
+DEFINES = $(DEFINES)
+!else
+DEFINES = $(DEFINES) -DDBG
+!endif
+
+all-windows::
+all-windows:: $(OUTPRE)kgina.dll
+
+clean-windows::
+	$(RM) $(OUTPRE)kgina.dll
+
+$(OUTPRE)kgina.dll: $(OBJS) $(KLIB) $(CLIB)
+	link $(WINDLLFLAGS) -def:gina.def -out:$*.dll \
+	   $** $(WINLIBS) $(SCLIB)
+	$(_VC_MANIFEST_EMBED_DLL)
+
+$(OUTPRE)ginastub.obj: ginastub.h
+
+#$(OUTPRE)gina.res: res.rc
+#	$(RC) $(RFLAGS) -r -fo $@ res.rc

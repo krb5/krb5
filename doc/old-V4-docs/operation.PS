@@ -1,0 +1,2669 @@
+%!PS-Adobe-2.0
+%%Title: operation.mss
+%%DocumentFonts: (atend)
+%%Creator: John T Kohl,,E40-351M,31510,6176432831 and Scribe 7(1700)
+%%CreationDate: 4 January 1990 11:55
+%%Pages: (atend)
+%%EndComments
+% PostScript Prelude for Scribe.
+/BS {/SV save def 0.0 792.0 translate .01 -.01 scale} bind def
+/ES {showpage SV restore} bind def
+/SC {setrgbcolor} bind def
+/FMTX matrix def
+/RDF {WFT SLT 0.0 eq 
+  {SSZ 0.0 0.0 SSZ neg 0.0 0.0 FMTX astore}
+  {SSZ 0.0 SLT neg sin SLT cos div SSZ mul SSZ neg 0.0 0.0 FMTX astore}
+  ifelse makefont setfont} bind def
+/SLT 0.0 def
+/SI { /SLT exch cvr def RDF} bind def
+/WFT /Courier findfont def
+/SF { /WFT exch findfont def RDF} bind def
+/SSZ 1000.0 def
+/SS { /SSZ exch 100.0 mul def RDF} bind def
+/AF { /WFT exch findfont def /SSZ exch 100.0 mul def RDF} bind def
+/MT /moveto load def
+/XM {currentpoint exch pop moveto} bind def
+/UL {gsave newpath moveto dup 2.0 div 0.0 exch rmoveto
+   setlinewidth 0.0 rlineto stroke grestore} bind def
+/LH {gsave newpath moveto setlinewidth
+   0.0 rlineto
+   gsave stroke grestore} bind def
+/LV {gsave newpath moveto setlinewidth
+   0.0 exch rlineto
+   gsave stroke grestore} bind def
+/BX {gsave newpath moveto setlinewidth
+   exch
+   dup 0.0 rlineto
+   exch 0.0 exch neg rlineto
+   neg 0.0 rlineto
+   closepath
+   gsave stroke grestore} bind def
+/BX1 {grestore} bind def
+/BX2 {setlinewidth 1 setgray stroke grestore} bind def
+/PB {/PV save def newpath translate
+    100.0 -100.0 scale pop /showpage {} def} bind def
+/PE {PV restore} bind def
+/GB {/PV save def newpath translate rotate
+    div dup scale 100.0 -100.0 scale /showpage {} def} bind def
+/GE {PV restore} bind def
+/FB {dict dup /FontMapDict exch def begin} bind def
+/FM {cvn exch cvn exch def} bind def
+/FE {end /original-findfont /findfont load def  /findfont
+   {dup FontMapDict exch known{FontMapDict exch get} if
+   original-findfont} def} bind def
+/BC {gsave moveto dup 0 exch rlineto exch 0 rlineto neg 0 exch rlineto closepath clip} bind def
+/EC /grestore load def
+/SH /show load def
+/MX {exch show 0.0 rmoveto} bind def
+/W {0 32 4 -1 roll widthshow} bind def
+/WX {0 32 5 -1 roll widthshow 0.0 rmoveto} bind def
+/RC {100.0 -100.0 scale
+612.0 0.0 translate
+-90.0 rotate
+.01 -.01 scale} bind def
+/URC {100.0 -100.0 scale
+90.0 rotate
+-612.0 0.0 translate
+.01 -.01 scale} bind def
+/RCC {100.0 -100.0 scale
+0.0 -792.0 translate 90.0 rotate
+.01 -.01 scale} bind def
+/URCC {100.0 -100.0 scale
+-90.0 rotate 0.0 792.0 translate
+.01 -.01 scale} bind def
+%%EndProlog
+%%Page: 0 1
+BS
+0 SI
+20 /Times-Bold AF
+19324 13788 MT
+(Kerberos Operation Notes)SH
+27156 15798 MT
+(DRAFT)SH
+16 /Times-Roman AF
+27021 23502 MT
+(Bill Bryant)SH
+27289 25150 MT
+(John Kohl)SH
+23957 26798 MT
+(Project Athena, MIT)SH
+/Times-Bold SF
+19489 32396 MT
+(Initial Release, January 24, 1989)SH
+/Times-Italic SF
+17558 34044 MT
+(\050plus later patches through patchlevel 7\051)SH
+11 /Times-Roman AF
+7200 43798 MT
+(These notes assume that you have used the)SH
+/Times-Italic SF
+26322 XM
+(Kerberos Installation Notes)SH
+/Times-Roman SF
+38821 XM
+(to build and install your Kerberos)SH
+7200 44994 MT
+(system. As)
+275 W( in that document, we refer to the directory that contains the built Kerberos binaries as)SH
+7200 46190 MT
+([OBJ_DIR].)SH
+7200 48488 MT
+(This document assumes that you are a Unix system manager.)SH
+ES
+%%Page: 1 2
+BS
+0 SI
+16 /Times-Bold AF
+7200 8272 MT
+(1. How)
+400 W( Kerberos Works: A Schematic Description)SH
+11 /Times-Roman AF
+7200 10467 MT
+(This section provides a simplified description of a general user's interaction with the Kerberos system.)SH
+7200 11663 MT
+(This interaction happens transparently--users don't need to know and probably don't care about what's)SH
+7200 12859 MT
+(going on--but Kerberos administrators might find a schematic description of the process useful.  The)SH
+7200 14055 MT
+(description glosses over a lot of details; for more information, see)SH
+/Times-Italic SF
+36404 XM
+(Kerberos: An Authentication Service)SH
+7200 15251 MT
+(for Open Network Systems)SH
+/Times-Roman SF
+(, a paper presented at Winter USENIX 1988, in Dallas, Texas.)SH
+14 /Times-Bold AF
+7200 19069 MT
+(1.1 Network)
+350 W( Services and Their Client Programs)SH
+11 /Times-Roman AF
+7200 21264 MT
+(In an environment that provides network services, you use)SH
+/Times-Italic SF
+33164 XM
+(client)SH
+/Times-Roman SF
+35883 XM
+(programs to request service from)SH
+/Times-Italic SF
+50696 XM
+(server)SH
+/Times-Roman SF
+7200 22460 MT
+(programs that are somewhere on the network.  Suppose you have logged in to a workstation and you want)SH
+7200 23656 MT
+(to)SH
+/Times-Italic SF
+8331 XM
+(rlogin)SH
+/Times-Roman SF
+11296 XM
+(to another machine.  You use the local)SH
+/Times-Italic SF
+28493 XM
+(rlogin)SH
+/Times-Roman SF
+31458 XM
+(client program to contact the remote machine's)SH
+/Times-Italic SF
+7200 24852 MT
+(rlogin)SH
+/Times-Roman SF
+10165 XM
+(service daemon.)SH
+14 /Times-Bold AF
+7200 28670 MT
+(1.2 Kerberos)
+350 W( Tickets)SH
+11 /Times-Roman AF
+7200 30865 MT
+(Under Kerberos, the)SH
+/Times-Italic SF
+16422 XM
+(rlogin)SH
+/Times-Roman SF
+19387 XM
+(service program allows a client to login to a remote machine if it can provide)SH
+7200 32061 MT
+(a Kerberos)SH
+/Times-Bold SF
+12268 XM
+(ticket)SH
+/Times-Roman SF
+15169 XM
+(for the request.  This ticket proves the identity of the person who has used the client)SH
+7200 33257 MT
+(program to access the server program.)SH
+14 /Times-Bold AF
+7200 37075 MT
+(1.3 The)
+350 W( Kerberos Master Database)SH
+11 /Times-Roman AF
+7200 39270 MT
+(Kerberos will give you tickets only if you have an entry in the Kerberos server's)SH
+/Times-Bold SF
+42845 XM
+(master database)SH
+/Times-Roman SF
+(. Your)275 W
+7200 40466 MT
+(database entry includes your Kerberos username \050often referred to as your Kerberos)SH
+/Times-Bold SF
+44394 XM
+(principal)SH
+/Times-Roman SF
+48949 XM
+(name\051, and)SH
+7200 41662 MT
+(your Kerberos password.  Every Kerberos user must have an entry in this database.)SH
+14 /Times-Bold AF
+7200 45480 MT
+(1.4 The)
+350 W( Ticket-Granting Ticket)SH
+11 /Times-Roman AF
+7200 47675 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(kinit)SH
+/Times-Roman SF
+11416 XM
+(command prompts for your Kerberos username and password, and if you enter them)SH
+7200 48871 MT
+(successfully, you will obtain a Kerberos)SH
+/Times-Italic SF
+25131 XM
+(ticket-granting ticket)SH
+/Times-Roman SF
+(. As)
+275 W( illustrated below, client programs use)SH
+7200 50067 MT
+(this ticket to get other Kerberos tickets as needed.)SH
+14 /Times-Bold AF
+7200 53885 MT
+(1.5 Network)
+350 W( Services and the Master Database)SH
+11 /Times-Roman AF
+7200 56080 MT
+(The master database also contains entries for all network services that require Kerberos authentication.)SH
+7200 57276 MT
+(Suppose for instance that your site has a machine)SH
+/Times-Italic SF
+29163 XM
+(laughter)SH
+/Times-Roman SF
+33166 XM
+(that requires Kerberos authentication from)SH
+7200 58472 MT
+(anyone who wants to)SH
+/Times-Italic SF
+16792 XM
+(rlogin)SH
+/Times-Roman SF
+19757 XM
+(to it.  This service must be registered in the master database.  Its entry)SH
+7200 59668 MT
+(includes the service's principal name, and its)SH
+/Times-Bold SF
+27238 XM
+(instance)SH
+/Times-Roman SF
+(.)SH
+7200 61966 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(instance)SH
+/Times-Roman SF
+13126 XM
+(is the name of the service's machine; in this case, the service's instance is the name)SH
+/Times-Italic SF
+7200 63162 MT
+(laughter)SH
+/Times-Roman SF
+(. The)
+275 W( instance provides a means for Kerberos to distinguish between machines that provide the)SH
+7200 64358 MT
+(same service.  Your site is likely to have more than one machine that provides)SH
+/Times-Italic SF
+41840 XM
+(rlogin)SH
+/Times-Roman SF
+44805 XM
+(service.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(1)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 2 3
+BS
+0 SI
+14 /Times-Bold AF
+7200 8138 MT
+(1.6 The)
+350 W( User-Kerberos Interaction)SH
+11 /Times-Roman AF
+7200 10333 MT
+(Suppose that you \050in the guise of a general user\051 walk up to a workstation intending to login to it, and)SH
+7200 11529 MT
+(then)SH
+/Times-Italic SF
+9369 XM
+(rlogin)SH
+/Times-Roman SF
+12334 XM
+(to the machine)SH
+/Times-Italic SF
+19085 XM
+(laughter)SH
+/Times-Roman SF
+(. Here's)
+275 W( what happens.)SH
+9400 13480 MT
+(1.)SH
+10500 XM
+(You login to the workstation and use the)SH
+/Times-Italic SF
+28648 XM
+(kinit)SH
+/Times-Roman SF
+30879 XM
+(command to to get a ticket-granting ticket.)SH
+10500 14676 MT
+(This command prompts you for your username \050your Kerberos Principal Name\051, and your)SH
+10500 15872 MT
+(Kerberos password [on some systems which use the new version of)SH
+/Times-Italic SF
+40465 XM
+(/bin/login)SH
+/Times-Roman SF
+(, this may be)SH
+10500 17068 MT
+(done as part of the login process, not requiring the user to run a separate program].)SH
+12762 19019 MT
+(a.)SH
+13800 XM
+(The)SH
+/Times-Italic SF
+15785 XM
+(kinit)SH
+/Times-Roman SF
+18016 XM
+(command sends your request to the Kerberos master server machine.  The)SH
+13800 20215 MT
+(server software looks for your principal name's entry in the Kerberos)SH
+/Times-Bold SF
+44555 XM
+(master)SH
+13800 21411 MT
+(database)SH
+/Times-Roman SF
+(.)SH
+12700 23305 MT
+(b.)SH
+13800 XM
+(If this entry exists, the Kerberos server creates and returns a)SH
+/Times-Italic SF
+40430 XM
+(ticket-granting ticket)SH
+/Times-Roman SF
+(,)SH
+13800 24501 MT
+(encrypted in your password.  If)SH
+/Times-Italic SF
+27819 XM
+(kinit)SH
+/Times-Roman SF
+30050 XM
+(can decrypt the Kerberos reply using the)SH
+13800 25697 MT
+(password you provide, it stores this ticket in a)SH
+/Times-Bold SF
+34270 XM
+(ticket file)SH
+/Times-Roman SF
+38912 XM
+(on your local machine for)SH
+13800 26893 MT
+(later use.  The ticket file to be used can be specified in the)SH
+/Times-Bold SF
+39609 XM
+(KRBTKFILE)SH
+/Times-Roman SF
+13800 28089 MT
+(environment variable.  If this variable is not set, the name of the file will be)SH
+/Times-Italic SF
+13800 29285 MT
+(/tmp/tkt)SH
+/Times-BoldItalic SF
+(uid)SH
+/Times-Roman SF
+(, where)SH
+/Times-BoldItalic SF
+22141 XM
+(uid)SH
+/Times-Roman SF
+23884 XM
+(is the UNIX user-id, represented in decimal.)SH
+9400 31236 MT
+(2.)SH
+10500 XM
+(Now you use the)SH
+/Times-Italic SF
+18198 XM
+(rlogin)SH
+/Times-Roman SF
+21163 XM
+(client to try to access the machine)SH
+/Times-Italic SF
+36344 XM
+(laughter)SH
+/Times-Roman SF
+(.)SH
+/Courier SF
+11820 32813 MT
+(host%)SH
+/Times-Bold SF
+15780 XM
+(rlogin laughter)275 W
+/Times-Roman SF
+12762 34764 MT
+(a.)SH
+13800 XM
+(The)SH
+/Times-Italic SF
+15785 XM
+(rlogin)SH
+/Times-Roman SF
+18750 XM
+(client checks your ticket file to see if you have a ticket for)SH
+/Times-Italic SF
+44559 XM
+(laughter)SH
+/Times-Roman SF
+('s)SH
+/Times-Italic SF
+13800 35960 MT
+(rcmd)SH
+/Times-Roman SF
+16335 XM
+(service \050the rlogin program uses the)SH
+/Times-Italic SF
+32401 XM
+(rcmd)SH
+/Times-Roman SF
+34936 XM
+(service name, mostly for historical)SH
+13800 37156 MT
+(reasons\051. You)
+275 W( don't, so)SH
+/Times-Italic SF
+24583 XM
+(rlogin)SH
+/Times-Roman SF
+27548 XM
+(uses the ticket file's)SH
+/Times-Italic SF
+36590 XM
+(ticket-granting ticket)SH
+/Times-Roman SF
+46060 XM
+(to make a)SH
+13800 38352 MT
+(request to the master server's ticket-granting service.)SH
+12700 40246 MT
+(b.)SH
+13800 XM
+(This ticket-granting service receives the)SH
+/Times-Italic SF
+31667 XM
+(rcmd-laughter)SH
+/Times-Roman SF
+38296 XM
+(request and looks in the)SH
+13800 41442 MT
+(master database for an)SH
+/Times-Italic SF
+23938 XM
+(rcmd-laughter)SH
+/Times-Roman SF
+30567 XM
+(entry. If)
+275 W( that entry exists, the ticket-granting)SH
+13800 42638 MT
+(service issues you a ticket for that service.  That ticket is also cached in your ticket)SH
+13800 43834 MT
+(file.)SH
+12762 45728 MT
+(c.)SH
+13800 XM
+(The)SH
+/Times-Italic SF
+15785 XM
+(rlogin)SH
+/Times-Roman SF
+18750 XM
+(client now uses that ticket to request service from the)SH
+/Times-Italic SF
+42454 XM
+(laughter rlogin)SH
+/Times-Roman SF
+13800 46924 MT
+(service program.  The service program lets you)SH
+/Times-Italic SF
+34843 XM
+(rlogin)SH
+/Times-Roman SF
+37808 XM
+(if the ticket is valid.)SH
+16 /Times-Bold AF
+7200 51596 MT
+(2. Setting)
+400 W( Up and Testing the Kerberos Server)SH
+11 /Times-Roman AF
+7200 53791 MT
+(The procedure for setting up and testing a Kerberos server is as follows:)SH
+9400 55742 MT
+(1.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(kdb_init)SH
+/Times-Roman SF
+17985 XM
+(command to create and initialize the master database.)SH
+9400 57636 MT
+(2.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(kdb_edit)SH
+/Times-Roman SF
+18167 XM
+(utility to add your username to the master database.)SH
+9400 59530 MT
+(3.)SH
+10500 XM
+(Start the Kerberos server.)SH
+9400 61424 MT
+(4.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(kinit)SH
+/Times-Roman SF
+16335 XM
+(command to obtain a Kerberos ticket-granting ticket.)SH
+9400 63318 MT
+(5.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(klist)SH
+/Times-Roman SF
+16213 XM
+(command to verify that the)SH
+/Times-Italic SF
+28402 XM
+(kinit)SH
+/Times-Roman SF
+30633 XM
+(command authenticated you successfully.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(2)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 3 4
+BS
+0 SI
+14 /Times-Bold AF
+7200 8138 MT
+(2.1 Creating)
+350 W( and Initializing the Master Database)SH
+11 /Times-Roman AF
+7200 10333 MT
+(Login to the Kerberos master server machine, and use the)SH
+/Times-Bold SF
+32825 XM
+(su)SH
+/Times-Roman SF
+34140 XM
+(command to become root.  If you installed)SH
+7200 11529 MT
+(the Kerberos administration tools with the)SH
+/Times-Italic SF
+26020 XM
+(make install)SH
+/Times-Roman SF
+31642 XM
+(command and the default pathnames, they should)SH
+7200 12725 MT
+(be in the)SH
+/Times-Italic SF
+11263 XM
+(/usr/etc)SH
+/Times-Roman SF
+14838 XM
+(directory. If)
+275 W( you installed the tools in a different directory, hopefully you know what it)SH
+7200 13921 MT
+(is. From)
+275 W( now on, we will refer to this directory as [ADMIN_DIR].)SH
+7200 16219 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(kdb_init)SH
+/Times-Roman SF
+13066 XM
+(command creates and initializes the master database.  It asks you to enter the system's realm)SH
+7200 17415 MT
+(name and the database's master password.  Do not forget this password.  If you do, the database becomes)SH
+7200 18611 MT
+(useless. \050Your)
+275 W( realm name should be substituted for [REALMNAME] below.\051)SH
+7200 20909 MT
+(Use)SH
+/Times-Italic SF
+9185 XM
+(kdb_init)SH
+/Times-Roman SF
+13066 XM
+(as follows:)SH
+/Courier SF
+8520 22486 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+([ADMIN_DIR]/kdb_init)SH
+/Courier SF
+8520 23600 MT
+(Realm name \050default XXX\051:)SH
+/Times-Bold SF
+25680 XM
+([REALMNAME])SH
+39600 XM
+(<--)SH
+/Times-BoldItalic SF
+41619 XM
+(Enter your system's realm name.)SH
+/Courier SF
+8520 24714 MT
+(You will be prompted for the database Master Password.)SH
+8520 25828 MT
+(It is important that you NOT FORGET this password.)SH
+8520 28056 MT
+(Enter Kerberos master key:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter the master password.)SH
+14 /Times-Bold AF
+7200 32988 MT
+(2.2 Storing)
+350 W( the Master Password)SH
+11 /Times-Roman AF
+7200 35183 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(kstash)SH
+/Times-Roman SF
+12210 XM
+(command ``stashes'' the master password in the file)SH
+/Times-Italic SF
+35424 XM
+(/.k)SH
+/Times-Roman SF
+36768 XM
+(so that the Kerberos server can be)SH
+7200 36379 MT
+(started automatically during an unattended reboot of the master server.  Other administrative programs)SH
+7200 37575 MT
+(use this hidden password so that they can access the master database without someone having to manually)SH
+7200 38771 MT
+(provide the master password.  This command is an optional one; if you'd rather enter the master password)SH
+7200 39967 MT
+(each time you start the Kerberos server, don't use)SH
+/Times-Italic SF
+29312 XM
+(kstash)SH
+/Times-Roman SF
+(.)SH
+7200 42265 MT
+(One the one hand, if you use)SH
+/Times-Italic SF
+20090 XM
+(kstash)SH
+/Times-Roman SF
+(, a copy of the master key will reside on disk which may not be)SH
+7200 43461 MT
+(acceptable; on the other hand, if you don't use)SH
+/Times-Italic SF
+27848 XM
+(kstash)SH
+/Times-Roman SF
+(, the server cannot be started unless someone is)SH
+7200 44657 MT
+(around to type the password in manually.)SH
+7200 46955 MT
+(The command prompts you twice for the master password:)SH
+/Courier SF
+8520 48532 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+([ADMIN_DIR]/kstash)SH
+/Courier SF
+8520 50760 MT
+(Enter Kerberos master key:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter the master password.)SH
+/Courier SF
+8520 51874 MT
+(Current Kerberos master key version is 1.)SH
+8520 54102 MT
+(Master key entered)
+SH( BEWARE!)1320 W
+/Times-Roman SF
+7200 56400 MT
+(A note about the Kerberos database master key:  if your master key is compromised and the database is)SH
+7200 57596 MT
+(obtained, the security of your entire authentication system is compromised.  The master key must be a)SH
+7200 58792 MT
+(carefully kept secret.  If you keep backups, you must guard all the master keys you use, in case someone)SH
+7200 59988 MT
+(has stolen an old backup and wants to attack users' whose passwords haven't changed since the backup)SH
+7200 61184 MT
+(was stolen.  This is why we provide the option not to store it on disk.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(3)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 4 5
+BS
+0 SI
+14 /Times-Bold AF
+7200 8167 MT
+(2.3 Using)350 W
+/Times-BoldItalic SF
+13423 XM
+(kdb_edit)SH
+/Times-Bold SF
+18673 XM
+(to Add Users to the Master Database)SH
+11 /Times-Roman AF
+7200 10362 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(kdb_edit)SH
+/Times-Roman SF
+13248 XM
+(program is used to add new users and services to the master database, and to modify)SH
+7200 11558 MT
+(existing database information.  The program prompts you to enter a principal's)SH
+/Times-Bold SF
+42177 XM
+(name)SH
+/Times-Roman SF
+45018 XM
+(and)SH
+/Times-Bold SF
+46881 XM
+(instance)SH
+/Times-Roman SF
+(.)SH
+7200 13856 MT
+(A principal name is typically a username or a service program's name.  An instance further qualifies the)SH
+7200 15052 MT
+(principal. If)
+275 W( the principal is a service, the instance is used to specify the name of the machine on which)SH
+7200 16248 MT
+(that service runs.  If the principal is a username that has general user privileges, the instance is usually set)SH
+7200 17444 MT
+(to null.)SH
+7200 19742 MT
+(The following example shows how to use)SH
+/Times-Italic SF
+25805 XM
+(kdb_edit)SH
+/Times-Roman SF
+29868 XM
+(to add the user)SH
+/Times-Italic SF
+36588 XM
+(wave)SH
+/Times-Roman SF
+39123 XM
+(to the Kerberos database.)SH
+/Courier SF
+8520 21319 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+([ADMIN_DIR]/kdb_edit)SH
+/Courier SF
+8520 23547 MT
+(Opening database...)SH
+8520 25775 MT
+(Enter Kerberos master key:)SH
+8520 26889 MT
+(Verifying, please re-enter)SH
+8520 28003 MT
+(Enter Kerberos master key:)SH
+8520 29117 MT
+(Current Kerberos master key version is 1)SH
+8520 31345 MT
+(Master key entered.  BEWARE!)SH
+8520 32459 MT
+(Previous or default values are in [brackets] ,)SH
+8520 33573 MT
+(enter return to leave the same, or new value.)SH
+8520 35801 MT
+(Principal name:)SH
+/Times-Bold SF
+19080 XM
+(wave)SH
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter the username.)SH
+/Courier SF
+8520 36915 MT
+(Instance:)SH
+/Times-BoldItalic SF
+28800 XM
+(<-- Enter a null instance.)SH
+/Courier SF
+8520 39143 MT
+(<Not found>, Create [y] ?)SH
+/Times-Bold SF
+25680 XM
+(y)SH
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(The user-instance does not exist.)SH
+30450 40257 MT
+(Enter y to create the user-instance.)SH
+/Courier SF
+8520 41371 MT
+(Principal: wave  Instance:  m_key_v: 1)SH
+8520 42485 MT
+(New Password:)SH
+/Times-BoldItalic SF
+28800 XM
+(<-- Enter the user-instance's password.)SH
+/Courier SF
+8520 43599 MT
+(Verifying, please re-enter)SH
+8520 44713 MT
+(New Password:)SH
+8520 45827 MT
+(Principal's new key version = 1)SH
+8520 46941 MT
+(Expiration date \050enter dd-mm-yy\051 [ 12/31/99 ] ?)SH
+/Times-Bold SF
+39600 XM
+(<--)SH
+/Times-BoldItalic SF
+41619 XM
+(Enter newlines)SH
+/Courier SF
+8520 48055 MT
+(Max ticket lifetime \050*5 minutes\051 [ 255 ] ?)SH
+/Times-Bold SF
+39600 XM
+(<--)SH
+/Times-BoldItalic SF
+41619 XM
+(to get the)SH
+/Courier SF
+8520 49169 MT
+(Attributes [ 0 ] ?)SH
+/Times-Bold SF
+30120 XM
+(<--)SH
+/Times-BoldItalic SF
+32139 XM
+(default values.)SH
+/Courier SF
+8520 50283 MT
+(Edit O.K.)SH
+8520 52511 MT
+(Principal name:)SH
+/Times-BoldItalic SF
+28800 XM
+(<-- Enter a newline to exit the program.)SH
+/Times-Roman SF
+7200 54809 MT
+(Use the)SH
+/Times-Italic SF
+10804 XM
+(kdb_edit)SH
+/Times-Roman SF
+14867 XM
+(utility to add your username to the master database.)SH
+14 /Times-Bold AF
+7200 58627 MT
+(2.4 Starting)
+350 W( the Kerberos Server)SH
+11 /Times-Roman AF
+7200 60822 MT
+(Change directories to the directory in which you have installed the server program)SH
+/Times-Italic SF
+43701 XM
+(kerberos)SH
+/Times-Roman SF
+47824 XM
+(\050the default)SH
+7200 62018 MT
+(directory is)SH
+/Times-Italic SF
+12454 XM
+(/usr/etc)SH
+/Times-Roman SF
+(\051, and start the program as a background process:)SH
+/Courier SF
+8520 63595 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+(./kerberos &)SH
+/Times-Roman SF
+7200 65190 MT
+(If you have used the)SH
+/Times-Italic SF
+16393 XM
+(kstash)SH
+/Times-Roman SF
+19418 XM
+(command to store the master database password, the server will start)SH
+7200 66386 MT
+(automatically. If)
+275 W( you did not use)SH
+/Times-Italic SF
+22048 XM
+(kstash)SH
+/Times-Roman SF
+(, use the following command:)SH
+/Courier SF
+8520 67963 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+(./kerberos -m)SH
+10 /Times-Roman AF
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(4)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 5 6
+BS
+0 SI
+11 /Times-Roman AF
+7200 7955 MT
+(The server will prompt you to enter the master password before actually starting itself.)SH
+14 /Times-Bold AF
+7200 11773 MT
+(2.5 Testing)
+350 W( the Kerberos Server)SH
+11 /Times-Roman AF
+7200 13968 MT
+(Exit the root account and use the)SH
+/Times-Italic SF
+21893 XM
+(kinit)SH
+/Times-Roman SF
+24124 XM
+(command obtain a Kerberos ticket-granting ticket.  This command)SH
+7200 15164 MT
+(creates your ticket file and stores the ticket-granting ticket in it.)SH
+7200 17462 MT
+(If you used the default)SH
+/Times-Italic SF
+17371 XM
+(make install)SH
+/Times-Roman SF
+22993 XM
+(command and directories to install the Kerberos user utilities,)SH
+/Times-Italic SF
+50365 XM
+(kinit)SH
+/Times-Roman SF
+7200 18658 MT
+(will be in the)SH
+/Times-Italic SF
+13250 XM
+(/usr/athena)SH
+/Times-Roman SF
+18537 XM
+(directory. From now on, we'll refer to the Kerberos user commands directory as)SH
+7200 19854 MT
+([K_USER].)SH
+7200 22152 MT
+(Use)SH
+/Times-Italic SF
+9185 XM
+(kinit)SH
+/Times-Roman SF
+11416 XM
+(as follows:)SH
+/Courier SF
+8520 23729 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([K_USER]/kinit)SH
+/Courier SF
+8520 24843 MT
+(MIT Project Athena, \050ariadne\051)SH
+8520 25957 MT
+(Kerberos Initialization)SH
+8520 27071 MT
+(Kerberos name:)SH
+/Times-BoldItalic SF
+18420 XM
+(yourusername)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter your Kerberos username.)SH
+/Courier SF
+8520 28185 MT
+(Password:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter your Kerberos password.)SH
+/Times-Roman SF
+7200 30483 MT
+(Use the)SH
+/Times-Italic SF
+10804 XM
+(klist)SH
+/Times-Roman SF
+12913 XM
+(program to list the contents of your ticket file.)SH
+/Courier SF
+8520 32060 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([K_USER]/klist)SH
+/Times-Roman SF
+7200 33655 MT
+(The command should display something like the following:)SH
+/Courier SF
+8520 35181 MT
+(Ticket file:)
+SH( /tmp/tkt5555)1980 W
+8520 36295 MT
+(Principal: yourusername@REALMNAME)3300 W
+9840 38523 MT
+(Issued Expires)
+6600 W( Principal)5940 W
+8520 39637 MT
+(May 6)
+660 W( 10:15:23  May  6 18:15:23  krbtgt.REALMNAME@REALMNAME)SH
+/Times-Roman SF
+7200 41935 MT
+(If you have any problems, you can examine the log file)SH
+/Times-Italic SF
+31758 XM
+(/kerberos/kerberos.log)SH
+/Times-Roman SF
+42022 XM
+(on the Kerberos server)SH
+7200 43131 MT
+(machine to see if there was some sort of error.)SH
+16 /Times-Bold AF
+7200 47803 MT
+(3. Setting)
+400 W( up and testing the Administration server)SH
+11 /Times-Roman AF
+7200 49998 MT
+(The procedure for setting up and testing the Kerberos administration server is as follows:)SH
+9400 51949 MT
+(1.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(kdb_edit)SH
+/Times-Roman SF
+18167 XM
+(utility to add your username with an administration instance to the master)SH
+10500 53145 MT
+(database.)SH
+9400 55039 MT
+(2.)SH
+10500 XM
+(Edit the access control lists for the administration server)SH
+9400 56933 MT
+(3.)SH
+10500 XM
+(Start the Kerberos administration server.)SH
+9400 58827 MT
+(4.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(kpasswd)SH
+/Times-Roman SF
+18107 XM
+(command to change your password.)SH
+9400 60721 MT
+(5.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(kadmin)SH
+/Times-Roman SF
+17617 XM
+(command to add new entries to the database.)SH
+9400 62615 MT
+(6.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(kinit)SH
+/Times-Roman SF
+16335 XM
+(command to verify that the)SH
+/Times-Italic SF
+28524 XM
+(kadmin)SH
+/Times-Roman SF
+32037 XM
+(command correctly added new entries to)SH
+10500 63811 MT
+(the database.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(5)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 6 7
+BS
+0 SI
+14 /Times-Bold AF
+7200 8138 MT
+(3.1 Adding)
+350 W( an administration instance for the administrator)SH
+11 /Times-Roman AF
+7200 10333 MT
+(Login to the Kerberos master server machine, and use the)SH
+/Times-Bold SF
+32825 XM
+(su)SH
+/Times-Roman SF
+34140 XM
+(command to become root.  Use the)SH
+/Times-Italic SF
+49780 XM
+(kdb_edit)SH
+/Times-Roman SF
+7200 11529 MT
+(program to create an entry for each administrator with the instance ``)SH
+/Times-BoldItalic SF
+(admin)SH
+/Times-Roman SF
+(''.)SH
+/Courier SF
+8520 13106 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+([ADMIN_DIR]/kdb_edit)SH
+/Courier SF
+8520 15334 MT
+(Opening database...)SH
+8520 17562 MT
+(Enter Kerberos master key:)SH
+8520 18676 MT
+(Verifying, please re-enter)SH
+8520 19790 MT
+(Enter Kerberos master key:)SH
+8520 20904 MT
+(Current Kerberos master key version is 1)SH
+8520 23132 MT
+(Master key entered.  BEWARE!)SH
+8520 24246 MT
+(Previous or default values are in [brackets] ,)SH
+8520 25360 MT
+(enter return to leave the same, or new value.)SH
+8520 27588 MT
+(Principal name:)SH
+/Times-Bold SF
+19080 XM
+(wave)SH
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter the username.)SH
+/Courier SF
+8520 28702 MT
+(Instance:)SH
+/Times-Bold SF
+(admin)SH
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter ``admin''.)SH
+/Courier SF
+8520 30930 MT
+(<Not found>, Create [y] ?)SH
+/Times-Bold SF
+25680 XM
+(y)SH
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(The user-instance does not exist.)SH
+30450 32044 MT
+(Enter y to create the user-instance.)SH
+/Courier SF
+8520 33158 MT
+(Principal: wave  Instance: admin m_key_v: 1)SH
+8520 34272 MT
+(New Password:)SH
+/Times-BoldItalic SF
+28800 XM
+(<-- Enter the user-instance's password.)SH
+/Courier SF
+8520 35386 MT
+(Verifying, please re-enter)SH
+8520 36500 MT
+(New Password:)SH
+8520 37614 MT
+(Principal's new key version = 1)SH
+8520 38728 MT
+(Expiration date \050enter dd-mm-yy\051 [ 12/31/99 ] ?)SH
+/Times-Bold SF
+39600 XM
+(<--)SH
+/Times-BoldItalic SF
+41619 XM
+(Enter newlines)SH
+/Courier SF
+8520 39842 MT
+(Max ticket lifetime \050*5 minutes\051 [ 255 ] ?)SH
+/Times-Bold SF
+39600 XM
+(<--)SH
+/Times-BoldItalic SF
+41619 XM
+(to get the)SH
+/Courier SF
+8520 40956 MT
+(Attributes [ 0 ] ?)SH
+/Times-Bold SF
+30120 XM
+(<--)SH
+/Times-BoldItalic SF
+32139 XM
+(default values.)SH
+/Courier SF
+8520 42070 MT
+(Edit O.K.)SH
+8520 44298 MT
+(Principal name:)SH
+/Times-BoldItalic SF
+28800 XM
+(<-- Enter a newline to exit the program.)SH
+14 /Times-Bold AF
+7200 48116 MT
+(3.2 The)
+350 W( Access Control Lists)SH
+11 /Times-Roman AF
+7200 50311 MT
+(The Kerberos administration server uses three access control lists to determine who is authorized to make)SH
+7200 51507 MT
+(certain requests.  The access control lists are stored on the master Kerberos server in the same directory as)SH
+7200 52703 MT
+(the principal database,)SH
+/Times-Italic SF
+17340 XM
+(/kerberos)SH
+/Times-Roman SF
+(. The)
+275 W( access control lists are simple ASCII text files, with each line)SH
+7200 53899 MT
+(specifying the name of one principal who is allowed the particular function.  To allow several people to)SH
+7200 55095 MT
+(perform the same function, put their principal names on separate lines in the same file.)SH
+7200 57393 MT
+(The first list,)SH
+/Times-Italic SF
+13128 XM
+(/kerberos/admin_acl.mod)SH
+/Times-Roman SF
+(, is a list of principals which are authorized to change entries in the)SH
+7200 58589 MT
+(database. To)
+275 W( allow the administrator `)SH
+/Times-Bold SF
+(wave)SH
+/Times-Roman SF
+(' to modify entries in the database for the realm `)SH
+/Times-Bold SF
+(TIM.EDU)SH
+/Times-Roman SF
+(',)SH
+7200 59785 MT
+(you would put the following line into the file)SH
+/Times-Italic SF
+27275 XM
+(/kerberos/admin_acl.mod)SH
+/Times-Roman SF
+(:)SH
+/Courier SF
+8520 61311 MT
+(wave.admin@TIM.EDU)SH
+/Times-Roman SF
+7200 63609 MT
+(The second list,)SH
+/Times-Italic SF
+14410 XM
+(/kerberos/admin_acl.get)SH
+/Times-Roman SF
+(, is a list of principals which are authorized to retrieve entries)SH
+7200 64805 MT
+(from the database.)SH
+7200 67103 MT
+(The third list,)SH
+/Times-Italic SF
+13434 XM
+(/kerberos/admin_acl.add)SH
+/Times-Roman SF
+(, is a list of principals which are authorized to add new entries to)SH
+7200 68299 MT
+(the database.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(6)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 7 8
+BS
+0 SI
+14 /Times-Bold AF
+7200 8138 MT
+(3.3 Starting)
+350 W( the administration server)SH
+11 /Times-Roman AF
+7200 10333 MT
+(Change directories to the directory in which you have installed the administration server program)SH
+/Times-Italic SF
+7200 11529 MT
+(kadmind)SH
+/Times-Roman SF
+11263 XM
+(\050the default directory is)SH
+/Times-Italic SF
+21831 XM
+(/usr/etc)SH
+/Times-Roman SF
+(\051, and start the program as a background process:)SH
+/Courier SF
+8520 13106 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+(./kadmind -n&)SH
+/Times-Roman SF
+7200 14701 MT
+(If you have used the)SH
+/Times-Italic SF
+16393 XM
+(kstash)SH
+/Times-Roman SF
+19418 XM
+(command to store the master database password, the server will start)SH
+7200 15897 MT
+(automatically. If)
+275 W( you did not use)SH
+/Times-Italic SF
+22048 XM
+(kstash)SH
+/Times-Roman SF
+(, use the following command:)SH
+/Courier SF
+8520 17474 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+(./kadmind)SH
+/Times-Roman SF
+7200 19069 MT
+(The server will prompt you to enter the master password before actually starting itself; after it starts, you)SH
+7200 20265 MT
+(should suspend it and put it in the background \050usually this is done by typing control-Z and then)SH
+/Times-Bold SF
+49792 XM
+(bg)SH
+/Times-Roman SF
+(\051.)SH
+14 /Times-Bold AF
+7200 24112 MT
+(3.4 Testing)350 W
+/Times-BoldItalic SF
+14434 XM
+(kpasswd)SH
+11 /Times-Roman AF
+7200 26307 MT
+(To test the administration server, you should try changing your password with the)SH
+/Times-Italic SF
+43494 XM
+(kpasswd)SH
+/Times-Roman SF
+47497 XM
+(command, and)SH
+7200 27503 MT
+(you should try adding new users with the)SH
+/Times-Italic SF
+25592 XM
+(kadmin)SH
+/Times-Roman SF
+29105 XM
+(command \050both commands are installed into)SH
+/Times-Italic SF
+48963 XM
+(/usr/athena)SH
+/Times-Roman SF
+7200 28699 MT
+(by default\051.)SH
+7200 30997 MT
+(Before testing, you should exit the root account.)SH
+7200 33295 MT
+(To change your password, run the)SH
+/Times-Italic SF
+22441 XM
+(kpasswd)SH
+/Times-Roman SF
+26444 XM
+(command:)SH
+/Courier SF
+8520 34872 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([K_USER]/kpasswd)SH
+/Courier SF
+8520 35986 MT
+(Old password for wave@TIM.EDU:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+(Enter your password)SH
+/Courier SF
+8520 37100 MT
+(New Password for wave@TIM.EDU:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+(Enter a new password)SH
+/Courier SF
+8520 38214 MT
+(Verifying, please re-enter New Password for wave@TIM.EDU:)SH
+/Times-Bold SF
+28800 39328 MT
+(<--)SH
+/Times-BoldItalic SF
+(Enter new password again)SH
+/Courier SF
+8520 40442 MT
+(Password changed.)SH
+/Times-Roman SF
+7200 42037 MT
+(Once you have changed your password, use the)SH
+/Times-Italic SF
+28365 XM
+(kinit)SH
+/Times-Roman SF
+30596 XM
+(program as shown above to verify that the password)SH
+7200 43233 MT
+(was properly changed.)SH
+14 /Times-Bold AF
+7200 47080 MT
+(3.5 Testing)350 W
+/Times-BoldItalic SF
+14434 XM
+(kadmin)SH
+11 /Times-Roman AF
+7200 49275 MT
+(You should also test the function of the)SH
+/Times-Italic SF
+24798 XM
+(kadmin)SH
+/Times-Roman SF
+28311 XM
+(program, by adding a new user \050here named)SH
+7200 50471 MT
+(``)SH
+/Courier SF
+(username)SH
+/Times-Roman SF
+(''\051:)SH
+/Courier SF
+8520 52048 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([K_USER]/kadmin)SH
+/Courier SF
+8520 53162 MT
+(Welcome to the Kerberos Administration Program, version 2)SH
+8520 54276 MT
+(Type "help" if you need it.)SH
+8520 55390 MT
+(admin:)SH
+/Times-Bold SF
+13800 XM
+(ank username)SH
+/Times-BoldItalic SF
+28800 XM
+(`ank' stands for Add New Key)SH
+/Courier SF
+8520 56504 MT
+(Admin password:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+(enter the password)SH
+28800 57618 MT
+(you chose above for wave.admin)SH
+/Courier SF
+8520 58732 MT
+(Password for username:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+(Enter the user's initial password)SH
+/Courier SF
+8520 59846 MT
+(Verifying, please re-enter Password for username:)SH
+/Times-Bold SF
+40920 XM
+(<--)SH
+/Times-BoldItalic SF
+(enter it again)SH
+/Courier SF
+8520 60960 MT
+(username added to database.)SH
+8520 63188 MT
+(admin: quit)660 W
+8520 64302 MT
+(Cleaning up and exiting.)SH
+10 /Times-Roman AF
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(7)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 8 9
+BS
+0 SI
+14 /Times-Bold AF
+7200 8167 MT
+(3.6 Verifying)
+350 W( with)SH
+/Times-BoldItalic SF
+18671 XM
+(kinit)SH
+11 /Times-Roman AF
+7200 10362 MT
+(Once you've added a new user, you should test to make sure it was added properly by using)SH
+/Times-Italic SF
+47917 XM
+(kinit)SH
+/Times-Roman SF
+(, and)SH
+7200 11558 MT
+(trying to get tickets for that user:)SH
+/Courier SF
+8520 13135 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([K_USER]/kinit username)SH
+/Courier SF
+8520 14249 MT
+(MIT Project Athena \050ariadne\051)SH
+8520 15363 MT
+(Kerberos Initialization for "username@TIM.EDU")SH
+8520 16477 MT
+(Password:)SH
+/Times-Bold SF
+15120 XM
+(<--)SH
+/Times-BoldItalic SF
+(Enter the user's password you used above)SH
+/Courier SF
+8520 17591 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([K_USER]/klist)SH
+/Courier SF
+8520 18705 MT
+(Ticket file:)
+SH( /tmp/tkt_5509_spare1)1980 W
+8520 19819 MT
+(Principal: username@TIM.MIT.EDU)3300 W
+9840 22047 MT
+(Issued Expires)
+6600 W( Principal)5940 W
+8520 23161 MT
+(Nov 20 15:58:52  Nov 20 23:58:52  krbtgt.TIM.EDU@TIM.EDU)SH
+/Times-Roman SF
+7200 25459 MT
+(If you have any problems, you can examine the log files)SH
+/Times-Italic SF
+32186 XM
+(/kerberos/kerberos.log)SH
+/Times-Roman SF
+42450 XM
+(and)SH
+/Times-Italic SF
+7200 26655 MT
+(/kerberos/admin_server.syslog)SH
+/Times-Roman SF
+21008 XM
+(on the Kerberos server machine to see if there was some sort of error.)SH
+16 /Times-Bold AF
+7200 31327 MT
+(4. Setting)
+400 W( up and testing slave server\050s\051)SH
+11 /Times-Roman AF
+7200 33522 MT
+([Unfortunately, this chapter is not yet ready.  Sorry. -ed])SH
+16 /Times-Bold AF
+7200 38194 MT
+(5. A)
+400 W( Sample Application)SH
+11 /Times-Roman AF
+7200 40389 MT
+(This release of Kerberos comes with a sample application server and a corresponding client program.)SH
+7200 41585 MT
+(You will find this software in the [OBJ_DIR])SH
+/Times-Italic SF
+(/appl/sample)SH
+/Times-Roman SF
+33170 XM
+(directory. The)
+275 W( file)SH
+/Times-Italic SF
+41691 XM
+(sample_client)SH
+/Times-Roman SF
+48076 XM
+(contains the)SH
+7200 42781 MT
+(client program's executable code, the file)SH
+/Times-Italic SF
+25677 XM
+(sample_server)SH
+/Times-Roman SF
+32366 XM
+(contains the server's executable.)SH
+7200 45079 MT
+(The programs are rudimentary.  When they have been installed \050the installation procedure is described in)SH
+7200 46275 MT
+(detail later\051, they work as follows:)SH
+/Symbol SF
+9169 48351 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The user starts)SH
+/Times-Italic SF
+16639 XM
+(sample_client)SH
+/Times-Roman SF
+23024 XM
+(and provides as arguments to the command the name of the)SH
+9950 49547 MT
+(server machine and a checksum.  For instance:)SH
+/Courier SF
+11270 51147 MT
+(host%)SH
+/Times-Bold SF
+15230 XM
+(sample_client)SH
+/Times-BoldItalic SF
+22966 XM
+(servername 43)385 W
+/Symbol SF
+9169 53041 MT
+(\267)SH
+/Times-Italic SF
+9950 XM
+(Sample_client)SH
+/Times-Roman SF
+16457 XM
+(contacts the server machine and authenticates the user to)SH
+/Times-Italic SF
+41654 XM
+(sample_server)SH
+/Times-Roman SF
+(.)SH
+/Symbol SF
+9169 54935 MT
+(\267)SH
+/Times-Italic SF
+9950 XM
+(Sample_server)SH
+/Times-Roman SF
+16761 XM
+(authenticates itself to)SH
+/Times-Italic SF
+26384 XM
+(sample_client)SH
+/Times-Roman SF
+(, then returns a message to the client)SH
+9950 56131 MT
+(program. This)
+275 W( message contains diagnostic information that includes the user's username,)SH
+9950 57327 MT
+(the Kerberos realm, and the user's workstation address.)SH
+/Symbol SF
+9169 59221 MT
+(\267)SH
+/Times-Italic SF
+9950 XM
+(Sample_client)SH
+/Times-Roman SF
+16457 XM
+(displays the server's message on the user's terminal screen.)SH
+14 /Times-Bold AF
+7200 63039 MT
+(5.1 The)
+350 W( Installation Process)SH
+11 /Times-Roman AF
+7200 65234 MT
+(In general, you use the following procedure to install a Kerberos-authenticated server-client system.)SH
+9400 67185 MT
+(1.)SH
+10500 XM
+(Add the appropriate entry to the Kerberos database using)SH
+/Times-Italic SF
+35881 XM
+(kdb_edit)SH
+/Times-Roman SF
+39944 XM
+(or)SH
+/Times-Italic SF
+41135 XM
+(kadmin)SH
+/Times-Roman SF
+44648 XM
+(\050described)SH
+10500 68381 MT
+(below\051.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(8)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 9 10
+BS
+0 SI
+11 /Times-Roman AF
+9400 7955 MT
+(2.)SH
+10500 XM
+(Create a)SH
+/Times-Italic SF
+14408 XM
+(/etc/srvtab)SH
+/Times-Roman SF
+19327 XM
+(file for the server machine.)SH
+9400 9849 MT
+(3.)SH
+10500 XM
+(Install the service program and the)SH
+/Times-Italic SF
+26016 XM
+(/etc/srvtab)SH
+/Times-Roman SF
+30935 XM
+(file on the server machine.)SH
+9400 11743 MT
+(4.)SH
+10500 XM
+(Install the client program on the client machine.)SH
+9400 13637 MT
+(5.)SH
+10500 XM
+(Update the)SH
+/Times-Italic SF
+15570 XM
+(/etc/services)SH
+/Times-Roman SF
+21281 XM
+(file on the client and server machines.)SH
+7200 15935 MT
+(We will use the sample application as an example, although the procedure used to install)SH
+/Times-Italic SF
+46484 XM
+(sample_server)SH
+/Times-Roman SF
+7200 17131 MT
+(differs slightly from the general case because the)SH
+/Times-Italic SF
+29006 XM
+(sample_server)SH
+/Times-Roman SF
+35695 XM
+(takes requests via the)SH
+/Times-Italic SF
+45347 XM
+(inetd)SH
+/Times-Roman SF
+47822 XM
+(program.)SH
+/Times-Italic SF
+7200 18327 MT
+(Inetd)SH
+/Times-Roman SF
+9735 XM
+(starts)SH
+/Times-Italic SF
+12332 XM
+(sample_server)SH
+/Times-Roman SF
+19021 XM
+(each time a client process contacts the server machine.)SH
+/Times-Italic SF
+43606 XM
+(Sample_server)SH
+/Times-Roman SF
+7200 19523 MT
+(processes the request, terminiates, then is restarted when)SH
+/Times-Italic SF
+32368 XM
+(inetd)SH
+/Times-Roman SF
+34843 XM
+(receives another)SH
+/Times-Italic SF
+42293 XM
+(sample_client)SH
+/Times-Roman SF
+48678 XM
+(request.)SH
+7200 20719 MT
+(When you install the program on the server, you must add a)SH
+/Times-Italic SF
+33807 XM
+(sample)SH
+/Times-Roman SF
+37198 XM
+(entry to the server machine's)SH
+/Times-Italic SF
+7200 21915 MT
+(/etc/inetd.conf)SH
+/Times-Roman SF
+13738 XM
+(file.)SH
+7200 24213 MT
+(The following description assumes that you are installing)SH
+/Times-Italic SF
+32680 XM
+(sample_server)SH
+/Times-Roman SF
+39369 XM
+(on the machine)SH
+/Times-Italic SF
+46364 XM
+(ariadne.tim.edu)SH
+/Times-Roman SF
+(.)SH
+7200 25409 MT
+(Here's the process, step by step:)SH
+9400 27360 MT
+(1.)SH
+10500 XM
+(Login as or)SH
+/Times-Italic SF
+15785 XM
+(su)SH
+/Times-Roman SF
+17038 XM
+(to root on the Kerberos server machine.  Use the)SH
+/Times-Italic SF
+38631 XM
+(kdb_edit)SH
+/Times-Roman SF
+42694 XM
+(or)SH
+/Times-Italic SF
+43885 XM
+(kadmin)SH
+/Times-Roman SF
+47398 XM
+(program)SH
+10500 28556 MT
+(to create an entry for)SH
+/Times-Italic SF
+19935 XM
+(sample)SH
+/Times-Roman SF
+23326 XM
+(in the Kerberos database:)SH
+/Courier SF
+11820 30133 MT
+(host#)SH
+/Times-Bold SF
+15780 XM
+([ADMIN_DIR]/kdb_edit)SH
+/Courier SF
+11820 32361 MT
+(Opening database...)SH
+11820 34589 MT
+(Enter Kerberos master key:)SH
+11820 35703 MT
+(Verifying, please re-enter)SH
+11820 36817 MT
+(master key entered.  BEWARE!)SH
+11820 37931 MT
+(Previous or default values are in [brackets] ,)SH
+11820 39045 MT
+(enter return to leave the same, or new value.)SH
+11820 41273 MT
+(Principal name:)SH
+/Times-Bold SF
+22380 XM
+(sample)SH
+26220 XM
+(<--)SH
+/Times-BoldItalic SF
+28239 XM
+(Enter the principal name.)SH
+/Courier SF
+11820 42387 MT
+(Instance:)SH
+/Times-Bold SF
+18420 XM
+(ariadne)SH
+26220 XM
+(<--)SH
+/Times-BoldItalic SF
+28239 XM
+(Instances cannot have periods in them.)SH
+/Courier SF
+11820 44615 MT
+(<Not found>, Create [y] ?)SH
+/Times-Bold SF
+28980 XM
+(y)SH
+/Courier SF
+11820 46843 MT
+(Principal: sample_server  Instance: ariadne m_key_v: 1)SH
+11820 47957 MT
+(New Password:)SH
+/Times-Bold SF
+26220 XM
+(<--)SH
+/Times-BoldItalic SF
+28239 XM
+(Enter ``RANDOM'' to get random password.)SH
+/Courier SF
+11820 49071 MT
+(Verifying, please re-enter)SH
+11820 50185 MT
+(New Password:)SH
+/Times-Bold SF
+26220 XM
+(<--)SH
+/Times-BoldItalic SF
+28239 XM
+(Enter ``RANDOM'' again.)SH
+/Courier SF
+11820 51299 MT
+(Random password [y] ?)SH
+/Times-Bold SF
+26340 XM
+(y)SH
+/Courier SF
+11820 53527 MT
+(Principal's new key version = 1)SH
+11820 54641 MT
+(Expiration date \050enter dd-mm-yy\051 [ 12/31/99 ] ?)SH
+11820 55755 MT
+(Max ticket lifetime \050*5 minutes\051 [ 255 ] ?)SH
+11820 56869 MT
+(Attributes [ 0 ] ?)SH
+11820 57983 MT
+(Edit O.K.)SH
+11820 60211 MT
+(Principal name:)SH
+/Times-Bold SF
+26220 XM
+(<--)SH
+/Times-BoldItalic SF
+28239 XM
+(Enter newline to exit kdb_edit.)SH
+/Times-Roman SF
+9400 62105 MT
+(2.)SH
+10500 XM
+(Use the)SH
+/Times-Italic SF
+14104 XM
+(ext_srvtab)SH
+/Times-Roman SF
+18961 XM
+(program to create a)SH
+/Times-Italic SF
+27755 XM
+(srvtab)SH
+/Times-Roman SF
+30780 XM
+(file for)SH
+/Times-Italic SF
+34078 XM
+(sample_server)SH
+/Times-Roman SF
+('s host machine:)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(9)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 10 11
+BS
+0 SI
+11 /Courier AF
+11820 7937 MT
+(host#)SH
+/Times-Bold SF
+15780 XM
+([ADMIN_DIR]/ext_srvtab ariadne)275 W
+/Courier SF
+11820 10165 MT
+(Enter Kerberos master key:)SH
+11820 11279 MT
+(Current Kerberos master key version is 1.)SH
+11820 13507 MT
+(Generating 'ariadne-new-srvtab'....)SH
+/Times-Roman SF
+10500 15102 MT
+(Transfer the)SH
+/Times-Italic SF
+16118 XM
+(ariadne-new-srvtab)SH
+/Times-Roman SF
+25069 XM
+(file to)SH
+/Times-Italic SF
+27941 XM
+(ariadne)SH
+/Times-Roman SF
+31638 XM
+(and install it as)SH
+/Times-Italic SF
+38544 XM
+(/etc/srvtab)SH
+/Times-Roman SF
+(. Note)
+275 W( that this)SH
+10500 16298 MT
+(file is equivalent to the service's password and should be treated with care.  For example, it)SH
+10500 17494 MT
+(could be transferred by removable media, but should not be sent over an open network in)SH
+10500 18690 MT
+(the clear.  Once installed, this file should be readable only by root.)SH
+9400 20584 MT
+(3.)SH
+10500 XM
+(Add the following line to the)SH
+/Times-Italic SF
+23516 XM
+(/etc/services)SH
+/Times-Roman SF
+29227 XM
+(file on)SH
+/Times-Italic SF
+32343 XM
+(ariadne)SH
+/Times-Roman SF
+(, and on all machines that will run)SH
+10500 21780 MT
+(the)SH
+/Times-Italic SF
+12119 XM
+(sample_client)SH
+/Times-Roman SF
+18504 XM
+(program:)SH
+/Courier SF
+11820 23306 MT
+(sample 906/tcp)
+2640 W( #)
+3960 W( Kerberos sample app server)SH
+/Times-Roman SF
+9400 25200 MT
+(4.)SH
+10500 XM
+(Add a line similar to the following line to the)SH
+/Times-Italic SF
+30666 XM
+(/etc/inetd.conf)SH
+/Times-Roman SF
+37204 XM
+(file on)SH
+/Times-Italic SF
+40320 XM
+(sample_server)SH
+/Times-Roman SF
+('s)SH
+10500 26396 MT
+(machine:)SH
+/Courier SF
+11820 27922 MT
+(sample stream tcp nowait switched root)1320 W
+14460 29036 MT
+([PATH]/sample_server sample_server)SH
+/Times-Roman SF
+10500 30631 MT
+(where [PATH] should be substituted with the path to the)SH
+/Times-Italic SF
+35674 XM
+(sample_server)SH
+/Times-Roman SF
+42363 XM
+(program. \050This)275 W
+/Times-Italic SF
+10500 31827 MT
+(inetd.conf)SH
+/Times-Roman SF
+15144 XM
+(information should be placed on one line.\051  You should examine existing lines in)SH
+/Times-Italic SF
+10500 33023 MT
+(/etc/inetd.conf)SH
+/Times-Roman SF
+17038 XM
+(and use the same format used by other entries \050e.g. for telnet\051.  Most systems)SH
+10500 34219 MT
+(do not have a column for the `switched' keyword, and some do not have a column for the)SH
+10500 35415 MT
+(username \050usually `root', as above\051.)SH
+9400 37309 MT
+(5.)SH
+10500 XM
+(Restart)SH
+/Times-Italic SF
+13891 XM
+(inetd)SH
+/Times-Roman SF
+16366 XM
+(by sending the current)SH
+/Times-Italic SF
+26446 XM
+(inetd)SH
+/Times-Roman SF
+28921 XM
+(process a hangup signal:)SH
+/Courier SF
+11820 38909 MT
+(host#)SH
+/Times-Bold SF
+15780 XM
+(kill -HUP)275 W
+/Times-BoldItalic SF
+21373 XM
+(process_id_number)SH
+/Times-Roman SF
+9400 40803 MT
+(6.)SH
+10500 XM
+(The)SH
+/Times-Italic SF
+12485 XM
+(sample_server)SH
+/Times-Roman SF
+19174 XM
+(is now ready to take)SH
+/Times-Italic SF
+28307 XM
+(sample_client)SH
+/Times-Roman SF
+34692 XM
+(requests.)SH
+14 /Times-Bold AF
+7200 44621 MT
+(5.2 Testing)
+350 W( the Sample Server)SH
+11 /Times-Roman AF
+7200 46816 MT
+(Assume that you have installed)SH
+/Times-Italic SF
+21223 XM
+(sample_server)SH
+/Times-Roman SF
+27912 XM
+(on)SH
+/Times-Italic SF
+29287 XM
+(ariadne)SH
+/Times-Roman SF
+(.)SH
+7200 49114 MT
+(Login to your workstation and use the)SH
+/Times-Italic SF
+24217 XM
+(kinit)SH
+/Times-Roman SF
+26448 XM
+(command to obtain a Kerberos ticket-granting ticket:)SH
+/Courier SF
+8520 50691 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([K_USER]/kinit)SH
+/Courier SF
+8520 51805 MT
+(MIT Project Athena, \050your_workstation\051)SH
+8520 52919 MT
+(Kerberos Initialization)SH
+8520 54033 MT
+(Kerberos name:)SH
+/Times-BoldItalic SF
+18420 XM
+(yourusername)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter your Kerberos username.)SH
+/Courier SF
+8520 55147 MT
+(Password:)SH
+/Times-Bold SF
+28800 XM
+(<--)SH
+/Times-BoldItalic SF
+30819 XM
+(Enter your Kerberos password.)SH
+/Times-Roman SF
+7200 57445 MT
+(Now use the)SH
+/Times-Italic SF
+12973 XM
+(sample_client)SH
+/Times-Roman SF
+19358 XM
+(program as follows:)SH
+/Courier SF
+8520 59022 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([PATH]/sample_client ariadne)275 W
+/Times-Roman SF
+7200 60617 MT
+(The command should display something like the following:)SH
+/Courier SF
+8520 62143 MT
+(The server says:)SH
+8520 63257 MT
+(You are)SH
+/Times-BoldItalic SF
+13800 XM
+(yourusername)SH
+/Courier SF
+(.@REALMNAME \050local name)SH
+/Times-BoldItalic SF
+36180 XM
+(yourusername)SH
+/Courier SF
+(\051,)SH
+9180 64371 MT
+(at address)SH
+/Times-BoldItalic SF
+16440 XM
+(yournetaddress)SH
+/Courier SF
+(, version VERSION9, cksum 997)SH
+10 /Times-Roman AF
+7200 75600 MT
+(MIT Project Athena)SH
+30100 XM
+(10)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 11 12
+BS
+0 SI
+16 /Times-Bold AF
+7200 8272 MT
+(6. Service)
+400 W( names and other services)SH
+14 SS 
+7200 12090 MT
+(6.1 rlogin,)
+350 W( rsh, rcp, tftp, and others)SH
+11 /Times-Roman AF
+7200 14285 MT
+(Many services use a common principal name for authentication purposes.)SH
+/Times-Italic SF
+40128 XM
+(rlogin)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+43368 XM
+(rsh)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+45324 XM
+(rcp)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+47340 XM
+(tftp)SH
+/Times-Roman SF
+49083 XM
+(and others)SH
+7200 15481 MT
+(use the principal name ``)SH
+/Courier SF
+(rcmd)SH
+/Times-Roman SF
+(''. For)
+275 W( example, to set up the machine)SH
+/Times-Italic SF
+38033 XM
+(ariadne)SH
+/Times-Roman SF
+41730 XM
+(to support Kerberos rlogin,)SH
+7200 16677 MT
+(it needs to have a service key for principal ``)SH
+/Courier SF
+(rcmd)SH
+/Times-Roman SF
+('', instance ``)SH
+/Courier SF
+(ariadne)SH
+/Times-Roman SF
+(''. You)
+275 W( create this key in the)SH
+7200 17873 MT
+(same way as shown above for the sample service.)SH
+7200 20171 MT
+(After creating this key, you need to run the)SH
+/Times-Italic SF
+26382 XM
+(ext_srvtab)SH
+/Times-Roman SF
+31239 XM
+(program again to generate a new srvtab file for)SH
+7200 21367 MT
+(ariadne.)SH
+14 /Times-Bold AF
+7200 25185 MT
+(6.2 NFS)
+350 W( modifications)SH
+11 /Times-Roman AF
+7200 27380 MT
+(The NFS modifications distributed separately use the service name ``)SH
+/Courier SF
+(rvdsrv)SH
+/Times-Roman SF
+('' with the instance set to)SH
+7200 28576 MT
+(the machine name \050as for the sample server and the rlogin, rsh, rcp and tftp services\051.)SH
+14 /Times-Bold AF
+7200 32394 MT
+(6.3 inetd.conf)
+350 W( entries)SH
+11 /Times-Roman AF
+7200 34589 MT
+(The following are the)SH
+/Times-Italic SF
+16974 XM
+(/etc/inetd.conf)SH
+/Times-Roman SF
+23512 XM
+(entries necessary to support rlogin, encrypted rlogin, rsh, and rcp)SH
+7200 35785 MT
+(services on a server machine.  As above, your)SH
+/Times-Italic SF
+27631 XM
+(inetd.conf)SH
+/Times-Roman SF
+32275 XM
+(may not support all the fields shown here.)SH
+/Courier SF
+8520 37311 MT
+(eklogin stream)
+660 W( tcp nowait unswitched root)1320 W
+11160 38425 MT
+([PATH]/klogind eklogind)1320 W
+8520 39539 MT
+(kshell stream tcp nowait unswitched root)1320 W
+11160 40653 MT
+([PATH]/kshd kshd)1320 W
+8520 41767 MT
+(klogin stream tcp nowait unswitched root)1320 W
+11160 42881 MT
+([PATH]/klogind klogind)1320 W
+10 /Times-Roman AF
+7200 75600 MT
+(MIT Project Athena)SH
+30100 XM
+(11)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: i 13
+BS
+0 SI
+14 /Times-Bold AF
+25272 8138 MT
+(Table of Contents)SH
+13 SS 
+7200 9781 MT
+(1. How)
+325 W( Kerberos Works: A Schematic Description)SH
+53350 XM
+(1)SH
+12 /Times-Roman AF
+9000 11130 MT
+(1.1 Network)
+300 W( Services and Their Client Programs)SH
+53400 XM
+(1)SH
+9000 12479 MT
+(1.2 Kerberos)
+300 W( Tickets)SH
+53400 XM
+(1)SH
+9000 13828 MT
+(1.3 The)
+300 W( Kerberos Master Database)SH
+53400 XM
+(1)SH
+9000 15177 MT
+(1.4 The)
+300 W( Ticket-Granting Ticket)SH
+53400 XM
+(1)SH
+9000 16526 MT
+(1.5 Network)
+300 W( Services and the Master Database)SH
+53400 XM
+(1)SH
+9000 17875 MT
+(1.6 The)
+300 W( User-Kerberos Interaction)SH
+53400 XM
+(2)SH
+13 /Times-Bold AF
+7200 19518 MT
+(2. Setting)
+325 W( Up and Testing the Kerberos Server)SH
+53350 XM
+(2)SH
+12 /Times-Roman AF
+9000 20867 MT
+(2.1 Creating)
+300 W( and Initializing the Master Database)SH
+53400 XM
+(3)SH
+9000 22216 MT
+(2.2 Storing)
+300 W( the Master Password)SH
+53400 XM
+(3)SH
+9000 23571 MT
+(2.3 Using)300 W
+/Times-BoldItalic SF
+14267 XM
+(kdb_edit)SH
+/Times-Roman SF
+18768 XM
+(to Add Users to the Master Database)SH
+53400 XM
+(4)SH
+9000 24920 MT
+(2.4 Starting)
+300 W( the Kerberos Server)SH
+53400 XM
+(4)SH
+9000 26269 MT
+(2.5 Testing)
+300 W( the Kerberos Server)SH
+53400 XM
+(5)SH
+13 /Times-Bold AF
+7200 27912 MT
+(3. Setting)
+325 W( up and testing the Administration server)SH
+53350 XM
+(5)SH
+12 /Times-Roman AF
+9000 29261 MT
+(3.1 Adding)
+300 W( an administration instance for the administrator)SH
+53400 XM
+(6)SH
+9000 30610 MT
+(3.2 The)
+300 W( Access Control Lists)SH
+53400 XM
+(6)SH
+9000 31959 MT
+(3.3 Starting)
+300 W( the administration server)SH
+53400 XM
+(7)SH
+9000 33314 MT
+(3.4 Testing)300 W
+/Times-BoldItalic SF
+15001 XM
+(kpasswd)SH
+/Times-Roman SF
+53400 XM
+(7)SH
+9000 34669 MT
+(3.5 Testing)300 W
+/Times-BoldItalic SF
+15001 XM
+(kadmin)SH
+/Times-Roman SF
+53400 XM
+(7)SH
+9000 36024 MT
+(3.6 Verifying)
+300 W( with)SH
+/Times-BoldItalic SF
+18501 XM
+(kinit)SH
+/Times-Roman SF
+53400 XM
+(8)SH
+13 /Times-Bold AF
+7200 37667 MT
+(4. Setting)
+325 W( up and testing slave server\050s\051)SH
+53350 XM
+(8)SH
+7200 39310 MT
+(5. A)
+325 W( Sample Application)SH
+53350 XM
+(8)SH
+12 /Times-Roman AF
+9000 40659 MT
+(5.1 The)
+300 W( Installation Process)SH
+53400 XM
+(8)SH
+9000 42008 MT
+(5.2 Testing)
+300 W( the Sample Server)SH
+52800 XM
+(10)SH
+13 /Times-Bold AF
+7200 43651 MT
+(6. Service)
+325 W( names and other services)SH
+52700 XM
+(11)SH
+12 /Times-Roman AF
+9000 45000 MT
+(6.1 rlogin,)
+300 W( rsh, rcp, tftp, and others)SH
+52800 XM
+(11)SH
+9000 46349 MT
+(6.2 NFS)
+300 W( modifications)SH
+52800 XM
+(11)SH
+9000 47698 MT
+(6.3 inetd.conf)
+300 W( entries)SH
+52800 XM
+(11)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30461 XM
+(i)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Trailer
+%%Pages: 13
+%%DocumentFonts: Times-Roman Times-Bold Times-Italic Times-BoldItalic Courier Symbol

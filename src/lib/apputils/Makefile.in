@@ -1,0 +1,54 @@
+prefix=@prefix@
+bindir=@bindir@
+datadir=@datadir@
+mydatadir=$(datadir)/apputils
+thisconfigdir=../..
+myfulldir=lib/apputils
+mydir=lib/apputils
+BUILDTOP=$(REL)..$(S)..
+RELDIR=../lib/apputils
+SED = sed
+DEFS=
+
+##DOS##BUILDTOP = ..\..
+##DOS##LIBNAME=$(OUTPRE)apputils.lib
+##DOS##XTRA=
+##DOS##OBJFILE=$(OUTPRE)apputils.lst
+
+# LIBOBJS may or may not contain daemon.o; dummy.o is just here to
+# avoid having an empty library.
+STLIBOBJS=dummy.o @LIBOBJS@
+STOBJLISTS=OBJS.ST
+LIBBASE=apputils
+
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+install-unix:: install-libs
+
+LINTFLAGS=-uhvb 
+LINTFILES= daemon.c
+LIBOBJS=$(OUTPRE)daemon.$(OBJEXT)
+
+SRCS=	$(srcdir)/daemon.c \
+	$(srcdir)/dummy.c
+
+@libpriv_frag@
+@lib_frag@
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+daemon.so daemon.po $(OUTPRE)daemon.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  daemon.c
+dummy.so dummy.po $(OUTPRE)dummy.$(OBJEXT): dummy.c

@@ -1,0 +1,8 @@
+thisconfigdir=..
+myfulldir=kadmin
+mydir=kadmin
+BUILDTOP=$(REL)..
+SUBDIRS = cli dbutil passwd ktutil server testing
+
+all::
+

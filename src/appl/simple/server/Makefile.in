@@ -1,0 +1,20 @@
+thisconfigdir=../../..
+myfulldir=appl/simple/server
+mydir=appl/simple/server
+BUILDTOP=$(REL)..$(S)..$(S)..
+
+LOCALINCLUDES= -I.. -I$(srcdir)/..
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+all:: sim_server
+
+sim_server: sim_server.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o sim_server sim_server.o $(KRB5_BASE_LIBS)
+
+install::
+	$(INSTALL_PROGRAM) sim_server $(DESTDIR)$(SERVER_BINDIR)/sim_server
+
+clean::
+	$(RM) sim_server.o sim_server

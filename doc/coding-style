@@ -1,0 +1,566 @@
+WRITING C CODE
+==============
+
+The code in the krb5 source tree largely follows BSD KNF
+(/usr/share/misc/style on NetBSD) except that it uses a four column
+basic offset.  The style described here is a synthesis of BSD KNF and
+the GNU coding standards for the C language.  The formatting described
+in the "Formatting Your Source Code" section of the GNU coding
+standards is mostly what we want, except we use BSD brace style and
+BSD-ish conventions for the spacing around operators.
+
+Formatting style for C code
+---------------------------
+
+In general, use a four column basic offset, tab stops at eight
+columns.  Indents should be tabified, i.e. continuous tabs followed by
+spaces if necessary if the indent isn't a multiple of eight columns.
+The "bsd" style in emacs cc-mode mostly does the right thing.  You can
+use "M-x c-set-style" "bsd" to get this.  Alternatively, you can use
+the "krb5" style that is included here.
+
+Labels, including case labels, are outdented by four columns.
+Continuations of statements are indented by an additional four
+columns.  When continuing expressions this way, split the expression
+so that the newline goes before a binary operator rather than after
+it.
+
+Continuations of argument lists or parenthesized expressions should
+line up with the column after the opening parenthesis.  Note that this
+may create width problems if you call a fuction deep in a bunch of
+nested control flow statements.  Regardless, any expression split
+between lines should stil be split so that the newline goes before a
+binary operator rather than after it.
+
+The maximum width should be 79 columns.  If you need more than this,
+consider rewriting the code so that it fits in 79 columns, since
+control flow that is nested deeply enough to require excessive width
+is also likely to be difficult to understand if not broken up.
+Exceptions may be made for long strings, though ANSI C string
+concatenation should work around that as well.
+
+Function names for definitions should start on column zero, on the
+line following their return type name, e.g.
+
+	char *
+	foo(int a)
+	{
+	    /* ... */
+	}
+
+[just pretend that's really at column zero]
+
+The opening brace of a function definition should also be on column
+zero.
+
+Braces that open substatements, such as those following "if", "else",
+"while", "for", "do", and "switch", should be on the same line as the
+begining of the statement.  This is sometimes called "hanging" braces.
+The corresponding closing brace should be at the same indentation
+level as the beginning of the statement.
+
+The "while" keyword in a do-while construct should sit on the same
+line as the closing brace of the substatement following "do":
+
+	do {
+	    foo();
+	} while (0);
+
+If there is an "if" statement immediately following an "else" keyword,
+it should go on the same line immediately after the "else":
+
+	if (x) {
+	    foo();
+	} else if (y) {
+	    bar();
+	}
+
+Comments to the right of code start in column 32.  Comments not to the
+right of code are indented at the prevailing indent for the
+surrounding code.  Make the comments complete sentences.  If you need
+more than one line, make them into block comments, like this:
+
+	/*
+	 * This is a block comment.  It should consist of complete
+	 * sentences.
+	 *
+	 * Paragraphs should be separated by blank lines so that emacs
+	 * fill commands will work properly.
+	 */
+
+Really important single-line comments should also be done in block
+form:
+
+	/*
+	 * This is a really important one-line comment.
+	 */
+
+In order to get the start and end delimiters for block comments to
+stay when you use emacs to fill paragraphs in the comments, set both
+the c-hanging-comment-starter-p and the c-hanging-comment-ender-p
+variables to nil.  This will be done by the tentative "krb5" style for
+the emacs cc-mode.
+
+Since we are mostly aiming for C '89 compatibility, don't use "//"
+comments.
+
+Spaces go after keywords, but not after function names.  Do not,
+however, put a space after sizeof.  Don't put a space after a cast
+operator, either.  Spaces also do not go before parentheses that are
+argument lists for function calls even if the function call is through
+a pointer.  Spaces go after commas in argument lists, as well as
+commas that are comma operators.  Spaces also go between parts in a
+for loop, except for "forever" type loops.  Use for statements rather
+than while statements to create forever loops.
+
+	if (x) {
+	    p = calloc(1024, sizeof(int));
+	}
+	cp = (*elem->fp)(1024);
+	for (i = 0; i < 10; i++);
+	for (;;) {
+	    /* ... */
+	}
+
+Binary operators get spaces, unary ones do not.  Prefix and postfix
+operators also do not get spaces.  The structure member operators "."
+and "->" count as postfix operators syntactically, not as binary
+operators.
+
+	x = --a + b / c - d++;
+	y = p->z.v[x];
+
+Put spaces around the "?" and ":" in a conditional expression.
+
+	x = y ? f() : g();
+
+In general, do not parenthesize the argument of "return".
+
+Coding practices for C
+----------------------
+
+Assume, for most purposes, working ANSI/ISO C ('89, not '99) support,
+both for internal use and for applications compiling against Kerberos
+header files and libraries.  Some exceptions are noted below.
+
+Do not use assignments as truth values.  Rather than this:
+
+	/* bad style */
+	if ((retval = krb5_foo()))
+	    /* ... */;
+
+do this:
+
+	/* better style */
+	retval = krb5_foo();
+	if (retval)
+	    /* ... */;
+
+This makes the code easier to read, and also makes it easier to use
+debuggers.  It may be excusable to put assignments into the
+conditional espression of a "while" statement, though, like:
+
+	while ((ch = getopt(argc, argv, "abn")) != -1)
+	    /* ... */;
+
+Using assignments as truth values in conditional expressions may make
+code particularly impenetrable.
+
+There are at least three types of "zero" known to C.  These are the
+integer zero (0), the null pointer constant (NULL), and the character
+constant zero ('\0').  Yes, these are usually all technically the
+integer zero.  Use them in their correct contexts.  (Purists will
+point out that 0 is a valid null pointer constant; still, do not use 0
+to specify a null pointer constant.  For further unconfusion, read the
+section on null pointer constants in the C FAQ.)  Do not use a lone
+variable as a truth value unless it's of integer type.  Thus:
+
+	int i;
+	char *cp;
+	/* ... */
+	if (i)
+	    /* ... */;
+	if (cp != NULL) {
+	    while (*cp != '\0')
+		/* ... */;
+	}
+
+Do not cast uses of NULL unless you're calling a function with a
+variable number of arguments, in which case you should cast it to to
+the appropriate pointer type.  Likewise, do not cast the return value
+from malloc() and friends; the prototype should declare them properly
+as returning a void * and thus shouldn't require an explicit cast.
+
+Do not assume that realloc(NULL, size) will do the right thing, or
+that free(NULL) will do the right thing.  ANSI guarantees that it
+will, but some old libraries (hopefully becoming obsolete) don't.
+Also, don't assume that malloc(0) will return a non-NULL pointer.
+Typically, though, the output of malloc(0) will be safe to pass to
+realloc() and free().
+
+In any case, reading the section in the C FAQ on null pointers is
+highly recommended to remove confusion regarding null pointers in C,
+since this is a subject of much confusion to even experienced
+programmers.  In particular, if you do not understand why using
+calloc() to allocate a struct that contains pointer members or why
+calling memset() to initialize such a struct to all-bytes-zero is
+wrong, reread that section again.  (Note that there are *lots* of
+examples of code in the krb5 source tree that erroneously calls
+memset() to zero a struct, and we should fix these somehow
+eventually.)
+
+Control flow statements that have a single statement as their body
+should nevertheless have braces around their bodies if the body is
+more than one line long, especially in the case of stacked multiple
+if-else clauses; use:
+
+	if (x) {
+	    if (y)
+		foo();
+	    else
+		bar();
+	}
+
+instead of:
+
+	/* bad style */
+	if (x)
+	    if (y)
+		foo();
+	    else
+		bar();
+
+which, while legible to the compiler, may confuse human readers and
+make the code less maintainable, especially if new branches get added
+to any of the clauses.
+
+Also, you should almost never intersperse conditional compilation
+directives with control flow statements, as some combination of
+#define'd symbols may result in statements getting eaten by dangling
+bits of control flow statements.  When it is not possible to avoid
+this questionable practice (you really should rewrite the relevant
+code section), make use of redundant braces to ensure that a compiler
+error will result in preference to incorrect runtime behavior (such as
+inadvertantly providing someone with a root shell).
+
+Do not intersperse conditional compilation directives with control
+flow statements in such a way that confuses emacs cc-mode.  Not only
+does emacs get confused, but the code becomes more difficult to read
+and maintain.  Therefore, avoid code like this:
+
+	    /* bad style */
+	    if (x) {
+		f();
+	    }
+	#ifdef FOO
+	    else if (y) {
+	#else
+	    else {
+	#endif
+		g();
+	    }
+
+Put comments after conditional compilation directives such as "#else"
+and "#endif".  Make them correspond to the sense of the value that
+controls the compilation of the section they are closing, i.e.
+
+	#ifdef FOO
+	/* ... */
+	#else /* !FOO */
+	/* ... */
+	#endif /* !FOO */
+
+Also, in the case of more complex conditional compilation directives,
+write the comments like this:
+
+	#if defined(FOO) || defined(BAR)
+	/* ... */
+	#else /* !(defined(FOO) || defined(BAR)) */
+	/* ... */
+	#endif /* !(defined(FOO) || defined(BAR)) */
+
+If you are writing a do-while loop that has only one statement in its
+body, put braces around it anyway, since the while clause may be
+mistaken for a while loop with an empty body.  Don't do this:
+
+	/* bad style */
+	do
+	    foo();
+	while (x);
+
+Instead, write this:
+
+	/* better style */
+	do {
+	    foo();
+	} while (x);
+
+While it is syntactically correct to call through a function pointer
+without applying a dereference operator to it, do not write code that
+does this.  It is easier to see that the function call is actually
+taking place through a function pointer if you write an explicit
+dereference.  However, do not explicitly take the address of a
+function in order to assign it to a function pointer, since a function
+name degrades into a pointer.  Thus:
+
+	int (*fp)(void);
+	int foofunc(void);
+	fp = foofunc;
+	x = (*fp)();
+
+In general, do not take the address of an array.  It does not return a
+pointer to the first element; it returns a pointer to the array
+itself.  These are often identical when cast to an integral type, but
+they are inherently of different types themselves.  Functions that
+take array types or pointers to array types as arguments can be
+particularly trouble-prone.
+
+If a function is declared to return a value, do not call "return"
+without an argument or allow the flow of control to fall off the end
+of the function.
+
+Always declare the return type of a function, even if it returns int.
+Yes, this means declaring main() to return int, since main() is
+required to return int by the standard.  If a function is not supposed
+to return a value, declare it as returning void rather than omitting
+the return type, which will default the return type to int.
+
+Try to use ANSI C prototype-style function definitions in preference
+to K&R style definitions.  When using K&R style function definitions,
+declare all the argument types, even those that are int, but beware of
+any narrow types in the argument list.
+
+Do not declare variables in an inner scope, e.g. inside the compound
+substatement of an if statement, unless the complexity of the code
+really demands that the variables be declared that way.  In such
+situations, the function could probably stand to be broken up into
+smaller chunks anyway.  Do not declare variables in an inner scope
+that shadow ones in an outer scope, since this leads to confusion.
+Also, some debugging environments, such as gdb under Solaris, can't
+see variables declared in an inner scope, so declaring such variables
+will make maintenance more difficult as well.
+
+Parenthesize expressions that may be confusing, particularly where C's
+precedences are broken.  For example, the shift operators have lower
+precedence than the +, -, *, /, and % operators.  Perhaps the most
+familiar C precedence quirk is that equality and relational operators
+are of higher precedence than assignment operators.  Less well known
+is that the bitwise operators are of a lower precedence than equality
+and relational operators.
+
+The sizeof operator takes either a unary expression or a parenthesized
+type name.  It is not necessary to parenthesize the operand of sizeof
+if it is applied to a unary expression, but still, always parenthesize
+the operand of the sizeof operator.  The sizeof operator does not
+evaluate its operand if it is a unary expression, so usages such as
+
+	s = sizeof(++foo);
+
+should be avoided for the sake of sanity and readability.
+
+Don't pass around structures except by address.  We may relax this
+restriction for non-API function, though.
+
+For new functions, input parameters should go before output parameters
+in the call signature.  There are exceptions, such as a context-like
+parameter.
+
+Every function should have block comment preceding it describing
+briefly in complete sentences what it does, what inputs and outputs it
+has, and what error codes it can return.  It should also describe any
+unsual aspects of the function.  At some point we will want to put
+some of this information into a machine-parsable form.
+
+Macros should have all-uppercase names.  If it is necessary to use
+multiple statements, use braces, and wrap the whole thing in a
+do-while(0) construct, such as
+
+	#define FOOMACRO(x, y) do {			\
+	    foo = (x) + (y);				\
+	    f(y);					\
+	} while (0)
+
+Leave off the semicolon at the end of a function-like macro, so that
+it can be mostly used like a call to a function without a return
+value.  Line up the backslashes to make it more readable.  Use M-x
+c-backslash-region in emacs to do neat lined-up backslashes.
+Parenthesize uses of arguments in the replacement text of a macro in
+order to prevent weird interactions.
+
+Strive to make your code capable of compiling using "gcc -Wall
+-Wmissing-prototypes -Wtraditional -Wcast-qual -Wcast-align
+-Wconversion -Waggregate-return -pedantic" [XXX need to rethink this
+somewhat] without generating any errors or warnings.  Do not, however,
+compile using the "-ansi" flag to gcc, since that can result in odd
+behavior with header files on some systems, causing some necessary
+symbols to not be defined.
+
+Namespaces
+----------
+
+The C standard reserves a bunch of namespaces for the implementation.
+Don't stomp on them.  For practical purposes, any identifier with a
+leading underscore should not be used.  (Technically, ^_[a-z].* are
+reserved only for file scope, so should be safe for things smaller
+than file scope, but it's better to be paranoid in this case.)
+
+POSIX reserves typedef names ending with _t as well.
+
+Recall that errno is a reserved identifier, and is permitted to be a
+macro.  Therefore, do not use errno as the name of a structure member,
+etc.
+
+Reserved namespaces are somewhat more restricted than this; read the
+appropriate section of the C standard if you have questions.
+
+If you're writing new library code, pick a short prefix and stick with
+it for any identifier with external linkage.  If for some reason a
+library needs to have external symbols that should not be visible to
+the application, pick another (related) prefix to use for the internal
+globals.  This applies to typedef names, tag names, and preprocessor
+identifiers as well.
+
+For the krb5 library, the prefix for public global symbols is "krb5_".
+Use "krb5int_" as a prefix for library internal globals.  Avoid using
+"__" in symbol names, as it may confuse C++ implementations.  There
+are admittedly a number of places where we leak thing into the
+namespace; we should try to fix these.
+
+Header files should also not leak symbols.  Usually using the upcased
+version of the prefix you've picked will suffice, e.g. "KRB5_" as a
+CPP symbol prefix corresponding to "krb5_".  In general, do not define
+macros that are lowercase, in order to avoid confusion and to prevent
+namespace collisions.
+
+The C standard only guarantees six case-insensitive characters to be
+significant in external identifiers; this is largely regarded as
+obsolescent even in 1989 and we will ignore it.  It does, however,
+only guarantee 31 case-sensitive characters to be signficant in
+internal identifiers, so do not use identifiers that differ beyond the
+31st character.  This is unlikely to be a problem, though.
+
+Aspects of C style in GNU coding std but not here
+-------------------------------------------------
+
+* redundant parens to force extra indent of operators of different
+  precedences
+
+* redundant parens to force general extra indent of expressions that
+  are broken between lines
+
+* use of ^L characters to break up source files into pages
+
+* nitpicking about capitalization in comments of variable names when
+  their values are meant
+
+* commenting usages of static variables
+
+* casts to void
+
+* separation of word in names with underscores vs case change
+
+* enum vs #define'd integer constants 
+
+* 14 char filename limits, MS-DOS filename limits
+
+* portability
+
+* system library function quirks
+
+* internationalization
+
+* mmap()
+
+Aspects of C style in BSD KNF but not here
+------------------------------------------
+
+* sorting of header files
+
+* sorting of struct members
+
+* separating struct tag decl and struct typedef
+
+* sorting of var decl
+
+* lining up var names in decls
+
+* newline after decls
+
+* usage of __P
+
+* usage of getopt
+
+* not initializing vars in decls
+
+* stdarg/varargs handling
+
+Emacs cc-mode style
+-------------------
+
+Putting the following code in your .emacs file will result in mostly
+the right thing happening with respect to formatting style.  Note that
+you may want to turn on auto-newline feature of cc-mode, though that
+seems to have some bugs with brace-elseif-brace handling at least in
+the version of cc-mode that comes with emacs 20.3.
+
+	(defconst krb5-c-style
+	  '("bsd" 
+	    (c-cleanup-list
+	     brace-elseif-brace brace-else-brace defun-close-semi)
+	    (c-comment-continuation-stars . "* ")
+	    (c-electric-pound-behavior alignleft)
+	    (c-hanging-braces-alist
+	     (brace-list-open)
+	     (class-open after)
+	     (substatement-open after)
+	     (block-close . c-snug-do-while)
+	     (extern-lang-open after))
+	    (c-hanging-colons-alist
+	     (case-label after)
+	     (label after))
+	    (c-hanging-comment-starter-p)
+	    (c-hanging-comment-ender-p)
+	    (c-indent-comments-syntactically-p . t)
+	    (c-label-minimum-indentation . 0)
+	    (c-special-indent-hook)))
+	(defun krb5-c-hook ()
+	  (c-add-style "krb5" krb5-c-style t))
+	(add-hook 'c-mode-common-hook 'krb5-c-hook)
+
+indent.pro settings
+-------------------
+
+The following settings for the indent program should produce a
+reasonable approximation to the C coding style described here, though
+some manual cleanup may be necessary.  Note that the gindent installed
+in the gnu locker does not currently handle -psl correctly though.
+
+-bap
+-br
+-ce
+-ci4
+-cli0
+-d0
+-di8
+-i4
+-ip4
+-l79
+-nbc
+-ncdb
+-ndj
+-nfc1
+-lp
+-npcs
+-psl
+-sc
+-sob
+
+MAKEFILES
+=========
+
+[XXX needs to be written]
+
+TEST SUITES
+===========
+
+[XXX needs to be written]

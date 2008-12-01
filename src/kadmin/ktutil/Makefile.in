@@ -1,0 +1,68 @@
+thisconfigdir=../..
+myfulldir=kadmin/ktutil
+mydir=kadmin/ktutil
+BUILDTOP=$(REL)..$(S)..
+LOCALINCLUDES = $(KRB4_INCLUDES)
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+OBJS= 	ktutil.o \
+	ktutil_ct.o \
+	ktutil_funcs.o
+
+SRCS= 	$(srcdir)/ktutil.c \
+	ktutil_ct.c \
+	$(srcdir)/ktutil_funcs.c
+
+all:: ktutil
+
+ktutil: ktutil.o $(OBJS) $(SS_DEPLIB) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o ktutil $(OBJS) $(SS_LIB) $(KRB5_BASE_LIBS)
+
+install::
+	$(INSTALL_PROGRAM) ktutil ${DESTDIR}$(ADMIN_BINDIR)/ktutil
+	$(INSTALL_DATA) $(srcdir)/ktutil.M ${DESTDIR}$(ADMIN_MANDIR)/ktutil.8
+
+generate-files-mac: ktutil_ct.c
+
+# needed until we run makedepend
+ktutil_ct.c: ktutil_ct.ct
+
+ktutil_ct.o: ktutil_ct.c
+
+clean::
+	$(RM) ktutil_ct.c
+
+depend:: ktutil_ct.c
+
+clean::
+	$(RM) ktutil
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)ktutil.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SS_DEPS) ktutil.c \
+  ktutil.h
+$(OUTPRE)ktutil_ct.$(OBJEXT): $(COM_ERR_DEPS) $(SS_DEPS) \
+  ktutil_ct.c
+$(OUTPRE)ktutil_funcs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  ktutil.h ktutil_funcs.c

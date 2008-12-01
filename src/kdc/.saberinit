@@ -1,0 +1,35 @@
+suppress 223
+suppress 285
+suppress 33 on v4_klog
+suppress 34 on v4_klog
+suppress 36 on sendto
+suppress 35
+suppress 287 on usage
+suppress 287 on sin
+suppress 349 on krb_err_txt
+suppress 349 on krbONE
+suppress 349 on _ctype_
+suppress 340
+suppress 341
+suppress 346
+suppress 226 on error
+load -G main.o kdc5_err.o kdc_util.o network.o policy.o	-I../include
+load -G do_as_req.o do_tgs_req.o extern.o	-I../include
+make SRCS=dispatch.c saber
+load -G kerberos_v4.c -DBACKWARD_COMPAT -DVARARGS -I../include/kerberosIV -I../include -I../include/stdc-incl
+cd  /site/Don/krb5/kdc
+load -G ../lib/kdb/libkdb.a ../lib/libkrb5.a
+load -G ../lib/des/libdes.a ../lib/os-4.3/libos.a ../lib/crc-32/libcrc32.a
+load -G /mit/isode/isode-6.0/@sys/lib/libisode.a
+load -G -lkrb -ldes -lcom_err
+setopt load_flags -I/mit/krb5/vax-cc/include
+link
+unload /site/Don/krb5/lib/kdb/libkdb.a(decrypt_key.o)
+cd     /site/Don/krb5/lib/kdb
+make SRCS=decrypt_key.c saber
+unload /site/Don/krb5/lib/des/libdes.a(enc_dec.o)
+unload /site/Don/krb5/lib/des/libdes.a(new_rn_key.o)
+cd     /site/Don/krb5/lib/des
+make SRCS=enc_dec.c saber
+make SRCS=new_rn_key.c saber
+run

@@ -1,0 +1,47 @@
+thisconfigdir=../..
+myfulldir=tests/resolve
+mydir=tests/resolve
+BUILDTOP=$(REL)..$(S)..
+RUN_SETUP = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+OBJS=resolve.o addrinfo-test.o fake-addrinfo-test.o
+SRCS=$(srcdir)/resolve.c $(srcdir)/addrinfo-test.c \
+	$(srcdir)/fake-addrinfo-test.c
+
+all:: resolve addrinfo-test fake-addrinfo-test
+
+resolve: resolve.o
+	$(CC_LINK) -o $@ resolve.o $(LIBS)
+
+addrinfo-test: addrinfo-test.o
+	$(CC_LINK) -o $@ addrinfo-test.o $(SUPPORT_LIB) $(LIBS)
+
+fake-addrinfo-test: fake-addrinfo-test.o
+	$(CC_LINK) -o $@ fake-addrinfo-test.o $(SUPPORT_LIB) $(LIBS)
+
+check:: resolve addrinfo-test fake-addrinfo-test
+	$(RUN_SETUP) $(VALGRIND) ./resolve
+	$(RUN_SETUP) $(VALGRIND) ./addrinfo-test -p telnet
+	$(RUN_SETUP) $(VALGRIND) ./fake-addrinfo-test -p telnet
+
+install::
+
+clean::
+	$(RM) resolve addrinfo-test fake-addrinfo-test
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)resolve.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  resolve.c
+$(OUTPRE)addrinfo-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  addrinfo-test.c
+$(OUTPRE)fake-addrinfo-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h addrinfo-test.c fake-addrinfo-test.c

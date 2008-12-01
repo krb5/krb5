@@ -1,0 +1,2338 @@
+%!PS-Adobe-2.0
+%%Title: installation.mss
+%%DocumentFonts: (atend)
+%%Creator: John T Kohl,,E40-351M,31510,6176432831 and Scribe 7(1700)
+%%CreationDate: 4 January 1990 11:56
+%%Pages: (atend)
+%%EndComments
+% PostScript Prelude for Scribe.
+/BS {/SV save def 0.0 792.0 translate .01 -.01 scale} bind def
+/ES {showpage SV restore} bind def
+/SC {setrgbcolor} bind def
+/FMTX matrix def
+/RDF {WFT SLT 0.0 eq 
+  {SSZ 0.0 0.0 SSZ neg 0.0 0.0 FMTX astore}
+  {SSZ 0.0 SLT neg sin SLT cos div SSZ mul SSZ neg 0.0 0.0 FMTX astore}
+  ifelse makefont setfont} bind def
+/SLT 0.0 def
+/SI { /SLT exch cvr def RDF} bind def
+/WFT /Courier findfont def
+/SF { /WFT exch findfont def RDF} bind def
+/SSZ 1000.0 def
+/SS { /SSZ exch 100.0 mul def RDF} bind def
+/AF { /WFT exch findfont def /SSZ exch 100.0 mul def RDF} bind def
+/MT /moveto load def
+/XM {currentpoint exch pop moveto} bind def
+/UL {gsave newpath moveto dup 2.0 div 0.0 exch rmoveto
+   setlinewidth 0.0 rlineto stroke grestore} bind def
+/LH {gsave newpath moveto setlinewidth
+   0.0 rlineto
+   gsave stroke grestore} bind def
+/LV {gsave newpath moveto setlinewidth
+   0.0 exch rlineto
+   gsave stroke grestore} bind def
+/BX {gsave newpath moveto setlinewidth
+   exch
+   dup 0.0 rlineto
+   exch 0.0 exch neg rlineto
+   neg 0.0 rlineto
+   closepath
+   gsave stroke grestore} bind def
+/BX1 {grestore} bind def
+/BX2 {setlinewidth 1 setgray stroke grestore} bind def
+/PB {/PV save def newpath translate
+    100.0 -100.0 scale pop /showpage {} def} bind def
+/PE {PV restore} bind def
+/GB {/PV save def newpath translate rotate
+    div dup scale 100.0 -100.0 scale /showpage {} def} bind def
+/GE {PV restore} bind def
+/FB {dict dup /FontMapDict exch def begin} bind def
+/FM {cvn exch cvn exch def} bind def
+/FE {end /original-findfont /findfont load def  /findfont
+   {dup FontMapDict exch known{FontMapDict exch get} if
+   original-findfont} def} bind def
+/BC {gsave moveto dup 0 exch rlineto exch 0 rlineto neg 0 exch rlineto closepath clip} bind def
+/EC /grestore load def
+/SH /show load def
+/MX {exch show 0.0 rmoveto} bind def
+/W {0 32 4 -1 roll widthshow} bind def
+/WX {0 32 5 -1 roll widthshow 0.0 rmoveto} bind def
+/RC {100.0 -100.0 scale
+612.0 0.0 translate
+-90.0 rotate
+.01 -.01 scale} bind def
+/URC {100.0 -100.0 scale
+90.0 rotate
+-612.0 0.0 translate
+.01 -.01 scale} bind def
+/RCC {100.0 -100.0 scale
+0.0 -792.0 translate 90.0 rotate
+.01 -.01 scale} bind def
+/URCC {100.0 -100.0 scale
+-90.0 rotate 0.0 792.0 translate
+.01 -.01 scale} bind def
+%%EndProlog
+%%Page: 0 1
+BS
+0 SI
+20 /Times-Bold AF
+18823 13788 MT
+(Kerberos Installation Notes)SH
+27156 15798 MT
+(DRAFT)SH
+16 /Times-Roman AF
+27021 23502 MT
+(Bill Bryant)SH
+25557 25150 MT
+(Jennifer Steiner)SH
+27289 26798 MT
+(John Kohl)SH
+23957 30444 MT
+(Project Athena, MIT)SH
+/Times-Bold SF
+19489 36042 MT
+(Initial Release, January 24, 1989)SH
+/Times-Italic SF
+17558 37690 MT
+(\050plus later patches through patchlevel 7\051)SH
+11 /Times-Roman AF
+7200 45644 MT
+(The release consists of three parts.)SH
+7200 47942 MT
+(The first part consists of the core Kerberos system, which was developed at MIT and does not require)SH
+7200 49138 MT
+(additional licenses for us to distribute.  Included in this part are the Kerberos authentication server, the)SH
+7200 50334 MT
+(Kerberos library, the)SH
+/Times-Italic SF
+16606 XM
+(ndbm)SH
+/Times-Roman SF
+19325 XM
+(database interface library, user programs, administration programs, manual)SH
+7200 51530 MT
+(pages, some applications which use Kerberos for authentication, and some utilities.)SH
+7200 53828 MT
+(The second part is the Data Encryption Standard \050DES\051 library, which we are distributing only within the)SH
+7200 55024 MT
+(United States.)SH
+7200 57322 MT
+(The third part contains Kerberos modifications to Sun's NFS, which we distribute as ``context diffs'' to)SH
+7200 58518 MT
+(the Sun NFS source code.  Its distribution is controlled to provide an accounting of who has retrieved the)SH
+7200 59714 MT
+(patches, so that Project Athena can comply with its agreements with Sun regarding distribution of these)SH
+7200 60910 MT
+(changes.)SH
+ES
+%%Page: 1 2
+BS
+0 SI
+16 /Times-Bold AF
+7200 8272 MT
+(1. Organization)
+400 W( of the Source Directory)SH
+11 /Times-Roman AF
+7200 10467 MT
+(The Kerberos building and installation process, as described in this document, builds the binaries and)SH
+7200 11663 MT
+(executables from the files contained in the Kerberos source tree, and deposits them in a separate object)SH
+7200 12859 MT
+(tree. This)
+275 W( is intended to easily support several different build trees from a single source tree \050this is useful)SH
+7200 14055 MT
+(if you support several machine architectures\051.  We suggest that you copy the Kerberos sources into a)SH
+/Times-Italic SF
+7200 15251 MT
+(/mit/kerberos/src)SH
+/Times-Roman SF
+14991 XM
+(directory, and create as well a)SH
+/Times-Italic SF
+28396 XM
+(/mit/kerberos/obj)SH
+/Times-Roman SF
+36249 XM
+(directory in which to hold the)SH
+7200 16447 MT
+(executables. In)
+275 W( the rest of this document, we'll refer to the Kerberos source and object directories as)SH
+7200 17643 MT
+([SOURCE_DIR] and [OBJ_DIR], respectively.)SH
+7200 19941 MT
+(Below is a brief overview of the organization of the complete source directory.  More detailed)SH
+7200 21137 MT
+(descriptions follow.)SH
+/Times-Bold SF
+7200 23088 MT
+(admin)SH
+/Times-Roman SF
+18200 XM
+(utilities for the Kerberos administrator)SH
+/Times-Bold SF
+7200 24783 MT
+(appl)SH
+/Times-Roman SF
+18200 XM
+(applications that use Kerberos)SH
+/Times-Bold SF
+7200 26478 MT
+(appl/bsd)SH
+/Times-Roman SF
+18200 XM
+(Berkeley's rsh/rlogin suite, using Kerberos)SH
+/Times-Bold SF
+7200 28173 MT
+(appl/knetd)SH
+/Times-Roman SF
+18200 XM
+(\050old\051 software for inetd-like multiplexing of a single TCP listening port)SH
+/Times-Bold SF
+7200 29868 MT
+(appl/sample)SH
+/Times-Roman SF
+18200 XM
+(sample application servers and clients)SH
+/Times-Bold SF
+7200 31563 MT
+(appl/tftp)SH
+/Times-Roman SF
+18200 XM
+(Trivial File Transfer Protocol, using Kerberos)SH
+/Times-Bold SF
+7200 33258 MT
+(include)SH
+/Times-Roman SF
+18200 XM
+(include files)SH
+/Times-Bold SF
+7200 34953 MT
+(kadmin)SH
+/Times-Roman SF
+18200 XM
+(remote administrative interface to the Kerberos master database)SH
+/Times-Bold SF
+7200 36648 MT
+(kuser)SH
+/Times-Roman SF
+18200 XM
+(assorted user programs)SH
+/Times-Bold SF
+7200 38343 MT
+(lib)SH
+/Times-Roman SF
+18200 XM
+(libraries for use with/by Kerberos)SH
+/Times-Bold SF
+7200 40038 MT
+(lib/acl)SH
+/Times-Roman SF
+18200 XM
+(Access Control List library)SH
+/Times-Bold SF
+7200 41733 MT
+(lib/des)SH
+/Times-Roman SF
+18200 XM
+(Data Encryption Standard library \050US only\051)SH
+/Times-Bold SF
+7200 43428 MT
+(lib/kadm)SH
+/Times-Roman SF
+18200 XM
+(administrative interface library)SH
+/Times-Bold SF
+7200 45123 MT
+(lib/kdb)SH
+/Times-Roman SF
+18200 XM
+(Kerberos server library interface to)SH
+/Times-Italic SF
+33925 XM
+(ndbm)SH
+/Times-Bold SF
+7200 46818 MT
+(lib/knet)SH
+/Times-Roman SF
+18200 XM
+(\050old\051 library for use with)SH
+/Times-Bold SF
+29349 XM
+(knetd)SH
+7200 48513 MT
+(lib/krb)SH
+/Times-Roman SF
+18200 XM
+(Kerberos library)SH
+/Times-Bold SF
+7200 50208 MT
+(man)SH
+/Times-Roman SF
+18200 XM
+(manual pages)SH
+/Times-Bold SF
+7200 51903 MT
+(prototypes)SH
+/Times-Roman SF
+18200 XM
+(sample configuration files)SH
+/Times-Bold SF
+7200 53598 MT
+(server)SH
+/Times-Roman SF
+18200 XM
+(the authentication server)SH
+/Times-Bold SF
+7200 55293 MT
+(slave)SH
+/Times-Roman SF
+18200 XM
+(Kerberos slave database propagation software)SH
+/Times-Bold SF
+7200 56988 MT
+(tools)SH
+/Times-Roman SF
+18200 XM
+(shell scripts for maintaining the source tree)SH
+/Times-Bold SF
+7200 58683 MT
+(util)SH
+/Times-Roman SF
+18200 XM
+(utilities)SH
+/Times-Bold SF
+7200 60378 MT
+(util/imake)SH
+/Times-Roman SF
+18200 XM
+(Imakefile-to-Makefile ``compilation'' tool)SH
+/Times-Bold SF
+7200 62073 MT
+(util/ss)SH
+/Times-Roman SF
+18200 XM
+(Sub-system library \050for command line subsystems\051)SH
+/Times-Bold SF
+7200 63768 MT
+(util/et)SH
+/Times-Roman SF
+18200 XM
+(Error-table library \050for independent, unique error codes\051)SH
+/Times-Bold SF
+7200 65463 MT
+(util/makedepend)SH
+/Times-Roman SF
+18200 XM
+(Makefile dependency generator tool)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(1)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 2 3
+BS
+0 SI
+14 /Times-Bold AF
+7200 8167 MT
+(1.1 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(admin)SH
+/Times-Bold SF
+16340 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 10362 MT
+(This directory contains source for the Kerberos master database administration tools.)SH
+/Times-Bold SF
+7200 12313 MT
+(kdb_init)SH
+/Times-Roman SF
+18200 XM
+(This program creates and initializes the Kerberos master database.  It prompts)SH
+18200 13509 MT
+(for a Kerberos realmname, and the Kerberos master password.)SH
+/Times-Bold SF
+7200 15204 MT
+(kstash)SH
+/Times-Roman SF
+18200 XM
+(This program ``stashes'' the master password in the file)SH
+/Times-Italic SF
+43033 XM
+(/.k)SH
+/Times-Roman SF
+44377 XM
+(so that the master)SH
+18200 16400 MT
+(server machine can restart the Kerberos server automatically after an unattended)SH
+18200 17596 MT
+(reboot. The)
+275 W( hidden password is also available to administrative programs that)SH
+18200 18792 MT
+(have been set to run automatically.)SH
+/Times-Bold SF
+7200 20487 MT
+(kdb_edit)SH
+/Times-Roman SF
+18200 XM
+(This program is a low-level tool for editing the master database.)SH
+/Times-Bold SF
+7200 22182 MT
+(kdb_destroy)SH
+/Times-Roman SF
+18200 XM
+(This program deletes the master database.)SH
+/Times-Bold SF
+7200 23877 MT
+(kdb_util)SH
+/Times-Roman SF
+18200 XM
+(This program can be used to dump the master database into an ascii file, and can)SH
+18200 25073 MT
+(also be used to load the ascii file into the master database.)SH
+/Times-Bold SF
+7200 26768 MT
+(ext_srvtab)SH
+/Times-Roman SF
+18200 XM
+(This program extracts information from the master database and creates a host-)SH
+18200 27964 MT
+(dependent)SH
+/Times-Italic SF
+22995 XM
+(srvtab)SH
+/Times-Roman SF
+26020 XM
+(file. This)
+275 W( file contains the Kerberos keys for the host's)SH
+18200 29160 MT
+(``Kerberized'' services.  These services look up their keys in the)SH
+/Times-Italic SF
+46846 XM
+(srvtab)SH
+/Times-Roman SF
+49871 XM
+(file for)SH
+18200 30356 MT
+(use in the authentication process.)SH
+14 /Times-Bold AF
+7200 34203 MT
+(1.2 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(kuser)SH
+/Times-Bold SF
+15874 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 36398 MT
+(This directory contains the source code for several user-oriented programs.)SH
+/Times-Bold SF
+7200 38349 MT
+(kinit)SH
+/Times-Roman SF
+18200 XM
+(This program prompts users for their usernames and Kerberos passwords, then)SH
+18200 39545 MT
+(furnishes them with Kerberos ticket-granting tickets.)SH
+/Times-Bold SF
+7200 41240 MT
+(kdestroy)SH
+/Times-Roman SF
+18200 XM
+(This program destroys any active tickets.  Users should use)SH
+/Times-Italic SF
+44563 XM
+(kdestroy)SH
+/Times-Roman SF
+48564 XM
+(before they)SH
+18200 42436 MT
+(log off their workstations.)SH
+/Times-Bold SF
+7200 44131 MT
+(klist)SH
+/Times-Roman SF
+18200 XM
+(This program lists a user's active tickets.)SH
+/Times-Bold SF
+7200 45826 MT
+(ksrvtgt)SH
+/Times-Roman SF
+18200 XM
+(This retrieves a ticket-granting ticket with a life time of five minutes, using a)SH
+18200 47022 MT
+(server's secret key in lieu of a password.  It is primarily for use in shell scripts)SH
+18200 48218 MT
+(and other batch facilities.)SH
+/Times-Bold SF
+7200 49913 MT
+(ksu)SH
+/Times-Roman SF
+18200 XM
+(Substitute user id, using Kerberos to mediate attempts to change to ``root''.)SH
+14 /Times-Bold AF
+7200 53760 MT
+(1.3 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(appl)SH
+/Times-Bold SF
+15173 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 55955 MT
+(If your site has the appropriate BSD license, your Kerberos release provides certain Unix utilities The)SH
+7200 57151 MT
+(Berkeley programs that have been modified to use Kerberos authentication are found in the)SH
+/Times-Italic SF
+47640 XM
+(appl/bsd)SH
+/Times-Roman SF
+7200 58347 MT
+(directory. They)
+275 W( include)SH
+/Times-Italic SF
+18043 XM
+(login)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+20855 XM
+(rlogin)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+24095 XM
+(rsh)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+27914 XM
+(rcp)SH
+/Times-Roman SF
+(, as well as the associated daemon programs)SH
+/Times-Italic SF
+49081 XM
+(kshd)SH
+/Times-Roman SF
+51372 XM
+(and)SH
+/Times-Italic SF
+7200 59543 MT
+(klogind)SH
+/Times-Roman SF
+(. The)275 W
+/Times-Italic SF
+13310 XM
+(login)SH
+/Times-Roman SF
+15847 XM
+(program obtains ticket-granting tickets for users upon login; the other utilities provide)SH
+7200 60739 MT
+(authenticated Unix network services.)SH
+7200 63037 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(appl)SH
+/Times-Roman SF
+11416 XM
+(directory also contains samples Kerberos application client and server programs, an)SH
+7200 64233 MT
+(authenticated)SH
+/Times-Italic SF
+13339 XM
+(tftp)SH
+/Times-Roman SF
+15082 XM
+(program,)SH
+/Times-Italic SF
+19358 XM
+(knetd)SH
+/Times-Roman SF
+(, an authenticated inet daemon.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(2)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 3 4
+BS
+0 SI
+14 /Times-Bold AF
+7200 8167 MT
+(1.4 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(server)SH
+/Times-Bold SF
+16185 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 10362 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(server)SH
+/Times-Roman SF
+12208 XM
+(directory contains the Kerberos KDC server, called)SH
+/Times-Italic SF
+35052 XM
+(kerberos)SH
+/Times-Roman SF
+(. This)
+275 W( program manages read-)SH
+7200 11558 MT
+(only requests made to the master database, distributing tickets and encryption keys to clients requesting)SH
+7200 12754 MT
+(authentication service.)SH
+14 /Times-Bold AF
+7200 16601 MT
+(1.5 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(kadmin)SH
+/Times-Bold SF
+17040 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 18796 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(kadmin)SH
+/Times-Roman SF
+12698 XM
+(directory contains the Kerberos administration server and associated client programs.  The)SH
+7200 19992 MT
+(server accepts network requests from the user program)SH
+/Times-Italic SF
+31570 XM
+(kpasswd)SH
+/Times-Roman SF
+35573 XM
+(\050used to change a user's password\051, the)SH
+7200 21188 MT
+(Kerberos administration program)SH
+/Times-Italic SF
+22137 XM
+(kadmin)SH
+/Times-Roman SF
+(, and the srvtab utility program)SH
+/Times-Italic SF
+39276 XM
+(ksrvutil)SH
+/Times-Roman SF
+(. The)
+275 W( administration)SH
+7200 22384 MT
+(server can make modifications to the master database.)SH
+14 /Times-Bold AF
+7200 26231 MT
+(1.6 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(include)SH
+/Times-Bold SF
+16962 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 28426 MT
+(This directory contains the)SH
+/Times-Italic SF
+19236 XM
+(include)SH
+/Times-Roman SF
+22749 XM
+(files needed to build the Kerberos system.)SH
+14 /Times-Bold AF
+7200 32273 MT
+(1.7 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(lib)SH
+/Times-Bold SF
+14162 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 34468 MT
+(The)SH
+/Times-Italic SF
+9185 XM
+(lib)SH
+/Times-Roman SF
+10622 XM
+(directory has six subdirectories:)SH
+/Times-Italic SF
+25193 XM
+(acl)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+27087 XM
+(des)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+29103 XM
+(kadm)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+32035 XM
+(kdb)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+34173 XM
+(knet)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+38418 XM
+(krb)SH
+/Times-Roman SF
+(. The)275 W
+/Times-Italic SF
+42694 XM
+(des)SH
+/Times-Roman SF
+44435 XM
+(directory contains)SH
+7200 35664 MT
+(source for the DES encryption library.  The)SH
+/Times-Italic SF
+26595 XM
+(kadm)SH
+/Times-Roman SF
+29252 XM
+(directory contains source for the Kerberos)SH
+7200 36860 MT
+(administration server utility library.  The)SH
+/Times-Italic SF
+25439 XM
+(kdb)SH
+/Times-Roman SF
+27302 XM
+(directory contains source for the Kerberos database routine)SH
+7200 38056 MT
+(library. The)275 W
+/Times-Italic SF
+12942 XM
+(knet)SH
+/Times-Roman SF
+15049 XM
+(directory contains source for a library used by clients of the)SH
+/Times-Italic SF
+41530 XM
+(knetd)SH
+/Times-Roman SF
+44187 XM
+(server. The)275 W
+/Times-Italic SF
+49683 XM
+(krb)SH
+/Times-Roman SF
+7200 39252 MT
+(directory contains source for the)SH
+/Times-Italic SF
+21707 XM
+(libkrb.a)SH
+/Times-Roman SF
+25435 XM
+(library. This)
+275 W( library contains routines that are used by the)SH
+7200 40448 MT
+(Kerberos server program, and by applications programs that require authentication service.)SH
+14 /Times-Bold AF
+7200 44295 MT
+(1.8 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(man)SH
+/Times-Bold SF
+15251 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 46490 MT
+(This directory contains manual pages for Kerberos programs and library routines.)SH
+14 /Times-Bold AF
+7200 50337 MT
+(1.9 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(prototypes)SH
+/Times-Bold SF
+18596 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 52532 MT
+(This directory contains prototype)SH
+/Times-Italic SF
+22108 XM
+(/etc/services)SH
+/Times-Roman SF
+27819 XM
+(and)SH
+/Times-Italic SF
+29682 XM
+(/etc/krb.conf)SH
+/Times-Roman SF
+35486 XM
+(files. New)
+275 W( entries must be added to the)SH
+/Times-Italic SF
+7200 53728 MT
+(/etc/services)SH
+/Times-Roman SF
+12911 XM
+(file for the Kerberos server, and possibly for Kerberized applications \050)SH
+/Times-Italic SF
+(services.append)SH
+/Times-Roman SF
+7200 54924 MT
+(contains the entries used by the Athena-provided servers & applications, and is suitable for appending to)SH
+7200 56120 MT
+(your existing)SH
+/Times-Italic SF
+13250 XM
+(/etc/services)SH
+/Times-Roman SF
+18961 XM
+(file.\051. The)275 W
+/Times-Italic SF
+23878 XM
+(/etc/krb.conf)SH
+/Times-Roman SF
+29682 XM
+(file defines the local Kerberos realm for its host and)SH
+7200 57316 MT
+(lists Kerberos servers for given realms.  The)SH
+/Times-Italic SF
+26961 XM
+(/etc/krb.realms)SH
+/Times-Roman SF
+33865 XM
+(file defines exceptions for mapping machine)SH
+7200 58512 MT
+(names to Kerberos realms.)SH
+14 /Times-Bold AF
+7200 62359 MT
+(1.10 The)350 W
+/Times-BoldItalic SF
+13034 XM
+(tools)SH
+/Times-Bold SF
+16107 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 64554 MT
+(This directory contains a makefile to set up a directory tree for building the software in, and a shell script)SH
+7200 65750 MT
+(to format code in the style we use.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(3)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 4 5
+BS
+0 SI
+14 /Times-Bold AF
+7200 8167 MT
+(1.11 The)350 W
+/Times-BoldItalic SF
+13034 XM
+(util)SH
+/Times-Bold SF
+15329 XM
+(Directory)SH
+11 /Times-Roman AF
+7200 10362 MT
+(This directory contains several utility programs and libraries.  Included are Larry Wall's)SH
+/Times-Italic SF
+46296 XM
+(patch)SH
+/Times-Roman SF
+49015 XM
+(program, a)SH
+/Times-Italic SF
+7200 11558 MT
+(make)SH
+/Times-Roman SF
+9795 XM
+(pre-processor program called)SH
+/Times-Italic SF
+22956 XM
+(imake)SH
+/Times-Roman SF
+(, and a program for generating Makefile dependencies,)SH
+/Times-Italic SF
+7200 12754 MT
+(makedepend)SH
+/Times-Roman SF
+(, as well as the Sub-system library and utilities \050)SH
+/Times-Italic SF
+(ss)SH
+/Times-Roman SF
+(\051, and the Error table library and utilities)SH
+7200 13950 MT
+(\050)SH
+/Times-Italic SF
+(et)SH
+/Times-Roman SF
+(\051.)SH
+16 /Times-Bold AF
+7200 18622 MT
+(2. Preparing)
+400 W( for Installation)SH
+11 /Times-Roman AF
+7200 20817 MT
+(This document assumes that you will build the system on the machine on which you plan to install the)SH
+7200 22013 MT
+(Kerberos master server and its database.  You'll need about 10 megabytes for source and executables.)SH
+7200 24311 MT
+(By default, there must be a)SH
+/Times-Italic SF
+19327 XM
+(/kerberos)SH
+/Times-Roman SF
+23756 XM
+(directory on the master server machine in which to store the)SH
+7200 25507 MT
+(Kerberos database files.  If the master server machine does not have room on its root partition for these)SH
+7200 26703 MT
+(files, create a)SH
+/Times-Italic SF
+13306 XM
+(/kerberos)SH
+/Times-Roman SF
+17735 XM
+(symbolic link to another file system.)SH
+16 /Times-Bold AF
+7200 31375 MT
+(3. Preparing)
+400 W( for the Build)SH
+11 /Times-Roman AF
+7200 33570 MT
+(Before you build the system, you have to choose a)SH
+/Times-Bold SF
+29653 XM
+(realm name)SH
+/Times-Roman SF
+(, the name that specifies the system's)SH
+7200 34766 MT
+(administrative domain.  Project Athena uses the internet domain name ATHENA.MIT.EDU to specify its)SH
+7200 35962 MT
+(Kerberos realm name.  We recommend using a name of this form.)SH
+/Times-Bold SF
+36857 XM
+(NOTE:)SH
+/Times-Roman SF
+40616 XM
+(the realm-name is case)SH
+7200 37158 MT
+(sensitive; by convention, we suggest that you use your internet domain name, in capital letters.)SH
+7200 39456 MT
+(Edit the [SOURCE_DIR]/)SH
+/Times-Italic SF
+(include/krb.h)SH
+/Times-Roman SF
+24860 XM
+(file and look for the following lines of code:)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(4)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 5 6
+BS
+0 SI
+11 /Courier AF
+8520 7886 MT
+(/*)SH
+9180 9000 MT
+(* Kerberos specific definitions)SH
+9180 10114 MT
+(*)SH
+9180 11228 MT
+(* KRBLOG is the log file for the kerberos master server.)SH
+9180 12342 MT
+(* KRB_CONF is the configuration file where different host)SH
+9180 13456 MT
+(* machines running master and slave servers can be found.)SH
+9180 14570 MT
+(* KRB_MASTER is the name of the machine with the master)SH
+9180 15684 MT
+(* database.  The admin_server runs on this machine, and all)SH
+9180 16798 MT
+(* changes to the db \050as opposed to read-only requests, which)SH
+9180 17912 MT
+(* can go to slaves\051 must go to it.)SH
+9180 19026 MT
+(* KRB_HOST is the default machine when looking for a kerberos)SH
+9180 20140 MT
+(* slave server.  Other possibilities are in the KRB_CONF file.)SH
+9180 21254 MT
+(* KRB_REALM is the name of the realm.)SH
+9180 22368 MT
+(*/)SH
+8520 24596 MT
+(#ifdef notdef)SH
+8520 25710 MT
+(this is server-only, does not belong here;)SH
+8520 26824 MT
+(#define KRBLOG)
+3960 W( "/kerberos/kerberos.log")5940 W
+8520 27938 MT
+(are these used anyplace '?';)SH
+8520 29052 MT
+(#define VX_KRB_HSTFILE)
+9240 W( "/etc/krbhst")660 W
+8520 30166 MT
+(#define PC_KRB_HSTFILE)
+9240 W( "\134\134kerberos\134\134krbhst")660 W
+8520 31280 MT
+(#endif)SH
+8520 33508 MT
+(#define KRB_CONF)
+9240 W( "/etc/krb.conf")4620 W
+8520 34622 MT
+(#define KRB_RLM_TRANS)
+9240 W( "/etc/krb.realms")1320 W
+8520 35736 MT
+(#define KRB_MASTER)
+9240 W( "kerberos")3300 W
+8520 36850 MT
+(#define KRB_HOST)
+9240 W( KRB_MASTER)5280 W
+8520 37964 MT
+(#define KRB_REALM)
+9240 W( "ATHENA.MIT.EDU")3960 W
+/Times-Roman SF
+7200 39559 MT
+(Edit the last line as follows:)SH
+9400 41510 MT
+(1.)SH
+10500 XM
+(Change the KRB_REALM definition so that it specifies the realm name you have chosen)SH
+10500 42706 MT
+(for your Kerberos system.  This is a default which is usually overridden by a configuration)SH
+10500 43902 MT
+(file on each machine; however, if that config file is absent, many programs will use this)SH
+10500 45098 MT
+("built-in" realm name.)SH
+14 /Times-Bold AF
+7200 48945 MT
+(3.1 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(/etc/krb.conf)SH
+/Times-Bold SF
+19956 XM
+(File)SH
+11 /Times-Roman AF
+7200 51140 MT
+(Create a)SH
+/Times-Italic SF
+11108 XM
+(/etc/krb.conf)SH
+/Times-Roman SF
+16912 XM
+(file using the following format:)SH
+/Times-BoldItalic SF
+8520 52740 MT
+(realm_name)SH
+8520 53854 MT
+(realm_name master_server_name)1045 W
+/Courier SF
+25594 XM
+(admin server)SH
+/Times-Roman SF
+7200 55449 MT
+(where)SH
+/Times-Italic SF
+10161 XM
+(realm_name)SH
+/Times-Roman SF
+15934 XM
+(specifies the system's realm name, and)SH
+/Times-Italic SF
+33375 XM
+(master_server_name)SH
+/Times-Roman SF
+42874 XM
+(specifies the machine)SH
+7200 56645 MT
+(name on which you will run the master server.  The words 'admin server' must appear next to the name of)SH
+7200 57841 MT
+(the server on which you intend to run the administration server \050which must be a machine with access to)SH
+7200 59037 MT
+(the database\051.)SH
+7200 61335 MT
+(For example, if your realm name is)SH
+/Times-Italic SF
+22962 XM
+(tim.edu)SH
+/Times-Roman SF
+26506 XM
+(and your master server's name is)SH
+/Times-Italic SF
+41288 XM
+(kerberos.tim.edu)SH
+/Times-Roman SF
+(, the file)SH
+7200 62531 MT
+(should have these contents:)SH
+/Courier SF
+8520 64057 MT
+(tim.edu)SH
+8520 65171 MT
+(tim.edu kerberos.tim.edu)
+660 W( admin server)SH
+/Times-Roman SF
+7200 67469 MT
+(See the [SOURCE_DIR]/)SH
+/Times-Italic SF
+(prototypes/etc.krb.conf)SH
+/Times-Roman SF
+28921 XM
+(file for an example)SH
+/Times-Italic SF
+37533 XM
+(/etc/krb.conf)SH
+/Times-Roman SF
+43337 XM
+(file. That)
+275 W( file has)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(5)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 6 7
+BS
+0 SI
+11 /Times-Roman AF
+7200 7955 MT
+(examples of how to provide backup servers for a given realm \050additional lines with the same leading)SH
+7200 9151 MT
+(realm name\051 and how to designate servers for remote realms.)SH
+14 /Times-Bold AF
+7200 12998 MT
+(3.2 The)350 W
+/Times-BoldItalic SF
+12334 XM
+(/etc/krb.realms)SH
+/Times-Bold SF
+21280 XM
+(File)SH
+11 /Times-Roman AF
+7200 15193 MT
+(In many situations, the default realm in which a host operates will be identical to the domain portion its)SH
+7200 16389 MT
+(Internet domain name.)SH
+7200 18687 MT
+(If this is not the case, you will need to establish a translation from host name or domain name to realm)SH
+7200 19883 MT
+(name. This)
+275 W( is accomplished with the)SH
+/Times-Italic SF
+23820 XM
+(/etc/krb.realms)SH
+/Times-Roman SF
+30724 XM
+(file.)SH
+7200 22181 MT
+(Each line of the translation file specifies either a hostname or domain name, and its associated realm:)SH
+/Courier SF
+8520 23707 MT
+(.domain.name kerberos.realm1)SH
+8520 24821 MT
+(host.name kerberos.realm2)SH
+/Times-Roman SF
+7200 26416 MT
+(For example, to map all hosts in the domain LSC.TIM.EDU to KRB.REALM1 but the host)SH
+7200 27612 MT
+(FILMS.LSC.TIM.EDU to KRB.REALM2 your file would read:)SH
+/Courier SF
+8520 29138 MT
+(.LSC.TIM.EDU KRB.REALM1)SH
+8520 30252 MT
+(FILMS.LSC.TIM.EDU KRB.REALM2)SH
+/Times-Roman SF
+7200 31847 MT
+(If a particular host matches both a domain and a host entry, the host entry takes precedence.)SH
+16 /Times-Bold AF
+7200 36519 MT
+(4. Building)
+400 W( the Software)SH
+11 /Times-Roman AF
+7200 38714 MT
+(Before you build the software read the)SH
+/Times-Bold SF
+24395 XM
+(README)SH
+/Times-Roman SF
+29558 XM
+(file in [SOURCE_DIR].  What follows is a more)SH
+7200 39910 MT
+(detailed description of the instructions listed in README.)SH
+9400 41861 MT
+(1.)SH
+10500 XM
+(Create an [OBJ_DIR] directory to hold the tree of Kerberos object files you are about to)SH
+10500 43057 MT
+(build, for example,)SH
+/Times-Italic SF
+19145 XM
+(/mit/kerberos/obj)SH
+/Times-Roman SF
+(.)SH
+9400 44951 MT
+(2.)SH
+10500 XM
+(Change directory to [OBJ_DIR].  The following command creates directories under)SH
+10500 46147 MT
+([OBJ_DIR] and installs Makefiles for the final build.)SH
+/Courier SF
+11820 47724 MT
+(host%)SH
+/Times-Bold SF
+15780 XM
+(make -f [SOURCE_DIR]/tools/makeconfig SRCDIR=[SOURCE_DIR])275 W
+/Times-Roman SF
+9400 49618 MT
+(3.)SH
+10500 XM
+(Change directory to util/imake.includes.  Read through config.Imakefile, turning on)SH
+10500 50814 MT
+(appropriate flags for your installation.  Change SRCTOP so that it is set to the top level of)SH
+10500 52010 MT
+(your source directory.)SH
+9400 53904 MT
+(4.)SH
+10500 XM
+(Check that your machine type has a definition in include/osconf.h & related files in the)SH
+10500 55100 MT
+(source tree \050if it doesn't, then you may need to create your own; if you get successful)SH
+10500 56296 MT
+(results, please post to kerberos@athena.mit.edu\051)SH
+9400 58190 MT
+(5.)SH
+10500 XM
+(Change directory to [OBJ_DIR].  The next command generates new Makefiles based on the)SH
+10500 59386 MT
+(configuration you selected in config.Imakefile, then adds dependency information to the)SH
+10500 60582 MT
+(Makefiles, and finally builds the system:)SH
+/Courier SF
+11820 62159 MT
+(host%)SH
+/Times-Bold SF
+15780 XM
+(make world)275 W
+/Times-Roman SF
+10500 63754 MT
+(This command takes a while to complete; you may wish to redirect the output onto a file)SH
+10500 64950 MT
+(and put the job in the background:)SH
+/Courier SF
+11820 66527 MT
+(host%)SH
+/Times-Bold SF
+15780 XM
+(make world)
+275 W( >&WORLDLOG_891201 &)SH
+/Times-Roman SF
+10500 68122 MT
+(If you need to rebuild the Kerberos programs and libraries after making a change, you can)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(6)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 7 8
+BS
+0 SI
+11 /Times-Roman AF
+10500 7955 MT
+(usually just type:)SH
+/Courier SF
+11820 9532 MT
+(host%)SH
+/Times-Bold SF
+15780 XM
+(make all)275 W
+/Times-Roman SF
+10500 11127 MT
+(However, if you changed the configuration in config.Imakefile or modified the Imakefiles)SH
+10500 12323 MT
+(or Makefiles, you should run)SH
+/Times-Italic SF
+23514 XM
+(make world)SH
+/Times-Roman SF
+28952 XM
+(to re-build all the Makefiles and dependency lists.)SH
+14 /Times-Bold AF
+7200 16141 MT
+(4.1 Testing)
+350 W( the DES Library)SH
+11 /Times-Roman AF
+7200 18336 MT
+(Use the)SH
+/Times-Italic SF
+10804 XM
+(verify)SH
+/Times-Roman SF
+13583 XM
+(command to test the DES library implementation:)SH
+/Courier SF
+8520 19913 MT
+(host%)SH
+/Times-Bold SF
+12480 XM
+([OBJ_DIR]/lib/des/verify)SH
+/Times-Roman SF
+7200 21508 MT
+(The command should display the following:)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(7)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 8 9
+BS
+0 SI
+11 /Courier AF
+8520 7886 MT
+(Examples per FIPS publication 81, keys ivs and cipher)SH
+8520 9000 MT
+(in hex.  These are the correct answers, see below for)SH
+8520 10114 MT
+(the actual answers.)SH
+8520 12342 MT
+(Examples per Davies and Price.)SH
+8520 14570 MT
+(EXAMPLE ECB)
+SH( key)
+2640 W( = 08192a3b4c5d6e7f)SH
+13800 15684 MT
+(clear = 0)SH
+13800 16798 MT
+(cipher = 25 dd ac 3e 96 17 64 67)SH
+8520 17912 MT
+(ACTUAL ECB)SH
+13800 19026 MT
+(clear "")SH
+13800 20140 MT
+(cipher =)
+660 W( \050low to high bytes\051)SH
+19080 21254 MT
+(25 dd ac 3e 96 17 64 67)SH
+8520 23482 MT
+(EXAMPLE ECB)
+SH( key)
+2640 W( = 0123456789abcdef)SH
+13800 24596 MT
+(clear = "Now is the time for all ")SH
+13800 25710 MT
+(cipher = 3f a4 0e 8a 98 4d 48 15 ...)SH
+8520 26824 MT
+(ACTUAL ECB)SH
+13800 27938 MT
+(clear "Now is the time for all ")SH
+13800 29052 MT
+(cipher =)
+660 W( \050low to high bytes\051)SH
+19080 30166 MT
+(3f a4 0e 8a 98 4d 48 15)SH
+8520 32394 MT
+(EXAMPLE CBC)
+SH( key)
+2640 W( = 0123456789abcdef  iv = 1234567890abcdef)SH
+13800 33508 MT
+(clear = "Now is the time for all ")SH
+13800 34622 MT
+(cipher =)
+SH( e5)
+4620 W( c7 cd de 87 2b f2 7c)SH
+24360 35736 MT
+(43 e9 34 00 8c 38 9c 0f)SH
+24360 36850 MT
+(68 37 88 49 9a 7c 05 f6)SH
+8520 37964 MT
+(ACTUAL CBC)SH
+13800 39078 MT
+(clear "Now is the time for all ")SH
+13800 40192 MT
+(ciphertext = \050low to high bytes\051)SH
+19080 41306 MT
+(e5 c7 cd de 87 2b f2 7c)SH
+19080 42420 MT
+(43 e9 34 00 8c 38 9c 0f)SH
+19080 43534 MT
+(68 37 88 49 9a 7c 05 f6)SH
+19080 44648 MT
+(00 00 00 00 00 00 00 00)SH
+19080 45762 MT
+(00 00 00 00 00 00 00 00)SH
+19080 46876 MT
+(00 00 00 00 00 00 00 00)SH
+19080 47990 MT
+(00 00 00 00 00 00 00 00)SH
+19080 49104 MT
+(00 00 00 00 00 00 00 00)SH
+13800 50218 MT
+(decrypted clear_text = "Now is the time for all ")SH
+8520 51332 MT
+(EXAMPLE CBC checksum)
+SH( key)
+1980 W( =  0123456789abcdef iv =  1234567890abcdef)SH
+13800 52446 MT
+(clear =)
+SH( "7654321)
+5280 W( Now is the time for ")SH
+13800 53560 MT
+(checksum 58)
+4620 W( d2 e7 7e 86 06 27 33  or some part thereof)SH
+8520 54674 MT
+(ACTUAL CBC checksum)SH
+19080 55788 MT
+(encrypted cksum = \050low to high bytes\051)SH
+19080 56902 MT
+(58 d2 e7 7e 86 06 27 33)SH
+/Times-Roman SF
+7200 59200 MT
+(If the)SH
+/Times-Italic SF
+9826 XM
+(verify)SH
+/Times-Roman SF
+12605 XM
+(command fails to display this information as specified above, the implementation of DES for)SH
+7200 60396 MT
+(your hardware needs to be adjusted.  Your Kerberos system cannot work properly if your DES library)SH
+7200 61592 MT
+(fails this test.)SH
+7200 63890 MT
+(When you have finished building the software, you will find the executables in the object tree as follows:)SH
+/Times-Bold SF
+7200 65841 MT
+([OBJ_DIR]/admin)SH
+/Times-Italic SF
+18200 XM
+(ext_srvtab)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+23332 XM
+(kdb_destroy)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+29258 XM
+(kdb_edit)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+33596 XM
+(kdb_init)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+37752 XM
+(kdb_util)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+43771 XM
+(kstash)SH
+/Times-Roman SF
+(.)SH
+/Times-Bold SF
+7200 67536 MT
+([OBJ_DIR]/kuser)SH
+/Times-Italic SF
+18200 XM
+(kdestroy)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+22476 XM
+(kinit)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+24982 XM
+(klist)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+27366 XM
+(ksrvtgt)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+32773 XM
+(ksu)SH
+/Times-Roman SF
+(.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(8)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 9 10
+BS
+0 SI
+11 /Times-Bold AF
+7200 7955 MT
+([OBJ_DIR]/server)SH
+/Times-Italic SF
+18200 XM
+(kerberos)SH
+/Times-Roman SF
+(.)SH
+/Times-Bold SF
+7200 9650 MT
+([OBJ_DIR]/appl/bsd)SH
+/Times-Italic SF
+18200 XM
+(klogind)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+22050 XM
+(kshd)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+24616 XM
+(login.krb)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+29169 XM
+(rcp)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+31185 XM
+(rlogin)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+36288 XM
+(rsh)SH
+/Times-Roman SF
+(.)SH
+/Times-Bold SF
+7200 11345 MT
+([OBJ_DIR]/appl/knetd)SH
+/Times-Italic SF
+18200 XM
+(knetd)SH
+/Times-Roman SF
+(.)SH
+/Times-Bold SF
+7200 13040 MT
+([OBJ_DIR]/appl/sample)SH
+/Times-Italic SF
+18200 14236 MT
+(sample_server)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+25164 XM
+(sample_client)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+31824 XM
+(simple_server)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+40407 XM
+(simple_client)SH
+/Times-Roman SF
+(.)SH
+/Times-Bold SF
+7200 15931 MT
+([OBJ_DIR]/appl/tftp)SH
+/Times-Italic SF
+18200 XM
+(tcom)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+20888 XM
+(tftpd)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+25319 XM
+(tftp)SH
+/Times-Roman SF
+(.)SH
+/Times-Bold SF
+7200 17626 MT
+([OBJ_DIR]/slave)SH
+/Times-Italic SF
+18200 XM
+(kprop)SH
+/Times-Roman SF
+21041 XM
+(and)SH
+/Times-Italic SF
+22904 XM
+(kpropd)SH
+/Times-Roman SF
+(.)SH
+16 /Times-Bold AF
+7200 22298 MT
+(5. Installing)
+400 W( the Software)SH
+11 /Times-Roman AF
+7200 24493 MT
+(To install the software, issue the)SH
+/Times-Italic SF
+21711 XM
+(make install)SH
+/Times-Roman SF
+27333 XM
+(command from the [OBJ_DIR] \050you need to be a privileged)SH
+7200 25689 MT
+(user in order to properly install the programs\051.  Programs can either be installed in default directories, or)SH
+7200 26885 MT
+(under a given root directory, as described below.)SH
+14 /Times-Bold AF
+7200 30703 MT
+(5.1 The)
+350 W( ``Standard'' Places)SH
+11 /Times-Roman AF
+7200 32898 MT
+(If you use the)SH
+/Times-Italic SF
+13492 XM
+(make)SH
+/Times-Roman SF
+16087 XM
+(command as follows:)SH
+/Courier SF
+8520 34475 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+(make install)275 W
+/Times-Roman SF
+7200 36070 MT
+(the installation process will try to install the various parts of the system in ``standard'' directories.  This)SH
+7200 37266 MT
+(process creates the ``standard'' directories as needed.)SH
+7200 39564 MT
+(The standard installation process copies things as follows:)SH
+/Symbol SF
+9169 41640 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The)SH
+/Times-Italic SF
+11935 XM
+(include)SH
+/Times-Roman SF
+15448 XM
+(files)SH
+/Times-Italic SF
+17617 XM
+(krb.h)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+20458 XM
+(des.h)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+23299 XM
+(mit-copyright.h)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+30662 XM
+(kadm.h)SH
+/Times-Roman SF
+34144 XM
+(and)SH
+/Times-Italic SF
+36007 XM
+(kadm_err.h)SH
+/Times-Roman SF
+41383 XM
+(get copied to the)SH
+/Times-Italic SF
+9950 42836 MT
+(/usr/include)SH
+/Times-Roman SF
+15481 XM
+(directory.)SH
+/Symbol SF
+9169 44730 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The Kerberos libraries)SH
+/Times-Italic SF
+20119 XM
+(libdes.a)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+24122 XM
+(libkrb.a)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+28125 XM
+(libkdb.a)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+32250 XM
+(libkadm.a)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+37169 XM
+(libknet.a)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+43401 XM
+(libacl.a)SH
+/Times-Roman SF
+47007 XM
+(get)SH
+9950 45926 MT
+(copied to the)SH
+/Times-Italic SF
+15907 XM
+(/usr/athena/lib)SH
+/Times-Roman SF
+22662 XM
+(\050or wherever you pointed LIBDIR in config.Imakefile\051)SH
+9950 47122 MT
+(directory.)SH
+/Symbol SF
+9169 49016 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The Kerberos master database utilities)SH
+/Times-Italic SF
+27085 XM
+(kdb_init)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+31241 XM
+(kdb_destroy)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+37167 XM
+(kdb_edit)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+41505 XM
+(kdb_util)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+45661 XM
+(kstash)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+9950 50212 MT
+(ext_srvtab)SH
+/Times-Roman SF
+14807 XM
+(get copied to the)SH
+/Times-Italic SF
+22383 XM
+(/usr/etc)SH
+/Times-Roman SF
+25958 XM
+(\050DAEMDIR\051 directory.)SH
+/Symbol SF
+9169 52106 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The Kerberos user utilities)SH
+/Times-Italic SF
+21924 XM
+(kinit)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+24430 XM
+(kdestroy)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+28706 XM
+(klist)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+31090 XM
+(ksrvtgt)SH
+/Times-Roman SF
+34359 XM
+(and)SH
+/Times-Italic SF
+36222 XM
+(ksu)SH
+/Times-Roman SF
+37963 XM
+(get copied to the)SH
+/Times-Italic SF
+45539 XM
+(/usr/athena)SH
+/Times-Roman SF
+9950 53302 MT
+(\050PROGDIR\051 directory.)SH
+/Symbol SF
+9169 55196 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The modified Berkeley utilities)SH
+/Times-Italic SF
+24004 XM
+(rsh)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+25960 XM
+(rlogin)SH
+/Times-Roman SF
+28925 XM
+(get copied to the)SH
+/Times-Italic SF
+36501 XM
+(/usr/ucb)SH
+/Times-Roman SF
+40382 XM
+(\050UCBDIR\051 directory;)SH
+/Times-Italic SF
+9950 56392 MT
+(rcp)SH
+/Times-Roman SF
+11691 XM
+(gets copied to the)SH
+/Times-Italic SF
+19695 XM
+(/bin)SH
+/Times-Roman SF
+21682 XM
+(\050SLASHBINDIR\051 directory; and)SH
+/Times-Italic SF
+36375 XM
+(rlogind)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+40165 XM
+(rshd)SH
+/Times-Roman SF
+(, and)SH
+/Times-Italic SF
+44534 XM
+(login.krb)SH
+/Times-Roman SF
+48812 XM
+(get)SH
+9950 57588 MT
+(copied to the)SH
+/Times-Italic SF
+15907 XM
+(/usr/etc)SH
+/Times-Roman SF
+19482 XM
+(\050DAEMDIR\051 directory.  The old copies of the user programs are)SH
+9950 58784 MT
+(renamed)SH
+/Times-Italic SF
+14011 XM
+(rsh.ucb)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+17830 XM
+(rlogin.ucb)SH
+/Times-Roman SF
+22658 XM
+(and)SH
+/Times-Italic SF
+24521 XM
+(rcp.ucb)SH
+/Times-Roman SF
+(, respectively.  The Kerberos versions of these)SH
+9950 59980 MT
+(programs are designed to fall back and execute the original versions if something prevents)SH
+9950 61176 MT
+(the Kerberos versions from succeeding.)SH
+/Symbol SF
+9169 63070 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The Kerberos version of)SH
+/Times-Italic SF
+20944 XM
+(tftp)SH
+/Times-Roman SF
+22687 XM
+(and)SH
+/Times-Italic SF
+24550 XM
+(tcom)SH
+/Times-Roman SF
+26963 XM
+(get copied to the)SH
+/Times-Italic SF
+34539 XM
+(/usr/athena)SH
+/Times-Roman SF
+39826 XM
+(\050PROGDIR\051 directory;)SH
+/Times-Italic SF
+9950 64266 MT
+(tftpd)SH
+/Times-Roman SF
+12243 XM
+(gets copied to the)SH
+/Times-Italic SF
+20247 XM
+(/etc)SH
+/Times-Roman SF
+22110 XM
+(\050ETCDIR\051 directory.)SH
+/Times-Italic SF
+31884 XM
+(tftp)SH
+/Times-Roman SF
+33627 XM
+(and)SH
+/Times-Italic SF
+35490 XM
+(tftpd)SH
+/Times-Roman SF
+37783 XM
+(are installed set-uid to an)SH
+9950 65462 MT
+(unprivileged user \050user id of DEF_UID\051.)SH
+/Symbol SF
+9169 67356 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The)SH
+/Times-Italic SF
+11935 XM
+(knetd)SH
+/Times-Roman SF
+14592 XM
+(daemon gets copied to the)SH
+/Times-Italic SF
+26353 XM
+(/usr/etc)SH
+/Times-Roman SF
+29928 XM
+(\050DAEMDIR\051 directory.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30350 XM
+(9)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: 10 11
+BS
+0 SI
+11 /Symbol AF
+9169 8080 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The Kerberos server)SH
+/Times-Italic SF
+19201 XM
+(kerberos)SH
+/Times-Roman SF
+(, the slave propagation software)SH
+/Times-Italic SF
+37343 XM
+(kprop)SH
+/Times-Roman SF
+40184 XM
+(and)SH
+/Times-Italic SF
+42047 XM
+(kpropd)SH
+/Times-Roman SF
+(, and the)SH
+9950 9276 MT
+(administration server)SH
+/Times-Italic SF
+19542 XM
+(kadmind)SH
+/Times-Roman SF
+23605 XM
+(get copied to the)SH
+/Times-Italic SF
+31181 XM
+(/usr/etc)SH
+/Times-Roman SF
+34756 XM
+(\050SVRDIR, SVRDIR, and)SH
+9950 10472 MT
+(DAEMDIR\051 directory.)SH
+/Symbol SF
+9169 12366 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The remote administration tools)SH
+/Times-Italic SF
+24310 XM
+(kpasswd)SH
+/Times-Roman SF
+(,)SH
+/Times-Italic SF
+28588 XM
+(ksrvutil)SH
+/Times-Roman SF
+32163 XM
+(and)SH
+/Times-Italic SF
+34026 XM
+(kadmin)SH
+/Times-Roman SF
+37539 XM
+(get copied to the)SH
+/Times-Italic SF
+45115 XM
+(/usr/athena)SH
+/Times-Roman SF
+9950 13562 MT
+(\050PROGDIR\051 directory.)SH
+/Symbol SF
+9169 15456 MT
+(\267)SH
+/Times-Roman SF
+9950 XM
+(The Kerberos manual pages get installed in the appropriate)SH
+/Times-Italic SF
+36187 XM
+(/usr/man)SH
+/Times-Roman SF
+40374 XM
+(directories. Don't)275 W
+9950 16652 MT
+(forget to run)SH
+/Times-Italic SF
+15723 XM
+(makewhatis)SH
+/Times-Roman SF
+21192 XM
+(after installing the manual pages.)SH
+14 /Times-Bold AF
+7200 20470 MT
+(5.2 ``Non-Standard'')
+350 W( Installation)SH
+11 /Times-Roman AF
+7200 22665 MT
+(If you'd rather install the software in a different location, you can use the)SH
+/Times-Italic SF
+39667 XM
+(make)SH
+/Times-Roman SF
+42262 XM
+(command as follows,)SH
+7200 23861 MT
+(where [DEST_DIR] specifies an alternate destination directory which will be used as the root for the)SH
+7200 25057 MT
+(installed programs, i.e. programs that would normally be installed in /usr/athena would be installed in)SH
+7200 26253 MT
+([DEST_DIR]/usr/athena.)SH
+/Courier SF
+8520 27830 MT
+(host#)SH
+/Times-Bold SF
+12480 XM
+(make install DESTDIR=[DEST_DIR])275 W
+16 SS 
+7200 32502 MT
+(6. Conclusion)400 W
+11 /Times-Roman AF
+7200 34697 MT
+(Now that you have built and installed your Kerberos system, use the accompanying Kerberos Operation)SH
+4030 50 44224 34897 UL
+4398 50 48529 34897 UL
+7200 35893 MT
+(Notes to create a Kerberos Master database, install authenticated services, and start the Kerberos server.)SH
+2566 50 7200 36093 UL
+16 /Times-Bold AF
+7200 40565 MT
+(7. Acknowledgements)400 W
+11 /Times-Roman AF
+7200 42760 MT
+(We'd like to thank Henry Mensch and Jon Rochlis for helping us debug this document.)SH
+10 SS 
+7200 75600 MT
+(MIT Project Athena)SH
+30100 XM
+(10)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Page: i 12
+BS
+0 SI
+14 /Times-Bold AF
+25272 8138 MT
+(Table of Contents)SH
+13 SS 
+7200 9781 MT
+(1. Organization)
+325 W( of the Source Directory)SH
+53350 XM
+(1)SH
+12 /Times-Roman AF
+9000 11136 MT
+(1.1 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(admin)SH
+/Times-Roman SF
+16701 XM
+(Directory)SH
+53400 XM
+(2)SH
+9000 12491 MT
+(1.2 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(kuser)SH
+/Times-Roman SF
+16300 XM
+(Directory)SH
+53400 XM
+(2)SH
+9000 13846 MT
+(1.3 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(appl)SH
+/Times-Roman SF
+15700 XM
+(Directory)SH
+53400 XM
+(2)SH
+9000 15201 MT
+(1.4 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(server)SH
+/Times-Roman SF
+16566 XM
+(Directory)SH
+53400 XM
+(3)SH
+9000 16556 MT
+(1.5 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(kadmin)SH
+/Times-Roman SF
+17301 XM
+(Directory)SH
+53400 XM
+(3)SH
+9000 17911 MT
+(1.6 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(include)SH
+/Times-Roman SF
+17234 XM
+(Directory)SH
+53400 XM
+(3)SH
+9000 19266 MT
+(1.7 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(lib)SH
+/Times-Roman SF
+14834 XM
+(Directory)SH
+53400 XM
+(3)SH
+9000 20621 MT
+(1.8 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(man)SH
+/Times-Roman SF
+15767 XM
+(Directory)SH
+53400 XM
+(3)SH
+9000 21976 MT
+(1.9 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(prototypes)SH
+/Times-Roman SF
+18634 XM
+(Directory)SH
+53400 XM
+(3)SH
+9000 23331 MT
+(1.10 The)300 W
+/Times-BoldItalic SF
+13866 XM
+(tools)SH
+/Times-Roman SF
+16501 XM
+(Directory)SH
+53400 XM
+(3)SH
+9000 24686 MT
+(1.11 The)300 W
+/Times-BoldItalic SF
+13866 XM
+(util)SH
+/Times-Roman SF
+15835 XM
+(Directory)SH
+53400 XM
+(4)SH
+13 /Times-Bold AF
+7200 26329 MT
+(2. Preparing)
+325 W( for Installation)SH
+53350 XM
+(4)SH
+7200 27972 MT
+(3. Preparing)
+325 W( for the Build)SH
+53350 XM
+(4)SH
+12 /Times-Roman AF
+9000 29327 MT
+(3.1 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(/etc/krb.conf)SH
+/Times-Roman SF
+19801 XM
+(File)SH
+53400 XM
+(5)SH
+9000 30682 MT
+(3.2 The)300 W
+/Times-BoldItalic SF
+13266 XM
+(/etc/krb.realms)SH
+/Times-Roman SF
+20936 XM
+(File)SH
+53400 XM
+(6)SH
+13 /Times-Bold AF
+7200 32325 MT
+(4. Building)
+325 W( the Software)SH
+53350 XM
+(6)SH
+12 /Times-Roman AF
+9000 33674 MT
+(4.1 Testing)
+300 W( the DES Library)SH
+53400 XM
+(7)SH
+13 /Times-Bold AF
+7200 35317 MT
+(5. Installing)
+325 W( the Software)SH
+53350 XM
+(9)SH
+12 /Times-Roman AF
+9000 36666 MT
+(5.1 The)
+300 W( ``Standard'' Places)SH
+53400 XM
+(9)SH
+9000 38015 MT
+(5.2 ``Non-Standard'')
+300 W( Installation)SH
+52800 XM
+(10)SH
+13 /Times-Bold AF
+7200 39658 MT
+(6. Conclusion)325 W
+52700 XM
+(10)SH
+7200 41301 MT
+(7. Acknowledgements)325 W
+52700 XM
+(10)SH
+10 /Times-Roman AF
+7200 75600 MT
+(MIT Project Athena)SH
+30461 XM
+(i)SH
+47890 XM
+(4 January 1990)SH
+ES
+%%Trailer
+%%Pages: 12
+%%DocumentFonts: Times-Roman Times-Bold Times-Italic Times-BoldItalic Courier Symbol

@@ -1,0 +1,36 @@
+thisconfigdir=../..
+myfulldir=tests/create
+mydir=tests/create
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+SRCS=$(srcdir)/kdb5_mkdums.c
+KDB5_DEP_LIBS=$(THREAD_LINKOPTS) $(DL_LIB)
+
+all:: kdb5_mkdums
+
+kdb5_mkdums: kdb5_mkdums.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o kdb5_mkdums kdb5_mkdums.o $(KDB5_DEP_LIBS) $(KDB5_LIBS) $(KRB5_BASE_LIBS)
+
+all:: kdb5_mkdums
+
+install::
+
+clean::
+	$(RM) kdb5_mkdums.o kdb5_mkdums
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)kdb5_mkdums.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SS_DEPS) kdb5_mkdums.c

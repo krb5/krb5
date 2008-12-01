@@ -1,0 +1,273 @@
+#@#include<windows.h>
+#@#define RGBA(r,g,b,a) ((((DWORD) ((a) & 0xff)) << 24) | RGB(r,g,b))
+Name,Type,Value,Description
+CredWindow,KC_SPACE,0,"Options for the credentials window as well as the Network Identity Manager application."
+  AutoInit,KC_INT32,0,"Boolean. Prompt for new credentials if no credentials are present during startup."
+  AutoStart,KC_INT32,0,"[PRIVATE] Boolean. Start Network Identity Manager automatically when the current user logs in."
+  AutoImport,KC_INT32,1,"Boolean. Import credentials from the LSA cache when Network Identity Manager starts."
+  AutoDetectNet,KC_INT32,1,"Boolean. Automatically detect network connectivity changes."
+  HideWatermark,KC_INT32,0,"Boolean. Suppress watermark in Credentials display.  NOTE:  there is no guarantee that this value will exist in future versions."
+  KeepRunning,KC_INT32,1,"Boolean. Run from the system notification area after the main window is closed."
+  DefaultView,KC_STRING,ByIdentity,"[PRIVATE] Name of the default view in Advanced mode."
+  DefaultViewMini,KC_STRING,CompactIdentity,"[PRIVATE] Name of the default view in Basic mode."
+  PaddingHorizontal,KC_INT32,4,"[PRIVATE]"
+  PaddingVertical,KC_INT32,2,"[PRIVATE]"
+  PaddingHeader,KC_INT32,16,"[PRIVATE]"
+  Monitor,KC_INT32,1,"Boolean. Monitor credentials for expiration and renewal."
+  DefaultMonitor,KC_INT32,1,"Boolean. This is the default Monitor value that is assigned for new identities."
+  RefreshTimeout,KC_INT32,60,"Number of seconds between credentials window refreshes.  The credentials window automatically triggers a refresh operation.  This value specifies the number of seconds that must elapse between two refreshes.  During the refresh, all the credentials provider plug-ins will need to re-enumerate their respective credentials."
+  WarnThreshold,KC_INT32,900,In seconds
+  AllowWarn,KC_INT32,1,"Boolean. Enables warning."
+  CriticalThreshold,KC_INT32,300,In seconds
+  AllowCritical,KC_INT32,1,Boolean. Enables critical.
+  AutoRenewThreshold,KC_INT32,600,In seconds
+  AllowAutoRenew,KC_INT32,1,Boolean.
+  RenewAtHalfLife,KC_INT32,1,Boolean. Use half-life algorithm for renewals.
+  DefaultAllowAutoRenew,KC_INT32,1,Default AllowAutoRenew value for new identities
+  DefaultSticky,KC_INT32,0,Default Sticky value for new identities
+  MaxThreshold,KC_INT32,86400,Max value for a threshold (1 day)
+  MinThreshold,KC_INT32,10,Min value for a threshold (0)
+  LogToFile,KC_INT32,0,Boolean. If true logs trace events to a nidmdbg.log in the temp folder
+  DestroyCredsOnExit,KC_INT32,0,Boolean.  If true; all credentials will be destroyed when NetIDMgr exits.
+  NotificationAction,KC_INT32,50025,Action to perform when the user clicks on the notification icon.
+  DefaultWindowMode,KC_INT32,1,(0-normal; 1-mini)
+  DefaultTheme,KC_STRING,Default,Default theme.  The name should correspond to a subspace in Themes
+  ViewAllIdents,KC_INT32,0,"Boolean. Try to display all known identities if non-zero."
+  Windows,KC_SPACE,0,Window parameters
+    _Schema,KC_SPACE,0,Schema
+      Width,KC_INT32,0,
+      Height,KC_INT32,0,
+      XPos,KC_INT32,0,
+      YPos,KC_INT32,0,
+      Dock,KC_INT32,0,Dock on window corner (0-none; 1-top left; 2-top right; 3-bottom right; 4-bottom left)
+    _Schema,KC_ENDSPACE,0,
+    Main,KC_SPACE,0,Main window
+    Main,KC_ENDSPACE,0,
+    MainMini,KC_SPACE,0,Main window (mini mode)
+      Width,KC_INT32,470,
+      Height,KC_INT32,500,
+      Dock,KC_INT32,3,
+    MainMini,KC_ENDSPACE,0,
+    NewCred,KC_SPACE,0,New credentials window
+      ForceToTop,KC_INT32,1,Force new creds window to the top
+      AnimateSizeChanges,KC_INT32,1,Animate the new creds window when the size needs changing.
+      AnimationSteps,KC_INT32,7,Number of steps in size-change animation
+      AnimationStepTimeout,KC_INT32,40,Number of milliseconds to wait between each step of the size-change animation
+    NewCred,KC_ENDSPACE,0,
+  Windows,KC_ENDSPACE,0,
+  Views,KC_SPACE,0,Preconfigured views for credentials
+   _Schema,KC_SPACE,0,Schema for view definitions
+     Description,KC_STRING,"",Description of the view
+     ColumnList,KC_STRING,"","List of columns for the view, in order"
+     _AppVersion,KC_BINARY,0,Binary version stamp
+     Columns,KC_SPACE,0,"Column definitions.  Each column name should have a corresponding subspace here.  The name of the column should be a property or field name, unless it is a pseudo column like _CWFlags."
+       _Schema,KC_SPACE,0,Column definition schema
+        Width,KC_INT32,0,Width of the column
+        SortIndex,KC_INT32,0,Sort index
+        Flags,KC_INT32,0,Flags (See KHUI_CW_COL_* values)
+       _Schema,KC_ENDSPACE,0
+     Columns,KC_ENDSPACE,0
+   _Schema,KC_ENDSPACE,0,
+   Custom_0,KC_SPACE,0,First custom view.  Additional views have names of the form Custom_N
+    Description,KC_STRING,Custom view,
+    ColumnList,KC_STRING,"_CWFlags,IdentityName,TypeName,Name,TimeLeft",
+    Columns,KC_SPACE,0,Columns
+      _CWFlags,KC_SPACE,0,
+        Width,KC_INT32,20,
+        Flags,KC_INT32,112,
+      _CWFlags,KC_ENDSPACE,0,
+      IdentityName,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,0,
+        Flags,KC_INT32,11,
+      IdentityName,KC_ENDSPACE,0
+      TypeName,KC_SPACE,0
+        Width,KC_INT32,100
+        SortIndex,KC_INT32,1
+        Flags,KC_INT32,11
+      TypeName,KC_ENDSPACE,0
+      Name,KC_SPACE,0
+        Width,KC_INT32,200
+        SortIndex,KC_INT32,2
+        Flags,KC_INT32,3
+      Name,KC_ENDSPACE,0
+      TimeLeft,KC_SPACE,0
+        Width,KC_INT32,200
+        Flags,KC_INT32,1
+      TimeLeft,KC_ENDSPACE,0
+    Columns,KC_ENDSPACE,0
+   Custom_0,KC_ENDSPACE,0,
+   ByIdentity,KC_SPACE,0,The default view
+    Description,KC_STRING,View grouped by identity and credential type,
+    ColumnList,KC_STRING,"_CWFlags,IdentityName,TypeName,Location,Name,TimeLeft",
+    Columns,KC_SPACE,0,Columns
+      _CWFlags,KC_SPACE,0,
+        Width,KC_INT32,20,
+        Flags,KC_INT32,112,
+      _CWFlags,KC_ENDSPACE,0,
+      IdentityName,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,0,
+        Flags,KC_INT32,11,
+      IdentityName,KC_ENDSPACE,0
+      TypeName,KC_SPACE,0
+        Width,KC_INT32,100
+        SortIndex,KC_INT32,1
+        Flags,KC_INT32,11
+      TypeName,KC_ENDSPACE,0
+      Location,KC_SPACE,0,
+        Width,KC_INT32,50
+        SortIndex,KC_INT32,2
+        Flags,KC_INT32,11
+      Location,KC_ENDSPACE,0,
+      Name,KC_SPACE,0
+        Width,KC_INT32,200
+        SortIndex,KC_INT32,3
+        Flags,KC_INT32,3
+      Name,KC_ENDSPACE,0
+      TimeLeft,KC_SPACE,0
+        Width,KC_INT32,200
+        Flags,KC_INT32,1
+      TimeLeft,KC_ENDSPACE,0
+    Columns,KC_ENDSPACE,0
+   ByIdentity,KC_ENDSPACE,0
+   ByType,KC_SPACE,0,The default view
+    Description,KC_STRING,View grouped by type and identity,
+    ColumnList,KC_STRING,"_CWFlags,TypeName,IdentityName,Name,TimeLeft",
+    Columns,KC_SPACE,0,Columns
+      _CWFlags,KC_SPACE,0,
+        Width,KC_INT32,20,
+        Flags,KC_INT32,112,
+      _CWFlags,KC_ENDSPACE,0,
+      TypeName,KC_SPACE,0
+        Width,KC_INT32,100
+        SortIndex,KC_INT32,0
+        Flags,KC_INT32,11
+      TypeName,KC_ENDSPACE,0
+      IdentityName,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,1,
+        Flags,KC_INT32,11,
+      IdentityName,KC_ENDSPACE,0
+      Name,KC_SPACE,0
+        Width,KC_INT32,200
+        SortIndex,KC_INT32,2
+        Flags,KC_INT32,3
+      Name,KC_ENDSPACE,0
+      TimeLeft,KC_SPACE,0
+        Width,KC_INT32,200
+        Flags,KC_INT32,1
+      TimeLeft,KC_ENDSPACE,0
+    Columns,KC_ENDSPACE,0
+   ByType,KC_ENDSPACE,0
+   ByLocation,KC_SPACE,0,View by location
+    Description,KC_STRING,View grouped by location,
+    ColumnList,KC_STRING,"_CWFlags,Location,IdentityName,TypeName,Name,TimeLeft",
+    Columns,KC_SPACE,0,Columns
+      _CWFlags,KC_SPACE,0,
+        Width,KC_INT32,20,
+        Flags,KC_INT32,112,
+      _CWFlags,KC_ENDSPACE,0,
+      Location,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,0,
+        Flags,KC_INT32,11,
+      Location,KC_ENDSPACE,0,
+      IdentityName,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,1,
+        Flags,KC_INT32,11,
+      IdentityName,KC_ENDSPACE,0
+      TypeName,KC_SPACE,0
+        Width,KC_INT32,100
+        SortIndex,KC_INT32,2
+        Flags,KC_INT32,11
+      TypeName,KC_ENDSPACE,0
+      Name,KC_SPACE,0
+        Width,KC_INT32,200
+        SortIndex,KC_INT32,3
+        Flags,KC_INT32,3
+      Name,KC_ENDSPACE,0
+      TimeLeft,KC_SPACE,0
+        Width,KC_INT32,200
+        Flags,KC_INT32,1
+      TimeLeft,KC_ENDSPACE,0
+    Columns,KC_ENDSPACE,0
+   ByLocation,KC_ENDSPACE,0
+   CompactIdentity,KC_SPACE,0,Default Compact View by Identity
+     Description,KC_STRING,Compact view of identities
+     ColumnList,KC_STRING,"IdentityName",
+     ExpandedIdentity,KC_INT32,1,Use expanded display of identity headers
+     NoHeader,KC_INT32,1,Suppress the column header
+     Columns,KC_SPACE,0,
+       IdentityName,KC_SPACE,0,
+         Width,KC_INT32,415,
+         SortIndex,KC_INT32,0,
+         Flags,KC_INT32,171
+       IdentityName,KC_ENDSPACE,0,
+     Columns,KC_ENDSPACE,0,
+   CompactIdentity,KC_ENDSPACE,0
+   Custom_1,KC_SPACE,0,Default Compact View by Identity
+     Description,KC_STRING,Compact view of identities
+     ColumnList,KC_STRING,"IdentityName",
+     ExpandedIdentity,KC_INT32,1,Use expanded display of identity headers
+     NoHeader,KC_INT32,1,Suppress the column header
+     Columns,KC_SPACE,0,
+       IdentityName,KC_SPACE,0,
+         Width,KC_INT32,415,
+         SortIndex,KC_INT32,0,
+         Flags,KC_INT32,171
+       IdentityName,KC_ENDSPACE,0,
+     Columns,KC_ENDSPACE,0,
+   Custom_1,KC_ENDSPACE,0
+  Views,KC_ENDSPACE,0
+  Notices,KC_SPACE,0,Notices and alerts
+    MinimizeWarning,KC_INT32,1,Show the minimize warning?
+  Notices,KC_ENDSPACE,0
+  Themes,KC_SPACE,0,Color schemes for the credentials display
+    _Schema,KC_SPACE,0,Schema for color schemes
+      ClrSelection,KC_INT32,0,"Background (Selection)"
+      ClrBackground,KC_INT32,0,"Background (Normal)"
+      ClrGray,KC_INT32,0,"Background (Gray)"
+      ClrHeader,KC_INT32,0,"Header (Normal)"
+      ClrHeaderCred,KC_INT32,0,"Header (with credentials)"
+      ClrHeaderWarn,KC_INT32,0,"Header (Warning)"
+      ClrHeaderCrit,KC_INT32,0,"Header (Critical)"
+      ClrHeaderExp,KC_INT32,0,"Header (Expired)"
+      ClrHeaderSel,KC_INT32,0,"Header (Normal, Selected)"
+      ClrHeaderCredSel,KC_INT32,0,"Header (with credentials, Selected)"
+      ClrHeaderWarnSel,KC_INT32,0,"Header (Warning, Selected)"
+      ClrHeaderCritSel,KC_INT32,0,"Header (Critical, Selected)"
+      ClrHeaderExpSel,KC_INT32,0,"Header (Expired, Selected)"
+      ClrHeaderOutline,KC_INT32,0,"Header (Outline color)"
+      ClrText,KC_INT32,0,"Text (Normal)"
+      ClrTextSel,KC_INT32,0,"Text (Selected)"
+      ClrTextHeader,KC_INT32,0,"Text (Header)"
+      ClrTextHeaderSel,KC_INT32,0,"Text (Header, Selected)"
+      ClrTextHeaderGray,KC_INT32,0,"Text (Header, Gray)"
+      ClrTextHeaderGraySel,KC_INT32,0,"Text (Header, Gray, Selected)"
+    _Schema,KC_ENDSPACE,0,
+    Default,KC_SPACE,0,Default color scheme
+      ClrSelection,KC_INT32,"RGB(192,192,192)",
+      ClrBackground,KC_INT32,"RGB(255,255,255)",
+      ClrGray,KC_INT32,"RGB(240,240,240)",
+      ClrHeader,KC_INT32,"RGB(240,240,240)",
+      ClrHeaderCred,KC_INT32,"RGB(184,235,134)",
+      ClrHeaderWarn,KC_INT32,"RGB(235,235,134)",
+      ClrHeaderCrit,KC_INT32,"RGB(235,184,134)",
+      ClrHeaderExp,KC_INT32,"RGB(235,134,134)",
+      ClrHeaderSel,KC_INT32,"RGB(200,200,200)",
+      ClrHeaderCredSel,KC_INT32,"RGB(144,195, 94)",
+      ClrHeaderWarnSel,KC_INT32,"RGB(195,195, 94)",
+      ClrHeaderCritSel,KC_INT32,"RGB(195,144, 94)",
+      ClrHeaderExpSel,KC_INT32,"RGB(195, 94, 94)",
+      ClrHeaderOutline,KC_INT32,"RGB(15,15,15)",
+      ClrText,KC_INT32,"RGB(15,15,15)",
+      ClrTextSel,KC_INT32,"RGB(0,0,0)",
+      ClrTextHeader,KC_INT32,"RGB(15,15,15)",
+      ClrTextHeaderSel,KC_INT32,"RGB(0,0,0)",
+      ClrTextHeaderGray,KC_INT32,"RGB(192,192,192)",
+      ClrTextHeaderGraySel,KC_INT32,"RGB(240,240,240)",
+    Default,KC_ENDSPACE,0
+  Themes,KC_ENDSPACE,0
+CredWindow,KC_ENDSPACE,0

@@ -1,0 +1,47 @@
+Name,Type,Value,Description
+PluginManager,KC_SPACE,0,Plugin Manager Configuration
+  Plugins,KC_SPACE,0,Plugin Specific configuration
+    PluginMaxFailureCount,KC_INT32,3,Maximum number of failure counts before plugin is disabled
+    PluginFailureCountResetTime,KC_INT64,36000,Time after first failure at which the failure count is reset
+    _Schema,KC_SPACE,0,Plugin schema
+      Module,KC_STRING,<module name>,The name of the module that registered this plugin
+      Description,KC_STRING,<Description>,Description of the plugin
+      Dependencies,KC_STRING,<Dependencies>,Multi string of plugin names of plugins that this plugin depends on
+      Type,KC_INT32,0,The type of the plugin
+#      Flags,KC_INT32,0,Flags (Deprecated)
+      Disabled,KC_INT32,0,Plug-in is disabled (Boolean)
+      NoUnload,KC_INT32,0,Do not unload the plugin (Boolean)
+      FailureCount,KC_INT32,0,Number of failed loads
+      FailureTime,KC_INT64,0,FILETIME of first failure
+      FailureReason,KC_INT32,0,Reason for first failure.  One of the plugin status values.
+      Parameters,KC_SPACE,0,Plugin parameters.  The schema beyond this is plugin dependent.
+      Parameters,KC_ENDSPACE,0,
+    _Schema,KC_ENDSPACE,0,
+  Plugins,KC_ENDSPACE,0,
+  Modules,KC_SPACE,0,Module Specific configuration
+    ModuleMaxFailureCount,KC_INT32,3,Maximum number of failure counts before module is disabled
+    ModuleFailureCountResetTime,KC_INT64,72000,Time after first failure at which the failure count is reset
+    _Schema,KC_SPACE,0,Module schema
+      ImagePath,KC_STRING,<Path to the library binary>,Path to the DLL (including DLL name)
+#      Flags,KC_INT32,0,Flags (Deprecated)
+      Disabled,KC_INT32,0,Module is disabled (Boolean)
+      FailureCount,KC_INT32,0,Number of failed loads
+      FailureTime,KC_INT64,0,FILETIME of first failure
+      FailureReason,KC_INT32,0,Reason for last failure.  One of the module status values.
+      PluginList,KC_STRING,<plugins>,List of plugins implemented in the module
+    _Schema,KC_ENDSPACE,0,
+# The OpenAFS plug-in is installed separately.
+#    OpenAFS,KC_SPACE,0,OpenAFS Module
+#      ImagePath,KC_STRING,afscred.dll,
+#      PluginList,KC_STRING,AfsCred,
+#    OpenAFS,KC_ENDSPACE,0,
+#    MITKrb5,KC_SPACE,0,MIT Kerberos V
+#      ImagePath,KC_STRING,krb5cred.dll,
+#      PluginList,KC_STRING,Krb5Cred,
+#    MITKrb5,KC_ENDSPACE,0,
+#    MITKrb4,KC_SPACE,0,MIT Kerberos IV
+#     ImagePath,KC_STRING,krb4cred.dll,
+#      PluginList,KC_STRING,Krb4Cred,
+#    MITKrb4,KC_ENDSPACE,0,
+  Modules,KC_ENDSPACE,0,
+PluginManager,KC_ENDSPACE,0,

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+find . \( -name \*.c -o -name \*.h -o -name \*.hin -o -name \*.in \
+	  -o -name \*.txt -o -name Makefile.in -o -name \*.sh -o -name \*.exp \
+	  -o -name \*.cxx -o -name \*.hxx -o -name \*.html -o -name \*.def \
+	  -o -name \*.idl -o -name \*.Acf -o -name \*.Idl \
+	  -o -name Makefile.w32 \
+	  \) -print | \
+while read name; do
+  if test "`svn pg svn:eol-style $name`" == ""; then
+    svn ps svn:eol-style native $name
+  fi
+done

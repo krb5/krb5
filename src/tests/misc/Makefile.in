@@ -1,0 +1,68 @@
+thisconfigdir=../..
+myfulldir=tests/misc
+mydir=tests/misc
+BUILDTOP=$(REL)..$(S)..
+RUN_SETUP = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+OBJS=test_getpw.o
+SRCS=\
+	$(srcdir)/test_getpw.c \
+	$(srcdir)/test_getsockname.c \
+	$(srcdir)/test_cxx_krb5.cpp \
+	$(srcdir)/test_cxx_gss.cpp \
+	$(srcdir)/test_cxx_rpc.cpp
+
+all:: test_getpw
+
+check:: test_getpw test_cxx_krb5 test_cxx_gss test_cxx_rpc
+	$(RUN_SETUP) $(VALGRIND) ./test_getpw
+	$(RUN_SETUP) $(VALGRIND) ./test_cxx_krb5
+	$(RUN_SETUP) $(VALGRIND) ./test_cxx_gss
+	$(RUN_SETUP) $(VALGRIND) ./test_cxx_rpc
+
+test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_LIB)
+
+test_getsockname: $(OUTPRE)test_getsockname.$(OBJEXT)
+	$(CC_LINK) $(ALL_CFLAGS) -o test_getsockname $(OUTPRE)test_getsockname.$(OBJEXT) $(LIBS)
+
+test_cxx_krb5: $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_DEPLIB)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_krb5 $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_BASE_LIBS) $(LIBS)
+test_cxx_gss: $(OUTPRE)test_cxx_gss.$(OBJEXT)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_gss $(OUTPRE)test_cxx_gss.$(OBJEXT) $(LIBS)
+test_cxx_rpc: $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_DEPLIBS)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_rpc $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_LIBS) $(KRB5_BASE_LIBS) $(LIBS)
+
+test_cxx_krb5.$(OBJEXT): test_cxx_krb5.cpp
+test_cxx_gss.$(OBJEXT): test_cxx_gss.cpp
+test_cxx_rpc.$(OBJEXT): test_cxx_rpc.cpp
+
+install::
+
+clean::
+	$(RM) test_getpw test_cxx_krb5 test_cxx_gss *.o
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)test_getpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  test_getpw.c
+$(OUTPRE)test_getsockname.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  test_getsockname.c
+$(OUTPRE)test_cxx_krb5.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h test_cxx_krb5.cpp
+$(OUTPRE)test_cxx_gss.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  test_cxx_gss.cpp
+$(OUTPRE)test_cxx_rpc.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h test_cxx_rpc.cpp

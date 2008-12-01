@@ -1,0 +1,108 @@
+thisconfigdir=./..
+myfulldir=appl/gssftp/ftpd
+mydir=ftpd
+BUILDTOP=$(REL)..$(S)..$(S)..
+#
+# appl/gssftp/ftpd/Makefile.in
+#
+DEFINES = -DGSSAPI -DFTP_BUFSIZ=10240 #-DNOCONFIDENTIAL
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+SETENVSRC=@SETENVSRC@
+SETENVOBJ=@SETENVOBJ@
+LIBOBJS=@LIBOBJS@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+FTPD_LIBS=@FTPD_LIBS@
+
+SRCS	= $(srcdir)/ftpd.c ftpcmd.c $(srcdir)/popen.c \
+	  $(srcdir)/vers.c \
+	  $(srcdir)/../ftp/glob.c \
+	  $(srcdir)/../ftp/radix.c \
+	  $(srcdir)/../ftp/secure.c \
+	  $(srcdir)/../../bsd/getdtablesize.c $(SETENVSRC)
+
+OBJS	= ftpd.o ftpcmd.o glob.o popen.o vers.o radix.o \
+	  secure.o $(LIBOBJS) $(SETENVOBJ)
+
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
+
+all::	ftpd
+
+ftpd:	$(OBJS) $(PTY_DEPLIB) $(GSS_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(PTY_LIB) $(UTIL_LIB) $(GSS_LIBS) $(KRB4COMPAT_LIBS)
+
+generate-files-mac: ftpcmd.c
+
+clean::
+	$(RM) ftpd ftpcmd.c
+
+depend::
+
+install::
+	for f in ftpd; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8; \
+	done
+
+
+ftpcmd.c: $(srcdir)/ftpcmd.y
+	$(RM) ftpcmd.c y.tab.c
+	$(YACC) $(srcdir)/ftpcmd.y
+	$(MV) y.tab.c ftpcmd.c
+
+glob.o: $(srcdir)/../ftp/glob.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../ftp/glob.c
+radix.o: $(srcdir)/../ftp/radix.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../ftp/radix.c
+secure.o: $(srcdir)/../ftp/secure.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../ftp/secure.c
+
+getdtablesize.o: $(srcdir)/../../bsd/getdtablesize.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../../bsd/getdtablesize.c
+
+setenv.o: $(srcdir)/../../bsd/setenv.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../../bsd/setenv.c
+
+
+ftpd.o: $(srcdir)/pathnames.h
+secure.o: $(srcdir)/secure.h
+
+ftpd.o: $(srcdir)/ftpd.c
+ftpcmd.o: ftpcmd.c
+popen.o: $(srcdir)/popen.c
+vers.o: $(srcdir)/vers.c
+
+# NOPOSTFIX
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)ftpd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi_krb5.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/libpty.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-util.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/port-sockets.h \
+  $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
+  ftpd.c ftpd_var.h pathnames.h secure.h
+$(OUTPRE)ftpcmd.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(SRCTOP)/include/k5-buf.h \
+  $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
+  ftpcmd.c ftpd_var.h
+$(OUTPRE)popen.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h ftpd_var.h \
+  popen.c
+$(OUTPRE)vers.$(OBJEXT): vers.c
+$(OUTPRE)glob.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../ftp/ftp_var.h $(srcdir)/../ftp/glob.c
+$(OUTPRE)radix.$(OBJEXT): $(srcdir)/../ftp/ftp_var.h \
+  $(srcdir)/../ftp/radix.c
+$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(srcdir)/../arpa/ftp.h $(srcdir)/../ftp/secure.c secure.h
+$(OUTPRE)getdtablesize.$(OBJEXT): $(srcdir)/../../bsd/getdtablesize.c
