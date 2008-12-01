@@ -88,13 +88,11 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 {
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer, *padding;
-    size_t i, j, num_sign_data;
     krb5_keyblock k1, k2, k3;
     krb5_data d1, d2, d3;
     krb5_keyusage ms_usage;
     char salt_data[14];
     krb5_data salt;
-    krb5_data *sign_data = NULL;
 
     d1.length = d2.length = d3.length = 0;
     d1.data = d2.data = d3.data = NULL;
@@ -156,32 +154,11 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    /* Create a checksum over all the data to be signed */
-    for (i = 0, num_sign_data = 0; i < num_data; i++) {
-	krb5_crypto_iov *iov = &data[i];
-
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
-	    num_sign_data++;
-    }
-    sign_data = (krb5_data *)calloc(num_sign_data, sizeof(krb5_data));
-    if (sign_data == NULL)
-	goto cleanup;
-
-    for (i = 0, j = 0; i < num_data; i++) {
-	krb5_crypto_iov *iov = &data[i];
-
-	if (iov->flags == KRB5_CRYPTO_TYPE_DATA ||
-	    iov->flags == KRB5_CRYPTO_TYPE_SIGN_ONLY) {
-	    sign_data[j++] = iov[i].data;
-	}
-    }
-
-    krb5_hmac(hash, &k2, 1, sign_data, &trailer->data);
+    krb5_hmac_iov(hash, &k2, data, num_data, &trailer->data);
 
     krb5_hmac(hash, &k1, 1, &trailer->data, &d3);
 
-    ret = enc->encrypt_iov(&k3, ivec, data);
+    ret = enc->encrypt_iov(&k3, ivec, data, num_data);
 
 cleanup:
     if (d1.data != NULL) {
@@ -195,9 +172,6 @@ cleanup:
     if (d3.data != NULL) {
 	memset(d3.data, 0, d3.length);
 	free(d3.data);
-    }
-    if (sign_data != NULL) {
-	free(sign_data);
     }
 
     return ret;

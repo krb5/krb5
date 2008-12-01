@@ -25,7 +25,8 @@
  */
 
 #include "k5-int.h"
-#include "etypes.h"
+#include "cksumtypes.h"
+#include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_make_checksum_iov(krb5_context context,
@@ -35,4 +36,33 @@ krb5_c_make_checksum_iov(krb5_context context,
 			 krb5_crypto_iov *data,
 			 size_t num_data)
 {
+    krb5_error_code ret;
+    size_t cksumlen;
+    krb5_crypto_iov *checksum;
+    size_t i;
+
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
+	if (krb5_cksumtypes_list[i].ctype == cksumtype)
+	    break;
+    }
+
+    if (i == krb5_cksumtypes_length)
+	return(KRB5_BAD_ENCTYPE);
+
+    if (krb5_cksumtypes_list[i].keyhash)
+	cksumlen = krb5_cksumtypes_list[i].keyhash->hashsize;
+    else
+	cksumlen = krb5_cksumtypes_list[i].hash->hashsize;
+
+    checksum = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_CHECKSUM);
+    if (checksum == NULL || checksum->data.length < cksumlen)
+	return(KRB5_BAD_MSIZE);
+
+    checksum->data.length = cksumlen;
+
+    ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i],
+				      key, usage, data, num_data,
+				      &checksum->data);
+
+    return(ret);
 }

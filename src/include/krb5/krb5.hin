@@ -630,6 +630,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_error_code KRB5_CALLCONV
     krb5_c_verify_checksum_iov
     (krb5_context context, 
+		    krb5_cksumtype cksumtype,
 		    const krb5_keyblock *key, krb5_keyusage usage,
 		    const krb5_crypto_iov *data, size_t num_data,
 		    krb5_boolean *valid);
