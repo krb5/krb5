@@ -167,7 +167,16 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
+    /* Adjust pointers so confounder is at start of header */
+
+    header->data.length -= hash->hashsize;
+    header->data.data   += hash->hashsize;
+
     ret = enc->encrypt_iov(&k3, ivec, data, num_data);
+
+    header->data.length += hash->hashsize;
+    header->data.data   -= hash->hashsize;
+
     if (ret != 0)
 	goto cleanup;
 
