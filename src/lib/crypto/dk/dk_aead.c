@@ -97,11 +97,12 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
 	if (!ENCRYPT_DATA_IOV(iov)) /* DATA | PADDING */
 	    continue;
 
-	if (iov->flags == KRB5_CRYPTO_TYPE_PADDING && i > 0) {
-	    const krb5_crypto_iov *data_to_pad = &data[i - 1];
+	if (iov->flags == KRB5_CRYPTO_TYPE_PADDING) {
 	    size_t padlen = 0;
 
-	    if (blocksize != 0) {
+	    if (i > 0 && blocksize != 0) {
+		const krb5_crypto_iov *data_to_pad = &data[i - 1];
+
 		padlen = blocksize - (data_to_pad->data.length % blocksize);
 
 		if (iov->data.length < padlen)
