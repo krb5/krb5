@@ -90,7 +90,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock k1, k2, k3;
     krb5_data d1, d2, d3;
-    krb5_data checksum, confounder;
+    krb5_data checksum, confounder, header_data;
     krb5_keyusage ms_usage;
     char salt_data[14];
     krb5_data salt;
@@ -108,6 +108,8 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
     if (header == NULL || header->data.length < hash->hashsize + CONFOUNDERLENGTH)
 	return KRB5_BAD_MSIZE;
+
+    header_data = header->data;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer != NULL)
@@ -159,6 +161,10 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     checksum.data = header->data.data;
     checksum.length = hash->hashsize;
 
+    /* Adjust pointers so confounder is at start of header */
+    header->data.length -= hash->hashsize;
+    header->data.data   += hash->hashsize;
+
     ret = krb5_hmac_iov(hash, &k2, data, num_data, &checksum);
     if (ret != 0)
 	goto cleanup;
@@ -167,20 +173,14 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    /* Adjust pointers so confounder is at start of header */
-
-    header->data.length -= hash->hashsize;
-    header->data.data   += hash->hashsize;
-
     ret = enc->encrypt_iov(&k3, ivec, data, num_data);
-
-    header->data.length += hash->hashsize;
-    header->data.data   -= hash->hashsize;
 
     if (ret != 0)
 	goto cleanup;
 
 cleanup:
+    header->data = header_data; /* restore header pointers */
+
     if (d1.data != NULL) {
 	memset(d1.data, 0, d1.length);
 	free(d1.data);
@@ -211,7 +211,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock k1, k2, k3;
     krb5_data d1, d2, d3;
-    krb5_data checksum;
+    krb5_data checksum, header_data;
     krb5_keyusage ms_usage;
     char salt_data[14];
     krb5_data salt;
@@ -222,6 +222,8 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
     if (header == NULL || header->data.length != hash->hashsize + CONFOUNDERLENGTH)
 	return KRB5_BAD_MSIZE;
+
+    header_data = header->data;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer == NULL || trailer->data.length != 0)
@@ -264,20 +266,15 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     checksum.data = header->data.data;
     checksum.length = hash->hashsize;
 
+    /* Adjust pointers so confounder is at start of header */
+    header->data.length -= hash->hashsize;
+    header->data.data   += hash->hashsize;
+
     ret = krb5_hmac(hash, &k1, 1, &checksum, &d3);
     if (ret != 0)
 	goto cleanup;
 
-    /* Adjust pointers so confounder is at start of header */
-
-    header->data.length -= hash->hashsize;
-    header->data.data   += hash->hashsize;
-
     ret = enc->decrypt_iov(&k3, ivec, data, num_data);
-
-    header->data.length += hash->hashsize;
-    header->data.data   -= hash->hashsize;
-
     if (ret != 0)
 	goto cleanup;
 
@@ -285,12 +282,14 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    if (memcmp(header->data.data, d1.data, hash->hashsize) != 0) {
+    if (memcmp(checksum.data, d1.data, hash->hashsize) != 0) {
 	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	goto cleanup;
     }
 
 cleanup:
+    header->data = header_data; /* restore header pointers */
+
     if (d1.data != NULL) {
 	memset(d1.data, 0, d1.length);
 	free(d1.data);
