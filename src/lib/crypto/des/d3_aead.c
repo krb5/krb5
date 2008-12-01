@@ -53,7 +53,10 @@ krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
      * Initialize left and right with the contents of the initial
      * vector.
      */
-    ip = ivec;
+    if (ivec != NULL)
+	ip = ivec;
+    else
+	ip = mit_des_zeroblock;
     GET_HALF_BLOCK(left, ip);
     GET_HALF_BLOCK(right, ip);
 
@@ -134,7 +137,10 @@ krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
     /*
      * Prime the old cipher with ivec.
      */
-    ip = ivec;
+    if (ivec != NULL)
+	ip = ivec;
+    else
+	ip = mit_des_zeroblock;
     GET_HALF_BLOCK(ocipherl, ip);
     GET_HALF_BLOCK(ocipherr, ip);
 

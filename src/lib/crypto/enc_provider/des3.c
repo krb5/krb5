@@ -177,7 +177,7 @@ k5_des3_encrypt_iov(const krb5_keyblock *key,
     /* this has a return value, but the code always returns zero */
     krb5int_des3_cbc_encrypt_iov(data, num_data,
 			     schedule[0], schedule[1], schedule[2],
-			     ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
+			     ivec?(const unsigned char *) ivec->data : NULL);
 
     zap(schedule, sizeof(schedule));
 
@@ -200,7 +200,7 @@ k5_des3_decrypt_iov(const krb5_keyblock *key,
     /* this has a return value, but the code always returns zero */
     krb5int_des3_cbc_decrypt_iov(data, num_data,
 				 schedule[0], schedule[1], schedule[2],
-				 ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
+				 ivec?(const unsigned char *) ivec->data : NULL);
 
     zap(schedule, sizeof(schedule));
 
