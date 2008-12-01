@@ -133,7 +133,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       krb5int_dk_string_to_key,
       NULL, /*PRF*/
       0,
-      &krb5int_aead_dk },
+      NULL },
     { ENCTYPE_ARCFOUR_HMAC, 
       "arcfour-hmac","ArcFour with HMAC/md5", &krb5int_enc_arcfour,
       &krb5int_hash_md5,
