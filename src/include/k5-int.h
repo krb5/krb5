@@ -2060,37 +2060,6 @@ extern const krb5_cc_ops *krb5_cc_dfl_ops;
 krb5_error_code
 krb5int_cc_os_default_name(krb5_context context, char **name);
 
-/* reentrant mutex used by krb5_cc_* functions */
-typedef struct _k5_cc_mutex {
-    k5_mutex_t lock;
-    krb5_context owner;
-    krb5_int32 refcount;
-} k5_cc_mutex;
-
-#define K5_CC_MUTEX_PARTIAL_INITIALIZER \
-	{ K5_MUTEX_PARTIAL_INITIALIZER, NULL, 0 }
-
-krb5_error_code
-k5_cc_mutex_init(k5_cc_mutex *m);
-
-krb5_error_code
-k5_cc_mutex_finish_init(k5_cc_mutex *m);
-
-#define k5_cc_mutex_destroy(M) \
-k5_mutex_destroy(&(M)->lock);
-
-void
-k5_cc_mutex_assert_locked(krb5_context context, k5_cc_mutex *m);
-
-void
-k5_cc_mutex_assert_unlocked(krb5_context context, k5_cc_mutex *m);
-
-krb5_error_code
-k5_cc_mutex_lock(krb5_context context, k5_cc_mutex *m);
-
-krb5_error_code
-k5_cc_mutex_unlock(krb5_context context, k5_cc_mutex *m);
-
 typedef struct _krb5_donot_replay {
     krb5_magic magic;
     krb5_ui_4 hash;
