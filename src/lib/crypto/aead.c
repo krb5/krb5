@@ -177,6 +177,9 @@ process_block_p(const krb5_crypto_iov *data,
     const krb5_crypto_iov *iov = &data[i];
     int process_block;
 
+    /* got_header is not used for include_sign_only */
+    assert(iov_state->include_sign_only ? iov_state->got_header == 1 : 1);
+
     switch (iov->flags) {
     case KRB5_CRYPTO_TYPE_HEADER:
 	/* Because SIGN_ONLY headers share padding with SIGN_ONLY data */
