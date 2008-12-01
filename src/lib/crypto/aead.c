@@ -151,3 +151,180 @@ cleanup:
 
     return ret;
 }
+
+const struct krb5_cksumtypes * KRB5_CALLCONV
+krb5int_c_find_checksum_type(krb5_cksumtype cksumtype)
+{
+    size_t i;
+
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
+	if (krb5_cksumtypes_list[i].ctype == cksumtype)
+	    break;
+    }
+
+    if (i == krb5_cksumtypes_length)
+	return NULL;
+
+    return &krb5_cksumtypes_list[i];
+}
+
+void KRB5_CALLCONV
+krb5int_c_iov_get_block(unsigned char *block,
+			size_t block_size,
+			const krb5_crypto_iov *data,
+			size_t num_data,
+			struct iov_block_state *iov_state)
+{
+    size_t i, j = 0;
+
+    for (i = iov_state->iov_pos; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+	size_t nbytes;
+
+	if (iov_state->got_header ?
+	    !ENCRYPT_DATA_IOV(iov) :
+	    !ENCRYPT_CONF_IOV(iov))
+	    continue;
+
+	nbytes = iov->data.length - iov_state->data_pos;
+	if (nbytes > block_size - j)
+	    nbytes = block_size - j;
+
+	memcpy(block + j, iov->data.data + iov_state->data_pos, nbytes);
+
+	iov_state->data_pos += nbytes;
+	j += nbytes;
+
+	assert(j <= block_size);
+
+	if (j == block_size)
+	    break;
+
+	assert(iov_state->data_pos == iov->data.length);
+
+	iov_state->data_pos = 0;
+    }
+
+    if (iov_state->got_header == 0 &&
+	data[i].data.length == iov_state->data_pos) {
+	/* Once we have consumed the header, return to start */
+	iov_state->iov_pos = 0;
+	iov_state->data_pos = 0;
+	iov_state->got_header = 1;
+    }
+
+    if (j != block_size)
+	memset(block + j, 0, block_size - j);
+
+    iov_state->iov_pos = i;
+}
+
+void KRB5_CALLCONV
+krb5int_c_iov_put_block(const krb5_crypto_iov *data,
+			size_t num_data,
+			unsigned char *block,
+			size_t block_size,
+			struct iov_block_state *iov_state)
+{
+    size_t i, j = 0;
+
+    for (i = iov_state->iov_pos; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+	size_t nbytes;
+
+	if (iov_state->got_header ?
+	    !ENCRYPT_DATA_IOV(iov) :
+	    !ENCRYPT_CONF_IOV(iov))
+	    continue;
+
+	nbytes = iov->data.length - iov_state->data_pos;
+	if (nbytes > block_size - j)
+	    nbytes = block_size - j;
+
+	memcpy(iov->data.data + iov_state->data_pos, block + j, nbytes);
+
+	iov_state->data_pos += nbytes;
+	j += nbytes;
+
+	assert(j <= block_size);
+
+	if (j == block_size)
+	    break;
+
+	assert(iov_state->data_pos == iov->data.length);
+
+	iov_state->data_pos = 0;
+    }
+
+    if (iov_state->got_header == 0 &&
+	data[i].data.length == iov_state->data_pos) {
+	/* Once we have consumed the header, return to start */
+	iov_state->iov_pos = 0;
+	iov_state->data_pos = 0;
+	iov_state->got_header = 1;
+    }
+
+    iov_state->iov_pos = i;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
+			     const struct krb5_enc_provider *enc,
+			     const struct krb5_hash_provider *hash,
+			     const krb5_keyblock *key,
+			     krb5_keyusage keyusage,
+			     const krb5_data *ivec,
+			     krb5_crypto_iov *data,
+			     size_t num_data)
+{
+    krb5_error_code ret;
+    size_t header_len, trailer_len, padding_len;
+    krb5_crypto_iov iov[4];
+    krb5_crypto_iov *stream, *s_data;
+
+    stream = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM);
+    assert(stream != NULL);
+
+    s_data = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_DATA);
+    if (s_data == NULL)
+	return KRB5_BAD_MSIZE;
+
+    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER, &header_len);
+    if (ret != 0)
+	return ret;
+
+    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER, &trailer_len);
+    if (ret != 0)
+	return ret;
+
+    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING, &padding_len);
+    if (ret != 0)
+	return ret;
+
+    if (stream->data.length < header_len + trailer_len)
+	return KRB5_BAD_MSIZE;
+
+    iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
+    iov[0].data.data = stream->data.data;
+    iov[0].data.length = header_len;
+
+    iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[1].data.data = iov[0].data.data + iov[0].data.length;
+    iov[1].data.length = stream->data.length - header_len - trailer_len;
+
+    /* XXX not self-describing with respect to length, this is the best we can do */
+    iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
+    iov[2].data.data = NULL;
+    iov[2].data.length = 0;
+
+    iov[3].flags = KRB5_CRYPTO_TYPE_TRAILER;
+    iov[3].data.data = stream->data.data + stream->data.length - trailer_len;
+    iov[3].data.length = trailer_len;
+
+    ret = aead->decrypt_iov(aead, enc, hash, key, keyusage, ivec, iov, sizeof(iov)/sizeof(iov[0]));
+    if (ret == 0)
+	*s_data = iov[1];
+
+    return ret;
+}
+
