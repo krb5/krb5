@@ -88,3 +88,9 @@ krb5_error_code
 krb5_derive_random(const struct krb5_enc_provider *enc,
 		   const krb5_keyblock *inkey, krb5_data *outrnd,
 		   const krb5_data *in_constant);
+
+/* AEAD */
+
+extern const struct krb5_aead_provider krb5int_aead_dk;
+extern const struct krb5_aead_provider krb5int_aead_aes;
+
