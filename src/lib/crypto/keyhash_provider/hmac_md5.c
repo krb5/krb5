@@ -35,6 +35,7 @@
 #include "arcfour-int.h"
 #include "rsa-md5.h"
 #include "hash_provider.h"
+#include "../aead.h"
 
 static  krb5_error_code
 k5_hmac_md5_hash (const krb5_keyblock *key, krb5_keyusage usage,

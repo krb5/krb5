@@ -233,6 +233,9 @@ iov_get_block(char block[BLOCK_SIZE],
 	*y = 0;
     }
 
+    if (j != BLOCK_SIZE)
+	memset(block + j, 0, BLOCK_SIZE - j);
+
     *x = i;
 }
 
