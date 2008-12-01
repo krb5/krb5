@@ -15,6 +15,7 @@ krb5_arcfour_encrypt_length
 krb5_c_block_size
 krb5_c_checksum_length
 krb5_c_crypto_length
+krb5_c_crypto_length_iov
 krb5_c_decrypt
 krb5_c_decrypt_iov
 krb5_c_encrypt
@@ -30,6 +31,7 @@ krb5_c_keylengths
 krb5_c_make_checksum
 krb5_c_make_checksum_iov
 krb5_c_make_random_key
+krb5_c_padding_length
 krb5_c_prf
 krb5_c_prf_length
 krb5_c_random_add_entropy
