@@ -108,11 +108,11 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
      */
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header->data.length != CONFOUNDERLENGTH)
+    if (header == NULL || header->data.length < CONFOUNDERLENGTH)
 	return KRB5_BAD_MSIZE;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || header->data.length != hash->hashsize)
+    if (trailer == NULL || trailer->data.length < hash->hashsize)
 	return KRB5_BAD_MSIZE;
 
     padding = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_PADDING);
@@ -152,6 +152,8 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
 	memset(k1.contents + 7, 0xAB, 9);
+
+    header->data.length = CONFOUNDERLENGTH;
 
     ret = krb5_c_random_make_octets(0, &header->data);
     if (ret != 0)
