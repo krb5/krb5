@@ -188,5 +188,7 @@ k5_md4des_verify(const krb5_keyblock *key, krb5_keyusage usage,
 const struct krb5_keyhash_provider krb5int_keyhash_md4des = {
     CONFLENGTH+RSA_MD4_CKSUM_LENGTH,
     k5_md4des_hash,
-    k5_md4des_verify
+    k5_md4des_verify,
+    NULL,
+    NULL
 };
