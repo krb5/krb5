@@ -65,8 +65,8 @@ des3.so des3.po $(OUTPRE)des3.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../des/des_int.h \
-  des3.c
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../aead.h \
+  $(srcdir)/../des/des_int.h des3.c
 aes.so aes.po $(OUTPRE)aes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -76,8 +76,8 @@ aes.so aes.po $(OUTPRE)aes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../aes/aes.h $(srcdir)/../aes/uitypes.h aes.c \
-  enc_provider.h
+  $(srcdir)/../aead.h $(srcdir)/../aes/aes.h $(srcdir)/../aes/uitypes.h \
+  aes.c enc_provider.h
 rc4.so rc4.po $(OUTPRE)rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -87,5 +87,5 @@ rc4.so rc4.po $(OUTPRE)rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../arcfour/arcfour-int.h $(srcdir)/../arcfour/arcfour.h \
-  enc_provider.h rc4.c
+  $(srcdir)/../aead.h $(srcdir)/../arcfour/arcfour-int.h \
+  $(srcdir)/../arcfour/arcfour.h enc_provider.h rc4.c
