@@ -212,6 +212,11 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_wrap_size_limit,	/* gss_wrap_size_limit */
 	NULL,				/* gss_export_name */
 	NULL,				/* gss_store_cred */
+	spnego_gss_wrap_aead,
+	spnego_gss_unwrap_aead,
+	spnego_gss_wrap_iov,
+	spnego_gss_unwrap_iov,
+	spnego_gss_wrap_iov_length,
 };
 
 static gss_mechanism spnego_mech_configs[] = {
@@ -1506,6 +1511,107 @@ spnego_gss_seal(void *context,
 		    conf_state,
 		    output_message_buffer);
 
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_wrap_aead(OM_uint32 *minor_status,
+		     gss_ctx_id_t context_handle,
+		     int conf_req_flag,
+		     gss_qop_t qop_req,
+		     gss_buffer_t input_assoc_buffer,
+		     gss_buffer_t input_payload_buffer,
+		     int *conf_state,
+		     gss_buffer_t output_message_buffer)
+{
+	OM_uint32 ret;
+	ret = gss_wrap_aead(minor_status,
+			    context_handle,
+			    conf_req_flag,
+			    qop_req,
+			    input_assoc_buffer,
+			    input_payload_buffer,
+			    conf_state,
+			    output_message_buffer);
+
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_unwrap_aead(OM_uint32 *minor_status,
+		       gss_ctx_id_t context_handle,
+		       gss_buffer_t input_message_buffer,
+		       gss_buffer_t input_assoc_buffer,
+		       gss_buffer_t output_payload_buffer,
+		       int *conf_state,
+		       gss_qop_t *qop_state)
+{
+	OM_uint32 ret;
+	ret = gss_unwrap_aead(minor_status,
+			      context_handle,
+			      input_message_buffer,
+			      input_assoc_buffer,
+			      output_payload_buffer,
+			      conf_state,
+			      qop_state);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_wrap_iov(OM_uint32 *minor_status,
+		    gss_ctx_id_t context_handle,
+		    int conf_req_flag,
+		    gss_qop_t qop_req,
+		    int *conf_state,
+		    gss_iov_buffer_desc *iov,
+		    int iov_count)
+{
+	OM_uint32 ret;
+	ret = gss_wrap_iov(minor_status,
+			   context_handle,
+			   conf_req_flag,
+			   qop_req,
+			   conf_state,
+			   iov,
+			   iov_count);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_unwrap_iov(OM_uint32 *minor_status,
+		      gss_ctx_id_t context_handle,
+		      int *conf_state,
+		      gss_qop_t *qop_state,
+		      gss_iov_buffer_desc *iov,
+		      int iov_count)
+{
+	OM_uint32 ret;
+	ret = gss_unwrap_iov(minor_status,
+			     context_handle,
+			     conf_state,
+			     qop_state,
+			     iov,
+			     iov_count);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_wrap_iov_length(OM_uint32 *minor_status,
+			   gss_ctx_id_t context_handle,
+			   int conf_req_flag,
+			   gss_qop_t qop_req,
+			   int *conf_state,
+			   gss_iov_buffer_desc *iov,
+			   int iov_count)
+{
+	OM_uint32 ret;
+	ret = gss_wrap_iov_length(minor_status,
+				  context_handle,
+				  conf_req_flag,
+				  qop_req,
+				  conf_state,
+				  iov,
+				  iov_count);
 	return (ret);
 }
 
