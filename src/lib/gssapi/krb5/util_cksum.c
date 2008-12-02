@@ -115,18 +115,18 @@ kg_make_checksum_iov_v1(krb5_context context,
 			krb5_keyblock *seq,
 			krb5_keyblock *enc,
 			krb5_keyusage sign_usage,
-			size_t iov_count,
 			gss_iov_buffer_desc *iov,
+			int iov_count,
 			krb5_checksum *checksum)
 {
     krb5_error_code code;
     gss_iov_buffer_desc *header;
     krb5_crypto_iov *kiov;
     size_t kiov_count;
-    size_t i = 0, j;
+    int i = 0, j;
     size_t conf_len;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
     kiov_count = 3 + iov_count;
@@ -186,8 +186,8 @@ checksum_iov_v3(krb5_context context,
 		size_t rrc,
 		krb5_keyblock *key,
 		krb5_keyusage sign_usage,
-		size_t iov_count,
 		gss_iov_buffer_desc *iov,
+		int iov_count,
 		krb5_boolean verify,
 		krb5_boolean *valid)
 {
@@ -196,7 +196,7 @@ checksum_iov_v3(krb5_context context,
     gss_iov_buffer_desc *trailer;
     krb5_crypto_iov *kiov;
     size_t kiov_count;
-    size_t i = 0, j;
+    int i = 0, j;
     unsigned int k5_checksumlen;
 
     if (verify)
@@ -206,10 +206,10 @@ checksum_iov_v3(krb5_context context,
     if (code != 0)
 	return code;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(rrc != 0 || trailer != NULL);
 
     if (trailer == NULL) {
@@ -268,11 +268,11 @@ kg_make_checksum_iov_v3(krb5_context context,
 			size_t rrc,
 			krb5_keyblock *key,
 			krb5_keyusage sign_usage,
-			size_t iov_count,
-			gss_iov_buffer_desc *iov)
+			gss_iov_buffer_desc *iov,
+			int iov_count)
 {
     return checksum_iov_v3(context, type, rrc, key,
-			   sign_usage, iov_count, iov, 0, NULL);
+			   sign_usage, iov, iov_count, 0, NULL);
 }
 
 krb5_error_code
@@ -281,10 +281,10 @@ kg_verify_checksum_iov_v3(krb5_context context,
 			  size_t rrc,
 			  krb5_keyblock *key,
 			  krb5_keyusage sign_usage,
-			  size_t iov_count,
 			  gss_iov_buffer_desc *iov,
+			  int iov_count,
 			  krb5_boolean *valid)
 {
     return checksum_iov_v3(context, type, rrc, key,
-			   sign_usage, iov_count, iov, 1, valid);
+			   sign_usage, iov, iov_count, 1, valid);
 }

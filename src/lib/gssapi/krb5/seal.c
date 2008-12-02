@@ -69,13 +69,13 @@ krb5_gss_wrap_iov(OM_uint32 *minor_status,
 		  int conf_req_flag,
 		  gss_qop_t qop_req,
 		  int *conf_state,
-		  size_t iov_count,
-		  gss_iov_buffer_desc *iov)
+		  gss_iov_buffer_desc *iov,
+		  int iov_count)
 {
     OM_uint32 major_status;
 
     major_status = kg_seal_iov(minor_status, context_handle, conf_req_flag,
-			       qop_req, conf_state, iov_count, iov, KG_TOK_WRAP_MSG);
+			       qop_req, conf_state, iov, iov_count, KG_TOK_WRAP_MSG);
 
     return major_status;
 }
@@ -86,13 +86,13 @@ krb5_gss_wrap_iov_length(OM_uint32 *minor_status,
 			 int conf_req_flag,
 			 gss_qop_t qop_req,
 			 int *conf_state,
-			 size_t iov_count,
-			 gss_iov_buffer_desc *iov)
+			 gss_iov_buffer_desc *iov,
+			 int iov_count)
 {
     OM_uint32 major_status;
 
     major_status = kg_seal_iov_length(minor_status, context_handle, conf_req_flag,
-				      qop_req, conf_state, iov_count, iov);
+				      qop_req, conf_state, iov, iov_count);
     return major_status;
 }
 

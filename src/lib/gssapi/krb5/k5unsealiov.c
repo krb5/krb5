@@ -37,8 +37,8 @@ static OM_uint32
 kg_unseal_v1_iov(krb5_context context,
 		 OM_uint32 *minor_status,
 		 krb5_gss_ctx_id_rec *ctx,
-		 size_t iov_count,
 		 gss_iov_buffer_desc *iov,
+		 int iov_count,
 		 int *conf_state,
 		 gss_qop_t *qop_state,
 		 int toktype)
@@ -63,10 +63,10 @@ kg_unseal_v1_iov(krb5_context context,
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL && trailer->buffer.length != 0) {
 	*minor_status = (OM_uint32)KRB5_BAD_MSIZE;
 	return GSS_S_DEFECTIVE_TOKEN;
@@ -166,14 +166,14 @@ kg_unseal_v1_iov(krb5_context context,
 
 		code = kg_arcfour_docrypt_iov(context, enc_key, 0,
 					      &bigend_seqnum[0], 4,
-					      iov_count, iov);
+					      iov, iov_count);
 		krb5_free_keyblock(context, enc_key);
 	    } else {
 		code = kg_decrypt_iov(context, ctx->proto,
 				      ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
 				      0 /*EC*/, 0 /*RRC*/,
 				      ctx->enc, KG_USAGE_SEAL, NULL,
-				      iov_count, iov);
+				      iov, iov_count);
 	    }
 	    if (code != 0) {
 		retval = GSS_S_FAILURE;
@@ -189,7 +189,7 @@ kg_unseal_v1_iov(krb5_context context,
 	     * this and fixup the last data IOV and padding IOV appropriately.
 	     */
 	    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-		retval = kg_fixup_padding_iov(&code, iov_count, iov);
+		retval = kg_fixup_padding_iov(&code, iov, iov_count);
 		if (retval != GSS_S_COMPLETE)
 		    goto cleanup;
 	    }
@@ -232,7 +232,7 @@ kg_unseal_v1_iov(krb5_context context,
     /* compute the checksum of the message */
     code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type,
 				   conflen != 0, ctx->seq, ctx->enc,
-				   sign_usage, iov_count, iov, &md5cksum);
+				   sign_usage, iov, iov_count, &md5cksum);
     if (code != 0) {
 	retval = GSS_S_FAILURE;
 	goto cleanup;
@@ -301,7 +301,7 @@ kg_unseal_v1_iov(krb5_context context,
     retval = g_order_check(&ctx->seqstate, (gssint_uint64)seqnum);
 
 cleanup:
-    kg_release_iov(iov_count, iov);
+    kg_release_iov(iov, iov_count);
     krb5_free_checksum_contents(context, &md5cksum);
 
     *minor_status = code;
@@ -319,8 +319,8 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 		    krb5_gss_ctx_id_rec *ctx,
 		    int *conf_state,
 		    gss_qop_t *qop_state,
-		    size_t iov_count,
 		    gss_iov_buffer_desc *iov,
+		    int iov_count,
 		    int toktype,
 		    int toktype2)
 {
@@ -333,19 +333,19 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     size_t input_length;
     unsigned int bodysize;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
 
-    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
 	*minor_status = EINVAL;
 	return GSS_S_FAILURE;
     }
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
 
     ptr = (unsigned char *)header->buffer.value;
     input_length = header->buffer.length;
@@ -353,7 +353,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
 	size_t data_length, assoc_data_length;
 
-	kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
+	kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
 
 	input_length += data_length;
 
@@ -373,10 +373,10 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     }
 
     if (ctx->proto == 0)
-	code = kg_unseal_v1_iov(context, minor_status, ctx, iov_count, iov,
+	code = kg_unseal_v1_iov(context, minor_status, ctx, iov, iov_count,
 			        conf_state, qop_state, toktype);
     else
-	code = gss_krb5int_unseal_v3_iov(context, minor_status, ctx, iov_count, iov,
+	code = gss_krb5int_unseal_v3_iov(context, minor_status, ctx, iov, iov_count,
 					 conf_state, qop_state, toktype);
 
     if (code != 0)
@@ -393,8 +393,8 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 		     krb5_gss_ctx_id_rec *ctx,
 		     int *conf_state,
 		     gss_qop_t *qop_state,
-		     size_t iov_count,
 		     gss_iov_buffer_desc *iov,
+		     int iov_count,
 		     int toktype,
 		     int toktype2)
 {
@@ -403,7 +403,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     OM_uint32 code = 0, major_status = GSS_S_FAILURE;
     krb5_context context = ctx->k5_context;
     int conf_req_flag;
-    size_t i = 0, j;
+    int i = 0, j;
     gss_iov_buffer_desc *tiov = NULL;
     gss_iov_buffer_t stream, data = NULL;
     gss_iov_buffer_t theader, tdata = NULL, tpadding, ttrailer;
@@ -413,7 +413,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	goto cleanup;
     }
 
-    stream = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM);
+    stream = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_STREAM);
     assert(stream != NULL);
 
     ptr = (unsigned char *)stream->buffer.value;
@@ -554,7 +554,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     assert(i <= iov_count + 2);
 
     major_status = kg_unseal_iov_token(&code, ctx, conf_state, qop_state,
-				       i, tiov, toktype, toktype2);
+				       tiov, i, toktype, toktype2);
     if (major_status == GSS_S_COMPLETE)
 	*data = *tdata;
     else if (tdata->flags & GSS_IOV_BUFFER_FLAG_ALLOCATED)
@@ -574,8 +574,8 @@ kg_unseal_iov(OM_uint32 *minor_status,
 	      gss_ctx_id_t context_handle,
 	      int *conf_state,
 	      gss_qop_t *qop_state,
-	      size_t iov_count,
 	      gss_iov_buffer_desc *iov,
+	      int iov_count,
 	      int toktype)
 {
     krb5_gss_ctx_id_rec *ctx;
@@ -597,12 +597,12 @@ kg_unseal_iov(OM_uint32 *minor_status,
 
     assert(toktype2 == KG_TOK_WRAP_MSG);
 
-    if (kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_STREAM) != NULL) {
+    if (kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_STREAM) != NULL) {
 	code = kg_unseal_stream_iov(minor_status, ctx, conf_state, qop_state,
-				    iov_count, iov, toktype, toktype2);
+				    iov, iov_count, toktype, toktype2);
     } else {
 	code = kg_unseal_iov_token(minor_status, ctx, conf_state, qop_state,
-				   iov_count, iov, toktype, toktype2);
+				   iov, iov_count, toktype, toktype2);
     }
 
     return code;

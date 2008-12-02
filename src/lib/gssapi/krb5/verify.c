@@ -69,14 +69,14 @@ OM_uint32
 krb5_gss_verify_mic_iov(OM_uint32 *minor_status,
 			gss_ctx_id_t context_handle,
 			gss_qop_t *qop_state,
-			size_t iov_count,
-			gss_iov_buffer_desc *iov)
+			gss_iov_buffer_desc *iov,
+			int iov_count)
 {
     OM_uint32 major_status;
 
     major_status = kg_unseal_iov(minor_status, context_handle,
 			         NULL, qop_state,
-				 iov_count, iov, KG_TOK_WRAP_MSG);
+				 iov, iov_count, KG_TOK_WRAP_MSG);
 
     return major_status;
 }

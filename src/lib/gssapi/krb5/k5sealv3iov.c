@@ -38,8 +38,8 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 				   krb5_gss_ctx_id_rec *ctx,
 				   int conf_req_flag,
 				   int *conf_state,
-				   size_t iov_count,
 				   gss_iov_buffer_desc *iov,
+				   int iov_count,
 				   int toktype)
 {
     krb5_error_code code;
@@ -72,14 +72,14 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	key = ctx->enc;
     }
 
-    kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
+    kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL)
 	return EINVAL;
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
-    padding = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_PADDING);
+    trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
+    padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
 
     outbuf = (unsigned char *)header->buffer.value;
 
@@ -171,7 +171,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
 	code = kg_encrypt_iov(context, ctx->proto,
 			      ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
-			      ec, rrc, key, key_usage, 0, iov_count, iov);
+			      ec, rrc, key, key_usage, 0, iov, iov_count);
 	if (code != 0)
 	    goto cleanup;
 
@@ -215,7 +215,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
 	code = kg_make_checksum_iov_v3(context, ctx->cksumtype,
 				       rrc, key, key_usage,
-				       iov_count, iov);
+				       iov, iov_count);
 	if (code != 0)
 	    goto cleanup;
 
@@ -240,7 +240,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     code = 0;
 
 cleanup:
-    kg_release_iov(iov_count, iov);
+    kg_release_iov(iov, iov_count);
 
     return code;
 }
@@ -249,8 +249,8 @@ OM_uint32
 gss_krb5int_unseal_v3_iov(krb5_context context,
 			  OM_uint32 *minor_status,
 			  krb5_gss_ctx_id_rec *ctx,
-			  size_t iov_count,
 			  gss_iov_buffer_desc *iov,
+			  int iov_count,
 			  int *conf_state,
 			  gss_qop_t *qop_state,
 			  int toktype)
@@ -274,10 +274,10 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     if (qop_state != NULL)
 	*qop_state = GSS_C_QOP_DEFAULT;
 
-    header = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
-    trailer = kg_locate_iov(iov_count, iov, GSS_IOV_BUFFER_TYPE_TRAILER);
+    trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG
@@ -288,7 +288,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 		    ? KG_USAGE_INITIATOR_SIGN
 		    : KG_USAGE_ACCEPTOR_SIGN));
 
-    kg_iov_msglen(iov_count, iov, &data_length, &assoc_data_length);
+    kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
 
     ptr = (unsigned char *)header->buffer.value;
 
@@ -335,7 +335,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    code = kg_decrypt_iov(context, ctx->proto,
 				  ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
 				  ec, rrc,
-				  key, key_usage, 0, iov_count, iov);
+				  key, key_usage, 0, iov, iov_count);
 	    if (code != 0) {
 		*minor_status = code;
 		return GSS_S_BAD_SIG;
@@ -364,7 +364,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	    code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, rrc,
 					     key, key_usage,
-					     iov_count, iov, &valid);
+					     iov, iov_count, &valid);
 	    if (code != 0 || valid == FALSE) {
 		*minor_status = code;
 		return GSS_S_BAD_SIG;
@@ -383,7 +383,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, 0,
 					 key, key_usage,
-					 iov_count, iov, &valid);
+					 iov, iov_count, &valid);
 	if (code != 0 || valid == FALSE) {
 	    *minor_status = code;
 	    return GSS_S_BAD_SIG;
