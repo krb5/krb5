@@ -567,20 +567,24 @@ call_server(host, port, oid, service_name, gss_flags, auth_flag,
 static void
 parse_oid(char *mechanism, gss_OID * oid)
 {
-    char   *mechstr = 0, *cp;
+    char   *mechstr = 0;
     gss_buffer_desc tok;
     OM_uint32 maj_stat, min_stat;
+    size_t i, mechlen = strlen(mechanism);
 
     if (isdigit((int) mechanism[0])) {
-	mechstr = malloc(strlen(mechanism) + 5);
+	mechstr = malloc(mechlen + 5);
 	if (!mechstr) {
 	    fprintf(stderr, "Couldn't allocate mechanism scratch!\n");
 	    return;
 	}
-	sprintf(mechstr, "{ %s }", mechanism);
-	for (cp = mechstr; *cp; cp++)
-	    if (*cp == '.')
-		*cp = ' ';
+	mechstr[0] = '{';
+	mechstr[1] = ' ';
+	for (i = 0; i < mechlen; i++)
+	  mechstr[i + 2] = (mechanism[i] == '.') ? ' ' : mechanism[i];
+	mechstr[mechlen + 2] = ' ';
+	mechstr[mechlen + 3] = ' ';
+	mechstr[mechlen + 4] = '\0';
 	tok.value = mechstr;
     } else
 	tok.value = mechanism;

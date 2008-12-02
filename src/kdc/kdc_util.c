@@ -567,6 +567,7 @@ add_to_transited(krb5_data *tgt_trans, krb5_data *new_trans,
   char        *realm;
   char        *trans;
   char        *otrans, *otrans_ptr;
+  size_t       bufsize;
 
   /* The following are for stepping through the transited field     */
 
@@ -595,7 +596,10 @@ add_to_transited(krb5_data *tgt_trans, krb5_data *new_trans,
   /* +1 for null, 
      +1 for extra comma which may be added between
      +1 for potential space when leading slash in realm */
-  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 3))) {
+  bufsize = strlen(realm) + strlen(otrans) + 3;
+  if (bufsize > MAX_REALM_LN)
+    bufsize = MAX_REALM_LN;
+  if (!(trans = (char *) malloc(bufsize))) {
     retval = ENOMEM;
     goto fail;
   }
@@ -783,17 +787,15 @@ add_to_transited(krb5_data *tgt_trans, krb5_data *new_trans,
     }
 
     if (new_trans->length != 0) {
-      if (strlen(trans) + 2 >= MAX_REALM_LN) {
+      if (strlcat(trans, ",", bufsize) >= bufsize) {
 	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	goto fail;
       }
-      strcat(trans, ",");
     }
-    if (strlen(trans) + strlen(current) + 1 >= MAX_REALM_LN) {
+    if (strlcat(trans, current, bufsize) >= bufsize) {
       retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
       goto fail;
     }
-    strcat(trans, current);
     new_trans->length = strlen(trans);
 
     strncpy(prev, exp, sizeof(prev) - 1);
@@ -804,24 +806,21 @@ add_to_transited(krb5_data *tgt_trans, krb5_data *new_trans,
 
   if (!added) {
     if (new_trans->length != 0) {
-      if (strlen(trans) + 2 >= MAX_REALM_LN) {
+      if (strlcat(trans, ",", bufsize) >= bufsize) {
 	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	goto fail;
       }
-      strcat(trans, ",");
     }
     if((realm[0] == '/') && trans[0]) {
-      if (strlen(trans) + 2 >= MAX_REALM_LN) {
+      if (strlcat(trans, " ", bufsize) >= bufsize) {
 	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	goto fail;
       }
-      strcat(trans, " ");
     }
-    if (strlen(trans) + strlen(realm) + 1 >= MAX_REALM_LN) {
+    if (strlcat(trans, realm, bufsize) >= bufsize) {
       retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
       goto fail;
     }
-    strcat(trans, realm);
     new_trans->length = strlen(trans);
   }
 
@@ -1532,7 +1531,7 @@ ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
 	snprintf(stmp, sizeof(stmp), "%s%ld", i ? " " : "", (long)ktype[i]);
 	if (strlen(s) + strlen(stmp) + sizeof("}") > len)
 	    break;
-	strcat(s, stmp);
+	strlcat(s, stmp, len);
     }
     if (i < nktypes) {
 	/*
@@ -1547,9 +1546,9 @@ ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
 		continue;
 	    }
 	}
-	strcat(s, "...");
+	strlcat(s, "...", len);
     }
-    strcat(s, "}");
+    strlcat(s, "}", len);
     return;
 }
 
@@ -1569,7 +1568,7 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
     if (rep->ticket != NULL) {
 	snprintf(stmp, sizeof(stmp),
 		 " tkt=%ld", (long)rep->ticket->enc_part.enctype);
-	strcat(s, stmp);
+	strlcat(s, stmp, len);
     }
 
     if (rep->ticket != NULL
@@ -1577,9 +1576,9 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
 	&& rep->ticket->enc_part2->session != NULL) {
 	snprintf(stmp, sizeof(stmp), " ses=%ld",
 		 (long)rep->ticket->enc_part2->session->enctype);
-	strcat(s, stmp);
+	strlcat(s, stmp, len);
     }
-    strcat(s, "}");
+    strlcat(s, "}", len);
     return;
 }
 

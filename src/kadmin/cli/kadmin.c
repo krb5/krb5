@@ -134,9 +134,9 @@ static char *strdur(duration)
     minutes = duration / 60;
     duration %= 60;
     seconds = duration;
-    sprintf(out, "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
-	    days, days == 1 ? "day" : "days",
-	    hours, minutes, seconds);
+    snprintf(out, sizeof(out), "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
+	     days, days == 1 ? "day" : "days",
+	     hours, minutes, seconds);
     return out;
 }
 
@@ -161,23 +161,22 @@ kadmin_parse_name(name, principal)
 {
     char *cp, *fullname;
     krb5_error_code retval;
+    int result;
 
     /* assumes def_realm is initialized! */
-    fullname = (char *)malloc(strlen(name) + 1 + strlen(def_realm) + 1);
-    if (fullname == NULL)
-	return ENOMEM;
-    strcpy(fullname, name);
-    cp = strchr(fullname, '@');
+    cp = strchr(name, '@');
     while (cp) {
-	if (cp - fullname && *(cp - 1) != '\\')
+	if (cp - name && *(cp - 1) != '\\')
 	    break;
 	else
 	    cp = strchr(cp + 1, '@');
     }
-    if (cp == NULL) {
-	strcat(fullname, "@");
-	strcat(fullname, def_realm);
-    }
+    if (cp == NULL)
+	result = asprintf(&fullname, "%s@%s", name, def_realm);
+    else
+	result = asprintf(&fullname, "%s", name);
+    if (result < 0)
+	return ENOMEM;
     retval = krb5_parse_name(context, fullname, principal);
     free(fullname);
     return retval;
@@ -795,11 +794,12 @@ void kadmin_cpw(argc, argv)
     } else if (argc == 1) {
 	unsigned int i = sizeof (newpw) - 1;
 
-	sprintf(prompt1, "Enter password for principal \"%.900s\"",
-		*argv);
-	sprintf(prompt2,
-		"Re-enter password for principal \"%.900s\"",
-		*argv);
+	snprintf(prompt1, sizeof(prompt1),
+		 "Enter password for principal \"%.900s\"",
+		 *argv);
+	snprintf(prompt2, sizeof(prompt2),
+		 "Re-enter password for principal \"%.900s\"",
+		 *argv);
 	retval = krb5_read_password(context, prompt1, prompt2,
 				    newpw, &i);
 	if (retval) {
@@ -1229,11 +1229,12 @@ void kadmin_addprinc(argc, argv)
     } else if (pass == NULL) {
 	unsigned int sz = sizeof (newpw) - 1;
 
-	sprintf(prompt1, "Enter password for principal \"%.900s\"",
-		canon);
-	sprintf(prompt2,
-		"Re-enter password for principal \"%.900s\"",
-		canon);
+	snprintf(prompt1, sizeof(prompt1),
+		 "Enter password for principal \"%.900s\"",
+		 canon);
+	snprintf(prompt2, sizeof(prompt2),
+		 "Re-enter password for principal \"%.900s\"",
+		 canon);
 	retval = krb5_read_password(context, prompt1, prompt2,
 				    newpw, &sz);
 	if (retval) {
@@ -1514,14 +1515,14 @@ void kadmin_getprinc(argc, argv)
 
 	    if (krb5_enctype_to_string(key_data->key_data_type[0],
 				       enctype, sizeof(enctype)))
-		sprintf(enctype, "<Encryption type 0x%x>",
-			key_data->key_data_type[0]);
+		snprintf(enctype, sizeof(enctype), "<Encryption type 0x%x>",
+			 key_data->key_data_type[0]);
 	    printf("Key: vno %d, %s, ", key_data->key_data_kvno, enctype);
 	    if (key_data->key_data_ver > 1) {
 		if (krb5_salttype_to_string(key_data->key_data_type[1],
 					    salttype, sizeof(salttype)))
-		    sprintf(salttype, "<Salt type 0x%x>",
-			    key_data->key_data_type[1]);
+		    snprintf(salttype, sizeof(salttype), "<Salt type 0x%x>",
+			     key_data->key_data_type[1]);
 		printf("%s\n", salttype);
 	    } else
 		printf("no salt\n");

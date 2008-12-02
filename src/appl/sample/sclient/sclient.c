@@ -159,11 +159,16 @@ main(int argc, char *argv[])
 	if (getnameinfo(ap->ai_addr, ap->ai_addrlen, abuf, sizeof(abuf),
 			pbuf, sizeof(pbuf), NI_NUMERICHOST | NI_NUMERICSERV)) {
 	    memset(abuf, 0, sizeof(abuf));
+	    memset(pbuf, 0, sizeof(pbuf));
 	    strncpy(abuf, "[error, cannot print address?]",
 		    sizeof(abuf)-1);
-	    strcpy(pbuf, "[?]");
+	    strncpy(pbuf, "[?]", sizeof(pbuf)-1);
 	}
-	sprintf(mbuf, "error contacting %s port %s", abuf, pbuf);
+	memset(mbuf, 0, sizeof(mbuf));
+	strncpy(mbuf, "error contacting ", sizeof(mbuf)-1);
+	strncat(mbuf, abuf, sizeof(mbuf) - strlen(mbuf) - 1);
+	strncat(mbuf, " port ", sizeof(mbuf) - strlen(mbuf) - 1);
+	strncat(mbuf, pbuf, sizeof(mbuf) - strlen(mbuf) - 1);
 	sock = socket(ap->ai_family, SOCK_STREAM, 0);
 	if (sock < 0) {
 	    fprintf(stderr, "%s: socket: %s\n", mbuf, strerror(errno));

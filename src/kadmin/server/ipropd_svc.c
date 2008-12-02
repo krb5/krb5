@@ -33,14 +33,15 @@ extern gss_name_t rqst2name(struct svc_req *rqstp);
 
 extern int setup_gss_names(struct svc_req *, gss_buffer_desc *,
 			   gss_buffer_desc *);
-extern char *client_addr(struct svc_req *, char *);
 extern void *global_server_handle;
 extern int nofork;
 extern short l_port;
 static char abuf[33];
 
-char *client_addr(struct svc_req *svc, char *buf) {
-    return strcpy(buf, inet_ntoa(svc->rq_xprt->xp_raddr.sin_addr));
+/* Result is stored in a static buffer and is invalidated by the next call. */
+static const char *client_addr(struct svc_req *svc) {
+    strlcpy(abuf, inet_ntoa(svc->rq_xprt->xp_raddr.sin_addr), sizeof(abuf));
+    return abuf;
 }
 
 static char *reply_ok_str	= "UPDATE_OK";
@@ -51,10 +52,8 @@ static char *reply_nil_str	= "UPDATE_NIL";
 static char *reply_perm_str	= "UPDATE_PERM_DENIED";
 static char *reply_unknown_str	= "<UNKNOWN_CODE>";
 
-#define	LOG_UNAUTH  _("Unauthorized request: %s, %s, "	\
-		      "client=%s, service=%s, addr=%s")
-#define	LOG_DONE    _("Request: %s, %s, %s, client=%s, "	\
-		      "service=%s, addr=%s")
+#define	LOG_UNAUTH  _("Unauthorized request: %s, client=%s, service=%s, addr=%s")
+#define	LOG_DONE    _("Request: %s, %s, %s, client=%s, service=%s, addr=%s")
 
 #ifdef	DPRINT
 #undef	DPRINT
@@ -182,8 +181,8 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 	ret.ret = UPDATE_PERM_DENIED;
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
-			 "<null>", client_name, service_name,
-			 client_addr(rqstp, abuf));
+			 client_name, service_name,
+			 client_addr(rqstp));
 	goto out;
     }
 
@@ -202,11 +201,13 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 			(unsigned long)arg->last_sno);
     }
 
-    krb5_klog_syslog(LOG_NOTICE, LOG_DONE, whoami,
+    krb5_klog_syslog(LOG_NOTICE,
+		     _("Request: %s, %s, %s, client=%s, service=%s, addr=%s"),
+		     whoami,
 		     obuf,
 		     ((kret == 0) ? "success" : error_message(kret)),
 		     client_name, service_name,
-		     client_addr(rqstp, abuf));
+		     client_addr(rqstp));
 
 out:
     if (nofork)
@@ -222,7 +223,7 @@ out:
  * Return arg cl str ptr on success, else NULL.
  */
 static char *
-getclhoststr(char *clprinc, char *cl, int len)
+getclhoststr(char *clprinc, char *cl, size_t len)
 {
     char *s;
     if ((s = strchr(clprinc, '/')) != NULL) {
@@ -300,8 +301,8 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
 	ret.ret = UPDATE_PERM_DENIED;
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
-			 "<null>", client_name, service_name,
-			 client_addr(rqstp, abuf));
+			 client_name, service_name,
+			 client_addr(rqstp));
 	goto out;
     }
 
@@ -326,8 +327,8 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
      * note the -i; modified version of kdb5_util dump format
      * to include sno (serial number)
      */
-    if (asprintf(&ubuf, "%s dump -i %s", KPROPD_DEFAULT_KDB5_UTIL,
-		 tmpf) < 0) {
+    if (asprintf(&ubuf, "%s dump -i %s </dev/null 2>&1",
+		 KPROPD_DEFAULT_KDB5_UTIL, tmpf) < 0) {
 	krb5_klog_syslog(LOG_ERR,
 			 _("%s: cannot construct kdb5 util dump string too long; out of memory"),
 			 whoami);
@@ -402,11 +403,11 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
 	ret.lastentry.last_time.seconds = 0;
 	ret.lastentry.last_time.useconds = 0;
 
-	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, whoami,
-			 "<null>",
-			 "success",
+	krb5_klog_syslog(LOG_NOTICE,
+			 _("Request: %s, spawned resync process %d, client=%s, service=%s, addr=%s"),
+			 whoami, fret,
 			 client_name, service_name,
-			 client_addr(rqstp, abuf));
+			 client_addr(rqstp));
 
 	goto out;
     }
@@ -600,12 +601,10 @@ kiprop_get_adm_host_srv_name(krb5_context context,
     if (ret = kadm5_get_master(context, realm, &host))
 	return (ret);
 
-    name = malloc(strlen(KIPROP_SVC_NAME)+ strlen(host) + 2);
-    if (name == NULL) {
+    if (asprintf(&name, "%s@%s", KIPROP_SVC_NAME, host) < 0) {
 	free(host);
 	return (ENOMEM);
     }
-    (void) sprintf(name, "%s@%s", KIPROP_SVC_NAME, host);
     free(host);
     *host_service_name = name;
 

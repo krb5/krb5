@@ -637,8 +637,8 @@ krb5_error_code ktest_make_sample_etype_info(p)
     krb5_etype_info_entry *** p;
 {
     krb5_etype_info_entry **info;
-    int	i;
-    char buf[80];
+    int	i, len;
+    char *str;
 
     info = malloc(sizeof(krb5_etype_info_entry *) * 4);
     if (!info)
@@ -650,11 +650,11 @@ krb5_error_code ktest_make_sample_etype_info(p)
 	if (info[i] == 0)
 	    goto memfail;
 	info[i]->etype = i;
-	sprintf(buf, "Morton's #%d", i);
-	info[i]->length = strlen(buf);
-	info[i]->salt = (unsigned char *) strdup(buf);
-	if (info[i]->salt == 0)
+	len = asprintf(&str, "Morton's #%d", i);
+	if (len < 0)
 	    goto memfail;
+	info[i]->salt = (krb5_octet *) str;
+	info[i]->length = len;
 	info[i]->s2kparams.data = NULL;
 	info[i]->s2kparams.length = 0;
 	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
@@ -674,8 +674,8 @@ krb5_error_code ktest_make_sample_etype_info2(p)
     krb5_etype_info_entry *** p;
 {
     krb5_etype_info_entry **info;
-    int	i;
-    char buf[80];
+    int	i, len;
+    char *str;
 
     info = malloc(sizeof(krb5_etype_info_entry *) * 4);
     if (!info)
@@ -687,17 +687,15 @@ krb5_error_code ktest_make_sample_etype_info2(p)
 	if (info[i] == 0)
 	    goto memfail;
 	info[i]->etype = i;
-	sprintf(buf, "Morton's #%d", i);
-	info[i]->length = strlen(buf);
-	info[i]->salt = (unsigned char *) strdup(buf);
-	if (info[i]->salt == 0)
+	len = asprintf(&str, "Morton's #%d", i);
+	if (len < 0)
 	    goto memfail;
-	sprintf(buf, "s2k: %d", i);
-	info[i]->s2kparams.data = malloc(strlen(buf)+1);
-	if (info[i]->s2kparams.data == NULL)
+	info[i]->salt = (krb5_octet *) str;
+	info[i]->length = (unsigned int) len;
+	len = asprintf(&info[i]->s2kparams.data, "s2k: %d", i);
+	if (len < 0)
 	    goto memfail;
-	strcpy( info[i]->s2kparams.data, buf);
-	info[i]->s2kparams.length = strlen(buf);
+	info[i]->s2kparams.length = (unsigned int) len;
 	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
     }
     free(info[1]->salt);
@@ -830,17 +828,18 @@ krb5_error_code ktest_make_sample_enc_sam_response_enc_2(p)
 #ifdef ENABLE_LDAP
 static krb5_error_code ktest_make_sample_key_data(krb5_key_data *p, int i)
 {
-    char buf[10];
+    char *str;
+    int len;
     p->key_data_ver = 2;
     p->key_data_kvno = 42;
-    sprintf(buf, "key%d", i);
+    len = asprintf(&str, "key%d", i);
     p->key_data_type[0] = 2;
-    p->key_data_length[0] = strlen(buf);
-    p->key_data_contents[0] = strdup(buf);
-    sprintf(buf, "salt%d", i);
+    p->key_data_length[0] = (unsigned int) len;
+    p->key_data_contents[0] = (krb5_octet *) str;
+    len = asprintf(&str, "salt%d", i);
     p->key_data_type[1] = i;
-    p->key_data_length[1] = strlen(buf);
-    p->key_data_contents[1] = strdup(buf);
+    p->key_data_length[1] = (unsigned int) len;
+    p->key_data_contents[1] = (krb5_octet *) str;
     if (p->key_data_contents[0] == NULL || p->key_data_contents[1] == NULL)
 	return ENOMEM;
     return 0;

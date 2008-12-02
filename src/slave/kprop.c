@@ -241,7 +241,7 @@ void get_tickets(context)
 	 * Initialize cache file which we're going to be using
 	 */
 	(void) mktemp(tkstring);
-	sprintf(buf, "FILE:%s", tkstring);
+	snprintf(buf, sizeof(buf), "FILE:%s", tkstring);
 
 	retval = krb5_cc_resolve(context, buf, &ccache);
 	if (retval) {
@@ -337,7 +337,7 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 
 	hp = gethostbyname(host);
 	if (hp == NULL) {
-		(void) sprintf(Errmsg, "%s: unknown host", host);
+		(void) snprintf(Errmsg, ErrmsgSz, "%s: unknown host", host);
 		*fd = -1;
 		return(0);
 	}
@@ -355,13 +355,13 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	
 	if (s < 0) {
-		(void) sprintf(Errmsg, "in call to socket");
+		(void) snprintf(Errmsg, ErrmsgSz, "in call to socket");
 		return(errno);
 	}
 	if (connect(s, (struct sockaddr *)&my_sin, sizeof my_sin) < 0) {
 		retval = errno;
 		close(s);
-		(void) sprintf(Errmsg, "in call to connect");
+		(void) snprintf(Errmsg, ErrmsgSz, "in call to connect");
 		return(retval);
 	}
 	*fd = s;
@@ -379,7 +379,7 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 	if (getsockname(s, (struct sockaddr *)&my_sin, &socket_length) < 0) {
 		retval = errno;
 		close(s);
-		(void) sprintf(Errmsg, "in call to getsockname");
+		(void) snprintf(Errmsg, ErrmsgSz, "in call to getsockname");
 		return(retval);
 	}
 	sender_addr.addrtype = ADDRTYPE_INET;
@@ -597,7 +597,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
 		retval = krb5_mk_priv(context, auth_context, &inbuf,
 				      &outbuf, NULL);
 		if (retval) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"while encoding database block starting at %d",
 				sent_size);
 			com_err(progname, retval, buf);

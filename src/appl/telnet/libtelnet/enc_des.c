@@ -550,28 +550,28 @@ fb64_printsub(data, cnt, buf, buflen, type)
 
 	switch(data[2]) {
 	case FB64_IV:
-		sprintf(lbuf, "%s_IV", type);
+		snprintf(lbuf, sizeof(lbuf), "%s_IV", type);
 		cp = lbuf;
 		goto common;
 
 	case FB64_IV_OK:
-		sprintf(lbuf, "%s_IV_OK", type);
+		snprintf(lbuf, sizeof(lbuf), "%s_IV_OK", type);
 		cp = lbuf;
 		goto common;
 
 	case FB64_IV_BAD:
-		sprintf(lbuf, "%s_IV_BAD", type);
+		snprintf(lbuf, sizeof(lbuf), "%s_IV_BAD", type);
 		cp = lbuf;
 		goto common;
 
 	default:
-		sprintf(lbuf, " %d (unknown)", data[2]);
+		snprintf(lbuf, sizeof(lbuf), " %d (unknown)", data[2]);
 		cp = lbuf;
 	common:
 		for (; (buflen > 0) && (*buf = *cp++); buf++)
 			buflen--;
 		for (i = 3; i < cnt; i++) {
-			sprintf(lbuf, " %d", data[i]);
+			snprintf(lbuf, sizeof(lbuf), " %d", data[i]);
 			for (cp = lbuf; (buflen > 0) && (*buf = *cp++); buf++)
 				buflen--;
 		}

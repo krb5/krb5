@@ -140,20 +140,17 @@ static struct plugin_dir_handle authdata_plugins;
 krb5_error_code
 load_authdata_plugins(krb5_context context)
 {
-    struct errinfo err;
     void **authdata_plugins_ftables = NULL;
     struct krb5plugin_authdata_ftable_v0 *ftable = NULL;
     size_t module_count;
     int i, k;
     init_proc server_init_proc = NULL;
 
-    memset(&err, 0, sizeof(err));
-
     /* Attempt to load all of the authdata plugins we can find. */
     PLUGIN_DIR_INIT(&authdata_plugins);
     if (PLUGIN_DIR_OPEN(&authdata_plugins) == 0) {
 	if (krb5int_open_plugin_dirs(objdirs, NULL,
-				     &authdata_plugins, &err) != 0) {
+				     &authdata_plugins, &context->err) != 0) {
 	    return KRB5_PLUGIN_NO_HANDLE;
 	}
     }
@@ -163,7 +160,7 @@ load_authdata_plugins(krb5_context context)
     n_authdata_systems = 0;
     if (krb5int_get_plugin_dir_data(&authdata_plugins,
 				    "authdata_server_0",
-				    &authdata_plugins_ftables, &err) != 0) {
+				    &authdata_plugins_ftables, &context->err) != 0) {
 	return KRB5_PLUGIN_NO_HANDLE;
     }
 

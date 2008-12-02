@@ -198,32 +198,16 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 		    goto cleanup;
 		}
 	    } else {
-		void *tmp=NULL;
-		char *oldstr = NULL;
-		unsigned int len=0;
+		char *newstr;
 
-		oldstr = strdup(ldap_context->root_certificate_file);
-		if (oldstr == NULL) {
+		if (asprintf(&newstr, "%s %s",
+			     ldap_context->root_certificate_file, val) < 0) {
 		    free (opt);
 		    free (val);
 		    status = ENOMEM;
 		    goto cleanup;
 		}
-
-		tmp = ldap_context->root_certificate_file;
-		len = strlen(ldap_context->root_certificate_file) + 2 + strlen(val);
-		ldap_context->root_certificate_file = realloc(ldap_context->root_certificate_file,
-							      len);
-		if (ldap_context->root_certificate_file == NULL) {
-		    free (tmp);
-		    free (opt);
-		    free (val);
-		    status = ENOMEM;
-		    goto cleanup;
-		}
-		memset(ldap_context->root_certificate_file, 0, len);
-		sprintf(ldap_context->root_certificate_file,"%s %s", oldstr, val);
-		free (oldstr);
+		ldap_context->root_certificate_file = newstr;
 	    }
 #endif
 	} else {

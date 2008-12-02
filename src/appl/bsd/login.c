@@ -529,7 +529,8 @@ void k_init (ttyn)
 
     /* Set up the credential cache environment variable */
     if (!getenv(KRB5_ENV_CCNAME)) {
-	sprintf(ccfile, "FILE:/tmp/krb5cc_p%ld", (long) getpid());
+	snprintf(ccfile, sizeof(ccfile), "FILE:/tmp/krb5cc_p%ld",
+		 (long) getpid());
 	setenv(KRB5_ENV_CCNAME, ccfile, 1);
 	krb5_cc_set_default_name(kcontext, ccfile);
 	unlink(ccfile+strlen("FILE:"));
@@ -571,7 +572,7 @@ static int k5_get_password (user_pwstring, pwsize)
 {
     krb5_error_code code;
     char prompt[255];			
-    sprintf(prompt,"Password for %s", username);
+    snprintf(prompt, sizeof(prompt), "Password for %s", username);
 
     /* reduce opportunities to be swapped out */
     code = krb5_read_password(kcontext, prompt, 0, user_pwstring, &pwsize);
@@ -1800,13 +1801,13 @@ int main(argc, argv)
 	    if (hostname) {
 		char buf[BUFSIZ];
 #ifdef UT_HOSTSIZE
-		(void) sprintf(buf,
+		(void) snprintf(buf, sizeof(buf),
 			       "ROOT LOGIN (krb) %s from %.*s, %s.%s@%s",
 			       tty, UT_HOSTSIZE, hostname,
 			       kdata->pname, kdata->pinst,
 			       kdata->prealm);
 #else
-		(void) sprintf(buf,
+		(void) snprintf(buf, sizeof(buf),
 			       "ROOT LOGIN (krb) %s from %s, %s.%s@%s",
 			       tty, hostname,
 			       kdata->pname, kdata->pinst,
@@ -2104,7 +2105,7 @@ void check_mail()
 {
     char tbuf[MAXPATHLEN+2];
     struct stat st;
-    (void)sprintf(tbuf, "%s/%s", MAILDIR, pwd->pw_name);
+    (void)snprintf(tbuf, sizeof(tbuf), "%s/%s", MAILDIR, pwd->pw_name);
     if (stat(tbuf, &st) == 0 && st.st_size != 0)
 	printf("You have %smail.\n",
 	       (st.st_mtime > st.st_atime) ? "new " : "");

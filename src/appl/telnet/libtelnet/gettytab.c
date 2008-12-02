@@ -117,7 +117,7 @@ nchktc()
 		write(2, "Gettytab entry too long\n", 24);
 		q[TABBUFSIZ - (p-tbuf)] = 0;
 	}
-	strcpy(p, q+1);
+	strlcpy(p, q+1, TABBUFSIZ - (p-tbuf));
 	tbuf = holdtbuf;
 	return(1);
 }

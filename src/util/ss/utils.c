@@ -70,9 +70,8 @@ gensym(name)
 {
 	char *symbol;
 
-	symbol = malloc((strlen(name)+6) * sizeof(char));
 	gensym_n++;
-	sprintf(symbol, "%s%05ld", name, gensym_n);
+	asprintf(&symbol, "%s%05ld", name, gensym_n);
 	return(symbol);
 }
 

@@ -75,6 +75,9 @@ krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
 	if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
 	    break;
 
+	if (input_pos.iov_pos == num_data)
+	    break;
+
 	GET_HALF_BLOCK(temp, ip);
 	left  ^= temp;
 	GET_HALF_BLOCK(temp, ip);
@@ -157,6 +160,9 @@ krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
 	 */
 
 	if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
+	    break;
+
+	if (input_pos.iov_pos == num_data)
 	    break;
 
 	ip = iblock;

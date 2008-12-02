@@ -530,7 +530,7 @@ int command(char *fmt, ...)
 	}
 	oldintr = signal(SIGINT, cmdabort);
 	va_start(ap, fmt);
-	vsprintf(in, fmt, ap);
+	vsnprintf(in, FTP_BUFSIZ, fmt, ap);
 	va_end(ap);
 again:	if (secure_command(in) == 0)
 		return(0);
@@ -719,7 +719,8 @@ int getreply(int expecteof)
 				if(msg_data.app_length < sizeof(ibuf) - 2) {
 				    memmove(ibuf, msg_data.app_data,
 					    msg_data.app_length);
-				    strcpy(&ibuf[msg_data.app_length], "\r\n");
+				    memcpy(&ibuf[msg_data.app_length], "\r\n",
+					   3);
 				} else {
 			            printf("Message too long!");
 				}
@@ -747,7 +748,7 @@ int getreply(int expecteof)
 				  if(msg_buf.length < sizeof(ibuf) - 2 - 1) {
 				    memcpy(ibuf, msg_buf.value, 
 					   msg_buf.length);
-				    strcpy(&ibuf[msg_buf.length], "\r\n");
+				    memcpy(&ibuf[msg_buf.length], "\r\n", 3);
 				  } else {
 				    user_gss_error(maj_stat, min_stat, 
 						   "reply was too long");
@@ -2011,7 +2012,8 @@ int do_auth()
 	  for (trial = 0; trial < n_gss_trials; trial++) {
 	    /* ftp@hostname first, the host@hostname */
 	    /* the V5 GSSAPI binding canonicalizes this for us... */
-	    sprintf(stbuf, "%s@%s", gss_trials[trial].service_name, hostname);
+	    snprintf(stbuf, sizeof(stbuf), "%s@%s",
+		     gss_trials[trial].service_name, hostname);
 	    if (debug)
 	      fprintf(stderr, "Trying to authenticate to <%s>\n", stbuf);
 
@@ -2235,7 +2237,7 @@ static void abort_remote(FILE *din)
 	 * send IAC in urgent mode instead of DM because 4.3BSD places oob mark
 	 * after urgent byte rather than before as is protocol now
 	 */
-	sprintf(buf, "%c%c%c", IAC, IP, IAC);
+	snprintf(buf, sizeof(buf), "%c%c%c", IAC, IP, IAC);
 	if (send(SOCKETNO(fileno(cout)), buf, 3, MSG_OOB) != 3)
 		PERROR_SOCKET("abort");
 	putc(DM, cout);

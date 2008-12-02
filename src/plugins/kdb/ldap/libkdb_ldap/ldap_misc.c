@@ -1499,7 +1499,7 @@ static inline char *
 format_d (int val)
 {
     char tmpbuf[2+3*sizeof(val)];
-    sprintf(tmpbuf, "%d", val);
+    snprintf(tmpbuf, sizeof(tmpbuf), "%d", val);
     return strdup(tmpbuf);
 }
 
@@ -1655,13 +1655,11 @@ krb5_ldap_get_reference_count (krb5_context context, char *dn, char *refattr,
 	goto cleanup;
     }
 
-    filter = (char *) malloc (strlen (refattr) + strlen (ptr) + 2);
-    if (filter == NULL) {
+    if (asprintf (&filter, "%s=%s", refattr, ptr) < 0) {
+	filter = NULL;
 	st = ENOMEM;
 	goto cleanup;
     }
-
-    sprintf (filter, "%s=%s", refattr, ptr);
 
     if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntrees)) != 0)
 	goto cleanup;

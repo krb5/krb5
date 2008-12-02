@@ -76,7 +76,7 @@ etc.
    fcc_nseq.c and fcc_read don't check return values a lot.
  */
 #include "k5-int.h"
-
+#include "cc-int.h"
 
 #include <stdio.h>
 #include <errno.h>

@@ -146,7 +146,6 @@ int main(argc, argv)
     char *targ, *host, *src;
     char *suser, *tuser, *thost;
     int i;
-    unsigned int cmdsiz = 30;
     char buf[RCP_BUFSIZ], cmdbuf[30];
     char *cmd = cmdbuf;
     struct servent *sp;
@@ -299,33 +298,25 @@ int main(argc, argv)
     }
 
 #ifdef KERBEROS
-    if (krb_realm != NULL)
-	cmdsiz += strlen(krb_realm);
-    if (krb_cache != NULL)
-	cmdsiz += strlen(krb_cache);
-    if (krb_config != NULL)
-	cmdsiz += strlen(krb_config);
+    if (asprintf(&cmd, "%srcp %s%s%s%s%s%s%s%s%s",
+		 encryptflag ? "-x " : "",
 
-    if ((cmd = (char *)malloc(cmdsiz)) == NULL) {
+		 iamrecursive ? " -r" : "", pflag ? " -p" : "", 
+		 targetshouldbedirectory ? " -d" : "",
+		 krb_realm != NULL ? " -k " : "",
+		 krb_realm != NULL ? krb_realm : "",
+		 krb_cache != NULL ? " -c " : "",
+		 krb_cache != NULL ? krb_cache : "",
+		 krb_config != NULL ? " -C " : "",
+		 krb_config != NULL ? krb_config : "") < 0) {
 	fprintf(stderr, "rcp: Cannot malloc.\n");
 	exit(1);
     }
-    (void) sprintf(cmd, "%srcp %s%s%s%s%s%s%s%s%s",
-		   encryptflag ? "-x " : "",
-
-		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
-		   targetshouldbedirectory ? " -d" : "",
-		   krb_realm != NULL ? " -k " : "",
-		   krb_realm != NULL ? krb_realm : "",
-		   krb_cache != NULL ? " -c " : "",
-		   krb_cache != NULL ? krb_cache : "",
-		   krb_config != NULL ? " -C " : "",
-		   krb_config != NULL ? krb_config : "");
 
 #else /* !KERBEROS */
-    (void) sprintf(cmd, "rcp%s%s%s",
-		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
-		   targetshouldbedirectory ? " -d" : "");
+    (void) snprintf(cmd, sizeof(cmdbuf), "rcp%s%s%s",
+		    iamrecursive ? " -r" : "", pflag ? " -p" : "", 
+		    targetshouldbedirectory ? " -d" : "");
 #endif /* KERBEROS */
     
 #ifdef POSIX_SIGNALS
@@ -389,22 +380,22 @@ int main(argc, argv)
 		      suser = pwd->pw_name;
 		    else if (!okname(suser))
 		      continue;
-		    (void) sprintf(buf,
+		    (void) snprintf(buf, sizeof(buf),
 #if defined(hpux) || defined(__hpux)
-				   "remsh %s -l %s -n %s %s '%s%s%s:%s'",
+				    "remsh %s -l %s -n %s %s '%s%s%s:%s'",
 #else
-				   "rsh %s -l %s -n %s %s '%s%s%s:%s'",
+				    "rsh %s -l %s -n %s %s '%s%s%s:%s'",
 #endif
-				   host, suser, cmd, src,
-				   tuser ? tuser : "",
-				   tuser ? "@" : "",
+				    host, suser, cmd, src,
+				    tuser ? tuser : "",
+				    tuser ? "@" : "",
 				   thost, targ);
 	       } else
-		   (void) sprintf(buf,
+		   (void) snprintf(buf, sizeof(buf),
 #if defined(hpux) || defined(__hpux)
-				  "remsh %s -n %s %s '%s%s%s:%s'",
+				   "remsh %s -n %s %s '%s%s%s:%s'",
 #else
-				  "rsh %s -n %s %s '%s%s%s:%s'",
+				   "rsh %s -n %s %s '%s%s%s:%s'",
 #endif
 				   argv[i], cmd, src,
 				   tuser ? tuser : "",
@@ -414,8 +405,8 @@ int main(argc, argv)
 	    } else {		/* local to remote */
 		krb5_creds *cred;
 		if (rem == -1) {
-		    (void) sprintf(buf, "%s -t %s",
-				   cmd, targ);
+		    (void) snprintf(buf, sizeof(buf), "%s -t %s",
+				    cmd, targ);
 		    host = thost;
 #ifdef KERBEROS
 		    authopts = AP_OPTS_MUTUAL_REQUIRED;
@@ -525,10 +516,10 @@ int main(argc, argv)
 		}
 	    }
 	    if (src == 0) {		/* local to local */
-		(void) sprintf(buf, "/bin/cp%s%s %s %s",
-			       iamrecursive ? " -r" : "",
-			       pflag ? " -p" : "",
-			       argv[i], argv[argc - 1]);
+		(void) snprintf(buf, sizeof(buf), "/bin/cp%s%s %s %s",
+				iamrecursive ? " -r" : "",
+				pflag ? " -p" : "",
+				argv[i], argv[argc - 1]);
 		(void) susystem(buf);
 	    } else {		/* remote to local */
 		krb5_creds *cred;
@@ -547,7 +538,7 @@ int main(argc, argv)
 		    host = argv[i];
 		    suser = pwd->pw_name;
 		}
-		(void) sprintf(buf, "%s -f %s", cmd, src);
+		(void) snprintf(buf, sizeof(buf), "%s -f %s", cmd, src);
 #ifdef KERBEROS
 		authopts = AP_OPTS_MUTUAL_REQUIRED;
 		status = kcmd(&sock, &host,
@@ -812,16 +803,16 @@ void source(argc, argv)
 	     * Make it compatible with possible future
 	     * versions expecting microseconds.
 	     */
-	    (void) sprintf(buf, "T%ld 0 %ld 0\n",
-			   stb.st_mtime, stb.st_atime);
+	    (void) snprintf(buf, sizeof(buf), "T%ld 0 %ld 0\n",
+			    stb.st_mtime, stb.st_atime);
 	    (void) rcmd_stream_write(rem, buf, strlen(buf), 0);
 	    if (response() < 0) {
 		(void) close(f);
 		continue;
 	    }
 	}
-	(void) sprintf(buf, "C%04o %ld %s\n",
-		       (int) stb.st_mode&07777, (long ) stb.st_size, last);
+	(void) snprintf(buf, sizeof(buf), "C%04o %ld %s\n",
+			(int) stb.st_mode&07777, (long ) stb.st_size, last);
 	(void) rcmd_stream_write(rem, buf, strlen(buf), 0);
 	if (response() < 0) {
 	    (void) close(f);
@@ -881,16 +872,16 @@ void rsource(name, statp)
     else
       last++;
     if (pflag) {
-	(void) sprintf(buf, "T%ld 0 %ld 0\n",
-		       statp->st_mtime, statp->st_atime);
+	(void) snprintf(buf, sizeof(buf), "T%ld 0 %ld 0\n",
+			statp->st_mtime, statp->st_atime);
 	(void) rcmd_stream_write(rem, buf, strlen(buf), 0);
 	if (response() < 0) {
 	    closedir(d);
 	    return;
 	}
     }
-    (void) sprintf(buf, "D%04lo %d %s\n", (long) statp->st_mode&07777, 0, 
-		   last);
+    (void) snprintf(buf, sizeof(buf), "D%04lo %d %s\n",
+		    (long) statp->st_mode&07777, 0, last);
     (void) rcmd_stream_write(rem, buf, strlen(buf), 0);
     if (response() < 0) {
 	closedir(d);
@@ -905,7 +896,7 @@ void rsource(name, statp)
 	    error("%s/%s: Name too long.\n", name, dp->d_name);
 	    continue;
 	}
-	(void) sprintf(buf, "%s/%s", name, dp->d_name);
+	(void) snprintf(buf, sizeof(buf), "%s/%s", name, dp->d_name);
 	bufv[0] = buf;
 	source(1, bufv);
     }
@@ -1092,8 +1083,8 @@ void sink(argc, argv)
 	if (targisdir) {
           if(strlen(targ) + strlen(cp) + 2 >= sizeof(nambuf))
 	    SCREWUP("target name too long");
-	  (void) sprintf(nambuf, "%s%s%s", targ,
-			 *targ ? "/" : "", cp);
+	  (void) snprintf(nambuf, sizeof(nambuf), "%s%s%s", targ,
+			  *targ ? "/" : "", cp);
 	} else {
 	  if (strlen(targ) + 1 >= sizeof (nambuf))
 	    SCREWUP("target name too long");
@@ -1238,7 +1229,7 @@ error(fmt, va_alist)
 
     errs++;
     *cp++ = 1;
-    (void) vsprintf(cp, fmt, ap);
+    (void) vsnprintf(cp, sizeof(buf) - (cp - buf), fmt, ap);
     va_end(ap);
 
     if (iamremote)

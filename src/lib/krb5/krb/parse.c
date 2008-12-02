@@ -313,7 +313,7 @@ k5_parse_name(krb5_context context, const char *name,
 		if (flags & KRB5_PRINCIPAL_PARSE_NO_REALM)
 			(krb5_princ_realm(context, principal)->data)[0] = '\0';
 		else
-			strcpy(krb5_princ_realm(context, principal)->data, default_realm);
+			strlcpy(krb5_princ_realm(context, principal)->data, default_realm, realmsize+1);
 	}
 	/*
 	 * Alright, we're done.  Now stuff a pointer to this monstrosity

@@ -213,7 +213,8 @@ expand(as)
 				*gpathp = 0;
 				if (gethdir(gpath + 1))
 					globerr = "Unknown user name after ~";
-				(void) strcpy(gpath, gpath + 1);
+				(void) memmove(gpath, gpath + 1,
+					       strlen(gpath));
 			} else
 				(void) strncpy(gpath, home, FTP_BUFSIZ - 1);
 			gpath[FTP_BUFSIZ - 1] = '\0';

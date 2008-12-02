@@ -34,6 +34,7 @@
 #include "k5-int.h"
 #include "os-proto.h"
 #include "cm.h"
+#include "../krb/auth_con.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -48,6 +49,7 @@ struct sendto_callback_context {
     krb5_principal 	set_password_for;
     char 		*newpw;
     krb5_data 		ap_req;
+    krb5_ui_4           remote_seq_num, local_seq_num;
 };
 
 /*
@@ -62,11 +64,12 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
     int sockType = (useTcp ? SOCK_STREAM : SOCK_DGRAM);
 
     code = krb5int_locate_server (context, realm, addrlist,
-				  locate_service_kpasswd, sockType, 0);
+				  locate_service_kpasswd, sockType, AF_INET);
 
     if (code == KRB5_REALM_CANT_RESOLVE || code == KRB5_REALM_UNKNOWN) {
 	code = krb5int_locate_server (context, realm, addrlist,
-				      locate_service_kadmin, SOCK_STREAM, 0);
+				      locate_service_kadmin, SOCK_STREAM,
+				      AF_INET);
 	if (!code) {
 	    /* Success with admin_server but now we need to change the
 	       port number to use DEFAULT_KPASSWD_PORT and the socktype.  */
@@ -159,6 +162,9 @@ static int kpasswd_sendto_msg_callback(struct conn_state *conn, void *callback_c
 				       &local_kaddr, NULL))) 
 	goto cleanup;
 
+    ctx->auth_context->remote_seq_number = ctx->remote_seq_num;
+    ctx->auth_context->local_seq_number = ctx->local_seq_num;
+
     if (ctx->set_password_for)
 	code = krb5int_mk_setpw_req(ctx->context, 
 				    ctx->auth_context, 
@@ -225,6 +231,9 @@ krb5_change_set_password(krb5_context context, krb5_creds *creds, char *newpw,
 				     creds, 
 				     &callback_ctx.ap_req)))
 	goto cleanup;
+
+    callback_ctx.remote_seq_num = callback_ctx.auth_context->remote_seq_number;
+    callback_ctx.local_seq_num = callback_ctx.auth_context->local_seq_number;
 
     do {
 	if ((code = krb5_locate_kpasswd(callback_ctx.context,

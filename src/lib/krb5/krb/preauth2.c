@@ -792,7 +792,7 @@ krb5_error_code pa_sam(krb5_context context,
 	return(ret);
 
     if (sam_challenge->sam_flags & KRB5_SAM_MUST_PK_ENCRYPT_SAD) {
-	krb5_xfree(sam_challenge);
+	krb5_free_sam_challenge(context, sam_challenge);
 	return(KRB5_SAM_UNSUPPORTED);
     }
 
@@ -842,7 +842,7 @@ krb5_error_code pa_sam(krb5_context context,
     krb5int_set_prompt_types(context, &prompt_type);
     if ((ret = ((*prompter)(context, prompter_data, name,
 			   banner, 1, &kprompt)))) {
-	krb5_xfree(sam_challenge);
+	krb5_free_sam_challenge(context, sam_challenge);
 	krb5int_set_prompt_types(context, 0);
 	return(ret);
     }
@@ -853,8 +853,8 @@ krb5_error_code pa_sam(krb5_context context,
 	if ((ret = krb5_us_timeofday(context, 
 				&enc_sam_response_enc.sam_timestamp,
 				&enc_sam_response_enc.sam_usec))) {
-		krb5_xfree(sam_challenge);
-		return(ret);
+	    krb5_free_sam_challenge(context,sam_challenge);
+	    return(ret);
 	}
 
 	sam_response.sam_patimestamp = enc_sam_response_enc.sam_timestamp;
@@ -878,7 +878,7 @@ krb5_error_code pa_sam(krb5_context context,
 	if ((salt->length == -1 || salt->length == SALT_TYPE_AFS_LENGTH) && (salt->data == NULL)) {
 	    if ((ret = krb5_principal2salt(context, request->client,
 					  &defsalt))) {
-		krb5_xfree(sam_challenge);
+		krb5_free_sam_challenge(context, sam_challenge);
 		return(ret);
 	    }
 
@@ -896,7 +896,7 @@ krb5_error_code pa_sam(krb5_context context,
 	    krb5_xfree(defsalt.data);
 
 	if (ret) {
-	    krb5_xfree(sam_challenge);
+	    krb5_free_sam_challenge(context, sam_challenge);
 	    return(ret);
 	}
 
@@ -916,7 +916,7 @@ krb5_error_code pa_sam(krb5_context context,
 	if ((salt->length == SALT_TYPE_AFS_LENGTH) && (salt->data == NULL)) {
 	    if (ret = krb5_principal2salt(context, request->client,
 					  &defsalt)) {
-		krb5_xfree(sam_challenge);
+		krb5_free_sam_challenge(context, sam_challenge);
 		return(ret);
 	    }
 
@@ -940,7 +940,7 @@ krb5_error_code pa_sam(krb5_context context,
 	    krb5_xfree(defsalt.data);
 
 	if (ret) {
-	    krb5_xfree(sam_challenge);
+	    krb5_free_sam_challenge(context, sam_challenge);
 	    return(ret);
 	}
 
@@ -990,6 +990,8 @@ krb5_error_code pa_sam(krb5_context context,
     pa->contents = (krb5_octet *) scratch->data;
 
     *out_padata = pa;
+
+    krb5_xfree(scratch);
 
     return(0);
 }

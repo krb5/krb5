@@ -594,7 +594,7 @@ char *krb5_pkinit_cert_hash_str(
     }
     cpOut = outstr;
     for(dex=0; dex<CC_SHA1_DIGEST_LENGTH; dex++) {
-	sprintf(cpOut, "%02X", (unsigned)(digest[dex]));
+	snprintf(cpOut, 3, "%02X", (unsigned)(digest[dex]));
 	cpOut += 2;
     }
     *cpOut = '\0';

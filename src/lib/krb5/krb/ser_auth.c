@@ -28,6 +28,9 @@
 /*
  * ser_auth.c - Serialize krb5_authenticator structure.
  */
+
+#ifndef LEAN_CLIENT
+
 #include "k5-int.h"
 #include "int-proto.h"
 
@@ -335,7 +338,6 @@ krb5_authenticator_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_o
     }
     return(kret);
 }
-
 /*
  * Register the authenticator serializer.
  */
@@ -344,3 +346,4 @@ krb5_ser_authenticator_init(krb5_context kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_authenticator_ser_entry));
 }
+#endif

@@ -161,7 +161,7 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, bool_t verbose)
 	    exit(1);
 	}
 	(void) strncpy(dbprinc, upd.kdb_princ_name.utf8str_t_val,
-		       (upd.kdb_princ_name.utf8str_t_len + 1));
+		       upd.kdb_princ_name.utf8str_t_len);
 	dbprinc[upd.kdb_princ_name.utf8str_t_len] = 0;
 	(void) printf(_("\tUpdate principal : %s\n"), dbprinc);
 
@@ -243,12 +243,12 @@ main(int argc, char **argv)
 	exit(1);
     }
 
-    (void) printf(_("\nKerberos update log (%s.ulog)\n"),
-		  params.dbname);
+    (void) printf(_("\nKerberos update log (%s)\n"),
+		  params.iprop_logfile);
 
     if (ulog_map(context, params.iprop_logfile, 0, FKPROPLOG, db_args)) {
-	(void) fprintf(stderr, _("Unable to map log file "
-				 "%s.ulog\n\n"), params.dbname);
+	(void) fprintf(stderr, _("Unable to map log file %s\n\n"),
+		       params.iprop_logfile);
 	exit(1);
     }
 
@@ -256,8 +256,8 @@ main(int argc, char **argv)
     if (log_ctx)
 	ulog = log_ctx->ulog;
     else {
-	(void) fprintf(stderr, _("Unable to map log file "
-				 "%s.ulog\n\n"), params.dbname);
+	(void) fprintf(stderr, _("Unable to map log file %s\n\n"),
+		       params.iprop_logfile);
 	exit(1);
     }
 

@@ -52,9 +52,16 @@
 
 #define ASN1BUF_OMIT_INLINE_FUNCS
 #include "asn1buf.h"
-#undef ASN1BUF_OMIT_INLINE_FUNCS
 #include <stdio.h>
 #include "asn1_get.h"
+
+#if !defined(__GNUC__) || defined(CONFIG_SMALL)
+/* Declare private procedures as static if they're not used for inline
+   expansion of other stuff elsewhere.  */
+static unsigned int asn1buf_free(const asn1buf *);
+static asn1_error_code asn1buf_ensure_space(asn1buf *, unsigned int);
+static asn1_error_code asn1buf_expand(asn1buf *, unsigned int);
+#endif
 
 #define asn1_is_eoc(class, num, indef)  \
 ((class) == UNIVERSAL && !(num) && !(indef))
@@ -318,8 +325,7 @@ asn1_error_code asn1buf_hex_unparse(const asn1buf *buf, char **s)
 /****************************************************************/
 /* Private Procedures */
 
-#undef asn1buf_size
-int asn1buf_size(const asn1buf *buf)
+static int asn1buf_size(const asn1buf *buf)
 {
     if (buf == NULL || buf->base == NULL) return 0;
     return buf->bound - buf->base + 1;
@@ -336,11 +342,9 @@ unsigned int asn1buf_free(const asn1buf *buf)
 asn1_error_code asn1buf_ensure_space(asn1buf *buf, const unsigned int amount)
 {
     unsigned int avail = asn1buf_free(buf);
-    if (avail < amount) {
-        asn1_error_code retval = asn1buf_expand(buf, amount-avail);
-        if (retval) return retval;
-    }
-    return 0;
+    if (avail >= amount)
+        return 0;
+    return asn1buf_expand(buf, amount-avail);
 }
 
 asn1_error_code asn1buf_expand(asn1buf *buf, unsigned int inc)
@@ -354,12 +358,9 @@ asn1_error_code asn1buf_expand(asn1buf *buf, unsigned int inc)
     if (inc < STANDARD_INCREMENT)
         inc = STANDARD_INCREMENT;
 
-    if (buf->base == NULL)
-        buf->base = malloc((asn1buf_size(buf)+inc) * sizeof(asn1_octet));
-    else
-        buf->base = realloc(buf->base,
-                            (asn1buf_size(buf)+inc) * sizeof(asn1_octet));
-    if (buf->base == NULL) return ENOMEM;
+    buf->base = realloc(buf->base,
+                        (asn1buf_size(buf)+inc) * sizeof(asn1_octet));
+    if (buf->base == NULL) return ENOMEM; /* XXX leak */
     buf->bound = (buf->base) + bound_offset + inc;
     buf->next = (buf->base) + next_offset;
     return 0;

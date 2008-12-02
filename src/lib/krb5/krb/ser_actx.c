@@ -550,8 +550,10 @@ krb5_ser_auth_context_init(krb5_context kcontext)
 	kret = krb5_ser_authdata_init(kcontext);
     if (!kret)
 	kret = krb5_ser_address_init(kcontext);
+#ifndef LEAN_CLIENT
     if (!kret)
 	kret = krb5_ser_authenticator_init(kcontext);
+#endif
     if (!kret)
 	kret = krb5_ser_checksum_init(kcontext);
     if (!kret)

@@ -21,8 +21,9 @@ check-runtest-no::
 	@echo "+++ runtest is unavailable."
 	@echo "+++"
 
+# Set VALGRIND at run time, that may be changed when running 'make'.
 check-runtest-yes:: t_inetd site.exp
-	$(RUNTEST) --tool krb --srcdir $(srcdir) $(KRB4_RUNTESTFLAGS) PRIOCNTL_HACK=@PRIOCNTL_HACK@ VALGRIND="$(VALGRIND)" $(RUNTESTFLAGS)
+	$(RUNTEST) --tool krb --srcdir $(srcdir) VALGRIND="$(VALGRIND)" $(RUNTESTFLAGS)
 
 t_inetd:: t_inetd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_inetd t_inetd.o $(KRB5_BASE_LIBS)
@@ -45,6 +46,8 @@ site.exp: runenv.vals Makefile
 	echo "set runvarlist [list `cat runenv.vals | tr '\n' ' '`]" | \
 		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
 	echo "set KRB5_DB_MODULE_DIR {$(KRB5_DB_MODULE_DIR)}" >> site.exp
+	echo "set PRIOCNTL_HACK @PRIOCNTL_HACK@" >> site.exp
+	echo set $(KRB4_RUNTESTFLAGS) | sed -e 's/=/ /' >> site.exp
 
 # +++ Dependency line eater +++
 # 

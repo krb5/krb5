@@ -90,22 +90,20 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
 {
     krb5_error_code retval = KRB5_ERR_HOST_REALM_UNKNOWN;
     const unsigned char *p, *base;
-    char host[MAXDNAME], *h;
+    char host[MAXDNAME];
     int ret, rdlen, len;
     struct krb5int_dns_state *ds = NULL;
+    struct k5buf buf;
 
     /*
      * Form our query, and send it via DNS
      */
 
+    krb5int_buf_init_fixed(&buf, host, sizeof(host));
     if (name == NULL || name[0] == '\0') {
-        if (strlcpy(host, prefix, sizeof(host)) >= sizeof(host))
-	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+	krb5int_buf_add(&buf, prefix);
     } else {
-        if ( strlen(prefix) + strlen(name) + 3 > MAXDNAME )
-            return KRB5_ERR_HOST_REALM_UNKNOWN;
-        if (snprintf(host, sizeof(host), "%s.%s", prefix, name) >= sizeof(host))
-	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+	krb5int_buf_add_fmt(&buf, "%s.%s", prefix, name);
 
         /* Realm names don't (normally) end with ".", but if the query
            doesn't end with "." and doesn't get an answer as is, the
@@ -117,10 +115,12 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
            the local domain or domain search lists to be expanded.
         */
 
-        h = host + strlen (host);
-        if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
-            strcpy (h, ".");
+	len = krb5int_buf_len(&buf);
+	if (len > 0 && host[len - 1] != '.')
+	    krb5int_buf_add(&buf, ".");
     }
+    if (krb5int_buf_data(&buf) == NULL)
+	return KRB5_ERR_HOST_REALM_UNKNOWN;
     ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
     if (ret < 0)
 	goto errout;

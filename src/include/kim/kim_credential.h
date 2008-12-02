@@ -101,6 +101,11 @@ typedef int kim_credential_state;
  * kim_options specified, #kim_credential_create_new() may present a 
  * GUI or command line prompt to obtain information from the user.
  *
+ * For legacy password-based Kerberos environments KIM also provides
+ * #kim_credential_create_new_with_password().  You should not use this 
+ * function unless you know that it will only be used in environments using 
+ * passwords.  Otherwise users without passwords may be prompted for them.
+ *
  * KIM provides the #kim_credential_create_from_keytab() to create credentials 
  * using a keytab. A keytab is an on-disk copy of a client identity's secret 
  * key.  Typically sites use keytabs for client identities that identify a 
@@ -324,7 +329,7 @@ void kim_credential_iterator_free (kim_credential_iterator *io_credential_iterat
  * \param in_client_identity  a client identity to obtain a credential for.   Specify NULL to 
  *                            allow the user to choose the identity
  * \param in_options          options to control credential acquisition. 
- * \note Depending on the kim_options specified, #kim_credential_create_new() may 
+ * \note #kim_credential_create_new() may 
  * present a GUI or command line prompt to obtain information from the user. 
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Acquire a new initial credential.
@@ -334,6 +339,27 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
                                      kim_identity    in_client_identity,
                                      kim_options     in_options);
 
+/*!
+ * \param out_credential      on exit, a new credential object containing a newly acquired 
+ *                            initial credential.  Must be freed with kim_credential_free().
+ * \param in_client_identity  a client identity to obtain a credential for.   Specify NULL to 
+ *                            allow the user to choose the identity
+ * \param in_options          options to control credential acquisition. 
+ * \param in_password         a password to be used while obtaining the credential. 
+ * \note #kim_credential_create_new_with_password() exists to support
+ * legacy password-based Kerberos environments.  You should not use this 
+ * function unless you know that it will only be used in environments using passwords.
+ * This function may also present a GUI or command line prompt to obtain
+ * additional information needed to obtain credentials (eg: SecurID pin).
+ * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
+ * \brief Acquire a new initial credential using the provided password.
+ * \sa kim_ccache_create_new
+ */
+kim_error kim_credential_create_new_with_password (kim_credential *out_credential,
+                                                   kim_identity    in_client_identity,
+                                                   kim_options     in_options,
+                                                   kim_string      in_password);
+    
 /*!
  * \param out_credential  on exit, a new credential object containing an initial credential
  *                        for \a in_identity obtained using \a in_keytab.  

@@ -145,7 +145,7 @@ krb5_def_store_mkey(krb5_context   context,
     char *tmp_ktname = NULL, *tmp_ktpath;
     krb5_data *realm = krb5_princ_realm(context, mname);
 #ifndef LEAN_CLIENT 
-    krb5_keytab kt;
+    krb5_keytab kt = NULL;
     krb5_keytab_entry new_entry;
 #endif /* LEAN_CLIENT */
     struct stat stb;
@@ -226,6 +226,10 @@ krb5_def_store_mkey(krb5_context   context,
 out:
     if (tmp_ktname != NULL)
         free(tmp_ktname);
+#ifndef LEAN_CLIENT 
+    if (kt)
+	krb5_kt_close(context, kt);
+#endif
 
     return retval;
 }
@@ -319,7 +323,7 @@ krb5_db_def_fetch_mkey_keytab(krb5_context   context,
                               krb5_kvno      *kvno)
 {
     krb5_error_code retval = 0;
-    krb5_keytab kt;
+    krb5_keytab kt = NULL;
     krb5_keytab_entry kt_ent;
     krb5_enctype enctype = IGNORE_ENCTYPE;
 
@@ -369,6 +373,9 @@ krb5_db_def_fetch_mkey_keytab(krb5_context   context,
     }
 
 errout:
+    if (kt)
+	krb5_kt_close(context, kt);
+
     return retval;
 }
 #endif /* LEAN_CLIENT */

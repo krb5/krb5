@@ -82,7 +82,7 @@ main(argc, argv)
 #endif
 	info.lorder = 0;
 	if (!(db = dbopen("bigtest", O_RDWR | O_CREAT | O_BINARY, 0644, DB_HASH, &info))) {
-		sprintf(buf, "dbopen: failed on file bigtest");
+		snprintf(buf, sizeof(buf), "dbopen: failed on file bigtest");
 		perror(buf);
 		exit(1);
 	}
@@ -96,10 +96,10 @@ main(argc, argv)
 		content.size = 128 + (rand()&1023);
 /*		printf("%d: Key size %d, data size %d\n", i, key.size,
 		       content.size); */
-		sprintf(keybuf, "Key #%d", i);
-		sprintf(contentbuf, "Contents #%d", i);
+		snprintf(keybuf, sizeof(keybuf), "Key #%d", i);
+		snprintf(contentbuf, sizeof(contentbuf), "Contents #%d", i);
 		if ((db->put)(db, &key, &content, R_NOOVERWRITE)) {
-			sprintf(buf, "dbm_store #%d", i);
+			snprintf(buf, sizeof(buf), "dbm_store #%d", i);
 			perror(buf);
 		}
 	}

@@ -240,8 +240,8 @@ krb5int_debug_fprint (const char *fmt, ...)
 		    krb5int_buf_add_fmt(&buf, " af%d", ai->ai_addr->sa_family);
 	    } else
 		krb5int_buf_add_fmt(&buf, " %s.%s", addrbuf, portbuf);
-	    if (krb5int_buf_cstr(&buf))
-		putstr(krb5int_buf_cstr(&buf));
+	    if (krb5int_buf_data(&buf))
+		putstr(krb5int_buf_data(&buf));
 	    krb5int_free_buf(&buf);
 	    break;
 	case 'D':

@@ -61,6 +61,8 @@
 #include <libtelnet/encrypt.h>
 #endif
 
+#include <k5-platform.h>
+
 FILE	*NetTrace = 0;		/* Not in bss, since needs to stay */
 int	prettydump;
 
@@ -646,7 +648,7 @@ printsub(direction, pointer, length)
 		}
 		{
 		    char tbuf[64];
-		    sprintf(tbuf, "%s%s%s%s%s",
+		    snprintf(tbuf, sizeof(tbuf), "%s%s%s%s%s",
 			pointer[2]&MODE_EDIT ? "|EDIT" : "",
 			pointer[2]&MODE_TRAPSIG ? "|TRAPSIG" : "",
 			pointer[2]&MODE_SOFT_TAB ? "|SOFT_TAB" : "",

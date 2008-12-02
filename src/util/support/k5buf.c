@@ -192,7 +192,7 @@ void krb5int_buf_truncate(struct k5buf *buf, size_t len)
 }
 
 
-char *krb5int_buf_cstr(struct k5buf *buf)
+char *krb5int_buf_data(struct k5buf *buf)
 {
     return (buf->buftype == ERROR) ? NULL : buf->data;
 }

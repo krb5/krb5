@@ -624,7 +624,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		    if (st == KRB5_KDB_NOENTRY || st == KRB5_KDB_CONSTRAINT_VIOLATION) {
 			int ost = st;
 			st = EINVAL;
-			sprintf(errbuf, "'%s' not found: ", xargs.containerdn);
+			snprintf(errbuf, sizeof(errbuf), "'%s' not found: ",
+				 xargs.containerdn);
 			prepend_err_str(context, errbuf, st, ost);
 		    }
 		    goto cleanup;
@@ -641,10 +642,10 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    }
 	    CHECK_NULL(subtree);
 
-	    standalone_principal_dn = malloc(strlen("krbprincipalname=") + strlen(user) + strlen(",") +
-					     strlen(subtree) + 1);
+	    if (asprintf(&standalone_principal_dn, "krbprincipalname=%s,%s",
+			 user, subtree) < 0)
+		standalone_principal_dn = NULL;
 	    CHECK_NULL(standalone_principal_dn);
-	    sprintf(standalone_principal_dn, "krbprincipalname=%s,%s", user, subtree);
 	    /*
 	     * free subtree when you are done using the subtree
 	     * set the boolean create_standalone_prinicipal to TRUE
@@ -1072,7 +1073,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		/* a load operation must replace an existing entry */
 		st = ldap_delete_ext_s(ld, standalone_principal_dn, NULL, NULL);
 		if (st != LDAP_SUCCESS) {
-		    sprintf(errbuf, "Principal delete failed (trying to replace entry): %s",
+		    snprintf(errbuf, sizeof(errbuf), "Principal delete failed (trying to replace entry): %s",
 			ldap_err2string(st));
 		    st = translate_ldap_error (st, OP_ADD);
 		    krb5_set_error_message(context, st, "%s", errbuf);
@@ -1082,7 +1083,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		}
 	    }
 	    if (st != LDAP_SUCCESS) {
-		sprintf(errbuf, "Principal add failed: %s", ldap_err2string(st));
+		snprintf(errbuf, sizeof(errbuf), "Principal add failed: %s", ldap_err2string(st));
 		st = translate_ldap_error (st, OP_ADD);
 		krb5_set_error_message(context, st, "%s", errbuf);
 		goto cleanup;
@@ -1119,7 +1120,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		st = ldap_modify_ext_s(ld, principal_dn, mods, NULL, NULL);
 
 	    if (st != LDAP_SUCCESS) {
-		sprintf(errbuf, "User modification failed: %s", ldap_err2string(st));
+		snprintf(errbuf, sizeof(errbuf), "User modification failed: %s", ldap_err2string(st));
 		st = translate_ldap_error (st, OP_MOD);
 		krb5_set_error_message(context, st, "%s", errbuf);
 		goto cleanup;

@@ -54,7 +54,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)
      * the rlogind or rshd. Set the environment variable as well.
      */
   
-    sprintf(ccname, "FILE:/tmp/krb5cc_p%ld", (long) getpid());
+    snprintf(ccname, sizeof(ccname), "FILE:/tmp/krb5cc_p%ld", (long) getpid());
     setenv("KRB5CCNAME", ccname, 1);
   
     retval = krb5_cc_resolve(context, ccname, ccache);

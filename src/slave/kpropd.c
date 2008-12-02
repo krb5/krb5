@@ -98,9 +98,15 @@ extern int daemon(int, int);
 #endif
 
 #define SYSLOG_CLASS LOG_DAEMON
+#define INITIAL_TIMER 10
 
 char *def_realm = NULL;
 int runonce = 0;
+
+/*
+ * Global fd to close upon alarm time-out.
+ */
+volatile int gfd = -1;
 
 /*
  * This struct simulates the use of _kadm5_server_handle_t
@@ -243,6 +249,14 @@ main(argc, argv)
     exit(ret);
 }
 
+void resync_alarm(int sn)
+{
+    close (gfd);
+    if (debug)
+	fprintf(stderr, _("resync_alarm: closing fd: %d\n"), gfd);
+    gfd = -1;
+}
+
 int do_standalone(iprop_role iproprole)
 {
 	struct	sockaddr_in	my_sin, frominet;
@@ -250,6 +264,12 @@ int do_standalone(iprop_role iproprole)
 	int	finet, s;
 	GETPEERNAME_ARG3_TYPE fromlen;
 	int	ret;
+	/*
+	 * Timer for accept/read calls, in case of network type errors.
+	 */
+	int backoff_timer = INITIAL_TIMER;
+
+retry:
 
 	finet = socket(AF_INET, SOCK_STREAM, 0);
 	if (finet < 0) {
@@ -281,13 +301,30 @@ int do_standalone(iprop_role iproprole)
 	    if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR,
 			   (char *)&on, sizeof(on)) < 0)
 		com_err(progname, errno,
-			_("in setsockopt(SO_REUSEADDR)"));
+			_("while setting socket option (SO_REUSEADDR)"));
 	    linger.l_onoff = 1;
 	    linger.l_linger = 2;
 	    if (setsockopt(finet, SOL_SOCKET, SO_LINGER,
 			   (void *)&linger, sizeof(linger)) < 0)
 		com_err(progname, errno,
-			_("in setsockopt(SO_LINGER)"));
+			_("while setting socket option (SO_LINGER)"));
+	    /*
+	     * We also want to set a timer so that the slave is not waiting
+	     * until infinity for an update from the master.
+	     */
+	    gfd = finet;
+	    signal(SIGALRM, resync_alarm);
+	    if (debug) {
+		fprintf(stderr, "do_standalone: setting resync alarm to %d\n",
+			backoff_timer);
+	    }
+	    if (alarm(backoff_timer) != 0) {
+		if (debug) {
+		    fprintf(stderr,
+			    _("%s: alarm already set\n"), progname);
+		}
+	    }
+	    backoff_timer *= 2;
 	}
 	if ((ret = bind(finet, (struct sockaddr *) &my_sin, sizeof(my_sin))) < 0) {
 	    if (debug) {
@@ -331,11 +368,30 @@ int do_standalone(iprop_role iproprole)
 		s = accept(finet, (struct sockaddr *) &frominet, &fromlen);
 
 		if (s < 0) {
-			if (errno != EINTR)
-				com_err(progname, errno,
-					"from accept system call");
-			continue;
+		    int e = errno;
+		    if (e != EINTR) {
+			com_err(progname, e,
+				_("while accepting connection"));
+			if (e != EBADF)
+			    backoff_timer = INITIAL_TIMER;
+		    }
+		    /*
+		     * If we got EBADF, an alarm signal handler closed
+		     * the file descriptor on us.
+		     */
+		    if (e != EBADF)
+			close(finet);
+		    /*
+		     * An alarm could have been set and the fd closed, we
+		     * should retry in case of transient network error for
+		     * up to a couple of minutes.
+		     */
+		    if (backoff_timer > 120)
+			return EINTR;
+		    goto retry;
 		}
+		alarm(0);
+		gfd = -1;
 		if (debug && iproprole != IPROP_SLAVE)
 			child_pid = 0;
 		else
@@ -351,10 +407,18 @@ int do_standalone(iprop_role iproprole)
 			close(s);
 			_exit(0);
 		default:
+		    /*
+		     * Errors should not be considered fatal in the
+		     * iprop case as we could have transient type
+		     * errors, such as network outage, etc.  Sleeping
+		     * 3s for 2s linger interval.
+		     */
 		    if (wait(&status) < 0) {
 			com_err(progname, errno,
 				_("while waiting to receive database"));
-			exit(1);
+			if (iproprole != IPROP_SLAVE)
+			    exit(1);
+			sleep(3);
 		    }
 
 		    close(s);
@@ -384,6 +448,23 @@ void doit(fd)
 	krb5_enctype etype;
 	int database_fd;
 
+	if (kpropd_context->kdblog_context &&
+	    kpropd_context->kdblog_context->iproprole == IPROP_SLAVE) {
+	    /*
+	     * We also want to set a timer so that the slave is not waiting
+	     * until infinity for an update from the master.
+	     */
+	    if (debug)
+		fprintf(stderr, "doit: setting resync alarm to 5s\n");
+	    signal(SIGALRM, resync_alarm);
+	    gfd = fd;
+	    if (alarm(5) != 0) {
+		if (debug) {
+		    fprintf(stderr,
+			    _("%s: alarm already set\n"), progname);
+		}
+	    }
+	}
 	fromlen = sizeof (from);
 	if (getpeername(fd, (struct sockaddr *) &from, &fromlen) < 0) {
 #ifdef ENOTSOCK
@@ -422,6 +503,11 @@ void doit(fd)
 	 * Now do the authentication
 	 */
 	kerberos_authenticate(kpropd_context, fd, &client, &etype, from);
+
+	/*
+	 * Turn off alarm upon successful authentication from master.
+	 */
+	alarm(0);
 
 	if (!authorized_principal(kpropd_context, client, etype)) {
 		char	*name;
@@ -512,7 +598,6 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	void *server_handle = NULL;
 	char *iprop_svc_princstr = NULL;
 	char *master_svc_princstr = NULL;
-	char *keytab_name = NULL;
 	unsigned int pollin, backoff_time;
 	int backoff_cnt = 0;
 	int reinit_cnt = 0;
@@ -609,7 +694,7 @@ reinit:
 	/*
 	 * Authentication, initialize rpcsec_gss handle etc.
 	 */
-	retval = kadm5_init_with_skey(iprop_svc_princstr, keytab_name,
+	retval = kadm5_init_with_skey(iprop_svc_princstr, srvtab,
 				      master_svc_princstr,
 				      &params,
 				      KADM5_STRUCT_VERSION,
@@ -725,10 +810,6 @@ reinit:
 				 * the full dump
 				 */
 				ret = do_standalone(log_ctx->iproprole);
-				if (ret)
-					syslog(LOG_WARNING,
-					    _("kpropd: Full resync, "
-					    "invalid return."));
 				if (debug) {
 					if (ret)
 						fprintf(stderr,
@@ -739,7 +820,12 @@ reinit:
 						    _("Full resync "
 						    "was successful\n"));
 				}
-				frdone = 1;
+				if (ret) {
+				    syslog(LOG_WARNING,
+					   _("kpropd: Full resync, invalid return."));
+				    frdone = 0;
+				} else
+				    frdone = 1;
 				break;
 
 			case UPDATE_BUSY:
@@ -783,9 +869,12 @@ reinit:
 					     db_args);
 
 			if (retval) {
-				syslog(LOG_ERR, _("kpropd: ulog_replay"
-					" failed, updates not registered."));
-				break;
+			    char *msg = krb5_get_error_message(kpropd_context,
+							       retval);
+			    syslog(LOG_ERR,
+				   _("kpropd: ulog_replay failed (%s), updates not registered."), msg);
+			    krb5_free_error_message(kpropd_context, msg);
+			    break;
 			}
 
 			if (debug)
@@ -1343,7 +1432,7 @@ recv_database(context, fd, database_fd, confmsg)
 	while (received_size < database_size) {
 	        retval = krb5_read_message(context, (void *) &fd, &inbuf);
 		if (retval) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"while reading database block starting at offset %d",
 				received_size);
 			com_err(progname, retval, buf);
@@ -1355,7 +1444,7 @@ recv_database(context, fd, database_fd, confmsg)
 		retval = krb5_rd_priv(context, auth_context, &inbuf, 
 				      &outbuf, NULL);
 		if (retval) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"while decoding database block starting at offset %d",
 				received_size);
 			com_err(progname, retval, buf);
@@ -1367,12 +1456,12 @@ recv_database(context, fd, database_fd, confmsg)
 		krb5_free_data_contents(context, &inbuf);
 		krb5_free_data_contents(context, &outbuf);
 		if (n < 0) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"while writing database block starting at offset %d",
 				received_size);
 			send_error(context, fd, errno, buf);
 		} else if (n != outbuf.length) {
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"incomplete write while writing database block starting at \noffset %d (%d written, %d expected)",
 				received_size, n, outbuf.length);
 			send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
@@ -1383,7 +1472,7 @@ recv_database(context, fd, database_fd, confmsg)
 	 * OK, we've seen the entire file.  Did we get too many bytes?
 	 */
 	if (received_size > database_size) {
-		sprintf(buf,
+		snprintf(buf, sizeof(buf),
 			"Received %d bytes, expected %d bytes for database file",
 			received_size, database_size);
 		send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
@@ -1432,8 +1521,8 @@ send_error(context, fd, err_code, err_text)
 	if (error.error > 127) {
 		error.error = KRB_ERR_GENERIC;
 		if (err_text) {
-			sprintf(buf, "%s %s", error_message(err_code),
-				err_text);
+			snprintf(buf, sizeof(buf), "%s %s",
+				 error_message(err_code), err_text);
 			text = buf;
 		}
 	} 
@@ -1470,7 +1559,7 @@ recv_error(context, inbuf)
 	} else if (error->error) {
 		com_err(progname, 
 			(krb5_error_code) error->error + ERROR_TABLE_BASE_krb5,
-			"signalled from server");
+			"signaled from server");
 		if (error->text.data)
 			fprintf(stderr,
 				"Error text from client: %s\n",
@@ -1585,12 +1674,10 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 
 	host = params.admin_server; /* XXX */
 
-	name = malloc(strlen(KADM5_KIPROP_HOST_SERVICE) + strlen(host) + 2);
-	if (name == NULL) {
+	if (asprintf(&name, "%s/%s", KADM5_KIPROP_HOST_SERVICE, host) < 0) {
 		free(host);
 		return (ENOMEM);
 	}
-	sprintf(name, "%s/%s", KADM5_KIPROP_HOST_SERVICE, host);
 	*host_service_name = name;
 
 	return (KADM5_OK);

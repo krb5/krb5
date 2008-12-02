@@ -1991,7 +1991,7 @@ static char *strdur(duration)
     minutes = duration / 60;
     duration %= 60;
     seconds = duration;
-    sprintf(out, "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
+    snprintf(out, sizeof(out), "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
 	    days, days == 1 ? "day" : "days",
 	    hours, minutes, seconds);
     return out;

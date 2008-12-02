@@ -858,7 +858,7 @@ void doit(f, fromp)
 	/*
 	 * Problems read failed ...
 	 */
-	sprintf(buferror, "Cannot read slave pty %s ",line);
+	snprintf(buferror, sizeof(buferror), "Cannot read slave pty %s ",line);
 	fatalperror(p,buferror);
     }
     close(syncpipe[0]);
@@ -867,7 +867,8 @@ void doit(f, fromp)
 #if defined(KERBEROS) 
     if (do_encrypt) {
 	if (rcmd_stream_write(f, SECURE_MESSAGE, sizeof(SECURE_MESSAGE), 0) < 0){
-	    sprintf(buferror, "Cannot encrypt-write network.");
+	    snprintf(buferror, sizeof(buferror),
+		     "Cannot encrypt-write network.");
 	    fatal(p,buferror);
 	}
     }
@@ -900,7 +901,8 @@ void doit(f, fromp)
 	/*
 	 * Problems write failed ...
 	 */
-	sprintf(buferror,"Cannot write slave pty %s ",line);
+	snprintf(buferror, sizeof(buferror), "Cannot write slave pty %s ",
+		 line);
 	fatalperror(f,buferror);
     }
 
@@ -1179,7 +1181,7 @@ void fatal(f, msg)
 #endif
     
     buf[0] = '\01';		/* error indicator */
-    (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
+    (void) snprintf(buf + 1, sizeof(buf) - 1, "%s: %s.\r\n", progname, msg);
     if ((f == netf) && (pid > 0))
       (void) rcmd_stream_write(f, buf, strlen(buf), 0);
     else
@@ -1213,7 +1215,7 @@ void fatalperror(f, msg)
 {
     char buf[512];
     
-    (void) sprintf(buf, "%s: %s", msg, error_message(errno));
+    (void) snprintf(buf, sizeof(buf), "%s: %s", msg, error_message(errno));
     fatal(f, buf);
 }
 
@@ -1288,18 +1290,14 @@ do_krb_login(host_addr, hostname)
     if (ticket)
 	krb5_free_ticket(bsd_context, ticket);
 
-    if (krusername)
-	msg_fail = (char *)malloc(strlen(krusername) + strlen(lusername) + 80);
-    if (!msg_fail)
-	fatal(netf, "User is not authorized to login to specified account");
-
     if (auth_sent)
-	sprintf(msg_fail, "Access denied because of improper credentials");
+	fatal(netf, "Access denied because of improper credentials");
+    else if (asprintf(&msg_fail,
+		      "User %s is not authorized to login to account %s",
+		      krusername, lusername) >= 0)
+	fatal(netf, msg_fail);
     else
-	sprintf(msg_fail, "User %s is not authorized to login to account %s",
-		krusername, lusername);
-    
-    fatal(netf, msg_fail);
+	fatal(netf, "User is not authorized to login to specified account");
     /* NOTREACHED */
 }
 

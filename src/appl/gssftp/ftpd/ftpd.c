@@ -773,7 +773,8 @@ user(name)
 				syslog(LOG_ERR, "user: username too long");
 				name = "[username too long]";
 			}
-			sprintf(buf, "GSSAPI user %s is%s authorized as %s",
+			snprintf(buf, sizeof(buf),
+				 "GSSAPI user %s is%s authorized as %s",
 				(char *) client_name.value, 
 				authorized ? "" : " not",
 				name);
@@ -797,7 +798,8 @@ user(name)
 				syslog(LOG_ERR, "user: username too long");
 				name = "[username too long]";
 			}
-			sprintf(buf, "Kerberos user %s%s%s@%s is%s authorized as %s",
+			snprintf(buf, sizeof(buf),
+				 "Kerberos user %s%s%s@%s is%s authorized as %s",
 				kdata.pname, *kdata.pinst ? "." : "",
 				kdata.pinst, kdata.prealm,
 				authorized ? "" : " not", name);
@@ -947,7 +949,8 @@ char *name, *passwd;
 		return 0;
 	my_creds.client = me;
 
-	sprintf(ccname, "FILE:/tmp/krb5cc_ftpd%ld", (long) getpid());
+	snprintf(ccname, sizeof(ccname), "FILE:/tmp/krb5cc_ftpd%ld",
+		 (long) getpid());
 	if (krb5_cc_resolve(kcontext, ccname, &ccache))
 		return(0);
 	if (krb5_cc_initialize(kcontext, ccache, me))
@@ -986,7 +989,8 @@ char *name, *passwd;
 	if (krb_get_lrealm(realm, 1) != KSUCCESS)
 		goto nuke_ccache;
 
-	sprintf(ccname, "%s_ftpd%ld", TKT_ROOT, (long) getpid());
+	snprintf(ccname, sizeof(ccname), "%s_ftpd%ld", TKT_ROOT,
+		 (long) getpid());
 	krb_set_tkt_string(ccname);
 
 	if (krb_get_pw_in_tkt(name, "", realm, "krbtgt", realm, 1, passwd))
@@ -1116,7 +1120,7 @@ login(passwd, logincode)
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 
 	/* open wtmp before chroot */
-	(void) sprintf(ttyline, "ftp%ld", (long) getpid());
+	(void) snprintf(ttyline, sizeof(ttyline), "ftp%ld", (long) getpid());
 	pty_logwtmp(ttyline, pw->pw_name, rhost_sane);
 	logged_in = 1;
 
@@ -1168,9 +1172,8 @@ login(passwd, logincode)
 	if (guest) {
 		reply(230, "Guest login ok, access restrictions apply.");
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: anonymous/%.*s", rhost_sane,
-		    sizeof(proctitle) - strlen(rhost_sane) -
-		    sizeof(": anonymous/"), passwd);
+		snprintf(proctitle, sizeof(proctitle), "%s: anonymous/%.*s",
+			 rhost_sane, passwd);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
@@ -1183,7 +1186,8 @@ login(passwd, logincode)
 			reply(230, "User %s logged in.", pw->pw_name);
 		}
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: %s", rhost_sane, pw->pw_name);
+		snprintf(proctitle, sizeof(proctitle), "%s: %s",
+			 rhost_sane, pw->pw_name);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
@@ -1219,7 +1223,7 @@ retrieve(cmd, name)
 			reply(501, "filename too long");
 			return;
 		}
-		(void) sprintf(line, cmd, name), name = line;
+		(void) snprintf(line, sizeof(line), cmd, name), name = line;
 		fin = ftpd_popen(line, "r"), closefunc = ftpd_pclose;
 		st.st_size = -1;
 #ifndef NOSTBLKSIZE
@@ -1401,7 +1405,8 @@ dataconn(name, size, fmode)
 	byte_count = 0;
 	if (size != (off_t) -1)
 		/* cast size to long in case sizeof(off_t) > sizeof(long) */
-		(void) sprintf (sizebuf, " (%ld bytes)", (long)size);
+		(void) snprintf (sizebuf, sizeof(sizebuf), " (%ld bytes)",
+				 (long)size);
 	else
 		sizebuf[0] = '\0';
 	if (pdata >= 0) {
@@ -1665,7 +1670,7 @@ statfilecmd(filename)
 		reply(501, "filename too long");
 		return;
 	}
-	(void) sprintf(line, "/bin/ls -lgA %s", filename);
+	(void) snprintf(line, sizeof(line), "/bin/ls -lgA %s", filename);
 	fin = ftpd_popen(line, "r");
 	lreply(211, "status of %s:", filename);
 	p = str;
@@ -1714,8 +1719,8 @@ statcmd()
 
 	lreply(211, "%s FTP server status:", hostname);
 	reply(0, "     %s", version);
-	sprintf(str, "     Connected to %s", remotehost[0] ? remotehost : "");
-	sprintf(&str[strlen(str)], " (%s)", rhost_addra);
+	snprintf(str, sizeof(str), "     Connected to %s (%s)",
+		 remotehost[0] ? remotehost : "", rhost_addra);
 	reply(0, "%s", str);
 	if (auth_type) reply(0, "     Authentication type: %s", auth_type);
 	if (logged_in) {
@@ -1730,22 +1735,16 @@ statcmd()
 	else
 		reply(0, "     Waiting for user name");
 	reply(0, "     Protection level: %s", levelnames[dlevel]);
-	sprintf(str, "     TYPE: %s", typenames[type]);
-	if (type == TYPE_A || type == TYPE_E)
-		sprintf(&str[strlen(str)], ", FORM: %s", formnames[form]);
+	snprintf(str, sizeof(str), "     TYPE: %s", typenames[type]);
+	if (type == TYPE_A || type == TYPE_E) {
+		snprintf(&str[strlen(str)], sizeof(str) - strlen(str),
+			 ", FORM: %s", formnames[form]);
+	}
 	if (type == TYPE_L)
-#if 1
 		strncat(str, " 8", sizeof (str) - strlen(str) - 1);
-#else
-/* this is silly. -- eichin@cygnus.com */
-#if NBBY == 8
-		sprintf(&str[strlen(str)], " %d", NBBY);
-#else
-		sprintf(&str[strlen(str)], " %d", bytesize);	/* need definition! */
-#endif
-#endif
-	sprintf(&str[strlen(str)], "; STRUcture: %s; transfer MODE: %s",
-	    strunames[stru], modenames[mode]);
+	snprintf(&str[strlen(str)], sizeof(str) - strlen(str),
+		 "; STRUcture: %s; transfer MODE: %s",
+		 strunames[stru], modenames[mode]);
 	reply(0, "%s", str);
 	if (data != -1)
 		strlcpy(str, "     Data connection open", sizeof(str));
@@ -1801,10 +1800,10 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 	va_list ap;
 
 	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 #else
-	sprintf(buf, fmt, p0, p1, p2, p3, p4, p5);
+	snprintf(buf, sizeof(buf), fmt, p0, p1, p2, p3, p4, p5);
 #endif
 
 	if (auth_type) {
@@ -1814,7 +1813,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 		 */
 		char in[FTP_BUFSIZ*3/2], out[FTP_BUFSIZ*3/2];
 		int length = 0, kerror;
-		if (n) sprintf(in, "%d%c", n, cont_char);
+		if (n) snprintf(in, sizeof(in), "%d%c", n, cont_char);
 		else in[0] = '\0';
 		strncat(in, buf, sizeof (in) - strlen(in) - 1);
 #ifdef KRB5_KRB4_COMPAT
@@ -1919,10 +1918,10 @@ lreply(n, fmt, p0, p1, p2, p3, p4, p5)
 	va_list ap;
 
 	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 #else
-	sprintf(buf, fmt, p0, p1, p2, p3, p4, p5);
+	snprintf(buf, sizeof(buf), fmt, p0, p1, p2, p3, p4, p5);
 #endif
 	cont_char = '-';
 	reply(n, "%s", buf);
@@ -2084,7 +2083,7 @@ dolog(sin4)
 		exit(1);
 	}
 #ifdef SETPROCTITLE
-	sprintf(proctitle, "%s: connected", rhost_sane);
+	snprintf(proctitle, sizeof(proctitle), "%s: connected", rhost_sane);
 	setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 
@@ -2231,7 +2230,7 @@ gunique(local)
 	cp = new + strlen(new);
 	*cp++ = '.';
 	for (count = 1; count < 100; count++) {
-		(void) sprintf(cp, "%d", count);
+		(void) snprintf(cp, sizeof(new) - (cp - new), "%d", count);
 		if (stat(new, &st) < 0)
 			return(new);
 	}
@@ -2414,7 +2413,8 @@ char *adata;
 		localname[sizeof(localname) - 1] = '\0';
 
 		for (gservice = gss_services; *gservice; gservice++) {
-			sprintf(service_name, "%s@%s", *gservice, localname);
+			snprintf(service_name, sizeof(service_name),
+				 "%s@%s", *gservice, localname);
 			name_buf.value = service_name;
 			name_buf.length = strlen(name_buf.value) + 1;
 			if (debug)
@@ -2723,7 +2723,8 @@ send_file_list(whichfiles)
 				ret = -2; /* XXX */
 				goto data_err;
 			}
-			sprintf(nbuf, "%s/%s", dirname, dir->d_name);
+			snprintf(nbuf, sizeof(nbuf), "%s/%s",
+				 dirname, dir->d_name);
 
 			/*
 			 * We have to do a stat to insure it's
@@ -2929,7 +2930,8 @@ ftpd_gss_convert_creds(name, creds)
 	if (krb5_parse_name(kcontext, name, &me))
 		return;
 
-	sprintf(ccname, "FILE:/tmp/krb5cc_ftpd%ld", (long) getpid());
+	snprintf(ccname, sizeof(ccname), "FILE:/tmp/krb5cc_ftpd%ld",
+		 (long) getpid());
 	if (krb5_cc_resolve(kcontext, ccname, &ccache))
 		return;
 	if (krb5_cc_initialize(kcontext, ccache, me))
@@ -2962,7 +2964,8 @@ ftpd_gss_convert_creds(name, creds)
 	if (krb524_convert_creds_kdc(kcontext, v5creds, &v4creds))
 		goto cleanup;
 
-	sprintf(ccname, "%s_ftpd%ld", TKT_ROOT, (long) getpid());
+	snprintf(ccname, sizeof(ccname), "%s_ftpd%ld",
+		 TKT_ROOT, (long) getpid());
 	krb_set_tkt_string(ccname);
 
 	if (in_tkt(v4creds.pname, v4creds.pinst) != KSUCCESS)

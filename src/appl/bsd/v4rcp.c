@@ -388,8 +388,9 @@ int main(argc, argv)
 
 		    case 'P':		/* Set port to use.  */
 			port = atoi(*argv);
-			sprintf(portarg, " -p%d", port);
-			sprintf(rcpportarg, " -P%d", port);
+			snprintf(portarg, sizeof(portarg), " -p%d", port);
+			snprintf(rcpportarg, sizeof(rcpportarg), " -P%d",
+				 port);
 			port = htons(port);
 			goto next_arg;
 
@@ -410,7 +411,8 @@ int main(argc, argv)
 			  usage();
 			strncpy(krb_realm,*argv,REALM_SZ);
 			krb_realm[REALM_SZ-1] = 0;
-			sprintf(realmarg, " -k %s", krb_realm);
+			snprintf(realmarg, sizeof(realmarg), " -k %s",
+				 krb_realm);
 			goto next_arg;
 #endif /* KERBEROS */
 		    /* The rest of these are not for users. */
@@ -539,16 +541,17 @@ notreg:
 			 * Make it compatible with possible future
 			 * versions expecting microseconds.
 			 */
-			(void) sprintf(buf, "T%ld 0 %ld 0\n",
-			    stb.st_mtime, stb.st_atime);
+			(void) snprintf(buf, sizeof(buf), "T%ld 0 %ld 0\n",
+					stb.st_mtime, stb.st_atime);
 			kstream_write (krem, buf, strlen (buf));
 			if (response() < 0) {
 				(void) close(f);
 				continue;
 			}
 		}
-		(void) sprintf(buf, "C%04o %ld %s\n",
-		    (unsigned int) stb.st_mode&07777, (long) stb.st_size, last);
+		(void) snprintf(buf, sizeof(buf), "C%04o %ld %s\n",
+				(unsigned int) stb.st_mode&07777,
+				(long) stb.st_size, last);
 		kstream_write (krem, buf, strlen (buf));
 		if (response() < 0) {
 			(void) close(f);
@@ -606,15 +609,15 @@ void rsource(name, statp)
 	else
 		last++;
 	if (pflag) {
-		(void) sprintf(buf, "T%ld 0 %ld 0\n",
-		    statp->st_mtime, statp->st_atime);
+		(void) snprintf(buf, sizeof(buf), "T%ld 0 %ld 0\n",
+				statp->st_mtime, statp->st_atime);
 		kstream_write (krem, buf, strlen (buf));
 		if (response() < 0) {
 			closedir(d);
 			return;
 		}
 	}
-	(void) sprintf(buf, "D%04o %d %s\n",
+	(void) sprintf(buf, sizeof(buf), "D%04o %d %s\n",
 		       (unsigned int) statp->st_mode&07777, 0, last);
 	kstream_write (krem, buf, strlen (buf));
 	if (response() < 0) {
@@ -630,7 +633,7 @@ void rsource(name, statp)
 			error("%s/%s: Name too long.\n", name, dp->d_name);
 			continue;
 		}
-		(void) sprintf(buf, "%s/%s", name, dp->d_name);
+		(void) snprintf(buf, sizeof(buf), "%s/%s", name, dp->d_name);
 		bufv[0] = buf;
 		source(1, bufv);
 	}

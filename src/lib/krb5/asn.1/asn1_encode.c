@@ -421,7 +421,8 @@ encode_a_field(asn1buf *buf, const void *val,
     {
         unsigned int length;
 
-        retval = asn1_encode_integer(buf, field->dataoff, &length);
+        retval = asn1_encode_integer(buf, (asn1_intmax) field->dataoff,
+                                     &length);
         if (retval) return retval;
         sum += length;
         break;

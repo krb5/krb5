@@ -97,7 +97,7 @@ int main (void) {
 	    /* Solaris returns "Invalid argument" if the buffer is too
 	       small.  AIX and Linux return no error indication.  */
 	    int e = errno;
-	    sprintf (buffer, "SIOCGIFCONF(%d)", t);
+	    snprintf (buffer, sizeof(buffer), "SIOCGIFCONF(%d)", t);
 	    errno = e;
 	    perror (buffer);
 	    if (e == EINVAL)

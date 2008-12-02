@@ -35,7 +35,7 @@ krb5int_buf_add
 krb5int_buf_add_len
 krb5int_buf_add_fmt
 krb5int_buf_truncate
-krb5int_buf_cstr
+krb5int_buf_data
 krb5int_buf_len
 krb5int_free_buf
 krb5int_utf8cs_to_ucs2les

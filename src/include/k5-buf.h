@@ -106,17 +106,17 @@ void krb5int_buf_truncate(struct k5buf *buf, size_t len);
 
    For a dynamic buffer, any buffer modification operation except
    krb5int_buf_truncate may invalidate the byte array address. */
-char *krb5int_buf_cstr(struct k5buf *buf);
+char *krb5int_buf_data(struct k5buf *buf);
 
 /* Retrieve the length of BUF, or -1 if there has been an allocation
    failure or the fixed buffer ran out of room.  The length is equal
-   to strlen(krb5int_buf_cstr(buf)) unless binary data was added with
+   to strlen(krb5int_buf_data(buf)) unless binary data was added with
    krb5int_buf_add_len. */
 ssize_t krb5int_buf_len(struct k5buf *buf);
 
 /* Free the storage used in the dynamic buffer BUF.  The caller may
    choose to take responsibility for freeing the return value of
-   krb5int_buf_cstr instead of using this function.  If BUF is a fixed
+   krb5int_buf_data instead of using this function.  If BUF is a fixed
    buffer, an assertion failure will result.  It is unnecessary
    (though harmless) to free a buffer after an error is detected; the
    storage will already have been freed in that case. */

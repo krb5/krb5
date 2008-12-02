@@ -322,12 +322,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 
     for (i=0; strcmp(security_container[i][0], "") != 0; i++) {
 
-	seccontacls[0] = (char *)malloc(strlen(security_container[i][0]) +
-					strlen(serviceobjdn) +
-					strlen(security_container[i][1]) + 1);
-
-	sprintf(seccontacls[0], "%s%s%s", security_container[i][0], serviceobjdn,
-		security_container[i][1]);
+	asprintf(&seccontacls[0], "%s%s%s", security_container[i][0], serviceobjdn,
+		 security_container[i][1]);
 	seccontclass.mod_values = seccontacls;
 
 	seccontarr[0] = &seccontclass;
@@ -351,10 +347,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
     krbcontclass.mod_type = "ACL";
 
     for (i=0; strcmp(kerberos_container[i][0], "") != 0; i++) {
-	krbcontacls[0] = (char *)malloc(strlen(kerberos_container[i][0]) + strlen(serviceobjdn)
-					+ strlen(kerberos_container[i][1]) + 1);
-	sprintf(krbcontacls[0], "%s%s%s", kerberos_container[i][0], serviceobjdn,
-		kerberos_container[i][1]);
+	asprintf(&krbcontacls[0], "%s%s%s", kerberos_container[i][0], serviceobjdn,
+		 kerberos_container[i][1]);
 	krbcontclass.mod_values = krbcontacls;
 
 	krbcontarr[0] = &krbcontclass;
@@ -373,20 +367,15 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
     }
 
 	/* Construct the realm dn from realm name */
-	realmdn = (char *)malloc(strlen("cn=") + strlen(realmname) +
-				 strlen(ldap_context->krbcontainer->DN) + 2);
-	sprintf(realmdn,"cn=%s,%s", realmname, ldap_context->krbcontainer->DN);
+	asprintf(&realmdn,"cn=%s,%s", realmname, ldap_context->krbcontainer->DN);
 
 	realmclass.mod_op = LDAP_MOD_ADD;
 	realmclass.mod_type = "ACL";
 
 	if (servicetype == LDAP_KDC_SERVICE) {
 	    for (i=0; strcmp(kdcrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *)malloc(strlen(kdcrights_realmcontainer[i][0])
-					      + strlen(serviceobjdn) +
-					      strlen(kdcrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn,
-			kdcrights_realmcontainer[i][1]);
+		asprintf(&realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn,
+			 kdcrights_realmcontainer[i][1]);
 		realmclass.mod_values = realmacls;
 
 		realmarr[0] = &realmclass;
@@ -405,11 +394,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 	    }
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    for (i=0; strcmp(adminrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *) malloc(strlen(adminrights_realmcontainer[i][0]) +
-					       strlen(serviceobjdn) +
-					       strlen(adminrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn,
-			adminrights_realmcontainer[i][1]);
+		asprintf(&realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn,
+			 adminrights_realmcontainer[i][1]);
 		realmclass.mod_values = realmacls;
 
 		realmarr[0] = &realmclass;
@@ -428,11 +414,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 	    }
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_realmcontainer[i][0], "")!=0; i++) {
-		realmacls[0] = (char *) malloc(strlen(pwdrights_realmcontainer[i][0]) +
-					       strlen(serviceobjdn) +
-					       strlen(pwdrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn,
-			pwdrights_realmcontainer[i][1]);
+		asprintf(&realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn,
+			 pwdrights_realmcontainer[i][1]);
 		realmclass.mod_values = realmacls;
 
 		realmarr[0] = &realmclass;
@@ -462,11 +445,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 
 	if (servicetype == LDAP_KDC_SERVICE) {
 	    for (i=0; strcmp(kdcrights_subtree[i][0], "")!=0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(kdcrights_subtree[i][0]) +
-						 strlen(serviceobjdn) +
-						 strlen(kdcrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn,
-			kdcrights_subtree[i][1]);
+		asprintf(&subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn,
+			 kdcrights_subtree[i][1]);
 		subtreeclass.mod_values = subtreeacls;
 
 		subtreearr[0] = &subtreeclass;
@@ -488,11 +468,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 	    }
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    for (i=0; strcmp(adminrights_subtree[i][0], "")!=0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(adminrights_subtree[i][0])
-						 + strlen(serviceobjdn)
-						 + strlen(adminrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn,
-			adminrights_subtree[i][1]);
+		asprintf(&subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn,
+			 adminrights_subtree[i][1]);
 		subtreeclass.mod_values = subtreeacls;
 
 		subtreearr[0] = &subtreeclass;
@@ -514,11 +491,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
 	    }
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_subtree[i][0], "") != 0; i++) {
-		subtreeacls[0] = (char *)malloc(strlen(pwdrights_subtree[i][0])
-						+ strlen(serviceobjdn)
-						+ strlen(pwdrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn,
-			pwdrights_subtree[i][1]);
+		asprintf(&subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn,
+			 pwdrights_subtree[i][1]);
 		subtreeclass.mod_values = subtreeacls;
 
 		subtreearr[0] = &subtreeclass;
@@ -632,21 +606,15 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
     /* Set the rights for the realm */
     if (mask & LDAP_REALM_RIGHTS) {
 
-	/* Construct the realm dn from realm name */
-	realmdn = (char *) malloc(strlen("cn=") + strlen(realmname) +
-				  strlen(ldap_context->krbcontainer->DN) + 2);
-	sprintf(realmdn,"cn=%s,%s", realmname, ldap_context->krbcontainer->DN);
+	asprintf(&realmdn,"cn=%s,%s", realmname, ldap_context->krbcontainer->DN);
 
 	realmclass.mod_op=LDAP_MOD_DELETE;
 	realmclass.mod_type="ACL";
 
 	if (servicetype == LDAP_KDC_SERVICE) {
 	    for (i=0; strcmp(kdcrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *) malloc(strlen(kdcrights_realmcontainer[i][0])
-					       + strlen(serviceobjdn) +
-					       strlen(kdcrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn,
-			kdcrights_realmcontainer[i][1]);
+		asprintf(&realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn,
+			 kdcrights_realmcontainer[i][1]);
 		realmclass.mod_values= realmacls;
 
 		realmarr[0]=&realmclass;
@@ -665,11 +633,8 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 	    }
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    for (i=0; strcmp(adminrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *) malloc(strlen(adminrights_realmcontainer[i][0]) +
-					       strlen(serviceobjdn) +
-					       strlen(adminrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn,
-			adminrights_realmcontainer[i][1]);
+		asprintf(&realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn,
+			 adminrights_realmcontainer[i][1]);
 		realmclass.mod_values= realmacls;
 
 		realmarr[0]=&realmclass;
@@ -688,11 +653,8 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 	    }
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0]=(char *)malloc(strlen(pwdrights_realmcontainer[i][0])
-					    + strlen(serviceobjdn)
-					    + strlen(pwdrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn,
-			pwdrights_realmcontainer[i][1]);
+		asprintf(&realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn,
+			 pwdrights_realmcontainer[i][1]);
 		realmclass.mod_values= realmacls;
 
 		realmarr[0]=&realmclass;
@@ -723,11 +685,8 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 
 	if (servicetype == LDAP_KDC_SERVICE) {
 	    for (i=0; strcmp(kdcrights_subtree[i][0], "")!=0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(kdcrights_subtree[i][0])
-						 + strlen(serviceobjdn)
-						 + strlen(kdcrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn,
-			kdcrights_subtree[i][1]);
+		asprintf(&subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn,
+			 kdcrights_subtree[i][1]);
 		subtreeclass.mod_values= subtreeacls;
 
 		subtreearr[0]=&subtreeclass;
@@ -748,11 +707,8 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 	    }
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    for (i=0; strcmp(adminrights_subtree[i][0], "") != 0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(adminrights_subtree[i][0])
-						 + strlen(serviceobjdn)
-						 + strlen(adminrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn,
-			adminrights_subtree[i][1]);
+		asprintf(&subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn,
+			 adminrights_subtree[i][1]);
 		subtreeclass.mod_values= subtreeacls;
 
 		subtreearr[0]=&subtreeclass;
@@ -773,11 +729,8 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
 	    }
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_subtree[i][0], "") != 0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(pwdrights_subtree[i][0])
-						 + strlen(serviceobjdn)
-						 + strlen(pwdrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn,
-			pwdrights_subtree[i][1]);
+		asprintf(&subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn,
+			 pwdrights_subtree[i][1]);
 		subtreeclass.mod_values= subtreeacls;
 
 		subtreearr[0]=&subtreeclass;
