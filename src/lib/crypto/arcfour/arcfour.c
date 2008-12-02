@@ -8,7 +8,7 @@ of RSA Data Security)
 */
 #include "k5-int.h"
 #include "arcfour-int.h"
-static const char *const l40 = "fortybits";
+const char *const krb5int_arcfour_l40 = "fortybits";
 
 void
 krb5_arcfour_encrypt_length(const struct krb5_enc_provider *enc,
@@ -139,7 +139,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
   /* begin the encryption, computer K1 */
   ms_usage=krb5int_arcfour_translate_usage(usage);
   if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-    strncpy(salt.data, l40, salt.length);
+    strncpy(salt.data, krb5int_arcfour_l40, salt.length);
     store_32_le(ms_usage, salt.data+10);
   } else {
     salt.length=4;
@@ -253,7 +253,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
   /* compute the salt */
   ms_usage=krb5int_arcfour_translate_usage(usage);
   if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-    strncpy(salt.data, l40, salt.length);
+    strncpy(salt.data, krb5int_arcfour_l40, salt.length);
     salt.data[10]=ms_usage & 0xff;
     salt.data[11]=(ms_usage>>8) & 0xff;
     salt.data[12]=(ms_usage>>16) & 0xff;

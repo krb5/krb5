@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "aead.h"
 
 /*
  * the HMAC transform looks like:
@@ -125,3 +126,40 @@ cleanup:
 
     return(ret);
 }
+
+krb5_error_code
+krb5_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
+	      const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
+{
+    krb5_data *sign_data;
+    size_t num_sign_data;
+    krb5_error_code ret;
+    size_t i, j;
+
+    /* Create a checksum over all the data to be signed */
+    for (i = 0, num_sign_data = 0; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+
+	if (SIGN_IOV(iov))
+	    num_sign_data++;
+    }
+    /* XXX cleanup to avoid alloc */
+    sign_data = (krb5_data *)calloc(num_sign_data, sizeof(krb5_data));
+    if (sign_data == NULL)
+	return ENOMEM;
+
+    for (i = 0, j = 0; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+
+	if (SIGN_IOV(iov))
+	    sign_data[j++] = iov->data;
+    }
+
+    /* caller must store checksum in iov as it may be TYPE_TRAILER or TYPE_CHECKSUM */
+    ret = krb5_hmac(hash, key, num_sign_data, sign_data, output);
+
+    free(sign_data);
+
+    return ret;
+}
+

@@ -16,6 +16,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS=\
 	checksum.o	\
+	dk_aead.o	\
 	dk_decrypt.o	\
 	dk_encrypt.o	\
 	derive.o	\
@@ -24,6 +25,7 @@ STLIBOBJS=\
 
 OBJS=\
 	$(OUTPRE)checksum.$(OBJEXT)	\
+	$(OUTPRE)dk_aead.$(OBJEXT)	\
 	$(OUTPRE)dk_decrypt.$(OBJEXT)	\
 	$(OUTPRE)dk_encrypt.$(OBJEXT)	\
 	$(OUTPRE)derive.$(OBJEXT)	\
@@ -32,6 +34,7 @@ OBJS=\
 
 SRCS=\
 	$(srcdir)/checksum.c	\
+	$(srcdir)/dk_aead.c	\
 	$(srcdir)/dk_decrypt.c	\
 	$(srcdir)/dk_encrypt.c	\
 	$(srcdir)/dk_prf.c \

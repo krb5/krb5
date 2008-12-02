@@ -35,6 +35,7 @@
 #include "arcfour-int.h"
 #include "rsa-md5.h"
 #include "hash_provider.h"
+#include "../aead.h"
 
 static  krb5_error_code
 k5_hmac_md5_hash (const krb5_keyblock *key, krb5_keyusage usage,
@@ -86,11 +87,67 @@ k5_hmac_md5_hash (const krb5_keyblock *key, krb5_keyusage usage,
   return ret;
 }
 
-		 
+static  krb5_error_code
+k5_hmac_md5_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
+		      const krb5_data *iv,
+		      const krb5_crypto_iov *data, size_t num_data,
+		      krb5_data *output)
+{
+  krb5_keyusage ms_usage;
+  krb5_error_code ret;
+  krb5_keyblock ks;
+  krb5_data ds, ks_constant, md5tmp;
+  krb5_MD5_CTX ctx;
+  char t[4];
+  size_t i;
+
+  ds.length = key->length;
+  ks.length = key->length;
+  ds.data = malloc(ds.length);
+  if (ds.data == NULL)
+    return ENOMEM;
+  ks.contents = (void *) ds.data;
+
+  ks_constant.data = "signaturekey";
+  ks_constant.length = strlen(ks_constant.data)+1; /* Including null*/
+
+  ret = krb5_hmac( &krb5int_hash_md5, key, 1,
+		   &ks_constant, &ds);
+  if (ret)
+    goto cleanup;
+
+  krb5_MD5Init (&ctx);
+  ms_usage = krb5int_arcfour_translate_usage (usage);
+  t[0] = (ms_usage) & 0xff;
+  t[1] = (ms_usage>>8) & 0xff;
+  t[2] = (ms_usage >>16) & 0xff;
+  t[3] = (ms_usage>>24) & 0XFF;
+  krb5_MD5Update (&ctx, (unsigned char * ) &t, 4);
+  for (i = 0; i < num_data; i++) {
+    const krb5_crypto_iov *iov = &data[i];
+
+    if (SIGN_IOV(iov))
+      krb5_MD5Update (&ctx, (unsigned char *)iov->data.data,
+		      (unsigned int)iov->data.length);
+  }
+  krb5_MD5Final(&ctx);
+  md5tmp.data = (void *) ctx.digest;
+  md5tmp.length = 16;
+  ret = krb5_hmac ( &krb5int_hash_md5, &ks, 1, &md5tmp,
+		    output);
+
+    cleanup:
+  memset(&ctx, 0, sizeof(ctx));
+  memset (ks.contents, 0, ks.length);
+  free (ks.contents);
+  return ret;
+}
 
 const struct krb5_keyhash_provider krb5int_keyhash_hmac_md5 = {
   16,
   k5_hmac_md5_hash,
-  NULL /*checksum  again*/
+  NULL, /*checksum  again*/
+  k5_hmac_md5_hash_iov,
+  NULL  /*checksum  again */
 };
 

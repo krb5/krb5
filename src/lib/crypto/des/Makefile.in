@@ -16,6 +16,7 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 STLIBOBJS=\
 	afsstring2key.o	\
 	d3_cbc.o	\
+	d3_aead.o	\
 	d3_kysched.o	\
 	f_cbc.o 	\
 	f_cksum.o	\
@@ -28,6 +29,7 @@ STLIBOBJS=\
 
 OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
 	$(OUTPRE)d3_cbc.$(OBJEXT)	\
+	$(OUTPRE)d3_aead.$(OBJEXT)	\
 	$(OUTPRE)d3_kysched.$(OBJEXT)	\
 	$(OUTPRE)f_cbc.$(OBJEXT) 	\
 	$(OUTPRE)f_cksum.$(OBJEXT)	\
@@ -40,6 +42,7 @@ OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
 
 SRCS=	$(srcdir)/afsstring2key.c	\
 	$(srcdir)/d3_cbc.c	\
+	$(srcdir)/d3_aead.c	\
 	$(srcdir)/d3_kysched.c	\
 	$(srcdir)/f_cbc.c	\
 	$(srcdir)/f_cksum.c	\

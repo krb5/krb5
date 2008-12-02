@@ -9,6 +9,7 @@
 #include "k5-int.h"
 #include "arcfour-int.h"
 #include "enc_provider.h"
+#include "../aead.h"
 /* gets the next byte from the PRNG */
 #if ((__GNUC__ >= 2) )
 static __inline__ unsigned int k5_arcfour_byte(ArcfourContext *);
@@ -156,6 +157,61 @@ k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
   return 0;
 }
 
+/* In-place encryption */
+static krb5_error_code
+k5_arcfour_docrypt_iov(const krb5_keyblock *key,
+		       const krb5_data *state,
+		       krb5_crypto_iov *data,
+		       size_t num_data)
+{
+    ArcfourContext *arcfour_ctx = NULL;
+    ArcFourCipherState *cipher_state = NULL;
+    krb5_error_code ret;
+    size_t i;
+
+    if (key->length != 16)
+	return KRB5_BAD_KEYSIZE;
+    if (state != NULL && (state->length != sizeof(ArcFourCipherState)))
+	return KRB5_BAD_MSIZE;
+
+    if (state != NULL) {
+	cipher_state = (ArcFourCipherState *)state->data;
+	arcfour_ctx = &cipher_state->ctx;
+	if (cipher_state->initialized == 0) {
+	    ret = k5_arcfour_init(arcfour_ctx, key->contents, key->length);
+	    if (ret != 0)
+		return ret;
+
+	    cipher_state->initialized = 1;
+	}
+    } else {
+	arcfour_ctx = (ArcfourContext *)malloc(sizeof(ArcfourContext));
+	if (arcfour_ctx == NULL)
+	    return ENOMEM;
+
+	ret = k5_arcfour_init(arcfour_ctx, key->contents, key->length);
+	if (ret != 0) {
+	    free(arcfour_ctx);
+	    return ret;
+	}
+    }
+
+    for (i = 0; i < num_data; i++) {
+	krb5_crypto_iov *iov = &data[i];
+
+	if (ENCRYPT_IOV(iov))
+	    k5_arcfour_crypt(arcfour_ctx, (unsigned char *)iov->data.data,
+			     (const unsigned char *)iov->data.data, iov->data.length);
+    }
+
+    if (state == NULL) {
+	memset(arcfour_ctx, 0, sizeof(ArcfourContext));
+	free(arcfour_ctx);
+    }
+
+    return 0;
+}
+
 static krb5_error_code
 k5_arcfour_make_key(const krb5_data *randombits, krb5_keyblock *key)
 {
@@ -208,5 +264,8 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_docrypt,
     k5_arcfour_make_key,
     k5_arcfour_init_state, /*xxx not implemented yet*/
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    k5_arcfour_docrypt_iov,
+    k5_arcfour_docrypt_iov
 };
+

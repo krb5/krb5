@@ -240,6 +240,21 @@ krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
 			 const mit_des_key_schedule ks3,
 			 const mit_des_cblock ivec);
 
+void
+krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
+			     unsigned long num_data,
+			     const mit_des_key_schedule ks1,
+			     const mit_des_key_schedule ks2,
+			     const mit_des_key_schedule ks3,
+			     mit_des_cblock ivec);
+
+void
+krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
+			     unsigned long num_data,
+			     const mit_des_key_schedule ks1,
+			     const mit_des_key_schedule ks2,
+			     const mit_des_key_schedule ks3,
+			     mit_des_cblock ivec);
 
 #define mit_des3_cbc_encrypt(in,out,length,ks1,ks2,ks3,ivec,enc) \
     ((enc ? krb5int_des3_cbc_encrypt : krb5int_des3_cbc_decrypt) \

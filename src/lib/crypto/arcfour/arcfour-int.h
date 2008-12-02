@@ -27,5 +27,6 @@ typedef struct {
 
 krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
 
+extern const char *const krb5int_arcfour_l40;
 
 #endif /* ARCFOUR_INT_H */

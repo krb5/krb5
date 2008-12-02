@@ -26,6 +26,7 @@
 
 #include "k5-int.h"
 #include "des_int.h"
+#include "../aead.h"
 
 static krb5_error_code
 validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,
@@ -41,6 +42,37 @@ validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,
     if (ivec && (ivec->length != 8))
 	return(KRB5_BAD_MSIZE);
     if (input->length != output->length)
+	return(KRB5_BAD_MSIZE);
+
+    switch (mit_des3_key_sched(*(mit_des3_cblock *)key->contents,
+			       *schedule)) {
+    case -1:
+	return(KRB5DES_BAD_KEYPAR);
+    case -2:
+	return(KRB5DES_WEAK_KEY);
+    }
+    return 0;
+}
+
+static krb5_error_code
+validate_and_schedule_iov(const krb5_keyblock *key, const krb5_data *ivec,
+			  const krb5_crypto_iov *data, size_t num_data,
+			  mit_des3_key_schedule *schedule)
+{
+    size_t i, input_length;
+
+    for (i = 0, input_length = 0; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+
+	if (ENCRYPT_IOV(iov))
+	    input_length += iov->data.length;
+    }
+
+    if (key->length != 24)
+	return(KRB5_BAD_KEYSIZE);
+    if ((input_length%8) != 0)
+	return(KRB5_BAD_MSIZE);
+    if (ivec && (ivec->length != 8))
 	return(KRB5_BAD_MSIZE);
 
     switch (mit_des3_key_sched(*(mit_des3_cblock *)key->contents,
@@ -129,6 +161,52 @@ k5_des3_make_key(const krb5_data *randombits, krb5_keyblock *key)
     return(0);
 }
 
+static krb5_error_code
+k5_des3_encrypt_iov(const krb5_keyblock *key,
+		    const krb5_data *ivec,
+		    krb5_crypto_iov *data,
+		    size_t num_data)
+{
+    mit_des3_key_schedule schedule;
+    krb5_error_code err;
+
+    err = validate_and_schedule_iov(key, ivec, data, num_data, &schedule);
+    if (err)
+	return err;
+
+    /* this has a return value, but the code always returns zero */
+    krb5int_des3_cbc_encrypt_iov(data, num_data,
+			     schedule[0], schedule[1], schedule[2],
+			     ivec != NULL ? (const unsigned char *) ivec->data : NULL);
+
+    zap(schedule, sizeof(schedule));
+
+    return(0);
+}
+
+static krb5_error_code
+k5_des3_decrypt_iov(const krb5_keyblock *key,
+		    const krb5_data *ivec,
+		    krb5_crypto_iov *data,
+		    size_t num_data)
+{
+    mit_des3_key_schedule schedule;
+    krb5_error_code err;
+
+    err = validate_and_schedule_iov(key, ivec, data, num_data, &schedule);
+    if (err)
+	return err;
+
+    /* this has a return value, but the code always returns zero */
+    krb5int_des3_cbc_decrypt_iov(data, num_data,
+				 schedule[0], schedule[1], schedule[2],
+				 ivec != NULL ? (const unsigned char *) ivec->data : NULL);
+
+    zap(schedule, sizeof(schedule));
+
+    return(0);
+}
+
 const struct krb5_enc_provider krb5int_enc_des3 = {
     8,
     21, 24,
@@ -136,5 +214,8 @@ const struct krb5_enc_provider krb5int_enc_des3 = {
     k5_des3_decrypt,
     k5_des3_make_key,
     krb5int_des_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    k5_des3_encrypt_iov,
+    k5_des3_decrypt_iov
 };
+
