@@ -9,6 +9,8 @@
 static char *rcsid = "$Header$";
 #endif
 
+#include "k5-platform.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "autoconf.h"
