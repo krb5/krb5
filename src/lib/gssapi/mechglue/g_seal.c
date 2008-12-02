@@ -100,9 +100,8 @@ gssint_seal_iov_shim(OM_uint32 *minor_status,
 
     status = gss_wrap_iov_length(minor_status, context_handle,
 				 conf_req_flag, qop_req,
-				 NULL,
-				 sizeof(iov)/sizeof(iov[0]),
-				 iov);
+				 NULL, iov,
+				 sizeof(iov)/sizeof(iov[0]));
     if (status != GSS_S_COMPLETE)
 	return status;
 
@@ -118,7 +117,7 @@ gssint_seal_iov_shim(OM_uint32 *minor_status,
 
     offset = 0;
 
-    iov[0].buffer.value = output_message_buffer->value + offset;
+    iov[0].buffer.value = (unsigned char *)output_message_buffer->value + offset;
     offset += iov[0].buffer.length;
 
     iov[1].buffer.value = (unsigned char *)output_message_buffer->value + offset;
@@ -131,7 +130,7 @@ gssint_seal_iov_shim(OM_uint32 *minor_status,
 
     status = gss_wrap_iov(minor_status, context_handle,
 			  conf_req_flag, qop_req, conf_state,
-			  sizeof(iov)/sizeof(iov[0]), iov);
+			  iov, sizeof(iov)/sizeof(iov[0]));
     if (status != GSS_S_COMPLETE) {
 	OM_uint32 minor;
 
@@ -194,7 +193,7 @@ gss_buffer_t		output_message_buffer;
 		map_error(minor_status, mech);
 	} else if (mech->gss_wrap_iov) {
 	    status = gssint_seal_iov_shim(minor_status,
-					  ctx->internal_ctx_id,
+					  ctx,
 					  conf_req_flag,
 					  qop_req,
 					  input_message_buffer,

@@ -100,6 +100,29 @@ OM_uint32 KRB5_CALLCONV gssspi_mech_invoke
 	 gss_buffer_t /*value*/);
 
 /*
+ * AEAD extensions
+ */
+
+OM_uint32 KRB5_CALLCONV gss_wrap_aead
+	(OM_uint32 * /*minor_status*/,
+	 gss_ctx_id_t /*context_handle*/,
+	 int /*conf_req_flag*/,
+	 gss_qop_t /*qop_req*/,
+	 gss_buffer_t /*input_assoc_buffer*/,
+	 gss_buffer_t /*input_payload_buffer*/,
+	 int * /*conf_state*/,
+	 gss_buffer_t /*output_message_buffer*/);
+
+OM_uint32 KRB5_CALLCONV gss_unwrap_aead
+	(OM_uint32 * /*minor_status*/,
+	 gss_ctx_id_t /*context_handle*/,
+	 gss_buffer_t /*input_message_buffer*/,
+	 gss_buffer_t /*input_assoc_buffer*/,
+	 gss_buffer_t /*output_payload_buffer*/,
+	 int * /*conf_state*/,
+	 gss_qop_t * /*qop_state*/);
+
+/*
  * SSPI extensions
  */
 #define GSS_C_DCE_STYLE			0x1000
@@ -168,8 +191,8 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov
     int,		/* conf_req_flag */
     gss_qop_t,		/* qop_req */
     int *,		/* conf_state */
-    size_t,		/* iov_count */
-    gss_iov_buffer_desc *);    /* iov */
+    gss_iov_buffer_desc *,    /* iov */
+    int);		/* iov_count */
 
 /*
  * Verify and optionally decrypt a sequence of buffers. To process
@@ -188,8 +211,8 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_iov
     gss_ctx_id_t,       /* context_handle */
     int *,		/* conf_state */
     gss_qop_t *,	/* qop_state */
-    size_t,		/* iov_count */
-    gss_iov_buffer_desc *);    /* iov */
+    gss_iov_buffer_desc *,    /* iov */
+    int);		/* iov_count */
 
 /*
  * Query HEADER, PADDING and TRAILER buffer lengths. DATA buffers
@@ -202,8 +225,8 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
     int,		/* conf_req_flag */
     gss_qop_t,		/* qop_req */
     int *,		/* conf_state */
-    size_t,		/* iov_count */
-    gss_iov_buffer_desc *); /* iov */
+    gss_iov_buffer_desc *, /* iov */
+    int);		/* iov_count */
 
 /*
  * Release buffers that have the ALLOCATED flag set.
@@ -211,8 +234,8 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
 OM_uint32 KRB5_CALLCONV gss_release_iov_buffer
 (
     OM_uint32 *,	/* minor_status */
-    size_t,		/* iov_count */
-    gss_iov_buffer_desc *); /* iov */
+    gss_iov_buffer_desc *, /* iov */
+    int);		/* iov_count */
 
 #ifdef __cplusplus
 }

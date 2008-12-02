@@ -35,8 +35,8 @@ val_wrap_iov_args(
     int conf_req_flag,
     gss_qop_t qop_req,
     int *conf_state,
-    size_t iov_count,
-    gss_iov_buffer_desc *iov)
+    gss_iov_buffer_desc *iov,
+    int iov_count)
 {
 
     /* Initialize outputs. */
@@ -65,15 +65,15 @@ gss_wrap_iov (minor_status,
               conf_req_flag,
               qop_req,
               conf_state,
-              iov_count,
-              iov)
+              iov,
+              iov_count)
 OM_uint32 *		minor_status;
 gss_ctx_id_t		context_handle;
 int			conf_req_flag;
 gss_qop_t		qop_req;
 int *			conf_state;
-size_t			iov_count;
 gss_iov_buffer_desc  *	iov;
+int			iov_count;
 {
  /* EXPORT DELETE START */
 
@@ -83,7 +83,7 @@ gss_iov_buffer_desc  *	iov;
 
     status = val_wrap_iov_args(minor_status, context_handle,
 			       conf_req_flag, qop_req,
-			       conf_state, iov_count, iov);
+			       conf_state, iov, iov_count);
     if (status != GSS_S_COMPLETE)
 	return (status);
 
@@ -103,8 +103,8 @@ gss_iov_buffer_desc  *	iov;
 					conf_req_flag,
 					qop_req,
 					conf_state,
-					iov_count,
-					iov);
+					iov,
+					iov_count);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
 	} else
@@ -123,15 +123,15 @@ gss_wrap_iov_length (minor_status,
                      conf_req_flag,
                      qop_req,
                      conf_state,
-                     iov_count,
-                     iov)
+                     iov,
+                     iov_count)
 OM_uint32 *		minor_status;
 gss_ctx_id_t		context_handle;
 int			conf_req_flag;
 gss_qop_t		qop_req;
 int *			conf_state;
-size_t			iov_count;
 gss_iov_buffer_desc  *	iov;
+int			iov_count;
 {
  /* EXPORT DELETE START */
 
@@ -141,7 +141,7 @@ gss_iov_buffer_desc  *	iov;
 
     status = val_wrap_iov_args(minor_status, context_handle,
 			       conf_req_flag, qop_req,
-			       conf_state, iov_count, iov);
+			       conf_state, iov, iov_count);
     if (status != GSS_S_COMPLETE)
 	return (status);
 
@@ -161,8 +161,8 @@ gss_iov_buffer_desc  *	iov;
 					      conf_req_flag,
 					      qop_req,
 					      conf_state,
-					      iov_count,
-					      iov);
+					      iov,
+					      iov_count);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
 	} else
@@ -177,11 +177,11 @@ gss_iov_buffer_desc  *	iov;
 
 OM_uint32 KRB5_CALLCONV
 gss_release_iov_buffer (minor_status,
-			iov_count,
-			iov)
+			iov,
+			iov_count)
 OM_uint32 *		minor_status;
-size_t			iov_count;
 gss_iov_buffer_desc *	iov;
+int			iov_count;
 {
     OM_uint32		status = GSS_S_COMPLETE;
     size_t		i;

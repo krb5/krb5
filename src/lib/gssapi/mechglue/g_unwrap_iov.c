@@ -34,8 +34,8 @@ val_unwrap_iov_args(
     gss_ctx_id_t context_handle,
     int *conf_state,
     gss_qop_t *qop_state,
-    size_t iov_count,
-    gss_iov_buffer_desc *iov)
+    gss_iov_buffer_desc *iov,
+    int iov_count)
 {
 
     /* Initialize outputs. */
@@ -63,14 +63,14 @@ gss_unwrap_iov (minor_status,
                 context_handle,
                 conf_state,
                 qop_state,
-                iov_count,
-                iov)
+                iov,
+                iov_count)
 OM_uint32 *		minor_status;
 gss_ctx_id_t		context_handle;
 int *			conf_state;
 gss_qop_t		*qop_state;
-size_t			iov_count;
 gss_iov_buffer_desc  *	iov;
+int			iov_count;
 {
  /* EXPORT DELETE START */
 
@@ -79,7 +79,7 @@ gss_iov_buffer_desc  *	iov;
     gss_mechanism	mech;
 
     status = val_unwrap_iov_args(minor_status, context_handle,
-				 conf_state, qop_state, iov_count, iov);
+				 conf_state, qop_state, iov, iov_count);
     if (status != GSS_S_COMPLETE)
 	return (status);
 
@@ -98,8 +98,8 @@ gss_iov_buffer_desc  *	iov;
 					  ctx->internal_ctx_id,
 					  conf_state,
 					  qop_state,
-					  iov_count,
-					  iov);
+					  iov,
+					  iov_count);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
 	} else

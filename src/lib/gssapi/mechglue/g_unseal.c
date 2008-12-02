@@ -49,7 +49,7 @@ gssint_unseal_iov_shim(OM_uint32 *minor_status,
     iov[1].buffer.length = 0;
 
     status = gss_unwrap_iov(minor_status, context_handle, conf_state,
-			    qop_state, 2, iov);
+			    qop_state, iov, sizeof(iov)/sizeof(iov[0]));
 
     *output_message_buffer = iov[1].buffer;
 
@@ -121,7 +121,7 @@ int *			qop_state;
 		map_error(minor_status, mech);
 	} else if (mech->gss_unwrap_iov) {
 	    status = gssint_unseal_iov_shim(minor_status,
-					    ctx->internal_ctx_id,
+					    ctx,
 					    input_message_buffer,
 					    output_message_buffer,
 					    conf_state,
