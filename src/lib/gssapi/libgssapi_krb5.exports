@@ -65,10 +65,12 @@ gss_str_to_oid
 gss_test_oid_set_member
 gss_unseal
 gss_unwrap
+gss_unwrap_aead
 gss_unwrap_iov
 gss_verify
 gss_verify_mic
 gss_wrap
+gss_wrap_aead
 gss_wrap_iov
 gss_wrap_iov_length
 gss_wrap_size_limit

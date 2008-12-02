@@ -42,8 +42,10 @@ SRCS = \
 	$(srcdir)/g_sign.c \
 	$(srcdir)/g_store_cred.c \
 	$(srcdir)/g_unseal.c \
+	$(srcdir)/g_unwrap_aead.c \
 	$(srcdir)/g_unwrap_iov.c \
 	$(srcdir)/g_verify.c \
+	$(srcdir)/g_wrap_aead.c \
 	$(srcdir)/g_wrap_iov.c \
 	$(srcdir)/oid_ops.c
 
@@ -78,8 +80,10 @@ OBJS = \
 	$(OUTPRE)g_sign.$(OBJEXT) \
 	$(OUTPRE)g_store_cred.$(OBJEXT) \
 	$(OUTPRE)g_unseal.$(OBJEXT) \
+	$(OUTPRE)g_unwrap_aead.$(OBJEXT) \
 	$(OUTPRE)g_unwrap_iov.$(OBJEXT) \
 	$(OUTPRE)g_verify.$(OBJEXT) \
+	$(OUTPRE)g_wrap_aead.$(OBJEXT) \
 	$(OUTPRE)g_wrap_iov.$(OBJEXT) \
 	$(OUTPRE)oid_ops.$(OBJEXT)
 
@@ -114,8 +118,10 @@ STLIBOBJS = \
 	g_sign.o \
 	g_store_cred.o \
 	g_unseal.o \
+	g_unwrap_aead.o \
 	g_unwrap_iov.o \
 	g_verify.o \
+	g_wrap_aead.o \
 	g_wrap_iov.o \
 	oid_ops.o
 
@@ -323,16 +329,40 @@ g_store_cred.so g_store_cred.po $(OUTPRE)g_store_cred.$(OBJEXT): \
   g_store_cred.c mechglue.h mglueP.h
 g_unseal.so g_unseal.po $(OUTPRE)g_unseal.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
-  g_unseal.c mechglue.h mglueP.h
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h g_unseal.c mechglue.h \
+  mglueP.h
+g_unwrap_aead.so g_unwrap_aead.po $(OUTPRE)g_unwrap_aead.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h g_unwrap_aead.c mechglue.h \
+  mglueP.h
+g_unwrap_iov.so g_unwrap_iov.po $(OUTPRE)g_unwrap_iov.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h g_unwrap_iov.c mechglue.h \
+  mglueP.h
 g_verify.so g_verify.po $(OUTPRE)g_verify.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
-  g_verify.c mechglue.h mglueP.h
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h g_verify.c mechglue.h \
+  mglueP.h
+g_wrap_aead.so g_wrap_aead.po $(OUTPRE)g_wrap_aead.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h g_wrap_aead.c mechglue.h \
+  mglueP.h
+g_wrap_iov.so g_wrap_iov.po $(OUTPRE)g_wrap_iov.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h g_wrap_iov.c mechglue.h \
+  mglueP.h
 oid_ops.so oid_ops.po $(OUTPRE)oid_ops.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
