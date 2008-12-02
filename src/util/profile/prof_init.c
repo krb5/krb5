@@ -253,7 +253,6 @@ profile_release(profile_t profile)
 	free(profile);
 }
 
-#ifndef  LEAN_CLIENT  
 /*
  * Here begins the profile serialization functions.
  */
@@ -400,5 +399,4 @@ cleanup:
 	}
 	return(retval);
 }
-#endif /* LEAN_CLIENT  */
 
