@@ -525,8 +525,10 @@ krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
 
     iov[0].flags = KRB5_CRYPTO_TYPE_STREAM;
     iov[0].data.data = malloc(input->length);
-    if (iov[0].data.data == NULL)
+    if (iov[0].data.data == NULL) {
 	return ENOMEM;
+    }
+    memcpy(iov[0].data.data, input->data, input->length);
     iov[0].data.length = input->length;
 
     iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
@@ -549,6 +551,7 @@ krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
     memcpy(output->data, iov[1].data.data, iov[1].data.length);
     output->length = iov[1].data.length;
 
+    memset(iov[0].data.data, 0, iov[0].data.length);
     free(iov[0].data.data);
 
     return ret;
