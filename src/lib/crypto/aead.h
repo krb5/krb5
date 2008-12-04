@@ -28,12 +28,12 @@
 
 /* AEAD helpers */
 
-krb5_crypto_iov * KRB5_CALLCONV
+krb5_crypto_iov *
 krb5int_c_locate_iov(krb5_crypto_iov *data,
 		     size_t num_data,
 		     krb5_cryptotype type);
 
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
 krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
 			    const krb5_keyblock *key,
 			    krb5_keyusage usage,
@@ -41,7 +41,7 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
 			    size_t num_data,
 			    krb5_data *cksum_data);
 
-const struct krb5_cksumtypes * KRB5_CALLCONV
+const struct krb5_cksumtypes *
 krb5int_c_find_checksum_type(krb5_cksumtype cksumtype);
 
 #define ENCRYPT_CONF_IOV(_iov)	((_iov)->flags == KRB5_CRYPTO_TYPE_HEADER)
@@ -68,21 +68,21 @@ struct iov_block_state {
 					 (_state)->include_sign_only = \
 					 (_state)->pad_to_boundary = 0)
 
-krb5_boolean KRB5_CALLCONV
+krb5_boolean
 krb5int_c_iov_get_block(unsigned char *block,
 			size_t block_size,
 			const krb5_crypto_iov *data,
 			size_t num_data,
 			struct iov_block_state *iov_state);
 
-krb5_boolean KRB5_CALLCONV
+krb5_boolean
 krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 			size_t num_data,
 			unsigned char *block,
 			size_t block_size,
 			struct iov_block_state *iov_state);
 
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
 krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
 			     const struct krb5_enc_provider *enc,
 			     const struct krb5_hash_provider *hash,
@@ -92,3 +92,31 @@ krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
 			     krb5_crypto_iov *data,
 			     size_t num_data);
 
+krb5_error_code
+krb5int_decrypt_aead_compat(const struct krb5_aead_provider *aead,
+			    const struct krb5_enc_provider *enc,
+			    const struct krb5_hash_provider *hash,
+			    const krb5_keyblock *key, krb5_keyusage usage,
+			    const krb5_data *ivec, const krb5_data *input,
+			    krb5_data *output);
+
+krb5_error_code
+krb5int_encrypt_aead_compat(const struct krb5_aead_provider *aead,
+			    const struct krb5_enc_provider *enc,
+			    const struct krb5_hash_provider *hash,
+			    const krb5_keyblock *key, krb5_keyusage usage,
+			    const krb5_data *ivec, const krb5_data *input,
+			    krb5_data *output);
+
+void
+krb5int_encrypt_length_aead_compat(const struct krb5_aead_provider *aead,
+				   const struct krb5_enc_provider *enc,
+				   const struct krb5_hash_provider *hash,
+				   size_t inputlen, size_t *length);
+
+krb5_error_code
+krb5int_padding_length(const struct krb5_aead_provider *aead,
+		       const struct krb5_enc_provider *enc,
+		       const struct krb5_hash_provider *hash,
+		       size_t data_length,
+		       unsigned int *pad_length);
