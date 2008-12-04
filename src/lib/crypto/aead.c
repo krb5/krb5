@@ -430,11 +430,11 @@ krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
 }
 
 krb5_error_code
-krb5int_padding_length(const struct krb5_aead_provider *aead,
-		       const struct krb5_enc_provider *enc,
-		       const struct krb5_hash_provider *hash,
-		       size_t data_length,
-		       unsigned int *pad_length)
+krb5int_c_padding_length(const struct krb5_aead_provider *aead,
+			 const struct krb5_enc_provider *enc,
+			 const struct krb5_hash_provider *hash,
+			 size_t data_length,
+			 unsigned int *pad_length)
 {
     unsigned int padding;
     krb5_error_code ret;
@@ -452,12 +452,12 @@ krb5int_padding_length(const struct krb5_aead_provider *aead,
 }
 
 krb5_error_code
-krb5int_encrypt_aead_compat(const struct krb5_aead_provider *aead,
-			    const struct krb5_enc_provider *enc,
-			    const struct krb5_hash_provider *hash,
-			    const krb5_keyblock *key, krb5_keyusage usage,
-			    const krb5_data *ivec, const krb5_data *input,
-			    krb5_data *output)
+krb5int_c_encrypt_aead_compat(const struct krb5_aead_provider *aead,
+			      const struct krb5_enc_provider *enc,
+			      const struct krb5_hash_provider *hash,
+			      const krb5_keyblock *key, krb5_keyusage usage,
+			      const krb5_data *ivec, const krb5_data *input,
+			      krb5_data *output)
 {
     krb5_crypto_iov iov[4];
     krb5_error_code ret;
@@ -470,7 +470,7 @@ krb5int_encrypt_aead_compat(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	return ret;
 
-    ret = krb5int_padding_length(aead, enc, hash, input->length, &padding_len);
+    ret = krb5int_c_padding_length(aead, enc, hash, input->length, &padding_len);
     if (ret != 0)
 	return ret;
 
@@ -513,12 +513,12 @@ krb5int_encrypt_aead_compat(const struct krb5_aead_provider *aead,
 }
 
 krb5_error_code
-krb5int_decrypt_aead_compat(const struct krb5_aead_provider *aead,
-			    const struct krb5_enc_provider *enc,
-			    const struct krb5_hash_provider *hash,
-			    const krb5_keyblock *key, krb5_keyusage usage,
-			    const krb5_data *ivec, const krb5_data *input,
-			    krb5_data *output)
+krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
+			      const struct krb5_enc_provider *enc,
+			      const struct krb5_hash_provider *hash,
+			      const krb5_keyblock *key, krb5_keyusage usage,
+			      const krb5_data *ivec, const krb5_data *input,
+			      krb5_data *output)
 {
     krb5_crypto_iov iov[2];
     krb5_error_code ret;
@@ -546,17 +546,17 @@ krb5int_decrypt_aead_compat(const struct krb5_aead_provider *aead,
 }
 
 void
-krb5int_encrypt_length_aead_compat(const struct krb5_aead_provider *aead,
-				   const struct krb5_enc_provider *enc,
-				   const struct krb5_hash_provider *hash,
-				   size_t inputlen, size_t *length)
+krb5int_c_encrypt_length_aead_compat(const struct krb5_aead_provider *aead,
+				     const struct krb5_enc_provider *enc,
+				     const struct krb5_hash_provider *hash,
+				     size_t inputlen, size_t *length)
 {
     size_t header_len = 0;
     size_t padding_len = 0;
     size_t trailer_len = 0;
 
     aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER, &header_len);
-    krb5int_padding_length(aead, enc, hash, inputlen, &padding_len);
+    krb5int_c_padding_length(aead, enc, hash, inputlen, &padding_len);
     aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER, &trailer_len);
 
     *length = header_len + inputlen + padding_len + trailer_len;

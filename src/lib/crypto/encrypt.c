@@ -50,11 +50,11 @@ krb5_c_encrypt(krb5_context context, const krb5_keyblock *key,
     if (krb5_enctypes_list[i].encrypt == NULL) {
 	assert(krb5_enctypes_list[i].aead != NULL);
 
-	return krb5int_encrypt_aead_compat(krb5_enctypes_list[i].aead,
-					   krb5_enctypes_list[i].enc,
-					   krb5_enctypes_list[i].hash,
-					   key, usage, ivec,
-					   input, &output->ciphertext);
+	return krb5int_c_encrypt_aead_compat(krb5_enctypes_list[i].aead,
+					     krb5_enctypes_list[i].enc,
+					     krb5_enctypes_list[i].hash,
+					     key, usage, ivec,
+					     input, &output->ciphertext);
     }
 
     return((*(krb5_enctypes_list[i].encrypt))

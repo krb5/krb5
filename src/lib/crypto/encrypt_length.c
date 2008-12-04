@@ -45,10 +45,10 @@ krb5_c_encrypt_length(krb5_context context, krb5_enctype enctype,
     if (krb5_enctypes_list[i].encrypt_len == NULL) {
 	assert(krb5_enctypes_list[i].aead != NULL);
 
-	krb5int_encrypt_length_aead_compat(krb5_enctypes_list[i].aead,
-					   krb5_enctypes_list[i].enc,
-					   krb5_enctypes_list[i].hash,
-					   inputlen, length);
+	krb5int_c_encrypt_length_aead_compat(krb5_enctypes_list[i].aead,
+					     krb5_enctypes_list[i].enc,
+					     krb5_enctypes_list[i].hash,
+					     inputlen, length);
     } else {
 	(*(krb5_enctypes_list[i].encrypt_len))
 	    (krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,
