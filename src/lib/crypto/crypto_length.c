@@ -105,7 +105,7 @@ krb5_c_crypto_length_iov(krb5_context context,
     krb5_error_code ret = 0;
     size_t i;
     const struct krb5_keytypes *ktp = NULL;
-    size_t data_length = 0, pad_length;
+    unsigned int data_length = 0, pad_length;
     krb5_crypto_iov *padding = NULL;
 
     /*
@@ -113,7 +113,7 @@ krb5_c_crypto_length_iov(krb5_context context,
      * report variable header lengths
      */
 
-    for (i = 0; i < krb5_enctypes_length; i++) {
+    for (i = 0; i < (size_t)krb5_enctypes_length; i++) {
 	if (krb5_enctypes_list[i].etype == enctype) {
 	    ktp = &krb5_enctypes_list[i];
 	    break;
