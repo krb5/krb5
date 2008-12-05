@@ -16,11 +16,11 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= aescbc.o descbc.o k5_md4des.o k5_md5des.o hmac_md5.o
+STLIBOBJS=  descbc.o k5_md4des.o k5_md5des.o hmac_md5.o
 
-OBJS= $(OUTPRE)aescbc.$(OBJEXT) $(OUTPRE)descbc.$(OBJEXT) $(OUTPRE)k5_md4des.$(OBJEXT) $(OUTPRE)k5_md5des.$(OBJEXT) $(OUTPRE)hmac_md5.$(OBJEXT)
+OBJS=  $(OUTPRE)descbc.$(OBJEXT) $(OUTPRE)k5_md4des.$(OBJEXT) $(OUTPRE)k5_md5des.$(OBJEXT) $(OUTPRE)hmac_md5.$(OBJEXT)
 
-SRCS= $(srcdir)/aescbc.c $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c $(srcdir)/hmac_md5.c
+SRCS=  $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c $(srcdir)/hmac_md5.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

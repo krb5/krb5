@@ -14,20 +14,18 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= des.o des3.o rc4.o aes.o aes_ctr.o
+STLIBOBJS= des.o des3.o rc4.o aes.o 
 
 OBJS= \
 	$(OUTPRE)des.$(OBJEXT) \
 	$(OUTPRE)des3.$(OBJEXT) \
 	$(OUTPRE)aes.$(OBJEXT) \
-	$(OUTPRE)aes_ctr.$(OBJEXT) \
 	$(OUTPRE)rc4.$(OBJEXT)
 
 SRCS= \
 	$(srcdir)/des.c \
 	$(srcdir)/des3.c \
 	$(srcdir)/aes.c \
-	$(srcdir)/aes_ctr.c \
 	$(srcdir)/rc4.c
 
 ##DOS##LIBOBJS = $(OBJS)

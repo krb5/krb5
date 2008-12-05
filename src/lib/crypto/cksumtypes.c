@@ -92,14 +92,6 @@ const struct krb5_cksumtypes krb5_cksumtypes_list[] = {
       "hmac-sha1-96-aes256", "HMAC-SHA1 AES256 key",
       0, NULL, 
       &krb5int_hash_sha1, 12 },
-    { CKSUMTYPE_AES128_CBC, 0,
-      "aes128-cbc", "CBC AES128 key",
-      0, &krb5int_keyhash_aescbc_128,
-      NULL, 16 },
-    { CKSUMTYPE_AES256_CBC, 0,
-      "aes256-cbc", "CBC AES256 key",
-      0, &krb5int_keyhash_aescbc_256,
-      NULL, 16 }
 };
 
 const unsigned int krb5_cksumtypes_length =
