@@ -273,7 +273,6 @@
 ./util/pty/void_assoc.c: TIOCNOTTY
 ./util/ss/configure.in: const HAVE_STDARG_H HAVE_VARARGS_H KRB5_DNS_LOOKUP KRB5_DNS_LOOKUP_KDC KRB5_DNS_LOOKUP_REALM NO_YYLINENO POSIX_SIGNALS RETSIGTYPE USE_DIRENT_H USE_SIGPROCMASK WAIT_USES_INT HAVE_STRDUP HAVE_STDLIB_H HAVE_LIBNSL HAVE_LIBSOCKET
 ./util/ss/error.c: ibm032 NeXT __STDC__
-./util/ss/execute_cmd.c: __SABER__
 ./util/ss/invocation.c: silly
 ./util/ss/list_rqs.c: lint NO_FORK __STDC__
 ./util/ss/pager.c: NO_FORK

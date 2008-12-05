@@ -1,4 +1,0 @@
-alias hex print (unsigned)
-setopt load_flags -I../include
-load -lisode
-alias reload load
