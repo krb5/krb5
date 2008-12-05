@@ -600,11 +600,11 @@ proc check_klogin { testname } {
 }
 
 # check_exit_status
-# Check the exit status of a spawned program.  Returns 1 if the
-# program succeeded, 0 if it failed.
+# Check the exit status of a spawned program (using the caller's value
+# of spawn_id).  Returns 1 if the program succeeded, 0 if it failed.
 
 proc check_exit_status { testname } {
-    global spawn_id
+    upvar 1 spawn_id spawn_id
 
     verbose "about to wait ($testname)"
     set status_list [wait -i $spawn_id]
