@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/ccfns.c
  *
- * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2007, 2008  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -69,6 +69,9 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
     krb5_ticket *tkt;
     krb5_principal s1, s2;
 
+    /* remove any dups */
+    krb5_cc_remove_cred(context, cache, 0, creds);
+
     ret = cache->ops->store(context, cache, creds);
     if (ret) return ret;
 
@@ -82,9 +85,11 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
     if (ret) return 0;
     s2 = tkt->server;
     if (!krb5_principal_compare(context, s1, s2)) {
-	creds->server = s2;
-	ret = cache->ops->store(context, cache, creds);
-	creds->server = s1;
+        creds->server = s2;
+        /* remove any dups */
+        krb5_cc_remove_cred(context, cache, 0, creds);
+        ret = cache->ops->store(context, cache, creds);
+        creds->server = s1;
     }
     krb5_free_ticket(context, tkt);
     return ret;
