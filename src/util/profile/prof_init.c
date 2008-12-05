@@ -42,7 +42,7 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
 	    for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
 		retval = profile_open_file(*fs, &new_file);
 		/* if this file is missing, skip to the next */
-		if (retval == ENOENT || retval == EACCES) {
+		if (retval == ENOENT || retval == EACCES || retval == EPERM) {
 			continue;
 		}
 		if (retval) {
