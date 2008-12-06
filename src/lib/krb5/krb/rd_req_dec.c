@@ -93,7 +93,7 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 				   req->ticket->enc_part.kvno,
 				   req->ticket->enc_part.enctype, &ktent);
 	if (retval != 0)
-	    return retval;
+	    goto map_error;
 
 	retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
 
@@ -102,9 +102,9 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 	krb5_error_code code;
 	krb5_kt_cursor cursor;
 
-	code = krb5_kt_start_seq_get(context, keytab, &cursor);
-	if (code != 0)
-	    return code;
+	retval = krb5_kt_start_seq_get(context, keytab, &cursor);
+	if (retval != 0)
+	    goto map_error;
 
 	while ((code = krb5_kt_next_entry(context, keytab,
 					  &ktent, &cursor)) == 0) {
@@ -124,6 +124,17 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 	    retval = code;
     }
 #endif /* LEAN_CLIENT */
+
+map_error:
+    switch (retval) {
+    case KRB5_KT_KVNONOTFOUND:
+    case KRB5_KT_NOTFOUND:
+    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
+	retval = KRB5KRB_AP_WRONG_PRINC;
+	break;
+    default:
+	break;
+    }
 
     return retval;
 }
