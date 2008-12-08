@@ -550,7 +550,7 @@ krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
     output->length = iov[1].data.length;
 
 cleanup:
-    memset(iov[0].data.data, 0, iov[0].data.length);
+    zap(iov[0].data.data,  iov[0].data.length);
     free(iov[0].data.data);
 
     return ret;
