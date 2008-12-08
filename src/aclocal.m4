@@ -1189,6 +1189,7 @@ fi
 AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
 AC_SUBST(MAKE_SHLIB_COMMAND)
+AC_SUBST(SHLIB_RPATH_FLAGS)
 AC_SUBST(SHLIB_EXPFLAGS)
 AC_SUBST(SHLIB_EXPORT_FILE_DEP)
 AC_SUBST(DYNOBJ_EXPDEPS)
@@ -1230,6 +1231,7 @@ AC_REQUIRE([KRB5_AC_NEED_LIBGEN])dnl
 AC_SUBST(CC_LINK)
 AC_SUBST(CXX_LINK)
 AC_SUBST(RPATH_FLAG)
+AC_SUBST(PROG_RPATH_FLAGS)
 AC_SUBST(DEPLIBEXT)])
 
 dnl
@@ -1258,6 +1260,17 @@ AC_ARG_ENABLE([shared], ,
 [if test "$enableval" != yes; then
   AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
 fi])
+AC_ARG_ENABLE([rpath],
+AC_HELP_STRING([--disable-rpath],[suppress run path flags in link lines]),
+[enable_rpath=$withval],
+[enable_rpath=yes])
+
+if test "x$enable_rpath" != xyes ; then
+	# Unset the rpath flag values set by shlib.conf
+	SHLIB_RPATH_FLAGS=
+	RPATH_FLAG=
+	PROG_RPATH_FLAGS=
+fi
 
 if test "$SHLIBEXT" = ".so-nobuild"; then
    AC_MSG_ERROR([Shared libraries are not yet supported on this platform.])
