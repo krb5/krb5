@@ -336,7 +336,7 @@ kg_seal_iov(OM_uint32 *minor_status,
     }
 
     if (code != 0) {
-	*minor_status = 0;
+	*minor_status = code;
 	save_error_info(*minor_status, context);
 	return GSS_S_FAILURE;
     }
