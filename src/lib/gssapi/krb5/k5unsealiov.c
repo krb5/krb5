@@ -301,7 +301,6 @@ kg_unseal_v1_iov(krb5_context context,
     retval = g_order_check(&ctx->seqstate, (gssint_uint64)seqnum);
 
 cleanup:
-    kg_release_iov(iov, iov_count);
     krb5_free_checksum_contents(context, &md5cksum);
 
     *minor_status = code;
