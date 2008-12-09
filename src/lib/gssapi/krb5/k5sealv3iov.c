@@ -240,7 +240,8 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     code = 0;
 
 cleanup:
-    kg_release_iov(iov, iov_count);
+    if (code != 0)
+	kg_release_iov(iov, iov_count);
 
     return code;
 }
