@@ -1,6 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2000,2002, 2003, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 2000,2002, 2003, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -902,6 +902,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
     }
     kerr = k5_mutex_lock(&cred->lock);
     if (kerr) {
+        if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
+            krb5_gss_release_cred(minor_status, (gss_cred_id_t *)&cred);
         krb5_free_context(context);
         *minor_status = kerr;
         return GSS_S_FAILURE;
