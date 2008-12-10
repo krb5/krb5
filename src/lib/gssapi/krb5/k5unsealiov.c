@@ -39,6 +39,7 @@ kg_unseal_v1_iov(krb5_context context,
 		 krb5_gss_ctx_id_rec *ctx,
 		 gss_iov_buffer_desc *iov,
 		 int iov_count,
+		 size_t token_wrapper_len,
 		 int *conf_state,
 		 gss_qop_t *qop_state,
 		 int toktype)
@@ -72,12 +73,12 @@ kg_unseal_v1_iov(krb5_context context,
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    if (header->buffer.length < 16) {
+    if (header->buffer.length < token_wrapper_len + 14) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    ptr = ((unsigned char *)header->buffer.value) + 2; /* skip past TOK_ID */
+    ptr = ((unsigned char *)header->buffer.value) + token_wrapper_len;
    
     signalg  = ptr[0];
     signalg |= ptr[1] << 8;
@@ -196,7 +197,7 @@ kg_unseal_v1_iov(krb5_context context,
 	}
     }
 
-    if (header->buffer.length != 16 + cksum_len + conflen) {
+    if (header->buffer.length != token_wrapper_len + 14 + cksum_len + conflen) {
 	retval = GSS_S_DEFECTIVE_TOKEN;
 	goto cleanup;
     }
@@ -331,6 +332,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     gss_iov_buffer_t trailer;
     size_t input_length;
     unsigned int bodysize;
+    int vfyflags = 0;
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL) {
@@ -363,9 +365,11 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 	    input_length += trailer->buffer.length;
     }
 
+    vfyflags = !ctx->proto;
+
     code = g_verify_token_header(ctx->mech_used,
 				 &bodysize, &ptr, toktype2,
-				 input_length, !ctx->proto);
+				 input_length, vfyflags);
     if (code != 0) {
 	*minor_status = code;
 	return GSS_S_DEFECTIVE_TOKEN;
@@ -373,6 +377,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 
     if (ctx->proto == 0)
 	code = kg_unseal_v1_iov(context, minor_status, ctx, iov, iov_count,
+				(ptr - (unsigned char *)header->buffer.value),
 			        conf_state, qop_state, toktype);
     else
 	code = gss_krb5int_unseal_v3_iov(context, minor_status, ctx, iov, iov_count,
