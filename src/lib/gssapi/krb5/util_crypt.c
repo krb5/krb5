@@ -256,8 +256,8 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     krb5_crypto_iov *kiov;
     size_t confsize;
 
-    *pkiov_count = 0;
     *pkiov = NULL;
+    *pkiov_count = 0;
 
     confsize = kg_confounder_size(context, (krb5_keyblock *)key);
 
@@ -271,7 +271,7 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     assert(trailer == NULL || trailer->buffer.length == 0);
 
     kiov_count = 3 + iov_count;
-    kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
+    kiov = (krb5_crypto_iov *)malloc(kiov_count * sizeof(krb5_crypto_iov));
     if (kiov == NULL)
 	return ENOMEM;
 
@@ -374,7 +374,7 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 	return KRB5_BAD_MSIZE;
 
     kiov_count = 3 + iov_count;
-    kiov = (krb5_crypto_iov *)malloc(kiov_count + sizeof(krb5_crypto_iov));
+    kiov = (krb5_crypto_iov *)malloc(kiov_count * sizeof(krb5_crypto_iov));
     if (kiov == NULL)
 	return ENOMEM;
 
@@ -478,7 +478,8 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov, iov_count, &kiov_count, &kiov);
+    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key,
+			    iov, iov_count, &kiov, &kiov_count);
     if (code == 0) {
 	code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);
@@ -526,7 +527,8 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov, iov_count, &kiov_count, &kiov);
+    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key,
+			    iov, iov_count, &kiov, &kiov_count);
     if (code == 0) {
 	code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
 	free(kiov);
@@ -549,8 +551,8 @@ kg_arcfour_docrypt_iov (krb5_context context,
     krb5int_access kaccess;
     krb5_keyblock seq_enc_key, usage_key;
     unsigned char t[4];
-    size_t kiov_count = 0;
     krb5_crypto_iov *kiov = NULL;
+    size_t kiov_count = 0;
 
     usage_key.length = longterm_key->length;
     usage_key.contents = malloc(usage_key.length);
@@ -574,20 +576,22 @@ kg_arcfour_docrypt_iov (krb5_context context,
     input.length = 4;
     output.data = (void *) usage_key.contents;
     output.length = usage_key.length;
-    code = (*kaccess.krb5int_hmac_iov) (kaccess.md5_hash_provider,
-                                        longterm_key, kiov, kiov_count, &output);
+    code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
+                                 longterm_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;
 
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
     output.data = (void *) seq_enc_key.contents;
-    code = (*kaccess.krb5int_hmac_iov) (kaccess.md5_hash_provider,
-                                        &usage_key, kiov, kiov_count, &output);
+    code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
+                                 &usage_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;
 
-    code = kg_translate_iov(context, 0, 0, longterm_key, iov, iov_count, &kiov_count, &kiov);
+    code = kg_translate_iov(context, 0 /* proto */, 0 /* dce_style */,
+			    0 /* ec */, 0 /* rrc */, longterm_key,
+			    iov, iov_count, &kiov, &kiov_count);
     if (code)
 	goto cleanup_arcfour;
 
