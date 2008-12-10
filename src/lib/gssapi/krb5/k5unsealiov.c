@@ -356,7 +356,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 
 	kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
 
-	input_length += data_length;
+	input_length += data_length - assoc_data_length;
 
 	if (padding != NULL)
 	    input_length += padding->buffer.length;
