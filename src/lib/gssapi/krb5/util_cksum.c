@@ -173,7 +173,8 @@ kg_make_checksum_iov_v1(krb5_context context,
     if (code == 0) {
 	checksum->length = kiov[0].data.length;
 	checksum->contents = (unsigned char *)kiov[0].data.data;
-    }
+    } else
+	free(kiov[0].data.data);
 
     xfree(kiov);
 
