@@ -112,9 +112,9 @@ make_seal_token_v1_iov(krb5_context context,
 	}
 
 	if (ctx->gss_flags & GSS_C_DCE_STYLE)
-	    tmsglen = 0;
+	    tmsglen = k5_headerlen; /* confounder length */
 	else
-	    tmsglen = data_length + padding->buffer.length;
+	    tmsglen = conf_data_length + padding->buffer.length;
     }
 
     /* Determine token size */
@@ -251,6 +251,7 @@ make_seal_token_v1_iov(krb5_context context,
 		goto cleanup;
 
 	    break;
+	}
 	default:
 	    code = kg_encrypt_iov(context, ctx->proto,
 				  ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
@@ -260,7 +261,6 @@ make_seal_token_v1_iov(krb5_context context,
 	    if (code != 0)
 		goto cleanup;
 	    break;
-	}
 	}
     }
 
