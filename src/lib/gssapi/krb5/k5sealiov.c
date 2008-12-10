@@ -273,7 +273,8 @@ make_seal_token_v1_iov(krb5_context context,
 	*conf_state = conf_req_flag;
 
 cleanup:
-    kg_release_iov(iov, iov_count);
+    if (code != 0)
+	kg_release_iov(iov, iov_count);
     krb5_free_checksum_contents(context, &md5cksum);
 
     return code;
