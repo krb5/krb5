@@ -120,14 +120,16 @@ make_seal_token_v1_iov(krb5_context context,
     /* Determine token size */
     tlen = g_token_size(ctx->mech_used, 14 + ctx->cksum_size + tmsglen);
 
+    k5_headerlen += tlen - tmsglen;
+
     if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-	code = kg_allocate_iov(header, tlen - tmsglen);
-    else if (header->buffer.length < tlen - tmsglen)
+	code = kg_allocate_iov(header, k5_headerlen);
+    else if (header->buffer.length < k5_headerlen)
 	code = KRB5_BAD_MSIZE;
     if (code != 0)
 	goto cleanup;
 
-    header->buffer.length = tlen;
+    header->buffer.length = k5_headerlen;
 
     ptr = (unsigned char *)header->buffer.value;
     g_make_token_header(ctx->mech_used, 14 + ctx->cksum_size + tmsglen, &ptr, toktype);
