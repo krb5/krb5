@@ -158,7 +158,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	/* EC */
 	store_16_be(ec, outbuf + 4);
 	/* RRC */
-	store_16_be(rrc, outbuf + 6);
+	store_16_be(0, outbuf + 6);
 	store_64_be(ctx->seq_send, outbuf + 8);
 
 	/* Copy of header to be encrypted */
@@ -172,6 +172,9 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 			      ec, rrc, key, key_usage, 0, iov, iov_count);
 	if (code != 0)
 	    goto cleanup;
+
+	/* RRC */
+	store_16_be(rrc, outbuf + 6);
 
 	ctx->seq_send++;
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
