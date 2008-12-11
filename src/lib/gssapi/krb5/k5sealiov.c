@@ -398,9 +398,11 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	INIT_IOV_DATA(trailer);
     }
 
+    /* For CFX, EC is used instead of padding, and is placed in header or trailer */
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
-	if (conf_req_flag && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+	if (conf_req_flag && ctx->proto == 0 &&
+	    (ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
 	    *minor_status = EINVAL;
 	    return GSS_S_FAILURE;
 	}
@@ -419,6 +421,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     if (ctx->proto == 1) {
 	krb5_enctype enctype = ctx->enc->enctype;
+	size_t ec;
 
 	code = krb5_c_crypto_length(context, enctype,
 				    conf_req_flag ?
@@ -448,7 +451,18 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		*minor_status = code;
 		return GSS_S_FAILURE;
 	    }
-	    gss_padlen = k5_padlen;
+	 
+	    if (k5_padlen == 0 && (ctx->gss_flags & GSS_C_DCE_STYLE)) {
+		/* Windows rejects AEAD tokens with non-zero EC */
+		code = krb5_c_block_size(context, enctype, &ec);
+		if (code != 0) {
+		    *minor_status = code;
+		    return GSS_S_FAILURE;
+		}
+	    } else
+		ec = k5_padlen;
+
+	    gss_trailerlen += ec;
 	} else {
 	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}

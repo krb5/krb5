@@ -45,12 +45,12 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     krb5_error_code code = KRB5_BAD_MSIZE;
     gss_iov_buffer_t header;
     gss_iov_buffer_t trailer;
-    gss_iov_buffer_t padding;
     unsigned char acceptor_flag;
     unsigned short tok_id;
     unsigned char *outbuf = NULL;
+    unsigned char *tbuf = NULL;
     int key_usage;
-    size_t rrc = 0, ec = 0;
+    size_t rrc = 0;
     size_t gss_headerlen;
     krb5_keyblock *key;
     size_t data_length, assoc_data_length;
@@ -79,13 +79,12 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	return EINVAL;
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
-    padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
 
     outbuf = (unsigned char *)header->buffer.value;
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	unsigned int k5_headerlen, k5_trailerlen, k5_padlen;
-	size_t gss_padlen = 0, gss_trailerlen = 0;
+	size_t ec = 0, gss_trailerlen = 0;
 	size_t conf_data_length = data_length - assoc_data_length;
 
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
@@ -97,19 +96,28 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	gss_padlen = k5_padlen;
+	if (k5_padlen == 0 && (ctx->gss_flags & GSS_C_DCE_STYLE)) {
+	    /* Windows rejects AEAD tokens with non-zero EC */
+	    code = krb5_c_block_size(context, key->enctype, &ec);
+	    if (code != 0)
+		goto cleanup;
+	} else
+	    ec = k5_padlen;
 
 	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
 	if (code != 0)
 	    goto cleanup;
 
 	gss_headerlen = 16 /* Header */ + k5_headerlen;
+	gss_trailerlen = ec + 16 /* E(Header) */ + k5_trailerlen;
 
 	if (trailer == NULL) {
-	    rrc = 16 /* E(Header) */ + k5_trailerlen;
-	    gss_headerlen += rrc;
-	} else
-	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen;
+	    rrc = gss_trailerlen;
+	    /* Workaround for Windows bug where it rotates by EC + RRC */
+	    if (ctx->gss_flags & GSS_C_DCE_STYLE)
+		rrc -= ec;
+	    gss_headerlen += gss_trailerlen;
+	}
 
 	if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 	    code = kg_allocate_iov(header, gss_headerlen);
@@ -118,22 +126,6 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 	header->buffer.length = gss_headerlen;
-
-	if (padding == NULL) {
-	    if (gss_padlen != 0) {
-		code = EINVAL;
-		goto cleanup;
-	    }
-	} else {
-	    if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-		code = kg_allocate_iov(padding, gss_padlen);
-	    else if (padding->buffer.length < gss_padlen)
-		code = KRB5_BAD_MSIZE;
-	    if (code != 0)
-		goto cleanup;
-	    padding->buffer.length = gss_padlen;
-	    memset(padding->buffer.value, 0xFF, padding->buffer.length);
-	}
 
 	if (trailer != NULL) {
 	    if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
@@ -144,8 +136,6 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 		goto cleanup;
 	    trailer->buffer.length = gss_trailerlen;
 	}
-
-	ec = gss_padlen;
 
 	/* TOK_ID */
 	store_16_be(0x0504, outbuf);
@@ -161,11 +151,14 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	store_16_be(0, outbuf + 6);
 	store_64_be(ctx->seq_send, outbuf + 8);
 
-	/* Copy of header to be encrypted */
+	/* EC | copy of header to be encrypted, located in (possibly rotated) trailer */
 	if (trailer == NULL)
-	    memcpy((unsigned char *)header->buffer.value + 16, header->buffer.value, 16);
+	    tbuf = (unsigned char *)header->buffer.value + 16; /* Header */
 	else
-	    memcpy((unsigned char *)trailer->buffer.value, header->buffer.value, 16);
+	    tbuf = (unsigned char *)trailer->buffer.value;
+
+	memset(tbuf, 0xFF, ec);
+	memcpy(tbuf + ec, header->buffer.value, 16);
 
 	code = kg_encrypt_iov(context, ctx->proto,
 			      ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
@@ -199,9 +192,6 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 	checksum->buffer.length = ctx->cksum_size;
-
-	if (padding != NULL)
-	    padding->buffer.length = 0;
 
 	/* TOK_ID */
 	store_16_be(tok_id, outbuf);
