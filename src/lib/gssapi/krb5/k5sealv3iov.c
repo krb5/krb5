@@ -132,7 +132,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    if (code != 0)
 		goto cleanup;
 	    padding->buffer.length = gss_padlen;
-	    memset(padding->buffer.value, 0, padding->buffer.length);
+	    memset(padding->buffer.value, 0xFF, padding->buffer.length);
 	}
 
 	if (trailer != NULL) {
