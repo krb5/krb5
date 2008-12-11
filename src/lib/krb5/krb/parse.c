@@ -32,7 +32,6 @@
 
 
 #include "k5-int.h"
-#include "k5-utf8.h"
 
 /*
  * converts a single-string representation of the name to the
@@ -60,10 +59,6 @@
 
 #define FCOMPNUM	10
 
-#define GET_CHAR(_cp)	(utf8 ? krb5int_utf8_to_ucs4((_cp)) : *(_cp))
-#define NEXT_CHAR(_cp)	(utf8 ? (const char *)KRB5_UTF8_INCR((_cp)) : (_cp)++)
-#define LEN_CHAR(_c)	(utf8 ? krb5int_ucs4_to_utf8((_c), NULL) : 1)
-
 /*
  * May the fleas of a thousand camels infest the ISO, they who think
  * that arbitrarily large multi-component names are a Good Thing.....
@@ -74,8 +69,7 @@ k5_parse_name(krb5_context context, const char *name,
 {
 	register const char	*cp;
 	register char	*q;
-	size_t		i, size;
-	krb5_ucs4	c;
+	register int	i,c,size;
 	int		components = 0;
 	const char	*parsed_realm = NULL;
 	int		fcompsize[FCOMPNUM];
@@ -85,7 +79,6 @@ k5_parse_name(krb5_context context, const char *name,
 	char		*tmpdata;
 	krb5_principal	principal;
 	krb5_error_code retval;
-	unsigned int	utf8 = (context->library_options & KRB5_LIBOPT_UTF8);
 	unsigned int	enterprise = (flags & KRB5_PRINCIPAL_PARSE_ENTERPRISE);
 	int		first_at;
 
@@ -96,10 +89,10 @@ k5_parse_name(krb5_context context, const char *name,
 	 * component.
 	 */
 	size = 0;
- 	for (i = 0, cp = name, first_at = 1; (c = GET_CHAR(cp)); NEXT_CHAR(cp)) {
+	for (i=0,cp = name, first_at = 1; (c = *cp); cp++) {
 		if (c == QUOTECHAR) {
-			NEXT_CHAR(cp);
-			if (!(c = GET_CHAR(cp)))
+			cp++;
+			if (!(c = *cp))
 				/*
 			 	 * QUOTECHAR can't be at the last
 			 	 * character of the name!
@@ -135,7 +128,7 @@ k5_parse_name(krb5_context context, const char *name,
 			if (c == REALM_SEP && enterprise && first_at)
 				first_at = 0;
 
-			size += LEN_CHAR(c);
+			size++;
 		}
 	}
 	if (parsed_realm != NULL)
@@ -194,9 +187,9 @@ k5_parse_name(krb5_context context, const char *name,
 	if (components >= FCOMPNUM) {
 		size = 0;
 		parsed_realm = NULL;
-		for (i=0,cp = name; (c = GET_CHAR(cp)); NEXT_CHAR(cp)) {
+		for (i=0,cp = name; (c = *cp); cp++) {
 			if (c == QUOTECHAR) {
-				NEXT_CHAR(cp);
+				cp++;
 				size++;
 			} else if (c == COMPONENT_SEP) {
 				if (krb5_princ_size(context, principal) > i)
@@ -209,7 +202,7 @@ k5_parse_name(krb5_context context, const char *name,
 				size = 0;
 				parsed_realm = cp+1;
 			} else
-				size += LEN_CHAR(c);
+				size++;
 		}
 		if (parsed_realm)
 			krb5_princ_realm(context, principal)->length = size;
@@ -267,10 +260,10 @@ k5_parse_name(krb5_context context, const char *name,
 	 * allocated.
 	 */
 	q = krb5_princ_component(context, principal, 0)->data;
-	for (i = 0, cp = name, first_at = 1; (c = GET_CHAR(cp)); NEXT_CHAR(cp)) {
+	for (i=0,cp = name, first_at = 1; (c = *cp); cp++) {
 		if (c == QUOTECHAR) {
-			NEXT_CHAR(cp);
-			switch (c = GET_CHAR(cp)) {
+			cp++;
+			switch (c = *cp) {
 			case 'n':
 				*q++ = '\n';
 				break;
@@ -284,10 +277,7 @@ k5_parse_name(krb5_context context, const char *name,
 				*q++ = '\0';
 				break;
 			default:
-				if (utf8)
-					q += krb5int_ucs4_to_utf8(c, q);
-				else
-					*q++ = c;
+				*q++ = c;
 				break;
 			}
 		} else if (c == COMPONENT_SEP && !enterprise) {
@@ -302,10 +292,7 @@ k5_parse_name(krb5_context context, const char *name,
 			if (c == REALM_SEP && enterprise && first_at)
 				first_at = 0;
 
-			if (utf8)
-				q += krb5int_ucs4_to_utf8(c, q);
-			else
-				*q++ = c;
+			*q++ = c;
 		}
 	}
 	*q++ = '\0';
