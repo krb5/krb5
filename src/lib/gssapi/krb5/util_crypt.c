@@ -299,8 +299,8 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     kiov[i].data.data = NULL;
     i++;
 
+    *pkiov = i;
     *pkiov_count = kiov_count;
-    *pkiov = kiov;
 
     return 0;
 }
@@ -328,8 +328,8 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     krb5_error_code code;
     size_t actual_rrc;
 
-    *pkiov_count = 0;
     *pkiov = NULL;
+    *pkiov_count = 0;
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
@@ -420,8 +420,8 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 	kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */
     i++;
 
-    *pkiov_count = kiov_count;
     *pkiov = kiov;
+    *pkiov_count = i;
 
     return 0;
 }
