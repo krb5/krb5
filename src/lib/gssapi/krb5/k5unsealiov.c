@@ -459,8 +459,10 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	tiov[i++] = iov[j];
     }
 
-    if (data == NULL)
+    if (data == NULL) {
+	code = EINVAL;
 	goto cleanup;
+    }
 
     /* PADDING | TRAILER */
     if (ctx->proto == 1) {
