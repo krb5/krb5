@@ -42,7 +42,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 				   int iov_count,
 				   int toktype)
 {
-    krb5_error_code code;
+    krb5_error_code code = KRB5_BAD_MSIZE;
     gss_iov_buffer_t header;
     gss_iov_buffer_t trailer;
     gss_iov_buffer_t padding;
@@ -292,13 +292,13 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
 
-    acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
+    acceptor_flag = ctx->initiate ? FLAG_SENDER_IS_ACCEPTOR : 0;
     key_usage = (toktype == KG_TOK_WRAP_MSG
-		 ? (ctx->initiate
+		 ? (!ctx->initiate 
 		    ? KG_USAGE_INITIATOR_SEAL
 		    : KG_USAGE_ACCEPTOR_SEAL)
-		 : (ctx->initiate
-		    ? KG_USAGE_INITIATOR_SIGN
+		 : (!ctx->initiate
+		    ? KG_USAGE_INITIATOR_SIGN 
 		    : KG_USAGE_ACCEPTOR_SIGN));
 
     kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
@@ -332,9 +332,15 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	/* Deal with RRC */
 	if (trailer == NULL) {
+	    size_t desired_rrc;
+
+	    if (ptr[2] & FLAG_WRAP_CONFIDENTIAL)
+		desired_rrc = 16 /* E(Header) */ + ctx->cksum_size;
+	    else
+		desired_rrc = ctx->cksum_size;
+
 	    /* According to MS, we only need to deal with a fixed RRC for DCE */
-	    if (rrc != (ptr[2] & FLAG_WRAP_CONFIDENTIAL) ?
-		16 /* E(Header) */ + ctx->cksum_size : ctx->cksum_size)
+	    if (rrc != desired_rrc)
 		goto defective;
 	} else if (rrc != 0) {
 	    /* Should have been rotated by kg_tokenize_stream_iov() */
