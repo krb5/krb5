@@ -277,7 +277,7 @@ krb5_pac_init(krb5_context context,
 
     pac->pac = (PACTYPE *)malloc(sizeof(PACTYPE));
     if (pac->pac == NULL) {
-	krb5_pac_free(context, pac);
+	free( pac);
 	return ENOMEM;
     }
 
@@ -297,7 +297,7 @@ krb5_pac_init(krb5_context context,
 }
 
 /*
- * Parse the supplied data into the (initialised) PAC
+ * Parse the supplied data into the  PAC allocated by this function
  */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_parse(krb5_context context,
