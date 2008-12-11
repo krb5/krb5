@@ -40,6 +40,7 @@ krb5_c_make_checksum_iov(krb5_context context,
     size_t cksumlen;
     krb5_crypto_iov *checksum;
     size_t i;
+    krb5_data cksum_data;
 
     for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == cksumtype)
@@ -49,20 +50,33 @@ krb5_c_make_checksum_iov(krb5_context context,
     if (i == krb5_cksumtypes_length)
 	return(KRB5_BAD_ENCTYPE);
 
-    if (krb5_cksumtypes_list[i].keyhash)
-	cksumlen = krb5_cksumtypes_list[i].keyhash->hashsize;
+    if (krb5_cksumtypes_list[i].keyhash != NULL)
+	cksum_data.length = krb5_cksumtypes_list[i].keyhash->hashsize;
     else
-	cksumlen = krb5_cksumtypes_list[i].hash->hashsize;
+	cksum_data.length = krb5_cksumtypes_list[i].hash->hashsize;
+
+    if (krb5_cksumtypes_list[i].trunc_size != 0)
+	cksumlen = krb5_cksumtypes_list[i].trunc_size;
+    else
+	cksumlen = cksum_data.length;
 
     checksum = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_CHECKSUM);
     if (checksum == NULL || checksum->data.length < cksumlen)
 	return(KRB5_BAD_MSIZE);
 
-    checksum->data.length = cksumlen;
+    cksum_data.data = malloc(cksum_data.length);
+    if (cksum_data.data == NULL)
+	return(ENOMEM);
 
     ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i],
 				      key, usage, data, num_data,
-				      &checksum->data);
+				      &cksum_data);
+    if (ret == 0) {
+	memcpy(checksum->data.data, cksum_data.data, cksumlen);
+	checksum->data.length = cksumlen;
+    }
+
+    free(cksum_data.data);
 
     return(ret);
 }
