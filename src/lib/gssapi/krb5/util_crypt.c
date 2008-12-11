@@ -299,8 +299,8 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     kiov[i].data.data = NULL;
     i++;
 
-    *pkiov = i;
-    *pkiov_count = kiov_count;
+    *pkiov = kiov;
+    *pkiov_count = i;
 
     return 0;
 }
