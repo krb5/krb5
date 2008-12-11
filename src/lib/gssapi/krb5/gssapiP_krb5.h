@@ -97,12 +97,9 @@
 #define KG_TOK_MIC_MSG          0x0101
 #define KG_TOK_WRAP_MSG         0x0201
 #define KG_TOK_DEL_CTX          0x0102
-
-#define KG2_TOK_INITIAL         0x0101
-#define KG2_TOK_RESPONSE        0x0202
-#define KG2_TOK_MIC             0x0303
-#define KG2_TOK_WRAP_INTEG      0x0404
-#define KG2_TOK_WRAP_PRIV       0x0505
+#define KG2_TOK_MIC_MSG         0x0404
+#define KG2_TOK_WRAP_MSG        0x0504
+#define KG2_TOK_DEL_CTX         0x0405
 
 #define KRB5_GSS_FOR_CREDS_OPTION 1
 
