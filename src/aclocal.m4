@@ -714,6 +714,16 @@ else
 	;;
     esac
   fi
+  if test "`uname -s`" = SunOS ; then
+    # Using Solaris but not GCC, assume Sunsoft compiler.
+    # We have some error-out-on-warning options available.
+    # Sunsoft 12 compiler defaults to -xc99=all, it appears, so "inline"
+    # works, but it also means that declaration-in-code warnings won't
+    # be issued.
+    # -v -fd -errwarn=E_DECLARATION_IN_CODE ...
+    WARN_CFLAGS="-errtags=yes -errwarn=E_BAD_PTR_INT_COMBINATION"
+    WARN_CXXFLAGS="-errtags=yes +w +w2 -xport64"
+  fi
 fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WARN_CXXFLAGS)
