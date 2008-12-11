@@ -32,6 +32,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#if 0
 /*
  * Solaris extensions
  */
@@ -44,6 +45,7 @@ int KRB5_CALLCONV gssd_pname_to_uid
 int KRB5_CALLCONV __gss_userok
 	(const gss_name_t /*name*/,
 	 const char * /*username*/);
+#endif
 
 /*
  * GGF extensions
@@ -67,6 +69,9 @@ OM_uint32 KRB5_CALLCONV gss_add_buffer_set_member
 OM_uint32 KRB5_CALLCONV gss_release_buffer_set
 	(OM_uint32 * /*minor_status*/,
 	 gss_buffer_set_t * /*buffer_set*/);
+
+/* returns buffer set with the first member containing session key */
+GSS_DLLIMP extern gss_OID GSS_C_INQ_SESSION_KEY;
 
 OM_uint32 KRB5_CALLCONV gss_inquire_sec_context_by_oid
 	(OM_uint32 * /*minor_status*/,
@@ -129,6 +134,11 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_aead
 #define GSS_C_IDENTIFY_FLAG		0x2000
 #define GSS_C_EXTENDED_ERROR_FLAG	0x4000
 
+OM_uint32 KRB5_CALLCONV gss_complete_auth_token
+	(OM_uint32 *minor_status,
+	 const gss_ctx_id_t context_handle,
+	 gss_buffer_t input_message_buffer);
+
 typedef struct gss_iov_buffer_desc_struct {
     OM_uint32 type;
     OM_uint32 flags;
@@ -182,7 +192,7 @@ typedef struct gss_iov_buffer_desc_struct {
  *
  * The typical (special cased) usage for DCE is as follows:
  *
- *  HEADER | SIGN_ONLY_DATA_1 | DATA | SIGN_ONLY_DATA_2
+ *  SIGN_ONLY_DATA_1 | DATA | SIGN_ONLY_DATA_2 | HEADER
  */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (
