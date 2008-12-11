@@ -50,7 +50,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     unsigned short tok_id;
     unsigned char *outbuf = NULL;
     int key_usage;
-    size_t rrc, ec = 0;
+    size_t rrc = 0, ec = 0;
     size_t gss_headerlen;
     krb5_keyblock *key;
     size_t data_length, assoc_data_length;
@@ -104,9 +104,11 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    goto cleanup;
 
 	gss_headerlen = 16 /* Header */ + k5_headerlen;
-	if (trailer == NULL)
-	    gss_headerlen += 16 /* E(Header) */ + k5_trailerlen;
-        else
+
+	if (trailer == NULL) {
+	    rrc = 16 /* E(Header) */ + k5_trailerlen;
+	    gss_headerlen += rrc;
+	} else
 	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen;
 
 	if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
@@ -115,6 +117,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    code = KRB5_BAD_MSIZE;
 	if (code != 0)
 	    goto cleanup;
+	header->buffer.length = gss_headerlen;
 
 	if (padding == NULL) {
 	    if (gss_padlen != 0) {
@@ -122,14 +125,13 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 		goto cleanup;
 	    }
 	} else {
-	    if (gss_padlen == 0)
-		padding->buffer.length = 0;
-	    else if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	    if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 		code = kg_allocate_iov(padding, gss_padlen);
 	    else if (padding->buffer.length < gss_padlen)
 		code = KRB5_BAD_MSIZE;
 	    if (code != 0)
 		goto cleanup;
+	    padding->buffer.length = gss_padlen;
 	    memset(padding->buffer.value, 0, padding->buffer.length);
 	}
 
@@ -140,14 +142,10 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 		code = KRB5_BAD_MSIZE;
 	    if (code != 0)
 		goto cleanup;
+	    trailer->buffer.length = gss_trailerlen;
 	}
 
 	ec = gss_padlen;
-
-	if (trailer == NULL)
-	    rrc = gss_trailerlen;
-	else
-	    rrc = 0;
 
 	/* TOK_ID */
 	store_16_be(0x0504, outbuf);
@@ -177,16 +175,27 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
 	ctx->seq_send++;
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
+	gss_iov_buffer_t checksum;
+
 	assert(ctx->cksum_size <= 0xFFFF);
 
 	tok_id = 0x0504;
 
     wrap_with_checksum:
 
-	if (trailer == NULL)
+	if (trailer == NULL) {
 	    rrc = ctx->cksum_size;
-	else
-	    rrc = 0;
+	    checksum = header;
+	} else
+	    checksum = trailer;
+
+	if (checksum->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	    code = kg_allocate_iov(checksum, ctx->cksum_size);
+	else if (checksum->buffer.length < ctx->cksum_size)
+	    code = KRB5_BAD_MSIZE;
+	if (code != 0)
+	    goto cleanup;
+	checksum->buffer.length = ctx->cksum_size;
 
 	if (padding != NULL)
 	    padding->buffer.length = 0;
