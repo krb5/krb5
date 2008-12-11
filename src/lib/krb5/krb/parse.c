@@ -158,6 +158,8 @@ k5_parse_name(krb5_context context, const char *name,
 	 */
 	if (!parsed_realm) {
 	    if (flags & KRB5_PRINCIPAL_PARSE_MUST_REALM) {
+		krb5_set_error_message(context, KRB5_PARSE_MALFORMED,
+				       "Principal %s is missing required realm", name);
 		krb5_xfree(principal->data);
 		krb5_xfree(principal);
 		return KRB5_PARSE_MALFORMED;
@@ -173,6 +175,8 @@ k5_parse_name(krb5_context context, const char *name,
 	    }
 	    realmsize = default_realm_size;
 	} else if (flags & KRB5_PRINCIPAL_PARSE_NO_REALM) {
+	    krb5_set_error_message(context, KRB5_PARSE_MALFORMED,
+				  "Principal %s has realm present", name);
 	    krb5_xfree(principal->data);
 	    krb5_xfree(principal);
 	    return KRB5_PARSE_MALFORMED;
