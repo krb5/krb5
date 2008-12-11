@@ -142,7 +142,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         }
 
         /* TOK_ID */
-        store_16_be(0x0504, outbuf);
+        store_16_be(KG2_TOK_WRAP_MSG, outbuf);
         /* flags */
         outbuf[2] = (acceptor_flag
                      | (conf_req_flag ? FLAG_WRAP_CONFIDENTIAL : 0)
@@ -186,7 +186,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
            what goes into the output token.  They may be the same, or
            message2 may be empty (for MIC).  */
 
-        tok_id = 0x0504;
+        tok_id = KG2_TOK_WRAP_MSG;
 
     wrap_with_checksum:
         plain.length = message->length + 16;
@@ -269,11 +269,11 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             store_16_be(0xffff, outbuf+6);
         }
     } else if (toktype == KG_TOK_MIC_MSG) {
-        tok_id = 0x0404;
+        tok_id = KG2_TOK_MIC_MSG;
         message2 = &empty_message;
         goto wrap_with_checksum;
     } else if (toktype == KG_TOK_DEL_CTX) {
-        tok_id = 0x0405;
+        tok_id = KG2_TOK_DEL_CTX;
         message = message2 = &empty_message;
         goto wrap_with_checksum;
     } else
@@ -365,7 +365,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     }
 
     if (toktype == KG_TOK_WRAP_MSG) {
-        if (load_16_be(ptr) != 0x0504)
+        if (load_16_be(ptr) != KG2_TOK_WRAP_MSG)
             goto defective;
         if (ptr[3] != 0xff)
             goto defective;
@@ -405,7 +405,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                cipher.ciphertext.length has been adjusted to the
                correct length.  */
             althdr = plain.data + plain.length - 16;
-            if (load_16_be(althdr) != 0x0504
+            if (load_16_be(althdr) != KG2_TOK_WRAP_MSG
                 || althdr[2] != ptr[2]
                 || althdr[3] != ptr[3]
                 || memcmp(althdr+8, ptr+8, 8)) {
@@ -462,7 +462,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         return err;
     } else if (toktype == KG_TOK_MIC_MSG) {
         /* wrap token, no confidentiality */
-        if (load_16_be(ptr) != 0x0404)
+        if (load_16_be(ptr) != KG2_TOK_MIC_MSG)
             goto defective;
     verify_mic_1:
         if (ptr[3] != 0xff)
@@ -498,7 +498,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         *minor_status = 0;
         return err;
     } else if (toktype == KG_TOK_DEL_CTX) {
-        if (load_16_be(ptr) != 0x0405)
+        if (load_16_be(ptr) != KG2_TOK_DEL_CTX)
             goto defective;
         message_buffer = &empty_message;
         goto verify_mic_1;

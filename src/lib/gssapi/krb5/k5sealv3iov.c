@@ -138,7 +138,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	}
 
 	/* TOK_ID */
-	store_16_be(0x0504, outbuf);
+	store_16_be(KG2_TOK_WRAP_MSG, outbuf);
 	/* flags */
 	outbuf[2] = (acceptor_flag
 		     | (conf_req_flag ? FLAG_WRAP_CONFIDENTIAL : 0)
@@ -175,7 +175,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
 	assert(ctx->cksum_size <= 0xFFFF);
 
-	tok_id = 0x0504;
+	tok_id = KG2_TOK_WRAP_MSG;
 
     wrap_with_checksum:
 
@@ -230,10 +230,10 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    store_16_be(rrc, outbuf + 6);
 	}
     } else if (toktype == KG_TOK_MIC_MSG) {
-	tok_id = 0x0404;
+	tok_id = KG2_TOK_MIC_MSG;
 	goto wrap_with_checksum;
     } else if (toktype == KG_TOK_DEL_CTX) {
-	tok_id = 0x0405;
+	tok_id = KG2_TOK_DEL_CTX;
 	goto wrap_with_checksum;
     } else {
 	abort();
@@ -312,7 +312,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     }
 
     if (toktype == KG_TOK_WRAP_MSG) {
-	if (load_16_be(ptr) != 0x0504)
+	if (load_16_be(ptr) != KG2_TOK_WRAP_MSG)
 	    goto defective;
 	if (ptr[3] != 0xFF)
 	    goto defective;
@@ -353,7 +353,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    /* Validate header integrity */
 	    althdr = (unsigned char *)header->buffer.value;
 
-	    if (load_16_be(althdr) != 0x0504
+	    if (load_16_be(althdr) != KG2_TOK_WRAP_MSG
 		|| althdr[2] != ptr[2]
 		|| althdr[3] != ptr[3]
 		|| memcmp(althdr + 8, ptr + 8, 8) != 0) {
@@ -382,7 +382,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
 	code = g_order_check(&ctx->seqstate, seqnum);
     } else if (toktype == KG_TOK_MIC_MSG) {
-	if (load_16_be(ptr) != 0x0404)
+	if (load_16_be(ptr) != KG2_TOK_MIC_MSG)
 	    goto defective;
 
     verify_mic_1:
@@ -399,7 +399,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	}
 	code = g_order_check(&ctx->seqstate, seqnum);
     } else if (toktype == KG_TOK_DEL_CTX) {
-	if (load_16_be(ptr) != 0x0405)
+	if (load_16_be(ptr) != KG2_TOK_DEL_CTX)
 	    goto defective;
 	goto verify_mic_1;
     } else {
