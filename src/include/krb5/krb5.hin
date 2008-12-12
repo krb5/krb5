@@ -315,6 +315,7 @@ typedef struct _krb5_address {
 #define	ADDRTYPE_XNS		0x0006
 #define	ADDRTYPE_ISO		0x0007
 #define ADDRTYPE_DDP		0x0010
+#define ADDRTYPE_NETBIOS	0x0014
 #define ADDRTYPE_INET6		0x0018
 /* not yet in the spec... */
 #define ADDRTYPE_ADDRPORT	0x0100
@@ -414,6 +415,7 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_HMAC_SHA1_DES3	0x000c
 #define CKSUMTYPE_HMAC_SHA1_96_AES128	0x000f
 #define CKSUMTYPE_HMAC_SHA1_96_AES256	0x0010
+#define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /*Microsoft netlogon cksumtype*/
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 
 /* The following are entropy source designations. Whenever
@@ -775,6 +777,7 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 /* #define	KDC_OPT_RESERVED	0x00080000 */
 /* #define	KDC_OPT_RESERVED	0x00040000 */
 #define	KDC_OPT_REQUEST_ANONYMOUS	0x00020000
+#define KDC_OPT_CNAME_IN_ADDL_TKT	0x00020000
 #define	KDC_OPT_CANONICALIZE		0x00010000
 /* #define	KDC_OPT_RESERVED	0x00008000 */
 /* #define	KDC_OPT_RESERVED	0x00004000 */
@@ -962,12 +965,15 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define KRB5_PADATA_PK_AS_REP		17 /* PKINIT */
 #define KRB5_PADATA_ETYPE_INFO2		19
 #define KRB5_PADATA_USE_SPECIFIED_KVNO	20
+#define KRB5_PADATA_SVR_REFERRAL_INFO	20 /* Windows 2000 referrals */
 #define KRB5_PADATA_SAM_REDIRECT	21
 #define KRB5_PADATA_GET_FROM_TYPED_DATA	22
 #define KRB5_PADATA_REFERRAL		25 /* draft referral system */
 #define KRB5_PADATA_SAM_CHALLENGE_2	30 /* draft challenge system, updated */
 #define KRB5_PADATA_SAM_RESPONSE_2	31 /* draft challenge system, updated */
-    
+#define KRB5_PADATA_PAC_REQUEST		128 /* include Windows PAC */
+#define KRB5_PADATA_FOR_USER		129 /* username protocol transition request */
+#define KRB5_PADATA_S4U_X509_USER	130 /* certificate protocol transition request */
 #define	KRB5_SAM_USE_SAD_AS_KEY		0x80000000
 #define	KRB5_SAM_SEND_ENCRYPTED_SAD	0x40000000
 #define	KRB5_SAM_MUST_PK_ENCRYPT_SAD	0x20000000 /* currently must be zero */
@@ -989,6 +995,8 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define KRB5_AUTHDATA_INITIAL_VERIFIED_CAS	9
 #define	KRB5_AUTHDATA_OSF_DCE	64
 #define KRB5_AUTHDATA_SESAME	65
+#define KRB5_AUTHDATA_WIN2K_PAC	128
+#define KRB5_AUTHDATA_ETYPE_NEGOTIATION	129	/* RFC 4537 */
 
 /* password change constants */
 
@@ -1141,6 +1149,7 @@ typedef struct _krb5_enc_kdc_rep_part {
     krb5_principal server;		/* server's principal identifier */
     krb5_address **caddrs;	/* array of ptrs to addresses,
 					   optional */
+    krb5_pa_data **enc_padata;		/* Windows 2000 compat */
 } krb5_enc_kdc_rep_part;
 
 typedef struct _krb5_kdc_rep {
@@ -1242,6 +1251,27 @@ typedef struct _krb5_pwd_data {
 } krb5_pwd_data;
 
 /* these need to be here so the typedefs are available for the prototypes */
+/*
+ * Note for Windows 2000 compatibility this is encoded
+ * in the enc_padata field of the krb5_enc_kdc_rep_part.
+ */
+typedef struct _krb5_pa_svr_referral_data {
+    /* Referred name, only realm is required */
+    krb5_principal     principal;
+} krb5_pa_svr_referral_data;
+
+typedef struct _krb5_pa_server_referral_data {
+    krb5_data          *referred_realm;
+    krb5_principal     true_principal_name;
+    krb5_principal     requested_principal_name;
+    krb5_timestamp     referral_valid_until;
+    krb5_checksum      rep_cksum;
+} krb5_pa_server_referral_data;
+
+typedef struct _krb5_pa_pac_req {
+    /* TRUE if a PAC should be included in TGS-REP */
+    krb5_boolean       include_pac;
+} krb5_pa_pac_req;
 
 /*
  * begin "safepriv.h"
@@ -1546,11 +1576,20 @@ krb5_error_code KRB5_CALLCONV krb5_mk_rep
 	(krb5_context,
 		krb5_auth_context,
 		krb5_data *);
+krb5_error_code KRB5_CALLCONV krb5_mk_rep_dce
+	(krb5_context,
+		krb5_auth_context,
+		krb5_data *);
 krb5_error_code KRB5_CALLCONV krb5_rd_rep
 	(krb5_context,
 		krb5_auth_context,
 		const krb5_data *,
 		krb5_ap_rep_enc_part **);
+krb5_error_code KRB5_CALLCONV krb5_rd_rep_dce
+	(krb5_context,
+		krb5_auth_context,
+		const krb5_data *,
+		krb5_int32 *);
 krb5_error_code KRB5_CALLCONV krb5_mk_error
 	(krb5_context,
 		const krb5_error *,
@@ -1610,16 +1649,19 @@ krb5_error_code KRB5_CALLCONV krb5_unparse_name_flags_ext
 /* Novell compat macros */
 #define krb5_unparse_name_short(_context, _principal, _name)	\
 	krb5_unparse_name_flags((_context), (_principal), \
-	    (_name), KRB5_PRINCIPAL_UNPARSE_SHORT | \
-		     KRB5_PRINCIPAL_UNPARSE_NO_REALM);
+	    KRB5_PRINCIPAL_UNPARSE_SHORT | \
+		KRB5_PRINCIPAL_UNPARSE_NO_REALM, \
+	    (_name))
 #define krb5_unparse_name_noncanonical(_context, _principal, _name) \
 	krb5_unparse_name_flags((_context), (_principal), \
-	    (_name), KRB5_PRINCIPAL_UNPARSE_DISPLAY);
+	    KRB5_PRINCIPAL_UNPARSE_DISPLAY, \
+	    (_name))
 #define krb5_unparse_name_short_noncanonical(_context, _principal, _name) \
 	krb5_unparse_name_flags((_context), (_principal), \
-	    (_name), KRB5_PRINCIPAL_UNPARSE_SHORT \
-		     KRB5_PRINCIPAL_UNPARSE_NO_REALM | \
-		     KRB5_PRINCIPAL_UNPARSE_DISPLAY);
+	    KRB5_PRINCIPAL_UNPARSE_SHORT | \
+		KRB5_PRINCIPAL_UNPARSE_NO_REALM | \
+		KRB5_PRINCIPAL_UNPARSE_DISPLAY, \
+	    (_name))
 
 krb5_error_code KRB5_CALLCONV krb5_set_principal_realm
 	(krb5_context, krb5_principal, const char *);
@@ -1648,6 +1690,13 @@ krb5_boolean KRB5_CALLCONV krb5_principal_compare_any_realm
 	(krb5_context,
 		krb5_const_principal,
 		krb5_const_principal);
+#define KRB5_PRINCIPAL_COMPARE_IGNORE_REALM	    1
+#define KRB5_PRINCIPAL_COMPARE_ENTERPRISE	    2 /* compare UPNs as real principals */
+krb5_boolean KRB5_CALLCONV krb5_principal_compare_flags
+	(krb5_context,
+		krb5_const_principal,
+		krb5_const_principal,
+		int);
 krb5_error_code KRB5_CALLCONV  krb5_init_keyblock
 		(krb5_context, krb5_enctype enctype,
 		size_t length, krb5_keyblock **out); 
@@ -1866,6 +1915,10 @@ krb5_set_password_using_ccache
 krb5_error_code KRB5_CALLCONV
 krb5_get_profile
 	(krb5_context, struct _profile_t * /* profile_t */ *);
+krb5_error_code KRB5_CALLCONV
+krb5_set_profile
+	(krb5_context, struct _profile_t /* profile_t */ *);
+
 
 #if KRB5_DEPRECATED
 KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
@@ -2463,6 +2516,15 @@ void KRB5_CALLCONV
 krb5_free_error_message (krb5_context, const char *);
 void KRB5_CALLCONV
 krb5_clear_error_message (krb5_context);
+
+krb5_error_code KRB5_CALLCONV
+krb5_decode_ad_if_relevant(krb5_context context,
+    const krb5_authdata *if_relevant,
+    krb5_authdata ***authdata);
+krb5_error_code KRB5_CALLCONV
+krb5_encode_ad_if_relevant(krb5_context context,
+    krb5_authdata * const*authdata,
+    krb5_authdata ***if_relevant_p);
 
 /*
  * Windows PAC
