@@ -27,9 +27,14 @@
  */
 
 #include "mglueP.h"
-#include "gss_libinit.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
 #endif
 
 #include <stdio.h>
@@ -40,16 +45,26 @@
 #define	M_DEFAULT	"default"
 
 #include "k5-thread.h"
+#include "k5-plugin.h"
+#include "osconf.h"
+#ifdef _GSS_STATIC_LINK
+#include "../krb5/gssapiP_krb5.h"
+#endif
+
+#define MECH_SYM "gss_mech_initialize"
+
+#ifndef MECH_CONF
+#define	MECH_CONF "/etc/gss/mech"
+#endif
 
 /* Local functions */
 static gss_mech_info searchMechList(const gss_OID);
+static void loadConfigFile(const char *);
 static void updateMechList(void);
 static void freeMechList(void);
-static void register_mech(gss_mechanism, const char *, void *);
 
 static OM_uint32 build_mechSet(void);
 static void free_mechSet(void);
-static void init_hardcoded(void);
 
 /*
  * list of mechanism libraries and their entry points.
@@ -58,28 +73,65 @@ static void init_hardcoded(void);
 static gss_mech_info g_mechList = NULL;
 static gss_mech_info g_mechListTail = NULL;
 static k5_mutex_t g_mechListLock = K5_MUTEX_PARTIAL_INITIALIZER;
+static time_t g_confFileModTime = (time_t)0;
 
+static time_t g_mechSetTime = (time_t)0;
 static gss_OID_set_desc g_mechSet = { 0, NULL };
 static k5_mutex_t g_mechSetLock = K5_MUTEX_PARTIAL_INITIALIZER;
+
+MAKE_INIT_FUNCTION(gssint_mechglue_init);
+MAKE_FINI_FUNCTION(gssint_mechglue_fini);
 
 int
 gssint_mechglue_init(void)
 {
 	int err;
 
+#ifdef SHOW_INITFINI_FUNCS
+	printf("gssint_mechglue_init\n");
+#endif
+
+	add_error_table(&et_ggss_error_table);
+
 	err = k5_mutex_finish_init(&g_mechSetLock);
-	return k5_mutex_finish_init(&g_mechListLock);
+	err = k5_mutex_finish_init(&g_mechListLock);
+
+#ifdef _GSS_STATIC_LINK
+	err = gss_krb5int_lib_init();
+#endif
+
+	return err;
 }
 
 void
 gssint_mechglue_fini(void)
 {
+	if (!INITIALIZER_RAN(gssint_mechglue_init) || PROGRAM_EXITING()) {
+#ifdef SHOW_INITFINI_FUNCS
+		printf("gssint_mechglue_fini: skipping\n");
+#endif
+		return;
+	}
+
+#ifdef SHOW_INITFINI_FUNCS
+	printf("gssint_mechglue_fini\n");
+#endif
+#ifdef _GSS_STATIC_LINK
+	gss_krb5int_lib_fini();
+#endif
 	k5_mutex_destroy(&g_mechSetLock);
 	k5_mutex_destroy(&g_mechListLock);
 	free_mechSet();
 	freeMechList();
+	remove_error_table(&et_ggss_error_table);
+	gssint_mecherrmap_destroy();
 }
 
+int
+gssint_mechglue_initialize_library(void)
+{
+	return CALL_INIT_FUNCTION(gssint_mechglue_init);
+}
 
 /*
  * function used to reclaim the memory used by a gss_OID structure.
@@ -93,13 +145,12 @@ gss_OID *oid;
 	OM_uint32 major;
 	gss_mech_info aMech;
 
-	if (gssint_initialize_library())
-		return GSS_S_FAILURE;
-
 	if (minor_status == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-	*minor_status = 0;
+	*minor_status = gssint_mechglue_initialize_library();
+	if (*minor_status != 0)
+		return (GSS_S_FAILURE);
 
 	*minor_status = k5_mutex_lock(&g_mechListLock);
 	if (*minor_status)
@@ -116,7 +167,6 @@ gss_OID *oid;
 		 */
 		if (aMech->mech && aMech->mech->gss_internal_release_oid) {
 			major = aMech->mech->gss_internal_release_oid(
-					aMech->mech->context,
 					minor_status, oid);
 			if (major == GSS_S_COMPLETE) {
 				k5_mutex_unlock(&g_mechListLock);
@@ -146,6 +196,8 @@ gss_indicate_mechs(minorStatus, mechSet)
 OM_uint32 *minorStatus;
 gss_OID_set *mechSet;
 {
+	char *fileName;
+	struct stat fileInfo;
 	unsigned int i, j;
 	gss_OID curItem;
 
@@ -161,9 +213,20 @@ gss_OID_set *mechSet;
 	if (minorStatus == NULL || mechSet == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-	if (gssint_initialize_library())
-		return GSS_S_FAILURE;
+	*minorStatus = gssint_mechglue_initialize_library();
+	if (*minorStatus != 0)
+		return (GSS_S_FAILURE);
 
+	fileName = MECH_CONF;
+
+	/*
+	 * If we have already computed the mechanisms supported and if it
+	 * is still valid; make a copy and return to caller,
+	 * otherwise build it first.
+	 */
+	if ((stat(fileName, &fileInfo) == 0 &&
+		fileInfo.st_mtime > g_mechSetTime)) {
+	} /* if g_mechSet is out of date or not initialized */
 	if (build_mechSet())
 		return GSS_S_FAILURE;
 
@@ -247,7 +310,8 @@ static OM_uint32
 build_mechSet(void)
 {
 	gss_mech_info mList;
-	int i, count;
+	int i;
+	size_t count;
 	gss_OID curItem;
 
 	/*
@@ -259,6 +323,20 @@ build_mechSet(void)
 	 */
 	if (k5_mutex_lock(&g_mechListLock) != 0)
 		return GSS_S_FAILURE;
+
+#if 0
+	/*
+	 * this checks for the case when we need to re-construct the
+	 * g_mechSet structure, but the mechanism list is upto date
+	 * (because it has been read by someone calling
+	 * gssint_get_mechanism)
+	 */
+	if (fileInfo.st_mtime > g_confFileModTime)
+	{
+		g_confFileModTime = fileInfo.st_mtime;
+		loadConfigFile(fileName);
+	}
+#endif
 
 	updateMechList();
 
@@ -323,6 +401,9 @@ build_mechSet(void)
 		}
 	}
 
+#if 0
+	g_mechSetTime = fileInfo.st_mtime;
+#endif
 	(void) k5_mutex_unlock(&g_mechSetLock);
 	(void) k5_mutex_unlock(&g_mechListLock);
 
@@ -343,6 +424,9 @@ const gss_OID oid;
 {
 	gss_mech_info aMech;
 	char *modOptions = NULL;
+
+	if (gssint_mechglue_initialize_library() != 0)
+		return (NULL);
 
 	/* make sure we have fresh data */
 	if (k5_mutex_lock(&g_mechListLock) != 0)
@@ -374,6 +458,9 @@ gssint_mech_to_oid(const char *mechStr, gss_OID* oid)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	*oid = GSS_C_NULL_OID;
+
+	if (gssint_mechglue_initialize_library() != 0)
+		return (GSS_S_FAILURE);
 
 	if ((mechStr == NULL) || (strlen(mechStr) == 0) ||
 		(strcasecmp(mechStr, M_DEFAULT) == 0))
@@ -413,6 +500,9 @@ gssint_oid_to_mech(const gss_OID oid)
 	if (oid == GSS_C_NULL_OID)
 		return (M_DEFAULT);
 
+	if (gssint_mechglue_initialize_library() != 0)
+		return (NULL);
+
 	/* ensure we have fresh data */
 	if (k5_mutex_lock(&g_mechListLock) != 0)
 		return NULL;
@@ -437,10 +527,11 @@ gssint_get_mechanisms(char *mechArray[], int arrayLen)
 	gss_mech_info aMech;
 	int i;
 
-	if (gssint_initialize_library())
-		return GSS_S_FAILURE;
 	if (mechArray == NULL || arrayLen < 1)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+	if (gssint_mechglue_initialize_library() != 0)
+		return (GSS_S_FAILURE);
 
 	/* ensure we have fresh data */
 	if (k5_mutex_lock(&g_mechListLock) != 0)
@@ -463,7 +554,6 @@ gssint_get_mechanisms(char *mechArray[], int arrayLen)
 	return (GSS_S_COMPLETE);
 } /* gss_get_mechanisms */
 
-
 /*
  * determines if the mechList needs to be updated from file
  * and performs the update.
@@ -472,10 +562,205 @@ gssint_get_mechanisms(char *mechArray[], int arrayLen)
 static void
 updateMechList(void)
 {
-
+	char *fileName;
+	struct stat fileInfo;
+  
+	fileName = MECH_CONF;
+  
+	/* check if mechList needs updating */
+	if (stat(fileName, &fileInfo) == 0 &&
+		(fileInfo.st_mtime > g_confFileModTime)) {
+		loadConfigFile(fileName);
+		g_confFileModTime = fileInfo.st_mtime;
+	}
+#if 0
 	init_hardcoded();
-
+#endif
 } /* updateMechList */
+
+#ifdef _GSS_STATIC_LINK
+static void
+releaseMechInfo(gss_mech_info *pCf)
+{
+	gss_mech_info cf;
+	OM_uint32 minor_status;
+
+	if (*pCf == NULL) {
+		return;
+	}
+
+	cf = *pCf;
+
+	if (cf->kmodName != NULL)
+		free(cf->kmodName);
+	if (cf->uLibName != NULL)
+		free(cf->uLibName);
+	if (cf->mechNameStr != NULL)
+		free(cf->mechNameStr);
+	if (cf->optionStr != NULL)
+		free(cf->optionStr);
+	if (cf->mech_type != GSS_C_NO_OID &&
+	    cf->mech_type != &cf->mech->mech_type)
+		generic_gss_release_oid(&minor_status, &cf->mech_type);
+	if (cf->mech != NULL && cf->free_mech) {
+		memset(cf->mech, 0, sizeof(*cf->mech));
+		free(cf->mech);
+	}
+	if (cf->dl_handle != NULL)
+		krb5int_close_plugin(cf->dl_handle);
+
+	memset(cf, 0, sizeof(*cf));
+	free(cf);
+
+	*pCf = NULL;
+}
+
+/*
+ * Register a mechanism.  Called with g_mechListLock held.
+ */
+int
+gssint_register_mechinfo(gss_mech_info template)
+{
+	gss_mech_info cf, new_cf;
+
+	new_cf = malloc(sizeof(*new_cf));
+	if (new_cf == NULL) {
+		return ENOMEM;
+	}
+
+	memset(new_cf, 0, sizeof(*new_cf));
+	if (template->mech_type != NULL) {
+		new_cf->mech_type = template->mech_type;
+		template->mech_type = NULL; /* don't double free */
+	} else {
+		template->mech_type = &template->mech->mech_type;
+	}
+	new_cf->dl_handle = template->dl_handle;
+	new_cf->mech = template->mech;
+	new_cf->free_mech = template->free_mech;
+	new_cf->priority = template->priority;
+	new_cf->next = NULL;
+
+	if (template->kmodName != NULL) {
+		new_cf->kmodName = strdup(template->kmodName);
+		if (new_cf->kmodName == NULL) {
+			releaseMechInfo(&new_cf);
+			return ENOMEM;
+		}
+	}
+	if (template->uLibName != NULL) {
+		new_cf->uLibName = strdup(template->uLibName);
+		if (new_cf->uLibName == NULL) {
+			releaseMechInfo(&new_cf);
+			return ENOMEM;
+		}
+	}
+	if (template->mechNameStr != NULL) {
+		new_cf->mechNameStr = strdup(template->mechNameStr);
+		if (new_cf->mechNameStr == NULL) {
+			releaseMechInfo(&new_cf);
+			return ENOMEM;
+		}
+	}
+	if (template->optionStr != NULL) {
+		new_cf->optionStr = strdup(template->optionStr);
+		if (new_cf->optionStr == NULL) {
+			releaseMechInfo(&new_cf);
+			return ENOMEM;
+		}
+	}
+	if (g_mechList == NULL) {
+		g_mechList = new_cf;
+		g_mechListTail = new_cf;
+		return 0;
+	} else if (new_cf->priority < g_mechList->priority) {
+		new_cf->next = g_mechList;
+		g_mechList = new_cf;
+		return 0;
+	}
+
+	for (cf = g_mechList; cf != NULL; cf = cf->next) {
+		if (cf->next == NULL ||
+		    new_cf->priority < cf->next->priority) {
+			new_cf->next = cf->next;
+			cf->next = new_cf;
+			if (g_mechListTail == cf) {
+				g_mechListTail = new_cf;
+			}
+			break;
+		}
+	}
+
+	return 0;
+}
+#endif /* _GSS_STATIC_LINK */
+
+#define GSS_ADD_DYNAMIC_METHOD(_dl, _mech, _symbol) \
+	do { \
+		struct errinfo errinfo; \
+		\
+		memset(&errinfo, 0, sizeof(errinfo)); \
+		if (krb5int_get_plugin_func(_dl, \
+					    #_symbol, \
+					    (void (**)())&(_mech)->_symbol, \
+					    &errinfo) || errinfo.code) \
+			(_mech)->_symbol = NULL; \
+	} while (0)
+
+static gss_mechanism
+build_dynamicMech(void *dl)
+{
+	gss_mechanism mech;
+
+	mech = (gss_mechanism)calloc(1, sizeof(*mech));
+	if (mech == NULL) {
+		return NULL;
+	}
+
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_acquire_cred);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_release_cred);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_init_sec_context);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_accept_sec_context);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_process_context_token);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_delete_sec_context);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_context_time);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_sign);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_verify);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_seal);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unseal);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_display_status);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_indicate_mechs);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_compare_name);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_display_name);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_import_name);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_release_name);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_cred);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_add_cred);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_sec_context);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_import_sec_context);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_cred_by_mech);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_names_for_mech);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_context);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_internal_release_oid);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_size_limit);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_store_cred);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_import_name_object);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name_object);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_sec_context_by_oid);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_cred_by_oid);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_set_sec_context_option);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_set_cred_option);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_mech_invoke);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_aead);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap_aead);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_iov);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap_iov);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_iov_length);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_complete_auth_token);
+
+	return mech;
+}
 
 static void
 freeMechList(void)
@@ -493,73 +778,6 @@ freeMechList(void)
 /*
  * Register a mechanism.  Called with g_mechListLock held.
  */
-static void
-register_mech(gss_mechanism mech, const char *namestr, void *dl_handle)
-{
-	gss_mech_info cf, new_cf;
-
-	new_cf = malloc(sizeof(*new_cf));
-	if (new_cf == NULL)
-		return;
-
-	memset(new_cf, 0, sizeof(*new_cf));
-	new_cf->kmodName = NULL;
-	new_cf->uLibName = strdup(namestr);
-	new_cf->mechNameStr = strdup(mech->mechNameStr);
-	new_cf->mech_type = &mech->mech_type;
-	new_cf->mech = mech;
-	new_cf->next = NULL;
-
-	if (g_mechList == NULL) {
-		g_mechList = new_cf;
-		g_mechListTail = new_cf;
-		return;
-	} else if (mech->priority < g_mechList->mech->priority) {
-		new_cf->next = g_mechList;
-		g_mechList = new_cf;
-		return;
-	}
-	for (cf = g_mechList; cf != NULL; cf = cf->next) {
-		if (cf->next == NULL ||
-		    mech->priority < cf->next->mech->priority) {
-			new_cf->next = cf->next;
-			cf->next = new_cf;
-			if (g_mechListTail == cf) {
-				g_mechListTail = new_cf;
-			}
-			break;
-		}
-	}
-}
-
-/*
- * Initialize the hardcoded mechanisms.  This function is called with
- * g_mechListLock held.
- */
-static void
-init_hardcoded(void)
-{
-	gss_mechanism *cflist;
-	static int inited;
-
-	if (inited)
-		return;
-
-	cflist = krb5_gss_get_mech_configs();
-	if (cflist == NULL)
-		return;
-	for ( ; *cflist != NULL; cflist++) {
-		register_mech(*cflist, "<builtin krb5>", NULL);
-	}
-	cflist = spnego_gss_get_mech_configs();
-	if (cflist == NULL)
-		return;
-	for ( ; *cflist != NULL; cflist++) {
-		register_mech(*cflist, "<builtin spnego>", NULL);
-	}
-	inited = 1;
-}
-
 
 /*
  * given the mechanism type, return the mechanism structure
@@ -569,12 +787,16 @@ init_hardcoded(void)
  * module if it has not been already loaded.
  */
 gss_mechanism
-gssint_get_mechanism(gss_OID oid)
+gssint_get_mechanism(oid)
+const gss_OID oid;
 {
 	gss_mech_info aMech;
+	gss_mechanism (*sym)(const gss_OID);
+	struct plugin_file_handle *dl;
+	struct errinfo errinfo;
 
-	if (gssint_initialize_library())
-		return NULL;
+	if (gssint_mechglue_initialize_library() != 0)
+		return (NULL);
 
 	if (k5_mutex_lock(&g_mechListLock) != 0)
 		return NULL;
@@ -602,10 +824,101 @@ gssint_get_mechanism(gss_OID oid)
 	if (aMech->mech) {
 		(void) k5_mutex_unlock(&g_mechListLock);
 		return (aMech->mech);
-	} else {
-		return NULL;
 	}
+
+	memset(&errinfo, 0, sizeof(errinfo));
+
+	if (krb5int_open_plugin(aMech->uLibName, &dl, &errinfo) != 0 ||
+	    errinfo.code != 0) {
+#if 0
+		(void) syslog(LOG_INFO, "libgss dlopen(%s): %s\n",
+				aMech->uLibName, dlerror());
+#endif
+		(void) k5_mutex_unlock(&g_mechListLock);
+		return ((gss_mechanism)NULL);
+	}
+
+	if (krb5int_get_plugin_func(dl, MECH_SYM, (void (**)())&sym,
+				    &errinfo) == 0) {
+		/* Call the symbol to get the mechanism table */
+		aMech->mech = (*sym)(aMech->mech_type);
+	} else {
+		/* Try dynamic dispatch table */
+		aMech->mech = build_dynamicMech(dl);
+		aMech->free_mech = 1;
+	}
+	if (aMech->mech == NULL) {
+		(void) krb5int_close_plugin(dl);
+#if 0
+		(void) syslog(LOG_INFO, "unable to initialize mechanism"
+				" library [%s]\n", aMech->uLibName);
+#endif
+		(void) k5_mutex_unlock(&g_mechListLock);
+		return ((gss_mechanism)NULL);
+	}
+
+	aMech->dl_handle = dl;
+
+	(void) k5_mutex_unlock(&g_mechListLock);
+	return (aMech->mech);
 } /* gssint_get_mechanism */
+
+gss_mechanism_ext
+gssint_get_mechanism_ext(oid)
+const gss_OID oid;
+{
+	gss_mech_info aMech;
+	gss_mechanism_ext mech_ext;
+
+	if (gssint_mechglue_initialize_library() != 0)
+		return (NULL);
+
+	/* check if the mechanism is already loaded */
+	if ((aMech = searchMechList(oid)) != NULL && aMech->mech_ext != NULL)
+		return (aMech->mech_ext);
+
+	if (gssint_get_mechanism(oid) == NULL)
+		return (NULL);
+
+	if (aMech->dl_handle == NULL)
+		return (NULL);
+
+	/* Load the gss_config_ext struct for this mech */
+
+	mech_ext = (gss_mechanism_ext)malloc(sizeof (struct gss_config_ext));
+
+	if (mech_ext == NULL)
+		return (NULL);
+
+#if 0
+	/*
+	 * dlsym() the mech's 'method' functions for the extended APIs
+	 *
+	 * NOTE:  Until the void *context argument is removed from the
+	 * SPI method functions' signatures it will be necessary to have
+	 * different function pointer typedefs and function names for
+	 * the SPI methods than for the API.  When this argument is
+	 * removed it will be possible to rename gss_*_sfct to gss_*_fct
+	 * and and gssspi_* to gss_*.
+	 */
+	mech_ext->gss_acquire_cred_with_password =
+		(gss_acquire_cred_with_password_sfct)dlsym(aMech->dl_handle,
+			"gssspi_acquire_cred_with_password");
+#endif
+
+	/* Set aMech->mech_ext */
+	(void) k5_mutex_lock(&g_mechListLock);
+
+	if (aMech->mech_ext == NULL)
+		aMech->mech_ext = mech_ext;
+	else
+		free(mech_ext);	/* we raced and lost; don't leak */
+
+	(void) k5_mutex_unlock(&g_mechListLock);
+
+	return (aMech->mech_ext);
+
+} /* gssint_get_mechanism_ext */
 
 
 /*
@@ -631,3 +944,240 @@ const gss_OID oid;
 	/* none found */
 	return ((gss_mech_info) NULL);
 } /* searchMechList */
+
+
+/*
+ * loads the configuration file
+ * this is called while having a mutex lock on the mechanism list
+ * entries for libraries that have been loaded can't be modified
+ * mechNameStr and mech_type fields are not updated during updates
+ */
+static void loadConfigFile(fileName)
+const char *fileName;
+{
+	char buffer[BUFSIZ], *oidStr, *oid, *sharedLib, *kernMod, *endp;
+	char *modOptions;
+	char sharedPath[sizeof (MECH_LIB_PREFIX) + BUFSIZ];
+	char *tmpStr;
+	FILE *confFile;
+	gss_OID mechOid;
+	gss_mech_info aMech, tmp;
+	OM_uint32 minor;
+	gss_buffer_desc oidBuf;
+
+	if ((confFile = fopen(fileName, "r")) == NULL) {
+		return;
+	}
+
+	(void) memset(buffer, 0, sizeof (buffer));
+	while (fgets(buffer, BUFSIZ, confFile) != NULL) {
+
+		/* ignore lines beginning with # */
+		if (*buffer == '#')
+			continue;
+
+		/*
+		 * find the first white-space character after
+		 * the mechanism name
+		 */
+		oidStr = buffer;
+		for (oid = buffer; *oid && !isspace(*oid); oid++);
+
+		/* Now find the first non-white-space character */
+		if (*oid) {
+			*oid = '\0';
+			oid++;
+			while (*oid && isspace(*oid))
+				oid++;
+		}
+
+		/*
+		 * If that's all, then this is a corrupt entry. Skip it.
+		 */
+		if (! *oid)
+			continue;
+
+		/* Find the end of the oid and make sure it is NULL-ended */
+		for (endp = oid; *endp && !isspace(*endp); endp++)
+			;
+
+		if (*endp) {
+			*endp = '\0';
+		}
+
+		/*
+		 * check if an entry for this oid already exists
+		 * if it does, and the library is already loaded then
+		 * we can't modify it, so skip it
+		 */
+		oidBuf.value = (void *)oid;
+		oidBuf.length = strlen(oid);
+		if (generic_gss_str_to_oid(&minor, &oidBuf, &mechOid)
+			!= GSS_S_COMPLETE) {
+#if 0
+			(void) syslog(LOG_INFO, "invalid mechanism oid"
+					" [%s] in configuration file", oid);
+#endif
+			continue;
+		}
+
+		aMech = searchMechList(mechOid);
+		if (aMech && aMech->mech) {
+			free(mechOid->elements);
+			free(mechOid);
+			continue;
+		}
+
+		/* Find the start of the shared lib name */
+		for (sharedLib = endp+1; *sharedLib && isspace(*sharedLib);
+			sharedLib++)
+			;
+
+		/*
+		 * If that's all, then this is a corrupt entry. Skip it.
+		 */
+		if (! *sharedLib) {
+			free(mechOid->elements);
+			free(mechOid);
+			continue;
+		}
+
+		/*
+		 * Find the end of the shared lib name and make sure it is
+		 *  NULL-terminated.
+		 */
+		for (endp = sharedLib; *endp && !isspace(*endp); endp++)
+			;
+
+		if (*endp) {
+			*endp = '\0';
+		}
+
+		/* Find the start of the optional kernel module lib name */
+		for (kernMod = endp+1; *kernMod && isspace(*kernMod);
+			kernMod++)
+			;
+
+		/*
+		 * If this item starts with a bracket "[", then
+		 * it is not a kernel module, but is a list of
+		 * options for the user module to parse later.
+		 */
+		if (*kernMod && *kernMod != '[') {
+			/*
+			 * Find the end of the shared lib name and make sure
+			 * it is NULL-terminated.
+			 */
+			for (endp = kernMod; *endp && !isspace(*endp); endp++)
+				;
+
+			if (*endp) {
+				*endp = '\0';
+			}
+		} else
+			kernMod = NULL;
+
+		/* Find the start of the optional module options list */
+		for (modOptions = endp+1; *modOptions && isspace(*modOptions);
+			modOptions++);
+
+		if (*modOptions == '[')  {
+			/* move past the opening bracket */
+			for (modOptions = modOptions+1;
+			    *modOptions && isspace(*modOptions);
+			    modOptions++);
+
+			/* Find the closing bracket */
+			for (endp = modOptions;
+				*endp && *endp != ']'; endp++);
+
+			if (endp)
+				*endp = '\0';
+
+		} else {
+			modOptions = NULL;
+		}
+
+		snprintf(sharedPath, sizeof(sharedPath), "%s%s", MECH_LIB_PREFIX, sharedLib);
+
+		/*
+		 * are we creating a new mechanism entry or
+		 * just modifying existing (non loaded) mechanism entry
+		 */
+		if (aMech) {
+			/*
+			 * delete any old values and set new
+			 * mechNameStr and mech_type are not modified
+			 */
+			if (aMech->kmodName) {
+				free(aMech->kmodName);
+				aMech->kmodName = NULL;
+			}
+
+			if (aMech->optionStr) {
+				free(aMech->optionStr);
+				aMech->optionStr = NULL;
+			}
+
+			if ((tmpStr = strdup(sharedPath)) != NULL) {
+				if (aMech->uLibName)
+					free(aMech->uLibName);
+				aMech->uLibName = tmpStr;
+			}
+
+			if (kernMod) /* this is an optional parameter */
+				aMech->kmodName = strdup(kernMod);
+
+			if (modOptions) /* optional module options */
+				aMech->optionStr = strdup(modOptions);
+
+			/* the oid is already set */
+			free(mechOid->elements);
+			free(mechOid);
+			continue;
+		}
+
+		/* adding a new entry */
+		aMech = malloc(sizeof (struct gss_mech_config));
+		if (aMech == NULL) {
+			free(mechOid->elements);
+			free(mechOid);
+			continue;
+		}
+		(void) memset(aMech, 0, sizeof (struct gss_mech_config));
+		aMech->mech_type = mechOid;
+		aMech->uLibName = strdup(sharedPath);
+		aMech->mechNameStr = strdup(oidStr);
+
+		/* check if any memory allocations failed - bad news */
+		if (aMech->uLibName == NULL || aMech->mechNameStr == NULL) {
+			if (aMech->uLibName)
+				free(aMech->uLibName);
+			if (aMech->mechNameStr)
+				free(aMech->mechNameStr);
+			free(mechOid->elements);
+			free(mechOid);
+			free(aMech);
+			continue;
+		}
+		if (kernMod)	/* this is an optional parameter */
+			aMech->kmodName = strdup(kernMod);
+
+		if (modOptions)
+			aMech->optionStr = strdup(modOptions);
+		/*
+		 * add the new entry to the end of the list - make sure
+		 * that only complete entries are added because other
+		 * threads might currently be searching the list.
+		 */
+		tmp = g_mechListTail;
+		g_mechListTail = aMech;
+
+		if (tmp != NULL)
+			tmp->next = aMech;
+
+		if (g_mechList == NULL)
+			g_mechList = aMech;
+	} /* while */
+	(void) fclose(confFile);
+} /* loadConfigFile */
