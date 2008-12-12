@@ -508,6 +508,8 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     else
 	trailer->buffer.length = gss_trailerlen;
 
+    assert(gss_padlen == 0 || padding != NULL);
+
     if (padding != NULL)
 	padding->buffer.length = gss_padlen;
 
