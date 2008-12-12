@@ -213,6 +213,10 @@ typedef INT64_TYPE krb5_int64;
 					   /* required */
 #define KDC_ERR_SERVER_NOMATCH		26 /* Requested server and */
 					   /* ticket don't match*/
+#define KDC_ERR_MUST_USE_USER2USER	27 /* Server principal valid for */
+					   /*	user2user only */
+#define KDC_ERR_PATH_NOT_ACCEPTED	28 /* KDC policy rejected transited */
+					   /*	path */
 #define KDC_ERR_SVC_UNAVAILABLE		29 /* A service is not
 					    * available that is
 					    * required to process the
@@ -251,13 +255,19 @@ typedef INT64_TYPE krb5_int64;
 
 /* PKINIT server-reported errors */
 #define KDC_ERR_CLIENT_NOT_TRUSTED		62 /* client cert not trusted */
+#define KDC_ERR_KDC_NOT_TRUSTED			63
 #define KDC_ERR_INVALID_SIG			64 /* client signature verify failed */
 #define KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED	65 /* invalid Diffie-Hellman parameters */
+#define KDC_ERR_CERTIFICATE_MISMATCH		66
+#define KRB_AP_ERR_NO_TGT			67
+#define KDC_ERR_WRONG_REALM			68
+#define KRB_AP_ERR_USER_TO_USER_REQUIRED	69
 #define KDC_ERR_CANT_VERIFY_CERTIFICATE		70 /* client cert not verifiable to */
 						   /* trusted root cert */
 #define KDC_ERR_INVALID_CERTIFICATE		71 /* client cert had invalid signature */
 #define KDC_ERR_REVOKED_CERTIFICATE		72 /* client cert was revoked */
 #define KDC_ERR_REVOCATION_STATUS_UNKNOWN	73 /* client cert revoked, reason unknown */
+#define KDC_ERR_REVOCATION_STATUS_UNAVAILABLE	74
 #define KDC_ERR_CLIENT_NAME_MISMATCH		75 /* mismatch between client cert and */
 						   /* principal name */
 #define KDC_ERR_INCONSISTENT_KEY_PURPOSE	77 /* bad extended key use */
@@ -302,6 +312,12 @@ typedef struct _krb5_etype_info_entry {
 #define KRB5_ETYPE_NO_SALT VALID_UINT_BITS
 
 typedef krb5_etype_info_entry ** krb5_etype_info;
+
+/* RFC 4537 */
+typedef struct _krb5_etype_list {
+	unsigned int	length;
+	krb5_enctype	*etypes;
+} krb5_etype_list;
 
 /*
  * a sam_challenge is returned for alternate preauth 
@@ -923,6 +939,12 @@ typedef struct _krb5_pa_enc_ts {
     krb5_int32		pausec;
 } krb5_pa_enc_ts;
 
+typedef struct _krb5_pa_for_user {
+    krb5_principal	user;
+    krb5_checksum	cksum;
+    krb5_data		auth_package;
+} krb5_pa_for_user;
+
 typedef krb5_error_code (*krb5_preauth_obtain_proc)
     (krb5_context,
 		    krb5_pa_data *,
@@ -1200,6 +1222,14 @@ void KRB5_CALLCONV krb5_free_enc_sam_response_enc_2_contents
  
 void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts *);
+void KRB5_CALLCONV krb5_free_pa_for_user
+	(krb5_context, krb5_pa_for_user * );
+void KRB5_CALLCONV krb5_free_pa_svr_referral_data
+	(krb5_context, krb5_pa_svr_referral_data * );
+void KRB5_CALLCONV krb5_free_pa_server_referral_data
+	(krb5_context, krb5_pa_server_referral_data * );
+void KRB5_CALLCONV krb5_free_pa_pac_req
+	(krb5_context, krb5_pa_pac_req * );
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1525,7 +1555,19 @@ struct krb5_setpw_req {
     krb5_data password;
 };
 krb5_error_code encode_krb5_setpw_req
-(const struct krb5_setpw_req *rep, krb5_data **code);
+	(const struct krb5_setpw_req *rep, krb5_data **code);
+
+krb5_error_code encode_krb5_pa_for_user
+	(const krb5_pa_for_user * , krb5_data **);
+
+krb5_error_code encode_krb5_pa_svr_referral_data
+	(const krb5_pa_svr_referral_data * , krb5_data **);
+
+krb5_error_code encode_krb5_pa_server_referral_data
+	(const krb5_pa_server_referral_data * , krb5_data **);
+
+krb5_error_code encode_krb5_pa_pac_req
+	(const krb5_pa_pac_req * , krb5_data **);
 
 /*************************************************************************
  * End of prototypes for krb5_encode.c
@@ -1670,6 +1712,18 @@ krb5_error_code decode_krb5_sam_key
 
 krb5_error_code decode_krb5_setpw_req
 	(const krb5_data *, krb5_data **, krb5_principal *);
+
+krb5_error_code decode_krb5_pa_for_user
+	(const krb5_data *, krb5_pa_for_user **);
+
+krb5_error_code decode_krb5_pa_svr_referral_data
+	(const krb5_data *, krb5_pa_svr_referral_data **);
+
+krb5_error_code decode_krb5_pa_server_referral_data
+	(const krb5_data *, krb5_pa_server_referral_data **);
+
+krb5_error_code decode_krb5_pa_pac_req
+	(const krb5_data *, krb5_pa_pac_req **);
 
 struct _krb5_key_data;		/* kdb.h */
 
@@ -2243,7 +2297,7 @@ extern int krb5int_prng_init(void);
 /*
  * Referral definitions, debugging hooks, and subfunctions.
  */
-#define        KRB5_REFERRAL_MAXHOPS	5
+#define        KRB5_REFERRAL_MAXHOPS	10
 /* #define DEBUG_REFERRALS */
 
 #ifdef DEBUG_REFERRALS
