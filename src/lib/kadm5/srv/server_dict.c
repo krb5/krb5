@@ -24,6 +24,7 @@ static char *rcsid = "$Header$";
 #include    "adm_proto.h"
 #include    <syslog.h>
 #include    "server_internal.h"
+#include    "k5-platform.h"
 
 static char	    **word_list = NULL;	    /* list of word pointers */
 static char	    *word_block = NULL;	    /* actual word data */

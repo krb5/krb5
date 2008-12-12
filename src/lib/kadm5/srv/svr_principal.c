@@ -754,7 +754,7 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 	 entry->aux_attributes = adb.aux_attributes;
 
     if ((mask & KADM5_PRINCIPAL) &&
-	(ret = krb5_copy_principal(handle->context, principal,
+	(ret = krb5_copy_principal(handle->context, kdb.princ,
 				   &entry->principal))) { 
 	goto done;
     }
