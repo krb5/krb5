@@ -1,6 +1,7 @@
 /*
  * lib/krb5/krb/copy_auth.c
  *
+ * Portions Copyright (C) 2008 Novell Inc.
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -79,4 +80,53 @@ krb5_copy_authdata(krb5_context context, krb5_authdata *const *inauthdat, krb5_a
 
     *outauthdat = tempauthdat;
     return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_decode_ad_if_relevant(krb5_context context, const krb5_authdata *if_relevant, krb5_authdata ***authdata)
+{
+    krb5_error_code code;
+    krb5_data data;
+
+    *authdata = NULL;
+
+    if (if_relevant->ad_type != KRB5_AUTHDATA_IF_RELEVANT)
+	return EINVAL;
+
+    data.length = if_relevant->length;
+    data.data = (char *)if_relevant->contents;
+
+    code = decode_krb5_authdata(&data, authdata);
+    if (code)
+	return code;
+
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_encode_ad_if_relevant(krb5_context context, krb5_authdata *const*authdata, krb5_authdata ***if_relevant_p)
+{
+    krb5_error_code code;
+    krb5_data *data;
+    krb5_authdata ad_datum;
+    krb5_authdata *ad_data[2];
+
+    *if_relevant_p = NULL;
+
+    code = encode_krb5_authdata((krb5_authdata * const *)authdata, &data);
+    if (code)
+	return code;
+
+    ad_datum.ad_type = KRB5_AUTHDATA_IF_RELEVANT;
+    ad_datum.length = data->length;
+    ad_datum.contents = (unsigned char *)data->data;
+
+    ad_data[0] = &ad_datum;
+    ad_data[1] = NULL;
+
+    code = krb5_copy_authdata(context, ad_data, if_relevant_p);
+
+    krb5_free_data(context, data);
+
+    return code;
 }
