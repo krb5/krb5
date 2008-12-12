@@ -965,6 +965,28 @@ krb5_error_code decode_krb5_setpw_req(const krb5_data *code,
     cleanup(free);
 }
 
+krb5_error_code decode_krb5_pa_for_user(const krb5_data *code, krb5_pa_for_user **rep)
+{
+    setup_buf_only();
+    alloc_field(*rep, krb5_pa_for_user);
+
+    retval = asn1_decode_pa_for_user(&buf, *rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
+krb5_error_code decode_krb5_pa_pac_req(const krb5_data *code, krb5_pa_pac_req **rep)
+{
+    setup_buf_only();
+    alloc_field(*rep, krb5_pa_pac_req);
+
+    retval = asn1_decode_pa_pac_req(&buf, *rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
 #ifndef DISABLE_PKINIT
 krb5_error_code decode_krb5_pa_pk_as_req(const krb5_data *code, krb5_pa_pk_as_req **rep)
 {

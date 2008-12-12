@@ -1186,18 +1186,41 @@ asn1_error_code asn1_decode_predicted_sam_response(asn1buf *buf, krb5_predicted_
     cleanup();
 }
 
-asn1_error_code asn1_decode_setpw_req(asn1buf *buf, krb5_data *rep, krb5_principal *principal)
+asn1_error_code asn1_decode_setpw_req(asn1buf *buf, krb5_data *newpasswd, krb5_principal *principal)
 {
     setup();
     *principal = NULL;
 
     { begin_structure();
-	get_lenfield(rep->length, rep->data, 0, asn1_decode_charstring);
+	get_lenfield(newpasswd->length, newpasswd->data, 0, asn1_decode_charstring);
 	if (tagnum == 1) {
 	    alloc_field(*principal, krb5_principal_data);
 	    opt_field(*principal, 1, asn1_decode_principal_name, 0);
 	    opt_field(*principal, 2, asn1_decode_realm, 0);
 	}
+	end_structure();
+    }
+    cleanup();
+}
+
+asn1_error_code asn1_decode_pa_for_user(asn1buf *buf, krb5_pa_for_user *val)
+{
+    setup();
+    { begin_structure();
+	get_field(val->user,0,asn1_decode_principal_name);
+	get_field(val->user,1,asn1_decode_realm);
+	get_field(val->cksum,2,asn1_decode_checksum);
+	get_lenfield(val->auth_package.length,val->auth_package.data,3,asn1_decode_generalstring);
+	end_structure();
+    }
+    cleanup();
+}
+
+asn1_error_code asn1_decode_pa_pac_req(asn1buf *buf, krb5_pa_pac_req *val)
+{
+    setup();
+    { begin_structure();
+	get_field(val->include_pac,0,asn1_decode_boolean);
 	end_structure();
     }
     cleanup();

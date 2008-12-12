@@ -30,6 +30,28 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
+asn1_error_code asn1_encode_boolean(asn1buf *buf, asn1_intmax val,
+				    unsigned int *retlen)
+{
+    asn1_error_code retval;
+    unsigned int length = 0;
+    unsigned int partlen = 1;
+    asn1_octet bval;
+
+    bval = val ? 0xFF : 0x00;
+
+    retval = asn1buf_insert_octet(buf, bval);
+    if (retval) return retval;
+
+    length = partlen;
+    retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE, ASN1_BOOLEAN, length, &partlen);
+    if (retval) return retval;
+    length += partlen;
+
+    *retlen = length;
+    return 0;
+}
+
 static asn1_error_code asn1_encode_integer_internal(asn1buf *buf,
                                                     asn1_intmax val,
                                                     unsigned int *retlen)

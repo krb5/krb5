@@ -206,6 +206,16 @@ static const struct field_info ticket_fields[] = {
 DEFSEQTYPE(untagged_ticket, krb5_ticket, ticket_fields, 0);
 DEFAPPTAGGEDTYPE(ticket, 1, untagged_ticket);
 
+static const struct field_info pa_data_fields[] = {
+    FIELDOF_NORM(krb5_pa_data, int32, pa_type, 1),
+    FIELDOF_STRING(krb5_pa_data, octetstring, contents, length, 2),
+};
+DEFSEQTYPE(pa_data, krb5_pa_data, pa_data_fields, 0);
+DEFPTRTYPE(pa_data_ptr, pa_data);
+
+DEFNULLTERMSEQOFTYPE(seq_of_pa_data, pa_data_ptr);
+DEFPTRTYPE(ptr_seqof_pa_data, seq_of_pa_data);
+
 DEFPTRTYPE(ticket_ptr, ticket);
 DEFNONEMPTYNULLTERMSEQOFTYPE(seq_of_ticket,ticket_ptr);
 DEFPTRTYPE(ptr_seqof_ticket, seq_of_ticket);
@@ -237,6 +247,8 @@ static const struct field_info enc_kdc_rep_part_fields[] = {
     /* caddr[11]                HostAddresses OPTIONAL */
     FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_host_addresses, caddrs,
                 11, 11),
+    /* encrypted-pa-data[12]	SEQUENCE OF PA-DATA OPTIONAL */
+    FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_pa_data, enc_padata, 12, 12),
 };
 static unsigned int optional_enc_kdc_rep_part(const void *p)
 {
@@ -331,17 +343,6 @@ static const struct field_info transited_fields[] = {
     FIELDOF_NORM(krb5_transited, ostring_data, tr_contents, 1),
 };
 DEFSEQTYPE(transited, krb5_transited, transited_fields, 0);
-
-static const struct field_info pa_data_fields[] = {
-    FIELDOF_NORM(krb5_pa_data, int32, pa_type, 1),
-    FIELDOF_STRING(krb5_pa_data, octetstring, contents, length, 2),
-};
-DEFSEQTYPE(pa_data, krb5_pa_data, pa_data_fields, 0);
-DEFPTRTYPE(pa_data_ptr, pa_data);
-
-DEFNULLTERMSEQOFTYPE(seq_of_pa_data, pa_data_ptr);
-DEFPTRTYPE(ptr_seqof_pa_data, seq_of_pa_data);
-
 
 static const struct field_info krb_safe_body_fields[] = {
     FIELDOF_NORM(krb5_safe, ostring_data, user_data, 0),
@@ -1134,7 +1135,43 @@ static const struct field_info setpw_req_fields[] = {
 
 DEFSEQTYPE(setpw_req, struct krb5_setpw_req, setpw_req_fields, 0);
 
+/* [MS-SFU] Section 2.2.1. */
+static const struct field_info pa_for_user_fields[] = {
+    FIELDOF_NORM(krb5_pa_for_user, principal, user, 0),
+    FIELDOF_NORM(krb5_pa_for_user, realm_of_principal, user, 1),
+    FIELDOF_NORM(krb5_pa_for_user, checksum, cksum, 2),
+    FIELDOF_NORM(krb5_pa_for_user, gstring_data, auth_package, 3),
+};
 
+DEFSEQTYPE(pa_for_user, krb5_pa_for_user, pa_for_user_fields, 0);
+
+/* draft-ietf-krb-wg-kerberos-referrals Appendix A. */
+static const struct field_info pa_svr_referral_data_fields[] = {
+    FIELDOF_NORM(krb5_pa_svr_referral_data, realm_of_principal, principal, 0),
+    FIELDOF_OPT(krb5_pa_svr_referral_data, principal, principal, 1, 1),
+};
+
+DEFSEQTYPE(pa_svr_referral_data, krb5_pa_svr_referral_data, pa_svr_referral_data_fields, 0);
+
+/* draft-ietf-krb-wg-kerberos-referrals Section 8. */
+static const struct field_info pa_server_referral_data_fields[] = {
+    FIELDOF_OPT(krb5_pa_server_referral_data, gstring_data_ptr, referred_realm, 0, 0),
+    FIELDOF_OPT(krb5_pa_server_referral_data, principal, true_principal_name, 1, 1),
+    FIELDOF_OPT(krb5_pa_server_referral_data, principal, requested_principal_name, 2, 2),
+    FIELDOF_OPT(krb5_pa_server_referral_data, kerberos_time, referral_valid_until, 3, 3),
+    FIELDOF_NORM(krb5_pa_server_referral_data, checksum, rep_cksum, 4),
+};
+
+DEFSEQTYPE(pa_server_referral_data, krb5_pa_server_referral_data, pa_server_referral_data_fields, 0);
+
+#if 0
+/* draft-brezak-win2k-krb-authz Section 6. */
+static const struct field_info pa_pac_request_fields[] = {
+    FIELDOF_NORM(krb5_pa_pac_req, boolean, include_pac, 0),
+};
+
+DEFSEQTYPE(pa_pac_request, krb5_pa_pac_req, pa_pac_request_fields, 0);
+#endif
 
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
@@ -1197,7 +1234,9 @@ MAKE_FULL_ENCODER(encode_krb5_sam_response_2, sam_response_2);
 MAKE_FULL_ENCODER(encode_krb5_predicted_sam_response,
                   predicted_sam_response);
 MAKE_FULL_ENCODER(encode_krb5_setpw_req, setpw_req);
-
+MAKE_FULL_ENCODER(encode_krb5_pa_for_user, pa_for_user);
+MAKE_FULL_ENCODER(encode_krb5_pa_svr_referral_data, pa_svr_referral_data);
+MAKE_FULL_ENCODER(encode_krb5_pa_server_referral_data, pa_server_referral_data);
 
 
 
