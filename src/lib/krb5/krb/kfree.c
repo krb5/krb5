@@ -1,7 +1,9 @@
 /*
  * lib/krb5/free/f_addr.c
  *
+ * Portions Copyright (C) 2008 Novell Inc.
  * Copyright 1990-1998 by the Massachusetts Institute of Technology.
+ * Portions Copyright 2008 Novell Inc.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -713,3 +715,62 @@ krb5_free_pa_enc_ts(krb5_context ctx, krb5_pa_enc_ts *pa_enc_ts)
 	return;
     krb5_xfree(pa_enc_ts);
 }
+
+void KRB5_CALLCONV
+krb5_free_pa_for_user(krb5_context context, krb5_pa_for_user *req)
+{
+    if (req == NULL)
+	return;
+    if (req->user != NULL) {
+	krb5_free_principal(context, req->user);
+	req->user = NULL;
+    }
+    krb5_free_checksum_contents(context, &req->cksum);
+    krb5_free_data_contents(context, &req->auth_package);
+    krb5_xfree(req);
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_server_referral_data(krb5_context context,
+				  krb5_pa_server_referral_data *ref)
+{
+    if (ref == NULL)
+	return;
+    if (ref->referred_realm) {
+	krb5_free_data(context, ref->referred_realm);
+	ref->referred_realm = NULL;
+    }
+    if (ref->true_principal_name != NULL) {
+	krb5_free_principal(context, ref->true_principal_name);
+	ref->true_principal_name = NULL;
+    } 
+    if (ref->requested_principal_name != NULL) {
+	krb5_free_principal(context, ref->requested_principal_name);
+	ref->requested_principal_name = NULL;
+    }
+    krb5_free_checksum_contents(context, &ref->rep_cksum); 
+    krb5_xfree(ref);
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_svr_referral_data(krb5_context context,
+			       krb5_pa_svr_referral_data *ref)
+{
+    if (ref == NULL)
+	return;
+    if (ref->principal != NULL) {
+	krb5_free_principal(context, ref->principal);
+	ref->principal = NULL;
+    } 
+    krb5_xfree(ref);
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_pac_req(krb5_context context,
+		     krb5_pa_pac_req *req)
+{
+    if (req == NULL)
+	return;
+    krb5_xfree(req);
+}
+
