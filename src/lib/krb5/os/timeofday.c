@@ -35,9 +35,13 @@
 krb5_error_code KRB5_CALLCONV
 krb5_timeofday(krb5_context context, register krb5_timestamp *timeret)
 {
-    krb5_os_context os_ctx = &context->os_context;
+    krb5_os_context os_ctx;
     time_t tval;
 
+    if (context == NULL)
+	return EINVAL;
+
+    os_ctx = &context->os_context;
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_TIME) {
 	    *timeret = os_ctx->time_offset;
 	    return 0;
