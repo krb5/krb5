@@ -1,6 +1,8 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2000,2002, 2003, 2007 by the Massachusetts Institute of Technology.
+ * Portions Copyright (C) 2008 Novell Inc.
+ * Copyright 2000, 2002, 2003, 2007, 2008
+ *	by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -72,7 +74,6 @@
  */
 
 #include "k5-int.h"
-#include "gss_libinit.h"
 #include "gssapiP_krb5.h"
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
@@ -222,7 +223,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         return(ENOMEM);
     }
 
-    ptr = data->checksum_data.data;
+    ptr = (unsigned char *)data->checksum_data.data;
 
     TWRITE_INT(ptr, data->md5.length, 0);
     TWRITE_STR(ptr, (unsigned char *) data->md5.contents, data->md5.length);
@@ -314,28 +315,37 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     ctx->krb_flags = k_cred->ticket_flags;
 
     /* build up the token */
+    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+	/*
+	 * For DCE RPC, do not encapsulate the AP-REQ in the
+	 * typical GSS wrapping.
+	 */
+	token->length = ap_req.length;
+	token->value = ap_req.data;
 
-    /* allocate space for the token */
-    tlen = g_token_size((gss_OID) mech_type, ap_req.length);
+	ap_req.data = NULL; /* don't double free */
+    } else {
+	/* allocate space for the token */
+	tlen = g_token_size((gss_OID) mech_type, ap_req.length);
 
-    if ((t = (unsigned char *) xmalloc(tlen)) == NULL) {
-        code = ENOMEM;
-        goto cleanup;
+	if ((t = (unsigned char *) xmalloc(tlen)) == NULL) {
+	    code = ENOMEM;
+	    goto cleanup;
+	}
+
+	/* fill in the buffer */
+	ptr = t;
+
+	g_make_token_header(mech_type, ap_req.length,
+			    &ptr, KG_TOK_CTX_AP_REQ);
+
+	TWRITE_STR(ptr, (unsigned char *) ap_req.data, ap_req.length);
+
+	/* pass it back */
+
+	token->length = tlen;
+	token->value = (void *) t;
     }
-
-    /* fill in the buffer */
-
-    ptr = t;
-
-    g_make_token_header(mech_type, ap_req.length,
-                        &ptr, KG_TOK_CTX_AP_REQ);
-
-    TWRITE_STR(ptr, (unsigned char *) ap_req.data, ap_req.length);
-
-    /* pass it back */
-
-    token->length = tlen;
-    token->value = (void *) t;
 
     code = 0;
 
@@ -433,6 +443,78 @@ setup_enc(
             goto fail;
         goto copy_subkey;
     }
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
+fail:
+    *minor_status = code;
+    return GSS_S_FAILURE;
+}
+
+static OM_uint32
+setup_enc_dce(
+   krb5_error_code *minor_status,
+   krb5_gss_ctx_id_rec *ctx,
+   krb5_context context)
+{
+    krb5_error_code code;
+    int i;
+
+    if (ctx->proto > 0) {
+	return GSS_S_COMPLETE; /* CFX handles acceptor_subkey directly */
+    }
+
+    assert(ctx->have_acceptor_subkey && ctx->acceptor_subkey);
+
+    if (ctx->enc != NULL) {
+	krb5_free_keyblock(context, ctx->enc);
+	ctx->enc = NULL;
+    }
+    if (ctx->seq != NULL) {
+	krb5_free_keyblock(context, ctx->seq);
+	ctx->seq = NULL;
+    }
+
+    switch(ctx->acceptor_subkey->enctype) {
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_CRC:
+	ctx->acceptor_subkey->enctype = ENCTYPE_DES_CBC_RAW;
+
+	/* The encryption key is the session key XOR
+	   0xf0f0f0f0f0f0f0f0.  */
+	if ((code = krb5_copy_keyblock(context, ctx->acceptor_subkey, &ctx->enc)))
+	    goto fail;
+
+	for (i=0; i<ctx->enc->length; i++)
+	    ctx->enc->contents[i] ^= 0xf0;
+
+	goto copy_acceptor_subkey_to_seq;
+
+    case ENCTYPE_DES3_CBC_SHA1:
+	/* MIT extension */
+	ctx->acceptor_subkey->enctype = ENCTYPE_DES3_CBC_RAW;
+
+    copy_acceptor_subkey:
+	code = krb5_copy_keyblock (context, ctx->acceptor_subkey, &ctx->enc);
+	if (code)
+	    goto fail;
+    copy_acceptor_subkey_to_seq:
+	code = krb5_copy_keyblock (context, ctx->acceptor_subkey, &ctx->seq);
+	if (code) {
+	    krb5_free_keyblock (context, ctx->enc);
+	    goto fail;
+	}
+	break;
+
+    case ENCTYPE_ARCFOUR_HMAC:
+	/* Microsoft extension */
+	goto copy_acceptor_subkey;
+    default:
+	assert(0);
+	break;
+    }
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
 fail:
     *minor_status = code;
     return GSS_S_FAILURE;
@@ -516,10 +598,15 @@ new_connection(
     ctx->gss_flags = (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG |
                       GSS_C_TRANS_FLAG |
                       ((req_flags) & (GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
-                                      GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG)));
+                                      GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG |
+				      GSS_C_DCE_STYLE | GSS_C_IDENTIFY_FLAG |
+				      GSS_C_EXTENDED_ERROR_FLAG)));
     ctx->seed_init = 0;
     ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
     ctx->seqstate = 0;
+
+    if (req_flags & GSS_C_DCE_STYLE)
+	ctx->gss_flags |= GSS_C_MUTUAL_FLAG;
 
     if ((code = krb5_timeofday(context, &now)))
         goto fail;
@@ -558,7 +645,7 @@ new_connection(
 
     {
         /* gsskrb5 v1 */
-        krb5_ui_4 seq_temp;
+        krb5_int32 seq_temp;
         if ((code = make_ap_req_v1(context, ctx,
                                    cred, k_cred, input_chan_bindings,
                                    mech_type, &token))) {
@@ -722,7 +809,11 @@ mutual_auth(
 
     ptr = (unsigned char *) input_token->value;
 
-    if (g_verify_token_header(ctx->mech_used,
+    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+	/* Raw AP-REP */
+	ap_rep.length = input_token->length;
+	ap_rep.data = (char *)input_token->value;
+    } else if (g_verify_token_header(ctx->mech_used,
                               &(ap_rep.length),
                               &ptr, KG_TOK_CTX_AP_REP,
                               input_token->length, 1)) {
@@ -774,7 +865,8 @@ mutual_auth(
                  (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
                  (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) !=0, ctx->proto);
 
-    if (ctx->proto == 1 && ap_rep_data->subkey) {
+    if ((ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE)) &&
+	ap_rep_data->subkey) {
         /* Keep acceptor's subkey.  */
         ctx->have_acceptor_subkey = 1;
         code = krb5_copy_keyblock(context, ap_rep_data->subkey,
@@ -790,6 +882,21 @@ mutual_auth(
 
     /* free the ap_rep_data */
     krb5_free_ap_rep_enc_part(context, ap_rep_data);
+
+    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+	krb5_data outbuf;
+
+	code = krb5_mk_rep_dce(context, ctx->auth_context, &outbuf);
+	if (code)
+	    goto fail;
+
+	output_token->value = outbuf.data;
+	output_token->length = outbuf.length;
+
+	major_status = setup_enc_dce(&code, ctx, context);
+	if (major_status != GSS_S_COMPLETE)
+	    goto fail;
+    }
 
     /* set established */
     ctx->established = 1;
@@ -991,7 +1098,7 @@ krb5_gss_init_context (krb5_context *ctxp)
     int is_kdc;
 #endif
 
-    err = gssint_initialize_library();
+    err = gss_krb5int_initialize_library();
     if (err)
         return err;
 #ifndef _WIN32
@@ -1010,11 +1117,11 @@ krb5_gss_init_context (krb5_context *ctxp)
 
 #ifndef _WIN32
 krb5_error_code
-krb5_gss_use_kdc_context()
+krb5int_gss_use_kdc_context()
 {
     krb5_error_code err;
 
-    err = gssint_initialize_library();
+    err = gss_krb5int_initialize_library();
     if (err)
         return err;
     err = k5_mutex_lock(&kg_kdc_flag_mutex);
