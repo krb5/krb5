@@ -19,6 +19,8 @@ decode_krb5_error
 decode_krb5_etype_info
 decode_krb5_kdc_req_body
 decode_krb5_pa_enc_ts
+decode_krb5_pa_for_user
+decode_krb5_pa_pac_req
 decode_krb5_padata_sequence
 decode_krb5_predicted_sam_response
 decode_krb5_priv
@@ -52,6 +54,9 @@ encode_krb5_etype_info
 encode_krb5_etype_info2
 encode_krb5_kdc_req_body
 encode_krb5_pa_enc_ts
+encode_krb5_pa_for_user
+encode_krb5_pa_server_referral_data
+encode_krb5_pa_svr_referral_data
 encode_krb5_padata_sequence
 encode_krb5_predicted_sam_response
 encode_krb5_priv
@@ -168,6 +173,7 @@ krb5_copy_principal
 krb5_copy_ticket
 krb5_create_secure_file
 krb5_crypto_us_timeofday
+krb5_decode_ad_if_relevant
 krb5_decode_kdc_rep
 krb5_decode_ticket
 krb5_decrypt_tkt_part
@@ -176,6 +182,7 @@ krb5_default_pwd_prompt2
 krb5_defkeyname
 krb5_deltat_to_string
 krb5_do_preauth
+krb5_encode_ad_if_relevant
 krb5_encode_kdc_rep
 krb5_encrypt_helper
 krb5_encrypt_tkt_part
@@ -222,6 +229,10 @@ krb5_free_ktypes
 krb5_free_last_req
 krb5_free_pa_data
 krb5_free_pa_enc_ts
+krb5_free_pa_pac_req
+krb5_free_pa_for_user
+krb5_free_pa_server_referral_data
+krb5_free_pa_svr_referral_data
 krb5_free_predicted_sam_response
 krb5_free_predicted_sam_response_contents
 krb5_free_principal
@@ -338,6 +349,7 @@ krb5_mk_error
 krb5_mk_ncred
 krb5_mk_priv
 krb5_mk_rep
+krb5_mk_rep_dce
 krb5_mk_req
 krb5_mk_req_extended
 krb5_mk_safe
@@ -362,6 +374,7 @@ krb5_principal2salt
 krb5_principal2salt_norealm
 krb5_principal_compare
 krb5_principal_compare_any_realm
+krb5_principal_compare_flags
 krb5_process_padata
 krb5_prompter_posix
 krb5_rc_close
@@ -407,6 +420,7 @@ krb5_rd_cred
 krb5_rd_error
 krb5_rd_priv
 krb5_rd_rep
+krb5_rd_rep_dce
 krb5_rd_req
 krb5_rd_req_decoded
 krb5_rd_req_decoded_anyflag
@@ -453,6 +467,7 @@ krb5_set_error_message
 krb5_set_password
 krb5_set_password_using_ccache
 krb5_set_principal_realm
+krb5_set_profile
 krb5_set_real_time
 krb5_set_time_offsets
 krb5_size_opaque
@@ -493,6 +508,7 @@ krb5int_init_context_kdc
 krb5int_initialize_library
 krb5int_pac_sign
 krb5int_sendtokdc_debug_handler
+krb5int_utf8_normcmp
 profile_abandon
 profile_add_node
 profile_add_relation
