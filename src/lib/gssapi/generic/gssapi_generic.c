@@ -119,6 +119,9 @@ static const gss_OID_desc const_oids[] = {
      * GSS_C_NT_EXPORT_NAME should be initialized to point
      * to that gss_OID_desc.
      */
+
+    /* GSS_C_INQ_SESSION_KEY */
+    {9, "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x05"},
 };
 
 /* Here are the constants which point to the static structure above.
@@ -147,3 +150,6 @@ GSS_DLLIMP gss_OID GSS_C_NT_ANONYMOUS           = oids+5;
 
 GSS_DLLIMP gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
 gss_OID gss_nt_exported_name                    = oids+6;
+
+GSS_DLLIMP gss_OID GSS_C_INQ_SESSION_KEY	= oids+7;
+
