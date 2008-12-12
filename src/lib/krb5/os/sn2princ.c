@@ -107,6 +107,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 
 	    memset(&hints, 0, sizeof(hints));
 	    hints.ai_family = AF_INET;
+	    hints.ai_flags = AI_CANONNAME;
 	try_getaddrinfo_again:
 	    err = getaddrinfo(hostname, 0, &hints, &ai);
 	    if (err) {
@@ -147,7 +148,8 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
                     if (!remote_host)
                         return ENOMEM;
                 }
-            }
+            } else
+		freeaddrinfo(ai);
 	} else /* type == KRB5_NT_UNKNOWN */ {
 	    remote_host = strdup(hostname);
 	}
