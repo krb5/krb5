@@ -1,6 +1,7 @@
 /*
  * lib/krb5/krb/rd_rep.c
  *
+ * Portions Copyright (C) 2008 Novell Inc.
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -110,6 +111,63 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
 clean_scratch:
     memset(scratch.data, 0, scratch.length); 
 
+    krb5_free_ap_rep(context, reply);
+    free(scratch.data);
+    return retval;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rd_rep_dce(krb5_context context, krb5_auth_context auth_context,
+		const krb5_data *inbuf, krb5_int32 *nonce)
+{
+    krb5_error_code 	  retval;
+    krb5_ap_rep 	* reply;
+    krb5_data 	 	  scratch;
+    krb5_ap_rep_enc_part *repl;
+
+    if (!krb5_is_ap_rep(inbuf))
+	return KRB5KRB_AP_ERR_MSG_TYPE;
+
+    /* decode it */
+
+    if ((retval = decode_krb5_ap_rep(inbuf, &reply)))
+	return retval;
+
+    /* put together an eblock for this encryption */
+
+    scratch.length = reply->enc_part.ciphertext.length;
+    if (!(scratch.data = malloc(scratch.length))) {
+	krb5_free_ap_rep(context, reply);
+	return(ENOMEM);
+    }
+
+    if ((retval = krb5_c_decrypt(context, auth_context->keyblock,
+				 KRB5_KEYUSAGE_AP_REP_ENCPART, 0,
+				 &reply->enc_part, &scratch)))
+	goto clean_scratch;
+
+    /* now decode the decrypted stuff */
+    retval = decode_krb5_ap_rep_enc_part(&scratch, &repl);
+    if (retval)
+	goto clean_scratch;
+
+    *nonce = repl->seq_number;
+    if (*nonce != auth_context->local_seq_number) {
+	retval = KRB5_MUTUAL_FAILED;
+	goto clean_scratch;
+    }
+
+    /* Must be NULL to prevent echoing for client AP-REP */
+    if (repl->subkey != NULL) {
+	retval = KRB5_MUTUAL_FAILED;
+	goto clean_scratch;
+    }
+
+clean_scratch:
+    memset(scratch.data, 0, scratch.length); 
+
+    if (repl != NULL)
+	krb5_free_ap_rep_enc_part(context, repl);
     krb5_free_ap_rep(context, reply);
     free(scratch.data);
     return retval;

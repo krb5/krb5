@@ -1,6 +1,7 @@
 /*
  * lib/krb5/krb/mk_rep.c
  *
+ * Portions Copyright (C) 2008 Novell Inc.
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -39,9 +40,9 @@
  returns system errors
 */
 
-krb5_error_code KRB5_CALLCONV
-krb5_mk_rep(krb5_context context, krb5_auth_context auth_context,
-	    krb5_data *outbuf)
+static krb5_error_code
+k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
+	  krb5_data *outbuf, int dce_style)
 {
     krb5_error_code 	  retval;
     krb5_ap_rep_enc_part  repl;
@@ -58,9 +59,16 @@ krb5_mk_rep(krb5_context context, krb5_auth_context auth_context,
             return(retval);
     }
 
-    repl.ctime = auth_context->authentp->ctime;    
-    repl.cusec = auth_context->authentp->cusec;    
-    if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_USE_SUBKEY) {
+    if (dce_style) {
+	krb5_us_timeofday(context, &repl.ctime, &repl.cusec);
+    } else {
+	repl.ctime = auth_context->authentp->ctime;    
+	repl.cusec = auth_context->authentp->cusec;    
+    }
+
+    if (dce_style)
+	repl.subkey = NULL;
+    else if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_USE_SUBKEY) {
 	retval = krb5int_generate_and_save_subkey (context, auth_context,
 						   auth_context->keyblock);
 	if (retval)
@@ -68,7 +76,11 @@ krb5_mk_rep(krb5_context context, krb5_auth_context auth_context,
 	repl.subkey = auth_context->send_subkey;
     } else
 	repl.subkey = auth_context->authentp->subkey;
-    repl.seq_number = auth_context->local_seq_number;
+
+    if (dce_style)
+	repl.seq_number = auth_context->remote_seq_number;
+    else
+	repl.seq_number = auth_context->local_seq_number;
 
     /* encode it before encrypting */
     if ((retval = encode_krb5_ap_rep_enc_part(&repl, &scratch)))
@@ -94,4 +106,16 @@ cleanup_scratch:
     krb5_free_data(context, scratch);
 
     return retval;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_mk_rep(krb5_context context, krb5_auth_context auth_context, krb5_data *outbuf)
+{
+    return k5_mk_rep(context, auth_context, outbuf, 0);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_mk_rep_dce(krb5_context context, krb5_auth_context auth_context, krb5_data *outbuf)
+{
+    return k5_mk_rep(context, auth_context, outbuf, 1);
 }
