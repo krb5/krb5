@@ -603,7 +603,7 @@ krb5_gss_glue.so krb5_gss_glue.po $(OUTPRE)krb5_gss_glue.$(OBJEXT): \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
   $(srcdir)/../mechglue/mechglue.h $(srcdir)/../mechglue/mglueP.h \
-  $(srcdir)/../spnego/gssapiP_spnego.h ../generic/gssapi_err_generic.h \
+  ../generic/gssapi_err_generic.h \
   gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h krb5_gss_glue.c
 lucid_context.so lucid_context.po $(OUTPRE)lucid_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \

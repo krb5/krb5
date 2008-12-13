@@ -28,7 +28,6 @@
 
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
-#include "../spnego/gssapiP_spnego.h"
 
 gss_mechanism KRB5_CALLCONV gss_mech_initialize(void);
 
