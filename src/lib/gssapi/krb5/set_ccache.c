@@ -50,6 +50,10 @@ gss_krb5int_ccache_name(OM_uint32 *minor_status,
     }
 
     assert(value->length == sizeof(*req));
+
+    if (value->length != sizeof(*req))
+	return GSS_S_FAILURE;
+
     req = (struct krb5_gss_ccache_name_req *)value->value;
 
     gss_out_name = k5_getspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);

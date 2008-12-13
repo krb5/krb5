@@ -7,7 +7,6 @@ gss_krb5int_copy_ccache(OM_uint32 *minor_status,
 			const gss_OID desired_object,
 			const gss_buffer_t value)
 {
-    OM_uint32 major_status;
     krb5_gss_cred_id_t k5creds;
     krb5_cc_cursor cursor;
     krb5_creds creds;
