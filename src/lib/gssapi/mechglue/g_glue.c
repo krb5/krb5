@@ -185,7 +185,7 @@ gssint_put_der_length(unsigned int length, unsigned char **buf, unsigned int max
  *
  */
 
-OM_uint32 gssint_get_mech_type(OID, token)
+OM_uint32 gssint_get_mech_type_oid(OID, token)
     gss_OID		OID;
     gss_buffer_t	token;
 {
@@ -247,6 +247,43 @@ OM_uint32 gssint_get_mech_type(OID, token)
     return (GSS_S_COMPLETE);
 }
 
+/*
+ * The following mechanisms do not always identify themselves
+ * per the GSS-API specification, when interoperating with MS
+ * peers. We include the OIDs here so we do not have to ilnk
+ * with the mechanism.
+ */
+static gss_OID_desc gss_ntlm_mechanism_oid_desc =
+	{10, (void *)"\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a"};
+static gss_OID_desc gss_spnego_mechanism_oid_desc =
+	{6, (void *)"\x2b\x06\x01\x05\x05\x02"};
+static gss_OID_desc gss_krb5_mechanism_oid_desc =
+	{9, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"};
+
+#define NTLMSSP_SIGNATURE "NTLMSSP"
+
+OM_uint32 gssint_get_mech_type(OID, token)
+    gss_OID		OID;
+    gss_buffer_t	token;
+{
+    /* Check for interoperability exceptions */
+    if (token->length >= sizeof(NTLMSSP_SIGNATURE) &&
+	memcmp(token->value, NTLMSSP_SIGNATURE,
+	       sizeof(NTLMSSP_SIGNATURE)) == 0) {
+	*OID = gss_ntlm_mechanism_oid_desc;
+    } else if (token->length != 0 &&
+	       ((char *)token->value)[0] == 0x6E) {
+ 	/* Could be a raw AP-REQ (check for APPLICATION tag) */
+	*OID = gss_krb5_mechanism_oid_desc;
+    } else if (token->length == 0) {
+	*OID = gss_spnego_mechanism_oid_desc;
+    } else {
+	return gssint_get_mech_type_oid(OID, token);
+    }
+
+    return (GSS_S_COMPLETE);
+}
+
 
 /*
  *  Internal routines to get and release an internal mechanism name
@@ -268,7 +305,6 @@ gss_name_t	*internal_name;
     if (mech) {
 	if (mech->gss_import_name) {
 	    status = mech->gss_import_name (
-					    mech->context,
 					    minor_status,
 					    union_name->external_name,
 					    union_name->name_type,
@@ -307,8 +343,7 @@ OM_uint32 gssint_export_internal_name(minor_status, mech_type,
 	return (GSS_S_BAD_MECH);
 
     if (mech->gss_export_name) {
-	status = mech->gss_export_name(mech->context,
-				       minor_status,
+	status = mech->gss_export_name(minor_status,
 				       internal_name,
 				       name_buf);
 	if (status != GSS_S_COMPLETE)
@@ -343,8 +378,7 @@ OM_uint32 gssint_export_internal_name(minor_status, mech_type,
      * mechanisms also, so that factoring name export/import out of
      * the mech and into libgss pays off.
      */
-    if ((status = mech->gss_display_name(mech->context,
-					 minor_status,
+    if ((status = mech->gss_display_name(minor_status,
 					 internal_name,
 					 &dispName,
 					 &nameOid))
@@ -422,7 +456,6 @@ gss_OID		*name_type;
     if (mech) {
 	if (mech->gss_display_name) {
 	    status = mech->gss_display_name (
-					     mech->context,
 					     minor_status,
 					     internal_name,
 					     external_name,
@@ -450,7 +483,6 @@ gss_name_t	*internal_name;
     if (mech) {
 	if (mech->gss_release_name) {
 	    status = mech->gss_release_name (
-					     mech->context,
 					     minor_status,
 					     internal_name);
 	    if (status != GSS_S_COMPLETE)
@@ -464,6 +496,32 @@ gss_name_t	*internal_name;
     return (GSS_S_BAD_MECH);
 }
 
+OM_uint32 gssint_delete_internal_sec_context (minor_status,
+					      mech_type,
+					      internal_ctx,
+					      output_token)
+OM_uint32	*minor_status;
+gss_OID		mech_type;
+gss_ctx_id_t	*internal_ctx;
+gss_buffer_t	output_token;
+{
+    OM_uint32		status;
+    gss_mechanism	mech;
+
+    mech = gssint_get_mechanism (mech_type);
+    if (mech) {
+	if (mech->gss_delete_sec_context)
+	    status = mech->gss_delete_sec_context (minor_status,
+						   internal_ctx,
+						   output_token);
+	else
+	    status = GSS_S_UNAVAILABLE;
+
+	return (status);
+    }
+
+    return (GSS_S_BAD_MECH);
+}
 
 /*
  * This function converts an internal gssapi name to a union gssapi
@@ -502,10 +560,11 @@ OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
     union_name->external_name =
 	(gss_buffer_t) malloc(sizeof(gss_buffer_desc));
     if (!union_name->external_name) {
+	    major_status = GSS_S_FAILURE;
 	    goto allocation_failure;
     }
 	
-    major_status = mech->gss_display_name(mech->context, minor_status,
+    major_status = mech->gss_display_name(minor_status,
 					  internal_name,
 					  union_name->external_name,
 					  &union_name->name_type);
@@ -551,16 +610,20 @@ gssint_get_mechanism_cred(union_cred, mech_type)
     gss_OID		mech_type;
 {
     int		i;
-    
+
     if (union_cred == GSS_C_NO_CREDENTIAL)
 	return GSS_C_NO_CREDENTIAL;
-    
+
+    /* SPNEGO mechanism will again call into GSSAPI */
+    if (g_OID_equal(&gss_spnego_mechanism_oid_desc, mech_type))
+	return (gss_cred_id_t)union_cred;
+
     for (i=0; i < union_cred->count; i++) {
 	if (g_OID_equal(mech_type, &union_cred->mechs_array[i]))
 	    return union_cred->cred_array[i];
 
 	/* for SPNEGO, check the next-lower set of creds */
-	if (g_OID_equal(gss_mech_spnego, &union_cred->mechs_array[i])) {
+	if (g_OID_equal(&gss_spnego_mechanism_oid_desc, &union_cred->mechs_array[i])) {
 	    gss_union_cred_t candidate_cred;
 	    gss_cred_id_t    sub_cred;
 
@@ -617,3 +680,4 @@ gssint_create_copy_buffer(srcBuf, destBuf, addNullChar)
 
     return (GSS_S_COMPLETE);
 } /* ****** gssint_create_copy_buffer  ****** */
+
