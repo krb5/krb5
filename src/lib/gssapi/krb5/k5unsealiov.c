@@ -393,7 +393,8 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 }
 
 /*
- * Split a SIGN_DATA | STREAM into TOKEN | SIGN_DATA | DATA | PADDING | TRAILER
+ * Split a STREAM | SIGN_DATA | DATA into
+ *         HEADER | SIGN_DATA | DATA | PADDING | TRAILER
  */
 static OM_uint32
 kg_unseal_stream_iov(OM_uint32 *minor_status,
@@ -453,8 +454,11 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	    continue;
 
 	if ((iov[j].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0) {
-	    if (data != NULL)
+	    if (data != NULL) {
+		/* only a single DATA buffer can appear */
+		code = EINVAL;
 		goto cleanup;
+	    }
 
 	    data = &iov[j];
 	    tdata = &tiov[i];
@@ -463,6 +467,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     }
 
     if (data == NULL) {
+	/* a single DATA buffer must be present */
 	code = EINVAL;
 	goto cleanup;
     }
@@ -493,22 +498,21 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	    theader->buffer.length += k5_headerlen; /* length validated later */
 	}
 
+	/* no PADDING for CFX, EC is used instead */
+	tpadding = &tiov[i++];
+	tpadding->buffer.length = 0;
+	tpadding->buffer.value = NULL;
+
 	code = krb5_c_crypto_length(context, enctype,
 				    conf_req_flag ? KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM,
 				    &k5_trailerlen);
 	if (code != 0)
 	    goto cleanup;
 
-	tpadding = &tiov[i++];
 	ttrailer = &tiov[i++];
-
-	ttrailer->buffer.length = conf_req_flag ? 16 : 0 /* E(Header) */ + k5_trailerlen;
+	ttrailer->buffer.length = ec + (conf_req_flag ? 16 : 0 /* E(Header) */) + k5_trailerlen;
 	ttrailer->buffer.value = (unsigned char *)stream->buffer.value +
 				  stream->buffer.length - ttrailer->buffer.length;
-
-	tpadding->buffer.length = ec;
-	tpadding->buffer.value = (unsigned char *)stream->buffer.value +
-				 stream->buffer.length - ttrailer->buffer.length - ec;
     } else {
 	conf_req_flag = (ptr[2] != 0xFF && ptr[3] != 0xFF);
 
@@ -525,16 +529,16 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	tpadding->buffer.length = 1;
 	tpadding->buffer.value = (unsigned char *)stream->buffer.value + stream->buffer.length - 1;
 
-	/* trailer is absent */
+	/* no TRAILER for pre-CFX */
 	ttrailer = &tiov[i++];
 	ttrailer->buffer.length = 0;
 	ttrailer->buffer.value = NULL;
     }
 
-    /* IOV: -----------0-------------+---1---+--2--+-------------3------------*/
-    /* Old: GSS-Header | Conf        | Data  | Pad |                          */
-    /* CFX: GSS-Header | Kerb-Header | Data  | EC  | E(Header) | Kerb-Trailer */
-    /* GSS: -------GSS-HEADER--------+-DATA--+-PAD-+-------GSS-TRAILER--------*/
+    /* IOV: -----------0-------------+---1---+--2--+----------------3--------------*/
+    /* Old: GSS-Header | Conf        | Data  | Pad |                               */
+    /* CFX: GSS-Header | Kerb-Header | Data  |     | EC | E(Header) | Kerb-Trailer */
+    /* GSS: -------GSS-HEADER--------+-DATA--+-PAD-+----------GSS-TRAILER----------*/
 
     /* Add 2 to bodysize for TOK_ID */
     if (2 + bodysize < theader->buffer.length +
