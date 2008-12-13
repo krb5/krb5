@@ -211,6 +211,7 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_keyblock *acceptor_subkey; /* CFX only */
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
+    krb5_authdata **authdata;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;
@@ -826,6 +827,10 @@ OM_uint32 KRB5_CALLCONV gss_krb5int_copy_ccache
  gss_cred_id_t cred_handle,
  krb5_ccache out_ccache);
 
+OM_uint32 KRB5_CALLCONV gss_krb5int_ccache_name
+ (OM_uint32 *minor_status, const char *name,
+ const char **out_name);
+
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
                                    gss_cred_id_t cred,
@@ -838,11 +843,20 @@ gss_krb5int_export_lucid_sec_context(OM_uint32 *minor_status,
                                      OM_uint32 version,
                                      void **kctx);
 
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_free_lucid_sec_context(OM_uint32 *minor_status,
+				   void *kctx);
 
 extern k5_mutex_t kg_kdc_flag_mutex;
 krb5_error_code krb5_gss_init_context (krb5_context *ctxp);
 
-krb5_error_code krb5_gss_use_kdc_context(void);
+krb5_error_code krb5int_gss_use_kdc_context(void);
+
+int gss_krb5int_lib_init(void);
+void gss_krb5int_lib_fini(void);
+
+OM_uint32 gss_krb5int_initialize_library(void);
+void gss_krb5int_cleanup_library(void);
 
 /* For error message handling.  */
 /* Returns a shared string, not a private copy!  */
@@ -864,4 +878,72 @@ krb5_gss_save_error_message(OM_uint32 minor_code, const char *format, ...)
 #define save_error_info krb5_gss_save_error_info
 extern void krb5_gss_delete_error_info(void *p);
 
+#define GSS_KRB5_COPY_CCACHE_OID_LENGTH 9
+#define GSS_KRB5_COPY_CCACHE_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x01"
+
+#define GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH 9
+#define GSS_KRB5_GET_TKT_FLAGS_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x02"
+
+#define GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x07"
+
+struct krb5_gss_export_lucid_sec_context_req {
+    OM_uint32 version;
+    void *kctx;
+};
+
+#define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH 9
+#define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x08"
+
+struct krb5_gss_set_allowable_enctypes_req {
+    OM_uint32 num_ktypes;
+    krb5_enctype *ktypes;
+};
+
+#define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH 9
+#define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x09"
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_register_acceptor_identity(const char *keytab);
+
+#define GSS_KRB5_CCACHE_NAME_OID_LENGTH 9
+#define GSS_KRB5_CCACHE_NAME_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0a"
+
+struct krb5_gss_ccache_name_req {
+    const char *name;
+    const char *out_name;
+};
+
+#define GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0b"
+
+#define GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_USE_KDC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0c"
+
+#define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x03"
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
+						const gss_ctx_id_t context_handle,
+						int ad_type,
+						gss_buffer_set_t ad_data);
+#define GSS_KRB5_SET_ACCEPTOR_ALIAS_OID_LENGTH 9
+#define GSS_KRB5_SET_ACCEPTOR_ALIAS_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x04"
+
+OM_uint32
+gss_krb5int_set_cred_alias(OM_uint32 *, gss_cred_id_t, krb5_principal *);
+
+#define GSS_KRB5_GET_SUBKEY_OID_LENGTH 9
+#define GSS_KRB5_GET_SUBKEY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x06"
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_get_subkey(const gss_ctx_id_t, krb5_keyblock **key);
+
+#define GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH 9
+#define GSS_KRB5_SET_CRED_RCACHE_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0d"
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_set_cred_rcache(OM_uint32 *, gss_cred_id_t, krb5_rcache rcache);
+ 
 #endif /* _GSSAPIP_KRB5_H_ */
