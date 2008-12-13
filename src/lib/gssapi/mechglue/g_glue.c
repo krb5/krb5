@@ -29,7 +29,6 @@
 #endif
 #include <string.h>
 #include <errno.h>
-#include "../spnego/gssapiP_spnego.h"
 
 #define	MSO_BIT (8*(sizeof (int) - 1))  /* Most significant octet bit */
 
