@@ -31,6 +31,7 @@
 #define __KRB5_KDC_UTIL__
 
 #include "kdb.h"
+#include "kdb_ext.h"
 
 typedef struct _krb5_fulladdr {
     krb5_address *	address;
@@ -38,8 +39,8 @@ typedef struct _krb5_fulladdr {
 } krb5_fulladdr;
 
 krb5_error_code check_hot_list (krb5_ticket *);
-krb5_boolean realm_compare (krb5_principal, krb5_principal);
-krb5_boolean krb5_is_tgs_principal (krb5_principal);
+krb5_boolean realm_compare (krb5_const_principal, krb5_const_principal);
+krb5_boolean krb5_is_tgs_principal (krb5_const_principal);
 krb5_error_code add_to_transited (krb5_data *,
 					    krb5_data *,
 					    krb5_principal,
@@ -62,15 +63,21 @@ krb5_error_code kdc_process_tgs_req
 	           const krb5_fulladdr *,
 	           krb5_data *,
 	           krb5_ticket **,
+		   krb5_db_entry *krbtgt,
+		   int *nprincs,
 	           krb5_keyblock **);
 
-krb5_error_code kdc_get_server_key (krb5_ticket *,
-					      krb5_keyblock **,
-					      krb5_kvno *);
+krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
+				    krb5_db_entry *, int *,
+				    krb5_keyblock **, krb5_kvno *);
 
 int validate_as_request (krb5_kdc_req *, krb5_db_entry, 
 					  krb5_db_entry, krb5_timestamp,
 					  const char **);
+
+int validate_forwardable(krb5_kdc_req *, krb5_db_entry, 
+			 krb5_db_entry, krb5_timestamp,
+			 const char **);
 
 int validate_tgs_request (krb5_kdc_req *, krb5_db_entry, 
 					  krb5_ticket *, krb5_timestamp,
@@ -187,6 +194,81 @@ krb5_error_code
 get_principal (krb5_context kcontext,
 	       krb5_const_principal search_for,
 	       krb5_db_entry *entries, int *nentries, krb5_boolean *more);
+
+krb5_boolean
+include_pac_p(krb5_context context, krb5_kdc_req *request);
+
+krb5_error_code return_svr_referral_data
+   (krb5_context context,
+	       krb5_db_entry *server,
+	       krb5_enc_kdc_rep_part *reply_encpart);
+
+krb5_error_code sign_authorization_data
+   (krb5_context context,
+		unsigned int flags,
+		krb5_const_principal client_princ,
+		krb5_db_entry *client,
+		krb5_db_entry *server,
+		krb5_db_entry *krbtgt,
+		krb5_keyblock *client_key,
+		krb5_keyblock *server_key,
+		krb5_timestamp authtime,
+		krb5_authdata **tgs_auth_data,
+		krb5_authdata ***ret_auth_data);
+
+krb5_error_code kdc_process_for_user
+	(krb5_context context,
+		krb5_kdc_req *request,
+		krb5_const_principal client_princ,
+		const krb5_db_entry *server,
+		krb5_keyblock *subkey,
+		krb5_timestamp kdc_time,
+		krb5_pa_for_user **s4u2_req,
+		krb5_db_entry *princ,
+		int *nprincs,
+		const char **status);
+
+krb5_error_code kdc_process_s4u2proxy_req
+	(krb5_context context,
+		krb5_kdc_req *request,
+		const krb5_enc_tkt_part *t2enc,
+		const krb5_db_entry *server,
+		krb5_const_principal server_princ,
+		krb5_const_principal proxy_princ,
+		const char **status);
+
+krb5_error_code kdc_check_transited_list
+	(krb5_context context,
+		const krb5_data *trans,
+		const krb5_data *realm1,
+		const krb5_data *realm2);
+
+krb5_error_code audit_as_request
+	(krb5_kdc_req *request,
+		krb5_db_entry *client,
+		krb5_db_entry *server,
+		krb5_timestamp authtime,
+		krb5_error_code errcode);
+
+krb5_error_code audit_tgs_request
+	(krb5_kdc_req *request,
+		krb5_const_principal client,
+		krb5_db_entry *server,
+		krb5_timestamp authtime,
+		krb5_error_code errcode);
+
+krb5_error_code get_principal_in_pac
+	(krb5_context context,
+		krb5_authdata *ad,
+		krb5_db_entry *tgs,
+		krb5_db_entry *princ);
+
+krb5_error_code
+set_reply_server(krb5_context context,
+	krb5_kdc_req *request,
+		krb5_db_entry *server,
+		krb5_principal reply_buffer,
+		krb5_ticket *ticket_reply);
 
 #define isflagset(flagfield, flag) (flagfield & (flag))
 #define setflag(flagfield, flag) (flagfield |= (flag))
