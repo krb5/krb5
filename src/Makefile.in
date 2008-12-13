@@ -12,6 +12,7 @@ mydir=.
 SUBDIRS=util include lib @krb524@ kdc kadmin @ldap_plugin_dir@ slave clients \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \
+	plugins/gssapi/spnego \
 	appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
@@ -118,6 +119,9 @@ fake-install:
 	(w=`pwd`; cd plugins/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	if test -r plugins/preauth/pkinit/Makefile; then \
 	  (w=`pwd`; cd plugins/preauth/pkinit && $(MAKE) install DESTDIR="$$w/util/fakedest"); \
+	fi
+	if test -r plugins/gssapi/spnego/Makefile; then \
+	  (w=`pwd`; cd plugins/gssapi/spnego && $(MAKE) install DESTDIR="$$w/util/fakedest"); \
 	fi
 
 #	(w=`pwd`; cd plugins/locate/python && $(MAKE) install DESTDIR="$$w/util/fakedest")
