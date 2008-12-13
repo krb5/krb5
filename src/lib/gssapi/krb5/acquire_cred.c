@@ -97,8 +97,11 @@ k5_mutex_t gssint_krb5_keytab_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static char *krb5_gss_keytab = NULL;
 
 /* Heimdal calls this gsskrb5_register_acceptor_identity. */
-OM_uint32 KRB5_CALLCONV
-gss_krb5int_register_acceptor_identity(const char *keytab)
+OM_uint32
+gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
+				       const gss_OID desired_mech,
+				       const gss_OID desired_object,
+				       gss_buffer_t value)
 {
     char *new, *old;
     int err;
@@ -107,10 +110,10 @@ gss_krb5int_register_acceptor_identity(const char *keytab)
     if (err != 0)
         return GSS_S_FAILURE;
 
-    if (keytab == NULL)
+    if (value->value == NULL)
         return GSS_S_FAILURE;
 
-    new = strdup(keytab);
+    new = strdup((char *)value->value);
     if (new == NULL)
         return GSS_S_FAILURE;
 
@@ -715,11 +718,16 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 OM_uint32
 gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
     gss_cred_id_t cred_handle,
-    krb5_rcache rcache)
+    const gss_OID desired_oid,
+    const gss_buffer_t value)
 {
    krb5_gss_cred_id_t cred;
    krb5_error_code code;
    krb5_context context;
+   krb5_rcache rcache;
+
+   assert(value->length == sizeof(rcache));
+   rcache = (krb5_rcache)value->value;
 
    if (cred_handle == GSS_C_NO_CREDENTIAL)
       return GSS_S_NO_CRED;

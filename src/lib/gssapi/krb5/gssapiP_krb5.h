@@ -817,45 +817,122 @@ int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
  * These take unglued krb5-mech-specific contexts.
  */
 
+#define GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH 9
+#define GSS_KRB5_GET_TKT_FLAGS_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x02"
+
 OM_uint32 KRB5_CALLCONV gss_krb5int_get_tkt_flags
 (OM_uint32 *minor_status,
- gss_ctx_id_t context_handle,
- krb5_flags *ticket_flags);
+ const gss_ctx_id_t context_handle,
+ const gss_OID desired_object,
+ gss_buffer_set_t *data_set);
+
+#define GSS_KRB5_COPY_CCACHE_OID_LENGTH 9
+#define GSS_KRB5_COPY_CCACHE_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x01"
 
 OM_uint32 KRB5_CALLCONV gss_krb5int_copy_ccache
 (OM_uint32 *minor_status,
  gss_cred_id_t cred_handle,
- krb5_ccache out_ccache);
+ const gss_OID desired_oid,
+ const gss_buffer_t value);
+
+#define GSS_KRB5_CCACHE_NAME_OID_LENGTH 9
+#define GSS_KRB5_CCACHE_NAME_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0a"
+
+struct krb5_gss_ccache_name_req {
+    const char *name;
+    const char *out_name;
+};
 
 OM_uint32 KRB5_CALLCONV gss_krb5int_ccache_name
- (OM_uint32 *minor_status, const char *name,
- const char **out_name);
+ (OM_uint32 *minor_status,
+  const gss_OID,
+  const gss_OID,
+  const gss_buffer_t);
+
+#define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH 9
+#define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x08"
+
+struct krb5_gss_set_allowable_enctypes_req {
+    OM_uint32 num_ktypes;
+    krb5_enctype *ktypes;
+};
 
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
                                    gss_cred_id_t cred,
-                                   OM_uint32 num_ktypes,
-                                   krb5_enctype *ktypes);
+                                   const gss_OID desired_oid,
+                                   const gss_buffer_t value);
 
-OM_uint32 KRB5_CALLCONV
+#define GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x07"
+
+OM_uint32
 gss_krb5int_export_lucid_sec_context(OM_uint32 *minor_status,
-                                     gss_ctx_id_t *context_handle,
-                                     OM_uint32 version,
-                                     void **kctx);
+                                     const gss_ctx_id_t context_handle,
+                                     const gss_OID desired_object,
+                                     gss_buffer_set_t *data_set);
 
-OM_uint32 KRB5_CALLCONV
-gss_krb5int_free_lucid_sec_context(OM_uint32 *minor_status,
-				   void *kctx);
+#define GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0b"
+
+OM_uint32
+gss_krb5int_free_lucid_sec_context(OM_uint32 *, const gss_OID,
+				   const gss_OID, gss_buffer_t);
 
 extern k5_mutex_t kg_kdc_flag_mutex;
 krb5_error_code krb5_gss_init_context (krb5_context *ctxp);
 
-krb5_error_code krb5int_gss_use_kdc_context(void);
+#define GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_USE_KDC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0c"
+
+OM_uint32 krb5int_gss_use_kdc_context(OM_uint32 *, const gss_OID,
+				      const gss_OID, gss_buffer_t);
+
+#define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH 9
+#define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x09"
+
+OM_uint32
+gss_krb5int_register_acceptor_identity(OM_uint32 *, const gss_OID, const gss_OID, gss_buffer_t);
+
+#define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x03"
+
+OM_uint32
+gss_krb5int_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
+						const gss_ctx_id_t context_handle,
+						const gss_OID desired_object,
+						gss_buffer_set_t *ad_data);
+
+#if 0
+#define GSS_KRB5_SET_ACCEPTOR_ALIAS_OID_LENGTH 9
+#define GSS_KRB5_SET_ACCEPTOR_ALIAS_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x04"
+
+OM_uint32
+gss_krb5int_set_cred_alias(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
+#endif
+
+#define GSS_KRB5_INQ_SESSION_KEY_OID_LENGTH 9
+#define GSS_KRB5_INQ_SESSION_KEY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x05"
+
+OM_uint32
+gss_krb5int_inq_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
+ 
+#define GSS_KRB5_GET_SUBKEY_OID_LENGTH 9
+#define GSS_KRB5_GET_SUBKEY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x06"
+
+OM_uint32
+gss_krb5int_get_subkey(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
+
+#define GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH 9
+#define GSS_KRB5_SET_CRED_RCACHE_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0d"
+
+OM_uint32
+gss_krb5int_set_cred_rcache(OM_uint32 *, gss_cred_id_t, const gss_OID, const gss_buffer_t);
 
 #ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);
 void gss_krb5int_lib_fini(void);
-#endif
+#endif /* _GSS_STATIC_LINK */
 
 OM_uint32 gss_krb5int_initialize_library(void);
 void gss_krb5int_cleanup_library(void);
@@ -880,72 +957,4 @@ krb5_gss_save_error_message(OM_uint32 minor_code, const char *format, ...)
 #define save_error_info krb5_gss_save_error_info
 extern void krb5_gss_delete_error_info(void *p);
 
-#define GSS_KRB5_COPY_CCACHE_OID_LENGTH 9
-#define GSS_KRB5_COPY_CCACHE_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x01"
-
-#define GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH 9
-#define GSS_KRB5_GET_TKT_FLAGS_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x02"
-
-#define GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH 9
-#define GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x07"
-
-struct krb5_gss_export_lucid_sec_context_req {
-    OM_uint32 version;
-    void *kctx;
-};
-
-#define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH 9
-#define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x08"
-
-struct krb5_gss_set_allowable_enctypes_req {
-    OM_uint32 num_ktypes;
-    krb5_enctype *ktypes;
-};
-
-#define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH 9
-#define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x09"
-
-OM_uint32 KRB5_CALLCONV
-gss_krb5int_register_acceptor_identity(const char *keytab);
-
-#define GSS_KRB5_CCACHE_NAME_OID_LENGTH 9
-#define GSS_KRB5_CCACHE_NAME_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0a"
-
-struct krb5_gss_ccache_name_req {
-    const char *name;
-    const char *out_name;
-};
-
-#define GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH 9
-#define GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0b"
-
-#define GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH 9
-#define GSS_KRB5_USE_KDC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0c"
-
-#define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH 9
-#define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x03"
-
-OM_uint32 KRB5_CALLCONV
-gss_krb5int_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
-						const gss_ctx_id_t context_handle,
-						int ad_type,
-						gss_buffer_set_t ad_data);
-#define GSS_KRB5_SET_ACCEPTOR_ALIAS_OID_LENGTH 9
-#define GSS_KRB5_SET_ACCEPTOR_ALIAS_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x04"
-
-OM_uint32
-gss_krb5int_set_cred_alias(OM_uint32 *, gss_cred_id_t, krb5_principal *);
-
-#define GSS_KRB5_GET_SUBKEY_OID_LENGTH 9
-#define GSS_KRB5_GET_SUBKEY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x06"
-
-OM_uint32 KRB5_CALLCONV
-gss_krb5int_get_subkey(const gss_ctx_id_t, krb5_keyblock **key);
-
-#define GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH 9
-#define GSS_KRB5_SET_CRED_RCACHE_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0d"
-
-OM_uint32 KRB5_CALLCONV
-gss_krb5int_set_cred_rcache(OM_uint32 *, gss_cred_id_t, krb5_rcache rcache);
- 
 #endif /* _GSSAPIP_KRB5_H_ */

@@ -138,92 +138,119 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_get_subkey(
-   const gss_ctx_id_t context_handle,
-   krb5_keyblock **key)
+    OM_uint32 *minor_status,
+    const gss_ctx_id_t context_handle,
+    const gss_OID desired_object,
+    gss_buffer_set_t *data_set)
 {
-   krb5_gss_ctx_id_rec *ctx;
-   int code;
+    OM_uint32 major_status;
+    krb5_error_code code;
+    krb5_gss_ctx_id_rec *ctx;
+    krb5_keyblock *key, *outkey;
+    gss_buffer_desc rep;
 
-   *key = NULL;
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+    key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
 
-   /* validate the context handle */
-   if (! kg_validate_ctx_id(context_handle)) {
-      return(GSS_S_NO_CONTEXT);
-   }
+    code = krb5_copy_keyblock(ctx->k5_context, key, &outkey);
+    if (code) {
+	*minor_status = code;
+	return GSS_S_FAILURE;
+    }
 
-   ctx = (krb5_gss_ctx_id_rec *) context_handle;
+    rep.value = &outkey;
+    rep.length = sizeof(outkey);
 
-   if (! ctx->established) {
-      return(GSS_S_NO_CONTEXT);
-   }
+    major_status = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
+    if (GSS_ERROR(major_status)) {
+	krb5_free_keyblock(ctx->k5_context, &outkey);
+	return major_status;
+    }
 
-   code = krb5_copy_keyblock(ctx->k5_context,
-			     ctx->have_acceptor_subkey ?
-				ctx->acceptor_subkey : ctx->subkey,
-			     key);
-   if (code) {
-     return (GSS_S_FAILURE);
-   }
+    return GSS_S_COMPLETE;
+}
 
-   return (GSS_S_COMPLETE);
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_inq_session_key(
+    OM_uint32 *minor_status,
+    const gss_ctx_id_t context_handle,
+    const gss_OID desired_object,
+    gss_buffer_set_t *data_set)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    krb5_keyblock *key;
+    gss_buffer_desc rep;
+
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+    key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
+
+    rep.value = key->contents;
+    rep.length = key->length;
+
+    return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
 }
 
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_extract_authz_data_from_sec_context(
    OM_uint32 *minor_status,
    const gss_ctx_id_t context_handle,
-   int ad_type,
-   gss_buffer_set_t ad_data)
+   const gss_OID desired_object,
+   gss_buffer_set_t *data_set)
 {
-   OM_uint32 major_status;
-   krb5_gss_ctx_id_rec *ctx;
-   krb5_authdata **p;
-   gss_buffer_t tmp;
+    OM_uint32 major_status;
+    krb5_gss_ctx_id_rec *ctx;
+    krb5_authdata **p;
+    int ad_type = 0, i;
+    unsigned char *cp;
 
-   /* validate the context handle */
-   if (!kg_validate_ctx_id(context_handle)) {
-      return (GSS_S_NO_CONTEXT);
-   }
+    *data_set = GSS_C_NO_BUFFER_SET;
 
-   ctx = (krb5_gss_ctx_id_rec *) context_handle;
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   if (!ctx->established) {
-      return (GSS_S_NO_CONTEXT);
-   }
+    major_status = GSS_S_FAILURE;
+    *minor_status = ENOENT;
 
-   major_status = GSS_S_FAILURE;
-   *minor_status = ENOENT;
+    /* Determine authorization data type from DER encoded OID suffix */
+    cp = desired_object->elements;
+    cp += GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH;
 
-   ad_data->count = 0;
-   ad_data->elements = NULL;
+    for (i = 0;
+	 i < desired_object->length - GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH;
+	 i++)
+    {
+	ad_type = (ad_type << 7) | (cp[i] & 0x7f);
+	if ((cp[i] & 0x80) == 0)
+	    break;
+	/* XXX should we return an error if there is another arc */
+    }
 
-   /*
-    * This is an internal API so let's just return a pointer
-    * into the data and have the shim copy it.
-    */
-   if (ctx->authdata != NULL) {
-      major_status = GSS_S_COMPLETE;
-      *minor_status = 0;
-      for (p = ctx->authdata; *p != NULL; p++) {
-	 if ((*p)->ad_type == ad_type) {
-	    ad_data->count++;
-	    tmp = (gss_buffer_desc *)realloc(ad_data->elements,
-					     ad_data->count * sizeof(gss_buffer_desc));
-	    if (tmp == NULL) {
-		if (ad_data->elements != NULL)
-		    free(ad_data->elements);
-		ad_data->count = 0;
-		ad_data->elements = NULL;
-		*minor_status = ENOMEM;
-		major_status = GSS_S_FAILURE;
-		break;
+    if (ad_type == 0)
+	return GSS_S_FAILURE;
+
+    if (ctx->authdata != NULL) {
+	major_status = GSS_S_COMPLETE;
+	*minor_status = 0;
+
+	for (p = ctx->authdata; *p != NULL; p++) {
+	    if ((*p)->ad_type == ad_type) {
+		gss_buffer_desc ad_data;
+
+		ad_data.length = (*p)->length;
+		ad_data.value = (*p)->contents;
+
+		major_status = generic_gss_add_buffer_set_member(
+		    minor_status, &ad_data, data_set);
+		if (GSS_ERROR(major_status))
+		    break;
 	    }
-	    ad_data->elements = tmp;
-	    ad_data->elements[ad_data->count-1].length = (*p)->length;
-	    ad_data->elements[ad_data->count-1].value = (*p)->contents;
-	 }
-      }
-   }
-       
-   return (major_status);
+	}
+    }
+
+    if (GSS_ERROR(major_status)) {
+	OM_uint32 tmp;
+
+	generic_gss_release_buffer_set(&tmp, data_set);
+    }
+
+    return major_status;
 }
