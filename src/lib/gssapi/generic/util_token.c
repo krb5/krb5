@@ -174,7 +174,7 @@ g_verify_token_header(
     unsigned char **buf_in,
     int tok_type,
     unsigned int toksize_in,
-    int wrapper_required)
+    int flags)
 {
     unsigned char *buf = *buf_in;
     int seqsize;
@@ -184,7 +184,7 @@ g_verify_token_header(
     if ((toksize-=1) < 0)
         return(G_BAD_TOK_HEADER);
     if (*buf++ != 0x60) {
-        if (wrapper_required)
+        if (flags & G_VFY_TOKEN_HDR_WRAPPER_REQUIRED)
             return(G_BAD_TOK_HEADER);
         buf--;
         toksize++;
@@ -194,7 +194,8 @@ g_verify_token_header(
     if ((seqsize = der_read_length(&buf, &toksize)) < 0)
         return(G_BAD_TOK_HEADER);
 
-    if (seqsize != toksize)
+    if ((flags & G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE) == 0 &&
+	seqsize != toksize)
         return(G_BAD_TOK_HEADER);
 
     if ((toksize-=1) < 0)
