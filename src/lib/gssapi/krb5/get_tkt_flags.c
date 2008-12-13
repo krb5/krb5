@@ -36,18 +36,7 @@ gss_krb5int_get_tkt_flags(OM_uint32 *minor_status,
     krb5_gss_ctx_id_rec *ctx;
     gss_buffer_desc rep;
 
-    /* validate the context handle */
-    if (! kg_validate_ctx_id(context_handle)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        return(GSS_S_NO_CONTEXT);
-    }
-
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
-
-    if (! ctx->established) {
-        *minor_status = KG_CTX_INCOMPLETE;
-        return(GSS_S_NO_CONTEXT);
-    }
 
     rep.value = &ctx->krb_flags;
     rep.length = sizeof(ctx->krb_flags);

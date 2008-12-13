@@ -16,12 +16,13 @@ gss_krb5int_copy_ccache(OM_uint32 *minor_status,
     krb5_ccache out_ccache;
         
     assert(value->length == sizeof(out_ccache));
+
+    if (value->length != sizeof(out_ccache))
+	return GSS_S_FAILURE;
+
     out_ccache = (krb5_ccache)value->value;
 
-    /* validate the cred handle */
-    major_status = krb5_gss_validate_cred(minor_status, cred_handle);
-    if (major_status)
-        return(major_status);
+    /* cred handle will have been validated by gssspi_set_cred_option() */
 
     k5creds = (krb5_gss_cred_id_t) cred_handle;
     code = k5_mutex_lock(&k5creds->lock);

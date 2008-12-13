@@ -727,6 +727,10 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
    krb5_rcache rcache;
 
    assert(value->length == sizeof(rcache));
+
+   if (value->length != sizeof(rcache))
+      return GSS_S_FAILURE;
+
    rcache = (krb5_rcache)value->value;
 
    if (cred_handle == GSS_C_NO_CREDENTIAL)
