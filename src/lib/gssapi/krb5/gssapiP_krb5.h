@@ -852,8 +852,10 @@ krb5_error_code krb5_gss_init_context (krb5_context *ctxp);
 
 krb5_error_code krb5int_gss_use_kdc_context(void);
 
+#ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);
 void gss_krb5int_lib_fini(void);
+#endif
 
 OM_uint32 gss_krb5int_initialize_library(void);
 void gss_krb5int_cleanup_library(void);

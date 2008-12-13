@@ -31,104 +31,6 @@
 
 gss_mechanism KRB5_CALLCONV gss_mech_initialize(void);
 
-/*
- * The krb5 mechanism provides two mech OIDs; use this initializer to
- * ensure that both dispatch tables contain identical function
- * pointers.
- */
-#ifndef LEAN_CLIENT
-#define KRB5_GSS_CONFIG_INIT                            \
-    NULL,                                               \
-    krb5_gss_acquire_cred,                              \
-    krb5_gss_release_cred,                              \
-    krb5_gss_init_sec_context,                          \
-    krb5_gss_accept_sec_context,                        \
-    krb5_gss_process_context_token,                     \
-    krb5_gss_delete_sec_context,                        \
-    krb5_gss_context_time,                              \
-    krb5_gss_sign,                                      \
-    krb5_gss_verify,                                    \
-    krb5_gss_seal,                                      \
-    krb5_gss_unseal,                                    \
-    krb5_gss_display_status,                            \
-    krb5_gss_indicate_mechs,                            \
-    krb5_gss_compare_name,                              \
-    krb5_gss_display_name,                              \
-    krb5_gss_import_name,                               \
-    krb5_gss_release_name,                              \
-    krb5_gss_inquire_cred,                              \
-    krb5_gss_add_cred,                                  \
-    krb5_gss_export_sec_context,                        \
-    krb5_gss_import_sec_context,                        \
-    krb5_gss_inquire_cred_by_mech,                      \
-    krb5_gss_inquire_names_for_mech,                    \
-    krb5_gss_inquire_context,                           \
-    krb5_gss_internal_release_oid,                      \
-    krb5_gss_wrap_size_limit,                           \
-    krb5_gss_export_name,                               \
-    NULL,                        /* store_cred */\
-    NULL,                        /* import_name_object */\
-    NULL,                        /* export_name_object */\
-    krb5_gss_inquire_sec_context_by_oid,	\
-    krb5_gss_inquire_cred_by_oid,		\
-    krb5_gss_set_sec_context_option,		\
-    krb5_gssspi_set_cred_option,		\
-    krb5_gssspi_mech_invoke,			\
-    NULL,		 /* wrap_aead */	\
-    NULL,		 /* unwrap_aead */	\
-    krb5_gss_wrap_iov,				\
-    krb5_gss_unwrap_iov,			\
-    krb5_gss_wrap_iov_length,			\
-    NULL,					
-
-#else   /* LEAN_CLIENT */
-
-#define KRB5_GSS_CONFIG_INIT                            \
-    NULL,                                               \
-    krb5_gss_acquire_cred,                              \
-    krb5_gss_release_cred,                              \
-    krb5_gss_init_sec_context,                          \
-    NULL,                                               \
-    krb5_gss_process_context_token,                     \
-    krb5_gss_delete_sec_context,                        \
-    krb5_gss_context_time,                              \
-    krb5_gss_sign,                                      \
-    krb5_gss_verify,                                    \
-    krb5_gss_seal,                                      \
-    krb5_gss_unseal,                                    \
-    krb5_gss_display_status,                            \
-    krb5_gss_indicate_mechs,                            \
-    krb5_gss_compare_name,                              \
-    krb5_gss_display_name,                              \
-    krb5_gss_import_name,                               \
-    krb5_gss_release_name,                              \
-    krb5_gss_inquire_cred,                              \
-    krb5_gss_add_cred,                                  \
-    NULL,                                               \
-    NULL,                                               \
-    krb5_gss_inquire_cred_by_mech,                      \
-    krb5_gss_inquire_names_for_mech,                    \
-    krb5_gss_inquire_context,                           \
-    krb5_gss_internal_release_oid,                      \
-    krb5_gss_wrap_size_limit,                           \
-    krb5_gss_export_name,                               \
-    NULL,                        /* store_cred */\
-    NULL,                        /* import_name_object */\
-    NULL,                        /* export_name_object */\
-    krb5_gss_inquire_sec_context_by_oid,	\
-    krb5_gss_inquire_cred_by_oid,		\
-    krb5_gss_set_sec_context_option,		\
-    krb5_gssspi_set_cred_option,		\
-    krb5_gssspi_mech_invoke,			\
-    NULL,		 /* wrap_aead */	\
-    NULL,		 /* unwrap_aead */	\
-    krb5_gss_wrap_iov,				\
-    krb5_gss_unwrap_iov,			\
-    krb5_gss_wrap_iov_length,			\
-    NULL,					
-
-#endif /* LEAN_CLIENT */
-
 static const gss_OID_desc krb5_gss_options_oid_array[] = {
     {GSS_KRB5_COPY_CCACHE_OID_LENGTH, GSS_KRB5_COPY_CCACHE_OID},
 #define krb5_gss_copy_ccache_oid (&krb5_gss_options_oid_array[0])
@@ -378,7 +280,52 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
 
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
-    KRB5_GSS_CONFIG_INIT
+    NULL,                                               
+    krb5_gss_acquire_cred,
+    krb5_gss_release_cred,
+    krb5_gss_init_sec_context,
+#ifndef LEAN_CLIENT
+    krb5_gss_accept_sec_context,
+#endif
+    krb5_gss_process_context_token,
+    krb5_gss_delete_sec_context,
+    krb5_gss_context_time,
+    krb5_gss_sign,
+    krb5_gss_verify,
+    krb5_gss_seal,
+    krb5_gss_unseal,
+    krb5_gss_display_status,
+    krb5_gss_indicate_mechs,
+    krb5_gss_compare_name,
+    krb5_gss_display_name,
+    krb5_gss_import_name,
+    krb5_gss_release_name,
+    krb5_gss_inquire_cred,
+    krb5_gss_add_cred,
+#ifndef LEAN_CLIENT
+    krb5_gss_export_sec_context,
+    krb5_gss_import_sec_context,
+#endif
+    krb5_gss_inquire_cred_by_mech,
+    krb5_gss_inquire_names_for_mech,
+    krb5_gss_inquire_context,
+    krb5_gss_internal_release_oid,
+    krb5_gss_wrap_size_limit,
+    krb5_gss_export_name,
+    NULL,                        /* store_cred */
+    NULL,                        /* import_name_object */
+    NULL,                        /* export_name_object */
+    krb5_gss_inquire_sec_context_by_oid,
+    krb5_gss_inquire_cred_by_oid,
+    krb5_gss_set_sec_context_option,
+    krb5_gssspi_set_cred_option,
+    krb5_gssspi_mech_invoke,
+    NULL,		 /* wrap_aead */	
+    NULL,		 /* unwrap_aead */	
+    krb5_gss_wrap_iov,
+    krb5_gss_unwrap_iov,
+    krb5_gss_wrap_iov_length,
+    NULL,		/* complete_auth_token */
 };
 
 gss_mechanism KRB5_CALLCONV
