@@ -358,7 +358,7 @@ static int gss_krb5mechglue_init(void)
     mech_krb5.mech_type = (gss_OID)gss_mech_krb5_old;
     gssint_register_mechinfo(&mech_krb5);
 
-    mech_krb5.mechNameStr = "kerberos_v5_ms";
+    mech_krb5.mechNameStr = "mskrb";
     mech_krb5.mech_type = (gss_OID)gss_mech_krb5_wrong;
     gssint_register_mechinfo(&mech_krb5);
 
