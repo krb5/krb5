@@ -78,7 +78,7 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
     size_t		offset;
     int			i = 0, iov_count;
 
-    /* HEADER | SIGN_DATA | DATA | PADDING | TRAILER */
+    /* HEADER | SIGN_ONLY_DATA | DATA | PADDING | TRAILER */
 
     iov[i].type = GSS_IOV_BUFFER_TYPE_HEADER;
     iov[i].flags = 0;
