@@ -245,7 +245,7 @@ g_glue.so g_glue.po $(OUTPRE)g_glue.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(COM_ERR_DEPS) \
   $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../spnego/gssapiP_spnego.h \
+  $(srcdir)/../generic/gssapi_generic.h  \
   ../generic/gssapi_err_generic.h g_glue.c mechglue.h \
   mglueP.h
 g_imp_name.so g_imp_name.po $(OUTPRE)g_imp_name.$(OBJEXT): \
