@@ -62,6 +62,9 @@ gssspi_mech_invoke (OM_uint32 *minor_status,
 				      desired_mech,
 				      desired_object,
 				      value);
+    if (status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
+
     return status;
 }
 

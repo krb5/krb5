@@ -70,8 +70,10 @@ gssspi_set_cred_option(OM_uint32 *minor_status,
 						union_cred->cred_array[i],
 						desired_object,
 						value);
-	if (status != GSS_S_COMPLETE)
+	if (status != GSS_S_COMPLETE) {
+	    map_error(minor_status, mech);
 	    break;
+	}
     }
 
     return status;

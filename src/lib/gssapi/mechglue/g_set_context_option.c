@@ -102,7 +102,8 @@ gss_set_sec_context_option (OM_uint32 *minor_status,
 	    ctx->internal_ctx_id = internal_ctx;
 	    *context_handle = (gss_ctx_id_t)ctx;
 	}
-    }
+    } else
+	map_error(minor_status, mech);
 
     return status;
 }

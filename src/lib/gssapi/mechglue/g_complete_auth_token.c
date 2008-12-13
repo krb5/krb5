@@ -55,11 +55,13 @@ gss_complete_auth_token (OM_uint32 *minor_status,
     mech = gssint_get_mechanism (ctx->mech_type);
 
     if (mech != NULL) {
-	if (mech->gss_complete_auth_token != NULL)
+	if (mech->gss_complete_auth_token != NULL) {
 	    status = mech->gss_complete_auth_token(minor_status,
 						   ctx->internal_ctx_id,
 						   input_message_buffer);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_COMPLETE;
     } else
 	status = GSS_S_BAD_MECH;

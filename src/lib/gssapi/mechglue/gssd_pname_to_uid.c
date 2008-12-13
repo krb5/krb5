@@ -53,9 +53,11 @@ uid_t * uid;
 	if (mech_type == GSS_C_NULL_OID)
 	    mech_type = &mech->mech_type;
 
-	if (mech->pname_to_uid)
-		status = mech->pname_to_uid(pname, name_type, mech_type, uid);
-	else
+	if (mech->pname_to_uid) {
+	    status = mech->pname_to_uid(pname, name_type, mech_type, uid);
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_BAD_MECH;
     } else
 	status = GSS_S_BAD_MECH;

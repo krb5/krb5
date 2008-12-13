@@ -63,7 +63,8 @@ val_wrap_aead_args(
 }
 
 static OM_uint32
-gssint_wrap_aead_iov_shim(OM_uint32 *minor_status,
+gssint_wrap_aead_iov_shim(gss_mechanism mech,
+			  OM_uint32 *minor_status,
 			  gss_ctx_id_t context_handle,
 			  int conf_req_flag,
 			  gss_qop_t qop_req,
@@ -111,11 +112,15 @@ gssint_wrap_aead_iov_shim(OM_uint32 *minor_status,
 
     iov_count = i;
 
-    status = gss_wrap_iov_length(minor_status, context_handle,
-				 conf_req_flag, qop_req,
-				 NULL, iov, iov_count);
-    if (status != GSS_S_COMPLETE)
+    assert(mech->gss_wrap_iov_length);
+
+    status = mech->gss_wrap_iov_length(minor_status, context_handle,
+				       conf_req_flag, qop_req,
+				       NULL, iov, iov_count);
+    if (status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	return status;
+    }
 
     /* Format output token (does not include associated data) */
     for (i = 0, output_message_buffer->length = 0; i < iov_count; i++) {
@@ -134,19 +139,29 @@ gssint_wrap_aead_iov_shim(OM_uint32 *minor_status,
 
     for (i = 0, offset = 0; i < iov_count; i++) {
 	if (iov[i].type == GSS_IOV_BUFFER_TYPE_DATA &&
-	    (iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY))
+	    (iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)) {
+	    /* leave SIGN_ONLY buffer pointing to input_assoc_buffer */
 	    continue;
+	}
 
+	/* setup pointers for output buffers */
 	iov[i].buffer.value = (unsigned char *)output_message_buffer->value + offset;
 	offset += iov[i].buffer.length;
+
+	/* copy input_payload_buffer */
+	if (iov[i].type == GSS_IOV_BUFFER_TYPE_DATA)
+	    memcpy(iov[i].buffer.value, input_payload_buffer->value, input_payload_buffer->length);
     }
 
-    status = gss_wrap_iov(minor_status, context_handle,
-			  conf_req_flag, qop_req,
-			  conf_state, iov, iov_count);
+    assert(mech->gss_wrap_iov);
+
+    status = mech->gss_wrap_iov(minor_status, context_handle,
+				conf_req_flag, qop_req,
+				conf_state, iov, iov_count);
     if (status != GSS_S_COMPLETE) {
 	OM_uint32 minor;
 
+	map_error(minor_status, mech);
 	gss_release_buffer(&minor, output_message_buffer);
     }
 
@@ -205,8 +220,9 @@ gss_buffer_t		output_message_buffer;
 					output_message_buffer);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
-	} else if (mech->gss_wrap_iov) {
-	    status = gssint_wrap_aead_iov_shim(minor_status,
+	} else if (mech->gss_wrap_iov && mech->gss_wrap_iov_length) {
+	    status = gssint_wrap_aead_iov_shim(mech,
+					       minor_status,
 					       ctx,
 					       conf_req_flag,
 					       qop_req,

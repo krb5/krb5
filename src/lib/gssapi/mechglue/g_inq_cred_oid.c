@@ -107,8 +107,10 @@ gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 						 union_cred->cred_array[i],
 						 desired_object,
 						 &ret_set);
-	if (status != GSS_S_COMPLETE)
+	if (status != GSS_S_COMPLETE) {
+	    map_error(minor_status, mech);
 	    continue;
+	}
 
 	if (union_cred->count == 1) {
 	    union_set = ret_set;

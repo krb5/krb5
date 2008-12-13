@@ -62,7 +62,8 @@ val_unwrap_aead_args(
 }
 
 static OM_uint32
-gssint_wrap_aead_iov_shim(OM_uint32 *minor_status,
+gssint_wrap_aead_iov_shim(gss_mechanism mech,
+			  OM_uint32 *minor_status,
 			  gss_ctx_id_t context_handle,
 			  gss_buffer_t input_message_buffer,
 			  gss_buffer_t input_assoc_buffer,
@@ -92,8 +93,12 @@ gssint_wrap_aead_iov_shim(OM_uint32 *minor_status,
     iov[i].buffer.length = 0;
     i++;
 
-    status = gss_unwrap_iov(minor_status, context_handle, conf_state,
-			    qop_state, iov, i);
+    assert(mech->gss_unwrap_iov);
+
+    status = mech->gss_unwrap_iov(minor_status, context_handle, conf_state,
+				  qop_state, iov, i);
+    if (status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
 
     *output_payload_buffer = iov[i - 1].buffer;
 
@@ -150,7 +155,8 @@ gss_qop_t		*qop_state;
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
 	} else if (mech->gss_unwrap_iov) {
-	    status = gssint_wrap_aead_iov_shim(minor_status,
+	    status = gssint_wrap_aead_iov_shim(mech,
+					       minor_status,
 					       ctx,
 					       input_message_buffer,
 					       input_assoc_buffer,

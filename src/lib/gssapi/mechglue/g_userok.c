@@ -100,10 +100,12 @@ gssint_userok(OM_uint32 *minor,
 	} else
 		mechName = intName->mech_name;
 
-	if (mech->gssint_userok)
+	if (mech->gssint_userok) {
 		major = mech->gssint_userok(minor, mechName,
 				user, user_ok);
-	else
+		if (major != GSS_S_COMPLETE)
+		    map_error(minor_status, mech);
+	} else
 		major = compare_names(minor, intName->mech_type,
 				    name, user, user_ok);
 

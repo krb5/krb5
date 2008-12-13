@@ -67,7 +67,8 @@ val_seal_args(
 }
 
 static OM_uint32
-gssint_seal_iov_shim(OM_uint32 *minor_status,
+gssint_seal_iov_shim(gss_mechanism mech,
+		     OM_uint32 *minor_status,
 		     gss_ctx_id_t context_handle,
 		     int conf_req_flag,
 		     int qop_req,
@@ -98,12 +99,16 @@ gssint_seal_iov_shim(OM_uint32 *minor_status,
     iov[3].buffer.value = NULL;
     iov[3].buffer.length = 0;
 
-    status = gss_wrap_iov_length(minor_status, context_handle,
-				 conf_req_flag, qop_req,
-				 NULL, iov,
-				 sizeof(iov)/sizeof(iov[0]));
-    if (status != GSS_S_COMPLETE)
+    assert(mech->gss_wrap_iov_length);
+
+    status = mech->gss_wrap_iov_length(minor_status, context_handle,
+				       conf_req_flag, qop_req,
+				       NULL, iov,
+				       sizeof(iov)/sizeof(iov[0]));
+    if (status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	return status;
+    }
 
     output_message_buffer->length = iov[0].buffer.length +
 				    iov[1].buffer.length +
@@ -123,17 +128,20 @@ gssint_seal_iov_shim(OM_uint32 *minor_status,
     iov[1].buffer.value = (unsigned char *)output_message_buffer->value + offset;
     offset += iov[1].buffer.length;
 
+    memcpy(iov[1].buffer.value, input_message_buffer->value, iov[1].buffer.length);
+
     iov[2].buffer.value = (unsigned char *)output_message_buffer->value + offset;
     offset += iov[2].buffer.length;
 
     iov[3].buffer.value = (unsigned char *)output_message_buffer->value + offset;
 
-    status = gss_wrap_iov(minor_status, context_handle,
-			  conf_req_flag, qop_req, conf_state,
-			  iov, sizeof(iov)/sizeof(iov[0]));
+    status = mech->gss_wrap_iov(minor_status, context_handle,
+				conf_req_flag, qop_req, conf_state,
+				iov, sizeof(iov)/sizeof(iov[0]));
     if (status != GSS_S_COMPLETE) {
 	OM_uint32 minor;
 
+	map_error(minor_status, mech);
 	gss_release_buffer(&minor, output_message_buffer);
     }
 
@@ -190,8 +198,9 @@ gss_buffer_t		output_message_buffer;
 				    output_message_buffer);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
-	} else if (mech->gss_wrap_iov) {
-	    status = gssint_seal_iov_shim(minor_status,
+	} else if (mech->gss_wrap_iov && mech->gss_wrap_iov_length) {
+	    status = gssint_seal_iov_shim(mech,
+					  minor_status,
 					  ctx,
 					  conf_req_flag,
 					  qop_req,

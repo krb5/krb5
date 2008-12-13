@@ -54,12 +54,14 @@ gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
     mech = gssint_get_mechanism (ctx->mech_type);
 
     if (mech != NULL) {
-	if (mech->gss_inquire_sec_context_by_oid != NULL)
+	if (mech->gss_inquire_sec_context_by_oid != NULL) {
 	    status = mech->gss_inquire_sec_context_by_oid(minor_status,
 							  ctx->internal_ctx_id,
 							  desired_object,
 							  data_set);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_BAD_MECH;
 
 	return status;
