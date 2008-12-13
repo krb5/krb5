@@ -137,21 +137,35 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
 	return GSS_S_FAILURE;
     }
 
-    for (i = 0, offset = 0; i < iov_count; i++) {
-	if (iov[i].type == GSS_IOV_BUFFER_TYPE_DATA &&
-	    (iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)) {
-	    /* leave SIGN_ONLY buffer pointing to input_assoc_buffer */
-	    continue;
-	}
+    i = 0, offset = 0;
 
-	/* setup pointers for output buffers */
-	iov[i].buffer.value = (unsigned char *)output_message_buffer->value + offset;
-	offset += iov[i].buffer.length;
+    /* HEADER */
+    iov[i].buffer.value = (unsigned char *)output_message_buffer->value + offset;
+    offset += iov[i].buffer.length;
+    i++;
 
-	/* copy input_payload_buffer */
-	if (iov[i].type == GSS_IOV_BUFFER_TYPE_DATA)
-	    memcpy(iov[i].buffer.value, input_payload_buffer->value, input_payload_buffer->length);
-    }
+    /* SIGN_ONLY_DATA */
+    if (input_assoc_buffer != GSS_C_NO_BUFFER)
+	i++;
+
+    /* DATA */
+    iov[i].buffer.value = (unsigned char *)output_message_buffer->value + offset;
+    offset += iov[i].buffer.length;
+
+    memcpy(iov[i].buffer.value, input_payload_buffer->value, iov[i].buffer.length);
+    i++;
+
+    /* PADDING */
+    iov[i].buffer.value = (unsigned char *)output_message_buffer->value + offset;
+    offset += iov[i].buffer.length;
+    i++;
+
+    /* TRAILER */
+    iov[i].buffer.value = (unsigned char *)output_message_buffer->value + offset;
+    offset += iov[i].buffer.length;
+    i++;
+
+    assert(offset == output_message_buffer->length);
 
     assert(mech->gss_wrap_iov);
 
