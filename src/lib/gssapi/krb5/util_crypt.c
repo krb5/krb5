@@ -764,13 +764,13 @@ int kg_map_toktype(int proto, int toktype)
     if (proto)
         switch (toktype) {
         case KG_TOK_SIGN_MSG:
-            toktype2 = 0x0404;
+            toktype2 = KG2_TOK_MIC_MSG;
             break;
         case KG_TOK_SEAL_MSG:
-            toktype2 = 0x0504;
+            toktype2 = KG2_TOK_WRAP_MSG;
             break;
         case KG_TOK_DEL_CTX:
-            toktype2 = 0x0405;
+            toktype2 = KG2_TOK_DEL_CTX;
             break;
         default:
             toktype2 = toktype;
