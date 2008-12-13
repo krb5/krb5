@@ -40,7 +40,7 @@
 #include "k5-thread.h"
 
 #include "gssapi_generic.h"
-
+#include "gssapi_ext.h"
 #include "gssapi_err_generic.h"
 #include <errno.h>
 
@@ -174,11 +174,15 @@ unsigned int g_token_size (const gss_OID_desc * mech, unsigned int body_size);
 void g_make_token_header (const gss_OID_desc * mech, unsigned int body_size,
                           unsigned char **buf, int tok_type);
 
+/* flags for g_verify_token_header() */
+#define	G_VFY_TOKEN_HDR_WRAPPER_REQUIRED	0x01
+#define G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE		0x02
+
 gss_int32 g_verify_token_header (const gss_OID_desc * mech,
                                  unsigned int *body_size,
                                  unsigned char **buf, int tok_type,
                                  unsigned int toksize_in,
-                                 int wrapper_required);
+                                 int flags);
 
 OM_uint32 g_display_major_status (OM_uint32 *minor_status,
                                   OM_uint32 status_value,
@@ -263,5 +267,23 @@ OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc *oid);
 int gssint_mecherrmap_get(OM_uint32 minor, gss_OID mech_oid,
                           OM_uint32 *mech_minor);
 OM_uint32 gssint_mecherrmap_map_errcode(OM_uint32 errcode);
+
+OM_uint32 generic_gss_create_empty_buffer_set
+(OM_uint32 * /*minor_status*/,
+            gss_buffer_set_t * /*buffer_set*/);
+
+OM_uint32 generic_gss_add_buffer_set_member
+(OM_uint32 * /*minor_status*/,
+            const gss_buffer_t /*member_buffer*/,
+            gss_buffer_set_t * /*buffer_set*/);
+
+OM_uint32 generic_gss_release_buffer_set
+(OM_uint32 * /*minor_status*/,
+            gss_buffer_set_t * /*buffer_set*/);
+
+OM_uint32 generic_gss_copy_oid_set
+(OM_uint32 *, /* minor_status */
+	    const gss_OID_set_desc *, /* const oidset*/
+	    gss_OID_set * /*new_oidset*/);
 
 #endif /* _GSSAPIP_GENERIC_H_ */
