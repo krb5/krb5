@@ -507,7 +507,8 @@ krb5_gss_use_kdc_context(void)
 }
 
 OM_uint32
-gss_krb5_get_subkey(
+gsskrb5_get_subkey(
+    OM_uint32  *minor_status,
     const gss_ctx_id_t context_handle,
     krb5_keyblock **key)
 {
@@ -515,13 +516,15 @@ gss_krb5_get_subkey(
 	GSS_KRB5_GET_SUBKEY_OID_LENGTH,
 	GSS_KRB5_GET_SUBKEY_OID };
     OM_uint32 major_status;
-    OM_uint32 minor_status;
     gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
+
+    if (minor_status == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     if (key == NULL)
 	return GSS_S_CALL_INACCESSIBLE_WRITE;
 
-    major_status = gss_inquire_sec_context_by_oid(&minor_status,
+    major_status = gss_inquire_sec_context_by_oid(minor_status,
 						  context_handle,
 						  (const gss_OID)&req_oid,
 						  &data_set);
@@ -536,7 +539,9 @@ gss_krb5_get_subkey(
 
     *key = *((krb5_keyblock **)data_set->elements[0].value);
 
-    gss_release_buffer_set(&minor_status, &data_set);
+    gss_release_buffer_set(minor_status, &data_set);
+
+    *minor_status = 0;
 
     return GSS_S_COMPLETE;
 }
