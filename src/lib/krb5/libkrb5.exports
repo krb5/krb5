@@ -508,7 +508,6 @@ krb5int_init_context_kdc
 krb5int_initialize_library
 krb5int_pac_sign
 krb5int_sendtokdc_debug_handler
-krb5int_utf8_normcmp
 profile_abandon
 profile_add_node
 profile_add_relation
