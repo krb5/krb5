@@ -134,7 +134,7 @@ error_out:
  * exported lucid context structure.
  */
 OM_uint32 KRB5_CALLCONV
-gss_krb5_free_lucid_sec_context(
+gss_krb5int_free_lucid_sec_context(
     OM_uint32 *minor_status,
     void *kctx)
 {

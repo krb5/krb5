@@ -1,5 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
+ * Portions Copyright (C) 2008 Novell Inc.
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software
@@ -133,4 +134,96 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 
     *minor_status = 0;
     return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_get_subkey(
+   const gss_ctx_id_t context_handle,
+   krb5_keyblock **key)
+{
+   krb5_gss_ctx_id_rec *ctx;
+   int code;
+
+   *key = NULL;
+
+   /* validate the context handle */
+   if (! kg_validate_ctx_id(context_handle)) {
+      return(GSS_S_NO_CONTEXT);
+   }
+
+   ctx = (krb5_gss_ctx_id_rec *) context_handle;
+
+   if (! ctx->established) {
+      return(GSS_S_NO_CONTEXT);
+   }
+
+   code = krb5_copy_keyblock(ctx->k5_context,
+			     ctx->have_acceptor_subkey ?
+				ctx->acceptor_subkey : ctx->subkey,
+			     key);
+   if (code) {
+     return (GSS_S_FAILURE);
+   }
+
+   return (GSS_S_COMPLETE);
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_extract_authz_data_from_sec_context(
+   OM_uint32 *minor_status,
+   const gss_ctx_id_t context_handle,
+   int ad_type,
+   gss_buffer_set_t ad_data)
+{
+   OM_uint32 major_status;
+   krb5_gss_ctx_id_rec *ctx;
+   krb5_authdata **p;
+   gss_buffer_t tmp;
+
+   /* validate the context handle */
+   if (!kg_validate_ctx_id(context_handle)) {
+      return (GSS_S_NO_CONTEXT);
+   }
+
+   ctx = (krb5_gss_ctx_id_rec *) context_handle;
+
+   if (!ctx->established) {
+      return (GSS_S_NO_CONTEXT);
+   }
+
+   major_status = GSS_S_FAILURE;
+   *minor_status = ENOENT;
+
+   ad_data->count = 0;
+   ad_data->elements = NULL;
+
+   /*
+    * This is an internal API so let's just return a pointer
+    * into the data and have the shim copy it.
+    */
+   if (ctx->authdata != NULL) {
+      major_status = GSS_S_COMPLETE;
+      *minor_status = 0;
+      for (p = ctx->authdata; *p != NULL; p++) {
+	 if ((*p)->ad_type == ad_type) {
+	    ad_data->count++;
+	    tmp = (gss_buffer_desc *)realloc(ad_data->elements,
+					     ad_data->count * sizeof(gss_buffer_desc));
+	    if (tmp == NULL) {
+		if (ad_data->elements != NULL)
+		    free(ad_data->elements);
+		ad_data->count = 0;
+		ad_data->elements = NULL;
+		*minor_status = ENOMEM;
+		major_status = GSS_S_FAILURE;
+		break;
+	    }
+	    ad_data->elements = tmp;
+	    ad_data->elements[ad_data->count-1].length = (*p)->length;
+	    ad_data->elements[ad_data->count-1].value = (*p)->contents;
+	 }
+      }
+   }
+       
+   return (major_status);
 }

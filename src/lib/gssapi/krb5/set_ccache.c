@@ -30,10 +30,9 @@
 
 #include <string.h>
 #include "gssapiP_krb5.h"
-#include "gss_libinit.h"
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_ccache_name(minor_status, name, out_name)
+gss_krb5int_ccache_name(minor_status, name, out_name)
     OM_uint32 *minor_status;
     const char *name;
     const char **out_name;
@@ -43,7 +42,7 @@ gss_krb5_ccache_name(minor_status, name, out_name)
     OM_uint32 minor = 0;
     char *gss_out_name;
 
-    err = gssint_initialize_library();
+    err = gss_krb5int_initialize_library();
     if (err) {
         *minor_status = err;
         return GSS_S_FAILURE;

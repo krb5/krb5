@@ -3,7 +3,24 @@ myfulldir=lib/gssapi/krb5
 mydir=lib/gssapi/krb5
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
-DEFS=
+DEFS=-D_GSS_STATIC_LINK=1
+
+#PROG_LIBPATH=-L$(TOPLIBD)
+#PROG_RPATH=$(KRB5_LIBDIR)
+#MODULE_INSTALL_DIR = $(GSS_MODULE_DIR)
+#LIBBASE=mech_krb5
+#LIBMAJOR=0
+#LIBMINOR=0
+#SO_EXT=.so
+#LIBINITFUNC=gss_krb5int_init
+#LIBFINIFUNC=gss_krb5int_fini
+#STOBJLISTS=../generic/OBJS.ST OBJS.ST
+#SUBDIROBJLISTS=../generic/OBJS.ST
+#SHLIB_EXPDEPS=$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
+#SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+#SHLIB_DIRS=-L$(TOPLIBD)
+#SHLIB_RDIRS=$(KRB5_LIBDIR)
+#RELDIR=gssapi/krb5
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb5
@@ -69,10 +86,7 @@ SRCS = \
 	$(srcdir)/val_cred.c \
 	$(srcdir)/verify.c \
 	$(srcdir)/wrap_size_limit.c \
-	gssapi_err_krb5.c
-
-#	$(srcdir)/pname_to_uid.c \
-#	$(srcdir)/k5mech.c
+	$(srcdir)/gssapi_err_krb5.c
 
 OBJS = \
 	$(OUTPRE)accept_sec_context.$(OBJEXT) \
@@ -286,7 +300,7 @@ acquire_cred.so acquire_cred.po $(OUTPRE)acquire_cred.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../gss_libinit.h \
+  $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h acquire_cred.c gssapiP_krb5.h \
   gssapi_err_krb5.h gssapi_krb5.h
 add_cred.so add_cred.po $(OUTPRE)add_cred.$(OBJEXT): \
@@ -391,7 +405,7 @@ disp_status.so disp_status.po $(OUTPRE)disp_status.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../gss_libinit.h \
+  $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h disp_status.c error_map.h \
   gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h
 duplicate_name.so duplicate_name.po $(OUTPRE)duplicate_name.$(OBJEXT): \
@@ -510,7 +524,7 @@ init_sec_context.so init_sec_context.po $(OUTPRE)init_sec_context.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../gss_libinit.h \
+  $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h gssapiP_krb5.h gssapi_err_krb5.h \
   gssapi_krb5.h init_sec_context.c
 inq_context.so inq_context.po $(OUTPRE)inq_context.$(OBJEXT): \
@@ -704,7 +718,7 @@ set_ccache.so set_ccache.po $(OUTPRE)set_ccache.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../gss_libinit.h \
+  $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h gssapiP_krb5.h gssapi_err_krb5.h \
   gssapi_krb5.h set_ccache.c
 sign.so sign.po $(OUTPRE)sign.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

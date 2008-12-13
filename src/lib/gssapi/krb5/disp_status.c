@@ -22,7 +22,6 @@
  */
 
 #include "gssapiP_krb5.h"
-#include "gss_libinit.h"
 #include "com_err.h"
 
 /* XXXX internationalization!! */
@@ -177,7 +176,7 @@ krb5_gss_display_status(minor_status, status_value, status_type,
         return(g_display_major_status(minor_status, status_value,
                                       message_context, status_string));
     } else if (status_type == GSS_C_MECH_CODE) {
-        (void) gssint_initialize_library();
+        (void) gss_krb5int_initialize_library();
 
         if (*message_context) {
             *minor_status = (OM_uint32) G_BAD_MSG_CTX;

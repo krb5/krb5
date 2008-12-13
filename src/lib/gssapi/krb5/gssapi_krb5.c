@@ -1,5 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
+ * Portions Copyright (C) 2008 Novell Inc.
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software
@@ -269,4 +270,397 @@ kg_set_ccache_name (OM_uint32 *minor_status, const char *name)
     free (new_name);
     *minor_status = 0;
     return GSS_S_COMPLETE;
+}
+
+/*
+ * Mechanism specific API shims below
+ */
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_get_tkt_flags(
+    OM_uint32 *minor_status,
+    gss_ctx_id_t context_handle,
+    krb5_flags *ticket_flags)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH,
+	GSS_KRB5_GET_TKT_FLAGS_OID };
+    OM_uint32 major_status;
+    gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
+
+    if (ticket_flags == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    major_status = gss_inquire_sec_context_by_oid(minor_status,
+						  context_handle,
+						  (const gss_OID)&req_oid,
+						  &data_set);
+    if (major_status != GSS_S_COMPLETE)
+	return major_status;
+
+    if (data_set == GSS_C_NO_BUFFER_SET ||
+        data_set->count != 1 ||
+	data_set->elements[0].length != sizeof(*ticket_flags)) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    *ticket_flags = *((krb5_flags *)data_set->elements[0].value);
+
+    gss_release_buffer_set(minor_status, &data_set);
+
+    *minor_status = 0;
+
+    return GSS_S_COMPLETE;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_copy_ccache(
+    OM_uint32 *minor_status,
+    gss_cred_id_t cred_handle,
+    krb5_ccache out_ccache)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_COPY_CCACHE_OID_LENGTH,
+	GSS_KRB5_COPY_CCACHE_OID };
+    OM_uint32 major_status;
+    gss_buffer_desc req_buffer;
+
+    if (out_ccache == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    req_buffer.value = out_ccache;
+    req_buffer.length = sizeof(out_ccache);
+
+    major_status = gssspi_set_cred_option(minor_status,
+					  cred_handle,
+					  (const gss_OID)&req_oid,
+					  &req_buffer);
+
+    return major_status;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_export_lucid_sec_context(
+    OM_uint32 *minor_status,
+    gss_ctx_id_t *context_handle,
+    OM_uint32 version,
+    void **kctx)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH,
+	GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID };
+    OM_uint32 major_status;
+    struct krb5_gss_export_lucid_sec_context_req req;
+    gss_buffer_desc req_buffer;
+
+    if (kctx == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    *kctx = NULL;
+
+    req.version = version;
+    req.kctx = NULL;
+
+    req_buffer.length = sizeof(req);
+    req_buffer.value = &req;
+
+    /*
+     * While it may seem we should call
+     * gss_inquire_context_by_oid() that would not let
+     * the underlying mechanism delete the context.
+     */
+    major_status = gss_set_sec_context_option(minor_status,
+					      context_handle,
+					      (const gss_OID)&req_oid,
+					      &req_buffer);
+
+    *kctx = req.kctx;
+
+    return major_status;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_set_allowable_enctypes(
+    OM_uint32 *minor_status,
+    gss_cred_id_t cred,
+    OM_uint32 num_ktypes,
+    krb5_enctype *ktypes)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH,
+	GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID };
+    OM_uint32 major_status;
+    struct krb5_gss_set_allowable_enctypes_req req;
+    gss_buffer_desc req_buffer;
+    
+    req.num_ktypes = num_ktypes;
+    req.ktypes = ktypes;
+
+    req_buffer.length = sizeof(req);
+    req_buffer.value = &req;
+
+    major_status = gssspi_set_cred_option(minor_status,
+					  cred,
+					  (const gss_OID)&req_oid,
+					  &req_buffer);
+
+    return major_status;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_ccache_name(
+    OM_uint32 *minor_status,
+    const char *name,
+    const char **out_name)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_CCACHE_NAME_OID_LENGTH,
+	GSS_KRB5_CCACHE_NAME_OID };
+    OM_uint32 major_status;
+    struct krb5_gss_ccache_name_req req;
+    gss_buffer_desc req_buffer;
+
+    if (out_name == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    *out_name = NULL;
+
+    req.name = name;
+    req.out_name = NULL;
+
+    req_buffer.length = sizeof(req);
+    req_buffer.value = &req;
+
+    major_status = gssspi_mech_invoke(minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    *out_name = req.out_name;
+
+    return major_status;    
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_free_lucid_sec_context(
+    OM_uint32 *minor_status,
+    void *kctx)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH,
+	GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID };
+    OM_uint32 major_status;
+    gss_buffer_desc req_buffer;
+
+    req_buffer.length = sizeof(kctx);
+    req_buffer.value = kctx;
+
+    major_status = gssspi_mech_invoke(minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    return major_status;    
+}
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_register_acceptor_identity(const char *keytab)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH,
+	GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID };
+    OM_uint32 major_status;
+    OM_uint32 minor_status;
+    gss_buffer_desc req_buffer;
+
+    req_buffer.length = sizeof(keytab);
+    req_buffer.value = (char *)keytab;
+
+    major_status = gssspi_mech_invoke(&minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    return major_status;    
+}
+
+krb5_error_code
+krb5_gss_use_kdc_context(void)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH,
+	GSS_KRB5_USE_KDC_CONTEXT_OID };
+    OM_uint32 major_status;
+    OM_uint32 minor_status;
+    gss_buffer_desc req_buffer;
+
+    req_buffer.length = 0;
+    req_buffer.value = NULL;
+
+    major_status = gssspi_mech_invoke(&minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    return major_status;    
+}
+
+OM_uint32
+gss_krb5_get_subkey(
+    const gss_ctx_id_t context_handle,
+    krb5_keyblock **key)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_GET_SUBKEY_OID_LENGTH,
+	GSS_KRB5_GET_SUBKEY_OID };
+    OM_uint32 major_status;
+    OM_uint32 minor_status;
+    gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
+
+    if (key == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    major_status = gss_inquire_sec_context_by_oid(&minor_status,
+						  context_handle,
+						  (const gss_OID)&req_oid,
+						  &data_set);
+    if (major_status != GSS_S_COMPLETE)
+	return major_status;
+
+    if (data_set == GSS_C_NO_BUFFER_SET ||
+        data_set->count != 1 ||
+	data_set->elements[0].length != sizeof(*key)) {
+	return GSS_S_FAILURE;
+    }
+
+    *key = *((krb5_keyblock **)data_set->elements[0].value);
+
+    gss_release_buffer_set(&minor_status, &data_set);
+
+    return GSS_S_COMPLETE;
+}
+
+/*
+ * This API should go away and be replaced with an accessor
+ * into a gss_name_t.
+ */
+OM_uint32 KRB5_CALLCONV
+gsskrb5_extract_authz_data_from_sec_context(
+    OM_uint32 *minor_status,
+    const gss_ctx_id_t context_handle,
+    int ad_type,
+    gss_buffer_t ad_data)
+{
+    gss_OID_desc req_oid;
+    unsigned char oid_buf[GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH + 6];
+    OM_uint32 major_status;
+    gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
+    int oad_type, i;
+    unsigned char *op;
+    OM_uint32 nbytes;
+
+    if (ad_data == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    /*
+     * This absolutely horrible code is used to DER encode the
+     * requested authorization data type into the last element
+     * of the request OID. Oh for an ASN.1 library...
+     */
+
+    memcpy(oid_buf, GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID,
+	   GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH);
+
+    nbytes = 0;
+    oad_type = ad_type;
+    while (ad_type) {
+	nbytes++;
+	ad_type >>= 7;
+    }
+    ad_type = oad_type;
+    op = oid_buf + GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH + nbytes;
+    i = -1;
+    while (ad_type) {
+	op[i] = (unsigned char)ad_type & 0x7f;
+	if (i != -1)
+	    op[i] |= 0x80;
+	i--;
+	ad_type >>= 7;
+    }
+
+    req_oid.elements = oid_buf;
+    req_oid.length = GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH + nbytes;
+    assert(req_oid.length <= sizeof(oid_buf));
+
+    major_status = gss_inquire_sec_context_by_oid(minor_status,
+						  context_handle,
+						  (const gss_OID)&req_oid,
+						  &data_set);
+    if (major_status != GSS_S_COMPLETE) {
+	return major_status;
+    }
+
+    if (data_set == GSS_C_NO_BUFFER_SET ||
+	data_set->count != 1) {
+	return GSS_S_FAILURE;
+    }
+
+    ad_data->length = data_set->elements[0].length;
+    ad_data->value = data_set->elements[0].value;
+
+    data_set->elements[0].length = 0;
+    data_set->elements[0].value = NULL;
+
+    data_set->count = 0;
+
+    gss_release_buffer_set(minor_status, &data_set);
+
+    return GSS_S_COMPLETE;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_set_cred_rcache(
+    OM_uint32 *minor_status,
+    gss_cred_id_t cred,
+    krb5_rcache rcache)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH,
+	GSS_KRB5_SET_CRED_RCACHE_OID };
+    OM_uint32 major_status;
+    gss_buffer_desc req_buffer;
+    
+    req_buffer.length = sizeof(rcache);
+    req_buffer.value = rcache;
+
+    major_status = gssspi_set_cred_option(minor_status,
+					  cred,
+					  (const gss_OID)&req_oid,
+					  &req_buffer);
+
+    return major_status;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_set_cred_alias(
+    OM_uint32 *minor_status,
+    gss_cred_id_t cred,
+    krb5_principal *aliases)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_SET_ACCEPTOR_ALIAS_OID_LENGTH,
+	GSS_KRB5_SET_ACCEPTOR_ALIAS_OID };
+    OM_uint32 major_status;
+    gss_buffer_desc req_buffer;
+
+    req_buffer.length = sizeof(aliases);
+    req_buffer.value = aliases;
+
+    major_status = gssspi_set_cred_option(minor_status,
+					  cred,
+					  (const gss_OID)&req_oid,
+					  &req_buffer);
+
+    return major_status;
 }

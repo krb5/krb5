@@ -180,7 +180,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
             if (cred_handle == GSS_C_NO_CREDENTIAL)
                 krb5_gss_release_cred(minor_status, (gss_cred_id_t *)&cred);
 
-            (void) gss_release_oid_set(minor_status, &mechs);
+            (void) generic_gss_release_oid_set(minor_status, &mechs);
             krb5_free_principal(context, ret_name);
             *minor_status = (OM_uint32) G_VALIDATE_FAILED;
             krb5_free_context(context);

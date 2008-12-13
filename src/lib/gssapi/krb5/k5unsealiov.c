@@ -365,7 +365,10 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 	    input_length += trailer->buffer.length;
     }
 
-    vfyflags = !ctx->proto;
+    if (ctx->proto == 0)
+	vfyflags |= G_VFY_TOKEN_HDR_WRAPPER_REQUIRED;
+    if (ctx->gss_flags & GSS_C_DCE_STYLE)
+	vfyflags |= G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE;
 
     code = g_verify_token_header(ctx->mech_used,
 				 &bodysize, &ptr, toktype2,
@@ -425,7 +428,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     code = g_verify_token_header(ctx->mech_used,
 				 &bodysize, &ptr, toktype2,
 				 stream->buffer.length,
-				 !ctx->proto);
+				 ctx->proto ? 0 : G_VFY_TOKEN_HDR_WRAPPER_REQUIRED);
     if (code != 0 || stream->buffer.length < 16) {
 	major_status = GSS_S_DEFECTIVE_TOKEN;
 	goto cleanup;
@@ -600,8 +603,6 @@ kg_unseal_iov(OM_uint32 *minor_status,
     }
 
     toktype2 = kg_map_toktype(ctx->proto, toktype);
-
-    assert(toktype2 == KG_TOK_WRAP_MSG);
 
     if (kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_STREAM) != NULL) {
 	code = kg_unseal_stream_iov(minor_status, ctx, conf_state, qop_state,

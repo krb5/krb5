@@ -50,7 +50,7 @@ krb5_gss_inquire_names_for_mech(minor_status, mechanism, name_types)
     }
 
     /* We're okay.  Create an empty OID set */
-    major = gss_create_empty_oid_set(minor_status, name_types);
+    major = generic_gss_create_empty_oid_set(minor_status, name_types);
     if (major == GSS_S_COMPLETE) {
         /* Now add our members. */
         if (
@@ -93,8 +93,7 @@ krb5_gss_inquire_names_for_mech(minor_status, mechanism, name_types)
          * status with the release call.
          */
         if (major != GSS_S_COMPLETE)
-            (void) gss_release_oid_set(&minor,
-                                       name_types);
+            (void) generic_gss_release_oid_set(&minor, name_types);
     }
     return(major);
 }
