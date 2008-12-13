@@ -160,9 +160,9 @@ static const gss_OID_desc krb5_gss_options_oid_array[] = {
 
 OM_uint32
 krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
-			     const gss_ctx_id_t context_handle,
-			     const gss_OID desired_object,
-			     gss_buffer_set_t *data_set)
+				     const gss_ctx_id_t context_handle,
+				     const gss_OID desired_object,
+				     gss_buffer_set_t *data_set)
 {
     gss_buffer_set_desc rep_set = {0, NULL};
     gss_buffer_desc rep;
@@ -245,7 +245,11 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 	    rep.value = u.key->contents;
 	    rep.length = u.key->length;
 
-	    free(u.key);
+	    major_status = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
+
+	    krb5_free_keyblock(((krb5_gss_ctx_id_rec *)context_handle)->k5_context, u.key);
+
+	    return major_status;
 	}
     } else {
 	*minor_status = EINVAL;
