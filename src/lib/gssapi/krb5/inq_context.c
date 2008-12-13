@@ -163,7 +163,7 @@ gss_krb5int_get_subkey(
 
     major_status = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
     if (GSS_ERROR(major_status)) {
-	krb5_free_keyblock(ctx->k5_context, &outkey);
+	krb5_free_keyblock(ctx->k5_context, outkey);
 	return major_status;
     }
 
@@ -254,3 +254,21 @@ gss_krb5int_extract_authz_data_from_sec_context(
 
     return major_status;
 }
+
+OM_uint32
+gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *minor_status,
+					      const gss_ctx_id_t context_handle,
+                                              const gss_OID desired_oid,
+                                              gss_buffer_set_t *data_set)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    gss_buffer_desc rep;
+
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+
+    rep.value = &ctx->authtime;
+    rep.length = sizeof(ctx->authtime);
+
+    return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
+}
+

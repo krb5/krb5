@@ -921,6 +921,7 @@ kg_accept_krb5(minor_status, context_handle,
 	}
     }
 
+    ctx->authtime = ticket->enc_part2->times.authtime;
     ctx->endtime = ticket->enc_part2->times.endtime;
     ctx->krb_flags = ticket->enc_part2->flags;
 

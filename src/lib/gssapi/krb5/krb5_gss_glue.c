@@ -52,6 +52,10 @@ static struct {
     {
 	{GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID},
 	gss_krb5int_export_lucid_sec_context
+    },
+    {
+	{GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID},
+	gss_krb5int_extract_authtime_from_sec_context
     }
 };
 
@@ -67,10 +71,15 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
     if (minor_status == NULL)
 	return GSS_S_CALL_INACCESSIBLE_WRITE;
 
+    *minor_status = 0;
+
     if (desired_object == GSS_C_NO_OID)
 	return GSS_S_CALL_INACCESSIBLE_READ;
 
-    *minor_status = 0;
+    if (data_set == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    *data_set = GSS_C_NO_BUFFER_SET;
 
     if (!kg_validate_ctx_id(context_handle))
 	return GSS_S_NO_CONTEXT;
@@ -114,11 +123,15 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
     if (minor_status == NULL)
 	return GSS_S_CALL_INACCESSIBLE_WRITE;
 
+    *minor_status = 0;
+
     if (desired_object == GSS_C_NO_OID)
 	return GSS_S_CALL_INACCESSIBLE_READ;
 
-    *minor_status = 0;
+    if (data_set == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
 
+    *data_set = GSS_C_NO_BUFFER_SET;
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
 	*minor_status = KRB5_NOCREDS_SUPPLIED;
 	return GSS_S_NO_CRED;
@@ -923,3 +936,41 @@ gss_krb5_set_cred_alias(
     return major_status;
 }
 #endif
+
+OM_uint32 KRB5_CALLCONV
+gsskrb5_extract_authtime_from_sec_context(OM_uint32 *minor_status,
+					  gss_ctx_id_t context_handle,
+					  krb5_timestamp *authtime)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH,
+	GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID };
+    OM_uint32 major_status;
+    gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
+
+    if (authtime == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    major_status = gss_inquire_sec_context_by_oid(minor_status,
+						  context_handle,
+						  (const gss_OID)&req_oid,
+						  &data_set);
+    if (major_status != GSS_S_COMPLETE)
+	return major_status;
+
+    if (data_set == GSS_C_NO_BUFFER_SET ||
+        data_set->count != 1 ||
+	data_set->elements[0].length != sizeof(*authtime)) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+
+    *authtime = *((krb5_flags *)data_set->elements[0].value);
+
+    gss_release_buffer_set(minor_status, &data_set);
+
+    *minor_status = 0;
+
+    return GSS_S_COMPLETE;
+}
+

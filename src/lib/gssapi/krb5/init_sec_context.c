@@ -629,6 +629,8 @@ new_connection(
     if (code)
         goto fail;
 
+    ctx->authtime = k_cred->times.authtime;
+
     if (default_mech) {
         mech_type = (gss_OID) gss_mech_krb5;
     }

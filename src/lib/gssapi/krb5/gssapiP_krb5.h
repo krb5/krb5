@@ -191,6 +191,7 @@ typedef struct _krb5_gss_ctx_id_rec {
     int sealalg;
     krb5_keyblock *enc;
     krb5_keyblock *seq;
+    krb5_timestamp authtime;
     krb5_timestamp endtime;
     krb5_flags krb_flags;
     /* XXX these used to be signed.  the old spec is inspecific, and
@@ -928,6 +929,15 @@ gss_krb5int_get_subkey(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffe
 
 OM_uint32
 gss_krb5int_set_cred_rcache(OM_uint32 *, gss_cred_id_t, const gss_OID, const gss_buffer_t);
+
+#define GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH 9
+#define GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x0e"
+
+OM_uint32
+gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
+					      const gss_ctx_id_t,
+					      const gss_OID,
+					      gss_buffer_set_t *);
 
 #ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);
