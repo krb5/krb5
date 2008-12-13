@@ -2574,7 +2574,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_pac_verify
 (krb5_context context,
 		const krb5_pac pac,
-		time_t authtime,
+		krb5_timestamp authtime,
 		krb5_const_principal principal,
 		const krb5_keyblock *server,
 		const krb5_keyblock *privsvr);

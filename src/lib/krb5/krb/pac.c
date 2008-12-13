@@ -378,7 +378,7 @@ krb5_pac_parse(krb5_context context,
 }
 
 static krb5_error_code
-k5_time_to_seconds_since_1970(krb5_ui_8 time, time_t *elapsedSeconds)
+k5_time_to_seconds_since_1970(krb5_ui_8 time, krb5_timestamp *elapsedSeconds)
 {
     krb5_ui_8 abstime;
 
@@ -395,7 +395,7 @@ k5_time_to_seconds_since_1970(krb5_ui_8 time, time_t *elapsedSeconds)
 }    
 
 static krb5_error_code
-k5_seconds_since_1970_to_time(time_t elapsedSeconds, krb5_ui_8 *time)
+k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds, krb5_ui_8 *time)
 {
     *time = elapsedSeconds;
 
@@ -410,14 +410,14 @@ k5_seconds_since_1970_to_time(time_t elapsedSeconds, krb5_ui_8 *time)
 static krb5_error_code
 k5_pac_validate_client(krb5_context context,
 		       const krb5_pac pac,
-		       time_t authtime,
+		       krb5_timestamp authtime,
 		       krb5_const_principal principal)
 {
     krb5_error_code ret;
     krb5_data client_info;
     char *pac_princname;
     unsigned char *p;
-    time_t pac_authtime;
+    krb5_timestamp pac_authtime;
     krb5_ui_2 pac_princname_length;
     krb5_ui_8 pac_nt_authtime;
     krb5_principal pac_principal;
@@ -604,7 +604,7 @@ k5_pac_verify_kdc_checksum(krb5_context context,
 krb5_error_code KRB5_CALLCONV
 krb5_pac_verify(krb5_context context,
 		const krb5_pac pac,
-		time_t authtime,
+		krb5_timestamp authtime,
 		krb5_const_principal principal,
 		const krb5_keyblock *server,
 		const krb5_keyblock *privsvr)
@@ -636,7 +636,7 @@ krb5_pac_verify(krb5_context context,
 static krb5_error_code
 k5_insert_client_info(krb5_context context,
 		      krb5_pac pac,
-		      time_t authtime,
+		      krb5_timestamp authtime,
 		      krb5_const_principal principal)
 {
     krb5_error_code ret;
@@ -778,7 +778,7 @@ k5_pac_encode_header(krb5_context context, krb5_pac pac)
 krb5_error_code KRB5_CALLCONV
 krb5int_pac_sign(krb5_context context,
 		 krb5_pac pac,
-		 time_t authtime,
+		 krb5_timestamp authtime,
 		 krb5_const_principal principal,
 		 const krb5_keyblock *server_key,
 		 const krb5_keyblock *privsvr_key,

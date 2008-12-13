@@ -2682,7 +2682,7 @@ static inline int authdata_eq (krb5_authdata a1, krb5_authdata a2)
 krb5_error_code KRB5_CALLCONV
 krb5int_pac_sign(krb5_context context,
 		 krb5_pac pac,
-		 time_t authtime,
+		 krb5_timestamp authtime,
 		 krb5_const_principal principal,
 		 const krb5_keyblock *server_key,
 		 const krb5_keyblock *privsvr_key,
