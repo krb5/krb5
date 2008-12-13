@@ -1,6 +1,5 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Portions Copyright (C) 2008 Novell Inc.
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software
@@ -21,6 +20,33 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+/*
+ * Copyright (c) 2006-2008, Novell, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *   * The copyright holder's name is not used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*
  * $Id$
@@ -29,10 +55,13 @@
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
 
+/*
+ * gss_inquire_sec_context_by_oid() methods
+ */
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
-} krb5_gss_inquire_sec_context_dispatch[] = {
+} krb5_gss_inquire_sec_context_by_oid_ops[] = {
     {
 	{GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH, GSS_KRB5_GET_TKT_FLAGS_OID},
 	gss_krb5int_get_tkt_flags
@@ -59,7 +88,7 @@ static struct {
     }
 };
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 				     const gss_ctx_id_t context_handle,
 				     const gss_OID desired_object,
@@ -89,13 +118,13 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
     if (!ctx->established)
 	return GSS_S_NO_CONTEXT;
 
-    for (i = 0; i < sizeof(krb5_gss_inquire_sec_context_dispatch)/
-		    sizeof(krb5_gss_inquire_sec_context_dispatch[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gss_inquire_sec_context_dispatch[i].oid)) {
-	    return (*krb5_gss_inquire_sec_context_dispatch[i].func)(minor_status,
-								    context_handle,
-								    desired_object,
-								    data_set);
+    for (i = 0; i < sizeof(krb5_gss_inquire_sec_context_by_oid_ops)/
+		    sizeof(krb5_gss_inquire_sec_context_by_oid_ops[0]); i++) {
+	if (g_OID_equal(desired_object, &krb5_gss_inquire_sec_context_by_oid_ops[i].oid)) {
+	    return (*krb5_gss_inquire_sec_context_by_oid_ops[i].func)(minor_status,
+								      context_handle,
+								      desired_object,
+								      data_set);
 	}
     }
 
@@ -104,13 +133,16 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
     return GSS_S_BAD_MECH; 
 }
 
+/*
+ * gss_inquire_cred_by_oid() methods
+ */
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, const gss_cred_id_t, const gss_OID, gss_buffer_set_t *);
-} krb5_gss_inquire_cred_dispatch[] = {
+} krb5_gss_inquire_cred_by_oid_ops[] = {
 };
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 			     const gss_cred_id_t cred_handle,
 			     const gss_OID desired_object,
@@ -143,13 +175,13 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 
     cred = (krb5_gss_cred_id_t) cred_handle;
 
-    for (i = 0; i < sizeof(krb5_gss_inquire_cred_dispatch)/
-		    sizeof(krb5_gss_inquire_cred_dispatch[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gss_inquire_cred_dispatch[i].oid)) {
-	    return (*krb5_gss_inquire_cred_dispatch[i].func)(minor_status,
-							     cred_handle,
-							     desired_object,
-							     data_set);
+    for (i = 0; i < sizeof(krb5_gss_inquire_cred_by_oid_ops)/
+		    sizeof(krb5_gss_inquire_cred_by_oid_ops[0]); i++) {
+	if (g_OID_equal(desired_object, &krb5_gss_inquire_cred_by_oid_ops[i].oid)) {
+	    return (*krb5_gss_inquire_cred_by_oid_ops[i].func)(minor_status,
+							       cred_handle,
+							       desired_object,
+							       data_set);
 	}
     }
 
@@ -158,13 +190,16 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
     return GSS_S_BAD_MECH;
 }
 
+/*
+ * gss_set_sec_context_option() methods
+ */
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, gss_ctx_id_t *, const gss_OID, const gss_buffer_t);
-} krb5_gss_set_sec_context_option_dispatch[] = {
+} krb5_gss_set_sec_context_option_ops[] = {
 };
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 				 gss_ctx_id_t *context_handle,
 				 const gss_OID desired_object,
@@ -195,13 +230,13 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 	    return GSS_S_NO_CONTEXT;
     }
 
-    for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_dispatch)/
-		    sizeof(krb5_gss_set_sec_context_option_dispatch[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gss_set_sec_context_option_dispatch[i].oid)) {
-	    return (*krb5_gss_set_sec_context_option_dispatch[i].func)(minor_status,
-								       context_handle,
-								       desired_object,
-								       value);
+    for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
+		    sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
+	if (g_OID_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
+	    return (*krb5_gss_set_sec_context_option_ops[i].func)(minor_status,
+								  context_handle,
+								  desired_object,
+								  value);
 	}
     }
 
@@ -210,10 +245,13 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
     return GSS_S_BAD_MECH; 
 }
 
+/*
+ * gssspi_set_cred_option() methods
+ */
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, gss_cred_id_t, const gss_OID, const gss_buffer_t);
-} krb5_gssspi_set_cred_option_dispatch[] = {
+} krb5_gssspi_set_cred_option_ops[] = {
     {
 	{GSS_KRB5_COPY_CCACHE_OID_LENGTH, GSS_KRB5_COPY_CCACHE_OID},
 	gss_krb5int_copy_ccache
@@ -228,7 +266,7 @@ static struct {
     }
 };
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
 			    gss_cred_id_t cred_handle,
 			    const gss_OID desired_object,
@@ -254,13 +292,13 @@ krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
     if (GSS_ERROR(major_status))
 	return major_status;
 
-    for (i = 0; i < sizeof(krb5_gssspi_set_cred_option_dispatch)/
-		    sizeof(krb5_gssspi_set_cred_option_dispatch[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gssspi_set_cred_option_dispatch[i].oid)) {
-	    return (*krb5_gssspi_set_cred_option_dispatch[i].func)(minor_status,
-								   cred_handle,
-								   desired_object,
-								   value);
+    for (i = 0; i < sizeof(krb5_gssspi_set_cred_option_ops)/
+		    sizeof(krb5_gssspi_set_cred_option_ops[0]); i++) {
+	if (g_OID_equal(desired_object, &krb5_gssspi_set_cred_option_ops[i].oid)) {
+	    return (*krb5_gssspi_set_cred_option_ops[i].func)(minor_status,
+							      cred_handle,
+							      desired_object,
+							      value);
 	}
     }
 
@@ -269,10 +307,13 @@ krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
     return GSS_S_BAD_MECH;
 }
 
+/*
+ * gssspi_mech_invoke() methods
+ */
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, const gss_OID, const gss_OID, gss_buffer_t);
-} krb5_gssspi_mech_invoke_dispatch[] = {
+} krb5_gssspi_mech_invoke_ops[] = {
     {
 	{GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH, GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID},
 	gss_krb5int_register_acceptor_identity
@@ -291,7 +332,7 @@ static struct {
     }
 };
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
 			 const gss_OID desired_mech,
 			 const gss_OID desired_object,
@@ -310,13 +351,13 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
     if (desired_object == GSS_C_NO_OID)
 	return GSS_S_CALL_INACCESSIBLE_READ;
 
-    for (i = 0; i < sizeof(krb5_gssspi_mech_invoke_dispatch)/
-		    sizeof(krb5_gssspi_mech_invoke_dispatch[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gssspi_mech_invoke_dispatch[i].oid)) {
-	    return (*krb5_gssspi_mech_invoke_dispatch[i].func)(minor_status,
-							       desired_mech,
-							       desired_object,
-							       value);
+    for (i = 0; i < sizeof(krb5_gssspi_mech_invoke_ops)/
+		    sizeof(krb5_gssspi_mech_invoke_ops[0]); i++) {
+	if (g_OID_equal(desired_object, &krb5_gssspi_mech_invoke_ops[i].oid)) {
+	    return (*krb5_gssspi_mech_invoke_ops[i].func)(minor_status,
+							  desired_mech,
+							  desired_object,
+							  value);
 	}
     }
 
@@ -739,7 +780,7 @@ krb5_gss_register_acceptor_identity(const char *keytab)
     OM_uint32 minor_status;
     gss_buffer_desc req_buffer;
 
-    req_buffer.length = sizeof(keytab);
+    req_buffer.length = strlen(keytab);
     req_buffer.value = (char *)keytab;
 
     major_status = gssspi_mech_invoke(&minor_status,
@@ -965,7 +1006,7 @@ gsskrb5_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 	return GSS_S_FAILURE;
     }
 
-    *authtime = *((krb5_flags *)data_set->elements[0].value);
+    *authtime = *((krb5_timestamp *)data_set->elements[0].value);
 
     gss_release_buffer_set(minor_status, &data_set);
 

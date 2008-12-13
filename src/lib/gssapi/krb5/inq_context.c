@@ -136,7 +136,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
     return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
 }
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 gss_krb5int_get_subkey(
     OM_uint32 *minor_status,
     const gss_ctx_id_t context_handle,
@@ -170,7 +170,7 @@ gss_krb5int_get_subkey(
     return GSS_S_COMPLETE;
 }
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 gss_krb5int_inq_session_key(
     OM_uint32 *minor_status,
     const gss_ctx_id_t context_handle,
@@ -190,7 +190,7 @@ gss_krb5int_inq_session_key(
     return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
 }
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 gss_krb5int_extract_authz_data_from_sec_context(
    OM_uint32 *minor_status,
    const gss_ctx_id_t context_handle,
@@ -199,7 +199,6 @@ gss_krb5int_extract_authz_data_from_sec_context(
 {
     OM_uint32 major_status;
     krb5_gss_ctx_id_rec *ctx;
-    krb5_authdata **p;
     int ad_type = 0, i;
     unsigned char *cp;
 
@@ -228,15 +227,12 @@ gss_krb5int_extract_authz_data_from_sec_context(
 	return GSS_S_FAILURE;
 
     if (ctx->authdata != NULL) {
-	major_status = GSS_S_COMPLETE;
-	*minor_status = 0;
-
-	for (p = ctx->authdata; *p != NULL; p++) {
-	    if ((*p)->ad_type == ad_type) {
+	for (i = 0; ctx->authdata[i] != NULL; i++) {
+	    if (ctx->authdata[i]->ad_type == ad_type) {
 		gss_buffer_desc ad_data;
 
-		ad_data.length = (*p)->length;
-		ad_data.value = (*p)->contents;
+		ad_data.length = ctx->authdata[i]->length;
+		ad_data.value = ctx->authdata[i]->contents;
 
 		major_status = generic_gss_add_buffer_set_member(
 		    minor_status, &ad_data, data_set);
