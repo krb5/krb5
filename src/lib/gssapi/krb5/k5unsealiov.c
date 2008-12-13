@@ -286,7 +286,7 @@ kg_unseal_v1_iov(krb5_context context,
 	goto cleanup;
     }
 
-    if (now > ctx->endtime) {
+    if (now > ctx->krb_times.endtime) {
 	*minor_status = 0;
 	retval = GSS_S_CONTEXT_EXPIRED;
 	goto cleanup;

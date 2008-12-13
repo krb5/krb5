@@ -400,5 +400,5 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
         *conf_state = conf_req_flag;
 
     *minor_status = 0;
-    return((ctx->endtime < now)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
+    return((ctx->krb_times.endtime < now)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
 }

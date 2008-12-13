@@ -346,7 +346,7 @@ kg_seal_iov(OM_uint32 *minor_status,
 
     *minor_status = 0;
 
-    return (ctx->endtime < now) ? GSS_S_CONTEXT_EXPIRED : GSS_S_COMPLETE;
+    return (ctx->krb_times.endtime < now) ? GSS_S_CONTEXT_EXPIRED : GSS_S_COMPLETE;
 }
 
 #define INIT_IOV_DATA(_iov)	do { (_iov)->buffer.value = NULL; \

@@ -57,7 +57,7 @@ krb5_gss_context_time(minor_status, context_handle, time_rec)
         return(GSS_S_FAILURE);
     }
 
-    if ((lifetime = ctx->endtime - now) <= 0) {
+    if ((lifetime = ctx->krb_times.endtime - now) <= 0) {
         *time_rec = 0;
         *minor_status = 0;
         return(GSS_S_CONTEXT_EXPIRED);

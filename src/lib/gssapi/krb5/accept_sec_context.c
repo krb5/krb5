@@ -256,7 +256,7 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
        goto fail;
    }
 
-   if (ctx->endtime < now) {
+   if (ctx->krb_times.endtime < now) {
        code = 0;
        major_status = GSS_S_CREDENTIALS_EXPIRED;
        goto fail;
@@ -294,7 +294,7 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
       *mech_type = ctx->mech_used;
 
    if (time_rec)
-      *time_rec = ctx->endtime - now;
+      *time_rec = ctx->krb_times.endtime - now;
 
    if (ret_flags)
       *ret_flags = ctx->gss_flags;
@@ -921,8 +921,7 @@ kg_accept_krb5(minor_status, context_handle,
 	}
     }
 
-    ctx->authtime = ticket->enc_part2->times.authtime;
-    ctx->endtime = ticket->enc_part2->times.endtime;
+    ctx->krb_times = ticket->enc_part2->times; /* struct copy */
     ctx->krb_flags = ticket->enc_part2->flags;
 
     krb5_free_ticket(context, ticket); /* Done with ticket */
@@ -938,7 +937,7 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
-    if (ctx->endtime < now) {
+    if (ctx->krb_times.endtime < now) {
         code = 0;
         major_status = GSS_S_CREDENTIALS_EXPIRED;
         goto fail;
@@ -1078,7 +1077,7 @@ kg_accept_krb5(minor_status, context_handle,
         *mech_type = (gss_OID) mech_used;
 
     if (time_rec)
-        *time_rec = ctx->endtime - now;
+        *time_rec = ctx->krb_times.endtime - now;
 
     if (ret_flags)
         *ret_flags = ctx->gss_flags;

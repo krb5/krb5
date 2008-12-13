@@ -263,7 +263,10 @@ kg_ctx_size(kcontext, arg, sizep)
      *  krb5_int32      for sealalg.
      *  ...             for enc
      *  ...             for seq
+     *  krb5_int32      for authtime.
+     *  krb5_int32      for starttime.
      *  krb5_int32      for endtime.
+     *  krb5_int32      for renew_till.
      *  krb5_int32      for flags.
      *  krb5_int64      for seq_send.
      *  krb5_int64      for seq_recv.
@@ -397,7 +400,13 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                                        &bp, &remain);
             (void) krb5_ser_pack_int32((krb5_int32) ctx->sealalg,
                                        &bp, &remain);
-            (void) krb5_ser_pack_int32((krb5_int32) ctx->endtime,
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.authtime,
+                                       &bp, &remain);
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.starttime,
+                                       &bp, &remain);
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.endtime,
+                                       &bp, &remain);
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.renew_till,
                                        &bp, &remain);
             (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_flags,
                                        &bp, &remain);
@@ -552,7 +561,13 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->sealalg = (int) ibuf;
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-            ctx->endtime = (krb5_timestamp) ibuf;
+            ctx->krb_times.authtime = (krb5_timestamp) ibuf;
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            ctx->krb_times.starttime = (krb5_timestamp) ibuf;
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            ctx->krb_times.endtime = (krb5_timestamp) ibuf;
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            ctx->krb_times.renew_till = (krb5_timestamp) ibuf;
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->krb_flags = (krb5_flags) ibuf;
             (void) (*kaccess.krb5_ser_unpack_int64)(&ctx->seq_send, &bp, &remain);

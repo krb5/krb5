@@ -311,7 +311,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
         goto cleanup;
 
     /* store the interesting stuff from creds and authent */
-    ctx->endtime = k_cred->times.endtime;
+    ctx->krb_times = k_cred->times;
     ctx->krb_flags = k_cred->ticket_flags;
 
     /* build up the token */
@@ -612,9 +612,9 @@ new_connection(
         goto fail;
 
     if (time_req == 0 || time_req == GSS_C_INDEFINITE) {
-        ctx->endtime = 0;
+        ctx->krb_times.endtime = 0;
     } else {
-        ctx->endtime = now + time_req;
+        ctx->krb_times.endtime = now + time_req;
     }
 
     if ((code = krb5_copy_principal(context, cred->princ, &ctx->here)))
@@ -625,11 +625,11 @@ new_connection(
         goto fail;
 
     code = get_credentials(context, cred, ctx->there, now,
-                           ctx->endtime, &k_cred);
+                           ctx->krb_times.endtime, &k_cred);
     if (code)
         goto fail;
 
-    ctx->authtime = k_cred->times.authtime;
+    ctx->krb_times = k_cred->times;
 
     if (default_mech) {
         mech_type = (gss_OID) gss_mech_krb5;
@@ -688,7 +688,7 @@ new_connection(
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
             goto fail;
-        *time_rec = ctx->endtime - now;
+        *time_rec = ctx->krb_times.endtime - now;
     }
 
     /* set the other returns */
@@ -908,7 +908,7 @@ mutual_auth(
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
             goto fail;
-        *time_rec = ctx->endtime - now;
+        *time_rec = ctx->krb_times.endtime - now;
     }
 
     if (ret_flags)

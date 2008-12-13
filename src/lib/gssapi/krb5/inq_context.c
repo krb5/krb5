@@ -73,7 +73,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
         return(GSS_S_FAILURE);
     }
 
-    if ((lifetime = ctx->endtime - now) < 0)
+    if ((lifetime = ctx->krb_times.endtime - now) < 0)
         lifetime = 0;
 
     if (initiator_name) {
@@ -262,8 +262,8 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-    rep.value = &ctx->authtime;
-    rep.length = sizeof(ctx->authtime);
+    rep.value = &ctx->krb_times.authtime;
+    rep.length = sizeof(ctx->krb_times.authtime);
 
     return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
 }

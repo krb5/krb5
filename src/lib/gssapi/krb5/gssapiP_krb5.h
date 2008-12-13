@@ -191,8 +191,7 @@ typedef struct _krb5_gss_ctx_id_rec {
     int sealalg;
     krb5_keyblock *enc;
     krb5_keyblock *seq;
-    krb5_timestamp authtime;
-    krb5_timestamp endtime;
+    krb5_ticket_times krb_times;
     krb5_flags krb_flags;
     /* XXX these used to be signed.  the old spec is inspecific, and
        the new spec specifies unsigned.  I don't believe that the change

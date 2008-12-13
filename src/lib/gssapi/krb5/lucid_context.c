@@ -210,7 +210,7 @@ make_external_lucid_ctx_v1(
 
     lctx->version = 1;
     lctx->initiate = gctx->initiate ? 1 : 0;
-    lctx->endtime = gctx->endtime;
+    lctx->endtime = gctx->krb_times.endtime;
     lctx->send_seq = gctx->seq_send;
     lctx->recv_seq = gctx->seq_recv;
     lctx->protocol = gctx->proto;

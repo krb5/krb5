@@ -449,7 +449,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
         return(GSS_S_FAILURE);
     }
 
-    if (now > ctx->endtime) {
+    if (now > ctx->krb_times.endtime) {
         *minor_status = 0;
         return(GSS_S_CONTEXT_EXPIRED);
     }
