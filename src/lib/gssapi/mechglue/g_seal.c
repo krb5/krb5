@@ -181,7 +181,6 @@ gss_buffer_t		output_message_buffer;
     if (mech) {
 	if (mech->gss_seal) {
 	    status = mech->gss_seal(
-				    mech->context,
 				    minor_status,
 				    ctx->internal_ctx_id,
 				    conf_req_flag,
@@ -233,6 +232,57 @@ gss_buffer_t		output_message_buffer;
 		    output_message_buffer);
 }
 
+#if 0
+static OM_uint32
+gssint_wrap_size_limit_iov_shim(OM_uint32 *minor_status,
+				gss_ctx_id_t context_handle,
+				int conf_req_flag,
+				gss_qop_t qop_req,
+				OM_uint32 req_output_size,
+				OM_uint32 *max_input_size)
+{
+    gss_iov_buffer_desc	iov[4];
+    OM_uint32		status;
+    OM_uint32		ohlen;
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER;
+    iov[0].flags = 0;
+    iov[0].buffer.value = NULL;
+    iov[0].buffer.length = 0;
+
+    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[1].flags = 0;
+    iov[1].buffer.length = req_output_size;
+    iov[1].buffer.value = NULL;
+
+    iov[2].type = GSS_IOV_BUFFER_TYPE_PADDING;
+    iov[2].flags = 0;
+    iov[2].buffer.value = NULL;
+    iov[2].buffer.length = 0;
+
+    iov[3].type = GSS_IOV_BUFFER_TYPE_TRAILER;
+    iov[3].flags = 0;
+    iov[3].buffer.value = NULL;
+    iov[3].buffer.length = 0;
+
+    status = gss_wrap_iov_length(minor_status, context_handle,
+				 conf_req_flag, qop_req,
+				 NULL, iov,
+				 sizeof(iov)/sizeof(iov[0]));
+    if (status != GSS_S_COMPLETE)
+	return status;
+
+    ohlen = iov[3].buffer.length - iov[2].buffer.length - iov[0].buffer.length;
+
+    if (ohlen < req_output_size)
+	*max_input_size = req_output_size - ohlen;
+    else
+	*max_input_size = 0;
+
+    return GSS_S_COMPLETE;
+}
+#endif
+
 /*
  * New for V2
  */
@@ -271,13 +321,19 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     if (!mech)
 	return (GSS_S_BAD_MECH);
 
-    if (!mech->gss_wrap_size_limit)
-	return (GSS_S_UNAVAILABLE);
-    
-    major_status = mech->gss_wrap_size_limit(mech->context, minor_status,
-					     ctx->internal_ctx_id,
-					     conf_req_flag, qop_req,
-					     req_output_size, max_input_size);
+    if (mech->gss_wrap_size_limit)
+	major_status = mech->gss_wrap_size_limit(minor_status,
+						 ctx->internal_ctx_id,
+						 conf_req_flag, qop_req,
+						 req_output_size, max_input_size);
+#if 0
+    else if (mech->gss_wrap_iov_length)
+	major_status = gssint_wrap_size_limit_iov_shim(minor_status, ctx,
+						       conf_req_flag, qop_req,
+						       req_output_size, max_input_size);
+#endif
+    else
+	major_status = GSS_S_UNAVAILABLE;
     if (major_status != GSS_S_COMPLETE)
 	map_error(minor_status, mech);
     return major_status;
