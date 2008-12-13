@@ -39,6 +39,7 @@ extern "C" {
 #define	ENUMERATED		0x0a
 #define	ENUMERATION_LENGTH	1
 #define	HEADER_ID		0x60
+#define GENERAL_STRING		0x1b
 
 /*
  * SPNEGO specific error codes (minor status codes)
@@ -123,7 +124,6 @@ extern const gss_OID_set_desc * const gss_mech_set_spnego;
 
 OM_uint32 spnego_gss_acquire_cred
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	gss_name_t,		/* desired_name */
 	OM_uint32,		/* time_req */
@@ -136,7 +136,6 @@ OM_uint32 spnego_gss_acquire_cred
 
 OM_uint32 spnego_gss_release_cred
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	/* CSTYLED */
 	gss_cred_id_t	*	/* cred_handle */
@@ -144,7 +143,6 @@ OM_uint32 spnego_gss_release_cred
 
 OM_uint32 spnego_gss_init_sec_context
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	gss_cred_id_t,		/* claimant_cred_handle */
 	gss_ctx_id_t *,		/* context_handle */
@@ -163,7 +161,6 @@ OM_uint32 spnego_gss_init_sec_context
 #ifndef LEAN_CLIENT
 OM_uint32 spnego_gss_accept_sec_context
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	gss_ctx_id_t *,		/* context_handle */
 	gss_cred_id_t,		/* verifier_cred_handle */
@@ -179,9 +176,16 @@ OM_uint32 spnego_gss_accept_sec_context
 );
 #endif /* LEAN_CLIENT */
 
+OM_uint32 spnego_gss_compare_name
+(
+	OM_uint32 *,		/* minor_status */
+	const gss_name_t,	/* name1 */
+	const gss_name_t,	/* name2 */
+	int *			/* name_equal */
+);
+
 OM_uint32 spnego_gss_display_name
 (
-	void *,
 	OM_uint32 *,		/* minor_status */
 	gss_name_t,		/*  input_name */
 	gss_buffer_t,		/*  output_name_buffer */
@@ -190,7 +194,6 @@ OM_uint32 spnego_gss_display_name
 
 OM_uint32 spnego_gss_display_status
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	OM_uint32,		/* status_value */
 	int,			/* status_type */
@@ -201,7 +204,6 @@ OM_uint32 spnego_gss_display_status
 
 OM_uint32 spnego_gss_import_name
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	gss_buffer_t,		/* input_name_buffer */
 	gss_OID,		/* input_name_type */
@@ -211,7 +213,6 @@ OM_uint32 spnego_gss_import_name
 
 OM_uint32 spnego_gss_release_name
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	/* CSTYLED */
 	gss_name_t *		/* input_name */
@@ -219,7 +220,6 @@ OM_uint32 spnego_gss_release_name
 
 OM_uint32 spnego_gss_inquire_names_for_mech
 (
-	void *,			/* spnego context */
 	OM_uint32 *,		/* minor_status */
 	gss_OID,		/* mechanism */
 	gss_OID_set *		/* name_types */
@@ -227,7 +227,6 @@ OM_uint32 spnego_gss_inquire_names_for_mech
 
 OM_uint32 spnego_gss_unseal
 (
-	void *context,
 	OM_uint32 *minor_status,
 	gss_ctx_id_t context_handle,
 	gss_buffer_t input_message_buffer,
@@ -238,7 +237,6 @@ OM_uint32 spnego_gss_unseal
 
 OM_uint32 spnego_gss_seal
 (
-	void *context,
 	OM_uint32 *minor_status,
 	gss_ctx_id_t context_handle,
 	int conf_req_flag,
@@ -250,7 +248,6 @@ OM_uint32 spnego_gss_seal
 
 OM_uint32 spnego_gss_process_context_token
 (
-	void *context,
 	OM_uint32	*minor_status,
 	const gss_ctx_id_t context_handle,
 	const gss_buffer_t token_buffer
@@ -258,7 +255,6 @@ OM_uint32 spnego_gss_process_context_token
 
 OM_uint32 spnego_gss_delete_sec_context
 (
-	void *context,
 	OM_uint32 *minor_status,
 	gss_ctx_id_t *context_handle,
 	gss_buffer_t output_token
@@ -266,7 +262,6 @@ OM_uint32 spnego_gss_delete_sec_context
 
 OM_uint32 spnego_gss_context_time
 (
-	void *context,
 	OM_uint32	*minor_status,
 	const gss_ctx_id_t context_handle,
 	OM_uint32	*time_rec
@@ -274,7 +269,6 @@ OM_uint32 spnego_gss_context_time
 #ifndef LEAN_CLIENT
 OM_uint32 spnego_gss_export_sec_context
 (
-	void *context,
 	OM_uint32	*minor_status,
 	gss_ctx_id_t	*context_handle,
 	gss_buffer_t	interprocess_token
@@ -282,7 +276,6 @@ OM_uint32 spnego_gss_export_sec_context
 
 OM_uint32 spnego_gss_import_sec_context
 (
-	void			*context,
 	OM_uint32		*minor_status,
 	const gss_buffer_t	interprocess_token,
 	gss_ctx_id_t		*context_handle
@@ -291,7 +284,6 @@ OM_uint32 spnego_gss_import_sec_context
 
 OM_uint32 spnego_gss_inquire_context
 (
-	void		*context,
 	OM_uint32	*minor_status,
 	const gss_ctx_id_t context_handle,
 	gss_name_t	*src_name,
@@ -305,7 +297,6 @@ OM_uint32 spnego_gss_inquire_context
 
 OM_uint32 spnego_gss_wrap_size_limit
 (
-	void		*context,
 	OM_uint32	*minor_status,
 	const gss_ctx_id_t context_handle,
 	int		conf_req_flag,
@@ -316,7 +307,6 @@ OM_uint32 spnego_gss_wrap_size_limit
 
 OM_uint32 spnego_gss_sign
 (
-	void *context,
 	OM_uint32 *minor_status,
 	const gss_ctx_id_t context_handle,
 	int  qop_req,
@@ -326,13 +316,35 @@ OM_uint32 spnego_gss_sign
 
 OM_uint32 spnego_gss_verify
 (
-	void *context,
 	OM_uint32 *minor_status,
 	const gss_ctx_id_t context_handle,
 	const gss_buffer_t msg_buffer,
 	const gss_buffer_t token_buffer,
 	int *qop_state
 );
+
+OM_uint32
+spnego_gss_inquire_sec_context_by_oid
+(
+	OM_uint32 *minor_status,
+	const gss_ctx_id_t context_handle,
+	const gss_OID desired_object,
+	gss_buffer_set_t *data_set
+);
+
+OM_uint32
+spnego_gss_set_sec_context_option
+(
+	OM_uint32 *minor_status,
+	gss_ctx_id_t *context_handle,
+	const gss_OID desired_object,
+	const gss_buffer_t value
+);
+
+#define GSS_SPNEGO_UPDATED_OID_LENGTH 9
+#define GSS_SPNEGO_UPDATED_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x05"
+
+gss_mechanism KRB5_CALLCONV gss_mech_initialize(void);
 
 OM_uint32 spnego_gss_wrap_aead
 (
@@ -387,6 +399,14 @@ OM_uint32 spnego_gss_wrap_iov_length
 	int *conf_state,
 	gss_iov_buffer_desc *iov,
 	int iov_count
+);
+
+OM_uint32
+spnego_gss_complete_auth_token
+(
+	OM_uint32 *minor_status,
+	const gss_ctx_id_t context_handle,
+	gss_buffer_t input_message_buffer
 );
 
 #ifdef	__cplusplus

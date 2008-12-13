@@ -3,6 +3,27 @@ myfulldir=lib/gssapi/spnego
 mydir=lib/gssapi/spnego
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
+DEFS=
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+MODULE_INSTALL_DIR = $(GSS_MODULE_DIR)
+
+GSS_MECHGLUE_LIB=-lgssapi_krb5 -lcom_err
+LIBBASE=mech_spnego
+LIBMAJOR=0
+LIBMINOR=0
+SO_EXT=.so
+#LIBINITFUNC=gss_spnegoint_init
+#LIBFINIFUNC=gss_spnegoint_fini
+STOBJLISTS=../generic/OBJS.ST OBJS.ST
+SUBDIROBJLISTS=../generic/OBJS.ST
+SHLIB_EXPDEPS=\
+        $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
+SHLIB_EXPLIBS=$(GSS_MECHGLUE_LIB) $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+RELDIR=gssapi/spnego
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=spnego
@@ -16,11 +37,13 @@ OBJS = $(OUTPRE)spnego_mech.$(OBJEXT)
 
 STLIBOBJS = spnego_mech.o
 
-all-unix:: all-libobjs
+all-unix:: $(LIBBASE)$(SO_EXT)
+install-unix:: install-libs
+clean-unix:: clean-libs clean-libobjs
 
 ##DOS##LIBOBJS = $(OBJS)
 
-clean-unix:: clean-libobjs
+@libnover_frag@
 
 @libobj_frag@
 # +++ Dependency line eater +++
