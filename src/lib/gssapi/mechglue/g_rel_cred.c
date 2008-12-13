@@ -78,7 +78,7 @@ gss_cred_id_t *		cred_handle;
 	if (mech) {
 	    if (mech->gss_release_cred) {
 		temp_status = mech->gss_release_cred
-		    (mech->context,
+		    (
 		     minor_status,
 		     &union_cred->cred_array[j]);
 

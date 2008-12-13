@@ -70,7 +70,6 @@ int *			qop_state;
     if (mech) {
 	if (mech->gss_verify) {
 	    status = mech->gss_verify(
-				      mech->context,
 				      minor_status,
 				      ctx->internal_ctx_id,
 				      message_buffer,

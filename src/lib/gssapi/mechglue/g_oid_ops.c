@@ -100,3 +100,12 @@ gss_str_to_oid(minor_status, oid_str, oid)
     return status;
 }
 
+OM_uint32 KRB5_CALLCONV
+gssint_copy_oid_set(
+    OM_uint32 *minor_status,
+    const gss_OID_set_desc * const oidset,
+    gss_OID_set *new_oidset)
+{
+    return generic_gss_copy_oid_set(minor_status, oidset, new_oidset);
+}
+

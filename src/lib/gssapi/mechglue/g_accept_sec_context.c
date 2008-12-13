@@ -146,7 +146,7 @@ gss_cred_id_t *		d_cred;
     
     if(*context_handle == GSS_C_NO_CONTEXT) {
 	
-	if (GSS_EMPTY_BUFFER(input_token_buffer))
+	if (input_token_buffer == GSS_C_NO_BUFFER)
 	    return (GSS_S_CALL_INACCESSIBLE_READ);
 
 	/* Get the token mech type */
@@ -193,9 +193,7 @@ gss_cred_id_t *		d_cred;
     mech = gssint_get_mechanism (token_mech_type);
     if (mech && mech->gss_accept_sec_context) {
 
-	    status = mech->gss_accept_sec_context(
-						  mech->context,
-						  minor_status,
+	    status = mech->gss_accept_sec_context(minor_status,
 						  &union_ctx_id->internal_ctx_id,
 						  input_cred_handle,
 						  input_token_buffer,
@@ -236,7 +234,6 @@ gss_cred_id_t *		d_cred;
 						  output_token);
 		    if (internal_name != GSS_C_NO_NAME)
 			mech->gss_release_name(
-			    mech->context,
 			    &temp_minor_status,
 			    &internal_name);
 		    return (temp_status);
@@ -288,8 +285,7 @@ gss_cred_id_t *		d_cred;
 		d_u_cred->loopback = d_u_cred;
 
 		if (mech->gss_inquire_cred) {
-		    status = mech->gss_inquire_cred(mech->context,
-						    minor_status,
+		    status = mech->gss_inquire_cred(minor_status,
 						    tmp_d_cred,
 						    &internal_name,
 						    &d_u_cred->auxinfo.time_rec,

@@ -101,7 +101,7 @@ gss_buffer_t		interprocess_token;
     if (!mech->gss_export_sec_context)
 	return (GSS_S_UNAVAILABLE);
     
-    status = mech->gss_export_sec_context(mech->context, minor_status,
+    status = mech->gss_export_sec_context(minor_status,
 					  &ctx->internal_ctx_id, &token);
     if (status != GSS_S_COMPLETE) {
 	map_error(minor_status, mech);

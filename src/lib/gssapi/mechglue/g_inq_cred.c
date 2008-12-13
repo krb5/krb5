@@ -86,7 +86,7 @@ gss_OID_set *		mechanisms;
 	if (!mech->gss_inquire_cred)
 	    return (GSS_S_UNAVAILABLE);
 	
-	status = mech->gss_inquire_cred(mech->context, minor_status,
+	status = mech->gss_inquire_cred(minor_status,
 					GSS_C_NO_CREDENTIAL,
 					name ? &internal_name : NULL,
 					lifetime, cred_usage, mechanisms);
@@ -246,7 +246,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 	return (GSS_S_DEFECTIVE_CREDENTIAL);
 #endif
 
-    status = mech->gss_inquire_cred_by_mech(mech->context, minor_status,
+    status = mech->gss_inquire_cred_by_mech(minor_status,
 					    mech_cred, mech_type,
 					    name ? &internal_name : NULL,
 					    initiator_lifetime,

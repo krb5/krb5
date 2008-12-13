@@ -56,3 +56,4 @@ gss_buffer_t		exported_name;
 	return gssint_export_internal_name(minor_status, union_name->mech_type,
 					union_name->mech_name, exported_name);
 }
+

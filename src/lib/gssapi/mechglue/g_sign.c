@@ -99,7 +99,6 @@ gss_buffer_t		msg_token;
     if (mech) {
 	if (mech->gss_sign) {
 	    status = mech->gss_sign(
-				    mech->context,
 				    minor_status,
 				    ctx->internal_ctx_id,
 				    qop_req,

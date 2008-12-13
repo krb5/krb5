@@ -398,7 +398,7 @@ gss_add_cred(minor_status, input_cred_handle,
 	time_req = (acceptor_time_req > initiator_time_req) ?
 	    acceptor_time_req : initiator_time_req;
 
-    status = mech->gss_acquire_cred(mech->context, minor_status,
+    status = mech->gss_acquire_cred(minor_status,
 				    internal_name, time_req,
 				    GSS_C_NULL_OID_SET, cred_usage,
 				    &cred, NULL, &time_rec);
@@ -421,7 +421,6 @@ gss_add_cred(minor_status, input_cred_handle,
 	if (internal_name == NULL) {
 	    if (mech->gss_inquire_cred == NULL ||
 		((status = mech->gss_inquire_cred(
-		      mech->context,
 		      &temp_minor_status, cred,
 		      &allocated_name, NULL, NULL,
 		      NULL)) != GSS_S_COMPLETE))
@@ -430,8 +429,7 @@ gss_add_cred(minor_status, input_cred_handle,
 	}
 
 	if (internal_name != GSS_C_NO_NAME) {
-	    status = mech->gss_display_name(mech->context,
-					    &temp_minor_status, internal_name,
+	    status = mech->gss_display_name(&temp_minor_status, internal_name,
 					    &union_cred->auxinfo.name,
 					    &union_cred->auxinfo.name_type);
 	
@@ -519,8 +517,7 @@ errout:
 	free(new_cred_array);
 
     if (cred != NULL && mech->gss_release_cred)
-	mech->gss_release_cred(mech->context,
-			       &temp_minor_status, &cred);
+	mech->gss_release_cred(&temp_minor_status, &cred);
 
     if (allocated_name)
 	(void) gssint_release_internal_name(&temp_minor_status,

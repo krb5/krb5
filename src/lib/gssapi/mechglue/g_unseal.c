@@ -109,9 +109,7 @@ int *			qop_state;
 
     if (mech) {
 	if (mech->gss_unseal) {
-	    status = mech->gss_unseal(
-				      mech->context,
-				      minor_status,
+	    status = mech->gss_unseal(minor_status,
 				      ctx->internal_ctx_id,
 				      input_message_buffer,
 				      output_message_buffer,

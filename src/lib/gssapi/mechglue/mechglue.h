@@ -37,4 +37,6 @@
 
 #include <gssapi/gssapi_ext.h>
 
+void KRB5_CALLCONV gss_initialize(void);
+
 #endif /* _GSS_MECHGLUE_H */
