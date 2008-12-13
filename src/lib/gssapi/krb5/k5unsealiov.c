@@ -472,6 +472,14 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	goto cleanup;
     }
 
+    tpadding = &tiov[i++];
+    tpadding->type = GSS_IOV_BUFFER_TYPE_PADDING;
+    tpadding->flags = 0;
+
+    ttrailer = &tiov[i++];
+    ttrailer->type = GSS_IOV_BUFFER_TYPE_TRAILER;
+    ttrailer->flags = 0;
+
     /* PADDING | TRAILER */
     if (ctx->proto == 1) {
 	size_t ec, rrc;
@@ -499,7 +507,6 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	}
 
 	/* no PADDING for CFX, EC is used instead */
-	tpadding = &tiov[i++];
 	tpadding->buffer.length = 0;
 	tpadding->buffer.value = NULL;
 
@@ -509,10 +516,9 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	if (code != 0)
 	    goto cleanup;
 
-	ttrailer = &tiov[i++];
 	ttrailer->buffer.length = ec + (conf_req_flag ? 16 : 0 /* E(Header) */) + k5_trailerlen;
 	ttrailer->buffer.value = (unsigned char *)stream->buffer.value +
-				  stream->buffer.length - ttrailer->buffer.length;
+				 stream->buffer.length - ttrailer->buffer.length;
     } else {
 	conf_req_flag = (ptr[2] != 0xFF && ptr[3] != 0xFF);
 
@@ -525,12 +531,10 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	 * we can't set the padding accurately until decryption;
 	 * kg_fixup_padding_iov() will take care of this
 	 */
-	tpadding = &tiov[i++];
 	tpadding->buffer.length = 1;
 	tpadding->buffer.value = (unsigned char *)stream->buffer.value + stream->buffer.length - 1;
 
 	/* no TRAILER for pre-CFX */
-	ttrailer = &tiov[i++];
 	ttrailer->buffer.length = 0;
 	ttrailer->buffer.value = NULL;
     }
