@@ -647,6 +647,7 @@ gss_krb5_set_cred_rcache(
     return major_status;
 }
 
+#if 0
 OM_uint32 KRB5_CALLCONV
 gss_krb5_set_cred_alias(
     OM_uint32 *minor_status,
@@ -669,3 +670,4 @@ gss_krb5_set_cred_alias(
 
     return major_status;
 }
+#endif
