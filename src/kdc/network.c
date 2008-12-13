@@ -1154,6 +1154,38 @@ send_to_from(int s, void *buf, size_t len, int flags,
 #endif
 }
 
+static krb5_error_code
+make_too_big_error (krb5_data **out)
+{
+    krb5_error errpkt;
+    krb5_error_code retval;
+    krb5_data *scratch;
+
+    memset(&errpkt, 0, sizeof(errpkt));
+
+    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    if (retval)
+	return retval;  
+    errpkt.error = KRB_ERR_RESPONSE_TOO_BIG;
+    errpkt.server = tgs_server;
+    errpkt.client = NULL;
+    errpkt.text.length = 0;
+    errpkt.text.data = 0;
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+    scratch = malloc(sizeof(*scratch));
+    if (scratch == NULL)
+	return ENOMEM;
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    if (retval) {
+	free(scratch);
+	return retval;
+    }
+
+    *out = scratch;
+    return 0;
+}
+
 static void process_packet(struct connection *conn, const char *prog,
 			   int selflags)
 {
@@ -1208,6 +1240,16 @@ static void process_packet(struct connection *conn, const char *prog,
     }
     if (response == NULL)
 	return;
+    if (response->length > max_dgram_reply_size) {
+	krb5_free_data(kdc_context, response);
+	retval = make_too_big_error(&response);
+	if (retval) {
+	    krb5_klog_syslog(LOG_ERR,
+			     "error constructing KRB_ERR_RESPONSE_TOO_BIG error: %s",
+			     error_message(retval));
+	    return;
+	}
+    }
     cc = send_to_from(port_fd, response->data, (socklen_t) response->length, 0,
 		      (struct sockaddr *)&saddr, saddr_len,
 		      (struct sockaddr *)&daddr, daddr_len);
@@ -1554,7 +1596,13 @@ listen_and_process(const char *prog)
     
     while (!signal_requests_exit) {
 	if (signal_requests_hup) {
+	    int k;
+
 	    krb5_klog_reopen(kdc_context);
+	    for (k = 0; k < kdc_numrealms; k++)
+		krb5_db_invoke(kdc_realmlist[k]->realm_context,
+			       KRB5_KDB_METHOD_REFRESH_POLICY,
+			       NULL, NULL);
 	    signal_requests_hup = 0;
 	}
 
