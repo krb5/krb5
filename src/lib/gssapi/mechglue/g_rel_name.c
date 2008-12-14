@@ -48,7 +48,7 @@ gss_name_t *		input_name;
     *minor_status = 0;
     
     /* if input_name is NULL, return error */
-    if (input_name == 0)
+    if (input_name == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
 
     if (*input_name == GSS_C_NO_NAME)
@@ -65,16 +65,19 @@ gss_name_t *		input_name;
     *input_name = 0;
     *minor_status = 0;
 
-    if (union_name->name_type)
-	    gss_release_oid(minor_status, &union_name->name_type);
-    
-    free(union_name->external_name->value);
-    free(union_name->external_name);
+    if (union_name->name_type != GSS_C_NO_OID)
+	gss_release_oid(minor_status, &union_name->name_type);
+
+    if (union_name->external_name != GSS_C_NO_BUFFER) {
+	if (union_name->external_name->value != NULL)
+	    free(union_name->external_name->value);
+	free(union_name->external_name);
+    }
 
     if (union_name->mech_type) {
-	    gssint_release_internal_name(minor_status, union_name->mech_type,
-					&union_name->mech_name);
-	    gss_release_oid(minor_status, &union_name->mech_type);
+	gssint_release_internal_name(minor_status, union_name->mech_type,
+				     &union_name->mech_name);
+	gss_release_oid(minor_status, &union_name->mech_type);
     }
 
     free(union_name);
