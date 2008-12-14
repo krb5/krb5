@@ -44,6 +44,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 {
     krb5_error_code code = 0;
     gss_iov_buffer_t header;
+    gss_iov_buffer_t padding;
     gss_iov_buffer_t trailer;
     unsigned char acceptor_flag;
     unsigned short tok_id;
@@ -77,6 +78,10 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL)
 	return EINVAL;
+
+    padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
+    if (padding != NULL)
+	padding->buffer.length = 0;
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
 
@@ -271,6 +276,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 {
     OM_uint32 code;
     gss_iov_buffer_t header;
+    gss_iov_buffer_t padding;
     gss_iov_buffer_t trailer;
     unsigned char acceptor_flag;
     unsigned char *ptr = NULL;
@@ -290,6 +296,10 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
+
+    padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
+    if (padding != NULL && padding->buffer.length != 0)
+	return GSS_S_DEFECTIVE_TOKEN;
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
 
