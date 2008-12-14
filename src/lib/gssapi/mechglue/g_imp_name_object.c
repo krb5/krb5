@@ -69,8 +69,12 @@ void *			input_name;
 gss_OID			input_name_type;
 gss_name_t *		output_name;
 {
-    gss_union_name_t	    union_name;
+    gss_union_name_t	    union_name = NULL;
+    gss_mechanism	    mech = NULL;
+    gss_name_t		    internal_name = GSS_C_NO_NAME;
     OM_uint32		    tmp, major_status = GSS_S_FAILURE;
+    gss_OID_set		    mechlist = GSS_C_NO_OID_SET;
+    int			    i;
 
     major_status = val_imp_name_object_args(minor_status,
 					    input_name,
@@ -79,44 +83,42 @@ gss_name_t *		output_name;
     if (major_status != GSS_S_COMPLETE)
 	return major_status;
 
-    union_name = (gss_union_name_t)malloc(sizeof(*union_name));
-    if (union_name == NULL)
-	return GSS_S_FAILURE;
+    major_status = gss_indicate_mechs(minor_status, &mechlist);
+    if (major_status != GSS_S_COMPLETE)
+	return major_status;
 
-    union_name->loopback = NULL;
-    union_name->mech_type = 0;
-    union_name->mech_name = 0;
-    union_name->name_type = 0;
-    union_name->external_name = 0;
+    major_status = GSS_S_BAD_NAMETYPE;
 
-    major_status = generic_gss_copy_oid(minor_status,
-					input_name_type,
-					&union_name->name_type);
-    if (major_status != GSS_S_COMPLETE) {
-	map_errcode(minor_status);
-	goto allocation_failure;
+    for (i = 0; i < mechlist->count; i++) {
+	mech = gssint_get_mechanism(&mechlist->elements[i]);
+	if (mech == NULL || mech->gss_import_name_object == NULL)
+	    continue;
+
+	major_status = mech->gss_import_name_object(minor_status,
+						    input_name,
+						    input_name_type,
+						    &internal_name);
+	if (major_status != GSS_S_BAD_NAMETYPE)
+	    break;
     }
 
-    union_name->loopback = union_name;
-    *output_name = (gss_name_t)union_name;
+    if (major_status == GSS_S_COMPLETE) {
+	assert(internal_name != GSS_C_NO_NAME);
 
-    return GSS_S_COMPLETE;
+	major_status = gssint_convert_name_to_union_name(minor_status,
+							 mech,
+							 internal_name,
+							 &union_name);
+	if (major_status != GSS_S_COMPLETE) {
+	    if (mech->gss_release_name != NULL)
+		mech->gss_release_name(&tmp, &internal_name);
+	} else
+	    *output_name = (gss_name_t)union_name;
+   } else
+	map_error(minor_status, mech);
 
-allocation_failure:
-    if (union_name) {
-	if (union_name->external_name) {
-	    if (union_name->external_name->value)
-		free(union_name->external_name->value);
-	    free(union_name->external_name);
-	}
-	if (union_name->name_type)
-	    generic_gss_release_oid(&tmp, &union_name->name_type);
-	if (union_name->mech_name)
-	    gssint_release_internal_name(minor_status, union_name->mech_type,
-					&union_name->mech_name);
-	if (union_name->mech_type)
-	    generic_gss_release_oid(&tmp, &union_name->mech_type);
-	free(union_name);
-    }
+    generic_gss_release_oid_set(&tmp, &mechlist);
+
     return major_status;
 }
+
