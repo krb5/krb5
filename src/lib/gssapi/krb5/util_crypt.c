@@ -319,7 +319,6 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 {
     gss_iov_buffer_t header;
     gss_iov_buffer_t trailer;
-    gss_iov_buffer_t padding;
     int i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
@@ -333,8 +332,6 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
-
-    padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(trailer == NULL || rrc == 0);
@@ -352,20 +349,16 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 
     /* Check header and trailer sizes */
     gss_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
-    gss_trailerlen = 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
+    gss_trailerlen = ec + 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
     /* If we're caller without a trailer, we must rotate by trailer length */
     if (trailer == NULL) {
-	if (rrc != gss_trailerlen)
+	if (actual_rrc != gss_trailerlen)
 	    return KRB5_BAD_MSIZE;
 
-	/* Owing to a bug in Windows, for DCE the EC is placed in the header */
-	gss_headerlen += actual_rrc;
+	gss_headerlen += gss_trailerlen;
 	gss_trailerlen = 0;
     } else {
-	if (ec != (padding != NULL ? padding->buffer.length : 0))
-	    return KRB5_BAD_MSIZE;
-
 	if (trailer->buffer.length != gss_trailerlen)
 	    return KRB5_BAD_MSIZE;
     }
@@ -408,9 +401,8 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     i++;
 
     /*
-     * For CFX, place the krb5 trailer in the GSS trailer (aka.
-     * "padding") or, if rotating, after the encrypted copy of
-     * the krb5 header.
+     * For CFX, place the krb5 trailer in the GSS trailer or, if
+     * rotating, after the encrypted copy of the krb5 header.
      */
     kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
     kiov[i].data.length = k5_trailerlen;
