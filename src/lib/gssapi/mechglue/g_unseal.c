@@ -29,7 +29,8 @@
 #include "mglueP.h"
 
 static OM_uint32
-gssint_unseal_iov_shim(OM_uint32 *minor_status,
+gssint_unseal_iov_shim(gss_mechanism mech,
+		       OM_uint32 *minor_status,
 		       gss_ctx_id_t context_handle,
 		       gss_buffer_t input_message_buffer,
 		       gss_buffer_t output_message_buffer,
@@ -48,10 +49,20 @@ gssint_unseal_iov_shim(OM_uint32 *minor_status,
     iov[1].buffer.value = NULL;
     iov[1].buffer.length = 0;
 
-    status = gss_unwrap_iov(minor_status, context_handle, conf_state,
-			    qop_state, iov, sizeof(iov)/sizeof(iov[0]));
+    assert(mech->gss_unwrap_iov);
 
-    *output_message_buffer = iov[1].buffer;
+    status = mech->gss_unwrap_iov(minor_status, context_handle, conf_state,
+				  qop_state, iov, sizeof(iov)/sizeof(iov[0]));
+    if (status == GSS_S_COMPLETE)
+	*output_message_buffer = iov[1].buffer;
+    else {
+	OM_uint32 tmp;
+
+	map_error(minor_status, mech);
+
+	if (iov[1].flags & GSS_IOV_BUFFER_FLAG_ALLOCATED)
+	    gss_release_buffer(&tmp, &iov[1].buffer);
+    }
 
     return status;
 }
@@ -118,7 +129,8 @@ int *			qop_state;
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
 	} else if (mech->gss_unwrap_iov) {
-	    status = gssint_unseal_iov_shim(minor_status,
+	    status = gssint_unseal_iov_shim(mech,
+					    minor_status,
 					    ctx,
 					    input_message_buffer,
 					    output_message_buffer,
