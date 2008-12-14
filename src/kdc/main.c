@@ -1,7 +1,6 @@
 /*
  * kdc/main.c
  *
- * Portions Copyright (C) 2007 Apple Inc.
  * Copyright 1990,2001,2008 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -25,6 +24,33 @@
  * 
  *
  * Main procedure body for the KDC server process.
+ */
+/*
+ * Copyright (c) 2006-2008, Novell, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *   * The copyright holder's name is not used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <stdio.h>
@@ -319,7 +345,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 	 */
 
 	seed.length = rdp->realm_mkey.length;
-	seed.data = rdp->realm_mkey.contents;
+	seed.data = (char *)rdp->realm_mkey.contents;
 
 	if ((kret = krb5_c_random_add_entropy(rdp->realm_context,
 					     KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
@@ -445,6 +471,9 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	hierarchy[1] = "kdc_tcp_ports";
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_tcp_ports))
 	    default_tcp_ports = 0;
+	hierarchy[1] = "kdc_max_dgram_reply_size";
+	if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
+	    max_dgram_reply_size = MAX_DGRAM_SIZE;
 #ifdef KRB5_KRB4_COMPAT
 	hierarchy[1] = "v4_mode";
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &v4mode))
