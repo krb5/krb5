@@ -1646,23 +1646,6 @@ krb5_error_code KRB5_CALLCONV krb5_unparse_name_flags_ext
 		char **,
 		unsigned int *);
 
-/* Novell compat macros */
-#define krb5_unparse_name_short(_context, _principal, _name)	\
-	krb5_unparse_name_flags((_context), (_principal), \
-	    KRB5_PRINCIPAL_UNPARSE_SHORT | \
-		KRB5_PRINCIPAL_UNPARSE_NO_REALM, \
-	    (_name))
-#define krb5_unparse_name_noncanonical(_context, _principal, _name) \
-	krb5_unparse_name_flags((_context), (_principal), \
-	    KRB5_PRINCIPAL_UNPARSE_DISPLAY, \
-	    (_name))
-#define krb5_unparse_name_short_noncanonical(_context, _principal, _name) \
-	krb5_unparse_name_flags((_context), (_principal), \
-	    KRB5_PRINCIPAL_UNPARSE_SHORT | \
-		KRB5_PRINCIPAL_UNPARSE_NO_REALM | \
-		KRB5_PRINCIPAL_UNPARSE_DISPLAY, \
-	    (_name))
-
 krb5_error_code KRB5_CALLCONV krb5_set_principal_realm
 	(krb5_context, krb5_principal, const char *);
 
