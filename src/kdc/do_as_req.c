@@ -100,9 +100,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime;
     krb5_keyblock session_key;
-    krb5_keyblock encrypting_key;
     const char *status;
-    krb5_key_data  *server_key, *client_key;
+    krb5_key_data *server_key, *client_key;
+    krb5_keyblock server_keyblock, client_keyblock;
     krb5_enctype useenctype;
     krb5_boolean update_client = 0;
     krb5_data e_data;
@@ -110,7 +110,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_timestamp until, rtime;
     char *cname = 0, *sname = 0;
     const char *fromstring = 0;
-    krb5_keyblock server_signing_key;
     unsigned int c_flags = 0, s_flags = 0;
     krb5_principal_data server_princ;
     char ktypestr[128];
@@ -125,10 +124,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
-    encrypting_key.contents = 0;
+    server_keyblock.contents = 0;
+    client_keyblock.contents = 0;
     reply.padata = 0;
     session_key.contents = 0;
-    server_signing_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
     memset(&server_princ, 0, sizeof(server_princ));
 
@@ -421,8 +420,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     /* convert server.key into a real key (it may be encrypted
        in the database) */
     if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
-    /* server_signing_key is later used to generate auth data signatures */
-					       server_key, &server_signing_key,
+    /* server_keyblock is later used to generate auth data signatures */
+					       server_key, &server_keyblock,
 					       NULL))) {
 	status = "DECRYPT_SERVER_KEY";
 	goto errout;
@@ -451,12 +450,12 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     /* convert client.key_data into a real key */
     if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
-					       client_key, &encrypting_key,
+					       client_key, &client_keyblock,
 					       NULL))) {
 	status = "DECRYPT_CLIENT_KEY";
 	goto errout;
     }
-    encrypting_key.enctype = useenctype;
+    client_keyblock.enctype = useenctype;
 
     /* Start assembling the response */
     reply.msg_type = KRB5_AS_REP;
@@ -484,8 +483,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 				      &client,
 				      &server,
 				      &server,
-				      &encrypting_key,
-				      &server_signing_key,
+				      &client_keyblock,
+				      &server_keyblock,
 				      authtime,
 				      NULL,
 				      &enc_tkt_reply.authorization_data);
@@ -509,7 +508,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     /* moved here because we need authorization data in ticket_reply */
-    errcode = krb5_encrypt_tkt_part(kdc_context, &server_signing_key, &ticket_reply);
+    errcode = krb5_encrypt_tkt_part(kdc_context, &server_keyblock, &ticket_reply);
     if (errcode) {
 	status = "ENCRYPTING_TICKET";
 	goto errout;
@@ -518,7 +517,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     /* Fetch the padata info to be returned */
     errcode = return_padata(kdc_context, &client, req_pkt, request,
-			    &reply, client_key, &encrypting_key, &pa_context);
+			    &reply, client_key, &client_keyblock, &pa_context);
     if (errcode) {
 	status = "KDC_RETURN_PADATA";
 	goto errout;
@@ -531,14 +530,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     /* now encode/encrypt the response */
 
-    reply.enc_part.enctype = encrypting_key.enctype;
+    reply.enc_part.enctype = client_keyblock.enctype;
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
-				  0, &encrypting_key,  &reply, response);
-    krb5_free_keyblock_contents(kdc_context, &encrypting_key);
-    encrypting_key.contents = 0;
+				  0, &client_keyblock,  &reply, response);
     reply.enc_part.kvno = client_key->key_data_kvno;
-
     if (errcode) {
 	status = "ENCODE_KDC_REP";
 	goto errout;
@@ -610,10 +606,10 @@ errout:
 
     if (enc_tkt_reply.authorization_data != NULL)
 	krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
-    if (server_signing_key.contents)
- 	krb5_free_keyblock_contents(kdc_context, &server_signing_key);
-    if (encrypting_key.contents)
-	krb5_free_keyblock_contents(kdc_context, &encrypting_key);
+    if (server_keyblock.contents)
+ 	krb5_free_keyblock_contents(kdc_context, &server_keyblock);
+    if (client_keyblock.contents)
+	krb5_free_keyblock_contents(kdc_context, &client_keyblock);
     if (reply.padata)
 	krb5_free_pa_data(kdc_context, reply.padata);
 
