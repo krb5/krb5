@@ -677,7 +677,7 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 	errpkt.client = canon_client;
     else
 	errpkt.client = request->client;
-    errpkt.text.length = strlen(status)+1;
+    errpkt.text.length = strlen(status) + 1;
     if (!(errpkt.text.data = strdup(status)))
 	return ENOMEM;
 
@@ -689,7 +689,7 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 	errpkt.e_data = *e_data;
     } else {
 	errpkt.e_data.length = 0;
-	errpkt.e_data.data = 0;
+	errpkt.e_data.data = NULL;
     }
 
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);

@@ -1012,7 +1012,7 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
     if (ticket && ticket->enc_part2)
 	errpkt.client = ticket->enc_part2->client;
     else
-	errpkt.client = 0;
+	errpkt.client = NULL;
     errpkt.text.length = strlen(status) + 1;
     if (!(errpkt.text.data = strdup(status)))
 	return ENOMEM;
@@ -1022,7 +1022,7 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
 	return ENOMEM;
     }
     errpkt.e_data.length = 0;
-    errpkt.e_data.data = 0;
+    errpkt.e_data.data = NULL;
 
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
