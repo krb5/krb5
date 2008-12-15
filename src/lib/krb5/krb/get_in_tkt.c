@@ -984,6 +984,10 @@ krb5_get_init_creds(krb5_context context,
     if (tempint)
 	request.kdc_options |= KDC_OPT_PROXIABLE;
 
+    /* canonicalize */
+    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_CANONICALIZE))
+	request.kdc_options |= KDC_OPT_CANONICALIZE;
+
     /* allow_postdate */
     
     if (start_time > 0)
