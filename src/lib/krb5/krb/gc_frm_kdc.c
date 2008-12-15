@@ -786,9 +786,11 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_error_code retval, subretval;
     krb5_principal client, server, supplied_server, out_supplied_server;
     krb5_creds tgtq, cc_tgt, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
+    krb5_creds *tmp_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean old_use_conf_ktypes;
     char **hrealms;
-    unsigned int referral_count, i;
+    int tmp_tgt_count, referral_count, i, new_tgt_count;
+    krb5_boolean done_retry_with_referrals = FALSE;
 
     /* 
      * Set up client and server pointers.  Make a fresh and modifyable
@@ -811,12 +813,14 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
     memset(&referral_tgts, 0, sizeof(referral_tgts));
+    memset(&tmp_tgts, 0, sizeof(tmp_tgts));
 
     tgtptr = NULL;
     *tgts = NULL;
     *out_cred=NULL;
     old_use_conf_ktypes = context->use_conf_ktypes;
 
+retry_using_referrals:
     /* Copy client realm to server if no hint. */
     if (krb5_is_referral_realm(&server->realm)) {
         /* Use the client realm. */
@@ -849,6 +853,21 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		 "initial TGT for referral\n"));
 	retval = do_traversal(context, ccache, client, server,
 			      &cc_tgt, &tgtptr, tgts);
+	if (retval
+	    && done_retry_with_referrals == FALSE
+	    && !krb5_is_referral_realm(&supplied_server->realm)) {
+	    krb5_free_cred_contents(context, &tgtq);
+	    memset(&tgtq, 0, sizeof(tgtq));
+	    if (tgtptr == &cc_tgt) {
+		krb5_free_cred_contents(context, tgtptr);
+		memset(&cc_tgt, 0, sizeof(cc_tgt));
+		tgtptr = NULL;
+	    }
+	    krb5_free_data_contents(context, &server->realm);
+	    server->realm.length = 0;
+	    done_retry_with_referrals = TRUE;
+	    goto retry_using_referrals;
+	}
     }
     if (retval) {
         DPRINTF(("gc_from_kdc: failed to find initial TGT for referral\n"));
@@ -863,7 +882,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      * path, otherwise fall back to old-style assumptions.
      */
 
-    for (referral_count = 0;
+    for (referral_count = 0, new_tgt_count = 0, tmp_tgt_count = 0;
 	 referral_count < KRB5_REFERRAL_MAXHOPS;
 	 referral_count++) {
 #if 0
@@ -949,11 +968,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    DUMP_PRINC("gc_from_kdc credential received",
 		       (*out_cred)->server);
 
-	    if (referral_count == 0)
-		r1 = &tgtptr->server->data[1];
-	    else
-		r1 = &referral_tgts[referral_count-1]->server->data[1];
-
+	    r1 = &tgtptr->server->data[1];
 	    r2 = &(*out_cred)->server->data[1];
 	    if (data_eq(*r1, *r2)) {
 		DPRINTF(("gc_from_kdc: referred back to "
@@ -963,7 +978,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		break;
 	    }
 	    /* Check for referral routing loop. */
-	    for (i=0;i<referral_count;i++) {
+	    for (i=0;i<new_tgt_count;i++) {
 #if 0
 		DUMP_PRINC("gc_from_kdc: loop compare #1",
 			   (*out_cred)->server);
@@ -981,12 +996,36 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		    goto cleanup;
 		}
 	    }
+	    for (i=0;i<tmp_tgt_count;i++) {
+		if (krb5_principal_compare(context,
+					   (*out_cred)->server,
+					   tmp_tgts[i]->server)) {
+			DFPRINTF((stderr,
+				  "krb5_get_cred_from_kdc_opt: "
+				  "referral routing loop - "
+				  "got referral back to hop #%d\n", i));
+			retval=KRB5_KDC_UNREACH;
+			goto cleanup;
+		}
+	    }
 	    /* Point current tgt pointer at newly-received TGT. */
 	    if (tgtptr == &cc_tgt)
 		krb5_free_cred_contents(context, tgtptr);
-	    tgtptr=*out_cred;
-	    /* Save pointer to tgt in referral_tgts. */
-	    referral_tgts[referral_count]=*out_cred;
+	    memset(&cc_tgt, 0, sizeof(cc_tgt));
+	    retval = krb5_cc_retrieve_cred(context, ccache, RETR_FLAGS,
+					   *out_cred, &cc_tgt);
+	    if (!retval) {
+		tgtptr = &cc_tgt;
+		tmp_tgts[tmp_tgt_count] = *out_cred;
+		tmp_tgt_count++;
+		*out_cred = NULL;
+	    }
+	    if (*out_cred != NULL) {
+		tgtptr=*out_cred;
+		/* Save pointer to tgt in referral_tgts. */
+		referral_tgts[new_tgt_count]=*out_cred;
+		new_tgt_count++;
+	    }
 	    /* Copy krbtgt realm to server principal. */
 	    krb5_free_data_contents(context, &server->realm);
 	    retval = krb5int_copy_data_contents(context,
@@ -1164,6 +1203,11 @@ cleanup:
     for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++) {
         if(referral_tgts[i]) {
 	    krb5_free_creds(context, referral_tgts[i]);
+	}
+    }
+    for (i=0;i<tmp_tgt_count;i++) {
+	if(tmp_tgts[i]) {
+	    krb5_free_creds(context, tmp_tgts[i]);
 	}
     }
     DPRINTF(("gc_from_kdc finishing with %s\n",
