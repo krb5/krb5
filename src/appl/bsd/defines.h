@@ -44,18 +44,6 @@ extern void rcmd_stream_init_krb5 (krb5_keyblock *in_keyblock,
 
 extern void rcmd_stream_init_normal(void);
 
-#if defined(KRB5_KRB4_COMPAT) && !defined(SKIP_V4_PROTO)
-extern void rcmd_stream_init_krb4(C_Block, int, int, int);
-
-extern int k4cmd(int *sock, char **ahost, unsigned int rport,
-		 char *locuser,
-		 char *remuser, char *cmd, int *fd2p, KTEXT ticket,
-		 char *service, char *realm, CREDENTIALS *cred, 
-		 Key_schedule schedule, MSG_DAT *msg_data, 
-		 struct sockaddr_in *laddr, struct sockaddr_in *faddr, 
-		 long authopts, int anyport);
-#endif
-
 #ifndef HAVE_STRSAVE
 extern char *strsave(const char *sp);
 #endif
@@ -95,6 +83,3 @@ krb5_compat_recvauth_version(krb5_context, krb5_auth_context *,
 #endif
 
 #include "port-sockets.h"
-
-int accept_a_connection (int debug_port, struct sockaddr *from,
-			 socklen_t *fromlenp);

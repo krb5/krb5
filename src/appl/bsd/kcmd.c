@@ -90,16 +90,10 @@
 
 #include <errno.h>
 #include "k5-int.h"
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-#endif
 
 #include "defines.h"
 
 extern krb5_context bsd_context;
-#ifdef KRB5_KRB4_COMPAT
-extern Key_schedule v4_schedule;
-#endif
 
 
 #define START_PORT      5120     /* arbitrary */
@@ -140,26 +134,7 @@ static char *store_ptr = storage;
 static int twrite(int, char *, size_t, int);
 static int v5_des_read(int, char *, size_t, int), 
     v5_des_write(int, char *, size_t, int);
-#ifdef KRB5_KRB4_COMPAT
-static int v4_des_read(int, char *, size_t, int), 
-    v4_des_write(int, char *, size_t, int);
-static C_Block v4_session;
-static int right_justify;
-#endif
 static int do_lencheck;
-
-#ifdef KRB5_KRB4_COMPAT
-extern int
-krb_sendauth(long options, int fd, KTEXT ticket,
-	     char *service, char *inst, char *realm,
-	     unsigned KRB4_32 checksum,
-	     MSG_DAT *msg_data,
-	     CREDENTIALS *cred,
-	     Key_schedule schedule,
-	     struct sockaddr_in *laddr,
-	     struct sockaddr_in *faddr,
-	     char *version);
-#endif
 
 #ifdef POSIX_SIGNALS
 typedef sigset_t masktype;
@@ -631,133 +606,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 }
 
 
-
-#ifdef KRB5_KRB4_COMPAT
-int
-k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
-      cred, schedule, msg_data, laddr, faddr, authopts, anyport)
-     int *sock;
-     char **ahost;
-     unsigned int rport;
-     char *locuser, *remuser, *cmd;
-     int *fd2p;
-     KTEXT ticket;
-     char *service;
-     char *realm;
-     CREDENTIALS *cred;
-     Key_schedule schedule;
-     MSG_DAT *msg_data;
-     struct sockaddr_in *laddr, *faddr;
-     long authopts;
-     int anyport;
-{
-    int s;
-    masktype oldmask;
-    struct sockaddr_in sockin, from;
-    char c;
-    int lport = START_PORT;
-    int rc;
-    char *host_save;
-    int status;
-    int addrfamily = AF_INET;
-
-    block_urgent(&oldmask);
-    if (kcmd_connect (&s, &addrfamily, &sockin, *ahost, &host_save, rport, &lport, laddr) == -1) {
-	restore_sigs(&oldmask);
-	return -1;
-    }
-    *ahost = host_save;
-    /* If realm is null, look up from table */
-    if ((realm == NULL) || (realm[0] == '\0')) {
-	realm = krb_realmofhost(host_save);
-    }
-    lport--;
-    status = setup_secondary_channel(s, fd2p, &lport, &addrfamily, &from,
-				     anyport);
-    if (status)
-	goto bad;
-
-    /* set up the needed stuff for mutual auth */
-    *faddr = sockin;
-
-    status = krb_sendauth(authopts, s, ticket, service, *ahost,
-			  realm, (unsigned long) getpid(), msg_data,
-			  cred, schedule, laddr, faddr, "KCMDV0.1");
-    if (status != KSUCCESS) {
-	fprintf(stderr, "krb_sendauth failed: %s\n", krb_get_err_text(status));
-	status = -1;
-	goto bad2;
-    }
-    (void) write(s, remuser, strlen(remuser)+1);
-    (void) write(s, cmd, strlen(cmd)+1);
-
-reread:
-    if ((rc=read(s, &c, 1)) != 1) {
-	if (rc==-1) {
-	    perror(*ahost);
-	} else {
-	    fprintf(stderr,"rcmd: bad connection with remote host\n");
-	}
-	status = -1;
-	goto bad2;
-    }
-    if (c != 0) {
-	/* If rlogind was compiled on SunOS4, and it somehow
-	   got the shared library version numbers wrong, it
-	   may give an ld.so warning about an old version of a
-	   shared library.  Just ignore any such warning.
-	   Note that the warning is a characteristic of the
-	   server; we may not ourselves be running under
-	   SunOS4.  */
-	if (c == 'l') {
-	    char *check = "d.so: warning:";
-	    char *p;
-	    char cc;
-
-	    p = check;
-	    while (read(s, &c, 1) == 1) {
-		if (*p == '\0') {
-		    if (c == '\n')
-			break;
-		} else {
-		    if (c != *p)
-			break;
-		    ++p;
-		}
-	    }
-
-	    if (*p == '\0')
-		goto reread;
-
-	    cc = 'l';
-	    (void) write(2, &cc, 1);
-	    if (p != check)
-		(void) write(2, check, (unsigned) (p - check));
-	}
-
-	(void) write(2, &c, 1);
-	while (read(s, &c, 1) == 1) {
-	    (void) write(2, &c, 1);
-	    if (c == '\n')
-		break;
-	}
-	status = -1;
-	goto bad2;
-    }
-    restore_sigs(&oldmask);
-    *sock = s;
-    return (KSUCCESS);
- bad2:
-    if (lport)
-	(void) close(*fd2p);
- bad:
-    (void) close(s);
-    restore_sigs(&oldmask);
-    return (status);
-}
-#endif /* KRB5_KRB4_COMPAT */
-
-
 static int
 setup_socket (struct sockaddr *sa, GETSOCKNAME_ARG3_TYPE len)
 {
@@ -937,25 +785,6 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
     abort();
     }
 
-#ifdef KRB5_KRB4_COMPAT
-void rcmd_stream_init_krb4(session, encrypt_flag, lencheck, justify)
-     C_Block session;
-     int encrypt_flag;
-     int lencheck;
-     int justify;
-{
-    if (!encrypt_flag) {
-	rcmd_stream_init_normal();
-	return;
-    }
-    do_lencheck = lencheck;
-    right_justify = justify;
-    input = v4_des_read;
-    output = v4_des_write;
-    memcpy(v4_session, session, sizeof(v4_session));
-}
-#endif
-
 int rcmd_stream_read(fd, buf, len, sec)
      int fd;
      register char *buf;
@@ -1011,7 +840,6 @@ static int v5_des_read(fd, buf, len, secondary)
 	nstored = 0;
     }
 
-    /* See the comment in v4_des_read. */
     while (1) {
 	cc = krb5_net_read(bsd_context, fd, &c, 1);
 	/* we should check for non-blocking here, but we'd have
@@ -1149,162 +977,6 @@ static int v5_des_write(fd, buf, len, secondary)
     else return(len);
 }
 
-
-
-#ifdef KRB5_KRB4_COMPAT
-
-static int
-v4_des_read(fd, buf, len, secondary)
-int fd;
-char *buf;
-size_t len;
-int secondary;
-{
-	int nreturned = 0;
-	krb5_ui_4 net_len, rd_len;
-	int cc;
-	unsigned char c;
-
-	if (nstored >= len) {
-		memcpy(buf, store_ptr, len);
-		store_ptr += len;
-		nstored -= len;
-		return(len);
-	} else if (nstored) {
-		memcpy(buf, store_ptr, nstored);
-		nreturned += nstored;
-		buf += nstored;
-		len -= nstored;
-		nstored = 0;
-	}
-
-	/* We're fetching the length which is MSB first, and the MSB
-	   has to be zero unless the client is sending more than 2^24
-	   (16M) bytes in a single write (which is why this code is used
-	   in rlogin but not rcp or rsh.) The only reasons we'd get
-	   something other than zero are:
-		-- corruption of the tcp stream (which will show up when
-		   everything else is out of sync too)
-		-- un-caught Berkeley-style "pseudo out-of-band data" which
-		   happens any time the user hits ^C twice.
-	   The latter is *very* common, as shown by an 'rlogin -x -d' 
-	   using the CNS V4 rlogin.         Mark EIchin 1/95
-	   */
-	while (1) {
-	    cc = krb_net_read(fd, &c, 1);
-	    if (cc <= 0) return cc; /* read error */
-	    if (cc == 1) {
-		if (c == 0 || !do_lencheck) break;
-	    }
-	}
-
-	net_len = c;
-	if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
-	net_len = (net_len << 8) | c;
-	if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
-	net_len = (net_len << 8) | c;
-	if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
-	net_len = (net_len << 8) | c;
-
-	/* Note: net_len is unsigned */
-	if (net_len > sizeof(des_inbuf)) {
-		errno = EIO;
-		return(-1);
-	}
-	/* the writer tells us how much real data we are getting, but
-	   we need to read the pad bytes (8-byte boundary) */
-	rd_len = roundup(net_len, 8);
-	if ((cc = krb_net_read(fd, des_inbuf, rd_len)) != rd_len) {
-		errno = EIO;
-		return(-1);
-	}
-	(void) pcbc_encrypt((des_cblock *) des_inbuf,
-			    (des_cblock *) storage,
-			    (int) ((net_len < 8) ? 8 : net_len),
-			    v4_schedule,
-			    &v4_session,
-			    DECRYPT);
-	/* 
-	 * when the cleartext block is < 8 bytes, it is "right-justified"
-	 * in the block, so we need to adjust the pointer to the data
-	 */
-	if (net_len < 8 && right_justify)
-		store_ptr = storage + 8 - net_len;
-	else
-		store_ptr = storage;
-	nstored = net_len;
-	if (nstored > len) {
-		memcpy(buf, store_ptr, len);
-		nreturned += len;
-		store_ptr += len;
-		nstored -= len;
-	} else {
-		memcpy(buf, store_ptr, nstored);
-		nreturned += nstored;
-		nstored = 0;
-	}
-	
-	return(nreturned);
-}
-
-static int
-v4_des_write(fd, buf, len, secondary)
-int fd;
-char *buf;
-size_t len;
-int secondary;
-{
-	static char garbage_buf[8];
-	unsigned char *len_buf = (unsigned char *) des_outpkt;
-
-	/* 
-	 * pcbc_encrypt outputs in 8-byte (64 bit) increments
-	 *
-	 * it zero-fills the cleartext to 8-byte padding,
-	 * so if we have cleartext of < 8 bytes, we want
-	 * to insert random garbage before it so that the ciphertext
-	 * differs for each transmission of the same cleartext.
-	 * if len < 8 - sizeof(long), sizeof(long) bytes of random
-	 * garbage should be sufficient; leave the rest as-is in the buffer.
-	 * if len > 8 - sizeof(long), just garbage fill the rest.
-	 */
-
-#ifdef min
-#undef min
-#endif
-#define min(a,b) ((a < b) ? a : b)
-
-	if (len < 8) {
-		if (right_justify) {
-			krb5_random_confounder(8 - len, garbage_buf);
-			/* this "right-justifies" the data in the buffer */
-			(void) memcpy(garbage_buf + 8 - len, buf, len);
-		} else {
-			krb5_random_confounder(8 - len, garbage_buf + len);
-			(void) memcpy(garbage_buf, buf, len);
-		}
-	}
-	(void) pcbc_encrypt((des_cblock *) ((len < 8) ? garbage_buf : buf),
-			    (des_cblock *) (des_outpkt+4),
-			    (int) ((len < 8) ? 8 : len),
-			    v4_schedule,
-			    &v4_session,
-			    ENCRYPT);
-
-	/* tell the other end the real amount, but send an 8-byte padded
-	   packet */
-	len_buf[0] = (len & 0xff000000) >> 24;
-	len_buf[1] = (len & 0xff0000) >> 16;
-	len_buf[2] = (len & 0xff00) >> 8;
-	len_buf[3] = (len & 0xff);
-	if (write(fd, des_outpkt, roundup(len,8)+4) != roundup(len,8)+4) {
-		errno = EIO;
-		return(-1);
-	}
-	return(len);
-}
-
-#endif /* KRB5_KRB4_COMPAT */
 
 #ifndef HAVE_STRSAVE
 /* Strsave was a routine in the version 4 krb library: we put it here

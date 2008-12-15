@@ -32,10 +32,6 @@ char copyright[] =
    # login stanza
    krb5_get_tickets = 1
    # use password to get v5 tickets
-   krb4_get_tickets = 0
-   # use password to get v4 tickets
-   krb4_convert = 0
-   # use kerberos conversion daemon to get v4 tickets
    krb_run_aklog = 0
    # attempt to run aklog
    aklog_path = $(prefix)/bin/aklog
@@ -46,14 +42,8 @@ char copyright[] =
 #define KRB5_GET_TICKETS
 int login_krb5_get_tickets = 1;
 
-#ifdef KRB5_KRB4_COMPAT
-#define KRB4_GET_TICKETS
-int login_krb4_get_tickets = 0;
-#define KRB4_CONVERT
-int login_krb4_convert = 0;
 #define KRB_RUN_AKLOG
 int login_krb_run_aklog = 0;
-#endif /* KRB5_KRB4_COMPAT */
 
 int login_accept_passwd = 0;
 
@@ -67,10 +57,6 @@ int login_accept_passwd = 0;
  *			 allows preauthenticated login as root)
  * login -e name	(for pre-authenticated encrypted, must do term
  *			 negotiation)
- * ifdef KRB4_KLOGIN
- * login -k hostname (for Kerberos V4 rlogind with password access)
- * login -K hostname (for Kerberos V4 rlogind with restricted access)
- * endif KRB4_KLOGIN
  *
  * only one of: -r -f -e -k -K -F
  * only one of: -r -h -k -K
@@ -158,44 +144,6 @@ typedef sigtype (*handler)();
 #include "com_err.h"
 #include "osconf.h"
 #endif /* KRB5_GET_TICKETS */
-
-#ifdef KRB4_KLOGIN
-/* support for running under v4 klogind, -k -K flags */
-#define KRB4
-#endif
-
-#if (defined(KRB4_GET_TICKETS) || defined(KRB4_CONVERT))
-/* support for prompting for v4 initial tickets */
-#define KRB4
-#endif
-
-#ifdef KRB4
-#include <krb.h>
-#include <netinet/in.h>
-#ifdef HAVE_KRB4_PROTO_H
-#include <krb4-proto.h>
-#endif
-#include <arpa/inet.h>
-#ifdef BIND_HACK
-#include <arpa/nameser.h>
-#include <arpa/resolv.h>
-#endif /* BIND_HACK */
-
-/* Hacks to maintain compatability with Athena libkrb*/
-#ifndef HAVE_KRB_SAVE_CREDENTIALS
-#define krb_save_credentials save_credentials
-#endif /*HAVE_KRB_SAVE_CREDENTIALS*/
-
-#ifndef HAVE_KRB_GET_ERR_TEXT
-
-static const char *krb_get_err_text(kerror)
-     int kerror;
-{
-    return krb_err_txt[kerror];
-}
-
-#endif /*HAVE_KRB_GET_ERR_TEXT*/
-#endif /* KRB4 */
 
 #ifndef __STDC__
 #ifndef volatile
@@ -302,13 +250,8 @@ char term[64], *username;
 
 
 
-#ifdef KRB4
-#define KRB_ENVIRON	"KRBTKFILE"	/* Ticket file environment variable */
-#define KRB_TK_DIR	"/tmp/tkt_"	/* Where to put the ticket */
-#endif /* KRB4_GET_TICKETS */
-
-#if defined(KRB4_GET_TICKETS) || defined(KRB5_GET_TICKETS)
-#define MAXPWSIZE	128		/* Biggest string accepted for KRB4
+#ifdef KRB5_GET_TICKETS
+#define MAXPWSIZE	128		/* Biggest string accepted for KRB5
 					   passsword */
 #endif
 
@@ -353,12 +296,8 @@ static struct login_confs {
 } login_conf_set[] = {
 #ifdef KRB5_GET_TICKETS
     {"krb5_get_tickets", &login_krb5_get_tickets},
+    {"krb_run_aklog", &login_krb_run_aklog},
 #endif
-#ifdef KRB5_KRB4_COMPAT
-    {"krb4_get_tickets", &login_krb4_get_tickets},
-    {"krb4_convert", &login_krb4_convert},
-    {"krb4_run_aklog", &login_krb_run_aklog},
-#endif /* KRB5_KRB4_COMPAT */
 };
 
 static char *conf_yes[] = {
@@ -501,20 +440,8 @@ char ccfile[MAXPATHLEN+6];	/* FILE:path+\0 */
 int krbflag;			/* set if tickets have been obtained */
 #endif /* KRB5_GET_TICKETS */
 
-#ifdef KRB4_GET_TICKETS
-static int got_v4_tickets;
-AUTH_DAT *kdata = (AUTH_DAT *) NULL;
-char tkfile[MAXPATHLEN];
-#endif
-
-#ifdef KRB4_GET_TICKETS
-static void k_init (ttyn, realm)
-    char *ttyn;
-    char *realm;
-#else
 void k_init (ttyn)
     char *ttyn;
-#endif
 {
 #ifdef KRB5_GET_TICKETS
     krb5_error_code retval;
@@ -538,22 +465,6 @@ void k_init (ttyn)
 	/* note it correctly */
 	strncpy(ccfile, getenv(KRB5_ENV_CCNAME), sizeof(ccfile));
 	ccfile[sizeof(ccfile) - 1] = '\0';
-    }
-#endif
-
-#ifdef KRB4_GET_TICKETS
-    if (krb_get_lrealm(realm, 1) != KSUCCESS) {
-	strncpy(realm, KRB_REALM, sizeof(realm));
-	realm[sizeof(realm) - 1] = '\0';
-    }
-    if (login_krb4_get_tickets || login_krb4_convert) {
-	/* Set up the ticket file environment variable */
-	strncpy(tkfile, KRB_TK_DIR, sizeof(tkfile));
-	tkfile[sizeof(tkfile) - 1] = '\0';
-	strncat(tkfile, strrchr(ttyn, '/')+1,
-		sizeof(tkfile) - strlen(tkfile));
-	(void) unlink (tkfile);
-	setenv(KRB_ENVIRON, tkfile, 1);
     }
 #endif
 
@@ -637,235 +548,7 @@ static int have_v5_tickets (me)
 }
 #endif /* KRB5_GET_TICKETS */
 
-#ifdef KRB4_CONVERT
-static int
-try_convert524(kctx, me, use_ccache)
-    krb5_context kctx;
-    krb5_principal me;
-    int use_ccache;
-{
-    krb5_principal kpcserver;
-    krb5_error_code kpccode;
-    int kpcval;
-    krb5_creds increds, *v5creds;
-    CREDENTIALS v4creds;
-
-
-    /* If we have forwarded v5 tickets, retrieve the credentials from
-     * the cache; otherwise, the v5 credentials are in my_creds.
-     */
-    if (use_ccache) {
-	/* cc->ccache, already set up */
-	/* client->me, already set up */
-	kpccode = krb5_build_principal(kctx, &kpcserver, 
-				       krb5_princ_realm(kctx, me)->length,
-				       krb5_princ_realm(kctx, me)->data,
-				       "krbtgt",
-				       krb5_princ_realm(kctx, me)->data,
-				       NULL);
-	if (kpccode) {
-	    com_err("login/v4", kpccode,
-		    "while creating service principal name");
-	    return 0;
-	}
-
-	memset((char *) &increds, 0, sizeof(increds));
-	increds.client = me;
-	increds.server = kpcserver;
-	increds.times.endtime = 0;
-	increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
-	kpccode = krb5_get_credentials(kctx, 0, ccache,
-				       &increds, &v5creds);
-	krb5_free_principal(kctx, kpcserver);
-	increds.server = NULL;
-	if (kpccode) {
-	    com_err("login/v4", kpccode, "getting V5 credentials");
-	    return 0;
-	}
-
-	kpccode = krb524_convert_creds_kdc(kctx, v5creds, &v4creds);
-	krb5_free_creds(kctx, v5creds);
-    } else
-	kpccode = krb524_convert_creds_kdc(kctx, &my_creds, &v4creds);
-    if (kpccode) {
-	com_err("login/v4", kpccode, "converting to V4 credentials");
-	return 0;
-    }
-    /* this is stolen from the v4 kinit */
-    /* initialize ticket cache */
-    if ((kpcval = in_tkt(v4creds.pname,v4creds.pinst)
-	 != KSUCCESS)) {
-	com_err("login/v4", kpcval,
-		"trying to create the V4 ticket file");
-	return 0;
-    }
-    /* stash ticket, session key, etc. for future use */
-    if ((kpcval = krb_save_credentials(v4creds.service,
-				       v4creds.instance,
-				       v4creds.realm, 
-				       v4creds.session,
-				       v4creds.lifetime,
-				       v4creds.kvno,
-				       &(v4creds.ticket_st), 
-				       v4creds.issue_date))) {
-	com_err("login/v4", kpcval,
-		"trying to save the V4 ticket");
-	return 0;
-    }
-    got_v4_tickets = 1;
-    strncpy(tkfile, tkt_string(), sizeof(tkfile));
-    tkfile[sizeof(tkfile) - 1] = '\0';
-    return 1;
-}
-#endif
-
-#ifdef KRB4_GET_TICKETS
-static int
-try_krb4 (user_pwstring, realm)
-    char *user_pwstring;
-    char *realm;
-{
-    int krbval, kpass_ok = 0;
-
-    krbval = krb_get_pw_in_tkt(username, "", realm,
-			       "krbtgt", realm, 
-			       DEFAULT_TKT_LIFE,
-			       user_pwstring);
-
-    switch (krbval) {
-    case INTK_OK:
-	kpass_ok = 1;
-	krbflag = 1;
-	strncpy(tkfile, tkt_string(), sizeof(tkfile));
-	tkfile[sizeof(tkfile) - 1] = '\0';
-	break;	
-	/* These errors should be silent */
-	/* So the Kerberos database can't be probed */
-    case KDC_NULL_KEY:
-    case KDC_PR_UNKNOWN:
-    case INTK_BADPW:
-    case KDC_PR_N_UNIQUE:
-    case -1:
-	break;
-#if 0 /* I want to see where INTK_W_NOTALL comes from before letting
-	 kpass_ok be set in that case.  KR  */
-	/* These should be printed but are not fatal */
-    case INTK_W_NOTALL:
-	krbflag = 1;
-	kpass_ok = 1;
-	fprintf(stderr, "Kerberos error: %s\n",
-		krb_get_err_text(krbval));
-	break;
-#endif
-    default:
-	fprintf(stderr, "Kerberos error: %s\n",
-		krb_get_err_text(krbval));
-	break;
-    }
-    got_v4_tickets = kpass_ok;
-    return kpass_ok;
-}
-#endif /* KRB4_GET_TICKETS */
-
 /* Kerberos ticket-handling routines */
-
-#ifdef KRB4_GET_TICKETS
-/* call already conditionalized on login_krb4_get_tickets */
-/*
- * Verify the Kerberos ticket-granting ticket just retrieved for the
- * user.  If the Kerberos server doesn't respond, assume the user is
- * trying to fake us out (since we DID just get a TGT from what is
- * supposedly our KDC).  If the rcmd.<host> service is unknown (i.e.,
- * the local srvtab doesn't have it), let her in.
- *
- * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
- */
-static int verify_krb_v4_tgt (realm)
-    char *realm;
-{
-    char hostname[MAXHOSTNAMELEN], phost[BUFSIZ];
-    struct hostent *hp;
-    KTEXT_ST ticket;
-    AUTH_DAT authdata;
-    unsigned KRB4_32 addr;
-    static /*const*/ char rcmd_str[] = "rcmd";
-#if 0
-    char key[8];
-#endif
-    int krbval, retval, have_keys;
-
-    if (gethostname(hostname, sizeof(hostname)) == -1) {
-	perror ("cannot retrieve local hostname");
-	return -1;
-    }
-    strncpy (phost, krb_get_phost (hostname), sizeof (phost));
-    phost[sizeof(phost)-1] = 0;
-    hp = gethostbyname (hostname);
-    if (!hp) {
-	perror ("cannot retrieve local host address");
-	return -1;
-    }
-    memcpy ((char *) &addr, (char *)hp->h_addr, sizeof (addr));
-    /* Do we have rcmd.<host> keys? */
-#if 0 /* Be paranoid.  If srvtab exists, assume it must contain the
-	 right key.  The more paranoid mode also helps avoid a
-	 possible DNS spoofing issue.  */
-    have_keys = read_service_key (rcmd_str, phost, realm, 0, KEYFILE, key)
-	? 0 : 1;
-    memset (key, 0, sizeof (key));
-#else
-    have_keys = 0 == access (KEYFILE, F_OK);
-#endif
-    krbval = krb_mk_req (&ticket, rcmd_str, phost, realm, 0);
-    if (krbval == KDC_PR_UNKNOWN) {
-	/*
-	 * Our rcmd.<host> principal isn't known -- just assume valid
-	 * for now?  This is one case that the user _could_ fake out.
-	 */
-	if (have_keys)
-	    return -1;
-	else
-	    return 0;
-    }
-    else if (krbval != KSUCCESS) {
-	printf ("Unable to verify Kerberos TGT: %s\n", 
-		krb_get_err_text(krbval));
-#ifndef SYSLOG42
-	syslog (LOG_NOTICE|LOG_AUTH, "Kerberos TGT bad: %s",
-		krb_get_err_text(krbval));
-#endif
-	return -1;
-    }
-    /* got ticket, try to use it */
-    krbval = krb_rd_req (&ticket, rcmd_str, phost, addr, &authdata, "");
-    if (krbval != KSUCCESS) {
-	if (krbval == RD_AP_UNDEC && !have_keys)
-	    retval = 0;
-	else {
-	    retval = -1;
-	    printf ("Unable to verify `rcmd' ticket: %s\n",
-		    krb_get_err_text(krbval));
-	}
-#ifndef SYSLOG42
-	syslog (LOG_NOTICE|LOG_AUTH, "can't verify rcmd ticket: %s;%s\n",
-		krb_get_err_text(krbval),
-		retval
-		? "srvtab found, assuming failure"
-		: "no srvtab found, assuming success");
-#endif
-	goto EGRESS;
-    }
-    /*
-     * The rcmd.<host> ticket has been received _and_ verified.
-     */
-    retval = 1;
-    /* do cleanup and return */
-EGRESS:
-    memset (&ticket, 0, sizeof (ticket));
-    memset (&authdata, 0, sizeof (authdata));
-    return retval;
-}
-#endif /* KRB4_GET_TICKETS */
 
 static void destroy_tickets()
 {
@@ -877,10 +560,6 @@ static void destroy_tickets()
 	  krb5_cc_destroy (kcontext, cache);
     }
 #endif
-#ifdef KRB4_GET_TICKETS
-    if (login_krb4_get_tickets || login_krb4_convert)
-	dest_tkt();
-#endif /* KRB4_GET_TICKETS */
 }
 
 /* AFS support routines */
@@ -927,15 +606,15 @@ static int try_afscall (scall)
 static void
 afs_login ()
 {
-#if defined(KRB4_GET_TICKETS) && defined(SETPAG)
-    if (login_krb4_get_tickets && pwd->pw_uid) {
+#if defined(SETPAG)
+    if (login_krb5_get_tickets && pwd->pw_uid) {
 	/* Only reset the pag for non-root users. */
 	/* This allows root to become anything. */
 	pagflag = try_setpag ();
     }
 #endif
 #ifdef KRB_RUN_AKLOG
-    if (got_v4_tickets && login_krb_run_aklog) {
+    if (got_v5_tickets && login_krb_run_aklog) {
 	/* KPROGDIR is $(prefix)/bin */
 	char aklog_path[MAXPATHLEN];
 	struct stat st;
@@ -1048,10 +727,6 @@ int main(argc, argv)
     krb5_creds save_v5creds;
     krb5_ccache xtra_creds = NULL;
 #endif
-#ifdef KRB4_GET_TICKETS
-    CREDENTIALS save_v4creds;
-    char realm[REALM_SZ];
-#endif
     char *ccname = 0;   /* name of forwarded cache */
     char *tz = 0;
     char *hostname = 0;
@@ -1080,9 +755,6 @@ int main(argc, argv)
      * 	login as root.
      * -h is used by other servers to pass the name of the
      * remote host to login so that it may be placed in utmp and wtmp
-     * -k is used by klogind to cause the Kerberos V4 autologin protocol;
-     * -K is used by klogind to cause the Kerberos V4 autologin
-     *    protocol with restricted access.
      */
     (void)gethostname(tbuf, sizeof(tbuf));
     domain = strchr(tbuf, '.');
@@ -1133,33 +805,6 @@ int main(argc, argv)
 		*p = '\0';
 	    hostname = optarg;
 	    break;
-#ifdef KRB4_KLOGIN
-	case 'k':
-	case 'K':
-	    EXCL_AUTH_TEST;
-	    EXCL_HOST_TEST;
-	    if (getuid()) {
-		fprintf(stderr,
-			"login: -%c for super-user only.\n", ch);
-		exit(1);
-	    }
-	    /* "-k hostname" must be last args */
-	    if (optind != argc) {
-		fprintf(stderr, "Syntax error.\n");
-		exit(1);
-	    }
-	    if (ch == 'K')
-		Kflag = 1;
-	    else
-		kflag = 1;
-	    passwd_req = (do_krb_login(optarg, Kflag ? 1 : 0) == -1);
-	    if (domain && 
-		(p = strchr(optarg, '.')) &&
-		(!strcmp(p, domain))) 
-		*p = '\0';
-	    hostname = optarg;
-	    break;
-#endif /* KRB4_KLOGIN */
 	case 'e':
 	    EXCL_AUTH_TEST;
 	    if (getuid()) {
@@ -1243,18 +888,13 @@ int main(argc, argv)
        ask for username if we don't have it already
        look it up in local pw or shadow file (to get crypt string)
        ask for password
-       try and get v4, v5 tickets with it
+       try and get v5 tickets with it
        try and use the tickets against the local srvtab
        if the password matches, always let them in
        if the ticket decrypts, let them in.
-       v5 needs to work, does v4?
     */
 
-#ifdef KRB4_GET_TICKETS
-    k_init (ttyn, realm);
-#else
     k_init (ttyn);
-#endif
 
     for (cnt = 0;; username = NULL) {
 #ifdef KRB5_GET_TICKETS
@@ -1293,17 +933,6 @@ int main(argc, argv)
 	if (!unix_needs_passwd())
 	    break;
 
-	/* we have several sets of code:
-	   1) get v5 tickets alone -DKRB5_GET_TICKETS
-	   2) get v4 tickets alone [** don't! only get them *with* v5 **]
-	   3) get both tickets -DKRB5_GET_TICKETS -DKRB4_GET_TICKETS
-	   3a) use krb524 calls to get the v4 tickets -DKRB4_CONVERT plus (3).
-	   4) get no tickets and use the password file (none of thes defined.)
-		   
-	   Likewise we need to (optionally?) test these tickets against
-	   local srvtabs.
-	*/
-
 #ifdef KRB5_GET_TICKETS
 	if (login_krb5_get_tickets) {
 	    /* rename these to something more verbose */
@@ -1325,16 +954,7 @@ int main(argc, argv)
 	    if (pwd->pw_uid != 0) { /* Don't get tickets for root */
 		try_krb5(&me, user_pwstring);
 
-#ifdef KRB4_GET_TICKETS
-		if (login_krb4_get_tickets &&
-		    !(got_v5_tickets && login_krb4_convert))
-		    try_krb4(user_pwstring, realm);
-#endif
-		krbflag = (got_v5_tickets
-#ifdef KRB4_GET_TICKETS
-			   || got_v4_tickets
-#endif
-			   );
+		krbflag = got_v5_tickets;
 		memset (user_pwstring, 0, sizeof(user_pwstring));
 		/* password wiped, so we can relax */
 		setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
@@ -1371,13 +991,6 @@ int main(argc, argv)
 		    break;	/* we're ok */
 		}
 	    }
-#ifdef KRB4_GET_TICKETS
-	    else if (got_v4_tickets) {
-		if (login_krb4_get_tickets &&
-		    (verify_krb_v4_tgt(realm) != -1))
-		    break;	/* we're ok */
-	    }
-#endif /* KRB4_GET_TICKETS */
 
 	bad_login:
 	    setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
@@ -1481,19 +1094,8 @@ int main(argc, argv)
 	forwarded_v5_tickets = 1;
 #endif /* KRB5_GET_TICKETS */
 
-#if defined(KRB5_GET_TICKETS) && defined(KRB4_CONVERT)
-    if (login_krb4_convert && !got_v4_tickets) {
-	if (got_v5_tickets||forwarded_v5_tickets)
-	    try_convert524(kcontext, me, forwarded_v5_tickets);
-    }
-#endif
-
 #ifdef KRB5_GET_TICKETS
     if (login_krb5_get_tickets)
-	dofork();
-#endif
-#ifdef KRB4_GET_TICKETS
-    else if (login_krb4_get_tickets)
 	dofork();
 #endif
 
@@ -1552,17 +1154,16 @@ int main(argc, argv)
     (void) initgroups(username, pwd->pw_gid);
 
     /*
-     * The V5 ccache and V4 ticket file are both created as root.
-     * They need to be owned by the user, and chown (a) assumes
-     * they are stored in a file and (b) allows a race condition
-     * in which a user can delete the file (if the directory
-     * sticky bit is not set) and make it a symlink to somewhere
-     * else; on some platforms, chown() on a symlink actually
-     * changes the owner of the pointed-to file.  This is Bad.
+     * The V5 ccache is created as root.  It needs to be owned by the
+     * user, and chown (a) assumes they are stored in a file and (b)
+     * allows a race condition in which a user can delete the file (if
+     * the directory sticky bit is not set) and make it a symlink to
+     * somewhere else; on some platforms, chown() on a symlink
+     * actually changes the owner of the pointed-to file.  This is
+     * Bad.
      *
-     * So, we suck the V5 and V4 krbtgts into memory here, destroy
-     * the ccache/ticket file, and recreate them later after the
-     * setuid.
+     * So, we suck the V5 krbtgt into memory here, destroy the
+     * ccache/ticket file, and recreate them later after the setuid.
      *
      * With the new v5 api, v5 tickets are kept in memory until written
      * out after the setuid.  However, forwarded tickets still
@@ -1606,27 +1207,9 @@ int main(argc, argv)
     }
 #endif /* KRB5_GET_TICKETS */
 
-#ifdef KRB4_GET_TICKETS
-    if (got_v4_tickets) {
-	memset(&save_v4creds, 0, sizeof(save_v4creds));
-	     
-	retval = krb_get_cred("krbtgt", realm, realm, &save_v4creds);
-	if (retval != KSUCCESS) {
-	    syslog(LOG_ERR,
-		   "%s while retrieving V4 initial ticket for copy",
-		   error_message(retval));
-	    rewrite_ccache = 0;
-	}
-    }
-#endif /* KRB4_GET_TICKETS */
-
 #ifdef KRB5_GET_TICKETS
     if (forwarded_v5_tickets)
 	destroy_tickets();
-#endif
-#ifdef KRB4_GET_TICKETS
-    else if (got_v4_tickets)
-        destroy_tickets();
 #endif
 
 #ifdef OQUOTA
@@ -1702,29 +1285,6 @@ int main(argc, argv)
     }
 #endif /* KRB5_GET_TICKETS */
 
-#ifdef KRB4_GET_TICKETS
-    if (got_v4_tickets && rewrite_ccache) {
-	if ((retval = in_tkt(save_v4creds.pname, save_v4creds.pinst))
-	    != KSUCCESS) {
-	    syslog(LOG_ERR,
-		   "%s while re-initializing V4 ticket cache as user",
-		   error_message((retval == -1)?errno:retval));
-	} else if ((retval = krb_save_credentials(save_v4creds.service,
-						  save_v4creds.instance,
-						  save_v4creds.realm, 
-						  save_v4creds.session,
-						  save_v4creds.lifetime,
-						  save_v4creds.kvno,
-						  &(save_v4creds.ticket_st), 
-						  save_v4creds.issue_date))
-		   != KSUCCESS) {
-	    syslog(LOG_ERR,
-		   "%s while re-storing V4 tickets as user",
-		   error_message(retval));
-	}
-    }
-#endif /* KRB4_GET_TICKETS */
-
     if (*pwd->pw_shell == '\0')
 	pwd->pw_shell = BSHELL;
 
@@ -1779,12 +1339,6 @@ int main(argc, argv)
     if (term[0])
 	(void)setenv("TERM", term, 0);
 
-#ifdef KRB4_GET_TICKETS
-    /* tkfile[0] is only set if we got tickets above */
-    if (login_krb4_get_tickets && tkfile[0])
-	(void) setenv(KRB_ENVIRON, tkfile, 1);
-#endif /* KRB4_GET_TICKETS */
-
 #ifdef KRB5_GET_TICKETS
     /* ccfile[0] is only set if we got tickets above */
     if (login_krb5_get_tickets && ccfile[0]) {
@@ -1796,33 +1350,6 @@ int main(argc, argv)
     if (tty[sizeof("tty")-1] == 'd')
 	syslog(LOG_INFO, "DIALUP %s, %s", tty, pwd->pw_name);
     if (pwd->pw_uid == 0)
-#ifdef KRB4_KLOGIN
-	if (kdata) {
-	    if (hostname) {
-		char buf[BUFSIZ];
-#ifdef UT_HOSTSIZE
-		(void) snprintf(buf, sizeof(buf),
-			       "ROOT LOGIN (krb) %s from %.*s, %s.%s@%s",
-			       tty, UT_HOSTSIZE, hostname,
-			       kdata->pname, kdata->pinst,
-			       kdata->prealm);
-#else
-		(void) snprintf(buf, sizeof(buf),
-			       "ROOT LOGIN (krb) %s from %s, %s.%s@%s",
-			       tty, hostname,
-			       kdata->pname, kdata->pinst,
-			       kdata->prealm);
-#endif
-		syslog(LOG_NOTICE, "%s", buf);
-	    } else {
-		syslog(LOG_NOTICE,
-		       "ROOT LOGIN (krb) %s, %s.%s@%s",
-		       tty,
-		       kdata->pname, kdata->pinst,
-		       kdata->prealm);
-	    }
-	} else
-#endif /* KRB4_KLOGIN */
 	    {
 		if (hostname) {
 #ifdef UT_HOSTSIZE
@@ -1840,10 +1367,6 @@ int main(argc, argv)
     afs_login();
 
     if (!quietlog) {
-#ifdef KRB4_KLOGIN
-	if (!krbflag && !fflag && !eflag )
-	    printf("\nWarning: No Kerberos tickets obtained.\n\n");
-#endif /* KRB4_KLOGIN */
 	motd();
 	check_mail();
     }
@@ -2218,100 +1741,6 @@ int doremotelogin(host)
     return(ruserok(host, (pwd->pw_uid == 0), rusername, username));
 }
 
-#ifdef KRB4_KLOGIN
-int do_krb_login(host, strict)
-     char *host;
-     int strict;
-{
-    int rc;
-    struct sockaddr_in sin;
-    char instance[INST_SZ], version[9];
-    long authoptions = 0L;
-    struct hostent *hp = gethostbyname(host);
-    static char lusername[UT_NAMESIZE+1];
-    
-    /*
-     * Kerberos autologin protocol.
-     */
-
-    (void) memset((char *) &sin, 0, (int) sizeof(sin));
-    
-    if (hp)
-	(void) memcpy ((char *)&sin.sin_addr, hp->h_addr,
-		       sizeof(sin.sin_addr));
-    else
-	sin.sin_addr.s_addr = inet_addr(host);
-    
-    if ((hp == NULL) && (sin.sin_addr.s_addr == -1)) {
-	printf("Hostname did not resolve to an address, so Kerberos authentication failed\r\n");
-	/*
-	 * No host addr prevents auth, so
-	 * punt krb and require password
-	 */
-	if (strict) {
-	    goto paranoid;
-	} else {
-	    pwd = NULL;
-	    return(-1);
-	}
-    }
-
-    kdata = (AUTH_DAT *)malloc( sizeof(AUTH_DAT) );
-    ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
-
-    (void) strlcpy(instance, "*", sizeof(instance));
-    if ((rc=krb_recvauth(authoptions, 0, ticket, "rcmd",
-			 instance, &sin,
-			 (struct sockaddr_in *)0,
-			 kdata, "", (bit_64 *) 0, version))) {
-	printf("Kerberos rlogin failed: %s\r\n",krb_get_err_text(rc));
-	if (strict) {
-paranoid:
-	    /*
-	     * Paranoid hosts, such as a Kerberos server,
-	     * specify the Klogind daemon to disallow
-	     * even password access here.
-	     */
-	    printf("Sorry, you must have Kerberos authentication to access this host.\r\n");
-	    exit(1);
-	}
-    }
-    (void) lgetstr(lusername, sizeof (lusername), "Local user");
-    (void) lgetstr(term, sizeof(term), "Terminal type");
-    username = lusername;
-    if (getuid()) {
-	pwd = NULL;
-	return(-1);
-    }
-    pwd = getpwnam(lusername);
-    if (pwd == NULL) {
-	pwd = NULL;
-	return(-1);
-    }
-
-    /*
-     * if Kerberos login failed because of an error in krb_recvauth,
-     * return the indication of a bad attempt.  User will be prompted
-     * for a password.  We CAN'T check the .rhost file, because we need 
-     * the remote username to do that, and the remote username is in the 
-     * Kerberos ticket.  This affects ONLY the case where there is
-     * Kerberos on both ends, but Kerberos fails on the server end. 
-     */
-    if (rc) {
-	return(-1);
-    }
-
-    if ((rc=kuserok(kdata,lusername))) {
-	printf("login: %s has not given you permission to login without a password.\r\n",lusername);
-	if (strict) {
-	    exit(1);
-	}
-	return(-1);
-    }
-    return(0);
-}
-#endif /* KRB4_KLOGIN */
-
 void lgetstr(buf, cnt, err)
      char *buf, *err;
      int cnt;
@@ -2335,15 +1764,11 @@ void lgetstr(buf, cnt, err)
 void sleepexit(eval)
      int eval;
 {
-#ifdef KRB4_GET_TICKETS
-    if (login_krb4_get_tickets && krbflag)
-	(void) destroy_tickets();
-#endif /* KRB4_GET_TICKETS */
     sleep((u_int)5);
     exit(eval);
 }
 
-#if defined(KRB4_GET_TICKETS) || defined(KRB5_GET_TICKETS)
+#ifdef KRB5_GET_TICKETS
 static int hungup = 0;
 
 static sigtype
@@ -2351,7 +1776,7 @@ sighup() {
     hungup = 1;
 }
 
-/* call already conditionalized on login_krb4_get_tickets */
+/* call already conditionalized on login_krb5_get_tickets */
 /*
  * This routine handles cleanup stuff, and the like.
  * It exits only in the child process.
@@ -2436,7 +1861,7 @@ dofork()
     /* Leave */
     exit(0);
 }
-#endif /* KRB4_GET_TICKETS */
+#endif /* KRB5_GET_TICKETS */
 
 
 #ifndef HAVE_STRSAVE

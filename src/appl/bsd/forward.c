@@ -27,7 +27,6 @@
 
 #include "k5-int.h"
 
-#define SKIP_V4_PROTO /* To skip the krb4 prototypes */
 #include "defines.h"
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */

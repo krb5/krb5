@@ -19,8 +19,8 @@ tickets for the user.
 will prompt for a username, or take one on the command line, as
 .I login.krb5 username
 and will then prompt for a password. This password will be used to
-acquire Kerberos Version 5 tickets and Kerberos Version 4 tickets (if
-possible.) It will also attempt to run
+acquire Kerberos Version 5 tickets (if possible.) It will also attempt
+to run
 .I aklog
 to get \fIAFS\fP tokens for the user. The version 5 tickets will be
 tested against a local 
@@ -39,12 +39,6 @@ pass hostname to rlogind.  Must be the last argument.
 .TP
 \fB\-h\fP \fIhostname\fP
 pass hostname to telnetd, etc.  Must be the last argument.
-.TP
-\fB\-k\fP \fIhostname\fP
-Use Kerberos V4 to login.  Must be the last argument.
-.TP
-\fB\-K\fP \fIhostname\fP
-Use Kerberos V4 to login.  Must be the last argument.
 .TP
 \fB\-f\fP \fIname\fP
 Perform pre-authenticated login, e.g., datakit, xterm, etc.; 
@@ -66,17 +60,6 @@ stanza. A collection of options dealing with initial authentication are
 provided:
 .IP krb5_get_tickets
 Use password to get V5 tickets. Default value true.
-.IP krb4_get_tickets
-Use password to get V4 tickets. Default value false.
-.IP krb4_convert
-Use Kerberos conversion daemon to get V4 tickets. Default value
-false. If false, and krb4_get_tickets is true, then login will get
-the V5 tickets directly using the Kerberos V4 protocol directly.  
-This does not currently work with non MIT-V4 salt types
-(such as the AFS3 salt type.)  Note that if configuration parameter 
-is true, and the krb524d is not running, login will hang for 
-approximately a minute  under Solaris, 
-due to a Solaris socket emulation bug.
 .IP krb_run_aklog
 Attempt to run aklog. Default value false.
 .IP aklog_path
@@ -92,6 +75,3 @@ associated with
 .PP
 .SH SEE ALSO
 rlogind(8), rlogin(1), telnetd(8)
-.SH BUGS
-Should use a config file to select use of V5, V4, and AFS, as well as
-policy for startup.
