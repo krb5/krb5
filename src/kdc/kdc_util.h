@@ -40,6 +40,7 @@ typedef struct _krb5_fulladdr {
 
 krb5_error_code check_hot_list (krb5_ticket *);
 krb5_boolean realm_compare (krb5_const_principal, krb5_const_principal);
+krb5_boolean is_local_principal(krb5_const_principal princ1);
 krb5_boolean krb5_is_tgs_principal (krb5_const_principal);
 krb5_error_code add_to_transited (krb5_data *,
 					    krb5_data *,
@@ -257,11 +258,13 @@ krb5_error_code audit_tgs_request
 		krb5_timestamp authtime,
 		krb5_error_code errcode);
 
+#if 0
 krb5_error_code get_principal_in_pac
 	(krb5_context context,
 		krb5_authdata *ad,
 		krb5_db_entry *tgs,
 		krb5_db_entry *princ);
+#endif
 
 krb5_error_code
 set_reply_server(krb5_context context,
@@ -269,6 +272,12 @@ set_reply_server(krb5_context context,
 		krb5_db_entry *server,
 		krb5_principal reply_buffer,
 		krb5_ticket *ticket_reply);
+
+krb5_error_code
+validate_transit_path(krb5_context context,
+	krb5_const_principal client,
+		krb5_db_entry *server,
+		krb5_db_entry *krbtgt);
 
 #define isflagset(flagfield, flag) (flagfield & (flag))
 #define setflag(flagfield, flag) (flagfield |= (flag))

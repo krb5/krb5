@@ -273,7 +273,9 @@ handle_authdata (krb5_context context, krb5_db_entry *client,
     int i;
     const char *emsg;
 
+#if 0
     krb5_klog_syslog (LOG_DEBUG, "handling authdata");
+#endif
 
     for (i = 0; i < n_authdata_systems; i++) {
 	const krb5_authdata_systems *asys = &authdata_systems[i];
