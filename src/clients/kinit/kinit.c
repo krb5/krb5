@@ -148,6 +148,8 @@ struct k_opts
 
     int num_pa_opts;
     krb5_gic_opt_pa_data *pa_opts;
+
+    int canonicalize;
 };
 
 struct k5_data
@@ -182,6 +184,7 @@ struct option long_options[] = {
     { "forwardable", 0, NULL, 'f' },
     { "proxiable", 0, NULL, 'p' },
     { "noaddresses", 0, NULL, 'A' },
+    { "canonicalize", 0, NULL, 'C' },
     { NULL, 0, NULL, 0 }
 };
 
@@ -200,11 +203,13 @@ usage(progname)
 #define USAGE_LONG_FORWARDABLE " | --forwardable | --noforwardable"
 #define USAGE_LONG_PROXIABLE   " | --proxiable | --noproxiable"
 #define USAGE_LONG_ADDRESSES   " | --addresses | --noaddresses"
+#define USAGE_LONG_CANONICALiZE  " | --canonicalize"
 #define USAGE_BREAK_LONG       USAGE_BREAK
 #else
 #define USAGE_LONG_FORWARDABLE ""
 #define USAGE_LONG_PROXIABLE   ""
 #define USAGE_LONG_ADDRESSES   ""
+#define USAGE_LONG_CANONICALIZE	""
 #define USAGE_BREAK_LONG       ""
 #endif
 
@@ -217,6 +222,8 @@ usage(progname)
 	    "[-p | -P" USAGE_LONG_PROXIABLE "] "
 	    USAGE_BREAK_LONG
 	    "[-a | -A" USAGE_LONG_ADDRESSES "] "
+	    USAGE_BREAK_LONG
+	    "[-C" USAGE_LONG_CANONICALIZE "] "
 	    USAGE_BREAK
 	    "[-v] [-R] "
 	    "[-k [-t keytab_file]] "
@@ -268,6 +275,7 @@ fprintf(stderr, USAGE_OPT_FMT, indent, col1)
     ULINE("\t", "-A do not include addresses",  OPTTYPE_KRB5);
     ULINE("\t", "-v validate",                  OPTTYPE_KRB5);
     ULINE("\t", "-R renew",                     OPTTYPE_BOTH);
+    ULINE("\t", "-C canonicalize",		OPTTYPE_KRB5);
     ULINE("\t", "-k use keytab",                OPTTYPE_BOTH);
     ULINE("\t", "-t filename of keytab to use", OPTTYPE_BOTH);
     ULINE("\t", "-c Kerberos 5 cache name",     OPTTYPE_KRB5);
@@ -334,7 +342,7 @@ parse_options(argc, argv, opts, progname)
     int use_k5 = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:vX:"))
+    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:vX:C"))
 	   != -1) {
 	switch (i) {
 	case 'V':
@@ -425,6 +433,9 @@ parse_options(argc, argv, opts, progname)
 		com_err(progname, code, "while adding preauth option");
 		errflg++;
 	    }
+	    break;
+	case 'C':
+	    opts->canonicalize = 1;
 	    break;
 #if 0
 	    /*
@@ -828,6 +839,8 @@ k5_kinit(opts, k5)
 	krb5_get_init_creds_opt_set_proxiable(options, 1);
     if (opts->not_proxiable)
 	krb5_get_init_creds_opt_set_proxiable(options, 0);
+    if (opts->canonicalize)
+	krb5_get_init_creds_opt_set_canonicalize(options, 1);
     if (opts->addresses)
     {
 	krb5_address **addresses = NULL;
