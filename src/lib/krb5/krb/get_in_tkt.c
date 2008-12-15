@@ -986,6 +986,13 @@ krb5_get_init_creds(krb5_context context,
 
     /* canonicalize */
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_CANONICALIZE))
+	tempint = 1;
+    else if ((ret = krb5_libdefault_boolean(context, &client->realm,
+					    "canonicalize", &tempint)) == 0)
+	;
+    else
+	tempint = 0;
+    if (tempint)
 	request.kdc_options |= KDC_OPT_CANONICALIZE;
 
     /* allow_postdate */
