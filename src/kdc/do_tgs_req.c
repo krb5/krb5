@@ -254,7 +254,6 @@ tgt_again:
 	goto cleanup;
     }
 
-    /* Check for backend-indicated transit policy */
     if (!is_local_principal(header_enc_tkt->client))
 	setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
 
