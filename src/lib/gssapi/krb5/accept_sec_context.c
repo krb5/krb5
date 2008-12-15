@@ -1031,14 +1031,13 @@ kg_accept_krb5(minor_status, context_handle,
 
         /* the reply token hasn't been sent yet, but that's ok. */
 	if (ctx->gss_flags & GSS_C_DCE_STYLE) {
-	    if (ctx->proto == 0 && ctx->have_acceptor_subkey) {
-		assert(ctx->enc == NULL && ctx->seq == NULL);
+	    assert(ctx->have_acceptor_subkey);
+	    assert(ctx->enc == NULL && ctx->seq == NULL);
 
-		code = kg_derive_keys(context, ctx->acceptor_subkey, &ctx->enc, &ctx->seq);
-		if (code) {
-		    major_status = GSS_S_FAILURE;
-		    goto fail;
-		}
+	    code = kg_derive_keys(context, ctx->acceptor_subkey, &ctx->enc, &ctx->seq);
+	    if (code) {
+		major_status = GSS_S_FAILURE;
+		goto fail;
 	    }
 
 	    /* in order to force acceptor subkey to be used, don't set PROT_READY */
@@ -1144,8 +1143,8 @@ fail:
         xfree(reqcksum.contents);
     if (ap_rep.data)
         krb5_free_data_contents(context, &ap_rep);
-    if (!GSS_ERROR(major_status) &&
-	(major_status != GSS_S_CONTINUE_NEEDED && code != KRB5KRB_AP_ERR_MSG_TYPE)) {
+    if (major_status == GSS_S_COMPLETE ||
+	(major_status == GSS_S_CONTINUE_NEEDED && code != KRB5KRB_AP_ERR_MSG_TYPE)) {
         ctx->k5_context = context;
         context = NULL;
         goto done;
