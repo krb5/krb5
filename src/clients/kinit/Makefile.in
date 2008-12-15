@@ -25,8 +25,8 @@ SRCS=kinit.c
 all-unix:: kinit
 ##WIN32##all-windows:: $(KINIT)
 
-kinit: kinit.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ kinit.o $(KRB4COMPAT_LIBS)
+kinit: kinit.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kinit.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KINIT): $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib

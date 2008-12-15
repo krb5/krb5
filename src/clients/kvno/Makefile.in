@@ -23,8 +23,8 @@ all-unix:: kvno
 
 ##WIN32##all-windows:: $(KVNO)
 
-kvno: kvno.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ kvno.o $(KRB4COMPAT_LIBS)
+kvno: kvno.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kvno.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KVNO): $(OUTPRE)kvno.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) /out:$@ $**

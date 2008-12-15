@@ -29,9 +29,6 @@
 
 #include "autoconf.h"
 #include <krb5.h>
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-#endif
 #include <com_err.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
@@ -76,43 +73,16 @@ void printtime (time_t);
 void one_addr (krb5_address *);
 void fillit (FILE *, unsigned int, int);
 
-#ifdef KRB5_KRB4_COMPAT
-void do_v4_ccache (char *);
-#endif /* KRB5_KRB4_COMPAT */
-
 #define DEFAULT 0
 #define CCACHE 1
 #define KEYTAB 2
-
-/*
- * The reason we start out with got_k4 and got_k5 as zero (false) is
- * so that we can easily add dynamic loading support for determining
- * whether Kerberos 4 and Keberos 5 libraries are available
- */
-
-static int got_k5 = 0; 
-static int got_k4 = 0;
-
-static int default_k5 = 1;
-#ifdef KRB5_KRB4_COMPAT
-static int default_k4 = 1;
-#else
-static int default_k4 = 0;
-#endif
 
 static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, "Usage: %s [-5] [-4] [-e] [[-c] [-f] [-s] [-a [-n]]] %s",
+    fprintf(stderr, "Usage: %s [-e] [[-c] [-f] [-s] [-a [-n]]] %s",
 	     progname, "[-k [-t] [-K]] [name]\n"); 
-    fprintf(stderr, "\t-5 Kerberos 5 (%s)\n", KRB_AVAIL_STRING(got_k5));
-    fprintf(stderr, "\t-4 Kerberos 4 (%s)\n", KRB_AVAIL_STRING(got_k4));
-    fprintf(stderr, "\t   (Default is %s%s%s%s)\n",
-	    default_k5?"Kerberos 5":"",
-	    (default_k5 && default_k4)?" and ":"",
-	    default_k4?"Kerberos 4":"",
-	    (!default_k5 && !default_k4)?"neither":"");
     fprintf(stderr, "\t-c specifies credentials cache\n");
     fprintf(stderr, "\t-k specifies keytab\n");
     fprintf(stderr, "\t   (Default is credentials cache)\n");
@@ -136,12 +106,6 @@ main(argc, argv)
     int c;
     char *name;
     int mode;
-    int use_k5 = 0, use_k4 = 0;
-
-    got_k5 = 1;
-#ifdef KRB5_KRB4_COMPAT
-    got_k4 = 1;
-#endif
 
     progname = GET_PROGNAME(argv[0]);
 
@@ -179,24 +143,10 @@ main(argc, argv)
 	    mode = KEYTAB;
 	    break;
 	case '4':
-	    if (!got_k4)
-	    {
-#ifdef KRB5_KRB4_COMPAT
-		fprintf(stderr, "Kerberos 4 support could not be loaded\n");
-#else
-		fprintf(stderr, "This was not built with Kerberos 4 support\n");
-#endif
-		exit(3);
-	    }
-	    use_k4 = 1;
+	    fprintf(stderr, "Kerberos 4 is no longer supported\n");
+	    exit(3);
 	    break;
 	case '5':
-	    if (!got_k5)
-	    {
-		fprintf(stderr, "Kerberos 5 support could not be loaded\n");
-		exit(3);
-	    }
-	    use_k5 = 1;
 	    break;
 	default:
 	    usage();
@@ -224,17 +174,6 @@ main(argc, argv)
 
     name = (optind == argc-1) ? argv[optind] : 0;
 
-    if (!use_k5 && !use_k4)
-    {
-	use_k5 = default_k5;
-	use_k4 = default_k4;
-    }
-
-    if (!use_k5)
-	got_k5 = 0;
-    if (!use_k4)
-	got_k4 = 0;
-
     now = time(0);
     {
 	char tmp[BUFSIZ];
@@ -247,7 +186,6 @@ main(argc, argv)
 	    timestamp_width = 15;
     }
 
-    if (got_k5)
     {
 	krb5_error_code retval;
 	retval = krb5_init_context(&kcontext);
@@ -260,18 +198,6 @@ main(argc, argv)
 	    do_ccache(name);
 	else
 	    do_keytab(name);
-    } else {
-#ifdef KRB5_KRB4_COMPAT
-	if (mode == DEFAULT || mode == CCACHE)
-	    do_v4_ccache(name);
-	else {
-	    /* We may want to add v4 srvtab support */
-	    fprintf(stderr, 
-		    "%s: srvtab option not supported for Kerberos 4\n", 
-		    progname);
-	    exit(1);
-	}
-#endif /* KRB4_KRB5_COMPAT */
     }
 
     return 0;
@@ -733,105 +659,3 @@ fillit(f, num, c)
     for (i=0; i<num; i++)
 	fputc(c, f);
 }
-
-#ifdef KRB5_KRB4_COMPAT
-void
-do_v4_ccache(name)
-    char * name;
-{
-    char    pname[ANAME_SZ];
-    char    pinst[INST_SZ];
-    char    prealm[REALM_SZ];
-    char    *file;
-    int     k_errno;
-    CREDENTIALS c;
-    int     header = 1;
-
-    if (!got_k4)
-	return;
-
-    file = name?name:tkt_string();
-
-    if (status_only) {
-	fprintf(stderr, 
-		"%s: exit status option not supported for Kerberos 4\n",
-		progname);
-	exit(1);
-    }
-
-    if (got_k5)
-	printf("\n\n");
-
-    printf("Kerberos 4 ticket cache: %s\n", file);
-
-    /* 
-     * Since krb_get_tf_realm will return a ticket_file error, 
-     * we will call tf_init and tf_close first to filter out
-     * things like no ticket file.  Otherwise, the error that 
-     * the user would see would be 
-     * klist: can't find realm of ticket file: No ticket file (tf_util)
-     * instead of
-     * klist: No ticket file (tf_util)
-     */
-
-    /* Open ticket file */
-    k_errno = tf_init(file, R_TKT_FIL);
-    if (k_errno) {
-	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
-	exit(1);
-    }
-    /* Close ticket file */
-    (void) tf_close();
-
-    /* 
-     * We must find the realm of the ticket file here before calling
-     * tf_init because since the realm of the ticket file is not
-     * really stored in the principal section of the file, the
-     * routine we use must itself call tf_init and tf_close.
-     */
-    if ((k_errno = krb_get_tf_realm(file, prealm)) != KSUCCESS) {
-	fprintf(stderr, "%s: can't find realm of ticket file: %s\n",
-		progname, krb_get_err_text (k_errno));
-	exit(1);
-    }
-
-    /* Open ticket file */
-    if ((k_errno = tf_init(file, R_TKT_FIL))) {
-	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
-	exit(1);
-    }
-    /* Get principal name and instance */
-    if ((k_errno = tf_get_pname(pname)) ||
-	(k_errno = tf_get_pinst(pinst))) {
-	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
-	exit(1);
-    }
-
-    /* 
-     * You may think that this is the obvious place to get the
-     * realm of the ticket file, but it can't be done here as the
-     * routine to do this must open the ticket file.  This is why 
-     * it was done before tf_init.
-     */
-       
-    printf("Principal: %s%s%s%s%s\n\n", pname,
-	   (pinst[0] ? "." : ""), pinst,
-	   (prealm[0] ? "@" : ""), prealm);
-    while ((k_errno = tf_get_cred(&c)) == KSUCCESS) {
-	if (header) {
-	    printf("%-18s  %-18s  %s\n",
-		   "  Issued", "  Expires", "  Principal");
-	    header = 0;
-	}
-	printtime(c.issue_date);
-	fputs("  ", stdout);
-	printtime(krb_life_to_time(c.issue_date, c.lifetime));
-	printf("  %s%s%s%s%s\n",
-	       c.service, (c.instance[0] ? "." : ""), c.instance,
-	       (c.realm[0] ? "@" : ""), c.realm);
-    }
-    if (header && k_errno == EOF) {
-	printf("No tickets in file.\n");
-    }
-}
-#endif /* KRB4_KRB5_COMPAT */
