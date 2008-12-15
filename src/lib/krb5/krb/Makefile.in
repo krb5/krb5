@@ -94,7 +94,6 @@ STLIBOBJS= \
 	str_conv.o	\
 	tgtname.o	\
 	unparse.o	\
-	v4lifetime.o	\
 	valid_times.o	\
 	vfy_increds.o	\
 	vic_opt.o	\
@@ -181,7 +180,6 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)str_conv.$(OBJEXT)	\
 	$(OUTPRE)tgtname.$(OBJEXT)	\
 	$(OUTPRE)unparse.$(OBJEXT)	\
-	$(OUTPRE)v4lifetime.$(OBJEXT)	\
 	$(OUTPRE)valid_times.$(OBJEXT)	\
 	$(OUTPRE)vfy_increds.$(OBJEXT)	\
 	$(OUTPRE)vic_opt.$(OBJEXT)	\
@@ -269,7 +267,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/str_conv.c	\
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
-	$(srcdir)/v4lifetime.c	\
 	$(srcdir)/valid_times.c	\
 	$(srcdir)/vfy_increds.c \
 	$(srcdir)/vic_opt.c	\
@@ -1186,16 +1183,6 @@ unparse.so unparse.po $(OUTPRE)unparse.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   unparse.c
-v4lifetime.so v4lifetime.po $(OUTPRE)v4lifetime.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h v4lifetime.c
 valid_times.so valid_times.po $(OUTPRE)valid_times.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

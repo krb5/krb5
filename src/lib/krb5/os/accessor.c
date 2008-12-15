@@ -69,15 +69,9 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    SC (use_dns_kdc, _krb5_use_dns_kdc),
 #undef SC
 
-#ifdef KRB5_KRB4_COMPAT
-#define SC(FIELD, VAL)	S(FIELD, VAL)
-#else /* disable */
-#define SC(FIELD, VAL)	S(FIELD, 0)
-#endif
-	    SC (krb_life_to_time, krb5int_krb_life_to_time),
-	    SC (krb_time_to_life, krb5int_krb_time_to_life),
-	    SC (krb524_encode_v4tkt, krb5int_encode_v4tkt),
-#undef SC
+	    S (krb_life_to_time, 0),
+	    S (krb_time_to_life, 0),
+	    S (krb524_encode_v4tkt, 0),
 
 	    S (krb5int_c_mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
 #ifndef LEAN_CLIENT

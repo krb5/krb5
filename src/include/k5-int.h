@@ -2039,20 +2039,6 @@ krb5_error_code KRB5_CALLCONV krb5int_accessor
 #define KRB524_SERVICE "krb524"
 #define KRB524_PORT 4444
 
-/* v4lifetime.c */
-extern krb5_int32 krb5int_krb_life_to_time(krb5_int32, int);
-extern int krb5int_krb_time_to_life(krb5_int32, krb5_int32);
-
-/* conv_creds.c */
-int krb5int_encode_v4tkt
-	(struct ktext *v4tkt, char *buf, unsigned int *encoded_len);
-
-/* send524.c */
-int krb5int_524_sendto_kdc
-        (krb5_context context, const krb5_data * message, 
-	 const krb5_data * realm, krb5_data * reply,
-	 struct sockaddr *, socklen_t *);
-
 /* temporary -- this should be under lib/krb5/ccache somewhere */
 
 struct _krb5_ccache {
