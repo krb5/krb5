@@ -468,7 +468,6 @@ krb5_set_error_message
 krb5_set_password
 krb5_set_password_using_ccache
 krb5_set_principal_realm
-krb5_set_profile
 krb5_set_real_time
 krb5_set_time_offsets
 krb5_size_opaque

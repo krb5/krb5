@@ -1899,10 +1899,6 @@ krb5_set_password_using_ccache
 krb5_error_code KRB5_CALLCONV
 krb5_get_profile
 	(krb5_context, struct _profile_t * /* profile_t */ *);
-krb5_error_code KRB5_CALLCONV
-krb5_set_profile
-	(krb5_context, struct _profile_t /* profile_t */ *);
-
 
 #if KRB5_DEPRECATED
 KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
