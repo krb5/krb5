@@ -928,7 +928,7 @@ cleanup:
 			 !errcode ? "," : "",
 			 cname ? cname : "<unknown client>",
 			 s4u_name ? "[on behalf of " : "",
-			 s4u_name ? s4u_name : "",
+			 s4u_name ? s4u_name : "<unknown proxy>",
 			 s4u_name ? "] " : "",
 			 sname ? sname : "<unknown server>",
 			 errcode ? ", " : "",
