@@ -55,11 +55,8 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 #include <signal.h>
 #include "ftp_var.h"
 #ifndef _WIN32
-#ifndef KRB5_KRB4_COMPAT
-/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <sys/socket.h>
 #include <netdb.h>
-#endif
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -90,11 +87,6 @@ uid_t	getuid();
 sigtype	intr (int), lostpeer (int);
 extern	char *home;
 char	*getlogin();
-#ifdef KRB5_KRB4_COMPAT
-#include <krb.h>
-struct servent staticsp;
-extern char realm[];
-#endif /* KRB5_KRB4_COMPAT */
 
 static void cmdscanner (int);
 static char *slurpstring (void);
@@ -126,12 +118,6 @@ main(argc, argv)
 		fprintf(stderr, "ftp: ftp/tcp: unknown service\n");
 		exit(1);
 	}
-#ifdef KRB5_KRB4_COMPAT
-/* GDM need to static sp so that the information is not lost
-   when kerberos calls getservbyname */
-	memcpy(&staticsp,sp,sizeof(struct servent));
-	sp = &staticsp;
-#endif /* KRB5_KRB4_COMPAT */
 	doglob = 1;
 	interactive = 1;
 	autoauth = 1;
@@ -147,19 +133,6 @@ main(argc, argv)
 				options |= SO_DEBUG;
 				debug++;
 				break;
-
-#ifdef KRB5_KRB4_COMPAT
-			case 'k':
-				if (*++cp != '\0')
-					strncpy(realm, ++cp, REALM_SZ);
-				else if (argc > 1) {
-					argc--, argv++;
-					strncpy(realm, *argv, REALM_SZ);
-				}
-				else
-					fprintf(stderr, "ftp: -k expects arguments\n");
-				goto nextopt;
-#endif
 
 			case 'v':
 				verbose++;

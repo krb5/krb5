@@ -128,12 +128,6 @@ Sets the name of the
 file to use.  The default value is normally set by
 .IR /etc/krb5.conf .
 .TP
-\fB\-s\fP \fIsrvtab\fP
-Sets the name of the
-.I srvtab
-file to use for Kerberos V4 authentication.  The default value is normally
-.IR /etc/srvtab .
-.TP
 \fB\-w \fP{\fBip\fP|\fImaxhostlen\fP[\fB,\fP{\fBstriplocal\fP|\fBnostriplocal\fP}]}
 Controls the form of the remote hostname passed to login(1).
 Specifying \fBip\fP results in the numeric IP address always being

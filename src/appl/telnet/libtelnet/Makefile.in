@@ -25,7 +25,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 #
 AUTH_DEF=-DAUTHENTICATION -DENCRYPTION -DDES_ENCRYPTION -DKRB5 -DFORWARD \
 	-UNO_LOGIN_F -DLOGIN_CAP_F -DLOGIN_PROGRAM=KRB5_PATH_LOGIN
-LOCALINCLUDES=-I.. -I$(srcdir)/.. @KRB4_INCLUDES@
+LOCALINCLUDES=-I.. -I$(srcdir)/..
 DEFINES = -DTELNET_BUFSIZE=65535 $(AUTH_DEF)
 LIBOBJS=@LIBOBJS@
 
@@ -42,7 +42,6 @@ SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/encrypt.c \
 	$(srcdir)/genget.c \
 	$(srcdir)/misc.c \
-	$(srcdir)/kerberos.c \
 	$(srcdir)/kerberos5.c \
 	$(srcdir)/forward.c \
 	$(srcdir)/enc_des.c \
@@ -57,7 +56,7 @@ SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/strerror.c
 
 STLIBOBJS=   auth.o encrypt.o genget.o \
-	misc.o kerberos.o kerberos5.o forward.o enc_des.o \
+	misc.o kerberos5.o forward.o enc_des.o \
 	$(LIBOBJS) getent.o $(SETENVOBJ)
 
 TELNET_H= $(srcdir)/../arpa/telnet.h
@@ -73,10 +72,6 @@ auth.o: misc-proto.h
 encrypt.o: $(TELNET_H)
 encrypt.o: encrypt.h
 encrypt.o: misc.h
-kerberos.o: $(TELNET_H)
-kerberos.o: encrypt.h
-kerberos.o: auth.h
-kerberos.o: misc.h
 kerberos5.o: $(TELNET_H)
 kerberos5.o: encrypt.h
 kerberos5.o: auth.h
@@ -105,9 +100,6 @@ genget.so genget.po $(OUTPRE)genget.$(OBJEXT): genget.c \
   misc-proto.h misc.h
 misc.so misc.po $(OUTPRE)misc.$(OBJEXT): auth-proto.h \
   auth.h enc-proto.h encrypt.h misc-proto.h misc.c misc.h
-kerberos.so kerberos.po $(OUTPRE)kerberos.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
-  kerberos.c
 kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

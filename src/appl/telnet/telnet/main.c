@@ -235,14 +235,6 @@ main(argc, argv)
 #endif
 			break;
 		case 'k':
-#if defined(AUTHENTICATION) && defined(KRB4)
-		    {
-			extern char *dest_realm, dst_realm_buf[];
-			extern unsigned int dst_realm_sz;
-			dest_realm = dst_realm_buf;
-			(void)strncpy(dest_realm, optarg, dst_realm_sz);
-		    }
-#endif
 #if defined(AUTHENTICATION) && defined(KRB5)
 		    {
 			extern char *telnet_krb5_realm;
@@ -250,8 +242,7 @@ main(argc, argv)
 			telnet_krb5_realm = optarg;
 			break;
 		    }
-#endif
-#if !defined(AUTHENTICATION) || (!defined(KRB4) && !defined(KRB5))
+#else
 			fprintf(stderr,
 			   "%s: Warning: -k ignored, no Kerberos V4 support.\n",
 								prompt);

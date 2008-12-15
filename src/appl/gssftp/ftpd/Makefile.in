@@ -25,12 +25,12 @@ SRCS	= $(srcdir)/ftpd.c ftpcmd.c $(srcdir)/popen.c \
 OBJS	= ftpd.o ftpcmd.o glob.o popen.o vers.o radix.o \
 	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)
 
 all::	ftpd
 
-ftpd:	$(OBJS) $(PTY_DEPLIB) $(GSS_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(PTY_LIB) $(UTIL_LIB) $(GSS_LIBS) $(KRB4COMPAT_LIBS)
+ftpd:	$(OBJS) $(PTY_DEPLIB) $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(PTY_LIB) $(UTIL_LIB) $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
 generate-files-mac: ftpcmd.c
 
