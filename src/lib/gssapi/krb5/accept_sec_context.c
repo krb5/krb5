@@ -423,7 +423,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_principal name = NULL;
     krb5_ui_4 gss_flags = 0;
     int decode_req_message = 0;
-    krb5_gss_ctx_id_rec *ctx = 0;
+    krb5_gss_ctx_id_rec *ctx = NULL;
     krb5_timestamp now;
     gss_buffer_desc token;
     krb5_auth_context auth_context = NULL;
@@ -690,9 +690,6 @@ kg_accept_krb5(minor_status, context_handle,
                 goto fail;
             }
         }
-
-	if (ctx->gss_flags & GSS_C_DCE_STYLE)
-	    ctx->gss_flags |= GSS_C_MUTUAL_FLAG;
 
         /* at this point, bigend is set according to the initiator's
            byte order */
@@ -972,6 +969,10 @@ kg_accept_krb5(minor_status, context_handle,
     g_order_init(&(ctx->seqstate), ctx->seq_recv,
                  (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
                  (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0, ctx->proto);
+
+    /* DCE_STYLE implies mutual authentication */
+    if (ctx->gss_flags & GSS_C_DCE_STYLE)
+	ctx->gss_flags |= GSS_C_MUTUAL_FLAG;
 
     /* at this point, the entire context structure is filled in,
        so it can be released.  */
