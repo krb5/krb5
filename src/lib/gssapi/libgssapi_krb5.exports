@@ -9,12 +9,14 @@ GSS_C_NT_USER_NAME
 GSS_KRB5_NT_PRINCIPAL_NAME
 gss_accept_sec_context
 gss_acquire_cred
+gss_add_buffer_set_member
 gss_add_cred
 gss_add_oid_set_member
 gss_canonicalize_name
 gss_compare_name
 gss_complete_auth_token
 gss_context_time
+gss_create_empty_buffer_set
 gss_create_empty_oid_set
 gss_delete_sec_context
 gss_display_name
