@@ -1293,8 +1293,7 @@ struct _krb5_context {
 
 #define KRB5_LIBOPT_SYNC_KDCTIME	0x0001
 #define KRB5_LIBOPT_CASE_INSENSITIVE	0x0002
-#define KRB5_LIBOPT_RD_REQ_TRY_HOST_SPN	0x0004
-#define KRB5_LIBOPT_UTF8		0x0008
+#define KRB5_LIBOPT_UTF8		0x0004
 
 /* internal message representations */
 
