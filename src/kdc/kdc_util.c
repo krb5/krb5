@@ -2003,7 +2003,7 @@ check_constrained_delegation_acl(krb5_context context,
     assert(tl_data->tl_data_contents[tl_data->tl_data_length] == '\0');
 
     if (krb5_parse_name_flags(context,
-			      tl_data->tl_data_contents,
+			      (char *)tl_data->tl_data_contents,
 			      KRB5_PRINCIPAL_PARSE_NO_REALM,
 			      &acl) != 0)
 	return FALSE;
