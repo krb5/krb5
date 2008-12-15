@@ -369,6 +369,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     unsigned int k5_headerlen = 0, k5_trailerlen = 0, k5_padlen = 0;
     krb5_error_code code;
     krb5_context context;
+    int dce_style;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
 	*minor_status = (OM_uint32)G_UNKNOWN_QOP;
@@ -398,11 +399,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	INIT_IOV_DATA(trailer);
     }
 
+    dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
+
     /* For CFX, EC is used instead of padding, and is placed in header or trailer */
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
-	if (conf_req_flag && ctx->proto == 0 &&
-	    (ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+	if (conf_req_flag && ctx->proto == 0 && !dce_style) {
 	    *minor_status = EINVAL;
 	    return GSS_S_FAILURE;
 	}
@@ -452,7 +454,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 		return GSS_S_FAILURE;
 	    }
 	 
-	    if (k5_padlen == 0 && (ctx->gss_flags & GSS_C_DCE_STYLE)) {
+	    if (k5_padlen == 0 && dce_style) {
 		/* Windows rejects AEAD tokens with non-zero EC */
 		code = krb5_c_block_size(context, enctype, &ec);
 		if (code != 0) {
@@ -466,15 +468,13 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	} else {
 	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}
-    } else {
-	if (conf_req_flag) {
-	    k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+    } else if (conf_req_flag && !dce_style) {
+	k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
 
-	    if (k5_padlen == 1)
-		gss_padlen = 1;
-	    else
-		gss_padlen = k5_padlen - ((data_length - assoc_data_length) % k5_padlen);
-	}
+	if (k5_padlen == 1)
+	    gss_padlen = 1;
+	else
+	    gss_padlen = k5_padlen - ((data_length - assoc_data_length) % k5_padlen);
     }
 
     data_length += gss_padlen;
@@ -489,14 +489,14 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
 	data_size = 14 /* Header */ + ctx->cksum_size + k5_headerlen;
 
-	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
+	if (!dce_style)
 	    data_size += data_length;
 
 	gss_headerlen = g_token_size(ctx->mech_used, data_size);
 
 	/* g_token_size() will include data_size as well as the overhead, so
 	 * subtract data_length just to get the overhead (ie. token size) */
-	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
+	if (!dce_style)
 	    gss_headerlen -= data_length;
     }
 
