@@ -77,8 +77,6 @@ extern int process_ov_principal (char *fname, krb5_context kcontext,
 
 extern void load_db (int argc, char **argv);
 extern void dump_db (int argc, char **argv);
-extern void load_v4db (int argc, char **argv);
-extern void dump_v4db (int argc, char **argv);
 extern void kdb5_create (int argc, char **argv);
 extern void kdb5_destroy (int argc, char **argv);
 extern void kdb5_stash (int argc, char **argv);

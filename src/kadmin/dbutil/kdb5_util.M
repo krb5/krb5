@@ -213,59 +213,6 @@ is required and overrides the value specified on the command line or the
 default.
 .RE
 .TP
-\fBdump_v4\fP [\fB\-S\fP] [\fIfilename\fP]
-Dumps the current database into the Kerberos 4 database dump format.
-The \-S option specifies the short lifetime algorithm.
-.TP
-\fBload_v4\fP [\fB\-T\fP] [\fB\-v\fP] [\fB\-h\fP] [\fB\-S\fP]
-[\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB\-s\fP\ \fIstashfile\fP]
-\fIinputfile\fP
-.br
-Loads a Kerberos 4 database dump file.  Options:
-.RS
-.TP
-.B \-K
-prompts for the V5 master key instead of using the stashed version.
-.TP
-.B \-n
-prompts for the V4 master key, instead of reading from the stash file.
-.TP
-.B \-s \fIstashfile
-gets the V4 master key out of \fIstashfile\fP instead of /.k
-.TP
-.B \-T
-creates a new \fIkrbtgt\fP instead of converting the V4 one.  The V5 server
-will thus not recognize outstanding tickets, so this should be used 
-with caution.
-.TP
-.B \-v
-lists each principal as it is converted or ignored.
-.TP
-.B \-t
-uses a temporary database, then moves that into place, instead of adding 
-the keys to the current database.
-.TP
-.B \-S
-Uses the short lifetime algorithm for conversion.
-.TP
-.B \-h
-Stores the database as a hash instead of a btree.  This option is
-not recommended, as databases stored in hash format are known to
-corrupt data and lose principals.
-.PP
-Note: if the Kerberos 4 database had a default expiration date of 12/31/1999
-or 12/31/2009 (the compiled in defaults for older or newer Kerberos
-releases) then any entries which have the same expiration date will be
-converted to "never" expire in the version 5 database.  If the default
-did not match either value, all expiration dates will be preserved. 
-.PP
-Also, Kerberos 4 stored a single modification time for any change to a
-record; Version 5 stores a seperate modification time and last
-password change time.  In practice, Version 4 "modifications" were
-always password changes.  \fIload_v4\fP copies the value into both
-fields.
-.RE
-.TP
 \fBark\fP
 Adds a random key.
 .SH SEE ALSO
