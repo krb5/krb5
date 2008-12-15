@@ -695,16 +695,14 @@ tgt_again:
 	}
 
 	if ((errcode =
-	     concat_authorization_data(
-				       kdc_issued_auth_data,
+	     concat_authorization_data(kdc_issued_auth_data,
 				       request->unenc_authdata,
 				       &enc_tkt_reply.authorization_data))) {
 	    status = "CONCAT_AUTH";
 	    goto cleanup;
 	}
     } else
-	enc_tkt_reply.authorization_data =
-	    kdc_issued_auth_data;
+	enc_tkt_reply.authorization_data = kdc_issued_auth_data;
 
     enc_tkt_reply.session = &session_key;
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
