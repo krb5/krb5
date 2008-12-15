@@ -55,6 +55,10 @@
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
 
+#define g_OID_prefix_equal(o1, o2) \
+	(((o1)->length >= (o2)->length) && \
+	(memcmp((o1)->elements, (o2)->elements, (o2)->length) == 0))
+
 /*
  * gss_inquire_sec_context_by_oid() methods
  */
@@ -120,7 +124,7 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 
     for (i = 0; i < sizeof(krb5_gss_inquire_sec_context_by_oid_ops)/
 		    sizeof(krb5_gss_inquire_sec_context_by_oid_ops[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gss_inquire_sec_context_by_oid_ops[i].oid)) {
+	if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_sec_context_by_oid_ops[i].oid)) {
 	    return (*krb5_gss_inquire_sec_context_by_oid_ops[i].func)(minor_status,
 								      context_handle,
 								      desired_object,
@@ -177,7 +181,7 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 
     for (i = 0; i < sizeof(krb5_gss_inquire_cred_by_oid_ops)/
 		    sizeof(krb5_gss_inquire_cred_by_oid_ops[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gss_inquire_cred_by_oid_ops[i].oid)) {
+	if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_cred_by_oid_ops[i].oid)) {
 	    return (*krb5_gss_inquire_cred_by_oid_ops[i].func)(minor_status,
 							       cred_handle,
 							       desired_object,
@@ -232,7 +236,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 
     for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
 		    sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
+	if (g_OID_prefix_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
 	    return (*krb5_gss_set_sec_context_option_ops[i].func)(minor_status,
 								  context_handle,
 								  desired_object,
@@ -294,7 +298,7 @@ krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
 
     for (i = 0; i < sizeof(krb5_gssspi_set_cred_option_ops)/
 		    sizeof(krb5_gssspi_set_cred_option_ops[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gssspi_set_cred_option_ops[i].oid)) {
+	if (g_OID_prefix_equal(desired_object, &krb5_gssspi_set_cred_option_ops[i].oid)) {
 	    return (*krb5_gssspi_set_cred_option_ops[i].func)(minor_status,
 							      cred_handle,
 							      desired_object,
@@ -353,7 +357,7 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
 
     for (i = 0; i < sizeof(krb5_gssspi_mech_invoke_ops)/
 		    sizeof(krb5_gssspi_mech_invoke_ops[0]); i++) {
-	if (g_OID_equal(desired_object, &krb5_gssspi_mech_invoke_ops[i].oid)) {
+	if (g_OID_prefix_equal(desired_object, &krb5_gssspi_mech_invoke_ops[i].oid)) {
 	    return (*krb5_gssspi_mech_invoke_ops[i].func)(minor_status,
 							  desired_mech,
 							  desired_object,
