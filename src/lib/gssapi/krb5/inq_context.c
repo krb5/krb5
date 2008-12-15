@@ -189,6 +189,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
     return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
 }
 
+#if 0
 OM_uint32
 gss_krb5int_get_subkey(
     OM_uint32 *minor_status,
@@ -222,6 +223,7 @@ gss_krb5int_get_subkey(
 
     return GSS_S_COMPLETE;
 }
+#endif
 
 OM_uint32
 gss_krb5int_inq_session_key(

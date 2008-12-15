@@ -78,10 +78,12 @@ static struct {
 	{GSS_KRB5_INQ_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_SESSION_KEY_OID},
 	gss_krb5int_inq_session_key
     },
+#if 0
     {
 	{GSS_KRB5_GET_SUBKEY_OID_LENGTH, GSS_KRB5_GET_SUBKEY_OID},
 	gss_krb5int_get_subkey
     },
+#endif
     {
 	{GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID},
 	gss_krb5int_export_lucid_sec_context
@@ -816,6 +818,7 @@ krb5_gss_use_kdc_context(void)
     return major_status;    
 }
 
+#if 0
 OM_uint32
 gsskrb5_get_subkey(
     OM_uint32  *minor_status,
@@ -855,6 +858,7 @@ gsskrb5_get_subkey(
 
     return GSS_S_COMPLETE;
 }
+#endif
 
 /*
  * This API should go away and be replaced with an accessor
