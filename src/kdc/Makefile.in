@@ -12,15 +12,13 @@ RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 KDB5_LIB_DEPS=$(DL_LIB) $(THREAD_LINKOPTS)
 PROG_RPATH=$(KRB5_LIBDIR)
-FAKEKA=@FAKEKA@
 DEFS=-DLIBDIR=\"$(KRB5_LIBDIR)\"
-#EXTRADEPSRCS= fakeka.c
 
-all:: krb5kdc rtest $(FAKEKA)
+all:: krb5kdc rtest
 
 # DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
-LOCALINCLUDES = @KRB4_INCLUDES@ -I.
+LOCALINCLUDES = -I.
 SRCS= \
 	kdc5_err.c \
 	$(srcdir)/dispatch.c \
@@ -33,8 +31,7 @@ SRCS= \
 	$(srcdir)/policy.c \
 	$(srcdir)/extern.c \
 	$(srcdir)/replay.c \
-	$(srcdir)/kdc_authdata.c \
-	$(srcdir)/kerberos_v4.c
+	$(srcdir)/kdc_authdata.c
 
 OBJS= \
 	kdc5_err.o \
@@ -48,8 +45,7 @@ OBJS= \
 	policy.o \
 	extern.o \
 	replay.o \
-	kdc_authdata.o \
-	kerberos_v4.o
+	kdc_authdata.o
 
 RT_OBJS= rtest.o \
 	kdc_util.o \
@@ -64,14 +60,11 @@ kdc5_err.h: kdc5_err.et
 
 kdc5_err.o: kdc5_err.h
 
-krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
-	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
+krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS) $(APPUTILS_LIB)
 
 rtest: $(RT_OBJS) $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o rtest $(RT_OBJS) $(KDB5_LIBS) $(KADM_COMM_LIBS) $(KRB5_BASE_LIBS)
-
-fakeka: fakeka.o $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
-	$(CC_LINK) -o fakeka fakeka.o $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
 
 check-unix:: rtest
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;\
@@ -82,14 +75,9 @@ check-unix:: rtest
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
 	$(INSTALL_DATA) $(srcdir)/krb5kdc.M ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.8
-	f=$(FAKEKA); \
-	if test -n "$$f" ; then \
-		$(INSTALL_PROGRAM) $$f ${DESTDIR}$(SERVER_BINDIR)/$$f; \
-		$(INSTALL_DATA) $(srcdir)/fakeka.M ${DESTDIR}$(SERVER_MANDIR)/fakeka.8; \
-	fi
 
 clean::
-	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest fakeka.o fakeka
+	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest
 
 # +++ Dependency line eater +++
 # 
@@ -221,13 +209,3 @@ $(OUTPRE)kdc_authdata.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   extern.h kdc_authdata.c kdc_util.h
-$(OUTPRE)kerberos_v4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
-  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  kerberos_v4.c

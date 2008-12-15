@@ -47,9 +47,6 @@ krb5kdc \- Kerberos V5 KDC
 .B \-r
 .I realm
 ] [
-.B \-4
-.I v4mode
-] [
 .B \-n
 ]
 .br
@@ -129,23 +126,6 @@ The
 .B \-m
 option specifies that the master database password should be fetched
 from the keyboard rather than from a file on disk.
-.PP
-The
-.B \-4
-option specifies how the KDC responds to kerberos IV requests for
-tickets.  The command line option overrides the value in the KDC
-profile.  The possible values are 
-.I none,
-.I disable,
-.I full
-or
-.I nopreauth.
-These instruct the KDC to not respond to V4 packets, to
-respond with a version skew error, to issue tickets for all database
-entries, and to issue tickets for all but preauthentication required
-database entries respectively. The default behaviour is as if 
-.I none
-was specified.
 .PP
 The
 .B \-n
