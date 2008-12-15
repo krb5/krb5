@@ -602,7 +602,7 @@ releaseMechInfo(gss_mech_info *pCf)
 	if (cf->mech_type != GSS_C_NO_OID &&
 	    cf->mech_type != &cf->mech->mech_type)
 		generic_gss_release_oid(&minor_status, &cf->mech_type);
-	if (cf->mech != NULL && cf->free_mech) {
+	if (cf->mech != NULL) {
 		memset(cf->mech, 0, sizeof(*cf->mech));
 		free(cf->mech);
 	}
@@ -623,21 +623,22 @@ gssint_register_mechinfo(gss_mech_info template)
 {
 	gss_mech_info cf, new_cf;
 
-	new_cf = malloc(sizeof(*new_cf));
+	new_cf = calloc(1, sizeof(*new_cf));
 	if (new_cf == NULL) {
 		return ENOMEM;
 	}
 
-	memset(new_cf, 0, sizeof(*new_cf));
-	if (template->mech_type != NULL) {
-		new_cf->mech_type = template->mech_type;
-		template->mech_type = NULL; /* don't double free */
-	} else {
-		template->mech_type = &template->mech->mech_type;
-	}
 	new_cf->dl_handle = template->dl_handle;
-	new_cf->mech = template->mech;
-	new_cf->free_mech = template->free_mech;
+	/* copy mech so we can rewrite canonical mechanism OID */
+	new_cf->mech = (gss_mechanism)malloc(sizeof(struct gss_config));
+	if (new_cf->mech == NULL) {
+		releaseMechInfo(&new_cf);
+		return ENOMEM;
+	}
+	memcpy(new_cf->mech, template->mech, sizeof(struct gss_config));
+	if (template->mech_type != NULL)
+		new_cf->mech->mech_type = *(template->mech_type);
+	new_cf->mech_type = &new_cf->mech->mech_type;
 	new_cf->priority = template->priority;
 	new_cf->next = NULL;
 
@@ -845,7 +846,6 @@ const gss_OID oid;
 	} else {
 		/* Try dynamic dispatch table */
 		aMech->mech = build_dynamicMech(dl);
-		aMech->free_mech = 1;
 	}
 	if (aMech->mech == NULL) {
 		(void) krb5int_close_plugin(dl);
