@@ -82,9 +82,8 @@
 #endif /* APPLE_PKINIT */
 
 static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
-					 krb5_principal canon_principal,
-					 krb5_data **, const char *,
-					 int flags);
+					 krb5_principal, krb5_data **,
+					 const char *, int);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -601,8 +600,8 @@ errout:
 	    errcode = KRB_ERR_GENERIC;
 	    
 	errcode = prepare_error_as(request, errcode, &e_data,
- 				   client.princ, response,
-				   status, c_flags);
+ 				   c_nprincs ? client.princ : NULL,
+				   response, status, c_flags);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
 	    status = 0;
@@ -657,8 +656,8 @@ errout:
 
 static krb5_error_code
 prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
-		  krb5_principal canon_principal,
-		  krb5_data **response, const char *status, int flags)
+		  krb5_principal canon_client, krb5_data **response,
+		  const char *status, int flags)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -673,8 +672,9 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
     errpkt.error = error;
     errpkt.server = request->server;
 
-    if (isflagset(flags, KRB5_KDB_FLAG_CANONICALIZE))
-	errpkt.client = canon_principal;
+    if (isflagset(flags, KRB5_KDB_FLAG_CANONICALIZE) &&
+	canon_client != NULL)
+	errpkt.client = canon_client;
     else
 	errpkt.client = request->client;
     errpkt.text.length = strlen(status)+1;

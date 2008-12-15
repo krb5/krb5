@@ -76,8 +76,8 @@ static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
 				krb5_boolean *, int *);
 
 static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
-					  int, const char *, krb5_data **,
-					  const char *);
+					  int, const char *, krb5_principal,
+				          krb5_data **, const char *, int);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -948,7 +948,8 @@ cleanup:
 	    errcode = KRB_ERR_GENERIC;
 	    
 	retval = prepare_error_tgs(request, header_ticket, errcode,
-				   fromstring, response, status);
+				   fromstring, nprincs ? server.princ : NULL,
+				   response, status, s_flags);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
 	    status = 0;
@@ -989,7 +990,8 @@ cleanup:
 
 static krb5_error_code
 prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
-		   const char *ident, krb5_data **response, const char *status)
+		   const char *ident, krb5_principal canon_server,
+		   krb5_data **response, const char *status, int flags)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -1002,7 +1004,11 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
 				    &errpkt.susec)))
 	return(retval);
     errpkt.error = error;
-    errpkt.server = request->server;
+    if (isflagset(flags, KRB5_KDB_FLAG_CANONICALIZE) &&
+	canon_server != NULL)
+	errpkt.server = canon_server;
+    else
+	errpkt.server = request->server;
     if (ticket && ticket->enc_part2)
 	errpkt.client = ticket->enc_part2->client;
     else
