@@ -170,26 +170,7 @@ realm_compare(krb5_const_principal princ1, krb5_const_principal princ2)
 krb5_boolean
 is_local_principal(krb5_const_principal princ1)
 {
-    krb5_error_code errcode;
-    krb5_principal_data princ2;
-    char *default_realm;
-    krb5_boolean local;
-
-    errcode = krb5_get_default_realm(kdc_context, &default_realm);
-    if (errcode)
-	return FALSE;
-
-    krb5_princ_size(kdc_context, &princ2) = 0;
-    krb5_princ_name(kdc_context, &princ2) = NULL;
-    krb5_princ_type(kdc_context, &princ2) = KRB5_NT_PRINCIPAL;
-    krb5_princ_set_realm_data(kdc_context, &princ2, default_realm);
-    krb5_princ_set_realm_length(kdc_context, &princ2, strlen(default_realm));
- 
-    local = krb5_realm_compare(kdc_context, princ1, &princ2); 
-
-    krb5_free_default_realm(kdc_context, default_realm);
-
-    return local;
+    return krb5_realm_compare(kdc_context, princ1, tgs_server);
 }
 
 /*
@@ -1929,7 +1910,7 @@ kdc_process_for_user(krb5_context context,
     }
 
     if (krb5_princ_type(context, (*for_user)->user) !=
-		    KRB5_NT_ENTERPRISE_PRINCIPAL) {
+	KRB5_NT_ENTERPRISE_PRINCIPAL) {
 	*status = "INVALID_S4U2SELF_REQUEST";
 	return KRB5KDC_ERR_POLICY;
     }
