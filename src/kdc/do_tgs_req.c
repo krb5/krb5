@@ -255,9 +255,8 @@ tgt_again:
     }
 
     /* Check for backend-indicated transit policy */
-    if (!krb5_realm_compare(kdc_context, tgs_server, header_enc_tkt->client)) {
+    if (!is_local_principal(header_enc_tkt->client))
 	setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
-    }
 
     /* Check for protocol transition */
     errcode = kdc_process_for_user(kdc_context, request, header_enc_tkt->client,
@@ -421,7 +420,7 @@ tgt_again:
 	setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
 	if (!krb5_is_tgs_principal(server.princ) &&
-	    krb5_realm_compare(kdc_context, server.princ, tgs_server)) {
+	    is_local_principal(server.princ)) {
 	    if (isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
 		setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
 	    else
@@ -706,7 +705,7 @@ tgt_again:
 
     enc_tkt_reply.session = &session_key;
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-	krb5_realm_compare(kdc_context, header_enc_tkt->client, tgs_server))
+	is_local_principal(header_enc_tkt->client))
 	enc_tkt_reply.client = for_user->user;
     else
 	enc_tkt_reply.client = header_enc_tkt->client;

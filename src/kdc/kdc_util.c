@@ -275,7 +275,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
        
        we set a flag here for checking below.
        */
-    foreign_server = !realm_compare(tgs_server, apreq->ticket->server);
+    foreign_server = !is_local_principal(apreq->ticket->server);
 
     if ((retval = krb5_auth_con_init(kdc_context, &auth_context)))
 	goto cleanup;
@@ -358,7 +358,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 
     /* make sure the client is of proper lineage (see above) */
     if (foreign_server) {
-	if (realm_compare((*ticket)->enc_part2->client, tgs_server) &&
+	if (is_local_principal((*ticket)->enc_part2->client) &&
 	    for_user == FALSE) {
 	    /* someone in a foreign realm claiming to be local */
 	    krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
@@ -1942,7 +1942,7 @@ kdc_process_for_user(krb5_context context,
     /*
      * Do not attempt to lookup principals in foreign realms.
      */
-    if (krb5_realm_compare(context, (*for_user)->user, tgs_server)) {
+    if (is_local_principal((*for_user)->user)) {
 	*nprincs = 1;
 	code = krb5_db_get_principal_ext(kdc_context,
 					 (*for_user)->user,
