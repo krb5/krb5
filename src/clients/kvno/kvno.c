@@ -41,10 +41,10 @@ static void xusage()
 {
 #ifdef KRB5_KRB4_COMPAT
     fprintf(stderr, 
-            "usage: %s [-4 | [-c ccache] [-e etype] [-k keytab] [-S sname]] service1 service2 ...\n", 
+            "usage: %s [-4 | [-C] [-c ccache] [-e etype] [-k keytab] [-S sname]] service1 service2 ...\n", 
             prog);
 #else
-    fprintf(stderr, "usage: %s [-c ccache] [-e etype] [-k keytab] [-S sname] service1 service2 ...\n",
+    fprintf(stderr, "usage: %s [-C] [-c ccache] [-e etype] [-k keytab] [-S sname] service1 service2 ...\n",
             prog);
 #endif
     exit(1);
@@ -55,7 +55,7 @@ int quiet = 0;
 static void do_v4_kvno (int argc, char *argv[]);
 static void do_v5_kvno (int argc, char *argv[], 
                         char *ccachestr, char *etypestr, char *keytab_name,
-			char *sname);
+			char *sname, int canon);
 
 #include <com_err.h>
 static void extended_com_err_fn (const char *, errcode_t, const char *,
@@ -66,15 +66,18 @@ int main(int argc, char *argv[])
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
     char *sname = NULL;
-    int v4 = 0;
+    int v4 = 0, canon = 0;
 
     set_com_err_hook (extended_com_err_fn);
 
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "c:e:hk:q4S:")) != -1) {
+    while ((option = getopt(argc, argv, "Cc:e:hk:q4S:")) != -1) {
 	switch (option) {
+	case 'C':
+	    canon = 1;
+	    break;
 	case 'c':
 	    ccachestr = optarg;
 	    break;
@@ -115,7 +118,7 @@ int main(int argc, char *argv[])
 	do_v4_kvno(argc - optind, argv + optind);
     else
 	do_v5_kvno(argc - optind, argv + optind,
-		   ccachestr, etypestr, keytab_name, sname);
+		   ccachestr, etypestr, keytab_name, sname, canon);
     return 0;
 }
 
@@ -182,7 +185,7 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
 
 static void do_v5_kvno (int count, char *names[], 
                         char * ccachestr, char *etypestr, char *keytab_name,
-			char *sname)
+			char *sname, int canon)
 {
     krb5_error_code ret;
     int i, errors;
@@ -265,7 +268,8 @@ static void do_v5_kvno (int count, char *names[],
 
 	in_creds.keyblock.enctype = etype;
 
-	ret = krb5_get_credentials(context, 0, ccache, &in_creds, &out_creds);
+	ret = krb5_get_credentials(context, canon ? KRB5_GC_CANONICALIZE : 0,
+				   ccache, &in_creds, &out_creds);
 
 	krb5_free_principal(context, in_creds.server);
 
