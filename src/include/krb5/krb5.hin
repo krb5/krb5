@@ -1537,6 +1537,7 @@ void KRB5_CALLCONV krb5_free_tgt_creds
 
 #define	KRB5_GC_USER_USER	1	/* want user-user ticket */
 #define	KRB5_GC_CACHED		2	/* want cached ticket only */
+#define	KRB5_GC_CANONICALIZE	4	/* set canonicalize KDC option */
 
 krb5_error_code KRB5_CALLCONV krb5_get_credentials
 	(krb5_context,

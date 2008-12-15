@@ -54,5 +54,10 @@ krb5_preauth_supply_preauth_data(krb5_context context,
 				 const char *attr,
 				 const char *value);
 
+krb5_error_code
+krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
+			   krb5_creds *in_cred, krb5_creds **out_cred,
+			   krb5_creds ***tgts, int kdcopt);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
 
