@@ -28,10 +28,6 @@
 
 #include "k5-int.h"
 #include "ktutil.h"
-#ifdef KRB5_KRB4_COMPAT
-#include "kerberosIV/krb.h"
-#include <stdio.h>
-#endif
 #include <string.h>
 #include <ctype.h>
 
