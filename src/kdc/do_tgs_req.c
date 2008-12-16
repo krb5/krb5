@@ -655,7 +655,14 @@ tgt_again:
 	    if (ad_nprincs != 0) {
 		if (isflagset(ad_entry.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
 		    clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+
 		krb5_db_free_principal(kdc_context, &ad_entry, ad_nprincs);
+
+		if (ad_nprincs != 1) {
+		    status = "NON_UNIQUE_AUTH_DATA_PRINCIPAL";
+		    errcode = KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
+		    goto cleanup;
+		}
 	    }
 	}
     }
