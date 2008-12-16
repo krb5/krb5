@@ -686,9 +686,7 @@ tgt_again:
     }
 
     /* assemble any authorization data */
-    /* Don't let user inject KDC issued authorization data */
-    if (request->authorization_data.ciphertext.data != NULL &&
-	krb5_is_tgs_principal(request->server) == FALSE) {
+    if (request->authorization_data.ciphertext.data != NULL) {
 	krb5_data scratch;
 
 	scratch.length = request->authorization_data.ciphertext.length;
