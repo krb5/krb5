@@ -302,7 +302,7 @@ verify_as_reply(krb5_context 		context,
 
     /* per referrals draft, enterprise principals imply canonicalization */
     canon_flag = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
-	(krb5_princ_type(context, request->client) = KRB5_NT_ENTERPRISE_PRINCIPAL);
+	(krb5_princ_type(context, request->client) == KRB5_NT_ENTERPRISE_PRINCIPAL);
  
     if ((!canon_flag &&
 	 (!krb5_principal_compare(context, as_reply->client, request->client) ||
