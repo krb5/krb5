@@ -136,7 +136,7 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 
     *minor_status = EINVAL;
 
-    return GSS_S_BAD_MECH; 
+    return GSS_S_UNAVAILABLE; 
 }
 
 /*
@@ -193,7 +193,7 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 
     *minor_status = EINVAL;
 
-    return GSS_S_BAD_MECH;
+    return GSS_S_UNAVAILABLE;
 }
 
 /*
@@ -248,7 +248,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 
     *minor_status = EINVAL;
 
-    return GSS_S_BAD_MECH; 
+    return GSS_S_UNAVAILABLE; 
 }
 
 /*
@@ -310,7 +310,7 @@ krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
 
     *minor_status = EINVAL;
 
-    return GSS_S_BAD_MECH;
+    return GSS_S_UNAVAILABLE;
 }
 
 /*
@@ -369,7 +369,7 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
 
     *minor_status = EINVAL;
 
-    return GSS_S_BAD_MECH;
+    return GSS_S_UNAVAILABLE;
 }
 
 static struct gss_config krb5_mechanism = {
