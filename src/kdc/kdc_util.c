@@ -1448,20 +1448,20 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *client,
 {
     /*
      * If it's DES_CBC_MD5, there's a bit in the attribute mask which
-     * checks to see if we support it.
+     * checks to see if we support it.  For now, treat it as always
+     * clear.
      *
      * In theory everything's supposed to support DES_CBC_MD5, but
      * that's not the reality....
      */
-    if (enctype == ENCTYPE_DES_CBC_MD5 &&
-		    ((client->attributes & KRB5_KDB_SUPPORT_DESMD5) != 0))
-	return 1;
+    if (enctype == ENCTYPE_DES_CBC_MD5)
+	return 0;
 
     /*
      * XXX we assume everything can understand DES_CBC_CRC
      */
     if (enctype == ENCTYPE_DES_CBC_CRC)
-	return 1;
+	return 0;
     
     /*
      * If we have a key for the encryption system, we assume it's
