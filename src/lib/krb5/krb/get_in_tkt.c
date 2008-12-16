@@ -293,13 +293,18 @@ verify_as_reply(krb5_context 		context,
 		krb5_kdc_rep		*as_reply)
 {
     krb5_error_code		retval;
-    
+    int				canon_flag;
+
     /* check the contents for sanity: */
     if (!as_reply->enc_part2->times.starttime)
 	as_reply->enc_part2->times.starttime =
 	    as_reply->enc_part2->times.authtime;
-   
-    if ((!(request->kdc_options & KDC_OPT_CANONICALIZE) &&
+
+    /* per referrals draft, enterprise principals imply canonicalization */
+    canon_flag = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
+	(krb5_princ_type(context, request->client) = KRB5_NT_ENTERPRISE_PRINCIPAL);
+ 
+    if ((!canon_flag &&
 	 (!krb5_principal_compare(context, as_reply->client, request->client) ||
 	  !krb5_principal_compare(context, as_reply->enc_part2->server, request->server)))
 	|| !krb5_principal_compare(context, as_reply->enc_part2->server, as_reply->ticket->server)
