@@ -1680,7 +1680,8 @@ sign_authorization_data(krb5_context context,
 			krb5_timestamp authtime,
 			krb5_authdata **auth_data,
 			krb5_authdata ***ret_auth_data,
-			krb5_flags *attributes)
+			krb5_db_entry *ad_entry,
+			int *ad_nprincs)
 {
     krb5_error_code		code;
     kdb_sign_auth_data_req	req;
@@ -1689,8 +1690,11 @@ sign_authorization_data(krb5_context context,
     krb5_data			rep_data;
 
     *ret_auth_data = NULL;
-    if (attributes != NULL)
-	*attributes = (client != NULL) ? client->attributes : 0;
+    if (ad_entry != NULL) {
+	assert(ad_nprincs != NULL);
+	memset(ad_entry, 0, sizeof(*ad_entry));
+	*ad_nprincs = 0;
+    }
 
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
@@ -1704,6 +1708,9 @@ sign_authorization_data(krb5_context context,
     req.server_key		= server_key;
     req.authtime		= authtime;
     req.auth_data		= auth_data;
+
+    rep.entry			= ad_entry;
+    rep.nprincs			= 0;
 
     req_data.data = (void *)&req;
     req_data.length = sizeof(req);
@@ -1730,8 +1737,8 @@ sign_authorization_data(krb5_context context,
 	    code = krb5_copy_authdata(context, auth_data, ret_auth_data);
     } else {
 	*ret_auth_data = rep.auth_data;
-	if (attributes != NULL)
-	    *attributes = rep.attributes;
+	if (ad_nprincs != NULL)
+	    *ad_nprincs = rep.nprincs;
     }
 
     return code;

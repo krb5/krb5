@@ -621,11 +621,18 @@ tgt_again:
 	 * principal entry. Otherwise authorization data will be included
 	 * if it was present in the TGT, the client is from another realm
 	 * or protocol transition/constrained delegation was used.
+	 *
+	 * We permit sign_authorization_data() to return a krb5_db_entry
+	 * representing the principal associated with the authorization
+	 * data, in case that principal is not local to our realm and we
+	 * need to perform additional checks (such as disabling delegation
+	 * for cross-realm protocol transition below).
 	 */
 	if (header_enc_tkt->authorization_data != NULL ||
 	    isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) ||
 	    isflagset(c_flags, KRB5_KDB_FLAGS_S4U)) {
-	    krb5_flags attributes;
+	    krb5_db_entry	ad_entry;
+	    int			ad_nprincs = 0;
 
 	    errcode = sign_authorization_data(kdc_context,
 					      c_flags,
@@ -639,13 +646,17 @@ tgt_again:
 					      header_enc_tkt->times.authtime,
 					      header_enc_tkt->authorization_data,
 					      &kdc_issued_auth_data,
-					      &attributes);
+					      &ad_entry,
+					      &ad_nprincs);
 	    if (errcode) {
 		status = "SIGN_AUTH_DATA";
 		goto cleanup;
 	    }
-	    if (attributes & KRB5_KDB_DISALLOW_FORWARDABLE)
-		clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+	    if (ad_nprincs != 0) {
+		if (isflagset(ad_entry.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
+		    clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+		krb5_db_free_principal(kdc_context, &ad_entry, ad_nprincs);
+	    }
 	}
     }
 

@@ -112,7 +112,8 @@ typedef struct _kdb_sign_auth_data_req {
 typedef struct _kdb_sign_auth_data_rep {
     krb5_magic magic;
     krb5_authdata **auth_data;
-    krb5_flags attributes;
+    krb5_db_entry *entry;
+    int nprincs;
 } kdb_sign_auth_data_rep;
 
 typedef struct _kdb_check_transited_realms_req {

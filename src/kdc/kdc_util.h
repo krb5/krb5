@@ -216,7 +216,8 @@ krb5_error_code sign_authorization_data
 		krb5_timestamp authtime,
 		krb5_authdata **tgs_auth_data,
 		krb5_authdata ***ret_auth_data,
-		krb5_flags *ret_attributes);
+		krb5_db_entry *ad_entry,
+		int *ad_nprincs);
 
 krb5_error_code kdc_process_s4u2self_req
 	(krb5_context context,
