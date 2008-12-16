@@ -99,7 +99,7 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 	}
     }
 
-    if (retval == KRB5_KT_NOTFOUND) {
+    if (retval == KRB5_KT_NOTFOUND && keytab->ops->start_seq_get != NULL) {
 	krb5_error_code code;
 	krb5_kt_cursor cursor;
 
