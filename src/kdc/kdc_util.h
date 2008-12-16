@@ -261,13 +261,6 @@ krb5_error_code audit_tgs_request
 		krb5_error_code errcode);
 
 krb5_error_code
-set_reply_server(krb5_context context,
-	krb5_kdc_req *request,
-		krb5_db_entry *server,
-		krb5_principal reply_buffer,
-		krb5_ticket *ticket_reply);
-
-krb5_error_code
 validate_transit_path(krb5_context context,
 	krb5_const_principal client,
 		krb5_db_entry *server,

@@ -84,7 +84,7 @@
 
 static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
 					 krb5_principal, krb5_data **,
-					 const char *, int);
+					 const char *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -279,7 +279,19 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
-    set_reply_server(kdc_context, request, &server, &server_princ, &ticket_reply);
+    /*
+     * Turn off canonicalization for changepw service; if it is an
+     * alias for the TGS, then a client with an expired key could
+     * still be issued a ticket granting ticket.
+     */
+    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) &&
+	!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE))
+	server_princ = *(server.princ);
+    else
+	server_princ = *(request->server);
+    /* The realm is always canonicalized */
+    server_princ.realm = *(krb5_princ_realm(context, server.princ));
+    ticket_reply.server = &server_princ;
 
     enc_tkt_reply.flags = 0;
     setflag(enc_tkt_reply.flags, TKT_FLG_INITIAL);
@@ -602,7 +614,7 @@ errout:
 	    
 	errcode = prepare_error_as(request, errcode, &e_data,
  				   c_nprincs ? client.princ : NULL,
-				   response, status, c_flags);
+				   response, status);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
 	    status = 0;
@@ -658,7 +670,7 @@ errout:
 static krb5_error_code
 prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 		  krb5_principal canon_client, krb5_data **response,
-		  const char *status, int flags)
+		  const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -673,8 +685,7 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
     errpkt.error = error;
     errpkt.server = request->server;
 
-    if (isflagset(flags, KRB5_KDB_FLAG_CANONICALIZE) &&
-	canon_client != NULL)
+    if (error == KRB5KDC_ERR_WRONG_REALM)
 	errpkt.client = canon_client;
     else
 	errpkt.client = request->client;

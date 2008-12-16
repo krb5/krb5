@@ -2204,30 +2204,6 @@ audit_tgs_request(krb5_kdc_req *request,
 }
 
 krb5_error_code
-set_reply_server(krb5_context context,
-		 krb5_kdc_req *request,
-		 krb5_db_entry *server,
-		 krb5_principal reply_buffer,
-		 krb5_ticket *ticket_reply)
-{
-    /*
-     * Turn off canonicalization for changepw service; if it is an
-     * alias for the TGS, then a client with an expired key could
-     * still be issued a ticket granting ticket.
-     */
-    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) &&
-	!isflagset(server->attributes, KRB5_KDB_PWCHANGE_SERVICE))
-	*reply_buffer = *(server->princ);
-    else
-	*reply_buffer = *(request->server);
-    /* The realm is always canonicalized */
-    reply_buffer->realm = *(krb5_princ_realm(context, server->princ));
-    ticket_reply->server = reply_buffer;
-
-    return 0;
-}
-
-krb5_error_code
 validate_transit_path(krb5_context context,
 		      krb5_const_principal client,
 		      krb5_db_entry *server,

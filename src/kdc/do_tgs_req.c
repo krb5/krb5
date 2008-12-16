@@ -77,7 +77,7 @@ static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
 
 static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
 					  int, const char *, krb5_principal,
-				          krb5_data **, const char *, int);
+				          krb5_data **, const char *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -121,7 +121,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_authdata **kdc_issued_auth_data = NULL;    /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;	    /* client/server KDB flags */
     char *s4u_name = NULL;
-    krb5_principal_data server_princ;
 
     session_key.contents = NULL;
     
@@ -195,8 +194,17 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     nprincs = 1;
     if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
 	setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
-	setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
     }
+
+    /*
+     * TGS-REP canonicalization matches Windows 2003 rather
+     * than Windows 2000. This means that we should indicate
+     * to the backend to always return referrals by setting
+     * KDB_FLAG_CANONICALIZE, and we should also always
+     * return the requested SPN in the reply regardless of
+     * whether KDC_OPT_CANONICALIZE was set or not.
+     */
+    setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
 
     errcode = krb5_db_get_principal_ext(kdc_context,
 					request->server,
@@ -373,12 +381,7 @@ tgt_again:
 
     authtime = header_enc_tkt->times.authtime;
 
-    /*
-     * Server name canonicalization follows Windows 2000 behaviour,
-     * where the canonicalize flag will force the canonical name to
-     * be returned in the reply. (This changed in Windows 2003.)
-     */
-    set_reply_server(kdc_context, request, &server, &server_princ, &ticket_reply);
+    ticket_reply.server = request->server; /* XXX careful for realm... */
 
     enc_tkt_reply.flags = 0;
     enc_tkt_reply.times.starttime = 0;
@@ -674,6 +677,14 @@ tgt_again:
 	goto cleanup;
     }
 
+    if (reply_encpart.enc_padata != NULL) {
+	/*
+	 * Backend should not have returned referrals if canonicalize
+	 * flag was absent
+	 */
+	ticket_reply.server = server.princ;
+    }
+
     /* assemble any authorization data */
     /* Don't let user inject KDC issued authorization data */
     if (request->authorization_data.ciphertext.data != NULL &&
@@ -961,7 +972,7 @@ cleanup:
 	    
 	retval = prepare_error_tgs(request, header_ticket, errcode,
 				   fromstring, nprincs ? server.princ : NULL,
-				   response, status, s_flags);
+				   response, status);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
 	    status = 0;
@@ -1001,7 +1012,7 @@ cleanup:
 static krb5_error_code
 prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
 		   const char *ident, krb5_principal canon_server,
-		   krb5_data **response, const char *status, int flags)
+		   krb5_data **response, const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -1014,11 +1025,7 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
 				    &errpkt.susec)))
 	return(retval);
     errpkt.error = error;
-    if (isflagset(flags, KRB5_KDB_FLAG_CANONICALIZE) &&
-	canon_server != NULL)
-	errpkt.server = canon_server;
-    else
-	errpkt.server = request->server;
+    errpkt.server = request->server;
     if (ticket && ticket->enc_part2)
 	errpkt.client = ticket->enc_part2->client;
     else
