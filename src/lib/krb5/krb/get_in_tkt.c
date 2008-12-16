@@ -298,10 +298,11 @@ verify_as_reply(krb5_context 		context,
     if (!as_reply->enc_part2->times.starttime)
 	as_reply->enc_part2->times.starttime =
 	    as_reply->enc_part2->times.authtime;
-    
-    if (!krb5_principal_compare(context, as_reply->client, request->client)
-	|| !krb5_principal_compare(context, as_reply->enc_part2->server, request->server)
-	|| !krb5_principal_compare(context, as_reply->ticket->server, request->server)
+   
+    if ((!(request->kdc_options & KDC_OPT_CANONICALIZE) &&
+	 (!krb5_principal_compare(context, as_reply->client, request->client) ||
+	  !krb5_principal_compare(context, as_reply->enc_part2->server, request->server)))
+	|| !krb5_principal_compare(context, as_reply->enc_part2->server, as_reply->ticket->server)
 	|| (request->nonce != as_reply->enc_part2->nonce)
 	/* XXX check for extraneous flags */
 	/* XXX || (!krb5_addresses_compare(context, addrs, as_reply->enc_part2->caddrs)) */
