@@ -83,7 +83,7 @@
 
 static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
 					 krb5_principal, krb5_data **,
-					 const char *, int);
+					 const char *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -653,7 +653,7 @@ errout:
 static krb5_error_code
 prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 		  krb5_principal canon_client, krb5_data **response,
-		  const char *status, int flags)
+		  const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -668,8 +668,7 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
     errpkt.error = error;
     errpkt.server = request->server;
 
-    if (isflagset(flags, KRB5_KDB_FLAG_CANONICALIZE) &&
-	canon_client != NULL)
+    if (error == KDC_ERR_WRONG_REALM)
 	errpkt.client = canon_client;
     else
 	errpkt.client = request->client;
