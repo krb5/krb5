@@ -124,8 +124,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
-    server_keyblock.contents = 0;
-    client_keyblock.contents = 0;
+    server_keyblock.contents = NULL;
+    client_keyblock.contents = NULL;
     reply.padata = 0;
     session_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
@@ -606,16 +606,16 @@ errout:
 
     if (enc_tkt_reply.authorization_data != NULL)
 	krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
-    if (server_keyblock.contents)
+    if (server_keyblock.contents != NULL)
  	krb5_free_keyblock_contents(kdc_context, &server_keyblock);
-    if (client_keyblock.contents)
+    if (client_keyblock.contents != NULL)
 	krb5_free_keyblock_contents(kdc_context, &client_keyblock);
-    if (reply.padata)
+    if (reply.padata != NULL)
 	krb5_free_pa_data(kdc_context, reply.padata);
 
-    if (cname)
+    if (cname != NULL)
 	    free(cname);
-    if (sname)
+    if (sname != NULL)
 	    free(sname);
     if (c_nprincs) {
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
@@ -637,9 +637,9 @@ errout:
     }
     if (s_nprincs)
 	krb5_db_free_principal(kdc_context, &server, s_nprincs);
-    if (session_key.contents)
+    if (session_key.contents != NULL)
 	krb5_free_keyblock_contents(kdc_context, &session_key);
-    if (ticket_reply.enc_part.ciphertext.data) {
+    if (ticket_reply.enc_part.ciphertext.data != NULL) {
 	memset(ticket_reply.enc_part.ciphertext.data , 0,
 	       ticket_reply.enc_part.ciphertext.length);
 	free(ticket_reply.enc_part.ciphertext.data);
@@ -681,7 +681,7 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 	free(errpkt.text.data);
 	return ENOMEM;
     }
-    if (e_data && e_data->data) {
+    if (e_data  != NULL&& e_data->data != NULL) {
 	errpkt.e_data = *e_data;
     } else {
 	errpkt.e_data.length = 0;
