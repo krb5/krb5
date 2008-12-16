@@ -357,9 +357,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     }
 
     /* make sure the client is of proper lineage (see above) */
-    if (foreign_server) {
-	if (is_local_principal((*ticket)->enc_part2->client) &&
-	    for_user == FALSE) {
+    if (foreign_server && for_user == FALSE) {
+	if (is_local_principal((*ticket)->enc_part2->client)) {
 	    /* someone in a foreign realm claiming to be local */
 	    krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
 	    retval = KRB5KDC_ERR_POLICY;
