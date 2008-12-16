@@ -241,9 +241,14 @@ gss_buffer_t		output_message_buffer;
 		    output_message_buffer);
 }
 
-#if 0
+/*
+ * It is only possible to implement gss_wrap_size_limit() on top
+ * of gss_wrap_iov_length() for mechanisms that do not use any
+ * padding and have fixed length headers/trailers.
+ */
 static OM_uint32
-gssint_wrap_size_limit_iov_shim(OM_uint32 *minor_status,
+gssint_wrap_size_limit_iov_shim(gss_mechanism mech,
+				OM_uint32 *minor_status,
 				gss_ctx_id_t context_handle,
 				int conf_req_flag,
 				gss_qop_t qop_req,
@@ -274,23 +279,26 @@ gssint_wrap_size_limit_iov_shim(OM_uint32 *minor_status,
     iov[3].buffer.value = NULL;
     iov[3].buffer.length = 0;
 
-    status = gss_wrap_iov_length(minor_status, context_handle,
-				 conf_req_flag, qop_req,
-				 NULL, iov,
-				 sizeof(iov)/sizeof(iov[0]));
-    if (status != GSS_S_COMPLETE)
+    assert(mech->gss_wrap_iov_length);
+
+    status = mech->gss_wrap_iov_length(minor_status, context_handle,
+				       conf_req_flag, qop_req,
+				       NULL, iov,
+				       sizeof(iov)/sizeof(iov[0]));
+    if (status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	return status;
+    }
 
-    ohlen = iov[3].buffer.length - iov[2].buffer.length - iov[0].buffer.length;
+    ohlen = iov[0].buffer.length + iov[3].buffer.length;
 
-    if (ohlen < req_output_size)
+    if (iov[2].buffer.length == 0 && ohlen < req_output_size)
 	*max_input_size = req_output_size - ohlen;
     else
 	*max_input_size = 0;
 
     return GSS_S_COMPLETE;
 }
-#endif
 
 /*
  * New for V2
@@ -335,12 +343,10 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 						 ctx->internal_ctx_id,
 						 conf_req_flag, qop_req,
 						 req_output_size, max_input_size);
-#if 0
     else if (mech->gss_wrap_iov_length)
-	major_status = gssint_wrap_size_limit_iov_shim(minor_status, ctx,
+	major_status = gssint_wrap_size_limit_iov_shim(mech, minor_status, ctx,
 						       conf_req_flag, qop_req,
 						       req_output_size, max_input_size);
-#endif
     else
 	major_status = GSS_S_UNAVAILABLE;
     if (major_status != GSS_S_COMPLETE)
