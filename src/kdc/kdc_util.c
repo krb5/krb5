@@ -2236,3 +2236,19 @@ validate_transit_path(krb5_context context,
 
     return 0;
 }
+
+krb5_boolean
+is_referral_entry(krb5_context context, krb5_db_entry *server)
+{
+    krb5_tl_data tl_data;
+
+    tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
+    tl_data.tl_data_contents = NULL;
+
+    if (krb5_dbe_lookup_tl_data(context, server, &tl_data) == 0 &&
+	tl_data.tl_data_contents != NULL) {
+	return TRUE;
+    }
+
+    return FALSE;
+}

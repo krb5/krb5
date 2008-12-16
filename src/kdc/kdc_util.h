@@ -279,6 +279,10 @@ validate_transit_path(krb5_context context,
 		krb5_db_entry *server,
 		krb5_db_entry *krbtgt);
 
+krb5_boolean
+is_referral_entry(krb5_context context,
+	krb5_db_entry *server);
+
 #define isflagset(flagfield, flag) (flagfield & (flag))
 #define setflag(flagfield, flag) (flagfield |= (flag))
 #define clear(flagfield, flag) (flagfield &= ~(flag))

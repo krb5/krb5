@@ -124,7 +124,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     char *s4u_name = NULL;
     krb5_principal_data server_princ;
 
-    session_key.contents = 0;
+    session_key.contents = NULL;
     
     retval = decode_krb5_tgs_req(pkt, &request);
     if (retval)
@@ -384,17 +384,10 @@ tgt_again:
     enc_tkt_reply.flags = 0;
     enc_tkt_reply.times.starttime = 0;
 
-    if (isflagset(server.attributes, KRB5_KDB_OK_AS_DELEGATE)) {
-	krb5_tl_data tl_data;
-
-	tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
-	tl_data.tl_data_contents = NULL;
-
+    if (isflagset(server.attributes, KRB5_KDB_OK_AS_DELEGATE) &&
+	is_referral_entry(kdc_context, &server)) {
 	/* Ensure that we are not returning a referral */
-	if (krb5_dbe_lookup_tl_data(kdc_context, &server, &tl_data) != 0 ||
-	    tl_data.tl_data_contents == NULL) {
-	    setflag(enc_tkt_reply.flags, TKT_FLG_OK_AS_DELEGATE);
-	}
+	setflag(enc_tkt_reply.flags, TKT_FLG_OK_AS_DELEGATE);
     }
 
     /*
