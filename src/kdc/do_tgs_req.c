@@ -115,12 +115,11 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     char rep_etypestr[128];
     char fromstringbuf[70];
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* ticket granting or evidence ticket */
-    krb5_db_entry client, krbtgt, pac_princ;
+    krb5_db_entry client, krbtgt;
     int c_nprincs = 0, k_nprincs = 0;
     krb5_pa_for_user *for_user = NULL;	    /* protocol transition request */
     krb5_authdata **kdc_issued_auth_data = NULL;    /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;	    /* client/server KDB flags */
-    krb5_boolean pac_princ_decoded = FALSE;
     char *s4u_name = NULL;
     krb5_principal_data server_princ;
 
@@ -945,19 +944,17 @@ cleanup:
 	}
     }
     
-    if (header_ticket)
+    if (header_ticket != NULL)
 	krb5_free_ticket(kdc_context, header_ticket);
-    if (request)
+    if (request != NULL)
 	krb5_free_kdc_req(kdc_context, request);
-    if (cname)
+    if (cname != NULL)
 	free(cname);
-    if (sname)
+    if (sname != NULL)
 	free(sname);
-    if (nprincs)
+    if (nprincs != 0)
 	krb5_db_free_principal(kdc_context, &server, 1);
-     if (pac_princ_decoded)
- 	krb5_db_free_principal(kdc_context, &pac_princ, 1);
-    if (session_key.contents)
+    if (session_key.contents != NULL)
 	krb5_free_keyblock_contents(kdc_context, &session_key);
     if (newtransited)
 	free(enc_tkt_reply.transited.tr_contents.data);
@@ -965,13 +962,13 @@ cleanup:
 	krb5_db_free_principal(kdc_context, &krbtgt, k_nprincs);
     if (c_nprincs)
 	krb5_db_free_principal(kdc_context, &client, c_nprincs);
-    if (for_user)
+    if (for_user != NULL)
 	krb5_free_pa_for_user(kdc_context, for_user);
-    if (kdc_issued_auth_data)
+    if (kdc_issued_auth_data != NULL)
 	krb5_free_authdata(kdc_context, kdc_issued_auth_data);
-    if (s4u_name)
+    if (s4u_name != NULL)
 	free(s4u_name);
-    if (subkey)
+    if (subkey != NULL)
 	krb5_free_keyblock(kdc_context, subkey);
 
     return retval;
