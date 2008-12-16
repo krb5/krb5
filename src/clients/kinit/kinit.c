@@ -209,7 +209,7 @@ usage()
     fprintf(stderr, "\t-A do not include addresses\n");
     fprintf(stderr, "\t-v validate\n");
     fprintf(stderr, "\t-R renew\n");
-    fprintf(STDERR, "\t-C canonicalize\n");
+    fprintf(stderr, "\t-C canonicalize\n");
     fprintf(stderr, "\t-k use keytab\n");
     fprintf(stderr, "\t-t filename of keytab to use\n");
     fprintf(stderr, "\t-c Kerberos 5 cache name\n");
