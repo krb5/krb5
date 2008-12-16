@@ -536,7 +536,7 @@ char *kadmin_startup(argc, argv)
 	krb5_defkeyname = DEFAULT_KEYTAB;
     }
 
-    if ((retval = kadm5_init_iprop(handle)) != 0) {
+    if ((retval = kadm5_init_iprop(handle, 0)) != 0) {
 	com_err(whoami, retval, _("while mapping update log"));
 	exit(1);
     }
