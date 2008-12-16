@@ -625,6 +625,7 @@ tgt_again:
 	if (header_enc_tkt->authorization_data != NULL ||
 	    isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) ||
 	    isflagset(c_flags, KRB5_KDB_FLAGS_S4U)) {
+	    krb5_flags attributes;
 
 	    errcode = sign_authorization_data(kdc_context,
 					      c_flags,
@@ -637,11 +638,14 @@ tgt_again:
 					      &encrypting_key, /* U2U or server key */
 					      header_enc_tkt->times.authtime,
 					      header_enc_tkt->authorization_data,
-					      &kdc_issued_auth_data);
+					      &kdc_issued_auth_data,
+					      &attributes);
 	    if (errcode) {
 		status = "SIGN_AUTH_DATA";
 		goto cleanup;
 	    }
+	    if (attributes & KRB5_KDB_DISALLOW_FORWARDABLE)
+		clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
 	}
     }
 

@@ -487,7 +487,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 				      &server_keyblock,
 				      authtime,
 				      NULL,
-				      &enc_tkt_reply.authorization_data);
+				      &enc_tkt_reply.authorization_data,
+				      NULL);
     if (errcode) {
 	status = "SIGN_AUTH_DATA";
 	goto errout;

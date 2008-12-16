@@ -215,7 +215,8 @@ krb5_error_code sign_authorization_data
 		krb5_keyblock *server_key,
 		krb5_timestamp authtime,
 		krb5_authdata **tgs_auth_data,
-		krb5_authdata ***ret_auth_data);
+		krb5_authdata ***ret_auth_data,
+		krb5_flags *ret_attributes);
 
 krb5_error_code kdc_process_for_user
 	(krb5_context context,
@@ -257,14 +258,6 @@ krb5_error_code audit_tgs_request
 		krb5_db_entry *server,
 		krb5_timestamp authtime,
 		krb5_error_code errcode);
-
-#if 0
-krb5_error_code get_principal_in_pac
-	(krb5_context context,
-		krb5_authdata *ad,
-		krb5_db_entry *tgs,
-		krb5_db_entry *princ);
-#endif
 
 krb5_error_code
 set_reply_server(krb5_context context,

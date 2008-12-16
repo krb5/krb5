@@ -1679,7 +1679,8 @@ sign_authorization_data(krb5_context context,
 			krb5_keyblock *server_key,
 			krb5_timestamp authtime,
 			krb5_authdata **auth_data,
-			krb5_authdata ***ret_auth_data)
+			krb5_authdata ***ret_auth_data,
+			krb5_flags *attributes)
 {
     krb5_error_code		code;
     kdb_sign_auth_data_req	req;
@@ -1688,6 +1689,8 @@ sign_authorization_data(krb5_context context,
     krb5_data			rep_data;
 
     *ret_auth_data = NULL;
+    if (attributes != NULL)
+	*attributes = (client != NULL) ? client->attributes : 0;
 
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
@@ -1727,6 +1730,8 @@ sign_authorization_data(krb5_context context,
 	    code = krb5_copy_authdata(context, auth_data, ret_auth_data);
     } else {
 	*ret_auth_data = rep.auth_data;
+	if (attributes != NULL)
+	    *attributes = rep.attributes;
     }
 
     return code;
