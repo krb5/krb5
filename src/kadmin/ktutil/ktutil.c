@@ -98,7 +98,6 @@ void ktutil_read_v4(argc, argv)
     int argc;
     char *argv[];
 {
-#ifdef KRB5_KRB4_COMPAT
     krb5_error_code retval;
 
     if (argc != 2) {
@@ -108,9 +107,6 @@ void ktutil_read_v4(argc, argv)
     retval = ktutil_read_srvtab(kcontext, argv[1], &ktlist);
     if (retval)
 	com_err(argv[0], retval, "while reading srvtab \"%s\"", argv[1]);
-#else
-    fprintf(stderr, "%s: krb4 support not configured\n", argv[0]);
-#endif
 }
 
 void ktutil_write_v5(argc, argv)
@@ -132,19 +128,7 @@ void ktutil_write_v4(argc, argv)
     int argc;
     char *argv[];
 {
-#ifdef KRB5_KRB4_COMPAT
-    krb5_error_code retval;
-
-    if (argc != 2) {
-	fprintf(stderr, "%s: must specify srvtab to write\n", argv[0]);
-	return;
-    }
-    retval = ktutil_write_srvtab(kcontext, ktlist, argv[1]);
-    if (retval)
-	com_err(argv[0], retval, "while writing srvtab \"%s\"", argv[1]);
-#else
-    fprintf(stderr, "%s: krb4 support not configured\n", argv[0]);
-#endif
+    fprintf(stderr, "%s: writing srvtabs is no longer supported\n", argv[0]);
 }
 
 void ktutil_add_entry(argc, argv)

@@ -313,6 +313,9 @@ CXX_LINK=@CXX_LINK@
 # prefix (with no spaces after) for rpath flag to cc
 RPATH_FLAG=@RPATH_FLAG@
 
+# link flags to add PROG_RPATH to the rpath
+PROG_RPATH_FLAGS=@PROG_RPATH_FLAGS@
+
 # this gets set by configure to either $(STLIBEXT) or $(SHLIBEXT),
 # depending on whether we're building with shared libraries.
 DEPLIBEXT=@DEPLIBEXT@
@@ -548,8 +551,12 @@ SHLIB_EXPORT_FILE_DEP=@SHLIB_EXPORT_FILE_DEP@
 # to change to rearrange where the various parameters fit in.
 MAKE_SHLIB_COMMAND=@MAKE_SHLIB_COMMAND@
 
+# run path flags for explicit libraries depending on this one,
+# e.g. "-R$(SHLIB_RPATH)"
+SHLIB_RPATH_FLAGS=@SHLIB_RPATH_FLAGS@
+
 # flags for explicit libraries depending on this one,
-# e.g. "-R$(SHLIB_RPATH) $(SHLIB_SHLIB_DIRFLAGS) $(SHLIB_EXPLIBS)"
+# e.g. "$(SHLIB_RPATH_FLAGS) $(SHLIB_SHLIB_DIRFLAGS) $(SHLIB_EXPLIBS)"
 SHLIB_EXPFLAGS=@SHLIB_EXPFLAGS@
 
 ## Parameters to be set by configure for use in libobj.in:

@@ -94,10 +94,6 @@ Enables debugging.
 .B \-g
 Disables file name globbing.
 .TP
-\fB\-k\fP \fIrealm\fP
-When using Kerberos v4 authentication, gets tickets in
-.IR realm .
-.TP
 .B \-f
 Causes credentials to be forwarded to the remote host.
 .TP

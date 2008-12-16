@@ -20,8 +20,8 @@ all-unix:: kcpytkt
 ##WIN32##all-windows:: $(KCPYTKT)
 all-mac::
 
-kcpytkt: kcpytkt.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ kcpytkt.o $(KRB4COMPAT_LIBS)
+kcpytkt: kcpytkt.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kcpytkt.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KCPYTKT): $(OUTPRE)kcpytkt.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) /out:$@ $**

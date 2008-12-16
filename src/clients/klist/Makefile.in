@@ -22,8 +22,8 @@ SRCS = klist.c
 all-unix:: klist
 ##WIN32##all-windows:: $(KLIST)
 
-klist: klist.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ klist.o $(KRB4COMPAT_LIBS)
+klist: klist.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ klist.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KLIST): $(OUTPRE)klist.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(SLIB) $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)

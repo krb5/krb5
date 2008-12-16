@@ -99,10 +99,6 @@ dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
 	    krb5_free_kdc_req(kdc_context, as_req);
 	}
     }
-#ifdef KRB5_KRB4_COMPAT
-    else if (pkt->data[0] == 4)		/* old version */
-	retval = process_v4(pkt, from, response);
-#endif
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
 #ifndef NOCACHE

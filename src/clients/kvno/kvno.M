@@ -28,7 +28,7 @@
 .SH NAME
 kvno \- print key version numbers of Kerberos principals
 .SH SYNOPSIS
-\fBkvno\fP [\fB\-q\fP] [\fB\-h\fP] [\fB\-4\fP\ |\ [\fB-c ccache\fP]\ [\fB\-e etype\fP]]
+\fBkvno\fP [\fB\-q\fP] [\fB\-h\fP] [\fB-c ccache\fP]\ [\fB\-e etype\fP]
 \fBservice1\fP \fBservice2\fP \fB...\fP
 .br
 .SH DESCRIPTION
@@ -51,11 +51,6 @@ suppress printing
 .B \-h
 prints a usage statement and exits
 .TP
-.B \-4
-specifies that Kerberos version 4 tickets should be acquired and
-described.  This option is only available if Kerberos 4 support was
-enabled at compilation time.
-.TP
 .B \-S sname
 specifies that krb5_sname_to_principal() will be used to build
 principal names.  If this flag is specified, the
@@ -70,16 +65,10 @@ uses the following environment variable:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
 Location of the credentials (ticket) cache.
-.TP
-.SM KRBTKFILE
-Location of the v4 ticket file.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]
 default location of the credentials cache ([uid] is the decimal UID of
 the user).
-.TP
-/tmp/tkt[uid]
-default location of the v4 ticket file.
 .SH SEE ALSO
 kinit(1), kdestroy(1), krb5(3)

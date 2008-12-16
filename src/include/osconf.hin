@@ -115,18 +115,6 @@
 #define KRB5_ENV_CCNAME	"KRB5CCNAME"
 
 /*
- * krb4 kadmin stuff follows
- */
-
-/* the default syslog file */
-#define KADM_SYSLOG  "@LOCALSTATEDIR/krb5kdc/admin_server.syslog"
-
-/* where to find the bad password table */
-#define PW_CHECK_FILE "@LOCALSTATEDIR/krb5kdc/bad_passwd"
-
-#define DEFAULT_ACL_DIR	"@LOCALSTATEDIR/krb5kdc"
-
-/*
  * krb5 slave support follows
  */
 

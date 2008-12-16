@@ -48,7 +48,6 @@ STLIBOBJS= \
 	read_pwd.o	\
 	realm_dom.o	\
 	realm_iter.o	\
-	send524.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
         thread_safe.o   \
@@ -93,7 +92,6 @@ OBJS= \
 	$(OUTPRE)read_pwd.$(OBJEXT)	\
 	$(OUTPRE)realm_dom.$(OBJEXT)	\
 	$(OUTPRE)realm_iter.$(OBJEXT)	\
-	$(OUTPRE)send524.$(OBJEXT)	\
 	$(OUTPRE)sendto_kdc.$(OBJEXT)	\
 	$(OUTPRE)sn2princ.$(OBJEXT)	\
         $(OUTPRE)thread_safe.$(OBJEXT)  \
@@ -138,7 +136,6 @@ SRCS= \
 	$(srcdir)/realm_dom.c	\
 	$(srcdir)/realm_iter.c	\
 	$(srcdir)/port2ip.c	\
-	$(srcdir)/send524.c	\
 	$(srcdir)/sendto_kdc.c	\
 	$(srcdir)/sn2princ.c	\
         $(srcdir)/thread_safe.c \
@@ -593,16 +590,6 @@ port2ip.so port2ip.po $(OUTPRE)port2ip.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   os-proto.h port2ip.c
-send524.so send524.po $(OUTPRE)send524.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h os-proto.h send524.c
 sendto_kdc.so sendto_kdc.po $(OUTPRE)sendto_kdc.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

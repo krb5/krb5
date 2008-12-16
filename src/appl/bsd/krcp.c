@@ -68,30 +68,18 @@ char copyright[] =
 #include <k5-util.h>
 #include <com_err.h>
 
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-#endif
-
 #include "defines.h"
 
 #define RCP_BUFSIZ 4096
      
 int sock;
-struct sockaddr_in local, foreign; /* set up by kcmd used by v4_send_auth */
 char *krb_realm = NULL;
 char *krb_cache = NULL;
 char *krb_config = NULL;
 krb5_encrypt_block eblock;         /* eblock for encrypt/decrypt */
 krb5_context bsd_context;
 
-#ifdef KRB5_KRB4_COMPAT
-Key_schedule v4_schedule;
-CREDENTIALS v4_cred;
-KTEXT_ST v4_ticket;
-MSG_DAT v4_msg_data;
-#endif
-
-void	v4_send_auth(char *, char *), try_normal(char **);
+void	try_normal(char **);
 char	**save_argv(int, char **);
 #ifndef HAVE_STRSAVE
 char	*strsave();
@@ -422,8 +410,8 @@ int main(argc, argv)
 				  &cred,  
 				  0,  /* No seq # */
 				  0,  /* No server seq # */
-				  &local,
-				  &foreign,
+				  (struct sockaddr_in *) 0,
+				  (struct sockaddr_in *) 0,
 				  &auth_context, authopts,
 				  0, /* Not any port # */
 				  0,
@@ -432,25 +420,7 @@ int main(argc, argv)
 			if (kcmd_proto == KCMD_NEW_PROTOCOL)
 			    /* Don't fall back to less safe methods.  */
 			    exit (1);
-#ifdef KRB5_KRB4_COMPAT
-			fprintf(stderr, "Trying krb4 rcp...\n");
-			if (strncmp(buf, "-x rcp", 6) == 0)
-			    memcpy(buf, "rcp -x", 6);
-			status = k4cmd(&sock, &host, port,
-				       pwd->pw_name,
-				       tuser ? tuser : pwd->pw_name, buf,
-				       0, &v4_ticket, "rcmd", krb_realm,
-				       NULL, NULL, NULL,
-				       &local, &foreign, 0L, 0);
-			if (status)
-			    try_normal(orig_argv);
-			if (encryptflag)
-			    v4_send_auth(host, krb_realm);
-			rcmd_stream_init_krb4(v4_cred.session, encryptflag, 0,
-					      0);
-#else
 			try_normal(orig_argv);
-#endif
 		    }
 		    else {
 			krb5_boolean similar;
@@ -552,7 +522,7 @@ int main(argc, argv)
 			      0,  /* No seq # */
 			      0,  /* No server seq # */
 			      (struct sockaddr_in *) 0,
-			      &foreign,
+			      (struct sockaddr_in *) 0,
 			      &auth_context, authopts,
 			      0, /* Not any port # */
 			      0,
@@ -561,24 +531,7 @@ int main(argc, argv)
 			if (kcmd_proto == KCMD_NEW_PROTOCOL)
 			    /* Don't fall back to less safe methods.  */
 			    exit (1);
-#ifdef KRB5_KRB4_COMPAT
-			fprintf(stderr, "Trying krb4 rcp...\n");
-			if (strncmp(buf, "-x rcp", 6) == 0)
-			    memcpy(buf, "rcp -x", 6);
-			status = k4cmd(&sock, &host, port,
-				       pwd->pw_name, suser, buf,
-				       0, &v4_ticket, "rcmd", krb_realm,
-				       NULL, NULL, NULL,
-				       &local, &foreign, 0L, 0);
-			if (status)
-			    try_normal(orig_argv);
-			if (encryptflag)
-			    v4_send_auth(host, krb_realm);
-			rcmd_stream_init_krb4(v4_cred.session, encryptflag, 0,
-					      0);
-#else
 			try_normal(orig_argv);
-#endif
 		} else {
 		    krb5_keyblock *key = &cred->keyblock;
 
@@ -1405,35 +1358,5 @@ void
 char storage[2*RCP_BUFSIZ];		/* storage for the decryption */
 int nstored = 0;
 char *store_ptr = storage;
-
-#ifdef KRB5_KRB4_COMPAT
-void
-v4_send_auth(host,realm)
-char *host;
-char *realm;
-{
-	long authopts;
-
-	if ((realm == NULL) || (realm[0] == '\0'))
-	     realm = krb_realmofhost(host);
-	/* this needs to be sent again, because the
-	   rcp process needs the key.  the rshd has
-	   grabbed the first one. */
-	authopts = KOPT_DO_MUTUAL;
-	if ((rem = krb_sendauth(authopts, sock, &v4_ticket,
-				"rcmd", host,
-				realm, (unsigned long) getpid(),
-				&v4_msg_data,
-				&v4_cred, v4_schedule,
-				&local,
-				&foreign,
-				"KCMDV0.1")) != KSUCCESS) {
-		fprintf(stderr,
-			"krb_sendauth mutual fail: %s\n",
-			krb_get_err_text(rem));
-		exit(1);
-	}
-}
-#endif /* KRB5_KRB4_COMPAT */
 
 #endif /* KERBEROS */

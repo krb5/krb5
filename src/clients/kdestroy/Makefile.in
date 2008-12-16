@@ -22,8 +22,8 @@ PROG_RPATH=$(KRB5_LIBDIR)
 all-unix:: kdestroy
 ##WIN32##all-windows:: $(KDESTROY)
 
-kdestroy: kdestroy.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ kdestroy.o $(KRB4COMPAT_LIBS)
+kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kdestroy.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KDESTROY): $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $**

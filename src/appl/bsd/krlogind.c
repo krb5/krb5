@@ -75,9 +75,7 @@ char copyright[] =
  * The configuration is done either by command-line arguments passed by 
  * inetd, or by the name of the daemon. If command-line arguments are
  * present, they  take priority. The options are:
- * -k means trust krb4 or krb5
-* -5 means trust krb5
-* -4 means trust krb4
+ * -k means trust krb5
  * -p and -P means prompt for password.
  *    If the -P option is passed, then the password is verified in 
  * addition to all other checks. If -p is not passed with -k or -r,
@@ -97,9 +95,6 @@ char copyright[] =
  *   CRYPT    - Define this if encryption is to be an option.
  *   DO_NOT_USE_K_LOGIN - Define this if you want to use /bin/login
  *              instead  of the accompanying login.krb5. 
- *   KRB5_KRB4_COMPAT - Define this if v4 rlogin clients are also to be served.
- *   ALWAYS_V5_KUSEROK - Define this if you want .k5login to be
- *              checked even for v4 clients (instead of .klogin).
  *   LOG_ALL_LOGINS - Define this if you want to log all logins.
  *   LOG_OTHER_USERS - Define this if you want to log all principals
  *              that do not map onto the local user.
@@ -234,27 +229,14 @@ struct winsize {
 #ifdef KERBEROS
      
 #include "k5-int.h"
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-#endif
 #include <libpty.h>
 #ifdef HAVE_UTMP_H
 #include <utmp.h>
 #include <k5-util.h>
 #endif
 
-int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
-
-#define KRB5_RECVAUTH_V4	4
-#define KRB5_RECVAUTH_V5	5
-
 int non_privileged = 0; /* set when connection is seen to be from */
 			/* a non-privileged port */
-
-#ifdef KRB5_KRB4_COMPAT
-AUTH_DAT	*v4_kdata;
-Key_schedule v4_schedule;
-#endif
 
 #include "com_err.h"
 #include "defines.h"
@@ -268,7 +250,7 @@ krb5_ccache ccache = NULL;
 
 krb5_keytab keytab = NULL;
 
-#define ARGSTR	"k54ciepPD:S:M:L:fw:?"
+#define ARGSTR	"k5ciepPD:S:M:L:fw:?"
 #else /* !KERBEROS */
 #define ARGSTR	"rpPD:f?"
 #endif /* KERBEROS */
@@ -334,18 +316,7 @@ int	princ_maps_to_lname(krb5_principal, char *), default_realm(krb5_principal);
 krb5_sigtype	cleanup(int);
 krb5_error_code recvauth(int *);
 
-/* There are two authentication related masks:
-   * auth_ok and auth_sent.
-* The auth_ok mask is the oring of authentication systems any one
-* of which can be used.  
-* The auth_sent mask is the oring of one or more authentication/authorization
-* systems that succeeded.  If the anding
-* of these two masks is true, then authorization is successful.
-*/
-#define AUTH_KRB4 (0x1)
-#define AUTH_KRB5 (0x2)
-int auth_ok = 0, auth_sent = 0;
-int do_encrypt = 0, passwd_if_fail = 0, passwd_req = 0;
+int do_encrypt = 0, passwd_req = 0;
 int checksum_required = 0, checksum_ignored = 0;
 
 int stripdomain = 1;
@@ -397,15 +368,9 @@ int main(argc, argv)
       switch (ch) {
 #ifdef KERBEROS
 	case 'k':
-#ifdef KRB5_KRB4_COMPAT
-	auth_ok |= (AUTH_KRB5|AUTH_KRB4);
-#else
-	auth_ok |= AUTH_KRB5;
-#endif /* KRB5_KRB4_COMPAT*/
 	break;
 	
       case '5':
-	  auth_ok |= AUTH_KRB5;
 	break;
       case 'c':
 	checksum_required = 1;
@@ -414,11 +379,6 @@ int main(argc, argv)
 	checksum_ignored = 1;
 	break;
 	
-#ifdef KRB5_KRB4_COMPAT
-      case '4':
-	auth_ok |= AUTH_KRB4;
-	break;
-#endif
 #ifdef CRYPT
 	case 'x':         /* Use encryption. */
 	case 'X':
@@ -439,7 +399,6 @@ int main(argc, argv)
 	  break;
 #endif
 	case 'p':
-	  passwd_if_fail = 1; /* Passwd reqd if any check fails */
 	  break;
 	case 'P':         /* passwd is a must */
 	  passwd_req = 1;
@@ -618,10 +577,6 @@ void doit(f, fromp)
     if (setsockopt(f, SOL_SOCKET, SO_KEEPALIVE,
 		   (const char *) &on, sizeof (on)) < 0)
 	syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
-    if (auth_ok == 0) {
-	syslog(LOG_CRIT, "No authentication systems were enabled; all connections will be refused.");
-	fatal(f, "All authentication systems disabled; connection refused.");
-    }
 
     if (checksum_required&&checksum_ignored) {
 	syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
@@ -1233,8 +1188,7 @@ do_krb_login(host_addr, hostname)
 	exit(1);
     }
 
-    /* Check authentication. This can be either Kerberos V5, */
-    /* Kerberos V4, or host-based. */
+    /* Check authentication. */
     if ((status = recvauth(&valid_checksum))) {
 	if (ticket)
 	  krb5_free_ticket(bsd_context, ticket);
@@ -1249,56 +1203,22 @@ do_krb_login(host_addr, hostname)
     /* OK we have authenticated this user - now check authorization. */
     /* The Kerberos authenticated programs must use krb5_kuserok or kuserok*/
     
-#ifndef KRB5_KRB4_COMPAT
-    if (auth_sys == KRB5_RECVAUTH_V4) {
-	  fatal(netf, "This server does not support Kerberos V4");
-  }
-#endif
-    
-
-#if (defined(ALWAYS_V5_KUSEROK) || !defined(KRB5_KRB4_COMPAT))
-	/* krb5_kuserok returns 1 if OK */
-	if (client && krb5_kuserok(bsd_context, client, lusername))
-	  auth_sent |= ((auth_sys == KRB5_RECVAUTH_V4)?AUTH_KRB4:AUTH_KRB5);
-#else
-	if (auth_sys == KRB5_RECVAUTH_V4) {
-	    /* kuserok returns 0 if OK */
-	    if (!kuserok(v4_kdata, lusername))
-	      auth_sent |= AUTH_KRB4;
-	} else {
-	    /* krb5_kuserok returns 1 if OK */
-	    if (client && krb5_kuserok(bsd_context, client, lusername))
-	      auth_sent |= AUTH_KRB5;
-	}
-#endif
-
-    
-
-    if (checksum_required && !valid_checksum) {
-	if (auth_sent & AUTH_KRB5) {
-	    syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
-	
-	    fatal(netf, "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
-	} else {
-	  syslog(LOG_WARNING,
-		 "Configuration error: Requiring checksums with -c is inconsistent with allowing Kerberos V4 connections.");
-	}
-    }
-    if (auth_ok&auth_sent) /* This should be bitwise.*/
-	return;
-    
-    if (ticket)
-	krb5_free_ticket(bsd_context, ticket);
-
-    if (auth_sent)
-	fatal(netf, "Access denied because of improper credentials");
-    else if (asprintf(&msg_fail,
+    /* krb5_kuserok returns 1 if OK */
+    if (!client || !krb5_kuserok(bsd_context, client, lusername)) {
+	if (asprintf(&msg_fail,
 		      "User %s is not authorized to login to account %s",
 		      krusername, lusername) >= 0)
-	fatal(netf, msg_fail);
-    else
-	fatal(netf, "User is not authorized to login to specified account");
-    /* NOTREACHED */
+	    fatal(netf, msg_fail);
+	else
+	    fatal(netf,
+		  "User is not authorized to login to specified account");
+    }
+
+    if (checksum_required && !valid_checksum) {
+	syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
+	
+	fatal(netf, "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
+    }
 }
 
 #endif /* KERBEROS */
@@ -1332,10 +1252,10 @@ void usage()
 {
 #ifdef KERBEROS
     syslog(LOG_ERR, 
-	   "usage: klogind [-ke45pPf] [-D port] [-w[ip|maxhostlen[,[no]striplocal]]] or [r/R][k/K][x/e][p/P]logind");
+	   "usage: klogind [-ePf] [-D port] [-w[ip|maxhostlen[,[no]striplocal]]] or [r/R][k/K][x/e][p/P]logind");
 #else
     syslog(LOG_ERR, 
-	   "usage: rlogind [-rpPf] [-D port] or [r/R][p/P]logind");
+	   "usage: rlogind [-rPf] [-D port] or [r/R][p/P]logind");
 #endif
 }
 
@@ -1359,9 +1279,6 @@ recvauth(valid_checksum)
     struct sockaddr_storage peersin, laddr;
     socklen_t len;
     krb5_data inbuf;
-#ifdef KRB5_KRB4_COMPAT
-    char v4_instance[INST_SZ];	/* V4 Instance */
-#endif
     krb5_data version;
     krb5_authenticator *authenticator;
     krb5_rcache rcache;
@@ -1379,10 +1296,6 @@ recvauth(valid_checksum)
 	syslog(LOG_ERR, "get peer name failed %d", netf);
 	exit(1);
     }
-
-#ifdef KRB5_KRB4_COMPAT
-    strlcpy(v4_instance, "*", sizeof(v4_instance));
-#endif
 
     if ((status = krb5_auth_con_init(bsd_context, &auth_context)))
         return status;
@@ -1412,38 +1325,15 @@ recvauth(valid_checksum)
 	if (status) return status;
     }
 
-#ifdef KRB5_KRB4_COMPAT
-    status = krb5_compat_recvauth_version(bsd_context, &auth_context,
-					       &netf,
-				  NULL, 	/* Specify daemon principal */
-				  0, 		/* no flags */
-				  keytab, /* normally NULL to use v5srvtab */
-
-				  do_encrypt ? KOPT_DO_MUTUAL : 0, /*v4_opts*/
-				  "rcmd", 	/* v4_service */
-				  v4_instance, 	/* v4_instance */
-				  ss2sin(&peersin), /* foriegn address */
-				  ss2sin(&laddr), /* our local address */
-				  "", 		/* use default srvtab */
-
-				  &ticket, 	/* return ticket */
-				  &auth_sys, 	/* which authentication system*/
-				  &v4_kdata, v4_schedule,
-					       &version);
-#else
-    auth_sys = KRB5_RECVAUTH_V5;
     status = krb5_recvauth_version(bsd_context, &auth_context, &netf,
 				   NULL, 0, keytab, &ticket, &version);
-#endif
     if (status) {
-	if (auth_sys == KRB5_RECVAUTH_V5) {
-	    /*
-	     * clean up before exiting
-	     */
-	    getstr(netf, lusername, sizeof (lusername), "locuser");
-	    getstr(netf, term, sizeof(term), "Terminal type");
-	    getstr(netf, rusername, sizeof(rusername), "remuser");
-	}
+	/*
+	 * clean up before exiting
+	 */
+	getstr(netf, lusername, sizeof (lusername), "locuser");
+	getstr(netf, term, sizeof(term), "Terminal type");
+	getstr(netf, rusername, sizeof(rusername), "remuser");
 	return status;
     }
 
@@ -1451,32 +1341,24 @@ recvauth(valid_checksum)
     getstr(netf, term, sizeof(term), "Terminal type");
 
     kcmd_proto = KCMD_UNKNOWN_PROTOCOL;
-    if (auth_sys == KRB5_RECVAUTH_V5) {
-	if (version.length != 9) {
-	    fatal (netf, "bad application version length");
-	}
-	if (!memcmp (version.data, "KCMDV0.1", 9))
-	    kcmd_proto = KCMD_OLD_PROTOCOL;
-	else if (!memcmp (version.data, "KCMDV0.2", 9))
-	    kcmd_proto = KCMD_NEW_PROTOCOL;
+    if (version.length != 9) {
+	fatal (netf, "bad application version length");
     }
-#ifdef KRB5_KRB4_COMPAT
-    if (auth_sys == KRB5_RECVAUTH_V4)
-	kcmd_proto = KCMD_V4_PROTOCOL;
-#endif
+    if (!memcmp (version.data, "KCMDV0.1", 9))
+	kcmd_proto = KCMD_OLD_PROTOCOL;
+    else if (!memcmp (version.data, "KCMDV0.2", 9))
+	kcmd_proto = KCMD_NEW_PROTOCOL;
 
-    if ((auth_sys == KRB5_RECVAUTH_V5)
-	&& !(checksum_ignored
-	     && kcmd_proto == KCMD_OLD_PROTOCOL)) {
-      
+    if (!(checksum_ignored && kcmd_proto == KCMD_OLD_PROTOCOL)) {
+
       if ((status = krb5_auth_con_getauthenticator(bsd_context, auth_context,
 						   &authenticator)))
 	return status;
-    
+
       if (authenticator->checksum) {
 	struct sockaddr_in adr;
 	socklen_t adr_length = sizeof(adr);
-	char * chksumbuf;
+	char * chksumbuf = NULL;
 	if (getsockname(netf, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;
 	if (asprintf(&chksumbuf, "%u:%s%s", ntohs(adr.sin_port), term, lusername) < 0)
@@ -1500,32 +1382,6 @@ recvauth(valid_checksum)
       krb5_free_authenticator(bsd_context, authenticator);
     }
 
-
-#ifdef KRB5_KRB4_COMPAT
-    if (auth_sys == KRB5_RECVAUTH_V4) {
-
-	rcmd_stream_init_krb4(v4_kdata->session, do_encrypt, 1, 1);
-
-	/* We do not really know the remote user's login name.
-         * Assume it to be the same as the first component of the
-	 * principal's name. 
-         */
-	strncpy(rusername, v4_kdata->pname, sizeof(rusername) - 1);
-	rusername[sizeof(rusername) - 1] = '\0';
-
-	status = krb5_425_conv_principal(bsd_context, v4_kdata->pname,
-					 v4_kdata->pinst, v4_kdata->prealm,
-					 &client);
-	if (status) return status;
-
-	status = krb5_unparse_name(bsd_context, client, &krusername);
-	
-	return status;
-    }
-#endif
-
-    /* Must be V5  */
-	
     if ((status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
 				      &client)))
 	return status;

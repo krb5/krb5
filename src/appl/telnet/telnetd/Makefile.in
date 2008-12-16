@@ -30,7 +30,7 @@ LOCALINCLUDES=-I.. -I$(srcdir)/..
 DEFINES = -DTELNET_BUFSIZE=65535 $(AUTH_DEF) $(OTHERDEFS)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 
-PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 LIBS=	@TELNETD_LIBS@
@@ -60,8 +60,8 @@ OBJS=	telnetd.o \
 
 all:: telnetd
 
-telnetd: $(OBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS) ../libtelnet/libtelnet.a
-	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+telnetd: $(OBJS) $(PTY_DEPLIB) $(KRB5_BASE_DEPLIBS) ../libtelnet/libtelnet.a
+	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(PTY_LIB) $(UTIL_LIB) $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) telnetd

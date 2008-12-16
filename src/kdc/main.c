@@ -71,10 +71,6 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef KRB5_KRB4_COMPAT
-#include <des.h>
-#endif
-
 #if defined(NEED_DAEMON_PROTO)
 extern int daemon(int, int);
 #endif
@@ -336,9 +332,6 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 
     if (!rkey_init_done) {
 	krb5_data seed;
-#ifdef KRB5_KRB4_COMPAT
-	krb5_keyblock temp_key;
-#endif
 	/*
 	 * If all that worked, then initialize the random key
 	 * generators.
@@ -351,17 +344,6 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 					     KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
 	    goto whoops;
 
-#ifdef KRB5_KRB4_COMPAT
-	if ((kret = krb5_c_make_random_key(rdp->realm_context,
-					   ENCTYPE_DES_CBC_CRC, &temp_key))) {
-	    com_err(progname, kret,
-		    "while initializing V4 random key generator");
-	    goto whoops;
-	}
-
-	(void) des_init_random_number_generator(temp_key.contents);
-	krb5_free_keyblock_contents(rdp->realm_context, &temp_key);
-#endif
 	rkey_init_done = 1;
     }
  whoops:
@@ -431,7 +413,7 @@ setup_sam(void)
 void
 usage(char *name)
 {
-    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [-4 v4mode] [-X] [-n]\n"
+    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [-n]\n"
 	    "\nwhere,\n\t[-x db_args]* - Any number of database specific arguments.  Look at\n"
 	    "\t\t\teach database module documentation for supported\n\t\t\targuments\n",
 	    name);
@@ -457,9 +439,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     char               **db_args      = NULL;
     int                  db_args_size = 0;
 
-#ifdef KRB5_KRB4_COMPAT
-    char                *v4mode = 0;
-#endif
     extern char *optarg;
 
     if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
@@ -474,11 +453,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	hierarchy[1] = "kdc_max_dgram_reply_size";
 	if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
 	    max_dgram_reply_size = MAX_DGRAM_SIZE;
-#ifdef KRB5_KRB4_COMPAT
-	hierarchy[1] = "v4_mode";
-	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &v4mode))
-	    v4mode = 0;
-#endif
+
 	/* aprof_init can return 0 with aprof == NULL */
 	if (aprof)
 	     krb5_aprof_finish(aprof);
@@ -588,31 +563,15 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 #endif
 	    break;
 	case '4':
-#ifdef KRB5_KRB4_COMPAT
-	    if (v4mode)
-		free(v4mode);
-	    v4mode = strdup(optarg);
-#endif
 	    break;
 	case 'X':
-#ifdef KRB5_KRB4_COMPAT
-		enable_v4_crossrealm(argv[0]);
-#endif
-		break;
+	    break;
 	case '?':
 	default:
 	    usage(argv[0]);
 	    exit(1);
 	}
     }
-
-#ifdef KRB5_KRB4_COMPAT
-    /*
-     * Setup the v4 mode 
-     */
-    process_v4_mode(argv[0], v4mode);
-    free(v4mode);
-#endif
 
     /*
      * Check to see if we processed any realms.

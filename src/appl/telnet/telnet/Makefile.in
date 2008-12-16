@@ -47,8 +47,8 @@ OBJS=	authenc.o commands.o main.o network.o ring.o sys_bsd.o \
 
 all:: telnet
 
-telnet:	$(OBJS) $(KRB4COMPAT_DEPLIBS) ../libtelnet/libtelnet.a
-	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(KRB4COMPAT_LIBS)
+telnet:	$(OBJS) $(KRB5_BASE_DEPLIBS) ../libtelnet/libtelnet.a
+	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) telnet

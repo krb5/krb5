@@ -1,4 +1,3 @@
-/krb5\.saber/d
 /autoconf.h$/d
 /t_mddriver$/d
 /test_parse$/d

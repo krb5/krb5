@@ -120,8 +120,6 @@ struct _cmd_table {
      {"stash", kdb5_stash, 1},
      {"dump", dump_db, 1},
      {"load", load_db, 0},
-/*      {"dump_v4", dump_v4db, 1}, */
-/*      {"load_v4", load_v4db, 0}, */
      {"ark", add_random_key, 1},
      {NULL, NULL, 0},
 };

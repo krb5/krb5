@@ -64,16 +64,8 @@ char copyright[] =
 #ifdef KERBEROS
 #include <krb5.h>
 #include <com_err.h>
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-#endif
 #include "defines.h"
 #endif /* KERBEROS */
-
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-Key_schedule v4_schedule;
-#endif
 
 /*
  * rsh - remote shell
@@ -95,11 +87,6 @@ krb5_sigtype  sendsig(int);
 
 krb5_context bsd_context;
 krb5_creds *cred;
-
-#ifdef KRB5_KRB4_COMPAT
-Key_schedule v4_schedule;
-CREDENTIALS v4_cred;
-#endif
 
 int	encrypt_flag = 0;
 char	*krb_realm = (char *)0;
@@ -149,10 +136,6 @@ main(argc, argv0)
     krb5_error_code status;
     krb5_auth_context auth_context;
     int fflag = 0, Fflag = 0;
-#ifdef KRB5_KRB4_COMPAT
-    KTEXT_ST v4_ticket;
-    MSG_DAT v4_msg_data;
-#endif
 #endif  /* KERBEROS */
     int debug_port = 0;
     enum kcmd_proto kcmd_proto = KCMD_PROTOCOL_COMPAT_HACK;
@@ -383,26 +366,7 @@ main(argc, argv0)
 	   ones.  */
 	if (kcmd_proto == KCMD_NEW_PROTOCOL)
 	    exit (1);
-#ifdef KRB5_KRB4_COMPAT
-	/* No encrypted Kerberos 4 rsh. */
-	if (encrypt_flag)
-	    exit(1);
-#ifdef HAVE_ISATTY
-	if (isatty(fileno(stderr)))
-	    fprintf(stderr, "Trying krb4 rsh...\n");
-#endif
-	status = k4cmd(&rem, &host, debug_port,
-		       pwd->pw_name,
-		       user ? user : pwd->pw_name, args,
-		       &rfd2, &v4_ticket, "rcmd", krb_realm,
-		       &v4_cred, v4_schedule, &v4_msg_data,
-		       &local, &foreign, 0L, 0);
-	if (status)
-	    try_normal(argv0);
-	rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 0, 1);
-#else
 	try_normal(argv0);
-#endif
     } else {
 	krb5_keyblock *key = &cred->keyblock;
 

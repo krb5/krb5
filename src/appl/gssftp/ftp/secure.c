@@ -13,15 +13,6 @@ extern gss_ctx_id_t gcontext;
 
 #include <secure.h>	/* stuff which is specific to client or server */
 
-#ifdef KRB5_KRB4_COMPAT
-#include <krb.h>
-
-CRED_DECL
-extern KTEXT_ST ticket;
-extern MSG_DAT msg_data;
-extern Key_schedule schedule;
-#endif /* KRB5_KRB4_COMPAT */
-
 #ifdef _WIN32
 #undef ERROR
 #endif
@@ -81,21 +72,6 @@ static unsigned int smaxbuf;    /* Internal saved value of maxbuf
 				   in case changes on us */
 static unsigned int smaxqueue;  /* Maximum allowed to queue before 
 				   flush buffer. < smaxbuf by fudgefactor */
-
-#ifdef KRB5_KRB4_COMPAT
-#define KRB4_FUDGE_FACTOR 32	/* Amount of growth
-				 * from cleartext to ciphertext.
-				 * krb_mk_priv adds this # bytes.
-				 * Must be defined for each auth type.
-				 */
-#endif /* KRB5_KRB4_COMPAT */
-
-#ifdef KRB5_KRB4_COMPAT
-/* XXX - The following must be redefined if KERBEROS_V4 is not used
- * but some other auth type is.  They must have the same properties. */
-#define looping_write krb_net_write
-#define looping_read krb_net_read
-#endif
 
 /* perhaps use these in general, certainly use them for GSSAPI */
 
@@ -167,12 +143,6 @@ static int secure_determine_constants()
     smaxbuf = maxbuf;
     smaxqueue = maxbuf;
 
-#ifdef KRB5_KRB4_COMPAT
-    /* For KRB4 - we know the fudge factor to be 32 */
-    if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-	smaxqueue = smaxbuf - KRB4_FUDGE_FACTOR;
-    }
-#endif
 #ifdef GSSAPI
     if (strcmp(auth_type, "GSSAPI") == 0) {
 	OM_uint32 maj_stat, min_stat, mlen;
@@ -289,31 +259,6 @@ unsigned int nbyte;
 						     buffer lengths required */
 
 	/* Other auth types go here ... */
-#ifdef KRB5_KRB4_COMPAT
-	if (bufsize < nbyte + fudge) {
-		if (outbuf?
-		    (outbuf = realloc(outbuf, (unsigned) (nbyte + fudge))):
-		    (outbuf = malloc((unsigned) (nbyte + fudge)))) {
-		    bufsize = nbyte + fudge;
-		} else {
-			bufsize = 0;
-			secure_error("%s (in malloc of PROT buffer)",
-				     strerror(errno));
-			return(ERR);
-		}
-	}
-
-	if (strcmp(auth_type, "KERBEROS_V4") == 0)
-	  if ((length = dlevel == PROT_P ?
-	    krb_mk_priv(buf, (unsigned char *) outbuf, nbyte, schedule,
-			SESSION, &myaddr, &hisaddr)
-	  : krb_mk_safe(buf, (unsigned char *) outbuf, nbyte, SESSION,
-			&myaddr, &hisaddr)) == -1) {
-		secure_error("krb_mk_%s failed for KERBEROS_V4",
-				dlevel == PROT_P ? "priv" : "safe");
-		return(ERR);
-	  }
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 	if (strcmp(auth_type, "GSSAPI") == 0) {
 		gss_buffer_desc in_buf, out_buf;
@@ -392,22 +337,6 @@ int fd;
 			return(ERR);
 		}
 		/* Other auth types go here ... */
-#ifdef KRB5_KRB4_COMPAT
-		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-		  if ((kerror = dlevel == PROT_P ?
-		    krb_rd_priv(ucbuf, length, schedule, SESSION,
-				&hisaddr, &myaddr, &msg_data)
-		  : krb_rd_safe(ucbuf, length, SESSION,
-				&hisaddr, &myaddr, &msg_data))) {
-			secure_error("krb_rd_%s failed for KERBEROS_V4 (%s)",
-					dlevel == PROT_P ? "priv" : "safe",
-					krb_get_err_text(kerror));
-			return(ERR);
-		  }
-		  memmove(ucbuf, msg_data.app_data, msg_data.app_length);
-		  nin = bufp = msg_data.app_length;
-		}
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 		if (strcmp(auth_type, "GSSAPI") == 0) {
 		  gss_buffer_desc xmit_buf, msg_buf;

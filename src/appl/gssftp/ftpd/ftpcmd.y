@@ -76,13 +76,6 @@ unsigned int maxbuf, actualbuf;
 unsigned char *ucbuf;
 
 static int kerror;	/* XXX needed for all auth types */
-#ifdef KRB5_KRB4_COMPAT
-extern	struct sockaddr_in his_addr, ctrl_addr;
-#include <krb.h>
-extern AUTH_DAT kdata;
-extern Key_schedule schedule;
-extern MSG_DAT msg_data;
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -1090,27 +1083,6 @@ ftpd_getline(s, n, iop)
 	    if (debug) syslog(LOG_DEBUG, "getline got %d from %s <%s>\n", 
 			      len, cs, mic?"MIC":"ENC");
 	    clevel = mic ? PROT_S : PROT_P;
-#ifdef KRB5_KRB4_COMPAT
-	    if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-		if ((kerror = mic ?
-		    krb_rd_safe((unsigned char *)out, len, &kdata.session,
-			    &his_addr, &ctrl_addr, &msg_data)
-		  : krb_rd_priv((unsigned char *)out, len, schedule,
-			    &kdata.session, &his_addr, &ctrl_addr, &msg_data))
-			!= KSUCCESS) {
-		    reply(535, "%s! (%s)",
-			   mic ? "MIC command modified" : "ENC command garbled",
-			   krb_get_err_text(kerror));
-		    syslog(LOG_ERR,"%s failed: %s",
-			   mic ? "MIC krb_rd_safe" : "ENC krb_rd_priv",
-			   krb_get_err_text(kerror));
-		    *s = '\0';
-		    return(s);
-		}
-		(void) memcpy(s, msg_data.app_data, msg_data.app_length);
-		(void) memcpy(s+msg_data.app_length, "\r\n", 3);
-	    }
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 /* we know this is a MIC or ENC already, and out/len already has the bits */
 	    if (strcmp(auth_type, "GSSAPI") == 0) {
@@ -1158,7 +1130,7 @@ ftpd_getline(s, n, iop)
 	    }
 
 	}
-#if defined KRB5_KRB4_COMPAT || defined GSSAPI	/* or other auth types */
+#ifdef GSSAPI	/* or other auth types */
 	else {	/* !auth_type */
 	    if ( (!(strncmp(s, "ENC", 3))) || (!(strncmp(s, "MIC", 3)))
 #ifndef NOCONFIDENTIAL
@@ -1170,7 +1142,7 @@ ftpd_getline(s, n, iop)
                 return(s);
 	    }
 	}
-#endif /* KRB5_KRB4_COMPAT || GSSAPI */
+#endif GSSAPI
 
 	if (debug) {
 		if (!strncmp(s, "PASS ", 5) && !guest)

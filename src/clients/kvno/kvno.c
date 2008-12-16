@@ -39,20 +39,13 @@ static char *prog;
 
 static void xusage()
 {
-#ifdef KRB5_KRB4_COMPAT
-    fprintf(stderr, 
-            "usage: %s [-4 | [-C] [-c ccache] [-e etype] [-k keytab] [-S sname]] service1 service2 ...\n", 
-            prog);
-#else
     fprintf(stderr, "usage: %s [-C] [-c ccache] [-e etype] [-k keytab] [-S sname] service1 service2 ...\n",
             prog);
-#endif
     exit(1);
 }
 
 int quiet = 0;
 
-static void do_v4_kvno (int argc, char *argv[]);
 static void do_v5_kvno (int argc, char *argv[], 
                         char *ccachestr, char *etypestr, char *keytab_name,
 			char *sname, int canon);
@@ -66,14 +59,15 @@ int main(int argc, char *argv[])
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
     char *sname = NULL;
-    int v4 = 0, canon = 0;
+    int canon = 0;
+
 
     set_com_err_hook (extended_com_err_fn);
 
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "Cc:e:hk:q4S:")) != -1) {
+    while ((option = getopt(argc, argv, "Cc:e:hk:qS:")) != -1) {
 	switch (option) {
 	case 'C':
 	    canon = 1;
@@ -93,9 +87,6 @@ int main(int argc, char *argv[])
 	case 'q':
 	    quiet = 1;
 	    break;
-	case '4':
-	    v4 = 1;
-	    break;
 	case 'S':
 	    sname = optarg;
 	    break;
@@ -108,66 +99,9 @@ int main(int argc, char *argv[])
     if ((argc - optind) < 1)
 	xusage();
 
-    if ((ccachestr != NULL || etypestr != NULL || keytab_name != NULL) && v4)
-	xusage();
-
-    if (sname != NULL && v4)
-	xusage();
-
-    if (v4)
-	do_v4_kvno(argc - optind, argv + optind);
-    else
 	do_v5_kvno(argc - optind, argv + optind,
 		   ccachestr, etypestr, keytab_name, sname, canon);
     return 0;
-}
-
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-#endif
-static void do_v4_kvno (int count, char *names[])
-{
-#ifdef KRB5_KRB4_COMPAT
-    int i;
-
-    for (i = 0; i < count; i++) {
-	int err;
-	char name[ANAME_SZ], inst[INST_SZ], realm[REALM_SZ];
-	KTEXT_ST req;
-	CREDENTIALS creds;
-	*name = *inst = *realm = '\0';
-	err = kname_parse (name, inst, realm, names[i]);
-	if (err) {
-	    fprintf(stderr, "%s: error parsing name '%s': %s\n",
-		    prog, names[i], krb_get_err_text(err));
-	    exit(1);
-	}
-	if (realm[0] == 0) {
-	    err = krb_get_lrealm(realm, 1);
-	    if (err) {
-		fprintf(stderr, "%s: error looking up local realm: %s\n",
-			prog, krb_get_err_text(err));
-		exit(1);
-	    }
-	}
-	err = krb_mk_req(&req, name, inst, realm, 0);
-	if (err) {
-	    fprintf(stderr, "%s: krb_mk_req error: %s\n", prog,
-		    krb_get_err_text(err));
-	    exit(1);
-	}
-	err = krb_get_cred(name, inst, realm, &creds);
-	if (err) {
-	    fprintf(stderr, "%s: krb_get_cred error: %s\n", prog,
-		    krb_get_err_text(err));
-	    exit(1);
-	}
-	if (!quiet)
-	    printf("%s: kvno = %d\n", names[i], creds.kvno);
-    }
-#else
-    xusage();
-#endif
 }
 
 #include <krb5.h>

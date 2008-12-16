@@ -42,30 +42,15 @@ alpha*-dec-osf*)
 	;;
 esac
 dnl
-dnl krshd does not use krb524...
-dnl
 KRSHDLIBS="$LOGINLIBS"
-dnl 
-if test "$with_krb4" = "" || test "$with_krb4" = no; then
-	AC_MSG_RESULT(no krb4 support)
-	V4RCP=
-	V4RCPO=
-else 
-	AC_MSG_RESULT(Adding in krb4 rcp support)
-	V4RCP=v4rcp
-	V4RCPO=v4rcp.o
-fi
-dnl
 dnl
 AC_SUBST(KRSHDLIBS)
 AC_SUBST(LOGINLIBS)
-AC_SUBST(V4RCP)
-AC_SUBST(V4RCPO)
 dnl
 AC_FUNC_VFORK
 AC_TYPE_MODE_T
 AC_CHECK_FUNCS(isatty inet_aton getenv gettosbyname killpg initgroups setpriority setreuid setresuid waitpid setsid ptsname setlogin tcgetpgrp tcsetpgrp setpgid strsave utimes rmufile rresvport_af)
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h krb4-proto.h sys/ioctl_compat.h paths.h arpa/nameser.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h sys/ioctl_compat.h paths.h arpa/nameser.h)
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
 dnl
@@ -168,17 +153,7 @@ K5_AC_CHECK_FILES(/etc/environment /etc/TIMEZONE)
 dnl
 dnl
 AC_C_CONST
-if test "$krb5_cv_build_krb4_libs" = yes; then
-	AC_DEFINE(HAVE_KRB_GET_ERR_TEXT)
-	AC_DEFINE(HAVE_KRB_SAVE_CREDENTIALS)
-else
-	oldlibs=$LIBS
-	LIBS=" $KRB4_LIB -lkrb5 -lcrypto -lcom_err"
-	AC_CHECK_FUNCS(krb_get_err_text krb_save_credentials)
-	LIBS=$oldlibs
-fi
 
-AC_CHECK_HEADERS(krb4-proto.h)
 KRB5_AC_LIBUTIL
 KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

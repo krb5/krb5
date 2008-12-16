@@ -5,7 +5,7 @@
  * Written by Frank Dabek July 1998
  * Updated by Jeffrey Altman June 2006
  *
- * Copyright 1998, 1999, 2006 by the Massachusetts Institute of Technology.
+ * Copyright 1998, 1999, 2006, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -847,6 +847,10 @@ krb5_stdccv3_remove (krb5_context context,
         if (credentials) { cc_credentials_release (credentials); }
     }
     if (err == ccIteratorEnd) { err = ccErrCredentialsNotFound; }    
+
+    if (iterator) {
+        err = cc_credentials_iterator_release(iterator);
+    }
 
     if (!err) {
         cache_changed ();

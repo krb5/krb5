@@ -1,7 +1,8 @@
 /*
  * kdc/do_as_req.c
  *
- * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
+ * Portions Copyright (C) 2007 Apple Inc.
+ * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -127,6 +128,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     server_keyblock.contents = NULL;
     client_keyblock.contents = NULL;
     reply.padata = 0;
+    memset(&reply, 0, sizeof(reply));
+
     session_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
     memset(&server_princ, 0, sizeof(server_princ));
