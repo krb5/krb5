@@ -92,13 +92,14 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 				   server != NULL ? server : req->ticket->server,
 				   req->ticket->enc_part.kvno,
 				   req->ticket->enc_part.enctype, &ktent);
-	if (retval != 0)
-	    goto map_error;
+	if (retval == 0) {
+	    retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
 
-	retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
+	    (void) krb5_free_keytab_entry_contents(context, &ktent);
+	}
+    }
 
-	(void) krb5_free_keytab_entry_contents(context, &ktent);
-    } else {
+    if (retval == KRB5_KT_NOTFOUND) {
 	krb5_error_code code;
 	krb5_kt_cursor cursor;
 
@@ -108,10 +109,11 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 
 	while ((code = krb5_kt_next_entry(context, keytab,
 					  &ktent, &cursor)) == 0) {
-	    if (ktent.key.enctype == req->ticket->enc_part.enctype) {
-		retval = krb5_decrypt_tkt_part(context, &ktent.key,
-					       req->ticket);
-	    }
+	    if (ktent.key.enctype != req->ticket->enc_part.enctype)
+		continue;
+
+	    retval = krb5_decrypt_tkt_part(context, &ktent.key,
+					   req->ticket);
 
 	    (void) krb5_free_keytab_entry_contents(context, &ktent);
 
