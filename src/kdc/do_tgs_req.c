@@ -903,6 +903,8 @@ cleanup:
     }
     if (status) {
 	const char * emsg = NULL;
+	int s4u = isflagset(c_flags, KRB5_KDB_FLAGS_S4U);
+
 	if (!errcode)
 	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
 	if (errcode) 
@@ -915,9 +917,9 @@ cleanup:
 			 !errcode ? rep_etypestr : "",
 			 !errcode ? "," : "",
 			 cname ? cname : "<unknown client>",
-			 s4u_name ? "[on behalf of " : "",
-			 s4u_name ? s4u_name : "<unknown proxy>",
-			 s4u_name ? "] " : "",
+			 s4u ? "[on behalf of " : "",
+			 s4u ? (s4u_name != NULL ? s4u_name : "<unknown proxy>") : "",
+			 s4u ? "] " : "",
 			 sname ? sname : "<unknown server>",
 			 errcode ? ", " : "",
 			 errcode ? emsg : "");
