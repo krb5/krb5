@@ -218,7 +218,7 @@ krb5_error_code sign_authorization_data
 		krb5_authdata ***ret_auth_data,
 		krb5_flags *ret_attributes);
 
-krb5_error_code kdc_process_for_user
+krb5_error_code kdc_process_s4u2self_req
 	(krb5_context context,
 		krb5_kdc_req *request,
 		krb5_const_principal client_princ,

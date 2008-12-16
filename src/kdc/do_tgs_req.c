@@ -257,9 +257,9 @@ tgt_again:
 	setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
 
     /* Check for protocol transition */
-    errcode = kdc_process_for_user(kdc_context, request, header_enc_tkt->client,
-				   &server, header_enc_tkt->session, kdc_time,
-				   &for_user, &client, &c_nprincs, &status);
+    errcode = kdc_process_s4u2self_req(kdc_context, request, header_enc_tkt->client,
+				       &server, header_enc_tkt->session, kdc_time,
+				       &for_user, &client, &c_nprincs, &status);
     if (errcode)
 	goto cleanup;
     if (for_user != NULL)
@@ -340,7 +340,7 @@ tgt_again:
 	    /* From now on, use evidence ticket as header ticket */
 	    header_enc_tkt = request->second_ticket[st_idx]->enc_part2;
 
-	    assert(c_nprincs == 0); /* assured by kdc_process_for_user() */
+	    assert(c_nprincs == 0); /* assured by kdc_process_s4u2self_req() */
 
 	    client = st_client;
 	    c_nprincs = st_nprincs;

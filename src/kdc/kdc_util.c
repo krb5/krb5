@@ -1738,7 +1738,7 @@ sign_authorization_data(krb5_context context,
 }
 
 static krb5_error_code
-verify_for_user_checksum(krb5_context context,
+verify_s4u2self_checksum(krb5_context context,
 			 krb5_keyblock *key,
 			 krb5_pa_for_user *req)
 {
@@ -1809,7 +1809,7 @@ verify_for_user_checksum(krb5_context context,
  * validation code
  */
 static int
-validate_for_user_request(krb5_kdc_req *request,
+validate_s4u2self_request(krb5_kdc_req *request,
 			  const krb5_db_entry *client,
 			  krb5_timestamp kdc_time,
 			  const char **status)
@@ -1860,16 +1860,16 @@ validate_for_user_request(krb5_kdc_req *request,
  * Protocol transition (S4U2Self)
  */
 krb5_error_code
-kdc_process_for_user(krb5_context context,
-		     krb5_kdc_req *request,
-		     krb5_const_principal client_princ,
-		     const krb5_db_entry *server,
-		     krb5_keyblock *subkey,
-		     krb5_timestamp kdc_time,
-		     krb5_pa_for_user **for_user,
-		     krb5_db_entry *princ,
-		     int *nprincs,
-		     const char **status)
+kdc_process_s4u2self_req(krb5_context context,
+			 krb5_kdc_req *request,
+			 krb5_const_principal client_princ,
+			 const krb5_db_entry *server,
+			 krb5_keyblock *subkey,
+			 krb5_timestamp kdc_time,
+			 krb5_pa_for_user **for_user,
+			 krb5_db_entry *princ,
+			 int *nprincs,
+			 const char **status)
 {
     krb5_error_code		code;
     krb5_pa_data		**pa_data;
@@ -1919,7 +1919,7 @@ kdc_process_for_user(krb5_context context,
 	return KRB5KDC_ERR_POLICY;
     }
 
-    code = verify_for_user_checksum(context, subkey, *for_user);
+    code = verify_s4u2self_checksum(context, subkey, *for_user);
     if (code) {
 	*status = "INVALID_S4U2SELF_CHECKSUM";
 	krb5_free_pa_for_user(kdc_context, *for_user);
@@ -1966,7 +1966,7 @@ kdc_process_for_user(krb5_context context,
 	    return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
 	}
 
-	code = validate_for_user_request(request, princ, kdc_time, status);
+	code = validate_s4u2self_request(request, princ, kdc_time, status);
 	if (code) {
 	    return code;
 	}
