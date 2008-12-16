@@ -597,7 +597,7 @@ errout:
 	    
 	errcode = prepare_error_as(request, errcode, &e_data,
  				   c_nprincs ? client.princ : NULL,
-				   response, status, c_flags);
+				   response, status);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
 	    status = 0;
