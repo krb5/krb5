@@ -662,6 +662,7 @@ main(argc, argv)
 	      ktest_make_sample_enc_sam_response_enc);
 	encode_run(sam_ch,krb5_enc_sam_response_enc,"enc_sam_response_enc","",
 		   encode_krb5_enc_sam_response_enc);
+	ktest_empty_enc_sam_response_enc(&sam_ch);
     }
     /****************************************************************/
     /* encode_krb5_predicted_sam_response */
@@ -671,6 +672,7 @@ main(argc, argv)
 	      ktest_make_sample_predicted_sam_response);
 	encode_run(sam_ch,krb5_predicted_sam_response,"predicted_sam_response","",
 		   encode_krb5_predicted_sam_response);
+	ktest_empty_predicted_sam_response(&sam_ch);
     }
   /****************************************************************/
   /* encode_krb5_sam_response_2 */
