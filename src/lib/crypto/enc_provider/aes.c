@@ -286,8 +286,8 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 {
     aes_ctx ctx;
     char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
-    int nblocks = 0, blockno;
-    size_t input_length, i;
+    int nblocks = 0, blockno, i;
+    size_t input_length;
 
     CHECK_SIZES;
 
@@ -314,7 +314,6 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 	char blockN2[BLOCK_SIZE];   /* second last */
 	char blockN1[BLOCK_SIZE];   /* last block */
 	struct iov_block_state input_pos, output_pos;
-	size_t padding;
 
 	IOV_BLOCK_STATE_INIT(&input_pos);
 	IOV_BLOCK_STATE_INIT(&output_pos);
@@ -346,11 +345,8 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 
 	/* Maybe keep the trailing part, and copy in the last
 	   ciphertext block.  */
-	if (input_length % BLOCK_SIZE)
-	    padding = BLOCK_SIZE - (input_length % BLOCK_SIZE);
-	else
-	    padding = 0;
-	memcpy(tmp2, blockN1, BLOCK_SIZE - padding);
+	input_length %= BLOCK_SIZE;
+	memcpy(tmp2, blockN1, input_length ? input_length : BLOCK_SIZE);
 	dec(tmp3, tmp2, &ctx);
 	xorblock(tmp3, tmp);
 	/* Copy out ivec first before we clobber blockN1 with plaintext */
