@@ -201,7 +201,7 @@ checksum_iov_v3(krb5_context context,
     unsigned int k5_checksumlen;
 
     if (verify)
-	*valid = 0;
+	*valid = FALSE;
 
     code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_CHECKSUM, &k5_checksumlen);
     if (code != 0)

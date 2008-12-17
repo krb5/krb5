@@ -54,7 +54,7 @@ make_seal_token_v1_iov(krb5_context context,
     unsigned char *ptr;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
-    assert(conf_req_flag == 0 || toktype == KG_TOK_SEAL_MSG);
+    assert(toktype == KG_TOK_WRAP_MSG);
 
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
@@ -72,13 +72,11 @@ make_seal_token_v1_iov(krb5_context context,
 	trailer->buffer.length = 0;
 
     /* Determine confounder length */
-    if (conf_req_flag)
+    if (toktype == KG_TOK_WRAP_MSG || conf_req_flag)
 	k5_headerlen = kg_confounder_size(context, ctx->enc);
-    else
-	k5_headerlen = 0;
 
     /* Check padding length */
-    if (toktype == KG_TOK_SEAL_MSG) {
+    if (toktype == KG_TOK_WRAP_MSG) {
 	size_t k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
 	size_t gss_padlen;
 	size_t conf_data_length;
@@ -139,7 +137,7 @@ make_seal_token_v1_iov(krb5_context context,
     ptr[1] = (ctx->signalg >> 8) & 0xFF;
 
     /* 2..3 SEAL_ALG or Filler */
-    if (toktype == KG_TOK_SEAL_MSG && conf_req_flag) {
+    if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	ptr[2] = (ctx->sealalg     ) & 0xFF;
 	ptr[3] = (ctx->sealalg >> 8) & 0xFF;
     } else {
@@ -165,7 +163,7 @@ make_seal_token_v1_iov(krb5_context context,
 	break;
     case SGN_ALG_HMAC_MD5:
 	md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-	if (toktype != KG_TOK_SEAL_MSG)
+	if (toktype != KG_TOK_WRAP_MSG)
 	    sign_usage = 15;
 	break;
     default:
@@ -186,7 +184,7 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* compute the checksum */
     code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type,
-				   conf_req_flag, ctx->seq, ctx->enc,
+				   (k5_headerlen != 0), ctx->seq, ctx->enc,
 				   sign_usage, iov, iov_count, &md5cksum);
     if (code != 0)
 	goto cleanup;
@@ -468,7 +466,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	} else {
 	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
 	}
-    } else if (conf_req_flag && !dce_style) {
+    } else if (!dce_style) {
 	k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
 
 	if (k5_padlen == 1)
@@ -483,9 +481,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	/* Header | Checksum | Confounder | Data | Pad */
 	size_t data_size;
 
-	if (conf_req_flag) {
-	    k5_headerlen = kg_confounder_size(context, ctx->enc);
-	}
+	k5_headerlen = kg_confounder_size(context, ctx->enc);
 
 	data_size = 14 /* Header */ + ctx->cksum_size + k5_headerlen;
 

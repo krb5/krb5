@@ -56,7 +56,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     krb5_keyblock *key;
     size_t data_length, assoc_data_length;
 
-    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != NULL);
+    assert(toktype != KG_TOK_WRAP_MSG || ctx->enc != NULL);
     assert(ctx->big_endian == 0);
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
@@ -287,7 +287,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     gssint_uint64 seqnum;
     krb5_boolean valid;
 
-    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
+    assert(toktype != KG_TOK_WRAP_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
     assert(ctx->proto == 1);
 

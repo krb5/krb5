@@ -757,7 +757,7 @@ int kg_map_toktype(int proto, int toktype)
         case KG_TOK_SIGN_MSG:
             toktype2 = KG2_TOK_MIC_MSG;
             break;
-        case KG_TOK_SEAL_MSG:
+	case KG_TOK_WRAP_MSG:
             toktype2 = KG2_TOK_WRAP_MSG;
             break;
         case KG_TOK_DEL_CTX:

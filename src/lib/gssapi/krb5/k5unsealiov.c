@@ -61,6 +61,8 @@ kg_unseal_v1_iov(krb5_context context,
     size_t sumlen;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
+    assert(toktype == KG_TOK_WRAP_MSG);
+
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
 
@@ -78,7 +80,7 @@ kg_unseal_v1_iov(krb5_context context,
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    ptr = ((unsigned char *)header->buffer.value) + token_wrapper_len;
+    ptr = (unsigned char *)header->buffer.value + token_wrapper_len;
    
     signalg  = ptr[0];
     signalg |= ptr[1] << 8;
@@ -91,12 +93,12 @@ kg_unseal_v1_iov(krb5_context context,
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    if (toktype != KG_TOK_SEAL_MSG && sealalg != 0xFFFF) {
+    if (toktype != KG_TOK_WRAP_MSG && sealalg != 0xFFFF) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    if (toktype == KG_TOK_SEAL_MSG &&
+    if (toktype == KG_TOK_WRAP_MSG &&
 	!(sealalg == 0xFFFF || sealalg == ctx->sealalg)) {
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
@@ -117,7 +119,7 @@ kg_unseal_v1_iov(krb5_context context,
     case SGN_ALG_MD2_5:
     case SGN_ALG_HMAC_MD5:
 	cksum_len = 8;
-	if (toktype != KG_TOK_SEAL_MSG)
+	if (toktype != KG_TOK_WRAP_MSG)
 	    sign_usage = 15;
 	break;
     case SGN_ALG_3:
@@ -142,7 +144,7 @@ kg_unseal_v1_iov(krb5_context context,
     assert(ctx->big_endian == 0);
 
     /* decode the message, if SEAL */
-    if (toktype == KG_TOK_SEAL_MSG) {
+    if (toktype == KG_TOK_WRAP_MSG) {
 	if (sealalg != 0xFFFF) {
 	    if (ctx->enc->enctype == ENCTYPE_ARCFOUR_HMAC) {
 		unsigned char bigend_seqnum[4];
@@ -180,21 +182,21 @@ kg_unseal_v1_iov(krb5_context context,
 		retval = GSS_S_FAILURE;
 		goto cleanup;
 	    }
-	    conflen = kg_confounder_size(context, ctx->enc);
-
-	    /*
-	     * For GSS_C_DCE_STYLE, the caller manages the padding, because the
-	     * pad length is in the RPC PDU. The value of the padding may be
-	     * uninitialized. For normal GSS, the last bytes of the decrypted
-	     * data contain the pad length. kg_fixup_padding_iov() will find
-	     * this and fixup the last data IOV and padding IOV appropriately.
-	     */
-	    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-		retval = kg_fixup_padding_iov(&code, iov, iov_count);
-		if (retval != GSS_S_COMPLETE)
-		    goto cleanup;
-	    }
 	}
+
+	/*
+	* For GSS_C_DCE_STYLE, the caller manages the padding, because the
+	* pad length is in the RPC PDU. The value of the padding may be
+	* uninitialized. For normal GSS, the last bytes of the decrypted
+	* data contain the pad length. kg_fixup_padding_iov() will find
+	* this and fixup the last data IOV and padding IOV appropriately.
+	*/
+	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+	    retval = kg_fixup_padding_iov(&code, iov, iov_count);
+	    if (retval != GSS_S_COMPLETE)
+		goto cleanup;
+	}
+	conflen = kg_confounder_size(context, ctx->enc);
     }
 
     if (header->buffer.length != token_wrapper_len + 14 + cksum_len + conflen) {
@@ -416,7 +418,10 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     gss_iov_buffer_t stream, data = NULL;
     gss_iov_buffer_t theader, tdata = NULL, tpadding, ttrailer;
 
-    if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+    assert(toktype == KG_TOK_WRAP_MSG);
+    assert(toktype2 == KG_TOK_WRAP_MSG || toktype2 == KG2_TOK_WRAP_MSG);
+
+    if (toktype != KG_TOK_WRAP_MSG || (ctx->gss_flags & GSS_C_DCE_STYLE)) {
 	code = EINVAL;
 	goto cleanup;
     }
@@ -445,11 +450,13 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     theader = &tiov[i++];
     theader->type = GSS_IOV_BUFFER_TYPE_HEADER;
     theader->buffer.value = stream->buffer.value;
-    theader->buffer.length = (ptr - (unsigned char *)stream->buffer.value) + 14;
-    if (stream->buffer.length < theader->buffer.length) {
+    theader->buffer.length = ptr - (unsigned char *)stream->buffer.value;
+    if (bodysize < 14 ||
+	stream->buffer.length != theader->buffer.length + bodysize) {
 	major_status = GSS_S_DEFECTIVE_TOKEN;
 	goto cleanup;
     }
+    theader->buffer.length += 14;
 
     /* n[SIGN_DATA] | DATA | m[SIGN_DATA] */
     for (j = 0; j < iov_count; j++) {
@@ -479,6 +486,8 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     /* PADDING | TRAILER */
     tpadding = &tiov[i++];
     tpadding->type = GSS_IOV_BUFFER_TYPE_PADDING;
+    tpadding->buffer.length = 0;
+    tpadding->buffer.value = NULL;
 
     ttrailer = &tiov[i++];
     ttrailer->type = GSS_IOV_BUFFER_TYPE_TRAILER;
@@ -490,7 +499,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	unsigned int k5_trailerlen = 0;
 
 	conf_req_flag = ((ptr[0] & FLAG_WRAP_CONFIDENTIAL) != 0);
-	ec = load_16_be(ptr + 2);
+	ec = conf_req_flag ? load_16_be(ptr + 2) : 0;
 	rrc = load_16_be(ptr + 4);
 
 	if (rrc != 0) {
@@ -510,9 +519,6 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	}
 
 	/* no PADDING for CFX, EC is used instead */
-	tpadding->buffer.length = 0;
-	tpadding->buffer.value = NULL;
-
 	code = krb5_c_crypto_length(context, enctype,
 				    conf_req_flag ? KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM,
 				    &k5_trailerlen);
@@ -523,12 +529,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	ttrailer->buffer.value = (unsigned char *)stream->buffer.value +
 				 stream->buffer.length - ttrailer->buffer.length;
     } else {
-	conf_req_flag = (ptr[2] != 0xFF && ptr[3] != 0xFF);
-
-	theader->buffer.length += ctx->cksum_size;
-  
-	if (conf_req_flag)
-	    theader->buffer.length += kg_confounder_size(context, ctx->enc);
+	theader->buffer.length += ctx->cksum_size + kg_confounder_size(context, ctx->enc);
 
 	/*
 	 * we can't set the padding accurately until decryption;
@@ -547,10 +548,11 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     /* CFX: GSS-Header | Kerb-Header | Data  |     | EC | E(Header) | Kerb-Trailer */
     /* GSS: -------GSS-HEADER--------+-DATA--+-PAD-+----------GSS-TRAILER----------*/
 
-    /* Add 2 to bodysize for TOK_ID */
-    if (2 + bodysize < theader->buffer.length +
-		       tpadding->buffer.length +
-		       ttrailer->buffer.length) {
+    /* validate lengths */
+    if (stream->buffer.length < theader->buffer.length +
+				tpadding->buffer.length +
+				ttrailer->buffer.length)
+    {
 	code = (OM_uint32)KRB5_BAD_MSIZE;
 	major_status = GSS_S_DEFECTIVE_TOKEN;
 	goto cleanup;

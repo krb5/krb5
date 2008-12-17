@@ -427,25 +427,15 @@ static struct gss_config krb5_mechanism = {
     NULL,		/* complete_auth_token */
 };
 
-gss_mechanism KRB5_CALLCONV
-gss_mech_initialize(void)
-{
-    return &krb5_mechanism;
-}
 
 #ifdef _GSS_STATIC_LINK
 #include "mglueP.h"
-
 static int gss_krb5mechglue_init(void)
 {
     struct gss_mech_config mech_krb5;
 
     memset(&mech_krb5, 0, sizeof(mech_krb5));
-    mech_krb5.mech = gss_mech_initialize();
-    if (mech_krb5.mech == NULL) {
-	return GSS_S_FAILURE;
-    }
-
+    mech_krb5.mech = &krb5_mechanism;
     mech_krb5.mechNameStr = "kerberos_v5";
     mech_krb5.mech_type = (gss_OID)gss_mech_krb5;
 
@@ -464,6 +454,12 @@ static int gss_krb5mechglue_init(void)
 #else
 MAKE_INIT_FUNCTION(gss_krb5int_lib_init);
 MAKE_FINI_FUNCTION(gss_krb5int_lib_fini);
+
+gss_mechanism KRB5_CALLCONV
+gss_mech_initialize(void)
+{
+    return &krb5_mechanism;
+}
 #endif /* _GSS_STATIC_LINK */
 
 int gss_krb5int_lib_init(void)
