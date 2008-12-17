@@ -420,7 +420,7 @@ tgt_again:
 	    else
 		clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
 	}
-	if (client.attributes & KRB5_KDB_DISALLOW_FORWARDABLE)
+	if (isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
 	    clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
     }
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
