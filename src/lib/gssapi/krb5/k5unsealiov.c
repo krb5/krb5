@@ -430,7 +430,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 				 &bodysize, &ptr, toktype2,
 				 stream->buffer.length,
 				 ctx->proto ? 0 : G_VFY_TOKEN_HDR_WRAPPER_REQUIRED);
-    if (code != 0 || stream->buffer.length < 16) {
+    if (code != 0) {
 	major_status = GSS_S_DEFECTIVE_TOKEN;
 	goto cleanup;
     }
@@ -445,7 +445,11 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     theader = &tiov[i++];
     theader->type = GSS_IOV_BUFFER_TYPE_HEADER;
     theader->buffer.value = stream->buffer.value;
-    theader->buffer.length = 16;
+    theader->buffer.length = (ptr - (unsigned char *)stream->buffer.value) + 14;
+    if (stream->buffer.length < theader->buffer.length) {
+	major_status = GSS_S_DEFECTIVE_TOKEN;
+	goto cleanup;
+    }
 
     /* n[SIGN_DATA] | DATA | m[SIGN_DATA] */
     for (j = 0; j < iov_count; j++) {
