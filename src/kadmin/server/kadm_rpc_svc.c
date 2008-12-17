@@ -25,8 +25,6 @@ extern void *global_server_handle;
 
 static int check_rpcsec_auth(struct svc_req *);
 
-void log_badauth(OM_uint32 major, OM_uint32 minor,
-		 struct sockaddr_in *addr, char *data);
 /*
  * Function: kadm_1
  * 

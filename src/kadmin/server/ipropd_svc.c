@@ -31,8 +31,6 @@
 
 extern gss_name_t rqst2name(struct svc_req *rqstp);
 
-extern int setup_gss_names(struct svc_req *, gss_buffer_desc *,
-			   gss_buffer_desc *);
 extern void *global_server_handle;
 extern int nofork;
 extern short l_port;

@@ -123,12 +123,6 @@ int ipropfd;
 void kadm5_set_use_password_server (void);
 #endif
 
-extern void krb5_iprop_prog_1();
-extern kadm5_ret_t kiprop_get_adm_host_srv_name(
-	krb5_context,
-	const char *,
-	char **);
-
 /*
  * Function: usage
  * 
