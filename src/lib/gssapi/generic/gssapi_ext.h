@@ -156,7 +156,7 @@ typedef struct gss_iov_buffer_desc_struct {
 #define GSS_IOV_BUFFER_TYPE_SIGN_ONLY	    11	/* Sign only packet data */
 
 #define GSS_IOV_BUFFER_FLAG_MASK	    0xFFFF0000
-#define GSS_IOV_BUFFER_FLAG_ALLOCATE	    0x00010000	/* indicates GSS can allocate */
+#define GSS_IOV_BUFFER_FLAG_ALLOCATE	    0x00010000	/* indicates GSS should allocate */
 #define GSS_IOV_BUFFER_FLAG_ALLOCATED	    0x00020000	/* indicates caller should free */
 
 #define GSS_IOV_BUFFER_TYPE(_type)	    ((_type) & ~(GSS_IOV_BUFFER_FLAG_MASK))
