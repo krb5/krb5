@@ -1,7 +1,7 @@
 testing
 foo
-bar
 baz
 
 more
 here
+or something
