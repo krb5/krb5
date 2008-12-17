@@ -131,8 +131,8 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
 						 data, num_data, cksum_data);
     } else if (cksum_type->flags & KRB5_CKSUMFLAG_DERIVE) {
 	ret = krb5int_dk_make_checksum_iov(cksum_type->hash,
-					key, usage, data, num_data,
-					cksum_data);
+					   key, usage, data, num_data,
+					   cksum_data);
     } else {
 	ret = make_unkeyed_checksum_iov(cksum_type->hash, data, num_data,
 					cksum_data);

@@ -38,12 +38,12 @@ krb5_c_verify_checksum_iov(krb5_context context,
 			   krb5_boolean *valid)
 {
     unsigned int i;
-    size_t hashsize;
+    size_t cksumlen;
     krb5_error_code ret;
     krb5_data computed;
     krb5_crypto_iov *checksum;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == checksum_type)
 	    break;
     }
@@ -66,25 +66,31 @@ krb5_c_verify_checksum_iov(krb5_context context,
 
     /* otherwise, make the checksum again, and compare */
 
-    if ((ret = krb5_c_checksum_length(context, checksum_type, &hashsize)))
-	return(ret);
+    if (krb5_cksumtypes_list[i].keyhash != NULL)
+	computed.length = krb5_cksumtypes_list[i].keyhash->hashsize;
+    else
+	computed.length = krb5_cksumtypes_list[i].hash->hashsize;
 
-    if (checksum->data.length != hashsize)
+    if (krb5_cksumtypes_list[i].trunc_size != 0)
+	cksumlen = krb5_cksumtypes_list[i].trunc_size;
+    else
+	cksumlen = computed.length;
+
+    if (checksum->data.length != cksumlen)
 	return(KRB5_BAD_MSIZE);
 
-    computed.data = malloc(hashsize);
-    if (computed.data == NULL) {
+    computed.data = malloc(computed.length);
+    if (computed.data == NULL)
 	return(ENOMEM);
-    }
-    computed.length = hashsize;
 
     if ((ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i], key, usage,
-					data, num_data, &computed))) {
+					   data, num_data, &computed))) {
 	free(computed.data);
 	return(ret);
     }
 
-    *valid = (memcmp(computed.data, &checksum->data, hashsize) == 0);
+    *valid = (computed.length == cksumlen) &&
+	     (memcmp(computed.data, checksum->data.data, cksumlen) == 0);
 
     free(computed.data);
 

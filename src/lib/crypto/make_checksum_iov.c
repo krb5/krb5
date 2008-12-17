@@ -36,11 +36,11 @@ krb5_c_make_checksum_iov(krb5_context context,
 			 krb5_crypto_iov *data,
 			 size_t num_data)
 {
-    krb5_error_code ret;
+    unsigned int i;
     size_t cksumlen;
-    krb5_crypto_iov *checksum;
-    size_t i;
+    krb5_error_code ret;
     krb5_data cksum_data;
+    krb5_crypto_iov *checksum;
 
     for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == cksumtype)
