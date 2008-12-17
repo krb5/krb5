@@ -197,7 +197,7 @@ gss_buffer_t		output_message_buffer;
 	} else if (mech->gss_wrap_iov && mech->gss_wrap_iov_length) {
 	    status = gssint_seal_iov_shim(mech,
 					  minor_status,
-					  ctx,
+					  ctx->internal_ctx_id,
 					  conf_req_flag,
 					  qop_req,
 					  input_message_buffer,
