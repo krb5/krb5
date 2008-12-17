@@ -163,7 +163,7 @@ kg_make_checksum_iov_v1(krb5_context context,
     }
 
     for (j = 0; j < iov_count; j++) {
-	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
+	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
 	kiov[i].data.length = iov[j].buffer.length;
 	kiov[i].data.data = (char *)iov[j].buffer.value;
 	i++;
@@ -230,7 +230,7 @@ checksum_iov_v3(krb5_context context,
 
     /* Data */
     for (j = 0; j < iov_count; j++) {
-	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
+	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
 	kiov[i].data.length = iov[j].buffer.length;
 	kiov[i].data.data = (char *)iov[j].buffer.value;
 	i++;

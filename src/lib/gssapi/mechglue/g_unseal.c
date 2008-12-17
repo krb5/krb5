@@ -41,11 +41,9 @@ gssint_unseal_iov_shim(gss_mechanism mech,
     gss_iov_buffer_desc	iov[2];
 
     iov[0].type = GSS_IOV_BUFFER_TYPE_STREAM;
-    iov[0].flags = 0;
     iov[0].buffer = *input_message_buffer;
 
-    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
-    iov[1].flags = GSS_IOV_BUFFER_FLAG_ALLOCATE;
+    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA | GSS_IOV_BUFFER_FLAG_ALLOCATE;
     iov[1].buffer.value = NULL;
     iov[1].buffer.length = 0;
 
@@ -60,7 +58,7 @@ gssint_unseal_iov_shim(gss_mechanism mech,
 
 	map_error(minor_status, mech);
 
-	if (iov[1].flags & GSS_IOV_BUFFER_FLAG_ALLOCATED)
+	if (iov[1].type & GSS_IOV_BUFFER_FLAG_ALLOCATED)
 	    gss_release_buffer(&tmp, &iov[1].buffer);
     }
 

@@ -81,21 +81,17 @@ gssint_seal_iov_shim(gss_mechanism mech,
     size_t		offset;
 
     iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER;
-    iov[0].flags = 0;
     iov[0].buffer.value = NULL;
     iov[0].buffer.length = 0;
 
     iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
-    iov[1].flags = 0;
     iov[1].buffer = *input_message_buffer;
 
     iov[2].type = GSS_IOV_BUFFER_TYPE_PADDING;
-    iov[2].flags = 0;
     iov[2].buffer.value = NULL;
     iov[2].buffer.length = 0;
 
     iov[3].type = GSS_IOV_BUFFER_TYPE_TRAILER;
-    iov[3].flags = 0;
     iov[3].buffer.value = NULL;
     iov[3].buffer.length = 0;
 
@@ -260,22 +256,18 @@ gssint_wrap_size_limit_iov_shim(gss_mechanism mech,
     OM_uint32		ohlen;
 
     iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER;
-    iov[0].flags = 0;
     iov[0].buffer.value = NULL;
     iov[0].buffer.length = 0;
 
     iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
-    iov[1].flags = 0;
     iov[1].buffer.length = req_output_size;
     iov[1].buffer.value = NULL;
 
     iov[2].type = GSS_IOV_BUFFER_TYPE_PADDING;
-    iov[2].flags = 0;
     iov[2].buffer.value = NULL;
     iov[2].buffer.length = 0;
 
     iov[3].type = GSS_IOV_BUFFER_TYPE_TRAILER;
-    iov[3].flags = 0;
     iov[3].buffer.value = NULL;
     iov[3].buffer.length = 0;
 

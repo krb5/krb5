@@ -444,16 +444,14 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     /* HEADER */
     theader = &tiov[i++];
     theader->type = GSS_IOV_BUFFER_TYPE_HEADER;
-    theader->flags = 0;
     theader->buffer.value = stream->buffer.value;
     theader->buffer.length = 16;
 
     /* n[SIGN_DATA] | DATA | m[SIGN_DATA] */
     for (j = 0; j < iov_count; j++) {
-	if (iov[j].type != GSS_IOV_BUFFER_TYPE_DATA)
-	    continue;
+	OM_uint32 type = GSS_IOV_BUFFER_TYPE(iov[j].type);
 
-	if ((iov[j].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0) {
+	if (type == GSS_IOV_BUFFER_TYPE_DATA) {
 	    if (data != NULL) {
 		/* only a single DATA buffer can appear */
 		code = EINVAL;
@@ -463,7 +461,9 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	    data = &iov[j];
 	    tdata = &tiov[i];
 	}
-	tiov[i++] = iov[j];
+	if (type == GSS_IOV_BUFFER_TYPE_DATA ||
+	    type == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
+	    tiov[i++] = iov[j];
     }
 
     if (data == NULL) {
@@ -474,11 +474,9 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 
     tpadding = &tiov[i++];
     tpadding->type = GSS_IOV_BUFFER_TYPE_PADDING;
-    tpadding->flags = 0;
 
     ttrailer = &tiov[i++];
     ttrailer->type = GSS_IOV_BUFFER_TYPE_TRAILER;
-    ttrailer->flags = 0;
 
     /* PADDING | TRAILER */
     if (ctx->proto == 1) {
@@ -559,7 +557,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 
     assert(data != NULL);
 
-    if (data->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+    if (data->type & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
 	code = kg_allocate_iov(tdata, tdata->buffer.length);
 	if (code != 0)
 	    goto cleanup;
@@ -574,7 +572,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 				       tiov, i, toktype, toktype2);
     if (major_status == GSS_S_COMPLETE)
 	*data = *tdata;
-    else if (tdata->flags & GSS_IOV_BUFFER_FLAG_ALLOCATED)
+    else if (tdata->type & GSS_IOV_BUFFER_FLAG_ALLOCATED)
 	gss_release_buffer(NULL, &tdata->buffer);
 
 cleanup:

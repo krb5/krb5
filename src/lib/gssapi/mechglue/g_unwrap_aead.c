@@ -76,19 +76,16 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
     int			    i = 0;
 
     iov[i].type = GSS_IOV_BUFFER_TYPE_STREAM;
-    iov[i].flags = 0;
     iov[i].buffer = *input_message_buffer;
     i++;
 
     if (input_assoc_buffer != NULL) {
-	iov[i].type = GSS_IOV_BUFFER_TYPE_DATA;
-	iov[i].flags = GSS_IOV_BUFFER_FLAG_SIGN_ONLY;
+	iov[i].type = GSS_IOV_BUFFER_TYPE_SIGN_ONLY;
 	iov[i].buffer = *input_assoc_buffer;
 	i++;
     }
 
     iov[i].type = GSS_IOV_BUFFER_TYPE_DATA;
-    iov[i].flags = GSS_IOV_BUFFER_FLAG_ALLOCATE;
     iov[i].buffer.value = NULL;
     iov[i].buffer.length = 0;
     i++;

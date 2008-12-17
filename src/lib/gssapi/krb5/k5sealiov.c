@@ -97,7 +97,7 @@ make_seal_token_v1_iov(krb5_context context,
 
 	    if (conf_data_length % k5_padlen)
 		code = KRB5_BAD_MSIZE;
-	} else if (padding->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+	} else if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
 	    code = kg_allocate_iov(padding, gss_padlen);
 	} else if (padding->buffer.length < gss_padlen) {
 	    code = KRB5_BAD_MSIZE;
@@ -122,7 +122,7 @@ make_seal_token_v1_iov(krb5_context context,
 
     k5_headerlen += tlen - tmsglen;
 
-    if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+    if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 	code = kg_allocate_iov(header, k5_headerlen);
     else if (header->buffer.length < k5_headerlen)
 	code = KRB5_BAD_MSIZE;

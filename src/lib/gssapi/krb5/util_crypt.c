@@ -288,7 +288,7 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     i++;
 
     for (j = 0; j < iov_count; j++) {
-	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
+	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
 	kiov[i].data.length = iov[j].buffer.length;
 	kiov[i].data.data = (char *)iov[j].buffer.value;
 	i++;
@@ -384,7 +384,7 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     i++;
 
     for (j = 0; j < iov_count; j++) {
-	kiov[i].flags = kg_translate_flag_iov(iov[j].type, iov[j].flags);
+	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
 	kiov[i].data.length = iov[j].buffer.length;
 	kiov[i].data.data = (char *)iov[j].buffer.value;
 	i++;
@@ -601,19 +601,19 @@ cleanup_arcfour:
 }
 
 krb5_cryptotype
-kg_translate_flag_iov(OM_uint32 type, OM_uint32 flags)
+kg_translate_flag_iov(OM_uint32 type)
 {
     krb5_cryptotype ktype;
 
-    switch (type) {
+    switch (GSS_IOV_BUFFER_TYPE(type)) {
     case GSS_IOV_BUFFER_TYPE_PADDING:
 	ktype = KRB5_CRYPTO_TYPE_DATA;
 	break;
     case GSS_IOV_BUFFER_TYPE_DATA:
-	if (flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
-	    ktype = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-	else
-	    ktype = KRB5_CRYPTO_TYPE_DATA;
+	ktype = KRB5_CRYPTO_TYPE_DATA;
+	break;
+    case GSS_IOV_BUFFER_TYPE_SIGN_ONLY:
+	ktype = KRB5_CRYPTO_TYPE_SIGN_ONLY;
 	break;
     default:
 	ktype = KRB5_CRYPTO_TYPE_EMPTY;
@@ -635,7 +635,7 @@ kg_locate_iov(gss_iov_buffer_desc *iov,
 	return GSS_C_NO_IOV_BUFFER;
 
     for (i = iov_count - 1; i >= 0; i--) {
-	if (iov[i].type == type) {
+	if (GSS_IOV_BUFFER_TYPE(iov[i].type) == type) {
 	    if (p == GSS_C_NO_IOV_BUFFER)
 		p = &iov[i];
 	    else
@@ -660,13 +660,14 @@ kg_iov_msglen(gss_iov_buffer_desc *iov,
     *data_length_p = *assoc_data_length_p = 0;
 
     for (i = 0; i < iov_count; i++) {
-	if (iov[i].type != GSS_IOV_BUFFER_TYPE_DATA)
-	    continue;
+	OM_uint32 type = GSS_IOV_BUFFER_TYPE(iov[i].type);
 
-	if (iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY)
+	if (type == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
 	    assoc_data_length += iov[i].buffer.length;
 
-	data_length += iov[i].buffer.length;
+	if (type == GSS_IOV_BUFFER_TYPE_DATA ||
+	    type == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
+	    data_length += iov[i].buffer.length;
     }
 
     *data_length_p = data_length;
@@ -682,9 +683,9 @@ kg_release_iov(gss_iov_buffer_desc *iov, int iov_count)
     assert(iov != GSS_C_NO_IOV_BUFFER);
 
     for (i = 0; i < iov_count; i++) {
-	if (iov[i].flags & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
+	if (iov[i].type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
 	    gss_release_buffer(&min_stat, &iov[i].buffer);
-	    iov[i].flags &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
+	    iov[i].type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
 	}
     }
 }
@@ -782,10 +783,7 @@ krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count)
     assert(iov != GSS_C_NO_IOV_BUFFER);
 
     for (i = 0; i < iov_count; i++) {
-	if (iov[i].type != GSS_IOV_BUFFER_TYPE_DATA)
-	    continue;
-
-	if ((iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY) == 0) {
+	if (GSS_IOV_BUFFER_TYPE(iov[i].type) == GSS_IOV_BUFFER_TYPE_DATA) {
 	    has_conf_data = TRUE;
 	    break;
 	}
@@ -797,7 +795,7 @@ krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count)
 krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
 {
     assert(iov != GSS_C_NO_IOV_BUFFER);
-    assert(iov->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE);
+    assert(iov->type & GSS_IOV_BUFFER_FLAG_ALLOCATE);
 
     iov->buffer.length = size;
     iov->buffer.value = xmalloc(size);
@@ -806,7 +804,7 @@ krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
 	return ENOMEM;
     }
 
-    iov->flags |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
+    iov->type |= GSS_IOV_BUFFER_FLAG_ALLOCATED;
 
     return 0;
 }

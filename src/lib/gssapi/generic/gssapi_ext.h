@@ -141,7 +141,6 @@ OM_uint32 KRB5_CALLCONV gss_complete_auth_token
 
 typedef struct gss_iov_buffer_desc_struct {
     OM_uint32 type;
-    OM_uint32 flags;
     gss_buffer_desc buffer;
 } gss_iov_buffer_desc, *gss_iov_buffer_t;
 
@@ -154,10 +153,14 @@ typedef struct gss_iov_buffer_desc_struct {
 #define GSS_IOV_BUFFER_TYPE_TRAILER	    7	/* Mechanism trailer */
 #define GSS_IOV_BUFFER_TYPE_PADDING	    9	/* Padding */
 #define GSS_IOV_BUFFER_TYPE_STREAM	    10	/* Complete wrap token */
+#define GSS_IOV_BUFFER_TYPE_SIGN_ONLY	    11	/* Sign only packet data */
 
-#define GSS_IOV_BUFFER_FLAG_ALLOCATE	    1	/* indicates GSS can allocate */
-#define GSS_IOV_BUFFER_FLAG_ALLOCATED	    2	/* indicates caller should free */
-#define GSS_IOV_BUFFER_FLAG_SIGN_ONLY	    4	/* indicates associated data */
+#define GSS_IOV_BUFFER_FLAG_MASK	    0xFFFF0000
+#define GSS_IOV_BUFFER_FLAG_ALLOCATE	    0x00010000	/* indicates GSS can allocate */
+#define GSS_IOV_BUFFER_FLAG_ALLOCATED	    0x00020000	/* indicates caller should free */
+
+#define GSS_IOV_BUFFER_TYPE(_type)	    ((_type) & ~(GSS_IOV_BUFFER_FLAG_MASK))
+#define GSS_IOV_BUFFER_FLAGS(_type)	    ((_type) & GSS_IOV_BUFFER_FLAG_MASK)
 
 /*
  * Sign and optionally encrypt a sequence of buffers. The buffers
@@ -186,13 +189,13 @@ typedef struct gss_iov_buffer_desc_struct {
  *
  * which will emit GSS_Wrap() compatible tokens, and:
  *
- *  HEADER | SIGN_ONLY_DATA | DATA | PADDING | TRAILER
+ *  HEADER | SIGN_ONLY | DATA | PADDING | TRAILER
  *
  * for AEAD.
  *
  * The typical (special cased) usage for DCE is as follows:
  *
- *  SIGN_ONLY_DATA_1 | DATA | SIGN_ONLY_DATA_2 | HEADER
+ *  SIGN_ONLY_1 | DATA | SIGN_ONLY_2 | HEADER
  */
 OM_uint32 KRB5_CALLCONV gss_wrap_iov
 (

@@ -48,7 +48,7 @@
 #include "k5-plugin.h"
 #include "osconf.h"
 #ifdef _GSS_STATIC_LINK
-#include "../krb5/gssapiP_krb5.h"
+#include "gssapiP_krb5.h"
 #endif
 
 #define MECH_SYM "gss_mech_initialize"

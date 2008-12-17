@@ -124,7 +124,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    gss_headerlen += gss_trailerlen;
 	}
 
-	if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 	    code = kg_allocate_iov(header, gss_headerlen);
 	else if (header->buffer.length < gss_headerlen)
 	    code = KRB5_BAD_MSIZE;
@@ -133,7 +133,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	header->buffer.length = gss_headerlen;
 
 	if (trailer != NULL) {
-	    if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	    if (trailer->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 		code = kg_allocate_iov(trailer, gss_trailerlen);
 	    else if (trailer->buffer.length < gss_trailerlen)
 		code = KRB5_BAD_MSIZE;
@@ -190,7 +190,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	    gss_headerlen += gss_trailerlen;
 	}
 
-	if (header->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 	    code = kg_allocate_iov(header, gss_headerlen);
 	else if (header->buffer.length < gss_headerlen)
 	    code = KRB5_BAD_MSIZE;
@@ -199,7 +199,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	header->buffer.length = gss_headerlen;
 
 	if (trailer != NULL) {
-	    if (trailer->flags & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+	    if (trailer->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
 		code = kg_allocate_iov(trailer, gss_trailerlen);
 	    else if (trailer->buffer.length < gss_trailerlen)
 		code = KRB5_BAD_MSIZE;

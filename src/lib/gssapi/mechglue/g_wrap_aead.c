@@ -81,31 +81,26 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
     /* HEADER | SIGN_ONLY_DATA | DATA | PADDING | TRAILER */
 
     iov[i].type = GSS_IOV_BUFFER_TYPE_HEADER;
-    iov[i].flags = 0;
     iov[i].buffer.value = NULL;
     iov[i].buffer.length = 0;
     i++;
 
     if (input_assoc_buffer != GSS_C_NO_BUFFER) {
-	iov[i].type = GSS_IOV_BUFFER_TYPE_DATA;
-	iov[i].flags = GSS_IOV_BUFFER_FLAG_SIGN_ONLY;
+	iov[i].type = GSS_IOV_BUFFER_TYPE_SIGN_ONLY;
 	iov[i].buffer = *input_assoc_buffer;
 	i++;
     }
 
     iov[i].type = GSS_IOV_BUFFER_TYPE_DATA;
-    iov[i].flags = 0;
     iov[i].buffer = *input_payload_buffer;
     i++;
 
     iov[i].type = GSS_IOV_BUFFER_TYPE_PADDING;
-    iov[i].flags = 0;
     iov[i].buffer.value = NULL;
     iov[i].buffer.length = 0;
     i++;
 
     iov[i].type = GSS_IOV_BUFFER_TYPE_TRAILER;
-    iov[i].flags = 0;
     iov[i].buffer.value = NULL;
     iov[i].buffer.length = 0;
     i++;
@@ -124,8 +119,7 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
 
     /* Format output token (does not include associated data) */
     for (i = 0, output_message_buffer->length = 0; i < iov_count; i++) {
-	if (iov[i].type == GSS_IOV_BUFFER_TYPE_DATA &&
-	    (iov[i].flags & GSS_IOV_BUFFER_FLAG_SIGN_ONLY))
+	if (GSS_IOV_BUFFER_TYPE(iov[i].type) == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
 	    continue;
 
 	output_message_buffer->length += iov[i].buffer.length;
