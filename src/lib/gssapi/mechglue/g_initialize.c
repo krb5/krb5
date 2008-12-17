@@ -49,6 +49,7 @@
 #include "osconf.h"
 #ifdef _GSS_STATIC_LINK
 #include "gssapiP_krb5.h"
+#include "gssapiP_spnego.h"
 #endif
 
 #define MECH_SYM "gss_mech_initialize"
@@ -97,6 +98,7 @@ gssint_mechglue_init(void)
 	err = k5_mutex_finish_init(&g_mechListLock);
 
 #ifdef _GSS_STATIC_LINK
+	err = gss_spnegoint_lib_init();
 	err = gss_krb5int_lib_init();
 #endif
 
@@ -118,6 +120,7 @@ gssint_mechglue_fini(void)
 #endif
 #ifdef _GSS_STATIC_LINK
 	gss_krb5int_lib_fini();
+	gss_spnegoint_lib_fini();
 #endif
 	k5_mutex_destroy(&g_mechSetLock);
 	k5_mutex_destroy(&g_mechListLock);

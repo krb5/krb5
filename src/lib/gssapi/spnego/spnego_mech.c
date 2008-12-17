@@ -262,10 +262,43 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_complete_auth_token
 };
 
-gss_mechanism
+#ifdef _GSS_STATIC_LINK
+#include "mglueP.h"
+
+static int gss_spnegomechglue_init(void)
+{
+	struct gss_mech_config mech_spnego;
+
+	memset(&mech_spnego, 0, sizeof(mech_spnego));
+	mech_spnego.mech = &spnego_mechanism;
+	mech_spnego.mechNameStr = "spnego";
+	mech_spnego.mech_type = GSS_C_NO_OID;
+
+	return gssint_register_mechinfo(&mech_spnego);
+}
+#else
+gss_mechanism KRB5_CALLCONV
 gss_mech_initialize(void)
 {
 	return (&spnego_mechanism);
+}
+
+MAKE_INIT_FUNCTION(gss_krb5int_lib_init);
+MAKE_FINI_FUNCTION(gss_krb5int_lib_fini);
+int gss_krb5int_lib_init(void)
+#endif /* _GSS_STATIC_LINK */
+
+int gss_spnegoint_lib_init(void)
+{
+#ifdef _GSS_STATIC_LINK
+	return gss_spnegomechglue_init();
+#else
+	return 0;
+#endif
+}
+
+void gss_spnegoint_lib_fini(void)
+{
 }
 
 /*ARGSUSED*/

@@ -344,7 +344,12 @@ spnego_gss_set_sec_context_option
 #define GSS_SPNEGO_UPDATED_OID_LENGTH 9
 #define GSS_SPNEGO_UPDATED_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x05"
 
+#ifdef _GSS_STATIC_LINK
+int gss_spnegoint_lib_init(void);
+void gss_spnegoint_lib_fini(void);
+#else
 gss_mechanism KRB5_CALLCONV gss_mech_initialize(void);
+#endif /* _GSS_STATIC_LINK */
 
 OM_uint32 spnego_gss_wrap_aead
 (
