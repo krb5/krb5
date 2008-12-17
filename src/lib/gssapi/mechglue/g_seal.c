@@ -336,7 +336,8 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 						 conf_req_flag, qop_req,
 						 req_output_size, max_input_size);
     else if (mech->gss_wrap_iov_length)
-	major_status = gssint_wrap_size_limit_iov_shim(mech, minor_status, ctx,
+	major_status = gssint_wrap_size_limit_iov_shim(mech, minor_status,
+						       ctx->internal_ctx_id,
 						       conf_req_flag, qop_req,
 						       req_output_size, max_input_size);
     else

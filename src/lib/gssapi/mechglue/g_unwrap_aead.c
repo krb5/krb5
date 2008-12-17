@@ -154,7 +154,7 @@ gss_qop_t		*qop_state;
 	} else if (mech->gss_unwrap_iov) {
 	    status = gssint_wrap_aead_iov_shim(mech,
 					       minor_status,
-					       ctx,
+					       ctx->internal_ctx_id,
 					       input_message_buffer,
 					       input_assoc_buffer,
 					       output_payload_buffer,

@@ -129,7 +129,7 @@ int *			qop_state;
 	} else if (mech->gss_unwrap_iov) {
 	    status = gssint_unseal_iov_shim(mech,
 					    minor_status,
-					    ctx,
+					    ctx->internal_ctx_id,
 					    input_message_buffer,
 					    output_message_buffer,
 					    conf_state,
