@@ -1,0 +1,4 @@
+* audit krb5_rd_req changes with eye to cross-realm policy check
+* correct behavior for KDC cross-realm policy check
+* handle session key extraction
+* closure on enc_padata
