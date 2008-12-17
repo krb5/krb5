@@ -85,8 +85,8 @@ SRCS = \
 	$(srcdir)/util_seqnum.c \
 	$(srcdir)/val_cred.c \
 	$(srcdir)/verify.c \
-	$(srcdir)/wrap_size_limit.c \
-	$(srcdir)/gssapi_err_krb5.c
+	$(srcdir)/wrap_size_limit.c 
+
 
 OBJS = \
 	$(OUTPRE)accept_sec_context.$(OBJEXT) \
