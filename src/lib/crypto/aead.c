@@ -289,8 +289,7 @@ krb5int_c_iov_get_block(unsigned char *block,
 	memset(block + j, 0, block_size - j);
 
 #ifdef DEBUG_IOV
-    if (iov_state->iov_pos < num_data)
-	dump_block("get_block", i, j, block, block_size);
+    dump_block("get_block", i, j, block, block_size);
 #endif
 
     return (iov_state->iov_pos < num_data);
@@ -339,8 +338,7 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
     iov_state->iov_pos = i;
 
 #ifdef DEBUG_IOV
-    if (iov_state->iov_pos < num_data)
-	dump_block("put_block", i, j, block, block_size);
+    dump_block("put_block", i, j, block, block_size);
 #endif
 
     return (iov_state->iov_pos < num_data);
