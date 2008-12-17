@@ -1676,6 +1676,9 @@ krb5_boolean KRB5_CALLCONV krb5_principal_compare_any_realm
 		krb5_const_principal);
 #define KRB5_PRINCIPAL_COMPARE_IGNORE_REALM	    1
 #define KRB5_PRINCIPAL_COMPARE_ENTERPRISE	    2 /* compare UPNs as real principals */
+#define KRB5_PRINCIPAL_COMPARE_CASEFOLD		    4 /* case-insensitive comparison */
+#define KRB5_PRINCIPAL_COMPARE_UTF8		    8 /* treat principals as UTF-8 */
+
 krb5_boolean KRB5_CALLCONV krb5_principal_compare_flags
 	(krb5_context,
 		krb5_const_principal,

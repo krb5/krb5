@@ -31,8 +31,11 @@
 #include "k5-int.h"
 #include "k5-unicode.h"
 
-krb5_boolean KRB5_CALLCONV
-krb5_realm_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
+static krb5_boolean
+realm_compare_flags(krb5_context context,
+		    krb5_const_principal princ1,
+		    krb5_const_principal princ2,
+		    int flags)
 {
     const krb5_data *realm1 = krb5_princ_realm(context, princ1);
     const krb5_data *realm2 = krb5_princ_realm(context, princ2);
@@ -40,9 +43,15 @@ krb5_realm_compare(krb5_context context, krb5_const_principal princ1, krb5_const
     if (realm1->length != realm2->length)
 	return FALSE;
 
-    return (context->library_options & KRB5_LIBOPT_CASE_INSENSITIVE) ?
+    return (flags & KRB5_PRINCIPAL_COMPARE_CASEFOLD) ?
 	(strncasecmp(realm1->data, realm2->data, realm2->length) == 0) :
-	(memcmp(realm1->data, realm2->data, realm2->length)== 0);
+	(memcmp(realm1->data, realm2->data, realm2->length) == 0);
+}
+
+krb5_boolean KRB5_CALLCONV
+krb5_realm_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
+{
+    return realm_compare_flags(context, princ1, princ2, 0);
 }
 
 static krb5_error_code
@@ -76,8 +85,8 @@ krb5_principal_compare_flags(krb5_context context,
 {
     register int i;
     krb5_int32 nelem;
-    unsigned int casefold = (context->library_options & KRB5_LIBOPT_CASE_INSENSITIVE);
-    unsigned int utf8 = (context->library_options & KRB5_LIBOPT_UTF8);
+    unsigned int utf8 = (flags & KRB5_PRINCIPAL_COMPARE_UTF8) != 0;
+    unsigned int casefold = (flags & KRB5_PRINCIPAL_COMPARE_CASEFOLD) != 0;
     krb5_principal upn1 = NULL;
     krb5_principal upn2 = NULL;
     krb5_boolean ret = FALSE;
@@ -99,7 +108,7 @@ krb5_principal_compare_flags(krb5_context context,
 	goto out;
 
     if ((flags & KRB5_PRINCIPAL_COMPARE_IGNORE_REALM) == 0 &&
-	!krb5_realm_compare(context, princ1, princ2))
+	!realm_compare_flags(context, princ1, princ2, flags))
 	goto out;
 
     for (i = 0; i < (int) nelem; i++) {
