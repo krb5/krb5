@@ -87,14 +87,6 @@ gss_wrap_aead
 gss_wrap_iov
 gss_wrap_iov_length
 gss_wrap_size_limit
-gssint_der_length_size
-gssint_get_der_length
-gssint_get_mech_type
-gssint_get_mechanism
-gssint_get_mechanism_cred
-gssint_get_modOptions
-gssint_put_der_length
-gssint_copy_oid_set
 gssspi_set_cred_option
 gssspi_mech_invoke
 krb5_gss_dbg_client_expcreds
