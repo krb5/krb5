@@ -476,13 +476,13 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	goto cleanup;
     }
 
+    /* PADDING | TRAILER */
     tpadding = &tiov[i++];
     tpadding->type = GSS_IOV_BUFFER_TYPE_PADDING;
 
     ttrailer = &tiov[i++];
     ttrailer->type = GSS_IOV_BUFFER_TYPE_TRAILER;
 
-    /* PADDING | TRAILER */
     if (ctx->proto == 1) {
 	size_t ec, rrc;
 	krb5_enctype enctype = ctx->enc->enctype;
@@ -494,10 +494,11 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	rrc = load_16_be(ptr + 4);
 
 	if (rrc != 0) {
-	    code = gss_krb5int_rotate_left((unsigned char *)stream->buffer.value + 16,
-					   stream->buffer.length - 16, rrc);;
-	    if (code != 0)
+	    if (!gss_krb5int_rotate_left((unsigned char *)stream->buffer.value + 16,
+					 stream->buffer.length - 16, rrc)) {
+		code = ENOMEM;
 		goto cleanup;
+	    }
 	    store_16_be(0, ptr + 4); /* set RRC to zero */
 	}
 
