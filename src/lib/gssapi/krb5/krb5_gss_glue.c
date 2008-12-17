@@ -388,8 +388,13 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_context_time,
     krb5_gss_sign,
     krb5_gss_verify,
+#ifdef IOV_SHIM_EXERCISE
+    NULL,
+    NULL,
+#else
     krb5_gss_seal,
     krb5_gss_unseal,
+#endif
     krb5_gss_display_status,
     krb5_gss_indicate_mechs,
     krb5_gss_compare_name,
