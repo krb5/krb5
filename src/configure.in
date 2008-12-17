@@ -1121,7 +1121,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os
 	lib/krb5/unicode
 
-	lib/gssapi lib/gssapi/generic lib/gssapi/krb5
+	lib/gssapi lib/gssapi/generic lib/gssapi/krb5 lib/gssapi/spnego
 	lib/gssapi/mechglue
 
 	lib/rpc lib/rpc/unit-test
@@ -1145,7 +1145,6 @@ V5_AC_OUTPUT_MAKEFILE(.
 	plugins/preauth/cksum_body
 	plugins/preauth/wpse
 	plugins/authdata/greet
-	plugins/gssapi/spnego
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

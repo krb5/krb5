@@ -12,7 +12,6 @@ mydir=.
 SUBDIRS=util include lib @krb524@ kdc kadmin @ldap_plugin_dir@ slave clients \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \
-	plugins/gssapi/spnego \
 	appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
@@ -120,9 +119,6 @@ fake-install:
 	if test -r plugins/preauth/pkinit/Makefile; then \
 	  (w=`pwd`; cd plugins/preauth/pkinit && $(MAKE) install DESTDIR="$$w/util/fakedest"); \
 	fi
-	if test -r plugins/gssapi/spnego/Makefile; then \
-	  (w=`pwd`; cd plugins/gssapi/spnego && $(MAKE) install DESTDIR="$$w/util/fakedest"); \
-	fi
 
 #	(w=`pwd`; cd plugins/locate/python && $(MAKE) install DESTDIR="$$w/util/fakedest")
 
@@ -212,7 +208,6 @@ WINMAKEFILES=Makefile \
 	lib\des425\Makefile \
 	lib\gssapi\Makefile lib\gssapi\generic\Makefile \
 	lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
-	lib\gssapi\spnego\Makefile \
 	lib\krb4\Makefile lib\krb5\Makefile \
 	lib\krb5\asn.1\Makefile lib\krb5\ccache\Makefile \
 	lib\krb5\ccache\ccapi\Makefile \
@@ -305,8 +300,6 @@ WINMAKEFILES=Makefile \
 ##DOS##lib\gssapi\generic\Makefile: lib\gssapi\generic\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\mechglue\Makefile: lib\gssapi\mechglue\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\gssapi\spnego\Makefile: lib\gssapi\spnego\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\krb5\Makefile: lib\gssapi\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
