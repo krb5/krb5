@@ -742,8 +742,12 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 
     data->buffer.length -= relative_padlength;
 
-    padding->buffer.length += relative_padlength;
-    padding->buffer.value = p - relative_padlength;
+    /*
+     * We don't really know DATA and PADDING buffers are
+     * adjacent in memory so just set PADDING to NULL.
+     */
+    padding->buffer.length = 0;
+    padding->buffer.value = NULL;
 
     return GSS_S_COMPLETE;
 }

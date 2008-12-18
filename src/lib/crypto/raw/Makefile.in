@@ -2,6 +2,7 @@ thisconfigdir=../../..
 myfulldir=lib/crypto/raw
 mydir=lib/crypto/raw
 BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/..
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
@@ -13,11 +14,11 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= raw_decrypt.o raw_encrypt.o
+STLIBOBJS= raw_decrypt.o raw_encrypt.o raw_aead.o
 
-OBJS= $(OUTPRE)raw_decrypt.$(OBJEXT) $(OUTPRE)raw_encrypt.$(OBJEXT)
+OBJS= $(OUTPRE)raw_decrypt.$(OBJEXT) $(OUTPRE)raw_encrypt.$(OBJEXT) $(OUTPRE)raw_aead.$(OBJEXT)
 
-SRCS= $(srcdir)/raw_decrypt.c $(srcdir)/raw_encrypt.c
+SRCS= $(srcdir)/raw_decrypt.c $(srcdir)/raw_encrypt.c $(srcdir)/raw_aead.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -56,3 +57,13 @@ raw_encrypt.so raw_encrypt.po $(OUTPRE)raw_encrypt.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h raw.h raw_encrypt.c
+raw_aead.so raw_aead.po $(OUTPRE)raw_aead.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h raw.h raw_aead.c

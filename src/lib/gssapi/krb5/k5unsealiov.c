@@ -183,19 +183,6 @@ kg_unseal_v1_iov(krb5_context context,
 		goto cleanup;
 	    }
 	}
-
-	/*
-	* For GSS_C_DCE_STYLE, the caller manages the padding, because the
-	* pad length is in the RPC PDU. The value of the padding may be
-	* uninitialized. For normal GSS, the last bytes of the decrypted
-	* data contain the pad length. kg_fixup_padding_iov() will find
-	* this and fixup the last data IOV and padding IOV appropriately.
-	*/
-	if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-	    retval = kg_fixup_padding_iov(&code, iov, iov_count);
-	    if (retval != GSS_S_COMPLETE)
-		goto cleanup;
-	}
 	conflen = kg_confounder_size(context, ctx->enc);
     }
 
@@ -273,6 +260,19 @@ kg_unseal_v1_iov(krb5_context context,
 	code = 0;
 	retval = GSS_S_BAD_SIG;
 	goto cleanup;
+    }
+
+    /*
+     * For GSS_C_DCE_STYLE, the caller manages the padding, because the
+     * pad length is in the RPC PDU. The value of the padding may be
+     * uninitialized. For normal GSS, the last bytes of the decrypted
+     * data contain the pad length. kg_fixup_padding_iov() will find
+     * this and fixup the last data IOV and padding IOV appropriately.
+     */
+    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+	retval = kg_fixup_padding_iov(&code, iov, iov_count);
+	if (retval != GSS_S_COMPLETE)
+	    goto cleanup;
     }
 
     if (conf_state != NULL)
