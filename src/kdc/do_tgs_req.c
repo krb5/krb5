@@ -384,7 +384,10 @@ tgt_again:
 
     authtime = header_enc_tkt->times.authtime;
 
-    ticket_reply.server = request->server; /* XXX careful for realm... */
+    if (is_referral)
+	ticket_reply.server = server.princ;
+    else
+	ticket_reply.server = request->server; /* XXX careful for realm... */
 
     enc_tkt_reply.flags = 0;
     enc_tkt_reply.times.starttime = 0;
@@ -678,14 +681,6 @@ tgt_again:
     if (errcode) {
 	status = "KDC_RETURN_ENC_PADATA";
 	goto cleanup;
-    }
-
-    if (reply_encpart.enc_padata != NULL) {
-	/*
-	 * Backend should not have returned referrals if canonicalize
-	 * flag was absent
-	 */
-	ticket_reply.server = server.princ;
     }
 
     /* assemble any authorization data */
