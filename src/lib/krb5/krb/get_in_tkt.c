@@ -514,6 +514,8 @@ krb5_get_in_tkt(krb5_context context,
     int			loopcount = 0;
     krb5_int32		do_more = 0;
     int             use_master = 0;
+    int			referral_count = 0;
+    krb5_principal_data	referred_client;
 
 #if APPLE_PKINIT
     inTktDebug("krb5_get_in_tkt top\n");
@@ -524,7 +526,11 @@ krb5_get_in_tkt(krb5_context context,
 
     if (ret_as_reply)
 	*ret_as_reply = 0;
-    
+
+    referred_client = *(creds->client);
+    referred_client.realm.data = NULL;
+    referred_client.realm.length = 0;
+
     /*
      * Set up the basic request structure
      */
@@ -647,6 +653,24 @@ krb5_get_in_tkt(krb5_context context,
 		if (retval)
 		    goto cleanup;
 		continue;
+	    } else if (err_reply->error == KDC_ERR_WRONG_REALM) {
+		if (++referral_count > KRB5_REFERRAL_MAXHOPS ||
+		    err_reply->client == NULL ||
+		    err_reply->client->realm.length == 0)
+		    goto cleanup;
+		/* Rewrite request.client with realm from error reply */
+		if (referred_client.realm.data) {
+		    krb5_free_data_contents(context, &referred_client.realm);
+		    referred_client.realm.data = NULL;
+		}
+		retval = krb5int_copy_data_contents(context,
+						    &err_reply->client->realm,
+						    &referred_client.realm);
+		krb5_free_error(context, err_reply);		
+		if (retval)
+		    goto cleanup;
+		request.client = &referred_client;
+		continue;
 	    } else {
 		retval = (krb5_error_code) err_reply->error 
 		    + ERROR_TABLE_BASE_krb5;
@@ -698,6 +722,8 @@ cleanup:
 	else
 	    krb5_free_kdc_rep(context, as_reply);
     }
+    if (referred_client.realm.data)
+	krb5_free_data_contents(context, &referred_client.realm);
     return (retval);
 }
 
