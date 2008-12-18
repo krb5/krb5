@@ -132,8 +132,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     session_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
-    memset(&server_princ, 0, sizeof(server_princ));
-    memset(&client_princ, 0, sizeof(client_princ));
 
     ktypes2str(ktypestr, sizeof(ktypestr),
 	       request->nktypes, request->ktype);
