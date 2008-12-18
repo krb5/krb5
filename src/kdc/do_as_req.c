@@ -112,7 +112,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     char *cname = 0, *sname = 0;
     const char *fromstring = 0;
     unsigned int c_flags = 0, s_flags = 0;
-    krb5_principal_data server_princ;
+    krb5_principal_data server_princ, client_princ;
     char ktypestr[128];
     char rep_etypestr[128];
     char fromstringbuf[70];
@@ -133,6 +133,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     session_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
     memset(&server_princ, 0, sizeof(server_princ));
+    memset(&client_princ, 0, sizeof(client_princ));
 
     ktypes2str(ktypestr, sizeof(ktypestr),
 	       request->nktypes, request->ktype);
@@ -313,9 +314,12 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     enc_tkt_reply.session = &session_key;
     if (isflagset(c_flags, KRB5_KDB_FLAG_CANONICALIZE))
-	enc_tkt_reply.client = client.princ;
+	client_princ = *(client.princ);
     else
-	enc_tkt_reply.client = request->client;
+	client_princ = *(request->client);
+    /* The realm is always canonicalized */
+    client_princ.realm = *(krb5_princ_realm(context, client.princ));
+    enc_tkt_reply.client = &client_princ;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 
