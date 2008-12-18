@@ -579,8 +579,10 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 				       tiov, i, toktype, toktype2);
     if (major_status == GSS_S_COMPLETE)
 	*data = *tdata;
-    else if (tdata->type & GSS_IOV_BUFFER_FLAG_ALLOCATED)
+    else if (tdata->type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
 	gss_release_buffer(NULL, &tdata->buffer);
+	tdata->type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
+    }
 
 cleanup:
     if (tiov != NULL)

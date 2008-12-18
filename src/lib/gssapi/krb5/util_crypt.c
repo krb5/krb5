@@ -750,8 +750,10 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 
     data->buffer.length -= relative_padlength;
 
-    if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATED)
+    if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
 	gss_release_buffer(&minor, &padding->buffer);
+	padding->type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
+    }
 
     padding->buffer.length = 0;
     padding->buffer.value = NULL;
