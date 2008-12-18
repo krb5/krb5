@@ -265,7 +265,7 @@ tgt_again:
     if (!is_local_principal(header_enc_tkt->client))
 	setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
 
-    is_referral = is_referral_entry(kdc_context, &server);
+    is_referral = is_tgs_referral(kdc_context, request, &server);
 
     /* Check for protocol transition */
     errcode = kdc_process_s4u2self_req(kdc_context, request, header_enc_tkt->client,
