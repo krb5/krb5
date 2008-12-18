@@ -86,7 +86,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       krb5int_des_string_to_key,
       NULL, /*PRF*/
       0,
-      &krb5int_aead_raw  /*AEAD*/ },
+      &krb5int_aead_raw },
     { ENCTYPE_DES3_CBC_RAW,
       "des3-cbc-raw", "Triple DES cbc mode raw",
       &krb5int_enc_des3, NULL,

@@ -29,8 +29,6 @@
 #include "raw.h"
 #include "aead.h"
 
-#define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
-
 /* AEAD */
 
 static krb5_error_code
