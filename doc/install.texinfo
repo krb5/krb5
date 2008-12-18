@@ -206,9 +206,6 @@ The hostnames of your master and slave KDCs.
 @item
 How frequently you will propagate the database from the master KDC to
 the slave KDCs.
-
-@item
-Whether you need backward compatibility with Kerberos V4.
 @end itemize
 
 @menu
@@ -1184,17 +1181,6 @@ to just insert the following code:
 
 @smallexample
 @group
-#
-# Note --- if you are using Kerberos V4 and you either:
-#
-#    (a) haven't converted all your master or slave KDCs to V5, or
-#
-#    (b) are worried about inter-realm interoperability with other KDC's
-#        that are still using V4 
-#
-# you will need to switch the "kerberos" service to port 750 and create a
-# "kerberos-sec" service on port 88.
-#
 kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
 kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
 klogin        @value{DefaultKloginPort}/tcp          # Kerberos authenticated rlogin
@@ -1207,13 +1193,6 @@ eklogin       @value{DefaultEkloginPort}/tcp         # Kerberos auth. & encrypte
 krb524        @value{DefaultKrb524Port}/tcp         # Kerberos 5 to 4 ticket translator
 @end group
 @end smallexample
-
-@noindent As described in the comments in the above code, if your master
-KDC or any of your slave KDCs is running Kerberos V4, (or if you will be
-authenticating to any Kerberos V4 KDCs in another realm) you will need
-to switch the port number for @code{kerberos} to 750 and create a
-@code{kerberos-sec} service (tcp and udp) on port 88, so the Kerberos
-V4 KDC(s) will continue to work properly.
 
 @menu
 * Mac OS X Configuration::      

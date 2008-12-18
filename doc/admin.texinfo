@@ -502,18 +502,6 @@ The default lifetime of a ticket.  The default is
 code.
 @end ignore
 
-@itemx krb4_srvtab 
-Specifies the location of the Kerberos V4 srvtab file.  Default is
-@value{DefaultKrb4Srvtab}.
-
-@itemx krb4_config
-Specifies the location of hte Kerberos V4 configuration file.  Default
-is @value{DefaultKrb4Config}.
-
-@itemx krb4_realms
-Specifies the location of the Kerberos V4 domain/realm translation
-file.  Default is @value{DefaultKrb4Realms}.
-
 @itemx dns_lookup_kdc
 Indicate whether DNS SRV records should be used to locate the KDCs and
 other servers for a realm, if they are not listed in the information for
@@ -637,32 +625,6 @@ The list of specifiable options for each application may be found in
 that application's man pages.  The application defaults specified here
 are overridden by those specified in the [realms] section.
 
-A special application name (afs_krb5) is used by the krb524 service to
-know whether new format AFS tokens based on Kerberos 5 can be used
-rather than the older format which used a converted Kerberos 4 ticket.
-The new format allows for cross-realm authentication without
-introducing a security hole.  It is used by default.  Older AFS
-servers (before OpenAFS 1.2.8) will not support the new format.  If
-servers in your cell do not support the new format, you will need to
-add an @code{afs_krb5} relation to the @code{appdefaults} section.
-The following config file shows how to disable new format AFS tickets
-for the @code{afs.example.com} cell in the @code{EXAMPLE.COM} realm.
-
-@smallexample
-@group
-[appdefaults]
-    afs_krb5 = @{ 
-        EXAMPLE.COM = @{
-            afs/afs.example.com = false
-        @}
-    @}
-
-@end group
-@end smallexample
-
-
-
-
 
 @node login, realms (krb5.conf), appdefaults, krb5.conf
 @subsection [login]
@@ -674,20 +636,6 @@ login.krb5.  This section may contain any of the following relations:
 @itemx krb5_get_tickets
 Indicate whether or not to use a user's password to get V5 tickets.
 The default value is @value{DefaultKrb5GetTickets}.
-
-@itemx krb4_get_tickets
-Indicate whether or not to user a user's password to get V4 tickets.
-The default value is @value{DefaultKrb4GetTickets}.
-
-@itemx krb4_convert
-Indicate whether or not to use the Kerberos conversion daemon to get V4
-tickets.  The default value is @value{DefaultKrb4Convert}.  If this is
-set to false and krb4_get_tickets is true, then login will get the V5
-tickets directly using the Kerberos V4 protocol directly.  This does
-not currently work with non-MIT-V4 salt types (such as the AFS3 salt
-type).  Note that if this is set to true and krb524d is not running,
-login will hang for approximately a minute under Solaris, due to a
-Solaris socket emulation bug.
 
 @itemx krb_run_aklog
 Indicate whether or not to run aklog.  The default value is
@@ -1493,13 +1441,7 @@ If you wish to change this (which we do not recommend, because the
 current implementation has little protection against denial-of-service
 attacks), the standard port number assigned for Kerberos TCP traffic
 is port 88.
-
-@itemx v4_mode
-This string specifies how the KDC should respond to Kerberos 4
-packets.  The possible values are none, disable, full, and nopreauth.
-The default value is @value{DefaultV4Mode}.
-@comment these values found in krb5/src/kdc/kerberos_v4.c in v4mode_table
-@end table
+-@end table
 
 @node realms (kdc.conf), pkinit kdc options, kdcdefaults, kdc.conf
 @subsection [realms]
@@ -4353,7 +4295,6 @@ kerberos-adm  @value{DefaultKadmindPort}/udp          # Kerberos 5 admin/changep
 krb5_prop     @value{DefaultKrbPropPort}/tcp          # Kerberos slave propagation
 @c kpop          1109/tcp         # Pop with Kerberos
 eklogin       @value{DefaultEkloginPort}/tcp         # Kerberos auth. & encrypted rlogin
-krb524        @value{DefaultKrb524Port}/tcp         # Kerberos 5 to 4 ticket translator
 @end group
 @end smallexample
 
