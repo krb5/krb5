@@ -2233,7 +2233,7 @@ is_referral_entry(krb5_context context, krb5_db_entry *server)
     tl_data.tl_data_contents = NULL;
 
     if (krb5_dbe_lookup_tl_data(context, server, &tl_data) == 0 &&
-	tl_data.tl_data_contents != NULL) {
+	tl_data.tl_data_length != 0) {
 	return TRUE;
     }
 

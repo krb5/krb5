@@ -121,6 +121,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_authdata **kdc_issued_auth_data = NULL;    /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;	    /* client/server KDB flags */
     char *s4u_name = NULL;
+    krb5_boolean is_referral;
 
     session_key.contents = NULL;
     
@@ -264,6 +265,8 @@ tgt_again:
     if (!is_local_principal(header_enc_tkt->client))
 	setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
 
+    is_referral = is_referral_entry(kdc_context, &server);
+
     /* Check for protocol transition */
     errcode = kdc_process_s4u2self_req(kdc_context, request, header_enc_tkt->client,
 				       &server, header_enc_tkt->session, kdc_time,
@@ -387,7 +390,7 @@ tgt_again:
     enc_tkt_reply.times.starttime = 0;
 
     if (isflagset(server.attributes, KRB5_KDB_OK_AS_DELEGATE) &&
-	is_referral_entry(kdc_context, &server)) {
+	!is_referral) {
 	/* Ensure that we are not returning a referral */
 	setflag(enc_tkt_reply.flags, TKT_FLG_OK_AS_DELEGATE);
     }
