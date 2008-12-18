@@ -75,8 +75,8 @@
 {
     [[self window] center];
     // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
-    [[self window] setLevel:NSScreenSaverWindowLevel];
-    
+    [[self window] setLevel:NSModalPanelWindowLevel];    
+
     visibleAsSheet = NO;
     
     lifetimeFormatter.displaySeconds = NO;
