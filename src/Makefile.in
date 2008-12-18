@@ -9,7 +9,7 @@ mydir=.
 #	plugins/preauth/wpse
 #	plugins/preauth/cksum_body
 #	plugins/authdata/greet
-SUBDIRS=util include lib @krb524@ kdc kadmin @ldap_plugin_dir@ slave clients \
+SUBDIRS=util include lib kdc kadmin @ldap_plugin_dir@ slave clients \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \
 	appl tests \
@@ -195,7 +195,6 @@ WINMAKEFILES=Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
 	clients\kcpytkt\Makefile clients\kdeltkt\Makefile \
 	include\Makefile \
-	krb524\Makefile \
 	lib\Makefile lib\crypto\Makefile \
 	lib\crypto\crc32\Makefile lib\crypto\des\Makefile \
 	lib\crypto\dk\Makefile lib\crypto\enc_provider\Makefile \
@@ -205,11 +204,10 @@ WINMAKEFILES=Makefile \
 	lib\crypto\sha1\Makefile lib\crypto\arcfour\Makefile \
 	lib\crypto\md4\Makefile lib\crypto\md5\Makefile \
 	lib\crypto\yarrow\Makefile lib\crypto\aes\Makefile \
-	lib\des425\Makefile \
 	lib\gssapi\Makefile lib\gssapi\generic\Makefile \
 	lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
 	lib\gssapi\spnego\Makefile \
-	lib\krb4\Makefile lib\krb5\Makefile \
+	lib\krb5\Makefile \
 	lib\krb5\asn.1\Makefile lib\krb5\ccache\Makefile \
 	lib\krb5\ccache\ccapi\Makefile \
 	lib\krb5\error_tables\Makefile \
@@ -260,8 +258,6 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##include\Makefile: include\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##krb524\Makefile: krb524\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\Makefile: lib\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\Makefile: lib\crypto\Makefile.in $(MKFDEP)
@@ -294,8 +290,6 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\raw\Makefile: lib\crypto\raw\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\des425\Makefile: lib\des425\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\Makefile: lib\gssapi\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\generic\Makefile: lib\gssapi\generic\Makefile.in $(MKFDEP)
@@ -305,8 +299,6 @@ WINMAKEFILES=Makefile \
 ##DOS##lib\gssapi\spnego\Makefile: lib\gssapi\spnego\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\krb5\Makefile: lib\gssapi\krb5\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb4\Makefile: lib\krb4\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\Makefile: lib\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -395,14 +387,14 @@ FILES= ./* \
     clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
 	clients/kpasswd/* clients/kcpytkt/* clients/kdeltkt/* \
 	config/* include/* include/kerberosIV/* \
-	include/krb5/* include/krb5/stock/* include/sys/* krb524/* lib/* \
+	include/krb5/* include/krb5/stock/* include/sys/* lib/* \
 	lib/crypto/* lib/crypto/crc32/* lib/crypto/des/* lib/crypto/dk/* \
 	lib/crypto/enc_provider/* lib/crypto/hash_provider/* \
 	lib/crypto/keyhash_provider/* lib/crypto/old/* lib/crypto/raw/* \
 	lib/crypto/sha1/* lib/crypto/arcfour/* lib/crypto/md4/* \
 	lib/crypto/md5/* lib/crypto/yarrow/* \
-	lib/des425/* lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
-	lib/gssapi/mechglue/* lib/gssapi/spnego/* lib/krb4/* \
+	lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
+	lib/gssapi/mechglue/* lib/gssapi/spnego/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/ccapi/* \
 	lib/krb5/error_tables/* \
@@ -442,12 +434,9 @@ ETOUT =	\
 	$(INC)krb5_err.h $(ET)krb5_err.c \
 	$(INC)kv5m_err.h $(ET)kv5m_err.c \
 	$(INC)krb524_err.h $(ET)krb524_err.c \
-	$(INC)/kerberosIV/kadm_err.h lib/krb4/kadm_err.c \
-	$(INC)/kerberosIV/krb_err.h lib/krb4/krb_err.c \
 	$(PR)prof_err.h $(PR)prof_err.c \
 	$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.c \
-	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c \
-	lib/krb4/krb_err_txt.c
+	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c
 
 HOUT =	$(INC)krb5\krb5.h $(GG)gssapi.h $(PR)profile.h
 
@@ -502,10 +491,6 @@ $(INC)kv5m_err.h: $(AH) $(ET)kv5m_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)kv5m_err.et
 $(INC)krb524_err.h: $(AH) $(ET)krb524_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)krb524_err.et
-$(INC)/kerberosIV/kadm_err.h: $(AH) lib/krb4/kadm_err.et
-	$(AWK) -f $(AH) outfile=$@ lib/krb4/kadm_err.et
-$(INC)/kerberosIV/krb_err.h: $(AH) lib/krb4/krb_err.et
-	$(AWK) -f $(AH) outfile=$@ lib/krb4/krb_err.et
 $(PR)prof_err.h: $(AH) $(PR)prof_err.et
 	$(AWK) -f $(AH) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
@@ -527,10 +512,6 @@ $(ET)kv5m_err.c: $(AC) $(ET)kv5m_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)kv5m_err.et
 $(ET)krb524_err.c: $(AC) $(ET)krb524_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)krb524_err.et
-lib/krb4/kadm_err.c: $(AC) lib/krb4/kadm_err.et
-	$(AWK) -f $(AC) outfile=$@ lib/krb4/kadm_err.et
-lib/krb4/krb_err.c: $(AC) lib/krb4/krb_err.et
-	$(AWK) -f $(AC) outfile=$@ lib/krb4/krb_err.et
 $(PR)prof_err.c: $(AC) $(PR)prof_err.et
 	$(AWK) -f $(AC) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
@@ -541,10 +522,6 @@ $(CE)test1.c: $(AC) $(CE)test1.et
 	$(AWK) -f $(AC) outfile=$@ $(CE)test1.et
 $(CE)test2.c: $(AC) $(CE)test2.et
 	$(AWK) -f $(AC) outfile=$@ $(CE)test2.et
-
-lib/krb4/krb_err_txt.c: lib/krb4/krb_err.et
-	$(AWK) -f lib/krb4/et_errtxt.awk outfile=$@ \
-		lib/krb4/krb_err.et
 
 KRBHDEP = $(INC)krb5\krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
 	$(INC)kv5m_err.h $(INC)krb524_err.h $(INC)asn1_err.h
@@ -616,8 +593,6 @@ install-windows::
 	$(CP) clients\kcpytkt\$(OUTPRE)kcpytkt.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(CP) clients\kdeltkt\$(OUTPRE)kdeltkt.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(CP) clients\kpasswd\$(OUTPRE)kpasswd.exe "$(KRB_INSTALL_DIR)\bin\."
-	@if exist "$(KRB_INSTALL_DIR)\bin\krb4_32.dll" del "$(KRB_INSTALL_DIR)\bin\krb4_32.dll"
-	@if exist "$(KRB_INSTALL_DIR)\lib\krb4_32.lib" del "$(KRB_INSTALL_DIR)\lib\krb4_32.lib"
 
 install-unix:: 
 	$(INSTALL_SCRIPT) krb5-config \

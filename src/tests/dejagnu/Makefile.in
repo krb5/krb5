@@ -7,7 +7,6 @@ RUNTESTFLAGS =
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
-KRB4_RUNTESTFLAGS=@KRB4_DEJAGNU_TEST@
 
 SRCS=$(srcdir)/t_inetd.c
 
@@ -47,7 +46,6 @@ site.exp: runenv.vals Makefile
 		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
 	echo "set KRB5_DB_MODULE_DIR {$(KRB5_DB_MODULE_DIR)}" >> site.exp
 	echo "set PRIOCNTL_HACK @PRIOCNTL_HACK@" >> site.exp
-	echo set $(KRB4_RUNTESTFLAGS) | sed -e 's/=/ /' >> site.exp
 
 # +++ Dependency line eater +++
 # 

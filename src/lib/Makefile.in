@@ -1,15 +1,14 @@
 thisconfigdir=./..
 myfulldir=lib
 mydir=lib
-SUBDIRS=crypto krb5 des425 @KRB4@ gssapi rpc kdb kadm5 apputils
+SUBDIRS=crypto krb5 gssapi rpc kdb kadm5 apputils
 BUILDTOP=$(REL)..
 
 all-unix::
 
-CLEANLIBS = libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libdes425.a \
-	libkrb425.a libkadm.a libkrb4.a libcom_err.a libpty.a \
-	libss.a libgssapi.a libapputils.a \
-	libkrb5.so libcrypto.so libkrb4.so libdes425.so
+CLEANLIBS = libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libkadm.a \
+	libcom_err.a libpty.a ibss.a libgssapi.a libapputils.a libkrb5.so \
+	libcrypto.so
 
 clean-unix::
 

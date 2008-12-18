@@ -162,10 +162,6 @@ sub do_subs_2 {
 
     $_ = &uniquify($_);
 
-    # Some krb4 dependencies should only be present if building with krb4
-    # enabled.
-    s;\$\(BUILDTOP\)/include/kerberosIV/krb_err.h ;\$(KRB_ERR_H_DEP) ;g;
-
     # Delete trailing whitespace.
     s; *$;;g;
 

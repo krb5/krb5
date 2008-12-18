@@ -5,9 +5,6 @@
 
 #include "krb5.h"
 #include "autoconf.h"
-#ifdef KRB5_KRB4_COMPAT
-#include "kerberosIV/krb.h"
-#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -68,11 +65,9 @@ void test_524_conv_principal(krb5_context ctx, char *name)
 {
     krb5_principal princ = 0;
     krb5_error_code retval;
-#ifndef KRB5_KRB4_COMPAT
 #define ANAME_SZ 40
 #define INST_SZ  40
 #define REALM_SZ  40
-#endif
     char aname[ANAME_SZ+1], inst[INST_SZ+1], realm[REALM_SZ+1];
 
     aname[ANAME_SZ] = inst[INST_SZ] = realm[REALM_SZ] = 0;
