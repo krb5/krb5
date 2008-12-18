@@ -286,12 +286,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      * still be issued a ticket granting ticket.
      */
     if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) &&
-	!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE))
+	!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE)) {
 	server_princ = *(server.princ);
-    else
+    } else {
 	server_princ = *(request->server);
-    /* The realm is always canonicalized */
-    server_princ.realm = *(krb5_princ_realm(context, server.princ));
+	/* The realm is always canonicalized */
+	server_princ.realm = *(krb5_princ_realm(context, server.princ));
+    }
     ticket_reply.server = &server_princ;
 
     enc_tkt_reply.flags = 0;
@@ -311,12 +312,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	    setflag(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
 
     enc_tkt_reply.session = &session_key;
-    if (isflagset(c_flags, KRB5_KDB_FLAG_CANONICALIZE))
+    if (isflagset(c_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
 	client_princ = *(client.princ);
-    else
+    } else {
 	client_princ = *(request->client);
-    /* The realm is always canonicalized */
-    client_princ.realm = *(krb5_princ_realm(context, client.princ));
+	/* The realm is always canonicalized */
+	client_princ.realm = *(krb5_princ_realm(context, client.princ));
+    }
     enc_tkt_reply.client = &client_princ;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
