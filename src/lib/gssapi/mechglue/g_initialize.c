@@ -98,8 +98,8 @@ gssint_mechglue_init(void)
 	err = k5_mutex_finish_init(&g_mechListLock);
 
 #ifdef _GSS_STATIC_LINK
-	err = gss_spnegoint_lib_init();
 	err = gss_krb5int_lib_init();
+	err = gss_spnegoint_lib_init();
 #endif
 
 	return err;
@@ -119,8 +119,8 @@ gssint_mechglue_fini(void)
 	printf("gssint_mechglue_fini\n");
 #endif
 #ifdef _GSS_STATIC_LINK
-	gss_krb5int_lib_fini();
 	gss_spnegoint_lib_fini();
+	gss_krb5int_lib_fini();
 #endif
 	k5_mutex_destroy(&g_mechSetLock);
 	k5_mutex_destroy(&g_mechListLock);
@@ -712,7 +712,7 @@ gssint_register_mechinfo(gss_mech_info template)
 	} while (0)
 
 static gss_mechanism
-build_dynamicMech(void *dl)
+build_dynamicMech(void *dl, const gss_OID mech_type)
 {
 	gss_mechanism mech;
 
@@ -762,6 +762,10 @@ build_dynamicMech(void *dl)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap_iov);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_iov_length);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_complete_auth_token);
+
+	assert(mech_type != GSS_C_NO_OID);
+
+	mech->mech_type = *(mech_type);
 
 	return mech;
 }
@@ -848,7 +852,7 @@ const gss_OID oid;
 		aMech->mech = (*sym)(aMech->mech_type);
 	} else {
 		/* Try dynamic dispatch table */
-		aMech->mech = build_dynamicMech(dl);
+		aMech->mech = build_dynamicMech(dl, aMech->mech_type);
 	}
 	if (aMech->mech == NULL) {
 		(void) krb5int_close_plugin(dl);
