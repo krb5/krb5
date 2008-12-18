@@ -722,7 +722,7 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     }
 
     /*
-     * kg_tokenize_stream_iov() will place one byte of padding in the
+     * kg_unseal_stream_iov() will place one byte of padding in the
      * padding buffer; its true value is unknown until after decryption.
      *
      * relative_padlength contains the number of bytes to compensate the

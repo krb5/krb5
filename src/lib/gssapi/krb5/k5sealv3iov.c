@@ -354,7 +354,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    if (rrc != desired_rrc)
 		goto defective;
 	} else if (rrc != 0) {
-	    /* Should have been rotated by kg_tokenize_stream_iov() */
+	    /* Should have been rotated by kg_unseal_stream_iov() */
 	    goto defective;
 	}
 
