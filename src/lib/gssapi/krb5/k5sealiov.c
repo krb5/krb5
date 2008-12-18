@@ -184,8 +184,9 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* compute the checksum */
     code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type,
-				   (k5_headerlen != 0), ctx->seq, ctx->enc,
-				   sign_usage, iov, iov_count, &md5cksum);
+				   ctx->cksum_size, ctx->seq, ctx->enc,
+				   sign_usage, iov, iov_count, toktype,
+				   &md5cksum);
     if (code != 0)
 	goto cleanup;
 

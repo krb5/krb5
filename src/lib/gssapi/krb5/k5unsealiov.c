@@ -221,8 +221,9 @@ kg_unseal_v1_iov(krb5_context context,
 
     /* compute the checksum of the message */
     code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type,
-				   conflen != 0, ctx->seq, ctx->enc,
-				   sign_usage, iov, iov_count, &md5cksum);
+				   cksum_len, ctx->seq, ctx->enc,
+				   sign_usage, iov, iov_count, toktype,
+				   &md5cksum);
     if (code != 0) {
 	retval = GSS_S_FAILURE;
 	goto cleanup;
@@ -240,7 +241,7 @@ kg_unseal_v1_iov(krb5_context context,
 	    goto cleanup;
 	}
 
-	cksum.length = signalg == 0 ? 8 : 16;
+	cksum.length = cksum_len;
 	cksum.contents = md5cksum.contents + 16 - cksum.length;
 
 	code = memcmp(cksum.contents, ptr + 14, cksum.length);

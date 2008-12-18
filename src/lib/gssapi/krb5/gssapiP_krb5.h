@@ -392,12 +392,13 @@ void kg_release_iov(gss_iov_buffer_desc *iov,
 
 krb5_error_code kg_make_checksum_iov_v1(krb5_context context,
 		krb5_cksumtype type,
-		int conf_req_flag,
+		size_t token_cksum_len,
 		krb5_keyblock *seq,
 		krb5_keyblock *enc, /* for conf len */
 		krb5_keyusage sign_usage,
 		gss_iov_buffer_desc *iov,
 		int iov_count,
+		int toktype,
 		krb5_checksum *checksum);
 
 krb5_error_code kg_make_checksum_iov_v3(krb5_context context,

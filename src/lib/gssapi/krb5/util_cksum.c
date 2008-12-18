@@ -111,12 +111,13 @@ cleanup:
 krb5_error_code
 kg_make_checksum_iov_v1(krb5_context context,
 			krb5_cksumtype type,
-			int conf_req_flag,
+			size_t cksum_len,
 			krb5_keyblock *seq,
 			krb5_keyblock *enc,
 			krb5_keyusage sign_usage,
 			gss_iov_buffer_desc *iov,
 			int iov_count,
+			int toktype,
 			krb5_checksum *checksum)
 {
     krb5_error_code code;
@@ -124,7 +125,7 @@ kg_make_checksum_iov_v1(krb5_context context,
     krb5_crypto_iov *kiov;
     size_t kiov_count;
     int i = 0, j;
-    size_t conf_len;
+    size_t conf_len = 0, token_header_len;
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
@@ -135,7 +136,8 @@ kg_make_checksum_iov_v1(krb5_context context,
 	return ENOMEM;
 
     /* Checksum over ( Header | Confounder | Data | Pad ) */
-    conf_len = conf_req_flag ? kg_confounder_size(context, (krb5_keyblock *)enc) : 0;
+    if (toktype == KG_TOK_WRAP_MSG)
+	conf_len = kg_confounder_size(context, (krb5_keyblock *)enc);
 
     /* Checksum output */
     kiov[i].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
@@ -147,15 +149,17 @@ kg_make_checksum_iov_v1(krb5_context context,
     }
     i++;
 
+    /* Header | SND_SEQ | SGN_CKSUM | Confounder */
+    token_header_len = 16 + cksum_len + conf_len;
+
     /* Header (calculate from end because of variable length ASN.1 header) */
     kiov[i].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     kiov[i].data.length = 8;
-    kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - conf_len -
-			24; /* Header | SND_SEQ | SGN_CKSUM */
+    kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - token_header_len;
     i++;
 
     /* Confounder */
-    if (conf_req_flag) {
+    if (toktype == KG_TOK_WRAP_MSG) {
 	kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
 	kiov[i].data.length = conf_len;
 	kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - conf_len;

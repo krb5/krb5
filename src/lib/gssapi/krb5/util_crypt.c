@@ -254,17 +254,17 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     int i = 0, j;
     size_t kiov_count;
     krb5_crypto_iov *kiov;
-    size_t confsize;
+    size_t conf_len;
 
     *pkiov = NULL;
     *pkiov_count = 0;
 
-    confsize = kg_confounder_size(context, (krb5_keyblock *)key);
+    conf_len = kg_confounder_size(context, (krb5_keyblock *)key);
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
 
-    if (header->buffer.length < confsize)
+    if (header->buffer.length < conf_len)
 	return KRB5_BAD_MSIZE;
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
@@ -283,8 +283,8 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
 
     /* For pre-CFX, the confounder is at the end of the GSS header */
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-    kiov[i].data.length = confsize;
-    kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - confsize;
+    kiov[i].data.length = conf_len;
+    kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - conf_len;
     i++;
 
     for (j = 0; j < iov_count; j++) {
