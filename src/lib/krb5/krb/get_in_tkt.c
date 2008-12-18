@@ -513,6 +513,7 @@ krb5_get_in_tkt(krb5_context context,
     krb5_pa_data  **	preauth_to_use = 0;
     int			loopcount = 0;
     krb5_int32		do_more = 0;
+    int			canon_flag;
     int             use_master = 0;
     int			referral_count = 0;
     krb5_principal_data	referred_client;
@@ -531,6 +532,10 @@ krb5_get_in_tkt(krb5_context context,
     referred_client.realm.data = NULL;
     referred_client.realm.length = 0;
 
+    /* per referrals draft, enterprise principals imply canonicalization */
+    canon_flag = ((options & KDC_OPT_CANONICALIZE) != 0) ||
+	creds->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
+ 
     /*
      * Set up the basic request structure
      */
@@ -653,7 +658,7 @@ krb5_get_in_tkt(krb5_context context,
 		if (retval)
 		    goto cleanup;
 		continue;
-	    } else if (err_reply->error == KDC_ERR_WRONG_REALM) {
+	    } else if (canon_flag && err_reply->error == KDC_ERR_WRONG_REALM) {
 		if (++referral_count > KRB5_REFERRAL_MAXHOPS ||
 		    err_reply->client == NULL ||
 		    err_reply->client->realm.length == 0)
