@@ -555,8 +555,8 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     }
 
     /* setup data */
-    tdata->buffer.length = stream->buffer.length - theader->buffer.length -
-			   tpadding->buffer.length - ttrailer->buffer.length;
+    tdata->buffer.length = stream->buffer.length - ttrailer->buffer.length -
+			   tpadding->buffer.length - theader->buffer.length;
 
     assert(data != NULL);
 
