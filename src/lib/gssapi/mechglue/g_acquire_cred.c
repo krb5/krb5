@@ -381,8 +381,8 @@ gss_add_cred(minor_status, input_cred_handle,
 		internal_name = union_name->mech_name;
 	    else {
 		if (gssint_import_internal_name(minor_status,
-					       &mech->mech_type, union_name,
-					       &allocated_name) != GSS_S_COMPLETE)
+					        &mech->mech_type, union_name,
+					        &allocated_name) != GSS_S_COMPLETE)
 		    return (GSS_S_BAD_NAME);
 		internal_name = allocated_name;
 	    }
