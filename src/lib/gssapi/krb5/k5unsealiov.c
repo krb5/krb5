@@ -344,11 +344,6 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     }
 
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
-    if (padding == NULL && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
-    }
-
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
 
     ptr = (unsigned char *)header->buffer.value;
