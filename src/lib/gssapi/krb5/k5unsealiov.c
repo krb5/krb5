@@ -267,7 +267,7 @@ kg_unseal_v1_iov(krb5_context context,
      * pad length is in the RPC PDU. The value of the padding may be
      * uninitialized. For normal GSS, the last bytes of the decrypted
      * data contain the pad length. kg_fixup_padding_iov() will find
-     * this and fixup the last data IOV and padding IOV appropriately.
+     * this and fixup the last data IOV appropriately.
      */
     if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
 	retval = kg_fixup_padding_iov(&code, iov, iov_count);
