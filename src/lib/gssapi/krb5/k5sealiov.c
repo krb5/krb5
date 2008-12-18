@@ -198,12 +198,12 @@ make_seal_token_v1_iov(krb5_context context,
 			  md5cksum.contents, md5cksum.contents, 16);
 	if (code != 0)
 	    goto cleanup;
-	break;
 
 	cksum.length = ctx->cksum_size;
 	cksum.contents = md5cksum.contents + 16 - cksum.length;
 
 	memcpy(ptr + 14, cksum.contents, cksum.length);
+	break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
 	assert(md5cksum.length == ctx->cksum_size);
 	memcpy(ptr + 14, md5cksum.contents, md5cksum.length);
