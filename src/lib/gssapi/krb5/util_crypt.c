@@ -697,6 +697,7 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     gss_iov_buffer_t data = NULL;
     size_t padlength, relative_padlength;
     unsigned char *p;
+    OM_uint32 minor;
 
     data = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_DATA);
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
@@ -712,7 +713,7 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     }
 
     p = (unsigned char *)padding->buffer.value;
-    padlength = p[0];
+    padlength = p[padding->buffer.length - 1];
 
     if (data->buffer.length + padding->buffer.length < padlength ||
         padlength == 0) {
@@ -722,9 +723,14 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 
     /*
      * kg_tokenize_stream_iov() will place one byte of padding in the
-     * padding buffer, because its true value is unknown until decryption
-     * time. relative_padlength contains the number of bytes to compensate
-     * the padding and data buffers by.
+     * padding buffer; its true value is unknown until after decryption.
+     *
+     * relative_padlength contains the number of bytes to compensate the
+     * padding and data buffers by; it will be zero if the caller manages
+     * the padding length.
+     *
+     * If the caller manages the padding length, then relative_padlength
+     * wil be zero.
      *
      * eg. if the buffers are structured as follows:
      *
@@ -735,17 +741,18 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
      * after compensation they would look like:
      *
      *	    +-DATA--+-PAD--+
-     *	    | ABCDE | 4444 |
+     *	    | ABCDE | NULL |
      *	    +-------+------+
      */
     relative_padlength = padlength - padding->buffer.length;
 
+    assert(data->buffer.length >= relative_padlength);
+
     data->buffer.length -= relative_padlength;
 
-    /*
-     * We don't really know DATA and PADDING buffers are
-     * adjacent in memory so just set PADDING to NULL.
-     */
+    if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATED)
+	gss_release_buffer(&minor, &padding->buffer);
+
     padding->buffer.length = 0;
     padding->buffer.value = NULL;
 
