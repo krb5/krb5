@@ -3250,7 +3250,7 @@ g_get_tag_and_length(unsigned char **buf, int tag,
 	unsigned char *ptr = *buf;
 	int ret = -1; /* pessimists, assume failure ! */
 	unsigned int encoded_len;
-	int tmplen = 0;
+	unsigned int tmplen = 0;
 
 	*outlen = 0;
 	if (buflen > 1 && *ptr == tag) {
