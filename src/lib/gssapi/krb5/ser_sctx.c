@@ -99,7 +99,7 @@ kg_oid_internalize(kcontext, argp, buffer, lenremain)
         return EINVAL;
     }
     oid->length = ibuf;
-    oid->elements = malloc(ibuf);
+    oid->elements = malloc((size_t)ibuf);
     if (oid->elements == 0) {
         free(oid);
         return ENOMEM;
@@ -570,8 +570,8 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             ctx->krb_times.renew_till = (krb5_timestamp) ibuf;
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->krb_flags = (krb5_flags) ibuf;
-            (void) (*kaccess.krb5_ser_unpack_int64)(&ctx->seq_send, &bp, &remain);
-            kret = (*kaccess.krb5_ser_unpack_int64)(&ctx->seq_recv, &bp, &remain);
+            (void) (*kaccess.krb5_ser_unpack_int64)((krb5_int64 *)&ctx->seq_send, &bp, &remain);
+            kret = (*kaccess.krb5_ser_unpack_int64)((krb5_int64 *)&ctx->seq_recv, &bp, &remain);
             if (kret) {
                 free(ctx);
                 return kret;

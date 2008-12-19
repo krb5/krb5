@@ -483,7 +483,7 @@ setup_enc_dce(
    krb5_context context)
 {
     krb5_error_code code;
-    int i;
+    size_t i;
 
     if (ctx->proto > 0) {
 	return GSS_S_COMPLETE; /* CFX handles acceptor_subkey directly */
@@ -859,7 +859,7 @@ mutual_auth(
             if (code)
                 goto fail;
             if (krb_error->error)
-                code = krb_error->error + ERROR_TABLE_BASE_krb5;
+                code = (krb5_error_code)krb_error->error + ERROR_TABLE_BASE_krb5;
             else
                 code = 0;
             krb5_free_error(context, krb_error);

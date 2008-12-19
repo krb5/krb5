@@ -79,7 +79,7 @@ make_seal_token_v1 (krb5_context context,
      * we plan to write out to the token.
      * tlen is the length of the token
      * including header. */
-    unsigned  conflen=0, tmsglen, tlen, msglen;
+    unsigned int conflen=0, tmsglen, tlen, msglen;
     unsigned char *t, *ptr;
     unsigned char *plain;
     unsigned char pad;
@@ -246,8 +246,8 @@ make_seal_token_v1 (krb5_context context,
 
     /* create the seq_num */
 
-    if ((code = kg_make_seq_num(context, seq, direction?0:0xff, *seqnum,
-                                ptr+14, ptr+6))) {
+    if ((code = kg_make_seq_num(context, seq, direction?0:0xff,
+				(krb5_ui_4)*seqnum, ptr+14, ptr+6))) {
         xfree (plain);
         xfree(t);
         return(code);

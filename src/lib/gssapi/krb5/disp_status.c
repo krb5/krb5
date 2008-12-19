@@ -46,7 +46,7 @@ free_string (char *s)
 char *get_error_message(OM_uint32 minor_code)
 {
     gsserrmap *p = k5_getspecific(K5_KEY_GSS_KRB5_ERROR_MESSAGE);
-    char *msg = 0;
+    char *msg = NULL;
 #ifdef DEBUG
     fprintf(stderr, "%s(%lu, p=%p)", __func__, (unsigned long) minor_code,
             (void *) p);
@@ -61,7 +61,7 @@ char *get_error_message(OM_uint32 minor_code)
         }
     }
     if (msg == 0)
-        msg = error_message(minor_code);
+        msg = (char *)error_message((krb5_error_code)minor_code);
 #ifdef DEBUG
     fprintf(stderr, " -> %p/%s\n", (void *) msg, msg);
 #endif
@@ -134,7 +134,7 @@ void krb5_gss_save_error_info(OM_uint32 minor_code, krb5_context ctx)
     fprintf(stderr, "%s(%lu, ctx=%p)\n", __func__,
             (unsigned long) minor_code, (void *)ctx);
 #endif
-    s = krb5_get_error_message(ctx, minor_code);
+    s = (char *)krb5_get_error_message(ctx, (krb5_error_code)minor_code);
 #ifdef DEBUG
     fprintf(stderr, "%s(%lu, ctx=%p) saving: %s\n", __func__,
             (unsigned long) minor_code, (void *)ctx, s);
@@ -142,7 +142,7 @@ void krb5_gss_save_error_info(OM_uint32 minor_code, krb5_context ctx)
     save_error_string(minor_code, s);
     /* The get_error_message call above resets the error message in
        ctx.  Put it back, in case we make this call again *sigh*.  */
-    krb5_set_error_message(ctx, minor_code, "%s", s);
+    krb5_set_error_message(ctx, (krb5_error_code)minor_code, "%s", s);
     krb5_free_error_message(ctx, s);
 }
 void krb5_gss_delete_error_info(void *p)

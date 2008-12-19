@@ -165,7 +165,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     /* decode the message, if SEAL */
 
     if (toktype == KG_TOK_SEAL_MSG) {
-        int tmsglen = bodysize-(14+cksum_len);
+        size_t tmsglen = bodysize-(14+cksum_len);
         if (sealalg != 0xffff) {
             if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
                 *minor_status = ENOMEM;
@@ -463,11 +463,11 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
             message_buffer->value = NULL;
             message_buffer->length = 0;
         }
-        *minor_status = G_BAD_DIRECTION;
+        *minor_status = (OM_uint32)G_BAD_DIRECTION;
         return(GSS_S_BAD_SIG);
     }
 
-    retval = g_order_check(&(ctx->seqstate), seqnum);
+    retval = g_order_check(&(ctx->seqstate), (gssint_uint64)seqnum);
 
     /* success or ordering violation */
 

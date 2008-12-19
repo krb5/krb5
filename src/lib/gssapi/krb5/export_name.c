@@ -35,7 +35,8 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
     krb5_context context;
     krb5_error_code code;
     size_t length;
-    char *str, *cp;
+    char *str;
+    unsigned char *cp;
 
     if (minor_status)
         *minor_status = 0;
@@ -61,7 +62,7 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
                                   &str))) {
         if (minor_status)
             *minor_status = code;
-        save_error_info(code, context);
+        save_error_info((OM_uint32)code, context);
         krb5_free_context(context);
         return(GSS_S_FAILURE);
     }

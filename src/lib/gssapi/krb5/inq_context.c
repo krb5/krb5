@@ -254,7 +254,8 @@ gss_krb5int_extract_authz_data_from_sec_context(
 {
     OM_uint32 major_status;
     krb5_gss_ctx_id_rec *ctx;
-    int ad_type = 0, i;
+    int ad_type = 0;
+    size_t i;
     unsigned char *cp;
 
     *data_set = GSS_C_NO_BUFFER_SET;

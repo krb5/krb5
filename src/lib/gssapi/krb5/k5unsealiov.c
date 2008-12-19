@@ -378,7 +378,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
 
     if (ctx->proto == 0)
 	code = kg_unseal_v1_iov(context, minor_status, ctx, iov, iov_count,
-				(ptr - (unsigned char *)header->buffer.value),
+				(size_t)(ptr - (unsigned char *)header->buffer.value),
 			        conf_state, qop_state, toktype);
     else
 	code = gss_krb5int_unseal_v3_iov(context, minor_status, ctx, iov, iov_count,
@@ -436,7 +436,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 	goto cleanup;
     }
 
-    tiov = (gss_iov_buffer_desc *)calloc(iov_count + 2, sizeof(gss_iov_buffer_desc));
+    tiov = (gss_iov_buffer_desc *)calloc((size_t)iov_count + 2, sizeof(gss_iov_buffer_desc));
     if (tiov == NULL) {
 	code = ENOMEM;
 	goto cleanup;

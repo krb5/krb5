@@ -889,6 +889,8 @@ krb5_error_code krb5_gss_init_context (krb5_context *ctxp);
 OM_uint32 krb5int_gss_use_kdc_context(OM_uint32 *, const gss_OID,
 				      const gss_OID, gss_buffer_t);
 
+krb5_error_code krb5_gss_use_kdc_context(void);
+
 #define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH 9
 #define GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x09"
 

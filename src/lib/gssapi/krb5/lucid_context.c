@@ -72,7 +72,8 @@ gss_krb5int_export_lucid_sec_context(
     krb5_gss_ctx_id_t   ctx = (krb5_gss_ctx_id_t)context_handle;
     void                *lctx = NULL;
     unsigned char	*cp;
-    int			version, i;
+    unsigned int	version = 0;
+    size_t		i;
     gss_buffer_desc	rep;
 
     /* Assume failure */

@@ -159,7 +159,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         memset(plain.data + message->length, 'x', ec);
         memcpy(plain.data + message->length + ec, outbuf, 16);
 
-        cipher.ciphertext.data = outbuf + 16;
+        cipher.ciphertext.data = (char *)outbuf + 16;
         cipher.ciphertext.length = bufsize - 16;
         cipher.enctype = key->enctype;
         err = krb5_c_encrypt(context, key, key_usage, 0, &plain, &cipher);
@@ -339,7 +339,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         return GSS_S_DEFECTIVE_TOKEN;
     }
     if ((ptr[2] & FLAG_SENDER_IS_ACCEPTOR) != acceptor_flag) {
-        *minor_status = G_BAD_DIRECTION;
+        *minor_status = (OM_uint32)G_BAD_DIRECTION;
         return GSS_S_BAD_SIG;
     }
 
@@ -390,7 +390,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             be larger than the plaintext size.  */
             cipher.enctype = key->enctype;
             cipher.ciphertext.length = bodysize - 16;
-            cipher.ciphertext.data = ptr + 16;
+            cipher.ciphertext.data = (char *)ptr + 16;
             plain.length = bodysize - 16;
             plain.data = malloc(plain.length);
             if (plain.data == NULL)
@@ -404,7 +404,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             /* Don't use bodysize here!  Use the fact that
                cipher.ciphertext.length has been adjusted to the
                correct length.  */
-            althdr = plain.data + plain.length - 16;
+            althdr = (unsigned char *)plain.data + plain.length - 16;
             if (load_16_be(althdr) != KG2_TOK_WRAP_MSG
                 || althdr[2] != ptr[2]
                 || althdr[3] != ptr[3]
@@ -433,7 +433,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             store_16_be(0, ptr+4);
             store_16_be(0, ptr+6);
             plain.length = bodysize-ec;
-            plain.data = ptr;
+            plain.data = (char *)ptr;
             if (!gss_krb5int_rotate_left(ptr, bodysize-ec, 16))
                 goto no_mem;
             sum.length = ec;
@@ -500,7 +500,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     } else if (toktype == KG_TOK_DEL_CTX) {
         if (load_16_be(ptr) != KG2_TOK_DEL_CTX)
             goto defective;
-        message_buffer = &empty_message;
+        message_buffer = (gss_buffer_t)&empty_message;
         goto verify_mic_1;
     } else {
         goto defective;

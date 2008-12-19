@@ -350,7 +350,7 @@ kg_derive_keys(krb5_context context,
 	       krb5_keyblock **seq)
 {
     krb5_error_code code;
-    int i;
+    unsigned int i;
 
     switch(subkey->enctype) {
     case ENCTYPE_DES_CBC_MD5:
@@ -410,7 +410,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_context context;
     unsigned char *ptr, *ptr2;
     char *sptr;
-    long tmp;
+    OM_uint32 tmp;
     size_t md5len;
     int bigend;
     krb5_gss_cred_id_t cred = 0;
@@ -570,7 +570,7 @@ kg_accept_krb5(minor_status, context_handle,
 
     if ((code = krb5_auth_con_init(context, &auth_context))) {
         major_status = GSS_S_FAILURE;
-        save_error_info(code, context);
+        save_error_info((OM_uint32)code, context);
         goto fail;
     }
     if (cred->rcache) {
@@ -950,7 +950,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_free_ticket(context, ticket); /* Done with ticket */
 
     {
-        krb5_ui_4 seq_temp;
+        krb5_int32 seq_temp;
         krb5_auth_con_getremoteseqnumber(context, auth_context, &seq_temp);
         ctx->seq_recv = seq_temp;
     }
@@ -981,7 +981,7 @@ kg_accept_krb5(minor_status, context_handle,
 
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
         unsigned char * ptr3;
-        krb5_ui_4 seq_temp;
+        krb5_int32 seq_temp;
         int cfx_generate_subkey;
 
         if (ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE))
