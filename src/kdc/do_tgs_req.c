@@ -195,17 +195,8 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     nprincs = 1;
     if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
 	setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
+	setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
     }
-
-    /*
-     * TGS-REP canonicalization matches Windows 2003 rather
-     * than Windows 2000. This means that we should indicate
-     * to the backend to always return referrals by setting
-     * KDB_FLAG_CANONICALIZE, and we should also always
-     * return the requested SPN in the reply regardless of
-     * whether KDC_OPT_CANONICALIZE was set or not.
-     */
-    setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
 
     errcode = krb5_db_get_principal_ext(kdc_context,
 					request->server,
@@ -265,7 +256,8 @@ tgt_again:
     if (!is_local_principal(header_enc_tkt->client))
 	setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
 
-    is_referral = is_tgs_referral(kdc_context, request, &server);
+    is_referral = isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE) &&
+	krb5_is_tgs_principal(server.princ);
 
     /* Check for protocol transition */
     errcode = kdc_process_s4u2self_req(kdc_context, request, header_enc_tkt->client,
@@ -300,11 +292,11 @@ tgt_again:
 	 * Get the key for the second ticket, and decrypt it.
 	 */
 	if ((errcode = kdc_get_server_key(request->second_ticket[st_idx],
-					 c_flags,
-					 &st_client,
-					 &st_nprincs,
-					 &st_sealing_key,
-					 &st_srv_kvno))) {
+					  c_flags,
+					  &st_client,
+					  &st_nprincs,
+					  &st_sealing_key,
+					  &st_srv_kvno))) {
 	    status = "2ND_TKT_SERVER";
 	    goto cleanup;
 	}

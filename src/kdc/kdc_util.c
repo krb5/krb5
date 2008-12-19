@@ -439,7 +439,7 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
     }
     retval = krb5_dbe_find_enctype(kdc_context, server,
 				   ticket->enc_part.enctype, -1,
-				   ticket->enc_part.kvno, &server_key);
+				   (krb5_int32)ticket->enc_part.kvno, &server_key);
     if (retval)
 	goto errout;
     if (!server_key) {
@@ -739,7 +739,7 @@ add_to_transited(krb5_data *tgt_trans, krb5_data *new_trans,
 
 	/* Note that the second test here is an unsigned comparison,
 	   so the first half (or a cast) is also required.  */
-      assert(nlst < 0 || nlst < sizeof(next));
+      assert(nlst < 0 || nlst < (int)sizeof(next));
       if ((nlst < 0 || next[nlst] != '.') &&
 	  (next[0] != '/') &&
 	  (pl = subrealm(exp, realm))) {
@@ -1119,7 +1119,7 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
             lastlevel = tag; 
             if (levels == level) {
 	        /* in our context-dependent class, is this the one we're looking for ? */
-	        if (tag == field) {
+	        if (tag == (int)field) {
 		    /* return length and data */ 
 		    astream++;
 		    savelen = *astream;
@@ -2224,20 +2224,3 @@ validate_transit_path(krb5_context context,
     return 0;
 }
 
-krb5_boolean
-is_tgs_referral(krb5_context context,
-		krb5_kdc_req *request,
-		krb5_db_entry *server)
-{
-    krb5_tl_data tl_data;
-
-    tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
-    tl_data.tl_data_contents = NULL;
-
-    if (krb5_dbe_lookup_tl_data(context, server, &tl_data) == 0 &&
-	tl_data.tl_data_length != 0) {
-	return TRUE;
-    }
-
-    return FALSE;
-}

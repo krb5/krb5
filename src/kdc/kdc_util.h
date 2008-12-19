@@ -266,11 +266,6 @@ validate_transit_path(krb5_context context,
 		krb5_db_entry *server,
 		krb5_db_entry *krbtgt);
 
-krb5_boolean
-is_tgs_referral(krb5_context context,
-	krb5_kdc_req *request,
-	krb5_db_entry *server);
-
 #define isflagset(flagfield, flag) (flagfield & (flag))
 #define setflag(flagfield, flag) (flagfield |= (flag))
 #define clear(flagfield, flag) (flagfield &= ~(flag))
