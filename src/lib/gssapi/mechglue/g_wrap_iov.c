@@ -184,7 +184,7 @@ gss_iov_buffer_desc *	iov;
 int			iov_count;
 {
     OM_uint32		status = GSS_S_COMPLETE;
-    size_t		i;
+    int			i;
 
     if (minor_status)
 	*minor_status = 0;

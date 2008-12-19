@@ -104,6 +104,8 @@ typedef	OM_uint32	    (*gss_acquire_cred_with_password_sfct)(
 /* it to initialize the GSSAPI library		  */
 int gssint_mechglue_initialize_library(void);
 
+OM_uint32 gssint_get_mech_type_oid(gss_OID OID, gss_buffer_t token);
+
 /*
  * This is the definition of the mechs_array struct, which is used to
  * define the mechs array table. This table is used to indirectly

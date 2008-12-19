@@ -98,7 +98,7 @@ gssint_seal_iov_shim(gss_mechanism mech,
     assert(mech->gss_wrap_iov_length);
 
     status = mech->gss_wrap_iov_length(minor_status, context_handle,
-				       conf_req_flag, qop_req,
+				       conf_req_flag, (gss_qop_t)qop_req,
 				       NULL, iov,
 				       sizeof(iov)/sizeof(iov[0]));
     if (status != GSS_S_COMPLETE) {
@@ -132,7 +132,7 @@ gssint_seal_iov_shim(gss_mechanism mech,
     iov[3].buffer.value = (unsigned char *)output_message_buffer->value + offset;
 
     status = mech->gss_wrap_iov(minor_status, context_handle,
-				conf_req_flag, qop_req, conf_state,
+				conf_req_flag, (gss_qop_t)qop_req, conf_state,
 				iov, sizeof(iov)/sizeof(iov[0]));
     if (status != GSS_S_COMPLETE) {
 	OM_uint32 minor;

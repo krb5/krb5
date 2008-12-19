@@ -51,7 +51,7 @@ gssint_get_der_length(unsigned char **buf, unsigned int buf_len, unsigned int *b
     /* p points to the beginning of the buffer */
     unsigned char *p = *buf;
     int length, new_length;
-    int octets;
+    unsigned int octets;
 
     if (buf_len < 1)
 	return (-1);

@@ -397,6 +397,8 @@ gss_add_cred(minor_status, input_cred_handle,
     else if (cred_usage == GSS_C_BOTH)
 	time_req = (acceptor_time_req > initiator_time_req) ?
 	    acceptor_time_req : initiator_time_req;
+    else
+	time_req = 0;
 
     status = mech->gss_acquire_cred(minor_status,
 				    internal_name, time_req,

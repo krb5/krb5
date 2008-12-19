@@ -39,7 +39,7 @@ static OM_uint32 append_to_buffer_set(OM_uint32 *minor_status,
 				      gss_buffer_set_t *dst,
 				      const gss_buffer_set_t src)
 {
-    int i;
+    size_t i;
     OM_uint32 status;
 
     if (src == GSS_C_NO_BUFFER_SET)

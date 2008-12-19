@@ -74,7 +74,7 @@ gss_name_t *		output_name;
     gss_name_t		    internal_name = GSS_C_NO_NAME;
     OM_uint32		    tmp, major_status = GSS_S_FAILURE;
     gss_OID_set		    mechlist = GSS_C_NO_OID_SET;
-    int			    i;
+    size_t		    i;
 
     major_status = val_imp_name_object_args(minor_status,
 					    input_name,

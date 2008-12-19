@@ -313,7 +313,7 @@ static OM_uint32
 build_mechSet(void)
 {
 	gss_mech_info mList;
-	int i;
+	size_t i;
 	size_t count;
 	gss_OID curItem;
 
