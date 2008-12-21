@@ -176,6 +176,52 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
     return status;
 }
 
+OM_uint32
+gssint_wrap_aead (gss_mechanism mech,
+		  OM_uint32 *minor_status,
+		  gss_union_ctx_id_t ctx,
+		  int conf_req_flag,
+		  gss_qop_t qop_req,
+		  gss_buffer_t input_assoc_buffer,
+		  gss_buffer_t input_payload_buffer,
+		  int *conf_state,
+		  gss_buffer_t output_message_buffer)
+{
+ /* EXPORT DELETE START */
+    OM_uint32		status;
+
+    assert(ctx != NULL);
+    assert(mech != NULL);
+
+    if (mech->gss_wrap_aead) {
+	status = mech->gss_wrap_aead(minor_status,
+				     ctx->internal_ctx_id,
+				     conf_req_flag,
+				     qop_req,
+				     input_assoc_buffer,
+				     input_payload_buffer,
+				     conf_state,
+				     output_message_buffer);
+	if (status != GSS_S_COMPLETE)
+	    map_error(minor_status, mech);
+    } else if (mech->gss_wrap_iov && mech->gss_wrap_iov_length) {
+	status = gssint_wrap_aead_iov_shim(mech,
+					   minor_status,
+					   ctx->internal_ctx_id,
+					   conf_req_flag,
+					   qop_req,
+					   input_assoc_buffer,
+					   input_payload_buffer,
+					   conf_state,
+					   output_message_buffer);
+    } else
+	status = GSS_S_UNAVAILABLE;
+
+ /* EXPORT DELETE END */
+
+    return status; 
+}
+
 OM_uint32 KRB5_CALLCONV
 gss_wrap_aead (minor_status,
                context_handle,
@@ -194,11 +240,9 @@ gss_buffer_t		input_payload_buffer;
 int *			conf_state;
 gss_buffer_t		output_message_buffer;
 {
- /* EXPORT DELETE START */
-
     OM_uint32		status;
-    gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
+    gss_union_ctx_id_t	ctx;
 
     status = val_wrap_aead_args(minor_status, context_handle,
 				conf_req_flag, qop_req,
@@ -211,40 +255,13 @@ gss_buffer_t		output_message_buffer;
      * select the approprate underlying mechanism routine and
      * call it.
      */
-    
-    ctx = (gss_union_ctx_id_t) context_handle;
+    ctx = (gss_union_ctx_id_t)context_handle;
     mech = gssint_get_mechanism (ctx->mech_type);
-    
-    if (mech) {
-	if (mech->gss_wrap_aead) {
-	    status = mech->gss_wrap_aead(
-					minor_status,
-					ctx->internal_ctx_id,
-					conf_req_flag,
-					qop_req,
-					input_assoc_buffer,
-					input_payload_buffer,
-					conf_state,
-					output_message_buffer);
-	    if (status != GSS_S_COMPLETE)
-		map_error(minor_status, mech);
-	} else if (mech->gss_wrap_iov && mech->gss_wrap_iov_length) {
-	    status = gssint_wrap_aead_iov_shim(mech,
-					       minor_status,
-					       ctx->internal_ctx_id,
-					       conf_req_flag,
-					       qop_req,
-					       input_assoc_buffer,
-					       input_payload_buffer,
-					       conf_state,
-					       output_message_buffer);
-	} else
-	    status = GSS_S_UNAVAILABLE;
-	
-	return(status);
-    }
- /* EXPORT DELETE END */
- 
-    return (GSS_S_BAD_MECH);
-}
+    if (!mech)
+	return (GSS_S_BAD_MECH);
 
+    return gssint_wrap_aead(mech, minor_status, context_handle,
+			    conf_req_flag, qop_req,
+			    input_assoc_buffer, input_payload_buffer,
+			    conf_state, output_message_buffer);
+} 

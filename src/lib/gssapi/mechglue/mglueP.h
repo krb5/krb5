@@ -630,6 +630,27 @@ gssint_put_der_length(
 	unsigned int		/* max_len */
 );
 
+OM_uint32
+gssint_wrap_aead (gss_mechanism,	/* mech */
+		  OM_uint32 *,		/* minor_status */
+		  gss_union_ctx_id_t,	/* ctx */
+		  int,			/* conf_req_flag */
+		  gss_qop_t,		/* qop_req_flag */
+		  gss_buffer_t,		/* input_assoc_buffer */
+		  gss_buffer_t,		/* input_payload_buffer */
+		  int *,		/* conf_state */
+		  gss_buffer_t);	/* output_message_buffer */
+OM_uint32
+gssint_unwrap_aead (gss_mechanism,	/* mech */
+		    OM_uint32 *,	/* minor_status */
+		    gss_union_ctx_id_t,	/* ctx */
+		    gss_buffer_t,	/* input_message_buffer */
+		    gss_buffer_t,	/* input_assoc_buffer */
+		    gss_buffer_t,	/* output_payload_buffer */
+		    int *,		/* conf_state */
+		    gss_qop_t *);	/* qop_state */
+
+
 /* Use this to map an error code that was returned from a mech
    operation; the mech will be asked to produce the associated error
    messages.

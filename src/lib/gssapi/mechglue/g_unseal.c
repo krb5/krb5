@@ -28,43 +28,6 @@
 
 #include "mglueP.h"
 
-static OM_uint32
-gssint_unseal_iov_shim(gss_mechanism mech,
-		       OM_uint32 *minor_status,
-		       gss_ctx_id_t context_handle,
-		       gss_buffer_t input_message_buffer,
-		       gss_buffer_t output_message_buffer,
-		       int *conf_state,
-		       gss_qop_t *qop_state)
-{
-    OM_uint32		status;
-    gss_iov_buffer_desc	iov[2];
-
-    iov[0].type = GSS_IOV_BUFFER_TYPE_STREAM;
-    iov[0].buffer = *input_message_buffer;
-
-    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA | GSS_IOV_BUFFER_FLAG_ALLOCATE;
-    iov[1].buffer.value = NULL;
-    iov[1].buffer.length = 0;
-
-    assert(mech->gss_unwrap_iov);
-
-    status = mech->gss_unwrap_iov(minor_status, context_handle, conf_state,
-				  qop_state, iov, sizeof(iov)/sizeof(iov[0]));
-    if (status == GSS_S_COMPLETE)
-	*output_message_buffer = iov[1].buffer;
-    else {
-	OM_uint32 tmp;
-
-	map_error(minor_status, mech);
-
-	if (iov[1].type & GSS_IOV_BUFFER_FLAG_ALLOCATED)
-	    gss_release_buffer(&tmp, &iov[1].buffer);
-    }
-
-    return status;
-}
-
 OM_uint32 KRB5_CALLCONV
 gss_unseal (minor_status,
             context_handle,
@@ -112,7 +75,6 @@ int *			qop_state;
      * select the approprate underlying mechanism routine and
      * call it.
      */
-
     ctx = (gss_union_ctx_id_t) context_handle;
     mech = gssint_get_mechanism (ctx->mech_type);
 
@@ -126,14 +88,15 @@ int *			qop_state;
 				      qop_state);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
-	} else if (mech->gss_unwrap_iov) {
-	    status = gssint_unseal_iov_shim(mech,
-					    minor_status,
-					    ctx->internal_ctx_id,
-					    input_message_buffer,
-					    output_message_buffer,
-					    conf_state,
-					    (gss_qop_t *)qop_state);
+	} else if (mech->gss_unwrap_aead || mech->gss_unwrap_iov) {
+	    status = gssint_unwrap_aead(mech,
+					minor_status,
+					ctx,
+					input_message_buffer,
+					GSS_C_NO_BUFFER,
+					output_message_buffer,
+					conf_state,
+					(gss_qop_t *)qop_state);
 	} else
 	    status = GSS_S_UNAVAILABLE;
 

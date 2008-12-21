@@ -62,14 +62,14 @@ val_unwrap_aead_args(
 }
 
 static OM_uint32
-gssint_wrap_aead_iov_shim(gss_mechanism mech,
-			  OM_uint32 *minor_status,
-			  gss_ctx_id_t context_handle,
-			  gss_buffer_t input_message_buffer,
-			  gss_buffer_t input_assoc_buffer,
-			  gss_buffer_t output_payload_buffer,
-			  int *conf_state,
-			  gss_qop_t *qop_state)
+gssint_unwrap_aead_iov_shim(gss_mechanism mech,
+			    OM_uint32 *minor_status,
+			    gss_ctx_id_t context_handle,
+			    gss_buffer_t input_message_buffer,
+			    gss_buffer_t input_assoc_buffer,
+			    gss_buffer_t output_payload_buffer,
+			    int *conf_state,
+			    gss_qop_t *qop_state)
 {
     OM_uint32		    status;
     gss_iov_buffer_desc	    iov[3];
@@ -85,7 +85,7 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
 	i++;
     }
 
-    iov[i].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[i].type = GSS_IOV_BUFFER_TYPE_DATA | GSS_IOV_BUFFER_FLAG_ALLOCATE;
     iov[i].buffer.value = NULL;
     iov[i].buffer.length = 0;
     i++;
@@ -94,12 +94,63 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
 
     status = mech->gss_unwrap_iov(minor_status, context_handle, conf_state,
 				  qop_state, iov, i);
-    if (status != GSS_S_COMPLETE)
+    if (status == GSS_S_COMPLETE) {
+	*output_payload_buffer = iov[i - 1].buffer;
+    } else {
+	OM_uint32 minor;
+
 	map_error(minor_status, mech);
 
-    *output_payload_buffer = iov[i - 1].buffer;
+	if (iov[i - 1].type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
+	    gss_release_buffer(&minor, &iov[i - 1].buffer);
+	    iov[i - 1].type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
+	}
+    }
 
     return status;
+}
+
+OM_uint32
+gssint_unwrap_aead (gss_mechanism mech,
+		    OM_uint32 *minor_status,
+		    gss_union_ctx_id_t ctx,
+		    gss_buffer_t input_message_buffer,
+		    gss_buffer_t input_assoc_buffer,
+		    gss_buffer_t output_payload_buffer,
+		    int *conf_state,
+		    gss_qop_t *qop_state)
+{
+    OM_uint32		    status;
+
+    assert(mech != NULL);
+    assert(ctx != NULL);
+
+ /* EXPORT DELETE START */
+
+    if (mech->gss_unwrap_aead) {
+	status = mech->gss_unwrap_aead(minor_status,
+				       ctx->internal_ctx_id,
+				       input_message_buffer,
+				       input_assoc_buffer,
+				       output_payload_buffer,
+				       conf_state,
+				       qop_state);
+	if (status != GSS_S_COMPLETE)
+	    map_error(minor_status, mech);
+    } else if (mech->gss_unwrap_iov) {
+	status = gssint_unwrap_aead_iov_shim(mech,
+					     minor_status,
+					     ctx->internal_ctx_id,
+					     input_message_buffer,
+					     input_assoc_buffer,
+					     output_payload_buffer,
+					     conf_state,
+					     qop_state);
+    } else
+	status = GSS_S_UNAVAILABLE;
+ /* EXPORT DELETE END */
+	
+    return (status);
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -118,7 +169,6 @@ gss_buffer_t		output_payload_buffer;
 int 			*conf_state;
 gss_qop_t		*qop_state;
 {
- /* EXPORT DELETE START */
 
     OM_uint32		status;
     gss_union_ctx_id_t	ctx;
@@ -135,38 +185,14 @@ gss_qop_t		*qop_state;
      * select the approprate underlying mechanism routine and
      * call it.
      */
-    
     ctx = (gss_union_ctx_id_t) context_handle;
     mech = gssint_get_mechanism (ctx->mech_type);
     
-    if (mech) {
-	if (mech->gss_unwrap_aead) {
-	    status = mech->gss_unwrap_aead(
-				 	   minor_status,
-					   ctx->internal_ctx_id,
-					   input_message_buffer,
-					   input_assoc_buffer,
-					   output_payload_buffer,
-					   conf_state,
-					   qop_state);
-	    if (status != GSS_S_COMPLETE)
-		map_error(minor_status, mech);
-	} else if (mech->gss_unwrap_iov) {
-	    status = gssint_wrap_aead_iov_shim(mech,
-					       minor_status,
-					       ctx->internal_ctx_id,
-					       input_message_buffer,
-					       input_assoc_buffer,
-					       output_payload_buffer,
-					       conf_state,
-					       qop_state);
-	} else
-	    status = GSS_S_UNAVAILABLE;
-	
-	return(status);
-    }
- /* EXPORT DELETE END */
- 
-    return (GSS_S_BAD_MECH);
+    if (!mech)
+	return (GSS_S_BAD_MECH);
+
+    return gssint_unwrap_aead(mech, minor_status, context_handle,
+			      input_message_buffer, input_assoc_buffer,
+			      output_payload_buffer, conf_state, qop_state);
 }
 
