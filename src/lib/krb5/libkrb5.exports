@@ -173,7 +173,7 @@ krb5_copy_principal
 krb5_copy_ticket
 krb5_create_secure_file
 krb5_crypto_us_timeofday
-krb5_decode_ad_if_relevant
+krb5_decode_authdata_container
 krb5_decode_kdc_rep
 krb5_decode_ticket
 krb5_decrypt_tkt_part
@@ -182,7 +182,7 @@ krb5_default_pwd_prompt2
 krb5_defkeyname
 krb5_deltat_to_string
 krb5_do_preauth
-krb5_encode_ad_if_relevant
+krb5_encode_authdata_container
 krb5_encode_kdc_rep
 krb5_encrypt_helper
 krb5_encrypt_tkt_part

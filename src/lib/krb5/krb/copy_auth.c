@@ -109,18 +109,21 @@ krb5_copy_authdata(krb5_context context, krb5_authdata *const *inauthdat, krb5_a
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_decode_ad_if_relevant(krb5_context context, const krb5_authdata *if_relevant, krb5_authdata ***authdata)
+krb5_decode_authdata_container(krb5_context context,
+			       krb5_authdatatype type,
+			       const krb5_authdata *container,
+			       krb5_authdata ***authdata)
 {
     krb5_error_code code;
     krb5_data data;
 
     *authdata = NULL;
 
-    if (if_relevant->ad_type != KRB5_AUTHDATA_IF_RELEVANT)
+    if ((container->ad_type & AD_TYPE_FIELD_TYPE_MASK) != type)
 	return EINVAL;
 
-    data.length = if_relevant->length;
-    data.data = (char *)if_relevant->contents;
+    data.length = container->length;
+    data.data = (char *)container->contents;
 
     code = decode_krb5_authdata(&data, authdata);
     if (code)
@@ -130,27 +133,30 @@ krb5_decode_ad_if_relevant(krb5_context context, const krb5_authdata *if_relevan
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_encode_ad_if_relevant(krb5_context context, krb5_authdata *const*authdata, krb5_authdata ***if_relevant_p)
+krb5_encode_authdata_container(krb5_context context,
+			       krb5_authdatatype type,
+			       krb5_authdata *const*authdata,
+			       krb5_authdata ***container)
 {
     krb5_error_code code;
     krb5_data *data;
     krb5_authdata ad_datum;
     krb5_authdata *ad_data[2];
 
-    *if_relevant_p = NULL;
+    *container = NULL;
 
     code = encode_krb5_authdata((krb5_authdata * const *)authdata, &data);
     if (code)
 	return code;
 
-    ad_datum.ad_type = KRB5_AUTHDATA_IF_RELEVANT;
+    ad_datum.ad_type = type & AD_TYPE_FIELD_TYPE_MASK;;
     ad_datum.length = data->length;
     ad_datum.contents = (unsigned char *)data->data;
 
     ad_data[0] = &ad_datum;
     ad_data[1] = NULL;
 
-    code = krb5_copy_authdata(context, ad_data, if_relevant_p);
+    code = krb5_copy_authdata(context, ad_data, container);
 
     krb5_free_data(context, data);
 

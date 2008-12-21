@@ -891,13 +891,6 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 
 #define LR_TYPE_INTERPRETATION_MASK	0x7fff
 
-/* definitions for ad_type fields. */
-#define	AD_TYPE_EXTERNAL	0x4000
-#define	AD_TYPE_REGISTERED	0x2000
-
-#define AD_TYPE_FIELD_TYPE_MASK	0x1fff
-#define AD_TYPE_INTERNAL_MASK	0x3fff
-
 /* definitions for msec direction bit for KRB_SAFE, KRB_PRIV */
 #define	MSEC_DIRBIT		0x8000
 #define	MSEC_VAL_MASK		0x7fff
@@ -2507,11 +2500,13 @@ void KRB5_CALLCONV
 krb5_clear_error_message (krb5_context);
 
 krb5_error_code KRB5_CALLCONV
-krb5_decode_ad_if_relevant(krb5_context context,
+krb5_decode_authdata_container(krb5_context context,
+    krb5_authdatatype type,
     const krb5_authdata *if_relevant,
     krb5_authdata ***authdata);
 krb5_error_code KRB5_CALLCONV
-krb5_encode_ad_if_relevant(krb5_context context,
+krb5_encode_authdata_container(krb5_context context,
+    krb5_authdatatype type,
     krb5_authdata * const*authdata,
     krb5_authdata ***if_relevant_p);
 
