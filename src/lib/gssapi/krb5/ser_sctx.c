@@ -499,7 +499,7 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                 kret = krb5_ser_pack_int32((krb5_int32) ctx->cred_rcache,
                                            &bp, &remain);
 	    if (!kret) {
-		int i = 0;
+		krb5_int32 i = 0;
 
 		if (ctx->authdata) {
 		    for (; ctx->authdata[i]; i++)
