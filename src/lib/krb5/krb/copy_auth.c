@@ -149,7 +149,7 @@ krb5_encode_authdata_container(krb5_context context,
     if (code)
 	return code;
 
-    ad_datum.ad_type = type & AD_TYPE_FIELD_TYPE_MASK;;
+    ad_datum.ad_type = type & AD_TYPE_FIELD_TYPE_MASK;
     ad_datum.length = data->length;
     ad_datum.contents = (unsigned char *)data->data;
 
