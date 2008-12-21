@@ -195,7 +195,7 @@ static const gss_OID_set_desc spnego_oidsets[] = {
 };
 const gss_OID_set_desc * const gss_mech_set_spnego = spnego_oidsets+0;
 
-static int make_NegHints(gss_cred_id_t, gss_buffer_t *);
+static int make_NegHints(OM_uint32 *, gss_cred_id_t, gss_buffer_t *);
 static int put_neg_hints(unsigned char **, gss_buffer_t, unsigned int);
 static OM_uint32
 acc_ctx_hints(OM_uint32 *, gss_ctx_id_t *, gss_cred_id_t,
@@ -1038,7 +1038,8 @@ put_neg_hints(unsigned char **buf_out, gss_buffer_t input_token,
 #define HOST_PREFIX_LEN	(sizeof(HOST_PREFIX) - 1)
 
 static int
-make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
+make_NegHints(OM_uint32 *minor_status,
+	      gss_cred_id_t cred, gss_buffer_t *outbuf)
 {
 	char hostname[5 + MAXHOSTNAMELEN + 1];
 	gss_buffer_desc hintNameBuf;
@@ -1046,7 +1047,7 @@ make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
 	gss_name_t hintKerberosName;
 	gss_OID hintNameType;
 	OM_uint32 major_status;
-	OM_uint32 minor_status;
+	OM_uint32 minor;
 	unsigned int tlen = 0;
 	unsigned int hintNameSize = 0;
 	unsigned int negHintsSize = 0;
@@ -1056,7 +1057,7 @@ make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
 	*outbuf = GSS_C_NO_BUFFER;
 
 	if (cred != GSS_C_NO_CREDENTIAL) {
-		major_status = gss_inquire_cred(&minor_status,
+		major_status = gss_inquire_cred(minor_status,
 						cred,
 						&hintName,
 						NULL,
@@ -1070,13 +1071,14 @@ make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
 		/* this breaks mutual authentication but Samba relies on it */
 		if (gethostname(hostname + HOST_PREFIX_LEN,
 				sizeof(hostname) - HOST_PREFIX_LEN - 1) != 0) {
+			*minor_status = errno;
 			return (GSS_S_FAILURE);
 		}
 
 		hintNameBuf.value = hostname;
 		hintNameBuf.length = strlen(hostname);
 
-		major_status = gss_import_name(&minor_status,
+		major_status = gss_import_name(minor_status,
 					       &hintNameBuf,
 					       GSS_C_NT_HOSTBASED_SERVICE,
 					       &hintName);
@@ -1088,25 +1090,25 @@ make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
 	hintNameBuf.value = NULL;
 	hintNameBuf.length = 0;
 
-	major_status = gss_canonicalize_name(&minor_status,
+	major_status = gss_canonicalize_name(minor_status,
 					     hintName,
 					     (gss_OID)&gss_mech_krb5_oid,
 					     &hintKerberosName);
 	if (major_status != GSS_S_COMPLETE) {
-		gss_release_name(&minor_status, &hintName);
+		gss_release_name(&minor, &hintName);
 		return (major_status);
 	}
-	gss_release_name(&minor_status, &hintName);
+	gss_release_name(&minor, &hintName);
 
-	major_status = gss_display_name(&minor_status,
+	major_status = gss_display_name(minor_status,
 					hintKerberosName,
 					&hintNameBuf,
 					&hintNameType);
 	if (major_status != GSS_S_COMPLETE) {
-		gss_release_name(&minor_status, &hintName);
+		gss_release_name(&minor, &hintName);
 		return (major_status);
 	}
-	gss_release_name(&minor_status, &hintKerberosName);
+	gss_release_name(&minor, &hintKerberosName);
 
 	/*
 	 * Now encode the name hint into a NegHints ASN.1 type
@@ -1123,19 +1125,21 @@ make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
 	negHintsSize = tlen;
 
 	t = (unsigned char *)malloc(tlen);
-	if (t == NULL)
+	if (t == NULL) {
+		*minor_status = ENOMEM;
 		goto errout;
+	}
 
 	ptr = t;
 
 	*ptr++ = CONTEXT | 0x00; /* hintName identifier */
 	if (gssint_put_der_length(hintNameSize,
-					 &ptr, tlen - (int)(ptr-t)))
+				  &ptr, tlen - (int)(ptr-t)))
 		goto errout;
 
 	*ptr++ = GENERAL_STRING;
 	if (gssint_put_der_length(hintNameBuf.length,
-					 &ptr, tlen - (int)(ptr-t)))
+				  &ptr, tlen - (int)(ptr-t)))
 		goto errout;
 
 	memcpy(ptr, hintNameBuf.value, hintNameBuf.length);
@@ -1143,6 +1147,7 @@ make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
 
 	*outbuf = (gss_buffer_t)malloc(sizeof(gss_buffer_desc));
 	if (*outbuf == NULL) {
+		*minor_status = ENOMEM;
 		goto errout;
 	}
 	(*outbuf)->value = (void *)t;
@@ -1150,6 +1155,7 @@ make_NegHints(gss_cred_id_t cred, gss_buffer_t *outbuf)
 
 	t = NULL; /* don't free */
 
+	*minor_status = 0;
 	major_status = GSS_S_COMPLETE;
 
 errout:
@@ -1157,7 +1163,7 @@ errout:
 		free(t);
 	}
 
-	gss_release_buffer(&minor_status, &hintNameBuf);
+	gss_release_buffer(&minor, &hintNameBuf);
 
 	return (major_status);
 }
@@ -1200,7 +1206,7 @@ acc_ctx_hints(OM_uint32 *minor_status,
 		}
 	}
 
-	ret = make_NegHints(cred, mechListMIC);
+	ret = make_NegHints(minor_status, cred, mechListMIC);
 	if (ret != GSS_S_COMPLETE) {
 		goto cleanup;
 	}
