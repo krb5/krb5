@@ -458,7 +458,7 @@ void doit(fd)
 		fprintf(stderr, "doit: setting resync alarm to 5s\n");
 	    signal(SIGALRM, resync_alarm);
 	    gfd = fd;
-	    if (alarm(5) != 0) {
+	    if (alarm(INITIAL_TIMER) != 0) {
 		if (debug) {
 		    fprintf(stderr,
 			    _("%s: alarm already set\n"), progname);
@@ -508,6 +508,7 @@ void doit(fd)
 	 * Turn off alarm upon successful authentication from master.
 	 */
 	alarm(0);
+	gfd = -1;
 
 	if (!authorized_principal(kpropd_context, client, etype)) {
 		char	*name;
