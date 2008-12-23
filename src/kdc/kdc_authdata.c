@@ -571,6 +571,7 @@ handle_authdata (krb5_context context,
 					    client_key, server_key,
 					    req_pkt, request, enc_tkt_request,
 					    enc_tkt_reply);
+	    break;
 	default:
 	    code = 0;
 	    break;
