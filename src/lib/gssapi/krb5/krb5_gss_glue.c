@@ -78,12 +78,6 @@ static struct {
 	{GSS_KRB5_INQ_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_SESSION_KEY_OID},
 	gss_krb5int_inq_session_key
     },
-#if 0
-    {
-	{GSS_KRB5_GET_SUBKEY_OID_LENGTH, GSS_KRB5_GET_SUBKEY_OID},
-	gss_krb5int_get_subkey
-    },
-#endif
     {
 	{GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID},
 	gss_krb5int_export_lucid_sec_context
@@ -818,48 +812,6 @@ krb5_gss_use_kdc_context(void)
 
     return major_status;    
 }
-
-#if 0
-OM_uint32
-gsskrb5_get_subkey(
-    OM_uint32  *minor_status,
-    const gss_ctx_id_t context_handle,
-    krb5_keyblock **key)
-{
-    static const gss_OID_desc const req_oid = {
-	GSS_KRB5_GET_SUBKEY_OID_LENGTH,
-	GSS_KRB5_GET_SUBKEY_OID };
-    OM_uint32 major_status;
-    gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
-
-    if (minor_status == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
-
-    if (key == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
-
-    major_status = gss_inquire_sec_context_by_oid(minor_status,
-						  context_handle,
-						  (const gss_OID)&req_oid,
-						  &data_set);
-    if (major_status != GSS_S_COMPLETE)
-	return major_status;
-
-    if (data_set == GSS_C_NO_BUFFER_SET ||
-        data_set->count != 1 ||
-	data_set->elements[0].length != sizeof(*key)) {
-	return GSS_S_FAILURE;
-    }
-
-    *key = *((krb5_keyblock **)data_set->elements[0].value);
-
-    gss_release_buffer_set(minor_status, &data_set);
-
-    *minor_status = 0;
-
-    return GSS_S_COMPLETE;
-}
-#endif
 
 /*
  * This API should go away and be replaced with an accessor

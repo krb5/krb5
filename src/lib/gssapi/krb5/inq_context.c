@@ -189,42 +189,6 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
     return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
 }
 
-#if 0
-OM_uint32
-gss_krb5int_get_subkey(
-    OM_uint32 *minor_status,
-    const gss_ctx_id_t context_handle,
-    const gss_OID desired_object,
-    gss_buffer_set_t *data_set)
-{
-    OM_uint32 major_status;
-    krb5_error_code code;
-    krb5_gss_ctx_id_rec *ctx;
-    krb5_keyblock *key, *outkey;
-    gss_buffer_desc rep;
-
-    ctx = (krb5_gss_ctx_id_rec *) context_handle;
-    key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
-
-    code = krb5_copy_keyblock(ctx->k5_context, key, &outkey);
-    if (code) {
-	*minor_status = code;
-	return GSS_S_FAILURE;
-    }
-
-    rep.value = &outkey;
-    rep.length = sizeof(outkey);
-
-    major_status = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
-    if (GSS_ERROR(major_status)) {
-	krb5_free_keyblock(ctx->k5_context, outkey);
-	return major_status;
-    }
-
-    return GSS_S_COMPLETE;
-}
-#endif
-
 OM_uint32
 gss_krb5int_inq_session_key(
     OM_uint32 *minor_status,
