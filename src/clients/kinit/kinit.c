@@ -124,6 +124,7 @@ struct k_opts
     krb5_gic_opt_pa_data *pa_opts;
 
     int canonicalize;
+    int enterprise;
 };
 
 struct k5_data
@@ -148,6 +149,7 @@ struct option long_options[] = {
     { "proxiable", 0, NULL, 'p' },
     { "noaddresses", 0, NULL, 'A' },
     { "canonicalize", 0, NULL, 'C' },
+    { "enterprise", 0, NULL, 'E' },
     { NULL, 0, NULL, 0 }
 };
 
@@ -162,17 +164,19 @@ usage()
 #define USAGE_BREAK "\n\t"
 
 #ifdef GETOPT_LONG
-#define USAGE_LONG_FORWARDABLE " | --forwardable | --noforwardable"
-#define USAGE_LONG_PROXIABLE   " | --proxiable | --noproxiable"
-#define USAGE_LONG_ADDRESSES   " | --addresses | --noaddresses"
-#define USAGE_LONG_CANONICALiZE  " | --canonicalize"
+#define USAGE_LONG_FORWARDABLE  " | --forwardable | --noforwardable"
+#define USAGE_LONG_PROXIABLE    " | --proxiable | --noproxiable"
+#define USAGE_LONG_ADDRESSES    " | --addresses | --noaddresses"
+#define USAGE_LONG_CANONICALIZE " | --canonicalize"
+#define USAGE_LONG_ENTERPRISE   " | --enterprise"
 #define USAGE_BREAK_LONG       USAGE_BREAK
 #else
-#define USAGE_LONG_FORWARDABLE ""
-#define USAGE_LONG_PROXIABLE   ""
-#define USAGE_LONG_ADDRESSES   ""
+#define USAGE_LONG_FORWARDABLE  ""
+#define USAGE_LONG_PROXIABLE    ""
+#define USAGE_LONG_ADDRESSES    ""
 #define USAGE_LONG_CANONICALIZE	""
-#define USAGE_BREAK_LONG       ""
+#define USAGE_LONG_ENTERPRISE	""
+#define USAGE_BREAK_LONG        ""
 #endif
 
     fprintf(stderr, "Usage: %s [-V] "
@@ -186,6 +190,8 @@ usage()
 	    "[-a | -A" USAGE_LONG_ADDRESSES "] "
 	    USAGE_BREAK_LONG
 	    "[-C" USAGE_LONG_CANONICALIZE "] "
+	    USAGE_BREAK
+	    "[-E" USAGE_LONG_ENTERPRISE "] "
 	    USAGE_BREAK
 	    "[-v] [-R] "
 	    "[-k [-t keytab_file]] "
@@ -210,6 +216,7 @@ usage()
     fprintf(stderr, "\t-v validate\n");
     fprintf(stderr, "\t-R renew\n");
     fprintf(stderr, "\t-C canonicalize\n");
+    fprintf(stderr, "\t-E client is enterprise principal name\n");
     fprintf(stderr, "\t-k use keytab\n");
     fprintf(stderr, "\t-t filename of keytab to use\n");
     fprintf(stderr, "\t-c Kerberos 5 cache name\n");
@@ -271,7 +278,7 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:vX:C"))
+    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:vX:CE"))
 	   != -1) {
 	switch (i) {
 	case 'V':
@@ -366,6 +373,9 @@ parse_options(argc, argv, opts)
 	case 'C':
 	    opts->canonicalize = 1;
 	    break;
+	case 'E':
+	    opts->enterprise = 1;
+	    break;
 	case '4':
 	    fprintf(stderr, "Kerberos 4 is no longer supported\n");
 	    exit(3);
@@ -414,6 +424,7 @@ k5_begin(opts, k5)
     struct k5_data* k5;
 {
     krb5_error_code code = 0;
+    int flags = opts->enterprise ? KRB5_PRINCIPAL_PARSE_ENTERPRISE : 0;
 
     code = krb5_init_context(&k5->ctx);
     if (code) {
@@ -441,8 +452,8 @@ k5_begin(opts, k5)
     if (opts->principal_name)
     {
 	/* Use specified name */
-	if ((code = krb5_parse_name(k5->ctx, opts->principal_name, 
-				    &k5->me))) {
+	if ((code = krb5_parse_name_flags(k5->ctx, opts->principal_name, 
+					  flags, &k5->me))) {
 	    com_err(progname, code, "when parsing name %s", 
 		    opts->principal_name);
 	    return 0;
@@ -472,8 +483,8 @@ k5_begin(opts, k5)
 		  fprintf(stderr, "Unable to identify user\n");
 		  return 0;
 		}
-	      if ((code = krb5_parse_name(k5->ctx, name, 
-					  &k5->me)))
+	      if ((code = krb5_parse_name_flags(k5->ctx, name, 
+					        flags, &k5->me)))
 		{
 		  com_err(progname, code, "when parsing name %s", 
 			  name);
