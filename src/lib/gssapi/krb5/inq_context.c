@@ -239,14 +239,13 @@ gss_krb5int_inq_session_key(
     unsigned char oid_buf[GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + 6];
     unsigned char *op;
     size_t nbytes;
-    int oenctype, enctype, i;
+    int enctype, i;
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
     key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
 
     keyvalue.value = key->contents;
     keyvalue.length = key->length;
-    enctype = key->enctype;
 
     major_status = generic_gss_add_buffer_set_member(minor_status, &keyvalue, data_set);
     if (GSS_ERROR(major_status)) {
@@ -259,12 +258,12 @@ gss_krb5int_inq_session_key(
 	   GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH);
 
     nbytes = 0;
-    oenctype = enctype;
+    enctype = key->enctype;
     while (enctype) {
 	nbytes++;
 	enctype >>= 7;
     }
-    enctype = oenctype;
+    enctype = key->enctype;
     op = oid_buf + GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + nbytes;
     i = -1;
     while (enctype) {
