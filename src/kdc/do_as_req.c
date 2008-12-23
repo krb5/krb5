@@ -296,6 +296,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     ticket_reply.server = &server_princ;
 
     enc_tkt_reply.flags = 0;
+    enc_tkt_reply.times.authtime = authtime;
+
     setflag(enc_tkt_reply.flags, TKT_FLG_INITIAL);
 
     	/* It should be noted that local policy may affect the  */
@@ -322,8 +324,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     enc_tkt_reply.client = &client_princ;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
-
-    enc_tkt_reply.times.authtime = kdc_time;
 
     if (isflagset(request->kdc_options, KDC_OPT_POSTDATED)) {
 	setflag(enc_tkt_reply.flags, TKT_FLG_POSTDATED);
@@ -498,47 +498,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     reply_encpart.times.authtime = authtime = kdc_time;
 
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
-    errcode = sign_authorization_data(kdc_context,
-				      0,
-				      reply.client,
-				      &client,
-				      &server,
-				      &server,
-				      &client_keyblock,
-				      &server_keyblock,
-				      authtime,
-				      NULL,
-				      &enc_tkt_reply.authorization_data,
-				      NULL,
-				      NULL);
-    if (errcode) {
-	status = "SIGN_AUTH_DATA";
-	goto errout;
-    }
-    /* Add any additional auth data - XXX need to consolidate plugin interfaces */
-    errcode = handle_authdata(kdc_context, &client, req_pkt, request, &enc_tkt_reply);
-    if (errcode) {
-	krb5_klog_syslog(LOG_INFO,  "AS_REQ : handle_authdata (%d)", errcode);
-    }
-
     reply_encpart.enc_padata = NULL;
 
-    errcode = return_svr_referral_data(kdc_context,
-				       &server, &reply_encpart);
-    if (errcode) {
-	status = "KDC_RETURN_ENC_PADATA";
-	goto errout;
-    }
-
-    /* moved here because we need authorization data in ticket_reply */
-    errcode = krb5_encrypt_tkt_part(kdc_context, &server_keyblock, &ticket_reply);
-    if (errcode) {
-	status = "ENCRYPTING_TICKET";
-	goto errout;
-    }
-    ticket_reply.enc_part.kvno = server_key->key_data_kvno;
-
-    /* Fetch the padata info to be returned */
+    /* Fetch the padata info to be returned (do this before
+       authdata to handle possible replacement of reply key */
     errcode = return_padata(kdc_context, &client, req_pkt, request,
 			    &reply, client_key, &client_keyblock, &pa_context);
     if (errcode) {
@@ -550,6 +513,38 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     asReqDebug("process_as_req reply realm %s name %s\n", 
 	reply.client->realm.data, reply.client->data->data);
 #endif /* APPLE_PKINIT */
+
+    errcode = return_svr_referral_data(kdc_context,
+				       &server, &reply_encpart);
+    if (errcode) {
+	status = "KDC_RETURN_ENC_PADATA";
+	goto errout;
+    }
+
+    errcode = handle_authdata(kdc_context,
+			      c_flags,
+			      reply.client,
+			      &client,
+			      &server,
+			      &server,
+			      &client_keyblock,
+			      &server_keyblock,
+			      req_pkt,
+			      request,
+			      NULL, /* enc_tkt_request */
+			      &enc_tkt_reply);
+    if (errcode) {
+	krb5_klog_syslog(LOG_INFO, "AS_REQ : handle_authdata (%d)", errcode);
+	status = "HANDLE_AUTHDATA";
+	goto errout;
+    }
+
+    errcode = krb5_encrypt_tkt_part(kdc_context, &server_keyblock, &ticket_reply);
+    if (errcode) {
+	status = "ENCRYPTING_TICKET";
+	goto errout;
+    }
+    ticket_reply.enc_part.kvno = server_key->key_data_kvno;
 
     /* now encode/encrypt the response */
 

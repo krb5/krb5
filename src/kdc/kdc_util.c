@@ -1669,27 +1669,27 @@ get_principal (krb5_context kcontext,
 }
 
 krb5_error_code
-sign_authorization_data(krb5_context context,
-			unsigned int flags,
-			krb5_const_principal client_princ,
-			krb5_db_entry *client,
-			krb5_db_entry *server,
-			krb5_db_entry *krbtgt,
-			krb5_keyblock *client_key,
-			krb5_keyblock *server_key,
-			krb5_timestamp authtime,
-			krb5_authdata **auth_data,
-			krb5_authdata ***ret_auth_data,
-			krb5_db_entry *ad_entry,
-			int *ad_nprincs)
+sign_db_authdata (krb5_context context,
+		  unsigned int flags,
+		  krb5_const_principal client_princ,
+		  krb5_db_entry *client,
+		  krb5_db_entry *server,
+		  krb5_db_entry *krbtgt,
+		  krb5_keyblock *client_key,
+		  krb5_keyblock *server_key,
+		  krb5_timestamp authtime,
+		  krb5_authdata **tgs_authdata,
+		  krb5_authdata ***ret_authdata,
+		  krb5_db_entry *ad_entry,
+		  int *ad_nprincs)
 {
-    krb5_error_code		code;
-    kdb_sign_auth_data_req	req;
-    kdb_sign_auth_data_rep	rep;
-    krb5_data			req_data;
-    krb5_data			rep_data;
+    krb5_error_code code;
+    kdb_sign_auth_data_req req;
+    kdb_sign_auth_data_rep rep;
+    krb5_data req_data;
+    krb5_data rep_data;
 
-    *ret_auth_data = NULL;
+    *ret_authdata = NULL;
     if (ad_entry != NULL) {
 	assert(ad_nprincs != NULL);
 	memset(ad_entry, 0, sizeof(*ad_entry));
@@ -1707,7 +1707,7 @@ sign_authorization_data(krb5_context context,
     req.client_key		= client_key;
     req.server_key		= server_key;
     req.authtime		= authtime;
-    req.auth_data		= auth_data;
+    req.auth_data		= tgs_authdata;
 
     rep.entry			= ad_entry;
     rep.nprincs			= 0;
@@ -1722,25 +1722,10 @@ sign_authorization_data(krb5_context context,
 			  KRB5_KDB_METHOD_SIGN_AUTH_DATA,
 			  &req_data,
 			  &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
-	/*
-	 * If the backend does not implement the sign auth data
-	 * method, then we just copy the authorization data into
-	 * the response, except for the constrained delegation
-	 * case (which requires special handling because it will
-	 * promote untrusted auth data to KDC issued auth data;
-	 * this requires backend specific code)
-	 */
-	if (isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
-	    code = KRB5KDC_ERR_POLICY;
-	else
-	    code = krb5_copy_authdata(context, auth_data, ret_auth_data);
-    } else {
-	*ret_auth_data = rep.auth_data;
-	if (ad_nprincs != NULL)
-	    *ad_nprincs = rep.nprincs;
-    }
 
+    *ret_authdata = rep.auth_data;
+    *ad_nprincs = rep.nprincs;
+ 
     return code;
 }
 

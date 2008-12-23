@@ -614,58 +614,27 @@ tgt_again:
 		c_nprincs = 0;
 	    }
 	}
+    }
 
-	/*
-	 * Check whether KDC issued authorization data should be included.
-	 * A server can explicitly disable the inclusion of authorization
-	 * data by setting the KRB5_KDB_NO_AUTH_DATA_REQUIRED flag on its
-	 * principal entry. Otherwise authorization data will be included
-	 * if it was present in the TGT, the client is from another realm
-	 * or protocol transition/constrained delegation was used.
-	 *
-	 * We permit sign_authorization_data() to return a krb5_db_entry
-	 * representing the principal associated with the authorization
-	 * data, in case that principal is not local to our realm and we
-	 * need to perform additional checks (such as disabling delegation
-	 * for cross-realm protocol transition below).
-	 */
-	if (header_enc_tkt->authorization_data != NULL ||
-	    isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) ||
-	    isflagset(c_flags, KRB5_KDB_FLAGS_S4U)) {
-	    krb5_db_entry	ad_entry;
-	    int			ad_nprincs = 0;
+    enc_tkt_reply.authorization_data = NULL;
 
-	    errcode = sign_authorization_data(kdc_context,
-					      c_flags,
-					      isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) ?
-						    for_user->user : header_enc_tkt->client,
-					      (c_nprincs != 0) ? &client : NULL,
-					      &server,
-					      &krbtgt,
-					      NULL, /* ticket reply key not relevant */
-					      &encrypting_key, /* U2U or server key */
-					      header_enc_tkt->times.authtime,
-					      header_enc_tkt->authorization_data,
-					      &kdc_issued_auth_data,
-					      &ad_entry,
-					      &ad_nprincs);
-	    if (errcode) {
-		status = "SIGN_AUTH_DATA";
-		goto cleanup;
-	    }
-	    if (ad_nprincs != 0) {
-		if (isflagset(ad_entry.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
-		    clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-
-		krb5_db_free_principal(kdc_context, &ad_entry, ad_nprincs);
-
-		if (ad_nprincs != 1) {
-		    status = "NON_UNIQUE_AUTH_DATA_PRINCIPAL";
-		    errcode = KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
-		    goto cleanup;
-		}
-	    }
-	}
+    errcode = handle_authdata(kdc_context,
+			      c_flags,
+			      isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) ?
+					for_user->user : header_enc_tkt->client,
+			      (c_nprincs != 0) ? &client : NULL,
+			      &server,
+			      &krbtgt,
+			      NULL, /* ticket reply key not relevant here */
+			      &encrypting_key, /* U2U or server key */
+			      pkt,
+			      request,
+			      header_enc_tkt,
+			      &enc_tkt_reply);
+    if (errcode) {
+	krb5_klog_syslog(LOG_INFO, "TGS_REQ : handle_authdata (%d)", errcode);
+	status = "HANDLE_AUTHDATA";
+	goto cleanup;
     }
 
     errcode = return_svr_referral_data(kdc_context,
@@ -674,46 +643,6 @@ tgt_again:
 	status = "KDC_RETURN_ENC_PADATA";
 	goto cleanup;
     }
-
-    /* assemble any authorization data */
-    if (request->authorization_data.ciphertext.data != NULL) {
-	krb5_data scratch;
-
-	scratch.length = request->authorization_data.ciphertext.length;
-	if (!(scratch.data =
-	      malloc(request->authorization_data.ciphertext.length))) {
-	    status = "AUTH_NOMEM";
-	    errcode = ENOMEM;
-	    goto cleanup;
-	}
-
-	if ((errcode = krb5_c_decrypt(kdc_context,
-				      header_ticket->enc_part2->session,
-				      KRB5_KEYUSAGE_TGS_REQ_AD_SESSKEY,
-				      0, &request->authorization_data,
-				      &scratch))) {
-	    status = "AUTH_ENCRYPT_FAIL";
-	    free(scratch.data);
-	    goto cleanup;
-	}
-
-	/* scratch now has the authorization data, so we decode it */
-	errcode = decode_krb5_authdata(&scratch, &(request->unenc_authdata));
-	free(scratch.data);
-	if (errcode) {
-	    status = "AUTH_DECODE";
-	    goto cleanup;
-	}
-
-	if ((errcode =
-	     concat_authorization_data(kdc_issued_auth_data,
-				       request->unenc_authdata,
-				       &enc_tkt_reply.authorization_data))) {
-	    status = "CONCAT_AUTH";
-	    goto cleanup;
-	}
-    } else
-	enc_tkt_reply.authorization_data = kdc_issued_auth_data;
 
     enc_tkt_reply.session = &session_key;
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&

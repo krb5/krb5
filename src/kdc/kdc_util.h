@@ -176,9 +176,19 @@ krb5_error_code free_padata_context
 krb5_error_code load_authdata_plugins(krb5_context context);
 krb5_error_code unload_authdata_plugins(krb5_context context);
 
-krb5_error_code handle_authdata (krb5_context context, krb5_db_entry *client,
-				 krb5_data *req_pkt, krb5_kdc_req *request,
-				 krb5_enc_tkt_part *enc_tkt_reply);
+krb5_error_code
+handle_authdata (krb5_context context,
+		 unsigned int flags,
+		 krb5_const_principal reply_client,
+		 krb5_db_entry *client,
+		 krb5_db_entry *server,
+		 krb5_db_entry *krbtgt,
+		 krb5_keyblock *client_key,
+		 krb5_keyblock *server_key,
+		 krb5_data *req_pkt,
+		 krb5_kdc_req *request,
+		 krb5_enc_tkt_part *enc_tkt_request,
+		 krb5_enc_tkt_part *enc_tkt_reply);
 
 /* replay.c */
 krb5_boolean kdc_check_lookaside (krb5_data *, krb5_data **);
@@ -201,11 +211,11 @@ include_pac_p(krb5_context context, krb5_kdc_req *request);
 
 krb5_error_code return_svr_referral_data
    (krb5_context context,
-	       krb5_db_entry *server,
-	       krb5_enc_kdc_rep_part *reply_encpart);
+		krb5_db_entry *server,
+		krb5_enc_kdc_rep_part *reply_encpart);
 
-krb5_error_code sign_authorization_data
-   (krb5_context context,
+krb5_error_code sign_db_authdata
+    (krb5_context context,
 		unsigned int flags,
 		krb5_const_principal client_princ,
 		krb5_db_entry *client,
@@ -214,8 +224,8 @@ krb5_error_code sign_authorization_data
 		krb5_keyblock *client_key,
 		krb5_keyblock *server_key,
 		krb5_timestamp authtime,
-		krb5_authdata **tgs_auth_data,
-		krb5_authdata ***ret_auth_data,
+		krb5_authdata **tgs_authdata,
+		krb5_authdata ***ret_authdata,
 		krb5_db_entry *ad_entry,
 		int *ad_nprincs);
 

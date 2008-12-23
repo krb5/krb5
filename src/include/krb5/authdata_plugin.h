@@ -108,4 +108,53 @@ typedef struct krb5plugin_authdata_ftable_v0 {
 				     krb5_kdc_req *request,
 				     krb5_enc_tkt_part *enc_tkt_reply);
 } krb5plugin_authdata_ftable_v0;
+
+typedef struct krb5plugin_authdata_ftable_v1 {
+    /* Not-usually-visible name. */
+    char *name;
+
+    /*
+     * Per-plugin initialization/cleanup.  The init function is called
+     * by the KDC when the plugin is loaded, and the fini function is
+     * called before the plugin is unloaded.  Both are optional.
+     */
+    krb5_error_code (*init_proc)(krb5_context, void **);
+    void (*fini_proc)(krb5_context, void *);
+    /*
+     * Actual authorization data handling function.  If this field
+     * holds a null pointer, this mechanism will be skipped, and the
+     * init/fini functions will not be run.
+     *
+     * This function should only modify the field
+     * enc_tkt_reply->authorization_data.  All other values should be
+     * considered inputs only.  And, it should *modify* the field, not
+     * overwrite it and assume that there are no other authdata
+     * plugins in use.
+     *
+     * Memory management: authorization_data is a malloc-allocated,
+     * null-terminated sequence of malloc-allocated pointers to
+     * authorization data structures.  This plugin code currently
+     * assumes the libraries, KDC, and plugin all use the same malloc
+     * pool, which may be a problem if/when we get the KDC code
+     * running on Windows.
+     *
+     * If this function returns a non-zero error code, a message
+     * is logged, but no other action is taken.  Other authdata
+     * plugins will be called, and a response will be sent to the
+     * client (barring other problems).
+     */
+    krb5_error_code (*authdata_proc)(krb5_context,
+				     unsigned int flags,
+				     krb5_const_principal reply_client,
+				     struct _krb5_db_entry_new *client,
+				     struct _krb5_db_entry_new *server,
+				     struct _krb5_db_entry_new *tgs,
+				     krb5_keyblock *client_key,
+				     krb5_keyblock *server_key,
+				     krb5_data *req_pkt,
+				     krb5_kdc_req *request,
+				     krb5_enc_tkt_part *enc_tkt_request,
+				     krb5_enc_tkt_part *enc_tkt_reply);
+} krb5plugin_authdata_ftable_v1;
+
 #endif /* KRB5_AUTHDATA_PLUGIN_H_INCLUDED */
