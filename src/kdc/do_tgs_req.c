@@ -629,7 +629,8 @@ tgt_again:
 			      (c_nprincs != 0) ? &client : NULL,
 			      &server,
 			      &krbtgt,
-			      NULL, /* ticket reply key not relevant here */
+			      subkey != NULL ? subkey :
+				header_ticket->enc_part2->session,
 			      &encrypting_key, /* U2U or server key */
 			      pkt,
 			      request,
