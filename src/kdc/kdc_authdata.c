@@ -450,7 +450,7 @@ handle_tgt_authdata (krb5_context context,
      * if it was present in the TGT, the client is from another realm
      * or protocol transition/constrained delegation was used, or, in
      * the AS-REQ case, if the pre-auth data indicated the PAC should
-     * be absent.
+     * be present.
      *
      * We permit sign_authorization_data() to return a krb5_db_entry
      * representing the principal associated with the authorization
@@ -522,7 +522,7 @@ handle_tgt_authdata (krb5_context context,
     }
 
     if (ad_nprincs != 0) {
-	if (tgs_req &&
+	if (isflagset(flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
 	    isflagset(ad_entry.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
 	    clear(enc_tkt_reply->flags, TKT_FLG_FORWARDABLE);
 
