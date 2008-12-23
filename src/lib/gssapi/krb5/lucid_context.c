@@ -52,7 +52,7 @@ copy_keyblock_to_lucid_key(
 static krb5_error_code
 make_external_lucid_ctx_v1(
     krb5_gss_ctx_id_rec * gctx,
-    unsigned int version,
+    int version,
     void **out_ptr);
 
 
@@ -71,9 +71,7 @@ gss_krb5int_export_lucid_sec_context(
     OM_uint32           retval;
     krb5_gss_ctx_id_t   ctx = (krb5_gss_ctx_id_t)context_handle;
     void                *lctx = NULL;
-    unsigned char	*cp;
-    unsigned int	version = 0;
-    size_t		i;
+    int			version = 0;
     gss_buffer_desc	rep;
 
     /* Assume failure */
@@ -81,19 +79,13 @@ gss_krb5int_export_lucid_sec_context(
     *minor_status = 0;
     *data_set = GSS_C_NO_BUFFER_SET;
 
-    /* Determine authorization data type from DER encoded OID suffix */
-    cp = desired_object->elements;
-    cp += GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH;
-
-    for (i = 0;
-	 i < desired_object->length - GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH;
-	 i++)
-    {
-	version = (version << 7) | (cp[i] & 0x7f);
-	if ((cp[i] & 0x80) == 0)
-	    break;
-	/* XXX should we return an error if there is another arc */
-    }
+    retval = generic_gss_oid_decompose(minor_status,
+				       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID,
+				       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH,
+				       desired_object,
+				       &version);
+    if (GSS_ERROR(retval))
+	return retval;
 
     /* Externalize a structure of the right version */
     switch (version) {
@@ -194,7 +186,7 @@ error_out:
 static krb5_error_code
 make_external_lucid_ctx_v1(
     krb5_gss_ctx_id_rec * gctx,
-    unsigned int version,
+    int version,
     void **out_ptr)
 {
     gss_krb5_lucid_context_v1_t *lctx = NULL;

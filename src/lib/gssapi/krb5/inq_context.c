@@ -201,9 +201,7 @@ gss_krb5int_inq_session_key(
     gss_buffer_desc keyvalue, keyinfo;
     OM_uint32 major_status, minor;
     unsigned char oid_buf[GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + 6];
-    unsigned char *op;
-    size_t nbytes;
-    int enctype, i;
+    gss_OID_desc oid;
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
     key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
@@ -212,45 +210,37 @@ gss_krb5int_inq_session_key(
     keyvalue.length = key->length;
 
     major_status = generic_gss_add_buffer_set_member(minor_status, &keyvalue, data_set);
-    if (GSS_ERROR(major_status)) {
-	gss_release_buffer_set(&minor, data_set);
-	return major_status;
-    }
+    if (GSS_ERROR(major_status))
+	goto cleanup;
 
-    /* Construct the OID 1.2.840.113554.1.2.2.4.<enctype> */
-    memcpy(oid_buf, GSS_KRB5_SESSION_KEY_ENCTYPE_OID,
-	   GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH);
+    oid.elements = oid_buf;
+    oid.length = sizeof(oid_buf);
 
-    nbytes = 0;
-    enctype = key->enctype;
-    while (enctype) {
-	nbytes++;
-	enctype >>= 7;
-    }
-    enctype = key->enctype;
-    op = oid_buf + GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + nbytes;
-    i = -1;
-    while (enctype) {
-	op[i] = (unsigned char)enctype & 0x7f;
-	if (i != -1)
-	    op[i] |= 0x80;
-	i--;
-	enctype >>= 7;
-    }
+    major_status = generic_gss_oid_compose(minor_status,
+					   GSS_KRB5_SESSION_KEY_ENCTYPE_OID,
+					   GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH,
+					   key->enctype,
+					   &oid);
+    if (GSS_ERROR(major_status))
+	goto cleanup;
 
-    keyinfo.value = oid_buf;
-    keyinfo.length = GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + nbytes;
-    assert(keyinfo.length <= sizeof(oid_buf));
+    keyinfo.value = oid.elements;
+    keyinfo.length = oid.length;
 
     major_status = generic_gss_add_buffer_set_member(minor_status, &keyinfo, data_set);
-    if (GSS_ERROR(major_status)) {
-	assert(*data_set != GSS_C_NO_BUFFER_SET);
-	memset((*data_set)->elements[0].value, 0, (*data_set)->elements[0].length);
-	gss_release_buffer_set(&minor, data_set);
-	return major_status;
-    }
+    if (GSS_ERROR(major_status))
+	goto cleanup;
 
     return GSS_S_COMPLETE;
+
+cleanup:
+    if (*data_set != GSS_C_NO_BUFFER_SET) {
+	if ((*data_set)->count != 0)
+	    memset((*data_set)->elements[0].value, 0, (*data_set)->elements[0].length);
+	gss_release_buffer_set(&minor, data_set);
+    }
+
+    return major_status;
 }
 
 OM_uint32
@@ -264,31 +254,20 @@ gss_krb5int_extract_authz_data_from_sec_context(
     krb5_gss_ctx_id_rec *ctx;
     int ad_type = 0;
     size_t i;
-    unsigned char *cp;
 
     *data_set = GSS_C_NO_BUFFER_SET;
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-    major_status = GSS_S_FAILURE;
-    *minor_status = ENOENT;
-
-    /* Determine authorization data type from DER encoded OID suffix */
-    cp = desired_object->elements;
-    cp += GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH;
-
-    for (i = 0;
-	 i < desired_object->length - GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH;
-	 i++)
-    {
-	ad_type = (ad_type << 7) | (cp[i] & 0x7f);
-	if ((cp[i] & 0x80) == 0)
-	    break;
-	/* XXX should we return an error if there is another arc */
-    }
-
-    if (ad_type == 0)
+    major_status = generic_gss_oid_decompose(minor_status,
+					     GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID,
+					     GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH,
+					     desired_object,
+					     &ad_type);
+    if (major_status != GSS_S_COMPLETE || ad_type == 0) {
+	*minor_status = ENOENT;
 	return GSS_S_FAILURE;
+    }
 
     if (ctx->authdata != NULL) {
 	for (i = 0; ctx->authdata[i] != NULL; i++) {
@@ -298,8 +277,8 @@ gss_krb5int_extract_authz_data_from_sec_context(
 		ad_data.length = ctx->authdata[i]->length;
 		ad_data.value = ctx->authdata[i]->contents;
 
-		major_status = generic_gss_add_buffer_set_member(
-		    minor_status, &ad_data, data_set);
+		major_status = generic_gss_add_buffer_set_member(minor_status,
+								 &ad_data, data_set);
 		if (GSS_ERROR(major_status))
 		    break;
 	    }

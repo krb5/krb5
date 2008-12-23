@@ -619,46 +619,24 @@ gss_krb5_export_lucid_sec_context(
 {
     unsigned char oid_buf[GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH + 6];
     gss_OID_desc req_oid;
-    OM_uint32 major_status;
+    OM_uint32 major_status, minor;
     gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
-    int oversion, i;
-    unsigned char *op;
-    OM_uint32 nbytes;
 
     if (kctx == NULL)
 	return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *kctx = NULL;
 
-    /*
-     * This absolutely horrible code is used to DER encode the
-     * requested authorization data type into the last element
-     * of the request OID. Oh for an ASN.1 library...
-     */
-
-    memcpy(oid_buf, GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID,
-	   GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH);
-
-    nbytes = 0;
-    oversion = version;
-    while (version) {
-	nbytes++;
-	version >>= 7;
-    }
-    version = oversion;
-    op = oid_buf + GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH + nbytes;
-    i = -1;
-    while (version) {
-	op[i] = (unsigned char)version & 0x7f;
-	if (i != -1)
-	    op[i] |= 0x80;
-	i--;
-	version >>= 7;
-    }
-
     req_oid.elements = oid_buf;
-    req_oid.length = GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH + nbytes;
-    assert(req_oid.length <= sizeof(oid_buf));
+    req_oid.length = sizeof(oid_buf);
+
+    major_status = generic_gss_oid_compose(minor_status,
+					   GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID,
+					   GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH,
+					   (int)version,
+					   &req_oid);
+    if (GSS_ERROR(major_status))
+	return major_status;
 
     major_status = gss_inquire_sec_context_by_oid(minor_status,
 						  *context_handle,
@@ -682,7 +660,7 @@ gss_krb5_export_lucid_sec_context(
     (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
     *context_handle = GSS_C_NO_CONTEXT;
 
-    generic_gss_release_buffer_set(&nbytes, &data_set);
+    generic_gss_release_buffer_set(&minor, &data_set);
 
     return GSS_S_COMPLETE;
 }
@@ -828,42 +806,20 @@ gsskrb5_extract_authz_data_from_sec_context(
     unsigned char oid_buf[GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH + 6];
     OM_uint32 major_status;
     gss_buffer_set_t data_set = GSS_C_NO_BUFFER_SET;
-    int oad_type, i;
-    unsigned char *op;
-    OM_uint32 nbytes;
 
     if (ad_data == NULL)
 	return GSS_S_CALL_INACCESSIBLE_WRITE;
 
-    /*
-     * This absolutely horrible code is used to DER encode the
-     * requested authorization data type into the last element
-     * of the request OID. Oh for an ASN.1 library...
-     */
-
-    memcpy(oid_buf, GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID,
-	   GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH);
-
-    nbytes = 0;
-    oad_type = ad_type;
-    while (ad_type) {
-	nbytes++;
-	ad_type >>= 7;
-    }
-    ad_type = oad_type;
-    op = oid_buf + GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH + nbytes;
-    i = -1;
-    while (ad_type) {
-	op[i] = (unsigned char)ad_type & 0x7f;
-	if (i != -1)
-	    op[i] |= 0x80;
-	i--;
-	ad_type >>= 7;
-    }
-
     req_oid.elements = oid_buf;
-    req_oid.length = GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH + nbytes;
-    assert(req_oid.length <= sizeof(oid_buf));
+    req_oid.length = sizeof(oid_buf);
+
+    major_status = generic_gss_oid_compose(minor_status,
+					   GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID,
+					   GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH,
+					   ad_type,
+					   &req_oid);
+    if (GSS_ERROR(major_status))
+	return major_status;
 
     major_status = gss_inquire_sec_context_by_oid(minor_status,
 						  context_handle,

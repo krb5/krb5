@@ -261,6 +261,22 @@ generic_gss_str_to_oid(
     gss_buffer_t,       /* oid_str */
     gss_OID *);         /* oid */
 
+OM_uint32
+generic_gss_oid_compose(
+    OM_uint32 *,	/* minor_status */
+    const char *,	/* prefix */
+    size_t,		/* prefix_len */
+    int,		/* suffix */
+    gss_OID_desc *);	/* oid */
+
+OM_uint32
+generic_gss_oid_decompose(
+    OM_uint32 *,	/* minor_status */
+    const char *,	/*prefix */
+    size_t,		/* prefix_len */
+    gss_OID_desc *,	/* oid */
+    int *);		/* suffix */
+
 int gssint_mecherrmap_init(void);
 void gssint_mecherrmap_destroy(void);
 OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc *oid);
