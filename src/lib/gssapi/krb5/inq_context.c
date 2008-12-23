@@ -234,15 +234,60 @@ gss_krb5int_inq_session_key(
 {
     krb5_gss_ctx_id_rec *ctx;
     krb5_keyblock *key;
-    gss_buffer_desc rep;
+    gss_buffer_desc keyvalue, keyinfo;
+    OM_uint32 major_status, minor;
+    unsigned char oid_buf[GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + 6];
+    unsigned char *op;
+    size_t nbytes;
+    int oenctype, enctype, i;
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
     key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
 
-    rep.value = key->contents;
-    rep.length = key->length;
+    keyvalue.value = key->contents;
+    keyvalue.length = key->length;
+    enctype = key->enctype;
 
-    return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
+    major_status = generic_gss_add_buffer_set_member(minor_status, &keyvalue, data_set);
+    if (GSS_ERROR(major_status)) {
+	gss_release_buffer_set(&minor, data_set);
+	return major_status;
+    }
+
+    /* Construct the OID 1.2.840.113554.1.2.2.4.<enctype> */
+    memcpy(oid_buf, GSS_KRB5_SESSION_KEY_ENCTYPE_OID,
+	   GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH);
+
+    nbytes = 0;
+    oenctype = enctype;
+    while (enctype) {
+	nbytes++;
+	enctype >>= 7;
+    }
+    enctype = oenctype;
+    op = oid_buf + GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + nbytes;
+    i = -1;
+    while (enctype) {
+	op[i] = (unsigned char)enctype & 0x7f;
+	if (i != -1)
+	    op[i] |= 0x80;
+	i--;
+	enctype >>= 7;
+    }
+
+    keyinfo.value = oid_buf;
+    keyinfo.length = GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + nbytes;
+    assert(keyinfo.length <= sizeof(oid_buf));
+
+    major_status = generic_gss_add_buffer_set_member(minor_status, &keyinfo, data_set);
+    if (GSS_ERROR(major_status)) {
+	assert(*data_set != GSS_C_NO_BUFFER_SET);
+	memset((*data_set)->elements[0].value, 0, (*data_set)->elements[0].length);
+	gss_release_buffer_set(&minor, data_set);
+	return major_status;
+    }
+
+    return GSS_S_COMPLETE;
 }
 
 OM_uint32

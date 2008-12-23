@@ -103,6 +103,10 @@
  * The OID of the proposed standard krb5 v2 mechanism is:
  *      iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
  *      krb5v2(3) = 1.2.840.113554.1.2.3
+ * Provisionally reserved for Kerberos session key algorithm
+ * identifiers is:
+ *      iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
+ *      krb5(2) krb5_enctype(4) = 1.2.840.113554.1.2.2.4
  *
  */
 

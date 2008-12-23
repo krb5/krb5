@@ -70,7 +70,11 @@ OM_uint32 KRB5_CALLCONV gss_release_buffer_set
 	(OM_uint32 * /*minor_status*/,
 	 gss_buffer_set_t * /*buffer_set*/);
 
-/* returns buffer set with the first member containing session key */
+/*
+ * Returns a buffer set with the first member containing the
+ * session key for SSPI compatibility. The optional second
+ * member contains an OID identifying the session key type.
+ */
 GSS_DLLIMP extern gss_OID GSS_C_INQ_SESSION_KEY;
 
 OM_uint32 KRB5_CALLCONV gss_inquire_sec_context_by_oid

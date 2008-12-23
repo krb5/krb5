@@ -971,4 +971,8 @@ krb5_gss_save_error_message(OM_uint32 minor_code, const char *format, ...)
 #define save_error_info krb5_gss_save_error_info
 extern void krb5_gss_delete_error_info(void *p);
 
+/* Prefix concatenated with Kerberos encryption type */
+#define GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH 10
+#define GSS_KRB5_SESSION_KEY_ENCTYPE_OID  "\052\206\110\206\367\022\001\002\002\004"
+
 #endif /* _GSSAPIP_KRB5_H_ */
