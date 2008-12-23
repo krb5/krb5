@@ -120,8 +120,8 @@ static const gss_OID_desc const_oids[] = {
      * to that gss_OID_desc.
      */
 
-    /* GSS_C_INQ_SESSION_KEY */
-    {9, "\x2b\x06\x01\x04\x01\xa9\x4a\x13\x05"},
+    /* GSS_C_INQ_SESSION_KEY 1.2.840.113554.1.2.2.5.5 */
+    {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"},
 };
 
 /* Here are the constants which point to the static structure above.
