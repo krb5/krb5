@@ -371,7 +371,7 @@ load_preauth_plugins(krb5_context context)
 {
     void **preauth_plugins_ftables;
     struct krb5plugin_preauth_server_ftable_v1 *ftable;
-    int module_count, i, j, k;
+    size_t module_count, i, j, k;
     void *plugin_context;
     preauth_server_init_proc server_init_proc = NULL;
     char **kdc_realm_names = NULL;
@@ -429,7 +429,7 @@ load_preauth_plugins(krb5_context context)
 	krb5int_free_plugin_dir_data(preauth_plugins_ftables);
 	return ENOMEM;
     }
-    for (i = 0; i < kdc_numrealms; i++) {
+    for (i = 0; i < (size_t)kdc_numrealms; i++) {
 	kdc_realm_names[i] = kdc_realmlist[i]->realm_name;
     }
     kdc_realm_names[i] = NULL;
