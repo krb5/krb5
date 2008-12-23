@@ -321,7 +321,7 @@ static krb5_error_code
 merge_authdata (krb5_context context,
 		krb5_authdata **in_authdata,
 		krb5_authdata ***out_authdata,
-		int copy)
+		krb5_boolean copy)
 {
     size_t i, nadata = 0;
     krb5_authdata **authdata = *out_authdata;
