@@ -506,6 +506,8 @@ handle_tgt_authdata (krb5_context context,
 	if (tgs_req)
 	    return merge_authdata(context, enc_tkt_request->authorization_data,
 				  &enc_tkt_reply->authorization_data, TRUE);
+	else
+	    return 0;
     }
 
     if (ad_nprincs != 0) {
