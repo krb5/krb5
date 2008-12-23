@@ -523,7 +523,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     errcode = handle_authdata(kdc_context,
 			      c_flags,
-			      reply.client,
 			      &client,
 			      &server,
 			      &server,
@@ -531,6 +530,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 			      &server_keyblock,
 			      req_pkt,
 			      request,
+			      NULL, /* for_user_princ */
 			      NULL, /* enc_tkt_request */
 			      &enc_tkt_reply);
     if (errcode) {

@@ -179,7 +179,6 @@ krb5_error_code unload_authdata_plugins(krb5_context context);
 krb5_error_code
 handle_authdata (krb5_context context,
 		 unsigned int flags,
-		 krb5_const_principal reply_client,
 		 krb5_db_entry *client,
 		 krb5_db_entry *server,
 		 krb5_db_entry *krbtgt,
@@ -187,6 +186,7 @@ handle_authdata (krb5_context context,
 		 krb5_keyblock *server_key,
 		 krb5_data *req_pkt,
 		 krb5_kdc_req *request,
+		 krb5_const_principal for_user_princ,
 		 krb5_enc_tkt_part *enc_tkt_request,
 		 krb5_enc_tkt_part *enc_tkt_reply);
 

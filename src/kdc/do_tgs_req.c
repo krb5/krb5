@@ -618,10 +618,14 @@ tgt_again:
 
     enc_tkt_reply.authorization_data = NULL;
 
+    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
+	is_local_principal(header_enc_tkt->client))
+	enc_tkt_reply.client = for_user->user;
+    else
+	enc_tkt_reply.client = header_enc_tkt->client;
+
     errcode = handle_authdata(kdc_context,
 			      c_flags,
-			      isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) ?
-					for_user->user : header_enc_tkt->client,
 			      (c_nprincs != 0) ? &client : NULL,
 			      &server,
 			      &krbtgt,
@@ -629,6 +633,7 @@ tgt_again:
 			      &encrypting_key, /* U2U or server key */
 			      pkt,
 			      request,
+			      for_user ? for_user->user : NULL,
 			      header_enc_tkt,
 			      &enc_tkt_reply);
     if (errcode) {
@@ -645,11 +650,6 @@ tgt_again:
     }
 
     enc_tkt_reply.session = &session_key;
-    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-	is_local_principal(header_enc_tkt->client))
-	enc_tkt_reply.client = for_user->user;
-    else
-	enc_tkt_reply.client = header_enc_tkt->client;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 

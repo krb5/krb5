@@ -52,13 +52,13 @@ typedef krb5_error_code (*authdata_proc_0)
 /* MIT Kerberos 1.7 (V1) authdata plugin callback */
 typedef krb5_error_code (*authdata_proc_1)
     (krb5_context, unsigned int flags,
-     krb5_const_principal reply_client,
      krb5_db_entry *client, krb5_db_entry *server,
      krb5_db_entry *krbtgt,
      krb5_keyblock *client_key,
      krb5_keyblock *server_key,
      krb5_data *req_pkt,
      krb5_kdc_req *request,
+     krb5_const_principal for_user_princ,
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 typedef krb5_error_code (*init_proc)
@@ -70,7 +70,6 @@ typedef void (*fini_proc)
 static krb5_error_code handle_request_authdata
     (krb5_context context,
      unsigned int flags,
-     krb5_const_principal reply_client,
      krb5_db_entry *client,
      krb5_db_entry *server,
      krb5_db_entry *krbtgt,
@@ -78,6 +77,7 @@ static krb5_error_code handle_request_authdata
      krb5_keyblock *server_key,
      krb5_data *req_pkt,
      krb5_kdc_req *request,
+     krb5_const_principal for_user_princ,
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
@@ -85,7 +85,6 @@ static krb5_error_code handle_request_authdata
 static krb5_error_code handle_tgt_authdata
     (krb5_context context,
      unsigned int flags,
-     krb5_const_principal reply_client,
      krb5_db_entry *client,
      krb5_db_entry *server,
      krb5_db_entry *krbtgt,
@@ -93,6 +92,7 @@ static krb5_error_code handle_tgt_authdata
      krb5_keyblock *server_key,
      krb5_data *req_pkt,
      krb5_kdc_req *request,
+     krb5_const_principal for_user_princ,
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
@@ -369,7 +369,6 @@ merge_authdata (krb5_context context,
 static krb5_error_code
 handle_request_authdata (krb5_context context,
 			 unsigned int flags,
-			 krb5_const_principal reply_client,
 			 krb5_db_entry *client,
 			 krb5_db_entry *server,
 			 krb5_db_entry *krbtgt,
@@ -377,6 +376,7 @@ handle_request_authdata (krb5_context context,
 			 krb5_keyblock *server_key,
 			 krb5_data *req_pkt,
 			 krb5_kdc_req *request,
+			 krb5_const_principal for_user_princ,
 			 krb5_enc_tkt_part *enc_tkt_request,
 			 krb5_enc_tkt_part *enc_tkt_reply)
 {
@@ -424,7 +424,6 @@ handle_request_authdata (krb5_context context,
 static krb5_error_code
 handle_tgt_authdata (krb5_context context,
 		     unsigned int flags,
-		     krb5_const_principal reply_client,
 		     krb5_db_entry *client,
 		     krb5_db_entry *server,
 		     krb5_db_entry *krbtgt,
@@ -432,6 +431,7 @@ handle_tgt_authdata (krb5_context context,
 		     krb5_keyblock *server_key,
 		     krb5_data *req_pkt,
 		     krb5_kdc_req *request,
+		     krb5_const_principal for_user_princ,
 		     krb5_enc_tkt_part *enc_tkt_request,
 		     krb5_enc_tkt_part *enc_tkt_reply)
 {
@@ -440,6 +440,7 @@ handle_tgt_authdata (krb5_context context,
     krb5_db_entry ad_entry;
     int ad_nprincs = 0;
     krb5_boolean tgs_req = (request->msg_type == KRB5_TGS_REQ);
+    krb5_const_principal actual_client;
 
     /*
      * Check whether KDC issued authorization data should be included.
@@ -474,6 +475,16 @@ handle_tgt_authdata (krb5_context context,
     }
 
     /*
+     * We have this special case for protocol transition, because for
+     * cross-realm protocol transition the ticket reply client will
+     * not be changed until the final hop.
+     */
+    if (isflagset(flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
+	actual_client = for_user_princ;
+    else
+	actual_client = enc_tkt_reply->client;
+
+    /*
      * If the backend does not implement the sign authdata method, then
      * just copy the TGT authorization data into the reply, except for
      * the constrained delegation case (which requires special handling
@@ -485,7 +496,7 @@ handle_tgt_authdata (krb5_context context,
      */
     code = sign_db_authdata(context,
 			    flags,
-			    reply_client,
+			    actual_client,
 			    client,
 			    server,
 			    krbtgt,
@@ -538,7 +549,6 @@ handle_tgt_authdata (krb5_context context,
 krb5_error_code
 handle_authdata (krb5_context context,
 		 unsigned int flags,
-		 krb5_const_principal reply_client,
 		 krb5_db_entry *client,
 		 krb5_db_entry *server,
 		 krb5_db_entry *krbtgt,
@@ -546,6 +556,7 @@ handle_authdata (krb5_context context,
 		 krb5_keyblock *server_key,
 		 krb5_data *req_pkt,
 		 krb5_kdc_req *request,
+		 krb5_const_principal for_user_princ,
 		 krb5_enc_tkt_part *enc_tkt_request,
 		 krb5_enc_tkt_part *enc_tkt_reply)
 {
@@ -566,10 +577,11 @@ handle_authdata (krb5_context context,
 					    request, enc_tkt_reply);
 	    break;
 	case AUTHDATA_SYSTEM_V1:
-	    code = asys->handle_authdata.v1(context, flags, reply_client,
+	    code = asys->handle_authdata.v1(context, flags,
 					    client, server, krbtgt,
 					    client_key, server_key,
-					    req_pkt, request, enc_tkt_request,
+					    req_pkt, request, for_user_princ,
+					    enc_tkt_request,
 					    enc_tkt_reply);
 	    break;
 	default:
