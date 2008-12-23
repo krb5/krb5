@@ -992,8 +992,6 @@ cleanup:
 	return ret;
 } /* init_sec_context */
 
-static const gss_OID_desc gss_spnego_updated_oid =
-	{ GSS_SPNEGO_UPDATED_OID_LENGTH, GSS_SPNEGO_UPDATED_OID };
 /* We don't want to import KRB5 headers here */
 static const gss_OID_desc gss_mech_krb5_oid =
 	{ 9, "\052\206\110\206\367\022\001\002\002" };
