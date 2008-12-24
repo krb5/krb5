@@ -78,6 +78,10 @@
 
 #include "fake-addrinfo.h"
 
+static krb5_error_code
+domain_heuristic(krb5_context context, const char *domain,
+		 char **realm, int limit);
+
 #ifdef KRB5_DNS_LOOKUP
 
 #include "dnsglue.h"
@@ -334,7 +338,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***realmsp)
 {
     char **retrealms;
-    char *default_realm, *realm, *cp, *temp_realm;
+    char *realm, *cp;
     krb5_error_code retval;
     char local_host[MAXDNAME+1], host[MAXDNAME+1];
 
@@ -348,71 +352,71 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
 
     krb5int_clean_hostname(context, host, local_host, sizeof local_host);
 
-    /* Scan hostname for DNS realm, and save as last-ditch realm
-       assumption. */
-    cp = local_host;
-#ifdef DEBUG_REFERRALS
-    printf("  local_host: %s\n",local_host);
-#endif
-    realm = default_realm = (char *)NULL;
-    temp_realm = 0;
-    while (cp && !default_realm) {
-	if (*cp == '.') {
-	    cp++;
-	    if (default_realm == (char *)NULL) {
-		/* If nothing else works, use the host's domain */
-		default_realm = cp;
-	    }
-	} else {
-	    cp = strchr(cp, '.');
-	}
-    }
-#ifdef DEBUG_REFERRALS
-    printf("  done finding DNS-based default realm: >%s<\n",default_realm);
-#endif
-
+    /*
+     * Try looking up a _kerberos.<hostname> TXT record in DNS.  This
+     * heuristic is turned off by default since, in the absence of
+     * secure DNS, it can allow an attacker to control the realm used
+     * for a host.
+     */
+    realm = (char *)NULL;
 #ifdef KRB5_DNS_LOOKUP
-    if (realm == (char *)NULL) {
-        int use_dns = _krb5_use_dns_realm(context);
-        if ( use_dns ) {
-            /*
-             * Since this didn't appear in our config file, try looking
-             * it up via DNS.  Look for a TXT records of the form:
-             *
-             * _kerberos.<hostname>
-             *
-             */
-            cp = local_host;
-            do {
-                retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
-                cp = strchr(cp,'.');
-                if (cp) 
-                    cp++;
-            } while (retval && cp && cp[0]);
-        }
+    if (_krb5_use_dns_realm(context)) {
+	cp = local_host;
+	do {
+	    retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
+	    cp = strchr(cp,'.');
+	    if (cp) 
+		cp++;
+	} while (retval && cp && cp[0]);
     }
 #endif /* KRB5_DNS_LOOKUP */
 
-      
+    /*
+     * Next try searching the domain components as realms.  This
+     * heuristic is also turned off by default.  If DNS lookups for
+     * KDCs are enabled (as they are by default), an attacker could
+     * control which domain component is used as the realm for a host.
+     */
     if (realm == (char *)NULL) {
-        if (default_realm != (char *)NULL) {
-            /* We are defaulting to the realm of the host */
-            if (!(cp = strdup(default_realm)))
-                return ENOMEM;
-            realm = cp;
+	int limit;
+	errcode_t code;
 
-            /* Assume the realm name is upper case */
+	code = profile_get_integer(context->profile, "libdefaults",
+				   "realm_try_domains", 0, -1, &limit);
+	if (code == 0) {
+	    retval = domain_heuristic(context, local_host, &realm, limit);
+	    if (retval)
+		return retval;
+	}
+    }
+
+    /*
+     * The next fallback--and the first one to apply with default
+     * configuration--is to use the upper-cased parent domain of the
+     * hostname, regardless of whether we can actually look it up as a
+     * realm.
+     */
+    if (realm == (char *)NULL) {
+	cp = strchr(local_host, '.');
+	if (cp) {
+	    if (!(realm = strdup(cp + 1)))
+		return ENOMEM;
             for (cp = realm; *cp; cp++)
                 if (islower((int) (*cp)))
                     *cp = toupper((int) *cp);
-        } else {    
-            /* We are defaulting to the local realm */
-            retval = krb5_get_default_realm(context, &realm);
-            if (retval) {
-                return retval;
-            }
-        }
+	}
     }
+
+    /*
+     * The final fallback--used when the fully-qualified hostname has
+     * only one component--is to use the local default realm.
+     */
+    if (realm == (char *)NULL) {
+	retval = krb5_get_default_realm(context, &realm);
+	if (retval)
+	    return retval;
+    }
+
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
 	if (realm != (char *)NULL)
 	    free(realm);
@@ -487,4 +491,71 @@ krb5int_clean_hostname(krb5_context context, const char *host, char *local_host,
     printf("krb5int_clean_hostname ending: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
 #endif
     return 0;
+}
+
+/*
+ * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
+/*
+ * Walk through the components of a domain.  At each stage determine
+ * if a KDC can be located for that domain.  Return a realm
+ * corresponding to the upper-cased domain name for which a KDC was
+ * found or NULL if no KDC was found.  Stop searching after limit
+ * labels have been removed from the domain (-1 means don't search at
+ * all, 0 means try only the full domain itself, 1 means also try the
+ * parent domain, etc.) or when we reach a parent with only one label.
+ */
+static krb5_error_code
+domain_heuristic(krb5_context context, const char *domain,
+		 char **realm, int limit)
+{
+    krb5_error_code retval = 0, r;
+    struct addrlist alist;
+    krb5_data drealm;
+    char *cp = NULL;
+    char *fqdn = NULL;
+
+    *realm = NULL;
+    if (limit < 0)
+	return 0;
+
+    memset(&drealm, 0, sizeof (drealm));
+    if (!(fqdn = strdup(domain))) {
+	retval = ENOMEM;
+	goto cleanup;
+    }
+
+    /* Upper case the domain (for use as a realm) */
+    for (cp = fqdn; *cp; cp++)
+	if (islower((int)(*cp)))
+	    *cp = toupper((int)*cp);
+
+    /* Search up to limit parents, as long as we have multiple labels. */
+    cp = fqdn;
+    while (limit-- >= 0 && strchr(cp, '.') != NULL) {
+
+	drealm.length = strlen(cp);
+	drealm.data = cp;
+
+	/* Find a kdc based on this part of the domain name. */
+	r = krb5_locate_kdc(context, &drealm, &alist, 0, SOCK_DGRAM, 0);
+	if (!r) { /* Found a KDC! */
+	    krb5int_free_addrlist(&alist);
+	    if (!(*realm = strdup(cp))) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    break;
+	}
+
+	cp = strchr(cp, '.');
+	cp++;
+    }
+
+cleanup:
+    if (fqdn)
+	free(fqdn);
+    return retval;
 }

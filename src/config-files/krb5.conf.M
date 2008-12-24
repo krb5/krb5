@@ -201,6 +201,16 @@ realm of a host.  The default is not to use these records.
 General flag controlling the use of DNS for Kerberos information.  If both
 of the preceding options are specified, this option has no effect.
 
+.IP realm_try_domains
+Indicate whether a host's domain components should be used to
+determine the Kerberos realm of the host.  The value of this variable
+is an integer: -1 means not to search, 0 means to try the host's
+domain itself, 1 means to also try the domain's immediate parent, and
+so forth.  The library's usual mechanism for locating Kerberos realms
+is used to determine whether a domain is a valid realm--which may
+involve consulting DNS if dns_lookup_kdc is set.  The default is not
+to search domain components.
+
 .IP extra_addresses
 This allows a computer to use multiple local addresses, in order to
 allow Kerberos to work in a network that uses NATs.  The addresses should
