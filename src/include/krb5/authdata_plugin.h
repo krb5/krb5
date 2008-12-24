@@ -145,7 +145,6 @@ typedef struct krb5plugin_authdata_ftable_v1 {
      */
     krb5_error_code (*authdata_proc)(krb5_context,
 				     unsigned int flags,
-				     krb5_const_principal reply_client,
 				     struct _krb5_db_entry_new *client,
 				     struct _krb5_db_entry_new *server,
 				     struct _krb5_db_entry_new *tgs,
@@ -153,6 +152,7 @@ typedef struct krb5plugin_authdata_ftable_v1 {
 				     krb5_keyblock *server_key,
 				     krb5_data *req_pkt,
 				     krb5_kdc_req *request,
+				     krb5_const_principal for_user_princ,
 				     krb5_enc_tkt_part *enc_tkt_request,
 				     krb5_enc_tkt_part *enc_tkt_reply);
 } krb5plugin_authdata_ftable_v1;
