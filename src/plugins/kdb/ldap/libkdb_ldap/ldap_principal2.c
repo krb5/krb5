@@ -74,9 +74,10 @@ berval2tl_data(struct berval *in, krb5_tl_data **out)
  */
 
 krb5_error_code
-krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
+krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     krb5_context context;
     krb5_const_principal searchfor;
+    unsigned int flags;
     krb5_db_entry *entries;	/* filled in */
     int *nentries;		/* how much room/how many found */
     krb5_boolean *more;		/* are there more? */
