@@ -1608,9 +1608,9 @@ krb5_error_code KRB5_CALLCONV krb5_parse_name
 	(krb5_context,
 		const char *,
 		krb5_principal * );
-#define KRB5_PRINCIPAL_PARSE_NO_REALM	1
-#define KRB5_PRINCIPAL_PARSE_MUST_REALM	2
-#define KRB5_PRINCIPAL_PARSE_ENTERPRISE	4
+#define KRB5_PRINCIPAL_PARSE_NO_REALM		0x1
+#define KRB5_PRINCIPAL_PARSE_REQUIRE_REALM	0x2
+#define KRB5_PRINCIPAL_PARSE_ENTERPRISE		0x4
 krb5_error_code KRB5_CALLCONV krb5_parse_name_flags
 	(krb5_context,
 		const char *,
@@ -1625,9 +1625,9 @@ krb5_error_code KRB5_CALLCONV krb5_unparse_name_ext
 		krb5_const_principal,
 		char **,
 		unsigned int *);
-#define KRB5_PRINCIPAL_UNPARSE_SHORT	1
-#define KRB5_PRINCIPAL_UNPARSE_NO_REALM	2
-#define KRB5_PRINCIPAL_UNPARSE_DISPLAY	4
+#define KRB5_PRINCIPAL_UNPARSE_SHORT		0x1
+#define KRB5_PRINCIPAL_UNPARSE_NO_REALM		0x2
+#define KRB5_PRINCIPAL_UNPARSE_DISPLAY		0x4
 krb5_error_code KRB5_CALLCONV krb5_unparse_name_flags
 	(krb5_context,
 		krb5_const_principal,
