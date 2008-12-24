@@ -914,8 +914,8 @@ OM_uint32
 gss_krb5int_set_cred_alias(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
 #endif
 
-#define GSS_KRB5_INQ_SESSION_KEY_OID_LENGTH 11
-#define GSS_KRB5_INQ_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"
+#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH 11
+#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"
 
 OM_uint32
 gss_krb5int_inq_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);

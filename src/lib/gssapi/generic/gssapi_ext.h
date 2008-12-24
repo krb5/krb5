@@ -136,7 +136,7 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_aead
  * session key for SSPI compatibility. The optional second
  * member contains an OID identifying the session key type.
  */
-GSS_DLLIMP extern gss_OID GSS_C_INQ_SESSION_KEY;
+GSS_DLLIMP extern gss_OID GSS_C_INQ_SSPI_SESSION_KEY;
 
 OM_uint32 KRB5_CALLCONV gss_complete_auth_token
 	(OM_uint32 *minor_status,

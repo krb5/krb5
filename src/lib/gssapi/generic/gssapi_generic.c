@@ -120,7 +120,7 @@ static const gss_OID_desc const_oids[] = {
      * to that gss_OID_desc.
      */
 
-    /* GSS_C_INQ_SESSION_KEY 1.2.840.113554.1.2.2.5.5 */
+    /* GSS_C_INQ_SSPI_SESSION_KEY 1.2.840.113554.1.2.2.5.5 */
     {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"},
 };
 
@@ -151,5 +151,5 @@ GSS_DLLIMP gss_OID GSS_C_NT_ANONYMOUS           = oids+5;
 GSS_DLLIMP gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
 gss_OID gss_nt_exported_name                    = oids+6;
 
-GSS_DLLIMP gss_OID GSS_C_INQ_SESSION_KEY	= oids+7;
+GSS_DLLIMP gss_OID GSS_C_INQ_SSPI_SESSION_KEY	= oids+7;
 

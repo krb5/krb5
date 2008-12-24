@@ -75,7 +75,7 @@ static struct {
 	gss_krb5int_extract_authz_data_from_sec_context
     },
     {
-	{GSS_KRB5_INQ_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_SESSION_KEY_OID},
+	{GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_SSPI_SESSION_KEY_OID},
 	gss_krb5int_inq_session_key
     },
     {
