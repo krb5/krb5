@@ -335,9 +335,9 @@ krb5int_translate_gai_error (int num)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***realmsp)
+krb5int_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
+				char **realmp)
 {
-    char **retrealms;
     char *realm, *cp;
     krb5_error_code retval;
     char local_host[MAXDNAME+1], host[MAXDNAME+1];
@@ -417,16 +417,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
 	    return retval;
     }
 
-    if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
-	if (realm != (char *)NULL)
-	    free(realm);
-	return ENOMEM;
-    }
-
-    retrealms[0] = realm;
-    retrealms[1] = 0;
-    
-    *realmsp = retrealms;
+    *realmp = realm;
     return 0;
 }
 

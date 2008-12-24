@@ -177,7 +177,6 @@ krb5_auth_con_getauthenticator
 krb5_read_password
 krb5_aname_to_localname
 krb5_get_host_realm
-krb5_get_fallback_host_realm
 krb5_free_host_realm
 krb5_auth_con_genaddrs
 krb5_set_real_time

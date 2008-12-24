@@ -538,6 +538,10 @@ krb5int_locate_server (krb5_context, const krb5_data *realm,
 		       struct addrlist *, enum locate_service_type svc,
 		       int sockettype, int family);
 
+krb5_error_code
+krb5int_get_fallback_host_realm (krb5_context, krb5_data *hdata,
+				 char **realmp);
+
 /* new encryption provider api */
 
 struct krb5_enc_provider {
