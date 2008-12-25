@@ -261,7 +261,7 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
    krb5_gss_ctx_id_rec *ctx = 0;
    krb5_timestamp now;
    krb5_principal name = NULL;
-   krb5_int32 nonce = 0;
+   krb5_ui_4 nonce = 0;
    krb5_data ap_rep;
    OM_uint32 major_status = GSS_S_FAILURE;
 

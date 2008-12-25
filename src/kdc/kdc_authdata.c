@@ -337,8 +337,12 @@ merge_authdata (krb5_context context,
     for (i = 0; in_authdata[i] != NULL; i++)
 	;
 
-    authdata = (krb5_authdata **)realloc(*out_authdata,
-	((nadata + i + 1) * sizeof(krb5_authdata *)));
+    if (authdata == NULL) {
+	authdata = (krb5_authdata **)calloc(i + 1, sizeof(krb5_authdata *));
+    } else {
+	authdata = (krb5_authdata **)realloc(authdata,
+	    ((nadata + i + 1) * sizeof(krb5_authdata *)));
+    }
     if (authdata == NULL)
 	return ENOMEM;
 
@@ -573,16 +577,16 @@ handle_authdata (krb5_context context,
 	    if (request->msg_type != KRB5_AS_REQ)
 		continue;
 
-	    code = asys->handle_authdata.v0(context, client, req_pkt,
-					    request, enc_tkt_reply);
+	    code = (*asys->handle_authdata.v0)(context, client, req_pkt,
+					       request, enc_tkt_reply);
 	    break;
 	case AUTHDATA_SYSTEM_V1:
-	    code = asys->handle_authdata.v1(context, flags,
-					    client, server, krbtgt,
-					    client_key, server_key,
-					    req_pkt, request, for_user_princ,
-					    enc_tkt_request,
-					    enc_tkt_reply);
+	    code = (*asys->handle_authdata.v1)(context, flags,
+					      client, server, krbtgt,
+					      client_key, server_key,
+					      req_pkt, request, for_user_princ,
+					      enc_tkt_request,
+					      enc_tkt_reply);
 	    break;
 	default:
 	    code = 0;

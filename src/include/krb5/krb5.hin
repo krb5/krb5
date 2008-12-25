@@ -1583,7 +1583,7 @@ krb5_error_code KRB5_CALLCONV krb5_rd_rep_dce
 	(krb5_context,
 		krb5_auth_context,
 		const krb5_data *,
-		krb5_int32 *);
+		krb5_ui_4 *);
 krb5_error_code KRB5_CALLCONV krb5_mk_error
 	(krb5_context,
 		const krb5_error *,

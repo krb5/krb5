@@ -932,7 +932,7 @@ retry_using_referrals:
 	     */
 	    if (old_use_conf_ktypes || context->tgs_ktype_count == 0)
 		goto cleanup;
-	    for (i = 0; i < context->tgs_ktype_count; i++) {
+	    for (i = 0; i < (signed)context->tgs_ktype_count; i++) {
 		if ((*out_cred)->keyblock.enctype == context->tgs_ktypes[i]) {
 		    /* Found an allowable etype, so we're done */
 		    goto cleanup;

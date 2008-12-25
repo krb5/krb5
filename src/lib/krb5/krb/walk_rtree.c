@@ -248,7 +248,7 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 	}
     }		/* end of if use hierarchical method */
 
-    if (!(rettree = (krb5_principal *)calloc(links+2,
+    if (!(rettree = (krb5_principal *)calloc((size_t)links+2,
 					     sizeof(krb5_principal)))) {
 	return ENOMEM;
     }
