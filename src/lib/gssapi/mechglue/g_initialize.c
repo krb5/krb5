@@ -633,7 +633,7 @@ gssint_register_mechinfo(gss_mech_info template)
 
 	new_cf->dl_handle = template->dl_handle;
 	/* copy mech so we can rewrite canonical mechanism OID */
-	new_cf->mech = (gss_mechanism)malloc(sizeof(struct gss_config));
+	new_cf->mech = (gss_mechanism)calloc(1, sizeof(struct gss_config));
 	if (new_cf->mech == NULL) {
 		releaseMechInfo(&new_cf);
 		return ENOMEM;
@@ -643,6 +643,8 @@ gssint_register_mechinfo(gss_mech_info template)
 		new_cf->mech->mech_type = *(template->mech_type);
 	new_cf->mech_type = &new_cf->mech->mech_type;
 	new_cf->priority = template->priority;
+	new_cf->freeMech = 1;
+	new_cf->freeMechOID = 0;
 	new_cf->next = NULL;
 
 	if (template->kmodName != NULL) {
@@ -774,11 +776,26 @@ static void
 freeMechList(void)
 {
 	gss_mech_info cf, next_cf;
+	OM_uint32 minor;
 
 	for (cf = g_mechList; cf != NULL; cf = next_cf) {
 		next_cf = cf->next;
-		free(cf->uLibName);
-		free(cf->mechNameStr);
+		if (cf->kmodName != NULL)
+			free(cf->kmodName);
+		if (cf->uLibName != NULL)
+			free(cf->uLibName);
+		if (cf->mechNameStr != NULL)
+			free(cf->mechNameStr);
+		if (cf->optionStr != NULL)
+			free(cf->optionStr);
+		if (cf->mech_type != GSS_C_NO_OID && cf->freeMechOID)
+			generic_gss_release_oid(&minor, &cf->mech_type);
+		if (cf->mech != NULL && cf->freeMech)
+			free(cf->mech);
+		if (cf->mech_ext != NULL && cf->freeMech)
+			free(cf->mech_ext);
+		if (cf->dl_handle != NULL)
+			(void) krb5int_close_plugin(cf->dl_handle);
 		free(cf);
 	}
 }
@@ -853,6 +870,7 @@ const gss_OID oid;
 	} else {
 		/* Try dynamic dispatch table */
 		aMech->mech = build_dynamicMech(dl, aMech->mech_type);
+		aMech->freeMech = 1;
 	}
 	if (aMech->mech == NULL) {
 		(void) krb5int_close_plugin(dl);
@@ -1030,8 +1048,7 @@ const char *fileName;
 
 		aMech = searchMechList(mechOid);
 		if (aMech && aMech->mech) {
-			free(mechOid->elements);
-			free(mechOid);
+			generic_gss_release_oid(&minor, &mechOid);
 			continue;
 		}
 
@@ -1044,8 +1061,7 @@ const char *fileName;
 		 * If that's all, then this is a corrupt entry. Skip it.
 		 */
 		if (! *sharedLib) {
-			free(mechOid->elements);
-			free(mechOid);
+			generic_gss_release_oid(&minor, &mechOid);
 			continue;
 		}
 
@@ -1139,22 +1155,21 @@ const char *fileName;
 				aMech->optionStr = strdup(modOptions);
 
 			/* the oid is already set */
-			free(mechOid->elements);
-			free(mechOid);
+			generic_gss_release_oid(&minor, &mechOid);
 			continue;
 		}
 
 		/* adding a new entry */
-		aMech = malloc(sizeof (struct gss_mech_config));
+		aMech = calloc(1, sizeof (struct gss_mech_config));
 		if (aMech == NULL) {
-			free(mechOid->elements);
-			free(mechOid);
+			generic_gss_release_oid(&minor, &mechOid);
 			continue;
 		}
-		(void) memset(aMech, 0, sizeof (struct gss_mech_config));
 		aMech->mech_type = mechOid;
 		aMech->uLibName = strdup(sharedPath);
 		aMech->mechNameStr = strdup(oidStr);
+		aMech->freeMech = 0;
+		aMech->freeMechOID = 1;
 
 		/* check if any memory allocations failed - bad news */
 		if (aMech->uLibName == NULL || aMech->mechNameStr == NULL) {
@@ -1162,8 +1177,7 @@ const char *fileName;
 				free(aMech->uLibName);
 			if (aMech->mechNameStr)
 				free(aMech->mechNameStr);
-			free(mechOid->elements);
-			free(mechOid);
+			generic_gss_release_oid(&minor, &mechOid);
 			free(aMech);
 			continue;
 		}

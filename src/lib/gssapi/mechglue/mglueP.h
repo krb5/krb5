@@ -512,6 +512,8 @@ typedef struct gss_mech_config {
 	gss_mechanism mech;		/* mechanism initialization struct */
  	gss_mechanism_ext mech_ext;	/* extensions */
  	int priority;			/* mechanism preference order */
+	int freeMech;			/* free mech table */
+	int freeMechOID;		/* free mech OID */
 	struct gss_mech_config *next;	/* next element in the list */
 } *gss_mech_info;
 
