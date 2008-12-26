@@ -644,7 +644,6 @@ gssint_register_mechinfo(gss_mech_info template)
 	new_cf->mech_type = &new_cf->mech->mech_type;
 	new_cf->priority = template->priority;
 	new_cf->freeMech = 1;
-	new_cf->freeMechOID = 0;
 	new_cf->next = NULL;
 
 	if (template->kmodName != NULL) {
@@ -788,7 +787,7 @@ freeMechList(void)
 			free(cf->mechNameStr);
 		if (cf->optionStr != NULL)
 			free(cf->optionStr);
-		if (cf->mech_type != GSS_C_NO_OID && cf->freeMechOID)
+		if (cf->mech_type != &cf->mech->mech_type)
 			generic_gss_release_oid(&minor, &cf->mech_type);
 		if (cf->mech != NULL && cf->freeMech)
 			free(cf->mech);
@@ -1169,7 +1168,6 @@ const char *fileName;
 		aMech->uLibName = strdup(sharedPath);
 		aMech->mechNameStr = strdup(oidStr);
 		aMech->freeMech = 0;
-		aMech->freeMechOID = 1;
 
 		/* check if any memory allocations failed - bad news */
 		if (aMech->uLibName == NULL || aMech->mechNameStr == NULL) {
