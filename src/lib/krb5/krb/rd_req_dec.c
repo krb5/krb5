@@ -480,9 +480,11 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
    	if ((retval = krb5_copy_ticket(context, req->ticket, ticket)))
 	    goto cleanup;
     if (ap_req_options) {
-    	*ap_req_options = req->ap_options;
-	if ((*auth_context)->negotiated_etype != (*auth_context)->keyblock->enctype)
+    	*ap_req_options = req->ap_options & AP_OPTS_WIRE_MASK;
+	if (rfc4537_etypes_len != 0)
 	    *ap_req_options |= AP_OPTS_ETYPE_NEGOTIATION;
+	if ((*auth_context)->negotiated_etype != (*auth_context)->keyblock->enctype)
+	    *ap_req_options |= AP_OPTS_USE_SUBKEY;
     }
 
     retval = 0;

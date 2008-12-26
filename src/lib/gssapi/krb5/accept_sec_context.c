@@ -904,7 +904,7 @@ kg_accept_krb5(minor_status, context_handle,
         int cfx_generate_subkey;
 
         if (ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE) ||
-	    (ap_req_options & AP_OPTS_ETYPE_NEGOTIATION))
+	    (ap_req_options & AP_OPTS_USE_SUBKEY))
             cfx_generate_subkey = CFX_ACCEPTOR_SUBKEY;
         else
             cfx_generate_subkey = 0;
