@@ -29,6 +29,8 @@
 #include "aes.h"
 #include "../aead.h"
 
+#define CCM_COUNTER_LENGTH	3
+
 static void xorblock(unsigned char *out, const unsigned char *in)
 {
     int z;
@@ -62,7 +64,7 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
     else
 	memset(ctr, 0, BLOCK_SIZE);
 
-    ctr[0] &= 0x7;
+    ctr[0] = CCM_COUNTER_LENGTH - 1; /* q=3 */
 
     blockno  = (ctr[13] << 16);
     blockno |= (ctr[14] << 8 );
@@ -120,7 +122,7 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
     else
 	memset(ctr, 0, BLOCK_SIZE);
 
-    ctr[0] &= 0x7;
+    ctr[0] = CCM_COUNTER_LENGTH - 1; /* q=3 */
 
     blockno  = (ctr[13] << 16);
     blockno |= (ctr[14] << 8 );
