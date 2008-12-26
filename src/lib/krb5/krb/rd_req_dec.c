@@ -379,10 +379,38 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 
     desired_etypes_len = rfc4537_etypes_len;
 
-    if ((*auth_context)->authentp->subkey != NULL)
+    /*
+     * RFC 4537:
+     *
+     *   If the EtypeList is present and the server prefers an enctype from
+     *   the client's enctype list over that of the AP-REQ authenticator
+     *   subkey (if that is present) or the service ticket session key, the
+     *   server MUST create a subkey using that enctype.  This negotiated
+     *   subkey is sent in the subkey field of AP-REP message, and it is then
+     *   used as the protocol key or base key [RFC3961] for subsequent
+     *   communication.
+     *
+     *   If the enctype of the ticket session key is included in the enctype
+     *   list sent by the client, it SHOULD be the last on the list;
+     *   otherwise, this enctype MUST NOT be negotiated if it was not included
+     *   in the list.
+     *
+     * The second paragraph does appear to contradict the first with respect
+     * to whether it is legal to negotiate the ticket session key type if it
+     * is absent in the EtypeList. A literal reading suggests that we can use
+     * the AP-REQ subkey enctype. Also a client has no way of distinguishing
+     * a server that does not RFC 4537 from one that has chosen the same
+     * enctype as the ticket session key for the acceptor subkey, surely.
+     */
+
+    if ((*auth_context)->authentp->subkey != NULL) {
 	desired_etypes[desired_etypes_len++] = (*auth_context)->authentp->subkey->enctype;
-    desired_etypes[desired_etypes_len++] = req->ticket->enc_part2->session->enctype;
-    desired_etypes[desired_etypes_len++] = req->ticket->enc_part.enctype;
+    }
+    if (rfc4537_etypes_len == 0) {
+	/* If EtypeList was present, omit the ticket session key enctypes */
+	desired_etypes[desired_etypes_len++] = req->ticket->enc_part2->session->enctype;
+	desired_etypes[desired_etypes_len++] = req->ticket->enc_part.enctype;
+    }
     desired_etypes[desired_etypes_len] = ENCTYPE_NULL;
 
     if (((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_PERMIT_ALL) == 0) {
@@ -410,6 +438,8 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 			     &(*auth_context)->negotiated_etype);
     if (retval != 0)
 	goto cleanup;
+
+    assert((*auth_context)->negotiated_etype != ENCTYPE_NULL);
 
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
     if ((*auth_context)->authentp->subkey) {
@@ -554,6 +584,7 @@ negotiate_etype(krb5_context context,
 
     *negotiated_etype = ENCTYPE_NULL;
 
+    /* mandatory segment of desired_etypes must be permitted */
     for (i = mandatory_etypes_index; i < desired_etypes_len; i++) {
 	krb5_boolean permitted = FALSE;
 
@@ -577,6 +608,10 @@ negotiate_etype(krb5_context context,
 	}
     }
 
+    /*
+     * permitted_etypes is ordered from most to least preferred;
+     * find first desired_etype that matches.
+     */
     for (j = 0; j < permitted_etypes_len; j++) {
 	for (i = 0; i < desired_etypes_len; i++) {
 	    if (desired_etypes[i] == permitted_etypes[j]) {
