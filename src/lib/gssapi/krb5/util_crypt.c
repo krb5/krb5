@@ -162,9 +162,14 @@ kg_make_confounder(context, key, buf)
     size_t blocksize;
     krb5_data lrandom;
 
-    code = krb5_c_block_size(context, key->enctype, &blocksize);
-    if (code)
-        return(code);
+    /* We special case rc4*/
+    if (key->enctype == ENCTYPE_ARCFOUR_HMAC) {
+        blocksize = 8;
+    } else {
+	code = krb5_c_block_size(context, key->enctype, &blocksize);
+	if (code)
+	    return(code);
+    }
 
     lrandom.length = blocksize;
     lrandom.data = (char *)buf;
