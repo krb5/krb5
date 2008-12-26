@@ -1173,6 +1173,10 @@ static const struct field_info pa_pac_request_fields[] = {
 DEFSEQTYPE(pa_pac_request, krb5_pa_pac_req, pa_pac_request_fields, 0);
 #endif
 
+/* RFC 4537 */
+DEFFIELDTYPE(etype_list, krb5_etype_list, 
+             FIELDOF_SEQOF_INT32(krb5_etype_list, int32_ptr, etypes, length, -1));
+
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
 
@@ -1237,7 +1241,7 @@ MAKE_FULL_ENCODER(encode_krb5_setpw_req, setpw_req);
 MAKE_FULL_ENCODER(encode_krb5_pa_for_user, pa_for_user);
 MAKE_FULL_ENCODER(encode_krb5_pa_svr_referral_data, pa_svr_referral_data);
 MAKE_FULL_ENCODER(encode_krb5_pa_server_referral_data, pa_server_referral_data);
-
+MAKE_FULL_ENCODER(encode_krb5_etype_list, etype_list);
 
 
 

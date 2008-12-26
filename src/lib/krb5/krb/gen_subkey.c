@@ -40,7 +40,10 @@ key2data (krb5_keyblock k)
 }
 
 krb5_error_code
-krb5_generate_subkey(krb5_context context, const krb5_keyblock *key, krb5_keyblock **subkey)
+krb5_generate_subkey_extended(krb5_context context,
+			      const krb5_keyblock *key,
+			      krb5_enctype enctype,
+			      krb5_keyblock **subkey)
 {
     krb5_error_code retval;
     krb5_data seed;
@@ -52,10 +55,16 @@ krb5_generate_subkey(krb5_context context, const krb5_keyblock *key, krb5_keyblo
     if ((*subkey = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))) == NULL)
 	return(ENOMEM);
 
-    if ((retval = krb5_c_make_random_key(context, key->enctype, *subkey))) {
+    if ((retval = krb5_c_make_random_key(context, enctype, *subkey))) {
 	krb5_xfree(*subkey);
 	return(retval);
     }
 
     return(0);
+}
+
+krb5_error_code
+krb5_generate_subkey(krb5_context context, const krb5_keyblock *key, krb5_keyblock **subkey)
+{
+    return krb5_generate_subkey_extended(context, key, key->enctype, subkey);
 }

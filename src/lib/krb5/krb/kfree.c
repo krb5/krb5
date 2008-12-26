@@ -799,3 +799,13 @@ krb5_free_pa_pac_req(krb5_context context,
     krb5_xfree(req);
 }
 
+void KRB5_CALLCONV
+krb5_free_etype_list(krb5_context context,
+		     krb5_etype_list *etypes)
+{
+    if (etypes != NULL) {
+	if (etypes->etypes != NULL)
+	    krb5_xfree(etypes->etypes);
+	krb5_xfree(etypes);
+    }
+}

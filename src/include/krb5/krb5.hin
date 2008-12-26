@@ -838,10 +838,10 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 /* #define	AP_OPTS_RESERVED	0x00000010 */
 /* #define	AP_OPTS_RESERVED	0x00000008 */
 /* #define	AP_OPTS_RESERVED	0x00000004 */
-/* #define	AP_OPTS_RESERVED	0x00000002 */
-#define AP_OPTS_USE_SUBKEY	0x00000001
+#define	AP_OPTS_ETYPE_NEGOTIATION	0x00000002
+#define AP_OPTS_USE_SUBKEY		0x00000001
 
-#define AP_OPTS_WIRE_MASK	0xfffffff0
+#define AP_OPTS_WIRE_MASK		0xfffffff0
 
 /* definitions for ad_type fields. */
 #define	AD_TYPE_RESERVED	0x8000
@@ -2502,13 +2502,13 @@ krb5_clear_error_message (krb5_context);
 krb5_error_code KRB5_CALLCONV
 krb5_decode_authdata_container(krb5_context context,
     krb5_authdatatype type,
-    const krb5_authdata *if_relevant,
+    const krb5_authdata *container,
     krb5_authdata ***authdata);
 krb5_error_code KRB5_CALLCONV
 krb5_encode_authdata_container(krb5_context context,
     krb5_authdatatype type,
     krb5_authdata * const*authdata,
-    krb5_authdata ***if_relevant_p);
+    krb5_authdata ***container);
 
 /*
  * Windows PAC

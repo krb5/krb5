@@ -315,7 +315,7 @@ typedef krb5_etype_info_entry ** krb5_etype_info;
 
 /* RFC 4537 */
 typedef struct _krb5_etype_list {
-	unsigned int	length;
+	int		length;
 	krb5_enctype	*etypes;
 } krb5_etype_list;
 
@@ -1230,6 +1230,8 @@ void KRB5_CALLCONV krb5_free_pa_server_referral_data
 	(krb5_context, krb5_pa_server_referral_data * );
 void KRB5_CALLCONV krb5_free_pa_pac_req
 	(krb5_context, krb5_pa_pac_req * );
+void KRB5_CALLCONV krb5_free_etype_list
+	(krb5_context, krb5_etype_list * );
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1566,6 +1568,9 @@ krb5_error_code encode_krb5_pa_server_referral_data
 krb5_error_code encode_krb5_pa_pac_req
 	(const krb5_pa_pac_req * , krb5_data **);
 
+krb5_error_code encode_krb5_etype_list
+	(const krb5_etype_list * , krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1721,6 +1726,9 @@ krb5_error_code decode_krb5_pa_server_referral_data
 
 krb5_error_code decode_krb5_pa_pac_req
 	(const krb5_data *, krb5_pa_pac_req **);
+
+krb5_error_code decode_krb5_etype_list
+	(const krb5_data *, krb5_etype_list **);
 
 struct _krb5_key_data;		/* kdb.h */
 
@@ -1892,7 +1900,8 @@ void krb5int_set_prompt_types
 
 krb5_error_code
 krb5int_generate_and_save_subkey (krb5_context, krb5_auth_context,
-				  krb5_keyblock * /* Old keyblock, not new!  */);
+				  krb5_keyblock * /* Old keyblock, not new!  */,
+				  krb5_enctype);
 
 /* set and change password helpers */
 
@@ -2413,6 +2422,11 @@ void krb5_free_ets
 krb5_error_code krb5_generate_subkey
 	(krb5_context,
 		const krb5_keyblock *, krb5_keyblock **);
+krb5_error_code krb5_generate_subkey_extended
+	(krb5_context,
+		const krb5_keyblock *,
+		krb5_enctype,
+		krb5_keyblock **);
 krb5_error_code krb5_generate_seq_number
 	(krb5_context,
 		const krb5_keyblock *, krb5_ui_4 *);

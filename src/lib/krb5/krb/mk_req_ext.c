@@ -64,16 +64,25 @@
  returns system errors
 */
 
+static krb5_error_code
+make_etype_list(krb5_context context,
+		krb5_enctype *permitted_etypes,
+		krb5_enctype tkt_enctype,
+		krb5_authdata ***authdata);
+
 static krb5_error_code 
 krb5_generate_authenticator (krb5_context,
 				       krb5_authenticator *, krb5_principal,
 				       krb5_checksum *, krb5_keyblock *,
-				       krb5_ui_4, krb5_authdata ** );
+				       krb5_ui_4, krb5_authdata **,
+				       krb5_enctype *permitted_etypes,
+				       krb5_enctype tkt_enctype);
 
 krb5_error_code
 krb5int_generate_and_save_subkey (krb5_context context,
 				  krb5_auth_context auth_context,
-				  krb5_keyblock *keyblock)
+				  krb5_keyblock *keyblock,
+				  krb5_enctype enctype)
 {
     /* Provide some more fodder for random number code.
        This isn't strong cryptographically; the point here is not
@@ -92,7 +101,8 @@ krb5int_generate_and_save_subkey (krb5_context context,
 
     if (auth_context->send_subkey)
 	krb5_free_keyblock(context, auth_context->send_subkey);
-    if ((retval = krb5_generate_subkey(context, keyblock, &auth_context->send_subkey)))
+    if ((retval = krb5_generate_subkey_extended(context, keyblock, enctype,
+						&auth_context->send_subkey)))
 	return retval;
 
     if (auth_context->recv_subkey)
@@ -116,17 +126,22 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     krb5_checksum	  checksum;
     krb5_checksum	  *checksump = 0;
     krb5_auth_context	  new_auth_context;
+    krb5_enctype	  *permitted_etypes = NULL;
 
     krb5_ap_req request;
     krb5_data *scratch = 0;
     krb5_data *toutbuf;
 
     request.ap_options = ap_req_options & AP_OPTS_WIRE_MASK;
-    request.authenticator.ciphertext.data = 0;
+    request.authenticator.ciphertext.data = NULL;
     request.ticket = 0;
     
     if (!in_creds->ticket.length) 
 	return(KRB5_NO_TKT_SUPPLIED);
+
+    if ((ap_req_options & AP_OPTS_ETYPE_NEGOTIATION) &&
+	!(ap_req_options & AP_OPTS_MUTUAL_REQUIRED))
+	return(EINVAL);
 
     /* we need a native ticket */
     if ((retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket)))
@@ -174,7 +189,8 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 
     if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->send_subkey)) {
 	retval = krb5int_generate_and_save_subkey (context, *auth_context,
-						   &in_creds->keyblock);
+						   &in_creds->keyblock,
+						   in_creds->keyblock.enctype);
 	if (retval)
 	    goto cleanup;
     }
@@ -205,12 +221,23 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	goto cleanup_cksum;
     }
 
+    if (ap_req_options & AP_OPTS_ETYPE_NEGOTIATION) {
+	if ((*auth_context)->permitted_etypes == NULL) {
+	    retval = krb5_get_permitted_enctypes(context, &permitted_etypes);
+	    if (retval)
+		goto cleanup_cksum;
+	} else
+	    permitted_etypes = (*auth_context)->permitted_etypes;
+    }
+
     if ((retval = krb5_generate_authenticator(context,
 					      (*auth_context)->authentp,
-					      (in_creds)->client, checksump,
+					      in_creds->client, checksump,
 					      (*auth_context)->send_subkey,
 					      (*auth_context)->local_seq_number,
-					      (in_creds)->authdata)))
+					      in_creds->authdata,
+					      permitted_etypes,
+					      in_creds->keyblock.enctype)))
 	goto cleanup_cksum;
 	
     /* encode the authenticator */
@@ -223,7 +250,6 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
      */
     (*auth_context)->authentp->client = NULL;
     (*auth_context)->authentp->checksum = NULL;
-    (*auth_context)->authentp->authorization_data = NULL;
 
     /* call the encryption routine */
     if ((retval = krb5_encrypt_helper(context, &in_creds->keyblock,
@@ -242,6 +268,9 @@ cleanup_cksum:
       free(checksump->contents);
 
 cleanup:
+    if (permitted_etypes &&
+	permitted_etypes != (*auth_context)->permitted_etypes)
+	krb5_xfree(permitted_etypes);
     if (request.ticket)
 	krb5_free_ticket(context, request.ticket);
     if (request.authenticator.ciphertext.data) {
@@ -261,7 +290,9 @@ static krb5_error_code
 krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
 			    krb5_principal client, krb5_checksum *cksum,
 			    krb5_keyblock *key, krb5_ui_4 seq_number,
-			    krb5_authdata **authorization)
+			    krb5_authdata **authorization,
+			    krb5_enctype *permitted_etypes,
+			    krb5_enctype tkt_enctype)
 {
     krb5_error_code retval;
     
@@ -274,7 +305,114 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
     } else
 	authent->subkey = 0;
     authent->seq_number = seq_number;
-    authent->authorization_data = authorization;
+    authent->authorization_data = NULL;
+
+    if (authorization != NULL) {
+	retval = krb5_copy_authdata(context, authorization,
+				    &authent->authorization_data);
+	if (retval)
+	    return retval;
+    }
+    if (permitted_etypes != NULL) {
+	retval = make_etype_list(context, permitted_etypes, tkt_enctype,
+				 &authent->authorization_data);
+	if (retval)
+	    return retval;
+    }
 
     return(krb5_us_timeofday(context, &authent->ctime, &authent->cusec));
 }
+
+/* RFC 4537 */
+static krb5_error_code
+make_etype_list(krb5_context context,
+		krb5_enctype *permitted_etypes,
+		krb5_enctype tkt_enctype,
+		krb5_authdata ***authdata)
+{
+    krb5_error_code code;
+    krb5_etype_list etypes;
+    krb5_data *enc_etype_list;
+    krb5_data *ad_if_relevant;
+    krb5_authdata *etype_adata[2], etype_adatum, **adata;
+    int i;
+
+    etypes.etypes = permitted_etypes;
+
+    for (etypes.length = 0;
+	 etypes.etypes[etypes.length] != ENCTYPE_NULL;
+	 etypes.length++)
+	;
+
+    /*
+     * RFC 4537:
+     * If the enctype of the ticket session key is included in the enctype
+     * list sent by the client, it SHOULD be the last on the list.
+     */
+    for (i = 0; i < etypes.length; i++) {
+	if (etypes.etypes[i] == tkt_enctype) {
+	    krb5_enctype etype;
+
+	    etype = etypes.etypes[etypes.length - 1];
+	    etypes.etypes[etypes.length - 1] = tkt_enctype;
+	    etypes.etypes[i] = etype;
+	    break;
+	}
+    }
+
+    code = encode_krb5_etype_list(&etypes, &enc_etype_list);
+    if (code) {
+	return code;
+    }
+
+    etype_adatum.magic = KV5M_AUTHDATA;
+    etype_adatum.ad_type = KRB5_AUTHDATA_ETYPE_NEGOTIATION;
+    etype_adatum.length = enc_etype_list->length;
+    etype_adatum.contents = (krb5_octet *)enc_etype_list->data;
+
+    etype_adata[0] = &etype_adatum;
+    etype_adata[1] = NULL;
+
+    /* Wrap in AD-IF-RELEVANT container */
+    code = encode_krb5_authdata(etype_adata, &ad_if_relevant);
+    if (code) {
+	krb5_free_data(context, enc_etype_list);
+	return code;
+    }
+
+    krb5_free_data(context, enc_etype_list);
+
+    adata = *authdata;
+    if (adata == NULL) {
+	adata = (krb5_authdata **)calloc(2, sizeof(krb5_authdata *));
+	i = 0;
+    } else {
+	for (i = 0; adata[i] != NULL; i++)
+	    ;
+
+	adata = (krb5_authdata **)realloc(*authdata,
+					  (i + 2) * sizeof(krb5_authdata *));
+    }
+    if (adata == NULL) {
+	krb5_free_data(context, ad_if_relevant);
+	return ENOMEM;
+    }
+
+    adata[i] = (krb5_authdata *)malloc(sizeof(krb5_authdata));
+    if (adata[i] == NULL) {
+	krb5_free_data(context, ad_if_relevant);
+	return ENOMEM;
+    }
+    adata[i]->magic = KV5M_AUTHDATA;
+    adata[i]->ad_type = KRB5_AUTHDATA_IF_RELEVANT;
+    adata[i]->length = ad_if_relevant->length;
+    adata[i]->contents = (krb5_octet *)ad_if_relevant->data;
+    krb5_xfree(ad_if_relevant); /* contents owned by adata[i] */
+
+    adata[i + 1] = NULL;
+
+    *authdata = adata;
+
+    return 0;
+}
+

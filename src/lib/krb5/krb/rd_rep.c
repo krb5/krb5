@@ -129,6 +129,8 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
 	    krb5_free_keyblock(context, auth_context->send_subkey);
 	    auth_context->send_subkey = NULL;
 	}
+	/* not used for anything yet */
+	auth_context->negotiated_etype = (*repl)->subkey->enctype;
     }
 
     /* Get remote sequence number */
