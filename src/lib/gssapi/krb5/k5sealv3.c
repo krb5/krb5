@@ -82,6 +82,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     unsigned short tok_id;
     krb5_checksum sum;
     krb5_keyblock *key;
+    krb5_cksumtype cksumtype;
 
     assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
@@ -96,8 +97,10 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
                     : KG_USAGE_ACCEPTOR_SIGN));
     if (ctx->have_acceptor_subkey) {
         key = ctx->acceptor_subkey;
+	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
         key = ctx->enc;
+	cksumtype = ctx->cksumtype;
     }
 
 #ifdef CFX_EXERCISE
@@ -133,7 +136,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             return ENOMEM;
 
         /* Get size of ciphertext.  */
-        bufsize = 16 + krb5_encrypt_size (plain.length, ctx->enc->enctype);
+        bufsize = 16 + krb5_encrypt_size (plain.length, key->enctype);
         /* Allocate space for header plus encrypted data.  */
         outbuf = malloc(bufsize);
         if (outbuf == NULL) {
@@ -238,7 +241,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         sum.contents = outbuf + 16 + message2->length;
         sum.length = ctx->cksum_size;
 
-        err = krb5_c_make_checksum(context, ctx->cksumtype, key,
+        err = krb5_c_make_checksum(context, cksumtype, key,
                                    key_usage, &plain, &sum);
         zap(plain.data, plain.length);
         free(plain.data);
@@ -311,6 +314,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     krb5_error_code err;
     krb5_boolean valid;
     krb5_keyblock *key;
+    krb5_cksumtype cksumtype;
 
     assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
@@ -360,8 +364,10 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     value in that case, though, so we can just ignore the flag.  */
     if (ctx->have_acceptor_subkey && (ptr[2] & FLAG_ACCEPTOR_SUBKEY)) {
         key = ctx->acceptor_subkey;
+	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
         key = ctx->enc;
+	cksumtype = ctx->cksumtype;
     }
 
     if (toktype == KG_TOK_WRAP_MSG) {
@@ -442,7 +448,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                 return GSS_S_BAD_SIG;
             }
             sum.contents = ptr+bodysize-ec;
-            sum.checksum_type = ctx->cksumtype;
+            sum.checksum_type = cksumtype;
             err = krb5_c_verify_checksum(context, key, key_usage,
                                          &plain, &sum, &valid);
             if (err)
@@ -479,7 +485,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         memcpy(plain.data + message_buffer->length, ptr, 16);
         sum.length = bodysize - 16;
         sum.contents = ptr + 16;
-        sum.checksum_type = ctx->cksumtype;
+        sum.checksum_type = cksumtype;
         err = krb5_c_verify_checksum(context, key, key_usage,
                                      &plain, &sum, &valid);
         free(plain.data);

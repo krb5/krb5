@@ -343,52 +343,6 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
    return major_status;
 }
 
-static krb5_error_code
-kg_derive_keys(krb5_context context,
-	       krb5_keyblock *subkey,
-	       krb5_keyblock **enc,
-	       krb5_keyblock **seq)
-{
-    krb5_error_code code;
-    unsigned int i;
-
-    switch(subkey->enctype) {
-    case ENCTYPE_DES_CBC_MD5:
-    case ENCTYPE_DES_CBC_CRC:
-        subkey->enctype = ENCTYPE_DES_CBC_RAW;
-
-        /* fill in the encryption descriptors */
-
-        code = krb5_copy_keyblock(context, subkey, enc);
-	if (code)
-	    return code;
-
-        for (i=0; i<(*enc)->length; i++)
-            /*SUPPRESS 113*/
-            (*enc)->contents[i] ^= 0xf0;
-
-        goto copy_subkey_to_seq;
-
-    case ENCTYPE_DES3_CBC_SHA1:
-        subkey->enctype = ENCTYPE_DES3_CBC_RAW;
-
-        /* fill in the encryption descriptors */
-    default:
-        code = krb5_copy_keyblock(context, subkey, enc);
-	if (code)
-	    return code;
-
-    copy_subkey_to_seq:
-        code = krb5_copy_keyblock(context, subkey, seq);
-	if (code)
-	    return code;
-
-        break;
-    }
-
-    return 0;
-}
-
 static OM_uint32
 kg_accept_krb5(minor_status, context_handle,
 	      verifier_cred_handle, input_token,
@@ -440,6 +394,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5int_access kaccess;
     int cred_rcache = 0;
     int no_encap = 0;
+    krb5_flags ap_req_options = 0;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -586,7 +541,7 @@ kg_accept_krb5(minor_status, context_handle,
     }
 
     if ((code = krb5_rd_req(context, &auth_context, &ap_req, cred->princ,
-                            cred->keytab, NULL, &ticket))) {
+                            cred->keytab, &ap_req_options, &ticket))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
@@ -897,53 +852,17 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
-    ctx->proto = 0;
-    switch(ctx->subkey->enctype) {
-    case ENCTYPE_DES_CBC_MD5:
-    case ENCTYPE_DES_CBC_CRC:
-        ctx->signalg = SGN_ALG_DES_MAC_MD5;
-        ctx->cksum_size = 8;
-        ctx->sealalg = SEAL_ALG_DES;
-	break;
-    case ENCTYPE_DES3_CBC_SHA1:
-        ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
-        ctx->cksum_size = 20;
-        ctx->sealalg = SEAL_ALG_DES3KD;
-	break;
-    case ENCTYPE_ARCFOUR_HMAC:
-        ctx->signalg = SGN_ALG_HMAC_MD5 ;
-        ctx->cksum_size = 8;
-        ctx->sealalg = SEAL_ALG_MICROSOFT_RC4;
-	break;
-    default:
-        ctx->signalg = -1;
-        ctx->sealalg = -1;
-        ctx->proto = 1;
-        code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, ctx->subkey->enctype,
-                                                        &ctx->cksumtype);
-        if (code) {
-	    major_status = GSS_S_FAILURE;
-            goto fail;
-	}
-        code = krb5_c_checksum_length(context, ctx->cksumtype,
-                                      &ctx->cksum_size);
-        if (code) {
-	    major_status = GSS_S_FAILURE;
-            goto fail;
-	}
-        ctx->have_acceptor_subkey = 0;
-	break;
-    }
-
+    ctx->enc = NULL;
+    ctx->seq = NULL;
+    ctx->have_acceptor_subkey = 0;
     /* DCE_STYLE implies acceptor_subkey */
     if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
-	code = kg_derive_keys(context, ctx->subkey, &ctx->enc, &ctx->seq);
+	code = kg_setup_keys(context, ctx, ctx->subkey, &ctx->cksumtype);
 	if (code) {
 	    major_status = GSS_S_FAILURE;
 	    goto fail;
 	}
     }
-
     ctx->krb_times = ticket->enc_part2->times; /* struct copy */
     ctx->krb_flags = ticket->enc_part2->flags;
 
@@ -984,7 +903,8 @@ kg_accept_krb5(minor_status, context_handle,
         krb5_int32 seq_temp;
         int cfx_generate_subkey;
 
-        if (ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE))
+        if (ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE) ||
+	    (ap_req_options & AP_OPTS_ETYPE_NEGOTIATION))
             cfx_generate_subkey = CFX_ACCEPTOR_SUBKEY;
         else
             cfx_generate_subkey = 0;
@@ -1019,26 +939,19 @@ kg_accept_krb5(minor_status, context_handle,
                 major_status = GSS_S_FAILURE;
                 goto fail;
             }
-            code = (*kaccess.krb5int_c_mandatory_cksumtype)(context,
-                                                            ctx->acceptor_subkey->enctype,
-                                                            &ctx->acceptor_subkey_cksumtype);
-            if (code) {
-                major_status = GSS_S_FAILURE;
-                goto fail;
-            }
             ctx->have_acceptor_subkey = 1;
+
+	    code = kg_setup_keys(context, ctx, ctx->acceptor_subkey,
+				 &ctx->acceptor_subkey_cksumtype);
+	    if (code) {
+		major_status = GSS_S_FAILURE;
+		goto fail;
+	    }
         }
 
         /* the reply token hasn't been sent yet, but that's ok. */
 	if (ctx->gss_flags & GSS_C_DCE_STYLE) {
 	    assert(ctx->have_acceptor_subkey);
-	    assert(ctx->enc == NULL && ctx->seq == NULL);
-
-	    code = kg_derive_keys(context, ctx->acceptor_subkey, &ctx->enc, &ctx->seq);
-	    if (code) {
-		major_status = GSS_S_FAILURE;
-		goto fail;
-	    }
 
 	    /* in order to force acceptor subkey to be used, don't set PROT_READY */
 

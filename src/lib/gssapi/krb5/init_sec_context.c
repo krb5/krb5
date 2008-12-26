@@ -328,7 +328,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     mk_req_flags = AP_OPTS_USE_SUBKEY;
 
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
-        mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED;
+        mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_ETYPE_NEGOTIATION;
 
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
                                 checksum_data, k_cred, &ap_req);
@@ -382,168 +382,6 @@ cleanup:
         krb5_free_data_contents(context, &ap_req);
 
     return (code);
-}
-
-/*
- * setup_enc
- *
- * Fill in the encryption descriptors.  Called after AP-REQ is made.
- */
-static OM_uint32
-setup_enc(
-    OM_uint32 *minor_status,
-    krb5_gss_ctx_id_rec *ctx,
-    krb5_context context)
-{
-    krb5_error_code code;
-    unsigned int i;
-    krb5int_access kaccess;
-
-    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
-    if (code)
-        goto fail;
-
-    ctx->have_acceptor_subkey = 0;
-    ctx->proto = 0;
-    ctx->cksumtype = 0;
-    switch(ctx->subkey->enctype) {
-    case ENCTYPE_DES_CBC_MD5:
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_CRC:
-        ctx->subkey->enctype = ENCTYPE_DES_CBC_RAW;
-        ctx->signalg = SGN_ALG_DES_MAC_MD5;
-        ctx->cksum_size = 8;
-        ctx->sealalg = SEAL_ALG_DES;
-
-        /* The encryption key is the session key XOR
-           0xf0f0f0f0f0f0f0f0.  */
-        if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc)))
-            goto fail;
-
-        for (i=0; i<ctx->enc->length; i++)
-            ctx->enc->contents[i] ^= 0xf0;
-
-        goto copy_subkey_to_seq;
-
-    case ENCTYPE_DES3_CBC_SHA1:
-        /* MIT extension */
-        ctx->subkey->enctype = ENCTYPE_DES3_CBC_RAW;
-        ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
-        ctx->cksum_size = 20;
-        ctx->sealalg = SEAL_ALG_DES3KD;
-
-    copy_subkey:
-        code = krb5_copy_keyblock (context, ctx->subkey, &ctx->enc);
-        if (code)
-            goto fail;
-    copy_subkey_to_seq:
-        code = krb5_copy_keyblock (context, ctx->subkey, &ctx->seq);
-        if (code) {
-            krb5_free_keyblock (context, ctx->enc);
-            goto fail;
-        }
-        break;
-
-    case ENCTYPE_ARCFOUR_HMAC:
-        /* Microsoft extension */
-        ctx->signalg = SGN_ALG_HMAC_MD5 ;
-        ctx->cksum_size = 8;
-        ctx->sealalg = SEAL_ALG_MICROSOFT_RC4 ;
-
-        goto copy_subkey;
-
-    default:
-        /* Fill some fields we shouldn't be using on this path
-           with garbage.  */
-        ctx->signalg = -10;
-        ctx->sealalg = -10;
-
-        ctx->proto = 1;
-        code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, ctx->subkey->enctype,
-                                                        &ctx->cksumtype);
-        if (code)
-            goto fail;
-        code = krb5_c_checksum_length(context, ctx->cksumtype,
-                                      &ctx->cksum_size);
-        if (code)
-            goto fail;
-        goto copy_subkey;
-    }
-    *minor_status = 0;
-    return GSS_S_COMPLETE;
-fail:
-    *minor_status = code;
-    return GSS_S_FAILURE;
-}
-
-static OM_uint32
-setup_enc_dce(
-   krb5_error_code *minor_status,
-   krb5_gss_ctx_id_rec *ctx,
-   krb5_context context)
-{
-    krb5_error_code code;
-    size_t i;
-
-    if (ctx->proto > 0) {
-	return GSS_S_COMPLETE; /* CFX handles acceptor_subkey directly */
-    }
-
-    assert(ctx->have_acceptor_subkey && ctx->acceptor_subkey);
-
-    if (ctx->enc != NULL) {
-	krb5_free_keyblock(context, ctx->enc);
-	ctx->enc = NULL;
-    }
-    if (ctx->seq != NULL) {
-	krb5_free_keyblock(context, ctx->seq);
-	ctx->seq = NULL;
-    }
-
-    switch(ctx->acceptor_subkey->enctype) {
-    case ENCTYPE_DES_CBC_MD5:
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_CRC:
-	ctx->acceptor_subkey->enctype = ENCTYPE_DES_CBC_RAW;
-
-	/* The encryption key is the session key XOR
-	   0xf0f0f0f0f0f0f0f0.  */
-	if ((code = krb5_copy_keyblock(context, ctx->acceptor_subkey, &ctx->enc)))
-	    goto fail;
-
-	for (i=0; i<ctx->enc->length; i++)
-	    ctx->enc->contents[i] ^= 0xf0;
-
-	goto copy_acceptor_subkey_to_seq;
-
-    case ENCTYPE_DES3_CBC_SHA1:
-	/* MIT extension */
-	ctx->acceptor_subkey->enctype = ENCTYPE_DES3_CBC_RAW;
-
-    copy_acceptor_subkey:
-	code = krb5_copy_keyblock (context, ctx->acceptor_subkey, &ctx->enc);
-	if (code)
-	    goto fail;
-    copy_acceptor_subkey_to_seq:
-	code = krb5_copy_keyblock (context, ctx->acceptor_subkey, &ctx->seq);
-	if (code) {
-	    krb5_free_keyblock (context, ctx->enc);
-	    goto fail;
-	}
-	break;
-
-    case ENCTYPE_ARCFOUR_HMAC:
-	/* Microsoft extension */
-	goto copy_acceptor_subkey;
-    default:
-	assert(0);
-	break;
-    }
-    *minor_status = 0;
-    return GSS_S_COMPLETE;
-fail:
-    *minor_status = code;
-    return GSS_S_FAILURE;
 }
 
 /*
@@ -691,12 +529,16 @@ new_connection(
                                     &ctx->subkey);
     }
 
-    major_status = setup_enc(minor_status, ctx, context);
-
     if (k_cred) {
         krb5_free_creds(context, k_cred);
-        k_cred = 0;
+        k_cred = NULL;
     }
+    ctx->enc = NULL;
+    ctx->seq = NULL;
+    ctx->have_acceptor_subkey = 0;
+    code = kg_setup_keys(context, ctx, ctx->subkey, &ctx->cksumtype);
+    if (code != 0)
+	goto fail;
 
     /* at this point, the context is constructed and valid,
        hence, releaseable */
@@ -893,21 +735,24 @@ mutual_auth(
                  (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
                  (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) !=0, ctx->proto);
 
-    if ((ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE)) &&
-	ap_rep_data->subkey) {
+    if (ap_rep_data->subkey != NULL &&
+	(ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE) ||
+	 ap_rep_data->subkey->enctype != ctx->subkey->enctype)) {
         /* Keep acceptor's subkey.  */
         ctx->have_acceptor_subkey = 1;
         code = krb5_copy_keyblock(context, ap_rep_data->subkey,
                                   &ctx->acceptor_subkey);
-        if (code)
+        if (code) {
+	    krb5_free_ap_rep_enc_part(context, ap_rep_data);
             goto fail;
-        code = (*kaccess.krb5int_c_mandatory_cksumtype)(context,
-                                                        ctx->acceptor_subkey->enctype,
-                                                        &ctx->acceptor_subkey_cksumtype);
-        if (code)
-            goto fail;
+	}
+	code = kg_setup_keys(context, ctx, ctx->acceptor_subkey,
+			     &ctx->acceptor_subkey_cksumtype);
+	if (code) {
+	    krb5_free_ap_rep_enc_part(context, ap_rep_data);
+	    goto fail;
+	}
     }
-
     /* free the ap_rep_data */
     krb5_free_ap_rep_enc_part(context, ap_rep_data);
 
@@ -920,10 +765,6 @@ mutual_auth(
 
 	output_token->value = outbuf.data;
 	output_token->length = outbuf.length;
-
-	major_status = setup_enc_dce(&code, ctx, context);
-	if (major_status != GSS_S_COMPLETE)
-	    goto fail;
     }
 
     /* set established */

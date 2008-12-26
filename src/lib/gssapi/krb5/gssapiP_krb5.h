@@ -262,6 +262,12 @@ krb5_error_code kg_make_seed (krb5_context context,
                               krb5_keyblock *key,
                               unsigned char *seed);
 
+krb5_error_code
+kg_setup_keys(krb5_context context,
+	      krb5_gss_ctx_id_rec *ctx,
+	      krb5_keyblock *subkey,
+	      krb5_cksumtype *cksumtype);
+
 int kg_confounder_size (krb5_context context, krb5_keyblock *key);
 
 krb5_error_code kg_make_confounder (krb5_context context,

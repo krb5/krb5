@@ -54,6 +54,87 @@
 #include <memory.h>
 #endif
 
+krb5_error_code
+kg_setup_keys(krb5_context context,
+	      krb5_gss_ctx_id_rec *ctx,
+	      krb5_keyblock *subkey,
+	      krb5_cksumtype *cksumtype)
+{
+    krb5_error_code code;
+    unsigned int i;
+    krb5int_access kaccess;
+
+    assert(ctx != NULL);
+    assert(subkey != NULL);
+
+    *cksumtype = 0;
+    ctx->proto = 0;
+
+    code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
+    if (code != 0)
+	return code;
+
+    if (ctx->enc != NULL) {
+	krb5_free_keyblock(context, ctx->enc);
+	ctx->enc = NULL;
+    }
+    code = krb5_copy_keyblock(context, subkey, &ctx->enc);
+    if (code != 0)
+	return code;
+
+    if (ctx->seq != NULL) {
+	krb5_free_keyblock(context, ctx->seq);
+	ctx->seq = NULL;
+    }
+    code = krb5_copy_keyblock(context, subkey, &ctx->seq);
+    if (code != 0)
+	return code;
+
+    switch (subkey->enctype) {
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_CRC:
+	ctx->enc->enctype = ENCTYPE_DES_CBC_RAW;
+	ctx->seq->enctype = ENCTYPE_DES_CBC_RAW;
+	ctx->signalg = SGN_ALG_DES_MAC_MD5;
+	ctx->cksum_size = 8;
+	ctx->sealalg = SEAL_ALG_DES;
+
+	for (i = 0; i < ctx->enc->length; i++)
+	    /*SUPPRESS 113*/
+	    ctx->enc->contents[i] ^= 0xF0;
+	break;
+    case ENCTYPE_DES3_CBC_SHA1:
+	ctx->enc->enctype = ENCTYPE_DES3_CBC_RAW;
+	ctx->seq->enctype = ENCTYPE_DES3_CBC_RAW;
+	ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
+	ctx->cksum_size = 20;
+	ctx->sealalg = SEAL_ALG_DES3KD;
+	break;
+    case ENCTYPE_ARCFOUR_HMAC:
+	ctx->signalg = SGN_ALG_HMAC_MD5;
+	ctx->cksum_size = 8;
+	ctx->sealalg = SEAL_ALG_MICROSOFT_RC4;
+	break;
+    default:
+	ctx->signalg = -1;
+	ctx->sealalg = -1;
+	ctx->proto = 1;
+
+	code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, subkey->enctype,
+							cksumtype);
+	if (code != 0)
+	    return code;
+
+	code = krb5_c_checksum_length(context, *cksumtype, &ctx->cksum_size);
+	if (code != 0)
+	    return code;
+	break;
+    }
+
+    return 0;
+}
+
 int
 kg_confounder_size(context, key)
     krb5_context context;

@@ -54,6 +54,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     size_t rrc = 0;
     size_t gss_headerlen, gss_trailerlen;
     krb5_keyblock *key;
+    krb5_cksumtype cksumtype;
     size_t data_length, assoc_data_length;
 
     assert(toktype != KG_TOK_WRAP_MSG || ctx->enc != NULL);
@@ -69,8 +70,10 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 		    : KG_USAGE_ACCEPTOR_SIGN));
     if (ctx->have_acceptor_subkey) {
 	key = ctx->acceptor_subkey;
+	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
 	key = ctx->enc;
+	cksumtype = ctx->cksumtype;
     }
 
     kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
@@ -230,7 +233,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	}
 	store_64_be(ctx->seq_send, outbuf + 8);
 
-	code = kg_make_checksum_iov_v3(context, ctx->cksumtype,
+	code = kg_make_checksum_iov_v3(context, cksumtype,
 				       rrc, key, key_usage,
 				       iov, iov_count);
 	if (code != 0)
@@ -286,6 +289,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     krb5_keyblock *key;
     gssint_uint64 seqnum;
     krb5_boolean valid;
+    krb5_cksumtype cksumtype;
 
     assert(toktype != KG_TOK_WRAP_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
@@ -328,8 +332,10 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     if (ctx->have_acceptor_subkey && (ptr[2] & FLAG_ACCEPTOR_SUBKEY)) {
 	key = ctx->acceptor_subkey;
+	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
 	key = ctx->enc;
+	cksumtype = ctx->cksumtype;
     }
 
     if (toktype == KG_TOK_WRAP_MSG) {
@@ -392,7 +398,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    store_16_be(0, ptr + 4);
 	    store_16_be(0, ptr + 6);
 
-	    code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, rrc,
+	    code = kg_verify_checksum_iov_v3(context, cksumtype, rrc,
 					     key, key_usage,
 					     iov, iov_count, &valid);
 	    if (code != 0 || valid == FALSE) {
@@ -411,7 +417,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    goto defective;
 	seqnum = load_64_be(ptr + 8);
 
-	code = kg_verify_checksum_iov_v3(context, ctx->cksumtype, 0,
+	code = kg_verify_checksum_iov_v3(context, cksumtype, 0,
 					 key, key_usage,
 					 iov, iov_count, &valid);
 	if (code != 0 || valid == FALSE) {
