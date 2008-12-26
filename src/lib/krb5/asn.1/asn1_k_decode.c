@@ -1226,15 +1226,6 @@ asn1_error_code asn1_decode_pa_pac_req(asn1buf *buf, krb5_pa_pac_req *val)
     cleanup();
 }
 
-asn1_error_code asn1_decode_etype_list(asn1buf *buf, krb5_etype_list *val)
-{
-    setup();
-    { begin_structure();
-	end_structure();
-    }
-    cleanup();
-}
-
 #ifndef DISABLE_PKINIT
 /* PKINIT */
 
