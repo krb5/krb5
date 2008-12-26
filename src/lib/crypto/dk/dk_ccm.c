@@ -153,7 +153,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
-    size_t i;
+    size_t i, num_sign_data = 0;
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
     unsigned int payload_len = 0;
@@ -207,7 +207,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	}
     }
 
-    if (header != &data[0] || header->data.length < enc->block_size)
+    if (header->data.length < enc->block_size)
 	return KRB5_BAD_MSIZE;
 	
     /* RFC 5116 5.3, format flags octet */
@@ -216,10 +216,10 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     if (adata_len != 0)
 	flags |= CCM_FLAG_ADATA;
 
-    headerdata = header->data.data;
+    headerdata = (unsigned char *)header->data.data;
     headerdata[0] = flags;
 
-    nonce.data = &headerdata[1];
+    nonce.data = (char *)&headerdata[1];
     nonce.length = CCM_NONCE_LENGTH;
 
     if (iv != NULL) {
@@ -250,17 +250,28 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    sign_data[0] = *header;
+    sign_data[num_sign_data++] = *header;
 
     /* Include length of associated data in CBC-MAC */
-    sign_data[1].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-    sign_data[1].data.data = adata_len_buf;
-    sign_data[1].data.length = sizeof(adata_len_buf);
-    ret = encode_a_len(&sign_data[1].data, adata_len);
+    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
+    sign_data[num_sign_data].data.data = adata_len_buf;
+    sign_data[num_sign_data].data.length = sizeof(adata_len_buf);
+    ret = encode_a_len(&sign_data[num_sign_data].data, adata_len);
     if (ret != 0)
 	goto cleanup;
+    num_sign_data++;
 
-    memcpy(&sign_data[2], &data[1], (num_data - 1) * sizeof(krb5_crypto_iov));
+    /* Reorder input IOV so SIGN_ONLY data is before DATA */
+    for (i = 0; i < num_data; i++) {
+	if (data[i].flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	    sign_data[num_sign_data++] = data[i];
+    }
+    for (i = 0; i < num_data; i++) {
+	if (data[i].flags != KRB5_CRYPTO_TYPE_HEADER &&
+	    data[i].flags != KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	    sign_data[num_sign_data++] = data[i];
+    }
+    assert(num_sign_data == num_data + 1);
 
     d1.data = (char *)constantdata;
     d1.length = K5CLENGTH;
@@ -302,7 +313,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    ret = krb5int_c_make_checksum_iov(keyhash, &kc, usage, sign_data, num_data + 1, &cksum);
+    ret = krb5int_c_make_checksum_iov(keyhash, &kc, usage, sign_data, num_sign_data, &cksum);
     if (ret != 0)
 	goto cleanup;
 
@@ -364,7 +375,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
-    size_t i;
+    size_t i, num_sign_data = 0;
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
     unsigned int actual_adata_len = 0, actual_payload_len = 0;
@@ -457,15 +468,16 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    sign_data[0] = *header;
+    sign_data[num_sign_data++] = *header;
 
     /* Include length of associated data in CBC-MAC */
-    sign_data[1].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-    sign_data[1].data.data = adata_len_buf;
-    sign_data[1].data.length = sizeof(adata_len_buf);
-    ret = encode_a_len(&sign_data[1].data, actual_adata_len);
+    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
+    sign_data[num_sign_data].data.data = adata_len_buf;
+    sign_data[num_sign_data].data.length = sizeof(adata_len_buf);
+    ret = encode_a_len(&sign_data[num_sign_data].data, actual_adata_len);
     if (ret != 0)
 	goto cleanup;
+    num_sign_data++;
 
     d1.data = (char *)constantdata;
     d1.length = K5CLENGTH;
@@ -537,9 +549,19 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    memcpy(&sign_data[2], &data[1], (num_data - 1) * sizeof(krb5_crypto_iov));
+    /* Reorder input IOV so SIGN_ONLY data is before DATA */
+    for (i = 0; i < num_data; i++) {
+	if (data[i].flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	    sign_data[num_sign_data++] = data[i];
+    }
+    for (i = 0; i < num_data; i++) {
+	if (data[i].flags != KRB5_CRYPTO_TYPE_HEADER &&
+	    data[i].flags != KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	    sign_data[num_sign_data++] = data[i];
+    }
+    assert(num_sign_data == num_data + 1);
 
-    ret = krb5int_c_make_checksum_iov(keyhash, &kc, usage, sign_data, num_data + 1, &cksum);
+    ret = krb5int_c_make_checksum_iov(keyhash, &kc, usage, sign_data, num_sign_data, &cksum);
     if (ret != 0)
 	goto cleanup;
 
