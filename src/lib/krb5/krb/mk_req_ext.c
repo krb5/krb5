@@ -346,8 +346,9 @@ make_etype_list(krb5_context context,
 
     /*
      * RFC 4537:
-     * If the enctype of the ticket session key is included in the enctype
-     * list sent by the client, it SHOULD be the last on the list.
+     *
+     *   If the enctype of the ticket session key is included in the enctype
+     *   list sent by the client, it SHOULD be the last on the list;
      */
     for (i = 0; i < etypes.length; i++) {
 	if (etypes.etypes[i] == tkt_enctype) {
