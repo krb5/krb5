@@ -171,7 +171,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
                 *minor_status = ENOMEM;
                 return(GSS_S_FAILURE);
             }
-            if (ctx->enc->enctype == ENCTYPE_ARCFOUR_HMAC) {
+            if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) {
                 unsigned char bigend_seqnum[4];
                 krb5_keyblock *enc_key;
                 int i;

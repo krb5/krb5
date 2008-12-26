@@ -146,7 +146,7 @@ kg_unseal_v1_iov(krb5_context context,
     /* decode the message, if SEAL */
     if (toktype == KG_TOK_WRAP_MSG) {
 	if (sealalg != 0xFFFF) {
-	    if (ctx->enc->enctype == ENCTYPE_ARCFOUR_HMAC) {
+	    if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) {
 		unsigned char bigend_seqnum[4];
 		krb5_keyblock *enc_key;
 		size_t i;

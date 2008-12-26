@@ -112,6 +112,7 @@ kg_setup_keys(krb5_context context,
 	ctx->sealalg = SEAL_ALG_DES3KD;
 	break;
     case ENCTYPE_ARCFOUR_HMAC:
+    case ENCTYPE_ARCFOUR_HMAC_EXP:
 	ctx->signalg = SGN_ALG_HMAC_MD5;
 	ctx->cksum_size = 8;
 	ctx->sealalg = SEAL_ALG_MICROSOFT_RC4;
@@ -143,7 +144,8 @@ kg_confounder_size(context, key)
     krb5_error_code code;
     size_t blocksize;
     /* We special case rc4*/
-    if (key->enctype == ENCTYPE_ARCFOUR_HMAC)
+    if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
+	key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
         return 8;
     code = krb5_c_block_size(context, key->enctype, &blocksize);
     if (code)
@@ -163,7 +165,8 @@ kg_make_confounder(context, key, buf)
     krb5_data lrandom;
 
     /* We special case rc4*/
-    if (key->enctype == ENCTYPE_ARCFOUR_HMAC) {
+    if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
+	key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
         blocksize = 8;
     } else {
 	code = krb5_c_block_size(context, key->enctype, &blocksize);
@@ -264,6 +267,8 @@ kg_decrypt(context, key, usage, iv, in, out, length)
     return code;
 }
 
+const char const kg_arcfour_l40[] = "fortybits";
+
 krb5_error_code
 kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
                     const unsigned char *kd_data, size_t kd_data_len,
@@ -274,7 +279,9 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
     krb5_data input, output;
     krb5int_access kaccess;
     krb5_keyblock seq_enc_key, usage_key;
-    unsigned char t[4];
+    unsigned char t[14];
+    size_t i = 0;
+    int exportable = (longterm_key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP);
 
     usage_key.length = longterm_key->length;
     usage_key.contents = malloc(usage_key.length);
@@ -290,18 +297,24 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
     if (code)
         goto cleanup_arcfour;
 
-    t[0] = ms_usage &0xff;
-    t[1] = (ms_usage>>8) & 0xff;
-    t[2] = (ms_usage>>16) & 0xff;
-    t[3] = (ms_usage>>24) & 0xff;
+    if (exportable) {
+	memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
+	i += sizeof(kg_arcfour_l40);
+    }
+    t[i++] = ms_usage &0xff;
+    t[i++] = (ms_usage>>8) & 0xff;
+    t[i++] = (ms_usage>>16) & 0xff;
+    t[i++] = (ms_usage>>24) & 0xff;
     input.data = (void *) &t;
-    input.length = 4;
+    input.length = i;
     output.data = (void *) usage_key.contents;
     output.length = usage_key.length;
     code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
                                  longterm_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;
+    if (exportable)
+	memset(usage_key.contents + 7, 0xab, 9);
 
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
@@ -628,7 +641,9 @@ kg_arcfour_docrypt_iov (krb5_context context,
     krb5_data input, output;
     krb5int_access kaccess;
     krb5_keyblock seq_enc_key, usage_key;
-    unsigned char t[4];
+    unsigned char t[14];
+    size_t i = 0;
+    int exportable = (longterm_key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP);
     krb5_crypto_iov *kiov = NULL;
     size_t kiov_count = 0;
 
@@ -646,18 +661,24 @@ kg_arcfour_docrypt_iov (krb5_context context,
     if (code)
         goto cleanup_arcfour;
 
-    t[0] = ms_usage &0xff;
-    t[1] = (ms_usage>>8) & 0xff;
-    t[2] = (ms_usage>>16) & 0xff;
-    t[3] = (ms_usage>>24) & 0xff;
+    if (exportable) {
+	memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
+	i += sizeof(kg_arcfour_l40);
+    }
+    t[i++] = ms_usage &0xff;
+    t[i++] = (ms_usage>>8) & 0xff;
+    t[i++] = (ms_usage>>16) & 0xff;
+    t[i++] = (ms_usage>>24) & 0xff;
     input.data = (void *) &t;
-    input.length = 4;
+    input.length = i;
     output.data = (void *) usage_key.contents;
     output.length = usage_key.length;
     code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
                                  longterm_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;
+    if (exportable)
+	memset(usage_key.contents + 7, 0xab, 9);
 
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
