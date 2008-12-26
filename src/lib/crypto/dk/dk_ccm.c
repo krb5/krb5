@@ -149,7 +149,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 			size_t num_data)
 {
     krb5_error_code ret;
-    unsigned char constantdata[K5CLENGTH];
+    unsigned char constantdata[K5CLENGTH], *headerdata;
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
@@ -216,9 +216,10 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     if (adata_len != 0)
 	flags |= CCM_FLAG_ADATA;
 
-    header->data.data[0] = flags;
+    headerdata = header->data.data;
+    headerdata[0] = flags;
 
-    nonce.data = &header->data.data[1];
+    nonce.data = &headerdata[1];
     nonce.length = CCM_NONCE_LENGTH;
 
     if (iv != NULL) {
@@ -239,9 +240,9 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    header->data.data[13] = (payload_len >> 16) & 0xFF;
-    header->data.data[14] = (payload_len >> 8 ) & 0xFF;
-    header->data.data[15] = (payload_len      ) & 0xFF;
+    headerdata[13] = (payload_len >> 16) & 0xFF;
+    headerdata[14] = (payload_len >> 8 ) & 0xFF;
+    headerdata[15] = (payload_len      ) & 0xFF;
 
     sign_data = (krb5_crypto_iov *)calloc(num_data + 1, sizeof(krb5_crypto_iov));
     if (sign_data == NULL) {
@@ -359,7 +360,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 			size_t num_data)
 {
     krb5_error_code ret;
-    unsigned char constantdata[K5CLENGTH];
+    unsigned char constantdata[K5CLENGTH], *headerdata;
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
@@ -424,8 +425,9 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     if (header->data.length < enc->block_size)
 	return KRB5_BAD_MSIZE;
 
-    flags = header->data.data[0];
+    headerdata = (unsigned char *)header->data.data;
 
+    flags = headerdata[0];
     if ((flags & CCM_FLAG_RESERVED) != 0) {
 	return KRB5_BAD_MSIZE;
     }
@@ -442,9 +444,9 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	return KRB5_BAD_MSIZE;
     }
 
-    payload_len  = (header->data.data[13] << 16);
-    payload_len |= (header->data.data[14] << 8 );
-    payload_len |= (header->data.data[15]      );
+    payload_len  = (headerdata[13] << 16);
+    payload_len |= (headerdata[14] << 8 );
+    payload_len |= (headerdata[15]      );
 
     if (payload_len > actual_payload_len)
 	return KRB5_BAD_MSIZE;
@@ -511,7 +513,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	}
 	memcpy(&ivec.data[1], iv->data, iv->length);
     } else
-	memcpy(&ivec.data[1], &header->data.data[1], CCM_NONCE_LENGTH); /* Copy in nonce */
+	memcpy(&ivec.data[1], &headerdata[1], CCM_NONCE_LENGTH); /* Copy in nonce */
     memset(&ivec.data[1 + CCM_NONCE_LENGTH], 0, CCM_COUNTER_LENGTH); /* Set counter to zero */
 
     /* Decrypt checksum from trailer */
