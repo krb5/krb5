@@ -56,10 +56,12 @@
  *
  *    Kc = DK(base-key, usage | 0xCC)
  *
+ * Again as required by the CCM specification, SIGN_DATA is processed before
+ * DATA for the purpose of checksumming.
+ *
  * Because the base keys are compatible with RFC 3962, the two encryption
  * types defined here (ENCTYPE_AES128_CCM_128 and ENCTYPE_AES256_CCM_128)
- * are most useful in conjunction with a cryptosystem negotiation protocol
- * such as RFC 4537.
+ * are most useful in conjunction with RFC 4537.
  */
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
@@ -267,11 +269,9 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	    sign_data[num_sign_data++] = data[i];
     }
     for (i = 0; i < num_data; i++) {
-	if (data[i].flags != KRB5_CRYPTO_TYPE_HEADER &&
-	    data[i].flags != KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	if (data[i].flags == KRB5_CRYPTO_TYPE_DATA)
 	    sign_data[num_sign_data++] = data[i];
     }
-    assert(num_sign_data == num_data + 1);
 
     d1.data = (char *)constantdata;
     d1.length = K5CLENGTH;
@@ -555,11 +555,9 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	    sign_data[num_sign_data++] = data[i];
     }
     for (i = 0; i < num_data; i++) {
-	if (data[i].flags != KRB5_CRYPTO_TYPE_HEADER &&
-	    data[i].flags != KRB5_CRYPTO_TYPE_SIGN_ONLY)
+	if (data[i].flags == KRB5_CRYPTO_TYPE_DATA)
 	    sign_data[num_sign_data++] = data[i];
     }
-    assert(num_sign_data == num_data + 1);
 
     ret = krb5int_c_make_checksum_iov(keyhash, &kc, usage, sign_data, num_sign_data, &cksum);
     if (ret != 0)
