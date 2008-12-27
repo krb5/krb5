@@ -54,6 +54,8 @@
 #include <memory.h>
 #endif
 
+const char const kg_arcfour_l40[] = "fortybits";
+
 krb5_error_code
 kg_setup_keys(krb5_context context,
 	      krb5_gss_ctx_id_rec *ctx,
@@ -266,8 +268,6 @@ kg_decrypt(context, key, usage, iv, in, out, length)
         free(pivd->data);
     return code;
 }
-
-const char const kg_arcfour_l40[] = "fortybits";
 
 krb5_error_code
 kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
