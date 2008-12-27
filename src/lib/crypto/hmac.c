@@ -129,7 +129,7 @@ cleanup:
 
 krb5_error_code
 krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
-	      const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
+		 const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
     krb5_data *sign_data;
     size_t num_sign_data;
@@ -143,6 +143,7 @@ krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key
 	if (SIGN_IOV(iov))
 	    num_sign_data++;
     }
+
     /* XXX cleanup to avoid alloc */
     sign_data = (krb5_data *)calloc(num_sign_data, sizeof(krb5_data));
     if (sign_data == NULL)
