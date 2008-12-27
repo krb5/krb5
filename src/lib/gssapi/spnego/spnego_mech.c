@@ -1039,7 +1039,6 @@ static int
 make_NegHints(OM_uint32 *minor_status,
 	      gss_cred_id_t cred, gss_buffer_t *outbuf)
 {
-	char hostname[5 + MAXHOSTNAMELEN + 1];
 	gss_buffer_desc hintNameBuf;
 	gss_name_t hintName;
 	gss_name_t hintKerberosName;
@@ -1064,12 +1063,22 @@ make_NegHints(OM_uint32 *minor_status,
 		if (major_status != GSS_S_COMPLETE)
 			return (major_status);
 	} else {
-		memcpy(hostname, HOST_PREFIX, HOST_PREFIX_LEN);
+		krb5_error_code code;
+		krb5int_access kaccess;
+		char hostname[HOST_PREFIX_LEN + MAXHOSTNAMELEN + 1] = HOST_PREFIX;
+
+		code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
+		if (code != 0) {
+			*minor_status = code;
+			return (GSS_S_FAILURE);
+		}
 
 		/* this breaks mutual authentication but Samba relies on it */
-		if (gethostname(hostname + HOST_PREFIX_LEN,
-				sizeof(hostname) - HOST_PREFIX_LEN - 1) != 0) {
-			*minor_status = errno;
+		code = (*kaccess.clean_hostname)(NULL, NULL,
+						 &hostname[HOST_PREFIX_LEN],
+						 MAXHOSTNAMELEN);
+		if (code != 0) {
+			*minor_status = code;
 			return (GSS_S_FAILURE);
 		}
 

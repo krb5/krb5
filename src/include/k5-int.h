@@ -1991,6 +1991,7 @@ typedef struct _krb5int_access {
 					    struct srv_dns_entry **answers);
     void (*free_srv_dns_data)(struct srv_dns_entry *);
     int (*use_dns_kdc)(krb5_context);
+    krb5_error_code (*clean_hostname)(krb5_context, const char *, char *, size_t);
 
     /* krb4 compatibility stuff -- may be null if not enabled */
     krb5_int32 (*krb_life_to_time)(krb5_int32, int);
@@ -2005,7 +2006,7 @@ typedef struct _krb5int_access {
 
     /* Used for KDB LDAP back end.  */
     krb5_error_code
-    (*asn1_ldap_encode_sequence_of_keys) (ldap_seqof_key_data *val,
+    (*asn1_ldap_encode_sequence_of_keys) (const ldap_seqof_key_data *val,
 					  krb5_data **code);
 
     krb5_error_code
@@ -2083,6 +2084,7 @@ typedef struct _krb5int_access {
         (const krb5_sam_response_2 *rep, krb5_data **code);
     krb5_error_code (*encode_krb5_enc_sam_response_enc_2)
         (const krb5_enc_sam_response_enc_2 *rep, krb5_data **code);
+
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \
