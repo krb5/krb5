@@ -221,9 +221,7 @@ make_seal_token_v1_iov(krb5_context context,
 	goto cleanup;
 
     if (conf_req_flag) {
-	switch (ctx->sealalg) {
-	case SEAL_ALG_MICROSOFT_RC4:
-	{
+	if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) {
 	    unsigned char bigend_seqnum[4];
 	    krb5_keyblock *enc_key;
 	    size_t i;
@@ -246,21 +244,15 @@ make_seal_token_v1_iov(krb5_context context,
 					  bigend_seqnum, 4,
 					  iov, iov_count);
 	    krb5_free_keyblock(context, enc_key);
-	    if (code != 0)
-		goto cleanup;
-
-	    break;
-	}
-	default:
+	} else {
 	    code = kg_encrypt_iov(context, ctx->proto,
 				  ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
 				  0 /*EC*/, 0 /*RRC*/,
 				  ctx->enc, KG_USAGE_SEAL, NULL,
 				  iov, iov_count);
-	    if (code != 0)
-		goto cleanup;
-	    break;
 	}
+	if (code != 0)
+	    goto cleanup;
     }
 
     ctx->seq_send++;
