@@ -270,7 +270,8 @@ kg_unseal_v1_iov(krb5_context context,
      * data contain the pad length. kg_fixup_padding_iov() will find
      * this and fixup the last data IOV appropriately.
      */
-    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+    if (toktype == KG_TOK_WRAP_MSG &&
+	(ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
 	retval = kg_fixup_padding_iov(&code, iov, iov_count);
 	if (retval != GSS_S_COMPLETE)
 	    goto cleanup;
