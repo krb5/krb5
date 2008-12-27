@@ -103,14 +103,16 @@ krb5int_ccm_crypto_length(const struct krb5_aead_provider *aead,
 }
 
 static krb5_error_code
-encode_a_len(krb5_data *a, unsigned int adata_len)
+encode_a_len(krb5_data *a, krb5_ui_8 adata_len)
 {
     size_t len;
     unsigned char *p;
 
-    if (adata_len > (1 << 16) - (1 << 8))
+    if (adata_len > (1LL << 32))
+	len = 10;
+    else if (adata_len > (1LL << 16) - (1LL << 8))
 	len = 6;
-    else if (adata_len > 0)
+    else if (adata_len)
 	len = 2;
     else
 	len = 0;
@@ -132,6 +134,18 @@ encode_a_len(krb5_data *a, unsigned int adata_len)
 	p[3] = (adata_len >> 16) & 0xFF;
 	p[4] = (adata_len >> 8 ) & 0xFF;
 	p[5] = (adata_len      ) & 0xFF;
+	break;
+    case 10:
+	p[0] = 0xFF;
+	p[1] = 0xFF;
+	p[2] = (adata_len >> 56) & 0xFF;
+	p[3] = (adata_len >> 48) & 0xFF;
+	p[4] = (adata_len >> 40) & 0xFF;
+	p[5] = (adata_len >> 32) & 0xFF;
+	p[6] = (adata_len >> 24) & 0xFF;
+	p[7] = (adata_len >> 16) & 0xFF;
+	p[8] = (adata_len >> 8 ) & 0xFF;
+	p[9] = (adata_len      ) & 0xFF;
 	break;
     }
 
@@ -159,7 +173,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
     unsigned int payload_len = 0;
-    unsigned int adata_len = 0;
+    krb5_ui_8 adata_len = 0;
     unsigned char flags = 0;
     krb5_data nonce, cksum, ivec;
     krb5_cksumtype cksumtype;
@@ -378,7 +392,8 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     size_t i, num_sign_data = 0;
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
-    unsigned int actual_adata_len = 0, actual_payload_len = 0;
+    krb5_ui_8 actual_adata_len = 0;
+    unsigned int actual_payload_len = 0;
     unsigned int payload_len = 0;
     unsigned char flags = 0;
     krb5_data cksum, ivec;
