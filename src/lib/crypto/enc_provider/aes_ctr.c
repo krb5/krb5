@@ -31,7 +31,7 @@
 
 #define CCM_FLAG_MASK_Q		0x07
 
-#define CCM_COUNTER_LENGTH	3
+#define CCM_DEFAULT_COUNTER_LEN	3 /* default q=3 from RFC 5116 5.3 */
 
 static inline void xorblock(unsigned char *out, const unsigned char *in)
 {
@@ -52,7 +52,7 @@ static inline void getctrblockno(krb5_ui_8 *pblockno,
     assert(q >= 2 && q <= 8);
 
     for (i = 0, blockno = 0; i < q; i++) {
-	register int s = (q - i - 1) * 8;
+	register krb5_octet s = (q - i - 1) * 8;
 
 	blockno |= ctr[16 - q + i] << s;
     }
@@ -69,11 +69,14 @@ static inline void putctrblockno(krb5_ui_8 blockno,
     q = ctr[0] + 1;
 
     for (i = 0; i < q; i++) {
-	register int s = (q - i - 1) * 8;
+	register krb5_octet s = (q - i - 1) * 8;
 
 	ctr[16 - q + i] = (blockno >> s) & 0xFF;
     }
 }
+
+/* Maximum number of invocations with a given nonce and key */
+#define maxblocks(q)	    (1UL << (8 * q))
 
 /*
  * ivec must be a correctly formatted counter block per SP800-38C A.3
@@ -106,7 +109,7 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 	memcpy(ctr, ivec->data, BLOCK_SIZE);
     } else {
 	memset(ctr, 0, BLOCK_SIZE);
-	ctr[0] = CCM_COUNTER_LENGTH - 1; /* default q=3 from RFC 5116 5.3 */
+	ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
     }
 
     getctrblockno(&blockno, ctr);
@@ -114,6 +117,9 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
     for (;;) {
 	unsigned char plain[BLOCK_SIZE];
 	unsigned char ectr[BLOCK_SIZE];
+
+	if (blockno >= maxblocks(ctr[0] + 1))
+	    return KRB5_CRYPTO_INTERNAL;
 
 	if (!krb5int_c_iov_get_block((unsigned char *)plain, BLOCK_SIZE, data, num_data, &input_pos))
 	    break;
@@ -161,7 +167,7 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 	memcpy(ctr, ivec->data, BLOCK_SIZE);
     } else {
 	memset(ctr, 0, BLOCK_SIZE);
-	ctr[0] = CCM_COUNTER_LENGTH - 1; /* default q=3 from RFC 5116 5.3 */
+	ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
     }
 
     getctrblockno(&blockno, ctr);
@@ -169,6 +175,9 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
     for (;;) {
 	unsigned char ectr[BLOCK_SIZE];
 	unsigned char cipher[BLOCK_SIZE];
+
+	if (blockno >= maxblocks(ctr[0] + 1))
+	    return KRB5_CRYPTO_INTERNAL;
 
 	if (!krb5int_c_iov_get_block((unsigned char *)cipher, BLOCK_SIZE, data, num_data, &input_pos))
 	    break;
