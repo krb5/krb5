@@ -29,6 +29,8 @@
 #include "aes.h"
 #include "../aead.h"
 
+#define CCM_FLAG_MASK_Q		0x07
+
 #define CCM_COUNTER_LENGTH	3
 
 static void xorblock(unsigned char *out, const unsigned char *in)
@@ -38,6 +40,9 @@ static void xorblock(unsigned char *out, const unsigned char *in)
 	out[z] ^= in[z];
 }
 
+/*
+ * ivec must be a correctly formatted counter block per SP800-38C A.3
+ */
 static krb5_error_code
 krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 		            const krb5_data *ivec,
@@ -46,7 +51,8 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 {
     aes_ctx ctx;
     unsigned char ctr[BLOCK_SIZE];
-    size_t blockno;
+    register krb5_octet q, i;
+    krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
     if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
@@ -59,16 +65,24 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
     input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
-    if (ivec != NULL)
+    if (ivec != NULL) {
+	if (ivec->length != BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
+	    return KRB5_BAD_MSIZE;
+
 	memcpy(ctr, ivec->data, BLOCK_SIZE);
-    else
+    } else {
 	memset(ctr, 0, BLOCK_SIZE);
+	ctr[0] = CCM_COUNTER_LENGTH - 1; /* default q=3 from RFC 5116 5.3 */
+    }
+    q = ctr[0] + 1;
 
-    ctr[0] = CCM_COUNTER_LENGTH - 1; /* q=3 */
+    assert(q >= 2 && q <= 8);
 
-    blockno  = (ctr[13] << 16);
-    blockno |= (ctr[14] << 8 );
-    blockno |= (ctr[15]      );
+    for (i = 0, blockno = 0; i < q; i++) {
+	register int s = (q - i - 1) * 8;
+
+	blockno |= ctr[16 - q + i] << s;
+    }
 
     for (;;) {
 	unsigned char plain[BLOCK_SIZE];
@@ -85,9 +99,11 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 
 	blockno++;
 
-	ctr[13] = (blockno >> 16) & 0xFF;
-	ctr[14] = (blockno >> 8 ) & 0xFF;
-	ctr[15] = (blockno      ) & 0xFF;
+	for (i = 0; i < q; i++) {
+	    register int s = (q - i - 1) * 8;
+
+	    ctr[16 - q + i] = (blockno >> s) & 0xFF;
+	}
     }
 
     if (ivec != NULL)
@@ -104,7 +120,8 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 {
     aes_ctx ctx;
     unsigned char ctr[BLOCK_SIZE];
-    size_t blockno = 0;
+    register krb5_octet q, i;
+    krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
     if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
@@ -117,16 +134,24 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
     input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
-    if (ivec != NULL)
+    if (ivec != NULL) {
+	if (ivec->length != BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
+	    return KRB5_BAD_MSIZE;
+
 	memcpy(ctr, ivec->data, BLOCK_SIZE);
-    else
+    } else {
 	memset(ctr, 0, BLOCK_SIZE);
+	ctr[0] = CCM_COUNTER_LENGTH - 1; /* default q=3 from RFC 5116 5.3 */
+    }
+    q = ctr[0] + 1;
 
-    ctr[0] = CCM_COUNTER_LENGTH - 1; /* q=3 */
+    assert(q >= 2 && q <= 8);
 
-    blockno  = (ctr[13] << 16);
-    blockno |= (ctr[14] << 8 );
-    blockno |= (ctr[15]      );
+    for (i = 0, blockno = 0; i < q; i++) {
+	register krb5_octet s = (q - i - 1) * 8;
+
+	blockno |= ctr[16 - q + i] << s;
+    }
 
     for (;;) {
 	unsigned char ectr[BLOCK_SIZE];
@@ -143,9 +168,11 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 
 	blockno++;
 
-	ctr[13] = (blockno >> 16) & 0xFF;
-	ctr[14] = (blockno >> 8 ) & 0xFF;
-	ctr[15] = (blockno      ) & 0xFF;
+	for (i = 0; i < q; i++) {
+	    register krb5_octet s = (q - i - 1) * 8;
+
+	    ctr[16 - q + i] = (blockno >> s) & 0xFF;
+	}
     }
 
     if (ivec != NULL)

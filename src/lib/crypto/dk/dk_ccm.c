@@ -71,9 +71,6 @@
 #define CCM_FLAG_ADATA		0x40
 #define CCM_FLAG_RESERVED	0x80
 
-#define CCM_NONCE_LENGTH	12
-#define CCM_COUNTER_LENGTH	3
-
 static krb5_error_code
 krb5int_ccm_crypto_length(const struct krb5_aead_provider *aead,
 			  const struct krb5_enc_provider *enc,
@@ -81,11 +78,9 @@ krb5int_ccm_crypto_length(const struct krb5_aead_provider *aead,
 			  krb5_cryptotype type,
 			  unsigned int *length)
 {
-    assert(enc->block_size >= 16);
-
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
-	*length = 16;
+	*length = 12; /* RFC 5116 5.3 */
 	break;
     case KRB5_CRYPTO_TYPE_PADDING:
 	*length = 0; /* CTR mode requires no padding */
@@ -154,37 +149,117 @@ encode_a_len(krb5_data *a, krb5_ui_8 adata_len)
     return 0;
 }
 
+/*
+ * format_B0() allows the tradeoff between nonce and payload length to
+ * be parameterized by replacing the crypto_length() callback
+ */
+static krb5_error_code
+format_B0(krb5_data *B0,	    /* B0 */
+	  krb5_data *nonce,	    /* N */
+	  size_t trailer_len,	    /* t */
+	  krb5_ui_8 adata_len,	    /* a */
+	  krb5_ui_8 payload_len)    /* Q */
+{
+    unsigned char flags;
+    unsigned char *p;
+    krb5_octet q, i = 0;
+
+    if (B0->length != 16)
+	return KRB5_BAD_MSIZE;
+
+    /* SP800-38C A.1: Length Requirements */
+
+    /* t is an elements of {4, 6, 8, 10, 12, 14, 16} */
+    if (trailer_len % 2 ||
+	(trailer_len < 4 || trailer_len > 16))
+	return KRB5_BAD_MSIZE;
+
+    /* n is an element of {7, 8, 9, 10, 11, 12, 13} */
+    if (nonce->length < 7 || nonce->length > 13)
+	return KRB5_BAD_MSIZE;
+
+    q = 15 - nonce->length;
+
+    /* P consists of fewer than 2^(8q) octets */
+    if (payload_len >= (1UL << (8 * q)))
+	return KRB5_BAD_MSIZE;
+
+    /* SP800-38C A.1: Formatting of the Control Information and the Nonce */
+    flags = q - 1;
+    flags |= (((trailer_len - 2) / 2) << 3);
+    if (adata_len != 0)
+	flags |= CCM_FLAG_ADATA;
+
+    p = (unsigned char *)B0->data;
+    p[i++] = flags;
+
+    memcpy(&p[i], nonce->data, nonce->length);
+    i += nonce->length;
+
+    for (; i < B0->length; i++) {
+	register krb5_octet s;
+
+	s = (q - (i - nonce->length)) * 8;
+
+	p[i] = (payload_len >> s) & 0xFF;
+    }
+
+    return 0;
+}
+
+/*
+ * format_Ctr0 is parameterized by extracting the flags octet from B0
+ */
+static krb5_error_code
+format_Ctr0(krb5_data *Ctr0, krb5_data *B0)
+{
+    krb5_octet n; /* nonce length */
+    krb5_octet q; /* counter length */
+
+    assert(B0->length == 16);
+
+    q = (B0->data[0] & CCM_FLAG_MASK_Q) + 1;
+
+    Ctr0->data[0] = q - 1;
+
+    n = 15 - q;
+
+    assert(n >= 7 && n <= 13);
+
+    memcpy(&Ctr0->data[1], &B0->data[1], n);
+    memset(&Ctr0->data[1 + n], 0, q);
+
+    return 0;
+}
+ 
 static krb5_error_code
 krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 			const struct krb5_enc_provider *enc,
 			const struct krb5_hash_provider *hash,
 			const krb5_keyblock *key,
 			krb5_keyusage usage,
-			const krb5_data *iv,
+			const krb5_data *ivec,
 			krb5_crypto_iov *data,
 			size_t num_data)
 {
     krb5_error_code ret;
-    unsigned char constantdata[K5CLENGTH], *headerdata;
+    unsigned char constantdata[K5CLENGTH];
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
     size_t i, num_sign_data = 0;
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
-    unsigned int payload_len = 0;
-    krb5_ui_8 adata_len = 0;
-    unsigned char flags = 0;
-    krb5_data nonce, cksum, ivec;
+    size_t payload_len = 0;
+    size_t adata_len = 0;
+    krb5_data cksum, counter;
     krb5_cksumtype cksumtype;
     const struct krb5_cksumtypes *keyhash;
     char adata_len_buf[6];
+    unsigned char B0[16], Ctr[16];
 
     kc.contents = NULL;
     kc.length = 0;
-
-    ivec.data = NULL;
-    ivec.length = 0;
 
     cksum.data = NULL;
     cksum.length = 0;
@@ -194,7 +269,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	return ret;
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL)
+    if (header == NULL || header->data.length < header_len)
 	return KRB5_BAD_MSIZE;
 
     ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER, &trailer_len);
@@ -223,42 +298,11 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	}
     }
 
-    if (header->data.length < enc->block_size)
-	return KRB5_BAD_MSIZE;
-	
-    /* RFC 5116 5.3, format flags octet */
-    flags = CCM_COUNTER_LENGTH - 1; /* q=3 */
-    flags |= (((trailer_len - 2) / 2) << 3);
-    if (adata_len != 0)
-	flags |= CCM_FLAG_ADATA;
+    header->data.length = header_len;
 
-    headerdata = (unsigned char *)header->data.data;
-    headerdata[0] = flags;
-
-    nonce.data = (char *)&headerdata[1];
-    nonce.length = CCM_NONCE_LENGTH;
-
-    if (iv != NULL) {
-	/* iv should be NONCE | COUNTER */
-	if (iv->length != nonce.length) {
-	    ret = KRB5_BAD_MSIZE;
-	    goto cleanup;
-	}
-	memcpy(nonce.data, iv->data, iv->length);
-    } else {
-	ret = krb5_c_random_make_octets(/* XXX */ NULL, &nonce);
-	if (ret != 0)
-	    goto cleanup;
-    }
-
-    if (payload_len > 0xFFFFFF) {
-	ret = KRB5_BAD_MSIZE;
+    ret = krb5_c_random_make_octets(/* XXX */ NULL, &header->data);
+    if (ret != 0)
 	goto cleanup;
-    }
-
-    headerdata[13] = (payload_len >> 16) & 0xFF;
-    headerdata[14] = (payload_len >> 8 ) & 0xFF;
-    headerdata[15] = (payload_len      ) & 0xFF;
 
     sign_data = (krb5_crypto_iov *)calloc(num_data + 1, sizeof(krb5_crypto_iov));
     if (sign_data == NULL) {
@@ -266,13 +310,20 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    sign_data[num_sign_data++] = *header;
+    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
+    sign_data[num_sign_data].data.data = (char *)B0;
+    sign_data[num_sign_data].data.length = sizeof(B0);
+    ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
+		    (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
+    if (ret != 0)
+	goto cleanup;
+    num_sign_data++;
 
     /* Include length of associated data in CBC-MAC */
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     sign_data[num_sign_data].data.data = adata_len_buf;
     sign_data[num_sign_data].data.length = sizeof(adata_len_buf);
-    ret = encode_a_len(&sign_data[num_sign_data].data, adata_len);
+    ret = encode_a_len(&sign_data[num_sign_data].data, (krb5_ui_8)adata_len);
     if (ret != 0)
 	goto cleanup;
     num_sign_data++;
@@ -331,27 +382,27 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    /* Setup counter */
-    ivec.data = malloc(enc->block_size);
-    if (ivec.data == NULL) {
-	ret = ENOMEM;
-	goto cleanup;
-    }
-    ivec.length = enc->block_size;
+    /* Initialize first counter block */
+    if (ivec == NULL) {
+	counter.length = sizeof(Ctr);
+	counter.data = (char *)Ctr;
 
-    ivec.data[0] = flags;
-    memcpy(&ivec.data[1], nonce.data, nonce.length); /* Copy in nonce */
-    memset(&ivec.data[1 + nonce.length], 0, CCM_COUNTER_LENGTH); /* Set counter to zero */
+	ret = format_Ctr0(&counter, &sign_data[0].data);
+	if (ret != 0)
+	    goto cleanup;
+
+	ivec = &counter;
+    }
 
     trailer->data.length = trailer_len;
 
     /* Encrypt checksum and place in trailer */
-    ret = enc->encrypt(&kc, &ivec, &cksum, &trailer->data);
+    ret = enc->encrypt(&kc, ivec, &cksum, &trailer->data);
     if (ret != 0)
 	goto cleanup;
 
     /* Don't encrypt B0 (header), but encrypt everything else */
-    ret = enc->encrypt_iov(&kc, &ivec, data, num_data);
+    ret = enc->encrypt_iov(&kc, ivec, data, num_data);
     if (ret != 0)
 	goto cleanup;
 
@@ -362,10 +413,6 @@ cleanup:
     }
     if (cksum.data != NULL) {
 	free(cksum.data);
-    }
-    if (ivec.data != NULL) {
-	zap(ivec.data, ivec.length);
-	free(ivec.data);
     }
     if (sign_data != NULL) {
 	free(sign_data);
@@ -380,32 +427,28 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 			const struct krb5_hash_provider *hash,
 			const krb5_keyblock *key,
 			krb5_keyusage usage,
-			const krb5_data *iv,
+			const krb5_data *ivec,
 			krb5_crypto_iov *data,
 			size_t num_data)
 {
     krb5_error_code ret;
-    unsigned char constantdata[K5CLENGTH], *headerdata;
+    unsigned char constantdata[K5CLENGTH];
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_keyblock kc;
     size_t i, num_sign_data = 0;
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
-    krb5_ui_8 actual_adata_len = 0;
-    unsigned int actual_payload_len = 0;
-    unsigned int payload_len = 0;
-    unsigned char flags = 0;
-    krb5_data cksum, ivec;
+    size_t adata_len = 0;
+    size_t payload_len = 0;
+    krb5_data cksum, counter;
     krb5_cksumtype cksumtype;
     const struct krb5_cksumtypes *keyhash;
     char adata_len_buf[6];
+    unsigned char B0[16], Ctr[16];
 
     kc.contents = NULL;
     kc.length = 0;
-
-    ivec.data = NULL;
-    ivec.length = 0;
 
     cksum.data = NULL;
     cksum.length = 0;
@@ -415,7 +458,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	return ret;
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header != &data[0])
+    if (header == NULL || header->data.length != header_len)
 	return KRB5_BAD_MSIZE;
 
     ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER, &trailer_len);
@@ -431,10 +474,10 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 
 	switch (iov->flags) {
 	case KRB5_CRYPTO_TYPE_DATA:
-	    actual_payload_len += iov->data.length;
+	    payload_len += iov->data.length;
 	    break;
 	case KRB5_CRYPTO_TYPE_SIGN_ONLY:
-	    actual_adata_len += iov->data.length;
+	    adata_len += iov->data.length;
 	    break;
 	case KRB5_CRYPTO_TYPE_PADDING:
 	    if (iov->data.length != 0)
@@ -445,51 +488,26 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	}
     }
 
-    if (actual_payload_len > 0xFFFFFF)
-	return KRB5_BAD_MSIZE;
-
-    if (header->data.length < enc->block_size)
-	return KRB5_BAD_MSIZE;
-
-    headerdata = (unsigned char *)header->data.data;
-
-    flags = headerdata[0];
-    if ((flags & CCM_FLAG_RESERVED) != 0) {
-	return KRB5_BAD_MSIZE;
-    }
-    if ((flags & CCM_FLAG_MASK_Q) != CCM_COUNTER_LENGTH - 1) {
-	/* Check q=3 */
-	return KRB5_BAD_MSIZE;
-    }
-    if ((unsigned int)(flags & CCM_FLAG_MASK_T) >> 3 != (trailer->data.length - 2) / 2) {
-	/* Check bits 3-5 contain (trailer_len-2)/2 */
-	return KRB5_BAD_MSIZE;
-    }
-    if ((flags & CCM_FLAG_ADATA) != (actual_adata_len ? CCM_FLAG_ADATA : 0)) {
-	/* Check that AData flag matches presence of associated data */
-	return KRB5_BAD_MSIZE;
-    }
-
-    payload_len  = (headerdata[13] << 16);
-    payload_len |= (headerdata[14] << 8 );
-    payload_len |= (headerdata[15]      );
-
-    if (payload_len > actual_payload_len)
-	return KRB5_BAD_MSIZE;
-
     sign_data = (krb5_crypto_iov *)calloc(num_data + 1, sizeof(krb5_crypto_iov));
     if (sign_data == NULL) {
 	ret = ENOMEM;
 	goto cleanup;
     }
 
-    sign_data[num_sign_data++] = *header;
+    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
+    sign_data[num_sign_data].data.data = (char *)B0;
+    sign_data[num_sign_data].data.length = sizeof(B0);
+    ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
+		    (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
+    if (ret != 0)
+	goto cleanup;
+    num_sign_data++;
 
     /* Include length of associated data in CBC-MAC */
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     sign_data[num_sign_data].data.data = adata_len_buf;
     sign_data[num_sign_data].data.length = sizeof(adata_len_buf);
-    ret = encode_a_len(&sign_data[num_sign_data].data, actual_adata_len);
+    ret = encode_a_len(&sign_data[num_sign_data].data, (krb5_ui_8)adata_len);
     if (ret != 0)
 	goto cleanup;
     num_sign_data++;
@@ -524,32 +542,25 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     }
     cksum.length = trailer_len;
 
-    /* Setup counter */
-    ivec.data = malloc(enc->block_size);
-    if (ivec.data == NULL) {
-	ret = ENOMEM;
-	goto cleanup;
-    }
-    ivec.length = enc->block_size;
+    /* Initialize first counter block */
+    if (ivec == NULL) {
+	counter.length = sizeof(Ctr);
+	counter.data = (char *)Ctr;
 
-    ivec.data[0] = flags;
-    if (iv != NULL) {
-	if (iv->length != CCM_NONCE_LENGTH) {
-	    ret = KRB5_BAD_MSIZE;
+	ret = format_Ctr0(&counter, &sign_data[0].data);
+	if (ret != 0)
 	    goto cleanup;
-	}
-	memcpy(&ivec.data[1], iv->data, iv->length);
-    } else
-	memcpy(&ivec.data[1], &headerdata[1], CCM_NONCE_LENGTH); /* Copy in nonce */
-    memset(&ivec.data[1 + CCM_NONCE_LENGTH], 0, CCM_COUNTER_LENGTH); /* Set counter to zero */
+
+	ivec = &counter;
+    }
 
     /* Decrypt checksum from trailer */
-    ret = enc->decrypt(&kc, &ivec, &trailer->data, &trailer->data);
+    ret = enc->decrypt(&kc, ivec, &trailer->data, &trailer->data);
     if (ret != 0)
 	goto cleanup;
 
     /* Don't decrypt B0 (header), but decrypt everything else */
-    ret = enc->decrypt_iov(&kc, &ivec, data, num_data);
+    ret = enc->decrypt_iov(&kc, ivec, data, num_data);
     if (ret != 0)
 	goto cleanup;
 
@@ -591,10 +602,6 @@ cleanup:
     }
     if (cksum.data != NULL) {
 	free(cksum.data);
-    }
-    if (ivec.data != NULL) {
-	zap(ivec.data, ivec.length);
-	free(ivec.data);
     }
     if (sign_data != NULL) {
 	free(sign_data);
