@@ -942,7 +942,6 @@ cleanup:
 					      req_flags,
 					      &mechtok_out, send_token,
 					      output_token) < 0) {
-
 			ret = GSS_S_FAILURE;
 		}
 	} else if (send_token != NO_TOKEN_SEND) {
@@ -1040,7 +1039,7 @@ make_NegHints(OM_uint32 *minor_status,
 	      gss_cred_id_t cred, gss_buffer_t *outbuf)
 {
 	gss_buffer_desc hintNameBuf;
-	gss_name_t hintName;
+	gss_name_t hintName = GSS_C_NO_NAME;
 	gss_name_t hintKerberosName;
 	gss_OID hintNameType;
 	OM_uint32 major_status;
@@ -1062,7 +1061,9 @@ make_NegHints(OM_uint32 *minor_status,
 						NULL);
 		if (major_status != GSS_S_COMPLETE)
 			return (major_status);
-	} else {
+	}
+
+	if (hintName == GSS_C_NO_NAME) {
 		krb5_error_code code;
 		krb5int_access kaccess;
 		char hostname[HOST_PREFIX_LEN + MAXHOSTNAMELEN + 1] = HOST_PREFIX;
@@ -1215,6 +1216,7 @@ acc_ctx_hints(OM_uint32 *minor_status,
 
 	ret = make_NegHints(minor_status, cred, mechListMIC);
 	if (ret != GSS_S_COMPLETE) {
+		*return_token = NO_TOKEN_SEND;
 		goto cleanup;
 	}
 
@@ -1555,7 +1557,7 @@ spnego_gss_accept_sec_context(
 			    OM_uint32 *time_rec,
 			    gss_cred_id_t *delegated_cred_handle)
 {
-	OM_uint32 ret, tmpret, tmpmin, negState;
+	OM_uint32 ret, tmpmin, negState;
 	send_token_flag return_token;
 	gss_buffer_t mechtok_in, mic_in, mic_out;
 	gss_buffer_desc mechtok_out = GSS_C_EMPTY_BUFFER;
@@ -1652,6 +1654,10 @@ spnego_gss_accept_sec_context(
 cleanup:
 	if (return_token != NO_TOKEN_SEND && return_token != CHECK_MIC) {
 		/* For acceptor-sends-first send a tokenInit */
+		int tmpret;
+
+		assert(sc != NULL);
+
 		if (sendTokenInit) {
 			tmpret = make_spnego_tokenInit_msg(sc,
 							   1,
@@ -1666,9 +1672,8 @@ cleanup:
 							   return_token,
 							   output_token);
 		}
-		if (tmpret != GSS_S_COMPLETE) {
-			ret = tmpret;
-		}
+		if (tmpret < 0)
+			ret = GSS_S_FAILURE;
 	}
 	if (ret == GSS_S_COMPLETE) {
 		*context_handle = (gss_ctx_id_t)sc->ctx_handle;
