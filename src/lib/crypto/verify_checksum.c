@@ -56,19 +56,16 @@ krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
 
 	keyhash = krb5_cksumtypes_list[i].keyhash;
 
-	if (keyhash->verify == NULL) {
+	if (keyhash->verify == NULL && keyhash->verify_iov != NULL) {
 	    krb5_crypto_iov iov[1];
 
 	    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
 	    iov[0].data = *data;
 
-	    assert(keyhash->verify_iov != NULL);
-
-	    ret = (*keyhash->verify_iov)(key, usage, 0, iov, 1, &indata, valid);
-	} else {
-	    ret = (*keyhash->verify)(key, usage, 0, data, &indata, valid);
+	    return (*keyhash->verify_iov)(key, usage, 0, iov, 1, &indata, valid);
+	} else if (keyhash->verify != NULL) {
+	    return (*keyhash->verify)(key, usage, 0, data, &indata, valid);
 	}
-	return(ret);
     }
 
     /* otherwise, make the checksum again, and compare */
