@@ -143,7 +143,9 @@ gss_OID_set *		mechanisms;
      */
     
     if(name != NULL) {
-	if ((gss_import_name(&temp_minor_status,
+	if (union_cred->auxinfo.name.length == 0) {
+	    *name = GSS_C_NO_NAME;
+	} else if ((gss_import_name(&temp_minor_status,
 			     &union_cred->auxinfo.name,
 			     union_cred->auxinfo.name_type,
 			     name) != GSS_S_COMPLETE) ||
