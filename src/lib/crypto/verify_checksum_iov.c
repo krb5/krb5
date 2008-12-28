@@ -60,8 +60,8 @@ krb5_c_verify_checksum_iov(krb5_context context,
     if (krb5_cksumtypes_list[i].keyhash &&
 	krb5_cksumtypes_list[i].keyhash->verify_iov)
 	return((*(krb5_cksumtypes_list[i].keyhash->verify_iov))(key, usage, 0,
-								&checksum->data,
 								data, num_data,
+								&checksum->data,
 								valid));
 
     /* otherwise, make the checksum again, and compare */
