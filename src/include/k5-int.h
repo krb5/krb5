@@ -627,9 +627,9 @@ struct krb5_keyhash_provider {
     krb5_error_code (*verify_iov) (const krb5_keyblock *key,
 				  krb5_keyusage keyusage,
 				  const krb5_data *ivec,
-				  const krb5_data *input,
 				  const krb5_crypto_iov *data,
 				  size_t num_data,
+				  const krb5_data *hash,
 				  krb5_boolean *valid);
 };
 
