@@ -33,11 +33,46 @@
 
 #define CCM_COUNTER_LENGTH	3
 
-static void xorblock(unsigned char *out, const unsigned char *in)
+static inline void xorblock(unsigned char *out, const unsigned char *in)
 {
     int z;
     for (z = 0; z < BLOCK_SIZE; z++)
 	out[z] ^= in[z];
+}
+
+/* Get the current counter block number from the IV */
+static inline void getctrblockno(krb5_ui_8 *pblockno,
+				 const unsigned char ctr[BLOCK_SIZE])
+{
+    register krb5_octet q, i;
+    krb5_ui_8 blockno;
+
+    q = ctr[0] + 1;
+
+    assert(q >= 2 && q <= 8);
+
+    for (i = 0, blockno = 0; i < q; i++) {
+	register int s = (q - i - 1) * 8;
+
+	blockno |= ctr[16 - q + i] << s;
+    }
+
+    *pblockno = blockno;
+}
+
+/* Store the current counter block number in the IV */
+static inline void putctrblockno(krb5_ui_8 blockno,
+				 unsigned char ctr[BLOCK_SIZE])
+{
+    register krb5_octet q, i;
+
+    q = ctr[0] + 1;
+
+    for (i = 0; i < q; i++) {
+	register int s = (q - i - 1) * 8;
+
+	ctr[16 - q + i] = (blockno >> s) & 0xFF;
+    }
 }
 
 /*
@@ -51,7 +86,6 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 {
     aes_ctx ctx;
     unsigned char ctr[BLOCK_SIZE];
-    register krb5_octet q, i;
     krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
@@ -74,15 +108,8 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 	memset(ctr, 0, BLOCK_SIZE);
 	ctr[0] = CCM_COUNTER_LENGTH - 1; /* default q=3 from RFC 5116 5.3 */
     }
-    q = ctr[0] + 1;
 
-    assert(q >= 2 && q <= 8);
-
-    for (i = 0, blockno = 0; i < q; i++) {
-	register int s = (q - i - 1) * 8;
-
-	blockno |= ctr[16 - q + i] << s;
-    }
+    getctrblockno(&blockno, ctr);
 
     for (;;) {
 	unsigned char plain[BLOCK_SIZE];
@@ -97,13 +124,7 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 	xorblock(plain, ectr);
 	krb5int_c_iov_put_block(data, num_data, (unsigned char *)plain, BLOCK_SIZE, &output_pos);
 
-	blockno++;
-
-	for (i = 0; i < q; i++) {
-	    register int s = (q - i - 1) * 8;
-
-	    ctr[16 - q + i] = (blockno >> s) & 0xFF;
-	}
+	putctrblockno(++blockno, ctr);
     }
 
     if (ivec != NULL)
@@ -120,7 +141,6 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 {
     aes_ctx ctx;
     unsigned char ctr[BLOCK_SIZE];
-    register krb5_octet q, i;
     krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
@@ -143,15 +163,8 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 	memset(ctr, 0, BLOCK_SIZE);
 	ctr[0] = CCM_COUNTER_LENGTH - 1; /* default q=3 from RFC 5116 5.3 */
     }
-    q = ctr[0] + 1;
 
-    assert(q >= 2 && q <= 8);
-
-    for (i = 0, blockno = 0; i < q; i++) {
-	register krb5_octet s = (q - i - 1) * 8;
-
-	blockno |= ctr[16 - q + i] << s;
-    }
+    getctrblockno(&blockno, ctr);
 
     for (;;) {
 	unsigned char ectr[BLOCK_SIZE];
@@ -166,13 +179,7 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 	xorblock(cipher, ectr);
 	krb5int_c_iov_put_block(data, num_data, (unsigned char *)cipher, BLOCK_SIZE, &output_pos);
 
-	blockno++;
-
-	for (i = 0; i < q; i++) {
-	    register krb5_octet s = (q - i - 1) * 8;
-
-	    ctr[16 - q + i] = (blockno >> s) & 0xFF;
-	}
+	putctrblockno(++blockno, ctr);
     }
 
     if (ivec != NULL)
