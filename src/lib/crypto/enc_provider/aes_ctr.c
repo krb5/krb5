@@ -244,7 +244,7 @@ krb5int_aes_decrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_aes_make_key(const krb5_data *randombits, krb5_keyblock *key)
+k5_aes_make_key_ctr(const krb5_data *randombits, krb5_keyblock *key)
 {
     if (key->length != 16 && key->length != 32)
 	return(KRB5_BAD_KEYSIZE);
@@ -258,14 +258,14 @@ k5_aes_make_key(const krb5_data *randombits, krb5_keyblock *key)
 }
 
 static krb5_error_code
-krb5int_aes_init_state (const krb5_keyblock *key, krb5_keyusage usage,
-			krb5_data *state)
+krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
+			    krb5_data *state)
 {
-    state->length = 16;
-    state->data = (void *) malloc(16);
+    state->length = BLOCK_SIZE;
+    state->data = calloc(1, state->length);
     if (state->data == NULL)
 	return ENOMEM;
-    memset(state->data, 0, state->length);
+    state->data[0] = CCM_DEFAULT_COUNTER_LEN - 1;
     return 0;
 }
 
@@ -274,8 +274,8 @@ const struct krb5_enc_provider krb5int_enc_aes128_ctr = {
     16, 16,
     krb5int_aes_encrypt_ctr,
     krb5int_aes_decrypt_ctr,
-    k5_aes_make_key,
-    krb5int_aes_init_state,
+    k5_aes_make_key_ctr,
+    krb5int_aes_init_state_ctr,
     krb5int_default_free_state,
     krb5int_aes_encrypt_ctr_iov,
     krb5int_aes_decrypt_ctr_iov
@@ -286,8 +286,8 @@ const struct krb5_enc_provider krb5int_enc_aes256_ctr = {
     32, 32,
     krb5int_aes_encrypt_ctr,
     krb5int_aes_decrypt_ctr,
-    k5_aes_make_key,
-    krb5int_aes_init_state,
+    k5_aes_make_key_ctr,
+    krb5int_aes_init_state_ctr,
     krb5int_default_free_state,
     krb5int_aes_encrypt_ctr_iov,
     krb5int_aes_decrypt_ctr_iov
