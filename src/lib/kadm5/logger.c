@@ -569,7 +569,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 				{ "LOCAL7",	LOG_LOCAL7	},
 #endif	/* LOG_LOCAL7 */
 			    };
-			    int j;
+			    unsigned int j;
 
 			    for (j = 0; j < sizeof(facilities)/sizeof(facilities[0]); j++)
 				if (!strcasecmp(cp2, facilities[j].name)) {
