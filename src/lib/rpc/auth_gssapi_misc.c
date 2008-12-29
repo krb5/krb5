@@ -9,6 +9,8 @@
 #include <gssapi/gssapi.h>
 #include <gssrpc/auth_gssapi.h>
 
+#include "gssrpcint.h"
+
 #ifdef __CODECENTER__
 #define DEBUG_GSSAPI 1
 #endif
@@ -181,7 +183,7 @@ static void auth_gssapi_display_status_1(
 	  putc ('\n', stderr);
 	  if (misc_debug_gssapi)
 	      gssrpcint_printf("GSS-API authentication error %s: %*s\n",
-			       m, msg.length, msg.value);
+			       m, msg.length, (char *) msg.value);
 	  (void) gss_release_buffer(&minor_stat, &msg);
 	  
 	  if (!msg_ctx)
