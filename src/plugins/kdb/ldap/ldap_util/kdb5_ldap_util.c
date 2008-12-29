@@ -104,7 +104,7 @@ krb5_boolean manual_mkey = FALSE;
  * This function prints the usage of kdb5_ldap_util, which is
  * the LDAP configuration utility.
  */
-void usage()
+void usage(void)
 {
     fprintf(stderr, "Usage: "
 "kdb5_ldap_util [-D user_dn [-w passwd]] [-H ldapuri]\n"
@@ -420,7 +420,6 @@ int main(argc, argv)
      * we will print the help corresponding to the sub-command.
      */
     if (print_help_message) {
-	char *cmd_name = cmd_argv[0];
 	free(cmd_argv);
 	cmd_argv = NULL;
 	usage();
