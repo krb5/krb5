@@ -643,11 +643,13 @@ tgt_again:
 	goto cleanup;
     }
 
-    errcode = return_svr_referral_data(kdc_context,
-				       &server, &reply_encpart);
-    if (errcode) {
-	status = "KDC_RETURN_ENC_PADATA";
-	goto cleanup;
+    if (isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
+	errcode = return_svr_referral_data(kdc_context,
+					   &server, &reply_encpart);
+	if (errcode) {
+	    status = "KDC_RETURN_ENC_PADATA";
+	    goto cleanup;
+	}
     }
 
     enc_tkt_reply.session = &session_key;
