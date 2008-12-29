@@ -406,11 +406,8 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     if ((*auth_context)->authentp->subkey != NULL) {
 	desired_etypes[desired_etypes_len++] = (*auth_context)->authentp->subkey->enctype;
     }
-    if (rfc4537_etypes_len == 0) {
-	/* If EtypeList was present, omit the ticket session key enctypes */
-	desired_etypes[desired_etypes_len++] = req->ticket->enc_part2->session->enctype;
-	desired_etypes[desired_etypes_len++] = req->ticket->enc_part.enctype;
-    }
+    desired_etypes[desired_etypes_len++] = req->ticket->enc_part2->session->enctype;
+    desired_etypes[desired_etypes_len++] = req->ticket->enc_part.enctype;
     desired_etypes[desired_etypes_len] = ENCTYPE_NULL;
 
     if (((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_PERMIT_ALL) == 0) {
