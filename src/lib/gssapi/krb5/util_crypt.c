@@ -162,21 +162,14 @@ kg_make_confounder(context, key, buf)
     krb5_keyblock *key;
     unsigned char *buf;
 {
-    krb5_error_code code;
-    size_t blocksize;
+    int confsize;
     krb5_data lrandom;
 
-    /* We special case rc4*/
-    if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
-	key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-        blocksize = 8;
-    } else {
-	code = krb5_c_block_size(context, key->enctype, &blocksize);
-	if (code)
-	    return(code);
-    }
+    confsize = kg_confounder_size(context, key);
+    if (confsize < 0)
+	return KRB5_BAD_MSIZE;
 
-    lrandom.length = blocksize;
+    lrandom.length = confsize;
     lrandom.data = (char *)buf;
 
     return(krb5_c_random_make_octets(context, &lrandom));
