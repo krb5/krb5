@@ -38,6 +38,7 @@
 #include "kdb5.h"
 #include <assert.h>
 #include "kdb_log.h"
+#include "kdb5int.h"
 
 /* Currently DB2 policy related errors are exported from DAL.  But
    other databases should set_err function to return string.  */
@@ -1109,7 +1110,7 @@ krb5_db_put_principal(krb5_context kcontext,
 		upd->kdb_princ_name.utf8str_t_val = princ_name;
 		upd->kdb_princ_name.utf8str_t_len = strlen(princ_name);
 
-                if (status = ulog_add_update(kcontext, upd))
+                if ((status = ulog_add_update(kcontext, upd)))
 			goto err_lock;
 		upd++;
         }

@@ -16,6 +16,7 @@
 #include <syslog.h>
 #include "kdb5.h"
 #include "kdb_log.h"
+#include "kdb5int.h"
 
 /*
  * This modules includes all the necessary functions that create and
@@ -73,7 +74,7 @@ ulog_sync_update(kdb_hlog_t *ulog, kdb_ent_header_t *upd)
 	   (pagesize-1)) & (~(pagesize-1));
 
     size = end - start;
-    if (retval = msync((caddr_t)start, size, MS_SYNC)) {
+    if ((retval = msync((caddr_t)start, size, MS_SYNC))) {
 	return (retval);
     }
 
@@ -186,10 +187,10 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     recsize = sizeof (kdb_ent_header_t) + upd_size;
 
     if (recsize > ulog->kdb_block) {
-	if (retval = ulog_resize(ulog, ulogentries, ulogfd, recsize)) {
-	    /* Resize element array failed */
-	    return (retval);
-	}
+	    if ((retval = ulog_resize(ulog, ulogentries, ulogfd, recsize))) {
+		    /* Resize element array failed */
+		    return (retval);
+	    }
     }
 
     cur_sno = ulog->kdb_last_sno;
@@ -227,7 +228,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     if (!xdr_kdb_incr_update_t(&xdrs, upd))
 	return (KRB5_LOG_CONV);
 
-    if (retval = ulog_sync_update(ulog, indx_log))
+    if ((retval = ulog_sync_update(ulog, indx_log)))
 	return (retval);
 
     if (ulog->kdb_num < ulogentries)
@@ -280,7 +281,7 @@ ulog_finish_update(krb5_context context, kdb_incr_update_t *upd)
 
     ulog->kdb_state = KDB_STABLE;
 
-    if (retval = ulog_sync_update(ulog, indx_log))
+    if ((retval = ulog_sync_update(ulog, indx_log)))
 	return (retval);
 
     ulog_sync_header(ulog);
@@ -370,8 +371,8 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 			   (upd->kdb_princ_name.utf8str_t_len + 1));
 	    dbprincstr[upd->kdb_princ_name.utf8str_t_len] = 0;
 
-	    if (retval = krb5_parse_name(context, dbprincstr,
-					 &dbprinc)) {
+	    if ((retval = krb5_parse_name(context, dbprincstr,
+					  &dbprinc))) {
 		goto cleanup;
 	    }
 
@@ -398,7 +399,7 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 
 	    (void) memset(entry, 0, sizeof (krb5_db_entry));
 
-	    if (retval = ulog_conv_2dbentry(context, entry, upd, 1))
+	    if ((retval = ulog_conv_2dbentry(context, entry, upd, 1)))
 		goto cleanup;
 
 	    retval = krb5int_put_principal_no_log(context, entry,
@@ -441,7 +442,7 @@ ulog_check(krb5_context context, kdb_hlog_t *ulog, char **db_args)
 {
     XDR			xdrs;
     krb5_error_code	retval = 0;
-    int			i;
+    unsigned int	i;
     kdb_ent_header_t	*indx_log;
     kdb_incr_update_t	*upd = NULL;
     kdb_incr_result_t	*incr_ret = NULL;
