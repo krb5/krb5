@@ -261,11 +261,36 @@ static krb5_error_code
 krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
 			    krb5_data *state)
 {
-    state->length = BLOCK_SIZE;
-    state->data = calloc(1, state->length);
+    krb5_data nonce;
+    unsigned int n, q;
+    krb5_error_code code;
+
+    code = krb5_c_crypto_length(NULL, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &n);
+    if (code != 0)
+	return code;
+
+    assert(n >= 7 && n <= 13);
+
+    state->length = 16;
+    state->data = malloc(state->length);
     if (state->data == NULL)
 	return ENOMEM;
-    state->data[0] = CCM_DEFAULT_COUNTER_LEN - 1;
+
+    q = 15 - n;
+    state->data[0] = q - 1;
+
+    nonce.data = &state->data[1];
+    nonce.length = n;
+
+    code = krb5_c_random_make_octets(NULL, &nonce);
+    if (code != 0) {
+	free(state->data);
+	state->data = NULL;
+	return code;
+    }
+
+    memset(&state->data[1 + n], 0, q);
+
     return 0;
 }
 
