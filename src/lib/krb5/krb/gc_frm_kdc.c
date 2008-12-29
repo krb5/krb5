@@ -787,7 +787,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_principal client, server, supplied_server, out_supplied_server;
     krb5_creds tgtq, cc_tgt, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean old_use_conf_ktypes;
-    char *hrealm;
+    char **hrealms;
     unsigned int referral_count, i;
 
     /* 
@@ -1021,22 +1021,23 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      */
     if (krb5_is_referral_realm(&supplied_server->realm)) {
         if (server->length >= 2) {
-	    retval=krb5int_get_fallback_host_realm(context, &server->data[1],
-						   &hrealm);
+	    retval=krb5_get_fallback_host_realm(context, &server->data[1],
+						&hrealms);
 	    if (retval) goto cleanup;
 #if 0
 	    DPRINTF(("gc_from_kdc: using fallback realm of %s\n",
-		     hrealm));
+		     hrealms[0]));
 #endif
 	    krb5_free_data_contents(context,&in_cred->server->realm);
-	    server->realm.data=hrealm;
-	    server->realm.length=strlen(hrealm);
+	    server->realm.data=hrealms[0];
+	    server->realm.length=strlen(hrealms[0]);
+	    free(hrealms);
 	}
 	else {
 	    /*
 	     * Problem case: Realm tagged for referral but apparently not
 	     * in a <type>/<host> format that
-	     * krb5int_get_fallback_host_realm can deal with.
+	     * krb5_get_fallback_host_realm can deal with.
 	     */
 	    DPRINTF(("gc_from_kdc: referral specified "
 		     "but no fallback realm avaiable!\n"));

@@ -262,6 +262,7 @@ krb5_get_default_config_files
 krb5_get_default_in_tkt_ktypes
 krb5_get_default_realm
 krb5_get_error_message
+krb5_get_fallback_host_realm
 krb5_get_host_realm
 krb5_get_in_tkt
 krb5_get_in_tkt_with_keytab
