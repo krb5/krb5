@@ -76,7 +76,7 @@ static inline void putctrblockno(krb5_ui_8 blockno,
 }
 
 /* Maximum number of invocations with a given nonce and key */
-#define maxblocks(q)	    (1UL << (8 * q))
+#define maxblocks(q)	    (1UL << (8 * (q)))
 
 /*
  * ivec must be a correctly formatted counter block per SP800-38C A.3
