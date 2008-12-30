@@ -826,6 +826,7 @@ reinit:
 				    syslog(LOG_WARNING,
 					   _("kpropd: Full resync, invalid return."));
 				    frdone = 0;
+				    backoff_cnt++;
 				} else
 				    frdone = 1;
 				break;
