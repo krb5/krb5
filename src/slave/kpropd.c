@@ -987,11 +987,20 @@ unsigned int backoff_from_master(int *cnt) {
 }
 
 static void
-kpropd_com_err_proc(whoami, code, fmt, args)
-	const char	*whoami;
-	long		code;
-	const char	*fmt;
-	va_list		args;
+kpropd_com_err_proc(const char *whoami,
+		    long code,
+		    const char *fmt,
+		    va_list args)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
+
+static void
+kpropd_com_err_proc(const char *whoami,
+		    long code,
+		    const char *fmt,
+		    va_list args)
 {
 	char	error_buf[8096];
 
