@@ -121,7 +121,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_authdata **kdc_issued_auth_data = NULL;    /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;	    /* client/server KDB flags */
     char *s4u_name = NULL;
-    krb5_boolean is_referral = FALSE;
+    krb5_boolean is_referral;
 
     session_key.contents = NULL;
     
@@ -256,11 +256,8 @@ tgt_again:
     if (!is_local_principal(header_enc_tkt->client))
 	setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
 
-    if (krb5_is_tgs_principal(server.princ) &&
-	!krb5_principal_compare(kdc_context, tgs_server, server.princ)) {
-	assert(!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE));
-	is_referral = TRUE;
-    }
+    is_referral = krb5_is_tgs_principal(server.princ) &&
+	!krb5_principal_compare(kdc_context, tgs_server, server.princ);
 
     /* Check for protocol transition */
     errcode = kdc_process_s4u2self_req(kdc_context, request, header_enc_tkt->client,

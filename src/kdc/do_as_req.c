@@ -281,16 +281,20 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     /*
-     * Turn off canonicalization for changepw service; if it is an
-     * alias for the TGS, then a client with an expired key could
-     * still be issued a ticket granting ticket.
+     * Turn off canonicalization for services that are aliases of
+     * the TGS, such as (in Windows) the changepw service.
      */
-    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) &&
-	!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE)) {
+    if (isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE) &&
+	krb5_is_tgs_principal(server.princ) &&
+	!krb5_is_tgs_principal(request->server)) {
+	clear(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
+    }
+
+    if (isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
 	server_princ = *(server.princ);
     } else {
 	server_princ = *(request->server);
-	/* The realm is always canonicalized */
+	/* The realm is always canonicalized in Windows */
 	server_princ.realm = *(krb5_princ_realm(context, server.princ));
     }
     ticket_reply.server = &server_princ;
