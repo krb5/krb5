@@ -376,6 +376,9 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
 
     for (j = 0; j < iov_count; j++) {
 	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
+	if (kiov[i].flags == KRB5_CRYPTO_TYPE_EMPTY)
+	    continue;
+
 	kiov[i].data.length = iov[j].buffer.length;
 	kiov[i].data.data = (char *)iov[j].buffer.value;
 	i++;
@@ -469,6 +472,9 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 
     for (j = 0; j < iov_count; j++) {
 	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
+	if (kiov[i].flags == KRB5_CRYPTO_TYPE_EMPTY)
+	    continue;
+
 	kiov[i].data.length = iov[j].buffer.length;
 	kiov[i].data.data = (char *)iov[j].buffer.value;
 	i++;
