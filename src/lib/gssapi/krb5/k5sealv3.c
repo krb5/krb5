@@ -84,7 +84,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     krb5_keyblock *key;
     krb5_cksumtype cksumtype;
 
-    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
@@ -99,9 +98,10 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         key = ctx->acceptor_subkey;
 	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
-        key = ctx->enc;
+        key = ctx->subkey;
 	cksumtype = ctx->cksumtype;
     }
+    assert(key != NULL);
 
 #ifdef CFX_EXERCISE
     {
@@ -184,6 +184,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #endif
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
         krb5_data plain;
+	size_t cksumsize;
 
         /* Here, message is the application-supplied data; message2 is
            what goes into the output token.  They may be the same, or
@@ -197,10 +198,13 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         if (plain.data == NULL)
             return ENOMEM;
 
-        if (ctx->cksum_size > 0xffff)
-            abort();
+	err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
+	if (err)
+	    goto error;
 
-        bufsize = 16 + message2->length + ctx->cksum_size;
+	assert(cksumsize <= 0xffff);
+
+        bufsize = 16 + message2->length + cksumsize;
         outbuf = malloc(bufsize);
         if (outbuf == NULL) {
             free(plain.data);
@@ -239,7 +243,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             memcpy(outbuf + 16, message2->value, message2->length);
 
         sum.contents = outbuf + 16 + message2->length;
-        sum.length = ctx->cksum_size;
+        sum.length = cksumsize;
 
         err = krb5_c_make_checksum(context, cksumtype, key,
                                    key_usage, &plain, &sum);
@@ -250,9 +254,9 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             zap(outbuf,bufsize);
             goto error;
         }
-        if (sum.length != ctx->cksum_size)
+        if (sum.length != cksumsize)
             abort();
-        memcpy(outbuf + 16 + message2->length, sum.contents, ctx->cksum_size);
+        memcpy(outbuf + 16 + message2->length, sum.contents, cksumsize);
         krb5_free_checksum_contents(context, &sum);
         sum.contents = 0;
         /* Now that we know we're actually generating the token...  */
@@ -267,7 +271,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
                 store_16_be(rrc, outbuf+6);
 #endif
             /* Fix up EC field.  */
-            store_16_be(ctx->cksum_size, outbuf+4);
+            store_16_be(cksumsize, outbuf+4);
         } else {
             store_16_be(0xffff, outbuf+6);
         }
@@ -316,7 +320,6 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     krb5_keyblock *key;
     krb5_cksumtype cksumtype;
 
-    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
     assert(ctx->proto == 1);
 
@@ -366,9 +369,10 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         key = ctx->acceptor_subkey;
 	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
-        key = ctx->enc;
+        key = ctx->subkey;
 	cksumtype = ctx->cksumtype;
     }
+    assert(key != NULL);
 
     if (toktype == KG_TOK_WRAP_MSG) {
         if (load_16_be(ptr) != KG2_TOK_WRAP_MSG)
@@ -425,6 +429,12 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                 message_buffer->value = NULL;
             }
         } else {
+	    size_t cksumsize;
+
+	    err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
+	    if (err)
+		goto error;
+
             /* no confidentiality */
             if (conf_state)
                 *conf_state = 0;
@@ -443,7 +453,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             if (!gss_krb5int_rotate_left(ptr, bodysize-ec, 16))
                 goto no_mem;
             sum.length = ec;
-            if (sum.length != ctx->cksum_size) {
+            if (sum.length != cksumsize) {
                 *minor_status = 0;
                 return GSS_S_BAD_SIG;
             }

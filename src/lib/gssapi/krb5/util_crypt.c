@@ -128,11 +128,6 @@ kg_setup_keys(krb5_context context,
 							cksumtype);
 	if (code != 0)
 	    return code;
-
-	code = krb5_c_checksum_length(context, *cksumtype, &ctx->cksum_size);
-	if (code != 0)
-	    return code;
-	break;
     }
 
     return 0;
@@ -417,7 +412,6 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     unsigned int k5_headerlen = 0, k5_trailerlen = 0;
     size_t gss_headerlen, gss_trailerlen;
     krb5_error_code code;
-    size_t actual_rrc;
 
     *pkiov = NULL;
     *pkiov_count = 0;
@@ -436,15 +430,17 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     if (code != 0)
 	return code;
 
-    /* Determine the actual RRC after compensating for Windows bug */
-    actual_rrc = dce_style ? ec + rrc : rrc;
-
     /* Check header and trailer sizes */
     gss_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
     gss_trailerlen = ec + 16 /* E(GSS-Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
     /* If we're caller without a trailer, we must rotate by trailer length */
     if (trailer == NULL) {
+	size_t actual_rrc = rrc;
+
+	if (dce_style)
+	    actual_rrc += ec; /* compensate for Windows bug */
+
 	if (actual_rrc != gss_trailerlen)
 	    return KRB5_BAD_MSIZE;
 
@@ -464,15 +460,11 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 	return ENOMEM;
 
     /*
-     * For CFX, place the krb5 header after the GSS header, offset
-     * by the real rotation count which, owing to a bug in Windows,
-     * is actually EC + RRC for DCE_STYLE.
+     * The krb5 header is located at the end of the GSS header.
      */
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
     kiov[i].data.length = k5_headerlen;
-    kiov[i].data.data = (char *)header->buffer.value + 16;
-    if (trailer == NULL)
-	kiov[i].data.data += actual_rrc;
+    kiov[i].data.data = (char *)header->buffer.value + header->buffer.length - k5_headerlen;
     i++;
 
     for (j = 0; j < iov_count; j++) {
@@ -482,26 +474,26 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 	i++;
     }
 
+    /*
+     * The EC and encrypted GSS header are placed in the trailer, which may
+     * be rotated directly after the plaintext header if no trailer buffer
+     * is provided.
+     */
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
-    if (trailer == NULL) {
-	kiov[i].data.length = (actual_rrc - rrc) + 16; /* EC for DCE | E(Header) */
+    kiov[i].data.length = ec + 16; /* E(Header) */
+    if (trailer == NULL)
 	kiov[i].data.data = (char *)header->buffer.value + 16;
-    } else {
-	kiov[i].data.length = 16; /* E(Header) */
+    else
 	kiov[i].data.data = (char *)trailer->buffer.value;
-    }
     i++;
 
     /*
-     * For CFX, place the krb5 trailer in the GSS trailer or, if
-     * rotating, after the encrypted copy of the krb5 header.
+     * The krb5 trailer is placed after the encrypted copy of the
+     * krb5 header (which may be in the GSS header or trailer).
      */
     kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
     kiov[i].data.length = k5_trailerlen;
-    if (trailer == NULL)
-	kiov[i].data.data = (char *)header->buffer.value + 16 + actual_rrc - k5_trailerlen;
-    else
-	kiov[i].data.data = (char *)trailer->buffer.value + 16; /* E(Header) */
+    kiov[i].data.data = kiov[i - 1].data.data + ec + 16; /* E(Header) */
     i++;
 
     *pkiov = kiov;

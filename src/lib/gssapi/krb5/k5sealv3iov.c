@@ -57,8 +57,8 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     krb5_cksumtype cksumtype;
     size_t data_length, assoc_data_length;
 
-    assert(toktype != KG_TOK_WRAP_MSG || ctx->enc != NULL);
     assert(ctx->big_endian == 0);
+    assert(ctx->proto == 1);
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG
@@ -72,9 +72,11 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 	key = ctx->acceptor_subkey;
 	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
-	key = ctx->enc;
+	key = ctx->subkey;
 	cksumtype = ctx->cksumtype;
     }
+    assert(key != NULL);
+    assert(cksumtype != 0);
 
     kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
 
@@ -179,14 +181,17 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
 	ctx->seq_send++;
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
-	assert(ctx->cksum_size <= 0xFFFF);
-
 	tok_id = KG2_TOK_WRAP_MSG;
 
     wrap_with_checksum:
 
 	gss_headerlen = 16;
-	gss_trailerlen = ctx->cksum_size;
+
+	code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_CHECKSUM, &gss_trailerlen);
+	if (code != 0)
+	    goto cleanup;
+
+	assert(gss_trailerlen <= 0xFFFF);
 
 	if (trailer == NULL) {
 	    rrc = gss_trailerlen;
@@ -243,7 +248,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
 	if (toktype == KG_TOK_WRAP_MSG) {
 	    /* Fix up EC field */
-	    store_16_be(ctx->cksum_size, outbuf + 4);
+	    store_16_be(gss_trailerlen, outbuf + 4);
 	    /* Fix up RRC field */
 	    store_16_be(rrc, outbuf + 6);
 	}
@@ -290,8 +295,8 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     gssint_uint64 seqnum;
     krb5_boolean valid;
     krb5_cksumtype cksumtype;
+    int conf_flag = 0;
 
-    assert(toktype != KG_TOK_WRAP_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
     assert(ctx->proto == 1);
 
@@ -334,27 +339,43 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	key = ctx->acceptor_subkey;
 	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
-	key = ctx->enc;
+	key = ctx->subkey;
 	cksumtype = ctx->cksumtype;
     }
+    assert(key != NULL);
+
 
     if (toktype == KG_TOK_WRAP_MSG) {
+	unsigned int k5_trailerlen;
+
 	if (load_16_be(ptr) != KG2_TOK_WRAP_MSG)
 	    goto defective;
+	conf_flag = ((ptr[2] & FLAG_WRAP_CONFIDENTIAL) != 0);
 	if (ptr[3] != 0xFF)
 	    goto defective;
 	ec = load_16_be(ptr + 4);
 	rrc = load_16_be(ptr + 6);
 	seqnum = load_64_be(ptr + 8);
 
+	code = krb5_c_crypto_length(context, key->enctype,
+				    conf_flag ? KRB5_CRYPTO_TYPE_TRAILER :
+						KRB5_CRYPTO_TYPE_CHECKSUM,
+				    &k5_trailerlen);
+	if (code != 0) {
+	    *minor_status = code;
+	    return GSS_S_FAILURE;
+	}
+
 	/* Deal with RRC */
 	if (trailer == NULL) {
-	    size_t desired_rrc;
+	    size_t desired_rrc = k5_trailerlen;
 
-	    if (ptr[2] & FLAG_WRAP_CONFIDENTIAL)
-		desired_rrc = 16 /* E(Header) */ + ctx->cksum_size;
-	    else
-		desired_rrc = ctx->cksum_size;
+	    if (conf_flag) {
+		desired_rrc += 16; /* E(Header) */
+
+		if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
+		    desired_rrc += ec;
+	    }
 
 	    /* According to MS, we only need to deal with a fixed RRC for DCE */
 	    if (rrc != desired_rrc)
@@ -364,7 +385,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    goto defective;
 	}
 
-	if (ptr[2] & FLAG_WRAP_CONFIDENTIAL) {
+	if (conf_flag) {
 	    unsigned char *althdr;
 
 	    /* Decrypt */
@@ -378,7 +399,10 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    }
 
 	    /* Validate header integrity */
-	    althdr = (unsigned char *)header->buffer.value;
+	    if (trailer == NULL)
+		althdr = (unsigned char *)header->buffer.value + 16 + ec;
+	    else
+		althdr = (unsigned char *)trailer->buffer.value + ec;
 
 	    if (load_16_be(althdr) != KG2_TOK_WRAP_MSG
 		|| althdr[2] != ptr[2]
@@ -391,7 +415,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 	    /* caller should have fixed up padding */
 	} else {
 	    /* Verify checksum: note EC is checksum size here, not padding */
-	    if (ec != ctx->cksum_size)
+	    if (ec != k5_trailerlen)
 		goto defective;
 
 	    /* Zero EC, RRC before computing checksum */
@@ -436,7 +460,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     *minor_status = 0;
 
     if (conf_state != NULL)
-	*conf_state = ((ptr[2] & FLAG_WRAP_CONFIDENTIAL) != 0);
+	*conf_state = conf_flag;
 
     return code;
 

@@ -419,7 +419,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 	if (ctx->have_acceptor_subkey)
 	    enctype = ctx->acceptor_subkey->enctype;
 	else
-	    enctype = ctx->enc->enctype;
+	    enctype = ctx->subkey->enctype;
 
 	code = krb5_c_crypto_length(context, enctype,
 				    conf_req_flag ?
