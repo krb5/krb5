@@ -216,13 +216,29 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
     return(0);
 }
 
+krb5_pa_data *
+find_pa_data(krb5_pa_data **padata, krb5_preauthtype pa_type)
+{
+    krb5_pa_data **tmppa;
+
+    if (padata == NULL)
+	return NULL;
+
+    for (tmppa = padata; *tmppa != NULL; tmppa++) {
+	if ((*tmppa)->pa_type == pa_type)
+	    break;
+    }
+
+    return *tmppa;
+}
+
 krb5_error_code 
 kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 		    krb5_data *pkt, krb5_ticket **ticket,
 		    krb5_db_entry *krbtgt, int *nprincs,
 		    krb5_keyblock **subkey)
 {
-    krb5_pa_data       ** tmppa;
+    krb5_pa_data        * tmppa;
     krb5_ap_req 	* apreq;
     krb5_error_code 	  retval;
     krb5_data		  scratch1;
@@ -233,30 +249,17 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     krb5_checksum 	* his_cksum = NULL;
     krb5_keyblock 	* key = NULL;
     krb5_kvno 		  kvno = 0;
-    krb5_boolean	  for_user = FALSE;
 
     *nprincs = 0;
 
-    if (!request->padata)
-	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
-    for (tmppa = request->padata; *tmppa; tmppa++) {
-	if ((*tmppa)->pa_type == KRB5_PADATA_AP_REQ)
-	    break;
-    }
-    if (!*tmppa)			/* cannot find any AP_REQ */
+    tmppa = find_pa_data(request->padata, KRB5_PADATA_AP_REQ);
+    if (!tmppa)
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
 
-    scratch1.length = (*tmppa)->length;
-    scratch1.data = (char *)(*tmppa)->contents;
+    scratch1.length = tmppa->length;
+    scratch1.data = (char *)tmppa->contents;
     if ((retval = decode_krb5_ap_req(&scratch1, &apreq)))
 	return retval;
-
-    /* Set for_user to TRUE if protocol transition is being used */
-    for (tmppa = request->padata; *tmppa; tmppa++) {
-	if ((*tmppa)->pa_type == KRB5_PADATA_FOR_USER)
-	    break;
-    }
-    for_user = (*tmppa != NULL);
 
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
@@ -357,7 +360,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     }
 
     /* make sure the client is of proper lineage (see above) */
-    if (foreign_server && for_user == FALSE) {
+    if (foreign_server && !find_pa_data(request->padata, KRB5_PADATA_FOR_USER)) {
 	if (is_local_principal((*ticket)->enc_part2->client)) {
 	    /* someone in a foreign realm claiming to be local */
 	    krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");

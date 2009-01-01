@@ -172,6 +172,9 @@ krb5_error_code return_padata
 krb5_error_code free_padata_context
     (krb5_context context, void **padata_context);
 
+krb5_pa_data *find_pa_data
+    (krb5_pa_data **padata, krb5_preauthtype pa_type);
+
 /* kdc_authdata.c */
 krb5_error_code load_authdata_plugins(krb5_context context);
 krb5_error_code unload_authdata_plugins(krb5_context context);
