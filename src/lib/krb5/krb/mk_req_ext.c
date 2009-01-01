@@ -66,7 +66,7 @@
 
 static krb5_error_code
 make_etype_list(krb5_context context,
-		krb5_enctype *permitted_etypes,
+		krb5_enctype *desired_etypes,
 		krb5_enctype tkt_enctype,
 		krb5_authdata ***authdata);
 
@@ -75,7 +75,7 @@ krb5_generate_authenticator (krb5_context,
 				       krb5_authenticator *, krb5_principal,
 				       krb5_checksum *, krb5_keyblock *,
 				       krb5_ui_4, krb5_authdata **,
-				       krb5_enctype *permitted_etypes,
+				       krb5_enctype *desired_etypes,
 				       krb5_enctype tkt_enctype);
 
 krb5_error_code
@@ -126,7 +126,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     krb5_checksum	  checksum;
     krb5_checksum	  *checksump = 0;
     krb5_auth_context	  new_auth_context;
-    krb5_enctype	  *permitted_etypes = NULL;
+    krb5_enctype	  *desired_etypes = NULL;
 
     krb5_ap_req request;
     krb5_data *scratch = 0;
@@ -223,11 +223,11 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 
     if (ap_req_options & AP_OPTS_ETYPE_NEGOTIATION) {
 	if ((*auth_context)->permitted_etypes == NULL) {
-	    retval = krb5_get_permitted_enctypes(context, &permitted_etypes);
+	    retval = krb5_get_tgs_ktypes(context, in_creds->server, &desired_etypes);
 	    if (retval)
 		goto cleanup_cksum;
 	} else
-	    permitted_etypes = (*auth_context)->permitted_etypes;
+	    desired_etypes = (*auth_context)->permitted_etypes;
     }
 
     if ((retval = krb5_generate_authenticator(context,
@@ -236,7 +236,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 					      (*auth_context)->send_subkey,
 					      (*auth_context)->local_seq_number,
 					      in_creds->authdata,
-					      permitted_etypes,
+					      desired_etypes,
 					      in_creds->keyblock.enctype)))
 	goto cleanup_cksum;
 	
@@ -268,9 +268,9 @@ cleanup_cksum:
       free(checksump->contents);
 
 cleanup:
-    if (permitted_etypes &&
-	permitted_etypes != (*auth_context)->permitted_etypes)
-	krb5_xfree(permitted_etypes);
+    if (desired_etypes &&
+	desired_etypes != (*auth_context)->permitted_etypes)
+	krb5_xfree(desired_etypes);
     if (request.ticket)
 	krb5_free_ticket(context, request.ticket);
     if (request.authenticator.ciphertext.data) {
@@ -291,7 +291,7 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
 			    krb5_principal client, krb5_checksum *cksum,
 			    krb5_keyblock *key, krb5_ui_4 seq_number,
 			    krb5_authdata **authorization,
-			    krb5_enctype *permitted_etypes,
+			    krb5_enctype *desired_etypes,
 			    krb5_enctype tkt_enctype)
 {
     krb5_error_code retval;
@@ -313,8 +313,9 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
 	if (retval)
 	    return retval;
     }
-    if (permitted_etypes != NULL) {
-	retval = make_etype_list(context, permitted_etypes, tkt_enctype,
+    /* Only send EtypeList if we prefer another enctype to tkt_enctype */ 
+    if (desired_etypes != NULL && desired_etypes[0] != tkt_enctype) {
+	retval = make_etype_list(context, desired_etypes, tkt_enctype,
 				 &authent->authorization_data);
 	if (retval)
 	    return retval;
@@ -326,7 +327,7 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
 /* RFC 4537 */
 static krb5_error_code
 make_etype_list(krb5_context context,
-		krb5_enctype *permitted_etypes,
+		krb5_enctype *desired_etypes,
 		krb5_enctype tkt_enctype,
 		krb5_authdata ***authdata)
 {
@@ -337,7 +338,7 @@ make_etype_list(krb5_context context,
     krb5_authdata *etype_adata[2], etype_adatum, **adata;
     int i;
 
-    etypes.etypes = permitted_etypes;
+    etypes.etypes = desired_etypes;
 
     for (etypes.length = 0;
 	 etypes.etypes[etypes.length] != ENCTYPE_NULL;
