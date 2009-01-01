@@ -846,7 +846,11 @@ gss_krb5int_export_lucid_sec_context(OM_uint32 *minor_status,
                                      const gss_OID desired_object,
                                      gss_buffer_set_t *data_set);
 
-/* 1.2.840.113554.1.2.2.5.5 reserved for GSS_C_INQ_SSPI_SESSION_KEY */
+#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH 11
+#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"
+
+OM_uint32
+gss_krb5int_inq_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
 
 #define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH 11
 #define GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x06"
@@ -857,20 +861,14 @@ gss_krb5int_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
 						const gss_OID desired_object,
 						gss_buffer_set_t *ad_data);
 
-#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH 11
-#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x07"
-
-OM_uint32
-gss_krb5int_inq_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
-
 #define GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH 11
-#define GSS_KRB5_SET_CRED_RCACHE_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x08"
+#define GSS_KRB5_SET_CRED_RCACHE_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x07"
 
 OM_uint32
 gss_krb5int_set_cred_rcache(OM_uint32 *, gss_cred_id_t, const gss_OID, const gss_buffer_t);
 
 #define GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH 11
-#define GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x09"
+#define GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x08"
 
 OM_uint32
 gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
