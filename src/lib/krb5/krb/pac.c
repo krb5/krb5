@@ -297,7 +297,7 @@ krb5_pac_init(krb5_context context,
 }
 
 /*
- * Parse the supplied data into the  PAC allocated by this function
+ * Parse the supplied data into the PAC allocated by this function
  */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_parse(krb5_context context,
@@ -378,13 +378,13 @@ krb5_pac_parse(krb5_context context,
 }
 
 static krb5_error_code
-k5_time_to_seconds_since_1970(krb5_ui_8 time, krb5_timestamp *elapsedSeconds)
+k5_time_to_seconds_since_1970(krb5_ui_8 ntTime, krb5_timestamp *elapsedSeconds)
 {
     krb5_ui_8 abstime;
 
-    time /= 10000000;
+    ntTime /= 10000000;
 
-    abstime = time > 0 ? time - NT_TIME_EPOCH : -time;
+    abstime = time > 0 ? ntTime - NT_TIME_EPOCH : -ntTime;
 
     if (abstime > KRB5_INT32_MAX)
 	return ERANGE;
@@ -395,14 +395,14 @@ k5_time_to_seconds_since_1970(krb5_ui_8 time, krb5_timestamp *elapsedSeconds)
 }    
 
 static krb5_error_code
-k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds, krb5_ui_8 *time)
+k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds, krb5_ui_8 *ntTime)
 {
-    *time = elapsedSeconds;
+    *ntTime = elapsedSeconds;
 
     if (elapsedSeconds > 0)
-	*time += NT_TIME_EPOCH;
+	*ntTime += NT_TIME_EPOCH;
 
-    *time *= 10000000;
+    *ntTime *= 10000000;
    
     return 0;
 }
@@ -652,7 +652,7 @@ k5_insert_client_info(krb5_context context,
     }
 
     ret = krb5_unparse_name_flags(context, principal,
-				  KRB5_PRINCIPAL_UNPARSE_SHORT, &princ_name_utf8);
+				  KRB5_PRINCIPAL_UNPARSE_NO_REALM, &princ_name_utf8);
     if (ret != 0)
 	goto cleanup;
 
