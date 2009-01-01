@@ -527,26 +527,28 @@ setup_tcp_listener_ports(struct socksetup *data)
 
 	/* Sockets are created, prepare to listen on them.  */
 	if (s4 >= 0) {
-	    FD_SET(s4, &sstate.rfds);
-	    if (s4 >= sstate.max)
-		sstate.max = s4 + 1;
 	    if (add_tcp_listener_fd(data, s4) == 0)
 		close(s4);
-	    else
+	    else {
+		FD_SET(s4, &sstate.rfds);
+		if (s4 >= sstate.max)
+		    sstate.max = s4 + 1;
 		krb5_klog_syslog(LOG_INFO, "listening on fd %d: tcp %s",
 				 s4, paddr((struct sockaddr *)&sin4));
+	    }
 	}
 #ifdef KRB5_USE_INET6
 	if (s6 >= 0) {
-	    FD_SET(s6, &sstate.rfds);
-	    if (s6 >= sstate.max)
-		sstate.max = s6 + 1;
 	    if (add_tcp_listener_fd(data, s6) == 0) {
 		close(s6);
 		s6 = -1;
-	    } else
+	    } else {
+		FD_SET(s6, &sstate.rfds);
+		if (s6 >= sstate.max)
+		    sstate.max = s6 + 1;
 		krb5_klog_syslog(LOG_INFO, "listening on fd %d: tcp %s",
 				 s6, paddr((struct sockaddr *)&sin6));
+	    }
 	    if (s4 < 0)
 		krb5_klog_syslog(LOG_INFO,
 				 "assuming IPv6 socket accepts IPv4");
@@ -665,9 +667,6 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 		return 1;
 	    }
 	}
-	FD_SET (sock, &sstate.rfds);
-	if (sock >= sstate.max)
-	    sstate.max = sock + 1;
 	krb5_klog_syslog (LOG_INFO, "listening on fd %d: udp %s%s", sock,
 			  paddr((struct sockaddr *)addr),
 			  pktinfo ? " (pktinfo)" : "");
@@ -675,6 +674,9 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 	    close(sock);
 	    return 1;
 	}
+	FD_SET (sock, &sstate.rfds);
+	if (sock >= sstate.max)
+	    sstate.max = sock + 1;
     }
     return 0;
 }
