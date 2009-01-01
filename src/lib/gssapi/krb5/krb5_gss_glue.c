@@ -713,31 +713,6 @@ gss_krb5_set_cred_rcache(
     return major_status;
 }
 
-#if 0
-OM_uint32 KRB5_CALLCONV
-gss_krb5_set_cred_alias(
-    OM_uint32 *minor_status,
-    gss_cred_id_t cred,
-    krb5_principal *aliases)
-{
-    static const gss_OID_desc const req_oid = {
-	GSS_KRB5_SET_ACCEPTOR_ALIAS_OID_LENGTH,
-	GSS_KRB5_SET_ACCEPTOR_ALIAS_OID };
-    OM_uint32 major_status;
-    gss_buffer_desc req_buffer;
-
-    req_buffer.length = sizeof(aliases);
-    req_buffer.value = aliases;
-
-    major_status = gssspi_set_cred_option(minor_status,
-					  cred,
-					  (const gss_OID)&req_oid,
-					  &req_buffer);
-
-    return major_status;
-}
-#endif
-
 OM_uint32 KRB5_CALLCONV
 gsskrb5_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 					  gss_ctx_id_t context_handle,
