@@ -223,8 +223,8 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_context_time,	/* gss_context_time */
 	spnego_gss_sign,		/* gss_sign */
 	spnego_gss_verify,		/* gss_verify */
-	spnego_gss_seal,		/* gss_seal */
-	spnego_gss_unseal,		/* gss_unseal */
+	spnego_gss_wrap,		/* gss_wrap */
+	spnego_gss_unwrap,		/* gss_unwrap */
 	spnego_gss_display_status,
 	NULL,				/* gss_indicate_mechs */
 	spnego_gss_compare_name,
@@ -1863,16 +1863,16 @@ spnego_gss_inquire_names_for_mech(
 }
 
 OM_uint32
-spnego_gss_unseal(
+spnego_gss_unwrap(
 		OM_uint32 *minor_status,
 		gss_ctx_id_t context_handle,
 		gss_buffer_t input_message_buffer,
 		gss_buffer_t output_message_buffer,
 		int *conf_state,
-		int *qop_state)
+		gss_qop_t *qop_state)
 {
 	OM_uint32 ret;
-	ret = gss_unseal(minor_status,
+	ret = gss_unwrap(minor_status,
 			context_handle,
 			input_message_buffer,
 			output_message_buffer,
@@ -1883,17 +1883,17 @@ spnego_gss_unseal(
 }
 
 OM_uint32
-spnego_gss_seal(
+spnego_gss_wrap(
 		OM_uint32 *minor_status,
 		gss_ctx_id_t context_handle,
 		int conf_req_flag,
-		int qop_req,
+		gss_qop_t qop_req,
 		gss_buffer_t input_message_buffer,
 		int *conf_state,
 		gss_buffer_t output_message_buffer)
 {
 	OM_uint32 ret;
-	ret = gss_seal(minor_status,
+	ret = gss_wrap(minor_status,
 		    context_handle,
 		    conf_req_flag,
 		    qop_req,

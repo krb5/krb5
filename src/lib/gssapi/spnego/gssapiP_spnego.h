@@ -225,22 +225,22 @@ OM_uint32 spnego_gss_inquire_names_for_mech
 	gss_OID_set *		/* name_types */
 );
 
-OM_uint32 spnego_gss_unseal
+OM_uint32 spnego_gss_unwrap
 (
 	OM_uint32 *minor_status,
 	gss_ctx_id_t context_handle,
 	gss_buffer_t input_message_buffer,
 	gss_buffer_t output_message_buffer,
 	int *conf_state,
-	int *qop_state
+	gss_qop_t *qop_state
 );
 
-OM_uint32 spnego_gss_seal
+OM_uint32 spnego_gss_wrap
 (
 	OM_uint32 *minor_status,
 	gss_ctx_id_t context_handle,
 	int conf_req_flag,
-	int qop_req,
+	gss_qop_t qop_req,
 	gss_buffer_t input_message_buffer,
 	int *conf_state,
 	gss_buffer_t output_message_buffer

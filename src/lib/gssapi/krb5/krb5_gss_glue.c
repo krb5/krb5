@@ -386,8 +386,8 @@ static struct gss_config krb5_mechanism = {
     NULL,
     NULL,
 #else
-    krb5_gss_seal,
-    krb5_gss_unseal,
+    krb5_gss_wrap,
+    krb5_gss_unwrap,
 #endif
     krb5_gss_display_status,
     krb5_gss_indicate_mechs,
