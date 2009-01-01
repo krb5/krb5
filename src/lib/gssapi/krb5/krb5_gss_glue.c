@@ -319,10 +319,6 @@ static struct {
 	gss_krb5int_register_acceptor_identity
     },
     {
-	{GSS_KRB5_CCACHE_NAME_OID_LENGTH, GSS_KRB5_CCACHE_NAME_OID},
-	gss_krb5int_ccache_name
-    },
-    {
 	{GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID},
 	gss_krb5int_free_lucid_sec_context
     },
@@ -691,40 +687,6 @@ gss_krb5_set_allowable_enctypes(
 					  &req_buffer);
 
     return major_status;
-}
-
-OM_uint32 KRB5_CALLCONV
-gss_krb5_ccache_name(
-    OM_uint32 *minor_status,
-    const char *name,
-    const char **out_name)
-{
-    static const gss_OID_desc const req_oid = {
-	GSS_KRB5_CCACHE_NAME_OID_LENGTH,
-	GSS_KRB5_CCACHE_NAME_OID };
-    OM_uint32 major_status;
-    struct krb5_gss_ccache_name_req req;
-    gss_buffer_desc req_buffer;
-
-    if (out_name == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
-
-    *out_name = NULL;
-
-    req.name = name;
-    req.out_name = NULL;
-
-    req_buffer.length = sizeof(req);
-    req_buffer.value = &req;
-
-    major_status = gssspi_mech_invoke(minor_status,
-				      (const gss_OID)gss_mech_krb5,
-				      (const gss_OID)&req_oid,
-				      &req_buffer);
-
-    *out_name = req.out_name;
-
-    return major_status;    
 }
 
 OM_uint32 KRB5_CALLCONV

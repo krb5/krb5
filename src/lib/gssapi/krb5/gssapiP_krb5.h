@@ -823,20 +823,6 @@ OM_uint32 KRB5_CALLCONV gss_krb5int_copy_ccache
  const gss_OID desired_oid,
  const gss_buffer_t value);
 
-#define GSS_KRB5_CCACHE_NAME_OID_LENGTH 11
-#define GSS_KRB5_CCACHE_NAME_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0a"
-
-struct krb5_gss_ccache_name_req {
-    const char *name;
-    const char *out_name;
-};
-
-OM_uint32 KRB5_CALLCONV gss_krb5int_ccache_name
- (OM_uint32 *minor_status,
-  const gss_OID,
-  const gss_OID,
-  const gss_buffer_t);
-
 #define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH 11
 #define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x08"
 

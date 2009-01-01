@@ -32,16 +32,15 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5int_ccache_name(OM_uint32 *minor_status,
-			const gss_OID desired_mech,
-			const gss_OID desired_object,
-			gss_buffer_t value)
+gss_krb5_ccache_name(minor_status, name, out_name)
+    OM_uint32 *minor_status;
+    const char *name;
+    const char **out_name;
 {
     char *old_name = NULL;
     OM_uint32 err = 0;
     OM_uint32 minor = 0;
     char *gss_out_name;
-    struct krb5_gss_ccache_name_req *req;
 
     err = gss_krb5int_initialize_library();
     if (err) {
@@ -49,16 +48,9 @@ gss_krb5int_ccache_name(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    assert(value->length == sizeof(*req));
-
-    if (value->length != sizeof(*req))
-	return GSS_S_FAILURE;
-
-    req = (struct krb5_gss_ccache_name_req *)value->value;
-
     gss_out_name = k5_getspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
 
-    if (req->out_name) {
+    if (out_name) {
         const char *tmp_name = NULL;
 
         if (!err) {
@@ -73,7 +65,7 @@ gss_krb5int_ccache_name(OM_uint32 *minor_status,
        don't free up any storage (leave old_name NULL).  */
 
     if (!err)
-        kg_set_ccache_name (&err, req->name);
+        kg_set_ccache_name (&err, name);
 
     minor = k5_setspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME, gss_out_name);
     if (minor) {
@@ -86,8 +78,8 @@ gss_krb5int_ccache_name(OM_uint32 *minor_status,
     }
 
     if (!err) {
-        if (req->out_name != NULL) {
-            req->out_name = gss_out_name;
+        if (out_name) {
+            *out_name = gss_out_name;
         }
     }
 
