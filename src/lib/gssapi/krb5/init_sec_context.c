@@ -987,25 +987,19 @@ krb5_gss_init_context (krb5_context *ctxp)
 }
 
 #ifndef _WIN32
-OM_uint32
-krb5int_gss_use_kdc_context(OM_uint32 *minor_status,
-			    const gss_OID desired_mech,
-			    const gss_OID desired_object,
-			    gss_buffer_t value)
+krb5_error_code
+krb5_gss_use_kdc_context()
 {
-    OM_uint32 err;
-
-    *minor_status = 0;
+    krb5_error_code err;
 
     err = gss_krb5int_initialize_library();
     if (err)
-        return err;
-    *minor_status = k5_mutex_lock(&kg_kdc_flag_mutex);
-    if (*minor_status) {
-	return GSS_S_FAILURE;
-    }
+	return err;
+    err = k5_mutex_lock(&kg_kdc_flag_mutex);
+    if (err)
+	return err;
     kdc_flag = 1;
     k5_mutex_unlock(&kg_kdc_flag_mutex);
-    return GSS_S_COMPLETE;
+    return 0;
 }
 #endif

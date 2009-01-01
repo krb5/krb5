@@ -97,11 +97,8 @@ k5_mutex_t gssint_krb5_keytab_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static char *krb5_gss_keytab = NULL;
 
 /* Heimdal calls this gsskrb5_register_acceptor_identity. */
-OM_uint32
-gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
-				       const gss_OID desired_mech,
-				       const gss_OID desired_object,
-				       gss_buffer_t value)
+OM_uint32 KRB5_CALLCONV
+krb5_gss_register_acceptor_identity(const char *keytab)
 {
     char *new, *old;
     int err;
@@ -110,10 +107,10 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
     if (err != 0)
         return GSS_S_FAILURE;
 
-    if (value->value == NULL)
-        return GSS_S_FAILURE;
+    if (keytab == NULL)
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
-    new = strdup((char *)value->value);
+    new = strdup(keytab);
     if (new == NULL)
         return GSS_S_FAILURE;
 

@@ -124,27 +124,18 @@ error_out:
  * Frees the storage associated with an
  * exported lucid context structure.
  */
-OM_uint32
-gss_krb5int_free_lucid_sec_context(
+OM_uint32 KRB5_CALLCONV
+gss_krb5_free_lucid_sec_context(
     OM_uint32 *minor_status,
-    const gss_OID desired_mech,
-    const gss_OID desired_object,
-    gss_buffer_t value)
+    void *kctx)
 {
     OM_uint32           retval;
     krb5_error_code     kret = 0;
     int                 version;
-    void		*kctx;
 
     /* Assume failure */
     retval = GSS_S_FAILURE;
     *minor_status = 0;
-
-    kctx = value->value;
-    if (!kctx) {
-        kret = EINVAL;
-        goto error_out;
-    }
 
     /* Verify pointer is valid lucid context */
     if (! kg_validate_lucidctx_id(kctx)) {
