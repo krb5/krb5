@@ -411,8 +411,6 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 		*minor_status = 0;
 		return GSS_S_BAD_SIG;
 	    }
-
-	    /* caller should have fixed up padding */
 	} else {
 	    /* Verify checksum: note EC is checksum size here, not padding */
 	    if (ec != k5_trailerlen)
