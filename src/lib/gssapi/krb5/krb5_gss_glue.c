@@ -307,6 +307,65 @@ krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
     return GSS_S_UNAVAILABLE;
 }
 
+/*
+ * gssspi_mech_invoke() methods
+ */
+static struct {
+    gss_OID_desc oid;
+    OM_uint32 (*func)(OM_uint32 *, const gss_OID, const gss_OID, gss_buffer_t);
+} krb5_gssspi_mech_invoke_ops[] = {
+    {
+	{GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH, GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID},
+	gss_krb5int_register_acceptor_identity
+    },
+    {
+	{GSS_KRB5_CCACHE_NAME_OID_LENGTH, GSS_KRB5_CCACHE_NAME_OID},
+	gss_krb5int_ccache_name
+    },
+    {
+	{GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID},
+	gss_krb5int_free_lucid_sec_context
+    },
+    {
+	{GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH, GSS_KRB5_USE_KDC_CONTEXT_OID},
+	krb5int_gss_use_kdc_context
+    }
+};
+
+static OM_uint32
+krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
+			 const gss_OID desired_mech,
+			 const gss_OID desired_object,
+			 gss_buffer_t value)
+{
+    size_t i;
+
+    if (minor_status == NULL)
+	return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    *minor_status = 0;
+
+    if (desired_mech == GSS_C_NO_OID)
+	return GSS_S_BAD_MECH;
+
+    if (desired_object == GSS_C_NO_OID)
+	return GSS_S_CALL_INACCESSIBLE_READ;
+
+    for (i = 0; i < sizeof(krb5_gssspi_mech_invoke_ops)/
+		    sizeof(krb5_gssspi_mech_invoke_ops[0]); i++) {
+	if (g_OID_prefix_equal(desired_object, &krb5_gssspi_mech_invoke_ops[i].oid)) {
+	    return (*krb5_gssspi_mech_invoke_ops[i].func)(minor_status,
+							  desired_mech,
+							  desired_object,
+							  value);
+	}
+    }
+
+    *minor_status = EINVAL;
+
+    return GSS_S_UNAVAILABLE;
+}
+
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
     NULL,                                               
@@ -358,7 +417,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_inquire_cred_by_oid,
     krb5_gss_set_sec_context_option,
     krb5_gssspi_set_cred_option,
-    NULL,			 /* mech_invoke */
+    krb5_gssspi_mech_invoke,
     NULL,		 /* wrap_aead */	
     NULL,		 /* unwrap_aead */	
     krb5_gss_wrap_iov,
@@ -632,6 +691,97 @@ gss_krb5_set_allowable_enctypes(
 					  &req_buffer);
 
     return major_status;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_ccache_name(
+    OM_uint32 *minor_status,
+    const char *name,
+    const char **out_name)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_CCACHE_NAME_OID_LENGTH,
+	GSS_KRB5_CCACHE_NAME_OID };
+    OM_uint32 major_status;
+    struct krb5_gss_ccache_name_req req;
+    gss_buffer_desc req_buffer;
+
+    req.name = name;
+    req.out_name = out_name;
+
+    req_buffer.length = sizeof(req);
+    req_buffer.value = &req;
+
+    major_status = gssspi_mech_invoke(minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    return major_status;    
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_free_lucid_sec_context(
+    OM_uint32 *minor_status,
+    void *kctx)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH,
+	GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID };
+    OM_uint32 major_status;
+    gss_buffer_desc req_buffer;
+
+    req_buffer.length = sizeof(kctx);
+    req_buffer.value = kctx;
+
+    major_status = gssspi_mech_invoke(minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    return major_status;    
+}
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_register_acceptor_identity(const char *keytab)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH,
+	GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID };
+    OM_uint32 major_status;
+    OM_uint32 minor_status;
+    gss_buffer_desc req_buffer;
+
+    req_buffer.length = strlen(keytab);
+    req_buffer.value = (char *)keytab;
+
+    major_status = gssspi_mech_invoke(&minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    return major_status;    
+}
+
+krb5_error_code
+krb5_gss_use_kdc_context(void)
+{
+    static const gss_OID_desc const req_oid = {
+	GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH,
+	GSS_KRB5_USE_KDC_CONTEXT_OID };
+    OM_uint32 major_status;
+    OM_uint32 minor_status;
+    gss_buffer_desc req_buffer;
+
+    req_buffer.length = 0;
+    req_buffer.value = NULL;
+
+    major_status = gssspi_mech_invoke(&minor_status,
+				      (const gss_OID)gss_mech_krb5,
+				      (const gss_OID)&req_oid,
+				      &req_buffer);
+
+    return major_status;    
 }
 
 /*
