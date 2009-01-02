@@ -443,7 +443,7 @@ add_rpc_listener_fd (struct socksetup *data, struct rpc_svc_data *svc, int sock)
     }
 
     if (!svc_register(conn->u.rpc.transp, svc->prognum, svc->versnum,
-		      svc->dispatch, IPPROTO_TCP)) {
+		      svc->dispatch, 0)) {
 	krb5_klog_syslog(LOG_ERR, "Cannot register RPC service: %s; continuing",
 			 strerror(errno));
 	delete_fd(conn);
