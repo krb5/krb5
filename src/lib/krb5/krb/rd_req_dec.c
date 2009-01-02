@@ -110,9 +110,7 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 
 	    (void) krb5_free_keytab_entry_contents(context, &ktent);
 	}
-    }
-
-    if (retval == KRB5_KT_NOTFOUND && keytab->ops->start_seq_get != NULL) {
+    } else { 
 	krb5_error_code code;
 	krb5_kt_cursor cursor;
 
@@ -203,24 +201,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	princ_data.realm.data = realm;
 	princ_data.realm.length = strlen(realm);
     }
-    /*
-     * The following code is commented out now that match based on
-     * key rather than name.
-     */
-#if 0
-    if (server && !krb5_principal_compare(context, server, req->ticket->server)) {
-	char *found_name = 0, *wanted_name = 0;
-	if (krb5_unparse_name(context, server, &wanted_name) == 0
-	    && krb5_unparse_name(context, req->ticket->server, &found_name) == 0)
-	    krb5_set_error_message(context, KRB5KRB_AP_WRONG_PRINC,
-				   "Wrong principal in request (found %s, wanted %s)",
-				   found_name, wanted_name);
-	krb5_free_unparsed_name(context, wanted_name);
-	krb5_free_unparsed_name(context, found_name);
-	retval =  KRB5KRB_AP_WRONG_PRINC;
-	goto cleanup;
-    }
-#endif
+
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
        do we need special processing here ?	*/
