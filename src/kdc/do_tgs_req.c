@@ -628,7 +628,7 @@ tgt_again:
 			      c_flags,
 			      (c_nprincs != 0) ? &client : NULL,
 			      &server,
-			      &krbtgt,
+			      k_nprincs ? &krbtgt : NULL,
 			      subkey != NULL ? subkey :
 				header_ticket->enc_part2->session,
 			      &encrypting_key, /* U2U or server key */
@@ -697,7 +697,7 @@ tgt_again:
     }
     if (isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM)) {
 	errcode = validate_transit_path(kdc_context, header_enc_tkt->client,
-					&server, &krbtgt);
+					&server, k_nprincs ? &krbtgt : NULL);
 	if (errcode) {
 	    status = "NON_TRANSITIVE";
 	    goto cleanup;
