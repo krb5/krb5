@@ -672,8 +672,7 @@ krb5_get_in_tkt(krb5_context context,
 		if (++referral_count > KRB5_REFERRAL_MAXHOPS ||
 		    err_reply->client == NULL ||
 		    err_reply->client->realm.length == 0) {
-		    retval = (krb5_error_code) err_reply->error +
-			ERROR_TABLE_BASE_krb5;
+		    retval = KRB5KDC_ERR_WRONG_REALM;
 		    krb5_free_error(context, err_reply);
 		    goto cleanup;
 		}
@@ -1329,8 +1328,7 @@ krb5_get_init_creds(krb5_context context,
 	    } else if (canon_flag && err_reply->error == KDC_ERR_WRONG_REALM) {
 		if (err_reply->client == NULL ||
 		    err_reply->client->realm.length == 0) {
-		    ret = (krb5_error_code) err_reply->error
-		          + ERROR_TABLE_BASE_krb5;
+		    ret = KRB5KDC_ERR_WRONG_REALM;
 		    krb5_free_error(context, err_reply);
 		    goto cleanup;
 		}
