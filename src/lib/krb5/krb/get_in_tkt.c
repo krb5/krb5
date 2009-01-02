@@ -671,8 +671,12 @@ krb5_get_in_tkt(krb5_context context,
 	    } else if (canon_flag && err_reply->error == KDC_ERR_WRONG_REALM) {
 		if (++referral_count > KRB5_REFERRAL_MAXHOPS ||
 		    err_reply->client == NULL ||
-		    err_reply->client->realm.length == 0)
+		    err_reply->client->realm.length == 0) {
+		    retval = (krb5_error_code) err_reply->error +
+			ERROR_TABLE_BASE_krb5;
+		    krb5_free_error(context, err_reply);
 		    goto cleanup;
+		}
 		/* Rewrite request.client with realm from error reply */
 		if (referred_client.realm.data) {
 		    krb5_free_data_contents(context, &referred_client.realm);
@@ -970,6 +974,8 @@ krb5_get_init_creds(krb5_context context,
     krb5_timestamp time_now;
     krb5_enctype etype = 0;
     krb5_preauth_client_rock get_data_rock;
+    int canon_flag = 0;
+    krb5_principal_data referred_client;
 
     /* initialize everything which will be freed at cleanup */
 
@@ -993,6 +999,11 @@ krb5_get_init_creds(krb5_context context,
 #endif /* APPLE_PKINIT */
     
     err_reply = NULL;
+
+    /* referred_client is used to rewrite the client realm for referrals */
+    referred_client = *client;
+    referred_client.realm.data = NULL;
+    referred_client.realm.length = 0;
 
     /*
      * Set up the basic request structure
@@ -1102,6 +1113,10 @@ krb5_get_init_creds(krb5_context context,
     /* client */
 
     request.client = client;
+
+    /* per referrals draft, enterprise principals imply canonicalization */
+    canon_flag = ((request.kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
+	client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
 
     /* service */
     
@@ -1311,6 +1326,26 @@ krb5_get_init_creds(krb5_context context,
 		if (ret)
 		    goto cleanup;
 		/* continue to next iteration */
+	    } else if (canon_flag && err_reply->error == KDC_ERR_WRONG_REALM) {
+		if (err_reply->client == NULL ||
+		    err_reply->client->realm.length == 0) {
+		    ret = (krb5_error_code) err_reply->error
+		          + ERROR_TABLE_BASE_krb5;
+		    krb5_free_error(context, err_reply);
+		    goto cleanup;
+		}
+		/* Rewrite request.client with realm from error reply */
+		if (referred_client.realm.data) {
+		    krb5_free_data_contents(context, &referred_client.realm);
+		    referred_client.realm.data = NULL;
+		}
+		ret = krb5int_copy_data_contents(context,
+						 &err_reply->client->realm,
+						 &referred_client.realm);
+		krb5_free_error(context, err_reply);
+		if (ret)
+		    goto cleanup;
+		request.client = &referred_client;
 	    } else {
 		if (err_reply->e_data.length > 0) {
 		    /* continue to next iteration */
@@ -1461,6 +1496,8 @@ cleanup:
 	*as_reply = local_as_reply;
     else if (local_as_reply)
 	krb5_free_kdc_rep(context, local_as_reply);
+    if (referred_client.realm.data)
+	krb5_free_data_contents(context, &referred_client.realm);
 
     return(ret);
 }
