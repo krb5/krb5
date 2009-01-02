@@ -112,7 +112,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     char *cname = 0, *sname = 0;
     const char *fromstring = 0;
     unsigned int c_flags = 0, s_flags = 0;
-    krb5_principal_data server_princ, client_princ;
+    krb5_principal_data client_princ;
     char ktypestr[128];
     char rep_etypestr[128];
     char fromstringbuf[70];
@@ -281,23 +281,17 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     /*
-     * Turn off canonicalization for services that are aliases of
-     * the TGS, such as (in Windows) the changepw service.
+     * Canonicalization is only effective if we are issuing a TGT
+     * (the intention is to allow support for Windows "short" realm
+     * aliases, nothing more).
      */
     if (isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE) &&
-	krb5_is_tgs_principal(server.princ) &&
-	!krb5_is_tgs_principal(request->server)) {
-	clear(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
-    }
-
-    if (isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
-	server_princ = *(server.princ);
+	krb5_is_tgs_principal(request->server) &&
+	krb5_is_tgs_principal(server.princ)) {
+	ticket_reply.server = server.princ;
     } else {
-	server_princ = *(request->server);
-	/* The realm is always canonicalized in Windows */
-	server_princ.realm = *(krb5_princ_realm(context, server.princ));
+	ticket_reply.server = request->server;
     }
-    ticket_reply.server = &server_princ;
 
     enc_tkt_reply.flags = 0;
     enc_tkt_reply.times.authtime = authtime;
