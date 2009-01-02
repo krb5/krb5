@@ -247,8 +247,6 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     krb5_auth_context 	  auth_context = NULL;
     krb5_authenticator	* authenticator = NULL;
     krb5_checksum 	* his_cksum = NULL;
-    krb5_keyblock 	* key = NULL;
-    krb5_kvno 		  kvno = 0;
 
     *nprincs = 0;
 
@@ -292,17 +290,6 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	goto cleanup_auth_context;
 #endif
 
-    if ((retval = kdc_get_server_key(apreq->ticket, 0, krbtgt, nprincs, &key, &kvno)))
-	goto cleanup_auth_context;
-
-    /*
-     * XXX This is currently wrong but to fix it will require making a 
-     * new keytab for groveling over the kdb.
-     */
-    retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, key);
-    krb5_free_keyblock(kdc_context, key);
-    if (retval) 
-	goto cleanup_auth_context;
 
     if ((retval = krb5_rd_req_decoded_anyflag(kdc_context, &auth_context, apreq, 
 				      apreq->ticket->server, 
