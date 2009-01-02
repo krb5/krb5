@@ -579,6 +579,7 @@ asn1_error_code asn1_decode_enc_kdc_rep_part(asn1buf *buf, krb5_enc_kdc_rep_part
         get_field(val->server,9,asn1_decode_realm);
         get_field(val->server,10,asn1_decode_principal_name);
         opt_field(val->caddrs,11,asn1_decode_host_addresses,NULL);
+        opt_field(val->enc_padata,12,asn1_decode_sequence_of_pa_data,NULL);
         end_structure();
         val->magic = KV5M_ENC_KDC_REP_PART;
     }
