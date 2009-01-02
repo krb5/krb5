@@ -729,8 +729,8 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_process_context_token);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_delete_sec_context);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_context_time);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_sign);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_verify);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_get_mic);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_verify_mic);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_display_status);

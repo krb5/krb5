@@ -630,8 +630,8 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_process_context_token,
     krb5_gss_delete_sec_context,
     krb5_gss_context_time,
-    krb5_gss_sign,
-    krb5_gss_verify,
+    krb5_gss_get_mic,
+    krb5_gss_verify_mic,
 #ifdef IOV_SHIM_EXERCISE
     NULL,
     NULL,

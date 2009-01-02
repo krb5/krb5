@@ -319,7 +319,7 @@ krb5_error_code kg_decrypt_iov (krb5_context context,
 OM_uint32 kg_seal (OM_uint32 *minor_status,
                    gss_ctx_id_t context_handle,
                    int conf_req_flag,
-                   int qop_req,
+                   gss_qop_t qop_req,
                    gss_buffer_t input_message_buffer,
                    int *conf_state,
                    gss_buffer_t output_message_buffer,
@@ -330,7 +330,7 @@ OM_uint32 kg_unseal (OM_uint32 *minor_status,
                      gss_buffer_t input_token_buffer,
                      gss_buffer_t message_buffer,
                      int *conf_state,
-                     int *qop_state,
+                     gss_qop_t *qop_state,
                      int toktype);
 
 OM_uint32 kg_seal_size (OM_uint32 *minor_status,
@@ -529,22 +529,6 @@ OM_uint32 krb5_gss_context_time
 (OM_uint32*,       /* minor_status */
  gss_ctx_id_t,     /* context_handle */
  OM_uint32*        /* time_rec */
-);
-
-OM_uint32 krb5_gss_sign
-(OM_uint32*,       /* minor_status */
- gss_ctx_id_t,     /* context_handle */
- int,              /* qop_req */
- gss_buffer_t,     /* message_buffer */
- gss_buffer_t      /* message_token */
-);
-
-OM_uint32 krb5_gss_verify
-(OM_uint32*,       /* minor_status */
- gss_ctx_id_t,     /* context_handle */
- gss_buffer_t,     /* message_buffer */
- gss_buffer_t,     /* token_buffer */
- int*              /* qop_state */
 );
 
 OM_uint32 krb5_gss_display_status
@@ -796,7 +780,7 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                                       unsigned char *ptr,
                                       unsigned int bodysize,
                                       gss_buffer_t message_buffer,
-                                      int *conf_state, int *qop_state,
+                                      int *conf_state, gss_qop_t *qop_state,
                                       int toktype);
 
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);

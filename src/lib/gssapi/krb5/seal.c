@@ -41,7 +41,7 @@ krb5_gss_wrap(minor_status, context_handle, conf_req_flag,
     gss_buffer_t        output_message_buffer;
 {
     return(kg_seal(minor_status, context_handle, conf_req_flag,
-                   (int) qop_req, input_message_buffer, conf_state,
+                   qop_req, input_message_buffer, conf_state,
                    output_message_buffer, KG_TOK_WRAP_MSG));
 }
 
@@ -58,7 +58,8 @@ krb5_gss_wrap_iov(OM_uint32 *minor_status,
     OM_uint32 major_status;
 
     major_status = kg_seal_iov(minor_status, context_handle, conf_req_flag,
-			       qop_req, conf_state, iov, iov_count, KG_TOK_WRAP_MSG);
+			       qop_req, conf_state,
+			       iov, iov_count, KG_TOK_WRAP_MSG);
 
     return major_status;
 }

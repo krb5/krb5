@@ -305,22 +305,22 @@ OM_uint32 spnego_gss_wrap_size_limit
 	OM_uint32	*max_input_size
 );
 
-OM_uint32 spnego_gss_sign
+OM_uint32 spnego_gss_get_mic
 (
 	OM_uint32 *minor_status,
 	const gss_ctx_id_t context_handle,
-	int  qop_req,
+	gss_qop_t qop_req,
 	const gss_buffer_t message_buffer,
 	gss_buffer_t message_token
 );
 
-OM_uint32 spnego_gss_verify
+OM_uint32 spnego_gss_verify_mic
 (
 	OM_uint32 *minor_status,
 	const gss_ctx_id_t context_handle,
 	const gss_buffer_t msg_buffer,
 	const gss_buffer_t token_buffer,
-	int *qop_state
+	gss_qop_t *qop_state
 );
 
 OM_uint32

@@ -486,7 +486,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
     gss_buffer_t input_token_buffer;
     gss_buffer_t message_buffer;
     int *conf_state;
-    int *qop_state;
+    gss_qop_t *qop_state;
     int toktype;
 {
     krb5_gss_ctx_id_rec *ctx;

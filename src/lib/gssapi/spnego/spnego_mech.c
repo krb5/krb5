@@ -221,8 +221,8 @@ static struct gss_config spnego_mechanism =
 	NULL,				/* gss_process_context_token */
 	spnego_gss_delete_sec_context,	/* gss_delete_sec_context */
 	spnego_gss_context_time,	/* gss_context_time */
-	spnego_gss_sign,		/* gss_sign */
-	spnego_gss_verify,		/* gss_verify */
+	spnego_gss_get_mic,		/* gss_get_mic */
+	spnego_gss_verify_mic,		/* gss_verify_mic */
 	spnego_gss_wrap,		/* gss_wrap */
 	spnego_gss_unwrap,		/* gss_unwrap */
 	spnego_gss_display_status,
@@ -2033,15 +2033,15 @@ spnego_gss_wrap_size_limit(
 }
 
 OM_uint32
-spnego_gss_sign(
+spnego_gss_get_mic(
 		OM_uint32 *minor_status,
 		const gss_ctx_id_t context_handle,
-		int  qop_req,
+		gss_qop_t  qop_req,
 		const gss_buffer_t message_buffer,
 		gss_buffer_t message_token)
 {
 	OM_uint32 ret;
-	ret = gss_sign(minor_status,
+	ret = gss_get_mic(minor_status,
 		    context_handle,
 		    qop_req,
 		    message_buffer,
@@ -2050,19 +2050,19 @@ spnego_gss_sign(
 }
 
 OM_uint32
-spnego_gss_verify(
+spnego_gss_verify_mic(
 		OM_uint32 *minor_status,
 		const gss_ctx_id_t context_handle,
 		const gss_buffer_t msg_buffer,
 		const gss_buffer_t token_buffer,
-		int *qop_state)
+		gss_qop_t *qop_state)
 {
 	OM_uint32 ret;
 	ret = gss_verify_mic(minor_status,
 			    context_handle,
 			    msg_buffer,
 			    token_buffer,
-			    (gss_qop_t *)qop_state); /* XXX */
+			    qop_state);
 	return (ret);
 }
 

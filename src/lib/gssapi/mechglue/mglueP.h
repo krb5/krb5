@@ -184,21 +184,21 @@ typedef struct gss_config {
 		    gss_ctx_id_t,	/* context_handle */
 		    OM_uint32*		/* time_rec */
 		    );
-    OM_uint32       (*gss_sign)
+    OM_uint32       (*gss_get_mic)
 	(
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
-		    int,		/* qop_req */
+		    gss_qop_t,		/* qop_req */
 		    gss_buffer_t,	/* message_buffer */
 		    gss_buffer_t	/* message_token */
 		    );
-    OM_uint32       (*gss_verify)
+    OM_uint32       (*gss_verify_mic)
 	(
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    gss_buffer_t,	/* message_buffer */
 		    gss_buffer_t,	/* token_buffer */
-		    int*		/* qop_state */
+		    gss_qop_t*		/* qop_state */
 		    );
     OM_uint32       (*gss_wrap)
 	(
