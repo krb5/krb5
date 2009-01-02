@@ -293,18 +293,28 @@ verify_as_reply(krb5_context 		context,
 		krb5_kdc_rep		*as_reply)
 {
     krb5_error_code		retval;
-    int				canon_flag;
+    int				canon_req;
+    int				canon_ok;
 
     /* check the contents for sanity: */
     if (!as_reply->enc_part2->times.starttime)
 	as_reply->enc_part2->times.starttime =
 	    as_reply->enc_part2->times.authtime;
 
-    /* per referrals draft, enterprise principals imply canonicalization */
-    canon_flag = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
+    /*
+     * We only allow the AS-REP server name to be changed if the
+     * caller set the canonicalize flag (or requested an enterprise
+     * principal) and we requested (and received) a TGT.
+     */
+    canon_req = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
 	(krb5_princ_type(context, request->client) == KRB5_NT_ENTERPRISE_PRINCIPAL);
+    if (canon_req) {
+	canon_ok = IS_TGS_PRINC(context, request->server) &&
+		   IS_TGS_PRINC(context, as_reply->enc_part2->server);
+    } else
+	canon_ok = 0;
  
-    if ((!canon_flag &&
+    if ((!canon_ok &&
 	 (!krb5_principal_compare(context, as_reply->client, request->client) ||
 	  !krb5_principal_compare(context, as_reply->enc_part2->server, request->server)))
 	|| !krb5_principal_compare(context, as_reply->enc_part2->server, as_reply->ticket->server)
@@ -1199,7 +1209,7 @@ krb5_get_init_creds(krb5_context context,
 	krb5_data random_data;
 
 	random_data.length = 4;
-	random_data.data = random_buf;
+	random_data.data = (char *)random_buf;
 	if (krb5_c_random_make_octets(context, &random_data) == 0)
 	    /* See RT ticket 3196 at MIT.  If we set the high bit, we
 	       may have compatibility problems with Heimdal, because
