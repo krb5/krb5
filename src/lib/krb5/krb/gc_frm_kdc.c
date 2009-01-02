@@ -139,10 +139,6 @@ static void tr_dbg_rtree(struct tr_state *, const char *, krb5_principal);
 #define HARD_CC_ERR(r) ((r) && (r) != KRB5_CC_NOTFOUND &&	\
 	(r) != KRB5_CC_NOT_KTYPE)
 
-#define IS_TGS_PRINC(c, p)						\
-    (krb5_princ_size((c), (p)) == 2 &&					\
-     data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
-
 /*
  * Flags for ccache lookups of cross-realm TGTs.
  *

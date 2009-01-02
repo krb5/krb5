@@ -29,8 +29,6 @@
 
 #include "k5-int.h"
 
-#define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
-
 /*
  * This is an internal routine which validates the krb5_timestamps
  * field in a krb5_ticket.
