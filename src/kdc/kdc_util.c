@@ -294,11 +294,9 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 
     if ((retval = kdc_get_server_key(apreq->ticket, 0, krbtgt, nprincs, &key, &kvno)))
 	goto cleanup_auth_context;
-
     /*
-     * XXX This is currently wrong but to fix it will require making a 
-     * new keytab for groveling over the kdb.
-     */
+* We do not use the KDB keytab because other parts of the TGS need the TGT key.
+*/
     retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, key);
     krb5_free_keyblock(kdc_context, key);
     if (retval) 
