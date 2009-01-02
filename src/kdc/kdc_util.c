@@ -1464,7 +1464,7 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *client,
      * XXX we assume everything can understand DES_CBC_CRC
      */
     if (enctype == ENCTYPE_DES_CBC_CRC)
-	return 0;
+	return 1;
     
     /*
      * If we have a key for the encryption system, we assume it's
