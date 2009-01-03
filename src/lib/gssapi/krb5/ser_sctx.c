@@ -284,7 +284,7 @@ kg_ctx_size(kcontext, arg, sizep)
      */
     kret = EINVAL;
     if ((ctx = (krb5_gss_ctx_id_rec *) arg)) {
-        required = 18*sizeof(krb5_int32);
+        required = 21*sizeof(krb5_int32);
         required += 2*sizeof(krb5_int64);
         required += sizeof(ctx->seed);
 
