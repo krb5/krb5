@@ -126,10 +126,25 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 	    retval = krb5_decrypt_tkt_part(context, &ktent.key,
 					   req->ticket);
 
-	    (void) krb5_free_keytab_entry_contents(context, &ktent);
-
-	    if (retval == 0)
+	    if (retval == 0 ) {
+		/*
+		 * We overwrite ticket->server to be the principal
+		 * that we match in the keytab.  The reason for doing
+		 * this is that GSS-API and other consumers look at
+		 * that principal to make authorization decisions
+		 * about whether the appropriate server is contacted.
+		 * It might be cleaner to create a new API and store
+		 * the server in the auth_context, but doing so would
+		 * probably miss existing uses of the server. Instead,
+		 * perhaps an API should be created to retrieve the
+		 * server as it appeared in the ticket.
+		 */
+		krb5_free_principal(context, req->ticket->server);
+		retval = krb5_copy_principal(context, ktent.principal, &req->ticket->server);
+		(void) krb5_free_keytab_entry_contents(context, &ktent);
 		break;
+	    }
+	    (void) krb5_free_keytab_entry_contents(context, &ktent);
 	}
 
 	code = krb5_kt_end_seq_get(context, keytab, &cursor);
@@ -240,6 +255,19 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	goto cleanup;
     }
 
+    if (!server) {
+	server = req->ticket->server;
+    }
+    /* Get an rcache if necessary. */
+    if (((*auth_context)->rcache == NULL)
+	&& ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME)
+	&& server) {
+	if ((retval = krb5_get_server_rcache(context,
+					     krb5_princ_component(context,
+								  server,0),
+					     &(*auth_context)->rcache)))
+	  goto cleanup;
+    }
     /* okay, now check cross-realm policy */
 
 #if defined(_SINGLE_HOP_ONLY)
