@@ -56,8 +56,7 @@ $(OUTPRE)tcl_ovsec_kadm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
   $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
   $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
-  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/krb5.h tcl_kadm5.h tcl_ovsec_kadm.c
 $(OUTPRE)tcl_kadm5.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
@@ -68,8 +67,7 @@ $(OUTPRE)tcl_kadm5.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
   $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
   $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
-  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/krb5.h tcl_kadm5.c tcl_kadm5.h
 $(OUTPRE)test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   tcl_kadm5.h test.c

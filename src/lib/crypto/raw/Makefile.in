@@ -66,4 +66,5 @@ raw_aead.so raw_aead.po $(OUTPRE)raw_aead.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h raw.h raw_aead.c
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../aead.h \
+  raw.h raw_aead.c
