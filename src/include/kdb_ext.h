@@ -37,8 +37,6 @@
 #define KRB5_KDB_OK_TO_AUTH_AS_DELEGATE	0x00200000
 /* Service does not require authorization data */
 #define KRB5_KDB_NO_AUTH_DATA_REQUIRED	0x00400000
-/* Used to indicate non-Windows client behaviour */
-#define KRB5_KDB_NON_MS_PRINCIPAL	0x00800000
 /* Private flag used to indicate principal is local TGS */
 #define KRB5_KDB_TICKET_GRANTING_SERVICE	0x01000000
 /* Private flag used to indicate trust is non-transitive */
@@ -57,8 +55,6 @@
 #define KRB5_KDB_FLAG_PROTOCOL_TRANSITION	0x00000100
 /* Constrained delegation */
 #define KRB5_KDB_FLAG_CONSTRAINED_DELEGATION	0x00000200
-/* PKINIT */
-#define KRB5_KDB_FLAG_PKINIT			0x00000400
 /* User-to-user */
 #define KRB5_KDB_FLAG_USER_TO_USER		0x00000800
 /* Cross-realm */
