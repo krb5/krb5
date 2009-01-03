@@ -39,8 +39,8 @@
 #define KRB5_KDB_NO_AUTH_DATA_REQUIRED	0x00400000
 /* Private flag used to indicate principal is local TGS */
 #define KRB5_KDB_TICKET_GRANTING_SERVICE	0x01000000
-/* Private flag used to indicate trust is non-transitive */
-#define KRB5_KDB_TRUST_NON_TRANSITIVE		0x02000000
+/* Private flag used to indicate xrealm relationship  is non-transitive */
+#define KRB5_KDB_xrealm_NON_TRANSITIVE		0x02000000
 
 /* Entry get flags */
 /* Name canonicalization requested */

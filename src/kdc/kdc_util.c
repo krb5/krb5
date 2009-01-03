@@ -2197,12 +2197,12 @@ validate_transit_path(krb5_context context,
 		      krb5_db_entry *krbtgt)
 {
     /* Incoming */
-    if (isflagset(server->attributes, KRB5_KDB_TRUST_NON_TRANSITIVE)) {
+    if (isflagset(server->attributes, KRB5_KDB_xrealm_NON_TRANSITIVE)) {
 	return KRB5KDC_ERR_PATH_NOT_ACCEPTED;
     }
 
     /* Outgoing */
-    if (isflagset(krbtgt->attributes, KRB5_KDB_TRUST_NON_TRANSITIVE) &&
+    if (isflagset(krbtgt->attributes, KRB5_KDB_xrealm_NON_TRANSITIVE) &&
 	(!krb5_principal_compare(context, server->princ, krbtgt->princ) ||
 	 !krb5_realm_compare(context, client, krbtgt->princ))) {
 	return KRB5KDC_ERR_PATH_NOT_ACCEPTED;
