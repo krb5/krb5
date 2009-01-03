@@ -16,6 +16,8 @@
 #include <gssrpc/rpc.h>
 #include <gssrpc/auth_gssapi.h>
 
+#include "gssrpcint.h"
+
 #ifdef __CODECENTER__
 #define DEBUG_GSSAPI 1
 #endif

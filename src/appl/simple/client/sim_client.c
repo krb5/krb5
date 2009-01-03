@@ -330,7 +330,7 @@ main(argc, argv)
 	com_err(progname, retval, "while deleting replay cache");
 	exit(1);
     }
-
+    krb5_auth_con_setrcache(context, auth_context, NULL);
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);
     

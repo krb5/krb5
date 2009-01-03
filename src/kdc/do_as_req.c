@@ -110,13 +110,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     register int i;
     krb5_timestamp until, rtime;
     char *cname = 0, *sname = 0;
-    const char *fromstring = 0;
     unsigned int c_flags = 0, s_flags = 0;
     krb5_principal_data client_princ;
-    char ktypestr[128];
-    char rep_etypestr[128];
-    char fromstringbuf[70];
     void *pa_context = NULL;
+    int did_log = 0;
+    const char *emsg = 0;
 
 #if APPLE_PKINIT
     asReqDebug("process_as_req top realm %s name %s\n", 
@@ -132,15 +130,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     session_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
-
-    ktypes2str(ktypestr, sizeof(ktypestr),
-	       request->nktypes, request->ktype);
-
-    fromstring = inet_ntop(ADDRTYPE2FAMILY (from->address->addrtype),
-			   from->address->contents,
-			   fromstringbuf, sizeof(fromstringbuf));
-    if (!fromstring)
-	fromstring = "<unknown>";
 
     if (!request->client) {
 	status = "NULL_CLIENT";
@@ -564,14 +553,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
 
-    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
-    krb5_klog_syslog(LOG_INFO,
-		     "AS_REQ (%s) %s: ISSUE: authtime %d, "
-		     "%s, %s for %s",
-		     ktypestr,
-	             fromstring, authtime,
-		     rep_etypestr,
-		     cname, sname);
+    log_as_req(from, request, &reply, cname, sname, authtime, 0, 0, 0);
+    did_log = 1;
 
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
     /*
@@ -582,33 +565,31 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
     update_client = 1;
 
+    goto egress;
+
 errout:
+    assert (status != 0);
+    /* fall through */
+
+egress:
     if (update_client) {
 	audit_as_request(request, &client, &server, authtime, errcode);
     }
+
     if (pa_context)
 	free_padata_context(kdc_context, &pa_context);
 
-    if (status) {
-	const char * emsg = 0;
-	if (errcode) 
-	    emsg = krb5_get_error_message (kdc_context, errcode);
+    if (errcode)
+	emsg = krb5_get_error_message(kdc_context, errcode);
 
-        krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s: %s: %s for %s%s%s",
-			 ktypestr,
-	       fromstring, status, 
-	       cname ? cname : "<unknown client>",
-	       sname ? sname : "<unknown server>",
-	       errcode ? ", " : "",
-	       errcode ? emsg : "");
-	if (errcode)
-	    krb5_free_error_message (kdc_context, emsg);
+    if (status) {
+	log_as_req(from, request, &reply, cname, sname, 0,
+		   status, errcode, emsg);
+	did_log = 1;
     }
     if (errcode) {
-        int got_err = 0;
 	if (status == 0) {
-	    status = krb5_get_error_message (kdc_context, errcode);
-	    got_err = 1;
+	    status = emsg;
 	}
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
@@ -617,11 +598,10 @@ errout:
 	errcode = prepare_error_as(request, errcode, &e_data,
  				   c_nprincs ? client.princ : NULL,
 				   response, status);
-	if (got_err) {
-	    krb5_free_error_message (kdc_context, status);
-	    status = 0;
-	}
+	status = 0;
     }
+    if (emsg)
+	krb5_free_error_message(kdc_context, emsg);
 
     if (enc_tkt_reply.authorization_data != NULL)
 	krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
@@ -665,7 +645,7 @@ errout:
     }
 
     krb5_free_data_contents(kdc_context, &e_data);
-    
+    assert(did_log != 0);
     return errcode;
 }
 

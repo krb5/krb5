@@ -1,9 +1,7 @@
 /*
  * lib/crypto/keyhash_provider/hmac_md5.c
  *
-(I don't know)
-.
- * Copyright2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -26,8 +24,8 @@
  * or implied warranty.
  * 
  *
-* Implementation of the Microsoft hmac-md5 checksum type.
-* Implemented based on draft-brezak-win2k-krb-rc4-hmac-03
+ * Implementation of the Microsoft hmac-md5 checksum type.
+ * Implemented based on draft-brezak-win2k-krb-rc4-hmac-03
  */
 
 #include "k5-int.h"

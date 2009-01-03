@@ -282,7 +282,7 @@ auth_gssapi.so auth_gssapi.po $(OUTPRE)auth_gssapi.$(OBJEXT): \
   $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
   $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
   $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
-  $(SRCTOP)/include/krb5.h auth_gssapi.c
+  $(SRCTOP)/include/krb5.h auth_gssapi.c gssrpcint.h
 auth_gssapi_misc.so auth_gssapi_misc.po $(OUTPRE)auth_gssapi_misc.$(OBJEXT): \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
@@ -290,7 +290,7 @@ auth_gssapi_misc.so auth_gssapi_misc.po $(OUTPRE)auth_gssapi_misc.$(OBJEXT): \
   $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
   $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
   $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
-  $(SRCTOP)/include/gssrpc/xdr.h auth_gssapi_misc.c
+  $(SRCTOP)/include/gssrpc/xdr.h auth_gssapi_misc.c gssrpcint.h
 bindresvport.so bindresvport.po $(OUTPRE)bindresvport.$(OBJEXT): \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
@@ -495,7 +495,7 @@ svc_auth_gssapi.so svc_auth_gssapi.po $(OUTPRE)svc_auth_gssapi.$(OBJEXT): \
   $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
   $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
   $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/krb5.h \
-  svc_auth_gssapi.c
+  gssrpcint.h svc_auth_gssapi.c
 svc_raw.so svc_raw.po $(OUTPRE)svc_raw.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/auth.h \
   $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \

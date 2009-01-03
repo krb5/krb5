@@ -4,7 +4,7 @@ mydir=plugins/kdb/ldap/ldap_util
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFINES = -DKDB4_DISABLE
 DEFS=
-LOCALINCLUDES = -I. @KRB4_INCLUDES@ -I$(srcdir)/../libkdb_ldap -I$(SRCTOP)/lib/kdb
+LOCALINCLUDES = -I. -I$(srcdir)/../libkdb_ldap -I$(SRCTOP)/lib/kdb
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
 #KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
@@ -17,9 +17,9 @@ GETDATE = ../../../../kadmin/cli/getdate.o
 
 all:: $(PROG)
 
-$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) $(GETDATE)
+$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIB) $(GETDATE)
 	$(CC_LINK) -o $(PROG) $(OBJS) $(GETDATE) \
-		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB4COMPAT_LIBS)
+		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)

@@ -2,10 +2,9 @@ thisconfigdir=../..
 myfulldir=kadmin/dbutil
 mydir=kadmin/dbutil
 BUILDTOP=$(REL)..$(S)..
-DEFINES = -DKDB4_DISABLE
 DEFS=
-LOCALINCLUDES = -I. @KRB4_INCLUDES@
-PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+LOCALINCLUDES = -I.
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB5_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 
@@ -17,8 +16,8 @@ OBJS = kdb5_util.o kdb5_create.o kadm5_create.o string_table.o kdb5_destroy.o kd
 
 all:: $(PROG)
 
-$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB4COMPAT_LIBS)
+$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 import_err.c import_err.h: $(srcdir)/import_err.et
 

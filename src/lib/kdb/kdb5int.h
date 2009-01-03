@@ -1,8 +1,8 @@
 /*
- * include/kerberosIV/kdc.h
+ * lib/kdb5/kdb5int.h
  *
- * Copyright 1987, 1988, 1994 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright (C) 2008 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,33 +23,22 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- * Include file for the Kerberos Key Distribution Center. 
+ *
+ * Private header file for the kdb5 library for internal functions
  */
 
-#ifndef KDC_DEFS
-#define KDC_DEFS
+#ifndef __KDB5INT_H__
+#define __KDB5INT_H__
 
-#define S_AD_SZ		sizeof(struct sockaddr_in)
+#include "kdb5.h"
 
-#ifdef notdef
-#define max(a,b)	(a>b ? a : b)
-#define min(a,b)	(a<b ? a : b)
-#endif
+krb5_error_code
+krb5int_put_principal_no_log(krb5_context kcontext,
+			     krb5_db_entry *entries, int *nentries);
 
-#define TRUE		1
-#define FALSE		0
+krb5_error_code
+krb5int_delete_principal_no_log(krb5_context kcontext,
+				krb5_principal search_for,
+				int *nentries);
 
-#define MKEYFILE	"/.k"
-#define K_LOGFIL	"/kerberos/kpropd.log"
-#define KS_LOGFIL	"/kerberos/kerberos_slave.log"
-#define KRB_ACL		"/kerberos/kerberos.acl"
-#define KRB_PROG	"./kerberos"
-
-#define ONE_MINUTE	60
-#define FIVE_MINUTES	(5 * ONE_MINUTE)
-#define ONE_HOUR	(60 * ONE_MINUTE)
-#define ONE_DAY		(24 * ONE_HOUR)
-#define THREE_DAYS	(3 * ONE_DAY)
-
-#endif /* KDC_DEFS */
-
+#endif /* __KDB5INT_H__ */

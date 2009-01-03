@@ -277,7 +277,24 @@ krb5_error_code
 validate_transit_path(krb5_context context,
 	krb5_const_principal client,
 		krb5_db_entry *server,
-		krb5_db_entry *krbtgt);
+		      krb5_db_entry *krbtgt);
+
+
+void
+log_as_req(const krb5_fulladdr *from,
+	   krb5_kdc_req *request, krb5_kdc_rep *reply,
+	   const char *cname, const char *sname,
+	   krb5_timestamp authtime,
+	   const char *status, krb5_error_code errcode, const char *emsg);
+void
+log_tgs_req(const krb5_fulladdr *from,
+	    krb5_kdc_req *request, krb5_kdc_rep *reply,
+	    const char *cname, const char *sname, const char *altcname,
+	    krb5_timestamp authtime,
+	    const char *status, krb5_error_code errcode, const char *emsg);
+void log_tgs_alt_tgt(krb5_principal p);
+
+
 
 #define isflagset(flagfield, flag) (flagfield & (flag))
 #define setflag(flagfield, flag) (flagfield |= (flag))

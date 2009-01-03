@@ -64,7 +64,6 @@ values for \fIlibraries\fP are:
 .in +.5i
 krb5         Kerberos 5 application
 gssapi       GSSAPI application with Kerberos 5 bindings
-krb4         Kerberos 4 application
 kadm-client  Kadmin client
 kadm-server  Kadmin server
 kdb          Application that accesses the kerberos database

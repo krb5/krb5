@@ -425,6 +425,10 @@ the following new or changed files:
   slave/kpropd_rpc.c
   slave/kproplog.c
 
+and marked portions of the following files:
+
+  lib/krb5/os/hst_realm.c
+
 are subject to the following license:
 
   Copyright (c) 2004 Sun Microsystems, Inc.

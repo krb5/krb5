@@ -1,7 +1,7 @@
 /*
  * kdc/do_tgs_req.c
  *
- * Copyright 1990,1991,2001,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -76,7 +76,7 @@ static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
 				krb5_boolean *, int *);
 
 static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
-					  int, const char *, krb5_principal,
+					  int,  krb5_principal,
 				          krb5_data **, const char *);
 
 /*ARGSUSED*/
@@ -102,8 +102,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
     krb5_key_data  *server_key;
-    char *cname = 0, *sname = 0, *tmp = 0;
-    const char *fromstring = 0;
+    char *cname = 0, *sname = 0, *altcname = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
 /*    krb5_address *noaddrarray[1]; */
     krb5_enctype useenctype;
@@ -111,9 +110,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     register int i;
     int firstpass = 1;
     const char	*status = 0;
-    char ktypestr[128];
-    char rep_etypestr[128];
-    char fromstringbuf[70];
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* ticket granting or evidence ticket */
     krb5_db_entry client, krbtgt;
     int c_nprincs = 0, k_nprincs = 0;
@@ -122,6 +118,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     unsigned int c_flags = 0, s_flags = 0;	    /* client/server KDB flags */
     char *s4u_name = NULL;
     krb5_boolean is_referral;
+    const char *emsg = NULL;
 
     session_key.contents = NULL;
     
@@ -129,8 +126,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     if (retval)
 	return retval;
 
-    ktypes2str(ktypestr, sizeof(ktypestr),
-	       request->nktypes, request->ktype);
     /*
      * setup_server_realm() sets up the global realm-specific data pointer.
      */
@@ -138,12 +133,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
 	krb5_free_kdc_req(kdc_context, request);
 	return retval;
     }
-
-    fromstring = inet_ntop(ADDRTYPE2FAMILY(from->address->addrtype),
-			   from->address->contents,
-			   fromstringbuf, sizeof(fromstringbuf));
-    if (!fromstring)
-	fromstring = "<unknown>";
 
     if ((errcode = krb5_unparse_name(kdc_context, request->server, &sname))) {
 	status = "UNPARSING SERVER";
@@ -728,7 +717,7 @@ tgt_again:
 			      enc_tkt_reply.transited.tr_contents.data,
 			      tdots);
 	else {
-	    const char *emsg = krb5_get_error_message(kdc_context, errcode);
+	    emsg = krb5_get_error_message(kdc_context, errcode);
 	    krb5_klog_syslog (LOG_ERR,
 			      "unexpected error checking transit from "
 			      "'%s' to '%s' via '%.*s%s': %s",
@@ -738,6 +727,7 @@ tgt_again:
 			      enc_tkt_reply.transited.tr_contents.data,
 			      tdots, emsg);
 	    krb5_free_error_message(kdc_context, emsg);
+	    emsg = NULL;
 	}
     } else
 	krb5_klog_syslog (LOG_INFO, "not checking transit path");
@@ -764,19 +754,13 @@ tgt_again:
 	krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
 	krb5_principal client2 = t2enc->client;
 	if (!krb5_principal_compare(kdc_context, request->server, client2)) {
-		if ((errcode = krb5_unparse_name(kdc_context, client2, &tmp)))
-			tmp = 0;
-		if (tmp != NULL)
-		    limit_string(tmp);
+		if ((errcode = krb5_unparse_name(kdc_context, client2, &altcname)))
+		    altcname = 0;
+		if (altcname != NULL)
+		    limit_string(altcname);
 
-		krb5_klog_syslog(LOG_INFO,
-				 "TGS_REQ %s: 2ND_TKT_MISMATCH: "
-				 "authtime %d, %s for %s, 2nd tkt client %s",
-				 fromstring, authtime,
-				 cname ? cname : "<unknown client>",
-				 sname ? sname : "<unknown server>",
-				 tmp ? tmp : "<unknown>");
 		errcode = KRB5KDC_ERR_SERVER_NOMATCH;
+		status = "2ND_TKT_MISMATCH";
 		goto cleanup;
 	}
 	    
@@ -851,36 +835,16 @@ tgt_again:
     free(reply.enc_part.ciphertext.data);
     
 cleanup:
-    if (0) {
-	assert(header_enc_tkt != NULL);
-	audit_tgs_request(request, header_enc_tkt->client, &server, header_enc_tkt->times.authtime, errcode);
+    assert(status != NULL);
+    if (errcode) 
+	emsg = krb5_get_error_message (kdc_context, errcode);
+    log_tgs_req(from, request, &reply, cname, sname, altcname, authtime,
+		status, errcode, emsg);
+    if (errcode) {
+	krb5_free_error_message (kdc_context, emsg);
+	emsg = NULL;
     }
-    if (status) {
-	const char * emsg = NULL;
-	int s4u = isflagset(c_flags, KRB5_KDB_FLAGS_S4U);
 
-	if (!errcode)
-	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
-	if (errcode) 
-	    emsg = krb5_get_error_message (kdc_context, errcode);
-	krb5_klog_syslog(LOG_INFO,
-			 "TGS_REQ (%s) %s: %s: authtime %d, "
-			 "%s%s %s %s%s%sfor %s%s%s",
-			 ktypestr,
-			 fromstring, status, authtime,
-			 !errcode ? rep_etypestr : "",
-			 !errcode ? "," : "",
-			 cname ? cname : "<unknown client>",
-			 s4u ? "[on behalf of " : "",
-			 s4u ? (s4u_name != NULL ? s4u_name : "<unknown proxy>") : "",
-			 s4u ? "] " : "",
-			 sname ? sname : "<unknown server>",
-			 errcode ? ", " : "",
-			 errcode ? emsg : "");
-	if (errcode)
-	    krb5_free_error_message (kdc_context, emsg);
-    }
-    
     if (errcode) {
         int got_err = 0;
 	if (status == 0) {
@@ -892,7 +856,7 @@ cleanup:
 	    errcode = KRB_ERR_GENERIC;
 	    
 	retval = prepare_error_tgs(request, header_ticket, errcode,
-				   fromstring, nprincs ? server.princ : NULL,
+	nprincs ? server.princ : NULL,
 				   response, status);
 	if (got_err) {
 	    krb5_free_error_message (kdc_context, status);
@@ -932,7 +896,7 @@ cleanup:
 
 static krb5_error_code
 prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
-		   const char *ident, krb5_principal canon_server,
+   krb5_principal canon_server,
 		   krb5_data **response, const char *status)
 {
     krb5_error errpkt;
@@ -1024,7 +988,6 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
 	} else if (*nprincs == 1) {
 	    /* Found it! */
 	    krb5_principal tmpprinc;
-	    char *sname;
 
 	    tmp = *krb5_princ_realm(kdc_context, *pl2);
 	    krb5_princ_set_realm(kdc_context, *pl2, 
@@ -1038,15 +1001,7 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
 
 	    krb5_free_principal(kdc_context, request->server);
 	    request->server = tmpprinc;
-	    if (krb5_unparse_name(kdc_context, request->server, &sname)) {
-		krb5_klog_syslog(LOG_INFO,
-		       "TGS_REQ: issuing alternate <un-unparseable> TGT");
-	    } else {
-		limit_string(sname);
-		krb5_klog_syslog(LOG_INFO,
-		       "TGS_REQ: issuing TGT %s", sname);
-		free(sname);
-	    }
+	    log_tgs_alt_tgt(request->server);
 	    krb5_free_realm_tree(kdc_context, plist);
 	    return;
 	}

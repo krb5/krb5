@@ -142,7 +142,7 @@ string_to_boolean (const char *string, krb5_boolean *out)
 {
     static const char *const yes[] = { "y", "yes", "true", "t", "1", "on" };
     static const char *const no[] = { "n", "no", "false", "f", "nil", "0", "off" };
-    int i;
+    unsigned int i;
 
     for (i = 0; i < sizeof(yes)/sizeof(yes[0]); i++)
 	if (!strcasecmp(string, yes[i])) {
@@ -250,7 +250,7 @@ krb5_aprof_get_string(acontext, hierarchy, uselast, stringp)
 {
     krb5_error_code	kret;
     char		**values;
-    int			i, lastidx;
+    int			lastidx;
 
     if (!(kret = krb5_aprof_getvals(acontext, hierarchy, &values))) {
 	for (lastidx=0; values[lastidx]; lastidx++);

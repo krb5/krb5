@@ -112,7 +112,8 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
         if (!err) {
              krb5_cc_set_default_name (context, name);
         }
-        
+
+        kim_identity_free (&identity); 
         kim_string_free (&name);
         kim_ccache_free (&kimccache);
     }

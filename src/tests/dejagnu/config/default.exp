@@ -821,7 +821,6 @@ proc modify_principal { name args } {
 # kadmind +4
 # kpasswd +5
 # (nothing) +6
-# krb524 +7
 # application servers (krlogind, telnetd, krshd, ftpd, etc) +8
 # iprop +9 (if enabled)
 # kpropd +10
@@ -1039,7 +1038,6 @@ proc setup_krb5_conf { {type client} } {
 	}
 	puts $conffile "	krb4_config = $tmppwd/krb.conf"
 	puts $conffile "	krb4_realms = $tmppwd/krb.realms"
-	puts $conffile "	krb4_srvtab = $tmppwd/v4srvtab"
 	if { $mode == "tcp" } {
 	    puts $conffile "	udp_preference_limit = 1"
 	}
@@ -1058,7 +1056,6 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "		admin_server = $hostname:[expr 4 + $portbase]"
 	puts $conffile "		kpasswd_server = $hostname:[expr 5 + $portbase]"
 	puts $conffile "		default_domain = $domain"
-	puts $conffile "                krb524_server = $hostname:[expr 7 + $portbase]"
 	puts $conffile "		database_module = foo_db2"
 	puts $conffile "	\}"
 	puts $conffile ""
@@ -1130,10 +1127,6 @@ proc setup_kerberos_env { {type client} } {
     # Direct the Kerberos programs at a local ticket file.
     set env(KRB5CCNAME) $tmppwd/tkt
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
-
-    # Direct the Kerberos programs at a local ticket file.
-    set env(KRBTKFILE) $tmppwd/tktv4
-    verbose "KRBTKFILE=$env(KRBTKFILE)"
 
     # Direct the Kerberos server at a cache file stored in the
     # temporary directory.
@@ -1762,7 +1755,7 @@ proc start_kerberos_daemons { standalone } {
 
     envstack_push
     setup_kerberos_env kdc
-    spawn $KRB5KDC -r $REALMNAME -n -4 full
+    spawn $KRB5KDC -r $REALMNAME -n full
     envstack_pop
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
@@ -2437,171 +2430,6 @@ proc v4_compatible_enctype {} {
     } else {
 	return 0
     }
-}
-
-# kinit
-# Use kinit to get a ticket.  If the argument is non-zero, call pass
-# at relevant points.  Returns 1 on success, 0 on failure.
-
-proc v4kinit { name pass standalone } {
-    global REALMNAME
-    global KINIT
-    global spawn_id
-    global des3_krbtgt
-
-    # Use kinit to get a ticket.
-	#
-	# For now always get forwardable tickets. Later when we need to make
-	# tests that distiguish between forwardable tickets and otherwise
-	# we should but another option to this proc. --proven
-	#
-    spawn $KINIT -4 $name@$REALMNAME
-    expect {
-	"Password for $name@$REALMNAME:" {
-	    verbose "v4kinit started"
-	}
-	timeout {
-	    fail "v4kinit"
-	    return 0
-	}
-	eof {
-	    fail "v4kinit"
-	    return 0
-	}
-    }
-    send "$pass\r"
-    expect eof
-    if {$des3_krbtgt == 0} {
-	if ![check_exit_status v4kinit] {
-	    return 0
-	}
-    } else {
-	# Fail if kinit is successful with a des3 TGT.
-	set status_list [wait -i $spawn_id]
-	set testname v4kinit
-	verbose "wait -i $spawn_id returned $status_list ($testname)"
-	if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 1 } {
-	    verbose -log "exit status: $status_list"
-	    fail "$testname (exit status)"
-	}
-    }
-    if {$standalone} {
-	pass "v4kinit"
-    }
-
-    return 1
-}
-
-proc v4kinit_kt { name keytab standalone } {
-    global REALMNAME
-    global KINIT
-    global spawn_id
-
-    # Use kinit to get a ticket.
-	#
-	# For now always get forwardable tickets. Later when we need to make
-	# tests that distiguish between forwardable tickets and otherwise
-	# we should but another option to this proc. --proven
-	#
-    spawn $KINIT -4 -k -t $keytab $name@$REALMNAME
-    expect {
-	timeout {
-	    fail "v4kinit"
-	    return 0
-	}
-	eof { }
-    }
-    if ![check_exit_status kinit] {
-	return 0
-    }
-
-    if {$standalone} {
-	pass "v4kinit"
-    }
-
-    return 1
-}
-
-# List v4 tickets.
-# Client and server are regular expressions.
-proc v4klist { client server testname } {
-    global KLIST
-    global tmppwd
-
-    spawn $KLIST -4
-    expect {
-	-re "Kerberos 4 ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*Principal:\[ 	\]*$client.*$server\r\n" {
-	    verbose "klist started"
-	}
-	timeout {
-	    fail $testname
-	    return 0
-	}
-	eof {
-	    fail $testname
-	    return 0
-	}
-    }
-
-    expect eof
-
-    if ![check_exit_status $testname] {
-	return 0
-    }
-    pass $testname
-    return 1
-}
-
-# Destroy tickets.
-proc v4kdestroy { testname } {
-    global KDESTROY
-    spawn $KDESTROY -4
-    if ![check_exit_status $testname] {
-	return 0
-    }
-    pass $testname
-    return 1
-}
-
-# Try to list the krb4 tickets -- there shouldn't be any ticket file.
-proc v4klist_none { testname } {
-    global KLIST
-    global tmppwd
-
-    # Double check that the ticket was destroyed.
-    spawn $KLIST -4
-    expect {
-	-re "Kerberos 4 ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*klist: You have no tickets cached.*\r\n" {
-	    verbose "v4klist started"
-	    pass "$testname (output)"
-	}
-	timeout {
-	    fail "$testname (output)"
-	    # Skip the 'wait' below, if it's taking too long.
-	    untested "$testname (exit status)"
-	    return 0
-	}
-	eof {
-	    fail "$testname (output)"
-	}
-    }
-    # We can't use check_exit_status, because we expect an exit status
-    # of 1.
-    expect eof
-    set status_list [wait -i $spawn_id]
-    verbose "wait -i $spawn_id returned $status_list (v4klist)"
-    if { [lindex $status_list 2] != 0 } {
-	fail "$testname (exit status)"
-	return 0
-    } else {
-	if { [lindex $status_list 3] != 1 } {
-	    fail "$testname (exit status)"
-	    return 0
-	} else {
-	    pass "$testname (exit status)"
-	}
-    }
-    return 1
 }
 
 # Set up a root shell using rlogin $hostname -l root.  This is used

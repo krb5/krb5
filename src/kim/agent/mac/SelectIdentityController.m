@@ -55,7 +55,7 @@
     NSString *message = nil;
     
     [[self window] center];
-    [[self window] setLevel:NSScreenSaverWindowLevel];
+    [[self window] setLevel:NSModalPanelWindowLevel];
     
     longTimeFormatter.displaySeconds = NO;
     longTimeFormatter.displayShortFormat = NO;

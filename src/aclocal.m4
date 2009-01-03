@@ -74,7 +74,6 @@ AC_REQUIRE_CPP
 if test -z "$LD" ; then LD=$CC; fi
 AC_ARG_VAR(LD,[linker command [CC]])
 AC_SUBST(LDFLAGS) dnl
-WITH_KRB4 dnl
 KRB5_AC_CHOOSE_ET dnl
 KRB5_AC_CHOOSE_SS dnl
 KRB5_AC_CHOOSE_DB dnl
@@ -502,61 +501,6 @@ changequote([, ])dnl
   AC_DEFINE_UNQUOTED($ac_tr_file) $2], $3)dnl
 done
 ])
-dnl
-dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
-dnl
-AC_DEFUN(WITH_KRB4,[
-AC_ARG_WITH([krb4],
-[  --without-krb4          omit Kerberos V4 backwards compatibility (default)
-  --with-krb4             use V4 libraries included with V5
-  --with-krb4=KRB4DIR     use preinstalled V4 libraries],
-,
-withval=no
-)dnl
-if test $withval = no; then
-	AC_MSG_NOTICE(no krb4 support)
-	KRB4_LIB=
-	KRB4_DEPLIB=
-	KRB4_INCLUDES=
-	KRB4_LIBPATH=
-	KRB_ERR_H_DEP=
-	krb5_cv_build_krb4_libs=no
-	krb5_cv_krb4_libdir=
-else
- AC_DEFINE([KRB5_KRB4_COMPAT], 1, [Define this if building with krb4 compat])
- if test $withval = yes; then
-	AC_MSG_NOTICE(enabling built in krb4 support)
-	KRB4_DEPLIB='$(TOPLIBD)/libkrb4$(DEPLIBEXT)'
-	KRB4_LIB=-lkrb4
-	KRB4_INCLUDES='-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV'
-	KRB4_LIBPATH=
-	KRB_ERR_H_DEP='$(BUILDTOP)/include/kerberosIV/krb_err.h'
-	krb5_cv_build_krb4_libs=yes
-	krb5_cv_krb4_libdir=
- else
-	AC_MSG_NOTICE(using preinstalled krb4 in $withval)
-	KRB4_LIB="-lkrb"
-dnl	DEPKRB4_LIB="$withval/lib/libkrb.a"
-	KRB4_INCLUDES="-I$withval/include"
-	KRB4_LIBPATH="-L$withval/lib"
-	KRB_ERR_H_DEP=
-	krb5_cv_build_krb4_libs=no
-	krb5_cv_krb4_libdir="$withval/lib"
- fi
-fi
-AC_SUBST(KRB4_INCLUDES)
-AC_SUBST(KRB4_LIBPATH)
-AC_SUBST(KRB4_LIB)
-AC_SUBST(KRB4_DEPLIB)
-AC_SUBST(KRB_ERR_H_DEP)
-dnl We always compile the des425 library
-DES425_DEPLIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
-DES425_LIB=-ldes425
-AC_SUBST(DES425_DEPLIB)
-AC_SUBST(DES425_LIB)
-])dnl
-dnl
-dnl
 AC_DEFUN(KRB5_AC_CHECK_FOR_CFLAGS,[
 AC_BEFORE([$0],[AC_PROG_CC])
 AC_BEFORE([$0],[AC_PROG_CXX])

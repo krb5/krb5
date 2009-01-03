@@ -839,7 +839,7 @@ krb5_error_code kadm5_init_krb5_context (krb5_context *ctx)
  * libkdb's ulog functions.  The srv equivalent makes the actual calls.
  */
 krb5_error_code
-kadm5_init_iprop(void *handle)
+kadm5_init_iprop(void *handle, char **db_args)
 {
 	return (0);
 }

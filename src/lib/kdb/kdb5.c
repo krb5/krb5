@@ -38,6 +38,7 @@
 #include "kdb5.h"
 #include <assert.h>
 #include "kdb_log.h"
+#include "kdb5int.h"
 
 /* Currently DB2 policy related errors are exported from DAL.  But
    other databases should set_err function to return string.  */

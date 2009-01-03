@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2003 by the Massachusetts Institute of Technology.
+ * lib/rpc/gssrpcint.h
+ *
+ * Copyright (C) 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -21,27 +23,17 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
+ *
+ * <<< Description >>>
  */
 
-#ifdef _WIN32
-#include "krb5.h"
+#ifndef __GSSRPCINT_H__
+#define __GSSRPCINT_H__
 
-#ifdef krb524_convert_creds_kdc
-#undef krb524_convert_creds_kdc
+extern void gssrpcint_printf(const char *format, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 1, 2)))
 #endif
-#ifdef krb524_init_ets
-#undef krb524_init_ets
-#endif
+  ;
 
-int KRB5_CALLCONV_WRONG
-krb524_convert_creds_kdc(krb5_context context, krb5_creds *v5creds, struct credentials *v4creds)
-{
-	return(krb5_524_convert_creds(context,v5creds,v4creds));
-}
-
-void KRB5_CALLCONV_WRONG
-krb524_init_ets(krb5_context context)
-{
-	/* no-op */
-}
-#endif /* _WIN32 */
+#endif /* __GSSRPCINT_H__ */

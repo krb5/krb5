@@ -47,7 +47,7 @@ proc start_telnet_daemon { args } {
     # we don't need to use inetd.  The portbase+8 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
     # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "sh -c \"$TELNETD $args -debug -t \$tmppwd/srvtab -R $REALMNAME -L $tmppwd/login.wrap -X KERBEROS_V4 [expr 8 + $portbase]\" &\r"
+    send -i $rlogin_spawn_id "sh -c \"$TELNETD $args -debug -t \$tmppwd/srvtab -R $REALMNAME -L $tmppwd/login.wrap [expr 8 + $portbase]\" &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }

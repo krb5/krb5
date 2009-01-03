@@ -1394,13 +1394,30 @@ void ktest_empty_sam_key(p)
 	free(p->sam_key.contents);
 }
 
+void ktest_empty_predicted_sam_response(p)
+    krb5_predicted_sam_response *p;
+{
+    ktest_empty_keyblock(&p->sam_key);
+    ktest_destroy_principal(&p->client);
+    ktest_empty_data(&p->msd);
+}
+
+void ktest_empty_enc_sam_response_enc(p)
+    krb5_enc_sam_response_enc *p;
+{
+  ktest_empty_data(&p->sam_sad);
+}
+
 void ktest_empty_sam_response_2(p)
     krb5_sam_response_2 *p;
 {
+  ktest_empty_data(&p->sam_track_id);
+  ktest_empty_data(&p->sam_enc_nonce_or_sad.ciphertext);
 }
 void ktest_empty_enc_sam_response_enc_2(p)
     krb5_enc_sam_response_enc_2 *p;
 {
+  ktest_empty_data(&p->sam_sad);
 }
 
 #ifdef ENABLE_LDAP
@@ -1413,5 +1430,6 @@ void ktest_empty_ldap_seqof_key_data(ctx, p)
 	free(p->key_data[i].key_data_contents[0]);
 	free(p->key_data[i].key_data_contents[1]);
     }
+    free(p->key_data);
 }
 #endif

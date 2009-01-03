@@ -1669,6 +1669,7 @@ get_principal (krb5_context kcontext,
 				 more);
 }
 
+
 krb5_error_code
 sign_db_authdata (krb5_context context,
 		  unsigned int flags,
@@ -2208,5 +2209,126 @@ validate_transit_path(krb5_context context,
     }
 
     return 0;
+}
+
+
+/* Main logging routines for ticket requests.
+
+   There are a few simple cases -- unparseable requests mainly --
+   where messages are logged otherwise, but once a ticket request can
+   be decoded in some basic way, these routines are used for logging
+   the details.  */
+
+/* "status" is null to indicate success.  */
+/* Someday, pass local address/port as well.  */
+void
+log_as_req(const krb5_fulladdr *from,
+	   krb5_kdc_req *request, krb5_kdc_rep *reply,
+	   const char *cname, const char *sname,
+	   krb5_timestamp authtime,
+	   const char *status, krb5_error_code errcode, const char *emsg)
+{
+    const char *fromstring = 0;
+    char fromstringbuf[70];
+    char ktypestr[128];
+    const char *cname2 = cname ? cname : "<unknown client>";
+    const char *sname2 = sname ? sname : "<unknown server>";
+
+    fromstring = inet_ntop(ADDRTYPE2FAMILY (from->address->addrtype),
+			   from->address->contents,
+			   fromstringbuf, sizeof(fromstringbuf));
+    if (!fromstring)
+	fromstring = "<unknown>";
+    ktypes2str(ktypestr, sizeof(ktypestr),
+	       request->nktypes, request->ktype);
+
+    if (status == NULL) {
+	/* success */
+	char rep_etypestr[128];
+	rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), reply);
+	krb5_klog_syslog(LOG_INFO,
+			 "AS_REQ (%s) %s: ISSUE: authtime %d, %s, %s for %s",
+			 ktypestr, fromstring, authtime,
+			 rep_etypestr, cname2, sname2);
+    } else {
+	/* fail */
+        krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s: %s: %s for %s%s%s",
+			 ktypestr, fromstring, status, 
+			 cname2, sname2, emsg ? ", " : "", emsg ? emsg : "");
+    }
+#if 0
+    /* Sun (OpenSolaris) version would probably something like this.
+       The client and server names passed can be null, unlike in the
+       logging routines used above.  Note that a struct in_addr is
+       used, but the real address could be an IPv6 address.  */
+    audit_krb5kdc_as_req(some in_addr *, (in_port_t)from->port, 0,
+			 cname, sname, errcode);
+#endif
+}
+
+/* Here "status" must be non-null.  Error code
+   KRB5KDC_ERR_SERVER_NOMATCH is handled specially.  */
+void
+log_tgs_req(const krb5_fulladdr *from,
+	    krb5_kdc_req *request, krb5_kdc_rep *reply,
+	    const char *cname, const char *sname, const char *altcname,
+	    krb5_timestamp authtime,
+	    const char *status, krb5_error_code errcode, const char *emsg)
+{
+    char ktypestr[128];
+    const char *fromstring = 0;
+    char fromstringbuf[70];
+    char rep_etypestr[128];
+
+    fromstring = inet_ntop(ADDRTYPE2FAMILY(from->address->addrtype),
+			   from->address->contents,
+			   fromstringbuf, sizeof(fromstringbuf));
+    if (!fromstring)
+	fromstring = "<unknown>";
+    ktypes2str(ktypestr, sizeof(ktypestr), request->nktypes, request->ktype);
+    if (!errcode)
+	rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), reply);
+    else
+	rep_etypestr[0] = 0;
+
+    /* Differences: server-nomatch message logs 2nd ticket's client
+       name (useful), and doesn't log ktypestr (probably not
+       important).  */
+    if (errcode != KRB5KDC_ERR_SERVER_NOMATCH)
+	krb5_klog_syslog(LOG_INFO,
+			 "TGS_REQ (%s) %s: %s: authtime %d, %s%s %s for %s%s%s",
+			 ktypestr,
+			 fromstring, status, authtime,
+			 rep_etypestr,
+			 !errcode ? "," : "",
+			 cname ? cname : "<unknown client>",
+			 sname ? sname : "<unknown server>",
+			 errcode ? ", " : "",
+			 errcode ? emsg : "");
+    else
+	krb5_klog_syslog(LOG_INFO,
+			 "TGS_REQ %s: %s: authtime %d, %s for %s, 2nd tkt client %s",
+			 fromstring, status, authtime,
+			 cname ? cname : "<unknown client>",
+			 sname ? sname : "<unknown server>",
+			 altcname ? altcname : "<unknown>");
+
+    /* OpenSolaris: audit_krb5kdc_tgs_req(...)  or
+       audit_krb5kdc_tgs_req_2ndtktmm(...) */
+}
+
+void
+log_tgs_alt_tgt(krb5_principal p)
+{
+    char *sname;
+    if (krb5_unparse_name(kdc_context, p, &sname)) {
+	krb5_klog_syslog(LOG_INFO,
+			 "TGS_REQ: issuing alternate <un-unparseable> TGT");
+    } else {
+	limit_string(sname);
+	krb5_klog_syslog(LOG_INFO, "TGS_REQ: issuing TGT %s", sname);
+	free(sname);
+    }
+    /* OpenSolaris: audit_krb5kdc_tgs_req_alt_tgt(...) */
 }
 

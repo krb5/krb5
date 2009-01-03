@@ -210,6 +210,8 @@ void ktest_empty_sam_challenge
 void ktest_empty_sam_response
 	(krb5_sam_response * p);
 void ktest_empty_sam_key(krb5_sam_key *p);
+void ktest_empty_enc_sam_response_enc(krb5_enc_sam_response_enc *p);
+void ktest_empty_predicted_sam_response(krb5_predicted_sam_response *p);
 void ktest_empty_sam_response_2(krb5_sam_response_2 *p);
 void ktest_empty_enc_sam_response_enc_2(krb5_enc_sam_response_enc_2 *p);
 

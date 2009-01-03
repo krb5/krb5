@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/rcache/rcdef.c
  *
@@ -32,18 +33,17 @@
 #include "rc_dfl.h"
 
 const krb5_rc_ops krb5_rc_dfl_ops =
- {
-  0,
-  "dfl",
-  krb5_rc_dfl_init,
-  krb5_rc_dfl_recover,
-  krb5_rc_dfl_recover_or_init,
-  krb5_rc_dfl_destroy,
-  krb5_rc_dfl_close,
-  krb5_rc_dfl_store,
-  krb5_rc_dfl_expunge,
-  krb5_rc_dfl_get_span,
-  krb5_rc_dfl_get_name,
-  krb5_rc_dfl_resolve
- }
-;
+{
+    0,
+    "dfl",
+    krb5_rc_dfl_init,
+    krb5_rc_dfl_recover,
+    krb5_rc_dfl_recover_or_init,
+    krb5_rc_dfl_destroy,
+    krb5_rc_dfl_close,
+    krb5_rc_dfl_store,
+    krb5_rc_dfl_expunge,
+    krb5_rc_dfl_get_span,
+    krb5_rc_dfl_get_name,
+    krb5_rc_dfl_resolve
+};

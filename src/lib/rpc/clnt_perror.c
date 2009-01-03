@@ -233,7 +233,7 @@ static struct rpc_errtab  rpc_errlist[] = {
 char *
 clnt_sperrno(enum clnt_stat stat)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < sizeof(rpc_errlist)/sizeof(struct rpc_errtab); i++) {
 		if (rpc_errlist[i].status == stat) {
@@ -339,7 +339,7 @@ static struct auth_errtab auth_errlist[] = {
 static char *
 auth_errmsg(enum auth_stat stat)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < sizeof(auth_errlist)/sizeof(struct auth_errtab); i++) {
 		if (auth_errlist[i].status == stat) {

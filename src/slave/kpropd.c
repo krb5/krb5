@@ -249,7 +249,7 @@ main(argc, argv)
     exit(ret);
 }
 
-void resync_alarm(int sn)
+static void resync_alarm(int sn)
 {
     close (gfd);
     if (debug)
@@ -458,7 +458,7 @@ void doit(fd)
 		fprintf(stderr, "doit: setting resync alarm to 5s\n");
 	    signal(SIGALRM, resync_alarm);
 	    gfd = fd;
-	    if (alarm(5) != 0) {
+	    if (alarm(INITIAL_TIMER) != 0) {
 		if (debug) {
 		    fprintf(stderr,
 			    _("%s: alarm already set\n"), progname);
@@ -508,6 +508,7 @@ void doit(fd)
 	 * Turn off alarm upon successful authentication from master.
 	 */
 	alarm(0);
+	gfd = -1;
 
 	if (!authorized_principal(kpropd_context, client, etype)) {
 		char	*name;
@@ -638,8 +639,9 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	params.realm = def_realm;
 
 	if (master_svc_princstr == NULL) {
-		if (retval = kadm5_get_kiprop_host_srv_name(kpropd_context,
-					def_realm, &master_svc_princstr)) {
+		if ((retval = kadm5_get_kiprop_host_srv_name(kpropd_context,
+							     def_realm, 
+							     &master_svc_princstr))) {
 			com_err(progname, retval,
 				_("%s: unable to get kiprop host based "
 					"service name for realm %s\n"),
@@ -651,7 +653,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	/*
 	 * Set cc to the default credentials cache
 	 */
-	if (retval = krb5_cc_default(kpropd_context, &cc)) {
+	if ((retval = krb5_cc_default(kpropd_context, &cc))) {
 		com_err(progname, retval,
 			_("while opening default "
 				"credentials cache"));
@@ -681,8 +683,8 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	    }
 	    /* XXX Memory leak: Old r->data value.  */
 	}
-	if (retval = krb5_unparse_name(kpropd_context, iprop_svc_principal,
-				&iprop_svc_princstr)) {
+	if ((retval = krb5_unparse_name(kpropd_context, iprop_svc_principal,
+					&iprop_svc_princstr))) {
 		com_err(progname, retval,
 			_("while canonicalizing principal name"));
 		krb5_free_principal(kpropd_context, iprop_svc_principal);
@@ -824,6 +826,7 @@ reinit:
 				    syslog(LOG_WARNING,
 					   _("kpropd: Full resync, invalid return."));
 				    frdone = 0;
+				    backoff_cnt++;
 				} else
 				    frdone = 1;
 				break;
@@ -949,7 +952,7 @@ done:
 		free(iprop_svc_princstr);
 	if (master_svc_princstr)
 		free(master_svc_princstr);
-	if (retval = krb5_cc_close(kpropd_context, cc)) {
+	if ((retval = krb5_cc_close(kpropd_context, cc))) {
 		com_err(progname, retval,
 			_("while closing default ccache"));
 		exit(1);
@@ -983,23 +986,21 @@ unsigned int backoff_from_master(int *cnt) {
 	return (btime);
 }
 
-
-static char *
-copy_leading_substring(char *src, size_t len)
-{
-    char *result;
-    result = malloc((len + 1) * sizeof(char));
-    (void) strncpy(result, src, len+1);
-    result[len] = 0;
-    return result;
-}
+static void
+kpropd_com_err_proc(const char *whoami,
+		    long code,
+		    const char *fmt,
+		    va_list args)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
 
 static void
-kpropd_com_err_proc(whoami, code, fmt, args)
-	const char	*whoami;
-	long		code;
-	const char	*fmt;
-	va_list		args;
+kpropd_com_err_proc(const char *whoami,
+		    long code,
+		    const char *fmt,
+		    va_list args)
 {
 	char	error_buf[8096];
 
@@ -1668,7 +1669,6 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 			       const char *realm,
 			       char **host_service_name)
 {
-	kadm5_ret_t ret;
 	char *name;
 	char *host;
 

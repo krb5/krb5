@@ -881,7 +881,9 @@ int main(argc, argv)
 	setup(ldap_seqof_key_data,"ldap_seqof_key_data",
 	      ktest_make_sample_ldap_seqof_key_data);
 	decode_run("ldap_seqof_key_data","","30 81 87 A0 03 02 01 01 A1 03 02 01 01 A2 03 02 01 2A A3 03 02 01 0E A4 71 30 6F 30 23 A0 10 30 0E A0 03 02 01 00 A1 07 04 05 73 61 6C 74 30 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 30 30 23 A0 10 30 0E A0 03 02 01 01 A1 07 04 05 73 61 6C 74 31 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 31 30 23 A0 10 30 0E A0 03 02 01 02 A1 07 04 05 73 61 6C 74 32 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 32",acc.asn1_ldap_decode_sequence_of_keys,ktest_equal_ldap_sequence_of_keys,ktest_empty_ldap_seqof_key_data);
+	ktest_empty_ldap_seqof_key_data(test_context, &ref);
     }
+
 #endif
 
     krb5_free_context(test_context);
