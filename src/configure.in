@@ -144,14 +144,6 @@ if test "$enableval" = yes ; then
 else
 	AC_DEFINE(NOCACHE,1,[Define if the KDC should use no replay cache])
 fi
-AC_ARG_ENABLE([fakeka],
-AC_HELP_STRING([--enable-fakeka],[build the Fake KA server (emulates an AFS kaserver) @<:@default: don't build@:>@]), , enableval=no)dnl
-if test "$enableval" = yes; then
-	FAKEKA=fakeka
-else
-	FAKEKA=
-fi
-AC_SUBST(FAKEKA)
 KRB5_RUN_FLAGS
 dnl
 AC_TYPE_SIGNAL
