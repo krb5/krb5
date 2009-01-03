@@ -25,6 +25,7 @@
 #define _GSSAPI_KRB5_H_
 
 #include <gssapi/gssapi.h>
+#include <gssapi/gssapi_ext.h>
 #include <krb5.h>
 
 /* C++ friendlyness */
@@ -265,6 +266,20 @@ OM_uint32 KRB5_CALLCONV
 gss_krb5_free_lucid_sec_context(OM_uint32 *minor_status,
                                 void *kctx);
 
+
+OM_uint32 KRB5_CALLCONV
+gsskrb5_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
+					    const gss_ctx_id_t context_handle,
+					    int ad_type,
+					    gss_buffer_t ad_data);
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_set_cred_rcache(OM_uint32 *minor_status,
+			 gss_cred_id_t cred,
+			 krb5_rcache rcache);
+
+OM_uint32 KRB5_CALLCONV
+gsskrb5_extract_authtime_from_sec_context(OM_uint32 *, gss_ctx_id_t, krb5_timestamp *);
 
 #ifdef __cplusplus
 }

@@ -174,13 +174,15 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
     /*
      * Allocate memory for a NULL terminated list of tickets.
      */
-    for (ncred = 0; ppcreds[ncred]; ncred++);
+    for (ncred = 0; ppcreds[ncred]; ncred++)
+	;
 
     if ((pcred = (krb5_cred *)calloc(1, sizeof(krb5_cred))) == NULL) 
         return ENOMEM;
 
     if ((pcred->tickets 
-	 = (krb5_ticket **)calloc(ncred+1, sizeof(krb5_ticket *))) == NULL) {
+	 = (krb5_ticket **)calloc((size_t)ncred+1,
+				  sizeof(krb5_ticket *))) == NULL) {
 	free(pcred);
 	return ENOMEM;
     }

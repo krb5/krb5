@@ -33,13 +33,5 @@ krb5_gss_indicate_mechs(minor_status, mech_set)
     OM_uint32 *minor_status;
     gss_OID_set *mech_set;
 {
-    *minor_status = 0;
-
-    if (gssint_copy_oid_set(minor_status, gss_mech_set_krb5_both, mech_set)) {
-        *mech_set     = GSS_C_NO_OID_SET;
-        *minor_status = ENOMEM;
-        return(GSS_S_FAILURE);
-    }
-
-    return(GSS_S_COMPLETE);
+    return generic_gss_copy_oid_set(minor_status, gss_mech_set_krb5_both, mech_set);
 }

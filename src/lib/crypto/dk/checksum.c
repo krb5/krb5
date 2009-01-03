@@ -103,7 +103,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
+krb5int_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
 		          const krb5_keyblock *key, krb5_keyusage usage,
 			  const krb5_crypto_iov *data, size_t num_data,
 			  krb5_data *output)
@@ -159,7 +159,7 @@ krb5_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
 
     /* hash the data */
 
-    if ((ret = krb5_hmac_iov(hash, &kc, data, num_data, output)) != 0)
+    if ((ret = krb5int_hmac_iov(hash, &kc, data, num_data, output)) != 0)
 	memset(output->data, 0, output->length);
 
     /* ret is set correctly by the prior call */

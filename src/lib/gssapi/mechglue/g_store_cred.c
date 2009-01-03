@@ -111,7 +111,7 @@ gss_cred_usage_t	*cred_usage_stored;
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			return (GSS_S_NO_CRED);
 
-		major_status = mech->gss_store_cred(mech->context,
+		major_status = mech->gss_store_cred(
 						    minor_status,
 						    (gss_cred_id_t)mech_cred,
 						    cred_usage,
@@ -143,7 +143,7 @@ gss_cred_usage_t	*cred_usage_stored;
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			continue; /* can't happen, but safe to ignore */
 
-		major_status = mech->gss_store_cred(mech->context,
+		major_status = mech->gss_store_cred(
 						minor_status,
 						(gss_cred_id_t)mech_cred,
 						cred_usage,

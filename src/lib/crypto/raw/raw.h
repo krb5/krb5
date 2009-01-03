@@ -44,3 +44,6 @@ krb5_error_code krb5_raw_decrypt
 		const krb5_keyblock *key, krb5_keyusage usage,
 		const krb5_data *ivec, const krb5_data *input,
 		krb5_data *arg_output);
+
+extern const struct krb5_aead_provider krb5int_aead_raw;
+

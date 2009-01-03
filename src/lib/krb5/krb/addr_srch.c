@@ -29,6 +29,20 @@
 
 #include "k5-int.h"
 
+static unsigned int
+address_count(krb5_address *const *addrlist)
+{
+    unsigned int i;
+
+    if (addrlist == NULL)
+	return 0;
+
+    for (i = 0; addrlist[i]; i++)
+	;
+
+    return i;
+}
+
 /*
  * if addr is listed in addrlist, or addrlist is null, return TRUE.
  * if not listed, return FALSE
@@ -36,6 +50,14 @@
 krb5_boolean
 krb5_address_search(krb5_context context, const krb5_address *addr, krb5_address *const *addrlist)
 {
+    /*
+     * Treat an address list containing only a NetBIOS address
+     * as empty, because we presently have no way of associating
+     * a client with its NetBIOS address.
+     */
+    if (address_count(addrlist) == 1 &&
+        addrlist[0]->addrtype == ADDRTYPE_NETBIOS)
+	return TRUE;
     if (!addrlist)
 	return TRUE;
     for (; *addrlist; addrlist++) {

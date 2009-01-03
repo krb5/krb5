@@ -30,7 +30,6 @@
  */
 
 #include "gssapiP_generic.h"
-#include "gss_libinit.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -73,9 +72,6 @@ static int g_save(db, type, ptr)
     vkey vk;
     DBT key;
 
-    ret = gssint_initialize_library();
-    if (ret)
-        return 0;
     ret = k5_mutex_lock(&db->mutex);
     if (ret)
         return 0;
@@ -97,9 +93,6 @@ static int g_save(db, type, ptr)
 #else
     g_set_elt *gs;
 
-    ret = gssint_initialize_library();
-    if (ret)
-        return 0;
     ret = k5_mutex_lock(&db->mutex);
     if (ret)
         return 0;

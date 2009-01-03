@@ -18,6 +18,7 @@ STLIBOBJS=\
 	d3_cbc.o	\
 	d3_aead.o	\
 	d3_kysched.o	\
+	f_aead.o 	\
 	f_cbc.o 	\
 	f_cksum.o	\
 	f_parity.o 	\
@@ -31,6 +32,7 @@ OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
 	$(OUTPRE)d3_cbc.$(OBJEXT)	\
 	$(OUTPRE)d3_aead.$(OBJEXT)	\
 	$(OUTPRE)d3_kysched.$(OBJEXT)	\
+	$(OUTPRE)f_aead.$(OBJEXT) 	\
 	$(OUTPRE)f_cbc.$(OBJEXT) 	\
 	$(OUTPRE)f_cksum.$(OBJEXT)	\
 	$(OUTPRE)f_parity.$(OBJEXT) 	\
@@ -44,6 +46,7 @@ SRCS=	$(srcdir)/afsstring2key.c	\
 	$(srcdir)/d3_cbc.c	\
 	$(srcdir)/d3_aead.c	\
 	$(srcdir)/d3_kysched.c	\
+	$(srcdir)/f_aead.c	\
 	$(srcdir)/f_cbc.c	\
 	$(srcdir)/f_cksum.c	\
 	$(srcdir)/f_parity.c	\
@@ -141,6 +144,16 @@ d3_kysched.so d3_kysched.po $(OUTPRE)d3_kysched.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h d3_kysched.c des_int.h
+f_aead.so f_aead.po $(OUTPRE)f_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(srcdir)/../aead.h des_int.h f_aead.c f_tables.h
 f_cbc.so f_cbc.po $(OUTPRE)f_cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \

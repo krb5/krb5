@@ -30,7 +30,7 @@
  * oid_ops.c - GSS-API V2 interfaces to manipulate OIDs
  */
 
-#include "mglueP.h"
+#include "gssapiP_generic.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -316,7 +316,8 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     }
     while ((bp < &cp[oid_str->length]) && isdigit(*bp))
 	bp++;
-    while ((bp < &cp[oid_str->length]) && isspace(*bp))
+    while ((bp < &cp[oid_str->length]) &&
+	   (isspace(*bp) || *bp == '.'))
 	bp++;
     if (sscanf((char *)bp, "%ld", &numbuf) != 1) {
 	*minor_status = EINVAL;
@@ -402,6 +403,92 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     return(GSS_S_FAILURE);
 }
 
+/* Compose an OID of a prefix and an integer suffix */
+OM_uint32
+generic_gss_oid_compose(
+    OM_uint32 *minor_status,
+    const char *prefix,
+    size_t prefix_len,
+    int suffix,
+    gss_OID_desc *oid)
+{
+    int osuffix, i;
+    size_t nbytes;
+    unsigned char *op;
+
+    if (oid == GSS_C_NO_OID) {
+	*minor_status = EINVAL;
+	return GSS_S_FAILURE;
+    }
+    if (oid->length < prefix_len) {
+	*minor_status = ERANGE;
+	return GSS_S_FAILURE;
+    }
+
+    memcpy(oid->elements, prefix, prefix_len);
+
+    nbytes = 0;
+    osuffix = suffix;
+    while (suffix) {
+	nbytes++;
+	suffix >>= 7;
+    }
+    suffix = osuffix;
+
+    if (oid->length < prefix_len + nbytes) {
+	*minor_status = ERANGE;
+	return GSS_S_FAILURE;
+    }
+
+    op = oid->elements + prefix_len + nbytes;
+    i = -1;
+    while (suffix) {
+	op[i] = (unsigned char)suffix & 0x7f;
+	if (i != -1) 
+	    op[i] |= 0x80;
+	i--;
+	suffix >>= 7;
+    }
+
+    oid->length = prefix_len + nbytes;
+
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
+}
+
+OM_uint32
+generic_gss_oid_decompose(
+    OM_uint32 *minor_status,
+    const char *prefix,
+    size_t prefix_len,
+    gss_OID_desc *oid,
+    int *suffix)
+{
+    size_t i, slen;
+    unsigned char *op;
+
+    if (oid->length < prefix_len ||
+	memcmp(oid->elements, prefix, prefix_len) != 0) {
+	return GSS_S_BAD_MECH;
+    }
+
+    op = oid->elements + prefix_len;
+
+    *suffix = 0;
+
+    slen = oid->length - prefix_len;
+
+    for (i = 0; i < slen; i++) {
+	*suffix = (*suffix << 7) | (op[i] & 0x7f);
+	if (i + 1 != slen && (op[i] & 0x80) == 0) {
+	    *minor_status = EINVAL;
+	    return GSS_S_FAILURE;
+	}
+    }
+
+    return GSS_S_COMPLETE;
+}
+
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
@@ -424,7 +511,7 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
  * PERFORMANCE OF THIS SOFTWARE.
  */
 OM_uint32
-gssint_copy_oid_set(
+generic_gss_copy_oid_set(
     OM_uint32 *minor_status,
     const gss_OID_set_desc * const oidset,
     gss_OID_set *new_oidset
@@ -479,3 +566,4 @@ done:
 
     return (major);
 }
+

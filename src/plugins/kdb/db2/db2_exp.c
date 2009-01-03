@@ -124,6 +124,7 @@ WRAP_K (krb5_db2_db_unlock, (krb5_context ctx), (ctx));
 WRAP_K (krb5_db2_db_get_principal,
 	(krb5_context ctx,
 		   krb5_const_principal p,
+		   unsigned int flags,
 		   krb5_db_entry *d,
 		   int * i,
 	 krb5_boolean *b),
@@ -253,4 +254,5 @@ kdb_vftabl kdb_function_table = {
   /* get_master_key */			       wrap_krb5_db2_db_get_mkey,
   /* blah blah blah */ 0,0,0,0,0,0,
   /* promote_db */			       wrap_krb5_db2_promote_db,
+  0,0,0,
 };

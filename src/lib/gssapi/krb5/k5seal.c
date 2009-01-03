@@ -79,7 +79,7 @@ make_seal_token_v1 (krb5_context context,
      * we plan to write out to the token.
      * tlen is the length of the token
      * including header. */
-    unsigned  conflen=0, tmsglen, tlen, msglen;
+    unsigned int conflen=0, tmsglen, tlen, msglen;
     unsigned char *t, *ptr;
     unsigned char *plain;
     unsigned char pad;
@@ -246,8 +246,8 @@ make_seal_token_v1 (krb5_context context,
 
     /* create the seq_num */
 
-    if ((code = kg_make_seq_num(context, seq, direction?0:0xff, *seqnum,
-                                ptr+14, ptr+6))) {
+    if ((code = kg_make_seq_num(context, seq, direction?0:0xff,
+				(krb5_ui_4)*seqnum, ptr+14, ptr+6))) {
         xfree (plain);
         xfree(t);
         return(code);
@@ -324,7 +324,7 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
     OM_uint32 *minor_status;
     gss_ctx_id_t context_handle;
     int conf_req_flag;
-    int qop_req;
+    gss_qop_t qop_req;
     gss_buffer_t input_message_buffer;
     int *conf_state;
     gss_buffer_t output_message_buffer;
@@ -400,5 +400,5 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
         *conf_state = conf_req_flag;
 
     *minor_status = 0;
-    return((ctx->endtime < now)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
+    return((ctx->krb_times.endtime < now)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
 }

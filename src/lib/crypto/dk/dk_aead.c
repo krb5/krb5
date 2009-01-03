@@ -176,7 +176,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     d2.length = hash->hashsize;
     d2.data = (char *)cksum;
 
-    ret = krb5_hmac_iov(hash, &ki, data, num_data, &d2);
+    ret = krb5int_hmac_iov(hash, &ki, data, num_data, &d2);
     if (ret != 0)
 	goto cleanup;
 
@@ -230,6 +230,11 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     unsigned int hmacsize = 0;
     unsigned char *cksum = NULL;
 
+    if (krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM) != NULL) {
+	return krb5int_c_iov_decrypt_stream(aead, enc, hash, key,
+					    usage, ivec, data, num_data);
+    }
+
     ke.contents = ki.contents = NULL;
     ke.length = ki.length = 0;
 
@@ -252,7 +257,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
 
     if (blocksize == 0) {
 	/* Check for correct input length in CTS mode */
-        if (enc->block_size != 0 && cipherlen < enc->block_size)
+	if (enc->block_size != 0 && cipherlen < enc->block_size)
 	    return KRB5_BAD_MSIZE;
     } else {
 	/* Check that the input data is correctly padded */
@@ -321,7 +326,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     d1.length = hash->hashsize; /* non-truncated length */
     d1.data = (char *)cksum;
 
-    ret = krb5_hmac_iov(hash, &ki, data, num_data, &d1);
+    ret = krb5int_hmac_iov(hash, &ki, data, num_data, &d1);
     if (ret != 0)
 	goto cleanup;
 

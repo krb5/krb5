@@ -46,12 +46,13 @@ typedef int asn1_tagnum;
 #define KVNO 5
 
 /* Universal Tag Numbers */
+#define ASN1_BOOLEAN		1
 #define ASN1_INTEGER            2
 #define ASN1_BITSTRING          3
 #define ASN1_OCTETSTRING        4
 #define ASN1_NULL               5
 #define ASN1_OBJECTIDENTIFIER   6
-#define ASN1_ENUMERATED 10
+#define ASN1_ENUMERATED		10
 #define ASN1_SEQUENCE           16
 #define ASN1_SET                17
 #define ASN1_PRINTABLESTRING    19

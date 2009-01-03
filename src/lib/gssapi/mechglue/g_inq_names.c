@@ -69,7 +69,6 @@ gss_OID_set *	name_types;
 
 	if (mech->gss_inquire_names_for_mech) {
 	    status = mech->gss_inquire_names_for_mech(
-				mech->context,
 				minor_status,
 				mechanism,
 				name_types);

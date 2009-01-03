@@ -23,23 +23,23 @@
  */
 
 /*
- *  glue routine for gss_verify
+ *  glue routine for gss_verify_mic
  */
 
 #include "mglueP.h"
 
 OM_uint32 KRB5_CALLCONV
-gss_verify (minor_status,
-            context_handle,
-            message_buffer,
-            token_buffer,
-            qop_state)
+gss_verify_mic (minor_status,
+		context_handle,
+		message_buffer,
+		token_buffer,
+		qop_state)
 
 OM_uint32 *		minor_status;
 gss_ctx_id_t		context_handle;
 gss_buffer_t		message_buffer;
 gss_buffer_t		token_buffer;
-int *			qop_state;
+gss_qop_t *		qop_state;
 
 {
     OM_uint32		status;
@@ -68,14 +68,13 @@ int *			qop_state;
     mech = gssint_get_mechanism (ctx->mech_type);
 
     if (mech) {
-	if (mech->gss_verify) {
-	    status = mech->gss_verify(
-				      mech->context,
-				      minor_status,
-				      ctx->internal_ctx_id,
-				      message_buffer,
-				      token_buffer,
-				      qop_state);
+	if (mech->gss_verify_mic) {
+	    status = mech->gss_verify_mic(
+					  minor_status,
+					  ctx->internal_ctx_id,
+					  message_buffer,
+					  token_buffer,
+					  qop_state);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
 	} else
@@ -88,7 +87,7 @@ int *			qop_state;
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_verify_mic (minor_status,
+gss_verify (minor_status,
             context_handle,
             message_buffer,
             token_buffer,
@@ -98,9 +97,10 @@ OM_uint32 *		minor_status;
 gss_ctx_id_t		context_handle;
 gss_buffer_t		message_buffer;
 gss_buffer_t		token_buffer;
-gss_qop_t *		qop_state;
+int *			qop_state;
 
 {
-	return (gss_verify(minor_status, context_handle,
-			   message_buffer, token_buffer, (int *) qop_state));
+	return (gss_verify_mic(minor_status, context_handle,
+			       message_buffer, token_buffer,
+			       (gss_qop_t *) qop_state));
 }

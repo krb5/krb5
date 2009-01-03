@@ -53,7 +53,6 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #endif
 	    S (free_addrlist, krb5int_free_addrlist),
 	    S (krb5_hmac, krb5_hmac),
-	    S (krb5_hmac_iov, krb5_hmac_iov),
 	    S (md5_hash_provider, &krb5int_hash_md5),
 	    S (arcfour_enc_provider, &krb5int_enc_arcfour),
 	    S (sendto_udp, &krb5int_sendto),
@@ -68,6 +67,7 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    SC (free_srv_dns_data, krb5int_free_srv_dns_data),
 	    SC (use_dns_kdc, _krb5_use_dns_kdc),
 #undef SC
+	    S (clean_hostname, krb5int_clean_hostname),
 
 	    S (krb_life_to_time, 0),
 	    S (krb_time_to_life, 0),

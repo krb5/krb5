@@ -52,7 +52,7 @@ copy_keyblock_to_lucid_key(
 static krb5_error_code
 make_external_lucid_ctx_v1(
     krb5_gss_ctx_id_rec * gctx,
-    unsigned int version,
+    int version,
     void **out_ptr);
 
 
@@ -63,33 +63,29 @@ make_external_lucid_ctx_v1(
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_export_lucid_sec_context(
     OM_uint32           *minor_status,
-    gss_ctx_id_t        *context_handle,
-    OM_uint32           version,
-    void                **kctx)
+    gss_ctx_id_t        context_handle,
+    const gss_OID	desired_object,
+    gss_buffer_set_t	*data_set)
 {
     krb5_error_code     kret = 0;
     OM_uint32           retval;
-    krb5_gss_ctx_id_t   ctx;
+    krb5_gss_ctx_id_t   ctx = (krb5_gss_ctx_id_t)context_handle;
     void                *lctx = NULL;
+    int			version = 0;
+    gss_buffer_desc	rep;
 
     /* Assume failure */
     retval = GSS_S_FAILURE;
     *minor_status = 0;
+    *data_set = GSS_C_NO_BUFFER_SET;
 
-    if (kctx)
-        *kctx = NULL;
-    else {
-        kret = EINVAL;
-        goto error_out;
-    }
-
-    if (!kg_validate_ctx_id(*context_handle)) {
-        kret = (OM_uint32) G_VALIDATE_FAILED;
-        retval = GSS_S_NO_CONTEXT;
-        goto error_out;
-    }
-
-    ctx = (krb5_gss_ctx_id_t) *context_handle;
+    retval = generic_gss_oid_decompose(minor_status,
+				       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID,
+				       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH,
+				       desired_object,
+				       &version);
+    if (GSS_ERROR(retval))
+	return retval;
 
     /* Externalize a structure of the right version */
     switch (version) {
@@ -111,17 +107,12 @@ gss_krb5int_export_lucid_sec_context(
         goto error_out;
     }
 
-    *kctx = lctx;
-    *minor_status = 0;
-    retval = GSS_S_COMPLETE;
+    rep.value = lctx;
+    rep.length = sizeof(lctx);
 
-    /* Clean up the context state (it is an error for
-     * someone to attempt to use this context again)
-     */
-    (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
-    *context_handle = GSS_C_NO_CONTEXT;
-
-    return (retval);
+    retval = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
+    if (GSS_ERROR(retval))
+	goto error_out;
 
 error_out:
     if (*minor_status == 0)
@@ -133,19 +124,23 @@ error_out:
  * Frees the storage associated with an
  * exported lucid context structure.
  */
-OM_uint32 KRB5_CALLCONV
-gss_krb5_free_lucid_sec_context(
+OM_uint32
+gss_krb5int_free_lucid_sec_context(
     OM_uint32 *minor_status,
-    void *kctx)
+    const gss_OID desired_mech,
+    const gss_OID desired_object,
+    gss_buffer_t value)
 {
     OM_uint32           retval;
     krb5_error_code     kret = 0;
     int                 version;
+    void		*kctx;
 
     /* Assume failure */
     retval = GSS_S_FAILURE;
     *minor_status = 0;
 
+    kctx = value->value;
     if (!kctx) {
         kret = EINVAL;
         goto error_out;
@@ -191,7 +186,7 @@ error_out:
 static krb5_error_code
 make_external_lucid_ctx_v1(
     krb5_gss_ctx_id_rec * gctx,
-    unsigned int version,
+    int version,
     void **out_ptr)
 {
     gss_krb5_lucid_context_v1_t *lctx = NULL;
@@ -208,7 +203,7 @@ make_external_lucid_ctx_v1(
 
     lctx->version = 1;
     lctx->initiate = gctx->initiate ? 1 : 0;
-    lctx->endtime = gctx->endtime;
+    lctx->endtime = gctx->krb_times.endtime;
     lctx->send_seq = gctx->seq_send;
     lctx->recv_seq = gctx->seq_recv;
     lctx->protocol = gctx->proto;

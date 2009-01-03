@@ -296,8 +296,6 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\mechglue\Makefile: lib\gssapi\mechglue\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\gssapi\spnego\Makefile: lib\gssapi\spnego\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\krb5\Makefile: lib\gssapi\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\Makefile: lib\krb5\Makefile.in $(MKFDEP)

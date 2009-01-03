@@ -254,7 +254,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 
     SETUP_CONTEXT();
     /* get the principal info */
-    if ((st=krb5_ldap_get_principal(context, searchfor, &entries, nentries, &more)) != 0 || *nentries == 0)
+    if ((st=krb5_ldap_get_principal(context, searchfor, 0, &entries, nentries, &more)) != 0 || *nentries == 0)
 	goto cleanup;
 
     if (((st=krb5_get_princ_type(context, &entries, &(ptype))) != 0) ||

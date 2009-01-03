@@ -20,9 +20,6 @@ do {								\
 	(o1)->length = (o2)->length;				\
 } while (0)
 
-#define	GSS_EMPTY_BUFFER(buf)	((buf) == NULL ||\
-	(buf)->value == NULL || (buf)->length == 0)
-
 /*
  * Array of context IDs typed by mechanism OID
  */
@@ -78,7 +75,20 @@ typedef struct gss_cred_id_struct {
 	gss_cred_id_t		*cred_array;
 	gss_union_cred_auxinfo	auxinfo;
 } gss_union_cred_desc, *gss_union_cred_t;
- 
+
+typedef	OM_uint32	    (*gss_acquire_cred_with_password_sfct)(
+		    void *,		/* context */
+		    OM_uint32 *,	/* minor_status */
+		    const gss_name_t,	/* desired_name */
+		    const gss_buffer_t, /* password */
+		    OM_uint32,		/* time_req */
+		    const gss_OID_set,	/* desired_mechs */
+		    int,		/* cred_usage */
+		    gss_cred_id_t *,	/* output_cred_handle */
+		    gss_OID_set *,	/* actual_mechs */
+		    OM_uint32 *		/* time_rec */
+	/* */);
+
 /*
  * Rudimentary pointer validation macro to check whether the
  * "loopback" field of an opaque struct points back to itself.  This
@@ -91,7 +101,10 @@ typedef struct gss_cred_id_struct {
 /********************************************************/
 /* The Mechanism Dispatch Table -- a mechanism needs to */
 /* define one of these and provide a function to return */
-/* it to initialize the GSSAPI library                  */
+/* it to initialize the GSSAPI library		  */
+int gssint_mechglue_initialize_library(void);
+
+OM_uint32 gssint_get_mech_type_oid(gss_OID OID, gss_buffer_t token);
 
 /*
  * This is the definition of the mechs_array struct, which is used to
@@ -105,13 +118,10 @@ typedef struct gss_cred_id_struct {
  */
  
 typedef struct gss_config {
-    OM_uint32	    priority;
-    char *	    mechNameStr;
     gss_OID_desc    mech_type;
     void *	    context;
     OM_uint32       (*gss_acquire_cred)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t,		/* desired_name */
 		    OM_uint32,		/* time_req */
@@ -123,13 +133,11 @@ typedef struct gss_config {
 		    );
     OM_uint32       (*gss_release_cred)
 	(
-		    void*,		/* context */		       
 		    OM_uint32*,		/* minor_status */
 		    gss_cred_id_t*	/* cred_handle */
 		    );
     OM_uint32       (*gss_init_sec_context)
 	(
-		    void*,			/* context */
 		    OM_uint32*,			/* minor_status */
 		    gss_cred_id_t,		/* claimant_cred_handle */
 		    gss_ctx_id_t*,		/* context_handle */
@@ -146,7 +154,6 @@ typedef struct gss_config {
 		    );
     OM_uint32       (*gss_accept_sec_context)
 	(
-		    void*,			/* context */
 		    OM_uint32*,			/* minor_status */
 		    gss_ctx_id_t*,		/* context_handle */
 		    gss_cred_id_t,		/* verifier_cred_handle */
@@ -161,67 +168,59 @@ typedef struct gss_config {
 		    );
     OM_uint32       (*gss_process_context_token)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    gss_buffer_t	/* token_buffer */
 		    );
     OM_uint32       (*gss_delete_sec_context)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t*,	/* context_handle */
 		    gss_buffer_t	/* output_token */
 		    );
     OM_uint32       (*gss_context_time)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    OM_uint32*		/* time_rec */
 		    );
-    OM_uint32       (*gss_sign)
+    OM_uint32       (*gss_get_mic)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
-		    int,		/* qop_req */
+		    gss_qop_t,		/* qop_req */
 		    gss_buffer_t,	/* message_buffer */
 		    gss_buffer_t	/* message_token */
 		    );
-    OM_uint32       (*gss_verify)
+    OM_uint32       (*gss_verify_mic)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    gss_buffer_t,	/* message_buffer */
 		    gss_buffer_t,	/* token_buffer */
-		    int*		/* qop_state */
+		    gss_qop_t*		/* qop_state */
 		    );
-    OM_uint32       (*gss_seal)
+    OM_uint32       (*gss_wrap)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    int,		/* conf_req_flag */
-		    int,		/* qop_req */
+		    gss_qop_t,		/* qop_req */
 		    gss_buffer_t,	/* input_message_buffer */
 		    int*,		/* conf_state */
 		    gss_buffer_t	/* output_message_buffer */
 		    );
-    OM_uint32       (*gss_unseal)
+    OM_uint32       (*gss_unwrap)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    gss_buffer_t,	/* input_message_buffer */
 		    gss_buffer_t,	/* output_message_buffer */
 		    int*,		/* conf_state */
-		    int*		/* qop_state */
+		    gss_qop_t*		/* qop_state */
 		    );
     OM_uint32       (*gss_display_status)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    OM_uint32,		/* status_value */
 		    int,		/* status_type */
@@ -231,13 +230,11 @@ typedef struct gss_config {
 		    );
     OM_uint32       (*gss_indicate_mechs)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_OID_set*	/* mech_set */
 		    );
     OM_uint32       (*gss_compare_name)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t,		/* name1 */
 		    gss_name_t,		/* name2 */
@@ -245,7 +242,6 @@ typedef struct gss_config {
 		    );
     OM_uint32       (*gss_display_name)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t,		/* input_name */
 		    gss_buffer_t,	/* output_name_buffer */
@@ -253,7 +249,6 @@ typedef struct gss_config {
 		    );
     OM_uint32       (*gss_import_name)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_buffer_t,	/* input_name_buffer */
 		    gss_OID,		/* input_name_type */
@@ -261,13 +256,11 @@ typedef struct gss_config {
 		    );
     OM_uint32       (*gss_release_name)
 	(
-		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t*		/* input_name */
 		    );
     OM_uint32       (*gss_inquire_cred)
 	(
-		    void*,			/* context */
 		    OM_uint32 *,		/* minor_status */
 		    gss_cred_id_t,		/* cred_handle */
 		    gss_name_t *,		/* name */
@@ -277,7 +270,6 @@ typedef struct gss_config {
 		    );
     OM_uint32	    (*gss_add_cred)
 	(
-		    void*,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_cred_id_t,	/* input_cred_handle */
 		    gss_name_t,		/* desired_name */
@@ -292,21 +284,18 @@ typedef struct gss_config {
 		    );
     OM_uint32	    (*gss_export_sec_context)
 	(
-		    void*,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_ctx_id_t *,	/* context_handle */
 		    gss_buffer_t	/* interprocess_token */
 		    );
     OM_uint32	    (*gss_import_sec_context)
 	(
-		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_buffer_t,	/* interprocess_token */
 		    gss_ctx_id_t *	/* context_handle */
 		    );
     OM_uint32 	    (*gss_inquire_cred_by_mech)
 	(
-		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_cred_id_t,	/* cred_handle */
 		    gss_OID,		/* mech_type */
@@ -317,14 +306,12 @@ typedef struct gss_config {
 		    );
     OM_uint32	    (*gss_inquire_names_for_mech)
 	(
-		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_OID,		/* mechanism */
 		    gss_OID_set *	/* name_types */
 		    );
     OM_uint32	(*gss_inquire_context)
 	(
-		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    gss_name_t *,	/* src_name */
@@ -332,18 +319,16 @@ typedef struct gss_config {
 		    OM_uint32 *,	/* lifetime_rec */
 		    gss_OID *,		/* mech_type */
 		    OM_uint32 *,	/* ctx_flags */
-		    int *,           	/* locally_initiated */
+		    int *,	   	/* locally_initiated */
 		    int *		/* open */
 		    );
     OM_uint32	    (*gss_internal_release_oid)
 	(
-		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_OID *		/* OID */
 	 );
     OM_uint32	     (*gss_wrap_size_limit)
 	(
-		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    int,		/* conf_req_flag */
@@ -351,16 +336,30 @@ typedef struct gss_config {
 		    OM_uint32,		/* req_output_size */
 		    OM_uint32 *		/* max_input_size */
 	 );
+#if 0
+    int		     (*pname_to_uid)
+	(
+		    char *,		/* pname */
+		    gss_OID,		/* name type */
+		    gss_OID,		/* mech type */
+		    uid_t *		/* uid */
+		    );
+	OM_uint32		(*gssint_userok)
+	(
+		    OM_uint32 *,	/* minor_status */
+		    const gss_name_t,	/* pname */
+		    const char *,	/* local user */
+		    int *		/* user ok? */
+	/* */);
+#endif
 	OM_uint32		(*gss_export_name)
 	(
-		void *,			/* context */
 		OM_uint32 *,		/* minor_status */
 		const gss_name_t,	/* input_name */
 		gss_buffer_t		/* exported_name */
 	/* */);
 	OM_uint32	(*gss_store_cred)
 	(
-		void *,			/* context */
 		OM_uint32 *,		/* minor_status */
 		const gss_cred_id_t,	/* input_cred */
 		gss_cred_usage_t,	/* cred_usage */
@@ -370,7 +369,131 @@ typedef struct gss_config {
 		gss_OID_set *,		/* elements_stored */
 		gss_cred_usage_t *	/* cred_usage_stored */
 	/* */);
+
+	OM_uint32	(*gss_import_name_object)
+	(
+		OM_uint32 *,		/* minor_status */
+		void *,			/* input_name */
+		gss_OID,		/* input_name_type */
+		gss_name_t *		/* output_name */
+	/* */);
+
+	OM_uint32	(*gss_export_name_object)
+	(
+		OM_uint32 *,		/* minor_status */
+		gss_name_t,		/* input_name */
+		gss_OID,		/* desired_name_type */
+		void **			/* output_name */
+	/* */);
+
+	/* GGF extensions */
+
+	OM_uint32       (*gss_inquire_sec_context_by_oid)
+    	(
+    		    OM_uint32 *,	/* minor_status */
+    		    const gss_ctx_id_t, /* context_handle */
+    		    const gss_OID,      /* OID */
+    		    gss_buffer_set_t *  /* data_set */
+    		    );
+	OM_uint32       (*gss_inquire_cred_by_oid)
+    	(
+    		    OM_uint32 *,	/* minor_status */
+    		    const gss_cred_id_t, /* cred_handle */
+    		    const gss_OID,      /* OID */
+    		    gss_buffer_set_t *  /* data_set */
+    		    );
+	OM_uint32       (*gss_set_sec_context_option)
+    	(
+    		    OM_uint32 *,	/* minor_status */
+    		    gss_ctx_id_t *,     /* context_handle */
+    		    const gss_OID,      /* OID */
+    		    const gss_buffer_t  /* value */
+    		    );
+	OM_uint32       (*gssspi_set_cred_option)
+    	(
+    		    OM_uint32 *,	/* minor_status */
+    		    gss_cred_id_t,      /* cred_handle */
+    		    const gss_OID,      /* OID */
+    		    const gss_buffer_t	/* value */
+    		    );
+	OM_uint32       (*gssspi_mech_invoke)
+    	(
+    		    OM_uint32*,		/* minor_status */
+    		    const gss_OID, 	/* mech OID */
+    		    const gss_OID,      /* OID */
+    		    gss_buffer_t 	/* value */
+    		    );
+
+	/* AEAD extensions */
+	OM_uint32	(*gss_wrap_aead)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int,			/* conf_req_flag */
+	    gss_qop_t,			/* qop_req */
+	    gss_buffer_t,		/* input_assoc_buffer */
+	    gss_buffer_t,		/* input_payload_buffer */
+	    int *,			/* conf_state */
+	    gss_buffer_t		/* output_message_buffer */
+	/* */);
+
+	OM_uint32	(*gss_unwrap_aead)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    gss_buffer_t,		/* input_message_buffer */
+	    gss_buffer_t,		/* input_assoc_buffer */
+	    gss_buffer_t,		/* output_payload_buffer */
+	    int *,			/* conf_state */
+	    gss_qop_t *			/* qop_state */
+	/* */);
+
+	/* SSPI extensions */
+	OM_uint32	(*gss_wrap_iov)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int,			/* conf_req_flag */
+	    gss_qop_t,			/* qop_req */
+	    int *,			/* conf_state */
+	    gss_iov_buffer_desc *,	/* iov */
+	    int				/* iov_count */
+	/* */);
+
+	OM_uint32	(*gss_unwrap_iov)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int *,			/* conf_state */
+	    gss_qop_t *,		/* qop_state */
+	    gss_iov_buffer_desc *,	/* iov */
+	    int				/* iov_count */
+	/* */);
+
+	OM_uint32	(*gss_wrap_iov_length)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context_handle */
+	    int,			/* conf_req_flag*/
+	    gss_qop_t, 			/* qop_req */
+	    int *, 			/* conf_state */
+	    gss_iov_buffer_desc *,	/* iov */
+	    int				/* iov_count */
+	/* */);
+
+	OM_uint32       (*gss_complete_auth_token)
+    	(
+    		    OM_uint32*,		/* minor_status */
+    		    const gss_ctx_id_t,	/* context_handle */
+    		    gss_buffer_t	/* input_message_buffer */
+    		    );
+
 } *gss_mechanism;
+
+/* This structure MUST NOT be used by any code outside libgss */
+typedef struct gss_config_ext {
+    gss_acquire_cred_with_password_sfct	gss_acquire_cred_with_password;
+} *gss_mechanism_ext;
 
 /*
  * In the user space we use a wrapper structure to encompass the
@@ -387,21 +510,22 @@ typedef struct gss_mech_config {
 	void *dl_handle;		/* RTLD object handle for the mech */
 	gss_OID mech_type;		/* mechanism oid */
 	gss_mechanism mech;		/* mechanism initialization struct */
+ 	gss_mechanism_ext mech_ext;	/* extensions */
+ 	int priority;			/* mechanism preference order */
+	int freeMech;			/* free mech table */
 	struct gss_mech_config *next;	/* next element in the list */
 } *gss_mech_info;
-
-/* Mechanisms defined within our library */
-
-extern gss_mechanism *krb5_gss_get_mech_configs(void);
-extern gss_mechanism *spnego_gss_get_mech_configs(void);
 
 /********************************************************/
 /* Internal mechglue routines */
 
+#if 0
 int gssint_mechglue_init(void);
 void gssint_mechglue_fini(void);
+#endif
 
 gss_mechanism gssint_get_mechanism (gss_OID);
+gss_mechanism_ext gssint_get_mechanism_ext(const gss_OID);
 OM_uint32 gssint_get_mech_type (gss_OID, gss_buffer_t);
 char *gssint_get_kmodName(const gss_OID);
 char *gssint_get_modOptions(const gss_OID);
@@ -412,6 +536,11 @@ OM_uint32 gssint_export_internal_name(OM_uint32 *, const gss_OID,
 OM_uint32 gssint_display_internal_name (OM_uint32 *, gss_OID, gss_name_t,
 				       gss_buffer_t, gss_OID *);
 OM_uint32 gssint_release_internal_name (OM_uint32 *, gss_OID, gss_name_t *);
+OM_uint32 gssint_delete_internal_sec_context (OM_uint32 *, gss_OID,
+					      gss_ctx_id_t *, gss_buffer_t);
+#ifdef _GSS_STATIC_LINK
+int gssint_register_mechinfo(gss_mech_info template);
+#endif
 
 OM_uint32 gssint_convert_name_to_union_name
 	  (OM_uint32 *,		/* minor_status */
@@ -466,6 +595,14 @@ gssint_get_mechanisms(
 );
 
 OM_uint32
+gssint_userok(
+	OM_uint32 *,		/* minor */
+	const gss_name_t,	/* name */
+	const char *,		/* user */
+	int *			/* user_ok */
+);
+
+OM_uint32
 gss_store_cred(
 	OM_uint32 *,		/* minor_status */
 	const gss_cred_id_t,	/* input_cred_handle */
@@ -493,6 +630,27 @@ gssint_put_der_length(
 	unsigned char **,	/* buf */
 	unsigned int		/* max_len */
 );
+
+OM_uint32
+gssint_wrap_aead (gss_mechanism,	/* mech */
+		  OM_uint32 *,		/* minor_status */
+		  gss_union_ctx_id_t,	/* ctx */
+		  int,			/* conf_req_flag */
+		  gss_qop_t,		/* qop_req_flag */
+		  gss_buffer_t,		/* input_assoc_buffer */
+		  gss_buffer_t,		/* input_payload_buffer */
+		  int *,		/* conf_state */
+		  gss_buffer_t);	/* output_message_buffer */
+OM_uint32
+gssint_unwrap_aead (gss_mechanism,	/* mech */
+		    OM_uint32 *,	/* minor_status */
+		    gss_union_ctx_id_t,	/* ctx */
+		    gss_buffer_t,	/* input_message_buffer */
+		    gss_buffer_t,	/* input_assoc_buffer */
+		    gss_buffer_t,	/* output_payload_buffer */
+		    int *,		/* conf_state */
+		    gss_qop_t *);	/* qop_state */
+
 
 /* Use this to map an error code that was returned from a mech
    operation; the mech will be asked to produce the associated error

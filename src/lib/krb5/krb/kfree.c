@@ -25,6 +25,33 @@
  *
  * krb5_free_address()
  */
+/*
+ * Copyright (c) 2006-2008, Novell, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *   * The copyright holder's name is not used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "k5-int.h"
 
@@ -712,4 +739,73 @@ krb5_free_pa_enc_ts(krb5_context ctx, krb5_pa_enc_ts *pa_enc_ts)
     if (!pa_enc_ts)
 	return;
     krb5_xfree(pa_enc_ts);
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_for_user(krb5_context context, krb5_pa_for_user *req)
+{
+    if (req == NULL)
+	return;
+    if (req->user != NULL) {
+	krb5_free_principal(context, req->user);
+	req->user = NULL;
+    }
+    krb5_free_checksum_contents(context, &req->cksum);
+    krb5_free_data_contents(context, &req->auth_package);
+    krb5_xfree(req);
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_server_referral_data(krb5_context context,
+				  krb5_pa_server_referral_data *ref)
+{
+    if (ref == NULL)
+	return;
+    if (ref->referred_realm) {
+	krb5_free_data(context, ref->referred_realm);
+	ref->referred_realm = NULL;
+    }
+    if (ref->true_principal_name != NULL) {
+	krb5_free_principal(context, ref->true_principal_name);
+	ref->true_principal_name = NULL;
+    } 
+    if (ref->requested_principal_name != NULL) {
+	krb5_free_principal(context, ref->requested_principal_name);
+	ref->requested_principal_name = NULL;
+    }
+    krb5_free_checksum_contents(context, &ref->rep_cksum); 
+    krb5_xfree(ref);
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_svr_referral_data(krb5_context context,
+			       krb5_pa_svr_referral_data *ref)
+{
+    if (ref == NULL)
+	return;
+    if (ref->principal != NULL) {
+	krb5_free_principal(context, ref->principal);
+	ref->principal = NULL;
+    } 
+    krb5_xfree(ref);
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_pac_req(krb5_context context,
+		     krb5_pa_pac_req *req)
+{
+    if (req == NULL)
+	return;
+    krb5_xfree(req);
+}
+
+void KRB5_CALLCONV
+krb5_free_etype_list(krb5_context context,
+		     krb5_etype_list *etypes)
+{
+    if (etypes != NULL) {
+	if (etypes->etypes != NULL)
+	    krb5_xfree(etypes->etypes);
+	krb5_xfree(etypes);
+    }
 }

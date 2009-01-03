@@ -265,7 +265,9 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
 
 error:;
     krb5_xfree(outbuf->data);
-    return retval;
+    outbuf->length = 0;
+    outbuf->data = NULL;
 
+    return retval;
 }
 

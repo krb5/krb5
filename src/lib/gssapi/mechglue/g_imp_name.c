@@ -252,7 +252,7 @@ importExportName(minor, unionName)
      * have created it.
      */
     if (mech->gss_export_name) {
-	major = mech->gss_import_name(mech->context, minor,
+	major = mech->gss_import_name(minor,
 				      &expName, (gss_OID)GSS_C_NT_EXPORT_NAME,
 				      &unionName->mech_name);
 	if (major != GSS_S_COMPLETE)
@@ -350,7 +350,7 @@ importExportName(minor, unionName)
      */
     expName.length = nameLen;
     expName.value = nameLen ? (void *)buf : NULL;
-    major = mech->gss_import_name(mech->context, minor, &expName,
+    major = mech->gss_import_name(minor, &expName,
 				  GSS_C_NULL_OID, &unionName->mech_name);
     if (major != GSS_S_COMPLETE) {
 	map_error(minor, mech);
@@ -363,3 +363,4 @@ importExportName(minor, unionName)
     }
     return major;
 } /* importExportName */
+

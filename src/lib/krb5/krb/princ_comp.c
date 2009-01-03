@@ -29,37 +29,116 @@
  */
 
 #include "k5-int.h"
+#include "k5-unicode.h"
+
+static krb5_boolean
+realm_compare_flags(krb5_context context,
+		    krb5_const_principal princ1,
+		    krb5_const_principal princ2,
+		    int flags)
+{
+    const krb5_data *realm1 = krb5_princ_realm(context, princ1);
+    const krb5_data *realm2 = krb5_princ_realm(context, princ2);
+
+    if (realm1->length != realm2->length)
+	return FALSE;
+
+    return (flags & KRB5_PRINCIPAL_COMPARE_CASEFOLD) ?
+	(strncasecmp(realm1->data, realm2->data, realm2->length) == 0) :
+	(memcmp(realm1->data, realm2->data, realm2->length) == 0);
+}
 
 krb5_boolean KRB5_CALLCONV
 krb5_realm_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
 {
-    if (!data_eq(*krb5_princ_realm(context, princ1),
-		 *krb5_princ_realm(context, princ2)))
-	return FALSE;
+    return realm_compare_flags(context, princ1, princ2, 0);
+}
 
-    return TRUE;
+static krb5_error_code
+upn_to_principal(krb5_context context,
+		 krb5_const_principal princ,
+		 krb5_principal *upn)
+{
+    char *unparsed_name;
+    krb5_error_code code;
+
+    code = krb5_unparse_name_flags(context, princ,
+				   KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+				   &unparsed_name);
+    if (code) {
+	*upn = NULL;
+	return code;
+    }
+
+    code = krb5_parse_name(context, unparsed_name, upn);
+
+    free(unparsed_name);
+
+    return code;
 }
 
 krb5_boolean KRB5_CALLCONV
-krb5_principal_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
+krb5_principal_compare_flags(krb5_context context,
+			     krb5_const_principal princ1,
+			     krb5_const_principal princ2,
+			     int flags)
 {
     register int i;
     krb5_int32 nelem;
+    unsigned int utf8 = (flags & KRB5_PRINCIPAL_COMPARE_UTF8) != 0;
+    unsigned int casefold = (flags & KRB5_PRINCIPAL_COMPARE_CASEFOLD) != 0;
+    krb5_principal upn1 = NULL;
+    krb5_principal upn2 = NULL;
+    krb5_boolean ret = FALSE;
+
+    if (flags & KRB5_PRINCIPAL_COMPARE_ENTERPRISE) {
+	/* Treat UPNs as if they were real principals */
+	if (krb5_princ_type(context, princ1) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+	    if (upn_to_principal(context, princ1, &upn1) == 0)
+		princ1 = upn1;
+	}
+	if (krb5_princ_type(context, princ2) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+	    if (upn_to_principal(context, princ2, &upn2) == 0)
+		princ2 = upn2;
+	}
+    }
 
     nelem = krb5_princ_size(context, princ1);
     if (nelem != krb5_princ_size(context, princ2))
-	return FALSE;
+	goto out;
 
-    if (! krb5_realm_compare(context, princ1, princ2))
-	return FALSE;
+    if ((flags & KRB5_PRINCIPAL_COMPARE_IGNORE_REALM) == 0 &&
+	!realm_compare_flags(context, princ1, princ2, flags))
+	goto out;
 
     for (i = 0; i < (int) nelem; i++) {
 	register const krb5_data *p1 = krb5_princ_component(context, princ1, i);
 	register const krb5_data *p2 = krb5_princ_component(context, princ2, i);
-	if (!data_eq(*p1, *p2))
-	    return FALSE;
+	int cmp;
+
+	if (casefold) {
+	    if (utf8)
+		cmp = krb5int_utf8_normcmp(p1, p2, KRB5_UTF8_CASEFOLD);
+	    else
+		cmp = p1->length == p2->length ?
+			strncasecmp(p1->data, p2->data, p2->length) :
+			p1->length - p2->length;
+	} else
+	    cmp = !data_eq(*p1, *p2);
+
+	if (cmp != 0)
+	    goto out;
     }
-    return TRUE;
+
+    ret = TRUE;
+
+out:
+    if (upn1 != NULL)
+	krb5_free_principal(context, upn1);
+    if (upn2 != NULL)
+	krb5_free_principal(context, upn2);
+
+    return ret;
 }
 
 krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *r)
@@ -81,3 +160,20 @@ krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *r)
     else
         return FALSE;
 }
+
+krb5_boolean KRB5_CALLCONV
+krb5_principal_compare(krb5_context context,
+		       krb5_const_principal princ1,
+		       krb5_const_principal princ2)
+{
+    return krb5_principal_compare_flags(context, princ1, princ2, 0);
+}
+
+krb5_boolean KRB5_CALLCONV
+krb5_principal_compare_any_realm(krb5_context context,
+				 krb5_const_principal princ1,
+				 krb5_const_principal princ2)
+{
+    return krb5_principal_compare_flags(context, princ1, princ2, KRB5_PRINCIPAL_COMPARE_IGNORE_REALM);
+}
+

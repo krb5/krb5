@@ -2,22 +2,26 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5int_copy_ccache(minor_status, cred_handle, out_ccache)
-    OM_uint32 *minor_status;
-    gss_cred_id_t cred_handle;
-    krb5_ccache out_ccache;
+gss_krb5int_copy_ccache(OM_uint32 *minor_status,
+			gss_cred_id_t cred_handle,
+			const gss_OID desired_object,
+			const gss_buffer_t value)
 {
-    OM_uint32 major_status;
     krb5_gss_cred_id_t k5creds;
     krb5_cc_cursor cursor;
     krb5_creds creds;
     krb5_error_code code;
     krb5_context context;
+    krb5_ccache out_ccache;
+        
+    assert(value->length == sizeof(out_ccache));
 
-    /* validate the cred handle */
-    major_status = krb5_gss_validate_cred(minor_status, cred_handle);
-    if (major_status)
-        return(major_status);
+    if (value->length != sizeof(out_ccache))
+	return GSS_S_FAILURE;
+
+    out_ccache = (krb5_ccache)value->value;
+
+    /* cred handle will have been validated by gssspi_set_cred_option() */
 
     k5creds = (krb5_gss_cred_id_t) cred_handle;
     code = k5_mutex_lock(&k5creds->lock);

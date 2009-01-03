@@ -54,5 +54,16 @@ krb5_preauth_supply_preauth_data(krb5_context context,
 				 const char *attr,
 				 const char *value);
 
+krb5_error_code
+krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
+			   krb5_creds *in_cred, krb5_creds **out_cred,
+			   krb5_creds ***tgts, int kdcopt);
+
+#define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
+
+#define IS_TGS_PRINC(c, p)						\
+    (krb5_princ_size((c), (p)) == 2 &&					\
+     data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
 

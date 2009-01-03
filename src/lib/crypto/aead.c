@@ -130,9 +130,9 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
 	ret = (*(cksum_type->keyhash->hash_iov))(key, usage, 0,
 						 data, num_data, cksum_data);
     } else if (cksum_type->flags & KRB5_CKSUMFLAG_DERIVE) {
-	ret = krb5_dk_make_checksum_iov(cksum_type->hash,
-					key, usage, data, num_data,
-					cksum_data);
+	ret = krb5int_dk_make_checksum_iov(cksum_type->hash,
+					   key, usage, data, num_data,
+					   cksum_data);
     } else {
 	ret = make_unkeyed_checksum_iov(cksum_type->hash, data, num_data,
 					cksum_data);
@@ -289,8 +289,7 @@ krb5int_c_iov_get_block(unsigned char *block,
 	memset(block + j, 0, block_size - j);
 
 #ifdef DEBUG_IOV
-    if (iov_state->iov_pos < num_data)
-	dump_block("get_block", i, j, block, block_size);
+    dump_block("get_block", i, j, block, block_size);
 #endif
 
     return (iov_state->iov_pos < num_data);
@@ -339,8 +338,7 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
     iov_state->iov_pos = i;
 
 #ifdef DEBUG_IOV
-    if (iov_state->iov_pos < num_data)
-	dump_block("put_block", i, j, block, block_size);
+    dump_block("put_block", i, j, block, block_size);
 #endif
 
     return (iov_state->iov_pos < num_data);

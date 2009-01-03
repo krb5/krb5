@@ -20,6 +20,60 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+/*
+ * Copyright (c) 2006-2008, Novell, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *   * The copyright holder's name is not used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+/*
+ * Copyright (c) 2006-2008, Novell, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *   * The copyright holder's name is not used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "gssapiP_krb5.h"
 
@@ -72,7 +126,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
         return(GSS_S_FAILURE);
     }
 
-    if ((lifetime = ctx->endtime - now) < 0)
+    if ((lifetime = ctx->krb_times.endtime - now) < 0)
         lifetime = 0;
 
     if (initiator_name) {
@@ -134,3 +188,126 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
     *minor_status = 0;
     return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
 }
+
+OM_uint32
+gss_krb5int_inq_session_key(
+    OM_uint32 *minor_status,
+    const gss_ctx_id_t context_handle,
+    const gss_OID desired_object,
+    gss_buffer_set_t *data_set)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    krb5_keyblock *key;
+    gss_buffer_desc keyvalue, keyinfo;
+    OM_uint32 major_status, minor;
+    unsigned char oid_buf[GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + 6];
+    gss_OID_desc oid;
+
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+    key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
+
+    keyvalue.value = key->contents;
+    keyvalue.length = key->length;
+
+    major_status = generic_gss_add_buffer_set_member(minor_status, &keyvalue, data_set);
+    if (GSS_ERROR(major_status))
+	goto cleanup;
+
+    oid.elements = oid_buf;
+    oid.length = sizeof(oid_buf);
+
+    major_status = generic_gss_oid_compose(minor_status,
+					   GSS_KRB5_SESSION_KEY_ENCTYPE_OID,
+					   GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH,
+					   key->enctype,
+					   &oid);
+    if (GSS_ERROR(major_status))
+	goto cleanup;
+
+    keyinfo.value = oid.elements;
+    keyinfo.length = oid.length;
+
+    major_status = generic_gss_add_buffer_set_member(minor_status, &keyinfo, data_set);
+    if (GSS_ERROR(major_status))
+	goto cleanup;
+
+    return GSS_S_COMPLETE;
+
+cleanup:
+    if (*data_set != GSS_C_NO_BUFFER_SET) {
+	if ((*data_set)->count != 0)
+	    memset((*data_set)->elements[0].value, 0, (*data_set)->elements[0].length);
+	gss_release_buffer_set(&minor, data_set);
+    }
+
+    return major_status;
+}
+
+OM_uint32
+gss_krb5int_extract_authz_data_from_sec_context(
+   OM_uint32 *minor_status,
+   const gss_ctx_id_t context_handle,
+   const gss_OID desired_object,
+   gss_buffer_set_t *data_set)
+{
+    OM_uint32 major_status;
+    krb5_gss_ctx_id_rec *ctx;
+    int ad_type = 0;
+    size_t i;
+
+    *data_set = GSS_C_NO_BUFFER_SET;
+
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+
+    major_status = generic_gss_oid_decompose(minor_status,
+					     GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID,
+					     GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH,
+					     desired_object,
+					     &ad_type);
+    if (major_status != GSS_S_COMPLETE || ad_type == 0) {
+	*minor_status = ENOENT;
+	return GSS_S_FAILURE;
+    }
+
+    if (ctx->authdata != NULL) {
+	for (i = 0; ctx->authdata[i] != NULL; i++) {
+	    if (ctx->authdata[i]->ad_type == ad_type) {
+		gss_buffer_desc ad_data;
+
+		ad_data.length = ctx->authdata[i]->length;
+		ad_data.value = ctx->authdata[i]->contents;
+
+		major_status = generic_gss_add_buffer_set_member(minor_status,
+								 &ad_data, data_set);
+		if (GSS_ERROR(major_status))
+		    break;
+	    }
+	}
+    }
+
+    if (GSS_ERROR(major_status)) {
+	OM_uint32 tmp;
+
+	generic_gss_release_buffer_set(&tmp, data_set);
+    }
+
+    return major_status;
+}
+
+OM_uint32
+gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *minor_status,
+					      const gss_ctx_id_t context_handle,
+                                              const gss_OID desired_oid,
+                                              gss_buffer_set_t *data_set)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    gss_buffer_desc rep;
+
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+
+    rep.value = &ctx->krb_times.authtime;
+    rep.length = sizeof(ctx->krb_times.authtime);
+
+    return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
+}
+

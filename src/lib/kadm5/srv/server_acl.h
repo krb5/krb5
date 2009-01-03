@@ -95,6 +95,12 @@ krb5_boolean kadm5int_acl_check
 		   krb5_int32,
 		   krb5_principal,
 		   restriction_t **);
+krb5_boolean kadm5int_acl_check_krb
+	(krb5_context,
+		   krb5_const_principal,
+		   krb5_int32,
+		   krb5_const_principal,
+		   restriction_t **);
 krb5_error_code kadm5int_acl_impose_restrictions
 	(krb5_context,
 		   kadm5_principal_ent_rec *,

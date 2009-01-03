@@ -72,7 +72,7 @@ int *			name_equal;
 {
     OM_uint32		major_status, temp_minor;
     gss_union_name_t	union_name1, union_name2;
-    gss_mechanism	mech;
+    gss_mechanism	mech = NULL;
     gss_name_t		internal_name;
     
     major_status = val_comp_name_args(minor_status,
@@ -114,7 +114,11 @@ int *			name_equal;
 	if ((union_name1->mech_name == 0) || (union_name2->mech_name == 0))
 	    /* should never happen */
 	    return (GSS_S_BAD_NAME);
-	major_status = mech->gss_compare_name(mech->context, minor_status,
+	if (!mech)
+	    return (GSS_S_BAD_MECH);
+	if (!mech->gss_compare_name)
+	    return (GSS_S_UNAVAILABLE);
+	major_status = mech->gss_compare_name(minor_status,
 					      union_name1->mech_name,
 					      union_name2->mech_name,
 					      name_equal);
@@ -190,7 +194,11 @@ int *			name_equal;
     if (major_status != GSS_S_COMPLETE)
 	return (GSS_S_COMPLETE); /* return complete, but not equal */
 
-    major_status = mech->gss_compare_name(mech->context, minor_status,
+    if (!mech)
+	return (GSS_S_BAD_MECH);
+    if (!mech->gss_compare_name)
+	return (GSS_S_UNAVAILABLE);
+    major_status = mech->gss_compare_name(minor_status,
 					  union_name1->mech_name,
 					  internal_name, name_equal);
     if (major_status != GSS_S_COMPLETE)

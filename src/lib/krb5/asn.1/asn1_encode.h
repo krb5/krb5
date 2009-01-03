@@ -41,6 +41,7 @@
 
    Operations
 
+     asn1_encode_boolean
      asn1_encode_integer
      asn1_encode_unsigned_integer
      asn1_encode_octetstring
@@ -50,6 +51,8 @@
      asn1_encode_oid
 */
 
+asn1_error_code asn1_encode_boolean
+	(asn1buf *buf, asn1_intmax val, unsigned int *retlen);
 asn1_error_code asn1_encode_integer
         (asn1buf *buf, asn1_intmax val, unsigned int *retlen);
 /* requires  *buf is allocated

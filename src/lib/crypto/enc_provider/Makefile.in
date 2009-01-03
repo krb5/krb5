@@ -2,7 +2,7 @@ thisconfigdir=../../..
 myfulldir=lib/crypto/enc_provider
 mydir=lib/crypto/enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../arcfour -I$(srcdir)/../aes
+LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../arcfour -I$(srcdir)/../aes -I$(srcdir)/..
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
@@ -14,7 +14,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= des.o des3.o rc4.o aes.o
+STLIBOBJS= des.o des3.o rc4.o aes.o 
 
 OBJS= \
 	$(OUTPRE)des.$(OBJEXT) \
@@ -54,7 +54,8 @@ des.so des.po $(OUTPRE)des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../des/des_int.h des.c enc_provider.h
+  $(srcdir)/../aead.h $(srcdir)/../des/des_int.h des.c \
+  enc_provider.h
 des3.so des3.po $(OUTPRE)des3.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \

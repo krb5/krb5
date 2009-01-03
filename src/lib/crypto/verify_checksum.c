@@ -51,10 +51,22 @@ krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
     indata.length = cksum->length;
     indata.data = (char *) cksum->contents;
 
-    if (krb5_cksumtypes_list[i].keyhash &&
-	krb5_cksumtypes_list[i].keyhash->verify)
-	return((*(krb5_cksumtypes_list[i].keyhash->verify))(key, usage, 0, data,
-							    &indata, valid));
+    if (krb5_cksumtypes_list[i].keyhash) {
+	const struct krb5_keyhash_provider *keyhash;
+
+	keyhash = krb5_cksumtypes_list[i].keyhash;
+
+	if (keyhash->verify == NULL && keyhash->verify_iov != NULL) {
+	    krb5_crypto_iov iov[1];
+
+	    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+	    iov[0].data = *data;
+
+	    return (*keyhash->verify_iov)(key, usage, 0, iov, 1, &indata, valid);
+	} else if (keyhash->verify != NULL) {
+	    return (*keyhash->verify)(key, usage, 0, data, &indata, valid);
+	}
+    }
 
     /* otherwise, make the checksum again, and compare */
 

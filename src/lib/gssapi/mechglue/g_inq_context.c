@@ -111,7 +111,6 @@ gss_inquire_context(
     }
 
     status = mech->gss_inquire_context(
-			mech->context,
 			minor_status,
 			ctx->internal_ctx_id,
 			(src_name ? &localSourceName : NULL),
@@ -135,8 +134,7 @@ gss_inquire_context(
 
 	    if (status != GSS_S_COMPLETE) {
 		if (localTargName)
-		    mech->gss_release_name(mech->context,
-					   &temp_minor, &localTargName);
+		    mech->gss_release_name(&temp_minor, &localTargName);
 		return (status);
 	    }
 

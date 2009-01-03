@@ -99,7 +99,7 @@ kg_oid_internalize(kcontext, argp, buffer, lenremain)
         return EINVAL;
     }
     oid->length = ibuf;
-    oid->elements = malloc(ibuf);
+    oid->elements = malloc((size_t)ibuf);
     if (oid->elements == 0) {
         free(oid);
         return ENOMEM;
@@ -263,7 +263,10 @@ kg_ctx_size(kcontext, arg, sizep)
      *  krb5_int32      for sealalg.
      *  ...             for enc
      *  ...             for seq
+     *  krb5_int32      for authtime.
+     *  krb5_int32      for starttime.
      *  krb5_int32      for endtime.
+     *  krb5_int32      for renew_till.
      *  krb5_int32      for flags.
      *  krb5_int64      for seq_send.
      *  krb5_int64      for seq_recv.
@@ -275,11 +278,13 @@ kg_ctx_size(kcontext, arg, sizep)
      *  ...             for acceptor_subkey
      *  krb5_int32      for acceptor_key_cksumtype
      *  krb5_int32      for cred_rcache
+     *  krb5_int32      for number of elements in authdata array
+     *  ...             for authdata array
      *  krb5_int32      for trailer.
      */
     kret = EINVAL;
     if ((ctx = (krb5_gss_ctx_id_rec *) arg)) {
-        required = 17*sizeof(krb5_int32);
+        required = 21*sizeof(krb5_int32);
         required += 2*sizeof(krb5_int64);
         required += sizeof(ctx->seed);
 
@@ -337,6 +342,16 @@ kg_ctx_size(kcontext, arg, sizep)
                                     KV5M_KEYBLOCK,
                                     (krb5_pointer) ctx->acceptor_subkey,
                                     &required);
+	if (!kret && ctx->authdata) {
+	    krb5_int32 i;
+
+	    for (i = 0; !kret && ctx->authdata[i]; i++) {
+		kret = krb5_size_opaque(kcontext,
+					KV5M_AUTHDATA,
+					(krb5_pointer)ctx->authdata[i],
+					&required);
+	    }
+	}
         if (!kret)
             *sizep += required;
     }
@@ -397,7 +412,13 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                                        &bp, &remain);
             (void) krb5_ser_pack_int32((krb5_int32) ctx->sealalg,
                                        &bp, &remain);
-            (void) krb5_ser_pack_int32((krb5_int32) ctx->endtime,
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.authtime,
+                                       &bp, &remain);
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.starttime,
+                                       &bp, &remain);
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.endtime,
+                                       &bp, &remain);
+            (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_times.renew_till,
                                        &bp, &remain);
             (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_flags,
                                        &bp, &remain);
@@ -477,6 +498,25 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
             if (!kret)
                 kret = krb5_ser_pack_int32((krb5_int32) ctx->cred_rcache,
                                            &bp, &remain);
+	    if (!kret) {
+		krb5_int32 i = 0;
+
+		if (ctx->authdata) {
+		    for (; ctx->authdata[i]; i++)
+			;
+		}
+		/* authdata count */
+		kret = krb5_ser_pack_int32(i, &bp, &remain);
+		if (!kret && ctx->authdata) {
+		    /* authdata */
+		    for (i = 0; !kret && ctx->authdata[i]; i++)
+			kret = krb5_externalize_opaque(kcontext,
+						       KV5M_AUTHDATA,
+						       ctx->authdata[i],
+						       &bp,
+						       &remain);
+		}
+	    }
             /* trailer */
             if (!kret)
                 kret = krb5_ser_pack_int32(KG_CONTEXT, &bp, &remain);
@@ -552,11 +592,17 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->sealalg = (int) ibuf;
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-            ctx->endtime = (krb5_timestamp) ibuf;
+            ctx->krb_times.authtime = (krb5_timestamp) ibuf;
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            ctx->krb_times.starttime = (krb5_timestamp) ibuf;
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            ctx->krb_times.endtime = (krb5_timestamp) ibuf;
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            ctx->krb_times.renew_till = (krb5_timestamp) ibuf;
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->krb_flags = (krb5_flags) ibuf;
-            (void) (*kaccess.krb5_ser_unpack_int64)(&ctx->seq_send, &bp, &remain);
-            kret = (*kaccess.krb5_ser_unpack_int64)(&ctx->seq_recv, &bp, &remain);
+            (void) (*kaccess.krb5_ser_unpack_int64)((krb5_int64 *)&ctx->seq_send, &bp, &remain);
+            kret = (*kaccess.krb5_ser_unpack_int64)((krb5_int64 *)&ctx->seq_recv, &bp, &remain);
             if (kret) {
                 free(ctx);
                 return kret;
@@ -647,11 +693,31 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             }
             if (!kret)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-            ctx->cred_rcache = ibuf;
+            ctx->acceptor_subkey_cksumtype = ibuf;
             if (!kret)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-            ctx->acceptor_subkey_cksumtype = ibuf;
+            ctx->cred_rcache = ibuf;
+	    /* authdata */
+            if (!kret)
+                kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+	    if (!kret) {
+		krb5_int32 nadata = ibuf, i;
 
+		if (nadata > 0) {
+		    ctx->authdata = (krb5_authdata **)calloc((size_t)nadata + 1,
+							     sizeof(krb5_authdata *));
+		    if (ctx->authdata == NULL) {
+			kret = ENOMEM;
+		    } else {
+			for (i = 0; !kret && i < nadata; i++)
+			    kret = krb5_internalize_opaque(kcontext,
+							   KV5M_AUTHDATA,
+							   (krb5_pointer *)&ctx->authdata[i],
+							   &bp,
+							   &remain);
+		    }
+		}
+	    }
             /* Get trailer */
             if (!kret)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);

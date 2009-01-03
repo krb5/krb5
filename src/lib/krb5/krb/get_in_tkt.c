@@ -293,15 +293,31 @@ verify_as_reply(krb5_context 		context,
 		krb5_kdc_rep		*as_reply)
 {
     krb5_error_code		retval;
-    
+    int				canon_req;
+    int				canon_ok;
+
     /* check the contents for sanity: */
     if (!as_reply->enc_part2->times.starttime)
 	as_reply->enc_part2->times.starttime =
 	    as_reply->enc_part2->times.authtime;
-    
-    if (!krb5_principal_compare(context, as_reply->client, request->client)
-	|| !krb5_principal_compare(context, as_reply->enc_part2->server, request->server)
-	|| !krb5_principal_compare(context, as_reply->ticket->server, request->server)
+
+    /*
+     * We only allow the AS-REP server name to be changed if the
+     * caller set the canonicalize flag (or requested an enterprise
+     * principal) and we requested (and received) a TGT.
+     */
+    canon_req = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
+	(krb5_princ_type(context, request->client) == KRB5_NT_ENTERPRISE_PRINCIPAL);
+    if (canon_req) {
+	canon_ok = IS_TGS_PRINC(context, request->server) &&
+		   IS_TGS_PRINC(context, as_reply->enc_part2->server);
+    } else
+	canon_ok = 0;
+ 
+    if ((!canon_ok &&
+	 (!krb5_principal_compare(context, as_reply->client, request->client) ||
+	  !krb5_principal_compare(context, as_reply->enc_part2->server, request->server)))
+	|| !krb5_principal_compare(context, as_reply->enc_part2->server, as_reply->ticket->server)
 	|| (request->nonce != as_reply->enc_part2->nonce)
 	/* XXX check for extraneous flags */
 	/* XXX || (!krb5_addresses_compare(context, addrs, as_reply->enc_part2->caddrs)) */
@@ -507,7 +523,10 @@ krb5_get_in_tkt(krb5_context context,
     krb5_pa_data  **	preauth_to_use = 0;
     int			loopcount = 0;
     krb5_int32		do_more = 0;
+    int			canon_flag;
     int             use_master = 0;
+    int			referral_count = 0;
+    krb5_principal_data	referred_client;
 
 #if APPLE_PKINIT
     inTktDebug("krb5_get_in_tkt top\n");
@@ -518,7 +537,15 @@ krb5_get_in_tkt(krb5_context context,
 
     if (ret_as_reply)
 	*ret_as_reply = 0;
-    
+
+    referred_client = *(creds->client);
+    referred_client.realm.data = NULL;
+    referred_client.realm.length = 0;
+
+    /* per referrals draft, enterprise principals imply canonicalization */
+    canon_flag = ((options & KDC_OPT_CANONICALIZE) != 0) ||
+	creds->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
+ 
     /*
      * Set up the basic request structure
      */
@@ -641,6 +668,27 @@ krb5_get_in_tkt(krb5_context context,
 		if (retval)
 		    goto cleanup;
 		continue;
+	    } else if (canon_flag && err_reply->error == KDC_ERR_WRONG_REALM) {
+		if (++referral_count > KRB5_REFERRAL_MAXHOPS ||
+		    err_reply->client == NULL ||
+		    err_reply->client->realm.length == 0) {
+		    retval = KRB5KDC_ERR_WRONG_REALM;
+		    krb5_free_error(context, err_reply);
+		    goto cleanup;
+		}
+		/* Rewrite request.client with realm from error reply */
+		if (referred_client.realm.data) {
+		    krb5_free_data_contents(context, &referred_client.realm);
+		    referred_client.realm.data = NULL;
+		}
+		retval = krb5int_copy_data_contents(context,
+						    &err_reply->client->realm,
+						    &referred_client.realm);
+		krb5_free_error(context, err_reply);		
+		if (retval)
+		    goto cleanup;
+		request.client = &referred_client;
+		continue;
 	    } else {
 		retval = (krb5_error_code) err_reply->error 
 		    + ERROR_TABLE_BASE_krb5;
@@ -692,6 +740,8 @@ cleanup:
 	else
 	    krb5_free_kdc_rep(context, as_reply);
     }
+    if (referred_client.realm.data)
+	krb5_free_data_contents(context, &referred_client.realm);
     return (retval);
 }
 
@@ -923,6 +973,8 @@ krb5_get_init_creds(krb5_context context,
     krb5_timestamp time_now;
     krb5_enctype etype = 0;
     krb5_preauth_client_rock get_data_rock;
+    int canon_flag = 0;
+    krb5_principal_data referred_client;
 
     /* initialize everything which will be freed at cleanup */
 
@@ -946,6 +998,11 @@ krb5_get_init_creds(krb5_context context,
 #endif /* APPLE_PKINIT */
     
     err_reply = NULL;
+
+    /* referred_client is used to rewrite the client realm for referrals */
+    referred_client = *client;
+    referred_client.realm.data = NULL;
+    referred_client.realm.length = 0;
 
     /*
      * Set up the basic request structure
@@ -983,6 +1040,17 @@ krb5_get_init_creds(krb5_context context,
 	tempint = 0;
     if (tempint)
 	request.kdc_options |= KDC_OPT_PROXIABLE;
+
+    /* canonicalize */
+    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_CANONICALIZE))
+	tempint = 1;
+    else if ((ret = krb5_libdefault_boolean(context, &client->realm,
+					    "canonicalize", &tempint)) == 0)
+	;
+    else
+	tempint = 0;
+    if (tempint)
+	request.kdc_options |= KDC_OPT_CANONICALIZE;
 
     /* allow_postdate */
     
@@ -1044,6 +1112,10 @@ krb5_get_init_creds(krb5_context context,
     /* client */
 
     request.client = client;
+
+    /* per referrals draft, enterprise principals imply canonicalization */
+    canon_flag = ((request.kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
+	client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
 
     /* service */
     
@@ -1151,7 +1223,7 @@ krb5_get_init_creds(krb5_context context,
 	krb5_data random_data;
 
 	random_data.length = 4;
-	random_data.data = random_buf;
+	random_data.data = (char *)random_buf;
 	if (krb5_c_random_make_octets(context, &random_data) == 0)
 	    /* See RT ticket 3196 at MIT.  If we set the high bit, we
 	       may have compatibility problems with Heimdal, because
@@ -1253,6 +1325,25 @@ krb5_get_init_creds(krb5_context context,
 		if (ret)
 		    goto cleanup;
 		/* continue to next iteration */
+	    } else if (canon_flag && err_reply->error == KDC_ERR_WRONG_REALM) {
+		if (err_reply->client == NULL ||
+		    err_reply->client->realm.length == 0) {
+		    ret = KRB5KDC_ERR_WRONG_REALM;
+		    krb5_free_error(context, err_reply);
+		    goto cleanup;
+		}
+		/* Rewrite request.client with realm from error reply */
+		if (referred_client.realm.data) {
+		    krb5_free_data_contents(context, &referred_client.realm);
+		    referred_client.realm.data = NULL;
+		}
+		ret = krb5int_copy_data_contents(context,
+						 &err_reply->client->realm,
+						 &referred_client.realm);
+		krb5_free_error(context, err_reply);
+		if (ret)
+		    goto cleanup;
+		request.client = &referred_client;
 	    } else {
 		if (err_reply->e_data.length > 0) {
 		    /* continue to next iteration */
@@ -1403,6 +1494,8 @@ cleanup:
 	*as_reply = local_as_reply;
     else if (local_as_reply)
 	krb5_free_kdc_rep(context, local_as_reply);
+    if (referred_client.realm.data)
+	krb5_free_data_contents(context, &referred_client.realm);
 
     return(ret);
 }

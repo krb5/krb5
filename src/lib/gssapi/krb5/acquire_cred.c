@@ -72,7 +72,6 @@
  */
 
 #include "k5-int.h"
-#include "gss_libinit.h"
 #include "gssapiP_krb5.h"
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -98,20 +97,23 @@ k5_mutex_t gssint_krb5_keytab_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static char *krb5_gss_keytab = NULL;
 
 /* Heimdal calls this gsskrb5_register_acceptor_identity. */
-OM_uint32 KRB5_CALLCONV
-krb5_gss_register_acceptor_identity(const char *keytab)
+OM_uint32
+gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
+				       const gss_OID desired_mech,
+				       const gss_OID desired_object,
+				       gss_buffer_t value)
 {
     char *new, *old;
     int err;
 
-    err = gssint_initialize_library();
+    err = gss_krb5int_initialize_library();
     if (err != 0)
         return GSS_S_FAILURE;
 
-    if (keytab == NULL)
+    if (value->value == NULL)
         return GSS_S_FAILURE;
 
-    new = strdup(keytab);
+    new = strdup((char *)value->value);
     if (new == NULL)
         return GSS_S_FAILURE;
 
@@ -153,7 +155,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
 
     /* open the default keytab */
 
-    code = gssint_initialize_library();
+    code = gss_krb5int_initialize_library();
     if (code != 0) {
         *minor_status = code;
         return GSS_S_FAILURE;
@@ -181,7 +183,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
         if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
             (void) krb5_kt_close(context, kt);
             if (code == KRB5_KT_NOTFOUND) {
-                char *errstr = krb5_get_error_message(context, code);
+                char *errstr = (char *)krb5_get_error_message(context, code);
                 krb5_set_error_message(context, KG_KEYTAB_NOMATCH, "%s", errstr);
                 krb5_free_error_message(context, errstr);
                 *minor_status = KG_KEYTAB_NOMATCH;
@@ -464,7 +466,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     OM_uint32 ret;
     krb5_error_code code;
 
-    code = gssint_initialize_library();
+    code = gss_krb5int_initialize_library();
     if (code) {
         *minor_status = code;
         return GSS_S_FAILURE;
@@ -711,4 +713,49 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
     krb5_free_context(context);
     return(GSS_S_COMPLETE);
+}
+
+OM_uint32
+gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
+    gss_cred_id_t cred_handle,
+    const gss_OID desired_oid,
+    const gss_buffer_t value)
+{
+   krb5_gss_cred_id_t cred;
+   krb5_error_code code;
+   krb5_context context;
+   krb5_rcache rcache;
+
+   assert(value->length == sizeof(rcache));
+
+   if (value->length != sizeof(rcache))
+      return GSS_S_FAILURE;
+
+   rcache = (krb5_rcache)value->value;
+
+   if (cred_handle == GSS_C_NO_CREDENTIAL)
+      return GSS_S_NO_CRED;
+
+   cred = (krb5_gss_cred_id_t)cred_handle;
+
+   code = krb5_gss_init_context(&context);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
+   if (cred->rcache != NULL) {
+      code = krb5_rc_close(context, cred->rcache);
+      if (code) {
+	 *minor_status = code;
+	 krb5_free_context(context);
+	 return GSS_S_FAILURE;
+      }
+   }
+
+   cred->rcache = rcache;
+
+   krb5_free_context(context);
+
+   *minor_status = 0;
+   return GSS_S_COMPLETE;
 }

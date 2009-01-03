@@ -42,5 +42,5 @@ OM_uint32 krb5_gss_canonicalize_name(OM_uint32  *minor_status,
         return(GSS_S_BAD_MECH);
     }
 
-    return(gss_duplicate_name(minor_status, input_name, output_name));
+    return(krb5_gss_duplicate_name(minor_status, input_name, output_name));
 }

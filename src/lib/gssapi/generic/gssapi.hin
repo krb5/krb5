@@ -178,6 +178,7 @@ typedef int             gss_cred_usage_t;
 #define GSS_C_AF_BSC        17
 #define GSS_C_AF_DSS        18
 #define GSS_C_AF_OSI        19
+#define GSS_C_AF_NETBIOS    20
 #define GSS_C_AF_X25        21
 
 #define GSS_C_AF_NULLADDR   255

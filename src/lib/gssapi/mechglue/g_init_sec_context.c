@@ -209,7 +209,6 @@ OM_uint32 *		time_rec;
      */
     
     status = mech->gss_init_sec_context(
-	mech->context,
 	minor_status,
 	input_cred_handle,
 	&union_ctx_id->internal_ctx_id,

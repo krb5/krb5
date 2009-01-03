@@ -2,8 +2,8 @@ thisconfigdir=../..
 myfulldir=lib/krb5
 mydir=lib/krb5
 BUILDTOP=$(REL)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os
-SUBDIRS= error_tables asn.1 ccache keytab krb os rcache
+LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode
+SUBDIRS= error_tables asn.1 ccache keytab krb os rcache unicode
 DEFS=
 
 ##DOSBUILDTOP = ..\..
@@ -32,6 +32,7 @@ STOBJLISTS= \
 	keytab/OBJS.ST \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
+	unicode/OBJS.ST \
 	os/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
@@ -42,6 +43,7 @@ SUBDIROBJLISTS= \
 	keytab/OBJS.ST \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
+	unicode/OBJS.ST \
 	os/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
@@ -93,6 +95,9 @@ all-windows::
 	cd ..\rcache
 	@echo Making in krb5\rcache
 	$(MAKE) -$(MFLAGS)
+	cd ..\unicode
+	@echo Making in krb5\unicode
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
@@ -119,6 +124,9 @@ clean-windows::
 	$(MAKE) -$(MFLAGS) clean
 	cd ..\rcache
 	@echo Making clean in krb5\rcache
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\unicode
+	@echo Making clean in krb5\unicode
 	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean locally

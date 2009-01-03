@@ -176,7 +176,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     header->data.length -= hash->hashsize;
     header->data.data   += hash->hashsize;
 
-    ret = krb5_hmac_iov(hash, &k2, data, num_data, &checksum);
+    ret = krb5int_hmac_iov(hash, &k2, data, num_data, &checksum);
     if (ret != 0)
 	goto cleanup;
 
@@ -289,7 +289,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
 	goto cleanup;
 
-    ret = krb5_hmac_iov(hash, &k2, data, num_data, &d1);
+    ret = krb5int_hmac_iov(hash, &k2, data, num_data, &d1);
     if (ret != 0)
 	goto cleanup;
 

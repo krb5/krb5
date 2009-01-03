@@ -62,8 +62,8 @@
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
                                    gss_cred_id_t cred_handle,
-                                   OM_uint32 num_ktypes,
-                                   krb5_enctype *ktypes)
+                                   const gss_OID desired_oid,
+                                   const gss_buffer_t value)
 {
     unsigned int i;
     krb5_enctype * new_ktypes;
@@ -71,10 +71,14 @@ gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
     krb5_gss_cred_id_t cred;
     krb5_error_code kerr = 0;
     OM_uint32 temp_status;
+    struct krb5_gss_set_allowable_enctypes_req *req;
 
     /* Assume a failure */
     *minor_status = 0;
     major_status = GSS_S_FAILURE;
+
+    assert(value->length == sizeof(*req));
+    req = (struct krb5_gss_set_allowable_enctypes_req *)value->value;
 
     /* verify and valildate cred handle */
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
@@ -88,9 +92,9 @@ gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
     }
     cred = (krb5_gss_cred_id_t) cred_handle;
 
-    if (ktypes) {
-        for (i = 0; i < num_ktypes && ktypes[i]; i++) {
-            if (!krb5_c_valid_enctype(ktypes[i])) {
+    if (req->ktypes) {
+        for (i = 0; i < req->num_ktypes && req->ktypes[i]; i++) {
+            if (!krb5_c_valid_enctype(req->ktypes[i])) {
                 kerr = KRB5_PROG_ETYPE_NOSUPP;
                 goto error_out;
             }
@@ -108,7 +112,7 @@ gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
 
     /* Copy the requested ktypes into the cred structure */
     if ((new_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * (i + 1)))) {
-        memcpy(new_ktypes, ktypes, sizeof(krb5_enctype) * i);
+        memcpy(new_ktypes, req->ktypes, sizeof(krb5_enctype) * i);
         new_ktypes[i] = 0;      /* "null-terminate" the list */
     }
     else {

@@ -266,12 +266,13 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
 	xorblock(tmp, blockN1);
 	enc(tmp2, tmp, &ctx);
 	memcpy(blockN1, tmp2, BLOCK_SIZE);
-	if (ivec != NULL)
-	    memcpy(ivec->data, tmp2, BLOCK_SIZE);
 
-	/* Put the last two blocks back into the ivec (reverse order) */
+	/* Put the last two blocks back into the iovec (reverse order) */
 	krb5int_c_iov_put_block(data, num_data, (unsigned char *)blockN1, BLOCK_SIZE, &output_pos);
 	krb5int_c_iov_put_block(data, num_data, (unsigned char *)blockN2, BLOCK_SIZE, &output_pos);
+
+	if (ivec != NULL)
+	    memcpy(ivec->data, blockN1, BLOCK_SIZE);
     }
 
     return 0;
@@ -285,8 +286,8 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 {
     aes_ctx ctx;
     char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
-    int nblocks = 0, blockno;
-    size_t input_length, i;
+    int nblocks = 0, blockno, i;
+    size_t input_length;
 
     CHECK_SIZES;
 
@@ -337,25 +338,25 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 
 	/* Decrypt second last block */
 	dec(tmp2, blockN2, &ctx);
-	/* Set tmp3 to last ciphertext block (already padded) */
-	memcpy(tmp3, blockN1, BLOCK_SIZE);
 	/* Set tmp2 to last (possibly partial) plaintext block, and
 	   save it.  */
-	xorblock(tmp2, tmp3);
-	memcpy(blockN1, tmp2, BLOCK_SIZE);
+	xorblock(tmp2, blockN1);
+	memcpy(blockN2, tmp2, BLOCK_SIZE);
+
 	/* Maybe keep the trailing part, and copy in the last
 	   ciphertext block.  */
-	memcpy(tmp2, tmp3, BLOCK_SIZE);
+	input_length %= BLOCK_SIZE;
+	memcpy(tmp2, blockN1, input_length ? input_length : BLOCK_SIZE);
 	dec(tmp3, tmp2, &ctx);
 	xorblock(tmp3, tmp);
-	/* Copy out ivec first before we clobber blockN2 with plaintext */
+	/* Copy out ivec first before we clobber blockN1 with plaintext */
 	if (ivec != NULL)
-	    memcpy(ivec->data, blockN2, BLOCK_SIZE);
-	memcpy(blockN2, tmp3, BLOCK_SIZE);
+	    memcpy(ivec->data, blockN1, BLOCK_SIZE);
+	memcpy(blockN1, tmp3, BLOCK_SIZE);
 
-	/* Put the last two blocks back into the ivec */
-	krb5int_c_iov_put_block(data, num_data, (unsigned char *)blockN2, BLOCK_SIZE, &output_pos);
+	/* Put the last two blocks back into the iovec */
 	krb5int_c_iov_put_block(data, num_data, (unsigned char *)blockN1, BLOCK_SIZE, &output_pos);
+	krb5int_c_iov_put_block(data, num_data, (unsigned char *)blockN2, BLOCK_SIZE, &output_pos);
     }
 
     return 0;

@@ -165,13 +165,13 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     /* decode the message, if SEAL */
 
     if (toktype == KG_TOK_SEAL_MSG) {
-        int tmsglen = bodysize-(14+cksum_len);
+        size_t tmsglen = bodysize-(14+cksum_len);
         if (sealalg != 0xffff) {
             if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
                 *minor_status = ENOMEM;
                 return(GSS_S_FAILURE);
             }
-            if (ctx->enc->enctype == ENCTYPE_ARCFOUR_HMAC) {
+            if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) {
                 unsigned char bigend_seqnum[4];
                 krb5_keyblock *enc_key;
                 int i;
@@ -449,7 +449,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
         return(GSS_S_FAILURE);
     }
 
-    if (now > ctx->endtime) {
+    if (now > ctx->krb_times.endtime) {
         *minor_status = 0;
         return(GSS_S_CONTEXT_EXPIRED);
     }
@@ -463,11 +463,11 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
             message_buffer->value = NULL;
             message_buffer->length = 0;
         }
-        *minor_status = G_BAD_DIRECTION;
+        *minor_status = (OM_uint32)G_BAD_DIRECTION;
         return(GSS_S_BAD_SIG);
     }
 
-    retval = g_order_check(&(ctx->seqstate), seqnum);
+    retval = g_order_check(&(ctx->seqstate), (gssint_uint64)seqnum);
 
     /* success or ordering violation */
 
@@ -486,7 +486,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
     gss_buffer_t input_token_buffer;
     gss_buffer_t message_buffer;
     int *conf_state;
-    int *qop_state;
+    gss_qop_t *qop_state;
     int toktype;
 {
     krb5_gss_ctx_id_rec *ctx;
@@ -515,23 +515,8 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
 
     ptr = (unsigned char *) input_token_buffer->value;
 
-    if (ctx->proto)
-        switch (toktype) {
-        case KG_TOK_SIGN_MSG:
-            toktype2 = 0x0404;
-            break;
-        case KG_TOK_SEAL_MSG:
-            toktype2 = 0x0504;
-            break;
-        case KG_TOK_DEL_CTX:
-            toktype2 = 0x0405;
-            break;
-        default:
-            toktype2 = toktype;
-            break;
-        }
-    else
-        toktype2 = toktype;
+    toktype2 = kg_map_toktype(ctx->proto, toktype);
+
     err = g_verify_token_header(ctx->mech_used,
                                 &bodysize, &ptr, toktype2,
                                 input_token_buffer->length,

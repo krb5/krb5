@@ -143,7 +143,7 @@ gss_ctx_id_t *		context_handle;
 	goto error_out;
     }
     
-    status = mech->gss_import_sec_context(mech->context, minor_status,
+    status = mech->gss_import_sec_context(minor_status,
 					  &token, &ctx->internal_ctx_id);
 
     if (status == GSS_S_COMPLETE) {

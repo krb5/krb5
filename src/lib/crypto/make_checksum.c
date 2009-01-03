@@ -63,6 +63,9 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 
     if (krb5_cksumtypes_list[i].keyhash) {
 	/* check if key is compatible */
+	const struct krb5_keyhash_provider *keyhash;
+
+	keyhash = krb5_cksumtypes_list[i].keyhash;
 
 	if (krb5_cksumtypes_list[i].keyed_etype) {
 	    for (e1=0; e1<krb5_enctypes_length; e1++) 
@@ -82,7 +85,18 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 	    }
 	}
 
-	ret = (*(krb5_cksumtypes_list[i].keyhash->hash))(key, usage, 0, input, &data);
+	if (keyhash->hash == NULL) {
+	    krb5_crypto_iov iov[1];
+
+	    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+	    iov[0].data = *input;
+
+	    assert(keyhash->hash_iov != NULL);
+
+	    ret = (*keyhash->hash_iov)(key, usage, 0, iov, 1, &data);
+	} else {
+	    ret = (*keyhash->hash)(key, usage, 0, input, &data);
+	}
     } else if (krb5_cksumtypes_list[i].flags & KRB5_CKSUMFLAG_DERIVE) {
 	ret = krb5_dk_make_checksum(krb5_cksumtypes_list[i].hash,
 				    key, usage, input, &data);

@@ -1,6 +1,7 @@
 _kadm5_check_handle
 _kadm5_chpass_principal_util
 kadm5int_acl_check
+kadm5int_acl_check_krb
 kadm5int_acl_finish
 kadm5int_acl_impose_restrictions
 kadm5int_acl_init

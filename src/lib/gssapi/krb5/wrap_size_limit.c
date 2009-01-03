@@ -111,9 +111,15 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
         /* No pseudo-ASN.1 wrapper overhead, so no sequence length and
            OID.  */
         OM_uint32 sz = req_output_size;
+
         /* Token header: 16 octets.  */
         if (conf_req_flag) {
-            while (sz > 0 && krb5_encrypt_size(sz, ctx->enc->enctype) + 16 > req_output_size)
+	    krb5_enctype enctype;
+
+	    enctype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey->enctype
+						: ctx->subkey->enctype;
+
+            while (sz > 0 && krb5_encrypt_size(sz, enctype) + 16 > req_output_size)
                 sz--;
             /* Allow for encrypted copy of header.  */
             if (sz > 16)
@@ -129,11 +135,24 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
                 sz = 0;
 #endif
         } else {
+	    krb5_cksumtype cksumtype;
+	    krb5_error_code err;
+	    size_t cksumsize;
+
+	    cksumtype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey_cksumtype
+						  : ctx->cksumtype;
+
+	    err = krb5_c_checksum_length(ctx->k5_context, cksumtype, &cksumsize);
+	    if (err) {
+		*minor_status = err;
+		return GSS_S_FAILURE;
+	    }
+
             /* Allow for token header and checksum.  */
-            if (sz < 16 + ctx->cksum_size)
+            if (sz < 16 + cksumsize)
                 sz = 0;
             else
-                sz -= (16 + ctx->cksum_size);
+                sz -= (16 + cksumsize);
         }
 
         *max_input_size = sz;

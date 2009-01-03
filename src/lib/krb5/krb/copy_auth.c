@@ -26,6 +26,33 @@
  *
  * krb5_copy_authdata()
  */
+/*
+ * Copyright (c) 2006-2008, Novell, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *   * The copyright holder's name is not used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "k5-int.h"
 
@@ -79,4 +106,59 @@ krb5_copy_authdata(krb5_context context, krb5_authdata *const *inauthdat, krb5_a
 
     *outauthdat = tempauthdat;
     return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_decode_authdata_container(krb5_context context,
+			       krb5_authdatatype type,
+			       const krb5_authdata *container,
+			       krb5_authdata ***authdata)
+{
+    krb5_error_code code;
+    krb5_data data;
+
+    *authdata = NULL;
+
+    if ((container->ad_type & AD_TYPE_FIELD_TYPE_MASK) != type)
+	return EINVAL;
+
+    data.length = container->length;
+    data.data = (char *)container->contents;
+
+    code = decode_krb5_authdata(&data, authdata);
+    if (code)
+	return code;
+
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_encode_authdata_container(krb5_context context,
+			       krb5_authdatatype type,
+			       krb5_authdata *const*authdata,
+			       krb5_authdata ***container)
+{
+    krb5_error_code code;
+    krb5_data *data;
+    krb5_authdata ad_datum;
+    krb5_authdata *ad_data[2];
+
+    *container = NULL;
+
+    code = encode_krb5_authdata((krb5_authdata * const *)authdata, &data);
+    if (code)
+	return code;
+
+    ad_datum.ad_type = type & AD_TYPE_FIELD_TYPE_MASK;
+    ad_datum.length = data->length;
+    ad_datum.contents = (unsigned char *)data->data;
+
+    ad_data[0] = &ad_datum;
+    ad_data[1] = NULL;
+
+    code = krb5_copy_authdata(context, ad_data, container);
+
+    krb5_free_data(context, data);
+
+    return code;
 }

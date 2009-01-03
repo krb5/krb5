@@ -8,7 +8,7 @@ LOCALINCLUDES = -I$(srcdir)/enc_provider \
 	-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider \
 	-I$(srcdir)/aes \
 	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk -I$(srcdir)/arcfour \
-	-I$(srcdir)/yarrow -I$(srcdir)/sha1
+	-I$(srcdir)/yarrow -I$(srcdir)/sha1 -I$(srcdir)/md5
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

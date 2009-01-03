@@ -38,6 +38,9 @@
 #define GSSAPIGENERIC_END_DECLS
 #endif
 
+#define	GSS_EMPTY_BUFFER(buf)	((buf) == NULL ||\
+	(buf)->value == NULL || (buf)->length == 0)
+
 GSSAPIGENERIC_BEGIN_DECLS
 
 /* Deprecated MIT krb5 oid names provided for compatibility.

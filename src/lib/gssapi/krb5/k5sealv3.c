@@ -34,8 +34,8 @@
 #include "gssapiP_krb5.h"
 #include <stdarg.h>
 
-static int
-rotate_left (void *ptr, size_t bufsiz, size_t rc)
+int
+gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc)
 {
     /* Optimize for receiving.  After some debugging is done, the MIT
        implementation won't do any rotates on sending, and while
@@ -62,10 +62,6 @@ rotate_left (void *ptr, size_t bufsiz, size_t rc)
 
 static const gss_buffer_desc empty_message = { 0, 0 };
 
-#define FLAG_SENDER_IS_ACCEPTOR 0x01
-#define FLAG_WRAP_CONFIDENTIAL  0x02
-#define FLAG_ACCEPTOR_SUBKEY    0x04
-
 krb5_error_code
 gss_krb5int_make_seal_token_v3 (krb5_context context,
                                 krb5_gss_ctx_id_rec *ctx,
@@ -86,8 +82,8 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     unsigned short tok_id;
     krb5_checksum sum;
     krb5_keyblock *key;
+    krb5_cksumtype cksumtype;
 
-    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
@@ -100,9 +96,12 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
                     : KG_USAGE_ACCEPTOR_SIGN));
     if (ctx->have_acceptor_subkey) {
         key = ctx->acceptor_subkey;
+	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
-        key = ctx->enc;
+        key = ctx->subkey;
+	cksumtype = ctx->cksumtype;
     }
+    assert(key != NULL);
 
 #ifdef CFX_EXERCISE
     {
@@ -137,7 +136,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             return ENOMEM;
 
         /* Get size of ciphertext.  */
-        bufsize = 16 + krb5_encrypt_size (plain.length, ctx->enc->enctype);
+        bufsize = 16 + krb5_encrypt_size (plain.length, key->enctype);
         /* Allocate space for header plus encrypted data.  */
         outbuf = malloc(bufsize);
         if (outbuf == NULL) {
@@ -146,7 +145,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         }
 
         /* TOK_ID */
-        store_16_be(0x0504, outbuf);
+        store_16_be(KG2_TOK_WRAP_MSG, outbuf);
         /* flags */
         outbuf[2] = (acceptor_flag
                      | (conf_req_flag ? FLAG_WRAP_CONFIDENTIAL : 0)
@@ -163,7 +162,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         memset(plain.data + message->length, 'x', ec);
         memcpy(plain.data + message->length + ec, outbuf, 16);
 
-        cipher.ciphertext.data = outbuf + 16;
+        cipher.ciphertext.data = (char *)outbuf + 16;
         cipher.ciphertext.length = bufsize - 16;
         cipher.enctype = key->enctype;
         err = krb5_c_encrypt(context, key, key_usage, 0, &plain, &cipher);
@@ -178,19 +177,20 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 
 #ifdef CFX_EXERCISE
         rrc = rand() & 0xffff;
-        if (rotate_left(outbuf+16, bufsize-16,
+        if (gss_krb5int_rotate_left(outbuf+16, bufsize-16,
                         (bufsize-16) - (rrc % (bufsize - 16))))
             store_16_be(rrc, outbuf+6);
         /* If the rotate fails, don't worry about it.  */
 #endif
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
         krb5_data plain;
+	size_t cksumsize;
 
         /* Here, message is the application-supplied data; message2 is
            what goes into the output token.  They may be the same, or
            message2 may be empty (for MIC).  */
 
-        tok_id = 0x0504;
+        tok_id = KG2_TOK_WRAP_MSG;
 
     wrap_with_checksum:
         plain.length = message->length + 16;
@@ -198,10 +198,13 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         if (plain.data == NULL)
             return ENOMEM;
 
-        if (ctx->cksum_size > 0xffff)
-            abort();
+	err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
+	if (err)
+	    goto error;
 
-        bufsize = 16 + message2->length + ctx->cksum_size;
+	assert(cksumsize <= 0xffff);
+
+        bufsize = 16 + message2->length + cksumsize;
         outbuf = malloc(bufsize);
         if (outbuf == NULL) {
             free(plain.data);
@@ -240,9 +243,9 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             memcpy(outbuf + 16, message2->value, message2->length);
 
         sum.contents = outbuf + 16 + message2->length;
-        sum.length = ctx->cksum_size;
+        sum.length = cksumsize;
 
-        err = krb5_c_make_checksum(context, ctx->cksumtype, key,
+        err = krb5_c_make_checksum(context, cksumtype, key,
                                    key_usage, &plain, &sum);
         zap(plain.data, plain.length);
         free(plain.data);
@@ -251,9 +254,9 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             zap(outbuf,bufsize);
             goto error;
         }
-        if (sum.length != ctx->cksum_size)
+        if (sum.length != cksumsize)
             abort();
-        memcpy(outbuf + 16 + message2->length, sum.contents, ctx->cksum_size);
+        memcpy(outbuf + 16 + message2->length, sum.contents, cksumsize);
         krb5_free_checksum_contents(context, &sum);
         sum.contents = 0;
         /* Now that we know we're actually generating the token...  */
@@ -263,21 +266,21 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #ifdef CFX_EXERCISE
             rrc = rand() & 0xffff;
             /* If the rotate fails, don't worry about it.  */
-            if (rotate_left(outbuf+16, bufsize-16,
+            if (gss_krb5int_rotate_left(outbuf+16, bufsize-16,
                             (bufsize-16) - (rrc % (bufsize - 16))))
                 store_16_be(rrc, outbuf+6);
 #endif
             /* Fix up EC field.  */
-            store_16_be(ctx->cksum_size, outbuf+4);
+            store_16_be(cksumsize, outbuf+4);
         } else {
             store_16_be(0xffff, outbuf+6);
         }
     } else if (toktype == KG_TOK_MIC_MSG) {
-        tok_id = 0x0404;
+        tok_id = KG2_TOK_MIC_MSG;
         message2 = &empty_message;
         goto wrap_with_checksum;
     } else if (toktype == KG_TOK_DEL_CTX) {
-        tok_id = 0x0405;
+        tok_id = KG2_TOK_DEL_CTX;
         message = message2 = &empty_message;
         goto wrap_with_checksum;
     } else
@@ -303,7 +306,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                             krb5_gss_ctx_id_rec *ctx,
                             unsigned char *ptr, unsigned int bodysize,
                             gss_buffer_t message_buffer,
-                            int *conf_state, int *qop_state, int toktype)
+                            int *conf_state, gss_qop_t *qop_state, int toktype)
 {
     krb5_context context = *contextptr;
     krb5_data plain;
@@ -315,8 +318,8 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     krb5_error_code err;
     krb5_boolean valid;
     krb5_keyblock *key;
+    krb5_cksumtype cksumtype;
 
-    assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
     assert(ctx->proto == 1);
 
@@ -343,7 +346,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         return GSS_S_DEFECTIVE_TOKEN;
     }
     if ((ptr[2] & FLAG_SENDER_IS_ACCEPTOR) != acceptor_flag) {
-        *minor_status = G_BAD_DIRECTION;
+        *minor_status = (OM_uint32)G_BAD_DIRECTION;
         return GSS_S_BAD_SIG;
     }
 
@@ -364,19 +367,22 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     value in that case, though, so we can just ignore the flag.  */
     if (ctx->have_acceptor_subkey && (ptr[2] & FLAG_ACCEPTOR_SUBKEY)) {
         key = ctx->acceptor_subkey;
+	cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
-        key = ctx->enc;
+        key = ctx->subkey;
+	cksumtype = ctx->cksumtype;
     }
+    assert(key != NULL);
 
     if (toktype == KG_TOK_WRAP_MSG) {
-        if (load_16_be(ptr) != 0x0504)
+        if (load_16_be(ptr) != KG2_TOK_WRAP_MSG)
             goto defective;
         if (ptr[3] != 0xff)
             goto defective;
         ec = load_16_be(ptr+4);
         rrc = load_16_be(ptr+6);
         seqnum = load_64_be(ptr+8);
-        if (!rotate_left(ptr+16, bodysize-16, rrc)) {
+        if (!gss_krb5int_rotate_left(ptr+16, bodysize-16, rrc)) {
         no_mem:
             *minor_status = ENOMEM;
             return GSS_S_FAILURE;
@@ -394,7 +400,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             be larger than the plaintext size.  */
             cipher.enctype = key->enctype;
             cipher.ciphertext.length = bodysize - 16;
-            cipher.ciphertext.data = ptr + 16;
+            cipher.ciphertext.data = (char *)ptr + 16;
             plain.length = bodysize - 16;
             plain.data = malloc(plain.length);
             if (plain.data == NULL)
@@ -408,8 +414,8 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             /* Don't use bodysize here!  Use the fact that
                cipher.ciphertext.length has been adjusted to the
                correct length.  */
-            althdr = plain.data + plain.length - 16;
-            if (load_16_be(althdr) != 0x0504
+            althdr = (unsigned char *)plain.data + plain.length - 16;
+            if (load_16_be(althdr) != KG2_TOK_WRAP_MSG
                 || althdr[2] != ptr[2]
                 || althdr[3] != ptr[3]
                 || memcmp(althdr+8, ptr+8, 8)) {
@@ -423,6 +429,12 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                 message_buffer->value = NULL;
             }
         } else {
+	    size_t cksumsize;
+
+	    err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
+	    if (err)
+		goto error;
+
             /* no confidentiality */
             if (conf_state)
                 *conf_state = 0;
@@ -437,16 +449,16 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             store_16_be(0, ptr+4);
             store_16_be(0, ptr+6);
             plain.length = bodysize-ec;
-            plain.data = ptr;
-            if (!rotate_left(ptr, bodysize-ec, 16))
+            plain.data = (char *)ptr;
+            if (!gss_krb5int_rotate_left(ptr, bodysize-ec, 16))
                 goto no_mem;
             sum.length = ec;
-            if (sum.length != ctx->cksum_size) {
+            if (sum.length != cksumsize) {
                 *minor_status = 0;
                 return GSS_S_BAD_SIG;
             }
             sum.contents = ptr+bodysize-ec;
-            sum.checksum_type = ctx->cksumtype;
+            sum.checksum_type = cksumtype;
             err = krb5_c_verify_checksum(context, key, key_usage,
                                          &plain, &sum, &valid);
             if (err)
@@ -466,7 +478,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         return err;
     } else if (toktype == KG_TOK_MIC_MSG) {
         /* wrap token, no confidentiality */
-        if (load_16_be(ptr) != 0x0404)
+        if (load_16_be(ptr) != KG2_TOK_MIC_MSG)
             goto defective;
     verify_mic_1:
         if (ptr[3] != 0xff)
@@ -483,7 +495,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         memcpy(plain.data + message_buffer->length, ptr, 16);
         sum.length = bodysize - 16;
         sum.contents = ptr + 16;
-        sum.checksum_type = ctx->cksumtype;
+        sum.checksum_type = cksumtype;
         err = krb5_c_verify_checksum(context, key, key_usage,
                                      &plain, &sum, &valid);
         free(plain.data);
@@ -502,9 +514,9 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
         *minor_status = 0;
         return err;
     } else if (toktype == KG_TOK_DEL_CTX) {
-        if (load_16_be(ptr) != 0x0405)
+        if (load_16_be(ptr) != KG2_TOK_DEL_CTX)
             goto defective;
-        message_buffer = &empty_message;
+        message_buffer = (gss_buffer_t)&empty_message;
         goto verify_mic_1;
     } else {
         goto defective;
