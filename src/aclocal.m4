@@ -90,7 +90,6 @@ dnl in which the configure file lives.
 dnl
 CONFIG_RELTOPDIR=$ac_reltopdir
 AC_SUBST(CONFIG_RELTOPDIR)
-AC_SUBST(subdirs)
 lib_frag=$srcdir/$ac_config_fragdir/lib.in
 AC_SUBST_FILE(lib_frag)
 libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
@@ -1760,7 +1759,6 @@ else
   : # neither enabled
 dnl  AC_MSG_NOTICE(disabling ldap backend module support)
 fi
-AC_SUBST(OPENLDAP_PLUGIN)
 ])dnl
 dnl
 dnl If libkeyutils exists (on Linux) include it and use keyring ccache
