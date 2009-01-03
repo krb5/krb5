@@ -86,7 +86,7 @@ static kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
      /* and trailing null.  If glob has no @, also allocate space for */
      /* the realm. */
      append_realm = (realm != NULL) && (strchr(glob, '@') == NULL);
-     p = (char *) malloc(strlen(glob)*2+ 3 + (append_realm ? 2 : 0));
+     p = (char *) malloc(strlen(glob)*2+ 3 + (append_realm ? 3 : 0));
      if (p == NULL)
 	  return ENOMEM;
      *regexp = p;
@@ -120,6 +120,7 @@ static kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
 
      if (append_realm) {
 	  *p++ = '@';
+	  *p++ = '.';
 	  *p++ = '*';
      }
 

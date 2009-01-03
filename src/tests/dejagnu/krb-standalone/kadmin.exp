@@ -383,7 +383,9 @@ proc kadmin_list {  } {
     global KEY
     global spawn_id
 
-    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "get_principals *"
+    # "*" would match everything
+    # "*n" should match a few like kadmin/admin but see ticket 5667
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "get_principals *n"
     expect_after {
 	"Cannot contact any KDC" {
 	    fail "kadmin ldb lost KDC"

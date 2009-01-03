@@ -506,9 +506,11 @@ AC_BEFORE([$0],[AC_PROG_CC])
 AC_BEFORE([$0],[AC_PROG_CXX])
 krb5_ac_cflags_set=${CFLAGS+set}
 krb5_ac_cxxflags_set=${CXXFLAGS+set}
+krb5_ac_warn_cflags_set=${WARN_CFLAGS+set}
+krb5_ac_warn_cxxflags_set=${WARN_CXXFLAGS+set}
 ])
 dnl
-AC_DEFUN(TRY_CC_FLAG,[dnl
+AC_DEFUN(TRY_WARN_CC_FLAG,[dnl
   cachevar=`echo "krb5_cv_cc_flag_$1" | sed s/[[^a-zA-Z0-9_]]/_/g`
   AC_CACHE_CHECK([if C compiler supports $1], [$cachevar],
   [# first try without, then with
@@ -519,7 +521,7 @@ AC_DEFUN(TRY_CC_FLAG,[dnl
      CFLAGS="$old_cflags"],
     [AC_MSG_ERROR(compiling simple test program with $CFLAGS failed)])])
   if eval test '"${'$cachevar'}"' = yes; then
-    CFLAGS="$CFLAGS $1"
+    WARN_CFLAGS="$WARN_CFLAGS $1"
   fi
   eval flag_supported='${'$cachevar'}'
 ])dnl
@@ -550,7 +552,7 @@ if test "$withval" = yes; then
   AC_DEFINE(CONFIG_SMALL,1,[Define to reduce code size even if it means more cpu usage])
 fi
 # -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.
-extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wconversion -Wshadow"
+extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wshadow"
 # -Wmissing-prototypes
 if test "$GCC" = yes ; then
   # Putting this here means we get -Os after -O2, which works.
@@ -562,32 +564,32 @@ if test "$GCC" = yes ; then
       *)        CFLAGS="$CFLAGS -Os" ;;
     esac
   fi
-  if test "x$krb5_ac_cflags_set" = xset ; then
-    AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)
+  if test "x$krb5_ac_warn_cflags_set" = xset ; then
+    AC_MSG_NOTICE(not adding extra gcc warning flags because WARN_CFLAGS was set)
   else
     AC_MSG_NOTICE(adding extra warning flags for gcc)
-    CFLAGS="$CFLAGS $extra_gcc_warn_opts -Wmissing-prototypes"
+    WARN_CFLAGS="$WARN_CFLAGS $extra_gcc_warn_opts -Wmissing-prototypes"
     if test "`uname -s`" = Darwin ; then
       AC_MSG_NOTICE(skipping pedantic warnings on Darwin)
     elif test "`uname -s`" = Linux ; then
       AC_MSG_NOTICE(skipping pedantic warnings on Linux)
     else
-      CFLAGS="$CFLAGS -pedantic"
+      WARN_CFLAGS="$WARN_CFLAGS -pedantic"
     fi
     if test "$ac_cv_cxx_compiler_gnu" = yes; then
-      if test "x$krb5_ac_cxxflags_set" = xset ; then
-        AC_MSG_NOTICE(not adding extra g++ warnings because CXXFLAGS was set)
+      if test "x$krb5_ac_warn_cxxflags_set" = xset ; then
+        AC_MSG_NOTICE(not adding extra g++ warnings because WARN_CXXFLAGS was set)
       else
         AC_MSG_NOTICE(adding extra warning flags for g++)
-        CXXFLAGS="$CXXFLAGS $extra_gcc_warn_opts"
+        WARN_CXXFLAGS="$WARN_CXXFLAGS $extra_gcc_warn_opts"
       fi
     fi
     # Currently, G++ does not support -Wno-format-zero-length.
-    TRY_CC_FLAG(-Wno-format-zero-length)
+    TRY_WARN_CC_FLAG(-Wno-format-zero-length)
     # Other flags here may not be supported on some versions of
     # gcc that people want to use.
     for flag in overflow strict-overflow missing-format-attribute missing-prototypes return-type missing-braces parentheses switch unused-function unused-label unused-variable unused-value unknown-pragmas sign-compare newline-eof ; do
-      TRY_CC_FLAG(-W$flag)
+      TRY_WARN_CC_FLAG(-W$flag)
     done
     #  old-style-definition? generates many, many warnings
     #
@@ -603,9 +605,9 @@ if test "$GCC" = yes ; then
     # We're currently targeting C89+, not C99, so disallow some
     # constructs.
     for flag in declaration-after-statement variadic-macros ; do
-      TRY_CC_FLAG(-Werror=$flag)
+      TRY_WARN_CC_FLAG(-Werror=$flag)
       if test "$flag_supported" = no; then
-        TRY_CC_FLAG(-W$flag)
+        TRY_WARN_CC_FLAG(-W$flag)
       fi
     done
     #  missing-prototypes? maybe someday
@@ -667,6 +669,8 @@ else
     WARN_CXXFLAGS="-errtags=yes +w +w2 -xport64"
   fi
 fi
+AC_SUBST(WARN_CFLAGS)
+AC_SUBST(WARN_CXXFLAGS)
 ])dnl
 dnl
 dnl
