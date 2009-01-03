@@ -969,9 +969,6 @@ if test "$enable_thread_support" = yes; then
   fi # tsmissing not empty
 fi # enable_thread_support
 dnl
-HOST_TYPE=$krb5_cv_host
-AC_SUBST(HOST_TYPE)
-dnl
 dnl Sadly, we seem to have accidentally committed ourselves in 1.4 to
 dnl an ABI that includes the existence of libkrb5support.0 even
 dnl though random apps should never use anything from it.  And on
