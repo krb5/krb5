@@ -508,9 +508,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
-    if (find_pa_data(reply.padata, KRB5_PADATA_PK_AS_REP))
-	c_flags |= KRB5_KDB_FLAG_PKINIT;
-
     errcode = handle_authdata(kdc_context,
 			      c_flags,
 			      &client,
