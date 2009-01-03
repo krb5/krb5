@@ -66,8 +66,12 @@ component_length_quoted(const krb5_data *src, int flags)
     int size = length;
 
     if ((flags & KRB5_PRINCIPAL_UNPARSE_DISPLAY) == 0) {
+	int no_realm = (flags & KRB5_PRINCIPAL_UNPARSE_NO_REALM) &&
+		       !(flags & KRB5_PRINCIPAL_UNPARSE_SHORT);
+
 	for (j = 0; j < length; j++,cp++)
-	    if (*cp == REALM_SEP  || *cp == COMPONENT_SEP ||
+	    if ((!no_realm && *cp == REALM_SEP) ||
+		*cp == COMPONENT_SEP ||
 		*cp == '\0' || *cp == '\\' || *cp == '\t' ||
 		*cp == '\n' || *cp == '\b')
 		size++;
@@ -90,9 +94,16 @@ copy_component_quoting(char *dest, const krb5_data *src, int flags)
     }
 
     for (j=0; j < length; j++,cp++) {
+	int no_realm = (flags & KRB5_PRINCIPAL_UNPARSE_NO_REALM) &&
+		       !(flags & KRB5_PRINCIPAL_UNPARSE_SHORT);
+
 	switch (*cp) {
-	case COMPONENT_SEP:
 	case REALM_SEP:
+	    if (no_realm) {
+		*q++ = *cp;
+		break;
+	    }
+	case COMPONENT_SEP:
 	case '\\':
 	    *q++ = '\\';
 	    *q++ = *cp;
