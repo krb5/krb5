@@ -70,7 +70,7 @@ int
 gss_to_krb5_name_1(struct svc_req *rqstp, krb5_context ctx, gss_name_t gss_name,
 		   krb5_principal *princ, gss_buffer_t gss_str);
 
-<<<<<<< HEAD:src/kadmin/server/misc.h
+
 extern volatile int signal_request_exit;
 extern volatile int signal_request_hup;
 
@@ -84,8 +84,7 @@ krb5_error_code setup_network(void *handle, const char *prog);
 krb5_error_code listen_and_process(void *handle, const char *prog);
 krb5_error_code closedown_network(void *handle, const char *prog);
 
-#endif /* _MISC_H */
-=======
+
 void 
 krb5_iprop_prog_1(struct svc_req *rqstp, SVCXPRT *transp);
 
@@ -94,4 +93,5 @@ kiprop_get_adm_host_srv_name(krb5_context,
 			     const char *,
 			     char **);
 
->>>>>>> trunk:src/kadmin/server/misc.h
+
+#endif /* _MISC_H */
