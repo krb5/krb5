@@ -126,7 +126,9 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 	    retval = krb5_decrypt_tkt_part(context, &ktent.key,
 					   req->ticket);
 
-	    if (retval == 0 ) {
+	    if (retval == 0) {
+		krb5_principal tmp;
+
 		/*
 		 * We overwrite ticket->server to be the principal
 		 * that we match in the keytab.  The reason for doing
@@ -139,8 +141,11 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 		 * perhaps an API should be created to retrieve the
 		 * server as it appeared in the ticket.
 		 */
-		krb5_free_principal(context, req->ticket->server);
-		retval = krb5_copy_principal(context, ktent.principal, &req->ticket->server);
+		retval = krb5_copy_principal(context, ktent.principal, &tmp);
+		if (retval == 0) {
+		    krb5_free_principal(context, req->ticket->server);
+		    req->ticket->server = tmp;
+		}
 		(void) krb5_free_keytab_entry_contents(context, &ktent);
 		break;
 	    }
