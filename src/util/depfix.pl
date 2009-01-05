@@ -1,6 +1,6 @@
 #!env perl -w
 #
-# Copyright 1995,2001,2002,2003,2004,2005 by the Massachusetts Institute of Technology.
+# Copyright 1995,2001,2002,2003,2004,2005,2009 by the Massachusetts Institute of Technology.
 # All Rights Reserved.
 #
 # Export of this software from the United States of America may
@@ -200,10 +200,8 @@ sub split_lines {
 }
 
 print <<EOH ;
-# +++ Dependency line eater +++
 # 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
+# Generated makefile dependencies follow.
 #
 EOH
 my $buf = '';

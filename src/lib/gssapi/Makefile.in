@@ -135,8 +135,3 @@ $(EXPORTED_HEADERS) generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_g
 @lib_frag@
 @libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#

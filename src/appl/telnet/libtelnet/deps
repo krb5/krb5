@@ -1,0 +1,38 @@
+# 
+# Generated makefile dependencies follow.
+#
+auth.so auth.po $(OUTPRE)auth.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  auth-proto.h auth.c auth.h enc-proto.h encrypt.h misc-proto.h
+encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  enc-proto.h encrypt.c encrypt.h misc-proto.h misc.h
+genget.so genget.po $(OUTPRE)genget.$(OBJEXT): genget.c \
+  misc-proto.h misc.h
+misc.so misc.po $(OUTPRE)misc.$(OBJEXT): auth-proto.h \
+  auth.h enc-proto.h encrypt.h misc-proto.h misc.c misc.h
+kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(srcdir)/../arpa/telnet.h \
+  auth-proto.h auth.h enc-proto.h encrypt.h kerberos5.c \
+  krb5forw.h misc-proto.h misc.h
+forward.so forward.po $(OUTPRE)forward.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h forward.c \
+  krb5forw.h
+enc_des.so enc_des.po $(OUTPRE)enc_des.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h $(srcdir)/../arpa/telnet.h \
+  enc-proto.h enc_des.c encrypt.h key-proto.h misc-proto.h
+setenv.so setenv.po $(OUTPRE)setenv.$(OBJEXT): misc-proto.h \
+  setenv.c
+getent.so getent.po $(OUTPRE)getent.$(OBJEXT): getent.c \
+  gettytab.h
+parsetos.so parsetos.po $(OUTPRE)parsetos.$(OBJEXT): \
+  misc-proto.h parsetos.c
+strdup.so strdup.po $(OUTPRE)strdup.$(OBJEXT): strdup.c
+strcasecmp.so strcasecmp.po $(OUTPRE)strcasecmp.$(OBJEXT): \
+  strcasecmp.c
+strchr.so strchr.po $(OUTPRE)strchr.$(OBJEXT): strchr.c
+strrchr.so strrchr.po $(OUTPRE)strrchr.$(OBJEXT): strrchr.c
+strftime.so strftime.po $(OUTPRE)strftime.$(OBJEXT): \
+  strftime.c
+strerror.so strerror.po $(OUTPRE)strerror.$(OBJEXT): \
+  strerror.c

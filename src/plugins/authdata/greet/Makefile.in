@@ -37,11 +37,3 @@ clean::
 @libnover_frag@
 @libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-greet_auth.so greet_auth.po $(OUTPRE)greet_auth.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/authdata_plugin.h \
-  greet_auth.c

@@ -49,17 +49,3 @@ clean-unix::
 install-unix::
 	$(INSTALL_PROGRAM) gss-client $(DESTDIR)$(CLIENT_BINDIR)/gss-client
 	$(INSTALL_PROGRAM) gss-server $(DESTDIR)$(SERVER_BINDIR)/gss-server
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-$(OUTPRE)gss-client.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h gss-client.c \
-  gss-misc.h
-$(OUTPRE)gss-misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  gss-misc.c gss-misc.h
-$(OUTPRE)gss-server.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(SRCTOP)/include/port-sockets.h gss-misc.h gss-server.c

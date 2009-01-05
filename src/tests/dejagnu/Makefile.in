@@ -47,10 +47,3 @@ site.exp: runenv.vals Makefile
 	echo "set KRB5_DB_MODULE_DIR {$(KRB5_DB_MODULE_DIR)}" >> site.exp
 	echo "set PRIOCNTL_HACK @PRIOCNTL_HACK@" >> site.exp
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-$(OUTPRE)t_inetd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(COM_ERR_DEPS) t_inetd.c

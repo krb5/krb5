@@ -39,12 +39,3 @@ clean::
 @libnover_frag@
 @libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-wpse_main.so wpse_main.po $(OUTPRE)wpse_main.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/preauth_plugin.h \
-  wpse_main.c

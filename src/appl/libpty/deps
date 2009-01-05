@@ -1,0 +1,45 @@
+# 
+# Generated makefile dependencies follow.
+#
+pty_err.so pty_err.po $(OUTPRE)pty_err.$(OBJEXT): $(COM_ERR_DEPS) \
+  pty_err.c
+cleanup.so cleanup.po $(OUTPRE)cleanup.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h cleanup.c \
+  libpty.h pty-int.h pty_err.h
+getpty.so getpty.po $(OUTPRE)getpty.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h getpty.c libpty.h \
+  pty-int.h pty_err.h
+init_slave.so init_slave.po $(OUTPRE)init_slave.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  init_slave.c libpty.h pty-int.h pty_err.h
+open_ctty.so open_ctty.po $(OUTPRE)open_ctty.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h open_ctty.c pty-int.h pty_err.h
+open_slave.so open_slave.po $(OUTPRE)open_slave.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h open_slave.c pty-int.h pty_err.h
+update_utmp.so update_utmp.po $(OUTPRE)update_utmp.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  libpty.h pty-int.h pty_err.h update_utmp.c
+update_wtmp.so update_wtmp.po $(OUTPRE)update_wtmp.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h pty-int.h pty_err.h update_wtmp.c
+vhangup.so vhangup.po $(OUTPRE)vhangup.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h libpty.h \
+  pty-int.h pty_err.h vhangup.c
+void_assoc.so void_assoc.po $(OUTPRE)void_assoc.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  libpty.h pty-int.h pty_err.h void_assoc.c
+logwtmp.so logwtmp.po $(OUTPRE)logwtmp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h libpty.h \
+  logwtmp.c pty-int.h pty_err.h
+init.so init.po $(OUTPRE)init.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h init.c \
+  libpty.h pty-int.h pty_err.h
+sane_hostname.so sane_hostname.po $(OUTPRE)sane_hostname.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  libpty.h pty-int.h pty_err.h sane_hostname.c

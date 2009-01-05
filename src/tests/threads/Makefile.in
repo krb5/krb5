@@ -36,9 +36,3 @@ install::
 clean::
 	$(RM) t_rcache.o t_rcache
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-

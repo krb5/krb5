@@ -1,5 +1,5 @@
 AC_PREREQ(2.52)
-AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
 Massachusetts Institute of Technology.
 ])
 dnl
@@ -706,7 +706,7 @@ dnl  Note: Be careful in quoting.
 dnl        The ac_foreach generates the list of fragments to include
 dnl        or "" if $2 is empty
 AC_DEFUN(_K5_GEN_MAKEFILE,[dnl
-AC_CONFIG_FILES([$1/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:$1/Makefile.in:$srcdir/]K5_TOPDIR[/config/post.in])
+AC_CONFIG_FILES([$1/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:$1/Makefile.in:$1/deps:$srcdir/]K5_TOPDIR[/config/post.in])
 ])
 dnl
 dnl K5_GEN_FILE( <ac_output arguments> )
@@ -726,7 +726,7 @@ dnl
 define(_V5_AC_OUTPUT_MAKEFILE,
 [ifelse($2, , ,AC_CONFIG_FILES($2))
 AC_FOREACH([DIR], [$1],dnl
- [AC_CONFIG_FILES(DIR[/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:]DIR[/Makefile.in:$srcdir/]K5_TOPDIR[/config/post.in])])
+ [AC_CONFIG_FILES(DIR[/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:]DIR[/Makefile.in:]DIR[/deps:$srcdir/]K5_TOPDIR[/config/post.in])])
 K5_AC_OUTPUT])dnl
 dnl
 dnl
