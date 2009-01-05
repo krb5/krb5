@@ -52,22 +52,6 @@ pkinit_crypto_openssl.so pkinit_crypto_openssl.po $(OUTPRE)pkinit_crypto_openssl
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h /opt/local/include/openssl/asn1.h \
-  /opt/local/include/openssl/asn1_mac.h /opt/local/include/openssl/bio.h \
-  /opt/local/include/openssl/bn.h /opt/local/include/openssl/buffer.h \
-  /opt/local/include/openssl/conf.h /opt/local/include/openssl/crypto.h \
-  /opt/local/include/openssl/dh.h /opt/local/include/openssl/dsa.h \
-  /opt/local/include/openssl/e_os2.h /opt/local/include/openssl/ec.h \
-  /opt/local/include/openssl/ecdh.h /opt/local/include/openssl/ecdsa.h \
-  /opt/local/include/openssl/err.h /opt/local/include/openssl/evp.h \
-  /opt/local/include/openssl/lhash.h /opt/local/include/openssl/obj_mac.h \
-  /opt/local/include/openssl/objects.h /opt/local/include/openssl/opensslconf.h \
-  /opt/local/include/openssl/opensslv.h /opt/local/include/openssl/ossl_typ.h \
-  /opt/local/include/openssl/pem.h /opt/local/include/openssl/pem2.h \
-  /opt/local/include/openssl/pkcs12.h /opt/local/include/openssl/pkcs7.h \
-  /opt/local/include/openssl/rsa.h /opt/local/include/openssl/safestack.h \
-  /opt/local/include/openssl/sha.h /opt/local/include/openssl/stack.h \
-  /opt/local/include/openssl/symhacks.h /opt/local/include/openssl/x509.h \
-  /opt/local/include/openssl/x509_vfy.h /opt/local/include/openssl/x509v3.h \
-  pkcs11.h pkinit.h pkinit_accessor.h pkinit_crypto.h \
-  pkinit_crypto_openssl.c pkinit_crypto_openssl.h
+  $(SRCTOP)/include/krb5/preauth_plugin.h pkcs11.h pkinit.h \
+  pkinit_accessor.h pkinit_crypto.h pkinit_crypto_openssl.c \
+  pkinit_crypto_openssl.h
