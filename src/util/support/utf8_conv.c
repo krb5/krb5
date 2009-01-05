@@ -103,6 +103,9 @@ k5_utf8s_to_ucs2s(krb5_ucs2 *ucs2str,
 		
 	if (ucs2str != NULL) {
 #ifdef K5_BE
+#ifndef SWAP16
+#define SWAP16(X)	((((X) << 8) | ((X) >> 8)) & 0xFFFF)
+#endif
 	    if (little_endian)
 		ucs2str[ucs2len] = SWAP16(ch);
 	    else
