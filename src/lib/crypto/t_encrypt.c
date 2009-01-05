@@ -1,7 +1,7 @@
 /*
-main * lib/crypto/t_encrypt.c
+ * lib/crypto/t_encrypt.c
  *
- * Copyright 2001, 2008by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
