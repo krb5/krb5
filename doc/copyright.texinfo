@@ -609,9 +609,6 @@ OpenLDAP is a registered trademark of the OpenLDAP Foundation.
 Copyright 1999-2003 The OpenLDAP Foundation, Redwood City,
 California, USA.  All Rights Reserved.  Permission to copy and
 distribute verbatim copies of this document is granted.
-Permission is granted to make and distribute verbatim copies of this
-manual provided the copyright notices and this permission notice are
-preserved on all copies.
 
 @iftex
 @vskip 12pt
@@ -619,6 +616,10 @@ preserved on all copies.
 @vskip 12pt
 @end iftex
 @end quotation
+
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notices and this permission notice are
+preserved on all copies.
 
 @ignore
 Permission is granted to process this file through TeX and print the
