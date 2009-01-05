@@ -263,13 +263,13 @@ static krb5_preauth_systems static_preauth_systems[] = {
 	"pkinit",
 	KRB5_PADATA_PK_AS_REQ,
 	PA_SUFFICIENT,	
-	NULL,			// pa_sys_context
-	NULL,			// init
-	NULL,			// fini
+	NULL,			/* pa_sys_context */
+	NULL,			/* init */
+	NULL,			/* fini */
 	get_pkinit_edata,	
 	verify_pkinit_request,
 	return_pkinit_response,
-	NULL			// free_pa_request_context
+	NULL			/* free_pa_request_context */
     },
 #endif /* APPLE_PKINIT */
     {
