@@ -384,7 +384,7 @@ k5_time_to_seconds_since_1970(krb5_ui_8 ntTime, krb5_timestamp *elapsedSeconds)
 
     ntTime /= 10000000;
 
-    abstime = time > 0 ? ntTime - NT_TIME_EPOCH : -ntTime;
+    abstime = ntTime > 0 ? ntTime - NT_TIME_EPOCH : -ntTime;
 
     if (abstime > KRB5_INT32_MAX)
 	return ERANGE;
