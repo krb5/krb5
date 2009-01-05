@@ -19,6 +19,7 @@
 #include "k5-int.h"
 #include "k5-utf8.h"
 #include "k5-unicode.h"
+#include "ucdata/ucdata.h"
 
 #include <ctype.h>
 
