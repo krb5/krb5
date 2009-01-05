@@ -66,6 +66,8 @@
 #include <Python.h>
 #elif HAVE_PYTHON2_3_PYTHON_H
 #include <python2.3/Python.h>
+#elif HAVE_PYTHON2_5_PYTHON_H
+#include <python2.5/Python.h>
 #else
 #error "Where's the Python header file?"
 #endif

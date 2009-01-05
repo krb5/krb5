@@ -1024,7 +1024,12 @@ fi
 AC_SUBST(ldap_plugin_dir)
 AC_SUBST(LDAP)
 
-AC_CHECK_HEADERS(Python.h python2.3/Python.h)
+dnl We really should look for and use python-config.
+PYTHON_LIB=
+AC_CHECK_HEADERS(Python.h python2.3/Python.h python2.5/Python.h)
+AC_CHECK_LIB(python2.3,main,[PYTHON_LIB=-lpython2.3],
+  AC_CHECK_LIB(python2.5,main,[PYTHON_LIB=-lpython2.5]))
+AC_SUBST(PYTHON_LIB)
 
 dnl
 dnl Kludge for simple server --- FIXME is this the best way to do this?
