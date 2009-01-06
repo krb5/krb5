@@ -27,13 +27,6 @@
 
 #include "ksu.h"
     
-static krb5_error_code krb5_verify_tkt_def
-		  (krb5_context,
-    		   krb5_principal,
-    		   krb5_principal,
-    		   krb5_keyblock *,
-    		   krb5_data *,
-    		   krb5_ticket **);
 
 void plain_dump_principal ();
 
@@ -282,121 +275,6 @@ krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
     return TRUE;
 }
 
-static krb5_error_code 
-krb5_verify_tkt_def(context, client, server, cred_ses_key, 
-		    scr_ticket, clear_ticket)
-    /* IN */
-    krb5_context context;
-    krb5_principal client;
-    krb5_principal server;
-    krb5_keyblock *cred_ses_key;
-    krb5_data *scr_ticket;
-    /* OUT */
-    krb5_ticket **clear_ticket;
-{
-    krb5_keytab keytabid;
-    krb5_enctype enctype;
-    krb5_keytab_entry ktentry;
-    krb5_keyblock *tkt_key = NULL;
-    krb5_ticket * tkt = NULL;
-    krb5_error_code retval =0;
-    krb5_keyblock *	tkt_ses_key;
-    
-    if ((retval = decode_krb5_ticket(scr_ticket, &tkt))){
-	return retval;
-    }
-    
-    if (auth_debug){ 
-	fprintf(stderr,"krb5_verify_tkt_def: verifying target server\n");
-	dump_principal(context, "server", server); 
-	dump_principal(context, "tkt->server", tkt->server); 
-    } 	
-    
-    if (server && !krb5_principal_compare(context, server, tkt->server)){
-	return KRB5KRB_AP_WRONG_PRINC;
-    }
-    
-    /* get the default keytab */
-    if ((retval = krb5_kt_default(context, &keytabid))){
-	krb5_free_ticket(context, tkt);	
-	return retval;
-    }
-
-    enctype = tkt->enc_part.enctype;
-    
-    if ((retval = krb5_kt_get_entry(context, keytabid, server,
-				    tkt->enc_part.kvno, enctype, &ktentry))){
-	krb5_free_ticket(context, tkt);	
-	return retval;
-    }
-    
-    krb5_kt_close(context, keytabid);
-    
-    if ((retval = krb5_copy_keyblock(context, &ktentry.key, &tkt_key))){
-	krb5_free_ticket(context, tkt);	
-	krb5_kt_free_entry(context, &ktentry);
-	return retval;
-    }
-    
-    /* decrypt the ticket */  
-    if ((retval = krb5_decrypt_tkt_part(context, tkt_key, tkt))) {
-	krb5_free_ticket(context, tkt);	
-	krb5_kt_free_entry(context, &ktentry);
-	krb5_free_keyblock(context, tkt_key);
-	return(retval);
-    }
-
-    /* Check to make sure ticket hasn't expired */
-    retval = krb5_check_exp(context, tkt->enc_part2->times);
-    if (retval) {
-	if (auth_debug && (retval == KRB5KRB_AP_ERR_TKT_EXPIRED)) {
-	    fprintf(stderr,
-		    "krb5_verify_tkt_def: ticket has expired");
-	}
-	krb5_free_ticket(context, tkt);	
-	krb5_kt_free_entry(context, &ktentry);
-	krb5_free_keyblock(context, tkt_key);
-	return KRB5KRB_AP_ERR_TKT_EXPIRED;
-    }
-    
-    if (!krb5_principal_compare(context, client, tkt->enc_part2->client)) {
-	krb5_free_ticket(context, tkt);	
-	krb5_kt_free_entry(context, &ktentry);
-	krb5_free_keyblock(context, tkt_key);
-	return KRB5KRB_AP_ERR_BADMATCH;
-    }
-    
-    if (auth_debug){ 
-	fprintf(stderr,
-		"krb5_verify_tkt_def: verified client's identity\n");
-	dump_principal(context, "client", client);
-	dump_principal(context, "tkt->enc_part2->client",tkt->enc_part2->client);
-    } 	
-    
-    tkt_ses_key = tkt->enc_part2->session;	
-    
-    if (cred_ses_key->enctype != tkt_ses_key->enctype ||
-	cred_ses_key->length != tkt_ses_key->length ||
-	memcmp((char *)cred_ses_key->contents,
-	       (char *)tkt_ses_key->contents, cred_ses_key->length)) {
-	
-	krb5_free_ticket(context, tkt);	
-	krb5_kt_free_entry(context, &ktentry);
-	krb5_free_keyblock(context, tkt_key);
-	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
-    }
-    
-    if (auth_debug){ 
-	fprintf(stderr,
-		"krb5_verify_tkt_def: session keys match \n");
-    } 	
-    
-    *clear_ticket = tkt; 
-    krb5_kt_free_entry(context, &ktentry);
-    krb5_free_keyblock(context, tkt_key);
-    return 0; 	
-    
-}
 
 
 krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
