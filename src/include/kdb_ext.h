@@ -90,7 +90,7 @@ krb5_error_code krb5_db_invoke ( krb5_context kcontext,
 #define KRB5_KDB_METHOD_AUDIT_AS			0x00000050
 #define KRB5_KDB_METHOD_AUDIT_TGS			0x00000060
 #define KRB5_KDB_METHOD_REFRESH_POLICY			0x00000070
-#define KRB5_KDB_METHOD_GET_PAC_PRINC			0x00000080
+#define KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE	0x00000080
 
 typedef struct _kdb_sign_auth_data_req {
     krb5_magic magic;
@@ -161,5 +161,11 @@ typedef struct _kdb_audit_tgs_req {
     krb5_timestamp authtime;
     krb5_error_code error_code;
 } kdb_audit_tgs_req;
+
+typedef struct _kdb_check_allowed_to_delegate_req {
+    krb5_magic magic;
+    const krb5_db_entry *server;
+    krb5_const_principal proxy;
+} kdb_check_allowed_to_delegate_req;
 
 #endif /* KRB5_KDB5_EXT__ */

@@ -1971,61 +1971,46 @@ kdc_process_s4u2self_req(krb5_context context,
     return 0;
 }
 
-static krb5_boolean
-check_constrained_delegation_acl(krb5_context context,
-				 krb5_tl_data *tl_data,
-				 krb5_const_principal spn)
-{
-    krb5_principal acl;
-    krb5_boolean ret;
-
-    assert(tl_data->tl_data_contents[tl_data->tl_data_length] == '\0');
-
-    if (krb5_parse_name_flags(context,
-			      (char *)tl_data->tl_data_contents,
-			      KRB5_PRINCIPAL_PARSE_NO_REALM,
-			      &acl) != 0)
-	return FALSE;
-
-    ret = krb5_principal_compare_flags(context, acl, spn, KRB5_PRINCIPAL_COMPARE_IGNORE_REALM);
-
-    krb5_free_principal(context, acl);
-
-    return ret;
-}
-
 static krb5_error_code
 check_allowed_to_delegate_to(krb5_context context,
 			     const krb5_db_entry *server,
 			     krb5_const_principal proxy)
 {
-    krb5_tl_data		*tl_data;
-    krb5_boolean		allowed = FALSE;
+    kdb_check_allowed_to_delegate_req   req;
+    krb5_data			req_data;
+    krb5_data			rep_data;
+    krb5_error_code		code;
 
     /* Can't get a TGT (otherwise it would be unconstrained delegation) */
     if (krb5_is_tgs_principal(proxy)) {
 	return KRB5KDC_ERR_POLICY;
     }
 
-    /* Must be in same realm -- ACLs are non-qualified SPNs */
-    if (!krb5_realm_compare(kdc_context, server->princ, proxy)) {
+    /* Must be in same realm */
+    if (!krb5_realm_compare(context, server->princ, proxy)) {
 	return KRB5_IN_TKT_REALM_MISMATCH; /* XXX */
     }
 
-    for (tl_data = server->tl_data; tl_data != NULL; tl_data = tl_data->tl_data_next) {
-        if (tl_data->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL) {
-	    if (check_constrained_delegation_acl(context, tl_data, proxy)) {
-		allowed = TRUE;
-		break;
-	    }
-        }
+    req.server = server;
+    req.proxy = proxy;
+
+    req_data.data = (void *)&req;
+    req_data.length = sizeof(req);
+
+    rep_data.data = NULL;
+    rep_data.length = 0;
+
+    code = krb5_db_invoke(context,
+			  KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE,
+			  &req_data,
+			  &rep_data);
+    if (code == KRB5_KDB_DBTYPE_NOSUP) {
+	code = KRB5KDC_ERR_POLICY;
     }
 
-    if (allowed == FALSE) {
-	return KRB5KDC_ERR_POLICY;
-    }
+    assert(rep_data.length == 0);
 
-    return 0;
+    return code;
 }
 
 krb5_error_code
