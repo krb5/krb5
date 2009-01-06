@@ -56,6 +56,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     int *path_passwd;
 {
     krb5_principal client, server;
+    krb5_verify_init_creds_opt vfy_opts;
     krb5_creds tgt, tgtq, in_creds, * out_creds;
     krb5_creds **tgts = NULL; /* list of ticket granting tickets */       
     
@@ -213,9 +214,11 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
 	krb5_free_tgt_creds(context, tgts);
     }
     
-    retval = krb5_verify_tkt_def(context, client, server, 
-				 &out_creds->keyblock, &out_creds->ticket,
-				 &target_tkt);
+    krb5_verify_init_creds_opt_init(&vfy_opts);
+    krb5_verify_init_creds_opt_set_ap_req_nofail( &vfy_opts, 1);
+	retval = krb5_verify_init_creds(context, out_creds, server, NULL /*keytab*/,
+					NULL /*output ccache*/,
+					&vfy_opts);
     if (retval) {
 	com_err(prog_name, retval, "while verifying ticket for server");
 	return (FALSE);
@@ -242,7 +245,7 @@ krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
 {
 				 
     krb5_creds tgt, tgtq;
-    krb5_ticket * target_tkt;                 
+    krb5_verify_init_creds_opt vfy_opts;
     krb5_error_code retval;
     
     memset((char *) &tgtq, 0, sizeof(tgtq)); 
@@ -266,9 +269,12 @@ krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
 	return (FALSE) ; 	
 	
     }
-    
-    if ((retval = krb5_verify_tkt_def(context, client, server, &tgt.keyblock, 
-				      &tgt.ticket, &target_tkt))){
+    krb5_verify_init_creds_opt_init(&vfy_opts);
+    krb5_verify_init_creds_opt_set_ap_req_nofail( &vfy_opts, 1);
+	retval = krb5_verify_init_creds(context, &tgt, server, NULL /*keytab*/,
+					NULL /*output ccache*/,
+					&vfy_opts);
+					if (retval){
 	com_err(prog_name, retval, "while verifing ticket for server"); 
 	return (FALSE);
     }
