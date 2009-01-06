@@ -1662,12 +1662,12 @@ proc start_tail { fname spawnid_var pid_var which standalone } {
 
     set p 0
     set otimeout $timeout
-    set timeout 1
+    set timeout 3
     set ok 0
     while { $ok == 0 && $p < 3 } {
 	expect {
 	    -i $spawn_id
-	    -ex "$markstr\r\n" { set ok 1 }
+	    -ex "$markstr" { set ok 1 }
 	    -re "\[^\r\n\]*\r\n" { exp_continue }
 	    timeout {
 		# Some versions of GNU tail had a race condition where
