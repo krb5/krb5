@@ -110,6 +110,8 @@ static kadm5_ret_t new_server_handle(krb5_ui_4 api_version,
 {
      kadm5_server_handle_t handle;
 
+     *out_handle = NULL;
+
      if (! (handle = (kadm5_server_handle_t)
 	    malloc(sizeof(*handle))))
 	  return ENOMEM;
@@ -137,6 +139,8 @@ static kadm5_ret_t new_server_handle(krb5_ui_4 api_version,
  */
 static void free_server_handle(kadm5_server_handle_t handle)
 {
+     if (!handle)
+	  return;
      krb5_free_principal(handle->context, handle->current_caller);
      free(handle);
 }
@@ -310,10 +314,8 @@ create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -349,12 +351,12 @@ create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 
  exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -374,10 +376,8 @@ create_principal3_2_svc(cprinc3_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -414,11 +414,12 @@ create_principal3_2_svc(cprinc3_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
+
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -438,10 +439,8 @@ delete_principal_2_svc(dprinc_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -474,11 +473,11 @@ delete_principal_2_svc(dprinc_arg *arg, struct svc_req *rqstp)
 
     }
     free(prime_arg);
-    free_server_handle(handle);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
- exit_func:
 
+exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -499,10 +498,8 @@ modify_principal_2_svc(mprinc_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
@@ -534,11 +531,11 @@ modify_principal_2_svc(mprinc_arg *arg, struct svc_req *rqstp)
 	  if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -562,10 +559,8 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
@@ -633,12 +628,12 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
 	     krb5_free_error_message(handle->context, errmsg);
 
     }
-    free_server_handle(handle);
     free(prime_arg1);
     free(prime_arg2);    
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -659,10 +654,8 @@ get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -710,11 +703,11 @@ get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
 	  if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -734,10 +727,8 @@ get_princs_2_svc(gprincs_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -772,10 +763,10 @@ get_princs_2_svc(gprincs_arg *arg, struct svc_req *rqstp)
 		krb5_free_error_message(handle->context, errmsg);
 
     }
-    free_server_handle(handle);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -795,10 +786,8 @@ chpass_principal_2_svc(chpass_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -837,11 +826,11 @@ chpass_principal_2_svc(chpass_arg *arg, struct svc_req *rqstp)
 		krb5_free_error_message(handle->context, errmsg);
     }
 
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -861,10 +850,8 @@ chpass_principal3_2_svc(chpass3_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -909,11 +896,11 @@ chpass_principal3_2_svc(chpass3_arg *arg, struct svc_req *rqstp)
 		krb5_free_error_message(handle->context, errmsg);
     }
 
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -933,10 +920,8 @@ setv4key_principal_2_svc(setv4key_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -972,11 +957,11 @@ setv4key_principal_2_svc(setv4key_arg *arg, struct svc_req *rqstp)
 		krb5_free_error_message(handle->context, errmsg);
     }
 
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -996,10 +981,8 @@ setkey_principal_2_svc(setkey_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1035,11 +1018,11 @@ setkey_principal_2_svc(setkey_arg *arg, struct svc_req *rqstp)
 		krb5_free_error_message(handle->context, errmsg);
     }
 
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1059,10 +1042,8 @@ setkey_principal3_2_svc(setkey3_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1101,11 +1082,11 @@ setkey_principal3_2_svc(setkey3_arg *arg, struct svc_req *rqstp)
 		krb5_free_error_message(handle->context, errmsg);
     }
 
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1128,10 +1109,8 @@ chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
 	 goto exit_func;
 
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1140,7 +1119,6 @@ chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
-	 free_server_handle(handle);
 	 goto exit_func;
     }
     if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
@@ -1182,11 +1160,11 @@ chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1208,10 +1186,8 @@ chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1220,7 +1196,6 @@ chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
-	 free_server_handle(handle);
 	 goto exit_func;
     }
     if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
@@ -1268,11 +1243,11 @@ chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     free(prime_arg);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1292,10 +1267,8 @@ create_policy_2_svc(cpol_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1326,10 +1299,10 @@ create_policy_2_svc(cpol_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1349,10 +1322,8 @@ delete_policy_2_svc(dpol_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1381,10 +1352,10 @@ delete_policy_2_svc(dpol_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1404,10 +1375,8 @@ modify_policy_2_svc(mpol_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1437,10 +1406,10 @@ modify_policy_2_svc(mpol_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1463,10 +1432,8 @@ get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1526,10 +1493,10 @@ get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
 	 log_unauth(funcname, prime_arg,
 		    &client_name, &service_name, rqstp);
     }
-    free_server_handle(handle);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 
 }
@@ -1550,10 +1517,8 @@ get_pols_2_svc(gpols_arg *arg, struct svc_req *rqstp)
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 goto exit_func;
 
-    if ((ret.code = check_handle((void *)handle))) {
-	 free_server_handle(handle);
+    if ((ret.code = check_handle((void *)handle)))
 	 goto exit_func;
-    }
 
     ret.api_version = handle->api_version;
 
@@ -1585,10 +1550,10 @@ get_pols_2_svc(gpols_arg *arg, struct svc_req *rqstp)
 	if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
     }
-    free_server_handle(handle);
     gss_release_buffer(&minor_stat, &client_name);
     gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+    free_server_handle(handle);
     return &ret;
 }
 
@@ -1605,10 +1570,8 @@ getprivs_ret * get_privs_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      if ((ret.code = new_server_handle(*arg, rqstp, &handle)))
 	  goto exit_func;
 
-     if ((ret.code = check_handle((void *)handle))) {
-	  free_server_handle(handle);
+     if ((ret.code = check_handle((void *)handle)))
 	  goto exit_func;
-     }
 
      ret.api_version = handle->api_version;
 
@@ -1628,10 +1591,10 @@ getprivs_ret * get_privs_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      if (errmsg != NULL)
 		krb5_free_error_message(handle->context, errmsg);
 
-     free_server_handle(handle);
      gss_release_buffer(&minor_stat, &client_name);
      gss_release_buffer(&minor_stat, &service_name);
 exit_func:
+     free_server_handle(handle);
      return &ret;
 }
 
