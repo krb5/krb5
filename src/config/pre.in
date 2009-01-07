@@ -221,7 +221,6 @@ GSS_MODULE_DIR = @libdir@/gss
 KRB5_INCSUBDIRS = \
 	$(KRB5_INCDIR)/krb5 \
 	$(KRB5_INCDIR)/gssapi \
-	$(KRB5_INCDIR)/kerberosIV \
 	$(KRB5_INCDIR)/gssrpc
 
 #
