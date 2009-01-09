@@ -1,7 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2000, 2002, 2003, 2007, 2008
->>>>>>> trunk:src/lib/gssapi/krb5/init_sec_context.c
+ * Copyright 2000, 2002, 2003, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
