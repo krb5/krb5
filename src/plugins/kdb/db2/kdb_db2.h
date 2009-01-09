@@ -42,7 +42,8 @@ typedef struct _krb5_db2_context {
     int                 db_locks_held;  /* Number of times locked       */
     int                 db_lock_mode;   /* Last lock mode, e.g. greatest*/
     krb5_boolean        db_nb_locks;    /* [Non]Blocking lock modes     */
-    krb5_keyblock      *db_master_key;  /* Master key of database       */
+    krb5_keyblock      *db_master_key; /* Master key of database */
+    krb5_keyblock_node *db_master_key_list;  /* Master key list of database */
     osa_adb_policy_t    policy_db;
     krb5_boolean tempdb;
 } krb5_db2_context;
@@ -121,6 +122,13 @@ krb5_db2_db_set_mkey( krb5_context context,
 krb5_error_code
 krb5_db2_db_get_mkey( krb5_context context,
 		      krb5_keyblock **key);
+krb5_error_code
+krb5_db2_db_set_mkey_list( krb5_context context,
+		      krb5_keyblock_node *keylist);
+
+krb5_error_code
+krb5_db2_db_get_mkey_list( krb5_context context,
+		      krb5_keyblock_node **keylist);
 
 krb5_error_code
 krb5_db2_db_put_principal( krb5_context context,

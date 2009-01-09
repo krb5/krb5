@@ -15,7 +15,9 @@ static char *rcsid = "$Header$";
 #include "server_internal.h"
 
 krb5_principal	    master_princ;
-krb5_keyblock	    master_keyblock;
+krb5_keyblock	    master_keyblock; /* local mkey */
+krb5_keyblock_node  *master_keylist = NULL;
+krb5_actkvno_node   *active_mkey_list = NULL;
 krb5_db_entry	    master_db;
 
 krb5_principal	    hist_princ;
@@ -32,6 +34,8 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
     int		   ret = 0;
     char	   *realm;
     krb5_boolean   from_kbd = FALSE;
+    krb5_keyblock  *mkey;
+    krb5_kvno       mkvno = IGNORE_VNO;
 
     if (from_keyboard)
       from_kbd = TRUE;
@@ -50,21 +54,44 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 
     master_keyblock.enctype = handle->params.enctype;
 
+    /* 
+     * Fetch the local mkey, may not be the latest but that's okay because we
+     * really want the list of all mkeys and those can be retrieved with any
+     * valid mkey.
+     */
     ret = krb5_db_fetch_mkey(handle->context, master_princ,
 			     master_keyblock.enctype, from_kbd,
 			     FALSE /* only prompt once */,
 			     handle->params.stash_file,
-			     NULL /* don't care about kvno */,
+			     &mkvno  /* get the kvno of the returned mkey */,
 			     NULL /* I'm not sure about this,
 				     but it's what the kdc does --marc */,
 			     &master_keyblock);
     if (ret)
 	goto done;
 				 
+#if 0 /************** Begin IFDEF'ed OUT *******************************/
+    /*
+     * XXX WAF: since the local mkey may not be latest, hold off on verifying it
+     * since krb5_db_fetch_mkey_list will do this work.
+     */
     if ((ret = krb5_db_verify_master_key(handle->context, master_princ,
 					 IGNORE_VNO, &master_keyblock))) {
 	  krb5_db_fini(handle->context);
 	  return ret;
+    }
+#endif /**************** END IFDEF'ed OUT *******************************/
+
+    if ((ret = krb5_db_fetch_mkey_list(handle->context, master_princ,
+				       mkey, mkvno, &master_keylist))) {
+	krb5_db_fini(handle->context);
+	return (ret);
+    }
+
+    if ((ret = krb5_dbe_fetch_act_mkey_list(handle->context, master_princ,
+				            &active_mkey_list))) {
+	krb5_db_fini(handle->context);
+	return (ret);
     }
 
 done:
@@ -106,6 +133,7 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
     char    *realm, *hist_name;
     krb5_key_data *key_data;
     krb5_key_salt_tuple ks[1];
+    krb5_keyblock *tmp_mkey;
 
     if (r == NULL)  {
 	if ((ret = krb5_get_default_realm(handle->context, &realm)))
@@ -177,7 +205,11 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
     if (ret)
 	goto done;
 
-    ret = krb5_dbekd_decrypt_key_data(handle->context, &master_keyblock,
+    ret = krb5_dbe_find_mkey(handle->context, master_keylist, &hist_db, &tmp_mkey);
+    if (ret)
+	goto done;
+
+    ret = krb5_dbekd_decrypt_key_data(handle->context, tmp_mkey,
 				  key_data, &hist_key, NULL);
     if (ret)
 	goto done;

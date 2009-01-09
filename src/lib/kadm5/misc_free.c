@@ -37,7 +37,8 @@ kadm5_ret_t
      free(names);
     return KADM5_OK;
 }
-
+/* XXX WAF: maybe delete this if all compiles */
+#if 0 /************** Begin IFDEF'ed OUT *******************************/
 /* XXX this ought to be in libkrb5.a, but isn't */
 kadm5_ret_t krb5_free_key_data_contents(context, key)
    krb5_context context;
@@ -54,6 +55,7 @@ kadm5_ret_t krb5_free_key_data_contents(context, key)
      }
      return KADM5_OK;
 }
+#endif /**************** END IFDEF'ed OUT *******************************/
 
 kadm5_ret_t kadm5_free_key_data(void *server_handle,
 				krb5_int16 *n_key_data,

@@ -434,6 +434,37 @@ krb5_db2_db_get_mkey(krb5_context context, krb5_keyblock **key)
     return 0;
 }
 
+krb5_error_code
+krb5_db2_db_set_mkey_list(krb5_context context, krb5_keyblock_node *key_list)
+{
+    krb5_db2_context *db_ctx;
+    kdb5_dal_handle *dal_handle;
+
+    if (!k5db2_inited(context))
+	return (KRB5_KDB_DBNOTINITED);
+
+    dal_handle = context->dal_handle;
+    db_ctx = dal_handle->db_context;
+    db_ctx->db_master_key_list = key_list;
+    return 0;
+}
+
+krb5_error_code
+krb5_db2_db_get_mkey_list(krb5_context context, krb5_keyblock_node **key_list)
+{
+    krb5_db2_context *db_ctx;
+    kdb5_dal_handle *dal_handle;
+
+    if (!k5db2_inited(context))
+	return (KRB5_KDB_DBNOTINITED);
+
+    dal_handle = context->dal_handle;
+    db_ctx = dal_handle->db_context;
+    *key_list = db_ctx->db_master_key_list;
+
+    return 0;
+}
+
 /*
  * Set the "name" of the current database to some alternate value.
  *

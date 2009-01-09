@@ -129,6 +129,12 @@ typedef struct _kdb_vftabl{
     krb5_error_code (*get_master_key) (krb5_context kcontext,
 				       krb5_keyblock **key);
 
+    krb5_error_code (*set_master_key_list) (krb5_context kcontext,
+				            krb5_keyblock_node *keylist);
+
+    krb5_error_code (*get_master_key_list) (krb5_context kcontext,
+				            krb5_keyblock_node **keylist);
+
 
     krb5_error_code (*setup_master_key_name) (krb5_context kcontext,
 					      char *keyname,
@@ -153,6 +159,13 @@ typedef struct _kdb_vftabl{
 					  krb5_principal mprinc,
 					  krb5_kvno     kvno,
 					  krb5_keyblock *mkey);
+
+    krb5_error_code (*fetch_master_key_list) (krb5_context kcontext,
+					      krb5_principal mname,
+					      const krb5_keyblock *key,
+					      krb5_kvno            kvno,
+					      krb5_keyblock_node  **mkeys_list);
+
 
     krb5_error_code (*dbe_search_enctype) (krb5_context kcontext,
 					   krb5_db_entry *dbentp,

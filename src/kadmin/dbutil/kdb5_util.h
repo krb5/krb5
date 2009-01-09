@@ -82,6 +82,8 @@ extern void dump_v4db (int argc, char **argv);
 extern void kdb5_create (int argc, char **argv);
 extern void kdb5_destroy (int argc, char **argv);
 extern void kdb5_stash (int argc, char **argv);
+extern void kdb5_add_mkey (int argc, char **argv);
+extern void kdb5_use_mkey (int argc, char **argv);
 
 extern void update_ok_file (char *file_name);
 

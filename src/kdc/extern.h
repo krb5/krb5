@@ -41,6 +41,7 @@ typedef struct __kdc_realm_data {
     krb5_context	realm_context;	/* Context to be used for realm	    */
     krb5_keytab		realm_keytab; 	/* keytab to be used for this realm */
     char *		realm_profile;	/* Profile file for this realm	    */
+    krb5_keyblock_node * mkey_list;	/* list of mkeys in use for this realm */
     /*
      * Database per-realm data.
      */
@@ -48,6 +49,12 @@ typedef struct __kdc_realm_data {
     char *		realm_stash;	/* Stash file name for realm	    */
     char *		realm_mpname;	/* Master principal name for realm  */
     krb5_principal	realm_mprinc;	/* Master principal for realm	    */
+    /* XXX WAF: is realm_mkey the most current key in the keytab (or from
+     * command line)?  Or should this be the active key?  I need to make sure
+     * this is handled properly.  what about the kvno of this key?
+     * or maybe this should go away and be replaced with a function that
+     * returns the proper mkey given a princ.
+     */
     krb5_keyblock	realm_mkey;	/* Master key for this realm	    */
     /*
      * TGS per-realm data.
@@ -81,6 +88,7 @@ kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 #define	max_life_for_realm		kdc_active_realm->realm_maxlife
 #define	max_renewable_life_for_realm	kdc_active_realm->realm_maxrlife
 #define	master_keyblock			kdc_active_realm->realm_mkey
+#define	master_keylist			kdc_active_realm->mkey_list
 #define	master_princ			kdc_active_realm->realm_mprinc
 #define	tgs_server			kdc_active_realm->realm_tgsprinc
 #define reject_bad_transit		kdc_active_realm->realm_reject_bad_transit

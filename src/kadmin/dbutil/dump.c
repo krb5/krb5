@@ -274,6 +274,7 @@ static krb5_error_code master_key_convert(context, db_entry)
 
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
+    /* XXX WAF: need to fix this! */
     if (is_mkey && db_entry->n_key_data != 1)
 	    fprintf(stderr,
 		    "Master key db entry has %d keys, expecting only 1!\n",

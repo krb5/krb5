@@ -96,6 +96,7 @@ void usage()
 }
 
 extern krb5_keyblock master_keyblock;
+extern krb5_keyblock_node *master_keylist;
 extern krb5_principal master_princ;
 krb5_db_entry master_entry;
 int	valid_master_key = 0;
@@ -123,6 +124,8 @@ struct _cmd_table {
 /*      {"dump_v4", dump_v4db, 1}, */
 /*      {"load_v4", load_v4db, 0}, */
      {"ark", add_random_key, 1},
+     {"add_mkey", kdb5_add_mkey, 1}, /* 1 is opendb */
+     {"use_mkey", kdb5_use_mkey, 1}, /* 1 is opendb */
      {NULL, NULL, 0},
 };
 
@@ -480,12 +483,25 @@ static int open_db_and_mkey()
 	exit_status++;
 	return(0);
     }
+
     if ((retval = krb5_db_verify_master_key(util_context, master_princ, 
 					    kvno, &master_keyblock))) {
 	com_err(progname, retval, "while verifying master key");
 	exit_status++;
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
+    }
+
+    /*
+     * I think I need to get the mkey list here so the ark command will
+     * work properly.
+     */
+    if ((retval = krb5_db_fetch_mkey_list(util_context, master_princ,
+				       &master_keyblock, kvno, &master_keylist))) {
+	com_err(progname, retval, "while getting master key list");
+	com_err(progname, 0, "Warning: proceeding without master key list");
+	exit_status++;
+	return(0);
     }
 
     seed.length = master_keyblock.length;
@@ -496,6 +512,7 @@ static int open_db_and_mkey()
 	exit_status++;
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
+        krb5_db_free_mkey_list(util_context, master_keylist);
 	return(1);
     }
 
@@ -516,6 +533,7 @@ quit()
 
     if (finished)
 	return 0;
+    krb5_db_free_mkey_list(util_context, master_keylist);
     retval = krb5_db_fini(util_context);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     finished = TRUE;
@@ -546,6 +564,7 @@ add_random_key(argc, argv)
     char *me = progname;
     char *ks_str = NULL;
     char *pr_str;
+    krb5_keyblock *tmp_mkey;
 
     if (argc < 2)
 	usage();
@@ -600,7 +619,16 @@ add_random_key(argc, argv)
 	free_keysalts = 0;
     } else
 	free_keysalts = 1;
-    ret = krb5_dbe_ark(util_context, &master_keyblock,
+
+    /* Find the mkey used to protect the existing keys */
+    ret = krb5_dbe_find_mkey(util_context, master_keylist, &dbent, &tmp_mkey);
+    if (ret) {
+	com_err(me, ret, "while finding mkey");
+	exit_status++;
+	return;
+    }
+
+    ret = krb5_dbe_ark(util_context, tmp_mkey,
 		       keysalts, num_keysalts,
 		       &dbent);
     if (free_keysalts)

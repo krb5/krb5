@@ -171,7 +171,46 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_DB_ARGS                 0x7fff
 #endif /* SECURID */
 #define KRB5_TL_USER_CERTIFICATE        0x0007
-    
+#define KRB5_TL_MKVNO                   0x0008
+#define KRB5_TL_ACTKVNO                 0x0009
+#define KRB5_TL_MKEY_AUX                0x000a
+
+/* version number for KRB5_TL_ACTKVNO data */
+#define KRB5_TL_ACTKVNO_VER_1	1
+
+/* version number for KRB5_TL_MKEY_AUX data */
+#define KRB5_TL_MKEY_AUX_VER_1	1
+
+/* XXX WAF: the indef. struct typedefs below may not be needed so ifdef'ing them
+ * out for now */
+/*
+ * Doing this because it this struct should be defined in k5-int.h but this
+ * header file can't include that one.
+ */
+#if 0 /************** Begin IFDEF'ed OUT *******************************/
+#ifndef _KRB5_INT_H
+struct _krb5_actkvno_node;
+typedef struct _krb5_actkvno_node krb5_actkvno_node;
+struct _krb5_mkey_aux_node;
+typedef struct _krb5_mkey_aux_node krb5_mkey_aux_node;
+#endif
+#endif /**************** END IFDEF'ed OUT *******************************/
+
+typedef struct _krb5_actkvno_node {
+    struct _krb5_actkvno_node *next;
+    krb5_kvno act_kvno;
+    krb5_timestamp act_time;
+} krb5_actkvno_node;
+
+typedef struct _krb5_mkey_aux_node {
+    struct _krb5_mkey_aux_node *next;
+    krb5_kvno	  mkey_kvno; /* kvno of mkey protecting the latest_mkey */
+    /* XXX WAF: maybe krb5_data isn't adequate, the kvno and enctype is needed I
+     * think.  Perhaps krb5_key_data should be used?
+     */
+    krb5_key_data    latest_mkey; /* most recent mkey */
+} krb5_mkey_aux_node;
+
 /*
  * Determines the number of failed KDC requests before DISALLOW_ALL_TIX is set
  * on the principal.
@@ -294,6 +333,17 @@ krb5_error_code krb5_db_verify_master_key ( krb5_context   kcontext,
                                             krb5_kvno      kvno,
 					    krb5_keyblock  *mkey );
 krb5_error_code
+krb5_db_fetch_mkey_list( krb5_context    context,
+		         krb5_principal  mname,
+		         const krb5_keyblock * mkey,
+		         krb5_kvno             mkvno,
+		         krb5_keyblock_node  **mkeys_list );
+
+krb5_error_code
+krb5_db_free_mkey_list( krb5_context         context,
+		        krb5_keyblock_node  *mkey_list );
+
+krb5_error_code
 krb5_dbe_find_enctype( krb5_context	kcontext,
 		       krb5_db_entry	*dbentp,
 		       krb5_int32		ktype,
@@ -333,15 +383,60 @@ krb5_dbekd_encrypt_key_data( krb5_context 		  context,
 			     krb5_key_data	        * key_data);
 
 krb5_error_code
+krb5_dbe_fetch_act_mkey_list(krb5_context        context,
+			     krb5_principal      mprinc,
+			     krb5_actkvno_node  **act_mkey_list);
+
+krb5_error_code
+krb5_dbe_find_act_mkey( krb5_context          context,
+                        krb5_keyblock_node  * mkey_list,
+                        krb5_actkvno_node   * act_mkey_list,
+                        krb5_keyblock      ** act_mkey);
+
+krb5_error_code
+krb5_dbe_find_mkey( krb5_context	 context,
+                    krb5_keyblock_node * mkey_list,
+                    krb5_db_entry      * entry,
+                    krb5_keyblock      ** mkey);
+
+krb5_error_code
+krb5_dbe_lookup_mkvno( krb5_context    context,
+		       krb5_db_entry * entry,
+		       krb5_kvno     * mkvno);
+
+krb5_error_code
 krb5_dbe_lookup_mod_princ_data( krb5_context          context,
 				krb5_db_entry       * entry,
 				krb5_timestamp      * mod_time,
 				krb5_principal      * mod_princ);
  
+krb5_error_code
+krb5_dbe_lookup_mkey_aux( krb5_context         context,
+		          krb5_db_entry      * entry,
+		          krb5_mkey_aux_node ** mkey_aux_data_list);
+krb5_error_code
+krb5_dbe_update_mkvno( krb5_context    context,
+		       krb5_db_entry * entry,
+		       krb5_kvno       mkvno);
 
 krb5_error_code
-krb5_dbe_update_last_pwd_change( krb5_context          context,
-				 krb5_db_entry       * entry,
+krb5_dbe_lookup_actkvno( krb5_context         context,
+		         krb5_db_entry      * entry,
+		         krb5_actkvno_node ** actkvno_list);
+
+krb5_error_code
+krb5_dbe_update_mkey_aux( krb5_context          context,
+		          krb5_db_entry       * entry,
+		          krb5_mkey_aux_node  * mkey_aux_data_list);
+
+krb5_error_code
+krb5_dbe_update_actkvno(krb5_context    context,
+			krb5_db_entry * entry,
+			const krb5_actkvno_node *actkvno_list);
+
+krb5_error_code
+krb5_dbe_update_last_pwd_change( krb5_context     context,
+				 krb5_db_entry  * entry,
 				 krb5_timestamp	  stamp);
 
 krb5_error_code
@@ -417,6 +512,12 @@ krb5_dbe_apw( krb5_context	  context,
 	      char 		* passwd,
 	      krb5_db_entry	* db_entry);
 
+int
+get_key_data_kvno( krb5_context	   context,
+		   int		   count,
+		   krb5_key_data * data);
+
+
 /* default functions. Should not be directly called */
 /*
  *   Default functions prototype
@@ -453,12 +554,25 @@ krb5_def_verify_master_key( krb5_context   context,
 			    krb5_kvno      kvno,
 			    krb5_keyblock *mkey);
 
+krb5_error_code
+krb5_def_fetch_mkey_list( krb5_context            context,
+			    krb5_principal        mprinc,
+			    const krb5_keyblock  *mkey,
+			    krb5_kvno             mkvno,
+			    krb5_keyblock_node  **mkeys_list);
+
 krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
 				   char *pwd,
 				   krb5_keyblock *key );
 
+krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
+				        krb5_keyblock_node *keylist );
+
 krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
 				   krb5_keyblock **key );
+
+krb5_error_code kdb_def_get_mkey_list ( krb5_context kcontext,
+				        krb5_keyblock_node **keylist );
 
 krb5_error_code
 krb5_dbe_def_cpw( krb5_context	  context,

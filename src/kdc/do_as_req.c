@@ -76,6 +76,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_keyblock encrypting_key;
     const char *status;
     krb5_key_data  *server_key, *client_key;
+    krb5_keyblock *tmp_mkey;
     krb5_enctype useenctype;
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
     krb5_boolean update_client = 0;
@@ -334,9 +335,14 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
+    if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist, &server, &tmp_mkey))) {
+	status = "FINDING_MASTER_KEY";
+	goto errout;
+    }
+
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
+    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, tmp_mkey, 
 					       server_key, &encrypting_key,
 					       NULL))) {
 	status = "DECRYPT_SERVER_KEY";
@@ -373,8 +379,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
+    if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist, &client, &tmp_mkey))) {
+	status = "FINDING_MASTER_KEY";
+	goto errout;
+    }
+
     /* convert client.key_data into a real key */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
+    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, tmp_mkey, 
 					       client_key, &encrypting_key,
 					       NULL))) {
 	status = "DECRYPT_CLIENT_KEY";

@@ -56,7 +56,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-static int
+int
 get_key_data_kvno(context, count, data)
     krb5_context	  context;
     int			  count;

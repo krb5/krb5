@@ -377,6 +377,10 @@ errout:
 }
 #endif /* LEAN_CLIENT */
 
+/* XXX WAF: I'm now thinking this fucntion should check to see if the fetched
+ * key matches the latest mkey in the master princ.  If it doesn't then the
+ * latest mkey should be returned by using the mkey_aux tl data.
+ */
 krb5_error_code
 krb5_db_def_fetch_mkey(krb5_context   context,
                        krb5_principal mname,
@@ -432,6 +436,9 @@ krb5_db_def_fetch_mkey(krb5_context   context,
     }
 }
 
+/*
+ * Note, this verifies that the input mkey is currently protecting all the mkeys
+ */
 krb5_error_code
 krb5_def_verify_master_key(krb5_context    context,
                            krb5_principal  mprinc,
@@ -486,6 +493,152 @@ krb5_def_verify_master_key(krb5_context    context,
     return retval;
 }
 
+krb5_error_code
+krb5_def_fetch_mkey_list(krb5_context        context,
+                       krb5_principal        mprinc,
+                       const krb5_keyblock  *mkey,
+                       krb5_kvno             mkvno,
+                       krb5_keyblock_node  **mkeys_list)
+{
+    krb5_error_code retval;
+    krb5_db_entry master_entry;
+    int nprinc;
+    krb5_boolean more, found_key = FALSE;
+    krb5_keyblock tmp_mkey, tmp_clearkey;
+    krb5_keyblock_node *mkey_list_head, **mkey_list_node;
+    krb5_key_data *key_data;
+    krb5_mkey_aux_node	*mkey_aux_data_list, *aux_data_entry;
+    int i;
+
+    if (mkeys_list == NULL)
+	return (EINVAL);
+
+    memset(&tmp_mkey, 0, sizeof(tmp_mkey));
+    memset(&tmp_clearkey, 0, sizeof(tmp_clearkey));
+
+    nprinc = 1;
+    if ((retval = krb5_db_get_principal(context, mprinc,
+					&master_entry, &nprinc, &more)))
+	return (retval);
+	
+    if (nprinc != 1) {
+	if (nprinc)
+	    krb5_db_free_principal(context, &master_entry, nprinc);
+	return(KRB5_KDB_NOMASTERKEY);
+    } else if (more) {
+	krb5_db_free_principal(context, &master_entry, nprinc);
+	return (KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    }
+
+    /*
+     * Check if the input mkey is the latest key and if it isn't then find the
+     * latest mkey.
+     */
+    if ((retval = krb5_dbekd_decrypt_key_data(context, &tmp_mkey,
+					      &master_entry.key_data[0],
+					      &tmp_clearkey, NULL)) != 0) {
+	/*
+	 * Note the mkvno may provide a hint as to which mkey_aux tuple to
+	 * decrypt.
+	 */
+	if ((retval = krb5_dbe_lookup_mkey_aux(context, &master_entry, &mkey_aux_data_list)))
+	    goto clean_n_exit;
+
+	/* for performance sake, try decrypting with matching kvno */
+	for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
+	     aux_data_entry = aux_data_entry->next) {
+
+	    if (aux_data_entry->mkey_kvno == mkvno) {
+		if (krb5_dbekd_decrypt_key_data(context, &tmp_mkey, &aux_data_entry->latest_mkey,
+				   &tmp_clearkey, NULL) == 0) {
+		    found_key = TRUE;
+		    break;
+		}
+	    }
+	}
+	if (found_key != TRUE) {
+	    /* given the importance of acquiring the latest mkey, try brute force */
+	    for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
+		 aux_data_entry = aux_data_entry->next) {
+
+		if (krb5_dbekd_decrypt_key_data(context, &tmp_mkey, &aux_data_entry->latest_mkey,
+						&tmp_clearkey, NULL) == 0) {
+		    found_key = TRUE;
+		    /* XXX WAF: should I issue warning about kvno not matching?
+		     */
+		    break;
+		}
+	    }
+	    if (found_key != TRUE) {
+		krb5_set_error_message (context, KRB5_KDB_BADMASTERKEY,
+			"Unable to decrypt latest master key with the provided master key\n");
+		retval = KRB5_KDB_BADMASTERKEY;
+		goto clean_n_exit;
+	    }
+	}
+    }
+
+    /*
+     * Extract all the mkeys from master_entry using the most current mkey and
+     * create a mkey list for the mkeys field in kdc_realm_t. 
+     */
+
+    mkey_list_head = (krb5_keyblock_node *) malloc(sizeof(krb5_keyblock_node));
+    if (mkey_list_head == NULL) {
+	retval = ENOMEM;
+	goto clean_n_exit;
+    }
+
+    memset(mkey_list_head, 0, sizeof(krb5_keyblock_node));
+    mkey_list_node = &mkey_list_head;
+
+    for (i=0; i < master_entry.n_key_data; i++) {
+	if (*mkey_list_node == NULL) {
+	    /* *mkey_list_node points to next field of previous node */
+	    *mkey_list_node = (krb5_keyblock_node *) malloc(sizeof(krb5_keyblock_node));
+	    if (*mkey_list_node == NULL) {
+		retval = ENOMEM;
+		goto clean_n_exit;
+	    }
+	    memset(*mkey_list_node, 0, sizeof(krb5_keyblock_node));
+	}
+	key_data = &master_entry.key_data[i];
+	retval = krb5_dbekd_decrypt_key_data(context, mkey,
+					     key_data, &((*mkey_list_node)->keyblock),
+					     NULL);
+	if (retval)
+	    goto clean_n_exit;
+
+	mkey_list_node = &((*mkey_list_node)->next);
+    }
+
+    *mkeys_list = mkey_list_head;
+
+clean_n_exit:
+
+    if (tmp_mkey.contents) {
+	memset(tmp_mkey.contents, 0, tmp_mkey.length);
+	krb5_db_free(context, tmp_mkey.contents);
+    }
+
+    if (tmp_clearkey.contents) {
+	memset(tmp_clearkey.contents, 0, tmp_clearkey.length);
+	krb5_db_free(context, tmp_clearkey.contents);
+    }
+
+    krb5_db_free_principal(context, &master_entry, nprinc);
+    if (retval != 0) {
+	krb5_keyblock_node *cur_node, *next_node;
+
+	for (cur_node = mkey_list_head; cur_node != NULL; cur_node = next_node) {
+	    next_node = cur_node->next;
+	    krb5_free_keyblock(context, &(cur_node->keyblock));
+	    krb5_xfree(cur_node);
+	}
+    }
+    
+    return retval;
+}
 
 krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
 				   char *pwd,
@@ -497,6 +650,20 @@ krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
 
 krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
 				   krb5_keyblock **key )
+{
+    /* printf("default get master key\n"); */
+    return 0;
+}
+
+krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
+				        krb5_keyblock_node *keylist )
+{
+    /* printf("default set master key\n"); */
+    return 0;
+}
+
+krb5_error_code kdb_def_get_mkey_list ( krb5_context kcontext,
+				        krb5_keyblock_node **keylist )
 {
     /* printf("default get master key\n"); */
     return 0;

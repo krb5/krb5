@@ -1140,6 +1140,11 @@ void KRB5_CALLCONV krb5_free_enc_sam_response_enc_2_contents
 void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts *);
 
+#include "kdb.h"
+
+void KRB5_CALLCONV krb5_free_key_data_contents
+	(krb5_context, krb5_key_data *);
+
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
 #include "k5-plugin.h"

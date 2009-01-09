@@ -230,6 +230,10 @@ master key name '%s'\n",
 
 	pw_size = 1024;
 	pw_str = malloc(pw_size);
+	if (pw_str == NULL) {
+	    com_err(progname, ENOMEM, "while creating new master key");
+	    exit_status++; return;
+	}
 	
 	retval = krb5_read_password(util_context, KRB5_KDC_MKEY_1, KRB5_KDC_MKEY_2,
 				    pw_str, &pw_size);

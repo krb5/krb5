@@ -381,6 +381,7 @@ kdc_get_server_key(krb5_ticket *ticket, krb5_keyblock **key, krb5_kvno *kvno)
     krb5_boolean 	  more;
     int	nprincs;
     krb5_key_data	* server_key;
+    krb5_keyblock       * tmp_mkey;
 
     nprincs = 1;
 
@@ -404,6 +405,11 @@ kdc_get_server_key(krb5_ticket *ticket, krb5_keyblock **key, krb5_kvno *kvno)
 	}
 	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
     }
+
+    retval = krb5_dbe_find_mkey(kdc_context, master_keylist, &server, &tmp_mkey);
+    if (retval)
+	goto errout;
+
     retval = krb5_dbe_find_enctype(kdc_context, &server,
 				   ticket->enc_part.enctype, -1,
 				   ticket->enc_part.kvno, &server_key);
@@ -415,7 +421,7 @@ kdc_get_server_key(krb5_ticket *ticket, krb5_keyblock **key, krb5_kvno *kvno)
     }
     *kvno = server_key->key_data_kvno;
     if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
-	retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock,
+	retval = krb5_dbekd_decrypt_key_data(kdc_context, tmp_mkey,
 					     server_key,
 					     *key, NULL);
 	if (retval) {

@@ -124,6 +124,7 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
     krb5_keytab_entry 	* entry;
 {
     krb5_context	  context;
+    krb5_keyblock_node  * master_keylist;
     krb5_keyblock       * master_key;
     krb5_error_code 	  kerror = 0;
     krb5_key_data 	* key_data;
@@ -163,7 +164,11 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
     }
 
     /* match key */
-    kerror = krb5_db_get_mkey(context, &master_key);
+    kerror = krb5_db_get_mkey_list(context, &master_keylist);
+    if (kerror)
+	goto error;
+
+    kerror = krb5_dbe_find_mkey(context, master_keylist, &db_entry, &master_key);
     if (kerror)
 	goto error;
 

@@ -27,6 +27,7 @@
  */
 
 #include "k5-int.h"
+#include <kdb.h>
 
 void KRB5_CALLCONV
 krb5_free_address(krb5_context context, krb5_address *val)
@@ -713,3 +714,20 @@ krb5_free_pa_enc_ts(krb5_context ctx, krb5_pa_enc_ts *pa_enc_ts)
 	return;
     krb5_xfree(pa_enc_ts);
 }
+
+void KRB5_CALLCONV
+krb5_free_key_data_contents(krb5_context context,
+                            krb5_key_data *key)
+{
+     int i, idx;
+     
+     idx = (key->key_data_ver == 1 ? 1 : 2);
+     for (i = 0; i < idx; i++) {
+	  if (key->key_data_contents[i]) {
+	       memset(key->key_data_contents[i], 0, key->key_data_length[i]);
+	       free(key->key_data_contents[i]);
+	  }
+     }
+     return;
+}
+
