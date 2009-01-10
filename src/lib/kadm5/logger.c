@@ -569,7 +569,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 				{ "LOCAL7",	LOG_LOCAL7	},
 #endif	/* LOG_LOCAL7 */
 			    };
-			    int j;
+			    unsigned int j;
 
 			    for (j = 0; j < sizeof(facilities)/sizeof(facilities[0]); j++)
 				if (!strcasecmp(cp2, facilities[j].name)) {
@@ -664,10 +664,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 	log_control.log_nentries = 1;
     }
     if (log_control.log_nentries) {
-	log_control.log_whoami = (char *) malloc(strlen(whoami)+1);
-	if (log_control.log_whoami)
-	    strcpy(log_control.log_whoami, whoami);
-
+	log_control.log_whoami = strdup(whoami);
 	log_control.log_hostname = (char *) malloc(MAXHOSTNAMELEN + 1);
 	if (log_control.log_hostname) {
 	    gethostname(log_control.log_hostname, MAXHOSTNAMELEN);

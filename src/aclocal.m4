@@ -1,5 +1,5 @@
 AC_PREREQ(2.52)
-AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
 Massachusetts Institute of Technology.
 ])
 dnl
@@ -74,7 +74,6 @@ AC_REQUIRE_CPP
 if test -z "$LD" ; then LD=$CC; fi
 AC_ARG_VAR(LD,[linker command [CC]])
 AC_SUBST(LDFLAGS) dnl
-WITH_KRB4 dnl
 KRB5_AC_CHOOSE_ET dnl
 KRB5_AC_CHOOSE_SS dnl
 KRB5_AC_CHOOSE_DB dnl
@@ -91,7 +90,6 @@ dnl in which the configure file lives.
 dnl
 CONFIG_RELTOPDIR=$ac_reltopdir
 AC_SUBST(CONFIG_RELTOPDIR)
-AC_SUBST(subdirs)
 lib_frag=$srcdir/$ac_config_fragdir/lib.in
 AC_SUBST_FILE(lib_frag)
 libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
@@ -502,69 +500,16 @@ changequote([, ])dnl
   AC_DEFINE_UNQUOTED($ac_tr_file) $2], $3)dnl
 done
 ])
-dnl
-dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
-dnl
-AC_DEFUN(WITH_KRB4,[
-AC_ARG_WITH([krb4],
-[  --without-krb4          omit Kerberos V4 backwards compatibility (default)
-  --with-krb4             use V4 libraries included with V5
-  --with-krb4=KRB4DIR     use preinstalled V4 libraries],
-,
-withval=no
-)dnl
-if test $withval = no; then
-	AC_MSG_NOTICE(no krb4 support)
-	KRB4_LIB=
-	KRB4_DEPLIB=
-	KRB4_INCLUDES=
-	KRB4_LIBPATH=
-	KRB_ERR_H_DEP=
-	krb5_cv_build_krb4_libs=no
-	krb5_cv_krb4_libdir=
-else
- AC_DEFINE([KRB5_KRB4_COMPAT], 1, [Define this if building with krb4 compat])
- if test $withval = yes; then
-	AC_MSG_NOTICE(enabling built in krb4 support)
-	KRB4_DEPLIB='$(TOPLIBD)/libkrb4$(DEPLIBEXT)'
-	KRB4_LIB=-lkrb4
-	KRB4_INCLUDES='-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV'
-	KRB4_LIBPATH=
-	KRB_ERR_H_DEP='$(BUILDTOP)/include/kerberosIV/krb_err.h'
-	krb5_cv_build_krb4_libs=yes
-	krb5_cv_krb4_libdir=
- else
-	AC_MSG_NOTICE(using preinstalled krb4 in $withval)
-	KRB4_LIB="-lkrb"
-dnl	DEPKRB4_LIB="$withval/lib/libkrb.a"
-	KRB4_INCLUDES="-I$withval/include"
-	KRB4_LIBPATH="-L$withval/lib"
-	KRB_ERR_H_DEP=
-	krb5_cv_build_krb4_libs=no
-	krb5_cv_krb4_libdir="$withval/lib"
- fi
-fi
-AC_SUBST(KRB4_INCLUDES)
-AC_SUBST(KRB4_LIBPATH)
-AC_SUBST(KRB4_LIB)
-AC_SUBST(KRB4_DEPLIB)
-AC_SUBST(KRB_ERR_H_DEP)
-dnl We always compile the des425 library
-DES425_DEPLIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
-DES425_LIB=-ldes425
-AC_SUBST(DES425_DEPLIB)
-AC_SUBST(DES425_LIB)
-])dnl
-dnl
-dnl
 AC_DEFUN(KRB5_AC_CHECK_FOR_CFLAGS,[
 AC_BEFORE([$0],[AC_PROG_CC])
 AC_BEFORE([$0],[AC_PROG_CXX])
 krb5_ac_cflags_set=${CFLAGS+set}
 krb5_ac_cxxflags_set=${CXXFLAGS+set}
+krb5_ac_warn_cflags_set=${WARN_CFLAGS+set}
+krb5_ac_warn_cxxflags_set=${WARN_CXXFLAGS+set}
 ])
 dnl
-AC_DEFUN(TRY_CC_FLAG,[dnl
+AC_DEFUN(TRY_WARN_CC_FLAG,[dnl
   cachevar=`echo "krb5_cv_cc_flag_$1" | sed s/[[^a-zA-Z0-9_]]/_/g`
   AC_CACHE_CHECK([if C compiler supports $1], [$cachevar],
   [# first try without, then with
@@ -575,7 +520,7 @@ AC_DEFUN(TRY_CC_FLAG,[dnl
      CFLAGS="$old_cflags"],
     [AC_MSG_ERROR(compiling simple test program with $CFLAGS failed)])])
   if eval test '"${'$cachevar'}"' = yes; then
-    CFLAGS="$CFLAGS $1"
+    WARN_CFLAGS="$WARN_CFLAGS $1"
   fi
   eval flag_supported='${'$cachevar'}'
 ])dnl
@@ -606,7 +551,7 @@ if test "$withval" = yes; then
   AC_DEFINE(CONFIG_SMALL,1,[Define to reduce code size even if it means more cpu usage])
 fi
 # -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.
-extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wconversion -Wshadow"
+extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wshadow"
 # -Wmissing-prototypes
 if test "$GCC" = yes ; then
   # Putting this here means we get -Os after -O2, which works.
@@ -618,32 +563,32 @@ if test "$GCC" = yes ; then
       *)        CFLAGS="$CFLAGS -Os" ;;
     esac
   fi
-  if test "x$krb5_ac_cflags_set" = xset ; then
-    AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)
+  if test "x$krb5_ac_warn_cflags_set" = xset ; then
+    AC_MSG_NOTICE(not adding extra gcc warning flags because WARN_CFLAGS was set)
   else
     AC_MSG_NOTICE(adding extra warning flags for gcc)
-    CFLAGS="$CFLAGS $extra_gcc_warn_opts -Wmissing-prototypes"
+    WARN_CFLAGS="$WARN_CFLAGS $extra_gcc_warn_opts -Wmissing-prototypes"
     if test "`uname -s`" = Darwin ; then
       AC_MSG_NOTICE(skipping pedantic warnings on Darwin)
     elif test "`uname -s`" = Linux ; then
       AC_MSG_NOTICE(skipping pedantic warnings on Linux)
     else
-      CFLAGS="$CFLAGS -pedantic"
+      WARN_CFLAGS="$WARN_CFLAGS -pedantic"
     fi
     if test "$ac_cv_cxx_compiler_gnu" = yes; then
-      if test "x$krb5_ac_cxxflags_set" = xset ; then
-        AC_MSG_NOTICE(not adding extra g++ warnings because CXXFLAGS was set)
+      if test "x$krb5_ac_warn_cxxflags_set" = xset ; then
+        AC_MSG_NOTICE(not adding extra g++ warnings because WARN_CXXFLAGS was set)
       else
         AC_MSG_NOTICE(adding extra warning flags for g++)
-        CXXFLAGS="$CXXFLAGS $extra_gcc_warn_opts"
+        WARN_CXXFLAGS="$WARN_CXXFLAGS $extra_gcc_warn_opts"
       fi
     fi
     # Currently, G++ does not support -Wno-format-zero-length.
-    TRY_CC_FLAG(-Wno-format-zero-length)
+    TRY_WARN_CC_FLAG(-Wno-format-zero-length)
     # Other flags here may not be supported on some versions of
     # gcc that people want to use.
     for flag in overflow strict-overflow missing-format-attribute missing-prototypes return-type missing-braces parentheses switch unused-function unused-label unused-variable unused-value unknown-pragmas sign-compare newline-eof ; do
-      TRY_CC_FLAG(-W$flag)
+      TRY_WARN_CC_FLAG(-W$flag)
     done
     #  old-style-definition? generates many, many warnings
     #
@@ -659,9 +604,9 @@ if test "$GCC" = yes ; then
     # We're currently targeting C89+, not C99, so disallow some
     # constructs.
     for flag in declaration-after-statement variadic-macros ; do
-      TRY_CC_FLAG(-Werror=$flag)
+      TRY_WARN_CC_FLAG(-Werror=$flag)
       if test "$flag_supported" = no; then
-        TRY_CC_FLAG(-W$flag)
+        TRY_WARN_CC_FLAG(-W$flag)
       fi
     done
     #  missing-prototypes? maybe someday
@@ -712,7 +657,19 @@ else
 	;;
     esac
   fi
+  if test "`uname -s`" = SunOS ; then
+    # Using Solaris but not GCC, assume Sunsoft compiler.
+    # We have some error-out-on-warning options available.
+    # Sunsoft 12 compiler defaults to -xc99=all, it appears, so "inline"
+    # works, but it also means that declaration-in-code warnings won't
+    # be issued.
+    # -v -fd -errwarn=E_DECLARATION_IN_CODE ...
+    WARN_CFLAGS="-errtags=yes -errwarn=E_BAD_PTR_INT_COMBINATION"
+    WARN_CXXFLAGS="-errtags=yes +w +w2 -xport64"
+  fi
 fi
+AC_SUBST(WARN_CFLAGS)
+AC_SUBST(WARN_CXXFLAGS)
 ])dnl
 dnl
 dnl
@@ -749,7 +706,7 @@ dnl  Note: Be careful in quoting.
 dnl        The ac_foreach generates the list of fragments to include
 dnl        or "" if $2 is empty
 AC_DEFUN(_K5_GEN_MAKEFILE,[dnl
-AC_CONFIG_FILES([$1/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:$1/Makefile.in:$srcdir/]K5_TOPDIR[/config/post.in])
+AC_CONFIG_FILES([$1/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:$1/Makefile.in:$1/deps:$srcdir/]K5_TOPDIR[/config/post.in])
 ])
 dnl
 dnl K5_GEN_FILE( <ac_output arguments> )
@@ -769,7 +726,7 @@ dnl
 define(_V5_AC_OUTPUT_MAKEFILE,
 [ifelse($2, , ,AC_CONFIG_FILES($2))
 AC_FOREACH([DIR], [$1],dnl
- [AC_CONFIG_FILES(DIR[/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:]DIR[/Makefile.in:$srcdir/]K5_TOPDIR[/config/post.in])])
+ [AC_CONFIG_FILES(DIR[/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:]DIR[/Makefile.in:]DIR[/deps:$srcdir/]K5_TOPDIR[/config/post.in])])
 K5_AC_OUTPUT])dnl
 dnl
 dnl
@@ -1185,6 +1142,7 @@ fi
 AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
 AC_SUBST(MAKE_SHLIB_COMMAND)
+AC_SUBST(SHLIB_RPATH_FLAGS)
 AC_SUBST(SHLIB_EXPFLAGS)
 AC_SUBST(SHLIB_EXPORT_FILE_DEP)
 AC_SUBST(DYNOBJ_EXPDEPS)
@@ -1226,6 +1184,7 @@ AC_REQUIRE([KRB5_AC_NEED_LIBGEN])dnl
 AC_SUBST(CC_LINK)
 AC_SUBST(CXX_LINK)
 AC_SUBST(RPATH_FLAG)
+AC_SUBST(PROG_RPATH_FLAGS)
 AC_SUBST(DEPLIBEXT)])
 
 dnl
@@ -1254,6 +1213,17 @@ AC_ARG_ENABLE([shared], ,
 [if test "$enableval" != yes; then
   AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
 fi])
+AC_ARG_ENABLE([rpath],
+AC_HELP_STRING([--disable-rpath],[suppress run path flags in link lines]),
+[enable_rpath=$withval],
+[enable_rpath=yes])
+
+if test "x$enable_rpath" != xyes ; then
+	# Unset the rpath flag values set by shlib.conf
+	SHLIB_RPATH_FLAGS=
+	RPATH_FLAG=
+	PROG_RPATH_FLAGS=
+fi
 
 if test "$SHLIBEXT" = ".so-nobuild"; then
    AC_MSG_ERROR([Shared libraries are not yet supported on this platform.])
@@ -1462,7 +1432,8 @@ AC_DEFUN([KRB5_NEED_PROTO], [
 ifelse([$3], ,[if test "x$ac_cv_func_$2" = xyes; then])
 AC_CACHE_CHECK([if $2 needs a prototype provided], krb5_cv_func_$2_noproto,
 AC_TRY_COMPILE([$1],
-[struct k5foo {int foo; } xx;
+[#undef $2
+struct k5foo {int foo; } xx;
 extern int $2 (struct k5foo*);
 $2(&xx);
 ],
@@ -1788,7 +1759,6 @@ else
   : # neither enabled
 dnl  AC_MSG_NOTICE(disabling ldap backend module support)
 fi
-AC_SUBST(OPENLDAP_PLUGIN)
 ])dnl
 dnl
 dnl If libkeyutils exists (on Linux) include it and use keyring ccache

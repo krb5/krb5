@@ -160,7 +160,7 @@ static const char *paddr (struct sockaddr *sa)
     if (getnameinfo(sa, socklen(sa),
 		    buf, sizeof(buf), portbuf, sizeof(portbuf),
 		    NI_NUMERICHOST|NI_NUMERICSERV))
-	strcpy(buf, "<unprintable>");
+	strlcpy(buf, "<unprintable>", sizeof(buf));
     else {
 	unsigned int len = sizeof(buf) - strlen(buf);
 	char *p = buf + strlen(buf);
@@ -527,26 +527,28 @@ setup_tcp_listener_ports(struct socksetup *data)
 
 	/* Sockets are created, prepare to listen on them.  */
 	if (s4 >= 0) {
-	    FD_SET(s4, &sstate.rfds);
-	    if (s4 >= sstate.max)
-		sstate.max = s4 + 1;
 	    if (add_tcp_listener_fd(data, s4) == 0)
 		close(s4);
-	    else
+	    else {
+		FD_SET(s4, &sstate.rfds);
+		if (s4 >= sstate.max)
+		    sstate.max = s4 + 1;
 		krb5_klog_syslog(LOG_INFO, "listening on fd %d: tcp %s",
 				 s4, paddr((struct sockaddr *)&sin4));
+	    }
 	}
 #ifdef KRB5_USE_INET6
 	if (s6 >= 0) {
-	    FD_SET(s6, &sstate.rfds);
-	    if (s6 >= sstate.max)
-		sstate.max = s6 + 1;
 	    if (add_tcp_listener_fd(data, s6) == 0) {
 		close(s6);
 		s6 = -1;
-	    } else
+	    } else {
+		FD_SET(s6, &sstate.rfds);
+		if (s6 >= sstate.max)
+		    sstate.max = s6 + 1;
 		krb5_klog_syslog(LOG_INFO, "listening on fd %d: tcp %s",
 				 s6, paddr((struct sockaddr *)&sin6));
+	    }
 	    if (s4 < 0)
 		krb5_klog_syslog(LOG_INFO,
 				 "assuming IPv6 socket accepts IPv4");
@@ -665,9 +667,6 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 		return 1;
 	    }
 	}
-	FD_SET (sock, &sstate.rfds);
-	if (sock >= sstate.max)
-	    sstate.max = sock + 1;
 	krb5_klog_syslog (LOG_INFO, "listening on fd %d: udp %s%s", sock,
 			  paddr((struct sockaddr *)addr),
 			  pktinfo ? " (pktinfo)" : "");
@@ -675,6 +674,9 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 	    close(sock);
 	    return 1;
 	}
+	FD_SET (sock, &sstate.rfds);
+	if (sock >= sstate.max)
+	    sstate.max = sock + 1;
     }
     return 0;
 }
@@ -695,7 +697,7 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
     err = getnameinfo(addr, socklen(addr), haddrbuf, sizeof(haddrbuf),
 		      0, 0, NI_NUMERICHOST);
     if (err)
-	strcpy(haddrbuf, "<unprintable>");
+	strlcpy(haddrbuf, "<unprintable>", sizeof(haddrbuf));
 
     switch (addr->sa_family) {
     case AF_INET:
@@ -1154,6 +1156,38 @@ send_to_from(int s, void *buf, size_t len, int flags,
 #endif
 }
 
+static krb5_error_code
+make_too_big_error (krb5_data **out)
+{
+    krb5_error errpkt;
+    krb5_error_code retval;
+    krb5_data *scratch;
+
+    memset(&errpkt, 0, sizeof(errpkt));
+
+    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    if (retval)
+	return retval;  
+    errpkt.error = KRB_ERR_RESPONSE_TOO_BIG;
+    errpkt.server = tgs_server;
+    errpkt.client = NULL;
+    errpkt.text.length = 0;
+    errpkt.text.data = 0;
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+    scratch = malloc(sizeof(*scratch));
+    if (scratch == NULL)
+	return ENOMEM;
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    if (retval) {
+	free(scratch);
+	return retval;
+    }
+
+    *out = scratch;
+    return 0;
+}
+
 static void process_packet(struct connection *conn, const char *prog,
 			   int selflags)
 {
@@ -1192,7 +1226,7 @@ static void process_packet(struct connection *conn, const char *prog,
 	char addrbuf[100];
 	if (getnameinfo(ss2sa(&daddr), daddr_len, addrbuf, sizeof(addrbuf),
 			0, 0, NI_NUMERICHOST))
-	    strcpy(addrbuf, "?");
+	    strlcpy(addrbuf, "?", sizeof(addrbuf));
 	com_err(prog, 0, "pktinfo says local addr is %s", addrbuf);
     }
 #endif
@@ -1208,6 +1242,16 @@ static void process_packet(struct connection *conn, const char *prog,
     }
     if (response == NULL)
 	return;
+    if (response->length > max_dgram_reply_size) {
+	krb5_free_data(kdc_context, response);
+	retval = make_too_big_error(&response);
+	if (retval) {
+	    krb5_klog_syslog(LOG_ERR,
+			     "error constructing KRB_ERR_RESPONSE_TOO_BIG error: %s",
+			     error_message(retval));
+	    return;
+	}
+    }
     cc = send_to_from(port_fd, response->data, (socklen_t) response->length, 0,
 		      (struct sockaddr *)&saddr, saddr_len,
 		      (struct sockaddr *)&daddr, daddr_len);
@@ -1216,7 +1260,7 @@ static void process_packet(struct connection *conn, const char *prog,
         krb5_free_data(kdc_context, response);
 	if (inet_ntop(((struct sockaddr *)&saddr)->sa_family,
 		      addr.contents, addrbuf, sizeof(addrbuf)) == 0) {
-	    strcpy(addrbuf, "?");
+	    strlcpy(addrbuf, "?", sizeof(addrbuf));
 	}
 	com_err(prog, errno, "while sending reply to %s/%d",
 		addrbuf, faddr.port);
@@ -1269,7 +1313,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 		    newconn->u.tcp.addrbuf, sizeof(newconn->u.tcp.addrbuf),
 		    tmpbuf, sizeof(tmpbuf),
 		    NI_NUMERICHOST | NI_NUMERICSERV))
-	strcpy(newconn->u.tcp.addrbuf, "???");
+	strlcpy(newconn->u.tcp.addrbuf, "???", sizeof(newconn->u.tcp.addrbuf));
     else {
 	char *p, *end;
 	p = newconn->u.tcp.addrbuf;
@@ -1277,7 +1321,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 	p += strlen(p);
 	if (end - p > 2 + strlen(tmpbuf)) {
 	    *p++ = '.';
-	    strcpy(p, tmpbuf);
+	    strlcpy(p, tmpbuf, end - p);
 	}
     }
 #if 0
@@ -1554,7 +1598,13 @@ listen_and_process(const char *prog)
     
     while (!signal_requests_exit) {
 	if (signal_requests_hup) {
+	    int k;
+
 	    krb5_klog_reopen(kdc_context);
+	    for (k = 0; k < kdc_numrealms; k++)
+		krb5_db_invoke(kdc_realmlist[k]->realm_context,
+			       KRB5_KDB_METHOD_REFRESH_POLICY,
+			       NULL, NULL);
 	    signal_requests_hup = 0;
 	}
 

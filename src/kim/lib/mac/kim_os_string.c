@@ -67,6 +67,8 @@ kim_error kim_os_string_create_localized (kim_string *out_string,
         if (!err && cfstring) {
             err = kim_os_string_create_from_cfstring (&string, cfstring);
         }
+        
+        if (cfstring) { CFRelease (cfstring); }
     }
     
     if (!err && !string) {
@@ -99,21 +101,34 @@ kim_error kim_os_string_create_from_cfstring (kim_string  *out_string,
     if (!err && !in_cfstring) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        length = CFStringGetMaximumSizeForEncoding (CFStringGetLength (in_cfstring), 
-                                                    kCFStringEncodingUTF8) + 1;
+        char *ptr = NULL;
         
-        string = (char *) calloc (length, sizeof (char));
-        if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+        /* check if in_cfstring is a C string internally so we can 
+         * avoid using CFStringGetMaximumSizeForEncoding which is wasteful */
+        ptr = (char *) CFStringGetCStringPtr(in_cfstring, 
+                                             kCFStringEncodingUTF8);
+        if (ptr) {
+            string = strdup (ptr);
+            if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+
+        } else {
+            length = CFStringGetMaximumSizeForEncoding (CFStringGetLength (in_cfstring), 
+                                                        kCFStringEncodingUTF8) + 1;
+            
+            string = (char *) calloc (length, sizeof (char));
+            if (!string) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+        
+            if (!err) {
+                if (!CFStringGetCString (in_cfstring, 
+                                         (char *) string, 
+                                         length, 
+                                         kCFStringEncodingUTF8)) {
+                    err = KIM_OUT_OF_MEMORY_ERR;
+                }        
+            }        
+        }
     }
     
-    if (!err) {
-        if (!CFStringGetCString (in_cfstring, 
-                                 (char *) string, 
-                                 length, 
-                                 kCFStringEncodingUTF8)) {
-            err = KIM_OUT_OF_MEMORY_ERR;
-        }        
-    }
     
     if (!err) {
         *out_string = string;

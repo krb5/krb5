@@ -145,8 +145,7 @@ static char *build_name_with_realm(char *name, char *realm)
 {
      char *n;
 
-     n = (char *) malloc(strlen(name) + strlen(realm) + 2);
-     sprintf(n, "%s@%s", name, realm);
+     asprintf(&n, "%s@%s", name, realm);
      return n;
 }
 

@@ -226,7 +226,7 @@ static kim_error kim_os_preferences_set_value (kim_preference_key in_key,
     kim_error err = KIM_NO_ERROR;
     CFStringRef key = NULL;
     
-    if (!err && !in_value) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    /* in_value may be NULL if removing the key */
     
     if (!err) {
         key = kim_os_preferences_cfstring_for_key (in_key);
@@ -888,20 +888,21 @@ kim_error kim_os_preferences_set_options_for_key (kim_preference_key in_key,
     kim_error err = KIM_NO_ERROR;
     CFMutableDictionaryRef dictionary = NULL;
     
-    if (!err && !in_options) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    /* in_options may be KIM_OPTIONS_DEFAULT, in which case we empty the dict */
     
-    if (!err) {
+    if (!err && in_options) {
         dictionary = CFDictionaryCreateMutable (kCFAllocatorDefault, 0, 
                                                 &kCFTypeDictionaryKeyCallBacks,
                                                 &kCFTypeDictionaryValueCallBacks);
         if (!dictionary) { err = check_error (KIM_OUT_OF_MEMORY_ERR); }
+
+        if (!err) {
+            err = kim_os_preferences_options_to_dictionary (in_options, dictionary);
+        }
     }
     
     if (!err) {
-        err = kim_os_preferences_options_to_dictionary (in_options, dictionary);
-    }
-    
-    if (!err) {
+        /* NULL dictioray will remove any entry for this key */
         err = kim_os_preferences_set_value (in_key, dictionary);
     }
     
@@ -937,7 +938,6 @@ kim_error kim_os_preferences_get_favorites_for_key (kim_preference_key in_key,
             
             for (i = 0; !err && i < count; i++) {
                 CFDictionaryRef dictionary = NULL;
-                kim_options options = KIM_OPTIONS_DEFAULT;
                 CFStringRef cfstring = NULL;
                 
                 dictionary = (CFDictionaryRef) CFArrayGetValueAtIndex (value, i);
@@ -955,6 +955,7 @@ kim_error kim_os_preferences_get_favorites_for_key (kim_preference_key in_key,
                 if (!err && cfstring) {
                     kim_string string = NULL;
                     kim_identity identity = NULL;
+                    kim_options options = KIM_OPTIONS_DEFAULT;
                     
                     err = kim_os_string_create_from_cfstring (&string, cfstring);
                     

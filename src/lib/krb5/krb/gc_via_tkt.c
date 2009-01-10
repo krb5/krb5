@@ -31,12 +31,6 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
-#define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
-
-#define IS_TGS_PRINC(c, p)						\
-    (krb5_princ_size((c), (p)) == 2 &&					\
-     data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
-
 static krb5_error_code
 krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *address, krb5_data *psectkt, krb5_creds **ppcreds)
 {

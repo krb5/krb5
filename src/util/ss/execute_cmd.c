@@ -27,19 +27,7 @@
  *      Has been replaced by a macro.
  */
 
-#ifdef __SABER__
-/* sigh.  saber won't deal with pointer-to-const-struct */
-static struct _ss_request_entry * get_request (tbl, idx)
-    ss_request_table * tbl;
-    int idx;
-{
-    struct _ss_request_table *tbl1 = (struct _ss_request_table *) tbl;
-    struct _ss_request_entry *e = (struct _ss_request_entry *) tbl1->requests;
-    return e + idx;
-}
-#else
 #define get_request(tbl,idx)    ((tbl) -> requests + (idx))
-#endif
 
 /*
  * check_request_table(rqtbl, argc, argv, sci_idx)
@@ -69,11 +57,7 @@ static int check_request_table (rqtbl, argc, argv, sci_idx)
     char *argv[];
     int sci_idx;
 {
-#ifdef __SABER__
-    struct _ss_request_entry *request;
-#else
     register ss_request_entry *request;
-#endif
     register ss_data *info;
     register char const * const * name;
     char *string = argv[0];

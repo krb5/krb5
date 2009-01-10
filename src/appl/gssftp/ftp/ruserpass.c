@@ -136,7 +136,7 @@ ruserpass(host, aname, apass, aacct)
 	hdir = getenv("HOME");
 	if (hdir == NULL)
 		hdir = ".";
-	(void) sprintf(buf, "%s/.netrc", hdir);
+	(void) snprintf(buf, sizeof(buf), "%s/.netrc", hdir);
 	cfile = fopen(buf, "r");
 	if (cfile == NULL) {
 		if (errno != ENOENT)
@@ -187,8 +187,7 @@ next:
 		case LOGIN:
 			if (token()) {
 				if (*aname == 0) { 
-					*aname = malloc((unsigned) strlen(tokval) + 1);
-					(void) strcpy(*aname, tokval);
+					*aname = strdup(tokval);
 				} else {
 					if (strcmp(*aname, tokval))
 						goto next;
@@ -204,8 +203,7 @@ next:
 				goto bad;
 			}
 			if (token() && *apass == 0) {
-				*apass = malloc((unsigned) strlen(tokval) + 1);
-				(void) strcpy(*apass, tokval);
+				*apass = strdup(tokval);
 			}
 			break;
 		case ACCOUNT:
@@ -216,8 +214,7 @@ next:
 				goto bad;
 			}
 			if (token() && *aacct == 0) {
-				*aacct = malloc((unsigned) strlen(tokval) + 1);
-				(void) strcpy(*aacct, tokval);
+				*aacct = strdup(tokval);
 			}
 			break;
 		case MACDEF:

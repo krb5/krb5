@@ -41,9 +41,8 @@ static krb5_error_code
 krb5_ktkdb_get_name(krb5_context context, krb5_keytab keytab,
 		    char *name, unsigned int namelen)
 {
-    if (namelen < sizeof("KDB:"))
+    if (strlcpy(name, "KDB:", namelen) >= namelen);
 	return KRB5_KT_NAME_TOOLONG;
-    strcpy(name, "KDB:");
     return 0;
 }
 
@@ -179,6 +178,8 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
     kerror = krb5_dbe_find_enctype(context, &db_entry,
 				   xrealm_tgt?enctype:-1,
 				   -1, kvno, &key_data);
+    if (kerror == KRB5_KDB_NO_MATCHING_KEY)
+	kerror = KRB5_KT_KVNONOTFOUND;
     if (kerror)
 	goto error;
 

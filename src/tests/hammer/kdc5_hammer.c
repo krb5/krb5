@@ -217,12 +217,12 @@ main(argc, argv)
 	   again given a prefix and count to test the db lib and kdb */
 	ctmp[0] = '\0';
 	for (i = 1; i <= depth; i++) {
-	  (void) sprintf(ctmp2, "%s%s%d-DEPTH-%d", (i != 1) ? "/" : "",
-			 prefix, n, i);
+	  (void) snprintf(ctmp2, sizeof(ctmp2), "%s%s%d-DEPTH-%d",
+			  (i != 1) ? "/" : "", prefix, n, i);
 	  ctmp2[sizeof(ctmp2) - 1] = '\0';
 	  strncat(ctmp, ctmp2, sizeof(ctmp) - 1 - strlen(ctmp));
 	  ctmp[sizeof(ctmp) - 1] = '\0';
-	  sprintf(client, "%s@%s", ctmp, cur_realm);
+	  snprintf(client, sizeof(client), "%s@%s", ctmp, cur_realm);
 
 	  if (get_tgt (test_context, client, &client_princ, ccache)) {
 	    errors++;
@@ -233,12 +233,12 @@ main(argc, argv)
 
 	  stmp[0] = '\0';
 	  for (j = 1; j <= depth; j++) {
-	    (void) sprintf(stmp2, "%s%s%d-DEPTH-%d", (j != 1) ? "/" : "",
-			   prefix, n, j);
+	    (void) snprintf(stmp2, sizeof(stmp2), "%s%s%d-DEPTH-%d",
+			    (j != 1) ? "/" : "", prefix, n, j);
 	    stmp2[sizeof (stmp2) - 1] = '\0';
 	    strncat(stmp, stmp2, sizeof(stmp) - 1 - strlen(stmp));
 	    stmp[sizeof(stmp) - 1] = '\0';
-	    sprintf(server, "%s@%s", stmp, cur_realm);
+	    snprintf(server, sizeof(server), "%s@%s", stmp, cur_realm);
 	    if (verify_cs_pair(test_context, client, client_princ, 
 			       stmp, cur_realm, n, i, j, ccache))
 	      errors++;
@@ -343,9 +343,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     memset((char *)&creds, 0, sizeof(creds));
 
     /* Do client side */
-    sname = (char *) malloc(strlen(service)+strlen(hostname)+2);
-    if (sname) {
-	sprintf(sname, "%s@%s", service, hostname);
+    if (asprintf(&sname, "%s@%s", service, hostname) >= 0) {
 	retval = krb5_parse_name(context, sname, &creds.server);
 	free(sname);
     }

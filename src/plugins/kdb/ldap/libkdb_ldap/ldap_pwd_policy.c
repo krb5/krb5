@@ -179,7 +179,7 @@ cleanup:
     return(st);
 }
 
-krb5_error_code
+static krb5_error_code
 populate_policy(krb5_context context,
     LDAP *ld,
     LDAPMessage *ent,
@@ -209,7 +209,7 @@ cleanup:
     return st;
 }
 
-krb5_error_code
+static krb5_error_code
 krb5_ldap_get_password_policy_from_dn (krb5_context context,
     char *pol_name,
     char *pol_dn,

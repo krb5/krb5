@@ -16,19 +16,6 @@ if ![info exists FTPD] {
     set FTPD [findfile $objdir/../../appl/gssftp/ftpd/ftpd]
 }
 
-# Make sure .klogin is reasonable.
-if ![check_k5login ftp] {
-    return
-}
-
-# Set up the kerberos database.
-if {![get_hostname] \
-    || ![setup_kerberos_files] \
-    || ![setup_kerberos_env] \
-    || ![setup_kerberos_db 0]} {
-    return
-}
-
 # A procedure to start up the ftp daemon.
 
 proc start_ftp_daemon { } {
@@ -67,20 +54,6 @@ proc stop_ftp_daemon { } {
 	unset ftpd_pid
     }
 }
-
-# Create a file to use for ftp testing.
-set file [open $tmppwd/ftp-test w]
-puts $file "This file is used for ftp testing."
-close $file
-
-# Create a large file to use for ftp testing. File needs to be 
-# larger that 2^20 or 1MB for PBSZ testing.
-set file [open $tmppwd/bigftp-test w]
-puts $file "This file is used for ftp testing.\n"
-seek $file 1048576 current
-puts $file "This file is used for ftp testing."
-close $file
-
 
 # Test that a file was copied correctly.
 proc check_file { filename {bigfile 0}} {
@@ -206,7 +179,7 @@ proc ftp_test { } {
     spawn $FTP -d -v $hostname [expr 8 + $portbase]
     expect_after {
 	-re "--->\[^\r\n\]*\r\n" { exp_continue }
-	-re "encoding \[0-9\]* bytes MIC \[a-zA-Z/+\]*" { exp_continue }
+	-re "encoding \[0-9\]* bytes MIC \[a-zA-Z0-9/+=\]*\r\n" { exp_continue }
 	-re "sealed \[A-Z()\]*" { exp_continue }
 	-re "secure_command\[A-Z()\]*" { exp_continue }
 	timeout {
@@ -470,37 +443,65 @@ proc ftp_test { } {
     }
 }
 
-# The ftp client will look in $HOME/.netrc for the user name to use.
-# To avoid confusing the testsuite, point $HOME at a directory where
-# we know there is no .netrc file.
-if [info exists env(HOME)] {
-    set home $env(HOME)
-} elseif [info exists home] {
-    unset home
-}
-set env(HOME) $tmppwd
+run_once gssftp {
+    # Make sure .klogin is reasonable.
+    if ![check_k5login ftp] {
+	return
+    }
 
-# Run the test.  Logging in sometimes takes a while, so increase the
-# timeout.
-set oldtimeout $timeout
-set timeout 60
-set status [catch ftp_test msg]
-set timeout $oldtimeout
+    # Set up the kerberos database.
+    if {![get_hostname] \
+	    || ![setup_kerberos_files] \
+	    || ![setup_kerberos_env] \
+	    || ![setup_kerberos_db 0]} {
+	return
+    }
 
-# Shut down the kerberos daemons and the ftp daemon.
-stop_kerberos_daemons
+    # Create a file to use for ftp testing.
+    set file [open $tmppwd/ftp-test w]
+    puts $file "This file is used for ftp testing."
+    close $file
 
-stop_ftp_daemon
+    # Create a large file to use for ftp testing. File needs to be 
+    # larger that 2^20 or 1MB for PBSZ testing.
+    set file [open $tmppwd/bigftp-test w]
+    puts $file "This file is used for ftp testing.\n"
+    seek $file 1048576 current
+    puts $file "This file is used for ftp testing."
+    close $file
 
-ftp_restore_env
+    # The ftp client will look in $HOME/.netrc for the user name to use.
+    # To avoid confusing the testsuite, point $HOME at a directory where
+    # we know there is no .netrc file.
+    if [info exists env(HOME)] {
+	set home $env(HOME)
+    } elseif [info exists home] {
+	unset home
+    }
+    set env(HOME) $tmppwd
 
-# Reset $HOME, for safety in case we are going to run more tests.
-if [info exists home] {
-    set env(HOME) $home
-} else {
-    unset env(HOME)
-}
+    # Run the test.  Logging in sometimes takes a while, so increase the
+    # timeout.
+    set oldtimeout $timeout
+    set timeout 60
+    set status [catch ftp_test msg]
+    set timeout $oldtimeout
 
-if { $status != 0 } {
-    perror "error in gssftp.exp: $msg"
+    # Shut down the kerberos daemons and the ftp daemon.
+    stop_kerberos_daemons
+
+    stop_ftp_daemon
+
+    ftp_restore_env
+
+    # Reset $HOME, for safety in case we are going to run more tests.
+    if [info exists home] {
+	set env(HOME) $home
+    } else {
+	unset env(HOME)
+    }
+
+    if { $status != 0 } {
+	perror "error in gssftp.exp: $msg"
+    }
 }

@@ -55,11 +55,9 @@ krb5_get_realm_domain(krb5_context context, const char *realm, char **domain)
 			       "default_domain", realm, &temp_domain);
     if (!retval && temp_domain)
     {
-        *domain = malloc(strlen(temp_domain) + 1);
+        *domain = strdup(temp_domain);
         if (!*domain) {
             retval = ENOMEM;
-        } else {
-            strcpy(*domain, temp_domain);
         }
         profile_release_string(temp_domain);
     }

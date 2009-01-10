@@ -76,7 +76,7 @@ etc.
    fcc_nseq.c and fcc_read don't check return values a lot.
  */
 #include "k5-int.h"
-
+#include "cc-int.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -1997,8 +1997,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      if (kret)
 	 return kret;
 
-     (void) strcpy(scratch, TKT_ROOT);
-     (void) strcat(scratch, "XXXXXX");
+     (void) snprintf(scratch, sizeof(scratch), "%sXXXXXX", TKT_ROOT);
      ret = mkstemp(scratch);
      if (ret == -1) {
          k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);

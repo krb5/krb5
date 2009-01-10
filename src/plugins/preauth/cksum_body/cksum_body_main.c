@@ -535,8 +535,9 @@ server_verify(krb5_context kcontext,
 	my_authz_data[0]->ad_type = 1;
 	my_authz_data[0]->length = AD_ALLOC_SIZE;
 	memcpy(my_authz_data[0]->contents, ad_header, sizeof(ad_header));
-	sprintf(my_authz_data[0]->contents + sizeof(ad_header),
-	       "cksum authorization data: %d bytes worth!\n", AD_ALLOC_SIZE);
+	snprintf(my_authz_data[0]->contents + sizeof(ad_header),
+		 AD_ALLOC_SIZE - sizeof(ad_header),
+		 "cksum authorization data: %d bytes worth!\n", AD_ALLOC_SIZE);
 	*authz_data = my_authz_data;
 #ifdef DEBUG
 	fprintf(stderr, "Returning %d bytes of authorization data\n",

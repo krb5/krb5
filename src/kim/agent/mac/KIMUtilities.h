@@ -53,6 +53,7 @@
 
 #define options_keypath              @"content.options"
 
+#define uses_default_options_keypath @"content.usesDefaultTicketOptions"
 #define valid_lifetime_keypath       @"content.valid_lifetime"
 #define renewal_lifetime_keypath     @"content.renewal_lifetime"
 #define renewable_keypath            @"content.renewable"
@@ -65,6 +66,7 @@
 #define max_renewable_keypath        @"content.maxRenewableLifetime"
 
 #define wants_change_password_keypath @"content.wants_change_password"
+#define accepting_input_keypath      @"content.acceptingInput"
 
 #define ACKVOContext                 @"authenticationController"
 

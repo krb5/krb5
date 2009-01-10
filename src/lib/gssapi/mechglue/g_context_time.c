@@ -64,7 +64,6 @@ OM_uint32 *		time_rec;
 
 	if (mech->gss_context_time) {
 	    status = mech->gss_context_time(
-					    mech->context,
 					    minor_status,
 					    ctx->internal_ctx_id,
 					    time_rec);

@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/rcache/rcfns.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -39,7 +40,7 @@ krb5_rc_initialize (krb5_context context, krb5_rcache id, krb5_deltat span)
 
 krb5_error_code KRB5_CALLCONV
 krb5_rc_recover_or_initialize (krb5_context context, krb5_rcache id,
-			       krb5_deltat span)
+                               krb5_deltat span)
 {
     return krb5_x(id->ops->recover_or_init,(context, id, span));
 }
@@ -64,7 +65,7 @@ krb5_rc_close (krb5_context context, krb5_rcache id)
 
 krb5_error_code KRB5_CALLCONV
 krb5_rc_store (krb5_context context, krb5_rcache id,
-	       krb5_donot_replay *dontreplay)
+               krb5_donot_replay *dontreplay)
 {
     return krb5_x((id)->ops->store,(context, id, dontreplay));
 }
@@ -77,7 +78,7 @@ krb5_rc_expunge (krb5_context context, krb5_rcache id)
 
 krb5_error_code KRB5_CALLCONV
 krb5_rc_get_lifespan (krb5_context context, krb5_rcache id,
-		      krb5_deltat *spanp)
+                      krb5_deltat *spanp)
 {
     return krb5_x((id)->ops->get_span,(context, id, spanp));
 }

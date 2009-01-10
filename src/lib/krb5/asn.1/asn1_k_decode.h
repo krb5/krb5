@@ -233,4 +233,11 @@ asn1_error_code asn1_decode_sequence_of_trusted_ca
 asn1_error_code asn1_decode_sequence_of_algorithm_identifier
         (asn1buf *buf, krb5_algorithm_identifier ***val);
 
+asn1_error_code asn1_decode_setpw_req
+	(asn1buf *buf, krb5_data *rep, krb5_principal *principal);
+asn1_error_code asn1_decode_pa_for_user
+	(asn1buf *buf, krb5_pa_for_user *val);
+asn1_error_code asn1_decode_pa_pac_req
+	(asn1buf *buf, krb5_pa_pac_req *val);
+
 #endif

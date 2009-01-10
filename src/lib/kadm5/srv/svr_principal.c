@@ -763,18 +763,17 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 
     if ((mask & KADM5_POLICY) &&
 	adb.policy && (adb.aux_attributes & KADM5_POLICY)) {
-	if ((entry->policy = (char *) malloc(strlen(adb.policy) + 1)) == NULL) {
+	if ((entry->policy = strdup(adb.policy)) == NULL) {
 	    ret = ENOMEM;
 	    goto done;
 	}
-	strcpy(entry->policy, adb.policy);
     }
 
     if (mask & KADM5_AUX_ATTRIBUTES)
 	 entry->aux_attributes = adb.aux_attributes;
 
     if ((mask & KADM5_PRINCIPAL) &&
-	(ret = krb5_copy_principal(handle->context, principal,
+	(ret = krb5_copy_principal(handle->context, kdb.princ,
 				   &entry->principal))) { 
 	goto done;
     }

@@ -269,6 +269,7 @@ krb5int_mk_setpw_req(krb5_context context,
     krb5_error_code ret;
     krb5_data	cipherpw;
     krb5_data	*encoded_setpw;
+    struct krb5_setpw_req req;
 
     char *ptr;
 
@@ -279,7 +280,10 @@ krb5int_mk_setpw_req(krb5_context context,
 				      KRB5_AUTH_CONTEXT_DO_SEQUENCE)))
 	return(ret);
 
-    ret = encode_krb5_setpw_req(targprinc, passwd, &encoded_setpw);
+    req.target = targprinc;
+    req.password.data = passwd;
+    req.password.length = strlen(passwd);
+    ret = encode_krb5_setpw_req(&req, &encoded_setpw);
     if (ret) {
 	return ret;
     }

@@ -203,7 +203,7 @@ krb5_ldap_list_realm(context, realms)
 	goto cleanup;
     }
 
-    *realms = calloc(count+1, sizeof (char *));
+    *realms = calloc((unsigned int) count+1, sizeof (char *));
     CHECK_NULL(*realms);
 
     for (ent = ldap_first_entry(ld, result), count = 0; ent != NULL;
@@ -288,7 +288,7 @@ krb5_ldap_delete_realm (context, lrealm)
 	assert (sizeof (filter) >= sizeof ("(krbprincipalname=)") +
 		strlen (realm) + 2 /* "*@" */ + 1);
 
-	sprintf (filter, "(krbprincipalname=*@%s)", realm);
+	snprintf (filter, sizeof(filter), "(krbprincipalname=*@%s)", realm);
 	free (realm);
 
 	/* LDAP_SEARCH(NULL, LDAP_SCOPE_SUBTREE, filter, attr); */
@@ -297,7 +297,8 @@ krb5_ldap_delete_realm (context, lrealm)
 	if ((st=krb5_get_subtree_info(&lcontext, &subtrees, &ntree)) != 0)
 	    goto cleanup;
 
-        result_arr = (LDAPMessage **)  calloc(ntree+1, sizeof(LDAPMessage *));
+        result_arr = (LDAPMessage **)  calloc((unsigned int)ntree+1,
+					      sizeof(LDAPMessage *));
         if (result_arr == NULL) {
             st = ENOMEM;
             goto cleanup;
@@ -642,8 +643,8 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    for (i=0; oldkdcservers[i]; ++i)
 		if ((st=deleteAttribute(ld, oldkdcservers[i], "krbRealmReferences",
 					rparams->realmdn)) != 0) {
-		    sprintf (errbuf, "Error removing 'krbRealmReferences' from %s: ",
-			     oldkdcservers[i]);
+		    snprintf (errbuf, sizeof(errbuf), "Error removing 'krbRealmReferences' from %s: ",
+			      oldkdcservers[i]);
 		    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
@@ -653,8 +654,8 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    for (i=0; newkdcservers[i]; ++i)
 		if ((st=updateAttribute(ld, newkdcservers[i], "krbRealmReferences",
 					rparams->realmdn)) != 0) {
-		    sprintf (errbuf, "Error adding 'krbRealmReferences' to %s: ",
-			     newkdcservers[i]);
+		    snprintf (errbuf, sizeof(errbuf), "Error adding 'krbRealmReferences' to %s: ",
+			      newkdcservers[i]);
 		    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
@@ -679,8 +680,8 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    for (i=0; oldadminservers[i]; ++i)
 		if ((st=deleteAttribute(ld, oldadminservers[i], "krbRealmReferences",
 					rparams->realmdn)) != 0) {
-		    sprintf(errbuf, "Error removing 'krbRealmReferences' from "
-			    "%s: ", oldadminservers[i]);
+		    snprintf(errbuf, sizeof(errbuf), "Error removing 'krbRealmReferences' from "
+			     "%s: ", oldadminservers[i]);
 		    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
@@ -690,8 +691,8 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    for (i=0; newadminservers[i]; ++i)
 		if ((st=updateAttribute(ld, newadminservers[i], "krbRealmReferences",
 					rparams->realmdn)) != 0) {
-		    sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
-			    newadminservers[i]);
+		    snprintf(errbuf, sizeof(errbuf), "Error adding 'krbRealmReferences' to %s: ",
+			     newadminservers[i]);
 		    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
@@ -715,8 +716,8 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    for (i=0; oldpasswdservers[i]; ++i)
 		if ((st=deleteAttribute(ld, oldpasswdservers[i], "krbRealmReferences",
 					rparams->realmdn)) != 0) {
-		    sprintf(errbuf, "Error removing 'krbRealmReferences' from "
-			    "%s: ", oldpasswdservers[i]);
+		    snprintf(errbuf, sizeof(errbuf), "Error removing 'krbRealmReferences' from "
+			     "%s: ", oldpasswdservers[i]);
 		    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
@@ -726,8 +727,8 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    for (i=0; newpasswdservers[i]; ++i)
 		if ((st=updateAttribute(ld, newpasswdservers[i], "krbRealmReferences",
 					rparams->realmdn)) != 0) {
-		    sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
-			    newpasswdservers[i]);
+		    snprintf(errbuf, sizeof(errbuf), "Error adding 'krbRealmReferences' to %s: ",
+			     newpasswdservers[i]);
 		    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
@@ -994,9 +995,10 @@ krb5_ldap_create_realm(context, rparams, mask)
 
     realm_name = rparams->realm_name;
 
-    dn = malloc(strlen("cn=") + strlen(realm_name) + strlen(ldap_context->krbcontainer->DN) + 2);
+    if (asprintf(&dn, "cn=%s,%s", realm_name,
+		 ldap_context->krbcontainer->DN) < 0)
+	dn = NULL;
     CHECK_NULL(dn);
-    sprintf(dn, "cn=%s,%s", realm_name, ldap_context->krbcontainer->DN);
 
     strval[0] = realm_name;
     strval[1] = NULL;
@@ -1135,8 +1137,8 @@ krb5_ldap_create_realm(context, rparams, mask)
     if (mask & LDAP_REALM_KDCSERVERS)
 	for (i=0; rparams->kdcservers[i]; ++i)
 	    if ((st=updateAttribute(ld, rparams->kdcservers[i], "krbRealmReferences", dn)) != 0) {
-		sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
-			rparams->kdcservers[i]);
+		snprintf(errbuf, sizeof(errbuf), "Error adding 'krbRealmReferences' to %s: ",
+			 rparams->kdcservers[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
 		ldap_delete_ext_s(ld, dn, NULL, NULL);
@@ -1146,8 +1148,8 @@ krb5_ldap_create_realm(context, rparams, mask)
     if (mask & LDAP_REALM_ADMINSERVERS)
 	for (i=0; rparams->adminservers[i]; ++i)
 	    if ((st=updateAttribute(ld, rparams->adminservers[i], "krbRealmReferences", dn)) != 0) {
-		sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
-			rparams->adminservers[i]);
+		snprintf(errbuf, sizeof(errbuf), "Error adding 'krbRealmReferences' to %s: ",
+			 rparams->adminservers[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
 		ldap_delete_ext_s(ld, dn, NULL, NULL);
@@ -1157,8 +1159,8 @@ krb5_ldap_create_realm(context, rparams, mask)
     if (mask & LDAP_REALM_PASSWDSERVERS)
 	for (i=0; rparams->passwdservers[i]; ++i)
 	    if ((st=updateAttribute(ld, rparams->passwdservers[i], "krbRealmReferences", dn)) != 0) {
-		sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
-			rparams->passwdservers[i]);
+		snprintf(errbuf, sizeof(errbuf), "Error adding 'krbRealmReferences' to %s: ",
+			 rparams->passwdservers[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
 		ldap_delete_ext_s(ld, dn, NULL, NULL);
@@ -1241,12 +1243,11 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 
     krbcontDN = ldap_context->krbcontainer->DN;
 
-    rlparams->realmdn = (char *) malloc(strlen("cn=") + strlen(lrealm) + strlen(krbcontDN) + 2);
-    if (rlparams->realmdn == NULL) {
+    if (asprintf(&rlparams->realmdn, "cn=%s,%s", lrealm, krbcontDN) < 0) {
+	rlparams->realmdn = NULL;
 	st = ENOMEM;
 	goto cleanup;
     }
-    sprintf(rlparams->realmdn, "cn=%s,%s", lrealm, krbcontDN);
 
     /* populate the realm name in the structure */
     rlparams->realm_name = strdup(lrealm);

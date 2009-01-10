@@ -488,6 +488,38 @@ krb5_is_permitted_enctype(krb5_context context, krb5_enctype etype)
     return(ret);
 }
 
+/* The same as krb5_is_permitted_enctype, but verifies multiple etype's
+ * Returns 0 is either the list of the permitted enc types is not available
+ * or all requested etypes are not permitted. Otherwise returns 1.
+ */
+
+krb5_boolean
+krb5_is_permitted_enctype_ext ( krb5_context context,
+                                krb5_etypes_permitted *etypes)
+{
+    krb5_enctype *list, *ptr;
+    krb5_boolean ret = 0;
+    int i = 0;
+
+    if (krb5_get_permitted_enctypes(context, &list))
+        return(0);
+
+    for ( i=0; i< etypes->etype_count; i++ )
+    {
+        for (ptr = list; *ptr; ptr++)
+        {
+            if (*ptr == etypes->etype[i])
+            {
+                etypes->etype_ok[i] =  TRUE;
+                ret = 1;
+            }
+        }
+    }
+    krb5_free_ktypes (context, list);
+
+    return(ret);
+}
+
 static krb5_error_code
 copy_ktypes(krb5_context ctx,
 	    unsigned int nktypes,

@@ -6,6 +6,7 @@
 #include    <k5-int.h>
 #include    <kdb.h>
 #include    <kadm5/server_internal.h>
+#include    <kadm5/server_acl.h>
 #include    "misc.h"
 
 /*
@@ -95,19 +96,61 @@ randkey_principal_wrapper_3(void *server_handle,
 }
 
 kadm5_ret_t
-schpw_util_wrapper(void *server_handle, krb5_principal princ,
+schpw_util_wrapper(void *server_handle,
+		   krb5_principal client,
+		   krb5_principal target,
+		   krb5_boolean initial_flag,
 		   char *new_pw, char **ret_pw,
 		   char *msg_ret, unsigned int msg_len)
 {
-    kadm5_ret_t ret;
+    kadm5_ret_t			ret;
+    kadm5_server_handle_t	handle = server_handle;
+    krb5_boolean		access_granted;
+    krb5_boolean		self;
 
-    ret = check_min_life(server_handle, princ, msg_ret, msg_len);
-    if (ret)
-	return ret;
+    /*
+     * If no target is explicitly provided, then the target principal
+     * is the client principal.
+     */
+    if (target == NULL)
+	target = client;
 
-    return kadm5_chpass_principal_util(server_handle, princ,
-				       new_pw, ret_pw,
-				       msg_ret, msg_len);
+    /*
+     * A principal can always change its own password, as long as it
+     * has an initial ticket and meets the minimum password lifetime
+     * requirement.
+     */
+    self = krb5_principal_compare(handle->context, client, target);
+    if (self) {
+	ret = check_min_life(server_handle, target, msg_ret, msg_len);
+	if (ret != 0)
+	    return ret;
+
+	access_granted = initial_flag;
+    } else
+	access_granted = FALSE;
+
+    if (!access_granted &&
+	kadm5int_acl_check_krb(handle->context, client,
+			       ACL_CHANGEPW, target, NULL)) {
+	/*
+	 * Otherwise, principals with appropriate privileges can change
+	 * any password
+	 */
+	access_granted = TRUE;
+    }
+
+    if (access_granted) {
+	ret = kadm5_chpass_principal_util(server_handle,
+					  target,
+					  new_pw, ret_pw,
+					  msg_ret, msg_len);
+    } else {
+	ret = KADM5_AUTH_CHANGEPW;
+	strlcpy(msg_ret, "Unauthorized request", msg_len);
+    }
+
+    return ret;
 }
 
 kadm5_ret_t

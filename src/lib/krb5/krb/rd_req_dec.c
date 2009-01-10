@@ -2,7 +2,7 @@
  * lib/krb5/krb/rd_req_dec.c
  *
  * Copyright (c) 1994 CyberSAFE Corporation.
- * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -62,6 +62,19 @@
 static krb5_error_code decrypt_authenticator
 	(krb5_context, const krb5_ap_req *, krb5_authenticator **,
 	 int);
+static krb5_error_code
+decode_etype_list(krb5_context context,
+		  const krb5_authenticator *authp,
+		  krb5_enctype **desired_etypes,
+		  int *desired_etypes_len);
+static krb5_error_code
+negotiate_etype(krb5_context context,
+		const krb5_enctype *desired_etypes,
+		int desired_etypes_len,
+		int mandatory_etypes_index,
+		const krb5_enctype *permitted_etypes,
+		int permitted_etypes_len,
+		krb5_enctype *negotiated_etype);
 
 krb5_error_code
 krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
@@ -79,27 +92,83 @@ krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
 
 static krb5_error_code
 krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
-			     krb5_keytab keytab)
+			     krb5_const_principal server, krb5_keytab keytab)
 {
     krb5_error_code 	  retval;
-    krb5_enctype 	  enctype;
     krb5_keytab_entry 	  ktent;
 
-    enctype = req->ticket->enc_part.enctype;
+    retval = KRB5_KT_NOTFOUND;
 
 #ifndef LEAN_CLIENT 
-    if ((retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
-				    req->ticket->enc_part.kvno,
-				    enctype, &ktent)))
-	return retval;
+    if (server != NULL || keytab->ops->start_seq_get == NULL) {
+	retval = krb5_kt_get_entry(context, keytab,
+				   server != NULL ? server : req->ticket->server,
+				   req->ticket->enc_part.kvno,
+				   req->ticket->enc_part.enctype, &ktent);
+	if (retval == 0) {
+	    retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
+
+	    (void) krb5_free_keytab_entry_contents(context, &ktent);
+	}
+    } else { 
+	krb5_error_code code;
+	krb5_kt_cursor cursor;
+
+	retval = krb5_kt_start_seq_get(context, keytab, &cursor);
+	if (retval != 0)
+	    goto map_error;
+
+	while ((code = krb5_kt_next_entry(context, keytab,
+					  &ktent, &cursor)) == 0) {
+	    if (ktent.key.enctype != req->ticket->enc_part.enctype)
+		continue;
+
+	    retval = krb5_decrypt_tkt_part(context, &ktent.key,
+					   req->ticket);
+
+	    if (retval == 0) {
+		krb5_principal tmp;
+
+		/*
+		 * We overwrite ticket->server to be the principal
+		 * that we match in the keytab.  The reason for doing
+		 * this is that GSS-API and other consumers look at
+		 * that principal to make authorization decisions
+		 * about whether the appropriate server is contacted.
+		 * It might be cleaner to create a new API and store
+		 * the server in the auth_context, but doing so would
+		 * probably miss existing uses of the server. Instead,
+		 * perhaps an API should be created to retrieve the
+		 * server as it appeared in the ticket.
+		 */
+		retval = krb5_copy_principal(context, ktent.principal, &tmp);
+		if (retval == 0) {
+		    krb5_free_principal(context, req->ticket->server);
+		    req->ticket->server = tmp;
+		}
+		(void) krb5_free_keytab_entry_contents(context, &ktent);
+		break;
+	    }
+	    (void) krb5_free_keytab_entry_contents(context, &ktent);
+	}
+
+	code = krb5_kt_end_seq_get(context, keytab, &cursor);
+	if (code != 0)
+	    retval = code;
+    }
 #endif /* LEAN_CLIENT */
 
-    retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
-    /* Upon error, Free keytab entry first, then return */
+map_error:
+    switch (retval) {
+    case KRB5_KT_KVNONOTFOUND:
+    case KRB5_KT_NOTFOUND:
+    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
+	retval = KRB5KRB_AP_WRONG_PRINC;
+	break;
+    default:
+	break;
+    }
 
-#ifndef LEAN_CLIENT 
-    (void) krb5_kt_free_entry(context, &ktent);
-#endif /* LEAN_CLIENT */
     return retval;
 }
 
@@ -134,8 +203,13 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 			krb5_ticket **ticket, int check_valid_flag)
 {
     krb5_error_code 	  retval = 0;
-    krb5_principal_data princ_data;
-    
+    krb5_principal_data	princ_data;
+    krb5_enctype         *desired_etypes = NULL;
+    int			  desired_etypes_len = 0;
+    int			  rfc4537_etypes_len = 0;
+    krb5_enctype         *permitted_etypes = NULL;
+    int			  permitted_etypes_len = 0;
+ 
     req->ticket->enc_part2 = NULL;
     if (server && krb5_is_referral_realm(&server->realm)) {
 	char *realm;
@@ -147,18 +221,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	princ_data.realm.data = realm;
 	princ_data.realm.length = strlen(realm);
     }
-    if (server && !krb5_principal_compare(context, server, req->ticket->server)) {
-	char *found_name = 0, *wanted_name = 0;
-	if (krb5_unparse_name(context, server, &wanted_name) == 0
-	    && krb5_unparse_name(context, req->ticket->server, &found_name) == 0)
-	    krb5_set_error_message(context, KRB5KRB_AP_WRONG_PRINC,
-				   "Wrong principal in request (found %s, wanted %s)",
-				   found_name, wanted_name);
-	krb5_free_unparsed_name(context, wanted_name);
-	krb5_free_unparsed_name(context, found_name);
-	retval =  KRB5KRB_AP_WRONG_PRINC;
-	goto cleanup;
-    }
+
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
        do we need special processing here ?	*/
@@ -171,18 +234,19 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	krb5_free_keyblock(context, (*auth_context)->keyblock);
 	(*auth_context)->keyblock = NULL;
     } else {
-    	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, keytab)))
+    	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, server, keytab)))
 	    goto cleanup;
     }
 
     /* XXX this is an evil hack.  check_valid_flag is set iff the call
        is not from inside the kdc.  we can use this to determine which
        key usage to use */
+#ifndef LEAN_CLIENT
     if ((retval = decrypt_authenticator(context, req, 
 					&((*auth_context)->authentp),
 					check_valid_flag)))
 	goto cleanup;
-
+#endif
     if (!krb5_principal_compare(context, (*auth_context)->authentp->client,
 				req->ticket->enc_part2->client)) {
 	retval = KRB5KRB_AP_ERR_BADMATCH;
@@ -196,6 +260,19 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	goto cleanup;
     }
 
+    if (!server) {
+	server = req->ticket->server;
+    }
+    /* Get an rcache if necessary. */
+    if (((*auth_context)->rcache == NULL)
+	&& ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME)
+	&& server) {
+	if ((retval = krb5_get_server_rcache(context,
+					     krb5_princ_component(context,
+								  server,0),
+					     &(*auth_context)->rcache)))
+	  goto cleanup;
+    }
     /* okay, now check cross-realm policy */
 
 #if defined(_SINGLE_HOP_ONLY)
@@ -295,80 +372,85 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
       }
     }
 
-    /* check if the various etypes are permitted */
+    /* read RFC 4537 etype list from sender */
+    retval = decode_etype_list(context,
+			       (*auth_context)->authentp,
+			       &desired_etypes,
+			       &rfc4537_etypes_len);
+    if (retval != 0)
+	goto cleanup;
 
-    if ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_PERMIT_ALL) {
-	/* no etype check needed */;
-    } else if ((*auth_context)->permitted_etypes == NULL) {
-	int etype;
-	/* check against the default set */
-	if ((!krb5_is_permitted_enctype(context,
-					etype = req->ticket->enc_part.enctype)) ||
-	    (!krb5_is_permitted_enctype(context,
-					etype = req->ticket->enc_part2->session->enctype)) ||
-	    (((*auth_context)->authentp->subkey) &&
-	     !krb5_is_permitted_enctype(context,
-					etype = (*auth_context)->authentp->subkey->enctype))) {
-	    char enctype_name[30];
-	    retval = KRB5_NOPERM_ETYPE;
-	    if (krb5_enctype_to_string(etype, enctype_name, sizeof(enctype_name)) == 0)
-		krb5_set_error_message(context, retval,
-				       "Encryption type %s not permitted",
-				       enctype_name);
-	    goto cleanup;
-	}
-    } else {
-	/* check against the set in the auth_context */
-	int i;
-
-	for (i=0; (*auth_context)->permitted_etypes[i]; i++)
-	    if ((*auth_context)->permitted_etypes[i] ==
-		req->ticket->enc_part.enctype)
-		break;
-	if (!(*auth_context)->permitted_etypes[i]) {
-	    char enctype_name[30];
-	    retval = KRB5_NOPERM_ETYPE;
-	    if (krb5_enctype_to_string(req->ticket->enc_part.enctype,
-				       enctype_name, sizeof(enctype_name)) == 0)
-		krb5_set_error_message(context, retval,
-				       "Encryption type %s not permitted",
-				       enctype_name);
-	    goto cleanup;
-	}
-	
-	for (i=0; (*auth_context)->permitted_etypes[i]; i++)
-	    if ((*auth_context)->permitted_etypes[i] ==
-		req->ticket->enc_part2->session->enctype)
-		break;
-	if (!(*auth_context)->permitted_etypes[i]) {
-	    char enctype_name[30];
-	    retval = KRB5_NOPERM_ETYPE;
-	    if (krb5_enctype_to_string(req->ticket->enc_part2->session->enctype,
-				       enctype_name, sizeof(enctype_name)) == 0)
-		krb5_set_error_message(context, retval,
-				       "Encryption type %s not permitted",
-				       enctype_name);
-	    goto cleanup;
-	}
-	
-	if ((*auth_context)->authentp->subkey) {
-	    for (i=0; (*auth_context)->permitted_etypes[i]; i++)
-		if ((*auth_context)->permitted_etypes[i] ==
-		    (*auth_context)->authentp->subkey->enctype)
-		    break;
-	    if (!(*auth_context)->permitted_etypes[i]) {
-		char enctype_name[30];
-		retval = KRB5_NOPERM_ETYPE;
-		if (krb5_enctype_to_string((*auth_context)->authentp->subkey->enctype,
-					   enctype_name,
-					   sizeof(enctype_name)) == 0)
-		    krb5_set_error_message(context, retval,
-					   "Encryption type %s not permitted",
-					   enctype_name);
-		goto cleanup;
-	    }
-	}
+    if (desired_etypes == NULL)
+	desired_etypes = (krb5_enctype *)calloc(4, sizeof(krb5_enctype));
+    else
+	desired_etypes = (krb5_enctype *)realloc(desired_etypes,
+						 (rfc4537_etypes_len + 4) *
+						    sizeof(krb5_enctype));
+    if (desired_etypes == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
     }
+
+    desired_etypes_len = rfc4537_etypes_len;
+
+    /*
+     * RFC 4537:
+     *
+     *   If the EtypeList is present and the server prefers an enctype from
+     *   the client's enctype list over that of the AP-REQ authenticator
+     *   subkey (if that is present) or the service ticket session key, the
+     *   server MUST create a subkey using that enctype.  This negotiated
+     *   subkey is sent in the subkey field of AP-REP message, and it is then
+     *   used as the protocol key or base key [RFC3961] for subsequent
+     *   communication.
+     *
+     *   If the enctype of the ticket session key is included in the enctype
+     *   list sent by the client, it SHOULD be the last on the list;
+     *   otherwise, this enctype MUST NOT be negotiated if it was not included
+     *   in the list.
+     *
+     * The second paragraph does appear to contradict the first with respect
+     * to whether it is legal to negotiate the ticket session key type if it
+     * is absent in the EtypeList. A literal reading suggests that we can use
+     * the AP-REQ subkey enctype. Also a client has no way of distinguishing
+     * a server that does not RFC 4537 from one that has chosen the same
+     * enctype as the ticket session key for the acceptor subkey, surely.
+     */
+
+    if ((*auth_context)->authentp->subkey != NULL) {
+	desired_etypes[desired_etypes_len++] = (*auth_context)->authentp->subkey->enctype;
+    }
+    desired_etypes[desired_etypes_len++] = req->ticket->enc_part2->session->enctype;
+    desired_etypes[desired_etypes_len++] = req->ticket->enc_part.enctype;
+    desired_etypes[desired_etypes_len] = ENCTYPE_NULL;
+
+    if (((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_PERMIT_ALL) == 0) {
+	if ((*auth_context)->permitted_etypes != NULL) {
+	    permitted_etypes = (*auth_context)->permitted_etypes;
+	} else {
+	    retval = krb5_get_permitted_enctypes(context, &permitted_etypes);
+	    if (retval != 0)
+		goto cleanup;
+	}
+	for (permitted_etypes_len = 0;
+	     permitted_etypes[permitted_etypes_len] != ENCTYPE_NULL;
+	     permitted_etypes_len++)
+	    ;
+    } else {
+	permitted_etypes = NULL;
+	permitted_etypes_len = 0;
+    }
+
+    /* check if the various etypes are permitted */
+    retval = negotiate_etype(context,
+			     desired_etypes, desired_etypes_len,
+			     rfc4537_etypes_len,
+			     permitted_etypes, permitted_etypes_len,
+			     &(*auth_context)->negotiated_etype);
+    if (retval != 0)
+	goto cleanup;
+
+    assert((*auth_context)->negotiated_etype != ENCTYPE_NULL);
 
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
     if ((*auth_context)->authentp->subkey) {
@@ -408,11 +490,22 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     if (ticket)
    	if ((retval = krb5_copy_ticket(context, req->ticket, ticket)))
 	    goto cleanup;
-    if (ap_req_options)
-    	*ap_req_options = req->ap_options;
+    if (ap_req_options) {
+    	*ap_req_options = req->ap_options & AP_OPTS_WIRE_MASK;
+	if (rfc4537_etypes_len != 0)
+	    *ap_req_options |= AP_OPTS_ETYPE_NEGOTIATION;
+	if ((*auth_context)->negotiated_etype != (*auth_context)->keyblock->enctype)
+	    *ap_req_options |= AP_OPTS_USE_SUBKEY;
+    }
+
     retval = 0;
     
 cleanup:
+    if (desired_etypes != NULL)
+	krb5_xfree(desired_etypes);
+    if (permitted_etypes != NULL &&
+	permitted_etypes != (*auth_context)->permitted_etypes)
+	krb5_xfree(permitted_etypes);
     if (server == &princ_data)
 	krb5_free_default_realm(context, princ_data.realm.data);
     if (retval) {
@@ -454,6 +547,7 @@ krb5_rd_req_decoded_anyflag(krb5_context context,
   return retval;
 }
 
+#ifndef LEAN_CLIENT
 static krb5_error_code
 decrypt_authenticator(krb5_context context, const krb5_ap_req *request,
 		      krb5_authenticator **authpp, int is_ap_req)
@@ -488,3 +582,131 @@ free(scratch.data);}
     clean_scratch();
     return retval;
 }
+#endif
+
+static krb5_error_code
+negotiate_etype(krb5_context context,
+		const krb5_enctype *desired_etypes,
+		int desired_etypes_len,
+		int mandatory_etypes_index,
+		const krb5_enctype *permitted_etypes,
+		int permitted_etypes_len,
+		krb5_enctype *negotiated_etype)
+{
+    int i, j;
+
+    *negotiated_etype = ENCTYPE_NULL;
+
+    /* mandatory segment of desired_etypes must be permitted */
+    for (i = mandatory_etypes_index; i < desired_etypes_len; i++) {
+	krb5_boolean permitted = FALSE;
+
+	for (j = 0; j < permitted_etypes_len; j++) {
+	    if (desired_etypes[i] == permitted_etypes[j]) {
+		permitted = TRUE;
+		break;
+	    }
+	}
+
+	if (permitted == FALSE) {
+	    char enctype_name[30];
+
+	    if (krb5_enctype_to_string(desired_etypes[i],
+				       enctype_name,
+				       sizeof(enctype_name)) == 0)
+		krb5_set_error_message(context, KRB5_NOPERM_ETYPE,
+				       "Encryption type %s not permitted",
+				       enctype_name);
+		return KRB5_NOPERM_ETYPE;
+	}
+    }
+
+    /*
+     * permitted_etypes is ordered from most to least preferred;
+     * find first desired_etype that matches.
+     */
+    for (j = 0; j < permitted_etypes_len; j++) {
+	for (i = 0; i < desired_etypes_len; i++) {
+	    if (desired_etypes[i] == permitted_etypes[j]) {
+		*negotiated_etype = permitted_etypes[j];
+		return 0;
+	    }
+	}
+    }
+
+    /*NOTREACHED*/
+    return KRB5_NOPERM_ETYPE;
+}
+
+static krb5_error_code
+decode_etype_list(krb5_context context,
+		  const krb5_authenticator *authp,
+		  krb5_enctype **desired_etypes,
+		  int *desired_etypes_len)
+{
+    krb5_error_code code;
+    krb5_authdata **ad_if_relevant = NULL;
+    krb5_authdata *etype_adata = NULL;
+    krb5_etype_list *etype_list = NULL;
+    int i, j;
+    krb5_data data;
+
+    *desired_etypes = NULL;
+
+    if (authp->authorization_data == NULL)
+	return 0;
+
+    /*
+     * RFC 4537 says that ETYPE_NEGOTIATION auth data should be wrapped
+     * in AD_IF_RELEVANT, but we handle the case where it is mandatory.
+     */
+    for (i = 0; authp->authorization_data[i] != NULL; i++) {
+	switch (authp->authorization_data[i]->ad_type) {
+	case KRB5_AUTHDATA_IF_RELEVANT:
+	    code = krb5_decode_authdata_container(context,
+						  KRB5_AUTHDATA_IF_RELEVANT,
+						  authp->authorization_data[i],
+						  &ad_if_relevant);
+	    if (code != 0)
+		continue;
+
+	    for (j = 0; ad_if_relevant[j] != NULL; j++) {
+		if (ad_if_relevant[j]->ad_type == KRB5_AUTHDATA_ETYPE_NEGOTIATION) {
+		    etype_adata = ad_if_relevant[j];
+		    break;
+		}
+	    }
+	    if (etype_adata == NULL) {
+		krb5_free_authdata(context, ad_if_relevant);
+		ad_if_relevant = NULL;
+	    }
+	    break;
+	case KRB5_AUTHDATA_ETYPE_NEGOTIATION:
+	    etype_adata = authp->authorization_data[i];
+	    break;
+	default:
+	    break;
+	}
+	if (etype_adata != NULL)
+	    break;
+    }
+
+    if (etype_adata == NULL)
+	return 0;
+
+    data.data = (char *)etype_adata->contents;
+    data.length = etype_adata->length;
+
+    code = decode_krb5_etype_list(&data, &etype_list);
+    if (code == 0) {
+	*desired_etypes = etype_list->etypes;
+	*desired_etypes_len = etype_list->length;
+	krb5_xfree(etype_list);
+    }
+
+    if (ad_if_relevant != NULL)
+	krb5_free_authdata(context, ad_if_relevant);
+
+    return code;
+}
+

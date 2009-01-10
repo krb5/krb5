@@ -167,8 +167,7 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
     if (authorization_data) {
 	/* need to encrypt it in the request */
 
-	if ((retval = encode_krb5_authdata((const krb5_authdata**)authorization_data,
-					   &scratch)))
+	if ((retval = encode_krb5_authdata(authorization_data, &scratch)))
 	    return(retval);
 
 	if ((retval = krb5_encrypt_helper(context, &in_cred->keyblock,

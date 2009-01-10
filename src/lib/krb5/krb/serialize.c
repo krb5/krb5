@@ -62,7 +62,8 @@ krb5_register_serializer(krb5_context kcontext, const krb5_ser_entry *entry)
 
     kret = 0;
     /* See if it's already there, if so, we're good to go. */
-    if (!(stable = krb5_find_serializer(kcontext, entry->odtype))) {
+    if (!(stable = (krb5_ser_entry *)krb5_find_serializer(kcontext,
+							  entry->odtype))) {
 	/*
 	 * Can't find our type.  Create a new entry.
 	 */

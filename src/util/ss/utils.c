@@ -56,26 +56,11 @@ char * generate_rqte(func_name, info_string, cmds, options)
     char const *cmds;
     int options;
 {
-    int size;
-    char *string, *var_name, numbuf[16];
+    char *string, *var_name;
     var_name = generate_cmds_string(cmds);
     generate_function_definition(func_name);
-    size = 6;		/* "    { " */
-    size += strlen(var_name)+8; /* "quux, " */
-    size += strlen(func_name)+8; /* "foo, " */
-    size += strlen(info_string)+8; /* "\"Info!\", " */
-    sprintf(numbuf, "%d", options);
-    size += strlen(numbuf)+5;		/* " }," + NL + NUL */
-    string = malloc(size);
-    strcpy(string, "    { ");
-    strcat(string, var_name);
-    strcat(string, ",\n      ");
-    strcat(string, func_name);
-    strcat(string, ",\n      ");
-    strcat(string, info_string);
-    strcat(string, ",\n      ");
-    strcat(string, numbuf);
-    strcat(string, " },\n");
+    asprintf(&string, "    { %s,\n      %s,\n      %s,\n      %d },\n",
+	     var_name, func_name, info_string, options);
     return(string);
 }
 
@@ -85,9 +70,8 @@ gensym(name)
 {
 	char *symbol;
 
-	symbol = malloc((strlen(name)+6) * sizeof(char));
 	gensym_n++;
-	sprintf(symbol, "%s%05ld", name, gensym_n);
+	asprintf(&symbol, "%s%05ld", name, gensym_n);
 	return(symbol);
 }
 
@@ -96,14 +80,8 @@ char *str_concat3(a, b, c)
 	register char *a, *b, *c;
 {
 	char *result;
-	int size_a = strlen(a);
-	int size_b = strlen(b);
-	int size_c = strlen(c);
 
-	result = malloc((size_a + size_b + size_c + 2)*sizeof(char));
-	strcpy(result, a);
-	strcpy(&result[size_a], c);
-	strcpy(&result[size_a+size_c], b);
+	asprintf(&result, "%s%s%s", a, c, b);
 	return(result);
 }
 
@@ -112,13 +90,8 @@ char *quote(string)
 	register char *string;
 {
 	register char *result;
-	int len;
-	len = strlen(string)+1;
-	result = malloc(len+2);
-	result[0] = '"';
-	strncpy(&result[1], string, len-1);
-	result[len] = '"';
-	result[len+1] = '\0';
+
+	asprintf(&result, "\"%s\"", string);
 	return(result);
 }
 

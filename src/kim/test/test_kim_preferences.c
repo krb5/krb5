@@ -658,6 +658,8 @@ void test_kim_preferences_add_favorite_identity (kim_test_state_t state)
                 log_failure (state, "Favorite identity %s not found in favorite identities list", 
                              fids[i].identity);
             }
+            
+            kim_identity_free (&identity);
         }
         
         if (!err && i != count) {
@@ -841,6 +843,8 @@ void test_kim_preferences_remove_favorite_identity (kim_test_state_t state)
                 log_failure (state, "Favorite identity %s not found in favorite identities list", 
                              fids[i].identity);
             }
+            
+            kim_identity_free (&identity);
         }
         
         if (!err && i != count) {
@@ -855,7 +859,6 @@ void test_kim_preferences_remove_favorite_identity (kim_test_state_t state)
     if (!err) {
         kim_preferences prefs = NULL;
         kim_count count, j;
-        kim_string string;
         
         err = kim_preferences_create (&prefs);
         fail_if_error (state, "kim_preferences_create", err, 
@@ -870,6 +873,7 @@ void test_kim_preferences_remove_favorite_identity (kim_test_state_t state)
         for (j = 0; j < count; j++) {
             kim_identity compare_identity = NULL;
             kim_options compare_options = NULL;
+            kim_string string = NULL;
             
             err = kim_preferences_get_favorite_identity_at_index (prefs, 0, 
                                                                   &compare_identity, 
@@ -878,7 +882,12 @@ void test_kim_preferences_remove_favorite_identity (kim_test_state_t state)
                            "while getting favorite identity %d", (int) j);
             
             if (!err) {
-                kim_identity_get_display_string(compare_identity, &string);
+                err = kim_identity_get_display_string(compare_identity, &string);
+                fail_if_error (state, "kim_identity_get_display_string", err, 
+                               "while getting the display string for identity %d", (int) j);
+            }
+            
+            if (!err) {
                 err = kim_preferences_remove_favorite_identity(prefs, compare_identity);
                 fail_if_error (state, "kim_preferences_remove_favorite_identity", err, 
                                "while removing favorite identity %d \"%s\"", (int) j, string);
@@ -897,6 +906,7 @@ void test_kim_preferences_remove_favorite_identity (kim_test_state_t state)
                              display_string);
             }
             
+            kim_string_free (&string);
             kim_identity_free (&compare_identity);
             kim_options_free (&compare_options);
         }

@@ -87,6 +87,7 @@
 #include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
+#include <adm_proto.h>
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
 #include <ldap_principal.h>
@@ -1991,7 +1992,7 @@ static char *strdur(duration)
     minutes = duration / 60;
     duration %= 60;
     seconds = duration;
-    sprintf(out, "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
+    snprintf(out, sizeof(out), "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
 	    days, days == 1 ? "day" : "days",
 	    hours, minutes, seconds);
     return out;
@@ -2004,7 +2005,7 @@ static char *strdur(duration)
 static void print_realm_params(krb5_ldap_realm_params *rparams, int mask)
 {
     char **slist = NULL;
-    int num_entry_printed = 0, i = 0;
+    unsigned int num_entry_printed = 0, i = 0;
 
     /* Print the Realm Attributes on the standard output */
     printf("%25s: %-50s\n", "Realm Name", global_params.realm);

@@ -44,21 +44,21 @@
 #define OK 0
 #define NOTOK (-1)
 	
-	/* IDENTIFIER OCTET = TAG CLASS | FORM OF ENCODING | TAG NUMBER */
+/* IDENTIFIER OCTET = TAG CLASS | FORM OF ENCODING | TAG NUMBER */
 	
-	/* TAG CLASSES */
+/* TAG CLASSES */
 #define ID_CLASS   0xc0		/* bits 8 and 7 */
 #define CLASS_UNIV 0x00		/* 0 = universal */
 #define CLASS_APPL 0x40		/* 1 = application */
 #define CLASS_CONT 0x80		/* 2 = context-specific */
 #define CLASS_PRIV 0xc0		/* 3 = private */
 	
-	/* FORM OF ENCODING */
+/* FORM OF ENCODING */
 #define ID_FORM   0x20		/* bit 6 */
 #define FORM_PRIM 0x00		/* 0 = primitive */
 #define FORM_CONS 0x20		/* 1 = constructed */
 	
-	/* TAG NUMBERS */
+/* TAG NUMBERS */
 #define ID_TAG    0x1f		/* bits 5-1 */
 #define PRIM_BOOL 0x01		/* Boolean */
 #define PRIM_INT  0x02		/* Integer */
@@ -131,192 +131,192 @@ static int convert_nibble(int ch)
 }
 
 int trval(fin, fout)
-	FILE	*fin;
-	FILE	*fout;
+    FILE	*fin;
+    FILE	*fout;
 {
-	unsigned char *p;
-	unsigned int maxlen;
-	int len;
-	int cc, cc2, n1, n2;
-	int r;
-	int rlen;
+    unsigned char *p;
+    unsigned int maxlen;
+    int len;
+    int cc, cc2, n1, n2;
+    int r;
+    int rlen;
 	
-	maxlen = BUFSIZ;
-	p = (unsigned char *)malloc(maxlen);
-	len = 0;
-	while ((cc = fgetc(fin)) != EOF) {
-		if (len == maxlen) {
-			maxlen += BUFSIZ;
-			p = (unsigned char *)realloc(p, maxlen);
-		}
-		if (do_hex) {
-			if (cc == ' ' || cc == '\n' || cc == '\t')
-				continue;
-			cc2 = fgetc(fin);
-			if (cc2 == EOF)
-				break;
-			n1 = convert_nibble(cc);
-			n2 = convert_nibble(cc2);
-			cc = (n1 << 4) + n2;
-		}
-		p[len++] = cc;
+    maxlen = BUFSIZ;
+    p = (unsigned char *)malloc(maxlen);
+    len = 0;
+    while ((cc = fgetc(fin)) != EOF) {
+	if ((unsigned int) len == maxlen) {
+	    maxlen += BUFSIZ;
+	    p = (unsigned char *)realloc(p, maxlen);
 	}
-	fprintf(fout, "<%d>", len);
-	r = trval2(fout, p, len, 0, &rlen);
-	fprintf(fout, "\n");
-	(void) free(p);
-	return(r);
+	if (do_hex) {
+	    if (cc == ' ' || cc == '\n' || cc == '\t')
+		continue;
+	    cc2 = fgetc(fin);
+	    if (cc2 == EOF)
+		break;
+	    n1 = convert_nibble(cc);
+	    n2 = convert_nibble(cc2);
+	    cc = (n1 << 4) + n2;
+	}
+	p[len++] = cc;
+    }
+    fprintf(fout, "<%d>", len);
+    r = trval2(fout, p, len, 0, &rlen);
+    fprintf(fout, "\n");
+    (void) free(p);
+    return(r);
 }
 
 int trval2(fp, enc, len, lev, rlen)
-	FILE *fp;
-	unsigned char *enc;
-	int len;
-	int lev;
-	int *rlen;
+    FILE *fp;
+    unsigned char *enc;
+    int len;
+    int lev;
+    int *rlen;
 {
-	int l, eid, elen, xlen, r, rlen2;
-	int rlen_ext = 0;
+    int l, eid, elen, xlen, r, rlen2;
+    int rlen_ext = 0;
 
-	r = OK;
+    r = OK;
 
-	if (len < 2) {
-		fprintf(fp, "missing id and length octets (%d)\n", len);
-		return(NOTOK);
-	}
+    if (len < 2) {
+	fprintf(fp, "missing id and length octets (%d)\n", len);
+	return(NOTOK);
+    }
 	
-	fprintf(fp, "\n");
-	for (l=0; l<lev; l++) fprintf(fp, ".  ");
+    fprintf(fp, "\n");
+    for (l=0; l<lev; l++) fprintf(fp, ".  ");
 	
 context_restart:
-	eid = enc[0];
-	elen = enc[1];
+    eid = enc[0];
+    elen = enc[1];
 
-	if (print_id_and_len) {
-		fprintf(fp, "%02x ", eid);
-		fprintf(fp, "%02x ", elen);
-	}
+    if (print_id_and_len) {
+	fprintf(fp, "%02x ", eid);
+	fprintf(fp, "%02x ", elen);
+    }
 	
-	if (elen == LEN_XTND) {
-		fprintf(fp,
-			"indefinite length encoding not implemented (0x%02x)\n", elen);
-		return(NOTOK);
-	}
+    if (elen == LEN_XTND) {
+	fprintf(fp,
+		"indefinite length encoding not implemented (0x%02x)\n", elen);
+	return(NOTOK);
+    }
 	
-	xlen = 0;
-	if (elen & LEN_XTND) {
-		xlen = elen & LEN_MASK;
-		if (xlen > len - 2) {
-			fprintf(fp, "extended length too long (%d > %d - 2)\n", xlen, len);
-			return(NOTOK);
-		}
-		elen = decode_len(fp, enc+2, xlen);
+    xlen = 0;
+    if (elen & LEN_XTND) {
+	xlen = elen & LEN_MASK;
+	if (xlen > len - 2) {
+	    fprintf(fp, "extended length too long (%d > %d - 2)\n", xlen, len);
+	    return(NOTOK);
 	}
+	elen = decode_len(fp, enc+2, xlen);
+    }
 	
-	if (elen > len - 2 - xlen) {
-		fprintf(fp, "length too long (%d > %d - 2 - %d)\n", elen, len, xlen);
-		return(NOTOK);
-	}
+    if (elen > len - 2 - xlen) {
+	fprintf(fp, "length too long (%d > %d - 2 - %d)\n", elen, len, xlen);
+	return(NOTOK);
+    }
 	
-	print_tag_type(fp, eid, lev);
+    print_tag_type(fp, eid, lev);
 
-	if (print_context_shortcut &&
-	    ((eid & ID_CLASS) == CLASS_CONT) && (lev > 0)) {
-		rlen_ext += 2 + xlen;
-		enc += 2 + xlen;
-		goto context_restart;
-	}
+    if (print_context_shortcut &&
+	((eid & ID_CLASS) == CLASS_CONT) && (lev > 0)) {
+	rlen_ext += 2 + xlen;
+	enc += 2 + xlen;
+	goto context_restart;
+    }
 
-	switch(eid & ID_FORM) {
-	case FORM_PRIM:
-		r = do_prim(fp, eid & ID_TAG, enc+2+xlen, elen, lev+1);
-		*rlen = 2 + xlen + elen + rlen_ext;
-		break;
-	case FORM_CONS:
-		if (print_constructed_length) {
-			fprintf(fp, "constr ");
-			fprintf(fp, "<%d>", elen);
-		}
-		r = do_cons(fp, enc+2+xlen, elen, lev+1, &rlen2);
-		*rlen = 2 + xlen + rlen2 + rlen_ext;
-		break;
+    switch(eid & ID_FORM) {
+    case FORM_PRIM:
+	r = do_prim(fp, eid & ID_TAG, enc+2+xlen, elen, lev+1);
+	*rlen = 2 + xlen + elen + rlen_ext;
+	break;
+    case FORM_CONS:
+	if (print_constructed_length) {
+	    fprintf(fp, "constr ");
+	    fprintf(fp, "<%d>", elen);
 	}
+	r = do_cons(fp, enc+2+xlen, elen, lev+1, &rlen2);
+	*rlen = 2 + xlen + rlen2 + rlen_ext;
+	break;
+    }
 	
-	return(r);
+    return(r);
 }
 
 int decode_len(fp, enc, len)
-	FILE *fp;
-	unsigned char *enc;
-	int len;
+    FILE *fp;
+    unsigned char *enc;
+    int len;
 {
-	int rlen;
-	int i;
+    int rlen;
+    int i;
 	
+    if (print_id_and_len)
+	fprintf(fp, "%02x ", enc[0]);
+    rlen = enc[0];
+    for (i=1; i<len; i++) {
 	if (print_id_and_len)
-		fprintf(fp, "%02x ", enc[0]);
-	rlen = enc[0];
-	for (i=1; i<len; i++) {
-		if (print_id_and_len)
-			fprintf(fp, "%02x ", enc[i]);
-		rlen = (rlen * 0x100) + enc[i];
-	}
-	return(rlen);
+	    fprintf(fp, "%02x ", enc[i]);
+	rlen = (rlen * 0x100) + enc[i];
+    }
+    return(rlen);
 }
 
 /*
  * This is the printing function for bit strings
  */
 int do_prim_bitstring(fp, tag, enc, len, lev)
-	FILE *fp;
-	int tag;
-	unsigned char *enc;
-	int len;
-	int lev;
+    FILE *fp;
+    int tag;
+    unsigned char *enc;
+    int len;
+    int lev;
 {
-	int	i;
-	long	num = 0;
+    int	i;
+    long	num = 0;
 
-	if (tag != PRIM_BITS || len > 5)
-		return 0;
+    if (tag != PRIM_BITS || len > 5)
+	return 0;
 
-	for (i=1; i < len; i++) {
-		num = num << 8;
-		num += enc[i];
-	}
+    for (i=1; i < len; i++) {
+	num = num << 8;
+	num += enc[i];
+    }
 
-	fprintf(fp, "0x%lx", num);
-	if (enc[0])
-		fprintf(fp, " (%d unused bits)", enc[0]);
-	return 1;
+    fprintf(fp, "0x%lx", num);
+    if (enc[0])
+	fprintf(fp, " (%d unused bits)", enc[0]);
+    return 1;
 }
 
 /*
  * This is the printing function for integers
  */
 int do_prim_int(fp, tag, enc, len, lev)
-	FILE *fp;
-	int tag;
-	unsigned char *enc;
-	int len;
-	int lev;
+    FILE *fp;
+    int tag;
+    unsigned char *enc;
+    int len;
+    int lev;
 {
-	int	i;
-	long	num = 0;
+    int	i;
+    long	num = 0;
 
-	if (tag != PRIM_INT || len > 4)
-		return 0;
+    if (tag != PRIM_INT || len > 4)
+	return 0;
 
-	if (enc[0] & 0x80)
-		num = -1;
+    if (enc[0] & 0x80)
+	num = -1;
 
-	for (i=0; i < len; i++) {
-		num = num << 8;
-		num += enc[i];
-	}
+    for (i=0; i < len; i++) {
+	num = num << 8;
+	num += enc[i];
+    }
 
-	fprintf(fp, "%ld", num);
-	return 1;
+    fprintf(fp, "%ld", num);
+    return 1;
 }
 
 
@@ -325,80 +325,80 @@ int do_prim_int(fp, tag, enc, len, lev)
  * other other type which is best printed as a string
  */
 int do_prim_string(fp, tag, enc, len, lev)
-	FILE *fp;
-	int tag;
-	unsigned char *enc;
-	int len;
-	int lev;
+    FILE *fp;
+    int tag;
+    unsigned char *enc;
+    int len;
+    int lev;
 {
-	int	i;
+    int	i;
 
-	/*
-	 * Only try this printing function with "reasonable" types
-	 */
-	if ((tag < DEFN_NUMS) && (tag != PRIM_OCTS))
-		return 0;
+    /*
+     * Only try this printing function with "reasonable" types
+     */
+    if ((tag < DEFN_NUMS) && (tag != PRIM_OCTS))
+	return 0;
 
-	for (i=0; i < len; i++)
-		if (!isprint(enc[i]))
-			return 0;
-	fprintf(fp, "\"%.*s\"", len, enc);
-	return 1;
+    for (i=0; i < len; i++)
+	if (!isprint(enc[i]))
+	    return 0;
+    fprintf(fp, "\"%.*s\"", len, enc);
+    return 1;
 }
 
 int do_prim(fp, tag, enc, len, lev)
-	FILE *fp;
-	int tag;
-	unsigned char *enc;
-	int len;
-	int lev;
+    FILE *fp;
+    int tag;
+    unsigned char *enc;
+    int len;
+    int lev;
 {
-	int n;
-	int i;
-	int j;
-	int width;
+    int n;
+    int i;
+    int j;
+    int width;
 
-	if (do_prim_string(fp, tag, enc, len, lev))
-		return OK;
-	if (do_prim_int(fp, tag, enc, len, lev))
-		return OK;
-	if (do_prim_bitstring(fp, tag, enc, len, lev))
-		return OK;
+    if (do_prim_string(fp, tag, enc, len, lev))
+	return OK;
+    if (do_prim_int(fp, tag, enc, len, lev))
+	return OK;
+    if (do_prim_bitstring(fp, tag, enc, len, lev))
+	return OK;
 
-	if (print_primitive_length)
-		fprintf(fp, "<%d>", len);
+    if (print_primitive_length)
+	fprintf(fp, "<%d>", len);
 	
-	width = (80 - (lev * 3) - 8) / 4;
+    width = (80 - (lev * 3) - 8) / 4;
 	
-	for (n = 0; n < len; n++) {
-		if ((n % width) == 0) {
-			fprintf(fp, "\n");
-			for (i=0; i<lev; i++) fprintf(fp, "   ");
-		}
-		fprintf(fp, "%02x ", enc[n]);
-		if ((n % width) == (width-1)) {
-			fprintf(fp, "    ");
-			for (i=n-(width-1); i<=n; i++)
-				if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
-				else fprintf(fp, ".");
-		}
+    for (n = 0; n < len; n++) {
+	if ((n % width) == 0) {
+	    fprintf(fp, "\n");
+	    for (i=0; i<lev; i++) fprintf(fp, "   ");
 	}
-	if ((j = (n % width)) != 0) {
-		fprintf(fp, "    ");
-		for (i=0; i<width-j; i++) fprintf(fp, "   ");
-		for (i=n-j; i<n; i++)
-			if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
-			else fprintf(fp, ".");
+	fprintf(fp, "%02x ", enc[n]);
+	if ((n % width) == (width-1)) {
+	    fprintf(fp, "    ");
+	    for (i=n-(width-1); i<=n; i++)
+		if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
+		else fprintf(fp, ".");
 	}
-	return(OK);
+    }
+    if ((j = (n % width)) != 0) {
+	fprintf(fp, "    ");
+	for (i=0; i<width-j; i++) fprintf(fp, "   ");
+	for (i=n-j; i<n; i++)
+	    if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
+	    else fprintf(fp, ".");
+    }
+    return(OK);
 }
 
 int do_cons(fp, enc, len, lev, rlen)
-FILE *fp;
-unsigned char *enc;
-int len;
-int lev;
-int *rlen;
+    FILE *fp;
+    unsigned char *enc;
+    int len;
+    int lev;
+    int *rlen;
 {
     int n;
     int r = 0;
@@ -414,7 +414,7 @@ int *rlen;
     }
     if (rlent != len) {
 	fprintf(fp, "inconsistent constructed lengths (%d != %d)\n",
-	rlent, len);
+		rlent, len);
 	return(NOTOK);
     }
     *rlen = rlent;
@@ -422,344 +422,344 @@ int *rlen;
 }
 
 struct typestring_table {
-	int	k1, k2;
-	char	*str;
-	int	new_appl;
+    int	k1, k2;
+    char	*str;
+    int	new_appl;
 };
 
 static char *lookup_typestring(table, key1, key2)
-	struct typestring_table *table;
-	int	key1, key2;
+    struct typestring_table *table;
+    int	key1, key2;
 {
-	struct typestring_table *ent;
+    struct typestring_table *ent;
 
-	for (ent = table; ent->k1 > 0; ent++) {
-		if ((ent->k1 == key1) &&
-		    (ent->k2 == key2)) {
-			if (ent->new_appl)
-				current_appl_type = ent->new_appl;
-			return ent->str;
-		}
+    for (ent = table; ent->k1 > 0; ent++) {
+	if ((ent->k1 == key1) &&
+	    (ent->k2 == key2)) {
+	    if (ent->new_appl)
+		current_appl_type = ent->new_appl;
+	    return ent->str;
 	}
-	return 0;
+    }
+    return 0;
 }
 
 
 struct typestring_table univ_types[] = {
-	{ PRIM_BOOL, -1, "Boolean"},
-	{ PRIM_INT, -1, "Integer"},
-	{ PRIM_BITS, -1, "Bit String"},
-	{ PRIM_OCTS, -1, "Octet String"},
-	{ PRIM_NULL, -1, "Null"},
-	{ PRIM_OID, -1, "Object Identifier"},
-	{ PRIM_ODE, -1, "Object Descriptor"},
-	{ CONS_EXTN, -1, "External"},
-	{ PRIM_REAL, -1, "Real"},
-	{ PRIM_ENUM, -1, "Enumerated type"},
-	{ PRIM_ENCR, -1, "Encrypted"},
-	{ CONS_SEQ, -1, "Sequence/Sequence Of"},
-	{ CONS_SET, -1, "Set/Set Of"},
-	{ DEFN_NUMS, -1, "Numeric String"},
-	{ DEFN_PRTS, -1, "Printable String"},
-	{ DEFN_T61S, -1, "T.61 String"},
-	{ DEFN_VTXS, -1, "Videotex String"},
-	{ DEFN_IA5S, -1, "IA5 String"},
-	{ DEFN_UTCT, -1, "UTCTime"},
-	{ DEFN_GENT, -1, "Generalized Time"},
-	{ DEFN_GFXS, -1, "Graphics string (ISO2375)"},
-	{ DEFN_VISS, -1, "Visible string"},
-	{ DEFN_GENS, -1, "General string"},
-	{ DEFN_CHRS, -1, "Character string"},
-	{ -1, -1, 0}
-	};
+    { PRIM_BOOL, -1, "Boolean"},
+    { PRIM_INT, -1, "Integer"},
+    { PRIM_BITS, -1, "Bit String"},
+    { PRIM_OCTS, -1, "Octet String"},
+    { PRIM_NULL, -1, "Null"},
+    { PRIM_OID, -1, "Object Identifier"},
+    { PRIM_ODE, -1, "Object Descriptor"},
+    { CONS_EXTN, -1, "External"},
+    { PRIM_REAL, -1, "Real"},
+    { PRIM_ENUM, -1, "Enumerated type"},
+    { PRIM_ENCR, -1, "Encrypted"},
+    { CONS_SEQ, -1, "Sequence/Sequence Of"},
+    { CONS_SET, -1, "Set/Set Of"},
+    { DEFN_NUMS, -1, "Numeric String"},
+    { DEFN_PRTS, -1, "Printable String"},
+    { DEFN_T61S, -1, "T.61 String"},
+    { DEFN_VTXS, -1, "Videotex String"},
+    { DEFN_IA5S, -1, "IA5 String"},
+    { DEFN_UTCT, -1, "UTCTime"},
+    { DEFN_GENT, -1, "Generalized Time"},
+    { DEFN_GFXS, -1, "Graphics string (ISO2375)"},
+    { DEFN_VISS, -1, "Visible string"},
+    { DEFN_GENS, -1, "General string"},
+    { DEFN_CHRS, -1, "Character string"},
+    { -1, -1, 0}
+};
 
 #ifdef KRB5
 struct typestring_table krb5_types[] = {
-	{ 1, -1, "Krb5 Ticket"},
-	{ 2, -1, "Krb5 Autenticator"},
-	{ 3, -1, "Krb5 Encrypted ticket part"},
-	{ 10, -1, "Krb5 AS-REQ packet"},
-	{ 11, -1, "Krb5 AS-REP packet"},
-	{ 12, -1, "Krb5 TGS-REQ packet"},
-	{ 13, -1, "Krb5 TGS-REP packet"},
-	{ 14, -1, "Krb5 AP-REQ packet"},
-	{ 15, -1, "Krb5 AP-REP packet"},
-	{ 20, -1, "Krb5 SAFE packet"},
-	{ 21, -1, "Krb5 PRIV packet"},
-	{ 22, -1, "Krb5 CRED packet"},
-	{ 30, -1, "Krb5 ERROR packet"},
-	{ 25, -1, "Krb5 Encrypted AS-REP part"},
-	{ 26, -1, "Krb5 Encrypted TGS-REP part"},
-	{ 27, -1, "Krb5 Encrypted AP-REP part"},
-	{ 28, -1, "Krb5 Encrypted PRIV part"},
-	{ 29, -1, "Krb5 Encrypted CRED part"},
-	{ -1, -1, 0}
+    { 1, -1, "Krb5 Ticket"},
+    { 2, -1, "Krb5 Autenticator"},
+    { 3, -1, "Krb5 Encrypted ticket part"},
+    { 10, -1, "Krb5 AS-REQ packet"},
+    { 11, -1, "Krb5 AS-REP packet"},
+    { 12, -1, "Krb5 TGS-REQ packet"},
+    { 13, -1, "Krb5 TGS-REP packet"},
+    { 14, -1, "Krb5 AP-REQ packet"},
+    { 15, -1, "Krb5 AP-REP packet"},
+    { 20, -1, "Krb5 SAFE packet"},
+    { 21, -1, "Krb5 PRIV packet"},
+    { 22, -1, "Krb5 CRED packet"},
+    { 30, -1, "Krb5 ERROR packet"},
+    { 25, -1, "Krb5 Encrypted AS-REP part"},
+    { 26, -1, "Krb5 Encrypted TGS-REP part"},
+    { 27, -1, "Krb5 Encrypted AP-REP part"},
+    { 28, -1, "Krb5 Encrypted PRIV part"},
+    { 29, -1, "Krb5 Encrypted CRED part"},
+    { -1, -1, 0}
 };
 
 struct typestring_table krb5_fields[] = {
-	{ 1000, 0, "name-type"}, /* PrincipalName */
-	{ 1000, 1, "name-string"},
+    { 1000, 0, "name-type"}, /* PrincipalName */
+    { 1000, 1, "name-string"},
 
-	{ 1001, 0, "etype"},	/* Encrypted data */
-	{ 1001, 1, "kvno"},	
-	{ 1001, 2, "cipher"},
+    { 1001, 0, "etype"},	/* Encrypted data */
+    { 1001, 1, "kvno"},	
+    { 1001, 2, "cipher"},
 
-	{ 1002, 0, "addr-type"},	/* HostAddress */
-	{ 1002, 1, "address"},	
+    { 1002, 0, "addr-type"},	/* HostAddress */
+    { 1002, 1, "address"},	
 
-	{ 1003, 0, "addr-type"},	/* HostAddresses */
-	{ 1003, 1, "address"},	
+    { 1003, 0, "addr-type"},	/* HostAddresses */
+    { 1003, 1, "address"},	
 
-	{ 1004, 0, "ad-type"},	/* AuthorizationData */
-	{ 1004, 1, "ad-data"},	
+    { 1004, 0, "ad-type"},	/* AuthorizationData */
+    { 1004, 1, "ad-data"},	
 
-	{ 1005, 0, "keytype"},	/* EncryptionKey */
-	{ 1005, 1, "keyvalue"},	
+    { 1005, 0, "keytype"},	/* EncryptionKey */
+    { 1005, 1, "keyvalue"},	
 
-	{ 1006, 0, "cksumtype"},	/* Checksum */
-	{ 1006, 1, "checksum"},
+    { 1006, 0, "cksumtype"},	/* Checksum */
+    { 1006, 1, "checksum"},
 
-	{ 1007, 0, "kdc-options"},	/* KDC-REQ-BODY */
-	{ 1007, 1, "cname", 1000},	
-	{ 1007, 2, "realm"},
-	{ 1007, 3, "sname", 1000},	
-	{ 1007, 4, "from"},
-	{ 1007, 5, "till"},	
-	{ 1007, 6, "rtime"},
-	{ 1007, 7, "nonce"},
-	{ 1007, 8, "etype"},
-	{ 1007, 9, "addresses", 1003},
-	{ 1007, 10, "enc-authorization-data", 1001},
-	{ 1007, 11, "additional-tickets"},
+    { 1007, 0, "kdc-options"},	/* KDC-REQ-BODY */
+    { 1007, 1, "cname", 1000},	
+    { 1007, 2, "realm"},
+    { 1007, 3, "sname", 1000},	
+    { 1007, 4, "from"},
+    { 1007, 5, "till"},	
+    { 1007, 6, "rtime"},
+    { 1007, 7, "nonce"},
+    { 1007, 8, "etype"},
+    { 1007, 9, "addresses", 1003},
+    { 1007, 10, "enc-authorization-data", 1001},
+    { 1007, 11, "additional-tickets"},
 
-	{ 1008, 1, "padata-type"},	/* PA-DATA */
-	{ 1008, 2, "pa-data"},
+    { 1008, 1, "padata-type"},	/* PA-DATA */
+    { 1008, 2, "pa-data"},
 
-	{ 1009, 0, "user-data"},	/* KRB-SAFE-BODY */
-	{ 1009, 1, "timestamp"},	
-	{ 1009, 2, "usec"},
-	{ 1009, 3, "seq-number"},	
-	{ 1009, 4, "s-address", 1002},
-	{ 1009, 5, "r-address", 1002},
+    { 1009, 0, "user-data"},	/* KRB-SAFE-BODY */
+    { 1009, 1, "timestamp"},	
+    { 1009, 2, "usec"},
+    { 1009, 3, "seq-number"},	
+    { 1009, 4, "s-address", 1002},
+    { 1009, 5, "r-address", 1002},
 
-	{ 1010, 0, "lr-type"},	/* LastReq */
-	{ 1010, 1, "lr-value"},
+    { 1010, 0, "lr-type"},	/* LastReq */
+    { 1010, 1, "lr-value"},
 
-	{ 1011, 0, "key", 1005},	/* KRB-CRED-INFO */
-	{ 1011, 1, "prealm"},	
-	{ 1011, 2, "pname", 1000},
-	{ 1011, 3, "flags"},	
-	{ 1011, 4, "authtime"},
-	{ 1011, 5, "startime"},	
-	{ 1011, 6, "endtime"},
-	{ 1011, 7, "renew-till"},
-	{ 1011, 8, "srealm"},
-	{ 1011, 9, "sname", 1000},
-	{ 1011, 10, "caddr", 1002},
+    { 1011, 0, "key", 1005},	/* KRB-CRED-INFO */
+    { 1011, 1, "prealm"},	
+    { 1011, 2, "pname", 1000},
+    { 1011, 3, "flags"},	
+    { 1011, 4, "authtime"},
+    { 1011, 5, "startime"},	
+    { 1011, 6, "endtime"},
+    { 1011, 7, "renew-till"},
+    { 1011, 8, "srealm"},
+    { 1011, 9, "sname", 1000},
+    { 1011, 10, "caddr", 1002},
 
-	{ 1, 0, "tkt-vno"},	/* Ticket */
-	{ 1, 1, "realm"},
-	{ 1, 2, "sname", 1000},
-	{ 1, 3, "tkt-enc-part", 1001},
+    { 1, 0, "tkt-vno"},	/* Ticket */
+    { 1, 1, "realm"},
+    { 1, 2, "sname", 1000},
+    { 1, 3, "tkt-enc-part", 1001},
 
-	{ 2, 0, "authenticator-vno"}, /* Authenticator */
-	{ 2, 1, "crealm"},
-	{ 2, 2, "cname", 1000},
-	{ 2, 3, "cksum", 1006},
-	{ 2, 4, "cusec"},
-	{ 2, 5, "ctime"},
-	{ 2, 6, "subkey", 1005},
-	{ 2, 7, "seq-number"},
-	{ 2, 8, "authorization-data", 1004},
+    { 2, 0, "authenticator-vno"}, /* Authenticator */
+    { 2, 1, "crealm"},
+    { 2, 2, "cname", 1000},
+    { 2, 3, "cksum", 1006},
+    { 2, 4, "cusec"},
+    { 2, 5, "ctime"},
+    { 2, 6, "subkey", 1005},
+    { 2, 7, "seq-number"},
+    { 2, 8, "authorization-data", 1004},
 
-	{ 3, 0, "flags"}, /* EncTicketPart */
-	{ 3, 1, "key", 1005},
-	{ 3, 2, "crealm"},
-	{ 3, 3, "cname", 1000},
-	{ 3, 4, "transited"},
-	{ 3, 5, "authtime"},
-	{ 3, 6, "starttime"},
-	{ 3, 7, "endtime"},
-	{ 3, 8, "renew-till"},
-	{ 3, 9, "caddr", 1003},
-	{ 3, 10, "authorization-data", 1004},
+    { 3, 0, "flags"}, /* EncTicketPart */
+    { 3, 1, "key", 1005},
+    { 3, 2, "crealm"},
+    { 3, 3, "cname", 1000},
+    { 3, 4, "transited"},
+    { 3, 5, "authtime"},
+    { 3, 6, "starttime"},
+    { 3, 7, "endtime"},
+    { 3, 8, "renew-till"},
+    { 3, 9, "caddr", 1003},
+    { 3, 10, "authorization-data", 1004},
 
-	{ 10, 1, "pvno"},	/* AS-REQ */
-	{ 10, 2, "msg-type"},
-	{ 10, 3, "padata", 1008},
-	{ 10, 4, "req-body", 1007},
+    { 10, 1, "pvno"},	/* AS-REQ */
+    { 10, 2, "msg-type"},
+    { 10, 3, "padata", 1008},
+    { 10, 4, "req-body", 1007},
 
-	{ 11, 0, "pvno"},	/* AS-REP */
-	{ 11, 1, "msg-type"},
-	{ 11, 2, "padata", 1008},
-	{ 11, 3, "crealm"},
-	{ 11, 4, "cname", 1000},
-	{ 11, 5, "ticket"},
-	{ 11, 6, "enc-part", 1001},
+    { 11, 0, "pvno"},	/* AS-REP */
+    { 11, 1, "msg-type"},
+    { 11, 2, "padata", 1008},
+    { 11, 3, "crealm"},
+    { 11, 4, "cname", 1000},
+    { 11, 5, "ticket"},
+    { 11, 6, "enc-part", 1001},
 
-	{ 12, 1, "pvno"},	/* TGS-REQ */
-	{ 12, 2, "msg-type"},
-	{ 12, 3, "padata", 1008},
-	{ 12, 4, "req-body", 1007},
+    { 12, 1, "pvno"},	/* TGS-REQ */
+    { 12, 2, "msg-type"},
+    { 12, 3, "padata", 1008},
+    { 12, 4, "req-body", 1007},
 
-	{ 13, 0, "pvno"},	/* TGS-REP */
-	{ 13, 1, "msg-type"},
-	{ 13, 2, "padata", 1008},
-	{ 13, 3, "crealm"},
-	{ 13, 4, "cname", 1000},
-	{ 13, 5, "ticket"},
-	{ 13, 6, "enc-part", 1001},
+    { 13, 0, "pvno"},	/* TGS-REP */
+    { 13, 1, "msg-type"},
+    { 13, 2, "padata", 1008},
+    { 13, 3, "crealm"},
+    { 13, 4, "cname", 1000},
+    { 13, 5, "ticket"},
+    { 13, 6, "enc-part", 1001},
 
-	{ 14, 0, "pvno"},	/* AP-REQ */
-	{ 14, 1, "msg-type"},
-	{ 14, 2, "ap-options"},
-	{ 14, 3, "ticket"},
-	{ 14, 4, "authenticator", 1001},
+    { 14, 0, "pvno"},	/* AP-REQ */
+    { 14, 1, "msg-type"},
+    { 14, 2, "ap-options"},
+    { 14, 3, "ticket"},
+    { 14, 4, "authenticator", 1001},
 
-	{ 15, 0, "pvno"},	/* AP-REP */
-	{ 15, 1, "msg-type"},
-	{ 15, 2, "enc-part", 1001},
+    { 15, 0, "pvno"},	/* AP-REP */
+    { 15, 1, "msg-type"},
+    { 15, 2, "enc-part", 1001},
 	
-	{ 20, 0, "pvno"},	/* KRB-SAFE */
-	{ 20, 1, "msg-type"},
-	{ 20, 2, "safe-body", 1009},
-	{ 20, 3, "cksum", 1006},
+    { 20, 0, "pvno"},	/* KRB-SAFE */
+    { 20, 1, "msg-type"},
+    { 20, 2, "safe-body", 1009},
+    { 20, 3, "cksum", 1006},
 
-	{ 21, 0, "pvno"},	/* KRB-PRIV */
-	{ 21, 1, "msg-type"},
-	{ 21, 2, "enc-part", 1001},
+    { 21, 0, "pvno"},	/* KRB-PRIV */
+    { 21, 1, "msg-type"},
+    { 21, 2, "enc-part", 1001},
 
-	{ 22, 0, "pvno"},	/* KRB-CRED */
-	{ 22, 1, "msg-type"},
-	{ 22, 2, "tickets"},
-	{ 22, 3, "enc-part", 1001},
+    { 22, 0, "pvno"},	/* KRB-CRED */
+    { 22, 1, "msg-type"},
+    { 22, 2, "tickets"},
+    { 22, 3, "enc-part", 1001},
 
-	{ 25, 0, "key", 1005},	/* EncASRepPart */
-	{ 25, 1, "last-req", 1010},
-	{ 25, 2, "nonce"},
-	{ 25, 3, "key-expiration"},
-	{ 25, 4, "flags"},
-	{ 25, 5, "authtime"},
-	{ 25, 6, "starttime"},
-	{ 25, 7, "enddtime"},
-	{ 25, 8, "renew-till"},
-	{ 25, 9, "srealm"},
-	{ 25, 10, "sname", 1000},
-	{ 25, 11, "caddr", 1003},
+    { 25, 0, "key", 1005},	/* EncASRepPart */
+    { 25, 1, "last-req", 1010},
+    { 25, 2, "nonce"},
+    { 25, 3, "key-expiration"},
+    { 25, 4, "flags"},
+    { 25, 5, "authtime"},
+    { 25, 6, "starttime"},
+    { 25, 7, "enddtime"},
+    { 25, 8, "renew-till"},
+    { 25, 9, "srealm"},
+    { 25, 10, "sname", 1000},
+    { 25, 11, "caddr", 1003},
 	
-	{ 26, 0, "key", 1005},	/* EncTGSRepPart */
-	{ 26, 1, "last-req", 1010},
-	{ 26, 2, "nonce"},
-	{ 26, 3, "key-expiration"},
-	{ 26, 4, "flags"},
-	{ 26, 5, "authtime"},
-	{ 26, 6, "starttime"},
-	{ 26, 7, "enddtime"},
-	{ 26, 8, "renew-till"},
-	{ 26, 9, "srealm"},
-	{ 26, 10, "sname", 1000},
-	{ 26, 11, "caddr", 1003},
+    { 26, 0, "key", 1005},	/* EncTGSRepPart */
+    { 26, 1, "last-req", 1010},
+    { 26, 2, "nonce"},
+    { 26, 3, "key-expiration"},
+    { 26, 4, "flags"},
+    { 26, 5, "authtime"},
+    { 26, 6, "starttime"},
+    { 26, 7, "enddtime"},
+    { 26, 8, "renew-till"},
+    { 26, 9, "srealm"},
+    { 26, 10, "sname", 1000},
+    { 26, 11, "caddr", 1003},
 	
-	{ 27, 0, "ctime"},	/* EncApRepPart */
-	{ 27, 1, "cusec"},
-	{ 27, 2, "subkey", 1005},
-	{ 27, 3, "seq-number"},
+    { 27, 0, "ctime"},	/* EncApRepPart */
+    { 27, 1, "cusec"},
+    { 27, 2, "subkey", 1005},
+    { 27, 3, "seq-number"},
 
-	{ 28, 0, "user-data"},	/* EncKrbPrivPart */
-	{ 28, 1, "timestamp"},
-	{ 28, 2, "usec"},
-	{ 28, 3, "seq-number"},
-	{ 28, 4, "s-address", 1002},
-	{ 28, 5, "r-address", 1002},
+    { 28, 0, "user-data"},	/* EncKrbPrivPart */
+    { 28, 1, "timestamp"},
+    { 28, 2, "usec"},
+    { 28, 3, "seq-number"},
+    { 28, 4, "s-address", 1002},
+    { 28, 5, "r-address", 1002},
 
-	{ 29, 0, "ticket-info", 1011},	/* EncKrbCredPart */
-	{ 29, 1, "nonce"},
-	{ 29, 2, "timestamp"},
-	{ 29, 3, "usec"},
-	{ 29, 4, "s-address", 1002},
-	{ 29, 5, "r-address", 1002},
+    { 29, 0, "ticket-info", 1011},	/* EncKrbCredPart */
+    { 29, 1, "nonce"},
+    { 29, 2, "timestamp"},
+    { 29, 3, "usec"},
+    { 29, 4, "s-address", 1002},
+    { 29, 5, "r-address", 1002},
 
-	{ 30, 0, "pvno"},	/* KRB-ERROR */
-	{ 30, 1, "msg-type"},
-	{ 30, 2, "ctime"},
-	{ 30, 3, "cusec"},
-	{ 30, 4, "stime"},
-	{ 30, 5, "susec"},
-	{ 30, 6, "error-code"},
-	{ 30, 7, "crealm"},
-	{ 30, 8, "cname", 1000},
-	{ 30, 9, "realm"},
-	{ 30, 10, "sname", 1000},
-	{ 30, 11, "e-text"},
-	{ 30, 12, "e-data"},
+    { 30, 0, "pvno"},	/* KRB-ERROR */
+    { 30, 1, "msg-type"},
+    { 30, 2, "ctime"},
+    { 30, 3, "cusec"},
+    { 30, 4, "stime"},
+    { 30, 5, "susec"},
+    { 30, 6, "error-code"},
+    { 30, 7, "crealm"},
+    { 30, 8, "cname", 1000},
+    { 30, 9, "realm"},
+    { 30, 10, "sname", 1000},
+    { 30, 11, "e-text"},
+    { 30, 12, "e-data"},
 	
-	{ -1, -1, 0}
+    { -1, -1, 0}
 };
 #endif
 
 void print_tag_type(fp, eid, lev)
-        FILE *fp;
-        int     eid;
-        int     lev;
+    FILE *fp;
+    int     eid;
+    int     lev;
 {
-	int	tag = eid & ID_TAG;
-	int	do_space = 1;
-	char	*str;
+    int	tag = eid & ID_TAG;
+    int	do_space = 1;
+    char	*str;
 
-	fprintf(fp, "[");
+    fprintf(fp, "[");
 	
-	switch(eid & ID_CLASS) {
-	case CLASS_UNIV:
-		if (print_types && print_skip_tagnum)
-			do_space = 0;
-		else
-			fprintf(fp, "UNIV %d", tag);
-		break;
-	case CLASS_APPL:
-		current_appl_type = tag;
+    switch(eid & ID_CLASS) {
+    case CLASS_UNIV:
+	if (print_types && print_skip_tagnum)
+	    do_space = 0;
+	else
+	    fprintf(fp, "UNIV %d", tag);
+	break;
+    case CLASS_APPL:
+	current_appl_type = tag;
 #ifdef KRB5
-		if (print_krb5_types) {
-			str = lookup_typestring(krb5_types, tag, -1);
-			if (str) {
-				fputs(str, fp);
-				break;
-			}
-		}
-#endif
-		fprintf(fp, "APPL %d", tag);
+	if (print_krb5_types) {
+	    str = lookup_typestring(krb5_types, tag, -1);
+	    if (str) {
+		fputs(str, fp);
 		break;
-	case CLASS_CONT:
+	    }
+	}
+#endif
+	fprintf(fp, "APPL %d", tag);
+	break;
+    case CLASS_CONT:
 #ifdef KRB5
-		if (print_krb5_types && current_appl_type) {
-			str = lookup_typestring(krb5_fields,
-						current_appl_type, tag);
-			if (str) {
-				fputs(str, fp);
-				break;
-			}
-		}
+	if (print_krb5_types && current_appl_type) {
+	    str = lookup_typestring(krb5_fields,
+				    current_appl_type, tag);
+	    if (str) {
+		fputs(str, fp);
+		break;
+	    }
+	}
 #endif
-		if (print_skip_context && lev)
-			fprintf(fp, "%d", tag);
-		else
-			fprintf(fp, "CONT %d", tag);
-		break;
-	case CLASS_PRIV:
-		fprintf(fp, "PRIV %d", tag);
-		break;
-	}
+	if (print_skip_context && lev)
+	    fprintf(fp, "%d", tag);
+	else
+	    fprintf(fp, "CONT %d", tag);
+	break;
+    case CLASS_PRIV:
+	fprintf(fp, "PRIV %d", tag);
+	break;
+    }
 	
-	if (print_types && ((eid & ID_CLASS) == CLASS_UNIV)) {
-		if (do_space)
-			fputs(" ", fp);
-		str = lookup_typestring(univ_types, eid & ID_TAG, -1);
-		if (str)
-			fputs(str, fp);
-		else
-			fprintf(fp, "UNIV %d???", eid & ID_TAG);
-	}
+    if (print_types && ((eid & ID_CLASS) == CLASS_UNIV)) {
+	if (do_space)
+	    fputs(" ", fp);
+	str = lookup_typestring(univ_types, eid & ID_TAG, -1);
+	if (str)
+	    fputs(str, fp);
+	else
+	    fprintf(fp, "UNIV %d???", eid & ID_TAG);
+    }
 	
-	fprintf(fp, "] ");
+    fprintf(fp, "] ");
 	
 }	
 

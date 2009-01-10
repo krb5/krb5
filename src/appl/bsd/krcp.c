@@ -68,30 +68,18 @@ char copyright[] =
 #include <k5-util.h>
 #include <com_err.h>
 
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-#endif
-
 #include "defines.h"
 
 #define RCP_BUFSIZ 4096
      
 int sock;
-struct sockaddr_in local, foreign; /* set up by kcmd used by v4_send_auth */
 char *krb_realm = NULL;
 char *krb_cache = NULL;
 char *krb_config = NULL;
 krb5_encrypt_block eblock;         /* eblock for encrypt/decrypt */
 krb5_context bsd_context;
 
-#ifdef KRB5_KRB4_COMPAT
-Key_schedule v4_schedule;
-CREDENTIALS v4_cred;
-KTEXT_ST v4_ticket;
-MSG_DAT v4_msg_data;
-#endif
-
-void	v4_send_auth(char *, char *), try_normal(char **);
+void	try_normal(char **);
 char	**save_argv(int, char **);
 #ifndef HAVE_STRSAVE
 char	*strsave();
@@ -146,7 +134,6 @@ int main(argc, argv)
     char *targ, *host, *src;
     char *suser, *tuser, *thost;
     int i;
-    unsigned int cmdsiz = 30;
     char buf[RCP_BUFSIZ], cmdbuf[30];
     char *cmd = cmdbuf;
     struct servent *sp;
@@ -206,31 +193,28 @@ int main(argc, argv)
 	    argc--, argv++;
 	    if (argc == 0) 
 	      usage();
-	    if(!(krb_realm = (char *)malloc(strlen(*argv) + 1))){
+	    if(!(krb_realm = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
 		exit(1);
 	    }
-	    strcpy(krb_realm, *argv);	
 	    goto next_arg;
 	  case 'c':		/* Change default ccache file */
 	    argc--, argv++;
 	    if (argc == 0) 
 	      usage();
-	    if(!(krb_cache = (char *)malloc(strlen(*argv) + 1))){
+	    if(!(krb_cache = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
 		exit(1);
 	    }
-	    strcpy(krb_cache, *argv);	
 	    goto next_arg;
 	  case 'C':		/* Change default config file */
 	    argc--, argv++;
 	    if (argc == 0) 
 	      usage();
-	    if(!(krb_config = (char *)malloc(strlen(*argv) + 1))){
+	    if(!(krb_config = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
 		exit(1);
 	    }
-	    strcpy(krb_config, *argv);	
 	    goto next_arg;
 	  case 'P':
 	    if (!strcmp (*argv, "O"))
@@ -302,33 +286,25 @@ int main(argc, argv)
     }
 
 #ifdef KERBEROS
-    if (krb_realm != NULL)
-	cmdsiz += strlen(krb_realm);
-    if (krb_cache != NULL)
-	cmdsiz += strlen(krb_cache);
-    if (krb_config != NULL)
-	cmdsiz += strlen(krb_config);
+    if (asprintf(&cmd, "%srcp %s%s%s%s%s%s%s%s%s",
+		 encryptflag ? "-x " : "",
 
-    if ((cmd = (char *)malloc(cmdsiz)) == NULL) {
+		 iamrecursive ? " -r" : "", pflag ? " -p" : "", 
+		 targetshouldbedirectory ? " -d" : "",
+		 krb_realm != NULL ? " -k " : "",
+		 krb_realm != NULL ? krb_realm : "",
+		 krb_cache != NULL ? " -c " : "",
+		 krb_cache != NULL ? krb_cache : "",
+		 krb_config != NULL ? " -C " : "",
+		 krb_config != NULL ? krb_config : "") < 0) {
 	fprintf(stderr, "rcp: Cannot malloc.\n");
 	exit(1);
     }
-    (void) sprintf(cmd, "%srcp %s%s%s%s%s%s%s%s%s",
-		   encryptflag ? "-x " : "",
-
-		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
-		   targetshouldbedirectory ? " -d" : "",
-		   krb_realm != NULL ? " -k " : "",
-		   krb_realm != NULL ? krb_realm : "",
-		   krb_cache != NULL ? " -c " : "",
-		   krb_cache != NULL ? krb_cache : "",
-		   krb_config != NULL ? " -C " : "",
-		   krb_config != NULL ? krb_config : "");
 
 #else /* !KERBEROS */
-    (void) sprintf(cmd, "rcp%s%s%s",
-		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
-		   targetshouldbedirectory ? " -d" : "");
+    (void) snprintf(cmd, sizeof(cmdbuf), "rcp%s%s%s",
+		    iamrecursive ? " -r" : "", pflag ? " -p" : "", 
+		    targetshouldbedirectory ? " -d" : "");
 #endif /* KERBEROS */
     
 #ifdef POSIX_SIGNALS
@@ -392,22 +368,22 @@ int main(argc, argv)
 		      suser = pwd->pw_name;
 		    else if (!okname(suser))
 		      continue;
-		    (void) sprintf(buf,
+		    (void) snprintf(buf, sizeof(buf),
 #if defined(hpux) || defined(__hpux)
-				   "remsh %s -l %s -n %s %s '%s%s%s:%s'",
+				    "remsh %s -l %s -n %s %s '%s%s%s:%s'",
 #else
-				   "rsh %s -l %s -n %s %s '%s%s%s:%s'",
+				    "rsh %s -l %s -n %s %s '%s%s%s:%s'",
 #endif
-				   host, suser, cmd, src,
-				   tuser ? tuser : "",
-				   tuser ? "@" : "",
+				    host, suser, cmd, src,
+				    tuser ? tuser : "",
+				    tuser ? "@" : "",
 				   thost, targ);
 	       } else
-		   (void) sprintf(buf,
+		   (void) snprintf(buf, sizeof(buf),
 #if defined(hpux) || defined(__hpux)
-				  "remsh %s -n %s %s '%s%s%s:%s'",
+				   "remsh %s -n %s %s '%s%s%s:%s'",
 #else
-				  "rsh %s -n %s %s '%s%s%s:%s'",
+				   "rsh %s -n %s %s '%s%s%s:%s'",
 #endif
 				   argv[i], cmd, src,
 				   tuser ? tuser : "",
@@ -417,8 +393,8 @@ int main(argc, argv)
 	    } else {		/* local to remote */
 		krb5_creds *cred;
 		if (rem == -1) {
-		    (void) sprintf(buf, "%s -t %s",
-				   cmd, targ);
+		    (void) snprintf(buf, sizeof(buf), "%s -t %s",
+				    cmd, targ);
 		    host = thost;
 #ifdef KERBEROS
 		    authopts = AP_OPTS_MUTUAL_REQUIRED;
@@ -434,8 +410,8 @@ int main(argc, argv)
 				  &cred,  
 				  0,  /* No seq # */
 				  0,  /* No server seq # */
-				  &local,
-				  &foreign,
+				  (struct sockaddr_in *) 0,
+				  (struct sockaddr_in *) 0,
 				  &auth_context, authopts,
 				  0, /* Not any port # */
 				  0,
@@ -444,25 +420,7 @@ int main(argc, argv)
 			if (kcmd_proto == KCMD_NEW_PROTOCOL)
 			    /* Don't fall back to less safe methods.  */
 			    exit (1);
-#ifdef KRB5_KRB4_COMPAT
-			fprintf(stderr, "Trying krb4 rcp...\n");
-			if (strncmp(buf, "-x rcp", 6) == 0)
-			    memcpy(buf, "rcp -x", 6);
-			status = k4cmd(&sock, &host, port,
-				       pwd->pw_name,
-				       tuser ? tuser : pwd->pw_name, buf,
-				       0, &v4_ticket, "rcmd", krb_realm,
-				       NULL, NULL, NULL,
-				       &local, &foreign, 0L, 0);
-			if (status)
-			    try_normal(orig_argv);
-			if (encryptflag)
-			    v4_send_auth(host, krb_realm);
-			rcmd_stream_init_krb4(v4_cred.session, encryptflag, 0,
-					      0);
-#else
 			try_normal(orig_argv);
-#endif
 		    }
 		    else {
 			krb5_boolean similar;
@@ -528,10 +486,10 @@ int main(argc, argv)
 		}
 	    }
 	    if (src == 0) {		/* local to local */
-		(void) sprintf(buf, "/bin/cp%s%s %s %s",
-			       iamrecursive ? " -r" : "",
-			       pflag ? " -p" : "",
-			       argv[i], argv[argc - 1]);
+		(void) snprintf(buf, sizeof(buf), "/bin/cp%s%s %s %s",
+				iamrecursive ? " -r" : "",
+				pflag ? " -p" : "",
+				argv[i], argv[argc - 1]);
 		(void) susystem(buf);
 	    } else {		/* remote to local */
 		krb5_creds *cred;
@@ -550,7 +508,7 @@ int main(argc, argv)
 		    host = argv[i];
 		    suser = pwd->pw_name;
 		}
-		(void) sprintf(buf, "%s -f %s", cmd, src);
+		(void) snprintf(buf, sizeof(buf), "%s -f %s", cmd, src);
 #ifdef KERBEROS
 		authopts = AP_OPTS_MUTUAL_REQUIRED;
 		status = kcmd(&sock, &host,
@@ -564,7 +522,7 @@ int main(argc, argv)
 			      0,  /* No seq # */
 			      0,  /* No server seq # */
 			      (struct sockaddr_in *) 0,
-			      &foreign,
+			      (struct sockaddr_in *) 0,
 			      &auth_context, authopts,
 			      0, /* Not any port # */
 			      0,
@@ -573,24 +531,7 @@ int main(argc, argv)
 			if (kcmd_proto == KCMD_NEW_PROTOCOL)
 			    /* Don't fall back to less safe methods.  */
 			    exit (1);
-#ifdef KRB5_KRB4_COMPAT
-			fprintf(stderr, "Trying krb4 rcp...\n");
-			if (strncmp(buf, "-x rcp", 6) == 0)
-			    memcpy(buf, "rcp -x", 6);
-			status = k4cmd(&sock, &host, port,
-				       pwd->pw_name, suser, buf,
-				       0, &v4_ticket, "rcmd", krb_realm,
-				       NULL, NULL, NULL,
-				       &local, &foreign, 0L, 0);
-			if (status)
-			    try_normal(orig_argv);
-			if (encryptflag)
-			    v4_send_auth(host, krb_realm);
-			rcmd_stream_init_krb4(v4_cred.session, encryptflag, 0,
-					      0);
-#else
 			try_normal(orig_argv);
-#endif
 		} else {
 		    krb5_keyblock *key = &cred->keyblock;
 
@@ -815,16 +756,16 @@ void source(argc, argv)
 	     * Make it compatible with possible future
 	     * versions expecting microseconds.
 	     */
-	    (void) sprintf(buf, "T%ld 0 %ld 0\n",
-			   stb.st_mtime, stb.st_atime);
+	    (void) snprintf(buf, sizeof(buf), "T%ld 0 %ld 0\n",
+			    stb.st_mtime, stb.st_atime);
 	    (void) rcmd_stream_write(rem, buf, strlen(buf), 0);
 	    if (response() < 0) {
 		(void) close(f);
 		continue;
 	    }
 	}
-	(void) sprintf(buf, "C%04o %ld %s\n",
-		       (int) stb.st_mode&07777, (long ) stb.st_size, last);
+	(void) snprintf(buf, sizeof(buf), "C%04o %ld %s\n",
+			(int) stb.st_mode&07777, (long ) stb.st_size, last);
 	(void) rcmd_stream_write(rem, buf, strlen(buf), 0);
 	if (response() < 0) {
 	    (void) close(f);
@@ -884,16 +825,16 @@ void rsource(name, statp)
     else
       last++;
     if (pflag) {
-	(void) sprintf(buf, "T%ld 0 %ld 0\n",
-		       statp->st_mtime, statp->st_atime);
+	(void) snprintf(buf, sizeof(buf), "T%ld 0 %ld 0\n",
+			statp->st_mtime, statp->st_atime);
 	(void) rcmd_stream_write(rem, buf, strlen(buf), 0);
 	if (response() < 0) {
 	    closedir(d);
 	    return;
 	}
     }
-    (void) sprintf(buf, "D%04lo %d %s\n", (long) statp->st_mode&07777, 0, 
-		   last);
+    (void) snprintf(buf, sizeof(buf), "D%04lo %d %s\n",
+		    (long) statp->st_mode&07777, 0, last);
     (void) rcmd_stream_write(rem, buf, strlen(buf), 0);
     if (response() < 0) {
 	closedir(d);
@@ -908,7 +849,7 @@ void rsource(name, statp)
 	    error("%s/%s: Name too long.\n", name, dp->d_name);
 	    continue;
 	}
-	(void) sprintf(buf, "%s/%s", name, dp->d_name);
+	(void) snprintf(buf, sizeof(buf), "%s/%s", name, dp->d_name);
 	bufv[0] = buf;
 	source(1, bufv);
     }
@@ -1095,8 +1036,8 @@ void sink(argc, argv)
 	if (targisdir) {
           if(strlen(targ) + strlen(cp) + 2 >= sizeof(nambuf))
 	    SCREWUP("target name too long");
-	  (void) sprintf(nambuf, "%s%s%s", targ,
-			 *targ ? "/" : "", cp);
+	  (void) snprintf(nambuf, sizeof(nambuf), "%s%s%s", targ,
+			  *targ ? "/" : "", cp);
 	} else {
 	  if (strlen(targ) + 1 >= sizeof (nambuf))
 	    SCREWUP("target name too long");
@@ -1241,7 +1182,7 @@ error(fmt, va_alist)
 
     errs++;
     *cp++ = 1;
-    (void) vsprintf(cp, fmt, ap);
+    (void) vsnprintf(cp, sizeof(buf) - (cp - buf), fmt, ap);
     va_end(ap);
 
     if (iamremote)
@@ -1417,35 +1358,5 @@ void
 char storage[2*RCP_BUFSIZ];		/* storage for the decryption */
 int nstored = 0;
 char *store_ptr = storage;
-
-#ifdef KRB5_KRB4_COMPAT
-void
-v4_send_auth(host,realm)
-char *host;
-char *realm;
-{
-	long authopts;
-
-	if ((realm == NULL) || (realm[0] == '\0'))
-	     realm = krb_realmofhost(host);
-	/* this needs to be sent again, because the
-	   rcp process needs the key.  the rshd has
-	   grabbed the first one. */
-	authopts = KOPT_DO_MUTUAL;
-	if ((rem = krb_sendauth(authopts, sock, &v4_ticket,
-				"rcmd", host,
-				realm, (unsigned long) getpid(),
-				&v4_msg_data,
-				&v4_cred, v4_schedule,
-				&local,
-				&foreign,
-				"KCMDV0.1")) != KSUCCESS) {
-		fprintf(stderr,
-			"krb_sendauth mutual fail: %s\n",
-			krb_get_err_text(rem));
-		exit(1);
-	}
-}
-#endif /* KRB5_KRB4_COMPAT */
 
 #endif /* KERBEROS */

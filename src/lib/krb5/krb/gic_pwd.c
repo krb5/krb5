@@ -45,10 +45,7 @@ krb5_get_as_key_password(
 	if ((ret = krb5_unparse_name(context, client, &clientstr)))
 	  return(ret);
 
-	strcpy(promptstr, "Password for ");
-	strncat(promptstr, clientstr, sizeof(promptstr)-strlen(promptstr)-1);
-	promptstr[sizeof(promptstr)-1] = '\0';
-
+	snprintf(promptstr, sizeof(promptstr), "Password for %s", clientstr);
 	free(clientstr);
 
 	prompt.prompt = promptstr;
@@ -115,11 +112,11 @@ krb5_get_init_creds_password(krb5_context context,
    pw0.data = pw0array;
 
    if (password && password[0]) {
-      if ((pw0.length = strlen(password)) > sizeof(pw0array)) {
-	 ret = EINVAL;
-	 goto cleanup;
+      if (strlcpy(pw0.data, password, sizeof(pw0array)) >= sizeof(pw0array)) {
+	  ret = EINVAL;
+	  goto cleanup;
       }
-      strcpy(pw0.data, password);
+      pw0.length = strlen(password);
    } else {
       pw0.data[0] = '\0';
       pw0.length = sizeof(pw0array);
@@ -241,7 +238,8 @@ krb5_get_init_creds_password(krb5_context context,
    prompt[1].reply = &pw1;
    prompt_types[1] = KRB5_PROMPT_TYPE_NEW_PASSWORD_AGAIN;
 
-   strcpy(banner, "Password expired.  You must change it now.");
+   strlcpy(banner, "Password expired.  You must change it now.",
+	   sizeof(banner));
 
    for (tries = 3; tries; tries--) {
       pw0.length = sizeof(pw0array);

@@ -397,10 +397,7 @@ char *handle_sam_labels(krb5_sam_challenge *sc)
     unsigned int prompt_len = sc->sam_response_prompt.length;
     char *challenge = sc->sam_challenge.data;
     unsigned int challenge_len = sc->sam_challenge.length;
-    char *prompt1, *p;
-    char *sep1 = ": [";
-    char *sep2 = "]\n";
-    char *sep3 = ": ";
+    struct k5buf buf;
 
     if (sc->sam_cksum.length == 0) {
       /* or invalid -- but lets just handle presence now XXX */
@@ -438,20 +435,16 @@ char *handle_sam_labels(krb5_sam_challenge *sc)
        Challenge for Digital Pathways mechanism: [134591]
        Passcode: 
      */
-    p = prompt1 = malloc(label_len + strlen(sep1) +
-			 challenge_len + strlen(sep2) +
-			 prompt_len+ strlen(sep3) + 1);
-    if (p == NULL)
-	return NULL;
+    krb5int_buf_init_dynamic(&buf);
     if (challenge_len) {
-	strncpy(p, label, label_len); p += label_len;
-	strcpy(p, sep1); p += strlen(sep1);
-	strncpy(p, challenge, challenge_len); p += challenge_len;
-	strcpy(p, sep2); p += strlen(sep2);
+	krb5int_buf_add_len(&buf, label, label_len);
+	krb5int_buf_add(&buf, ": [");
+	krb5int_buf_add_len(&buf, challenge, challenge_len);
+	krb5int_buf_add(&buf, "]\n");
     }
-    strncpy(p, prompt, prompt_len); p += prompt_len;
-    strcpy(p, sep3); /* p += strlen(sep3); */
-    return prompt1;
+    krb5int_buf_add_len(&buf, prompt, prompt_len);
+    krb5int_buf_add(&buf, ": ");
+    return krb5int_buf_data(&buf);
 }
 
 /*

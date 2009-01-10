@@ -125,16 +125,16 @@ krb5_ldap_readpassword(context, ldap_context, password)
 	/* Check if the entry has the path of a certificate */
 	if (!strncmp(start, "{FILE}", strlen("{FILE}"))) {
 	    /* Set *password = {FILE}<path to cert>\0<cert password> */
-	    /*ptr = strchr(start, ':');
-	      if (ptr == NULL) { */
-	    *password = (unsigned char *)malloc(strlen(start) + 2);
+	    size_t len = strlen(start);
+
+	    *password = (unsigned char *)malloc(len + 2);
 	    if (*password == NULL) {
 		st = ENOMEM;
 		goto rp_exit;
 	    }
-	    (*password)[strlen(start) + 1] = '\0';
-	    (*password)[strlen(start)] = '\0';
-	    strcpy((char *)(*password), start);
+	    memcpy((char *)(*password), start, len);
+	    (*password)[len] = '\0';
+	    (*password)[len + 1] = '\0';
 	    goto got_password;
 	} else {
 	    CT.value = (unsigned char *)start;
@@ -198,7 +198,7 @@ tohex(in, ret)
     ret->data[ret->length] = 0;
 
     for (i = 0; i < in.length; i++)
-	sprintf(ret->data + 2 * i, "%02x", in.data[i] & 0xff);
+	snprintf(ret->data + 2 * i, 3, "%02x", in.data[i] & 0xff);
 
 cleanup:
 

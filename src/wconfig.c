@@ -57,9 +57,10 @@ int main(int argc, char *argv[])
 {
 	char *ignore_str = "--ignore=";
 	int ignore_len;
-	char *cp, tmp[80];
+	char *cp, *tmp;
 	char *win_flag;
 	char wflags[1024];
+	size_t wlen, alen;
 
 #ifdef _WIN32
 	win_flag = win32_flag;
@@ -67,21 +68,22 @@ int main(int argc, char *argv[])
 	win_flag = "UNIX##";
 #endif
 
-	wflags[0] = 0;
+	wlen = 0;
 
 	ignore_len = strlen(ignore_str);
 	argc--; argv++;
 	while (*argv && *argv[0] == '-') {
-		wflags[sizeof(wflags) - 1] = '\0';
-		if (strlen (wflags) + 1 + strlen (*argv) > sizeof (wflags) - 1) {
+		alen = strlen(*argv);
+		if (wlen + 1 + alen > sizeof (wflags) - 1) {
 			fprintf (stderr,
-				 "wconfig: argument list too long (internal limit %d)",
-				 sizeof (wflags));
+				 "wconfig: argument list too long (internal limit %lu)",
+				 (unsigned long) sizeof (wflags));
 			exit (1);
 		}
-		if (wflags[0])
-			strcat(wflags, " ");
-		strcat(wflags, *argv);
+		if (wlen > 0)
+			wflags[wlen++] = ' ';
+		memcpy(&wflags[wlen], *argv, alen);
+		wlen += alen;
 
 		if (!strcmp(*argv, "--mit")) {
 			mit_specific = 1;
@@ -99,19 +101,19 @@ int main(int argc, char *argv[])
 			continue;
 		}
 		if (!strncmp(*argv, "--enable-", 9)) {
-			sprintf(tmp, "%s##", (*argv)+ignore_len);
-			for (cp = tmp; *cp; cp++) {
-				if (islower(*cp))
-					*cp = toupper(*cp);
-			}
-			cp = malloc(strlen(tmp)+1);
-			if (!cp) {
+			tmp = malloc(alen - ignore_len + 3);
+			if (!tmp) {
 				fprintf(stderr,
 					"wconfig: malloc failed!\n");
 				exit(1);
 			}
-			strcpy(cp, tmp);
-			add_ignore_list(cp);
+			memcpy(tmp, *argv + ignore_len, alen - ignore_len);
+			memcpy(tmp + alen - ignore_len, "##", 3);
+			for (cp = tmp; *cp; cp++) {
+				if (islower(*cp))
+					*cp = toupper(*cp);
+			}
+			add_ignore_list(tmp);
 			argc--; argv++;
 			continue;
 		}
@@ -123,6 +125,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Invalid option: %s\n", *argv);
 		exit(1);
 	}
+	wflags[wlen] = '\0';
 
 	if (win_flag)
 		add_ignore_list(win_flag);
@@ -175,16 +178,25 @@ copy_file (char *path, char *fname)
     FILE *fin;
     char buf[1024];
     char **cpp, *ptr;
-    int len;
+    size_t len, plen, flen;
 
     if (strcmp(fname, "-") == 0) {
 	    fin = stdin;
     } else {
+	    plen = strlen(path);
+	    flen = strlen(fname);
+	    if (plen + 1 + flen > sizeof(buf) - 1) {
+		    fprintf(stderr, "Name %s or %s too long", path, fname);
+		    return 1;
+	    }
+	    memcpy(buf, path, plen);
 #ifdef _WIN32
-	    sprintf(buf, "%s\\%s", path, fname);
+	    buf[plen] = '\\';
 #else
-	    sprintf(buf, "%s/%s", path, fname);
+	    buf[plen] = '/';
 #endif
+	    memcpy(buf + plen + 1, fname, flen);
+	    buf[plen + 1 + flen] = '\0';
 	    fin = fopen (buf, "r");                     /* File to read */
 	    if (fin == NULL) {
 		    fprintf(stderr, "wconfig: Can't open file %s\n", buf);

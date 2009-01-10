@@ -65,11 +65,11 @@ greet_authdata(krb5_context ctx, krb5_db_entry *client,
 	free(a);
 	return ENOMEM;
     }
-    strcpy(p, "hello there");
+    strncpy(p, "hello there", GREET_SIZE-1);
     a->magic = KV5M_AUTHDATA;
     a->ad_type = -42;
     a->length = GREET_SIZE;
-    a->contents = p;
+    a->contents = (unsigned char *)p;
     if (enc_tkt_reply->authorization_data == 0) {
 	count = 0;
     } else {

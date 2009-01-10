@@ -418,7 +418,7 @@ ser_keytab_test(krb5_context kcontext, int verbose)
 	!(kret = ser_data(verbose, "> Resolved default keytab",
 			  (krb5_pointer) keytab, KV5M_KEYTAB)) &&
 	!(kret = krb5_kt_close(kcontext, keytab))) {
-	sprintf(ccname, "FILE:temp_kt_%d", (int) getpid());
+	snprintf(ccname, sizeof(ccname), "FILE:temp_kt_%d", (int) getpid());
 	if (!(kret = krb5_kt_resolve(kcontext, ccname, &keytab)) &&
 	    !(kret = ser_data(verbose, "> Resolved FILE keytab",
 			      (krb5_pointer) keytab, KV5M_KEYTAB)) &&

@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/export_sec_context.c
  *
@@ -26,22 +27,22 @@
  */
 
 /*
- * export_sec_context.c	- Externalize the security context.
+ * export_sec_context.c - Externalize the security context.
  */
 #include "gssapiP_krb5.h"
 #ifndef LEAN_CLIENT
 OM_uint32
 krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
-    OM_uint32		*minor_status;
-    gss_ctx_id_t	*context_handle;
-    gss_buffer_t	interprocess_token;
+    OM_uint32           *minor_status;
+    gss_ctx_id_t        *context_handle;
+    gss_buffer_t        interprocess_token;
 {
-    krb5_context	context = NULL;
-    krb5_error_code	kret;
-    OM_uint32		retval;
-    size_t		bufsize, blen;
-    krb5_gss_ctx_id_t	ctx;
-    krb5_octet		*obuffer, *obp;
+    krb5_context        context = NULL;
+    krb5_error_code     kret;
+    OM_uint32           retval;
+    size_t              bufsize, blen;
+    krb5_gss_ctx_id_t   ctx;
+    krb5_octet          *obuffer, *obp;
 
     /* Assume a tragic failure */
     obuffer = (krb5_octet *) NULL;
@@ -49,35 +50,35 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
     *minor_status = 0;
 
     if (!kg_validate_ctx_id(*context_handle)) {
-	    kret = (OM_uint32) G_VALIDATE_FAILED;
-	    retval = GSS_S_NO_CONTEXT;
-	    goto error_out;
+        kret = (OM_uint32) G_VALIDATE_FAILED;
+        retval = GSS_S_NO_CONTEXT;
+        goto error_out;
     }
 
     ctx = (krb5_gss_ctx_id_t) *context_handle;
     context = ctx->k5_context;
     kret = krb5_gss_ser_init(context);
     if (kret)
-	goto error_out;
+        goto error_out;
 
     /* Determine size needed for externalization of context */
     bufsize = 0;
     if ((kret = kg_ctx_size(context, (krb5_pointer) ctx,
-			    &bufsize)))
-	    goto error_out;
+                            &bufsize)))
+        goto error_out;
 
     /* Allocate the buffer */
     if ((obuffer = (krb5_octet *) xmalloc(bufsize)) == NULL) {
-	    kret = ENOMEM;
-	    goto error_out;
+        kret = ENOMEM;
+        goto error_out;
     }
 
     obp = obuffer;
     blen = bufsize;
     /* Externalize the context */
     if ((kret = kg_ctx_externalize(context,
-				   (krb5_pointer) ctx, &obp, &blen)))
-	    goto error_out;
+                                   (krb5_pointer) ctx, &obp, &blen)))
+        goto error_out;
 
     /* Success!  Return the buffer */
     interprocess_token->length = bufsize - blen;
@@ -93,14 +94,14 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
 
 error_out:
     if (retval != GSS_S_COMPLETE)
-	if (kret != 0 && context != 0)
-	    save_error_info(kret, context);
+        if (kret != 0 && context != 0)
+            save_error_info((OM_uint32)kret, context);
     if (obuffer && bufsize) {
-	    memset(obuffer, 0, bufsize);
-	    xfree(obuffer);
+        memset(obuffer, 0, bufsize);
+        xfree(obuffer);
     }
-    if (*minor_status == 0) 
-	    *minor_status = (OM_uint32) kret;
+    if (*minor_status == 0)
+        *minor_status = (OM_uint32) kret;
     return(retval);
 }
 #endif /* LEAN_CLIENT */

@@ -31,6 +31,7 @@
 
 #if defined(USE_KIM)
 #include <kim/kim.h>
+#include "kim_library_private.h"
 #elif defined(USE_LEASH)
 static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal,char*,int) = NULL;
 static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
@@ -78,7 +79,7 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
     }
 
 #ifdef USE_KIM
-    {
+    if (kim_library_allow_automatic_prompting ()) {
         kim_error err = KIM_NO_ERROR;
         kim_ccache kimccache = NULL;
         kim_identity identity = KIM_IDENTITY_ANY;
@@ -111,7 +112,8 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
         if (!err) {
              krb5_cc_set_default_name (context, name);
         }
-        
+
+        kim_identity_free (&identity); 
         kim_string_free (&name);
         kim_ccache_free (&kimccache);
     }

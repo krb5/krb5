@@ -59,10 +59,6 @@ will also need the @code{admin_server} entry in @code{krb5.conf}.
 This should list port @value{DefaultKpasswdPort} on your master KDC.
 It is used when a user changes her password.
 
-@item _kerberos-iv._udp
-This should refer to your KDCs that serve Kerberos version 4 requests,
-if you have Kerberos v4 enabled.
-
 @end table
 
 Be aware, however, that the DNS SRV specification requires that the

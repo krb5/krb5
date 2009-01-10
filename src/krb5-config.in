@@ -32,11 +32,10 @@ exec_prefix=@exec_prefix@
 includedir=@includedir@
 libdir=@libdir@
 CC_LINK='@CC_LINK@'
-KRB4_LIB=@KRB4_LIB@
-DES425_LIB=@DES425_LIB@
 KDB5_DB_LIB=@KDB5_DB_LIB@
 LDFLAGS='@LDFLAGS@'
 RPATH_FLAG='@RPATH_FLAG@'
+PROG_RPATH_FLAGS='@PROG_RPATH_FLAGS@'
 PTHREAD_CFLAGS='@PTHREAD_CFLAGS@'
 DL_LIB='@DL_LIB@'
 
@@ -86,9 +85,6 @@ while test $# != 0; do
 	gssapi)
 	    library=gssapi
 	    ;;
-	krb4)
-	    library=krb4
-	    ;;
 	kadm-client)
 	    library=kadm_client
 	    ;;
@@ -125,7 +121,6 @@ if test -n "$do_help"; then
     echo "Libraries:"
     echo "        krb5              Kerberos 5 application"
     echo "        gssapi            GSSAPI application with Kerberos 5 bindings"
-    echo "        krb4              Kerberos 4 application"
     echo "        kadm-client       Kadmin client"
     echo "        kadm-server       Kadmin server"
     echo "        kdb               Application that accesses the kerberos database"
@@ -185,6 +180,7 @@ if test -n "$do_libs"; then
     # Ugly gross hack for our build tree
     lib_flags=`echo $CC_LINK | sed -e 's/\$(CC)//' \
 	    -e 's/\$(PURE)//' \
+	    -e 's#\$(PROG_RPATH_FLAGS)#'"$PROG_RPATH_FLAGS"'#' \
 	    -e 's#\$(PROG_RPATH)#'$libdir'#' \
 	    -e 's#\$(PROG_LIBPATH)#'$libdirarg'#' \
 	    -e 's#\$(RPATH_FLAG)#'"$RPATH_FLAG"'#' \
@@ -214,11 +210,6 @@ if test -n "$do_libs"; then
 
     if test $library = 'gssapi'; then
 	lib_flags="$lib_flags -lgssapi_krb5"
-	library=krb5
-    fi
-
-    if test $library = 'krb4'; then
-	lib_flags="$lib_flags $KRB4_LIB $DES425_LIB"
 	library=krb5
     fi
 

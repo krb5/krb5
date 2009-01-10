@@ -516,6 +516,8 @@ kadm5_ret_t    kadm5_free_name_list(void *server_handle, char **names,
 
 krb5_error_code kadm5_init_krb5_context (krb5_context *);
 
+krb5_error_code kadm5_init_iprop(void *server_handle, char **db_args);
+
 /*
  * kadm5_get_principal_keys is used only by kadmin.local to extract existing
  * keys from the database without changing them.  It should never be exposed

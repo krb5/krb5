@@ -12,6 +12,7 @@ static char *rcsid = "$Header$";
 #include	<kadm5/admin.h>
 #include	"server_internal.h"
 #include	<stdlib.h>
+#include	<string.h>
 #include	<errno.h>
 
 #define MAX_PW_HISTORY	10
@@ -289,11 +290,10 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     if( cnt != 1 )
 	return KADM5_UNK_POLICY;
 
-    if ((entry->policy = (char *) malloc(strlen(t->name) + 1)) == NULL) {
+    if ((entry->policy = strdup(t->name)) == NULL) {
 	 krb5_db_free_policy(handle->context, t);
 	 return ENOMEM;
     }
-    strcpy(entry->policy, t->name);
     entry->pw_min_life = t->pw_min_life;
     entry->pw_max_life = t->pw_max_life;
     entry->pw_min_length = t->pw_min_length;

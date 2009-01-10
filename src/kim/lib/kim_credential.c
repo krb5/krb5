@@ -213,6 +213,46 @@ kim_error kim_credential_create_new (kim_credential *out_credential,
 
 /* ------------------------------------------------------------------------ */
 
+static void kim_credential_remember_prefs (kim_identity in_identity,
+                                           kim_options  in_options)
+{
+    kim_error err = KIM_NO_ERROR;
+    kim_preferences prefs = NULL;
+    kim_boolean remember_identity = 0;
+    kim_boolean remember_options = 0;
+    
+    err = kim_preferences_create (&prefs);
+    
+    if (!err && in_options) {
+        err = kim_preferences_get_remember_options (prefs, 
+                                                    &remember_options);
+    }
+    
+    if (!err && in_identity) {
+        err = kim_preferences_get_remember_client_identity (prefs, 
+                                                            &remember_identity);
+    }
+    
+    if (!err && remember_options) {
+        err = kim_preferences_set_options (prefs, in_options);
+    }
+    
+    if (!err && remember_identity) {
+        err = kim_preferences_set_client_identity (prefs, in_identity);
+        
+    }        
+    
+    if (!err && (remember_options || remember_identity)) {
+        err = kim_preferences_synchronize (prefs);
+    }
+    
+    kim_preferences_free (&prefs);
+    
+    check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
 kim_error kim_credential_create_new_with_password (kim_credential *out_credential,
                                                    kim_identity    in_identity,
                                                    kim_options     in_options,
@@ -269,7 +309,11 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                 
                 /* reenter enter_identity so just forget this identity
                  * even if we got an error */
-                if (err == KIM_USER_CANCELED_ERR) { err = KIM_NO_ERROR; }
+                if (err == KIM_USER_CANCELED_ERR || 
+                    err == KIM_DUPLICATE_UI_REQUEST_ERR) { 
+                    err = KIM_NO_ERROR; 
+                }
+                
                 kim_identity_free (&identity);
             }
             
@@ -290,6 +334,7 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
             
             /* set counter to zero so we can tell if we got prompted */
             context.prompt_count = 0;
+            context.password_to_save = NULL;
             
             err = krb5_error (credential->context,
                               krb5_get_init_creds_password (credential->context, 
@@ -356,21 +401,47 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
                 kim_string_free (&new_password);
             }
             
-            if (!err || err == KIM_USER_CANCELED_ERR) {
+            if (!err || err == KIM_USER_CANCELED_ERR || 
+                        err == KIM_DUPLICATE_UI_REQUEST_ERR) {
                 /* new creds obtained or the user gave up */
                 done_with_credentials = 1;
                 
-            } else {
-                /*  new creds failed, report error to user */
-                kim_error terr = kim_ui_handle_kim_error (&context, identity, 
-                                                          kim_ui_error_type_authentication,
-                                                          err);
-                
-                if (prompt_count) {
-                    /* User was prompted and might have entered bad info 
-                     * so let them try again. */
-                    err = terr;
+                if (!err) {
+                    /* remember identity and options if the user wanted to */
+                    kim_credential_remember_prefs (identity, options);
                 }
+                
+                if (err == KIM_DUPLICATE_UI_REQUEST_ERR) { 
+                    kim_ccache ccache = NULL;
+                    /* credential for this identity was obtained, but via a different 
+                     * dialog.  Find it.  */
+                    
+                    err = kim_ccache_create_from_client_identity (&ccache, 
+                                                                  identity);
+                    
+                    if (!err) {
+                        err = kim_ccache_get_valid_credential (ccache, 
+                                                               &credential);
+                    }
+                    
+                    kim_ccache_free (&ccache);
+                }                
+                
+            } else if (prompt_count) {
+                /* User was prompted and might have entered bad info 
+                 * so report error and try again. */
+ 
+                err = kim_ui_handle_kim_error (&context, identity, 
+                                               kim_ui_error_type_authentication,
+                                               err);
+            }
+            
+            if (err == KRB5KRB_AP_ERR_BAD_INTEGRITY || 
+                err == KRB5KDC_ERR_PREAUTH_FAILED ||
+                err == KIM_BAD_PASSWORD_ERR || err == KIM_PREAUTH_FAILED_ERR) {
+                /* if the password could have failed, remove any saved ones
+                 * or the user will get stuck. */
+                kim_os_identity_remove_saved_password (identity);
             }
             
             if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
@@ -380,16 +451,11 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
             /* identity obtained or the user gave up */
             done_with_identity = 1;
             
-        } else {
-            /*  new creds failed, report error to user */
-            kim_error terr = kim_ui_handle_kim_error (&context, identity, 
-                                                      kim_ui_error_type_authentication,
-                                                      err);
-            
-            if (!in_identity) {
-                /* User entered an identity so let them try again */
-                err = terr;
-            }
+        } else if (!in_identity) {
+            /* User entered an identity so report error and try again */
+            err = kim_ui_handle_kim_error (&context, identity, 
+                                           kim_ui_error_type_authentication,
+                                           err);
         }            
     
         if (identity != in_identity) { kim_identity_free (&identity); }
@@ -399,13 +465,13 @@ kim_error kim_credential_create_new_with_password (kim_credential *out_credentia
         kim_error fini_err = kim_ui_fini (&context);
         if (!err) { err = check_error (fini_err); }
     }
-    
+        
     if (!err) {
         *out_credential = credential;
         credential = NULL;
     }
     
-    if (options != in_options ) { kim_options_free (&options); }
+    if (options != in_options) { kim_options_free (&options); }
     kim_credential_free (&credential);
     
     return check_error (err);
@@ -513,6 +579,7 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     }
     
     if (principal ) { krb5_free_principal (credential->context, principal); }
+    if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
 
     if (!err) {
         *out_credential = credential;
@@ -520,7 +587,6 @@ kim_error kim_credential_create_from_keytab (kim_credential *out_credential,
     }
     
     if (options != in_options) { kim_options_free (&options); }
-    if (free_creds) { krb5_free_cred_contents (credential->context, &creds); }
     kim_credential_free (&credential);
     
     return check_error (err);
@@ -614,6 +680,7 @@ kim_error kim_credential_create_for_change_password (kim_credential  *out_creden
         
         /* set counter to zero so we can tell if we got prompted */
         in_ui_context->prompt_count = 0; 
+        in_ui_context->identity = in_identity;
 
         err = krb5_error (credential->context,
                           krb5_get_init_creds_password (credential->context, 

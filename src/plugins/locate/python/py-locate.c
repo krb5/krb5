@@ -66,6 +66,8 @@
 #include <Python.h>
 #elif HAVE_PYTHON2_3_PYTHON_H
 #include <python2.3/Python.h>
+#elif HAVE_PYTHON2_5_PYTHON_H
+#include <python2.5/Python.h>
 #else
 #error "Where's the Python header file?"
 #endif
@@ -261,7 +263,7 @@ lookup (void *blob, enum locate_service_type svc, const char *realm,
 	if (PyString_Check (field)) {
 	    portstr = PyString_AsString (field);
 	} else if (PyInt_Check (field)) {
-	    sprintf(portbuf, "%ld", PyInt_AsLong (field));
+	    snprintf(portbuf, sizeof(portbuf), "%ld", PyInt_AsLong (field));
 	    portstr = portbuf;
 	} else {
 	    krb5_set_error_message(blob, -1,

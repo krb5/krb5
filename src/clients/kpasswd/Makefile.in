@@ -42,13 +42,3 @@ install-all install-kdc install-server install-client install-unix::
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** $(SCLIB)
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-$(OUTPRE)kpasswd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
-  kpasswd.c
-$(OUTPRE)ksetpwd.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h ksetpwd.c

@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/inq_names.c
  *
@@ -32,68 +33,67 @@
 
 OM_uint32
 krb5_gss_inquire_names_for_mech(minor_status, mechanism, name_types)
-    OM_uint32	*minor_status;
-    gss_OID	mechanism;
-    gss_OID_set	*name_types;
+    OM_uint32   *minor_status;
+    gss_OID     mechanism;
+    gss_OID_set *name_types;
 {
-    OM_uint32	major, minor;
+    OM_uint32   major, minor;
 
     /*
      * We only know how to handle our own mechanism.
      */
     if ((mechanism != GSS_C_NULL_OID) &&
-	!g_OID_equal(gss_mech_krb5, mechanism) &&
-	!g_OID_equal(gss_mech_krb5_old, mechanism)) {
-	*minor_status = 0;
-	return(GSS_S_BAD_MECH);
+        !g_OID_equal(gss_mech_krb5, mechanism) &&
+        !g_OID_equal(gss_mech_krb5_old, mechanism)) {
+        *minor_status = 0;
+        return(GSS_S_BAD_MECH);
     }
 
     /* We're okay.  Create an empty OID set */
-    major = gss_create_empty_oid_set(minor_status, name_types);
+    major = generic_gss_create_empty_oid_set(minor_status, name_types);
     if (major == GSS_S_COMPLETE) {
-	/* Now add our members. */
-	if (
-	    ((major = generic_gss_add_oid_set_member(minor_status,
-						     gss_nt_user_name,
-						     name_types)
-	      ) == GSS_S_COMPLETE) &&
-	    ((major = generic_gss_add_oid_set_member(minor_status,
-						     gss_nt_machine_uid_name,
-						     name_types)
-	      ) == GSS_S_COMPLETE) &&
-	    ((major = generic_gss_add_oid_set_member(minor_status,
-						     gss_nt_string_uid_name,
-						     name_types)
-	      ) == GSS_S_COMPLETE) &&
-	    ((major = generic_gss_add_oid_set_member(minor_status,
-						     gss_nt_service_name,
-						     name_types)
-	      ) == GSS_S_COMPLETE) &&
-	    ((major = generic_gss_add_oid_set_member(minor_status,
-						     gss_nt_service_name_v2,
-						     name_types)
-	      ) == GSS_S_COMPLETE) &&
-	    ((major = generic_gss_add_oid_set_member(minor_status,
-						     gss_nt_exported_name,
-						     name_types)
-	      ) == GSS_S_COMPLETE) &&
-	    ((major = generic_gss_add_oid_set_member(minor_status,
-						     gss_nt_krb5_name,
-						     name_types)
-	      ) == GSS_S_COMPLETE)
-	    ) {
-	    major = generic_gss_add_oid_set_member(minor_status,
-						   gss_nt_krb5_principal,
-						   name_types);
-	}
+        /* Now add our members. */
+        if (
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     gss_nt_user_name,
+                                                     name_types)
+            ) == GSS_S_COMPLETE) &&
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     gss_nt_machine_uid_name,
+                                                     name_types)
+            ) == GSS_S_COMPLETE) &&
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     gss_nt_string_uid_name,
+                                                     name_types)
+            ) == GSS_S_COMPLETE) &&
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     gss_nt_service_name,
+                                                     name_types)
+            ) == GSS_S_COMPLETE) &&
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     gss_nt_service_name_v2,
+                                                     name_types)
+            ) == GSS_S_COMPLETE) &&
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     gss_nt_exported_name,
+                                                     name_types)
+            ) == GSS_S_COMPLETE) &&
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     gss_nt_krb5_name,
+                                                     name_types)
+            ) == GSS_S_COMPLETE)
+        ) {
+            major = generic_gss_add_oid_set_member(minor_status,
+                                                   gss_nt_krb5_principal,
+                                                   name_types);
+        }
 
-	/*
-	 * If we choked, then release the set, but don't overwrite the minor
-	 * status with the release call.
-	 */
-	if (major != GSS_S_COMPLETE)
-	    (void) gss_release_oid_set(&minor,
-				       name_types);
+        /*
+         * If we choked, then release the set, but don't overwrite the minor
+         * status with the release call.
+         */
+        if (major != GSS_S_COMPLETE)
+            (void) generic_gss_release_oid_set(&minor, name_types);
     }
     return(major);
 }

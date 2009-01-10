@@ -47,6 +47,7 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 #endif
+#include "k5-platform.h"	/* SIZE_MAX */
 
 #ifdef DEBUG_GSSAPI
 int svc_debug_gss = DEBUG_GSSAPI;

@@ -50,7 +50,7 @@
 #include "k5-platform.h"
 #include "k5-thread.h"
 
-#include <stdio.h>		/* for sprintf */
+#include <stdio.h>
 #include <errno.h>
 
 #define IMPLEMENT_FAKE_GETADDRINFO

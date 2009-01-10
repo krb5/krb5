@@ -24,6 +24,8 @@
 #include <gssapi/gssapi_krb5.h>
 #endif
 
+#include "gssrpcint.h"
+
 #ifdef GSSAPI_KRB5
 /* This is here for the krb5_error_code typedef and the
    KRB5KRB_AP_WRONG_PRINC #define.*/
@@ -403,7 +405,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 		    break;
 
 	       PRINTF(("accept_sec_context returned 0x%x 0x%x wrong-princ=%#x\n",
-		       call_res.gss_major, call_res.gss_minor, KRB5KRB_AP_WRONG_PRINC));
+		       call_res.gss_major, call_res.gss_minor, (int) KRB5KRB_AP_WRONG_PRINC));
 	       if (call_res.gss_major == GSS_S_COMPLETE ||
 		   call_res.gss_major == GSS_S_CONTINUE_NEEDED) {
 		    /* server_creds was right, set it! */
@@ -950,7 +952,7 @@ bool_t svcauth_gssapi_set_names(
 	  in_buf.value = names[i].name;
 	  in_buf.length = strlen(in_buf.value) + 1;
 
-	  PRINTF(("svcauth_gssapi_set_names: importing %s\n", in_buf.value));
+	  PRINTF(("svcauth_gssapi_set_names: importing %s\n", names[i].name));
 
 	  gssstat = gss_import_name(&minor_stat, &in_buf, names[i].type,
 				    &server_name_list[i]); 

@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +11,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -29,26 +30,26 @@ static const unsigned char zeros[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
 krb5_error_code
 kg_make_seed(context, key, seed)
-     krb5_context context;
-     krb5_keyblock *key;
-     unsigned char *seed;
+    krb5_context context;
+    krb5_keyblock *key;
+    unsigned char *seed;
 {
-   krb5_error_code code;
-   krb5_keyblock *tmpkey;
-   unsigned int i;
+    krb5_error_code code;
+    krb5_keyblock *tmpkey;
+    unsigned int i;
 
-   code = krb5_copy_keyblock(context, key, &tmpkey);
-   if (code)
-      return(code);
+    code = krb5_copy_keyblock(context, key, &tmpkey);
+    if (code)
+	return(code);
 
-   /* reverse the key bytes, as per spec */
+    /* reverse the key bytes, as per spec */
 
-   for (i=0; i<tmpkey->length; i++)
-      tmpkey->contents[i] = key->contents[key->length - 1 - i];
+    for (i=0; i<tmpkey->length; i++)
+	tmpkey->contents[i] = key->contents[key->length - 1 - i];
 
-   code = kg_encrypt(context, tmpkey, KG_USAGE_SEAL, NULL, zeros, seed, 16);
+    code = kg_encrypt(context, tmpkey, KG_USAGE_SEAL, NULL, zeros, seed, 16);
 
-   krb5_free_keyblock(context, tmpkey);
+    krb5_free_keyblock(context, tmpkey);
 
-   return(code);
+    return(code);
 }

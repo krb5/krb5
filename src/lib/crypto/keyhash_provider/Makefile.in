@@ -16,11 +16,11 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= descbc.o k5_md4des.o k5_md5des.o hmac_md5.o
+STLIBOBJS= descbc.o k5_md4des.o k5_md5des.o hmac_md5.o md5_hmac.o
 
-OBJS= $(OUTPRE)descbc.$(OBJEXT) $(OUTPRE)k5_md4des.$(OBJEXT) $(OUTPRE)k5_md5des.$(OBJEXT) $(OUTPRE)hmac_md5.$(OBJEXT)
+OBJS= $(OUTPRE)descbc.$(OBJEXT) $(OUTPRE)k5_md4des.$(OBJEXT) $(OUTPRE)k5_md5des.$(OBJEXT) $(OUTPRE)hmac_md5.$(OBJEXT) $(OUTPRE)md5_hmac.$(OBJEXT)
 
-SRCS= $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c $(srcdir)/hmac_md5.c
+SRCS= $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c $(srcdir)/hmac_md5.c $(srcdir)/md5_hmac.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -54,52 +54,3 @@ clean-unix:: clean-libobjs
 
 @libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-descbc.so descbc.po $(OUTPRE)descbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../des/des_int.h descbc.c keyhash_provider.h
-k5_md4des.so k5_md4des.po $(OUTPRE)k5_md4des.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../des/des_int.h \
-  $(srcdir)/../md4/rsa-md4.h k5_md4des.c keyhash_provider.h
-k5_md5des.so k5_md5des.po $(OUTPRE)k5_md5des.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../des/des_int.h \
-  $(srcdir)/../md5/rsa-md5.h k5_md5des.c keyhash_provider.h
-hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../arcfour/arcfour-int.h $(srcdir)/../arcfour/arcfour.h \
-  $(srcdir)/../hash_provider/hash_provider.h $(srcdir)/../md5/rsa-md5.h \
-  hmac_md5.c keyhash_provider.h

@@ -25,29 +25,6 @@ if ![regexp des- $supported_enctypes] {
     return
 }
 
-# Remove old wrapper script
-    catch "exec rm -f $tmppwd/login.wrap"
-
-# Start up a root shell.
-if ![setup_root_shell telnet] {
-    return
-}
-
-# Make sure .k5login is reasonable.
-if ![check_k5login rlogin] {
-    stop_root_shell
-    return
-}
-
-# Set up the kerberos database.
-if {![get_hostname] \
-    || ![setup_kerberos_files] \
-    || ![setup_kerberos_env] \
-    || ![setup_kerberos_db 0]} {
-    stop_root_shell
-    return
-}
-
 # A procedure to start up the telnet daemon.
 
 proc start_telnet_daemon { args } {
@@ -70,7 +47,7 @@ proc start_telnet_daemon { args } {
     # we don't need to use inetd.  The portbase+8 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
     # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "sh -c \"$TELNETD $args -debug -t \$tmppwd/srvtab -R $REALMNAME -L $tmppwd/login.wrap -X KERBEROS_V4 [expr 8 + $portbase]\" &\r"
+    send -i $rlogin_spawn_id "sh -c \"$TELNETD $args -debug -t \$tmppwd/srvtab -R $REALMNAME -L $tmppwd/login.wrap [expr 8 + $portbase]\" &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
@@ -427,23 +404,48 @@ proc telnet_test { } {
     stop_telnet_daemon
 }
 
-# Run the test.  Logging in sometimes takes a while, so increase the
-# timeout.
-set oldtimeout $timeout
-set timeout 60
-set status [catch telnet_test msg]
-set timeout $oldtimeout
+run_once telnet {
+    # Remove old wrapper script
+    catch "exec rm -f $tmppwd/login.wrap"
 
-# Shut down the kerberos daemons, the telnet daemon, and the rlogin
-# process.
-stop_kerberos_daemons
+    # Start up a root shell.
+    if ![setup_root_shell telnet] {
+	return
+    }
 
-stop_telnet_daemon
+    # Make sure .k5login is reasonable.
+    if ![check_k5login rlogin] {
+	stop_root_shell
+	return
+    }
 
-stop_root_shell
+    # Set up the kerberos database.
+    if {![get_hostname] \
+	    || ![setup_kerberos_files] \
+	    || ![setup_kerberos_env] \
+	    || ![setup_kerberos_db 0]} {
+	stop_root_shell
+	return
+    }
 
-if { $status != 0 } {
-    send_error "ERROR: error in telnet.exp\n"
-    send_error "$msg\n"
-    exit 1
+    # Run the test.  Logging in sometimes takes a while, so increase the
+    # timeout.
+    set oldtimeout $timeout
+    set timeout 60
+    set status [catch telnet_test msg]
+    set timeout $oldtimeout
+
+    # Shut down the kerberos daemons, the telnet daemon, and the rlogin
+    # process.
+    stop_kerberos_daemons
+
+    stop_telnet_daemon
+
+    stop_root_shell
+
+    if { $status != 0 } {
+	send_error "ERROR: error in telnet.exp\n"
+	send_error "$msg\n"
+	exit 1
+    }
 }

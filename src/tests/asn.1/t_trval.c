@@ -38,8 +38,8 @@
 
 static void usage()
 {
-	fprintf(stderr, "Usage: trval [--types] [--krb5] [--krb5decode] [--hex] [-notypebytes] [file]\n");
-	exit(1);
+    fprintf(stderr, "Usage: trval [--types] [--krb5] [--krb5decode] [--hex] [-notypebytes] [file]\n");
+    exit(1);
 }
 
 /*
@@ -48,60 +48,60 @@ static void usage()
  */
 static
 int check_option(word, option)
-	char *word;
-	char *option;
+    char *word;
+    char *option;
 {
-	if (word[0] != '-')
-		return 0;
-	if (word[1] == '-')
-		word++;
-	if (strcmp(word+1, option))
-		return 0;
-	return 1;
+    if (word[0] != '-')
+	return 0;
+    if (word[1] == '-')
+	word++;
+    if (strcmp(word+1, option))
+	return 0;
+    return 1;
 }
 
 int main(argc, argv)
-	int argc;
-	char **argv;
+    int argc;
+    char **argv;
 {
-	int optflg = 1;
-	FILE *fp;
-	int r = 0;
+    int optflg = 1;
+    FILE *fp;
+    int r = 0;
 	
-	while (--argc > 0) {
-		argv++;
-		if (optflg && *(argv)[0] == '-') {
-			if (check_option(*argv, "help"))
-				usage();
-			else if (check_option(*argv, "types"))
-				print_types = 1;
-			else if (check_option(*argv, "notypes"))
-				print_types = 0;
-			else if (check_option(*argv, "krb5"))
-				print_krb5_types = 1;
-			else if (check_option(*argv, "hex"))
-				do_hex = 1;
-			else if (check_option(*argv, "notypebytes"))
-				print_id_and_len = 0;
-			else if (check_option(*argv, "krb5decode")) {
-				print_id_and_len = 0;
-				print_krb5_types = 1;
-				print_types = 1;
-			} else {
-				fprintf(stderr,"trval: unknown option: %s\n", *argv);
-				usage();
-			}
-		} else {
-			optflg = 0;
-			if ((fp = fopen(*argv,"r")) == NULL) {
-				fprintf(stderr,"trval: unable to open %s\n", *argv);
-				continue;
-			}
-			r = trval(fp, stdout);
-			fclose(fp);
-		}
+    while (--argc > 0) {
+	argv++;
+	if (optflg && *(argv)[0] == '-') {
+	    if (check_option(*argv, "help"))
+		usage();
+	    else if (check_option(*argv, "types"))
+		print_types = 1;
+	    else if (check_option(*argv, "notypes"))
+		print_types = 0;
+	    else if (check_option(*argv, "krb5"))
+		print_krb5_types = 1;
+	    else if (check_option(*argv, "hex"))
+		do_hex = 1;
+	    else if (check_option(*argv, "notypebytes"))
+		print_id_and_len = 0;
+	    else if (check_option(*argv, "krb5decode")) {
+		print_id_and_len = 0;
+		print_krb5_types = 1;
+		print_types = 1;
+	    } else {
+		fprintf(stderr,"trval: unknown option: %s\n", *argv);
+		usage();
+	    }
+	} else {
+	    optflg = 0;
+	    if ((fp = fopen(*argv,"r")) == NULL) {
+		fprintf(stderr,"trval: unable to open %s\n", *argv);
+		continue;
+	    }
+	    r = trval(fp, stdout);
+	    fclose(fp);
 	}
-	if (optflg) r = trval(stdin, stdout);
+    }
+    if (optflg) r = trval(stdin, stdout);
 	
-	exit(r);
+    exit(r);
 }

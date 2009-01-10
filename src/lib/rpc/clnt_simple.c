@@ -51,7 +51,9 @@ static char sccsid[] = "@(#)clnt_simple.c 1.35 87/08/11 Copyr 1984 Sun Micro";
 static struct callrpc_private {
 	CLIENT	*client;
         SOCKET  socket;
-	int	oldprognum, oldversnum, valid;
+	rpcprog_t oldprognum;
+	rpcvers_t oldversnum;
+	int	valid;
 	char	*oldhost;
 } *callrpc_private;
 

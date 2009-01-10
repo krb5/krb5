@@ -116,6 +116,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
     char tmpbuf[max(NI_MAXHOST + NI_MAXSERV + 30, 200)];
+    struct k5buf buf;
 
     if (!krb5int_debug_sendto_kdc)
 	return;
@@ -221,26 +222,27 @@ krb5int_debug_fprint (const char *fmt, ...)
 	case 'A':
 	    /* %A => addrinfo */
 	    ai = va_arg(args, struct addrinfo *);
+	    krb5int_buf_init_dynamic(&buf);
 	    if (ai->ai_socktype == SOCK_DGRAM)
-		strcpy(tmpbuf, "dgram");
+		krb5int_buf_add(&buf, "dgram");
 	    else if (ai->ai_socktype == SOCK_STREAM)
-		strcpy(tmpbuf, "stream");
+		krb5int_buf_add(&buf, "stream");
 	    else
-		snprintf(tmpbuf, sizeof(tmpbuf), "socktype%d", ai->ai_socktype);
+		krb5int_buf_add_fmt(&buf, "socktype%d", ai->ai_socktype);
+
 	    if (0 != getnameinfo (ai->ai_addr, ai->ai_addrlen,
 				  addrbuf, sizeof (addrbuf),
 				  portbuf, sizeof (portbuf),
 				  NI_NUMERICHOST | NI_NUMERICSERV)) {
 		if (ai->ai_addr->sa_family == AF_UNSPEC)
-		    strcpy(tmpbuf + strlen(tmpbuf), " AF_UNSPEC");
+		    krb5int_buf_add(&buf, " AF_UNSPEC");
 		else
-		    snprintf(tmpbuf + strlen(tmpbuf),
-			     sizeof(tmpbuf)-strlen(tmpbuf),
-			     " af%d", ai->ai_addr->sa_family);
+		    krb5int_buf_add_fmt(&buf, " af%d", ai->ai_addr->sa_family);
 	    } else
-		snprintf(tmpbuf + strlen(tmpbuf), sizeof(tmpbuf)-strlen(tmpbuf),
-			 " %s.%s", addrbuf, portbuf);
-	    putstr(tmpbuf);
+		krb5int_buf_add_fmt(&buf, " %s.%s", addrbuf, portbuf);
+	    if (krb5int_buf_data(&buf))
+		putstr(krb5int_buf_data(&buf));
+	    krb5int_free_buf(&buf);
 	    break;
 	case 'D':
 	    /* %D => krb5_data * */

@@ -3,6 +3,7 @@
 
 #include "krbasn1.h"
 #include "asn1buf.h"
+#include "k5-int.h"
 
 asn1_error_code asn1_krb5_data_unparse
 	(const krb5_data *code, char **s);
@@ -27,5 +28,8 @@ krb5_error_code krb5_data_hex_parse
 
 void asn1buf_print
 	(const asn1buf *buf);
+
+extern krb5int_access acc;
+extern void init_access(const char *progname);
 
 #endif

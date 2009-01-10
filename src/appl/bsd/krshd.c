@@ -39,25 +39,14 @@ char copyright[] =
  * This is the rshell daemon. The very basic protocol for checking 
  * authentication and authorization is:
  * 1) Check authentication.
- * 2) Check authorization via the access-control files: 
- *    ~/.k5login (using krb5_kuserok) and/or
+ * 2) Check authorization via the access-control files:
+ *    ~/.k5login (using krb5_kuserok)
  * Execute command if configured authoriztion checks pass, else deny 
  * permission.
- *
- * The configuration is done either by command-line arguments passed by inetd, 
- * or by the name of the daemon. If command-line arguments are present, they 
- * take priority. The options are:
- * -k means trust krb4 or krb5
- * -5 means trust krb5
- * -4 means trust krb4 (using .klogin)
- * 
  */
      
 /* DEFINES:
  *   KERBEROS - Define this if application is to be kerberised.
- *   KRB5_KRB4_COMPAT - Define this if v4 rlogin clients are also to be served.
- *   ALWAYS_V5_KUSEROK - Define this if you want .k5login to be
- *              checked even for v4 clients (instead of .klogin).
  *   LOG_ALL_LOGINS - Define this if you want to log all logins.
  *   LOG_OTHER_USERS - Define this if you want to log all principals that do
  *              not map onto the local user.
@@ -87,10 +76,7 @@ char copyright[] =
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
-#if !defined(KERBEROS) || !defined(KRB5_KRB4_COMPAT)
-/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <sys/socket.h>
-#endif
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -122,10 +108,7 @@ char copyright[] =
 #include <stdarg.h>
 
 #include <signal.h>
-#if !defined(KERBEROS) || !defined(KRB5_KRB4_COMPAT)
-/* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <netdb.h>
-#endif
 
 #ifdef CRAY
 #ifndef NO_UDB
@@ -159,11 +142,8 @@ char copyright[] =
 #include "k5-int.h"
 #include <com_err.h>
 #include "loginpaths.h"
-#ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
-Key_schedule v4_schedule;
-#endif
 #include <k5-util.h>
+#include <k5-platform.h>
 
 #ifdef HAVE_PATHS_H
 #include <paths.h>
@@ -185,7 +165,7 @@ Key_schedule v4_schedule;
 #define MAXDNAME 256 /*per the rfc*/
 #endif
 
-#define ARGSTR	"ek54ciD:S:M:AP:?L:w:"
+#define ARGSTR	"ek5ciD:S:M:AP:?L:w:"
 
 
 
@@ -217,22 +197,13 @@ static krb5_error_code recvauth(int netfd, struct sockaddr *peersin,
      
 #endif /* KERBEROS */
 
+static int accept_a_connection (int debug_port, struct sockaddr *from,
+				socklen_t *fromlenp);
      
 #ifndef HAVE_KILLPG
 #define killpg(pid, sig) kill(-(pid), (sig))
 #endif
 
-/* There are two authentication related masks:
-   * auth_ok and auth_sent.
-* The auth_ok mask is the oring of authentication systems any one
-* of which can be used.  
-* The auth_sent mask is the oring of one or more authentication/authorization
-* systems that succeeded.  If the anding
-* of these two masks is true, then authorization is successful.
-*/
-#define AUTH_KRB4 (0x1)
-#define AUTH_KRB5 (0x2)
-int auth_ok = 0, auth_sent = 0;
 int checksum_required = 0, checksum_ignored = 0;
 char *progname;
 
@@ -320,15 +291,9 @@ int main(argc, argv)
       switch (ch) {
 #ifdef KERBEROS
 	case 'k':
-#ifdef KRB5_KRB4_COMPAT
-	auth_ok |= (AUTH_KRB5|AUTH_KRB4);
-#else
-	auth_ok |= AUTH_KRB5;
-#endif /* KRB5_KRB4_COMPAT*/
 	break;
 	
       case '5':
-	  auth_ok |= AUTH_KRB5;
 	break;
       case 'c':
 	checksum_required = 1;
@@ -337,12 +302,6 @@ int main(argc, argv)
 	checksum_ignored = 1;
 	break;
 	
-#ifdef KRB5_KRB4_COMPAT
-      case '4':
-	auth_ok |= AUTH_KRB4;
-	break;
-#endif
-	  
         case 'e':
 	require_encrypt = 1;
 	  break;
@@ -536,16 +495,6 @@ char cmdbuf[NCARGS+1];
 char *kremuser;
 krb5_principal client;
 krb5_authenticator *kdata;
-
-#ifdef KRB5_KRB4_COMPAT
-AUTH_DAT	*v4_kdata;
-KTEXT		v4_ticket;
-#endif
-
-int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
-
-#define KRB5_RECVAUTH_V4	4
-#define KRB5_RECVAUTH_V5	5
 
 static void
 ignore_signals()
@@ -940,7 +889,7 @@ void doit(f, fromp)
        privileges. */
     if (port) {
 	/* Place entry into wtmp */
-	sprintf(ttyn,"krsh%ld",(long) (getpid() % 9999999));
+	snprintf(ttyn,sizeof(ttyn),"krsh%ld",(long) (getpid() % 9999999));
 	pty_logwtmp(ttyn,locuser,sane_host);
     }
     /*      We are simply execing a program over rshd : log entry into wtmp,
@@ -1090,31 +1039,14 @@ void doit(f, fromp)
     }
 
 #ifdef KERBEROS
-
-#if defined(KRB5_KRB4_COMPAT) && !defined(ALWAYS_V5_KUSEROK)
-	if (auth_sys == KRB5_RECVAUTH_V4) {
-	    /* kuserok returns 0 if OK */
-	    if (kuserok(v4_kdata, locuser)){
-		syslog(LOG_ERR ,
-		       "Principal %s (%s@%s (%s)) for local user %s failed kuserok.\n",
-		       kremuser, remuser, hostaddra, hostname, locuser);
-		}
-	    else auth_sent |= AUTH_KRB4;
-	} else
-#endif
-	{
-	    /* krb5_kuserok returns 1 if OK */
-	    if (!krb5_kuserok(bsd_context, client, locuser)){
-		syslog(LOG_ERR ,
-		       "Principal %s (%s@%s (%s)) for local user %s failed krb5_kuserok.\n",
-		       kremuser, remuser, hostaddra, hostname, locuser);
-	    }
-	    else
-		auth_sent |=
-		    ((auth_sys == KRB5_RECVAUTH_V4) ? AUTH_KRB4 : AUTH_KRB5);
-	}
-
-	
+    /* krb5_kuserok returns 1 if OK */
+    if (!krb5_kuserok(bsd_context, client, locuser)){
+	syslog(LOG_ERR ,
+	       "Principal %s (%s@%s (%s)) for local user %s failed krb5_kuserok.\n",
+	       kremuser, remuser, hostaddra, hostname, locuser);
+	error("Permission denied.\n");
+	goto signout_please;
+    }
 #else
     if (pwd->pw_passwd != 0 && *pwd->pw_passwd != '\0' &&
 	ruserok(hostname[0] ? hostname : hostaddra,
@@ -1126,24 +1058,12 @@ void doit(f, fromp)
 
 
     if (checksum_required && !valid_checksum) {
-	if (auth_sent & AUTH_KRB5) {
-	    syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
-	    error( "You are using an old Kerberos5 client without checksum support; only newer clients are authorized.\n");
-	    goto signout_please;
-	} else {
-	    syslog(LOG_WARNING,
-   "Configuration error: Requiring checksums with -c is inconsistent with allowing Kerberos V4 connections.");
-	}
+	syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
+	error( "You are using an old Kerberos5 client without checksum support; only newer clients are authorized.\n");
+	goto signout_please;
     }
     if (require_encrypt&&(!do_encrypt)) {
 	error("You must use encryption.\n");
-	goto signout_please;
-    }
-    if (!(auth_ok&auth_sent)) {
-	if (auth_sent)
-	    error("Another authentication mechanism must be used to access this host.\n");
-	else
-	    error("Permission denied.\n");
 	goto signout_please;
     }
     
@@ -1422,12 +1342,10 @@ void doit(f, fromp)
     strncat(homedir, pwd->pw_dir, sizeof(homedir)-6);
     strncat(shell, pwd->pw_shell, sizeof(shell)-7);
     strncat(username, pwd->pw_name, sizeof(username)-6);
-    path = (char *) malloc(strlen(kprogdir) + strlen(path_rest) + 7);
-    if (path == NULL) {
+    if (asprintf(&path, "PATH=%s:%s", kprogdir, path_rest) < 0) {
         perror("malloc");
 	_exit(1);
     }
-    sprintf(path, "PATH=%s:%s", kprogdir, path_rest);
     envinit[PATHENV] = path;
 
     /* If we have KRB5CCNAME set, then copy into the
@@ -1436,10 +1354,8 @@ void doit(f, fromp)
      */
     if (getenv("KRB5CCNAME")) {
 	int i;
-	char *buf2 = (char *)malloc(strlen(getenv("KRB5CCNAME"))
-			 		   +strlen("KRB5CCNAME=")+1);
-	if (buf2) {
-	  sprintf(buf2, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
+	char *buf2;
+	if (asprintf(&buf2, "KRB5CCNAME=%s",getenv("KRB5CCNAME")) >= 0) {
 
 	  for (i = 0; envinit[i]; i++);
 	  envinit[i] = buf2;
@@ -1459,10 +1375,10 @@ void doit(f, fromp)
 			  NI_NUMERICHOST | NI_NUMERICSERV);
       if (aierr)
 	  goto skip_localaddr_env;
-      sprintf(local_addr,  "KRB5LOCALADDR=%s", hbuf);
+      snprintf(local_addr, sizeof(local_addr), "KRB5LOCALADDR=%s", hbuf);
       envinit[i++] =local_addr;
 
-      sprintf(local_port,  "KRB5LOCALPORT=%s", sbuf);
+      snprintf(local_port, sizeof(local_port), "KRB5LOCALPORT=%s", sbuf);
       envinit[i++] =local_port;
     skip_localaddr_env:
 
@@ -1471,10 +1387,10 @@ void doit(f, fromp)
 			  NI_NUMERICHOST | NI_NUMERICSERV);
       if (aierr)
 	  goto skip_remoteaddr_env;
-      sprintf(remote_addr, "KRB5REMOTEADDR=%s", hbuf);
+      snprintf(remote_addr, sizeof(remote_addr), "KRB5REMOTEADDR=%s", hbuf);
       envinit[i++] =remote_addr;
 
-      sprintf(remote_port, "KRB5REMOTEPORT=%s", sbuf);
+      snprintf(remote_port, sizeof(remote_port), "KRB5REMOTEPORT=%s", sbuf);
       envinit[i++] =remote_port;
 
     skip_remoteaddr_env:
@@ -1488,11 +1404,8 @@ void doit(f, fromp)
 	    char *buf2;
 
 	    if(getenv(save_env[cnt])) {
-		    buf2 = (char *)malloc(strlen(getenv(save_env[cnt]))
-					 +strlen(save_env[cnt])+2);
-		    if (buf2) {
-			    sprintf(buf2, "%s=%s", save_env[cnt], 
-				    getenv(save_env[cnt]));
+		    if (asprintf(&buf2, "%s=%s", save_env[cnt], 
+				 getenv(save_env[cnt])) >= 0) {
 			    for (i = 0; envinit[i]; i++);
 			    envinit[i] = buf2;
 		    }
@@ -1513,29 +1426,24 @@ void doit(f, fromp)
 	struct stat s2;
 	int offst = 0;
 
-	copy = malloc(strlen(cmdbuf) + 1);
+	copy = strdup(cmdbuf);
 	if (copy == NULL) {
 	    perror("malloc");
 	    _exit(1);
 	}
-	strcpy(copy, cmdbuf);
 	if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
 		offst = 3;
 	}
 
-        strcpy((char *) cmdbuf + offst, kprogdir);
+        strlcpy(cmdbuf + offst, kprogdir, sizeof(cmdbuf) - offst);
 	cp = copy + 3 + offst;
 
-	cmdbuf[sizeof(cmdbuf) - 1] = '\0';
-	if (auth_sys == KRB5_RECVAUTH_V4) {
-	  strncat(cmdbuf, "/v4rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
-	} else {
-	  strncat(cmdbuf, "/rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
-	}
+	strlcat(cmdbuf, "/rcp", sizeof(cmdbuf));
+
 	if (stat((char *)cmdbuf + offst, &s2) >= 0)
-	  strncat(cmdbuf, cp, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
+	  strlcat(cmdbuf, cp, sizeof(cmdbuf));
 	else
-	  strncpy(cmdbuf, copy, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
+	  strlcpy(cmdbuf, copy, sizeof(cmdbuf));
 	free(copy);
     }
 #endif
@@ -1585,8 +1493,8 @@ error(fmt, va_alist)
 #endif
 
     *cp++ = 1;
-    (void) sprintf(cp, "%s: ", progname);
-    (void) vsprintf(buf+strlen(buf), fmt, ap);
+    (void) snprintf(cp, sizeof(buf) - (cp - buf), "%s: ", progname);
+    (void) vsnprintf(buf+strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
     va_end(ap);
     (void) write(2, buf, strlen(buf));
     syslog(LOG_ERR ,"%s",buf+1);
@@ -1619,7 +1527,8 @@ char *makejtmp(uid, gid, jid)
     register char *endc, *tdp = &tmpdir[strlen(tmpdir)];
     register int i;
     
-    sprintf(tdp, "%s/jtmp.%06d", JTMPDIR, jid);
+    snprintf(tdp, sizeof(tmpdir) - (tdp - tmpdir), "%s/jtmp.%06d",
+	     JTMPDIR, jid);
     endc = &tmpdir[strlen(tmpdir)];
     
     endc[1] = '\0';
@@ -1778,7 +1687,7 @@ loglogin(host, flag, failures, ue)
 void usage()
 {
 #ifdef KERBEROS
-    syslog(LOG_ERR, "usage: kshd [-54ecikK]  ");
+    syslog(LOG_ERR, "usage: kshd [-eciK]  ");
 #else
     syslog(LOG_ERR, "usage: rshd");
 #endif
@@ -1805,9 +1714,6 @@ recvauth(netfd, peersin, valid_checksum)
     struct sockaddr_in laddr;
     socklen_t len;
     krb5_data inbuf;
-#ifdef KRB5_KRB4_COMPAT
-    char v4_instance[INST_SZ];	/* V4 Instance */
-#endif
     krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
     krb5_rcache		rcache;
@@ -1827,10 +1733,6 @@ recvauth(netfd, peersin, valid_checksum)
 #define SIZEOF_INADDR  SIZEOF_in_addr
 #else
 #define SIZEOF_INADDR sizeof(struct in_addr)
-#endif
-
-#ifdef KRB5_KRB4_COMPAT
-    strcpy(v4_instance, "*");
 #endif
 
     status = krb5_auth_con_init(bsd_context, &auth_context);
@@ -1862,65 +1764,24 @@ recvauth(netfd, peersin, valid_checksum)
 	if (status) return status;
     }
 
-#ifdef KRB5_KRB4_COMPAT
-    status = krb5_compat_recvauth_version(bsd_context, &auth_context, &netfd,
-				  NULL,		/* Specify daemon principal */
-				  0, 		/* no flags */
-				  keytab, /* normally NULL to use v5srvtab */
-				  0, 		/* v4_opts */
-				  "rcmd", 	/* v4_service */
-				  v4_instance, 	/* v4_instance */
-				  (struct sockaddr_in *)peersin, /* foreign address */
-				  &laddr, 	/* our local address */
-				  "", 		/* use default srvtab */
-
-				  &ticket, 	/* return ticket */
-				  &auth_sys, 	/* which authentication system*/
-				  &v4_kdata, 0, &version);
-#else
     status = krb5_recvauth_version(bsd_context, &auth_context, &netfd,
 				   NULL,        /* daemon principal */
 				   0,           /* no flags */
 				   keytab,      /* normally NULL to use v5srvtab */
 				   &ticket,    /* return ticket */
 				   &version); /* application version string */
-    auth_sys = KRB5_RECVAUTH_V5;
-#endif
     if (status) {
-	if (auth_sys == KRB5_RECVAUTH_V5) {
-	    /*
-	     * clean up before exiting
-	     */
-	    getstr(netfd, locuser, sizeof(locuser), "locuser");
-	    getstr(netfd, cmdbuf, sizeof(cmdbuf), "command");
-	    getstr(netfd, remuser, sizeof(locuser), "remuser");
-	}
+	/*
+	 * clean up before exiting
+	 */
+	getstr(netfd, locuser, sizeof(locuser), "locuser");
+	getstr(netfd, cmdbuf, sizeof(cmdbuf), "command");
+	getstr(netfd, remuser, sizeof(locuser), "remuser");
 	return status;
     }
 
     getstr(netfd, locuser, sizeof(locuser), "locuser");
     getstr(netfd, cmdbuf, sizeof(cmdbuf), "command");
-
-#ifdef KRB5_KRB4_COMPAT
-    if (auth_sys == KRB5_RECVAUTH_V4) {
-	rcmd_stream_init_normal();
-	
-	/* We do not really know the remote user's login name.
-         * Assume it to be the same as the first component of the
-	 * principal's name. 
-         */
-	strcpy(remuser, v4_kdata->pname);
-
-	status = krb5_425_conv_principal(bsd_context, v4_kdata->pname,
-					 v4_kdata->pinst, v4_kdata->prealm,
-					 &client);
-	if (status) return status;
-
-	status = krb5_unparse_name(bsd_context, client, &kremuser);
-	
-	return status;
-    }
-#endif /* KRB5_KRB4_COMPAT */
 
     /* Must be V5  */
 	
@@ -1949,27 +1810,17 @@ recvauth(netfd, peersin, valid_checksum)
 	struct sockaddr_storage adr;
 	unsigned int adr_length = sizeof(adr);
 	int e;
-	unsigned int buflen = strlen(cmdbuf)+strlen(locuser)+32;
-	char * chksumbuf = (char *) malloc(buflen);
+	char namebuf[32], *chksumbuf = NULL;
 
-	if (chksumbuf == 0)
-	    goto error_cleanup;
 	if (getsockname(netfd, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;
 
 	e = getnameinfo((struct sockaddr *)&adr, adr_length, 0, 0,
-			chksumbuf, buflen, NI_NUMERICSERV);
-	if (e) {
-	    free(chksumbuf);
+			namebuf, sizeof(namebuf), NI_NUMERICSERV);
+	if (e)
 	    fatal(netfd, "local error: can't examine port number");
-	}
-	if (strlen(chksumbuf) > 30) {
-	    free(chksumbuf);
-	    fatal(netfd, "wacky local port number?!");
-	}
-	strcat(chksumbuf, ":");
-	strcat(chksumbuf,cmdbuf);
-	strcat(chksumbuf,locuser);
+	if (asprintf(&chksumbuf, "%s:%s%s", namebuf, cmdbuf, locuser) < 0)
+	    goto error_cleanup;
 
 	status = krb5_verify_checksum(bsd_context,
 				      authenticator->checksum->checksum_type,
@@ -2060,7 +1911,7 @@ void fatal(f, msg)
 #endif
 
     buf[0] = '\01';             /* error indicator */
-    (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
+    (void) snprintf(buf + 1, sizeof(buf) - 1, "%s: %s.\r\n",progname, msg);
     if ((f == netf) && (pid > 0))
       (void) rcmd_stream_write(f, buf, strlen(buf), 0);
     else
@@ -2077,4 +1928,116 @@ void fatal(f, msg)
         cleanup(-1);
     }
     exit(1);
+}
+
+static int
+accept_a_connection (int debug_port, struct sockaddr *from,
+		     socklen_t *fromlenp)
+{
+    int n, s, fd, s4 = -1, s6 = -1, on = 1;
+    fd_set sockets;
+
+    FD_ZERO(&sockets);
+
+#ifdef KRB5_USE_INET6
+    {
+	struct sockaddr_in6 sock_in6;
+
+	if ((s = socket(AF_INET6, SOCK_STREAM, PF_UNSPEC)) < 0) {
+	    if ((errno == EPROTONOSUPPORT) || (errno == EAFNOSUPPORT))
+		goto skip_ipv6;
+	    fprintf(stderr, "Error in socket(INET6): %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	memset((char *) &sock_in6, 0,sizeof(sock_in6));
+	sock_in6.sin6_family = AF_INET6;
+	sock_in6.sin6_port = htons(debug_port);
+	sock_in6.sin6_addr = in6addr_any;
+
+	(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			  (char *)&on, sizeof(on));
+
+	if ((bind(s, (struct sockaddr *) &sock_in6, sizeof(sock_in6))) < 0) {
+	    fprintf(stderr, "Error in bind(INET6): %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	if ((listen(s, 5)) < 0) {
+	    fprintf(stderr, "Error in listen(INET6): %s\n", strerror(errno));
+	    exit(2);
+	}
+	s6 = s;
+	FD_SET(s, &sockets);
+    skip_ipv6:
+	;
+    }
+#endif
+
+    {
+	struct sockaddr_in sock_in;
+
+	if ((s = socket(AF_INET, SOCK_STREAM, PF_UNSPEC)) < 0) {
+	    fprintf(stderr, "Error in socket: %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	memset((char *) &sock_in, 0,sizeof(sock_in));
+	sock_in.sin_family = AF_INET;
+	sock_in.sin_port = htons(debug_port);
+	sock_in.sin_addr.s_addr = INADDR_ANY;
+
+	(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			  (char *)&on, sizeof(on));
+
+	if ((bind(s, (struct sockaddr *) &sock_in, sizeof(sock_in))) < 0) {
+	    if (s6 >= 0 && errno == EADDRINUSE)
+		goto try_ipv6_only;
+	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	if ((listen(s, 5)) < 0) {
+	    fprintf(stderr, "Error in listen: %s\n", strerror(errno));
+	    exit(2);
+	}
+	s4 = s;
+	FD_SET(s, &sockets);
+    try_ipv6_only:
+	;
+    }
+    if (s4 == -1 && s6 == -1) {
+	fprintf(stderr, "No valid sockets established, exiting\n");
+	exit(2);
+    }
+    n = select(((s4 < s6) ? s6 : s4) + 1, &sockets, 0, 0, 0);
+    if (n < 0) {
+	fprintf(stderr, "select error: %s\n", strerror(errno));
+	exit(2);
+    } else if (n == 0) {
+	fprintf(stderr, "internal error? select returns 0\n");
+	exit(2);
+    }
+    if (s6 != -1 && FD_ISSET(s6, &sockets)) {
+	if (s4 != -1)
+	    close(s4);
+	s = s6;
+    } else if (FD_ISSET(s4, &sockets)) {
+	if (s6 != -1)
+	    close(s6);
+	s = s4;
+    } else {
+	fprintf(stderr,
+		"internal error? select returns positive, "
+		"but neither fd available\n");
+	exit(2);
+    }
+
+    if ((fd = accept(s, from, fromlenp)) < 0) {
+	fprintf(stderr, "Error in accept: %s\n", strerror(errno));
+	exit(2);
+    }
+
+    close(s);
+    return fd;
 }

@@ -67,7 +67,6 @@ gss_buffer_t		token_buffer;
 
 	if (mech->gss_process_context_token) {
 	    status = mech->gss_process_context_token(
-						    mech->context,
 						    minor_status,
 						    ctx->internal_ctx_id,
 						    token_buffer);

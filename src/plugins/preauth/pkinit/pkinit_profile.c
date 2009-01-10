@@ -161,11 +161,9 @@ pkinit_kdcdefault_string(krb5_context context, const char *realmname,
     if (values[0] == NULL) {
 	retval = ENOENT;
     } else {
-	*ret_value = malloc(strlen(values[0]) + 1);
+	*ret_value = strdup(values[0]);
 	if (*ret_value == NULL)
 	    retval = ENOMEM;
-	else
-	    strcpy(*ret_value, values[0]);
     }
 
     profile_free_list(values);
@@ -321,11 +319,9 @@ pkinit_libdefault_string(krb5_context context, const krb5_data *realm,
     if (values[0] == NULL) {
 	retval = ENOENT;
     } else {
-	*ret_value = malloc(strlen(values[0]) + 1);
+	*ret_value = strdup(values[0]);
 	if (*ret_value == NULL)
 	    retval = ENOMEM;
-	else
-	    strcpy(*ret_value, values[0]);
     }
 
     profile_free_list(values);

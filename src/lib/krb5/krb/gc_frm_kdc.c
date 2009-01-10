@@ -92,6 +92,7 @@ struct tr_state {
     krb5_creds *cur_cc_tgt;
     krb5_creds *nxt_cc_tgt;
     unsigned int ntgts;
+    krb5_creds *offpath_tgt;
 };
 
 /*
@@ -139,10 +140,6 @@ static void tr_dbg_rtree(struct tr_state *, const char *, krb5_principal);
 #define HARD_CC_ERR(r) ((r) && (r) != KRB5_CC_NOTFOUND &&	\
 	(r) != KRB5_CC_NOT_KTYPE)
 
-#define IS_TGS_PRINC(c, p)						\
-    (krb5_princ_size((c), (p)) == 2 &&					\
-     data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
-
 /*
  * Flags for ccache lookups of cross-realm TGTs.
  *
@@ -168,9 +165,11 @@ static krb5_error_code init_rtree(struct tr_state *,
 static krb5_error_code do_traversal(krb5_context ctx, krb5_ccache,
     krb5_principal client, krb5_principal server,
     krb5_creds *out_cc_tgt, krb5_creds **out_tgt,
-    krb5_creds ***out_kdc_tgts);
-static krb5_error_code krb5_get_cred_from_kdc_opt(krb5_context, krb5_ccache,
-    krb5_creds *, krb5_creds **, krb5_creds ***, int);
+    krb5_creds ***out_kdc_tgts, int *tgtptr_isoffpath);
+static krb5_error_code chase_offpath(struct tr_state *, krb5_principal,
+    krb5_principal);
+static krb5_error_code offpath_loopchk(struct tr_state *ts,
+    krb5_creds *tgt, krb5_creds *reftgts[], unsigned int rcount);
 
 /*
  * init_cc_tgts()
@@ -434,6 +433,7 @@ find_nxt_kdc(struct tr_state *ts)
     krb5_principal *kdcptr;
 
     TR_DBG(ts, "find_nxt_kdc");
+    assert(ts->ntgts > 0);
     assert(ts->nxt_tgt == ts->kdc_tgts[ts->ntgts-1]);
     if (krb5_princ_size(ts->ctx, ts->nxt_tgt->server) != 2)
 	return KRB5_KDCREP_MODIFIED;
@@ -448,21 +448,39 @@ find_nxt_kdc(struct tr_state *ts)
 	    break;
 	}
     }
-    if (*kdcptr == NULL) {
-	/*
-	 * Not found; we probably got an unexpected realm referral.
-	 * Don't touch NXT_KDC, thus allowing next_closest_tgt() to
-	 * continue looping backwards.
-	 */
-	if (ts->ntgts > 0) {
-	    /* Punt NXT_TGT from KDC_TGTS if bogus. */
-	    krb5_free_creds(ts->ctx, ts->kdc_tgts[--ts->ntgts]);
-	    ts->kdc_tgts[ts->ntgts] = NULL;
-	}
-	TR_DBG_RET(ts, "find_nxt_kdc", KRB5_KDCREP_MODIFIED);
+    if (*kdcptr != NULL) {
+	ts->nxt_kdc = kdcptr;
+	TR_DBG_RET(ts, "find_nxt_kdc", 0);
+	return 0;
+    }
+
+    r2 = krb5_princ_component(ts->ctx, ts->kdc_list[0], 1);
+    if (r1 != NULL && r2 != NULL &&
+	r1->length == r2->length &&
+	!memcmp(r1->data, r2->data, r1->length)) {
+	TR_DBG_RET(ts, "find_nxt_kdc: looped back to local",
+		   KRB5_KDCREP_MODIFIED);
 	return KRB5_KDCREP_MODIFIED;
     }
-    ts->nxt_kdc = kdcptr;
+
+    /*
+     * Realm is not in our list; we probably got an unexpected realm
+     * referral.
+     */
+    ts->offpath_tgt = ts->nxt_tgt;
+    if (ts->cur_kdc == ts->kdc_list) {
+	/*
+	 * Local KDC referred us off path; trust it for caching
+	 * purposes.
+	 */
+	return 0;
+    }
+    /*
+     * Unlink the off-path TGT from KDC_TGTS but don't free it,
+     * because we should return it.
+     */
+    ts->kdc_tgts[--ts->ntgts] = NULL;
+    ts->nxt_tgt = ts->cur_tgt;
     TR_DBG_RET(ts, "find_nxt_kdc", 0);
     return 0;
 }
@@ -577,10 +595,8 @@ next_closest_tgt(struct tr_state *ts, krb5_principal client)
 	    break;
 	}
 	/*
-	 * Because try_kdc() validates referral TGTs, it can return an
-	 * error indicating a bogus referral.  The loop continues when
-	 * it gets a bogus referral, which is arguably the right
-	 * thing.  (Previous implementation unconditionally failed.)
+	 * In case of errors in try_kdc() or find_nxt_kdc(), continue
+	 * looping through the KDC list.
 	 */
     }
     /*
@@ -689,7 +705,8 @@ do_traversal(krb5_context ctx,
 	     krb5_principal server,
 	     krb5_creds *out_cc_tgt,
 	     krb5_creds **out_tgt,
-	     krb5_creds ***out_kdc_tgts)
+	     krb5_creds ***out_kdc_tgts,
+	     int *tgtptr_isoffpath)
 {
     krb5_error_code retval;
     struct tr_state state, *ts;
@@ -717,13 +734,23 @@ do_traversal(krb5_context ctx,
 	retval = next_closest_tgt(ts, client);
 	if (retval)
 	    goto cleanup;
+
+	if (ts->offpath_tgt != NULL) {
+	    retval = chase_offpath(ts, client, server);
+	    if (retval)
+		goto cleanup;
+	    break;
+	}
 	assert(ts->cur_kdc != ts->nxt_kdc);
     }
 
     if (NXT_TGT_IS_CACHED(ts)) {
+	assert(ts->offpath_tgt = NULL);
 	*out_cc_tgt = *ts->cur_cc_tgt;
 	*out_tgt = out_cc_tgt;
 	MARK_CUR_CC_TGT_CLEAN(ts);
+    } else if (ts->offpath_tgt != NULL){
+	*out_tgt = ts->offpath_tgt;
     } else {
 	/* CUR_TGT is somewhere in KDC_TGTS; no need to copy. */
 	*out_tgt = ts->nxt_tgt;
@@ -739,7 +766,123 @@ cleanup:
 	    free(ts->kdc_tgts);
     } else
 	*out_kdc_tgts = ts->kdc_tgts;
+    *tgtptr_isoffpath = (ts->offpath_tgt != NULL);
     return retval;
+}
+
+/*
+ * chase_offpath()
+ *
+ * Chase off-path TGT referrals.
+ *
+ * If we are traversing a trusted path (either hierarchically derived
+ * or explicit capath) and get a TGT pointing to a realm off this
+ * path, query the realm referenced by that off-path TGT.  Repeat
+ * until we get to the destination realm or encounter an error.
+ *
+ * CUR_TGT is always either pointing into REFTGTS or is an alias for
+ * TS->OFFPATH_TGT.
+ */
+static krb5_error_code
+chase_offpath(struct tr_state *ts,
+	      krb5_principal client, krb5_principal server)
+{
+    krb5_error_code retval;
+    krb5_creds mcred;
+    krb5_creds *cur_tgt, *nxt_tgt, *reftgts[KRB5_REFERRAL_MAXHOPS];
+    krb5_data *rsrc, *rdst, *r1;
+    unsigned int rcount, i;
+
+    rdst = krb5_princ_realm(ts->ctx, server);
+    cur_tgt = ts->offpath_tgt;
+
+    for (rcount = 0; rcount < KRB5_REFERRAL_MAXHOPS; rcount++) {
+	nxt_tgt = NULL;
+	memset(&mcred, 0, sizeof(mcred));
+	rsrc = krb5_princ_component(ts->ctx, cur_tgt->server, 1);
+	retval = krb5_tgtname(ts->ctx, rdst, rsrc, &mcred.server);
+	if (retval)
+	    goto cleanup;
+	mcred.client = client;
+        retval = krb5_get_cred_via_tkt(ts->ctx, cur_tgt,
+				       FLAGS2OPTS(cur_tgt->ticket_flags),
+				       cur_tgt->addresses, &mcred, &nxt_tgt);
+	mcred.client = NULL;
+	krb5_free_principal(ts->ctx, mcred.server);
+	mcred.server = NULL;
+	if (retval)
+	    goto cleanup;
+	if (!IS_TGS_PRINC(ts->ctx, nxt_tgt->server)) {
+	    retval = KRB5_KDCREP_MODIFIED;
+	    goto cleanup;
+	}
+	r1 = krb5_princ_component(ts->ctx, nxt_tgt->server, 1);
+	if (rdst->length == r1->length &&
+	    !memcmp(rdst->data, r1->data, rdst->length)) {
+	    retval = 0;
+	    goto cleanup;
+	}
+	retval = offpath_loopchk(ts, nxt_tgt, reftgts, rcount);
+	if (retval)
+	    goto cleanup;
+	reftgts[rcount] = nxt_tgt;
+	cur_tgt = nxt_tgt;
+	nxt_tgt = NULL;
+    }
+    /* Max hop count exceeded. */
+    retval = KRB5_KDCREP_MODIFIED;
+
+cleanup:
+    if (mcred.server != NULL) {
+	krb5_free_principal(ts->ctx, mcred.server);
+    }
+    /*
+     * Don't free TS->OFFPATH_TGT if it's in the list of cacheable
+     * TGTs to be returned by do_traversal().
+     */
+    if (ts->offpath_tgt != ts->nxt_tgt) {
+	krb5_free_creds(ts->ctx, ts->offpath_tgt);
+    }
+    ts->offpath_tgt = NULL;
+    if (nxt_tgt != NULL) {
+	if (retval)
+	    krb5_free_creds(ts->ctx, nxt_tgt);
+	else
+	    ts->offpath_tgt = nxt_tgt;
+    }
+    for (i = 0; i < rcount; i++) {
+	krb5_free_creds(ts->ctx, reftgts[i]);
+    }
+    return retval;
+}
+
+/*
+ * offpath_loopchk()
+ *
+ * Check for loop back to previously-visited realms, both off-path and
+ * on-path.
+ */
+static krb5_error_code
+offpath_loopchk(struct tr_state *ts,
+		krb5_creds *tgt, krb5_creds *reftgts[], unsigned int rcount)
+{
+    krb5_data *r1, *r2;
+    unsigned int i;
+
+    r1 = krb5_princ_component(ts->ctx, tgt->server, 1);
+    for (i = 0; i < rcount; i++) {
+	r2 = krb5_princ_component(ts->ctx, reftgts[i]->server, 1);
+	if (r1->length == r2->length &&
+	    !memcmp(r1->data, r2->data, r1->length))
+	    return KRB5_KDCREP_MODIFIED;
+    }
+    for (i = 0; i < ts->ntgts; i++) {
+	r2 = krb5_princ_component(ts->ctx, ts->kdc_tgts[i]->server, 1);
+	if (r1->length == r2->length &&
+	    !memcmp(r1->data, r2->data, r1->length))
+	    return KRB5_KDCREP_MODIFIED;
+    }
+    return 0;
 }
 
 /*
@@ -778,7 +921,7 @@ cleanup:
  * Returns errors, system errors.
  */
 
-static krb5_error_code
+krb5_error_code
 krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			   krb5_creds *in_cred, krb5_creds **out_cred,
 			   krb5_creds ***tgts, int kdcopt)
@@ -786,6 +929,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_error_code retval, subretval;
     krb5_principal client, server, supplied_server, out_supplied_server;
     krb5_creds tgtq, cc_tgt, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
+    krb5_creds *otgtptr = NULL;
+    int tgtptr_isoffpath = 0;
     krb5_boolean old_use_conf_ktypes;
     char **hrealms;
     unsigned int referral_count, i;
@@ -847,8 +992,10 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     } else if (!HARD_CC_ERR(retval)) {
         DPRINTF(("gc_from_kdc: starting do_traversal to find "
 		 "initial TGT for referral\n"));
+	tgtptr_isoffpath = 0;
+	otgtptr = NULL;
 	retval = do_traversal(context, ccache, client, server,
-			      &cc_tgt, &tgtptr, tgts);
+			      &cc_tgt, &tgtptr, tgts, &tgtptr_isoffpath);
     }
     if (retval) {
         DPRINTF(("gc_from_kdc: failed to find initial TGT for referral\n"));
@@ -863,6 +1010,11 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      * path, otherwise fall back to old-style assumptions.
      */
 
+    /*
+     * Save TGTPTR because we rewrite it in the referral loop, and
+     * we might need to explicitly free it later.
+     */
+    otgtptr = tgtptr;
     for (referral_count = 0;
 	 referral_count < KRB5_REFERRAL_MAXHOPS;
 	 referral_count++) {
@@ -987,6 +1139,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    tgtptr=*out_cred;
 	    /* Save pointer to tgt in referral_tgts. */
 	    referral_tgts[referral_count]=*out_cred;
+	    *out_cred = NULL;
 	    /* Copy krbtgt realm to server principal. */
 	    krb5_free_data_contents(context, &server->realm);
 	    retval = krb5int_copy_data_contents(context,
@@ -1061,6 +1214,11 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     /* Free tgtptr data if reused from above. */
     if (tgtptr == &cc_tgt)
 	krb5_free_cred_contents(context, tgtptr);
+    tgtptr = NULL;
+    /* Free saved TGT in OTGTPTR if it was off-path. */
+    if (tgtptr_isoffpath)
+	krb5_free_creds(context, otgtptr);
+    otgtptr = NULL;
     /* Free TGTS if previously filled by do_traversal() */
     if (*tgts != NULL) {
 	for (i = 0; (*tgts)[i] != NULL; i++) {
@@ -1075,11 +1233,13 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     if (!retval) {
 	tgtptr = &cc_tgt;
     } else if (!HARD_CC_ERR(retval)) {
+	tgtptr_isoffpath = 0;
 	retval = do_traversal(context, ccache, client, server,
-			      &cc_tgt, &tgtptr, tgts);
+			      &cc_tgt, &tgtptr, tgts, &tgtptr_isoffpath);
     }
     if (retval)
 	goto cleanup;
+    otgtptr = tgtptr;
 
     /*
      * Finally have TGT for target realm!  Try using it to get creds.
@@ -1102,6 +1262,8 @@ cleanup:
     krb5_free_cred_contents(context, &tgtq);
     if (tgtptr == &cc_tgt)
 	krb5_free_cred_contents(context, tgtptr);
+    if (tgtptr_isoffpath)
+	krb5_free_creds(context, otgtptr);
     context->use_conf_ktypes = old_use_conf_ktypes;
     /* Drop the original principal back into in_cred so that it's cached
        in the expected format. */

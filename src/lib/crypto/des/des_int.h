@@ -64,9 +64,56 @@
 #ifndef KRB5_MIT_DES__
 #define KRB5_MIT_DES__
 
-#define KRB5INT_CRYPTO_DES_INT	/* skip krb4-specific DES stuff */
-#include "kerberosIV/des.h"	/* for des_key_schedule, etc. */
-#undef KRB5INT_CRYPTO_DES_INT	/* don't screw other inclusions of des.h */
+#if defined(__MACH__) && defined(__APPLE__)
+#include <TargetConditionals.h>
+#include <AvailabilityMacros.h>
+#if TARGET_RT_MAC_CFM
+#error "Use KfM 4.0 SDK headers for CFM compilation."
+#endif
+#if defined(DEPRECATED_IN_MAC_OS_X_VERSION_10_5) && !defined(KRB5_SUPRESS_DEPRECATED_WARNINGS)
+#define KRB5INT_DES_DEPRECATED DEPRECATED_IN_MAC_OS_X_VERSION_10_5
+#endif
+#endif /* defined(__MACH__) && defined(__APPLE__) */
+
+/* Macro to add deprecated attribute to DES types and functions */
+/* Currently only defined on Mac OS X 10.5 and later.           */
+#ifndef KRB5INT_DES_DEPRECATED
+#define KRB5INT_DES_DEPRECATED
+#endif
+
+#include <limits.h>
+
+#if UINT_MAX >= 0xFFFFFFFFUL
+#define DES_INT32 int
+#define DES_UINT32 unsigned int
+#else
+#define DES_INT32 long
+#define DES_UINT32 unsigned long
+#endif
+
+typedef unsigned char des_cblock[8] 	/* crypto-block size */
+KRB5INT_DES_DEPRECATED;
+
+/*
+ * Key schedule.
+ *
+ * This used to be
+ *
+ * typedef struct des_ks_struct {
+ *     union { DES_INT32 pad; des_cblock _;} __;
+ * } des_key_schedule[16];
+ *
+ * but it would cause trouble if DES_INT32 were ever more than 4
+ * bytes.  The reason is that all the encryption functions cast it to
+ * (DES_INT32 *), and treat it as if it were DES_INT32[32].  If
+ * 2*sizeof(DES_INT32) is ever more than sizeof(des_cblock), the
+ * caller-allocated des_key_schedule will be overflowed by the key
+ * scheduling functions.  We can't assume that every platform will
+ * have an exact 32-bit int, and nothing should be looking inside a
+ * des_key_schedule anyway.
+ */
+typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16] 
+KRB5INT_DES_DEPRECATED;
 
 typedef des_cblock mit_des_cblock;
 typedef des_key_schedule mit_des_key_schedule;
@@ -240,6 +287,21 @@ krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
 			 const mit_des_key_schedule ks3,
 			 const mit_des_cblock ivec);
 
+void
+krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
+			     unsigned long num_data,
+			     const mit_des_key_schedule ks1,
+			     const mit_des_key_schedule ks2,
+			     const mit_des_key_schedule ks3,
+			     mit_des_cblock ivec);
+
+void
+krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
+			     unsigned long num_data,
+			     const mit_des_key_schedule ks1,
+			     const mit_des_key_schedule ks2,
+			     const mit_des_key_schedule ks3,
+			     mit_des_cblock ivec);
 
 #define mit_des3_cbc_encrypt(in,out,length,ks1,ks2,ks3,ivec,enc) \
     ((enc ? krb5int_des3_cbc_encrypt : krb5int_des3_cbc_decrypt) \
@@ -262,6 +324,17 @@ krb5int_des_cbc_decrypt(const mit_des_cblock *in,
     ((enc ? krb5int_des_cbc_encrypt : krb5int_des_cbc_decrypt) \
      (in, out, length, schedule, ivec), 0)
 
+void
+krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
+			    unsigned long num_data,
+			    const mit_des_key_schedule schedule,
+			    mit_des_cblock ivec);
+
+void
+krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
+			    unsigned long num_data,
+			    const mit_des_key_schedule schedule,
+			    mit_des_cblock ivec);
 
 /* d3_procky.c */
 extern krb5_error_code mit_des3_process_key

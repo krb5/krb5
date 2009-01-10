@@ -39,13 +39,10 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 {
     krb5_rcache rcache = 0;
     char *cachename = 0, *cachetype;
-    char tmp[4];
     krb5_error_code retval;
-    unsigned int p, i;
-    unsigned int len;
-
+    unsigned int i;
+    struct k5buf buf;
 #ifdef HAVE_GETEUID
-    unsigned long tens;
     unsigned long uid = geteuid();
 #endif
     
@@ -54,55 +51,24 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
     
     cachetype = krb5_rc_default_type(context);
 
-    len = piece->length + 3 + 1;
+    krb5int_buf_init_dynamic(&buf);
+    krb5int_buf_add(&buf, cachetype);
+    krb5int_buf_add(&buf, ":");
     for (i = 0; i < piece->length; i++) {
 	if (piece->data[i] == '-')
-	    len++;
+	    krb5int_buf_add(&buf, "--");
 	else if (!isvalidrcname((int) piece->data[i]))
-	    len += 3;
+	    krb5int_buf_add_fmt(&buf, "-%03o", piece->data[i]);
+	else
+	    krb5int_buf_add_len(&buf, &piece->data[i], 1);
     }
-
 #ifdef HAVE_GETEUID
-    len += 2;	/* _<uid> */
-    for (tens = 1; (uid / tens) > 9 ; tens *= 10)
-	len++;
-#endif
-    
-    cachename = malloc(strlen(cachetype) + 5 + len);
-    if (!cachename) {
-	retval = ENOMEM;
-	goto cleanup;
-    }
-    strcpy(cachename, cachetype);
-
-    p = strlen(cachename);
-    cachename[p++] = ':';
-    for (i = 0; i < piece->length; i++) {
-	if (piece->data[i] == '-') {
-	    cachename[p++] = '-';
-	    cachename[p++] = '-';
-	    continue;
-	}
-	if (!isvalidrcname((int) piece->data[i])) {
-	    snprintf(tmp, sizeof(tmp), "%03o", piece->data[i]);
-	    cachename[p++] = '-';
-	    cachename[p++] = tmp[0];
-	    cachename[p++] = tmp[1];
-	    cachename[p++] = tmp[2];
-	    continue;
-	}
-	cachename[p++] = piece->data[i];
-    }
-
-#ifdef HAVE_GETEUID
-    cachename[p++] = '_';
-    while (tens) {
-	cachename[p++] = '0' + ((uid / tens) % 10);
-	tens /= 10;
-    }
+    krb5int_buf_add_fmt(&buf, "_%lu", uid);
 #endif
 
-    cachename[p++] = '\0';
+    cachename = krb5int_buf_data(&buf);
+    if (cachename == NULL)
+	return ENOMEM;
 
     retval = krb5_rc_resolve_full(context, &rcache, cachename);
     if (retval) {

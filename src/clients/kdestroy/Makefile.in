@@ -22,8 +22,8 @@ PROG_RPATH=$(KRB5_LIBDIR)
 all-unix:: kdestroy
 ##WIN32##all-windows:: $(KDESTROY)
 
-kdestroy: kdestroy.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ kdestroy.o $(KRB4COMPAT_LIBS)
+kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kdestroy.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KDESTROY): $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $**
@@ -39,13 +39,3 @@ install-unix::
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \
 		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	done
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-$(OUTPRE)kdestroy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
-  kdestroy.c

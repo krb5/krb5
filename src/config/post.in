@@ -88,13 +88,19 @@ depend-dependencies:
 		'$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" '$(STLIBOBJS)' \
 		< .d > .depend
 
+# Temporarily keep the rule for removing the dependency line eater
+# until we're sure we've gotten everything converted and excised the
+# old stuff from Makefile.in files.
 depend-update-makefile: .depend depend-recurse
 	if test -n "$(SRCS)" ; then \
-		sed -e '/^# +++ Dependency line eater +++/,$$d' \
-			< $(srcdir)/Makefile.in | cat - .depend \
-			> $(srcdir)/Makefile.in.new; \
-	$(SRCTOP)/config/move-if-changed $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in ; \
-	else :; fi
+		$(CP) .depend $(srcdir)/deps.new ; \
+	else \
+		echo "# No dependencies here." > $(srcdir)/deps.new ; \
+	fi
+	$(SRCTOP)/config/move-if-changed $(srcdir)/deps.new $(srcdir)/deps
+	sed -e '/^# +++ Dependency line eater +++/,$$d' \
+		< $(srcdir)/Makefile.in > $(srcdir)/Makefile.in.new
+	$(SRCTOP)/config/move-if-changed $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in
 
 DEPTARGETS = .depend .d .dtmp $(DEP_VERIFY)
 DEPTARGETS_CLEAN = .depend .d .dtmp $(DEPTARGETS_@srcdir@_@CONFIG_RELTOPDIR@)
@@ -141,7 +147,7 @@ Makefiles-prerecurse: Makefile
 
 # thisconfigdir = relative path from this Makefile to config.status
 # mydir = relative path from config.status to this Makefile
-Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
+Makefile: $(srcdir)/Makefile.in $(srcdir)/deps $(thisconfigdir)/config.status \
 		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
 	cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/Makefile
 $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure

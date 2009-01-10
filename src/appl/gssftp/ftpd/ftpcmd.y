@@ -66,6 +66,7 @@ static char sccsid[] = "@(#)ftpcmd.y	5.24 (Berkeley) 2/25/91";
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <k5-buf.h>
 
 #include "ftpd_var.h"
 
@@ -75,13 +76,6 @@ unsigned int maxbuf, actualbuf;
 unsigned char *ucbuf;
 
 static int kerror;	/* XXX needed for all auth types */
-#ifdef KRB5_KRB4_COMPAT
-extern	struct sockaddr_in his_addr, ctrl_addr;
-#include <krb.h>
-extern AUTH_DAT kdata;
-extern Key_schedule schedule;
-extern MSG_DAT msg_data;
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -1089,27 +1083,6 @@ ftpd_getline(s, n, iop)
 	    if (debug) syslog(LOG_DEBUG, "getline got %d from %s <%s>\n", 
 			      len, cs, mic?"MIC":"ENC");
 	    clevel = mic ? PROT_S : PROT_P;
-#ifdef KRB5_KRB4_COMPAT
-	    if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-		if ((kerror = mic ?
-		    krb_rd_safe((unsigned char *)out, len, &kdata.session,
-			    &his_addr, &ctrl_addr, &msg_data)
-		  : krb_rd_priv((unsigned char *)out, len, schedule,
-			    &kdata.session, &his_addr, &ctrl_addr, &msg_data))
-			!= KSUCCESS) {
-		    reply(535, "%s! (%s)",
-			   mic ? "MIC command modified" : "ENC command garbled",
-			   krb_get_err_text(kerror));
-		    syslog(LOG_ERR,"%s failed: %s",
-			   mic ? "MIC krb_rd_safe" : "ENC krb_rd_priv",
-			   krb_get_err_text(kerror));
-		    *s = '\0';
-		    return(s);
-		}
-		(void) memcpy(s, msg_data.app_data, msg_data.app_length);
-		(void) strcpy(s+msg_data.app_length, "\r\n");
-	    }
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 /* we know this is a MIC or ENC already, and out/len already has the bits */
 	    if (strcmp(auth_type, "GSSAPI") == 0) {
@@ -1139,7 +1112,7 @@ ftpd_getline(s, n, iop)
 		}
 
 		memcpy(s, msg_buf.value, msg_buf.length);
-		strcpy(s+msg_buf.length-(s[msg_buf.length-1]?0:1), "\r\n");
+		memcpy(s+msg_buf.length-(s[msg_buf.length-1]?0:1), "\r\n", 3);
 		gss_release_buffer(&min_stat, &msg_buf);
 	    }
 #endif /* GSSAPI */
@@ -1157,7 +1130,7 @@ ftpd_getline(s, n, iop)
 	    }
 
 	}
-#if defined KRB5_KRB4_COMPAT || defined GSSAPI	/* or other auth types */
+#ifdef GSSAPI	/* or other auth types */
 	else {	/* !auth_type */
 	    if ( (!(strncmp(s, "ENC", 3))) || (!(strncmp(s, "MIC", 3)))
 #ifndef NOCONFIDENTIAL
@@ -1169,7 +1142,7 @@ ftpd_getline(s, n, iop)
                 return(s);
 	    }
 	}
-#endif /* KRB5_KRB4_COMPAT || GSSAPI */
+#endif GSSAPI
 
 	if (debug) {
 		if (!strncmp(s, "PASS ", 5) && !guest)
@@ -1438,10 +1411,9 @@ copy(s)
 {
 	char *p;
 
-	p = malloc((unsigned) strlen(s) + 1);
+	p = strdup(s);
 	if (p == NULL)
 		fatal("Ran out of memory.");
-	(void) strcpy(p, s);
 	return (p);
 }
 
@@ -1471,6 +1443,7 @@ help(ctab, s)
 	if (s == 0) {
 		register int i, j, w;
 		int columns, lines;
+		struct k5buf buf;
 
 		lreply(214, "The following %scommands are recognized %s.",
 		    ftype, "(* =>'s unimplemented)");
@@ -1479,16 +1452,18 @@ help(ctab, s)
 			columns = 1;
 		lines = (NCMDS + columns - 1) / columns;
 		for (i = 0; i < lines; i++) {
-			strcpy(str, "   ");
+			krb5int_buf_init_fixed(&buf, str, sizeof(str));
+			krb5int_buf_add(&buf, "   ");
 			for (j = 0; j < columns; j++) {
 				c = ctab + j * lines + i;
-				sprintf(&str[strlen(str)], "%s%c", c->name,
-					c->implemented ? ' ' : '*');
+				krb5int_buf_add_fmt(&buf, "%s%c", c->name,
+						    c->implemented ? ' '
+						    : '*');
 				if (c + lines >= &ctab[NCMDS])
 					break;
 				w = strlen(c->name) + 1;
 				while (w < width) {
-					strcat(str, " ");
+					krb5int_buf_add(&buf, " ");
 					w++;
 				}
 			}

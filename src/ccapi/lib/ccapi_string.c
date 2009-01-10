@@ -67,10 +67,8 @@ cc_int32 cci_string_new (cc_string_t *out_string,
     }
     
     if (!err) {
-        string->data = malloc (strlen (in_cstring) + 1);
-        if (string->data) { 
-            strcpy ((char *)string->data, in_cstring);
-        } else { 
+        string->data = strdup (in_cstring);
+        if (!string->data) { 
             err = cci_check_error (ccErrNoMem); 
         }
         

@@ -260,7 +260,7 @@ oops:
 	if (cp == NULL)
 	    return "Unknown error code";
 	cp1 = cp;
-	strcpy(cp, "Unknown code ");
+	strlcpy(cp, "Unknown code ", ET_EBUFSIZ);
 	cp += sizeof("Unknown code ") - 1;
 	if (table_num != 0L) {
 		(void) error_table_name_r(table_num, cp);

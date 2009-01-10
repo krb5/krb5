@@ -30,3 +30,6 @@ extern const struct krb5_keyhash_provider krb5int_keyhash_descbc;
 extern const struct krb5_keyhash_provider krb5int_keyhash_md4des;
 extern const struct krb5_keyhash_provider krb5int_keyhash_md5des;
 extern const struct krb5_keyhash_provider krb5int_keyhash_hmac_md5;
+extern const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac;
+extern const struct krb5_keyhash_provider krb5int_keyhash_aescbc_128;
+extern const struct krb5_keyhash_provider krb5int_keyhash_aescbc_256;

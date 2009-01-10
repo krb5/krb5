@@ -90,11 +90,10 @@ krb5_os_get_tty_uio(krb5_context context, krb5_uio uio)
 	    } while (ch != EOF && ch != '\n');
 	read_string[sizeof(read_string)-1] = 0;
 
-	if ((p->response = malloc(strlen(read_string)+1)) == NULL) {
+	if ((p->response = strdup(read_string)) == NULL) {
 	    errno = ENOMEM;
 	    goto cleanup;
 	}
-	strcpy(p->response, read_string);
 
 	if ((p->flags & KRB5_UIO_ECHORESPONSE) == 0) {
 	    (void) putchar('\n');

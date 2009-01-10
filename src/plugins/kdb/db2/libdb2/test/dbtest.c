@@ -163,7 +163,7 @@ main(argc, argv)
 		p = getenv("TMPDIR");
 		if (p == NULL)
 			p = "/var/tmp";
-		(void)sprintf(buf, "%s/__dbtest", p);
+		(void)snprintf(buf, sizeof(buf), "%s/__dbtest", p);
 		fname = buf;
 		(void)unlink(buf);
 	} else  if (!sflag)

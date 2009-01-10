@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/rcache/rc_none.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * replay cache no-op implementation
  */
@@ -42,10 +43,10 @@ krb5_rc_none_noargs(krb5_context ctx, krb5_rcache rc)
 {
     return 0;
 }
-#define krb5_rc_none_recover	krb5_rc_none_noargs
-#define krb5_rc_none_destroy	krb5_rc_none_noargs
-#define krb5_rc_none_close	krb5_rc_none_noargs
-#define krb5_rc_none_expunge	krb5_rc_none_noargs
+#define krb5_rc_none_recover    krb5_rc_none_noargs
+#define krb5_rc_none_destroy    krb5_rc_none_noargs
+#define krb5_rc_none_close      krb5_rc_none_noargs
+#define krb5_rc_none_expunge    krb5_rc_none_noargs
 
 static krb5_error_code KRB5_CALLCONV
 krb5_rc_none_store(krb5_context ctx, krb5_rcache rc, krb5_donot_replay *r)

@@ -2,8 +2,8 @@ thisconfigdir=../..
 myfulldir=lib/krb5
 mydir=lib/krb5
 BUILDTOP=$(REL)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os
-SUBDIRS= error_tables asn.1 ccache keytab krb os rcache
+LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode
+SUBDIRS= error_tables asn.1 ccache keytab krb os rcache unicode
 DEFS=
 
 ##DOSBUILDTOP = ..\..
@@ -32,6 +32,7 @@ STOBJLISTS= \
 	keytab/OBJS.ST \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
+	unicode/OBJS.ST \
 	os/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
@@ -42,6 +43,7 @@ SUBDIROBJLISTS= \
 	keytab/OBJS.ST \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
+	unicode/OBJS.ST \
 	os/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
@@ -93,6 +95,9 @@ all-windows::
 	cd ..\rcache
 	@echo Making in krb5\rcache
 	$(MAKE) -$(MFLAGS)
+	cd ..\unicode
+	@echo Making in krb5\unicode
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
@@ -120,6 +125,9 @@ clean-windows::
 	cd ..\rcache
 	@echo Making clean in krb5\rcache
 	$(MAKE) -$(MFLAGS) clean
+	cd ..\unicode
+	@echo Making clean in krb5\unicode
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean locally
 
@@ -128,20 +136,3 @@ install-unix:: install-libs
 @lib_frag@
 @libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-krb5_libinit.so krb5_libinit.po $(OUTPRE)krb5_libinit.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/ccache/cc-int.h $(srcdir)/keytab/kt-int.h \
-  $(srcdir)/os/os-proto.h $(srcdir)/rcache/rc-int.h krb5_libinit.c \
-  krb5_libinit.h

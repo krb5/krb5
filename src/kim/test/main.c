@@ -40,6 +40,8 @@ int main (int argc, const char * argv[])
 
     test_kim_identity_create_from_string (state);
     
+    test_kim_identity_create_from_components (state);
+    
     test_kim_identity_copy (state);
     
     test_kim_identity_compare (state);

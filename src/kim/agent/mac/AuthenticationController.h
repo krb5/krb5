@@ -65,6 +65,7 @@
 
     IBOutlet NSWindow *ticketOptionsSheet;
     IBOutlet NSObjectController *ticketOptionsController;
+    BOOL visibleAsSheet;
     
     IBOutlet NSSlider *validLifetimeSlider;
     IBOutlet NSSlider *renewableLifetimeSlider;
@@ -79,12 +80,12 @@
 
 - (void) setContent: (NSMutableDictionary *) newContent;
 
-- (void) showEnterIdentity;
-- (void) showAuthPrompt;
-- (void) showEnterPassword;
-- (void) showSAM;
-- (void) showChangePassword;
-- (void) showError;
+- (void) showEnterIdentity: (NSWindow *) parentWindow;
+- (void) showAuthPrompt: (NSWindow *) parentWindow;
+- (void) showEnterPassword: (NSWindow *) parentWindow;
+- (void) showSAM: (NSWindow *) parentWindow;
+- (void) showChangePassword: (NSWindow *) parentWindow;
+- (void) showError: (NSWindow *) parentWindow;
 
 - (IBAction) cancel: (id) sender;
 - (IBAction) enterIdentity: (id) sender;
@@ -92,18 +93,28 @@
 - (IBAction) changePassword: (id) sender;
 - (IBAction) showedError: (id) sender;
 
+- (IBAction) checkboxDidChange: (id) sender;
 - (IBAction) sliderDidChange: (id) sender;
 
 - (IBAction) showTicketOptions: (id) sender;
 - (IBAction) cancelTicketOptions: (id) sender;
 - (IBAction) saveTicketOptions: (id) sender;
 
-- (void) sheetDidEnd: (NSWindow *) sheet 
+- (IBAction) cancelAuthSheet: (id) sender;
+
+- (void) authSheetDidEnd: (NSWindow *) sheet 
+              returnCode: (int) returnCode 
+             contextInfo: (void *) contextInfo;
+- (void) ticketOptionsSheetDidEnd: (NSWindow *) sheet 
           returnCode: (int) returnCode 
          contextInfo: (void *) contextInfo;
 
 - (IBAction) changePasswordGearAction: (id) sender;
 
 - (void) swapView: (NSView *) aView;
+- (void) showSpinny;
+- (void) hideSpinny;
+- (void) clearSensitiveInputs;
+- (void) clearAllInputs;
 
 @end

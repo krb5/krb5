@@ -47,10 +47,7 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#ifndef KRB5_KRB4_COMPAT
-/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <sys/socket.h>
-#endif
 #include <sys/wait.h>
 #include <sys/file.h>
 #include <netinet/in.h>
@@ -80,10 +77,7 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #define sigsetjmp(j,s)	setjmp(j)
 #define siglongjmp	longjmp
 #endif
-#ifndef KRB5_KRB4_COMPAT
-/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <netdb.h>
-#endif
 #include <errno.h>
 #include <syslog.h>
 #include <unistd.h>
@@ -101,6 +95,8 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #endif
 #include "pathnames.h"
 #include <libpty.h>
+
+#include <k5-platform.h>
 
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);
@@ -127,18 +123,6 @@ extern int yyparse(void);
 #include <k5-util.h>
 #include "port-sockets.h"
 
-#ifdef KRB5_KRB4_COMPAT
-#include <krb5.h>
-#include <krb.h>
-
-AUTH_DAT kdata;
-KTEXT_ST ticket;
-MSG_DAT msg_data;
-Key_schedule schedule;
-char *keyfile;
-static char *krb4_services[] = { "ftp", "rcmd", NULL };
-#endif /* KRB5_KRB4_COMPAT */
-
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -160,7 +144,7 @@ static void log_gss_error(int, OM_uint32, OM_uint32, const char *);
 
 char *auth_type;	/* Authentication succeeded?  If so, what type? */
 static char *temp_auth_type;
-int authorized;		/* Auth succeeded and was accepted by krb4 or gssapi */
+int authorized;		/* Auth succeeded and was accepted by gssapi */
 int have_creds;		/* User has credentials on disk */
 
 /*
@@ -292,16 +276,9 @@ main(argc, argv, envp)
 	int addrlen, c, on = 1, tos, port = -1;
 	extern char *optarg;
 	extern int optopt;
-#ifdef KRB5_KRB4_COMPAT
-	char *option_string = "AaCcdElp:r:s:T:t:U:u:vw:";
-#else /* !KRB5_KRB4_COMPAT */
 	char *option_string = "AaCcdElp:r:T:t:U:u:vw:";
-#endif /* KRB5_KRB4_COMPAT */
 	ftpusers = _PATH_FTPUSERS_DEFAULT;
 
-#ifdef KRB5_KRB4_COMPAT
-	keyfile = KEYFILE;
-#endif /* KRB5_KRB4_COMPAT */
 	debug = 0;
 #ifdef SETPROCTITLE
 	/*
@@ -360,12 +337,6 @@ main(argc, argv, envp)
 		case 'r':
 			setenv("KRB_CONF", optarg, 1);
 			break;
-
-#ifdef KRB5_KRB4_COMPAT
-		case 's':
-			keyfile = optarg;
-			break;
-#endif /* KRB5_KRB4_COMPAT */
 
 		case 't':
 			timeout = atoi(optarg);
@@ -572,14 +543,13 @@ static char *
 sgetsave(s)
 	char *s;
 {
-	char *new = malloc((unsigned) strlen(s) + 1);
+	char *new = strdup(s);
 
 	if (new == NULL) {
 		perror_reply(421, "Local resource failure: malloc");
 		dologout(1);
 		/* NOTREACHED */
 	}
-	(void) strcpy(new, s);
 	return (new);
 }
 
@@ -772,36 +742,13 @@ user(name)
 				syslog(LOG_ERR, "user: username too long");
 				name = "[username too long]";
 			}
-			sprintf(buf, "GSSAPI user %s is%s authorized as %s",
+			snprintf(buf, sizeof(buf),
+				 "GSSAPI user %s is%s authorized as %s",
 				(char *) client_name.value, 
 				authorized ? "" : " not",
 				name);
 		}
-#ifdef KRB5_KRB4_COMPAT
-		else
-#endif /* KRB5_KRB4_COMPAT */
 #endif /* GSSAPI */
-#ifdef KRB5_KRB4_COMPAT
-		if (auth_type && strcmp(auth_type, "KERBEROS_V4") == 0) {
-			int len;
-
-			authorized = kuserok(&kdata,name) == 0;
-			len = sizeof("Kerberos user .@ is not authorized as "
-				     "; Password required.")
-				+ strlen(kdata.pname)
-				+ strlen(kdata.pinst)
-				+ strlen(kdata.prealm)
-				+ strlen(name);
-			if (len >= sizeof(buf)) {
-				syslog(LOG_ERR, "user: username too long");
-				name = "[username too long]";
-			}
-			sprintf(buf, "Kerberos user %s%s%s@%s is%s authorized as %s",
-				kdata.pname, *kdata.pinst ? "." : "",
-				kdata.pinst, kdata.prealm,
-				authorized ? "" : " not", name);
-		}
-#endif /* KRB5_KRB4_COMPAT */
 
 		if (!authorized && authlevel == AUTHLEVEL_AUTHORIZE) {
 			strncat(buf, "; Access denied.",
@@ -907,9 +854,6 @@ end_login()
 #ifdef GSSAPI
 		krb5_cc_destroy(kcontext, ccache);
 #endif
-#ifdef KRB5_KRB4_COMPAT
-		dest_tkt();
-#endif
 		have_creds = 0;
 	}
 	pw = NULL;
@@ -926,18 +870,6 @@ char *name, *passwd;
 	krb5_creds my_creds;
 	krb5_timestamp now;
 #endif /* GSSAPI */
-#ifdef KRB5_KRB4_COMPAT
-	char realm[REALM_SZ];
-#ifndef GSSAPI
-	char **service;
-	KTEXT_ST ticket;
-	AUTH_DAT authdata;
-	des_cblock key;
-	char instance[INST_SZ];
-	unsigned long faddr;
-	struct hostent *hp;
-#endif /* GSSAPI */
-#endif /* KRB5_KRB4_COMPAT */
 	char ccname[MAXPATHLEN];
 
 #ifdef GSSAPI
@@ -946,7 +878,8 @@ char *name, *passwd;
 		return 0;
 	my_creds.client = me;
 
-	sprintf(ccname, "FILE:/tmp/krb5cc_ftpd%ld", (long) getpid());
+	snprintf(ccname, sizeof(ccname), "FILE:/tmp/krb5cc_ftpd%ld",
+		 (long) getpid());
 	if (krb5_cc_resolve(kcontext, ccname, &ccache))
 		return(0);
 	if (krb5_cc_initialize(kcontext, ccache, me))
@@ -979,58 +912,10 @@ char *name, *passwd;
 		krb5_cc_destroy(kcontext, ccache);
 		return(1);
 	}
-#endif /* GSSAPI */
 
-#ifdef KRB5_KRB4_COMPAT
-	if (krb_get_lrealm(realm, 1) != KSUCCESS)
-		goto nuke_ccache;
-
-	sprintf(ccname, "%s_ftpd%ld", TKT_ROOT, (long) getpid());
-	krb_set_tkt_string(ccname);
-
-	if (krb_get_pw_in_tkt(name, "", realm, "krbtgt", realm, 1, passwd))
-		goto nuke_ccache;
-
-#ifndef GSSAPI
-	/* Verify the ticket since we didn't verify the krb5 one. */
-	strncpy(instance, krb_get_phost(hostname), sizeof(instance));
-
-	if ((hp = gethostbyname(instance)) == NULL)
-		goto nuke_ccache;
-	memcpy((char *) &faddr, (char *)hp->h_addr, sizeof(faddr));
-
-	for (service = krb4_services; *service; service++) {
-		if (!read_service_key(*service, instance,
-				      realm, 0, keyfile, key)) {
-			(void) memset(key, 0, sizeof(key));
-			if (krb_mk_req(&ticket, *service,
-				       instance, realm, 33) ||
-			    krb_rd_req(&ticket, *service, instance,
-				       faddr, &authdata,keyfile) ||
-			    kuserok(&authdata, name)) {
-				dest_tkt();
-				goto nuke_ccache;
-			} else
-				break;
-		}
-	}
-
-	if (!*service) {
-		dest_tkt();
-		goto nuke_ccache;
-	}
-
-	if (!want_creds) {
-		dest_tkt();
-		return(1);
-	}
-#endif /* GSSAPI */
-#endif /* KRB5_KRB4_COMPAT */
-
-#if defined(GSSAPI) || defined(KRB5_KRB4_COMPAT)
 	have_creds = 1;
 	return(1);
-#endif /* GSSAPI || KRB5_KRB4_COMPAT */
+#endif /* GSSAPI */
 
 nuke_ccache:
 #ifdef GSSAPI
@@ -1106,16 +991,13 @@ login(passwd, logincode)
 		const char *ccname = krb5_cc_get_name(kcontext, ccache);
 		chown(ccname, pw->pw_uid, pw->pw_gid);
 #endif
-#ifdef KRB5_KRB4_COMPAT
-		chown(tkt_string(), pw->pw_uid, pw->pw_gid);
-#endif
 	}
 
 	(void) krb5_setegid((gid_t)pw->pw_gid);
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 
 	/* open wtmp before chroot */
-	(void) sprintf(ttyline, "ftp%ld", (long) getpid());
+	(void) snprintf(ttyline, sizeof(ttyline), "ftp%ld", (long) getpid());
 	pty_logwtmp(ttyline, pw->pw_name, rhost_sane);
 	logged_in = 1;
 
@@ -1167,9 +1049,8 @@ login(passwd, logincode)
 	if (guest) {
 		reply(230, "Guest login ok, access restrictions apply.");
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: anonymous/%.*s", rhost_sane,
-		    sizeof(proctitle) - strlen(rhost_sane) -
-		    sizeof(": anonymous/"), passwd);
+		snprintf(proctitle, sizeof(proctitle), "%s: anonymous/%.*s",
+			 rhost_sane, passwd);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
@@ -1182,7 +1063,8 @@ login(passwd, logincode)
 			reply(230, "User %s logged in.", pw->pw_name);
 		}
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: %s", rhost_sane, pw->pw_name);
+		snprintf(proctitle, sizeof(proctitle), "%s: %s",
+			 rhost_sane, pw->pw_name);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
@@ -1218,7 +1100,7 @@ retrieve(cmd, name)
 			reply(501, "filename too long");
 			return;
 		}
-		(void) sprintf(line, cmd, name), name = line;
+		(void) snprintf(line, sizeof(line), cmd, name), name = line;
 		fin = ftpd_popen(line, "r"), closefunc = ftpd_pclose;
 		st.st_size = -1;
 #ifndef NOSTBLKSIZE
@@ -1400,9 +1282,10 @@ dataconn(name, size, fmode)
 	byte_count = 0;
 	if (size != (off_t) -1)
 		/* cast size to long in case sizeof(off_t) > sizeof(long) */
-		(void) sprintf (sizebuf, " (%ld bytes)", (long)size);
+		(void) snprintf (sizebuf, sizeof(sizebuf), " (%ld bytes)",
+				 (long)size);
 	else
-		(void) strcpy(sizebuf, "");
+		sizebuf[0] = '\0';
 	if (pdata >= 0) {
 		int s, fromlen = sizeof(data_dest);
 
@@ -1664,7 +1547,7 @@ statfilecmd(filename)
 		reply(501, "filename too long");
 		return;
 	}
-	(void) sprintf(line, "/bin/ls -lgA %s", filename);
+	(void) snprintf(line, sizeof(line), "/bin/ls -lgA %s", filename);
 	fin = ftpd_popen(line, "r");
 	lreply(211, "status of %s:", filename);
 	p = str;
@@ -1713,8 +1596,8 @@ statcmd()
 
 	lreply(211, "%s FTP server status:", hostname);
 	reply(0, "     %s", version);
-	sprintf(str, "     Connected to %s", remotehost[0] ? remotehost : "");
-	sprintf(&str[strlen(str)], " (%s)", rhost_addra);
+	snprintf(str, sizeof(str), "     Connected to %s (%s)",
+		 remotehost[0] ? remotehost : "", rhost_addra);
 	reply(0, "%s", str);
 	if (auth_type) reply(0, "     Authentication type: %s", auth_type);
 	if (logged_in) {
@@ -1729,41 +1612,35 @@ statcmd()
 	else
 		reply(0, "     Waiting for user name");
 	reply(0, "     Protection level: %s", levelnames[dlevel]);
-	sprintf(str, "     TYPE: %s", typenames[type]);
-	if (type == TYPE_A || type == TYPE_E)
-		sprintf(&str[strlen(str)], ", FORM: %s", formnames[form]);
+	snprintf(str, sizeof(str), "     TYPE: %s", typenames[type]);
+	if (type == TYPE_A || type == TYPE_E) {
+		snprintf(&str[strlen(str)], sizeof(str) - strlen(str),
+			 ", FORM: %s", formnames[form]);
+	}
 	if (type == TYPE_L)
-#if 1
 		strncat(str, " 8", sizeof (str) - strlen(str) - 1);
-#else
-/* this is silly. -- eichin@cygnus.com */
-#if NBBY == 8
-		sprintf(&str[strlen(str)], " %d", NBBY);
-#else
-		sprintf(&str[strlen(str)], " %d", bytesize);	/* need definition! */
-#endif
-#endif
-	sprintf(&str[strlen(str)], "; STRUcture: %s; transfer MODE: %s",
-	    strunames[stru], modenames[mode]);
+	snprintf(&str[strlen(str)], sizeof(str) - strlen(str),
+		 "; STRUcture: %s; transfer MODE: %s",
+		 strunames[stru], modenames[mode]);
 	reply(0, "%s", str);
 	if (data != -1)
-		strcpy(str, "     Data connection open");
+		strlcpy(str, "     Data connection open", sizeof(str));
 	else if (pdata != -1) {
-		strcpy(str, "     in Passive mode");
+		strlcpy(str, "     in Passive mode", sizeof(str));
 		sin4 = &pasv_addr;
 		goto printaddr;
 	} else if (usedefault == 0) {
-		strcpy(str, "     PORT");
 		sin4 = &data_dest;
 printaddr:
 		a = (u_char *) &sin4->sin_addr;
 		p = (u_char *) &sin4->sin_port;
 #define UC(b) (((int) b) & 0xff)
-		sprintf(&str[strlen(str)], " (%d,%d,%d,%d,%d,%d)", UC(a[0]),
-			UC(a[1]), UC(a[2]), UC(a[3]), UC(p[0]), UC(p[1]));
+		snprintf(str, sizeof(str), "     PORT (%d,%d,%d,%d,%d,%d)",
+			 UC(a[0]), UC(a[1]), UC(a[2]), UC(a[3]), UC(p[0]),
+			 UC(p[1]));
 #undef UC
 	} else
-		strcpy(str, "     No data connection");
+		strlcpy(str, "     No data connection", sizeof(str));
 	reply(0, "%s", str);
 	reply(211, "End of status");
 }
@@ -1800,10 +1677,10 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 	va_list ap;
 
 	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 #else
-	sprintf(buf, fmt, p0, p1, p2, p3, p4, p5);
+	snprintf(buf, sizeof(buf), fmt, p0, p1, p2, p3, p4, p5);
 #endif
 
 	if (auth_type) {
@@ -1813,33 +1690,9 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 		 */
 		char in[FTP_BUFSIZ*3/2], out[FTP_BUFSIZ*3/2];
 		int length = 0, kerror;
-		if (n) sprintf(in, "%d%c", n, cont_char);
+		if (n) snprintf(in, sizeof(in), "%d%c", n, cont_char);
 		else in[0] = '\0';
 		strncat(in, buf, sizeof (in) - strlen(in) - 1);
-#ifdef KRB5_KRB4_COMPAT
-		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-			if (clevel == PROT_P)
-				length = krb_mk_priv((unsigned char *)in,
-						     (unsigned char *)out,
-						     strlen(in),
-						     schedule, &kdata.session,
-						     &ctrl_addr,
-						     &his_addr);
-			else
-				length = krb_mk_safe((unsigned char *)in,
-						     (unsigned char *)out,
-						     strlen(in),
-						     &kdata.session,
-						     &ctrl_addr,
-						     &his_addr);
-			if (length == -1) {
-				syslog(LOG_ERR,
-				       "krb_mk_%s failed for KERBEROS_V4",
-				       clevel == PROT_P ? "priv" : "safe");
-				fputs(in,stdout);
-			}
-		} else
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 		/* reply (based on level) */
 		if (strcmp(auth_type, "GSSAPI") == 0) {
@@ -1918,10 +1771,10 @@ lreply(n, fmt, p0, p1, p2, p3, p4, p5)
 	va_list ap;
 
 	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 #else
-	sprintf(buf, fmt, p0, p1, p2, p3, p4, p5);
+	snprintf(buf, sizeof(buf), fmt, p0, p1, p2, p3, p4, p5);
 #endif
 	cont_char = '-';
 	reply(n, "%s", buf);
@@ -2083,7 +1936,7 @@ dolog(sin4)
 		exit(1);
 	}
 #ifdef SETPROCTITLE
-	sprintf(proctitle, "%s: connected", rhost_sane);
+	snprintf(proctitle, sizeof(proctitle), "%s: connected", rhost_sane);
 	setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 
@@ -2109,9 +1962,6 @@ dologout(status)
 	if (have_creds) {
 #ifdef GSSAPI
 		krb5_cc_destroy(kcontext, ccache);
-#endif
-#ifdef KRB5_KRB4_COMPAT
-		dest_tkt();
 #endif
 	}
 	/* beware of flushing buffers after a SIGPIPE */
@@ -2230,7 +2080,7 @@ gunique(local)
 	cp = new + strlen(new);
 	*cp++ = '.';
 	for (count = 1; count < 100; count++) {
-		(void) sprintf(cp, "%d", count);
+		(void) snprintf(cp, sizeof(new) - (cp - new), "%d", count);
 		if (stat(new, &st) < 0)
 			return(new);
 	}
@@ -2272,12 +2122,6 @@ char *atype;
 	if (auth_type)
 		reply(534, "Authentication type already set to %s", auth_type);
 	else
-#ifdef KRB5_KRB4_COMPAT
-	if (strcmp(atype, "KERBEROS_V4") == 0)
-		reply(334, "Using authentication type %s; ADAT must follow",
-				temp_auth_type = atype);
-	else
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 	if (strcmp(atype, "GSSAPI") == 0)
 		reply(334, "Using authentication type %s; ADAT must follow",
@@ -2293,13 +2137,6 @@ auth_data(adata)
 char *adata;
 {
 	int kerror, length;
-#ifdef KRB5_KRB4_COMPAT
-	static char **service=NULL;
-	char instance[INST_SZ];
-	KRB4_32 cksum;
-	char buf[FTP_BUFSIZ];
-	u_char out_buf[sizeof(buf)];
-#endif /* KRB5_KRB4_COMPAT */
 
 	if (auth_type) {
 		reply(503, "Authentication already established");
@@ -2309,61 +2146,6 @@ char *adata;
 		reply(503, "Must identify AUTH type before ADAT");
 		return(0);
 	}
-#ifdef KRB5_KRB4_COMPAT
-	if (strcmp(temp_auth_type, "KERBEROS_V4") == 0) {
-	        kerror = radix_encode(adata, out_buf, &length, 1);
-		if (kerror) {
-			reply(501, "Couldn't decode ADAT (%s)",
-			      radix_error(kerror));
-			syslog(LOG_ERR, "Couldn't decode ADAT (%s)",
-			       radix_error(kerror));
-			return(0);
-		}
-		(void) memcpy((char *)ticket.dat, (char *)out_buf, ticket.length = length);
-		strcpy(instance, "*");
-
-		kerror = 255;
-		for (service = krb4_services; *service; service++) {
-		  kerror = krb_rd_req(&ticket, *service, instance,
-				      his_addr.sin_addr.s_addr, 
-				      &kdata, keyfile);
-		  /* Success */
-		  if(!kerror) break;
-		} 
-		/* rd_req failed.... */
-		if(kerror) {
-		  secure_error("ADAT: Kerberos V4 krb_rd_req: %s",
-			       krb_get_err_text(kerror));
-		  return(0);
-		}
-
-		/* add one to the (formerly) sealed checksum, and re-seal it */
-		cksum = kdata.checksum + 1;
-		cksum = htonl(cksum);
-		key_sched(kdata.session,schedule);
-		if ((length = krb_mk_safe((u_char *)&cksum, out_buf, sizeof(cksum),
-					  &kdata.session,&ctrl_addr, &his_addr)) == -1) {
-			secure_error("ADAT: krb_mk_safe failed");
-			return(0);
-		}
-		if (length >= (FTP_BUFSIZ - sizeof("ADAT=")) / 4 * 3) {
-			secure_error("ADAT: reply too long");
-			return(0);
-		}
-
-		kerror = radix_encode(out_buf, buf, &length, 0);
-		if (kerror) {
-			secure_error("Couldn't encode ADAT reply (%s)",
-				     radix_error(kerror));
-			return(0);
-		}
-		reply(235, "ADAT=%s", buf);
-		/* Kerberos V4 authentication succeeded */
-		auth_type = temp_auth_type;
-		temp_auth_type = NULL;
-		return(1);
-	}
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 	if (strcmp(temp_auth_type, "GSSAPI") == 0) {
 		int replied = 0;
@@ -2413,7 +2195,8 @@ char *adata;
 		localname[sizeof(localname) - 1] = '\0';
 
 		for (gservice = gss_services; *gservice; gservice++) {
-			sprintf(service_name, "%s@%s", *gservice, localname);
+			snprintf(service_name, sizeof(service_name),
+				 "%s@%s", *gservice, localname);
 			name_buf.value = service_name;
 			name_buf.length = strlen(name_buf.value) + 1;
 			if (debug)
@@ -2722,7 +2505,8 @@ send_file_list(whichfiles)
 				ret = -2; /* XXX */
 				goto data_err;
 			}
-			sprintf(nbuf, "%s/%s", dirname, dir->d_name);
+			snprintf(nbuf, sizeof(nbuf), "%s/%s",
+				 dirname, dir->d_name);
 
 			/*
 			 * We have to do a stat to insure it's
@@ -2918,17 +2702,13 @@ ftpd_gss_convert_creds(name, creds)
 	OM_uint32 major_status, minor_status;
 	krb5_principal me;
 	char ccname[MAXPATHLEN];
-#ifdef KRB5_KRB4_COMPAT
-	krb5_principal kpcserver;
-	krb5_creds increds, *v5creds;
-	CREDENTIALS v4creds;
-#endif
 
 	/* Set up ccache */
 	if (krb5_parse_name(kcontext, name, &me))
 		return;
 
-	sprintf(ccname, "FILE:/tmp/krb5cc_ftpd%ld", (long) getpid());
+	snprintf(ccname, sizeof(ccname), "FILE:/tmp/krb5cc_ftpd%ld",
+		 (long) getpid());
 	if (krb5_cc_resolve(kcontext, ccname, &ccache))
 		return;
 	if (krb5_cc_initialize(kcontext, ccache, me))
@@ -2939,47 +2719,9 @@ ftpd_gss_convert_creds(name, creds)
 	if (major_status != GSS_S_COMPLETE)
 		goto cleanup;
 
-#ifdef KRB5_KRB4_COMPAT
-	/* Convert krb5 creds to krb4 */
-
-	if (krb5_build_principal_ext(kcontext, &kpcserver, 
-				     krb5_princ_realm(kcontext, me)->length,
-				     krb5_princ_realm(kcontext, me)->data,
-				     6, "krbtgt",
-				     krb5_princ_realm(kcontext, me)->length,
-				     krb5_princ_realm(kcontext, me)->data,
-				     0))
-		goto cleanup;
-
-	memset((char *) &increds, 0, sizeof(increds));
-	increds.client = me;
-	increds.server = kpcserver;
-	increds.times.endtime = 0;
-	increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
-	if (krb5_get_credentials(kcontext, 0, ccache, &increds, &v5creds))
-		goto cleanup;
-	if (krb524_convert_creds_kdc(kcontext, v5creds, &v4creds))
-		goto cleanup;
-
-	sprintf(ccname, "%s_ftpd%ld", TKT_ROOT, (long) getpid());
-	krb_set_tkt_string(ccname);
-
-	if (in_tkt(v4creds.pname, v4creds.pinst) != KSUCCESS)
-		goto cleanup;
-
-	if (krb_save_credentials(v4creds.service, v4creds.instance,
-				 v4creds.realm, v4creds.session,
-				 v4creds.lifetime, v4creds.kvno,
-				 &(v4creds.ticket_st), v4creds.issue_date))
-		goto cleanup_v4;
-#endif /* KRB5_KRB4_COMPAT */
 	have_creds = 1;
 	return;
 
-#ifdef KRB5_KRB4_COMPAT
-cleanup_v4:
-	dest_tkt();
-#endif
 cleanup:
 	krb5_cc_destroy(kcontext, ccache);
 }

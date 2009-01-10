@@ -425,9 +425,9 @@ main (argc, argv)
 	   cache will be created.*/
 	
 	do {
-	    sprintf(cc_target_tag, "%s%ld.%d",
-		    KRB5_SECONDARY_CACHE,
-		    (long) target_uid, gen_sym());
+	    snprintf(cc_target_tag, KRB5_SEC_BUFFSIZE, "%s%ld.%d",
+		     KRB5_SECONDARY_CACHE,
+		     (long) target_uid, gen_sym());
 	    cc_target_tag_tmp = strchr(cc_target_tag, ':') + 1;
 	    
 	}while ( !stat ( cc_target_tag_tmp, &st_temp)); 
@@ -855,15 +855,16 @@ char *sh;
 static char * ontty()
 {
     char *p, *ttyname();
-    static char buf[MAXPATHLEN + 4];
+    static char buf[MAXPATHLEN + 5];
+    int result;
     
     buf[0] = 0;
     if ((p = ttyname(STDERR_FILENO))) {
-	if (strlen (p) > MAXPATHLEN) {
+	result = snprintf(buf, sizeof(buf), " on %s", p);
+	if (SNPRINTF_OVERFLOW(result, sizeof(buf))) {
 	    fprintf (stderr, "terminal name %s too long\n", p);
 	    exit (1);
 	}
-	sprintf(buf, " on %s", p);
     }
     return (buf);
 }
@@ -875,11 +876,7 @@ static int set_env_var(name, value)
 {
     char * env_var_buf;
     
-    /* allocate extra two spaces, one for the = and one for the \0 */  
-    env_var_buf = (char *) xcalloc(2 + strlen(name) + strlen(value),
-				   sizeof(char)); 
-    
-    sprintf(env_var_buf,"%s=%s",name, value);  
+    asprintf(&env_var_buf,"%s=%s",name, value);  
     return putenv(env_var_buf);
     
 }

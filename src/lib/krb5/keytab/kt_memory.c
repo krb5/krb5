@@ -252,7 +252,7 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 	goto done;
     }
 
-    if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL) {
+    if ((data->name = strdup(name)) == NULL) {
 	k5_mutex_destroy(&data->lock);
 	krb5_xfree(data);
 	krb5_xfree(list->keytab);
@@ -260,8 +260,6 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 	err = ENOMEM;
 	goto done;
     }
-
-    (void) strcpy(data->name, name);
 
     data->link = NULL;
     data->refcount = 0;
@@ -474,21 +472,12 @@ krb5_mkt_get_entry(krb5_context context, krb5_keytab id,
 krb5_error_code KRB5_CALLCONV
 krb5_mkt_get_name(krb5_context context, krb5_keytab id, char *name, unsigned int len)
 {
+    int result;
+
     memset(name, 0, len);
-
-    if (len < strlen(id->ops->prefix)+2)
+    result = snprintf(name, len, "%s:%s", id->ops->prefix, KTNAME(id));
+    if (SNPRINTF_OVERFLOW(result, len))
 	return(KRB5_KT_NAME_TOOLONG);
-    strcpy(name, id->ops->prefix);
-    name += strlen(id->ops->prefix);
-    name[0] = ':';
-    name++;
-    len -= strlen(id->ops->prefix)+1;
-
-    if (len < strlen(KTNAME(id))+1)
-	return(KRB5_KT_NAME_TOOLONG);
-    strcpy(name, KTNAME(id));
-    /* strcpy will NUL-terminate the destination */
-
     return(0);
 }
 

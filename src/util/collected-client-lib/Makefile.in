@@ -77,8 +77,3 @@ clean-unix:: clean-libs
 @lib_frag@
 #@#libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#

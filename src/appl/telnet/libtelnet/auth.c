@@ -142,24 +142,6 @@ Authenticator authenticators[] = {
 				kerberos5_status,
 				kerberos5_printsub },
 #endif
-#ifdef	KRB4
-# ifdef ENCRYPTION
-	{ AUTHTYPE_KERBEROS_V4, AUTH_WHO_CLIENT|AUTH_HOW_MUTUAL,
-				kerberos4_init,
-				kerberos4_send,
-				kerberos4_is,
-				kerberos4_reply,
-				kerberos4_status,
-				kerberos4_printsub },
-# endif	/* ENCRYPTION */
-	{ AUTHTYPE_KERBEROS_V4, AUTH_WHO_CLIENT|AUTH_HOW_ONE_WAY,
-				kerberos4_init,
-				kerberos4_send,
-				kerberos4_is,
-				kerberos4_reply,
-				kerberos4_status,
-				kerberos4_printsub },
-#endif
 	{ 0, },
 };
 
@@ -658,7 +640,7 @@ auth_gen_printsub(data, cnt, buf, buflen)
 	buf[buflen-2] = '*';
 	buflen -= 2;
 	for (; cnt > 0; cnt--, data++) {
-		sprintf((char *)tbuf, " %d", *data);
+		snprintf((char *)tbuf, sizeof(tbuf), " %d", *data);
 		for (cp = tbuf; *cp && buflen > 0; --buflen)
 			*buf++ = *cp++;
 		if (buflen <= 0)

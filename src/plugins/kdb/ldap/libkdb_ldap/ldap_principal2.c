@@ -74,9 +74,10 @@ berval2tl_data(struct berval *in, krb5_tl_data **out)
  */
 
 krb5_error_code
-krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
+krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     krb5_context context;
     krb5_const_principal searchfor;
+    unsigned int flags;
     krb5_db_entry *entries;	/* filled in */
     int *nentries;		/* how much room/how many found */
     krb5_boolean *more;		/* are there more? */
@@ -319,13 +320,13 @@ cleanup:
 }
 
 krb5int_access accessor;
-extern int kldap_ensure_initialized (void);
 
 static krb5_error_code
 asn1_encode_sequence_of_keys (krb5_key_data *key_data, krb5_int16 n_key_data,
 			      krb5_int32 mkvno, krb5_data **code)
 {
     krb5_error_code err;
+    ldap_seqof_key_data val;
 
     /*
      * This should be pushed back into other library initialization
@@ -335,8 +336,11 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data, krb5_int16 n_key_data,
     if (err)
 	return err;
 
-    return accessor.asn1_ldap_encode_sequence_of_keys(key_data, n_key_data,
-						      mkvno, code);
+    val.key_data = key_data;
+    val.n_key_data = n_key_data;
+    val.mkvno = mkvno;
+
+    return accessor.asn1_ldap_encode_sequence_of_keys(&val, code);
 }
 
 static krb5_error_code
@@ -344,6 +348,7 @@ asn1_decode_sequence_of_keys (krb5_data *in, krb5_key_data **out,
 			      krb5_int16 *n_key_data, int *mkvno)
 {
     krb5_error_code err;
+    ldap_seqof_key_data *p;
 
     /*
      * This should be pushed back into other library initialization
@@ -353,8 +358,14 @@ asn1_decode_sequence_of_keys (krb5_data *in, krb5_key_data **out,
     if (err)
 	return err;
 
-    return accessor.asn1_ldap_decode_sequence_of_keys(in, out, n_key_data,
-						      mkvno);
+    err = accessor.asn1_ldap_decode_sequence_of_keys(in, &p);
+    if (err)
+	return err;
+    *out = p->key_data;
+    *n_key_data = p->n_key_data;
+    *mkvno = p->mkvno;
+    free(p);
+    return 0;
 }
 
 
@@ -614,7 +625,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		    if (st == KRB5_KDB_NOENTRY || st == KRB5_KDB_CONSTRAINT_VIOLATION) {
 			int ost = st;
 			st = EINVAL;
-			sprintf(errbuf, "'%s' not found: ", xargs.containerdn);
+			snprintf(errbuf, sizeof(errbuf), "'%s' not found: ",
+				 xargs.containerdn);
 			prepend_err_str(context, errbuf, st, ost);
 		    }
 		    goto cleanup;
@@ -631,10 +643,10 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    }
 	    CHECK_NULL(subtree);
 
-	    standalone_principal_dn = malloc(strlen("krbprincipalname=") + strlen(user) + strlen(",") +
-					     strlen(subtree) + 1);
+	    if (asprintf(&standalone_principal_dn, "krbprincipalname=%s,%s",
+			 user, subtree) < 0)
+		standalone_principal_dn = NULL;
 	    CHECK_NULL(standalone_principal_dn);
-	    sprintf(standalone_principal_dn, "krbprincipalname=%s,%s", user, subtree);
 	    /*
 	     * free subtree when you are done using the subtree
 	     * set the boolean create_standalone_prinicipal to TRUE
@@ -1062,7 +1074,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		/* a load operation must replace an existing entry */
 		st = ldap_delete_ext_s(ld, standalone_principal_dn, NULL, NULL);
 		if (st != LDAP_SUCCESS) {
-		    sprintf(errbuf, "Principal delete failed (trying to replace entry): %s",
+		    snprintf(errbuf, sizeof(errbuf), "Principal delete failed (trying to replace entry): %s",
 			ldap_err2string(st));
 		    st = translate_ldap_error (st, OP_ADD);
 		    krb5_set_error_message(context, st, "%s", errbuf);
@@ -1072,7 +1084,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		}
 	    }
 	    if (st != LDAP_SUCCESS) {
-		sprintf(errbuf, "Principal add failed: %s", ldap_err2string(st));
+		snprintf(errbuf, sizeof(errbuf), "Principal add failed: %s", ldap_err2string(st));
 		st = translate_ldap_error (st, OP_ADD);
 		krb5_set_error_message(context, st, "%s", errbuf);
 		goto cleanup;
@@ -1109,7 +1121,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		st = ldap_modify_ext_s(ld, principal_dn, mods, NULL, NULL);
 
 	    if (st != LDAP_SUCCESS) {
-		sprintf(errbuf, "User modification failed: %s", ldap_err2string(st));
+		snprintf(errbuf, sizeof(errbuf), "User modification failed: %s", ldap_err2string(st));
 		st = translate_ldap_error (st, OP_MOD);
 		krb5_set_error_message(context, st, "%s", errbuf);
 		goto cleanup;

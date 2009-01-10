@@ -44,6 +44,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 static krb5_error_code
 krb5_get_credentials_core(krb5_context context, krb5_flags options,
@@ -110,6 +111,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     krb5_creds **tgts;
     krb5_flags fields;
     int not_ktype;
+    int kdcopt = 0;
 
     retval = krb5_get_credentials_core(context, options,
 				       in_creds,
@@ -141,7 +143,11 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     else
 	not_ktype = 0;
 
-    retval = krb5_get_cred_from_kdc(context, ccache, ncreds, out_creds, &tgts);
+    if (options & KRB5_GC_CANONICALIZE)
+	kdcopt |= KDC_OPT_CANONICALIZE;
+
+    retval = krb5_get_cred_from_kdc_opt(context, ccache, ncreds,
+					out_creds, &tgts, kdcopt);
     if (tgts) {
 	register int i = 0;
 	krb5_error_code rv2;

@@ -638,11 +638,10 @@ errcode_t profile_set_relation_value(struct profile_node *node,
 	if (!node->value)
 		return PROF_SET_SECTION_VALUE;
 
-	cp = malloc(strlen(new_value)+1);
+	cp = strdup(new_value);
 	if (!cp)
 		return ENOMEM;
 
-	strcpy(cp, new_value);
 	free(node->value);
 	node->value = cp;
 
@@ -667,10 +666,9 @@ errcode_t profile_rename_node(struct profile_node *node, const char *new_name)
 	/*
 	 * Make sure we can allocate memory for the new name, first!
 	 */
-	new_string = malloc(strlen(new_name)+1);
+	new_string = strdup(new_name);
 	if (!new_string)
 		return ENOMEM;
-	strcpy(new_string, new_name);
 
 	/*
 	 * Find the place to where the new node should go.  We look

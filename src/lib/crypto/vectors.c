@@ -129,10 +129,10 @@ test_mit_des_s2k ()
 	sd.data = (char *) s;
 
 	assert (strlen (s) + 4 < sizeof (buf));
-	sprintf (buf, "\"%s\"", s);
+	snprintf (buf, sizeof (buf), "\"%s\"", s);
 	printf (  "salt:     %-25s", buf);
 	printhex (strlen(s), s);
-	sprintf (buf, "\"%s\"", p);
+	snprintf (buf, sizeof (buf), "\"%s\"", p);
 	printf ("\npassword: %-25s", buf);
 	printhex (strlen(p), p);
 	printf ("\n");
@@ -174,10 +174,10 @@ test_s2k (krb5_enctype enctype)
 	key.contents = key_contents;
 
 	assert (strlen (s) + 4 < sizeof (buf));
-	sprintf (buf, "\"%s\"", s);
+	snprintf (buf, sizeof(buf), "\"%s\"", s);
 	printf (  "salt:\t%s\n\t", buf);
 	printhex (strlen(s), s);
-	sprintf (buf, "\"%s\"", p);
+	snprintf (buf, sizeof(buf), "\"%s\"", p);
 	printf ("\npasswd:\t%s\n\t", buf);
 	printhex (strlen(p), p);
 	printf ("\n");

@@ -79,6 +79,8 @@
 #include <libtelnet/misc-proto.h>
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION)  */
 
+#include <k5-platform.h>
+
 static int is_unique (char *, char **, char **);
 
 
@@ -867,8 +869,8 @@ suboption()
 	    name = gettermname();
 	    len = strlen(name) + 4 + 2;
 	    if (len < NETROOM()) {
-		sprintf((char *)temp, "%c%c%c%c%s%c%c", IAC, SB, TELOPT_TTYPE,
-				TELQUAL_IS, name, IAC, SE);
+		snprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+			 IAC, SB, TELOPT_TTYPE, TELQUAL_IS, name, IAC, SE);
 		ring_supply_data(&netoring, temp, len);
 		printsub('>', &temp[2], len-2);
 	    } else {
@@ -889,8 +891,8 @@ suboption()
 
 	    TerminalSpeeds(&ispeed, &o_speed);
 
-	    sprintf((char *)temp, "%c%c%c%c%ld,%ld%c%c", IAC, SB, TELOPT_TSPEED,
-		    TELQUAL_IS, o_speed, ispeed, IAC, SE);
+	    snprintf((char *)temp, sizeof(temp), "%c%c%c%c%ld,%ld%c%c", IAC,
+		     SB, TELOPT_TSPEED, TELQUAL_IS, o_speed, ispeed, IAC, SE);
 	    len = strlen((char *)temp+4) + 4;	/* temp[3] is 0 ... */
 
 	    if (len < NETROOM()) {
@@ -995,8 +997,8 @@ suboption()
 		send_wont(TELOPT_XDISPLOC, 1);
 		break;
 	    }
-	    sprintf((char *)temp, "%c%c%c%c%s%c%c", IAC, SB, TELOPT_XDISPLOC,
-		    TELQUAL_IS, dp, IAC, SE);
+	    snprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+		     IAC, SB, TELOPT_XDISPLOC, TELQUAL_IS, dp, IAC, SE);
 	    len = strlen((char *)temp+4) + 4;	/* temp[3] is 0 ... */
 
 	    if (len < NETROOM()) {

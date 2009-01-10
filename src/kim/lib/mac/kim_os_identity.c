@@ -85,12 +85,14 @@ kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
     if (!err && !in_identity ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    /* Short circuit if password saving is disabled */
+    if (!err && !kim_library_allow_home_directory_access ()) {
+        err = check_error (ENOENT); /* simulate no password found */
+    }
+    
     if (!err && !kim_os_identity_allow_save_password ()) {
         err = kim_os_identity_remove_saved_password (in_identity);
         if (!err) {
-            /* simulate no password found */
-            err = check_error (ENOENT);
+            err = check_error (ENOENT); /* simulate no password found */
         }
     }
     
@@ -116,8 +118,8 @@ kim_error kim_os_identity_get_saved_password (kim_identity  in_identity,
         err = kim_string_create_from_buffer (out_password, buffer, length);
     }
     
-    if (name  ) { kim_string_free (&name); }
-    if (realm ) { kim_string_free (&realm); }
+    kim_string_free (&name);
+    kim_string_free (&realm);
     if (buffer) { SecKeychainItemFreeContent (NULL, buffer); }
     
     return check_error (err);
@@ -135,7 +137,10 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
     if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    /* Short circuit if password saving is disabled */
+    if (!err && !kim_library_allow_home_directory_access ()) {
+        return KIM_NO_ERROR; /* simulate no error */
+    }
+    
     if (!err && !kim_os_identity_allow_save_password ()) {
         return kim_os_identity_remove_saved_password (in_identity);
     }
@@ -153,7 +158,7 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
         UInt32 namelen = strlen (name);
         UInt32 realmlen = strlen (realm);
         
-        // Add the password to the keychain
+        /* Add the password to the keychain */
         err = SecKeychainAddGenericPassword (nil, 
                                              realmlen, realm,
                                              namelen, name,
@@ -161,8 +166,8 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
                                              &itemRef); 
         
         if (err == errSecDuplicateItem) {
-            // We've already stored a password for this principal
-            // but it might have changed so update it
+            /* We've already stored a password for this principal
+             * but it might have changed so update it */
             void *buffer = NULL;
             UInt32 length = 0;
             
@@ -186,7 +191,7 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
             }
             
         } else if (!err) {
-            // We added a new entry, add a descriptive label
+            /* We added a new entry, add a descriptive label */
             SecKeychainAttributeList *copiedAttrs = NULL;
             SecKeychainAttributeInfo attrInfo;
             UInt32 tag = 7;
@@ -231,8 +236,8 @@ kim_error kim_os_identity_set_saved_password (kim_identity in_identity,
         if (itemRef) { CFRelease (itemRef); }
     }
     
-    if (name ) { kim_string_free (&name); }
-    if (realm) { kim_string_free (&realm); }
+    kim_string_free (&name);
+    kim_string_free (&realm);
     
     return check_error (err);
 }    
@@ -246,6 +251,10 @@ kim_error kim_os_identity_remove_saved_password (kim_identity in_identity)
     kim_string name = NULL;
     
     if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
+    
+    if (!err && !kim_library_allow_home_directory_access ()) {
+        return KIM_NO_ERROR; /* simulate no error */
+    }
     
     if (!err) {
         err = kim_identity_get_components_string (in_identity, &name);
@@ -278,8 +287,8 @@ kim_error kim_os_identity_remove_saved_password (kim_identity in_identity)
         if (itemRef) { CFRelease (itemRef); }
     }
     
-    if (name ) { kim_string_free (&name); }
-    if (realm) { kim_string_free (&realm); }
+    kim_string_free (&name);
+    kim_string_free (&realm);
     
     return check_error (err);
 }    

@@ -51,6 +51,33 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+/*
+ * Copyright (c) 2006-2008, Novell, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *   * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *   * The copyright holder's name is not used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "k5-int.h"
 #include "kdc_util.h"
@@ -236,13 +263,13 @@ static krb5_preauth_systems static_preauth_systems[] = {
 	"pkinit",
 	KRB5_PADATA_PK_AS_REQ,
 	PA_SUFFICIENT,	
-	NULL,			// pa_sys_context
-	NULL,			// init
-	NULL,			// fini
+	NULL,			/* pa_sys_context */
+	NULL,			/* init */
+	NULL,			/* fini */
 	get_pkinit_edata,	
 	verify_pkinit_request,
 	return_pkinit_response,
-	NULL			// free_pa_request_context
+	NULL			/* free_pa_request_context */
     },
 #endif /* APPLE_PKINIT */
     {
@@ -311,6 +338,27 @@ static krb5_preauth_systems static_preauth_systems[] = {
 	0,
 	0
     },
+    {
+	"pac-request",
+	KRB5_PADATA_PAC_REQUEST,
+	PA_PSEUDO,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+    },
+#if 0
+    {
+	"server-referral",
+	KRB5_PADATA_SERVER_REFERRAL,
+	PA_PSEUDO,
+	0,
+	0,
+	return_server_referral
+    },
+#endif
     { "[end]", -1,}
 };
 
@@ -321,21 +369,18 @@ static struct plugin_dir_handle preauth_plugins;
 krb5_error_code
 load_preauth_plugins(krb5_context context)
 {
-    struct errinfo err;
     void **preauth_plugins_ftables;
     struct krb5plugin_preauth_server_ftable_v1 *ftable;
-    int module_count, i, j, k;
+    size_t module_count, i, j, k;
     void *plugin_context;
     preauth_server_init_proc server_init_proc = NULL;
     char **kdc_realm_names = NULL;
-
-    memset(&err, 0, sizeof(err));
 
     /* Attempt to load all of the preauth plugins we can find. */
     PLUGIN_DIR_INIT(&preauth_plugins);
     if (PLUGIN_DIR_OPEN(&preauth_plugins) == 0) {
 	if (krb5int_open_plugin_dirs(objdirs, NULL,
-				     &preauth_plugins, &err) != 0) {
+				     &preauth_plugins, &context->err) != 0) {
 	    return KRB5_PLUGIN_NO_HANDLE;
 	}
     }
@@ -344,7 +389,7 @@ load_preauth_plugins(krb5_context context)
     preauth_plugins_ftables = NULL;
     if (krb5int_get_plugin_dir_data(&preauth_plugins,
 				    "preauthentication_server_1",
-				    &preauth_plugins_ftables, &err) != 0) {
+				    &preauth_plugins_ftables, &context->err) != 0) {
 	return KRB5_PLUGIN_NO_HANDLE;
     }
 
@@ -384,7 +429,7 @@ load_preauth_plugins(krb5_context context)
 	krb5int_free_plugin_dir_data(preauth_plugins_ftables);
 	return ENOMEM;
     }
-    for (i = 0; i < kdc_numrealms; i++) {
+    for (i = 0; i < (size_t)kdc_numrealms; i++) {
 	kdc_realm_names[i] = kdc_realmlist[i]->realm_name;
     }
     kdc_realm_names[i] = NULL;
@@ -901,8 +946,7 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
 			  "%spreauth required but hint list is empty",
 			  hw_only ? "hw" : "");
     }
-    retval = encode_krb5_padata_sequence((const krb5_pa_data **) pa_data,
-					 &edat);
+    retval = encode_krb5_padata_sequence(pa_data, &edat);
     if (retval)
 	goto errout;
     *e_data = *edat;
@@ -1108,11 +1152,12 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s", emsg);
 	krb5_free_error_message(context, emsg);
     }
+
     /* The following switch statement allows us
      * to return some preauth system errors back to the client.
      */
     switch(retval) {
-    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
+    case 0: /* in case of PA-PAC-REQUEST with no PA-ENC-TIMESTAMP */
     case KRB5KRB_AP_ERR_SKEW:
     case KRB5KDC_ERR_ETYPE_NOSUPP:
     /* rfc 4556 */
@@ -1136,6 +1181,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     /* This value is shared with KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED. */
     /* case KRB5KDC_ERR_KEY_TOO_WEAK: */
 	return retval;
+    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     default:
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
@@ -1299,7 +1345,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     krb5_timestamp		timenow;
     krb5_error_code		decrypt_err = 0;
 
-    scratch.data = pa->contents;
+    scratch.data = (char *)pa->contents;
     scratch.length = pa->length;
 
     enc_ts_data.data = 0;
@@ -1508,10 +1554,9 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
 	}
     }
     if (etype_info2)
-	retval = encode_krb5_etype_info2((const krb5_etype_info_entry **) entry,
-				    &scratch);
-    else 	retval = encode_krb5_etype_info((const krb5_etype_info_entry **) entry,
-				    &scratch);
+	retval = encode_krb5_etype_info2(entry, &scratch);
+    else
+ 	retval = encode_krb5_etype_info(entry, &scratch);
     if (retval)
 	goto cleanup;
     pa_data->contents = (unsigned char *)scratch->data;
@@ -1603,13 +1648,13 @@ etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata,
 	goto cleanup;
 
     if (etype_info2)
-	retval = encode_krb5_etype_info2((const krb5_etype_info_entry **) entry, &scratch);
+	retval = encode_krb5_etype_info2(entry, &scratch);
     else
-	retval = encode_krb5_etype_info((const krb5_etype_info_entry **) entry, &scratch);
+	retval = encode_krb5_etype_info(entry, &scratch);
 
     if (retval)
 	goto cleanup;
-    tmp_padata->contents = scratch->data;
+    tmp_padata->contents = (krb5_octet *)scratch->data;
     tmp_padata->length = scratch->length;
     *send_pa = tmp_padata;
 
@@ -1779,7 +1824,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
      * all this once.
      */
 
-    scratch.data = in_padata->contents;
+    scratch.data = (char *)in_padata->contents;
     scratch.length = in_padata->length;
     
     if ((retval = decode_krb5_sam_response(&scratch, &sr))) {
@@ -2092,7 +2137,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
       if (retval) goto cleanup;
       pa_data->magic = KV5M_PA_DATA;
       pa_data->pa_type = KRB5_PADATA_SAM_CHALLENGE;
-      pa_data->contents = scratch->data;
+      pa_data->contents = (krb5_octet *)scratch->data;
       pa_data->length = scratch->length;
       
       retval = 0;
@@ -2260,7 +2305,7 @@ sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
       if (retval) goto cleanup;
       pa_data->magic = KV5M_PA_DATA;
       pa_data->pa_type = KRB5_PADATA_SAM_CHALLENGE;
-      pa_data->contents = scratch->data;
+      pa_data->contents = (krb5_octet *)scratch->data;
       pa_data->length = scratch->length;
       
       retval = 0;
@@ -2291,7 +2336,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
     krb5_timestamp		timenow;
     char			*princ_req = 0, *princ_psr = 0;
 
-    scratch.data = pa->contents;
+    scratch.data = (char *)pa->contents;
     scratch.length = pa->length;
     
     if ((retval = decode_krb5_sam_response(&scratch, &sr))) {
@@ -2862,3 +2907,146 @@ cleanup:
 }
 
 #endif /* APPLE_PKINIT */
+
+/*
+ * Returns TRUE if the PAC should be included
+ */
+krb5_boolean
+include_pac_p(krb5_context context, krb5_kdc_req *request)
+{
+    krb5_error_code		code;
+    krb5_pa_data		**padata;
+    krb5_boolean		retval = TRUE; /* default is to return PAC */
+    krb5_data			data;
+    krb5_pa_pac_req		*req = NULL;
+
+    if (request->padata == NULL) {
+	return retval;
+    }
+
+    for (padata = request->padata; *padata != NULL; padata++) {
+	if ((*padata)->pa_type == KRB5_PADATA_PAC_REQUEST) {
+	    data.data = (char *)(*padata)->contents;
+	    data.length = (*padata)->length;
+
+	    code = decode_krb5_pa_pac_req(&data, &req);
+	    if (code == 0) {
+		retval = req->include_pac;
+		krb5_free_pa_pac_req(context, req);
+		req = NULL;
+	    }
+	    break;
+	}
+    }
+
+    return retval;
+}
+
+krb5_error_code
+return_svr_referral_data(krb5_context context,
+			 krb5_db_entry *server,
+			 krb5_enc_kdc_rep_part *reply_encpart)
+{
+    krb5_error_code		code;
+    krb5_tl_data		tl_data;
+    krb5_pa_data		*pa_data;
+
+    /* This should be initialized and only used for Win2K compat */
+    assert(reply_encpart->enc_padata == NULL);
+
+    tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
+
+    code = krb5_dbe_lookup_tl_data(context, server, &tl_data);
+    if (code || tl_data.tl_data_length == 0)
+	return 0; /* no server referrals to return */
+
+    pa_data = (krb5_pa_data *)malloc(sizeof(*pa_data));
+    if (pa_data == NULL)
+	return ENOMEM;
+
+    pa_data->magic = KV5M_PA_DATA;
+    pa_data->pa_type = KRB5_PADATA_SVR_REFERRAL_INFO;
+    pa_data->length = tl_data.tl_data_length;
+    pa_data->contents = malloc(pa_data->length);
+    if (pa_data->contents == NULL) {
+	free(pa_data);
+	return ENOMEM;
+    }
+    memcpy(pa_data->contents, tl_data.tl_data_contents, tl_data.tl_data_length);
+
+    reply_encpart->enc_padata = (krb5_pa_data **)calloc(2, sizeof(krb5_pa_data *));
+    if (reply_encpart->enc_padata == NULL) {
+	free(pa_data->contents);
+	free(pa_data);
+	return ENOMEM;
+    }    
+
+    reply_encpart->enc_padata[0] = pa_data;
+    reply_encpart->enc_padata[1] = NULL;
+
+    return 0;
+}
+
+#if 0
+static krb5_error_code return_server_referral(krb5_context context,
+					      krb5_pa_data * padata, 
+					      krb5_db_entry *client,
+					      krb5_db_entry *server,
+					      krb5_kdc_req *request, krb5_kdc_rep *reply,
+					      krb5_key_data *client_key,
+					      krb5_keyblock *encrypting_key,
+					      krb5_pa_data **send_pa)
+{
+    krb5_error_code		code;
+    krb5_tl_data		tl_data;
+    krb5_pa_data		*pa_data;
+    krb5_enc_data		enc_data;
+    krb5_data			plain;
+    krb5_data			*enc_pa_data;
+
+    *send_pa = NULL;
+
+    tl_data.tl_data_type = KRB5_TL_SERVER_REFERRAL;
+
+    code = krb5_dbe_lookup_tl_data(context, server, &tl_data);
+    if (code || tl_data.tl_data_length == 0)
+	return 0; /* no server referrals to return */
+
+    plain.length = tl_data.tl_data_length;
+    plain.data = tl_data.tl_data_contents;
+
+    /* Encrypt ServerReferralData */
+    code = krb5_encrypt_helper(context, encrypting_key,
+			       KRB5_KEYUSAGE_PA_SERVER_REFERRAL_DATA,
+			       &plain, &enc_data);
+    if (code)
+	return code;
+
+    /* Encode ServerReferralData into PA-SERVER-REFERRAL-DATA */
+    code = encode_krb5_enc_data(&enc_data, &enc_pa_data);
+    if (code) {
+	krb5_free_data_contents(context, &enc_data.ciphertext);
+	return code;
+    }
+
+    krb5_free_data_contents(context, &enc_data.ciphertext);
+
+    /* Return PA-SERVER-REFERRAL-DATA */
+    pa_data = (krb5_pa_data *)malloc(sizeof(*pa_data));
+    if (pa_data == NULL) {
+	krb5_free_data(context, enc_pa_data);
+	return ENOMEM;
+    }
+
+    pa_data->magic = KV5M_PA_DATA;
+    pa_data->pa_type = KRB5_PADATA_SVR_REFERRAL_INFO;
+    pa_data->length = enc_pa_data->length;
+    pa_data->contents = enc_pa_data->data;
+
+    free(enc_pa_data); /* don't free contents */
+
+    *send_pa = pa_data;
+
+    return 0;
+}
+#endif

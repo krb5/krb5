@@ -30,13 +30,24 @@ MKSTEMP_OBJ= @MKSTEMP_OBJ@
 ##DOS##MKSTEMP_ST_OBJ= mkstemp.o
 ##DOS##MKSTEMP_OBJ= $(OUTPRE)mkstemp.$(OBJEXT)
 
+STRLCPY_ST_OBJ=@STRLCPY_ST_OBJ@
+STRLCPY_OBJ=@STRLCPY_OBJ@
+
+PRINTF_ST_OBJ= @PRINTF_ST_OBJ@
+PRINTF_OBJ= @PRINTF_OBJ@
+
 STLIBOBJS= \
 	threads.o \
 	init-addrinfo.o \
 	plugins.o \
 	errors.o \
+	k5buf.o \
 	gmt_mktime.o \
 	fake-addrinfo.o \
+	utf8.o \
+	utf8_conv.o \
+	$(STRLCPY_ST_OBJ) \
+	$(PRINTF_ST_OBJ) \
 	$(MKSTEMP_ST_OBJ)
 
 LIBOBJS= \
@@ -44,8 +55,13 @@ LIBOBJS= \
 	$(OUTPRE)init-addrinfo.$(OBJEXT) \
 	$(OUTPRE)plugins.$(OBJEXT) \
 	$(OUTPRE)errors.$(OBJEXT) \
+	$(OUTPRE)k5buf.$(OBJEXT) \
 	$(OUTPRE)gmt_mktime.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
+	$(OUTPRE)utf8.$(OBJEXT) \
+	$(OUTPRE)utf8_conv.$(OBJEXT) \
+	$(STRLCPY_OBJ) \
+	$(PRINTF_OBJ) \
 	$(MKSTEMP_OBJ)
 
 STOBJLISTS=OBJS.ST
@@ -58,9 +74,15 @@ SRCS=\
 	$(srcdir)/threads.c \
 	$(srcdir)/init-addrinfo.c \
 	$(srcdir)/errors.c \
+	$(srcdir)/k5buf.c \
 	$(srcdir)/gmt_mktime.c \
 	$(srcdir)/fake-addrinfo.c \
-	$(srcdir)/mkstemp.c
+	$(srcdir)/utf8.c \
+	$(srcdir)/utf8_conv.c \
+	$(srcdir)/strlcpy.c \
+	$(srcdir)/printf.c \
+	$(srcdir)/mkstemp.c \
+	$(srcdir)/t_k5buf.c
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
@@ -105,35 +127,19 @@ libkrb5support.exports: $(srcdir)/libkrb5support-fixed.exports Makefile
 ##DOS##	$(RM) libkrb5support.exports
 ##DOS##	$(MV) new-exports libkrb5support.exports
 
+T_K5BUF_OBJS= t_k5buf.o k5buf.o $(PRINTF_ST_OBJ)
+
+t_k5buf: $(T_K5BUF_OBJS)
+	$(CC_LINK) -o t_k5buf $(T_K5BUF_OBJS)
+
+TEST_PROGS= t_k5buf
+
+check-unix:: $(TEST_PROGS)
+	./t_k5buf
+
+clean::
+	$(RM) t_k5buf.o t_k5buf
+
 @lib_frag@
 @libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-threads.so threads.po $(OUTPRE)threads.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h supp-int.h \
-  threads.c
-init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  cache-addrinfo.h init-addrinfo.c
-errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h errors.c supp-int.h
-gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-gmt_mktime.h \
-  gmt_mktime.c
-fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  cache-addrinfo.h fake-addrinfo.c supp-int.h
-mkstemp.so mkstemp.po $(OUTPRE)mkstemp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  mkstemp.c

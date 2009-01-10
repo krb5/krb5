@@ -121,7 +121,7 @@ gss_buffer_t		status_string;
     if (mech && mech->gss_display_status) {
 	OM_uint32 r;
 
-	r = mech->gss_display_status(mech->context, minor_status,
+	r = mech->gss_display_status(minor_status,
 				     status_value, status_type, mech_type,
 				     message_context, status_string);
 	/* How's this for weird?  If we get an error returning the
@@ -358,12 +358,11 @@ gss_buffer_t outStr;
 
 	/* now copy the status code and return to caller */
 	outStr->length = strlen(errStr);
-	outStr->value = malloc((size_t)outStr->length+1);
+	outStr->value = strdup(errStr);
 	if (outStr->value == NULL) {
 		outStr->length = 0;
 		return (GSS_S_FAILURE);
 	}
 
-	(void) strcpy((char *)outStr->value, errStr);
 	return (GSS_S_COMPLETE);
 } /* displayMajor */

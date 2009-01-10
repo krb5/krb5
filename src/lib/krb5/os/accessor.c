@@ -67,16 +67,11 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    SC (free_srv_dns_data, krb5int_free_srv_dns_data),
 	    SC (use_dns_kdc, _krb5_use_dns_kdc),
 #undef SC
+	    S (clean_hostname, krb5int_clean_hostname),
 
-#ifdef KRB5_KRB4_COMPAT
-#define SC(FIELD, VAL)	S(FIELD, VAL)
-#else /* disable */
-#define SC(FIELD, VAL)	S(FIELD, 0)
-#endif
-	    SC (krb_life_to_time, krb5int_krb_life_to_time),
-	    SC (krb_time_to_life, krb5int_krb_time_to_life),
-	    SC (krb524_encode_v4tkt, krb5int_encode_v4tkt),
-#undef SC
+	    S (krb_life_to_time, 0),
+	    S (krb_time_to_life, 0),
+	    S (krb524_encode_v4tkt, 0),
 
 	    S (krb5int_c_mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
 #ifndef LEAN_CLIENT
@@ -133,6 +128,9 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    SC (krb5int_set_prompt_types, krb5int_set_prompt_types),
 	    SC (encode_krb5_authdata_elt, encode_krb5_authdata_elt),
 #undef SC
+
+	    S (encode_krb5_sam_response_2, encode_krb5_sam_response_2),
+	    S (encode_krb5_enc_sam_response_enc_2, encode_krb5_enc_sam_response_enc_2),
 
 #if DESIGNATED_INITIALIZERS
 	};

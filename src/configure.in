@@ -55,20 +55,6 @@ AC_KRB5_TCL
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
 dnl
-if test -z "$KRB4_LIB"; then
-kadminv4=""
-krb524=""
-libkrb4=""
-KRB4=""
-else
-kadminv4=kadmin.v4
-krb524=krb524
-libkrb4=lib/krb4
-KRB4=krb4
-fi
-AC_SUBST(KRB4)
-AC_SUBST(krb524)
-dnl
 dnl Begin autoconf tests for the Makefiles generated out of the top-level
 dnl configure.in...
 dnl
@@ -90,6 +76,19 @@ AC_SUBST(LIBUTIL)
 dnl for kdc
 AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h sys/sockio.h ifaddrs.h unistd.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
+AC_CHECK_FUNCS(strlcpy)
+EXTRA_SUPPORT_SYMS=
+AC_CHECK_FUNC(strlcpy, [STRLCPY_ST_OBJ= STRLCPY_OBJ=], [STRLCPY_ST_OBJ=strlcpy.o STRLCPY_OBJ='$(OUTPRE)strlcpy.$(OBJEXT)' EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_strlcpy krb5int_strlcat"])
+AC_SUBST(STRLCPY_OBJ)
+AC_SUBST(STRLCPY_ST_OBJ)
+AC_CHECK_FUNC(vasprintf,
+[PRINTF_ST_OBJ=
+PRINTF_OBJ=],
+[PRINTF_ST_OBJ=printf.o
+PRINTF_OBJ='$(OUTPRE)printf.$(OBJEXT)'
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_asprintf krb5int_vasprintf"])
+AC_SUBST(PRINTF_OBJ)
+AC_SUBST(PRINTF_ST_OBJ)
 KRB5_NEED_PROTO([#include <stdarg.h>
 #include <stdio.h>
 ],vasprintf)
@@ -100,6 +99,7 @@ KRB5_NEED_PROTO([#include <string.h>
 /* Solaris 8 declares swab in stdlib.h.  */
 #include <stdlib.h>
 ],swab,1)
+KRB5_NEED_PROTO([#include <ctype.h>],isblank,1)
 dnl
 AC_PROG_AWK
 KRB5_AC_INET6
@@ -144,17 +144,8 @@ if test "$enableval" = yes ; then
 else
 	AC_DEFINE(NOCACHE,1,[Define if the KDC should use no replay cache])
 fi
-AC_ARG_ENABLE([fakeka],
-AC_HELP_STRING([--enable-fakeka],[build the Fake KA server (emulates an AFS kaserver) @<:@default: don't build@:>@]), , enableval=no)dnl
-if test "$enableval" = yes; then
-	FAKEKA=fakeka
-else
-	FAKEKA=
-fi
-AC_SUBST(FAKEKA)
 KRB5_RUN_FLAGS
 dnl
-dnl for krb524
 AC_TYPE_SIGNAL
 dnl
 dnl from old include/configure.in
@@ -169,7 +160,6 @@ AC_C_CONST
 AC_HEADER_DIRENT
 AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield bswap16 bswap64 mkstemp getusershell lstat access ftime getcwd srand48 srand srandom stat strchr strerror strerror_r strstr timezone umask waitpid sem_init sem_trywait daemon)
 dnl
-EXTRA_SUPPORT_SYMS=
 AC_CHECK_FUNC(mkstemp,
 [MKSTEMP_ST_OBJ=
 MKSTEMP_OBJ=],
@@ -573,15 +563,6 @@ AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],
 AC_DEFINE(KRB5_ATHENA_COMPAT,1,[Define if MIT Project Athena default configuration should be used]),)
 
-if test "$KRB4_LIB" = ''; then
-	AC_MSG_NOTICE(No Kerberos 4 compatibility)
-	maybe_kerberosIV=
-else
-	AC_MSG_NOTICE(Kerberos 4 compatibility enabled)
-	maybe_kerberosIV=kerberosIV
-	AC_DEFINE(KRB5_KRB4_COMPAT,1,[Define if Kerberos V4 backwards compatibility should be supported])
-fi
-AC_SUBST(maybe_kerberosIV)
 dnl
 AC_C_INLINE
 AH_TOP([
@@ -687,11 +668,6 @@ if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; t
 fi
 AC_SUBST(DO_TEST) 
 dnl
-DO_V4_TEST=
-if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != "" -a "$ath_compat" != ""; then
- 	DO_V4_TEST=ok
-fi
-AC_SUBST(DO_V4_TEST)
 dnl The following are substituted into kadmin/testing/scripts/env-setup.sh
 RBUILD=`pwd`
 AC_SUBST(RBUILD)
@@ -712,25 +688,6 @@ K5_GEN_FILE(kadmin/testing/scripts/env-setup.sh:kadmin/testing/scripts/env-setup
 dnl for lib/kadm5
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
 AC_CHECK_PROG(PERL,perl,perl)
-dnl
-dnl
-dnl for lib/krb4
-case $krb5_cv_host in
-     *-apple-darwin*)
-     KRB_ERR_TXT=
-     KRB_ERR=
-     KRB_ERR_C=krb_err.c
-     ;;
-     *)
-     KRB_ERR='$(OUTPRE)krb_err.$(OBJEXT)'
-     KRB_ERR_TXT=krb_err_txt.c
-     KRB_ERR_C=
-     ;;
-esac
-AC_SUBST([KRB_ERR_TXT])
-AC_SUBST([KRB_ERR])
-AC_SUBST([KRB_ERR_C])
-dnl
 dnl
 dnl lib/gssapi
 AC_CHECK_HEADER(stdint.h,[
@@ -957,13 +914,6 @@ else
 	HAVE_RUNTEST=no
 fi
 AC_SUBST(HAVE_RUNTEST)
-if test "$KRB4_LIB" = ''; then
-	KRB4_DEJAGNU_TEST="KRBIV=0"
-else
-	AC_MSG_RESULT(Kerberos 4 testing enabled)
-	KRB4_DEJAGNU_TEST="KRBIV=1"
-fi
-AC_SUBST(KRB4_DEJAGNU_TEST)
 
 dnl for plugins/kdb/db2
 dnl
@@ -1011,9 +961,6 @@ if test "$enable_thread_support" = yes; then
   fi # tsmissing not empty
 fi # enable_thread_support
 dnl
-HOST_TYPE=$krb5_cv_host
-AC_SUBST(HOST_TYPE)
-dnl
 dnl Sadly, we seem to have accidentally committed ourselves in 1.4 to
 dnl an ABI that includes the existence of libkrb5support.0 even
 dnl though random apps should never use anything from it.  And on
@@ -1038,9 +985,6 @@ if test "$COM_ERR_VERSION" = k5 ; then
 fi
 if test "$SS_VERSION" = k5 ; then
   K5_GEN_MAKEFILE(util/ss)
-fi
-if test -n "$KRB4_LIB"; then
-  K5_GEN_MAKEFILE(lib/krb4)
 fi
 dnl
 dnl
@@ -1073,10 +1017,19 @@ if test -n "$OPENLDAP_PLUGIN"; then
   K5_GEN_MAKEFILE(plugins/kdb/ldap/ldap_util)
   K5_GEN_MAKEFILE(plugins/kdb/ldap/libkdb_ldap)
   ldap_plugin_dir=plugins/kdb/ldap
+  LDAP=yes
+else
+  LDAP=no
 fi
 AC_SUBST(ldap_plugin_dir)
+AC_SUBST(LDAP)
 
-AC_CHECK_HEADERS(Python.h python2.3/Python.h)
+dnl We really should look for and use python-config.
+PYTHON_LIB=
+AC_CHECK_HEADERS(Python.h python2.3/Python.h python2.5/Python.h)
+AC_CHECK_LIB(python2.3,main,[PYTHON_LIB=-lpython2.3],
+  AC_CHECK_LIB(python2.5,main,[PYTHON_LIB=-lpython2.5]))
+AC_SUBST(PYTHON_LIB)
 
 dnl
 dnl Kludge for simple server --- FIXME is this the best way to do this?
@@ -1092,7 +1045,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	util util/support util/profile util/send-pr
 
-	lib lib/des425 lib/kdb
+	lib lib/kdb
 
 	lib/crypto lib/crypto/crc32 lib/crypto/des lib/crypto/dk
 	lib/crypto/enc_provider lib/crypto/hash_provider
@@ -1102,9 +1055,10 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os
+	lib/krb5/unicode
 
-	lib/gssapi lib/gssapi/generic lib/gssapi/krb5
-	lib/gssapi/mechglue lib/gssapi/spnego
+	lib/gssapi lib/gssapi/generic lib/gssapi/krb5 lib/gssapi/spnego
+	lib/gssapi/mechglue
 
 	lib/rpc lib/rpc/unit-test
 
@@ -1112,8 +1066,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib/apputils
 
-	kdc slave krb524 config-files gen-manpages include
-	include/kerberosIV
+	kdc slave config-files gen-manpages include
 
 	plugins/locate/python
 	plugins/kdb/db2

@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/set_ccache.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -29,28 +30,35 @@
 
 #include <string.h>
 #include "gssapiP_krb5.h"
-#include "gss_libinit.h"
 
-OM_uint32 KRB5_CALLCONV 
-gss_krb5_ccache_name(minor_status, name, out_name)
-	OM_uint32 *minor_status;
-	const char *name;
-	const char **out_name;
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_ccache_name(OM_uint32 *minor_status,
+			const gss_OID desired_mech,
+			const gss_OID desired_object,
+			gss_buffer_t value)
 {
     char *old_name = NULL;
     OM_uint32 err = 0;
     OM_uint32 minor = 0;
     char *gss_out_name;
+    struct krb5_gss_ccache_name_req *req;
 
-    err = gssint_initialize_library();
+    err = gss_krb5int_initialize_library();
     if (err) {
-	*minor_status = err;
-	return GSS_S_FAILURE;
+        *minor_status = err;
+        return GSS_S_FAILURE;
     }
+
+    assert(value->length == sizeof(*req));
+
+    if (value->length != sizeof(*req))
+	return GSS_S_FAILURE;
+
+    req = (struct krb5_gss_ccache_name_req *)value->value;
 
     gss_out_name = k5_getspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
 
-    if (out_name) {
+    if (req->out_name) {
         const char *tmp_name = NULL;
 
         if (!err) {
@@ -58,35 +66,35 @@ gss_krb5_ccache_name(minor_status, name, out_name)
         }
         if (!err) {
             old_name = gss_out_name;
-            gss_out_name = tmp_name;
-        }            
+            gss_out_name = (char *)tmp_name;
+        }
     }
     /* If out_name was NULL, we keep the same gss_out_name value, and
        don't free up any storage (leave old_name NULL).  */
 
     if (!err)
-        kg_set_ccache_name (&err, name);
+        kg_set_ccache_name (&err, req->name);
 
     minor = k5_setspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME, gss_out_name);
     if (minor) {
-	/* Um.  Now what?  */
-	if (err == 0) {
-	    err = minor;
-	}
-	free(gss_out_name);
-	gss_out_name = NULL;
+        /* Um.  Now what?  */
+        if (err == 0) {
+            err = minor;
+        }
+        free(gss_out_name);
+        gss_out_name = NULL;
     }
 
     if (!err) {
-        if (out_name) {
-            *out_name = gss_out_name;
+        if (req->out_name) {
+            *(req->out_name) = gss_out_name;
         }
     }
-    
+
     if (old_name != NULL) {
         free (old_name);
     }
-    
+
     *minor_status = err;
     return (*minor_status == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;
 }

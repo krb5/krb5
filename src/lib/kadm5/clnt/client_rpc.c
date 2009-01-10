@@ -2,6 +2,8 @@
 #include <kadm5/kadm_rpc.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
+#include <string.h>  /* for memset prototype */
+
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif

@@ -86,15 +86,6 @@ void auth_debug (int);
 void auth_printsub (unsigned char *, int, unsigned char *, unsigned int);
 
 
-#ifdef	KRB4
-int kerberos4_init (Authenticator *, int);
-int kerberos4_send (Authenticator *);
-void kerberos4_is (Authenticator *, unsigned char *, int);
-void kerberos4_reply (Authenticator *, unsigned char *, int);
-int kerberos4_status (Authenticator *, char *, int);
-void kerberos4_printsub (unsigned char *, int, unsigned char *, unsigned int);
-#endif
-
 #ifdef	KRB5
 int kerberos5_init (Authenticator *, int);
 int kerberos5_send (Authenticator *);

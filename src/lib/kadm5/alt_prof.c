@@ -73,42 +73,28 @@ krb5_aprof_init(fname, envname, acontextp)
     krb5_error_code	kret;
     profile_t		profile;
     const char *kdc_config;
-    size_t krb5_config_len, kdc_config_len;
     char *profile_path;
     char **filenames;
     int i;
+    struct k5buf buf;
 
     kret = krb5_get_default_config_files (&filenames);
     if (kret)
 	return kret;
-    krb5_config_len = 0;
-    for (i = 0; filenames[i] != NULL; i++)
-	krb5_config_len += strlen(filenames[i]) + 1;
-    if (i > 0)
-	krb5_config_len--;
-    if (envname == NULL
-	|| (kdc_config = getenv(envname)) == NULL)
+    if (envname == NULL || (kdc_config = getenv(envname)) == NULL)
 	kdc_config = fname;
-    if (kdc_config == NULL)
-	kdc_config_len = 0;
-    else
-	kdc_config_len = strlen(kdc_config);
-    profile_path = malloc(2 + krb5_config_len + kdc_config_len);
-    if (profile_path == NULL) {
-	krb5_free_config_files(filenames);
-	return ENOMEM;
+    krb5int_buf_init_dynamic(&buf);
+    if (kdc_config)
+	krb5int_buf_add(&buf, kdc_config);
+    for (i = 0; filenames[i] != NULL; i++) {
+	if (krb5int_buf_len(&buf) > 0)
+	    krb5int_buf_add(&buf, ":");
+	krb5int_buf_add(&buf, filenames[i]);
     }
-    if (kdc_config_len)
-	strcpy(profile_path, kdc_config);
-    else
-	profile_path[0] = 0;
-    if (krb5_config_len)
-	for (i = 0; filenames[i] != NULL; i++) {
-	    if (kdc_config_len || i)
-		strcat(profile_path, ":");
-	    strcat(profile_path, filenames[i]);
-	}
     krb5_free_config_files(filenames);
+    profile_path = krb5int_buf_data(&buf);
+    if (profile_path == NULL)
+	return ENOMEM;
     profile = (profile_t) NULL;
     kret = profile_init_path(profile_path, &profile);
     free(profile_path);
@@ -156,7 +142,7 @@ string_to_boolean (const char *string, krb5_boolean *out)
 {
     static const char *const yes[] = { "y", "yes", "true", "t", "1", "on" };
     static const char *const no[] = { "n", "no", "false", "f", "nil", "0", "off" };
-    int i;
+    unsigned int i;
 
     for (i = 0; i < sizeof(yes)/sizeof(yes[0]); i++)
 	if (!strcasecmp(string, yes[i])) {
@@ -192,6 +178,7 @@ krb5_aprof_get_boolean(krb5_pointer acontext, const char **hierarchy,
     }
     valp = values[idx];
     kret = string_to_boolean (valp, &val);
+    profile_free_list(values);
     if (kret)
 	return kret;
     *retdata = val;
@@ -235,9 +222,7 @@ krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
 	kret = krb5_string_to_deltat(valp, deltatp);
 
 	/* Free the string storage */
-	for (idx=0; values[idx]; idx++)
-	    krb5_xfree(values[idx]);
-	krb5_xfree(values);
+	profile_free_list(values);
     }
     return(kret);
 }
@@ -265,22 +250,25 @@ krb5_aprof_get_string(acontext, hierarchy, uselast, stringp)
 {
     krb5_error_code	kret;
     char		**values;
-    int			idx, i;
+    int			lastidx;
 
     if (!(kret = krb5_aprof_getvals(acontext, hierarchy, &values))) {
-	idx = 0;
+	for (lastidx=0; values[lastidx]; lastidx++);
+	lastidx--;
+
+	/* Excise the entry we want from the null-terminated list,
+	   and free up the rest.  */
 	if (uselast) {
-	    for (idx=0; values[idx]; idx++);
-	    idx--;
+	    *stringp = values[lastidx];
+	    values[lastidx] = NULL;
+	} else {
+	    *stringp = values[0];
+	    values[0] = values[lastidx];
+	    values[lastidx] = NULL;
 	}
 
-	*stringp = values[idx];
-
 	/* Free the string storage */
-	for (i=0; values[i]; i++)
-	    if (i != idx)
-		krb5_xfree(values[i]);
-	krb5_xfree(values);
+	profile_free_list(values);
     }
     return(kret);
 }
@@ -322,9 +310,7 @@ krb5_aprof_get_int32(acontext, hierarchy, uselast, intp)
 	    kret = EINVAL;
 
 	/* Free the string storage */
-	for (idx=0; values[idx]; idx++)
-	    krb5_xfree(values[idx]);
-	krb5_xfree(values);
+	profile_free_list(values);
     }
     return(kret);
 }
@@ -798,15 +784,16 @@ kadm5_free_config_params(context, params)
     kadm5_config_params	*params;
 {
     if (params) {
-	krb5_xfree(params->dbname);
-	krb5_xfree(params->mkey_name);
-	krb5_xfree(params->stash_file);
-	krb5_xfree(params->keysalts);
+	free(params->dbname);
+	free(params->mkey_name);
+	free(params->stash_file);
+	free(params->keysalts);
 	free(params->admin_server);
 	free(params->admin_keytab);
 	free(params->dict_file);
 	free(params->acl_file);
 	free(params->realm);
+	free(params->iprop_logfile);
     }
     return(0);
 }

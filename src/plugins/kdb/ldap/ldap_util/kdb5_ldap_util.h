@@ -63,10 +63,10 @@ extern char *progname;
 extern int exit_status;
 extern krb5_context util_context;
 
-extern void usage();
+extern void usage(void);
 extern void db_usage(int);
 
-#define ARG_VAL (--argc > 0 ? (koptarg = *(++argv)) : (char *)(usage(MAIN_HELP), NULL))
+#define ARG_VAL (--argc > 0 ? (koptarg = *(++argv)) : (char *)(db_usage(MAIN_HELP), NULL))
 
 /* Following are the bitmaps that indicate which of the options among -D, -w, -h, -p & -t
  * were specified on the command line.

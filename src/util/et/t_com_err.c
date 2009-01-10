@@ -15,14 +15,14 @@ try_one (errcode_t code, int known, int table, int msgno)
     const char *msg = error_message (code);
     char buffy[1024];
 
-    sprintf (buffy, "error table %d message %d", table, msgno);
+    snprintf (buffy, sizeof(buffy), "error table %d message %d", table, msgno);
     if (0 == strcmp (buffy, msg)) {
 	if (!known) {
 	    known_err++;
 	}
 	return;
     }
-    sprintf (buffy, "Unknown code et%d %d", table, msgno);
+    snprintf (buffy, sizeof(buffy), "Unknown code et%d %d", table, msgno);
     if (!strcmp (buffy, msg)) {
 	if (known)
 	    known_err++;

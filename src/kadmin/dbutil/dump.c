@@ -331,15 +331,12 @@ void update_ok_file (file_name)
 	int fd;
 	static char ok[]=".dump_ok";
 
-	if ((file_ok = (char *)malloc(strlen(file_name) + strlen(ok) + 1))
-	    == NULL) {
+	if (asprintf(&file_ok, "%s%s", file_name, ok) < 0) {
 		com_err(progname, ENOMEM,
 			"while allocating filename for update_ok_file");
 		exit_status++;
 		return;
 	}
-	strcpy(file_ok, file_name);
-	strcat(file_ok, ok);
 	if ((fd = open(file_ok, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
 		com_err(progname, errno, "while creating 'ok' file, '%s'",
 			file_ok);
@@ -2283,14 +2280,11 @@ load_db(argc, argv)
     }
     dumpfile = argv[aindex];
 
-    if (!(dbname_tmp = (char *) malloc(strlen(dbname)+
-				       strlen(dump_tmptrail)+1))) {
+    if (asprintf(&dbname_tmp, "%s%s", dbname, dump_tmptrail) < 0) {
 	fprintf(stderr, no_name_mem_fmt, progname);
 	exit_status++;
 	return;
     }
-    strcpy(dbname_tmp, dbname);
-    strcat(dbname_tmp, dump_tmptrail);
 
     /*
      * Initialize the Kerberos context and error tables.

@@ -52,9 +52,16 @@
 
 #define ASN1BUF_OMIT_INLINE_FUNCS
 #include "asn1buf.h"
-#undef ASN1BUF_OMIT_INLINE_FUNCS
 #include <stdio.h>
 #include "asn1_get.h"
+
+#if !defined(__GNUC__) || defined(CONFIG_SMALL)
+/* Declare private procedures as static if they're not used for inline
+   expansion of other stuff elsewhere.  */
+static unsigned int asn1buf_free(const asn1buf *);
+static asn1_error_code asn1buf_ensure_space(asn1buf *, unsigned int);
+static asn1_error_code asn1buf_expand(asn1buf *, unsigned int);
+#endif
 
 #define asn1_is_eoc(class, num, indef)  \
 ((class) == UNIVERSAL && !(num) && !(indef))
@@ -117,7 +124,7 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
 
     nestlevel = 1 + indef;
     if (!indef) {
-        if (length <= buf->bound - buf->next + 1)
+        if (length <= (size_t)(buf->bound - buf->next + 1))
             buf->next += length;
         else
             return ASN1_OVERRUN;
@@ -128,7 +135,7 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
         retval = asn1_get_tag_2(buf, &t);
         if (retval) return retval;
         if (!t.indef) {
-            if (t.length <= buf->bound - buf->next + 1)
+            if (t.length <= (size_t)(buf->bound - buf->next + 1))
                 buf->next += t.length;
             else
                 return ASN1_OVERRUN;
@@ -165,29 +172,20 @@ asn1_error_code asn1buf_insert_octet(asn1buf *buf, const int o)
     return 0;
 }
 
-asn1_error_code asn1buf_insert_octetstring(asn1buf *buf, const unsigned int len, const krb5_octet *s)
+asn1_error_code
+asn1buf_insert_bytestring(asn1buf *buf, const unsigned int len, const void *sv)
 {
     asn1_error_code retval;
     unsigned int length;
+    const char *s = sv;
 
     retval = asn1buf_ensure_space(buf,len);
     if (retval) return retval;
     for (length=1; length<=len; length++,(buf->next)++)
-        *(buf->next) = (char)(s[len-length]);
+        *(buf->next) = (s[len-length]);
     return 0;
 }
 
-asn1_error_code asn1buf_insert_charstring(asn1buf *buf, const unsigned int len, const char *s)
-{
-    asn1_error_code retval;
-    unsigned int length;
-
-    retval = asn1buf_ensure_space(buf,len);
-    if (retval) return retval;
-    for (length=1; length<=len; length++,(buf->next)++)
-        *(buf->next) = (char)(s[len-length]);
-    return 0;
-}
 
 #undef asn1buf_remove_octet
 asn1_error_code asn1buf_remove_octet(asn1buf *buf, asn1_octet *o)
@@ -201,7 +199,7 @@ asn1_error_code asn1buf_remove_octetstring(asn1buf *buf, const unsigned int len,
 {
     unsigned int i;
 
-    if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
+    if (len > (size_t)(buf->bound + 1 - buf->next)) return ASN1_OVERRUN;
     if (len == 0) {
         *s = 0;
         return 0;
@@ -219,7 +217,7 @@ asn1_error_code asn1buf_remove_charstring(asn1buf *buf, const unsigned int len, 
 {
     unsigned int i;
 
-    if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
+    if (len > (size_t)(buf->bound + 1 - buf->next)) return ASN1_OVERRUN;
     if (len == 0) {
         *s = 0;
         return 0;
@@ -276,13 +274,11 @@ asn1_error_code asn1buf_unparse(const asn1buf *buf, char **s)
 {
     free(*s);
     if (buf == NULL) {
-        *s = malloc(sizeof("<NULL>"));
+        *s = strdup("<NULL>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<NULL>");
     } else if (buf->base == NULL) {
-        *s = malloc(sizeof("<EMPTY>"));
+        *s = strdup("<EMPTY>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<EMPTY>");
     } else {
         unsigned int length = asn1buf_len(buf);
         unsigned int i;
@@ -305,13 +301,11 @@ asn1_error_code asn1buf_hex_unparse(const asn1buf *buf, char **s)
     free(*s);
 
     if (buf == NULL) {
-        *s = malloc(sizeof("<NULL>"));
+        *s = strdup("<NULL>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<NULL>");
     } else if (buf->base == NULL) {
-        *s = malloc(sizeof("<EMPTY>"));
+        *s = strdup("<EMPTY>");
         if (*s == NULL) return ENOMEM;
-        strcpy(*s,"<EMPTY>");
     } else {
         unsigned int length = asn1buf_len(buf);
         int i;
@@ -331,8 +325,7 @@ asn1_error_code asn1buf_hex_unparse(const asn1buf *buf, char **s)
 /****************************************************************/
 /* Private Procedures */
 
-#undef asn1buf_size
-int asn1buf_size(const asn1buf *buf)
+static int asn1buf_size(const asn1buf *buf)
 {
     if (buf == NULL || buf->base == NULL) return 0;
     return buf->bound - buf->base + 1;
@@ -348,12 +341,10 @@ unsigned int asn1buf_free(const asn1buf *buf)
 #undef asn1buf_ensure_space
 asn1_error_code asn1buf_ensure_space(asn1buf *buf, const unsigned int amount)
 {
-    int avail = asn1buf_free(buf);
-    if (avail < amount) {
-        asn1_error_code retval = asn1buf_expand(buf, amount-avail);
-        if (retval) return retval;
-    }
-    return 0;
+    unsigned int avail = asn1buf_free(buf);
+    if (avail >= amount)
+        return 0;
+    return asn1buf_expand(buf, amount-avail);
 }
 
 asn1_error_code asn1buf_expand(asn1buf *buf, unsigned int inc)
@@ -367,12 +358,9 @@ asn1_error_code asn1buf_expand(asn1buf *buf, unsigned int inc)
     if (inc < STANDARD_INCREMENT)
         inc = STANDARD_INCREMENT;
 
-    if (buf->base == NULL)
-        buf->base = malloc((asn1buf_size(buf)+inc) * sizeof(asn1_octet));
-    else
-        buf->base = realloc(buf->base,
-                            (asn1buf_size(buf)+inc) * sizeof(asn1_octet));
-    if (buf->base == NULL) return ENOMEM;
+    buf->base = realloc(buf->base,
+                        (asn1buf_size(buf)+inc) * sizeof(asn1_octet));
+    if (buf->base == NULL) return ENOMEM; /* XXX leak */
     buf->bound = (buf->base) + bound_offset + inc;
     buf->next = (buf->base) + next_offset;
     return 0;

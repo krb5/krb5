@@ -215,6 +215,7 @@ error_out: \
 #define free_field(rep,f) free((rep)->f)
 #define clear_field(rep,f) (*(rep))->f = 0
 
+#ifndef LEAN_CLIENT
 krb5_error_code decode_krb5_authenticator(const krb5_data *code, krb5_authenticator **rep)
 {
     setup();
@@ -254,6 +255,7 @@ error_out:
     }
     return retval;
 }
+#endif
 
 krb5_error_code
 KRB5_CALLCONV
@@ -944,6 +946,53 @@ krb5_error_code decode_krb5_predicted_sam_response(const krb5_data *code, krb5_p
     alloc_field(*rep,krb5_predicted_sam_response);
 
     retval = asn1_decode_predicted_sam_response(&buf,*rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
+krb5_error_code decode_krb5_setpw_req(const krb5_data *code,
+				      krb5_data **rep,
+				      krb5_principal *principal)
+{
+    setup_buf_only();
+    alloc_field(*rep, krb5_data);
+    *principal = NULL;
+
+    retval = asn1_decode_setpw_req(&buf, *rep, principal);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
+krb5_error_code decode_krb5_pa_for_user(const krb5_data *code, krb5_pa_for_user **rep)
+{
+    setup_buf_only();
+    alloc_field(*rep, krb5_pa_for_user);
+
+    retval = asn1_decode_pa_for_user(&buf, *rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
+krb5_error_code decode_krb5_pa_pac_req(const krb5_data *code, krb5_pa_pac_req **rep)
+{
+    setup_buf_only();
+    alloc_field(*rep, krb5_pa_pac_req);
+
+    retval = asn1_decode_pa_pac_req(&buf, *rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
+krb5_error_code decode_krb5_etype_list(const krb5_data *code, krb5_etype_list **rep)
+{
+    setup_buf_only();
+    alloc_field(*rep, krb5_etype_list);
+
+    retval = asn1_decode_sequence_of_enctype(&buf, &(*rep)->length, &(*rep)->etypes);
     if (retval) clean_return(retval);
 
     cleanup(free);

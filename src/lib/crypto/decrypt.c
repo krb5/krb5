@@ -26,6 +26,7 @@
 
 #include "k5-int.h"
 #include "etypes.h"
+#include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_decrypt(krb5_context context, const krb5_keyblock *key,
@@ -49,6 +50,16 @@ krb5_c_decrypt(krb5_context context, const krb5_keyblock *key,
     if ((input->enctype != ENCTYPE_UNKNOWN) &&
 	(krb5_enctypes_list[i].etype != input->enctype))
 	return(KRB5_BAD_ENCTYPE);
+
+    if (krb5_enctypes_list[i].decrypt == NULL) {
+	assert(krb5_enctypes_list[i].aead != NULL);
+
+	return krb5int_c_decrypt_aead_compat(krb5_enctypes_list[i].aead,
+					     krb5_enctypes_list[i].enc,
+					     krb5_enctypes_list[i].hash,
+					     key, usage, ivec,
+					     &input->ciphertext, output);
+    }
 
     return((*(krb5_enctypes_list[i].decrypt))
 	   (krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,

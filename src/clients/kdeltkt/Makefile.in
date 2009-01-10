@@ -20,8 +20,8 @@ all-unix:: kdeltkt
 ##WIN32##all-windows:: $(KDELTKT)
 all-mac::
 
-kdeltkt: kdeltkt.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ kdeltkt.o $(KRB4COMPAT_LIBS)
+kdeltkt: kdeltkt.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kdeltkt.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KDELTKT): $(OUTPRE)kdeltkt.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) /out:$@ $**

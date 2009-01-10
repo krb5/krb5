@@ -48,41 +48,7 @@
 {
     NSMutableSet *result = [[super keyPathsForValuesAffectingValueForKey:key] mutableCopy];
     NSSet *otherKeys = nil;
-    
-//    if ([key isEqualToString:@"principalString"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimIdentity", nil];
-//    } 
-//    else if ([key isEqualToString:@"expirationDate"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"state", @"expirationTime", nil];
-//    } 
-//    else if ([key isEqualToString:@"expirationString"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"state", @"expirationTime", nil];
-//    }
-//    else if ([key isEqualToString:@"isProxiable"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-//    }
-//    else if ([key isEqualToString:@"isForwardable"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-//    }
-//    else if ([key isEqualToString:@"isAddressless"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-//    }
-//    else if ([key isEqualToString:@"isRenewable"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-//    }
-//    else if ([key isEqualToString:@"validLifetime"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-//    }
-//    else if ([key isEqualToString:@"renewableLifetime"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", nil];
-//    }
-//    else if ([key isEqualToString:@"validLifetimeString"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"validLifetime", nil];
-//    }
-//    else if ([key isEqualToString:@"renewableLifetimeString"]) {
-//        otherKeys = [NSSet setWithObjects:@"kimOptions", @"renewableLifetime", nil];
-//    }
-    
+        
     [result unionSet:otherKeys];
     
     return [result autorelease];
@@ -511,7 +477,7 @@
             }
 
             //NSLog(@"waited %@", [[NSThread currentThread] description]);
-            [(Identities *) [connection rootProxy] update];
+            [(Identities *) [connection rootProxy] reload];
 	    sleep (1);
         }
 	

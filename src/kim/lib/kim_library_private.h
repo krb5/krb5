@@ -32,6 +32,8 @@
 
 kim_error kim_library_init (void);
 
+kim_boolean kim_os_library_caller_uses_gui (void);
+
 kim_ui_environment kim_os_library_get_ui_environment (void);
 
 kim_ui_environment kim_library_ui_environment (void);

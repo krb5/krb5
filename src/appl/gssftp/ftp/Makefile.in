@@ -21,20 +21,13 @@ OBJS	= $(OUTPRE)cmds.$(OBJEXT) $(OUTPRE)cmdtab.$(OBJEXT) \
 	  $(OUTPRE)main.$(OBJEXT) $(OUTPRE)radix.$(OBJEXT) \
 	  $(OUTPRE)ruserpass.$(OBJEXT) $(OUTPRE)secure.$(OBJEXT)
 
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
-
-#
-# We cannot have @KRB4_INCLUDES@ under Windows, since we do not use
-# configure, so we redefine LOCALINCLUDES not to have that.
-#
-
-##WIN32##LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)
 
 all-unix::	ftp
 all-windows::	$(OUTPRE)ftp.exe
 
 ftp:	$(OBJS) $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o ftp $(OBJS) $(GSS_LIBS) $(KRB4COMPAT_LIBS)
+	$(CC_LINK) -o ftp $(OBJS) $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
 $(OUTPRE)ftp.exe: $(OBJS) $(GLIB) $(KLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib advapi32.lib $(SCLIB)
@@ -70,35 +63,3 @@ radix.o: $(srcdir)/radix.c
 secure.o: $(srcdir)/secure.c
 
 # NOPOSTFIX
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-$(OUTPRE)cmds.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h \
-  cmds.c ftp_var.h pathnames.h
-$(OUTPRE)cmdtab.$(OBJEXT): cmdtab.c ftp_var.h
-$(OUTPRE)domacro.$(OBJEXT): domacro.c ftp_var.h
-$(OUTPRE)ftp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi_krb5.h $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h \
-  $(srcdir)/../arpa/telnet.h ftp.c ftp_var.h secure.h
-$(OUTPRE)getpass.$(OBJEXT): ftp_var.h getpass.c
-$(OUTPRE)glob.$(OBJEXT): ftp_var.h glob.c
-$(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h \
-  ftp_var.h main.c
-$(OUTPRE)radix.$(OBJEXT): ftp_var.h radix.c
-$(OUTPRE)ruserpass.$(OBJEXT): ftp_var.h ruserpass.c
-$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(srcdir)/../arpa/ftp.h secure.c secure.h

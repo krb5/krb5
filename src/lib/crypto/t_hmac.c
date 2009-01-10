@@ -135,6 +135,7 @@ static void test_hmac()
     krb5_error_code err;
     int i, j;
     int lose = 0;
+    struct k5buf buf;
 
     /* RFC 2202 test vector.  */
     static const struct hmac_test md5tests[] = {
@@ -240,11 +241,12 @@ static void test_hmac()
 	    exit(1);
 	}
 
-	if (sizeof(stroutbuf) - 3 < 2 * out.length)
-	    abort();
-	strcpy(stroutbuf, "0x");
+	krb5int_buf_init_fixed(&buf, stroutbuf, sizeof(stroutbuf));
+	krb5int_buf_add(&buf, "0x");
 	for (j = 0; j < out.length; j++)
-	    sprintf(stroutbuf + strlen(stroutbuf), "%02x", 0xff & outbuf[j]);
+	    krb5int_buf_add_fmt(&buf, "%02x", 0xff & outbuf[j]);
+	if (krb5int_buf_data(&buf) == NULL)
+	    abort();
 	if (strcmp(stroutbuf, md5tests[i].hexdigest)) {
 	    printf("*** CHECK FAILED!\n"
 		   "\tReturned: %s.\n"

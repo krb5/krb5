@@ -32,6 +32,9 @@ kdc.conf: Makefile
 
 krb5.conf: Makefile
 	cat $(SRCTOP)/config-files/krb5.conf > krb5.new
+	echo "[dbmodules]" >> krb5.new
+	echo " db_module_dir = $(BUILDTOP)/util/fakedest$(KRB5_DB_MODULE_DIR)" >> krb5.new
+	mv krb5.new krb5.conf
 
 # Verify that the mkey stash code is backward compat with old/non-keytab stashfile format
 mkeystash_check: kdc.conf krb5.conf bigendian
@@ -47,9 +50,3 @@ mkeystash_check: kdc.conf krb5.conf bigendian
 clean::
 	$(RM) kdc.conf
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-$(OUTPRE)bigendian.$(OBJEXT): bigendian.c

@@ -121,8 +121,6 @@ struct _cmd_table {
      {"stash", kdb5_stash, 1},
      {"dump", dump_db, 1},
      {"load", load_db, 0},
-/*      {"dump_v4", dump_v4db, 1}, */
-/*      {"load_v4", load_v4db, 0}, */
      {"ark", add_random_key, 1},
      {"add_mkey", kdb5_add_mkey, 1}, /* 1 is opendb */
      {"use_mkey", kdb5_use_mkey, 1}, /* 1 is opendb */
@@ -218,15 +216,11 @@ int main(argc, argv)
 	    global_params.dbname = koptarg;
 	    global_params.mask |= KADM5_CONFIG_DBNAME;
 
-	    db_name_tmp = malloc( strlen(global_params.dbname) + sizeof("dbname="));
-	    if( db_name_tmp == NULL )
+	    if (asprintf(&db_name_tmp, "dbname=%s", global_params.dbname) < 0)
 	    {
 		com_err(progname, ENOMEM, "while parsing command arguments");
 		exit(1);
 	    }
-
-	    strcpy( db_name_tmp, "dbname=");
-	    strcat( db_name_tmp, global_params.dbname );
 
 	    if (!add_db_arg(db_name_tmp)) {
 		com_err(progname, ENOMEM, "while parsing command arguments\n");

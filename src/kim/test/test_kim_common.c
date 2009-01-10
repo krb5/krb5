@@ -100,7 +100,7 @@ void fail_if_error (kim_test_state_t  in_state,
         va_list args;
         kim_string message = NULL;
         
-        kim_error err = kim_string_create_for_last_error (&message, err);
+        kim_error err = kim_string_create_for_last_error (&message, in_err);
         
         printf ("\tFAILURE: ");
         printf ("%s() got %d (%s) ",

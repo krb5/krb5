@@ -25,8 +25,8 @@ SRCS=kinit.c
 all-unix:: kinit
 ##WIN32##all-windows:: $(KINIT)
 
-kinit: kinit.o $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ kinit.o $(KRB4COMPAT_LIBS)
+kinit: kinit.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ kinit.o $(KRB5_BASE_LIBS)
 
 ##WIN32##$(KINIT): $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib
@@ -42,13 +42,3 @@ install-unix::
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \
 		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	done
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-$(OUTPRE)kinit.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/krb5.h kinit.c

@@ -26,6 +26,7 @@
 
 #include "k5-int.h"
 #include "etypes.h"
+#include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt_length(krb5_context context, krb5_enctype enctype,
@@ -41,9 +42,18 @@ krb5_c_encrypt_length(krb5_context context, krb5_enctype enctype,
     if (i == krb5_enctypes_length)
 	return(KRB5_BAD_ENCTYPE);
 
-    (*(krb5_enctypes_list[i].encrypt_len))
-	(krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,
-	 inputlen, length);
+    if (krb5_enctypes_list[i].encrypt_len == NULL) {
+	assert(krb5_enctypes_list[i].aead != NULL);
+
+	krb5int_c_encrypt_length_aead_compat(krb5_enctypes_list[i].aead,
+					     krb5_enctypes_list[i].enc,
+					     krb5_enctypes_list[i].hash,
+					     inputlen, length);
+    } else {
+	(*(krb5_enctypes_list[i].encrypt_len))
+	    (krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,
+	    inputlen, length);
+    }
 
     return(0);
 }

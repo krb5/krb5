@@ -131,11 +131,10 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop)
 	goto done;
     } else {
 	if(strcmp(cp, "")) {
-	    if((rec->policy = (char *) malloc(strlen(cp)+1)) == NULL)  {
+	    if((rec->policy = strdup(cp)) == NULL)  {
 		ret = ENOMEM;
 		goto done;
 	    }
-	    strcpy(rec->policy, cp);
 	} else rec->policy = NULL;
     }
     if((cp = nstrtok((char *) NULL, "\t")) == NULL) {

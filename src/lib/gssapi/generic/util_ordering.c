@@ -1,6 +1,7 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +11,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -34,18 +35,18 @@
 #define QUEUE_LENGTH 20
 
 typedef struct _queue {
-   int do_replay;
-   int do_sequence;
-   int start;
-   int length;
-   gssint_uint64 firstnum;
-   /* Stored as deltas from firstnum.  This way, the high bit won't
-      overflow unless we've actually gone through 2**n messages, or
-      gotten something *way* out of sequence.  */
-   gssint_uint64 elem[QUEUE_LENGTH];
-   /* All ones for 64-bit sequence numbers; 32 ones for 32-bit
-      sequence numbers.  */
-   gssint_uint64 mask;
+    int do_replay;
+    int do_sequence;
+    int start;
+    int length;
+    gssint_uint64 firstnum;
+    /* Stored as deltas from firstnum.  This way, the high bit won't
+       overflow unless we've actually gone through 2**n messages, or
+       gotten something *way* out of sequence.  */
+    gssint_uint64 elem[QUEUE_LENGTH];
+    /* All ones for 64-bit sequence numbers; 32 ones for 32-bit
+       sequence numbers.  */
+    gssint_uint64 mask;
 } queue;
 
 /* rep invariant:
@@ -59,157 +60,157 @@ typedef struct _queue {
 static void
 queue_insert(queue *q, int after, gssint_uint64 seqnum)
 {
-   /* insert.  this is not the fastest way, but it's easy, and it's
-      optimized for insert at end, which is the common case */
-   int i;
+    /* insert.  this is not the fastest way, but it's easy, and it's
+       optimized for insert at end, which is the common case */
+    int i;
 
-   /* common case: at end, after == q->start+q->length-1 */
+    /* common case: at end, after == q->start+q->length-1 */
 
-   /* move all the elements (after,last] up one slot */
+    /* move all the elements (after,last] up one slot */
 
-   for (i=q->start+q->length-1; i>after; i--)
-      QELEM(q,i+1) = QELEM(q,i);
+    for (i=q->start+q->length-1; i>after; i--)
+        QELEM(q,i+1) = QELEM(q,i);
 
-   /* fill in slot after+1 */
+    /* fill in slot after+1 */
 
-   QELEM(q,after+1) = seqnum;
+    QELEM(q,after+1) = seqnum;
 
-   /* Either increase the length by one, or move the starting point up
-      one (deleting the first element, which got bashed above), as
-      appropriate. */
+    /* Either increase the length by one, or move the starting point up
+       one (deleting the first element, which got bashed above), as
+       appropriate. */
 
-   if (q->length == QSIZE(q)) {
-      q->start++;
-      if (q->start == QSIZE(q))
-	 q->start = 0;
-   } else {
-      q->length++;
-   }
+    if (q->length == QSIZE(q)) {
+        q->start++;
+        if (q->start == QSIZE(q))
+            q->start = 0;
+    } else {
+        q->length++;
+    }
 }
 
 gss_int32
 g_order_init(void **vqueue, gssint_uint64 seqnum,
-	     int do_replay, int do_sequence, int wide_nums)
+             int do_replay, int do_sequence, int wide_nums)
 {
-   queue *q;
+    queue *q;
 
-   if ((q = (queue *) malloc(sizeof(queue))) == NULL)
-      return(ENOMEM);
+    if ((q = (queue *) malloc(sizeof(queue))) == NULL)
+        return(ENOMEM);
 
-   /* This stops valgrind from complaining about writing uninitialized
-      data if the caller exports the context and writes it to a file.
-      We don't actually use those bytes at all, but valgrind still
-      complains.  */
-   memset(q, 0xfe, sizeof(*q));
+    /* This stops valgrind from complaining about writing uninitialized
+       data if the caller exports the context and writes it to a file.
+       We don't actually use those bytes at all, but valgrind still
+       complains.  */
+    memset(q, 0xfe, sizeof(*q));
 
-   q->do_replay = do_replay;
-   q->do_sequence = do_sequence;
-   q->mask = wide_nums ? ~(gssint_uint64)0 : 0xffffffffUL;
+    q->do_replay = do_replay;
+    q->do_sequence = do_sequence;
+    q->mask = wide_nums ? ~(gssint_uint64)0 : 0xffffffffUL;
 
-   q->start = 0;
-   q->length = 1;
-   q->firstnum = seqnum;
-   q->elem[q->start] = ((gssint_uint64)0 - 1) & q->mask;
+    q->start = 0;
+    q->length = 1;
+    q->firstnum = seqnum;
+    q->elem[q->start] = ((gssint_uint64)0 - 1) & q->mask;
 
-   *vqueue = (void *) q;
-   return(0);
+    *vqueue = (void *) q;
+    return(0);
 }
 
 gss_int32
 g_order_check(void **vqueue, gssint_uint64 seqnum)
 {
-   queue *q;
-   int i;
-   gssint_uint64 expected;
+    queue *q;
+    int i;
+    gssint_uint64 expected;
 
-   q = (queue *) (*vqueue);
+    q = (queue *) (*vqueue);
 
-   if (!q->do_replay && !q->do_sequence)
-      return(GSS_S_COMPLETE);
+    if (!q->do_replay && !q->do_sequence)
+        return(GSS_S_COMPLETE);
 
-   /* All checks are done relative to the initial sequence number, to
-      avoid (or at least put off) the pain of wrapping.  */
-   seqnum -= q->firstnum;
-   /* If we're only doing 32-bit values, adjust for that again.
+    /* All checks are done relative to the initial sequence number, to
+       avoid (or at least put off) the pain of wrapping.  */
+    seqnum -= q->firstnum;
+    /* If we're only doing 32-bit values, adjust for that again.
 
-      Note that this will probably be the wrong thing to if we get
-      2**32 messages sent with 32-bit sequence numbers.  */
-   seqnum &= q->mask;
+    Note that this will probably be the wrong thing to if we get
+    2**32 messages sent with 32-bit sequence numbers.  */
+    seqnum &= q->mask;
 
-   /* rule 1: expected sequence number */
+    /* rule 1: expected sequence number */
 
-   expected = (QELEM(q,q->start+q->length-1)+1) & q->mask;
-   if (seqnum == expected) { 
-      queue_insert(q, q->start+q->length-1, seqnum);
-      return(GSS_S_COMPLETE);
-   }
+    expected = (QELEM(q,q->start+q->length-1)+1) & q->mask;
+    if (seqnum == expected) {
+        queue_insert(q, q->start+q->length-1, seqnum);
+        return(GSS_S_COMPLETE);
+    }
 
-   /* rule 2: > expected sequence number */
+    /* rule 2: > expected sequence number */
 
-   if ((seqnum > expected)) {
-      queue_insert(q, q->start+q->length-1, seqnum);
-      if (q->do_replay && !q->do_sequence)
-	 return(GSS_S_COMPLETE);
-      else
-	 return(GSS_S_GAP_TOKEN);
-   }
+    if ((seqnum > expected)) {
+        queue_insert(q, q->start+q->length-1, seqnum);
+        if (q->do_replay && !q->do_sequence)
+            return(GSS_S_COMPLETE);
+        else
+            return(GSS_S_GAP_TOKEN);
+    }
 
-   /* rule 3: seqnum < seqnum(first) */
+    /* rule 3: seqnum < seqnum(first) */
 
-   if ((seqnum < QELEM(q,q->start)) &&
-       /* Is top bit of whatever width we're using set?
+    if ((seqnum < QELEM(q,q->start)) &&
+        /* Is top bit of whatever width we're using set?
 
-	  We used to check for greater than or equal to firstnum, but
-	  (1) we've since switched to compute values relative to
-	  firstnum, so the lowest we can have is 0, and (2) the effect
-	  of the original scheme was highly dependent on whether
-	  firstnum was close to either side of 0.  (Consider
-	  firstnum==0xFFFFFFFE and we miss three packets; the next
-	  packet is *new* but would look old.)
+        We used to check for greater than or equal to firstnum, but
+        (1) we've since switched to compute values relative to
+        firstnum, so the lowest we can have is 0, and (2) the effect
+        of the original scheme was highly dependent on whether
+        firstnum was close to either side of 0.  (Consider
+        firstnum==0xFFFFFFFE and we miss three packets; the next
+        packet is *new* but would look old.)
 
-          This check should give us 2**31 or 2**63 messages "new", and
-          just as many "old".  That's not quite right either.  */
-       (seqnum & (1 + (q->mask >> 1)))
-       ) {
-      if (q->do_replay && !q->do_sequence)
-	 return(GSS_S_OLD_TOKEN);
-      else
-	 return(GSS_S_UNSEQ_TOKEN);
-   }
+        This check should give us 2**31 or 2**63 messages "new", and
+        just as many "old".  That's not quite right either.  */
+        (seqnum & (1 + (q->mask >> 1)))
+    ) {
+        if (q->do_replay && !q->do_sequence)
+            return(GSS_S_OLD_TOKEN);
+        else
+            return(GSS_S_UNSEQ_TOKEN);
+    }
 
-   /* rule 4+5: seqnum in [seqnum(first),seqnum(last)]  */
+    /* rule 4+5: seqnum in [seqnum(first),seqnum(last)]  */
 
-   else {
-      if (seqnum == QELEM(q,q->start+q->length-1))
-	 return(GSS_S_DUPLICATE_TOKEN);
+    else {
+        if (seqnum == QELEM(q,q->start+q->length-1))
+            return(GSS_S_DUPLICATE_TOKEN);
 
-      for (i=q->start; i<q->start+q->length-1; i++) {
-	 if (seqnum == QELEM(q,i))
-	    return(GSS_S_DUPLICATE_TOKEN);
-	 if ((seqnum > QELEM(q,i)) && (seqnum < QELEM(q,i+1))) {
-	    queue_insert(q, i, seqnum);
-	    if (q->do_replay && !q->do_sequence)
-	       return(GSS_S_COMPLETE);
-	    else
-	       return(GSS_S_UNSEQ_TOKEN);
-	 }
-      }
-   }
+        for (i=q->start; i<q->start+q->length-1; i++) {
+            if (seqnum == QELEM(q,i))
+                return(GSS_S_DUPLICATE_TOKEN);
+            if ((seqnum > QELEM(q,i)) && (seqnum < QELEM(q,i+1))) {
+                queue_insert(q, i, seqnum);
+                if (q->do_replay && !q->do_sequence)
+                    return(GSS_S_COMPLETE);
+                else
+                    return(GSS_S_UNSEQ_TOKEN);
+            }
+        }
+    }
 
-   /* this should never happen */
-   return(GSS_S_FAILURE);
+    /* this should never happen */
+    return(GSS_S_FAILURE);
 }
 
 void
 g_order_free(void **vqueue)
 {
-   queue *q;
-   
-   q = (queue *) (*vqueue);
+    queue *q;
 
-   free(q);
+    q = (queue *) (*vqueue);
 
-   *vqueue = NULL;
+    free(q);
+
+    *vqueue = NULL;
 }
 
 /*
@@ -226,11 +227,11 @@ gss_uint32
 g_queue_externalize(void *vqueue, unsigned char **buf, size_t *lenremain)
 {
     if (*lenremain < sizeof(queue))
-	return ENOMEM;
+        return ENOMEM;
     memcpy(*buf, vqueue, sizeof(queue));
     *buf += sizeof(queue);
     *lenremain -= sizeof(queue);
-    
+
     return 0;
 }
 
@@ -240,9 +241,9 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
     void *q;
 
     if (*lenremain < sizeof(queue))
-	return EINVAL;
+        return EINVAL;
     if ((q = malloc(sizeof(queue))) == 0)
-	return ENOMEM;
+        return ENOMEM;
     memcpy(q, *buf, sizeof(queue));
     *buf += sizeof(queue);
     *lenremain -= sizeof(queue);

@@ -2,24 +2,6 @@
 # This is a DejaGnu test script.
 # This script tests Kerberos kadmin5 using kadmin.local as verification.
 
-# Set up the kerberos database.
-if {![get_hostname] \
-    || ![setup_kerberos_files] \
-    || ![setup_kerberos_env] \
-    || ![setup_kerberos_db 0]} {
-    return
-}
-
-# find kpasswd
-if ![info exists KPASSWD] {
-    set KPASSWD [findfile $objdir/../../clients/kpasswd/kpasswd]
-}
-
-# find kdestroy
-if ![info exists KDESTROY] {
-    set KDESTROY [findfile $objdir/../../clients/kdestroy/kdestroy]
-}
-
 #++
 # kadmin_add	- Test add new v5 principal function of kadmin.
 #
@@ -68,7 +50,10 @@ proc kadmin_add { pname password } {
 	# use kadmin.local to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
+	envstack_push
+	setup_kerberos_env kdc
 	spawn $KADMIN_LOCAL -r $REALMNAME
+	envstack_pop
 	expect_after {
 	    -i $spawn_id
 	    timeout {
@@ -169,7 +154,10 @@ proc kadmin_add_rnd { pname { flags "" } } {
 	# use kadmin.local to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
+	envstack_push
+	setup_kerberos_env kdc
 	spawn $KADMIN_LOCAL -r $REALMNAME
+	envstack_pop
 	expect_after {
 	     -i $spawn_id
 	    timeout {
@@ -395,7 +383,9 @@ proc kadmin_list {  } {
     global KEY
     global spawn_id
 
-    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "get_principals *"
+    # "*" would match everything
+    # "*n" should match a few like kadmin/admin but see ticket 5667
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "get_principals *n"
     expect_after {
 	"Cannot contact any KDC" {
 	    fail "kadmin ldb lost KDC"
@@ -568,7 +558,10 @@ proc kadmin_delete { pname } {
 	#
 	# use kadmin.local to verify that the old principal is not present.
 	#
+	envstack_push
+	setup_kerberos_env kdc
 	spawn $KADMIN_LOCAL -r $REALMNAME
+	envstack_pop
 	expect_after {
 	    -i $spawn_id
 	    timeout {
@@ -692,7 +685,10 @@ proc kadmin_addpol { pname } {
     #
     # use kadmin.local to verify that a policy was created
     #
+    envstack_push
+    setup_kerberos_env kdc
     spawn $KADMIN_LOCAL -r $REALMNAME
+    envstack_pop
     expect_after {
         -i $spawn_id
         timeout {
@@ -775,7 +771,10 @@ proc kadmin_delpol { pname } {
     #
     # use kadmin.local to verify that the old policy is not present.
     #
+    envstack_push
+    setup_kerberos_env kdc
     spawn $KADMIN_LOCAL -r $REALMNAME
+    envstack_pop
     expect_after {
         -i $spawn_id
         timeout {
@@ -1062,14 +1061,24 @@ proc kadmin_test { } {
     verbose "kadmin_test succeeded"
 }
 
-# Run the test.
-set status [catch kadmin_test msg]
+run_once kadmin {
+    # Set up the kerberos database.
+    if {![get_hostname] \
+	    || ![setup_kerberos_files] \
+	    || ![setup_kerberos_env] \
+	    || ![setup_kerberos_db 0]} {
+	return
+    }
 
-# Shut down the kerberos daemons and the rsh daemon.
-stop_kerberos_daemons
+    # Run the test.
+    set status [catch kadmin_test msg]
 
-if { $status != 0 } {
-    send_error "ERROR: error in kadmin.exp\n"
-    send_error "$msg\n"
-    exit 1
+    # Shut down the kerberos daemons and the rsh daemon.
+    stop_kerberos_daemons
+
+    if { $status != 0 } {
+	send_error "ERROR: error in kadmin.exp\n"
+	send_error "$msg\n"
+	exit 1
+    }
 }

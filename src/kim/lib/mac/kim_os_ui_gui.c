@@ -24,13 +24,12 @@
  * or implied warranty.
  */
 
-#ifndef LEAN_CLIENT
+#ifdef KIM_BUILTIN_UI
 
 #include "kim_os_private.h"
 
 #include "k5_mig_client.h"
 
-#include <Kerberos/kipc_client.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <unistd.h>
@@ -561,4 +560,4 @@ kim_error kim_os_ui_gui_fini (kim_ui_context *io_context)
     return check_error (err);
 }
 
-#endif /* LEAN_CLIENT */
+#endif /* KIM_BUILTIN_UI */

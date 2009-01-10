@@ -5,6 +5,7 @@
 #include "autoconf.h"
 #include "krb5.h"
 #include "gssapi/gssapi.h"
+#include "k5-platform.h"
 #define HAVE_DLOPEN 1
 
 static int verbose = 1;
@@ -53,28 +54,20 @@ static void *do_open_1(const char *libname, const char *rev,
 {
     void *p;
     char *namebuf;
-    size_t sz;
+    int r;
 
     if (verbose)
 	printf("from line %d: do_open(%s)...%*s", line, libname,
 	       HORIZ-strlen(libname), "");
-    sz = strlen(SHLIB_SUFFIX) + strlen(libname) + 4;
 #ifdef _AIX
-    sz += strlen(rev) + 8;
+    r = asprintf(&namebuf, "lib%s%s", libname, SHLIB_SUFFIX);
+#else
+    r = asprintf(&namebuf, "lib%s%s(shr.o.%s)", libname, SHLIB_SUFFIX, rev);
 #endif
-    namebuf = malloc(sz);
-    if (namebuf == 0) {
-	perror("malloc");
+    if (r < 0) {
+	perror("asprintf");
 	exit(1);
     }
-    strcpy(namebuf, "lib");
-    strcat(namebuf, libname);
-    strcat(namebuf, SHLIB_SUFFIX);
-#ifdef _AIX
-    strcat(namebuf, "(shr.o.");
-    strcat(namebuf, rev);
-    strcat(namebuf, ")");
-#endif
 
 #ifndef RTLD_MEMBER
 #define RTLD_MEMBER 0
@@ -116,7 +109,7 @@ static void do_close_1(void *libhandle, int line)
 {
     if (verbose) {
 	char pbuf[3*sizeof(libhandle)+4];
-	sprintf(pbuf, "%p", libhandle);
+	snprintf(pbuf, sizeof(pbuf), "%p", libhandle);
 	printf("from line %d: do_close(%s)...%*s", line, pbuf,
 	       HORIZ-1-strlen(pbuf), "");
     }

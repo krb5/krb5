@@ -453,12 +453,12 @@ krb5int_plugin_file_handle_array_init (struct plugin_file_handle ***harray)
 }
 
 static long
-krb5int_plugin_file_handle_array_add (struct plugin_file_handle ***harray, int *count, 
+krb5int_plugin_file_handle_array_add (struct plugin_file_handle ***harray, size_t *count, 
                                       struct plugin_file_handle *p)
 {
     long err = 0;
     struct plugin_file_handle **newharray = NULL;
-    int newcount = *count + 1;
+    size_t newcount = *count + 1;
     
     newharray = realloc (*harray, ((newcount + 1) * sizeof (**harray))); /* +1 for NULL */
     if (newharray == NULL) { 
@@ -528,7 +528,7 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
     }
 
     if (!err) {
-        int j;
+        size_t j;
         for (i = 0; !err && filebases[i]; i++) {
             for (j = 0; !err && fileexts[j]; j++) {
 		if (asprintf(&tempnames[(i*exts_count)+j], "%s%s", 
@@ -564,7 +564,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
 {
     long err = 0;
     struct plugin_file_handle **h = NULL;
-    int count = 0;
+    size_t count = 0;
     char **filenames = NULL;
     int i;
 
@@ -683,7 +683,7 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
 {
     long err = 0;
     void **p = NULL;
-    int count = 0;
+    size_t count = 0;
 
     /* XXX Do we need to add a leading "_" to the symbol name on any
        modern platforms?  */
@@ -742,7 +742,7 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
 {
     long err = 0;
     void (**p)() = NULL;
-    int count = 0;
+    size_t count = 0;
     
     /* XXX Do we need to add a leading "_" to the symbol name on any
         modern platforms?  */

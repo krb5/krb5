@@ -251,12 +251,8 @@ krb5_cc_set_default_name(krb5_context context, const char *name)
     if (name != NULL) {
         if (!err) {
             /* If the name isn't NULL, make a copy of it */
-            new_ccname = malloc (strlen (name) + 1);
+            new_ccname = strdup (name);
             if (new_ccname == NULL) { err = ENOMEM; }
-        }
-        
-        if (!err) {
-            strcpy (new_ccname, name);
         }
     }
     

@@ -42,7 +42,7 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
 	    for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
 		retval = profile_open_file(*fs, &new_file);
 		/* if this file is missing, skip to the next */
-		if (retval == ENOENT || retval == EACCES) {
+		if (retval == ENOENT || retval == EACCES || retval == EPERM) {
 			continue;
 		}
 		if (retval) {
@@ -71,7 +71,7 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
 
 #define COUNT_LINKED_LIST(COUNT, PTYPE, START, FIELD)	\
 	{						\
-	    int cll_counter = 0;			\
+	    size_t cll_counter = 0;			\
 	    PTYPE cll_ptr = (START);			\
 	    while (cll_ptr != NULL) {			\
 		cll_counter++;				\
@@ -106,7 +106,8 @@ errcode_t KRB5_CALLCONV
 profile_init_path(const_profile_filespec_list_t filepath,
 		  profile_t *ret_profile)
 {
-	int n_entries, i;
+        unsigned int n_entries;
+        int i;
 	unsigned int ent_len;
 	const char *s, *t;
 	profile_filespec_t *filenames;
@@ -125,7 +126,7 @@ profile_init_path(const_profile_filespec_list_t filepath,
 
 	/* measure, copy, and skip each one */
 	for(s = filepath, i=0; (t = strchr(s, ':')) || (t=s+strlen(s)); s=t+1, i++) {
-		ent_len = t-s;
+	        ent_len = (unsigned int) (t-s);
 		filenames[i] = (char*) malloc(ent_len + 1);
 		if (filenames[i] == 0) {
 			/* if malloc fails, free the ones that worked */
@@ -252,7 +253,6 @@ profile_release(profile_t profile)
 	free(profile);
 }
 
-#ifndef  LEAN_CLIENT  
 /*
  * Here begins the profile serialization functions.
  */
@@ -344,6 +344,7 @@ errcode_t profile_ser_internalize(const char *unused, profile_t *profilep,
 
 	bp = *bufpp;
 	remain = *remainp;
+	fcount = 0;
 
 	if (remain >= 12)
 		(void) unpack_int32(&tmp, &bp, &remain);
@@ -358,11 +359,11 @@ errcode_t profile_ser_internalize(const char *unused, profile_t *profilep,
 	(void) unpack_int32(&fcount, &bp, &remain);
 	retval = ENOMEM;
 
-	flist = (profile_filespec_t *) malloc(sizeof(profile_filespec_t) * (fcount + 1));
+	flist = (profile_filespec_t *) malloc(sizeof(profile_filespec_t) * (size_t) (fcount + 1));
 	if (!flist)
 		goto cleanup;
 	
-	memset(flist, 0, sizeof(char *) * (fcount+1));
+	memset(flist, 0, sizeof(char *) * (size_t) (fcount+1));
 	for (i=0; i<fcount; i++) {
 		if (!unpack_int32(&tmp, &bp, &remain)) {
 			flist[i] = (char *) malloc((size_t) (tmp+1));
@@ -398,5 +399,4 @@ cleanup:
 	}
 	return(retval);
 }
-#endif /* LEAN_CLIENT  */
 

@@ -5,6 +5,8 @@
 
 #include <errno.h>
 
+#include "k5-platform.h"
+
 #ifndef SYS_ERRLIST_DECLARED
 extern char const * const sys_errlist[];
 extern const int sys_nerr;

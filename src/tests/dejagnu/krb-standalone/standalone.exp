@@ -89,6 +89,8 @@ proc doit { } {
     global portbase
     global mode
 
+    setup_kerberos_env kdc
+
     # Start up the kerberos and kadmind daemons.
     if ![start_kerberos_daemons 1] {
 	return
@@ -138,6 +140,7 @@ proc doit { } {
     verbose "wait -i $spawn_id returned $k_stat (kadmin addpol)"
     catch "close -i $spawn_id"
 
+    setup_kerberos_env client
     # Use kinit to get a ticket.
     if ![kinit krbtest/admin adminpass$KEY 1] {
 	return
@@ -172,51 +175,11 @@ proc doit { } {
 	kinit_kt "foo/bar" $tmppwd/fookeytab 1 "kt kvno $vno"
 	do_klist "foo/bar" "krbtgt/$REALMNAME@$REALMNAME" "klist kt foo/bar vno $vno"
 	do_kdestroy "kdestroy foo/bar vno $vno"
-	
-	if {[info exists KRBIV] && $KRBIV &&
-	    [regexp {des-cbc-[a-z0-9-]*:v4} [lindex $supported_enctypes 0]]} {
-	    catch "exec rm -f $tmppwd/foosrvtab"
-	    spawn $KTUTIL
-	    expect_after {
-		timeout	{ fail "ktutil converting keytab to srvtab" ; set ok 0 }
-		eof	{ fail "ktutil converting keytab to srvtab" ; set ok 0 }
-	    }
-	    expect "ktutil: "
-	    send "rkt $tmppwd/fookeytab\r"
-	    expect -ex "rkt $tmppwd/fookeytab\r"
-	    expect "ktutil: "
-# for debugging, just log this
-#	    send "list\r"
-#	    expect "ktutil: "
-	    #
-	    send "wst $tmppwd/foosrvtab\r"
-	    expect -ex "wst $tmppwd/foosrvtab\r"
-	    expect "ktutil: "
-# for debugging, just log this
-#	    send "clear\r"
-#	    expect "ktutil: "
-#	    send "rst $tmppwd/foosrvtab\r"
-#	    expect "ktutil: "
-#	    send "list\r"
-#	    expect "ktutil: "
-	    # okay, now quit and finish testing
-	    send "quit\r"
-	    expect eof
-	    catch expect_after
-	    if [check_exit_status "ktutil converting keytab to srvtab (vno $vno)"] {
-		pass "ktutil converting keytab to srvtab (vno $vno)"
-		do_klist_kt $tmppwd/fookeytab "klist srvtab foo/bar vno $vno"
-		kinit_kt "foo/bar" "SRVTAB:$tmppwd/foosrvtab" 1 "st kvno $vno"
-		do_klist "foo/bar" "krbtgt/$REALMNAME@$REALMNAME" "klist st foo/bar vno $vno"
-		do_kdestroy "kdestroy st foo/bar vno $vno"
-	    }
-	} else {
-	    verbose "skipping v5kinit/srvtab tests because of non-v4 enctype"
-	}
     }
     catch "exec rm -f $keytab"
     # Check that kadmin.local can actually read the correct kvno, even
     # if we don't expect kadmin to be able to.
+    setup_kerberos_env kdc
     spawn $KADMIN_LOCAL -r $REALMNAME
     set ok 1
     expect_after {
@@ -232,36 +195,6 @@ proc doit { } {
     if [check_exit_status "kadmin.local examine foo/bar for high kvno"] {
 	if $ok {
 	    pass "kadmin.local correct high kvno"
-	}
-    }
-
-    if { $mode == "tcp" } {
-	set response {}
-	set got_response 0
-	set kdcsock ""
-	catch {
-	    send_log "connecting to $hostname [expr 3 + $portbase]\n"
-	    set kdcsock [socket $hostname [expr 3 + $portbase]]
-	    fconfigure $kdcsock -encoding binary -blocking 0 -buffering none
-	    puts -nonewline $kdcsock [binary format H* ffffffff]
-	    # XXX
-	    sleep 3
-	    set response [read $kdcsock]
-	    set got_response 1
-	} msg
-	if [string length $kdcsock] { catch "close $kdcsock" }
-	if $got_response {
-#	send_log [list sent length -1, got back $response]
-#	send_log "\n"
-	    if [string length $response]>10 {
-		pass "too-long TCP request"
-	    } else {
-		send_log "response too short\n"
-		fail "too-long TCP request"
-	    }
-	} else {
-	    send_log "too-long connect/exchange failure: $msg\n"
-	    fail "too-long TCP request"
 	}
     }
 }

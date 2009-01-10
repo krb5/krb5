@@ -57,6 +57,8 @@ static char sccsid[] = "@(#)glob.c	5.9 (Berkeley) 2/25/91";
 #include <limits.h>
 #endif
 
+#include <k5-platform.h>
+
 #include "ftp_var.h"
 
 #ifdef ARG_MAX
@@ -211,7 +213,8 @@ expand(as)
 				*gpathp = 0;
 				if (gethdir(gpath + 1))
 					globerr = "Unknown user name after ~";
-				(void) strcpy(gpath, gpath + 1);
+				(void) memmove(gpath, gpath + 1,
+					       strlen(gpath));
 			} else
 				(void) strncpy(gpath, home, FTP_BUFSIZ - 1);
 			gpath[FTP_BUFSIZ - 1] = '\0';
@@ -258,10 +261,7 @@ matchdir(pattern)
 	char *base = *gpath ? gpath : ".";
 	char *buffer = 0;
 
-	buffer = malloc(strlen(base) + strlen("\\*") + 1);
-	if (!buffer) return;
-	strcpy(buffer, base);
-	strcat(buffer, "\\*");
+	if (asprintf(&buffer, "%s\\*", base) < 0) return;
 	hFile = FindFirstFile(buffer, &file_data);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		if (!globbed)
@@ -732,12 +732,10 @@ char *
 strspl(cp, dp)
 	register char *cp, *dp;
 {
-	register char *ep = malloc((unsigned)(strlen(cp) + strlen(dp) + 1));
+	char *ep;
 
-	if (ep == (char *)0)
+	if (asprintf(&ep, "%s%s", cp, dp) < 0)
 		fatal("Out of memory");
-	(void) strcpy(ep, cp);
-	(void) strcat(ep, dp);
 	return (ep);
 }
 
@@ -775,10 +773,12 @@ static int gethdir(mhome)
 	char *mhome;
 {
 	register struct passwd *pp = getpwnam(mhome);
+	size_t bufsize = lastgpathp - mhome;
 
-	if (!pp || ((mhome + strlen(pp->pw_dir)) >= lastgpathp))
+	if (!pp)
 		return (1);
-	(void) strcpy(mhome, pp->pw_dir);
+	if (strlcpy(mhome, pp->pw_dir, bufsize) >= bufsize)
+		return (1);
 	return (0);
 }
 #endif

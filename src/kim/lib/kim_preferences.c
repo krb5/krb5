@@ -230,7 +230,7 @@ kim_error kim_favorites_add_identity (kim_favorites io_favorites,
 {
     kim_error err = KIM_NO_ERROR;
     kim_identity identity = NULL;
-    kim_options options = NULL;
+    kim_options options = KIM_OPTIONS_DEFAULT;
     kim_count insert_at = 0;
     
     if (!err && !io_favorites) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -437,16 +437,24 @@ static kim_error kim_preferences_read (kim_preferences in_preferences)
     
     if (!err) {
         kim_identity default_identity = kim_default_client_identity;
+        kim_identity identity = NULL;
         
         err = kim_os_identity_create_for_username (&default_identity);
         
         if (!err) {
             err = kim_os_preferences_get_identity_for_key (kim_preference_key_client_identity,
                                                            default_identity,
-                                                           &in_preferences->client_identity);
+                                                           &identity);
+        }
+        
+        if (!err) {
+            kim_identity_free (&in_preferences->client_identity);
+            in_preferences->client_identity = identity;
+            identity = NULL;
         }
         
         kim_identity_free (&default_identity);
+        kim_identity_free (&identity);
     }
     
     if (!err) {
@@ -502,7 +510,7 @@ static kim_error kim_preferences_write (kim_preferences in_preferences)
     
     if (!err && !in_preferences) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
-    if (!err && in_preferences->remember_options && in_preferences->options_changed) {
+    if (!err && in_preferences->options_changed) {
         err = kim_os_preferences_set_options_for_key (kim_preference_key_options,
                                                       in_preferences->options);        
     }
@@ -512,7 +520,7 @@ static kim_error kim_preferences_write (kim_preferences in_preferences)
                                                       in_preferences->remember_options);
     }
     
-    if (!err && in_preferences->remember_client_identity && in_preferences->client_identity_changed) {
+    if (!err && in_preferences->client_identity_changed) {
         kim_identity default_identity = kim_default_client_identity;
         
         err = kim_os_identity_create_for_username (&default_identity);

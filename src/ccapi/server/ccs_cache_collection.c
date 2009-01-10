@@ -571,25 +571,6 @@ cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  io_cac
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_cache_collection_context_release (ccs_cache_collection_t io_cache_collection,
-                                                       k5_ipc_stream           in_request_data,
-                                                       k5_ipc_stream           io_reply_data)
-{
-    cc_int32 err = ccNoError;
-    
-    if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
-    if (!in_request_data    ) { err = cci_check_error (ccErrBadParam); }
-    if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
-    
-    if (!err) {
-        /* Currently does nothing */
-    }
-    
-    return cci_check_error (err);    
-}
-
-/* ------------------------------------------------------------------------ */
-
 static cc_int32 ccs_cache_collection_sync (ccs_cache_collection_t io_cache_collection,
                                             k5_ipc_stream           in_request_data,
                                             k5_ipc_stream           io_reply_data)
@@ -1051,9 +1032,8 @@ static cc_int32 ccs_cache_collection_unlock (ccs_pipe_t             in_client_pi
     }
     
     if (!err) {
-        if (in_request_name == cci_context_release_msg_id) {
-            err = ccs_cache_collection_context_release (io_cache_collection,
-                                                        in_request_data, reply_data);
+        if (in_request_name == cci_context_unused_release_msg_id) {
+            /* Old release message.  Do nothing. */
             
         } else if (in_request_name == cci_context_sync_msg_id) {
             err = ccs_cache_collection_sync (io_cache_collection,

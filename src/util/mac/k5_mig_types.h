@@ -44,12 +44,16 @@
 #ifndef K5_MIG_TYPES_H
 #define K5_MIG_TYPES_H
 
+#define K5_IPC_MAX_MSG_SIZE 2048 + MAX_TRAILER_SIZE
 
-#define K5_IPC_MAX_MSG_SIZE 1024
+#define K5_MIG_LOOKUP_SUFFIX  ".ipcLookup"
+#define K5_MIG_SERVICE_SUFFIX ".ipcService"
 
-typedef const char  k5_ipc_inl_request_t[K5_IPC_MAX_MSG_SIZE];
+#define K5_IPC_MAX_INL_MSG_SIZE 1024
+
+typedef const char  k5_ipc_inl_request_t[K5_IPC_MAX_INL_MSG_SIZE];
 typedef const char *k5_ipc_ool_request_t;
-typedef char        k5_ipc_inl_reply_t[K5_IPC_MAX_MSG_SIZE];
+typedef char        k5_ipc_inl_reply_t[K5_IPC_MAX_INL_MSG_SIZE];
 typedef char       *k5_ipc_ool_reply_t;
 
 #endif /* K5_MIG_TYPES_H */

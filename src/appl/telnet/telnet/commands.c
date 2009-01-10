@@ -117,6 +117,8 @@ static	unsigned long sourceroute(char *, char **, int *);
 
 #include "fake-addrinfo.h"
 
+#include <k5-platform.h>
+
 char	*hostname;
 static char _hostname[MAXDNAME];
 static char hostaddrstring[NI_MAXHOST];
@@ -1745,8 +1747,8 @@ env_find(var)
 env_init()
 {
 	extern char **environ;
-	register char **epp, *cp;
-	register struct env_lst *ep;
+	char **epp, *cp;
+	struct env_lst *ep;
 
 	for (epp = environ; *epp; epp++) {
 		if ((cp = strchr(*epp, '='))) {
@@ -1770,8 +1772,7 @@ env_init()
 
 		gethostname(hbuf, 256);
 		hbuf[256] = '\0';
-		cp = (char *)malloc(strlen(hbuf) + strlen(cp2) + 1);
-		sprintf((char *)cp, "%s%s", hbuf, cp2);
+		asprintf(&cp, "%s%s", hbuf, cp2);
 		free(ep->value);
 		ep->value = (unsigned char *)cp;
 	}
@@ -2431,7 +2432,7 @@ tn(argc, argv)
 	return 0;
     }
     if (argc < 2) {
-	(void) strcpy(line, "open ");
+	(void) strlcpy(line, "open ", sizeof(line));
 	printf("(to) ");
 	(void) fgets(&line[strlen(line)], (int) (sizeof(line) - strlen(line)),
 		     stdin);
@@ -2580,7 +2581,8 @@ tn(argc, argv)
 	if (error) {
 	    fprintf (stderr, "getnameinfo() error printing address: %s\n",
 		     gai_strerror (error));
-	    strcpy (hostaddrstring, "[address unprintable]");
+	    strlcpy (hostaddrstring, "[address unprintable]",
+		     sizeof(hostaddrstring));
 	}
 	printf("Trying %s...\r\n", hostaddrstring);
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)

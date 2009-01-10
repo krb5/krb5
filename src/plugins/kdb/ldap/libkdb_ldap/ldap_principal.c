@@ -143,7 +143,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
     krb5_db_entry            entry;
     krb5_principal           principal;
     char                     **subtree=NULL, *princ_name=NULL, *realm=NULL, **values=NULL, *filter=NULL; 
-    unsigned int             filterlen=0, tree=0, ntree=1, i=0;
+    unsigned int             tree=0, ntree=1, i=0;
     krb5_error_code          st=0, tempst=0;
     LDAP                     *ld=NULL;
     LDAPMessage              *result=NULL, *ent=NULL;
@@ -174,11 +174,9 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
     if (match_expr == NULL)
 	match_expr = default_match_expr;
 
-    filterlen = strlen(FILTER) + strlen(match_expr) + 2 + 1;  /* 2 for closing brackets */
-    filter = malloc (filterlen);
+    if (asprintf(&filter, FILTER"%s))", match_expr) < 0)
+	filter = NULL;
     CHECK_NULL(filter);
-    memset(filter, 0, filterlen);
-    sprintf(filter, FILTER"%s))", match_expr);
 
     if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntree)) != 0) 
 	goto cleanup;
@@ -256,7 +254,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 
     SETUP_CONTEXT();
     /* get the principal info */
-    if ((st=krb5_ldap_get_principal(context, searchfor, &entries, nentries, &more)) != 0 || *nentries == 0)
+    if ((st=krb5_ldap_get_principal(context, searchfor, 0, &entries, nentries, &more)) != 0 || *nentries == 0)
 	goto cleanup;
 
     if (((st=krb5_get_princ_type(context, &entries, &(ptype))) != 0) ||
@@ -385,52 +383,17 @@ cleanup:
 krb5_error_code
 krb5_ldap_unparse_principal_name(char *user_name)
 {
-    char *tmp_princ_name=NULL, *princ_name=NULL, *tmp=NULL;
-    int l=0;
-    krb5_error_code st=0;
+    char *in, *out;
 
-    if (strstr(user_name, "\\@")) {
-
-	tmp_princ_name = strdup(user_name);
-	if (!tmp_princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
-	}
-	tmp = tmp_princ_name;
-
-	princ_name = (char *) malloc (strlen(user_name));
-	if (!princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
-	}
-	memset(princ_name, 0, strlen(user_name));
-
-	l = 0;
-	while (*tmp_princ_name) {
-	    if ((*tmp_princ_name == '\\') && (*(tmp_princ_name+1) == '@')) {
-		tmp_princ_name += 1;
-	    } else {
-		*(princ_name + l) = *tmp_princ_name++;
-		l++;
-	    }
-	}
-
-	memset(user_name, 0, strlen(user_name));
-	sprintf(user_name, "%s", princ_name);
+    out = user_name;
+    for (in = user_name; *in; in++) {
+	if (*in == '\\' && *(in + 1) == '@')
+	    continue;
+	*out++ = *in;
     }
+    *out = '\0';
 
-cleanup:
-    if (tmp) {
-	free(tmp);
-	tmp = NULL;
-    }
-
-    if (princ_name) {
-	free(princ_name);
-	princ_name = NULL;
-    }
-
-    return st;
+    return 0;
 }
 
 
@@ -452,62 +415,25 @@ krb5_ldap_parse_principal_name(i_princ_name, o_princ_name)
     char              *i_princ_name;
     char              **o_princ_name;
 {
-    char *tmp_princ_name = NULL, *princ_name = NULL, *at_rlm_name = NULL;
-    int l = 0, m = 0, tmp_princ_name_len = 0, princ_name_len = 0, at_count = 0;
-    krb5_error_code st = 0;
+    const char *at_rlm_name, *p;
+    struct k5buf buf;
 
     at_rlm_name = strrchr(i_princ_name, '@');
-
     if (!at_rlm_name) {
 	*o_princ_name = strdup(i_princ_name);
-	if (!o_princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
-	}
+	if (!o_princ_name)
+	    return ENOMEM;
     } else {
-	tmp_princ_name_len = at_rlm_name - i_princ_name;
-
-	tmp_princ_name = (char *) malloc ((unsigned) tmp_princ_name_len + 1);
-	if (!tmp_princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
+	krb5int_buf_init_dynamic(&buf);
+	for (p = i_princ_name; p < at_rlm_name; p++) {
+	    if (*p == '@')
+		krb5int_buf_add(&buf, "\\");
+	    krb5int_buf_add_len(&buf, p, 1);
 	}
-	memset(tmp_princ_name, 0, (unsigned) tmp_princ_name_len + 1);
-	memcpy(tmp_princ_name, i_princ_name, (unsigned) tmp_princ_name_len);
-
-	l = 0;
-	while (tmp_princ_name[l]) {
-	    if (tmp_princ_name[l++] == '@')
-		at_count++;
-	}
-
-	princ_name_len = strlen(i_princ_name) + at_count + 1;
-	princ_name = (char *) malloc ((unsigned) princ_name_len);
-	if (!princ_name) {
-	    st = ENOMEM;
-	    goto cleanup;
-	}
-	memset(princ_name, 0, (unsigned) princ_name_len);
-
-	l = 0;
-	m = 0;
-	while (tmp_princ_name[l]) {
-	    if (tmp_princ_name[l] == '@') {
-		princ_name[m++]='\\';
-	    }
-	    princ_name[m++]=tmp_princ_name[l++];
-	}
-	strcat(princ_name, at_rlm_name);
-
-	*o_princ_name = princ_name;
+	krb5int_buf_add(&buf, at_rlm_name);
+	*o_princ_name = krb5int_buf_data(&buf);
+	if (!*o_princ_name)
+	    return ENOMEM;
     }
-
-cleanup:
-
-    if (tmp_princ_name) {
-	free(tmp_princ_name);
-	tmp_princ_name = NULL;
-    }
-
-    return st;
+    return 0;
 }

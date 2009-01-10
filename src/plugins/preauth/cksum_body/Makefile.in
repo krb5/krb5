@@ -39,12 +39,3 @@ clean::
 @libnover_frag@
 @libobj_frag@
 
-# +++ Dependency line eater +++
-# 
-# Makefile dependencies follow.  This must be the last section in
-# the Makefile.in file
-#
-cksum_body_main.so cksum_body_main.po $(OUTPRE)cksum_body_main.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/preauth_plugin.h \
-  cksum_body_main.c

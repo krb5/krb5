@@ -115,18 +115,6 @@
 #define KRB5_ENV_CCNAME	"KRB5CCNAME"
 
 /*
- * krb4 kadmin stuff follows
- */
-
-/* the default syslog file */
-#define KADM_SYSLOG  "@LOCALSTATEDIR/krb5kdc/admin_server.syslog"
-
-/* where to find the bad password table */
-#define PW_CHECK_FILE "@LOCALSTATEDIR/krb5kdc/bad_passwd"
-
-#define DEFAULT_ACL_DIR	"@LOCALSTATEDIR/krb5kdc"
-
-/*
  * krb5 slave support follows
  */
 
@@ -137,5 +125,11 @@
 #define KPROPD_DEFAULT_KPROP "@SBINDIR/kprop"
 #define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
 #define KPROPD_ACL_FILE "@LOCALSTATEDIR/krb5kdc/kpropd.acl"
+
+/*
+ * GSS mechglue
+ */
+#define MECH_CONF "@SYSCONFDIR/gss/mech"
+#define MECH_LIB_PREFIX "@GSSMODULEDIR/"
 
 #endif /* KRB5_OSCONF__ */

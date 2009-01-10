@@ -75,7 +75,9 @@
 {
     [[self window] center];
     // We need to float over the loginwindow and SecurityAgent so use its hardcoded level.
-    [[self window] setLevel:NSScreenSaverWindowLevel];
+    [[self window] setLevel:NSModalPanelWindowLevel];    
+
+    visibleAsSheet = NO;
     
     lifetimeFormatter.displaySeconds = NO;
     lifetimeFormatter.displayShortFormat = NO;
@@ -136,6 +138,9 @@
             [glueController setValue:[NSNumber numberWithBool:valid] 
                           forKeyPath:change_password_ok_keypath];
         }
+        else {
+            [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        }
     }
     else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -148,13 +153,97 @@
     [super showWindow:sender];
 }
 
+- (void) showWithParent: (NSWindow *) parentWindow
+{
+    // attach as sheet if given a parentWindow
+    if (parentWindow && !visibleAsSheet) {
+        [NSApp beginSheet:[self window] 
+           modalForWindow:parentWindow
+            modalDelegate:self
+           didEndSelector:@selector(authSheetDidEnd:returnCode:contextInfo:)
+              contextInfo:NULL];
+    }
+    // else, display as normal
+    else {
+        [self showWindow:nil];
+    }
+}
+
+- (void) windowWillBeginSheet: (NSNotification *) notification
+{
+    visibleAsSheet = YES;
+}
+
+- (void) windowDidEndSheet: (NSNotification *) notification
+{
+    visibleAsSheet = NO;
+}
+
 - (void) setContent: (NSMutableDictionary *) newContent
 {
     [self window]; // wake up the nib connections
     [glueController setContent:newContent];
 }
 
-- (void) showEnterIdentity
+- (void) swapView: (NSView *) aView
+{
+    NSWindow *theWindow = [self window];
+    NSRect windowFrame;
+    NSRect viewFrame;
+    
+    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    
+    windowFrame = [theWindow frame];
+    viewFrame = [theWindow frameRectForContentRect:[aView frame]];
+    windowFrame.origin.y -= viewFrame.size.height - windowFrame.size.height;
+    
+    windowFrame.size.width = viewFrame.size.width;
+    windowFrame.size.height = viewFrame.size.height;
+    
+    [theWindow setFrame:windowFrame display:YES animate:YES];
+    
+    [containerView addSubview:aView];
+    
+}
+
+- (void) showSpinny
+{
+    [enterSpinny          startAnimation: nil];
+    [passwordSpinny       startAnimation: nil];
+    [samSpinny            startAnimation: nil];
+    [changePasswordSpinny startAnimation: nil];
+    [glueController setValue:[NSNumber numberWithBool:NO]
+                  forKeyPath:accepting_input_keypath];
+}
+
+- (void) hideSpinny
+{
+    [enterSpinny          stopAnimation: nil];
+    [passwordSpinny       stopAnimation: nil];
+    [samSpinny            stopAnimation: nil];
+    [changePasswordSpinny stopAnimation: nil];    
+    [glueController setValue:[NSNumber numberWithBool:YES]
+                  forKeyPath:accepting_input_keypath];
+}
+
+- (void) clearSensitiveInputs
+{
+    [glueController setValue:@"" 
+                  forKeyPath:prompt_response_keypath];
+}
+
+- (void) clearAllInputs
+{
+    [glueController setValue:@"" 
+                  forKeyPath:old_password_keypath];
+    [glueController setValue:@"" 
+                  forKeyPath:new_password_keypath];
+    [glueController setValue:@"" 
+                  forKeyPath:verify_password_keypath];
+    [self clearSensitiveInputs];
+}
+
+- (void) showEnterIdentity: (NSWindow *) parentWindow
 {
     kim_error err = KIM_NO_ERROR;
     NSWindow *theWindow = [self window];
@@ -218,32 +307,34 @@
     [glueController setValue:message
                   forKeyPath:message_keypath];
 
-    [enterSpinny stopAnimation:nil];
+    [self hideSpinny];
+    [self clearAllInputs];
 
     [self swapView:identityView];
 
     [theWindow makeFirstResponder:identityField];
 
-    [[self window] makeKeyAndOrderFront:nil];
+    [self showWithParent: parentWindow];
 }
 
-- (void) showAuthPrompt
+- (void) showAuthPrompt: (NSWindow *) parentWindow
 {
     uint32_t type = [[glueController valueForKeyPath:@"content.prompt_type"] unsignedIntegerValue];
     
-    [passwordSpinny stopAnimation:nil];
-    [samSpinny stopAnimation:nil];
+    [self hideSpinny];
+
+    [self clearSensitiveInputs];
 
     switch (type) {
         case kim_prompt_type_password :
-            [self showEnterPassword]; break;
+            [self showEnterPassword: parentWindow]; break;
         case kim_prompt_type_preauth :
         default :
-            [self showSAM]; break;
+            [self showSAM: parentWindow]; break;
     }
 }
 
-- (void) showEnterPassword
+- (void) showEnterPassword: (NSWindow *) parentWindow
 {
     CGFloat shrinkBy;
     NSRect frame;
@@ -283,31 +374,10 @@
     [self swapView:passwordView];
     
     [theWindow makeFirstResponder:passwordField];
-    [self showWindow:nil];
+    [self showWithParent:parentWindow];
 }
 
-- (void) swapView: (NSView *) aView
-{
-    NSWindow *theWindow = [self window];
-    NSRect windowFrame;
-    NSRect viewFrame;
-    
-    [[containerView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    
-    windowFrame = [theWindow frame];
-    viewFrame = [theWindow frameRectForContentRect:[aView frame]];
-    windowFrame.origin.y -= viewFrame.size.height - windowFrame.size.height;
-    
-    windowFrame.size.width = viewFrame.size.width;
-    windowFrame.size.height = viewFrame.size.height;
-    
-    [theWindow setFrame:windowFrame display:YES animate:YES];
-    
-    [containerView addSubview:aView];
-    
-}
-
-- (void) showSAM
+- (void) showSAM: (NSWindow *) parentWindow
 {
     // set badge
     [samBadge setBadgePath:associatedClient.path];
@@ -317,11 +387,11 @@
     
     [self swapView:samView];
     
-    [self showWindow:nil];
     [[self window] makeFirstResponder:samPromptField];
+    [self showWithParent:parentWindow];
 }
 
-- (void) showChangePassword
+- (void) showChangePassword: (NSWindow *) parentWindow
 {
     NSString *key = ([glueController valueForKeyPath:password_expired_keypath]) ? ACAppPrincReqKey : ACPrincReqKey;
     NSString *message = [NSString stringWithFormat:
@@ -358,24 +428,43 @@
     // set badge
     [changePasswordBadge setBadgePath:associatedClient.path];
     
-    [changePasswordSpinny stopAnimation:nil];
+    [self hideSpinny];
+    
+    if (![[self window] isVisible]) {
+        [self clearAllInputs];
+    }
     
     [self swapView:changePasswordView];
-    
-    [self showWindow:nil];
+
+    [self showWithParent:parentWindow];
+
     [theWindow makeFirstResponder:oldPasswordField];
 }
 
-- (void) showError
+- (void) showError: (NSWindow *) parentWindow
 {
     // wake up the nib connections and adjust window size
     [self window];
     // set badge
     [errorBadge setBadgePath:associatedClient.path];
 
+    [self hideSpinny];
     [self swapView:errorView];
     
-    [self showWindow:nil];
+    [self showWithParent:parentWindow];
+}
+
+- (IBAction) checkboxDidChange: (id) sender
+{
+    if ([[ticketOptionsController valueForKeyPath:uses_default_options_keypath] boolValue]) {
+        // merge defaults onto current options
+        NSMutableDictionary *currentOptions = [ticketOptionsController content];
+        NSDictionary *defaultOptions = [KIMUtilities dictionaryForKimOptions:NULL];
+        [currentOptions addEntriesFromDictionary:defaultOptions];
+        // update the sliders, since their values aren't bound
+        [validLifetimeSlider setDoubleValue:[[ticketOptionsController valueForKeyPath:valid_lifetime_keypath] doubleValue]];
+        [renewableLifetimeSlider setDoubleValue:[[ticketOptionsController valueForKeyPath:renewal_lifetime_keypath] doubleValue]];
+    }    
 }
 
 - (IBAction) sliderDidChange: (id) sender
@@ -412,13 +501,12 @@
         options = [favoriteOptions objectForKey:expandedString];
     }
     
-    // else fallback to options passed from client
-    // use a copy of the current options
+    // else, it's not a favorite identity. use default options
     if (!options) {
-        options = [[[glueController valueForKeyPath:options_keypath] mutableCopy] autorelease];
+        options = [KIMUtilities dictionaryForKimOptions:KIM_OPTIONS_DEFAULT];
     }
     
-    [ticketOptionsController setContent:options];
+    [ticketOptionsController setContent:[[options mutableCopy] autorelease]];
     
     [ticketOptionsController setValue:[NSNumber numberWithInteger:[KIMUtilities minValidLifetime]]
                            forKeyPath:min_valid_keypath];
@@ -439,7 +527,7 @@
     [NSApp beginSheet:ticketOptionsSheet
        modalForWindow:[self window]
         modalDelegate:self 
-       didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)
+       didEndSelector:@selector(ticketOptionsSheetDidEnd:returnCode:contextInfo:)
           contextInfo:NULL];
 }
 
@@ -453,9 +541,22 @@
     [NSApp endSheet:ticketOptionsSheet];
 }
 
-- (void) sheetDidEnd: (NSWindow *) sheet 
-          returnCode: (int) returnCode 
-         contextInfo: (void *) contextInfo
+- (IBAction) cancelAuthSheet: (id) sender
+{
+    [NSApp endSheet:[self window]];
+}
+
+- (void) authSheetDidEnd: (NSWindow *) sheet 
+              returnCode: (int) returnCode 
+             contextInfo: (void *) contextInfo
+{
+    [sheet orderOut:nil];
+}
+        
+        
+- (void) ticketOptionsSheetDidEnd: (NSWindow *) sheet 
+                       returnCode: (int) returnCode 
+                      contextInfo: (void *) contextInfo
 {
     if (returnCode == NSUserCancelledError) {
         // discard new options
@@ -487,12 +588,11 @@
         }
         
         if (!identity) { err = KIM_BAD_PRINCIPAL_STRING_ERR; }
-        if (!options) { err = KIM_BAD_OPTIONS_ERR; }
         
-        if (!err && identity) {
+        if (!err) {
             err = kim_preferences_remove_favorite_identity(prefs, identity);
         }
-        if (!err && identity && options) {
+        if (!err) {
             err = kim_preferences_add_favorite_identity(prefs, identity, options);
         }
         if (!err) {
@@ -515,7 +615,7 @@
         options = [glueController valueForKeyPath:options_keypath];
     }
     
-    [enterSpinny startAnimation:nil];
+    [self showSpinny];
     
     // the principal must already be valid to get this far
     [associatedClient didEnterIdentity:expandedString options:options wantsChangePassword:YES];
@@ -523,6 +623,7 @@
 
 - (IBAction) cancel: (id) sender
 {
+    [NSApp endSheet:[self window]];
     [associatedClient didCancel];
 }
 
@@ -535,7 +636,7 @@
         options = [glueController valueForKeyPath:options_keypath];
     }
     
-    [enterSpinny startAnimation:nil];
+    [self showSpinny];
 
     // the principal must already be valid to get this far
     [associatedClient didEnterIdentity:expandedString options:options wantsChangePassword:NO];
@@ -549,8 +650,8 @@
     if (!saveResponse) {
         saveResponse = [NSNumber numberWithBool:NO];
     }
-    [passwordSpinny startAnimation:nil];
-    [samSpinny startAnimation:nil];
+
+    [self showSpinny];
     [associatedClient didPromptForAuth:responseString
                           saveResponse:saveResponse];
 }
@@ -561,11 +662,12 @@
     NSString *newString = [glueController valueForKeyPath:new_password_keypath];
     NSString *verifyString = [glueController valueForKeyPath:verify_password_keypath];
     
-    [changePasswordSpinny startAnimation:nil];
+    [self showSpinny];
     
     [associatedClient didChangePassword:oldString
                             newPassword:newString
                          verifyPassword:verifyString];
+    [NSApp endSheet:[self window]];
 }
 
 - (IBAction) showedError: (id) sender

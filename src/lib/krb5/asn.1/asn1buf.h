@@ -13,16 +13,7 @@ typedef struct code_buffer_rep {
 
 /**************** Private Procedures ****************/
 
-int asn1buf_size
-        (const asn1buf *buf);
-/* requires  *buf has been created and not destroyed
-   effects   Returns the total size
-        (in octets) of buf's octet buffer. */
-#define asn1buf_size(buf) \
-  (((buf) == NULL || (buf)->base == NULL) \
-   ? 0 \
-   : ((buf)->bound - (buf)->base + 1))
-
+#if (__GNUC__ >= 2) && !defined(CONFIG_SMALL)
 unsigned int asn1buf_free
         (const asn1buf *buf);
 /* requires  *buf is allocated
@@ -40,13 +31,10 @@ asn1_error_code asn1buf_ensure_space
    effects  If buf has less than amount octets of free space, then it is
             expanded to have at least amount octets of free space.
             Returns ENOMEM memory is exhausted. */
-#ifndef CONFIG_SMALL
 #define asn1buf_ensure_space(buf,amount) \
   ((asn1buf_free(buf) < (amount)) \
    ? (asn1buf_expand((buf), (amount)-asn1buf_free(buf))) \
    : 0)
-#endif
-
 
 asn1_error_code asn1buf_expand
         (asn1buf *buf, unsigned int inc);
@@ -54,6 +42,7 @@ asn1_error_code asn1buf_expand
    modifies  *buf
    effects   Expands *buf by allocating space for inc more octets.
              Returns ENOMEM if memory is exhausted. */
+#endif
 
 int asn1buf_len
         (const asn1buf *buf);
@@ -162,21 +151,16 @@ extern __inline__ asn1_error_code asn1buf_insert_octet(asn1buf *buf, const int o
 }
 #endif
 
-asn1_error_code asn1buf_insert_octetstring
-        (asn1buf *buf, const unsigned int len, const asn1_octet *s);
+asn1_error_code asn1buf_insert_bytestring
+        (asn1buf *buf, const unsigned int len, const void *s);
 /* requires  *buf is allocated
    modifies  *buf
-   effects   Inserts the contents of s (an octet array of length len)
+   effects   Inserts the contents of s (an array of length len)
               into the buffer *buf, expanding the buffer if necessary.
              Returns ENOMEM if memory is exhausted. */
 
-asn1_error_code asn1buf_insert_charstring
-        (asn1buf *buf, const unsigned int len, const char *s);
-/* requires  *buf is allocated
-   modifies  *buf
-   effects   Inserts the contents of s (a character array of length len)
-              into the buffer *buf, expanding the buffer if necessary.
-             Returns ENOMEM if memory is exhausted. */
+#define asn1buf_insert_octetstring asn1buf_insert_bytestring
+#define asn1buf_insert_charstring  asn1buf_insert_bytestring
 
 asn1_error_code asn1buf_remove_octet
         (asn1buf *buf, asn1_octet *o);

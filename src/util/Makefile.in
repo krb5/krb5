@@ -16,14 +16,6 @@ MAYBE_SS_k5 = ss
 MAYBE_ET_sys =
 MAYBE_SS_sys =
 
-editsh = sed -e 's,@''ARADD''@,$(ARADD),g' -e 's,@''ARCHIVE''@,$(ARCHIVE),g'
-HOST_TYPE=@HOST_TYPE@
-HAVE_GCC=@HAVE_GCC@
-SLIBSH=sed -e 's|@''CC''@|$(CC)|g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@''HAVE_GCC''@,$(HAVE_GCC),g'
-
-DL_COMPILE=@DL_COMPILE@
-DL_COMPILE_TAIL=@DL_COMPILE_TAIL@
-
 all-recurse:
 
 clean-unix::

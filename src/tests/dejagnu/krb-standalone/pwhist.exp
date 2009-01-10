@@ -121,95 +121,97 @@ proc wraptest { test cmd } {
     }
 }
 
-# Set up the kerberos database.
-if {![get_hostname] \
-    || ![setup_kerberos_files] \
-    || ![setup_kerberos_env] \
-    || ![setup_kerberos_db 0]} {
-    return
-}
+run_once pwhist {
+    # Set up the kerberos database.
+    if {![get_hostname] \
+	    || ![setup_kerberos_files] \
+	    || ![setup_kerberos_env kdc] \
+	    || ![setup_kerberos_db 0]} {
+	return
+    }
 
-set failall 0
-wraptest "nkeys=1, nhist=3" {
-    mustrun { addpol crashpol }
-    mustrun { modpol crashpol "-history 3"}
-    mustrun { addprinc crash 1111 }
-    mustrun { modprinc crash "-policy crashpol" }
-    chkpass { cpw crash 2222 }
-    chkfail { cpw crash 2222 }
-    chkfail { cpw crash 1111 }
-}
-verbose {old_keys [ 1111 ->[] ]}
+    set failall 0
+    wraptest "nkeys=1, nhist=3" {
+	mustrun { addpol crashpol }
+	mustrun { modpol crashpol "-history 3"}
+	mustrun { addprinc crash 1111 }
+	mustrun { modprinc crash "-policy crashpol" }
+	chkpass { cpw crash 2222 }
+	chkfail { cpw crash 2222 }
+	chkfail { cpw crash 1111 }
+    }
+    verbose {old_keys [ 1111 ->[] ]}
 
-# The following will result in reading/writing past array bounds if
-# add_to_history() is not patched.
-#
-# NOTE: A pass from this test does not mean the bug isn't present;
-# check with Purify, valgrind, etc.
-wraptest "array bounds ok on nkeys=1, nhist 3->2" {
-    mustrun { modpol crashpol "-history 2" }
-    chkpass { cpw crash 3333 }
-}
-verbose {old_keys [ ->2222 ]}
+    # The following will result in reading/writing past array bounds if
+    # add_to_history() is not patched.
+    #
+    # NOTE: A pass from this test does not mean the bug isn't present;
+    # check with Purify, valgrind, etc.
+    wraptest "array bounds ok on nkeys=1, nhist 3->2" {
+	mustrun { modpol crashpol "-history 2" }
+	chkpass { cpw crash 3333 }
+    }
+    verbose {old_keys [ ->2222 ]}
 
-wraptest "verify nhist=2" {
-    mustrun { delprinc crash }
-    mustrun { addprinc crash 1111 }
-    mustrun { modprinc crash "-policy crashpol" }
-    chkpass { cpw crash 2222 }
-    chkfail { cpw crash 2222 }
-    chkfail { cpw crash 1111 }
-}
-verbose {old_keys [ ->1111 ]}
+    wraptest "verify nhist=2" {
+	mustrun { delprinc crash }
+	mustrun { addprinc crash 1111 }
+	mustrun { modprinc crash "-policy crashpol" }
+	chkpass { cpw crash 2222 }
+	chkfail { cpw crash 2222 }
+	chkfail { cpw crash 1111 }
+    }
+    verbose {old_keys [ ->1111 ]}
 
-# The following will fail if growing the history array causes an extra
-# key to be lost due to failure to shift entries.
-wraptest "grow nhist 2->3" {
-    mustrun { modpol crashpol "-history 3" }
-    chkpass { cpw crash 3333 }
-    chkfail { cpw crash 3333 }
-    chkfail { cpw crash 2222 }
-    chkfail { cpw crash 1111 }
-}
-verbose {old_keys [ 2222 ->1111 ]}
+    # The following will fail if growing the history array causes an extra
+    # key to be lost due to failure to shift entries.
+    wraptest "grow nhist 2->3" {
+	mustrun { modpol crashpol "-history 3" }
+	chkpass { cpw crash 3333 }
+	chkfail { cpw crash 3333 }
+	chkfail { cpw crash 2222 }
+	chkfail { cpw crash 1111 }
+    }
+    verbose {old_keys [ 2222 ->1111 ]}
 
-wraptest "grow nhist 3->4" {
-    mustrun { modpol crashpol "-history 4" }
-    chkfail { cpw crash 3333 }
-    chkfail { cpw crash 2222 }
-    chkfail { cpw crash 1111 }
-    chkpass { cpw crash 4444 }
-    chkfail { cpw crash 3333 }
-    chkfail { cpw crash 2222 }
-    chkfail { cpw crash 1111 }
-}
-verbose {old_keys [ 2222 3333 ->1111 ]}
-wraptest "shrink nhist 4->3" {
-    mustrun { modpol crashpol "-history 3" }
-    chkfail { cpw crash 4444 }
-    chkfail { cpw crash 3333 }
-    chkfail { cpw crash 2222 }
-    chkfail { cpw crash 1111 }
-    chkpass { cpw crash 5555 }
-}
-verbose {old_keys [ 4444 ->3333 ]}
-wraptest "verify nhist=3" {
-    chkfail { cpw crash 5555 }
-    chkfail { cpw crash 4444 }
-    chkfail { cpw crash 3333 }
-    chkpass { cpw crash 2222 }
-}
-verbose {old_keys [ ->4444 5555 ]}
-wraptest "shrink nhist 3->2" {
-    mustrun { modpol crashpol "-history 2" }
-    chkfail { cpw crash 2222 }
-    chkfail { cpw crash 5555 }
-    chkfail { cpw crash 4444 }
-    chkpass { cpw crash 3333 }
-}
-verbose {old_keys [ ->2222 ]}
+    wraptest "grow nhist 3->4" {
+	mustrun { modpol crashpol "-history 4" }
+	chkfail { cpw crash 3333 }
+	chkfail { cpw crash 2222 }
+	chkfail { cpw crash 1111 }
+	chkpass { cpw crash 4444 }
+	chkfail { cpw crash 3333 }
+	chkfail { cpw crash 2222 }
+	chkfail { cpw crash 1111 }
+    }
+    verbose {old_keys [ 2222 3333 ->1111 ]}
+    wraptest "shrink nhist 4->3" {
+	mustrun { modpol crashpol "-history 3" }
+	chkfail { cpw crash 4444 }
+	chkfail { cpw crash 3333 }
+	chkfail { cpw crash 2222 }
+	chkfail { cpw crash 1111 }
+	chkpass { cpw crash 5555 }
+    }
+    verbose {old_keys [ 4444 ->3333 ]}
+    wraptest "verify nhist=3" {
+	chkfail { cpw crash 5555 }
+	chkfail { cpw crash 4444 }
+	chkfail { cpw crash 3333 }
+	chkpass { cpw crash 2222 }
+    }
+    verbose {old_keys [ ->4444 5555 ]}
+    wraptest "shrink nhist 3->2" {
+	mustrun { modpol crashpol "-history 2" }
+	chkfail { cpw crash 2222 }
+	chkfail { cpw crash 5555 }
+	chkfail { cpw crash 4444 }
+	chkpass { cpw crash 3333 }
+    }
+    verbose {old_keys [ ->2222 ]}
 
-delprinc crash
-delpol crashpol
+    delprinc crash
+    delpol crashpol
 
-stop_kerberos_daemons
+    stop_kerberos_daemons
+}

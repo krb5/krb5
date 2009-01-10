@@ -5,7 +5,7 @@
  * Written by Frank Dabek July 1998
  * Updated by Jeffrey Altman June 2006
  *
- * Copyright 1998, 1999, 2006 by the Massachusetts Institute of Technology.
+ * Copyright 1998, 1999, 2006, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -347,12 +347,11 @@ krb5_stdccv3_generate_new (krb5_context context, krb5_ccache *id )
     }
     
     if (!err) {
-        name = (char *) malloc (sizeof (*name) * (strlen (ccstring->data) + 1));
+        name = strdup (ccstring->data);
         if (!name) { err = KRB5_CC_NOMEM; }
     }
     
     if (!err) {
-        strcpy (name, ccstring->data);
         ccapi_data->cache_name = name;
         name = NULL; /* take ownership */
         
@@ -407,7 +406,7 @@ krb5_stdccv3_resolve (krb5_context context, krb5_ccache *id , const char *residu
     }
     
     if (!err) {
-        name = malloc (strlen(residual) + 1);
+        name = strdup (residual);
         if (!name) { err = KRB5_CC_NOMEM; }
     }
     
@@ -421,7 +420,6 @@ krb5_stdccv3_resolve (krb5_context context, krb5_ccache *id , const char *residu
     }
 
     if (!err) {
-	strcpy(name, residual);        
 	ccapi_data->cache_name = name;
         name = NULL; /* take ownership */
 
@@ -850,6 +848,10 @@ krb5_stdccv3_remove (krb5_context context,
     }
     if (err == ccIteratorEnd) { err = ccErrCredentialsNotFound; }    
 
+    if (iterator) {
+        err = cc_credentials_iterator_release(iterator);
+    }
+
     if (!err) {
         cache_changed ();
     }
@@ -936,12 +938,11 @@ krb5_stdccv3_ptcursor_next(
 	}
 
 	if (!err) {
-	    name = (char *) malloc (sizeof (*name) * (strlen (ccstring->data) + 1));
+	    name = strdup (ccstring->data);
 	    if (!name) { err = KRB5_CC_NOMEM; }
 	}
 	
 	if (!err) {
-	    strcpy (name, ccstring->data);
 	    ccapi_data->cache_name = name;
 	    name = NULL; /* take ownership */
     
@@ -1198,15 +1199,13 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve
   	if (!(ccapi_data = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData))))
 		goto errout;
 
-	if (!(cName = malloc(strlen(residual)+1)))
+	if (!(cName = strdup(residual)))
 		goto errout;
 	
   	newCache->ops = &krb5_cc_stdcc_ops;
 	newCache->data = ccapi_data;
 	ccapi_data->cache_name = cName;
 
-	strcpy(cName, residual);
-	
  	err = cc_open(gCntrlBlock, cName, CC_CRED_V5, 0L,
 		      &ccapi_data->NamedCache);
         if (err != CC_NOERROR) {

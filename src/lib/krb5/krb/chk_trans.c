@@ -137,7 +137,7 @@ process_intermediates (krb5_error_code (*fn)(krb5_data *, void *), void *data,
 }
 
 static krb5_error_code
-maybe_join (krb5_data *last, krb5_data *buf, int bufsiz)
+maybe_join (krb5_data *last, krb5_data *buf, unsigned int bufsiz)
 {
     if (buf->length == 0)
 	return 0;

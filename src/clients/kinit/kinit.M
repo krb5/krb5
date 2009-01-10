@@ -28,8 +28,6 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 .TP
 .B kinit
 .ad l
-[\fB\-5\fP]
-[\fB\-4\fP]
 [\fB\-V\fP]
 [\fB\-l\fP \fIlifetime\fP] [\fB\-s\fP \fIstart_time\fP]
 [\fB\-r\fP \fIrenewable_life\fP]
@@ -48,27 +46,7 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 .I kinit
 obtains and caches an initial ticket-granting ticket for
 .IR principal .  
-The typical default behavior is to acquire only
-Kerberos 5 tickets.  However, if kinit was built with both 
-Kerberos 4 support and with the default behavior of acquiring both
-types of tickets, it will try to acquire both Kerberos 5 and Kerberos 4
-by default.
-Any documentation particular to Kerberos 4 does not apply if Kerberos 4
-support was not built into kinit.
 .SH OPTIONS
-.TP
-.B \-5
-get Kerberos 5 tickets.  This overrides whatever the default built-in
-behavior may be.  This option may be used with
-.B \-4
-.
-.TP
-.B \-4
-get Kerberos 4 tickets.  This overrides whatever the default built-in
-behavior may be.  This option is only available if kinit was built
-with Kerberos 4 compatibility.  This option may be used with 
-.B \-5
-.
 .TP
 .B \-V
 display verbose output.
@@ -105,45 +83,43 @@ requests a postdated ticket, valid starting at
 Postdated tickets are issued with the
 .I invalid
 flag set, and need to be fed back to the kdc before use.
-(Not applicable to Kerberos 4.)
 .TP
 \fB\-r\fP \fIrenewable_life\fP
 requests renewable tickets, with a total lifetime of
 .IR renewable_life .
 The duration is in the same format as the
 .B \-l
-option, with the same delimiters.  (Not applicable to Kerberos 4.)
+option, with the same delimiters.
 .TP
 .B \-f
-request forwardable tickets.  (Not applicable to Kerberos 4.)
+request forwardable tickets.
 .TP
 .B \-F
-do not request forwardable tickets.  (Not applicable to Kerberos 4.)
+do not request forwardable tickets.
 .TP
 .B \-p
-request proxiable tickets.  (Not applicable to Kerberos 4.)
+request proxiable tickets.
 .TP
 .B \-P
-do not request proxiable tickets.  (Not applicable to Kerberos 4.)
+do not request proxiable tickets.
 .TP
 .B \-a
-request tickets with the local address[es].  (Not applicable to Kerberos 4.)
+request tickets with the local address[es].
 .TP
 .B \-A
-request address-less tickets.  (Not applicable to Kerberos 4.)
+request address-less tickets.
 .TP
 .B \-v
 requests that the ticket granting ticket in the cache (with the 
 .I invalid
 flag set) be passed to the kdc for validation.  If the ticket is within
 its requested time range, the cache is replaced with the validated
-ticket.  (Not applicable to Kerberos 4.)
+ticket.
 .TP
 .B \-R
 requests renewal of the ticket-granting ticket.  Note that an expired
 ticket cannot be renewed, even if the ticket is still within its
-renewable life.  When using this option with Kerberos 4, the kdc must
-support Kerberos 5 to Kerberos 4 ticket conversion.
+renewable life.
 .TP
 \fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]
 requests a host ticket, obtained from a key in the local host's
@@ -152,9 +128,7 @@ file.  The name and location of the keytab file may be specified with
 the
 .B \-t
 .I keytab_file
-option; otherwise the default name and location will be used.  When using
-this option with Kerberos 4, the kdc must support Kerberos 5 to Kerberos 4
-ticket conversion.
+option; otherwise the default name and location will be used.
 .TP
 \fB\-c\fP \fIcache_name\fP
 use
@@ -167,15 +141,10 @@ The default credentials cache may vary between systems.  If the
 environment variable is set, its value is used to name the default
 ticket cache.  Any existing contents of the cache are destroyed by
 .IR kinit .
-(Note: The default name for Kerberos 4 comes from the
-.B KRBTKFILE
-environment variable.  This option does not apply to Kerberos 4.)
 .TP
 \fB\-S\fP \fIservice_name\fP
 specify an alternate service name to use when
-getting initial tickets.  (Applicable to Kerberos 5 or if using both
-Kerberos 5 and Kerberos 4 with a kdc that supports Kerberos 5 to Kerberos 4
-ticket conversion.)
+getting initial tickets.
 .TP
 \fB\-X\fP \fIattribute\fP[=\fIvalue\fP]
 specify a pre\-authentication attribute and value to be passed to
@@ -204,17 +173,10 @@ uses the following environment variables:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
 Location of the Kerberos 5 credentials (ticket) cache.
-.TP "\w'.SM KRBTKFILE\ \ 'u"
-.SM KRBTKFILE
-Filename of the Kerberos 4 credentials (ticket) cache.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]
 default location of Kerberos 5 credentials cache 
-([uid] is the decimal UID of the user).
-.TP "\w'/tmp/tkt[uid]\ \ 'u"
-/tmp/tkt[uid]
-default location of Kerberos 4 credentials cache 
 ([uid] is the decimal UID of the user).
 .TP
 /etc/krb5.keytab

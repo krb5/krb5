@@ -134,9 +134,9 @@ static char *strdur(duration)
     minutes = duration / 60;
     duration %= 60;
     seconds = duration;
-    sprintf(out, "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
-	    days, days == 1 ? "day" : "days",
-	    hours, minutes, seconds);
+    snprintf(out, sizeof(out), "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
+	     days, days == 1 ? "day" : "days",
+	     hours, minutes, seconds);
     return out;
 }
 
@@ -161,23 +161,22 @@ kadmin_parse_name(name, principal)
 {
     char *cp, *fullname;
     krb5_error_code retval;
+    int result;
 
     /* assumes def_realm is initialized! */
-    fullname = (char *)malloc(strlen(name) + 1 + strlen(def_realm) + 1);
-    if (fullname == NULL)
-	return ENOMEM;
-    strcpy(fullname, name);
-    cp = strchr(fullname, '@');
+    cp = strchr(name, '@');
     while (cp) {
-	if (cp - fullname && *(cp - 1) != '\\')
+	if (cp - name && *(cp - 1) != '\\')
 	    break;
 	else
 	    cp = strchr(cp + 1, '@');
     }
-    if (cp == NULL) {
-	strcat(fullname, "@");
-	strcat(fullname, def_realm);
-    }
+    if (cp == NULL)
+	result = asprintf(&fullname, "%s@%s", name, def_realm);
+    else
+	result = asprintf(&fullname, "%s", name);
+    if (result < 0)
+	return ENOMEM;
     retval = krb5_parse_name(context, fullname, principal);
     free(fullname);
     return retval;
@@ -279,14 +278,9 @@ char *kadmin_startup(argc, argv)
 	    break;
 	case 'd':
 	    /* now db_name is not a seperate argument. It has to be passed as part of the db_args */
-	    if (!db_name) {
-		db_name = malloc(strlen(optarg) + sizeof("dbname="));
-	    } else {
-		db_name = realloc(db_name, strlen(optarg) + sizeof("dbname="));
-	    }
-
-	    strcpy(db_name, "dbname=");
-	    strcat(db_name, optarg);
+	    if (db_name)
+		free(db_name);
+	    asprintf(&db_name, "dbname=%s", optarg);
 
 	    db_args_size++;
 	    {
@@ -437,43 +431,27 @@ char *kadmin_startup(argc, argv)
 	    }
 	    if (cp != NULL)
 		*cp = '\0';
-	    princstr = (char*)malloc(strlen(canon) + 6 /* "/admin" */ +
-				     (realm ? 1 + strlen(realm) : 0) + 1);
-	    if (princstr == NULL) {
+	    if (asprintf(&princstr, "%s/admin%s%s", canon,
+			 (realm) ? "@" : "",
+			 (realm) ? realm : "") < 0) {
 		fprintf(stderr, "%s: out of memory\n", whoami);
 		exit(1);
-	    }
-	    strcpy(princstr, canon);
-	    strcat(princstr, "/admin");
-	    if (realm) {
-		strcat(princstr, "@");
-		strcat(princstr, realm);
 	    }
 	    free(canon);
 	    krb5_free_principal(context, princ);
 	    freeprinc++;
 	} else if ((luser = getenv("USER"))) {
-	    princstr = (char *) malloc(strlen(luser) + 7 /* "/admin@" */
-				       + strlen(def_realm) + 1);
-	    if (princstr == NULL) {
+	    if (asprintf(&princstr, "%s/admin@%s", luser, def_realm) < 0) {
 		fprintf(stderr, "%s: out of memory\n", whoami);
 		exit(1);
 	    }
-	    strcpy(princstr, luser);
-	    strcat(princstr, "/admin");
-	    strcat(princstr, "@");
-	    strcat(princstr, def_realm);
 	    freeprinc++;
 	} else if ((pw = getpwuid(getuid()))) {
-	    princstr = (char *) malloc(strlen(pw->pw_name) + 7 /* "/admin@" */
-				       + strlen(def_realm) + 1);
-	    if (princstr == NULL) {
+	    if (asprintf(&princstr, "%s/admin@%s", pw->pw_name,
+			 def_realm) < 0) {
 		fprintf(stderr, "%s: out of memory\n", whoami);
 		exit(1);
 	    }
-	    strcpy(princstr, pw->pw_name);
-	    strcat(princstr, "/admin@");
-	    strcat(princstr, def_realm);
 	    freeprinc++;
 	} else {
 	    fprintf(stderr, "%s: unable to figure out a principal name\n",
@@ -558,7 +536,7 @@ char *kadmin_startup(argc, argv)
 	krb5_defkeyname = DEFAULT_KEYTAB;
     }
 
-    if ((retval = kadm5_init_iprop(handle)) != 0) {
+    if ((retval = kadm5_init_iprop(handle, 0)) != 0) {
 	com_err(whoami, retval, _("while mapping update log"));
 	exit(1);
     }
@@ -816,11 +794,12 @@ void kadmin_cpw(argc, argv)
     } else if (argc == 1) {
 	unsigned int i = sizeof (newpw) - 1;
 
-	sprintf(prompt1, "Enter password for principal \"%.900s\"",
-		*argv);
-	sprintf(prompt2,
-		"Re-enter password for principal \"%.900s\"",
-		*argv);
+	snprintf(prompt1, sizeof(prompt1),
+		 "Enter password for principal \"%.900s\"",
+		 *argv);
+	snprintf(prompt2, sizeof(prompt2),
+		 "Re-enter password for principal \"%.900s\"",
+		 *argv);
 	retval = krb5_read_password(context, prompt1, prompt2,
 				    newpw, &i);
 	if (retval) {
@@ -1250,11 +1229,12 @@ void kadmin_addprinc(argc, argv)
     } else if (pass == NULL) {
 	unsigned int sz = sizeof (newpw) - 1;
 
-	sprintf(prompt1, "Enter password for principal \"%.900s\"",
-		canon);
-	sprintf(prompt2,
-		"Re-enter password for principal \"%.900s\"",
-		canon);
+	snprintf(prompt1, sizeof(prompt1),
+		 "Enter password for principal \"%.900s\"",
+		 canon);
+	snprintf(prompt2, sizeof(prompt2),
+		 "Re-enter password for principal \"%.900s\"",
+		 canon);
 	retval = krb5_read_password(context, prompt1, prompt2,
 				    newpw, &sz);
 	if (retval) {
@@ -1501,6 +1481,14 @@ void kadmin_getprinc(argc, argv)
 	free(canon);
 	return;
     }
+    free(canon);
+    canon = NULL;
+    retval = krb5_unparse_name(context, dprinc.principal, &canon);
+    if (retval) {
+	com_err("get_principal", retval, "while canonicalizing principal");
+	krb5_free_principal(context, princ);
+	return;
+    }
     retval = krb5_unparse_name(context, dprinc.mod_name, &modcanon);
     if (retval) {
 	com_err("get_principal", retval, "while unparsing modname");
@@ -1535,14 +1523,14 @@ void kadmin_getprinc(argc, argv)
 
 	    if (krb5_enctype_to_string(key_data->key_data_type[0],
 				       enctype, sizeof(enctype)))
-		sprintf(enctype, "<Encryption type 0x%x>",
-			key_data->key_data_type[0]);
+		snprintf(enctype, sizeof(enctype), "<Encryption type 0x%x>",
+			 key_data->key_data_type[0]);
 	    printf("Key: vno %d, %s, ", key_data->key_data_kvno, enctype);
 	    if (key_data->key_data_ver > 1) {
 		if (krb5_salttype_to_string(key_data->key_data_type[1],
 					    salttype, sizeof(salttype)))
-		    sprintf(salttype, "<Salt type 0x%x>",
-			    key_data->key_data_type[1]);
+		    snprintf(salttype, sizeof(salttype), "<Salt type 0x%x>",
+			     key_data->key_data_type[1]);
 		printf("%s\n", salttype);
 	    } else
 		printf("no salt\n");

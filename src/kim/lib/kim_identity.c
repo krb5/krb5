@@ -24,8 +24,8 @@
  * or implied warranty.
  */
 
+#include "k5-int.h"
 #include <krb5.h>
-#include <gssapi/gssapi.h>
 #include "kim_private.h"
 
 /* ------------------------------------------------------------------------ */
@@ -110,7 +110,6 @@ kim_error kim_identity_create_from_components (kim_identity *out_identity,
 {
     kim_error err = KIM_NO_ERROR;
     kim_identity identity = NULL;
-    krb5_principal_data principal_data;  /* allocated by KIM so can't be returned */
     
     if (!err && !out_identity    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_realm        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -126,64 +125,23 @@ kim_error kim_identity_create_from_components (kim_identity *out_identity,
     
     if (!err) {
         va_list args;
-        kim_count component_count = 1;
-        
+
         va_start (args, in_1st_component);
-        while (va_arg (args, kim_string)) { component_count++; }
-        va_end (args);
-        
-        principal_data.length = component_count;
-        principal_data.data = (krb5_data *) malloc (component_count * sizeof (krb5_data));
-        if (!principal_data.data) { err = KIM_OUT_OF_MEMORY_ERR; }
-    }   
-    
-    if (!err) {
-        va_list args;
-        krb5_int32 i;
-        
-        krb5_princ_set_realm_length (context, &principal_data, strlen (in_realm));
-        krb5_princ_set_realm_data (context, &principal_data, (char *) in_realm);
-        
-        va_start (args, in_1st_component);
-        for (i = 0; !err && (i < principal_data.length); i++) {
-            kim_string component = NULL;
-            if (i == 0) {
-                err = kim_string_copy (&component, in_1st_component);
-            } else {
-                err = kim_string_copy (&component, va_arg (args, kim_string));
-            }
-            
-            if (!err) {
-                principal_data.data[i].data = (char *) component;
-                principal_data.data[i].length = strlen (component);
-            }
-        }            
-        va_end (args);
-    }
-    
-    if (!err) {
-        /* make a copy that has actually been allocated by the krb5 
-         * library so krb5_free_principal can be called on it */
         err = krb5_error (identity->context,
-                          krb5_copy_principal (identity->context, 
-                                               &principal_data, 
-                                               &identity->principal));
-    }    
-    
+                          krb5int_build_principal_alloc_va (identity->context,
+                                                            &identity->principal,
+                                                            strlen(in_realm),
+                                                            in_realm,
+                                                            in_1st_component,
+                                                            args));
+        va_end (args);
+    }   
+
     if (!err) {
         *out_identity = identity;
         identity = NULL;
     }
     
-    if (principal_data.data) { 
-        krb5_int32 i;
-        
-        for (i = 0; i < principal_data.length; i++) {
-            kim_string component = principal_data.data[i].data;
-            kim_string_free (&component);
-        }
-        free (principal_data.data); 
-    }
     kim_identity_free (&identity);
     
     return check_error (err);
@@ -569,6 +527,7 @@ kim_error kim_identity_change_password_with_credential (kim_identity    in_ident
     krb5_data message_data;
     krb5_data description_data;
     
+    if (!err && !in_identity     ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_credential   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_new_password ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_ui_context   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
@@ -666,6 +625,8 @@ kim_error kim_identity_change_password_with_credential (kim_identity    in_ident
         *out_rejected_err = rejected_err;
     }
     
+    if (creds) { krb5_free_creds (in_identity->context, creds); }
+    
     return check_error (err);
 }
 
@@ -689,7 +650,7 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
         kim_error rejected_err = KIM_NO_ERROR;
         kim_string rejected_message = NULL;
         kim_string rejected_description = NULL;
-        kim_boolean was_prompted = 0;
+        kim_boolean was_prompted = 0;   /* ignore because we always prompt */
         
         err = kim_ui_change_password (in_ui_context,
                                       in_identity,
@@ -746,18 +707,14 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
                                        rejected_message, 
                                        rejected_description);
             
-        } else if (err && err != KIM_USER_CANCELED_ERR) {
-            /*  new creds failed, report error to user */
-            kim_error terr = KIM_NO_ERROR;
-            
-            terr = kim_ui_handle_kim_error (in_ui_context, in_identity, 
-                                            kim_ui_error_type_change_password,
-                                            err);
-            
-            if (was_prompted || err == KIM_PASSWORD_MISMATCH_ERR) {
-                /* User could have entered bad info so let them try again. */
-                err = terr;
-            }
+        } else if (err && err != KIM_USER_CANCELED_ERR && 
+                          err != KIM_DUPLICATE_UI_REQUEST_ERR) {
+            /* New creds failed, report error to user.
+             * Overwrite error so we loop and let the user try again.
+             * The user always gets prompted so we always loop. */
+            err = kim_ui_handle_kim_error (in_ui_context, in_identity, 
+                                           kim_ui_error_type_change_password,
+                                           err);
             
         } else {
             /* password change succeeded or the user gave up */
@@ -782,10 +739,13 @@ kim_error kim_identity_change_password_common (kim_identity    in_identity,
                 
                 kim_string_free (&saved_password);
             }
+
+            if (err == KIM_DUPLICATE_UI_REQUEST_ERR) { err = KIM_NO_ERROR; }
         }
         
         kim_string_free (&rejected_message);
         kim_string_free (&rejected_description);
+        
         kim_ui_free_string (in_ui_context, &old_password);
         kim_ui_free_string (in_ui_context, &new_password);
         kim_ui_free_string (in_ui_context, &verify_password);         

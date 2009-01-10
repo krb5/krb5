@@ -102,7 +102,7 @@
 #include "k5-thread.h"
 #include "supp-int.h"
 
-#include <stdio.h>		/* for sprintf */
+#include <stdio.h>
 #include <errno.h>
 
 #define IMPLEMENT_FAKE_GETADDRINFO
@@ -354,7 +354,7 @@ system_getnameinfo (const struct sockaddr *sa, socklen_t salen,
 #if (!defined (HAVE_GETADDRINFO) || defined (WRAP_GETADDRINFO)) && defined(DEBUG_ADDRINFO)
 /* Some debug routines.  */
 
-static const char *protoname (int p, char *buf) {
+static const char *protoname (int p, char *buf, size_t bufsize) {
 #define X(N) if (p == IPPROTO_ ## N) return #N
 
     X(TCP);
@@ -373,11 +373,11 @@ static const char *protoname (int p, char *buf) {
     X(IGMP);
 #endif
 
-    sprintf(buf, " %-2d", p);
+    snprintf(buf, bufsize, " %-2d", p);
     return buf;
 }	
 
-static const char *socktypename (int t, char *buf) {
+static const char *socktypename (int t, char *buf, size_t bufsize) {
     switch (t) {
     case SOCK_DGRAM: return "DGRAM";
     case SOCK_STREAM: return "STREAM";
@@ -385,14 +385,14 @@ static const char *socktypename (int t, char *buf) {
     case SOCK_RDM: return "RDM";
     case SOCK_SEQPACKET: return "SEQPACKET";
     }
-    sprintf(buf, " %-2d", t);
+    snprintf(buf, bufsize, " %-2d", t);
     return buf;
 }
 
-static const char *familyname (int f, char *buf) {
+static const char *familyname (int f, char *buf, size_t bufsize) {
     switch (f) {
     default:
-	sprintf(buf, "AF %d", f);
+	snprintf(buf, bufsize, "AF %d", f);
 	return buf;
     case AF_INET: return "AF_INET";
     case AF_INET6: return "AF_INET6";
@@ -422,11 +422,14 @@ static void debug_dump_getaddrinfo_args (const char *name, const char *serv,
 	if (sep[0] == 0)
 	    fprintf(stderr, "no-flags");
 	if (hint->ai_family)
-	    fprintf(stderr, " %s", familyname(hint->ai_family, buf));
+	    fprintf(stderr, " %s", familyname(hint->ai_family, buf,
+					      sizeof(buf)));
 	if (hint->ai_socktype)
-	    fprintf(stderr, " SOCK_%s", socktypename(hint->ai_socktype, buf));
+	    fprintf(stderr, " SOCK_%s", socktypename(hint->ai_socktype, buf,
+						     sizeof(buf)));
 	if (hint->ai_protocol)
-	    fprintf(stderr, " IPPROTO_%s", protoname(hint->ai_protocol, buf));
+	    fprintf(stderr, " IPPROTO_%s", protoname(hint->ai_protocol, buf,
+						     sizeof(buf)));
     } else
 	fprintf(stderr, "(null)");
     fprintf(stderr, " }):\n");
@@ -444,11 +447,13 @@ static void debug_dump_addrinfos (const struct addrinfo *ai)
     fprintf(stderr, "addrinfos returned:\n");
     while (ai) {
 	fprintf(stderr, "%p...", ai);
-	fprintf(stderr, " socktype=%s", socktypename(ai->ai_socktype, buf));
-	fprintf(stderr, " ai_family=%s", familyname(ai->ai_family, buf));
+	fprintf(stderr, " socktype=%s", socktypename(ai->ai_socktype, buf,
+						     sizeof(buf)));
+	fprintf(stderr, " ai_family=%s", familyname(ai->ai_family, buf,
+						    sizeof(buf)));
 	if (ai->ai_family != ai->ai_addr->sa_family)
 	    fprintf(stderr, " sa_family=%s",
-		    familyname(ai->ai_addr->sa_family, buf));
+		    familyname(ai->ai_addr->sa_family, buf, sizeof(buf)));
 	fprintf(stderr, "\n");
 	ai = ai->ai_next;
 	count++;
@@ -960,7 +965,8 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    char tmpbuf[20];
 	numeric_host:
 	    uc = (const unsigned char *) &sinp->sin_addr;
-	    sprintf(tmpbuf, "%d.%d.%d.%d", uc[0], uc[1], uc[2], uc[3]);
+	    snprintf(tmpbuf, sizeof(tmpbuf), "%d.%d.%d.%d",
+		     uc[0], uc[1], uc[2], uc[3]);
 	    strncpy(host, tmpbuf, hlen);
 #else
 	    char *p;
@@ -996,7 +1002,7 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    port = ntohs (sinp->sin_port);
 	    if (port < 0 || port > 65535)
 		return EAI_FAIL;
-	    sprintf (numbuf, "%d", port);
+	    snprintf (numbuf, sizeof(numbuf), "%d", port);
 	    strncpy (service, numbuf, slen);
 	} else {
 	    int serr;

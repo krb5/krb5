@@ -11,37 +11,40 @@
 #define GETSOCKNAME_ARG3_TYPE int
 #endif
 
+#define RFC3244_VERSION	0xff80
+
 krb5_error_code
-process_chpw_request(context, server_handle, realm, s, keytab, sockin, 
-		     req, rep)
+process_chpw_request(context, server_handle, realm, keytab,
+		     local_faddr, remote_faddr, req, rep)
      krb5_context context;
      void *server_handle;
      char *realm;
-     int s;
      krb5_keytab keytab;
-     struct sockaddr_in *sockin;
+     krb5_fulladdr *local_faddr;
+     krb5_fulladdr *remote_faddr;
      krb5_data *req;
      krb5_data *rep;
 {
     krb5_error_code ret;
     char *ptr;
     int plen, vno;
-    krb5_address local_kaddr, remote_kaddr;
-    int allocated_mem = 0;  
     krb5_data ap_req, ap_rep;
     krb5_auth_context auth_context;
     krb5_principal changepw;
+    krb5_principal client, target = NULL;
     krb5_ticket *ticket;
     krb5_data cipher, clear;
-    struct sockaddr local_addr, remote_addr;
-    GETSOCKNAME_ARG3_TYPE addrlen;
     krb5_replay_data replay;
     krb5_error krberror;
     int numresult;
     char strresult[1024];
-    char *clientstr;
+    char *clientstr = NULL, *targetstr = NULL;
     size_t clen;
     char *cdots;
+    struct sockaddr_storage ss;
+    socklen_t salen;
+    char addrbuf[100];
+    krb5_address *addr = remote_faddr->address;
 
     ret = 0;
     rep->length = 0;
@@ -58,7 +61,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	   or the caller passed in garbage */
 	ret = KRB5KRB_AP_ERR_MODIFIED;
 	numresult = KRB5_KPASSWD_MALFORMED;
-	strcpy(strresult, "Request was truncated");
+	strlcpy(strresult, "Request was truncated", sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -77,7 +80,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     vno = (*ptr++ & 0xff) ;
     vno = (vno<<8) | (*ptr++ & 0xff);
 
-    if (vno != 1) {
+    if (vno != 1 && vno != RFC3244_VERSION) {
 	ret = KRB5KDC_ERR_BAD_PVNO;
 	numresult = KRB5_KPASSWD_BAD_VERSION;
 	snprintf(strresult, sizeof(strresult),
@@ -93,7 +96,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     if (ptr + ap_req.length >= req->data + req->length) {
 	ret = KRB5KRB_AP_ERR_MODIFIED;
 	numresult = KRB5_KPASSWD_MALFORMED;
-	strcpy(strresult, "Request was truncated in AP-REQ");
+	strlcpy(strresult, "Request was truncated in AP-REQ",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -105,7 +109,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     ret = krb5_auth_con_init(context, &auth_context);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed initializing auth context");
+	strlcpy(strresult, "Failed initializing auth context",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -113,7 +118,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 				 KRB5_AUTH_CONTEXT_DO_SEQUENCE);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed initializing auth context");
+	strlcpy(strresult, "Failed initializing auth context",
+		sizeof(strresult));
 	goto chpwfail;
     }
 	
@@ -121,7 +127,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 			       "kadmin", "changepw", NULL);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed building kadmin/changepw principal");
+	strlcpy(strresult, "Failed building kadmin/changepw principal",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -130,63 +137,11 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 
     if (ret) {
 	numresult = KRB5_KPASSWD_AUTHERROR;
-	strcpy(strresult, "Failed reading application request");
+	strlcpy(strresult, "Failed reading application request",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
-    /* set up address info */
-
-    addrlen = sizeof(local_addr);
-
-    if (getsockname(s, &local_addr, &addrlen) < 0) {
-	ret = errno;
-	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed getting server internet address");
-	goto chpwfail;
-    }
-
-    /* some brain-dead OS's don't return useful information from
-     * the getsockname call.  Namely, windows and solaris.  */
-
-    if (((struct sockaddr_in *)&local_addr)->sin_addr.s_addr != 0) {
-	local_kaddr.addrtype = ADDRTYPE_INET;
-	local_kaddr.length =
-	    sizeof(((struct sockaddr_in *) &local_addr)->sin_addr);
-	local_kaddr.contents = 
-	    (krb5_octet *) &(((struct sockaddr_in *) &local_addr)->sin_addr);
-    } else {
-	krb5_address **addrs;
-
-	krb5_os_localaddr(context, &addrs);
-	local_kaddr.magic = addrs[0]->magic;
-	local_kaddr.addrtype = addrs[0]->addrtype;
-	local_kaddr.length = addrs[0]->length;
-	local_kaddr.contents = malloc(addrs[0]->length);
-	memcpy(local_kaddr.contents, addrs[0]->contents, addrs[0]->length);
-	allocated_mem++;
-
-	krb5_free_addresses(context, addrs);
-    }
-
-    addrlen = sizeof(remote_addr);
-
-    if (getpeername(s, &remote_addr, &addrlen) < 0) {
-	ret = errno;
-	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed getting client internet address");
-	goto chpwfail;
-    }
-
-    remote_kaddr.addrtype = ADDRTYPE_INET;
-    remote_kaddr.length =
-	sizeof(((struct sockaddr_in *) &remote_addr)->sin_addr);
-    remote_kaddr.contents = 
-	(krb5_octet *) &(((struct sockaddr_in *) &remote_addr)->sin_addr);
-    
-    remote_kaddr.addrtype = ADDRTYPE_INET;
-    remote_kaddr.length = sizeof(sockin->sin_addr);
-    remote_kaddr.contents = (krb5_octet *) &sockin->sin_addr;
-    
     /* mk_priv requires that the local address be set.
        getsockname is used for this.  rd_priv requires that the
        remote address be set.  recvfrom is used for this.  If
@@ -202,18 +157,11 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
        is specified.  Are we having fun yet?  */
 
     ret = krb5_auth_con_setaddrs(context, auth_context, NULL,
-			     &remote_kaddr);
+			         remote_faddr->address);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed storing client internet address");
-	goto chpwfail;
-    }
-
-    /* verify that this is an AS_REQ ticket */
-
-    if (!(ticket->enc_part2->flags & TKT_FLG_INITIAL)) {
-	numresult = KRB5_KPASSWD_AUTHERROR;
-	strcpy(strresult, "Ticket must be derived from a password");
+	strlcpy(strresult, "Failed storing client internet address",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
@@ -222,11 +170,12 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     ret = krb5_mk_rep(context, auth_context, &ap_rep);
     if (ret) {
 	numresult = KRB5_KPASSWD_AUTHERROR;
-	strcpy(strresult, "Failed replying to application request");
+	strlcpy(strresult, "Failed replying to application request",
+		sizeof(strresult));
 	goto chpwfail;
     }
 
-    /* decrypt the new password */
+    /* decrypt the ChangePasswdData */
 
     cipher.length = (req->data + req->length) - ptr;
     cipher.data = ptr;
@@ -234,23 +183,66 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     ret = krb5_rd_priv(context, auth_context, &cipher, &clear, &replay);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed decrypting request");
+	strlcpy(strresult, "Failed decrypting request", sizeof(strresult));
 	goto chpwfail;
     }
 
-    ret = krb5_unparse_name(context, ticket->enc_part2->client, &clientstr);
+    client = ticket->enc_part2->client;
+
+    /* decode ChangePasswdData for setpw requests */
+    if (vno == RFC3244_VERSION) {
+	krb5_data *clear_data;
+
+	ret = decode_krb5_setpw_req(&clear, &clear_data, &target);
+	if (ret != 0) {
+	    numresult = KRB5_KPASSWD_MALFORMED;
+	    strlcpy(strresult, "Failed decoding ChangePasswdData",
+		    sizeof(strresult));
+	    goto chpwfail;
+	}
+
+	memset(clear.data, 0, clear.length);
+	free(clear.data);
+
+	clear = *clear_data;
+	free(clear_data);
+
+	if (target != NULL) {
+	    ret = krb5_unparse_name(context, target, &targetstr);
+	    if (ret != 0) {
+		numresult = KRB5_KPASSWD_HARDERROR;
+		strlcpy(strresult, "Failed unparsing target name for log",
+			sizeof(strresult));
+		goto chpwfail;
+	    }
+	}
+    }
+
+    ret = krb5_unparse_name(context, client, &clientstr);
     if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
-	strcpy(strresult, "Failed unparsing client name for log");
+	strlcpy(strresult, "Failed unparsing client name for log",
+		sizeof(strresult));
 	goto chpwfail;
     }
+
+    /* for cpw, verify that this is an AS_REQ ticket */
+    if (vno == 1 &&
+	(ticket->enc_part2->flags & TKT_FLG_INITIAL) == 0) {
+	numresult = KRB5_KPASSWD_INITIAL_FLAG_NEEDED;
+	strlcpy(strresult, "Ticket must be derived from a password",
+		sizeof(strresult));
+	goto chpwfail;
+    }
+
     /* change the password */
 
     ptr = (char *) malloc(clear.length+1);
     memcpy(ptr, clear.data, clear.length);
     ptr[clear.length] = '\0';
 
-    ret = schpw_util_wrapper(server_handle, ticket->enc_part2->client,
+    ret = schpw_util_wrapper(server_handle, client, target,
+			     (ticket->enc_part2->flags & TKT_FLG_INITIAL) != 0,
 			     ptr, NULL, strresult, sizeof(strresult));
 
     /* zap the password */
@@ -262,27 +254,85 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 
     clen = strlen(clientstr);
     trunc_name(&clen, &cdots);
-    krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
-		     inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
-		     (int) clen, clientstr, cdots,
-		     ret ? krb5_get_error_message (context, ret) : "success");
-    krb5_free_unparsed_name(context, clientstr);
 
-    if (ret) {
-	if ((ret != KADM5_PASS_Q_TOOSHORT) && 
-	    (ret != KADM5_PASS_REUSE) && (ret != KADM5_PASS_Q_CLASS) && 
-	    (ret != KADM5_PASS_Q_DICT) && (ret != KADM5_PASS_TOOSOON))
-	    numresult = KRB5_KPASSWD_HARDERROR;
-	else
-	    numresult = KRB5_KPASSWD_SOFTERROR;
-	/* strresult set by kadb5_chpass_principal_util() */
-	goto chpwfail;
+    switch (addr->addrtype) {
+    case ADDRTYPE_INET: {
+	struct sockaddr_in *sin = ss2sin(&ss);
+
+	sin->sin_family = AF_INET;
+	memcpy(&sin->sin_addr, addr->contents, addr->length);
+	sin->sin_port = htons(remote_faddr->port);
+	salen = sizeof(*sin);
+	break;
+    }
+    case ADDRTYPE_INET6: {
+	struct sockaddr_in6 *sin6 = ss2sin6(&ss);
+
+	sin6->sin6_family = AF_INET6;
+	memcpy(&sin6->sin6_addr, addr->contents, addr->length);
+	sin6->sin6_port = htons(remote_faddr->port);
+	salen = sizeof(*sin6);
+	break;
+    }
+    default: {
+	struct sockaddr *sa = ss2sa(&ss);
+
+	sa->sa_family = AF_UNSPEC;
+	salen = sizeof(*sa);
+	break;
+    }
     }
 
-    /* success! */
+    if (getnameinfo(ss2sa(&ss), salen,
+		    addrbuf, sizeof(addrbuf), NULL, 0,
+		    NI_NUMERICHOST | NI_NUMERICSERV) != 0)
+	strlcpy(addrbuf, "<unprintable>", sizeof(addrbuf));
 
-    numresult = KRB5_KPASSWD_SUCCESS;
-    strcpy(strresult, "");
+    if (vno == RFC3244_VERSION) {
+	size_t tlen;
+	char *tdots;
+	const char *targetp;
+
+	if (target == NULL) {
+	    tlen = clen;
+	    tdots = cdots;
+	    targetp = targetstr;
+	} else {
+	    tlen = strlen(targetstr);
+	    trunc_name(&tlen, &tdots);
+	    targetp = clientstr;
+	}
+
+	krb5_klog_syslog(LOG_NOTICE, "setpw request from %s by %.*s%s for %.*s%s: %s",
+			 addrbuf,
+			 (int) clen, clientstr, cdots,
+			 (int) tlen, targetp, tdots,
+			 ret ? krb5_get_error_message (context, ret) : "success");
+    } else {
+	krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
+			 addrbuf,
+			 (int) clen, clientstr, cdots,
+			 ret ? krb5_get_error_message (context, ret) : "success");
+    }
+    switch (ret) {
+    case KADM5_AUTH_CHANGEPW:
+	numresult = KRB5_KPASSWD_ACCESSDENIED;
+	break;
+    case KADM5_PASS_Q_TOOSHORT:
+    case KADM5_PASS_REUSE:
+    case KADM5_PASS_Q_CLASS:
+    case KADM5_PASS_Q_DICT:
+    case KADM5_PASS_TOOSOON:
+	numresult = KRB5_KPASSWD_HARDERROR;
+	break;
+    case 0:
+	numresult = KRB5_KPASSWD_SUCCESS;
+	strlcpy(strresult, "", sizeof(strresult));
+	break;
+    default:
+	numresult = KRB5_KPASSWD_SOFTERROR;
+	break;
+    }
 
 chpwfail:
 
@@ -299,18 +349,20 @@ chpwfail:
     cipher.length = 0;
 
     if (ap_rep.length) {
-	ret = krb5_auth_con_setaddrs(context, auth_context, &local_kaddr,
-				     NULL);
+	ret = krb5_auth_con_setaddrs(context, auth_context,
+				     local_faddr->address, NULL);
 	if (ret) {
 	    numresult = KRB5_KPASSWD_HARDERROR;
-	    strcpy(strresult,
-		   "Failed storing client and server internet addresses");
+	    strlcpy(strresult,
+		    "Failed storing client and server internet addresses",
+		    sizeof(strresult));
 	} else {
 	    ret = krb5_mk_priv(context, auth_context, &clear, &cipher,
 			       &replay);
 	    if (ret) {
 		numresult = KRB5_KPASSWD_HARDERROR;
-		strcpy(strresult, "Failed encrypting reply");
+		strlcpy(strresult, "Failed encrypting reply",
+			sizeof(strresult));
 	    }
 	}
     }
@@ -409,8 +461,12 @@ bailout:
 	krb5_xfree(clear.data);
     if (cipher.length)
 	krb5_xfree(cipher.data);
-    if (allocated_mem) 
-        krb5_xfree(local_kaddr.contents);
+    if (target)
+	krb5_free_principal(context, target);
+    if (targetstr)
+	krb5_free_unparsed_name(context, targetstr);
+    if (clientstr)
+	krb5_free_unparsed_name(context, clientstr);
 
     return(ret);
 }

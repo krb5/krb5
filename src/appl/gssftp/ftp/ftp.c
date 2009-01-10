@@ -88,11 +88,8 @@ int gettimeofday(struct timeval *tv, void *tz);
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#ifndef KRB5_KRB4_COMPAT
-/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <sys/socket.h>
 #include <netdb.h>
-#endif
 #include <sys/time.h>
 #include <sys/file.h>
 #ifdef HAVE_SYS_SELECT_H
@@ -124,14 +121,8 @@ int gettimeofday(struct timeval *tv, void *tz);
 #define L_INCR 1
 #endif
 
-#ifdef KRB5_KRB4_COMPAT
-#include <krb.h>
+#include <k5-platform.h>
 
-KTEXT_ST ticket;
-CREDENTIALS cred;
-Key_schedule schedule;
-MSG_DAT msg_data;
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 /* need to include the krb5 file, because we're doing manual fallback
@@ -411,7 +402,7 @@ int login(char *host)
 		return(1);
 	for (n = 0; n < macnum; ++n) {
 		if (!strcmp("init", macros[n].mac_name)) {
-			(void) strcpy(line, "$init");
+			(void) strlcpy(line, "$init", sizeof(line));
 			makeargv();
 			domacro(margc, margv);
 			break;
@@ -436,20 +427,6 @@ static int secure_command(char* cmd)
 	int length;
 
 	if (auth_type && clevel != PROT_C) {
-#ifdef KRB5_KRB4_COMPAT
-		if (strcmp(auth_type, "KERBEROS_V4") == 0)
-		    if ((length = clevel == PROT_P ?
-			krb_mk_priv((unsigned char *)cmd, (unsigned char *)out,
-				strlen(cmd), schedule,
-				&cred.session, &myctladdr, &hisctladdr)
-		      : krb_mk_safe((unsigned char *)cmd, (unsigned char *)out,
-				strlen(cmd), &cred.session,
-				&myctladdr, &hisctladdr)) == -1) {
-			fprintf(stderr, "krb_mk_%s failed for KERBEROS_V4\n",
-					clevel == PROT_P ? "priv" : "safe");
-			return(0);
-		    }
-#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 		/* secure_command (based on level) */
 		if (strcmp(auth_type, "GSSAPI") == 0) {
@@ -528,7 +505,7 @@ int command(char *fmt, ...)
 	}
 	oldintr = signal(SIGINT, cmdabort);
 	va_start(ap, fmt);
-	vsprintf(in, fmt, ap);
+	vsnprintf(in, FTP_BUFSIZ, fmt, ap);
 	va_end(ap);
 again:	if (secure_command(in) == 0)
 		return(0);
@@ -692,39 +669,6 @@ int getreply(int expecteof)
 					code, radix_error(kerror), obuf);
 			    n = '5';
 			}
-#ifdef KRB5_KRB4_COMPAT
-			else if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-			    if (safe)
-				kerror = krb_rd_safe((unsigned char *)ibuf,
-						     (unsigned int) len,
-						     &cred.session,
-						     &hisctladdr,
-						     &myctladdr, &msg_data);
-			    else
-				kerror = krb_rd_priv((unsigned char *)ibuf,
-						     (unsigned int) len,
-						     schedule, &cred.session,
-						     &hisctladdr, &myctladdr,
-						     &msg_data);
-			    if (kerror != KSUCCESS) {
-				printf("%d reply %s! (krb_rd_%s: %s)\n", code,
-				       safe ? "modified" : "garbled",
-				       safe ? "safe" : "priv",
-				       krb_get_err_text(kerror));
-				n = '5';
-			    } else {
-				if (debug) printf("%c:", safe ? 'S' : 'P');
-				if(msg_data.app_length < sizeof(ibuf) - 2) {
-				    memmove(ibuf, msg_data.app_data,
-					    msg_data.app_length);
-				    strcpy(&ibuf[msg_data.app_length], "\r\n");
-				} else {
-			            printf("Message too long!");
-				}
-				continue;
-			    }
-			}
-#endif
 #ifdef GSSAPI
 			else if (strcmp(auth_type, "GSSAPI") == 0) {
 				gss_buffer_desc xmit_buf, msg_buf;
@@ -745,7 +689,7 @@ int getreply(int expecteof)
 				  if(msg_buf.length < sizeof(ibuf) - 2 - 1) {
 				    memcpy(ibuf, msg_buf.value, 
 					   msg_buf.length);
-				    strcpy(&ibuf[msg_buf.length], "\r\n");
+				    memcpy(&ibuf[msg_buf.length], "\r\n", 3);
 				  } else {
 				    user_gss_error(maj_stat, min_stat, 
 						   "reply was too long");
@@ -1661,10 +1605,6 @@ void pswitch(int flag)
 		char *authtype;
 		int clvl;
 	        int dlvl;
-#ifdef KRB5_KRB4_COMPAT
-		C_Block session;
-		Key_schedule schedule;
-#endif /* KRB5_KRB4_COMPAT */
 	} proxstruct, tmpstruct;
 	struct comvars *ip, *op;
 
@@ -1742,12 +1682,6 @@ void pswitch(int flag)
 	     clevel = PROT_C;
 	if (!dlevel)
 	     dlevel = PROT_C;
-#ifdef KRB5_KRB4_COMPAT
-	memcpy(ip->session, cred.session, sizeof(cred.session));
-	memcpy(cred.session, op->session, sizeof(cred.session));
-	memcpy(ip->schedule, schedule, sizeof(schedule));
-	memcpy(schedule, op->schedule, sizeof(schedule));
-#endif /* KRB5_KRB4_COMPAT */
 	(void) signal(SIGINT, oldintr);
 	if (abrtflag) {
 		abrtflag = 0;
@@ -1953,10 +1887,6 @@ gunique(char *local)
 	return(new);
 }
 
-#ifdef KRB5_KRB4_COMPAT
-char realm[REALM_SZ + 1];
-#endif /* KRB5_KRB4_COMPAT */
-
 #ifdef GSSAPI
 static const struct {
     gss_OID mech_type;
@@ -1971,14 +1901,10 @@ static const int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);
 int do_auth()
 {
 	int oldverbose = verbose;
-#ifdef KRB5_KRB4_COMPAT
-	char *service, inst[INST_SZ];
-	KRB4_32 cksum, checksum = getpid();
-#endif /* KRB5_KRB4_COMPAT */
-#if defined(KRB5_KRB4_COMPAT) || defined(GSSAPI)
+#ifdef GSSAPI
 	u_char out_buf[FTP_BUFSIZ];
 	int i;
-#endif /* KRB5_KRB4_COMPAT */
+#endif /* GSSAPI */
 
 	if (auth_type) return(1);	/* auth already succeeded */
 
@@ -2009,7 +1935,8 @@ int do_auth()
 	  for (trial = 0; trial < n_gss_trials; trial++) {
 	    /* ftp@hostname first, the host@hostname */
 	    /* the V5 GSSAPI binding canonicalizes this for us... */
-	    sprintf(stbuf, "%s@%s", gss_trials[trial].service_name, hostname);
+	    snprintf(stbuf, sizeof(stbuf), "%s@%s",
+		     gss_trials[trial].service_name, hostname);
 	    if (debug)
 	      fprintf(stderr, "Trying to authenticate to <%s>\n", stbuf);
 
@@ -2128,68 +2055,6 @@ int do_auth()
 	  }
 	}
 #endif /* GSSAPI */
-#ifdef KRB5_KRB4_COMPAT
-	if (command("AUTH %s", "KERBEROS_V4") == CONTINUE) {
-	    if (verbose)
-		printf("%s accepted as authentication type\n", "KERBEROS_V4");
-
-	    strncpy(inst, (char *) krb_get_phost(hostname), sizeof(inst) - 1);
-	    inst[sizeof(inst) - 1] = '\0';
-	    if (realm[0] == '\0')
-	    	strncpy(realm, (char *) krb_realmofhost(hostname), sizeof(realm) - 1);
-	    realm[sizeof(realm) - 1] = '\0';
-	    if ((kerror = krb_mk_req(&ticket, service = "ftp",
-					inst, realm, checksum))
-		&& (kerror != KDC_PR_UNKNOWN ||
-	        (kerror = krb_mk_req(&ticket, service = "rcmd",
-					inst, realm, checksum))))
-			fprintf(stderr, "Kerberos V4 krb_mk_req failed: %s\n",
-					krb_get_err_text(kerror));
-	    else if ((kerror = krb_get_cred(service, inst, realm, &cred)))
-			fprintf(stderr, "Kerberos V4 krb_get_cred failed: %s\n",
-					krb_get_err_text(kerror));
-	    else {
-		key_sched(cred.session, schedule);
-		reply_parse = "ADAT=";
-		oldverbose = verbose;
-		verbose = 0;
-		i = ticket.length;
-		if ((kerror = radix_encode(ticket.dat, out_buf, &i, 0)))
-			fprintf(stderr, "Base 64 encoding failed: %s\n",
-					radix_error(kerror));
-		else if (command("ADAT %s", out_buf) != COMPLETE)
-			fprintf(stderr, "Kerberos V4 authentication failed\n");
-		else if (!reply_parse)
-			fprintf(stderr,
-			       "No authentication data received from server\n");
-		else if ((kerror = radix_encode((unsigned char *)reply_parse, out_buf, &i, 1)))
-			fprintf(stderr, "Base 64 decoding failed: %s\n",
-					radix_error(kerror));
-		else if ((kerror = krb_rd_safe(out_buf, (unsigned )i,
-					       &cred.session,
-					       &hisctladdr, &myctladdr, 
-					       &msg_data)))
-			fprintf(stderr, "Kerberos V4 krb_rd_safe failed: %s\n",
-					krb_get_err_text(kerror));
-		else {
-		    /* fetch the (modified) checksum */
-		    (void) memcpy(&cksum, msg_data.app_data, sizeof(cksum));
-		    if (ntohl(cksum) == checksum + 1) {
-			verbose = oldverbose;
-			if (verbose)
-			   printf("Kerberos V4 authentication succeeded\n");
-			reply_parse = NULL;
-			auth_type = "KERBEROS_V4";
-			return(1);
-		    } else fprintf(stderr,
-				"Kerberos V4 mutual authentication failed\n");
-		}
-		verbose = oldverbose;
-		reply_parse = NULL;
-	    }
-	} else	fprintf(stderr, "%s rejected as an authentication type\n",
-				"KERBEROS_V4");
-#endif /* KRB5_KRB4_COMPAT */
 
 	/* Other auth types go here ... */
 
@@ -2233,7 +2098,7 @@ static void abort_remote(FILE *din)
 	 * send IAC in urgent mode instead of DM because 4.3BSD places oob mark
 	 * after urgent byte rather than before as is protocol now
 	 */
-	sprintf(buf, "%c%c%c", IAC, IP, IAC);
+	snprintf(buf, sizeof(buf), "%c%c%c", IAC, IP, IAC);
 	if (send(SOCKETNO(fileno(cout)), buf, 3, MSG_OOB) != 3)
 		PERROR_SOCKET("abort");
 	putc(DM, cout);

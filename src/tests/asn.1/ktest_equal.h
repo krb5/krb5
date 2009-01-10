@@ -2,6 +2,7 @@
 #define __KTEST_EQUAL_H__
 
 #include "k5-int.h"
+#include "kdb.h"
 
 /* int ktest_equal_structure(krb5_structure *ref, *var) */
 /* effects  Returns true (non-zero) if ref and var are
@@ -90,4 +91,6 @@ int ktest_equal_krb5_etype_info_entry
     (krb5_etype_info_entry * ref,
 		    krb5_etype_info_entry * var);
 
+int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
+				      ldap_seqof_key_data *var);
 #endif

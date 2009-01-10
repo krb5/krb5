@@ -219,11 +219,8 @@ gen_dbsuffix(char *db_name, char *sfx)
     if (sfx == NULL)
 	return ((char *) NULL);
 
-    dbsuffix = malloc(strlen(db_name) + strlen(sfx) + 1);
-    if (!dbsuffix)
+    if (asprintf(&dbsuffix, "%s%s", db_name, sfx) < 0)
 	return (0);
-    (void) strcpy(dbsuffix, db_name);
-    (void) strcat(dbsuffix, sfx);
     return dbsuffix;
 }
 
@@ -1769,7 +1766,7 @@ krb5_db2_db_rename(context, from, to)
 	    retval = errno;
 	    goto errout;
 	}
-	strcat(new_policy, ".lock");
+	strlcat(new_policy, ".lock",sizeof(new_policy));
 	(void) unlink(new_policy);
     }
 

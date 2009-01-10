@@ -12,10 +12,14 @@
 	<string>edu.mit.Kerberos.KerberosAgent</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+        <key>CFBundleName</key>
+        <string>KerberosAgent</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>KrbA</string>
+        <key>CFBundleShortVersionString</key>
+        <string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>NSMainNibFile</key>

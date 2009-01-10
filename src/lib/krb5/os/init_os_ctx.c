@@ -198,9 +198,8 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
         char *env = getenv("KRB5_CONFIG");
         if (env)
         {
-            name = malloc(strlen(env) + 1);
+            name = strdup(env);
             if (!name) return ENOMEM;
-            strcpy(name, env);
         }
     }
     if (!name && !secure)
@@ -419,7 +418,6 @@ krb5_get_profile (krb5_context ctx, profile_t *profile)
 {
     return profile_copy (ctx->profile, profile);
 }	
-
 
 krb5_error_code
 krb5_set_config_files(krb5_context ctx, const char **filenames)

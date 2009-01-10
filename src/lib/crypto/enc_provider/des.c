@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "des_int.h"
 #include "enc_provider.h"
+#include "aead.h"
 
 static krb5_error_code
 k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
@@ -106,6 +107,67 @@ k5_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
     return(0);
 }
 
+static krb5_error_code
+k5_des_docrypt_iov(const krb5_keyblock *key, const krb5_data *ivec,
+		   krb5_crypto_iov *data, size_t num_data, int enc)
+{
+    mit_des_key_schedule schedule;
+    size_t input_length = 0;
+    int i;
+
+    /* key->enctype was checked by the caller */
+
+    if (key->length != 8)
+	return(KRB5_BAD_KEYSIZE);
+
+    for (i = 0; i < num_data; i++) {
+	const krb5_crypto_iov *iov = &data[i];
+
+	if (ENCRYPT_DATA_IOV(iov))
+	    input_length += iov->data.length;
+    }
+
+    if ((input_length % 8) != 0)
+	return(KRB5_BAD_MSIZE);
+    if (ivec && (ivec->length != 8))
+	return(KRB5_BAD_MSIZE);
+
+    switch (mit_des_key_sched(key->contents, schedule)) {
+    case -1:
+	return(KRB5DES_BAD_KEYPAR);
+    case -2:
+	return(KRB5DES_WEAK_KEY);
+    }
+
+    /* this has a return value, but the code always returns zero */
+    if (enc)
+	krb5int_des_cbc_encrypt_iov(data, num_data, schedule, ivec ? ivec->data : NULL);
+    else
+	krb5int_des_cbc_decrypt_iov(data, num_data, schedule, ivec ? ivec->data : NULL);
+
+    memset(schedule, 0, sizeof(schedule));
+
+    return(0);
+}
+
+static krb5_error_code
+k5_des_encrypt_iov(const krb5_keyblock *key,
+		    const krb5_data *ivec,
+		    krb5_crypto_iov *data,
+		    size_t num_data)
+{
+    return k5_des_docrypt_iov(key, ivec, data, num_data, 1);
+}
+
+static krb5_error_code
+k5_des_decrypt_iov(const krb5_keyblock *key,
+		   const krb5_data *ivec,
+		   krb5_crypto_iov *data,
+		   size_t num_data)
+{
+    return k5_des_docrypt_iov(key, ivec, data, num_data, 0);
+}
+
 const struct krb5_enc_provider krb5int_enc_des = {
     8,
     7, 8,
@@ -113,5 +175,7 @@ const struct krb5_enc_provider krb5int_enc_des = {
     k5_des_decrypt,
     k5_des_make_key,
     krb5int_des_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    k5_des_encrypt_iov,
+    k5_des_decrypt_iov
 };

@@ -24,19 +24,33 @@
  * or implied warranty.
  */
 
-#ifndef LEAN_CLIENT
-
-#define KERBEROSLOGIN_DEPRECATED
+#ifdef KIM_TO_KLL_SHIM
 
 #include "CredentialsCache.h"
 #include "KerberosLogin.h"
 #include "KerberosLoginPrivate.h"
 #include <kim/kim.h>
 #include "kim_private.h"
+#include "k5-thread.h"
+#include <time.h>
+
+/* 
+ * Deprecated Error codes 
+ */
+enum {
+    /* Carbon Dialog errors */
+    klDialogDoesNotExistErr             = 19676,
+    klDialogAlreadyExistsErr,
+    klNotInForegroundErr,
+    klNoAppearanceErr,
+    klFatalDialogErr,
+    klCarbonUnavailableErr    
+};
 
 krb5_get_init_creds_opt *__KLLoginOptionsGetKerberos5Options (KLLoginOptions ioOptions);
 KLTime __KLLoginOptionsGetStartTime (KLLoginOptions ioOptions);
 char *__KLLoginOptionsGetServiceName (KLLoginOptions ioOptions);
+
 
 /* ------------------------------------------------------------------------ */
 
@@ -158,7 +172,7 @@ KLStatus KLAcquireNewTicketsWithPassword (KLPrincipal      inPrincipal,
 
 /* ------------------------------------------------------------------------ */
 
-KLStatus KLSetApplicationOptions (const KLApplicationOptions *inAppOptions)
+KLStatus KLSetApplicationOptions (const void *inAppOptions)
 {
     /* Deprecated */
     return kl_check_error (klNoErr);
@@ -166,10 +180,14 @@ KLStatus KLSetApplicationOptions (const KLApplicationOptions *inAppOptions)
 
 /* ------------------------------------------------------------------------ */
 
-KLStatus KLGetApplicationOptions (KLApplicationOptions *outAppOptions)
+KLStatus KLGetApplicationOptions (void *outAppOptions)
 {
-    /* Deprecated */
-    return kl_check_error (klNoErr);
+    /* Deprecated -- this function took a struct declared on the caller's
+     * stack.  It used to fill in the struct with information about the
+     * Mac OS 9 dialog used for automatic prompting.  Since there is no
+     * way for us provide valid values, just leave the struct untouched
+     * and return a reasonable error. */
+    return kl_check_error (klDialogDoesNotExistErr);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -185,13 +203,9 @@ KLStatus KLAcquireInitialTickets (KLPrincipal      inPrincipal,
     kim_identity identity = NULL;
     
     if (!err) {
-        err = kim_ccache_create_from_client_identity (&ccache, 
-                                                      inPrincipal);
-        
-        if (err) {
-            /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new (&ccache, inPrincipal, inLoginOptions);
-        }
+        err = kim_ccache_create_new_if_needed (&ccache, 
+                                               inPrincipal,
+                                               inLoginOptions);
     }
     
     if (!err && outPrincipal) {
@@ -267,7 +281,9 @@ KLStatus KLDestroyTickets (KLPrincipal inPrincipal)
     kim_error err = KIM_NO_ERROR;
     kim_ccache ccache = NULL;
     
-    err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    if (!err) {
+        err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
+    }
     
     if (!err) {
         err = kim_ccache_destroy (&ccache);
@@ -285,9 +301,6 @@ KLStatus KLChangePassword (KLPrincipal inPrincipal)
 
 /* ------------------------------------------------------------------------ */
 
-
-/* Kerberos Login dialog low level functions */
-
 KLStatus KLAcquireInitialTicketsWithPassword (KLPrincipal      inPrincipal,
                                               KLLoginOptions   inLoginOptions,
                                               const char      *inPassword,
@@ -297,16 +310,10 @@ KLStatus KLAcquireInitialTicketsWithPassword (KLPrincipal      inPrincipal,
     kim_ccache ccache = NULL;
     
     if (!err) {
-        err = kim_ccache_create_from_client_identity (&ccache, 
-                                                      inPrincipal);
-        
-        if (err) {
-            /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new_with_password (&ccache, 
-                                                       inPrincipal,
-                                                       inLoginOptions,
-                                                       inPassword);
-        }
+        err = kim_ccache_create_new_if_needed_with_password (&ccache, 
+                                                             inPrincipal,
+                                                             inLoginOptions,
+                                                             inPassword);
     }
     
     if (!err && outCredCacheName) {
@@ -567,17 +574,49 @@ KLStatus KLValidateInitialTickets (KLPrincipal      inPrincipal,
     return kl_check_error (err);
 }
 
+static cc_time_t g_cc_change_time = 0;
+static KLTime g_kl_change_time = 0;
+static k5_mutex_t g_change_time_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+
+MAKE_INIT_FUNCTION(kim_change_time_init);
+MAKE_FINI_FUNCTION(kim_change_time_fini);
+
+/* ------------------------------------------------------------------------ */
+
+static int kim_change_time_init (void)
+{
+    g_kl_change_time = time (NULL);
+    
+    return k5_mutex_finish_init(&g_change_time_mutex);
+}
+
+/* ------------------------------------------------------------------------ */
+
+static void kim_change_time_fini (void)
+{
+    if (!INITIALIZER_RAN (kim_change_time_init) || PROGRAM_EXITING ()) {
+	return;
+    }
+    
+    k5_mutex_destroy(&g_change_time_mutex);
+}
 
 /* ------------------------------------------------------------------------ */
 
 KLStatus KLLastChangedTime (KLTime *outLastChangedTime)
 {
-    KLStatus     err = klNoErr;
+    KLStatus     err = CALL_INIT_FUNCTION (kim_change_time_init);
+    kim_error mutex_err = KIM_NO_ERROR;
     cc_context_t context = NULL;
     cc_time_t    ccChangeTime = 0;
     
-    if (!outLastChangedTime) { err = kl_check_error (klParameterErr); }
-    
+    if (!err && !outLastChangedTime) { err = kl_check_error (klParameterErr); }
+        
+    if (!err) {
+        mutex_err = k5_mutex_lock (&g_change_time_mutex);
+        if (mutex_err) { err = mutex_err; }
+    }
+
     if (!err) {
         err = cc_initialize (&context, ccapi_version_4, NULL, NULL);
     }
@@ -587,10 +626,24 @@ KLStatus KLLastChangedTime (KLTime *outLastChangedTime)
     }
     
     if (!err) {
-        *outLastChangedTime = ccChangeTime;
+        /* cc_context_get_change_time returns 0 if there are no tickets
+         * but KLLastChangedTime always returned the current time.  So
+         * fake the current time if cc_context_get_change_time returns 0. */
+        if (ccChangeTime > g_cc_change_time) {
+            /* changed, make sure g_kl_change_time increases in value */
+            if (ccChangeTime > g_kl_change_time) {
+                g_kl_change_time = ccChangeTime;
+            } else {
+                g_kl_change_time++; /* we got ahead of the ccapi, just increment */
+            }
+            g_cc_change_time = ccChangeTime;
+        }
+        
+        *outLastChangedTime = g_kl_change_time;
     }
     
-    if (context) { cc_context_release (context); }
+    if (context   ) { cc_context_release (context); }
+    if (!mutex_err) { k5_mutex_unlock (&g_change_time_mutex); }
     
     return kl_check_error (err);
 }
@@ -612,11 +665,7 @@ KLStatus KLCacheHasValidTickets (KLPrincipal         inPrincipal,
     if (!outFoundValidTickets) { err = kl_check_error (klParameterErr); }
     
     if (!err) {
-        if (inPrincipal) {
-            err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
-        } else {
-            err = kim_ccache_create_from_default (&ccache);
-        }
+        err = kim_ccache_create_from_client_identity (&ccache, inPrincipal);
     }
     
     if (!err) {
@@ -625,6 +674,10 @@ KLStatus KLCacheHasValidTickets (KLPrincipal         inPrincipal,
     
     if (!err && outPrincipal) {
         err = kim_ccache_get_client_identity (ccache, &identity);
+        if (err) {
+            err = KIM_NO_ERROR;
+            identity = NULL;
+        } 
     }
     
     if (!err && outCredCacheName) {
@@ -886,6 +939,8 @@ enum {
 };
 
 
+/* ------------------------------------------------------------------------ */
+
 KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
                                   void                       *ioBuffer,
                                   KLSize                     *ioBufferSize)
@@ -927,11 +982,11 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
     } else if (!err && inOption == loginOption_LoginInstance) {
         targetSize = 0; /* Deprecated */
         
-    } else if (!err && (inOption == loginOption_ShowOptions &&
-                        inOption == loginOption_RememberShowOptions &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras &&
+    } else if (!err && (inOption == loginOption_ShowOptions ||
+                        inOption == loginOption_RememberShowOptions ||
+                        inOption == loginOption_LongTicketLifetimeDisplay ||
+                        inOption == loginOption_RememberPrincipal ||
+                        inOption == loginOption_RememberExtras ||
                         inOption == loginOption_RememberPassword)) {
         targetSize = sizeof(KLBoolean);
         
@@ -962,11 +1017,10 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
             }
         }
         
-    } else if (!err && (inOption == loginOption_MinimalTicketLifetime &&
-                        inOption == loginOption_MaximalTicketLifetime &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras)) {
+    } else if (!err && (inOption == loginOption_MinimalTicketLifetime ||
+                        inOption == loginOption_MaximalTicketLifetime ||
+                        inOption == loginOption_MinimalRenewableLifetime ||
+                        inOption == loginOption_MaximalRenewableLifetime)) {
         targetSize = sizeof(KLLifetime);
         
         if (!returnSizeOnly) {
@@ -994,9 +1048,9 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
             }
         }
         
-    } else if (!err && (inOption == loginOption_DefaultRenewableTicket &&
-                        inOption == loginOption_DefaultForwardableTicket &&
-                        inOption == loginOption_DefaultProxiableTicket &&
+    } else if (!err && (inOption == loginOption_DefaultRenewableTicket ||
+                        inOption == loginOption_DefaultForwardableTicket ||
+                        inOption == loginOption_DefaultProxiableTicket ||
                         inOption == loginOption_DefaultAddresslessTicket)) {
         targetSize = sizeof(KLBoolean);
         
@@ -1031,7 +1085,7 @@ KLStatus KLGetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         
-    } else if (!err && (inOption == loginOption_DefaultTicketLifetime &&
+    } else if (!err && (inOption == loginOption_DefaultTicketLifetime ||
                         inOption == loginOption_DefaultRenewableLifetime)) {
         targetSize = sizeof(KLLifetime);
         
@@ -1128,11 +1182,11 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
     } else if (!err && inOption == loginOption_LoginInstance) {
         /* Ignored */
         
-    } else if (!err && (inOption == loginOption_ShowOptions &&
-                        inOption == loginOption_RememberShowOptions &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras &&
+    } else if (!err && (inOption == loginOption_ShowOptions ||
+                        inOption == loginOption_RememberShowOptions ||
+                        inOption == loginOption_LongTicketLifetimeDisplay ||
+                        inOption == loginOption_RememberPrincipal ||
+                        inOption == loginOption_RememberExtras ||
                         inOption == loginOption_RememberPassword)) {
         if (inBufferSize > sizeof (KLBoolean)) {
             err = kl_check_error (klBufferTooLargeErr);
@@ -1141,17 +1195,16 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_RememberPrincipal) {
-            err = kim_preferences_set_remember_client_identity (prefs, *(kim_boolean *)inBuffer);
+            err = kim_preferences_set_remember_client_identity (prefs, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_RememberExtras) {
-            err = kim_preferences_set_remember_options (prefs, *(kim_boolean *)inBuffer);
+            err = kim_preferences_set_remember_options (prefs, *(KLBoolean *)inBuffer);
         }
         
-    } else if (!err && (inOption == loginOption_MinimalTicketLifetime &&
-                        inOption == loginOption_MaximalTicketLifetime &&
-                        inOption == loginOption_LongTicketLifetimeDisplay &&
-                        inOption == loginOption_RememberPrincipal &&
-                        inOption == loginOption_RememberExtras)) {
+    } else if (!err && (inOption == loginOption_MinimalTicketLifetime ||
+                        inOption == loginOption_MaximalTicketLifetime ||
+                        inOption == loginOption_MinimalRenewableLifetime ||
+                        inOption == loginOption_MaximalRenewableLifetime)) {
         if (inBufferSize > sizeof (KLLifetime)) {
             err = kl_check_error (klBufferTooLargeErr);
         } else if (inBufferSize < sizeof (KLLifetime)) {
@@ -1159,21 +1212,21 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_MinimalTicketLifetime) {
-            err = kim_preferences_set_minimum_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_minimum_lifetime (prefs, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_MaximalTicketLifetime) {
-            err = kim_preferences_set_maximum_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_maximum_lifetime (prefs, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_MinimalRenewableLifetime) {
-            err = kim_preferences_set_minimum_renewal_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_minimum_renewal_lifetime (prefs, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_MaximalRenewableLifetime) {
-            err = kim_preferences_set_maximum_renewal_lifetime (prefs, *(kim_lifetime *)inBuffer);
+            err = kim_preferences_set_maximum_renewal_lifetime (prefs, *(KLLifetime *)inBuffer);
         }   
         
-    } else if (!err && (inOption == loginOption_DefaultRenewableTicket &&
-                        inOption == loginOption_DefaultForwardableTicket &&
-                        inOption == loginOption_DefaultProxiableTicket &&
+    } else if (!err && (inOption == loginOption_DefaultRenewableTicket ||
+                        inOption == loginOption_DefaultForwardableTicket ||
+                        inOption == loginOption_DefaultProxiableTicket ||
                         inOption == loginOption_DefaultAddresslessTicket)) {
         kim_options options = NULL;
         
@@ -1188,16 +1241,16 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_DefaultRenewableTicket) {
-            err = kim_options_set_renewable (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_renewable (options, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultForwardableTicket) {
-            err = kim_options_set_forwardable (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_forwardable (options, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultProxiableTicket) {
-            err = kim_options_set_proxiable (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_proxiable (options, *(KLBoolean *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultAddresslessTicket) {
-            err = kim_options_set_addressless (options, *(kim_boolean *)inBuffer);
+            err = kim_options_set_addressless (options, *(KLBoolean *)inBuffer);
         }   
         
         if (!err) {
@@ -1206,7 +1259,7 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         
         kim_options_free (&options);
         
-    } else if (!err && (inOption == loginOption_DefaultTicketLifetime &&
+    } else if (!err && (inOption == loginOption_DefaultTicketLifetime ||
                         inOption == loginOption_DefaultRenewableLifetime)) {
         kim_options options = NULL;
         
@@ -1221,10 +1274,10 @@ KLStatus KLSetDefaultLoginOption (const KLDefaultLoginOption  inOption,
         }
         
         if (!err && inOption == loginOption_DefaultTicketLifetime) {
-            err = kim_options_set_lifetime (options, *(kim_lifetime *)inBuffer);
+            err = kim_options_set_lifetime (options, *(KLLifetime *)inBuffer);
             
         } else if (!err && inOption == loginOption_DefaultRenewableLifetime) {
-            err = kim_options_set_renewal_lifetime (options, *(kim_lifetime *)inBuffer);
+            err = kim_options_set_renewal_lifetime (options, *(KLLifetime *)inBuffer);
         }   
         
         if (!err) {
@@ -1393,11 +1446,18 @@ KLStatus KLCreatePrincipalFromTriplet (const char  *inName,
                                        const char  *inRealm,
                                        KLPrincipal *outPrincipal)
 {
-    return kl_check_error (kim_identity_create_from_components (outPrincipal,
-                                                                inRealm,
-                                                                inName, 
-                                                                inInstance,
-                                                                NULL));
+    if (inInstance && strlen (inInstance) > 0) {
+        return kl_check_error (kim_identity_create_from_components (outPrincipal,
+                                                                    inRealm,
+                                                                    inName, 
+                                                                    inInstance,
+                                                                    NULL));
+    } else {
+        return kl_check_error (kim_identity_create_from_components (outPrincipal,
+                                                                    inRealm,
+                                                                    inName, 
+                                                                    NULL));        
+    }
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1797,4 +1857,4 @@ char *__KLLoginOptionsGetServiceName (KLLoginOptions ioOptions)
 
 
 
-#endif /* LEAN_CLIENT */
+#endif /* KIM_TO_KLL_SHIM */

@@ -131,23 +131,12 @@ krb5/src/appl/bsd/login.c
 @end ignore
 @set DefaultKrb5GetTickets true
 @comment login_krb5_get_tickets
-@set DefaultKrb4GetTickets false
-@comment login_krb4_get_tickets
-@set DefaultKrb4Convert false
-@comment login_krb4_convert
 @set DefaultKrbRunAklog false
 @comment login_krb_run_aklog
 @set DefaultAklogPath $(prefix)/bin/aklog
 @comment lines 955-956
 @set DefaultAcceptPasswd false
 @comment login_accept_password
-
-@ignore
-the following defaults should be consistent with the values set in
-krb5/src/kdc/kerberos_v4
-@end ignore
-@set DefaultV4Mode  none
-@comment KDC_V4_DEFAULT_MODE
 
 @ignore
 these defaults are based on code in krb5/src/aclocal.m4
@@ -174,14 +163,6 @@ the following are based on variables in krb5/src/include/kerberosIV/krbports.h
 @set DefaultTelnetPort 23
 @set DefaultFTPPort 21
 @set DefaultKrb524Port 4444
-
-@comment src/include/kerberosIV/krb.h
-@set DefaultKrb4Srvtab /etc/srvtab
-@comment line 131
-@set DefaultKrb4Config /etc/krb.conf
-@comment KRB_CONF
-@set DefaultKrb4Realms /etc/krb.realms
-@comment KRB_RLM_TRANS
 
 @comment krb5/src/lib/krb5/krb/get_in_tkt.c
 @set DefaultRenewLifetime 0

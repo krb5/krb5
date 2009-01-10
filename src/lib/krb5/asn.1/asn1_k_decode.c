@@ -579,6 +579,7 @@ asn1_error_code asn1_decode_enc_kdc_rep_part(asn1buf *buf, krb5_enc_kdc_rep_part
         get_field(val->server,9,asn1_decode_realm);
         get_field(val->server,10,asn1_decode_principal_name);
         opt_field(val->caddrs,11,asn1_decode_host_addresses,NULL);
+        opt_field(val->enc_padata,12,asn1_decode_sequence_of_pa_data,NULL);
         end_structure();
         val->magic = KV5M_ENC_KDC_REP_PART;
     }
@@ -741,12 +742,12 @@ array_expand (void *array, int n_elts, size_t elt_size)
 
     if (n_elts <= 0)
         return NULL;
-    if (n_elts > SIZE_MAX / elt_size)
+    if ((unsigned int) n_elts > SIZE_MAX / elt_size)
         return NULL;
     new_size = n_elts * elt_size;
     if (new_size == 0)
         return NULL;
-    if (new_size / elt_size != n_elts)
+    if (new_size / elt_size != (unsigned int) n_elts)
         return NULL;
     new_array = realloc(array, new_size);
     return new_array;
@@ -1186,6 +1187,46 @@ asn1_error_code asn1_decode_predicted_sam_response(asn1buf *buf, krb5_predicted_
     cleanup();
 }
 
+asn1_error_code asn1_decode_setpw_req(asn1buf *buf, krb5_data *newpasswd, krb5_principal *principal)
+{
+    setup();
+    *principal = NULL;
+
+    { begin_structure();
+	get_lenfield(newpasswd->length, newpasswd->data, 0, asn1_decode_charstring);
+	if (tagnum == 1) {
+	    alloc_field(*principal, krb5_principal_data);
+	    opt_field(*principal, 1, asn1_decode_principal_name, 0);
+	    opt_field(*principal, 2, asn1_decode_realm, 0);
+	}
+	end_structure();
+    }
+    cleanup();
+}
+
+asn1_error_code asn1_decode_pa_for_user(asn1buf *buf, krb5_pa_for_user *val)
+{
+    setup();
+    { begin_structure();
+	get_field(val->user,0,asn1_decode_principal_name);
+	get_field(val->user,1,asn1_decode_realm);
+	get_field(val->cksum,2,asn1_decode_checksum);
+	get_lenfield(val->auth_package.length,val->auth_package.data,3,asn1_decode_generalstring);
+	end_structure();
+    }
+    cleanup();
+}
+
+asn1_error_code asn1_decode_pa_pac_req(asn1buf *buf, krb5_pa_pac_req *val)
+{
+    setup();
+    { begin_structure();
+	get_field(val->include_pac,0,asn1_decode_boolean);
+	end_structure();
+    }
+    cleanup();
+}
+
 #ifndef DISABLE_PKINIT
 /* PKINIT */
 
@@ -1374,7 +1415,8 @@ asn1_error_code asn1_decode_algorithm_identifier(asn1buf *buf,  krb5_algorithm_i
         val->parameters.length = 0;
         val->parameters.data = NULL;
 
-        if (length > subbuf.next - subbuf.base) {
+        assert(subbuf.next >= subbuf.base);
+        if (length > (size_t)(subbuf.next - subbuf.base)) {
             unsigned int size = length - (subbuf.next - subbuf.base);
             retval = asn1buf_remove_octetstring(&subbuf, size,
                                                 &val->parameters.data);

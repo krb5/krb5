@@ -35,4 +35,8 @@
 /* GSSAPI Extension functions -- these functions aren't */
 /* in the GSSAPI, but they are provided in this library */
 
+#include <gssapi/gssapi_ext.h>
+
+void KRB5_CALLCONV gss_initialize(void);
+
 #endif /* _GSS_MECHGLUE_H */
