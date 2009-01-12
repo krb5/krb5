@@ -292,7 +292,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	goto cleanup_auth_context;
 #endif
 
-    if ((retval = kdc_get_server_key(apreq->ticket, 0, krbtgt, nprincs, &key, &kvno)))
+    if ((retval = kdc_get_server_key(apreq->ticket, 0, foreign_server,
+				     krbtgt, nprincs, &key, &kvno)))
 	goto cleanup_auth_context;
     /*
      * We do not use the KDB keytab because other parts of the TGS need the TGT key.
@@ -408,11 +409,11 @@ cleanup:
  */
 krb5_error_code
 kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
-		   krb5_db_entry *server,
+		   krb5_boolean match_enctype, krb5_db_entry *server,
 		   int *nprincs, krb5_keyblock **key, krb5_kvno *kvno)
 {
     krb5_error_code 	  retval;
-    krb5_boolean 	  more;
+    krb5_boolean 	  more, similar;
     krb5_key_data	* server_key;
 
     *nprincs = 1;
@@ -438,23 +439,43 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
 	}
 	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
     }
+    if (server->attributes & KRB5_KDB_DISALLOW_SVR ||
+	server->attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
+	retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+	goto errout;
+    }
     retval = krb5_dbe_find_enctype(kdc_context, server,
-				   ticket->enc_part.enctype, -1,
-				   (krb5_int32)ticket->enc_part.kvno, &server_key);
+				   match_enctype ? ticket->enc_part.enctype : -1,
+				   -1, (krb5_int32)ticket->enc_part.kvno,
+				   &server_key);
     if (retval)
 	goto errout;
     if (!server_key) {
 	retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
 	goto errout;
     }
-    *kvno = server_key->key_data_kvno;
     if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
 	retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock,
 					     server_key,
 					     *key, NULL);
     } else
 	retval = ENOMEM;
+    retval = krb5_c_enctype_compare(kdc_context, ticket->enc_part.enctype,
+				    (*key)->enctype, &similar);
+    if (retval)
+	goto errout;
+    if (!similar) {
+	retval = KRB5_KDB_NO_PERMITTED_KEY;
+	goto errout;
+    }
+    (*key)->enctype = ticket->enc_part.enctype;
+    *kvno = server_key->key_data_kvno;
 errout:
+    if (retval != 0) {
+	krb5_db_free_principal(kdc_context, server, *nprincs);
+	*nprincs = 0;
+    }
+
     return retval;
 }
 
@@ -1985,7 +2006,7 @@ check_allowed_to_delegate_to(krb5_context context,
 
     /* Must be in same realm */
     if (!krb5_realm_compare(context, server->princ, proxy)) {
-	return KRB5_IN_TKT_REALM_MISMATCH; /* XXX */
+	return KRB5KDC_ERR_BADOPTION;
     }
 
     req.server = server;

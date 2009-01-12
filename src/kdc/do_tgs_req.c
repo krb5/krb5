@@ -282,6 +282,7 @@ tgt_again:
 	 */
 	if ((errcode = kdc_get_server_key(request->second_ticket[st_idx],
 					  c_flags,
+					  TRUE, /* match_enctype */
 					  &st_client,
 					  &st_nprincs,
 					  &st_sealing_key,
