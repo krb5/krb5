@@ -1692,11 +1692,8 @@ sign_db_authdata (krb5_context context,
     krb5_data rep_data;
 
     *ret_authdata = NULL;
-    if (ad_entry != NULL) {
-	assert(ad_nprincs != NULL);
-	memset(ad_entry, 0, sizeof(*ad_entry));
-	*ad_nprincs = 0;
-    }
+    memset(ad_entry, 0, sizeof(*ad_entry));
+    *ad_nprincs = 0;
 
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
