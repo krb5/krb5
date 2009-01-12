@@ -2396,6 +2396,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 	/* Now check the replay cache. */
 	rep.client = princ_psr;
 	rep.server = "SAM/rc";  /* Should not match any principal name. */
+	rep.msghash = NULL;
 	rep.ctime = psr->stime;
 	rep.cusec = psr->susec;
 	retval = krb5_rc_store(kdc_context, kdc_rcache, &rep);

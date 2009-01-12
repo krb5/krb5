@@ -2177,6 +2177,7 @@ typedef struct _krb5_donot_replay {
     krb5_ui_4 hash;
     char *server;			/* null-terminated */
     char *client;			/* null-terminated */
+    char *msghash;			/* null-terminated */
     krb5_int32 cusec;
     krb5_timestamp ctime;
 } krb5_donot_replay;
@@ -2201,6 +2202,9 @@ krb5_error_code krb5_auth_to_rep
 	(krb5_context,
 		krb5_tkt_authent *,
 		krb5_donot_replay *);
+krb5_error_code krb5_rc_hash_message
+	(krb5_context context,
+		const krb5_data *message, char **out);
 
 
 krb5_error_code KRB5_CALLCONV krb5_rc_initialize

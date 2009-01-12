@@ -62,6 +62,7 @@ static void try_one (struct tinfo *t)
 	     buf);
     r.server = buf;
     r.client = (t->my_cusec & 7) + "abcdefgh@ATHENA.MIT.EDU";
+    r.msghash = NULL;
     if (t->now != t->my_ctime) {
 	if (t->my_ctime != 0) {
 	    snprintf(buf2, sizeof(buf2), "%3d: %ld %5d\n", t->idx,

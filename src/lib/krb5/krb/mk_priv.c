@@ -214,6 +214,7 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
 	}
 
 	replay.server = "";		/* XXX */
+	replay.msghash = NULL;
 	replay.cusec = replaydata.usec;
 	replay.ctime = replaydata.timestamp;
 	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {

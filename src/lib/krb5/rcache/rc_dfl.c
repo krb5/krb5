@@ -85,8 +85,12 @@ cmp(krb5_donot_replay *old, krb5_donot_replay *new1, krb5_deltat t)
     if ((old->cusec == new1->cusec) && /* most likely to distinguish */
         (old->ctime == new1->ctime) &&
         (strcmp(old->client, new1->client) == 0) &&
-        (strcmp(old->server, new1->server) == 0)) /* always true */
-        return CMP_REPLAY;
+        (strcmp(old->server, new1->server) == 0)) { /* always true */
+        /* If both records include message hashes, compare them as well. */
+        if (old->msghash == NULL || new1->msghash == NULL ||
+            strcmp(old->msghash, new1->msghash) == 0)
+            return CMP_REPLAY;
+    }
     return CMP_HOHUM;
 }
 
@@ -157,17 +161,22 @@ rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
     ta->na = t->a; t->a = ta;
     ta->nh = t->h[rephash]; t->h[rephash] = ta;
     ta->rep = *rep;
-    if (!(ta->rep.client = strdup(rep->client))) {
-        FREE(ta);
-        return CMP_MALLOC;
-    }
-    if (!(ta->rep.server = strdup(rep->server))) {
-        FREE(ta->rep.client);
-        FREE(ta);
-        return CMP_MALLOC;
-    }
-
+    ta->rep.client = ta->rep.server = ta->rep.msghash = NULL;
+    if (!(ta->rep.client = strdup(rep->client)))
+        goto error;
+    if (!(ta->rep.server = strdup(rep->server)))
+        goto error;
+    if (rep->msghash && !(ta->rep.msghash = strdup(rep->msghash)))
+        goto error;
     return CMP_HOHUM;
+error:
+    if (ta->rep.client)
+        free(ta->rep.client);
+    if (ta->rep.server)
+        free(ta->rep.server);
+    if (ta->rep.msghash)
+        free(ta->rep.msghash);
+    return CMP_MALLOC;
 }
 
 char * KRB5_CALLCONV
@@ -241,6 +250,8 @@ krb5_rc_dfl_close_no_free(krb5_context context, krb5_rcache id)
         t->a = q->na;
         FREE(q->rep.client);
         FREE(q->rep.server);
+        if (q->rep.msghash)
+            FREE(q->rep.msghash);
         FREE(q);
     }
 #ifndef NOIOSTUFF
@@ -328,11 +339,13 @@ krb5_rc_free_entry(krb5_context context, krb5_donot_replay **rep)
     {
         if (rp->client)
             free(rp->client);
-
         if (rp->server)
             free(rp->server);
+        if (rp->msghash)
+            free(rp->msghash);
         rp->client = NULL;
         rp->server = NULL;
+        rp->msghash = NULL;
         free(rp);
     }
 }
@@ -345,7 +358,7 @@ krb5_rc_io_fetch(krb5_context context, struct dfl_data *t,
     unsigned int len;
     krb5_error_code retval;
 
-    rep->client = rep->server = 0;
+    rep->client = rep->server = rep->msghash = NULL;
 
     retval = krb5_rc_io_read(context, &t->d, (krb5_pointer) &len2,
                              sizeof(len2));
@@ -423,6 +436,7 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
     long max_size;
     int expired_entries = 0;
     krb5_int32 now;
+    char *msghash = NULL;
 
     if ((retval = krb5_rc_io_open(context, &t->d, t->name))) {
         return retval;
@@ -443,8 +457,7 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
         retval = KRB5_RC_MALLOC;
         goto io_fail;
     }
-    rep->client = NULL;
-    rep->server = NULL;
+    rep->client = rep->server = rep->msghash = NULL;
 
     if (krb5_timeofday(context, &now))
         now = 0;
@@ -463,21 +476,38 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
         else if (retval != 0)
             goto io_fail;
 
-
-        if (alive(now, rep, t->lifespan) != CMP_EXPIRED) {
-            if (rc_store(context, id, rep, now) == CMP_MALLOC) {
-                retval = KRB5_RC_MALLOC; goto io_fail;
+        if (!*rep->client) {
+            /* An empty client field indicates an extension record. */
+            if (strncmp(rep->server, "HASH:", 5) == 0) {
+                msghash = strdup(rep->server + 5);
+                if (msghash == NULL) {
+                    retval = KRB5_RC_MALLOC;
+                    goto io_fail;
+                }
             }
         } else {
-            expired_entries++;
+            /* This is a normal record. */
+            if (msghash) {
+                /* Use the hash from the prior extension record. */
+                rep->msghash = msghash;
+                msghash = NULL;
+            }
+            if (alive(now, rep, t->lifespan) != CMP_EXPIRED) {
+                if (rc_store(context, id, rep, now) == CMP_MALLOC) {
+                    retval = KRB5_RC_MALLOC; goto io_fail;
+                }
+            } else {
+                expired_entries++;
+            }
         }
         /*
-         *  free fields allocated by rc_io_fetch
+         *  free fields allocated by rc_io_fetch (or by us)
          */
         FREE(rep->server);
         FREE(rep->client);
-        rep->server = 0;
-        rep->client = 0;
+        if (rep->msghash)
+            FREE(rep->msghash);
+        rep->client = rep->server = rep->msghash = NULL;
     }
     retval = 0;
     krb5_rc_io_unmark(context, &t->d);
@@ -487,6 +517,8 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
      */
 io_fail:
     krb5_rc_free_entry(context, &rep);
+    if (msghash)
+        FREE(msghash);
     if (retval)
         krb5_rc_io_close(context, &t->d);
     else if (expired_entries > EXCESSREPS)
@@ -529,27 +561,38 @@ static krb5_error_code
 krb5_rc_io_store(krb5_context context, struct dfl_data *t,
                  krb5_donot_replay *rep)
 {
-    unsigned int clientlen, serverlen, len;
-    char *buf, *ptr;
+    unsigned int clientlen, serverlen;
     krb5_error_code ret;
+    struct k5buf buf;
+    char *ptr;
 
+    krb5int_buf_init_dynamic(&buf);
+    if (rep->msghash) {
+        clientlen = 1;
+        serverlen = strlen(rep->msghash) + 6;
+        krb5int_buf_add_len(&buf, (char *) &clientlen, sizeof(clientlen));
+        krb5int_buf_add_len(&buf, "", 1);
+        krb5int_buf_add_len(&buf, (char *) &serverlen, sizeof(serverlen));
+        krb5int_buf_add_fmt(&buf, "HASH:%s", rep->msghash);
+        krb5int_buf_add_len(&buf, "", 1);
+        krb5int_buf_add_len(&buf, (char *) &rep->cusec, sizeof(rep->cusec));
+        krb5int_buf_add_len(&buf, (char *) &rep->ctime, sizeof(rep->ctime));
+    }
     clientlen = strlen(rep->client) + 1;
     serverlen = strlen(rep->server) + 1;
-    len = sizeof(clientlen) + clientlen + sizeof(serverlen) + serverlen +
-        sizeof(rep->cusec) + sizeof(rep->ctime);
-    buf = malloc(len);
-    if (buf == 0)
-        return KRB5_RC_MALLOC;
-    ptr = buf;
-    memcpy(ptr, &clientlen, sizeof(clientlen)); ptr += sizeof(clientlen);
-    memcpy(ptr, rep->client, clientlen); ptr += clientlen;
-    memcpy(ptr, &serverlen, sizeof(serverlen)); ptr += sizeof(serverlen);
-    memcpy(ptr, rep->server, serverlen); ptr += serverlen;
-    memcpy(ptr, &rep->cusec, sizeof(rep->cusec)); ptr += sizeof(rep->cusec);
-    memcpy(ptr, &rep->ctime, sizeof(rep->ctime)); ptr += sizeof(rep->ctime);
+    krb5int_buf_add_len(&buf, (char *) &clientlen, sizeof(clientlen));
+    krb5int_buf_add_len(&buf, rep->client, clientlen);
+    krb5int_buf_add_len(&buf, (char *) &serverlen, sizeof(serverlen));
+    krb5int_buf_add_len(&buf, rep->server, serverlen);
+    krb5int_buf_add_len(&buf, (char *) &rep->cusec, sizeof(rep->cusec));
+    krb5int_buf_add_len(&buf, (char *) &rep->ctime, sizeof(rep->ctime));
 
-    ret = krb5_rc_io_write(context, &t->d, buf, len);
-    free(buf);
+    ptr = krb5int_buf_data(&buf);
+    if (ptr == NULL)
+        return KRB5_RC_MALLOC;
+
+    ret = krb5_rc_io_write(context, &t->d, ptr, krb5int_buf_len(&buf));
+    krb5int_free_buf(&buf);
     return ret;
 }
 
@@ -628,6 +671,8 @@ krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
         if (alive(now, &(*q)->rep, t->lifespan) == CMP_EXPIRED) {
             FREE((*q)->rep.client);
             FREE((*q)->rep.server);
+            if ((*q)->rep.msghash)
+                FREE((*q)->rep.msghash);
             FREE(*q);
             *q = *qt; /* why doesn't this feel right? */
         }
