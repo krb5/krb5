@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/hst_realm.c
  *
- * Copyright 1990,1991,2002 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2002,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -208,7 +208,9 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     printf("get_host_realm(host:%s) called\n",host);
 #endif
 
-    krb5int_clean_hostname(context, host, local_host, sizeof local_host);
+    retval = krb5int_clean_hostname(context, host, local_host, sizeof local_host);
+    if (retval)
+        return retval;
 
     /*
        Search for the best match for the host or domain.
@@ -350,7 +352,9 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
     printf("get_fallback_host_realm(host >%s<) called\n",host);
 #endif
 
-    krb5int_clean_hostname(context, host, local_host, sizeof local_host);
+    retval = krb5int_clean_hostname(context, host, local_host, sizeof local_host);
+    if (retval)
+        return retval;
 
     /*
      * Try looking up a _kerberos.<hostname> TXT record in DNS.  This
