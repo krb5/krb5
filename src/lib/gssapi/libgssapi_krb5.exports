@@ -23,11 +23,9 @@ gss_display_name
 gss_display_status
 gss_duplicate_name
 gss_export_name
-gss_export_name_object
 gss_export_sec_context
 gss_get_mic
 gss_import_name
-gss_import_name_object
 gss_import_sec_context
 gss_indicate_mechs
 gss_init_sec_context

@@ -25,10 +25,8 @@ SRCS = \
 	$(srcdir)/g_dup_name.c \
 	$(srcdir)/g_exp_sec_context.c \
 	$(srcdir)/g_export_name.c \
-	$(srcdir)/g_export_name_object.c \
 	$(srcdir)/g_glue.c \
 	$(srcdir)/g_imp_name.c \
-	$(srcdir)/g_imp_name_object.c \
 	$(srcdir)/g_imp_sec_context.c \
 	$(srcdir)/g_init_sec_context.c \
 	$(srcdir)/g_initialize.c \
@@ -71,10 +69,8 @@ OBJS = \
 	$(OUTPRE)g_dup_name.$(OBJEXT) \
 	$(OUTPRE)g_exp_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_export_name.$(OBJEXT) \
-	$(OUTPRE)g_export_name_object.$(OBJEXT) \
 	$(OUTPRE)g_glue.$(OBJEXT) \
 	$(OUTPRE)g_imp_name.$(OBJEXT) \
-	$(OUTPRE)g_imp_name_object.$(OBJEXT) \
 	$(OUTPRE)g_imp_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_init_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_initialize.$(OBJEXT) \
@@ -117,10 +113,8 @@ STLIBOBJS = \
 	g_dup_name.o \
 	g_exp_sec_context.o \
 	g_export_name.o \
-	g_export_name_object.o \
 	g_glue.o \
 	g_imp_name.o \
-	g_imp_name_object.o \
 	g_imp_sec_context.o \
 	g_init_sec_context.o \
 	g_initialize.o \

@@ -370,21 +370,6 @@ typedef struct gss_config {
 		gss_cred_usage_t *	/* cred_usage_stored */
 	/* */);
 
-	OM_uint32	(*gss_import_name_object)
-	(
-		OM_uint32 *,		/* minor_status */
-		void *,			/* input_name */
-		gss_OID,		/* input_name_type */
-		gss_name_t *		/* output_name */
-	/* */);
-
-	OM_uint32	(*gss_export_name_object)
-	(
-		OM_uint32 *,		/* minor_status */
-		gss_name_t,		/* input_name */
-		gss_OID,		/* desired_name_type */
-		void **			/* output_name */
-	/* */);
 
 	/* GGF extensions */
 
