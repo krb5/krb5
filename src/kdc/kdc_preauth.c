@@ -1156,6 +1156,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
      */
     switch(retval) {
     case 0: /* in case of PA-PAC-REQUEST with no PA-ENC-TIMESTAMP */
+    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     case KRB5KRB_AP_ERR_SKEW:
     case KRB5KDC_ERR_ETYPE_NOSUPP:
     /* rfc 4556 */
@@ -1179,7 +1180,6 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     /* This value is shared with KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED. */
     /* case KRB5KDC_ERR_KEY_TOO_WEAK: */
 	return retval;
-    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     default:
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
