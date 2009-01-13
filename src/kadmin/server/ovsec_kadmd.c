@@ -98,7 +98,7 @@ void *global_server_handle;
 #define OVSEC_KADM_CHANGEPW_SERVICE	"ovsec_adm/changepw"
 
 extern krb5_keyblock master_keyblock;
-extern krb5_keyblock_node  *master_keylist;
+extern krb5_keylist_node  *master_keylist;
 
 char *build_princ_name(char *name, char *realm);
 void log_badauth(OM_uint32 major, OM_uint32 minor,

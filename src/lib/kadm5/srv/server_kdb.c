@@ -16,7 +16,7 @@ static char *rcsid = "$Header$";
 
 krb5_principal	    master_princ;
 krb5_keyblock	    master_keyblock; /* local mkey */
-krb5_keyblock_node  *master_keylist = NULL;
+krb5_keylist_node  *master_keylist = NULL;
 krb5_actkvno_node   *active_mkey_list = NULL;
 krb5_db_entry	    master_db;
 

@@ -319,6 +319,9 @@ master key name '%s'\n",
 	com_err(progname, retval, "while adding entries to the database");
 	exit_status++; return;
     }
+
+
+
     /*
      * Always stash the master key so kadm5_create does not prompt for
      * it; delete the file below if it was not requested.  DO NOT EXIT
@@ -418,11 +421,10 @@ add_principal(context, princ, op, pblock)
     krb5_error_code 	  retval;
     krb5_db_entry 	  entry;
     krb5_kvno             mkey_kvno;
-
     krb5_timestamp	  now;
     struct iterate_args	  iargs;
-
     int			  nentries = 1;
+    krb5_actkvno_node     actkvno;
 
     memset((char *) &entry, 0, sizeof(entry));
 
@@ -459,6 +461,16 @@ add_principal(context, princ, op, pblock)
 						  &master_keyblock, NULL, 
 						  mkey_kvno, entry.key_data)))
 	    return retval;
+        /*
+         * There should always be at least one "active" mkey so creating the
+         * KRB5_TL_ACTKVNO entry now so the initial mkey is active.
+         */
+        actkvno.next = NULL;
+        actkvno.act_kvno = mkey_kvno;
+        actkvno.act_time = now;
+        if ((retval = krb5_dbe_update_actkvno(context, &entry, &actkvno)))
+            return retval;
+
 	break;
     case TGT_KEY:
 	iargs.ctx = context;

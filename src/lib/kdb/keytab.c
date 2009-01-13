@@ -123,7 +123,7 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
     krb5_keytab_entry 	* entry;
 {
     krb5_context	  context;
-    krb5_keyblock_node  * master_keylist;
+    krb5_keylist_node  * master_keylist;
     krb5_keyblock       * master_key;
     krb5_error_code 	  kerror = 0;
     krb5_key_data 	* key_data;

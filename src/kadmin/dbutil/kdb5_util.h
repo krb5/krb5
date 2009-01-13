@@ -82,6 +82,7 @@ extern void kdb5_destroy (int argc, char **argv);
 extern void kdb5_stash (int argc, char **argv);
 extern void kdb5_add_mkey (int argc, char **argv);
 extern void kdb5_use_mkey (int argc, char **argv);
+extern void kdb5_list_mkeys (int argc, char **argv);
 
 extern void update_ok_file (char *file_name);
 

@@ -349,10 +349,10 @@ typedef struct _krb5_keyblock {
 } krb5_keyblock;
 
 typedef struct _krb5_keylist_node {
-       krb5_keyblock keyblock;
-       krb5_kvno     kvno;
-       struct _krb5_keylist_node *next;
- } krb5_keyblock_node;
+    krb5_keyblock keyblock;
+    krb5_kvno     kvno;
+    struct _krb5_keylist_node *next;
+} krb5_keylist_node;
 
 #ifdef KRB5_OLD_CRYPTO
 typedef struct _krb5_encrypt_block {

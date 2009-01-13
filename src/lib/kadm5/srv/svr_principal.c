@@ -11,6 +11,7 @@ static char *rcsid = "$Header$";
 #include	<sys/types.h>
 #include	<sys/time.h>
 #include	<errno.h>
+#include	<k5-int.h>
 #include	<kadm5/admin.h>
 #include	<kdb.h>
 #include	<stdio.h>
@@ -26,8 +27,7 @@ static char *rcsid = "$Header$";
 
 extern	krb5_principal	    master_princ;
 extern	krb5_principal	    hist_princ;
-/* extern	krb5_keyblock	    master_keyblock; */
-extern  krb5_keyblock_node  *master_keylist;
+extern  krb5_keylist_node  *master_keylist;
 extern  krb5_actkvno_node   *active_mkey_list;
 extern	krb5_keyblock	    hist_key;
 extern	krb5_db_entry	    master_db;
@@ -201,6 +201,7 @@ kadm5_create_principal_3(void *server_handle,
     unsigned int		ret;
     kadm5_server_handle_t handle = server_handle;
     krb5_keyblock               *act_mkey;
+    krb5_kvno                   act_kvno;
 
     CHECK_HANDLE(server_handle);
 
@@ -344,7 +345,7 @@ kadm5_create_principal_3(void *server_handle,
     /* initialize the keys */
 
     ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-				 active_mkey_list, &act_mkey);
+				 active_mkey_list, &act_kvno, &act_mkey);
     if (ret)
 	return (ret);
 
@@ -360,9 +361,8 @@ kadm5_create_principal_3(void *server_handle,
 	return(ret);
     }
 
-    /* XXX WAF: this needs to be changed to use real mkvno */
     /* Record the master key VNO used to encrypt this entry's keys */
-    ret = krb5_dbe_update_mkvno(handle->context, &kdb, 1);
+    ret = krb5_dbe_update_mkvno(handle->context, &kdb, act_kvno);
     if (ret)
     {
 	krb5_db_free_principal(handle->context, &kdb, 1);
@@ -1362,7 +1362,7 @@ kadm5_chpass_principal_3(void *server_handle,
 	 goto done;
 
     ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-				 active_mkey_list, &act_mkey);
+				 active_mkey_list, NULL, &act_mkey);
     if (ret)
 	goto done;
 
@@ -1541,7 +1541,7 @@ kadm5_randkey_principal_3(void *server_handle,
        return(ret);
 
     ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-				 active_mkey_list, &act_mkey);
+				 active_mkey_list, NULL, &act_mkey);
     if (ret)
 	goto done;
 
@@ -1707,7 +1707,7 @@ kadm5_setv4key_principal(void *server_handle,
     keysalt.data.data = NULL;
 
     ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-				 active_mkey_list, &act_mkey);
+				 active_mkey_list, NULL, &act_mkey);
     if (ret)
 	goto done;
 
@@ -1926,7 +1926,7 @@ kadm5_setkey_principal_3(void *server_handle,
 	memset (&tmp_key_data, 0, sizeof(tmp_key_data));
 
 	ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-	                             active_mkey_list, &act_mkey);
+	                             active_mkey_list, NULL, &act_mkey);
 	if (ret)
 	    goto done;
 

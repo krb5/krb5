@@ -487,14 +487,14 @@ krb5_def_fetch_mkey_list(krb5_context        context,
                        krb5_principal        mprinc,
                        const krb5_keyblock  *mkey,
                        krb5_kvno             mkvno,
-                       krb5_keyblock_node  **mkeys_list)
+                       krb5_keylist_node  **mkeys_list)
 {
     krb5_error_code retval;
     krb5_db_entry master_entry;
     int nprinc;
     krb5_boolean more, found_key = FALSE;
     krb5_keyblock tmp_mkey, tmp_clearkey;
-    krb5_keyblock_node *mkey_list_head, **mkey_list_node;
+    krb5_keylist_node *mkey_list_head, **mkey_list_node;
     krb5_key_data *key_data;
     krb5_mkey_aux_node	*mkey_aux_data_list, *aux_data_entry;
     int i;
@@ -572,24 +572,24 @@ krb5_def_fetch_mkey_list(krb5_context        context,
      * create a mkey list for the mkeys field in kdc_realm_t. 
      */
 
-    mkey_list_head = (krb5_keyblock_node *) malloc(sizeof(krb5_keyblock_node));
+    mkey_list_head = (krb5_keylist_node *) malloc(sizeof(krb5_keylist_node));
     if (mkey_list_head == NULL) {
 	retval = ENOMEM;
 	goto clean_n_exit;
     }
 
-    memset(mkey_list_head, 0, sizeof(krb5_keyblock_node));
+    memset(mkey_list_head, 0, sizeof(krb5_keylist_node));
     mkey_list_node = &mkey_list_head;
 
     for (i=0; i < master_entry.n_key_data; i++) {
 	if (*mkey_list_node == NULL) {
 	    /* *mkey_list_node points to next field of previous node */
-	    *mkey_list_node = (krb5_keyblock_node *) malloc(sizeof(krb5_keyblock_node));
+	    *mkey_list_node = (krb5_keylist_node *) malloc(sizeof(krb5_keylist_node));
 	    if (*mkey_list_node == NULL) {
 		retval = ENOMEM;
 		goto clean_n_exit;
 	    }
-	    memset(*mkey_list_node, 0, sizeof(krb5_keyblock_node));
+	    memset(*mkey_list_node, 0, sizeof(krb5_keylist_node));
 	}
 	key_data = &master_entry.key_data[i];
 	retval = krb5_dbekd_decrypt_key_data(context, mkey,
@@ -617,7 +617,7 @@ clean_n_exit:
 
     krb5_db_free_principal(context, &master_entry, nprinc);
     if (retval != 0) {
-	krb5_keyblock_node *cur_node, *next_node;
+	krb5_keylist_node *cur_node, *next_node;
 
 	for (cur_node = mkey_list_head; cur_node != NULL; cur_node = next_node) {
 	    next_node = cur_node->next;
@@ -645,14 +645,14 @@ krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
 }
 
 krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
-				        krb5_keyblock_node *keylist )
+				        krb5_keylist_node *keylist )
 {
     /* printf("default set master key\n"); */
     return 0;
 }
 
 krb5_error_code kdb_def_get_mkey_list ( krb5_context kcontext,
-				        krb5_keyblock_node **keylist )
+				        krb5_keylist_node **keylist )
 {
     /* printf("default get master key\n"); */
     return 0;

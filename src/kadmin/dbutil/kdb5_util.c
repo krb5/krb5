@@ -96,7 +96,7 @@ void usage()
 }
 
 extern krb5_keyblock master_keyblock;
-extern krb5_keyblock_node *master_keylist;
+extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
 krb5_db_entry master_entry;
 int	valid_master_key = 0;
@@ -124,6 +124,7 @@ struct _cmd_table {
      {"ark", add_random_key, 1},
      {"add_mkey", kdb5_add_mkey, 1}, /* 1 is opendb */
      {"use_mkey", kdb5_use_mkey, 1}, /* 1 is opendb */
+     {"list_mkeys", kdb5_list_mkeys, 1}, /* 1 is opendb */
      {NULL, NULL, 0},
 };
 

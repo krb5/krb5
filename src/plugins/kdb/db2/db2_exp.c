@@ -194,12 +194,12 @@ WRAP_K (krb5_db2_db_get_mkey,
 	( krb5_context context, krb5_keyblock **key),
 	(context, key));
 
-WRAP_K (krb5_db2_set_master_key_list,
-	( krb5_context kcontext, krb5_keyblock_node *keylist),
+WRAP_K (krb5_db2_db_set_mkey_list,
+	( krb5_context kcontext, krb5_keylist_node *keylist),
 	(kcontext, keylist));
 
 WRAP_K (krb5_db2_db_get_mkey_list,
-	( krb5_context context, krb5_keyblock_node **keylist),
+	( krb5_context context, krb5_keylist_node **keylist),
 	(context, keylist));
 
 WRAP_K (krb5_db2_promote_db,
@@ -261,7 +261,7 @@ kdb_vftabl kdb_function_table = {
   /* db_free */                                wrap_krb5_db2_free,
   /* set_master_key */			       wrap_krb5_db2_set_master_key_ext,
   /* get_master_key */			       wrap_krb5_db2_db_get_mkey,
-  /* set_master_key_list */		       wrap_krb5_db2_set_master_key_list,
+  /* set_master_key_list */		       wrap_krb5_db2_db_set_mkey_list,
   /* get_master_key_list */	    	       wrap_krb5_db2_db_get_mkey_list,
   /* blah blah blah */ 0,0,0,0,0,0,0,
   /* promote_db */			       wrap_krb5_db2_promote_db,

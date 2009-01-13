@@ -41,7 +41,7 @@ typedef struct __kdc_realm_data {
     krb5_context	realm_context;	/* Context to be used for realm	    */
     krb5_keytab		realm_keytab; 	/* keytab to be used for this realm */
     char *		realm_profile;	/* Profile file for this realm	    */
-    krb5_keyblock_node * mkey_list;	/* list of mkeys in use for this realm */
+    krb5_keylist_node * mkey_list;	/* list of mkeys in use for this realm */
     /*
      * Database per-realm data.
      */

@@ -432,7 +432,7 @@ krb5_db2_db_get_mkey(krb5_context context, krb5_keyblock **key)
 }
 
 krb5_error_code
-krb5_db2_db_set_mkey_list(krb5_context context, krb5_keyblock_node *key_list)
+krb5_db2_db_set_mkey_list(krb5_context context, krb5_keylist_node *key_list)
 {
     krb5_db2_context *db_ctx;
     kdb5_dal_handle *dal_handle;
@@ -447,7 +447,7 @@ krb5_db2_db_set_mkey_list(krb5_context context, krb5_keyblock_node *key_list)
 }
 
 krb5_error_code
-krb5_db2_db_get_mkey_list(krb5_context context, krb5_keyblock_node **key_list)
+krb5_db2_db_get_mkey_list(krb5_context context, krb5_keylist_node **key_list)
 {
     krb5_db2_context *db_ctx;
     kdb5_dal_handle *dal_handle;
