@@ -386,11 +386,13 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 /*
  * gss_inquire_cred_by_oid() methods
  */
+#if 0
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, const gss_cred_id_t, const gss_OID, gss_buffer_set_t *);
 } krb5_gss_inquire_cred_by_oid_ops[] = {
 };
+#endif
 
 static OM_uint32
 krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
@@ -425,6 +427,7 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 
     cred = (krb5_gss_cred_id_t) cred_handle;
 
+#if 0
     for (i = 0; i < sizeof(krb5_gss_inquire_cred_by_oid_ops)/
 		    sizeof(krb5_gss_inquire_cred_by_oid_ops[0]); i++) {
 	if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_cred_by_oid_ops[i].oid)) {
@@ -434,6 +437,7 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 							       data_set);
 	}
     }
+#endif
 
     *minor_status = EINVAL;
 
@@ -443,11 +447,13 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 /*
  * gss_set_sec_context_option() methods
  */
+#if 0
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, gss_ctx_id_t *, const gss_OID, const gss_buffer_t);
 } krb5_gss_set_sec_context_option_ops[] = {
 };
+#endif
 
 static OM_uint32
 krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
@@ -480,6 +486,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 	    return GSS_S_NO_CONTEXT;
     }
 
+#if 0
     for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
 		    sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
 	if (g_OID_prefix_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
@@ -489,6 +496,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 								  value);
 	}
     }
+#endif
 
     *minor_status = EINVAL;
 
