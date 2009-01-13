@@ -98,7 +98,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     int nprincs = 0;
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime=0;
-    krb5_keyblock session_key, *tmp_mkey;
+    krb5_keyblock session_key;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
     krb5_key_data  *server_key;

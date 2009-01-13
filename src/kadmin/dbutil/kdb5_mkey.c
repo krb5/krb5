@@ -333,7 +333,7 @@ kdb5_use_mkey(int argc, char *argv[])
     krb5_kvno  use_kvno;
     krb5_timestamp now, start_time;
     krb5_actkvno_node *actkvno_list, *new_actkvno_list_head, *new_actkvno,
-                        *prev_actkvno, *cur_actkvno;
+                      *prev_actkvno, *cur_actkvno;
     krb5_db_entry master_entry;
     int   nentries = 0;
     krb5_boolean more = 0;

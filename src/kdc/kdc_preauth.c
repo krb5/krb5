@@ -667,6 +667,7 @@ get_entry_data(krb5_context context,
     krb5_deltat *delta;
     krb5_keyblock *keys, *tmp_mkey;
     krb5_key_data *entry_key;
+    krb5_error_code error;
 
     switch (type) {
     case krb5plugin_preauth_entry_request_certificate:
@@ -700,8 +701,10 @@ get_entry_data(krb5_context context,
 	ret->data = (char *) keys;
 	ret->length = sizeof(krb5_keyblock) * (request->nktypes + 1);
 	memset(ret->data, 0, ret->length);
-	if ((ret = krb5_dbe_find_mkey(context, master_keylist, &entry, &tmp_mkey)))
-	    return (ret);
+	if ((error = krb5_dbe_find_mkey(context, master_keylist, entry, &tmp_mkey))) {
+            free(ret);
+	    return (error);
+        }
 	k = 0;
 	for (i = 0; i < request->nktypes; i++) {
 	    entry_key = NULL;
@@ -1357,7 +1360,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     if ((enc_ts_data.data = (char *) malloc(enc_ts_data.length)) == NULL)
 	goto cleanup;
 
-    if ((retval = krb5_dbe_find_mkey(context, master_keylist, &client, &tmp_mkey)))
+    if ((retval = krb5_dbe_find_mkey(context, master_keylist, client, &tmp_mkey)))
 	goto cleanup;
 
     start = 0;

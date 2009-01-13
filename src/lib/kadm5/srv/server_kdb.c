@@ -34,7 +34,6 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
     int		   ret = 0;
     char	   *realm;
     krb5_boolean   from_kbd = FALSE;
-    krb5_keyblock  *mkey;
     krb5_kvno       mkvno = IGNORE_VNO;
 
     if (from_keyboard)
@@ -83,7 +82,7 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 #endif /**************** END IFDEF'ed OUT *******************************/
 
     if ((ret = krb5_db_fetch_mkey_list(handle->context, master_princ,
-				       mkey, mkvno, &master_keylist))) {
+				       &master_keyblock, mkvno, &master_keylist))) {
 	krb5_db_fini(handle->context);
 	return (ret);
     }

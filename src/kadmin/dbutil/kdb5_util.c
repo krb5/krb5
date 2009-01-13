@@ -89,7 +89,9 @@ void usage()
 	     "\t	[-mkey_convert] [-new_mkey_file mkey_file]\n"
 	     "\t	[-rev] [-recurse] [filename [princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
-	     "\tark	[-e etype_list] principal\n"
+	     "\tark	[-e etype_list] principal\n");
+     /* avoid a string length compiler warning */
+     fprintf(stderr,
 	     "\nwhere,\n\t[-x db_args]* - any number of database specific arguments.\n"
 	     "\t\t\tLook at each database documentation for supported arguments\n");
      exit(1);

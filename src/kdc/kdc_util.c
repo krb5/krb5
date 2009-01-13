@@ -440,11 +440,11 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
 	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
     }
 
-    retval = krb5_dbe_find_mkey(kdc_context, master_keylist, &server, &tmp_mkey);
+    retval = krb5_dbe_find_mkey(kdc_context, master_keylist, server, &tmp_mkey);
     if (retval)
 	goto errout;
 
-    retval = krb5_dbe_find_enctype(kdc_context, &server,
+    retval = krb5_dbe_find_enctype(kdc_context, server,
 				   ticket->enc_part.enctype, -1,
 				   (krb5_int32)ticket->enc_part.kvno, &server_key);
     if (retval)

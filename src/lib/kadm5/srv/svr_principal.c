@@ -346,8 +346,12 @@ kadm5_create_principal_3(void *server_handle,
 
     ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
 				 active_mkey_list, &act_kvno, &act_mkey);
-    if (ret)
-	return (ret);
+    if (ret) {
+        krb5_db_free_principal(handle->context, &kdb, 1);
+        if (mask & KADM5_POLICY)
+            (void) kadm5_free_policy_ent(handle->lhandle, &polent);
+        return (ret);
+    }
 
     if ((ret = krb5_dbe_cpw(handle->context, act_mkey,
 			    n_ks_tuple?ks_tuple:handle->params.keysalts,

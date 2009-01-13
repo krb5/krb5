@@ -7,6 +7,7 @@
 #if !defined(lint) && !defined(__CODECENTER__)
 static char *rcsid = "$Header$";
 #endif
+#include	<k5-int.h>
 #include	<kadm5/admin.h>
 #include	<stdlib.h>
 #include	"server_internal.h"
@@ -37,25 +38,6 @@ kadm5_ret_t
      free(names);
     return KADM5_OK;
 }
-/* XXX WAF: maybe delete this if all compiles */
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-/* XXX this ought to be in libkrb5.a, but isn't */
-kadm5_ret_t krb5_free_key_data_contents(context, key)
-   krb5_context context;
-   krb5_key_data *key;
-{
-     int i, idx;
-     
-     idx = (key->key_data_ver == 1 ? 1 : 2);
-     for (i = 0; i < idx; i++) {
-	  if (key->key_data_contents[i]) {
-	       memset(key->key_data_contents[i], 0, key->key_data_length[i]);
-	       free(key->key_data_contents[i]);
-	  }
-     }
-     return KADM5_OK;
-}
-#endif /**************** END IFDEF'ed OUT *******************************/
 
 kadm5_ret_t kadm5_free_key_data(void *server_handle,
 				krb5_int16 *n_key_data,
