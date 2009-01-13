@@ -1959,7 +1959,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 12
+#define KRB5INT_ACCESS_STRUCT_VERSION 13
 
 #ifndef ANAME_SZ
 struct ktext;			/* from krb.h, for krb524 support */
@@ -1972,6 +1972,7 @@ typedef struct _krb5int_access {
 				   const krb5_keyblock *key,
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
+    krb5_error_code (* krb5_auth_con_get_subkey_enctype)(krb5_context, krb5_auth_context, krb5_enctype *);
     /* service location and communication */
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, struct sendto_callback_info*, krb5_data *reply,
@@ -2579,6 +2580,11 @@ krb5_error_code krb5_auth_con_getpermetypes
 	(krb5_context,
 	    krb5_auth_context,
 	    krb5_enctype **);
+
+krb5_error_code krb5_auth_con_get_subkey_enctype
+	(krb5_context context,
+	    krb5_auth_context,
+	    krb5_enctype *);
 
 krb5_error_code KRB5_CALLCONV
 krb5int_server_decrypt_ticket_keyblock

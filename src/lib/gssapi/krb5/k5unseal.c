@@ -494,6 +494,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
     unsigned int bodysize;
     int err;
     int toktype2;
+    int vfyflags = 0;
     OM_uint32 ret;
 
     /* validate the context handle */
@@ -515,26 +516,49 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
 
     ptr = (unsigned char *) input_token_buffer->value;
 
-    toktype2 = kg_map_toktype(ctx->proto, toktype);
 
     err = g_verify_token_header(ctx->mech_used,
-                                &bodysize, &ptr, toktype2,
+                                &bodysize, &ptr, -1,
                                 input_token_buffer->length,
-                                !ctx->proto);
+                                vfyflags);
     if (err) {
         *minor_status = err;
         return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    if (ctx->proto == 0)
-        ret = kg_unseal_v1(ctx->k5_context, minor_status, ctx, ptr, bodysize,
-                           message_buffer, conf_state, qop_state,
-                           toktype);
-    else
+    if (bodysize < 2) {
+	*minor_status = (OM_uint32)G_BAD_TOK_HEADER;
+	return GSS_S_DEFECTIVE_TOKEN;
+    }
+
+    toktype2 = load_16_be(ptr);
+
+    ptr += 2;
+    bodysize -= 2;
+
+    switch (toktype2) {
+    case KG2_TOK_MIC_MSG:
+    case KG2_TOK_WRAP_MSG:
+    case KG2_TOK_DEL_CTX:
         ret = gss_krb5int_unseal_token_v3(&ctx->k5_context, minor_status, ctx,
                                           ptr, bodysize, message_buffer,
                                           conf_state, qop_state, toktype);
+	break;
+    case KG_TOK_MIC_MSG:
+    case KG_TOK_WRAP_MSG:
+    case KG_TOK_DEL_CTX:
+        ret = kg_unseal_v1(ctx->k5_context, minor_status, ctx, ptr, bodysize,
+                           message_buffer, conf_state, qop_state,
+                           toktype);
+	break;
+    default:
+	*minor_status = (OM_uint32)G_BAD_TOK_HEADER;
+	ret = GSS_S_DEFECTIVE_TOKEN;
+	break;
+    }
+
     if (ret != 0)
         save_error_info (*minor_status, ctx->k5_context);
+
     return ret;
 }
