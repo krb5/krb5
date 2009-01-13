@@ -284,7 +284,8 @@ validate_transit_path(krb5_context context,
 void
 log_as_req(const krb5_fulladdr *from,
 	   krb5_kdc_req *request, krb5_kdc_rep *reply,
-	   const char *cname, const char *sname,
+	   krb5_db_entry *client, const char *cname,
+	   krb5_db_entry *server, const char *sname,
 	   krb5_timestamp authtime,
 	   const char *status, krb5_error_code errcode, const char *emsg);
 void

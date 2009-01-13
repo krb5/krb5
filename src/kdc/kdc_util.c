@@ -1,7 +1,7 @@
 /*
  * kdc/kdc_util.c
  *
- * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -2117,84 +2117,6 @@ kdc_check_transited_list(krb5_context context,
 }
 
 krb5_error_code
-audit_as_request(krb5_kdc_req *request,
-		 krb5_db_entry *client,
-		 krb5_db_entry *server,
-		 krb5_timestamp authtime,
-		 krb5_error_code errcode)
-{
-    krb5_error_code		code;
-    kdb_audit_as_req		req;
-    krb5_data			req_data;
-    krb5_data			rep_data;
-
-    memset(&req, 0, sizeof(req));
-
-    req.request			= request;
-    req.client			= client;
-    req.server			= server;
-    req.authtime		= authtime;
-    req.error_code		= errcode;
-
-    req_data.data = (void *)&req;
-    req_data.length = sizeof(req);
-
-    rep_data.data = NULL;
-    rep_data.length = 0;
-
-    code = krb5_db_invoke(kdc_context,
-			  KRB5_KDB_METHOD_AUDIT_AS,
-			  &req_data,
-			  &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
-	return 0;
-    }
-
-    assert(rep_data.length == 0);
-
-    return code;
-}
-
-krb5_error_code
-audit_tgs_request(krb5_kdc_req *request,
-		  krb5_const_principal client,
-		  krb5_db_entry *server,
-		  krb5_timestamp authtime,
-		  krb5_error_code errcode)
-{
-    krb5_error_code		code;
-    kdb_audit_tgs_req		req;
-    krb5_data			req_data;
-    krb5_data			rep_data;
-
-    memset(&req, 0, sizeof(req));
-
-    req.request			= request;
-    req.client			= client;
-    req.server			= server;
-    req.authtime		= authtime;
-    req.error_code		= errcode;
-
-    req_data.data = (void *)&req;
-    req_data.length = sizeof(req);
-
-    rep_data.data = NULL;
-    rep_data.length = 0;
-
-    code = krb5_db_invoke(kdc_context,
-			  KRB5_KDB_METHOD_AUDIT_TGS,
-			  &req_data,
-			  &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
-	return 0;
-    }
-
-    assert(rep_data.length == 0);
-
-    return code;
-}
-
-krb5_error_code
 validate_transit_path(krb5_context context,
 		      krb5_const_principal client,
 		      krb5_db_entry *server,
@@ -2228,7 +2150,8 @@ validate_transit_path(krb5_context context,
 void
 log_as_req(const krb5_fulladdr *from,
 	   krb5_kdc_req *request, krb5_kdc_rep *reply,
-	   const char *cname, const char *sname,
+	   krb5_db_entry *client, const char *cname,
+	   krb5_db_entry *server, const char *sname,
 	   krb5_timestamp authtime,
 	   const char *status, krb5_error_code errcode, const char *emsg)
 {
@@ -2267,6 +2190,33 @@ log_as_req(const krb5_fulladdr *from,
        used, but the real address could be an IPv6 address.  */
     audit_krb5kdc_as_req(some in_addr *, (in_port_t)from->port, 0,
 			 cname, sname, errcode);
+#endif
+#if 1
+    {
+	kdb_audit_as_req	req;
+	krb5_data		req_data;
+	krb5_data		rep_data;
+
+	memset(&req, 0, sizeof(req));
+
+	req.request		= request;
+	req.client		= client;
+	req.server		= server;
+	req.authtime		= authtime;
+	req.error_code		= errcode;
+
+	req_data.data = (void *)&req;
+	req_data.length = sizeof(req);
+
+	rep_data.data = NULL;
+	rep_data.length = 0;
+
+	(void) krb5_db_invoke(kdc_context,
+			      KRB5_KDB_METHOD_AUDIT_AS,
+			      &req_data,
+			      &rep_data);
+	assert(rep_data.length == 0);
+    }
 #endif
 }
 
