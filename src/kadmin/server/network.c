@@ -1401,6 +1401,17 @@ static void process_packet(void *handle,
     }
 #endif
 
+    if (daddr_len == 0 && conn->type == CONN_UDP) {
+	/* If the PKTINFO option isn't set, this socket should be
+	   bound to a specific local address.  This info probably
+	   should've been saved in our socket data structure at setup
+	   time.  */
+	daddr_len = sizeof(daddr);
+	if (getsockname(port_fd, (struct sockaddr *)&daddr, &daddr_len) != 0)
+	    daddr_len = 0;
+	/* On failure, keep going anyways.  */
+    }
+
     request.length = cc;
     request.data = pktbuf;
     faddr.address = &addr;
