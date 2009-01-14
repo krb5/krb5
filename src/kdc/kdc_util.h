@@ -293,6 +293,7 @@ log_tgs_req(const krb5_fulladdr *from,
 	    krb5_kdc_req *request, krb5_kdc_rep *reply,
 	    const char *cname, const char *sname, const char *altcname,
 	    krb5_timestamp authtime,
+	    unsigned int c_flags, const char *s4u_name,
 	    const char *status, krb5_error_code errcode, const char *emsg);
 void log_tgs_alt_tgt(krb5_principal p);
 

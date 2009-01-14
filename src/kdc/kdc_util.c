@@ -2147,6 +2147,7 @@ validate_transit_path(krb5_context context,
 
 /* "status" is null to indicate success.  */
 /* Someday, pass local address/port as well.  */
+/* Currently no info about name canonicalization is logged.  */
 void
 log_as_req(const krb5_fulladdr *from,
 	   krb5_kdc_req *request, krb5_kdc_rep *reply,
@@ -2221,12 +2222,15 @@ log_as_req(const krb5_fulladdr *from,
 }
 
 /* Here "status" must be non-null.  Error code
-   KRB5KDC_ERR_SERVER_NOMATCH is handled specially.  */
+   KRB5KDC_ERR_SERVER_NOMATCH is handled specially.
+
+   Currently no info about name canonicalization is logged.  */
 void
 log_tgs_req(const krb5_fulladdr *from,
 	    krb5_kdc_req *request, krb5_kdc_rep *reply,
 	    const char *cname, const char *sname, const char *altcname,
 	    krb5_timestamp authtime,
+	    unsigned int c_flags, const char *s4u_name,
 	    const char *status, krb5_error_code errcode, const char *emsg)
 {
     char ktypestr[128];
@@ -2248,7 +2252,7 @@ log_tgs_req(const krb5_fulladdr *from,
     /* Differences: server-nomatch message logs 2nd ticket's client
        name (useful), and doesn't log ktypestr (probably not
        important).  */
-    if (errcode != KRB5KDC_ERR_SERVER_NOMATCH)
+    if (errcode != KRB5KDC_ERR_SERVER_NOMATCH) {
 	krb5_klog_syslog(LOG_INFO,
 			 "TGS_REQ (%s) %s: %s: authtime %d, %s%s %s for %s%s%s",
 			 ktypestr,
@@ -2259,7 +2263,19 @@ log_tgs_req(const krb5_fulladdr *from,
 			 sname ? sname : "<unknown server>",
 			 errcode ? ", " : "",
 			 errcode ? emsg : "");
-    else
+	if (s4u_name) {
+	    assert(isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) ||
+		   isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION));
+	    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
+		krb5_klog_syslog(LOG_INFO,
+				 "... PROTOCOL-TRANSITION s4u-client=%s",
+				 s4u_name);
+	    else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
+		krb5_klog_syslog(LOG_INFO,
+				 "... CONSTRAINED-DELEGATION s4u-client=%s",
+				 s4u_name);
+	}
+    } else
 	krb5_klog_syslog(LOG_INFO,
 			 "TGS_REQ %s: %s: authtime %d, %s for %s, 2nd tkt client %s",
 			 fromstring, status, authtime,
@@ -2269,6 +2285,7 @@ log_tgs_req(const krb5_fulladdr *from,
 
     /* OpenSolaris: audit_krb5kdc_tgs_req(...)  or
        audit_krb5kdc_tgs_req_2ndtktmm(...) */
+    /* ... krb5_db_invoke ... */
 }
 
 void
