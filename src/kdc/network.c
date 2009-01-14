@@ -1004,8 +1004,12 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 	     struct sockaddr *to, socklen_t *tolen)
 {
 #if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
-    if (to && tolen)
+    if (to && tolen) {
+	/* Clobber with something recognizeable in case we try to use
+	   the address.  */
+	memset(to, 0x40, *tolen);
 	*tolen = 0;
+    }
     return recvfrom(s, buf, len, flags, from, fromlen);
 #else
     int r;
@@ -1016,6 +1020,10 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 
     if (!to || !tolen)
 	return recvfrom(s, buf, len, flags, from, fromlen);
+
+    /* Clobber with something recognizeable in case we can't extract
+       the address but try to use it anyways.  */
+    memset(to, 0x40, *tolen);
 
     iov.iov_base = buf;
     iov.iov_len = len;
