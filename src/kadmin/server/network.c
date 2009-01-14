@@ -1,7 +1,7 @@
 /*
  * kadmin/server/network.c
  *
- * Copyright 1990,2000,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007,2008,2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -180,13 +180,16 @@ static const char *paddr (struct sockaddr *sa)
 
 /* kadmin data.  */
 
-enum kadm_conn_type { CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER,
-		      CONN_TCP, CONN_ROUTING, CONN_RPC_LISTENER, CONN_RPC };
+enum conn_type {
+    CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP,
+    CONN_RPC_LISTENER, CONN_RPC,
+    CONN_ROUTING
+};
 
 /* Per-connection info.  */
 struct connection {
     int fd;
-    enum kadm_conn_type type;
+    enum conn_type type;
     void (*service)(void *handle, struct connection *, const char *, int);
     union {
 	/* Type-specific information.  */
@@ -334,10 +337,6 @@ static krb5_error_code add_rpc_service(int port, u_long prognum, u_long versnum,
 
 #define USE_AF AF_INET
 #define USE_TYPE SOCK_DGRAM
-
-
-#define USE_AF AF_INET
-#define USE_TYPE SOCK_DGRAM
 #define USE_PROTO 0
 #define SOCKET_ERRNO errno
 #include "foreachaddr.h"
@@ -351,7 +350,7 @@ struct socksetup {
 };
 
 static struct connection *
-add_fd (struct socksetup *data, int sock, enum kadm_conn_type conntype,
+add_fd (struct socksetup *data, int sock, enum conn_type conntype,
 	void (*service)(void *handle, struct connection *, const char *, int))
 {
     struct connection *newconn;
