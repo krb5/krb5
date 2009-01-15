@@ -10,7 +10,6 @@
 /*
  * An implementation for the default replay cache type.
  */
-#define FREE(x) ((void) free((char *) (x)))
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
@@ -132,7 +131,7 @@ struct authlist
 
 static int
 rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
-         krb5_int32 now)
+         krb5_int32 now, krb5_boolean fromfile)
 {
     struct dfl_data *t = (struct dfl_data *)id->data;
     unsigned int rephash;
@@ -144,7 +143,20 @@ rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
         switch(cmp(&ta->rep, rep, t->lifespan))
         {
         case CMP_REPLAY:
-            return CMP_REPLAY;
+            if (fromfile) {
+                /*
+                 * This is an expected collision between a hash
+                 * extension record and a normal-format record.  Make
+                 * sure the message hash is included in the stored
+                 * record and carry on.
+                 */
+                if (!ta->rep.msghash && rep->msghash) {
+                    if (!(ta->rep.msghash = strdup(rep->msghash)))
+                        return CMP_MALLOC;
+                }
+                return CMP_HOHUM;
+            } else
+                return CMP_REPLAY;
         case CMP_HOHUM:
             if (alive(now, &ta->rep, t->lifespan) == CMP_EXPIRED)
                 t->nummisses++;
@@ -158,8 +170,6 @@ rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
 
     if (!(ta = (struct authlist *) malloc(sizeof(struct authlist))))
         return CMP_MALLOC;
-    ta->na = t->a; t->a = ta;
-    ta->nh = t->h[rephash]; t->h[rephash] = ta;
     ta->rep = *rep;
     ta->rep.client = ta->rep.server = ta->rep.msghash = NULL;
     if (!(ta->rep.client = strdup(rep->client)))
@@ -168,6 +178,8 @@ rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
         goto error;
     if (rep->msghash && !(ta->rep.msghash = strdup(rep->msghash)))
         goto error;
+    ta->na = t->a; t->a = ta;
+    ta->nh = t->h[rephash]; t->h[rephash] = ta;
     return CMP_HOHUM;
 error:
     if (ta->rep.client)
@@ -176,6 +188,7 @@ error:
         free(ta->rep.server);
     if (ta->rep.msghash)
         free(ta->rep.msghash);
+    free(ta);
     return CMP_MALLOC;
 }
 
@@ -242,22 +255,22 @@ krb5_rc_dfl_close_no_free(krb5_context context, krb5_rcache id)
     struct dfl_data *t = (struct dfl_data *)id->data;
     struct authlist *q;
 
-    FREE(t->h);
+    free(t->h);
     if (t->name)
-        FREE(t->name);
+        free(t->name);
     while ((q = t->a))
     {
         t->a = q->na;
-        FREE(q->rep.client);
-        FREE(q->rep.server);
+        free(q->rep.client);
+        free(q->rep.server);
         if (q->rep.msghash)
-            FREE(q->rep.msghash);
-        FREE(q);
+            free(q->rep.msghash);
+        free(q);
     }
 #ifndef NOIOSTUFF
     (void) krb5_rc_io_close(context, &t->d);
 #endif
-    FREE(t);
+    free(t);
     return 0;
 }
 
@@ -350,6 +363,100 @@ krb5_rc_free_entry(krb5_context context, krb5_donot_replay **rep)
     }
 }
 
+/*
+ * Parse a string in the format <len>:<data>, with the length
+ * represented in ASCII decimal.  On parse failure, return 0 but set
+ * *result to NULL.
+ */
+static krb5_error_code
+parse_counted_string(char **strptr, char **result)
+{
+    char *str = *strptr, *end;
+    unsigned long len;
+
+    *result = NULL;
+
+    /* Parse the length, expecting a ':' afterwards. */
+    errno = 0;
+    len = strtoul(str, &end, 10);
+    if (errno != 0 || *end != ':' || len > strlen(end + 1))
+        return 0;
+
+    /* Allocate space for *result and copy the data. */
+    *result = malloc(len + 1);
+    if (!*result)
+        return KRB5_RC_MALLOC;
+    memcpy(*result, end + 1, len);
+    (*result)[len] = '\0';
+    *strptr = end + 1 + len;
+    return 0;
+}
+
+/*
+ * Hash extension records have the format:
+ *  client = <empty string>
+ *  server = HASH:<msghash> <clientlen>:<client> <serverlen>:<server>
+ * Spaces in the client and server string are represented with 
+ * with backslashes.  Client and server lengths are represented in
+ * ASCII decimal (which is different from the 32-bit binary we use
+ * elsewhere in the replay cache).
+ *
+ * On parse failure, we leave the record unmodified.
+ */
+static krb5_error_code
+check_hash_extension(krb5_donot_replay *rep)
+{
+    char *msghash = NULL, *client = NULL, *server = NULL, *str, *end;
+    krb5_error_code retval = 0;
+
+    /* Check if this appears to match the hash extension format. */
+    if (*rep->client)
+        return 0;
+    if (strncmp(rep->server, "HASH:", 5) != 0)
+        return 0;
+
+    /* Parse out the message hash. */
+    str = rep->server + 5;
+    end = strchr(str, ' ');
+    if (!end)
+        return 0;
+    msghash = malloc(end - str + 1);
+    if (!msghash)
+        return KRB5_RC_MALLOC;
+    memcpy(msghash, str, end - str);
+    msghash[end - str] = '\0';
+    str = end + 1;
+
+    /* Parse out the client and server. */
+    retval = parse_counted_string(&str, &client);
+    if (retval != 0 || client == NULL)
+        goto error;
+    if (*str != ' ')
+        goto error;
+    str++;
+    retval = parse_counted_string(&str, &server);
+    if (retval != 0 || server == NULL)
+        goto error;
+    if (*str)
+        goto error;
+
+    free(rep->client);
+    free(rep->server);
+    rep->client = client;
+    rep->server = server;
+    rep->msghash = msghash;
+    return 0;
+
+error:
+    if (msghash)
+        free(msghash);
+    if (client)
+        free(client);
+    if (server)
+        free(server);
+    return retval;
+}
+
 static krb5_error_code
 krb5_rc_io_fetch(krb5_context context, struct dfl_data *t,
                  krb5_donot_replay *rep, int maxlen)
@@ -408,6 +515,10 @@ krb5_rc_io_fetch(krb5_context context, struct dfl_data *t,
     if (retval)
         goto errout;
 
+    retval = check_hash_extension(rep);
+    if (retval)
+        goto errout;
+
     return 0;
 
 errout:
@@ -415,6 +526,8 @@ errout:
         krb5_xfree(rep->client);
     if (rep->server)
         krb5_xfree(rep->server);
+    if (rep->msghash)
+        krb5_xfree(rep->msghash);
     rep->client = rep->server = 0;
     return retval;
 }
@@ -436,7 +549,6 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
     long max_size;
     int expired_entries = 0;
     krb5_int32 now;
-    char *msghash = NULL;
 
     if ((retval = krb5_rc_io_open(context, &t->d, t->name))) {
         return retval;
@@ -476,37 +588,21 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
         else if (retval != 0)
             goto io_fail;
 
-        if (!*rep->client) {
-            /* An empty client field indicates an extension record. */
-            if (strncmp(rep->server, "HASH:", 5) == 0) {
-                msghash = strdup(rep->server + 5);
-                if (msghash == NULL) {
-                    retval = KRB5_RC_MALLOC;
-                    goto io_fail;
-                }
+        if (alive(now, rep, t->lifespan) != CMP_EXPIRED) {
+            if (rc_store(context, id, rep, now, TRUE) == CMP_MALLOC) {
+                retval = KRB5_RC_MALLOC; goto io_fail;
             }
         } else {
-            /* This is a normal record. */
-            if (msghash) {
-                /* Use the hash from the prior extension record. */
-                rep->msghash = msghash;
-                msghash = NULL;
-            }
-            if (alive(now, rep, t->lifespan) != CMP_EXPIRED) {
-                if (rc_store(context, id, rep, now) == CMP_MALLOC) {
-                    retval = KRB5_RC_MALLOC; goto io_fail;
-                }
-            } else {
-                expired_entries++;
-            }
+            expired_entries++;
         }
+
         /*
-         *  free fields allocated by rc_io_fetch (or by us)
+         *  free fields allocated by rc_io_fetch
          */
-        FREE(rep->server);
-        FREE(rep->client);
+        free(rep->server);
+        free(rep->client);
         if (rep->msghash)
-            FREE(rep->msghash);
+            free(rep->msghash);
         rep->client = rep->server = rep->msghash = NULL;
     }
     retval = 0;
@@ -517,8 +613,6 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
      */
 io_fail:
     krb5_rc_free_entry(context, &rep);
-    if (msghash)
-        FREE(msghash);
     if (retval)
         krb5_rc_io_close(context, &t->d);
     else if (expired_entries > EXCESSREPS)
@@ -561,29 +655,56 @@ static krb5_error_code
 krb5_rc_io_store(krb5_context context, struct dfl_data *t,
                  krb5_donot_replay *rep)
 {
-    unsigned int clientlen, serverlen;
+    size_t clientlen, serverlen;
+    unsigned int len;
     krb5_error_code ret;
     struct k5buf buf;
     char *ptr;
 
-    krb5int_buf_init_dynamic(&buf);
+    clientlen = strlen(rep->client);
+    serverlen = strlen(rep->server);
+
     if (rep->msghash) {
-        clientlen = 1;
-        serverlen = strlen(rep->msghash) + 6;
-        krb5int_buf_add_len(&buf, (char *) &clientlen, sizeof(clientlen));
+        /*
+         * Write a hash extension record, to be followed by a record
+         * in regular format (without the message hash) for the
+         * benefit of old implementations.
+         */
+        struct k5buf extbuf;
+        char *extstr;
+
+        /* Format the extension value so we know its length. */
+        krb5int_buf_init_dynamic(&extbuf);
+        krb5int_buf_add_fmt(&extbuf, "HASH:%s %lu:%s %lu:%s", rep->msghash,
+                            (unsigned long) clientlen, rep->client,
+                            (unsigned long) serverlen, rep->server);
+        extstr = krb5int_buf_data(&extbuf);
+        if (!extstr)
+            return KRB5_RC_MALLOC;
+
+        /*
+         * Put the extension value into the server field of a
+         * regular-format record, with an empty client field.
+         */
+        krb5int_buf_init_dynamic(&buf);
+        len = 1;
+        krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
         krb5int_buf_add_len(&buf, "", 1);
-        krb5int_buf_add_len(&buf, (char *) &serverlen, sizeof(serverlen));
-        krb5int_buf_add_fmt(&buf, "HASH:%s", rep->msghash);
-        krb5int_buf_add_len(&buf, "", 1);
+        len = strlen(extstr) + 1;
+        krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
+        krb5int_buf_add_len(&buf, extstr, len);
         krb5int_buf_add_len(&buf, (char *) &rep->cusec, sizeof(rep->cusec));
         krb5int_buf_add_len(&buf, (char *) &rep->ctime, sizeof(rep->ctime));
-    }
-    clientlen = strlen(rep->client) + 1;
-    serverlen = strlen(rep->server) + 1;
-    krb5int_buf_add_len(&buf, (char *) &clientlen, sizeof(clientlen));
-    krb5int_buf_add_len(&buf, rep->client, clientlen);
-    krb5int_buf_add_len(&buf, (char *) &serverlen, sizeof(serverlen));
-    krb5int_buf_add_len(&buf, rep->server, serverlen);
+        free(extstr);
+    } else  /* No extension record needed. */
+        krb5int_buf_init_dynamic(&buf);
+
+    len = clientlen + 1;
+    krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
+    krb5int_buf_add_len(&buf, rep->client, len);
+    len = serverlen + 1;
+    krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
+    krb5int_buf_add_len(&buf, rep->server, len);
     krb5int_buf_add_len(&buf, (char *) &rep->cusec, sizeof(rep->cusec));
     krb5int_buf_add_len(&buf, (char *) &rep->ctime, sizeof(rep->ctime));
 
@@ -613,7 +734,7 @@ krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
     if (ret)
         return ret;
 
-    switch(rc_store(context, id, rep, now)) {
+    switch(rc_store(context, id, rep, now, FALSE)) {
     case CMP_MALLOC:
         k5_mutex_unlock(&id->lock);
         return KRB5_RC_MALLOC;
@@ -669,11 +790,11 @@ krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
     for (q = &t->a; *q; q = qt) {
         qt = &(*q)->na;
         if (alive(now, &(*q)->rep, t->lifespan) == CMP_EXPIRED) {
-            FREE((*q)->rep.client);
-            FREE((*q)->rep.server);
+            free((*q)->rep.client);
+            free((*q)->rep.server);
             if ((*q)->rep.msghash)
-                FREE((*q)->rep.msghash);
-            FREE(*q);
+                free((*q)->rep.msghash);
+            free(*q);
             *q = *qt; /* why doesn't this feel right? */
         }
     }

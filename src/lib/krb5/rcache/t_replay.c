@@ -41,6 +41,7 @@ static void usage(const char *progname)
     fprintf(stderr, "  %s dump <filename>\n", progname);
     fprintf(stderr, "  %s store <rc> <cli> <srv> <msg> <tstamp> <usec>"
             " <now> <now-usec>\n", progname);
+    fprintf(stderr, "  %s expunge <rc> <now> <now-usec>\n", progname);
     exit(1);
 }
 
@@ -147,6 +148,28 @@ cleanup:
         free(hash);
 }
 
+static void expunge(krb5_context ctx, char *rcspec,
+                    krb5_timestamp now_timestamp, krb5_int32 now_usec)
+{
+    krb5_rcache rc = NULL;
+    krb5_error_code retval = 0;
+
+    if (now_timestamp > 0)
+        krb5_set_debugging_time(ctx, now_timestamp, now_usec);
+    if ((retval = krb5_rc_resolve_full(ctx, &rc, rcspec)))
+        goto cleanup;
+    if ((retval = krb5_rc_recover_or_initialize(ctx, rc, ctx->clockskew)))
+        goto cleanup;
+    retval = krb5_rc_expunge(ctx, rc);
+cleanup:
+    if (!retval)
+        printf("Cache successfully expunged\n");
+    else
+        fprintf(stderr, "Failure: %s\n", krb5_get_error_message(ctx, retval));
+    if (rc)
+        krb5_rc_close(ctx, rc);
+}
+
 int main(int argc, char **argv)
 {
     krb5_context ctx;
@@ -216,6 +239,26 @@ int main(int argc, char **argv)
 
             store(ctx, rcspec, client, server, msg, timestamp, usec,
                   now_timestamp, now_usec);
+        } else if (strcmp(*argv, "expunge") == 0) {
+            /*
+             * Using the rcache interface, expunge a replay cache.
+             * The now-timestamp argument can be 0 to use the current
+             * time.
+             */
+            char *rcspec;
+            krb5_timestamp now_timestamp;
+            krb5_int32 now_usec;
+
+            argc--; argv++;
+            if (!argc) usage(progname);
+            rcspec = *argv;
+            argc--; argv++;
+            if (!argc) usage(progname);
+            now_timestamp = (krb5_timestamp) atol(*argv);
+            argc--; argv++;
+            if (!argc) usage(progname);
+            now_usec = (krb5_int32) atol(*argv);
+            expunge(ctx, rcspec, now_timestamp, now_usec);
         } else
             usage(progname);
         argc--; argv++;
