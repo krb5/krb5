@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/write_msg.c
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 1991, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -29,19 +29,20 @@
 
 #include "k5-int.h"
 #include <errno.h>
+#include "os-proto.h"
 
 krb5_error_code
 krb5_write_message(krb5_context context, krb5_pointer fdp, krb5_data *outbuf)
 {
 	krb5_int32	len;
 	int		fd = *( (int *) fdp);
+	sg_buf		sg[2];
 
 	len = htonl(outbuf->length);
-	if (krb5_net_write(context, fd, (char *)&len, 4) < 0) {
-		return(errno);
-	}
-	if (outbuf->length && (krb5_net_write(context, fd, outbuf->data, outbuf->length) < 0)) {
-		return(errno);
+	SG_SET(&sg[0], &len, 4);
+	SG_SET(&sg[1], outbuf->data, outbuf->length);
+	if (krb5int_net_writev(context, fd, sg, 2) < 0) {
+	    return errno;
 	}
 	return(0);
 }
