@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007,2008 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007,2008,2009 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -2594,6 +2594,7 @@ krb5int_server_decrypt_ticket_keyblock
 
 krb5_error_code krb5_read_message (krb5_context, krb5_pointer, krb5_data *);
 krb5_error_code krb5_write_message (krb5_context, krb5_pointer, krb5_data *);
+krb5_error_code krb5int_write_messages (krb5_context, krb5_pointer, krb5_data *, int);
 int krb5_net_read (krb5_context, int , char *, int);
 int krb5_net_write (krb5_context, int , const char *, int);
 

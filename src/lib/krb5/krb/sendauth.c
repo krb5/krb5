@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/sendauth.c
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 1991, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -38,14 +38,19 @@
 static const char sendauth_version[] = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code KRB5_CALLCONV
-krb5_sendauth(krb5_context context, krb5_auth_context *auth_context, krb5_pointer fd, char *appl_version, krb5_principal client, krb5_principal server, krb5_flags ap_req_options, krb5_data *in_data, krb5_creds *in_creds, krb5_ccache ccache, krb5_error **error, krb5_ap_rep_enc_part **rep_result, krb5_creds **out_creds)
+krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
+	      krb5_pointer fd, char *appl_version, krb5_principal client,
+	      krb5_principal server, krb5_flags ap_req_options,
+	      krb5_data *in_data, krb5_creds *in_creds, krb5_ccache ccache,
+	      krb5_error **error, krb5_ap_rep_enc_part **rep_result,
+	      krb5_creds **out_creds)
 {
 	krb5_octet		result;
 	krb5_creds 		creds;
 	krb5_creds		 * credsp = NULL;
 	krb5_creds		 * credspout = NULL;
 	krb5_error_code		retval = 0;
-	krb5_data		inbuf, outbuf;
+	krb5_data		inbuf, outbuf[2];
 	int			len;
 	krb5_ccache		use_ccache = 0;
 
@@ -58,13 +63,11 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context, krb5_pointe
 	 * over the length of the application version strings followed
 	 * by the string itself.  
 	 */
-	outbuf.length = strlen(sendauth_version) + 1;
-	outbuf.data = (char *) sendauth_version;
-	if ((retval = krb5_write_message(context, fd, &outbuf)))
-		return(retval);
-	outbuf.length = strlen(appl_version) + 1;
-	outbuf.data = appl_version;
-	if ((retval = krb5_write_message(context, fd, &outbuf)))
+	outbuf[0].length = strlen(sendauth_version) + 1;
+	outbuf[0].data = (char *) sendauth_version;
+	outbuf[1].length = strlen(appl_version) + 1;
+	outbuf[1].data = appl_version;
+	if ((retval = krb5int_write_messages(context, fd, outbuf, 2)))
 		return(retval);
 	/*
 	 * Now, read back a byte: 0 means no error, 1 means bad sendauth
@@ -154,15 +157,15 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context, krb5_pointe
 
 	if ((retval = krb5_mk_req_extended(context, auth_context,
 					   ap_req_options, in_data, credsp,
-					   &outbuf)))
+					   &outbuf[0])))
 	    goto error_return;
 
 	/*
 	 * First write the length of the AP_REQ message, then write
 	 * the message itself.
 	 */
-	retval = krb5_write_message(context, fd, &outbuf);
-	free(outbuf.data);
+	retval = krb5_write_message(context, fd, &outbuf[0]);
+	free(outbuf[0].data);
 	if (retval)
 	    goto error_return;
 
