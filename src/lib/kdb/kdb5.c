@@ -2484,9 +2484,9 @@ krb5_dbe_update_mkey_aux(krb5_context         context,
  * If version of the KRB5_TL_ACTKVNO data is KRB5_TL_ACTKVNO_VER_1 then size of
  * a actkvno tuple {act_kvno, act_time} entry is:
  */
-#define ACTKVNO_TUPLE_SIZE sizeof(krb5_int16) + sizeof(krb5_int32)
+#define ACTKVNO_TUPLE_SIZE (sizeof(krb5_int16) + sizeof(krb5_int32))
 #define act_kvno(cp) (cp) /* return pointer to start of act_kvno data */
-#define act_time(cp) (cp) + sizeof(krb5_int16) /* return pointer to start of act_time data */
+#define act_time(cp) ((cp) + sizeof(krb5_int16)) /* return pointer to start of act_time data */
 
 krb5_error_code
 krb5_dbe_lookup_actkvno(krb5_context context,
@@ -2495,11 +2495,12 @@ krb5_dbe_lookup_actkvno(krb5_context context,
 {
     krb5_tl_data tl_data;
     krb5_error_code code;
-    krb5_int16 version;
+    krb5_int16 version, tmp_kvno;
     krb5_actkvno_node *head_data = NULL, *new_data = NULL, *prev_data = NULL;
     unsigned int num_actkvno, i;
     krb5_octet *next_tuple;
 
+    memset(&tl_data, 0, sizeof(tl_data));
     tl_data.tl_data_type = KRB5_TL_ACTKVNO;
 
     if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
@@ -2526,10 +2527,11 @@ krb5_dbe_lookup_actkvno(krb5_context context,
                     krb5_free_actkvno_list(context, head_data);
                     return (ENOMEM);
                 }
-                krb5_kdb_decode_int16(act_kvno(next_tuple), new_data->act_kvno);
+                /* using tmp_kvno to avoid type mismatch */
+                krb5_kdb_decode_int16(act_kvno(next_tuple), tmp_kvno);
+                new_data->act_kvno = (krb5_kvno) tmp_kvno;
                 krb5_kdb_decode_int32(act_time(next_tuple), new_data->act_time);
-                /* XXX WAF: may be able to deal with list pointers in a better
-                 * way, see add_mkey() */
+
                 new_data->next = NULL;
                 if (prev_data != NULL)
                     prev_data->next = new_data;
@@ -2558,15 +2560,16 @@ krb5_dbe_update_actkvno(krb5_context context,
                         const krb5_actkvno_node *actkvno_list)
 {
     krb5_error_code retval = 0;
-    krb5_int16 version;
+    krb5_int16 version, tmp_kvno;
     krb5_tl_data new_tl_data;
-    krb5_octet *nextloc;
+    unsigned char *nextloc;
     const krb5_actkvno_node *cur_actkvno;
 
     if (actkvno_list == NULL) {
         return (EINVAL);
     }
 
+    memset(&new_tl_data, 0, sizeof(new_tl_data));
     /* allocate initial KRB5_TL_ACTKVNO tl_data entry */
     new_tl_data.tl_data_length = sizeof(version);
     new_tl_data.tl_data_contents = (krb5_octet *) malloc(new_tl_data.tl_data_length);
@@ -2574,9 +2577,11 @@ krb5_dbe_update_actkvno(krb5_context context,
         return (ENOMEM);
 
     /* add the current version # for the data format used for KRB5_TL_ACTKVNO */
-    krb5_kdb_encode_int16((krb5_ui_2)KRB5_TL_ACTKVNO_VER_1, (unsigned char *)new_tl_data.tl_data_contents);
+    krb5_kdb_encode_int16((krb5_ui_2)KRB5_TL_ACTKVNO_VER_1,
+                          (unsigned char *)new_tl_data.tl_data_contents);
 
-    for (cur_actkvno = actkvno_list; cur_actkvno != NULL; cur_actkvno = cur_actkvno->next) {
+    for (cur_actkvno = actkvno_list; cur_actkvno != NULL;
+         cur_actkvno = cur_actkvno->next) {
         new_tl_data.tl_data_length += ACTKVNO_TUPLE_SIZE;
         new_tl_data.tl_data_contents = (krb5_octet *) realloc(new_tl_data.tl_data_contents,
                                                               new_tl_data.tl_data_length);
@@ -2588,9 +2593,11 @@ krb5_dbe_update_actkvno(krb5_context context,
          * next location to store new tuple.
          */
         nextloc = new_tl_data.tl_data_contents + new_tl_data.tl_data_length - ACTKVNO_TUPLE_SIZE;
-        krb5_kdb_encode_int16((krb5_ui_2)cur_actkvno->act_kvno, (unsigned char *)nextloc);
+        /* using tmp_kvno to avoid type mismatch issues */
+        tmp_kvno = (krb5_int16) cur_actkvno->act_kvno;
+        krb5_kdb_encode_int16(tmp_kvno, nextloc);
         nextloc += sizeof(krb5_ui_2);
-        krb5_kdb_encode_int32((krb5_ui_4)cur_actkvno->act_time, (unsigned char *)nextloc);
+        krb5_kdb_encode_int32((krb5_ui_4)cur_actkvno->act_time, nextloc);
     }
 
     new_tl_data.tl_data_type = KRB5_TL_ACTKVNO;

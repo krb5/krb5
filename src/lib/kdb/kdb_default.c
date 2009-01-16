@@ -493,8 +493,9 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     krb5_db_entry master_entry;
     int nprinc;
     krb5_boolean more, found_key = FALSE;
-    krb5_keyblock tmp_mkey, tmp_clearkey;
-    krb5_keylist_node *mkey_list_head, **mkey_list_node;
+    krb5_keyblock tmp_clearkey;
+    const krb5_keyblock *current_mkey;
+    krb5_keylist_node *mkey_list_head = NULL, **mkey_list_node;
     krb5_key_data *key_data;
     krb5_mkey_aux_node	*mkey_aux_data_list, *aux_data_entry;
     int i;
@@ -502,7 +503,6 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     if (mkeys_list == NULL)
 	return (EINVAL);
 
-    memset(&tmp_mkey, 0, sizeof(tmp_mkey));
     memset(&tmp_clearkey, 0, sizeof(tmp_clearkey));
 
     nprinc = 1;
@@ -523,7 +523,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
      * Check if the input mkey is the latest key and if it isn't then find the
      * latest mkey.
      */
-    if ((retval = krb5_dbekd_decrypt_key_data(context, &tmp_mkey,
+    if ((retval = krb5_dbekd_decrypt_key_data(context, mkey,
 					      &master_entry.key_data[0],
 					      &tmp_clearkey, NULL)) != 0) {
 	/*
@@ -538,7 +538,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 	     aux_data_entry = aux_data_entry->next) {
 
 	    if (aux_data_entry->mkey_kvno == mkvno) {
-		if (krb5_dbekd_decrypt_key_data(context, &tmp_mkey, &aux_data_entry->latest_mkey,
+		if (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
 				   &tmp_clearkey, NULL) == 0) {
 		    found_key = TRUE;
 		    break;
@@ -550,11 +550,10 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 	    for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
 		 aux_data_entry = aux_data_entry->next) {
 
-		if (krb5_dbekd_decrypt_key_data(context, &tmp_mkey, &aux_data_entry->latest_mkey,
+		if (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
 						&tmp_clearkey, NULL) == 0) {
 		    found_key = TRUE;
-		    /* XXX WAF: should I issue warning about kvno not matching?
-		     */
+		    /* XXX WAF: should I issue warning about kvno not matching? */
 		    break;
 		}
 	    }
@@ -565,6 +564,9 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 		goto clean_n_exit;
 	    }
 	}
+        current_mkey = &tmp_clearkey;
+    } else {
+        current_mkey = mkey;
     }
 
     /*
@@ -581,7 +583,10 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     memset(mkey_list_head, 0, sizeof(krb5_keylist_node));
     mkey_list_node = &mkey_list_head;
 
-    for (i=0; i < master_entry.n_key_data; i++) {
+    /* XXX WAF: optimize by setting the first mkey_list_node to current mkey and
+     * if there are any others then do for loop below. */
+
+    for (i = 0; i < master_entry.n_key_data; i++) {
 	if (*mkey_list_node == NULL) {
 	    /* *mkey_list_node points to next field of previous node */
 	    *mkey_list_node = (krb5_keylist_node *) malloc(sizeof(krb5_keylist_node));
@@ -592,23 +597,19 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 	    memset(*mkey_list_node, 0, sizeof(krb5_keylist_node));
 	}
 	key_data = &master_entry.key_data[i];
-	retval = krb5_dbekd_decrypt_key_data(context, mkey,
+	retval = krb5_dbekd_decrypt_key_data(context, current_mkey,
 					     key_data, &((*mkey_list_node)->keyblock),
 					     NULL);
 	if (retval)
 	    goto clean_n_exit;
 
+        (*mkey_list_node)->kvno = key_data->key_data_kvno;
 	mkey_list_node = &((*mkey_list_node)->next);
     }
 
     *mkeys_list = mkey_list_head;
 
 clean_n_exit:
-
-    if (tmp_mkey.contents) {
-	memset(tmp_mkey.contents, 0, tmp_mkey.length);
-	krb5_db_free(context, tmp_mkey.contents);
-    }
 
     if (tmp_clearkey.contents) {
 	memset(tmp_clearkey.contents, 0, tmp_clearkey.length);
