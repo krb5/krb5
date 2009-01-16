@@ -600,6 +600,7 @@ kdb5_list_mkeys(int argc, char *argv[])
                      cur_kb_node->kvno, enctype, strdate(act_time));
         }
     }
+    printf("%s", output_str);
 
     /* clean up */
     (void) krb5_db_fini(util_context);
