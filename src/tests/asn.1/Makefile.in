@@ -8,7 +8,7 @@ LDAP=@LDAP@
 
 RUN_SETUP = @KRB5_RUN_ENV@
 
-SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_encode_test.c \
+SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_decode_test.c \
 	$(srcdir)/ktest.c $(srcdir)/ktest_equal.c $(srcdir)/utility.c \
 	$(srcdir)/trval.c $(srcdir)/t_trval.c
 
