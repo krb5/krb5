@@ -99,9 +99,10 @@ kg_setup_keys(krb5_context context,
 
     *cksumtype = 0;
     ctx->proto = 0;
+
     if (ctx->enc == NULL) {
-        ctx->signalg = -1;
-                ctx->sealalg = -1;
+	ctx->signalg = -1;
+	ctx->sealalg = -1;
     }
         
     code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
@@ -109,9 +110,9 @@ kg_setup_keys(krb5_context context,
 	return code;
 
     code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, subkey->enctype,
-                                                    cksumtype);
+						    cksumtype);
     if (code != 0)
-        return code;
+	return code;
 
     switch (subkey->enctype) {
     case ENCTYPE_DES_CBC_MD5:
@@ -154,7 +155,7 @@ kg_setup_keys(krb5_context context,
 	break;
     default:
 	ctx->proto = 1;
-
+	break;
     }
 
     return 0;

@@ -320,9 +320,8 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     krb5_keyblock *key;
     krb5_cksumtype cksumtype;
 
-    if(ctx->big_endian != 0)
-      goto defective;
-
+    if (ctx->big_endian != 0)
+	goto defective;
 
     if (qop_state)
         *qop_state = GSS_C_QOP_DEFAULT;
