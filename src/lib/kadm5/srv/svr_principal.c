@@ -1332,6 +1332,7 @@ kadm5_chpass_principal_3(void *server_handle,
     kadm5_server_handle_t	handle = server_handle;
     osa_pw_hist_ent		hist;
     krb5_keyblock               *act_mkey;
+    krb5_kvno                   act_kvno;
 
     CHECK_HANDLE(server_handle);
 
@@ -1366,7 +1367,7 @@ kadm5_chpass_principal_3(void *server_handle,
 	 goto done;
 
     ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-				 active_mkey_list, NULL, &act_mkey);
+				 active_mkey_list, &act_kvno, &act_mkey);
     if (ret)
 	goto done;
 
@@ -1377,6 +1378,10 @@ kadm5_chpass_principal_3(void *server_handle,
 		       keepold, &kdb);
     if (ret)
 	goto done;
+
+    ret = krb5_dbe_update_mkvno(handle->context, &kdb, act_kvno);
+    if (ret)
+	 goto done;
 
     kdb.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
 

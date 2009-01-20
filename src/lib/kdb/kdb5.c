@@ -1930,9 +1930,9 @@ krb5_dbe_fetch_act_mkey_list(krb5_context        context,
         if (tmp_actkvno == NULL)
             return (ENOMEM);
 
+        memset(tmp_actkvno, 0, sizeof(krb5_actkvno_node));
         tmp_actkvno->act_time = now;
         tmp_actkvno->act_kvno = master_entry.key_data[0].key_data_kvno;
-        tmp_actkvno->next = NULL;
 
         *act_mkey_list = tmp_actkvno;
     }
@@ -2373,14 +2373,15 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
             /* curloc points to first tuple entry in the tl_data_contents */
             curloc = tl_data.tl_data_contents + sizeof(version);
 
-            while (curloc != (tl_data.tl_data_contents + tl_data.tl_data_length)) {
-                assert(curloc < tl_data.tl_data_contents + tl_data.tl_data_length);
+            while (curloc < (tl_data.tl_data_contents + tl_data.tl_data_length)) {
 
                 new_data = (krb5_mkey_aux_node *) malloc(sizeof(krb5_mkey_aux_node));
                 if (new_data == NULL) {
                     krb5_free_mkey_aux_list(context, head_data);
                     return (ENOMEM);
                 }
+                memset(new_data, 0, sizeof(krb5_mkey_aux_node));
+
                 krb5_kdb_decode_int16(curloc, new_data->mkey_kvno);
                 curloc += sizeof(krb5_ui_2);
                 krb5_kdb_decode_int16(curloc, new_data->latest_mkey.key_data_kvno);
@@ -2399,6 +2400,10 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
                 }
                 memcpy(new_data->latest_mkey.key_data_contents[0], curloc,
                        new_data->latest_mkey.key_data_length[0]);
+                curloc += new_data->latest_mkey.key_data_length[0];
+
+                /* always using key data ver 1 for mkeys */
+                new_data->latest_mkey.key_data_ver = 1;
 
                 new_data->next = NULL;
                 if (prev_data != NULL)
@@ -2425,23 +2430,25 @@ krb5_dbe_update_mkey_aux(krb5_context         context,
 {
     krb5_tl_data tl_data;
     krb5_int16 version, tmp_kvno;
-    /* krb5_octet *nextloc; */
     unsigned char *nextloc;
     krb5_mkey_aux_node *aux_data_entry;
 
+    memset(&tl_data, 0, sizeof(tl_data));
     tl_data.tl_data_type = KRB5_TL_MKEY_AUX;
     /*
-     * determine out how much space to allocate
+     * determine out how much space to allocate.  Note key_data_ver not stored
+     * as this is hard coded to one and is accounted for in
+     * krb5_dbe_lookup_mkey_aux.
      */
     tl_data.tl_data_length = sizeof(version); /* version */
     for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
          aux_data_entry = aux_data_entry->next) {
-        tl_data.tl_data_length += sizeof(krb5_ui_2); /* mkey_kvno */
-        tl_data.tl_data_length += sizeof(krb5_ui_2); /* latest_mkey kvno */
-        tl_data.tl_data_length += sizeof(krb5_ui_2); /* latest_mkey enctype */
-        tl_data.tl_data_length += sizeof(krb5_ui_2); /* latest_mkey length */
-        tl_data.tl_data_length +=
-            aux_data_entry->latest_mkey.key_data_length[0]; /* mkey data */
+
+        tl_data.tl_data_length += (sizeof(krb5_ui_2) + /* mkey_kvno */
+                                   sizeof(krb5_ui_2) + /* latest_mkey kvno */
+                                   sizeof(krb5_ui_2) + /* latest_mkey enctype */
+                                   sizeof(krb5_ui_2) + /* latest_mkey length */
+                                   aux_data_entry->latest_mkey.key_data_length[0]);
     }
 
     tl_data.tl_data_contents = (krb5_octet *) malloc(tl_data.tl_data_length);
@@ -2460,19 +2467,22 @@ krb5_dbe_update_mkey_aux(krb5_context         context,
         tmp_kvno = (krb5_int16) aux_data_entry->mkey_kvno;
         krb5_kdb_encode_int16(tmp_kvno, nextloc);
         nextloc += sizeof(krb5_ui_2);
+
         krb5_kdb_encode_int16(aux_data_entry->latest_mkey.key_data_kvno,
                               nextloc);
         nextloc += sizeof(krb5_ui_2);
+
         krb5_kdb_encode_int16(aux_data_entry->latest_mkey.key_data_type[0],
                               nextloc);
         nextloc += sizeof(krb5_ui_2);
+
         krb5_kdb_encode_int16(aux_data_entry->latest_mkey.key_data_length[0],
                               nextloc);
         nextloc += sizeof(krb5_ui_2);
 
         if (aux_data_entry->latest_mkey.key_data_length[0] > 0) {
             memcpy(nextloc, aux_data_entry->latest_mkey.key_data_contents[0],
-                aux_data_entry->latest_mkey.key_data_length[0]);
+                   aux_data_entry->latest_mkey.key_data_length[0]);
             nextloc += aux_data_entry->latest_mkey.key_data_length[0];
         }
     }
@@ -2518,7 +2528,8 @@ krb5_dbe_lookup_actkvno(krb5_context context,
              * Find number of tuple entries, remembering to account for version
              * field.
              */
-            num_actkvno = (tl_data.tl_data_length - sizeof(version)) / ACTKVNO_TUPLE_SIZE;
+            num_actkvno = (tl_data.tl_data_length - sizeof(version)) /
+                          ACTKVNO_TUPLE_SIZE;
             prev_data = NULL;
             /* next_tuple points to first tuple entry in the tl_data_contents */
             next_tuple = tl_data.tl_data_contents + sizeof(version);
@@ -2528,12 +2539,13 @@ krb5_dbe_lookup_actkvno(krb5_context context,
                     krb5_free_actkvno_list(context, head_data);
                     return (ENOMEM);
                 }
+                memset(new_data, 0, sizeof(krb5_actkvno_node));
+
                 /* using tmp_kvno to avoid type mismatch */
                 krb5_kdb_decode_int16(act_kvno(next_tuple), tmp_kvno);
                 new_data->act_kvno = (krb5_kvno) tmp_kvno;
                 krb5_kdb_decode_int32(act_time(next_tuple), new_data->act_time);
 
-                new_data->next = NULL;
                 if (prev_data != NULL)
                     prev_data->next = new_data;
                 else

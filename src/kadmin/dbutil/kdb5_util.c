@@ -90,6 +90,8 @@ void usage()
 	     "\t	[-rev] [-recurse] [filename [princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
 	     "\tark	[-e etype_list] principal\n"
+	     "\tadd_mkey [-e etype] [-s]\n"
+	     "\tuse_mkey kvno [time]\n"
 	     "\tlist_mkeys\n");
      /* avoid a string length compiler warning */
      fprintf(stderr,
@@ -434,7 +436,8 @@ static int open_db_and_mkey()
     if (global_params.mask & KADM5_CONFIG_KVNO)
         kvno = global_params.kvno; /* user specified */
     else
-        kvno = (krb5_kvno) master_entry.key_data->key_data_kvno;
+        kvno = IGNORE_VNO;
+        /* kvno = (krb5_kvno) master_entry.key_data->key_data_kvno; */
 
     krb5_db_free_principal(util_context, &master_entry, nentries);
 
@@ -481,7 +484,8 @@ static int open_db_and_mkey()
 	exit_status++;
 	return(0);
     }
-
+#if 0 /************** Begin IFDEF'ed OUT *******************************/
+    /* krb5_db_fetch_mkey_list will verify the mkey */
     if ((retval = krb5_db_verify_master_key(util_context, master_princ, 
 					    kvno, &master_keyblock))) {
 	com_err(progname, retval, "while verifying master key");
@@ -489,13 +493,10 @@ static int open_db_and_mkey()
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
     }
+#endif /**************** END IFDEF'ed OUT *******************************/
 
-    /*
-     * I think I need to get the mkey list here so the ark command will
-     * work properly.
-     */
     if ((retval = krb5_db_fetch_mkey_list(util_context, master_princ,
-				       &master_keyblock, kvno, &master_keylist))) {
+				          &master_keyblock, kvno, &master_keylist))) {
 	com_err(progname, retval, "while getting master key list");
 	com_err(progname, 0, "Warning: proceeding without master key list");
 	exit_status++;
