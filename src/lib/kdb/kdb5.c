@@ -1702,7 +1702,9 @@ krb5_db_fetch_mkey(krb5_context    context,
 	    goto clean_n_exit;
 	}
 
-	tmp_key.enctype = key->enctype;
+        /* get the enctype from the stash */
+	tmp_key.enctype = ENCTYPE_UNKNOWN;
+
 	retval = dal_handle->lib_handle->vftabl.fetch_master_key(context,
 								 mname,
 								 &tmp_key,

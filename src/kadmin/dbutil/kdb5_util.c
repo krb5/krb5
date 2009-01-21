@@ -474,8 +474,6 @@ static int open_db_and_mkey()
 	mkey_password = 0;
 
     } else {
-        /* let the stash decide the enctype */
-        master_keyblock.enctype = ENCTYPE_UNKNOWN;
         if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
 					    master_keyblock.enctype,
 					    manual_mkey, FALSE,
@@ -508,7 +506,7 @@ static int open_db_and_mkey()
     }
 
     seed.length = master_keyblock.length;
-    seed.data = master_keyblock.contents;
+    seed.data = (char *) master_keyblock.contents;
 
     if ((retval = krb5_c_random_seed(util_context, &seed))) {
 	com_err(progname, retval, "while seeding random number generator");

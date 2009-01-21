@@ -49,7 +49,7 @@ kdb5_add_mkey(int argc, char *argv[])
     krb5_kvno old_kvno, new_mkey_kvno;
     krb5_keyblock new_master_keyblock;
     krb5_key_data tmp_key_data, *old_key_data;
-    krb5_enctype new_master_enctype;
+    krb5_enctype new_master_enctype = ENCTYPE_UNKNOWN;
     char *new_mkey_password;
     krb5_db_entry master_entry;
     krb5_timestamp now;
@@ -65,7 +65,7 @@ kdb5_add_mkey(int argc, char *argv[])
     while ((optchar = getopt(argc, argv, "e:s")) != -1) {
         switch(optchar) {
         case 'e':
-            if (krb5_string_to_enctype(optarg, &global_params.enctype)) {
+            if (krb5_string_to_enctype(optarg, &new_master_enctype)) {
                 com_err(progname, EINVAL, ": %s is an invalid enctype", optarg);
                 exit_status++;
                 return;
@@ -81,7 +81,8 @@ kdb5_add_mkey(int argc, char *argv[])
         }
     }
 
-    new_master_enctype = global_params.enctype;
+    if (new_master_enctype == ENCTYPE_UNKNOWN)
+        new_master_enctype = global_params.enctype;
 
     /* assemble & parse the master key name */
     if ((retval = krb5_db_setup_mkey_name(util_context,
@@ -331,7 +332,8 @@ kdb5_add_mkey(int argc, char *argv[])
         }
     }
 
-    printf("i = %d old_key_data_count = %d\n", i, old_key_data_count);
+    /* XXX WAF: debug printf, remove before final commit */
+    /* printf("i = %d old_key_data_count = %d\n", i, old_key_data_count); */
     assert(i == old_key_data_count + 1);
 
     if ((retval = krb5_dbe_update_mkey_aux(util_context, &master_entry,
@@ -662,7 +664,7 @@ kdb5_list_mkeys(int argc, char *argv[])
                 asprintf(&output_str, "KNVO: %d, Enctype: %s, Active on: %s\n",
                          cur_kb_node->kvno, enctype, strdate(act_time));
             } else {
-                asprintf(&output_str, "KNVO: %d, Enctype: %s, Not activated\n",
+                asprintf(&output_str, "KNVO: %d, Enctype: %s, No activate time set\n",
                          cur_kb_node->kvno, enctype);
             }
         }
