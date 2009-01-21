@@ -49,7 +49,7 @@ unit-test-ok:: unit-test-body
 PASS=@PASS@
 unit-test-body:
 	$(RM) krb5cc_rpc_test_*
-	$(ENV_SETUP) $(START_SERVERS)
+	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS)
 	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab.$$$$ ; export RPC_TEST_SRVTAB ; \
 	trap "echo Failed, cleaning up... ; rm -f $$RPC_TEST_SRVTAB ; $(ENV_SETUP) $(STOP_SERVERS) ; trap '' 0 ; exit 1" 0 1 2 3 14 15 ; \
 	if $(ENV_SETUP) \

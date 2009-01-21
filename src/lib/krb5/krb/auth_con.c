@@ -556,3 +556,13 @@ chk_heimdal_seqnum(krb5_ui_4 exp_seq, krb5_ui_4 in_seq)
     else
 	return 0;
 }
+
+krb5_error_code
+krb5_auth_con_get_subkey_enctype(krb5_context context,
+				 krb5_auth_context auth_context,
+				 krb5_enctype *etype)
+{
+    *etype = auth_context->negotiated_etype;
+    return 0;
+}
+

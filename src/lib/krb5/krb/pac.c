@@ -378,7 +378,7 @@ krb5_pac_parse(krb5_context context,
 }
 
 static krb5_error_code
-k5_time_to_seconds_since_1970(krb5_ui_8 ntTime, krb5_timestamp *elapsedSeconds)
+k5_time_to_seconds_since_1970(krb5_int64 ntTime, krb5_timestamp *elapsedSeconds)
 {
     krb5_ui_8 abstime;
 
@@ -419,7 +419,7 @@ k5_pac_validate_client(krb5_context context,
     unsigned char *p;
     krb5_timestamp pac_authtime;
     krb5_ui_2 pac_princname_length;
-    krb5_ui_8 pac_nt_authtime;
+    krb5_int64 pac_nt_authtime;
     krb5_principal pac_principal;
 
     ret = k5_pac_locate_buffer(context, pac, PAC_CLIENT_INFO, &client_info);

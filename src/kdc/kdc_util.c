@@ -1,7 +1,7 @@
 /*
  * kdc/kdc_util.c
  *
- * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -292,7 +292,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	goto cleanup_auth_context;
 #endif
 
-    if ((retval = kdc_get_server_key(apreq->ticket, 0, krbtgt, nprincs, &key, &kvno)))
+    if ((retval = kdc_get_server_key(apreq->ticket, 0, foreign_server,
+				     krbtgt, nprincs, &key, &kvno)))
 	goto cleanup_auth_context;
     /*
      * We do not use the KDB keytab because other parts of the TGS need the TGT key.
@@ -408,11 +409,11 @@ cleanup:
  */
 krb5_error_code
 kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
-		   krb5_db_entry *server,
+		   krb5_boolean match_enctype, krb5_db_entry *server,
 		   int *nprincs, krb5_keyblock **key, krb5_kvno *kvno)
 {
     krb5_error_code 	  retval;
-    krb5_boolean 	  more;
+    krb5_boolean 	  more, similar;
     krb5_key_data	* server_key;
     krb5_keyblock       * tmp_mkey;
 
@@ -433,11 +434,17 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
 	char *sname;
 
 	if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
+	    limit_string(sname);
 	    krb5_klog_syslog(LOG_ERR,"TGS_REQ: UNKNOWN SERVER: server='%s'",
 			     sname);
 	    free(sname);
 	}
 	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+    if (server->attributes & KRB5_KDB_DISALLOW_SVR ||
+	server->attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
+	retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+	goto errout;
     }
 
     retval = krb5_dbe_find_mkey(kdc_context, master_keylist, server, &tmp_mkey);
@@ -445,22 +452,37 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
 	goto errout;
 
     retval = krb5_dbe_find_enctype(kdc_context, server,
-				   ticket->enc_part.enctype, -1,
-				   (krb5_int32)ticket->enc_part.kvno, &server_key);
+				   match_enctype ? ticket->enc_part.enctype : -1,
+				   -1, (krb5_int32)ticket->enc_part.kvno,
+				   &server_key);
     if (retval)
 	goto errout;
     if (!server_key) {
 	retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
 	goto errout;
     }
-    *kvno = server_key->key_data_kvno;
     if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
 	retval = krb5_dbekd_decrypt_key_data(kdc_context, tmp_mkey,
 					     server_key,
 					     *key, NULL);
     } else
 	retval = ENOMEM;
+    retval = krb5_c_enctype_compare(kdc_context, ticket->enc_part.enctype,
+				    (*key)->enctype, &similar);
+    if (retval)
+	goto errout;
+    if (!similar) {
+	retval = KRB5_KDB_NO_PERMITTED_KEY;
+	goto errout;
+    }
+    (*key)->enctype = ticket->enc_part.enctype;
+    *kvno = server_key->key_data_kvno;
 errout:
+    if (retval != 0) {
+	krb5_db_free_principal(kdc_context, server, *nprincs);
+	*nprincs = 0;
+    }
+
     return retval;
 }
 
@@ -1698,11 +1720,8 @@ sign_db_authdata (krb5_context context,
     krb5_data rep_data;
 
     *ret_authdata = NULL;
-    if (ad_entry != NULL) {
-	assert(ad_nprincs != NULL);
-	memset(ad_entry, 0, sizeof(*ad_entry));
-	*ad_nprincs = 0;
-    }
+    memset(ad_entry, 0, sizeof(*ad_entry));
+    *ad_nprincs = 0;
 
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
@@ -1994,7 +2013,7 @@ check_allowed_to_delegate_to(krb5_context context,
 
     /* Must be in same realm */
     if (!krb5_realm_compare(context, server->princ, proxy)) {
-	return KRB5_IN_TKT_REALM_MISMATCH; /* XXX */
+	return KRB5KDC_ERR_BADOPTION;
     }
 
     req.server = server;
@@ -2104,84 +2123,6 @@ kdc_check_transited_list(krb5_context context,
 }
 
 krb5_error_code
-audit_as_request(krb5_kdc_req *request,
-		 krb5_db_entry *client,
-		 krb5_db_entry *server,
-		 krb5_timestamp authtime,
-		 krb5_error_code errcode)
-{
-    krb5_error_code		code;
-    kdb_audit_as_req		req;
-    krb5_data			req_data;
-    krb5_data			rep_data;
-
-    memset(&req, 0, sizeof(req));
-
-    req.request			= request;
-    req.client			= client;
-    req.server			= server;
-    req.authtime		= authtime;
-    req.error_code		= errcode;
-
-    req_data.data = (void *)&req;
-    req_data.length = sizeof(req);
-
-    rep_data.data = NULL;
-    rep_data.length = 0;
-
-    code = krb5_db_invoke(kdc_context,
-			  KRB5_KDB_METHOD_AUDIT_AS,
-			  &req_data,
-			  &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
-	return 0;
-    }
-
-    assert(rep_data.length == 0);
-
-    return code;
-}
-
-krb5_error_code
-audit_tgs_request(krb5_kdc_req *request,
-		  krb5_const_principal client,
-		  krb5_db_entry *server,
-		  krb5_timestamp authtime,
-		  krb5_error_code errcode)
-{
-    krb5_error_code		code;
-    kdb_audit_tgs_req		req;
-    krb5_data			req_data;
-    krb5_data			rep_data;
-
-    memset(&req, 0, sizeof(req));
-
-    req.request			= request;
-    req.client			= client;
-    req.server			= server;
-    req.authtime		= authtime;
-    req.error_code		= errcode;
-
-    req_data.data = (void *)&req;
-    req_data.length = sizeof(req);
-
-    rep_data.data = NULL;
-    rep_data.length = 0;
-
-    code = krb5_db_invoke(kdc_context,
-			  KRB5_KDB_METHOD_AUDIT_TGS,
-			  &req_data,
-			  &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
-	return 0;
-    }
-
-    assert(rep_data.length == 0);
-
-    return code;
-}
-
-krb5_error_code
 validate_transit_path(krb5_context context,
 		      krb5_const_principal client,
 		      krb5_db_entry *server,
@@ -2212,10 +2153,12 @@ validate_transit_path(krb5_context context,
 
 /* "status" is null to indicate success.  */
 /* Someday, pass local address/port as well.  */
+/* Currently no info about name canonicalization is logged.  */
 void
 log_as_req(const krb5_fulladdr *from,
 	   krb5_kdc_req *request, krb5_kdc_rep *reply,
-	   const char *cname, const char *sname,
+	   krb5_db_entry *client, const char *cname,
+	   krb5_db_entry *server, const char *sname,
 	   krb5_timestamp authtime,
 	   const char *status, krb5_error_code errcode, const char *emsg)
 {
@@ -2255,15 +2198,45 @@ log_as_req(const krb5_fulladdr *from,
     audit_krb5kdc_as_req(some in_addr *, (in_port_t)from->port, 0,
 			 cname, sname, errcode);
 #endif
+#if 1
+    {
+	kdb_audit_as_req	req;
+	krb5_data		req_data;
+	krb5_data		rep_data;
+
+	memset(&req, 0, sizeof(req));
+
+	req.request		= request;
+	req.client		= client;
+	req.server		= server;
+	req.authtime		= authtime;
+	req.error_code		= errcode;
+
+	req_data.data = (void *)&req;
+	req_data.length = sizeof(req);
+
+	rep_data.data = NULL;
+	rep_data.length = 0;
+
+	(void) krb5_db_invoke(kdc_context,
+			      KRB5_KDB_METHOD_AUDIT_AS,
+			      &req_data,
+			      &rep_data);
+	assert(rep_data.length == 0);
+    }
+#endif
 }
 
 /* Here "status" must be non-null.  Error code
-   KRB5KDC_ERR_SERVER_NOMATCH is handled specially.  */
+   KRB5KDC_ERR_SERVER_NOMATCH is handled specially.
+
+   Currently no info about name canonicalization is logged.  */
 void
 log_tgs_req(const krb5_fulladdr *from,
 	    krb5_kdc_req *request, krb5_kdc_rep *reply,
 	    const char *cname, const char *sname, const char *altcname,
 	    krb5_timestamp authtime,
+	    unsigned int c_flags, const char *s4u_name,
 	    const char *status, krb5_error_code errcode, const char *emsg)
 {
     char ktypestr[128];
@@ -2285,7 +2258,7 @@ log_tgs_req(const krb5_fulladdr *from,
     /* Differences: server-nomatch message logs 2nd ticket's client
        name (useful), and doesn't log ktypestr (probably not
        important).  */
-    if (errcode != KRB5KDC_ERR_SERVER_NOMATCH)
+    if (errcode != KRB5KDC_ERR_SERVER_NOMATCH) {
 	krb5_klog_syslog(LOG_INFO,
 			 "TGS_REQ (%s) %s: %s: authtime %d, %s%s %s for %s%s%s",
 			 ktypestr,
@@ -2296,7 +2269,19 @@ log_tgs_req(const krb5_fulladdr *from,
 			 sname ? sname : "<unknown server>",
 			 errcode ? ", " : "",
 			 errcode ? emsg : "");
-    else
+	if (s4u_name) {
+	    assert(isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) ||
+		   isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION));
+	    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
+		krb5_klog_syslog(LOG_INFO,
+				 "... PROTOCOL-TRANSITION s4u-client=%s",
+				 s4u_name);
+	    else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
+		krb5_klog_syslog(LOG_INFO,
+				 "... CONSTRAINED-DELEGATION s4u-client=%s",
+				 s4u_name);
+	}
+    } else
 	krb5_klog_syslog(LOG_INFO,
 			 "TGS_REQ %s: %s: authtime %d, %s for %s, 2nd tkt client %s",
 			 fromstring, status, authtime,
@@ -2306,6 +2291,7 @@ log_tgs_req(const krb5_fulladdr *from,
 
     /* OpenSolaris: audit_krb5kdc_tgs_req(...)  or
        audit_krb5kdc_tgs_req_2ndtktmm(...) */
+    /* ... krb5_db_invoke ... */
 }
 
 void

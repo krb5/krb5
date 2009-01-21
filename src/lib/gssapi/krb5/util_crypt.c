@@ -56,6 +56,34 @@
 
 const char const kg_arcfour_l40[] = "fortybits";
 
+static krb5_error_code
+kg_copy_keys(krb5_context context,
+	     krb5_gss_ctx_id_rec *ctx,
+	     krb5_keyblock *subkey)
+{
+    krb5_error_code code;
+
+    if (ctx->enc != NULL) {
+	krb5_free_keyblock(context, ctx->enc);
+	ctx->enc = NULL;
+    }
+
+    code = krb5_copy_keyblock(context, subkey, &ctx->enc);
+    if (code != 0)
+	return code;
+
+    if (ctx->seq != NULL) {
+	krb5_free_keyblock(context, ctx->seq);
+	ctx->seq = NULL;
+    }
+
+    code = krb5_copy_keyblock(context, subkey, &ctx->seq);
+    if (code != 0)
+	return code;
+
+    return 0;
+}
+
 krb5_error_code
 kg_setup_keys(krb5_context context,
 	      krb5_gss_ctx_id_rec *ctx,
@@ -72,23 +100,17 @@ kg_setup_keys(krb5_context context,
     *cksumtype = 0;
     ctx->proto = 0;
 
+    if (ctx->enc == NULL) {
+	ctx->signalg = -1;
+	ctx->sealalg = -1;
+    }
+        
     code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
     if (code != 0)
 	return code;
 
-    if (ctx->enc != NULL) {
-	krb5_free_keyblock(context, ctx->enc);
-	ctx->enc = NULL;
-    }
-    code = krb5_copy_keyblock(context, subkey, &ctx->enc);
-    if (code != 0)
-	return code;
-
-    if (ctx->seq != NULL) {
-	krb5_free_keyblock(context, ctx->seq);
-	ctx->seq = NULL;
-    }
-    code = krb5_copy_keyblock(context, subkey, &ctx->seq);
+    code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, subkey->enctype,
+						    cksumtype);
     if (code != 0)
 	return code;
 
@@ -96,6 +118,10 @@ kg_setup_keys(krb5_context context,
     case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_CRC:
+	code = kg_copy_keys(context, ctx, subkey);
+	if (code != 0)
+	    return code;
+
 	ctx->enc->enctype = ENCTYPE_DES_CBC_RAW;
 	ctx->seq->enctype = ENCTYPE_DES_CBC_RAW;
 	ctx->signalg = SGN_ALG_DES_MAC_MD5;
@@ -107,6 +133,10 @@ kg_setup_keys(krb5_context context,
 	    ctx->enc->contents[i] ^= 0xF0;
 	break;
     case ENCTYPE_DES3_CBC_SHA1:
+	code = kg_copy_keys(context, ctx, subkey);
+	if (code != 0)
+	    return code;
+
 	ctx->enc->enctype = ENCTYPE_DES3_CBC_RAW;
 	ctx->seq->enctype = ENCTYPE_DES3_CBC_RAW;
 	ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
@@ -115,19 +145,17 @@ kg_setup_keys(krb5_context context,
 	break;
     case ENCTYPE_ARCFOUR_HMAC:
     case ENCTYPE_ARCFOUR_HMAC_EXP:
+	code = kg_copy_keys(context, ctx, subkey);
+	if (code != 0)
+	    return code;
+
 	ctx->signalg = SGN_ALG_HMAC_MD5;
 	ctx->cksum_size = 8;
 	ctx->sealalg = SEAL_ALG_MICROSOFT_RC4;
 	break;
     default:
-	ctx->signalg = -1;
-	ctx->sealalg = -1;
 	ctx->proto = 1;
-
-	code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, subkey->enctype,
-							cksumtype);
-	if (code != 0)
-	    return code;
+	break;
     }
 
     return 0;

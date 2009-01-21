@@ -2,6 +2,8 @@ thisconfigdir=../../..
 myfulldir=lib/krb5/rcache
 mydir=lib/krb5/rcache
 BUILDTOP=$(REL)..$(S)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
@@ -36,12 +38,18 @@ SRCS=	\
 	$(srcdir)/rc_none.c	\
 	$(srcdir)/rc_conv.c	\
 	$(srcdir)/ser_rc.c	\
-	$(srcdir)/rcfns.c
+	$(srcdir)/rcfns.c	\
+	$(srcdir)/t_replay.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
+
+T_REPLAY_OBJS= t_replay.o
+
+t_replay: $(T_REPLAY_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_replay $(T_REPLAY_OBJS) $(KRB5_BASE_LIBS)
 
 @libobj_frag@
 

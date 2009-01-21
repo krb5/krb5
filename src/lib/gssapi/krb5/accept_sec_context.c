@@ -395,6 +395,7 @@ kg_accept_krb5(minor_status, context_handle,
     int cred_rcache = 0;
     int no_encap = 0;
     krb5_flags ap_req_options = 0;
+    krb5_enctype negotiated_etype;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -902,6 +903,34 @@ kg_accept_krb5(minor_status, context_handle,
         unsigned char * ptr3;
         krb5_int32 seq_temp;
         int cfx_generate_subkey;
+
+	/*
+	 * Do not generate a subkey per RFC 4537 unless we are upgrading to CFX,
+	 * because pre-CFX tokens do not indicate which key to use. (Note that
+	 * DCE_STYLE implies that we will use a subkey.)
+	 */
+	if (ctx->proto == 0 &&
+	    (ctx->gss_flags & GSS_C_DCE_STYLE) == 0 && 
+	    (ap_req_options & AP_OPTS_USE_SUBKEY)) {
+	    code = (*kaccess.krb5_auth_con_get_subkey_enctype) (context,
+								auth_context,
+								&negotiated_etype);
+	    if (code != 0) {
+		major_status = GSS_S_FAILURE;
+		goto fail;
+	    }
+
+	    switch (negotiated_etype) {
+	    case ENCTYPE_DES_CBC_MD5:
+	    case ENCTYPE_DES_CBC_MD4:
+	    case ENCTYPE_DES_CBC_CRC:
+	    case ENCTYPE_DES3_CBC_SHA1:
+	    case ENCTYPE_ARCFOUR_HMAC:
+	    case ENCTYPE_ARCFOUR_HMAC_EXP:
+		ap_req_options &= ~(AP_OPTS_USE_SUBKEY);
+		break;
+	    }
+	}
 
         if (ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE) ||
 	    (ap_req_options & AP_OPTS_USE_SUBKEY))

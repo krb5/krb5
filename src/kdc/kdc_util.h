@@ -69,6 +69,7 @@ krb5_error_code kdc_process_tgs_req
 	           krb5_keyblock **);
 
 krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
+				    krb5_boolean match_enctype,
 				    krb5_db_entry *, int *,
 				    krb5_keyblock **, krb5_kvno *);
 
@@ -283,7 +284,8 @@ validate_transit_path(krb5_context context,
 void
 log_as_req(const krb5_fulladdr *from,
 	   krb5_kdc_req *request, krb5_kdc_rep *reply,
-	   const char *cname, const char *sname,
+	   krb5_db_entry *client, const char *cname,
+	   krb5_db_entry *server, const char *sname,
 	   krb5_timestamp authtime,
 	   const char *status, krb5_error_code errcode, const char *emsg);
 void
@@ -291,6 +293,7 @@ log_tgs_req(const krb5_fulladdr *from,
 	    krb5_kdc_req *request, krb5_kdc_rep *reply,
 	    const char *cname, const char *sname, const char *altcname,
 	    krb5_timestamp authtime,
+	    unsigned int c_flags, const char *s4u_name,
 	    const char *status, krb5_error_code errcode, const char *emsg);
 void log_tgs_alt_tgt(krb5_principal p);
 

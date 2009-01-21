@@ -1,7 +1,7 @@
 /*
  * kadmin/server/network.c
  *
- * Copyright 1990,2000,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007,2008,2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -180,13 +180,16 @@ static const char *paddr (struct sockaddr *sa)
 
 /* kadmin data.  */
 
-enum kadm_conn_type { CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER,
-		      CONN_TCP, CONN_ROUTING, CONN_RPC_LISTENER, CONN_RPC };
+enum conn_type {
+    CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP,
+    CONN_RPC_LISTENER, CONN_RPC,
+    CONN_ROUTING
+};
 
 /* Per-connection info.  */
 struct connection {
     int fd;
-    enum kadm_conn_type type;
+    enum conn_type type;
     void (*service)(void *handle, struct connection *, const char *, int);
     union {
 	/* Type-specific information.  */
@@ -334,10 +337,6 @@ static krb5_error_code add_rpc_service(int port, u_long prognum, u_long versnum,
 
 #define USE_AF AF_INET
 #define USE_TYPE SOCK_DGRAM
-
-
-#define USE_AF AF_INET
-#define USE_TYPE SOCK_DGRAM
 #define USE_PROTO 0
 #define SOCKET_ERRNO errno
 #include "foreachaddr.h"
@@ -351,7 +350,7 @@ struct socksetup {
 };
 
 static struct connection *
-add_fd (struct socksetup *data, int sock, enum kadm_conn_type conntype,
+add_fd (struct socksetup *data, int sock, enum conn_type conntype,
 	void (*service)(void *handle, struct connection *, const char *, int))
 {
     struct connection *newconn;
@@ -1147,8 +1146,13 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 	     struct sockaddr *to, socklen_t *tolen)
 {
 #if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
-    if (to && tolen)
+    if (to && tolen) {
+	/* Clobber with something recognizeable in case we try to use
+	   the address.  */
+	memset(to, 0x40, *tolen);
 	*tolen = 0;
+    }
+
     return recvfrom(s, buf, len, flags, from, fromlen);
 #else
     int r;
@@ -1159,6 +1163,10 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 
     if (!to || !tolen)
 	return recvfrom(s, buf, len, flags, from, fromlen);
+
+    /* Clobber with something recognizeable in case we can't extract
+       the address but try to use it anyways.  */
+    memset(to, 0x40, *tolen);
 
     iov.iov_base = buf;
     iov.iov_len = len;
@@ -1392,6 +1400,17 @@ static void process_packet(void *handle,
 	com_err(prog, 0, "pktinfo says local addr is %s", addrbuf);
     }
 #endif
+
+    if (daddr_len == 0 && conn->type == CONN_UDP) {
+	/* If the PKTINFO option isn't set, this socket should be
+	   bound to a specific local address.  This info probably
+	   should've been saved in our socket data structure at setup
+	   time.  */
+	daddr_len = sizeof(daddr);
+	if (getsockname(port_fd, (struct sockaddr *)&daddr, &daddr_len) != 0)
+	    daddr_len = 0;
+	/* On failure, keep going anyways.  */
+    }
 
     request.length = cc;
     request.data = pktbuf;

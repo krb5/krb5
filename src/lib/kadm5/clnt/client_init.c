@@ -541,8 +541,12 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
 	     goto error;
      }
 
-     if (init_type != INIT_CREDS)
+     /* Credentials for kadmin don't need to be forwardable or proxiable. */
+     if (init_type != INIT_CREDS) {
 	  krb5_get_init_creds_opt_init(&opt);
+	  krb5_get_init_creds_opt_set_forwardable(&opt, 0);
+	  krb5_get_init_creds_opt_set_proxiable(&opt, 0);
+     }
 
      if (init_type == INIT_PASS) {
 	  code = krb5_get_init_creds_password(ctx, &outcreds, client, pass,

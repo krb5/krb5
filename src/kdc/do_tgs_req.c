@@ -1,7 +1,7 @@
 /*
  * kdc/do_tgs_req.c
  *
- * Copyright 1990,1991,2001,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2007,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -282,6 +282,7 @@ tgt_again:
 	 */
 	if ((errcode = kdc_get_server_key(request->second_ticket[st_idx],
 					  c_flags,
+					  TRUE, /* match_enctype */
 					  &st_client,
 					  &st_nprincs,
 					  &st_sealing_key,
@@ -839,7 +840,7 @@ cleanup:
     if (errcode) 
 	emsg = krb5_get_error_message (kdc_context, errcode);
     log_tgs_req(from, request, &reply, cname, sname, altcname, authtime,
-		status, errcode, emsg);
+		c_flags, s4u_name, status, errcode, emsg);
     if (errcode) {
 	krb5_free_error_message (kdc_context, emsg);
 	emsg = NULL;

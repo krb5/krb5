@@ -297,8 +297,8 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     krb5_cksumtype cksumtype;
     int conf_flag = 0;
 
-    assert(ctx->big_endian == 0);
-    assert(ctx->proto == 1);
+    if (ctx->big_endian != 0)
+	return GSS_S_DEFECTIVE_TOKEN;
 
     if (qop_state != NULL)
 	*qop_state = GSS_C_QOP_DEFAULT;

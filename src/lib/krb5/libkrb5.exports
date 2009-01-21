@@ -401,6 +401,7 @@ krb5_rc_free_entry
 krb5_rc_get_lifespan
 krb5_rc_get_name
 krb5_rc_get_type
+krb5_rc_hash_message
 krb5_rc_initialize
 krb5_rc_io_close
 krb5_rc_io_creat
@@ -414,6 +415,7 @@ krb5_rc_io_sync
 krb5_rc_io_unmark
 krb5_rc_io_write
 krb5_rc_recover
+krb5_rc_recover_or_initialize
 krb5_rc_register_type
 krb5_rc_resolve
 krb5_rc_resolve_full

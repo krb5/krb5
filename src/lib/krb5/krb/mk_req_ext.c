@@ -343,23 +343,15 @@ make_etype_list(krb5_context context,
     for (etypes.length = 0;
 	 etypes.etypes[etypes.length] != ENCTYPE_NULL;
 	 etypes.length++)
-	;
-
-    /*
-     * RFC 4537:
-     *
-     *   If the enctype of the ticket session key is included in the enctype
-     *   list sent by the client, it SHOULD be the last on the list;
-     */
-    for (i = 0; i < etypes.length; i++) {
-	if (etypes.etypes[i] == tkt_enctype) {
-	    krb5_enctype etype;
-
-	    etype = etypes.etypes[etypes.length - 1];
-	    etypes.etypes[etypes.length - 1] = tkt_enctype;
-	    etypes.etypes[i] = etype;
+    {
+	/*
+	 * RFC 4537:
+	 *
+	 *   If the enctype of the ticket session key is included in the enctype
+	 *   list sent by the client, it SHOULD be the last on the list;
+	 */
+	if (etypes.length && etypes.etypes[etypes.length - 1] == tkt_enctype)
 	    break;
-	}
     }
 
     code = encode_krb5_etype_list(&etypes, &enc_etype_list);

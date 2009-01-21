@@ -105,14 +105,6 @@ g_export_name.so g_export_name.po $(OUTPRE)g_export_name.$(OBJEXT): \
   $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h g_export_name.c mechglue.h \
   mglueP.h
-g_export_name_object.so g_export_name_object.po $(OUTPRE)g_export_name_object.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
-  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
-  ../generic/gssapi_err_generic.h g_export_name_object.c \
-  mechglue.h mglueP.h
 g_glue.so g_glue.po $(OUTPRE)g_glue.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
@@ -128,14 +120,6 @@ g_imp_name.so g_imp_name.po $(OUTPRE)g_imp_name.$(OBJEXT): \
   $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h g_imp_name.c mechglue.h \
   mglueP.h
-g_imp_name_object.so g_imp_name_object.po $(OUTPRE)g_imp_name_object.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
-  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
-  ../generic/gssapi_err_generic.h g_imp_name_object.c \
-  mechglue.h mglueP.h
 g_imp_sec_context.so g_imp_sec_context.po $(OUTPRE)g_imp_sec_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \

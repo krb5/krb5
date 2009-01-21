@@ -2,7 +2,7 @@
  * kdc/do_as_req.c
  *
  * Portions Copyright (C) 2007 Apple Inc.
- * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -99,7 +99,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_error_code errcode;
     int c_nprincs = 0, s_nprincs = 0;
     krb5_boolean more;
-    krb5_timestamp kdc_time, authtime;
+    krb5_timestamp kdc_time, authtime = 0;
     krb5_keyblock session_key;
     const char *status;
     krb5_key_data *server_key, *client_key;
@@ -561,9 +561,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
 
-    log_as_req(from, request, &reply, cname, sname, authtime, 0, 0, 0);
-    did_log = 1;
-
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
     /*
      * If we get this far, we successfully did the AS_REQ.
@@ -573,6 +570,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
     update_client = 1;
 
+    log_as_req(from, request, &reply, &client, cname, &server, sname,
+	       authtime, 0, 0, 0);
+    did_log = 1;
+
     goto egress;
 
 errout:
@@ -580,10 +581,6 @@ errout:
     /* fall through */
 
 egress:
-    if (update_client) {
-	audit_as_request(request, &client, &server, authtime, errcode);
-    }
-
     if (pa_context)
 	free_padata_context(kdc_context, &pa_context);
 
@@ -591,7 +588,7 @@ egress:
 	emsg = krb5_get_error_message(kdc_context, errcode);
 
     if (status) {
-	log_as_req(from, request, &reply, cname, sname, 0,
+	log_as_req(from, request, &reply, &client, cname, &server, sname, 0,
 		   status, errcode, emsg);
 	did_log = 1;
     }

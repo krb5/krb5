@@ -151,7 +151,7 @@ krb5_rd_rep_dce(krb5_context context, krb5_auth_context auth_context,
     krb5_error_code 	  retval;
     krb5_ap_rep 	* reply;
     krb5_data 	 	  scratch;
-    krb5_ap_rep_enc_part *repl;
+    krb5_ap_rep_enc_part *repl = NULL;
 
     if (!krb5_is_ap_rep(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;

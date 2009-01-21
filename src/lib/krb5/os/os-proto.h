@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/os-proto.h
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -61,6 +61,9 @@ void krb5int_debug_fprint (const char *fmt, ...);
 int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);
+
+/* The io vector is *not* const here, unlike writev()!  */
+int krb5int_net_writev (krb5_context, int, sg_buf *, int);
 
 #include "k5-thread.h"
 extern k5_mutex_t krb5int_us_time_mutex;

@@ -750,8 +750,6 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_size_limit);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_store_cred);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_import_name_object);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name_object);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_sec_context_by_oid);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_cred_by_oid);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_set_sec_context_option);

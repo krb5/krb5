@@ -1,7 +1,7 @@
 /*
  * kdc/network.c
  *
- * Copyright 1990,2000,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007,2008,2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -175,26 +175,18 @@ static const char *paddr (struct sockaddr *sa)
 
 /* KDC data.  */
 
-enum kdc_conn_type { CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP, CONN_ROUTING };
+enum conn_type {
+    CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP,
+    CONN_ROUTING
+};
 
 /* Per-connection info.  */
 struct connection {
     int fd;
-    enum kdc_conn_type type;
+    enum conn_type type;
     void (*service)(struct connection *, const char *, int);
     union {
 	/* Type-specific information.  */
-#if 0
-	struct {
-	    int x;
-	} udp;
-	struct {
-	    int x;
-	} udp_pktinfo;
-	struct {
-	    int x;
-	} tcp_listener;
-#endif
 	struct {
 	    /* connection */
 	    struct sockaddr_storage addr_s;
@@ -316,7 +308,7 @@ struct socksetup {
 };
 
 static struct connection *
-add_fd (struct socksetup *data, int sock, enum kdc_conn_type conntype,
+add_fd (struct socksetup *data, int sock, enum conn_type conntype,
 	void (*service)(struct connection *, const char *, int))
 {
     struct connection *newconn;
@@ -527,7 +519,7 @@ setup_tcp_listener_ports(struct socksetup *data)
 
 	/* Sockets are created, prepare to listen on them.  */
 	if (s4 >= 0) {
-	    if (add_tcp_listener_fd(data, s4) == 0)
+	    if (add_tcp_listener_fd(data, s4) == NULL)
 		close(s4);
 	    else {
 		FD_SET(s4, &sstate.rfds);
@@ -539,7 +531,7 @@ setup_tcp_listener_ports(struct socksetup *data)
 	}
 #ifdef KRB5_USE_INET6
 	if (s6 >= 0) {
-	    if (add_tcp_listener_fd(data, s6) == 0) {
+	    if (add_tcp_listener_fd(data, s6) == NULL) {
 		close(s6);
 		s6 = -1;
 	    } else {
@@ -1012,8 +1004,12 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 	     struct sockaddr *to, socklen_t *tolen)
 {
 #if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
-    if (to && tolen)
+    if (to && tolen) {
+	/* Clobber with something recognizeable in case we try to use
+	   the address.  */
+	memset(to, 0x40, *tolen);
 	*tolen = 0;
+    }
     return recvfrom(s, buf, len, flags, from, fromlen);
 #else
     int r;
@@ -1024,6 +1020,10 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 
     if (!to || !tolen)
 	return recvfrom(s, buf, len, flags, from, fromlen);
+
+    /* Clobber with something recognizeable in case we can't extract
+       the address but try to use it anyways.  */
+    memset(to, 0x40, *tolen);
 
     iov.iov_base = buf;
     iov.iov_len = len;
@@ -1306,7 +1306,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
     sockdata.retval = 0;
 
     newconn = add_tcp_data_fd(&sockdata, s);
-    if (newconn == 0)
+    if (newconn == NULL)
 	return;
 
     if (getnameinfo((struct sockaddr *)&addr_s, addrlen,

@@ -26,5 +26,34 @@
 
 #include "k5-int.h"
 
+struct krb5_cksumtypes {
+    krb5_cksumtype ctype;
+    unsigned int flags;
+    char *name;
+    char *aliases[2];
+    char *out_string;
+    /* if the hash is keyed, this is the etype it is keyed with.
+       Actually, it can be keyed by any etype which has the same
+       enc_provider as the specified etype.  DERIVE checksums can
+       be keyed with any valid etype. */
+    krb5_enctype keyed_etype;
+    /* I can't statically initialize a union, so I'm just going to use
+       two pointers here.  The keyhash is used if non-NULL.  If NULL,
+       then HMAC/hash with derived keys is used if the relevant flag
+       is set.  Otherwise, a non-keyed hash is computed.  This is all
+       kind of messy, but so is the krb5 api. */
+    const struct krb5_keyhash_provider *keyhash;
+    const struct krb5_hash_provider *hash;
+    /* This just gets uglier and uglier.  In the key derivation case,
+       we produce an hmac.  To make the hmac code work, we can't hack
+       the output size indicated by the hash provider, but we may want
+       a truncated hmac.  If we want truncation, this is the number of
+       bytes we truncate to; it should be 0 otherwise.  */
+    unsigned int trunc_size;
+};
+
+#define KRB5_CKSUMFLAG_DERIVE		0x0001
+#define KRB5_CKSUMFLAG_NOT_COLL_PROOF	0x0002
+
 extern const struct krb5_cksumtypes krb5_cksumtypes_list[];
 extern const unsigned int krb5_cksumtypes_length;

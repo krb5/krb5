@@ -87,28 +87,28 @@ unit-test-server: unit-test-server-setup unit-test-server-body \
 	unit-test-server-cleanup
 
 test-randkey:: randkey-test
-	$(ENV_SETUP) ./randkey-test
+	$(ENV_SETUP) $(VALGRIND) ./randkey-test
 
 test-handle-server:: server-handle-test
-	$(ENV_SETUP) ./server-handle-test
+	$(ENV_SETUP) $(VALGRIND) ./server-handle-test
 
 test-handle-client:: client-handle-test
-	$(ENV_SETUP) ./client-handle-test
+	$(ENV_SETUP) $(VALGRIND) ./client-handle-test
 
 test-noauth: init-test
-	$(ENV_SETUP) ./init-test
+	$(ENV_SETUP) $(VALGRIND) ./init-test
 
 test-destroy: destroy-test
-	$(ENV_SETUP) ./destroy-test
+	$(ENV_SETUP) $(VALGRIND) ./destroy-test
 
 unit-test-client-setup::
-	$(ENV_SETUP) $(START_SERVERS)
+	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS)
 
 unit-test-client-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS)
 
 unit-test-server-setup::
-	$(ENV_SETUP) $(START_SERVERS_LOCAL)
+	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS_LOCAL)
 
 unit-test-server-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS_LOCAL)
@@ -118,7 +118,8 @@ unit-test-client-body: site.exp test-noauth test-destroy test-handle-client
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
 		KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local \
-		PRIOCNTL_HACK=@PRIOCNTL_HACK@ $(RUNTESTFLAGS)
+		PRIOCNTL_HACK=@PRIOCNTL_HACK@ VALGRIND="$(VALGRIND)" \
+		$(RUNTESTFLAGS)
 	-mv api.log capi.log
 	-mv api.sum capi.sum
 
@@ -126,7 +127,8 @@ unit-test-server-body: site.exp test-handle-server lock-test
 	$(ENV_SETUP) $(RUNTEST) --tool api RPC=0 API=$(SRVTCL) \
 		LOCKTEST=./lock-test \
 		KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local \
-		PRIOCNTL_HACK=@PRIOCNTL_HACK@ $(RUNTESTFLAGS)
+		PRIOCNTL_HACK=@PRIOCNTL_HACK@ VALGRIND="$(VALGRIND)" \
+		$(RUNTESTFLAGS)
 	-mv api.log sapi.log
 	-mv api.sum sapi.sum
 

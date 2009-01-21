@@ -349,7 +349,13 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	tktauthent.ticket = req->ticket;	
 	tktauthent.authenticator = (*auth_context)->authentp;
 	if (!(retval = krb5_auth_to_rep(context, &tktauthent, &rep))) {
-	    retval = krb5_rc_store(context, (*auth_context)->rcache, &rep);
+	    retval = krb5_rc_hash_message(context,
+					  &req->authenticator.ciphertext,
+					  &rep.msghash);
+	    if (!retval) {
+		retval = krb5_rc_store(context, (*auth_context)->rcache, &rep);
+		krb5_xfree(rep.msghash);
+	    }
 	    krb5_xfree(rep.server);
 	    krb5_xfree(rep.client);
 	}
@@ -421,7 +427,6 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	desired_etypes[desired_etypes_len++] = (*auth_context)->authentp->subkey->enctype;
     }
     desired_etypes[desired_etypes_len++] = req->ticket->enc_part2->session->enctype;
-    desired_etypes[desired_etypes_len++] = req->ticket->enc_part.enctype;
     desired_etypes[desired_etypes_len] = ENCTYPE_NULL;
 
     if (((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_PERMIT_ALL) == 0) {

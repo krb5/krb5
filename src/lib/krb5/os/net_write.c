@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/net_write.c
  *
- * Copyright 1987, 1988, 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1987, 1988, 1990, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -26,6 +26,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 
 /*
  * krb5_net_write() writes "len" bytes from "buf" to the file
@@ -37,25 +38,45 @@
  */
 
 int
-krb5_net_write(krb5_context context, int fd, register const char *buf, int len)
+krb5_net_write(krb5_context context, int fd, const char *buf, int len)
 {
-    int cc;
-    register int wrlen = len;
-    do {
-	cc = SOCKET_WRITE((SOCKET)fd, buf, wrlen);
+    sg_buf sg;
+    SG_SET(&sg, buf, len);
+    return krb5int_net_writev(context, fd, &sg, 1);
+}
+
+int
+krb5int_net_writev(krb5_context context, int fd, sg_buf *sgp, int nsg)
+{
+    int cc, len = 0;
+    SOCKET_WRITEV_TEMP tmp;
+
+    while (nsg > 0) {
+	/* Skip any empty data blocks.  */
+	if (SG_LEN(sgp) == 0) {
+	    sgp++, nsg--;
+	    continue;
+	}
+	cc = SOCKET_WRITEV((SOCKET)fd, sgp, nsg, tmp);
 	if (cc < 0) {
 	    if (SOCKET_ERRNO == SOCKET_EINTR)
 		continue;
 
-		/* XXX this interface sucks! */
-        errno = SOCKET_ERRNO;           
-
-	    return(cc);
+	    /* XXX this interface sucks! */
+	    errno = SOCKET_ERRNO;           
+	    return -1;
 	}
-	else {
-	    buf += cc;
-	    wrlen -= cc;
+	len += cc;
+	while (cc > 0) {
+	    if ((unsigned)cc < SG_LEN(sgp)) {
+		SG_ADVANCE(sgp, (unsigned)cc);
+		cc = 0;
+	    } else {
+		cc -= SG_LEN(sgp);
+		sgp++, nsg--;
+		assert(nsg > 0 || cc == 0);
+	    }
 	}
-    } while (wrlen > 0);
-    return(len);
+    }
+    return len;
 }
