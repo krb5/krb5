@@ -49,7 +49,7 @@ kdb5_add_mkey(int argc, char *argv[])
     krb5_kvno old_kvno, new_mkey_kvno;
     krb5_keyblock new_master_keyblock;
     krb5_key_data tmp_key_data, *old_key_data;
-    krb5_enctype new_master_enctype = DEFAULT_KDC_ENCTYPE;
+    krb5_enctype new_master_enctype;
     char *new_mkey_password;
     krb5_db_entry master_entry;
     krb5_timestamp now;
@@ -65,7 +65,7 @@ kdb5_add_mkey(int argc, char *argv[])
     while ((optchar = getopt(argc, argv, "e:s")) != -1) {
         switch(optchar) {
         case 'e':
-            if (krb5_string_to_enctype(optarg, &new_master_enctype)) {
+            if (krb5_string_to_enctype(optarg, &global_params.enctype)) {
                 com_err(progname, EINVAL, ": %s is an invalid enctype", optarg);
                 exit_status++;
                 return;
@@ -80,6 +80,8 @@ kdb5_add_mkey(int argc, char *argv[])
             return;
         }
     }
+
+    new_master_enctype = global_params.enctype;
 
     /* assemble & parse the master key name */
     if ((retval = krb5_db_setup_mkey_name(util_context,

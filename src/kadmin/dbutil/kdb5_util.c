@@ -473,16 +473,20 @@ static int open_db_and_mkey()
 	free(scratch.data);
 	mkey_password = 0;
 
-    } else if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
+    } else {
+        /* let the stash decide the enctype */
+        master_keyblock.enctype = ENCTYPE_UNKNOWN;
+        if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
 					    master_keyblock.enctype,
 					    manual_mkey, FALSE,
 					    global_params.stash_file,
 					    &kvno,
-					    0, &master_keyblock))) {
-	com_err(progname, retval, "while reading master key");
-	com_err(progname, 0, "Warning: proceeding without master key");
-	exit_status++;
-	return(0);
+                                            0, &master_keyblock))) {
+            com_err(progname, retval, "while reading master key");
+            com_err(progname, 0, "Warning: proceeding without master key");
+            exit_status++;
+            return(0);
+        }
     }
 #if 0 /************** Begin IFDEF'ed OUT *******************************/
     /* krb5_db_fetch_mkey_list will verify the mkey */

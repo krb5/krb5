@@ -523,9 +523,18 @@ krb5_def_fetch_mkey_list(krb5_context        context,
      * Check if the input mkey is the latest key and if it isn't then find the
      * latest mkey.
      */
-    if ((retval = krb5_dbekd_decrypt_key_data(context, mkey,
-                                              &master_entry.key_data[0],
-                                              &tmp_clearkey, NULL)) != 0) {
+
+    if (mkey->enctype == master_entry.key_data[0].key_data_type[0] &&
+        mkvno == (krb5_kvno) master_entry.key_data[0].key_data_kvno) {
+        if (krb5_dbekd_decrypt_key_data(context, mkey,
+                                        &master_entry.key_data[0],
+                                        &tmp_clearkey, NULL) == 0) {
+            current_mkey = mkey;
+            found_key = TRUE;
+        }
+    }
+
+    if (!found_key) {
         /*
          * Note the mkvno may provide a hint as to which mkey_aux tuple to
          * decrypt.
@@ -545,13 +554,14 @@ krb5_def_fetch_mkey_list(krb5_context        context,
                 }
             }
         }
-        if (found_key != TRUE) {
+        if (!found_key) {
             /* given the importance of acquiring the latest mkey, try brute force */
             for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
                  aux_data_entry = aux_data_entry->next) {
 
-                if (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
-                                                &tmp_clearkey, NULL) == 0) {
+                if (mkey->enctype == aux_data_entry->latest_mkey.key_data_type[0] &&
+                    (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
+                                                &tmp_clearkey, NULL) == 0)) {
                     found_key = TRUE;
                     /* XXX WAF: should I issue warning about kvno not matching? */
                     break;
@@ -565,8 +575,6 @@ krb5_def_fetch_mkey_list(krb5_context        context,
             }
         }
         current_mkey = &tmp_clearkey;
-    } else {
-        current_mkey = mkey;
     }
 
     /*
