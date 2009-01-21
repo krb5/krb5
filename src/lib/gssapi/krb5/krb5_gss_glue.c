@@ -280,6 +280,7 @@ krb5_gss_use_kdc_context(void)
     OM_uint32 major_status;
     OM_uint32 minor_status;
     gss_buffer_desc req_buffer;
+    krb5_error_code ret;
 
     req_buffer.length = 0;
     req_buffer.value = NULL;
@@ -289,7 +290,15 @@ krb5_gss_use_kdc_context(void)
 				      (const gss_OID)&req_oid,
 				      &req_buffer);
 
-    return major_status;    
+    if (major_status != GSS_S_COMPLETE) {
+        if (minor_status != 0)
+            ret = (krb5_error_code)minor_status;
+        else
+            ret = KRB5KRB_ERR_GENERIC;
+    } else
+        ret = 0;
+
+    return ret;
 }
 
 /*
