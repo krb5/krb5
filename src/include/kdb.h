@@ -376,9 +376,9 @@ krb5_dbekd_encrypt_key_data( krb5_context 		  context,
 			     krb5_key_data	        * key_data);
 
 krb5_error_code
-krb5_dbe_fetch_act_mkey_list(krb5_context        context,
-			     krb5_principal      mprinc,
-			     krb5_actkvno_node  **act_mkey_list);
+krb5_dbe_fetch_act_key_list(krb5_context          context,
+			     krb5_principal       princ,
+			     krb5_actkvno_node  **act_key_list);
 
 krb5_error_code
 krb5_dbe_find_act_mkey( krb5_context          context,

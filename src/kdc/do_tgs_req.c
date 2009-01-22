@@ -101,6 +101,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_keyblock session_key;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
+    krb5_keyblock *tmp_mkey;
     krb5_key_data  *server_key;
     char *cname = 0, *sname = 0, *altcname = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
@@ -546,10 +547,16 @@ tgt_again:
 	    status = "FINDING_SERVER_KEY";
 	    goto cleanup;
 	}
+
+        if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist, &server, &tmp_mkey))) {
+            status = "FINDING_MASTER_KEY";
+            goto cleanup;
+        }
+
 	/* convert server.key into a real key (it may be encrypted
 	 *        in the database) */
 	if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context,
-						   &master_keyblock, 
+						   tmp_mkey, 
 						   server_key, &encrypting_key,
 						   NULL))) {
 	    status = "DECRYPT_SERVER_KEY";

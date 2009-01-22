@@ -46,7 +46,6 @@ krb5_aprof_get_string
 krb5_aprof_getvals
 krb5_aprof_init
 krb5_flags_to_string
-krb5_free_key_data_contents
 krb5_free_realm_params
 krb5_input_flag_to_string
 krb5_keysalt_is_present

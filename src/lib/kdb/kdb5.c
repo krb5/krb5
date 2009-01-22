@@ -1890,35 +1890,37 @@ clean_n_exit:
 #endif /**************** END IFDEF'ed OUT *******************************/
 
 krb5_error_code
-krb5_dbe_fetch_act_mkey_list(krb5_context        context,
-                             krb5_principal      mprinc,
-                             krb5_actkvno_node  **act_mkey_list)
+krb5_dbe_fetch_act_key_list(krb5_context         context,
+                            krb5_principal       princ,
+                            krb5_actkvno_node  **act_key_list)
 {
     krb5_error_code retval = 0;
-    krb5_db_entry master_entry;
+    krb5_db_entry entry;
     int nprinc;
     krb5_boolean more;
 
-    if (act_mkey_list == NULL)
+    if (act_key_list == NULL)
         return (EINVAL);
 
     nprinc = 1;
-    if ((retval = krb5_db_get_principal(context, mprinc,
-                &master_entry, &nprinc, &more)))
+    if ((retval = krb5_db_get_principal(context, princ, &entry,
+                                        &nprinc, &more))) {
         return (retval);
+    }
 
     if (nprinc != 1) {
-        if (nprinc)
-            krb5_db_free_principal(context, &master_entry, nprinc);
+        if (nprinc) {
+            krb5_db_free_principal(context, &entry, nprinc);
+        }
         return(KRB5_KDB_NOMASTERKEY);
     } else if (more) {
-        krb5_db_free_principal(context, &master_entry, nprinc);
+        krb5_db_free_principal(context, &entry, nprinc);
         return (KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
     }
 
-    retval = krb5_dbe_lookup_actkvno(context, &master_entry, act_mkey_list);
+    retval = krb5_dbe_lookup_actkvno(context, &entry, act_key_list);
 
-    if (*act_mkey_list == NULL) {
+    if (*act_key_list == NULL) {
         krb5_actkvno_node   *tmp_actkvno;
         krb5_timestamp       now;
         /*
@@ -1934,12 +1936,13 @@ krb5_dbe_fetch_act_mkey_list(krb5_context        context,
 
         memset(tmp_actkvno, 0, sizeof(krb5_actkvno_node));
         tmp_actkvno->act_time = now;
-        tmp_actkvno->act_kvno = master_entry.key_data[0].key_data_kvno;
+        /* use most current key */
+        tmp_actkvno->act_kvno = entry.key_data[0].key_data_kvno;
 
-        *act_mkey_list = tmp_actkvno;
+        *act_key_list = tmp_actkvno;
     }
 
-    krb5_db_free_principal(context, &master_entry, nprinc);
+    krb5_db_free_principal(context, &entry, nprinc);
     return retval;
 }
 

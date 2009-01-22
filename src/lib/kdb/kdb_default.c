@@ -372,10 +372,6 @@ errout:
     return retval;
 }
 
-/* XXX WAF: I'm now thinking this fucntion should check to see if the fetched
- * key matches the latest mkey in the master princ.  If it doesn't then the
- * latest mkey should be returned by using the mkey_aux tl data.
- */
 krb5_error_code
 krb5_db_def_fetch_mkey(krb5_context   context,
                        krb5_principal mname,

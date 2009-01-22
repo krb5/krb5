@@ -204,83 +204,6 @@ kdb5_add_mkey(int argc, char *argv[])
     memset(mkey_aux_data_head, 0, sizeof(krb5_mkey_aux_node));
     mkey_aux_data = &mkey_aux_data_head;
 
-    /* XXX WAF: old, remove before final commit */
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-    for (i = 0; i < old_key_data_count; i++) {
-        key_data = &old_key_data[i];
-
-        /* decrypt the old key */
-        /* XXX WAF: don't need to do this, use the master_keylist instead. */
-        memset(&plainkey, 0, sizeof(plainkey));
-        retval = krb5_dbekd_decrypt_key_data(util_context, &master_keylist->keyblock,
-                                             key_data, &plainkey, NULL);
-        if (retval) {
-            com_err(progname, retval, "while decrypting master keys");
-            exit_status++;
-            return;
-        }
-
-        /*
-         * Create a list of krb5_mkey_aux_node nodes.  One node contains the new
-         * mkey encrypted by an old mkey and the old mkey's kvno (one node per
-         * old mkey).
-         */
-
-        if (*mkey_aux_data == NULL) {
-            /* *mkey_aux_data points to next field of previous node */
-            *mkey_aux_data = (krb5_mkey_aux_node *) malloc(sizeof(krb5_mkey_aux_node));
-            if (*mkey_aux_data == NULL) {
-                com_err(progname, ENOMEM, "while creating mkey_aux_data");
-                exit_status++;
-                return;
-            }
-            memset(*mkey_aux_data, 0, sizeof(krb5_mkey_aux_node));
-        }
-
-        memset(&tmp_key_data, 0, sizeof(tmp_key_data));
-        /* encrypt the new mkey with the older mkey */
-        retval = krb5_dbekd_encrypt_key_data(util_context, &plainkey,
-                                             &new_master_keyblock,
-                                             NULL, /* no keysalt */
-                                             (int) new_mkey_kvno,
-                                             &tmp_key_data);
-        if (retval) {
-            com_err(progname, retval, "while encrypting master keys");
-            exit_status++;
-            return;
-        }
-
-        (*mkey_aux_data)->latest_mkey = tmp_key_data;
-        (*mkey_aux_data)->mkey_kvno = key_data->key_data_kvno;
-
-        mkey_aux_data = &((*mkey_aux_data)->next);
-
-        /*
-         * Store old key in master_entry keydata, + 1 to avoid overwritting the
-         * first key_data entry
-         */
-        retval = krb5_dbekd_encrypt_key_data(util_context, &new_master_keyblock,
-                                             &plainkey,
-                                             NULL, /* no keysalt */
-                                             (int) key_data->key_data_kvno,
-                                             &master_entry.key_data[i+1]);
-        if (retval) {
-            com_err(progname, retval, "while encrypting master keys");
-            exit_status++;
-            return;
-        }
-
-        /* free plain text key and old key data entry */
-        krb5_free_keyblock_contents(util_context, &plainkey);
-        for (j = 0; j < key_data->key_data_ver; j++) {
-            if (key_data->key_data_length[j]) {
-                /* the key_data contents are encrypted so no clearing first */
-                free(key_data->key_data_contents[j]);
-            }
-        }
-    } /* end for (i = 0; i < old_key_data_count; i++) */
-#endif /**************** END IFDEF'ed OUT *******************************/
-
     for (keylist_node = master_keylist, i = 1; keylist_node != NULL;
          keylist_node = keylist_node->next, i++) {
 
@@ -473,10 +396,6 @@ kdb5_use_mkey(int argc, char *argv[])
         return;
     }
 
-    /*
-     * determine which nodes to delete and where to insert new act kvno node
-     */
-
     /* alloc enough space to hold new and existing key_data */
     new_actkvno = (krb5_actkvno_node *) malloc(sizeof(krb5_actkvno_node));
     if (new_actkvno == NULL) {
@@ -488,6 +407,10 @@ kdb5_use_mkey(int argc, char *argv[])
 
     new_actkvno->act_kvno = use_kvno;
     new_actkvno->act_time = start_time;
+
+    /*
+     * determine which nodes to delete and where to insert new act kvno node
+     */
 
     if (actkvno_list == NULL) {
         /* new actkvno is the list */
@@ -530,7 +453,7 @@ kdb5_use_mkey(int argc, char *argv[])
             }
             if (trimed && inserted)
                 break;
-        } /* end for (new_actkvno_list_head = prev_actkvno = ... */
+        }
     }
 
     if ((retval = krb5_dbe_update_actkvno(util_context, &master_entry,
