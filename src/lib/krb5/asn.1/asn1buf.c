@@ -55,6 +55,12 @@
 #include <stdio.h>
 #include "asn1_get.h"
 
+#ifdef USE_VALGRIND
+#include <valgrind/memcheck.h>
+#else
+#define VALGRIND_CHECK_READABLE(PTR,SIZE) ((void)0)
+#endif
+
 #if !defined(__GNUC__) || defined(CONFIG_SMALL)
 /* Declare private procedures as static if they're not used for inline
    expansion of other stuff elsewhere.  */
@@ -181,6 +187,7 @@ asn1buf_insert_bytestring(asn1buf *buf, const unsigned int len, const void *sv)
 
     retval = asn1buf_ensure_space(buf,len);
     if (retval) return retval;
+    VALGRIND_CHECK_READABLE(sv, len);
     for (length=1; length<=len; length++,(buf->next)++)
         *(buf->next) = (s[len-length]);
     return 0;
