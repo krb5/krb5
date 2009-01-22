@@ -56,6 +56,9 @@ static char sccsid[] = "@(#)xdr.c 1.35 87/08/12";
 
 #ifdef USE_VALGRIND
 #include <valgrind/memcheck.h>
+#else
+#define VALGRIND_CHECK_DEFINED(LVALUE)		((void)0)
+#define VALGRIND_CHECK_READABLE(PTR,SIZE)	((void)0)
 #endif
 
 /*
@@ -97,9 +100,7 @@ xdr_int(XDR *xdrs, int *ip)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*ip);
-#endif
 		if (*ip > 0x7fffffffL || *ip < -0x7fffffffL - 1L)
 			return (FALSE);
 
@@ -133,9 +134,7 @@ xdr_u_int(XDR *xdrs, u_int *up)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*up);
-#endif
 		if (*up > 0xffffffffUL)
 			return (FALSE);
 
@@ -168,9 +167,7 @@ xdr_long(XDR *xdrs, long *lp)
 
 	switch (xdrs->x_op) {
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*lp);
-#endif
 		if (*lp > 0x7fffffffL || *lp < -0x7fffffffL - 1L)
 			return (FALSE);
 
@@ -194,9 +191,7 @@ xdr_u_long(XDR *xdrs, u_long *ulp)
 
 	switch (xdrs->x_op) {
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*ulp);
-#endif
 		if (*ulp > 0xffffffffUL)
 			return (FALSE);
 
@@ -222,9 +217,7 @@ xdr_short(register XDR *xdrs, short *sp)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*sp);
-#endif
 		l = (long) *sp;
 		return (XDR_PUTLONG(xdrs, &l));
 
@@ -255,9 +248,7 @@ xdr_u_short(register XDR *xdrs, u_short *usp)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*usp);
-#endif
 		l = (u_long) *usp;
 		return (XDR_PUTLONG(xdrs, (long *) &l));
 
@@ -283,7 +274,6 @@ xdr_char(XDR *xdrs, char *cp)
 {
 	int i;
 
-#ifdef USE_VALGRIND
 	switch (xdrs->x_op) {
 	case XDR_ENCODE:
 		VALGRIND_CHECK_DEFINED(*cp);
@@ -291,7 +281,6 @@ xdr_char(XDR *xdrs, char *cp)
 	default:
 		break;
 	}
-#endif
 	i = (*cp);
 	if (!xdr_int(xdrs, &i)) {
 		return (FALSE);
@@ -308,7 +297,6 @@ xdr_u_char(XDR *xdrs, u_char *cp)
 {
 	u_int u;
 
-#ifdef USE_VALGRIND
 	switch (xdrs->x_op) {
 	case XDR_ENCODE:
 		VALGRIND_CHECK_DEFINED(*cp);
@@ -316,7 +304,6 @@ xdr_u_char(XDR *xdrs, u_char *cp)
 	default:
 		break;
 	}
-#endif
 	u = (*cp);
 	if (!xdr_u_int(xdrs, &u)) {
 		return (FALSE);
@@ -336,9 +323,7 @@ xdr_bool(register XDR *xdrs, bool_t *bp)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*bp);
-#endif
 		lb = *bp ? XDR_TRUE : XDR_FALSE;
 		return (XDR_PUTLONG(xdrs, &lb));
 
@@ -367,7 +352,6 @@ xdr_enum(XDR *xdrs, enum_t *ep)
 	/*
 	 * enums are treated as ints
 	 */
-#ifdef USE_VALGRIND
 	switch (xdrs->x_op) {
 	case XDR_ENCODE:
 		VALGRIND_CHECK_DEFINED(*ep);
@@ -375,7 +359,6 @@ xdr_enum(XDR *xdrs, enum_t *ep)
 	default:
 		break;
 	}
-#endif
 	if (sizeof (enum sizecheck) == sizeof (long)) {
 		return (xdr_long(xdrs, (long *)ep));
 	} else if (sizeof (enum sizecheck) == sizeof (int)) {
@@ -425,9 +408,7 @@ xdr_opaque(XDR *xdrs, caddr_t cp, u_int cnt)
 	}
 
 	if (xdrs->x_op == XDR_ENCODE) {
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_READABLE((volatile void *)cp, cnt);
-#endif
 		if (!XDR_PUTBYTES(xdrs, cp, cnt)) {
 			return (FALSE);
 		}
@@ -518,9 +499,7 @@ xdr_int32(XDR *xdrs, int32_t *ip)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*ip);
-#endif
 		l = *ip;
 		return (xdr_long(xdrs, &l));    
 
@@ -545,9 +524,7 @@ xdr_u_int32(XDR *xdrs, uint32_t *up)
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
-#ifdef USE_VALGRIND
 		VALGRIND_CHECK_DEFINED(*up);
-#endif
 		ul = *up;
 		return (xdr_u_long(xdrs, &ul));    
 
