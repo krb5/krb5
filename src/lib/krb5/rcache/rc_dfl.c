@@ -396,7 +396,7 @@ parse_counted_string(char **strptr, char **result)
  * Hash extension records have the format:
  *  client = <empty string>
  *  server = HASH:<msghash> <clientlen>:<client> <serverlen>:<server>
- * Spaces in the client and server string are represented with 
+ * Spaces in the client and server string are represented with
  * with backslashes.  Client and server lengths are represented in
  * ASCII decimal (which is different from the 32-bit binary we use
  * elsewhere in the replay cache).

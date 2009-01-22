@@ -314,11 +314,11 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
     acceptor_flag = ctx->initiate ? FLAG_SENDER_IS_ACCEPTOR : 0;
     key_usage = (toktype == KG_TOK_WRAP_MSG
-                 ? (!ctx->initiate 
+                 ? (!ctx->initiate
                     ? KG_USAGE_INITIATOR_SEAL
                     : KG_USAGE_ACCEPTOR_SEAL)
                  : (!ctx->initiate
-                    ? KG_USAGE_INITIATOR_SIGN 
+                    ? KG_USAGE_INITIATOR_SIGN
                     : KG_USAGE_ACCEPTOR_SIGN));
 
     kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);

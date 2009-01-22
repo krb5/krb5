@@ -264,11 +264,11 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
         if (!err) {
             err = kim_ccache_create_from_client_identity (&kimccache, identity);
         }
-        
+
         if (!err) {
             err = kim_ccache_get_state (kimccache, &state);
         }
-        
+
         if (!err && state != kim_credentials_state_valid) {
             if (state == kim_credentials_state_needs_validation) {
                 err = kim_ccache_validate (kimccache, KIM_OPTIONS_DEFAULT);
@@ -277,13 +277,13 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
                 ccache = NULL;
             }
         }
-        
+
         if (!kimccache && kim_library_allow_automatic_prompting ()) {
             /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new (&kimccache, identity, 
+            err = kim_ccache_create_new (&kimccache, identity,
                                          KIM_OPTIONS_DEFAULT);
-        }        
-        
+        }
+
         if (!err) {
             err = kim_ccache_get_krb5_ccache (kimccache, context, &ccache);
         }

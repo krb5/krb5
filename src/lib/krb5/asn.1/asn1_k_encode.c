@@ -82,7 +82,7 @@ DEFFNLENTYPE(generalstring, char *, asn1_encode_generalstring);
 DEFFNLENTYPE(u_generalstring, unsigned char *, asn1_encode_generalstring);
 DEFFNLENTYPE(opaque, char *, asn1_encode_opaque);
 
-DEFFIELDTYPE(gstring_data, krb5_data, 
+DEFFIELDTYPE(gstring_data, krb5_data,
              FIELDOF_STRING(krb5_data, generalstring, data, length, -1));
 DEFPTRTYPE(gstring_data_ptr,gstring_data);
 
@@ -1174,7 +1174,7 @@ DEFSEQTYPE(pa_pac_request, krb5_pa_pac_req, pa_pac_request_fields, 0);
 #endif
 
 /* RFC 4537 */
-DEFFIELDTYPE(etype_list, krb5_etype_list, 
+DEFFIELDTYPE(etype_list, krb5_etype_list,
              FIELDOF_SEQOF_INT32(krb5_etype_list, int32_ptr, etypes, length, -1));
 
 /* Exported complete encoders -- these produce a krb5_data with

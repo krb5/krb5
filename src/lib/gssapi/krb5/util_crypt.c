@@ -104,7 +104,7 @@ kg_setup_keys(krb5_context context,
         ctx->signalg = -1;
         ctx->sealalg = -1;
     }
-        
+
     code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
     if (code != 0)
         return code;

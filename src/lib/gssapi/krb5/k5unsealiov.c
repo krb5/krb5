@@ -81,7 +81,7 @@ kg_unseal_v1_iov(krb5_context context,
     }
 
     ptr = (unsigned char *)header->buffer.value + token_wrapper_len;
-   
+
     signalg  = ptr[0];
     signalg |= ptr[1] << 8;
 
@@ -666,4 +666,3 @@ kg_unseal_iov(OM_uint32 *minor_status,
 
     return code;
 }
-

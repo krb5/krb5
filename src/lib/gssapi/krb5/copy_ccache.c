@@ -13,7 +13,7 @@ gss_krb5int_copy_ccache(OM_uint32 *minor_status,
     krb5_error_code code;
     krb5_context context;
     krb5_ccache out_ccache;
-        
+
     assert(value->length == sizeof(out_ccache));
 
     if (value->length != sizeof(out_ccache))

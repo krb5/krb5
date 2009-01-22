@@ -380,7 +380,7 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 
     *minor_status = EINVAL;
 
-    return GSS_S_UNAVAILABLE; 
+    return GSS_S_UNAVAILABLE;
 }
 
 /*
@@ -500,7 +500,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 
     *minor_status = EINVAL;
 
-    return GSS_S_UNAVAILABLE; 
+    return GSS_S_UNAVAILABLE;
 }
 
 /*
@@ -626,7 +626,7 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
 
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
-    NULL,                                               
+    NULL,
     krb5_gss_acquire_cred,
     krb5_gss_release_cred,
     krb5_gss_init_sec_context,
@@ -674,8 +674,8 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_set_sec_context_option,
     krb5_gssspi_set_cred_option,
     krb5_gssspi_mech_invoke,
-    NULL,                /* wrap_aead */        
-    NULL,                /* unwrap_aead */      
+    NULL,                /* wrap_aead */
+    NULL,                /* unwrap_aead */
     krb5_gss_wrap_iov,
     krb5_gss_unwrap_iov,
     krb5_gss_wrap_iov_length,
@@ -797,4 +797,3 @@ OM_uint32 gss_krb5int_initialize_library (void)
     return CALL_INIT_FUNCTION(gss_krb5int_lib_init);
 #endif
 }
-

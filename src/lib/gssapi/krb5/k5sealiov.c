@@ -449,7 +449,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
                 *minor_status = code;
                 return GSS_S_FAILURE;
             }
-         
+
             if (k5_padlen == 0 && dce_style) {
                 /* Windows rejects AEAD tokens with non-zero EC */
                 code = krb5_c_block_size(context, enctype, &ec);
@@ -514,4 +514,3 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     return GSS_S_COMPLETE;
 }
-

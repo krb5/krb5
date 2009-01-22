@@ -186,7 +186,7 @@ gss_krb5_set_allowable_enctypes(
     OM_uint32 major_status;
     struct krb5_gss_set_allowable_enctypes_req req;
     gss_buffer_desc req_buffer;
-    
+
     req.num_ktypes = num_ktypes;
     req.ktypes = ktypes;
 
@@ -225,7 +225,7 @@ gss_krb5_ccache_name(
                                       (const gss_OID)&req_oid,
                                       &req_buffer);
 
-    return major_status;    
+    return major_status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -247,7 +247,7 @@ gss_krb5_free_lucid_sec_context(
                                       (const gss_OID)&req_oid,
                                       &req_buffer);
 
-    return major_status;    
+    return major_status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -268,7 +268,7 @@ krb5_gss_register_acceptor_identity(const char *keytab)
                                       (const gss_OID)&req_oid,
                                       &req_buffer);
 
-    return major_status;    
+    return major_status;
 }
 
 krb5_error_code
@@ -368,7 +368,7 @@ gss_krb5_set_cred_rcache(
         GSS_KRB5_SET_CRED_RCACHE_OID };
     OM_uint32 major_status;
     gss_buffer_desc req_buffer;
-    
+
     req_buffer.length = sizeof(rcache);
     req_buffer.value = rcache;
 
@@ -416,4 +416,3 @@ gsskrb5_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 
     return GSS_S_COMPLETE;
 }
-
