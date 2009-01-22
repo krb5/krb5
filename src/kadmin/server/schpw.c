@@ -39,6 +39,7 @@ process_chpw_request(context, server_handle, realm, keytab,
     int numresult;
     char strresult[1024];
     char *clientstr = NULL, *targetstr = NULL;
+    const char *errmsg = NULL;
     size_t clen;
     char *cdots;
     struct sockaddr_storage ss;
@@ -244,6 +245,8 @@ process_chpw_request(context, server_handle, realm, keytab,
     ret = schpw_util_wrapper(server_handle, client, target,
 			     (ticket->enc_part2->flags & TKT_FLG_INITIAL) != 0,
 			     ptr, NULL, strresult, sizeof(strresult));
+    if (ret)
+	errmsg = krb5_get_error_message(context, ret);
 
     /* zap the password */
     memset(clear.data, 0, clear.length);
@@ -307,12 +310,12 @@ process_chpw_request(context, server_handle, realm, keytab,
 			 addrbuf,
 			 (int) clen, clientstr, cdots,
 			 (int) tlen, targetp, tdots,
-			 ret ? krb5_get_error_message (context, ret) : "success");
+			 errmsg ? errmsg : "success");
     } else {
 	krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
 			 addrbuf,
 			 (int) clen, clientstr, cdots,
-			 ret ? krb5_get_error_message (context, ret) : "success");
+			 errmsg ? errmsg : "success");
     }
     switch (ret) {
     case KADM5_AUTH_CHANGEPW:
@@ -467,6 +470,8 @@ bailout:
 	krb5_free_unparsed_name(context, targetstr);
     if (clientstr)
 	krb5_free_unparsed_name(context, clientstr);
+    if (errmsg)
+	krb5_free_error_message(context, errmsg);
 
     return(ret);
 }
