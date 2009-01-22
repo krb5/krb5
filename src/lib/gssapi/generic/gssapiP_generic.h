@@ -175,8 +175,8 @@ void g_make_token_header (const gss_OID_desc * mech, unsigned int body_size,
                           unsigned char **buf, int tok_type);
 
 /* flags for g_verify_token_header() */
-#define	G_VFY_TOKEN_HDR_WRAPPER_REQUIRED	0x01
-#define G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE		0x02
+#define G_VFY_TOKEN_HDR_WRAPPER_REQUIRED        0x01
+#define G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE         0x02
 
 gss_int32 g_verify_token_header (const gss_OID_desc * mech,
                                  unsigned int *body_size,
@@ -263,19 +263,19 @@ generic_gss_str_to_oid(
 
 OM_uint32
 generic_gss_oid_compose(
-    OM_uint32 *,	/* minor_status */
-    const char *,	/* prefix */
-    size_t,		/* prefix_len */
-    int,		/* suffix */
-    gss_OID_desc *);	/* oid */
+    OM_uint32 *,        /* minor_status */
+    const char *,       /* prefix */
+    size_t,             /* prefix_len */
+    int,                /* suffix */
+    gss_OID_desc *);    /* oid */
 
 OM_uint32
 generic_gss_oid_decompose(
-    OM_uint32 *,	/* minor_status */
-    const char *,	/*prefix */
-    size_t,		/* prefix_len */
-    gss_OID_desc *,	/* oid */
-    int *);		/* suffix */
+    OM_uint32 *,        /* minor_status */
+    const char *,       /*prefix */
+    size_t,             /* prefix_len */
+    gss_OID_desc *,     /* oid */
+    int *);             /* suffix */
 
 int gssint_mecherrmap_init(void);
 void gssint_mecherrmap_destroy(void);
@@ -299,7 +299,7 @@ OM_uint32 generic_gss_release_buffer_set
 
 OM_uint32 generic_gss_copy_oid_set
 (OM_uint32 *, /* minor_status */
-	    const gss_OID_set_desc *, /* const oidset*/
-	    gss_OID_set * /*new_oidset*/);
+            const gss_OID_set_desc *, /* const oidset*/
+            gss_OID_set * /*new_oidset*/);
 
 #endif /* _GSSAPIP_GENERIC_H_ */

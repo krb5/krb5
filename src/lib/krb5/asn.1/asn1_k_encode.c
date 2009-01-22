@@ -247,7 +247,7 @@ static const struct field_info enc_kdc_rep_part_fields[] = {
     /* caddr[11]                HostAddresses OPTIONAL */
     FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_host_addresses, caddrs,
                 11, 11),
-    /* encrypted-pa-data[12]	SEQUENCE OF PA-DATA OPTIONAL */
+    /* encrypted-pa-data[12]    SEQUENCE OF PA-DATA OPTIONAL */
     FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_pa_data, enc_padata, 12, 12),
 };
 static unsigned int optional_enc_kdc_rep_part(const void *p)

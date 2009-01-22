@@ -40,12 +40,12 @@ kg_make_seed(context, key, seed)
 
     code = krb5_copy_keyblock(context, key, &tmpkey);
     if (code)
-	return(code);
+        return(code);
 
     /* reverse the key bytes, as per spec */
 
     for (i=0; i<tmpkey->length; i++)
-	tmpkey->contents[i] = key->contents[key->length - 1 - i];
+        tmpkey->contents[i] = key->contents[key->length - 1 - i];
 
     code = kg_encrypt(context, tmpkey, KG_USAGE_SEAL, NULL, zeros, seed, 16);
 

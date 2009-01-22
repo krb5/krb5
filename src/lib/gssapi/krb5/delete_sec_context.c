@@ -107,7 +107,7 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
         krb5_gss_release_oid(minor_status, &ctx->mech_used);
 
     if (ctx->authdata)
-	krb5_free_authdata(context, ctx->authdata);
+        krb5_free_authdata(context, ctx->authdata);
 
     if (ctx->k5_context)
         krb5_free_context(ctx->k5_context);

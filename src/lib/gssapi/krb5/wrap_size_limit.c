@@ -114,10 +114,10 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 
         /* Token header: 16 octets.  */
         if (conf_req_flag) {
-	    krb5_enctype enctype;
+            krb5_enctype enctype;
 
-	    enctype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey->enctype
-						: ctx->subkey->enctype;
+            enctype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey->enctype
+                                                : ctx->subkey->enctype;
 
             while (sz > 0 && krb5_encrypt_size(sz, enctype) + 16 > req_output_size)
                 sz--;
@@ -135,18 +135,18 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
                 sz = 0;
 #endif
         } else {
-	    krb5_cksumtype cksumtype;
-	    krb5_error_code err;
-	    size_t cksumsize;
+            krb5_cksumtype cksumtype;
+            krb5_error_code err;
+            size_t cksumsize;
 
-	    cksumtype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey_cksumtype
-						  : ctx->cksumtype;
+            cksumtype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey_cksumtype
+                                                  : ctx->cksumtype;
 
-	    err = krb5_c_checksum_length(ctx->k5_context, cksumtype, &cksumsize);
-	    if (err) {
-		*minor_status = err;
-		return GSS_S_FAILURE;
-	    }
+            err = krb5_c_checksum_length(ctx->k5_context, cksumtype, &cksumsize);
+            if (err) {
+                *minor_status = err;
+                return GSS_S_FAILURE;
+            }
 
             /* Allow for token header and checksum.  */
             if (sz < 16 + cksumsize)

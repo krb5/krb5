@@ -64,15 +64,15 @@ OM_uint32 KRB5_CALLCONV
 gss_krb5int_export_lucid_sec_context(
     OM_uint32           *minor_status,
     gss_ctx_id_t        context_handle,
-    const gss_OID	desired_object,
-    gss_buffer_set_t	*data_set)
+    const gss_OID       desired_object,
+    gss_buffer_set_t    *data_set)
 {
     krb5_error_code     kret = 0;
     OM_uint32           retval;
     krb5_gss_ctx_id_t   ctx = (krb5_gss_ctx_id_t)context_handle;
     void                *lctx = NULL;
-    int			version = 0;
-    gss_buffer_desc	rep;
+    int                 version = 0;
+    gss_buffer_desc     rep;
 
     /* Assume failure */
     retval = GSS_S_FAILURE;
@@ -80,12 +80,12 @@ gss_krb5int_export_lucid_sec_context(
     *data_set = GSS_C_NO_BUFFER_SET;
 
     retval = generic_gss_oid_decompose(minor_status,
-				       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID,
-				       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH,
-				       desired_object,
-				       &version);
+                                       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID,
+                                       GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH,
+                                       desired_object,
+                                       &version);
     if (GSS_ERROR(retval))
-	return retval;
+        return retval;
 
     /* Externalize a structure of the right version */
     switch (version) {
@@ -112,7 +112,7 @@ gss_krb5int_export_lucid_sec_context(
 
     retval = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
     if (GSS_ERROR(retval))
-	goto error_out;
+        goto error_out;
 
 error_out:
     if (*minor_status == 0)
@@ -134,7 +134,7 @@ gss_krb5int_free_lucid_sec_context(
     OM_uint32           retval;
     krb5_error_code     kret = 0;
     int                 version;
-    void		*kctx;
+    void                *kctx;
 
     /* Assume failure */
     retval = GSS_S_FAILURE;

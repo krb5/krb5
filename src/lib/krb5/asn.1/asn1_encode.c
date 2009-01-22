@@ -31,7 +31,7 @@
 #include "asn1_make.h"
 
 asn1_error_code asn1_encode_boolean(asn1buf *buf, asn1_intmax val,
-				    unsigned int *retlen)
+                                    unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
@@ -321,10 +321,10 @@ asn1_error_code asn1_encode_opaque(asn1buf *buf, unsigned int len,
    correct byte order, in an allocated krb5_data.  */
 
 #ifdef POINTERS_ARE_ALL_THE_SAME
-#define LOADPTR(PTR,TYPE)	\
+#define LOADPTR(PTR,TYPE)       \
     (assert((TYPE)->loadptr != NULL), (TYPE)->loadptr(PTR))
 #else
-#define LOADPTR(PTR,TYPE)	\
+#define LOADPTR(PTR,TYPE)       \
     (*(const void *const *)(PTR))
 #endif
 

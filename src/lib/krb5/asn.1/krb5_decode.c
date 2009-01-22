@@ -952,8 +952,8 @@ krb5_error_code decode_krb5_predicted_sam_response(const krb5_data *code, krb5_p
 }
 
 krb5_error_code decode_krb5_setpw_req(const krb5_data *code,
-				      krb5_data **rep,
-				      krb5_principal *principal)
+                                      krb5_data **rep,
+                                      krb5_principal *principal)
 {
     setup_buf_only();
     alloc_field(*rep, krb5_data);

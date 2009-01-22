@@ -58,37 +58,37 @@ const char const kg_arcfour_l40[] = "fortybits";
 
 static krb5_error_code
 kg_copy_keys(krb5_context context,
-	     krb5_gss_ctx_id_rec *ctx,
-	     krb5_keyblock *subkey)
+             krb5_gss_ctx_id_rec *ctx,
+             krb5_keyblock *subkey)
 {
     krb5_error_code code;
 
     if (ctx->enc != NULL) {
-	krb5_free_keyblock(context, ctx->enc);
-	ctx->enc = NULL;
+        krb5_free_keyblock(context, ctx->enc);
+        ctx->enc = NULL;
     }
 
     code = krb5_copy_keyblock(context, subkey, &ctx->enc);
     if (code != 0)
-	return code;
+        return code;
 
     if (ctx->seq != NULL) {
-	krb5_free_keyblock(context, ctx->seq);
-	ctx->seq = NULL;
+        krb5_free_keyblock(context, ctx->seq);
+        ctx->seq = NULL;
     }
 
     code = krb5_copy_keyblock(context, subkey, &ctx->seq);
     if (code != 0)
-	return code;
+        return code;
 
     return 0;
 }
 
 krb5_error_code
 kg_setup_keys(krb5_context context,
-	      krb5_gss_ctx_id_rec *ctx,
-	      krb5_keyblock *subkey,
-	      krb5_cksumtype *cksumtype)
+              krb5_gss_ctx_id_rec *ctx,
+              krb5_keyblock *subkey,
+              krb5_cksumtype *cksumtype)
 {
     krb5_error_code code;
     unsigned int i;
@@ -101,61 +101,61 @@ kg_setup_keys(krb5_context context,
     ctx->proto = 0;
 
     if (ctx->enc == NULL) {
-	ctx->signalg = -1;
-	ctx->sealalg = -1;
+        ctx->signalg = -1;
+        ctx->sealalg = -1;
     }
         
     code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
     if (code != 0)
-	return code;
+        return code;
 
     code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, subkey->enctype,
-						    cksumtype);
+                                                    cksumtype);
     if (code != 0)
-	return code;
+        return code;
 
     switch (subkey->enctype) {
     case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_CRC:
-	code = kg_copy_keys(context, ctx, subkey);
-	if (code != 0)
-	    return code;
+        code = kg_copy_keys(context, ctx, subkey);
+        if (code != 0)
+            return code;
 
-	ctx->enc->enctype = ENCTYPE_DES_CBC_RAW;
-	ctx->seq->enctype = ENCTYPE_DES_CBC_RAW;
-	ctx->signalg = SGN_ALG_DES_MAC_MD5;
-	ctx->cksum_size = 8;
-	ctx->sealalg = SEAL_ALG_DES;
+        ctx->enc->enctype = ENCTYPE_DES_CBC_RAW;
+        ctx->seq->enctype = ENCTYPE_DES_CBC_RAW;
+        ctx->signalg = SGN_ALG_DES_MAC_MD5;
+        ctx->cksum_size = 8;
+        ctx->sealalg = SEAL_ALG_DES;
 
-	for (i = 0; i < ctx->enc->length; i++)
-	    /*SUPPRESS 113*/
-	    ctx->enc->contents[i] ^= 0xF0;
-	break;
+        for (i = 0; i < ctx->enc->length; i++)
+            /*SUPPRESS 113*/
+            ctx->enc->contents[i] ^= 0xF0;
+        break;
     case ENCTYPE_DES3_CBC_SHA1:
-	code = kg_copy_keys(context, ctx, subkey);
-	if (code != 0)
-	    return code;
+        code = kg_copy_keys(context, ctx, subkey);
+        if (code != 0)
+            return code;
 
-	ctx->enc->enctype = ENCTYPE_DES3_CBC_RAW;
-	ctx->seq->enctype = ENCTYPE_DES3_CBC_RAW;
-	ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
-	ctx->cksum_size = 20;
-	ctx->sealalg = SEAL_ALG_DES3KD;
-	break;
+        ctx->enc->enctype = ENCTYPE_DES3_CBC_RAW;
+        ctx->seq->enctype = ENCTYPE_DES3_CBC_RAW;
+        ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
+        ctx->cksum_size = 20;
+        ctx->sealalg = SEAL_ALG_DES3KD;
+        break;
     case ENCTYPE_ARCFOUR_HMAC:
     case ENCTYPE_ARCFOUR_HMAC_EXP:
-	code = kg_copy_keys(context, ctx, subkey);
-	if (code != 0)
-	    return code;
+        code = kg_copy_keys(context, ctx, subkey);
+        if (code != 0)
+            return code;
 
-	ctx->signalg = SGN_ALG_HMAC_MD5;
-	ctx->cksum_size = 8;
-	ctx->sealalg = SEAL_ALG_MICROSOFT_RC4;
-	break;
+        ctx->signalg = SGN_ALG_HMAC_MD5;
+        ctx->cksum_size = 8;
+        ctx->sealalg = SEAL_ALG_MICROSOFT_RC4;
+        break;
     default:
-	ctx->proto = 1;
-	break;
+        ctx->proto = 1;
+        break;
     }
 
     return 0;
@@ -170,7 +170,7 @@ kg_confounder_size(context, key)
     size_t blocksize;
     /* We special case rc4*/
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
-	key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
+        key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
         return 8;
     code = krb5_c_block_size(context, key->enctype, &blocksize);
     if (code)
@@ -190,7 +190,7 @@ kg_make_confounder(context, key, buf)
 
     confsize = kg_confounder_size(context, key);
     if (confsize < 0)
-	return KRB5_BAD_MSIZE;
+        return KRB5_BAD_MSIZE;
 
     lrandom.length = confsize;
     lrandom.data = (char *)buf;
@@ -314,8 +314,8 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
         goto cleanup_arcfour;
 
     if (exportable) {
-	memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
-	i += sizeof(kg_arcfour_l40);
+        memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
+        i += sizeof(kg_arcfour_l40);
     }
     t[i++] = ms_usage &0xff;
     t[i++] = (ms_usage>>8) & 0xff;
@@ -330,7 +330,7 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
     if (code)
         goto cleanup_arcfour;
     if (exportable)
-	memset(usage_key.contents + 7, 0xab, 9);
+        memset(usage_key.contents + 7, 0xab, 9);
 
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
@@ -380,7 +380,7 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     assert(header != NULL);
 
     if (header->buffer.length < conf_len)
-	return KRB5_BAD_MSIZE;
+        return KRB5_BAD_MSIZE;
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(trailer == NULL || trailer->buffer.length == 0);
@@ -388,7 +388,7 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)malloc(kiov_count * sizeof(krb5_crypto_iov));
     if (kiov == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     /* For pre-CFX (raw enctypes) there is no krb5 header */
     kiov[i].flags = KRB5_CRYPTO_TYPE_HEADER;
@@ -403,13 +403,13 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     i++;
 
     for (j = 0; j < iov_count; j++) {
-	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
-	if (kiov[i].flags == KRB5_CRYPTO_TYPE_EMPTY)
-	    continue;
+        kiov[i].flags = kg_translate_flag_iov(iov[j].type);
+        if (kiov[i].flags == KRB5_CRYPTO_TYPE_EMPTY)
+            continue;
 
-	kiov[i].data.length = iov[j].buffer.length;
-	kiov[i].data.data = (char *)iov[j].buffer.value;
-	i++;
+        kiov[i].data.length = iov[j].buffer.length;
+        kiov[i].data.data = (char *)iov[j].buffer.value;
+        i++;
     }
 
     kiov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
@@ -426,9 +426,9 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
 static krb5_error_code
 kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pkiov_count)
     krb5_context context;
-    int dce_style;		/* DCE_STYLE indicates actual RRC is EC + RRC */
-    size_t ec;			/* Extra rotate count for DCE_STYLE, pad length otherwise */
-    size_t rrc;			/* Rotate count */
+    int dce_style;              /* DCE_STYLE indicates actual RRC is EC + RRC */
+    size_t ec;                  /* Extra rotate count for DCE_STYLE, pad length otherwise */
+    size_t rrc;                 /* Rotate count */
     const krb5_keyblock *key;
     gss_iov_buffer_desc *iov;
     int iov_count;
@@ -455,11 +455,11 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 
     code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
     if (code != 0)
-	return code;
+        return code;
 
     code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
     if (code != 0)
-	return code;
+        return code;
 
     /* Check header and trailer sizes */
     gss_headerlen = 16 /* GSS-Header */ + k5_headerlen; /* Kerb-Header */
@@ -467,28 +467,28 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 
     /* If we're caller without a trailer, we must rotate by trailer length */
     if (trailer == NULL) {
-	size_t actual_rrc = rrc;
+        size_t actual_rrc = rrc;
 
-	if (dce_style)
-	    actual_rrc += ec; /* compensate for Windows bug */
+        if (dce_style)
+            actual_rrc += ec; /* compensate for Windows bug */
 
-	if (actual_rrc != gss_trailerlen)
-	    return KRB5_BAD_MSIZE;
+        if (actual_rrc != gss_trailerlen)
+            return KRB5_BAD_MSIZE;
 
-	gss_headerlen += gss_trailerlen;
-	gss_trailerlen = 0;
+        gss_headerlen += gss_trailerlen;
+        gss_trailerlen = 0;
     } else {
-	if (trailer->buffer.length != gss_trailerlen)
-	    return KRB5_BAD_MSIZE;
+        if (trailer->buffer.length != gss_trailerlen)
+            return KRB5_BAD_MSIZE;
     }
 
     if (header->buffer.length != gss_headerlen)
-	return KRB5_BAD_MSIZE;
+        return KRB5_BAD_MSIZE;
 
     kiov_count = 3 + iov_count;
     kiov = (krb5_crypto_iov *)malloc(kiov_count * sizeof(krb5_crypto_iov));
     if (kiov == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     /*
      * The krb5 header is located at the end of the GSS header.
@@ -499,13 +499,13 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     i++;
 
     for (j = 0; j < iov_count; j++) {
-	kiov[i].flags = kg_translate_flag_iov(iov[j].type);
-	if (kiov[i].flags == KRB5_CRYPTO_TYPE_EMPTY)
-	    continue;
+        kiov[i].flags = kg_translate_flag_iov(iov[j].type);
+        if (kiov[i].flags == KRB5_CRYPTO_TYPE_EMPTY)
+            continue;
 
-	kiov[i].data.length = iov[j].buffer.length;
-	kiov[i].data.data = (char *)iov[j].buffer.value;
-	i++;
+        kiov[i].data.length = iov[j].buffer.length;
+        kiov[i].data.data = (char *)iov[j].buffer.value;
+        i++;
     }
 
     /*
@@ -516,9 +516,9 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     kiov[i].flags = KRB5_CRYPTO_TYPE_DATA;
     kiov[i].data.length = ec + 16; /* E(Header) */
     if (trailer == NULL)
-	kiov[i].data.data = (char *)header->buffer.value + 16;
+        kiov[i].data.data = (char *)header->buffer.value + 16;
     else
-	kiov[i].data.data = (char *)trailer->buffer.value;
+        kiov[i].data.data = (char *)trailer->buffer.value;
     i++;
 
     /*
@@ -539,7 +539,7 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 static krb5_error_code
 kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov, iov_count, pkiov, pkiov_count)
     krb5_context context;
-    int proto;			/* 1 if CFX, 0 for pre-CFX */
+    int proto;                  /* 1 if CFX, 0 for pre-CFX */
     int dce_style;
     size_t ec;
     size_t rrc;
@@ -550,8 +550,8 @@ kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov, iov_count, pkiov,
     size_t *pkiov_count;
 {
     return proto ?
-	kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pkiov_count) :
-	kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count);
+        kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pkiov_count) :
+        kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count);
 }
 
 krb5_error_code
@@ -589,10 +589,10 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
     }
 
     code = kg_translate_iov(context, proto, dce_style, ec, rrc, key,
-			    iov, iov_count, &kiov, &kiov_count);
+                            iov, iov_count, &kiov, &kiov_count);
     if (code == 0) {
-	code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
-	free(kiov);
+        code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
+        free(kiov);
     }
 
     if (pivd != NULL)
@@ -638,10 +638,10 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
     }
 
     code = kg_translate_iov(context, proto, dce_style, ec, rrc, key,
-			    iov, iov_count, &kiov, &kiov_count);
+                            iov, iov_count, &kiov, &kiov_count);
     if (code == 0) {
-	code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
-	free(kiov);
+        code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
+        free(kiov);
     }
 
     if (pivd != NULL)
@@ -652,7 +652,7 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
 
 krb5_error_code
 kg_arcfour_docrypt_iov (krb5_context context,
-			const krb5_keyblock *longterm_key , int ms_usage,
+                        const krb5_keyblock *longterm_key , int ms_usage,
                         const unsigned char *kd_data, size_t kd_data_len,
                         gss_iov_buffer_desc *iov, int iov_count)
 {
@@ -681,8 +681,8 @@ kg_arcfour_docrypt_iov (krb5_context context,
         goto cleanup_arcfour;
 
     if (exportable) {
-	memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
-	i += sizeof(kg_arcfour_l40);
+        memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
+        i += sizeof(kg_arcfour_l40);
     }
     t[i++] = ms_usage &0xff;
     t[i++] = (ms_usage>>8) & 0xff;
@@ -697,7 +697,7 @@ kg_arcfour_docrypt_iov (krb5_context context,
     if (code)
         goto cleanup_arcfour;
     if (exportable)
-	memset(usage_key.contents + 7, 0xab, 9);
+        memset(usage_key.contents + 7, 0xab, 9);
 
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
@@ -708,10 +708,10 @@ kg_arcfour_docrypt_iov (krb5_context context,
         goto cleanup_arcfour;
 
     code = kg_translate_iov(context, 0 /* proto */, 0 /* dce_style */,
-			    0 /* ec */, 0 /* rrc */, longterm_key,
-			    iov, iov_count, &kiov, &kiov_count);
+                            0 /* ec */, 0 /* rrc */, longterm_key,
+                            iov, iov_count, &kiov, &kiov_count);
     if (code)
-	goto cleanup_arcfour;
+        goto cleanup_arcfour;
 
     code =  ((*kaccess.arcfour_enc_provider->encrypt_iov)(
                  &seq_enc_key, 0,
@@ -722,7 +722,7 @@ cleanup_arcfour:
     free ((void *) usage_key.contents);
     free ((void *) seq_enc_key.contents);
     if (kiov != NULL)
-	free(kiov);
+        free(kiov);
     return (code);
 }
 
@@ -734,14 +734,14 @@ kg_translate_flag_iov(OM_uint32 type)
     switch (GSS_IOV_BUFFER_TYPE(type)) {
     case GSS_IOV_BUFFER_TYPE_DATA:
     case GSS_IOV_BUFFER_TYPE_PADDING:
-	ktype = KRB5_CRYPTO_TYPE_DATA;
-	break;
+        ktype = KRB5_CRYPTO_TYPE_DATA;
+        break;
     case GSS_IOV_BUFFER_TYPE_SIGN_ONLY:
-	ktype = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-	break;
+        ktype = KRB5_CRYPTO_TYPE_SIGN_ONLY;
+        break;
     default:
-	ktype = KRB5_CRYPTO_TYPE_EMPTY;
-	break;
+        ktype = KRB5_CRYPTO_TYPE_EMPTY;
+        break;
     }
 
     return ktype;
@@ -749,22 +749,22 @@ kg_translate_flag_iov(OM_uint32 type)
 
 gss_iov_buffer_t
 kg_locate_iov(gss_iov_buffer_desc *iov,
-	      int iov_count,
-	      OM_uint32 type)
+              int iov_count,
+              OM_uint32 type)
 {
     int i;
     gss_iov_buffer_t p = GSS_C_NO_IOV_BUFFER;
 
     if (iov == GSS_C_NO_IOV_BUFFER)
-	return GSS_C_NO_IOV_BUFFER;
+        return GSS_C_NO_IOV_BUFFER;
 
     for (i = iov_count - 1; i >= 0; i--) {
-	if (GSS_IOV_BUFFER_TYPE(iov[i].type) == type) {
-	    if (p == GSS_C_NO_IOV_BUFFER)
-		p = &iov[i];
-	    else
-		return GSS_C_NO_IOV_BUFFER;
-	}
+        if (GSS_IOV_BUFFER_TYPE(iov[i].type) == type) {
+            if (p == GSS_C_NO_IOV_BUFFER)
+                p = &iov[i];
+            else
+                return GSS_C_NO_IOV_BUFFER;
+        }
     }
 
     return p;
@@ -772,9 +772,9 @@ kg_locate_iov(gss_iov_buffer_desc *iov,
 
 void
 kg_iov_msglen(gss_iov_buffer_desc *iov,
-	      int iov_count,
-	      size_t *data_length_p,
-	      size_t *assoc_data_length_p)
+              int iov_count,
+              size_t *data_length_p,
+              size_t *assoc_data_length_p)
 {
     int i;
     size_t data_length = 0, assoc_data_length = 0;
@@ -784,14 +784,14 @@ kg_iov_msglen(gss_iov_buffer_desc *iov,
     *data_length_p = *assoc_data_length_p = 0;
 
     for (i = 0; i < iov_count; i++) {
-	OM_uint32 type = GSS_IOV_BUFFER_TYPE(iov[i].type);
+        OM_uint32 type = GSS_IOV_BUFFER_TYPE(iov[i].type);
 
-	if (type == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
-	    assoc_data_length += iov[i].buffer.length;
+        if (type == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
+            assoc_data_length += iov[i].buffer.length;
 
-	if (type == GSS_IOV_BUFFER_TYPE_DATA ||
-	    type == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
-	    data_length += iov[i].buffer.length;
+        if (type == GSS_IOV_BUFFER_TYPE_DATA ||
+            type == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
+            data_length += iov[i].buffer.length;
     }
 
     *data_length_p = data_length;
@@ -807,17 +807,17 @@ kg_release_iov(gss_iov_buffer_desc *iov, int iov_count)
     assert(iov != GSS_C_NO_IOV_BUFFER);
 
     for (i = 0; i < iov_count; i++) {
-	if (iov[i].type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
-	    gss_release_buffer(&min_stat, &iov[i].buffer);
-	    iov[i].type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
-	}
+        if (iov[i].type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
+            gss_release_buffer(&min_stat, &iov[i].buffer);
+            iov[i].type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
+        }
     }
 }
 
 OM_uint32
 kg_fixup_padding_iov(OM_uint32 *minor_status,
-		     gss_iov_buffer_desc *iov,
-		     int iov_count)
+                     gss_iov_buffer_desc *iov,
+                     int iov_count)
 {
     gss_iov_buffer_t padding = NULL;
     gss_iov_buffer_t data = NULL;
@@ -829,13 +829,13 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
 
     if (data == NULL) {
-	*minor_status = 0;
-	return GSS_S_COMPLETE;
+        *minor_status = 0;
+        return GSS_S_COMPLETE;
     }
 
     if (padding == NULL || padding->buffer.length == 0) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
+        *minor_status = EINVAL;
+        return GSS_S_FAILURE;
     }
 
     p = (unsigned char *)padding->buffer.value;
@@ -843,8 +843,8 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
 
     if (data->buffer.length + padding->buffer.length < padlength ||
         padlength == 0) {
-	*minor_status = (OM_uint32)KRB5_BAD_MSIZE;
-	return GSS_S_DEFECTIVE_TOKEN;
+        *minor_status = (OM_uint32)KRB5_BAD_MSIZE;
+        return GSS_S_DEFECTIVE_TOKEN;
     }
 
     /*
@@ -860,15 +860,15 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
      *
      * eg. if the buffers are structured as follows:
      *
-     *	    +---DATA---+-PAD-+
-     *	    | ABCDE444 | 4   |
-     *	    +----------+-----+
+     *      +---DATA---+-PAD-+
+     *      | ABCDE444 | 4   |
+     *      +----------+-----+
      *
      * after compensation they would look like:
      *
-     *	    +-DATA--+-PAD--+
-     *	    | ABCDE | NULL |
-     *	    +-------+------+
+     *      +-DATA--+-PAD--+
+     *      | ABCDE | NULL |
+     *      +-------+------+
      */
     relative_padlength = padlength - padding->buffer.length;
 
@@ -877,8 +877,8 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     data->buffer.length -= relative_padlength;
 
     if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
-	gss_release_buffer(&minor, &padding->buffer);
-	padding->type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
+        gss_release_buffer(&minor, &padding->buffer);
+        padding->type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
     }
 
     padding->buffer.length = 0;
@@ -896,7 +896,7 @@ int kg_map_toktype(int proto, int toktype)
         case KG_TOK_SIGN_MSG:
             toktype2 = KG2_TOK_MIC_MSG;
             break;
-	case KG_TOK_WRAP_MSG:
+        case KG_TOK_WRAP_MSG:
             toktype2 = KG2_TOK_WRAP_MSG;
             break;
         case KG_TOK_DEL_CTX:
@@ -920,10 +920,10 @@ krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count)
     assert(iov != GSS_C_NO_IOV_BUFFER);
 
     for (i = 0; i < iov_count; i++) {
-	if (GSS_IOV_BUFFER_TYPE(iov[i].type) == GSS_IOV_BUFFER_TYPE_DATA) {
-	    has_conf_data = TRUE;
-	    break;
-	}
+        if (GSS_IOV_BUFFER_TYPE(iov[i].type) == GSS_IOV_BUFFER_TYPE_DATA) {
+            has_conf_data = TRUE;
+            break;
+        }
     }
 
     return (has_conf_data == FALSE);
@@ -937,8 +937,8 @@ krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
     iov->buffer.length = size;
     iov->buffer.value = xmalloc(size);
     if (iov->buffer.value == NULL) {
-	iov->buffer.length = 0;
-	return ENOMEM;
+        iov->buffer.length = 0;
+        return ENOMEM;
     }
 
     iov->type |= GSS_IOV_BUFFER_FLAG_ALLOCATED;

@@ -3,9 +3,9 @@
 
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_copy_ccache(OM_uint32 *minor_status,
-			gss_cred_id_t cred_handle,
-			const gss_OID desired_object,
-			const gss_buffer_t value)
+                        gss_cred_id_t cred_handle,
+                        const gss_OID desired_object,
+                        const gss_buffer_t value)
 {
     krb5_gss_cred_id_t k5creds;
     krb5_cc_cursor cursor;
@@ -17,7 +17,7 @@ gss_krb5int_copy_ccache(OM_uint32 *minor_status,
     assert(value->length == sizeof(out_ccache));
 
     if (value->length != sizeof(out_ccache))
-	return GSS_S_FAILURE;
+        return GSS_S_FAILURE;
 
     out_ccache = (krb5_ccache)value->value;
 

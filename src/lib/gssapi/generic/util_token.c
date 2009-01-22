@@ -195,7 +195,7 @@ g_verify_token_header(
         return(G_BAD_TOK_HEADER);
 
     if ((flags & G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE) == 0 &&
-	seqsize != toksize)
+        seqsize != toksize)
         return(G_BAD_TOK_HEADER);
 
     if ((toksize-=1) < 0)

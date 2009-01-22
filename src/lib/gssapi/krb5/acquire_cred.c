@@ -99,9 +99,9 @@ static char *krb5_gss_keytab = NULL;
 /* Heimdal calls this gsskrb5_register_acceptor_identity. */
 OM_uint32
 gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
-				       const gss_OID desired_mech,
-				       const gss_OID desired_object,
-				       gss_buffer_t value)
+                                       const gss_OID desired_mech,
+                                       const gss_OID desired_object,
+                                       gss_buffer_t value)
 {
     char *new, *old;
     int err;
@@ -746,9 +746,9 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
    if (cred->rcache != NULL) {
       code = krb5_rc_close(context, cred->rcache);
       if (code) {
-	 *minor_status = code;
-	 krb5_free_context(context);
-	 return GSS_S_FAILURE;
+         *minor_status = code;
+         krb5_free_context(context);
+         return GSS_S_FAILURE;
       }
    }
 

@@ -247,7 +247,7 @@ make_seal_token_v1 (krb5_context context,
     /* create the seq_num */
 
     if ((code = kg_make_seq_num(context, seq, direction?0:0xff,
-				(krb5_ui_4)*seqnum, ptr+14, ptr+6))) {
+                                (krb5_ui_4)*seqnum, ptr+14, ptr+6))) {
         xfree (plain);
         xfree(t);
         return(code);
