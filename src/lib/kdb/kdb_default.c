@@ -524,8 +524,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
      * latest mkey.
      */
 
-    if (mkey->enctype == master_entry.key_data[0].key_data_type[0] &&
-        mkvno == (krb5_kvno) master_entry.key_data[0].key_data_kvno) {
+    if (mkey->enctype == master_entry.key_data[0].key_data_type[0]) {
         if (krb5_dbekd_decrypt_key_data(context, mkey,
                                         &master_entry.key_data[0],
                                         &tmp_clearkey, NULL) == 0) {
@@ -542,15 +541,18 @@ krb5_def_fetch_mkey_list(krb5_context        context,
         if ((retval = krb5_dbe_lookup_mkey_aux(context, &master_entry, &mkey_aux_data_list)))
             goto clean_n_exit;
 
-        /* for performance sake, try decrypting with matching kvno */
-        for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
-             aux_data_entry = aux_data_entry->next) {
+        /* mkvno may be 0 in some cases like keyboard and should be ignored */
+        if (mkvno != 0) {
+            /* for performance sake, try decrypting with matching kvno */
+            for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
+                 aux_data_entry = aux_data_entry->next) {
 
-            if (aux_data_entry->mkey_kvno == mkvno) {
-                if (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
-                                                &tmp_clearkey, NULL) == 0) {
-                    found_key = TRUE;
-                    break;
+                if (aux_data_entry->mkey_kvno == mkvno) {
+                    if (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
+                                                    &tmp_clearkey, NULL) == 0) {
+                        found_key = TRUE;
+                        break;
+                    }
                 }
             }
         }
