@@ -528,10 +528,8 @@ new_connection(
                                     &ctx->subkey);
     }
 
-    if (k_cred) {
-        krb5_free_creds(context, k_cred);
-        k_cred = NULL;
-    }
+    krb5_free_creds(context, k_cred);
+    k_cred = NULL;
     ctx->enc = NULL;
     ctx->seq = NULL;
     ctx->have_acceptor_subkey = 0;

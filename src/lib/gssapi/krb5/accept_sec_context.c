@@ -334,9 +334,8 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
  fail:
    /* real failure code follows */
 
-   if (ctx)
-       (void) krb5_gss_delete_sec_context(minor_status,
-                                          (gss_ctx_id_t *) &ctx, NULL);
+   (void) krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t *) &ctx,
+                                      NULL);
    *context_handle = GSS_C_NO_CONTEXT;
    *minor_status = code;
 
