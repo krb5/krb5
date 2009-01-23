@@ -21,7 +21,7 @@ arcfour_aead.so arcfour_aead.po $(OUTPRE)arcfour_aead.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../aead.h \
-  arcfour-int.h arcfour.h arcfour_aead.c
+  $(srcdir)/../cksumtypes.h arcfour-int.h arcfour.h arcfour_aead.c
 arcfour_s2k.so arcfour_s2k.po $(OUTPRE)arcfour_s2k.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

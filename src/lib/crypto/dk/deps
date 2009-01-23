@@ -11,7 +11,8 @@ checksum.so checksum.po $(OUTPRE)checksum.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../aead.h \
-  $(srcdir)/../etypes.h checksum.c dk.h
+  $(srcdir)/../cksumtypes.h $(srcdir)/../etypes.h checksum.c \
+  dk.h
 dk_aead.so dk_aead.po $(OUTPRE)dk_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -21,7 +22,8 @@ dk_aead.so dk_aead.po $(OUTPRE)dk_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../aead.h dk.h dk_aead.c
+  $(srcdir)/../aead.h $(srcdir)/../cksumtypes.h dk.h \
+  dk_aead.c
 dk_decrypt.so dk_decrypt.po $(OUTPRE)dk_decrypt.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

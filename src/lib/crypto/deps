@@ -85,8 +85,8 @@ crypto_length.so crypto_length.po $(OUTPRE)crypto_length.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h aead.h crypto_length.c \
-  etypes.h
+  $(SRCTOP)/include/socket-utils.h aead.h cksumtypes.h \
+  crypto_length.c etypes.h
 crypto_libinit.so crypto_libinit.po $(OUTPRE)crypto_libinit.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -116,7 +116,7 @@ decrypt.so decrypt.po $(OUTPRE)decrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  aead.h decrypt.c etypes.h
+  aead.h cksumtypes.h decrypt.c etypes.h
 decrypt_iov.so decrypt_iov.po $(OUTPRE)decrypt_iov.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -126,8 +126,8 @@ decrypt_iov.so decrypt_iov.po $(OUTPRE)decrypt_iov.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h aead.h decrypt_iov.c \
-  etypes.h
+  $(SRCTOP)/include/socket-utils.h aead.h cksumtypes.h \
+  decrypt_iov.c etypes.h
 encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -137,7 +137,7 @@ encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  aead.h encrypt.c etypes.h
+  aead.h cksumtypes.h encrypt.c etypes.h
 encrypt_iov.so encrypt_iov.po $(OUTPRE)encrypt_iov.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -157,8 +157,8 @@ encrypt_length.so encrypt_length.po $(OUTPRE)encrypt_length.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h aead.h encrypt_length.c \
-  etypes.h
+  $(SRCTOP)/include/socket-utils.h aead.h cksumtypes.h \
+  encrypt_length.c etypes.h
 enctype_compare.so enctype_compare.po $(OUTPRE)enctype_compare.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -203,7 +203,7 @@ hmac.so hmac.po $(OUTPRE)hmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  aead.h hmac.c
+  aead.h cksumtypes.h hmac.c
 keyblocks.so keyblocks.po $(OUTPRE)keyblocks.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
