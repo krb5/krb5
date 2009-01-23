@@ -230,7 +230,7 @@ krb5_pac_get_buffer(krb5_context context,
 	return ret;
  
     data->data = malloc(d.length);
-    if (data == NULL)
+    if (data->data == NULL)
 	return ENOMEM;
 
     data->length = d.length;
