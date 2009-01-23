@@ -192,7 +192,8 @@ static kadm5_ret_t kadm5_get_either(int princ,
      char *regexp;
      int i, ret;
      kadm5_server_handle_t handle = server_handle;
-     
+
+     *princs = NULL;
      *count = 0;
      if (exp == NULL)
 	  exp = "*";

@@ -2259,6 +2259,9 @@ server_process_dh(krb5_context context,
     unsigned char *p = NULL;
     ASN1_INTEGER *pub_key = NULL;
 
+    *dh_pubkey = *server_key = NULL;
+    *dh_pubkey_len = *server_key_len = 0;
+
     /* get client's received DH parameters that we saved in server_check_dh */
     dh = cryptoctx->dh;
 

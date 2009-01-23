@@ -37,7 +37,10 @@ krb5_read_message(krb5_context context, krb5_pointer fdp, krb5_data *inbuf)
 	int		len2, ilen;
 	char		*buf = NULL;
 	int		fd = *( (int *) fdp);
-	
+
+	inbuf->data = NULL;
+	inbuf->length = 0;
+
 	if ((len2 = krb5_net_read(context, fd, (char *)&len, 4)) != 4)
 		return((len2 < 0) ? errno : ECONNABORTED);
 	len = ntohl(len);

@@ -1861,6 +1861,9 @@ krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
     krb5_tl_data tl_data;
     krb5_error_code code;
 
+    *mod_princ = NULL;
+    *mod_time = 0;
+
     tl_data.tl_data_type = KRB5_TL_MOD_PRINC;
 
     if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
