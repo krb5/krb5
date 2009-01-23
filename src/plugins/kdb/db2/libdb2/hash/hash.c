@@ -328,6 +328,8 @@ init_hash(hashp, file, info)
 		if (stat(file, &statbuf))
 			return (NULL);
 		hashp->hdr.bsize = statbuf.st_blksize;
+		if (hashp->hdr.bsize > MAX_BSIZE)
+		    hashp->hdr.bsize = MAX_BSIZE;
 		hashp->hdr.bshift = __log2(hashp->hdr.bsize);
 	}
 	if (info) {

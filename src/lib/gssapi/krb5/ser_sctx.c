@@ -342,16 +342,16 @@ kg_ctx_size(kcontext, arg, sizep)
                                     KV5M_KEYBLOCK,
                                     (krb5_pointer) ctx->acceptor_subkey,
                                     &required);
-	if (!kret && ctx->authdata) {
-	    krb5_int32 i;
+        if (!kret && ctx->authdata) {
+            krb5_int32 i;
 
-	    for (i = 0; !kret && ctx->authdata[i]; i++) {
-		kret = krb5_size_opaque(kcontext,
-					KV5M_AUTHDATA,
-					(krb5_pointer)ctx->authdata[i],
-					&required);
-	    }
-	}
+            for (i = 0; !kret && ctx->authdata[i]; i++) {
+                kret = krb5_size_opaque(kcontext,
+                                        KV5M_AUTHDATA,
+                                        (krb5_pointer)ctx->authdata[i],
+                                        &required);
+            }
+        }
         if (!kret)
             *sizep += required;
     }
@@ -498,25 +498,25 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
             if (!kret)
                 kret = krb5_ser_pack_int32((krb5_int32) ctx->cred_rcache,
                                            &bp, &remain);
-	    if (!kret) {
-		krb5_int32 i = 0;
+            if (!kret) {
+                krb5_int32 i = 0;
 
-		if (ctx->authdata) {
-		    for (; ctx->authdata[i]; i++)
-			;
-		}
-		/* authdata count */
-		kret = krb5_ser_pack_int32(i, &bp, &remain);
-		if (!kret && ctx->authdata) {
-		    /* authdata */
-		    for (i = 0; !kret && ctx->authdata[i]; i++)
-			kret = krb5_externalize_opaque(kcontext,
-						       KV5M_AUTHDATA,
-						       ctx->authdata[i],
-						       &bp,
-						       &remain);
-		}
-	    }
+                if (ctx->authdata) {
+                    for (; ctx->authdata[i]; i++)
+                        ;
+                }
+                /* authdata count */
+                kret = krb5_ser_pack_int32(i, &bp, &remain);
+                if (!kret && ctx->authdata) {
+                    /* authdata */
+                    for (i = 0; !kret && ctx->authdata[i]; i++)
+                        kret = krb5_externalize_opaque(kcontext,
+                                                       KV5M_AUTHDATA,
+                                                       ctx->authdata[i],
+                                                       &bp,
+                                                       &remain);
+                }
+            }
             /* trailer */
             if (!kret)
                 kret = krb5_ser_pack_int32(KG_CONTEXT, &bp, &remain);
@@ -697,27 +697,27 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             if (!kret)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->cred_rcache = ibuf;
-	    /* authdata */
+            /* authdata */
             if (!kret)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    if (!kret) {
-		krb5_int32 nadata = ibuf, i;
+            if (!kret) {
+                krb5_int32 nadata = ibuf, i;
 
-		if (nadata > 0) {
-		    ctx->authdata = (krb5_authdata **)calloc((size_t)nadata + 1,
-							     sizeof(krb5_authdata *));
-		    if (ctx->authdata == NULL) {
-			kret = ENOMEM;
-		    } else {
-			for (i = 0; !kret && i < nadata; i++)
-			    kret = krb5_internalize_opaque(kcontext,
-							   KV5M_AUTHDATA,
-							   (krb5_pointer *)&ctx->authdata[i],
-							   &bp,
-							   &remain);
-		    }
-		}
-	    }
+                if (nadata > 0) {
+                    ctx->authdata = (krb5_authdata **)calloc((size_t)nadata + 1,
+                                                             sizeof(krb5_authdata *));
+                    if (ctx->authdata == NULL) {
+                        kret = ENOMEM;
+                    } else {
+                        for (i = 0; !kret && i < nadata; i++)
+                            kret = krb5_internalize_opaque(kcontext,
+                                                           KV5M_AUTHDATA,
+                                                           (krb5_pointer *)&ctx->authdata[i],
+                                                           &bp,
+                                                           &remain);
+                    }
+                }
+            }
             /* Get trailer */
             if (!kret)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);

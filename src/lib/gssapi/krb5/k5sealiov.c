@@ -28,19 +28,19 @@
  */
 
 #include <assert.h>
-#include "k5-platform.h"	/* for 64-bit support */
-#include "k5-int.h"	     /* for zap() */
+#include "k5-platform.h"        /* for 64-bit support */
+#include "k5-int.h"          /* for zap() */
 #include "gssapiP_krb5.h"
 #include <stdarg.h>
 
 static krb5_error_code
 make_seal_token_v1_iov(krb5_context context,
-		       krb5_gss_ctx_id_rec *ctx,
-		       int conf_req_flag,
-		       int *conf_state,
-		       gss_iov_buffer_desc *iov,
-		       int iov_count,
-		       int toktype)
+                       krb5_gss_ctx_id_rec *ctx,
+                       int conf_req_flag,
+                       int *conf_state,
+                       gss_iov_buffer_desc *iov,
+                       int iov_count,
+                       int toktype)
 {
     krb5_error_code code = 0;
     gss_iov_buffer_t header;
@@ -61,58 +61,58 @@ make_seal_token_v1_iov(krb5_context context,
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL)
-	return EINVAL;
+        return EINVAL;
 
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL && (ctx->gss_flags & GSS_C_DCE_STYLE) == 0)
-	return EINVAL;
+        return EINVAL;
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL)
-	trailer->buffer.length = 0;
+        trailer->buffer.length = 0;
 
     /* Determine confounder length */
     if (toktype == KG_TOK_WRAP_MSG || conf_req_flag)
-	k5_headerlen = kg_confounder_size(context, ctx->enc);
+        k5_headerlen = kg_confounder_size(context, ctx->enc);
 
     /* Check padding length */
     if (toktype == KG_TOK_WRAP_MSG) {
-	size_t k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
-	size_t gss_padlen;
-	size_t conf_data_length;
+        size_t k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+        size_t gss_padlen;
+        size_t conf_data_length;
 
-	kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
-	conf_data_length = k5_headerlen + data_length - assoc_data_length;
+        kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
+        conf_data_length = k5_headerlen + data_length - assoc_data_length;
 
-	if (k5_padlen == 1)
-	    gss_padlen = 1; /* one byte to indicate one byte of padding */
-	else
-	    gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
+        if (k5_padlen == 1)
+            gss_padlen = 1; /* one byte to indicate one byte of padding */
+        else
+            gss_padlen = k5_padlen - (conf_data_length % k5_padlen);
 
-	if (ctx->gss_flags & GSS_C_DCE_STYLE) {
-	    /* DCE will pad the actual data itself; padding buffer optional and will be zeroed */
-	    gss_padlen = 0;
+        if (ctx->gss_flags & GSS_C_DCE_STYLE) {
+            /* DCE will pad the actual data itself; padding buffer optional and will be zeroed */
+            gss_padlen = 0;
 
-	    if (conf_data_length % k5_padlen)
-		code = KRB5_BAD_MSIZE;
-	} else if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
-	    code = kg_allocate_iov(padding, gss_padlen);
-	} else if (padding->buffer.length < gss_padlen) {
-	    code = KRB5_BAD_MSIZE;
-	}
-	if (code != 0)
-	    goto cleanup;
+            if (conf_data_length % k5_padlen)
+                code = KRB5_BAD_MSIZE;
+        } else if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
+            code = kg_allocate_iov(padding, gss_padlen);
+        } else if (padding->buffer.length < gss_padlen) {
+            code = KRB5_BAD_MSIZE;
+        }
+        if (code != 0)
+            goto cleanup;
 
-	/* Initialize padding buffer to pad itself */
-	if (padding != NULL) {
-	    padding->buffer.length = gss_padlen;
-	    memset(padding->buffer.value, (int)gss_padlen, gss_padlen);
-	}
+        /* Initialize padding buffer to pad itself */
+        if (padding != NULL) {
+            padding->buffer.length = gss_padlen;
+            memset(padding->buffer.value, (int)gss_padlen, gss_padlen);
+        }
 
-	if (ctx->gss_flags & GSS_C_DCE_STYLE)
-	    tmsglen = k5_headerlen; /* confounder length */
-	else
-	    tmsglen = conf_data_length + padding->buffer.length;
+        if (ctx->gss_flags & GSS_C_DCE_STYLE)
+            tmsglen = k5_headerlen; /* confounder length */
+        else
+            tmsglen = conf_data_length + padding->buffer.length;
     }
 
     /* Determine token size */
@@ -121,11 +121,11 @@ make_seal_token_v1_iov(krb5_context context,
     k5_headerlen += tlen - tmsglen;
 
     if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-	code = kg_allocate_iov(header, k5_headerlen);
+        code = kg_allocate_iov(header, k5_headerlen);
     else if (header->buffer.length < k5_headerlen)
-	code = KRB5_BAD_MSIZE;
+        code = KRB5_BAD_MSIZE;
     if (code != 0)
-	goto cleanup;
+        goto cleanup;
 
     header->buffer.length = k5_headerlen;
 
@@ -138,12 +138,12 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* 2..3 SEAL_ALG or Filler */
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
-	ptr[2] = (ctx->sealalg     ) & 0xFF;
-	ptr[3] = (ctx->sealalg >> 8) & 0xFF;
+        ptr[2] = (ctx->sealalg     ) & 0xFF;
+        ptr[3] = (ctx->sealalg >> 8) & 0xFF;
     } else {
-	/* No seal */
-	ptr[2] = 0xFF;
-	ptr[3] = 0xFF;
+        /* No seal */
+        ptr[2] = 0xFF;
+        ptr[3] = 0xFF;
     }
 
     /* 4..5 Filler */
@@ -156,103 +156,103 @@ make_seal_token_v1_iov(krb5_context context,
     switch (ctx->signalg) {
     case SGN_ALG_DES_MAC_MD5:
     case SGN_ALG_MD2_5:
-	md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
-	break;
+        md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
+        break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
-	md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
-	break;
+        md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
+        break;
     case SGN_ALG_HMAC_MD5:
-	md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-	if (toktype != KG_TOK_WRAP_MSG)
-	    sign_usage = 15;
-	break;
+        md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
+        if (toktype != KG_TOK_WRAP_MSG)
+            sign_usage = 15;
+        break;
     default:
     case SGN_ALG_DES_MAC:
-	abort ();
+        abort ();
     }
 
     code = krb5_c_checksum_length(context, md5cksum.checksum_type, &k5_trailerlen);
     if (code != 0)
-	goto cleanup;
+        goto cleanup;
     md5cksum.length = k5_trailerlen;
 
     if (k5_headerlen != 0) {
-	code = kg_make_confounder(context, ctx->enc, ptr + 14 + ctx->cksum_size);
-	if (code != 0)
-	    goto cleanup;
+        code = kg_make_confounder(context, ctx->enc, ptr + 14 + ctx->cksum_size);
+        if (code != 0)
+            goto cleanup;
     }
 
     /* compute the checksum */
     code = kg_make_checksum_iov_v1(context, md5cksum.checksum_type,
-				   ctx->cksum_size, ctx->seq, ctx->enc,
-				   sign_usage, iov, iov_count, toktype,
-				   &md5cksum);
+                                   ctx->cksum_size, ctx->seq, ctx->enc,
+                                   sign_usage, iov, iov_count, toktype,
+                                   &md5cksum);
     if (code != 0)
-	goto cleanup;
+        goto cleanup;
 
     switch (ctx->signalg) {
     case SGN_ALG_DES_MAC_MD5:
     case SGN_ALG_3:
-	code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
-			  (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
-			   ctx->seq->contents : NULL),
-			  md5cksum.contents, md5cksum.contents, 16);
-	if (code != 0)
-	    goto cleanup;
+        code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
+                          (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
+                           ctx->seq->contents : NULL),
+                          md5cksum.contents, md5cksum.contents, 16);
+        if (code != 0)
+            goto cleanup;
 
-	cksum.length = ctx->cksum_size;
-	cksum.contents = md5cksum.contents + 16 - cksum.length;
+        cksum.length = ctx->cksum_size;
+        cksum.contents = md5cksum.contents + 16 - cksum.length;
 
-	memcpy(ptr + 14, cksum.contents, cksum.length);
-	break;
+        memcpy(ptr + 14, cksum.contents, cksum.length);
+        break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
-	assert(md5cksum.length == ctx->cksum_size);
-	memcpy(ptr + 14, md5cksum.contents, md5cksum.length);
-	break;
+        assert(md5cksum.length == ctx->cksum_size);
+        memcpy(ptr + 14, md5cksum.contents, md5cksum.length);
+        break;
     case SGN_ALG_HMAC_MD5:
-	memcpy(ptr + 14, md5cksum.contents, ctx->cksum_size);
-	break;
+        memcpy(ptr + 14, md5cksum.contents, ctx->cksum_size);
+        break;
     }
 
     /* create the seq_num */
     code = kg_make_seq_num(context, ctx->seq, ctx->initiate ? 0 : 0xFF,
-			   (OM_uint32)ctx->seq_send, ptr + 14, ptr + 6);
+                           (OM_uint32)ctx->seq_send, ptr + 14, ptr + 6);
     if (code != 0)
-	goto cleanup;
+        goto cleanup;
 
     if (conf_req_flag) {
-	if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) {
-	    unsigned char bigend_seqnum[4];
-	    krb5_keyblock *enc_key;
-	    size_t i;
+        if (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) {
+            unsigned char bigend_seqnum[4];
+            krb5_keyblock *enc_key;
+            size_t i;
 
-	    bigend_seqnum[0] = (ctx->seq_send >> 24) & 0xFF;
-	    bigend_seqnum[1] = (ctx->seq_send >> 16) & 0xFF;
-	    bigend_seqnum[2] = (ctx->seq_send >> 8 ) & 0xFF;
-	    bigend_seqnum[3] = (ctx->seq_send      ) & 0xFF;
+            bigend_seqnum[0] = (ctx->seq_send >> 24) & 0xFF;
+            bigend_seqnum[1] = (ctx->seq_send >> 16) & 0xFF;
+            bigend_seqnum[2] = (ctx->seq_send >> 8 ) & 0xFF;
+            bigend_seqnum[3] = (ctx->seq_send      ) & 0xFF;
 
-	    code = krb5_copy_keyblock(context, ctx->enc, &enc_key);
-	    if (code != 0)
-		goto cleanup;
+            code = krb5_copy_keyblock(context, ctx->enc, &enc_key);
+            if (code != 0)
+                goto cleanup;
 
-	    assert(enc_key->length == 16);
+            assert(enc_key->length == 16);
 
-	    for (i = 0; i < enc_key->length; i++)
-		((char *)enc_key->contents)[i] ^= 0xF0;
+            for (i = 0; i < enc_key->length; i++)
+                ((char *)enc_key->contents)[i] ^= 0xF0;
 
-	    code = kg_arcfour_docrypt_iov(context, enc_key, 0,
-					  bigend_seqnum, 4,
-					  iov, iov_count);
-	    krb5_free_keyblock(context, enc_key);
-	} else {
-	    code = kg_encrypt_iov(context, ctx->proto,
-				  ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
-				  0 /*EC*/, 0 /*RRC*/,
-				  ctx->enc, KG_USAGE_SEAL, NULL,
-				  iov, iov_count);
-	}
-	if (code != 0)
-	    goto cleanup;
+            code = kg_arcfour_docrypt_iov(context, enc_key, 0,
+                                          bigend_seqnum, 4,
+                                          iov, iov_count);
+            krb5_free_keyblock(context, enc_key);
+        } else {
+            code = kg_encrypt_iov(context, ctx->proto,
+                                  ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0),
+                                  0 /*EC*/, 0 /*RRC*/,
+                                  ctx->enc, KG_USAGE_SEAL, NULL,
+                                  iov, iov_count);
+        }
+        if (code != 0)
+            goto cleanup;
     }
 
     ctx->seq_send++;
@@ -261,11 +261,11 @@ make_seal_token_v1_iov(krb5_context context,
     code = 0;
 
     if (conf_state != NULL)
-	*conf_state = conf_req_flag;
+        *conf_state = conf_req_flag;
 
 cleanup:
     if (code != 0)
-	kg_release_iov(iov, iov_count);
+        kg_release_iov(iov, iov_count);
     krb5_free_checksum_contents(context, &md5cksum);
 
     return code;
@@ -273,13 +273,13 @@ cleanup:
 
 OM_uint32
 kg_seal_iov(OM_uint32 *minor_status,
-	    gss_ctx_id_t context_handle,
-	    int conf_req_flag,
-	    gss_qop_t qop_req,
-	    int *conf_state,
-	    gss_iov_buffer_desc *iov,
-	    int iov_count,
-	    int toktype)
+            gss_ctx_id_t context_handle,
+            int conf_req_flag,
+            gss_qop_t qop_req,
+            int *conf_state,
+            gss_iov_buffer_desc *iov,
+            int iov_count,
+            int toktype)
 {
     krb5_gss_ctx_id_rec *ctx;
     krb5_error_code code;
@@ -287,52 +287,52 @@ kg_seal_iov(OM_uint32 *minor_status,
     krb5_context context;
 
     if (qop_req != 0) {
-	*minor_status = (OM_uint32)G_UNKNOWN_QOP;
-	return GSS_S_FAILURE;
+        *minor_status = (OM_uint32)G_UNKNOWN_QOP;
+        return GSS_S_FAILURE;
     }
 
     if (!kg_validate_ctx_id(context_handle)) {
-	*minor_status = (OM_uint32)G_VALIDATE_FAILED;
-	return GSS_S_NO_CONTEXT;
+        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
+        return GSS_S_NO_CONTEXT;
     }
 
     ctx = (krb5_gss_ctx_id_rec *)context_handle;
     if (!ctx->established) {
-	*minor_status = KG_CTX_INCOMPLETE;
-	return GSS_S_NO_CONTEXT;
+        *minor_status = KG_CTX_INCOMPLETE;
+        return GSS_S_NO_CONTEXT;
     }
 
     context = ctx->k5_context;
     code = krb5_timeofday(context, &now);
     if (code != 0) {
-	*minor_status = code;
-	save_error_info(*minor_status, context);
-	return GSS_S_FAILURE;
+        *minor_status = code;
+        save_error_info(*minor_status, context);
+        return GSS_S_FAILURE;
     }
 
     if (conf_req_flag && kg_integ_only_iov(iov, iov_count)) {
-	/* may be more sensible to return an error here */
-	conf_req_flag = FALSE;
+        /* may be more sensible to return an error here */
+        conf_req_flag = FALSE;
     }
 
     switch (ctx->proto) {
     case 0:
-	code = make_seal_token_v1_iov(context, ctx, conf_req_flag,
-				      conf_state, iov, iov_count, toktype);
-	break;
+        code = make_seal_token_v1_iov(context, ctx, conf_req_flag,
+                                      conf_state, iov, iov_count, toktype);
+        break;
     case 1:
-	code = gss_krb5int_make_seal_token_v3_iov(context, ctx, conf_req_flag,
-						  conf_state, iov, iov_count, toktype);
-	break;
+        code = gss_krb5int_make_seal_token_v3_iov(context, ctx, conf_req_flag,
+                                                  conf_state, iov, iov_count, toktype);
+        break;
     default:
-	code = G_UNKNOWN_QOP;
-	break;
+        code = G_UNKNOWN_QOP;
+        break;
     }
 
     if (code != 0) {
-	*minor_status = code;
-	save_error_info(*minor_status, context);
-	return GSS_S_FAILURE;
+        *minor_status = code;
+        save_error_info(*minor_status, context);
+        return GSS_S_FAILURE;
     }
 
     *minor_status = 0;
@@ -340,18 +340,18 @@ kg_seal_iov(OM_uint32 *minor_status,
     return (ctx->krb_times.endtime < now) ? GSS_S_CONTEXT_EXPIRED : GSS_S_COMPLETE;
 }
 
-#define INIT_IOV_DATA(_iov)	do { (_iov)->buffer.value = NULL; \
-				     (_iov)->buffer.length = 0; } \
-				while (0)
+#define INIT_IOV_DATA(_iov)     do { (_iov)->buffer.value = NULL; \
+                                     (_iov)->buffer.length = 0; } \
+                                while (0)
 
 OM_uint32
 kg_seal_iov_length(OM_uint32 *minor_status,
-		   gss_ctx_id_t context_handle,
-		   int conf_req_flag,
-		   gss_qop_t qop_req,
-		   int *conf_state,
-		   gss_iov_buffer_desc *iov,
-		   int iov_count)
+                   gss_ctx_id_t context_handle,
+                   int conf_req_flag,
+                   gss_qop_t qop_req,
+                   int *conf_state,
+                   gss_iov_buffer_desc *iov,
+                   int iov_count)
 {
     krb5_gss_ctx_id_rec *ctx;
     gss_iov_buffer_t header, trailer, padding;
@@ -363,31 +363,31 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     int dce_style;
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
-	*minor_status = (OM_uint32)G_UNKNOWN_QOP;
-	return GSS_S_FAILURE;
+        *minor_status = (OM_uint32)G_UNKNOWN_QOP;
+        return GSS_S_FAILURE;
     }
 
     if (!kg_validate_ctx_id(context_handle)) {
-	*minor_status = (OM_uint32)G_VALIDATE_FAILED;
-	return GSS_S_NO_CONTEXT;
+        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
+        return GSS_S_NO_CONTEXT;
     }
 
     ctx = (krb5_gss_ctx_id_rec *)context_handle;
     if (!ctx->established) {
-	*minor_status = KG_CTX_INCOMPLETE;
-	return GSS_S_NO_CONTEXT;
+        *minor_status = KG_CTX_INCOMPLETE;
+        return GSS_S_NO_CONTEXT;
     }
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL) {
-	*minor_status = EINVAL;
-	return GSS_S_FAILURE;
+        *minor_status = EINVAL;
+        return GSS_S_FAILURE;
     }
     INIT_IOV_DATA(header);
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
     if (trailer != NULL) {
-	INIT_IOV_DATA(trailer);
+        INIT_IOV_DATA(trailer);
     }
 
     dce_style = ((ctx->gss_flags & GSS_C_DCE_STYLE) != 0);
@@ -395,123 +395,122 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     /* For CFX, EC is used instead of padding, and is placed in header or trailer */
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
     if (padding == NULL) {
-	if (conf_req_flag && ctx->proto == 0 && !dce_style) {
-	    *minor_status = EINVAL;
-	    return GSS_S_FAILURE;
-	}
+        if (conf_req_flag && ctx->proto == 0 && !dce_style) {
+            *minor_status = EINVAL;
+            return GSS_S_FAILURE;
+        }
     } else {
-	INIT_IOV_DATA(padding);
+        INIT_IOV_DATA(padding);
     }
 
     kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
 
     if (conf_req_flag && kg_integ_only_iov(iov, iov_count))
-	conf_req_flag = FALSE;
+        conf_req_flag = FALSE;
 
     context = ctx->k5_context;
 
     gss_headerlen = gss_padlen = gss_trailerlen = 0;
 
     if (ctx->proto == 1) {
-	krb5_enctype enctype;
-	size_t ec;
+        krb5_enctype enctype;
+        size_t ec;
 
-	if (ctx->have_acceptor_subkey)
-	    enctype = ctx->acceptor_subkey->enctype;
-	else
-	    enctype = ctx->subkey->enctype;
+        if (ctx->have_acceptor_subkey)
+            enctype = ctx->acceptor_subkey->enctype;
+        else
+            enctype = ctx->subkey->enctype;
 
-	code = krb5_c_crypto_length(context, enctype,
-				    conf_req_flag ?
-					KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM,
-				    &k5_trailerlen);
-	if (code != 0) {
-	    *minor_status = code;
-	    return GSS_S_FAILURE;
-	}
+        code = krb5_c_crypto_length(context, enctype,
+                                    conf_req_flag ?
+                                        KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM,
+                                    &k5_trailerlen);
+        if (code != 0) {
+            *minor_status = code;
+            return GSS_S_FAILURE;
+        }
 
-	if (conf_req_flag) {
-	    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
-	    if (code != 0) {
-		*minor_status = code;
-		return GSS_S_FAILURE;
-	    }
-	}
+        if (conf_req_flag) {
+            code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
+            if (code != 0) {
+                *minor_status = code;
+                return GSS_S_FAILURE;
+            }
+        }
 
-	gss_headerlen = 16; /* Header */
-	if (conf_req_flag) {
-	    gss_headerlen += k5_headerlen; /* Kerb-Header */
-	    gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
+        gss_headerlen = 16; /* Header */
+        if (conf_req_flag) {
+            gss_headerlen += k5_headerlen; /* Kerb-Header */
+            gss_trailerlen = 16 /* E(Header) */ + k5_trailerlen; /* Kerb-Trailer */
 
-	    code = krb5_c_padding_length(context, enctype,
-					 data_length - assoc_data_length + 16 /* E(Header) */, &k5_padlen);
-	    if (code != 0) {
-		*minor_status = code;
-		return GSS_S_FAILURE;
-	    }
-	 
-	    if (k5_padlen == 0 && dce_style) {
-		/* Windows rejects AEAD tokens with non-zero EC */
-		code = krb5_c_block_size(context, enctype, &ec);
-		if (code != 0) {
-		    *minor_status = code;
-		    return GSS_S_FAILURE;
-		}
-	    } else
-		ec = k5_padlen;
+            code = krb5_c_padding_length(context, enctype,
+                                         data_length - assoc_data_length + 16 /* E(Header) */, &k5_padlen);
+            if (code != 0) {
+                *minor_status = code;
+                return GSS_S_FAILURE;
+            }
 
-	    gss_trailerlen += ec;
-	} else {
-	    gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
-	}
+            if (k5_padlen == 0 && dce_style) {
+                /* Windows rejects AEAD tokens with non-zero EC */
+                code = krb5_c_block_size(context, enctype, &ec);
+                if (code != 0) {
+                    *minor_status = code;
+                    return GSS_S_FAILURE;
+                }
+            } else
+                ec = k5_padlen;
+
+            gss_trailerlen += ec;
+        } else {
+            gss_trailerlen = k5_trailerlen; /* Kerb-Checksum */
+        }
     } else if (!dce_style) {
-	k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
+        k5_padlen = (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4) ? 1 : 8;
 
-	if (k5_padlen == 1)
-	    gss_padlen = 1;
-	else
-	    gss_padlen = k5_padlen - ((data_length - assoc_data_length) % k5_padlen);
+        if (k5_padlen == 1)
+            gss_padlen = 1;
+        else
+            gss_padlen = k5_padlen - ((data_length - assoc_data_length) % k5_padlen);
     }
 
     data_length += gss_padlen;
 
     if (ctx->proto == 0) {
-	/* Header | Checksum | Confounder | Data | Pad */
-	size_t data_size;
+        /* Header | Checksum | Confounder | Data | Pad */
+        size_t data_size;
 
-	k5_headerlen = kg_confounder_size(context, ctx->enc);
+        k5_headerlen = kg_confounder_size(context, ctx->enc);
 
-	data_size = 14 /* Header */ + ctx->cksum_size + k5_headerlen;
+        data_size = 14 /* Header */ + ctx->cksum_size + k5_headerlen;
 
-	if (!dce_style)
-	    data_size += data_length;
+        if (!dce_style)
+            data_size += data_length;
 
-	gss_headerlen = g_token_size(ctx->mech_used, data_size);
+        gss_headerlen = g_token_size(ctx->mech_used, data_size);
 
-	/* g_token_size() will include data_size as well as the overhead, so
-	 * subtract data_length just to get the overhead (ie. token size) */
-	if (!dce_style)
-	    gss_headerlen -= data_length;
+        /* g_token_size() will include data_size as well as the overhead, so
+         * subtract data_length just to get the overhead (ie. token size) */
+        if (!dce_style)
+            gss_headerlen -= data_length;
     }
 
     if (minor_status != NULL)
-	*minor_status = 0;
+        *minor_status = 0;
 
     if (trailer == NULL)
-	gss_headerlen += gss_trailerlen;
+        gss_headerlen += gss_trailerlen;
     else
-	trailer->buffer.length = gss_trailerlen;
+        trailer->buffer.length = gss_trailerlen;
 
     assert(gss_padlen == 0 || padding != NULL);
 
     if (padding != NULL)
-	padding->buffer.length = gss_padlen;
+        padding->buffer.length = gss_padlen;
 
     header->buffer.length = gss_headerlen;
 
     if (conf_state != NULL)
-	*conf_state = conf_req_flag;
+        *conf_state = conf_req_flag;
 
     return GSS_S_COMPLETE;
 }
-

@@ -1163,6 +1163,7 @@ make_too_big_error (krb5_data **out)
     krb5_error_code retval;
     krb5_data *scratch;
 
+    *out = NULL;
     memset(&errpkt, 0, sizeof(errpkt));
 
     retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);

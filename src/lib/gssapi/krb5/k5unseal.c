@@ -527,8 +527,8 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
     }
 
     if (bodysize < 2) {
-	*minor_status = (OM_uint32)G_BAD_TOK_HEADER;
-	return GSS_S_DEFECTIVE_TOKEN;
+        *minor_status = (OM_uint32)G_BAD_TOK_HEADER;
+        return GSS_S_DEFECTIVE_TOKEN;
     }
 
     toktype2 = load_16_be(ptr);
@@ -543,18 +543,18 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
         ret = gss_krb5int_unseal_token_v3(&ctx->k5_context, minor_status, ctx,
                                           ptr, bodysize, message_buffer,
                                           conf_state, qop_state, toktype);
-	break;
+        break;
     case KG_TOK_MIC_MSG:
     case KG_TOK_WRAP_MSG:
     case KG_TOK_DEL_CTX:
         ret = kg_unseal_v1(ctx->k5_context, minor_status, ctx, ptr, bodysize,
                            message_buffer, conf_state, qop_state,
                            toktype);
-	break;
+        break;
     default:
-	*minor_status = (OM_uint32)G_BAD_TOK_HEADER;
-	ret = GSS_S_DEFECTIVE_TOKEN;
-	break;
+        *minor_status = (OM_uint32)G_BAD_TOK_HEADER;
+        ret = GSS_S_DEFECTIVE_TOKEN;
+        break;
     }
 
     if (ret != 0)

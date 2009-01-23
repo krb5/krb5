@@ -61,7 +61,7 @@
 
 
 asn1_error_code asn1_decode_boolean
-	(asn1buf *buf, unsigned int *val);
+        (asn1buf *buf, unsigned int *val);
 asn1_error_code asn1_decode_integer
         (asn1buf *buf, long *val);
 asn1_error_code asn1_decode_unsigned_integer

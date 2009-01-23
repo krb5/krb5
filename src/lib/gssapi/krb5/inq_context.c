@@ -211,33 +211,33 @@ gss_krb5int_inq_session_key(
 
     major_status = generic_gss_add_buffer_set_member(minor_status, &keyvalue, data_set);
     if (GSS_ERROR(major_status))
-	goto cleanup;
+        goto cleanup;
 
     oid.elements = oid_buf;
     oid.length = sizeof(oid_buf);
 
     major_status = generic_gss_oid_compose(minor_status,
-					   GSS_KRB5_SESSION_KEY_ENCTYPE_OID,
-					   GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH,
-					   key->enctype,
-					   &oid);
+                                           GSS_KRB5_SESSION_KEY_ENCTYPE_OID,
+                                           GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH,
+                                           key->enctype,
+                                           &oid);
     if (GSS_ERROR(major_status))
-	goto cleanup;
+        goto cleanup;
 
     keyinfo.value = oid.elements;
     keyinfo.length = oid.length;
 
     major_status = generic_gss_add_buffer_set_member(minor_status, &keyinfo, data_set);
     if (GSS_ERROR(major_status))
-	goto cleanup;
+        goto cleanup;
 
     return GSS_S_COMPLETE;
 
 cleanup:
     if (*data_set != GSS_C_NO_BUFFER_SET) {
-	if ((*data_set)->count != 0)
-	    memset((*data_set)->elements[0].value, 0, (*data_set)->elements[0].length);
-	gss_release_buffer_set(&minor, data_set);
+        if ((*data_set)->count != 0)
+            memset((*data_set)->elements[0].value, 0, (*data_set)->elements[0].length);
+        gss_release_buffer_set(&minor, data_set);
     }
 
     return major_status;
@@ -260,35 +260,35 @@ gss_krb5int_extract_authz_data_from_sec_context(
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
     major_status = generic_gss_oid_decompose(minor_status,
-					     GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID,
-					     GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH,
-					     desired_object,
-					     &ad_type);
+                                             GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID,
+                                             GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH,
+                                             desired_object,
+                                             &ad_type);
     if (major_status != GSS_S_COMPLETE || ad_type == 0) {
-	*minor_status = ENOENT;
-	return GSS_S_FAILURE;
+        *minor_status = ENOENT;
+        return GSS_S_FAILURE;
     }
 
     if (ctx->authdata != NULL) {
-	for (i = 0; ctx->authdata[i] != NULL; i++) {
-	    if (ctx->authdata[i]->ad_type == ad_type) {
-		gss_buffer_desc ad_data;
+        for (i = 0; ctx->authdata[i] != NULL; i++) {
+            if (ctx->authdata[i]->ad_type == ad_type) {
+                gss_buffer_desc ad_data;
 
-		ad_data.length = ctx->authdata[i]->length;
-		ad_data.value = ctx->authdata[i]->contents;
+                ad_data.length = ctx->authdata[i]->length;
+                ad_data.value = ctx->authdata[i]->contents;
 
-		major_status = generic_gss_add_buffer_set_member(minor_status,
-								 &ad_data, data_set);
-		if (GSS_ERROR(major_status))
-		    break;
-	    }
-	}
+                major_status = generic_gss_add_buffer_set_member(minor_status,
+                                                                 &ad_data, data_set);
+                if (GSS_ERROR(major_status))
+                    break;
+            }
+        }
     }
 
     if (GSS_ERROR(major_status)) {
-	OM_uint32 tmp;
+        OM_uint32 tmp;
 
-	generic_gss_release_buffer_set(&tmp, data_set);
+        generic_gss_release_buffer_set(&tmp, data_set);
     }
 
     return major_status;
@@ -296,7 +296,7 @@ gss_krb5int_extract_authz_data_from_sec_context(
 
 OM_uint32
 gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *minor_status,
-					      const gss_ctx_id_t context_handle,
+                                              const gss_ctx_id_t context_handle,
                                               const gss_OID desired_oid,
                                               gss_buffer_set_t *data_set)
 {

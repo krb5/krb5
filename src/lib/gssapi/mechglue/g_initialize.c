@@ -1111,9 +1111,7 @@ const char *fileName;
 			for (endp = modOptions;
 				*endp && *endp != ']'; endp++);
 
-			if (endp)
-				*endp = '\0';
-
+			*endp = '\0';
 		} else {
 			modOptions = NULL;
 		}

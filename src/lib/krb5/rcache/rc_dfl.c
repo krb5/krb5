@@ -396,7 +396,7 @@ parse_counted_string(char **strptr, char **result)
  * Hash extension records have the format:
  *  client = <empty string>
  *  server = HASH:<msghash> <clientlen>:<client> <serverlen>:<server>
- * Spaces in the client and server string are represented with 
+ * Spaces in the client and server string are represented with
  * with backslashes.  Client and server lengths are represented in
  * ASCII decimal (which is different from the 32-bit binary we use
  * elsewhere in the replay cache).
@@ -658,8 +658,8 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
     size_t clientlen, serverlen;
     unsigned int len;
     krb5_error_code ret;
-    struct k5buf buf;
-    char *ptr;
+    struct k5buf buf, extbuf;
+    char *ptr, *extstr;
 
     clientlen = strlen(rep->client);
     serverlen = strlen(rep->server);
@@ -670,8 +670,6 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
          * in regular format (without the message hash) for the
          * benefit of old implementations.
          */
-        struct k5buf extbuf;
-        char *extstr;
 
         /* Format the extension value so we know its length. */
         krb5int_buf_init_dynamic(&extbuf);

@@ -45,25 +45,25 @@ g_canonicalize_host(char *hostname)
     char *canon, *str;
 
     if ((hent = gethostbyname(hostname)) == NULL)
-	return(NULL);
+        return(NULL);
 
     if (! (haddr = (char *) xmalloc(hent->h_length))) {
-	return(NULL);
+        return(NULL);
     }
 
     memcpy(haddr, hent->h_addr_list[0], hent->h_length);
 
     if (! (hent = gethostbyaddr(haddr, hent->h_length, hent->h_addrtype))) {
-	return(NULL);
+        return(NULL);
     }
 
     xfree(haddr);
 
     if ((canon = (char *) strdup(hent->h_name)) == NULL)
-	return(NULL);
+        return(NULL);
 
     for (str = canon; *str; str++)
-	if (isupper(*str)) *str = tolower(*str);
+        if (isupper(*str)) *str = tolower(*str);
 
     return(canon);
 }

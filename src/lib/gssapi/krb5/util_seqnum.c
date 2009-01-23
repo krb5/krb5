@@ -45,7 +45,7 @@ kg_make_seq_num(context, key, direction, seqnum, cksum, buf)
     plain[6] = direction;
     plain[7] = direction;
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
-	key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+        key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
         /* Yes, Microsoft used big-endian sequence number.*/
         plain[0] = (seqnum>>24) & 0xff;
         plain[1] = (seqnum>>16) & 0xff;
@@ -78,7 +78,7 @@ krb5_error_code kg_get_seq_num(context, key, cksum, buf, direction, seqnum)
     unsigned char plain[8];
 
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
-	key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+        key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
         code = kg_arcfour_docrypt (key, 0,
                                    cksum, 8,
                                    buf, 8,
@@ -96,7 +96,7 @@ krb5_error_code kg_get_seq_num(context, key, cksum, buf, direction, seqnum)
 
     *direction = plain[4];
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
-	key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+        key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
         *seqnum = (plain[3]|(plain[2]<<8) | (plain[1]<<16)| (plain[0]<<24));
     } else {
         *seqnum = ((plain[0]) |

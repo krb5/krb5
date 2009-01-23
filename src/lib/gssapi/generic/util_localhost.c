@@ -41,7 +41,7 @@ g_local_host_name(void)
     char buf[MAXHOSTNAMELEN+1], *ptr;
 
     if (gethostname(buf, sizeof(buf)) < 0)
-	return 0;
+        return 0;
 
     buf[sizeof(buf)-1] = '\0';
 

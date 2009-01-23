@@ -52,7 +52,7 @@
 */
 
 asn1_error_code asn1_encode_boolean
-	(asn1buf *buf, asn1_intmax val, unsigned int *retlen);
+        (asn1buf *buf, asn1_intmax val, unsigned int *retlen);
 asn1_error_code asn1_encode_integer
         (asn1buf *buf, asn1_intmax val, unsigned int *retlen);
 /* requires  *buf is allocated

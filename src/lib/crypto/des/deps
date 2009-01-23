@@ -30,7 +30,8 @@ d3_aead.so d3_aead.po $(OUTPRE)d3_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../aead.h d3_aead.c des_int.h f_tables.h
+  $(srcdir)/../aead.h $(srcdir)/../cksumtypes.h d3_aead.c \
+  des_int.h f_tables.h
 d3_kysched.so d3_kysched.po $(OUTPRE)d3_kysched.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -50,7 +51,8 @@ f_aead.so f_aead.po $(OUTPRE)f_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../aead.h des_int.h f_aead.c f_tables.h
+  $(srcdir)/../aead.h $(srcdir)/../cksumtypes.h des_int.h \
+  f_aead.c f_tables.h
 f_cbc.so f_cbc.po $(OUTPRE)f_cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \

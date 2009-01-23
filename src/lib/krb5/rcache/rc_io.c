@@ -223,7 +223,7 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
     krb5_error_code retval = 0;
     int do_not_unlink = 1;
 #ifndef NO_USERID
-    struct stat statb;
+    struct stat sb1, sb2;
 #endif
     char *dir;
     size_t dirlen;
@@ -239,24 +239,50 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 
 #ifdef NO_USERID
     d->fd = THREEPARAMOPEN(d->fn, O_RDWR | O_BINARY, 0600);
-#else
-    if ((d->fd = stat(d->fn, &statb)) != -1) {
-        uid_t me;
-
-        me = geteuid();
-        /* must be owned by this user, to prevent some security problems with
-         * other users modifying replay cache stufff */
-        if ((statb.st_uid != me) || ((statb.st_mode & S_IFMT) != S_IFREG)) {
-            FREE(d->fn);
-            return KRB5_RC_IO_PERM;
-        }
-        d->fd = THREEPARAMOPEN(d->fn, O_RDWR | O_BINARY, 0600);
-    }
-#endif
     if (d->fd == -1) {
         retval = rc_map_errno(context, errno, d->fn, "open");
         goto cleanup;
     }
+#else
+    d->fd = -1;
+    retval = lstat(d->fn, &sb1);
+    if (retval != 0) {
+        retval = rc_map_errno(context, errno, d->fn, "lstat");
+        goto cleanup;
+    }
+    d->fd = THREEPARAMOPEN(d->fn, O_RDWR | O_BINARY, 0600);
+    if (d->fd < 0) {
+        retval = rc_map_errno(context, errno, d->fn, "open");
+        goto cleanup;
+    }
+    retval = fstat(d->fd, &sb2);
+    if (retval < 0) {
+        retval = rc_map_errno(context, errno, d->fn, "fstat");
+        goto cleanup;
+    }
+    /* check if someone was playing with symlinks */
+    if ((sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino)
+        || (sb1.st_mode & S_IFMT) != S_IFREG)
+        {
+            retval = KRB5_RC_IO_PERM;
+            krb5_set_error_message(context, retval,
+                                   "rcache not a file %s", d->fn);
+            goto cleanup;
+        }
+    /* check that non other can read/write/execute the file */
+    if (sb1.st_mode & 077) {
+        krb5_set_error_message(context, retval, "Insecure file mode "
+                               "for replay cache file %s", d->fn);
+        return KRB5_RC_IO_UNKNOWN;
+    }
+    /* owned by me */
+    if (sb1.st_uid != geteuid()) {
+        retval = KRB5_RC_IO_PERM;
+        krb5_set_error_message(context, retval, "rcache not owned by %d",
+                               (int)geteuid());
+        goto cleanup;
+    }
+#endif
     set_cloexec_fd(d->fd);
 
     do_not_unlink = 0;

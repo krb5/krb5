@@ -1341,6 +1341,7 @@ krb5_get_init_creds(krb5_context context,
 						 &err_reply->client->realm,
 						 &referred_client.realm);
 		krb5_free_error(context, err_reply);
+		err_reply = NULL;
 		if (ret)
 		    goto cleanup;
 		request.client = &referred_client;

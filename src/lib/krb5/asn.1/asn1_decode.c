@@ -269,9 +269,8 @@ asn1_error_code asn1_decode_boolean(asn1buf *buf, unsigned *val)
 
     retval = asn1buf_remove_octet(buf, &bval);
     if (retval) return retval;
- 
+
     *val = (bval != 0x00);
- 
+
     cleanup();
 }
-

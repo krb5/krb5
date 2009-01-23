@@ -33,9 +33,9 @@
 
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_ccache_name(OM_uint32 *minor_status,
-			const gss_OID desired_mech,
-			const gss_OID desired_object,
-			gss_buffer_t value)
+                        const gss_OID desired_mech,
+                        const gss_OID desired_object,
+                        gss_buffer_t value)
 {
     char *old_name = NULL;
     OM_uint32 err = 0;
@@ -52,7 +52,7 @@ gss_krb5int_ccache_name(OM_uint32 *minor_status,
     assert(value->length == sizeof(*req));
 
     if (value->length != sizeof(*req))
-	return GSS_S_FAILURE;
+        return GSS_S_FAILURE;
 
     req = (struct krb5_gss_ccache_name_req *)value->value;
 

@@ -10,7 +10,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -18,13 +18,13 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.	Furthermore if you modify this software you must label
+ * permission.  Furthermore if you modify this software you must label
  * your software as modified software and not distribute it in such a
  * fashion that it might be confused with the original M.I.T. software.
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * Test the k5buf string buffer module.
  */
 
@@ -35,8 +35,8 @@
 static void fail_if(int condition, const char *name)
 {
     if (condition) {
-	fprintf(stderr, "%s failed\n", name);
-	exit(1);
+        fprintf(stderr, "%s failed\n", name);
+        exit(1);
     }
 }
 
@@ -44,9 +44,9 @@ static void fail_if(int condition, const char *name)
 static void check_buf(struct k5buf *buf, const char *name)
 {
     fail_if(buf->buftype != FIXED && buf->buftype != DYNAMIC
-	    && buf->buftype != ERROR, name);
+            && buf->buftype != ERROR, name);
     if (buf->buftype == ERROR)
-	return;
+        return;
     fail_if(buf->space == 0, name);
     fail_if(buf->space > SPACE_MAX, name);
     fail_if(buf->len >= buf->space, name);
@@ -85,7 +85,7 @@ static void test_realloc()
     size_t i;
 
     for (i = 0; i < sizeof(data); i++)
-	data[i] = 'a';
+        data[i] = 'a';
 
     /* Cause the buffer size to double from 128 to 256 bytes. */
     krb5int_buf_init_dynamic(&buf);
@@ -236,7 +236,7 @@ static void test_fmt()
     size_t i;
 
     for (i = 0; i < sizeof(data) - 1; i++)
-	data[i] = 'a';
+        data[i] = 'a';
     data[i] = '\0';
 
     /* Format some text into a non-empty fixed buffer. */

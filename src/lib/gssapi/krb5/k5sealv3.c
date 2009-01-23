@@ -96,10 +96,10 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
                     : KG_USAGE_ACCEPTOR_SIGN));
     if (ctx->have_acceptor_subkey) {
         key = ctx->acceptor_subkey;
-	cksumtype = ctx->acceptor_subkey_cksumtype;
+        cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
         key = ctx->subkey;
-	cksumtype = ctx->cksumtype;
+        cksumtype = ctx->cksumtype;
     }
     assert(key != NULL);
 
@@ -184,7 +184,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #endif
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
         krb5_data plain;
-	size_t cksumsize;
+        size_t cksumsize;
 
         /* Here, message is the application-supplied data; message2 is
            what goes into the output token.  They may be the same, or
@@ -198,11 +198,11 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         if (plain.data == NULL)
             return ENOMEM;
 
-	err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
-	if (err)
-	    goto error;
+        err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
+        if (err)
+            goto error;
 
-	assert(cksumsize <= 0xffff);
+        assert(cksumsize <= 0xffff);
 
         bufsize = 16 + message2->length + cksumsize;
         outbuf = malloc(bufsize);
@@ -321,7 +321,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     krb5_cksumtype cksumtype;
 
     if (ctx->big_endian != 0)
-	goto defective;
+        goto defective;
 
     if (qop_state)
         *qop_state = GSS_C_QOP_DEFAULT;
@@ -367,10 +367,10 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     value in that case, though, so we can just ignore the flag.  */
     if (ctx->have_acceptor_subkey && (ptr[2] & FLAG_ACCEPTOR_SUBKEY)) {
         key = ctx->acceptor_subkey;
-	cksumtype = ctx->acceptor_subkey_cksumtype;
+        cksumtype = ctx->acceptor_subkey_cksumtype;
     } else {
         key = ctx->subkey;
-	cksumtype = ctx->cksumtype;
+        cksumtype = ctx->cksumtype;
     }
     assert(key != NULL);
 
@@ -429,11 +429,11 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                 message_buffer->value = NULL;
             }
         } else {
-	    size_t cksumsize;
+            size_t cksumsize;
 
-	    err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
-	    if (err)
-		goto error;
+            err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
+            if (err)
+                goto error;
 
             /* no confidentiality */
             if (conf_state)

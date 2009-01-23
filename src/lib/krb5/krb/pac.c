@@ -230,7 +230,7 @@ krb5_pac_get_buffer(krb5_context context,
 	return ret;
  
     data->data = malloc(d.length);
-    if (data == NULL)
+    if (data->data == NULL)
 	return ENOMEM;
 
     data->length = d.length;
@@ -307,25 +307,25 @@ krb5_pac_parse(krb5_context context,
 {
     krb5_error_code ret;
     size_t i;
-    PACTYPE header;
     const unsigned char *p = (const unsigned char *)ptr;
     krb5_pac pac;
     size_t header_len;
+    krb5_ui_4 cbuffers, version;
 
     *ppac = NULL;
 
     if (len < PACTYPE_LENGTH)
 	return ERANGE;
 
-    header.cBuffers = load_32_le(p);
+    cbuffers = load_32_le(p);
     p += 4;
-    header.Version = load_32_le(p);
+    version = load_32_le(p);
     p += 4;
 
-    if (header.Version != 0)
+    if (version != 0)
 	return EINVAL;
 
-    header_len = PACTYPE_LENGTH + (header.cBuffers * PAC_INFO_BUFFER_LENGTH);
+    header_len = PACTYPE_LENGTH + (cbuffers * PAC_INFO_BUFFER_LENGTH);
     if (len < header_len)
 	return ERANGE;
 
@@ -334,13 +334,14 @@ krb5_pac_parse(krb5_context context,
 	return ret;
 
     pac->pac = (PACTYPE *)realloc(pac->pac,
-	sizeof(PACTYPE) + ((header.cBuffers - 1) * sizeof(PAC_INFO_BUFFER)));
+	sizeof(PACTYPE) + ((cbuffers - 1) * sizeof(PAC_INFO_BUFFER)));
     if (pac->pac == NULL) {
 	krb5_pac_free(context, pac);
 	return ENOMEM;
     }
 
-    memcpy(pac->pac, &header, sizeof(header));
+    pac->pac->cBuffers = cbuffers;
+    pac->pac->Version = version;
 
     for (i = 0; i < pac->pac->cBuffers; i++) {
 	PAC_INFO_BUFFER *buffer = &pac->pac->Buffers[i];

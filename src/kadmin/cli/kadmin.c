@@ -1486,7 +1486,7 @@ void kadmin_getprinc(argc, argv)
     retval = krb5_unparse_name(context, dprinc.principal, &canon);
     if (retval) {
 	com_err("get_principal", retval, "while canonicalizing principal");
-	krb5_free_principal(context, princ);
+	kadm5_free_principal_ent(handle, &dprinc);
 	return;
     }
     retval = krb5_unparse_name(context, dprinc.mod_name, &modcanon);

@@ -306,8 +306,8 @@ kg_set_ccache_name (OM_uint32 *minor_status, const char *name)
 }
 
 #define g_OID_prefix_equal(o1, o2) \
-	(((o1)->length >= (o2)->length) && \
-	(memcmp((o1)->elements, (o2)->elements, (o2)->length) == 0))
+        (((o1)->length >= (o2)->length) && \
+        (memcmp((o1)->elements, (o2)->elements, (o2)->length) == 0))
 
 /*
  * gss_inquire_sec_context_by_oid() methods
@@ -317,70 +317,70 @@ static struct {
     OM_uint32 (*func)(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
 } krb5_gss_inquire_sec_context_by_oid_ops[] = {
     {
-	{GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH, GSS_KRB5_GET_TKT_FLAGS_OID},
-	gss_krb5int_get_tkt_flags
+        {GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH, GSS_KRB5_GET_TKT_FLAGS_OID},
+        gss_krb5int_get_tkt_flags
     },
     {
-	{GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID},
-	gss_krb5int_extract_authz_data_from_sec_context
+        {GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID},
+        gss_krb5int_extract_authz_data_from_sec_context
     },
     {
-	{GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_SSPI_SESSION_KEY_OID},
-	gss_krb5int_inq_session_key
+        {GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_SSPI_SESSION_KEY_OID},
+        gss_krb5int_inq_session_key
     },
     {
-	{GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID},
-	gss_krb5int_export_lucid_sec_context
+        {GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID},
+        gss_krb5int_export_lucid_sec_context
     },
     {
-	{GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID},
-	gss_krb5int_extract_authtime_from_sec_context
+        {GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID},
+        gss_krb5int_extract_authtime_from_sec_context
     }
 };
 
 static OM_uint32
 krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
-				     const gss_ctx_id_t context_handle,
-				     const gss_OID desired_object,
-				     gss_buffer_set_t *data_set)
+                                     const gss_ctx_id_t context_handle,
+                                     const gss_OID desired_object,
+                                     gss_buffer_set_t *data_set)
 {
     krb5_gss_ctx_id_rec *ctx;
     size_t i;
 
     if (minor_status == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *minor_status = 0;
 
     if (desired_object == GSS_C_NO_OID)
-	return GSS_S_CALL_INACCESSIBLE_READ;
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
     if (data_set == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *data_set = GSS_C_NO_BUFFER_SET;
 
     if (!kg_validate_ctx_id(context_handle))
-	return GSS_S_NO_CONTEXT;
+        return GSS_S_NO_CONTEXT;
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
     if (!ctx->established)
-	return GSS_S_NO_CONTEXT;
+        return GSS_S_NO_CONTEXT;
 
     for (i = 0; i < sizeof(krb5_gss_inquire_sec_context_by_oid_ops)/
-		    sizeof(krb5_gss_inquire_sec_context_by_oid_ops[0]); i++) {
-	if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_sec_context_by_oid_ops[i].oid)) {
-	    return (*krb5_gss_inquire_sec_context_by_oid_ops[i].func)(minor_status,
-								      context_handle,
-								      desired_object,
-								      data_set);
-	}
+                    sizeof(krb5_gss_inquire_sec_context_by_oid_ops[0]); i++) {
+        if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_sec_context_by_oid_ops[i].oid)) {
+            return (*krb5_gss_inquire_sec_context_by_oid_ops[i].func)(minor_status,
+                                                                      context_handle,
+                                                                      desired_object,
+                                                                      data_set);
+        }
     }
 
     *minor_status = EINVAL;
 
-    return GSS_S_UNAVAILABLE; 
+    return GSS_S_UNAVAILABLE;
 }
 
 /*
@@ -396,46 +396,46 @@ static struct {
 
 static OM_uint32
 krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
-			     const gss_cred_id_t cred_handle,
-			     const gss_OID desired_object,
-			     gss_buffer_set_t *data_set)
+                             const gss_cred_id_t cred_handle,
+                             const gss_OID desired_object,
+                             gss_buffer_set_t *data_set)
 {
     OM_uint32 major_status = GSS_S_FAILURE;
     krb5_gss_cred_id_t cred;
     size_t i;
 
     if (minor_status == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *minor_status = 0;
 
     if (desired_object == GSS_C_NO_OID)
-	return GSS_S_CALL_INACCESSIBLE_READ;
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
     if (data_set == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *data_set = GSS_C_NO_BUFFER_SET;
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
-	*minor_status = (OM_uint32)KRB5_NOCREDS_SUPPLIED;
-	return GSS_S_NO_CRED;
+        *minor_status = (OM_uint32)KRB5_NOCREDS_SUPPLIED;
+        return GSS_S_NO_CRED;
     }
 
     major_status = krb5_gss_validate_cred(minor_status, cred_handle);
     if (GSS_ERROR(major_status))
-	return major_status;
+        return major_status;
 
     cred = (krb5_gss_cred_id_t) cred_handle;
 
 #if 0
     for (i = 0; i < sizeof(krb5_gss_inquire_cred_by_oid_ops)/
-		    sizeof(krb5_gss_inquire_cred_by_oid_ops[0]); i++) {
-	if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_cred_by_oid_ops[i].oid)) {
-	    return (*krb5_gss_inquire_cred_by_oid_ops[i].func)(minor_status,
-							       cred_handle,
-							       desired_object,
-							       data_set);
-	}
+                    sizeof(krb5_gss_inquire_cred_by_oid_ops[0]); i++) {
+        if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_cred_by_oid_ops[i].oid)) {
+            return (*krb5_gss_inquire_cred_by_oid_ops[i].func)(minor_status,
+                                                               cred_handle,
+                                                               desired_object,
+                                                               data_set);
+        }
     }
 #endif
 
@@ -457,50 +457,50 @@ static struct {
 
 static OM_uint32
 krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
-				 gss_ctx_id_t *context_handle,
-				 const gss_OID desired_object,
-				 const gss_buffer_t value)
+                                 gss_ctx_id_t *context_handle,
+                                 const gss_OID desired_object,
+                                 const gss_buffer_t value)
 {
     size_t i;
 
     if (minor_status == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *minor_status = 0;
 
     if (context_handle == NULL)
-	return GSS_S_CALL_INACCESSIBLE_READ;
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
     if (desired_object == GSS_C_NO_OID)
-	return GSS_S_CALL_INACCESSIBLE_READ;
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
     if (*context_handle != GSS_C_NO_CONTEXT) {
-	krb5_gss_ctx_id_rec *ctx;
+        krb5_gss_ctx_id_rec *ctx;
 
-	if (!kg_validate_ctx_id(*context_handle))
-	    return GSS_S_NO_CONTEXT;
+        if (!kg_validate_ctx_id(*context_handle))
+            return GSS_S_NO_CONTEXT;
 
-	ctx = (krb5_gss_ctx_id_rec *) context_handle;
+        ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-	if (!ctx->established)
-	    return GSS_S_NO_CONTEXT;
+        if (!ctx->established)
+            return GSS_S_NO_CONTEXT;
     }
 
 #if 0
     for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
-		    sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
-	if (g_OID_prefix_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
-	    return (*krb5_gss_set_sec_context_option_ops[i].func)(minor_status,
-								  context_handle,
-								  desired_object,
-								  value);
-	}
+                    sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
+        if (g_OID_prefix_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
+            return (*krb5_gss_set_sec_context_option_ops[i].func)(minor_status,
+                                                                  context_handle,
+                                                                  desired_object,
+                                                                  value);
+        }
     }
 #endif
 
     *minor_status = EINVAL;
 
-    return GSS_S_UNAVAILABLE; 
+    return GSS_S_UNAVAILABLE;
 }
 
 /*
@@ -511,53 +511,53 @@ static struct {
     OM_uint32 (*func)(OM_uint32 *, gss_cred_id_t, const gss_OID, const gss_buffer_t);
 } krb5_gssspi_set_cred_option_ops[] = {
     {
-	{GSS_KRB5_COPY_CCACHE_OID_LENGTH, GSS_KRB5_COPY_CCACHE_OID},
-	gss_krb5int_copy_ccache
+        {GSS_KRB5_COPY_CCACHE_OID_LENGTH, GSS_KRB5_COPY_CCACHE_OID},
+        gss_krb5int_copy_ccache
     },
     {
-	{GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH, GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID},
-	gss_krb5int_set_allowable_enctypes
+        {GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH, GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID},
+        gss_krb5int_set_allowable_enctypes
     },
     {
-	{GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH, GSS_KRB5_SET_CRED_RCACHE_OID},
-	gss_krb5int_set_cred_rcache
+        {GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH, GSS_KRB5_SET_CRED_RCACHE_OID},
+        gss_krb5int_set_cred_rcache
     }
 };
 
 static OM_uint32
 krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
-			    gss_cred_id_t cred_handle,
-			    const gss_OID desired_object,
-			    const gss_buffer_t value)
+                            gss_cred_id_t cred_handle,
+                            const gss_OID desired_object,
+                            const gss_buffer_t value)
 {
     OM_uint32 major_status = GSS_S_FAILURE;
     size_t i;
 
     if (minor_status == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *minor_status = 0;
 
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
-	*minor_status = (OM_uint32)KRB5_NOCREDS_SUPPLIED;
-	return GSS_S_NO_CRED;
+        *minor_status = (OM_uint32)KRB5_NOCREDS_SUPPLIED;
+        return GSS_S_NO_CRED;
     }
 
     if (desired_object == GSS_C_NO_OID)
-	return GSS_S_CALL_INACCESSIBLE_READ;
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
     major_status = krb5_gss_validate_cred(minor_status, cred_handle);
     if (GSS_ERROR(major_status))
-	return major_status;
+        return major_status;
 
     for (i = 0; i < sizeof(krb5_gssspi_set_cred_option_ops)/
-		    sizeof(krb5_gssspi_set_cred_option_ops[0]); i++) {
-	if (g_OID_prefix_equal(desired_object, &krb5_gssspi_set_cred_option_ops[i].oid)) {
-	    return (*krb5_gssspi_set_cred_option_ops[i].func)(minor_status,
-							      cred_handle,
-							      desired_object,
-							      value);
-	}
+                    sizeof(krb5_gssspi_set_cred_option_ops[0]); i++) {
+        if (g_OID_prefix_equal(desired_object, &krb5_gssspi_set_cred_option_ops[i].oid)) {
+            return (*krb5_gssspi_set_cred_option_ops[i].func)(minor_status,
+                                                              cred_handle,
+                                                              desired_object,
+                                                              value);
+        }
     }
 
     *minor_status = EINVAL;
@@ -573,50 +573,50 @@ static struct {
     OM_uint32 (*func)(OM_uint32 *, const gss_OID, const gss_OID, gss_buffer_t);
 } krb5_gssspi_mech_invoke_ops[] = {
     {
-	{GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH, GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID},
-	gss_krb5int_register_acceptor_identity
+        {GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID_LENGTH, GSS_KRB5_REGISTER_ACCEPTOR_IDENTITY_OID},
+        gss_krb5int_register_acceptor_identity
     },
     {
-	{GSS_KRB5_CCACHE_NAME_OID_LENGTH, GSS_KRB5_CCACHE_NAME_OID},
-	gss_krb5int_ccache_name
+        {GSS_KRB5_CCACHE_NAME_OID_LENGTH, GSS_KRB5_CCACHE_NAME_OID},
+        gss_krb5int_ccache_name
     },
     {
-	{GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID},
-	gss_krb5int_free_lucid_sec_context
+        {GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID},
+        gss_krb5int_free_lucid_sec_context
     },
     {
-	{GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH, GSS_KRB5_USE_KDC_CONTEXT_OID},
-	krb5int_gss_use_kdc_context
+        {GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH, GSS_KRB5_USE_KDC_CONTEXT_OID},
+        krb5int_gss_use_kdc_context
     }
 };
 
 static OM_uint32
 krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
-			 const gss_OID desired_mech,
-			 const gss_OID desired_object,
-			 gss_buffer_t value)
+                         const gss_OID desired_mech,
+                         const gss_OID desired_object,
+                         gss_buffer_t value)
 {
     size_t i;
 
     if (minor_status == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *minor_status = 0;
 
     if (desired_mech == GSS_C_NO_OID)
-	return GSS_S_BAD_MECH;
+        return GSS_S_BAD_MECH;
 
     if (desired_object == GSS_C_NO_OID)
-	return GSS_S_CALL_INACCESSIBLE_READ;
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
     for (i = 0; i < sizeof(krb5_gssspi_mech_invoke_ops)/
-		    sizeof(krb5_gssspi_mech_invoke_ops[0]); i++) {
-	if (g_OID_prefix_equal(desired_object, &krb5_gssspi_mech_invoke_ops[i].oid)) {
-	    return (*krb5_gssspi_mech_invoke_ops[i].func)(minor_status,
-							  desired_mech,
-							  desired_object,
-							  value);
-	}
+                    sizeof(krb5_gssspi_mech_invoke_ops[0]); i++) {
+        if (g_OID_prefix_equal(desired_object, &krb5_gssspi_mech_invoke_ops[i].oid)) {
+            return (*krb5_gssspi_mech_invoke_ops[i].func)(minor_status,
+                                                          desired_mech,
+                                                          desired_object,
+                                                          value);
+        }
     }
 
     *minor_status = EINVAL;
@@ -626,7 +626,7 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
 
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
-    NULL,                                               
+    NULL,
     krb5_gss_acquire_cred,
     krb5_gss_release_cred,
     krb5_gss_init_sec_context,
@@ -674,12 +674,12 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_set_sec_context_option,
     krb5_gssspi_set_cred_option,
     krb5_gssspi_mech_invoke,
-    NULL,		 /* wrap_aead */	
-    NULL,		 /* unwrap_aead */	
+    NULL,                /* wrap_aead */
+    NULL,                /* unwrap_aead */
     krb5_gss_wrap_iov,
     krb5_gss_unwrap_iov,
     krb5_gss_wrap_iov_length,
-    NULL,		/* complete_auth_token */
+    NULL,               /* complete_auth_token */
 };
 
 
@@ -748,12 +748,12 @@ int gss_krb5int_lib_init(void)
         return err;
     err = k5_mutex_finish_init(&kg_vdb.mutex);
     if (err)
-	return err;
+        return err;
 #endif
 #ifdef _GSS_STATIC_LINK
     err = gss_krb5mechglue_init();
     if (err)
-	return err;
+        return err;
 #endif
 
     return 0;
@@ -797,4 +797,3 @@ OM_uint32 gss_krb5int_initialize_library (void)
     return CALL_INIT_FUNCTION(gss_krb5int_lib_init);
 #endif
 }
-

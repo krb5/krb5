@@ -24,6 +24,8 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#ifndef CKSUMTYPES_H
+#define CKSUMTYPES_H
 #include "k5-int.h"
 
 struct krb5_cksumtypes {
@@ -57,3 +59,4 @@ struct krb5_cksumtypes {
 
 extern const struct krb5_cksumtypes krb5_cksumtypes_list[];
 extern const unsigned int krb5_cksumtypes_length;
+#endif

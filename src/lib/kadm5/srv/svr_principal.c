@@ -25,6 +25,12 @@ static char *rcsid = "$Header$";
 
 #endif
 
+#ifdef USE_VALGRIND
+#include <valgrind/memcheck.h>
+#else
+#define VALGRIND_CHECK_DEFINED(LVALUE) ((void)0)
+#endif
+
 extern	krb5_principal	    master_princ;
 extern	krb5_principal	    hist_princ;
 extern  krb5_keylist_node  *master_keylist;
@@ -49,6 +55,7 @@ kadm5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pr
     if (tempprinc == 0)
         return ENOMEM;
 
+    VALGRIND_CHECK_DEFINED(*inprinc);
     memcpy(tempprinc, inprinc, sizeof(krb5_principal_data));
 
     nelems = (int) krb5_princ_size(context, inprinc);
@@ -72,6 +79,7 @@ kadm5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pr
         if (len)
             memcpy(krb5_princ_component(context, tempprinc, i)->data,
                    krb5_princ_component(context, inprinc, i)->data, len);
+	krb5_princ_component(context, tempprinc, i)->magic = KV5M_DATA;
     }
 
     tempprinc->realm.data =

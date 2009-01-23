@@ -1770,125 +1770,6 @@ krb5_db_verify_master_key(krb5_context     kcontext,
     return status;
 }
 
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-/* XXX WAF: don't think this is needed now that I've modified
- * krb5_def_fetch_mkey_list.  Keeping it around just in case. */
-/*
- * get most current master key which may be stored with the master key princ.
- */ 
-
-krb5_error_code
-krb5_db_fetch_latest_mkey(krb5_context    context,
-                   krb5_principal  mname,
-                   krb5_enctype    etype,
-                   krb5_boolean    fromkeyboard,
-                   krb5_boolean    twice,
-                   char          * db_args,
-                   krb5_kvno     * kvno,
-                   krb5_data     * salt,
-                   krb5_keyblock * key)
-{
-    krb5_keyblock tmp_mkey, tmp_clearkey;
-    krb5_kvno     tmp_kvno;
-    krb5_db_entry master_entry;
-    int nprinc;
-    krb5_boolean more, found_key = FALSE;
-    krb5_mkey_aux_node	*mkey_aux_data_list, *aux_data_entry;
-    krb5_error_code retval = 0;
-
-    memset(&tmp_mkey, 0, sizeof(tmp_mkey));
-    memset(&tmp_clearkey, 0, sizeof(tmp_clearkey));
-
-    /* fetch the local mkey either from stash or via keyboard interactive */
-    if ((retval = krb5_db_fetch_mkey(context, mname, etype, fromkeyboard,
-				   twice, db_args, &tmp_kvno, NULL, &tmp_mkey))) {
-	return (retval);
-    }
-
-    nprinc = 1;
-    retval = krb5_db_get_principal(context, mname, &master_entry, &nprinc, &more);
-    if (retval != 0)
-	goto clean_n_exit;
-
-    if ((retval = krb5_dbekd_decrypt_key_data(context, &tmp_mkey,
-					      &master_entry.key_data[0],
-					      &tmp_clearkey, NULL)) != 0) {
-	/*
-	 * Note the tmp_kvno may provide a hint as to which mkey_aux tuple to
-	 * decrypt.
-	 */
-	if ((retval = krb5_dbe_lookup_mkey_aux(context, &master_entry, &mkey_aux_data_list)))
-	    goto clean_n_exit;
-
-	/* for performance sake, try decrypting with matching kvno */
-	for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
-	     aux_data_entry = aux_data_entry->next) {
-
-	    if (aux_data_entry->mkey_kvno == tmp_kvno) {
-		if (krb5_dbekd_decrypt_key_data(context, &tmp_mkey, &aux_data_entry->latest_mkey,
-				   &tmp_clearkey, NULL) == 0) {
-		    found_key = TRUE;
-		    break;
-		}
-	    }
-	}
-	if (found_key != TRUE) {
-	    /* given the importance of acquiring the latest mkey, try brute force */
-	    for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
-		 aux_data_entry = aux_data_entry->next) {
-
-		if (krb5_dbekd_decrypt_key_data(context, &tmp_mkey, &aux_data_entry->latest_mkey,
-						&tmp_clearkey, NULL) == 0) {
-		    found_key = TRUE;
-		    /* XXX WAF: should I issue warning about kvno not matching?
-		     */
-		    break;
-		}
-	    }
-	    if (found_key != TRUE) {
-		krb5_set_error_message (context, KRB5_KDB_BADMASTERKEY,
-			"Unable to decrypt latest master key with the provided master key\n");
-		retval = KRB5_KDB_BADMASTERKEY;
-		goto clean_n_exit;
-	    }
-	}
-
-	if ((retval = krb5_db_verify_master_key(context,
-						mname,
-						tmp_kvno,
-						&tmp_clearkey))) {
-	    krb5_set_error_message (context, KRB5_KDB_BADMASTERKEY,
-		"Failed to verify Latest master key decrypted with the provided master key\n");
-	    retval = KRB5_KDB_BADMASTERKEY;
-	    goto clean_n_exit;
-	}
-    }
-
-    key->contents = malloc(tmp_clearkey.length);
-    if (key->contents == NULL) {
-	retval = ENOMEM;
-	goto clean_n_exit;
-    }
-
-    key->magic = tmp_clearkey.magic;
-    key->enctype = tmp_clearkey.enctype;
-    key->length = tmp_clearkey.length;
-    memcpy(key->contents, tmp_clearkey.contents, tmp_clearkey.length);
-
-clean_n_exit:
-    if (tmp_mkey.contents) {
-	memset(tmp_mkey.contents, 0, tmp_mkey.length);
-	krb5_db_free(context, tmp_mkey.contents);
-    }
-    if (tmp_clearkey.contents) {
-	memset(tmp_clearkey.contents, 0, tmp_clearkey.length);
-	krb5_db_free(context, tmp_clearkey.contents);
-    }
-    krb5_db_free_principal(context, &master_entry, nprinc);
-    return (retval);
-}
-#endif /**************** END IFDEF'ed OUT *******************************/
-
 krb5_error_code
 krb5_dbe_fetch_act_key_list(krb5_context         context,
                             krb5_principal       princ,
@@ -2288,6 +2169,9 @@ krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
 {
     krb5_tl_data tl_data;
     krb5_error_code code;
+
+    *mod_princ = NULL;
+    *mod_time = 0;
 
     tl_data.tl_data_type = KRB5_TL_MOD_PRINC;
 
