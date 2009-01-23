@@ -82,6 +82,8 @@ k5_parse_name(krb5_context context, const char *name,
 	unsigned int	enterprise = (flags & KRB5_PRINCIPAL_PARSE_ENTERPRISE);
 	int		first_at;
 
+	*nprincipal = NULL;
+
 	/*
 	 * Pass 1.  Find out how many components there are to the name,
 	 * and get string sizes for the first FCOMPNUM components. For
