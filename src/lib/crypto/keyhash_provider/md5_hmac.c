@@ -54,6 +54,7 @@ k5_md5_hmac_hash (const krb5_keyblock *key, krb5_keyusage usage,
   krb5_MD5Update(&ctx, (unsigned char *)input->data, input->length);
   krb5_MD5Final(&ctx);
 
+  ds.magic = KV5M_DATA;
   ds.length = 16;
   ds.data = (char *)ctx.digest;
 
