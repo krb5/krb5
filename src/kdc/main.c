@@ -1,7 +1,7 @@
 /*
  * kdc/main.c
  *
- * Copyright 1990,2001,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2001,2008,2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -146,6 +146,10 @@ finish_realm(kdc_realm_t *rdp)
 	free(rdp->realm_tcp_ports);
     if (rdp->realm_keytab)
 	krb5_kt_close(rdp->realm_context, rdp->realm_keytab);
+    if (rdp->realm_host_based_services)
+	free(rdp->realm_host_based_services);
+    if (rdp->realm_no_host_referral)
+	free(rdp->realm_no_host_referral);
     if (rdp->realm_context) {
 	if (rdp->realm_mprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_mprinc);
@@ -162,6 +166,72 @@ finish_realm(kdc_realm_t *rdp)
     free(rdp);
 }
 
+static void 
+handle_referrals(krb5_realm_params *rparams, char *no_refrls, char *host_based_srvcs, kdc_realm_t *rdp )
+{
+    int i = 0;
+    if ( no_refrls == NULL ||  ( strchr(no_refrls,'*'))==0) {
+        if ( no_refrls!=0 ){
+            if (rparams && rparams->realm_no_host_referral) {
+                asprintf(&(rdp->realm_no_host_referral), "%s%s%s%s%s",
+                         " ", no_refrls," ",rparams->realm_no_host_referral, " ");
+            } else {
+                asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", no_refrls," ");
+            }
+  	} else {
+            if (rparams && rparams->realm_no_host_referral) {   
+                asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", rparams->realm_no_host_referral," ");
+            } else
+                rdp->realm_no_host_referral = 0;
+        }
+ 
+        if ( rdp->realm_no_host_referral &&
+             strlen(rdp->realm_no_host_referral)>1 && strchr(rdp->realm_no_host_referral, '*')!=0) {
+             rdp->realm_no_host_referral = strdup("*");
+        } else {
+             /*  only if no_host_referral != "*" */
+ 
+            if ( (host_based_srvcs !=0 &&  strchr(host_based_srvcs,'*')!=0) ||
+                 (rparams && rparams->realm_host_based_services && strchr(rparams->realm_host_based_services,'*')!=0)) {
+                asprintf(&(rdp->realm_host_based_services),"%s", "*");
+            } else {
+                if ( host_based_srvcs !=0) {
+                    if (rparams && rparams->realm_host_based_services) {
+                        asprintf(&(rdp->realm_host_based_services),"%s%s%s%s%s",
+                        " ", host_based_srvcs," ",rparams->realm_host_based_services," ");
+                    } else
+                        asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", host_based_srvcs," ");
+                } else {
+                    if (rparams && rparams->realm_host_based_services) {
+                        asprintf(&(rdp->realm_host_based_services),"%s%s%s"," ", rparams->realm_host_based_services," ");
+                    } else 
+                        rdp->realm_host_based_services = 0;
+                }
+            }
+
+            /* Walk realm_host_based_services and realm_no_host_referral and replace all ',' with whitespace */
+            i = 0; 
+            while ( rdp && rdp->realm_host_based_services && (rdp->realm_host_based_services)[i] != 0){
+                if (( rdp->realm_host_based_services)[i]==',' )
+                    ( rdp->realm_host_based_services)[i]=' ';
+                i++; 
+            }
+            i = 0;   
+            while ( rdp && rdp->realm_no_host_referral && ( rdp->realm_no_host_referral)[i] != 0){
+                if (( rdp->realm_no_host_referral)[i]==',' )
+                    ( rdp->realm_no_host_referral)[i]=' ';
+                i++;
+            }
+        }
+    } else {
+        if  ( no_refrls != NULL && strchr(no_refrls,'*') !=0 ) 
+          asprintf(&(rdp->realm_no_host_referral),"%s", "* ");
+        else
+          rdp->realm_no_host_referral = 0;
+    }
+
+    return;
+}
 /*
  * Initialize a realm control structure from the alternate profile or from
  * the specified defaults.
@@ -172,7 +242,8 @@ finish_realm(kdc_realm_t *rdp)
 static krb5_error_code
 init_realm(char *progname, kdc_realm_t *rdp, char *realm, 
 	   char *def_mpname, krb5_enctype def_enctype, char *def_udp_ports,
-	   char *def_tcp_ports, krb5_boolean def_manual, char **db_args)
+	   char *def_tcp_ports, krb5_boolean def_manual, char **db_args,
+           char *no_refrls, char *host_based_srvcs)
 {
     krb5_error_code	kret;
     krb5_boolean	manual;
@@ -239,7 +310,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 	rdp->realm_reject_bad_transit = rparams->realm_reject_bad_transit;
     else
 	rdp->realm_reject_bad_transit = 1;
-
+ 
     /* Handle ticket maximum life */
     rdp->realm_maxlife = (rparams && rparams->realm_max_life_valid) ?
 	rparams->realm_max_life : KRB5_KDB_MAX_LIFE;
@@ -247,6 +318,9 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     /* Handle ticket renewable maximum life */
     rdp->realm_maxrlife = (rparams && rparams->realm_max_rlife_valid) ?
 	rparams->realm_max_rlife : KRB5_KDB_MAX_RLIFE;
+
+    /* Handle KDC referrals */
+    handle_referrals(rparams, no_refrls, host_based_srvcs, rdp );
 
     if (rparams)
 	krb5_free_realm_params(rdp->realm_context, rparams);
@@ -437,6 +511,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     krb5_pointer	aprof;
     const char		*hierarchy[3];
     char               **db_args      = NULL;
+    char                *no_refrls = 0;
+    char                *host_based_srvcs = 0;
     int                  db_args_size = 0;
 
     extern char *optarg;
@@ -453,11 +529,30 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	hierarchy[1] = "kdc_max_dgram_reply_size";
 	if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
 	    max_dgram_reply_size = MAX_DGRAM_SIZE;
+        /* The service name "*" means any service. */
+        hierarchy[1] = "no_host_referral";
+        if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls)){
+            no_refrls = 0;
+        } else {
+            if ( strlen(no_refrls) && strchr(no_refrls, '*')) {
+                no_refrls = strdup("*");
+            }
+        }
+        if ( no_refrls == 0 || strchr(no_refrls, '*')==0) {
+            hierarchy[1] = "host_based_services";
+            if (krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs))
+                host_based_srvcs = 0;
+            else 
+            if (  strchr( host_based_srvcs, '*')) {
+                host_based_srvcs = strdup("*");
+            }
+        }
 
 	/* aprof_init can return 0 with aprof == NULL */
 	if (aprof)
 	     krb5_aprof_finish(aprof);
     }
+  
     if (default_udp_ports == 0)
 	default_udp_ports = strdup(DEFAULT_KDC_UDP_PORTLIST);
     if (default_tcp_ports == 0)
@@ -491,7 +586,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 		    if ((retval = init_realm(argv[0], rdatap, optarg, 
 					     mkey_name, menctype,
 					     default_udp_ports,
-					     default_tcp_ports, manual, db_args))) {
+					     default_tcp_ports, manual, db_args,
+                                             no_refrls, host_based_srvcs))) {
 			fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
 				argv[0], optarg);
 			exit(1);
@@ -588,7 +684,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
 	    if ((retval = init_realm(argv[0], rdatap, lrealm, 
 				     mkey_name, menctype, default_udp_ports,
-				     default_tcp_ports, manual, db_args))) {
+				     default_tcp_ports, manual, db_args,
+                                     no_refrls, host_based_srvcs))) {
 		fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
 			argv[0], lrealm);
 		exit(1);

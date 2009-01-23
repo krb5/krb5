@@ -71,13 +71,15 @@
 #include "extern.h"
 #include "adm_proto.h"
 
-
 static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
 				krb5_boolean *, int *);
 
 static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
 					  int,  krb5_principal,
 				          krb5_data **, const char *);
+
+static krb5_boolean
+is_substr ( char *, krb5_data *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -104,10 +106,10 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_key_data  *server_key;
     char *cname = 0, *sname = 0, *altcname = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
-/*    krb5_address *noaddrarray[1]; */
     krb5_enctype useenctype;
     int	errcode, errcode2;
     register int i;
+    size_t len;
     int firstpass = 1;
     const char	*status = 0;
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* ticket granting or evidence ticket */
@@ -117,8 +119,12 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_authdata **kdc_issued_auth_data = NULL;    /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;	    /* client/server KDB flags */
     char *s4u_name = NULL;
-    krb5_boolean is_referral;
+    krb5_boolean is_referral, db_ref_done = FALSE;
     const char *emsg = NULL;
+    char **realms, **cpp, *temp_buf=NULL;
+    krb5_data *comp1 = NULL, *comp2 = NULL; 
+    krb5_data *tgs_1 =NULL, *server_1 = NULL;
+    krb5_principal krbtgt_princ;
 
     session_key.contents = NULL;
     
@@ -133,14 +139,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
 	krb5_free_kdc_req(kdc_context, request);
 	return retval;
     }
-
-    if ((errcode = krb5_unparse_name(kdc_context, request->server, &sname))) {
-	status = "UNPARSING SERVER";
-	goto cleanup;
-    }
-    limit_string(sname);
-
-   /* errcode = kdc_process_tgs_req(request, from, pkt, &req_authdat); */
     errcode = kdc_process_tgs_req(request, from, pkt, &header_ticket,
 				  &krbtgt, &k_nprincs, &subkey);
     if (header_ticket && header_ticket->enc_part2 &&
@@ -181,11 +179,20 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     /* XXX make sure server here has the proper realm...taken from AP_REQ
        header? */
 
-    nprincs = 1;
     if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
 	setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
 	setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
     }
+
+    db_ref_done = FALSE;
+
+ref_tgt_again:
+    nprincs = 1;
+    if ((errcode = krb5_unparse_name(kdc_context, request->server, &sname))) {
+	status = "UNPARSING SERVER";
+	goto cleanup;
+    }
+    limit_string(sname);
 
     errcode = krb5_db_get_principal_ext(kdc_context,
 					request->server,
@@ -208,21 +215,109 @@ tgt_again:
 	 * might be a request for a TGT for some other realm; we
 	 * should do our best to find such a TGS in this db
 	 */
-	if (firstpass && krb5_is_tgs_principal(request->server) == TRUE) {
-	    if (krb5_princ_size(kdc_context, request->server) == 2) {
-		krb5_data *server_1 =
-		    krb5_princ_component(kdc_context, request->server, 1);
-		krb5_data *tgs_1 =
-		    krb5_princ_component(kdc_context, tgs_server, 1);
+        if (firstpass ) {
 
-		if (!tgs_1 || !data_eq(*server_1, *tgs_1)) {
-		    krb5_db_free_principal(kdc_context, &server, nprincs);
-		    find_alternate_tgs(request, &server, &more, &nprincs);
-		    firstpass = 0;
-		    goto tgt_again;
-		}
-	    }
-	}
+            if ( krb5_is_tgs_principal(request->server) == TRUE) { /* Principal is a name of krb ticket service */
+                if (krb5_princ_size(kdc_context, request->server) == 2) { 
+                                          
+                    server_1 = krb5_princ_component(kdc_context, request->server, 1);
+                    tgs_1 = krb5_princ_component(kdc_context, tgs_server, 1);
+
+                    if (!tgs_1 || !data_eq(*server_1, *tgs_1)) {
+                        krb5_db_free_principal(kdc_context, &server, nprincs);
+                        find_alternate_tgs(request, &server, &more, &nprincs);
+                        firstpass = 0;
+                        goto tgt_again;
+                    }
+                }  
+                krb5_db_free_principal(kdc_context, &server, nprincs);
+                status = "UNKNOWN_SERVER";
+                errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+                goto cleanup;
+
+            } else if ( db_ref_done == FALSE) {
+
+                /* By now we know that server principal name is unknown <== nprincs!=1 from get_principal 
+                 * If CANONICALIZE flag is set in the request                                 (1)
+                 * If req is not U2U authn. req                                               (2)
+                 * the requested server princ. has exactly two components                     (3)
+                 * either 
+                 *      the name type is NT-SRV-HST                                           (4.a)
+                 *      or name type is NT-UNKNOWN and 
+                 *         the 1st component is listed in conf file under host_based_services (4.b)
+                 * the 1st component is not in a list in conf under "no_host_referral"        (5)
+                 * the 2d component looks like fully-qualified domain name (FQDN)             (6) 
+                 * If all of these conditions are satisfied - try mapping the FQDN and 
+                 * re-process the request as if client had asked for cross-realm TGT.
+                 */
+
+                if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) == TRUE &&   /* (1) */
+                    !isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) &&       /* (2) */
+                    krb5_princ_size(kdc_context, request->server) == 2) {              /* (3) */
+
+                    comp1 = krb5_princ_component(kdc_context, request->server, 0);
+                    comp2 = krb5_princ_component(kdc_context, request->server, 1);
+
+                    if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST ||        /* (4.a) */
+                            (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&    /* (4.b) */
+                                (is_substr(kdc_active_realm->realm_host_based_services, comp1)==TRUE ||
+                                strchr(kdc_active_realm->realm_host_based_services, '*')))) &&
+                         (kdc_active_realm->realm_no_host_referral == NULL || 
+                            (!strchr(kdc_active_realm->realm_host_based_services, '*') &&
+                              is_substr(kdc_active_realm->realm_no_host_referral,comp1)==FALSE))) { /* (5) */
+
+                        for ( len=0; len < comp2->length; len++) {     
+                            if ( comp2->data[len] == '.' ) break;
+                        }
+                        if ( len == comp2->length)    /* (6) */
+                            goto cleanup; 
+
+                        /* try mapping FQDN or the containing domains */
+                        temp_buf = calloc(1, comp2->length+1);
+                        if ( !temp_buf){
+                            retval = ENOMEM; 
+                            goto cleanup;
+                        }
+                        strncpy(temp_buf, comp2->data,comp2->length);
+                        retval = krb5int_get_domain_realm_mapping(kdc_context, temp_buf, &realms);
+                        free(temp_buf);
+                        if (retval) {
+                            /* no match found */
+                            com_err("krb5_get_domain_realm_mapping", retval, 0);
+                            goto cleanup;
+                        }
+                        if (realms == 0) {
+                            printf(" (null)\n");
+                            goto cleanup;
+                        }
+                        if (realms[0] == 0) {
+                             printf(" (none)\n");
+                             free(realms);
+                             goto cleanup;
+                        }
+                       /* Modify request. 
+                        * Construct cross-realm tgt :  krbtgt/REMOTE_REALM@LOCAL_REALM 
+                        * and use it as a principal in this req. 
+                        */
+                        retval = krb5_build_principal(kdc_context, &krbtgt_princ, 
+                                      (*request->server).realm.length, 
+                                      (*request->server).realm.data, 
+                                      "krbtgt", realms[0], (char *)0);
+                         
+    			for (cpp = realms; *cpp; cpp++)  free(*cpp);
+                        krb5_free_principal(kdc_context, request->server);
+ 
+                        retval = krb5_copy_principal(kdc_context, krbtgt_princ, &(request->server));
+                        if ( retval == 0 ) {
+                            db_ref_done = TRUE;
+                            goto ref_tgt_again;
+                        }
+                    }
+                }
+            }
+        }
+
+
 	krb5_db_free_principal(kdc_context, &server, nprincs);
 	status = "UNKNOWN_SERVER";
 	errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
@@ -1015,3 +1110,26 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
     krb5_free_realm_tree(kdc_context, plist);
     return;
 }
+
+/* is_substr - verfies if d1 contains d2->data with head/trail-ing whitespaces 
+ */
+static krb5_boolean
+is_substr ( char *d1, krb5_data *d2)
+{
+    krb5_boolean ret = FALSE;
+    char *new_d2 = 0, *d2_formated = 0;
+    if ( d1 && d2 && d2->data && (d2->length+2 <= strlen(d1))){
+        if ((new_d2 = calloc(1,d2->length+1))) {
+            strncpy(new_d2,d2->data,d2->length);
+            asprintf( &d2_formated, "%c%s%c", ' ', new_d2, ' ');
+            if ( d2_formated != 0 && strstr( d1, d2_formated) != NULL)
+                ret = TRUE;
+            free(new_d2);
+            free(d2_formated);
+        }
+    }
+    return ret;
+}
+
+
+

@@ -1,7 +1,7 @@
 /*
  * lib/kadm/alt_prof.c
  *
- * Copyright 1995,2001,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1995,2001,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -272,6 +272,59 @@ krb5_aprof_get_string(acontext, hierarchy, uselast, stringp)
     }
     return(kret);
 }
+
+/*
+ * krb5_aprof_get_string_all()	- When the attr identified by "hierarchy" is specified multiple times, 
+ *                                collect all its string values from the alternate  profile. 
+ *
+ * Parameters:
+ *	acontext		- opaque context for alternate profile.
+ *	hierarchy		- hierarchy of value to retrieve.
+ *	stringp			- Returned string value.
+ *
+ * Returns:
+ * 	error codes from profile_get_values() or ENOMEM
+ * 	Caller is responsible for deallocating stringp buffer
+ */
+krb5_error_code
+krb5_aprof_get_string_all(acontext, hierarchy, stringp)
+    krb5_pointer  	acontext;
+    const char    	**hierarchy;
+    char                **stringp;
+{
+    krb5_error_code     kret=0;
+    char                **values;
+    int                 lastidx;
+    char                *tmp;
+    size_t             buf_size=0; 
+ 
+    if (!(kret = krb5_aprof_getvals(acontext, hierarchy, &values))) {
+        for (lastidx=0; values[lastidx]; lastidx++);
+        lastidx--;
+         
+        buf_size = strlen(values[0])+2;
+        for (lastidx=1; values[lastidx]; lastidx++){
+            buf_size += strlen(values[lastidx]+1);
+         }
+    }
+    if (buf_size > 0) {
+        *stringp = calloc(1,buf_size);
+        if (stringp == NULL){
+  	    profile_free_list(values);
+            return ENOMEM;
+        }
+        tmp=*stringp;
+        strcpy(tmp,values[0]);
+        for (lastidx=1; values[lastidx]; lastidx++){
+            tmp = strcat(tmp, " ");
+            tmp = strcat(tmp, values[lastidx]);
+         }
+        /* Free the string storage */
+        profile_free_list(values);
+    }
+    return(kret);
+} 
+
 
 /*
  * krb5_aprof_get_int32()	- Get a 32-bit integer value from the alternate
@@ -866,6 +919,10 @@ krb5_read_realm_params(kcontext, realm, rparamp)
 
     char		*kdcprofile = 0;
     char		*kdcenv = 0;
+    char                *no_refrls = 0;
+    char                *host_based_srvcs = 0;
+         
+
 
     krb5_error_code	kret;
 
@@ -971,6 +1028,26 @@ krb5_read_realm_params(kcontext, realm, rparamp)
 	rparams->realm_reject_bad_transit_valid = 1;
     }
 
+        hierarchy[2] = "no_host_referral";
+        if (!krb5_aprof_get_string_all(aprofile, hierarchy, &no_refrls)) {
+         
+            if (strchr(no_refrls, '*'))
+                no_refrls = strdup("*");
+            rparams->realm_no_host_referral = no_refrls;
+        } else
+            no_refrls = 0;
+
+  	if (no_refrls == 0 || strlen(no_refrls) == 0 || strncmp(no_refrls, "*",1) != 0) {
+            hierarchy[2] = "host_based_services";
+  	    if (!krb5_aprof_get_string_all(aprofile, hierarchy, &host_based_srvcs)){
+                if (strchr(host_based_srvcs, '*'))
+                    host_based_srvcs = strdup("*");
+                rparams->realm_host_based_services = host_based_srvcs;
+            } else
+                host_based_srvcs = 0;
+        }
+
+
     /* Get the value for the default principal flags */
     hierarchy[2] = "default_principal_flags";
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
@@ -1039,6 +1116,8 @@ krb5_free_realm_params(kcontext, rparams)
 	krb5_xfree(rparams->realm_kdc_ports);
 	krb5_xfree(rparams->realm_kdc_tcp_ports);
 	krb5_xfree(rparams->realm_acl_file);
+	krb5_xfree(rparams->realm_no_host_referral);
+	krb5_xfree(rparams->realm_host_based_services);
 	krb5_xfree(rparams);
     }
     return(0);

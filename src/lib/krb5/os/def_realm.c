@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/def_realm.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -187,3 +187,73 @@ krb5_free_default_realm(krb5_context context, char *lrealm)
 {
 	free (lrealm);
 }
+krb5_error_code
+krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char ***realmsp)
+{
+    char **retrealms;
+    char *realm, *cp, *temp_realm;
+    krb5_error_code retval;
+    char temp_host[MAX_DNS_NAMELEN+1];
+
+#ifdef DEBUG_REFERRALS
+    printf("krb5int_get_domain_realm_mapping(host:%s) called\n",host);
+#endif
+    /* do sanity check and lower-case */
+    retval = krb5int_clean_hostname(context, host, temp_host, sizeof temp_host);
+    if (retval)
+        return retval;
+    /*
+       Search for the best match for the host or domain.
+       Example: Given a host a.b.c.d, try to match on:
+         1) a.b.c.d  2) .b.c.d.   3) b.c.d  4)  .c.d  5) c.d  6) .d   7) d
+     */
+
+    cp = temp_host;
+    realm = (char *)NULL;
+    temp_realm = 0;
+    while (cp ) {
+#ifdef DEBUG_REFERRALS
+        printf("  trying to look up %s in the domain_realm map\n",cp);
+#endif
+  	retval = profile_get_string(context->profile, "domain_realm", cp,
+                                    0, (char *)NULL, &temp_realm);
+        if (retval)
+            return retval;
+        if (temp_realm != (char *)NULL)
+            break;	/* Match found */
+ 
+        /* Setup for another test */
+        if (*cp == '.') {
+            cp++;
+        } else {
+            cp = strchr(cp, '.');
+        }
+    }
+#ifdef DEBUG_REFERRALS
+    printf("  done searching the domain_realm map\n");
+#endif
+    if (temp_realm!=(char*)NULL) {
+#ifdef DEBUG_REFERRALS
+       printf("  temp_realm is %s\n",temp_realm);
+#endif
+        realm = strdup(temp_realm);
+        profile_release_string(temp_realm);
+        if (!realm) {
+            return ENOMEM;
+        }
+    }
+    if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
+        if (realm != (char *)NULL)
+            free(realm);
+        return ENOMEM;
+    }
+
+    retrealms[0] = realm;
+    retrealms[1] = 0;
+
+    *realmsp = retrealms;
+
+    return 0;
+}
+
+
