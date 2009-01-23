@@ -68,6 +68,9 @@ static void dump_rcache(const char *filename)
     FILE *fp;
     krb5_deltat lifespan;
     krb5_int16 vno;
+    char *str;
+    krb5_int32 usec;
+    krb5_timestamp timestamp;
 
     fp = fopen(filename, "r");
     if (!fp) {
@@ -80,10 +83,6 @@ static void dump_rcache(const char *filename)
         return;
     printf("Lifespan: %ld\n", (long) lifespan);
     while (1) {
-        char *str;
-        krb5_int32 usec;
-        krb5_timestamp timestamp;
-
         printf("---\n");
 
         if (!(str = read_counted_string(fp)))
@@ -114,6 +113,7 @@ static void store(krb5_context ctx, char *rcspec, char *client, char *server,
     krb5_error_code retval = 0;
     char *hash = NULL;
     krb5_donot_replay rep;
+    krb5_data d;
 
     if (now_timestamp > 0)
         krb5_set_debugging_time(ctx, now_timestamp, now_usec);
@@ -122,8 +122,6 @@ static void store(krb5_context ctx, char *rcspec, char *client, char *server,
     if ((retval = krb5_rc_recover_or_initialize(ctx, rc, ctx->clockskew)))
         goto cleanup;
     if (msg) {
-        krb5_data d;
-
         d.data = msg;
         d.length = strlen(msg);
         if ((retval = krb5_rc_hash_message(ctx, &d, &hash)))
