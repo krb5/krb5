@@ -146,10 +146,10 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
 	strncpy(salt.data, krb5int_arcfour_l40, salt.length);
-	store_32_le(ms_usage, (unsigned char *)salt.data + 10);
+	store_32_le(ms_usage, salt.data + 10);
     } else {
 	salt.length = 4;
-	store_32_le(ms_usage, (unsigned char *)salt.data);
+	store_32_le(ms_usage, salt.data);
     }
     ret = krb5_hmac(hash, key, 1, &salt, &d1);
     if (ret != 0)

@@ -1,7 +1,7 @@
 /*
  * k5-platform.h
  *
- * Copyright 2003, 2004, 2005, 2007, 2008 Massachusetts Institute of Technology.
+ * Copyright 2003, 2004, 2005, 2007, 2008, 2009 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -534,8 +534,9 @@ static inline unsigned int k5_swap16 (unsigned int x) {
 #endif
 
 static inline void
-store_16_be (unsigned int val, unsigned char *p)
+store_16_be (unsigned int val, void *vp)
 {
+    unsigned char *p = vp;
 #if defined(__GNUC__) && defined(K5_BE)
     PUT(16,p,val);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
@@ -546,8 +547,9 @@ store_16_be (unsigned int val, unsigned char *p)
 #endif
 }
 static inline void
-store_32_be (unsigned int val, unsigned char *p)
+store_32_be (unsigned int val, void *vp)
 {
+    unsigned char *p = vp;
 #if defined(__GNUC__) && defined(K5_BE)
     PUT(32,p,val);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
@@ -560,8 +562,9 @@ store_32_be (unsigned int val, unsigned char *p)
 #endif
 }
 static inline void
-store_64_be (UINT64_TYPE val, unsigned char *p)
+store_64_be (UINT64_TYPE val, void *vp)
 {
+    unsigned char *p = vp;
 #if defined(__GNUC__) && defined(K5_BE)
     PUT(64,p,val);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
@@ -578,8 +581,9 @@ store_64_be (UINT64_TYPE val, unsigned char *p)
 #endif
 }
 static inline unsigned short
-load_16_be (const unsigned char *p)
+load_16_be (const void *cvp)
 {
+    const unsigned char *p = cvp;
 #if defined(__GNUC__) && defined(K5_BE)
     return GET(16,p);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
@@ -589,8 +593,9 @@ load_16_be (const unsigned char *p)
 #endif
 }
 static inline unsigned int
-load_32_be (const unsigned char *p)
+load_32_be (const void *cvp)
 {
+    const unsigned char *p = cvp;
 #if defined(__GNUC__) && defined(K5_BE)
     return GET(32,p);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
@@ -602,8 +607,9 @@ load_32_be (const unsigned char *p)
 #endif
 }
 static inline UINT64_TYPE
-load_64_be (const unsigned char *p)
+load_64_be (const void *cvp)
 {
+    const unsigned char *p = cvp;
 #if defined(__GNUC__) && defined(K5_BE)
     return GET(64,p);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
@@ -613,8 +619,9 @@ load_64_be (const unsigned char *p)
 #endif
 }
 static inline void
-store_16_le (unsigned int val, unsigned char *p)
+store_16_le (unsigned int val, void *vp)
 {
+    unsigned char *p = vp;
 #if defined(__GNUC__) && defined(K5_LE)
     PUT(16,p,val);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
@@ -625,8 +632,9 @@ store_16_le (unsigned int val, unsigned char *p)
 #endif
 }
 static inline void
-store_32_le (unsigned int val, unsigned char *p)
+store_32_le (unsigned int val, void *vp)
 {
+    unsigned char *p = vp;
 #if defined(__GNUC__) && defined(K5_LE)
     PUT(32,p,val);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
@@ -639,8 +647,9 @@ store_32_le (unsigned int val, unsigned char *p)
 #endif
 }
 static inline void
-store_64_le (UINT64_TYPE val, unsigned char *p)
+store_64_le (UINT64_TYPE val, void *vp)
 {
+    unsigned char *p = vp;
 #if defined(__GNUC__) && defined(K5_LE)
     PUT(64,p,val);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
@@ -657,8 +666,9 @@ store_64_le (UINT64_TYPE val, unsigned char *p)
 #endif
 }
 static inline unsigned short
-load_16_le (const unsigned char *p)
+load_16_le (const void *cvp)
 {
+    const unsigned char *p = cvp;
 #if defined(__GNUC__) && defined(K5_LE)
     return GET(16,p);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
@@ -668,8 +678,9 @@ load_16_le (const unsigned char *p)
 #endif
 }
 static inline unsigned int
-load_32_le (const unsigned char *p)
+load_32_le (const void *cvp)
 {
+    const unsigned char *p = cvp;
 #if defined(__GNUC__) && defined(K5_LE)
     return GET(32,p);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
@@ -679,8 +690,9 @@ load_32_le (const unsigned char *p)
 #endif
 }
 static inline UINT64_TYPE
-load_64_le (const unsigned char *p)
+load_64_le (const void *cvp)
 {
+    const unsigned char *p = cvp;
 #if defined(__GNUC__) && defined(K5_LE)
     return GET(64,p);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
@@ -691,7 +703,7 @@ load_64_le (const unsigned char *p)
 }
 
 static inline unsigned short
-load_16_n (const unsigned char *p)
+load_16_n (const void *p)
 {
 #ifdef _WIN32
     unsigned __int16 n;
@@ -702,7 +714,7 @@ load_16_n (const unsigned char *p)
     return n;
 }
 static inline unsigned int
-load_32_n (const unsigned char *p)
+load_32_n (const void *p)
 {
 #ifdef _WIN32
     unsigned __int32 n;
@@ -713,7 +725,7 @@ load_32_n (const unsigned char *p)
     return n;
 }
 static inline UINT64_TYPE
-load_64_n (const unsigned char *p)
+load_64_n (const void *p)
 {
     UINT64_TYPE n;
     memcpy(&n, p, 8);
