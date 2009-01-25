@@ -78,7 +78,7 @@ main(argc, argv)
 {
 	char myname[MAXHOSTNAMELEN+1];
 	char *ptr;
-	char addrcopy[4];
+	struct in_addr addrcopy;
 	struct hostent *host;
 	int quiet = 0;
 
@@ -124,10 +124,10 @@ main(argc, argv)
 	    printf("Host address: %d.%d.%d.%d\n", 
 		   UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
 
-	memcpy(addrcopy, ptr, 4);
+	memcpy(&addrcopy.s_addr, ptr, 4);
 
 	/* Convert back to full name */
-	if((host = gethostbyaddr(addrcopy, 4, AF_INET)) == NULL) {
+	if((host = gethostbyaddr(&addrcopy.s_addr, 4, AF_INET)) == NULL) {
 		fprintf(stderr, "Error looking up IP address - fatal\n");
 		exit(2);
 	}
