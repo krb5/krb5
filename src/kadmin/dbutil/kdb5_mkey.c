@@ -312,7 +312,7 @@ kdb5_add_mkey(int argc, char *argv[])
     for (cur_mkey_aux_data = mkey_aux_data_head; cur_mkey_aux_data != NULL;
          cur_mkey_aux_data = next_mkey_aux_data) {
         next_mkey_aux_data = cur_mkey_aux_data->next;
-        krb5_free_key_data_contents(util_context, &(cur_mkey_aux_data->latest_mkey));
+        krb5_dbe_free_key_data_contents(util_context, &(cur_mkey_aux_data->latest_mkey));
         free(cur_mkey_aux_data);
     }
     return;

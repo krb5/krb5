@@ -85,11 +85,8 @@ void		    destroy_dict(void);
 kadm5_ret_t krb5_copy_key_data_contents(krb5_context context,
 					krb5_key_data *from, 
 					krb5_key_data *to);
-/* XXX WAF: maybe delete this if all compiles */
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
 kadm5_ret_t krb5_free_key_data_contents(krb5_context context, 
 					krb5_key_data *key);
-#endif /**************** END IFDEF'ed OUT *******************************/
 
 /*
  * *Warning* 

@@ -106,6 +106,26 @@ kdb_unlock_list()
     return k5_mutex_unlock(&db_lock);
 }
 
+/*
+ * XXX eventually this should be consolidated with krb5_free_key_data_contents
+ * so there is only a single version.
+ */
+void
+krb5_dbe_free_key_data_contents(krb5_context context,
+                                krb5_key_data *key)
+{
+    int i, idx;
+
+    idx = (key->key_data_ver == 1 ? 1 : 2);
+    for (i = 0; i < idx; i++) {
+        if (key->key_data_contents[i]) {
+            zap(key->key_data_contents[i], key->key_data_length[i]);
+            free(key->key_data_contents[i]);
+        }
+    }
+    return;
+}
+
 static void
 krb5_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
 {
@@ -126,25 +146,9 @@ krb5_free_mkey_aux_list(krb5_context context, krb5_mkey_aux_node *val)
     for (temp = val; temp != NULL;) {
         prev = temp;
         temp = temp->next;
-        krb5_free_key_data_contents(context, &prev->latest_mkey);
+        krb5_dbe_free_key_data_contents(context, &prev->latest_mkey);
         krb5_xfree(prev);
     }
-}
-
-void
-krb5_free_key_data_contents(krb5_context context,
-                            krb5_key_data *key)
-{
-    int i, idx;
-
-    idx = (key->key_data_ver == 1 ? 1 : 2);
-    for (i = 0; i < idx; i++) {
-        if (key->key_data_contents[i]) {
-            zap(key->key_data_contents[i], key->key_data_length[i]);
-            free(key->key_data_contents[i]);
-        }
-    }
-    return;
 }
 
 #define kdb_init_lib_lock(a) 0

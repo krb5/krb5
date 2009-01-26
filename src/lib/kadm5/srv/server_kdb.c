@@ -4,6 +4,11 @@
  * $Header$
  */
 
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
 #if !defined(lint) && !defined(__CODECENTER__)
 static char *rcsid = "$Header$";
 #endif

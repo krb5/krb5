@@ -53,6 +53,11 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
 #ifndef KRB5_KDB5__
 #define KRB5_KDB5__
 
@@ -655,7 +660,7 @@ krb5_db_get_context
 	(krb5_context, void **db_context);
 
 void
-krb5_free_key_data_contents(krb5_context, krb5_key_data *);
+krb5_dbe_free_key_data_contents(krb5_context, krb5_key_data *);
 
 #define KRB5_KDB_DEF_FLAGS	0
 
