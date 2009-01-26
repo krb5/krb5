@@ -81,6 +81,9 @@ static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
 static krb5_int32
 is_substr ( char *, krb5_data *);
 
+static krb5_int32
+prep_reprocess_req(krb5_kdc_req *, krb5_principal *);
+
 /*ARGSUSED*/
 krb5_error_code
 process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
@@ -109,7 +112,6 @@ krb5_data **response)
     krb5_enctype useenctype;
     int errcode, errcode2;
     register int i;
-    size_t len;
     int firstpass = 1;
     const char        *status = 0;
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* ticket granting or evidence ticket */
@@ -121,11 +123,8 @@ krb5_data **response)
     char *s4u_name = NULL;
     krb5_boolean is_referral, db_ref_done = FALSE;
     const char *emsg = NULL;
-    char **realms, **cpp, *temp_buf=NULL;
-    krb5_data *comp1 = NULL, *comp2 = NULL; 
     krb5_data *tgs_1 =NULL, *server_1 = NULL;
     krb5_principal krbtgt_princ;
-    krb5_int32 host_based_srv_listed, no_host_referral_listed;
 
     session_key.contents = NULL;
     
@@ -237,102 +236,15 @@ tgt_again:
                 goto cleanup;
 
             } else if ( db_ref_done == FALSE) {
-
-                /* By now we know that server principal name is unknown <== nprincs!=1 from get_principal 
-                 * If CANONICALIZE flag is set in the request                                 
-                 * If req is not U2U authn. req                                               
-                 * the requested server princ. has exactly two components                     
-                 * either 
-                 *      the name type is NT-SRV-HST                                           
-                 *      or name type is NT-UNKNOWN and 
-                 *         the 1st component is listed in conf file under host_based_services 
-                 * the 1st component is not in a list in conf under "no_host_referral"        
-                 * the 2d component looks like fully-qualified domain name (FQDN)              
-                 * If all of these conditions are satisfied - try mapping the FQDN and 
-                 * re-process the request as if client had asked for cross-realm TGT.
-                 */
-
-                if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) == TRUE &&   
-                    !isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) &&      
-                    krb5_princ_size(kdc_context, request->server) == 2) {             
-
-                    comp1 = krb5_princ_component(kdc_context, request->server, 0);
-                    comp2 = krb5_princ_component(kdc_context, request->server, 1);
-
-                    host_based_srv_listed   = FALSE;
-                    no_host_referral_listed = TRUE;
-                    if (kdc_active_realm->realm_host_based_services != NULL) {
-                        host_based_srv_listed = 
-                            is_substr(kdc_active_realm->realm_host_based_services, comp1);
-                        if (host_based_srv_listed == ENOMEM) {
-                            retval = ENOMEM; 
-                            goto cleanup; 
-                        }
-                    } 
-                    if (kdc_active_realm->realm_no_host_referral != NULL) {
-                        no_host_referral_listed = 
-                            is_substr(kdc_active_realm->realm_no_host_referral,comp1);
-                        if (no_host_referral_listed == ENOMEM) {
-                            retval = ENOMEM; 
-                            goto cleanup; 
-                        }
-                    } 
-
-                    if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST ||        
-                        (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&    
-                        kdc_active_realm->realm_host_based_services != NULL &&
-                        (host_based_srv_listed == TRUE ||
-                        strchr(kdc_active_realm->realm_host_based_services, '*')))) &&
-                        (kdc_active_realm->realm_no_host_referral == NULL || 
-                        (!strchr(kdc_active_realm->realm_host_based_services, '*') &&
-                        no_host_referral_listed == FALSE))) { 
-
-                        for (len=0; len < comp2->length; len++) {     
-                            if (comp2->data[len] == '.') break;
-                        }
-                        if (len == comp2->length)    
-                            goto cleanup; 
-
-                        temp_buf = calloc(1, comp2->length+1);
-                        if (!temp_buf){
-                            retval = ENOMEM; 
-                            goto cleanup;
-                        }
-                        strncpy(temp_buf, comp2->data,comp2->length);
-                        retval = krb5int_get_domain_realm_mapping(kdc_context, temp_buf, &realms);
-                        free(temp_buf);
-                        if (retval) {
-                            /* no match found */
-                            com_err("krb5_get_domain_realm_mapping", retval, 0);
-                            goto cleanup;
-                        }
-                        if (realms == 0) {
-                            printf(" (null)\n");
-                            goto cleanup;
-                        }
-                        if (realms[0] == 0) {
-                             printf(" (none)\n");
-                             free(realms);
-                             goto cleanup;
-                        }
-                       /* Modify request. 
-                        * Construct cross-realm tgt :  krbtgt/REMOTE_REALM@LOCAL_REALM 
-                        * and use it as a principal in this req. 
-                        */
-                        retval = krb5_build_principal(kdc_context, &krbtgt_princ, 
-                                      (*request->server).realm.length, 
-                                      (*request->server).realm.data, 
-                                      "krbtgt", realms[0], (char *)0);
-                         
-                        for (cpp = realms; *cpp; cpp++)  free(*cpp);
-                        krb5_free_principal(kdc_context, request->server);
- 
-                        retval = krb5_copy_principal(kdc_context, krbtgt_princ, &(request->server));
-                        if (retval == 0) {
-                            db_ref_done = TRUE;
-                            if (sname != NULL) free(sname);
-                            goto ref_tgt_again;
-                        }
+                retval = prep_reprocess_req(request, &krbtgt_princ);
+                if (!retval) {
+                    krb5_free_principal(kdc_context, request->server);
+                    retval = krb5_copy_principal(kdc_context, krbtgt_princ, &(request->server));
+                    if (!retval) {
+                        db_ref_done = TRUE;
+                        if (sname != NULL) 
+                            free(sname);
+                        goto ref_tgt_again;
                     }
                 }
             }
@@ -1139,9 +1051,10 @@ is_substr ( char *d1, krb5_data *d2)
     krb5_boolean ret = FALSE;
     char *new_d2 = 0, *d2_formated = 0;
     if ( d1 && d2 && d2->data && (d2->length+2 <= strlen(d1))){
-        if ((new_d2 = calloc(1,d2->length+1))) {
-            strncpy(new_d2,d2->data,d2->length);
-            if (asprintf( &d2_formated, "%c%s%c", ' ', new_d2, ' ') < 0)
+        new_d2 = calloc(1,d2->length+1);
+        if (new_d2 != NULL) {
+            strlcpy(new_d2,d2->data,d2->length+1);
+            if (asprintf( &d2_formated, "%c%s%c",' ',new_d2,' ') < 0)
                 ret = ENOMEM;
              else  if (d2_formated != 0 && strstr(d1, d2_formated) != NULL)
                 ret = TRUE;
@@ -1151,4 +1064,104 @@ is_substr ( char *d1, krb5_data *d2)
     }
     return ret;
 }
+
+static krb5_int32
+prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ) 
+{
+    krb5_error_code retval = KRB5KRB_AP_ERR_BADMATCH;
+    size_t len = 0;
+    char **realms, **cpp, *temp_buf=NULL;
+    krb5_data *comp1 = NULL, *comp2 = NULL; 
+    krb5_int32 host_based_srv_listed = 0, no_host_referral_listed = 0;
+
+    /* By now we know that server principal name is unknown.
+     * If CANONICALIZE flag is set in the request                                 
+     * If req is not U2U authn. req                                               
+     * the requested server princ. has exactly two components                     
+     * either 
+     *      the name type is NT-SRV-HST                                           
+     *      or name type is NT-UNKNOWN and 
+     *         the 1st component is listed in conf file under host_based_services 
+     * the 1st component is not in a list in conf under "no_host_referral"        
+     * the 2d component looks like fully-qualified domain name (FQDN)              
+     * If all of these conditions are satisfied - try mapping the FQDN and 
+     * re-process the request as if client had asked for cross-realm TGT.
+     */
+
+    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) == TRUE &&   
+        !isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) &&      
+        krb5_princ_size(kdc_context, request->server) == 2) {             
+
+        comp1 = krb5_princ_component(kdc_context, request->server, 0);
+        comp2 = krb5_princ_component(kdc_context, request->server, 1);
+        host_based_srv_listed   = FALSE;
+        no_host_referral_listed = TRUE;
+        if (kdc_active_realm->realm_host_based_services != NULL) {
+            host_based_srv_listed = is_substr(kdc_active_realm->realm_host_based_services, comp1);
+            if (host_based_srv_listed == ENOMEM) {
+                retval = ENOMEM; 
+                goto cleanup; 
+             }
+        } 
+        if (kdc_active_realm->realm_no_host_referral != NULL) {
+            no_host_referral_listed = is_substr(kdc_active_realm->realm_no_host_referral,comp1);
+            if (no_host_referral_listed == ENOMEM) {
+                retval = ENOMEM; 
+                goto cleanup; 
+             }
+         } 
+
+        if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST ||        
+            (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&    
+            kdc_active_realm->realm_host_based_services != NULL &&
+            (host_based_srv_listed == TRUE ||
+            strchr(kdc_active_realm->realm_host_based_services, '*')))) &&
+            (kdc_active_realm->realm_no_host_referral == NULL || 
+            (!strchr(kdc_active_realm->realm_host_based_services, '*') &&
+            no_host_referral_listed == FALSE))) { 
+
+            for (len=0; len < comp2->length; len++) {     
+                 if (comp2->data[len] == '.') break;
+            }
+            if (len == comp2->length)    
+                goto cleanup; 
+            temp_buf = calloc(1, comp2->length+1);
+            if (!temp_buf){
+                retval = ENOMEM; 
+                goto cleanup;
+            }
+            strlcpy(temp_buf, comp2->data,comp2->length+1);
+            retval = krb5int_get_domain_realm_mapping(kdc_context, temp_buf, &realms);
+            free(temp_buf);
+            if (retval) {
+                /* no match found */
+                com_err("krb5_get_domain_realm_mapping", retval, 0);
+                goto cleanup;
+            }
+            if (realms == 0) {
+                printf(" (null)\n");
+                goto cleanup;
+            }
+            if (realms[0] == 0) {
+                printf(" (none)\n");
+                free(realms);
+                goto cleanup;
+            }
+            /* Modify request. 
+             * Construct cross-realm tgt :  krbtgt/REMOTE_REALM@LOCAL_REALM 
+             * and use it as a principal in this req. 
+             */
+            retval = krb5_build_principal(kdc_context, krbtgt_princ, 
+                                            (*request->server).realm.length, 
+                                            (*request->server).realm.data, 
+                                            "krbtgt", realms[0], (char *)0);
+                         
+            for (cpp = realms; *cpp; cpp++)  
+                   free(*cpp);
+        }
+    }
+cleanup:
+    return retval;
+}
+
 
