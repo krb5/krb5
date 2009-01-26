@@ -1170,11 +1170,6 @@ void KRB5_CALLCONV krb5_free_pa_pac_req
 void KRB5_CALLCONV krb5_free_etype_list
 	(krb5_context, krb5_etype_list * );
 
-#include "kdb.h"
-
-void KRB5_CALLCONV krb5_free_key_data_contents
-	(krb5_context, krb5_key_data *);
-
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
 #include "k5-plugin.h"

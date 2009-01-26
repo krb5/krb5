@@ -221,7 +221,6 @@ krb5_free_etype_info
 krb5_free_host_realm
 krb5_free_kdc_rep
 krb5_free_kdc_req
-krb5_free_key_data_contents
 krb5_free_keyblock
 krb5_free_keyblock_contents
 krb5_free_keytab_entry_contents

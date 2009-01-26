@@ -810,20 +810,3 @@ krb5_free_etype_list(krb5_context context,
 	krb5_xfree(etypes);
     }
 }
-
-void KRB5_CALLCONV
-krb5_free_key_data_contents(krb5_context context,
-                            krb5_key_data *key)
-{
-     int i, idx;
-     
-     idx = (key->key_data_ver == 1 ? 1 : 2);
-     for (i = 0; i < idx; i++) {
-	  if (key->key_data_contents[i]) {
-	       memset(key->key_data_contents[i], 0, key->key_data_length[i]);
-	       free(key->key_data_contents[i]);
-	  }
-     }
-     return;
-}
-

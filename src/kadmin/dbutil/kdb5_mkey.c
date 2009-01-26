@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
@@ -255,8 +255,6 @@ kdb5_add_mkey(int argc, char *argv[])
         }
     }
 
-    /* XXX WAF: debug printf, remove before final commit */
-    /* printf("i = %d old_key_data_count = %d\n", i, old_key_data_count); */
     assert(i == old_key_data_count + 1);
 
     if ((retval = krb5_dbe_update_mkey_aux(util_context, &master_entry,
@@ -300,19 +298,19 @@ kdb5_add_mkey(int argc, char *argv[])
     }
     /* clean up */
     (void) krb5_db_fini(util_context);
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    zap((char *)master_keyblock.contents, master_keyblock.length);
     free(master_keyblock.contents);
-    memset((char *)new_master_keyblock.contents, 0, new_master_keyblock.length);
+    zap((char *)new_master_keyblock.contents, new_master_keyblock.length);
     free(new_master_keyblock.contents);
     if (pw_str) {
-        memset(pw_str, 0, pw_size);
+        zap(pw_str, pw_size);
         free(pw_str);
     }
     free(master_salt.data);
     free(mkey_fullname);
-    for (cur_mkey_aux_data = mkey_aux_data_head; cur_mkey_aux_data != NULL;
-        cur_mkey_aux_data = next_mkey_aux_data) {
 
+    for (cur_mkey_aux_data = mkey_aux_data_head; cur_mkey_aux_data != NULL;
+         cur_mkey_aux_data = next_mkey_aux_data) {
         next_mkey_aux_data = cur_mkey_aux_data->next;
         krb5_free_key_data_contents(util_context, &(cur_mkey_aux_data->latest_mkey));
         free(cur_mkey_aux_data);
@@ -511,9 +509,9 @@ kdb5_list_mkeys(int argc, char *argv[])
 
     /* assemble & parse the master key name */
     if ((retval = krb5_db_setup_mkey_name(util_context,
-                global_params.mkey_name,
-                global_params.realm,  
-                &mkey_fullname, &master_princ))) {
+                                          global_params.mkey_name,
+                                          global_params.realm,  
+                                          &mkey_fullname, &master_princ))) {
         com_err(progname, retval, "while setting up master key name");
         exit_status++;
         return;
@@ -551,8 +549,8 @@ kdb5_list_mkeys(int argc, char *argv[])
     for (cur_kb_node = master_keylist; cur_kb_node != NULL;
          cur_kb_node = cur_kb_node->next) {
 
-        if (krb5_enctype_to_string(cur_kb_node->keyblock.enctype,
-                                   enctype, sizeof(enctype))) {
+        if ((retval = krb5_enctype_to_string(cur_kb_node->keyblock.enctype,
+                                             enctype, sizeof(enctype)))) {
             com_err(progname, retval, "while getting enctype description");
             exit_status++;
             return;
@@ -580,18 +578,26 @@ kdb5_list_mkeys(int argc, char *argv[])
         }
 
         if (cur_kb_node->kvno == act_kvno) {
-            asprintf(&output_str, "KNVO: %d, Enctype: %s, Active on: %s *\n",
-                     cur_kb_node->kvno, enctype, strdate(act_time));
+            /* * indicates kvno is currently active */
+            retval = asprintf(&output_str, "KNVO: %d, Enctype: %s, Active on: %s *\n",
+                              cur_kb_node->kvno, enctype, strdate(act_time));
         } else {
             if (act_time) {
-                asprintf(&output_str, "KNVO: %d, Enctype: %s, Active on: %s\n",
-                         cur_kb_node->kvno, enctype, strdate(act_time));
+                retval = asprintf(&output_str, "KNVO: %d, Enctype: %s, Active on: %s\n",
+                                  cur_kb_node->kvno, enctype, strdate(act_time));
             } else {
-                asprintf(&output_str, "KNVO: %d, Enctype: %s, No activate time set\n",
-                         cur_kb_node->kvno, enctype);
+                retval = asprintf(&output_str, "KNVO: %d, Enctype: %s, No activate time set\n",
+                                  cur_kb_node->kvno, enctype);
             }
         }
+        if (retval == -1) {
+            com_err(progname, ENOMEM, "asprintf could not allocate enough memory to hold output");
+            exit_status++;
+            return;
+        }
         printf("%s", output_str);
+        free(output_str);
+        output_str = NULL;
     }
 
     /* clean up */

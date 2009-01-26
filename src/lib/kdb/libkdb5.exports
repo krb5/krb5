@@ -66,6 +66,7 @@ krb5_db_delete_policy
 krb5_db_free_policy
 krb5_def_store_mkey
 krb5_db_promote
+krb5_free_key_data_contents
 ulog_map
 ulog_set_role
 ulog_free_entries

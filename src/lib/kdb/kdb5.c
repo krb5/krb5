@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2008 by the Massachusetts Institute of Technology.
+ * Copyright 2006, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -20,6 +20,11 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
+ */
+
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
  */
 
 /*
@@ -107,9 +112,9 @@ krb5_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
     krb5_actkvno_node *temp, *prev;
 
     for (temp = val; temp != NULL;) {
-	prev = temp;
-	temp = temp->next;
-	krb5_xfree(prev);
+        prev = temp;
+        temp = temp->next;
+        krb5_xfree(prev);
     }
 }
 
@@ -119,11 +124,27 @@ krb5_free_mkey_aux_list(krb5_context context, krb5_mkey_aux_node *val)
     krb5_mkey_aux_node *temp, *prev;
 
     for (temp = val; temp != NULL;) {
-	prev = temp;
-	temp = temp->next;
-	krb5_free_key_data_contents(context, &prev->latest_mkey);
-	krb5_xfree(prev);
+        prev = temp;
+        temp = temp->next;
+        krb5_free_key_data_contents(context, &prev->latest_mkey);
+        krb5_xfree(prev);
     }
+}
+
+void
+krb5_free_key_data_contents(krb5_context context,
+                            krb5_key_data *key)
+{
+    int i, idx;
+
+    idx = (key->key_data_ver == 1 ? 1 : 2);
+    for (i = 0; i < idx; i++) {
+        if (key->key_data_contents[i]) {
+            zap(key->key_data_contents[i], key->key_data_length[i]);
+            free(key->key_data_contents[i]);
+        }
+    }
+    return;
 }
 
 #define kdb_init_lib_lock(a) 0
@@ -1684,7 +1705,7 @@ krb5_db_fetch_mkey(krb5_context    context,
 
 	if (!salt)
 	    krb5_xfree(scratch.data);
-	memset(password, 0, sizeof(password));	/* erase it */
+	zap(password, sizeof(password));	/* erase it */
 
     } else {
 	kdb5_dal_handle *dal_handle;
@@ -1731,7 +1752,7 @@ krb5_db_fetch_mkey(krb5_context    context,
 
   clean_n_exit:
     if (tmp_key.contents) {
-	memset(tmp_key.contents, 0, tmp_key.length);
+	zap(tmp_key.contents, tmp_key.length);
 	krb5_db_free(context, tmp_key.contents);
     }
     return retval;
@@ -2211,6 +2232,8 @@ krb5_dbe_lookup_mkvno(krb5_context	context,
     if (tl_data.tl_data_length == 0) {
 	*mkvno = 1; /* default for princs that lack the KRB5_TL_MKVNO data */
 	return (0);
+    } else if (tl_data.tl_data_length != 2) {
+	return (KRB5_KDB_TRUNCATED_RECORD);
     }
 
     krb5_kdb_decode_int16(tl_data.tl_data_contents, tmp);
@@ -2258,6 +2281,10 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
         /* get version to determine how to parse the data */
         krb5_kdb_decode_int16(tl_data.tl_data_contents, version);
         if (version == KRB5_TL_MKEY_AUX_VER_1) {
+
+            /* variable size, must be at least 10 bytes */
+            if (tl_data.tl_data_length < 10)
+                return (KRB5_KDB_TRUNCATED_RECORD);
 
             /* curloc points to first tuple entry in the tl_data_contents */
             curloc = tl_data.tl_data_contents + sizeof(version);
@@ -2413,6 +2440,11 @@ krb5_dbe_lookup_actkvno(krb5_context context,
         /* get version to determine how to parse the data */
         krb5_kdb_decode_int16(tl_data.tl_data_contents, version);
         if (version == KRB5_TL_ACTKVNO_VER_1) {
+
+            /* variable size, must be at least 8 bytes */
+            if (tl_data.tl_data_length < 8)
+                return (KRB5_KDB_TRUNCATED_RECORD);
+
             /*
              * Find number of tuple entries, remembering to account for version
              * field.
@@ -2466,6 +2498,7 @@ krb5_dbe_update_actkvno(krb5_context context,
     krb5_tl_data new_tl_data;
     unsigned char *nextloc;
     const krb5_actkvno_node *cur_actkvno;
+    krb5_octet *tmpptr;
 
     if (actkvno_list == NULL) {
         return (EINVAL);
@@ -2484,11 +2517,15 @@ krb5_dbe_update_actkvno(krb5_context context,
 
     for (cur_actkvno = actkvno_list; cur_actkvno != NULL;
          cur_actkvno = cur_actkvno->next) {
+
         new_tl_data.tl_data_length += ACTKVNO_TUPLE_SIZE;
-        new_tl_data.tl_data_contents = (krb5_octet *) realloc(new_tl_data.tl_data_contents,
-                                                              new_tl_data.tl_data_length);
-        if (new_tl_data.tl_data_contents == NULL)
+        tmpptr = realloc(new_tl_data.tl_data_contents, new_tl_data.tl_data_length);
+        if (tmpptr == NULL) {
+            free(new_tl_data.tl_data_contents);
             return (ENOMEM);
+        } else {
+            new_tl_data.tl_data_contents = tmpptr;
+        }
 
         /*
          * Using realloc so tl_data_contents is required to correctly calculate

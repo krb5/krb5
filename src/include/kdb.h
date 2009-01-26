@@ -195,6 +195,12 @@ typedef struct _krb5_mkey_aux_node {
     krb5_key_data    latest_mkey; /* most recent mkey */
 } krb5_mkey_aux_node;
 
+typedef struct _krb5_keylist_node {
+    krb5_keyblock keyblock;
+    krb5_kvno     kvno;
+    struct _krb5_keylist_node *next;
+} krb5_keylist_node;
+
 /*
  * Determines the number of failed KDC requests before DISALLOW_ALL_TIX is set
  * on the principal.
@@ -640,7 +646,6 @@ krb5_db_free_policy( krb5_context kcontext,
 		     osa_policy_ent_t policy);
 
 
-
 krb5_error_code
 krb5_db_set_context
 	(krb5_context, void *db_context);
@@ -648,6 +653,9 @@ krb5_db_set_context
 krb5_error_code
 krb5_db_get_context
 	(krb5_context, void **db_context);
+
+void
+krb5_free_key_data_contents(krb5_context, krb5_key_data *);
 
 #define KRB5_KDB_DEF_FLAGS	0
 
