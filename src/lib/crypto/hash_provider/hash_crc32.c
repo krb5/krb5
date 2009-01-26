@@ -44,11 +44,7 @@ k5_crc32_hash(unsigned int icount, const krb5_data *input,
 	c ^= cn;
     }
 
-    output->data[0] = c&0xff;
-    output->data[1] = (c>>8)&0xff;
-    output->data[2] = (c>>16)&0xff;
-    output->data[3] = (c>>24)&0xff;
-
+    store_32_le(c, output->data);
     return(0);
 }
 

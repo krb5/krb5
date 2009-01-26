@@ -317,10 +317,8 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
         memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
         i += sizeof(kg_arcfour_l40);
     }
-    t[i++] = ms_usage &0xff;
-    t[i++] = (ms_usage>>8) & 0xff;
-    t[i++] = (ms_usage>>16) & 0xff;
-    t[i++] = (ms_usage>>24) & 0xff;
+    store_32_le(ms_usage, &t[i]);
+    i += 4;
     input.data = (void *) &t;
     input.length = i;
     output.data = (void *) usage_key.contents;
@@ -684,10 +682,8 @@ kg_arcfour_docrypt_iov (krb5_context context,
         memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
         i += sizeof(kg_arcfour_l40);
     }
-    t[i++] = ms_usage &0xff;
-    t[i++] = (ms_usage>>8) & 0xff;
-    t[i++] = (ms_usage>>16) & 0xff;
-    t[i++] = (ms_usage>>24) & 0xff;
+    store_32_le(ms_usage, &t[i]);
+    i += 4;
     input.data = (void *) &t;
     input.length = i;
     output.data = (void *) usage_key.contents;

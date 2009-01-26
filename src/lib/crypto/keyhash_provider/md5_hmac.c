@@ -1,7 +1,7 @@
 /*
  * lib/crypto/keyhash_provider/md5_hmac.c
  *
- * Copyright2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -45,11 +45,7 @@ k5_md5_hmac_hash (const krb5_keyblock *key, krb5_keyusage usage,
   krb5_MD5Init(&ctx);
 
   ms_usage = krb5int_arcfour_translate_usage (usage);
-  t[0] = (ms_usage >>  0) & 0xff;
-  t[1] = (ms_usage >>  8) & 0xff;
-  t[2] = (ms_usage >> 16) & 0xff;
-  t[3] = (ms_usage >> 24) & 0xff;
-
+  store_32_le(ms_usage, t);
   krb5_MD5Update(&ctx, t, sizeof(t));
   krb5_MD5Update(&ctx, (unsigned char *)input->data, input->length);
   krb5_MD5Final(&ctx);

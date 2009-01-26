@@ -44,10 +44,7 @@ k5_sha1_hash(unsigned int icount, const krb5_data *input,
     shsFinal(&ctx);
 
     for (i=0; i<(sizeof(ctx.digest)/sizeof(ctx.digest[0])); i++) {
-	output->data[i*4] = (ctx.digest[i]>>24)&0xff;
-	output->data[i*4+1] = (ctx.digest[i]>>16)&0xff;
-	output->data[i*4+2] = (ctx.digest[i]>>8)&0xff;
-	output->data[i*4+3] = ctx.digest[i]&0xff;
+	store_32_be(ctx.digest[i], &output->data[i*4]);
     }
 
     return(0);

@@ -73,6 +73,8 @@ static char *rcsid = "$Header$";
 
 #include <gssapi/gssapi_generic.h>
 #include "gss-misc.h"
+/* for store_32_be */
+#include "k5-platform.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -175,11 +177,7 @@ int send_token(s, flags, tok)
      }
      if (tok->length > 0xffffffffUL)
 	 abort();
-     lenbuf[0] = (tok->length >> 24) & 0xff;
-     lenbuf[1] = (tok->length >> 16) & 0xff;
-     lenbuf[2] = (tok->length >> 8) & 0xff;
-     lenbuf[3] = tok->length & 0xff;
-
+     store_32_be(tok->length, lenbuf);
      ret = write_all(s, lenbuf, 4);
      if (ret < 0) {
 	  perror("sending token length");

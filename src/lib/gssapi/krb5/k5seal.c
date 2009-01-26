@@ -121,13 +121,11 @@ make_seal_token_v1 (krb5_context context,
     g_make_token_header(oid, 14+cksum_size+tmsglen, &ptr, toktype);
 
     /* 0..1 SIGN_ALG */
-    ptr[0] = signalg & 0xff;
-    ptr[1] = (signalg >> 8) & 0xff;
+    store_16_le(signalg, &ptr[0]);
 
     /* 2..3 SEAL_ALG or Filler */
     if ((toktype == KG_TOK_SEAL_MSG) && do_encrypt) {
-        ptr[2] = sealalg & 0xff;
-        ptr[3] = (sealalg >> 8) & 0xff;
+        store_16_le(sealalg, &ptr[2]);
     } else {
         /* No seal */
         ptr[2] = 0xff;
@@ -260,10 +258,7 @@ make_seal_token_v1 (krb5_context context,
             unsigned char bigend_seqnum[4];
             krb5_keyblock *enc_key;
             int i;
-            bigend_seqnum[0] = (*seqnum>>24) & 0xff;
-            bigend_seqnum[1] = (*seqnum>>16) & 0xff;
-            bigend_seqnum[2] = (*seqnum>>8) & 0xff;
-            bigend_seqnum[3] = *seqnum & 0xff;
+            store_32_be(seqnum, bigend_seqnum);
             code = krb5_copy_keyblock (context, enc, &enc_key);
             if (code)
             {

@@ -1,6 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Copyright2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2009 by the Massachusetts Institute of Technology.
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software
@@ -47,10 +47,7 @@ kg_make_seq_num(context, key, direction, seqnum, cksum, buf)
     if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
         key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
         /* Yes, Microsoft used big-endian sequence number.*/
-        plain[0] = (seqnum>>24) & 0xff;
-        plain[1] = (seqnum>>16) & 0xff;
-        plain[2] = (seqnum>>8) & 0xff;
-        plain[3] = seqnum & 0xff;
+        store_32_be(seqnum, plain);
         return kg_arcfour_docrypt (key, 0,
                                    cksum, 8,
                                    &plain[0], 8,
@@ -58,11 +55,7 @@ kg_make_seq_num(context, key, direction, seqnum, cksum, buf)
 
     }
 
-    plain[0] = (unsigned char) (seqnum&0xff);
-    plain[1] = (unsigned char) ((seqnum>>8)&0xff);
-    plain[2] = (unsigned char) ((seqnum>>16)&0xff);
-    plain[3] = (unsigned char) ((seqnum>>24)&0xff);
-
+    store_32_le(seqnum, plain);
     return(kg_encrypt(context, key, KG_USAGE_SEQ, cksum, plain, buf, 8));
 }
 

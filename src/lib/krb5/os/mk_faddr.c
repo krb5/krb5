@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/full_ipadr.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -57,8 +57,8 @@ krb5_make_fulladdr(krb5_context context, krb5_address *kaddr, krb5_address *kpor
     tmp16 = kaddr->addrtype;
     *marshal++ = 0x00;
     *marshal++ = 0x00;
-    *marshal++ = (krb5_octet) (tmp16 & 0xff);
-    *marshal++ = (krb5_octet) ((tmp16 >> 8) & 0xff);
+    store_16_le(tmp16, marshal);
+    marshal += 2;
 
     tmp32 = kaddr->length;
     store_32_le(tmp32, marshal);
