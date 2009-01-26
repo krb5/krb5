@@ -54,7 +54,6 @@
  */
 
 #include "k5-int.h"
-#include <kdb.h>
 
 void KRB5_CALLCONV
 krb5_free_address(krb5_context context, krb5_address *val)
