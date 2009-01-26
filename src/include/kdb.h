@@ -513,9 +513,9 @@ krb5_dbe_apw( krb5_context	  context,
 	      krb5_db_entry	* db_entry);
 
 int
-get_key_data_kvno( krb5_context	   context,
-		   int		   count,
-		   krb5_key_data * data);
+krb5_db_get_key_data_kvno( krb5_context	   context,
+			   int		   count,
+			   krb5_key_data * data);
 
 
 /* default functions. Should not be directly called */

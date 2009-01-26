@@ -145,8 +145,8 @@ kdb5_add_mkey(int argc, char *argv[])
     }
 
     /* First save the old keydata */
-    old_kvno = get_key_data_kvno(util_context, master_entry.n_key_data,
-                                 master_entry.key_data);
+    old_kvno = krb5_db_get_key_data_kvno(util_context, master_entry.n_key_data,
+					 master_entry.key_data);
     old_key_data_count = master_entry.n_key_data;
     old_key_data = master_entry.key_data;
 

@@ -57,7 +57,7 @@
 #include <errno.h>
 
 int
-get_key_data_kvno(context, count, data)
+krb5_db_get_key_data_kvno(context, count, data)
     krb5_context	  context;
     int			  count;
     krb5_key_data	* data;
@@ -260,7 +260,8 @@ krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, keepold, db_entry)
     int			  i;
 
     /* First save the old keydata */
-    kvno = get_key_data_kvno(context, db_entry->n_key_data, db_entry->key_data);
+    kvno = krb5_db_get_key_data_kvno(context, db_entry->n_key_data,
+				     db_entry->key_data);
     key_data_count = db_entry->n_key_data;
     key_data = db_entry->key_data;
     db_entry->key_data = NULL;
@@ -315,7 +316,8 @@ krb5_dbe_ark(context, master_key, ks_tuple, ks_tuple_count, db_entry)
     int			  i;
 
     /* First save the old keydata */
-    kvno = get_key_data_kvno(context, db_entry->n_key_data, db_entry->key_data);
+    kvno = krb5_db_get_key_data_kvno(context, db_entry->n_key_data,
+				     db_entry->key_data);
     key_data_count = db_entry->n_key_data;
     key_data = db_entry->key_data;
     db_entry->key_data = NULL;
@@ -553,8 +555,8 @@ krb5_dbe_def_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
     int			  i;
 
     /* First save the old keydata */
-    old_kvno = get_key_data_kvno(context, db_entry->n_key_data,
-				 db_entry->key_data);
+    old_kvno = krb5_db_get_key_data_kvno(context, db_entry->n_key_data,
+					 db_entry->key_data);
     key_data_count = db_entry->n_key_data;
     key_data = db_entry->key_data;
     db_entry->key_data = NULL;
@@ -612,8 +614,8 @@ krb5_dbe_apw(context, master_key, ks_tuple, ks_tuple_count, passwd, db_entry)
     int			  i;
 
     /* First save the old keydata */
-    old_kvno = get_key_data_kvno(context, db_entry->n_key_data,
-				 db_entry->key_data);
+    old_kvno = krb5_db_get_key_data_kvno(context, db_entry->n_key_data,
+					 db_entry->key_data);
     key_data_count = db_entry->n_key_data;
     key_data = db_entry->key_data;
     db_entry->key_data = NULL;

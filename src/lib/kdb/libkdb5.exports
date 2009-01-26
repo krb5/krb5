@@ -1,4 +1,3 @@
-get_key_data_kvno
 krb5_db_open
 krb5_db_inited
 krb5_db_alloc
@@ -12,6 +11,7 @@ krb5_db_free_mkey_list
 krb5_db_fini
 krb5_db_free_principal
 krb5_db_get_age
+krb5_db_get_key_data_kvno
 krb5_db_get_mkey
 krb5_db_get_mkey_list
 krb5_db_get_context
