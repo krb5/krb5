@@ -52,7 +52,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     unsigned char *tbuf = NULL;
     int key_usage;
     size_t rrc = 0;
-    size_t gss_headerlen, gss_trailerlen;
+    unsigned int  gss_headerlen, gss_trailerlen;
     krb5_keyblock *key;
     krb5_cksumtype cksumtype;
     size_t data_length, assoc_data_length;
@@ -130,21 +130,21 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
         }
 
         if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-            code = kg_allocate_iov(header, gss_headerlen);
+            code = kg_allocate_iov(header, (size_t) gss_headerlen);
         else if (header->buffer.length < gss_headerlen)
             code = KRB5_BAD_MSIZE;
         if (code != 0)
             goto cleanup;
-        header->buffer.length = gss_headerlen;
+        header->buffer.length = (size_t) gss_headerlen;
 
         if (trailer != NULL) {
             if (trailer->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-                code = kg_allocate_iov(trailer, gss_trailerlen);
+                code = kg_allocate_iov(trailer, (size_t) gss_trailerlen);
             else if (trailer->buffer.length < gss_trailerlen)
                 code = KRB5_BAD_MSIZE;
             if (code != 0)
                 goto cleanup;
-            trailer->buffer.length = gss_trailerlen;
+            trailer->buffer.length = (size_t) gss_trailerlen;
         }
 
         /* TOK_ID */
@@ -199,21 +199,21 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
         }
 
         if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-            code = kg_allocate_iov(header, gss_headerlen);
+            code = kg_allocate_iov(header, (size_t) gss_headerlen);
         else if (header->buffer.length < gss_headerlen)
             code = KRB5_BAD_MSIZE;
         if (code != 0)
             goto cleanup;
-        header->buffer.length = gss_headerlen;
+        header->buffer.length = (size_t) gss_headerlen;
 
         if (trailer != NULL) {
             if (trailer->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
-                code = kg_allocate_iov(trailer, gss_trailerlen);
+                code = kg_allocate_iov(trailer, (size_t) gss_trailerlen);
             else if (trailer->buffer.length < gss_trailerlen)
                 code = KRB5_BAD_MSIZE;
             if (code != 0)
                 goto cleanup;
-            trailer->buffer.length = gss_trailerlen;
+            trailer->buffer.length = (size_t) gss_trailerlen;
         }
 
         /* TOK_ID */
