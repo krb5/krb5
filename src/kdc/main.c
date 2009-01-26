@@ -166,71 +166,84 @@ finish_realm(kdc_realm_t *rdp)
     free(rdp);
 }
 
-static void 
+static krb5_error_code 
 handle_referrals(krb5_realm_params *rparams, char *no_refrls, char *host_based_srvcs, kdc_realm_t *rdp )
 {
     int i = 0;
-    if ( no_refrls == NULL ||  ( strchr(no_refrls,'*'))==0) {
-        if ( no_refrls!=0 ){
+    krb5_error_code retval = 0;
+    if (no_refrls == NULL || strchr(no_refrls, '*') == NULL) {
+        if (no_refrls != NULL){
             if (rparams && rparams->realm_no_host_referral) {
-                asprintf(&(rdp->realm_no_host_referral), "%s%s%s%s%s",
-                         " ", no_refrls," ",rparams->realm_no_host_referral, " ");
+                if (asprintf(&(rdp->realm_no_host_referral), "%s%s%s%s%s",
+                         " ", no_refrls," ",rparams->realm_no_host_referral, " ") < 0)
+                    retval = ENOMEM; 
             } else {
-                asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", no_refrls," ");
+                if(asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", no_refrls, " ") < 0)
+                    retval = ENOMEM; 
             }
   	} else {
             if (rparams && rparams->realm_no_host_referral) {   
-                asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", rparams->realm_no_host_referral," ");
+                if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", 
+                             rparams->realm_no_host_referral, " ") < 0)
+                    retval = ENOMEM; 
             } else
-                rdp->realm_no_host_referral = 0;
+                rdp->realm_no_host_referral = NULL;
         }
  
-        if ( rdp->realm_no_host_referral &&
-             strlen(rdp->realm_no_host_referral)>1 && strchr(rdp->realm_no_host_referral, '*')!=0) {
-             rdp->realm_no_host_referral = strdup("*");
+        if (rdp->realm_no_host_referral &&
+            strlen(rdp->realm_no_host_referral) > 1 && strchr(rdp->realm_no_host_referral, '*') != NULL) {
+            rdp->realm_no_host_referral = strdup("*");
         } else {
              /*  only if no_host_referral != "*" */
  
-            if ( (host_based_srvcs !=0 &&  strchr(host_based_srvcs,'*')!=0) ||
-                 (rparams && rparams->realm_host_based_services && strchr(rparams->realm_host_based_services,'*')!=0)) {
-                asprintf(&(rdp->realm_host_based_services),"%s", "*");
+            if ((host_based_srvcs != NULL &&  strchr(host_based_srvcs,'*') != NULL) ||
+                 (rparams && rparams->realm_host_based_services && 
+                             strchr(rparams->realm_host_based_services,'*') != NULL)) {
+                if (asprintf(&(rdp->realm_host_based_services),"%s", "*") < 0)
+                    retval = ENOMEM; 
             } else {
-                if ( host_based_srvcs !=0) {
+                if (host_based_srvcs != NULL) {
                     if (rparams && rparams->realm_host_based_services) {
-                        asprintf(&(rdp->realm_host_based_services),"%s%s%s%s%s",
-                        " ", host_based_srvcs," ",rparams->realm_host_based_services," ");
+                        if (asprintf(&(rdp->realm_host_based_services),"%s%s%s%s%s",
+                            " ", host_based_srvcs," ",rparams->realm_host_based_services," ") < 0)
+                            retval = ENOMEM; 
                     } else
-                        asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", host_based_srvcs," ");
+                        if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", 
+                                     host_based_srvcs, " ") < 0)
+                            retval = ENOMEM; 
                 } else {
                     if (rparams && rparams->realm_host_based_services) {
-                        asprintf(&(rdp->realm_host_based_services),"%s%s%s"," ", rparams->realm_host_based_services," ");
+                        if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", 
+                                     rparams->realm_host_based_services, " ") < 0)
+                            retval = ENOMEM; 
                     } else 
-                        rdp->realm_host_based_services = 0;
+                        rdp->realm_host_based_services = NULL;
                 }
             }
 
             /* Walk realm_host_based_services and realm_no_host_referral and replace all ',' with whitespace */
             i = 0; 
-            while ( rdp && rdp->realm_host_based_services && (rdp->realm_host_based_services)[i] != 0){
-                if (( rdp->realm_host_based_services)[i]==',' )
-                    ( rdp->realm_host_based_services)[i]=' ';
+            while (rdp && rdp->realm_host_based_services && (rdp->realm_host_based_services)[i] != 0){
+                if ((rdp->realm_host_based_services)[i] == ',')
+                    (rdp->realm_host_based_services)[i] = ' ';
                 i++; 
             }
             i = 0;   
-            while ( rdp && rdp->realm_no_host_referral && ( rdp->realm_no_host_referral)[i] != 0){
-                if (( rdp->realm_no_host_referral)[i]==',' )
-                    ( rdp->realm_no_host_referral)[i]=' ';
+            while (rdp && rdp->realm_no_host_referral && ( rdp->realm_no_host_referral)[i] != 0){
+                if ((rdp->realm_no_host_referral)[i] == ',')
+                    (rdp->realm_no_host_referral)[i] = ' ';
                 i++;
             }
         }
     } else {
-        if  ( no_refrls != NULL && strchr(no_refrls,'*') !=0 ) 
-          asprintf(&(rdp->realm_no_host_referral),"%s", "* ");
-        else
-          rdp->realm_no_host_referral = 0;
+        if  (no_refrls != NULL && strchr(no_refrls,'*') != NULL) {
+            if (asprintf(&(rdp->realm_no_host_referral),"%s", "*") < 0)
+                retval = ENOMEM; 
+        } else
+            rdp->realm_no_host_referral = NULL;
     }
 
-    return;
+    return retval;
 }
 /*
  * Initialize a realm control structure from the alternate profile or from
@@ -320,7 +333,9 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 	rparams->realm_max_rlife : KRB5_KDB_MAX_RLIFE;
 
     /* Handle KDC referrals */
-    handle_referrals(rparams, no_refrls, host_based_srvcs, rdp );
+    kret = handle_referrals(rparams, no_refrls, host_based_srvcs, rdp);
+    if (kret == ENOMEM)
+	goto whoops;
 
     if (rparams)
 	krb5_free_realm_params(rdp->realm_context, rparams);
@@ -511,8 +526,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     krb5_pointer	aprof;
     const char		*hierarchy[3];
     char               **db_args      = NULL;
-    char                *no_refrls = 0;
-    char                *host_based_srvcs = 0;
+    char                *no_refrls = NULL;
+    char                *host_based_srvcs = NULL;
     int                  db_args_size = 0;
 
     extern char *optarg;
@@ -531,20 +546,17 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    max_dgram_reply_size = MAX_DGRAM_SIZE;
         /* The service name "*" means any service. */
         hierarchy[1] = "no_host_referral";
-        if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls)){
-            no_refrls = 0;
-        } else {
-            if ( strlen(no_refrls) && strchr(no_refrls, '*')) {
+        if (!krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls)){
+            if (no_refrls != NULL && strlen(no_refrls) && strchr(no_refrls, '*')) {
                 no_refrls = strdup("*");
             }
         }
-        if ( no_refrls == 0 || strchr(no_refrls, '*')==0) {
+        if (no_refrls == 0 || strchr(no_refrls, '*') == NULL) {
             hierarchy[1] = "host_based_services";
-            if (krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs))
-                host_based_srvcs = 0;
-            else 
-            if (  strchr( host_based_srvcs, '*')) {
-                host_based_srvcs = strdup("*");
+            if (!krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs)) {
+                if (strchr(host_based_srvcs, '*')) {
+                    host_based_srvcs = strdup("*");
+                }
             }
         }
 
@@ -843,7 +855,4 @@ int main(int argc, char **argv)
     krb5_free_context(kcontext);
     return errout;
 }
-
-
-
 
