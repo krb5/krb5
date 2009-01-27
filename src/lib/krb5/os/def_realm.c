@@ -32,7 +32,7 @@
 #include "os-proto.h"
 #include <stdio.h>
 
-#ifdef KRB5_DNS_LOOKUP	     
+#ifdef KRB5_DNS_LOOKUP             
 #ifdef WSHELPER
 #include <wshelper.h>
 #else /* WSHELPER */
@@ -75,7 +75,7 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
     krb5_error_code retval;
 
     if (!context || (context->magic != KV5M_CONTEXT)) 
-	    return KV5M_CONTEXT;
+            return KV5M_CONTEXT;
 
     if (!context->default_realm) {
         /*
@@ -104,47 +104,47 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
         if (context->default_realm == 0) {
             int use_dns =  _krb5_use_dns_realm(context);
             if ( use_dns ) {
-		/*
-		 * Since this didn't appear in our config file, try looking
-		 * it up via DNS.  Look for a TXT records of the form:
-		 *
-		 * _kerberos.<localhost>
-		 * _kerberos.<domainname>
-		 * _kerberos.<searchlist>
-		 *
-		 */
-		char localhost[MAX_DNS_NAMELEN+1];
-		char * p;
+                /*
+                 * Since this didn't appear in our config file, try looking
+                 * it up via DNS.  Look for a TXT records of the form:
+                 *
+                 * _kerberos.<localhost>
+                 * _kerberos.<domainname>
+                 * _kerberos.<searchlist>
+                 *
+                 */
+                char localhost[MAX_DNS_NAMELEN+1];
+                char * p;
 
-		krb5int_get_fq_local_hostname (localhost, sizeof(localhost));
+                krb5int_get_fq_local_hostname (localhost, sizeof(localhost));
 
-		if ( localhost[0] ) {
-		    p = localhost;
-		    do {
-			retval = krb5_try_realm_txt_rr("_kerberos", p, 
-						       &context->default_realm);
-			p = strchr(p,'.');
-			if (p)
-			    p++;
-		    } while (retval && p && p[0]);
+                if ( localhost[0] ) {
+                    p = localhost;
+                    do {
+                        retval = krb5_try_realm_txt_rr("_kerberos", p, 
+                                                       &context->default_realm);
+                        p = strchr(p,'.');
+                        if (p)
+                            p++;
+                    } while (retval && p && p[0]);
 
-		    if (retval)
-			retval = krb5_try_realm_txt_rr("_kerberos", "", 
-						       &context->default_realm);
-		} else {
-		    retval = krb5_try_realm_txt_rr("_kerberos", "", 
-						   &context->default_realm);
-		}
-		if (retval) {
-		    return(KRB5_CONFIG_NODEFREALM);
-		}
+                    if (retval)
+                        retval = krb5_try_realm_txt_rr("_kerberos", "", 
+                                                       &context->default_realm);
+                } else {
+                    retval = krb5_try_realm_txt_rr("_kerberos", "", 
+                                                   &context->default_realm);
+                }
+                if (retval) {
+                    return(KRB5_CONFIG_NODEFREALM);
+                }
             }
         }
 #endif /* KRB5_DNS_LOOKUP */
     }
 
     if (context->default_realm == 0)
-	return(KRB5_CONFIG_NODEFREALM);
+        return(KRB5_CONFIG_NODEFREALM);
     if (context->default_realm[0] == 0) {
         free (context->default_realm);
         context->default_realm = 0;
@@ -162,11 +162,11 @@ krb5_error_code KRB5_CALLCONV
 krb5_set_default_realm(krb5_context context, const char *lrealm)
 {
     if (!context || (context->magic != KV5M_CONTEXT)) 
-	    return KV5M_CONTEXT;
+            return KV5M_CONTEXT;
 
     if (context->default_realm) {
-	    free(context->default_realm);
-	    context->default_realm = 0;
+            free(context->default_realm);
+            context->default_realm = 0;
     }
 
     /* Allow the user to clear the default realm setting by passing in 
@@ -176,7 +176,7 @@ krb5_set_default_realm(krb5_context context, const char *lrealm)
     context->default_realm = strdup(lrealm);
 
     if (!context->default_realm)
-	    return ENOMEM;
+            return ENOMEM;
 
     return(0);
 
@@ -185,8 +185,9 @@ krb5_set_default_realm(krb5_context context, const char *lrealm)
 void KRB5_CALLCONV
 krb5_free_default_realm(krb5_context context, char *lrealm)
 {
-	free (lrealm);
+    free (lrealm);
 }
+
 krb5_error_code
 krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char ***realmsp)
 {
@@ -195,9 +196,6 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
     krb5_error_code retval;
     char temp_host[MAX_DNS_NAMELEN+1];
 
-#ifdef DEBUG_REFERRALS
-    printf("krb5int_get_domain_realm_mapping(host:%s) called\n",host);
-#endif
     /* do sanity check and lower-case */
     retval = krb5int_clean_hostname(context, host, temp_host, sizeof temp_host);
     if (retval)
@@ -212,15 +210,12 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
     realm = (char *)NULL;
     temp_realm = 0;
     while (cp ) {
-#ifdef DEBUG_REFERRALS
-        printf("  trying to look up %s in the domain_realm map\n",cp);
-#endif
-  	retval = profile_get_string(context->profile, "domain_realm", cp,
+        retval = profile_get_string(context->profile, "domain_realm", cp,
                                     0, (char *)NULL, &temp_realm);
         if (retval)
             return retval;
         if (temp_realm != (char *)NULL)
-            break;	/* Match found */
+            break;        /* Match found */
  
         /* Setup for another test */
         if (*cp == '.') {
@@ -229,20 +224,15 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
             cp = strchr(cp, '.');
         }
     }
-#ifdef DEBUG_REFERRALS
-    printf("  done searching the domain_realm map\n");
-#endif
-    if (temp_realm!=(char*)NULL) {
-#ifdef DEBUG_REFERRALS
-       printf("  temp_realm is %s\n",temp_realm);
-#endif
+    if (temp_realm != (char*)NULL) {
         realm = strdup(temp_realm);
         profile_release_string(temp_realm);
         if (!realm) {
             return ENOMEM;
         }
     }
-    if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
+    retrealms = (char **)calloc(2, sizeof(*retrealms));
+    if (!retrealms) {
         if (realm != (char *)NULL)
             free(realm);
         return ENOMEM;
@@ -252,8 +242,6 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
     retrealms[1] = 0;
 
     *realmsp = retrealms;
-
     return 0;
 }
-
 
