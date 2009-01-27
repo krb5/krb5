@@ -184,7 +184,6 @@ typedef struct _kadm5_principal_ent_t_v2 {
 	krb5_int16 n_tl_data;
         krb5_tl_data *tl_data;
 	krb5_key_data *key_data;
-	int foo; /* XXX WAF: just to see if it breaks the build */
 } kadm5_principal_ent_rec_v2, *kadm5_principal_ent_t_v2;
 
 typedef struct _kadm5_principal_ent_t_v1 {

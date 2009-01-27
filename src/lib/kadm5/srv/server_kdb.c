@@ -76,8 +76,8 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
 				 
 #if 0 /************** Begin IFDEF'ed OUT *******************************/
     /*
-     * XXX WAF: since the local mkey may not be latest, hold off on verifying it
-     * since krb5_db_fetch_mkey_list will do this work.
+     * krb5_db_fetch_mkey_list will verify mkey so don't call
+     * krb5_db_verify_master_key()
      */
     if ((ret = krb5_db_verify_master_key(handle->context, master_princ,
 					 IGNORE_VNO, &master_keyblock))) {

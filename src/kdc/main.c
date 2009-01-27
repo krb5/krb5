@@ -150,9 +150,12 @@ finish_realm(kdc_realm_t *rdp)
 	if (rdp->realm_mprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_mprinc);
 	if (rdp->realm_mkey.length && rdp->realm_mkey.contents) {
+            /* XXX shouldn't memset be zap for safety? */
 	    memset(rdp->realm_mkey.contents, 0, rdp->realm_mkey.length);
 	    free(rdp->realm_mkey.contents);
 	}
+        if (rdp->mkey_list)
+            krb5_dbe_free_key_list(rdp->realm_context, rdp->mkey_list);
 	krb5_db_fini(rdp->realm_context);
 	if (rdp->realm_tgsprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);

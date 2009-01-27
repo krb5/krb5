@@ -2379,6 +2379,8 @@ kdb_ldap_create_principal (context, princ, op, pblock)
     krb5_ldap_context *ldap_context=NULL;
     struct iterate_args   iargs;
     krb5_data       *pdata;
+    krb5_timestamp now;
+    krb5_actkvno_node     actkvno;
 
     if ((pblock == NULL) || (context == NULL)) {
 	retval = EINVAL;
@@ -2425,14 +2427,12 @@ kdb_ldap_create_principal (context, princ, op, pblock)
     entry.tl_data = tl_data;
     entry.n_tl_data += 1;
     /* Set the creator's name */
-    {
-	krb5_timestamp now;
-	if ((retval = krb5_timeofday(context, &now)))
-	    goto cleanup;
-	if ((retval = krb5_dbe_update_mod_princ_data_new(context, &entry,
-							 now, &db_create_princ)))
-	    goto cleanup;
-    }
+    if ((retval = krb5_timeofday(context, &now)))
+        goto cleanup;
+    if ((retval = krb5_dbe_update_mod_princ_data_new(context, &entry,
+                                                     now, &db_create_princ)))
+        goto cleanup;
+
     entry.attributes = pblock->flags;
     entry.max_life = pblock->max_life;
     entry.max_renewable_life = pblock->max_rlife;
@@ -2507,6 +2507,17 @@ kdb_ldap_create_principal (context, princ, op, pblock)
 	if (retval) {
 	    goto cleanup;
 	}
+        /*
+         * There should always be at least one "active" mkey so creating the
+         * KRB5_TL_ACTKVNO entry now so the initial mkey is active.
+         */
+        actkvno.next = NULL;
+        actkvno.act_kvno = kvno;
+        actkvno.act_time = now;
+        retval = krb5_dbe_update_actkvno(context, &entry, &actkvno);
+	if (retval)
+	    goto cleanup;
+
 	break;
 
     case NULL_KEY:

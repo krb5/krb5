@@ -183,10 +183,10 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_MKEY_AUX                0x000a
 
 /* version number for KRB5_TL_ACTKVNO data */
-#define KRB5_TL_ACTKVNO_VER_1	1
+#define KRB5_TL_ACTKVNO_VER     1
 
 /* version number for KRB5_TL_MKEY_AUX data */
-#define KRB5_TL_MKEY_AUX_VER_1	1
+#define KRB5_TL_MKEY_AUX_VER    1
 
 typedef struct _krb5_actkvno_node {
     struct _krb5_actkvno_node *next;
@@ -661,6 +661,15 @@ krb5_db_get_context
 
 void
 krb5_dbe_free_key_data_contents(krb5_context, krb5_key_data *);
+
+void
+krb5_dbe_free_key_list(krb5_context, krb5_keylist_node *);
+
+void
+krb5_dbe_free_actkvno_list(krb5_context, krb5_actkvno_node *);
+
+void
+krb5_dbe_free_mkey_aux_list(krb5_context, krb5_mkey_aux_node *);
 
 #define KRB5_KDB_DEF_FLAGS	0
 

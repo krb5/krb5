@@ -288,7 +288,7 @@ krb5_db_def_fetch_mkey_stash(krb5_context   context,
     if (fread((krb5_pointer) key->contents, sizeof(key->contents[0]),
 					    key->length, kf) != key->length) {
 	retval = KRB5_KDB_CANTREAD_STORED;
-	memset(key->contents, 0,  key->length);
+	zap(key->contents, key->length);
 	free(key->contents);
 	key->contents = 0;
     } else
@@ -471,7 +471,7 @@ krb5_def_verify_master_key(krb5_context    context,
             kvno, master_entry.key_data->key_data_kvno);
     }
 
-    memset((char *)tempkey.contents, 0, tempkey.length);
+    zap((char *)tempkey.contents, tempkey.length);
     krb5_xfree(tempkey.contents);
     krb5_db_free_principal(context, &master_entry, nprinc);
     
@@ -489,8 +489,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     krb5_db_entry master_entry;
     int nprinc;
     krb5_boolean more, found_key = FALSE;
-    krb5_keyblock tmp_clearkey;
-    const krb5_keyblock *current_mkey;
+    krb5_keyblock cur_mkey;
     krb5_keylist_node *mkey_list_head = NULL, **mkey_list_node;
     krb5_key_data *key_data;
     krb5_mkey_aux_node	*mkey_aux_data_list, *aux_data_entry;
@@ -499,7 +498,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     if (mkeys_list == NULL)
         return (EINVAL);
 
-    memset(&tmp_clearkey, 0, sizeof(tmp_clearkey));
+    memset(&cur_mkey, 0, sizeof(cur_mkey));
 
     nprinc = 1;
     if ((retval = krb5_db_get_principal(context, mprinc,
@@ -523,8 +522,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     if (mkey->enctype == master_entry.key_data[0].key_data_type[0]) {
         if (krb5_dbekd_decrypt_key_data(context, mkey,
                                         &master_entry.key_data[0],
-                                        &tmp_clearkey, NULL) == 0) {
-            current_mkey = mkey;
+                                        &cur_mkey, NULL) == 0) {
             found_key = TRUE;
         }
     }
@@ -545,7 +543,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 
                 if (aux_data_entry->mkey_kvno == mkvno) {
                     if (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
-                                                    &tmp_clearkey, NULL) == 0) {
+                                                    &cur_mkey, NULL) == 0) {
                         found_key = TRUE;
                         break;
                     }
@@ -559,9 +557,8 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 
                 if (mkey->enctype == aux_data_entry->latest_mkey.key_data_type[0] &&
                     (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
-                                                &tmp_clearkey, NULL) == 0)) {
+                                                &cur_mkey, NULL) == 0)) {
                     found_key = TRUE;
-                    /* XXX WAF: should I issue warning about kvno not matching? */
                     break;
                 }
             }
@@ -572,7 +569,6 @@ krb5_def_fetch_mkey_list(krb5_context        context,
                 goto clean_n_exit;
             }
         }
-        current_mkey = &tmp_clearkey;
     }
 
     /*
@@ -587,12 +583,16 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     }
 
     memset(mkey_list_head, 0, sizeof(krb5_keylist_node));
-    mkey_list_node = &mkey_list_head;
 
-    /* XXX WAF: optimize by setting the first mkey_list_node to current mkey and
-     * if there are any others then do for loop below. */
+    /* Set mkey_list_head to the current mkey as an optimization. */
+    /* mkvno may not be latest so ... */
+    mkey_list_head->kvno = master_entry.key_data[0].key_data_kvno;
+    /* this is the latest clear mkey (avoids a redundant decrypt) */
+    mkey_list_head->keyblock = cur_mkey;
 
-    for (i = 0; i < master_entry.n_key_data; i++) {
+    /* loop through any other master keys creating a list of krb5_keylist_nodes */
+    mkey_list_node = &mkey_list_head->next;
+    for (i = 1; i < master_entry.n_key_data; i++) {
         if (*mkey_list_node == NULL) {
             /* *mkey_list_node points to next field of previous node */
             *mkey_list_node = (krb5_keylist_node *) malloc(sizeof(krb5_keylist_node));
@@ -603,7 +603,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
             memset(*mkey_list_node, 0, sizeof(krb5_keylist_node));
         }
         key_data = &master_entry.key_data[i];
-        retval = krb5_dbekd_decrypt_key_data(context, current_mkey,
+        retval = krb5_dbekd_decrypt_key_data(context, &cur_mkey,
                                              key_data,
                                              &((*mkey_list_node)->keyblock),
                                              NULL);
@@ -618,21 +618,10 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 
 clean_n_exit:
 
-    if (tmp_clearkey.contents) {
-        memset(tmp_clearkey.contents, 0, tmp_clearkey.length);
-        krb5_db_free(context, tmp_clearkey.contents);
-    }
-
     krb5_db_free_principal(context, &master_entry, nprinc);
-    if (retval != 0) {
-        krb5_keylist_node *cur_node, *next_node;
 
-        for (cur_node = mkey_list_head; cur_node != NULL; cur_node = next_node) {
-            next_node = cur_node->next;
-            krb5_free_keyblock(context, &(cur_node->keyblock));
-            krb5_xfree(cur_node);
-        }
-    }
+    if (retval != 0)
+        krb5_dbe_free_key_list(context, mkey_list_head);
 
     return retval;
 }

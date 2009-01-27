@@ -178,6 +178,7 @@ extern krb5_boolean	dbactive;
 extern int		exit_status;
 extern krb5_context	util_context;
 extern kadm5_config_params global_params;
+extern krb5_keylist_node *master_keylist;
 
 /* Strings */
 
@@ -274,48 +275,49 @@ static krb5_error_code master_key_convert(context, db_entry)
 
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
-    /* XXX WAF: need to fix this! */
-    if (is_mkey && db_entry->n_key_data != 1)
-	    fprintf(stderr,
-		    "Master key db entry has %d keys, expecting only 1!\n",
-		    db_entry->n_key_data);
-    for (i=0; i < db_entry->n_key_data; i++) {
-	key_data = &db_entry->key_data[i];
-	if (key_data->key_data_length == 0)
-	    continue;
-	retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock,
-					     key_data, &v5plainkey,
-					     &keysalt);
-	if (retval)
-		return retval;
+    if (is_mkey) {
+        retval = add_new_mkey(context, db_entry, &new_master_keyblock);
+        if (retval)
+            return retval;
+    } else {
+        for (i=0; i < db_entry->n_key_data; i++) {
+            key_data = &db_entry->key_data[i];
+            if (key_data->key_data_length == 0)
+                continue;
+            retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock,
+                                                 key_data, &v5plainkey,
+                                                 &keysalt);
+            if (retval)
+                    return retval;
 
-	memset(&new_key_data, 0, sizeof(new_key_data));
+            memset(&new_key_data, 0, sizeof(new_key_data));
 
-	if (is_mkey) {
-		key_ptr = &new_master_keyblock;
-		/* override mkey princ's kvno */
-		if (global_params.mask & KADM5_CONFIG_KVNO)
-			kvno = global_params.kvno;
-		else
-			kvno = (krb5_kvno) key_data->key_data_kvno;
-	} else {
-		key_ptr = &v5plainkey;
-		kvno = (krb5_kvno) key_data->key_data_kvno;
-	}
+            if (is_mkey) {
+                    key_ptr = &new_master_keyblock;
+                    /* override mkey princ's kvno */
+                    if (global_params.mask & KADM5_CONFIG_KVNO)
+                            kvno = global_params.kvno;
+                    else
+                            kvno = (krb5_kvno) key_data->key_data_kvno;
+            } else {
+                    key_ptr = &v5plainkey;
+                    kvno = (krb5_kvno) key_data->key_data_kvno;
+            }
 
-	retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
-					     key_ptr, &keysalt,
-					     (int) kvno,
-					     &new_key_data);
-	if (retval)
-		return retval;
-	krb5_free_keyblock_contents(context, &v5plainkey);
-	for (j = 0; j < key_data->key_data_ver; j++) {
-	    if (key_data->key_data_length[j]) {
-		free(key_data->key_data_contents[j]);
-	    }
-	}
-	*key_data = new_key_data;
+            retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
+                                                 key_ptr, &keysalt,
+                                                 (int) kvno,
+                                                 &new_key_data);
+            if (retval)
+                    return retval;
+            krb5_free_keyblock_contents(context, &v5plainkey);
+            for (j = 0; j < key_data->key_data_ver; j++) {
+                if (key_data->key_data_length[j]) {
+                    free(key_data->key_data_contents[j]);
+                }
+            }
+            *key_data = new_key_data;
+        }
     }
     return 0;
 }

@@ -41,7 +41,6 @@ typedef struct __kdc_realm_data {
     krb5_context	realm_context;	/* Context to be used for realm	    */
     krb5_keytab		realm_keytab; 	/* keytab to be used for this realm */
     char *		realm_profile;	/* Profile file for this realm	    */
-    krb5_keylist_node * mkey_list;	/* list of mkeys in use for this realm */
     /*
      * Database per-realm data.
      */
@@ -49,13 +48,12 @@ typedef struct __kdc_realm_data {
     char *		realm_stash;	/* Stash file name for realm	    */
     char *		realm_mpname;	/* Master principal name for realm  */
     krb5_principal	realm_mprinc;	/* Master principal for realm	    */
-    /* XXX WAF: is realm_mkey the most current key in the keytab (or from
-     * command line)?  Or should this be the active key?  I need to make sure
-     * this is handled properly.  what about the kvno of this key?
-     * or maybe this should go away and be replaced with a function that
-     * returns the proper mkey given a princ.
+    /*
+     * Note realm_mkey is mkey read from stash or keyboard and may not be the
+     * latest.  The mkey_list will have all the mkeys in use.
      */
     krb5_keyblock	realm_mkey;	/* Master key for this realm	    */
+    krb5_keylist_node * mkey_list;	/* list of mkeys in use for this realm */
     /*
      * TGS per-realm data.
      */

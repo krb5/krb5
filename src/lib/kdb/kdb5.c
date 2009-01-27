@@ -111,8 +111,7 @@ kdb_unlock_list()
  * so there is only a single version.
  */
 void
-krb5_dbe_free_key_data_contents(krb5_context context,
-                                krb5_key_data *key)
+krb5_dbe_free_key_data_contents(krb5_context context, krb5_key_data *key)
 {
     int i, idx;
 
@@ -126,8 +125,21 @@ krb5_dbe_free_key_data_contents(krb5_context context,
     return;
 }
 
-static void
-krb5_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
+void
+krb5_dbe_free_key_list(krb5_context context, krb5_keylist_node *mkey_list)
+{
+    krb5_keylist_node *cur_node, *next_node;
+
+    for (cur_node = mkey_list; cur_node != NULL; cur_node = next_node) {
+        next_node = cur_node->next;
+        krb5_free_keyblock(context, &(cur_node->keyblock));
+        krb5_xfree(cur_node);
+    }
+    return;
+}
+
+void
+krb5_dbe_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
 {
     krb5_actkvno_node *temp, *prev;
 
@@ -138,8 +150,8 @@ krb5_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
     }
 }
 
-static void
-krb5_free_mkey_aux_list(krb5_context context, krb5_mkey_aux_node *val)
+void
+krb5_dbe_free_mkey_aux_list(krb5_context context, krb5_mkey_aux_node *val)
 {
     krb5_mkey_aux_node *temp, *prev;
 
@@ -2284,8 +2296,7 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
     } else {
         /* get version to determine how to parse the data */
         krb5_kdb_decode_int16(tl_data.tl_data_contents, version);
-        if (version == KRB5_TL_MKEY_AUX_VER_1) {
-
+        if (version == 1) {
             /* variable size, must be at least 10 bytes */
             if (tl_data.tl_data_length < 10)
                 return (KRB5_KDB_TRUNCATED_RECORD);
@@ -2297,7 +2308,7 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
 
                 new_data = (krb5_mkey_aux_node *) malloc(sizeof(krb5_mkey_aux_node));
                 if (new_data == NULL) {
-                    krb5_free_mkey_aux_list(context, head_data);
+                    krb5_dbe_free_mkey_aux_list(context, head_data);
                     return (ENOMEM);
                 }
                 memset(new_data, 0, sizeof(krb5_mkey_aux_node));
@@ -2315,7 +2326,7 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
                     malloc(new_data->latest_mkey.key_data_length[0]);
 
                 if (new_data->latest_mkey.key_data_contents[0] == NULL) {
-                    krb5_free_mkey_aux_list(context, head_data);
+                    krb5_dbe_free_mkey_aux_list(context, head_data);
                     return (ENOMEM);
                 }
                 memcpy(new_data->latest_mkey.key_data_contents[0], curloc,
@@ -2343,6 +2354,7 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
     return (0);
 }
 
+#if KRB5_TL_MKEY_AUX_VER == 1
 krb5_error_code
 krb5_dbe_update_mkey_aux(krb5_context         context,
                          krb5_db_entry      * entry,
@@ -2377,7 +2389,7 @@ krb5_dbe_update_mkey_aux(krb5_context         context,
     }
 
     nextloc = tl_data.tl_data_contents;
-    version = KRB5_TL_MKEY_AUX_VER_1;
+    version = KRB5_TL_MKEY_AUX_VER;
     krb5_kdb_encode_int16(version, nextloc);
     nextloc += sizeof(krb5_ui_2);
 
@@ -2409,15 +2421,17 @@ krb5_dbe_update_mkey_aux(krb5_context         context,
 
     return (krb5_dbe_update_tl_data(context, entry, &tl_data));
 }
+#endif /* KRB5_TL_MKEY_AUX_VER == 1 */
 
-/* XXX WAF: should probably #ifdef this to be defined if version 1 is in use */
+#if KRB5_TL_ACTKVNO_VER == 1
 /*
- * If version of the KRB5_TL_ACTKVNO data is KRB5_TL_ACTKVNO_VER_1 then size of
+ * If version of the KRB5_TL_ACTKVNO data is KRB5_TL_ACTKVNO_VER == 1 then size of
  * a actkvno tuple {act_kvno, act_time} entry is:
  */
 #define ACTKVNO_TUPLE_SIZE (sizeof(krb5_int16) + sizeof(krb5_int32))
 #define act_kvno(cp) (cp) /* return pointer to start of act_kvno data */
 #define act_time(cp) ((cp) + sizeof(krb5_int16)) /* return pointer to start of act_time data */
+#endif
 
 krb5_error_code
 krb5_dbe_lookup_actkvno(krb5_context context,
@@ -2443,7 +2457,7 @@ krb5_dbe_lookup_actkvno(krb5_context context,
     } else {
         /* get version to determine how to parse the data */
         krb5_kdb_decode_int16(tl_data.tl_data_contents, version);
-        if (version == KRB5_TL_ACTKVNO_VER_1) {
+        if (version == 1) {
 
             /* variable size, must be at least 8 bytes */
             if (tl_data.tl_data_length < 8)
@@ -2461,7 +2475,7 @@ krb5_dbe_lookup_actkvno(krb5_context context,
             for (i = 0; i < num_actkvno; i++) {
                 new_data = (krb5_actkvno_node *) malloc(sizeof(krb5_actkvno_node));
                 if (new_data == NULL) {
-                    krb5_free_actkvno_list(context, head_data);
+                    krb5_dbe_free_actkvno_list(context, head_data);
                     return (ENOMEM);
                 }
                 memset(new_data, 0, sizeof(krb5_actkvno_node));
@@ -2492,6 +2506,7 @@ krb5_dbe_lookup_actkvno(krb5_context context,
 /*
  * Add KRB5_TL_ACTKVNO TL data entries to krb5_db_entry *entry
  */
+#if KRB5_TL_ACTKVNO_VER == 1
 krb5_error_code
 krb5_dbe_update_actkvno(krb5_context context,
                         krb5_db_entry *entry,
@@ -2516,7 +2531,7 @@ krb5_dbe_update_actkvno(krb5_context context,
         return (ENOMEM);
 
     /* add the current version # for the data format used for KRB5_TL_ACTKVNO */
-    version = KRB5_TL_ACTKVNO_VER_1;
+    version = KRB5_TL_ACTKVNO_VER;
     krb5_kdb_encode_int16(version, (unsigned char *) new_tl_data.tl_data_contents);
 
     for (cur_actkvno = actkvno_list; cur_actkvno != NULL;
@@ -2549,6 +2564,7 @@ krb5_dbe_update_actkvno(krb5_context context,
 
     return (retval);
 }
+#endif /* KRB5_TL_ACTKVNO_VER == 1 */
 
 krb5_error_code
 krb5_dbe_update_last_pwd_change(context, entry, stamp)
