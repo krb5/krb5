@@ -258,6 +258,8 @@ static const char hashoption[] = "-hash";
 static const char ovoption[] = "-ov";
 static const char dump_tmptrail[] = "~";
 
+static krb5_kvno new_mkvno;
+
 /*
  * Re-encrypt the key_data with the new master key...
  */
@@ -276,15 +278,20 @@ static krb5_error_code master_key_convert(context, db_entry)
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
     if (is_mkey) {
-        retval = add_new_mkey(context, db_entry, &new_master_keyblock);
+        retval = add_new_mkey(context, db_entry, &new_master_keyblock, &new_mkvno);
         if (retval)
             return retval;
     } else {
         for (i=0; i < db_entry->n_key_data; i++) {
+            krb5_keyblock   *tmp_mkey;
+
             key_data = &db_entry->key_data[i];
             if (key_data->key_data_length == 0)
                 continue;
-            retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock,
+            retval = krb5_dbe_find_mkey(context, master_keylist, db_entry, &tmp_mkey);
+            if (retval)
+                    return retval;
+            retval = krb5_dbekd_decrypt_key_data(context, tmp_mkey,
                                                  key_data, &v5plainkey,
                                                  &keysalt);
             if (retval)
@@ -292,17 +299,8 @@ static krb5_error_code master_key_convert(context, db_entry)
 
             memset(&new_key_data, 0, sizeof(new_key_data));
 
-            if (is_mkey) {
-                    key_ptr = &new_master_keyblock;
-                    /* override mkey princ's kvno */
-                    if (global_params.mask & KADM5_CONFIG_KVNO)
-                            kvno = global_params.kvno;
-                    else
-                            kvno = (krb5_kvno) key_data->key_data_kvno;
-            } else {
-                    key_ptr = &v5plainkey;
-                    kvno = (krb5_kvno) key_data->key_data_kvno;
-            }
+            key_ptr = &v5plainkey;
+            kvno = (krb5_kvno) key_data->key_data_kvno;
 
             retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
                                                  key_ptr, &keysalt,
@@ -318,6 +316,9 @@ static krb5_error_code master_key_convert(context, db_entry)
             }
             *key_data = new_key_data;
         }
+        retval = krb5_dbe_update_mkvno(context, db_entry, new_mkvno);
+        if (retval)
+                return retval;
     }
     return 0;
 }

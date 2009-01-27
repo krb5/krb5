@@ -35,16 +35,13 @@ static char *strdate(krb5_timestamp when)
 }
 
 krb5_error_code
-add_new_mkey(krb5_context context, krb5_db_entry *master_entry, krb5_keyblock *new_mkey)
+add_new_mkey(krb5_context context, krb5_db_entry *master_entry, krb5_keyblock *new_mkey, krb5_kvno *mkvno)
 {
     krb5_error_code retval = 0;
     int old_key_data_count, i;
     krb5_kvno old_kvno, new_mkey_kvno;
-    krb5_keyblock new_mkeyblock;
     krb5_key_data tmp_key_data, *old_key_data;
-    krb5_enctype new_master_enctype = ENCTYPE_UNKNOWN;
-    krb5_mkey_aux_node  *mkey_aux_data_head = NULL, **mkey_aux_data,
-                        *cur_mkey_aux_data, *next_mkey_aux_data;
+    krb5_mkey_aux_node  *mkey_aux_data_head = NULL, **mkey_aux_data;
     krb5_keylist_node  *keylist_node;
 
     /* First save the old keydata */
@@ -152,6 +149,9 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry, krb5_keyblock *n
         goto clean_n_exit;
     }
 
+    if (mkvno)
+        *mkvno = new_mkey_kvno;
+
 clean_n_exit:
     if (mkey_aux_data_head)
         krb5_dbe_free_mkey_aux_list(context, mkey_aux_data_head);
@@ -167,19 +167,14 @@ kdb5_add_mkey(int argc, char *argv[])
     char *pw_str = 0;
     unsigned int pw_size = 0;
     int do_stash = 0, nentries = 0;
-    int old_key_data_count, i;
     krb5_boolean more = 0;
     krb5_data pwd;
-    krb5_kvno old_kvno, new_mkey_kvno;
+    krb5_kvno new_mkey_kvno;
     krb5_keyblock new_mkeyblock;
-    krb5_key_data tmp_key_data, *old_key_data;
     krb5_enctype new_master_enctype = ENCTYPE_UNKNOWN;
     char *new_mkey_password;
     krb5_db_entry master_entry;
     krb5_timestamp now;
-    krb5_mkey_aux_node  *mkey_aux_data_head, **mkey_aux_data,
-                        *cur_mkey_aux_data, *next_mkey_aux_data;
-    krb5_keylist_node  *keylist_node;
 
     /*
      * The command table entry for this command causes open_db_and_mkey() to be
@@ -267,7 +262,7 @@ kdb5_add_mkey(int argc, char *argv[])
         return;
     }
 
-    retval = add_new_mkey(util_context, &master_entry, &new_mkeyblock);
+    retval = add_new_mkey(util_context, &master_entry, &new_mkeyblock, NULL);
     if (retval) {
         com_err(progname, retval, "adding new master key to master principal");
         exit_status++;
