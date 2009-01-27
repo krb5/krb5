@@ -185,7 +185,7 @@ kdb5_add_mkey(int argc, char *argv[])
         switch(optchar) {
         case 'e':
             if (krb5_string_to_enctype(optarg, &new_master_enctype)) {
-                com_err(progname, EINVAL, ": %s is an invalid enctype", optarg);
+                com_err(progname, EINVAL, "%s is an invalid enctype", optarg);
                 exit_status++;
                 return;
             }
@@ -338,7 +338,7 @@ kdb5_use_mkey(int argc, char *argv[])
 
     use_kvno = atoi(argv[1]);
     if (use_kvno == 0) {
-        com_err(progname, EINVAL, ": 0 is an invalid KVNO value.");
+        com_err(progname, EINVAL, "0 is an invalid KVNO value");
         exit_status++;
         return;
     } else {
@@ -351,14 +351,14 @@ kdb5_use_mkey(int argc, char *argv[])
             }
         }
         if (!found) {
-            com_err(progname, EINVAL, ": %d is an invalid KVNO value.", use_kvno);
+            com_err(progname, EINVAL, "%d is an invalid KVNO value", use_kvno);
             exit_status++;
             return;
         }
     }
 
     if ((retval = krb5_timeofday(util_context, &now))) {
-        com_err(progname, retval, "while getting current time.");
+        com_err(progname, retval, "while getting current time");
         exit_status++;
         return;
     }
@@ -466,7 +466,7 @@ kdb5_use_mkey(int argc, char *argv[])
 
     if ((retval = krb5_dbe_update_actkvno(util_context, &master_entry,
                                           new_actkvno_list_head))) {
-        com_err(progname, retval, "while updating actkvno data for master principal entry.");
+        com_err(progname, retval, "while updating actkvno data for master principal entry");
         exit_status++;
         return;
     }

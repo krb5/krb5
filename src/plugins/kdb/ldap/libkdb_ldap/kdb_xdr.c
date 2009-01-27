@@ -148,7 +148,7 @@ krb5_dbe_lookup_last_pwd_change(context, entry, stamp)
 
     return(0);
 }
-
+#if 0 /************** Begin IFDEF'ed OUT *******************************/
 krb5_error_code
 krb5_dbe_lookup_mkvno(krb5_context context,
 		      krb5_db_entry *entry,
@@ -192,6 +192,7 @@ krb5_dbe_update_mkvno(krb5_context    context,
 
     return (krb5_dbe_update_tl_data(context, entry, &tl_data));
 }
+#endif /**************** END IFDEF'ed OUT *******************************/
 
 /* it seems odd that there's no function to remove a tl_data, but if
    I need one, I'll add one */

@@ -371,7 +371,7 @@ asn1_decode_sequence_of_keys (krb5_data *in, krb5_key_data **out,
 
 /* Decoding ASN.1 encoded key */
 static struct berval **
-krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data) {
+krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data, krb5_kvno mkvno) {
     struct berval **ret = NULL;
     int currkvno;
     int num_versions = 1;
@@ -396,7 +396,7 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data) {
 	if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
 	    asn1_encode_sequence_of_keys (key_data+last,
 					  (krb5_int16) i - last + 1,
-					  0, /* For now, mkvno == 0*/
+					  mkvno,
 					  &code);
 	    ret[j] = malloc (sizeof (struct berval));
 	    if (ret[j] == NULL) {
@@ -927,8 +927,12 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	}
 
 	if (entries->mask & KADM5_KEY_DATA || entries->mask & KADM5_KVNO) {
+            krb5_kvno mkvno;
+
+            if ((st=krb5_dbe_lookup_mkvno(context, entries, &mkvno)) != 0)
+                goto cleanup;
 	    bersecretkey = krb5_encode_krbsecretkey (entries->key_data,
-						     entries->n_key_data);
+						     entries->n_key_data, mkvno);
 
 	    if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbprincipalkey",
 					      LDAP_MOD_REPLACE | LDAP_MOD_BVALUES, bersecretkey)) != 0)
@@ -1220,11 +1224,12 @@ cleanup:
 }
 
 krb5_error_code
-krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data)
+krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data, mkvno)
     krb5_context                context;
     krb5_db_entry               *entries;
     struct berval               **bvalues;
     krb5_tl_data                *userinfo_tl_data;
+    krb5_kvno                   *mkvno;
 {
     char                        *user=NULL;
     int                         i=0, j=0, noofkeys=0;
@@ -1235,7 +1240,6 @@ krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data)
 	goto cleanup;
 
     for (i=0; bvalues[i] != NULL; ++i) {
-	int mkvno; /* Not used currently */
 	krb5_int16 n_kd;
 	krb5_key_data *kd;
 	krb5_data in;
@@ -1248,7 +1252,7 @@ krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data)
 	st = asn1_decode_sequence_of_keys (&in,
 					   &kd,
 					   &n_kd,
-					   &mkvno);
+					   mkvno);
 
 	if (st != 0) {
 	    const char *msg = error_message(st);
