@@ -1036,8 +1036,6 @@ proc setup_krb5_conf { {type client} } {
 	    puts $conffile \
 		    "	permitted_enctypes = $permitted_enctypes($type)"
 	}
-	puts $conffile "	krb4_config = $tmppwd/krb.conf"
-	puts $conffile "	krb4_realms = $tmppwd/krb.realms"
 	if { $mode == "tcp" } {
 	    puts $conffile "	udp_preference_limit = 1"
 	}
