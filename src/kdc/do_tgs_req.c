@@ -128,6 +128,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     const char *emsg = NULL;
     krb5_data *tgs_1 =NULL, *server_1 = NULL;
     krb5_principal krbtgt_princ;
+    krb5_kvno ticket_kvno = 0;
 
     session_key.contents = NULL;
     
@@ -795,11 +796,11 @@ tgt_again:
             goto cleanup;
         }
             
-        ticket_reply.enc_part.kvno = 0;
+        ticket_kvno = 0;
         ticket_reply.enc_part.enctype = t2enc->session->enctype;
         st_idx++;
     } else {
-        ticket_reply.enc_part.kvno = server_key->key_data_kvno;
+        ticket_kvno = server_key->key_data_kvno;
     }
 
     errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
@@ -810,7 +811,7 @@ tgt_again:
         status = "TKT_ENCRYPT";
         goto cleanup;
     }
-
+    ticket_reply.enc_part.kvno = ticket_kvno;
     /* Start assembling the response */
     reply.msg_type = KRB5_TGS_REP;
     reply.padata = 0;/* always */
