@@ -126,13 +126,13 @@ krb5_dbe_free_key_data_contents(krb5_context context, krb5_key_data *key)
 }
 
 void
-krb5_dbe_free_key_list(krb5_context context, krb5_keylist_node *mkey_list)
+krb5_dbe_free_key_list(krb5_context context, krb5_keylist_node *key_list)
 {
     krb5_keylist_node *cur_node, *next_node;
 
-    for (cur_node = mkey_list; cur_node != NULL; cur_node = next_node) {
+    for (cur_node = key_list; cur_node != NULL; cur_node = next_node) {
         next_node = cur_node->next;
-        krb5_free_keyblock(context, &(cur_node->keyblock));
+        krb5_free_keyblock_contents(context, &(cur_node->keyblock));
         krb5_xfree(cur_node);
     }
     return;
