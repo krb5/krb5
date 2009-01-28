@@ -171,6 +171,12 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 	if ((retval = krb5_os_init_context(ctx, kdc)))
 		goto cleanup;
 
+	retval = profile_get_boolean(ctx->profile, "libdefaults",
+				     "allow_weak_crypto", NULL, 0, &tmp);
+	if (retval)
+		goto cleanup;
+	ctx->allow_weak_crypto = tmp;
+
 	/* initialize the prng (not well, but passable) */
 	if ((retval = krb5_c_random_os_entropy( ctx, 0, NULL)) !=0)
 	  goto cleanup;
@@ -289,6 +295,8 @@ krb5_set_default_in_tkt_ktypes(krb5_context context, const krb5_enctype *ktypes)
 	for (i = 0; ktypes[i]; i++) {
 	    if (!krb5_c_valid_enctype(ktypes[i])) 
 		return KRB5_PROG_ETYPE_NOSUPP;
+	    if (!context->allow_weak_crypto && krb5_c_weak_enctype(ktypes[i]))
+		return KRB5_PROG_ETYPE_NOSUPP;
 	}
 
 	/* Now copy the default ktypes into the context pointer */
@@ -314,6 +322,7 @@ get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profst
 		       unsigned int ctx_count, krb5_enctype *ctx_list)
 {
     krb5_enctype *old_ktypes;
+    krb5_enctype ktype;
 
     if (ctx_count) {
 	/* application-set defaults */
@@ -367,9 +376,11 @@ get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profst
 	j = 0;
 	i = 1;
 	while (1) {
-	    if (! krb5_string_to_enctype(sp, &old_ktypes[j]))
+	    if (!krb5_string_to_enctype(sp, &ktype) &&
+		(context->allow_weak_crypto || !krb5_c_weak_enctype(ktype))) {
+		old_ktypes[j] = ktype;
 		j++;
-
+	    }
 	    if (i++ >= count)
 		break;
 
@@ -409,6 +420,8 @@ krb5_set_default_tgs_enctypes (krb5_context context, const krb5_enctype *ktypes)
     if (ktypes) {
 	for (i = 0; ktypes[i]; i++) {
 	    if (!krb5_c_valid_enctype(ktypes[i])) 
+		return KRB5_PROG_ETYPE_NOSUPP;
+	    if (!context->allow_weak_crypto && krb5_c_weak_enctype(ktypes[i]))
 		return KRB5_PROG_ETYPE_NOSUPP;
 	}
 
