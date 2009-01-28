@@ -69,6 +69,7 @@ char *strchr();
 #include <unistd.h>
 #endif
 
+#include <netinet/in.h>
 #include <netdb.h>
 
 int
