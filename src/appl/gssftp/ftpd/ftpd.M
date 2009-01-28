@@ -122,12 +122,6 @@ file to use.  The default value is normally
 \fB\-u\fP \fIumask\fP
 Sets the umask for the ftpd process.  The default value is normally 027.
 .TP
-\fB\-r\fP \fIrealm-file\fP
-Sets the name of the
-.I krb.conf
-file to use.  The default value is normally set by
-.IR /etc/krb5.conf .
-.TP
 \fB\-w \fP{\fBip\fP|\fImaxhostlen\fP[\fB,\fP{\fBstriplocal\fP|\fBnostriplocal\fP}]}
 Controls the form of the remote hostname passed to login(1).
 Specifying \fBip\fP results in the numeric IP address always being
