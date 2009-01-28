@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * kdc/do_tgs_req.c
  *
@@ -71,15 +72,17 @@
 #include "extern.h"
 #include "adm_proto.h"
 
-static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
-                krb5_boolean *, int *);
+static void
+find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
+                    krb5_boolean *, int *);
 
-static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
-                          int,  krb5_principal,
-                          krb5_data **, const char *);
+static krb5_error_code
+prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
+                   int, krb5_principal,
+                   krb5_data **, const char *);
 
 static krb5_int32
-is_substr ( char *, krb5_data *);
+is_substr (char *, krb5_data *);
 
 static krb5_int32
 prep_reprocess_req(krb5_kdc_req *, krb5_principal *);
@@ -87,7 +90,7 @@ prep_reprocess_req(krb5_kdc_req *, krb5_principal *);
 /*ARGSUSED*/
 krb5_error_code
 process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
-krb5_data **response)
+                krb5_data **response)
 {
     krb5_keyblock * subkey = 0;
     krb5_kdc_req *request = 0;
@@ -737,23 +740,23 @@ tgt_again:
             setflag (enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED);
         } else if (errcode == KRB5KRB_AP_ERR_ILL_CR_TKT)
             krb5_klog_syslog (LOG_INFO,
-              "bad realm transit path from '%s' to '%s' "
-              "via '%.*s%s'",
-              cname ? cname : "<unknown client>",
-              sname ? sname : "<unknown server>",
-              tlen,
-              enc_tkt_reply.transited.tr_contents.data,
-              tdots);
+                              "bad realm transit path from '%s' to '%s' "
+                              "via '%.*s%s'",
+                              cname ? cname : "<unknown client>",
+                              sname ? sname : "<unknown server>",
+                              tlen,
+                              enc_tkt_reply.transited.tr_contents.data,
+                              tdots);
         else {
             emsg = krb5_get_error_message(kdc_context, errcode);
             krb5_klog_syslog (LOG_ERR,
-              "unexpected error checking transit from "
-              "'%s' to '%s' via '%.*s%s': %s",
-              cname ? cname : "<unknown client>",
-              sname ? sname : "<unknown server>",
-              tlen,
-              enc_tkt_reply.transited.tr_contents.data,
-              tdots, emsg);
+                              "unexpected error checking transit from "
+                              "'%s' to '%s' via '%.*s%s': %s",
+                              cname ? cname : "<unknown client>",
+                              sname ? sname : "<unknown server>",
+                              tlen,
+                              enc_tkt_reply.transited.tr_contents.data,
+                              tdots, emsg);
             krb5_free_error_message(kdc_context, emsg);
             emsg = NULL;
         }
@@ -924,8 +927,8 @@ cleanup:
 
 static krb5_error_code
 prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
-   krb5_principal canon_server,
-   krb5_data **response, const char *status)
+                   krb5_principal canon_server,
+                   krb5_data **response, const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -971,7 +974,7 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
  */
 static void
 find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
-   krb5_boolean *more, int *nprincs)
+                   krb5_boolean *more, int *nprincs)
 {
     krb5_error_code retval;
     krb5_principal *plist, *pl2;
@@ -1148,9 +1151,9 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
              * and use it as a principal in this req. 
              */
             retval = krb5_build_principal(kdc_context, krbtgt_princ, 
-                                            (*request->server).realm.length, 
-                                            (*request->server).realm.data, 
-                                            "krbtgt", realms[0], (char *)0);
+                                          (*request->server).realm.length, 
+                                          (*request->server).realm.data, 
+                                          "krbtgt", realms[0], (char *)0);
                          
             for (cpp = realms; *cpp; cpp++)  
                    free(*cpp);
