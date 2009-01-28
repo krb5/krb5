@@ -126,24 +126,24 @@ krb5_dbe_free_key_data_contents(krb5_context context, krb5_key_data *key)
 }
 
 void
-krb5_dbe_free_key_list(krb5_context context, krb5_keylist_node *key_list)
+krb5_dbe_free_key_list(krb5_context context, krb5_keylist_node *val)
 {
-    krb5_keylist_node *cur_node, *next_node;
+    krb5_keylist_node *temp = val, *prev;
 
-    for (cur_node = key_list; cur_node != NULL; cur_node = next_node) {
-        next_node = cur_node->next;
-        krb5_free_keyblock_contents(context, &(cur_node->keyblock));
-        krb5_xfree(cur_node);
+    while (temp != NULL) {
+        prev = temp;
+        temp = temp->next;
+        krb5_free_keyblock_contents(context, &(prev->keyblock));
+        krb5_xfree(prev);
     }
-    return;
 }
 
 void
 krb5_dbe_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
 {
-    krb5_actkvno_node *temp, *prev;
+    krb5_actkvno_node *temp = val, *prev;
 
-    for (temp = val; temp != NULL;) {
+    while (temp != NULL) {
         prev = temp;
         temp = temp->next;
         krb5_xfree(prev);
@@ -153,9 +153,9 @@ krb5_dbe_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
 void
 krb5_dbe_free_mkey_aux_list(krb5_context context, krb5_mkey_aux_node *val)
 {
-    krb5_mkey_aux_node *temp, *prev;
+    krb5_mkey_aux_node *temp = val, *prev;
 
-    for (temp = val; temp != NULL;) {
+    while (temp != NULL) {
         prev = temp;
         temp = temp->next;
         krb5_dbe_free_key_data_contents(context, &prev->latest_mkey);
@@ -1940,10 +1940,10 @@ krb5_dbe_find_act_mkey(krb5_context         context,
  * free the output key.
  */
 krb5_error_code
-krb5_dbe_find_mkey(krb5_context       context,
-                   krb5_keylist_node *mkey_list,
-                   krb5_db_entry      *entry,
-                   krb5_keyblock      **mkey)
+krb5_dbe_find_mkey(krb5_context         context,
+                   krb5_keylist_node  * mkey_list,
+                   krb5_db_entry      * entry,
+                   krb5_keyblock     ** mkey)
 {
     krb5_kvno mkvno;
     krb5_error_code retval;
@@ -2344,9 +2344,9 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
                 prev_data = new_data;
             }
         } else {
-            krb5_set_error_message (context, KRB5_KDB_BAD_VERSION,
-                "Illegal version number for KRB5_TL_MKEY_AUX %d\n",
-                version);
+            krb5_set_error_message(context, KRB5_KDB_BAD_VERSION,
+                                   "Illegal version number for KRB5_TL_MKEY_AUX %d\n",
+                                   version);
             return (KRB5_KDB_BAD_VERSION);
         }
     }

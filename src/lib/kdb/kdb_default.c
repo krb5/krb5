@@ -502,7 +502,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 
     nprinc = 1;
     if ((retval = krb5_db_get_principal(context, mprinc,
-                &master_entry, &nprinc, &more)))
+                                        &master_entry, &nprinc, &more)))
         return (retval);
 
     if (nprinc != 1) {
@@ -532,7 +532,8 @@ krb5_def_fetch_mkey_list(krb5_context        context,
          * Note the mkvno may provide a hint as to which mkey_aux tuple to
          * decrypt.
          */
-        if ((retval = krb5_dbe_lookup_mkey_aux(context, &master_entry, &mkey_aux_data_list)))
+        if ((retval = krb5_dbe_lookup_mkey_aux(context, &master_entry,
+                                               &mkey_aux_data_list)))
             goto clean_n_exit;
 
         /* mkvno may be 0 in some cases like keyboard and should be ignored */
@@ -542,7 +543,8 @@ krb5_def_fetch_mkey_list(krb5_context        context,
                  aux_data_entry = aux_data_entry->next) {
 
                 if (aux_data_entry->mkey_kvno == mkvno) {
-                    if (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
+                    if (krb5_dbekd_decrypt_key_data(context, mkey,
+                                                    &aux_data_entry->latest_mkey,
                                                     &cur_mkey, NULL) == 0) {
                         found_key = TRUE;
                         break;
@@ -556,8 +558,9 @@ krb5_def_fetch_mkey_list(krb5_context        context,
                  aux_data_entry = aux_data_entry->next) {
 
                 if (mkey->enctype == aux_data_entry->latest_mkey.key_data_type[0] &&
-                    (krb5_dbekd_decrypt_key_data(context, mkey, &aux_data_entry->latest_mkey,
-                                                &cur_mkey, NULL) == 0)) {
+                    (krb5_dbekd_decrypt_key_data(context, mkey,
+                                                 &aux_data_entry->latest_mkey,
+                                                 &cur_mkey, NULL) == 0)) {
                     found_key = TRUE;
                     break;
                 }
@@ -617,12 +620,9 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     *mkeys_list = mkey_list_head;
 
 clean_n_exit:
-
     krb5_db_free_principal(context, &master_entry, nprinc);
-
     if (retval != 0)
         krb5_dbe_free_key_list(context, mkey_list_head);
-
     return retval;
 }
 

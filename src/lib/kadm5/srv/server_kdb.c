@@ -209,7 +209,8 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
     if (ret)
 	goto done;
 
-    ret = krb5_dbe_find_mkey(handle->context, master_keylist, &hist_db, &tmp_mkey);
+    ret = krb5_dbe_find_mkey(handle->context, master_keylist, &hist_db,
+                             &tmp_mkey);
     if (ret)
 	goto done;
 

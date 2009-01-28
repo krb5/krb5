@@ -33,8 +33,9 @@ static char *rcsid = "$Header$";
 
 extern	krb5_principal	    master_princ;
 extern	krb5_principal	    hist_princ;
+extern  krb5_keyblock	    master_keyblock;
 extern  krb5_keylist_node  *master_keylist;
-extern  krb5_actkvno_node   *active_mkey_list;
+extern  krb5_actkvno_node  *active_mkey_list;
 extern	krb5_keyblock	    hist_key;
 extern	krb5_db_entry	    master_db;
 extern	krb5_db_entry	    hist_db;
@@ -2079,7 +2080,7 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
     krb5_key_data               *key_data;
     kadm5_ret_t                 ret;
     kadm5_server_handle_t       handle = server_handle;
-    krb5_keyblock               *tmp_mkey;
+    krb5_keyblock               *mkey_ptr;
 
     if (keyblocks)
          *keyblocks = NULL;
@@ -2093,9 +2094,22 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
        return(ret);
 
     if (keyblocks) {
-	ret = krb5_dbe_find_mkey(handle->context, master_keylist, &kdb, &tmp_mkey);
-	if (ret)
-	    goto done;
+	if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist, &kdb,
+                                      &mkey_ptr))) {
+            /* try refreshing master key list */
+            /* XXX it would nice if we had the mkvno here for optimization */
+            if (krb5_db_fetch_mkey_list(handle->context, master_princ,
+                                        &master_keyblock, 0,
+                                        &master_keylist) == 0) {
+                if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist,
+                                              &kdb, &mkey_ptr))) {
+                    goto done;
+                }
+            } else {
+                goto done;
+            }
+        }
+
          if (handle->api_version == KADM5_API_VERSION_1) {
               /* Version 1 clients will expect to see a DES_CRC enctype. */
               if ((ret = krb5_dbe_find_enctype(handle->context, &kdb,
@@ -2103,11 +2117,11 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
                                               -1, -1, &key_data)))
                    goto done;
 
-              if ((ret = decrypt_key_data(handle->context, tmp_mkey, 1, key_data,
+              if ((ret = decrypt_key_data(handle->context, mkey_ptr, 1, key_data,
                                          keyblocks, NULL)))
                    goto done;
          } else {
-              ret = decrypt_key_data(handle->context, tmp_mkey,
+              ret = decrypt_key_data(handle->context, mkey_ptr,
                                      kdb.n_key_data, kdb.key_data,
                                      keyblocks, n_keys);
               if (ret)
@@ -2205,7 +2219,7 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
     kadm5_server_handle_t handle = server_handle;
     krb5_db_entry dbent;
     krb5_key_data *key_data;
-    krb5_keyblock *tmp_mkey;
+    krb5_keyblock *mkey_ptr;
     int ret;
 
     CHECK_HANDLE(server_handle);
@@ -2222,12 +2236,23 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
 
     /* find_mkey only uses this field */
     dbent.tl_data = entry->tl_data;
-    ret = krb5_dbe_find_mkey(handle->context, master_keylist, &dbent, &tmp_mkey);
-    if (ret)
-	return (ret);
+    if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist, &dbent,
+                                  &mkey_ptr))) {
+        /* try refreshing master key list */
+        /* XXX it would nice if we had the mkvno here for optimization */
+        if (krb5_db_fetch_mkey_list(handle->context, master_princ,
+                                    &master_keyblock, 0, &master_keylist) == 0) {
+            if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist,
+                                          &dbent, &mkey_ptr))) {
+                return ret;
+            }
+        } else {
+            return ret;
+        }
+    }
 
     if ((ret = krb5_dbekd_decrypt_key_data(handle->context,
-					   tmp_mkey, key_data,
+					   mkey_ptr, key_data,
 					   keyblock, keysalt)))
 	 return ret;
 
