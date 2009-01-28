@@ -215,8 +215,8 @@ kdb5_add_mkey(int argc, char *argv[])
 
     retval = krb5_db_get_principal(util_context, master_princ, &master_entry,
                                    &nentries, &more);
-    if (retval != 0) {
-        com_err(progname, retval, "while setting up master key name");
+    if (retval != 0 || nentries != 1) {
+        com_err(progname, retval, "while getting master key principal %s", mkey_fullname);
         exit_status++;
         return;
     }
@@ -389,10 +389,10 @@ kdb5_use_mkey(int argc, char *argv[])
         return;
     }
 
-    retval = krb5_db_get_principal(util_context, master_princ, &master_entry, &nentries,
-        &more);
-    if (retval != 0) {
-        com_err(progname, retval, "while setting up master key name");
+    retval = krb5_db_get_principal(util_context, master_princ, &master_entry,
+                                   &nentries, &more);
+    if (retval != 0 || nentries != 1) {
+        com_err(progname, retval, "while getting master key principal %s", mkey_fullname);
         exit_status++;
         return;
     }
@@ -522,9 +522,9 @@ kdb5_list_mkeys(int argc, char *argv[])
         return;
     }
 
-    retval = krb5_db_get_principal(util_context, master_princ, &master_entry, &nentries,
-        &more);
-    if (retval != 0) {
+    retval = krb5_db_get_principal(util_context, master_princ, &master_entry,
+                                   &nentries, &more);
+    if (retval != 0 || nentries != 1) {
         com_err(progname, retval, "while getting master key principal %s", mkey_fullname);
         exit_status++;
         return;
