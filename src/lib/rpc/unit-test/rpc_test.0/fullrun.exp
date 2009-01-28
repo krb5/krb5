@@ -19,22 +19,16 @@ set ver_line "rpc_test server: bad verifier\[^\r\n\]*\[\r\n]+"
 set dots 0
 set server_lines 0
 while {1} {
-	set oldtimeout $timeout
-	set timeout 5
-	while {1} {
-		expect {
-			-i $server_id
-			-re $ver_line {
-				verbose "Got line from server."
-				incr server_lines
-			}
-			default {
-				break
-			}
-		}
-	}
-	set timeout $oldtimeout
 	expect {
+		-i $server_id
+		-re $ver_line {
+			verbose "Got line from server."
+			incr server_lines
+		}
+		default {
+			exp_continue
+		}
+
 		-i $client_id
 		. { 
 			incr dots
@@ -54,7 +48,6 @@ while {1} {
 			fail "full run: timeout waiting for dot"
 			break
 		}
-
 	}
 }
 if {$dots==11} {
