@@ -19,12 +19,8 @@
   unsigned char *out2 = (void *)(tdigest); \
   HASH_CTX  *ctx = (x); \
   shsFinal(ctx); \
-for (loopvar=0; loopvar<(sizeof(ctx->digest)/sizeof(ctx->digest[0])); loopvar++) { \
-  out2[loopvar*4] = (ctx->digest[loopvar]>>24)&0xff; \
-  out2[loopvar*4+1] = (ctx->digest[loopvar]>>16)&0xff; \
-  out2[loopvar*4+2] = (ctx->digest[loopvar]>>8)&0xff; \
-  out2[loopvar*4+3] = ctx->digest[loopvar]&0xff; \
-} \
+  for (loopvar=0; loopvar<(sizeof(ctx->digest)/sizeof(ctx->digest[0])); loopvar++) \
+    store_32_be(ctx->digest[loopvar], &out2[loopvar*4]); \
   } while(0)
 
 

@@ -97,11 +97,11 @@ krb5int_build_principal_va(krb5_context context,
     
     if (data) {
         while (--count >= 0) {
-            krb5_xfree(data[count].data);
+            free(data[count].data);
         }
-        krb5_xfree(data);
+        free(data);
     }
-    krb5_xfree(r);
+    free(r);
     
     return retval;
 }
@@ -140,7 +140,7 @@ krb5int_build_principal_alloc_va(krb5_context context,
     if (!retval) {
 	*princ = p;
     } else {
-        krb5_xfree(p);
+        free(p);
     }
     
     return retval;    
@@ -165,7 +165,7 @@ krb5_build_principal_alloc_va(krb5_context context,
     if (!retval) {
 	*princ = p;
     } else {
-        krb5_xfree(p);
+        free(p);
     }
 
     return retval;

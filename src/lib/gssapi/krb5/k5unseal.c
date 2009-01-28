@@ -175,10 +175,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
                 unsigned char bigend_seqnum[4];
                 krb5_keyblock *enc_key;
                 int i;
-                bigend_seqnum[0] = (seqnum>>24) & 0xff;
-                bigend_seqnum[1] = (seqnum>>16) & 0xff;
-                bigend_seqnum[2] = (seqnum>>8) & 0xff;
-                bigend_seqnum[3] = seqnum & 0xff;
+                store_32_be(seqnum, bigend_seqnum);
                 code = krb5_copy_keyblock (context, ctx->enc, &enc_key);
                 if (code)
                 {

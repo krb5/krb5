@@ -83,7 +83,7 @@ void KRB5_CALLCONV
 krb5_free_cksumtypes(krb5_context context, krb5_cksumtype *val)
 {
     if (val)
-	krb5_xfree(val);
+	free(val);
     return;
 }
 

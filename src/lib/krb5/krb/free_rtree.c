@@ -37,5 +37,5 @@ krb5_free_realm_tree(krb5_context context, krb5_principal *realms)
 	krb5_free_principal(context, *nrealms);
 	nrealms++;
     }
-    krb5_xfree(realms);
+    free(realms);
 }

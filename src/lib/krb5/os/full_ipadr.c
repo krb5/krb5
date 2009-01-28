@@ -53,7 +53,7 @@ krb5_make_full_ipaddr(krb5_context context, krb5_int32 adr,
 	2*sizeof(temptype) + 2*sizeof(templength);
 
     if (!(retaddr->contents = (krb5_octet *)malloc(retaddr->length))) {
-	krb5_xfree(retaddr);
+	free(retaddr);
 	return ENOMEM;
     }
     marshal = retaddr->contents;

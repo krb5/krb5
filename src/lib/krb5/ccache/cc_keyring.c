@@ -427,11 +427,11 @@ krb5_krcc_close(krb5_context context, krb5_ccache id)
 
     d = (krb5_krcc_data *) id->data;
 
-    krb5_xfree(d->name);
+    free(d->name);
     k5_cc_mutex_destroy(&d->lock);
-    krb5_xfree(d);
+    free(d);
 
-    krb5_xfree(id);
+    free(id);
 
     return KRB5_OK;
 }
@@ -498,7 +498,7 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 	return kret;
 
     krb5_krcc_clearcache(context, id);
-    krb5_xfree(d->name);
+    free(d->name);
     res = keyctl_unlink(d->ring_id, d->parent_id);
     if (res < 0) {
 	kret = errno;
@@ -509,8 +509,8 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 cleanup:
     k5_cc_mutex_unlock(context, &d->lock);
     k5_cc_mutex_destroy(&d->lock);
-    krb5_xfree(d);
-    krb5_xfree(id);
+    free(d);
+    free(id);
 
     krb5_change_cache();
 
@@ -811,14 +811,14 @@ krb5_krcc_new_data(const char *name, key_serial_t ring,
 
     kret = k5_cc_mutex_init(&d->lock);
     if (kret) {
-	krb5_xfree(d);
+	free(d);
 	return kret;
     }
 
     d->name = strdup(name);
     if (d->name == NULL) {
 	k5_cc_mutex_destroy(&d->lock);
-	krb5_xfree(d);
+	free(d);
 	return KRB5_CC_NOMEM;
     }
     d->princ_id = 0;
@@ -917,7 +917,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
     kret = krb5_krcc_new_data(uniquename, key, ring_id, &d);
     k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
     if (kret) {
-	krb5_xfree(lid);
+	free(lid);
 	return kret;
     }
     lid->data = d;
@@ -1339,13 +1339,13 @@ krb5_krcc_parse_cred(krb5_context context, krb5_ccache id, krb5_creds * creds,
 
   cleanticket:
     memset(creds->ticket.data, 0, (unsigned) creds->ticket.length);
-    krb5_xfree(creds->ticket.data);
+    free(creds->ticket.data);
   cleanauthdata:
     krb5_free_authdata(context, creds->authdata);
   cleanaddrs:
     krb5_free_addresses(context, creds->addresses);
   cleanblock:
-    krb5_xfree(creds->keyblock.contents);
+    free(creds->keyblock.contents);
   cleanserver:
     krb5_free_principal(context, creds->server);
   cleanclient:
@@ -1414,7 +1414,7 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
   errout:
     while (--i >= 0)
 	free(krb5_princ_component(context, tmpprinc, i)->data);
-    krb5_xfree(krb5_princ_realm(context, tmpprinc)->data);
+    free(krb5_princ_realm(context, tmpprinc)->data);
     free((char *) tmpprinc->data);
     free((char *) tmpprinc);
     return kret;
@@ -1456,7 +1456,7 @@ krb5_krcc_parse_keyblock(krb5_context context, krb5_ccache id,
     return KRB5_OK;
   errout:
     if (keyblock->contents)
-	krb5_xfree(keyblock->contents);
+	free(keyblock->contents);
     return kret;
 }
 
@@ -1523,7 +1523,7 @@ krb5_krcc_parse_krb5data(krb5_context context, krb5_ccache id,
     return KRB5_OK;
   errout:
     if (data->data)
-	krb5_xfree(data->data);
+	free(data->data);
     return kret;
 }
 
@@ -1632,7 +1632,7 @@ krb5_krcc_parse_addr(krb5_context context, krb5_ccache id, krb5_address * addr,
     return KRB5_OK;
   errout:
     if (addr->contents)
-	krb5_xfree(addr->contents);
+	free(addr->contents);
     return kret;
 }
 
@@ -1725,7 +1725,7 @@ krb5_krcc_parse_authdatum(krb5_context context, krb5_ccache id,
     return KRB5_OK;
   errout:
     if (a->contents)
-	krb5_xfree(a->contents);
+	free(a->contents);
     return kret;
 
 }

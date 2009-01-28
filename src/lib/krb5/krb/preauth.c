@@ -227,7 +227,7 @@ cleanup:
     if (etype_info)
 	krb5_free_etype_info(context, etype_info);
     if (f_salt)
-	krb5_xfree(salt.data);
+	free(salt.data);
     if (send_pa_list)
 	krb5_free_pa_data(context, send_pa_list);
     if (def_enc_key)
@@ -314,7 +314,7 @@ obtain_enc_ts_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_i
 
     *out_padata = pa;
 
-    krb5_xfree(scratch);
+    free(scratch);
     scratch = 0;
 
     retval = 0;
@@ -323,7 +323,7 @@ cleanup:
     if (scratch)
 	krb5_free_data(context, scratch);
     if (enc_data.ciphertext.data)
-	krb5_xfree(enc_data.ciphertext.data);
+	free(enc_data.ciphertext.data);
     return retval;
 }
 
@@ -383,7 +383,7 @@ sam_get_pass_from_user(krb5_context context, krb5_etype_info etype_info, git_key
       /* we don't keep the new password, just the key... */
       retval = (*key_proc)(context, enctype, 0, 
 			   (krb5_const_pointer)&newpw, new_enc_key);
-      krb5_xfree(newpw.data);
+      free(newpw.data);
     }
     krb5_default_pwd_prompt1 = oldprompt;
     return retval;
@@ -569,6 +569,6 @@ cleanup:
     if (scratch)
 	krb5_free_data(context, scratch);
     if (sam_challenge)
-        krb5_xfree(sam_challenge);
+        free(sam_challenge);
     return retval;
 }

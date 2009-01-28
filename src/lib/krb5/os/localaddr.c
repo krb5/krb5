@@ -1358,7 +1358,7 @@ get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
 	int i;
 	if (data.addr_temp) {
 	    for (i = 0; i < data.count; i++)
-		krb5_xfree (data.addr_temp[i]);
+		free (data.addr_temp[i]);
 	    free (data.addr_temp);
 	}
 	if (data.mem_err)

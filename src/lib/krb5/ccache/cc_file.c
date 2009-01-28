@@ -530,7 +530,7 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
  errout:
     while(--i >= 0)
 	free(krb5_princ_component(context, tmpprinc, i)->data);
-    krb5_xfree(krb5_princ_realm(context, tmpprinc)->data);
+    free(krb5_princ_realm(context, tmpprinc)->data);
     free((char *)tmpprinc->data);
     free((char *)tmpprinc);
     return kret;
@@ -628,7 +628,7 @@ krb5_fcc_read_keyblock(krb5_context context, krb5_ccache id, krb5_keyblock *keyb
      return KRB5_OK;
  errout:
      if (keyblock->contents) {
-	 krb5_xfree(keyblock->contents);
+	 free(keyblock->contents);
 	 keyblock->contents = NULL;
      }
      return kret;
@@ -669,7 +669,7 @@ krb5_fcc_read_data(krb5_context context, krb5_ccache id, krb5_data *data)
      return KRB5_OK;
  errout:
      if (data->data) {
-	 krb5_xfree(data->data);
+	 free(data->data);
 	 data->data = NULL;
      }
      return kret;
@@ -714,7 +714,7 @@ krb5_fcc_read_addr(krb5_context context, krb5_ccache id, krb5_address *addr)
      return KRB5_OK;
  errout:
      if (addr->contents) {
-	 krb5_xfree(addr->contents);
+	 free(addr->contents);
 	 addr->contents = NULL;
      }
      return kret;
@@ -898,7 +898,7 @@ krb5_fcc_read_authdatum(krb5_context context, krb5_ccache id, krb5_authdata *a)
      return KRB5_OK;
  errout:
      if (a->contents) {
-	 krb5_xfree(a->contents);
+	 free(a->contents);
 	 a->contents = NULL;
      }
      return kret;
@@ -1541,7 +1541,7 @@ static krb5_error_code KRB5_CALLCONV
 krb5_fcc_close(krb5_context context, krb5_ccache id)
 {
      dereference(context, (krb5_fcc_data *) id->data);
-     krb5_xfree(id);
+     free(id);
      return KRB5_OK;
 }
 
@@ -1676,7 +1676,7 @@ krb5_fcc_destroy(krb5_context context, krb5_ccache id)
   cleanup:
      k5_cc_mutex_unlock(context, &data->lock);
      dereference(context, data);
-     krb5_xfree(id);
+     free(id);
 
      krb5_change_cache ();
      return kret;
@@ -1828,7 +1828,7 @@ krb5_fcc_start_seq_get(krb5_context context, krb5_ccache id,
      if (OPENCLOSE(id)) {
           kret = krb5_fcc_open_file(context, id, FCC_OPEN_RDONLY);
           if (kret) {
-              krb5_xfree(fcursor);
+              free(fcursor);
 	      k5_cc_mutex_unlock(context, &data->lock);
               return kret;
           }
@@ -1837,12 +1837,12 @@ krb5_fcc_start_seq_get(krb5_context context, krb5_ccache id,
      /* Make sure we start reading right after the primary principal */
      kret = krb5_fcc_skip_header(context, id);
      if (kret) {
-         krb5_xfree(fcursor);
+         free(fcursor);
 	 goto done;
      }
      kret = krb5_fcc_skip_principal(context, id);
      if (kret) {
-         krb5_xfree(fcursor);
+         free(fcursor);
 	 goto done;
      }
 
@@ -1959,7 +1959,7 @@ krb5_fcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
         and if not, fcc_start_seq_get and/or fcc_next_cred will do the
         MAYBE_CLOSE.
      MAYBE_CLOSE(context, id, kret); */
-     krb5_xfree((krb5_fcc_cursor *) *cursor);
+     free((krb5_fcc_cursor *) *cursor);
      return 0;
 }
 

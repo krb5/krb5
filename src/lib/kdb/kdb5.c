@@ -1720,7 +1720,7 @@ krb5_db_fetch_mkey(krb5_context    context,
         }
 
 	if (!salt)
-	    krb5_xfree(scratch.data);
+	    free(scratch.data);
 	zap(password, sizeof(password));	/* erase it */
 
     } else {

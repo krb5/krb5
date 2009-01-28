@@ -676,13 +676,13 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
     krb5_free_data(context, tmp);
 
     if (ret) {
-	krb5_xfree(enc_data.ciphertext.data);
+	free(enc_data.ciphertext.data);
 	return(ret);
     }
 
     ret = encode_krb5_enc_data(&enc_data, &tmp);
 
-    krb5_xfree(enc_data.ciphertext.data);
+    free(enc_data.ciphertext.data);
 
     if (ret)
 	return(ret);
@@ -699,7 +699,7 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
 
     *out_padata = pa;
 
-    krb5_xfree(tmp);
+    free(tmp);
 
     return(0);
 }
@@ -893,7 +893,7 @@ krb5_error_code pa_sam(krb5_context context,
 				   (krb5_data *)gak_data, salt, as_key);
 
 	if (defsalt.length)
-	    krb5_xfree(defsalt.data);
+	    free(defsalt.data);
 
 	if (ret) {
 	    krb5_free_sam_challenge(context, sam_challenge);
@@ -937,7 +937,7 @@ krb5_error_code pa_sam(krb5_context context,
 				   &response_data, salt, as_key);
 
 	if (defsalt.length)
-	    krb5_xfree(defsalt.data);
+	    free(defsalt.data);
 
 	if (ret) {
 	    krb5_free_sam_challenge(context, sam_challenge);
@@ -958,7 +958,7 @@ krb5_error_code pa_sam(krb5_context context,
     sam_response.sam_type = sam_challenge->sam_type;
     sam_response.magic = KV5M_SAM_RESPONSE;
 
-    krb5_xfree(sam_challenge);
+    free(sam_challenge);
 
     /* encode the encoded part of the response */
     if ((ret = encode_krb5_enc_sam_response_enc(&enc_sam_response_enc,
@@ -991,7 +991,7 @@ krb5_error_code pa_sam(krb5_context context,
 
     *out_padata = pa;
 
-    krb5_xfree(scratch);
+    free(scratch);
 
     return(0);
 }
@@ -1458,7 +1458,7 @@ krb5_error_code pa_sam_2(krb5_context context,
 	if (retval) {
 	   krb5_free_sam_challenge_2(context, sc2);
 	   krb5_free_sam_challenge_2_body(context, sc2b);
-	   if (defsalt.length) krb5_xfree(defsalt.data);
+	   if (defsalt.length) free(defsalt.data);
 	   return(retval);
 	}
 
@@ -1472,7 +1472,7 @@ krb5_error_code pa_sam_2(krb5_context context,
 	   if (retval) {
 		krb5_free_sam_challenge_2(context, sc2);
 	        krb5_free_sam_challenge_2_body(context, sc2b);
-		if (defsalt.length) krb5_xfree(defsalt.data);
+		if (defsalt.length) free(defsalt.data);
 		return(retval);
 	   }
 
@@ -1483,14 +1483,14 @@ krb5_error_code pa_sam_2(krb5_context context,
 	   if (retval) {
 		krb5_free_sam_challenge_2(context, sc2);
 	        krb5_free_sam_challenge_2_body(context, sc2b);
-		if (defsalt.length) krb5_xfree(defsalt.data);
+		if (defsalt.length) free(defsalt.data);
 		return(retval);
 	   }
 	   krb5_free_keyblock_contents(context, &tmp_kb);
 	}
 
 	if (defsalt.length)
-	   krb5_xfree(defsalt.data);
+	   free(defsalt.data);
 
    } else {
 	/* as_key = string_to_key(SAD) */
@@ -1505,7 +1505,7 @@ krb5_error_code pa_sam_2(krb5_context context,
 				&response_data, salt, as_key);
 
 	if (defsalt.length)
-	   krb5_xfree(defsalt.data);
+	   free(defsalt.data);
 
 	if (retval) {
 	   krb5_free_sam_challenge_2(context, sc2);

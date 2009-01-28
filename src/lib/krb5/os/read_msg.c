@@ -57,7 +57,7 @@ krb5_read_message(krb5_context context, krb5_pointer fdp, krb5_data *inbuf)
 			return(ENOMEM);
 		}
 		if ((len2 = krb5_net_read(context, fd, buf, ilen)) != ilen) {
-			krb5_xfree(buf);
+			free(buf);
 			return((len2 < 0) ? errno : ECONNABORTED);
 		}
 	}

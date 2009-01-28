@@ -57,7 +57,7 @@ krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *con
     if ((retval = krb5_copy_data(context, psectkt, &pdata)))
 	goto cleanup;
     (*ppcreds)->second_ticket = *pdata;
-    krb5_xfree(pdata);
+    free(pdata);
 
     (*ppcreds)->ticket_flags = pkdcrep->enc_part2->flags;
     (*ppcreds)->times = pkdcrep->enc_part2->times;

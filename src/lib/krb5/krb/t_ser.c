@@ -128,7 +128,7 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
 		    if (verbose)
 			printf("%s: compare succeeded\n", msg);
 		}
-		krb5_xfree(outrep2);
+		free(outrep2);
 	    }
 	    else
 		printf("%s: second externalize returned %d\n", msg, kret);
@@ -144,7 +144,7 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
 
 		    actx = (krb5_auth_context) nctx;
 		    if (actx->i_vector)
-			krb5_xfree(actx->i_vector);
+			free(actx->i_vector);
 		}
 		krb5_auth_con_free(ser_ctx, (krb5_auth_context) nctx);
 		break;
@@ -164,11 +164,11 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
 		    eblock = (krb5_encrypt_block *) nctx;
 #if 0
 		    if (eblock->priv && eblock->priv_size)
-			krb5_xfree(eblock->priv);
+			free(eblock->priv);
 #endif
 		    if (eblock->key)
 			krb5_free_keyblock(ser_ctx, eblock->key);
-		    krb5_xfree(eblock);
+		    free(eblock);
 		}
 		break;
 	    case KV5M_PRINCIPAL:
@@ -184,7 +184,7 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
 	}
 	else
 	    printf("%s: internalize returned %d\n", msg, kret);
-	krb5_xfree(outrep);
+	free(outrep);
     }
     else
 	printf("%s: externalize_data returned %d\n", msg, kret);
@@ -307,7 +307,7 @@ ser_acontext_test(krb5_context kcontext, int verbose)
 		!(kret = ser_data(verbose, "> Auth context with new vector",
 				  (krb5_pointer) actx,
 				  KV5M_AUTH_CONTEXT)) &&
-		(krb5_xfree(actx->i_vector), actx->i_vector) &&
+		(free(actx->i_vector), actx->i_vector) &&
 		!(kret = krb5_auth_con_setivector(kcontext, actx,
 						  (krb5_pointer) print_erep)
 		  ) &&

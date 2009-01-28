@@ -77,7 +77,7 @@ recvauth_common(krb5_context context,
 	    if (strcmp(inbuf.data, sendauth_version)) {
 		problem = KRB5_SENDAUTH_BADAUTHVERS;
 	    }
-	    krb5_xfree(inbuf.data);
+	    free(inbuf.data);
 	}
 	if (flags & KRB5_RECVAUTH_BADAUTHVERS)
 	    problem = KRB5_SENDAUTH_BADAUTHVERS;
@@ -94,7 +94,7 @@ recvauth_common(krb5_context context,
 	if (version && !problem)
 	    *version = inbuf;
 	else
-	    krb5_xfree(inbuf.data);
+	    free(inbuf.data);
 	/*
 	 * OK, now check the problem variable.  If it's zero, we're
 	 * fine and we can continue.  Otherwise, we have to signal an
@@ -165,7 +165,7 @@ recvauth_common(krb5_context context,
     if (!problem) {
 	problem = krb5_rd_req(context, auth_context, &inbuf, server,
 			      keytab, &ap_option, ticket);
-	krb5_xfree(inbuf.data);
+	free(inbuf.data);
     }
 	
     /*
@@ -213,7 +213,7 @@ recvauth_common(krb5_context context,
 
     retval = krb5_write_message(context, fd, &outbuf);
     if (outbuf.data) {
-	krb5_xfree(outbuf.data);
+	free(outbuf.data);
     	/* We sent back an error, we need cleanup then return */
     	retval = problem;
     	goto cleanup;
@@ -227,7 +227,7 @@ recvauth_common(krb5_context context,
 	    return(retval);
 	}
 	retval = krb5_write_message(context, fd, &outbuf);
-	krb5_xfree(outbuf.data);
+	free(outbuf.data);
     }
 
 cleanup:;

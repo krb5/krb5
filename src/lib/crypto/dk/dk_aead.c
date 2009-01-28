@@ -1,7 +1,7 @@
 /*
  * lib/crypto/dk/dk_aead.c
  *
- * Copyright 2008 by the Massachusetts Institute of Technology.
+ * Copyright 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -147,10 +147,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
     d1.data = (char *)constantdata;
     d1.length = K5CLENGTH;
 
-    d1.data[0] = (usage >> 24) & 0xFF;
-    d1.data[1] = (usage >> 16) & 0xFF;
-    d1.data[2] = (usage >> 8 ) & 0xFF;
-    d1.data[3] = (usage      ) & 0xFF;
+    store_32_be(usage, constantdata);
 
     d1.data[4] = 0xAA;
 
@@ -298,10 +295,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     d1.data = (char *)constantdata;
     d1.length = K5CLENGTH;
 
-    d1.data[0] = (usage >> 24) & 0xFF;
-    d1.data[1] = (usage >> 16) & 0xFF;
-    d1.data[2] = (usage >> 8 ) & 0xFF;
-    d1.data[3] = (usage      ) & 0xFF;
+    store_32_be(usage, constantdata);
 
     d1.data[4] = 0xAA;
 

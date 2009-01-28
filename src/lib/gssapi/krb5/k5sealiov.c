@@ -2,7 +2,7 @@
 /*
  * lib/gssapi/krb5/k5sealiov.c
  *
- * Copyright 2008 by the Massachusetts Institute of Technology.
+ * Copyright 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -133,13 +133,11 @@ make_seal_token_v1_iov(krb5_context context,
     g_make_token_header(ctx->mech_used, 14 + ctx->cksum_size + tmsglen, &ptr, toktype);
 
     /* 0..1 SIGN_ALG */
-    ptr[0] = (ctx->signalg     ) & 0xFF;
-    ptr[1] = (ctx->signalg >> 8) & 0xFF;
+    store_16_le(ctx->signalg, &ptr[0]);
 
     /* 2..3 SEAL_ALG or Filler */
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
-        ptr[2] = (ctx->sealalg     ) & 0xFF;
-        ptr[3] = (ctx->sealalg >> 8) & 0xFF;
+        store_16_le(ctx->sealalg, &ptr[2]);
     } else {
         /* No seal */
         ptr[2] = 0xFF;
@@ -226,10 +224,7 @@ make_seal_token_v1_iov(krb5_context context,
             krb5_keyblock *enc_key;
             size_t i;
 
-            bigend_seqnum[0] = (ctx->seq_send >> 24) & 0xFF;
-            bigend_seqnum[1] = (ctx->seq_send >> 16) & 0xFF;
-            bigend_seqnum[2] = (ctx->seq_send >> 8 ) & 0xFF;
-            bigend_seqnum[3] = (ctx->seq_send      ) & 0xFF;
+            store_32_be(ctx->seq_send, bigend_seqnum);
 
             code = krb5_copy_keyblock(context, ctx->enc, &enc_key);
             if (code != 0)

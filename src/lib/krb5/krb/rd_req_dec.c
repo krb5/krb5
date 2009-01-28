@@ -354,10 +354,10 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 					  &rep.msghash);
 	    if (!retval) {
 		retval = krb5_rc_store(context, (*auth_context)->rcache, &rep);
-		krb5_xfree(rep.msghash);
+		free(rep.msghash);
 	    }
-	    krb5_xfree(rep.server);
-	    krb5_xfree(rep.client);
+	    free(rep.server);
+	    free(rep.client);
 	}
 
 	if (retval)
@@ -507,10 +507,10 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     
 cleanup:
     if (desired_etypes != NULL)
-	krb5_xfree(desired_etypes);
+	free(desired_etypes);
     if (permitted_etypes != NULL &&
 	permitted_etypes != (*auth_context)->permitted_etypes)
-	krb5_xfree(permitted_etypes);
+	free(permitted_etypes);
     if (server == &princ_data)
 	krb5_free_default_realm(context, princ_data.realm.data);
     if (retval) {
@@ -706,7 +706,7 @@ decode_etype_list(krb5_context context,
     if (code == 0) {
 	*desired_etypes = etype_list->etypes;
 	*desired_etypes_len = etype_list->length;
-	krb5_xfree(etype_list);
+	free(etype_list);
     }
 
     if (ad_if_relevant != NULL)

@@ -407,8 +407,8 @@ OM_uint32 gssint_export_internal_name(minor_status, mech_type,
 
     /* spec allows only 2 bytes for the mech oid length */
     mechOidLen = mechOidDERLen + mechOidTagLen + mech_type->length;
-    *buf++ = (mechOidLen & 0xFF00) >> 8;
-    *buf++ = (mechOidLen & 0x00FF);
+    store_16_be(mechOidLen, buf);
+    buf += 2;
 
     /*
      * DER Encoding of mech OID contains OID Tag (0x06), length and
@@ -427,10 +427,8 @@ OM_uint32 gssint_export_internal_name(minor_status, mech_type,
     buf += mech_type->length;
 
     /* spec designates the next 4 bytes for the name length */
-    *buf++ = (dispName.length & 0xFF000000) >> 24;
-    *buf++ = (dispName.length & 0x00FF0000) >> 16;
-    *buf++ = (dispName.length & 0x0000FF00) >> 8;
-    *buf++ = (dispName.length & 0X000000FF);
+    store_32_be(dispName.length, buf);
+    buf += 4;
 
     /* for the final ingredient - add the name from gss_display_name */
     (void) memcpy(buf, dispName.value, dispName.length);

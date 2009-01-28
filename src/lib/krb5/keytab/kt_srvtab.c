@@ -123,14 +123,14 @@ krb5_ktsrvtab_resolve(krb5_context context, const char *name, krb5_keytab *id)
     (*id)->ops = &krb5_kts_ops;
     data = (krb5_ktsrvtab_data *)malloc(sizeof(krb5_ktsrvtab_data));
     if (data == NULL) {
-	krb5_xfree(*id);
+	free(*id);
 	return(ENOMEM);
     }
 
     data->name = strdup(name);
     if (data->name == NULL) {
-	krb5_xfree(data);
-	krb5_xfree(*id);
+	free(data);
+	free(*id);
 	return(ENOMEM);
     }
 
@@ -156,10 +156,10 @@ krb5_ktsrvtab_close(krb5_context context, krb5_keytab id)
    * This routine should undo anything done by krb5_ktsrvtab_resolve().
    */
 {
-    krb5_xfree(KTFILENAME(id));
-    krb5_xfree(id->data);
+    free(KTFILENAME(id));
+    free(id->data);
     id->ops = 0;
-    krb5_xfree(id);
+    free(id);
     return (0);
 }
 
@@ -307,7 +307,7 @@ krb5_ktsrvtab_get_next(krb5_context context, krb5_keytab id, krb5_keytab_entry *
 krb5_error_code KRB5_CALLCONV
 krb5_ktsrvtab_end_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursor)
 {
-    krb5_xfree(*cursor);
+    free(*cursor);
     return krb5_ktsrvint_close(context, id);
 }
 

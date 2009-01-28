@@ -1,7 +1,7 @@
 /*
  * include/krb5/adm_proto.h
  *
- * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -83,6 +83,8 @@ krb5_error_code krb5_aprof_get_deltat
 	 krb5_deltat *);
 krb5_error_code krb5_aprof_get_string
 	(krb5_pointer, const char **, krb5_boolean, char **);
+krb5_error_code krb5_aprof_get_string_all
+        (krb5_pointer, const char **,  char **);
 krb5_error_code krb5_aprof_get_int32
 	(krb5_pointer,
 	 const char **,

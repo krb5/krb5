@@ -59,27 +59,19 @@ typedef UINT64_TYPE gssint_uint64;
    things */
 
 #define TWRITE_INT(ptr, num, bigend)                                    \
-   (ptr)[0] = (char) ((bigend)?((num)>>24):((num)&0xff));               \
-   (ptr)[1] = (char) ((bigend)?(((num)>>16)&0xff):(((num)>>8)&0xff));   \
-   (ptr)[2] = (char) ((bigend)?(((num)>>8)&0xff):(((num)>>16)&0xff));   \
-   (ptr)[3] = (char) ((bigend)?((num)&0xff):((num)>>24));               \
+   if (bigend) store_32_be(num, ptr); else store_32_le(num, ptr);       \
    (ptr) += 4;
 
 #define TWRITE_INT16(ptr, num, bigend)                                  \
-   (ptr)[0] = (char) ((bigend)?((num)>>24):((num)&0xff));               \
-   (ptr)[1] = (char) ((bigend)?(((num)>>16)&0xff):(((num)>>8)&0xff));   \
+   if (bigend) store_16_be((num)>>16, ptr); else store_16_le(num, ptr); \
    (ptr) += 2;
 
-#define TREAD_INT(ptr, num, bigend)             \
-   (num) = (((ptr)[0]<<((bigend)?24: 0)) |      \
-            ((ptr)[1]<<((bigend)?16: 8)) |      \
-            ((ptr)[2]<<((bigend)? 8:16)) |      \
-            ((ptr)[3]<<((bigend)? 0:24)));      \
+#define TREAD_INT(ptr, num, bigend)                        \
+   (num) = ((bigend) ? load_32_be(ptr) : load_32_le(ptr)); \
    (ptr) += 4;
 
-#define TREAD_INT16(ptr, num, bigend)           \
-   (num) = (((ptr)[0]<<((bigend)?24: 0)) |      \
-            ((ptr)[1]<<((bigend)?16: 8)));      \
+#define TREAD_INT16(ptr, num, bigend)                              \
+   (num) = ((bigend) ? (load_16_be(ptr) << 16) : load_16_le(ptr)); \
    (ptr) += 2;
 
 #define TWRITE_STR(ptr, str, len)               \

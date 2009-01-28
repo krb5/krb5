@@ -527,6 +527,9 @@ krb5_error_code os_get_default_config_files
 krb5_error_code krb5_os_hostaddr
 	(krb5_context, const char *, krb5_address ***);
 
+krb5_error_code krb5int_get_domain_realm_mapping
+        (krb5_context , const char *, char ***);
+
 /* N.B.: You need to include fake-addrinfo.h *before* k5-int.h if you're
    going to use this structure.  */
 struct addrlist {

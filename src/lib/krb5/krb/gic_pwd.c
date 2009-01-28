@@ -76,7 +76,7 @@ krb5_get_as_key_password(
 					   params->data?params:NULL, as_key);
 
     if (defsalt.length)
-	krb5_xfree(defsalt.data);
+	free(defsalt.data);
 
     return(ret);
 }
@@ -274,7 +274,7 @@ krb5_get_init_creds_password(krb5_context context,
 	 /* the change succeeded.  go on */
 
 	 if (result_code == 0) {
-	    krb5_xfree(result_string.data);
+	    free(result_string.data);
 	    break;
 	 }
 
@@ -283,7 +283,7 @@ krb5_get_init_creds_password(krb5_context context,
 	 ret = KRB5_CHPW_FAIL;
 
 	 if (result_code != KRB5_KPASSWD_SOFTERROR) {
-	    krb5_xfree(result_string.data);
+	    free(result_string.data);
 	    goto cleanup;
 	 }
 
@@ -301,8 +301,8 @@ krb5_get_init_creds_password(krb5_context context,
 		  (int) result_string.length,
 		  result_string.data ? result_string.data : "");
 
-	 krb5_xfree(code_string.data);
-	 krb5_xfree(result_string.data);
+	 free(code_string.data);
+	 free(result_string.data);
       }
    }
 

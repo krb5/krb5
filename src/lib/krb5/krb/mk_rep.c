@@ -122,7 +122,7 @@ k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {
 	*outbuf = *toutbuf;
-	krb5_xfree(toutbuf);
+	free(toutbuf);
     }
 
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);

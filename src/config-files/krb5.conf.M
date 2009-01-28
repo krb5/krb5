@@ -176,18 +176,6 @@ do not support the default cache as created by this version of
 Kerberos. Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
 DCE 1.1 systems.
 
-.IP krb4_srvtab 
-Specifies the location of the Kerberos V4 srvtab file.  Default is
-"/etc/srvtab".
-
-.IP krb4_config
-Specifies the location of the Kerberos V4 configuration file.  Default
-is "/etc/krb.conf".
-
-.IP krb4_realms
-Specifies the location of the Kerberos V4 domain/realm translation
-file.  Default is "/etc/krb.realms".
-
 .IP dns_lookup_kdc
 Indicate whether DNS SRV records shoud be used to locate the KDCs and 
 other servers for a realm, if they are not listed in the information 

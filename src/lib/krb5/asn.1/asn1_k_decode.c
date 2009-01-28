@@ -1208,6 +1208,7 @@ asn1_error_code asn1_decode_pa_for_user(asn1buf *buf, krb5_pa_for_user *val)
 {
     setup();
     { begin_structure();
+	alloc_field(val->user, krb5_principal_data);
         get_field(val->user,0,asn1_decode_principal_name);
         get_field(val->user,1,asn1_decode_realm);
         get_field(val->cksum,2,asn1_decode_checksum);

@@ -2,7 +2,7 @@
 /*
  * lib/gssapi/krb5/k5unsealiov.c
  *
- * Copyright 2008 by the Massachusetts Institute of Technology.
+ * Copyright 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -151,10 +151,7 @@ kg_unseal_v1_iov(krb5_context context,
                 krb5_keyblock *enc_key;
                 size_t i;
 
-                bigend_seqnum[0] = (seqnum >> 24) & 0xFF;
-                bigend_seqnum[1] = (seqnum >> 16) & 0xFF;
-                bigend_seqnum[2] = (seqnum >> 8 ) & 0xFF;
-                bigend_seqnum[3] = (seqnum      ) & 0xFF;
+                store_32_be(seqnum, bigend_seqnum);
 
                 code = krb5_copy_keyblock(context, ctx->enc, &enc_key);
                 if (code != 0) {

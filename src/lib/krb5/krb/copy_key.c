@@ -41,7 +41,7 @@ krb5_copy_keyblock(krb5_context context, const krb5_keyblock *from, krb5_keybloc
 		return ENOMEM;
 	*new_key = *from;
 	if (!(new_key->contents = (krb5_octet *)malloc(new_key->length))) {
-		krb5_xfree(new_key);
+		free(new_key);
 		return(ENOMEM);
 	}
 	memcpy((char *)new_key->contents, (char *)from->contents,

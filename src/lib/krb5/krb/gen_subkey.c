@@ -56,7 +56,7 @@ krb5_generate_subkey_extended(krb5_context context,
 	return(ENOMEM);
 
     if ((retval = krb5_c_make_random_key(context, enctype, *subkey))) {
-	krb5_xfree(*subkey);
+	free(*subkey);
 	return(retval);
     }
 

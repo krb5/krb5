@@ -103,7 +103,7 @@ krb5_send_tgs_basic(krb5_context context, krb5_data *in_data, krb5_creds *in_cre
 
     retval = encode_krb5_ap_req(&request, &toutbuf);
     *outbuf = *toutbuf;
-    krb5_xfree(toutbuf);
+    free(toutbuf);
 
 
     memset(request.authenticator.ciphertext.data, 0,
@@ -174,7 +174,7 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
 					  KRB5_KEYUSAGE_TGS_REQ_AD_SESSKEY,
 					  scratch,
 					  &tgsreq.authorization_data))) {
-	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
+	    free(tgsreq.authorization_data.ciphertext.data);
 	    krb5_free_data(context, scratch);
 	    return retval;
 	}
@@ -229,7 +229,7 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
 	for (counter = padata; *counter; counter++, i++);
 	combined_padata = malloc((i+2) * sizeof(*combined_padata));
 	if (!combined_padata) {
-	    krb5_xfree(ap_req_padata.contents);
+	    free(ap_req_padata.contents);
 	    retval = ENOMEM;
 	    goto send_tgs_error_2;
 	}
@@ -240,7 +240,7 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
     } else {
 	combined_padata = (krb5_pa_data **)malloc(2*sizeof(*combined_padata));
 	if (!combined_padata) {
-	    krb5_xfree(ap_req_padata.contents);
+	    free(ap_req_padata.contents);
 	    retval = ENOMEM;
 	    goto send_tgs_error_2;
 	}
@@ -251,12 +251,12 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
 
     /* the TGS_REQ is assembled in tgsreq, so encode it */
     if ((retval = encode_krb5_tgs_req(&tgsreq, &scratch))) {
-	krb5_xfree(ap_req_padata.contents);
-	krb5_xfree(combined_padata);
+	free(ap_req_padata.contents);
+	free(combined_padata);
 	goto send_tgs_error_2;
     }
-    krb5_xfree(ap_req_padata.contents);
-    krb5_xfree(combined_padata);
+    free(ap_req_padata.contents);
+    free(combined_padata);
 
     /* now send request & get response from KDC */
 send_again:
@@ -297,11 +297,11 @@ send_tgs_error_2:;
 
 send_tgs_error_1:;
     if (ktypes == NULL)
-	krb5_xfree(tgsreq.ktype);
+	free(tgsreq.ktype);
     if (tgsreq.authorization_data.ciphertext.data) {
 	memset(tgsreq.authorization_data.ciphertext.data, 0,
                tgsreq.authorization_data.ciphertext.length); 
-	krb5_xfree(tgsreq.authorization_data.ciphertext.data);
+	free(tgsreq.authorization_data.ciphertext.data);
     }
 
     return retval;

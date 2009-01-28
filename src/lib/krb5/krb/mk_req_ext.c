@@ -261,7 +261,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	goto cleanup_cksum;
     *outbuf = *toutbuf;
 
-    krb5_xfree(toutbuf);
+    free(toutbuf);
 
 cleanup_cksum:
     if (checksump && checksump->checksum_type != 0x8003)
@@ -270,7 +270,7 @@ cleanup_cksum:
 cleanup:
     if (desired_etypes &&
 	desired_etypes != (*auth_context)->permitted_etypes)
-	krb5_xfree(desired_etypes);
+	free(desired_etypes);
     if (request.ticket)
 	krb5_free_ticket(context, request.ticket);
     if (request.authenticator.ciphertext.data) {
@@ -280,8 +280,8 @@ cleanup:
     }
     if (scratch) {
 	memset(scratch->data, 0, scratch->length);
-        krb5_xfree(scratch->data);
-	krb5_xfree(scratch);
+        free(scratch->data);
+	free(scratch);
     }
     return retval;
 }
@@ -401,7 +401,7 @@ make_etype_list(krb5_context context,
     adata[i]->ad_type = KRB5_AUTHDATA_IF_RELEVANT;
     adata[i]->length = ad_if_relevant->length;
     adata[i]->contents = (krb5_octet *)ad_if_relevant->data;
-    krb5_xfree(ad_if_relevant); /* contents owned by adata[i] */
+    free(ad_if_relevant); /* contents owned by adata[i] */
 
     adata[i + 1] = NULL;
 

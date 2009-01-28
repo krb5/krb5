@@ -179,7 +179,7 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_close(krb5_context context, krb5_ccache id)
 {
-     krb5_xfree(id);
+     free(id);
      return KRB5_OK;
 }
 
@@ -193,7 +193,7 @@ krb5_mcc_free(krb5_context context, krb5_ccache id)
     for (curr = d->link; curr;) {
 	krb5_free_creds(context, curr->creds);
 	next = curr->next;
-	krb5_xfree(curr);
+	free(curr);
 	curr = next;
     }
     d->link = NULL;
@@ -234,11 +234,11 @@ krb5_mcc_destroy(krb5_context context, krb5_ccache id)
         return err;
 
     krb5_mcc_free(context, id);
-    krb5_xfree(d->name);
+    free(d->name);
     k5_cc_mutex_unlock(context, &d->lock);
     k5_cc_mutex_destroy(&d->lock);
-    krb5_xfree(d); 
-    krb5_xfree(id);
+    free(d); 
+    free(id);
 
     krb5_change_cache ();
     return KRB5_OK;
@@ -411,14 +411,14 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
         
     err = k5_cc_mutex_init(&d->lock);
     if (err) {
-	krb5_xfree(d);
+	free(d);
 	return err;
     }
 
     d->name = strdup(name);
     if (d->name == NULL) {
 	k5_cc_mutex_destroy(&d->lock);
-	krb5_xfree(d);
+	free(d);
 	return KRB5_CC_NOMEM;
     }
     d->link = NULL;
@@ -501,7 +501,7 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 
     k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
     if (err) {
-	krb5_xfree(lid);
+	free(lid);
 	return err;
     }
     lid->data = d;

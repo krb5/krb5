@@ -1,7 +1,7 @@
 /*
  * include/krb5/adm.h
  *
- * Copyright 1995,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1995,2001,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -200,6 +200,8 @@ typedef struct __krb5_realm_params {
     char *		realm_kdc_ports;
     char *		realm_kdc_tcp_ports;
     char *		realm_acl_file;
+    char *              realm_host_based_services;
+    char *              realm_no_host_referral;
     krb5_int32		realm_kadmind_port;
     krb5_enctype	realm_enctype;
     krb5_deltat		realm_max_life;

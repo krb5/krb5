@@ -334,7 +334,7 @@ krb5_425_conv_principal(krb5_context context, const char *name,
 			      *cp = tolower((unsigned char) *cp);
 		      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
 		      strncat(buf, domain, sizeof(buf) - 1 - strlen(buf));
-		      krb5_xfree(domain);
+		      free(domain);
 		  }
 		  instance = buf;
 	      }

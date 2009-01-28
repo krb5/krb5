@@ -75,10 +75,7 @@ krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
     datain.data = (char *) constantdata;
     datain.length = K5CLENGTH;
 
-    datain.data[0] = (usage>>24)&0xff;
-    datain.data[1] = (usage>>16)&0xff;
-    datain.data[2] = (usage>>8)&0xff;
-    datain.data[3] = usage&0xff;
+    store_32_be(usage, constantdata);
 
     datain.data[4] = (char) 0x99;
 
@@ -147,10 +144,7 @@ krb5int_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
     datain.data = (char *) constantdata;
     datain.length = K5CLENGTH;
 
-    datain.data[0] = (usage>>24)&0xff;
-    datain.data[1] = (usage>>16)&0xff;
-    datain.data[2] = (usage>>8)&0xff;
-    datain.data[3] = usage&0xff;
+    store_32_be(usage, constantdata);
 
     datain.data[4] = (char) 0x99;
 

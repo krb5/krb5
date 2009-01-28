@@ -362,6 +362,7 @@ krb5_os_free_context
 krb5_os_hostaddr
 krb5_os_init_context
 krb5_os_localaddr
+krb5int_get_domain_realm_mapping
 krb5_overridekeyname
 krb5_pac_add_buffer
 krb5_pac_free

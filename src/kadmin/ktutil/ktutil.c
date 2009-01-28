@@ -265,7 +265,7 @@ void ktutil_list(argc, argv)
 	    printf(")");
 	}
 	printf("\n");
-	krb5_xfree(pname);
+	free(pname);
     }
 }
 

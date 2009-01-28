@@ -43,8 +43,8 @@ krb5int_mk_chpw_req(krb5_context context,
 
     /* length */
 
-    *ptr++ = (packet->length>> 8) & 0xff;
-    *ptr++ = packet->length & 0xff;
+    store_16_be(packet->length, ptr);
+    ptr += 2;
 
     /* version == 0x0001 big-endian */
 
@@ -53,8 +53,8 @@ krb5int_mk_chpw_req(krb5_context context,
 
     /* ap_req length, big-endian */
 
-    *ptr++ = (ap_req->length>>8) & 0xff;
-    *ptr++ = ap_req->length & 0xff;
+    store_16_be(ap_req->length, ptr);
+    ptr += 2;
 
     /* ap-req data */
 
@@ -225,7 +225,7 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
 
 cleanup:
     if (ap_rep.length) {
-	krb5_xfree(clearresult.data);
+	free(clearresult.data);
     } else {
 	krb5_free_error(context, krberror);
     }
@@ -306,14 +306,14 @@ krb5int_mk_setpw_req(krb5_context context,
     ** build the packet -
     */
     /* put in the length */
-    *ptr++ = (packet->length>>8) & 0xff;
-    *ptr++ = packet->length & 0xff;
+    store_16_be(packet->length, ptr);
+    ptr += 2;
     /* put in the version */
     *ptr++ = (char)0xff;
     *ptr++ = (char)0x80;
     /* the ap_req length is big endian */
-    *ptr++ = (ap_req->length>>8) & 0xff;
-    *ptr++ = ap_req->length & 0xff;
+    store_16_be(ap_req->length, ptr);
+    ptr += 2;
     /* put in the request data */
     memcpy(ptr, ap_req->data, ap_req->length);
     ptr += ap_req->length;

@@ -730,7 +730,7 @@ k5_insert_checksum(krb5_context context,
     }
 
     /* Encode checksum type into buffer */
-    store_32_le((krb5_ui_4)*cksumtype, (unsigned char *)cksumdata.data);
+    store_32_le((krb5_ui_4)*cksumtype, cksumdata.data);
 
     return 0;
 }

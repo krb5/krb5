@@ -47,6 +47,6 @@ krb5_mk_error(krb5_context context, const krb5_error *dec_err,
     if ((retval = encode_krb5_error(dec_err, &new_enc_err)))
 	return(retval);
     *enc_err = *new_enc_err;
-    krb5_xfree(new_enc_err);
+    free(new_enc_err);
     return 0;
 }

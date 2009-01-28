@@ -93,8 +93,8 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 
 cleanup:
     if (rcache)
-	krb5_xfree(rcache);
+	free(rcache);
     if (cachename)
-	krb5_xfree(cachename);
+	free(cachename);
     return retval;
 }

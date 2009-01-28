@@ -59,15 +59,15 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
 	return ENOMEM;
     princ_ret = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (!princ_ret) {
-	krb5_xfree(princ_data);
+	free(princ_data);
 	return ENOMEM;
     }
     princ_ret->data = princ_data;
     princ_ret->length = count;
     tmpdata = malloc(rlen+1);
     if (!tmpdata) {
-	krb5_xfree(princ_data);
-	krb5_xfree(princ_ret);
+	free(princ_data);
+	free(princ_ret);
 	return ENOMEM;
     }	
     krb5_princ_set_realm_length(context, princ_ret, rlen);
@@ -94,10 +94,10 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
 
 free_out:
     while (--i >= 0)
-	krb5_xfree(princ_data[i].data);
-    krb5_xfree(princ_data);
-    krb5_xfree(princ_ret);
-    krb5_xfree(tmpdata);
+	free(princ_data[i].data);
+    free(princ_data);
+    free(princ_ret);
+    free(tmpdata);
     va_end(ap);
     return ENOMEM;
 }

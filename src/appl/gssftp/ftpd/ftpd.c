@@ -276,7 +276,7 @@ main(argc, argv, envp)
 	int addrlen, c, on = 1, tos, port = -1;
 	extern char *optarg;
 	extern int optopt;
-	char *option_string = "AaCcdElp:r:T:t:U:u:vw:";
+	char *option_string = "AaCcdElp:T:t:U:u:vw:";
 	ftpusers = _PATH_FTPUSERS_DEFAULT;
 
 	debug = 0;
@@ -332,10 +332,6 @@ main(argc, argv, envp)
 
 		case 'p':
 			port = atoi(optarg);
-			break;
-
-		case 'r':
-			setenv("KRB_CONF", optarg, 1);
 			break;
 
 		case 't':

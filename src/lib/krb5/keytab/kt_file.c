@@ -210,21 +210,21 @@ ktfile_common_resolve(krb5_context context, const char *name,
     
     (*id)->ops = ops;
     if ((data = (krb5_ktfile_data *)malloc(sizeof(krb5_ktfile_data))) == NULL) {
-	krb5_xfree(*id);
+	free(*id);
 	return(ENOMEM);
     }
 
     err = k5_mutex_init(&data->lock);
     if (err) {
-	krb5_xfree(data);
-	krb5_xfree(*id);
+	free(data);
+	free(*id);
 	return err;
     }
 
     if ((data->name = strdup(name)) == NULL) {
 	k5_mutex_destroy(&data->lock);
-	krb5_xfree(data);
-	krb5_xfree(*id);
+	free(data);
+	free(*id);
 	return(ENOMEM);
     }
 
@@ -259,12 +259,12 @@ krb5_ktfile_close(krb5_context context, krb5_keytab id)
    * This routine should undo anything done by krb5_ktfile_resolve().
    */
 {
-    krb5_xfree(KTFILENAME(id));
+    free(KTFILENAME(id));
     zap(KTFILEBUFP(id), BUFSIZ);
     k5_mutex_destroy(&((krb5_ktfile_data *)id->data)->lock);
-    krb5_xfree(id->data);
+    free(id->data);
     id->ops = 0;
-    krb5_xfree(id);
+    free(id);
     return (0);
 }
 
@@ -533,7 +533,7 @@ krb5_ktfile_end_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursor
 {
     krb5_error_code kerror;
 
-    krb5_xfree(*cursor);
+    free(*cursor);
     kerror = KTLOCK(id);
     if (kerror)
 	return kerror;
@@ -807,10 +807,10 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
 		if (kret) {
 		    if (keytab->data) {
 			if (KTFILENAME(keytab))
-			    krb5_xfree(KTFILENAME(keytab));
-			krb5_xfree(keytab->data);
+			    free(KTFILENAME(keytab));
+			free(keytab->data);
 		    }
-		    krb5_xfree(keytab);
+		    free(keytab);
 		}
 		else {
 		    *buffer = bp;

@@ -42,10 +42,10 @@ decrypt_credencdata(krb5_context context, krb5_cred *pcred,
 cleanup:
     if (ppart != NULL) {
 	memset(ppart, 0, sizeof(*ppart));
-	krb5_xfree(ppart);
+	free(ppart);
     }
     memset(scratch.data, 0, scratch.length);
-    krb5_xfree(scratch.data);
+    free(scratch.data);
 
     return retval;
 }
@@ -128,7 +128,7 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
 	    goto cleanup;
 
 	pcur->ticket = *pdata;
-	krb5_xfree(pdata);
+	free(pdata);
 
 
         pcur->is_skey = FALSE;
@@ -214,10 +214,10 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
         replay.cusec = replaydata.usec;
         replay.ctime = replaydata.timestamp;
         if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
-            krb5_xfree(replay.client);
+            free(replay.client);
             goto error;
         }
-        krb5_xfree(replay.client);
+        free(replay.client);
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) {

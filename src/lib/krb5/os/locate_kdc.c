@@ -337,7 +337,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 		 error_message(code));
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
 	    code = KRB5_REALM_UNKNOWN;
- 	krb5_xfree(host);
+ 	free(host);
   	return code;
      }
 
@@ -348,7 +348,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     
     if (count == 0) {
         profile_free_list(hostlist);
-	krb5_xfree(host);
+	free(host);
 	addrlist->naddrs = 0;
 	return 0;
     }
@@ -362,7 +362,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 	code = profile_get_values(context->profile, realm_srv_names,
 				  &masterlist);
 
-	krb5_xfree(host);
+	free(host);
 
 	if (code == 0) {
 	    for (i=0; masterlist[i]; i++) {
@@ -383,7 +383,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 	    }
 	}
     } else {
-	krb5_xfree(host);
+	free(host);
     }
 
     /* at this point, if master is non-NULL, then either the master kdc

@@ -119,10 +119,7 @@ krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
     d1.data = (char *) constantdata;
     d1.length = K5CLENGTH;
 
-    d1.data[0] = (usage>>24)&0xff;
-    d1.data[1] = (usage>>16)&0xff;
-    d1.data[2] = (usage>>8)&0xff;
-    d1.data[3] = usage&0xff;
+    store_32_be(usage, constantdata);
 
     d1.data[4] = (char) 0xAA;
 

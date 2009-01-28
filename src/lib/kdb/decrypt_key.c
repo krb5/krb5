@@ -90,7 +90,7 @@ krb5_dbekd_def_decrypt_key_data( krb5_context 	  context,
 
 	if ((retval = krb5_c_decrypt(context, mkey, 0 /* XXX */, 0,
 				     &cipher, &plain))) {
-	    krb5_xfree(plain.data);
+	    free(plain.data);
 	    return retval;
 	}
 
@@ -101,7 +101,7 @@ krb5_dbekd_def_decrypt_key_data( krb5_context 	  context,
 	   any better than that. */
 
 	if (tmplen > plain.length) {
-	    krb5_xfree(plain.data);
+	    free(plain.data);
 	    return(KRB5_CRYPTO_INTERNAL);
 	}
 
@@ -118,7 +118,7 @@ krb5_dbekd_def_decrypt_key_data( krb5_context 	  context,
 	    if ((keysalt->data.length = key_data->key_data_length[1])) {
 		if (!(keysalt->data.data=(char *)malloc(keysalt->data.length))){
 		    if (key_data->key_data_contents[0]) {
-			krb5_xfree(dbkey->contents);
+			free(dbkey->contents);
 			dbkey->contents = 0;
 			dbkey->length = 0;
 		    }

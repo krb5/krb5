@@ -128,7 +128,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     /* The caller is now responsible for cleaning up in_creds */
     if ((retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds,
 					ncreds))) {
-	krb5_xfree(ncreds);
+	free(ncreds);
 	ncreds = in_creds;
     } else {
 	*out_creds = ncreds;
@@ -311,7 +311,7 @@ krb5_validate_or_renew_creds(krb5_context context, krb5_creds *creds,
     /* ick.  copy the struct contents, free the container */
     if (out_creds) {
 	*creds = *out_creds;
-	krb5_xfree(out_creds);
+	free(out_creds);
     }
 
 cleanup:

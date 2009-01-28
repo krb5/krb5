@@ -91,7 +91,7 @@ krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata,
         goto clean_encpart;
 
     *outbuf = *scratch2;
-    krb5_xfree(scratch2);
+    free(scratch2);
     retval = 0;
 
 clean_encpart:
@@ -209,7 +209,7 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
 
 	if ((retval = krb5_gen_replay_name(context, auth_context->local_addr, 
 					   "_priv", &replay.client))) {
-    	    krb5_xfree(outbuf);
+    	    free(outbuf);
 	    goto error;
 	}
 
@@ -219,10 +219,10 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
 	replay.ctime = replaydata.timestamp;
 	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
 	    /* should we really error out here? XXX */
-    	    krb5_xfree(replay.client);
+    	    free(replay.client);
 	    goto error;
 	}
-	krb5_xfree(replay.client);
+	free(replay.client);
     }
 
     return 0;

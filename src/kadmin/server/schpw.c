@@ -251,7 +251,7 @@ process_chpw_request(context, server_handle, realm, keytab,
     /* zap the password */
     memset(clear.data, 0, clear.length);
     memset(ptr, 0, clear.length);
-    krb5_xfree(clear.data);
+    free(clear.data);
     free(ptr);
     clear.length = 0;
 
@@ -378,7 +378,7 @@ chpwfail:
            reply */
 
 	if (ap_rep.length) {
-	    krb5_xfree(ap_rep.data);
+	    free(ap_rep.data);
 	    ap_rep.length = 0;
 	}
 
@@ -457,13 +457,13 @@ bailout:
     if (changepw)
 	krb5_free_principal(context, changepw);
     if (ap_rep.length)
-	krb5_xfree(ap_rep.data);
+	free(ap_rep.data);
     if (ticket)
 	krb5_free_ticket(context, ticket);
     if (clear.length)
-	krb5_xfree(clear.data);
+	free(clear.data);
     if (cipher.length)
-	krb5_xfree(cipher.data);
+	free(cipher.data);
     if (target)
 	krb5_free_principal(context, target);
     if (targetstr)
