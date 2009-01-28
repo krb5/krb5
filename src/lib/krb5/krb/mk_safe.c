@@ -98,11 +98,11 @@ krb5_mk_safe_basic(krb5_context context, const krb5_data *userdata,
 	goto cleanup_checksum;
     }
     *outbuf = *scratch2;
-    krb5_xfree(scratch2);
+    free(scratch2);
     retval = 0;
 
 cleanup_checksum:
-    krb5_xfree(safe_checksum.contents);
+    free(safe_checksum.contents);
 
     memset((char *)scratch1->data, 0, scratch1->length); 
     krb5_free_data(context, scratch1);
@@ -234,7 +234,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
 
 	if ((retval = krb5_gen_replay_name(context, auth_context->local_addr, 
 					   "_safe", &replay.client))) {
-    	    krb5_xfree(outbuf);
+    	    free(outbuf);
 	    goto error;
 	}
 
@@ -244,10 +244,10 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
 	replay.ctime = replaydata.timestamp;
 	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
 	    /* should we really error out here? XXX */
-    	    krb5_xfree(outbuf);
+    	    free(outbuf);
 	    goto error;
 	}
-	krb5_xfree(replay.client);
+	free(replay.client);
     }
 
     return 0;

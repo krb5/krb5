@@ -489,7 +489,7 @@ MSTicketToMITTicket(KERB_EXTERNAL_TICKET *msticket, krb5_context context, krb5_d
         return FALSE;
     
     memcpy(ticket, newdata, sizeof(krb5_data));
-    krb5_xfree(newdata);
+    free(newdata);
     return TRUE;
 }
 
@@ -2056,7 +2056,7 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 
     lid->data = (krb5_pointer) malloc(sizeof(krb5_lcc_data));
     if (lid->data == NULL) {
-        krb5_xfree(lid);
+        free(lid);
         CloseHandle(LogonHandle);
         return KRB5_CC_NOMEM;
     }
@@ -2069,8 +2069,8 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 
     data->cc_name = (char *)malloc(strlen(residual)+1);
     if (data->cc_name == NULL) {
-        krb5_xfree(lid->data);
-        krb5_xfree(lid);
+        free(lid->data);
+        free(lid);
         CloseHandle(LogonHandle);
         return KRB5_CC_NOMEM;
     }
@@ -2090,9 +2090,9 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
             krb5_copy_principal(context, creds.client, &data->princ);
         krb5_free_cred_contents(context,&creds);
     } else if (!does_retrieve_ticket_cache_ticket()) {
-        krb5_xfree(data->cc_name);
-        krb5_xfree(lid->data);
-        krb5_xfree(lid);
+        free(data->cc_name);
+        free(lid->data);
+        free(lid);
         CloseHandle(LogonHandle);
         return KRB5_FCC_NOFILE;
     }
@@ -2169,9 +2169,9 @@ krb5_lcc_close(krb5_context context, krb5_ccache id)
 
         if (data) {
             CloseHandle(data->LogonHandle);
-            krb5_xfree(data);
+            free(data);
         }
-        krb5_xfree(id);
+        free(id);
     }
     return closeval;
 }

@@ -40,7 +40,7 @@ krb5_copy_checksum(krb5_context context, const krb5_checksum *ckfrom, krb5_check
 
     if (!(tempto->contents =
 	  (krb5_octet *)malloc(tempto->length))) {
-	krb5_xfree(tempto);
+	free(tempto);
 	return ENOMEM;
     }
     memcpy((char *) tempto->contents, (char *) ckfrom->contents,

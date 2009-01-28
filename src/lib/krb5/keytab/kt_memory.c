@@ -167,7 +167,7 @@ void krb5int_mkt_finalize(void) {
 	next_node = node->next;
 
 	/* destroy the contents of node->keytab */
-	krb5_xfree(KTNAME(node->keytab));
+	free(KTNAME(node->keytab));
 
 	/* free the keytab entries */
 	for (cursor = KTLINK(node->keytab); cursor; cursor = next_cursor) {
@@ -176,21 +176,21 @@ void krb5int_mkt_finalize(void) {
  	     * krb5_context since we know that the context isn't used by
 	     * krb5_kt_free_entry or krb5_free_principal. */
 	    krb5_kt_free_entry(NULL, cursor->entry);
-	    krb5_xfree(cursor->entry);
-	    krb5_xfree(cursor);
+	    free(cursor->entry);
+	    free(cursor);
 	}
 
 	/* destroy the lock */
 	k5_mutex_destroy(&(((krb5_mkt_data *)node->keytab->data)->lock));
 
 	/* free the private data */
-	krb5_xfree(node->keytab->data);
+	free(node->keytab->data);
 
 	/* and the keytab */
-	krb5_xfree(node->keytab);
+	free(node->keytab);
 
 	/* and finally the node */
-	krb5_xfree(node);
+	free(node);
     }
 }
 /*
@@ -230,15 +230,15 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
     }
 
     if ((list->keytab = (krb5_keytab)malloc(sizeof(struct _krb5_kt))) == NULL) {
-	krb5_xfree(list);
+	free(list);
 	err = ENOMEM;
 	goto done;	
     }
 
     list->keytab->ops = &krb5_mkt_ops;
     if ((data = (krb5_mkt_data *)malloc(sizeof(krb5_mkt_data))) == NULL) {
-	krb5_xfree(list->keytab);
-	krb5_xfree(list);
+	free(list->keytab);
+	free(list);
 	err = ENOMEM;
 	goto done;
     }
@@ -246,17 +246,17 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 
     err = k5_mutex_init(&data->lock);
     if (err) {
-	krb5_xfree(data);
-	krb5_xfree(list->keytab);
-	krb5_xfree(list);
+	free(data);
+	free(list->keytab);
+	free(list);
 	goto done;
     }
 
     if ((data->name = strdup(name)) == NULL) {
 	k5_mutex_destroy(&data->lock);
-	krb5_xfree(data);
-	krb5_xfree(list->keytab);
-	krb5_xfree(list);
+	free(data);
+	free(list->keytab);
+	free(list);
 	err = ENOMEM;
 	goto done;
     }
@@ -276,11 +276,11 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
     if (err) {
 	k5_mutex_destroy(&data->lock);
      	if (data && data->name) 
-		krb5_xfree(data->name);
-	krb5_xfree(data);
+		free(data->name);
+	free(data);
 	if (list && list->keytab)
-		krb5_xfree(list->keytab);
-	krb5_xfree(list);
+		free(list->keytab);
+	free(list);
     } else {
 	KTREFCNT(*id)++;
 	KTUNLOCK(*id);
@@ -350,28 +350,28 @@ krb5_mkt_close(krb5_context context, krb5_keytab id)
 	*listp = node->next;
 
 	/* destroy the contents of node->keytab (aka id) */
-	krb5_xfree(data->name);
+	free(data->name);
 
 	/* free the keytab entries */
 	for (cursor = KTLINK(node->keytab); cursor; cursor = next_cursor) {
 	    next_cursor = cursor->next;
 
 	    krb5_kt_free_entry(context, cursor->entry);
-	    krb5_xfree(cursor->entry);
-	    krb5_xfree(cursor);
+	    free(cursor->entry);
+	    free(cursor);
 	}
 
 	/* destroy the lock */
 	k5_mutex_destroy(&(data->lock));
 
 	/* free the private data */
-	krb5_xfree(data);
+	free(data);
 
 	/* and the keytab */
-	krb5_xfree(node->keytab);
+	free(node->keytab);
 
 	/* and finally the node */
-	krb5_xfree(node);
+	free(node);
     }
 #endif /* HEIMDAL_COMPATIBLE */
 
@@ -567,7 +567,7 @@ krb5_mkt_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     }
     cursor->entry = (krb5_keytab_entry *)malloc(sizeof(krb5_keytab_entry));
     if (cursor->entry == NULL) {
-	krb5_xfree(cursor);
+	free(cursor);
 	err = ENOMEM;
 	goto done;
     }
@@ -577,16 +577,16 @@ krb5_mkt_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     err = krb5_copy_keyblock_contents(context, &(entry->key), 
 				      &(cursor->entry->key));
     if (err) {
-	krb5_xfree(cursor->entry);
-	krb5_xfree(cursor);
+	free(cursor->entry);
+	free(cursor);
 	goto done;
     }
 
     err = krb5_copy_principal(context, entry->principal, &(cursor->entry->principal));
     if (err) {
 	krb5_free_keyblock_contents(context, &(cursor->entry->key));
-	krb5_xfree(cursor->entry);
-	krb5_xfree(cursor);
+	free(cursor->entry);
+	free(cursor);
 	goto done;
     }
 
@@ -635,9 +635,9 @@ krb5_mkt_remove(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     }
 
     krb5_kt_free_entry(context, (*pcursor)->entry);
-    krb5_xfree((*pcursor)->entry);
+    free((*pcursor)->entry);
     next = (*pcursor)->next;
-    krb5_xfree(*pcursor);
+    free(*pcursor);
     (*pcursor) = next;
 
   done:

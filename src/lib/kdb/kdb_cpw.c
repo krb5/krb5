@@ -412,7 +412,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	 	return(retval);
 
 	    key_salt.data = *saltdata;
-	    krb5_xfree(saltdata);
+	    free(saltdata);
 	}
 		break;
     	case KRB5_KDB_SALTTYPE_NOREALM:
@@ -438,7 +438,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 
 	    key_salt.data = *saltdata;
 	    key_salt.data.length = SALT_TYPE_AFS_LENGTH; /*length actually used below...*/
-	    krb5_xfree(saltdata);
+	    free(saltdata);
 #else
 	    /* Why do we do this? Well, the afs_mit_string_to_key needs to
 	       use strlen, and the realm is not NULL terminated.... */
@@ -481,7 +481,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 					     kvno, &tmp_key_data);
 	if (key_salt.data.data)
 	    free(key_salt.data.data);
-	krb5_xfree(key.contents);
+	free(key.contents);
 
 	if( retval )
 	    return retval;

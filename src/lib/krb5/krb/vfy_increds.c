@@ -226,7 +226,7 @@ cleanup:
    if (authcon)
       krb5_auth_con_free(context, authcon);
    if (ap_req.data)
-      krb5_xfree(ap_req.data);
+      free(ap_req.data);
 
    return(ret);
 }

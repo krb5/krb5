@@ -1533,7 +1533,7 @@ krb5_db_fetch_mkey(krb5_context    context,
         }
 
 	if (!salt)
-	    krb5_xfree(scratch.data);
+	    free(scratch.data);
 	memset(password, 0, sizeof(password));	/* erase it */
 
     } else {

@@ -334,10 +334,10 @@ krb5_rc_dfl_resolve(krb5_context context, krb5_rcache id, char *name)
 cleanup:
     if (t) {
         if (t->name)
-            krb5_xfree(t->name);
+            free(t->name);
         if (t->h)
-            krb5_xfree(t->h);
-        krb5_xfree(t);
+            free(t->h);
+        free(t);
     }
     return retval;
 }
@@ -523,11 +523,11 @@ krb5_rc_io_fetch(krb5_context context, struct dfl_data *t,
 
 errout:
     if (rep->client)
-        krb5_xfree(rep->client);
+        free(rep->client);
     if (rep->server)
-        krb5_xfree(rep->server);
+        free(rep->server);
     if (rep->msghash)
-        krb5_xfree(rep->msghash);
+        free(rep->msghash);
     rep->client = rep->server = 0;
     return retval;
 }

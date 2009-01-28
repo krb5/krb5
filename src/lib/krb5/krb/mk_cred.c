@@ -38,7 +38,7 @@ encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart,
     if (pkeyblock == NULL) {
 	    pencdata->ciphertext.data = scratch->data;
 	    pencdata->ciphertext.length = scratch->length;
-	    krb5_xfree(scratch);
+	    free(scratch);
 	    return 0;
     }
 
@@ -263,10 +263,10 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
         replay.ctime = replaydata.timestamp;
         if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
             /* should we really error out here? XXX */
-            krb5_xfree(replay.client);
+            free(replay.client);
             goto error;
         }
-        krb5_xfree(replay.client);
+        free(replay.client);
     }
 
     /* Encode creds structure */

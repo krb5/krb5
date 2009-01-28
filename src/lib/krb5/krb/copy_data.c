@@ -48,7 +48,7 @@ krb5_copy_data(krb5_context context, const krb5_data *indata, krb5_data **outdat
 
     retval = krb5int_copy_data_contents(context, indata, tempdata);
     if (retval) {
-	krb5_xfree(tempdata);
+	free(tempdata);
 	return retval;
     }
 

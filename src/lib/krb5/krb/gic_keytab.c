@@ -69,7 +69,7 @@ krb5_get_as_key_keytab(
     /* again, krb5's memory management is lame... */
 
     *as_key = *kt_key;
-    krb5_xfree(kt_key);
+    free(kt_key);
 
     (void) krb5_kt_free_entry(context, &kt_ent);
 

@@ -469,7 +469,7 @@ krb5_def_verify_master_key(krb5_context    context,
     }
 
     memset((char *)tempkey.contents, 0, tempkey.length);
-    krb5_xfree(tempkey.contents);
+    free(tempkey.contents);
     krb5_db_free_principal(context, &master_entry, nprinc);
     
     return retval;

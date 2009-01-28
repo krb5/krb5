@@ -149,11 +149,11 @@ mit_afs_string_to_key (krb5_keyblock *keyblock, const krb5_data *data,
       
       /* clean & free the input string */
       memset(password, 0, (size_t) pw_len);
-      krb5_xfree(password);
+      free(password);
     }
 #if 0
     /* must free here because it was copied for this special case */
-    krb5_xfree(salt->data);
+    free(salt->data);
 #endif
     return 0;
 }

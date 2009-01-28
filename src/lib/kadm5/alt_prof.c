@@ -639,7 +639,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
                !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
          if (!krb5_string_to_enctype(svalue, &params.enctype)) {
               params.mask |= KADM5_CONFIG_ENCTYPE;
-              krb5_xfree(svalue);
+              free(svalue);
          }
     } else {
          params.mask |= KADM5_CONFIG_ENCTYPE;
@@ -678,7 +678,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
                !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
          if (!krb5_string_to_timestamp(svalue, &params.expiration)) {
               params.mask |= KADM5_CONFIG_EXPIRATION;
-              krb5_xfree(svalue);
+              free(svalue);
          }
     } else {
          params.mask |= KADM5_CONFIG_EXPIRATION;
@@ -721,7 +721,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
          }
          if (!sp)
               params.mask |= KADM5_CONFIG_FLAGS;
-         krb5_xfree(svalue);
+         free(svalue);
     } else {
          params.mask |= KADM5_CONFIG_FLAGS;
          params.flags = KRB5_KDB_DEF_FLAGS;
@@ -761,7 +761,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
          if (params.num_keysalts)
               params.mask |= KADM5_CONFIG_ENCTYPES;
 
-         krb5_xfree(svalue);
+         free(svalue);
     }
     
         hierarchy[2] = "iprop_enable";
@@ -991,7 +991,7 @@ krb5_read_realm_params(kcontext, realm, rparamp)
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
         if (!krb5_string_to_enctype(svalue, &rparams->realm_enctype))
             rparams->realm_enctype_valid = 1;
-        krb5_xfree(svalue);
+        free(svalue);
     }
             
     /* Get the value for the stashfile */
@@ -1019,7 +1019,7 @@ krb5_read_realm_params(kcontext, realm, rparamp)
         if (!krb5_string_to_timestamp(svalue,
                                       &rparams->realm_expiration))
             rparams->realm_expiration_valid = 1;
-        krb5_xfree(svalue);
+        free(svalue);
     }
 
     hierarchy[2] = "reject_bad_transit";
@@ -1080,7 +1080,7 @@ krb5_read_realm_params(kcontext, realm, rparamp)
         }
         if (!sp)
             rparams->realm_flags_valid = 1;
-        krb5_xfree(svalue);
+        free(svalue);
     }
 
     rparams->realm_keysalts = NULL;
@@ -1108,17 +1108,17 @@ krb5_free_realm_params(kcontext, rparams)
     krb5_realm_params        *rparams;
 {
     if (rparams) {
-        krb5_xfree(rparams->realm_profile);
-        krb5_xfree(rparams->realm_dbname);
-        krb5_xfree(rparams->realm_mkey_name);
-        krb5_xfree(rparams->realm_stash_file);
-        krb5_xfree(rparams->realm_keysalts);
-        krb5_xfree(rparams->realm_kdc_ports);
-        krb5_xfree(rparams->realm_kdc_tcp_ports);
-        krb5_xfree(rparams->realm_acl_file);
-        krb5_xfree(rparams->realm_no_host_referral);
-        krb5_xfree(rparams->realm_host_based_services);
-        krb5_xfree(rparams);
+        free(rparams->realm_profile);
+        free(rparams->realm_dbname);
+        free(rparams->realm_mkey_name);
+        free(rparams->realm_stash_file);
+        free(rparams->realm_keysalts);
+        free(rparams->realm_kdc_ports);
+        free(rparams->realm_kdc_tcp_ports);
+        free(rparams->realm_acl_file);
+        free(rparams->realm_no_host_referral);
+        free(rparams->realm_host_based_services);
+        free(rparams);
     }
     return(0);
 }

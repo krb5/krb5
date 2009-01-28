@@ -74,7 +74,7 @@ krb5_principal_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     if ((principal = (krb5_principal) arg) &&
 	!(kret = krb5_unparse_name(kcontext, principal, &fname))) {
 	*sizep += (3*sizeof(krb5_int32)) + strlen(fname);
-	krb5_xfree(fname);
+	free(fname);
     }
     return(kret);
 }
@@ -111,7 +111,7 @@ krb5_principal_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet *
 		*buffer = bp;
 		*lenremain = remain;
 
-		krb5_xfree(fname);
+		free(fname);
 	    }
 	}
     }

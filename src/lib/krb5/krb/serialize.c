@@ -76,7 +76,7 @@ krb5_register_serializer(krb5_context kcontext, const krb5_ser_entry *entry)
 	    /* Copy in new entry */
 	    memcpy(&stable[kcontext->ser_ctx_count], entry,
 		   sizeof(krb5_ser_entry));
-	    if (kcontext->ser_ctx) krb5_xfree(kcontext->ser_ctx);
+	    if (kcontext->ser_ctx) free(kcontext->ser_ctx);
 	    kcontext->ser_ctx = (void *) stable;
 	    kcontext->ser_ctx_count++;
 	}

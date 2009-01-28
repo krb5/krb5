@@ -187,7 +187,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 
 	if (!hrealms[0]) {
 	    free(remote_host);
-	    krb5_xfree(hrealms);
+	    free(hrealms);
 	    return KRB5_ERR_HOST_REALM_UNKNOWN;
 	}
 	realm = hrealms[0];

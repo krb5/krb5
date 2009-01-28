@@ -115,13 +115,13 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
 
     db = KDBM_OPEN(dbname, O_RDONLY, 0600);
     if (!db) {
-	krb5_xfree(princ_name);
+	free(princ_name);
 	return KRB5_LNAME_CANTOPEN;
     }
 
     contents = KDBM_FETCH(db, key);
 
-    krb5_xfree(princ_name);
+    free(princ_name);
 
     if (contents.dptr == NULL) {
 	retval = KRB5_LNAME_NOTRANS;
@@ -583,7 +583,7 @@ rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, cons
 	    if (!(selstring = aname_full_to_mapping_name(fprincname)))
 		kret = ENOMEM;
 	}
-	krb5_xfree(fprincname);
+	free(fprincname);
     }
     if (!kret) {
 	/*
@@ -819,9 +819,9 @@ krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, int ln
 	    }
 	    else
 		kret = ENOMEM;
-	    krb5_xfree(pname);
+	    free(pname);
 	}
-	krb5_xfree(realm);
+	free(realm);
     }
     return(kret);
 }

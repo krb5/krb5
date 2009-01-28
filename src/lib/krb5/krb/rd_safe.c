@@ -245,10 +245,10 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
 	replay.cusec = replaydata.usec;
 	replay.ctime = replaydata.timestamp;
 	if ((retval = krb5_rc_store(context, auth_context->rcache, &replay))) {
-	    krb5_xfree(replay.client);
+	    free(replay.client);
 	    goto error;
 	}
-	krb5_xfree(replay.client);
+	free(replay.client);
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) {
@@ -271,7 +271,7 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
     return 0;
 
 error:
-    krb5_xfree(outbuf->data);
+    free(outbuf->data);
     return retval;
 
 }

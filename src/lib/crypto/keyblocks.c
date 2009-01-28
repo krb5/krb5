@@ -65,7 +65,7 @@ void
 krb5int_c_free_keyblock(krb5_context context, register krb5_keyblock *val)
 {
     krb5int_c_free_keyblock_contents(context, val);
-    krb5_xfree(val);
+    free(val);
 }
 
 void 
@@ -73,7 +73,7 @@ krb5int_c_free_keyblock_contents(krb5_context context, register krb5_keyblock *k
 {
      if (key->contents) {
        krb5int_zap_data (key->contents, key->length);
-	  krb5_xfree(key->contents);
+	  free(key->contents);
 	  key->contents = 0;
      }
 }

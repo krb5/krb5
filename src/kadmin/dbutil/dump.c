@@ -585,8 +585,8 @@ dump_k5beta_iterator(ptr, entry)
 	     krb5_dbe_lookup_last_pwd_change(arg->kcontext, entry,
 					     &last_pwd_change))) {
 	    fprintf(stderr, nokeys_err, arg->programname, name);
-	    krb5_xfree(mod_name);
-	    krb5_xfree(name);
+	    free(mod_name);
+	    free(name);
 	    return(retval);
 	}
 
@@ -602,8 +602,8 @@ dump_k5beta_iterator(ptr, entry)
 				   KRB5_KDB_SALTTYPE_V4,
 				   &akey))) {
 	    fprintf(stderr, nokeys_err, arg->programname, name);
-	    krb5_xfree(mod_name);
-	    krb5_xfree(name);
+	    free(mod_name);
+	    free(name);
 	    return(retval);
 	}
 
@@ -668,9 +668,9 @@ dump_k5beta_iterator(ptr, entry)
 	/* If we're blabbing, do it */
 	if (arg->verbose)
 	    fprintf(stderr, "%s\n", name);
-	krb5_xfree(mod_name);
+	free(mod_name);
     }
-    krb5_xfree(name);
+    free(name);
     return(0);
 }
 
@@ -845,7 +845,7 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 	    retval = EINVAL;
 	}
     }
-    krb5_xfree(name);
+    free(name);
     return(retval);
 }
 

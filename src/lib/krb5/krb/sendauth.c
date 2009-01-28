@@ -181,12 +181,12 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
 	if (inbuf.length) {
 		if (error) {
 		    if ((retval = krb5_rd_error(context, &inbuf, error))) {
-			krb5_xfree(inbuf.data);
+			free(inbuf.data);
 			goto error_return;
 		    }
 		}
 		retval = KRB5_SENDAUTH_REJECTED;
-		krb5_xfree(inbuf.data);
+		free(inbuf.data);
 		goto error_return;
 	}
 	
@@ -204,11 +204,11 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
 				      &repl))) {
 		if (repl)
 		    krb5_free_ap_rep_enc_part(context, repl);
-	        krb5_xfree(inbuf.data);
+	        free(inbuf.data);
 		goto error_return;
 	    }
 
-	    krb5_xfree(inbuf.data);
+	    free(inbuf.data);
 	    /*
 	     * If the user wants to look at the AP_REP message,
 	     * copy it for him

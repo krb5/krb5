@@ -79,7 +79,7 @@ krb5_dbekd_def_encrypt_key_data( krb5_context 		  context,
 
     for (i = 0; i < key_data->key_data_ver; i++)
 	if (key_data->key_data_contents[i])
-	    krb5_xfree(key_data->key_data_contents[i]);
+	    free(key_data->key_data_contents[i]);
 
     key_data->key_data_ver = 1;
     key_data->key_data_kvno = keyver;
@@ -110,7 +110,7 @@ krb5_dbekd_def_encrypt_key_data( krb5_context 		  context,
 
     if ((retval = krb5_c_encrypt(context, mkey, /* XXX */ 0, 0,
 				 &plain, &cipher))) {
-	krb5_xfree(key_data->key_data_contents[0]);
+	free(key_data->key_data_contents[0]);
 	return retval;
     }
 
@@ -123,7 +123,7 @@ krb5_dbekd_def_encrypt_key_data( krb5_context 		  context,
 		key_data->key_data_contents[1] =
 		    (krb5_octet *)malloc(keysalt->data.length);
 		if (key_data->key_data_contents[1] == NULL) {
-		    krb5_xfree(key_data->key_data_contents[0]);
+		    free(key_data->key_data_contents[0]);
 		    return ENOMEM;
 		}
 		memcpy(key_data->key_data_contents[1], keysalt->data.data,

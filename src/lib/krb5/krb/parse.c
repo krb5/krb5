@@ -148,7 +148,7 @@ k5_parse_name(krb5_context context, const char *name,
 	}
 	principal->data = (krb5_data *) malloc(sizeof(krb5_data) * components);
 	if (principal->data == NULL) {
-	    krb5_xfree((char *)principal);
+	    free((char *)principal);
 	    return ENOMEM;
 	}
 	principal->length = components;
@@ -162,15 +162,15 @@ k5_parse_name(krb5_context context, const char *name,
 	    if (flags & KRB5_PRINCIPAL_PARSE_REQUIRE_REALM) {
 		krb5_set_error_message(context, KRB5_PARSE_MALFORMED,
 				       "Principal %s is missing required realm", name);
-		krb5_xfree(principal->data);
-		krb5_xfree(principal);
+		free(principal->data);
+		free(principal);
 		return KRB5_PARSE_MALFORMED;
 	    }
 	    if (!default_realm && (flags & KRB5_PRINCIPAL_PARSE_NO_REALM) == 0) {
 		retval = krb5_get_default_realm(context, &default_realm);
 		if (retval) {
-		    krb5_xfree(principal->data);
-		    krb5_xfree((char *)principal);
+		    free(principal->data);
+		    free((char *)principal);
 		    return(retval);
 		}
 		default_realm_size = strlen(default_realm);
@@ -179,8 +179,8 @@ k5_parse_name(krb5_context context, const char *name,
 	} else if (flags & KRB5_PRINCIPAL_PARSE_NO_REALM) {
 	    krb5_set_error_message(context, KRB5_PARSE_MALFORMED,
 				  "Principal %s has realm present", name);
-	    krb5_xfree(principal->data);
-	    krb5_xfree(principal);
+	    free(principal->data);
+	    free(principal);
 	    return KRB5_PARSE_MALFORMED;
 	}
 
@@ -237,9 +237,9 @@ k5_parse_name(krb5_context context, const char *name,
 	 */
 	tmpdata = malloc(realmsize + 1);
 	if (tmpdata == 0) {
-		krb5_xfree(principal->data);
-		krb5_xfree(principal);
-		krb5_xfree(default_realm);
+		free(principal->data);
+		free(principal);
+		free(default_realm);
 		return ENOMEM;
 	}
 	krb5_princ_set_realm_length(context, principal, realmsize);
@@ -249,11 +249,11 @@ k5_parse_name(krb5_context context, const char *name,
 		  malloc(krb5_princ_component(context, principal, i)->length + 1);
 		if (tmpdata2 == NULL) {
 			for (i--; i >= 0; i--)
-				krb5_xfree(krb5_princ_component(context, principal, i)->data);
-			krb5_xfree(krb5_princ_realm(context, principal)->data);
-			krb5_xfree(principal->data);
-			krb5_xfree(principal);
-			krb5_xfree(default_realm);
+				free(krb5_princ_component(context, principal, i)->data);
+			free(krb5_princ_realm(context, principal)->data);
+			free(principal->data);
+			free(principal);
+			free(default_realm);
 			return(ENOMEM);
 		}
 		krb5_princ_component(context, principal, i)->data = tmpdata2;
@@ -321,7 +321,7 @@ k5_parse_name(krb5_context context, const char *name,
 	*nprincipal = principal;
 
 	if (default_realm != NULL)
-		krb5_xfree(default_realm);
+		free(default_realm);
 
 	return(0);
 }

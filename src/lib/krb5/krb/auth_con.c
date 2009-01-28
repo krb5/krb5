@@ -12,7 +12,7 @@ actx_copy_addr(krb5_context context, const krb5_address *inad, krb5_address **ou
 	return ENOMEM;
     *tmpad = *inad;
     if (!(tmpad->contents = (krb5_octet *)malloc(inad->length))) {
-	krb5_xfree(tmpad);
+	free(tmpad);
 	return ENOMEM;
     }
     memcpy((char *)tmpad->contents, (char *)inad->contents, inad->length);
@@ -63,7 +63,7 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context)
     if (auth_context->rcache)
 	krb5_rc_close(context, auth_context->rcache);
     if (auth_context->permitted_etypes)
-	krb5_xfree(auth_context->permitted_etypes);
+	free(auth_context->permitted_etypes);
     free(auth_context);
     return 0;
 }
@@ -336,7 +336,7 @@ krb5_auth_con_setpermetypes(krb5_context context, krb5_auth_context auth_context
 	return(ENOMEM);
 
     if (auth_context->permitted_etypes)
-	krb5_xfree(auth_context->permitted_etypes);
+	free(auth_context->permitted_etypes);
 
     auth_context->permitted_etypes = newpe;
 

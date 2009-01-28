@@ -642,7 +642,7 @@ int main(argc, argv)
 	setup(krb5_cred_enc_part,"krb5_cred_enc_part",ktest_make_sample_cred_enc_part);
 	decode_run("enc_cred_part","","7D 82 02 23 30 82 02 1F A0 82 01 DA 30 82 01 D6 30 81 E8 A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 07 03 05 00 FE DC BA 98 A4 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A8 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A9 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 AA 20 30 1E 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 30 81 E8 A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 07 03 05 00 FE DC BA 98 A4 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A8 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A9 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 AA 20 30 1E 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 A1 03 02 01 2A A2 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A3 05 02 03 01 E2 40 A4 0F 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 A5 0F 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23",decode_krb5_enc_cred_part,ktest_equal_enc_cred_part,krb5_free_cred_enc_part);
 	/* free_cred_enc_part does not free the pointer */
-	krb5_xfree(var);
+	free(var);
 	ktest_destroy_principal(&(ref.ticket_info[0]->client));
 	ktest_destroy_principal(&(ref.ticket_info[0]->server));
 	ref.ticket_info[0]->flags = 0;
@@ -658,7 +658,7 @@ int main(argc, argv)
 	ktest_destroy_address(&(ref.r_address));
 	decode_run("enc_cred_part","(optionals NULL)","7D 82 01 0E 30 82 01 0A A0 82 01 06 30 82 01 02 30 15 A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 30 81 E8 A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 07 03 05 00 FE DC BA 98 A4 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A8 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A9 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 AA 20 30 1E 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23",decode_krb5_enc_cred_part,ktest_equal_enc_cred_part,krb5_free_cred_enc_part);
 	/* free_cred_enc_part does not free the pointer */
-	krb5_xfree(var);
+	free(var);
 
 	ktest_empty_cred_enc_part(&ref);
     }
@@ -895,8 +895,8 @@ int main(argc, argv)
 void krb5_ktest_free_alt_method(krb5_context context, krb5_alt_method *val)
 {
     if (val->data)
-	krb5_xfree(val->data);
-    krb5_xfree(val);
+	free(val->data);
+    free(val);
 }
 
 void krb5_ktest_free_pwd_sequence(krb5_context context, 
@@ -904,7 +904,7 @@ void krb5_ktest_free_pwd_sequence(krb5_context context,
 {
     krb5_free_data(context, val->passwd);
     krb5_free_data(context, val->phrase);
-    krb5_xfree(val);
+    free(val);
 }
 
 void krb5_ktest_free_enc_data(krb5_context context, krb5_enc_data *val)

@@ -327,7 +327,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 		if (savep) {
 		    memcpy(*ksaltp, savep,
 			   len * sizeof(krb5_key_salt_tuple));
-		    krb5_xfree(savep);
+		    free(savep);
 		}
 
 		/* Save our values */

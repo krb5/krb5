@@ -181,7 +181,7 @@ retval = KRB5_FWD_BAD_PRINCIPAL;
 	    krb5_free_data(context, scratch);
     } else {
 	*outbuf = *scratch;
-	krb5_xfree(scratch);
+	free(scratch);
     }
         
 errout:

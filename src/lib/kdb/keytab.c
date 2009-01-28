@@ -92,7 +92,7 @@ krb5_ktkdb_close(context, kt)
    */
 
   kt->ops = NULL;
-  krb5_xfree(kt);
+  free(kt);
 
   return 0;
 }

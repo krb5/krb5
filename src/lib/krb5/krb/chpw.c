@@ -225,7 +225,7 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
 
 cleanup:
     if (ap_rep.length) {
-	krb5_xfree(clearresult.data);
+	free(clearresult.data);
     } else {
 	krb5_free_error(context, krberror);
     }

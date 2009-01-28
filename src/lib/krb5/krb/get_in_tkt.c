@@ -272,7 +272,7 @@ decrypt_as_reply(krb5_context 		context,
     
 	retval = (*key_proc)(context, as_reply->enc_part.enctype,
 			     &salt, keyseed, &decrypt_key);
-	krb5_xfree(salt.data);
+	free(salt.data);
 	if (retval)
 	    goto cleanup;
     }
@@ -409,7 +409,7 @@ stash_as_reply(krb5_context 		context,
 	goto cleanup;
 
     creds->ticket = *packet;
-    krb5_xfree(packet);
+    free(packet);
 
     /* store it in the ccache! */
     if (ccache)
@@ -430,12 +430,12 @@ cleanup:
 	if (creds->keyblock.contents) {
 	    memset((char *)creds->keyblock.contents, 0,
 		   creds->keyblock.length);
-	    krb5_xfree(creds->keyblock.contents);
+	    free(creds->keyblock.contents);
 	    creds->keyblock.contents = 0;
 	    creds->keyblock.length = 0;
 	}
 	if (creds->ticket.data) {
-	    krb5_xfree(creds->ticket.data);
+	    free(creds->ticket.data);
 	    creds->ticket.data = 0;
 	}
 	if (creds->addresses) {
@@ -1489,7 +1489,7 @@ cleanup:
 	krb5_free_keyblock_contents(context, &as_key);
     if (salt.data &&
 	(!(options && (options->flags & KRB5_GET_INIT_CREDS_OPT_SALT))))
-	krb5_xfree(salt.data);
+	free(salt.data);
     krb5_free_data_contents(context, &s2kparams);
     if (as_reply)
 	*as_reply = local_as_reply;

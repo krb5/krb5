@@ -40,6 +40,6 @@ krb5_free_krbhst(krb5_context context, char *const *hostlist)
 
     for (cp = hostlist; *cp; cp++)
 	free(*cp);
-    krb5_xfree(hostlist);
+    free((char *)hostlist);
     return 0;
 }
