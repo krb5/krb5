@@ -707,6 +707,8 @@ struct update_enc_mkvno {
     unsigned int re_match_count;
     unsigned int already_current;
     unsigned int updated;
+    unsigned int dry_run : 1;
+    unsigned int verbose : 1;
 #ifdef SOLARIS_REGEXPS
     char *expbuf;
 #endif
@@ -845,10 +847,22 @@ update_princ_encryption_1(void *cb, krb5_db_entry *ent)
                 pname);
         goto fail;
     }
+    /* Line up "skip" and "update" messages for viewing.  */
     if (old_mkvno == new_mkvno) {
+        if (p->dry_run && p->verbose)
+            printf("would skip:   %s\n", pname);
+        else if (p->verbose)
+            printf("skipping: %s\n", pname);
         p->already_current++;
         goto skip;
     }
+    if (p->dry_run) {
+        if (p->verbose)
+            printf("would update: %s\n", pname);
+        p->updated++;
+        goto skip;
+    } else if (p->verbose)
+        printf("updating: %s\n", pname);
     retval = master_key_convert (util_context, ent);
     if (retval) {
         com_err(progname, retval,
@@ -928,10 +942,16 @@ kdb5_update_princ_encryption(int argc, char *argv[])
     char *regexp = NULL;
     krb5_keyblock *tmp_keyblock = NULL;
 
-    while ((optchar = getopt(argc, argv, "f")) != -1) {
+    while ((optchar = getopt(argc, argv, "fnv")) != -1) {
         switch (optchar) {
         case 'f':
             force = 1;
+            break;
+        case 'n':
+            data.dry_run = 1;
+            break;
+        case 'v':
+            data.verbose = 1;
             break;
         case '?':
         case ':':
@@ -980,8 +1000,7 @@ kdb5_update_princ_encryption(int argc, char *argv[])
 #ifdef BSD_REGEXPS
         ((msg = (char *) re_comp(regexp)) != NULL)
 #endif
-        )
-    {
+        ) {
         /* XXX syslog msg or regerr(regerrno) */
         com_err(progname, 0, "error compiling converted regexp '%s'", regexp);
         free(regexp);
@@ -1028,11 +1047,20 @@ kdb5_update_princ_encryption(int argc, char *argv[])
     new_master_keyblock = *tmp_keyblock;
 
     if (!force &&
+        !data.dry_run &&
         !are_you_sure("Re-encrypt all keys not using master key vno %u?",
                       new_mkvno)) {
         printf("OK, doing nothing.\n");
         exit_status++;
         goto cleanup;
+    }
+    if (data.verbose) {
+        if (data.dry_run)
+            printf("Principals whose keys WOULD BE re-encrypted to master key vno %u:\n",
+                   new_mkvno);
+        else
+            printf("Principals whose keys are being re-encrypted to master key vno %u if necessary:\n",
+                   new_mkvno);
     }
 
     retval = krb5_db_iterate(util_context, name_pattern,
@@ -1044,8 +1072,12 @@ kdb5_update_princ_encryption(int argc, char *argv[])
         exit_status++;
     }
     (void) krb5_db_fini(util_context);
-    printf("%u principals processed: %u updated, %u already current\n",
-           data.re_match_count, data.updated, data.already_current);
+    if (data.dry_run)
+        printf("%u principals processed: %u would be updated, %u already current\n",
+               data.re_match_count, data.updated, data.already_current);
+    else
+        printf("%u principals processed: %u updated, %u already current\n",
+               data.re_match_count, data.updated, data.already_current);
 
 cleanup:
     free(regexp);

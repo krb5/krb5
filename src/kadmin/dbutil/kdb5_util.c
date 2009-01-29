@@ -98,7 +98,7 @@ void usage()
 	     "\tadd_mkey [-e etype] [-s]\n"
 	     "\tuse_mkey kvno [time]\n"
 	     "\tlist_mkeys\n"
-	     "\tupdate_princ_encryption [-f] [princ-pattern]\n"
+	     "\tupdate_princ_encryption [-f] [-n] [-v] [princ-pattern]\n"
              );
      /* avoid a string length compiler warning */
      fprintf(stderr,

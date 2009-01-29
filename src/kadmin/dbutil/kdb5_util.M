@@ -225,14 +225,26 @@ This option needs documentation.
 \fBlist_mkeys\fP
 This option needs documentation.
 .TP
-\fBupdate_princ_encryption\fP [\fB\-f\fP] [\fBprinc\-pattern\fP]
+\fBupdate_princ_encryption\fP [\fB\-f\fP] [\fB\-n\fP] [\fB\-v\fP] [\fBprinc\-pattern\fP]
 Update all principal records (or only those matching the
 .B princ\-pattern
 glob pattern) to re-encrypt the key data using the latest version of
-the database master key, if they are encrypted using older versions.
+the database master key, if they are encrypted using older versions,
+and give a count at the end of the number of principals updated.
 If the
 .B \-f
 option is not given, ask for confirmation before starting to make
-changes.
+changes.  The
+.B \-v
+option causes each principal processed (each one matching the pattern)
+to be listed, and an indication given as to whether it needed updating
+or not.
+The
+.B \-n
+option causes the actions not to be taken, only the normal or verbose
+status messages displayed; this implies
+.B \-f
+since no database changes will be performed and thus there's little
+reason to seek confirmation.
 .SH SEE ALSO
 kadmin(8)
