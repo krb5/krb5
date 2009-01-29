@@ -25,6 +25,11 @@
  * 
  */
 
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
 #include "k5-int.h"
 #include "kdb.h"
 #include <string.h>

@@ -471,6 +471,10 @@ add_principal(context, princ, op, pblock)
         if ((retval = krb5_dbe_update_actkvno(context, &entry, &actkvno)))
             return retval;
 
+        /* so getprinc shows the right kvno */
+        if ((retval = krb5_dbe_update_mkvno(context, &entry, mkey_kvno)))
+            return retval;
+
 	break;
     case TGT_KEY:
 	iargs.ctx = context;

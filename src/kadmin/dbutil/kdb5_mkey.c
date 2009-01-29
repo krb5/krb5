@@ -34,19 +34,39 @@ static char *strdate(krb5_timestamp when)
     return out;
 }
 
+krb5_kvno
+get_next_kvno(krb5_context context, krb5_db_entry *entry)
+{
+    krb5_kvno new_kvno;
+
+    new_kvno = krb5_db_get_key_data_kvno(context, entry->n_key_data,
+                                         entry->key_data);
+    new_kvno++;
+    /* deal with wrapping */
+    if (new_kvno == 0)
+        new_kvno = 1; /* knvo must not be 0 as this is special value (IGNORE_VNO) */
+
+    return (new_kvno);
+}
+
 krb5_error_code
-add_new_mkey(krb5_context context, krb5_db_entry *master_entry, krb5_keyblock *new_mkey, krb5_kvno *mkvno)
+add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
+             krb5_keyblock *new_mkey, krb5_kvno use_mkvno)
 {
     krb5_error_code retval = 0;
     int old_key_data_count, i;
-    krb5_kvno old_kvno, new_mkey_kvno;
+    krb5_kvno new_mkey_kvno;
     krb5_key_data tmp_key_data, *old_key_data;
     krb5_mkey_aux_node  *mkey_aux_data_head = NULL, **mkey_aux_data;
     krb5_keylist_node  *keylist_node;
 
-    /* First save the old keydata */
-    old_kvno = krb5_db_get_key_data_kvno(context, master_entry->n_key_data,
-					 master_entry->key_data);
+    /* do this before modifying master_entry key_data */
+    new_mkey_kvno = get_next_kvno(context, master_entry);
+    /* verify the requested mkvno if not 0 is the one that would be used here. */
+    if (use_mkvno != 0 && new_mkey_kvno != use_mkvno)
+        return (KRB5_KDB_KVNONOMATCH);
+
+    /* save the old keydata */
     old_key_data_count = master_entry->n_key_data;
     old_key_data = master_entry->key_data;
 
@@ -57,18 +77,13 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry, krb5_keyblock *n
      * logic from master_key_convert().
      */
     master_entry->key_data = (krb5_key_data *) malloc(sizeof(krb5_key_data) *
-                                                     (old_key_data_count + 1));
+                                                      (old_key_data_count + 1));
     if (master_entry->key_data == NULL)
         return (ENOMEM);
 
     memset((char *) master_entry->key_data, 0,
            sizeof(krb5_key_data) * (old_key_data_count + 1));
     master_entry->n_key_data = old_key_data_count + 1;
-
-    new_mkey_kvno = old_kvno + 1;
-    /* deal with wrapping? */
-    if (new_mkey_kvno == 0)
-        new_mkey_kvno = 1; /* knvo must not be 0 as this is special value (IGNORE_VNO) */
 
     /* Note, mkey does not have salt */
     /* add new mkey encrypted with itself to mkey princ entry */
@@ -78,7 +93,11 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry, krb5_keyblock *n
                                               &master_entry->key_data[0]))) {
         return (retval);
     }
-
+    /* so getprinc will show the new mkvno */
+    if ((retval = krb5_dbe_update_mkvno(context, master_entry, new_mkey_kvno))) {
+        krb5_free_key_data_contents(context, &master_entry->key_data[0]);
+        return (retval);
+    }
     /*
      * Need to decrypt old keys with the current mkey which is in the global
      * master_keyblock and encrypt those keys with the latest mkey.  And while
@@ -148,9 +167,6 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry, krb5_keyblock *n
                                            mkey_aux_data_head))) {
         goto clean_n_exit;
     }
-
-    if (mkvno)
-        *mkvno = new_mkey_kvno;
 
 clean_n_exit:
     if (mkey_aux_data_head)
@@ -222,13 +238,13 @@ kdb5_add_mkey(int argc, char *argv[])
         exit_status++;
         return;
     } else if (nentries == 0) {
-        com_err(progname, retval,
+        com_err(progname, KRB5_KDB_NOENTRY,
                 "principal %s not found in Kerberos database",
                 mkey_fullname);
         exit_status++;
         return;
     } else if (nentries > 1) {
-        com_err(progname, retval,
+        com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
                 "principal %s has multiple entries in Kerberos database",
                 mkey_fullname);
         exit_status++;
@@ -412,13 +428,13 @@ kdb5_use_mkey(int argc, char *argv[])
         exit_status++;
         return;
     } else if (nentries == 0) {
-        com_err(progname, retval,
+        com_err(progname, KRB5_KDB_NOENTRY,
                 "principal %s not found in Kerberos database",
                 mkey_fullname);
         exit_status++;
         return;
     } else if (nentries > 1) {
-        com_err(progname, retval,
+        com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
                 "principal %s has multiple entries in Kerberos database",
                 mkey_fullname);
         exit_status++;
@@ -559,13 +575,13 @@ kdb5_list_mkeys(int argc, char *argv[])
         exit_status++;
         return;
     } else if (nentries == 0) {
-        com_err(progname, retval,
+        com_err(progname, KRB5_KDB_NOENTRY,
                 "principal %s not found in Kerberos database",
                 mkey_fullname);
         exit_status++;
         return;
     } else if (nentries > 1) {
-        com_err(progname, retval,
+        com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
                 "principal %s has multiple entries in Kerberos database",
                 mkey_fullname);
         exit_status++;

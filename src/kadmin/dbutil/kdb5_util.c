@@ -442,9 +442,6 @@ static int open_db_and_mkey()
         kvno = global_params.kvno; /* user specified */
     else
         kvno = IGNORE_VNO;
-        /* kvno = (krb5_kvno) master_entry.key_data->key_data_kvno; */
-
-    krb5_db_free_principal(util_context, &master_entry, nentries);
 
     /* the databases are now open, and the master principal exists */
     dbactive = TRUE;

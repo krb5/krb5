@@ -47,6 +47,7 @@
  */
 static int			mkey_convert;
 static krb5_keyblock		new_master_keyblock;
+static krb5_kvno                new_mkvno;
 
 static int	backwards;
 static int	recursive;
@@ -179,6 +180,7 @@ extern int		exit_status;
 extern krb5_context	util_context;
 extern kadm5_config_params global_params;
 extern krb5_keylist_node *master_keylist;
+extern krb5_db_entry      master_entry;
 
 /* Strings */
 
@@ -258,8 +260,6 @@ static const char hashoption[] = "-hash";
 static const char ovoption[] = "-ov";
 static const char dump_tmptrail[] = "~";
 
-static krb5_kvno new_mkvno;
-
 /*
  * Re-encrypt the key_data with the new master key...
  */
@@ -278,7 +278,7 @@ static krb5_error_code master_key_convert(context, db_entry)
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
     if (is_mkey) {
-        retval = add_new_mkey(context, db_entry, &new_master_keyblock, &new_mkvno);
+        retval = add_new_mkey(context, db_entry, &new_master_keyblock, new_mkvno);
         if (retval)
             return retval;
     } else {
@@ -290,7 +290,7 @@ static krb5_error_code master_key_convert(context, db_entry)
                 continue;
             retval = krb5_dbe_find_mkey(context, master_keylist, db_entry, &tmp_mkey);
             if (retval)
-                    return retval;
+                return retval;
             retval = krb5_dbekd_decrypt_key_data(context, tmp_mkey,
                                                  key_data, &v5plainkey,
                                                  &keysalt);
@@ -1193,6 +1193,11 @@ dump_db(argc, argv)
 			    exit(1);
 		    }
 	    }
+            /*
+             * get new master key vno that will be used to protect princs, used
+             * later on.
+             */
+            new_mkvno = get_next_kvno(util_context, &master_entry);
     }
 
     kret = 0;
