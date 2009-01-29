@@ -411,7 +411,14 @@ kdb5_use_mkey(int argc, char *argv[])
     }
 
     if (argc == 3) {
-        start_time = (krb5_timestamp) get_date(argv[2]);
+        time_t t = get_date(argv[2]);
+         if (t == -1) {
+            com_err(progname, 0, "could not parse date-time string '%s'",
+                    argv[2]);
+            exit_status++;
+            return;
+        } else
+            start_time = (krb5_timestamp) t;
     } else {
         start_time = now;
     }
