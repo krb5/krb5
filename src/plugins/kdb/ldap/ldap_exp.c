@@ -85,6 +85,7 @@ kdb_vftabl kdb_function_table = {
   /* fetch_master_key */		       NULL /* krb5_ldap_fetch_mkey */,
   /* verify_master_key */		       NULL /* krb5_ldap_verify_master_key */,
   /* fetch_master_key_list */		       NULL,
+  /* store_master_key_list */		       NULL,
   /* Search enc type */                        NULL,
   /* Change pwd   */                           NULL
 

@@ -282,6 +282,10 @@ kdb_setup_opt_functions(db_library lib)
 	lib->vftabl.fetch_master_key_list = krb5_def_fetch_mkey_list;
     }
 
+    if (lib->vftabl.store_master_key_list == NULL) {
+	lib->vftabl.store_master_key_list = krb5_def_store_mkey_list;
+    }
+
     if (lib->vftabl.dbe_search_enctype == NULL) {
 	lib->vftabl.dbe_search_enctype = krb5_dbe_def_search_enctype;
     }
@@ -1646,6 +1650,41 @@ krb5_db_store_master_key(krb5_context kcontext,
 							     mname,
 							     kvno,
 							     key, master_pwd);
+    get_errmsg(kcontext, status);
+    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
+
+  clean_n_exit:
+    return status;
+}
+
+krb5_error_code
+krb5_db_store_master_key_list(krb5_context kcontext,
+			      char *keyfile,
+			      krb5_principal mname,
+			      krb5_keylist_node *keylist,
+			      char *master_pwd)
+{
+    krb5_error_code status = 0;
+    kdb5_dal_handle *dal_handle;
+
+    if (kcontext->dal_handle == NULL) {
+	status = kdb_setup_lib_handle(kcontext);
+	if (status) {
+	    goto clean_n_exit;
+	}
+    }
+
+    dal_handle = kcontext->dal_handle;
+    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
+    if (status) {
+	goto clean_n_exit;
+    }
+
+    status = dal_handle->lib_handle->vftabl.store_master_key_list(kcontext,
+								  keyfile,
+								  mname,
+								  keylist,
+								  master_pwd);
     get_errmsg(kcontext, status);
     kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 

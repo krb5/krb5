@@ -263,7 +263,7 @@ kdb_vftabl kdb_function_table = {
   /* get_master_key */			       wrap_krb5_db2_db_get_mkey,
   /* set_master_key_list */		       wrap_krb5_db2_db_set_mkey_list,
   /* get_master_key_list */	    	       wrap_krb5_db2_db_get_mkey_list,
-  /* blah blah blah */ 0,0,0,0,0,0,0,
+  /* blah blah blah */ 0,0,0,0,0,0,0,0,
   /* promote_db */			       wrap_krb5_db2_promote_db,
   0,0,0,
 };

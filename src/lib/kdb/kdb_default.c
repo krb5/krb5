@@ -138,12 +138,11 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 #endif
 
 krb5_error_code
-krb5_def_store_mkey(krb5_context   context,
-                    char           *keyfile,
-                    krb5_principal mname,
-                    krb5_kvno      kvno,
-                    krb5_keyblock  *key,
-                    char           *master_pwd)
+krb5_def_store_mkey_list(krb5_context       context,
+			 char               *keyfile,
+			 krb5_principal     mname,
+			 krb5_keylist_node  *keylist,
+			 char               *master_pwd)
 {
     krb5_error_code retval = 0;
     char defkeyfile[MAXPATHLEN+1];
@@ -204,12 +203,17 @@ krb5_def_store_mkey(krb5_context   context,
     if (retval != 0)
         goto out;
 
-    memset((char *) &new_entry, 0, sizeof(new_entry));
-    new_entry.principal = mname;
-    new_entry.key = *key;
-    new_entry.vno = kvno;
+    while (keylist && !retval) {
+        memset((char *) &new_entry, 0, sizeof(new_entry));
+        new_entry.principal = mname;
+        new_entry.key = keylist->keyblock;
+        new_entry.vno = keylist->kvno;
 
-    retval = krb5_kt_add_entry(context, kt, &new_entry);
+        retval = krb5_kt_add_entry(context, kt, &new_entry);
+        keylist = keylist->next;
+    }
+    krb5_kt_close(context, kt);
+
     if (retval != 0) {
         /* delete tmp keyfile if it exists and an error occurrs */
         if (stat(keyfile, &stb) >= 0)
@@ -227,10 +231,25 @@ krb5_def_store_mkey(krb5_context   context,
 out:
     if (tmp_ktname != NULL)
         free(tmp_ktname);
-    if (kt)
-	krb5_kt_close(context, kt);
 
     return retval;
+}
+
+krb5_error_code
+krb5_def_store_mkey(krb5_context   context,
+                    char           *keyfile,
+                    krb5_principal mname,
+                    krb5_kvno      kvno,
+                    krb5_keyblock  *key,
+                    char           *master_pwd)
+{
+    krb5_keylist_node list;
+
+    list.kvno = kvno;
+    list.keyblock = *key;
+    list.next = NULL;
+    return krb5_def_store_mkey_list(context, keyfile, mname, &list,
+				    master_pwd);
 }
 
 static krb5_error_code
