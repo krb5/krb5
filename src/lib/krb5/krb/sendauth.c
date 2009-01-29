@@ -155,6 +155,7 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
 	    }
 	}
 
+	outbuf[0].data = NULL;	/* Coverity is confused otherwise */
 	if ((retval = krb5_mk_req_extended(context, auth_context,
 					   ap_req_options, in_data, credsp,
 					   &outbuf[0])))
