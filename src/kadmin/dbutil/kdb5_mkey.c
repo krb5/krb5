@@ -498,6 +498,10 @@ kdb5_use_mkey(int argc, char *argv[])
              cur_actkvno != NULL;
              prev_actkvno = cur_actkvno, cur_actkvno = cur_actkvno->next) {
 
+            if (cur_actkvno->act_kvno == use_kvno) {
+                cur_actkvno->act_time = start_time;
+                inserted = 1;   /* fake it */
+            }
             if (!inserted) {
                 if (new_actkvno->act_time < cur_actkvno->act_time) {
                     if (prev_actkvno) {
