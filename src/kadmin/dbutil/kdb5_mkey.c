@@ -467,7 +467,8 @@ kdb5_use_mkey(int argc, char *argv[])
 
     retval = krb5_dbe_lookup_actkvno(util_context, &master_entry, &actkvno_list);
     if (retval != 0) {
-        com_err(progname, retval, "while setting up master key name");
+        com_err(progname, retval,
+                "while looking up active version of master key");
         exit_status++;
         return;
     }
@@ -628,8 +629,14 @@ kdb5_list_mkeys(int argc, char *argv[])
     } else {
         retval = krb5_dbe_find_act_mkey(util_context, master_keylist,
                                         actkvno_list, &act_kvno, &act_mkey);
-        if (retval != 0) {
-            com_err(progname, retval, "while setting up master key name");
+        if (retval == KRB5_KDB_NOACTMASTERKEY) {
+            /* Maybe we went through a time warp, and the only keys
+               with activation dates have them set in the future?  */
+            com_err(progname, retval, "");
+            /* Keep going.  */
+            act_kvno = -1;
+        } else if (retval != 0) {
+            com_err(progname, retval, "while looking up active master key");
             exit_status++;
             return;
         }
