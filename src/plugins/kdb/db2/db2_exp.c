@@ -59,7 +59,7 @@ static char *_csrc = "@(#) %filespec: db2_exp.c~5 %  (%full_filespec: db2_exp.c~
    locking code into the top and bottom of each referenced function
    won't do.  (We aren't doing recursive locks, currently.)  */
 
-static k5_mutex_t *krb5_db2_mutex;
+k5_mutex_t *krb5_db2_mutex;
 
 #define WRAP(NAME,TYPE,ARGLIST,ARGNAMES,ERROR_RESULT)	\
 	static TYPE wrap_##NAME ARGLIST			\

@@ -216,4 +216,7 @@ krb5_error_code krb5_db2_delete_policy ( krb5_context kcontext,
 void krb5_db2_free_policy( krb5_context kcontext,
 			   osa_policy_ent_t entry );
 
+/* Thread-safety wrapper slapped on top of original implementation.  */
+extern k5_mutex_t *krb5_db2_mutex;
+
 #endif /* KRB5_KDB_DB2_H */
