@@ -1,4 +1,3 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * kdc/do_tgs_req.c
  *
@@ -71,21 +70,18 @@
 #include "policy.h"
 #include "extern.h"
 #include "adm_proto.h"
+#include <ctype.h>
 
-static void
-find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
-                    krb5_boolean *, int *);
+static void 
+find_alternate_tgs(krb5_kdc_req *,krb5_db_entry *,
+                   krb5_boolean *,int *);
 
-static krb5_error_code
-prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
-                   int, krb5_principal,
-                   krb5_data **, const char *);
-
-static krb5_int32
-is_substr (char *, krb5_data *);
+static krb5_error_code 
+prepare_error_tgs(krb5_kdc_req *,krb5_ticket *,int,
+                  krb5_principal,krb5_data **,const char *);
 
 static krb5_int32
-prep_reprocess_req(krb5_kdc_req *, krb5_principal *);
+prep_reprocess_req(krb5_kdc_req *,krb5_principal *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -189,7 +185,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     }
 
     db_ref_done = FALSE;
-
 ref_tgt_again:
     nprincs = 1;
     if ((errcode = krb5_unparse_name(kdc_context, request->server, &sname))) {
@@ -1047,35 +1042,14 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
     return;
 }
 
-/* is_substr - verfies if d1 contains d2->data with head/trail-ing whitespaces 
- */
-static krb5_int32
-is_substr ( char *d1, krb5_data *d2)
-{
-    krb5_boolean ret = FALSE;
-    char *new_d2 = 0, *d2_formated = 0;
-    if ( d1 && d2 && d2->data && (d2->length+2 <= strlen(d1))){
-        new_d2 = calloc(1,d2->length+1);
-        if (new_d2 != NULL) {
-            strlcpy(new_d2,d2->data,d2->length+1);
-            if (asprintf( &d2_formated, "%c%s%c",' ',new_d2,' ') < 0)
-                ret = ENOMEM;
-             else  if (d2_formated != 0 && strstr(d1, d2_formated) != NULL)
-                ret = TRUE;
-            free(new_d2);
-            free(d2_formated);
-        }
-    }
-    return ret;
-}
-
 static krb5_int32
 prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ) 
 {
     krb5_error_code retval = KRB5KRB_AP_ERR_BADMATCH;
+    size_t len = 0;
     char **realms, **cpp, *temp_buf=NULL;
     krb5_data *comp1 = NULL, *comp2 = NULL; 
-    krb5_int32 host_based_srv_listed = 0, no_host_referral_listed = 0;
+    char *comp1_str = NULL; 
 
     /* By now we know that server principal name is unknown.
      * If CANONICALIZE flag is set in the request                                 
@@ -1092,39 +1066,33 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
      */
 
     if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) == TRUE &&   
-        !isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) &&      
+        !isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) && 
         krb5_princ_size(kdc_context, request->server) == 2) {             
 
         comp1 = krb5_princ_component(kdc_context, request->server, 0);
         comp2 = krb5_princ_component(kdc_context, request->server, 1);
-        host_based_srv_listed   = FALSE;
-        no_host_referral_listed = TRUE;
-        if (kdc_active_realm->realm_host_based_services != NULL) {
-            host_based_srv_listed = is_substr(kdc_active_realm->realm_host_based_services, comp1);
-            if (host_based_srv_listed == ENOMEM) {
-                retval = ENOMEM; 
-                goto cleanup; 
-             }
-        } 
-        if (kdc_active_realm->realm_no_host_referral != NULL) {
-            no_host_referral_listed = is_substr(kdc_active_realm->realm_no_host_referral,comp1);
-            if (no_host_referral_listed == ENOMEM) {
-                retval = ENOMEM; 
-                goto cleanup; 
-             }
-         } 
 
-        if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST ||        
-            (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&    
+        comp1_str = calloc(1,comp1->length+1);
+        if (!comp1_str) {
+            retval = ENOMEM; 
+            goto cleanup; 
+         }
+        strlcpy(comp1_str,comp1->data,comp1->length+1);
+
+        if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST || 
+            (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&   
             kdc_active_realm->realm_host_based_services != NULL &&
-            (host_based_srv_listed == TRUE ||
-            strchr(kdc_active_realm->realm_host_based_services, '*')))) &&
+            (match_config_pattern(kdc_active_realm->realm_host_based_services, comp1_str) == TRUE ||
+             match_config_pattern(kdc_active_realm->realm_host_based_services, "*") == TRUE))) &&
             (kdc_active_realm->realm_no_host_referral == NULL || 
-            (!strchr(kdc_active_realm->realm_host_based_services, '*') &&
-            no_host_referral_listed == FALSE))) { 
+            (match_config_pattern(kdc_active_realm->realm_no_host_referral, "*") == FALSE &&
+             match_config_pattern(kdc_active_realm->realm_no_host_referral, comp1_str) == FALSE))) { 
 
-            if (memchr(comp2->data, '.', comp2->length) == NULL)
-                goto cleanup;
+            for (len=0; len < comp2->length; len++) {     
+                 if (comp2->data[len] == '.') break;
+            }
+            if (len == comp2->length)    
+                goto cleanup; 
             temp_buf = calloc(1, comp2->length+1);
             if (!temp_buf){
                 retval = ENOMEM; 
@@ -1161,6 +1129,7 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
         }
     }
 cleanup:
+    free(comp1_str);
     return retval;
 }
 
