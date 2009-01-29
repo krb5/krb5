@@ -1,7 +1,7 @@
 /*
  * admin/edit/kdb5_edit.h
  *
- * Copyright 1992, 2008 by the Massachusetts Institute of Technology.
+ * Copyright 1992, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -45,6 +45,9 @@ extern int valid_master_key;
 extern krb5_db_entry master_db;
 extern char **db5util_db_args;
 extern int    db5util_db_args_size;
+extern krb5_kvno new_mkvno;
+extern krb5_keylist_node *master_keylist;
+extern krb5_keyblock new_master_keyblock;
 extern int add_db_arg(char *arg);
 
 extern void usage(void);
@@ -83,6 +86,9 @@ extern void kdb5_stash (int argc, char **argv);
 extern void kdb5_add_mkey (int argc, char **argv);
 extern void kdb5_use_mkey (int argc, char **argv);
 extern void kdb5_list_mkeys (int argc, char **argv);
+extern void kdb5_update_princ_encryption (int argc, char **argv);
+extern krb5_error_code master_key_convert(krb5_context context,
+					  krb5_db_entry *db_entry);
 
 extern void update_ok_file (char *file_name);
 

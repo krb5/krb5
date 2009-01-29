@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -11,6 +12,22 @@
 #include <kadm5/admin.h>
 #include <adm_proto.h>
 #include "kdb5_util.h"
+
+#if defined(HAVE_COMPILE) && defined(HAVE_STEP)
+#define SOLARIS_REGEXPS
+#elif defined(HAVE_REGCOMP) && defined(HAVE_REGEXEC)
+#define POSIX_REGEXPS
+#elif defined(HAVE_RE_COMP) && defined(HAVE_RE_EXEC)
+#define BSD_REGEXPS
+#else
+#error I cannot find any regexp functions
+#endif
+#ifdef SOLARIS_REGEXPS
+#include	<regexpr.h>
+#endif
+#ifdef POSIX_REGEXPS
+#include	<regex.h>
+#endif
 
 extern krb5_keyblock master_keyblock; /* current mkey */
 extern krb5_principal master_princ;
@@ -292,7 +309,7 @@ kdb5_add_mkey(int argc, char *argv[])
         return;
     }
 
-    retval = add_new_mkey(util_context, &master_entry, &new_mkeyblock, NULL);
+    retval = add_new_mkey(util_context, &master_entry, &new_mkeyblock, 0);
     if (retval) {
         com_err(progname, retval, "adding new master key to master principal");
         exit_status++;
@@ -673,4 +690,355 @@ kdb5_list_mkeys(int argc, char *argv[])
         free(prev_actkvno);
     }
     return;
+}
+
+struct update_enc_mkvno {
+    unsigned int re_match_count;
+    unsigned int already_current;
+    unsigned int updated;
+#ifdef SOLARIS_REGEXPS
+    char *expbuf;
+#endif
+#ifdef POSIX_REGEXPS
+    regex_t preg;
+#endif
+#if !defined(SOLARIS_REGEXPS) && !defined(POSIX_REGEXPS)
+    unsigned char placeholder;
+#endif
+};
+
+/* XXX Duplicated in libkadm5srv! */
+/*
+ * Function: glob_to_regexp
+ *
+ * Arguments:
+ *
+ *	glob	(r) the shell-style glob (?*[]) to convert
+ *	realm	(r) the default realm to append, or NULL
+ *	regexp	(w) the ed-style regexp created from glob
+ *
+ * Effects:
+ *
+ * regexp is filled in with allocated memory contained a regular
+ * expression to be used with re_comp/compile that matches what the
+ * shell-style glob would match.  If glob does not contain an "@"
+ * character and realm is not NULL, "@*" is appended to the regexp.
+ *
+ * Conversion algorithm:
+ *
+ *	quoted characters are copied quoted
+ *	? is converted to .
+ *	* is converted to .*
+ * 	active characters are quoted: ^, $, .
+ *	[ and ] are active but supported and have the same meaning, so
+ *		they are copied
+ *	other characters are copied
+ *	regexp is anchored with ^ and $
+ */
+static int glob_to_regexp(char *glob, char *realm, char **regexp)
+{
+     int append_realm;
+     char *p;
+
+     /* validate the glob */
+     if (glob[strlen(glob)-1] == '\\')
+	  return EINVAL;
+
+     /* A character of glob can turn into two in regexp, plus ^ and $ */
+     /* and trailing null.  If glob has no @, also allocate space for */
+     /* the realm. */
+     append_realm = (realm != NULL) && (strchr(glob, '@') == NULL);
+     p = (char *) malloc(strlen(glob)*2+ 3 + (append_realm ? 3 : 0));
+     if (p == NULL)
+	  return ENOMEM;
+     *regexp = p;
+
+     *p++ = '^';
+     while (*glob) {
+	  switch (*glob) {
+	  case '?':
+	       *p++ = '.';
+	       break;
+	  case '*':
+	       *p++ = '.';
+	       *p++ = '*';
+	       break;
+	  case '.':
+	  case '^':
+	  case '$':
+	       *p++ = '\\';
+	       *p++ = *glob;
+	       break;
+	  case '\\':
+	       *p++ = '\\';
+	       *p++ = *++glob;
+	       break;
+	  default:
+	       *p++ = *glob;
+	       break;
+	  }
+	  glob++;
+     }
+
+     if (append_realm) {
+	  *p++ = '@';
+	  *p++ = '.';
+	  *p++ = '*';
+     }
+
+     *p++ = '$';
+     *p++ = '\0';
+     return 0;
+}
+
+static int
+update_princ_encryption_1(void *cb, krb5_db_entry *ent)
+{
+    struct update_enc_mkvno *p = cb;
+    char *pname = 0;
+    krb5_error_code retval;
+    int match;
+    krb5_timestamp now;
+    int nentries = 1;
+    int result;
+    krb5_kvno old_mkvno;
+
+    retval = krb5_unparse_name(util_context, ent->princ, &pname);
+    if (retval) {
+        com_err(progname, retval,
+                "getting string representation of principal name");
+        goto fail;
+    }
+
+    if (krb5_principal_compare (util_context, ent->princ, master_princ)) {
+        goto skip;
+    }
+
+#ifdef SOLARIS_REGEXPS
+    match = (step(pname, p->expbuf) != 0);
+#endif
+#ifdef POSIX_REGEXPS
+    match = (regexec(&p->preg, pname, 0, NULL, 0) == 0);
+#endif
+#ifdef BSD_REGEXPS
+    match = (re_exec(pname) != 0);
+#endif
+    if (!match) {
+        goto skip;
+    }
+    p->re_match_count++;
+    retval = krb5_dbe_lookup_mkvno(util_context, ent, &old_mkvno);
+    if (retval) {
+        com_err(progname, retval,
+                "determining master key used for principal '%s'",
+                pname);
+        goto fail;
+    }
+    if (old_mkvno == new_mkvno) {
+        p->already_current++;
+        goto skip;
+    }
+    retval = master_key_convert (util_context, ent);
+    if (retval) {
+        com_err(progname, retval,
+                "error re-encrypting key for principal '%s'", pname);
+        goto fail;
+    }
+    if ((retval = krb5_timeofday(util_context, &now))) {
+        com_err(progname, retval, "while getting current time");
+        goto fail;
+    }
+
+    if ((retval = krb5_dbe_update_mod_princ_data(util_context, ent,
+                                                 now, master_princ))) {
+        com_err(progname, retval,
+                "while updating principal '%s' modification time", pname);
+        goto fail;
+    }
+
+    if ((retval = krb5_db_put_principal(util_context, ent, &nentries))) {
+        com_err(progname, retval,
+                "while updating principal '%s' key data in the database",
+                pname);
+        goto fail;
+    }
+    p->updated++;
+skip:
+    result = 0;
+    goto egress;
+fail:
+    exit_status++;
+    result = 1;
+egress:
+    if (pname)
+        krb5_free_unparsed_name(util_context, pname);
+    return result;
+}
+
+extern int are_you_sure (const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 1, 2)))
+#endif
+    ;
+
+int
+are_you_sure (const char *format, ...)
+{
+    va_list va;
+    char ansbuf[100];
+
+    va_start(va, format);
+    vprintf(format, va);
+    va_end(va);
+    printf("\n(type 'yes' to confirm)? ");
+    fflush(stdout);
+    if (fgets(ansbuf, sizeof(ansbuf), stdin) == NULL)
+        return 0;
+    if (strcmp(ansbuf, "yes\n"))
+        return 0;
+    return 1;
+}
+
+void
+kdb5_update_princ_encryption(int argc, char *argv[])
+{
+    struct update_enc_mkvno data = { 0 };
+    char *name_pattern = NULL;
+    int force = 0;
+    int optchar;
+    krb5_error_code retval;
+    krb5_actkvno_node *actkvno_list;
+    krb5_db_entry master_entry;
+    int nentries = 1, more = 0;
+    char *mkey_fullname = 0;
+#ifdef BSD_REGEXPS
+    char *msg;
+#endif
+    char *regexp = NULL;
+    krb5_keyblock *tmp_keyblock = NULL;
+
+    while ((optchar = getopt(argc, argv, "f")) != -1) {
+        switch (optchar) {
+        case 'f':
+            force = 1;
+            break;
+        case '?':
+        case ':':
+        default:
+            usage();
+        }
+    }
+    if (argv[optind] != NULL) {
+        name_pattern = argv[optind];
+        if (argv[optind+1] != NULL)
+            usage();
+    }
+
+    retval = krb5_unparse_name(util_context, master_princ, &mkey_fullname);
+    if (retval) {
+        com_err(progname, retval, "while formatting master principal name");
+        exit_status++;
+        goto cleanup;
+    }
+
+    if (master_keylist == NULL) {
+        com_err(progname, retval, "master keylist not initialized");
+        exit_status++;
+        goto cleanup;
+    }
+
+    /* The glob_to_regexp code only cares if the "realm" parameter is
+       NULL or not; the string data is irrelevant.  */
+    if (name_pattern == NULL)
+        name_pattern = "*";
+    if (glob_to_regexp(name_pattern, "hi", &regexp) != 0) {
+        com_err(progname, ENOMEM,
+                "converting glob pattern '%s' to regular expression",
+                name_pattern);
+        exit_status++;
+        goto cleanup;
+    }
+
+    if (
+#ifdef SOLARIS_REGEXPS
+        ((data.expbuf = compile(regexp, NULL, NULL)) == NULL)
+#endif
+#ifdef POSIX_REGEXPS
+        ((regcomp(&data.preg, regexp, REG_NOSUB)) != 0)
+#endif
+#ifdef BSD_REGEXPS
+        ((msg = (char *) re_comp(regexp)) != NULL)
+#endif
+        )
+    {
+        /* XXX syslog msg or regerr(regerrno) */
+        com_err(progname, 0, "error compiling converted regexp '%s'", regexp);
+        free(regexp);
+        exit_status++;
+        goto cleanup;
+    }
+
+    retval = krb5_db_get_principal(util_context, master_princ, &master_entry,
+                                   &nentries, &more);
+    if (retval != 0) {
+        com_err(progname, retval, "while getting master key principal %s",
+                mkey_fullname);
+        exit_status++;
+        goto cleanup;
+    }
+    if (nentries != 1) {
+        com_err(progname, 0,
+                "cannot find master key principal %s in database!",
+                mkey_fullname);
+        exit_status++;
+        goto cleanup;
+    }
+
+    retval = krb5_dbe_lookup_actkvno(util_context, &master_entry, &actkvno_list);
+    if (retval != 0) {
+        com_err(progname, retval, "while looking up active kvno list");
+        exit_status++;
+        goto cleanup;
+    }
+
+    /* Master key is always stored encrypted in the latest version of
+       itself.  */
+    new_mkvno = krb5_db_get_key_data_kvno(util_context,
+                                          master_entry.n_key_data,
+                                          master_entry.key_data);
+
+    retval = krb5_dbe_find_mkey(util_context, master_keylist,
+                                &master_entry, &tmp_keyblock);
+    if (retval) {
+        com_err(progname, retval, "retrieving the most recent master key");
+        exit_status++;
+        goto cleanup;
+    }
+    new_master_keyblock = *tmp_keyblock;
+
+    if (!force &&
+        !are_you_sure("Re-encrypt all keys not using master key vno %u?",
+                      new_mkvno)) {
+        printf("OK, doing nothing.\n");
+        exit_status++;
+        goto cleanup;
+    }
+
+    retval = krb5_db_iterate(util_context, name_pattern,
+                             update_princ_encryption_1, &data);
+    /* If exit_status is set, then update_princ_encryption_1 already
+       printed a message.  */
+    if (retval != 0 && exit_status == 0) {
+        com_err(progname, retval, "trying to process principal database");
+        exit_status++;
+    }
+    (void) krb5_db_fini(util_context);
+    printf("%u principals processed: %u updated, %u already current\n",
+           data.re_match_count, data.updated, data.already_current);
+
+cleanup:
+    free(regexp);
+    memset(&new_master_keyblock, 0, sizeof(new_master_keyblock));
+    krb5_free_keyblock(util_context, tmp_keyblock);
+    krb5_free_unparsed_name(util_context, mkey_fullname);
 }

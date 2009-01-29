@@ -1,7 +1,7 @@
 /*
  * kadmin/dbutil/dump.c
  *
- * Copyright 1990,1991,2001,2006,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2006,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -46,8 +46,8 @@
  * Needed for master key conversion.
  */
 static int			mkey_convert;
-static krb5_keyblock		new_master_keyblock;
-static krb5_kvno                new_mkvno;
+krb5_keyblock			new_master_keyblock;
+krb5_kvno                       new_mkvno;
 
 static int	backwards;
 static int	recursive;
@@ -179,7 +179,6 @@ extern krb5_boolean	dbactive;
 extern int		exit_status;
 extern krb5_context	util_context;
 extern kadm5_config_params global_params;
-extern krb5_keylist_node *master_keylist;
 extern krb5_db_entry      master_entry;
 
 /* Strings */
@@ -263,7 +262,7 @@ static const char dump_tmptrail[] = "~";
 /*
  * Re-encrypt the key_data with the new master key...
  */
-static krb5_error_code master_key_convert(context, db_entry)
+krb5_error_code master_key_convert(context, db_entry)
     krb5_context	  context;
     krb5_db_entry	* db_entry;
 {
@@ -316,6 +315,7 @@ static krb5_error_code master_key_convert(context, db_entry)
             }
             *key_data = new_key_data;
         }
+	assert(new_mkvno > 0);
         retval = krb5_dbe_update_mkvno(context, db_entry, new_mkvno);
         if (retval)
                 return retval;

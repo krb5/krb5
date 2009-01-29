@@ -1,7 +1,7 @@
 /*
  * admin/edit/kdb5_edit.c
  *
- * (C) Copyright 1990,1991, 1996, 2008 by the Massachusetts Institute of Technology.
+ * (C) Copyright 1990,1991, 1996, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -85,7 +85,7 @@ kadm5_config_params global_params;
 void usage()
 {
      fprintf(stderr, "Usage: "
-	   "kdb5_util [-x db_args]* [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
+	     "kdb5_util [-x db_args]* [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
 	     "\t        [-kv mkeyVNO] [-sf stashfilename] [-m] cmd [cmd_options]\n"
 	     "\tcreate	[-s]\n"
 	     "\tdestroy	[-f]\n"
@@ -97,7 +97,9 @@ void usage()
 	     "\tark	[-e etype_list] principal\n"
 	     "\tadd_mkey [-e etype] [-s]\n"
 	     "\tuse_mkey kvno [time]\n"
-	     "\tlist_mkeys\n");
+	     "\tlist_mkeys\n"
+	     "\tupdate_princ_encryption [-f] [princ-pattern]\n"
+             );
      /* avoid a string length compiler warning */
      fprintf(stderr,
 	     "\nwhere,\n\t[-x db_args]* - any number of database specific arguments.\n"
@@ -135,6 +137,7 @@ struct _cmd_table {
      {"add_mkey", kdb5_add_mkey, 1}, /* 1 is opendb */
      {"use_mkey", kdb5_use_mkey, 1}, /* 1 is opendb */
      {"list_mkeys", kdb5_list_mkeys, 1}, /* 1 is opendb */
+     {"update_princ_encryption", kdb5_update_princ_encryption, 1},
      {NULL, NULL, 0},
 };
 

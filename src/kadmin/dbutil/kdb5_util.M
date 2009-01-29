@@ -215,5 +215,24 @@ default.
 .TP
 \fBark\fP
 Adds a random key.
+.TP
+\fBadd_mkey\fP ...
+This option needs documentation.
+.TP
+\fBuse_mkey\fP ...
+This option needs documentation.
+.TP
+\fBlist_mkeys\fP
+This option needs documentation.
+.TP
+\fBupdate_princ_encryption\fP [\fB\-f\fP] [\fBprinc\-pattern\fP]
+Update all principal records (or only those matching the
+.B princ\-pattern
+glob pattern) to re-encrypt the key data using the latest version of
+the database master key, if they are encrypted using older versions.
+If the
+.B \-f
+option is not given, ask for confirmation before starting to make
+changes.
 .SH SEE ALSO
 kadmin(8)
