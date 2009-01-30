@@ -1082,11 +1082,11 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
         if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST || 
             (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&   
             kdc_active_realm->realm_host_based_services != NULL &&
-            (match_config_pattern(kdc_active_realm->realm_host_based_services, comp1_str) == TRUE ||
-             match_config_pattern(kdc_active_realm->realm_host_based_services, "*") == TRUE))) &&
+            (krb5_match_config_pattern(kdc_active_realm->realm_host_based_services, comp1_str) == TRUE ||
+             krb5_match_config_pattern(kdc_active_realm->realm_host_based_services, "*") == TRUE))) &&
             (kdc_active_realm->realm_no_host_referral == NULL || 
-            (match_config_pattern(kdc_active_realm->realm_no_host_referral, "*") == FALSE &&
-             match_config_pattern(kdc_active_realm->realm_no_host_referral, comp1_str) == FALSE))) { 
+            (krb5_match_config_pattern(kdc_active_realm->realm_no_host_referral, "*") == FALSE &&
+             krb5_match_config_pattern(kdc_active_realm->realm_no_host_referral, comp1_str) == FALSE))) { 
 
             for (len=0; len < comp2->length; len++) {     
                  if (comp2->data[len] == '.') break;

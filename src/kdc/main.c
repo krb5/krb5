@@ -173,13 +173,17 @@ handle_referral_params(krb5_realm_params *rparams,
 {
     krb5_error_code retval = 0;
 
-    if (no_refrls && match_config_pattern(no_refrls, "*") == TRUE)
+    if (no_refrls && krb5_match_config_pattern(no_refrls, "*") == TRUE) {
         rdp->realm_no_host_referral = strdup("*");
-    else {
+        if (!rdp->realm_no_host_referral)
+            retval = ENOMEM;
+    } else {
         if (rparams && rparams->realm_no_host_referral) {
-            if (match_config_pattern(rparams->realm_no_host_referral, "*") == TRUE)
+            if (krb5_match_config_pattern(rparams->realm_no_host_referral, "*") == TRUE) {
                 rdp->realm_no_host_referral = strdup("*");
-            else if  (no_refrls && (asprintf(&(rdp->realm_no_host_referral), "%s%s%s%s%s",
+                if (!rdp->realm_no_host_referral)
+                    retval = ENOMEM;
+           } else if  (no_refrls && (asprintf(&(rdp->realm_no_host_referral), "%s%s%s%s%s",
                         " ", no_refrls," ",rparams->realm_no_host_referral, " ") < 0))
                 retval = ENOMEM; 
             else if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", 
@@ -191,18 +195,22 @@ handle_referral_params(krb5_realm_params *rparams,
             rdp->realm_no_host_referral = NULL;
     }
 
-    if (rdp->realm_no_host_referral && match_config_pattern(rdp->realm_no_host_referral, "*") == TRUE) {
+    if (rdp->realm_no_host_referral && krb5_match_config_pattern(rdp->realm_no_host_referral, "*") == TRUE) {
         rdp->realm_host_based_services = NULL; 
         return 0;
     }
 
-    if (host_based_srvcs && (match_config_pattern(host_based_srvcs, "*") == TRUE))
+    if (host_based_srvcs && (krb5_match_config_pattern(host_based_srvcs, "*") == TRUE)) {
             rdp->realm_host_based_services = strdup("*");
-    else {
+            if (!rdp->realm_host_based_services)
+                retval = ENOMEM;
+    } else {
             if (rparams && rparams->realm_host_based_services) {
-                if (match_config_pattern(rparams->realm_host_based_services, "*") == TRUE)
+                if (krb5_match_config_pattern(rparams->realm_host_based_services, "*") == TRUE) {
                     rdp->realm_host_based_services = strdup("*");
-                else if (host_based_srvcs && asprintf(&(rdp->realm_host_based_services), "%s%s%s%s%s",
+                    if (!rdp->realm_host_based_services)
+                        retval = ENOMEM;
+                } else if (host_based_srvcs && asprintf(&(rdp->realm_host_based_services), "%s%s%s%s%s",
                            " ", host_based_srvcs," ",rparams->realm_host_based_services, " ") < 0)
                     retval = ENOMEM; 
                 else if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", 
@@ -257,8 +265,13 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     }
     
     /* Handle profile file name */
-    if (rparams && rparams->realm_profile)
+    if (rparams && rparams->realm_profile) {
 	rdp->realm_profile = strdup(rparams->realm_profile);
+        if (!rdp->realm_profile) {
+            kret = ENOMEM;
+            goto whoops;
+        }
+    }
 
     /* Handle master key name */
     if (rparams && rparams->realm_mkey_name)
@@ -266,20 +279,35 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     else
 	rdp->realm_mpname = (def_mpname) ? strdup(def_mpname) :
 	    strdup(KRB5_KDB_M_NAME);
+    if (!rdp->realm_mpname) {
+        kret = ENOMEM;
+        goto whoops;
+    }
 
     /* Handle KDC ports */
     if (rparams && rparams->realm_kdc_ports)
 	rdp->realm_ports = strdup(rparams->realm_kdc_ports);
     else
 	rdp->realm_ports = strdup(def_udp_ports);
+    if (!rdp->realm_ports) {
+        kret = ENOMEM;
+        goto whoops;
+    }
     if (rparams && rparams->realm_kdc_tcp_ports)
 	rdp->realm_tcp_ports = strdup(rparams->realm_kdc_tcp_ports);
     else
 	rdp->realm_tcp_ports = strdup(def_tcp_ports);
-
+    if (!rdp->realm_tcp_ports) {
+        kret = ENOMEM;
+        goto whoops;
+    }
     /* Handle stash file */
     if (rparams && rparams->realm_stash_file) {
 	rdp->realm_stash = strdup(rparams->realm_stash_file);
+        if (!rdp->realm_stash) {
+            kret = ENOMEM;
+            goto whoops;
+        }
 	manual = FALSE;
     } else
 	manual = def_manual;
@@ -519,7 +547,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         hierarchy[1] = "no_host_referral";
         if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls)) 
             no_refrls = 0;
-        if (!no_refrls || match_config_pattern(no_refrls, "*") == FALSE) {
+        if (!no_refrls || krb5_match_config_pattern(no_refrls, "*") == FALSE) {
             hierarchy[1] = "host_based_services";
             if (krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs))
                 host_based_srvcs = 0;
@@ -530,10 +558,22 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	     krb5_aprof_finish(aprof);
     }
   
-    if (default_udp_ports == 0)
+    if (default_udp_ports == 0) {
 	default_udp_ports = strdup(DEFAULT_KDC_UDP_PORTLIST);
-    if (default_tcp_ports == 0)
+        if (default_udp_ports == 0) {
+            fprintf(stderr," KDC cannot initialize. Not enough memory\n");
+            exit(1);
+        }
+    }
+    if (default_tcp_ports == 0) {
 	default_tcp_ports = strdup(DEFAULT_KDC_TCP_PORTLIST);
+        default_tcp_ports = strdup(DEFAULT_KDC_TCP_PORTLIST);
+        if (default_tcp_ports == 0) {
+            fprintf(stderr," KDC cannot initialize. Not enough memory\n");
+            exit(1);
+        }
+    }
+
     /*
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
@@ -629,6 +669,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    if (default_udp_ports)
 		free(default_udp_ports);
 	    default_udp_ports = strdup(optarg);
+            if (!default_udp_ports) {
+                fprintf(stderr," KDC cannot initialize. Not enough memory\n");
+                exit(1);
+            }
 #if 0 /* not yet */
 	    if (default_tcp_ports)
 		free(default_tcp_ports);
@@ -693,6 +737,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	free(db_args);
     if (db_name)
 	free(db_name);
+    if (host_based_srvcs)
+        free(host_based_srvcs);
+    if (no_refrls)
+        free(no_refrls);
 
     return;
 }
