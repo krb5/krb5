@@ -55,7 +55,7 @@ krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *con
         goto cleanup;
 
     if ((retval = krb5_copy_data(context, psectkt, &pdata)))
-	goto cleanup;
+	goto cleanup_keyblock;
     (*ppcreds)->second_ticket = *pdata;
     free(pdata);
 
@@ -85,7 +85,7 @@ krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *con
     return 0;
 
 cleanup_keyblock:
-    krb5_free_keyblock(context, &(*ppcreds)->keyblock);
+    krb5_free_keyblock_contents(context, &(*ppcreds)->keyblock);
 
 cleanup:
     free (*ppcreds);
