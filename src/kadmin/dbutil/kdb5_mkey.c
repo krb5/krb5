@@ -521,6 +521,7 @@ kdb5_use_mkey(int argc, char *argv[])
                 }
             }
             if (!trimed) {
+                /* trim entries in past that are superceded */
                 if (cur_actkvno->act_time > now) {
                     if (prev_actkvno) {
                         new_actkvno_list_head = prev_actkvno;
@@ -529,6 +530,7 @@ kdb5_use_mkey(int argc, char *argv[])
                     }
                     trimed = TRUE;
                 } else if (cur_actkvno->next == NULL) {
+                    /* XXX this is buggy, fix soon. */
                     new_actkvno_list_head = cur_actkvno;
                     trimed = TRUE;
                 }
@@ -1203,7 +1205,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
     }
 
     if (!force) {
-        printf("Will purge/delete all unused master keys stored in the '%s' principal, are you sure?\n",
+        printf("Will purge all unused master keys stored in the '%s' principal, are you sure?\n",
                mkey_fullname);
         printf("(type 'yes' to confirm)? ");
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
@@ -1253,12 +1255,10 @@ kdb5_purge_mkeys(int argc, char *argv[])
      * args.kvnos has been marked with the mkvno's that are currently protecting
      * princ entries
      */
-    if (verbose) {
-        if (dry_run)
-            printf("Would purge the follwing master key(s) from %s:\n", mkey_fullname);
-        else
-            printf("Will purge the follwing master key(s) from %s:\n", mkey_fullname);
-    }
+    if (dry_run)
+        printf("Would purge the follwing master key(s) from %s:\n", mkey_fullname);
+    else
+        printf("Purging the follwing master key(s) from %s:\n", mkey_fullname);
 
     /* find # of keys still in use or print out verbose info */
     for (i = num_kvnos_inuse = num_kvnos_purged = 0; i < args.num_kvnos; i++) {
@@ -1268,24 +1268,22 @@ kdb5_purge_mkeys(int argc, char *argv[])
             /* this key would be deleted */
             if (args.kvnos[i].kvno == master_kvno) {
                 com_err(progname, KRB5_KDB_STORED_MKEY_NOTCURRENT,
-                        "master key stash file needs updating");
+                        "master key stash file needs updating, command aborting");
                 exit_status++;
                 return;
             }
             num_kvnos_purged++;
-            if (verbose)
-                printf("KNVO: %d\n", args.kvnos[i].kvno);
+            printf("KNVO: %d\n", args.kvnos[i].kvno);
         }
     }
     /* didn't find any keys to purge */
     if (num_kvnos_inuse == args.num_kvnos) {
-        if (verbose)
-            printf("No keys will be purged\n");
+        printf("All keys in use, nothing purged.\n");
         goto clean_and_exit;
     }
     if (dry_run) {
         /* bail before doing anything else */
-        printf("%d key(s) would be purged\n", num_kvnos_purged);
+        printf("%d key(s) would be purged.\n", num_kvnos_purged);
         goto clean_and_exit;
     }
 
@@ -1410,6 +1408,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         exit_status++;
         return;
     }
+    printf("%d key(s) purged.\n", num_kvnos_purged);
 
 clean_and_exit:
     /* clean up */
