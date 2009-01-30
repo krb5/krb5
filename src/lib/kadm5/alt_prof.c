@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <kdb_log.h>
 
+krb5_boolean match_config_pattern(const char *, const char*);
 static krb5_key_salt_tuple *copy_key_salt_tuple(ksalt, len)
 krb5_key_salt_tuple *ksalt;
 krb5_int32 len;
@@ -294,22 +295,22 @@ krb5_aprof_get_string_all(acontext, hierarchy, stringp)
 {
     krb5_error_code     kret=0;
     char                **values;
-    int                 lastidx;
-    char                *tmp;
-    size_t              buf_size=0; 
+    int                 lastidx = 0;
+    char                *tmp = NULL ;
+    size_t              buf_size = 0; 
     kret = krb5_aprof_getvals(acontext, hierarchy, &values);
     if (!kret) {
         for (lastidx=0; values[lastidx]; lastidx++);
         lastidx--;
          
-        buf_size = strlen(values[0])+2;
+        buf_size = strlen(values[0])+3;
         for (lastidx=1; values[lastidx]; lastidx++){
-            buf_size += strlen(values[lastidx]+1);
+            buf_size += strlen(values[lastidx]) + 3;
          }
     }
     if (buf_size > 0) {
         *stringp = calloc(1,buf_size);
-        if (stringp == NULL){
+        if (*stringp == NULL){
             profile_free_list(values);
             return ENOMEM;
         }
@@ -1028,25 +1029,19 @@ krb5_read_realm_params(kcontext, realm, rparamp)
         rparams->realm_reject_bad_transit_valid = 1;
     }
 
-        hierarchy[2] = "no_host_referral";
-        if (!krb5_aprof_get_string_all(aprofile, hierarchy, &no_refrls)) {
-         
-            if (strchr(no_refrls, '*'))
-                no_refrls = strdup("*");
-            rparams->realm_no_host_referral = no_refrls;
-        } else
+    hierarchy[2] = "no_host_referral";
+    if (!krb5_aprof_get_string_all(aprofile, hierarchy, &no_refrls)) 
+       rparams->realm_no_host_referral = no_refrls;
+    else 
             no_refrls = 0;
 
-          if (no_refrls == 0 || strlen(no_refrls) == 0 || strncmp(no_refrls, "*",1) != 0) {
-            hierarchy[2] = "host_based_services";
-              if (!krb5_aprof_get_string_all(aprofile, hierarchy, &host_based_srvcs)){
-                if (strchr(host_based_srvcs, '*'))
-                    host_based_srvcs = strdup("*");
-                rparams->realm_host_based_services = host_based_srvcs;
-            } else
-                host_based_srvcs = 0;
-        }
-
+    if (!no_refrls || match_config_pattern(no_refrls, "*") == FALSE) {
+        hierarchy[2] = "host_based_services";
+        if (!krb5_aprof_get_string_all(aprofile, hierarchy, &host_based_srvcs))
+            rparams->realm_host_based_services = host_based_srvcs;
+        else
+            host_based_srvcs = 0;
+    }
 
     /* Get the value for the default principal flags */
     hierarchy[2] = "default_principal_flags";
@@ -1105,7 +1100,7 @@ cleanup:
 krb5_error_code
 krb5_free_realm_params(kcontext, rparams)
     krb5_context        kcontext;
-    krb5_realm_params        *rparams;
+    krb5_realm_params   *rparams;
 {
     if (rparams) {
         free(rparams->realm_profile);
@@ -1122,4 +1117,29 @@ krb5_free_realm_params(kcontext, rparams)
     }
     return(0);
 }
+/* 
+ * match_config_pattern - 
+ *       returns TRUE is the pattern is found in the attr's list of values.
+ *       Otherwise - FALSE.
+ *       In conf file the values are separates by commas or whitespaces.
+ */
+krb5_boolean
+match_config_pattern(const char *string, const char *pattern)
+{
+    const char *ptr;
+    char next = '\0';
+    int len = strlen(pattern);
+ 
+    for (ptr = strstr(string,pattern); ptr != 0; ptr = strstr(ptr+len,pattern)) {
+         if (ptr == string || isspace(*(ptr-1)) || *(ptr-1) ==',') {
+             next = *(ptr + len);
+             if (next == '\0' || isspace(next) || next ==',') {
+                  return TRUE;
+             }
+         }
+    }
+    return FALSE;
+}
+
+
 

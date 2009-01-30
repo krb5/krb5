@@ -1024,6 +1024,7 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "\[libdefaults\]"
 	puts $conffile "	default_realm = $REALMNAME"
 	puts $conffile "	dns_lookup_kdc = false"
+	puts $conffile "	allow_weak_crypto = true"
 	if [info exists default_tgs_enctypes($type)] {
 	    puts $conffile \
 		    "	default_tgs_enctypes = $default_tgs_enctypes($type)"

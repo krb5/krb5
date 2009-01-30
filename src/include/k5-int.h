@@ -1228,6 +1228,8 @@ struct _krb5_context {
 
     /* For Sun iprop code; does this really have to be here?  */
     struct _kdb_log_context *kdblog_context;
+
+    krb5_boolean allow_weak_crypto;
 };
 
 /* could be used in a table to find an etype and initialize a block */
@@ -2317,6 +2319,8 @@ typedef struct
 
 krb5_boolean krb5_is_permitted_enctype_ext 
          ( krb5_context, krb5_etypes_permitted *);
+
+krb5_boolean KRB5_CALLCONV krb5_c_weak_enctype(krb5_enctype);
 
 krb5_error_code krb5_kdc_rep_decrypt_proc
 	(krb5_context,

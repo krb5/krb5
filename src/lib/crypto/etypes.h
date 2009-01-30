@@ -60,7 +60,10 @@ struct krb5_keytypes {
     krb5_prf_func prf;
     krb5_cksumtype required_ctype;
     const struct krb5_aead_provider *aead;
+    krb5_flags flags;
 };
+
+#define ETYPE_WEAK 1
 
 extern const struct krb5_keytypes krb5_enctypes_list[];
 extern const int krb5_enctypes_length;

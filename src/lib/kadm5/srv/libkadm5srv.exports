@@ -84,6 +84,7 @@ krb5_klog_syslog
 krb5_read_realm_params
 krb5_string_to_flags
 krb5_string_to_keysalts
+match_config_pattern
 master_db
 master_keyblock
 master_keylist

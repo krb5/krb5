@@ -97,6 +97,7 @@ krb5_error_code krb5_read_realm_params (krb5_context,
 					krb5_realm_params **);
 krb5_error_code krb5_free_realm_params (krb5_context,
 					krb5_realm_params *);
+krb5_boolean match_config_pattern(const char *, const char *);
 
 /* str_conv.c */
 krb5_error_code
