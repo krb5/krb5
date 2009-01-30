@@ -163,6 +163,16 @@ krb5_dbe_free_mkey_aux_list(krb5_context context, krb5_mkey_aux_node *val)
     }
 }
 
+void
+krb5_dbe_free_tl_data(krb5_context context, krb5_tl_data *tl_data)
+{
+    if (tl_data) {
+        if (tl_data->tl_data_contents)
+            free(tl_data->tl_data_contents);
+        free(tl_data);
+    }
+}
+
 #define kdb_init_lib_lock(a) 0
 #define kdb_destroy_lib_lock(a) (void)0
 #define kdb_lock_lib_lock(a, b) 0
@@ -2404,6 +2414,12 @@ krb5_dbe_update_mkey_aux(krb5_context         context,
     unsigned char *nextloc;
     krb5_mkey_aux_node *aux_data_entry;
 
+    if (!mkey_aux_data_list) {
+        /* delete the KRB5_TL_MKEY_AUX from the entry */
+        krb5_dbe_delete_tl_data(context, entry, KRB5_TL_MKEY_AUX);
+        return (0);
+    }
+
     memset(&tl_data, 0, sizeof(tl_data));
     tl_data.tl_data_type = KRB5_TL_MKEY_AUX;
     /*
@@ -2620,6 +2636,44 @@ krb5_dbe_update_last_pwd_change(context, entry, stamp)
     tl_data.tl_data_contents = buf;
 
     return (krb5_dbe_update_tl_data(context, entry, &tl_data));
+}
+
+krb5_error_code
+krb5_dbe_delete_tl_data(krb5_context context,
+                        krb5_db_entry *entry,
+                        krb5_int16 tl_data_type) 
+{
+    krb5_tl_data *tl_data, *prev_tl_data, *free_tl_data;
+
+    /*
+     * Find existing entries of the specified type and remove them from the
+     * entry's tl_data list.
+     */
+
+    for (prev_tl_data = tl_data = entry->tl_data; tl_data != NULL;) {
+        if (tl_data->tl_data_type == tl_data_type) {
+            if (tl_data == entry->tl_data) {
+                /* remove from head */
+                entry->tl_data = tl_data->tl_data_next;
+                prev_tl_data = entry->tl_data;
+            } else if (tl_data->tl_data_next == NULL) {
+                /* remove from tail */
+                prev_tl_data->tl_data_next = NULL;
+            } else {
+                /* remove in between */
+                prev_tl_data->tl_data_next = tl_data->tl_data_next;
+            }
+            free_tl_data = tl_data;
+            tl_data = tl_data->tl_data_next;
+            krb5_dbe_free_tl_data(context, free_tl_data);
+            entry->n_tl_data--;
+        } else {
+            tl_data = tl_data->tl_data_next;
+            prev_tl_data = tl_data;
+        }
+    }
+
+    return (0);
 }
 
 krb5_error_code

@@ -178,15 +178,6 @@ WRAP_VOID (krb5_db2_free_policy,
 	   ( krb5_context kcontext, osa_policy_ent_t entry ),
 	   (kcontext, entry));
 
-WRAP (krb5_db2_alloc, void *,
-      ( krb5_context kcontext,  
-	void *ptr, 
-	size_t size ),
-      (kcontext, ptr, size), NULL);
-WRAP_VOID (krb5_db2_free,
-	   ( krb5_context kcontext, void *ptr ),
-	   (kcontext, ptr));
-
 WRAP_K (krb5_db2_set_master_key_ext,
 	( krb5_context kcontext, char *pwd, krb5_keyblock *key),
 	(kcontext, pwd, key));

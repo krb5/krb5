@@ -2096,11 +2096,14 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
     if (keyblocks) {
 	if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist, &kdb,
                                       &mkey_ptr))) {
+            krb5_keylist_node *tmp_mkey_list;
             /* try refreshing master key list */
             /* XXX it would nice if we had the mkvno here for optimization */
             if (krb5_db_fetch_mkey_list(handle->context, master_princ,
                                         &master_keyblock, 0,
-                                        &master_keylist) == 0) {
+                                        &tmp_mkey_list) == 0) {
+                krb5_dbe_free_key_list(handle->context, master_keylist);
+                master_keylist = tmp_mkey_list;
                 if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist,
                                               &kdb, &mkey_ptr))) {
                     goto done;
@@ -2238,10 +2241,13 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
     dbent.tl_data = entry->tl_data;
     if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist, &dbent,
                                   &mkey_ptr))) {
+        krb5_keylist_node *tmp_mkey_list;
         /* try refreshing master key list */
         /* XXX it would nice if we had the mkvno here for optimization */
         if (krb5_db_fetch_mkey_list(handle->context, master_princ,
-                                    &master_keyblock, 0, &master_keylist) == 0) {
+                                    &master_keyblock, 0, &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(handle->context, master_keylist);
+            master_keylist = tmp_mkey_list;
             if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist,
                                           &dbent, &mkey_ptr))) {
                 return ret;

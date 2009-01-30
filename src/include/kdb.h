@@ -484,6 +484,11 @@ krb5_dbe_lookup_last_pwd_change( krb5_context          context,
 				 krb5_timestamp      * stamp);
 
 krb5_error_code
+krb5_dbe_delete_tl_data( krb5_context    context,
+                         krb5_db_entry * entry,
+                         krb5_int16      tl_data_type);
+
+krb5_error_code
 krb5_dbe_update_tl_data( krb5_context          context,
 			 krb5_db_entry       * entry,
 			 krb5_tl_data        * new_tl_data);
@@ -681,6 +686,9 @@ krb5_dbe_free_actkvno_list(krb5_context, krb5_actkvno_node *);
 
 void
 krb5_dbe_free_mkey_aux_list(krb5_context, krb5_mkey_aux_node *);
+
+void
+krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
 
 #define KRB5_KDB_DEF_FLAGS	0
 

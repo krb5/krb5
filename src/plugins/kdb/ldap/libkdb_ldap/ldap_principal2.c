@@ -345,7 +345,7 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data, krb5_int16 n_key_data,
 
 static krb5_error_code
 asn1_decode_sequence_of_keys (krb5_data *in, krb5_key_data **out,
-			      krb5_int16 *n_key_data, int *mkvno)
+			      krb5_int16 *n_key_data, krb5_kvno *mkvno)
 {
     krb5_error_code err;
     ldap_seqof_key_data *p;

@@ -116,6 +116,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     void *pa_context = NULL;
     int did_log = 0;
     const char *emsg = 0;
+    krb5_keylist_node *tmp_mkey_list;
 
 #if APPLE_PKINIT
     asReqDebug("process_as_req top realm %s name %s\n", 
@@ -431,7 +432,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         /* try refreshing master key list */
         /* XXX it would nice if we had the mkvno here for optimization */
         if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
-                                    &master_keyblock, 0, &master_keylist) == 0) {
+                                    &master_keyblock, 0, &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(kdc_context, master_keylist);
+            master_keylist = tmp_mkey_list;
             if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist,
                                               &server, &mkey_ptr))) {
                 status = "FINDING_MASTER_KEY";
@@ -479,7 +482,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         /* try refreshing master key list */
         /* XXX it would nice if we had the mkvno here for optimization */
         if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
-                                    &master_keyblock, 0, &master_keylist) == 0) {
+                                    &master_keyblock, 0, &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(kdc_context, master_keylist);
+            master_keylist = tmp_mkey_list;
             if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist,
                                               &client, &mkey_ptr))) {
                 status = "FINDING_MASTER_KEY";

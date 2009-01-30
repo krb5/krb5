@@ -467,7 +467,8 @@ add_principal(context, princ, op, pblock)
          */
         actkvno.next = NULL;
         actkvno.act_kvno = mkey_kvno;
-        actkvno.act_time = now;
+        /* earliest possible time in case system clock is set back */
+        actkvno.act_time = 0;
         if ((retval = krb5_dbe_update_actkvno(context, &entry, &actkvno)))
             return retval;
 

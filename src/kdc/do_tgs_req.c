@@ -576,10 +576,13 @@ tgt_again:
 
         if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist, &server,
                                           &mkey_ptr))) {
+            krb5_keylist_node *tmp_mkey_list;
             /* try refreshing master key list */
             /* XXX it would nice if we had the mkvno here for optimization */
             if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
-                                        &master_keyblock, 0, &master_keylist) == 0) {
+                                        &master_keyblock, 0, &tmp_mkey_list) == 0) {
+                krb5_dbe_free_key_list(kdc_context, master_keylist);
+                master_keylist = tmp_mkey_list;
                 if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist,
                                                   &server, &mkey_ptr))) {
                     status = "FINDING_MASTER_KEY";

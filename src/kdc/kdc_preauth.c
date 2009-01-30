@@ -703,10 +703,13 @@ get_entry_data(krb5_context context,
 	memset(ret->data, 0, ret->length);
 	if ((error = krb5_dbe_find_mkey(context, master_keylist, entry,
                                         &mkey_ptr))) {
+            krb5_keylist_node *tmp_mkey_list;
             /* try refreshing the mkey list in case it's been updated */
             if (krb5_db_fetch_mkey_list(context, master_princ,
                                         &master_keyblock, 0,
-                                        &master_keylist) == 0) {
+                                        &tmp_mkey_list) == 0) {
+                krb5_dbe_free_key_list(context, master_keylist);
+                master_keylist = tmp_mkey_list;
                 if ((error = krb5_dbe_find_mkey(context, master_keylist, entry,
                                                 &mkey_ptr))) {
                     free(ret);
@@ -1374,10 +1377,13 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 
     if ((retval = krb5_dbe_find_mkey(context, master_keylist, client,
                                      &mkey_ptr))) {
+        krb5_keylist_node *tmp_mkey_list;
         /* try refreshing the mkey list in case it's been updated */
         if (krb5_db_fetch_mkey_list(context, master_princ,
                                     &master_keyblock, 0,
-                                    &master_keylist) == 0) {
+                                    &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(context, master_keylist);
+            master_keylist = tmp_mkey_list;
             if ((retval = krb5_dbe_find_mkey(context, master_keylist, client,
                                              &mkey_ptr))) {
                 goto cleanup;
@@ -2044,10 +2050,13 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	{
           if ((retval = krb5_dbe_find_mkey(context, master_keylist, &assoc,
                                            &mkey_ptr))) {
-               /* try refreshing the mkey list in case it's been updated */
+              krb5_keylist_node *tmp_mkey_list;
+              /* try refreshing the mkey list in case it's been updated */
               if (krb5_db_fetch_mkey_list(context, master_princ,
                                           &master_keyblock, 0,
-                                          &master_keylist) == 0) {
+                                          &tmp_mkey_list) == 0) {
+                  krb5_dbe_free_key_list(context, master_keylist);
+                  master_keylist = tmp_mkey_list;
                   if ((retval = krb5_dbe_find_mkey(context, master_keylist, &assoc,
                                                    &mkey_ptr))) {
                       return (retval);
@@ -2705,10 +2714,13 @@ static krb5_error_code verify_pkinit_request(
     }
     cert_hash_len = strlen(cert_hash);
     if ((krtn = krb5_dbe_find_mkey(context, master_keylist, &entry, &mkey_ptr))) {
+        krb5_keylist_node *tmp_mkey_list;
         /* try refreshing the mkey list in case it's been updated */
         if (krb5_db_fetch_mkey_list(context, master_princ,
                                     &master_keyblock, 0,
-                                    &master_keylist) == 0) {
+                                    &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(context, master_keylist);
+            master_keylist = tmp_mkey_list;
             if ((krtn = krb5_dbe_find_mkey(context, master_keylist, &entry,
                                            &mkey_ptr))) {
                 goto cleanup;

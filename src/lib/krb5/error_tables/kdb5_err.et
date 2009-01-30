@@ -59,6 +59,7 @@ ec KRB5_KDB_CANTREAD_STORED,	"Cannot find/read stored master key"
 ec KRB5_KDB_BADSTORED_MKEY,	"Stored master key is corrupted"
 ec KRB5_KDB_NOACTMASTERKEY,	"Cannot find active master key"
 ec KRB5_KDB_KVNONOMATCH,	"KVNO of new master key does not match expected value"
+ec KRB5_KDB_STORED_MKEY_NOTCURRENT,	"Stored master key is not current"
 
 ec KRB5_KDB_CANTLOCK_DB,	"Insufficient access to lock database"
 

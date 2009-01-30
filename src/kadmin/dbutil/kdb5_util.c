@@ -98,16 +98,18 @@ void usage()
 	     "\tadd_mkey [-e etype] [-s]\n"
 	     "\tuse_mkey kvno [time]\n"
 	     "\tlist_mkeys\n"
-	     "\tupdate_princ_encryption [-f] [-n] [-v] [princ-pattern]\n"
              );
      /* avoid a string length compiler warning */
      fprintf(stderr,
+	     "\tupdate_princ_encryption [-f] [-n] [-v] [princ-pattern]\n"
+	     "\tpurge_mkeys [-f] [-n] [-v]\n"
 	     "\nwhere,\n\t[-x db_args]* - any number of database specific arguments.\n"
 	     "\t\t\tLook at each database documentation for supported arguments\n");
      exit(1);
 }
 
 extern krb5_keyblock master_keyblock;
+krb5_kvno   master_kvno; /* fetched */
 extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
 krb5_db_entry master_entry;
@@ -129,15 +131,16 @@ struct _cmd_table {
      int opendb;
 } cmd_table[] = {
      {"create", kdb5_create, 0},
-     {"destroy", kdb5_destroy, 1},
+     {"destroy", kdb5_destroy, 1}, /* 1 opens the kdb */
      {"stash", kdb5_stash, 1},
      {"dump", dump_db, 1},
      {"load", load_db, 0},
      {"ark", add_random_key, 1},
-     {"add_mkey", kdb5_add_mkey, 1}, /* 1 is opendb */
-     {"use_mkey", kdb5_use_mkey, 1}, /* 1 is opendb */
-     {"list_mkeys", kdb5_list_mkeys, 1}, /* 1 is opendb */
+     {"add_mkey", kdb5_add_mkey, 1},
+     {"use_mkey", kdb5_use_mkey, 1},
+     {"list_mkeys", kdb5_list_mkeys, 1},
      {"update_princ_encryption", kdb5_update_princ_encryption, 1},
+     {"purge_mkeys", kdb5_purge_mkeys, 1},
      {NULL, NULL, 0},
 };
 
@@ -399,7 +402,6 @@ static int open_db_and_mkey()
     int nentries;
     krb5_boolean more;
     krb5_data scratch, pwd, seed;
-    krb5_kvno kvno;
 
     dbactive = FALSE;
     valid_master_key = 0;
@@ -442,9 +444,9 @@ static int open_db_and_mkey()
     }
 
     if (global_params.mask & KADM5_CONFIG_KVNO)
-        kvno = global_params.kvno; /* user specified */
+        master_kvno = global_params.kvno; /* user specified */
     else
-        kvno = IGNORE_VNO;
+        master_kvno = IGNORE_VNO;
 
     /* the databases are now open, and the master principal exists */
     dbactive = TRUE;
@@ -483,7 +485,7 @@ static int open_db_and_mkey()
 					    master_keyblock.enctype,
 					    manual_mkey, FALSE,
 					    global_params.stash_file,
-					    &kvno,
+					    &master_kvno,
                                             0, &master_keyblock))) {
             com_err(progname, retval, "while reading master key");
             com_err(progname, 0, "Warning: proceeding without master key");
@@ -494,7 +496,7 @@ static int open_db_and_mkey()
 #if 0 /************** Begin IFDEF'ed OUT *******************************/
     /* krb5_db_fetch_mkey_list will verify the mkey */
     if ((retval = krb5_db_verify_master_key(util_context, master_princ, 
-					    kvno, &master_keyblock))) {
+					    master_kvno, &master_keyblock))) {
 	com_err(progname, retval, "while verifying master key");
 	exit_status++;
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
@@ -503,7 +505,8 @@ static int open_db_and_mkey()
 #endif /**************** END IFDEF'ed OUT *******************************/
 
     if ((retval = krb5_db_fetch_mkey_list(util_context, master_princ,
-				          &master_keyblock, kvno, &master_keylist))) {
+				          &master_keyblock, master_kvno,
+                                          &master_keylist))) {
 	com_err(progname, retval, "while getting master key list");
 	com_err(progname, 0, "Warning: proceeding without master key list");
 	exit_status++;
