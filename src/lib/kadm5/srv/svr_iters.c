@@ -46,6 +46,7 @@ struct iter_data {
 #endif
 };
 
+/* XXX Duplicated in kdb5_util!  */
 /*
  * Function: glob_to_regexp
  *

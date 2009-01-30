@@ -2059,9 +2059,16 @@ populate_krb5_db_entry (krb5_context context,
 
     /* KRBSECRETKEY */
     if ((bvalues=ldap_get_values_len(ld, ent, "krbprincipalkey")) != NULL) {
+        krb5_kvno mkvno = 0;
+
 	mask |= KDB_SECRET_KEY_ATTR;
-	if ((st=krb5_decode_krbsecretkey(context, entry, bvalues, &userinfo_tl_data)) != 0)
+	if ((st=krb5_decode_krbsecretkey(context, entry, bvalues, &userinfo_tl_data, &mkvno)) != 0)
 	    goto cleanup;
+        if (mkvno != 0) {
+            /* don't add the tl data if mkvno == 0 */
+            if ((st=krb5_dbe_update_mkvno(context, entry, mkvno)) != 0)
+                goto cleanup;
+        }
     }
 
     /* LAST PASSWORD CHANGE */

@@ -60,6 +60,7 @@
 #include "kdb5_util.h"
 
 extern krb5_keyblock master_keyblock;
+extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
 extern kadm5_config_params global_params;
 
@@ -145,36 +146,38 @@ kdb5_stash(argc, argv)
     else
         mkey_kvno = IGNORE_VNO; /* use whatever krb5_db_fetch_mkey finds */
 
-    /* TRUE here means read the keyboard, but only once */
-    retval = krb5_db_fetch_mkey(context, master_princ,
-				master_keyblock.enctype,
-				TRUE, FALSE, (char *) NULL,
-                                &mkey_kvno,
-				NULL, &master_keyblock);
-    if (retval) {
-	com_err(progname, retval, "while reading master key");
-	(void) krb5_db_fini(context);
-	exit_status++; return; 
+    if (!valid_master_key) {
+	/* TRUE here means read the keyboard, but only once */
+	retval = krb5_db_fetch_mkey(context, master_princ,
+				    master_keyblock.enctype,
+				    TRUE, FALSE, (char *) NULL,
+				    &mkey_kvno,
+				    NULL, &master_keyblock);
+	if (retval) {
+	    com_err(progname, retval, "while reading master key");
+	    (void) krb5_db_fini(context);
+	    exit_status++; return; 
+	}
+
+	retval = krb5_db_fetch_mkey_list(context, master_princ,
+					 &master_keyblock, mkey_kvno,
+					 &master_keylist);
+	if (retval) {
+	    com_err(progname, retval, "while getting master key list");
+	    (void) krb5_db_fini(context);
+	    exit_status++; return;
+	}
+    } else {
+	printf("Using existing stashed keys to update stash file.\n");
     }
 
-    retval = krb5_db_verify_master_key(context, master_princ, 
-                                       mkey_kvno,
-				       &master_keyblock);
-    if (retval) {
-	com_err(progname, retval, "while verifying master key");
-	(void) krb5_db_fini(context);
-	exit_status++; return; 
-    }	
-
-    retval = krb5_db_store_master_key(context, keyfile, master_princ, 
-                                      mkey_kvno, &master_keyblock, NULL);
+    retval = krb5_db_store_master_key_list(context, keyfile, master_princ, 
+					   master_keylist, NULL);
     if (retval) {
 	com_err(progname, errno, "while storing key");
-	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	(void) krb5_db_fini(context);
 	exit_status++; return; 
     }
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 
     retval = krb5_db_fini(context);
     if (retval) {

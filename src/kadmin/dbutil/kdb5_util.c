@@ -1,7 +1,7 @@
 /*
  * admin/edit/kdb5_edit.c
  *
- * (C) Copyright 1990,1991, 1996, 2008 by the Massachusetts Institute of Technology.
+ * (C) Copyright 1990,1991, 1996, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -53,6 +53,11 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
 #include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
@@ -80,7 +85,7 @@ kadm5_config_params global_params;
 void usage()
 {
      fprintf(stderr, "Usage: "
-	   "kdb5_util [-x db_args]* [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
+	     "kdb5_util [-x db_args]* [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
 	     "\t        [-kv mkeyVNO] [-sf stashfilename] [-m] cmd [cmd_options]\n"
 	     "\tcreate	[-s]\n"
 	     "\tdestroy	[-f]\n"
@@ -90,12 +95,22 @@ void usage()
 	     "\t	[-rev] [-recurse] [filename [princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
 	     "\tark	[-e etype_list] principal\n"
+	     "\tadd_mkey [-e etype] [-s]\n"
+	     "\tuse_mkey kvno [time]\n"
+	     "\tlist_mkeys\n"
+             );
+     /* avoid a string length compiler warning */
+     fprintf(stderr,
+	     "\tupdate_princ_encryption [-f] [-n] [-v] [princ-pattern]\n"
+	     "\tpurge_mkeys [-f] [-n] [-v]\n"
 	     "\nwhere,\n\t[-x db_args]* - any number of database specific arguments.\n"
 	     "\t\t\tLook at each database documentation for supported arguments\n");
      exit(1);
 }
 
 extern krb5_keyblock master_keyblock;
+krb5_kvno   master_kvno; /* fetched */
+extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
 krb5_db_entry master_entry;
 int	valid_master_key = 0;
@@ -116,11 +131,16 @@ struct _cmd_table {
      int opendb;
 } cmd_table[] = {
      {"create", kdb5_create, 0},
-     {"destroy", kdb5_destroy, 1},
+     {"destroy", kdb5_destroy, 1}, /* 1 opens the kdb */
      {"stash", kdb5_stash, 1},
      {"dump", dump_db, 1},
      {"load", load_db, 0},
      {"ark", add_random_key, 1},
+     {"add_mkey", kdb5_add_mkey, 1},
+     {"use_mkey", kdb5_use_mkey, 1},
+     {"list_mkeys", kdb5_list_mkeys, 1},
+     {"update_princ_encryption", kdb5_update_princ_encryption, 1},
+     {"purge_mkeys", kdb5_purge_mkeys, 1},
      {NULL, NULL, 0},
 };
 
@@ -382,7 +402,6 @@ static int open_db_and_mkey()
     int nentries;
     krb5_boolean more;
     krb5_data scratch, pwd, seed;
-    krb5_kvno kvno;
 
     dbactive = FALSE;
     valid_master_key = 0;
@@ -425,11 +444,9 @@ static int open_db_and_mkey()
     }
 
     if (global_params.mask & KADM5_CONFIG_KVNO)
-        kvno = global_params.kvno; /* user specified */
+        master_kvno = global_params.kvno; /* user specified */
     else
-        kvno = (krb5_kvno) master_entry.key_data->key_data_kvno;
-
-    krb5_db_free_principal(util_context, &master_entry, nentries);
+        master_kvno = IGNORE_VNO;
 
     /* the databases are now open, and the master principal exists */
     dbactive = TRUE;
@@ -463,33 +480,48 @@ static int open_db_and_mkey()
 	free(scratch.data);
 	mkey_password = 0;
 
-    } else if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
+    } else {
+        if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
 					    master_keyblock.enctype,
 					    manual_mkey, FALSE,
 					    global_params.stash_file,
-					    &kvno,
-					    0, &master_keyblock))) {
-	com_err(progname, retval, "while reading master key");
-	com_err(progname, 0, "Warning: proceeding without master key");
-	exit_status++;
-	return(0);
+					    &master_kvno,
+                                            0, &master_keyblock))) {
+            com_err(progname, retval, "while reading master key");
+            com_err(progname, 0, "Warning: proceeding without master key");
+            exit_status++;
+            return(0);
+        }
     }
+#if 0 /************** Begin IFDEF'ed OUT *******************************/
+    /* krb5_db_fetch_mkey_list will verify the mkey */
     if ((retval = krb5_db_verify_master_key(util_context, master_princ, 
-					    kvno, &master_keyblock))) {
+					    master_kvno, &master_keyblock))) {
 	com_err(progname, retval, "while verifying master key");
 	exit_status++;
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
     }
+#endif /**************** END IFDEF'ed OUT *******************************/
+
+    if ((retval = krb5_db_fetch_mkey_list(util_context, master_princ,
+				          &master_keyblock, master_kvno,
+                                          &master_keylist))) {
+	com_err(progname, retval, "while getting master key list");
+	com_err(progname, 0, "Warning: proceeding without master key list");
+	exit_status++;
+	return(0);
+    }
 
     seed.length = master_keyblock.length;
-    seed.data = master_keyblock.contents;
+    seed.data = (char *) master_keyblock.contents;
 
     if ((retval = krb5_c_random_seed(util_context, &seed))) {
 	com_err(progname, retval, "while seeding random number generator");
 	exit_status++;
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
+        krb5_db_free_mkey_list(util_context, master_keylist);
 	return(1);
     }
 
@@ -510,6 +542,7 @@ quit()
 
     if (finished)
 	return 0;
+    krb5_db_free_mkey_list(util_context, master_keylist);
     retval = krb5_db_fini(util_context);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     finished = TRUE;
@@ -540,6 +573,7 @@ add_random_key(argc, argv)
     char *me = progname;
     char *ks_str = NULL;
     char *pr_str;
+    krb5_keyblock *tmp_mkey;
 
     if (argc < 2)
 	usage();
@@ -594,7 +628,16 @@ add_random_key(argc, argv)
 	free_keysalts = 0;
     } else
 	free_keysalts = 1;
-    ret = krb5_dbe_ark(util_context, &master_keyblock,
+
+    /* Find the mkey used to protect the existing keys */
+    ret = krb5_dbe_find_mkey(util_context, master_keylist, &dbent, &tmp_mkey);
+    if (ret) {
+	com_err(me, ret, "while finding mkey");
+	exit_status++;
+	return;
+    }
+
+    ret = krb5_dbe_ark(util_context, tmp_mkey,
 		       keysalts, num_keysalts,
 		       &dbent);
     if (free_keysalts)

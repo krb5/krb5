@@ -59,7 +59,7 @@ static char *_csrc = "@(#) %filespec: db2_exp.c~5 %  (%full_filespec: db2_exp.c~
    locking code into the top and bottom of each referenced function
    won't do.  (We aren't doing recursive locks, currently.)  */
 
-static k5_mutex_t *krb5_db2_mutex;
+k5_mutex_t *krb5_db2_mutex;
 
 #define WRAP(NAME,TYPE,ARGLIST,ARGNAMES,ERROR_RESULT)	\
 	static TYPE wrap_##NAME ARGLIST			\
@@ -178,21 +178,21 @@ WRAP_VOID (krb5_db2_free_policy,
 	   ( krb5_context kcontext, osa_policy_ent_t entry ),
 	   (kcontext, entry));
 
-WRAP (krb5_db2_alloc, void *,
-      ( krb5_context kcontext,  
-	void *ptr, 
-	size_t size ),
-      (kcontext, ptr, size), NULL);
-WRAP_VOID (krb5_db2_free,
-	   ( krb5_context kcontext, void *ptr ),
-	   (kcontext, ptr));
-
 WRAP_K (krb5_db2_set_master_key_ext,
 	( krb5_context kcontext, char *pwd, krb5_keyblock *key),
 	(kcontext, pwd, key));
 WRAP_K (krb5_db2_db_get_mkey,
 	( krb5_context context, krb5_keyblock **key),
 	(context, key));
+
+WRAP_K (krb5_db2_db_set_mkey_list,
+	( krb5_context kcontext, krb5_keylist_node *keylist),
+	(kcontext, keylist));
+
+WRAP_K (krb5_db2_db_get_mkey_list,
+	( krb5_context context, krb5_keylist_node **keylist),
+	(context, keylist));
+
 WRAP_K (krb5_db2_promote_db,
 	( krb5_context kcontext, char *conf_section, char **db_args ),
 	(kcontext, conf_section, db_args));
@@ -248,11 +248,13 @@ kdb_vftabl kdb_function_table = {
   /* db_free_supported_realms */	       NULL,
   /* errcode_2_string */                       NULL,
   /* release_errcode_string */		       NULL,
-  /* db_alloc */                               wrap_krb5_db2_alloc,
-  /* db_free */                                wrap_krb5_db2_free,
+  /* db_alloc */                               krb5_db2_alloc,
+  /* db_free */                                krb5_db2_free,
   /* set_master_key */			       wrap_krb5_db2_set_master_key_ext,
   /* get_master_key */			       wrap_krb5_db2_db_get_mkey,
-  /* blah blah blah */ 0,0,0,0,0,0,
+  /* set_master_key_list */		       wrap_krb5_db2_db_set_mkey_list,
+  /* get_master_key_list */	    	       wrap_krb5_db2_db_get_mkey_list,
+  /* blah blah blah */ 0,0,0,0,0,0,0,0,
   /* promote_db */			       wrap_krb5_db2_promote_db,
   0,0,0,
 };

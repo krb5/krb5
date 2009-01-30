@@ -665,8 +665,9 @@ get_entry_data(krb5_context context,
     int i, k;
     krb5_data *ret;
     krb5_deltat *delta;
-    krb5_keyblock *keys;
+    krb5_keyblock *keys, *mkey_ptr;
     krb5_key_data *entry_key;
+    krb5_error_code error;
 
     switch (type) {
     case krb5plugin_preauth_entry_request_certificate:
@@ -700,13 +701,32 @@ get_entry_data(krb5_context context,
 	ret->data = (char *) keys;
 	ret->length = sizeof(krb5_keyblock) * (request->nktypes + 1);
 	memset(ret->data, 0, ret->length);
+	if ((error = krb5_dbe_find_mkey(context, master_keylist, entry,
+                                        &mkey_ptr))) {
+            krb5_keylist_node *tmp_mkey_list;
+            /* try refreshing the mkey list in case it's been updated */
+            if (krb5_db_fetch_mkey_list(context, master_princ,
+                                        &master_keyblock, 0,
+                                        &tmp_mkey_list) == 0) {
+                krb5_dbe_free_key_list(context, master_keylist);
+                master_keylist = tmp_mkey_list;
+                if ((error = krb5_dbe_find_mkey(context, master_keylist, entry,
+                                                &mkey_ptr))) {
+                    free(ret);
+                    return (error);
+                }
+            } else {
+                free(ret);
+                return (error);
+            }
+        }
 	k = 0;
 	for (i = 0; i < request->nktypes; i++) {
 	    entry_key = NULL;
 	    if (krb5_dbe_find_enctype(context, entry, request->ktype[i],
 				      -1, 0, &entry_key) != 0)
 		continue;
-	    if (krb5_dbekd_decrypt_key_data(context, &master_keyblock,
+	    if (krb5_dbekd_decrypt_key_data(context, mkey_ptr,
 					    entry_key, &keys[k], NULL) != 0) {
 		if (keys[k].contents != NULL)
 		    krb5_free_keyblock_contents(context, &keys[k]);
@@ -1337,7 +1357,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     krb5_data			scratch;
     krb5_data			enc_ts_data;
     krb5_enc_data 		*enc_data = 0;
-    krb5_keyblock		key;
+    krb5_keyblock		key, *mkey_ptr;
     krb5_key_data *		client_key;
     krb5_int32			start;
     krb5_timestamp		timenow;
@@ -1355,6 +1375,24 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     if ((enc_ts_data.data = (char *) malloc(enc_ts_data.length)) == NULL)
 	goto cleanup;
 
+    if ((retval = krb5_dbe_find_mkey(context, master_keylist, client,
+                                     &mkey_ptr))) {
+        krb5_keylist_node *tmp_mkey_list;
+        /* try refreshing the mkey list in case it's been updated */
+        if (krb5_db_fetch_mkey_list(context, master_princ,
+                                    &master_keyblock, 0,
+                                    &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(context, master_keylist);
+            master_keylist = tmp_mkey_list;
+            if ((retval = krb5_dbe_find_mkey(context, master_keylist, client,
+                                             &mkey_ptr))) {
+                goto cleanup;
+            }
+        } else {
+            goto cleanup;
+        }
+    }
+
     start = 0;
     decrypt_err = 0;
     while (1) {
@@ -1363,7 +1401,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 					      -1, 0, &client_key)))
 	    goto cleanup;
 
-	if ((retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock, 
+	if ((retval = krb5_dbekd_decrypt_key_data(context, mkey_ptr, 
 						  client_key, &key, NULL)))
 	    goto cleanup;
 
@@ -1946,7 +1984,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
     krb5_sam_challenge		sc;
     krb5_predicted_sam_response	psr;
     krb5_data *			scratch;
-    krb5_keyblock encrypting_key;
+    krb5_keyblock encrypting_key, *mkey_ptr;
     char response[9];
     char inputblock[8];
     krb5_data predict_response;
@@ -2010,6 +2048,24 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
       if (sc.sam_type) {
 	/* so use assoc to get the key out! */
 	{
+          if ((retval = krb5_dbe_find_mkey(context, master_keylist, &assoc,
+                                           &mkey_ptr))) {
+              krb5_keylist_node *tmp_mkey_list;
+              /* try refreshing the mkey list in case it's been updated */
+              if (krb5_db_fetch_mkey_list(context, master_princ,
+                                          &master_keyblock, 0,
+                                          &tmp_mkey_list) == 0) {
+                  krb5_dbe_free_key_list(context, master_keylist);
+                  master_keylist = tmp_mkey_list;
+                  if ((retval = krb5_dbe_find_mkey(context, master_keylist, &assoc,
+                                                   &mkey_ptr))) {
+                      return (retval);
+                  }
+              } else {
+                  return (retval);
+              }
+          }
+
 	  /* here's what do_tgs_req does */
 	  retval = krb5_dbe_find_enctype(kdc_context, &assoc,
 					 ENCTYPE_DES_CBC_RAW,
@@ -2026,7 +2082,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	  }
 	  /* convert server.key into a real key */
 	  retval = krb5_dbekd_decrypt_key_data(kdc_context,
-					       &master_keyblock, 
+					       mkey_ptr, 
 					       assoc_key, &encrypting_key,
 					       NULL);
 	  if (retval) {
@@ -2513,7 +2569,7 @@ static krb5_error_code verify_pkinit_request(
     unsigned		    cert_hash_len;
     unsigned		    key_dex;
     unsigned		    cert_match = 0;
-    krb5_keyblock	    decrypted_key;
+    krb5_keyblock	    decrypted_key, *mkey_ptr;
     
     /* the data we get from the AS-REQ */
     krb5_timestamp	    client_ctime = 0;
@@ -2657,6 +2713,22 @@ static krb5_error_code verify_pkinit_request(
 	goto cleanup;
     }
     cert_hash_len = strlen(cert_hash);
+    if ((krtn = krb5_dbe_find_mkey(context, master_keylist, &entry, &mkey_ptr))) {
+        krb5_keylist_node *tmp_mkey_list;
+        /* try refreshing the mkey list in case it's been updated */
+        if (krb5_db_fetch_mkey_list(context, master_princ,
+                                    &master_keyblock, 0,
+                                    &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(context, master_keylist);
+            master_keylist = tmp_mkey_list;
+            if ((krtn = krb5_dbe_find_mkey(context, master_keylist, &entry,
+                                           &mkey_ptr))) {
+                goto cleanup;
+            }
+        } else {
+            goto cleanup;
+        }
+    }
     for(key_dex=0; key_dex<client->n_key_data; key_dex++) {
 	krb5_key_data *key_data = &client->key_data[key_dex];
 	kdcPkinitDebug("--- key %u type[0] %u length[0] %u type[1] %u length[1] %u\n",
@@ -2671,7 +2743,7 @@ static krb5_error_code verify_pkinit_request(
 	 * Unfortunately this key is stored encrypted even though it's
 	 * not sensitive... 
 	 */
-	krtn = krb5_dbekd_decrypt_key_data(context, &master_keyblock, 
+	krtn = krb5_dbekd_decrypt_key_data(context, mkey_ptr, 
 		    key_data, &decrypted_key, NULL);
 	if(krtn) {
 	    kdcPkinitDebug("verify_pkinit_request: error decrypting cert hash block\n");

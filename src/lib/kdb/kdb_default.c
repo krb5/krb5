@@ -1,7 +1,7 @@
 /*
  * lib/kdb/kdb_helper.c
  *
- * Copyright 1995, 2008 by the Massachusetts Institute of Technology. 
+ * Copyright 1995, 2009 by the Massachusetts Institute of Technology. 
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -23,6 +23,11 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
+ */
+
+/*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
  */
 
 #include "k5-int.h"
@@ -133,12 +138,11 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 #endif
 
 krb5_error_code
-krb5_def_store_mkey(krb5_context   context,
-                    char           *keyfile,
-                    krb5_principal mname,
-                    krb5_kvno      kvno,
-                    krb5_keyblock  *key,
-                    char           *master_pwd)
+krb5_def_store_mkey_list(krb5_context       context,
+			 char               *keyfile,
+			 krb5_principal     mname,
+			 krb5_keylist_node  *keylist,
+			 char               *master_pwd)
 {
     krb5_error_code retval = 0;
     char defkeyfile[MAXPATHLEN+1];
@@ -199,12 +203,17 @@ krb5_def_store_mkey(krb5_context   context,
     if (retval != 0)
         goto out;
 
-    memset((char *) &new_entry, 0, sizeof(new_entry));
-    new_entry.principal = mname;
-    new_entry.key = *key;
-    new_entry.vno = kvno;
+    while (keylist && !retval) {
+        memset((char *) &new_entry, 0, sizeof(new_entry));
+        new_entry.principal = mname;
+        new_entry.key = keylist->keyblock;
+        new_entry.vno = keylist->kvno;
 
-    retval = krb5_kt_add_entry(context, kt, &new_entry);
+        retval = krb5_kt_add_entry(context, kt, &new_entry);
+        keylist = keylist->next;
+    }
+    krb5_kt_close(context, kt);
+
     if (retval != 0) {
         /* delete tmp keyfile if it exists and an error occurrs */
         if (stat(keyfile, &stb) >= 0)
@@ -222,10 +231,25 @@ krb5_def_store_mkey(krb5_context   context,
 out:
     if (tmp_ktname != NULL)
         free(tmp_ktname);
-    if (kt)
-	krb5_kt_close(context, kt);
 
     return retval;
+}
+
+krb5_error_code
+krb5_def_store_mkey(krb5_context   context,
+                    char           *keyfile,
+                    krb5_principal mname,
+                    krb5_kvno      kvno,
+                    krb5_keyblock  *key,
+                    char           *master_pwd)
+{
+    krb5_keylist_node list;
+
+    list.kvno = kvno;
+    list.keyblock = *key;
+    list.next = NULL;
+    return krb5_def_store_mkey_list(context, keyfile, mname, &list,
+				    master_pwd);
 }
 
 static krb5_error_code
@@ -288,7 +312,7 @@ krb5_db_def_fetch_mkey_stash(krb5_context   context,
     if (fread((krb5_pointer) key->contents, sizeof(key->contents[0]),
 					    key->length, kf) != key->length) {
 	retval = KRB5_KDB_CANTREAD_STORED;
-	memset(key->contents, 0,  key->length);
+	zap(key->contents, key->length);
 	free(key->contents);
 	key->contents = 0;
     } else
@@ -421,6 +445,9 @@ krb5_db_def_fetch_mkey(krb5_context   context,
     }
 }
 
+/*
+ * Note, this verifies that the input mkey is currently protecting all the mkeys
+ */
 krb5_error_code
 krb5_def_verify_master_key(krb5_context    context,
                            krb5_principal  mprinc,
@@ -468,13 +495,160 @@ krb5_def_verify_master_key(krb5_context    context,
             kvno, master_entry.key_data->key_data_kvno);
     }
 
-    memset((char *)tempkey.contents, 0, tempkey.length);
+    zap((char *)tempkey.contents, tempkey.length);
     free(tempkey.contents);
     krb5_db_free_principal(context, &master_entry, nprinc);
     
     return retval;
 }
 
+krb5_error_code
+krb5_def_fetch_mkey_list(krb5_context        context,
+                       krb5_principal        mprinc,
+                       const krb5_keyblock  *mkey,
+                       krb5_kvno             mkvno,
+                       krb5_keylist_node  **mkeys_list)
+{
+    krb5_error_code retval;
+    krb5_db_entry master_entry;
+    int nprinc;
+    krb5_boolean more, found_key = FALSE;
+    krb5_keyblock cur_mkey;
+    krb5_keylist_node *mkey_list_head = NULL, **mkey_list_node;
+    krb5_key_data *key_data;
+    krb5_mkey_aux_node	*mkey_aux_data_list, *aux_data_entry;
+    int i;
+
+    if (mkeys_list == NULL)
+        return (EINVAL);
+
+    memset(&cur_mkey, 0, sizeof(cur_mkey));
+
+    nprinc = 1;
+    if ((retval = krb5_db_get_principal(context, mprinc,
+                                        &master_entry, &nprinc, &more)))
+        return (retval);
+
+    if (nprinc != 1) {
+        if (nprinc)
+            krb5_db_free_principal(context, &master_entry, nprinc);
+        return(KRB5_KDB_NOMASTERKEY);
+    } else if (more) {
+        krb5_db_free_principal(context, &master_entry, nprinc);
+        return (KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    }
+
+    /*
+     * Check if the input mkey is the latest key and if it isn't then find the
+     * latest mkey.
+     */
+
+    if (mkey->enctype == master_entry.key_data[0].key_data_type[0]) {
+        if (krb5_dbekd_decrypt_key_data(context, mkey,
+                                        &master_entry.key_data[0],
+                                        &cur_mkey, NULL) == 0) {
+            found_key = TRUE;
+        }
+    }
+
+    if (!found_key) {
+        /*
+         * Note the mkvno may provide a hint as to which mkey_aux tuple to
+         * decrypt.
+         */
+        if ((retval = krb5_dbe_lookup_mkey_aux(context, &master_entry,
+                                               &mkey_aux_data_list)))
+            goto clean_n_exit;
+
+        /* mkvno may be 0 in some cases like keyboard and should be ignored */
+        if (mkvno != 0) {
+            /* for performance sake, try decrypting with matching kvno */
+            for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
+                 aux_data_entry = aux_data_entry->next) {
+
+                if (aux_data_entry->mkey_kvno == mkvno) {
+                    if (krb5_dbekd_decrypt_key_data(context, mkey,
+                                                    &aux_data_entry->latest_mkey,
+                                                    &cur_mkey, NULL) == 0) {
+                        found_key = TRUE;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!found_key) {
+            /* given the importance of acquiring the latest mkey, try brute force */
+            for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
+                 aux_data_entry = aux_data_entry->next) {
+
+                if (mkey->enctype == aux_data_entry->latest_mkey.key_data_type[0] &&
+                    (krb5_dbekd_decrypt_key_data(context, mkey,
+                                                 &aux_data_entry->latest_mkey,
+                                                 &cur_mkey, NULL) == 0)) {
+                    found_key = TRUE;
+                    break;
+                }
+            }
+            if (found_key != TRUE) {
+                krb5_set_error_message (context, KRB5_KDB_BADMASTERKEY,
+                    "Unable to decrypt latest master key with the provided master key\n");
+                retval = KRB5_KDB_BADMASTERKEY;
+                goto clean_n_exit;
+            }
+        }
+    }
+
+    /*
+     * Extract all the mkeys from master_entry using the most current mkey and
+     * create a mkey list for the mkeys field in kdc_realm_t. 
+     */
+
+    mkey_list_head = (krb5_keylist_node *) malloc(sizeof(krb5_keylist_node));
+    if (mkey_list_head == NULL) {
+        retval = ENOMEM;
+        goto clean_n_exit;
+    }
+
+    memset(mkey_list_head, 0, sizeof(krb5_keylist_node));
+
+    /* Set mkey_list_head to the current mkey as an optimization. */
+    /* mkvno may not be latest so ... */
+    mkey_list_head->kvno = master_entry.key_data[0].key_data_kvno;
+    /* this is the latest clear mkey (avoids a redundant decrypt) */
+    mkey_list_head->keyblock = cur_mkey;
+
+    /* loop through any other master keys creating a list of krb5_keylist_nodes */
+    mkey_list_node = &mkey_list_head->next;
+    for (i = 1; i < master_entry.n_key_data; i++) {
+        if (*mkey_list_node == NULL) {
+            /* *mkey_list_node points to next field of previous node */
+            *mkey_list_node = (krb5_keylist_node *) malloc(sizeof(krb5_keylist_node));
+            if (*mkey_list_node == NULL) {
+                retval = ENOMEM;
+                goto clean_n_exit;
+            }
+            memset(*mkey_list_node, 0, sizeof(krb5_keylist_node));
+        }
+        key_data = &master_entry.key_data[i];
+        retval = krb5_dbekd_decrypt_key_data(context, &cur_mkey,
+                                             key_data,
+                                             &((*mkey_list_node)->keyblock),
+                                             NULL);
+        if (retval)
+            goto clean_n_exit;
+
+        (*mkey_list_node)->kvno = key_data->key_data_kvno;
+        mkey_list_node = &((*mkey_list_node)->next);
+    }
+
+    *mkeys_list = mkey_list_head;
+
+clean_n_exit:
+    krb5_db_free_principal(context, &master_entry, nprinc);
+    if (retval != 0)
+        krb5_dbe_free_key_list(context, mkey_list_head);
+    return retval;
+}
 
 krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
 				   char *pwd,
@@ -486,6 +660,20 @@ krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
 
 krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
 				   krb5_keyblock **key )
+{
+    /* printf("default get master key\n"); */
+    return 0;
+}
+
+krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
+				        krb5_keylist_node *keylist )
+{
+    /* printf("default set master key\n"); */
+    return 0;
+}
+
+krb5_error_code kdb_def_get_mkey_list ( krb5_context kcontext,
+				        krb5_keylist_node **keylist )
 {
     /* printf("default get master key\n"); */
     return 0;

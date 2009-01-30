@@ -68,6 +68,7 @@ typedef struct _krb5_ldap_realm_params {
   char          **passwdservers;
   krb5_tl_data  *tl_data;
   krb5_keyblock mkey;
+  krb5_keylist_node *mkey_list; /* all master keys in use for the realm */
   long          mask;
 } krb5_ldap_realm_params;
 

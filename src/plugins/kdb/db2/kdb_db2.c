@@ -431,6 +431,37 @@ krb5_db2_db_get_mkey(krb5_context context, krb5_keyblock **key)
     return 0;
 }
 
+krb5_error_code
+krb5_db2_db_set_mkey_list(krb5_context context, krb5_keylist_node *key_list)
+{
+    krb5_db2_context *db_ctx;
+    kdb5_dal_handle *dal_handle;
+
+    if (!k5db2_inited(context))
+	return (KRB5_KDB_DBNOTINITED);
+
+    dal_handle = context->dal_handle;
+    db_ctx = dal_handle->db_context;
+    db_ctx->db_master_key_list = key_list;
+    return 0;
+}
+
+krb5_error_code
+krb5_db2_db_get_mkey_list(krb5_context context, krb5_keylist_node **key_list)
+{
+    krb5_db2_context *db_ctx;
+    kdb5_dal_handle *dal_handle;
+
+    if (!k5db2_inited(context))
+	return (KRB5_KDB_DBNOTINITED);
+
+    dal_handle = context->dal_handle;
+    db_ctx = dal_handle->db_context;
+    *key_list = db_ctx->db_master_key_list;
+
+    return 0;
+}
+
 /*
  * Set the "name" of the current database to some alternate value.
  *
@@ -1171,8 +1202,19 @@ krb5_db2_db_iterate_ext(krb5_context context,
 	retval = krb5_decode_princ_contents(context, &contdata, &entries);
 	if (retval)
 	    break;
+	retval = k5_mutex_unlock(krb5_db2_mutex);
+	if (retval)
+	    break;
 	retval = (*func) (func_arg, &entries);
 	krb5_dbe_free_contents(context, &entries);
+	/* Note: If re-locking fails, the wrapper in db2_exp.c will
+	   still try to unlock it again.  That would be a bug.  Fix
+	   when integrating the locking better.  */
+	if (retval) {
+	    (void) k5_mutex_lock(krb5_db2_mutex);
+	    break;
+	}
+	retval = k5_mutex_lock(krb5_db2_mutex);
 	if (retval)
 	    break;
 	if (!recursive) {

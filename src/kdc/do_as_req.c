@@ -104,6 +104,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     const char *status;
     krb5_key_data *server_key, *client_key;
     krb5_keyblock server_keyblock, client_keyblock;
+    krb5_keyblock *mkey_ptr;
     krb5_enctype useenctype;
     krb5_boolean update_client = 0;
     krb5_data e_data;
@@ -115,6 +116,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     void *pa_context = NULL;
     int did_log = 0;
     const char *emsg = 0;
+    krb5_keylist_node *tmp_mkey_list;
 
 #if APPLE_PKINIT
     asReqDebug("process_as_req top realm %s name %s\n", 
@@ -425,9 +427,28 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
+    if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist, &server,
+                                      &mkey_ptr))) {
+        /* try refreshing master key list */
+        /* XXX it would nice if we had the mkvno here for optimization */
+        if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
+                                    &master_keyblock, 0, &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(kdc_context, master_keylist);
+            master_keylist = tmp_mkey_list;
+            if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist,
+                                              &server, &mkey_ptr))) {
+                status = "FINDING_MASTER_KEY";
+                goto errout;
+            }
+        } else {
+            status = "FINDING_MASTER_KEY";
+            goto errout;
+        }
+    }
+
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
+    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, mkey_ptr, 
     /* server_keyblock is later used to generate auth data signatures */
 					       server_key, &server_keyblock,
 					       NULL))) {
@@ -456,8 +477,27 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
+    if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist, &client,
+                                      &mkey_ptr))) {
+        /* try refreshing master key list */
+        /* XXX it would nice if we had the mkvno here for optimization */
+        if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
+                                    &master_keyblock, 0, &tmp_mkey_list) == 0) {
+            krb5_dbe_free_key_list(kdc_context, master_keylist);
+            master_keylist = tmp_mkey_list;
+            if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist,
+                                              &client, &mkey_ptr))) {
+                status = "FINDING_MASTER_KEY";
+                goto errout;
+            }
+        } else {
+            status = "FINDING_MASTER_KEY";
+            goto errout;
+        }
+    }
+
     /* convert client.key_data into a real key */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
+    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, mkey_ptr, 
 					       client_key, &client_keyblock,
 					       NULL))) {
 	status = "DECRYPT_CLIENT_KEY";

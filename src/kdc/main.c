@@ -154,9 +154,12 @@ finish_realm(kdc_realm_t *rdp)
 	if (rdp->realm_mprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_mprinc);
 	if (rdp->realm_mkey.length && rdp->realm_mkey.contents) {
+            /* XXX shouldn't memset be zap for safety? */
 	    memset(rdp->realm_mkey.contents, 0, rdp->realm_mkey.length);
 	    free(rdp->realm_mkey.contents);
 	}
+        if (rdp->mkey_list)
+            krb5_dbe_free_key_list(rdp->realm_context, rdp->mkey_list);
 	krb5_db_fini(rdp->realm_context);
 	if (rdp->realm_tgsprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);
@@ -242,6 +245,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     krb5_boolean	manual;
     krb5_realm_params	*rparams;
     int			kdb_open_flags;
+    krb5_kvno       mkvno = IGNORE_VNO;
 
     memset((char *) rdp, 0, sizeof(kdc_realm_t));
     if (!realm) {
@@ -374,18 +378,25 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     }
 
     /*
-     * Get the master key.
+     * Get the master key (note, may not be the most current mkey).
      */
     if ((kret = krb5_db_fetch_mkey(rdp->realm_context, rdp->realm_mprinc,
 				   rdp->realm_mkey.enctype, manual,
 				   FALSE, rdp->realm_stash,
-				   NULL, NULL, &rdp->realm_mkey))) {
+				   &mkvno, NULL, &rdp->realm_mkey))) {
 	com_err(progname, kret,
 		"while fetching master key %s for realm %s",
 		rdp->realm_mpname, realm);
 	goto whoops;
     }
 
+#if 0 /************** Begin IFDEF'ed OUT *******************************/
+    /*
+     * Commenting krb5_db_verify_master_key out because it requires the most
+     * current mkey which may not be the case here.  The call to
+     * krb5_db_fetch_mkey_list() will end up verifying that the mkey is viable
+     * anyway.
+     */
     /* Verify the master key */
     if ((kret = krb5_db_verify_master_key(rdp->realm_context,
 					  rdp->realm_mprinc,
@@ -393,6 +404,14 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 					  &rdp->realm_mkey))) {
 	com_err(progname, kret,
 		"while verifying master key for realm %s", realm);
+	goto whoops;
+    }
+#endif /**************** END IFDEF'ed OUT *******************************/
+
+    if ((kret = krb5_db_fetch_mkey_list(rdp->realm_context, rdp->realm_mprinc,
+				   &rdp->realm_mkey, mkvno, &rdp->mkey_list))) {
+	com_err(progname, kret,
+		"while fetching master keys list for realm %s", realm);
 	goto whoops;
     }
 

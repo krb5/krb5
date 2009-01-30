@@ -1535,6 +1535,8 @@ void kadmin_getprinc(argc, argv)
 	    } else
 		printf("no salt\n");
 	}
+	printf("MKey: vno %d\n",
+	       dprinc.mkvno);
 
 	printf("Attributes:");
 	for (i = 0; i < sizeof (prflags) / sizeof (char *); i++) {

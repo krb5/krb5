@@ -98,6 +98,7 @@ void *global_server_handle;
 #define OVSEC_KADM_CHANGEPW_SERVICE	"ovsec_adm/changepw"
 
 extern krb5_keyblock master_keyblock;
+extern krb5_keylist_node  *master_keylist;
 
 char *build_princ_name(char *name, char *realm);
 void log_badauth(OM_uint32 major, OM_uint32 minor,
@@ -393,6 +394,11 @@ int main(int argc, char *argv[])
      ret = krb5_db_set_mkey(hctx, &master_keyblock);
      if (ret) {
 	  krb5_klog_syslog(LOG_ERR, "Can't set master key for kdb keytab.");
+	  goto kterr;
+     }
+     ret = krb5_db_set_mkey_list(hctx, master_keylist);
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "Can't set master key list for kdb keytab.");
 	  goto kterr;
      }
      ret = krb5_kt_register(context, &krb5_kt_kdb_ops);

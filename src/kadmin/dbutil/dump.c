@@ -1,7 +1,7 @@
 /*
  * kadmin/dbutil/dump.c
  *
- * Copyright 1990,1991,2001,2006,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2006,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -46,7 +46,8 @@
  * Needed for master key conversion.
  */
 static int			mkey_convert;
-static krb5_keyblock		new_master_keyblock;
+krb5_keyblock			new_master_keyblock;
+krb5_kvno                       new_mkvno;
 
 static int	backwards;
 static int	recursive;
@@ -178,6 +179,7 @@ extern krb5_boolean	dbactive;
 extern int		exit_status;
 extern krb5_context	util_context;
 extern kadm5_config_params global_params;
+extern krb5_db_entry      master_entry;
 
 /* Strings */
 
@@ -260,7 +262,7 @@ static const char dump_tmptrail[] = "~";
 /*
  * Re-encrypt the key_data with the new master key...
  */
-static krb5_error_code master_key_convert(context, db_entry)
+krb5_error_code master_key_convert(context, db_entry)
     krb5_context	  context;
     krb5_db_entry	* db_entry;
 {
@@ -274,47 +276,49 @@ static krb5_error_code master_key_convert(context, db_entry)
 
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
-    if (is_mkey && db_entry->n_key_data != 1)
-	    fprintf(stderr,
-		    "Master key db entry has %d keys, expecting only 1!\n",
-		    db_entry->n_key_data);
-    for (i=0; i < db_entry->n_key_data; i++) {
-	key_data = &db_entry->key_data[i];
-	if (key_data->key_data_length == 0)
-	    continue;
-	retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock,
-					     key_data, &v5plainkey,
-					     &keysalt);
-	if (retval)
-		return retval;
+    if (is_mkey) {
+        retval = add_new_mkey(context, db_entry, &new_master_keyblock, new_mkvno);
+        if (retval)
+            return retval;
+    } else {
+        for (i=0; i < db_entry->n_key_data; i++) {
+            krb5_keyblock   *tmp_mkey;
 
-	memset(&new_key_data, 0, sizeof(new_key_data));
+            key_data = &db_entry->key_data[i];
+            if (key_data->key_data_length == 0)
+                continue;
+            retval = krb5_dbe_find_mkey(context, master_keylist, db_entry, &tmp_mkey);
+            if (retval)
+                return retval;
+            retval = krb5_dbekd_decrypt_key_data(context, tmp_mkey,
+                                                 key_data, &v5plainkey,
+                                                 &keysalt);
+            if (retval)
+                    return retval;
 
-	if (is_mkey) {
-		key_ptr = &new_master_keyblock;
-		/* override mkey princ's kvno */
-		if (global_params.mask & KADM5_CONFIG_KVNO)
-			kvno = global_params.kvno;
-		else
-			kvno = (krb5_kvno) key_data->key_data_kvno;
-	} else {
-		key_ptr = &v5plainkey;
-		kvno = (krb5_kvno) key_data->key_data_kvno;
-	}
+            memset(&new_key_data, 0, sizeof(new_key_data));
 
-	retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
-					     key_ptr, &keysalt,
-					     (int) kvno,
-					     &new_key_data);
-	if (retval)
-		return retval;
-	krb5_free_keyblock_contents(context, &v5plainkey);
-	for (j = 0; j < key_data->key_data_ver; j++) {
-	    if (key_data->key_data_length[j]) {
-		free(key_data->key_data_contents[j]);
-	    }
-	}
-	*key_data = new_key_data;
+            key_ptr = &v5plainkey;
+            kvno = (krb5_kvno) key_data->key_data_kvno;
+
+            retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
+                                                 key_ptr, &keysalt,
+                                                 (int) kvno,
+                                                 &new_key_data);
+            if (retval)
+                    return retval;
+            krb5_free_keyblock_contents(context, &v5plainkey);
+            for (j = 0; j < key_data->key_data_ver; j++) {
+                if (key_data->key_data_length[j]) {
+                    free(key_data->key_data_contents[j]);
+                }
+            }
+            *key_data = new_key_data;
+        }
+	assert(new_mkvno > 0);
+        retval = krb5_dbe_update_mkvno(context, db_entry, new_mkvno);
+        if (retval)
+                return retval;
     }
     return 0;
 }
@@ -1189,6 +1193,11 @@ dump_db(argc, argv)
 			    exit(1);
 		    }
 	    }
+            /*
+             * get new master key vno that will be used to protect princs, used
+             * later on.
+             */
+            new_mkvno = get_next_kvno(util_context, &master_entry);
     }
 
     kret = 0;

@@ -10,14 +10,18 @@ KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 
 PROG = kdb5_util
 
-SRCS = kdb5_util.c kdb5_create.c kadm5_create.c string_table.c kdb5_destroy.c kdb5_stash.c import_err.c strtok.c dump.c ovload.c
+SRCS = kdb5_util.c kdb5_create.c kadm5_create.c string_table.c kdb5_destroy.c \
+	   kdb5_stash.c import_err.c strtok.c dump.c ovload.c kdb5_mkey.c
 
-OBJS = kdb5_util.o kdb5_create.o kadm5_create.o string_table.o kdb5_destroy.o kdb5_stash.o import_err.o strtok.o dump.o ovload.o
+OBJS = kdb5_util.o kdb5_create.o kadm5_create.o string_table.o kdb5_destroy.o \
+	   kdb5_stash.o import_err.o strtok.o dump.o ovload.o kdb5_mkey.o
+
+GETDATE = ../cli/getdate.o
 
 all:: $(PROG)
 
-$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
+$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(GETDATE)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(GETDATE) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 import_err.c import_err.h: $(srcdir)/import_err.et
 

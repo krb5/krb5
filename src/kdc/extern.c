@@ -27,6 +27,7 @@
  */
 
 #include "k5-int.h"
+#include "kdb.h"
 #include "extern.h"
 
 /* real declarations of KDC's externs */
