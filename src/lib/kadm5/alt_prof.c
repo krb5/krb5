@@ -39,7 +39,7 @@
 #include <ctype.h>
 #include <kdb_log.h>
 
-krb5_boolean match_config_pattern(const char *, const char*);
+krb5_boolean krb5_match_config_pattern(const char *, const char*);
 static krb5_key_salt_tuple *copy_key_salt_tuple(ksalt, len)
 krb5_key_salt_tuple *ksalt;
 krb5_int32 len;
@@ -1035,7 +1035,7 @@ krb5_read_realm_params(kcontext, realm, rparamp)
     else 
             no_refrls = 0;
 
-    if (!no_refrls || match_config_pattern(no_refrls, "*") == FALSE) {
+    if (!no_refrls || krb5_match_config_pattern(no_refrls, "*") == FALSE) {
         hierarchy[2] = "host_based_services";
         if (!krb5_aprof_get_string_all(aprofile, hierarchy, &host_based_srvcs))
             rparams->realm_host_based_services = host_based_srvcs;
@@ -1124,7 +1124,7 @@ krb5_free_realm_params(kcontext, rparams)
  *       In conf file the values are separates by commas or whitespaces.
  */
 krb5_boolean
-match_config_pattern(const char *string, const char *pattern)
+krb5_match_config_pattern(const char *string, const char *pattern)
 {
     const char *ptr;
     char next = '\0';
