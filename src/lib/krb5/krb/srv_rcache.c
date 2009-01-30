@@ -71,21 +71,13 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 	return ENOMEM;
 
     retval = krb5_rc_resolve_full(context, &rcache, cachename);
-    if (retval) {
-	rcache = 0;
+    if (retval)
 	goto cleanup;
-    }
 
-    /*
-     * First try to recover the replay cache; if that doesn't work,
-     * initialize it.
-     */
-    retval = krb5_rc_recover_or_initialize(context, rcache, context->clockskew);
-    if (retval) {
-	krb5_rc_close(context, rcache);
-	rcache = 0;
+    retval = krb5_rc_recover_or_initialize(context, rcache,
+					   context->clockskew);
+    if (retval)
 	goto cleanup;
-    }
 
     *rcptr = rcache;
     rcache = 0;
@@ -93,7 +85,7 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 
 cleanup:
     if (rcache)
-	free(rcache);
+	krb5_rc_close(context, rcache);
     if (cachename)
 	free(cachename);
     return retval;
