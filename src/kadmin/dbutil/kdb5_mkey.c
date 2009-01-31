@@ -1014,7 +1014,6 @@ kdb5_update_princ_encryption(int argc, char *argv[])
         ) {
         /* XXX syslog msg or regerr(regerrno) */
         com_err(progname, 0, "error compiling converted regexp '%s'", regexp);
-        free(regexp);
         exit_status++;
         goto cleanup;
     }
