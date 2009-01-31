@@ -1197,6 +1197,8 @@ krb5_db2_db_iterate_ext(krb5_context context,
 #endif
     }
     while (dbret == 0) {
+	krb5_error_code retval2;
+
 	contdata.data = contents.data;
 	contdata.length = contents.size;
 	retval = krb5_decode_princ_contents(context, &contdata, &entries);
@@ -1207,16 +1209,16 @@ krb5_db2_db_iterate_ext(krb5_context context,
 	    break;
 	retval = (*func) (func_arg, &entries);
 	krb5_dbe_free_contents(context, &entries);
+	retval2 = k5_mutex_lock(krb5_db2_mutex);
 	/* Note: If re-locking fails, the wrapper in db2_exp.c will
 	   still try to unlock it again.  That would be a bug.  Fix
 	   when integrating the locking better.  */
-	if (retval) {
-	    (void) k5_mutex_lock(krb5_db2_mutex);
-	    break;
-	}
-	retval = k5_mutex_lock(krb5_db2_mutex);
 	if (retval)
 	    break;
+	if (retval2) {
+	    retval = retval2;
+	    break;
+	}
 	if (!recursive) {
 	    dbret = (*db->seq) (db, &key, &contents,
 				backwards ? R_PREV : R_NEXT);
