@@ -942,7 +942,7 @@ kdb5_update_princ_encryption(int argc, char *argv[])
     int force = 0;
     int optchar;
     krb5_error_code retval;
-    krb5_actkvno_node *actkvno_list;
+    krb5_actkvno_node *actkvno_list = 0;
     krb5_db_entry master_entry;
     int nentries = 1;
     krb5_boolean more = FALSE;
@@ -1094,6 +1094,7 @@ cleanup:
     memset(&new_master_keyblock, 0, sizeof(new_master_keyblock));
     krb5_free_keyblock(util_context, tmp_keyblock);
     krb5_free_unparsed_name(util_context, mkey_fullname);
+    krb5_dbe_free_actkvno_list(util_context, actkvno_list);
 }
 
 struct kvnos_in_use {
