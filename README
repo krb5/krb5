@@ -59,12 +59,34 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
+DES transition
+--------------
+
+The Data Encryption Standard (DES) is widely recognized as weak.  The
+krb5-1.7 release will contain measures to encourage sites to migrate
+away from using single-DES cryptosystems.  Among these is a
+configuration variable that enables "weak" enctypes, but will default
+to "false" in the future.  Depending on the outcome of ongoing
+discussion on krbdev@mit.edu, this default could change prior to the
+final release of krb5-1.7.
+
+Additional measures to ease the transition away from DES are planned
+for the final krb5-1.7 release.
+
 Major changes in 1.7
 --------------------
 
 * Remove support for version 4 of the Kerberos protocol (krb4).
 
-* Client library now follows client principal referrals.
+* New libdefaults configuration variable "allow_weak_crypto".  NOTE:
+  Currently defaults to "false", but may default to "true" in a future
+  release.  Setting this variable to "false" will have the effect of
+  removing weak enctypes (currently defined to be all single-DES
+  enctypes) from permitted_enctypes, default_tkt_enctypes, and
+  default_tgs_enctypes.
+
+* Client library now follows client principal referrals, for
+  compatibility with Windows.
 
 * KDC can issue realm referrals for service principals based on domain
   names.
@@ -79,6 +101,11 @@ Major changes in 1.7
 
 * DCE RPC, including three-leg GSS context setup and unencapsulated
   GSS tokens.
+
+* NTLM recognition support in GSS-API, to facilitate dropping in an
+  NTLM implementation.
+
+* KDC support for principal aliases, if the back end supports them.
 
 * Microsoft set/change password (RFC 3244) protocol in kadmind.
 
