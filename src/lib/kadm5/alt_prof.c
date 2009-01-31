@@ -749,7 +749,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
          if (aprofile)
               krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue);
          if (svalue == NULL)
-             svalue = strdup("des3-hmac-sha1:normal des-cbc-crc:normal");
+             svalue = strdup(KRB5_DEFAULT_SUPPORTED_ENCTYPES);
 
          params.keysalts = NULL;
          params.num_keysalts = 0;
