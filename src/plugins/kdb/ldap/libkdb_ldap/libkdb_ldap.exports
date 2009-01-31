@@ -49,3 +49,5 @@ krb5_ldap_free_supported_realms
 krb5_ldap_errcode_2_string
 krb5_ldap_release_errcode_string
 krb5_ldap_create
+krb5_ldap_set_mkey_list
+krb5_ldap_get_mkey_list
