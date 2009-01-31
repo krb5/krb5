@@ -110,6 +110,7 @@ main(argc, argv)
 	    exit(3);
 	}
 
+	printf("Ready!\n");
 	if ((acc = accept(sock, (struct sockaddr *)&f_inaddr,
 			  &namelen)) == -1) {
 	    com_err(progname, errno, "accepting");
