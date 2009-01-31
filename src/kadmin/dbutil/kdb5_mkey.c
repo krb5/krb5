@@ -583,7 +583,7 @@ kdb5_list_mkeys(int argc, char *argv[])
     krb5_keyblock *act_mkey;
 
     if (master_keylist == NULL) {
-        com_err(progname, retval, "master keylist not initialized");
+        com_err(progname, 0, "master keylist not initialized");
         exit_status++;
         return;
     }
