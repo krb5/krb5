@@ -24,17 +24,17 @@
  * or implied warranty.
  * 
  * This file contains tests for the PRNG code in Kerberos.  IT reads
- *an input file, and writes an output file.  It is assumed that the
- *output file will be diffed against expected output  to see whether
- *regression tests pass.  The input file is very primitive format.  It
- *is composed of alternating seeds and outputs.   The first  line in
- *the file is an integer source Id from the krb5_c_randsource enum in
- *krb5.h.  Then an integer seed length is be
- *read.  Then that many bytes (encoded in hex) is read; whitspace or
- *newlines may be inserted between bytes.  Then after the seed data is
- *a  integer describing how many bytes of output should be written.
- *Then another source ID and seed length is read.  If the seed length
- *is 0, the source id is ignored and the seed is not seeded.
+ * an input file, and writes an output file.  It is assumed that the
+ * output file will be diffed against expected output  to see whether
+ * regression tests pass.  The input file is very primitive format.  It
+ * is composed of alternating seeds and outputs.   The first  line in
+ * the file is an integer source Id from the krb5_c_randsource enum in
+ * krb5.h.  Then an integer seed length is be
+ * read.  Then that many bytes (encoded in hex) is read; whitspace or
+ * newlines may be inserted between bytes.  Then after the seed data is
+ * an integer describing how many bytes of output should be written.
+ * Then another source ID and seed length is read.  If the seed length
+ * is 0, the source id is ignored and the seed is not seeded.
  */
 
 #include "k5-int.h"
