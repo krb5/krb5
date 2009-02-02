@@ -796,7 +796,7 @@ void mput(argc, argv)
 			printf("%s\n", globerr);
 			if (gargs) {
 				blkfree(gargs);
-				free((char *)gargs);
+				free(gargs);
 			}
 			continue;
 		}
@@ -818,7 +818,7 @@ void mput(argc, argv)
 		}
 		if (gargs != NULL) {
 			blkfree(gargs);
-			free((char *)gargs);
+			free(gargs);
 		}
 	}
 	(void) signal(SIGINT, oldintr);
@@ -1959,7 +1959,7 @@ static int globulize(cpp)
 		printf("%s: %s\n", *cpp, globerr);
 		if (globbed) {
 			blkfree(globbed);
-			free((char *)globbed);
+			free(globbed);
 		}
 		return (0);
 	}
@@ -1969,7 +1969,7 @@ static int globulize(cpp)
 		/* don't waste too much memory */
 		if (*globbed) {
 			blkfree(globbed1);
-			free((char *)globbed);
+			free(globbed);
 		}
 	}
 	return (1);

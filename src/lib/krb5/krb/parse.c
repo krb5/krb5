@@ -148,7 +148,7 @@ k5_parse_name(krb5_context context, const char *name,
 	}
 	principal->data = (krb5_data *) malloc(sizeof(krb5_data) * components);
 	if (principal->data == NULL) {
-	    free((char *)principal);
+	    free(principal);
 	    return ENOMEM;
 	}
 	principal->length = components;
@@ -170,7 +170,7 @@ k5_parse_name(krb5_context context, const char *name,
 		retval = krb5_get_default_realm(context, &default_realm);
 		if (retval) {
 		    free(principal->data);
-		    free((char *)principal);
+		    free(principal);
 		    return(retval);
 		}
 		default_realm_size = strlen(default_realm);

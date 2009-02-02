@@ -15,8 +15,6 @@
 #include "rc-int.h"
 #include "k5-thread.h"
 
-#define FREE(x) ((void) free((char *) (x)))
-
 struct krb5_rc_typelist {
     const krb5_rc_ops *ops;
     struct krb5_rc_typelist *next;
@@ -119,13 +117,13 @@ krb5_rc_default(krb5_context context, krb5_rcache *id)
 
     if ((retval = krb5_rc_resolve_type(context, id,
                                        krb5_rc_default_type(context)))) {
-        FREE(*id);
+        free(*id);
         return retval;
     }
     if ((retval = krb5_rc_resolve(context, *id,
                                   krb5_rc_default_name(context)))) {
         k5_mutex_destroy(&(*id)->lock);
-        FREE(*id);
+        free(*id);
         return retval;
     }
     (*id)->magic = KV5M_RCACHE;
@@ -154,19 +152,19 @@ krb5_error_code krb5_rc_resolve_full(krb5_context context, krb5_rcache *idptr,
     type[residual - string_name] = '\0';
 
     if (!(id = (krb5_rcache) malloc(sizeof(*id)))) {
-        FREE(type);
+        free(type);
         return KRB5_RC_MALLOC;
     }
 
     if ((retval = krb5_rc_resolve_type(context, &id,type))) {
-        FREE(type);
-        FREE(id);
+        free(type);
+        free(id);
         return retval;
     }
-    FREE(type);
+    free(type);
     if ((retval = krb5_rc_resolve(context, id,residual + 1))) {
         k5_mutex_destroy(&id->lock);
-        FREE(id);
+        free(id);
         return retval;
     }
     id->magic = KV5M_RCACHE;

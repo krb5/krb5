@@ -11,8 +11,6 @@
  * An implementation for the default replay cache type.
  */
 
-#define FREE(x) ((void) free((char *) (x)))
-
 #include "rc_base.h"
 
 /*
@@ -31,7 +29,7 @@ krb5_auth_to_rep(krb5_context context, krb5_tkt_authent *auth, krb5_donot_replay
         return retval; /* shouldn't happen */
     if ((retval = krb5_unparse_name(context, auth->authenticator->client,
                                     &rep->client))) {
-        FREE(rep->server);
+        free(rep->server);
         return retval; /* shouldn't happen. */
     }
     return 0;

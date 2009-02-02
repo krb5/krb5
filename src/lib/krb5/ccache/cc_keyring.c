@@ -1388,7 +1388,7 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
 	}
 	tmpprinc->data = ALLOC(msize, krb5_data);
 	if (tmpprinc->data == 0) {
-	    free((char *) tmpprinc);
+	    free(tmpprinc);
 	    return KRB5_CC_NOMEM;
 	}
     } else
@@ -1415,8 +1415,8 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
     while (--i >= 0)
 	free(krb5_princ_component(context, tmpprinc, i)->data);
     free(krb5_princ_realm(context, tmpprinc)->data);
-    free((char *) tmpprinc->data);
-    free((char *) tmpprinc);
+    free(tmpprinc->data);
+    free(tmpprinc);
     return kret;
 }
 

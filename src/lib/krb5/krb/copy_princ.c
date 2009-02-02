@@ -49,7 +49,7 @@ krb5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pri
     tempprinc->data = malloc(nelems * sizeof(krb5_data));
 
     if (tempprinc->data == 0) {
-	free((char *)tempprinc);
+	free(tempprinc);
 	return ENOMEM;
     }
 

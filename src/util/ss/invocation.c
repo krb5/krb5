@@ -125,6 +125,6 @@ ss_delete_invocation(sci_idx)
 	free(t->rqt_tables);
 	while(t->info_dirs[0] != (char *)NULL)
 		ss_delete_info_dir(sci_idx, t->info_dirs[0], &ignored_code);
-	free((char *)t->info_dirs);
-	free((char *)t);
+	free(t->info_dirs);
+	free(t);
 }

@@ -200,12 +200,12 @@ cmd_list:	/* empty */
 cmd:		USER SP username CRLF
 		{
 			user((char *) $3);
-			free((char *) $3);
+			free($3);
 		}
 	|	PASS SP password CRLF
 		{
 			pass((char *) $3);
-			free((char *) $3);
+			free($3);
 		}
 	|	PORT SP host_port CRLF
 		{
@@ -349,21 +349,21 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL)
 				retrieve((char *) 0, (char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	STOR check_login SP pathname CRLF
 		{
 			if ($2 && $4 != NULL)
 				store_file((char *) $4, "w", 0);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	APPE check_login SP pathname CRLF
 		{
 			if ($2 && $4 != NULL)
 				store_file((char *) $4, "a", 0);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	NLST check_login CRLF
 		{
@@ -375,7 +375,7 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL) 
 				send_file_list((char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	LIST check_login CRLF
 		{
@@ -387,14 +387,14 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL)
 				retrieve("/bin/ls -lgA %s", (char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	STAT check_login SP pathname CRLF
 		{
 			if ($2 && $4 != NULL)
 				statfilecmd((char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	STAT CRLF
 		{
@@ -405,7 +405,7 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL)
 				delete_file((char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	RNTO SP pathname CRLF
 		{
@@ -416,7 +416,7 @@ cmd:		USER SP username CRLF
 			} else {
 				reply(503, "Bad sequence of commands.");
 			}
-			free((char *) $3);
+			free($3);
 		}
 	|	ABOR CRLF
 		{
@@ -432,7 +432,7 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL)
 				cwd((char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	HELP CRLF
 		{
@@ -462,14 +462,14 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL)
 				makedir((char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	RMD nonguest SP pathname CRLF
 		{
 			if ($2 && $4 != NULL)
 				removedir((char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	PWD check_login CRLF
 		{
@@ -526,7 +526,7 @@ cmd:		USER SP username CRLF
 					reply(200, "CHMOD command successful.");
 			}
 			if ($8 != NULL)
-				free((char *) $8);
+				free($8);
 		}
 	|	SITE SP IDLE CRLF
 		{
@@ -553,7 +553,7 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL)
 				store_file((char *) $4, "w", 1);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	SYST CRLF
 		{
@@ -584,7 +584,7 @@ cmd:		USER SP username CRLF
 			if ($2 && $4 != NULL)
 				sizecmd((char *) $4);
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 
 		/*
@@ -617,7 +617,7 @@ cmd:		USER SP username CRLF
 				}
 			}
 			if ($4 != NULL)
-				free((char *) $4);
+				free($4);
 		}
 	|	AUTH SP STRING CRLF
 		{
@@ -626,7 +626,7 @@ cmd:		USER SP username CRLF
 	|	ADAT SP STRING CRLF
 		{
 			auth_data((char *) $3);
-			free((char *) $3);
+			free($3);
 		}
 	|	QUIT CRLF
 		{
@@ -644,7 +644,7 @@ rcmd:		RNFR check_login SP pathname CRLF
 			if ($2 && $4) {
 				fromname = renamefrom((char *) $4);
 				if (fromname == (char *) 0 && $4) {
-					free((char *) $4);
+					free($4);
 				}
 			}
 		}
@@ -803,10 +803,10 @@ pathname:	pathstring
 					$$ = $1;
 				else {
 					reply(550, "%s", globerr);
-					free((char *) $1);
+					free($1);
 				}
 			} else
-				free((char *) $1);
+				free($1);
 		} else
 			$$ = $1;
 	}

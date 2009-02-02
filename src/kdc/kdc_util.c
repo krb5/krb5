@@ -145,7 +145,7 @@ concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
 	    *retdata[i] = **ptr;
 	    if (!(retdata[i]->contents =
 		  (krb5_octet *)malloc(retdata[i]->length))) {
-		free((char *)retdata[i]);
+		free(retdata[i]);
 		retdata[i] = 0;
 		krb5_free_authdata(kdc_context, retdata);
 		return ENOMEM;

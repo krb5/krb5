@@ -43,12 +43,12 @@ krb5_error_code ktutil_free_kt_list(context, list)
 
     for (lp = list; lp;) {
 	retval = krb5_kt_free_entry(context, lp->entry);
-	free((char *)lp->entry);
+	free(lp->entry);
 	if (retval)
 	    break;
 	prev = lp;
 	lp = lp->next;
-	free((char *)prev);
+	free(prev);
     }
     return retval;
 }
@@ -283,7 +283,7 @@ krb5_error_code ktutil_read_keytab(context, name, list)
 	lp->entry = entry;
     }
     if (entry)
-	free((char *)entry);
+	free(entry);
     if (retval) {
 	if (retval == KRB5_KT_END)
 	    retval = 0;

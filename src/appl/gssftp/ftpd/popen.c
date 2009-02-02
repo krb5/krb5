@@ -142,7 +142,7 @@ ftpd_popen(program, type)
 
 pfree:	for (argc = 1; argv[argc] != NULL; argc++) {
 		blkfree((char **)argv[argc]);
-		free((char *)argv[argc]);
+		free(argv[argc]);
 	}
 	return(iop);
 }

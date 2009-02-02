@@ -506,7 +506,7 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
 	}
 	tmpprinc->data = ALLOC (msize, krb5_data);
 	if (tmpprinc->data == 0) {
-	    free((char *)tmpprinc);
+	    free(tmpprinc);
 	    return KRB5_CC_NOMEM;
 	}
     } else
@@ -531,8 +531,8 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
     while(--i >= 0)
 	free(krb5_princ_component(context, tmpprinc, i)->data);
     free(krb5_princ_realm(context, tmpprinc)->data);
-    free((char *)tmpprinc->data);
-    free((char *)tmpprinc);
+    free(tmpprinc->data);
+    free(tmpprinc);
     return kret;
 }
 

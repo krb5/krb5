@@ -40,7 +40,6 @@
 #error find some way to use net-byte-order file version numbers.
 #endif
 
-#define FREE(x) ((void) free((char *) (x)))
 #define UNIQUE getpid() /* hopefully unique number */
 
 #define GETDIR (dir = getdir(), dirlen = strlen(dir) + sizeof(PATH_SEPARATOR) - 1)
@@ -205,7 +204,7 @@ cleanup:
         if (d->fn) {
             if (!do_not_unlink)
                 (void) unlink(d->fn);
-            FREE(d->fn);
+            free(d->fn);
             d->fn = NULL;
         }
         if (d->fd != -1) {
@@ -299,7 +298,7 @@ cleanup:
         if (d->fn) {
             if (!do_not_unlink)
                 (void) unlink(d->fn);
-            FREE(d->fn);
+            free(d->fn);
             d->fn = NULL;
         }
         if (d->fd >= 0)
@@ -470,7 +469,7 @@ krb5_error_code
 krb5_rc_io_close(krb5_context context, krb5_rc_iostuff *d)
 {
     if (d->fn != NULL) {
-        FREE(d->fn);
+        free(d->fn);
         d->fn = NULL;
     }
     if (d->fd != -1) {

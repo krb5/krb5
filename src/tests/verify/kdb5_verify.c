@@ -303,8 +303,8 @@ errout:
       }
     }
 
-    free((char *)pwd_key.contents);
-    free((char *)db_key.contents);
+    free(pwd_key.contents);
+    free(db_key.contents);
 
     if (kdbe.key_data[0].key_data_kvno != 1) {
       fprintf(stderr,"\tkvno did not match stored value for %s.\n", princ_name);
