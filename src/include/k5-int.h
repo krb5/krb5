@@ -201,7 +201,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_DNS_LOOKUP_KDC              "dns_lookup_kdc"
 #define KRB5_CONF_DNS_LOOKUP_REALM            "dns_lookup_realm"
 #define KRB5_CONF_DNS_FALLBACK                "dns_fallback"
-#edefine KRB5_CONF_EXTRA_ADDRESSES            "extra_addresses"
+#define KRB5_CONF_EXTRA_ADDRESSES            "extra_addresses"
 #define KRB5_CONF_HOST_BASED_SERVICES         "host_based_services"
 #define KRB5_CONF_IPROP_ENABLE                "iprop_enable"
 #define KRB5_CONF_IPROP_MASTER_ULOGSIZE       "iprop_master_ulogsize"
