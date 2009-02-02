@@ -52,7 +52,7 @@ static char sccsid[] = "@(#)get_myaddress.c 1.4 87/08/11 Copyr 1984 Sun Micro";
 int
 get_myaddress(struct sockaddr_in *addr)
 {
-	memset((void *) addr, 0, sizeof(*addr));
+	memset(addr, 0, sizeof(*addr));
 	addr->sin_family = AF_INET;
 	addr->sin_port = htons(PMAPPORT);
 	addr->sin_addr.s_addr = htonl(INADDR_LOOPBACK);

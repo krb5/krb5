@@ -165,7 +165,7 @@ finish_realm(kdc_realm_t *rdp)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);
 	krb5_free_context(rdp->realm_context);
     }
-    memset((char *) rdp, 0, sizeof(*rdp));
+    memset(rdp, 0, sizeof(*rdp));
     free(rdp);
 }
 
@@ -247,7 +247,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     int			kdb_open_flags;
     krb5_kvno       mkvno = IGNORE_VNO;
 
-    memset((char *) rdp, 0, sizeof(kdc_realm_t));
+    memset(rdp, 0, sizeof(kdc_realm_t));
     if (!realm) {
 	kret = EINVAL;
 	goto whoops;
@@ -814,7 +814,7 @@ int main(int argc, char **argv)
 	fprintf(stderr, "%s: cannot get memory for realm list\n", argv[0]);
 	exit(1);
     }
-    memset((char *) kdc_realmlist, 0,
+    memset(kdc_realmlist, 0,
 	   (size_t) (sizeof(kdc_realm_t *) * KRB5_KDC_MAX_REALMS));
 
     /*

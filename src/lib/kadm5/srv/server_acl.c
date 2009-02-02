@@ -607,7 +607,7 @@ kadm5int_acl_find_entry(kcontext, principal, dest_princ)
     wildstate_t		state;
 
     DPRINT(DEBUG_CALLS, acl_debug_level, ("* kadm5int_acl_find_entry()\n"));
-    memset((char *)&state, 0, sizeof state);
+    memset(&state, 0, sizeof state);
     for (entry=acl_list_head; entry; entry = entry->ae_next) {
 	if (entry->ae_name_bad)
 	    continue;

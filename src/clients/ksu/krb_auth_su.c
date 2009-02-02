@@ -59,9 +59,9 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     krb5_boolean zero_password;
     
     *path_passwd = 0;
-    memset((char *) &tgtq, 0, sizeof(tgtq)); 
-    memset((char *) &tgt, 0, sizeof(tgt)); 
-    memset((char *) &in_creds, 0, sizeof(krb5_creds)); 
+    memset(&tgtq, 0, sizeof(tgtq)); 
+    memset(&tgt, 0, sizeof(tgt)); 
+    memset(&in_creds, 0, sizeof(krb5_creds)); 
     
 	
     if ((retval= krb5_copy_principal(context,  client_pname, &client))){
@@ -241,8 +241,8 @@ krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
     krb5_verify_init_creds_opt vfy_opts;
     krb5_error_code retval;
     
-    memset((char *) &tgtq, 0, sizeof(tgtq)); 
-    memset((char *) &tgt, 0, sizeof(tgt)); 
+    memset(&tgtq, 0, sizeof(tgtq)); 
+    memset(&tgt, 0, sizeof(tgt)); 
     
     if ((retval= krb5_copy_principal(context, client, &tgtq.client))){
 	com_err(prog_name, retval,"while copying client principal");   
@@ -300,7 +300,7 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
         return (FALSE);
     }
 
-    memset((char *)&my_creds, 0, sizeof(my_creds));
+    memset(&my_creds, 0, sizeof(my_creds));
     
     if ((code = krb5_copy_principal(context, client, &my_creds.client))){ 
         com_err (prog_name, code, "while copying principal");

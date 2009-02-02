@@ -132,7 +132,7 @@ krb5_ldap_readpassword(context, ldap_context, password)
 		st = ENOMEM;
 		goto rp_exit;
 	    }
-	    memcpy((char *)(*password), start, len);
+	    memcpy(*password, start, len);
 	    (*password)[len] = '\0';
 	    (*password)[len + 1] = '\0';
 	    goto got_password;

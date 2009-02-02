@@ -3144,17 +3144,16 @@ sourceroute(arg, cpp, lenp)
 			sin_addr.s_addr = tmp;
 		} else if ((host = gethostbyname(cp))) {
 #if	defined(h_addr)
-			memcpy((caddr_t)&sin_addr,
-				host->h_addr_list[0], sizeof(sin_addr));
+			memcpy(&sin_addr,
+			        host->h_addr_list[0], sizeof(sin_addr));
 #else
-			memcpy((caddr_t)&sin_addr, host->h_addr, 
-			       sizeof(sin_addr));
+			memcpy(&sin_addr, host->h_addr, sizeof(sin_addr));
 #endif
 		} else {
 			*cpp = cp;
 			return(0);
 		}
-		memcpy(lsrp, (char *)&sin_addr, 4);
+		memcpy(lsrp, &sin_addr, 4);
 		lsrp += 4;
 		if (cp2)
 			cp = cp2;

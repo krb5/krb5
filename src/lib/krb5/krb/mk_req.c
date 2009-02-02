@@ -65,7 +65,7 @@ krb5_mk_req(krb5_context context, krb5_auth_context *auth_context,
       return retval;
 
     /* obtain ticket & session key */
-    memset((char *)&creds, 0, sizeof(creds));
+    memset(&creds, 0, sizeof(creds));
     if ((retval = krb5_copy_principal(context, server, &creds.server)))
 	goto cleanup_princ;
 

@@ -180,7 +180,7 @@ k5db2_clear_context(krb5_db2_context *dbctx)
     /*
      * Clear the structure and reset the defaults.
      */
-    memset((char *) dbctx, 0, sizeof(krb5_db2_context));
+    memset(dbctx, 0, sizeof(krb5_db2_context));
     dbctx->db_name = default_db_name;
     dbctx->db_nb_locks = FALSE;
     dbctx->tempdb = FALSE;
@@ -199,7 +199,7 @@ k5db2_init_context(krb5_context context)
 	if (db_ctx == NULL)
 	    return ENOMEM;
 	else {
-	    memset((char *) db_ctx, 0, sizeof(krb5_db2_context));
+	    memset(db_ctx, 0, sizeof(krb5_db2_context));
 	    k5db2_clear_context((krb5_db2_context *) db_ctx);
 	    dal_handle->db_context = (void *) db_ctx;
 	}
@@ -1113,7 +1113,7 @@ krb5_db2_db_delete_principal(krb5_context context,
     case 0:
 	;
     }
-    memset((char *) &entry, 0, sizeof(entry));
+    memset(&entry, 0, sizeof(entry));
     contdata.data = contents.data;
     contdata.length = contents.size;
     retval = krb5_decode_princ_contents(context, &contdata, &entry);
@@ -1124,7 +1124,7 @@ krb5_db2_db_delete_principal(krb5_context context,
     /* Clear encrypted key contents */
     for (i = 0; i < entry.n_key_data; i++) {
 	if (entry.key_data[i].key_data_length[0]) {
-	    memset((char *) entry.key_data[i].key_data_contents[0], 0,
+	    memset(entry.key_data[i].key_data_contents[0], 0,
 		   (unsigned) entry.key_data[i].key_data_length[0]);
 	}
     }

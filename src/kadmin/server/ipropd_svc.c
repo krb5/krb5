@@ -542,7 +542,7 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
 	svcerr_noproc(transp);
 	return;
     }
-    (void) memset((char *)&argument, 0, sizeof (argument));
+    (void) memset(&argument, 0, sizeof (argument));
     if (!svc_getargs(transp, _xdr_argument, (caddr_t)&argument)) {
 	krb5_klog_syslog(LOG_ERR,
 			 _("RPC svc_getargs failed (%s)"),

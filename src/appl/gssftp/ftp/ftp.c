@@ -196,7 +196,7 @@ hookup(char* host, int port)
 #endif
 	static char hostnamebuf[80];
 
-	memset((char *)&hisctladdr, 0, sizeof (hisctladdr));
+	memset(&hisctladdr, 0, sizeof (hisctladdr));
 	hisctladdr.sin_addr.s_addr = inet_addr(host);
 	if (hisctladdr.sin_addr.s_addr != -1) {
 		hisctladdr.sin_family = AF_INET;

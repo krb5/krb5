@@ -78,7 +78,7 @@ ftpd_popen(program, type)
 			return(NULL);
 		if ((pids = (int *)malloc((u_int)(fds * sizeof(int)))) == NULL)
 			return(NULL);
-		memset((char *)pids, 0, fds * sizeof(int));
+		memset(pids, 0, fds * sizeof(int));
 	}
 	if (pipe(pdes) < 0)
 		return(NULL);

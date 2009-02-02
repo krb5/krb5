@@ -57,8 +57,8 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
     krb5_keyblock *session_key;
     krb5_boolean old_use_conf_ktypes = context->use_conf_ktypes;
 
-    memset((char *)&creds, 0, sizeof(creds));
-    memset((char *)&tgt, 0, sizeof(creds));
+    memset(&creds, 0, sizeof(creds));
+    memset(&tgt, 0, sizeof(creds));
 
     if (cc == 0) {
       if ((retval = krb5int_cc_default(context, &cc)))

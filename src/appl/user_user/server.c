@@ -125,7 +125,7 @@ char *argv[];
       return 4;
   }
 
-  memset ((char*)&creds, 0, sizeof(creds));
+  memset (&creds, 0, sizeof(creds));
   retval = krb5_cc_get_principal(context, cc, &creds.client);
   if (retval) {
       com_err("uu-client", retval, "getting principal name");

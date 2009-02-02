@@ -99,7 +99,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
     if (master_entry->key_data == NULL)
         return (ENOMEM);
 
-    memset((char *) master_entry->key_data, 0,
+    memset(master_entry->key_data, 0,
            sizeof(krb5_key_data) * (old_key_data_count + 1));
     master_entry->n_key_data = old_key_data_count + 1;
 
@@ -1308,7 +1308,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         exit_status++;
         return;
     }
-    memset((char *) master_entry.key_data, 0, sizeof(krb5_key_data) * num_kvnos_inuse);
+    memset(master_entry.key_data, 0, sizeof(krb5_key_data) * num_kvnos_inuse);
     master_entry.n_key_data = num_kvnos_inuse; /* there's only 1 mkey per kvno */
 
     /*

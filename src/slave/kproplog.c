@@ -397,7 +397,7 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, unsigned int verbose)
 	    exit(1);
 	}
 
-	(void) memset((char *)&upd, 0, sizeof (kdb_incr_update_t));
+	(void) memset(&upd, 0, sizeof (kdb_incr_update_t));
 	xdrmem_create(&xdrs, (char *)indx_log->entry_data,
 		      indx_log->kdb_entry_size, XDR_DECODE);
 	if (!xdr_kdb_incr_update_t(&xdrs, &upd)) {
@@ -498,7 +498,7 @@ main(int argc, char **argv)
 	exit(1);
     }
 
-    (void) memset((char *)&params, 0, sizeof (params));
+    (void) memset(&params, 0, sizeof (params));
 
     if (kadm5_get_config_params(context, 1, &params, &params)) {
 	(void) fprintf(stderr,

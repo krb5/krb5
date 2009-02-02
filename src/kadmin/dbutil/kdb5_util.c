@@ -519,7 +519,7 @@ static int open_db_and_mkey()
     if ((retval = krb5_c_random_seed(util_context, &seed))) {
 	com_err(progname, retval, "while seeding random number generator");
 	exit_status++;
-	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+	memset(master_keyblock.contents, 0, master_keyblock.length);
 	krb5_free_keyblock_contents(util_context, &master_keyblock);
         krb5_db_free_mkey_list(util_context, master_keylist);
 	return(1);
@@ -544,7 +544,7 @@ quit()
 	return 0;
     krb5_db_free_mkey_list(util_context, master_keylist);
     retval = krb5_db_fini(util_context);
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    memset(master_keyblock.contents, 0, master_keyblock.length);
     finished = TRUE;
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");

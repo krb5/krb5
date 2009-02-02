@@ -395,7 +395,7 @@ main(argc, argv)
 	if (secflag)  {
 		int sz = sizeof(ss);
 
-		memset((char *)&dv, 0, sizeof(dv));
+		memset(&dv, 0, sizeof(dv));
 
 		if (getsysv(&sysv, sizeof(struct sysv)) != 0) {
 			perror("getsysv");

@@ -217,7 +217,7 @@ void kadm_1(rqstp, transp)
 	  svcerr_noproc(transp);
 	  return;
      }
-     memset((char *)&argument, 0, sizeof(argument));
+     memset(&argument, 0, sizeof(argument));
      if (!svc_getargs(transp, xdr_argument, &argument)) {
 	  svcerr_decode(transp);
 	  return;

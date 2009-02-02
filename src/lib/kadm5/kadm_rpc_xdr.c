@@ -230,7 +230,7 @@ bool_t xdr_krb5_key_data_nocontents(XDR *xdrs, krb5_key_data *objp)
      unsigned int tmp;
 
      if (xdrs->x_op == XDR_DECODE)
-	  memset((char *) objp, 0, sizeof(krb5_key_data));
+	  memset(objp, 0, sizeof(krb5_key_data));
 
      if (!xdr_krb5_int16(xdrs, &objp->key_data_ver)) {
 	  return (FALSE);
@@ -322,7 +322,7 @@ bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
 	       tl2 = (krb5_tl_data *) malloc(sizeof(krb5_tl_data));
 	       if (tl2 == NULL)
 		    return FALSE;
-	       memset((char *) tl2, 0, sizeof(krb5_tl_data));
+	       memset(tl2, 0, sizeof(krb5_tl_data));
 	       if (!xdr_krb5_int16(xdrs, &tl2->tl_data_type))
 		    return FALSE;
 	       if (!xdr_bytes(xdrs, (char **)&tl2->tl_data_contents, &len, ~0))

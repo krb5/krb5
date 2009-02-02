@@ -764,7 +764,7 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 	 mask = in_mask;
     }
 
-    memset((char *) entry, 0, sizeof(*entry));
+    memset(entry, 0, sizeof(*entry));
 
     if (principal == NULL)
 	return EINVAL;
@@ -1184,7 +1184,7 @@ static kadm5_ret_t add_to_history(krb5_context context,
 	     }
 	     free(histp->key_data);
 	 }
-	 free((void *)adb->old_keys);
+	 free(adb->old_keys);
 	 adb->old_keys = tmp;
 	 nkeys = adb->old_key_len = nhist - 1;
 	 knext = adb->old_key_next = 0;
@@ -2155,7 +2155,7 @@ static int decrypt_key_data(krb5_context context, krb5_keyblock *mkey,
      keys = (krb5_keyblock *) malloc(n_key_data*sizeof(krb5_keyblock));
      if (keys == NULL)
 	  return ENOMEM;
-     memset((char *) keys, 0, n_key_data*sizeof(krb5_keyblock));
+     memset(keys, 0, n_key_data*sizeof(krb5_keyblock));
 
      for (i = 0; i < n_key_data; i++) {
           ret = krb5_dbekd_decrypt_key_data(context, mkey,
@@ -2169,7 +2169,7 @@ static int decrypt_key_data(krb5_context context, krb5_keyblock *mkey,
 		   }
 	       }
 
-	       memset((char *) keys, 0, n_key_data*sizeof(krb5_keyblock));
+	       memset(keys, 0, n_key_data*sizeof(krb5_keyblock));
 	       free(keys);
 	       return ret;
 	  }

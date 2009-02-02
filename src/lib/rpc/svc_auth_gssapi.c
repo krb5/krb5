@@ -169,7 +169,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
      /* use AUTH_NONE until there is a client_handle */
      rqst->rq_xprt->xp_auth = &svc_auth_none;
      
-     memset((char *) &call_res, 0, sizeof(call_res));
+     memset(&call_res, 0, sizeof(call_res));
      creds.client_handle.length = 0;
      creds.client_handle.value = NULL;
      
@@ -185,7 +185,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 
      PRINTF(("svcauth_gssapi: decoding credentials\n"));
      xdrmem_create(&xdrs, cred->oa_base, cred->oa_length, XDR_DECODE); 
-     memset((char *) &creds, 0, sizeof(creds));
+     memset(&creds, 0, sizeof(creds));
      if (! xdr_authgssapi_creds(&xdrs, &creds)) {
 	  PRINTF(("svcauth_gssapi: failed decoding creds\n"));
 	  LOG_MISCERR("protocol error in client credentials");
@@ -691,7 +691,7 @@ static svc_auth_gssapi_data *create_client(void)
      client_data = (svc_auth_gssapi_data *) malloc(sizeof(*client_data));
      if (client_data == NULL)
 	  return NULL;
-     memset((char *) client_data, 0, sizeof(*client_data));
+     memset(client_data, 0, sizeof(*client_data));
      L_PRINTF(2, ("create_client: new client_data = %p\n", 
 		  (void *) client_data));
      

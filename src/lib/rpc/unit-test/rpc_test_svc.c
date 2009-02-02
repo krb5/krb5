@@ -53,7 +53,7 @@ rpc_test_prog_1_svc(rqstp, transp)
 		_rpcsvcstate = _SERVED;
 		return;
 	}
-	(void) memset((char *)&argument, 0, sizeof (argument));
+	(void) memset(&argument, 0, sizeof (argument));
 	if (!svc_getargs(transp, xdr_argument, &argument)) {
 		svcerr_decode(transp);
 		_rpcsvccount--;

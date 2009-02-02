@@ -340,7 +340,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 	      service);
 
     /* Initialize variables */
-    memset((char *)&creds, 0, sizeof(creds));
+    memset(&creds, 0, sizeof(creds));
 
     /* Do client side */
     if (asprintf(&sname, "%s@%s", service, hostname) >= 0) {
@@ -466,7 +466,7 @@ int get_tgt (context, p_client_str, p_client, ccache)
 	return(-1);
     }
 
-    memset((char *)&my_creds, 0, sizeof(my_creds));
+    memset(&my_creds, 0, sizeof(my_creds));
     
     if ((code = krb5_parse_name (context, p_client_str, p_client))) {
 	com_err (prog, code, "when parsing name %s", p_client_str);

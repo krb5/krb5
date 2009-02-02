@@ -199,7 +199,7 @@ ofb64_init(server)
 fb64_init(fbp)
 	register struct fb *fbp;
 {
-	memset((void *)fbp, 0, sizeof(*fbp));
+	memset(fbp, 0, sizeof(*fbp));
 	fbp->state[0] = fbp->state[1] = FAILED;
 	fbp->fb_feed[0] = IAC;
 	fbp->fb_feed[1] = SB;
@@ -600,8 +600,8 @@ fb64_stream_iv(seed, stp)
 	Block seed;
 	register struct stinfo *stp;
 {
-	memcpy((void *)stp->str_iv,     (void *)seed, sizeof(Block));
-	memcpy((void *)stp->str_output, (void *)seed, sizeof(Block));
+	memcpy(stp->str_iv,     seed, sizeof(Block));
+	memcpy(stp->str_output, seed, sizeof(Block));
 
 	stp->str_index = sizeof(Block);
 }
@@ -611,7 +611,7 @@ fb64_stream_key(key, stp)
 	Block key;
 	register struct stinfo *stp;
 {
-	memcpy((void *)stp->str_keybytes, (void *)key, sizeof(Block));
+	memcpy(stp->str_keybytes, key, sizeof(Block));
 	stp->str_key.length = 8;
 	stp->str_key.contents = stp->str_keybytes;
 	/* the original version of this code uses des ecb mode, but
@@ -619,7 +619,7 @@ fb64_stream_key(key, stp)
 	   is identical */
 	stp->str_key.enctype = ENCTYPE_DES_CBC_RAW;
 
-	memcpy((void *)stp->str_output, (void *)stp->str_iv, sizeof(Block));
+	memcpy(stp->str_output, stp->str_iv, sizeof(Block));
 
 	stp->str_index = sizeof(Block);
 }
@@ -659,7 +659,7 @@ cfb64_encrypt(s, c)
 		if (idx == sizeof(Block)) {
 			Block b;
 			ecb_encrypt(stp, stp->str_output, b);
-			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
+			memcpy(stp->str_feed,b,sizeof(Block));
 			idx = 0;
 		}
 
@@ -693,7 +693,7 @@ cfb64_decrypt(data)
 	if (idx == sizeof(Block)) {
 		Block b;
 		ecb_encrypt(stp, stp->str_output, b);
-		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
+		memcpy(stp->str_feed, b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
 		idx = 0;		/* But now use 0 */ 
 	}
@@ -735,7 +735,7 @@ ofb64_encrypt(s, c)
 		if (idx == sizeof(Block)) {
 			Block b;
 			ecb_encrypt(stp, stp->str_feed, b);
-			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
+			memcpy(stp->str_feed,b,sizeof(Block));
 			idx = 0;
 		}
 		*s++ ^= stp->str_feed[idx];
@@ -766,7 +766,7 @@ ofb64_decrypt(data)
 	if (idx == sizeof(Block)) {
 		Block b;
 		ecb_encrypt(stp, stp->str_feed, b);
-		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
+		memcpy(stp->str_feed, b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
 		idx = 0;		/* But now use 0 */ 
 	}

@@ -41,7 +41,7 @@ krb5_gen_portaddr(krb5_context context, const krb5_address *addr, krb5_const_poi
 	return KRB5_PROG_ATYPE_NOSUPP;
     port = *(const krb5_int16 *)ptr;
     
-    memcpy((char *)&adr, (char *)addr->contents, sizeof(adr));
+    memcpy(&adr, addr->contents, sizeof(adr));
     return krb5_make_full_ipaddr(context, adr, port, outaddr);
 #else
     return KRB5_PROG_ATYPE_NOSUPP;

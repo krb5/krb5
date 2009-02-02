@@ -176,8 +176,8 @@ AUTH *auth_gssapi_create(
 	  rpc_createerr.cf_error.re_errno = ENOMEM;
 	  goto cleanup;
      }
-     memset((char *) auth, 0, sizeof(*auth));
-     memset((char *) pdata, 0, sizeof(*pdata));
+     memset(auth, 0, sizeof(*auth));
+     memset(pdata, 0, sizeof(*pdata));
      
      auth->ah_ops = &auth_gssapi_ops;
      auth->ah_private = (caddr_t) pdata;
@@ -246,7 +246,7 @@ try_new_version:
 	  bindp = NULL;
      }
      
-     memset((char *) &call_res, 0, sizeof(call_res));
+     memset(&call_res, 0, sizeof(call_res));
      
 next_token:
      *gssstat = gss_init_sec_context(minor_stat,
@@ -283,7 +283,7 @@ next_token:
 	  
 	  PRINTF(("gssapi_create: calling GSSAPI_INIT (%d)\n", init_func));
 	  
-	  memset((char *) &call_res, 0, sizeof(call_res));
+	  memset(&call_res, 0, sizeof(call_res));
 	  callstat = clnt_call(clnt, init_func,
 			       xdr_authgssapi_init_arg, &call_arg,
 			       xdr_authgssapi_init_res, &call_res,

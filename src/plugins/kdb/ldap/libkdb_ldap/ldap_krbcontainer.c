@@ -86,7 +86,7 @@ krb5_ldap_read_krbcontainer_params(krb5_context	context,
 
     cparams =(krb5_ldap_krbcontainer_params *) malloc(sizeof(krb5_ldap_krbcontainer_params));
     CHECK_NULL(cparams);
-    memset((char *) cparams, 0, sizeof(krb5_ldap_krbcontainer_params));
+    memset(cparams, 0, sizeof(krb5_ldap_krbcontainer_params));
 
     /* read kerberos containter location from [dbmodules] section of krb5.conf file */
     if (ldap_context->conf_section) {

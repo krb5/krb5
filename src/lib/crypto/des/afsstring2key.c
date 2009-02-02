@@ -142,7 +142,7 @@ mit_afs_string_to_key (krb5_keyblock *keyblock, const krb5_data *data,
       (void) mit_des_cbc_cksum (password, key, i, key_sked, ikey);
 	
       /* erase key_sked */
-      memset((char *)key_sked, 0,sizeof(key_sked));
+      memset(key_sked, 0,sizeof(key_sked));
 
       /* now fix up key parity again */
       mit_des_fixup_key_parity(key);

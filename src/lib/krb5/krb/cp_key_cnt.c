@@ -40,7 +40,7 @@ krb5_copy_keyblock_contents(krb5_context context, const krb5_keyblock *from, krb
         to->contents = (krb5_octet *)malloc(to->length);
         if (!to->contents)
             return ENOMEM;
-        memcpy((char *)to->contents, (char *)from->contents, to->length);
+        memcpy(to->contents, from->contents, to->length);
     } else 
         to->contents = 0;
     return 0;

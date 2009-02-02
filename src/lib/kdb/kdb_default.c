@@ -204,7 +204,7 @@ krb5_def_store_mkey_list(krb5_context       context,
         goto out;
 
     while (keylist && !retval) {
-        memset((char *) &new_entry, 0, sizeof(new_entry));
+        memset(&new_entry, 0, sizeof(new_entry));
         new_entry.principal = mname;
         new_entry.key = keylist->keyblock;
         new_entry.vno = keylist->kvno;

@@ -14,7 +14,7 @@ iprop_null_1(void *argp, CLIENT *clnt)
 {
 	static char clnt_res;
 
-	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	memset(&clnt_res, 0, sizeof(clnt_res));
 	if (clnt_call (clnt, IPROP_NULL,
 		(xdrproc_t) xdr_void, (caddr_t) argp,
 		(xdrproc_t) xdr_void, (caddr_t) &clnt_res,
@@ -29,7 +29,7 @@ iprop_get_updates_1(kdb_last_t *argp, CLIENT *clnt)
 {
 	static kdb_incr_result_t clnt_res;
 
-	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	memset(&clnt_res, 0, sizeof(clnt_res));
 	if (clnt_call (clnt, IPROP_GET_UPDATES,
 		(xdrproc_t) xdr_kdb_last_t, (caddr_t) argp,
 		(xdrproc_t) xdr_kdb_incr_result_t, (caddr_t) &clnt_res,
@@ -44,7 +44,7 @@ iprop_full_resync_1(void *argp, CLIENT *clnt)
 {
 	static kdb_fullresync_result_t clnt_res;
 
-	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	memset(&clnt_res, 0, sizeof(clnt_res));
 	if (clnt_call (clnt, IPROP_FULL_RESYNC,
 		(xdrproc_t) xdr_void, (caddr_t) argp,
 		(xdrproc_t) xdr_kdb_fullresync_result_t, (caddr_t) &clnt_res,

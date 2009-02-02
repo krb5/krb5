@@ -262,7 +262,7 @@ void get_tickets(context)
 	 *
 	 * Construct the principal name for the slave host.
 	 */
-	memset((char *)&creds, 0, sizeof(creds));
+	memset(&creds, 0, sizeof(creds));
 	retval = krb5_sname_to_principal(context,
 					 slave_host, KPROP_SERVICE_NAME,
 					 KRB5_NT_SRV_HST, &creds.server);
@@ -342,7 +342,7 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 		return(0);
 	}
 	my_sin.sin_family = hp->h_addrtype;
-	memcpy((char *)&my_sin.sin_addr, hp->h_addr, sizeof(my_sin.sin_addr));
+	memcpy(&my_sin.sin_addr, hp->h_addr, sizeof(my_sin.sin_addr));
 	if(!port) {
 		sp = getservbyname(KPROP_SERVICE, "tcp");
 		if (sp == 0) {
@@ -372,7 +372,7 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 	receiver_addr.addrtype = ADDRTYPE_INET;
 	receiver_addr.length = sizeof(my_sin.sin_addr);
 	receiver_addr.contents = (krb5_octet *) malloc(sizeof(my_sin.sin_addr));
-	memcpy((char *) receiver_addr.contents, (char *) &my_sin.sin_addr,
+	memcpy(receiver_addr.contents, &my_sin.sin_addr,
 	       sizeof(my_sin.sin_addr));
 
 	socket_length = sizeof(my_sin);
@@ -385,7 +385,7 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 	sender_addr.addrtype = ADDRTYPE_INET;
 	sender_addr.length = sizeof(my_sin.sin_addr);
 	sender_addr.contents = (krb5_octet *) malloc(sizeof(my_sin.sin_addr));
-	memcpy((char *) sender_addr.contents, (char *) &my_sin.sin_addr,
+	memcpy(sender_addr.contents, &my_sin.sin_addr,
 	       sizeof(my_sin.sin_addr));
 
 	return(0);
@@ -672,7 +672,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
 		exit(1);
 	}
 
-	memcpy((char *)&send_size, outbuf.data, sizeof(send_size));
+	memcpy(&send_size, outbuf.data, sizeof(send_size));
 	send_size = ntohl(send_size);
 	if (send_size != database_size) {
 		com_err(progname, 0,
@@ -696,7 +696,7 @@ send_error(context, my_creds, fd, err_text, err_code)
 	const char	*text;
 	krb5_data	outbuf;
 
-	memset((char *)&error, 0, sizeof(error));
+	memset(&error, 0, sizeof(error));
 	krb5_us_timeofday(context, &error.ctime, &error.cusec);
 	error.server = my_creds->server;
 	error.client = my_principal;

@@ -68,7 +68,7 @@ krb5_copy_authdatum(krb5_context context, const krb5_authdata *inad, krb5_authda
 	free(tmpad);
 	return ENOMEM;
     }
-    memcpy((char *)tmpad->contents, (char *)inad->contents, inad->length);
+    memcpy(tmpad->contents, inad->contents, inad->length);
     *outad = tmpad;
     return 0;
 }

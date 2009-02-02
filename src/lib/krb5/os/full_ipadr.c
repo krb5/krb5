@@ -59,25 +59,25 @@ krb5_make_full_ipaddr(krb5_context context, krb5_int32 adr,
     marshal = retaddr->contents;
 
     temptype = htons(ADDRTYPE_INET);
-    (void) memcpy((char *)marshal, (char *)&temptype, sizeof(temptype));
+    (void) memcpy(marshal, &temptype, sizeof(temptype));
     marshal += sizeof(temptype);
 
     templength = htonl(sizeof(smushaddr));
-    (void) memcpy((char *)marshal, (char *)&templength, sizeof(templength));
+    (void) memcpy(marshal, &templength, sizeof(templength));
     marshal += sizeof(templength);
 
-    (void) memcpy((char *)marshal, (char *)&smushaddr, sizeof(smushaddr));
+    (void) memcpy(marshal, &smushaddr, sizeof(smushaddr));
     marshal += sizeof(smushaddr);
 
     temptype = htons(ADDRTYPE_IPPORT);
-    (void) memcpy((char *)marshal, (char *)&temptype, sizeof(temptype));
+    (void) memcpy(marshal, &temptype, sizeof(temptype));
     marshal += sizeof(temptype);
 
     templength = htonl(sizeof(smushport));
-    (void) memcpy((char *)marshal, (char *)&templength, sizeof(templength));
+    (void) memcpy(marshal, &templength, sizeof(templength));
     marshal += sizeof(templength);
 
-    (void) memcpy((char *)marshal, (char *)&smushport, sizeof(smushport));
+    (void) memcpy(marshal, &smushport, sizeof(smushport));
     marshal += sizeof(smushport);
 
     *outaddr = retaddr;

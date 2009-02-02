@@ -50,31 +50,31 @@ krb5_unpack_full_ipaddr(krb5_context context, const krb5_address *inaddr, krb5_i
 
     marshal = inaddr->contents;
 
-    (void) memcpy((char *)&temptype, (char *)marshal, sizeof(temptype));
+    (void) memcpy(&temptype, marshal, sizeof(temptype));
     marshal += sizeof(temptype);
     if (temptype != htons(ADDRTYPE_INET))
 	return KRB5_PROG_ATYPE_NOSUPP;
 
-    (void) memcpy((char *)&templength, (char *)marshal, sizeof(templength));
+    (void) memcpy(&templength, marshal, sizeof(templength));
     marshal += sizeof(templength);
     if (templength != htonl(sizeof(smushaddr)))
 	return KRB5_PROG_ATYPE_NOSUPP;
 
-    (void) memcpy((char *)&smushaddr, (char *)marshal, sizeof(smushaddr));
+    (void) memcpy(&smushaddr, marshal, sizeof(smushaddr));
     /* leave in net order */
     marshal += sizeof(smushaddr);
 
-    (void) memcpy((char *)&temptype, (char *)marshal, sizeof(temptype));
+    (void) memcpy(&temptype, marshal, sizeof(temptype));
     marshal += sizeof(temptype);
     if (temptype != htons(ADDRTYPE_IPPORT))
 	return KRB5_PROG_ATYPE_NOSUPP;
 
-    (void) memcpy((char *)&templength, (char *)marshal, sizeof(templength));
+    (void) memcpy(&templength, marshal, sizeof(templength));
     marshal += sizeof(templength);
     if (templength != htonl(sizeof(smushport)))
 	return KRB5_PROG_ATYPE_NOSUPP;
 
-    (void) memcpy((char *)&smushport, (char *)marshal, sizeof(smushport));
+    (void) memcpy(&smushport, marshal, sizeof(smushport));
     /* leave in net order */
 
     *adr = (krb5_int32) smushaddr;

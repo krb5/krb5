@@ -46,9 +46,9 @@ main(argc, argv)
     }
 
     /* Set server's address */
-    (void) memset((char *)&s_sock, 0, sizeof(s_sock));
+    (void) memset(&s_sock, 0, sizeof(s_sock));
 
-    memcpy((char *)&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
+    memcpy(&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
 #ifdef DEBUG
     printf("s_sock.sin_addr is %s\n", inet_ntoa(s_sock.sin_addr));
 #endif
@@ -61,7 +61,7 @@ main(argc, argv)
 	exit(1);
     }
 
-    memset((char *)&c_sock, 0, sizeof(c_sock));
+    memset(&c_sock, 0, sizeof(c_sock));
     c_sock.sin_family = AF_INET;
 
     /* Bind it to set the address; kernel will fill in port # */
@@ -78,7 +78,7 @@ main(argc, argv)
     }
     
     /* Get my address */
-    memset((char *) &c_sock, 0, sizeof(c_sock));
+    memset(&c_sock, 0, sizeof(c_sock));
     i = sizeof(c_sock);
     if (getsockname(sock, (struct sockaddr *)&c_sock, &i) < 0) {
 	perror("getsockname");

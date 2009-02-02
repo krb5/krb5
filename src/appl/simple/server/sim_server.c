@@ -132,7 +132,7 @@ char *argv[];
     }
 
     /* Set up server address */
-    memset((char *)&s_sock, 0, sizeof(s_sock));
+    memset(&s_sock, 0, sizeof(s_sock));
     s_sock.sin_family = AF_INET;
 
     if (port == 0) {
@@ -155,7 +155,7 @@ char *argv[];
 	fprintf(stderr, "%s: host unknown\n", full_hname);
 	exit(1);
     }
-    memcpy((char *)&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
+    memcpy(&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
 
     /* Open socket */
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {

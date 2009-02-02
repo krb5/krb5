@@ -1300,7 +1300,7 @@ void
 	    exit(1);
     }
     
-    memset ((char*)&creds, 0, sizeof(creds));
+    memset (&creds, 0, sizeof(creds));
 
     if ((status = krb5_read_message(bsd_context, (krb5_pointer)&rem,
 				    &pname_data)))

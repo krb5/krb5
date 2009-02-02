@@ -249,7 +249,7 @@ kerberos5_send(ap)
 		return(0);
 	}
 
-	memset((char *)&creds, 0, sizeof(creds));
+	memset(&creds, 0, sizeof(creds));
 	if (auth_debug_mode)
 	    printf("telnet: calling krb5_sname_to_principal\n");
 	if ((r = krb5_sname_to_principal(telnet_context, RemoteHostName,

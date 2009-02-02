@@ -120,7 +120,7 @@ char *argv[];
 	  return 5;
       }
 
-      memcpy ((char *)&serv_net_addr.sin_addr, host->h_addr_list[i++], 
+      memcpy (&serv_net_addr.sin_addr, host->h_addr_list[i++], 
 	      sizeof(serv_net_addr.sin_addr));
 
       if (connect(s, (struct sockaddr *)&serv_net_addr, 
@@ -139,7 +139,7 @@ char *argv[];
       return 6;
   }
 
-  memset ((char*)&creds, 0, sizeof(creds));
+  memset (&creds, 0, sizeof(creds));
 
   retval = krb5_cc_get_principal(context, cc, &creds.client);
   if (retval) {

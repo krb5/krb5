@@ -123,7 +123,7 @@ svcudp_bufcreate(
 		set_cloexec_fd(sock);
 		madesock = TRUE;
 	}
-	memset((char *)&addr, 0, sizeof (addr));
+	memset(&addr, 0, sizeof (addr));
 #if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 	addr.sin_len = sizeof(addr);
 #endif
@@ -194,7 +194,7 @@ svcudp_recv(
 	uint32_t replylen;
 
     again:
-	memset((char *) &dummy, 0, sizeof(dummy));
+	memset(&dummy, 0, sizeof(dummy));
 	dummy_iov[0].iov_base = rpc_buffer(xprt);
 	dummy_iov[0].iov_len = (int) su->su_iosz;
 	dummy.msg_iov = dummy_iov;
@@ -337,7 +337,7 @@ svcudp_destroy(register SVCXPRT *xprt)
 	(type *) mem_alloc((unsigned) (sizeof(type) * (size)))
 
 #define BZERO(addr, type, size)	 \
-	memset((char *) addr, 0, sizeof(type) * (int) (size)) 
+	memset(addr, 0, sizeof(type) * (int) (size)) 
 
 /*
  * An entry in the cache

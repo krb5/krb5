@@ -195,7 +195,7 @@ main(argc, argv)
     }
 
     retval = krb5_db_fini(test_context);
-    memset((char *)master_keyblock.contents, 0, 
+    memset(master_keyblock.contents, 0, 
 	   (size_t) master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
@@ -218,7 +218,7 @@ add_princ(context, str_newprinc)
     krb5_db_entry 	  newentry;
     char 		  princ_name[4096];
 
-    memset((char *)&newentry, 0, sizeof(newentry));
+    memset(&newentry, 0, sizeof(newentry));
     snprintf(princ_name, sizeof(princ_name), "%s@%s", str_newprinc, cur_realm);
     if ((retval = krb5_parse_name(context, princ_name, &newprinc))) {
       com_err(progname, retval, "while parsing '%s'", princ_name);

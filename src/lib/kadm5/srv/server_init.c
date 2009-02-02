@@ -210,7 +210,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
       * of params_in.  So use that realm, make params_in contain an
       * empty mask, and behave like version 2.
       */
-     memset((char *) &params_local, 0, sizeof(params_local));
+     memset(&params_local, 0, sizeof(params_local));
      if (api_version == KADM5_API_VERSION_1) {
 	  params_local.realm = (char *) params_in;
 	  if (params_in)

@@ -104,7 +104,7 @@ krb5_mk_safe_basic(krb5_context context, const krb5_data *userdata,
 cleanup_checksum:
     free(safe_checksum.contents);
 
-    memset((char *)scratch1->data, 0, scratch1->length); 
+    memset(scratch1->data, 0, scratch1->length); 
     krb5_free_data(context, scratch1);
     return retval;
 }
@@ -119,7 +119,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
     krb5_replay_data      replaydata;
 
     /* Clear replaydata block */
-    memset((char *) &replaydata, 0, sizeof(krb5_replay_data));
+    memset(&replaydata, 0, sizeof(krb5_replay_data));
 
     /* Get keyblock */
     if ((keyblock = auth_context->send_subkey) == NULL)

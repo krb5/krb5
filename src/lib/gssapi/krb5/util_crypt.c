@@ -345,10 +345,10 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
                  &seq_enc_key, 0,
                  &input, &output));
 cleanup_arcfour:
-    memset ((void *) seq_enc_key.contents, 0, seq_enc_key.length);
-    memset ((void *) usage_key.contents, 0, usage_key.length);
-    free ((void *) usage_key.contents);
-    free ((void *) seq_enc_key.contents);
+    memset (seq_enc_key.contents, 0, seq_enc_key.length);
+    memset (usage_key.contents, 0, usage_key.length);
+    free (usage_key.contents);
+    free (seq_enc_key.contents);
     return (code);
 }
 
@@ -713,10 +713,10 @@ kg_arcfour_docrypt_iov (krb5_context context,
                  &seq_enc_key, 0,
                  kiov, kiov_count));
 cleanup_arcfour:
-    memset ((void *) seq_enc_key.contents, 0, seq_enc_key.length);
-    memset ((void *) usage_key.contents, 0, usage_key.length);
-    free ((void *) usage_key.contents);
-    free ((void *) seq_enc_key.contents);
+    memset (seq_enc_key.contents, 0, seq_enc_key.length);
+    memset (usage_key.contents, 0, usage_key.length);
+    free (usage_key.contents);
+    free (seq_enc_key.contents);
     if (kiov != NULL)
         free(kiov);
     return (code);

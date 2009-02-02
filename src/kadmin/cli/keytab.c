@@ -266,7 +266,7 @@ int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
      krb5_keyblock *keys;
      int code, nkeys, i;
 
-     (void) memset((char *)&princ_rec, 0, sizeof(princ_rec));
+     (void) memset(&princ_rec, 0, sizeof(princ_rec));
 
      princ = NULL;
      keys = NULL;
@@ -309,7 +309,7 @@ int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
      }
 
      for (i = 0; i < nkeys; i++) {
-	  memset((char *) &new_entry, 0, sizeof(new_entry));
+	  memset(&new_entry, 0, sizeof(new_entry));
 	  new_entry.principal = princ;
 	  new_entry.key = keys[i];
 	  new_entry.vno = princ_rec.kvno;

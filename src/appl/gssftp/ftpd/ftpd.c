@@ -869,7 +869,7 @@ char *name, *passwd;
 	char ccname[MAXPATHLEN];
 
 #ifdef GSSAPI
-	memset((char *)&my_creds, 0, sizeof(my_creds));
+	memset(&my_creds, 0, sizeof(my_creds));
 	if (krb5_parse_name(kcontext, name, &me))
 		return 0;
 	my_creds.client = me;

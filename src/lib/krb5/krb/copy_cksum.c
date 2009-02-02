@@ -38,13 +38,11 @@ krb5_copy_checksum(krb5_context context, const krb5_checksum *ckfrom, krb5_check
 	return ENOMEM;
     *tempto = *ckfrom;
 
-    if (!(tempto->contents =
-	  (krb5_octet *)malloc(tempto->length))) {
+    if (!(tempto->contents = (krb5_octet *)malloc(tempto->length))) {
 	free(tempto);
 	return ENOMEM;
     }
-    memcpy((char *) tempto->contents, (char *) ckfrom->contents,
-	   ckfrom->length);
+    memcpy(tempto->contents, ckfrom->contents, ckfrom->length);
 
     *ckto = tempto;
     return 0;

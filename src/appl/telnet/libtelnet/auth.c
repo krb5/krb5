@@ -383,8 +383,7 @@ auth_send(data, cnt)
 	auth_send_cnt = cnt;
 	if (auth_send_cnt > sizeof(_auth_send_data))
 	    auth_send_cnt = sizeof(_auth_send_data);
-	memcpy((void *)_auth_send_data, (void *)data, 
-	       (unsigned) auth_send_cnt);
+	memcpy(_auth_send_data, data, (unsigned) auth_send_cnt);
 	auth_send_data = _auth_send_data;
 
 	auth_send_retry();
@@ -510,7 +509,7 @@ auth_name(data, cnt)
 					Name, cnt, (int) sizeof(savename)-1);
 		return;
 	}
-	memcpy((void *)savename, (void *)data, (unsigned) cnt);
+	memcpy(savename, data, (unsigned) cnt);
 	savename[cnt] = '\0';	/* Null terminate */
 	if (auth_debug_mode)
 		printf(">>>%s: Got NAME [%s]\r\n", Name, savename);

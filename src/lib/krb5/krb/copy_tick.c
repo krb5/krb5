@@ -62,7 +62,7 @@ krb5_copy_enc_tkt_part(krb5_context context, const krb5_enc_tkt_part *partfrom, 
 	    free(tempto);
 	    return ENOMEM;
 	}
-	memcpy((char *)tempto->transited.tr_contents.data,
+	memcpy(tempto->transited.tr_contents.data,
 	       (char *)partfrom->transited.tr_contents.data,
 	       partfrom->transited.tr_contents.length);
     }

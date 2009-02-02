@@ -428,7 +428,7 @@ cleanup:
 	if (server)
 	    krb5_free_principal(context, server);
 	if (creds->keyblock.contents) {
-	    memset((char *)creds->keyblock.contents, 0,
+	    memset(creds->keyblock.contents, 0,
 		   creds->keyblock.length);
 	    free(creds->keyblock.contents);
 	    creds->keyblock.contents = 0;

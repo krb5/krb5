@@ -75,7 +75,7 @@ typedef UINT64_TYPE gssint_uint64;
    (ptr) += 2;
 
 #define TWRITE_STR(ptr, str, len)               \
-   memcpy((ptr), (char *) (str), (len));        \
+   memcpy((ptr), (str), (len));                 \
    (ptr) += (len);
 
 #define TREAD_STR(ptr, str, len)                \

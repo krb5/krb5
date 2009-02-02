@@ -177,7 +177,7 @@ recvauth_common(krb5_context context,
 	krb5_error	error;
 	const	char *message;
 
-	memset((char *)&error, 0, sizeof(error));
+	memset(&error, 0, sizeof(error));
 	krb5_us_timeofday(context, &error.stime, &error.susec);
 	if(server) 
 		error.server = server;

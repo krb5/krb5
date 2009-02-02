@@ -147,7 +147,7 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
     if (!in_cred->ticket.length)
         return(KRB5_NO_TKT_SUPPLIED);
 
-    memset((char *)&tgsreq, 0, sizeof(tgsreq));
+    memset(&tgsreq, 0, sizeof(tgsreq));
 
     tgsreq.kdc_options = kdcoptions;
     tgsreq.server = (krb5_principal) sname;

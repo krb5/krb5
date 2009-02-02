@@ -54,7 +54,7 @@ krb5_get_credentials_core(krb5_context context, krb5_flags options,
     if (!in_creds || !in_creds->server || !in_creds->client)
         return EINVAL;
 
-    memset((char *)mcreds, 0, sizeof(krb5_creds));
+    memset(mcreds, 0, sizeof(krb5_creds));
     mcreds->magic = KV5M_CREDS;
     if (in_creds->times.endtime != 0) {
 	mcreds->times.endtime = in_creds->times.endtime;
@@ -122,7 +122,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     if ((ncreds = (krb5_creds *)malloc(sizeof(krb5_creds))) == NULL)
 	return ENOMEM;
 
-    memset((char *)ncreds, 0, sizeof(krb5_creds));
+    memset(ncreds, 0, sizeof(krb5_creds));
     ncreds->magic = KV5M_CREDS;
 
     /* The caller is now responsible for cleaning up in_creds */
@@ -261,7 +261,7 @@ krb5_validate_or_renew_creds(krb5_context context, krb5_creds *creds,
     krb5_creds *out_creds = 0; /* for check before dereferencing below */
     krb5_creds **tgts;
 
-    memset((char *)&in_creds, 0, sizeof(krb5_creds));
+    memset(&in_creds, 0, sizeof(krb5_creds));
 
     in_creds.server = NULL;
     tgts = NULL;

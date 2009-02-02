@@ -449,8 +449,8 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	    if(!(key_salt.data.data = (char *) malloc(slen+1)))
 	        return ENOMEM;
 	    key_salt.data.data[slen] = 0;
-	    memcpy((char *)key_salt.data.data,
-		   (char *)(*krb5_princ_realm(context,db_entry->princ)).data,
+	    memcpy(key_salt.data.data,
+		   (*krb5_princ_realm(context,db_entry->princ)).data,
 		   slen);
 	    key_salt.data.length = SALT_TYPE_AFS_LENGTH; /*length actually used below...*/
 #endif

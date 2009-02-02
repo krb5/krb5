@@ -230,7 +230,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
       * of params_in.  So use that realm, make params_in contain an
       * empty mask, and behave like version 2.
       */
-     memset((char *) &params_local, 0, sizeof(params_local));
+     memset(&params_local, 0, sizeof(params_local));
      if (api_version == KADM5_API_VERSION_1) {
 	  realm = params_local.realm = (char *) params_in;
 	  if (params_in)
@@ -319,8 +319,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 
      memset(&addr, 0, sizeof(addr));
      addr.sin_family = hp->h_addrtype;
-     (void) memcpy((char *) &addr.sin_addr, (char *) hp->h_addr,
-		   sizeof(addr.sin_addr));
+     (void) memcpy(&addr.sin_addr, hp->h_addr, sizeof(addr.sin_addr));
      if (iprop_enable)
 	 addr.sin_port = htons((u_short) handle->params.iprop_port);
      else

@@ -1224,7 +1224,7 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
     /* Initialize realm container structure */
     rlparams =(krb5_ldap_realm_params *) malloc(sizeof(krb5_ldap_realm_params));
     CHECK_NULL(rlparams);
-    memset((char *) rlparams, 0, sizeof(krb5_ldap_realm_params));
+    memset(rlparams, 0, sizeof(krb5_ldap_realm_params));
 
     /* allocate tl_data structure to store MASK information */
     rlparams->tl_data = malloc (sizeof(krb5_tl_data));
@@ -1232,7 +1232,7 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 	st = ENOMEM;
 	goto cleanup;
     }
-    memset((char *) rlparams->tl_data, 0, sizeof(krb5_tl_data));
+    memset(rlparams->tl_data, 0, sizeof(krb5_tl_data));
     rlparams->tl_data->tl_data_type = KDB_TL_USER_INFO;
 
     /* set the mask parameter to 0 */

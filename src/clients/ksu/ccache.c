@@ -230,9 +230,9 @@ int chunk_count = 1;
         }
 
 
-   memset((char *) &temp_tktq, 0, sizeof(temp_tktq));
-   memset((char *) &temp_tkt, 0, sizeof(temp_tkt));
-   memset((char *) &creds, 0, sizeof(creds));
+   memset(&temp_tktq, 0, sizeof(temp_tktq));
+   memset(&temp_tkt, 0, sizeof(temp_tkt));
+   memset(&creds, 0, sizeof(creds));
 
 	/* initialize the cursor */    	
     if ((retval = krb5_cc_start_seq_get(context, cc, &cur))) {

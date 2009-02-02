@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
 
      nofork = 0;
 
-     memset((char *) &params, 0, sizeof(params));
+     memset(&params, 0, sizeof(params));
      
      argc--; argv++;
      while (argc) {

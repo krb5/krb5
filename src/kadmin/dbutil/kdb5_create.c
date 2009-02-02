@@ -349,7 +349,7 @@ master key name '%s'\n",
     }
     /* clean up */
     (void) krb5_db_fini(util_context);
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    memset(master_keyblock.contents, 0, master_keyblock.length);
     free(master_keyblock.contents);
     if (pw_str) {
 	memset(pw_str, 0, pw_size);
@@ -426,7 +426,7 @@ add_principal(context, princ, op, pblock)
     int			  nentries = 1;
     krb5_actkvno_node     actkvno;
 
-    memset((char *) &entry, 0, sizeof(entry));
+    memset(&entry, 0, sizeof(entry));
 
     entry.len = KRB5_KDB_V1_BASE_LENGTH;
     entry.attributes = pblock->flags;
@@ -449,7 +449,7 @@ add_principal(context, princ, op, pblock)
 	if ((entry.key_data=(krb5_key_data*)malloc(sizeof(krb5_key_data)))
 	    == NULL)
 	    goto error_out;
-	memset((char *) entry.key_data, 0, sizeof(krb5_key_data));
+	memset(entry.key_data, 0, sizeof(krb5_key_data));
 	entry.n_key_data = 1;
 
         if (global_params.mask & KADM5_CONFIG_KVNO)

@@ -187,7 +187,7 @@ krb5_free_cred_contents(krb5_context context, krb5_creds *val)
 	val->server = 0;
     }
     if (val->keyblock.contents) {
-	memset((char *)val->keyblock.contents, 0, val->keyblock.length);
+	memset(val->keyblock.contents, 0, val->keyblock.length);
 	free(val->keyblock.contents);
 	val->keyblock.contents = 0;
     }

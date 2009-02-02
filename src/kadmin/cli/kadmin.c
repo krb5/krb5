@@ -216,7 +216,7 @@ char *kadmin_startup(argc, argv)
     char *db_name = NULL;
     char *svcname;
 
-    memset((char *) &params, 0, sizeof(params));
+    memset(&params, 0, sizeof(params));
 
 #if defined(USE_KIM)
     /* Turn off all password prompting from the KLL */

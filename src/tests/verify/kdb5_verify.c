@@ -209,7 +209,7 @@ main(argc, argv)
     krb5_finish_key(context, &master_encblock);
 
     retval = krb5_db_fini(context);
-    memset((char *)master_keyblock.contents, 0, (size_t) master_keyblock.length);
+    memset(master_keyblock.contents, 0, (size_t) master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
 	exit(1);

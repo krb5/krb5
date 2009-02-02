@@ -121,8 +121,8 @@ krb5_ldap_read_startup_information(krb5_context context)
                                                  || ((mask & LDAP_REALM_KRBTICKETFLAGS) == 0)) {
         kadm5_config_params  params_in, params_out;
 
-        memset((char *) &params_in, 0, sizeof(params_in));
-        memset((char *) &params_out, 0, sizeof(params_out));
+        memset(&params_in, 0, sizeof(params_in));
+        memset(&params_out, 0, sizeof(params_out));
 
         retval = kadm5_get_config_params(context, 1, &params_in, &params_out);
         if (retval) {

@@ -1891,7 +1891,7 @@ krb5_fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
      if (kret)
 	 return kret;
 
-     memset((char *)creds, 0, sizeof(*creds));
+     memset(creds, 0, sizeof(*creds));
      MAYBE_OPEN(context, id, FCC_OPEN_RDONLY);
      fcursor = (krb5_fcc_cursor *) *cursor;
 

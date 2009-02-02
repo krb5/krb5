@@ -276,7 +276,7 @@ retry:
 		com_err(progname, errno, "while obtaining socket");
 		exit(1);
 	}
-	memset((char *) &my_sin,0, sizeof(my_sin));
+	memset(&my_sin,0, sizeof(my_sin));
 	if(!port) {
 		sp = getservbyname(KPROP_SERVICE, "tcp");
 		if (sp == NULL) {
@@ -361,7 +361,7 @@ retry:
 		int child_pid;
 		int status;
 	    
-		memset((char *)&frominet, 0, sizeof(frominet));
+		memset(&frominet, 0, sizeof(frominet));
 		fromlen = sizeof(frominet);
 		if (debug)
 		    fprintf(stderr, "waiting for a kprop connection\n");
@@ -1019,7 +1019,7 @@ void PRS(argv)
 	static const char	tmp[] = ".temp";
 	kdb_log_context *log_ctx;
 
-	(void) memset((char *)&params, 0, sizeof (params));
+	(void) memset(&params, 0, sizeof (params));
 
 	retval = krb5_init_context(&kpropd_context);
 	if (retval) {
@@ -1221,7 +1221,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     sender_addr.addrtype = ADDRTYPE_INET;
     sender_addr.length = sizeof(my_sin.sin_addr);
     sender_addr.contents = (krb5_octet *) malloc(sizeof(my_sin.sin_addr));
-    memcpy((char *) sender_addr.contents, (char *) &my_sin.sin_addr,
+    memcpy(sender_addr.contents, &my_sin.sin_addr,
            sizeof(my_sin.sin_addr));
 
     sin_length = sizeof(r_sin);
@@ -1233,7 +1233,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     receiver_addr.addrtype = ADDRTYPE_INET;
     receiver_addr.length = sizeof(r_sin.sin_addr);
     receiver_addr.contents = (krb5_octet *) malloc(sizeof(r_sin.sin_addr));
-    memcpy((char *) receiver_addr.contents, (char *) &r_sin.sin_addr,
+    memcpy(receiver_addr.contents, &r_sin.sin_addr,
            sizeof(r_sin.sin_addr));
 
     if (debug) {
@@ -1410,7 +1410,7 @@ recv_database(context, fd, database_fd, confmsg)
 			"while decoding database size from client");
 		exit(1);
 	}
-	memcpy((char *) &database_size, outbuf.data, sizeof(database_size));
+	memcpy(&database_size, outbuf.data, sizeof(database_size));
 	krb5_free_data_contents(context, &inbuf);
 	krb5_free_data_contents(context, &outbuf);
 	database_size = ntohl(database_size);
@@ -1508,7 +1508,7 @@ send_error(context, fd, err_code, err_text)
 	krb5_data	outbuf;
 	char		buf[1024];
 
-	memset((char *)&error, 0, sizeof(error));
+	memset(&error, 0, sizeof(error));
 	krb5_us_timeofday(context, &error.stime, &error.susec);
 	error.server = server;
 	error.client = client;

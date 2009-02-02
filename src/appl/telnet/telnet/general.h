@@ -41,5 +41,5 @@
 #define	numberof(x)	(sizeof x/sizeof x[0])
 #define	highestof(x)	(numberof(x)-1)
 
-#define	ClearElement(x)		memset((char *)&x, 0, sizeof x)
-#define	ClearArray(x)		memset((char *)x, 0, sizeof x)
+#define	ClearElement(x)		memset(&x, 0, sizeof x)
+#define	ClearArray(x)		memset(x, 0, sizeof x)

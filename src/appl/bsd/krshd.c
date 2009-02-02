@@ -1950,7 +1950,7 @@ accept_a_connection (int debug_port, struct sockaddr *from,
 	    exit(2);
 	}
 
-	memset((char *) &sock_in6, 0,sizeof(sock_in6));
+	memset(&sock_in6, 0,sizeof(sock_in6));
 	sock_in6.sin6_family = AF_INET6;
 	sock_in6.sin6_port = htons(debug_port);
 	sock_in6.sin6_addr = in6addr_any;
@@ -1982,7 +1982,7 @@ accept_a_connection (int debug_port, struct sockaddr *from,
 	    exit(2);
 	}
 
-	memset((char *) &sock_in, 0,sizeof(sock_in));
+	memset(&sock_in, 0,sizeof(sock_in));
 	sock_in.sin_family = AF_INET;
 	sock_in.sin_port = htons(debug_port);
 	sock_in.sin_addr.s_addr = INADDR_ANY;

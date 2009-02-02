@@ -64,7 +64,7 @@ krb5_make_fulladdr(krb5_context context, krb5_address *kaddr, krb5_address *kpor
     store_32_le(tmp32, marshal);
     marshal += 4;
 
-    (void) memcpy((char *)marshal, (char *)(kaddr->contents), kaddr->length);
+    (void) memcpy(marshal, kaddr->contents, kaddr->length);
     marshal += kaddr->length;
 
     tmp16 = kport->addrtype;
@@ -77,7 +77,7 @@ krb5_make_fulladdr(krb5_context context, krb5_address *kaddr, krb5_address *kpor
     store_32_le(tmp32, marshal);
     marshal += 4;
 
-    (void) memcpy((char *)marshal, (char *)(kport->contents), kport->length);
+    (void) memcpy(marshal, kport->contents, kport->length);
     marshal += kport->length;
     return 0;
 }

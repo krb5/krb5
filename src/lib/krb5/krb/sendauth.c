@@ -91,7 +91,7 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
      * If no credentials were provided, try getting it from the
      * credentials cache.
      */
-    memset((char *)&creds, 0, sizeof(creds));
+    memset(&creds, 0, sizeof(creds));
 
     /*
      * See if we need to access the credentials cache

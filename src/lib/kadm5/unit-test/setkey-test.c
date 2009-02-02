@@ -84,7 +84,7 @@ main(int argc, char **argv)
    * to kadm5 server.
    */
 
-  memset((char *) &context, 0, sizeof(context));
+  memset(&context, 0, sizeof(context));
   kadm5_init_krb5_context(&context);
 
   ret = krb5_parse_name(context, principal, &princ);
@@ -174,7 +174,7 @@ main(int argc, char **argv)
        for (encnum = 0; testp[encnum].magic != -1; encnum++) {
 	    printf("+   enctype %d\n", testp[encnum].enctype);
 		   
-	    memset((char *) &ktent, 0, sizeof(ktent));
+	    memset(&ktent, 0, sizeof(ktent));
 	    ktent.principal = princ;
 	    ktent.key = testp[encnum];
 	    ktent.vno = princ_ent.kvno;
@@ -185,7 +185,7 @@ main(int argc, char **argv)
 		 exit(1);
 	    }
 
-	    memset((char *)&my_creds, 0, sizeof(my_creds));
+	    memset(&my_creds, 0, sizeof(my_creds));
 	    my_creds.client = princ;
 	    my_creds.server = server;
 	    

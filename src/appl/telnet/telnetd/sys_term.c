@@ -235,7 +235,7 @@ copy_termbuf(cp, len)
 {
 	if (len > sizeof(termbuf))
 		len = sizeof(termbuf);
-	memcpy((char *)&termbuf, cp, len);
+	memcpy(&termbuf, cp, len);
 	termbuf2 = termbuf;
 }
 #endif	/* defined(LINEMODE) && defined(TIOCPKT_IOCTL) */
@@ -956,7 +956,7 @@ getptyslave()
 	init_termbuf();
 # ifdef	TIOCGWINSZ
 	if (def_row || def_col) {
-		memset((char *)&ws, 0, sizeof(ws));
+		memset(&ws, 0, sizeof(ws));
 		ws.ws_col = def_col;
 		ws.ws_row = def_row;
 		(void)ioctl(t, TIOCSWINSZ, (char *)&ws);
@@ -1137,7 +1137,7 @@ startslave(host, autologin, autoname)
 				INIT_FIFO);
 		fatalperror(net, tbuf);
 	}
-	memset((char *)&request, 0, sizeof(request));
+	memset(&request, 0, sizeof(request));
 	request.magic = INIT_MAGIC;
 	SCPYN(request.gen_id, gen_id);
 	SCPYN(request.tty_id, &line[8]);

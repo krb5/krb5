@@ -131,7 +131,7 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     if (!entry) {
         return ENOMEM;
     }
-    memset((char *) entry, 0, sizeof(*entry));
+    memset(entry, 0, sizeof(*entry));
 
     if (!lp) {		/* if list is empty, start one */
         lp = (krb5_kt_list) malloc(sizeof(*lp));
@@ -258,7 +258,7 @@ krb5_error_code ktutil_read_keytab(context, name, list)
 	    retval = ENOMEM;
 	    break;
 	}
-	memset((char *)entry, 0, sizeof (*entry));
+	memset(entry, 0, sizeof (*entry));
 	retval = krb5_kt_next_entry(context, kt, entry, &cursor);
 	if (retval)
 	    break;

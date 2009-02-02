@@ -525,8 +525,8 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 
     krb5_error_code        kret = 0;
 
-    memset((char *) &params, 0, sizeof(params));
-    memset((char *) &empty_params, 0, sizeof(empty_params));
+    memset(&params, 0, sizeof(params));
+    memset(&empty_params, 0, sizeof(empty_params));
 
     if (params_in == NULL) params_in = &empty_params;
 
@@ -952,7 +952,7 @@ krb5_read_realm_params(kcontext, realm, rparamp)
     }
 
     /* Initialize realm parameters */
-    memset((char *) rparams, 0, sizeof(krb5_realm_params));
+    memset(rparams, 0, sizeof(krb5_realm_params));
 
     /* Get the value for the database */
     hierarchy[0] = "realms";

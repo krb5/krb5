@@ -1493,7 +1493,7 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
     try2read = (char *) NULL;
     (*linenop)++;
     retval = 1;
-    memset((char *)&dbent, 0, sizeof(dbent));
+    memset(&dbent, 0, sizeof(dbent));
 
     /* Make sure we've got key_data entries */
     if (krb5_dbe_create_key_data(kcontext, &dbent) ||
@@ -1794,7 +1794,7 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
     const char		*try2read;
 
     try2read = (char *) NULL;
-    memset((char *) &dbentry, 0, sizeof(dbentry));
+    memset(&dbentry, 0, sizeof(dbentry));
     (*linenop)++;
     retval = 1;
     name = (char *) NULL;

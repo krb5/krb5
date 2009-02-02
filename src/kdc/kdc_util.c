@@ -150,9 +150,7 @@ concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
 		krb5_free_authdata(kdc_context, retdata);
 		return ENOMEM;
 	    }
-	    memcpy((char *) retdata[i]->contents,
-		   (char *)(*ptr)->contents,
-		   retdata[i]->length);
+	    memcpy(retdata[i]->contents, (*ptr)->contents, retdata[i]->length);
 
 	    ptr++;
 	    i++;

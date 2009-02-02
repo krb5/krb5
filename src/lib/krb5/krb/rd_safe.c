@@ -128,7 +128,7 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
 				    KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
 				    scratch, his_cksum, &valid);
 
-    (void) memset((char *)scratch->data, 0, scratch->length);
+    (void) memset(scratch->data, 0, scratch->length);
     krb5_free_data(context, scratch);
     
     if (!valid) {

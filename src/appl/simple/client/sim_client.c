@@ -161,9 +161,9 @@ main(argc, argv)
             *cp = tolower((int) *cp);
 
     /* Set server's address */
-    (void) memset((char *)&s_sock, 0, sizeof(s_sock));
+    (void) memset(&s_sock, 0, sizeof(s_sock));
 
-    memcpy((char *)&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
+    memcpy(&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
 #ifdef DEBUG
     printf("s_sock.sin_addr is %s\n", inet_ntoa(s_sock.sin_addr));
 #endif
@@ -186,7 +186,7 @@ main(argc, argv)
 	exit(1);
     }
 
-    memset((char *)&c_sock, 0, sizeof(c_sock));
+    memset(&c_sock, 0, sizeof(c_sock));
     c_sock.sin_family = AF_INET;
 #ifdef BROKEN_STREAMS_SOCKETS
     if (gethostname(my_hostname, sizeof(my_hostname)) < 0) {
@@ -198,7 +198,7 @@ main(argc, argv)
 	fprintf(stderr, "%s: unknown host\n", hostname);
 	exit(1);
     }
-    memcpy((char *)&c_sock.sin_addr, host->h_addr, sizeof(c_sock.sin_addr));
+    memcpy(&c_sock.sin_addr, host->h_addr, sizeof(c_sock.sin_addr));
 #endif
     
 
@@ -243,7 +243,7 @@ main(argc, argv)
     /* PREPARE KRB_SAFE MESSAGE */
 
     /* Get my address */
-    memset((char *) &c_sock, 0, sizeof(c_sock));
+    memset(&c_sock, 0, sizeof(c_sock));
     len = sizeof(c_sock);
     if (getsockname(sock, (struct sockaddr *)&c_sock, &len) < 0) {
 	com_err(progname, errno, "while getting socket name");

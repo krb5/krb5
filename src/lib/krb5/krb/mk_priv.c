@@ -119,7 +119,7 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
     krb5_replay_data      replaydata;
 
     /* Clear replaydata block */
-    memset((char *) &replaydata, 0, sizeof(krb5_replay_data));
+    memset(&replaydata, 0, sizeof(krb5_replay_data));
 
     /* Get keyblock */
     if ((keyblock = auth_context->send_subkey) == NULL)

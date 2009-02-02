@@ -109,7 +109,7 @@ Ring *ring;
     unsigned char *buffer;
     int count;
 {
-    memset((char *)ring, 0, sizeof *ring);
+    memset(ring, 0, sizeof *ring);
 
     ring->size = count;
 

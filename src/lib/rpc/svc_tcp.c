@@ -156,7 +156,7 @@ svctcp_create(
 		set_cloexec_fd(sock);
 		madesock = TRUE;
 	}
-	memset((char *)&addr, 0, sizeof (addr));
+	memset(&addr, 0, sizeof (addr));
 #if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 	addr.sin_len = sizeof(addr);
 #endif

@@ -562,7 +562,7 @@ ser_cksum_test(krb5_context kcontext, int verbose)
 	checksum.checksum_type = 123;
 	checksum.length = sizeof(ckdata);
 	checksum.contents = ckdata;
-	memcpy(ckdata, (char *) &stuff, sizeof(ckdata)); 
+	memcpy(ckdata, &stuff, sizeof(ckdata)); 
 	if (!(kret = ser_data(verbose, "> checksum with data",
 			      (krb5_pointer) &checksum, KV5M_CHECKSUM))) {
 	    if (verbose)

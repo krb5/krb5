@@ -449,8 +449,8 @@ krb5_error_code find_ticket (context, cc, client, server, found)
 	
     *found = FALSE;
 
-    memset((char *) &tgtq, 0, sizeof(tgtq));
-    memset((char *) &tgt, 0, sizeof(tgt));
+    memset(&tgtq, 0, sizeof(tgtq));
+    memset(&tgt, 0, sizeof(tgt));
 
     retval= krb5_copy_principal(context,  client, &tgtq.client);
     if (retval)
