@@ -252,7 +252,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     ptr = (unsigned char *)data->checksum_data.data;
 
     TWRITE_INT(ptr, data->md5.length, 0);
-    TWRITE_STR(ptr, (unsigned char *) data->md5.contents, data->md5.length);
+    TWRITE_STR(ptr, data->md5.contents, data->md5.length);
     TWRITE_INT(ptr, data->ctx->gss_flags, 0);
 
     /* done with this, free it */
@@ -261,7 +261,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     if (credmsg.data) {
         TWRITE_INT16(ptr, KRB5_GSS_FOR_CREDS_OPTION, 0);
         TWRITE_INT16(ptr, credmsg.length, 0);
-        TWRITE_STR(ptr, (unsigned char *) credmsg.data, credmsg.length);
+        TWRITE_STR(ptr, credmsg.data, credmsg.length);
 
         /* free credmsg data */
         krb5_free_data_contents(context, &credmsg);
@@ -365,7 +365,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
         g_make_token_header(mech_type, ap_req.length,
                             &ptr, KG_TOK_CTX_AP_REQ);
 
-        TWRITE_STR(ptr, (unsigned char *) ap_req.data, ap_req.length);
+        TWRITE_STR(ptr, ap_req.data, ap_req.length);
 
         /* pass it back */
 
