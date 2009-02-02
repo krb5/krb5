@@ -1068,7 +1068,6 @@ static krb5_int32
 prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ) 
 {
     krb5_error_code retval = KRB5KRB_AP_ERR_BADMATCH;
-    size_t len = 0;
     char **realms, **cpp, *temp_buf=NULL;
     krb5_data *comp1 = NULL, *comp2 = NULL; 
     char *comp1_str = NULL; 
@@ -1110,11 +1109,8 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
             (krb5_match_config_pattern(kdc_active_realm->realm_no_host_referral, "*") == FALSE &&
              krb5_match_config_pattern(kdc_active_realm->realm_no_host_referral, comp1_str) == FALSE))) { 
 
-            for (len=0; len < comp2->length; len++) {     
-                 if (comp2->data[len] == '.') break;
-            }
-            if (len == comp2->length)    
-                goto cleanup; 
+	    if (memchr(comp2->data, '.', comp2->length) == NULL)
+		goto cleanup;
             temp_buf = calloc(1, comp2->length+1);
             if (!temp_buf){
                 retval = ENOMEM; 
