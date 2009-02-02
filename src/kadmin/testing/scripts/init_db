@@ -106,7 +106,7 @@ set cmds {
 
     {ovsec_kadm_create_policy $server_handle "test-pol 0 10000 8 2 3 0" \
 	    {OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_LENGTH OVSEC_KADM_PW_MIN_CLASSES OVSEC_KADM_PW_MAX_LIFE OVSEC_KADM_PW_HISTORY_NUM}}
-    {ovsec_kadm_create_policy $server_handle "once-a-min 30 0 0 0 0 0" \
+    {ovsec_kadm_create_policy $server_handle "once-a-min 10 0 0 0 0 0" \
 	    {OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_LIFE}}
     {ovsec_kadm_create_policy $server_handle "dict-only 0 0 0 0 0 0" \
 	    {OVSEC_KADM_POLICY}}
