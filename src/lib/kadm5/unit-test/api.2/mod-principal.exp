@@ -598,6 +598,7 @@ proc test20 {} {
     send "lindex \$principal 10\n"
     expect {
 	-re "test-pol\n$prompt$"	{ fail "$test" }
+	-re "null\n$prompt$"		{ pass "$test" }
 	timeout				{ pass "$test" }
     }
     send "lindex \$p1 6\n"
