@@ -132,6 +132,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     k5_mutex_assert_locked(&cred->lock);
     memset((char *) &in_creds, 0, sizeof(krb5_creds));
+    in_creds.client = in_creds.server = NULL;
 
     if ((code = krb5_copy_principal(context, cred->princ, &in_creds.client)))
         goto cleanup;
