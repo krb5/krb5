@@ -172,7 +172,7 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
 	    goto cleanup;
 	memset(password.data, 0, password.length);
 	password.length = 0;
-	memcpy(&lp->entry->key, &key, sizeof(krb5_keyblock));
+	lp->entry->key = key;
     } else {
         printf("Key for %s (hex): ", princ_str);
 	fgets(buf, BUFSIZ, stdin);

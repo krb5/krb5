@@ -56,7 +56,7 @@ kadm5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pr
         return ENOMEM;
 
     VALGRIND_CHECK_DEFINED(*inprinc);
-    memcpy(tempprinc, inprinc, sizeof(krb5_principal_data));
+    *tempprinc = *inprinc;
 
     nelems = (int) krb5_princ_size(context, inprinc);
     tempprinc->data = krb5_db_alloc(context, NULL, nelems * sizeof(krb5_data));

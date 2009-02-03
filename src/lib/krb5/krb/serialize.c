@@ -84,7 +84,7 @@ krb5_register_serializer(krb5_context kcontext, const krb5_ser_entry *entry)
 	    kret = ENOMEM;
     }
     else
-	memcpy(stable, entry, sizeof(krb5_ser_entry));
+	*stable = *entry;
     return(kret);
 }
 

@@ -1663,8 +1663,7 @@ int f;
 	**      copy the initial modes we saved into sb; this is
 	**      for restoring to the initial state
 	*/
-	(void)memcpy(&sb, &defmodes, sizeof(defmodes));
-	
+	sb = defmodes;
 #else
 	sb.sg_flags &= ~(CBREAK|RAW|TBDELAY);
 	sb.sg_flags |= defflags|tabflag;

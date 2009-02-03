@@ -638,7 +638,7 @@ gssint_register_mechinfo(gss_mech_info template)
 		releaseMechInfo(&new_cf);
 		return ENOMEM;
 	}
-	memcpy(new_cf->mech, template->mech, sizeof(struct gss_config));
+	*new_cf->mech = *template->mech;
 	if (template->mech_type != NULL)
 		new_cf->mech->mech_type = *(template->mech_type);
 	new_cf->mech_type = &new_cf->mech->mech_type;

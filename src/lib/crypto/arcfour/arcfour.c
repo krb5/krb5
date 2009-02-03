@@ -81,7 +81,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
   d1.data=malloc(d1.length);
   if (d1.data == NULL)
     return (ENOMEM);
-  memcpy(&k1, key, sizeof (krb5_keyblock));
+  k1 = *key;
   k1.length=d1.length;
   k1.contents= (void *) d1.data;
 
@@ -91,7 +91,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
     free(d1.data);
     return (ENOMEM);
   }
-  memcpy(&k2, key, sizeof (krb5_keyblock));
+  k2 = *key;
   k2.length=d2.length;
   k2.contents=(void *) d2.data;
 
@@ -102,7 +102,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
     free(d2.data);
     return (ENOMEM);
   }
-  memcpy(&k3, key, sizeof (krb5_keyblock));
+  k3 = *key;
   k3.length=d3.length;
   k3.contents= (void *) d3.data;
   
@@ -201,7 +201,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
   d1.data=malloc(d1.length);
   if (d1.data == NULL)
     return (ENOMEM);
-  memcpy(&k1, key, sizeof (krb5_keyblock));
+  k1 = *key;
   k1.length=d1.length;
   k1.contents= (void *) d1.data;
   
@@ -211,7 +211,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
     free(d1.data);
     return (ENOMEM);
   }
-  memcpy(&k2, key, sizeof(krb5_keyblock));
+  k2 = *key;
   k2.length=d2.length;
   k2.contents= (void *) d2.data;
 
@@ -222,7 +222,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
     free(d2.data);
     return (ENOMEM);
   }
-  memcpy(&k3, key, sizeof(krb5_keyblock));
+  k3 = *key;
   k3.length=d3.length;
   k3.contents= (void *) d3.data;
 
