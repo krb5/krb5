@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <regex.h>
-#include <krb5.h>
+#include "k5-int.h"
 #include "pkinit.h"
 
 typedef struct _pkinit_cert_info pkinit_cert_info;
