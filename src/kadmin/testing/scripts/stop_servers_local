@@ -1,17 +1,12 @@
 #!/bin/sh
 
 DUMMY=${TESTDIR=$TOP/testing}
-DUMMY=${RESTORE_FILES=$TESTDIR/scripts/restore_files.sh}
 DUMMY=${KRB5RCACHEDIR=$TESTDIR}
 
-v4files=false
 while [ $# -gt 0 ] ; do
 	case $1 in
 		-start_servers)
 			start_servers=$1
-			;;
-		-v4files)
-			v4files=true
 			;;
 		*) 
 			TOP=$1
@@ -46,8 +41,4 @@ if test "x$USER" = x ; then
 fi
 rm -f $KRB5RCACHEDIR/krb5kdc_rcache.$USER
 
-# restore saved system config files
-if $v4files; then
-	$RESTORE_FILES $start_servers
-fi
 exit 0

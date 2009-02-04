@@ -11,8 +11,6 @@
 
 DUMMY=${TESTDIR=$TOP/testing}
 DUMMY=${STESTDIR=$STOP/testing}
-DUMMY=${SAVE_FILES=$STESTDIR/scripts/save_files.sh}
-DUMMY=${FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl}
 DUMMY=${START_SERVERS_LOCAL=$STESTDIR/scripts/start_servers_local}
 # This'll be wrong sometimes
 DUMMY=${RSH_CMD=rsh}
