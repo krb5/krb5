@@ -1878,8 +1878,10 @@ krb5_dbe_fetch_act_key_list(krb5_context         context,
     if (nprinc != 1) {
         if (nprinc) {
             krb5_db_free_principal(context, &entry, nprinc);
+            return (KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+        } else {
+            return(KRB5_KDB_NOMASTERKEY);
         }
-        return(KRB5_KDB_NOMASTERKEY);
     } else if (more) {
         krb5_db_free_principal(context, &entry, nprinc);
         return (KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
@@ -1888,24 +1890,19 @@ krb5_dbe_fetch_act_key_list(krb5_context         context,
     retval = krb5_dbe_lookup_actkvno(context, &entry, act_key_list);
 
     if (*act_key_list == NULL) {
-        krb5_actkvno_node   *tmp_actkvno;
-        krb5_timestamp       now;
+        krb5_actkvno_node *tmp_actkvno;
         /*
          * for mkey princ entries without KRB5_TL_ACTKVNO data provide a default
          */
-
-        if ((retval = krb5_timeofday(context, &now)))
-            return (retval);
 
         tmp_actkvno = (krb5_actkvno_node *) malloc(sizeof(krb5_actkvno_node));
         if (tmp_actkvno == NULL)
             return (ENOMEM);
 
         memset(tmp_actkvno, 0, sizeof(krb5_actkvno_node));
-        tmp_actkvno->act_time = now;
+        tmp_actkvno->act_time = 0; /* earliest time possible */
         /* use most current key */
         tmp_actkvno->act_kvno = entry.key_data[0].key_data_kvno;
-
         *act_key_list = tmp_actkvno;
     }
 
@@ -1915,7 +1912,7 @@ krb5_dbe_fetch_act_key_list(krb5_context         context,
 
 /*
  * Locates the "active" mkey used when encrypting a princ's keys.  Note, the
- * caller must not free the output act_mkey.
+ * caller must NOT free the output act_mkey.
  */
 
 krb5_error_code
@@ -1937,10 +1934,20 @@ krb5_dbe_find_act_mkey(krb5_context         context,
 
     /*
      * The list should be sorted in time, early to later so if the first entry
-     * is later than now, this is a problem
+     * is later than now, this is a problem.  The fallback in this case is to
+     * return the earlist activation entry.
      */
     if (act_mkey_list->act_time > now) {
-        return (KRB5_KDB_NOACTMASTERKEY);
+        while (cur_keyblock && cur_keyblock->kvno != act_mkey_list->act_kvno)
+            cur_keyblock = cur_keyblock->next;
+        if (cur_keyblock) {
+            *act_mkey = &cur_keyblock->keyblock;
+            if (act_kvno != NULL)
+                *act_kvno = cur_keyblock->kvno;
+            return (0);
+        } else {
+            return (KRB5_KDB_NOACTMASTERKEY);
+        }
     }
 
     /* find the most current entry <= now */
