@@ -1742,7 +1742,7 @@ static int tcl_ovsec_kadm_get_policy(ClientData clientData,
 				     Tcl_Interp *interp,
 				     int argc, const char *argv[])
 {
-     ovsec_kadm_policy_ent_t ent;
+     ovsec_kadm_policy_ent_t ent = NULL;
      Tcl_DString *ent_dstring = 0;
      char *policy;
      char *ent_var;
