@@ -409,7 +409,6 @@ if ![info exists KEY] {
 # We can't use them now because we don't know the right KEY.
 # krb5.conf might change if running tests on another host
 file delete $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/slave.conf \
-    $tmppwd/krb.realms $tmppwd/krb.conf \
     $tmppwd/krb5.client.conf $tmppwd/krb5.server.conf \
     $tmppwd/krb5.kdc.conf $tmppwd/krb5.slave.conf
 
@@ -967,22 +966,6 @@ proc setup_kerberos_files { } {
 	puts $aclfile "krbtest/admin@$REALMNAME *"
 	puts $aclfile "kiprop/$hostname@$REALMNAME p"
 	close $aclfile
-    }
-
-    # Create krb.conf file
-    if ![file exists $tmppwd/krb.conf] {
-	set conffile [open $tmppwd/krb.conf w]
-	puts $conffile "$REALMNAME"
-	puts $conffile "$REALMNAME $hostname:[expr 1 + $portbase] admin server"
-	close $conffile
-    }
-
-    # Create krb.realms file
-    if ![file exists $tmppwd/krb.realms] {
-	set conffile [open $tmppwd/krb.realms w]
-	puts $conffile ".[string toupper $domain] $REALMNAME"
-	puts $conffile "[string toupper $domain]. $REALMNAME"
-	close $conffile
     }
 
     # Create dictfile file.
