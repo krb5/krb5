@@ -185,7 +185,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
      */
     if (ldap_context->max_server_conns == 0) {
 	st = prof_get_integer_def (context, conf_section,
-				   "ldap_conns_per_server",
+				   KRB5_CONF_LDAP_CONNS_PER_SERVER,
 				   DEFAULT_CONNS_PER_SERVER,
 				   &ldap_context->max_server_conns);
 	if (st)
@@ -208,9 +208,9 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
     if (ldap_context->bind_dn == NULL) {
 	char *name = 0;
 	if (srv_type == KRB5_KDB_SRV_TYPE_KDC)
-	    name = "ldap_kdc_dn";
+	    name = KRB5_CONF_LDAP_KDC_DN;
 	else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN)
-	    name = "ldap_kadmind_dn";
+	    name = KRB5_CONF_LDAP_KADMIN_DN;
 	else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD)
 	    name = "ldap_kpasswdd_dn";
 
@@ -229,7 +229,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
      */
     if (ldap_context->service_password_file == NULL) {
 	st = prof_get_string_def (context, conf_section,
-				  "ldap_service_password_file",
+				  KRB5_CONF_LDAP_SERVICE_PASSWORD_FILE,
 				  &ldap_context->service_password_file);
 	if (st)
 	    goto cleanup;
@@ -243,7 +243,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
      */
     if (ldap_context->root_certificate_file == NULL) {
 	st = prof_get_string_def (context, conf_section,
-				  "ldap_root_certificate_file",
+				  KRB5_CONF_LDAP_ROOT_CERTIFICATE_FILE,
 				  &ldap_context->root_certificate_file);
 	if (st)
 	    goto cleanup;
@@ -268,7 +268,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	}
 
 	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
-				   "ldap_servers", NULL, &tempval)) != 0) {
+				   KRB5_CONF_LDAP_SERVERS, NULL, &tempval)) != 0) {
 	    krb5_set_error_message (context, st, "Error reading 'ldap_servers' attribute");
 	    goto cleanup;
 	}

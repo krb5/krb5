@@ -1247,7 +1247,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 {
     krb5_error_code err;
     static const char *const profile_name[] = {
-	"libdefaults", "extra_addresses", 0
+	KRB5_CONF_LIBDEFAULTS, KRB5_CONF_EXTRA_ADDRESSES, 0
     };
     char **values;
     char **iter;

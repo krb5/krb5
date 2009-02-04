@@ -1104,9 +1104,9 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
             (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&   
             kdc_active_realm->realm_host_based_services != NULL &&
             (krb5_match_config_pattern(kdc_active_realm->realm_host_based_services, comp1_str) == TRUE ||
-             krb5_match_config_pattern(kdc_active_realm->realm_host_based_services, "*") == TRUE))) &&
+             krb5_match_config_pattern(kdc_active_realm->realm_host_based_services, KRB5_CONF_ASTERISK) == TRUE))) &&
             (kdc_active_realm->realm_no_host_referral == NULL || 
-            (krb5_match_config_pattern(kdc_active_realm->realm_no_host_referral, "*") == FALSE &&
+            (krb5_match_config_pattern(kdc_active_realm->realm_no_host_referral, KRB5_CONF_ASTERISK) == FALSE &&
              krb5_match_config_pattern(kdc_active_realm->realm_no_host_referral, comp1_str) == FALSE))) { 
 
 	    if (memchr(comp2->data, '.', comp2->length) == NULL)

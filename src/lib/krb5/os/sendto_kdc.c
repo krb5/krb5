@@ -377,7 +377,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     if (!tcp_only && context->udp_pref_limit < 0) {
 	int tmp;
 	retval = profile_get_integer(context->profile,
-				     "libdefaults", "udp_preference_limit", 0,
+				     KRB5_CONF_LIBDEFAULTS, KRB5_CONF_UDP_PREFERENCE_LIMIT, 0,
 				     DEFAULT_UDP_PREF_LIMIT, &tmp);
 	if (retval)
 	    return retval;

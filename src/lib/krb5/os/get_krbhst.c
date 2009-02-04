@@ -68,9 +68,9 @@ krb5_get_krbhst(krb5_context context, const krb5_data *realm, char ***hostlist)
 
     rethosts = 0;
 
-    realm_kdc_names[0] = "realms";
+    realm_kdc_names[0] = KRB5_CONF_REALMS;
     realm_kdc_names[1] = realm->data;
-    realm_kdc_names[2] = "kdc";
+    realm_kdc_names[2] = KRB5_CONF_KDC;
     realm_kdc_names[3] = 0;
 
     if (context->profile == 0)

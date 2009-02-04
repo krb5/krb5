@@ -115,7 +115,7 @@ krb5_verify_init_creds(krb5_context context,
 	       goto cleanup;
        } else if (krb5_libdefault_boolean(context,
 					  &creds->client->realm,
-					  "verify_ap_req_nofail",
+					  KRB5_CONF_VERIFY_AP_REQ_NOFAIL,
 					  &nofail)
 		  == 0) {
 	   if (nofail)

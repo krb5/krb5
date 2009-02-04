@@ -703,9 +703,9 @@ krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, int ln
 		 *
 		 * [realms]->realm->"auth_to_local_names"->mapping_name
 		 */
-		hierarchy[0] = "realms";
+		hierarchy[0] = KRB5_CONF_REALMS;
 		hierarchy[1] = realm;
-		hierarchy[2] = "auth_to_local_names";
+		hierarchy[2] = KRB5_CONF_AUTH_TO_LOCAL_NAMES;
 		hierarchy[3] = mname;
 		hierarchy[4] = (char *) NULL;
 		if (!(kret = profile_get_values(context->profile,
@@ -747,9 +747,9 @@ krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, int ln
 		     *	DEFAULT		- Use default rule.
 		     * The first rule to find a match is used.
 		     */
-		    hierarchy[0] = "realms";
+		    hierarchy[0] = KRB5_CONF_REALMS;
 		    hierarchy[1] = realm;
-		    hierarchy[2] = "auth_to_local";
+		    hierarchy[2] = KRB5_CONF_AUTH_TO_LOCAL;
 		    hierarchy[3] = (char *) NULL;
 		    if (!(kret = profile_get_values(context->profile,
 						    hierarchy,

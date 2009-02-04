@@ -70,11 +70,11 @@ maybe_use_dns (krb5_context context, const char *name, int defalt)
     char * value = NULL;
     int use_dns = 0;
 
-    code = profile_get_string(context->profile, "libdefaults",
+    code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
                               name, 0, 0, &value);
     if (value == 0 && code == 0)
-	code = profile_get_string(context->profile, "libdefaults",
-				  "dns_fallback", 0, 0, &value);
+	code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+				  KRB5_CONF_DNS_FALLBACK, 0, 0, &value);
     if (code)
         return defalt;
 
@@ -89,13 +89,13 @@ maybe_use_dns (krb5_context context, const char *name, int defalt)
 int
 _krb5_use_dns_kdc(krb5_context context)
 {
-    return maybe_use_dns (context, "dns_lookup_kdc", DEFAULT_LOOKUP_KDC);
+    return maybe_use_dns (context, KRB5_CONF_DNS_LOOKUP_KDC, DEFAULT_LOOKUP_KDC);
 }
 
 int
 _krb5_use_dns_realm(krb5_context context)
 {
-    return maybe_use_dns (context, "dns_lookup_realm", DEFAULT_LOOKUP_REALM);
+    return maybe_use_dns (context, KRB5_CONF_DNS_LOOKUP_REALM, DEFAULT_LOOKUP_REALM);
 }
 
 #endif /* KRB5_DNS_LOOKUP */
@@ -325,7 +325,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
     masterlist = NULL;
 
-    realm_srv_names[0] = "realms";
+    realm_srv_names[0] = KRB5_CONF_REALMS;
     realm_srv_names[1] = host;
     realm_srv_names[2] = name;
     realm_srv_names[3] = 0;
@@ -354,9 +354,9 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     }
     
     if (get_masters) {
-	realm_srv_names[0] = "realms";
+	realm_srv_names[0] = KRB5_CONF_REALMS;
 	realm_srv_names[1] = host;
-	realm_srv_names[2] = "admin_server";
+	realm_srv_names[2] = KRB5_CONF_ADMIN_SERVER;
 	realm_srv_names[3] = 0;
 
 	code = profile_get_values(context->profile, realm_srv_names,
@@ -712,7 +712,7 @@ prof_locate_server (krb5_context context, const krb5_data *realm,
 
     switch (svc) {
     case locate_service_kdc:
-	profname = "kdc";
+	profname = KRB5_CONF_KDC;
 	/* We used to use /etc/services for these, but enough systems
 	   have old, crufty, wrong settings that this is probably
 	   better.  */
@@ -721,19 +721,19 @@ prof_locate_server (krb5_context context, const krb5_data *realm,
 	dflport2 = htons(KRB5_DEFAULT_SEC_PORT);
 	break;
     case locate_service_master_kdc:
-	profname = "master_kdc";
+	profname = KRB5_CONF_MASTER_KDC;
 	goto kdc_ports;
     case locate_service_kadmin:
-	profname = "admin_server";
+	profname = KRB5_CONF_ADMIN_SERVER;
 	dflport1 = htons(DEFAULT_KADM5_PORT);
 	break;
     case locate_service_krb524:
-	profname = "krb524_server";
+	profname = KRB5_CONF_KRB524_SERVER;
 	serv = getservbyname(KRB524_SERVICE, "udp");
 	dflport1 = serv ? serv->s_port : htons (KRB524_PORT);
 	break;
     case locate_service_kpasswd:
-	profname = "kpasswd_server";
+	profname = KRB5_CONF_KPASSWD_SERVER;
 	dflport1 = htons(DEFAULT_KPASSWD_PORT);
 	break;
     default:

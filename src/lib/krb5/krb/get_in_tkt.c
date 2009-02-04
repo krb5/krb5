@@ -800,7 +800,7 @@ krb5_libdefault_string(krb5_context context, const krb5_data *realm,
 
     profile = context->profile;
 	    
-    names[0] = "libdefaults";
+    names[0] = KRB5_CONF_LIBDEFAULTS;
 
     /*
      * Try number one:
@@ -887,7 +887,7 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
 	return 0;
     }
 
-    ret = krb5_libdefault_string(context, realm, "preferred_preauth_types",
+    ret = krb5_libdefault_string(context, realm, KRB5_CONF_PREFERRED_PREAUTH_TYPES,
 				 &preauth_types);
     if ((ret != 0) || (preauth_types == NULL)) {
 	/* Try to use PKINIT first. */
@@ -1022,7 +1022,7 @@ krb5_get_init_creds(krb5_context context,
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_FORWARDABLE))
 	tempint = options->forwardable;
     else if ((ret = krb5_libdefault_boolean(context, &client->realm,
-					    "forwardable", &tempint)) == 0)
+					    KRB5_CONF_FORWARDABLE, &tempint)) == 0)
 	    ;
     else
 	tempint = 0;
@@ -1034,7 +1034,7 @@ krb5_get_init_creds(krb5_context context,
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_PROXIABLE))
 	tempint = options->proxiable;
     else if ((ret = krb5_libdefault_boolean(context, &client->realm,
-					    "proxiable", &tempint)) == 0)
+					    KRB5_CONF_PROXIABLE, &tempint)) == 0)
 	    ;
     else
 	tempint = 0;
@@ -1045,7 +1045,7 @@ krb5_get_init_creds(krb5_context context,
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_CANONICALIZE))
 	tempint = 1;
     else if ((ret = krb5_libdefault_boolean(context, &client->realm,
-					    "canonicalize", &tempint)) == 0)
+					    KRB5_CONF_CANONICALIZE, &tempint)) == 0)
 	;
     else
 	tempint = 0;
@@ -1066,7 +1066,7 @@ krb5_get_init_creds(krb5_context context,
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_TKT_LIFE)) {
         tkt_life = options->tkt_life;
     } else if ((ret = krb5_libdefault_string(context, &client->realm,
-					     "ticket_lifetime", &tempstr))
+					     KRB5_CONF_TICKET_LIFETIME, &tempstr))
 	       == 0) {
 	ret = krb5_string_to_deltat(tempstr, &tkt_life);
 	free(tempstr);
@@ -1084,7 +1084,7 @@ krb5_get_init_creds(krb5_context context,
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_RENEW_LIFE)) {
 	renew_life = options->renew_life;
     } else if ((ret = krb5_libdefault_string(context, &client->realm,
-					     "renew_lifetime", &tempstr))
+					     KRB5_CONF_RENEW_LIFETIME, &tempstr))
 	       == 0) {
 	ret = krb5_string_to_deltat(tempstr, &renew_life);
 	free(tempstr);
@@ -1178,7 +1178,7 @@ krb5_get_init_creds(krb5_context context,
     /* it would be nice if this parsed out an address list, but
        that would be work. */
     else if (((ret = krb5_libdefault_boolean(context, &client->realm,
-					    "noaddresses", &tempint)) != 0)
+					    KRB5_CONF_NOADDRESSES, &tempint)) != 0)
 	     || (tempint == 1)) {
 	    ;
     } else {

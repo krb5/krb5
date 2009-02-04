@@ -1092,7 +1092,7 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 
     pkiDebug("%s: entered for realm %s\n", __FUNCTION__, plgctx->realmname);
     retval = pkinit_kdcdefault_string(context, plgctx->realmname,
-				      "pkinit_identity",
+				      KRB5_CONF_PKINIT_IDENTITY,
 				      &plgctx->idopts->identity);
     if (retval != 0 || NULL == plgctx->idopts->identity) {
 	retval = EINVAL;
@@ -1103,7 +1103,7 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
     }
 
     retval = pkinit_kdcdefault_strings(context, plgctx->realmname,
-				       "pkinit_anchors",
+				       KRB5_CONF_PKINIT_ANCHORS,
 				       &plgctx->idopts->anchors);
     if (retval != 0 || NULL == plgctx->idopts->anchors) {
 	retval = EINVAL;
@@ -1114,26 +1114,26 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
     }
 
     pkinit_kdcdefault_strings(context, plgctx->realmname,
-			      "pkinit_pool",
+			      KRB5_CONF_PKINIT_POOL,
 			      &plgctx->idopts->intermediates);
 
     pkinit_kdcdefault_strings(context, plgctx->realmname,
-			      "pkinit_revoke",
+			      KRB5_CONF_PKINIT_REVOKE,
 			      &plgctx->idopts->crls);
 
     pkinit_kdcdefault_string(context, plgctx->realmname,
-			     "pkinit_kdc_ocsp",
+			     KRB5_CONF_PKINIT_KDC_OCSP,
 			     &plgctx->idopts->ocsp);
 
     pkinit_kdcdefault_string(context, plgctx->realmname,
-			     "pkinit_mappings_file",
+			     KRB5_CONF_PKINIT_MAPPING_FILE,
 			     &plgctx->idopts->dn_mapping_file);
 
     pkinit_kdcdefault_integer(context, plgctx->realmname,
-			      "pkinit_dh_min_bits",
+			      KRB5_CONF_PKINIT_DH_MIN_BITS,
 			      PKINIT_DEFAULT_DH_MIN_BITS,
 			      &plgctx->opts->dh_min_bits);
-    if (plgctx->opts->dh_min_bits < 1024) {
+    if (plgctx->opts->dh_min_bits < PKINIT_DEFAULT_DH_MIN_BITS) {
 	pkiDebug("%s: invalid value (%d) for pkinit_dh_min_bits, "
 		 "using default value (%d) instead\n", __FUNCTION__,
 		 plgctx->opts->dh_min_bits, PKINIT_DEFAULT_DH_MIN_BITS);
@@ -1141,15 +1141,15 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
     }
 
     pkinit_kdcdefault_boolean(context, plgctx->realmname,
-			      "pkinit_allow_upn",
+			      KRB5_CONF_PKINIT_ALLOW_UPN,
 			      0, &plgctx->opts->allow_upn);
 
     pkinit_kdcdefault_boolean(context, plgctx->realmname,
-			      "pkinit_require_crl_checking",
+			      KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING,
 			      0, &plgctx->opts->require_crl_checking);
 
     pkinit_kdcdefault_string(context, plgctx->realmname,
-			     "pkinit_eku_checking",
+			     KRB5_CONF_PKINIT_EKU_CHECKING,
 			     &eku_string);
     if (eku_string != NULL) {
 	if (strcasecmp(eku_string, "kpClientAuth") == 0) {

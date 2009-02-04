@@ -566,7 +566,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
             goto cleanup;
     
     /* Initialize realm parameters */
-    hierarchy[0] = "realms";
+    hierarchy[0] = KRB5_CONF_REALMS;
     hierarchy[1] = lrealm;
     hierarchy[3] = (char *) NULL;
 
@@ -576,7 +576,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
                      aprofile, hierarchy, CONFTAG, DEFAULT)
 
     /* Get the value for the admin server */
-    GET_STRING_PARAM(admin_server, KADM5_CONFIG_ADMIN_SERVER, "admin_server",
+    GET_STRING_PARAM(admin_server, KADM5_CONFIG_ADMIN_SERVER, KRB5_CONF_ADMIN_SERVER,
                      NULL);
 
     if (params.mask & KADM5_CONFIG_ADMIN_SERVER) {
@@ -590,7 +590,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     }
 
     /* Get the value for the database */
-    GET_STRING_PARAM(dbname, KADM5_CONFIG_DBNAME, "database_name",
+    GET_STRING_PARAM(dbname, KADM5_CONFIG_DBNAME, KRB5_CONF_DATABASE_NAME,
                      DEFAULT_KDB_FILE);
 
     params.admin_dbname_was_here = NULL;
@@ -599,7 +599,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 
     /* Get the value for the admin (policy) database lock file*/
     if (!GET_STRING_PARAM(admin_keytab, KADM5_CONFIG_ADMIN_KEYTAB,
-                          "admin_keytab", NULL)) {
+                          KRB5_CONF_ADMIN_KEYTAB, NULL)) {
         const char *s = getenv("KRB5_KTNAME");
         if (s == NULL)
             s = DEFAULT_KADM5_KEYTAB;
@@ -609,11 +609,11 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     }
     
     /* Get the name of the acl file */
-    GET_STRING_PARAM(acl_file, KADM5_CONFIG_ACL_FILE, "acl_file",
+    GET_STRING_PARAM(acl_file, KADM5_CONFIG_ACL_FILE, KRB5_CONF_ACL_FILE,
                      DEFAULT_KADM5_ACL_FILE);
 
     /* Get the name of the dict file */
-    GET_STRING_PARAM(dict_file, KADM5_CONFIG_DICT_FILE, "dict_file", NULL);
+    GET_STRING_PARAM(dict_file, KADM5_CONFIG_DICT_FILE, KRB5_CONF_DICT_FILE, NULL);
 
 #define GET_PORT_PARAM(FIELD, BIT, CONFTAG, DEFAULT) \
     get_port_param(&params.FIELD, params_in->FIELD,  \
@@ -621,18 +621,18 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
                    aprofile, hierarchy, CONFTAG, DEFAULT)
     /* Get the value for the kadmind port */
     GET_PORT_PARAM(kadmind_port, KADM5_CONFIG_KADMIND_PORT,
-                   "kadmind_port", DEFAULT_KADM5_PORT);
+                   KRB5_CONF_KADMIND_PORT, DEFAULT_KADM5_PORT);
 
     /* Get the value for the kpasswd port */
     GET_PORT_PARAM(kpasswd_port, KADM5_CONFIG_KPASSWD_PORT,
-                   "kpasswd_port", DEFAULT_KPASSWD_PORT);
+                   KRB5_CONF_KPASSWD_PORT, DEFAULT_KPASSWD_PORT);
 
     /* Get the value for the master key name */
     GET_STRING_PARAM(mkey_name, KADM5_CONFIG_MKEY_NAME,
-                     "master_key_name", NULL);
+                     KRB5_CONF_MASTER_KEY_NAME, NULL);
 
     /* Get the value for the master key type */
-    hierarchy[2] = "master_key_type";
+    hierarchy[2] = KRB5_CONF_MASTER_KEY_TYPE;
     if (params_in->mask & KADM5_CONFIG_ENCTYPE) {
          params.mask |= KADM5_CONFIG_ENCTYPE;
          params.enctype = params_in->enctype;
@@ -655,7 +655,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     
     /* Get the value for the stashfile */
     GET_STRING_PARAM(stash_file, KADM5_CONFIG_STASH_FILE,
-                     "key_stash_file", NULL);
+                     KRB5_CONF_KEY_STASH_FILE, NULL);
 
     /* Get the value for maximum ticket lifetime. */
 #define GET_DELTAT_PARAM(FIELD, BIT, CONFTAG, DEFAULT) \
@@ -663,15 +663,15 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
                      &params.mask, params_in->mask, BIT, \
                      aprofile, hierarchy, CONFTAG, DEFAULT)
 
-    GET_DELTAT_PARAM(max_life, KADM5_CONFIG_MAX_LIFE, "max_life",
+    GET_DELTAT_PARAM(max_life, KADM5_CONFIG_MAX_LIFE, KRB5_CONF_MAX_LIFE,
                      24 * 60 * 60); /* 1 day */
 
     /* Get the value for maximum renewable ticket lifetime. */
-    GET_DELTAT_PARAM(max_rlife, KADM5_CONFIG_MAX_RLIFE, "max_renewable_life",
+    GET_DELTAT_PARAM(max_rlife, KADM5_CONFIG_MAX_RLIFE, KRB5_CONF_MAX_RENEWABLE_LIFE,
                      0);
 
     /* Get the value for the default principal expiration */
-    hierarchy[2] = "default_principal_expiration";
+    hierarchy[2] = KRB5_CONF_DEFAULT_PRINCIPAL_EXPIRATION;
     if (params_in->mask & KADM5_CONFIG_EXPIRATION) {
          params.mask |= KADM5_CONFIG_EXPIRATION;
          params.expiration = params_in->expiration;
@@ -687,7 +687,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     }
     
     /* Get the value for the default principal flags */
-    hierarchy[2] = "default_principal_flags";
+    hierarchy[2] = KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS;
     if (params_in->mask & KADM5_CONFIG_FLAGS) {
          params.mask |= KADM5_CONFIG_FLAGS;
          params.flags = params_in->flags;
@@ -729,7 +729,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     }
 
     /* Get the value for the supported enctype/salttype matrix */
-    hierarchy[2] = "supported_enctypes";
+    hierarchy[2] = KRB5_CONF_SUPPORTED_ENCTYPES;
     if (params_in->mask & KADM5_CONFIG_ENCTYPES) {
          /* The following scenario is when the input keysalts are !NULL */
          if(params_in->keysalts) {
@@ -765,7 +765,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
          free(svalue);
     }
     
-        hierarchy[2] = "iprop_enable";
+        hierarchy[2] = KRB5_CONF_IPROP_ENABLE;
 
         params.iprop_enabled = FALSE;
         params.mask |= KADM5_CONFIG_IPROP_ENABLED;
@@ -783,7 +783,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
         }
 
         if (!GET_STRING_PARAM(iprop_logfile, KADM5_CONFIG_IPROP_LOGFILE,
-                              "iprop_logfile", NULL)) {
+                              KRB5_CONF_IPROP_LOGFILE, NULL)) {
             if (params.mask & KADM5_CONFIG_DBNAME) {
                 if (asprintf(&params.iprop_logfile, "%s.ulog", params.dbname) >= 0) {
                     params.mask |= KADM5_CONFIG_IPROP_LOGFILE;
@@ -792,9 +792,9 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
         }
 
         GET_PORT_PARAM(iprop_port, KADM5_CONFIG_IPROP_PORT,
-                       "iprop_port", 0);
+                       KRB5_CONF_IPROP_PORT, 0);
 
-        hierarchy[2] = "iprop_master_ulogsize";
+        hierarchy[2] = KRB5_CONF_IPROP_MASTER_ULOGSIZE;
 
         params.iprop_ulogsize = DEF_ULOGENTRIES;
         params.mask |= KADM5_CONFIG_ULOG_SIZE;
@@ -816,7 +816,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
         }
 
         GET_DELTAT_PARAM(iprop_poll_time, KADM5_CONFIG_POLL_TIME,
-                         "iprop_slave_poll", 2 * 60); /* 2m */
+                         KRB5_CONF_IPROP_SLAVE_POLL, 2 * 60); /* 2m */
 
     *params_out = params;
     
@@ -955,40 +955,40 @@ krb5_read_realm_params(kcontext, realm, rparamp)
     memset(rparams, 0, sizeof(krb5_realm_params));
 
     /* Get the value for the database */
-    hierarchy[0] = "realms";
+    hierarchy[0] = KRB5_CONF_REALMS;
     hierarchy[1] = lrealm;
-    hierarchy[2] = "database_name";
+    hierarchy[2] = KRB5_CONF_DATABASE_NAME;
     hierarchy[3] = (char *) NULL;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
         rparams->realm_dbname = svalue;
         
     /* Get the value for the KDC port list */
-    hierarchy[2] = "kdc_ports";
+    hierarchy[2] = KRB5_CONF_KDC_PORTS;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
         rparams->realm_kdc_ports = svalue;
-    hierarchy[2] = "kdc_tcp_ports";
+    hierarchy[2] = KRB5_CONF_KDC_TCP_PORTS;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
         rparams->realm_kdc_tcp_ports = svalue;
 
     /* Get the name of the acl file */
-    hierarchy[2] = "acl_file";
+    hierarchy[2] = KRB5_CONF_ACL_FILE;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
         rparams->realm_acl_file = svalue;
             
     /* Get the value for the kadmind port */
-    hierarchy[2] = "kadmind_port";
+    hierarchy[2] = KRB5_CONF_KADMIND_PORT;
     if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
         rparams->realm_kadmind_port = ivalue;
         rparams->realm_kadmind_port_valid = 1;
     }
             
     /* Get the value for the master key name */
-    hierarchy[2] = "master_key_name";
+    hierarchy[2] = KRB5_CONF_MASTER_KEY_NAME;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
         rparams->realm_mkey_name = svalue;
             
     /* Get the value for the master key type */
-    hierarchy[2] = "master_key_type";
+    hierarchy[2] = KRB5_CONF_MASTER_KEY_TYPE;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
         if (!krb5_string_to_enctype(svalue, &rparams->realm_enctype))
             rparams->realm_enctype_valid = 1;
@@ -996,26 +996,26 @@ krb5_read_realm_params(kcontext, realm, rparamp)
     }
             
     /* Get the value for the stashfile */
-    hierarchy[2] = "key_stash_file";
+    hierarchy[2] = KRB5_CONF_KEY_STASH_FILE;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
         rparams->realm_stash_file = svalue;
             
     /* Get the value for maximum ticket lifetime. */
-    hierarchy[2] = "max_life";
+    hierarchy[2] = KRB5_CONF_MAX_LIFE;
     if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
         rparams->realm_max_life = dtvalue;
         rparams->realm_max_life_valid = 1;
     }
             
     /* Get the value for maximum renewable ticket lifetime. */
-    hierarchy[2] = "max_renewable_life";
+    hierarchy[2] = KRB5_CONF_MAX_RENEWABLE_LIFE;
     if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
         rparams->realm_max_rlife = dtvalue;
         rparams->realm_max_rlife_valid = 1;
     }
             
     /* Get the value for the default principal expiration */
-    hierarchy[2] = "default_principal_expiration";
+    hierarchy[2] = KRB5_CONF_DEFAULT_PRINCIPAL_EXPIRATION;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
         if (!krb5_string_to_timestamp(svalue,
                                       &rparams->realm_expiration))
@@ -1023,20 +1023,20 @@ krb5_read_realm_params(kcontext, realm, rparamp)
         free(svalue);
     }
 
-    hierarchy[2] = "reject_bad_transit";
+    hierarchy[2] = KRB5_CONF_REJECT_BAD_TRANSIT;
     if (!krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
         rparams->realm_reject_bad_transit = bvalue;
         rparams->realm_reject_bad_transit_valid = 1;
     }
 
-    hierarchy[2] = "no_host_referral";
+    hierarchy[2] = KRB5_CONF_NO_HOST_REFERRAL;
     if (!krb5_aprof_get_string_all(aprofile, hierarchy, &no_refrls)) 
        rparams->realm_no_host_referral = no_refrls;
     else 
             no_refrls = 0;
 
-    if (!no_refrls || krb5_match_config_pattern(no_refrls, "*") == FALSE) {
-        hierarchy[2] = "host_based_services";
+    if (!no_refrls || krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == FALSE) {
+        hierarchy[2] = KRB5_CONF_HOST_BASED_SERVICES;
         if (!krb5_aprof_get_string_all(aprofile, hierarchy, &host_based_srvcs))
             rparams->realm_host_based_services = host_based_srvcs;
         else
@@ -1044,7 +1044,7 @@ krb5_read_realm_params(kcontext, realm, rparamp)
     }
 
     /* Get the value for the default principal flags */
-    hierarchy[2] = "default_principal_flags";
+    hierarchy[2] = KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
         char *sp, *ep, *tp;
 

@@ -746,7 +746,7 @@ pkinit_cert_matching(krb5_context context,
 
     /* If no matching rules, select the default cert and we're done */
     pkinit_libdefault_strings(context, krb5_princ_realm(context, princ),
-			      "pkinit_cert_match", &rules);
+			      KRB5_CONF_PKINIT_CERT_MATCH, &rules);
     if (rules == NULL) {
 	pkiDebug("%s: no matching rules found in config file\n", __FUNCTION__);
 	retval = crypto_cert_select_default(context, plg_cryptoctx,

@@ -47,8 +47,8 @@ maybe_use_reverse_dns (krb5_context context, int defalt)
     char * value = NULL;
     int use_rdns = 0;
 
-    code = profile_get_string(context->profile, "libdefaults",
-                              "rdns", 0, 0, &value);
+    code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                              KRB5_CONF_RDNS, 0, 0, &value);
     if (code)
         return defalt;
 
