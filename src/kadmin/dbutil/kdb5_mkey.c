@@ -187,8 +187,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
     }
 
 clean_n_exit:
-    if (mkey_aux_data_head)
-        krb5_dbe_free_mkey_aux_list(context, mkey_aux_data_head);
+    krb5_dbe_free_mkey_aux_list(context, mkey_aux_data_head);
     return (retval);
 }
 
@@ -214,6 +213,10 @@ kdb5_add_mkey(int argc, char *argv[])
      * The command table entry for this command causes open_db_and_mkey() to be
      * called first to open the KDB and get the current mkey.
      */
+
+    memset(&new_mkeyblock, 0, sizeof(new_mkeyblock));
+    memset(&master_princ, 0, sizeof(master_princ));
+    master_salt.data = NULL;
 
     while ((optchar = getopt(argc, argv, "e:s")) != -1) {
         switch(optchar) {
@@ -254,19 +257,19 @@ kdb5_add_mkey(int argc, char *argv[])
                 "while getting master key principal %s",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries == 0) {
         com_err(progname, KRB5_KDB_NOENTRY,
                 "principal %s not found in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries > 1) {
         com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
                 "principal %s has multiple entries in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     printf("Creating new master key for master key principal '%s'\n",
@@ -281,7 +284,7 @@ kdb5_add_mkey(int argc, char *argv[])
     if (pw_str == NULL) {
         com_err(progname, ENOMEM, "while creating new master key");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     retval = krb5_read_password(util_context, KRB5_KDC_MKEY_1, KRB5_KDC_MKEY_2,
@@ -289,7 +292,7 @@ kdb5_add_mkey(int argc, char *argv[])
     if (retval) {
         com_err(progname, retval, "while reading new master key from keyboard");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
     new_mkey_password = pw_str;
 
@@ -299,7 +302,7 @@ kdb5_add_mkey(int argc, char *argv[])
     if (retval) {
         com_err(progname, retval, "while calculating master key salt");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     retval = krb5_c_string_to_key(util_context, new_master_enctype, 
@@ -307,34 +310,34 @@ kdb5_add_mkey(int argc, char *argv[])
     if (retval) {
         com_err(progname, retval, "while transforming master key from password");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     retval = add_new_mkey(util_context, &master_entry, &new_mkeyblock, 0);
     if (retval) {
         com_err(progname, retval, "adding new master key to master principal");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_timeofday(util_context, &now))) {
         com_err(progname, retval, "while getting current time");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_dbe_update_mod_princ_data(util_context, &master_entry,
                                                  now, master_princ))) {
         com_err(progname, retval, "while updating the master key principal modification time");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_db_put_principal(util_context, &master_entry, &nentries))) {
         (void) krb5_db_fini(util_context);
         com_err(progname, retval, "while adding master key entry to the database");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if (do_stash) {
@@ -349,6 +352,8 @@ kdb5_add_mkey(int argc, char *argv[])
             printf("Warning: couldn't stash master key.\n");
         }
     }
+
+cleanup_return:
     /* clean up */
     (void) krb5_db_fini(util_context);
     zap((char *)master_keyblock.contents, master_keyblock.length);
@@ -360,8 +365,7 @@ kdb5_add_mkey(int argc, char *argv[])
         free(pw_str);
     }
     free(master_salt.data);
-    free(mkey_fullname);
-
+    krb5_free_unparsed_name(util_context, mkey_fullname);
     return;
 }
 
@@ -369,16 +373,18 @@ void
 kdb5_use_mkey(int argc, char *argv[])
 {
     krb5_error_code retval;
-    char  *mkey_fullname;
+    char  *mkey_fullname = NULL;
     krb5_kvno  use_kvno;
     krb5_timestamp now, start_time;
-    krb5_actkvno_node *actkvno_list, *new_actkvno,
+    krb5_actkvno_node *actkvno_list = NULL, *new_actkvno = NULL,
                       *prev_actkvno, *cur_actkvno;
     krb5_db_entry master_entry;
-    int   nentries = 0;
-    krb5_boolean more = 0, found;
-    krb5_keylist_node  *keylist_node;
+    int nentries = 0;
+    krb5_boolean more = FALSE;
+    krb5_keylist_node *keylist_node;
     krb5_boolean inserted = FALSE;
+
+    memset(&master_princ, 0, sizeof(master_princ));
 
     if (argc < 2 || argc > 3) {
         /* usage calls exit */
@@ -392,14 +398,12 @@ kdb5_use_mkey(int argc, char *argv[])
         return;
     } else {
         /* verify use_kvno is valid */
-        for (keylist_node = master_keylist, found = FALSE; keylist_node != NULL;
+        for (keylist_node = master_keylist; keylist_node != NULL;
              keylist_node = keylist_node->next) {
-            if (use_kvno == keylist_node->kvno) {
-                found = TRUE;
+            if (use_kvno == keylist_node->kvno)
                 break;
-            }
         }
-        if (!found) {
+        if (!keylist_node) {
             com_err(progname, EINVAL, "%d is an invalid KVNO value", use_kvno);
             exit_status++;
             return;
@@ -442,7 +446,7 @@ kdb5_use_mkey(int argc, char *argv[])
                                           &mkey_fullname, &master_princ))) {
         com_err(progname, retval, "while setting up master key name");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     retval = krb5_db_get_principal(util_context, master_princ, &master_entry,
@@ -452,19 +456,19 @@ kdb5_use_mkey(int argc, char *argv[])
                 "while getting master key principal %s",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries == 0) {
         com_err(progname, KRB5_KDB_NOENTRY,
                 "principal %s not found in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries > 1) {
         com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
                 "principal %s has multiple entries in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     retval = krb5_dbe_lookup_actkvno(util_context, &master_entry, &actkvno_list);
@@ -472,7 +476,7 @@ kdb5_use_mkey(int argc, char *argv[])
         com_err(progname, retval,
                 "while looking up active version of master key");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     /*
@@ -511,7 +515,7 @@ kdb5_use_mkey(int argc, char *argv[])
         if (new_actkvno == NULL) {
             com_err(progname, ENOMEM, "while adding new master key");
             exit_status++;
-            return;
+            goto cleanup_return;
         }
         memset(new_actkvno, 0, sizeof(krb5_actkvno_node));
         new_actkvno->act_kvno = use_kvno;
@@ -548,34 +552,35 @@ kdb5_use_mkey(int argc, char *argv[])
     if (actkvno_list->act_time > now) {
         com_err(progname, EINVAL, "there must be one master key currently active");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_dbe_update_actkvno(util_context, &master_entry,
-                                          /* new_actkvno_list_head))) { */
-        actkvno_list))) {
-            com_err(progname, retval, "while updating actkvno data for master principal entry");
-            exit_status++;
-            return;
-        }
+                                          actkvno_list))) {
+        com_err(progname, retval, "while updating actkvno data for master principal entry");
+        exit_status++;
+        goto cleanup_return;
+    }
 
     if ((retval = krb5_dbe_update_mod_princ_data(util_context, &master_entry,
                                                  now, master_princ))) {
         com_err(progname, retval, "while updating the master key principal modification time");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_db_put_principal(util_context, &master_entry, &nentries))) {
         (void) krb5_db_fini(util_context);
         com_err(progname, retval, "while adding master key entry to the database");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
+cleanup_return:
     /* clean up */
     (void) krb5_db_fini(util_context);
-    free(mkey_fullname);
+    krb5_free_unparsed_name(util_context, mkey_fullname);
+    krb5_free_principal(util_context, master_princ);
     krb5_dbe_free_actkvno_list(util_context, actkvno_list);
     return;
 }
@@ -584,13 +589,13 @@ void
 kdb5_list_mkeys(int argc, char *argv[])
 {
     krb5_error_code retval;
-    char  *mkey_fullname, *output_str = NULL, enctype[BUFSIZ];
+    char  *mkey_fullname = NULL, *output_str = NULL, enctype[BUFSIZ];
     krb5_kvno  act_kvno;
     krb5_timestamp act_time;
-    krb5_actkvno_node *actkvno_list = NULL, *cur_actkvno, *prev_actkvno;
+    krb5_actkvno_node *actkvno_list = NULL, *cur_actkvno;
     krb5_db_entry master_entry;
     int   nentries = 0;
-    krb5_boolean more = 0;
+    krb5_boolean more = FALSE;
     krb5_keylist_node  *cur_kb_node;
     krb5_keyblock *act_mkey;
 
@@ -617,26 +622,26 @@ kdb5_list_mkeys(int argc, char *argv[])
                 "while getting master key principal %s",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries == 0) {
         com_err(progname, KRB5_KDB_NOENTRY,
                 "principal %s not found in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries > 1) {
         com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
                 "principal %s has multiple entries in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     retval = krb5_dbe_lookup_actkvno(util_context, &master_entry, &actkvno_list);
     if (retval != 0) {
         com_err(progname, retval, "while looking up active kvno list");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if (actkvno_list == NULL) {
@@ -653,7 +658,7 @@ kdb5_list_mkeys(int argc, char *argv[])
         } else if (retval != 0) {
             com_err(progname, retval, "while looking up active master key");
             exit_status++;
-            return;
+            goto cleanup_return;
         }
     }
 
@@ -666,7 +671,7 @@ kdb5_list_mkeys(int argc, char *argv[])
                                              enctype, sizeof(enctype)))) {
             com_err(progname, retval, "while getting enctype description");
             exit_status++;
-            return;
+            goto cleanup_return;
         }
 
         if (actkvno_list != NULL) {
@@ -686,7 +691,7 @@ kdb5_list_mkeys(int argc, char *argv[])
             if ((retval = krb5_timeofday(util_context, &act_time))) {
                 com_err(progname, retval, "while getting current time");
                 exit_status++;
-                return;
+                goto cleanup_return;
             }
         }
 
@@ -706,22 +711,20 @@ kdb5_list_mkeys(int argc, char *argv[])
         if (retval == -1) {
             com_err(progname, ENOMEM, "asprintf could not allocate enough memory to hold output");
             exit_status++;
-            return;
+            goto cleanup_return;
         }
         printf("%s", output_str);
         free(output_str);
         output_str = NULL;
     }
 
+cleanup_return:
     /* clean up */
     (void) krb5_db_fini(util_context);
-    free(mkey_fullname);
+    krb5_free_unparsed_name(util_context, mkey_fullname);
     free(output_str);
-    for (cur_actkvno = actkvno_list; cur_actkvno != NULL;) {
-        prev_actkvno = cur_actkvno;
-        cur_actkvno = cur_actkvno->next;
-        free(prev_actkvno);
-    }
+    krb5_free_principal(util_context, master_princ);
+    krb5_dbe_free_actkvno_list(util_context, actkvno_list);
     return;
 }
 
@@ -845,7 +848,7 @@ update_princ_encryption_1(void *cb, krb5_db_entry *ent)
         goto fail;
     }
 
-    if (krb5_principal_compare (util_context, ent->princ, master_princ)) {
+    if (krb5_principal_compare(util_context, ent->princ, master_princ)) {
         goto skip;
     }
 
@@ -1150,7 +1153,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
 {
     int optchar;
     krb5_error_code retval;
-    char  *mkey_fullname;
+    char  *mkey_fullname = NULL;
     krb5_timestamp now;
     krb5_db_entry master_entry;
     int   nentries = 0;
@@ -1160,9 +1163,12 @@ kdb5_purge_mkeys(int argc, char *argv[])
     char buf[5];
     unsigned int i, j, k, num_kvnos_inuse, num_kvnos_purged;
     unsigned int old_key_data_count;
-    krb5_actkvno_node *cur_actkvno_list, *actkvno_entry, *prev_actkvno_entry;
-    krb5_mkey_aux_node *cur_mkey_aux_list, *mkey_aux_entry, *prev_mkey_aux_entry;
+    krb5_actkvno_node *actkvno_list = NULL, *actkvno_entry, *prev_actkvno_entry;
+    krb5_mkey_aux_node *mkey_aux_list = NULL, *mkey_aux_entry, *prev_mkey_aux_entry;
     krb5_key_data *old_key_data;
+
+    memset(&master_princ, 0, sizeof(master_princ));
+    memset(&args, 0, sizeof(args));
 
     optind = 1;
     while ((optchar = getopt(argc, argv, "fnv")) != -1) {
@@ -1201,19 +1207,19 @@ kdb5_purge_mkeys(int argc, char *argv[])
                 "while getting master key principal %s",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries == 0) {
         com_err(progname, KRB5_KDB_NOENTRY,
                 "principal %s not found in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     } else if (nentries > 1) {
         com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
                 "principal %s has multiple entries in Kerberos database",
                 mkey_fullname);
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if (!force) {
@@ -1222,11 +1228,11 @@ kdb5_purge_mkeys(int argc, char *argv[])
         printf("(type 'yes' to confirm)? ");
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
             exit_status++;
-            return;
+            goto cleanup_return;
         }
         if (strcmp(buf, "yes\n")) {
             exit_status++;
-            return;
+            goto cleanup_return;
         }
         printf("OK, purging unused master keys from '%s'...\n", mkey_fullname);
     }
@@ -1236,7 +1242,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
     if (old_key_data_count == 1) {
         if (verbose)
             printf("There is only one master key which can not be purged.\n");
-        return;
+        goto cleanup_return;
     }
     old_key_data = master_entry.key_data;
 
@@ -1245,7 +1251,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         retval = ENOMEM;
         com_err(progname, ENOMEM, "while allocating args.kvnos");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
     memset(args.kvnos, 0, sizeof(struct kvnos_in_use) * old_key_data_count);
     args.num_kvnos = old_key_data_count;
@@ -1261,7 +1267,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
                                   (krb5_pointer) &args))) {
         com_err(progname, retval, "while finding master keys in use");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
     /*
      * args.kvnos has been marked with the mkvno's that are currently protecting
@@ -1282,7 +1288,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
                 com_err(progname, KRB5_KDB_STORED_MKEY_NOTCURRENT,
                         "master key stash file needs updating, command aborting");
                 exit_status++;
-                return;
+                goto cleanup_return;
             }
             num_kvnos_purged++;
             printf("KNVO: %d\n", args.kvnos[i].kvno);
@@ -1291,26 +1297,26 @@ kdb5_purge_mkeys(int argc, char *argv[])
     /* didn't find any keys to purge */
     if (num_kvnos_inuse == args.num_kvnos) {
         printf("All keys in use, nothing purged.\n");
-        goto clean_and_exit;
+        goto cleanup_return;
     }
     if (dry_run) {
         /* bail before doing anything else */
         printf("%d key(s) would be purged.\n", num_kvnos_purged);
-        goto clean_and_exit;
+        goto cleanup_return;
     }
 
-    retval = krb5_dbe_lookup_actkvno(util_context, &master_entry, &cur_actkvno_list);
+    retval = krb5_dbe_lookup_actkvno(util_context, &master_entry, &actkvno_list);
     if (retval != 0) {
         com_err(progname, retval, "while looking up active kvno list");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
-    retval = krb5_dbe_lookup_mkey_aux(util_context, &master_entry, &cur_mkey_aux_list);
+    retval = krb5_dbe_lookup_mkey_aux(util_context, &master_entry, &mkey_aux_list);
     if (retval != 0) {
         com_err(progname, retval, "while looking up mkey aux data list");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     master_entry.key_data = (krb5_key_data *) malloc(sizeof(krb5_key_data) * num_kvnos_inuse);
@@ -1318,7 +1324,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         retval = ENOMEM;
         com_err(progname, ENOMEM, "while allocating key_data");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
     memset(master_entry.key_data, 0, sizeof(krb5_key_data) * num_kvnos_inuse);
     master_entry.n_key_data = num_kvnos_inuse; /* there's only 1 mkey per kvno */
@@ -1336,15 +1342,15 @@ kdb5_purge_mkeys(int argc, char *argv[])
                 } else {
                     /* remove unused mkey */
                     /* adjust the actkno data */
-                    for (prev_actkvno_entry = actkvno_entry = cur_actkvno_list;
+                    for (prev_actkvno_entry = actkvno_entry = actkvno_list;
                          actkvno_entry != NULL;
                          actkvno_entry = actkvno_entry->next) {
 
                         if (actkvno_entry->act_kvno == args.kvnos[j].kvno) {
-                            if (actkvno_entry == cur_actkvno_list) {
+                            if (actkvno_entry == actkvno_list) {
                                 /* remove from head */
-                                cur_actkvno_list = actkvno_entry->next;
-                                prev_actkvno_entry = cur_actkvno_list;
+                                actkvno_list = actkvno_entry->next;
+                                prev_actkvno_entry = actkvno_list;
                             } else if (actkvno_entry->next == NULL) {
                                 /* remove from tail */
                                 prev_actkvno_entry->next = NULL;
@@ -1352,27 +1358,29 @@ kdb5_purge_mkeys(int argc, char *argv[])
                                 /* remove in between */
                                 prev_actkvno_entry->next = actkvno_entry->next;
                             }
-                            /* XXX WAF: free actkvno_entry */
+                            actkvno_entry->next = NULL;
+                            krb5_dbe_free_actkvno_list(util_context, actkvno_entry);
                             break; /* deleted entry, no need to loop further */
                         } else {
                             prev_actkvno_entry = actkvno_entry;
                         }
                     }
                     /* adjust the mkey aux data */
-                    for (prev_mkey_aux_entry = mkey_aux_entry = cur_mkey_aux_list;
+                    for (prev_mkey_aux_entry = mkey_aux_entry = mkey_aux_list;
                          mkey_aux_entry != NULL;
                          mkey_aux_entry = mkey_aux_entry->next) {
 
                         if (mkey_aux_entry->mkey_kvno == args.kvnos[j].kvno) {
-                            if (mkey_aux_entry == cur_mkey_aux_list) {
-                                cur_mkey_aux_list = mkey_aux_entry->next;
-                                prev_mkey_aux_entry = cur_mkey_aux_list;
+                            if (mkey_aux_entry == mkey_aux_list) {
+                                mkey_aux_list = mkey_aux_entry->next;
+                                prev_mkey_aux_entry = mkey_aux_list;
                             } else if (mkey_aux_entry->next == NULL) {
                                 prev_mkey_aux_entry->next = NULL;
                             } else {
                                 prev_mkey_aux_entry->next = mkey_aux_entry->next;
                             }
-                            /* XXX WAF: free mkey_aux_entry */
+                            mkey_aux_entry->next = NULL;
+                            krb5_dbe_free_mkey_aux_list(util_context, mkey_aux_entry);
                             break; /* deleted entry, no need to loop further */
                         } else {
                             prev_mkey_aux_entry = mkey_aux_entry;
@@ -1385,15 +1393,15 @@ kdb5_purge_mkeys(int argc, char *argv[])
     assert(k == num_kvnos_inuse);
 
     if ((retval = krb5_dbe_update_actkvno(util_context, &master_entry,
-                                          cur_actkvno_list))) {
+                                          actkvno_list))) {
         com_err(progname, retval,
                 "while updating actkvno data for master principal entry");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_dbe_update_mkey_aux(util_context, &master_entry,
-                                           cur_mkey_aux_list))) {
+                                           mkey_aux_list))) {
         com_err(progname, retval,
                 "while updating mkey_aux data for master principal entry");
         exit_status++;
@@ -1403,7 +1411,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
     if ((retval = krb5_timeofday(util_context, &now))) {
         com_err(progname, retval, "while getting current time");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_dbe_update_mod_princ_data(util_context, &master_entry,
@@ -1411,21 +1419,24 @@ kdb5_purge_mkeys(int argc, char *argv[])
         com_err(progname, retval,
                 "while updating the master key principal modification time");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_db_put_principal(util_context, &master_entry, &nentries))) {
         (void) krb5_db_fini(util_context);
         com_err(progname, retval, "while adding master key entry to the database");
         exit_status++;
-        return;
+        goto cleanup_return;
     }
     printf("%d key(s) purged.\n", num_kvnos_purged);
 
-clean_and_exit:
+cleanup_return:
     /* clean up */
     (void) krb5_db_fini(util_context);
+    krb5_free_principal(util_context, master_princ);
     free(args.kvnos);
-    free(mkey_fullname);
+    krb5_free_unparsed_name(util_context, mkey_fullname);
+    krb5_dbe_free_actkvno_list(util_context, actkvno_list);
+    krb5_dbe_free_mkey_aux_list(util_context, mkey_aux_list);
     return;
 }
