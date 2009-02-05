@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/bld_pr_ext.c
  *
- * Copyright 1991, 2008 by the Massachusetts Institute of Technology.
+ * Copyright 1991, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -36,12 +36,10 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
 			 unsigned int rlen, const char * realm, ...)
 {
     va_list ap;
-    register int i, count = 0;
-    register unsigned int size;
-    register char *next;
-    char *tmpdata = 0;
+    int i, count = 0;
     krb5_data *princ_data;
     krb5_principal princ_ret;
+    krb5_data tmpdata;
 
     va_start(ap, realm);
     /* count up */
@@ -64,28 +62,22 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
     }
     princ_ret->data = princ_data;
     princ_ret->length = count;
-    tmpdata = malloc(rlen+1);
-    if (!tmpdata) {
+    tmpdata.length = rlen;
+    tmpdata.data = (char *) realm;
+    if (krb5int_copy_data_contents_add0(context, &tmpdata, &princ_ret->realm) != 0) {
 	free(princ_data);
 	free(princ_ret);
 	return ENOMEM;
     }	
-    krb5_princ_set_realm_length(context, princ_ret, rlen);
-    krb5_princ_set_realm_data(context, princ_ret, tmpdata);
-    memcpy(tmpdata, realm, rlen);
-    tmpdata[rlen] = 0;
 
     /* process rest of components */
     va_start(ap, realm);
     for (i = 0; i < count; i++) {
-	size = va_arg(ap, unsigned int);
-	next = va_arg(ap, char *);
-	princ_data[i].length = size;
-	princ_data[i].data = malloc(size+1);
-	if (!princ_data[i].data)
+	tmpdata.length = va_arg(ap, unsigned int);
+	tmpdata.data = va_arg(ap, char *);
+	if (krb5int_copy_data_contents_add0(context, &tmpdata,
+					    &princ_data[i]) != 0)
 	    goto free_out;
-	memcpy(princ_data[i].data, next, size);
-	princ_data[i].data[size] = 0;
     }
     va_end(ap);
     *princ = princ_ret;
@@ -96,8 +88,8 @@ free_out:
     while (--i >= 0)
 	free(princ_data[i].data);
     free(princ_data);
+    free(princ_ret->realm.data);
     free(princ_ret);
-    free(tmpdata);
     va_end(ap);
     return ENOMEM;
 }

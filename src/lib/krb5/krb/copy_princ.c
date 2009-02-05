@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/copy_princ.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -54,35 +54,25 @@ krb5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pri
     }
 
     for (i = 0; i < nelems; i++) {
-	unsigned int len = krb5_princ_component(context, inprinc, i)->length;
-	krb5_princ_component(context, tempprinc, i)->length = len;
-        if (len) {
-            if (((krb5_princ_component(context, tempprinc, i)->data =
-                   malloc(len)) == 0)) {
-                while (--i >= 0)
-                    free(krb5_princ_component(context, tempprinc, i)->data);
-                free (tempprinc->data);
-                free (tempprinc);
-                return ENOMEM;
-            }
-	    memcpy(krb5_princ_component(context, tempprinc, i)->data,
-		   krb5_princ_component(context, inprinc, i)->data, len);
-        } else
-            krb5_princ_component(context, tempprinc, i)->data = 0;
+	if (krb5int_copy_data_contents(context,
+				       krb5_princ_component(context, inprinc, i),
+				       krb5_princ_component(context, tempprinc, i)) != 0) {
+	    while (--i >= 0)
+		free(krb5_princ_component(context, tempprinc, i)->data);
+	    free (tempprinc->data);
+	    free (tempprinc);
+	    return ENOMEM;
+        }
     }
 
-    tempprinc->realm.data =
-        malloc((tempprinc->realm.length = inprinc->realm.length) + 1);
-    if (!tempprinc->realm.data) {
+    if (krb5int_copy_data_contents_add0(context, &inprinc->realm,
+					&tempprinc->realm) != 0) {
         for (i = 0; i < nelems; i++)
 	    free(krb5_princ_component(context, tempprinc, i)->data);
 	free(tempprinc->data);
 	free(tempprinc);
 	return ENOMEM;
     }
-    memcpy(tempprinc->realm.data, inprinc->realm.data,
-	   inprinc->realm.length);
-    tempprinc->realm.data[tempprinc->realm.length] = 0;
 
     *outprinc = tempprinc;
     return 0;
