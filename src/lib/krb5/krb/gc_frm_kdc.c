@@ -745,7 +745,7 @@ do_traversal(krb5_context ctx,
     }
 
     if (NXT_TGT_IS_CACHED(ts)) {
-	assert(ts->offpath_tgt = NULL);
+	assert(ts->offpath_tgt == NULL);
 	*out_cc_tgt = *ts->cur_cc_tgt;
 	*out_tgt = out_cc_tgt;
 	MARK_CUR_CC_TGT_CLEAN(ts);
