@@ -50,7 +50,7 @@ recvauth_common(krb5_context context,
 		krb5_data *version)
 {
     krb5_auth_context	  new_auth_context;
-    krb5_flags		  ap_option;
+    krb5_flags		  ap_option = 0;
     krb5_error_code	  retval, problem;
     krb5_data		  inbuf;
     krb5_data		  outbuf;
