@@ -258,7 +258,7 @@ make_seal_token_v1 (krb5_context context,
             unsigned char bigend_seqnum[4];
             krb5_keyblock *enc_key;
             int i;
-            store_32_be(seqnum, bigend_seqnum);
+            store_32_be(*seqnum, bigend_seqnum);
             code = krb5_copy_keyblock (context, enc, &enc_key);
             if (code)
             {
