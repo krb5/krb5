@@ -533,10 +533,12 @@ static inline unsigned int k5_swap16 (unsigned int x) {
 # define SWAP64			OSSwapInt64
 #endif
 
+/* Note that on Windows at least this file can be included from C++
+   source, so casts *from* void* are required.  */
 static inline void
 store_16_be (unsigned int val, void *vp)
 {
-    unsigned char *p = vp;
+    unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_BE)
     PUT(16,p,val);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
@@ -549,7 +551,7 @@ store_16_be (unsigned int val, void *vp)
 static inline void
 store_32_be (unsigned int val, void *vp)
 {
-    unsigned char *p = vp;
+    unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_BE)
     PUT(32,p,val);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
@@ -564,7 +566,7 @@ store_32_be (unsigned int val, void *vp)
 static inline void
 store_64_be (UINT64_TYPE val, void *vp)
 {
-    unsigned char *p = vp;
+    unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_BE)
     PUT(64,p,val);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
@@ -583,7 +585,7 @@ store_64_be (UINT64_TYPE val, void *vp)
 static inline unsigned short
 load_16_be (const void *cvp)
 {
-    const unsigned char *p = cvp;
+    const unsigned char *p = (const unsigned char *) cvp;
 #if defined(__GNUC__) && defined(K5_BE)
     return GET(16,p);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
@@ -595,7 +597,7 @@ load_16_be (const void *cvp)
 static inline unsigned int
 load_32_be (const void *cvp)
 {
-    const unsigned char *p = cvp;
+    const unsigned char *p = (const unsigned char *) cvp;
 #if defined(__GNUC__) && defined(K5_BE)
     return GET(32,p);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
@@ -609,7 +611,7 @@ load_32_be (const void *cvp)
 static inline UINT64_TYPE
 load_64_be (const void *cvp)
 {
-    const unsigned char *p = cvp;
+    const unsigned char *p = (const unsigned char *) cvp;
 #if defined(__GNUC__) && defined(K5_BE)
     return GET(64,p);
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
@@ -621,7 +623,7 @@ load_64_be (const void *cvp)
 static inline void
 store_16_le (unsigned int val, void *vp)
 {
-    unsigned char *p = vp;
+    unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_LE)
     PUT(16,p,val);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
@@ -634,7 +636,7 @@ store_16_le (unsigned int val, void *vp)
 static inline void
 store_32_le (unsigned int val, void *vp)
 {
-    unsigned char *p = vp;
+    unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_LE)
     PUT(32,p,val);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
@@ -649,7 +651,7 @@ store_32_le (unsigned int val, void *vp)
 static inline void
 store_64_le (UINT64_TYPE val, void *vp)
 {
-    unsigned char *p = vp;
+    unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_LE)
     PUT(64,p,val);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
@@ -668,7 +670,7 @@ store_64_le (UINT64_TYPE val, void *vp)
 static inline unsigned short
 load_16_le (const void *cvp)
 {
-    const unsigned char *p = cvp;
+    const unsigned char *p = (const unsigned char *) cvp;
 #if defined(__GNUC__) && defined(K5_LE)
     return GET(16,p);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
@@ -680,7 +682,7 @@ load_16_le (const void *cvp)
 static inline unsigned int
 load_32_le (const void *cvp)
 {
-    const unsigned char *p = cvp;
+    const unsigned char *p = (const unsigned char *) cvp;
 #if defined(__GNUC__) && defined(K5_LE)
     return GET(32,p);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
@@ -692,7 +694,7 @@ load_32_le (const void *cvp)
 static inline UINT64_TYPE
 load_64_le (const void *cvp)
 {
-    const unsigned char *p = cvp;
+    const unsigned char *p = (const unsigned char *) cvp;
 #if defined(__GNUC__) && defined(K5_LE)
     return GET(64,p);
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
