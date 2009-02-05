@@ -4,7 +4,10 @@ load_lib "helpers.exp"
 
 global spawn_id
 global server_id
+global server_started
 global hostname
+
+if { !$server_started } {return} 
 
 start_client "gss err" gsserr testuser notathena 8h 1026 notserver@$hostname
 

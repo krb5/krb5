@@ -4,6 +4,9 @@ load_lib "helpers.exp"
 
 global spawn_id
 global server_id
+global server_started
+
+if { !$server_started } {return} 
 
 # Start the client and do a full run
 start_client "full run" fullrun testuser notathena 8h 1026

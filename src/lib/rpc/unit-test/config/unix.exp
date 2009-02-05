@@ -112,6 +112,10 @@ proc rpc_test_exit {} {
 	global server_started
 	global kill
 
+        if { [info exists server_started] && $server_started == 0 } { 
+	    return 
+	}
+
  	if {[catch {
 		expect {
 			-i $server_id
@@ -143,6 +147,7 @@ proc rpc_test_start { } {
  	verbose "% $SERVER" 1
 	set server_pid [spawn $SERVER $PROT]
 	set server_id $spawn_id
+        set server_started 1
 
 	unset env(KRB5_KTNAME)
 
@@ -150,6 +155,18 @@ proc rpc_test_start { } {
 
 	expect {
 		"running" { }
+	        "Cannot register service" {
+		        send_error "Server cannot register with portmap/rpcbind!!\n"
+		        note "+++"
+		        note "+++ These tests require the ability to register with portmap/rpcbind"
+		        note "+++ Either the server is not running or it does not"
+		        note "+++  allow registration using a loopback connection"
+		        note "+++"
+		        verbose $expect_out(buffer) 1
+		        set server_started 0
+		        unsupported "Server registration"
+		        return
+	        }
 		eof { 
 			send_error "server exited!"
 			verbose $expect_out(buffer) 1
