@@ -1722,6 +1722,9 @@ krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_
                  * Make sure we zero any trailing data.
                  */
                 zero_point = ftell(KTFILEP(id));
+                if (zero_point < 0) {
+                    return errno;
+                }
                 while ((size = fread(iobuf, 1, sizeof(iobuf), KTFILEP(id)))) {
                     if (size != sizeof(iobuf)) {
                         remainder = size % sizeof(krb5_int32);
