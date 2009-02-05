@@ -518,27 +518,28 @@ domain_heuristic(krb5_context context, const char *domain,
     krb5_error_code retval = 0, r;
     struct addrlist alist;
     krb5_data drealm;
-    char *cp = NULL;
-    char *fqdn = NULL;
+    char *cp = NULL, *fqdn, *dot;
 
     *realm = NULL;
     if (limit < 0)
 	return 0;
 
     memset(&drealm, 0, sizeof (drealm));
-    if (!(fqdn = strdup(domain))) {
+    fqdn = strdup(domain);
+    if (!fqdn) {
 	retval = ENOMEM;
 	goto cleanup;
     }
 
     /* Upper case the domain (for use as a realm) */
-    for (cp = fqdn; *cp; cp++)
+    for (cp = fqdn; *cp; cp++) {
 	if (islower((int)(*cp)))
 	    *cp = toupper((int)*cp);
+    }
 
     /* Search up to limit parents, as long as we have multiple labels. */
     cp = fqdn;
-    while (limit-- >= 0 && strchr(cp, '.') != NULL) {
+    while (limit-- >= 0 && (dot = strchr(cp, '.')) != NULL) {
 
 	drealm.length = strlen(cp);
 	drealm.data = cp;
@@ -547,19 +548,18 @@ domain_heuristic(krb5_context context, const char *domain,
 	r = krb5_locate_kdc(context, &drealm, &alist, 0, SOCK_DGRAM, 0);
 	if (!r) { /* Found a KDC! */
 	    krb5int_free_addrlist(&alist);
-	    if (!(*realm = strdup(cp))) {
+	    *realm = strdup(cp);
+	    if (!*realm) {
 		retval = ENOMEM;
 		goto cleanup;
 	    }
 	    break;
 	}
 
-	cp = strchr(cp, '.');
-	cp++;
+	cp = dot + 1;
     }
 
 cleanup:
-    if (fqdn)
-	free(fqdn);
+    free(fqdn);
     return retval;
 }
