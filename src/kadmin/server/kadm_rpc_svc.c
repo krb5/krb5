@@ -7,6 +7,7 @@
 #include <gssrpc/rpc.h>
 #include <gssapi/gssapi_krb5.h> /* for gss_nt_krb5_name */
 #include <syslog.h>
+#include <string.h>
 #include "autoconf.h"
 #ifdef HAVE_MEMORY_H
 #include <memory.h>

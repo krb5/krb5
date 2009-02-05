@@ -9,6 +9,7 @@
 #include <memory.h>
 #endif
 #include <time.h>
+#include <string.h>
 
 #include <kadm5/admin.h>
 #include "admin_internal.h"
