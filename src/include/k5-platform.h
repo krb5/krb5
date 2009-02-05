@@ -912,14 +912,18 @@ snprintf(char *str, size_t size, const char *format, ...)
 #endif /* win32? */
 #endif /* no vsnprintf */
 
-#if !defined(__cplusplus) && (__GNUC__ > 2)
-extern int krb5int_vasprintf(char **, const char *, va_list)
-    __attribute__((__format__(__printf__, 2, 0)));
-extern int krb5int_asprintf(char **, const char *, ...)
-    __attribute__((__format__(__printf__, 2, 3)));
-#endif
-
 #ifndef HAVE_VASPRINTF
+
+extern int krb5int_vasprintf(char **, const char *, va_list)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 0)))
+#endif
+    ;
+extern int krb5int_asprintf(char **, const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 3)))
+#endif
+    ;
 
 #define vasprintf krb5int_vasprintf
 /* Assume HAVE_ASPRINTF iff HAVE_VASPRINTF.  */
