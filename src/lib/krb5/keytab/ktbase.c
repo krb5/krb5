@@ -162,10 +162,10 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 {
     const struct krb5_kt_typelist *tlist;
-    char *pfx;
+    char *pfx = NULL;
     unsigned int pfxlen;
     const char *cp, *resid;
-    krb5_error_code err;
+    krb5_error_code err = 0;
     
     cp = strchr (name, ':');
     if (!cp) {
@@ -201,7 +201,7 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 
     err = k5_mutex_lock(&kt_typehead_lock);
     if (err)
-	return err;
+	goto cleanup;
     tlist = kt_typehead;
     /* Don't need to hold the lock, since entries are never modified
        or removed once they're in the list.  Just need to protect
@@ -209,12 +209,15 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
     k5_mutex_unlock(&kt_typehead_lock);
     for (; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
-	    free(pfx);
-	    return (*tlist->ops->resolve)(context, resid, ktid);
+	    err = (*tlist->ops->resolve)(context, resid, ktid);
+	    goto cleanup;
 	}
     }
+    err = KRB5_KT_UNKNOWN_TYPE;
+
+cleanup:
     free(pfx);
-    return KRB5_KT_UNKNOWN_TYPE;
+    return err;
 }
 
 /*
