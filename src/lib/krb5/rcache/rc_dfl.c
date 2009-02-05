@@ -826,14 +826,9 @@ krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
         t = (struct dfl_data *)id->data; /* point to recovered cache */
     }
 
-    tmp = (krb5_rcache) malloc(sizeof(*tmp));
-    if (!tmp)
-        return ENOMEM;
     retval = krb5_rc_resolve_type(context, &tmp, "dfl");
-    if (retval) {
-        free(tmp);
+    if (retval)
         return retval;
-    }
     retval = krb5_rc_resolve(context, tmp, 0);
     if (retval)
         goto cleanup;

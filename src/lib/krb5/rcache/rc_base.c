@@ -64,24 +64,39 @@ krb5_error_code krb5_rc_register_type(krb5_context context,
     return 0;
 }
 
-krb5_error_code krb5_rc_resolve_type(krb5_context context, krb5_rcache *id,
+krb5_error_code krb5_rc_resolve_type(krb5_context context, krb5_rcache *idptr,
                                      char *type)
 {
     struct krb5_rc_typelist *t;
     krb5_error_code err;
+    krb5_rcache id;
+
+    *idptr = NULL;
+
+    /* Find the named type in the list. */
     err = k5_mutex_lock(&rc_typelist_lock);
     if (err)
         return err;
-    for (t = typehead;t && strcmp(t->ops->type,type);t = t->next)
+    for (t = typehead; t && strcmp(t->ops->type, type); t = t->next)
         ;
-    if (!t) {
-        k5_mutex_unlock(&rc_typelist_lock);
-        return KRB5_RC_TYPE_NOTFOUND;
-    }
-    /* allocate *id? nah */
-    (*id)->ops = t->ops;
     k5_mutex_unlock(&rc_typelist_lock);
-    return k5_mutex_init(&(*id)->lock);
+    if (!t)
+        return KRB5_RC_TYPE_NOTFOUND;
+
+    /* Create and return the rcache structure. */
+    id = malloc(sizeof(*id));
+    if (!id)
+        return KRB5_RC_MALLOC;
+    err = k5_mutex_init(&id->lock);
+    if (err) {
+        free(id);
+        return err;
+    }
+    id->data = NULL;  /* Gets real data when resolved */
+    id->magic = 0;    /* Gets real magic after resolved */
+    id->ops = t->ops;
+    *idptr = id;
+    return 0;
 }
 
 char * krb5_rc_get_type(krb5_context context, krb5_rcache id)
@@ -108,25 +123,23 @@ char * krb5_rc_default_name(krb5_context context)
 }
 
 krb5_error_code
-krb5_rc_default(krb5_context context, krb5_rcache *id)
+krb5_rc_default(krb5_context context, krb5_rcache *idptr)
 {
     krb5_error_code retval;
+    krb5_rcache id;
 
-    if (!(*id = (krb5_rcache )malloc(sizeof(**id))))
-        return KRB5_RC_MALLOC;
-
-    if ((retval = krb5_rc_resolve_type(context, id,
-                                       krb5_rc_default_type(context)))) {
-        free(*id);
+    *idptr = NULL;
+    retval = krb5_rc_resolve_type(context, &id, krb5_rc_default_type(context));
+    if (retval)
+        return retval;
+    retval = krb5_rc_resolve(context, id, krb5_rc_default_name(context));
+    if (retval) {
+        k5_mutex_destroy(&id->lock);
+        free(id);
         return retval;
     }
-    if ((retval = krb5_rc_resolve(context, *id,
-                                  krb5_rc_default_name(context)))) {
-        k5_mutex_destroy(&(*id)->lock);
-        free(*id);
-        return retval;
-    }
-    (*id)->magic = KV5M_RCACHE;
+    id->magic = KV5M_RCACHE;
+    *idptr = id;
     return retval;
 }
 
@@ -151,17 +164,10 @@ krb5_error_code krb5_rc_resolve_full(krb5_context context, krb5_rcache *idptr,
     (void) strncpy(type, string_name, diff);
     type[residual - string_name] = '\0';
 
-    if (!(id = (krb5_rcache) malloc(sizeof(*id)))) {
-        free(type);
-        return KRB5_RC_MALLOC;
-    }
-
-    if ((retval = krb5_rc_resolve_type(context, &id,type))) {
-        free(type);
-        free(id);
-        return retval;
-    }
+    retval = krb5_rc_resolve_type(context, &id,type);
     free(type);
+    if (retval)
+        return retval;
     if ((retval = krb5_rc_resolve(context, id,residual + 1))) {
         k5_mutex_destroy(&id->lock);
         free(id);
