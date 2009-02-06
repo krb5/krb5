@@ -113,7 +113,7 @@ k5_des_docrypt_iov(const krb5_keyblock *key, const krb5_data *ivec,
 {
     mit_des_key_schedule schedule;
     size_t input_length = 0;
-    int i;
+    unsigned int i;
 
     /* key->enctype was checked by the caller */
 

@@ -286,7 +286,8 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 {
     aes_ctx ctx;
     char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
-    int nblocks = 0, blockno, i;
+    int nblocks = 0, blockno;
+    unsigned int i;
     size_t input_length;
 
     CHECK_SIZES;

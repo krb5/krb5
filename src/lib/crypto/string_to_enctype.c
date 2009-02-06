@@ -30,7 +30,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_enctype(char *string, krb5_enctype *enctypep)
 {
-    int i, j;
+    unsigned int i, j;
 
     for (i=0; i<krb5_enctypes_length; i++) {
 	if (strcasecmp(krb5_enctypes_list[i].name, string) == 0) {
