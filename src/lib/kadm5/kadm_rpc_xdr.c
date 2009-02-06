@@ -220,6 +220,29 @@ xdr_krb5_ui_2(XDR *xdrs, krb5_ui_2 *objp)
 
 
 
+static bool_t xdr_krb5_boolean(XDR *xdrs, krb5_boolean *kbool)
+{
+	bool_t val;
+	
+	switch (xdrs->x_op) {
+	case XDR_DECODE:
+	     if (!xdr_bool(xdrs, &val))
+		     return FALSE;
+	     
+	     *kbool = (val == FALSE) ? FALSE : TRUE;
+	     return TRUE;
+	     
+	case XDR_ENCODE:
+	     val = *kbool ? TRUE : FALSE;
+	     return xdr_bool(xdrs, &val);
+
+	case XDR_FREE:
+	     return TRUE;
+	}
+	
+	return FALSE;
+}
+
 bool_t xdr_krb5_key_data_nocontents(XDR *xdrs, krb5_key_data *objp)
 {
      /*
@@ -655,7 +678,7 @@ xdr_chpass3_arg(XDR *xdrs, chpass3_arg *objp)
 	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
 		return (FALSE);
 	}
-	if (!xdr_bool(xdrs, &objp->keepold)) {
+	if (!xdr_krb5_boolean(xdrs, &objp->keepold)) {
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
@@ -715,7 +738,7 @@ xdr_setkey3_arg(XDR *xdrs, setkey3_arg *objp)
 	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
 		return (FALSE);
 	}
-	if (!xdr_bool(xdrs, &objp->keepold)) {
+	if (!xdr_krb5_boolean(xdrs, &objp->keepold)) {
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *) &objp->ks_tuple,
@@ -752,7 +775,7 @@ xdr_chrand3_arg(XDR *xdrs, chrand3_arg *objp)
 	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
 		return (FALSE);
 	}
-	if (!xdr_bool(xdrs, &objp->keepold)) {
+	if (!xdr_krb5_boolean(xdrs, &objp->keepold)) {
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
