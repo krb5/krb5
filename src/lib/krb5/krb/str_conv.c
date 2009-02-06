@@ -217,7 +217,7 @@ krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp)
 krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_string(krb5_timestamp timestamp, char *buffer, size_t buflen)
 {
-    int ret;
+    size_t ret;
     time_t timestamp2 = timestamp;
     struct tm tmbuf;
     const char *fmt = "%c"; /* This is to get around gcc -Wall warning that 
