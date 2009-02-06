@@ -64,6 +64,9 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 
 static struct timeval timeout = { 3, 0 };
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
 
 /*
  * pmapper remote-call-service interface.
@@ -245,7 +248,8 @@ clnt_broadcast(
 	AUTH *unix_auth = authunix_create_default();
 	XDR xdr_stream;
 	register XDR *xdrs = &xdr_stream;
-	int outlen, inlen, fromlen, nets;
+	int outlen, inlen, nets;
+	GETSOCKNAME_ARG3_TYPE fromlen;
         SOCKET sock;
 	int on = 1;
 #ifdef FD_SETSIZE

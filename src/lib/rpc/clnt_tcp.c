@@ -64,6 +64,10 @@ static char sccsid[] = "@(#)clnt_tcp.c 1.37 87/10/05 Copyr 1984 Sun Micro";
 
 #define MCALL_MSG_SIZE 24
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
+
 static enum clnt_stat	clnttcp_call(CLIENT *, rpcproc_t, xdrproc_t, void *,
 				     xdrproc_t, void *, struct timeval);
 static void		clnttcp_abort(CLIENT *);
@@ -372,7 +376,7 @@ clnttcp_control(
 	void *info)
 {
 	register struct ct_data *ct = (struct ct_data *)cl->cl_private;
-	int len;
+	GETSOCKNAME_ARG3_TYPE len;
 	
 	switch (request) {
 	case CLSET_TIMEOUT:

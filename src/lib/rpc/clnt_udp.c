@@ -52,6 +52,9 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
 #include <port-sockets.h>
 #include <errno.h>
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
 
 /*
  * UDP bases client side rpc operations
@@ -82,7 +85,7 @@ struct cu_data {
 	struct sockaddr_in cu_raddr;
 	int		   cu_rlen;
 	struct sockaddr_in cu_laddr;
-	int		   cu_llen;
+        GETSOCKNAME_ARG3_TYPE  cu_llen;
 	struct timeval	   cu_wait;
 	struct timeval     cu_total;
 	struct rpc_err	   cu_error;
@@ -235,7 +238,7 @@ clntudp_call(
 	register XDR *xdrs;
 	register int outlen;
 	register int inlen;
-	int fromlen;
+	GETSOCKNAME_ARG3_TYPE fromlen; /* Assumes recvfrom uses same type */
 #ifdef FD_SETSIZE
 	fd_set readfds;
 	fd_set mask;
