@@ -1918,7 +1918,8 @@ ure_write_dfa(ure_dfa_t dfa, FILE *out)
                     l = (ucs2_t) (((sym->sym.chr - 0x10000) & 1023) + 0xdc00);
                     fprintf(out, "\\x%04hX\\x%04hX ", h, l);
                 } else
-                  fprintf(out, "\\x%04lX ", sym->sym.chr & 0xffff);
+		    fprintf(out, "\\x%04lX ",
+			    (unsigned long)(sym->sym.chr & 0xffff));
                 break;
               case _URE_ANY_CHAR:
                 fprintf(out, "<any> ");
