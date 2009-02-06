@@ -1878,7 +1878,8 @@ ure_write_dfa(ure_dfa_t dfa, FILE *out)
                     l = (ucs2_t) (((rp->min_code - 0x10000) & 1023) + 0xdc00);
                     fprintf(out, "\\x%04hX\\x%04hX", h, l);
                 } else
-                  fprintf(out, "\\x%04lX", rp->min_code & 0xffff);
+                    fprintf(out, "\\x%04lX",
+                            (unsigned long)(rp->min_code & 0xffff));
                 if (rp->max_code != rp->min_code) {
                     putc('-', out);
                     if (rp->max_code >= 0x10000 &&
@@ -1887,7 +1888,8 @@ ure_write_dfa(ure_dfa_t dfa, FILE *out)
                         l = (ucs2_t) (((rp->max_code - 0x10000) & 1023) + 0xdc00);
                         fprintf(out, "\\x%04hX\\x%04hX", h, l);
                     } else
-                      fprintf(out, "\\x%04lX", rp->max_code & 0xffff);
+                        fprintf(out, "\\x%04lX",
+                                (unsigned long)(rp->max_code & 0xffff));
                 }
             }
             if (sym->sym.ccl.ranges_used > 0)
@@ -1918,8 +1920,8 @@ ure_write_dfa(ure_dfa_t dfa, FILE *out)
                     l = (ucs2_t) (((sym->sym.chr - 0x10000) & 1023) + 0xdc00);
                     fprintf(out, "\\x%04hX\\x%04hX ", h, l);
                 } else
-		    fprintf(out, "\\x%04lX ",
-			    (unsigned long)(sym->sym.chr & 0xffff));
+                    fprintf(out, "\\x%04lX ",
+                            (unsigned long)(sym->sym.chr & 0xffff));
                 break;
               case _URE_ANY_CHAR:
                 fprintf(out, "<any> ");
