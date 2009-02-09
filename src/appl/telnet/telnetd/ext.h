@@ -170,7 +170,9 @@ extern int
 	tty_israw (void),
 	tty_issofttab (void),
 	tty_istrapsig (void),
-	tty_linemode (void);
+	tty_linemode (void),
+	readstream_termio(int, char *, char *, char *, int *),
+	readstream_termios(int, char *, char *, char *, int *);
 
 extern void
 	tty_rspeed (int),

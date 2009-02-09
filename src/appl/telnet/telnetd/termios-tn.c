@@ -9,6 +9,9 @@
 #include <termio.h>
 #endif
 
+#include "defs.h"
+#include "ext.h"
+
 int readstream_termios(cmd, ibuf, vstop, vstart, ixon)
      int cmd;
      char *ibuf;

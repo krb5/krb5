@@ -6,6 +6,9 @@
 #include <sys/ioctl.h>
 #include <termio.h>
 
+#include "defs.h"
+#include "ext.h"
+
 int readstream_termio(cmd, ibuf, vstop, vstart, ixon)
      int cmd;
      char *ibuf;
