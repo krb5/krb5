@@ -24,6 +24,9 @@
  * or implied warranty.
  */
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
 #include "k5-ipc_stream.h"
 
 #if !defined(htonll)
@@ -43,7 +46,7 @@ struct k5_ipc_stream_s {
     uint64_t max_size;
 };
 
-const struct k5_ipc_stream_s k5_ipc_stream_initializer = { NULL, 0, 0 };
+static const struct k5_ipc_stream_s k5_ipc_stream_initializer = { NULL, 0, 0 };
 
 #define K5_IPC_STREAM_SIZE_INCREMENT 128
 
