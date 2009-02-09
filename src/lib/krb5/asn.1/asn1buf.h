@@ -129,7 +129,7 @@ asn1_error_code asn1buf_skiptail
              constructed indefinite sequence.
    effects   skips trailing fields. */
 
-asn1_error_code asn1buf_destroy
+void asn1buf_destroy
         (asn1buf **buf);
 /* effects   Deallocates **buf, sets *buf to NULL. */
 

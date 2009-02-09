@@ -154,14 +154,13 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
     return 0;
 }
 
-asn1_error_code asn1buf_destroy(asn1buf **buf)
+void asn1buf_destroy(asn1buf **buf)
 {
     if (*buf != NULL) {
         free((*buf)->base);
         free(*buf);
         *buf = NULL;
     }
-    return 0;
 }
 
 #ifdef asn1buf_insert_octet
