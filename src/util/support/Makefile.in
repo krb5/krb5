@@ -36,6 +36,9 @@ STRLCPY_OBJ=@STRLCPY_OBJ@
 PRINTF_ST_OBJ= @PRINTF_ST_OBJ@
 PRINTF_OBJ= @PRINTF_OBJ@
 
+IPC_ST_OBJ=
+IPC_OBJ=
+
 STLIBOBJS= \
 	threads.o \
 	init-addrinfo.o \
@@ -46,6 +49,7 @@ STLIBOBJS= \
 	fake-addrinfo.o \
 	utf8.o \
 	utf8_conv.o \
+	$(IPC_ST_OBJ) \
 	$(STRLCPY_ST_OBJ) \
 	$(PRINTF_ST_OBJ) \
 	$(MKSTEMP_ST_OBJ)
@@ -60,6 +64,7 @@ LIBOBJS= \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
 	$(OUTPRE)utf8.$(OBJEXT) \
 	$(OUTPRE)utf8_conv.$(OBJEXT) \
+	$(IPC_OBJ) \
 	$(STRLCPY_OBJ) \
 	$(PRINTF_OBJ) \
 	$(MKSTEMP_OBJ)
