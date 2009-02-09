@@ -53,7 +53,7 @@ krb5int_aes_string_to_key(const struct krb5_enc_provider *enc,
 	/* The first two need casts in case 'int' is 16 bits.  */
 	iter_count = load_32_be(p);
 	if (iter_count == 0) {
-	    iter_count = (1L << 16) << 16;
+	    iter_count = (1UL << 16) << 16;
 	    if (((iter_count >> 16) >> 16) != 1)
 		return KRB5_ERR_BAD_S2K_PARAMS;
 	}
