@@ -126,6 +126,8 @@ krb5_free_uio(krb5_context context, krb5_uio uio)
 {
     krb5_uio		p, next;
 
+    if (uio == NULL)
+	return;
     for (p = uio; p; p = next) {
 	next = p->next;
 	if (p->prompt && (p->flags & KRB5_UIO_FREE_PROMPT))

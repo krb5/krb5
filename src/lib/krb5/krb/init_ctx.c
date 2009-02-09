@@ -254,23 +254,16 @@ cleanup:
 void KRB5_CALLCONV
 krb5_free_context(krb5_context ctx)
 {
+     if (ctx == NULL)
+	 return;
      krb5_os_free_context(ctx);
 
-     if (ctx->in_tkt_ktypes) {
-          free(ctx->in_tkt_ktypes);
-	  ctx->in_tkt_ktypes = 0;
-     }
-
-     if (ctx->tgs_ktypes) {
-          free(ctx->tgs_ktypes);
-	  ctx->tgs_ktypes = 0;
-     }
-
-     if (ctx->default_realm) {
-	  free(ctx->default_realm);
-	  ctx->default_realm = 0;
-     }
-
+     free(ctx->in_tkt_ktypes);
+     ctx->in_tkt_ktypes = 0;
+     free(ctx->tgs_ktypes);
+     ctx->tgs_ktypes = 0;
+     free(ctx->default_realm);
+     ctx->default_realm = 0;
      if (ctx->ser_ctx_count && ctx->ser_ctx) {
 	  free(ctx->ser_ctx);
 	  ctx->ser_ctx = 0;
