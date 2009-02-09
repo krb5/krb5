@@ -53,17 +53,17 @@ WorkItem::WorkItem(k5_ipc_stream buf, WIN_PIPE* pipe, const long type, const lon
 WorkItem::WorkItem(const WorkItem& item) : _buf(NULL), _rpcmsg(0), _pipe(NULL), _sst(0) {
 
     k5_ipc_stream    _buf = NULL;
-    k5_ipc_stream_new(&_buf);
-    k5_ipc_stream_write(_buf, 
-                     k5_ipc_stream_data(item.payload()),
-                     k5_ipc_stream_size(item.payload()) );
+    krb5int_ipc_stream_new(&_buf);
+    krb5int_ipc_stream_write(_buf, 
+                     krb5int_ipc_stream_data(item.payload()),
+                     krb5int_ipc_stream_size(item.payload()) );
     WorkItem(_buf, item._pipe, item._rpcmsg, item._sst);
     }
 
 WorkItem::WorkItem() : _buf(NULL), _rpcmsg(CCMSG_INVALID), _pipe(NULL), _sst(0) { }
 
 WorkItem::~WorkItem() {
-    if (_buf)   k5_ipc_stream_release(_buf);
+    if (_buf)   krb5int_ipc_stream_release(_buf);
     if (_pipe)  ccs_win_pipe_release(_pipe);
     }
 

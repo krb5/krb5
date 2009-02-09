@@ -136,15 +136,15 @@ kern_return_t k5_ipc_server_request (mach_port_t             in_connection_port,
     k5_ipc_stream request_stream = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_new (&request_stream);
+        err = krb5int_ipc_stream_new (&request_stream);
     }
     
     if (!err) {
         if (in_inl_requestCnt) {
-            err = k5_ipc_stream_write (request_stream, in_inl_request, in_inl_requestCnt);
+            err = krb5int_ipc_stream_write (request_stream, in_inl_request, in_inl_requestCnt);
             
         } else if (in_ool_requestCnt) {
-            err = k5_ipc_stream_write (request_stream, in_ool_request, in_ool_requestCnt);
+            err = krb5int_ipc_stream_write (request_stream, in_ool_request, in_ool_requestCnt);
             
         } else {
             err = EINVAL;
@@ -155,7 +155,7 @@ kern_return_t k5_ipc_server_request (mach_port_t             in_connection_port,
         err = k5_ipc_server_handle_request (in_connection_port, in_reply_port, request_stream);
     }
     
-    k5_ipc_stream_release (request_stream);
+    krb5int_ipc_stream_release (request_stream);
     if (in_ool_requestCnt) { vm_deallocate (mach_task_self (), (vm_address_t) in_ool_request, in_ool_requestCnt); }
     
     return err;
@@ -346,14 +346,14 @@ int32_t k5_ipc_server_send_reply (mach_port_t   in_reply_port,
     if (!err) {
         /* depending on how big the message is, use the fast inline buffer or  
          * the slow dynamically allocated buffer */
-        mach_msg_type_number_t reply_length = k5_ipc_stream_size (in_reply_stream);
+        mach_msg_type_number_t reply_length = krb5int_ipc_stream_size (in_reply_stream);
         
         if (reply_length > K5_IPC_MAX_INL_MSG_SIZE) {            
             //dprintf ("%s choosing out of line buffer (size is %d)", 
             //                  __FUNCTION__, reply_length);
             
             err = vm_read (mach_task_self (), 
-                           (vm_address_t) k5_ipc_stream_data (in_reply_stream), reply_length, 
+                           (vm_address_t) krb5int_ipc_stream_data (in_reply_stream), reply_length, 
                            (vm_address_t *) &ool_reply, &ool_reply_length);
             
         } else {
@@ -361,7 +361,7 @@ int32_t k5_ipc_server_send_reply (mach_port_t   in_reply_port,
             //                  __FUNCTION__, reply_length);
             
             inl_reply_length = reply_length;
-            memcpy (inl_reply, k5_ipc_stream_data (in_reply_stream), reply_length);
+            memcpy (inl_reply, krb5int_ipc_stream_data (in_reply_stream), reply_length);
         }
     }
     

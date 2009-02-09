@@ -207,8 +207,8 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
                 in_msg,                         /* Message type */
                 (unsigned char*)&ptspdata,      /* Our tspdata* will be sent back to the reply proc. */
                 (unsigned char*)uuid,
-                k5_ipc_stream_size(in_request_stream),
-                (unsigned char*)k5_ipc_stream_data(in_request_stream), /* Data buffer */
+                krb5int_ipc_stream_size(in_request_stream),
+                (unsigned char*)krb5int_ipc_stream_data(in_request_stream), /* Data buffer */
                 sst,                            /* session start time */
                 (long*)(&err) );                /* Return code */
             }

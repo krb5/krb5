@@ -279,8 +279,8 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
                             break;
                         case CCMSG_PING:
                             cci_debug_printf("  Processing PING");
-                            err = k5_ipc_stream_new  (&stream);
-                            err = k5_ipc_stream_write(stream, "This is a test of the emergency broadcasting system", 52);
+                            err = krb5int_ipc_stream_new  (&stream);
+                            err = krb5int_ipc_stream_write(stream, "This is a test of the emergency broadcasting system", 52);
                             err = ccs_os_server_send_reply(pipe, stream);
                             break;
                         default:
@@ -288,7 +288,7 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
                                 rpcmsg, uuid);
                             break;
                         }
-                    if (buf)        k5_ipc_stream_release(buf);
+                    if (buf)        krb5int_ipc_stream_release(buf);
                     /* Don't free uuid, which was allocated here.  A pointer to it is in the 
                        rpcargs struct which was passed to connectionListener which will be
                        received by ccapi_listen when the client exits.  ccapi_listen needs 
@@ -333,8 +333,8 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_pipe,
                 (unsigned char*)&h,                 /* client's tspdata* */
                 (unsigned char*)uuid,
                 getMySST(),
-                k5_ipc_stream_size(in_reply_stream),   /* Length of buffer */
-                (const unsigned char*)k5_ipc_stream_data(in_reply_stream),   /* Data buffer */
+                krb5int_ipc_stream_size(in_reply_stream),   /* Length of buffer */
+                (const unsigned char*)krb5int_ipc_stream_data(in_reply_stream),   /* Data buffer */
                 &status );                          /* Return code */
             }
         RpcExcept(1) {

@@ -545,36 +545,36 @@ kim_error kim_options_write_to_stream (kim_options   in_options,
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int64 (io_stream, options->start_time);
+        err = krb5int_ipc_stream_write_int64 (io_stream, options->start_time);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int64 (io_stream, options->lifetime);
+        err = krb5int_ipc_stream_write_int64 (io_stream, options->lifetime);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (io_stream, options->renewable);
+        err = krb5int_ipc_stream_write_int32 (io_stream, options->renewable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int64 (io_stream, 
+        err = krb5int_ipc_stream_write_int64 (io_stream, 
                                          options->renewal_lifetime);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (io_stream, options->forwardable);
+        err = krb5int_ipc_stream_write_int32 (io_stream, options->forwardable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (io_stream, options->proxiable);
+        err = krb5int_ipc_stream_write_int32 (io_stream, options->proxiable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (io_stream, options->addressless);
+        err = krb5int_ipc_stream_write_int32 (io_stream, options->addressless);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream,  options->service_name);
+        err = krb5int_ipc_stream_write_string (io_stream,  options->service_name);
     }
     
     if (options != in_options) { kim_options_free (&options); }
@@ -593,37 +593,37 @@ kim_error kim_options_read_from_stream (kim_options    io_options,
     if (!err && !io_stream ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     
     if (!err) {
-        err = k5_ipc_stream_read_int64 (io_stream, &io_options->start_time);
+        err = krb5int_ipc_stream_read_int64 (io_stream, &io_options->start_time);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int64 (io_stream, &io_options->lifetime);
+        err = krb5int_ipc_stream_read_int64 (io_stream, &io_options->lifetime);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &io_options->renewable);
+        err = krb5int_ipc_stream_read_int32 (io_stream, &io_options->renewable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int64 (io_stream, 
+        err = krb5int_ipc_stream_read_int64 (io_stream, 
                                         &io_options->renewal_lifetime);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &io_options->forwardable);
+        err = krb5int_ipc_stream_read_int32 (io_stream, &io_options->forwardable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &io_options->proxiable);
+        err = krb5int_ipc_stream_read_int32 (io_stream, &io_options->proxiable);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (io_stream, &io_options->addressless);
+        err = krb5int_ipc_stream_read_int32 (io_stream, &io_options->addressless);
     }
     
     if (!err) {
         char *service_name = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &service_name);
+        err = krb5int_ipc_stream_read_string (io_stream, &service_name);
         
         if (!err) {
             kim_string_free (&io_options->service_name);
@@ -634,7 +634,7 @@ kim_error kim_options_read_from_stream (kim_options    io_options,
             }
         }
         
-        k5_ipc_stream_free_string (service_name);
+        krb5int_ipc_stream_free_string (service_name);
     }
     
     return check_error (err);    

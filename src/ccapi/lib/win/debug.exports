@@ -3,9 +3,9 @@
     cci_os_ipc
     cci_os_ipc_msg
     cci_os_ipc_thread_init
-    k5_ipc_stream_data
-    k5_ipc_stream_write
-    k5_ipc_stream_new
+    krb5int_ipc_stream_data
+    krb5int_ipc_stream_write
+    krb5int_ipc_stream_new
     
     ccs_authenticate
     

@@ -168,7 +168,7 @@ cc_int32 ccapi_credentials_iterator_next (cc_credentials_iterator_t  in_credenti
         err = cci_credentials_read (out_credentials, reply);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }
@@ -201,7 +201,7 @@ cc_int32 ccapi_credentials_iterator_clone (cc_credentials_iterator_t  in_credent
         err = cci_credentials_iterator_new (out_credentials_iterator, identifier);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     cci_identifier_release (identifier);
     
     return cci_check_error (err);

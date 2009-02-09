@@ -76,15 +76,15 @@ static int32_t kim_handle_request_init (mach_port_t   in_client_port,
     bool isFrontProcess = 0;
 
     if (!err) {
-        err = k5_ipc_stream_read_int32 (in_request_stream, &pid);
+        err = krb5int_ipc_stream_read_int32 (in_request_stream, &pid);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &name);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &name);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &path);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &path);
     } 
     
     
@@ -101,8 +101,8 @@ static int32_t kim_handle_request_init (mach_port_t   in_client_port,
                                             path:path];
     }
     
-    k5_ipc_stream_free_string (name);    
-    k5_ipc_stream_free_string (path);
+    krb5int_ipc_stream_free_string (name);    
+    krb5int_ipc_stream_free_string (path);
 
     return err;   
 }
@@ -116,18 +116,18 @@ int32_t kim_handle_reply_init (mach_port_t   in_reply_port,
     k5_ipc_stream reply = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
     
     if (!err) {
         err = k5_ipc_server_send_reply (in_reply_port, reply);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return err;   
 }
@@ -174,19 +174,19 @@ int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port,
     }
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_string (reply, identity_string);
+        err = krb5int_ipc_stream_write_string (reply, identity_string);
     }
 
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_uint32 (reply, in_change_password);
+        err = krb5int_ipc_stream_write_uint32 (reply, in_change_password);
     }
     
     if (!err && !in_error) {
@@ -198,7 +198,7 @@ int32_t kim_handle_reply_enter_identity (mach_port_t   in_reply_port,
     }
     
     kim_string_free (&identity_string);
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return err;   
 }
@@ -248,19 +248,19 @@ int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port,
     }
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_string (reply, identity_string);
+        err = krb5int_ipc_stream_write_string (reply, identity_string);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_uint32 (reply, in_change_password);
+        err = krb5int_ipc_stream_write_uint32 (reply, in_change_password);
     }
 
     if (!err && !in_error) {
@@ -272,7 +272,7 @@ int32_t kim_handle_reply_select_identity (mach_port_t   in_reply_port,
     }
     
     kim_string_free (&identity_string);
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return err;   
 }
@@ -295,31 +295,31 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
     char *description = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &identity_string);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &identity_string);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (in_request_stream, &type);
+        err = krb5int_ipc_stream_read_int32 (in_request_stream, &type);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (in_request_stream, &allow_save_reply);
+        err = krb5int_ipc_stream_read_int32 (in_request_stream, &allow_save_reply);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (in_request_stream, &hide_reply);
+        err = krb5int_ipc_stream_read_int32 (in_request_stream, &hide_reply);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &title);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &title);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &message);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &message);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &description);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &description);
     }    
     
     if (!err) {
@@ -335,10 +335,10 @@ static int32_t kim_handle_request_auth_prompt (mach_port_t   in_client_port,
                                                description:description];
     }
     
-    k5_ipc_stream_free_string (identity_string);    
-    k5_ipc_stream_free_string (title);    
-    k5_ipc_stream_free_string (message);    
-    k5_ipc_stream_free_string (description);    
+    krb5int_ipc_stream_free_string (identity_string);    
+    krb5int_ipc_stream_free_string (title);    
+    krb5int_ipc_stream_free_string (message);    
+    krb5int_ipc_stream_free_string (description);    
     
     return err;   
 }
@@ -354,26 +354,26 @@ int32_t kim_handle_reply_auth_prompt (mach_port_t   in_reply_port,
     k5_ipc_stream reply = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_string (reply, in_prompt_response);
+        err = krb5int_ipc_stream_write_string (reply, in_prompt_response);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_int32 (reply, in_allow_save_response);
+        err = krb5int_ipc_stream_write_int32 (reply, in_allow_save_response);
     }
     
     if (!err) {
         err = k5_ipc_server_send_reply (in_reply_port, reply);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return err;   
 }
@@ -391,11 +391,11 @@ static int32_t kim_handle_request_change_password (mach_port_t   in_client_port,
     int32_t old_password_expired = 0;
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &identity_string);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &identity_string);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (in_request_stream, 
+        err = krb5int_ipc_stream_read_int32 (in_request_stream, 
                                         &old_password_expired);
     }    
     
@@ -407,7 +407,7 @@ static int32_t kim_handle_request_change_password (mach_port_t   in_client_port,
                                                     expired:old_password_expired];
     }
     
-    k5_ipc_stream_free_string (identity_string);   
+    krb5int_ipc_stream_free_string (identity_string);   
     
     return err;   
 }
@@ -424,30 +424,30 @@ int32_t kim_handle_reply_change_password (mach_port_t   in_reply_port,
     k5_ipc_stream reply = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_string (reply, in_old_password);
+        err = krb5int_ipc_stream_write_string (reply, in_old_password);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_string (reply, in_new_password);
+        err = krb5int_ipc_stream_write_string (reply, in_new_password);
     }
     
     if (!err && !in_error) {
-        err = k5_ipc_stream_write_string (reply, in_vfy_password);
+        err = krb5int_ipc_stream_write_string (reply, in_vfy_password);
     }
     
     if (!err) {
         err = k5_ipc_server_send_reply (in_reply_port, reply);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return err;   
 }
@@ -467,24 +467,24 @@ static int32_t kim_handle_request_handle_error (mach_port_t   in_client_port,
     char *description = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &identity_string);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &identity_string);
         /* Can be empty string "" if there is no identity */
         if (!err && !identity_string[0]) {
-            k5_ipc_stream_free_string (identity_string);   
+            krb5int_ipc_stream_free_string (identity_string);   
             identity_string = NULL;
         }
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (in_request_stream, &error);
+        err = krb5int_ipc_stream_read_int32 (in_request_stream, &error);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &message);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &message);
     }    
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &description);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &description);
     }    
     
     if (!err) {
@@ -497,9 +497,9 @@ static int32_t kim_handle_request_handle_error (mach_port_t   in_client_port,
                                              description:description];
     }
     
-    k5_ipc_stream_free_string (identity_string);   
-    k5_ipc_stream_free_string (message);   
-    k5_ipc_stream_free_string (description);   
+    krb5int_ipc_stream_free_string (identity_string);   
+    krb5int_ipc_stream_free_string (message);   
+    krb5int_ipc_stream_free_string (description);   
     
     return err;   
 }
@@ -513,18 +513,18 @@ int32_t kim_handle_reply_handle_error (mach_port_t   in_reply_port,
     k5_ipc_stream reply = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
 
     if (!err) {
         err = k5_ipc_server_send_reply (in_reply_port, reply);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return err;   
 }
@@ -553,18 +553,18 @@ int32_t kim_handle_reply_fini (mach_port_t   in_reply_port,
     k5_ipc_stream reply = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
     
     if (!err) {
         err = k5_ipc_server_send_reply (in_reply_port, reply);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return err;   
 }
@@ -609,7 +609,7 @@ int32_t k5_ipc_server_handle_request (mach_port_t   in_client_port,
     char *message_type = NULL;
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_stream, &message_type);
+        err = krb5int_ipc_stream_read_string (in_request_stream, &message_type);
     }
     
     if (!err) {
@@ -653,7 +653,7 @@ int32_t k5_ipc_server_handle_request (mach_port_t   in_client_port,
         }
     }
     
-    k5_ipc_stream_free_string (message_type);
+    krb5int_ipc_stream_free_string (message_type);
     
     return err;
 }

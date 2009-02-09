@@ -193,7 +193,7 @@ cc_int32 ccapi_ccache_iterator_next (cc_ccache_iterator_t  in_ccache_iterator,
         err = cci_ccache_new (out_ccache, identifier);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     cci_identifier_release (identifier);
     
     return cci_check_error (err);
@@ -240,7 +240,7 @@ cc_int32 ccapi_ccache_iterator_clone (cc_ccache_iterator_t  in_ccache_iterator,
     }
 
     cci_identifier_release (identifier);
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }

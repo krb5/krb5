@@ -33,45 +33,45 @@ struct k5_ipc_stream_s;
 typedef struct k5_ipc_stream_s *k5_ipc_stream;
 
 
-int32_t k5_ipc_stream_new (k5_ipc_stream *out_stream);
+int32_t krb5int_ipc_stream_new (k5_ipc_stream *out_stream);
 
-uint32_t k5_ipc_stream_release (k5_ipc_stream io_stream);
+uint32_t krb5int_ipc_stream_release (k5_ipc_stream io_stream);
 
-uint64_t k5_ipc_stream_size (k5_ipc_stream in_stream);
+uint64_t krb5int_ipc_stream_size (k5_ipc_stream in_stream);
 
-const char *k5_ipc_stream_data (k5_ipc_stream in_stream);
+const char *krb5int_ipc_stream_data (k5_ipc_stream in_stream);
 
-uint32_t k5_ipc_stream_read (k5_ipc_stream  in_stream, 
-                             void          *io_data,
-                             uint64_t       in_size);
-uint32_t k5_ipc_stream_write (k5_ipc_stream  in_stream, 
-                              const void    *in_data,
-                              uint64_t       in_size);
+uint32_t krb5int_ipc_stream_read (k5_ipc_stream  in_stream, 
+				  void          *io_data,
+				  uint64_t       in_size);
+uint32_t krb5int_ipc_stream_write (k5_ipc_stream  in_stream, 
+				   const void    *in_data,
+				   uint64_t       in_size);
 
-uint32_t k5_ipc_stream_read_string (k5_ipc_stream   io_stream, 
-                                    char          **out_string);
-uint32_t k5_ipc_stream_write_string (k5_ipc_stream  io_stream, 
-                                     const char    *in_string);
-void k5_ipc_stream_free_string (char *in_string);
+uint32_t krb5int_ipc_stream_read_string (k5_ipc_stream   io_stream, 
+					 char          **out_string);
+uint32_t krb5int_ipc_stream_write_string (k5_ipc_stream  io_stream, 
+					  const char    *in_string);
+void krb5int_ipc_stream_free_string (char *in_string);
 
-uint32_t k5_ipc_stream_read_int32 (k5_ipc_stream  io_stream, 
-                                   int32_t       *out_int32);
-uint32_t k5_ipc_stream_write_int32 (k5_ipc_stream io_stream, 
-                                    int32_t       in_int32);
+uint32_t krb5int_ipc_stream_read_int32 (k5_ipc_stream  io_stream, 
+					int32_t       *out_int32);
+uint32_t krb5int_ipc_stream_write_int32 (k5_ipc_stream io_stream, 
+					 int32_t       in_int32);
 
-uint32_t k5_ipc_stream_read_uint32 (k5_ipc_stream  io_stream, 
-                                    uint32_t      *out_uint32);
-uint32_t k5_ipc_stream_write_uint32 (k5_ipc_stream io_stream, 
-                                     uint32_t      in_uint32);
+uint32_t krb5int_ipc_stream_read_uint32 (k5_ipc_stream  io_stream, 
+					 uint32_t      *out_uint32);
+uint32_t krb5int_ipc_stream_write_uint32 (k5_ipc_stream io_stream, 
+					  uint32_t      in_uint32);
 
-uint32_t k5_ipc_stream_read_int64 (k5_ipc_stream  io_stream, 
-                                   int64_t       *out_int64);
-uint32_t k5_ipc_stream_write_int64 (k5_ipc_stream io_stream, 
-                                    int64_t       in_int64);
+uint32_t krb5int_ipc_stream_read_int64 (k5_ipc_stream  io_stream, 
+					int64_t       *out_int64);
+uint32_t krb5int_ipc_stream_write_int64 (k5_ipc_stream io_stream, 
+					 int64_t       in_int64);
 
-uint32_t k5_ipc_stream_read_uint64 (k5_ipc_stream  io_stream, 
-                                    uint64_t      *out_uint64);
-uint32_t k5_ipc_stream_write_uint64 (k5_ipc_stream io_stream, 
-                                     uint64_t      in_uint64);
+uint32_t krb5int_ipc_stream_read_uint64 (k5_ipc_stream  io_stream, 
+					 uint64_t      *out_uint64);
+uint32_t krb5int_ipc_stream_write_uint64 (k5_ipc_stream io_stream, 
+					  uint64_t      in_uint64);
 
 #endif /* K5_IPC_STREAM_H */

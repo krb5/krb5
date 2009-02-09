@@ -252,19 +252,19 @@ cc_uint32 cci_identifier_read (cci_identifier_t *out_identifier,
     if (!io_stream     ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_string (io_stream, &server_id);
+        err = krb5int_ipc_stream_read_string (io_stream, &server_id);
     }
 
     if (!err) {
-        err = k5_ipc_stream_read_string (io_stream, &object_id);
+        err = krb5int_ipc_stream_read_string (io_stream, &object_id);
     }    
      
     if (!err) {
         err = cci_identifier_alloc (out_identifier, server_id, object_id);
     }
     
-    k5_ipc_stream_free_string (server_id);
-    k5_ipc_stream_free_string (object_id);
+    krb5int_ipc_stream_free_string (server_id);
+    krb5int_ipc_stream_free_string (object_id);
     
     return cci_check_error (err);
 }
@@ -280,11 +280,11 @@ cc_uint32 cci_identifier_write (cci_identifier_t in_identifier,
     if (!io_stream    ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, in_identifier->server_id);
+        err = krb5int_ipc_stream_write_string (io_stream, in_identifier->server_id);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, in_identifier->object_id);
+        err = krb5int_ipc_stream_write_string (io_stream, in_identifier->object_id);
     }
     
     return cci_check_error (err);

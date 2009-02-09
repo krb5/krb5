@@ -67,11 +67,11 @@ cc_int32 cci_message_new_request_header (k5_ipc_stream      *out_request,
     if (!out_request) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_new (&request);
+        err = krb5int_ipc_stream_new (&request);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_uint32 (request, in_request_name);
+        err = krb5int_ipc_stream_write_uint32 (request, in_request_name);
     }
     
     if (!err) {
@@ -83,7 +83,7 @@ cc_int32 cci_message_new_request_header (k5_ipc_stream      *out_request,
         request = NULL;
     }
     
-    k5_ipc_stream_release (request);
+    krb5int_ipc_stream_release (request);
     
     return cci_check_error (err);
 }
@@ -103,7 +103,7 @@ cc_int32 cci_message_read_request_header (k5_ipc_stream       in_request,
     if (!out_identifier  ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request, &request_name);
+        err = krb5int_ipc_stream_read_uint32 (in_request, &request_name);
     }
     
     if (!err) {
@@ -132,11 +132,11 @@ cc_int32 cci_message_new_reply_header (k5_ipc_stream     *out_reply,
     if (!out_reply) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply);
+        err = krb5int_ipc_stream_new (&reply);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_int32 (reply, in_error);
+        err = krb5int_ipc_stream_write_int32 (reply, in_error);
     }
     
     if (!err) {
@@ -144,7 +144,7 @@ cc_int32 cci_message_new_reply_header (k5_ipc_stream     *out_reply,
         reply = NULL;
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return cci_check_error (err);
 }
@@ -161,7 +161,7 @@ cc_int32 cci_message_read_reply_header (k5_ipc_stream      in_reply,
     if (!out_reply_error) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_int32 (in_reply, &reply_err);
+        err = krb5int_ipc_stream_read_int32 (in_reply, &reply_err);
     }
     
     if (!err) {
@@ -177,7 +177,7 @@ cc_int32 cci_message_read_reply_header (k5_ipc_stream      in_reply,
 
 /* ------------------------------------------------------------------------ */
 
-uint32_t k5_ipc_stream_read_time (k5_ipc_stream  io_stream, 
+uint32_t krb5int_ipc_stream_read_time (k5_ipc_stream  io_stream, 
                                   cc_time_t     *out_time)
 {
     int32_t err = 0;
@@ -187,7 +187,7 @@ uint32_t k5_ipc_stream_read_time (k5_ipc_stream  io_stream,
     if (!out_time ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_int64 (io_stream, &t);
+        err = krb5int_ipc_stream_read_int64 (io_stream, &t);
     }
     
     if (!err) {
@@ -199,15 +199,15 @@ uint32_t k5_ipc_stream_read_time (k5_ipc_stream  io_stream,
 
 /* ------------------------------------------------------------------------ */
 
-uint32_t k5_ipc_stream_write_time (k5_ipc_stream io_stream, 
-                                   cc_time_t     in_time)
+uint32_t krb5int_ipc_stream_write_time (k5_ipc_stream io_stream, 
+					cc_time_t     in_time)
 {
     int32_t err = 0;
     
     if (!io_stream) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_write_int64 (io_stream, in_time);
+        err = krb5int_ipc_stream_write_int64 (io_stream, in_time);
     }
     
     return cci_check_error (err);

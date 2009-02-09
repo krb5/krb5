@@ -366,7 +366,7 @@ cc_int32 ccs_server_handle_request (ccs_pipe_t     in_client_pipe,
     }
 
     cci_identifier_release (request_identifier);
-    k5_ipc_stream_release (reply_data);
+    krb5int_ipc_stream_release (reply_data);
     
     return cci_check_error (err);    
 }
@@ -386,17 +386,17 @@ cc_int32 ccs_server_send_reply (ccs_pipe_t     in_reply_pipe,
         err = cci_message_new_reply_header (&reply, in_reply_err);
     }
     
-    if (!err && in_reply_data && k5_ipc_stream_size (in_reply_data) > 0) {
-        err = k5_ipc_stream_write (reply, 
-                                k5_ipc_stream_data (in_reply_data), 
-                                k5_ipc_stream_size (in_reply_data));
+    if (!err && in_reply_data && krb5int_ipc_stream_size (in_reply_data) > 0) {
+        err = krb5int_ipc_stream_write (reply, 
+                                krb5int_ipc_stream_data (in_reply_data), 
+                                krb5int_ipc_stream_size (in_reply_data));
     }
     
     if (!err) {
         err = ccs_os_server_send_reply (in_reply_pipe, reply);
     }
     
-    k5_ipc_stream_release (reply);
+    krb5int_ipc_stream_release (reply);
     
     return cci_check_error (err);    
 }

@@ -335,11 +335,11 @@ cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
     }
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply_data);
+        err = krb5int_ipc_stream_new (&reply_data);
     }
     
     if (!err) {
-	err = k5_ipc_stream_write_time (reply_data, io_ccache->last_changed_time);
+	err = krb5int_ipc_stream_write_time (reply_data, io_ccache->last_changed_time);
     }
 
     if (!err) {
@@ -365,7 +365,7 @@ cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
                                             io_ccache->name);
     }
     
-    k5_ipc_stream_release (reply_data);
+    krb5int_ipc_stream_release (reply_data);
     
     return cci_check_error (err);
 }
@@ -487,7 +487,7 @@ cc_int32 ccs_ccache_write_name (ccs_ccache_t in_ccache,
     if (!io_stream) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, in_ccache->name);
+        err = krb5int_ipc_stream_write_string (io_stream, in_ccache->name);
     }
     
     return cci_check_error (err);    
@@ -562,7 +562,7 @@ static cc_int32 ccs_ccache_get_credentials_version (ccs_ccache_t           io_cc
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_write_uint32 (io_reply_data, io_ccache->creds_version);
+        err = krb5int_ipc_stream_write_uint32 (io_reply_data, io_ccache->creds_version);
     }
     
     return cci_check_error (err);    
@@ -583,7 +583,7 @@ static cc_int32 ccs_ccache_get_name (ccs_ccache_t           io_ccache,
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_reply_data, io_ccache->name);
+        err = krb5int_ipc_stream_write_string (io_reply_data, io_ccache->name);
     }
     
     return cci_check_error (err);    
@@ -605,7 +605,7 @@ static cc_int32 ccs_ccache_get_principal (ccs_ccache_t           io_ccache,
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request_data, &version);
+        err = krb5int_ipc_stream_read_uint32 (in_request_data, &version);
     }
     
     if (!err && version == cc_credentials_v4_v5) {
@@ -614,10 +614,10 @@ static cc_int32 ccs_ccache_get_principal (ccs_ccache_t           io_ccache,
     
     if (!err) {
         if (version == cc_credentials_v4) {
-            err = k5_ipc_stream_write_string (io_reply_data, io_ccache->v4_principal);
+            err = krb5int_ipc_stream_write_string (io_reply_data, io_ccache->v4_principal);
             
         } else if (version == cc_credentials_v5) {
-            err = k5_ipc_stream_write_string (io_reply_data, io_ccache->v5_principal);
+            err = krb5int_ipc_stream_write_string (io_reply_data, io_ccache->v5_principal);
             
         } else {
             err = cci_check_error (ccErrBadCredentialsVersion);
@@ -644,11 +644,11 @@ static cc_int32 ccs_ccache_set_principal (ccs_ccache_t           io_ccache,
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request_data, &version);
+        err = krb5int_ipc_stream_read_uint32 (in_request_data, &version);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_string (in_request_data, &principal);
+        err = krb5int_ipc_stream_read_string (in_request_data, &principal);
     }
     
     if (!err) {
@@ -681,7 +681,7 @@ static cc_int32 ccs_ccache_set_principal (ccs_ccache_t           io_ccache,
         err = ccs_ccache_changed (io_ccache, io_cache_collection);
     }
     
-    k5_ipc_stream_free_string (principal);
+    krb5int_ipc_stream_free_string (principal);
         
     return cci_check_error (err);    
 }
@@ -834,11 +834,11 @@ static cc_int32 ccs_ccache_lock (ccs_pipe_t             in_client_pipe,
     if (!io_reply_data                  ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request_data, &lock_type);
+        err = krb5int_ipc_stream_read_uint32 (in_request_data, &lock_type);
     }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request_data, &block);
+        err = krb5int_ipc_stream_read_uint32 (in_request_data, &block);
     }
     
     if (!err) {
@@ -892,7 +892,7 @@ static cc_int32 ccs_ccache_get_last_default_time (ccs_ccache_t           io_ccac
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_time (io_reply_data, io_ccache->last_default_time);
+        err = krb5int_ipc_stream_write_time (io_reply_data, io_ccache->last_default_time);
     }
     
     return cci_check_error (err);    
@@ -913,7 +913,7 @@ static cc_int32 ccs_ccache_get_change_time (ccs_ccache_t           io_ccache,
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_write_time (io_reply_data, io_ccache->last_changed_time);
+        err = krb5int_ipc_stream_write_time (io_reply_data, io_ccache->last_changed_time);
     }
     
     return cci_check_error (err);    
@@ -941,13 +941,13 @@ static cc_int32 ccs_ccache_wait_for_change (ccs_pipe_t              in_client_pi
     if (!out_will_block                 ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_time (in_request_data, &last_wait_for_change_time);
+        err = krb5int_ipc_stream_read_time (in_request_data, &last_wait_for_change_time);
     }
     
     if (!err) {
 	if (last_wait_for_change_time < io_ccache->last_changed_time) {
 	    cci_debug_printf ("%s returning immediately", __FUNCTION__);
-	    err = k5_ipc_stream_write_time (io_reply_data, io_ccache->last_changed_time);
+	    err = krb5int_ipc_stream_write_time (io_reply_data, io_ccache->last_changed_time);
 	    
 	} else {
 	    ccs_callback_t callback = NULL;
@@ -995,20 +995,20 @@ static cc_int32 ccs_ccache_get_kdc_time_offset (ccs_ccache_t           io_ccache
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request_data, &cred_vers);
+        err = krb5int_ipc_stream_read_uint32 (in_request_data, &cred_vers);
     }
     
     if (!err) {
         if (cred_vers == cc_credentials_v4) {
             if (io_ccache->kdc_time_offset_v4_valid) {
-                err = k5_ipc_stream_write_time (io_reply_data, io_ccache->kdc_time_offset_v4);
+                err = krb5int_ipc_stream_write_time (io_reply_data, io_ccache->kdc_time_offset_v4);
             } else {
                 err = cci_check_error (ccErrTimeOffsetNotSet);
             }
             
         } else if (cred_vers == cc_credentials_v5) {
             if (io_ccache->kdc_time_offset_v5_valid) {
-                err = k5_ipc_stream_write_time (io_reply_data, io_ccache->kdc_time_offset_v5);
+                err = krb5int_ipc_stream_write_time (io_reply_data, io_ccache->kdc_time_offset_v5);
             } else {
                 err = cci_check_error (ccErrTimeOffsetNotSet);
             }
@@ -1037,18 +1037,18 @@ static cc_int32 ccs_ccache_set_kdc_time_offset (ccs_ccache_t           io_ccache
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request_data, &cred_vers);
+        err = krb5int_ipc_stream_read_uint32 (in_request_data, &cred_vers);
     }
     
     if (!err) {
         if (cred_vers == cc_credentials_v4) {
-            err = k5_ipc_stream_read_time (in_request_data, &io_ccache->kdc_time_offset_v4);
+            err = krb5int_ipc_stream_read_time (in_request_data, &io_ccache->kdc_time_offset_v4);
             
             if (!err) {
                 io_ccache->kdc_time_offset_v4_valid = 1;
             }
         } else if (cred_vers == cc_credentials_v5) {
-            err = k5_ipc_stream_read_time (in_request_data, &io_ccache->kdc_time_offset_v5);
+            err = krb5int_ipc_stream_read_time (in_request_data, &io_ccache->kdc_time_offset_v5);
             
             if (!err) {
                 io_ccache->kdc_time_offset_v5_valid = 1;
@@ -1081,7 +1081,7 @@ static cc_int32 ccs_ccache_clear_kdc_time_offset (ccs_ccache_t           io_ccac
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_read_uint32 (in_request_data, &cred_vers);
+        err = krb5int_ipc_stream_read_uint32 (in_request_data, &cred_vers);
     }
     
     if (!err) {
@@ -1132,7 +1132,7 @@ cc_int32 ccs_ccache_handle_message (ccs_pipe_t              in_client_pipe,
     if (!out_reply_data                 ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply_data);
+        err = krb5int_ipc_stream_new (&reply_data);
     }
     
     if (!err) {
@@ -1231,7 +1231,7 @@ cc_int32 ccs_ccache_handle_message (ccs_pipe_t              in_client_pipe,
         }
     }
     
-    k5_ipc_stream_release (reply_data);
+    krb5int_ipc_stream_release (reply_data);
     
     return cci_check_error (err);
 }

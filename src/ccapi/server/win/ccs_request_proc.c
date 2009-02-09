@@ -52,11 +52,11 @@ void ccs_rpc_request(
     status = (rpcmsg != CCMSG_REQUEST) && (rpcmsg != CCMSG_PING);
     
     if (!status) {                         
-        status = k5_ipc_stream_new (&stream);  /* Create a stream for the request data */
+        status = krb5int_ipc_stream_new (&stream);  /* Create a stream for the request data */
         }
 
     if (!status) {                          /* Put the data into the stream */
-        status = k5_ipc_stream_write (stream, pbRequest, lenRequest);
+        status = krb5int_ipc_stream_write (stream, pbRequest, lenRequest);
         }
 
     pipe = ccs_win_pipe_new(pszUUID, *p);    

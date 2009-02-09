@@ -121,7 +121,7 @@ static  cc_int32 ccs_credentials_iterator_clone (ccs_credentials_iterator_t io_c
     if (!out_reply_data ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = k5_ipc_stream_new (&reply_data);
+        err = krb5int_ipc_stream_new (&reply_data);
     }
     
     if (!err) {
@@ -153,7 +153,7 @@ static  cc_int32 ccs_credentials_iterator_clone (ccs_credentials_iterator_t io_c
         reply_data = NULL; /* take ownership */
     }
     
-    k5_ipc_stream_release (reply_data);
+    krb5int_ipc_stream_release (reply_data);
     
     return cci_check_error (err);
 }

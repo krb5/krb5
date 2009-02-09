@@ -593,13 +593,13 @@ kim_error kim_selection_hints_write_to_stream (kim_selection_hints in_selection_
     if (!err && !io_stream         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
 
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, 
-                                          in_selection_hints->application_identifier);
+        err = krb5int_ipc_stream_write_string (io_stream, 
+					       in_selection_hints->application_identifier);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, 
-                                          in_selection_hints->explanation);
+        err = krb5int_ipc_stream_write_string (io_stream, 
+					       in_selection_hints->explanation);
     }
     
     if (!err) {
@@ -608,33 +608,33 @@ kim_error kim_selection_hints_write_to_stream (kim_selection_hints in_selection_
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, 
-                                          in_selection_hints->service_identity);
+        err = krb5int_ipc_stream_write_string (io_stream, 
+					       in_selection_hints->service_identity);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, 
-                                          in_selection_hints->client_realm);
+        err = krb5int_ipc_stream_write_string (io_stream, 
+					       in_selection_hints->client_realm);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, 
-                                          in_selection_hints->user);
+        err = krb5int_ipc_stream_write_string (io_stream, 
+					       in_selection_hints->user);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, 
-                                          in_selection_hints->service_realm);
+        err = krb5int_ipc_stream_write_string (io_stream, 
+					       in_selection_hints->service_realm);
     }
     
     if (!err) {
-       err = k5_ipc_stream_write_string (io_stream, 
-                                         in_selection_hints->service);
+       err = krb5int_ipc_stream_write_string (io_stream, 
+					      in_selection_hints->service);
     }
     
     if (!err) {
-        err = k5_ipc_stream_write_string (io_stream, 
-                                          in_selection_hints->server);
+        err = krb5int_ipc_stream_write_string (io_stream, 
+					       in_selection_hints->server);
     }
     
     return check_error (err);    
@@ -652,26 +652,26 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
     
     if (!err) {
         char *application_identifier = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &application_identifier);
+        err = krb5int_ipc_stream_read_string (io_stream, &application_identifier);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->application_identifier, 
                                    application_identifier);
         }
         
-        k5_ipc_stream_free_string (application_identifier);
+        krb5int_ipc_stream_free_string (application_identifier);
     }
     
     if (!err) {
         char *explanation = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &explanation);
+        err = krb5int_ipc_stream_read_string (io_stream, &explanation);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->explanation, 
                                    explanation);
         }
         
-        k5_ipc_stream_free_string (explanation);
+        krb5int_ipc_stream_free_string (explanation);
     }
     
     if (!err) {
@@ -686,71 +686,71 @@ kim_error kim_selection_hints_read_from_stream (kim_selection_hints io_selection
     
     if (!err) {
         char *service_identity = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &service_identity);
+        err = krb5int_ipc_stream_read_string (io_stream, &service_identity);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->service_identity, 
                                    service_identity);
         }
         
-        k5_ipc_stream_free_string (service_identity);
+        krb5int_ipc_stream_free_string (service_identity);
     }
     
     if (!err) {
         char *client_realm = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &client_realm);
+        err = krb5int_ipc_stream_read_string (io_stream, &client_realm);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->client_realm, 
                                    client_realm);
         }
         
-        k5_ipc_stream_free_string (client_realm);
+        krb5int_ipc_stream_free_string (client_realm);
     }
     
     if (!err) {
         char *user = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &user);
+        err = krb5int_ipc_stream_read_string (io_stream, &user);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->user, user);
         }
         
-        k5_ipc_stream_free_string (user);
+        krb5int_ipc_stream_free_string (user);
     }
     
     if (!err) {
         char *service_realm = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &service_realm);
+        err = krb5int_ipc_stream_read_string (io_stream, &service_realm);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->service_realm, 
                                    service_realm);
         }
         
-        k5_ipc_stream_free_string (service_realm);
+        krb5int_ipc_stream_free_string (service_realm);
     }
     
     if (!err) {
         char *service = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &service);
+        err = krb5int_ipc_stream_read_string (io_stream, &service);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->service, service);
         }
         
-        k5_ipc_stream_free_string (service);
+        krb5int_ipc_stream_free_string (service);
     }
     
     if (!err) {
         char *server = NULL;
-        err = k5_ipc_stream_read_string (io_stream, &server);
+        err = krb5int_ipc_stream_read_string (io_stream, &server);
         
         if (!err) {
             err = kim_string_copy (&io_selection_hints->server, server);
         }
         
-        k5_ipc_stream_free_string (server);
+        krb5int_ipc_stream_free_string (server);
     }
     
     return check_error (err);    
