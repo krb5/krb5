@@ -29,8 +29,8 @@
 
 #include "k5-platform.h"
 
-struct k5_ipc_stream;
-typedef struct k5_ipc_stream *k5_ipc_stream;
+struct k5_ipc_stream_s;
+typedef struct k5_ipc_stream_s *k5_ipc_stream;
 
 
 int32_t k5_ipc_stream_new (k5_ipc_stream *out_stream);
