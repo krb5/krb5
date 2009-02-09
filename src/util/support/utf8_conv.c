@@ -58,6 +58,7 @@
  * All functions return -1 if the character or string cannot be converted.
  */
 
+#include <assert.h>
 #include "k5-platform.h"
 #include "k5-utf8.h"
 #include "supp-int.h"
