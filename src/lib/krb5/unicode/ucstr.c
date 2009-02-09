@@ -104,15 +104,17 @@ krb5int_ucstr2upper(
 #define TOUPPER(c)  (islower(c) ? toupper(c) : (c))
 #define TOLOWER(c)  (isupper(c) ? tolower(c) : (c))
 
-krb5_data *
+krb5_error_code
 krb5int_utf8_normalize(
 		       krb5_data * data,
-		       krb5_data * newdata,
+		       krb5_data ** newdataptr,
 		       unsigned flags)
 {
     int i, j, len, clen, outpos, ucsoutlen, outsize, last;
-    char *out, *outtmp, *s;
-    krb5_ucs4 *ucs, *p, *ucsout;
+    char *out = NULL, *outtmp, *s;
+    krb5_ucs4 *ucs = NULL, *p, *ucsout = NULL;
+    krb5_data *newdata;
+    krb5_error_code retval = 0;
 
     static unsigned char mask[] = {
     0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
@@ -120,17 +122,15 @@ krb5int_utf8_normalize(
     unsigned casefold = flags & KRB5_UTF8_CASEFOLD;
     unsigned approx = flags & KRB5_UTF8_APPROX;
 
-    if (data == NULL) {
-	return NULL;
-    }
+    *newdataptr = NULL;
+
     s = data->data;
     len = data->length;
 
-    if (!newdata) {
-	newdata = (krb5_data *) malloc(sizeof(*newdata));
-	if (newdata == NULL)
-	    return NULL;
-    }
+    newdata = malloc(sizeof(*newdata));
+    if (newdata == NULL)
+	return ENOMEM;
+
     /*
      * Should first check to see if string is already in proper normalized
      * form. This is almost as time consuming as the normalization though.
@@ -140,9 +140,10 @@ krb5int_utf8_normalize(
     if (KRB5_UTF8_ISASCII(s)) {
 	if (casefold) {
 	    outsize = len + 7;
-	    out = (char *) malloc(outsize);
+	    out = malloc(outsize);
 	    if (out == NULL) {
-		return NULL;
+		retval = ENOMEM;
+		goto cleanup;
 	    }
 	    outpos = 0;
 
@@ -151,10 +152,7 @@ krb5int_utf8_normalize(
 	    }
 	    if (i == len) {
 		out[outpos++] = TOLOWER(s[len - 1]);
-		out[outpos] = '\0';
-		newdata->data = out;
-		newdata->length = outpos;
-		return newdata;
+		goto cleanup;
 	    }
 	} else {
 	    for (i = 1; (i < len) && KRB5_UTF8_ISASCII(s + i); i++) {
@@ -165,25 +163,29 @@ krb5int_utf8_normalize(
 		newdata->length = len;
 		newdata->data = malloc(newdata->length + 1);
 		if (newdata->data == NULL) {
-		    return NULL;
+		    retval = ENOMEM;
+		    goto cleanup;
 		}
 		memcpy(newdata->data, s, len);
 		newdata->data[len] = '\0';
-		return newdata;
+		*newdataptr = newdata;
+		return 0;
 	    }
 	    outsize = len + 7;
-	    out = (char *) malloc(outsize);
+	    out = malloc(outsize);
 	    if (out == NULL) {
-		return NULL;
+		retval = ENOMEM;
+		goto cleanup;
 	    }
 	    outpos = i - 1;
 	    memcpy(out, s, outpos);
 	}
     } else {
 	outsize = len + 7;
-	out = (char *) malloc(outsize);
+	out = malloc(outsize);
 	if (out == NULL) {
-	    return NULL;
+	    retval = ENOMEM;
+	    goto cleanup;
 	}
 	outpos = 0;
 	i = 0;
@@ -191,8 +193,8 @@ krb5int_utf8_normalize(
 
     p = ucs = malloc(len * sizeof(*ucs));
     if (ucs == NULL) {
-	free(out);
-	return NULL;
+	retval = ENOMEM;
+	goto cleanup;
     }
     /* convert character before first non-ascii to ucs-4 */
     if (i > 0) {
@@ -206,9 +208,8 @@ krb5int_utf8_normalize(
 	while (i < len) {
 	    clen = KRB5_UTF8_CHARLEN2(s + i, clen);
 	    if (clen == 0) {
-		free(ucs);
-		free(out);
-		return NULL;
+		retval = KRB5_ERR_INVALID_UTF8;
+		goto cleanup;
 	    }
 	    if (clen == 1) {
 		/* ascii */
@@ -218,9 +219,8 @@ krb5int_utf8_normalize(
 	    i++;
 	    for (j = 1; j < clen; j++) {
 		if ((s[i] & 0xc0) != 0x80) {
-		    free(ucs);
-		    free(out);
-		    return NULL;
+		    retval = KRB5_ERR_INVALID_UTF8;
+		    goto cleanup;
 		}
 		*p <<= 6;
 		*p |= s[i] & 0x3f;
@@ -249,12 +249,10 @@ krb5int_utf8_normalize(
 		 */
 		if (outsize - outpos < 7) {
 		    outsize = ucsoutlen - j + outpos + 6;
-		    outtmp = (char *) realloc(out, outsize);
+		    outtmp = realloc(out, outsize);
 		    if (outtmp == NULL) {
-			free(ucsout);
-			free(ucs);
-			free(out);
-			return NULL;
+			retval = ENOMEM;
+			goto cleanup;
 		    }
 		    out = outtmp;
 		}
@@ -273,11 +271,10 @@ krb5int_utf8_normalize(
 	/* Allocate more space in out if necessary */
 	if (len - i >= outsize - outpos) {
 	    outsize += 1 + ((len - i) - (outsize - outpos));
-	    outtmp = (char *) realloc(out, outsize);
+	    outtmp = realloc(out, outsize);
 	    if (outtmp == NULL) {
-		free(ucs);
-		free(out);
-		return NULL;
+		retval = ENOMEM;
+		goto cleanup;
 	    }
 	    out = outtmp;
 	}
@@ -295,11 +292,19 @@ krb5int_utf8_normalize(
 	p = ucs + 1;
     }
 
+cleanup:
     free(ucs);
+    free(ucsout);
+    if (retval) {
+	free(out);
+	free(newdata);
+	return retval;
+    }
     out[outpos] = '\0';
     newdata->data = out;
     newdata->length = outpos;
-    return newdata;
+    *newdataptr = newdata;
+    return 0;
 }
 
 /* compare UTF8-strings, optionally ignore casing */
