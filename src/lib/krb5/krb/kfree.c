@@ -60,8 +60,7 @@ krb5_free_address(krb5_context context, krb5_address *val)
 {
     if (val == NULL)
 	return;
-    if (val->contents)
-	free(val->contents);
+    free(val->contents);
     free(val);
 }
 
@@ -188,11 +187,7 @@ krb5_free_cred_contents(krb5_context context, krb5_creds *val)
     val->client = 0;
     krb5_free_principal(context, val->server);
     val->server = 0;
-    if (val->keyblock.contents) {
-	memset(val->keyblock.contents, 0, val->keyblock.length);
-	free(val->keyblock.contents);
-	val->keyblock.contents = 0;
-    }
+    krb5_free_keyblock_contents(context, &val->keyblock);
     free(val->ticket.data);
     val->ticket.data = 0;
     free(val->second_ticket.data);
