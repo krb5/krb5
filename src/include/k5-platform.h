@@ -539,9 +539,9 @@ static inline void
 store_16_be (unsigned int val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
-#if defined(__GNUC__) && defined(K5_BE)
+#if defined(__GNUC__) && defined(K5_BE) && !defined(__cplusplus)
     PUT(16,p,val);
-#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16) && !defined(__cplusplus)
     PUTSWAPPED(16,p,val);
 #else
     p[0] = (val >>  8) & 0xff;
@@ -552,9 +552,9 @@ static inline void
 store_32_be (unsigned int val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
-#if defined(__GNUC__) && defined(K5_BE)
+#if defined(__GNUC__) && defined(K5_BE) && !defined(__cplusplus)
     PUT(32,p,val);
-#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32) && !defined(__cplusplus)
     PUTSWAPPED(32,p,val);
 #else
     p[0] = (val >> 24) & 0xff;
@@ -567,9 +567,9 @@ static inline void
 store_64_be (UINT64_TYPE val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
-#if defined(__GNUC__) && defined(K5_BE)
+#if defined(__GNUC__) && defined(K5_BE) && !defined(__cplusplus)
     PUT(64,p,val);
-#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64) && !defined(__cplusplus)
     PUTSWAPPED(64,p,val);
 #else
     p[0] = (unsigned char)((val >> 56) & 0xff);
@@ -586,9 +586,9 @@ static inline unsigned short
 load_16_be (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
-#if defined(__GNUC__) && defined(K5_BE)
+#if defined(__GNUC__) && defined(K5_BE) && !defined(__cplusplus)
     return GET(16,p);
-#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16) && !defined(__cplusplus)
     return GETSWAPPED(16,p);
 #else
     return (p[1] | (p[0] << 8));
@@ -598,9 +598,9 @@ static inline unsigned int
 load_32_be (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
-#if defined(__GNUC__) && defined(K5_BE)
+#if defined(__GNUC__) && defined(K5_BE) && !defined(__cplusplus)
     return GET(32,p);
-#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32) && !defined(__cplusplus)
     return GETSWAPPED(32,p);
 #else
     return (p[3] | (p[2] << 8)
@@ -612,9 +612,9 @@ static inline UINT64_TYPE
 load_64_be (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
-#if defined(__GNUC__) && defined(K5_BE)
+#if defined(__GNUC__) && defined(K5_BE) && !defined(__cplusplus)
     return GET(64,p);
-#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64) && !defined(__cplusplus)
     return GETSWAPPED(64,p);
 #else
     return ((UINT64_TYPE)load_32_be(p) << 32) | load_32_be(p+4);
@@ -624,9 +624,9 @@ static inline void
 store_16_le (unsigned int val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
-#if defined(__GNUC__) && defined(K5_LE)
+#if defined(__GNUC__) && defined(K5_LE) && !defined(__cplusplus)
     PUT(16,p,val);
-#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16) && !defined(__cplusplus)
     PUTSWAPPED(16,p,val);
 #else
     p[1] = (val >>  8) & 0xff;
@@ -637,9 +637,9 @@ static inline void
 store_32_le (unsigned int val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
-#if defined(__GNUC__) && defined(K5_LE)
+#if defined(__GNUC__) && defined(K5_LE) && !defined(__cplusplus)
     PUT(32,p,val);
-#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32) && !defined(__cplusplus)
     PUTSWAPPED(32,p,val);
 #else
     p[3] = (val >> 24) & 0xff;
@@ -652,9 +652,9 @@ static inline void
 store_64_le (UINT64_TYPE val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
-#if defined(__GNUC__) && defined(K5_LE)
+#if defined(__GNUC__) && defined(K5_LE) && !defined(__cplusplus)
     PUT(64,p,val);
-#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64) && !defined(__cplusplus)
     PUTSWAPPED(64,p,val);
 #else
     p[7] = (unsigned char)((val >> 56) & 0xff);
@@ -671,9 +671,9 @@ static inline unsigned short
 load_16_le (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
-#if defined(__GNUC__) && defined(K5_LE)
+#if defined(__GNUC__) && defined(K5_LE) && !defined(__cplusplus)
     return GET(16,p);
-#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16) && !defined(__cplusplus)
     return GETSWAPPED(16,p);
 #else
     return (p[0] | (p[1] << 8));
@@ -683,9 +683,9 @@ static inline unsigned int
 load_32_le (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
-#if defined(__GNUC__) && defined(K5_LE)
+#if defined(__GNUC__) && defined(K5_LE) && !defined(__cplusplus)
     return GET(32,p);
-#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32) && !defined(__cplusplus)
     return GETSWAPPED(32,p);
 #else
     return (p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24));
@@ -695,9 +695,9 @@ static inline UINT64_TYPE
 load_64_le (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
-#if defined(__GNUC__) && defined(K5_LE)
+#if defined(__GNUC__) && defined(K5_LE) && !defined(__cplusplus)
     return GET(64,p);
-#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64) && !defined(__cplusplus)
     return GETSWAPPED(64,p);
 #else
     return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
