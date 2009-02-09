@@ -36,8 +36,8 @@
 
 /* Structure invariants:
 
-   buftype is FIXED, DYNAMIC, or ERROR
-   if buftype is not ERROR:
+   buftype is BUFTYPE_FIXED, BUFTYPE_DYNAMIC, or BUFTYPE_ERROR
+   if buftype is not BUFTYPE_ERROR:
      space > 0
      space <= floor(SIZE_MAX / 2) (to fit within ssize_t)
      len < space
@@ -52,13 +52,13 @@ static int ensure_space(struct k5buf *buf, size_t len)
     size_t new_space;
     char *new_data;
 
-    if (buf->buftype == ERROR)
+    if (buf->buftype == BUFTYPE_ERROR)
         return 0;
     if (buf->space - 1 - buf->len >= len) /* Enough room already. */
         return 1;
-    if (buf->buftype == FIXED) /* Can't resize a fixed buffer. */
+    if (buf->buftype == BUFTYPE_FIXED) /* Can't resize a fixed buffer. */
         goto error_exit;
-    assert(buf->buftype == DYNAMIC);
+    assert(buf->buftype == BUFTYPE_DYNAMIC);
     new_space = buf->space * 2;
     while (new_space <= SPACE_MAX && new_space - buf->len - 1 < len)
         new_space *= 2;
@@ -72,18 +72,18 @@ static int ensure_space(struct k5buf *buf, size_t len)
     return 1;
 
  error_exit:
-    if (buf->buftype == DYNAMIC) {
+    if (buf->buftype == BUFTYPE_DYNAMIC) {
         free(buf->data);
         buf->data = NULL;
     }
-    buf->buftype = ERROR;
+    buf->buftype = BUFTYPE_ERROR;
     return 0;
 }
 
 void krb5int_buf_init_fixed(struct k5buf *buf, char *data, size_t space)
 {
     assert(space > 0);
-    buf->buftype = FIXED;
+    buf->buftype = BUFTYPE_FIXED;
     buf->data = data;
     buf->space = space;
     buf->len = 0;
@@ -92,11 +92,11 @@ void krb5int_buf_init_fixed(struct k5buf *buf, char *data, size_t space)
 
 void krb5int_buf_init_dynamic(struct k5buf *buf)
 {
-    buf->buftype = DYNAMIC;
+    buf->buftype = BUFTYPE_DYNAMIC;
     buf->space = DYNAMIC_INITIAL_SIZE;
     buf->data = malloc(buf->space);
     if (buf->data == NULL) {
-        buf->buftype = ERROR;
+        buf->buftype = BUFTYPE_ERROR;
         return;
     }
     buf->len = 0;
@@ -124,24 +124,24 @@ void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
     size_t remaining;
     char *tmp;
 
-    if (buf->buftype == ERROR)
+    if (buf->buftype == BUFTYPE_ERROR)
         return;
     remaining = buf->space - buf->len;
 
-    if (buf->buftype == FIXED) {
+    if (buf->buftype == BUFTYPE_FIXED) {
         /* Format the data directly into the fixed buffer. */
         va_start(ap, fmt);
         r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
         va_end(ap);
         if (SNPRINTF_OVERFLOW(r, remaining))
-            buf->buftype = ERROR;
+            buf->buftype = BUFTYPE_ERROR;
         else
             buf->len += (unsigned int) r;
         return;
     }
 
     /* Optimistically format the data directly into the dynamic buffer. */
-    assert(buf->buftype == DYNAMIC);
+    assert(buf->buftype == BUFTYPE_DYNAMIC);
     va_start(ap, fmt);
     r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
     va_end(ap);
@@ -159,7 +159,7 @@ void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
         r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
         va_end(ap);
         if (SNPRINTF_OVERFLOW(r, remaining))  /* Shouldn't ever happen. */
-            buf->buftype = ERROR;
+            buf->buftype = BUFTYPE_ERROR;
         else
             buf->len += (unsigned int) r;
         return;
@@ -171,7 +171,7 @@ void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
     r = vasprintf(&tmp, fmt, ap);
     va_end(ap);
     if (r < 0) {
-        buf->buftype = ERROR;
+        buf->buftype = BUFTYPE_ERROR;
         return;
     }
     if (ensure_space(buf, r)) {
@@ -184,7 +184,7 @@ void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 
 void krb5int_buf_truncate(struct k5buf *buf, size_t len)
 {
-    if (buf->buftype == ERROR)
+    if (buf->buftype == BUFTYPE_ERROR)
         return;
     assert(len <= buf->len);
     buf->len = len;
@@ -194,20 +194,20 @@ void krb5int_buf_truncate(struct k5buf *buf, size_t len)
 
 char *krb5int_buf_data(struct k5buf *buf)
 {
-    return (buf->buftype == ERROR) ? NULL : buf->data;
+    return (buf->buftype == BUFTYPE_ERROR) ? NULL : buf->data;
 }
 
 ssize_t krb5int_buf_len(struct k5buf *buf)
 {
-    return (buf->buftype == ERROR) ? -1 : (ssize_t) buf->len;
+    return (buf->buftype == BUFTYPE_ERROR) ? -1 : (ssize_t) buf->len;
 }
 
 void krb5int_free_buf(struct k5buf *buf)
 {
-    if (buf->buftype == ERROR)
+    if (buf->buftype == BUFTYPE_ERROR)
         return;
-    assert(buf->buftype == DYNAMIC);
+    assert(buf->buftype == BUFTYPE_DYNAMIC);
     free(buf->data);
     buf->data = NULL;
-    buf->buftype = ERROR;
+    buf->buftype = BUFTYPE_ERROR;
 }

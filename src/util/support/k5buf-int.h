@@ -46,6 +46,6 @@
 #define SPACE_MAX (SIZE_MAX / 2) /* rounds down, since SIZE_MAX is odd */
 
 /* Buffer type values. */
-enum { FIXED, DYNAMIC, ERROR };
+enum { BUFTYPE_FIXED, BUFTYPE_DYNAMIC, BUFTYPE_ERROR };
 
 #endif /* K5BUF_INT_H */
