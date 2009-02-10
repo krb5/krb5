@@ -643,18 +643,19 @@ krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
     if (new_node == NULL)
 	return ENOMEM;
     err = krb5_copy_creds(ctx, creds, &new_node->creds);
-    if (err) {
-	free(new_node);
-	return err;
-    }
+    if (err)
+	goto cleanup;
     err = k5_cc_mutex_lock(ctx, &mptr->lock);
     if (err)
-	return err;
+	goto cleanup;
     new_node->next = mptr->link;
     mptr->link = new_node;
     update_mcc_change_time(mptr);
     k5_cc_mutex_unlock(ctx, &mptr->lock);
     return 0;
+cleanup:
+    free(new_node);
+    return err;
 }
 
 static krb5_error_code KRB5_CALLCONV
