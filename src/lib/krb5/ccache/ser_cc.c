@@ -158,36 +158,57 @@ krb5_ccache_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **
     krb5_int32		ibuf;
     krb5_octet		*bp;
     size_t		remain;
-    char		*ccname;
+    char		*ccname = NULL;
+
+    *argp = NULL;
 
     bp = *buffer;
     remain = *lenremain;
-    kret = EINVAL;
-    /* Read our magic number */
-    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
-	ibuf = 0;
-    if (ibuf == KV5M_CCACHE) {
-	kret = ENOMEM;
 
-	/* Get the length of the ccache name */
-	kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    /* Read our magic number. */
+    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (kret)
+	return kret;
+    if (ibuf != KV5M_CCACHE)
+	return EINVAL;
 
-	if (!kret &&
-	    (ccname = (char *) malloc((size_t) (ibuf+1))) &&
-	    !(kret = krb5_ser_unpack_bytes((krb5_octet *) ccname,
-					   (size_t) ibuf,
-					   &bp, &remain))) {
-	    ccname[ibuf] = '\0';
-	    if (!(kret = krb5_cc_resolve(kcontext, ccname, &ccache)) &&
-		!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)) &&
-		(ibuf == KV5M_CCACHE)) {
-		*buffer = bp;
-		*lenremain = remain;
-		*argp = (krb5_pointer) ccache;
-	    }
-	    free(ccname);
-	}
+    /* Unpack and validate the length of the ccache name. */
+    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (kret)
+	return kret;
+    if (ibuf < 0 || ibuf > remain)
+	return EINVAL;
+
+    /* Allocate and unpack the name. */
+    ccname = malloc(ibuf + 1);
+    if (!ccname)
+	return ENOMEM;
+    kret = krb5_ser_unpack_bytes((krb5_octet *) ccname, (size_t) ibuf,
+				 &bp, &remain);
+    if (kret)
+	goto cleanup;
+    ccname[ibuf] = '\0';
+
+    /* Read the second magic number. */
+    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (kret)
+	goto cleanup;
+    if (ibuf != KV5M_CCACHE) {
+	kret = EINVAL;
+	goto cleanup;
     }
+
+    /* Resolve the named credential cache. */
+    kret = krb5_cc_resolve(kcontext, ccname, &ccache);
+    if (kret)
+	goto cleanup;
+
+    *buffer = bp;
+    *lenremain = remain;
+    *argp = ccache;
+
+cleanup:
+    free(ccname);
     return(kret);
 }
 
