@@ -43,9 +43,9 @@ static void fail_if(int condition, const char *name)
 /* Test the invariants of a buffer. */
 static void check_buf(struct k5buf *buf, const char *name)
 {
-    fail_if(buf->buftype != FIXED && buf->buftype != DYNAMIC
-            && buf->buftype != ERROR, name);
-    if (buf->buftype == ERROR)
+    fail_if(buf->buftype != BUFTYPE_FIXED && buf->buftype != BUFTYPE_DYNAMIC
+            && buf->buftype != BUFTYPE_ERROR, name);
+    if (buf->buftype == BUFTYPE_ERROR)
         return;
     fail_if(buf->space == 0, name);
     fail_if(buf->space > SPACE_MAX, name);
@@ -135,7 +135,8 @@ static void test_realloc()
     check_buf(&buf, "realloc 5");
     s = krb5int_buf_data(&buf);
     len = krb5int_buf_len(&buf);
-    fail_if(buf.buftype != ERROR || s != NULL || len != -1, "realloc 5");
+    fail_if(buf.buftype != BUFTYPE_ERROR || s != NULL || len != -1,
+            "realloc 5");
     krb5int_free_buf(&buf);
 
     /* Cause a reallocation to fail by integer overflow. */
@@ -145,7 +146,8 @@ static void test_realloc()
     check_buf(&buf, "realloc 6");
     s = krb5int_buf_data(&buf);
     len = krb5int_buf_len(&buf);
-    fail_if(buf.buftype != ERROR || s != NULL || len != -1, "realloc 6");
+    fail_if(buf.buftype != BUFTYPE_ERROR || s != NULL || len != -1,
+            "realloc 6");
     krb5int_free_buf(&buf);
 }
 
@@ -162,7 +164,8 @@ static void test_overflow()
     check_buf(&buf, "overflow 1");
     s = krb5int_buf_data(&buf);
     len = krb5int_buf_len(&buf);
-    fail_if(buf.buftype != ERROR || s != NULL || len != -1, "overflow 1");
+    fail_if(buf.buftype != BUFTYPE_ERROR || s != NULL || len != -1,
+            "overflow 1");
 
     /* Cause a fixed-sized buffer overflow with integer overflow. */
     krb5int_buf_init_fixed(&buf, storage, sizeof(storage));
@@ -171,7 +174,8 @@ static void test_overflow()
     check_buf(&buf, "overflow 2");
     s = krb5int_buf_data(&buf);
     len = krb5int_buf_len(&buf);
-    fail_if(buf.buftype != ERROR || s != NULL || len != -1, "overflow 2");
+    fail_if(buf.buftype != BUFTYPE_ERROR || s != NULL || len != -1,
+            "overflow 2");
 }
 
 static void test_error()
@@ -182,7 +186,7 @@ static void test_error()
     /* Cause an overflow and then perform actions afterwards. */
     krb5int_buf_init_fixed(&buf, storage, sizeof(storage));
     krb5int_buf_add(&buf, "1");
-    fail_if(buf.buftype != ERROR, "error");
+    fail_if(buf.buftype != BUFTYPE_ERROR, "error");
     check_buf(&buf, "error");
     krb5int_buf_add(&buf, "test");
     check_buf(&buf, "error");
@@ -190,7 +194,7 @@ static void test_error()
     check_buf(&buf, "error");
     krb5int_buf_truncate(&buf, 3);
     check_buf(&buf, "error");
-    fail_if(buf.buftype != ERROR, "error");
+    fail_if(buf.buftype != BUFTYPE_ERROR, "error");
 }
 
 static void test_truncate()
@@ -253,7 +257,7 @@ static void test_fmt()
     check_buf(&buf, "fmt 2");
     s = krb5int_buf_data(&buf);
     len = krb5int_buf_len(&buf);
-    fail_if(buf.buftype != ERROR || s != NULL || len != -1, "fmt 2");
+    fail_if(buf.buftype != BUFTYPE_ERROR || s != NULL || len != -1, "fmt 2");
 
     /* Format some text into a non-empty dynamic buffer. */
     krb5int_buf_init_dynamic(&buf);
