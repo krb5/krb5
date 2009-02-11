@@ -80,6 +80,15 @@ krb5_free_addresses(krb5_context context, krb5_address **val)
 
 
 void KRB5_CALLCONV
+krb5_free_alt_method(krb5_context context,
+		     krb5_alt_method *alt)
+{
+    if (alt) {
+	free(alt->data);
+	free(alt);
+    }
+}
+void KRB5_CALLCONV
 krb5_free_ap_rep(krb5_context context, register krb5_ap_rep *val)
 {
     if (val == NULL)
@@ -254,6 +263,15 @@ krb5_free_data_contents(krb5_context context, krb5_data *val)
     }
 }
 
+void KRB5_CALLCONV
+krb5_free_enc_data(krb5_context context, krb5_enc_data *val)
+{
+    if (val == NULL)
+	return;
+    krb5_free_data_contents(context, &val->ciphertext);
+    free(val);
+}
+
 void krb5_free_etype_info(krb5_context context, krb5_etype_info info)
 {
     int i;
@@ -426,19 +444,30 @@ krb5_free_pwd_data(krb5_context context, krb5_pwd_data *val)
 
 
 void KRB5_CALLCONV
+krb5_free_passwd_phrase_element(krb5_context context,
+				passwd_phrase_element *val)
+{
+    register passwd_phrase_element **temp;
+
+    if (val == NULL)
+	return;
+    krb5_free_data(context, val->passwd);
+    val->passwd = NULL;
+    krb5_free_data(context, val->phrase);
+    val->phrase = NULL;
+    free(val);
+}
+
+
+void KRB5_CALLCONV
 krb5_free_pwd_sequences(krb5_context context, passwd_phrase_element **val)
 {
     register passwd_phrase_element **temp;
 
     if (val == NULL)
 	return;
-    for (temp = val; *temp; temp++) {
-	krb5_free_data(context, (*temp)->passwd);
-	(*temp)->passwd = 0;
-	krb5_free_data(context, (*temp)->phrase);
-	(*temp)->phrase = 0;
-	free(*temp);
-    }
+    for (temp = val; *temp; temp++)
+	krb5_free_passwd_phrase_element(context, *temp);
     free(val);
 }
 
