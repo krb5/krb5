@@ -6,10 +6,10 @@ SUBDIRS= generic krb5 spnego mechglue
 DEFS=-D_GSS_STATIC_LINK=1
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib
-##DOSOBJFILELIST=@$(OUTPRE)mechglue.lst @$(OUTPRE)spnego.lst @$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst @$(OUTPRE)gssapi.lst
-##DOSOBJFILEDEP=$(OUTPRE)mechglue.lst $(OUTPRE)spnego.lst $(OUTPRE)generic.lst $(OUTPRE)krb5.lst $(OUTPRE)gssapi.lst
+##DOSOBJFILELIST=@$(OUTPRE)mechglue.lst @$(OUTPRE)spnego.lst @$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst # @$(OUTPRE)gssapi.lst
+##DOSOBJFILEDEP=$(OUTPRE)mechglue.lst $(OUTPRE)spnego.lst $(OUTPRE)generic.lst $(OUTPRE)krb5.lst # $(OUTPRE)gssapi.lst
 
-##DOSOBJFILE=$(OUTPRE)gssapi.lst
+###DOSOBJFILE=$(OUTPRE)gssapi.lst
 ##DOSLIBOBJS=$(OBJS)
 
 ##DOS##DLL_EXP_TYPE=GSS
