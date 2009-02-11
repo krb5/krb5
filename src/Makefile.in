@@ -44,12 +44,6 @@ all-windows:: maybe-awk Makefile-windows
 	@echo Making autoconf.h in include
 	cd include
 	$(MAKE) -$(MFLAGS) autoconf.h
-
-	@echo Making in ccapi
-	cd ..\ccapi
-	cd
-	$(MAKE) -$(MFLAGS)
-
 	@echo Making in util
 	cd ..\util
 	$(MAKE) -$(MFLAGS)
@@ -59,6 +53,9 @@ all-windows:: maybe-awk Makefile-windows
 	@echo Making in lib
 	cd ..\lib
 	$(MAKE) -$(MFLAGS) 
+	@echo Making in ccapi
+	cd ..\ccapi
+	$(MAKE) -$(MFLAGS)
 	@echo Making in windows
 	cd ..\windows
 	$(MAKE) -$(MFLAGS) 
@@ -188,7 +185,7 @@ WINMAKEFILES=Makefile \
 	ccapi\Makefile \
 	ccapi\lib\win\Makefile \
 	ccapi\server\win\Makefile \
-    ccapi\test\Makefile \
+	ccapi\test\Makefile \
 	clients\Makefile clients\kdestroy\Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
@@ -214,6 +211,7 @@ WINMAKEFILES=Makefile \
 	lib\krb5\krb\Makefile \
 	lib\krb5\os\Makefile lib\krb5\posix\Makefile \
 	lib\krb5\rcache\Makefile \
+	lib\krb5\unicode\Makefile \
 	util\Makefile \
 	util\et\Makefile util\profile\Makefile \
 	util\support\Makefile \
@@ -295,6 +293,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\mechglue\Makefile: lib\gssapi\mechglue\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\gssapi\spnego\Makefile: lib\gssapi\spnego\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\krb5\Makefile: lib\gssapi\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\Makefile: lib\krb5\Makefile.in $(MKFDEP)
@@ -316,6 +316,8 @@ WINMAKEFILES=Makefile \
 ##DOS##lib\krb5\posix\Makefile: lib\krb5\posix\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\rcache\Makefile: lib\krb5\rcache\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\krb5\unicode\Makefile: lib\krb5\unicode\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\Makefile: util\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -424,6 +426,7 @@ GG  = lib/gssapi/generic/
 GK  = lib/gssapi/krb5/
 PR  = util/profile/
 CE  = util/et/
+CCL = ccapi/lib/
 
 ETOUT =	\
 	$(INC)asn1_err.h $(ET)asn1_err.c \
@@ -433,7 +436,8 @@ ETOUT =	\
 	$(INC)krb524_err.h $(ET)krb524_err.c \
 	$(PR)prof_err.h $(PR)prof_err.c \
 	$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.c \
-	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c
+	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c \
+	$(CCL)ccapi_err.h $(CCL)ccapi_err.c
 
 HOUT =	$(INC)krb5\krb5.h $(GG)gssapi.h $(PR)profile.h
 
@@ -494,6 +498,8 @@ $(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
 	$(AWK) -f $(AH) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.h: $(AH) $(GK)gssapi_err_krb5.et
 	$(AWK) -f $(AH) outfile=$@ $(GK)gssapi_err_krb5.et
+$(CCL)ccapi_err.h: $(AH) $(CCL)ccapi_err.et
+	$(AWK) -f $(AH) outfile=$@ $(CCL)ccapi_err.et
 $(CE)test1.h: $(AH) $(CE)test1.et
 	$(AWK) -f $(AH) outfile=$@ $(CE)test1.et
 $(CE)test2.h: $(AH) $(CE)test2.et
@@ -515,6 +521,8 @@ $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
 	$(AWK) -f $(AC) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.c: $(AC) $(GK)gssapi_err_krb5.et
 	$(AWK) -f $(AC) outfile=$@ $(GK)gssapi_err_krb5.et
+$(CCL)ccapi_err.c: $(AC) $(CCL)ccapi_err.et
+	$(AWK) -f $(AC) outfile=$@ $(CCL)ccapi_err.et
 $(CE)test1.c: $(AC) $(CE)test1.et
 	$(AWK) -f $(AC) outfile=$@ $(CE)test1.et
 $(CE)test2.c: $(AC) $(CE)test2.et
