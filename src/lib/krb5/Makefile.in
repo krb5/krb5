@@ -8,8 +8,8 @@ DEFS=
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)krb5.lib
-##DOSOBJFILEDEP=$(OUTPRE)asn1.lst $(OUTPRE)ccache.lst $(OUTPRE)err_tbls.lst $(OUTPRE)keytab.lst $(OUTPRE)krb.lst $(OUTPRE)os.lst $(OUTPRE)posix.lst $(OUTPRE)rcache.lst $(OUTPRE)krb5.lst
-##DOSOBJFILELIST=@$(OUTPRE)asn1.lst @$(OUTPRE)ccache.lst @$(OUTPRE)err_tbls.lst @$(OUTPRE)keytab.lst @$(OUTPRE)krb.lst @$(OUTPRE)os.lst @$(OUTPRE)posix.lst @$(OUTPRE)rcache.lst @$(OUTPRE)krb5.lst
+##DOSOBJFILEDEP=$(OUTPRE)asn1.lst $(OUTPRE)ccache.lst $(OUTPRE)err_tbls.lst $(OUTPRE)keytab.lst $(OUTPRE)krb.lst $(OUTPRE)os.lst $(OUTPRE)posix.lst $(OUTPRE)rcache.lst $(OUTPRE)krb5.lst $(OUTPRE)unicode.lst
+##DOSOBJFILELIST=@$(OUTPRE)asn1.lst @$(OUTPRE)ccache.lst @$(OUTPRE)err_tbls.lst @$(OUTPRE)keytab.lst @$(OUTPRE)krb.lst @$(OUTPRE)os.lst @$(OUTPRE)posix.lst @$(OUTPRE)rcache.lst @$(OUTPRE)krb5.lst @$(OUTPRE)unicode.lst
 ##DOSOBJFILE=$(OUTPRE)krb5.lst
 ##DOSLIBOBJS=$(OBJS)
 ##DOSLOCALINCLUDES=-Iccache\ccapi -I..\..\windows\lib -Iccache -Ikeytab -Ircache -Ios
