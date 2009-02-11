@@ -41,7 +41,9 @@
 
 #include <stdarg.h>
 #include <string.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 /* The k5buf module is intended to allow multi-step string
    construction in a fixed or dynamic buffer without the need to check
