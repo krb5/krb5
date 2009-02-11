@@ -29,13 +29,12 @@
 
 extern "C" {
 #include "ccs_common.h"
+#include "ccs_os_notify.h"
 #include "ccs_os_server.h"
-#include <syslog.h>
 #include "ccs_reply.h"
 #include "ccs_request.h"
 #include "win-utils.h"
 #include "ccutils.h"
-#include "cci_stream.h"
     }
 
 #include "WorkQueue.h"
@@ -949,3 +948,16 @@ extern "C" void  __RPC_FAR * __RPC_USER midl_user_allocate(size_t len) {
 extern "C" void __RPC_USER midl_user_free(void __RPC_FAR * ptr) {
     free(ptr);
     }
+
+/* stubs */
+extern "C" cc_int32
+ccs_os_notify_cache_collection_changed (ccs_cache_collection_t cc)
+{
+    return 0;
+}
+
+extern "C" cc_int32
+ccs_os_notify_ccache_changed (ccs_cache_collection_t cc, const char *name)
+{
+    return 0;
+}

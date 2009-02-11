@@ -7,6 +7,7 @@ OBJS	= $(OUTPRE)ccapi_ccache.obj \
           $(OUTPRE)ccapi_credentials.obj \
           $(OUTPRE)ccapi_credentials_iterator.obj \
           $(OUTPRE)ccapi_ipc.obj \
+	  $(OUTPRE)ccapi_err.obj \
           $(OUTPRE)ccapi_os_ipc.obj \
           $(OUTPRE)ccapi_string.obj \
           $(OUTPRE)ccapi_v2.obj \
@@ -17,7 +18,6 @@ OBJS	= $(OUTPRE)ccapi_ccache.obj \
           $(OUTPRE)cci_message.obj \
           $(OUTPRE)cci_os_debugging.obj \
           $(OUTPRE)cci_os_identifier.obj \
-          $(OUTPRE)cci_stream.obj \
           $(OUTPRE)ccs_reply_proc.obj \
           $(OUTPRE)ccs_reply_s.obj \
           $(OUTPRE)ccs_request_c.obj \
@@ -62,7 +62,7 @@ CPPFLAGS = $(CPPFLAGS) /EHsc -D_CRTAPI1=_cdecl -D_CRTAPI2=_cdecl -DWINVER=0x0501
 
 ##### Linker
 LINK	= link
-LIBS	= kernel32.lib ws2_32.lib user32.lib advapi32.lib
+LIBS	= ..\$(CLIB) ..\$(SLIB) kernel32.lib ws2_32.lib user32.lib advapi32.lib
 LFLAGS	= /nologo $(LOPTS)
 
 all:: Makefile copysrc midl $(OUTPRE)ccapi.dll finish

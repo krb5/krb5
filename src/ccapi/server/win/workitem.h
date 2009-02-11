@@ -5,7 +5,6 @@
 #include "windows.h"
 
 extern "C" {
-    #include "cci_stream.h"
     #include "ccs_pipe.h"
     }
 

@@ -28,7 +28,6 @@
 #define _work_queue_h
 
 #include "windows.h"
-#include "cci_stream.h"
 #include "ccs_pipe.h"
 
 EXTERN_C    BOOL worklist_isEmpty();

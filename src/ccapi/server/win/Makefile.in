@@ -22,7 +22,6 @@ OBJS	= $(OUTPRE)cci_array_internal.$(OBJEXT) \
           $(OUTPRE)cci_message.$(OBJEXT) \
           $(OUTPRE)cci_os_debugging.$(OBJEXT) \
           $(OUTPRE)cci_os_identifier.$(OBJEXT) \
-          $(OUTPRE)cci_stream.$(OBJEXT) \
           $(OUTPRE)ccs_array.$(OBJEXT) \
           $(OUTPRE)ccs_cache_collection.$(OBJEXT) \
           $(OUTPRE)ccs_callback.$(OBJEXT) \
@@ -66,7 +65,7 @@ CPPFLAGS = $(CPPFLAGS) /EHsc -D_CRTAPI1=_cdecl -D_CRTAPI2=_cdecl -DWINVER=0x0501
 
 ##### Linker
 LINK	= link
-LIBS	= rpcrt4.lib advapi32.lib ws2_32.lib user32.lib
+LIBS	= ..\$(SLIB) rpcrt4.lib advapi32.lib ws2_32.lib user32.lib
 LFLAGS	= /nologo $(LOPTS)
 
 

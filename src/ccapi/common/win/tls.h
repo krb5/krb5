@@ -33,7 +33,7 @@
 #include "time.h"
 #include "rpc.h"
 
-#include "cci_stream.h"
+#include "k5-ipc_stream.h"
 
 #define UUID_SIZE   128
 
