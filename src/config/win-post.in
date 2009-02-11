@@ -109,3 +109,8 @@ clean-windows-files::
 	$(RM) .\$(OUTPRE)*.idb .\$(OUTPRE)*.ilk
 	$(RM) .\$(OUTPRE)*.manifest
 !endif
+
+# Dependencies
+!if exist($(srcdir)/deps)
+!include $(srcdir)/deps
+!endif
