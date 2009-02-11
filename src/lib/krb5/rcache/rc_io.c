@@ -80,9 +80,9 @@ krb5_rc_io_mkstemp(krb5_context context, krb5_rc_iostuff *d, char *dir)
     krb5_error_code retval = 0;
 #if HAVE_SYS_STAT_H
     struct stat stbuf;
-#endif
 
     memset(&stbuf, 0, sizeof(stbuf));
+#endif
     if (asprintf(&d->fn, "%s%skrb5_RCXXXXXX",
                  dir, PATH_SEPARATOR) < 0) {
         d->fn = NULL;
