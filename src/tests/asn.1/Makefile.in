@@ -9,10 +9,11 @@ LDAP=@LDAP@
 RUN_SETUP = @KRB5_RUN_ENV@
 
 SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_decode_test.c \
-	$(srcdir)/ktest.c $(srcdir)/ktest_equal.c $(srcdir)/utility.c \
+	$(srcdir)/krb5_decode_leak.c $(srcdir)/ktest.c \
+	$(srcdir)/ktest_equal.c $(srcdir)/utility.c \
 	$(srcdir)/trval.c $(srcdir)/t_trval.c
 
-all:: krb5_encode_test krb5_decode_test t_trval
+all:: krb5_encode_test krb5_decode_test krb5_decode_leak t_trval
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
 
@@ -26,10 +27,22 @@ DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o utility.o
 krb5_decode_test: $(DECOBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o krb5_decode_test $(DECOBJS) $(KRB5_BASE_LIBS)
 
+LEAKOBJS = krb5_decode_leak.o ktest.o ktest_equal.o utility.o
+
+krb5_decode_leak: $(LEAKOBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o krb5_decode_leak $(LEAKOBJS) $(KRB5_BASE_LIBS)
+
 t_trval: t_trval.o
 	$(CC) -o t_trval $(ALL_CFLAGS) t_trval.o
 
-check:: check-encode check-encode-trval check-decode
+check:: check-encode check-encode-trval check-decode check-leak
+
+# Does not actually test for leaks unless using valgrind or a similar
+# tool, but does exercise a bunch of code.
+check-leak: krb5_decode_leak
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+		export KRB5_CONFIG ;\
+		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_leak
 
 check-decode: krb5_decode_test
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
