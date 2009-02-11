@@ -189,15 +189,23 @@ static void free_test_cred(krb5_context context)
           exit(1);\
      } else if(debug) printf("%s went ok\n", msg);
 
+#define CHECK_BOOL(expr,errstr,msg) \
+     if (expr) {\
+          fprintf(stderr, "%s %s\n", msg, errstr);	\
+          exit(1); \
+     } else if(debug) printf("%s went ok\n", msg);
+
 #define CHECK_FAIL(experr, kret, msg) \
      if (experr != kret) { CHECK(kret, msg);}
 
-static void cc_test(krb5_context context, const char *name, int flags)
+static void cc_test(krb5_context context, const char *name, krb5_flags flags)
 {
      krb5_ccache id, id2;
      krb5_creds creds;
      krb5_error_code kret;
      krb5_cc_cursor cursor;
+     krb5_principal tmp;
+
      const char *c_name;
      char newcache[300];
      char *save_type;
@@ -221,8 +229,21 @@ static void cc_test(krb5_context context, const char *name, int flags)
      kret = krb5_cc_store_cred(context, id, &test_creds);
      CHECK(kret, "store");
 
+     kret = krb5_cc_get_principal(context, id, &tmp);
+     CHECK(kret, "get_principal");
+
+     CHECK_BOOL(krb5_realm_compare(context, tmp, test_creds.client) != TRUE,
+		"realms do not match", "realm_compare");
+
+
+     CHECK_BOOL(krb5_principal_compare(context, tmp, test_creds.client) != TRUE,
+		"principals do not match", "principal_compare");
+
+     krb5_free_principal(context, tmp);
+
      kret = krb5_cc_set_flags (context, id, flags);
      CHECK(kret, "set_flags");
+
      kret = krb5_cc_start_seq_get(context, id, &cursor);
      CHECK(kret, "start_seq_get");
      kret = 0;
