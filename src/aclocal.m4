@@ -1215,7 +1215,7 @@ AC_ARG_ENABLE([shared], ,
 fi])
 AC_ARG_ENABLE([rpath],
 AC_HELP_STRING([--disable-rpath],[suppress run path flags in link lines]),
-[enable_rpath=$withval],
+[enable_rpath=$enableval],
 [enable_rpath=yes])
 
 if test "x$enable_rpath" != xyes ; then
