@@ -502,8 +502,8 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
       return (retval);
     retval = krb5_unparse_name( context, creds->server, &server);
     if (retval) {
-      return (retval);
       krb5_get_init_creds_opt_free(context, (krb5_get_init_creds_opt *)opte);
+      return (retval);
     }
     server_princ = creds->server;
     client_princ = creds->client;
