@@ -273,7 +273,7 @@ rtree_capath_vals(
     memcpy(clientz, client->data, client->length);
 
     serverz = calloc(server->length + 1, 1);
-    if (clientz == NULL) {
+    if (serverz == NULL) {
 	retval = ENOMEM;
 	goto error;
     }
