@@ -2085,7 +2085,7 @@ finished:
 
 
 static int tcl_kadm5_get_principal(ClientData clientData, Tcl_Interp *interp,
-				   int argc, const const char *argv[])
+				   int argc, const char *argv[])
 {
      krb5_principal princ;
      kadm5_principal_ent_rec ent;
