@@ -427,7 +427,7 @@ optional_etype_info_entry(const void *vptr)
     const krb5_etype_info_entry *val = vptr;
     unsigned int optional = 0;
 
-    if (val->length >= 0 && val->length != KRB5_ETYPE_NO_SALT)
+    if (val->length != KRB5_ETYPE_NO_SALT)
         optional |= (1u << 1);
 
     return optional;
@@ -445,7 +445,7 @@ optional_etype_info2_entry(const void *vptr)
     const krb5_etype_info_entry *val = vptr;
     unsigned int optional = 0;
 
-    if (val->length >= 0 && val->length != KRB5_ETYPE_NO_SALT)
+    if (val->length != KRB5_ETYPE_NO_SALT)
         optional |= (1u << 1);
     if (val->s2kparams.data)
         optional |= (1u << 2);
