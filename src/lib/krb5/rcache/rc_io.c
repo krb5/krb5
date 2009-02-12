@@ -295,12 +295,10 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 
 cleanup:
     if (retval) {
-        if (d->fn) {
-            if (!do_not_unlink)
-                (void) unlink(d->fn);
-            free(d->fn);
-            d->fn = NULL;
-        }
+        if (!do_not_unlink)
+            (void) unlink(d->fn);
+        free(d->fn);
+        d->fn = NULL;
         if (d->fd >= 0)
             (void) close(d->fd);
     }
