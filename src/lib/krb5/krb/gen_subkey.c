@@ -47,20 +47,28 @@ krb5_generate_subkey_extended(krb5_context context,
 {
     krb5_error_code retval;
     krb5_data seed;
+    krb5_keyblock *keyblock;
+
+    *subkey = NULL;
 
     seed = key2data(*key);
-    if ((retval = krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
-	return(retval);
+    retval = krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TRUSTEDPARTY,
+				       &seed);
+    if (retval)
+	return retval;
 
-    if ((*subkey = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))) == NULL)
-	return(ENOMEM);
+    keyblock = malloc(sizeof(krb5_keyblock));
+    if (!keyblock)
+	return ENOMEM;
 
-    if ((retval = krb5_c_make_random_key(context, enctype, *subkey))) {
+    retval = krb5_c_make_random_key(context, enctype, keyblock);
+    if (retval) {
 	free(*subkey);
-	return(retval);
+	return retval;
     }
 
-    return(0);
+    *subkey = keyblock;
+    return 0;
 }
 
 krb5_error_code
