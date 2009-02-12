@@ -54,7 +54,7 @@
 #include <memory.h>
 #endif
 
-const char const kg_arcfour_l40[] = "fortybits";
+static const char kg_arcfour_l40[] = "fortybits";
 
 static krb5_error_code
 kg_copy_keys(krb5_context context,
