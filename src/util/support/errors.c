@@ -113,6 +113,20 @@ krb5int_get_error (struct errinfo *ep, long code)
     if (fptr == NULL) {
 	unlock();
     no_fptr:
+	/* Theoretically, according to ISO C, strerror should be able
+	   to give us a message back for any int value.  However, on
+	   UNIX at least, the errno codes strerror will actually be
+	   useful for are positive, so a negative value here would be
+	   kind of weird.
+
+	   Coverity Prevent thinks we shouldn't be passing negative
+	   values to strerror, and it's not likely to be useful, so
+	   let's not do it.
+
+	   Besides, normally we shouldn't get here; fptr should take
+	   us to a callback function in the com_err library.  */
+	if (code < 0)
+	    goto format_number;
 #ifdef HAVE_STRERROR_R
 	if (strerror_r (code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0) {
 	    char *p = strdup(ep->scratch_buf);
