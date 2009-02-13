@@ -809,7 +809,6 @@ static void process_routing_update(struct connection *conn, const char *prog,
     int n_read;
     struct rt_msghdr rtm;
 
-    krb5_klog_syslog(LOG_INFO, "routing socket readable");
     while ((n_read = read(conn->fd, &rtm, sizeof(rtm))) > 0) {
 	if (n_read < sizeof(rtm)) {
 	    /* Quick hack to figure out if the interesting
@@ -828,10 +827,12 @@ static void process_routing_update(struct connection *conn, const char *prog,
 		return;
 	    }
 	}
+#if 0
 	krb5_klog_syslog(LOG_INFO,
 			 "got routing msg type %d(%s) v%d",
 			 rtm.rtm_type, rtm_type_name(rtm.rtm_type),
 			 rtm.rtm_version);
+#endif
 	if (rtm.rtm_msglen > sizeof(rtm)) {
 	    /* It appears we get a partial message and the rest is
 	       thrown away?  */
@@ -848,7 +849,11 @@ static void process_routing_update(struct connection *conn, const char *prog,
 	case RTM_IFINFO:
 	case RTM_OLDADD:
 	case RTM_OLDDEL:
-	    krb5_klog_syslog(LOG_INFO, "reconfiguration needed");
+#if 0
+	    krb5_klog_syslog(LOG_DEBUG,
+			     "network reconfiguration message (%s) received",
+			     rtm_type_name(rtm.rtm_type));
+#endif
 	    network_reconfiguration_needed = 1;
 	    break;
 	case RTM_RESOLVE:
@@ -861,10 +866,14 @@ static void process_routing_update(struct connection *conn, const char *prog,
 	case RTM_LOSING:
 	case RTM_GET:
 	    /* Not interesting.  */
+#if 0
 	    krb5_klog_syslog(LOG_DEBUG, "routing msg not interesting");
+#endif
 	    break;
 	default:
-	    krb5_klog_syslog(LOG_INFO, "unhandled routing message type, will reconfigure just for the fun of it");
+	    krb5_klog_syslog(LOG_INFO,
+			     "unhandled routing message type %d, will reconfigure just for the fun of it",
+			     rtm.rtm_type);
 	    network_reconfiguration_needed = 1;
 	    break;
 	}
@@ -1610,7 +1619,9 @@ listen_and_process(const char *prog)
 	}
 
 	if (network_reconfiguration_needed) {
-	    krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
+	    /* No point in re-logging what we've just logged.  */
+	    if (netchanged == 0)
+		krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
 	    /* It might be tidier to add a timer-callback interface to
 	       the control loop here, but for this one use, it's not a
 	       big deal.  */
