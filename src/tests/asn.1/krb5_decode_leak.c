@@ -22,6 +22,20 @@
 
 krb5_context test_context;
 
+/*
+ * Contrary to our usual convention, krb5_free_cred_enc_part is a
+ * contents-only free function (and is assumed to be by mk_cred and
+ * rd_cred) and we have no whole-structure free function for that data
+ * type.  So create one here.
+ */
+static void
+free_cred_enc_part_whole(krb5_context ctx,
+                         krb5_cred_enc_part *val)
+{
+    krb5_free_cred_enc_part(ctx, val);
+    free(val);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -410,7 +424,7 @@ main(int argc, char **argv)
         
         setup(cep, "cred_enc_part", ktest_make_sample_cred_enc_part);
         leak_test(cep, encode_krb5_enc_cred_part, decode_krb5_enc_cred_part,
-                  krb5_free_cred_enc_part);
+                  free_cred_enc_part_whole);
 
         ktest_destroy_principal(&(cep.ticket_info[0]->client));
         ktest_destroy_principal(&(cep.ticket_info[0]->server));
@@ -425,7 +439,7 @@ main(int argc, char **argv)
         ktest_destroy_address(&(cep.s_address));
         ktest_destroy_address(&(cep.r_address));
         leak_test(cep, encode_krb5_enc_cred_part, decode_krb5_enc_cred_part,
-                  krb5_free_cred_enc_part);
+                  free_cred_enc_part_whole);
         ktest_empty_cred_enc_part(&cep);
     }
   
