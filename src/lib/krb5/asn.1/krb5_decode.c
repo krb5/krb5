@@ -65,6 +65,15 @@ setup_no_length(type)
 var = calloc(1,sizeof(*var));\
 if ((var) == NULL) clean_return(ENOMEM)
 
+/*
+ * Allocate a principal and initialize enough fields for
+ * krb5_free_principal to have defined behavior.
+ */
+#define alloc_principal(var)                    \
+  alloc_field(var);                             \
+  var->realm.data = NULL;                       \
+  var->data = NULL
+
 /* process encoding header ***************************************/
 /* decode tag and check that it == [APPLICATION tagnum] */
 #define check_apptag(tagexpect)                                         \
@@ -227,22 +236,20 @@ decode_krb5_authenticator(const krb5_data *code, krb5_authenticator **repptr)
     clear_field(rep,subkey);
     clear_field(rep,checksum);
     clear_field(rep,client);
+    clear_field(rep,authorization_data);
 
     check_apptag(2);
     { begin_structure();
         { krb5_kvno kvno;
             get_field(kvno,0,asn1_decode_kvno);
             if (kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
-        alloc_field(rep->client);
+        alloc_principal(rep->client);
         get_field(rep->client,1,asn1_decode_realm);
         get_field(rep->client,2,asn1_decode_principal_name);
-        if (tagnum == 3) {
-            alloc_field(rep->checksum);
-            get_field(*(rep->checksum),3,asn1_decode_checksum); }
+        opt_field(rep->checksum,3,asn1_decode_checksum_ptr);
         get_field(rep->cusec,4,asn1_decode_int32);
         get_field(rep->ctime,5,asn1_decode_kerberos_time);
-        if (tagnum == 6) { alloc_field(rep->subkey); }
-        opt_field(*(rep->subkey),6,asn1_decode_encryption_key);
+        opt_field(rep->subkey,6,asn1_decode_encryption_key_ptr);
         opt_field(rep->seq_number,7,asn1_decode_seqnum);
         opt_field(rep->authorization_data,8,asn1_decode_authorization_data);
         rep->magic = KV5M_AUTHENTICATOR;
@@ -250,12 +257,7 @@ decode_krb5_authenticator(const krb5_data *code, krb5_authenticator **repptr)
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,subkey);
-        free_field(rep,checksum);
-        free_field(rep,client);
-        free(rep);
-    }
+    krb5_free_authenticator(NULL, rep);
     return retval;
 }
 #endif
@@ -273,6 +275,8 @@ decode_krb5_ticket(const krb5_data *code, krb5_ticket **repptr)
     setup(krb5_ticket *);
     alloc_field(rep);
     clear_field(rep,server);
+    clear_field(rep,enc_part.ciphertext.data);
+    clear_field(rep,enc_part2);
 
     check_apptag(1);
     { begin_structure();
@@ -280,7 +284,7 @@ decode_krb5_ticket(const krb5_data *code, krb5_ticket **repptr)
             get_field(kvno,0,asn1_decode_kvno);
             if (kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO);
         }
-        alloc_field(rep->server);
+        alloc_principal(rep->server);
         get_field(rep->server,1,asn1_decode_realm);
         get_field(rep->server,2,asn1_decode_principal_name);
         get_field(rep->enc_part,3,asn1_decode_encrypted_data);
@@ -289,10 +293,7 @@ decode_krb5_ticket(const krb5_data *code, krb5_ticket **repptr)
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,server);
-        free(rep);
-    }
+    krb5_free_ticket(NULL, rep);
     return retval;
 }
 
@@ -301,6 +302,7 @@ decode_krb5_encryption_key(const krb5_data *code, krb5_keyblock **repptr)
 {
     setup(krb5_keyblock *);
     alloc_field(rep);
+    clear_field(rep,contents);
 
     { begin_structure();
         get_field(rep->enctype,0,asn1_decode_enctype);
@@ -308,7 +310,10 @@ decode_krb5_encryption_key(const krb5_data *code, krb5_keyblock **repptr)
         end_structure();
         rep->magic = KV5M_KEYBLOCK;
     }
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_keyblock(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -318,13 +323,15 @@ decode_krb5_enc_tkt_part(const krb5_data *code, krb5_enc_tkt_part **repptr)
     alloc_field(rep);
     clear_field(rep,session);
     clear_field(rep,client);
+    clear_field(rep,transited.tr_contents.data);
+    clear_field(rep,caddrs);
+    clear_field(rep,authorization_data);
 
     check_apptag(3);
     { begin_structure();
         get_field(rep->flags,0,asn1_decode_ticket_flags);
-        alloc_field(rep->session);
-        get_field(*(rep->session),1,asn1_decode_encryption_key);
-        alloc_field(rep->client);
+        get_field(rep->session,1,asn1_decode_encryption_key_ptr);
+        alloc_principal(rep->client);
         get_field(rep->client,2,asn1_decode_realm);
         get_field(rep->client,3,asn1_decode_principal_name);
         get_field(rep->transited,4,asn1_decode_transited_encoding);
@@ -342,11 +349,7 @@ decode_krb5_enc_tkt_part(const krb5_data *code, krb5_enc_tkt_part **repptr)
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,session);
-        free_field(rep,client);
-        free(rep);
-    }
+    krb5_free_enc_tkt_part(NULL, rep);
     return retval;
 }
 
@@ -376,6 +379,11 @@ decode_krb5_as_rep(const krb5_data *code, krb5_kdc_rep **repptr)
 {
     setup_no_length(krb5_kdc_rep *);
     alloc_field(rep);
+    clear_field(rep,padata);
+    clear_field(rep,client);
+    clear_field(rep,ticket);
+    clear_field(rep,enc_part.ciphertext.data);
+    clear_field(rep,enc_part2);
 
     check_apptag(11);
     retval = asn1_decode_kdc_rep(&buf,rep);
@@ -385,7 +393,10 @@ decode_krb5_as_rep(const krb5_data *code, krb5_kdc_rep **repptr)
         clean_return(KRB5_BADMSGTYPE);
 #endif
 
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_kdc_rep(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -393,6 +404,11 @@ decode_krb5_tgs_rep(const krb5_data *code, krb5_kdc_rep **repptr)
 {
     setup_no_length(krb5_kdc_rep *);
     alloc_field(rep);
+    clear_field(rep,padata);
+    clear_field(rep,client);
+    clear_field(rep,ticket);
+    clear_field(rep,enc_part.ciphertext.data);
+    clear_field(rep,enc_part2);
 
     check_apptag(13);
     retval = asn1_decode_kdc_rep(&buf,rep);
@@ -401,7 +417,10 @@ decode_krb5_tgs_rep(const krb5_data *code, krb5_kdc_rep **repptr)
     if (rep->msg_type != KRB5_TGS_REP) clean_return(KRB5_BADMSGTYPE);
 #endif
 
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_kdc_rep(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -410,6 +429,7 @@ decode_krb5_ap_req(const krb5_data *code, krb5_ap_req **repptr)
     setup(krb5_ap_req *);
     alloc_field(rep);
     clear_field(rep,ticket);
+    clear_field(rep,authenticator.ciphertext.data);
 
     check_apptag(14);
     { begin_structure();
@@ -423,18 +443,14 @@ decode_krb5_ap_req(const krb5_data *code, krb5_ap_req **repptr)
 #endif
         }
         get_field(rep->ap_options,2,asn1_decode_ap_options);
-        alloc_field(rep->ticket);
-        get_field(*(rep->ticket),3,asn1_decode_ticket);
+        get_field(rep->ticket,3,asn1_decode_ticket_ptr);
         get_field(rep->authenticator,4,asn1_decode_encrypted_data);
         end_structure();
         rep->magic = KV5M_AP_REQ;
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,ticket);
-        free(rep);
-    }
+    krb5_free_ap_req(NULL, rep);
     return retval;
 }
 
@@ -443,6 +459,7 @@ decode_krb5_ap_rep(const krb5_data *code, krb5_ap_rep **repptr)
 {
     setup(krb5_ap_rep *);
     alloc_field(rep);
+    clear_field(rep,enc_part.ciphertext.data);
 
     check_apptag(15);
     { begin_structure();
@@ -459,7 +476,10 @@ decode_krb5_ap_rep(const krb5_data *code, krb5_ap_rep **repptr)
         end_structure();
         rep->magic = KV5M_AP_REP;
     }
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_ap_rep(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -474,18 +494,14 @@ decode_krb5_ap_rep_enc_part(const krb5_data *code,
     { begin_structure();
         get_field(rep->ctime,0,asn1_decode_kerberos_time);
         get_field(rep->cusec,1,asn1_decode_int32);
-        if (tagnum == 2) { alloc_field(rep->subkey); }
-        opt_field(*(rep->subkey),2,asn1_decode_encryption_key);
+        opt_field(rep->subkey,2,asn1_decode_encryption_key_ptr);
         opt_field(rep->seq_number,3,asn1_decode_seqnum);
         end_structure();
         rep->magic = KV5M_AP_REP_ENC_PART;
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,subkey);
-        free(rep);
-    }
+    krb5_free_ap_rep_enc_part(NULL, rep);
     return retval;
 }
 
@@ -494,6 +510,14 @@ decode_krb5_as_req(const krb5_data *code, krb5_kdc_req **repptr)
 {
     setup_no_length(krb5_kdc_req *);
     alloc_field(rep);
+    clear_field(rep,padata);
+    clear_field(rep,client);
+    clear_field(rep,server);
+    clear_field(rep,ktype);
+    clear_field(rep,addresses);
+    clear_field(rep,authorization_data.ciphertext.data);
+    clear_field(rep,unenc_authdata);
+    clear_field(rep,second_ticket);
 
     check_apptag(10);
     retval = asn1_decode_kdc_req(&buf,rep);
@@ -502,7 +526,10 @@ decode_krb5_as_req(const krb5_data *code, krb5_kdc_req **repptr)
     if (rep->msg_type != KRB5_AS_REQ) clean_return(KRB5_BADMSGTYPE);
 #endif
 
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_kdc_req(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -510,6 +537,14 @@ decode_krb5_tgs_req(const krb5_data *code, krb5_kdc_req **repptr)
 {
     setup_no_length(krb5_kdc_req *);
     alloc_field(rep);
+    clear_field(rep,padata);
+    clear_field(rep,client);
+    clear_field(rep,server);
+    clear_field(rep,ktype);
+    clear_field(rep,addresses);
+    clear_field(rep,authorization_data.ciphertext.data);
+    clear_field(rep,unenc_authdata);
+    clear_field(rep,second_ticket);
 
     check_apptag(12);
     retval = asn1_decode_kdc_req(&buf,rep);
@@ -518,7 +553,10 @@ decode_krb5_tgs_req(const krb5_data *code, krb5_kdc_req **repptr)
     if (rep->msg_type != KRB5_TGS_REQ) clean_return(KRB5_BADMSGTYPE);
 #endif
 
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_kdc_req(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -554,6 +592,9 @@ decode_krb5_safe_with_body(const krb5_data *code, krb5_safe **repptr,
     krb5_data tmpbody;
     setup(krb5_safe *);
     alloc_field(rep);
+    clear_field(rep,user_data.data);
+    clear_field(rep,r_address);
+    clear_field(rep,s_address);
     clear_field(rep,checksum);
     tmpbody.magic = 0;
 
@@ -581,8 +622,7 @@ decode_krb5_safe_with_body(const krb5_data *code, krb5_safe **repptr,
             tmpbody.data = NULL;
         }
         get_field(*rep,2,asn1_decode_krb_safe_body);
-        alloc_field(rep->checksum);
-        get_field(*(rep->checksum),3,asn1_decode_checksum);
+        get_field(rep->checksum,3,asn1_decode_checksum_ptr);
         rep->magic = KV5M_SAFE;
         end_structure();
     }
@@ -590,10 +630,7 @@ decode_krb5_safe_with_body(const krb5_data *code, krb5_safe **repptr,
         *body = tmpbody;
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,checksum);
-        free(rep);
-    }
+    krb5_free_safe(NULL, rep);
     return retval;
 }
 
@@ -608,6 +645,7 @@ decode_krb5_priv(const krb5_data *code, krb5_priv **repptr)
 {
     setup(krb5_priv *);
     alloc_field(rep);
+    clear_field(rep,enc_part.ciphertext.data);
 
     check_apptag(21);
     { begin_structure();
@@ -624,7 +662,10 @@ decode_krb5_priv(const krb5_data *code, krb5_priv **repptr)
         rep->magic = KV5M_PRIV;
         end_structure();
     }
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_priv(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -632,6 +673,7 @@ decode_krb5_enc_priv_part(const krb5_data *code, krb5_priv_enc_part **repptr)
 {
     setup(krb5_priv_enc_part *);
     alloc_field(rep);
+    clear_field(rep,user_data.data);
     clear_field(rep,r_address);
     clear_field(rep,s_address);
 
@@ -641,20 +683,14 @@ decode_krb5_enc_priv_part(const krb5_data *code, krb5_priv_enc_part **repptr)
         opt_field(rep->timestamp,1,asn1_decode_kerberos_time);
         opt_field(rep->usec,2,asn1_decode_int32);
         opt_field(rep->seq_number,3,asn1_decode_seqnum);
-        alloc_field(rep->s_address);
-        get_field(*(rep->s_address),4,asn1_decode_host_address);
-        if (tagnum == 5) { alloc_field(rep->r_address); }
-        opt_field(*(rep->r_address),5,asn1_decode_host_address);
+        get_field(rep->s_address,4,asn1_decode_host_address_ptr);
+        opt_field(rep->r_address,5,asn1_decode_host_address_ptr);
         rep->magic = KV5M_PRIV_ENC_PART;
         end_structure();
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,r_address);
-        free_field(rep,s_address);
-        free(rep);
-    }
+    krb5_free_priv_enc_part(NULL, rep);
     return retval;
 }
 
@@ -663,6 +699,8 @@ decode_krb5_cred(const krb5_data *code, krb5_cred **repptr)
 {
     setup(krb5_cred *);
     alloc_field(rep);
+    clear_field(rep,tickets);
+    clear_field(rep,enc_part.ciphertext.data);
 
     check_apptag(22);
     { begin_structure();
@@ -680,7 +718,10 @@ decode_krb5_cred(const krb5_data *code, krb5_cred **repptr)
         rep->magic = KV5M_CRED;
         end_structure();
     }
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_cred(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -690,6 +731,7 @@ decode_krb5_enc_cred_part(const krb5_data *code, krb5_cred_enc_part **repptr)
     alloc_field(rep);
     clear_field(rep,r_address);
     clear_field(rep,s_address);
+    clear_field(rep,ticket_info);
 
     check_apptag(29);
     { begin_structure();
@@ -697,20 +739,16 @@ decode_krb5_enc_cred_part(const krb5_data *code, krb5_cred_enc_part **repptr)
         opt_field(rep->nonce,1,asn1_decode_int32);
         opt_field(rep->timestamp,2,asn1_decode_kerberos_time);
         opt_field(rep->usec,3,asn1_decode_int32);
-        if (tagnum == 4) { alloc_field(rep->s_address); }
-        opt_field(*(rep->s_address),4,asn1_decode_host_address);
-        if (tagnum == 5) { alloc_field(rep->r_address); }
-        opt_field(*(rep->r_address),5,asn1_decode_host_address);
+        opt_field(rep->s_address,4,asn1_decode_host_address_ptr);
+        opt_field(rep->r_address,5,asn1_decode_host_address_ptr);
         rep->magic = KV5M_CRED_ENC_PART;
         end_structure();
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,r_address);
-        free_field(rep,s_address);
-        free(rep);
-    }
+    /* Despite the name, krb5_free_cred_enc_part is contents only. */
+    krb5_free_cred_enc_part(NULL, rep);
+    free(rep);
     return retval;
 }
 
@@ -722,6 +760,8 @@ decode_krb5_error(const krb5_data *code, krb5_error **repptr)
     alloc_field(rep);
     clear_field(rep,server);
     clear_field(rep,client);
+    clear_field(rep,text.data);
+    clear_field(rep,e_data.data);
 
     check_apptag(30);
     { begin_structure();
@@ -739,10 +779,10 @@ decode_krb5_error(const krb5_data *code, krb5_error **repptr)
         get_field(rep->stime,4,asn1_decode_kerberos_time);
         get_field(rep->susec,5,asn1_decode_int32);
         get_field(rep->error,6,asn1_decode_ui_4);
-        if (tagnum == 7) { alloc_field(rep->client); }
+        if (tagnum == 7) { alloc_principal(rep->client); }
         opt_field(rep->client,7,asn1_decode_realm);
         opt_field(rep->client,8,asn1_decode_principal_name);
-        alloc_field(rep->server);
+        alloc_principal(rep->server);
         get_field(rep->server,9,asn1_decode_realm);
         get_field(rep->server,10,asn1_decode_principal_name);
         opt_lenfield(rep->text.length,rep->text.data,11,asn1_decode_generalstring);
@@ -752,11 +792,7 @@ decode_krb5_error(const krb5_data *code, krb5_error **repptr)
     }
     cleanup_manual();
 error_out:
-    if (rep) {
-        free_field(rep,server);
-        free_field(rep,client);
-        free(rep);
-    }
+    krb5_free_error(NULL, rep);
     return retval;
 }
 
@@ -784,12 +820,16 @@ decode_krb5_pwd_data(const krb5_data *code, krb5_pwd_data **repptr)
 {
     setup(krb5_pwd_data *);
     alloc_field(rep);
+    clear_field(rep,element);
     { begin_structure();
         get_field(rep->sequence_count,0,asn1_decode_int);
         get_field(rep->element,1,asn1_decode_sequence_of_passwdsequence);
         rep->magic = KV5M_PWD_DATA;
         end_structure (); }
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_pwd_data(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -806,6 +846,7 @@ decode_krb5_alt_method(const krb5_data *code, krb5_alt_method **repptr)
 {
     setup(krb5_alt_method *);
     alloc_field(rep);
+    clear_field(rep,data);
     { begin_structure();
         get_field(rep->method,0,asn1_decode_int32);
         if (tagnum == 1) {
@@ -817,7 +858,10 @@ decode_krb5_alt_method(const krb5_data *code, krb5_alt_method **repptr)
         rep->magic = KV5M_ALT_METHOD;
         end_structure();
     }
-    cleanup(free);
+    cleanup_manual();
+error_out:
+    krb5_free_alt_method(NULL, rep);
+    return retval;
 }
 
 krb5_error_code
@@ -1147,14 +1191,7 @@ decode_krb5_reply_key_pack(const krb5_data *code, krb5_reply_key_pack **repptr)
     if (retval)
         goto error_out;
 
-    cleanup_manual();
-error_out:
-    if (rep) {
-        free(rep->replyKey.contents);
-        free(rep->asChecksum.contents);
-        free(rep);
-    }
-    return retval;
+    cleanup(free);
 }
 
 krb5_error_code
