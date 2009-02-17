@@ -12,6 +12,8 @@ if [info exist env(DEBUG)] { debug 1 }
 # Here are the tests
 #
 
+set pol2_time [timestamp]
+
 test_3pass {test2} {D.5: different new passwords} test2 test2 test2 foobar \
 	4 {New passwords do not match - password not changed.}
 
@@ -89,8 +91,13 @@ test_win {pol1} {successful change} pol1 polAAAAAA polBBBBBB
 test_win {pol1} {successful change} pol1 polBBBBBB polCCCCCC
 test_win {pol1} {successful change} pol1 polCCCCCC pol111111
 
-verbose "(sleeping 30 seconds)"
-catch "exec sleep 30"
+# Under "make check", init_db will just have been run and we could
+# jump right into the too-soon test.  But if someone is working with
+# the test suite manually, init_db may have been run a while ago.
+# So, force some known state, first.
+set delay [expr $pol2_time + 11 - [timestamp]]
+verbose "(sleeping $delay seconds so pol2 password can be changed)"
+sleep $delay
 
 test_win {pol2} {successful change} pol2 pol222222 polbbbbbb
 
@@ -98,8 +105,9 @@ test_3pass {pol2} {D.15: too soon to change password} pol2 \
 	polbbbbbb pol222222 pol222222 \
 	4 {Password cannot be changed because it was changed too recently.  Please wait until .*[12][0-9][0-9][0-9] before you change it.  If you need to change your password before then, contact your system security administrator.}
 
-verbose "(sleeping 30 seconds)"
-catch "exec sleep 30"
+# Now delay a little longer (if needed) and try changing pol2's
+# password again.
+verbose "(sleeping 10 seconds)"
+sleep 10
 
 test_win {pol2} {password min life passed} pol2 polbbbbbb pol222222
-
