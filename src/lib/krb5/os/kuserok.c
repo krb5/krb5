@@ -90,13 +90,12 @@ krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser)
     if (SNPRINTF_OVERFLOW(result, sizeof(pbuf)))
 	return(FALSE);
 
-    fp = fopen(pbuf, "r");
-    if (!fp) {
+    if (access(pbuf, F_OK)) {	 /* not accessible */
 	/*
-	 * If he's trying to log in as himself, and there is no
-	 * readable .k5login file, let him.  To find out, call
+	 * if he's trying to log in as himself, and there is no .k5login file,
+	 * let him.  To find out, call
 	 * krb5_aname_to_localname to convert the principal to a name
-	 * which we can string compare.
+	 * which we can string compare. 
 	 */
 	if (!(krb5_aname_to_localname(context, principal,
 				      sizeof(kuser), kuser))
