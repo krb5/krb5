@@ -132,7 +132,7 @@ kdc_args="-R dfl:kdc_rcache.$USER"
 (trap "" 2; cd $TOP/../kdc; ./krb5kdc $kdc_args; touch $kdc_start_file) \
 	< /dev/null > $usrtmp/kdc-log.$USER 2>&1 &
 
-s=10
+s=1
 max_s=60
 sofar_s=0
 timewait_s=300
@@ -140,7 +140,7 @@ timewait_s=300
 while true; do
 	rm -f $adm_start_file
 
-	(sleep 5; cd $TOP/server; ./kadmind $ovadm_args; \
+	(sleep 1; cd $TOP/server; ./kadmind $ovadm_args; \
 		touch $adm_start_file) < /dev/null > $usrtmp/kadm-log.$USER 2>&1 &
 
 	# wait until they start
