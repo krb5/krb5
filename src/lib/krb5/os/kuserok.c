@@ -79,22 +79,24 @@ krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser)
     char linebuf[BUFSIZ];
     char *newline;
     int gobble;
-
-    /* no account => no access */
     char pwbuf[BUFSIZ];
     struct passwd pwx;
+    int result;
+
+    /* no account => no access */
     if (k5_getpwnam_r(luser, &pwx, pwbuf, sizeof(pwbuf), &pwd) != 0)
 	return(FALSE);
-    (void) strncpy(pbuf, pwd->pw_dir, sizeof(pbuf) - 1);
-    pbuf[sizeof(pbuf) - 1] = '\0';
-    (void) strncat(pbuf, "/.k5login", sizeof(pbuf) - 1 - strlen(pbuf));
+    result = snprintf(pbuf, sizeof(pbuf), "%s/.k5login", pwd->pw_dir);
+    if (SNPRINTF_OVERFLOW(result, sizeof(pbuf)))
+	return(FALSE);
 
-    if (access(pbuf, F_OK)) {	 /* not accessible */
+    fp = fopen(pbuf, "r");
+    if (!fp) {
 	/*
-	 * if he's trying to log in as himself, and there is no .k5login file,
-	 * let him.  To find out, call
+	 * If he's trying to log in as himself, and there is no
+	 * readable .k5login file, let him.  To find out, call
 	 * krb5_aname_to_localname to convert the principal to a name
-	 * which we can string compare. 
+	 * which we can string compare.
 	 */
 	if (!(krb5_aname_to_localname(context, principal,
 				      sizeof(kuser), kuser))
