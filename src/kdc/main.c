@@ -585,7 +585,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         }
     }
     if (default_tcp_ports == 0) {
-	default_tcp_ports = strdup(DEFAULT_KDC_TCP_PORTLIST);
         default_tcp_ports = strdup(DEFAULT_KDC_TCP_PORTLIST);
         if (default_tcp_ports == 0) {
             fprintf(stderr," KDC cannot initialize. Not enough memory\n");
