@@ -36,7 +36,7 @@ if {![get_hostname] \
 
 proc start_rsh_daemon { } {
     global REALMNAME
-    global KRSHD
+    global KRSHD T_INETD
     global RCP
     global tmppwd
     global krshd_spawn_id
@@ -49,21 +49,20 @@ proc start_rsh_daemon { } {
     }
 
 
-    # The -D argument tells it to accept a single connection, so we
-    # don't need to use inetd.  The portbase+8 is the port to listen at.
-    #
     # The -L ENV_SET is for the I/S Athena brokeness in dot files where
     #	LD_LIBRARY_PATH will be overridden causing the "exec csh -c rcp ..." 
     #	to fail as the .cshrc is read in. We do not use the -f option as
     #	a users shell might be sh...
     #	Later a proper fix would be to have kshd exec rcp directly
     #   shell indirection...
-    spawn $KRSHD -k -c -D [expr 8 + $portbase] -P $tmppwd -S $tmppwd/srvtab -M $REALMNAME -L ENV_SET
+    spawn $T_INETD [expr 8 + $portbase] $KRSHD $KRSHD -k -c -P $tmppwd -S $tmppwd/srvtab -M $REALMNAME -L ENV_SET
     set krshd_spawn_id $spawn_id
     set krshd_pid [exp_pid]
 
-    # Give the rsh daemon a few seconds to get set up.
-    sleep 2
+    expect {
+	-ex "Ready!"	{ }
+	eof		{ error "couldn't start t_inetd helper" }
+    }
 }
 
 # A procedure to stop the rsh daemon.

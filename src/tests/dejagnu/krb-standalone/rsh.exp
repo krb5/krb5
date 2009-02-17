@@ -35,20 +35,20 @@ if {![get_hostname] \
 
 proc start_rsh_daemon { option } {
     global REALMNAME
-    global KRSHD
+    global KRSHD T_INETD
     global tmppwd
     global krshd_spawn_id
     global krshd_pid
     global portbase
 
-    # The -D argument tells it to accept a single connection, so we
-    # don't need to use inetd.  The portbase+8 is the port to listen at.
-    spawn $KRSHD -k -c -D [expr 8 + $portbase] -S $tmppwd/srvtab -M $REALMNAME -A $option
+    spawn $T_INETD [expr 8 + $portbase] $KRSHD $KRSHD -k -c -S $tmppwd/srvtab -M $REALMNAME -A $option
     set krshd_spawn_id $spawn_id
     set krshd_pid [exp_pid]
 
-    # Give the rsh daemon a few seconds to get set up.
-    sleep 2
+    expect {
+	-ex "Ready!"	{ }
+	eof		{ error "couldn't start t_inetd helper" }
+    }
 }
 
 # A procedure to stop the rsh daemon.

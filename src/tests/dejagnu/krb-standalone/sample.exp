@@ -47,6 +47,9 @@ proc start_sserver_daemon { inetd } {
 	    set sserver_spawn_id $spawn_id
 
 	    verbose "sserver_spawn is $sserver_spawn_id" 1
+
+	    # Give sserver some time to start
+	    sleep 2
     } else {
 	    # Start the sserver
 	    spawn $T_INETD [expr 8 + $portbase] $SSERVER sserver -S $tmppwd/srvtab
@@ -54,10 +57,12 @@ proc start_sserver_daemon { inetd } {
 	    set sserver_spawn_id $spawn_id
 
 	    verbose "sserver_spawn (t_inetd) is $sserver_spawn_id" 1
-    }
 
-    # Give sserver some time to start
-    sleep 2
+	    expect {
+		-ex "Ready!"	{ }
+		eof		{ error "couldn't start t_inetd helper" }
+	    }
+    }
 
     return 1
 }
@@ -171,17 +176,19 @@ proc doit { } {
 	return
     }
 
-    if ![start_sserver_daemon 0 ] {
-	return 
-    }
+    run_once sample_standalone {
+	if ![start_sserver_daemon 0 ] {
+	    return 
+	}
 
-    if ![test_sclient sclient] {
-	return
-    }
+	if ![test_sclient sclient] {
+	    return
+	}
     
-    pass "sample - standalone"
+	pass "sample - standalone"
 
-    stop_check_sserver_daemon
+	stop_check_sserver_daemon
+    }
     
     if ![start_sserver_daemon 1 ] {
 	return 
