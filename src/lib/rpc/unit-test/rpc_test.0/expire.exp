@@ -2,7 +2,7 @@ set timeout 40
 
 load_lib "helpers.exp"
 
-global spawn_id
+global server_started
 
 proc expired {} {
     global spawn_id server_id
@@ -18,7 +18,9 @@ proc expired {} {
 
     flush_server
 }
-expired
+
+#if { [info exists server_pid] && ($server_pid >= 0) } { expired }
+if { $server_started } {expired } 
 
 proc overlap {} {
     global spawn_id
@@ -41,6 +43,6 @@ proc overlap {} {
 
     flush_server
 }
-overlap
+if { $server_started } {overlap} 
 
 
