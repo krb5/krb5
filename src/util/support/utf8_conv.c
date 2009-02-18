@@ -199,7 +199,7 @@ krb5int_utf8s_to_ucs2les(const char *utf8s,
 
     len = k5_utf8s_to_ucs2s((krb5_ucs2 *)*ucs2les, utf8s, chars + 1, 1);
     if (len < 0) {
-	free(ucs2les);
+	free(*ucs2les);
 	*ucs2les = NULL;
 	return EINVAL;
     }
