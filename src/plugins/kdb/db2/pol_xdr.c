@@ -6,6 +6,7 @@
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
+#include <string.h>
 
 static 
 bool_t xdr_nullstring(XDR *xdrs, char **objp)
