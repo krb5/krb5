@@ -114,7 +114,7 @@ pkinit_kdcdefault_strings(krb5_context context, const char *realmname,
 	 *	    }
 	 */
 
-	names[0] = "realms";
+	names[0] = KRB5_CONF_REALMS;
 	names[1] = realmname;
 	names[2] = option;
 	names[3] = 0;
@@ -130,7 +130,7 @@ pkinit_kdcdefault_strings(krb5_context context, const char *realmname,
      *	    option = <value>
      */
 
-    names[0] = "kdcdefaults";
+    names[0] = KRB5_CONF_KDCDEFAULTS;
     names[1] = option;
     names[2] = 0;
     retval = profile_get_values(profile, names, &values);
@@ -256,7 +256,7 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
 	 *	  }
 	 */
 
-	names[0] = "libdefaults";
+	names[0] = KRB5_CONF_LIBDEFAULTS;
 	names[1] = realmstr;
 	names[2] = option;
 	names[3] = 0;
@@ -273,7 +273,7 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
 	 *	}
 	 */
 
-	names[0] = "realms";
+	names[0] = KRB5_CONF_REALMS;
 	names[1] = realmstr;
 	names[2] = option;
 	names[3] = 0;
@@ -289,7 +289,7 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
      *	      option = <value>
      */
 
-    names[0] = "libdefaults";
+    names[0] = KRB5_CONF_LIBDEFAULTS;
     names[1] = option;
     names[2] = 0;
     retval = profile_get_values(profile, names, &values);

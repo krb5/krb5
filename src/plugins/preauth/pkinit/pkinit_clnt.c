@@ -38,6 +38,7 @@
 #include <dlfcn.h>
 #include <sys/stat.h>
 
+#include "k5-int.h"
 #include "pkinit.h"
 
 #ifdef LONGHORN_BETA_COMPAT
@@ -548,7 +549,7 @@ verify_kdc_san(krb5_context context,
 
     retval = pkinit_libdefault_strings(context,
 				       krb5_princ_realm(context, kdcprinc), 
-				       "pkinit_kdc_hostname",
+				       KRB5_CONF_PKINIT_KDC_HOSTNAME,
 				       &cfghosts);
     if (retval || cfghosts == NULL) {
 	pkiDebug("%s: No pkinit_kdc_hostname values found in config file\n",
@@ -936,19 +937,19 @@ pkinit_client_profile(krb5_context context,
 	     context, plgctx, reqctx, request);
 
     pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_win2k",
+			      KRB5_CONF_PKINIT_WIN2K,
 			      reqctx->opts->win2k_target,
 			      &reqctx->opts->win2k_target);
     pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_win2k_require_binding",
+			      KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING,
 			      reqctx->opts->win2k_require_cksum,
 			      &reqctx->opts->win2k_require_cksum);
     pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_require_crl_checking",
+			      KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING,
 			      reqctx->opts->require_crl_checking,
 			      &reqctx->opts->require_crl_checking);
     pkinit_libdefault_integer(context, &request->server->realm,
-			      "pkinit_dh_min_bits",
+			      KRB5_CONF_PKINIT_DH_MIN_BITS,
 			      reqctx->opts->dh_size,
 			      &reqctx->opts->dh_size);
     if (reqctx->opts->dh_size != 1024 && reqctx->opts->dh_size != 2048
@@ -959,7 +960,7 @@ pkinit_client_profile(krb5_context context,
 	reqctx->opts->dh_size = PKINIT_DEFAULT_DH_MIN_BITS;
     }
     pkinit_libdefault_string(context, &request->server->realm,
-			     "pkinit_eku_checking",
+			     KRB5_CONF_PKINIT_EKU_CHECKING,
 			     &eku_string);
     if (eku_string != NULL) {
 	if (strcasecmp(eku_string, "kpKDC") == 0) {
@@ -980,7 +981,7 @@ pkinit_client_profile(krb5_context context,
 #ifdef LONGHORN_BETA_COMPAT
     /* Temporarily just set global flag from config file */
     pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_longhorn",
+			      KRB5_CONF_PKINIT_LONGHORN,
 			      0,
 			      &longhorn);
 #endif
@@ -988,16 +989,16 @@ pkinit_client_profile(krb5_context context,
     /* Only process anchors here if they were not specified on command line */
     if (reqctx->idopts->anchors == NULL)
 	pkinit_libdefault_strings(context, &request->server->realm,
-				  "pkinit_anchors",
+				  KRB5_CONF_PKINIT_ANCHORS,
 				  &reqctx->idopts->anchors);
     pkinit_libdefault_strings(context, &request->server->realm,
-			      "pkinit_pool",
+			      KRB5_CONF_PKINIT_POOL,
 			      &reqctx->idopts->intermediates);
     pkinit_libdefault_strings(context, &request->server->realm,
-			      "pkinit_revoke",
+			      KRB5_CONF_PKINIT_REVOKE,
 			      &reqctx->idopts->crls);
     pkinit_libdefault_strings(context, &request->server->realm,
-			      "pkinit_identities",
+			      KRB5_CONF_PKINIT_IDENTITIES,
 			      &reqctx->idopts->identity_alt);
 }
 

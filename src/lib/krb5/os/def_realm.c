@@ -84,8 +84,8 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
          */
         context->default_realm = 0;
         if (context->profile != 0) {
-            retval = profile_get_string(context->profile, "libdefaults",
-                                        "default_realm", 0, 0,
+            retval = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                        KRB5_CONF_DEFAULT_REALM, 0, 0,
                                         &realm);
 
             if (!retval && realm) {
@@ -210,7 +210,7 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
     realm = (char *)NULL;
     temp_realm = 0;
     while (cp ) {
-        retval = profile_get_string(context->profile, "domain_realm", cp,
+        retval = profile_get_string(context->profile, KRB5_CONF_DOMAIN_REALM, cp,
                                     0, (char *)NULL, &temp_realm);
         if (retval)
             return retval;

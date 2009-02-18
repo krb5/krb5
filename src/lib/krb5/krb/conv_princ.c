@@ -220,8 +220,8 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
 
      if (context->profile == 0)
        return KRB5_CONFIG_CANTOPEN;
-     retval = profile_get_string(context->profile, "realms",
-				 tmp_prealm, "v4_realm", 0,
+     retval = profile_get_string(context->profile, KRB5_CONF_REALMS,
+				 tmp_prealm, KRB5_CONF_V4_REALM, 0,
 				 &tmp_realm);
      free(tmp_prealm);
      if (retval) { 
@@ -263,15 +263,15 @@ krb5_425_conv_principal(krb5_context context, const char *name,
      /* First, convert the realm, since the v4 realm is not necessarily the same as the v5 realm
         To do that, iterate over all the realms in the config file, looking for a matching 
         v4_realm line */
-     names2 [0] = "realms";
+     names2 [0] = KRB5_CONF_REALMS;
      names2 [1] = NULL;
      retval = profile_iterator_create (context -> profile, names2, PROFILE_ITER_LIST_SECTION | PROFILE_ITER_SECTIONS_ONLY, &iterator);
      while (retval == 0) {
      	retval = profile_iterator (&iterator, &realm_name, &dummy_value);
      	if ((retval == 0) && (realm_name != NULL)) {
-     		names [0] = "realms";
+     		names [0] = KRB5_CONF_REALMS;
      		names [1] = realm_name;
-     		names [2] = "v4_realm";
+     		names [2] = KRB5_CONF_V4_REALM;
      		names [3] = NULL;
 
      		retval = profile_get_values (context -> profile, names, &v4realms);
@@ -314,9 +314,9 @@ krb5_425_conv_principal(krb5_context context, const char *name,
 	  }
 	  name = p->v5_str;
 	  if ((p->flags & DO_REALM_CONVERSION) && !strchr(instance, '.')) {
-	      names[0] = "realms";
+	      names[0] = KRB5_CONF_REALMS;
 	      names[1] = realm;
-	      names[2] = "v4_instance_convert";
+	      names[2] = KRB5_CONF_V4_INSTANCE_CONVERT;
 	      names[3] = instance;
 	      names[4] = 0;
 	      retval = profile_get_values(context->profile, names, &full_name);

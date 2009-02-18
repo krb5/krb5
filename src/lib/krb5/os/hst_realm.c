@@ -234,7 +234,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 #ifdef DEBUG_REFERRALS
         printf("  trying to look up %s in the domain_realm map\n",cp);
 #endif
-	retval = profile_get_string(context->profile, "domain_realm", cp,
+	retval = profile_get_string(context->profile, KRB5_CONF_DOMAIN_REALM, cp,
 				    0, (char *)NULL, &temp_realm);
 	if (retval)
 	    return retval;
@@ -385,8 +385,8 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
 	int limit;
 	errcode_t code;
 
-	code = profile_get_integer(context->profile, "libdefaults",
-				   "realm_try_domains", 0, -1, &limit);
+	code = profile_get_integer(context->profile, KRB5_CONF_LIBDEFAULTS,
+				   KRB5_CONF_REALM_TRY_DOMAINS, 0, -1, &limit);
 	if (code == 0) {
 	    retval = domain_heuristic(context, local_host, &realm, limit);
 	    if (retval)

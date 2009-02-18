@@ -413,7 +413,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
        When it's static, it goes into ".picdata", which is
        read-write.  */
     static const char *const dbpath_names[] = {
-	KDB_MODULE_SECTION, "db_module_dir", NULL,
+	KDB_MODULE_SECTION, KRB5_CONF_DB_MODULE_DIR, NULL,
     };
     const char *filebases[2];
     char **profpath = NULL;

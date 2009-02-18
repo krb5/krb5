@@ -51,8 +51,8 @@ krb5_get_realm_domain(krb5_context context, const char *realm, char **domain)
     krb5_error_code retval;
     char *temp_domain = 0;
 
-    retval = profile_get_string(context->profile, "realms", realm,
-			       "default_domain", realm, &temp_domain);
+    retval = profile_get_string(context->profile, KRB5_CONF_REALMS, realm,
+			       KRB5_CONF_DEFAULT_DOMAIN, realm, &temp_domain);
     if (!retval && temp_domain)
     {
         *domain = strdup(temp_domain);

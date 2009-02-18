@@ -51,8 +51,8 @@ krb5_kt_default_name(krb5_context context, char *name, int name_size)
 	if (strlcpy(name, cp, namesize) >= namesize)
 	    return KRB5_CONFIG_NOTENUFSPACE;
     } else if ((profile_get_string(context->profile,
-				   "libdefaults",
-				   "default_keytab_name", NULL, 
+				   KRB5_CONF_LIBDEFAULTS,
+				   KRB5_CONF_DEFAULT_KEYTAB_NAME, NULL, 
 				   NULL, &retval) == 0) &&
 	       retval) {
 	if (strlcpy(name, retval, namesize) >= namesize)

@@ -176,14 +176,14 @@ handle_referral_params(krb5_realm_params *rparams,
 {
     krb5_error_code retval = 0;
 
-    if (no_refrls && krb5_match_config_pattern(no_refrls, "*") == TRUE) {
-        rdp->realm_no_host_referral = strdup("*");
+    if (no_refrls && krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == TRUE) {
+        rdp->realm_no_host_referral = strdup(KRB5_CONF_ASTERISK);
         if (!rdp->realm_no_host_referral)
             retval = ENOMEM;
     } else {
         if (rparams && rparams->realm_no_host_referral) {
-            if (krb5_match_config_pattern(rparams->realm_no_host_referral, "*") == TRUE) {
-                rdp->realm_no_host_referral = strdup("*");
+            if (krb5_match_config_pattern(rparams->realm_no_host_referral, KRB5_CONF_ASTERISK) == TRUE) {
+                rdp->realm_no_host_referral = strdup(KRB5_CONF_ASTERISK);
                 if (!rdp->realm_no_host_referral)
                     retval = ENOMEM;
            } else if  (no_refrls && (asprintf(&(rdp->realm_no_host_referral), "%s%s%s%s%s",
@@ -198,19 +198,19 @@ handle_referral_params(krb5_realm_params *rparams,
             rdp->realm_no_host_referral = NULL;
     }
 
-    if (rdp->realm_no_host_referral && krb5_match_config_pattern(rdp->realm_no_host_referral, "*") == TRUE) {
+    if (rdp->realm_no_host_referral && krb5_match_config_pattern(rdp->realm_no_host_referral, KRB5_CONF_ASTERISK) == TRUE) {
         rdp->realm_host_based_services = NULL; 
         return 0;
     }
 
-    if (host_based_srvcs && (krb5_match_config_pattern(host_based_srvcs, "*") == TRUE)) {
-            rdp->realm_host_based_services = strdup("*");
+    if (host_based_srvcs && (krb5_match_config_pattern(host_based_srvcs, KRB5_CONF_ASTERISK) == TRUE)) {
+            rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
             if (!rdp->realm_host_based_services)
                 retval = ENOMEM;
     } else {
             if (rparams && rparams->realm_host_based_services) {
-                if (krb5_match_config_pattern(rparams->realm_host_based_services, "*") == TRUE) {
-                    rdp->realm_host_based_services = strdup("*");
+                if (krb5_match_config_pattern(rparams->realm_host_based_services, KRB5_CONF_ASTERISK) == TRUE) {
+                    rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
                     if (!rdp->realm_host_based_services)
                         retval = ENOMEM;
                 } else if (host_based_srvcs && asprintf(&(rdp->realm_host_based_services), "%s%s%s%s%s",
@@ -552,22 +552,22 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     extern char *optarg;
 
     if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
-	hierarchy[0] = "kdcdefaults";
-	hierarchy[1] = "kdc_ports";
+	hierarchy[0] = KRB5_CONF_KDCDEFAULTS;
+	hierarchy[1] = KRB5_CONF_KDC_PORTS;
 	hierarchy[2] = (char *) NULL;
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_udp_ports))
 	    default_udp_ports = 0;
-	hierarchy[1] = "kdc_tcp_ports";
+	hierarchy[1] = KRB5_CONF_KDC_TCP_PORTS;
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_tcp_ports))
 	    default_tcp_ports = 0;
-	hierarchy[1] = "kdc_max_dgram_reply_size";
+	hierarchy[1] = KRB5_CONF_MAX_DGRAM_REPLY_SIZE;
 	if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
 	    max_dgram_reply_size = MAX_DGRAM_SIZE;
-        hierarchy[1] = "no_host_referral";
+        hierarchy[1] = KRB5_CONF_NO_HOST_REFERRAL;
         if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls)) 
             no_refrls = 0;
-        if (!no_refrls || krb5_match_config_pattern(no_refrls, "*") == FALSE) {
-            hierarchy[1] = "host_based_services";
+        if (!no_refrls || krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == FALSE) {
+            hierarchy[1] = KRB5_CONF_HOST_BASED_SERVICES;
             if (krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs))
                 host_based_srvcs = 0;
         }
