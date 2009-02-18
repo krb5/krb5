@@ -440,7 +440,7 @@ generic_gss_oid_compose(
 	return GSS_S_FAILURE;
     }
 
-    op = oid->elements + prefix_len + nbytes;
+    op = (unsigned char *) oid->elements + prefix_len + nbytes;
     i = -1;
     while (suffix) {
 	op[i] = (unsigned char)suffix & 0x7f;
@@ -472,7 +472,7 @@ generic_gss_oid_decompose(
 	return GSS_S_BAD_MECH;
     }
 
-    op = oid->elements + prefix_len;
+    op = (unsigned char *) oid->elements + prefix_len;
 
     *suffix = 0;
 
