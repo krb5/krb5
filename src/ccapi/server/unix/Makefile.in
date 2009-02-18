@@ -12,4 +12,3 @@ clean-unix:: clean-libobjs
 
 @libobj_frag@
 
-# +++ Dependency line eater +++

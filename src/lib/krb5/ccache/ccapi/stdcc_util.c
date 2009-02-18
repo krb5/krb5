@@ -17,7 +17,9 @@
 
 #include "stdcc_util.h"
 #include "krb5.h"
+#ifdef _WIN32			/* it's part of krb5.h everywhere else */
 #include "kv5m_err.h"
+#endif
 
 #define fieldSize 255
 

@@ -7,7 +7,6 @@ SUBDIRS= lib server test
 
 all-windows:: 
 	@echo Making in ccapi\lib\win
-    @echo buildtop: $(BUILDTOP)
 	cd lib\win
 	cd
 	$(MAKE) -$(MFLAGS)
@@ -34,4 +33,3 @@ clean-windows::
 	cd
 	$(MAKE) -$(MFLAGS) clean
 
-# +++ Dependency line eater +++

@@ -3,10 +3,11 @@ myfulldir=ccapi/lib
 mydir=ccapi/lib
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS=unix
-LOCALINCLUDES=-I$(srcdir)/../common
+LOCALINCLUDES=-I$(srcdir)/../common -I.
 
-SHLIB_EXPDEPS= $(COM_ERR_DEPLIB)
-SHLIB_EXPLIBS=-lcom_err
+SHLIB_EXPDEPS= $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+SHLIB_EXPLIBS=-lcom_err $(SUPPORT_LIB)
+RELDIR=../ccapi/lib
 
 LIBBASE=krb5-ccapi
 LIBMAJOR=1
@@ -14,9 +15,7 @@ LIBMINOR=0
 
 STOBJLISTS= \
 	OBJS.ST \
-	unix/OBJS.ST \
-	../common/OBJS.ST \
-	../common/unix/OBJS.ST
+	unix/OBJS.ST
 
 STLIBOBJS= \
 	ccapi_ccache.o \
@@ -62,4 +61,3 @@ clean-unix:: clean-libobjs clean-liblinks clean-libs
 @lib_frag@
 @libobj_frag@
 
-# +++ Dependency line eater +++
