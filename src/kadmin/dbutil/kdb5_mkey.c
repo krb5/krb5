@@ -372,12 +372,13 @@ kdb5_use_mkey(int argc, char *argv[])
     char  *mkey_fullname;
     krb5_kvno  use_kvno;
     krb5_timestamp now, start_time;
-    krb5_actkvno_node *actkvno_list, *new_actkvno_list_head, *new_actkvno,
+    krb5_actkvno_node *actkvno_list, *new_actkvno,
                       *prev_actkvno, *cur_actkvno;
     krb5_db_entry master_entry;
     int   nentries = 0;
     krb5_boolean more = 0, found;
     krb5_keylist_node  *keylist_node;
+    krb5_boolean inserted = FALSE;
 
     if (argc < 2 || argc > 3) {
         /* usage calls exit */
@@ -413,7 +414,7 @@ kdb5_use_mkey(int argc, char *argv[])
 
     if (argc == 3) {
         time_t t = get_date(argv[2]);
-         if (t == -1) {
+        if (t == -1) {
             com_err(progname, 0, "could not parse date-time string '%s'",
                     argv[2]);
             exit_status++;
@@ -474,37 +475,58 @@ kdb5_use_mkey(int argc, char *argv[])
         return;
     }
 
-    /* alloc enough space to hold new and existing key_data */
-    new_actkvno = (krb5_actkvno_node *) malloc(sizeof(krb5_actkvno_node));
-    if (new_actkvno == NULL) {
-        com_err(progname, ENOMEM, "while adding new master key");
-        exit_status++;
-        return;
-    }
-    memset(new_actkvno, 0, sizeof(krb5_actkvno_node));
-
-    new_actkvno->act_kvno = use_kvno;
-    new_actkvno->act_time = start_time;
-
     /*
-     * determine which nodes to delete and where to insert new act kvno node
+     * If an entry already exists with the same kvno either delete it or if it's
+     * the only entry, just set its active time.
      */
+    for (prev_actkvno = NULL, cur_actkvno = actkvno_list;
+         cur_actkvno != NULL;
+         prev_actkvno = cur_actkvno, cur_actkvno = cur_actkvno->next) {
 
-    if (actkvno_list == NULL) {
-        /* new actkvno is the list */
-        new_actkvno_list_head = new_actkvno;
-    } else {
-        krb5_boolean inserted = FALSE, trimed = FALSE;
-
-        for (prev_actkvno = NULL, cur_actkvno = actkvno_list;
-             cur_actkvno != NULL;
-             prev_actkvno = cur_actkvno, cur_actkvno = cur_actkvno->next) {
-
-            if (cur_actkvno->act_kvno == use_kvno) {
-                cur_actkvno->act_time = start_time;
-                inserted = TRUE;   /* fake it */
+        if (cur_actkvno->act_kvno == use_kvno) {
+            /* delete it */
+            if (prev_actkvno) {
+                prev_actkvno->next = cur_actkvno->next;
+                cur_actkvno->next = NULL;
+                krb5_dbe_free_actkvno_list(util_context, cur_actkvno);
+            } else {
+                if (cur_actkvno->next) {
+                    /* delete it from front of list */
+                    actkvno_list = cur_actkvno->next;
+                    cur_actkvno->next = NULL;
+                    krb5_dbe_free_actkvno_list(util_context, cur_actkvno);
+                } else {
+                    /* There's only one entry, go ahead and change the time */
+                    cur_actkvno->act_time = start_time;
+                    inserted = TRUE;
+                }
             }
-            if (!inserted) {
+            break;
+        }
+    }
+
+    if (!inserted) {
+        /* alloc enough space to hold new and existing key_data */
+        new_actkvno = (krb5_actkvno_node *) malloc(sizeof(krb5_actkvno_node));
+        if (new_actkvno == NULL) {
+            com_err(progname, ENOMEM, "while adding new master key");
+            exit_status++;
+            return;
+        }
+        memset(new_actkvno, 0, sizeof(krb5_actkvno_node));
+        new_actkvno->act_kvno = use_kvno;
+        new_actkvno->act_time = start_time;
+
+        /* insert new act kvno node */
+
+        if (actkvno_list == NULL) {
+            /* new actkvno is the list */
+            actkvno_list = new_actkvno;
+        } else {
+            for (prev_actkvno = NULL, cur_actkvno = actkvno_list;
+                 cur_actkvno != NULL;
+                 prev_actkvno = cur_actkvno, cur_actkvno = cur_actkvno->next) {
+
                 if (new_actkvno->act_time < cur_actkvno->act_time) {
                     if (prev_actkvno) {
                         prev_actkvno->next = new_actkvno;
@@ -513,42 +535,32 @@ kdb5_use_mkey(int argc, char *argv[])
                         new_actkvno->next = actkvno_list;
                         actkvno_list = new_actkvno;
                     }
-                    inserted = TRUE;
+                    break;
                 } else if (cur_actkvno->next == NULL) {
                     /* end of line, just add new node to end of list */
                     cur_actkvno->next = new_actkvno;
-                    inserted = TRUE;
+                    break;
                 }
             }
-            if (!trimed) {
-                /* trim entries in past that are superceded */
-                if (cur_actkvno->act_time > now) {
-                    if (prev_actkvno) {
-                        new_actkvno_list_head = prev_actkvno;
-                    } else {
-                        new_actkvno_list_head = actkvno_list;
-                    }
-                    trimed = TRUE;
-                } else if (cur_actkvno->next == NULL) {
-                    /* XXX this is buggy, fix soon. */
-                    new_actkvno_list_head = cur_actkvno;
-                    trimed = TRUE;
-                }
-            }
-            if (trimed && inserted)
-                break;
         }
     }
 
-    if ((retval = krb5_dbe_update_actkvno(util_context, &master_entry,
-                                          new_actkvno_list_head))) {
-        com_err(progname, retval, "while updating actkvno data for master principal entry");
+    if (actkvno_list->act_time > now) {
+        com_err(progname, EINVAL, "there must be one master key currently active");
         exit_status++;
         return;
     }
 
+    if ((retval = krb5_dbe_update_actkvno(util_context, &master_entry,
+                                          /* new_actkvno_list_head))) { */
+        actkvno_list))) {
+            com_err(progname, retval, "while updating actkvno data for master principal entry");
+            exit_status++;
+            return;
+        }
+
     if ((retval = krb5_dbe_update_mod_princ_data(util_context, &master_entry,
-                now, master_princ))) {
+                                                 now, master_princ))) {
         com_err(progname, retval, "while updating the master key principal modification time");
         exit_status++;
         return;
@@ -658,7 +670,7 @@ kdb5_list_mkeys(int argc, char *argv[])
         }
 
         if (actkvno_list != NULL) {
-            act_time = 0;
+            act_time = -1; /* assume actkvno entry not found */
             for (cur_actkvno = actkvno_list; cur_actkvno != NULL;
                  cur_actkvno = cur_actkvno->next) {
                 if (cur_actkvno->act_kvno == cur_kb_node->kvno) {
@@ -683,7 +695,7 @@ kdb5_list_mkeys(int argc, char *argv[])
             retval = asprintf(&output_str, "KNVO: %d, Enctype: %s, Active on: %s *\n",
                               cur_kb_node->kvno, enctype, strdate(act_time));
         } else {
-            if (act_time) {
+            if (act_time != -1) {
                 retval = asprintf(&output_str, "KNVO: %d, Enctype: %s, Active on: %s\n",
                                   cur_kb_node->kvno, enctype, strdate(act_time));
             } else {
