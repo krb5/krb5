@@ -365,7 +365,7 @@ rtree_hier_realms(
 {
     krb5_error_code retval;
     struct hstate c, s;
-    krb5_data *ctweens, *stweens, *twp, *r, *rp;
+    krb5_data *ctweens = NULL, *stweens = NULL, *twp, *r, *rp;
     size_t nctween, nstween;
 
     *realms = NULL;
