@@ -389,7 +389,7 @@ rtree_hier_realms(
     }
     /* Copy server realm "tweens" backward. */
     for (twp = &stweens[nstween]; twp-- > stweens;) {
-	krb5int_copy_data_contents(context, twp, rp++);
+	retval = krb5int_copy_data_contents(context, twp, rp++);
 	if (retval) goto error;
     }
 error:
