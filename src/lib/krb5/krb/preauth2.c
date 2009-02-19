@@ -273,7 +273,7 @@ krb5_free_preauth_context(krb5_context context)
 {
     int i;
     void *pctx;
-    if (context->preauth_context != NULL) {
+    if (context && context->preauth_context != NULL) {
 	for (i = 0; i < context->preauth_context->n_modules; i++) {
 	    pctx = context->preauth_context->modules[i].plugin_context;
 	    if (context->preauth_context->modules[i].client_fini != NULL) {
