@@ -391,6 +391,7 @@ make_etype_list(krb5_context context,
 	krb5_free_data(context, ad_if_relevant);
 	return ENOMEM;
     }
+    *authdata = adata;
 
     adata[i] = (krb5_authdata *)malloc(sizeof(krb5_authdata));
     if (adata[i] == NULL) {
@@ -404,8 +405,6 @@ make_etype_list(krb5_context context,
     free(ad_if_relevant); /* contents owned by adata[i] */
 
     adata[i + 1] = NULL;
-
-    *authdata = adata;
 
     return 0;
 }
