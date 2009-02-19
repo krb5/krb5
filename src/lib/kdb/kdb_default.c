@@ -516,13 +516,14 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     krb5_keyblock cur_mkey;
     krb5_keylist_node *mkey_list_head = NULL, **mkey_list_node;
     krb5_key_data *key_data;
-    krb5_mkey_aux_node	*mkey_aux_data_list, *aux_data_entry;
+    krb5_mkey_aux_node	*mkey_aux_data_list = NULL, *aux_data_entry;
     int i;
 
     if (mkeys_list == NULL)
         return (EINVAL);
 
     memset(&cur_mkey, 0, sizeof(cur_mkey));
+    memset(&master_entry, 0, sizeof(master_entry));
 
     nprinc = 1;
     if ((retval = krb5_db_get_principal(context, mprinc,
@@ -645,6 +646,7 @@ krb5_def_fetch_mkey_list(krb5_context        context,
 
 clean_n_exit:
     krb5_db_free_principal(context, &master_entry, nprinc);
+    krb5_dbe_free_mkey_aux_list(context, mkey_aux_data_list);
     if (retval != 0)
         krb5_dbe_free_key_list(context, mkey_list_head);
     return retval;

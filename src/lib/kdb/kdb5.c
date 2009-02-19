@@ -115,11 +115,13 @@ krb5_dbe_free_key_data_contents(krb5_context context, krb5_key_data *key)
 {
     int i, idx;
 
-    idx = (key->key_data_ver == 1 ? 1 : 2);
-    for (i = 0; i < idx; i++) {
-        if (key->key_data_contents[i]) {
-            zap(key->key_data_contents[i], key->key_data_length[i]);
-            free(key->key_data_contents[i]);
+    if (key) {
+        idx = (key->key_data_ver == 1 ? 1 : 2);
+        for (i = 0; i < idx; i++) {
+            if (key->key_data_contents[i]) {
+                zap(key->key_data_contents[i], key->key_data_length[i]);
+                free(key->key_data_contents[i]);
+            }
         }
     }
     return;
@@ -2383,6 +2385,7 @@ krb5_dbe_lookup_mkey_aux(krb5_context          context,
 
                 if (new_data->latest_mkey.key_data_contents[0] == NULL) {
                     krb5_dbe_free_mkey_aux_list(context, head_data);
+                    free(new_data);
                     return (ENOMEM);
                 }
                 memcpy(new_data->latest_mkey.key_data_contents[0], curloc,
