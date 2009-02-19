@@ -74,6 +74,12 @@ rtree_hier_realms(
     size_t *nrealms,
     int sep);
 
+static void
+free_realmlist(
+    krb5_context context,
+    krb5_data *realms,
+    size_t nrealms);
+
 static krb5_error_code
 rtree_hier_tweens(
     krb5_context context,
@@ -333,12 +339,14 @@ rtree_hier_tree(
 	srcrealm = dstrealm;
     }
     *rettree = tree;
+    free_realmlist(context, realms, nrealms);
     return 0;
 error:
     while (pprinc != NULL && pprinc > tree) {
 	krb5_free_principal(context, *--pprinc);
 	*pprinc = NULL;
     }
+    free_realmlist(context, realms, nrealms);
     free(tree);
     return retval;
 }
@@ -360,6 +368,9 @@ rtree_hier_realms(
     krb5_data *ctweens, *stweens, *twp, *r, *rp;
     size_t nctween, nstween;
 
+    *realms = NULL;
+    *nrealms = 0;
+
     r = rp = NULL;
     c.str = client->data;
     c.len = client->length;
@@ -376,35 +387,46 @@ rtree_hier_realms(
     retval = rtree_hier_tweens(context, &s, &stweens, &nstween, 0, sep);
     if (retval) goto error;
 
-    *nrealms = nctween + nstween;
-    rp = r = calloc(*nrealms, sizeof(krb5_data));
+    rp = r = calloc(nctween + nstween, sizeof(krb5_data));
     if (r == NULL) {
 	retval = ENOMEM;
 	goto error;
     }
     /* Copy client realm "tweens" forward. */
     for (twp = ctweens; twp < &ctweens[nctween]; twp++) {
-	retval = krb5int_copy_data_contents(context, twp, rp++);
+	retval = krb5int_copy_data_contents(context, twp, rp);
 	if (retval) goto error;
+	rp++;
     }
     /* Copy server realm "tweens" backward. */
     for (twp = &stweens[nstween]; twp-- > stweens;) {
-	retval = krb5int_copy_data_contents(context, twp, rp++);
+	retval = krb5int_copy_data_contents(context, twp, rp);
 	if (retval) goto error;
+	rp++;
     }
 error:
-    if (retval) {
-	*nrealms = 0;
-	while (rp > r) {
-	    krb5_free_data_contents(context, --rp);
-	}
-	free(r);
-	r = NULL;
-    }
     free(ctweens);
     free(stweens);
+    if (retval) {
+	free_realmlist(context, r, rp - r);
+	return retval;
+    }
     *realms = r;
-    return retval;
+    *nrealms = rp - r;
+    return 0;
+}
+
+static void
+free_realmlist(
+    krb5_context context,
+    krb5_data *realms,
+    size_t nrealms)
+{
+    size_t i;
+
+    for (i = 0; i < nrealms; i++)
+	krb5_free_data_contents(context, &realms[i]);
+    free(realms);
 }
 
 /*
