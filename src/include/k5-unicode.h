@@ -117,9 +117,9 @@ void krb5int_ucstr2upper(
 #define KRB5_UTF8_ARG2NFC	0x4U
 #define KRB5_UTF8_APPROX	0x8U
 
-krb5_data * krb5int_utf8_normalize(
+krb5_error_code krb5int_utf8_normalize(
     krb5_data *,
-    krb5_data *,
+    krb5_data **,
     unsigned);
 
 int krb5int_utf8_normcmp(
