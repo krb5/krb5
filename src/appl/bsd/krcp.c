@@ -1115,7 +1115,8 @@ void sink(argc, argv)
 	  wrerr++;
 	if (ftruncate(of, size))
 	  error("rcp: can't truncate %s: %s\n", nambuf, error_message(errno));
-	(void) close(of);
+	if (close(of) != 0)
+	    error("rcp: error closing %s: %s\n", nambuf, error_message(errno));
 	(void) response();
 	if (setimes) {
 	    setimes = 0;
