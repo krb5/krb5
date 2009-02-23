@@ -94,10 +94,11 @@ krb5int_generate_and_save_subkey (krb5_context context,
     krb5_data d;
     krb5_error_code retval;
 
-    krb5_crypto_us_timeofday (&rnd_data.sec, &rnd_data.usec);
-    d.length = sizeof (rnd_data);
-    d.data = (char *) &rnd_data;
-    (void) krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_TIMING, &d);
+    if (krb5_crypto_us_timeofday(&rnd_data.sec, &rnd_data.usec) == 0) {
+	d.length = sizeof(rnd_data);
+	d.data = (char *) &rnd_data;
+	krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TIMING, &d);
+    }
 
     if (auth_context->send_subkey)
 	krb5_free_keyblock(context, auth_context->send_subkey);
