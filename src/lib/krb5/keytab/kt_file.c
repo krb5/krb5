@@ -795,7 +795,9 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
 								keytab);
 				if (!kret) {
 				    fpos = foff; /* XX range check? */
-				    fseek(KTFILEP(keytab), fpos, SEEK_SET);
+				    if (fseek(KTFILEP(keytab), fpos,
+					      SEEK_SET) == -1)
+					kret = errno;
 				}
 			    }
 			    kret = 0;
@@ -1437,7 +1439,11 @@ krb5_ktfileint_internal_read_entry(krb5_context context, krb5_keytab id, krb5_ke
     /*
      * Reposition file pointer to the next inter-record length field.
      */
-    fseek(KTFILEP(id), start_pos + size, SEEK_SET);
+    if (fseek(KTFILEP(id), start_pos + size, SEEK_SET) == -1) {
+	error = errno;
+	goto fail;
+    }
+
     return 0;
 fail:
     
