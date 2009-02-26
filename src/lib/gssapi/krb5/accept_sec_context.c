@@ -811,9 +811,9 @@ kg_accept_krb5(minor_status, context_handle,
     }
 
     /* XXX move this into gss_name_t */
-    if (ticket->enc_part2->authorization_data != NULL &&
-        (code = krb5_copy_authdata(context,
+    if (        (code = krb5_merge_authdata(context,
                                    ticket->enc_part2->authorization_data,
+                                            authdat->authorization_data,
                                    &ctx->authdata))) {
         major_status = GSS_S_FAILURE;
         goto fail;
