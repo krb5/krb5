@@ -41,7 +41,7 @@
 
 krb5_error_code
 krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
-	  unsigned int icount, const krb5_data *input, krb5_data *output)
+          unsigned int icount, const krb5_data *input, krb5_data *output)
 {
     size_t hashsize, blocksize;
     unsigned char *xorkey, *ihash;
@@ -53,26 +53,26 @@ krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
     blocksize = hash->blocksize;
 
     if (key->length > blocksize)
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
     if (output->length < hashsize)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     /* if this isn't > 0, then there won't be enough space in this
        array to compute the outer hash */
     if (icount == 0)
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 
     /* allocate space for the xor key, hash input vector, and inner hash */
 
     if ((xorkey = (unsigned char *) malloc(blocksize)) == NULL)
-	return(ENOMEM);
+        return(ENOMEM);
     if ((ihash = (unsigned char *) malloc(hashsize)) == NULL) {
-	free(xorkey);
-	return(ENOMEM);
+        free(xorkey);
+        return(ENOMEM);
     }
     if ((hashin = (krb5_data *)malloc(sizeof(krb5_data)*(icount+1))) == NULL) {
-	free(ihash);
-	free(xorkey);
-	return(ENOMEM);
+        free(ihash);
+        free(xorkey);
+        return(ENOMEM);
     }
 
     /* create the inner padded key */
@@ -80,28 +80,27 @@ krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
     memset(xorkey, 0x36, blocksize);
 
     for (i=0; i<key->length; i++)
-	xorkey[i] ^= key->contents[i];
+        xorkey[i] ^= key->contents[i];
 
     /* compute the inner hash */
 
-    for (i=0; i<icount; i++) {
-	hashin[0].length = blocksize;
-	hashin[0].data = (char *) xorkey;
-	hashin[i+1] = input[i];
-    }
+    hashin[0].length = blocksize;
+    hashin[0].data = (char *) xorkey;
+    for (i=0; i<icount; i++) 
+        hashin[i+1] = input[i];
 
     hashout.length = hashsize;
     hashout.data = (char *) ihash;
 
     if ((ret = ((*(hash->hash))(icount+1, hashin, &hashout))))
-	goto cleanup;
+        goto cleanup;
 
     /* create the outer padded key */
 
     memset(xorkey, 0x5c, blocksize);
 
     for (i=0; i<key->length; i++)
-	xorkey[i] ^= key->contents[i];
+        xorkey[i] ^= key->contents[i];
 
     /* compute the outer hash */
 
@@ -112,7 +111,7 @@ krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
     output->length = hashsize;
 
     if ((ret = ((*(hash->hash))(2, hashin, output))))
-	memset(output->data, 0, output->length);
+        memset(output->data, 0, output->length);
 
     /* ret is set correctly by the prior call */
 
@@ -129,7 +128,7 @@ cleanup:
 
 krb5_error_code
 krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
-		 const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
+                 const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
     krb5_data *sign_data;
     size_t num_sign_data;
@@ -138,22 +137,22 @@ krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key
 
     /* Create a checksum over all the data to be signed */
     for (i = 0, num_sign_data = 0; i < num_data; i++) {
-	const krb5_crypto_iov *iov = &data[i];
+        const krb5_crypto_iov *iov = &data[i];
 
-	if (SIGN_IOV(iov))
-	    num_sign_data++;
+        if (SIGN_IOV(iov))
+            num_sign_data++;
     }
 
     /* XXX cleanup to avoid alloc */
     sign_data = (krb5_data *)calloc(num_sign_data, sizeof(krb5_data));
     if (sign_data == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     for (i = 0, j = 0; i < num_data; i++) {
-	const krb5_crypto_iov *iov = &data[i];
+        const krb5_crypto_iov *iov = &data[i];
 
-	if (SIGN_IOV(iov))
-	    sign_data[j++] = iov->data;
+        if (SIGN_IOV(iov))
+            sign_data[j++] = iov->data;
     }
 
     /* caller must store checksum in iov as it may be TYPE_TRAILER or TYPE_CHECKSUM */
