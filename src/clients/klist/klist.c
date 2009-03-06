@@ -56,7 +56,7 @@
 extern int optind;
 
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
-int show_etype = 0, show_addresses = 0, no_resolve = 0;
+int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -81,12 +81,13 @@ static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, "Usage: %s [-e] [[-c] [-f] [-s] [-a [-n]]] %s",
+    fprintf(stderr, "Usage: %s [-e] [-V] [[-c] [-f] [-s] [-a [-n]]] %s",
 	     progname, "[-k [-t] [-K]] [name]\n"); 
     fprintf(stderr, "\t-c specifies credentials cache\n");
     fprintf(stderr, "\t-k specifies keytab\n");
     fprintf(stderr, "\t   (Default is credentials cache)\n");
     fprintf(stderr, "\t-e shows the encryption type\n");
+    fprintf(stderr, "\t-V shows the Kerberos version and exits\n");
     fprintf(stderr, "\toptions for credential caches:\n");
     fprintf(stderr, "\t\t-f shows credentials flags\n");
     fprintf(stderr, "\t\t-s sets exit status based on valid tgt existence\n");
@@ -111,7 +112,8 @@ main(argc, argv)
 
     name = NULL;
     mode = DEFAULT;
-    while ((c = getopt(argc, argv, "fetKsnack45")) != -1) {
+    /* V=version so v can be used for verbose later if desired.  */
+    while ((c = getopt(argc, argv, "fetKsnack45V")) != -1) {
 	switch (c) {
 	case 'f':
 	    show_flags = 1;
@@ -148,6 +150,9 @@ main(argc, argv)
 	    break;
 	case '5':
 	    break;
+	case 'V':
+	    print_version = 1;
+	    break;
 	default:
 	    usage();
 	    break;
@@ -170,6 +175,11 @@ main(argc, argv)
 	fprintf(stderr, "Extra arguments (starting with \"%s\").\n",
 		argv[optind+1]);
 	usage();
+    }
+
+    if (print_version) {
+	printf("%s version %s\n", PACKAGE_NAME, PACKAGE_VERSION);
+	exit(0);
     }
 
     name = (optind == argc-1) ? argv[optind] : 0;
