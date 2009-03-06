@@ -136,36 +136,25 @@ gen_nonce(krb5_context  context,
  */
 static krb5_error_code
 send_as_request(krb5_context 		context,
-		krb5_kdc_req		*request,
+		krb5_data *packet, const krb5_data *realm,
 		krb5_error ** 		ret_err_reply,
 		krb5_kdc_rep ** 	ret_as_reply,
 		int 			    *use_master)
 {
     krb5_kdc_rep *as_reply = 0;
     krb5_error_code retval;
-    krb5_data *packet = 0;
     krb5_data reply;
     char k4_version;		/* same type as *(krb5_data::data) */
     int tcp_only = 0;
-    krb5_timestamp time_now;
 
     reply.data = 0;
 
     /* set the nonce if the caller expects us to do it */
-    if (request->nonce == 0) {
-        if ((retval = krb5_timeofday(context, &time_now)))
-	    goto cleanup;
-        request->nonce = (krb5_int32) time_now;
-    }
-
-    /* encode & send to KDC */
-    if ((retval = encode_krb5_as_req(request, &packet)) != 0)
-	goto cleanup;
 
     k4_version = packet->data[0];
 send_again:
     retval = krb5_sendto_kdc(context, packet, 
-			     krb5_princ_realm(context, request->client),
+			     realm,
 			     &reply, use_master, tcp_only);
 #if APPLE_PKINIT
     inTktDebug("krb5_sendto_kdc returned %d\n", (int)retval);
@@ -240,8 +229,6 @@ send_again:
 	krb5_free_kdc_rep(context, as_reply);
 
 cleanup:
-    if (packet)
-	krb5_free_data(context, packet);
     if (reply.data)
 	free(reply.data);
     return retval;
@@ -517,6 +504,7 @@ krb5_get_in_tkt(krb5_context context,
     krb5_timestamp	time_now;
     krb5_keyblock *	decrypt_key = 0;
     krb5_kdc_req	request;
+    krb5_data *encoded_request;
     krb5_pa_data	**padata = 0;
     krb5_error *	err_reply;
     krb5_kdc_rep *	as_reply = 0;
@@ -650,8 +638,13 @@ krb5_get_in_tkt(krb5_context context,
          */
 	request.nonce = (krb5_int32) time_now;
 
-	if ((retval = send_as_request(context, &request, &err_reply,
-				      &as_reply, &use_master)))
+	if ((retval = encode_krb5_as_req(&request, &encoded_request)) != 0)
+	    goto cleanup;
+	retval = send_as_request(context, encoded_request,
+				 krb5_princ_realm(context, request.client), &err_reply,
+				 &as_reply, &use_master);
+	krb5_free_data_contents(context, encoded_request);
+	if (retval != 0)
 	    goto cleanup;
 
 	if (err_reply) {
@@ -1156,7 +1149,6 @@ krb5_get_init_creds(krb5_context context,
 
     krb5_preauth_request_context_init(context);
 
-    /* nonce is filled in by send_as_request if we don't take care of it */
 
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST)) {
 	request.ktype = options->etype_list;
@@ -1301,7 +1293,8 @@ krb5_get_init_creds(krb5_context context,
 
 	err_reply = 0;
 	local_as_reply = 0;
-	if ((ret = send_as_request(context, &request, &err_reply,
+	if ((ret = send_as_request(context, encoded_previous_request,
+				   krb5_princ_realm(context, request.client), &err_reply,
 				   &local_as_reply, use_master)))
 	    goto cleanup;
 
