@@ -1124,12 +1124,10 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
                 goto cleanup;
             }
             if (realms == 0) {
-                printf(" (null)\n");
                 retval = KRB5KRB_AP_ERR_BADMATCH;
                 goto cleanup;
             }
             if (realms[0] == 0) {
-                printf(" (none)\n");
                 free(realms);
                 retval = KRB5KRB_AP_ERR_BADMATCH;
                 goto cleanup;
