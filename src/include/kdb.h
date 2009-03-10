@@ -266,6 +266,7 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
 /* libkdb.spec */
+krb5_error_code krb5_db_setup_lib_handle(krb5_context kcontext);
 krb5_error_code krb5_db_open( krb5_context kcontext, char **db_args, int mode );
 krb5_error_code krb5_db_init  ( krb5_context kcontext );
 krb5_error_code krb5_db_create ( krb5_context kcontext, char **db_args );

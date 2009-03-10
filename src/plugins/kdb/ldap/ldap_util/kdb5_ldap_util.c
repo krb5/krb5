@@ -297,7 +297,6 @@ int main(argc, argv)
     unsigned int ldapmask = 0;
     unsigned int passwd_len = 0;
     char *prompt = NULL;
-    kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
     char *value = NULL, *conf_section = NULL;
     krb5_boolean realm_name_required = TRUE;
@@ -587,12 +586,13 @@ int main(argc, argv)
     cmd = cmd_lookup(cmd_argv[0]);
 
     /* Setup DAL handle to access the database */
-    dal_handle = calloc((size_t)1, sizeof(kdb5_dal_handle));
-    if (dal_handle == NULL) {
+    db_retval = krb5_db_setup_lib_handle(util_context);
+    if (db_retval) {
+	com_err(progname, db_retval, "while setting up lib handle");
+	exit_status++;
 	goto cleanup;
     }
-    dal_handle->db_context = ldap_context;
-    util_context->dal_handle = dal_handle;
+    util_context->dal_handle->db_context = ldap_context;
     ldap_context = NULL;
 
     db_retval = krb5_ldap_read_server_params(util_context, conf_section, KRB5_KDB_SRV_TYPE_OTHER);
@@ -603,7 +603,7 @@ int main(argc, argv)
     }
 
     if (cmd->opendb) {
-	db_retval = krb5_ldap_db_init(util_context, (krb5_ldap_context *)dal_handle->db_context);
+	db_retval = krb5_ldap_db_init(util_context, (krb5_ldap_context *)util_context->dal_handle->db_context);
 	if (db_retval) {
 	    com_err(progname, db_retval, "while initializing database");
 	    exit_status++;
@@ -639,8 +639,6 @@ cleanup:
 	free(prompt);
     if (conf_section)
 	free(conf_section);
-    if (dal_handle)
-	free(dal_handle);
 
     if (usage_print) {
 	usage();
