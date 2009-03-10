@@ -2678,8 +2678,8 @@ krb5_dbe_delete_tl_data(krb5_context context,
             krb5_dbe_free_tl_data(context, free_tl_data);
             entry->n_tl_data--;
         } else {
-            tl_data = tl_data->tl_data_next;
             prev_tl_data = tl_data;
+            tl_data = tl_data->tl_data_next;
         }
     }
 

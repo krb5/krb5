@@ -148,51 +148,6 @@ krb5_dbe_lookup_last_pwd_change(context, entry, stamp)
 
     return(0);
 }
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-krb5_error_code
-krb5_dbe_lookup_mkvno(krb5_context context,
-		      krb5_db_entry *entry,
-		      krb5_kvno *mkvno)
-{
-    krb5_tl_data tl_data;
-    krb5_error_code code;
-    krb5_int16 tmp;
-
-    tl_data.tl_data_type = KRB5_TL_MKVNO;
-
-    if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
-	return (code);
-
-    /* XXX need to think about this */
-    if (tl_data.tl_data_length != 2) {
-	*mkvno = 0;
-	return (0);
-    }
-
-    /* XXX this needs to be the inverse of how this is encoded */
-    krb5_kdb_decode_int16(tl_data.tl_data_contents, tmp);
-
-    *mkvno = (krb5_kvno) tmp;
-
-    return (0);
-}
-
-krb5_error_code
-krb5_dbe_update_mkvno(krb5_context    context,
-		      krb5_db_entry * entry,
-		      krb5_kvno       mkvno)
-{
-    krb5_tl_data tl_data;
-    krb5_octet buf[2];		/* this is the encoded size of an int16 */
-
-    tl_data.tl_data_type = KRB5_TL_MKVNO;
-    tl_data.tl_data_length = sizeof(buf);
-    krb5_kdb_encode_int16((krb5_int16) mkvno, buf);
-    tl_data.tl_data_contents = buf;
-
-    return (krb5_dbe_update_tl_data(context, entry, &tl_data));
-}
-#endif /**************** END IFDEF'ed OUT *******************************/
 
 /* it seems odd that there's no function to remove a tl_data, but if
    I need one, I'll add one */
