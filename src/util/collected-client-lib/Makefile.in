@@ -31,7 +31,7 @@ STOBJLISTS= \
 	../../lib/gssapi/krb5/OBJS.ST \
 	../../lib/gssapi/spnego/OBJS.ST \
 	../../lib/krb5/OBJS.ST \
-#	../../lib/krb5/error_tables/OBJS.ST \
+	../../lib/krb5/error_tables/OBJS.ST \
 	../../lib/krb5/asn.1/OBJS.ST \
 	../../lib/krb5/ccache/OBJS.ST \
 	../../lib/krb5/keytab/OBJS.ST \
