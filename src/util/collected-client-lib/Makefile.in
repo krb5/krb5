@@ -31,13 +31,14 @@ STOBJLISTS= \
 	../../lib/gssapi/krb5/OBJS.ST \
 	../../lib/gssapi/spnego/OBJS.ST \
 	../../lib/krb5/OBJS.ST \
-	../../lib/krb5/error_tables/OBJS.ST \
+#	../../lib/krb5/error_tables/OBJS.ST \
 	../../lib/krb5/asn.1/OBJS.ST \
 	../../lib/krb5/ccache/OBJS.ST \
 	../../lib/krb5/keytab/OBJS.ST \
 	../../lib/krb5/krb/OBJS.ST \
 	../../lib/krb5/rcache/OBJS.ST \
 	../../lib/krb5/os/OBJS.ST \
+	../../lib/krb5/unicode/OBJS.ST \
 	../profile/OBJS.ST \
 	../../lib/crypto/crc32/OBJS.ST \
 	../../lib/crypto/des/OBJS.ST \
@@ -60,8 +61,10 @@ STOBJLISTS= \
 SRCS=
 
 SHLIB_EXPDEPS =
+
+LIBS_UTILS=-lresolv
 # Add -lm if dumping thread stats, for sqrt.
-SHLIB_EXPLIBS= @CRYPTO_LIBS@ $(LIBS) $(DL_LIB)
+SHLIB_EXPLIBS= @CRYPTO_LIBS@ $(LIBS) $(DL_LIB) $(LIBS_UTILS)
 SHLIB_DIRS=
 SHLIB_RDIRS=
 
