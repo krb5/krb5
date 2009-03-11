@@ -172,6 +172,7 @@ krb5_copy_checksum
 krb5_copy_context
 krb5_copy_creds
 krb5_copy_data
+krb5_copy_error_message
 krb5_copy_keyblock
 krb5_copy_keyblock_contents
 krb5_copy_principal
