@@ -134,11 +134,12 @@ krb5_error_code dispatch (krb5_data *,
 krb5_error_code kdc_initialize_rcache (krb5_context, char *);
 
 krb5_error_code setup_server_realm (krb5_principal);
+void kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...);
 
 /* network.c */
-krb5_error_code listen_and_process (const char *);
-krb5_error_code setup_network (const char *);
-krb5_error_code closedown_network (const char *);
+krb5_error_code listen_and_process (void);
+krb5_error_code setup_network (void);
+krb5_error_code closedown_network (void);
 
 /* policy.c */
 int against_local_policy_as (krb5_kdc_req *, krb5_db_entry,

@@ -1861,7 +1861,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
     scratch.length = in_padata->length;
     
     if ((retval = decode_krb5_sam_response(&scratch, &sr))) {
-	com_err("krb5kdc", retval,
+	kdc_err(context, retval,
 		"return_sam_data(): decode_krb5_sam_response failed");
 	goto cleanup;
     }
@@ -1880,7 +1880,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
 
 	if ((retval = krb5_c_decrypt(context, &psr_key, /* XXX */ 0, 0,
 				     &tmpdata, &scratch))) {
-	    com_err("krb5kdc", retval,
+	    kdc_err(context, retval,
 		    "return_sam_data(): decrypt track_id failed");
 	    free(scratch.data);
 	    goto cleanup;
@@ -1888,7 +1888,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
     }
 
     if ((retval = decode_krb5_predicted_sam_response(&scratch, &psr))) {
-	com_err("krb5kdc", retval,
+	kdc_err(context, retval,
 		"return_sam_data(): decode_krb5_predicted_sam_response failed");
 	free(scratch.data);
 	goto cleanup;
@@ -1896,7 +1896,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
 
     /* We could use sr->sam_flags, but it may be absent or altered. */
     if (psr->sam_flags & KRB5_SAM_MUST_PK_ENCRYPT_SAD) {
-	com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+	kdc_err(context, retval = KRB5KDC_ERR_PREAUTH_FAILED,
 		"Unsupported SAM flag must-pk-encrypt-sad");
 	goto cleanup;
     }
@@ -1949,7 +1949,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
 	break;
 
     default:
-	com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+	kdc_err(context, retval = KRB5KDC_ERR_PREAUTH_FAILED,
 		"Unimplemented keytype for SAM key mixing");
 	goto cleanup;
     }
@@ -2017,7 +2017,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 
       retval = krb5_copy_principal(kdc_context, request->client, &newp);
       if (retval) {
-	com_err("krb5kdc", retval, "copying client name for preauth probe");
+	kdc_err(kdc_context, retval, "copying client name for preauth probe");
 	return retval;
       }
 
@@ -2075,7 +2075,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	  if (retval) {
 	    char *sname;
 	    krb5_unparse_name(kdc_context, request->client, &sname);
-	    com_err("krb5kdc", retval, 
+	    kdc_err(kdc_context, retval, 
 		    "snk4 finding the enctype and key <%s>", sname);
 	    free(sname);
 	    return retval;
@@ -2086,7 +2086,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 					       assoc_key, &encrypting_key,
 					       NULL);
 	  if (retval) {
-	    com_err("krb5kdc", retval, 
+	    kdc_err(kdc_context, retval, 
 		    "snk4 pulling out key entry");
 	    return retval;
 	  }
@@ -2213,13 +2213,14 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 
 	if (retval) {
 	  /* random key failed */
-	  com_err("krb5kdc", retval,"generating random challenge for preauth");
+	  kdc_err(kdc_context, retval,
+		  "generating random challenge for preauth");
 	  return retval;
 	}
 	/* now session_key has a key which we can pick bits out of */
 	/* we need six decimal digits. Grab 6 bytes, div 2, mod 10 each. */
 	if (session_key.length != 8) {
-	  com_err("krb5kdc", retval = KRB5KDC_ERR_ETYPE_NOSUPP,
+	  kdc_err(kdc_context, retval = KRB5KDC_ERR_ETYPE_NOSUPP,
 		  "keytype didn't match code expectations");
 	  return retval;
 	}
@@ -2236,9 +2237,8 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 
 	encrypting_key.enctype = ENCTYPE_DES_CBC_RAW;
 
-	if (retval) {
-	  com_err("krb5kdc", retval, "snk4 processing key");
-	}
+	if (retval)
+	    kdc_err(kdc_context, retval, "snk4 processing key");
 
 	{
 	    krb5_data plain;
@@ -2255,7 +2255,8 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
 
 	    if ((retval = krb5_c_encrypt(kdc_context, &encrypting_key,
 					 /* XXX */ 0, 0, &plain, &cipher))) {
-		com_err("krb5kdc", retval, "snk4 response generation failed");
+		kdc_err(kdc_context, retval,
+			"snk4 response generation failed");
 		return retval;
 	    }
 	}
@@ -2389,7 +2390,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
     
     if ((retval = decode_krb5_sam_response(&scratch, &sr))) {
 	scratch.data = 0;
-	com_err("krb5kdc", retval, "decode_krb5_sam_response failed");
+	kdc_err(context, retval, "decode_krb5_sam_response failed");
 	goto cleanup;
     }
 
@@ -2409,13 +2410,13 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 
       if ((retval = krb5_c_decrypt(context, &psr_key, /* XXX */ 0, 0,
 				   &tmpdata, &scratch))) {
-	  com_err("krb5kdc", retval, "decrypt track_id failed");
+	  kdc_err(context, retval, "decrypt track_id failed");
 	  goto cleanup;
       }
     }
 
     if ((retval = decode_krb5_predicted_sam_response(&scratch, &psr))) {
-	com_err("krb5kdc", retval,
+	kdc_err(context, retval,
 		"decode_krb5_predicted_sam_response failed -- replay attack?");
 	goto cleanup;
     }
@@ -2426,7 +2427,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
     if ((retval = krb5_unparse_name(context, psr->client, &princ_psr)))
 	goto cleanup;
     if (strcmp(princ_req, princ_psr) != 0) {
-	com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+	kdc_err(context, retval = KRB5KDC_ERR_PREAUTH_FAILED,
 		"Principal mismatch in SAM psr! -- replay attack?");
 	goto cleanup;
     }
@@ -2444,7 +2445,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 	 * psr's would be able to be replayed.
 	 */
 	if (timenow - psr->stime > rc_lifetime) {
-	    com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+	    kdc_err(context, retval = KRB5KDC_ERR_PREAUTH_FAILED,
 	    "SAM psr came back too late! -- replay attack?");
 	    goto cleanup;
 	}
@@ -2457,7 +2458,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 	rep.cusec = psr->susec;
 	retval = krb5_rc_store(kdc_context, kdc_rcache, &rep);
 	if (retval) {
-	    com_err("krb5kdc", retval, "SAM psr replay attack!");
+	    kdc_err(kdc_context, retval, "SAM psr replay attack!");
 	    goto cleanup;
 	}
     }
@@ -2474,13 +2475,13 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 
 	if ((retval = krb5_c_decrypt(context, &psr->sam_key, /* XXX */ 0,
 				     0, &sr->sam_enc_nonce_or_ts, &scratch))) {
-	    com_err("krb5kdc", retval, "decrypt nonce_or_ts failed");
+	    kdc_err(context, retval, "decrypt nonce_or_ts failed");
 	    goto cleanup;
 	}
     }
 
     if ((retval = decode_krb5_enc_sam_response_enc(&scratch, &esre))) {
-	com_err("krb5kdc", retval, "decode_krb5_enc_sam_response_enc failed");
+	kdc_err(context, retval, "decode_krb5_enc_sam_response_enc failed");
 	goto cleanup;
     }
 
@@ -2498,7 +2499,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 
   cleanup:
     if (retval)
-	com_err("krb5kdc", retval, "sam verify failure");
+	kdc_err(context, retval, "sam verify failure");
     if (scratch.data) free(scratch.data);
     if (sr) free(sr);
     if (psr) free(psr);
