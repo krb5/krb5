@@ -129,9 +129,10 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
             gss_headerlen += gss_trailerlen;
         }
 
-        if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+        if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
             code = kg_allocate_iov(header, (size_t) gss_headerlen);
-        else if (header->buffer.length < gss_headerlen)
+            outbuf = (unsigned char *)header->buffer.value;
+        } else if (header->buffer.length < gss_headerlen)
             code = KRB5_BAD_MSIZE;
         if (code != 0)
             goto cleanup;
