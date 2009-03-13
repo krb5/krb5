@@ -254,7 +254,13 @@ decrypt_as_reply(krb5_context 		context,
     if (key)
 	    decrypt_key = key;
     else {
-	if ((retval = krb5_principal2salt(context, request->client, &salt)))
+	/*
+	 * Use salt corresponding to the client principal supplied by
+	 * the KDC, which may differ from the requested principal if
+	 * canonicalization is in effect.  We will check
+	 * as_reply->client later in verify_as_reply.
+	 */
+	if ((retval = krb5_principal2salt(context, as_reply->client, &salt)))
 	    return(retval);
     
 	retval = (*key_proc)(context, as_reply->enc_part.enctype,
@@ -1384,6 +1390,22 @@ krb5_get_init_creds(krb5_context context,
 #endif /* APPLE_PKINIT */
 	goto cleanup;
 	}
+
+    /*
+     * If we haven't gotten a salt from another source yet, set up one
+     * corresponding to the client principal returned by the KDC.  We
+     * could get the same effect by passing local_as_reply->client to
+     * gak_fct below, but that would put the canonicalized client name
+     * in the prompt, which raises issues of needing to sanitize
+     * unprintable characters.  So for now we just let it affect the
+     * salt.  local_as_reply->client will be checked later on in
+     * verify_as_reply.
+     */
+    if (salt.length == SALT_TYPE_AFS_LENGTH && salt.data == NULL) {
+	ret = krb5_principal2salt(context, local_as_reply->client, &salt);
+	if (ret)
+	    goto cleanup;
+    }
 
     /* XXX For 1.1.1 and prior KDC's, when SAM is used w/ USE_SAD_AS_KEY,
        the AS_REP comes back encrypted in the user's longterm key
