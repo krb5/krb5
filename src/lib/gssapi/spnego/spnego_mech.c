@@ -1650,7 +1650,8 @@ spnego_gss_accept_sec_context(
 				 &negState, &return_token);
 	}
 cleanup:
-	if (return_token != NO_TOKEN_SEND && return_token != CHECK_MIC) {
+	if (return_token == INIT_TOKEN_SEND ||
+	    return_token == CONT_TOKEN_SEND) {
 		/* For acceptor-sends-first send a tokenInit */
 		int tmpret;
 
