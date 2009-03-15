@@ -85,12 +85,13 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     char                        *user=NULL, *filter=NULL, **subtree=NULL;
     unsigned int                tree=0, ntrees=1, princlen=0;
     krb5_error_code	        tempst=0, st=0;
-    char                        **values=NULL;
+    char                        **values=NULL, *cname=NULL;
     LDAP	                *ld=NULL;
     LDAPMessage	                *result=NULL, *ent=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
+    krb5_principal		cprinc=NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -145,7 +146,7 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
 		 * NOTE: a principalname k* in ldap server will return all the principals starting with a k
 		 */
 		for (i=0; values[i] != NULL; ++i) {
-		    if (strcasecmp(values[i], user) == 0) {
+		    if (strcmp(values[i], user) == 0) {
 			*nentries = 1;
 			break;
 		    }
@@ -156,8 +157,27 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
 		    continue;
 	    }
 
-	    if ((st = populate_krb5_db_entry(context, ldap_context, ld, ent, searchfor,
-			entries)) != 0)
+	    if ((values=ldap_get_values(ld, ent, "krbcanonicalname")) != NULL) {
+		if (values[0] && strcmp(values[0], user) != 0) {
+		    /* We matched an alias, not the canonical name. */
+		    if (flags & KRB5_KDB_FLAG_CANONICALIZE) {
+			st = krb5_ldap_parse_principal_name(values[0], &cname);
+			if (st != 0)
+			    goto cleanup;
+			st = krb5_parse_name(context, cname, &cprinc);
+			if (st != 0)
+			    goto cleanup;
+		    } else /* No canonicalization, so don't return aliases. */
+			*nentries = 0;
+		}
+		ldap_value_free(values);
+		if (*nentries == 0)
+		    continue;
+	    }
+
+	    if ((st = populate_krb5_db_entry(context, ldap_context, ld, ent,
+					     cprinc ? cprinc : searchfor,
+					     entries)) != 0)
 		goto cleanup;
 	}
 	ldap_msgfree(result);
@@ -189,6 +209,12 @@ cleanup:
 
     if (user)
 	free(user);
+
+    if (cname)
+	free(cname);
+
+    if (cprinc)
+	krb5_free_principal(context, cprinc);
 
     return st;
 }

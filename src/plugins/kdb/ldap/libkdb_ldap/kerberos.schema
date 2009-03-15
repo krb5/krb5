@@ -20,6 +20,15 @@
 #                    specific syntax definitions
 #                 Kerberos Object Class(6) class# version#
 #                    specific class definitions
+#
+#    iso(1)
+#      member-body(2)
+#        United States(840)
+#          mit (113554)
+#            infosys(1)
+#              ldap(4)
+#                attributeTypes(1)
+#                  Kerberos(6)
 
 ########################################################################
 
@@ -36,6 +45,17 @@ attributetype ( 2.16.840.1.113719.1.301.4.1.1
 		SUBSTR caseExactSubstringsMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
 
+##### If there are multiple krbPrincipalName values for an entry, this
+##### is the canonical principal name in the RFC 1964 specified
+##### format.  (If this attribute does not exist, then all
+##### krbPrincipalName values are treated as canonical.)
+
+attributetype ( 1.2.840.113554.1.4.1.6.1
+                NAME 'krbCanonicalName'
+                EQUALITY caseExactIA5Match
+                SUBSTR caseExactSubstringsMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+                SINGLE-VALUE)
 
 ##### This specifies the type of the principal, the types could be any of
 ##### the types mentioned in section 6.2 of RFC 4120
@@ -422,7 +442,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.46.1
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
 
 
-##### This stores the alternate principal names for the principal in the RFC 1961 specified format
+##### This stores the alternate principal names for the principal in the RFC 1964 specified format
 
 attributetype ( 2.16.840.1.113719.1.301.4.47.1
                 NAME 'krbPrincipalAliases'
@@ -556,7 +576,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.8.1
                 NAME 'krbPrincipalAux'
 		SUP top
                 AUXILIARY
-                MAY ( krbPrincipalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData ) )
+                MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData ) )
 
 
 ###### This class is used to create additional principals and stand alone principals.
