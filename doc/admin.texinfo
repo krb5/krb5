@@ -4039,6 +4039,26 @@ file.
 Add krb5principalname to the indexes in slapd.conf to speed up the access.
 @end enumerate
 
+With the LDAP back end it is possible to provide aliases for principal
+entries.  Currently we provide no mechanism provided for creating
+aliases, so it must be done by direct manipulation of the LDAP
+entries.
+
+An entry with aliases contains multiple values of the krbPrincipalName
+attribute.  Since LDAP attribute values are not ordered, it is
+necessary to specify which principal name is canonical, by using the
+krbCanonicalName attribute.  Therefore, to create aliases for an
+entry, first set the krbCanonicalName attribute of the entry to the
+canonical principal name (which should be identical to the
+pre-existing krbPrincipalName value), and then add additional
+krbPrincipalName attributes for the aliases.
+
+Principal aliases are only returned by the KDC when the client
+requests canonicalization.  Canonicalization is normally requested for
+service principals; for client principals, an explicit flag is often
+required (e.g. @code{kinit -C}) and canonicalization is only performed
+for initial ticket requests.
+
 @node Application Servers, Backups of Secure Hosts, Configuring Kerberos with OpenLDAP back-end, Top
 @chapter Application Servers
 
