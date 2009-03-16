@@ -454,7 +454,9 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
                                     &master_keyblock, 0, &tmp_mkey_list) == 0) {
             krb5_dbe_free_key_list(kdc_context, master_keylist);
             master_keylist = tmp_mkey_list;
-	    krb5_db_set_mkey_list(kdc_context, master_keylist);
+	    retval = krb5_db_set_mkey_list(kdc_context, master_keylist);
+            if (retval)
+                goto errout;
             if ((retval = krb5_dbe_find_mkey(kdc_context, master_keylist,
                                              server, &mkey_ptr))) {
                 goto errout;
@@ -469,10 +471,10 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
 				   -1, (krb5_int32)ticket->enc_part.kvno,
 				   &server_key);
     if (retval)
-	goto errout;
+        goto errout;
     if (!server_key) {
-	retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
-	goto errout;
+        retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+        goto errout;
     }
     if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
 	retval = krb5_dbekd_decrypt_key_data(kdc_context, mkey_ptr,

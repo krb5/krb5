@@ -444,7 +444,12 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
 		"while setting master key for realm %s", realm);
 	goto whoops;
     }
-    krb5_db_set_mkey_list(rdp->realm_context, rdp->mkey_list);
+    kret = krb5_db_set_mkey_list(rdp->realm_context, rdp->mkey_list);
+    if (kret) {
+        kdc_err(rdp->realm_context, kret,
+                "while setting master key list for realm %s", realm);
+        goto whoops;
+    }
 
     /* Set up the keytab */
     if ((kret = krb5_ktkdb_resolve(rdp->realm_context, NULL,
