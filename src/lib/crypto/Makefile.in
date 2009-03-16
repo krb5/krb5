@@ -16,6 +16,7 @@ DEFS=
 
 EXTRADEPSRCS=\
 	$(srcdir)/t_nfold.c	\
+	$(srcdir)/t_cf2.c \
 	$(srcdir)/t_encrypt.c	\
 	$(srcdir)/t_prf.c \
 	$(srcdir)/t_prng.c	\
@@ -205,12 +206,17 @@ libcrypto.lib:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_pkcs5
+check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_pkcs5 t_cf2
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	diff t_prng.output $(srcdir)/t_prng.expected
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
+	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
+	diff t_prf.output $(srcdir)/t_prf.expected
+	$(RUN_SETUP) $(VALGRIND) ./t_cf2 <$(srcdir)/t_cf2.in >t_cf2.output
+	diff t_cf2.output $(srcdir)/t_cf2.expected
+
 
 #	$(RUN_SETUP) $(VALGRIND) ./t_pkcs5
 
@@ -222,6 +228,10 @@ t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPO
 
 t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_prf.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+
+t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_cf2.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)
@@ -242,7 +252,7 @@ t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 
 clean::
 	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o t_prng.o t_prng \
-		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o
+		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o t_cf2 t_cf2.o
 	-$(RM) t_prng.output
 
 all-windows::
