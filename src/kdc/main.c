@@ -414,7 +414,6 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
 		rdp->realm_mpname, realm);
 	goto whoops;
     }
-
 #if 0 /************** Begin IFDEF'ed OUT *******************************/
     /*
      * Commenting krb5_db_verify_master_key out because it requires the most
@@ -445,6 +444,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
 		"while setting master key for realm %s", realm);
 	goto whoops;
     }
+    krb5_db_set_mkey_list(rdp->realm_context, rdp->mkey_list);
 
     /* Set up the keytab */
     if ((kret = krb5_ktkdb_resolve(rdp->realm_context, NULL,
