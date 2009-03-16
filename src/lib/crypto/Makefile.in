@@ -36,6 +36,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 STLIBOBJS=\
 	aead.o		 	\
 	block_size.o		\
+	cf2.o \
 	checksum_length.o	\
 	cksumtype_to_string.o	\
 	cksumtypes.o		\
@@ -79,6 +80,7 @@ STLIBOBJS=\
 OBJS=\
 	$(OUTPRE)aead.$(OBJEXT)		 	\
 	$(OUTPRE)block_size.$(OBJEXT)		\
+	$(OUTPRE)cf2$(OBJEXT) \
 	$(OUTPRE)checksum_length.$(OBJEXT)	\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
@@ -151,6 +153,7 @@ SRCS=\
 	$(srcdir)/old_api_glue.c	\
 	$(srcdir)/pbkdf2.c	\
 	$(srcdir)/prf.c \
+	$(srcdir)/cf2.c \
 	$(srcdir)/prng.c		\
 	$(srcdir)/random_to_key.c	\
 	$(srcdir)/state.c \

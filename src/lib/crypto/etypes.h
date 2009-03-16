@@ -67,3 +67,17 @@ struct krb5_keytypes {
 
 extern const struct krb5_keytypes krb5_enctypes_list[];
 extern const int krb5_enctypes_length;
+
+static inline const struct krb5_keytypes*
+find_enctype (krb5_enctype enctype)
+{
+    int i;
+    for (i=0; i<krb5_enctypes_length; i++) {
+	if (krb5_enctypes_list[i].etype == enctype)
+	    break;
+    }
+
+    if (i == krb5_enctypes_length)
+	return NULL;
+    return &krb5_enctypes_list[i];
+}
