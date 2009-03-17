@@ -1248,7 +1248,8 @@ spnego_gss_accept_sec_context(void *ct,
 				 &negState, &return_token);
 	}
 cleanup:
-	if (return_token != NO_TOKEN_SEND && return_token != CHECK_MIC) {
+	if (return_token == INIT_TOKEN_SEND ||
+	    return_token == CONT_TOKEN_SEND) {
 		tmpret = make_spnego_tokenTarg_msg(negState, sc->internal_mech,
 						   &mechtok_out, mic_out,
 						   return_token,
