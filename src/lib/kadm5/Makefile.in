@@ -98,5 +98,10 @@ clean-unix:: clean-libobjs
 
 clean-windows::
 
+install-headers-unix install:: $(BUILD_HDRS)
+	$(INSTALL_DATA) $(srcdir)/admin.h $(DESTDIR)$(KRB5_INCDIR)$(S)kadm5$(S)admin.h
+	$(INSTALL_DATA) chpass_util_strings.h $(DESTDIR)$(KRB5_INCDIR)$(S)kadm5$(S)chpass_util_strings.h
+	$(INSTALL_DATA) kadm_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kadm5$(S)kadm_err.h
+
 @libobj_frag@
 
