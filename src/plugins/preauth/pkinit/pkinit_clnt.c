@@ -38,7 +38,6 @@
 #include <dlfcn.h>
 #include <sys/stat.h>
 
-#include "k5-int.h"
 #include "pkinit.h"
 
 #ifdef LONGHORN_BETA_COMPAT

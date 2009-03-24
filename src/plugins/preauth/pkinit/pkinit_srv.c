@@ -33,7 +33,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include "k5-int.h"
 #include "pkinit.h"
 
 static krb5_error_code
