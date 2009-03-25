@@ -216,20 +216,31 @@ default.
 \fBark\fP
 Adds a random key.
 .TP
-\fBadd_mkey\fP ...
-This option needs documentation.
+\fBadd_mkey\fP [\fB\-e etype\fP] [\fB\-s\fP] 
+Adds a new master key to the K/M (master key) principal.  Existing master keys will remain.
+The
+.B \-e etype
+option allows specification of the enctype of the new master key.  The
+.B \-s
+option stashes the new master key in a local stash file which will be created if it doesn't already exist.
 .TP
-\fBuse_mkey\fP ...
-This option needs documentation.
+\fBuse_mkey\fP \fImkeyVNO [\fBtime\fP]
+Sets the activation time of the master key specified by 
+.B mkeyVNO.
+Once a master key is active (i.e. its activation time has been reached) it will then be used to encrypt principal keys either when the principal keys change, are newly created or when the update_princ_encryption command is run.  If the
+.B time 
+argument is provided then that will be the activation time otherwise the current time is used by default.  The format of the optional
+.B time 
+argument is that specified in the Time Formats section of the kadmin man page.
 .TP
 \fBlist_mkeys\fP
-This option needs documentation.
+List all master keys from most recent to earliest in K/M principal. The output will show the KVNO, enctype and salt for each mkey similar to kadmin getprinc output.  A * following an mkey denotes the currently active master key. 
 .TP
 \fBupdate_princ_encryption\fP [\fB\-f\fP] [\fB\-n\fP] [\fB\-v\fP] [\fBprinc\-pattern\fP]
 Update all principal records (or only those matching the
 .B princ\-pattern
-glob pattern) to re-encrypt the key data using the latest version of
-the database master key, if they are encrypted using older versions,
+glob pattern) to re-encrypt the key data using the active
+database master key, if they are encrypted using older versions,
 and give a count at the end of the number of principals updated.
 If the
 .B \-f
