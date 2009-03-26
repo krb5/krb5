@@ -1121,29 +1121,42 @@ krb5_error_code decode_krb5_fast_req
   cleanup(free);
 }
 
-krb5_error_code decode_krb5_pa_fx_fast_reply
+krb5_error_code decode_krb5_fast_response
 (const krb5_data *code, krb5_fast_response **repptr)
 {
-  setup(krb5_fast_response *);
+    setup(krb5_fast_response *);
 
-  alloc_field(rep);
-  clear_field(rep, finished);
-  clear_field(rep, padata);
-  clear_field(rep,rep_key);
-  {
-      int indef;
-      unsigned int taglen;
-      next_tag_from_buf(buf);
-      if (tagnum != 0)
-          clean_return(ASN1_BAD_ID);
-  }
-  {begin_structure();
-  get_field(rep->padata, 0, asn1_decode_sequence_of_pa_data);
-  opt_field(rep->rep_key, 1, asn1_decode_encryption_key_ptr);
-  opt_field(rep->finished, 2, asn1_decode_fast_finished_ptr);
-  end_structure(); }
-  rep->magic = KV5M_FAST_RESPONSE;
-  cleanup(free);
+    alloc_field(rep);
+    clear_field(rep, finished);
+    clear_field(rep, padata);
+    clear_field(rep,rep_key);
+    {begin_structure();
+    get_field(rep->padata, 0, asn1_decode_sequence_of_pa_data);
+    opt_field(rep->rep_key, 1, asn1_decode_encryption_key_ptr);
+    opt_field(rep->finished, 2, asn1_decode_fast_finished_ptr);
+    end_structure(); }
+    rep->magic = KV5M_FAST_RESPONSE;
+    cleanup(free);
+}
+
+krb5_error_code decode_krb5_pa_fx_fast_reply
+(const krb5_data *code, krb5_enc_data **repptr)
+{
+    setup(krb5_enc_data *);
+    alloc_field(rep);
+    {
+        int indef;
+        unsigned int taglen;
+        next_tag_from_buf(buf);
+        if (tagnum != 0)
+            clean_return(ASN1_BAD_ID);
+    }
+    {begin_structure();
+    get_field(*rep, 0, asn1_decode_encrypted_data);
+    end_structure();
+    }
+
+    cleanup(free);
 }
 
   

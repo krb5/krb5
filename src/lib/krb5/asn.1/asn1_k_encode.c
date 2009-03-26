@@ -1244,8 +1244,13 @@ static unsigned int fast_response_optional (const void *p)
 }
 DEFSEQTYPE( fast_response, krb5_fast_response, fast_response_fields, fast_response_optional);
 
-DEFFIELDTYPE(pa_fx_fast_reply, krb5_fast_response,
-             FIELDOF_ENCODEAS(krb5_fast_response, fast_response, 0));
+static const struct field_info fast_rep_fields[] = {
+  FIELDOF_ENCODEAS(krb5_enc_data, encrypted_data, 0),
+};
+DEFSEQTYPE(fast_rep, krb5_enc_data, fast_rep_fields, 0);
+
+DEFFIELDTYPE(pa_fx_fast_reply, krb5_enc_data,
+             FIELDOF_ENCODEAS(krb5_enc_data, fast_rep, 0));
 
 
 
@@ -1319,6 +1324,7 @@ MAKE_FULL_ENCODER(encode_krb5_etype_list, etype_list);
 MAKE_FULL_ENCODER(encode_krb5_pa_fx_fast_request, pa_fx_fast_request);
 MAKE_FULL_ENCODER( encode_krb5_fast_req, fast_req);
 MAKE_FULL_ENCODER( encode_krb5_pa_fx_fast_reply, pa_fx_fast_reply);
+MAKE_FULL_ENCODER(encode_krb5_fast_response, fast_response);
 
 
 
