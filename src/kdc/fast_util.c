@@ -116,9 +116,144 @@ void kdc_free_rstate
     return;
     if (s->armor_key)
 	krb5_free_keyblock(kdc_context, s->armor_key);
+    if (s->reply_key)
+	krb5_free_keyblock(kdc_context, s->reply_key);
     if (s->cookie) {
 	free(s->cookie->contents);
 	free(s->cookie);
     }
     free(s);
+}
+
+krb5_error_code kdc_fast_response_handle_padata
+(struct kdc_request_state *state, krb5_kdc_rep *rep, const krb5_data *pkt)
+{
+    krb5_error_code retval = 0;
+    krb5_fast_finished finish;
+    krb5_fast_response fast_response;
+    krb5_data *encoded_ticket = NULL;
+    krb5_data *encoded_fast_response = NULL;
+    krb5_pa_data *pa = NULL, **pa_array;
+    krb5_cksumtype cksumtype = CKSUMTYPE_RSA_MD5;
+    
+    if (!state->armor_key)
+	return 0;
+    memset(&finish, 0, sizeof(finish));
+    fast_response.padata = rep->padata;
+    fast_response.rep_key = state->reply_key; 
+    fast_response.finished = &finish;
+    finish.client = rep->client;
+    pa_array = calloc(3, sizeof(*pa_array));
+    if (pa_array == NULL)
+	retval = ENOMEM;
+    pa = calloc(1, sizeof(krb5_pa_data));
+    if (retval == 0 && pa == NULL)
+	retval = ENOMEM;
+    if (retval == 0)
+	retval = krb5_us_timeofday(kdc_context, &finish.timestamp, &finish.usec);
+    if (retval == 0)
+	retval = encode_krb5_ticket(rep->ticket, &encoded_ticket);
+    if (retval == 0)
+	retval = krb5_c_make_checksum(kdc_context, cksumtype,
+				      state->armor_key, KRB5_KEYUSAGE_FAST_FINISHED,
+				      encoded_ticket, &finish.ticket_checksum);
+/* xxx checksum should be something else; sticking ticket_checksum there is a placeholder*/
+    if (retval == 0)
+	retval = krb5_c_make_checksum(kdc_context, cksumtype,
+				      state->armor_key, KRB5_KEYUSAGE_FAST_FINISHED,
+				      encoded_ticket, &finish.checksum);
+    if (retval == 0)
+	retval = encode_krb5_fast_response(&fast_response,  &encoded_fast_response);
+    if (retval == 0) {
+	pa[0].pa_type = KRB5_PADATA_FX_FAST;
+	pa[0].length = encoded_fast_response->length;
+	pa[0].contents = (unsigned char *)  encoded_fast_response->data;
+	pa_array[0] = &pa[0];
+	rep->padata = pa_array;
+	pa_array = NULL;
+	encoded_fast_response = NULL;
+	pa = NULL;
+    }
+    if (pa)
+      free(pa);
+    if (encoded_fast_response)
+	krb5_free_data(kdc_context, encoded_fast_response);
+    if (encoded_ticket)
+	krb5_free_data(kdc_context, encoded_ticket);
+    if (finish.checksum.contents)
+	krb5_free_checksum_contents(kdc_context, &finish.checksum);
+    if (finish.ticket_checksum.contents)
+	krb5_free_checksum_contents(kdc_context, &finish.checksum);
+    return retval;
+}
+
+/*
+ * We assume the caller is responsible for passing us an in_padata
+ * sufficient to include in a FAST error.  In the FAST case we will
+ * throw away the e_data in the error (if any); in the non-FAST case
+ * we will not use the in_padata.
+ */
+krb5_error_code kdc_fast_handle_error
+(krb5_context context, struct kdc_request_state *state,
+ krb5_pa_data  **in_padata, krb5_error *err)
+{
+    krb5_error_code retval = 0;
+    krb5_fast_response resp;
+    krb5_error fx_error;
+    krb5_data *encoded_fx_error = NULL, *encoded_fast_response = NULL;
+    krb5_pa_data pa[2];
+    krb5_pa_data *outer_pa[3];
+    krb5_pa_data **inner_pa = NULL;
+    size_t size = 0;
+    krb5_data *encoded_e_data = NULL;
+
+    memset(outer_pa, 0, sizeof(outer_pa));
+    if (!state->armor_key)
+	return 0;
+    fx_error = *err;
+    fx_error.e_data.data = NULL;
+    fx_error.e_data.length = 0;
+    for (size = 0; in_padata&&in_padata[size]; size++);
+    size +=3;
+    inner_pa = calloc(size, sizeof(krb5_pa_data *));
+    if (inner_pa == NULL)
+	retval = ENOMEM;
+    if (retval == 0)
+	for (size=0; in_padata&&in_padata[size]; size++)
+	    inner_pa[size] = in_padata[size];
+    if (retval == 0)
+	retval = encode_krb5_error(&fx_error, &encoded_fx_error);
+    if (retval == 0) {
+	pa[0].pa_type = KRB5_PADATA_FX_ERROR;
+	pa[0].length = encoded_fx_error->length;
+	pa[0].contents = (unsigned char *) encoded_fx_error->data;
+	inner_pa[size++] = &pa[0];
+	resp.padata = inner_pa;
+	resp.rep_key = NULL;
+	resp.finished = NULL;
+    }
+    if (retval == 0)
+	retval = encode_krb5_fast_response(&resp, &encoded_fast_response);
+    if (inner_pa)
+	free(inner_pa); /*contained storage from caller and our stack*/
+    if (retval == 0) {
+	pa[0].pa_type = KRB5_PADATA_FX_FAST;
+	pa[0].length = encoded_fast_response->length;
+	pa[0].contents = (unsigned char *) encoded_fast_response->data;
+	outer_pa[0] = &pa[0];
+    }
+    retval = encode_krb5_padata_sequence(outer_pa, &encoded_e_data);
+    if (retval == 0) {
+      /*process_as holds onto a pointer to the original e_data and frees it*/
+	err->e_data = *encoded_e_data;
+	free(encoded_e_data); /*contents belong to err*/
+	encoded_e_data = NULL;
+    }
+    if (encoded_e_data)
+	krb5_free_data(kdc_context, encoded_e_data);
+    if (encoded_fast_response)
+	krb5_free_data(kdc_context, encoded_fast_response);
+    if (encoded_fx_error)
+	krb5_free_data(kdc_context, encoded_fx_error);
+    return retval;
 }
