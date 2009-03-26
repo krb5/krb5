@@ -1177,6 +1177,79 @@ DEFSEQTYPE(pa_pac_request, krb5_pa_pac_req, pa_pac_request_fields, 0);
 DEFFIELDTYPE(etype_list, krb5_etype_list,
              FIELDOF_SEQOF_INT32(krb5_etype_list, int32_ptr, etypes, length, -1));
 
+/* draft-ietf-krb-wg-preauth-framework-09 */
+static const struct field_info fast_armor_fields[] = {
+    FIELDOF_NORM(krb5_fast_armor, int32, armor_type, 0),
+    FIELDOF_NORM( krb5_fast_armor, ostring_data, armor_value, 1),
+};
+
+DEFSEQTYPE( fast_armor, krb5_fast_armor, fast_armor_fields, 0);
+DEFPTRTYPE( ptr_fast_armor, fast_armor);
+
+static const struct field_info fast_armored_req_fields[] = {
+    FIELDOF_OPT( krb5_fast_armored_req, ptr_fast_armor, armor, 0, 0),
+    FIELDOF_NORM( krb5_fast_armored_req, checksum, req_checksum, 1),
+    FIELDOF_NORM( krb5_fast_armored_req, encrypted_data, enc_part, 2),
+};
+
+static unsigned int fast_armored_req_optional (const void *p) {
+    const krb5_fast_armored_req *val = p;
+    unsigned int optional = 0;
+    if (val->armor)
+        optional |= (1u)<<0;
+    return optional;
+}
+
+DEFSEQTYPE( fast_armored_req, krb5_fast_armored_req, fast_armored_req_fields, fast_armored_req_optional);
+DEFFIELDTYPE( pa_fx_fast_request, krb5_fast_armored_req,
+              FIELDOF_ENCODEAS( krb5_fast_armored_req, fast_armored_req, 0));
+
+static const struct field_info fast_req_fields[] = {
+    FIELDOF_NORM(krb5_fast_req, int32, fast_options, 0),
+    FIELDOF_NORM( krb5_fast_req, ptr_seqof_pa_data, req_body.padata, 1),
+    FIELDOF_NORM( krb5_fast_req, kdc_req_body, req_body, 2),
+};
+
+DEFSEQTYPE(fast_req, krb5_fast_req, fast_req_fields, 0);
+
+
+static const struct field_info fast_finished_fields[] = {
+    FIELDOF_NORM( krb5_fast_finished, kerberos_time, timestamp, 0),
+    FIELDOF_NORM( krb5_fast_finished, int32, usec, 1),
+    FIELDOF_NORM( krb5_fast_finished, realm_of_principal, client, 2),
+    FIELDOF_NORM(krb5_fast_finished, principal, client, 3),
+    FIELDOF_NORM( krb5_fast_finished, checksum, checksum, 4),
+    FIELDOF_NORM( krb5_fast_finished, checksum, ticket_checksum, 5),
+};
+
+DEFSEQTYPE( fast_finished, krb5_fast_finished, fast_finished_fields, 0);
+
+DEFPTRTYPE( ptr_fast_finished, fast_finished);
+
+static const struct field_info fast_response_fields[] = {
+    FIELDOF_NORM(krb5_fast_response, ptr_seqof_pa_data, padata, 0),
+    FIELDOF_OPT( krb5_fast_response, ptr_encryption_key, rep_key, 1, 1),
+    FIELDOF_OPT( krb5_fast_response, ptr_fast_finished, finished, 2, 2),
+};
+
+static unsigned int fast_response_optional (const void *p)
+{
+    unsigned int optional = 0;
+    const krb5_fast_response *val = p;
+    if (val->rep_key)
+        optional |= (1u <<1);
+    if (val->finished)
+        optional |= (1u<<2);
+    return optional;
+}
+DEFSEQTYPE( fast_response, krb5_fast_response, fast_response_fields, fast_response_optional);
+
+DEFFIELDTYPE(pa_fx_fast_reply, krb5_fast_response,
+             FIELDOF_ENCODEAS(krb5_fast_response, fast_response, 0));
+
+
+
+
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
 
@@ -1243,6 +1316,9 @@ MAKE_FULL_ENCODER(encode_krb5_pa_svr_referral_data, pa_svr_referral_data);
 MAKE_FULL_ENCODER(encode_krb5_pa_server_referral_data, pa_server_referral_data);
 MAKE_FULL_ENCODER(encode_krb5_etype_list, etype_list);
 
+MAKE_FULL_ENCODER(encode_krb5_pa_fx_fast_request, pa_fx_fast_request);
+MAKE_FULL_ENCODER( encode_krb5_fast_req, fast_req);
+MAKE_FULL_ENCODER( encode_krb5_pa_fx_fast_reply, pa_fx_fast_reply);
 
 
 

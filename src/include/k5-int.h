@@ -1288,6 +1288,16 @@ void KRB5_CALLCONV krb5_free_pa_pac_req
 void KRB5_CALLCONV krb5_free_etype_list
 	(krb5_context, krb5_etype_list * );
 
+void KRB5_CALLCONV krb5_free_fast_armor
+(krb5_context, krb5_fast_armor *);
+void KRB5_CALLCONV krb5_free_fast_armored_req
+(krb5_context, krb5_fast_armored_req *);
+void KRB5_CALLCONV krb5_free_fast_req(krb5_context, krb5_fast_req *);
+void KRB5_CALLCONV krb5_free_fast_finished
+(krb5_context, krb5_fast_finished *);
+void KRB5_CALLCONV krb5_free_fast_response
+(krb5_context, krb5_fast_response *);
+
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
 #include "k5-plugin.h"
@@ -1597,6 +1607,13 @@ krb5_error_code encode_krb5_pa_pac_req
 krb5_error_code encode_krb5_etype_list
 	(const krb5_etype_list * , krb5_data **);
 
+krb5_error_code encode_krb5_pa_fx_fast_request
+(const krb5_fast_armored_req *, krb5_data **);
+krb5_error_code encode_krb5_fast_req
+(const krb5_fast_req *, krb5_data **);
+krb5_error_code encode_krb5_pa_fx_fast_reply
+(const krb5_fast_response *, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1755,6 +1772,16 @@ krb5_error_code decode_krb5_pa_pac_req
 
 krb5_error_code decode_krb5_etype_list
 	(const krb5_data *, krb5_etype_list **);
+
+krb5_error_code decode_krb5_pa_fx_fast_request
+(const krb5_data *, krb5_fast_armored_req **);
+
+krb5_error_code decode_krb5_fast_req
+(const krb5_data *, krb5_fast_req **);
+
+
+krb5_error_code decode_krb5_pa_fx_fast_reply
+(const krb5_data *, krb5_fast_response **);
 
 struct _krb5_key_data;		/* kdb.h */
 

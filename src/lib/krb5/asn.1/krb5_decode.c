@@ -94,9 +94,9 @@ if ((var) == NULL) clean_return(ENOMEM)
 /* process a structure *******************************************/
 
 /* decode an explicit tag and place the number in tagnum */
-#define next_tag()                              \
+#define next_tag_from_buf(buf)                              \
 { taginfo t2;                                   \
-  retval = asn1_get_tag_2(&subbuf, &t2);        \
+  retval = asn1_get_tag_2(&(buf), &t2);        \
   if (retval) clean_return(retval);             \
   asn1class = t2.asn1class;                     \
   construction = t2.construction;               \
@@ -104,6 +104,8 @@ if ((var) == NULL) clean_return(ENOMEM)
   indef = t2.indef;                             \
   taglen = t2.length;                           \
 }
+#define next_tag() next_tag_from_buf(subbuf)
+
 
 static asn1_error_code
 asn1_get_eoc_tag (asn1buf *buf)
@@ -1080,6 +1082,71 @@ decode_krb5_etype_list(const krb5_data *code, krb5_etype_list **repptr)
     cleanup(free);
 }
 
+krb5_error_code decode_krb5_pa_fx_fast_request
+(const krb5_data *code, krb5_fast_armored_req **repptr)
+{
+  setup(krb5_fast_armored_req *);
+  alloc_field(rep);
+  clear_field(rep, armor);
+  {
+      int indef;
+      unsigned int taglen;
+      next_tag_from_buf(buf);
+      if (tagnum != 0)
+          clean_return(ASN1_BAD_ID);
+  }
+  {begin_structure();
+  opt_field(rep->armor, 0, asn1_decode_fast_armor_ptr);
+  get_field(rep->req_checksum, 1, asn1_decode_checksum);
+  get_field(rep->enc_part, 2, asn1_decode_encrypted_data);
+  end_structure();}
+  rep->magic = KV5M_FAST_ARMORED_REQ;
+  cleanup(free);
+}
+
+krb5_error_code decode_krb5_fast_req
+(const krb5_data *code, krb5_fast_req **repptr)
+{
+  setup(krb5_fast_req *);
+  alloc_field(rep);
+  clear_field(rep, req_body.padata);
+  {begin_structure();
+  
+
+  get_field(rep->fast_options, 0, asn1_decode_int32);
+  opt_field(rep->req_body.padata, 1, asn1_decode_sequence_of_pa_data);
+  get_field(rep->req_body, 2, asn1_decode_kdc_req_body);
+  end_structure(); }
+  rep->magic  = KV5M_FAST_REQ;
+  cleanup(free);
+}
+
+krb5_error_code decode_krb5_pa_fx_fast_reply
+(const krb5_data *code, krb5_fast_response **repptr)
+{
+  setup(krb5_fast_response *);
+
+  alloc_field(rep);
+  clear_field(rep, finished);
+  clear_field(rep, padata);
+  clear_field(rep,rep_key);
+  {
+      int indef;
+      unsigned int taglen;
+      next_tag_from_buf(buf);
+      if (tagnum != 0)
+          clean_return(ASN1_BAD_ID);
+  }
+  {begin_structure();
+  get_field(rep->padata, 0, asn1_decode_sequence_of_pa_data);
+  opt_field(rep->rep_key, 1, asn1_decode_encryption_key_ptr);
+  opt_field(rep->finished, 2, asn1_decode_fast_finished_ptr);
+  end_structure(); }
+  rep->magic = KV5M_FAST_RESPONSE;
+  cleanup(free);
+}
+
+  
 #ifndef DISABLE_PKINIT
 krb5_error_code
 decode_krb5_pa_pk_as_req(const krb5_data *code, krb5_pa_pk_as_req **repptr)

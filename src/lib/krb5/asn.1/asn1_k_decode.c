@@ -1625,6 +1625,60 @@ error_out:
     return retval;
 }
 
+asn1_error_code asn1_decode_fast_armor
+(asn1buf *buf, krb5_fast_armor *val)
+{
+    setup();
+    val->armor_value.data = NULL;
+    {begin_structure();
+    get_field(val->armor_type, 0, asn1_decode_int32);
+    get_lenfield(val->armor_value.length, val->armor_value.data,
+                 1, asn1_decode_charstring);
+    end_structure();
+    }
+    return 0;
+ error_out:
+    krb5_free_data_contents( NULL, &val->armor_value);
+    return retval;
+}
+
+asn1_error_code asn1_decode_fast_armor_ptr
+(asn1buf *buf, krb5_fast_armor **valptr)
+{
+    decode_ptr(krb5_fast_armor *, asn1_decode_fast_armor);
+}
+
+asn1_error_code asn1_decode_fast_finished
+(asn1buf *buf, krb5_fast_finished *val)
+{
+    setup();
+    val->client = NULL;
+    val->checksum.contents = NULL;
+    val->ticket_checksum.contents = NULL;
+    {begin_structure();
+    get_field(val->timestamp, 0, asn1_decode_kerberos_time);
+    get_field(val->usec, 1, asn1_decode_int32);
+    alloc_field(val->client);
+    get_field(val->client, 2, asn1_decode_realm);
+    get_field(val->client, 3, asn1_decode_principal_name);
+    get_field(val->checksum, 4, asn1_decode_checksum);
+    get_field(val->ticket_checksum, 5, asn1_decode_checksum);
+    end_structure();
+    }
+    return 0;
+ error_out:
+    krb5_free_principal(NULL, val->client);
+    krb5_free_checksum_contents(NULL, &val->checksum);
+    krb5_free_checksum_contents( NULL, &val->ticket_checksum);
+    return retval;
+}
+asn1_error_code asn1_decode_fast_finished_ptr
+(asn1buf *buf, krb5_fast_finished **valptr)
+{
+    decode_ptr( krb5_fast_finished *, asn1_decode_fast_finished);
+}
+
+  
 #ifndef DISABLE_PKINIT
 /* PKINIT */
 
