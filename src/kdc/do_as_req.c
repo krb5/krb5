@@ -118,6 +118,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     const char *emsg = 0;
     krb5_keylist_node *tmp_mkey_list;
     struct kdc_request_state *state = NULL;
+    krb5_data encoded_req_body;
     
 
 #if APPLE_PKINIT
@@ -140,7 +141,12 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	status = "constructing state";
 	goto errout;
     }
-    errcode = kdc_find_fast(&request, req_pkt, NULL /*TGS key*/, state);
+    if (fetch_asn1_field((unsigned char *) req_pkt->data,
+			 1, 4, &encoded_req_body) != 0) {
+    errcode = ASN1_BAD_ID;
+    status = "Finding req_body";
+}
+    errcode = kdc_find_fast(&request, &encoded_req_body, NULL /*TGS key*/, state);
     if (errcode) {
 	status = "error decoding FAST";
 	goto errout;
