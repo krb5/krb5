@@ -133,6 +133,12 @@ static krb5_error_code verify_enc_timestamp
 		    krb5_data **e_data,
 		    krb5_authdata ***authz_data);
 
+static krb5_error_code get_enc_ts
+    (krb5_context, krb5_kdc_req *request,
+		    krb5_db_entry *client, krb5_db_entry *server,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_system_context,
+		    krb5_pa_data *data);
 static krb5_error_code get_etype_info
     (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
@@ -279,7 +285,7 @@ static krb5_preauth_systems static_preauth_systems[] = {
 	NULL,
 	NULL,
 	NULL,
-        0,
+        get_enc_ts,
 	verify_enc_timestamp,
 	0
     },
@@ -1365,7 +1371,20 @@ request_contains_enctype (krb5_context context,  const krb5_kdc_req *request,
     return 0;
 }
 
-
+static krb5_error_code get_enc_ts
+    (krb5_context context, krb5_kdc_req *request,
+		    krb5_db_entry *client, krb5_db_entry *server,
+		    preauth_get_entry_data_proc get_entry_data_proc,
+		    void *pa_system_context,
+		    krb5_pa_data *data)
+{
+  struct kdc_request_state *state = request->kdc_state;
+  if (state->armor_key)
+    return ENOENT;
+  return 0;
+}
+  
+  
 static krb5_error_code
 verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 		     krb5_data *req_pkt,
