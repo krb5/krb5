@@ -113,10 +113,7 @@ krb5_error_code  kdc_find_fast
     krb5_clear_error_message(kdc_context);
     fast_padata = find_pa_data(request->padata,
 			       KRB5_PADATA_FX_FAST);
-    cookie_padata = find_pa_data(request->padata, KRB5_PADATA_FX_COOKIE);
-        if (fast_padata == NULL)
-	return 0; /*no fast*/
-    
+    if (fast_padata !=  NULL){
     scratch.length = fast_padata->length;
     scratch.data = (char *) fast_padata->contents;
     retval = decode_krb5_pa_fx_fast_request(&scratch, &fast_armored_req);
@@ -171,7 +168,20 @@ krb5_error_code  kdc_find_fast
 	if ((fast_req->fast_options & UNSUPPORTED_CRITICAL_FAST_OPTIONS) !=0)
 	    retval = KRB5KDC_ERR_UNKNOWN_CRITICAL_FAST_OPTION;
     }
-    if (retval == 0 && cookie_padata != NULL) {
+	    if (retval == 0)
+	        cookie_padata = find_pa_data(fast_req->req_body->padata, KRB5_PADATA_FX_COOKIE);
+	    if (retval == 0) {
+	      state->fast_options = fast_req->fast_options;
+	      if (request->kdc_state == state)
+		request->kdc_state = NULL;
+	      krb5_free_kdc_req( kdc_context, request);
+	      *requestptr = fast_req->req_body;
+	      fast_req->req_body = NULL;
+	
+	    }
+    }
+    else cookie_padata = find_pa_data(request->padata, KRB5_PADATA_FX_COOKIE);
+        if (retval == 0 && cookie_padata != NULL) {
 	krb5_pa_data *new_padata = malloc(sizeof (krb5_pa_data));
 	if (new_padata != NULL) {
 	    retval = ENOMEM;
@@ -188,16 +198,7 @@ krb5_error_code  kdc_find_fast
 	    }
 	}
     }
-    if (retval == 0) {
-	state->fast_options = fast_req->fast_options;
-	if (request->kdc_state == state)
-	    request->kdc_state = NULL;
-	krb5_free_kdc_req( kdc_context, request);
-	*requestptr = fast_req->req_body;
-	fast_req->req_body = NULL;
-	
-    }
-    if (fast_req)
+	if (fast_req)
 	krb5_free_fast_req( kdc_context, fast_req);
     if (fast_armored_req)
 	krb5_free_fast_armored_req(kdc_context, fast_armored_req);
@@ -232,7 +233,9 @@ void kdc_free_rstate
 }
 
 krb5_error_code kdc_fast_response_handle_padata
-(struct kdc_request_state *state, krb5_kdc_rep *rep, const krb5_data *pkt)
+(struct kdc_request_state *state,
+ krb5_kdc_req *request,
+ krb5_kdc_rep *rep)
 {
     krb5_error_code retval = 0;
     krb5_fast_finished finish;
@@ -246,7 +249,8 @@ krb5_error_code kdc_fast_response_handle_padata
 	return 0;
     memset(&finish, 0, sizeof(finish));
     fast_response.padata = rep->padata;
-    fast_response.rep_key = state->reply_key; 
+    fast_response.rep_key = state->reply_key;
+    fast_response.nonce = request->nonce;
     fast_response.finished = &finish;
     finish.client = rep->client;
     pa_array = calloc(3, sizeof(*pa_array));
@@ -263,11 +267,6 @@ krb5_error_code kdc_fast_response_handle_padata
 	retval = krb5_c_make_checksum(kdc_context, cksumtype,
 				      state->armor_key, KRB5_KEYUSAGE_FAST_FINISHED,
 				      encoded_ticket, &finish.ticket_checksum);
-/* xxx checksum should be something else; sticking ticket_checksum there is a placeholder*/
-    if (retval == 0)
-	retval = krb5_c_make_checksum(kdc_context, cksumtype,
-				      state->armor_key, KRB5_KEYUSAGE_FAST_FINISHED,
-				      encoded_ticket, &finish.checksum);
     if (retval == 0)
 	retval = encode_krb5_fast_response(&fast_response,  &encoded_fast_response);
     if (retval == 0) {
@@ -286,10 +285,8 @@ krb5_error_code kdc_fast_response_handle_padata
 	krb5_free_data(kdc_context, encoded_fast_response);
     if (encoded_ticket)
 	krb5_free_data(kdc_context, encoded_ticket);
-    if (finish.checksum.contents)
-	krb5_free_checksum_contents(kdc_context, &finish.checksum);
     if (finish.ticket_checksum.contents)
-	krb5_free_checksum_contents(kdc_context, &finish.checksum);
+	krb5_free_checksum_contents(kdc_context, &finish.ticket_checksum);
     return retval;
 }
 
@@ -301,6 +298,7 @@ krb5_error_code kdc_fast_response_handle_padata
  */
 krb5_error_code kdc_fast_handle_error
 (krb5_context context, struct kdc_request_state *state,
+ krb5_kdc_req *request,
  krb5_pa_data  **in_padata, krb5_error *err)
 {
     krb5_error_code retval = 0;
@@ -335,6 +333,7 @@ krb5_error_code kdc_fast_handle_error
 	pa[0].contents = (unsigned char *) encoded_fx_error->data;
 	inner_pa[size++] = &pa[0];
 	resp.padata = inner_pa;
+	resp.nonce = request->nonce;
 	resp.rep_key = NULL;
 	resp.finished = NULL;
     }

@@ -766,7 +766,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int e
 	}
     }
     retval = kdc_fast_handle_error(kdc_context, rstate,
-				   pa, &errpkt);
+				   request, pa, &errpkt);
     if (retval == 0)
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);

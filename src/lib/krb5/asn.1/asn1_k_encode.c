@@ -1224,8 +1224,7 @@ static const struct field_info fast_finished_fields[] = {
     FIELDOF_NORM( krb5_fast_finished, int32, usec, 1),
     FIELDOF_NORM( krb5_fast_finished, realm_of_principal, client, 2),
     FIELDOF_NORM(krb5_fast_finished, principal, client, 3),
-    FIELDOF_NORM( krb5_fast_finished, checksum, checksum, 4),
-    FIELDOF_NORM( krb5_fast_finished, checksum, ticket_checksum, 5),
+    FIELDOF_NORM( krb5_fast_finished, checksum, ticket_checksum, 4),
 };
 
 DEFSEQTYPE( fast_finished, krb5_fast_finished, fast_finished_fields, 0);
@@ -1236,6 +1235,7 @@ static const struct field_info fast_response_fields[] = {
     FIELDOF_NORM(krb5_fast_response, ptr_seqof_pa_data, padata, 0),
     FIELDOF_OPT( krb5_fast_response, ptr_encryption_key, rep_key, 1, 1),
     FIELDOF_OPT( krb5_fast_response, ptr_fast_finished, finished, 2, 2),
+    FIELDOF_NORM(krb5_fast_response, int32, nonce, 3),
 };
 
 static unsigned int fast_response_optional (const void *p)

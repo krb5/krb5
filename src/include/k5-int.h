@@ -989,19 +989,19 @@ typedef struct _krb5_fast_req {
 #define UNSUPPORTED_CRITICAL_FAST_OPTIONS 0x00ff
 #define KRB5_FAST_OPTION_HIDE_CLIENT_NAMES 0x01
 
-    typedef struct _krb5_fast_finished {
-	krb5_timestamp timestamp;
-	krb5_int32 usec;
-	krb5_principal client;
-	krb5_checksum checksum;
-	krb5_checksum ticket_checksum;
-    } krb5_fast_finished;
+typedef struct _krb5_fast_finished {
+    krb5_timestamp timestamp;
+    krb5_int32 usec;
+    krb5_principal client;
+    krb5_checksum ticket_checksum;
+} krb5_fast_finished;
 
-	typedef struct _krb5_fast_response {
-	    krb5_magic magic;
+typedef struct _krb5_fast_response {
+    krb5_magic magic;
     krb5_pa_data **padata;
     krb5_keyblock *rep_key;
     krb5_fast_finished *finished;
+    krb5_int32 nonce;
 } krb5_fast_response;
 
 

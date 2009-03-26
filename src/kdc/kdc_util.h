@@ -323,9 +323,12 @@ krb5_error_code  kdc_find_fast
  struct kdc_request_state *state);
 
 krb5_error_code kdc_fast_response_handle_padata
-(struct kdc_request_state *state, krb5_kdc_rep *rep, const krb5_data *pkt);
+(struct kdc_request_state *state,
+ krb5_kdc_req *request,
+ krb5_kdc_rep *rep);
 krb5_error_code kdc_fast_handle_error
 (krb5_context context, struct kdc_request_state *state,
+ krb5_kdc_req *request,
  krb5_pa_data  **in_padata, krb5_error *err);
 
  

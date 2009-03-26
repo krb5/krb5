@@ -1653,7 +1653,6 @@ asn1_error_code asn1_decode_fast_finished
 {
     setup();
     val->client = NULL;
-    val->checksum.contents = NULL;
     val->ticket_checksum.contents = NULL;
     {begin_structure();
     get_field(val->timestamp, 0, asn1_decode_kerberos_time);
@@ -1661,14 +1660,12 @@ asn1_error_code asn1_decode_fast_finished
     alloc_field(val->client);
     get_field(val->client, 2, asn1_decode_realm);
     get_field(val->client, 3, asn1_decode_principal_name);
-    get_field(val->checksum, 4, asn1_decode_checksum);
-    get_field(val->ticket_checksum, 5, asn1_decode_checksum);
+    get_field(val->ticket_checksum, 4, asn1_decode_checksum);
     end_structure();
     }
     return 0;
  error_out:
     krb5_free_principal(NULL, val->client);
-    krb5_free_checksum_contents(NULL, &val->checksum);
     krb5_free_checksum_contents( NULL, &val->ticket_checksum);
     return retval;
 }

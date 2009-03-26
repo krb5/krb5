@@ -159,7 +159,7 @@ krb5_error_code krb5int_fast_as_armor
 
 krb5_error_code 
 krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *state,
-		       const krb5_kdc_req *request,
+		        krb5_kdc_req *request,
 		       const krb5_data *to_be_checksummed, kdc_req_encoder_proc encoder,
 		       krb5_data **encoded_request)
 {
@@ -172,6 +172,8 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     krb5_data *encoded_armored_req = NULL;
     krb5_data *local_encoded_result = NULL;
     krb5_cksumtype cksumtype;
+    krb5_data random_data;
+    char random_buf[4];
 
     assert(state != NULL);
     assert(state->fast_outer_request.padata == NULL);
@@ -179,6 +181,14 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     if (state->armor_key == NULL) {
 	return encoder(request, encoded_request);
     }
+/* Fill in a fresh random nonce for each inner request*/
+    	random_data.length = 4;
+	random_data.data = (char *)random_buf;
+	retval = krb5_c_random_make_octets(context, &random_data);
+	if (retval == 0) {
+	    	    request->nonce = 0x7fffffff & load_32_n(random_buf);
+		    state->nonce = request->nonce;
+	}
     fast_req.req_body =  request;
     if (fast_req.req_body->padata == NULL) {
 	fast_req.req_body->padata = calloc(1, sizeof(krb5_pa_data *));
@@ -287,6 +297,12 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 	krb5_free_pa_data(context, result);
 	result = NULL;
 	if (retval == 0) {
+	    if (fast_response->nonce != state->nonce) {
+		krb5_set_error_message(context, KRB5_KDCREP_MODIFIED, "Nonce in reply did not match expected value");
+		retval = KRB5_KDCREP_MODIFIED;
+	    }
+	}
+	if (retval == 0) {	
 	    fx_error_pa = krb5int_find_pa_data(context, fast_response->padata, KRB5_PADATA_FX_ERROR);
 	    if (fx_error_pa == NULL) {
 		krb5_set_error_message(context, KRB5KDC_ERR_PREAUTH_FAILED, "Expecting FX_ERROR pa-data inside FAST container");

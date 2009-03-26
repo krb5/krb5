@@ -1142,7 +1142,8 @@ krb5_error_code decode_krb5_fast_response
     get_field(rep->padata, 0, asn1_decode_sequence_of_pa_data);
     opt_field(rep->rep_key, 1, asn1_decode_encryption_key_ptr);
     opt_field(rep->finished, 2, asn1_decode_fast_finished_ptr);
-    end_structure(); }
+    get_field(rep->nonce, 3, asn1_decode_int32);
+        end_structure(); }
     rep->magic = KV5M_FAST_RESPONSE;
     cleanup(free);
 }

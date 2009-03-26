@@ -39,6 +39,7 @@ struct krb5int_fast_request_state {
     krb5_ui_4 fast_state_flags;
     krb5_ui_4 fast_options;
     krb5_data cookie_contents;
+    krb5_int32 nonce;
 };
 
 krb5_error_code
@@ -49,7 +50,7 @@ typedef krb5_error_code(*kdc_req_encoder_proc) (const krb5_kdc_req *, krb5_data 
 
 krb5_error_code 
 krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *state,
-		       const krb5_kdc_req *request,
+		       krb5_kdc_req *request,
 		       const krb5_data *to_be_checksummed, kdc_req_encoder_proc encoder,
 		       krb5_data **encoded_request);
 krb5_error_code

@@ -828,7 +828,6 @@ void krb5_free_fast_finished
   if (!val)
     return;
   krb5_free_principal(context, val->client);
-  krb5_free_checksum_contents(context, &val->checksum);
   krb5_free_checksum_contents(context, &val->ticket_checksum);
   free(val);
 }
