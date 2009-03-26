@@ -257,8 +257,7 @@ static krb5_error_code decrypt_fast_reply
     krb5_pa_data *fx_reply = NULL;
     krb5_fast_response *local_resp = NULL;
     assert(state != NULL);
-    if (state->armor_key == NULL)
-	return 0;
+    assert(state->armor_key);
         fx_reply = krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FX_FAST);
     if (fx_reply == NULL)
 	retval = KRB5_ERR_FAST_REQUIRED;
@@ -417,6 +416,8 @@ krb5_error_code krb5int_fast_process_response
     krb5_boolean cksum_valid;
     krb5_clear_error_message(context);
     *as_key = NULL;
+    if (state->armor_key == 0)
+	return 0;
         retval = decrypt_fast_reply(context, state, resp->padata,
 				&fast_response);
     if (retval == 0) {
