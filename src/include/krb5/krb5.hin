@@ -1016,7 +1016,7 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define KRB5_AUTHDATA_SESAME	65
 #define KRB5_AUTHDATA_WIN2K_PAC	128
 #define KRB5_AUTHDATA_ETYPE_NEGOTIATION	129	/* RFC 4537 */
-
+#define KRB5_AUTHDATA_FX_ARMOR 71
 /* password change constants */
 
 #define KRB5_KPASSWD_SUCCESS		0

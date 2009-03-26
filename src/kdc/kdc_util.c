@@ -230,6 +230,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     krb5_pa_data        * tmppa;
     krb5_ap_req 	* apreq;
     krb5_error_code 	  retval;
+    krb5_authdata **authdata = NULL;
     krb5_data		  scratch1;
     krb5_data 		* scratch = NULL;
     krb5_boolean 	  foreign_server = FALSE;
@@ -341,6 +342,22 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 						 &authenticator)))
 	goto cleanup_auth_context;
 
+    retval = krb5int_find_authdata(kdc_context,
+				   (*ticket)->enc_part2->authorization_data,
+				   authenticator->authorization_data,
+				   KRB5_AUTHDATA_FX_ARMOR, &authdata);
+    if (retval != 0)
+	goto cleanup_auth_context;
+        if (authdata&& authdata[0]) {
+	krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
+			       "ticket valid only as FAST armor");
+	retval = KRB5KDC_ERR_POLICY;
+	krb5_free_authdata(kdc_context, authdata);
+	goto cleanup_auth_context;
+    }
+    krb5_free_authdata(kdc_context, authdata);
+    
+			       
     /* Check for a checksum */
     if (!(his_cksum = authenticator->checksum)) {
 	retval = KRB5KRB_AP_ERR_INAPP_CKSUM; 
