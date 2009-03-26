@@ -981,6 +981,10 @@ typedef struct _krb5_fast_req {
    krb5_kdc_req *req_body;
 } krb5_fast_req;
 
+/* Bits 0-15 are critical in fast options.*/
+#define UNSUPPORTED_CRITICAL_FAST_OPTIONS 0x00ff
+#define KRB5_FAST_OPTION_HIDE_CLIENT_NAMES 0x01
+
     typedef struct _krb5_fast_finished {
 	krb5_timestamp timestamp;
 	krb5_int32 usec;
