@@ -631,7 +631,12 @@ krb5_error_code KRB5_CALLCONV
 
 /* Defined in KDC referrals draft */
 #define KRB5_KEYUSAGE_PA_REFERRAL		26 /* XXX note conflict with above */
+/* define in draft-ietf-krb-wg-preauth-framework*/
+#define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
+#define KRB5_KEYUSAGE_FAST_ENC 51
+#define KRB5_KEYUSAGE_FAST_FINISHED 53
 
+#define KRB5_KEYUSAGE_FAST_REP 52
 krb5_boolean KRB5_CALLCONV krb5_c_valid_enctype
 	(krb5_enctype ktype);
 krb5_boolean KRB5_CALLCONV krb5_c_valid_cksumtype
@@ -982,6 +987,11 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define KRB5_PADATA_PAC_REQUEST		128 /* include Windows PAC */
 #define KRB5_PADATA_FOR_USER		129 /* username protocol transition request */
 #define KRB5_PADATA_S4U_X509_USER	130 /* certificate protocol transition request */
+#define KRB5_PADATA_FX_COOKIE 133
+#define KRB5_PADATA_FX_FAST  136
+#define KRB5_PADATA_FX_ERROR 137
+#define KRB5_PADATA_ENCRYPTED_CHALLENGE 138
+
 #define	KRB5_SAM_USE_SAD_AS_KEY		0x80000000
 #define	KRB5_SAM_SEND_ENCRYPTED_SAD	0x40000000
 #define	KRB5_SAM_MUST_PK_ENCRYPT_SAD	0x20000000 /* currently must be zero */
