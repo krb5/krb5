@@ -634,6 +634,7 @@ krb5_error_code KRB5_CALLCONV
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
 #define KRB5_KEYUSAGE_FAST_ENC 51
+#define KRB5_KEYUSAGE_FAST_REP 52
 #define KRB5_KEYUSAGE_FAST_FINISHED 53
 
 #define KRB5_KEYUSAGE_FAST_REP 52

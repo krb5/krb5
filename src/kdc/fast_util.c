@@ -95,6 +95,30 @@ static krb5_error_code armor_ap_request
     return retval;
 }
 
+static krb5_error_code encrypt_fast_reply
+(struct kdc_request_state *state,  const krb5_fast_response *response,
+ krb5_data **fx_fast_reply)
+{
+    krb5_error_code retval = 0;
+    krb5_enc_data encrypted_reply;
+    krb5_data *encoded_response = NULL;
+    assert(state->armor_key);
+    retval = encode_krb5_fast_response(response, &encoded_response);
+    if (retval== 0) 
+	retval = krb5_encrypt_helper(kdc_context, state->armor_key,
+				     KRB5_KEYUSAGE_FAST_REP,
+				     encoded_response, &encrypted_reply);
+    if (encoded_response)
+	krb5_free_data(kdc_context, encoded_response);
+    encoded_response = NULL;
+    if (retval == 0) {
+	retval = encode_krb5_pa_fx_fast_reply(&encrypted_reply,
+					      fx_fast_reply);
+	krb5_free_data_contents(kdc_context, &encrypted_reply.ciphertext);
+    }
+    return retval;
+}
+
 	
 krb5_error_code  kdc_find_fast
 (krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
@@ -241,7 +265,7 @@ krb5_error_code kdc_fast_response_handle_padata
     krb5_fast_finished finish;
     krb5_fast_response fast_response;
     krb5_data *encoded_ticket = NULL;
-    krb5_data *encoded_fast_response = NULL;
+    krb5_data *encrypted_reply = NULL;
     krb5_pa_data *pa = NULL, **pa_array;
     krb5_cksumtype cksumtype = CKSUMTYPE_RSA_MD5;
     
@@ -268,21 +292,21 @@ krb5_error_code kdc_fast_response_handle_padata
 				      state->armor_key, KRB5_KEYUSAGE_FAST_FINISHED,
 				      encoded_ticket, &finish.ticket_checksum);
     if (retval == 0)
-	retval = encode_krb5_fast_response(&fast_response,  &encoded_fast_response);
+	retval = encrypt_fast_reply(state, &fast_response, &encrypted_reply);
     if (retval == 0) {
 	pa[0].pa_type = KRB5_PADATA_FX_FAST;
-	pa[0].length = encoded_fast_response->length;
-	pa[0].contents = (unsigned char *)  encoded_fast_response->data;
+	pa[0].length = encrypted_reply->length;
+	pa[0].contents = (unsigned char *)  encrypted_reply->data;
 	pa_array[0] = &pa[0];
 	rep->padata = pa_array;
 	pa_array = NULL;
-	encoded_fast_response = NULL;
+	encrypted_reply = NULL;
 	pa = NULL;
     }
     if (pa)
       free(pa);
-    if (encoded_fast_response)
-	krb5_free_data(kdc_context, encoded_fast_response);
+    if (encrypted_reply)
+	krb5_free_data(kdc_context, encrypted_reply);
     if (encoded_ticket)
 	krb5_free_data(kdc_context, encoded_ticket);
     if (finish.ticket_checksum.contents)
@@ -290,6 +314,7 @@ krb5_error_code kdc_fast_response_handle_padata
     return retval;
 }
 
+	
 /*
  * We assume the caller is responsible for passing us an in_padata
  * sufficient to include in a FAST error.  In the FAST case we will
@@ -304,7 +329,7 @@ krb5_error_code kdc_fast_handle_error
     krb5_error_code retval = 0;
     krb5_fast_response resp;
     krb5_error fx_error;
-    krb5_data *encoded_fx_error = NULL, *encoded_fast_response = NULL;
+    krb5_data *encoded_fx_error = NULL, *encrypted_reply = NULL;
     krb5_pa_data pa[2];
     krb5_pa_data *outer_pa[3];
     krb5_pa_data **inner_pa = NULL;
@@ -338,13 +363,13 @@ krb5_error_code kdc_fast_handle_error
 	resp.finished = NULL;
     }
     if (retval == 0)
-	retval = encode_krb5_fast_response(&resp, &encoded_fast_response);
+	retval = encrypt_fast_reply(state, &resp, &encrypted_reply);
     if (inner_pa)
 	free(inner_pa); /*contained storage from caller and our stack*/
     if (retval == 0) {
 	pa[0].pa_type = KRB5_PADATA_FX_FAST;
-	pa[0].length = encoded_fast_response->length;
-	pa[0].contents = (unsigned char *) encoded_fast_response->data;
+	pa[0].length = encrypted_reply->length;
+	pa[0].contents = (unsigned char *) encrypted_reply->data;
 	outer_pa[0] = &pa[0];
     }
     retval = encode_krb5_padata_sequence(outer_pa, &encoded_e_data);
@@ -356,8 +381,8 @@ krb5_error_code kdc_fast_handle_error
     }
     if (encoded_e_data)
 	krb5_free_data(kdc_context, encoded_e_data);
-    if (encoded_fast_response)
-	krb5_free_data(kdc_context, encoded_fast_response);
+    if (encrypted_reply)
+	krb5_free_data(kdc_context, encrypted_reply);
     if (encoded_fx_error)
 	krb5_free_data(kdc_context, encoded_fx_error);
     return retval;

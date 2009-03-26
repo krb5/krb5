@@ -566,6 +566,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
+    
     errcode = handle_authdata(kdc_context,
 			      c_flags,
 			      &client,
@@ -590,6 +591,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
     ticket_reply.enc_part.kvno = server_key->key_data_kvno;
+    errcode = kdc_fast_response_handle_padata(state, request, &reply);
+    if (errcode) {
+	status = "fast response handling";
+	goto errout;
+    }
 
     /* now encode/encrypt the response */
 
