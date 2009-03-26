@@ -125,6 +125,9 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_data *tgs_1 =NULL, *server_1 = NULL;
     krb5_principal krbtgt_princ;
     krb5_kvno ticket_kvno = 0;
+    struct kdc_request_state *state = NULL;
+    krb5_pa_data *pa_tgs_req; /*points into request*/
+    krb5_data scratch;
 
     session_key.contents = NULL;
     
@@ -140,7 +143,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
         return retval;
     }
     errcode = kdc_process_tgs_req(request, from, pkt, &header_ticket,
-                                  &krbtgt, &k_nprincs, &subkey);
+                                  &krbtgt, &k_nprincs, &subkey, &pa_tgs_req);
     if (header_ticket && header_ticket->enc_part2 &&
         (errcode2 = krb5_unparse_name(kdc_context, 
                                       header_ticket->enc_part2->client,
@@ -161,7 +164,15 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
         status="UNEXPECTED NULL in header_ticket";
         goto cleanup;
     }
-
+    scratch.length = pa_tgs_req->length;
+    scratch.data = (char *) pa_tgs_req->contents;
+    errcode = kdc_find_fast(&request, &scratch, subkey, state);
+    if (errcode !=0) {
+	status = "kdc_find_fast";
+		goto cleanup;
+    }
+    
+    
     /*
      * Pointer to the encrypted part of the header ticket, which may be
      * replaced to point to the encrypted part of the evidence ticket
@@ -916,6 +927,8 @@ cleanup:
         krb5_free_ticket(kdc_context, header_ticket);
     if (request != NULL)
         krb5_free_kdc_req(kdc_context, request);
+    if (state)
+	kdc_free_rstate(state);
     if (cname != NULL)
         free(cname);
     if (sname != NULL)

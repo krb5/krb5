@@ -234,7 +234,8 @@ krb5_error_code
 kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 		    krb5_data *pkt, krb5_ticket **ticket,
 		    krb5_db_entry *krbtgt, int *nprincs,
-		    krb5_keyblock **subkey)
+		    krb5_keyblock **subkey,
+		    krb5_pa_data **pa_tgs_req)
 {
     krb5_pa_data        * tmppa;
     krb5_ap_req 	* apreq;
@@ -383,6 +384,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	}
     }
 
+    if (retval == 0)
+      *pa_tgs_req = tmppa;
 cleanup_authenticator:
     krb5_free_authenticator(kdc_context, authenticator);
 

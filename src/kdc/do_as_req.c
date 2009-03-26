@@ -117,6 +117,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     int did_log = 0;
     const char *emsg = 0;
     krb5_keylist_node *tmp_mkey_list;
+    struct kdc_request_state *state = NULL;
+    
 
 #if APPLE_PKINIT
     asReqDebug("process_as_req top realm %s name %s\n", 
@@ -132,6 +134,15 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     session_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
+
+    errcode = kdc_make_rstate(&state);
+    if (errcode != 0) {
+	status = "constructing state";
+	goto errout;
+    }
+    errcode = kdc_find_fast(&request, req_pkt, NULL /*TGS key*/, state);
+    if (errcode)
+	goto errout;
 
     if (!request->client) {
 	status = "NULL_CLIENT";
@@ -679,6 +690,7 @@ egress:
     }
 
     krb5_free_data_contents(kdc_context, &e_data);
+    kdc_free_rstate(state);
     assert(did_log != 0);
     return errcode;
 }

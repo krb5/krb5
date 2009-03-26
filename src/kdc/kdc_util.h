@@ -66,7 +66,7 @@ krb5_error_code kdc_process_tgs_req
 	           krb5_ticket **,
 		   krb5_db_entry *krbtgt,
 		   int *nprincs,
-	           krb5_keyblock **);
+	           krb5_keyblock **, krb5_pa_data **pa_tgs_req);
 
 krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
 				    krb5_boolean match_enctype,
