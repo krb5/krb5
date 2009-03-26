@@ -153,24 +153,88 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 {
     krb5_error_code retval = 0;
     krb5_error *err_reply = *err_replyptr;
-    *retry = (err_reply->e_data.length > 0);
     *out_padata = NULL;
-    if ((err_reply->error == KDC_ERR_PREAUTH_REQUIRED
-	 ||err_reply->error == KDC_ERR_PREAUTH_FAILED) && err_reply->e_data.length) {
+    if (state->armor_key) {
+	krb5_pa_data *fast_pa, *fx_error_pa;
 	krb5_pa_data **result = NULL;
+	krb5_data scratch, *encoded_td = NULL;
+	krb5_error *fx_error = NULL;
+	krb5_fast_response *fast_response = NULL;
 	retval = decode_krb5_padata_sequence(&err_reply->e_data, &result);
 	if (retval == 0)
-	if (retval == 0) {
-	    *out_padata = result;
-
+	    fast_pa = krb5int_find_pa_data(context, result, KRB5_PADATA_FX_FAST);
+	if (retval || fast_pa == NULL) {
+	    /*This can happen if the KDC does not understand FAST. We
+	     * don't expect that, but treating it as the fatal error
+	     * indicated by the KDC seems reasonable.
+	     */
+	    *retry = 0;
+	    krb5_free_pa_data(context, result);
 	    return 0;
 	}
+	scratch.data = (char *) fast_pa->contents;
+	scratch.length = fast_pa->length;
+	retval = decode_krb5_fast_response(&scratch, &fast_response);
 	krb5_free_pa_data(context, result);
-	krb5_set_error_message(context, retval,
-			       "Error decoding padata in error reply");
-	return retval;
-    }
-    return 0;
+	result = NULL;
+	if (retval == 0) {
+	    fx_error_pa = krb5int_find_pa_data(context, fast_response->padata, KRB5_PADATA_FX_ERROR);
+	    if (fx_error_pa == NULL) {
+		krb5_set_error_message(context, KRB5KDC_ERR_PREAUTH_FAILED, "Expecting FX_ERROR pa-data inside FAST container");
+		retval = KRB5KDC_ERR_PREAUTH_FAILED;
+	    }
+	}
+	if (retval == 0) {
+	    scratch.data = (char *) fx_error_pa->contents;
+	    scratch.length = fx_error_pa->length;
+	    retval = decode_krb5_error(&scratch, &fx_error);
+	}
+	/*
+	 * krb5_pa_data and krb5_typed_data are safe to cast between:
+	 * they have the same type fields in the same order.
+	 * (krb5_preauthtype is a krb5_int32).  If krb5_typed_data is
+	 * ever changed then this will need to be a copy not a cast.
+	 */
+	if (retval == 0) 
+	    retval = encode_krb5_typed_data( (krb5_typed_data **) fast_response->padata,
+					    &encoded_td);
+	if (retval == 0) {
+	    fx_error->e_data = *encoded_td;
+	    free(encoded_td); /*contents owned by fx_error*/
+	    encoded_td = NULL;
+	    krb5_free_error(context, err_reply);
+	    *err_replyptr = fx_error;
+	    fx_error = NULL;
+	    *out_padata = fast_response->padata;
+	    fast_response->padata = NULL;
+	    /*
+	     * If there is more than the fx_error padata, then we want
+	     * to retry the error
+	     */
+	    *retry = (*out_padata)[1] != NULL;
+	}
+	if (fx_error)
+	    krb5_free_error(context, fx_error);
+	krb5_free_fast_response(context, fast_response);
+    } else { /*not FAST*/
+	*retry = (err_reply->e_data.length > 0);
+	if ((err_reply->error == KDC_ERR_PREAUTH_REQUIRED
+	     ||err_reply->error == KDC_ERR_PREAUTH_FAILED) && err_reply->e_data.length) {
+	    krb5_pa_data **result = NULL;
+	    retval = decode_krb5_padata_sequence(&err_reply->e_data, &result);
+	    if (retval == 0)
+		if (retval == 0) {
+		    *out_padata = result;
+
+		    return 0;
+		}
+	    krb5_free_pa_data(context, result);
+	    krb5_set_error_message(context, retval,
+				   "Error decoding padata in error reply");
+	    return retval;
+	}
+	}
+    return retval;
 }
 
 krb5_error_code
@@ -194,3 +258,20 @@ krb5int_fast_free_state( krb5_context context, struct krb5int_fast_request_state
     krb5_free_fast_armor(context, state->armor);
     krb5_free_data_contents(context, &state->cookie_contents);
 }
+
+krb5_pa_data * krb5int_find_pa_data
+(krb5_context context, krb5_pa_data *const *padata, krb5_preauthtype pa_type)
+{
+        krb5_pa_data * const *tmppa;
+
+    if (padata == NULL)
+	return NULL;
+
+    for (tmppa = padata; *tmppa != NULL; tmppa++) {
+	if ((*tmppa)->pa_type == pa_type)
+	    break;
+    }
+
+    return *tmppa;
+}
+

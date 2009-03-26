@@ -217,17 +217,7 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
 krb5_pa_data *
 find_pa_data(krb5_pa_data **padata, krb5_preauthtype pa_type)
 {
-    krb5_pa_data **tmppa;
-
-    if (padata == NULL)
-	return NULL;
-
-    for (tmppa = padata; *tmppa != NULL; tmppa++) {
-	if ((*tmppa)->pa_type == pa_type)
-	    break;
-    }
-
-    return *tmppa;
+return krb5int_find_pa_data(kdc_context, padata, pa_type);
 }
 
 krb5_error_code 
