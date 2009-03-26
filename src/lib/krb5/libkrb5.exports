@@ -227,6 +227,7 @@ krb5_free_enc_tkt_part
 krb5_free_error
 krb5_free_error_message
 krb5_free_etype_info
+krb5_free_fast_req
 krb5_free_host_realm
 krb5_free_kdc_rep
 krb5_free_kdc_req

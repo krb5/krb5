@@ -797,3 +797,18 @@ krb5_free_etype_list(krb5_context context,
 	free(etypes);
     }
 }
+void krb5_free_fast_req(krb5_context context, krb5_fast_req *val)
+{
+  if (val == NULL)
+    return;
+  krb5_free_kdc_req(context, val->req_body);
+  free(val);
+}
+
+void krb5_free_fast_armor(krb5_context context, krb5_fast_armor *val)
+{
+  if (val == NULL)
+    return;
+  krb5_free_data_contents(context, &val->armor_value);
+  free(val);
+}
