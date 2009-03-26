@@ -154,6 +154,7 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
     krb5_error_code retval = 0;
     krb5_error *err_reply = *err_replyptr;
     *out_padata = NULL;
+    *retry = 0;
     if (state->armor_key) {
 	krb5_pa_data *fast_pa, *fx_error_pa;
 	krb5_pa_data **result = NULL;
