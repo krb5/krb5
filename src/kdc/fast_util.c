@@ -42,6 +42,60 @@
  * kdc-req-body.
  */
 
+static krb5_error_code armor_ap_request
+(struct kdc_request_state *state, krb5_fast_armor *armor)
+{
+    krb5_error_code retval = 0;
+    krb5_auth_context authcontext = NULL;
+    krb5_ticket *ticket = NULL;
+    krb5_keyblock *subkey = NULL;
+    
+    assert(armor->armor_type = KRB5_FAST_ARMOR_AP_REQUEST);
+    krb5_clear_error_message(kdc_context);
+    retval = krb5_auth_con_init(kdc_context, &authcontext);
+    if (retval == 0)
+	retval = krb5_auth_con_setflags(kdc_context, authcontext, 0); /*disable replay cache*/
+    retval = krb5_rd_req(kdc_context, &authcontext,
+			 &armor->armor_value, NULL /*server*/,
+			 kdc_active_realm->realm_keytab,  NULL, &ticket);
+    if (retval !=0) {
+	const char * errmsg = krb5_get_error_message(kdc_context, retval);
+		krb5_set_error_message(kdc_context, retval,
+				       "%s while handling ap-request armor", errmsg);
+		krb5_free_error_message(kdc_context, errmsg);
+    }
+    if (retval == 0) {
+	if (!krb5_principal_compare_any_realm(kdc_context,
+					      tgs_server,
+					      ticket->server)) {
+	    krb5_set_error_message(kdc_context, KRB5KDC_ERR_SERVER_NOMATCH,
+				   "ap-request armor for something other than  the local TGS");
+	    retval = KRB5KDC_ERR_SERVER_NOMATCH;
+	}
+    }
+    if (retval ==0) {
+	retval = krb5_auth_con_getrecvsubkey(kdc_context, authcontext, &subkey);
+	if (retval !=0 || subkey == NULL) {
+	    krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
+				   "ap-request armor without subkey");
+	    retval = KRB5KDC_ERR_POLICY;
+	}
+    }
+    if (retval==0) 
+	retval = krb5_c_fx_cf2_simple(kdc_context,
+				      subkey, "subkeyarmor",
+				      ticket->enc_part2->session, "ticketarmor",
+				      &state->armor_key);
+    if (ticket)
+	krb5_free_ticket(kdc_context, ticket);
+    if (subkey)
+	krb5_free_keyblock(kdc_context, subkey);
+    if (authcontext)
+	krb5_auth_con_free(kdc_context, authcontext);
+    return retval;
+}
+
+	
 krb5_error_code  kdc_find_fast
 (krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
  krb5_keyblock *tgs_subkey,
@@ -52,8 +106,11 @@ krb5_error_code  kdc_find_fast
     krb5_data scratch;
     krb5_fast_req * fast_req = NULL;
     krb5_kdc_req *request = *requestptr;
+    krb5_fast_armored_req *fast_armored_req = NULL;
+    krb5_boolean cksum_valid;
 
     scratch.data = NULL;
+    krb5_clear_error_message(kdc_context);
     fast_padata = find_pa_data(request->padata,
 			       KRB5_PADATA_FX_FAST);
     cookie_padata = find_pa_data(request->padata, KRB5_PADATA_FX_COOKIE);
@@ -62,8 +119,55 @@ krb5_error_code  kdc_find_fast
     
     scratch.length = fast_padata->length;
     scratch.data = (char *) fast_padata->contents;
-    retval = decode_krb5_fast_req(&scratch, &fast_req);
+    retval = decode_krb5_pa_fx_fast_request(&scratch, &fast_armored_req);
+    if (retval == 0 &&fast_armored_req->armor) {
+	switch (fast_armored_req->armor->armor_type) {
+	case KRB5_FAST_ARMOR_AP_REQUEST:
+	    retval = armor_ap_request(state, fast_armored_req->armor);
+	    break;
+	default:
+	    krb5_set_error_message(kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
+				   "Unknow FAST armor type %d",
+				   fast_armored_req->armor->armor_type);
+	    retval = KRB5KDC_ERR_PREAUTH_FAILED;
+	}
+    }
+    if (retval == 0 && !state->armor_key) {
+	if (tgs_subkey)
+	    retval =krb5_copy_keyblock(kdc_context, tgs_subkey, &state->armor_key);
+	else {
+	    krb5_set_error_message(kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
+				   "No armor key but FAST armored request present");
+	    retval = KRB5KDC_ERR_PREAUTH_FAILED;
+	}
+    }
     if (retval == 0) {
+	krb5_data plaintext;
+	plaintext.length = fast_armored_req->enc_part.ciphertext.length;
+	plaintext.data = malloc(plaintext.length);
+	if (plaintext.data == NULL)
+	    retval = ENOMEM;
+	retval = krb5_c_decrypt(kdc_context,
+				state->armor_key,
+				KRB5_KEYUSAGE_FAST_ENC, NULL,
+				&fast_armored_req->enc_part,
+				&plaintext);
+	if (retval == 0)
+	    retval = decode_krb5_fast_req(&plaintext, &fast_req);
+	if (plaintext.data)
+	    free(plaintext.data);
+    }
+    if (retval == 0)
+      retval = krb5_c_verify_checksum(kdc_context, state->armor_key,
+				      KRB5_KEYUSAGE_FAST_REQ_CHKSUM,
+				      checksummed_data, &fast_armored_req->req_checksum,
+				      &cksum_valid);
+    if (retval == 0 && !cksum_valid) {
+      retval = KRB5KRB_AP_ERR_MODIFIED;
+      krb5_set_error_message(kdc_context, KRB5KRB_AP_ERR_MODIFIED,
+			     "FAST req_checksum invalid; request modified");
+    }
+	    if (retval == 0) {
 	if ((fast_req->fast_options & UNSUPPORTED_CRITICAL_FAST_OPTIONS) !=0)
 	    retval = KRB5KDC_ERR_UNKNOWN_CRITICAL_FAST_OPTION;
     }
@@ -95,6 +199,8 @@ krb5_error_code  kdc_find_fast
     }
     if (fast_req)
 	krb5_free_fast_req( kdc_context, fast_req);
+    if (fast_armored_req)
+	krb5_free_fast_armored_req(kdc_context, fast_armored_req);
     return retval;
 }
 
