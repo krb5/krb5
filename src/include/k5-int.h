@@ -978,7 +978,7 @@ typedef struct _krb5_fast_req {
     krb5_magic magic;
     krb5_int32 fast_options;
     /* padata from req_body is used*/
-   krb5_kdc_req req_body;
+   krb5_kdc_req *req_body;
 } krb5_fast_req;
 
     typedef struct _krb5_fast_finished {
@@ -1613,6 +1613,9 @@ krb5_error_code encode_krb5_fast_req
 (const krb5_fast_req *, krb5_data **);
 krb5_error_code encode_krb5_pa_fx_fast_reply
 (const krb5_enc_data *, krb5_data **);
+
+krb5_error_code encode_krb5_fast_response
+(const krb5_fast_response *, krb5_data **);
 
 /*************************************************************************
  * End of prototypes for krb5_encode.c

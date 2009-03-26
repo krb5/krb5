@@ -338,6 +338,8 @@ asn1_encode_kdc_req_body(asn1buf *buf, const krb5_kdc_req *val,
 DEFFNXTYPE(kdc_req_body, krb5_kdc_req, asn1_encode_kdc_req_body);
 /* end ugly hack */
 
+DEFPTRTYPE(ptr_kdc_req_body,kdc_req_body);
+
 static const struct field_info transited_fields[] = {
     FIELDOF_NORM(krb5_transited, octet, tr_type, 0),
     FIELDOF_NORM(krb5_transited, ostring_data, tr_contents, 1),
@@ -1204,10 +1206,14 @@ DEFSEQTYPE( fast_armored_req, krb5_fast_armored_req, fast_armored_req_fields, fa
 DEFFIELDTYPE( pa_fx_fast_request, krb5_fast_armored_req,
               FIELDOF_ENCODEAS( krb5_fast_armored_req, fast_armored_req, 0));
 
+DEFFIELDTYPE(fast_req_padata, krb5_kdc_req,
+             FIELDOF_NORM(krb5_kdc_req, ptr_seqof_pa_data, padata, -1));
+DEFPTRTYPE(ptr_fast_req_padata, fast_req_padata);
+
 static const struct field_info fast_req_fields[] = {
     FIELDOF_NORM(krb5_fast_req, int32, fast_options, 0),
-    FIELDOF_NORM( krb5_fast_req, ptr_seqof_pa_data, req_body.padata, 1),
-    FIELDOF_NORM( krb5_fast_req, kdc_req_body, req_body, 2),
+    FIELDOF_NORM( krb5_fast_req, ptr_fast_req_padata, req_body, 1),
+    FIELDOF_NORM( krb5_fast_req, ptr_kdc_req_body, req_body, 2),
 };
 
 DEFSEQTYPE(fast_req, krb5_fast_req, fast_req_fields, 0);

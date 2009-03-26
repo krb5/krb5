@@ -1107,18 +1107,24 @@ krb5_error_code decode_krb5_pa_fx_fast_request
 krb5_error_code decode_krb5_fast_req
 (const krb5_data *code, krb5_fast_req **repptr)
 {
-  setup(krb5_fast_req *);
-  alloc_field(rep);
-  clear_field(rep, req_body.padata);
-  {begin_structure();
-  
-
-  get_field(rep->fast_options, 0, asn1_decode_int32);
-  opt_field(rep->req_body.padata, 1, asn1_decode_sequence_of_pa_data);
-  get_field(rep->req_body, 2, asn1_decode_kdc_req_body);
-  end_structure(); }
-  rep->magic  = KV5M_FAST_REQ;
-  cleanup(free);
+    setup(krb5_fast_req *);
+    alloc_field(rep);
+    alloc_field(rep->req_body);
+    clear_field(rep, req_body->padata);
+    {begin_structure();
+    get_field(rep->fast_options, 0, asn1_decode_int32);
+    opt_field(rep->req_body->padata, 1, asn1_decode_sequence_of_pa_data);
+    get_field(*(rep->req_body), 2, asn1_decode_kdc_req_body);
+    end_structure(); }
+    rep->magic  = KV5M_FAST_REQ;
+    cleanup_manual();
+ error_out:
+    if (rep) {
+        if (rep->req_body)
+            krb5_free_kdc_req(0, rep->req_body);
+        free(rep);
+    }
+    return retval;
 }
 
 krb5_error_code decode_krb5_fast_response
