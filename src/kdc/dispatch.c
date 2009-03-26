@@ -92,11 +92,12 @@ dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
 	    /*
 	     * setup_server_realm() sets up the global realm-specific data
 	     * pointer.
+	     * process_as_req frees the request if it is called
 	     */
 	    if (!(retval = setup_server_realm(as_req->server))) {
 		retval = process_as_req(as_req, pkt, from, response);
 	    }
-	    krb5_free_kdc_req(kdc_context, as_req);
+	    else 	    krb5_free_kdc_req(kdc_context, as_req);
 	}
     }
     else

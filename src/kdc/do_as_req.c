@@ -691,6 +691,7 @@ egress:
 
     krb5_free_data_contents(kdc_context, &e_data);
     kdc_free_rstate(state);
+    krb5_free_kdc_req(kdc_context, request);
     assert(did_log != 0);
     return errcode;
 }
