@@ -141,9 +141,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
     errcode = kdc_find_fast(&request, req_pkt, NULL /*TGS key*/, state);
-    if (errcode)
+    if (errcode) {
+	status = "error decoding FAST";
 	goto errout;
-
+    }
     if (!request->client) {
 	status = "NULL_CLIENT";
 	errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
