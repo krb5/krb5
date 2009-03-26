@@ -298,6 +298,30 @@ log_tgs_req(const krb5_fulladdr *from,
 	    const char *status, krb5_error_code errcode, const char *emsg);
 void log_tgs_alt_tgt(krb5_principal p);
 
+/*Request state*/
+
+struct kdc_request_state {
+    krb5_keyblock *armor_key;
+    krb5_pa_data *cookie;
+    krb5_int32 fast_options;
+    krb5_int32 fast_internal_flags;
+};
+krb5_error_code kdc_make_rstate(struct kdc_request_state **out);
+void kdc_free_rstate
+(struct kdc_request_state *s);
+
+/* FAST*/
+enum krb5_fast_kdc_flags {
+    KRB5_FAST_REPLY_KEY_USED = 0x1,
+    KRB5_FAST_REPLY_KEY_REPLACED = 0x02,
+};
+
+krb5_error_code  kdc_find_fast
+(krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
+ krb5_keyblock *tgs_subkey,
+ struct kdc_request_state *state);
+
+ 
 
 
 #define isflagset(flagfield, flag) (flagfield & (flag))

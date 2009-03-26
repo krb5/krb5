@@ -19,6 +19,7 @@ decode_krb5_encryption_key
 decode_krb5_error
 decode_krb5_etype_info
 decode_krb5_etype_info2
+decode_krb5_fast_req
 decode_krb5_kdc_req_body
 decode_krb5_pa_enc_ts
 decode_krb5_pa_for_user
