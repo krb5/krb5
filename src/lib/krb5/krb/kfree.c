@@ -54,6 +54,7 @@
  */
 
 #include "k5-int.h"
+#include <assert.h>
 
 void KRB5_CALLCONV
 krb5_free_address(krb5_context context, krb5_address *val)
@@ -344,6 +345,7 @@ krb5_free_kdc_req(krb5_context context, krb5_kdc_req *val)
 {
     if (val == NULL)
 	return;
+    assert( val->kdc_state == NULL);
     krb5_free_pa_data(context, val->padata);
     krb5_free_principal(context, val->client);
     krb5_free_principal(context, val->server);

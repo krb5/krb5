@@ -1142,6 +1142,13 @@ typedef struct _krb5_kdc_req {
     krb5_authdata **unenc_authdata; /* unencrypted auth data,
 					   if available */
     krb5_ticket **second_ticket;/* second ticket array; OPTIONAL */
+    /* the following field is added in March 2009; it is a hack so
+     * that FAST state can be carried to pre-authentication plugins.
+     * A new plugin interface may be a better long-term approach.  It
+     * is believed to be safe to extend this structure because it is
+     * not found in any public APIs.
+     */
+    void * kdc_state;
 } krb5_kdc_req;
 
 typedef struct _krb5_enc_kdc_rep_part {
