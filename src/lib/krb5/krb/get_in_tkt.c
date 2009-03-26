@@ -1239,6 +1239,9 @@ krb5_get_init_creds(krb5_context context,
 	    /* XXX  Yuck.  Old version.  */
 	    request.nonce = (krb5_int32) time_now;
     }
+    ret = krb5int_fast_as_armor(context, fast_state, options, &request);
+    if (ret != 0)
+	goto cleanup;
     /* give the preauth plugins a chance to prep the request body */
     krb5_preauth_prepare_request(context, options, &request);
     ret = krb5int_fast_prep_req_body(context, fast_state,

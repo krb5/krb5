@@ -2410,6 +2410,15 @@ krb5_get_init_creds_opt_set_pa
 		const char *attr,
 		const char *value);
 
+krb5_error_code KRB5_CALLCONV krb5_get_init_creds_opt_set_fast_ccache_name
+(krb5_context context, krb5_get_init_creds_opt *opt,
+ const char * fast_ccache_name);
+    /*   This API sets a ccache name that will contain some TGT on
+	 calls to get_init_creds functions.   If set, this ccache will
+	 be used for FAST (draft-ietf-krb-wg-preauth-framework) to
+	 protect the AS-REQ from observation and active attack.  If
+	 the fast_ccache_name is set, then FAST may be required by the
+	 client library.  In this version FAST is required.*/
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password
 (krb5_context context,

@@ -830,6 +830,7 @@ void krb5_free_fast_finished
   krb5_free_principal(context, val->client);
   krb5_free_checksum_contents(context, &val->checksum);
   krb5_free_checksum_contents(context, &val->ticket_checksum);
+  free(val);
 }
 
 void krb5_free_typed_data(krb5_context context, krb5_typed_data **in)
@@ -843,4 +844,17 @@ void krb5_free_typed_data(krb5_context context, krb5_typed_data **in)
     i++;
   }
   free(in);
+}
+
+void krb5_free_fast_armored_req(krb5_context context,
+				krb5_fast_armored_req *val)
+{
+    if (val == NULL)
+	return;
+    if (val->armor)
+	krb5_free_fast_armor(context, val->armor);
+    krb5_free_data_contents(context, &val->enc_part.ciphertext);
+    if (val->req_checksum.contents)
+      krb5_free_checksum_contents(context, &val->req_checksum);
+    free(val);
 }

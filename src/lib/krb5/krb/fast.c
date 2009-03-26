@@ -49,8 +49,59 @@
  * important questions there is the presence of a cookie.
  */
 #include "fast.h"
+#include "int-proto.h"
 
 
+static krb5_error_code fast_armor_ap_request
+(krb5_context context, struct krb5int_fast_request_state *state,
+ krb5_ccache ccache, krb5_data *target_realm)
+{
+    krb5_error_code retval = 0;
+    krb5_creds creds, *out_creds = NULL;
+    krb5_auth_context authcontext = NULL;
+    krb5_data encoded_authenticator;
+    krb5_fast_armor *armor = NULL;
+    krb5_keyblock *subkey = NULL, *armor_key = NULL;
+    encoded_authenticator.data = NULL;
+    memset(&creds, 0, sizeof(creds));
+    retval = krb5_tgtname(context, target_realm, target_realm, &creds.server);
+    if (retval ==0)
+	retval = krb5_cc_get_principal(context, ccache, &creds.client);
+    if (retval == 0)
+	retval = krb5_get_credentials(context, 0, ccache,  &creds, &out_creds);
+    if (retval == 0)
+	retval = krb5_mk_req_extended(context, &authcontext, AP_OPTS_USE_SUBKEY, NULL /*data*/,
+				      out_creds, &encoded_authenticator);
+    if (retval == 0)
+	retval = krb5_auth_con_getsendsubkey(context, authcontext, &subkey);
+    if (retval == 0)
+	retval = krb5_c_fx_cf2_simple(context, subkey, "subkeyarmor",
+				      &out_creds->keyblock, "ticketarmor", &armor_key);
+    if (retval == 0) {
+	armor = calloc(1, sizeof(krb5_fast_armor));
+	if (armor == NULL)
+	    retval = ENOMEM;
+    }
+    if (retval == 0) {
+	armor->armor_type = KRB5_FAST_ARMOR_AP_REQUEST;
+	armor->armor_value = encoded_authenticator;
+	encoded_authenticator.data = NULL;
+	encoded_authenticator.length = 0;
+	state->armor = armor;
+	armor = NULL;
+	state->armor_key = armor_key;
+	armor_key = NULL;
+    }
+    krb5_free_keyblock(context, armor_key);
+    krb5_free_keyblock(context, subkey);
+    if (out_creds)
+	krb5_free_creds(context, out_creds);
+    krb5_free_cred_contents(context, &creds);
+    if (encoded_authenticator.data)
+	krb5_free_data_contents(context, &encoded_authenticator);
+    krb5_auth_con_free(context, authcontext);
+    return retval;
+}
 
 krb5_error_code
 krb5int_fast_prep_req_body(krb5_context context, struct krb5int_fast_request_state *state,
@@ -77,6 +128,34 @@ krb5int_fast_prep_req_body(krb5_context context, struct krb5int_fast_request_sta
     return retval;
 }
 
+krb5_error_code krb5int_fast_as_armor
+(krb5_context context, struct krb5int_fast_request_state *state,
+ krb5_gic_opt_ext *opte,
+ krb5_kdc_req *request)
+{
+    krb5_error_code retval = 0;
+    krb5_ccache ccache = NULL;
+    krb5_clear_error_message(context);
+    if (opte->opt_private->fast_ccache_name) {
+	retval = krb5_cc_resolve(context, opte->opt_private->fast_ccache_name,
+				 &ccache);
+	if (retval==0)
+		retval = fast_armor_ap_request(context, state, ccache,
+					       krb5_princ_realm(context, request->server));
+	if (retval != 0) {
+	    const char * errmsg;
+	    errmsg = krb5_get_error_message(context, retval);
+	    if (errmsg) {
+		krb5_set_error_message(context, retval, "%s constructing AP-REQ armor", errmsg);
+		krb5_free_error_message(context, errmsg);
+	    }
+	}
+    }
+    if (ccache)
+	krb5_cc_close(context, ccache);
+    return retval;
+}
+
 
 krb5_error_code 
 krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *state,
@@ -88,28 +167,51 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     krb5_pa_data *pa_array[3];
     krb5_pa_data pa[2];
     krb5_fast_req fast_req;
+    krb5_fast_armored_req *armored_req = NULL;
     krb5_data *encoded_fast_req = NULL;
+    krb5_data *encoded_armored_req = NULL;
     krb5_data *local_encoded_result = NULL;
+    krb5_cksumtype cksumtype;
 
     assert(state != NULL);
-        assert(state->fast_outer_request.padata == NULL);
+    assert(state->fast_outer_request.padata == NULL);
     memset(pa_array, 0, sizeof pa_array);
     if (state->armor_key == NULL) {
 	return encoder(request, encoded_request);
     }
     fast_req.req_body =  request;
     if (fast_req.req_body->padata == NULL) {
-      fast_req.req_body->padata = calloc(1, sizeof(krb5_pa_data *));
-      if (fast_req.req_body->padata == NULL)
-	retval = ENOMEM;
+	fast_req.req_body->padata = calloc(1, sizeof(krb5_pa_data *));
+	if (fast_req.req_body->padata == NULL)
+	    retval = ENOMEM;
     }
     fast_req.fast_options = state->fast_options;
     if (retval == 0)
 	retval = encode_krb5_fast_req(&fast_req, &encoded_fast_req);
+    if (retval == 0) {
+	armored_req = calloc(1, sizeof(krb5_fast_armored_req));
+	if (armored_req == NULL)
+	    retval = ENOMEM;
+    }
+    if (retval == 0)
+	armored_req->armor = state->armor;
+    if (retval == 0)
+	retval = krb5int_c_mandatory_cksumtype(context, state->armor_key->enctype,
+					       &cksumtype);
+    if (retval ==0)
+	retval = krb5_c_make_checksum(context, cksumtype, state->armor_key,
+				      KRB5_KEYUSAGE_FAST_REQ_CHKSUM, to_be_checksummed,
+				      &armored_req->req_checksum);
+    if (retval == 0)
+	retval = krb5_encrypt_helper(context, state->armor_key,
+				     KRB5_KEYUSAGE_FAST_ENC, encoded_fast_req,
+				     &armored_req->enc_part);
+    if (retval == 0)
+	retval = encode_krb5_pa_fx_fast_request(armored_req, &encoded_armored_req);
     if (retval==0) {
 	pa[0].pa_type = KRB5_PADATA_FX_FAST;
-	pa[0].contents = (unsigned char *) encoded_fast_req->data;
-	pa[0].length = encoded_fast_req->length;
+	pa[0].contents = (unsigned char *) encoded_armored_req->data;
+	pa[0].length = encoded_armored_req->length;
 	pa_array[0] = &pa[0];
     }
     if (state->cookie_contents.data) {
@@ -124,6 +226,12 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     if (retval == 0) {
 	*encoded_request = local_encoded_result;
 	local_encoded_result = NULL;
+    }
+    if (encoded_armored_req)
+	krb5_free_data(context, encoded_armored_req);
+    if (armored_req) {
+	armored_req->armor = NULL; /*owned by state*/
+	krb5_free_fast_armored_req(context, armored_req);
     }
     if (encoded_fast_req)
 	krb5_free_data(context, encoded_fast_req);

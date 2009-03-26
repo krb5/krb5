@@ -146,6 +146,8 @@ krb5int_gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
     /* Free up any private stuff */
     if (opte->opt_private->preauth_data != NULL)
 	free_gic_opt_ext_preauth_data(context, opte);
+    if (opte->opt_private->fast_ccache_name)
+	free(opte->opt_private->fast_ccache_name);
     free(opte->opt_private);
     opte->opt_private = NULL;
     return 0;
@@ -464,4 +466,22 @@ krb5_get_init_creds_opt_free_pa(krb5_context context,
 	    free(preauth_data[i].value);
     }
     free(preauth_data);
+}
+krb5_error_code KRB5_CALLCONV krb5_get_init_creds_opt_set_fast_ccache_name
+(krb5_context context, krb5_get_init_creds_opt *opt, const char *ccache_name)
+{
+    krb5_error_code retval = 0;
+    krb5_gic_opt_ext *opte;
+
+    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
+				     "krb5_get_init_creds_opt_set_fast_ccache_name");
+    if (retval)
+	return retval;
+    if (opte->opt_private->fast_ccache_name) {
+	free(opte->opt_private->fast_ccache_name);
+    }
+    opte->opt_private->fast_ccache_name = strdup(ccache_name);
+    if (opte->opt_private->fast_ccache_name == NULL)
+	retval = ENOMEM;
+    return retval;
 }

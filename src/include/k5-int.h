@@ -963,6 +963,10 @@ typedef struct _krb5_pa_for_user {
     krb5_data		auth_package;
 } krb5_pa_for_user;
 
+enum {
+  KRB5_FAST_ARMOR_AP_REQUEST = 0x1
+};
+
 typedef struct _krb5_fast_armor {
     krb5_int32 armor_type;
     krb5_data armor_value;
@@ -1130,6 +1134,7 @@ void krb5_free_etype_info
 typedef struct _krb5_gic_opt_private {
     int num_preauth_data;
     krb5_gic_opt_pa_data *preauth_data;
+  char * fast_ccache_name;
 } krb5_gic_opt_private;
 
 /*
