@@ -668,6 +668,7 @@ get_entry_data(krb5_context context,
     krb5_keyblock *keys, *mkey_ptr;
     krb5_key_data *entry_key;
     krb5_error_code error;
+    struct kdc_request_state *state = request->kdc_state;
 
     switch (type) {
     case krb5plugin_preauth_entry_request_certificate:
@@ -752,6 +753,30 @@ get_entry_data(krb5_context context,
 	}
 	return ASN1_PARSE_ERROR;
 	break;
+    case krb5plugin_preauth_fast_armor:
+	ret = calloc(1, sizeof(krb5_data));
+	if (ret == NULL)
+	    return ENOMEM;
+	if (state->armor_key == NULL) {
+	    *result = ret;
+	    return 0;
+	}
+	error = krb5_copy_keyblock(context, state->armor_key, &keys);
+	if (error == 0) {
+	    ret->data = (char *) keys;
+	    ret->length = sizeof(krb5_keyblock);
+	    *result = ret;
+	    return 0;
+	}
+	free(ret);
+	return error;
+    case krb5plugin_preauth_free_fast_armor:
+	if ((*result)->data) {
+	    keys = (krb5_keyblock *) (*result)->data;
+	    krb5_free_keyblock(context, keys);
+	}
+	free(*result);
+	return 0;
     default:
 	break;
     }

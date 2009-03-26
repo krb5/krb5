@@ -1080,7 +1080,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/kdb/db2/libdb2/mpool
 	plugins/kdb/db2/libdb2/recno
 	plugins/kdb/db2/libdb2/test
-	plugins/preauth/cksum_body
+	plugins/preauth/cksum_body plugins/preauth/encrypted_challenge
 	plugins/preauth/wpse
 	plugins/authdata/greet
 

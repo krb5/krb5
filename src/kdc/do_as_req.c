@@ -151,6 +151,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	status = "error decoding FAST";
 	goto errout;
     }
+    request->kdc_state = state;
     if (!request->client) {
 	status = "NULL_CLIENT";
 	errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
@@ -704,6 +705,7 @@ egress:
 
     krb5_free_data_contents(kdc_context, &e_data);
     kdc_free_rstate(state);
+    request->kdc_state = NULL;
     krb5_free_kdc_req(kdc_context, request);
     assert(did_log != 0);
     return errcode;

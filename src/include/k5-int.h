@@ -910,9 +910,11 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * requested information.  It is opaque to the plugin code and can be
  * expanded in the future as new types of requests are defined which
  * may require other things to be passed through. */
+    struct krb5int_fast_request_state;
 typedef struct _krb5_preauth_client_rock {
 	krb5_magic	magic;
-	krb5_kdc_rep	*as_reply;
+    krb5_enctype *etype;
+    struct krb5int_fast_request_state *fast_state;
 } krb5_preauth_client_rock;
 
 /* This structure lets us keep track of all of the modules which are loaded,
@@ -2031,7 +2033,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 13
+#define KRB5INT_ACCESS_STRUCT_VERSION 14
 
 #ifndef ANAME_SZ
 struct ktext;			/* from krb.h, for krb524 support */
@@ -2085,6 +2087,16 @@ typedef struct _krb5int_access {
     krb5_error_code
     (*asn1_ldap_decode_sequence_of_keys) (krb5_data *in,
 					  ldap_seqof_key_data **);
+  /* Used for encrypted challenge fast factor*/
+    krb5_error_code (*encode_enc_data)(const krb5_enc_data *, krb5_data **);
+    krb5_error_code (*decode_enc_data)(const krb5_data *, krb5_enc_data **);
+    void (*free_enc_data)(krb5_context, krb5_enc_data *);
+    krb5_error_code (*encode_enc_ts)(const krb5_pa_enc_ts *, krb5_data **);
+    krb5_error_code (*decode_enc_ts)(const krb5_data *, krb5_pa_enc_ts **);
+    void (*free_enc_ts)(krb5_context, krb5_pa_enc_ts *);
+    krb5_error_code (*encrypt_helper)
+	(krb5_context, const krb5_keyblock *, krb5_keyusage, const krb5_data *,
+	 krb5_enc_data *);
 
     /*
      * pkinit asn.1 encode/decode functions

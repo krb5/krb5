@@ -1251,8 +1251,9 @@ krb5_get_init_creds(krb5_context context,
         goto cleanup;
 
     get_data_rock.magic = CLIENT_ROCK_MAGIC;
-    get_data_rock.as_reply = NULL;
-
+    get_data_rock.etype = &etype;
+    get_data_rock.fast_state = fast_state;
+    
     /* now, loop processing preauth data and talking to the kdc */
     for (loopcount = 0; loopcount < MAX_IN_TKT_LOOPS; loopcount++) {
 	if (request.padata) {
@@ -1404,7 +1405,7 @@ krb5_get_init_creds(krb5_context context,
     if ((ret = sort_krb5_padata_sequence(context, &request.server->realm,
 					 local_as_reply->padata)))
 	goto cleanup;
-    get_data_rock.as_reply = local_as_reply;
+    etype = local_as_reply->enc_part.enctype;
     if ((ret = krb5_do_preauth(context,
 			       &request,
 			       encoded_request_body, encoded_previous_request,
