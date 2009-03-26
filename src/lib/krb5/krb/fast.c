@@ -164,7 +164,7 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
 		       krb5_data **encoded_request)
 {
     krb5_error_code retval = 0;
-    krb5_pa_data *pa_array[3];
+    krb5_pa_data *pa_array[2];
     krb5_pa_data pa[2];
     krb5_fast_req fast_req;
     krb5_fast_armored_req *armored_req = NULL;
@@ -174,6 +174,7 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     krb5_cksumtype cksumtype;
     krb5_data random_data;
     char random_buf[4];
+
 
     assert(state != NULL);
     assert(state->fast_outer_request.padata == NULL);
@@ -223,12 +224,6 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
 	pa[0].contents = (unsigned char *) encoded_armored_req->data;
 	pa[0].length = encoded_armored_req->length;
 	pa_array[0] = &pa[0];
-    }
-    if (state->cookie_contents.data) {
-	pa[1].contents = (unsigned char *) state->cookie_contents.data;
-	pa[1].length = state->cookie_contents.length;
-	pa[1].pa_type = KRB5_PADATA_FX_COOKIE;
-	pa_array[1] = &pa[1];
     }
     state->fast_outer_request.padata = pa_array;
     if(retval == 0)
@@ -381,7 +376,11 @@ krb5int_fast_free_state( krb5_context context, struct krb5int_fast_request_state
     /*We are responsible for none of the store in the fast_outer_req*/
     krb5_free_keyblock(context, state->armor_key);
     krb5_free_fast_armor(context, state->armor);
-    krb5_free_data_contents(context, &state->cookie_contents);
+    if (state->cookie) {
+	free(state->cookie->contents);
+	free(state->cookie);
+	state->cookie = NULL;
+    }
 }
 
 krb5_pa_data * krb5int_find_pa_data

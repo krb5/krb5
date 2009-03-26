@@ -38,7 +38,7 @@ struct krb5int_fast_request_state {
     krb5_fast_armor *armor;
     krb5_ui_4 fast_state_flags;
     krb5_ui_4 fast_options;
-    krb5_data cookie_contents;
+  krb5_pa_data *cookie;
     krb5_int32 nonce;
 };
 
