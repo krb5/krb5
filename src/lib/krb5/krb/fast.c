@@ -246,6 +246,63 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     return retval;
 }
 
+static krb5_error_code decrypt_fast_reply
+(krb5_context context, struct krb5int_fast_request_state *state,
+ krb5_pa_data **in_padata,
+ krb5_fast_response **response)
+{
+    krb5_error_code retval = 0;
+    krb5_data scratch;
+    krb5_enc_data *encrypted_response = NULL;
+    krb5_pa_data *fx_reply = NULL;
+    krb5_fast_response *local_resp = NULL;
+    assert(state != NULL);
+    if (state->armor_key == NULL)
+	return 0;
+        fx_reply = krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FX_FAST);
+    if (fx_reply == NULL)
+	retval = KRB5_ERR_FAST_REQUIRED;
+    if (retval == 0) {
+	scratch.data = (char *) fx_reply->contents;
+	scratch.length = fx_reply->length;
+	retval = decode_krb5_pa_fx_fast_reply(&scratch, &encrypted_response);
+    }
+    scratch.data = NULL;
+    if (retval == 0) {
+	scratch.data = malloc(encrypted_response->ciphertext.length);
+	if (scratch.data == NULL)
+	    retval = ENOMEM;
+	scratch.length = encrypted_response->ciphertext.length;
+    }
+    if (retval == 0)
+	retval = krb5_c_decrypt(context, state->armor_key,
+				KRB5_KEYUSAGE_FAST_REP, NULL,
+				encrypted_response, &scratch);
+    if (retval != 0) {
+	const char * errmsg;
+	errmsg = krb5_get_error_message(context, retval);
+	krb5_set_error_message(context, retval, "%s while decrypting FAST reply", errmsg);
+	krb5_free_error_message(context, errmsg);
+    }
+    if (retval == 0)
+	retval = decode_krb5_fast_response(&scratch, &local_resp);
+    if (retval == 0) {
+	if (local_resp->nonce != state->nonce) {
+	    retval = KRB5_KDCREP_MODIFIED;
+	    krb5_set_error_message(context, retval, "nonce modified in FAST response: KDC response modified");
+	}
+    }
+    if (retval == 0) {
+	*response = local_resp;
+	local_resp = NULL;
+    }
+    if (scratch.data)
+	free(scratch.data);
+    if (encrypted_response)
+	krb5_free_enc_data(context, encrypted_response);
+    return retval;
+}
+
 /*
  * FAST separates two concepts: the set of padata we're using to
  * decide what pre-auth mechanisms to use and the set of padata we're
@@ -269,15 +326,15 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
     *out_padata = NULL;
     *retry = 0;
     if (state->armor_key) {
-	krb5_pa_data *fast_pa, *fx_error_pa;
+	krb5_pa_data *fx_error_pa;
 	krb5_pa_data **result = NULL;
 	krb5_data scratch, *encoded_td = NULL;
 	krb5_error *fx_error = NULL;
 	krb5_fast_response *fast_response = NULL;
 	retval = decode_krb5_padata_sequence(&err_reply->e_data, &result);
 	if (retval == 0)
-	    fast_pa = krb5int_find_pa_data(context, result, KRB5_PADATA_FX_FAST);
-	if (retval || fast_pa == NULL) {
+	    retval = decrypt_fast_reply(context, state, result, &fast_response);
+	if (retval) {
 	    /*This can happen if the KDC does not understand FAST. We
 	     * don't expect that, but treating it as the fatal error
 	     * indicated by the KDC seems reasonable.
@@ -286,17 +343,8 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 	    krb5_free_pa_data(context, result);
 	    return 0;
 	}
-	scratch.data = (char *) fast_pa->contents;
-	scratch.length = fast_pa->length;
-	retval = decode_krb5_fast_response(&scratch, &fast_response);
 	krb5_free_pa_data(context, result);
 	result = NULL;
-	if (retval == 0) {
-	    if (fast_response->nonce != state->nonce) {
-		krb5_set_error_message(context, KRB5_KDCREP_MODIFIED, "Nonce in reply did not match expected value");
-		retval = KRB5_KDCREP_MODIFIED;
-	    }
-	}
 	if (retval == 0) {	
 	    fx_error_pa = krb5int_find_pa_data(context, fast_response->padata, KRB5_PADATA_FX_ERROR);
 	    if (fx_error_pa == NULL) {
@@ -317,7 +365,7 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 	 */
 	if (retval == 0) 
 	    retval = encode_krb5_typed_data( (krb5_typed_data **) fast_response->padata,
-					    &encoded_td);
+					     &encoded_td);
 	if (retval == 0) {
 	    fx_error->e_data = *encoded_td;
 	    free(encoded_td); /*contents owned by fx_error*/
@@ -353,10 +401,58 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 				   "Error decoding padata in error reply");
 	    return retval;
 	}
-	}
+    }
     return retval;
 }
 
+
+krb5_error_code krb5int_fast_process_response
+(krb5_context context, struct krb5int_fast_request_state *state,
+ krb5_kdc_rep *resp,
+ krb5_keyblock **as_key)
+{
+    krb5_error_code retval = 0;
+    krb5_fast_response *fast_response = NULL;
+    krb5_data *encoded_ticket = NULL;
+    krb5_boolean cksum_valid;
+    krb5_clear_error_message(context);
+    *as_key = NULL;
+        retval = decrypt_fast_reply(context, state, resp->padata,
+				&fast_response);
+    if (retval == 0) {
+	if (fast_response->finished == 0) {
+	    retval = KRB5_KDCREP_MODIFIED;
+	    krb5_set_error_message(context, retval, "FAST response missing finish message in KDC reply");
+	}
+    }
+    if (retval == 0)
+	retval = encode_krb5_ticket(resp->ticket, &encoded_ticket);
+    if (retval == 0)
+	retval = krb5_c_verify_checksum(context, state->armor_key,
+					KRB5_KEYUSAGE_FAST_FINISHED,
+					encoded_ticket,
+					&fast_response->finished->ticket_checksum,
+					&cksum_valid);
+    if (retval == 0 && cksum_valid == 0) {
+	retval = KRB5_KDCREP_MODIFIED;
+	krb5_set_error_message(context, retval, "ticket modified in KDC reply");
+    }
+    if (retval == 0) {
+	krb5_free_principal(context, resp->client);
+	resp->client = fast_response->finished->client;
+	fast_response->finished->client = NULL;
+	*as_key = fast_response->rep_key;
+	fast_response->rep_key = NULL;
+	krb5_free_pa_data(context, resp->padata);
+	resp->padata = fast_response->padata;
+	fast_response->padata = NULL;
+    }
+    if (fast_response)
+	krb5_free_fast_response(context, fast_response);
+    if (encoded_ticket)
+	krb5_free_data(context, encoded_ticket);
+    return retval;
+}
 krb5_error_code
 krb5int_fast_make_state( krb5_context context, struct krb5int_fast_request_state **state)
 {
@@ -381,6 +477,7 @@ krb5int_fast_free_state( krb5_context context, struct krb5int_fast_request_state
 	free(state->cookie);
 	state->cookie = NULL;
     }
+    free(state);
 }
 
 krb5_pa_data * krb5int_find_pa_data

@@ -58,6 +58,11 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 			   krb5_error **err_replyptr			   , krb5_pa_data ***out_padata,
 			   krb5_boolean *retry);
 
+krb5_error_code krb5int_fast_process_response
+(krb5_context context, struct krb5int_fast_request_state *state,
+ krb5_kdc_rep *resp,
+ krb5_keyblock **as_key);
+
 krb5_error_code
 krb5int_fast_make_state( krb5_context context, struct krb5int_fast_request_state **state);
 
