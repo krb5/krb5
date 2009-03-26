@@ -812,3 +812,22 @@ void krb5_free_fast_armor(krb5_context context, krb5_fast_armor *val)
   krb5_free_data_contents(context, &val->armor_value);
   free(val);
 }
+
+void krb5_free_fast_response(krb5_context context, krb5_fast_response *val)
+{
+  if (!val)
+    return;
+  krb5_free_pa_data(context, val->padata);
+  krb5_free_fast_finished(context, val->finished);
+  free(val);
+}
+
+void krb5_free_fast_finished
+(krb5_context context, krb5_fast_finished *val)
+{
+  if (!val)
+    return;
+  krb5_free_principal(context, val->client);
+  krb5_free_checksum_contents(context, &val->checksum);
+  krb5_free_checksum_contents(context, &val->ticket_checksum);
+}
