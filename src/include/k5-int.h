@@ -963,6 +963,40 @@ typedef struct _krb5_pa_for_user {
     krb5_data		auth_package;
 } krb5_pa_for_user;
 
+typedef struct _krb5_fast_armor {
+    krb5_int32 armor_type;
+    krb5_data armor_value;
+} krb5_fast_armor;
+typedef struct _krb5_fast_armored_req {
+    krb5_magic magic;
+    krb5_fast_armor *armor;
+    krb5_checksum req_checksum;
+    krb5_enc_data enc_part;
+} krb5_fast_armored_req;
+
+typedef struct _krb5_fast_req {
+    krb5_magic magic;
+    krb5_int32 fast_options;
+    /* padata from req_body is used*/
+   krb5_kdc_req req_body;
+} krb5_fast_req;
+
+    typedef struct _krb5_fast_finished {
+	krb5_timestamp timestamp;
+	krb5_int32 usec;
+	krb5_principal client;
+	krb5_checksum checksum;
+	krb5_checksum ticket_checksum;
+    } krb5_fast_finished;
+
+	typedef struct _krb5_fast_response {
+	    krb5_magic magic;
+    krb5_pa_data **padata;
+    krb5_keyblock *rep_key;
+    krb5_fast_finished *finished;
+} krb5_fast_response;
+
+
 typedef krb5_error_code (*krb5_preauth_obtain_proc)
     (krb5_context,
 		    krb5_pa_data *,
