@@ -146,7 +146,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     errcode = ASN1_BAD_ID;
     status = "Finding req_body";
 }
-    errcode = kdc_find_fast(&request, &encoded_req_body, NULL /*TGS key*/, state);
+    errcode = kdc_find_fast(&request, &encoded_req_body, NULL /*TGS key*/, NULL, state);
     if (errcode) {
 	status = "error decoding FAST";
 	goto errout;

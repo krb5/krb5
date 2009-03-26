@@ -123,6 +123,7 @@ static krb5_error_code encrypt_fast_reply
 krb5_error_code  kdc_find_fast
 (krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
  krb5_keyblock *tgs_subkey,
+ krb5_keyblock *tgs_session,
  struct kdc_request_state *state)
 {
     krb5_error_code retval = 0;
@@ -155,7 +156,10 @@ krb5_error_code  kdc_find_fast
     }
     if (retval == 0 && !state->armor_key) {
 	if (tgs_subkey)
-	    retval =krb5_copy_keyblock(kdc_context, tgs_subkey, &state->armor_key);
+	  retval = krb5_c_fx_cf2_simple(kdc_context,
+					tgs_subkey, "subkeyarmor",
+					tgs_session, "ticketarmor",
+					&state->armor_key);
 	else {
 	    krb5_set_error_message(kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
 				   "No armor key but FAST armored request present");
@@ -268,12 +272,15 @@ krb5_error_code kdc_fast_response_handle_padata
     krb5_data *encrypted_reply = NULL;
     krb5_pa_data *pa = NULL, **pa_array;
     krb5_cksumtype cksumtype = CKSUMTYPE_RSA_MD5;
+    krb5_pa_data *empty_padata[] = {NULL};
     
     if (!state->armor_key)
 	return 0;
     memset(&finish, 0, sizeof(finish));
     fast_response.padata = rep->padata;
-    fast_response.rep_key = state->reply_key;
+    if (fast_response.padata == NULL)
+	fast_response.padata = &empty_padata[0];
+        fast_response.rep_key = state->reply_key;
     fast_response.nonce = request->nonce;
     fast_response.finished = &finish;
     finish.client = rep->client;
@@ -287,6 +294,8 @@ krb5_error_code kdc_fast_response_handle_padata
 	retval = krb5_us_timeofday(kdc_context, &finish.timestamp, &finish.usec);
     if (retval == 0)
 	retval = encode_krb5_ticket(rep->ticket, &encoded_ticket);
+    if (retval == 0)
+    retval = krb5int_c_mandatory_cksumtype(kdc_context, state->armor_key->enctype, &cksumtype);
     if (retval == 0)
 	retval = krb5_c_make_checksum(kdc_context, cksumtype,
 				      state->armor_key, KRB5_KEYUSAGE_FAST_FINISHED,

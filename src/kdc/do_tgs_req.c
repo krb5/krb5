@@ -76,7 +76,7 @@ find_alternate_tgs(krb5_kdc_req *,krb5_db_entry *,
                    krb5_boolean *,int *);
 
 static krb5_error_code 
-prepare_error_tgs(krb5_kdc_req *,krb5_ticket *,int,
+prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
                   krb5_principal,krb5_data **,const char *);
 
 static krb5_int32
@@ -166,7 +166,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     }
     scratch.length = pa_tgs_req->length;
     scratch.data = (char *) pa_tgs_req->contents;
-    errcode = kdc_find_fast(&request, &scratch, subkey, state);
+    errcode = kdc_find_fast(&request, &scratch, subkey, header_ticket->enc_part2->session, state);
     if (errcode !=0) {
 	status = "kdc_find_fast";
 		goto cleanup;
@@ -873,7 +873,12 @@ tgt_again:
 
     reply.enc_part.enctype = subkey ? subkey->enctype :
     header_ticket->enc_part2->session->enctype;
-    errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
+    errcode  = kdc_fast_response_handle_padata(state, request, &reply);
+    if (errcode !=0 ) {
+	status = "Preparing FAST padata";
+	goto cleanup;
+    }
+            errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
                   subkey ? 1 : 0,
                   subkey ? subkey :
                   header_ticket->enc_part2->session,
@@ -914,7 +919,7 @@ cleanup:
         if (errcode < 0 || errcode > 128)
             errcode = KRB_ERR_GENERIC;
             
-        retval = prepare_error_tgs(request, header_ticket, errcode,
+        retval = prepare_error_tgs(state, request, header_ticket, errcode,
         nprincs ? server.princ : NULL,
                    response, status);
         if (got_err) {
@@ -956,7 +961,8 @@ cleanup:
 }
 
 static krb5_error_code
-prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
+prepare_error_tgs (struct kdc_request_state *state,
+		   krb5_kdc_req *request, krb5_ticket *ticket, int error,
                    krb5_principal canon_server,
                    krb5_data **response, const char *status)
 {
@@ -979,14 +985,19 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
     errpkt.text.length = strlen(status) + 1;
     if (!(errpkt.text.data = strdup(status)))
         return ENOMEM;
-
+    
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
         free(errpkt.text.data);
         return ENOMEM;
     }
     errpkt.e_data.length = 0;
     errpkt.e_data.data = NULL;
-
+    retval = kdc_fast_handle_error(kdc_context, state, request, NULL, &errpkt);
+    if (retval) {
+	free(scratch);
+	free(errpkt.text.data);
+	return retval;
+    }
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
     if (retval)

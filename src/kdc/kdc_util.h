@@ -319,7 +319,7 @@ enum krb5_fast_kdc_flags {
 
 krb5_error_code  kdc_find_fast
 (krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
- krb5_keyblock *tgs_subkey,
+ krb5_keyblock *tgs_subkey, krb5_keyblock *tgs_session,
  struct kdc_request_state *state);
 
 krb5_error_code kdc_fast_response_handle_padata
