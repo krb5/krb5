@@ -1297,16 +1297,6 @@ decode_krb5_reply_key_pack_draft9(const krb5_data *code,
 }
 
 krb5_error_code
-decode_krb5_typed_data(const krb5_data *code, krb5_typed_data ***repptr)
-{
-    setup_buf_only(krb5_typed_data **);
-    retval = asn1_decode_sequence_of_typed_data(&buf, &rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
 decode_krb5_td_trusted_certifiers(const krb5_data *code,
                                   krb5_external_principal_identifier ***repptr)
 {
@@ -1328,3 +1318,13 @@ decode_krb5_td_dh_parameters(const krb5_data *code,
     cleanup(free);
 }
 #endif /* DISABLE_PKINIT */
+
+krb5_error_code
+decode_krb5_typed_data(const krb5_data *code, krb5_typed_data ***repptr)
+{
+    setup_buf_only(krb5_typed_data **);
+    retval = asn1_decode_sequence_of_typed_data(&buf, &rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}

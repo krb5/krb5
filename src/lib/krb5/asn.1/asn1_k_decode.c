@@ -2321,6 +2321,8 @@ error_out:
     return retval;
 }
 
+#endif /* DISABLE_PKINIT */
+
 static void free_typed_data(void *dummy, krb5_typed_data *val)
 {
     free(val->data);
@@ -2354,4 +2356,3 @@ asn1_decode_typed_data_ptr(asn1buf *buf, krb5_typed_data **valptr)
 {
     decode_ptr(krb5_typed_data *, asn1_decode_typed_data);
 }
-#endif /* DISABLE_PKINIT */

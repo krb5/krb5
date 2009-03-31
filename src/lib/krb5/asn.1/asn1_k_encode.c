@@ -1337,7 +1337,6 @@ MAKE_FULL_ENCODER(encode_krb5_fast_response, fast_response);
 
 
 
-#ifndef DISABLE_PKINIT
 /*
  * PKINIT
  */
@@ -1438,6 +1437,8 @@ MAKE_FULL_ENCODER(encode_krb5_fast_response, fast_response);
   if (retval) {\
     return retval; }\
   sum += length; }
+
+#ifndef DISABLE_PKINIT
 
 /* Callable encoders for the types defined above, until the PKINIT
    encoders get converted.  */
@@ -1819,6 +1820,8 @@ asn1_error_code asn1_encode_td_trusted_certifiers(asn1buf *buf, const krb5_exter
     asn1_cleanup();
 }
 
+#endif /* DISABLE_PKINIT */
+
 asn1_error_code asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_typed_data **val, unsigned int *retlen)
 {
     asn1_setup();
@@ -1847,4 +1850,3 @@ asn1_error_code asn1_encode_typed_data(asn1buf *buf, const krb5_typed_data *val,
     asn1_makeseq();
     asn1_cleanup();
 }
-#endif /* DISABLE_PKINIT */
