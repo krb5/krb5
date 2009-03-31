@@ -187,7 +187,7 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
     if ((retval = encode_krb5_authdata(authorization_data, &scratch)))
         goto send_tgs_error_1;
 
-    if ((retval = krb5_encrypt_helper(context, *subkey,
+    if ((retval = krb5_encrypt_helper(context, local_subkey,
                       KRB5_KEYUSAGE_TGS_REQ_AD_SUBKEY,
                       scratch,
                       &tgsreq.authorization_data))) {
