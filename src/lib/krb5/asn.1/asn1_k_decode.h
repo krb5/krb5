@@ -266,4 +266,16 @@ asn1_error_code asn1_decode_pa_for_user
 asn1_error_code asn1_decode_pa_pac_req
         (asn1buf *buf, krb5_pa_pac_req *val);
 
+asn1_error_code asn1_decode_fast_armor
+(asn1buf *buf, krb5_fast_armor *val);
+
+asn1_error_code asn1_decode_fast_armor_ptr
+(asn1buf *buf, krb5_fast_armor **val);
+
+asn1_error_code asn1_decode_fast_finished
+(asn1buf *buf, krb5_fast_finished *val);
+
+asn1_error_code asn1_decode_fast_finished_ptr
+(asn1buf *buf, krb5_fast_finished **val);
+
 #endif

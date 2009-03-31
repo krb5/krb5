@@ -910,9 +910,11 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * requested information.  It is opaque to the plugin code and can be
  * expanded in the future as new types of requests are defined which
  * may require other things to be passed through. */
+    struct krb5int_fast_request_state;
 typedef struct _krb5_preauth_client_rock {
 	krb5_magic	magic;
-	krb5_kdc_rep	*as_reply;
+    krb5_enctype *etype;
+    struct krb5int_fast_request_state *fast_state;
 } krb5_preauth_client_rock;
 
 /* This structure lets us keep track of all of the modules which are loaded,
@@ -962,6 +964,48 @@ typedef struct _krb5_pa_for_user {
     krb5_checksum	cksum;
     krb5_data		auth_package;
 } krb5_pa_for_user;
+
+enum {
+  KRB5_FAST_ARMOR_AP_REQUEST = 0x1
+};
+
+typedef struct _krb5_fast_armor {
+    krb5_int32 armor_type;
+    krb5_data armor_value;
+} krb5_fast_armor;
+typedef struct _krb5_fast_armored_req {
+    krb5_magic magic;
+    krb5_fast_armor *armor;
+    krb5_checksum req_checksum;
+    krb5_enc_data enc_part;
+} krb5_fast_armored_req;
+
+typedef struct _krb5_fast_req {
+    krb5_magic magic;
+    krb5_int32 fast_options;
+    /* padata from req_body is used*/
+   krb5_kdc_req *req_body;
+} krb5_fast_req;
+
+/* Bits 0-15 are critical in fast options.*/
+#define UNSUPPORTED_CRITICAL_FAST_OPTIONS 0x00ff
+#define KRB5_FAST_OPTION_HIDE_CLIENT_NAMES 0x01
+
+typedef struct _krb5_fast_finished {
+    krb5_timestamp timestamp;
+    krb5_int32 usec;
+    krb5_principal client;
+    krb5_checksum ticket_checksum;
+} krb5_fast_finished;
+
+typedef struct _krb5_fast_response {
+    krb5_magic magic;
+    krb5_pa_data **padata;
+    krb5_keyblock *rep_key;
+    krb5_fast_finished *finished;
+    krb5_int32 nonce;
+} krb5_fast_response;
+
 
 typedef krb5_error_code (*krb5_preauth_obtain_proc)
     (krb5_context,
@@ -1036,6 +1080,10 @@ krb5_error_code krb5_process_padata
 		krb5_creds *, 
 		krb5_int32 *);		
 
+krb5_pa_data * krb5int_find_pa_data
+(krb5_context,  krb5_pa_data * const *, krb5_preauthtype);
+/* Does not return a copy; original padata sequence responsible for freeing*/
+
 void krb5_free_etype_info
     (krb5_context, krb5_etype_info);
 
@@ -1088,6 +1136,7 @@ void krb5_free_etype_info
 typedef struct _krb5_gic_opt_private {
     int num_preauth_data;
     krb5_gic_opt_pa_data *preauth_data;
+  char * fast_ccache_name;
 } krb5_gic_opt_private;
 
 /*
@@ -1253,6 +1302,16 @@ void KRB5_CALLCONV krb5_free_pa_pac_req
 	(krb5_context, krb5_pa_pac_req * );
 void KRB5_CALLCONV krb5_free_etype_list
 	(krb5_context, krb5_etype_list * );
+
+void KRB5_CALLCONV krb5_free_fast_armor
+(krb5_context, krb5_fast_armor *);
+void KRB5_CALLCONV krb5_free_fast_armored_req
+(krb5_context, krb5_fast_armored_req *);
+void KRB5_CALLCONV krb5_free_fast_req(krb5_context, krb5_fast_req *);
+void KRB5_CALLCONV krb5_free_fast_finished
+(krb5_context, krb5_fast_finished *);
+void KRB5_CALLCONV krb5_free_fast_response
+(krb5_context, krb5_fast_response *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1563,6 +1622,16 @@ krb5_error_code encode_krb5_pa_pac_req
 krb5_error_code encode_krb5_etype_list
 	(const krb5_etype_list * , krb5_data **);
 
+krb5_error_code encode_krb5_pa_fx_fast_request
+(const krb5_fast_armored_req *, krb5_data **);
+krb5_error_code encode_krb5_fast_req
+(const krb5_fast_req *, krb5_data **);
+krb5_error_code encode_krb5_pa_fx_fast_reply
+(const krb5_enc_data *, krb5_data **);
+
+krb5_error_code encode_krb5_fast_response
+(const krb5_fast_response *, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1721,6 +1790,19 @@ krb5_error_code decode_krb5_pa_pac_req
 
 krb5_error_code decode_krb5_etype_list
 	(const krb5_data *, krb5_etype_list **);
+
+krb5_error_code decode_krb5_pa_fx_fast_request
+(const krb5_data *, krb5_fast_armored_req **);
+
+krb5_error_code decode_krb5_fast_req
+(const krb5_data *, krb5_fast_req **);
+
+
+krb5_error_code decode_krb5_pa_fx_fast_reply
+(const krb5_data *, krb5_enc_data **);
+
+krb5_error_code decode_krb5_fast_response
+(const krb5_data *, krb5_fast_response **);
 
 struct _krb5_key_data;		/* kdb.h */
 
@@ -1951,7 +2033,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 13
+#define KRB5INT_ACCESS_STRUCT_VERSION 14
 
 #ifndef ANAME_SZ
 struct ktext;			/* from krb.h, for krb524 support */
@@ -2005,6 +2087,16 @@ typedef struct _krb5int_access {
     krb5_error_code
     (*asn1_ldap_decode_sequence_of_keys) (krb5_data *in,
 					  ldap_seqof_key_data **);
+  /* Used for encrypted challenge fast factor*/
+    krb5_error_code (*encode_enc_data)(const krb5_enc_data *, krb5_data **);
+    krb5_error_code (*decode_enc_data)(const krb5_data *, krb5_enc_data **);
+    void (*free_enc_data)(krb5_context, krb5_enc_data *);
+    krb5_error_code (*encode_enc_ts)(const krb5_pa_enc_ts *, krb5_data **);
+    krb5_error_code (*decode_enc_ts)(const krb5_data *, krb5_pa_enc_ts **);
+    void (*free_enc_ts)(krb5_context, krb5_pa_enc_ts *);
+    krb5_error_code (*encrypt_helper)
+	(krb5_context, const krb5_keyblock *, krb5_keyusage, const krb5_data *,
+	 krb5_enc_data *);
 
     /*
      * pkinit asn.1 encode/decode functions

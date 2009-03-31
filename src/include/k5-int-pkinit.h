@@ -101,6 +101,9 @@ typedef struct _krb5_trusted_ca {
 } krb5_trusted_ca;
 
 /* typed data */
+/* The FAST error handling logic currently assumes that this structure  and krb5_pa_data * can be safely cast to each other
+ * if this structure changes, that code needs to be updated to copy.
+ */
 typedef struct _krb5_typed_data {
     krb5_magic magic;
     krb5_int32  type;
@@ -266,5 +269,7 @@ krb5_error_code decode_krb5_td_trusted_certifiers
 
 krb5_error_code decode_krb5_td_dh_parameters
 	(const krb5_data *, krb5_algorithm_identifier ***);
+
+void krb5_free_typed_data(krb5_context, krb5_typed_data **);
 
 #endif /* _KRB5_INT_PKINIT_H */

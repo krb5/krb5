@@ -24,6 +24,7 @@ SRCS= \
 	$(srcdir)/dispatch.c \
 	$(srcdir)/do_as_req.c \
 	$(srcdir)/do_tgs_req.c \
+	$(srcdir)/fast_util.c \
 	$(srcdir)/kdc_util.c \
 	$(srcdir)/kdc_preauth.c \
 	$(srcdir)/main.c \
@@ -38,6 +39,7 @@ OBJS= \
 	dispatch.o \
 	do_as_req.o \
 	do_tgs_req.o \
+	fast_util.o \
 	kdc_util.o \
 	kdc_preauth.o \
 	main.o \

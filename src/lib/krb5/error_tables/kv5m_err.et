@@ -86,5 +86,7 @@ error_code KV5M_PREDICTED_SAM_RESPONSE,	"Bad magic number for krb5_predicted_sam
 error_code KV5M_PASSWD_PHRASE_ELEMENT,	"Bad magic number for passwd_phrase_element"
 error_code KV5M_GSS_OID,	"Bad magic number for GSSAPI OID"
 error_code KV5M_GSS_QUEUE,	"Bad magic number for GSSAPI QUEUE"
-
+error_code KV5M_FAST_ARMORED_REQ, "Bad magic number for fast armored request"
+error_code KV5M_FAST_REQ, "Bad magic number for FAST request"
+error_code KV5M_FAST_RESPONSE, "Bad magic number for FAST response"
 end

@@ -133,6 +133,12 @@ static krb5_error_code verify_enc_timestamp
 		    krb5_data **e_data,
 		    krb5_authdata ***authz_data);
 
+static krb5_error_code get_enc_ts
+    (krb5_context, krb5_kdc_req *request,
+		    krb5_db_entry *client, krb5_db_entry *server,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_system_context,
+		    krb5_pa_data *data);
 static krb5_error_code get_etype_info
     (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
@@ -279,7 +285,7 @@ static krb5_preauth_systems static_preauth_systems[] = {
 	NULL,
 	NULL,
 	NULL,
-        0,
+        get_enc_ts,
 	verify_enc_timestamp,
 	0
     },
@@ -668,6 +674,7 @@ get_entry_data(krb5_context context,
     krb5_keyblock *keys, *mkey_ptr;
     krb5_key_data *entry_key;
     krb5_error_code error;
+    struct kdc_request_state *state = request->kdc_state;
 
     switch (type) {
     case krb5plugin_preauth_entry_request_certificate:
@@ -752,6 +759,30 @@ get_entry_data(krb5_context context,
 	}
 	return ASN1_PARSE_ERROR;
 	break;
+    case krb5plugin_preauth_fast_armor:
+	ret = calloc(1, sizeof(krb5_data));
+	if (ret == NULL)
+	    return ENOMEM;
+	if (state->armor_key == NULL) {
+	    *result = ret;
+	    return 0;
+	}
+	error = krb5_copy_keyblock(context, state->armor_key, &keys);
+	if (error == 0) {
+	    ret->data = (char *) keys;
+	    ret->length = sizeof(krb5_keyblock);
+	    *result = ret;
+	    return 0;
+	}
+	free(ret);
+	return error;
+    case krb5plugin_preauth_free_fast_armor:
+	if ((*result)->data) {
+	    keys = (krb5_keyblock *) (*result)->data;
+	    krb5_free_keyblock(context, keys);
+	}
+	free(*result);
+	return 0;
     default:
 	break;
     }
@@ -1340,7 +1371,20 @@ request_contains_enctype (krb5_context context,  const krb5_kdc_req *request,
     return 0;
 }
 
-
+static krb5_error_code get_enc_ts
+    (krb5_context context, krb5_kdc_req *request,
+		    krb5_db_entry *client, krb5_db_entry *server,
+		    preauth_get_entry_data_proc get_entry_data_proc,
+		    void *pa_system_context,
+		    krb5_pa_data *data)
+{
+  struct kdc_request_state *state = request->kdc_state;
+  if (state->armor_key)
+    return ENOENT;
+  return 0;
+}
+  
+  
 static krb5_error_code
 verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 		     krb5_data *req_pkt,

@@ -40,6 +40,7 @@ STLIBOBJS= \
         enc_helper.o	\
 	encode_kdc.o	\
 	encrypt_tk.o	\
+	fast.o \
 	free_rtree.o	\
 	fwd_tgt.o	\
 	gc_frm_kdc.o	\
@@ -127,6 +128,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
         $(OUTPRE)enc_helper.$(OBJEXT)	\
 	$(OUTPRE)encode_kdc.$(OBJEXT)	\
 	$(OUTPRE)encrypt_tk.$(OBJEXT)	\
+	$(OUTPRE)fast.$(OBJEXT) \
 	$(OUTPRE)free_rtree.$(OBJEXT)	\
 	$(OUTPRE)fwd_tgt.$(OBJEXT)	\
 	$(OUTPRE)gc_frm_kdc.$(OBJEXT)	\
@@ -215,6 +217,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/enc_helper.c	\
 	$(srcdir)/encode_kdc.c	\
 	$(srcdir)/encrypt_tk.c	\
+	$(srcdir)/fast.c \
 	$(srcdir)/free_rtree.c	\
 	$(srcdir)/fwd_tgt.c	\
 	$(srcdir)/gc_frm_kdc.c	\

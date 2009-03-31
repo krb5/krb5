@@ -123,11 +123,22 @@ typedef krb5_error_code
  * information to enable it to process a request.
  */
 enum krb5plugin_preauth_client_request_type {
-    /* The returned krb5_data item holds the enctype used to encrypt the
-     * encrypted portion of the AS_REP packet. */
+    /* The returned krb5_data item holds the enctype expected to be  used to encrypt the
+     * encrypted portion of the AS_REP packet. When handling a
+     * PREAUTH_REQUIRED error, this typically comes from etype-info2.
+     * When handling an AS reply, it is initialized from the AS reply itself.*/
     krb5plugin_preauth_client_get_etype = 1,
     /* Free the data returned from krb5plugin_preauth_client_req_get_etype */
-    krb5plugin_preauth_client_free_etype = 2
+    krb5plugin_preauth_client_free_etype = 2,
+    /* The returned krb5_data contains the FAST armor key in a
+     * krb5_keyblock.  Returns success with a NULL data item in the
+     * krb5_data if the client library supports FAST but is not using it.*/
+    krb5plugin_preauth_client_fast_armor = 3,
+    /* Frees return from KRB5PLUGIN_PREAUTH_CLIENT_FAST_ARMOR.  It is
+     * acceptable to set data to NULL and free the keyblock using
+     * krb5_free_keyblock; in that case, this frees the krb5_data
+     * only.*/
+krb5plugin_preauth_client_free_fast_armor = 4,
 };
 typedef krb5_error_code
 (*preauth_get_client_data_proc)(krb5_context,
@@ -326,8 +337,16 @@ enum krb5plugin_preauth_entry_request_type {
      * implementation, there's a good chance that the result will not match
      * what the client sent, so don't go creating any fatal errors if it
      * doesn't match up. */
-    krb5plugin_preauth_request_body = 4
-};
+    krb5plugin_preauth_request_body = 4,
+    /* The returned krb5_data contains a krb5_keyblock with the FAST
+       armor key.  The data member is NULL if this method is not part
+       of a FAST tunnel */
+    krb5plugin_preauth_fast_armor = 5,
+    /* Frees a fast armor key; it is acceptable to set data to NULL
+       and free the keyblock using krb5_free_keyblock; in that  case,
+       this function simply frees the data*/
+    krb5plugin_preauth_free_fast_armor = 6,
+       };
 
 typedef krb5_error_code
 (*preauth_get_entry_data_proc)(krb5_context,

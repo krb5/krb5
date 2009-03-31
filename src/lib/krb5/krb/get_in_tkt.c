@@ -32,6 +32,7 @@
 #include "k5-int.h"
 #include "int-proto.h"
 #include "os-proto.h"
+#include "fast.h"
 
 #if APPLE_PKINIT
 #define     IN_TKT_DEBUG    0
@@ -967,6 +968,7 @@ krb5_get_init_creds(krb5_context context,
     krb5_data salt;
     krb5_data s2kparams;
     krb5_keyblock as_key;
+    krb5_keyblock *fast_as_key = NULL;
     krb5_error *err_reply;
     krb5_kdc_rep *local_as_reply;
     krb5_timestamp time_now;
@@ -974,6 +976,10 @@ krb5_get_init_creds(krb5_context context,
     krb5_preauth_client_rock get_data_rock;
     int canon_flag = 0;
     krb5_principal_data referred_client;
+    krb5_boolean retry = 0;
+    struct krb5int_fast_request_state *fast_state = NULL;
+    krb5_pa_data **out_padata = NULL;
+    
 
     /* initialize everything which will be freed at cleanup */
 
@@ -988,7 +994,7 @@ krb5_get_init_creds(krb5_context context,
     preauth_to_use = NULL;
     kdc_padata = NULL;
     as_key.length = 0;
-    salt.length = 0;
+        salt.length = 0;
     salt.data = NULL;
 
 	local_as_reply = 0;
@@ -1002,6 +1008,9 @@ krb5_get_init_creds(krb5_context context,
     referred_client = *client;
     referred_client.realm.data = NULL;
     referred_client.realm.length = 0;
+    ret = krb5int_fast_make_state(context, &fast_state);
+    if (ret)
+	    goto cleanup;
 
     /*
      * Set up the basic request structure
@@ -1231,15 +1240,20 @@ krb5_get_init_creds(krb5_context context,
 	    /* XXX  Yuck.  Old version.  */
 	    request.nonce = (krb5_int32) time_now;
     }
+    ret = krb5int_fast_as_armor(context, fast_state, options, &request);
+    if (ret != 0)
+	goto cleanup;
     /* give the preauth plugins a chance to prep the request body */
     krb5_preauth_prepare_request(context, options, &request);
-    ret = encode_krb5_kdc_req_body(&request, &encoded_request_body);
+    ret = krb5int_fast_prep_req_body(context, fast_state,
+				     &request, &encoded_request_body);
     if (ret)
         goto cleanup;
 
     get_data_rock.magic = CLIENT_ROCK_MAGIC;
-    get_data_rock.as_reply = NULL;
-
+    get_data_rock.etype = &etype;
+    get_data_rock.fast_state = fast_state;
+    
     /* now, loop processing preauth data and talking to the kdc */
     for (loopcount = 0; loopcount < MAX_IN_TKT_LOOPS; loopcount++) {
 	if (request.padata) {
@@ -1258,6 +1272,10 @@ krb5_get_init_creds(krb5_context context,
 				       gak_fct, gak_data,
 				       &get_data_rock, options)))
 	        goto cleanup;
+	    if (out_padata) {
+	      krb5_free_pa_data(context, out_padata);
+	      out_padata = NULL;
+	    }
 	} else {
 	    if (preauth_to_use != NULL) {
 		/*
@@ -1293,7 +1311,9 @@ krb5_get_init_creds(krb5_context context,
 	    krb5_free_data(context, encoded_previous_request);
 	    encoded_previous_request = NULL;
         }
-        ret = encode_krb5_as_req(&request, &encoded_previous_request);
+	ret = krb5int_fast_prep_req(context, fast_state,
+				    &request, encoded_request_body,
+				    encode_krb5_as_req, &encoded_previous_request);
 	if (ret)
 	    goto cleanup;
 
@@ -1305,15 +1325,19 @@ krb5_get_init_creds(krb5_context context,
 	    goto cleanup;
 
 	if (err_reply) {
-	    if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED &&
-		err_reply->e_data.length > 0) {
+	  ret = krb5int_fast_process_error(context, fast_state, &err_reply,
+					   &out_padata, &retry);
+	  if (ret !=0)
+	    goto cleanup;
+	  if ((err_reply->error == KDC_ERR_PREAUTH_REQUIRED ||err_reply->error == KDC_ERR_PREAUTH_FAILED)
+&& retry) {
 		/* reset the list of preauth types to try */
 		if (preauth_to_use) {
 		    krb5_free_pa_data(context, preauth_to_use);
 		    preauth_to_use = NULL;
 		}
-		ret = decode_krb5_padata_sequence(&err_reply->e_data,
-						  &preauth_to_use);
+		preauth_to_use = out_padata;
+		out_padata = NULL;
 		krb5_free_error(context, err_reply);
 		err_reply = NULL;
 		if (ret)
@@ -1345,7 +1369,7 @@ krb5_get_init_creds(krb5_context context,
 		    goto cleanup;
 		request.client = &referred_client;
 	    } else {
-		if (err_reply->e_data.length > 0) {
+		if (retry)  {
 		    /* continue to next iteration */
 		} else {
 		    /* error + no hints = give up */
@@ -1374,10 +1398,14 @@ krb5_get_init_creds(krb5_context context,
 
     /* process any preauth data in the as_reply */
     krb5_clear_preauth_context_use_counts(context);
+    ret = krb5int_fast_process_response(context, fast_state,
+				       local_as_reply, &fast_as_key);
+    if (ret)
+	goto cleanup;
     if ((ret = sort_krb5_padata_sequence(context, &request.server->realm,
 					 local_as_reply->padata)))
 	goto cleanup;
-    get_data_rock.as_reply = local_as_reply;
+    etype = local_as_reply->enc_part.enctype;
     if ((ret = krb5_do_preauth(context,
 			       &request,
 			       encoded_request_body, encoded_previous_request,
@@ -1419,8 +1447,14 @@ krb5_get_init_creds(krb5_context context,
        it.  If decrypting the as_rep fails, or if there isn't an
        as_key at all yet, then use the gak_fct to get one, and try
        again.  */
-
-    if (as_key.length)
+    if (fast_as_key) {
+	if (as_key.length)
+	    krb5_free_keyblock_contents(context, &as_key);
+	as_key = *fast_as_key;
+	free(fast_as_key);
+	fast_as_key = NULL;
+    }
+        if (as_key.length)
 	ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
 			       NULL, &as_key, krb5_kdc_rep_decrypt_proc,
 			       NULL);
@@ -1477,6 +1511,11 @@ cleanup:
 	}
     }
     krb5_preauth_request_context_fini(context);
+	krb5_free_keyblock(context, fast_as_key);
+    if (fast_state)
+	krb5int_fast_free_state(context, fast_state);
+    if (out_padata)
+	krb5_free_pa_data(context, out_padata);
     if (encoded_previous_request != NULL) {
 	krb5_free_data(context, encoded_previous_request);
 	encoded_previous_request = NULL;
