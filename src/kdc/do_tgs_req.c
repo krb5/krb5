@@ -164,6 +164,11 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
         status="UNEXPECTED NULL in header_ticket";
         goto cleanup;
     }
+    errcode = kdc_make_rstate(&state);
+    if (errcode !=0) {
+	status = "making state";
+	goto cleanup;
+    }
     scratch.length = pa_tgs_req->length;
     scratch.data = (char *) pa_tgs_req->contents;
     errcode = kdc_find_fast(&request, &scratch, subkey, header_ticket->enc_part2->session, state);
