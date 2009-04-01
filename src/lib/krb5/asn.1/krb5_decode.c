@@ -1114,7 +1114,7 @@ krb5_error_code decode_krb5_fast_req
     alloc_field(rep->req_body);
     clear_field(rep, req_body->padata);
     {begin_structure();
-    get_field(rep->fast_options, 0, asn1_decode_int32);
+    get_field(rep->fast_options, 0, asn1_decode_krb5_flags);
     opt_field(rep->req_body->padata, 1, asn1_decode_sequence_of_pa_data);
     get_field(*(rep->req_body), 2, asn1_decode_kdc_req_body);
     end_structure(); }

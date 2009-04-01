@@ -1211,7 +1211,7 @@ DEFFIELDTYPE(fast_req_padata, krb5_kdc_req,
 DEFPTRTYPE(ptr_fast_req_padata, fast_req_padata);
 
 static const struct field_info fast_req_fields[] = {
-    FIELDOF_NORM(krb5_fast_req, int32, fast_options, 0),
+    FIELDOF_NORM(krb5_fast_req, krb5_flags, fast_options, 0),
     FIELDOF_NORM( krb5_fast_req, ptr_fast_req_padata, req_body, 1),
     FIELDOF_NORM( krb5_fast_req, ptr_kdc_req_body, req_body, 2),
 };
