@@ -972,7 +972,7 @@ prepare_error_tgs (struct kdc_request_state *state,
                    krb5_data **response, const char *status)
 {
     krb5_error errpkt;
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     krb5_data *scratch;
 
     errpkt.ctime = request->nonce;
@@ -997,7 +997,8 @@ prepare_error_tgs (struct kdc_request_state *state,
     }
     errpkt.e_data.length = 0;
     errpkt.e_data.data = NULL;
-    retval = kdc_fast_handle_error(kdc_context, state, request, NULL, &errpkt);
+    if (state)
+	retval = kdc_fast_handle_error(kdc_context, state, request, NULL, &errpkt);
     if (retval) {
 	free(scratch);
 	free(errpkt.text.data);
