@@ -1340,8 +1340,6 @@ krb5_get_init_creds(krb5_context context,
 		out_padata = NULL;
 		krb5_free_error(context, err_reply);
 		err_reply = NULL;
-		if (ret)
-		    goto cleanup;
 		ret = sort_krb5_padata_sequence(context,
 						&request.server->realm,
 						preauth_to_use);

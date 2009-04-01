@@ -760,7 +760,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int e
 	    if (pa == NULL)
 		retval = ENOMEM;
 	    else 		for (size = 0; td[size]; size++) {
-		krb5_pa_data *pad = malloc(sizeof(krb5_pa_data *));
+		krb5_pa_data *pad = malloc(sizeof(krb5_pa_data ));
 		if (pad == NULL) {
 		    retval = ENOMEM;
 		    break;

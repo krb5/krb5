@@ -299,6 +299,8 @@ static krb5_error_code decrypt_fast_reply
 	free(scratch.data);
     if (encrypted_response)
 	krb5_free_enc_data(context, encrypted_response);
+    if (local_resp)
+	krb5_free_fast_response(context, local_resp);
     return retval;
 }
 

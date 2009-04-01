@@ -50,7 +50,7 @@ static krb5_error_code armor_ap_request
     krb5_ticket *ticket = NULL;
     krb5_keyblock *subkey = NULL;
     
-    assert(armor->armor_type = KRB5_FAST_ARMOR_AP_REQUEST);
+    assert(armor->armor_type == KRB5_FAST_ARMOR_AP_REQUEST);
     krb5_clear_error_message(kdc_context);
     retval = krb5_auth_con_init(kdc_context, &authcontext);
     if (retval == 0)
@@ -270,7 +270,7 @@ krb5_error_code kdc_fast_response_handle_padata
     krb5_fast_response fast_response;
     krb5_data *encoded_ticket = NULL;
     krb5_data *encrypted_reply = NULL;
-    krb5_pa_data *pa = NULL, **pa_array;
+    krb5_pa_data *pa = NULL, **pa_array = NULL;
     krb5_cksumtype cksumtype = CKSUMTYPE_RSA_MD5;
     krb5_pa_data *empty_padata[] = {NULL};
     
@@ -309,11 +309,14 @@ krb5_error_code kdc_fast_response_handle_padata
 	pa_array[0] = &pa[0];
 	rep->padata = pa_array;
 	pa_array = NULL;
+	free(encrypted_reply);
 	encrypted_reply = NULL;
 	pa = NULL;
     }
     if (pa)
       free(pa);
+    if (pa_array)
+	free(pa_array);
     if (encrypted_reply)
 	krb5_free_data(kdc_context, encrypted_reply);
     if (encoded_ticket)
