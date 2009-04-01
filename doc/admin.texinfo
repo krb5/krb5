@@ -462,7 +462,8 @@ Kerberos library.  The default is @value{DefaultKDCTimesync}.
 An integer which specifies the type of checksum to use.  Used for
 compatability with DCE security servers which do not support the
 default @value{DefaultChecksumType} used by this version of Kerberos.
-The possible values and their meanings are as follows.
+Note that the ap_req_checksum_type variable's value is ignored.  The
+kdc_req_checksum_type is only used for DES keys.   The possible values and their meanings are as follows.
 
 @comment taken from krb5/src/include/krb5.h[in]
 @table @b

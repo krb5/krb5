@@ -143,15 +143,11 @@ clock.  This corrective factor is only used by the Kerberos library.
 For compatability with DCE security servers which do not support the
 default CKSUMTYPE_RSA_MD5 used by this version of Kerberos. Use a value
 of 2 to use the CKSUMTYPE_RSA_MD4 instead. This applies to DCE 1.1 and
-earlier.
+earlier.  This value is only used for DES keys; other keys use the
+preferred checksum type for those keys.
 
 .IP ap_req_checksum_type 
-This allows you to set the checksum type used in the authenticator of
-KRB_AP_REQ messages.  The default value for this type is
-CKSUMTYPE_RSA_MD5.  For compatibility with applications linked against
-DCE version 1.1 or earlier Kerberos libraries, use a value of 2 to use
-the CKSUMTYPE_RSA_MD4
-instead.
+This obsolete variable is not used.
 
 .IP safe_checksum_type 
 This allows you to set the preferred keyed-checksum type for use in KRB_SAFE

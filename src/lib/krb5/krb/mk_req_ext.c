@@ -205,8 +205,13 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	    checksum.length = in_data->length;
 	    checksum.contents = (krb5_octet *) in_data->data;
 	} else {
+	    krb5_cksumtype cksumtype;
+	    retval = krb5int_c_mandatory_cksumtype(context, (*auth_context)->keyblock->enctype,
+						   &cksumtype);
+	    if (retval)
+		goto cleanup_cksum;
 	    if ((retval = krb5_c_make_checksum(context, 
-					       (*auth_context)->req_cksumtype,
+					       cksumtype,
 					       (*auth_context)->keyblock,
 					       KRB5_KEYUSAGE_AP_REQ_AUTH_CKSUM,
 					       in_data, &checksum)))
