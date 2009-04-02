@@ -1810,8 +1810,11 @@ recvauth(netfd, peersin, valid_checksum)
 	struct sockaddr_storage adr;
 	unsigned int adr_length = sizeof(adr);
 	int e;
-	char namebuf[32], *chksumbuf = NULL;
+	char namebuf[32];
+	krb5_boolean valid = 0;
+	krb5_data chksumbuf;
 
+	chksumbuf.data = NULL;
 	if (getsockname(netfd, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;
 
@@ -1819,19 +1822,20 @@ recvauth(netfd, peersin, valid_checksum)
 			namebuf, sizeof(namebuf), NI_NUMERICSERV);
 	if (e)
 	    fatal(netfd, "local error: can't examine port number");
-	if (asprintf(&chksumbuf, "%s:%s%s", namebuf, cmdbuf, locuser) < 0)
+	if (asprintf(&chksumbuf.data, "%s:%s%s", namebuf, cmdbuf, locuser) < 0)
 	    goto error_cleanup;
 
-	status = krb5_verify_checksum(bsd_context,
-				      authenticator->checksum->checksum_type,
-				      authenticator->checksum,
-				      chksumbuf, strlen(chksumbuf),
-				      ticket->enc_part2->session->contents, 
-				      ticket->enc_part2->session->length);
+	chksumbuf.length = strlen(chksumbuf.data);
+	status = krb5_c_verify_checksum(bsd_context,
+					ticket->enc_part2->session,
+					KRB5_KEYUSAGE_AP_REQ_AUTH_CKSUM,
+					&chksumbuf, authenticator->checksum,
+					&valid);
+	if (status == 0 && !valid) status = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
     error_cleanup:
-	if (chksumbuf)
-	    free(chksumbuf);
+	if (chksumbuf.data)
+	    free(chksumbuf.data);
 	if (status) {
 	    krb5_free_authenticator(bsd_context, authenticator);
 	    return status;
