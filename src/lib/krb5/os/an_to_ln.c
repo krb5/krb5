@@ -488,7 +488,7 @@ rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, cons
     char		*current;
     char		*fprincname;
     char		*selstring = 0;
-    int			num_comps, compind;
+    int			num_comps, compind, pos;
     size_t selstring_used;
     char		*cout;
     krb5_const krb5_data *datap;
@@ -503,16 +503,16 @@ rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, cons
 	 * First part.
 	 */
 	if (*current == '[') {
-	    if (sscanf(current+1,"%d:", &num_comps) == 1) {
+	    current++;
+	    if (sscanf(current,"%d:%n", &num_comps, &pos) == 1) {
 		if (num_comps == aname->length) {
 		    /*
 		     * We have a match based on the number of components.
 		     */
-		    current = strchr(current, ':');
+		    current += pos;
 		    selstring = (char *) malloc(MAX_FORMAT_BUFFER);
 		    selstring_used = 0;
-		    if (current && selstring) {
-			current++;
+		    if (selstring) {
 			cout = selstring;
 			/*
 			 * Plow through the string.
@@ -572,6 +572,8 @@ rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, cons
 			errout: if (kret)
 			    free(selstring);
 		    }
+		    else
+			kret = ENOMEM;
 		}
 		else
 		    kret = KRB5_LNAME_NOTRANS;
