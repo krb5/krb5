@@ -119,10 +119,10 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "ArcFour with HMAC/md5",
       &krb5int_enc_arcfour,
       &krb5int_hash_md5,
-      0,
+      20,
       krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
       krb5_arcfour_decrypt, krb5int_arcfour_string_to_key,
-      NULL, /*PRF*/
+      krb5int_arcfour_prf, /*PRF*/
       CKSUMTYPE_HMAC_MD5_ARCFOUR,
       &krb5int_aead_arcfour,
       0 /*flags*/ },
@@ -131,10 +131,10 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "Exportable ArcFour with HMAC/md5",
       &krb5int_enc_arcfour,
       &krb5int_hash_md5,
-      0,
+      20,
       krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
       krb5_arcfour_decrypt, krb5int_arcfour_string_to_key,
-      NULL, /*PRF*/
+      krb5int_arcfour_prf, /*PRF*/
       CKSUMTYPE_HMAC_MD5_ARCFOUR,
       &krb5int_aead_arcfour,
       0 /*flags*/ },
