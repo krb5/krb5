@@ -290,6 +290,17 @@ static krb5_preauth_systems static_preauth_systems[] = {
 	0
     },
     {
+	"FAST",
+        KRB5_PADATA_FX_FAST,
+        PA_HARDWARE,
+	NULL,
+	NULL,
+	NULL,
+        NULL,
+	NULL,
+	0
+    },
+    {
 	"etype-info",
 	KRB5_PADATA_ETYPE_INFO,
 	0,
