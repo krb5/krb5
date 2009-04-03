@@ -210,6 +210,8 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 						   &cksumtype);
 	    if (retval)
 		goto cleanup_cksum;
+	    if ((*auth_context)->req_cksumtype)
+		cksumtype = (*auth_context)->req_cksumtype;
 	    if ((retval = krb5_c_make_checksum(context, 
 					       cksumtype,
 					       (*auth_context)->keyblock,

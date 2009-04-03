@@ -147,7 +147,7 @@ earlier.  This value is only used for DES keys; other keys use the
 preferred checksum type for those keys.
 
 .IP ap_req_checksum_type 
-This obsolete variable is not used.
+If set  this variable  controls what ap-req checksum will be used in  authenticators. This variable should be unset so the appropriate checksum for the encryption key in use will be used.   This can be set if backward compatibility requires a specific checksum type.
 
 .IP safe_checksum_type 
 This allows you to set the preferred keyed-checksum type for use in KRB_SAFE
