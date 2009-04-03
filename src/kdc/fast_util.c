@@ -251,8 +251,8 @@ void kdc_free_rstate
     return;
     if (s->armor_key)
 	krb5_free_keyblock(kdc_context, s->armor_key);
-    if (s->reply_key)
-	krb5_free_keyblock(kdc_context, s->reply_key);
+    if (s->strengthen_key)
+	krb5_free_keyblock(kdc_context, s->strengthen_key);
     if (s->cookie) {
 	free(s->cookie->contents);
 	free(s->cookie);
@@ -263,7 +263,7 @@ void kdc_free_rstate
 krb5_error_code kdc_fast_response_handle_padata
 (struct kdc_request_state *state,
  krb5_kdc_req *request,
- krb5_kdc_rep *rep)
+ krb5_kdc_rep *rep, krb5_enctype enctype)
 {
     krb5_error_code retval = 0;
     krb5_fast_finished finish;
@@ -273,14 +273,23 @@ krb5_error_code kdc_fast_response_handle_padata
     krb5_pa_data *pa = NULL, **pa_array = NULL;
     krb5_cksumtype cksumtype = CKSUMTYPE_RSA_MD5;
     krb5_pa_data *empty_padata[] = {NULL};
+    krb5_keyblock *strengthen_key = NULL;
     
     if (!state->armor_key)
 	return 0;
     memset(&finish, 0, sizeof(finish));
+    retval = krb5_init_keyblock(kdc_context, enctype, 0, &strengthen_key);
+    if (retval == 0)
+	retval = krb5_c_make_random_key(kdc_context, enctype, strengthen_key);
+    if (retval == 0) {
+	state->strengthen_key = strengthen_key;
+	strengthen_key = NULL;
+    }
+    
     fast_response.padata = rep->padata;
     if (fast_response.padata == NULL)
 	fast_response.padata = &empty_padata[0];
-        fast_response.rep_key = state->reply_key;
+        fast_response.strengthen_key = state->strengthen_key;
     fast_response.nonce = request->nonce;
     fast_response.finished = &finish;
     finish.client = rep->client;
@@ -321,6 +330,8 @@ krb5_error_code kdc_fast_response_handle_padata
 	krb5_free_data(kdc_context, encrypted_reply);
     if (encoded_ticket)
 	krb5_free_data(kdc_context, encoded_ticket);
+    if (strengthen_key != NULL)
+	krb5_free_keyblock(kdc_context, strengthen_key);
     if (finish.ticket_checksum.contents)
 	krb5_free_checksum_contents(kdc_context, &finish.ticket_checksum);
     return retval;
@@ -377,7 +388,7 @@ krb5_error_code kdc_fast_handle_error
     if (retval == 0) {
 		resp.padata = inner_pa;
 	resp.nonce = request->nonce;
-	resp.rep_key = NULL;
+	resp.strengthen_key = NULL;
 	resp.finished = NULL;
     }
     if (retval == 0)
@@ -410,6 +421,21 @@ krb5_error_code kdc_fast_handle_error
 	krb5_free_data(kdc_context, encoded_fx_error);
     return retval;
 }
+
+krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
+					  krb5_keyblock *existing_key,
+					  krb5_keyblock **out_key)
+{
+    krb5_error_code retval = 0;
+    if (state->armor_key)
+	retval = krb5_c_fx_cf2_simple(kdc_context,
+				      state->strengthen_key, "strengthenkey", 
+				      existing_key,
+				      "replykey", out_key);
+    else retval = krb5_copy_keyblock(kdc_context, existing_key, out_key);
+    return retval;
+}
+
 
 krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
 				    krb5_pa_data **cookie)

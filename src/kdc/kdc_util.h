@@ -302,11 +302,12 @@ void log_tgs_alt_tgt(krb5_principal p);
 
 struct kdc_request_state {
     krb5_keyblock *armor_key;
-  krb5_keyblock *reply_key; /*When replaced by FAST*/
+  krb5_keyblock *strengthen_key; 
     krb5_pa_data *cookie;
     krb5_int32 fast_options;
     krb5_int32 fast_internal_flags;
 };
+
 krb5_error_code kdc_make_rstate(struct kdc_request_state **out);
 void kdc_free_rstate
 (struct kdc_request_state *s);
@@ -325,11 +326,17 @@ krb5_error_code  kdc_find_fast
 krb5_error_code kdc_fast_response_handle_padata
 (struct kdc_request_state *state,
  krb5_kdc_req *request,
- krb5_kdc_rep *rep);
+ krb5_kdc_rep *rep,
+ krb5_enctype enctype);
 krb5_error_code kdc_fast_handle_error
 (krb5_context context, struct kdc_request_state *state,
  krb5_kdc_req *request,
  krb5_pa_data  **in_padata, krb5_error *err);
+
+krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
+					  krb5_keyblock *existing_key,
+					  krb5_keyblock **out_key);
+
 
 krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
 				    krb5_pa_data **cookie);

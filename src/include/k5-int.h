@@ -1001,7 +1001,7 @@ typedef struct _krb5_fast_finished {
 typedef struct _krb5_fast_response {
     krb5_magic magic;
     krb5_pa_data **padata;
-    krb5_keyblock *rep_key;
+    krb5_keyblock *strengthen_key;
     krb5_fast_finished *finished;
     krb5_int32 nonce;
 } krb5_fast_response;

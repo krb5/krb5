@@ -1137,10 +1137,10 @@ krb5_error_code decode_krb5_fast_response
     alloc_field(rep);
     clear_field(rep, finished);
     clear_field(rep, padata);
-    clear_field(rep,rep_key);
+    clear_field(rep,strengthen_key);
     {begin_structure();
     get_field(rep->padata, 0, asn1_decode_sequence_of_pa_data);
-    opt_field(rep->rep_key, 1, asn1_decode_encryption_key_ptr);
+    opt_field(rep->strengthen_key, 1, asn1_decode_encryption_key_ptr);
     opt_field(rep->finished, 2, asn1_decode_fast_finished_ptr);
     get_field(rep->nonce, 3, asn1_decode_int32);
         end_structure(); }

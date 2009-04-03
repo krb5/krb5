@@ -412,14 +412,14 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 krb5_error_code krb5int_fast_process_response
 (krb5_context context, struct krb5int_fast_request_state *state,
  krb5_kdc_rep *resp,
- krb5_keyblock **as_key)
+ krb5_keyblock **strengthen_key)
 {
     krb5_error_code retval = 0;
     krb5_fast_response *fast_response = NULL;
     krb5_data *encoded_ticket = NULL;
     krb5_boolean cksum_valid;
     krb5_clear_error_message(context);
-    *as_key = NULL;
+    *strengthen_key = NULL;
     if (state->armor_key == 0)
 	return 0;
         retval = decrypt_fast_reply(context, state, resp->padata,
@@ -446,8 +446,8 @@ krb5_error_code krb5int_fast_process_response
 	krb5_free_principal(context, resp->client);
 	resp->client = fast_response->finished->client;
 	fast_response->finished->client = NULL;
-	*as_key = fast_response->rep_key;
-	fast_response->rep_key = NULL;
+	*strengthen_key = fast_response->strengthen_key;
+	fast_response->strengthen_key = NULL;
 	krb5_free_pa_data(context, resp->padata);
 	resp->padata = fast_response->padata;
 	fast_response->padata = NULL;
@@ -458,6 +458,29 @@ krb5_error_code krb5int_fast_process_response
 	krb5_free_data(context, encoded_ticket);
     return retval;
 }
+
+krb5_error_code krb5int_fast_reply_key(krb5_context context,
+				       krb5_keyblock *strengthen_key,
+				       krb5_keyblock *existing_key,
+				       krb5_keyblock *out_key)
+{
+    krb5_keyblock *key = NULL;
+    krb5_error_code retval = 0;
+    krb5_free_keyblock_contents(context, out_key);
+    if (strengthen_key) {
+	retval = krb5_c_fx_cf2_simple(context, strengthen_key,
+				      "strengthenkey", existing_key, "replykey", &key);
+	if (retval == 0) {
+	    *out_key = *key;
+	    free(key);
+	}
+    } else {
+	retval = krb5_copy_keyblock_contents(context, existing_key, out_key);
+    }
+    return retval;
+}
+
+
 krb5_error_code
 krb5int_fast_make_state( krb5_context context, struct krb5int_fast_request_state **state)
 {

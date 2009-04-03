@@ -878,7 +878,8 @@ tgt_again:
 
     reply.enc_part.enctype = subkey ? subkey->enctype :
     header_ticket->enc_part2->session->enctype;
-    errcode  = kdc_fast_response_handle_padata(state, request, &reply);
+    errcode  = kdc_fast_response_handle_padata(state, request, &reply,
+					       subkey?subkey->enctype:header_ticket->enc_part2->session->enctype);
     if (errcode !=0 ) {
 	status = "Preparing FAST padata";
 	goto cleanup;

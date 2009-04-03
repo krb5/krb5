@@ -60,7 +60,7 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 krb5_error_code krb5int_fast_process_response
 (krb5_context context, struct krb5int_fast_request_state *state,
  krb5_kdc_rep *resp,
- krb5_keyblock **as_key);
+ krb5_keyblock **strengthen_key);
 
 krb5_error_code
 krb5int_fast_make_state( krb5_context context, struct krb5int_fast_request_state **state);
@@ -72,5 +72,11 @@ krb5_error_code krb5int_fast_as_armor
  krb5_gic_opt_ext *opte,
  krb5_kdc_req *request);
 
+krb5_error_code krb5int_fast_reply_key(krb5_context context,
+				       krb5_keyblock *strengthen_key,
+				       krb5_keyblock *existing_key,
+				       krb5_keyblock *output_key);
+
+				       
 
 #endif
