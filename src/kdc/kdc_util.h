@@ -331,6 +331,9 @@ krb5_error_code kdc_fast_handle_error
  krb5_kdc_req *request,
  krb5_pa_data  **in_padata, krb5_error *err);
 
+krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
+				    krb5_pa_data **cookie);
+
  
 
 

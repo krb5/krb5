@@ -342,8 +342,8 @@ krb5_error_code kdc_fast_handle_error
     krb5_fast_response resp;
     krb5_error fx_error;
     krb5_data *encoded_fx_error = NULL, *encrypted_reply = NULL;
-    krb5_pa_data pa[2];
-    krb5_pa_data *outer_pa[3];
+    krb5_pa_data pa[1];
+    krb5_pa_data *outer_pa[3], *cookie = NULL;
     krb5_pa_data **inner_pa = NULL;
     size_t size = 0;
     krb5_data *encoded_e_data = NULL;
@@ -369,7 +369,13 @@ krb5_error_code kdc_fast_handle_error
 	pa[0].length = encoded_fx_error->length;
 	pa[0].contents = (unsigned char *) encoded_fx_error->data;
 	inner_pa[size++] = &pa[0];
-	resp.padata = inner_pa;
+	if (find_pa_data(inner_pa, KRB5_PADATA_FX_COOKIE) == NULL)
+	    retval = kdc_preauth_get_cookie(state, &cookie);
+    }
+    if (cookie != NULL)
+	inner_pa[size++] = cookie;
+    if (retval == 0) {
+		resp.padata = inner_pa;
 	resp.nonce = request->nonce;
 	resp.rep_key = NULL;
 	resp.finished = NULL;
@@ -378,6 +384,11 @@ krb5_error_code kdc_fast_handle_error
 	retval = encrypt_fast_reply(state, &resp, &encrypted_reply);
     if (inner_pa)
 	free(inner_pa); /*contained storage from caller and our stack*/
+    if (cookie) {
+	free(cookie->contents);
+	free(cookie);
+	cookie = NULL;
+    }
     if (retval == 0) {
 	pa[0].pa_type = KRB5_PADATA_FX_FAST;
 	pa[0].length = encrypted_reply->length;
@@ -398,4 +409,31 @@ krb5_error_code kdc_fast_handle_error
     if (encoded_fx_error)
 	krb5_free_data(kdc_context, encoded_fx_error);
     return retval;
+}
+
+krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
+				    krb5_pa_data **cookie)
+{
+    char *contents;
+    krb5_pa_data *pa = NULL;
+    /* In our current implementation, the only purpose served by
+     * returning a cookie is to indicate that a conversation should
+     * continue on error.  Thus, the cookie can have a constant
+     * string.  If cookies are used for real, versioning so that KDCs
+     * can be upgraded, keying, expiration and many other issues need
+     * to be considered.
+     */
+    contents = strdup("MIT");
+    if (contents == NULL)
+	return ENOMEM;
+    pa = calloc(1, sizeof(krb5_pa_data));
+    if (pa == NULL) {
+	free(contents);
+	return ENOMEM;
+    }
+    pa->pa_type = KRB5_PADATA_FX_COOKIE;
+    pa->length = strlen(contents);
+    pa->contents = (unsigned char *) contents;
+    *cookie = pa;
+    return 0;
 }

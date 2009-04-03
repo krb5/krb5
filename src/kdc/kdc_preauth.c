@@ -961,7 +961,8 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
     e_data->data = 0;
     
     hw_only = isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH);
-    pa_data = malloc(sizeof(krb5_pa_data *) * (n_preauth_systems+1));
+    /* Allocate 1 entry for the terminator and one for the cookie*/
+    pa_data = malloc(sizeof(krb5_pa_data *) * (n_preauth_systems+21));
     if (pa_data == 0)
 	return;
     memset(pa_data, 0, sizeof(krb5_pa_data *) * (n_preauth_systems+1));
@@ -995,6 +996,8 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
 			  "%spreauth required but hint list is empty",
 			  hw_only ? "hw" : "");
     }
+/* If we fail to get the cookie it is probably still reasonable to continue with the response*/
+    kdc_preauth_get_cookie(request->kdc_state, pa);
     retval = encode_krb5_padata_sequence(pa_data, &edat);
     if (retval)
 	goto errout;
