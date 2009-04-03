@@ -378,9 +378,11 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 	    fast_response->padata = NULL;
 	    /*
 	     * If there is more than the fx_error padata, then we want
-	     * to retry the error
+	     * to retry the error if a cookie is present
 	     */
 	    *retry = (*out_padata)[1] != NULL;
+	    if (krb5int_find_pa_data(context, *out_padata, KRB5_PADATA_FX_COOKIE) == NULL)
+		*retry = 0;
 	}
 	if (fx_error)
 	    krb5_free_error(context, fx_error);
@@ -475,11 +477,6 @@ krb5int_fast_free_state( krb5_context context, struct krb5int_fast_request_state
     /*We are responsible for none of the store in the fast_outer_req*/
     krb5_free_keyblock(context, state->armor_key);
     krb5_free_fast_armor(context, state->armor);
-    if (state->cookie) {
-	free(state->cookie->contents);
-	free(state->cookie);
-	state->cookie = NULL;
-    }
     free(state);
 }
 
