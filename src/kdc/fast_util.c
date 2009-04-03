@@ -50,7 +50,7 @@ static krb5_error_code armor_ap_request
     krb5_ticket *ticket = NULL;
     krb5_keyblock *subkey = NULL;
     
-    assert(armor->armor_type = KRB5_FAST_ARMOR_AP_REQUEST);
+    assert(armor->armor_type == KRB5_FAST_ARMOR_AP_REQUEST);
     krb5_clear_error_message(kdc_context);
     retval = krb5_auth_con_init(kdc_context, &authcontext);
     if (retval == 0)
@@ -251,8 +251,8 @@ void kdc_free_rstate
     return;
     if (s->armor_key)
 	krb5_free_keyblock(kdc_context, s->armor_key);
-    if (s->reply_key)
-	krb5_free_keyblock(kdc_context, s->reply_key);
+    if (s->strengthen_key)
+	krb5_free_keyblock(kdc_context, s->strengthen_key);
     if (s->cookie) {
 	free(s->cookie->contents);
 	free(s->cookie);
@@ -263,24 +263,33 @@ void kdc_free_rstate
 krb5_error_code kdc_fast_response_handle_padata
 (struct kdc_request_state *state,
  krb5_kdc_req *request,
- krb5_kdc_rep *rep)
+ krb5_kdc_rep *rep, krb5_enctype enctype)
 {
     krb5_error_code retval = 0;
     krb5_fast_finished finish;
     krb5_fast_response fast_response;
     krb5_data *encoded_ticket = NULL;
     krb5_data *encrypted_reply = NULL;
-    krb5_pa_data *pa = NULL, **pa_array;
+    krb5_pa_data *pa = NULL, **pa_array = NULL;
     krb5_cksumtype cksumtype = CKSUMTYPE_RSA_MD5;
     krb5_pa_data *empty_padata[] = {NULL};
+    krb5_keyblock *strengthen_key = NULL;
     
     if (!state->armor_key)
 	return 0;
     memset(&finish, 0, sizeof(finish));
+    retval = krb5_init_keyblock(kdc_context, enctype, 0, &strengthen_key);
+    if (retval == 0)
+	retval = krb5_c_make_random_key(kdc_context, enctype, strengthen_key);
+    if (retval == 0) {
+	state->strengthen_key = strengthen_key;
+	strengthen_key = NULL;
+    }
+    
     fast_response.padata = rep->padata;
     if (fast_response.padata == NULL)
 	fast_response.padata = &empty_padata[0];
-        fast_response.rep_key = state->reply_key;
+        fast_response.strengthen_key = state->strengthen_key;
     fast_response.nonce = request->nonce;
     fast_response.finished = &finish;
     finish.client = rep->client;
@@ -309,15 +318,20 @@ krb5_error_code kdc_fast_response_handle_padata
 	pa_array[0] = &pa[0];
 	rep->padata = pa_array;
 	pa_array = NULL;
+	free(encrypted_reply);
 	encrypted_reply = NULL;
 	pa = NULL;
     }
     if (pa)
       free(pa);
+    if (pa_array)
+	free(pa_array);
     if (encrypted_reply)
 	krb5_free_data(kdc_context, encrypted_reply);
     if (encoded_ticket)
 	krb5_free_data(kdc_context, encoded_ticket);
+    if (strengthen_key != NULL)
+	krb5_free_keyblock(kdc_context, strengthen_key);
     if (finish.ticket_checksum.contents)
 	krb5_free_checksum_contents(kdc_context, &finish.ticket_checksum);
     return retval;
@@ -339,8 +353,8 @@ krb5_error_code kdc_fast_handle_error
     krb5_fast_response resp;
     krb5_error fx_error;
     krb5_data *encoded_fx_error = NULL, *encrypted_reply = NULL;
-    krb5_pa_data pa[2];
-    krb5_pa_data *outer_pa[3];
+    krb5_pa_data pa[1];
+    krb5_pa_data *outer_pa[3], *cookie = NULL;
     krb5_pa_data **inner_pa = NULL;
     size_t size = 0;
     krb5_data *encoded_e_data = NULL;
@@ -366,15 +380,26 @@ krb5_error_code kdc_fast_handle_error
 	pa[0].length = encoded_fx_error->length;
 	pa[0].contents = (unsigned char *) encoded_fx_error->data;
 	inner_pa[size++] = &pa[0];
-	resp.padata = inner_pa;
+	if (find_pa_data(inner_pa, KRB5_PADATA_FX_COOKIE) == NULL)
+	    retval = kdc_preauth_get_cookie(state, &cookie);
+    }
+    if (cookie != NULL)
+	inner_pa[size++] = cookie;
+    if (retval == 0) {
+		resp.padata = inner_pa;
 	resp.nonce = request->nonce;
-	resp.rep_key = NULL;
+	resp.strengthen_key = NULL;
 	resp.finished = NULL;
     }
     if (retval == 0)
 	retval = encrypt_fast_reply(state, &resp, &encrypted_reply);
     if (inner_pa)
 	free(inner_pa); /*contained storage from caller and our stack*/
+    if (cookie) {
+	free(cookie->contents);
+	free(cookie);
+	cookie = NULL;
+    }
     if (retval == 0) {
 	pa[0].pa_type = KRB5_PADATA_FX_FAST;
 	pa[0].length = encrypted_reply->length;
@@ -395,4 +420,46 @@ krb5_error_code kdc_fast_handle_error
     if (encoded_fx_error)
 	krb5_free_data(kdc_context, encoded_fx_error);
     return retval;
+}
+
+krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
+					  krb5_keyblock *existing_key,
+					  krb5_keyblock **out_key)
+{
+    krb5_error_code retval = 0;
+    if (state->armor_key)
+	retval = krb5_c_fx_cf2_simple(kdc_context,
+				      state->strengthen_key, "strengthenkey", 
+				      existing_key,
+				      "replykey", out_key);
+    else retval = krb5_copy_keyblock(kdc_context, existing_key, out_key);
+    return retval;
+}
+
+
+krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
+				    krb5_pa_data **cookie)
+{
+    char *contents;
+    krb5_pa_data *pa = NULL;
+    /* In our current implementation, the only purpose served by
+     * returning a cookie is to indicate that a conversation should
+     * continue on error.  Thus, the cookie can have a constant
+     * string.  If cookies are used for real, versioning so that KDCs
+     * can be upgraded, keying, expiration and many other issues need
+     * to be considered.
+     */
+    contents = strdup("MIT");
+    if (contents == NULL)
+	return ENOMEM;
+    pa = calloc(1, sizeof(krb5_pa_data));
+    if (pa == NULL) {
+	free(contents);
+	return ENOMEM;
+    }
+    pa->pa_type = KRB5_PADATA_FX_COOKIE;
+    pa->length = strlen(contents);
+    pa->contents = (unsigned char *) contents;
+    *cookie = pa;
+    return 0;
 }

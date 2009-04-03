@@ -646,6 +646,36 @@ krb5_error_code pa_salt(krb5_context context,
 }
 
 static
+krb5_error_code pa_fx_cookie(krb5_context context,
+				 krb5_kdc_req *request,
+				 krb5_pa_data *in_padata,
+				 krb5_pa_data **out_padata,
+				 krb5_data *salt,
+				 krb5_data *s2kparams,
+				 krb5_enctype *etype,
+				 krb5_keyblock *as_key,
+				 krb5_prompter_fct prompter,
+				 void *prompter_data,
+				 krb5_gic_get_as_key_fct gak_fct,
+				 void *gak_data)
+{
+    krb5_pa_data *pa = calloc(1, sizeof(krb5_pa_data));
+    krb5_octet *contents;
+    if (pa == NULL)
+	return ENOMEM;
+    contents = malloc(in_padata->length);
+    if (contents == NULL) {
+	free(pa);
+	return ENOMEM;
+    }
+    *pa = *in_padata;
+    pa->contents = contents;
+    memcpy(contents, in_padata->contents, pa->length);
+    *out_padata = pa;
+    return 0;
+}
+
+static
 krb5_error_code pa_enc_timestamp(krb5_context context,
 				 krb5_kdc_req *request,
 				 krb5_pa_data *in_padata,
@@ -1708,6 +1738,11 @@ static const pa_types_t pa_types[] = {
 	KRB5_PADATA_SAM_CHALLENGE,
 	pa_sam,
 	PA_REAL,
+    },
+    {
+	KRB5_PADATA_FX_COOKIE,
+	pa_fx_cookie,
+	PA_INFO,
     },
     {
 	-1,

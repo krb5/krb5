@@ -967,8 +967,8 @@ krb5_get_init_creds(krb5_context context,
     int loopcount;
     krb5_data salt;
     krb5_data s2kparams;
-    krb5_keyblock as_key;
-    krb5_keyblock *fast_as_key = NULL;
+    krb5_keyblock as_key, encrypting_key;
+    krb5_keyblock *strengthen_key = NULL;
     krb5_error *err_reply;
     krb5_kdc_rep *local_as_reply;
     krb5_timestamp time_now;
@@ -994,6 +994,8 @@ krb5_get_init_creds(krb5_context context,
     preauth_to_use = NULL;
     kdc_padata = NULL;
     as_key.length = 0;
+    encrypting_key.length = 0;
+    encrypting_key.contents = NULL;
         salt.length = 0;
     salt.data = NULL;
 
@@ -1340,8 +1342,6 @@ krb5_get_init_creds(krb5_context context,
 		out_padata = NULL;
 		krb5_free_error(context, err_reply);
 		err_reply = NULL;
-		if (ret)
-		    goto cleanup;
 		ret = sort_krb5_padata_sequence(context,
 						&request.server->realm,
 						preauth_to_use);
@@ -1399,7 +1399,7 @@ krb5_get_init_creds(krb5_context context,
     /* process any preauth data in the as_reply */
     krb5_clear_preauth_context_use_counts(context);
     ret = krb5int_fast_process_response(context, fast_state,
-				       local_as_reply, &fast_as_key);
+				       local_as_reply, &strengthen_key);
     if (ret)
 	goto cleanup;
     if ((ret = sort_krb5_padata_sequence(context, &request.server->realm,
@@ -1447,18 +1447,15 @@ krb5_get_init_creds(krb5_context context,
        it.  If decrypting the as_rep fails, or if there isn't an
        as_key at all yet, then use the gak_fct to get one, and try
        again.  */
-    if (fast_as_key) {
-	if (as_key.length)
-	    krb5_free_keyblock_contents(context, &as_key);
-	as_key = *fast_as_key;
-	free(fast_as_key);
-	fast_as_key = NULL;
-    }
-        if (as_key.length)
-	ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
-			       NULL, &as_key, krb5_kdc_rep_decrypt_proc,
+    if (as_key.length) {
+      ret = krb5int_fast_reply_key(context, strengthen_key, &as_key,
+				   &encrypting_key);
+      if (ret)
+	goto cleanup;
+      	ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
+			       NULL, &encrypting_key, krb5_kdc_rep_decrypt_proc,
 			       NULL);
-    else
+    } else
 	ret = -1;
 	   
     if (ret) {
@@ -1470,6 +1467,10 @@ krb5_get_init_creds(krb5_context context,
 			       &as_key, gak_data))))
 	    goto cleanup;
 
+	ret = krb5int_fast_reply_key(context, strengthen_key, &as_key,
+				     &encrypting_key);
+	if (ret)
+	  goto cleanup;
 	if ((ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
 				    NULL, &as_key, krb5_kdc_rep_decrypt_proc,
 				    NULL)))
@@ -1511,8 +1512,10 @@ cleanup:
 	}
     }
     krb5_preauth_request_context_fini(context);
-	krb5_free_keyblock(context, fast_as_key);
-    if (fast_state)
+	krb5_free_keyblock(context, strengthen_key);
+	if (encrypting_key.contents)
+	  krb5_free_keyblock_contents(context, &encrypting_key);
+	    if (fast_state)
 	krb5int_fast_free_state(context, fast_state);
     if (out_padata)
 	krb5_free_pa_data(context, out_padata);
