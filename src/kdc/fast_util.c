@@ -211,7 +211,7 @@ krb5_error_code  kdc_find_fast
     else cookie_padata = find_pa_data(request->padata, KRB5_PADATA_FX_COOKIE);
         if (retval == 0 && cookie_padata != NULL) {
 	krb5_pa_data *new_padata = malloc(sizeof (krb5_pa_data));
-	if (new_padata != NULL) {
+	if (new_padata == NULL) {
 	    retval = ENOMEM;
 	} else {
 	    new_padata->pa_type = KRB5_PADATA_FX_COOKIE;

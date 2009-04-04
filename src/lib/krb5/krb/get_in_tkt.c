@@ -1472,7 +1472,7 @@ krb5_get_init_creds(krb5_context context,
 	if (ret)
 	  goto cleanup;
 	if ((ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
-				    NULL, &as_key, krb5_kdc_rep_decrypt_proc,
+				    NULL, &encrypting_key, krb5_kdc_rep_decrypt_proc,
 				    NULL)))
 	    goto cleanup;
     }
