@@ -98,12 +98,13 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_transited enc_tkt_transited;
     int newtransited = 0;
     krb5_error_code retval = 0;
+    krb5_keyblock encrypting_key;
     int nprincs = 0;
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime=0;
     krb5_keyblock session_key;
     krb5_timestamp until, rtime;
-    krb5_keyblock encrypting_key;
+    krb5_keyblock *reply_key = NULL;
     krb5_keyblock *mkey_ptr;
     krb5_key_data  *server_key;
     char *cname = 0, *sname = 0, *altcname = 0;
@@ -884,10 +885,14 @@ tgt_again:
 	status = "Preparing FAST padata";
 	goto cleanup;
     }
+    errcode =kdc_fast_handle_reply_key(state, subkey?subkey:header_ticket->enc_part2->session, &reply_key);
+    if (errcode) {
+      status  = "generating reply key";
+      goto cleanup;
+    }
             errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
                   subkey ? 1 : 0,
-                  subkey ? subkey :
-                  header_ticket->enc_part2->session,
+					  reply_key,
                   &reply, response);
     if (errcode) {
         status = "ENCODE_KDC_REP";
@@ -906,6 +911,8 @@ tgt_again:
     
 cleanup:
     assert(status != NULL);
+    if (reply_key)
+      krb5_free_keyblock(kdc_context, reply_key);
     if (errcode) 
         emsg = krb5_get_error_message (kdc_context, errcode);
     log_tgs_req(from, request, &reply, cname, sname, altcname, authtime,
