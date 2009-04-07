@@ -119,9 +119,11 @@ k5_utf8s_to_ucs2s(krb5_ucs2 *ucs2str,
     }
 
     assert(ucs2len < count);
-
-    /* Add null terminator if there's room in the buffer. */
-    ucs2str[ucs2len] = 0;
+    
+    if (ucs2str != NULL) {
+	/* Add null terminator if there's room in the buffer. */
+	ucs2str[ucs2len] = 0;
+    }
 
     return ucs2len;
 }
