@@ -485,6 +485,22 @@ int main(argc, argv)
     ktest_destroy_keyblock(&(ref.subkey));
     ref.seq_number = 0;
     decode_run("ap_rep_enc_part","(optionals NULL)","7B 1C 30 1A A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A1 05 02 03 01 E2 40",decode_krb5_ap_rep_enc_part,ktest_equal_ap_rep_enc_part,krb5_free_ap_rep_enc_part);
+
+    retval = krb5_data_hex_parse(&code, "7B 06 30 04 A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A1 05 02 03 01 E2 40");
+    if (retval) {
+	com_err("krb5_decode_test", retval, "while parsing");
+	exit(1);
+    }
+    retval = decode_krb5_ap_rep_enc_part(&code, &var);
+    if (retval != ASN1_OVERRUN) {
+	printf("ERROR: ");
+    } else {
+	printf("OK: ");
+    }
+    printf("ap_rep_enc_part(optionals NULL + expect ASN1_OVERRUN for inconsistent length of timestamp)\n");
+    krb5_free_data_contents(test_context, &code);
+    if (!retval) krb5_free_ap_rep_enc_part(test_context, var);
+
     ktest_empty_ap_rep_enc_part(&ref);
   }
   
