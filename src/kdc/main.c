@@ -252,7 +252,7 @@ handle_referral_params(krb5_realm_params *rparams,
                 rdp->realm_host_based_services = NULL;
     }
 
-    return 0;
+    return retval;
 }
 /*
  * Initialize a realm control structure from the alternate profile or from
