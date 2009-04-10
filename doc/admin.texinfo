@@ -355,6 +355,8 @@ Following are definitions of some of the Kerberos terminology.
 
 Any tag in the configuration files which requires a list of encryption
 types can be set to some combination of the following strings.
+Encryption types marked as ``weak'' are available for compatibility
+but not recommended for use.
 
 @include support-enc.texinfo
 
@@ -441,6 +443,12 @@ should be requested by the client.  The format is the same as for
 Identifies all encryption types that are permitted for use in session
 key encryption.  The default value for this tag is
 @value{DefaultPermittedEnctypes}.
+
+@itemx allow_weak_crypto
+If this is set to 0 (for false), then weak encryption types will be
+filtered out of the previous three lists (as noted in @ref{Supported
+Encryption Types}).  The default value for this tag is true, but that
+default may change in the future.
 
 @itemx clockskew
 Sets the maximum allowable amount of clockskew in seconds that the
