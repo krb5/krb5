@@ -634,10 +634,13 @@ krb5_error_code pa_salt(krb5_context context,
 			krb5_gic_get_as_key_fct gak_fct, void *gak_data)
 {
     krb5_data tmp;
+    krb5_error_code retval;
 
     tmp = padata2data(*in_padata);
     krb5_free_data_contents(context, salt);
-    krb5int_copy_data_contents(context, &tmp, salt);
+    retval = krb5int_copy_data_contents(context, &tmp, salt);
+    if (retval)
+	return retval;
 
     if (in_padata->pa_type == KRB5_PADATA_AFS3_SALT)
 	salt->length = SALT_TYPE_AFS_LENGTH;
