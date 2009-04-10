@@ -264,8 +264,6 @@ krb5_cc_set_default_name(krb5_context context, const char *name)
         new_ccname = NULL;  /* don't free */
     }
     
-    if (new_ccname != NULL) { free (new_ccname); }
-    
     return err;
 }
 
