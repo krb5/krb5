@@ -67,6 +67,7 @@ recvauth_common(krb5_context context,
 	 * and exit.
 	 */
 	problem = 0;
+	response = 0;
 
 	if (!(flags & KRB5_RECVAUTH_SKIP_VERSION)) {
 	    /*
@@ -76,11 +77,14 @@ recvauth_common(krb5_context context,
 		return(retval);
 	    if (strcmp(inbuf.data, sendauth_version)) {
 		problem = KRB5_SENDAUTH_BADAUTHVERS;
+		response = 1;
 	    }
 	    free(inbuf.data);
 	}
-	if (flags & KRB5_RECVAUTH_BADAUTHVERS)
+	if (flags & KRB5_RECVAUTH_BADAUTHVERS) {
 	    problem = KRB5_SENDAUTH_BADAUTHVERS;
+	    response = 1;
+	}
 	
 	/*
 	 * Do the same thing for the application version string.
@@ -88,40 +92,16 @@ recvauth_common(krb5_context context,
 	if ((retval = krb5_read_message(context, fd, &inbuf)))
 		return(retval);
 	if (appl_version && strcmp(inbuf.data, appl_version)) {
-		if (!problem)
+		if (!problem) {
 			problem = KRB5_SENDAUTH_BADAPPLVERS;
+			response = 2;
+		}
 	}
 	if (version && !problem)
 	    *version = inbuf;
 	else
 	    free(inbuf.data);
-	/*
-	 * OK, now check the problem variable.  If it's zero, we're
-	 * fine and we can continue.  Otherwise, we have to signal an
-	 * error to the client side and bail out.
-	 */
-	switch (problem) {
-	case 0:
-		response = 0;
-		break;
-	case KRB5_SENDAUTH_BADAUTHVERS:
-		response = 1;
-		break;
-	case KRB5_SENDAUTH_BADAPPLVERS:
-		response = 2;
-		break;
-	default:
-		/*
-		 * Should never happen!
-		 */
-		response = 255;
-#ifdef SENDAUTH_DEBUG
-		fprintf(stderr, "Programming botch in recvauth!  problem = %d",
-			problem);
-		abort();
-#endif
-		break;
-	}
+
 	/*
 	 * Now we actually write the response.  If the response is non-zero,
 	 * exit with a return value of problem
