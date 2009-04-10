@@ -512,7 +512,6 @@ krb5_get_in_tkt(krb5_context context,
     krb5_keyblock *	decrypt_key = 0;
     krb5_kdc_req	request;
     krb5_data *encoded_request;
-    krb5_pa_data	**padata = 0;
     krb5_error *	err_reply;
     krb5_kdc_rep *	as_reply = 0;
     krb5_pa_data  **	preauth_to_use = 0;
@@ -664,7 +663,7 @@ krb5_get_in_tkt(krb5_context context,
 		    goto cleanup;
                 retval = sort_krb5_padata_sequence(context,
 						   &request.server->realm,
-						   padata);
+						   preauth_to_use);
 		if (retval)
 		    goto cleanup;
 		continue;
@@ -728,8 +727,6 @@ cleanup:
 	krb5_free_addresses(context, request.addresses);
     if (request.padata)
 	krb5_free_pa_data(context, request.padata);
-    if (padata)
-	krb5_free_pa_data(context, padata);
     if (preauth_to_use)
 	krb5_free_pa_data(context, preauth_to_use);
     if (decrypt_key)
