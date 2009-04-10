@@ -416,6 +416,7 @@ krb5_error_code krb5int_populate_gic_opt (
   krb5_get_init_creds_opt *opt;
   krb5_error_code retval;
 
+    *opte = NULL;
     retval = krb5_get_init_creds_opt_alloc(context, &opt);
     if (retval)
 	return(retval);
@@ -439,12 +440,17 @@ krb5_error_code krb5int_populate_gic_opt (
 	krb5_get_init_creds_opt_set_proxiable(opt, 1);
     else krb5_get_init_creds_opt_set_proxiable(opt, 0);
     if (creds && creds->times.endtime) {
-        krb5_timeofday(context, &starttime);
+	retval = krb5_timeofday(context, &starttime);
+	if (retval)
+	    goto cleanup;
         if (creds->times.starttime) starttime = creds->times.starttime;
         krb5_get_init_creds_opt_set_tkt_life(opt, creds->times.endtime - starttime);
     }
     return krb5int_gic_opt_to_opte(context, opt, opte, 0,
 				   "krb5int_populate_gic_opt");
+cleanup:
+    krb5_get_init_creds_opt_free(context, opt);
+    return retval;
 }
 
 /*
