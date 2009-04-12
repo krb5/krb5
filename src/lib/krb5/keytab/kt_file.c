@@ -635,7 +635,6 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
     krb5_int32		file_is_open;
     krb5_int64		file_pos;
     char		*ktname;
-    size_t		namelen;
     const char		*fnamep;
 
     required = 0;
@@ -654,13 +653,10 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
 	    file_pos = 0;
 
 	    /* Calculate the length of the name */
-	    namelen = (keytab->ops && keytab->ops->prefix) ?
-		strlen(keytab->ops->prefix)+1 : 0;
 	    if (ktdata && ktdata->name)
 		fnamep = ktdata->name;
 	    else
 		fnamep = ktfile_def_name;
-	    namelen += (strlen(fnamep)+1);
 
 	    if (keytab->ops && keytab->ops->prefix) {
 		if (asprintf(&ktname, "%s:%s", keytab->ops->prefix, fnamep) < 0)
@@ -743,7 +739,6 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
 	ibuf = 0;
     if (ibuf == KV5M_KEYTAB) {
-	kret = ENOMEM;
 
 	/* Get the length of the keytab name */
 	kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
