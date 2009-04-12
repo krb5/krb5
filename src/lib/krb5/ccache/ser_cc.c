@@ -100,7 +100,6 @@ krb5_ccache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
     krb5_octet		*bp;
     size_t		remain;
     char		*ccname;
-    size_t		namelen;
     const char		*fnamep;
 
     required = 0;
@@ -114,10 +113,7 @@ krb5_ccache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
 	    /* Our identifier */
 	    (void) krb5_ser_pack_int32(KV5M_CCACHE, &bp, &remain);
 
-	    /* Calculate the length of the name */
-	    namelen = ccache->ops->prefix ? strlen(ccache->ops->prefix)+1 : 0;
 	    fnamep = krb5_cc_get_name(kcontext, ccache);
-	    namelen += (strlen(fnamep)+1);
 
 	    if (ccache->ops->prefix) {
 		if (asprintf(&ccname, "%s:%s", ccache->ops->prefix, fnamep) < 0)

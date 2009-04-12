@@ -227,7 +227,7 @@ krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id,
 	  return kret;
      }
 
-     while ((kret = krb5_cc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
+     while (krb5_cc_next_cred(context, id, &cursor, &fetchcreds) == KRB5_OK) {
       if (krb5int_cc_creds_match_request(context, whichfields, mcreds, &fetchcreds))
       {
 	      if (ktypes) {
