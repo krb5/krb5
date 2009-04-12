@@ -102,7 +102,6 @@ krb5_rcache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
     krb5_octet          *bp;
     size_t              remain;
     char                *rcname;
-    size_t              namelen;
     char                *fnamep;
 
     required = 0;
@@ -116,11 +115,7 @@ krb5_rcache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
             /* Our identifier */
             (void) krb5_ser_pack_int32(KV5M_RCACHE, &bp, &remain);
 
-            /* Calculate the length of the name */
-            namelen = (rcache->ops && rcache->ops->type) ?
-                strlen(rcache->ops->type)+1 : 0;
             fnamep = krb5_rc_get_name(kcontext, rcache);
-            namelen += (strlen(fnamep)+1);
 
             if (rcache->ops && rcache->ops->type) {
                 if (asprintf(&rcname, "%s:%s", rcache->ops->type, fnamep) < 0)
@@ -170,7 +165,6 @@ krb5_rcache_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **
     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
         ibuf = 0;
     if (ibuf == KV5M_RCACHE) {
-        kret = ENOMEM;
 
         /* Get the length of the rcache name */
         kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);

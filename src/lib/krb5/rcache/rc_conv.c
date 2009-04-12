@@ -67,7 +67,7 @@ krb5_rc_hash_message(krb5_context context, const krb5_data *message,
         krb5_free_checksum_contents(context, &cksum);
         return KRB5_RC_MALLOC;
     }
-    ptr = hash;
+
     for (i = 0, ptr = hash; i < cksum.length; i++, ptr += 2)
         snprintf(ptr, 3, "%02X", cksum.contents[i]);
     *ptr = '\0';
