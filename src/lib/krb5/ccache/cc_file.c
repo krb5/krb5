@@ -2129,6 +2129,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
 
 err_out:
      k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
+     k5_cc_mutex_unlock(context, &data->lock);
      k5_cc_mutex_destroy(&data->lock);
      free(data->filename);
      free(data);
