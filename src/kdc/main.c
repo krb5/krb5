@@ -175,7 +175,6 @@ handle_referral_params(krb5_realm_params *rparams,
                        kdc_realm_t *rdp )
 {
     krb5_error_code retval = 0;
-
     if (no_refrls && krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == TRUE) {
         rdp->realm_no_host_referral = strdup(KRB5_CONF_ASTERISK);
         if (!rdp->realm_no_host_referral)
@@ -192,9 +191,10 @@ handle_referral_params(krb5_realm_params *rparams,
             else if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", 
                         rparams->realm_no_host_referral, " ") < 0) 
                 retval = ENOMEM; 
-        } else if( no_refrls != NULL && asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", no_refrls, " ") < 0)
-            retval = ENOMEM; 
-        else
+        } else if( no_refrls != NULL) {
+            if ( asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", no_refrls, " ") < 0)
+                retval = ENOMEM; 
+        } else
             rdp->realm_no_host_referral = NULL;
     }
 
@@ -213,16 +213,17 @@ handle_referral_params(krb5_realm_params *rparams,
                     rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
                     if (!rdp->realm_host_based_services)
                         retval = ENOMEM;
-                } else if (host_based_srvcs && asprintf(&(rdp->realm_host_based_services), "%s%s%s%s%s",
+                } else if (host_based_srvcs) {
+                    if (asprintf(&(rdp->realm_host_based_services), "%s%s%s%s%s",
                            " ", host_based_srvcs," ",rparams->realm_host_based_services, " ") < 0)
                     retval = ENOMEM; 
-                else if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", 
+                } else if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", 
                            rparams->realm_host_based_services, " ") < 0) 
                     retval = ENOMEM; 
-            } else if(host_based_srvcs != NULL && asprintf(&(rdp->realm_host_based_services),"%s%s%s", 
-                      " ", host_based_srvcs, " ") < 0)
+            } else if (host_based_srvcs) {
+                if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", host_based_srvcs, " ") < 0)
                     retval = ENOMEM; 
-            else
+            } else
                 rdp->realm_host_based_services = NULL;
     }
 
