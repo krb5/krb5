@@ -1086,8 +1086,7 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
      * If all of these conditions are satisfied - try mapping the FQDN and 
      * re-process the request as if client had asked for cross-realm TGT.
      */
-
-    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) == TRUE &&   
+    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) &&   
         !isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) && 
         krb5_princ_size(kdc_context, request->server) == 2) {             
 
