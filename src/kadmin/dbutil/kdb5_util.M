@@ -236,6 +236,18 @@ argument is that specified in the Time Formats section of the kadmin man page.
 \fBlist_mkeys\fP
 List all master keys from most recent to earliest in K/M principal. The output will show the KVNO, enctype and salt for each mkey similar to kadmin getprinc output.  A * following an mkey denotes the currently active master key. 
 .TP
+\fBpurge_mkeys\fP [\fB-f\fP] [\fB-n\fP] [\fB-v\fP]
+Delete master keys from the K/M principal that are not used to protect any principals.  This command can be used to remove old master keys from a K/M principal once all principal keys are protected by a newer master key.
+.TP
+.B \-f
+does not prompt user.
+.TP
+.B \-n
+do a dry run, shows master keys that would be purged, does not actually purge any keys.
+.TP
+.B \-v
+verbose output.
+.TP
 \fBupdate_princ_encryption\fP [\fB\-f\fP] [\fB\-n\fP] [\fB\-v\fP] [\fBprinc\-pattern\fP]
 Update all principal records (or only those matching the
 .B princ\-pattern
