@@ -871,7 +871,7 @@ krb5_error_code pa_sam(krb5_context context,
 	/* message from the KDC.  If it is not set, pick an enctype that we */
 	/* think the KDC will have for us.				    */
 
-	if (etype && *etype == 0)
+	if (*etype == 0)
 	   *etype = ENCTYPE_DES_CBC_CRC;
 
 	if ((ret = (gak_fct)(context, request->client, *etype, prompter,
