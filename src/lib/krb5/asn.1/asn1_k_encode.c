@@ -1304,12 +1304,10 @@ MAKE_FULL_ENCODER(encode_krb5_etype_list, etype_list);
 { unsigned int length; \
   retval = encoder(buf,len,value,&length);      \
   if (retval) {\
-    asn1buf_destroy(&buf);\
     return retval; }\
   sum += length;\
   retval = asn1_make_etag(buf,CONTEXT_SPECIFIC,tag,length,&length);\
   if (retval) {\
-    asn1buf_destroy(&buf);\
     return retval; }\
   sum += length; }
 
@@ -1402,10 +1400,8 @@ asn1_error_code asn1_encode_algorithm_identifier(asn1buf *buf, const krb5_algori
     if (val->parameters.length != 0) {
         retval = asn1buf_insert_octetstring(buf, val->parameters.length,
                                             val->parameters.data);
-        if (retval) {
-            asn1buf_destroy(&buf);
+        if (retval)
             return retval;
-        }
         sum += val->parameters.length;
     }
 
@@ -1415,10 +1411,8 @@ asn1_error_code asn1_encode_algorithm_identifier(asn1buf *buf, const krb5_algori
                                  val->algorithm.data,
                                  &length);
 
-        if (retval) {
-            asn1buf_destroy(&buf);
+        if (retval)
             return retval;
-        }
         sum += length;
     }
 
@@ -1440,20 +1434,16 @@ asn1_error_code asn1_encode_subject_pk_info(asn1buf *buf, const krb5_subject_pk_
 
         retval = asn1buf_insert_octetstring(buf, val->algorithm.parameters.length,
                                             val->algorithm.parameters.data);
-        if (retval) {
-            asn1buf_destroy(&buf);
+        if (retval)
             return retval;
-        }
         sum += val->algorithm.parameters.length;
 
         retval = asn1_encode_oid(buf, val->algorithm.algorithm.length,
                                  val->algorithm.algorithm.data,
                                  &length);
 
-        if (retval) {
-            asn1buf_destroy(&buf);
+        if (retval)
             return retval;
-        }
         sum += length;
 
 
@@ -1461,10 +1451,8 @@ asn1_error_code asn1_encode_subject_pk_info(asn1buf *buf, const krb5_subject_pk_
                                 val->algorithm.parameters.length + length,
                                 &length);
 
-        if (retval) {
-            asn1buf_destroy(&buf);
+        if (retval)
             return retval;
-        }
         sum += length;
     }
 
@@ -1661,10 +1649,8 @@ asn1_error_code asn1_encode_kdc_dh_key_info(asn1buf *buf, const krb5_kdc_dh_key_
         retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0,
                                 val->subjectPublicKey.length + 1 + length,
                                 &length);
-        if (retval) {
-            asn1buf_destroy(&buf);
+        if (retval)
             return retval;
-        }
         sum += length;
     }
 
@@ -1738,10 +1724,8 @@ asn1_error_code asn1_encode_td_trusted_certifiers(asn1buf *buf, const krb5_exter
     {
         unsigned int length;
         retval = asn1_encode_sequence_of_external_principal_identifier(buf, val, &length);
-        if (retval) {
-            asn1buf_destroy(&buf);
+        if (retval)
             return retval;
-        }
         /* length set but ignored?  sum not updated?  */
     }
     asn1_cleanup();

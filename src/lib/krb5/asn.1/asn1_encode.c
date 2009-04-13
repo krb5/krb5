@@ -675,10 +675,13 @@ krb5int_asn1_do_full_encode(const void *rep, krb5_data **code,
 {
     unsigned int length;
     asn1_error_code retval;
-    unsigned int sum = 0;
     asn1buf *buf = NULL;
+    krb5_data *d;
 
-    if (rep == NULL) return ASN1_MISSING_FIELD;
+    *code = NULL;
+
+    if (rep == NULL)
+        return ASN1_MISSING_FIELD;
 
     retval = asn1buf_create(&buf);
     if (retval)
@@ -686,9 +689,12 @@ krb5int_asn1_do_full_encode(const void *rep, krb5_data **code,
 
     retval = krb5int_asn1_encode_a_thing(buf, rep, a, &length);
     if (retval)
-        return retval;
-    sum += length;
-    retval = asn12krb5_buf(buf, code);
+        goto cleanup;
+    retval = asn12krb5_buf(buf, &d);
+    if (retval)
+        goto cleanup;
+    *code = d;
+cleanup:
     asn1buf_destroy(&buf);
     return retval;
 }

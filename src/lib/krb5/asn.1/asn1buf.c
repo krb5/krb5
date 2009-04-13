@@ -154,14 +154,13 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
     return 0;
 }
 
-asn1_error_code asn1buf_destroy(asn1buf **buf)
+void asn1buf_destroy(asn1buf **buf)
 {
     if (*buf != NULL) {
         free((*buf)->base);
         free(*buf);
         *buf = NULL;
     }
-    return 0;
 }
 
 #ifdef asn1buf_insert_octet
@@ -254,21 +253,24 @@ int asn1buf_remains(asn1buf *buf, int indef)
 asn1_error_code asn12krb5_buf(const asn1buf *buf, krb5_data **code)
 {
     unsigned int i;
-    *code = (krb5_data*)calloc(1,sizeof(krb5_data));
-    if (*code == NULL) return ENOMEM;
-    (*code)->magic = KV5M_DATA;
-    (*code)->data = NULL;
-    (*code)->length = 0;
-    (*code)->length = asn1buf_len(buf);
-    (*code)->data = (char*)malloc((((*code)->length)+1)*sizeof(char));
-    if ((*code)->data == NULL) {
-        free(*code);
-        *code = NULL;
+    krb5_data *d;
+
+    *code = NULL;
+
+    d = calloc(1, sizeof(krb5_data));
+    if (d == NULL)
+        return ENOMEM;
+    d->length = asn1buf_len(buf);
+    d->data = malloc(d->length + 1);
+    if (d->data == NULL) {
+        free(d);
         return ENOMEM;
     }
-    for (i=0; i < (*code)->length; i++)
-        ((*code)->data)[i] = (buf->base)[((*code)->length)-i-1];
-    ((*code)->data)[(*code)->length] = '\0';
+    for (i=0; i < d->length; i++)
+        d->data[i] = buf->base[d->length - i - 1];
+    d->data[d->length] = '\0';
+    d->magic = KV5M_DATA;
+    *code = d;
     return 0;
 }
 

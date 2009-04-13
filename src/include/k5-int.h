@@ -2537,6 +2537,12 @@ void KRB5_CALLCONV krb5_free_pwd_data
 	(krb5_context, krb5_pwd_data *);
 void KRB5_CALLCONV krb5_free_pwd_sequences
 	(krb5_context, passwd_phrase_element **);
+void KRB5_CALLCONV krb5_free_passwd_phrase_element
+	(krb5_context, passwd_phrase_element *);
+void KRB5_CALLCONV krb5_free_alt_method
+	(krb5_context, krb5_alt_method *);
+void KRB5_CALLCONV krb5_free_enc_data
+	(krb5_context, krb5_enc_data *);
 krb5_error_code krb5_set_config_files
 	(krb5_context, const char **);
 

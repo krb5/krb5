@@ -13,10 +13,12 @@ decode_krb5_enc_data
 decode_krb5_enc_kdc_rep_part
 decode_krb5_enc_priv_part
 decode_krb5_enc_sam_response_enc
+decode_krb5_enc_sam_response_enc_2
 decode_krb5_enc_tkt_part
 decode_krb5_encryption_key
 decode_krb5_error
 decode_krb5_etype_info
+decode_krb5_etype_info2
 decode_krb5_kdc_req_body
 decode_krb5_pa_enc_ts
 decode_krb5_pa_for_user
@@ -29,6 +31,7 @@ decode_krb5_pwd_sequence
 decode_krb5_safe
 decode_krb5_sam_challenge
 decode_krb5_sam_response
+decode_krb5_sam_response_2
 decode_krb5_setpw_req
 decode_krb5_tgs_rep
 decode_krb5_tgs_req
@@ -47,6 +50,7 @@ encode_krb5_enc_data
 encode_krb5_enc_kdc_rep_part
 encode_krb5_enc_priv_part
 encode_krb5_enc_sam_response_enc
+encode_krb5_enc_sam_response_enc_2
 encode_krb5_enc_tkt_part
 encode_krb5_encryption_key
 encode_krb5_error
@@ -66,6 +70,7 @@ encode_krb5_safe
 encode_krb5_sam_challenge
 encode_krb5_sam_key
 encode_krb5_sam_response
+encode_krb5_sam_response_2
 encode_krb5_tgs_rep
 encode_krb5_tgs_req
 encode_krb5_ticket
@@ -192,6 +197,7 @@ krb5_fcc_ops
 krb5_find_serializer
 krb5_free_address
 krb5_free_addresses
+krb5_free_alt_method
 krb5_free_ap_rep
 krb5_free_ap_rep_enc_part
 krb5_free_ap_req
@@ -209,6 +215,7 @@ krb5_free_creds
 krb5_free_data
 krb5_free_data_contents
 krb5_free_default_realm
+krb5_free_enc_data
 krb5_free_enc_kdc_rep_part
 krb5_free_enc_sam_response_enc
 krb5_free_enc_sam_response_enc_2
@@ -233,6 +240,7 @@ krb5_free_pa_pac_req
 krb5_free_pa_for_user
 krb5_free_pa_server_referral_data
 krb5_free_pa_svr_referral_data
+krb5_free_passwd_phrase_element
 krb5_free_predicted_sam_response
 krb5_free_predicted_sam_response_contents
 krb5_free_principal
