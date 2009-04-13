@@ -193,6 +193,64 @@ void krb5int_mkt_finalize(void) {
 	free(node);
     }
 }
+
+static krb5_error_code
+create_list_node(const char *name, krb5_mkt_list_node **listp)
+{
+    krb5_mkt_list_node *list;
+    krb5_mkt_data *data = NULL;
+    krb5_error_code err;
+
+    *listp = NULL;
+
+    list = calloc(1, sizeof(krb5_mkt_list_node));
+    if (list == NULL) {
+	err = ENOMEM;
+	goto cleanup;
+    }
+
+    list->keytab = calloc(1, sizeof(struct _krb5_kt));
+    if (list->keytab == NULL) {
+	err = ENOMEM;
+	goto cleanup;
+    }
+    list->keytab->ops = &krb5_mkt_ops;
+
+    data = calloc(1, sizeof(krb5_mkt_data));
+    if (data == NULL) {
+	err = ENOMEM;
+	goto cleanup;
+    }
+    data->link = NULL;
+    data->refcount = 0;
+
+    data->name = strdup(name);
+    if (data->name == NULL) {
+	err = ENOMEM;
+	goto cleanup;
+    }
+
+    err = k5_mutex_init(&data->lock);
+    if (err)
+	goto cleanup;
+
+    list->keytab->data = data;
+    list->keytab->magic = KV5M_KEYTAB;
+    list->next = NULL;
+    *listp = list;
+    return 0;
+
+cleanup:
+    /* data->lock was initialized last, so no need to destroy. */
+    if (data)
+	free(data->name);
+    free(data);
+    if (list)
+	free(list->keytab);
+    free(list);
+    return err;
+}
+
 /*
  * This is an implementation specific resolver.  It returns a keytab 
  * initialized with memory keytab routines.
@@ -201,93 +259,43 @@ void krb5int_mkt_finalize(void) {
 krb5_error_code KRB5_CALLCONV 
 krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 {
-    krb5_mkt_data *data = 0;
     krb5_mkt_list_node *list;
     krb5_error_code err = 0;
+
+    *id = NULL;
 
     /* First determine if a memory keytab of this name already exists */
     err = KTGLOCK;
     if (err)
-	return(err);
+	return err;
 
-    for (list = krb5int_mkt_list; list; list = list->next)
-    {
-    	if (strcmp(name,KTNAME(list->keytab)) == 0) {
-	    /* Found */
-	    *id = list->keytab;
+    for (list = krb5int_mkt_list; list; list = list->next) {
+	if (strcmp(name,KTNAME(list->keytab)) == 0)
+	    break;
+    }
+
+    if (!list) {
+	/* We will now create the new key table with the specified name.
+	 * We do not drop the global lock, therefore the name will indeed
+	 * be unique when we add it.
+	 */
+	err = create_list_node(name, &list);
+	if (err)
 	    goto done;
-	}
+	list->next = krb5int_mkt_list;
+	krb5int_mkt_list = list;
     }
 
-    /* We will now create the new key table with the specified name.
-     * We do not drop the global lock, therefore the name will indeed
-     * be unique when we add it.
-     */
-
-    if ((list = (krb5_mkt_list_node *)malloc(sizeof(krb5_mkt_list_node))) == NULL) {
-	err = ENOMEM;
+    /* Increment the reference count on the keytab we found or created. */
+    err = KTLOCK(list->keytab);
+    if (err)
 	goto done;
-    }
-
-    if ((list->keytab = (krb5_keytab)malloc(sizeof(struct _krb5_kt))) == NULL) {
-	free(list);
-	err = ENOMEM;
-	goto done;	
-    }
-
-    list->keytab->ops = &krb5_mkt_ops;
-    if ((data = (krb5_mkt_data *)malloc(sizeof(krb5_mkt_data))) == NULL) {
-	free(list->keytab);
-	free(list);
-	err = ENOMEM;
-	goto done;
-    }
-    data->name = NULL;
-
-    err = k5_mutex_init(&data->lock);
-    if (err) {
-	free(data);
-	free(list->keytab);
-	free(list);
-	goto done;
-    }
-
-    if ((data->name = strdup(name)) == NULL) {
-	k5_mutex_destroy(&data->lock);
-	free(data);
-	free(list->keytab);
-	free(list);
-	err = ENOMEM;
-	goto done;
-    }
-
-    data->link = NULL;
-    data->refcount = 0;
-    list->keytab->data = (krb5_pointer)data;
-    list->keytab->magic = KV5M_KEYTAB;
-
-    list->next = krb5int_mkt_list;
-    krb5int_mkt_list = list;
-
+    KTREFCNT(list->keytab)++;
+    KTUNLOCK(list->keytab);
     *id = list->keytab;
-
-  done:
-    err = KTLOCK(*id);
-    if (err) {
-	k5_mutex_destroy(&data->lock);
-     	if (data && data->name) 
-		free(data->name);
-	free(data);
-	if (list && list->keytab)
-		free(list->keytab);
-	free(list);
-    } else {
-	KTREFCNT(*id)++;
-	KTUNLOCK(*id);
-    }
-
+done:
     KTGUNLOCK;
-    return(err);
+    return err;
 }
 
 
