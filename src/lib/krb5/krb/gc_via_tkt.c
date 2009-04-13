@@ -154,6 +154,7 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     krb5_error *err_reply;
     krb5_response tgsrep;
     krb5_enctype *enctypes = 0;
+    krb5_keyblock *subkey = NULL;
 
 #ifdef DEBUG_REFERRALS
     printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
@@ -200,12 +201,12 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	enctypes[1] = 0;
     }
     
-    retval = krb5_send_tgs(context, kdcoptions, &in_cred->times, enctypes, 
+    retval = krb5int_send_tgs(context, kdcoptions, &in_cred->times, enctypes, 
 			   in_cred->server, address, in_cred->authdata,
 			   0,		/* no padata */
 			   (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
 			   &in_cred->second_ticket : NULL,
-			   tkt, &tgsrep);
+			   tkt, &tgsrep, &subkey);
     if (enctypes)
 	free(enctypes);
     if (retval) {
@@ -280,7 +281,7 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     }
 
     if ((retval = krb5_decode_kdc_rep(context, &tgsrep.response,
-				      &tkt->keyblock, &dec_rep)))
+				      subkey, &dec_rep)))
 	goto error_4;
 
     if (dec_rep->msg_type != KRB5_TGS_REP) {
@@ -334,6 +335,9 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 			       &in_cred->second_ticket,  out_cred);
 
 error_3:;
+    if (subkey != NULL)
+      krb5_free_keyblock(context, subkey);
+    
     memset(dec_rep->enc_part2->session->contents, 0,
 	   dec_rep->enc_part2->session->length);
     krb5_free_kdc_rep(context, dec_rep);

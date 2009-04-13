@@ -441,7 +441,6 @@ krb5_recvauth_version
 krb5_register_serializer
 krb5_salttype_to_string
 krb5_secure_config_files
-krb5_send_tgs
 krb5_sendauth
 krb5_sendto_kdc
 krb5_ser_address_init

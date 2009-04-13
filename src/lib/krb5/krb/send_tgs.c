@@ -30,7 +30,7 @@
 #include "k5-int.h"
 
 /*
- Sends a request to the TGS and waits for a response.
+Constructs a TGS request
  options is used for the options in the KRB_TGS_REQ.
  timestruct values are used for from, till, rtime " " "
  enctype is used for enctype " " ", and to encrypt the authorization data, 
@@ -48,7 +48,8 @@
  returns system errors
  */
 static krb5_error_code 
-krb5_send_tgs_basic(krb5_context context, krb5_data *in_data, krb5_creds *in_cred, krb5_data *outbuf)
+tgs_construct_tgsreq(krb5_context context, krb5_data *in_data,
+		    krb5_creds *in_cred, krb5_data *outbuf, krb5_keyblock **subkey)
 {   
     krb5_error_code       retval;
     krb5_checksum         checksum;
@@ -56,6 +57,12 @@ krb5_send_tgs_basic(krb5_context context, krb5_data *in_data, krb5_creds *in_cre
     krb5_ap_req 	  request;
     krb5_data		* scratch;
     krb5_data           * toutbuf;
+    checksum.contents = NULL;
+/* Generate subkey*/
+    if ((retval = krb5_generate_subkey( context, &in_cred->keyblock,
+					subkey)) != 0)
+	return retval;
+    
 
     /* Generate checksum */
     if ((retval = krb5_c_make_checksum(context, context->kdc_req_sumtype,
@@ -63,43 +70,42 @@ krb5_send_tgs_basic(krb5_context context, krb5_data *in_data, krb5_creds *in_cre
 				       KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
 				       in_data, &checksum))) {
 	free(checksum.contents);
-	return(retval);
+	goto cleanup;
     }
 
     /* gen authenticator */
-    authent.subkey = 0;
+    authent.subkey = *subkey; /*owned by caller*/
     authent.seq_number = 0;
     authent.checksum = &checksum;
     authent.client = in_cred->client;
     authent.authorization_data = in_cred->authdata;
     if ((retval = krb5_us_timeofday(context, &authent.ctime,
-				    &authent.cusec))) {
-        free(checksum.contents);
-	return(retval);
-    }
+				    &authent.cusec))) 
+	goto cleanup;
+
 
     /* encode the authenticator */
-    if ((retval = encode_krb5_authenticator(&authent, &scratch))) {
-        free(checksum.contents);
-	return(retval);
-    }
+    if ((retval = encode_krb5_authenticator(&authent, &scratch)))
+	goto cleanup;
+
 
     free(checksum.contents);
+    checksum.contents = NULL;
 
-    request.authenticator.ciphertext.data = 0;
+    request.authenticator.ciphertext.data = NULL;
     request.authenticator.kvno = 0;
     request.ap_options = 0;
     request.ticket = 0;
 
     if ((retval = decode_krb5_ticket(&(in_cred)->ticket, &request.ticket)))
 	/* Cleanup scratch and scratch data */
-        goto cleanup_data;
+        goto cleanup;
 
     /* call the encryption routine */ 
     if ((retval = krb5_encrypt_helper(context, &in_cred->keyblock,
 				      KRB5_KEYUSAGE_TGS_REQ_AUTH,
 				      scratch, &request.authenticator)))
-	goto cleanup_ticket;
+	goto cleanup;
 
     retval = encode_krb5_ap_req(&request, &toutbuf);
     *outbuf = *toutbuf;
@@ -110,25 +116,30 @@ krb5_send_tgs_basic(krb5_context context, krb5_data *in_data, krb5_creds *in_cre
            request.authenticator.ciphertext.length);
     free(request.authenticator.ciphertext.data);
 
-cleanup_ticket:
+ cleanup:
+if (request.ticket)
     krb5_free_ticket(context, request.ticket);
 
-cleanup_data:
-    memset(scratch->data, 0, scratch->length);
+ if (scratch != NULL && scratch->data != NULL) { 
+zap(scratch->data,  scratch->length);
     free(scratch->data);
-
     free(scratch);
+ }
 
+ if (*subkey && retval != 0) {
+     krb5_free_keyblock(context, *subkey);
+     *subkey = NULL;
+ }
     return retval;
 }
 
 krb5_error_code
-krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
+krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
 	      const krb5_ticket_times *timestruct, const krb5_enctype *ktypes,
 	      krb5_const_principal sname, krb5_address *const *addrs,
 	      krb5_authdata *const *authorization_data,
 	      krb5_pa_data *const *padata, const krb5_data *second_ticket,
-	      krb5_creds *in_cred, krb5_response *rep)
+	      krb5_creds *in_cred, krb5_response *rep, krb5_keyblock **subkey)
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;
@@ -140,6 +151,8 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
     krb5_pa_data ap_req_padata;
     int tcp_only = 0, use_master;
 
+    assert (subkey != NULL);
+    *subkey  = NULL;
     /* 
      * in_creds MUST be a valid credential NOT just a partially filled in
      * place holder for us to get credentials for the caller.
@@ -170,8 +183,8 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
 	if ((retval = encode_krb5_authdata(authorization_data, &scratch)))
 	    return(retval);
 
-	if ((retval = krb5_encrypt_helper(context, &in_cred->keyblock,
-					  KRB5_KEYUSAGE_TGS_REQ_AD_SESSKEY,
+	if ((retval = krb5_encrypt_helper(context, *subkey,
+					  KRB5_KEYUSAGE_TGS_REQ_AD_SUBKEY,
 					  scratch,
 					  &tgsreq.authorization_data))) {
 	    free(tgsreq.authorization_data.ciphertext.data);
@@ -212,7 +225,8 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
     /*
      * Get an ap_req.
      */
-    if ((retval = krb5_send_tgs_basic(context, scratch, in_cred, &scratch2))) {
+    if ((retval = tgs_construct_tgsreq(context, scratch, in_cred
+				       , &scratch2, subkey))) {
         krb5_free_data(context, scratch);
 	goto send_tgs_error_2;
     }
@@ -275,7 +289,7 @@ send_again:
 		    tcp_only = 1;
 		    krb5_free_error(context, err_reply);
 		    free(rep->response.data);
-		    rep->response.data = 0;
+		    rep->response.data = NULL;
 		    goto send_again;
 		}
 		krb5_free_error(context, err_reply);
@@ -303,6 +317,11 @@ send_tgs_error_1:;
                tgsreq.authorization_data.ciphertext.length); 
 	free(tgsreq.authorization_data.ciphertext.data);
     }
+    if (rep->message_type != KRB5_TGS_REP && *subkey){
+	krb5_free_keyblock(context, *subkey);
+	*subkey = NULL;
+    }
+
 
     return retval;
 }

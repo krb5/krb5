@@ -2545,7 +2545,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_default_config_files
 
 void KRB5_CALLCONV krb5_free_config_files
 	(char **filenames);
-krb5_error_code krb5_send_tgs
+krb5_error_code krb5int_send_tgs
 	(krb5_context,
 		krb5_flags,
 		const krb5_ticket_times *,
@@ -2556,11 +2556,16 @@ krb5_error_code krb5_send_tgs
 		krb5_pa_data * const *,
 		const krb5_data *,
 		krb5_creds *,
-		krb5_response * );
+		krb5_response * , krb5_keyblock **subkey);
+                /* The subkey field is an output parameter; if a
+		 * tgs-rep is received then the subkey will be filled
+		 * in with the subkey needed to decrypt the TGS
+		 * response. Otherwise it will be set to null.
+		 */
 krb5_error_code krb5_decode_kdc_rep
 	(krb5_context,
 		krb5_data *,
-		const krb5_keyblock *,
+	  const krb5_keyblock *,
 		krb5_kdc_rep ** );
 
 krb5_error_code krb5_rd_req_decoded
