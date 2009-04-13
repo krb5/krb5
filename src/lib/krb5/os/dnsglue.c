@@ -112,7 +112,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
 	p = (ds->ansp == NULL)
 	    ? malloc(nextincr) : realloc(ds->ansp, nextincr);
 
-	if (p == NULL && ds->ansp != NULL) {
+	if (p == NULL) {
 	    ret = -1;
 	    goto errout;
 	}
