@@ -40,6 +40,7 @@
 
 struct timeval timelimit = {300, 0};  /* 5 minutes */
 char     *principal_attributes[] = { "krbprincipalname",
+				     "krbcanonicalname",
 				     "objectclass",
 				     "krbprincipalkey",
 				     "krbmaxrenewableage",
