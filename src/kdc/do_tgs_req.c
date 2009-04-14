@@ -55,7 +55,6 @@
  */
 
 #include "k5-int.h"
-#include "com_err.h"
 
 #include <syslog.h>
 #ifdef HAVE_NETINET_IN_H
@@ -1124,7 +1123,7 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
             free(temp_buf);
             if (retval) {
                 /* no match found */
-                com_err("krb5_get_domain_realm_mapping", retval, 0);
+                kdc_err(kdc_context, retval, 0);
                 goto cleanup;
             }
             if (realms == 0) {

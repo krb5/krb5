@@ -86,7 +86,7 @@ krb5_error_code setup_sam (void);
 
 void initialize_realms (krb5_context, int, char **);
 
-void finish_realms (char *);
+void finish_realms (void);
 
 static int nofork = 0;
 static int rkey_init_done = 0;
@@ -96,6 +96,31 @@ static struct sigaction s_action;
 #endif /* POSIX_SIGNALS */
 
 #define	KRB5_KDC_MAX_REALMS	32
+
+static krb5_context kdc_err_context;
+static const char *kdc_progname;
+
+/*
+ * We use krb5_klog_init to set up a com_err callback to log error
+ * messages.  The callback also pulls the error message out of the
+ * context we pass to krb5_klog_init; however, we use realm-specific
+ * contexts for most of our krb5 library calls, so the error message
+ * isn't present in the global context.  This wrapper ensures that the
+ * error message state from the call context is copied into the
+ * context known by krb5_klog.  call_context can be NULL if the error
+ * code did not come from a krb5 library function.
+ */
+void
+kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...)
+{
+    va_list ap;
+
+    if (call_context)
+	krb5_copy_error_message(kdc_err_context, call_context);
+    va_start(ap, fmt);
+    com_err_va(kdc_progname, code, fmt, ap);
+    va_end(ap);
+}
 
 /*
  * Find the realm entry for a given realm.
@@ -237,10 +262,10 @@ handle_referral_params(krb5_realm_params *rparams,
  * realm data and we should be all set to begin operation for that realm.
  */
 static krb5_error_code
-init_realm(char *progname, kdc_realm_t *rdp, char *realm, 
-	   char *def_mpname, krb5_enctype def_enctype, char *def_udp_ports,
-	   char *def_tcp_ports, krb5_boolean def_manual, char **db_args,
-           char *no_refrls, char *host_based_srvcs)
+init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
+	   krb5_enctype def_enctype, char *def_udp_ports, char *def_tcp_ports,
+	   krb5_boolean def_manual, char **db_args, char *no_refrls,
+	   char *host_based_srvcs)
 {
     krb5_error_code	kret;
     krb5_boolean	manual;
@@ -257,15 +282,14 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     rdp->realm_name = realm;
     kret = krb5int_init_context_kdc(&rdp->realm_context);
     if (kret) {
-	com_err(progname, kret, "while getting context for realm %s",
-		realm);
+	kdc_err(NULL, kret, "while getting context for realm %s", realm);
 	goto whoops;
     }
 
     kret = krb5_read_realm_params(rdp->realm_context, rdp->realm_name,
 				  &rparams);
     if (kret) {
-	com_err(progname, kret, "while reading realm parameters");
+	kdc_err(rdp->realm_context, kret, "while reading realm parameters");
 	goto whoops;
     }
     
@@ -351,7 +375,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 
     /* Set the default realm of this context */
     if ((kret = krb5_set_default_realm(rdp->realm_context, realm))) {
-	com_err(progname, kret, "while setting default realm to %s",
+	kdc_err(rdp->realm_context, kret, "while setting default realm to %s",
 		realm);
 	goto whoops;
     }
@@ -363,7 +387,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     kdb_open_flags = KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC;
 #endif
     if ((kret = krb5_db_open(rdp->realm_context, db_args, kdb_open_flags))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while initializing database for realm %s", realm);
 	goto whoops;
     }
@@ -372,7 +396,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     if ((kret = krb5_db_setup_mkey_name(rdp->realm_context, rdp->realm_mpname,
 					rdp->realm_name, (char **) NULL,
 					&rdp->realm_mprinc))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while setting up master key name %s for realm %s",
 		rdp->realm_mpname, realm);
 	goto whoops;
@@ -385,7 +409,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 				   rdp->realm_mkey.enctype, manual,
 				   FALSE, rdp->realm_stash,
 				   &mkvno, NULL, &rdp->realm_mkey))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while fetching master key %s for realm %s",
 		rdp->realm_mpname, realm);
 	goto whoops;
@@ -403,7 +427,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 					  rdp->realm_mprinc,
                                           IGNORE_VNO,
 					  &rdp->realm_mkey))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while verifying master key for realm %s", realm);
 	goto whoops;
     }
@@ -411,13 +435,13 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 
     if ((kret = krb5_db_fetch_mkey_list(rdp->realm_context, rdp->realm_mprinc,
 				   &rdp->realm_mkey, mkvno, &rdp->mkey_list))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while fetching master keys list for realm %s", realm);
 	goto whoops;
     }
 
     if ((kret = krb5_db_set_mkey(rdp->realm_context, &rdp->realm_mkey))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while setting master key for realm %s", realm);
 	goto whoops;
     }
@@ -425,7 +449,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     /* Set up the keytab */
     if ((kret = krb5_ktkdb_resolve(rdp->realm_context, NULL,
 				   &rdp->realm_keytab))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while resolving kdb keytab for realm %s", realm);
 	goto whoops;
     }
@@ -434,7 +458,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     if ((kret = krb5_build_principal(rdp->realm_context, &rdp->realm_tgsprinc,
 				     strlen(realm), realm, KRB5_TGS_NAME,
 				     realm, (char *) NULL))) {
-	com_err(progname, kret,
+	kdc_err(rdp->realm_context, kret,
 		"while building TGS name for realm %s", realm);
 	goto whoops;
     }
@@ -619,9 +643,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
 		if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
-		    if ((retval = init_realm(argv[0], rdatap, optarg, 
-					     mkey_name, menctype,
-					     default_udp_ports,
+		    if ((retval = init_realm(rdatap, optarg, mkey_name,
+					     menctype, default_udp_ports,
 					     default_tcp_ports, manual, db_args,
                                              no_refrls, host_based_srvcs))) {
 			fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
@@ -722,10 +745,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    exit(1);
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
-	    if ((retval = init_realm(argv[0], rdatap, lrealm, 
-				     mkey_name, menctype, default_udp_ports,
-				     default_tcp_ports, manual, db_args,
-                                     no_refrls, host_based_srvcs))) {
+	    if ((retval = init_realm(rdatap, lrealm, mkey_name, menctype,
+				     default_udp_ports, default_tcp_ports,
+				     manual, db_args, no_refrls,
+				     host_based_srvcs))) {
 		fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
 			argv[0], lrealm);
 		exit(1);
@@ -765,7 +788,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 }
 
 void
-finish_realms(char *prog)
+finish_realms()
 {
     int i;
 
@@ -830,8 +853,12 @@ int main(int argc, char **argv)
 	    exit(1);
     }
     krb5_klog_init(kcontext, "kdc", argv[0], 1);
+    kdc_err_context = kcontext;
+    kdc_progname = argv[0];
     /* N.B.: After this point, com_err sends output to the KDC log
-       file, and not to stderr.  */
+       file, and not to stderr.  We use the kdc_err wrapper around
+       com_err to ensure that the error state exists in the context
+       known to the krb5_klog callback. */
 
     initialize_kdc5_error_table();
 
@@ -847,35 +874,35 @@ int main(int argc, char **argv)
 
     retval = setup_sam();
     if (retval) {
-	com_err(argv[0], retval, "while initializing SAM");
-	finish_realms(argv[0]);
+	kdc_err(kcontext, retval, "while initializing SAM");
+	finish_realms();
 	return 1;
     }
 
-    if ((retval = setup_network(argv[0]))) {
-	com_err(argv[0], retval, "while initializing network");
-	finish_realms(argv[0]);
+    if ((retval = setup_network())) {
+	kdc_err(kcontext, retval, "while initializing network");
+	finish_realms();
 	return 1;
     }
     if (!nofork && daemon(0, 0)) {
-	com_err(argv[0], errno, "while detaching from tty");
-	finish_realms(argv[0]);
+	kdc_err(kcontext, errno, "while detaching from tty");
+	finish_realms();
 	return 1;
     }
     krb5_klog_syslog(LOG_INFO, "commencing operation");
-    if ((retval = listen_and_process(argv[0]))) {
-	com_err(argv[0], retval, "while processing network requests");
+    if ((retval = listen_and_process())) {
+	kdc_err(kcontext, retval, "while processing network requests");
 	errout++;
     }
-    if ((retval = closedown_network(argv[0]))) {
-	com_err(argv[0], retval, "while shutting down network");
+    if ((retval = closedown_network())) {
+	kdc_err(kcontext, retval, "while shutting down network");
 	errout++;
     }
     krb5_klog_syslog(LOG_INFO, "shutting down");
     unload_preauth_plugins(kcontext);
     unload_authdata_plugins(kcontext);
     krb5_klog_close(kdc_context);
-    finish_realms(argv[0]);
+    finish_realms();
     if (kdc_realmlist) 
       free(kdc_realmlist);
 #ifdef USE_RCACHE
