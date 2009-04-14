@@ -28,6 +28,7 @@ class Launcher:
         self._sandboxTier1 = '%s/%s' % (self._sandboxDir, 'tier1')
         self._sandboxTier2 = '%s/%s' % (self._sandboxDir, 'tier2')
         self._configurations = self._readServerConfiguration('%s/%s' % (self._confDir,confParams['testKDCconf']))
+        self._configurations_1 = self._readServerConfiguration('%s/%s' % (self._confDir,confParams['testKDCconf_1']))
         self._principals = self._readTestInputs('%s/%s' % (self._confDir,confParams['principals']))
         os.environ["LD_LIBRARY_PATH"] = '%s/lib' % self._buildDir
         self._pidRefKDC = 0
@@ -94,7 +95,7 @@ class Launcher:
             raise LaunchError, err_msg
 
         
-    def _launchClient(self, args, env):
+    def _launchClient(self, args, env, princType):
         """
         kinit & kvno
         """
@@ -109,7 +110,11 @@ class Launcher:
 
         # testHost', 'mybox.mit.edu is a srv defined in referral KDC. Get its kvno 
         cmd = '%s/clients/kvno/kvno' % self._buildDir 
-        handle = Popen([cmd, '-C', '-S', 'testHost', 'mybox.mit.edu'], 
+        if princType == 0:
+             handle = Popen([cmd, '-C', '-S', 'testHost', 'mybox.mit.edu'],
+                            env = env, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        if princType == 1:
+            handle = Popen([cmd, '-C', '-u', 'testHost/mybox.mit.edu'],                
                        env = env, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         (out, err) = handle.communicate()
         handle.wait()
@@ -185,7 +190,7 @@ class Launcher:
             self._tier1Init = True
         
         
-    def _launchTestingPair(self, srvParam,clntParam):
+    def _launchTestingPair(self, srvParam,clntParam, princType):
         # launch KDC       
         server_env = os.environ.copy()
         server_env["KRB5_KDC_PROFILE"] = '%s/kdc.conf' % self._sandboxTier2  
@@ -198,9 +203,9 @@ class Launcher:
                                      '%s/%s' % (self._confDir,'kdc_pri_template.conf'),
                                      self._vars)
         if self._tier2Init == False:
-            pid = self._createDB(server_env)
-            self._crossRealm('Y.COM', 'Z.COM', server_env)            
-            self._tier2Init = True
+          pid = self._createDB(server_env)
+          self._crossRealm('Y.COM', 'Z.COM', server_env)            
+          self._tier2Init = True
             
         server = self._launchKDC( 2, server_args, server_env)
         
@@ -211,7 +216,7 @@ class Launcher:
                         '%s/%s' % (self._confDir, 'krb5_priCL_template.conf'),
                          self._vars)  
         client_env["KRB5_KDC_PROFILE"] = server_env["KRB5_KDC_PROFILE"]                    
-        rc = self._launchClient(clntParam, client_env)
+        rc = self._launchClient(clntParam, client_env, princType)
         self._kill(server)
         return rc
  
@@ -232,9 +237,15 @@ class Launcher:
         result = dict()
         for princs in self._principals:
             for conf in self._configurations:                                         
-                rc = self._launchTestingPair( conf['confName'], princs % self._vars)
+                rc = self._launchTestingPair( conf['confName'], princs % self._vars, 0)
                 result[conf['confName']] = {'expected':conf['expected'], 'actual':rc}
-                print 'Test code for configuration %s principal %s: %s' % (conf, princs, rc)        
+                print 'Test code for configuration %s principal %s type KRB5_NT_SRV_HST: %s' % (conf, princs, rc)  
+            self.printTestResults(result)
+            for conf in self._configurations_1:                                         
+                rc = self._launchTestingPair( conf['confName'], princs % self._vars, 1)
+                result[conf['confName']] = {'expected':conf['expected'], 'actual':rc}
+                print 'Test code for configuration %s principal %si type KRB5_NT_UNKNOWN: %s' % (conf, princs, rc)    
+            self.printTestResults(result)
         return result
 
 
@@ -317,7 +328,6 @@ if __name__ == '__main__':
         test = Launcher(src_path)
         result = test.run('main')
         test.clean()
-        test.printTestResults(result)
         
     except:
         if test is not None:

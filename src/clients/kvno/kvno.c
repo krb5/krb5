@@ -39,7 +39,7 @@ static char *prog;
 
 static void xusage()
 {
-    fprintf(stderr, "usage: %s [-C] [-c ccache] [-e etype] [-k keytab] [-S sname] service1 service2 ...\n",
+    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype] [-k keytab] [-S sname] service1 service2 ...\n",
             prog);
     exit(1);
 }
@@ -48,7 +48,7 @@ int quiet = 0;
 
 static void do_v5_kvno (int argc, char *argv[], 
                         char *ccachestr, char *etypestr, char *keytab_name,
-			char *sname, int canon);
+			char *sname, int canon, int unknown);
 
 #include <com_err.h>
 static void extended_com_err_fn (const char *, errcode_t, const char *,
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
     char *sname = NULL;
-    int canon = 0;
+    int canon = 0, unknown = 0;
 
 
     set_com_err_hook (extended_com_err_fn);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "Cc:e:hk:qS:")) != -1) {
+    while ((option = getopt(argc, argv, "uCc:e:hk:qS:")) != -1) {
 	switch (option) {
 	case 'C':
 	    canon = 1;
@@ -89,7 +89,18 @@ int main(int argc, char *argv[])
 	    break;
 	case 'S':
 	    sname = optarg;
+            if (unknown == 1){ 
+                fprintf(stderr, "Options -u and -S are mutually exclusive\n");
+	        xusage();
+            }
 	    break;
+        case 'u':
+            unknown = 1;
+            if (sname){ 
+                fprintf(stderr, "Options -u and -S are mutually exclusive\n");
+	        xusage();
+            }
+            break;
 	default:
 	    xusage();
 	    break;
@@ -100,7 +111,7 @@ int main(int argc, char *argv[])
 	xusage();
 
 	do_v5_kvno(argc - optind, argv + optind,
-		   ccachestr, etypestr, keytab_name, sname, canon);
+		   ccachestr, etypestr, keytab_name, sname, canon, unknown);
     return 0;
 }
 
@@ -119,7 +130,7 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
 
 static void do_v5_kvno (int count, char *names[], 
                         char * ccachestr, char *etypestr, char *keytab_name,
-			char *sname, int canon)
+			char *sname, int canon, int unknown)
 {
     krb5_error_code ret;
     int i, errors;
@@ -190,6 +201,9 @@ static void do_v5_kvno (int count, char *names[],
 	    errors++;
 	    continue;
 	}
+        if (unknown == 1) {
+            krb5_princ_type(context, in_creds.server) = KRB5_NT_UNKNOWN;
+        }
 
 	ret = krb5_unparse_name(context, in_creds.server, &princ);
 	if (ret) {
