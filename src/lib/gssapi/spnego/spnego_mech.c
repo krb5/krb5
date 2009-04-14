@@ -1650,8 +1650,7 @@ spnego_gss_accept_sec_context(
 				 &negState, &return_token);
 	}
 cleanup:
-	if (return_token == INIT_TOKEN_SEND ||
-	    return_token == CONT_TOKEN_SEND) {
+	if (return_token != NO_TOKEN_SEND && return_token != CHECK_MIC) {
 		/* For acceptor-sends-first send a tokenInit */
 		int tmpret;
 
@@ -1666,7 +1665,8 @@ cleanup:
 							   return_token,
 							   output_token);
 		} else {
-			tmpret = make_spnego_tokenTarg_msg(negState, sc->internal_mech,
+			tmpret = make_spnego_tokenTarg_msg(negState,
+							   sc ? sc->internal_mech : GSS_C_NO_OID,
 							   &mechtok_out, mic_out,
 							   return_token,
 							   output_token);
@@ -3025,6 +3025,8 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 
 	if (outbuf == GSS_C_NO_BUFFER)
 		return (GSS_S_DEFECTIVE_TOKEN);
+	if (sendtoken == INIT_TOKEN_SEND && mech_wanted == GSS_C_NO_OID)
+	    return (GSS_S_DEFECTIVE_TOKEN);
 
 	outbuf->length = 0;
 	outbuf->value = NULL;
