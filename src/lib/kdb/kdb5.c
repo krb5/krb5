@@ -616,8 +616,8 @@ kdb_free_library(db_library lib)
     return status;
 }
 
-static krb5_error_code
-kdb_setup_lib_handle(krb5_context kcontext)
+krb5_error_code
+krb5_db_setup_lib_handle(krb5_context kcontext)
 {
     char   *library = NULL;
     krb5_error_code status = 0;
@@ -714,7 +714,7 @@ krb5_db_open(krb5_context kcontext, char **db_args, int mode)
     }
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -763,7 +763,7 @@ krb5_db_create(krb5_context kcontext, char **db_args)
     }
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -836,7 +836,7 @@ krb5_db_destroy(krb5_context kcontext, char **db_args)
     }
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -866,7 +866,7 @@ krb5_db_get_age(krb5_context kcontext, char *db_name, time_t * t)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -893,7 +893,7 @@ krb5_db_set_option(krb5_context kcontext, int option, void *value)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -921,7 +921,7 @@ krb5_db_lock(krb5_context kcontext, int lock_mode)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -951,7 +951,7 @@ krb5_db_unlock(krb5_context kcontext)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -983,7 +983,7 @@ krb5_db_get_principal(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1017,7 +1017,7 @@ krb5_db_get_principal_ext(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1047,7 +1047,7 @@ krb5_db_free_principal(krb5_context kcontext, krb5_db_entry * entry, int count)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1189,7 +1189,7 @@ krb5_db_put_principal(krb5_context kcontext,
     log_ctx = kcontext->kdblog_context;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1306,7 +1306,7 @@ krb5_db_delete_principal(krb5_context kcontext,
     log_ctx = kcontext->kdblog_context;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1378,7 +1378,7 @@ krb5_db_iterate(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1407,7 +1407,7 @@ krb5_supported_realms(krb5_context kcontext, char **realms)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1435,7 +1435,7 @@ krb5_free_supported_realms(krb5_context kcontext, char **realms)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1465,7 +1465,7 @@ krb5_db_set_master_key_ext(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1500,7 +1500,7 @@ krb5_db_set_mkey_list(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-        status = kdb_setup_lib_handle(kcontext);
+        status = krb5_db_setup_lib_handle(kcontext);
         if (status) {
             goto clean_n_exit;
         }
@@ -1528,7 +1528,7 @@ krb5_db_get_mkey(krb5_context kcontext, krb5_keyblock ** key)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1557,7 +1557,7 @@ krb5_db_get_mkey_list(krb5_context kcontext, krb5_keylist_node ** keylist)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-        status = kdb_setup_lib_handle(kcontext);
+        status = krb5_db_setup_lib_handle(kcontext);
         if (status) {
             goto clean_n_exit;
         }
@@ -1590,7 +1590,7 @@ krb5_db_fetch_mkey_list(krb5_context     context,
     krb5_error_code status = 0;
 
     if (context->dal_handle == NULL) {
-        status = kdb_setup_lib_handle(context);
+        status = krb5_db_setup_lib_handle(context);
         if (status) {
             goto clean_n_exit;
         }
@@ -1645,7 +1645,7 @@ krb5_db_store_master_key(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1680,7 +1680,7 @@ krb5_db_store_master_key_list(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -1778,7 +1778,7 @@ krb5_db_fetch_mkey(krb5_context    context,
 	kdb5_dal_handle *dal_handle;
 
 	if (context->dal_handle == NULL) {
-	    retval = kdb_setup_lib_handle(context);
+	    retval = krb5_db_setup_lib_handle(context);
 	    if (retval) {
 		goto clean_n_exit;
 	    }
@@ -1835,7 +1835,7 @@ krb5_db_verify_master_key(krb5_context     kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2030,7 +2030,7 @@ krb5_db_alloc(krb5_context kcontext, void *ptr, size_t size)
     void   *new_ptr = NULL;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2051,7 +2051,7 @@ krb5_db_free(krb5_context kcontext, void *ptr)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2091,7 +2091,7 @@ krb5_dbe_search_enctype(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2758,7 +2758,7 @@ krb5_dbe_cpw(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2792,7 +2792,7 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2820,7 +2820,7 @@ krb5_db_get_policy(krb5_context kcontext, char *name,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2849,7 +2849,7 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2877,7 +2877,7 @@ krb5_db_iter_policy(krb5_context kcontext, char *match_entry,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2906,7 +2906,7 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2933,7 +2933,7 @@ krb5_db_free_policy(krb5_context kcontext, osa_policy_ent_t policy)
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -2970,7 +2970,7 @@ krb5_db_promote(krb5_context kcontext, char **db_args)
     }
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -3004,7 +3004,7 @@ krb5_dbekd_decrypt_key_data( krb5_context 	  kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -3037,7 +3037,7 @@ krb5_dbekd_encrypt_key_data( krb5_context 		  kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
@@ -3087,7 +3087,7 @@ krb5_db_invoke(krb5_context kcontext,
     kdb5_dal_handle *dal_handle;
 
     if (kcontext->dal_handle == NULL) {
-	status = kdb_setup_lib_handle(kcontext);
+	status = krb5_db_setup_lib_handle(kcontext);
 	if (status) {
 	    goto clean_n_exit;
 	}
