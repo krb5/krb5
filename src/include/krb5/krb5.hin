@@ -2490,6 +2490,9 @@ krb5_vset_error_message (krb5_context, krb5_error_code, const char *, va_list)
     __attribute__((__format__(__printf__, 3, 0)))
 #endif
     ;
+void KRB5_CALLCONV
+krb5_copy_error_message (krb5_context, krb5_context);
+
 /*
  * The behavior of krb5_get_error_message is only defined the first
  * time it is called after a failed call to a krb5 function using the

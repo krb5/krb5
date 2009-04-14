@@ -2326,9 +2326,6 @@ krb5int_c_mandatory_cksumtype (krb5_context, krb5_enctype, krb5_cksumtype *);
 extern int krb5int_crypto_init (void);
 extern int krb5int_prng_init(void);
 
-#define krb5_copy_error_state(CTX, OCTX) \
-	krb5int_set_error(&(CTX)->errinfo, (OCTX)->errinfo.code, "%s", (OCTX)->errinfo.msg)
-
 /*
  * Referral definitions, debugging hooks, and subfunctions.
  */

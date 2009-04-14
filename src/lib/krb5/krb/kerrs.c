@@ -75,6 +75,20 @@ krb5_vset_error_message (krb5_context ctx, krb5_error_code code,
 #endif
 }
 
+/* Set the error message state of dest_ctx to that of src_ctx. */
+void KRB5_CALLCONV
+krb5_copy_error_message (krb5_context dest_ctx, krb5_context src_ctx)
+{
+    if (dest_ctx == src_ctx)
+	return;
+    if (src_ctx->err.msg) {
+	krb5int_set_error(&dest_ctx->err, src_ctx->err.code, "%s",
+			  src_ctx->err.msg);
+    } else {
+	krb5int_clear_error(dest_ctx);
+    }
+}
+
 const char * KRB5_CALLCONV
 krb5_get_error_message (krb5_context ctx, krb5_error_code code)
 {
