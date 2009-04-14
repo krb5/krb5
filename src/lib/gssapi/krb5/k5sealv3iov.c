@@ -90,8 +90,6 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
 
-    outbuf = (unsigned char *)header->buffer.value;
-
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
         unsigned int k5_headerlen, k5_trailerlen, k5_padlen;
         size_t ec = 0;
@@ -129,12 +127,13 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
             gss_headerlen += gss_trailerlen;
         }
 
-        if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE)
+        if (header->type & GSS_IOV_BUFFER_FLAG_ALLOCATE) {
             code = kg_allocate_iov(header, (size_t) gss_headerlen);
-        else if (header->buffer.length < gss_headerlen)
+        } else if (header->buffer.length < gss_headerlen)
             code = KRB5_BAD_MSIZE;
         if (code != 0)
             goto cleanup;
+        outbuf = (unsigned char *)header->buffer.value;
         header->buffer.length = (size_t) gss_headerlen;
 
         if (trailer != NULL) {
@@ -204,6 +203,7 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
             code = KRB5_BAD_MSIZE;
         if (code != 0)
             goto cleanup;
+        outbuf = (unsigned char *)header->buffer.value;
         header->buffer.length = (size_t) gss_headerlen;
 
         if (trailer != NULL) {
