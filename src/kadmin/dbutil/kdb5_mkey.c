@@ -185,6 +185,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
                                            mkey_aux_data_head))) {
         goto clean_n_exit;
     }
+    master_entry->mask |= KADM5_KEY_DATA;
 
 clean_n_exit:
     krb5_dbe_free_mkey_aux_list(context, mkey_aux_data_head);
@@ -906,6 +907,8 @@ update_princ_encryption_1(void *cb, krb5_db_entry *ent)
         goto fail;
     }
 
+    ent->mask |= KADM5_KEY_DATA;
+
     if ((retval = krb5_db_put_principal(util_context, ent, &nentries))) {
         com_err(progname, retval,
                 "while updating principal '%s' key data in the database",
@@ -1421,6 +1424,8 @@ kdb5_purge_mkeys(int argc, char *argv[])
         exit_status++;
         goto cleanup_return;
     }
+
+    master_entry.mask |= KADM5_KEY_DATA;
 
     if ((retval = krb5_db_put_principal(util_context, &master_entry, &nentries))) {
         (void) krb5_db_fini(util_context);
