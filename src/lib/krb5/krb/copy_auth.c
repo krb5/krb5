@@ -77,35 +77,60 @@ krb5_copy_authdatum(krb5_context context, const krb5_authdata *inad, krb5_authda
  * Copy an authdata array, with fresh allocation.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_copy_authdata(krb5_context context, krb5_authdata *const *inauthdat, krb5_authdata ***outauthdat)
+krb5_merge_authdata(krb5_context context, krb5_authdata *const *inauthdat1, krb5_authdata * const *inauthdat2,
+		    krb5_authdata ***outauthdat)
 {
     krb5_error_code retval;
     krb5_authdata ** tempauthdat;
-    register unsigned int nelems = 0;
+    register unsigned int nelems = 0, nelems2 = 0;
 
-    if (!inauthdat) {
+    *outauthdat = NULL;
+    if (!inauthdat1 && !inauthdat2) {
 	    *outauthdat = 0;
 	    return 0;
     }
 
-    while (inauthdat[nelems]) nelems++;
+    if (inauthdat1) 
+	while (inauthdat1[nelems]) nelems++;
+    if (inauthdat2) 
+	while (inauthdat2[nelems2]) nelems2++;
 
     /* one more for a null terminated list */
-    if (!(tempauthdat = (krb5_authdata **) calloc(nelems+1,
+    if (!(tempauthdat = (krb5_authdata **) calloc(nelems+nelems2+1,
 						  sizeof(*tempauthdat))))
 	return ENOMEM;
 
-    for (nelems = 0; inauthdat[nelems]; nelems++) {
-	retval = krb5_copy_authdatum(context, inauthdat[nelems],
-				     &tempauthdat[nelems]);
-	if (retval) {
-	    krb5_free_authdata(context, tempauthdat);
-	    return retval;
+    if (inauthdat1) {
+	for (nelems = 0; inauthdat1[nelems]; nelems++) {
+	    retval = krb5_copy_authdatum(context, inauthdat1[nelems],
+					 &tempauthdat[nelems]);
+	    if (retval) {
+		krb5_free_authdata(context, tempauthdat);
+		return retval;
+	    }
+	}
+    }
+
+    if (inauthdat2) {
+	for (nelems2 = 0; inauthdat2[nelems2]; nelems2++) {
+	    retval = krb5_copy_authdatum(context, inauthdat2[nelems2],
+					 &tempauthdat[nelems++]);
+	    if (retval) {
+		krb5_free_authdata(context, tempauthdat);
+		return retval;
+	    }
 	}
     }
 
     *outauthdat = tempauthdat;
     return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_copy_authdata(krb5_context context,
+		   krb5_authdata *const *in_authdat, krb5_authdata ***out)
+{
+    return krb5_merge_authdata(context, in_authdat, NULL, out);
 }
 
 krb5_error_code KRB5_CALLCONV

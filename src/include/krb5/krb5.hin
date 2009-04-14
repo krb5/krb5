@@ -1718,6 +1718,14 @@ krb5_error_code KRB5_CALLCONV krb5_copy_authdata
 	(krb5_context,
 		krb5_authdata * const *,
 		krb5_authdata ***);
+krb5_error_code KRB5_CALLCONV krb5_merge_authdata
+	(krb5_context,
+		krb5_authdata * const *,
+	 krb5_authdata *const *,
+		krb5_authdata ***);
+/* Merge two authdata arrays, such as the array from a ticket
+ * and authenticator */
+
 krb5_error_code KRB5_CALLCONV krb5_copy_authenticator
 	(krb5_context,
 		const krb5_authenticator *,

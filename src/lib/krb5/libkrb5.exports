@@ -354,6 +354,7 @@ krb5_make_fulladdr
 krb5_max_dgram_size
 krb5_max_skdc_timeout
 krb5_mcc_ops
+krb5_merge_authdata
 krb5_mk_1cred
 krb5_mk_error
 krb5_mk_ncred
