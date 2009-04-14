@@ -13,6 +13,7 @@ krb5_arcfour_decrypt
 krb5_arcfour_encrypt
 krb5_arcfour_encrypt_length
 krb5_c_block_size
+krb5_c_fx_cf2_simple
 krb5_c_checksum_length
 krb5_c_crypto_length
 krb5_c_crypto_length_iov
