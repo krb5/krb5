@@ -456,6 +456,7 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
                                     &master_keyblock, 0, &tmp_mkey_list) == 0) {
             krb5_dbe_free_key_list(kdc_context, master_keylist);
             master_keylist = tmp_mkey_list;
+	    krb5_db_set_mkey_list(kdc_context, master_keylist);
             if ((retval = krb5_dbe_find_mkey(kdc_context, master_keylist,
                                              server, &mkey_ptr))) {
                 goto errout;
