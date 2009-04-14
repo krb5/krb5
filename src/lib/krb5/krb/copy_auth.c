@@ -187,3 +187,92 @@ krb5_encode_authdata_container(krb5_context context,
 
     return code;
 }
+
+struct find_authdata_context {
+  krb5_authdata **out;
+  size_t space;
+  size_t length;
+};
+
+static krb5_error_code grow_find_authdata
+(krb5_context context, struct find_authdata_context *fctx,
+ krb5_authdata *elem)
+{
+  krb5_error_code retval = 0;
+  if (fctx->length == fctx->space) {
+    krb5_authdata **new;
+    if (fctx->space >= 256) {
+      krb5_set_error_message(context, ERANGE, "More than 256 authdata matched a query");
+      return ERANGE;
+    }
+    new       = realloc(fctx->out,
+			sizeof (krb5_authdata *)*(2*fctx->space+1));
+    if (new == NULL)
+      return ENOMEM;
+    fctx->out = new;
+    fctx->space *=2;
+  }
+  fctx->out[fctx->length+1] = NULL;
+  retval = krb5_copy_authdatum(context, elem,
+			       &fctx->out[fctx->length]);
+  if (retval == 0)
+    fctx->length++;
+  return retval;
+}
+
+  
+  
+
+static krb5_error_code find_authdata_1
+(krb5_context context, krb5_authdata *const *in_authdat, krb5_authdatatype ad_type,
+ struct find_authdata_context *fctx)
+{
+  int i = 0;
+  krb5_error_code retval=0;
+  
+  for (i = 0; in_authdat[i]; i++) {
+    krb5_authdata *ad = in_authdat[i];
+    if (ad->ad_type == ad_type && retval ==0)
+      retval = grow_find_authdata(context, fctx, ad);
+    else switch (ad->ad_type) {
+      krb5_authdata **decoded_container;
+    case KRB5_AUTHDATA_IF_RELEVANT:
+      if (retval == 0)
+	retval = krb5_decode_authdata_container( context, ad->ad_type, ad, &decoded_container);
+      if (retval == 0) {
+	retval = find_authdata_1(context,
+				 decoded_container, ad_type, fctx);
+	krb5_free_authdata(context, decoded_container);
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  return retval;
+}
+
+
+krb5_error_code krb5int_find_authdata
+(krb5_context context, krb5_authdata *const * ticket_authdata,
+ krb5_authdata * const *ap_req_authdata,
+ krb5_authdatatype ad_type,
+ krb5_authdata ***results)
+{
+  krb5_error_code retval = 0;
+  struct find_authdata_context fctx;
+  fctx.length = 0;
+  fctx.space = 2;
+  fctx.out = calloc(fctx.space+1, sizeof (krb5_authdata *));
+  *results = NULL;
+  if (fctx.out == NULL)
+    return ENOMEM;
+  if (ticket_authdata)
+      retval = find_authdata_1( context, ticket_authdata, ad_type, &fctx);
+  if ((retval==0) && ap_req_authdata)
+    retval = find_authdata_1( context, ap_req_authdata, ad_type, &fctx);
+  if ((retval== 0) && fctx.length)
+    *results = fctx.out;
+  else krb5_free_authdata(context, fctx.out);
+  return retval;
+}

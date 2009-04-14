@@ -2570,6 +2570,11 @@ krb5_error_code krb5_decode_kdc_rep
 		krb5_data *,
 	  const krb5_keyblock *,
 		krb5_kdc_rep ** );
+krb5_error_code krb5int_find_authdata
+(krb5_context context, krb5_authdata *const * ticket_authdata,
+ krb5_authdata * const *ap_req_authdata,
+ krb5_authdatatype ad_type,
+ krb5_authdata ***results);
 
 krb5_error_code krb5_rd_req_decoded
 	(krb5_context,
