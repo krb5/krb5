@@ -44,6 +44,8 @@ krb5_auth_con_init(krb5_context context, krb5_auth_context *auth_context)
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context)
 {
+    if (auth_context == NULL)
+	return 0;
     if (auth_context->local_addr) 
 	krb5_free_address(context, auth_context->local_addr);
     if (auth_context->remote_addr) 
