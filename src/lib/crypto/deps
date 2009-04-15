@@ -327,6 +327,16 @@ prf.so prf.po $(OUTPRE)prf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   etypes.h prf.c
+cf2.so cf2.po $(OUTPRE)cf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cf2.c etypes.h
 prng.so prng.po $(OUTPRE)prng.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -441,6 +451,8 @@ t_nfold.so t_nfold.po $(OUTPRE)t_nfold.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   t_nfold.c
+t_cf2.so t_cf2.po $(OUTPRE)t_cf2.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h t_cf2.c
 t_encrypt.so t_encrypt.po $(OUTPRE)t_encrypt.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

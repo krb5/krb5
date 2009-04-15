@@ -8,6 +8,7 @@ $(OUTPRE)gss-client.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/socket-utils.h gss-client.c gss-misc.h
 $(OUTPRE)gss-misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   gss-misc.c gss-misc.h
 $(OUTPRE)gss-server.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \

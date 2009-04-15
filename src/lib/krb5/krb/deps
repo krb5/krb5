@@ -273,6 +273,16 @@ encrypt_tk.so encrypt_tk.po $(OUTPRE)encrypt_tk.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h encrypt_tk.c
+fast.so fast.po $(OUTPRE)fast.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  fast.c fast.h int-proto.h
 free_rtree.so free_rtree.po $(OUTPRE)free_rtree.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -353,7 +363,7 @@ get_in_tkt.so get_in_tkt.po $(OUTPRE)get_in_tkt.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../os/os-proto.h \
-  get_in_tkt.c int-proto.h
+  fast.h get_in_tkt.c int-proto.h
 gic_keytab.so gic_keytab.po $(OUTPRE)gic_keytab.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -564,7 +574,8 @@ preauth2.so preauth2.po $(OUTPRE)preauth2.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h int-proto.h preauth2.c
+  $(SRCTOP)/include/socket-utils.h fast.h int-proto.h \
+  preauth2.c
 princ_comp.so princ_comp.po $(OUTPRE)princ_comp.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -807,6 +818,8 @@ str_conv.so str_conv.po $(OUTPRE)str_conv.$(OBJEXT): \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h str_conv.c
+t_ad_fx_armor.so t_ad_fx_armor.po $(OUTPRE)t_ad_fx_armor.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) t_ad_fx_armor.c
 tgtname.so tgtname.po $(OUTPRE)tgtname.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
