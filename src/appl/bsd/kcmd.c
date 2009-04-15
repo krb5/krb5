@@ -473,6 +473,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     if (krb5_auth_con_init(bsd_context, &auth_context)) 
 	goto bad2;
 
+    if (krb5_auth_con_set_req_cksumtype(bsd_context, auth_context, CKSUMTYPE_RSA_MD5) !=0 )
+	goto bad2;
     if (krb5_auth_con_setflags(bsd_context, auth_context, 
 			       KRB5_AUTH_CONTEXT_RET_TIME))
 	goto bad2;

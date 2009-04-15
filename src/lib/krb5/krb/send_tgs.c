@@ -51,6 +51,7 @@ static krb5_error_code
 tgs_construct_tgsreq(krb5_context context, krb5_data *in_data,
             krb5_creds *in_cred, krb5_data *outbuf, krb5_keyblock *subkey)
 {   
+    krb5_cksumtype cksumtype;
     krb5_error_code       retval;
     krb5_checksum         checksum;
     krb5_authenticator    authent;
@@ -63,9 +64,20 @@ tgs_construct_tgsreq(krb5_context context, krb5_data *in_data,
     request.authenticator.kvno = 0;
     request.ap_options = 0;
     request.ticket = 0;
-
+    switch (in_cred->keyblock.enctype) {
+    case ENCTYPE_DES_CBC_CRC:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_MD5:
+	cksumtype = context->kdc_req_sumtype;
+	break;
+    default:
+	retval = krb5int_c_mandatory_cksumtype(context, in_cred->keyblock.enctype, &cksumtype);
+	if (retval)
+	    goto cleanup;
+    }
+    
     /* Generate checksum */
-    if ((retval = krb5_c_make_checksum(context, context->kdc_req_sumtype,
+    if ((retval = krb5_c_make_checksum(context, cksumtype,
                        &in_cred->keyblock,
                        KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
                        in_data, &checksum))) {

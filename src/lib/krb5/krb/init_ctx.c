@@ -208,7 +208,7 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 	ctx->kdc_req_sumtype = tmp;
 
 	profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-			    KRB5_CONF_AP_REQ_CHECKSUM_TYPE, 0, CKSUMTYPE_RSA_MD5,
+			    KRB5_CONF_AP_REQ_CHECKSUM_TYPE, 0, 0,
 			    &tmp);
 	ctx->default_ap_req_sumtype = tmp;
 
