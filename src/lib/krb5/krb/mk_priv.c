@@ -136,6 +136,9 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
 	/* Need a better error */
 	return KRB5_RC_REQUIRED;
 
+    if (!auth_context->local_addr)
+	return KRB5_LOCAL_ADDR_REQUIRED;
+
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME)) {
 	if ((retval = krb5_us_timeofday(context, &replaydata.timestamp,
@@ -154,28 +157,26 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
 	} else {
     	    outdata->seq = replaydata.seq;
 	}
-    } 
+    }
 
 {
     krb5_address * premote_fulladdr = NULL;
-    krb5_address * plocal_fulladdr = NULL;
+    krb5_address * plocal_fulladdr;
     krb5_address remote_fulladdr;
     krb5_address local_fulladdr;
     CLEANUP_INIT(2);
 
-    if (auth_context->local_addr) {
-	if (auth_context->local_port) {
-	    if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
-				  	      auth_context->local_port, 
-					      &local_fulladdr))) {
-	    	CLEANUP_PUSH(local_fulladdr.contents, free);
-	    	plocal_fulladdr = &local_fulladdr;
-            } else {
-    	    	goto error;
-            }
+    if (auth_context->local_port) {
+	if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
+					  auth_context->local_port, 
+					  &local_fulladdr))) {
+	    CLEANUP_PUSH(local_fulladdr.contents, free);
+	    plocal_fulladdr = &local_fulladdr;
 	} else {
-	    plocal_fulladdr = auth_context->local_addr;
+	    goto error;
 	}
+    } else {
+	plocal_fulladdr = auth_context->local_addr;
     }
 
     if (auth_context->remote_addr) {
