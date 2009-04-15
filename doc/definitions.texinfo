@@ -43,7 +43,7 @@ default was set.
 the following should be consistent with the variables set in
 krb5/src/lib/krb5/krb/init_ctx.c
 @end ignore
-@set DefaultETypeList aes256-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
+@set DefaultETypeList aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
 @comment DEFAULT_ETYPE_LIST
 @set DefaultDefaultTgsEnctypes @value{DefaultETypeList}
 @set DefaultDefaultTktEnctypes @value{DefaultETypeList}
@@ -66,7 +66,7 @@ krb5/src/lib/krb5/krb/init_ctx.c
 
 @ignore
 the following defaults should be consistent with default variables set
-in krb5/src/include/stock/osconf.h
+in krb5/src/include/osconf.hin
 @end ignore
 @set DefaultMasterKeyType des3-cbc-sha1
 @comment DEFAULT_KDC_ENCTYPE
@@ -102,14 +102,14 @@ in krb5/src/include/stock/osconf.h
 the following defaults should be consistent with the numbers set in
 krb5/src/lib/kadm5/alt_prof.c
 @end ignore
-@set DefaultMaxLife 10 hours 
-@comment line 608
+@set DefaultMaxLife 24 hours 
+@comment max_life
 @set DefaultMaxRenewableLife 0 
-@comment line 622
+@comment max_rlife
 @set DefaultDefaultPrincipalExpiration 0 
-@comment line 639
-@set DefaultSupportedEnctypes des3-hmac-sha1:normal des-cbc-crc:normal
-@comment line 705
+@comment expiration
+@set DefaultSupportedEnctypes aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal
+@comment krb5/src/include/osconf.hin, KRB5_DEFAULT_SUPPORTED_ENCTYPES
 
 @ignore
 the following defaults should be consistent with the values set in
