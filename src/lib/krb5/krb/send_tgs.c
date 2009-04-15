@@ -55,7 +55,7 @@ tgs_construct_tgsreq(krb5_context context, krb5_data *in_data,
     krb5_checksum         checksum;
     krb5_authenticator 	  authent;
     krb5_ap_req 	  request;
-    krb5_data		* scratch;
+    krb5_data		* scratch = NULL;
     krb5_data           * toutbuf;
     checksum.contents = NULL;
     
@@ -119,8 +119,8 @@ if (request.ticket)
  if (scratch != NULL && scratch->data != NULL) { 
 zap(scratch->data,  scratch->length);
     free(scratch->data);
-    free(scratch);
  }
+ free(scratch);
 
     return retval;
 }
