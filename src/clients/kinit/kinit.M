@@ -37,7 +37,7 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 [\fB\-A\fP]
 [\fB\-v\fP] [\fB\-R\fP]
 [\fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]] [\fB\-c\fP \fIcache_name\fP]
-[\fB\-S\fP \fIservice_name\fP]
+[\fB\-S\fP \fIservice_name\fP][\fB\-T\fP \fIarmor_ccache\fP] 
 [\fB\-X\fP \fIattribute\fP[=\fIvalue\fP]]
 [\fIprincipal\fP]
 .ad b
@@ -129,6 +129,10 @@ the
 .B \-t
 .I keytab_file
 option; otherwise the default name and location will be used.
+.TP
+\fB\-T\fP \fIarmor_ccache\fP
+Specifies the name of a credential cache that already contains a ticket.  This ccache
+will be used to armor the request  Ideally, an attacker should have to attack both the armor ticket and the key of the principal.
 .TP
 \fB\-c\fP \fIcache_name\fP
 use

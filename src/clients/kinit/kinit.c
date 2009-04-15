@@ -117,6 +117,7 @@ struct k_opts
     char* service_name;
     char* keytab_name;
     char* k5_cache_name;
+    char *armor_ccache;
 
     action_type action;
 
@@ -195,9 +196,10 @@ usage()
 	    USAGE_BREAK
 	    "[-v] [-R] "
 	    "[-k [-t keytab_file]] "
-	    "[-c cachename] "
+	    "[-c cachename] " 
 	    USAGE_BREAK
-	    "[-S service_name]"
+	    "[-S service_name]""-T ticket_armor_cache"
+	    USAGE_BREAK
 	    "[-X <attribute>[=<value>]] [principal]"
 	    "\n\n", 
 	    progname);
@@ -278,7 +280,7 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:vX:CE"))
+    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:T:RS:vX:CE"))
 	   != -1) {
 	switch (i) {
 	case 'V':
@@ -346,6 +348,12 @@ parse_options(argc, argv, opts)
 	    } else {
 		opts->keytab_name = optarg;
 	    }
+	    break;
+	case 'T':
+	    if (opts->armor_ccache) {
+		fprintf(stderr, "Only one armor_ccache\n");
+		errflg++;
+	    } else opts->armor_ccache = optarg;
 	    break;
 	case 'R':
 	    opts->action = RENEW;
@@ -585,6 +593,9 @@ k5_kinit(opts, k5)
     }
     if (opts->no_addresses)
 	krb5_get_init_creds_opt_set_address_list(options, NULL);
+    if (opts->armor_ccache)
+    krb5_get_init_creds_opt_set_fast_ccache_name(k5->ctx, options, opts->armor_ccache);
+						 
 
     if ((opts->action == INIT_KT) && opts->keytab_name)
     {
