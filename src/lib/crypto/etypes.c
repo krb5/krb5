@@ -137,7 +137,8 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       NULL, /*PRF*/
       CKSUMTYPE_HMAC_MD5_ARCFOUR,
       &krb5int_aead_arcfour,
-      0 /*flags*/ },
+      ETYPE_WEAK
+    },
 
     { ENCTYPE_AES128_CTS_HMAC_SHA1_96,
       "aes128-cts-hmac-sha1-96", { "aes128-cts" },
