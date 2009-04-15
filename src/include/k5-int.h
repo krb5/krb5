@@ -982,7 +982,7 @@ typedef struct _krb5_fast_armored_req {
 
 typedef struct _krb5_fast_req {
     krb5_magic magic;
-    krb5_int32 fast_options;
+    krb5_flags fast_options;
     /* padata from req_body is used*/
    krb5_kdc_req *req_body;
 } krb5_fast_req;
@@ -1001,7 +1001,7 @@ typedef struct _krb5_fast_finished {
 typedef struct _krb5_fast_response {
     krb5_magic magic;
     krb5_pa_data **padata;
-    krb5_keyblock *rep_key;
+    krb5_keyblock *strengthen_key;
     krb5_fast_finished *finished;
     krb5_int32 nonce;
 } krb5_fast_response;

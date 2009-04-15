@@ -1211,7 +1211,7 @@ DEFFIELDTYPE(fast_req_padata, krb5_kdc_req,
 DEFPTRTYPE(ptr_fast_req_padata, fast_req_padata);
 
 static const struct field_info fast_req_fields[] = {
-    FIELDOF_NORM(krb5_fast_req, int32, fast_options, 0),
+    FIELDOF_NORM(krb5_fast_req, krb5_flags, fast_options, 0),
     FIELDOF_NORM( krb5_fast_req, ptr_fast_req_padata, req_body, 1),
     FIELDOF_NORM( krb5_fast_req, ptr_kdc_req_body, req_body, 2),
 };
@@ -1233,7 +1233,7 @@ DEFPTRTYPE( ptr_fast_finished, fast_finished);
 
 static const struct field_info fast_response_fields[] = {
     FIELDOF_NORM(krb5_fast_response, ptr_seqof_pa_data, padata, 0),
-    FIELDOF_OPT( krb5_fast_response, ptr_encryption_key, rep_key, 1, 1),
+    FIELDOF_OPT( krb5_fast_response, ptr_encryption_key, strengthen_key, 1, 1),
     FIELDOF_OPT( krb5_fast_response, ptr_fast_finished, finished, 2, 2),
     FIELDOF_NORM(krb5_fast_response, int32, nonce, 3),
 };
@@ -1242,7 +1242,7 @@ static unsigned int fast_response_optional (const void *p)
 {
     unsigned int optional = 0;
     const krb5_fast_response *val = p;
-    if (val->rep_key)
+    if (val->strengthen_key)
         optional |= (1u <<1);
     if (val->finished)
         optional |= (1u<<2);

@@ -819,6 +819,7 @@ void krb5_free_fast_response(krb5_context context, krb5_fast_response *val)
     return;
   krb5_free_pa_data(context, val->padata);
   krb5_free_fast_finished(context, val->finished);
+  krb5_free_keyblock(context, val->strengthen_key);
   free(val);
 }
 

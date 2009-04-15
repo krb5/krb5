@@ -349,13 +349,13 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 				   authenticator->authorization_data,
 				   KRB5_AUTHDATA_FX_ARMOR, &authdata);
     if (retval != 0)
-	goto cleanup_auth_context;
+	goto cleanup_authenticator;
         if (authdata&& authdata[0]) {
 	krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
 			       "ticket valid only as FAST armor");
 	retval = KRB5KDC_ERR_POLICY;
 	krb5_free_authdata(kdc_context, authdata);
-	goto cleanup_auth_context;
+	goto cleanup_authenticator;
     }
     krb5_free_authdata(kdc_context, authdata);
     

@@ -119,6 +119,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_keylist_node *tmp_mkey_list;
     struct kdc_request_state *state = NULL;
     krb5_data encoded_req_body;
+    krb5_keyblock *as_encrypting_key = NULL;
     
 
 #if APPLE_PKINIT
@@ -592,7 +593,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
     ticket_reply.enc_part.kvno = server_key->key_data_kvno;
-    errcode = kdc_fast_response_handle_padata(state, request, &reply);
+    errcode = kdc_fast_response_handle_padata(state, request, &reply, client_keyblock.enctype);
     if (errcode) {
 	status = "fast response handling";
 	goto errout;
@@ -602,8 +603,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     reply.enc_part.enctype = client_keyblock.enctype;
 
-    errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
-				  0, &client_keyblock,  &reply, response);
+    errcode = kdc_fast_handle_reply_key(state, &client_keyblock, &as_encrypting_key);
+    if (errcode) {
+	status = "generating reply key";
+	goto errout;
+    }
+        errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
+				  0, as_encrypting_key,  &reply, response);
     reply.enc_part.kvno = client_key->key_data_kvno;
     if (errcode) {
 	status = "ENCODE_KDC_REP";
@@ -637,7 +643,8 @@ errout:
 egress:
     if (pa_context)
 	free_padata_context(kdc_context, &pa_context);
-
+    if (as_encrypting_key)
+	krb5_free_keyblock(kdc_context, as_encrypting_key);
     if (errcode)
 	emsg = krb5_get_error_message(kdc_context, errcode);
 
@@ -760,7 +767,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int e
 	    if (pa == NULL)
 		retval = ENOMEM;
 	    else 		for (size = 0; td[size]; size++) {
-		krb5_pa_data *pad = malloc(sizeof(krb5_pa_data *));
+		krb5_pa_data *pad = malloc(sizeof(krb5_pa_data ));
 		if (pad == NULL) {
 		    retval = ENOMEM;
 		    break;

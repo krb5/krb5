@@ -34,5 +34,10 @@ extern krb5_error_code krb5int_arcfour_string_to_key(
 
 extern const struct krb5_enc_provider krb5int_enc_arcfour;
 extern const struct krb5_aead_provider krb5int_aead_arcfour;
+ krb5_error_code krb5int_arcfour_prf(
+					 const struct krb5_enc_provider *enc,
+					 const struct krb5_hash_provider *hash,
+					 const krb5_keyblock *key,
+					 const krb5_data *in, krb5_data *out);
 
 #endif /* ARCFOUR_H */

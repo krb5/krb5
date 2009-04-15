@@ -116,6 +116,7 @@ static krb5_error_code process_preauth
 	krb5_pa_data **pa_array = NULL;
 	krb5_data *encoded_ts = NULL;
 	krb5_pa_enc_ts ts;
+	enc.ciphertext.data = NULL;
 	if (retval == 0)
 	retval = krb5_us_timeofday(context, &ts.patimestamp, &ts.pausec);
 	if (retval == 0)
@@ -300,8 +301,6 @@ static krb5_error_code kdc_verify_preauth
     }
     if (armor_key)
 	krb5_free_keyblock(context, armor_key);
-    if (challenge_key)
-	krb5_free_keyblock(context, challenge_key);
     if (plain.data) 
 	free(plain.data);
     if (enc)
