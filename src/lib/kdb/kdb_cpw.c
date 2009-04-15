@@ -1,7 +1,7 @@
 /*
  * lib/kdb/kdb_cpw.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology. 
+ * Copyright 1995, 2009 by the Massachusetts Institute of Technology. 
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -431,32 +431,17 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
             key_salt.data.length = 0;
             key_salt.data.data = 0;
             break;
-    	case KRB5_KDB_SALTTYPE_AFS3: {
-#if 0
-            krb5_data * saltdata;
-            if (retval = krb5_copy_data(context, krb5_princ_realm(context,
-					db_entry->princ), &saltdata))
-	 	return(retval);
-
-	    key_salt.data = *saltdata;
+    	case KRB5_KDB_SALTTYPE_AFS3:
+	    /* The afs_mit_string_to_key needs to use strlen, and the
+	       realm field is not (necessarily) NULL terminated.  */
+	    retval = krb5int_copy_data_contents_add0(context,
+						     krb5_princ_realm(context,
+								      db_entry->princ),
+						     &key_salt.data);
+	    if (retval)
+		return retval;
 	    key_salt.data.length = SALT_TYPE_AFS_LENGTH; /*length actually used below...*/
-	    free(saltdata);
-#else
-	    /* Why do we do this? Well, the afs_mit_string_to_key needs to
-	       use strlen, and the realm is not NULL terminated.... */
-	    unsigned int slen = 
-		(*krb5_princ_realm(context,db_entry->princ)).length;
-	    if(!(key_salt.data.data = (char *) malloc(slen+1)))
-	        return ENOMEM;
-	    key_salt.data.data[slen] = 0;
-	    memcpy((char *)key_salt.data.data,
-		   (char *)(*krb5_princ_realm(context,db_entry->princ)).data,
-		   slen);
-	    key_salt.data.length = SALT_TYPE_AFS_LENGTH; /*length actually used below...*/
-#endif
-
-	}
-		break;
+	    break;
 	default:
 	    return(KRB5_KDB_BAD_SALTTYPE);
 	}
