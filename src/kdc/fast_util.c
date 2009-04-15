@@ -133,9 +133,11 @@ krb5_error_code  kdc_find_fast
     krb5_kdc_req *request = *requestptr;
     krb5_fast_armored_req *fast_armored_req = NULL;
     krb5_boolean cksum_valid;
+    krb5_keyblock empty_keyblock;
 
     scratch.data = NULL;
     krb5_clear_error_message(kdc_context);
+    memset(&empty_keyblock, 0, sizeof(krb5_keyblock));
     fast_padata = find_pa_data(request->padata,
 			       KRB5_PADATA_FX_FAST);
     if (fast_padata !=  NULL){
@@ -192,7 +194,23 @@ krb5_error_code  kdc_find_fast
       krb5_set_error_message(kdc_context, KRB5KRB_AP_ERR_MODIFIED,
 			     "FAST req_checksum invalid; request modified");
     }
-	    if (retval == 0) {
+    if (retval == 0) {
+	krb5_error_code ret;
+	/* We need to confirm that a keyed checksum is used for the
+	 * fast_req checksum.  In April 2009, the best way to do this is
+	 * to try verifying the checksum with a keyblock with an zero
+	 * length; if it succeeds, then an unkeyed checksum is used.*/
+	ret  = krb5_c_verify_checksum(kdc_context, &empty_keyblock,
+				      KRB5_KEYUSAGE_FAST_REQ_CHKSUM,
+				      checksummed_data, &fast_armored_req->req_checksum,
+				      &cksum_valid);
+	if (ret == 0) {
+	    retval = KRB5KDC_ERR_POLICY;
+	    krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
+				   "Unkeyed checksum used in fast_req");
+	}
+    }
+    if (retval == 0) {
 	if ((fast_req->fast_options & UNSUPPORTED_CRITICAL_FAST_OPTIONS) !=0)
 	    retval = KRB5KDC_ERR_UNKNOWN_CRITICAL_FAST_OPTION;
     }
