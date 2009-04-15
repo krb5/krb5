@@ -58,8 +58,18 @@
  * Use is subject to license terms.
  */
 
+/* This API is not considered as stable as the main krb5 API.
+ *
+ * - We may make arbitrary incompatible changes between feature
+ *   releases (e.g. from 1.7 to 1.8).
+ * - We will make some effort to avoid making incompatible changes for
+ *   bugfix releases, but will make them if necessary.
+ */
+
 #ifndef KRB5_KDB5__
 #define KRB5_KDB5__
+
+#include <krb5.h>
 
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL	0

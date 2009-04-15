@@ -30,6 +30,17 @@
  * $Header$
  */
 
+/*
+ * This API is not considered as stable as the main krb5 API.
+ *
+ * - We may make arbitrary incompatible changes between feature
+ *   releases (e.g. from 1.7 to 1.8).
+ * - We will make some effort to avoid making incompatible changes for
+ *   bugfix releases, but will make them if necessary.
+ * - We make no commitments at all regarding the v1 API (obtained by
+ *   defining USE_KADM5_API_VERSION to 1) and expect to remove it.
+ */
+
 #ifndef __KADM5_ADMIN_H__
 #define __KADM5_ADMIN_H__
 
