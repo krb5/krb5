@@ -144,9 +144,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     if (fetch_asn1_field((unsigned char *) req_pkt->data,
 			 1, 4, &encoded_req_body) != 0) {
-    errcode = ASN1_BAD_ID;
-    status = "Finding req_body";
-}
+        errcode = ASN1_BAD_ID;
+        status = "Finding req_body";
+	goto errout;
+    }
     errcode = kdc_find_fast(&request, &encoded_req_body, NULL /*TGS key*/, NULL, state);
     if (errcode) {
 	status = "error decoding FAST";
