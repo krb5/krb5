@@ -364,7 +364,8 @@ end_sequence_of_no_tagvars_helper(asn1buf *buf, asn1buf *seqbufp,
     return retval;
 }
 #define end_sequence_of_no_tagvars(buf) \
-    end_sequence_of_no_tagvars_helper(buf, &seqbuf, seqofindef)
+    retval = end_sequence_of_no_tagvars_helper(buf, &seqbuf, seqofindef); \
+    if (retval) clean_return(retval)
 
 /*
  * Function body for a pointer decoder, which allocates a pointer
