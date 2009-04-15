@@ -71,6 +71,26 @@ extern int longhorn;	    /* XXX Talking to a Longhorn server? */
 
 #define PKINIT_DEFAULT_DH_MIN_BITS  2048
 
+#define KRB5_CONF_KDCDEFAULTS                   "kdcdefaults"
+#define KRB5_CONF_LIBDEFAULTS                   "libdefaults"
+#define KRB5_CONF_REALMS                        "realms"
+#define KRB5_CONF_PKINIT_ALLOW_UPN              "pkinit_allow_upn"
+#define KRB5_CONF_PKINIT_ANCHORS                "pkinit_anchors"
+#define KRB5_CONF_PKINIT_CERT_MATCH             "pkinit_cert_match"
+#define KRB5_CONF_PKINIT_DH_MIN_BITS            "pkinit_dh_min_bits"
+#define KRB5_CONF_PKINIT_EKU_CHECKING           "pkinit_eku_checking"
+#define KRB5_CONF_PKINIT_IDENTITIES             "pkinit_identities"
+#define KRB5_CONF_PKINIT_IDENTITY               "pkinit_identity"
+#define KRB5_CONF_PKINIT_KDC_HOSTNAME           "pkinit_kdc_hostname"
+#define KRB5_CONF_PKINIT_KDC_OCSP               "pkinit_kdc_ocsp"
+#define KRB5_CONF_PKINIT_LONGHORN               "pkinit_longhorn"
+#define KRB5_CONF_PKINIT_MAPPING_FILE           "pkinit_mapping_file"
+#define KRB5_CONF_PKINIT_POOL                   "pkinit_pool"
+#define KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING   "pkinit_require_crl_checking"
+#define KRB5_CONF_PKINIT_REVOKE                 "pkinit_revoke"
+#define KRB5_CONF_PKINIT_WIN2K                  "pkinit_win2k"
+#define KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING  "pkinit_win2k_require_binding"
+
 /* Make pkiDebug(fmt,...) print, or not.  */
 #ifdef DEBUG
 #define pkiDebug	printf
