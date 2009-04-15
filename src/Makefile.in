@@ -12,6 +12,7 @@ mydir=.
 SUBDIRS=util include lib kdc kadmin @ldap_plugin_dir@ slave clients \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \
+	plugins/preauth/encrypted_challenge \
 	appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)

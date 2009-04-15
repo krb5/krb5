@@ -631,7 +631,15 @@ krb5_error_code KRB5_CALLCONV
 
 /* Defined in KDC referrals draft */
 #define KRB5_KEYUSAGE_PA_REFERRAL		26 /* XXX note conflict with above */
+/* define in draft-ietf-krb-wg-preauth-framework*/
+#define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
+#define KRB5_KEYUSAGE_FAST_ENC 51
+#define KRB5_KEYUSAGE_FAST_REP 52
+#define KRB5_KEYUSAGE_FAST_FINISHED 53
+#define KRB5_KEYUSAGE_ENC_CHALLENGE_CLIENT 54
+#define KRB5_KEYUSAGE_ENC_CHALLENGE_KDC 55
 
+#define KRB5_KEYUSAGE_FAST_REP 52
 krb5_boolean KRB5_CALLCONV krb5_c_valid_enctype
 	(krb5_enctype ktype);
 krb5_boolean KRB5_CALLCONV krb5_c_valid_cksumtype
@@ -982,6 +990,11 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define KRB5_PADATA_PAC_REQUEST		128 /* include Windows PAC */
 #define KRB5_PADATA_FOR_USER		129 /* username protocol transition request */
 #define KRB5_PADATA_S4U_X509_USER	130 /* certificate protocol transition request */
+#define KRB5_PADATA_FX_COOKIE 133
+#define KRB5_PADATA_FX_FAST  136
+#define KRB5_PADATA_FX_ERROR 137
+#define KRB5_PADATA_ENCRYPTED_CHALLENGE 138
+
 #define	KRB5_SAM_USE_SAD_AS_KEY		0x80000000
 #define	KRB5_SAM_SEND_ENCRYPTED_SAD	0x40000000
 #define	KRB5_SAM_MUST_PK_ENCRYPT_SAD	0x20000000 /* currently must be zero */
@@ -1005,7 +1018,7 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define KRB5_AUTHDATA_SESAME	65
 #define KRB5_AUTHDATA_WIN2K_PAC	128
 #define KRB5_AUTHDATA_ETYPE_NEGOTIATION	129	/* RFC 4537 */
-
+#define KRB5_AUTHDATA_FX_ARMOR 71
 /* password change constants */
 
 #define KRB5_KPASSWD_SUCCESS		0
@@ -1142,6 +1155,13 @@ typedef struct _krb5_kdc_req {
     krb5_authdata **unenc_authdata; /* unencrypted auth data,
 					   if available */
     krb5_ticket **second_ticket;/* second ticket array; OPTIONAL */
+    /* the following field is added in March 2009; it is a hack so
+     * that FAST state can be carried to pre-authentication plugins.
+     * A new plugin interface may be a better long-term approach.  It
+     * is believed to be safe to extend this structure because it is
+     * not found in any public APIs.
+     */
+    void * kdc_state;
 } krb5_kdc_req;
 
 typedef struct _krb5_enc_kdc_rep_part {
@@ -2393,6 +2413,15 @@ krb5_get_init_creds_opt_set_pa
 		const char *attr,
 		const char *value);
 
+krb5_error_code KRB5_CALLCONV krb5_get_init_creds_opt_set_fast_ccache_name
+(krb5_context context, krb5_get_init_creds_opt *opt,
+ const char * fast_ccache_name);
+    /*   This API sets a ccache name that will contain some TGT on
+	 calls to get_init_creds functions.   If set, this ccache will
+	 be used for FAST (draft-ietf-krb-wg-preauth-framework) to
+	 protect the AS-REQ from observation and active attack.  If
+	 the fast_ccache_name is set, then FAST may be required by the
+	 client library.  In this version FAST is required.*/
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password
 (krb5_context context,

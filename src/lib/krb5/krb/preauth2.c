@@ -37,6 +37,7 @@
 #include "osconf.h"
 #include <krb5/preauth_plugin.h>
 #include "int-proto.h"
+#include "fast.h"
 
 #if !defined(_WIN32)
 #include <unistd.h>
@@ -419,6 +420,7 @@ client_data_proc(krb5_context kcontext,
 		 krb5_data **retdata)
 {
     krb5_data *ret;
+    krb5_error_code retval;
     char *data;
 
     if (rock->magic != CLIENT_ROCK_MAGIC)
@@ -430,8 +432,6 @@ client_data_proc(krb5_context kcontext,
     case krb5plugin_preauth_client_get_etype:
 	{
 	    krb5_enctype *eptr;
-	    if (rock->as_reply == NULL)
-		return ENOENT;
 	    ret = malloc(sizeof(krb5_data));
 	    if (ret == NULL)
 		return ENOMEM;
@@ -443,7 +443,7 @@ client_data_proc(krb5_context kcontext,
 	    ret->data = data;
 	    ret->length = sizeof(krb5_enctype);
 	    eptr = (krb5_enctype *)data;
-	    *eptr = rock->as_reply->enc_part.enctype;
+	    *eptr = *rock->etype;
 	    *retdata = ret;
 	    return 0;
 	}
@@ -457,7 +457,38 @@ client_data_proc(krb5_context kcontext,
 	free(ret);
 	return 0;
 	break;
-    default:
+    case krb5plugin_preauth_client_fast_armor: {
+	krb5_keyblock *key = NULL;
+	ret = calloc(1, sizeof(krb5_data));
+	if (ret == NULL)
+	    return ENOMEM;
+	retval = 0;
+	if (rock->fast_state->armor_key)
+	    retval = krb5_copy_keyblock(kcontext, rock->fast_state->armor_key,
+					&key);
+	if (retval == 0) {
+	    ret->data = (char *) key;
+	    ret->length = key?sizeof(krb5_keyblock):0;
+	    key = NULL;
+	}
+	if (retval == 0) {
+	    *retdata = ret;
+	    ret = NULL;
+	}
+	if (ret)
+	    free(ret);
+	return retval;
+    }
+    case krb5plugin_preauth_client_free_fast_armor:
+	ret = *retdata;
+	if (ret) {
+	    if (ret->data)
+		krb5_free_keyblock(kcontext, (krb5_keyblock *) ret->data);
+	    free(ret);
+	    *retdata = NULL;
+	}
+	return 0;
+		default:
 	return EINVAL;
     }
 }

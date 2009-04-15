@@ -82,7 +82,7 @@
 #endif
 #endif /* APPLE_PKINIT */
 
-static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
+static krb5_error_code prepare_error_as (struct kdc_request_state *, krb5_kdc_req *, int, krb5_data *, 
 					 krb5_principal, krb5_data **,
 					 const char *);
 
@@ -117,6 +117,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     int did_log = 0;
     const char *emsg = 0;
     krb5_keylist_node *tmp_mkey_list;
+    struct kdc_request_state *state = NULL;
+    krb5_data encoded_req_body;
+    
 
 #if APPLE_PKINIT
     asReqDebug("process_as_req top realm %s name %s\n", 
@@ -133,6 +136,22 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     session_key.contents = 0;
     enc_tkt_reply.authorization_data = NULL;
 
+    errcode = kdc_make_rstate(&state);
+    if (errcode != 0) {
+	status = "constructing state";
+	goto errout;
+    }
+    if (fetch_asn1_field((unsigned char *) req_pkt->data,
+			 1, 4, &encoded_req_body) != 0) {
+    errcode = ASN1_BAD_ID;
+    status = "Finding req_body";
+}
+    errcode = kdc_find_fast(&request, &encoded_req_body, NULL /*TGS key*/, NULL, state);
+    if (errcode) {
+	status = "error decoding FAST";
+	goto errout;
+    }
+    request->kdc_state = state;
     if (!request->client) {
 	status = "NULL_CLIENT";
 	errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
@@ -548,6 +567,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
 
+    
     errcode = handle_authdata(kdc_context,
 			      c_flags,
 			      &client,
@@ -572,6 +592,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     }
     ticket_reply.enc_part.kvno = server_key->key_data_kvno;
+    errcode = kdc_fast_response_handle_padata(state, request, &reply);
+    if (errcode) {
+	status = "fast response handling";
+	goto errout;
+    }
 
     /* now encode/encrypt the response */
 
@@ -629,7 +654,7 @@ egress:
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;
 	    
-	errcode = prepare_error_as(request, errcode, &e_data,
+	errcode = prepare_error_as(state, request, errcode, &e_data,
  				   c_nprincs ? client.princ : NULL,
 				   response, status);
 	status = 0;
@@ -679,18 +704,24 @@ egress:
     }
 
     krb5_free_data_contents(kdc_context, &e_data);
+    kdc_free_rstate(state);
+    request->kdc_state = NULL;
+    krb5_free_kdc_req(kdc_context, request);
     assert(did_log != 0);
     return errcode;
 }
 
 static krb5_error_code
-prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
+prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int error, krb5_data *e_data,
 		  krb5_principal canon_client, krb5_data **response,
 		  const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
     krb5_data *scratch;
+    krb5_pa_data **pa = NULL;
+    krb5_typed_data **td = NULL;
+    size_t size;
     
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
@@ -719,13 +750,38 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 	errpkt.e_data.length = 0;
 	errpkt.e_data.data = NULL;
     }
-
+    /*We need to try and produce a padata sequence for FAST*/
+    retval = decode_krb5_padata_sequence(e_data, &pa);
+    if (retval != 0) {
+	retval = decode_krb5_typed_data(e_data, &td);
+	if (retval == 0) {
+	    for (size =0; td[size]; size++);
+	    pa = calloc(size+1, sizeof(*pa));
+	    if (pa == NULL)
+		retval = ENOMEM;
+	    else 		for (size = 0; td[size]; size++) {
+		krb5_pa_data *pad = malloc(sizeof(krb5_pa_data *));
+		if (pad == NULL) {
+		    retval = ENOMEM;
+		    break;
+		}
+		pad->pa_type = td[size]->type;
+		pad->contents = td[size]->data;
+		pad->length = td[size]->length;
+		pa[size] = pad;
+	    }
+	    krb5_free_typed_data(kdc_context, td);
+	}
+    }
+    retval = kdc_fast_handle_error(kdc_context, rstate,
+				   request, pa, &errpkt);
+    if (retval == 0)
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
     if (retval)
 	free(scratch);
     else 
 	*response = scratch;
-
+    krb5_free_pa_data(kdc_context, pa);
     return retval;
 }

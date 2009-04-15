@@ -54,6 +54,7 @@
  */
 
 #include "k5-int.h"
+#include <assert.h>
 
 void KRB5_CALLCONV
 krb5_free_address(krb5_context context, krb5_address *val)
@@ -344,6 +345,7 @@ krb5_free_kdc_req(krb5_context context, krb5_kdc_req *val)
 {
     if (val == NULL)
 	return;
+    assert( val->kdc_state == NULL);
     krb5_free_pa_data(context, val->padata);
     krb5_free_principal(context, val->client);
     krb5_free_principal(context, val->server);
@@ -794,4 +796,64 @@ krb5_free_etype_list(krb5_context context,
 	free(etypes->etypes);
 	free(etypes);
     }
+}
+void krb5_free_fast_req(krb5_context context, krb5_fast_req *val)
+{
+  if (val == NULL)
+    return;
+  krb5_free_kdc_req(context, val->req_body);
+  free(val);
+}
+
+void krb5_free_fast_armor(krb5_context context, krb5_fast_armor *val)
+{
+  if (val == NULL)
+    return;
+  krb5_free_data_contents(context, &val->armor_value);
+  free(val);
+}
+
+void krb5_free_fast_response(krb5_context context, krb5_fast_response *val)
+{
+  if (!val)
+    return;
+  krb5_free_pa_data(context, val->padata);
+  krb5_free_fast_finished(context, val->finished);
+  free(val);
+}
+
+void krb5_free_fast_finished
+(krb5_context context, krb5_fast_finished *val)
+{
+  if (!val)
+    return;
+  krb5_free_principal(context, val->client);
+  krb5_free_checksum_contents(context, &val->ticket_checksum);
+  free(val);
+}
+
+void krb5_free_typed_data(krb5_context context, krb5_typed_data **in)
+{
+  int i = 0;
+  if (in == NULL) return;
+  while (in[i] != NULL) {
+    if (in[i]->data != NULL)
+      free(in[i]->data);
+    free(in[i]);
+    i++;
+  }
+  free(in);
+}
+
+void krb5_free_fast_armored_req(krb5_context context,
+				krb5_fast_armored_req *val)
+{
+    if (val == NULL)
+	return;
+    if (val->armor)
+	krb5_free_fast_armor(context, val->armor);
+    krb5_free_data_contents(context, &val->enc_part.ciphertext);
+    if (val->req_checksum.contents)
+      krb5_free_checksum_contents(context, &val->req_checksum);
+    free(val);
 }

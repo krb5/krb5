@@ -66,7 +66,7 @@ krb5_error_code kdc_process_tgs_req
 	           krb5_ticket **,
 		   krb5_db_entry *krbtgt,
 		   int *nprincs,
-	           krb5_keyblock **);
+	           krb5_keyblock **, krb5_pa_data **pa_tgs_req);
 
 krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
 				    krb5_boolean match_enctype,
@@ -298,6 +298,40 @@ log_tgs_req(const krb5_fulladdr *from,
 	    const char *status, krb5_error_code errcode, const char *emsg);
 void log_tgs_alt_tgt(krb5_principal p);
 
+/*Request state*/
+
+struct kdc_request_state {
+    krb5_keyblock *armor_key;
+  krb5_keyblock *reply_key; /*When replaced by FAST*/
+    krb5_pa_data *cookie;
+    krb5_int32 fast_options;
+    krb5_int32 fast_internal_flags;
+};
+krb5_error_code kdc_make_rstate(struct kdc_request_state **out);
+void kdc_free_rstate
+(struct kdc_request_state *s);
+
+/* FAST*/
+enum krb5_fast_kdc_flags {
+    KRB5_FAST_REPLY_KEY_USED = 0x1,
+    KRB5_FAST_REPLY_KEY_REPLACED = 0x02,
+};
+
+krb5_error_code  kdc_find_fast
+(krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
+ krb5_keyblock *tgs_subkey, krb5_keyblock *tgs_session,
+ struct kdc_request_state *state);
+
+krb5_error_code kdc_fast_response_handle_padata
+(struct kdc_request_state *state,
+ krb5_kdc_req *request,
+ krb5_kdc_rep *rep);
+krb5_error_code kdc_fast_handle_error
+(krb5_context context, struct kdc_request_state *state,
+ krb5_kdc_req *request,
+ krb5_pa_data  **in_padata, krb5_error *err);
+
+ 
 
 
 #define isflagset(flagfield, flag) (flagfield & (flag))

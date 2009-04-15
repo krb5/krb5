@@ -34,7 +34,6 @@
 
 /**************** Macros (these save a lot of typing) ****************/
 
-#ifndef DISABLE_PKINIT
 /* setup() -- create and initialize bookkeeping variables
      retval: stores error codes returned from subroutines
      buf: the coding buffer
@@ -63,6 +62,7 @@ error:\
   *code = tmpcode;\
   return 0
 
+#ifndef DISABLE_PKINIT
 krb5_error_code encode_krb5_pa_pk_as_req(const krb5_pa_pk_as_req *rep, krb5_data **code)
 {
     krb5_setup();
@@ -153,15 +153,6 @@ krb5_error_code encode_krb5_td_trusted_certifiers(const krb5_external_principal_
     krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_typed_data(const krb5_typed_data **rep, krb5_data **code)
-{
-    krb5_setup();
-    retval = asn1_encode_sequence_of_typed_data(buf,rep,&length);
-    if (retval) goto error;
-    sum += length;
-    krb5_cleanup();
-}
-
 krb5_error_code encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **rep, krb5_data **code)
 {
     krb5_setup();
@@ -171,3 +162,13 @@ krb5_error_code encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **r
     krb5_cleanup();
 }
 #endif /* DISABLE_PKINIT */
+
+krb5_error_code encode_krb5_typed_data(const krb5_typed_data **rep, krb5_data **code)
+{
+    krb5_setup();
+    retval = asn1_encode_sequence_of_typed_data(buf,rep,&length);
+    if (retval) goto error;
+    sum += length;
+    krb5_cleanup();
+}
+

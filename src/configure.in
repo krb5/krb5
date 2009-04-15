@@ -1077,7 +1077,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	plugins/kdb/db2/libdb2/mpool
 	plugins/kdb/db2/libdb2/recno
 	plugins/kdb/db2/libdb2/test
-	plugins/preauth/cksum_body
+	plugins/preauth/cksum_body plugins/preauth/encrypted_challenge
 	plugins/preauth/wpse
 	plugins/authdata/greet
 
