@@ -141,6 +141,7 @@ typedef int             gss_cred_usage_t;
 #define GSS_C_ANON_FLAG         64
 #define GSS_C_PROT_READY_FLAG   128
 #define GSS_C_TRANS_FLAG        256
+#define GSS_C_DELEG_POLICY_FLAG 32768
 
 /*
  * Credential usage options

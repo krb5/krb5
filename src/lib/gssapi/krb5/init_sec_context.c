@@ -208,7 +208,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         if (code) {
             /* don't fail here; just don't accept/do the delegation
                request */
-            data->ctx->gss_flags &= ~GSS_C_DELEG_FLAG;
+            data->ctx->gss_flags &= ~(GSS_C_DELEG_FLAG |
+                                      GSS_C_DELEG_POLICY_FLAG);
 
             data->checksum_data.length = 24;
         } else {
@@ -493,6 +494,14 @@ new_connection(
         goto fail;
 
     ctx->krb_times = k_cred->times;
+
+    /*
+     * GSS_C_DELEG_POLICY_FLAG means to delegate only if the
+     * ok-as-delegate ticket flag is set.
+     */
+    if ((req_flags & GSS_C_DELEG_POLICY_FLAG)
+        && (k_cred->ticket_flags & TKT_FLG_OK_AS_DELEGATE))
+        ctx->gss_flags |= GSS_C_DELEG_FLAG | GSS_C_DELEG_POLICY_FLAG;
 
     if (default_mech) {
         mech_type = (gss_OID) gss_mech_krb5;
