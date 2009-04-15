@@ -403,6 +403,13 @@ handle_request_authdata (krb5_context context,
 			  KRB5_KEYUSAGE_TGS_REQ_AD_SESSKEY,
 			  0, &request->authorization_data,
 			  &scratch);
+    if (code != 0)
+	code = krb5_c_decrypt(context,
+			      client_key,
+			      KRB5_KEYUSAGE_TGS_REQ_AD_SUBKEY,
+			      0, &request->authorization_data,
+			      &scratch);
+
     if (code != 0) {
 	free(scratch.data);
 	return code;
