@@ -1568,6 +1568,13 @@ get_salt_from_key(krb5_context context, krb5_principal client,
 
     switch (client_key->key_data_type[1]) {
     case KRB5_KDB_SALTTYPE_NORMAL:
+	/*
+	 * The client could infer the salt from the principal, but
+	 * might use the wrong principal name if this is an alias.  So
+	 * it's more reliable to send an explicit salt.
+	 */
+	if ((retval = krb5_principal2salt(context, client, salt)))
+	    return retval;
 	break;
     case KRB5_KDB_SALTTYPE_V4:
 	/* send an empty (V4) salt */

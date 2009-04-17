@@ -1510,7 +1510,7 @@ cleanup:
 
 static krb5_error_code
 _make_etype_info_entry(krb5_context context,
-		       krb5_kdc_req *request, krb5_key_data *client_key,
+		       krb5_principal client_princ, krb5_key_data *client_key,
 		       krb5_enctype etype, krb5_etype_info_entry **entry,
 		       int etype_info2)
 {
@@ -1529,8 +1529,7 @@ _make_etype_info_entry(krb5_context context,
     tmp_entry->salt = 0;
     tmp_entry->s2kparams.data = NULL;
     tmp_entry->s2kparams.length = 0;
-    retval = get_salt_from_key(context, request->client,
-			       client_key, &salt);
+    retval = get_salt_from_key(context, client_princ, client_key, &salt);
     if (retval)
 	goto fail;
     if (etype_info2 && client_key->key_data_ver > 1 &&
@@ -1609,10 +1608,10 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
 	if (request_contains_enctype(context, request, db_etype)) {
 	    assert(etype_info2 ||
 		   !enctype_requires_etype_info_2(db_etype));
-	    if ((retval = _make_etype_info_entry(context, request, client_key,
-			    db_etype, &entry[i], etype_info2)) != 0) {
+	    retval = _make_etype_info_entry(context, client->princ, client_key,
+					    db_etype, &entry[i], etype_info2);
+	    if (retval != 0)
 		goto cleanup;
-	    }
 	    entry[i+1] = 0;
 	    i++;
 	}
@@ -1634,10 +1633,11 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
 
 	    }
 	    if (request_contains_enctype(context, request, db_etype)) {
-		if ((retval = _make_etype_info_entry(context, request,
-				client_key, db_etype, &entry[i], etype_info2)) != 0) {
+		retval = _make_etype_info_entry(context, client->princ,
+						client_key, db_etype,
+						&entry[i], etype_info2);
+		if (retval != 0)
 		    goto cleanup;
-		}
 		entry[i+1] = 0;
 		i++;
 	    }
@@ -1732,9 +1732,9 @@ etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata,
     }
     entry[0] = NULL;
     entry[1] = NULL;
-    retval = _make_etype_info_entry(context, request,
-				    client_key, encrypting_key->enctype,
-				    entry, etype_info2);
+    retval = _make_etype_info_entry(context, client->princ, client_key,
+				    encrypting_key->enctype, entry,
+				    etype_info2);
     if (retval)
 	goto cleanup;
 
