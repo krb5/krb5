@@ -21,7 +21,7 @@ ktutil: ktutil.o $(OBJS) $(SS_DEPLIB) $(KRB5_BASE_DEPLIBS)
 
 install::
 	$(INSTALL_PROGRAM) ktutil ${DESTDIR}$(CLIENT_BINDIR)/ktutil
-	$(INSTALL_DATA) $(srcdir)/ktutil.M ${DESTDIR}$(ADMIN_MANDIR)/ktutil.8
+	$(INSTALL_DATA) $(srcdir)/ktutil.M ${DESTDIR}$(CLIENT_MANDIR)/ktutil.1
 
 generate-files-mac: ktutil_ct.c
 
