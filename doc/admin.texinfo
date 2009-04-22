@@ -3826,10 +3826,10 @@ across the realms, they would run the following commands on the KDCs in
 @smallexample
 @group
 @b{shell%:} kadmin.local -e "des3-hmac-sha1:normal des-cbc-crc:v4"
-@b{kadmin:} add_princ -requires_preauth krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}
+@b{kadmin:} addprinc -requires_preauth krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}
 @b{Enter password for principal krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}:} 
 @b{Re-enter password for principal krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}:}
-@b{kadmin:} add_princ -requires_preauth krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
+@b{kadmin:} addprinc -requires_preauth krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
 @b{Enter password for principal krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}:}
 @b{Enter password for principal krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}:}
 @b{kadmin:}
