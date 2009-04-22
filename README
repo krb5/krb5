@@ -66,12 +66,7 @@ The Data Encryption Standard (DES) is widely recognized as weak.  The
 krb5-1.7 release will contain measures to encourage sites to migrate
 away from using single-DES cryptosystems.  Among these is a
 configuration variable that enables "weak" enctypes, but will default
-to "false" in the future.  Depending on the outcome of ongoing
-discussion on krbdev@mit.edu, this default could change prior to the
-final release of krb5-1.7.
-
-Additional measures to ease the transition away from DES are planned
-for the final krb5-1.7 release.
+to "false" in the future.
 
 Major changes in 1.7
 --------------------
@@ -113,284 +108,387 @@ Major changes in 1.7
 
 * Master key rollover support.
 
+* Flexible Authentication Secure Tunneling (FAST), a preauthentiation
+  framework that can protect the AS exchange from dictionary attack.
+
+* Implement client support for GSS_C_DELEG_POLICY_FLAG, which allows a
+  GSS application to delegate credentials only if permitted by KDC
+  policy.  One minor known bug, which will probably be fixed by final
+  release, occurs when this functionality is used with cross-realm
+  authentication; see RT ticket #6473.
+
+* Fix CVE-2009-0844, CVE-2009-0845, CVE-2009-0846, CVE-2009-0847 --
+  various vulnerabilities in SPNEGO and ASN.1 code.
+
+Known bugs by ticket ID
+-----------------------
+
+6473    strip ok-as-delegate if not in cross-realm TGT chain
+
 Changes by ticket ID
 --------------------
 
-194	a stash file is not a keytab
-914	keytab add without randomizing key
-1201	replay cache can produce false positive indications
-2836	feature request: compile/link time warnings for deprecated
-        functions
-2939	unified CCAPI implementation
-3496	krb524d should log success as well as failure
-3497	problems with corrupt (truncated) ccaches
-3499	race in replay cache file ownership
-3737	plugins support requires a Windows equivalent to opendir and
-        friends
-3929	support lazy launching of ccapi server
-3930	CCAPI server must be able to distinguish context handles from
+194     a stash file is not a keytab
+914     keytab add without randomizing key
+1165    annoying error message from krb5_mk_priv()
+1201    replay cache can produce false positive indications
+1624    use more secure checksum types
+2836    feature request: compile/link time warnings for deprecated functions
+2939    unified CCAPI implementation
+3496    krb524d should log success as well as failure
+3497    problems with corrupt (truncated) ccaches
+3499    race in replay cache file ownership
+3737    plugins support requires a Windows equivalent to opendir and friends
+3929    support lazy launching of ccapi server
+3930    CCAPI server must be able to distinguish context handles from
         other server instances
-3931	CCAPI context and ccache change times must be stored by the client
-3932	CCAPI should use a cc_handle not implemented as a pointer
-3933	CCAPI client library reconnection support
-3934	Implement CCAPI blocking calls
-3935	CCAPI implement locking
-3936	krb5_ccache functions should use the ccapi version 3 interface
-5411	MEMORY keytab
-5425	nonce needs to be random
-5427	buffer overflow in krb5_kt_get_name
-5428	MEMORY keytab leaks
-5429	MEMORY keytab should use krb5_copy_keyblock
-5430	MEMORY keytab's get_entry should set enctypes and kvnos
-5431	krb5_kt_get_type should return const char *.
-5432	krb5_kt_default_name should take an unsized length
-5440	sendto_kdc() not signal safe, doesn't respond well to
+3931    CCAPI context and ccache change times must be stored by the client
+3932    CCAPI should use a cc_handle not implemented as a pointer
+3933    CCAPI client library reconnection support
+3934    Implement CCAPI blocking calls
+3935    CCAPI implement locking
+3936    krb5_ccache functions should use the ccapi version 3 interface
+4241    Command line --version option
+5411    MEMORY keytab
+5425    nonce needs to be random
+5427    buffer overflow in krb5_kt_get_name
+5428    MEMORY keytab leaks
+5429    MEMORY keytab should use krb5_copy_keyblock
+5430    MEMORY keytab's get_entry should set enctypes and kvnos
+5431    krb5_kt_get_type should return const char *.
+5432    krb5_kt_default_name should take an unsized length
+5440    sendto_kdc() not signal safe, doesn't respond well to
         staggered TCP responses.
-5481	manual test of commit handler
-5517	use IP(V6)_PKTINFO in KDC for UDP sockets
-5545	uninitialized salt length when reading some keys
-5560	threads on Solaris 10
-5561	close-on-exec flags
-5565	krb5kdc.M is confused about keytype
-5567	don't check for readability resolving SRVTAB: keytab
-5568	Move CCAPI sources to krb5 repository
-5569	Fixed bugs introduced while moving to krb5 repository
-5570	Only use __attribute__ on GNUC compilers
-5574	Add advisory locking to CCAPI
-5575	don't include time.h in CredentialsCache.h if it's not needed
-5578	test commit handler
-5580	provide asprintf functionality for internal use
-5589	krb5 trunk no longer builds on Windows - vsnprintf
+5481    manual test of commit handler
+5517    use IP(V6)_PKTINFO in KDC for UDP sockets
+5545    uninitialized salt length when reading some keys
+5560    threads on Solaris 10
+5561    close-on-exec flags
+5565    krb5kdc.M is confused about keytype
+5567    don't check for readability resolving SRVTAB: keytab
+5568    Move CCAPI sources to krb5 repository
+5569    Fixed bugs introduced while moving to krb5 repository
+5570    Only use __attribute__ on GNUC compilers
+5574    Add advisory locking to CCAPI
+5575    don't include time.h in CredentialsCache.h if it's not needed
+5578    test commit handler
+5580    provide asprintf functionality for internal use
+5589    krb5 trunk no longer builds on Windows - vsnprintf
         implementation required
-5590	gss krb5 mech enhanced error messages
-5593	kadmind crash on Debian AMD64
-5594	Work on compiling CCAPI test suite on Windows
-5595	Problems with kpasswd and an IPv6 enviroment
-5598	ccs_pipe_t needs copy and release functions
-5599	Added new autogenerated file to generate-files-mac target
-5600	provide more useful error message when running kpropd on
-        command line
-5635	need more dylib_file specs for darwin
-5641	kadm5_setkey_principal_3 fix
-5642	Remove unused, unlocalizable error strings
-5643	Alignment fix
-5649	t_ser should no longer use kdb libraries
-5654	remap mechanism-specific status codes in mechglue/spnego
-5655	authorization-data plugin support in KDC
-5657	(Mac-specific) PROG_LIBPATH build fix
-5667	listprincs *z is broken
-5670	Add documentation for CCAPI
-5671	cleanup src/lib/gssapi/krb5/error_map.h on Windows
-5672	no unistd.h on Windows
-5699	test program build problem
-5754	cci_array_move should work when the source and dest positions are equal
-5760	stdint.h should only be accessed if HAVE_STDINT_H defined
-5771	cc_ccache_set_principal always returns error 227
-5776	profile library memory leaks introduced when malloc returns 0
-5786	Update Release Documentation for KFW 3.2.2
-5804	cc_initalize(ccapi_version_2) should return CC_BAD_API_VERSION
+5590    gss krb5 mech enhanced error messages
+5593    kadmind crash on Debian AMD64
+5594    Work on compiling CCAPI test suite on Windows
+5595    Problems with kpasswd and an IPv6 enviroment
+5598    ccs_pipe_t needs copy and release functions
+5599    Added new autogenerated file to generate-files-mac target
+5600    provide more useful error message when running kpropd on command line
+5635    need more dylib_file specs for darwin
+5641    kadm5_setkey_principal_3 fix
+5642    Remove unused, unlocalizable error strings
+5643    Alignment fix
+5649    t_ser should no longer use kdb libraries
+5654    remap mechanism-specific status codes in mechglue/spnego
+5655    authorization-data plugin support in KDC
+5657    (Mac-specific) PROG_LIBPATH build fix
+5667    listprincs *z is broken
+5670    Add documentation for CCAPI
+5671    cleanup src/lib/gssapi/krb5/error_map.h on Windows
+5672    no unistd.h on Windows
+5699    test program build problem
+5754    cci_array_move should work when the source and dest positions are equal
+5760    stdint.h should only be accessed if HAVE_STDINT_H defined
+5771    cc_ccache_set_principal always returns error 227
+5776    profile library memory leaks introduced when malloc returns 0
+5786    Update Release Documentation for KFW 3.2.2
+5804    cc_initalize(ccapi_version_2) should return CC_BAD_API_VERSION
         not CC_NOT_SUPP
-5805	Add documentation for error codes used for flow control.
-5806	Removed NOP line of code from krb5_fcc_next_cred()
-5807	can't store delegated krb5 creds when using spnego
-5813	cc_ccache_store_credentials should return ccErrBadCredentialsVersion
-5814	cci_array_move not returning correct new position
-5815	ccs_lock_status_grant_lock granting wrong lock
-5822	fixed mispelling in kadmin error message
-5828	Include time.h for time()
-5835	Kerberos with apple leopard
-5863	[no subject]
-5864	improve debugging of ticket verification in ksu
-5867	krb-priv sequence numbers don't match up in retransmitted requests
-5872	Add ccs_pipe_compare
-5884	Need CCAPI v2 support for Windows
-5885	Remove AppleConnect workaround
-5894	krb5int_arcfour_string_to_key does not support utf-8 strings
-5899	Compiling krb5-1.6.3 on FreeBSD 7.0-RELEASE
-5900	ccs_ccache_reset should check all arguments for NULL
-5901	CCAPI v2 support crash when client or server strings are NULL
-5902	cci_cred_union_compare_to_credentials_union doesn't work for v5 creds
-5903	Fix pointer cast in cc_seq_fetch_NCs_end
-5904	cc_set_principal should return error on bad cred version
-5905	cc_remove_cred should only remove one cred
-5906	Fixed error code remapping
-5907	Removed tests for check_cc_context_get_version
-5908	Remove C warnings from CCAPI tests
-5909	Add CCAPI v2 tests
-5911	removed unused header file inclusion CoreFoundation.h
-5912	Invalid assignment while trying to set input to NULL
-5915	cc_ccache_iterator_release, cc_credentials_iterator_release
+5805    Add documentation for error codes used for flow control.
+5806    Removed NOP line of code from krb5_fcc_next_cred()
+5807    can't store delegated krb5 creds when using spnego
+5813    cc_ccache_store_credentials should return ccErrBadCredentialsVersion
+5814    cci_array_move not returning correct new position
+5815    ccs_lock_status_grant_lock granting wrong lock
+5822    fixed mispelling in kadmin error message
+5828    Include time.h for time()
+5835    Kerberos with apple leopard
+5863    [no subject]
+5864    improve debugging of ticket verification in ksu
+5867    krb-priv sequence numbers don't match up in retransmitted requests
+5872    Add ccs_pipe_compare
+5884    Need CCAPI v2 support for Windows
+5885    Remove AppleConnect workaround
+5894    krb5int_arcfour_string_to_key does not support utf-8 strings
+5899    Compiling krb5-1.6.3 on FreeBSD 7.0-RELEASE
+5900    ccs_ccache_reset should check all arguments for NULL
+5901    CCAPI v2 support crash when client or server strings are NULL
+5902    cci_cred_union_compare_to_credentials_union doesn't work for v5 creds
+5903    Fix pointer cast in cc_seq_fetch_NCs_end
+5904    cc_set_principal should return error on bad cred version
+5905    cc_remove_cred should only remove one cred
+5906    Fixed error code remapping
+5907    Removed tests for check_cc_context_get_version
+5908    Remove C warnings from CCAPI tests
+5909    Add CCAPI v2 tests
+5911    removed unused header file inclusion CoreFoundation.h
+5912    Invalid assignment while trying to set input to NULL
+5915    cc_ccache_iterator_release, cc_credentials_iterator_release
         leak server memory
-5920	CCacheServer should track client iterators
-5923	Protect CFBundle calls with mutexes
-5925	Windows socket(...) returns SOCKET, not file handle
-5926	Added prototype to test function to remove warning.
-5943	db creation creates a kadmin/hostname princ but doesn't fix case
-5947	krb5_walk_realm_tree broken substring logic
-5948	error in filebase+suffix list generation in plugin code
-5949	Don't leak memory when multiple arguments are NULL
-5954	ksu fails without domain_realm mapping for local host
-5960	Move KIM implementation to the krb5 repository
-5962	unchecked calls to k5_mutex_lock() interact poorly with finalizers
-5963	Profile library should not call rw_access earlier than needed
-5964	Re: Fwd: [modauthkerb] [SOLVED] 'Request is a replay' + Basic auth
-5966	signed vs unsigned char * warnings in kdb_xdr.c
-5967	No prototype when building kdb5_util without krb4 support
-5969	Add header for kill() in USE_PASSWORD_SERVER case
-5982	cci_credentials_iterator_release using wrong message ID
-5989	Add new launchd flags to CCacheServer plist file
-5990	kadm5_setkey_principal_3 not copying key_data_ver and key_data_kvno
-5993	Masterkey Keytab Stash
-5999	fix ktutil listing with timestamp
-6000	misc uninitialized-storage accesses
-6001	Big endian stash file support
-6002	krb5_rc_io_creat should use mkstemp
-6005	krb5_get_error_message returns const char *
-6009	kdc does not compile with glibc 2.8
-6010	krb5int_gic_opte_copy should copy elements individually
-6011	Add EnableTransactions launchd option to CCacheServer
-6012	Add EnableTransactions	launchd	option to KerberosAgent
-6013	Stop building Kerberos.app as part of KfM.
-6015	gss_export_lucid_sec_context support for SPNEGO
-6016	SPNEGO workaround for SAMBA mech OID quirks
-6017	KDC virtual address support
-6019	Add signal to force KDC to check for changed interfaces
-6024	Don't use "ccache" in error string printed to user
-6025	Add macro so we don't print deprecated warnings while building KfM
-6026	CCacheServer crashes iterating over creds which have been destroyed
-6029	kadmind leaks error strings on failures
-6031	krb needs better realm lookup logic
-6032	test commit handler change
-6044	Add Apple Inc. to copyright lists.
-6052	Return extended krb5 error strings
-6055	KIM API
-6066	turn off thread-support debugging code
-6070	update DES code copyright notices
-6074	Use a valid UTF8 password for randkey password
-6075	Open log file for appending only, not also reading
-6076	Don't build PKINIT ASN.1 support code if not building PKINIT plugin
-6077	krb5_fcc_resolve file locking error on malloc failuer
-6080	mac port of kim should not depend on kipc
-6081	Conditionalize building of CCAPI ccache type on USE_CCAPI
-6083	profile write code should only quote empty strings
-6087	Notify clients on ccache deletion
-6088	Add support to send CFNotifications on ccache and cache
+5920    CCacheServer should track client iterators
+5923    Protect CFBundle calls with mutexes
+5925    Windows socket(...) returns SOCKET, not file handle
+5926    Added prototype to test function to remove warning.
+5943    db creation creates a kadmin/hostname princ but doesn't fix case
+5947    krb5_walk_realm_tree broken substring logic
+5948    error in filebase+suffix list generation in plugin code
+5949    Don't leak memory when multiple arguments are NULL
+5954    ksu fails without domain_realm mapping for local host
+5960    Move KIM implementation to the krb5 repository
+5962    unchecked calls to k5_mutex_lock() interact poorly with finalizers
+5963    Profile library should not call rw_access earlier than needed
+5964    Re: Fwd: [modauthkerb] [SOLVED] 'Request is a replay' + Basic auth
+5966    signed vs unsigned char * warnings in kdb_xdr.c
+5967    No prototype when building kdb5_util without krb4 support
+5969    Add header for kill() in USE_PASSWORD_SERVER case
+5982    cci_credentials_iterator_release using wrong message ID
+5989    Add new launchd flags to CCacheServer plist file
+5990    kadm5_setkey_principal_3 not copying key_data_ver and key_data_kvno
+5993    Masterkey Keytab Stash
+5999    fix ktutil listing with timestamp
+6000    misc uninitialized-storage accesses
+6001    Big endian stash file support
+6002    krb5_rc_io_creat should use mkstemp
+6005    krb5_get_error_message returns const char *
+6009    kdc does not compile with glibc 2.8
+6010    krb5int_gic_opte_copy should copy elements individually
+6011    Add EnableTransactions launchd option to CCacheServer
+6012    Add EnableTransactions  launchd option to KerberosAgent
+6013    Stop building Kerberos.app as part of KfM.
+6015    gss_export_lucid_sec_context support for SPNEGO
+6016    SPNEGO workaround for SAMBA mech OID quirks
+6017    KDC virtual address support
+6019    Add signal to force KDC to check for changed interfaces
+6024    Don't use "ccache" in error string printed to user
+6025    Add macro so we don't print deprecated warnings while building KfM
+6026    CCacheServer crashes iterating over creds which have been destroyed
+6029    kadmind leaks error strings on failures
+6031    krb needs better realm lookup logic
+6032    test commit handler change
+6044    Add Apple Inc. to copyright lists.
+6052    Return extended krb5 error strings
+6055    KIM API
+6066    turn off thread-support debugging code
+6070    update DES code copyright notices
+6074    Use a valid UTF8 password for randkey password
+6075    Open log file for appending only, not also reading
+6076    Don't build PKINIT ASN.1 support code if not building PKINIT plugin
+6077    krb5_fcc_resolve file locking error on malloc failuer
+6080    mac port of kim should not depend on kipc
+6081    Conditionalize building of CCAPI ccache type on USE_CCAPI
+6083    profile write code should only quote empty strings
+6087    Notify clients on ccache deletion
+6088    Add support to send CFNotifications on ccache and cache
         collection changes
-6090	k5_mutex_destroy calls pthread_mutex_destroy with mutex locked
-6091	lean client changes
-6093	KIM should not provide keytab functions when building lite framework
-6094	CCAPI is leaking mach ports
-6101	compile-time flag to disable iprop
-6103	fix resource leak in USE_PASSWORD_SERVER code
-6111	CCAPI should only use one pthread key
-6120	increase rpc timeout
-6121	dead code in lib/rpc/clnt_udp.c
-6131	Removed argument from kipc_client_lookup_server
-6133	C90 compliance
-6138	Switch KfM back to error tables
-6140	CCAPI should use common ipc and stream code
-6142	KerberosAgent dialogs jump around the screen
-6143	KerberosAgent: Enter Identity text field shouldn't be clear
+6090    k5_mutex_destroy calls pthread_mutex_destroy with mutex locked
+6091    lean client changes
+6093    KIM should not provide keytab functions when building lite framework
+6094    CCAPI is leaking mach ports
+6101    compile-time flag to disable iprop
+6103    fix resource leak in USE_PASSWORD_SERVER code
+6108    A client can fail to get initial creds if it changes the
+        password while doing so.
+6111    CCAPI should only use one pthread key
+6120    increase rpc timeout
+6121    dead code in lib/rpc/clnt_udp.c
+6131    Removed argument from kipc_client_lookup_server
+6133    C90 compliance
+6138    Switch KfM back to error tables
+6140    CCAPI should use common ipc and stream code
+6142    KerberosAgent dialogs jump around the screen
+6143    KerberosAgent: Enter Identity text field shouldn't be clear
         automatically
-6144	KerberosAgent: ignore user interaction while busy
-6145	KerberosAgent attach associated dialogs to Select Identity dialog
-6146	Client name passed by KIM is incorrect
-6147	KerberosAgent Use Defaults button doesn't work
-6151	Don't touch keychain if home directory access is disabled
-6153	Add KLL error table
-6154	Hinge building KLL shim off KIM_TO_KLL_SHIM, not LEAN_CLIENT
-6155	KLLastChangedTime should return current time, not 0
-6156	KLL shim layer does not correctly handle options
-6157	KIM should remember options and identity if prefs indicate
-6158	KerberosAgent should handle multiple clients simultaneously
-6159	KerberosAgent should handle zoom button better
-6160	KLL should use __attribute ((deprecated))
-6162	kim_options_copy should allow in_options to be KIM_OPTIONS_DEFAULT
-6163	Crash in kim_credential_create_from_keytab
-6164	KL APIs which take a NULL principal return klParameterErr
-6165	kim_options_create sometimes returns KIM_OPTIONS_DEFAULT
-6166	preferences should handle KIM_OPTIONS_DEFAULT
-6168	prefs should not create empty dictionary for KIM_OPTIONS_DEFAULT
-6169	Missing keys in KerberosAgent Info.plist
-6170	change password should always reprompt on error
-6171	allow kim ui plugins to have any name
-6172	kim_ui_plugin_fini sends pointer to context instead of context.
-6175	always zero out authentication strings
-6176	Test KIM plugin
-6179	kim_os_string_create_localized leaks CFStringRef
-6181	Free error message returned by krb5_get_error_message
-6182	kim test suite reports error messages incorrectly
-6183	KerberosAgent enter identity dialog should use default
-6184	handle stash file names with missing keytab type spec and colon in path
-6185	Merge KerberosIPC into k5_mig support
-6186	Move GUI/CLI detection from KerberosIPC into KIM
-6187	use KIM_BUILTIN_UI instead of LEAN_CLIENT for builtin UI
-6189	remove unused variable in kim_ui_cli_ask_change_password
-6190	Use a context to store error table info
-6192	Treat unreadable terminal as user cancelled so regression tests work
-6193	Remap some of the more confusing krb5 errors
-6194	Double free and leak in kim_os_library_get_application_path
-6195	Added back KLL test programs
-6197	KLCreatePrincipalFromTriplet should work with empty instance
-6198	KerberosAgent continues to ignore mouse events after error
-6199	don't include "WRFILE:" in call to mktemp
-6201	small leak in KDC authdata plugins
-6202	kadmind leaks extended error strings
-6211	pam_sam leaking outer krb5_data created by encode_krb5_sam_response
-6214	krb5_change_set_password not freeing chpw_rep contents
-6216	Free data in tests so leaks checking is easier
-6217	kim_preferences should free old identity before overwriting
-6218	kim_ccache_iterator_next leaks principal
-6219	kim_os_library_get_caller_name leaks file path
-6220	kim_identity_change_password_with_credential leaks krb5_creds
-6221	KerberosAgent should clear generic auth prompt
-6222	KerberosAgent enter dialog should add entered identities to favorites
-6224	KerberosAgent 'no selection' placeholder in ticket options
-6225	Remove ipc message sent on cc_context_release
-6226	KIM should only display error dialogs if it has displayed UI already
-6227	Apple LW_net_trans.patch make KDC rescan network after 30 seconds
-6231	Apple split build support
-6247	Apple patch: null out pointer in string_to_key after free
-6248	Apple patch: destroy Mach ports on unload
-6250	Use CFStringGetCStringPtr when possible
-6251	Add test for kim_identity_create_from_components
-6252	krb5_build_principal_va does not allocate krb5_principal
-6254	krb5_build_principal_ext walks off beginning of array
-6255	partial rewrite of the ASN.1 encoders
-6256	localize format strings, not final error string
-6260	KerberosAgent hangs changing pw for passwordless identities
-6261	Remove saved password if it fails to get tickets
-6262	Only prompt automatically from GUI apps
-6264	Avoid duplicate identical dialogs in KIM
-6265	KerberosAgent bindings causing crashes
-6266	BIND_8_COMPAT no longer needed in Leopard
-6267	Add _with_password credential acquisition functions to KIM API
-6274	Crypto IOV API per Projects/AEAD encryption API
-6282	krb5kdc deref uninit memory on the stack on unknown principal (pk-init)
-6285	Provide SPI to switch the mach port lookup for kipc
-6286	Allow kerberos configuration files fail with EPERM
-6289	replay cache is insecurely handled
-6290	KIM: Pushing authentication login window do application
-6291	Using referrals fills the the credentials cache more entries
+6144    KerberosAgent: ignore user interaction while busy
+6145    KerberosAgent attach associated dialogs to Select Identity dialog
+6146    Client name passed by KIM is incorrect
+6147    KerberosAgent Use Defaults button doesn't work
+6151    Don't touch keychain if home directory access is disabled
+6153    Add KLL error table
+6154    Hinge building KLL shim off KIM_TO_KLL_SHIM, not LEAN_CLIENT
+6155    KLLastChangedTime should return current time, not 0
+6156    KLL shim layer does not correctly handle options
+6157    KIM should remember options and identity if prefs indicate
+6158    KerberosAgent should handle multiple clients simultaneously
+6159    KerberosAgent should handle zoom button better
+6160    KLL should use __attribute ((deprecated))
+6162    kim_options_copy should allow in_options to be KIM_OPTIONS_DEFAULT
+6163    Crash in kim_credential_create_from_keytab
+6164    KL APIs which take a NULL principal return klParameterErr
+6165    kim_options_create sometimes returns KIM_OPTIONS_DEFAULT
+6166    preferences should handle KIM_OPTIONS_DEFAULT
+6168    prefs should not create empty dictionary for KIM_OPTIONS_DEFAULT
+6169    Missing keys in KerberosAgent Info.plist
+6170    change password should always reprompt on error
+6171    allow kim ui plugins to have any name
+6172    kim_ui_plugin_fini sends pointer to context instead of context.
+6175    always zero out authentication strings
+6176    Test KIM plugin
+6179    kim_os_string_create_localized leaks CFStringRef
+6181    Free error message returned by krb5_get_error_message
+6182    kim test suite reports error messages incorrectly
+6183    KerberosAgent enter identity dialog should use default
+6184    handle stash file names with missing keytab type spec and colon in path
+6185    Merge KerberosIPC into k5_mig support
+6186    Move GUI/CLI detection from KerberosIPC into KIM
+6187    use KIM_BUILTIN_UI instead of LEAN_CLIENT for builtin UI
+6189    remove unused variable in kim_ui_cli_ask_change_password
+6190    Use a context to store error table info
+6192    Treat unreadable terminal as user cancelled so regression tests work
+6193    Remap some of the more confusing krb5 errors
+6194    Double free and leak in kim_os_library_get_application_path
+6195    Added back KLL test programs
+6197    KLCreatePrincipalFromTriplet should work with empty instance
+6198    KerberosAgent continues to ignore mouse events after error
+6199    don't include "WRFILE:" in call to mktemp
+6201    small leak in KDC authdata plugins
+6202    kadmind leaks extended error strings
+6203    DELEG_POLICY_FLAG for GSS
+6211    pam_sam leaking outer krb5_data created by encode_krb5_sam_response
+6214    krb5_change_set_password not freeing chpw_rep contents
+6216    Free data in tests so leaks checking is easier
+6217    kim_preferences should free old identity before overwriting
+6218    kim_ccache_iterator_next leaks principal
+6219    kim_os_library_get_caller_name leaks file path
+6220    kim_identity_change_password_with_credential leaks krb5_creds
+6221    KerberosAgent should clear generic auth prompt
+6222    KerberosAgent enter dialog should add entered identities to favorites
+6224    KerberosAgent 'no selection' placeholder in ticket options
+6225    Remove ipc message sent on cc_context_release
+6226    KIM should only display error dialogs if it has displayed UI already
+6227    Apple LW_net_trans.patch make KDC rescan network after 30 seconds
+6231    Apple split build support
+6247    Apple patch: null out pointer in string_to_key after free
+6248    Apple patch: destroy Mach ports on unload
+6250    Use CFStringGetCStringPtr when possible
+6251    Add test for kim_identity_create_from_components
+6252    krb5_build_principal_va does not allocate krb5_principal
+6254    krb5_build_principal_ext walks off beginning of array
+6255    partial rewrite of the ASN.1 encoders
+6256    localize format strings, not final error string
+6260    KerberosAgent hangs changing pw for passwordless identities
+6261    Remove saved password if it fails to get tickets
+6262    Only prompt automatically from GUI apps
+6264    Avoid duplicate identical dialogs in KIM
+6265    KerberosAgent bindings causing crashes
+6266    BIND_8_COMPAT no longer needed in Leopard
+6267    Add _with_password credential acquisition functions to KIM API
+6274    Crypto IOV API per Projects/AEAD encryption API
+6282    krb5kdc deref uninit memory on the stack on unknown principal (pk-init)
+6285    Provide SPI to switch the mach port lookup for kipc
+6286    Allow kerberos configuration files fail with EPERM
+6289    replay cache is insecurely handled
+6290    KIM: Pushing authentication login window do application
+6291    Using referrals fills the the credentials cache more entries
         of the same name
-6294	lib/gssapi/krb5/init_sec_context.c: don't leak on mutex_lock failure
-6295	Memory leak in KIM identity object
-6297	"make check" fails due to krb5_cc_new_unique() on 64-bit
+6294    lib/gssapi/krb5/init_sec_context.c: don't leak on mutex_lock failure
+6295    Memory leak in KIM identity object
+6297    "make check" fails due to krb5_cc_new_unique() on 64-bit
         Solaris SPARC under Sun Studio
-6302	kadmind mem leaks [rdar 6358917]
-6303	Remove krb4 support
-6308	Alignment problem in resolver test
-6309	update ldap plugin Makefile for krb4 removal
-6315	move generated dependencies out of Makefile.in
-6316	KIM GC problem on 64-bit
-6335	test failures in password changing
-6336	enctype negotiation - etype list
-6337	kadmin should force non-forwardable tickets
-6339	Fwd: krb5_sendauth vs NAGLE vs DelayedAck
-6342	hash db2 code breaks if st_blksize > 64k
-6351	gss_header|trailerlen should be unsigned int
-6352	return correct kvno in TGS case
-6354	Master Key Migration Project
+6302    kadmind mem leaks [rdar 6358917]
+6303    Remove krb4 support
+6308    Alignment problem in resolver test
+6309    update ldap plugin Makefile for krb4 removal
+6315    move generated dependencies out of Makefile.in
+6316    KIM GC problem on 64-bit
+6335    test failures in password changing
+6336    enctype negotiation - etype list
+6337    kadmin should force non-forwardable tickets
+6339    Fwd: krb5_sendauth vs NAGLE vs DelayedAck
+6342    hash db2 code breaks if st_blksize > 64k
+6348    kadmin and ktutil installed in sbin, should be bin
+6349    lib/rpc tests should not fail if portmap/rpcbind not running
+6351    gss_header|trailerlen should be unsigned int
+6352    return correct kvno in TGS case
+6354    Master Key Migration Project
+6355    use t_inetd with a ready message and avoid waiting a lot in
+        non-root tests
+6356    small storage leak in KDC startup
+6357    address lib/kadm5 test suite slowness
+6358    speed up kpasswd tests
+6360    utf8_conv.c: wrong level of indirection in free()
+6361    new multi-masterkey support doesn't work well when system
+        clock is set back
+6362    don't do arithmetic on void pointers
+6363    int/ptr bug in gssapi code
+6364    declare replacement [v]asprintf functions
+6365    include omitted system header string.h
+6367    Fix a memory leak in krb5_kt_resolve
+6368    chpw.c: missing break in switch statement
+6370    Fix assertion in gc_frm_kdc.c
+6371    deal with memleaks in migrate mkey project
+6372    Fix memory handling bug in mk_req_ext
+6373    remove some redundant or useless qualifiers
+6374    Do not assume sizeof(bool_t) == sizeof(krb5_boolean)
+6375    Fix error handling in krb5_walk_realm_tree
+6376    Memory handling fixes in walk_rtree
+6377    make krb5_free_* functions ignore NULL
+6378    Change contract of krb5int_utf8_normalize and fix memory leaks
+6379    Fix possible free of uninitialized value in walk_rtree
+6390    --disable-rpath is not working
+6392    Fix allocation failure check in walk_rtree
+6393    Implement TGS authenticator subkey support
+6397    use macros for config parameter strings
+6398    remove obsolete GNU.ORG realm info
+6400    [no subject]
+6401    send_as_req re-encodes the request
+6402    CVE-2009-0845 SPNEGO can dereference a null pointer
+6403    kdb5_ldap_util create segfaults when
+        krb5_dbekd_encrypt_key_data() called
+6405    fixing several bugs relating to the migrate mkey project using
+        a LDAP KDB
+6407    Make a working krb5_copy_error_message
+6408    Report verbose error messages from KDC
+6412    crash using library-allocated storage for header in wrap_iov
+6415    Use correct salt for canonicalized principals
+6418    Improve LDAP admin documentation
+6419    Document alias support in LDAP back end
+6420    Add LDAP back end support for canonical name attribute
+6421    Implement KRB-FX_CF2
+6422    Implement krb5int_find_authdata
+6423    krb5_auth_con_free should support freeing a null auth_context
+        without segfault.
+6424    Call kdb_set_mkey_list from the KDC
+6425    Memory leak cleanup in ASN.1
+6427    Fix error handling issue in ASN.1 decoder
+6431    Install kadmin and kdb headers
+6432    Update kdb5_util man page for mkey migration project
+6435    Add PAC and principal parsing test cases
+6436    Implement FAST from draft-ietf-krb-wg-preauth-framework
+6437    mark export grade RC4 as weak
+6438    Handle authdata encrypted in subkey
+6439    Implement KDC side of TGS FAST
+6442    Null pointer defref in adding info
+6443    CVE-2009-0844 SPNEGO can read beyond buffer end
+6444    CVE-2009-0847 asn1buf_imbed incorrect length validation
+6445    CVE-2009-0846 asn1_decode_generaltime can free uninitialized pointer
+6449    Fall through on error return
+6450    kdc: handle_referral_params does not return ENOMEM errors
+6451    Update defaults in documentation
+6452    Document allow_weak_crypto
+6456    fix memory management in handle_referral_params
+6457    KDC realm referral test
+6458    use isflagset correctly in TGS referrals
+6459    Update kdb5_util man page with missing purge_mkeys command
+6460    Implement kinit option for FAST armor ccache
+6461    Require fast_req checksum to be keyed
+6462    clean up KDC realm referrals error handling
+6463    realm referral test cases forcing KRB5_NT_UNKNOWN
+6464    verify return code from krb5_db_set_mkey_list
+6465    send_tgs.c static analyzer friendliness
+6466    check encode_krb5_ap_req return in send_tgs.c
+6467    new copy_data_contents variant that null-terminates
+6468    k5_utf8s_to_ucs2s could deref NULL pointer...
+6469    fcc_generate_new destroys locked mutex on error
+6470    Send explicit salt for SALTTYPE_NORMAL keys
+6474    move kadmin, ktutil, k5srvutil man pages to man1
 
 Copyright and Other Legal Notices
 ---------------------------------
@@ -949,7 +1047,8 @@ Thanks to Red Hat for donating the pre-authentication plug-in
 framework.
 
 Thanks to Novell for donating the KDB abstraction layer and the LDAP
-database plug-in.
+database plug-in, and also code implementing the Microsoft protocol
+extensions.
 
 Thanks to Sun Microsystems for donating their implementations of
 mechglue, SPNEGO, master key rollover, and incremental propagation.
