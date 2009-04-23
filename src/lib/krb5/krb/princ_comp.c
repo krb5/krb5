@@ -112,21 +112,20 @@ krb5_principal_compare_flags(krb5_context context,
 	goto out;
 
     for (i = 0; i < (int) nelem; i++) {
-	register const krb5_data *p1 = krb5_princ_component(context, princ1, i);
-	register const krb5_data *p2 = krb5_princ_component(context, princ2, i);
-	int cmp;
+	const krb5_data *p1 = krb5_princ_component(context, princ1, i);
+	const krb5_data *p2 = krb5_princ_component(context, princ2, i);
+	krb5_boolean eq;
 
 	if (casefold) {
 	    if (utf8)
-		cmp = krb5int_utf8_normcmp(p1, p2, KRB5_UTF8_CASEFOLD);
+		eq = (krb5int_utf8_normcmp(p1, p2, KRB5_UTF8_CASEFOLD) == 0);
 	    else
-		cmp = p1->length == p2->length ?
-			strncasecmp(p1->data, p2->data, p2->length) :
-			p1->length - p2->length;
+		eq = (p1->length == p2->length
+		      && strncasecmp(p1->data, p2->data, p2->length) == 0);
 	} else
-	    cmp = !data_eq(*p1, *p2);
+	    eq = data_eq(*p1, *p2);
 
-	if (cmp != 0)
+	if (!eq)
 	    goto out;
     }
 
