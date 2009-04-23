@@ -427,7 +427,6 @@ krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned i
 	 assert(data->cur_offset > 0);
 	 assert(data->cur_offset <= data->valid_bytes);
 	 len -= ncopied;
-	 assert(len >= 0);
 	 /* Don't do arithmetic on void pointers.  */
 	 buf = (char*)buf + ncopied;
      }
