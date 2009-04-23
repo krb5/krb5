@@ -117,7 +117,7 @@ krb5_rcache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
 
             fnamep = krb5_rc_get_name(kcontext, rcache);
 
-            if (rcache->ops && rcache->ops->type) {
+            if (rcache->ops->type) {
                 if (asprintf(&rcname, "%s:%s", rcache->ops->type, fnamep) < 0)
                     rcname = NULL;
             } else
@@ -152,45 +152,57 @@ static krb5_error_code
 krb5_rcache_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code     kret;
-    krb5_rcache         rcache;
+    krb5_rcache         rcache = NULL;
     krb5_int32          ibuf;
     krb5_octet          *bp;
     size_t              remain;
-    char                *rcname;
+    char                *rcname = NULL;
 
     bp = *buffer;
     remain = *lenremain;
-    kret = EINVAL;
+
     /* Read our magic number */
-    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
-        ibuf = 0;
-    if (ibuf == KV5M_RCACHE) {
+    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain) || ibuf != KV5M_RCACHE)
+        return EINVAL;
 
-        /* Get the length of the rcache name */
-        kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    /* Get the length of the rcache name */
+    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (kret)
+        return kret;
 
-        if (!kret &&
-            (rcname = (char *) malloc((size_t) (ibuf+1))) &&
-            !(kret = krb5_ser_unpack_bytes((krb5_octet *) rcname,
-                                           (size_t) ibuf,
-                                           &bp, &remain))) {
-            rcname[ibuf] = '\0';
-            if (!(kret = krb5_rc_resolve_full(kcontext, &rcache, rcname))) {
-                (void) krb5_rc_recover(kcontext, rcache);
-                if (!kret &&
-                    !(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)) &&
-                    (ibuf == KV5M_RCACHE)) {
-                    *buffer = bp;
-                    *lenremain = remain;
-                    *argp = (krb5_pointer) rcache;
-                }
-                else
-                    krb5_rc_close(kcontext, rcache);
-            }
-            free(rcname);
-        }
+    /* Get the rcache name. */
+    rcname = malloc(ibuf + 1);
+    if (!rcname)
+        return ENOMEM;
+    kret = krb5_ser_unpack_bytes((krb5_octet*)rcname, (size_t) ibuf,
+                                 &bp, &remain);
+    if (kret)
+        goto cleanup;
+    rcname[ibuf] = '\0';
+
+    /* Resolve and recover the rcache. */
+    kret = krb5_rc_resolve_full(kcontext, &rcache, rcname);
+    if (kret)
+        goto cleanup;
+    krb5_rc_recover(kcontext, rcache);
+
+    /* Read our magic number again. */
+    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (kret)
+        goto cleanup;
+    if (ibuf != KV5M_RCACHE) {
+        kret = EINVAL;
+        goto cleanup;
     }
-    return(kret);
+
+    *buffer = bp;
+    *lenremain = remain;
+    *argp = (krb5_pointer) rcache;
+cleanup:
+    free(rcname);
+    if (kret != 0 && rcache)
+        krb5_rc_close(kcontext, rcache);
+    return kret;
 }
 
 /*
