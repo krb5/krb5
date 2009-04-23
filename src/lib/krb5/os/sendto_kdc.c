@@ -640,8 +640,6 @@ setup_connection (struct conn_state *state, struct addrinfo *ai,
 	    *udpbufp = malloc(krb5_max_dgram_size);
 	    if (*udpbufp == 0) {
 		dperror("malloc(krb5_max_dgram_size)");
-		(void) closesocket(state->fd);
-		state->fd = INVALID_SOCKET;
 		state->state = FAILED;
 		return 1;
 	    }
