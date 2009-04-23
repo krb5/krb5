@@ -1209,6 +1209,8 @@ asn1_decode_etype_info2_entry_ptr(asn1buf *buf, krb5_etype_info_entry **valptr)
 
 static asn1_error_code asn1_decode_etype_info2_entry_1_3(asn1buf *buf, krb5_etype_info_entry *val )
 {
+    krb5_octet *params = NULL;
+
     setup();
     val->salt = NULL;
     val->s2kparams.data = NULL;
@@ -1219,10 +1221,10 @@ static asn1_error_code asn1_decode_etype_info2_entry_1_3(asn1buf *buf, krb5_etyp
         } else
             val->length = KRB5_ETYPE_NO_SALT;
         if ( tagnum ==2) {
-            krb5_octet *params ;
             get_lenfield( val->s2kparams.length, params,
                           2, asn1_decode_octetstring);
             val->s2kparams.data = ( char *) params;
+            params = NULL;
         } else
             val->s2kparams.length = 0;
         end_structure();
@@ -1231,6 +1233,7 @@ static asn1_error_code asn1_decode_etype_info2_entry_1_3(asn1buf *buf, krb5_etyp
     return 0;
 error_out:
     krb5_free_data_contents(NULL, &val->s2kparams);
+    free(params);
     free(val->salt);
     val->salt = NULL;
     return retval;
