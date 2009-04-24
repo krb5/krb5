@@ -1643,123 +1643,64 @@ krb5_ktfileint_size_entry(krb5_context context, krb5_keytab_entry *entry, krb5_i
  * block in the file rather than the size of the actual entry)  
  */
 static krb5_error_code
-krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_needed, krb5_int32 *commit_point)
+krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_needed, krb5_int32 *commit_point_ptr)
 {
-    krb5_int32      size;
-    krb5_int32      remainder;
-    krb5_int32      zero_point;
-    krb5_kt_vno     kt_vno;
-    krb5_boolean    found = FALSE;
-    char            iobuf[BUFSIZ];
+    FILE *fp;
+    krb5_int32 size, zero_point, commit_point;
+    krb5_kt_vno kt_vno;
 
     KTCHECKLOCK(id);
-    /*
-     * Skip over file version number
-     */
-    if (fseek(KTFILEP(id), 0, SEEK_SET)) {
+    fp = KTFILEP(id);
+    /* Skip over file version number. */
+    if (fseek(fp, 0, SEEK_SET))
         return errno;
-    }
-    if (!fread(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
-        return KRB5_KT_IOERR;
-    }
+    if (!fread(&kt_vno, sizeof(kt_vno), 1, fp))
+        return errno;
 
-    while (!found) {
-        *commit_point = ftell(KTFILEP(id));
-        if (!fread(&size, sizeof(size), 1, KTFILEP(id))) {
-            /*
-             * Hit the end of file, reserve this slot.
-             */
+    for (;;) {
+        commit_point = ftell(fp);
+        if (!fread(&size, sizeof(size), 1, fp)) {
+            /* Hit the end of file, reserve this slot. */
+	    /* htonl(0) is 0, so no need to worry about byte order */
             size = 0;
-
-            /* fseek to synchronise buffered I/O on the key table. */
-	    /* XXX Without the weird setbuf hack, can we nuke this now?  */
-            if (fseek(KTFILEP(id), 0L, SEEK_CUR) < 0)
-            {
+            if (!fwrite(&size, sizeof(size), 1, fp))
                 return errno;
-            }
-	    
-#ifdef notdef
-	    /* We don't have to do this because htonl(0) == 0 */
-	    if (KTVERSION(id) != KRB5_KT_VNO_1)
-		    size = htonl(size);
-#endif
-	    
-            if (!fwrite(&size, sizeof(size), 1, KTFILEP(id))) {
-                return KRB5_KT_IOERR;
-            }
-            found = TRUE;
+            break;
         }
 
 	if (KTVERSION(id) != KRB5_KT_VNO_1)
-		size = ntohl(size);
+	    size = ntohl(size);
 
         if (size > 0) {
-            if (fseek(KTFILEP(id), size, SEEK_CUR)) {
+	    /* Non-empty record; seek past it. */
+            if (fseek(fp, size, SEEK_CUR))
                 return errno;
-            }
-        } else if (!found) {
-            size = -size;
+	} else if (size < 0) {
+	    /* Empty record; use if it's big enough, seek past otherwise. */
+	    size = -size;
             if (size >= *size_needed) {
                 *size_needed = size;
-                found = TRUE;	
-            } else if (size > 0) {
-                /*
-                 * The current hole is not large enough, so skip it
-                 */
-                if (fseek(KTFILEP(id), size, SEEK_CUR)) {
+		break;
+	    } else {
+                if (fseek(fp, size, SEEK_CUR))
                     return errno;
-                }
-            } else {
-
-                 /* fseek to synchronise buffered I/O on the key table. */
-
-                 if (fseek(KTFILEP(id), 0L, SEEK_CUR) < 0)
-                 {
-                     return errno;
-                 }
-
-                /*
-                 * Found the end of the file (marked by a 0 length buffer)
-                 * Make sure we zero any trailing data.
-                 */
-                zero_point = ftell(KTFILEP(id));
-                if (zero_point < 0) {
-                    return errno;
-                }
-                while ((size = fread(iobuf, 1, sizeof(iobuf), KTFILEP(id)))) {
-                    if (size != sizeof(iobuf)) {
-                        remainder = size % sizeof(krb5_int32);
-                        if (remainder) {
-                            size += sizeof(krb5_int32) - remainder;
-                        }
-                    }
-
-                    if (fseek(KTFILEP(id), 0L, SEEK_CUR) < 0)
-                    {
-                        return errno;
-                    }
-
-                    memset(iobuf, 0, (size_t) size);
-                    fwrite(iobuf, 1, (size_t) size, KTFILEP(id));
-		    fflush(KTFILEP(id));
-                    if (feof(KTFILEP(id))) {
-                        break;
-                    }
-
-                    if (fseek(KTFILEP(id), 0L, SEEK_CUR) < 0)
-                    {
-                        return errno;
-                    }
-
-                }
-                if (fseek(KTFILEP(id), zero_point, SEEK_SET)) {
-                    return errno;
-                }
-		found = TRUE;
-            }
-        }
+	    }
+	} else {
+	    /* Empty record at end of file; use it. */
+	    /* Ensure the new record will be followed by another 0. */
+	    zero_point = ftell(fp);
+	    if (fseek(fp, *size_needed, SEEK_CUR))
+		return errno;
+	    /* htonl(0) is 0, so no need to worry about byte order */
+            if (!fwrite(&size, sizeof(size), 1, fp))
+                return errno;
+	    if (fseek(fp, zero_point, SEEK_SET))
+		return errno;
+	    break;
+	}
     }
 
+    *commit_point_ptr = commit_point;
     return 0;
 }
 #endif /* LEAN_CLIENT */
