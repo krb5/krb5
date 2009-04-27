@@ -1225,7 +1225,9 @@ krb5_ktfileint_delete_entry(krb5_context context, krb5_keytab id, krb5_int32 del
 
         memset(iobuf, 0, (size_t) len);
         while (size > 0) {
-            fwrite(iobuf, 1, (size_t) len, KTFILEP(id));
+            if (!fwrite(iobuf, 1, (size_t) len, KTFILEP(id))) {
+		return KRB5_KT_IOERR;
+	    }
             size -= len;
             if (size < len) {
                 len = size;
