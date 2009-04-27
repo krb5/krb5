@@ -341,6 +341,16 @@ flag.)
 .B -requires_hwauth
 clears this flag.
 .TP
+{\fB\-\fP|\fB+\fP}\fBok_as_delegate\fP
+.B +ok_as_delegate
+sets the OK-AS-DELEGATE flag on tickets issued for use with this principal
+as the service, which clients may use as a hint that credentials can and
+should be delegated when authenticating to the service.  (Sets the
+.SM KRB5_KDB_OK_AS_DELEGATE
+flag.)
+.B -ok_as_delegate
+clears this flag.
+.TP
 {\fB\-\fP|\fB+\fP}\fBallow_svr\fP
 .B -allow_svr
 prohibits the issuance of service tickets for this principal.  (Sets the

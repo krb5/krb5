@@ -71,7 +71,8 @@ static struct pflag flags[] = {
 {"needchange", 10,	KRB5_KDB_REQUIRES_PWCHANGE,	0},
 {"allow_svr", 9,	KRB5_KDB_DISALLOW_SVR, 1},
 {"password_changing_service",	25,	KRB5_KDB_PWCHANGE_SERVICE,	0 },
-{"support_desmd5",	14,	KRB5_KDB_SUPPORT_DESMD5,	0 }
+{"support_desmd5",	14,	KRB5_KDB_SUPPORT_DESMD5,	0 },
+{"ok_as_delegate",	14,	KRB5_KDB_OK_AS_DELEGATE,	0 }
 };
 
 static char *prflags[] = {
@@ -91,6 +92,11 @@ static char *prflags[] = {
     "PWCHANGE_SERVICE",		/* 0x00002000 */
     "SUPPORT_DESMD5",		/* 0x00004000 */
     "NEW_PRINC",		/* 0x00008000 */
+    "UNKNOWN_0x00010000",	/* 0x00010000 */
+    "UNKNOWN_0x00020000",	/* 0x00020000 */
+    "UNKNOWN_0x00040000",	/* 0x00040000 */
+    "UNKNOWN_0x00080000",	/* 0x00080000 */
+    "OK_AS_DELEGATE",		/* 0x00100000 */
 };
 
 char *getenv();
@@ -1117,6 +1123,7 @@ kadmin_addprinc_usage(func)
 	    "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
 	    "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
 	    "\t\trequires_hwauth needchange allow_svr password_changing_service\n"
+	    "\t\tok_as_delegate\n"
 	    "\nwhere,\n\t[-x db_princ_args]* - any number of database specific arguments.\n"
 	    "\t\t\tLook at each database documentation for supported arguments\n");
 }
@@ -1133,6 +1140,7 @@ kadmin_modprinc_usage(func)
 	    "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
 	    "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
 	    "\t\trequires_hwauth needchange allow_svr password_changing_service\n"
+	    "\t\tok_as_delegate\n"
 	    "\nwhere,\n\t[-x db_princ_args]* - any number of database specific arguments.\n"
 	    "\t\t\tLook at each database documentation for supported arguments\n"
 	);

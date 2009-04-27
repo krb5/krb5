@@ -417,11 +417,8 @@ tgt_again:
     enc_tkt_reply.flags = 0;
     enc_tkt_reply.times.starttime = 0;
 
-    if (isflagset(server.attributes, KRB5_KDB_OK_AS_DELEGATE) &&
-        !is_referral) {
-        /* Ensure that we are not returning a referral */
+    if (isflagset(server.attributes, KRB5_KDB_OK_AS_DELEGATE))
         setflag(enc_tkt_reply.flags, TKT_FLG_OK_AS_DELEGATE);
-    }
 
     /*
      * Fix header_ticket's starttime; if it's zero, fill in the
