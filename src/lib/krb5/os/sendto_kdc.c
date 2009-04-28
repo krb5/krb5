@@ -605,7 +605,7 @@ set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
 
 
 
-static int
+static void
 setup_connection (struct conn_state *state, struct addrinfo *ai,
 		  const krb5_data *message, char **udpbufp)
 {
@@ -641,13 +641,12 @@ setup_connection (struct conn_state *state, struct addrinfo *ai,
 	    if (*udpbufp == 0) {
 		dperror("malloc(krb5_max_dgram_size)");
 		state->state = FAILED;
-		return 1;
+		return;
 	    }
 	}
 	state->x.in.buf = *udpbufp;
 	state->x.in.bufsize = krb5_max_dgram_size;
     }
-    return 0;
 }
 
 static int
@@ -1189,13 +1188,13 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     int pass;
     int delay_this_pass = 2;
     krb5_error_code retval;
-    struct conn_state *conns;
-    krb5_data *callback_data = 0;
-    size_t n_conns, host;
-    struct select_state *sel_state;
+    struct conn_state *conns = NULL;
+    krb5_data *callback_data = NULL;
+    size_t n_conns = 0, host;
+    struct select_state *sel_state = NULL;
     struct timeval now;
     int winning_conn = -1, e = 0;
-    char *udpbuf = 0;
+    char *udpbuf = NULL;
 
     if (message)
 	dprint("krb5int_sendto(message=%d@%p, addrlist=", message->length, message->data);
@@ -1207,29 +1206,27 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     reply->data = 0;
     reply->length = 0;
 
-    n_conns = addrs->naddrs;
-    conns = calloc(n_conns, sizeof(struct conn_state));
-    if (conns == NULL) {
+    conns = calloc(addrs->naddrs, sizeof(struct conn_state));
+    if (conns == NULL)
 	return ENOMEM;
-    }
 
     if (callback_info) {
-	callback_data = calloc(n_conns, sizeof(krb5_data));
+	callback_data = calloc(addrs->naddrs, sizeof(krb5_data));
 	if (callback_data == NULL) {
-	    return ENOMEM;
+	    retval = ENOMEM;
+	    goto egress;
 	}
     }
 
-    for (i = 0; i < n_conns; i++) {
+    for (i = 0; i < addrs->naddrs; i++)
 	conns[i].fd = INVALID_SOCKET;
-    }
 
     /* One for use here, listing all our fds in use, and one for
        temporary use in service_fds, for the fds of interest.  */
     sel_state = malloc(2 * sizeof(*sel_state));
     if (sel_state == NULL) {
-	free(conns);
-	return ENOMEM;
+	retval = ENOMEM;
+	goto egress;
     }
     sel_state->max = 0;
     sel_state->nfds = 0;
@@ -1240,14 +1237,11 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 
 
     /* Set up connections.  */
-    for (host = 0; host < n_conns; host++) {
-	retval = setup_connection(&conns[host], 
-				  addrs->addrs[host].ai,
-				  message, 
-				  &udpbuf);
-	if (retval)
-	    continue;
+    for (host = 0; host < addrs->naddrs; host++) {
+	setup_connection(&conns[host], addrs->addrs[host].ai, message,
+			 &udpbuf);
     }
+    n_conns = addrs->naddrs;
     for (pass = 0; pass < MAX_PASS; pass++) {
 	/* Possible optimization: Make only one pass if TCP only.
 	   Stop making passes if all UDP ports are closed down.  */
@@ -1326,18 +1320,15 @@ egress:
     for (i = 0; i < n_conns; i++) {
 	if (conns[i].fd != INVALID_SOCKET)
 	    closesocket(conns[i].fd);
-	if (conns[i].state == READING
-	    && conns[i].x.in.buf != 0
-	    && conns[i].x.in.buf != udpbuf)
+	if (conns[i].state == READING && conns[i].x.in.buf != udpbuf)
 	    free(conns[i].x.in.buf);
 	if (callback_info) {
-	    callback_info->pfn_cleanup( callback_info->context, &callback_data[i]);
+	    callback_info->pfn_cleanup(callback_info->context,
+				       &callback_data[i]);
 	}
     }
 
-    if (callback_data) 
-	free(callback_data);
-
+    free(callback_data);
     free(conns);
     if (reply->data != udpbuf)
 	free(udpbuf);
