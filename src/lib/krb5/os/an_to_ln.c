@@ -376,103 +376,108 @@ static krb5_error_code
 aname_replacer(char *string, char **contextp, char **result)
 {
     krb5_error_code	kret;
-    char		*in;
-    char		*out;
+    char		*in = NULL, *out = NULL, *rule = NULL, *repl = NULL;
     char		*cp, *ep, *tp;
-    char		*rule, *repl;
     size_t		rule_size, repl_size;
     int			doglobal;
 
-    kret = ENOMEM;
-    *result = (char *) NULL;
+    *result = NULL;
+
     /* Allocate the formatting buffers */
-    if ((in = (char *) malloc(MAX_FORMAT_BUFFER)) &&
-	(out = (char *) malloc(MAX_FORMAT_BUFFER))) {
-	/*
-	 * Prime the buffers.  Copy input string to "out" to simulate it
-	 * being the result of an initial iteration.
-	 */
-	strncpy(out, string, MAX_FORMAT_BUFFER - 1);
-	out[MAX_FORMAT_BUFFER - 1] = '\0';
-	in[0] = '\0';
-	kret = 0;
-	/*
-	 * Pound through the expression until we're done.
-	 */
-	for (cp = *contextp; *cp; ) {
-	    /* Skip leading whitespace */
-	    while (isspace((int) (*cp)))
-		cp++;
-
-	    /*
-	     * Find our separators.  First two characters must be "s/"
-	     * We must also find another "/" followed by another "/".
-	     */
-	    if ((cp[0] == 's') &&
-		(cp[1] == '/') &&
-		(ep = strchr(&cp[2], '/')) &&
-		(tp = strchr(&ep[1], '/'))) {
-
-		/* Figure out sizes of strings and allocate them */
-		rule_size = (size_t) (ep - &cp[2]);
-		repl_size = (size_t) (tp - &ep[1]);
-		if ((rule = (char *) malloc(rule_size+1)) &&
-		    (repl = (char *) malloc(repl_size+1))) {
-
-		    /* Copy the strings */
-		    strncpy(rule, &cp[2], rule_size);
-		    strncpy(repl, &ep[1], repl_size);
-		    rule[rule_size] = repl[repl_size] = '\0';
-
-		    /* Check for trailing "g" */
-		    doglobal = (tp[1] == 'g') ? 1 : 0;
-		    if (doglobal)
-			tp++;
-
-		    /* Swap previous in and out buffers */
-		    ep = in;
-		    in = out;
-		    out = ep;
-
-		    /* Do the replacemenbt */
-		    memset(out, '\0', MAX_FORMAT_BUFFER);
-		    if (!do_replacement(rule, repl, doglobal, in, out)) {
-			free(rule);
-			free(repl);
-			kret = KRB5_LNAME_NOTRANS;
-			break;
-		    }
-		    free(rule);
-		    free(repl);
-
-		    /* If we have no output buffer left, this can't be good */
-		    if (strlen(out) == 0) {
-			kret = KRB5_LNAME_NOTRANS;
-			break;
-		    }
-		}
-		else {
-		    /* No memory for copies */
-		    free(rule);
-		    kret = ENOMEM;
-		    break;
-		}
-	    }
-	    else {
-		/* Bad syntax */
-		kret = KRB5_CONFIG_BADFORMAT;
-		break;
-	    }
-	    /* Advance past trailer */
-	    cp = &tp[1];
-	}
-	free(in);
-	if (!kret)
-	    *result = out;
-	else
-	    free(out);
+    in = malloc(MAX_FORMAT_BUFFER);
+    if (!in)
+	return ENOMEM;
+    out = malloc(MAX_FORMAT_BUFFER);
+    if (!out) {
+	kret = ENOMEM;
+	goto cleanup;
     }
-    return(kret);
+
+    /*
+     * Prime the buffers.  Copy input string to "out" to simulate it
+     * being the result of an initial iteration.
+     */
+    strlcpy(out, string, MAX_FORMAT_BUFFER);
+    in[0] = '\0';
+    kret = 0;
+    /*
+     * Pound through the expression until we're done.
+     */
+    for (cp = *contextp; *cp; ) {
+	/* Skip leading whitespace */
+	while (isspace((int) (*cp)))
+	    cp++;
+
+	/*
+	 * Find our separators.  First two characters must be "s/"
+	 * We must also find another "/" followed by another "/".
+	 */
+	if (!((cp[0] == 's') &&
+	      (cp[1] == '/') &&
+	      (ep = strchr(&cp[2], '/')) &&
+	      (tp = strchr(&ep[1], '/')))) {
+	    /* Bad syntax */
+	    kret = KRB5_CONFIG_BADFORMAT;
+	    goto cleanup;
+	}
+
+	/* Figure out sizes of strings and allocate them */
+	rule_size = (size_t) (ep - &cp[2]);
+	repl_size = (size_t) (tp - &ep[1]);
+	rule = malloc(rule_size + 1);
+	if (!rule) {
+	    kret = ENOMEM;
+	    goto cleanup;
+	}
+	repl = malloc(repl_size + 1);
+	if (!repl) {
+	    kret = ENOMEM;
+	    goto cleanup;
+	}
+
+	/* Copy the strings */
+	memcpy(rule, &cp[2], rule_size);
+	memcpy(repl, &ep[1], repl_size);
+	rule[rule_size] = repl[repl_size] = '\0';
+
+	/* Check for trailing "g" */
+	doglobal = (tp[1] == 'g') ? 1 : 0;
+	if (doglobal)
+	    tp++;
+
+	/* Swap previous in and out buffers */
+	ep = in;
+	in = out;
+	out = ep;
+
+	/* Do the replacemenbt */
+	memset(out, '\0', MAX_FORMAT_BUFFER);
+	if (!do_replacement(rule, repl, doglobal, in, out)) {
+	    kret = KRB5_LNAME_NOTRANS;
+	    goto cleanup;
+	}
+	free(rule);
+	free(repl);
+	rule = repl = NULL;
+
+	/* If we have no output buffer left, this can't be good */
+	if (strlen(out) == 0) {
+	    kret = KRB5_LNAME_NOTRANS;
+	    goto cleanup;
+	}
+
+	/* Advance past trailer */
+	cp = &tp[1];
+    }
+    free(in);
+    *result = out;
+    return 0;
+cleanup:
+    free(in);
+    free(out);
+    free(repl);
+    free(rule);
+    return kret;
 }
 
 /*
