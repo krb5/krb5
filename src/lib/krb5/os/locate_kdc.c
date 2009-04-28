@@ -624,6 +624,7 @@ module_locate_server (krb5_context ctx, const krb5_data *realm,
     char *realmz;		/* NUL-terminated realm */
     int i;
     struct module_callback_data cbdata = { 0, };
+    const char *msg;
 
     Tprintf("in module_locate_server\n");
     cbdata.lp = addrlist;
@@ -639,7 +640,8 @@ module_locate_server (krb5_context ctx, const krb5_data *realm,
 					"service_locator", &ptrs, &ctx->err);
     if (code) {
 	Tprintf("error looking up plugin symbols: %s\n",
-		krb5_get_error_message(ctx, code));
+		(msg = krb5_get_error_message(ctx, code)));
+	krb5_free_error_message(ctx, msg);
 	return KRB5_PLUGIN_NO_HANDLE;
     }
 
