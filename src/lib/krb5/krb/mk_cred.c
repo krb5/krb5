@@ -215,13 +215,10 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
     }
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
         (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) {
-        replaydata.seq = auth_context->local_seq_number;
-        if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) {
-            auth_context->local_seq_number++;
-	    increased_sequence = TRUE;
-        } else {
+        replaydata.seq = auth_context->local_seq_number++;
+	increased_sequence = TRUE;
+        if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)
             outdata->seq = replaydata.seq;
-        }
     }
 
     if (auth_context->local_addr) {
