@@ -74,7 +74,7 @@ Major changes in 1.7
 * Remove support for version 4 of the Kerberos protocol (krb4).
 
 * New libdefaults configuration variable "allow_weak_crypto".  NOTE:
-  Currently defaults to "false", but may default to "true" in a future
+  Currently defaults to "true", but may default to "false" in a future
   release.  Setting this variable to "false" will have the effect of
   removing weak enctypes (currently defined to be all single-DES
   enctypes) from permitted_enctypes, default_tkt_enctypes, and
