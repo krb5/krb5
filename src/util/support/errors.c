@@ -34,12 +34,23 @@ krb5int_err_init (void)
 #define lock()		k5_mutex_lock(&krb5int_error_info_support_mutex)
 #define unlock()	k5_mutex_unlock(&krb5int_error_info_support_mutex)
 
+#undef krb5int_set_error
 void
 krb5int_set_error (struct errinfo *ep, long code, const char *fmt, ...)
 {
     va_list args;
     va_start (args, fmt);
-    krb5int_vset_error (ep, code, fmt, args);
+    krb5int_vset_error_fl (ep, code, NULL, 0, fmt, args);
+    va_end (args);
+}
+
+void
+krb5int_set_error_fl (struct errinfo *ep, long code,
+		      const char *file, int line, const char *fmt, ...)
+{
+    va_list args;
+    va_start (args, fmt);
+    krb5int_vset_error_fl (ep, code, file, line, fmt, args);
     va_end (args);
 }
 
@@ -47,8 +58,16 @@ void
 krb5int_vset_error (struct errinfo *ep, long code,
 		    const char *fmt, va_list args)
 {
+    krb5int_vset_error_fl(ep, code, NULL, 0, fmt, args);
+}
+
+void
+krb5int_vset_error_fl (struct errinfo *ep, long code,
+		       const char *file, int line,
+		       const char *fmt, va_list args)
+{
     va_list args2;
-    char *str = NULL;
+    char *str = NULL, *str2, *slash;
     const char *loc_fmt = NULL;
     
 #ifdef USE_KIM
@@ -66,6 +85,17 @@ krb5int_vset_error (struct errinfo *ep, long code,
 	str = NULL;
     }
     va_end(args2);
+
+    if (str && line) {
+	/* Try to add file and line suffix. */
+	slash = strrchr(file, '/');
+	if (slash)
+	    file = slash + 1;
+	if (asprintf(&str2, "%s (%s: %d)", str, file, line) > 0) {
+	    free(str);
+	    str = str2;
+	}
+    }
     
     /* If that failed, try using scratch_buf */
     if (str == NULL) {

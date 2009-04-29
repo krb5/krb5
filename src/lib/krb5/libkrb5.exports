@@ -487,6 +487,7 @@ krb5_set_default_realm
 krb5_set_default_tgs_enctypes
 krb5_set_default_tgs_ktypes
 krb5_set_error_message
+krb5_set_error_message_fl
 krb5_set_password
 krb5_set_password_using_ccache
 krb5_set_principal_realm
