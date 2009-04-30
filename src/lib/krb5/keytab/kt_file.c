@@ -200,41 +200,45 @@ static krb5_error_code krb5_ktfileint_find_slot
 
 static krb5_error_code
 ktfile_common_resolve(krb5_context context, const char *name,
-		      krb5_keytab *id, const struct _krb5_kt_ops *ops)
+		      krb5_keytab *idptr, const struct _krb5_kt_ops *ops)
 {
-    krb5_ktfile_data *data;
-    krb5_error_code err;
+    krb5_ktfile_data *data = NULL;
+    krb5_error_code err = ENOMEM;
+    krb5_keytab id;
 
-    if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
-	return(ENOMEM);
+    *idptr = NULL;
+
+    id = calloc(1, sizeof(*id));
+    if (id == NULL)
+	return ENOMEM;
     
-    (*id)->ops = ops;
-    if ((data = (krb5_ktfile_data *)malloc(sizeof(krb5_ktfile_data))) == NULL) {
-	free(*id);
-	return(ENOMEM);
-    }
+    id->ops = ops;
+    data = calloc(1, sizeof(krb5_ktfile_data));
+    if (data == NULL)
+	goto cleanup;
+
+    data->name = strdup(name);
+    if (data->name == NULL)
+	goto cleanup;
 
     err = k5_mutex_init(&data->lock);
-    if (err) {
-	free(data);
-	free(*id);
-	return err;
-    }
-
-    if ((data->name = strdup(name)) == NULL) {
-	k5_mutex_destroy(&data->lock);
-	free(data);
-	free(*id);
-	return(ENOMEM);
-    }
+    if (err)
+	goto cleanup;
 
     data->openf = 0;
     data->version = 0;
     data->iter_count = 0;
 
-    (*id)->data = (krb5_pointer)data;
-    (*id)->magic = KV5M_KEYTAB;
-    return(0);
+    id->data = (krb5_pointer) data;
+    id->magic = KV5M_KEYTAB;
+    *idptr = id;
+    return 0;
+cleanup:
+    if (data)
+	free(data->name);
+    free(data);
+    free(id);
+    return err;
 }
 
 static krb5_error_code KRB5_CALLCONV 
