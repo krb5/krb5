@@ -1204,17 +1204,11 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     if (pa_ok)
 	return 0;
 
-    /* pa system was not found, but principal doesn't require preauth */
-    if (!pa_found &&
-	!isflagset(client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
-	!isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH))
+    /* pa system was not found; we may return PREAUTH_REQUIRED later,
+       but we did not actually fail to verify the pre-auth. */
+    if (!pa_found)
        return 0;
 
-    if (!pa_found) {
-	emsg = krb5_get_error_message(context, retval);
-	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s", emsg);
-	krb5_free_error_message(context, emsg);
-    }
 
     /* The following switch statement allows us
      * to return some preauth system errors back to the client.
