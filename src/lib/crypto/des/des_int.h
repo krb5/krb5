@@ -374,5 +374,9 @@ extern krb5_error_code mit_des_set_random_generator_seed
 extern krb5_error_code mit_des_set_random_sequence_number
 	(const krb5_data * sequence,
 		   krb5_pointer random_state);
-
+krb5_error_code
+krb5int_des_prf (const struct krb5_enc_provider *enc,
+		const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key,
+		 const krb5_data *in, krb5_data *out);
 #endif	/*DES_INTERNAL_DEFS*/
