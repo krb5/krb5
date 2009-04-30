@@ -10,7 +10,8 @@ arcfour.so arcfour.po $(OUTPRE)arcfour.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  arcfour-int.h arcfour.c arcfour.h
+  $(srcdir)/../hash_provider/hash_provider.h arcfour-int.h \
+  arcfour.c arcfour.h
 arcfour_aead.so arcfour_aead.po $(OUTPRE)arcfour_aead.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
