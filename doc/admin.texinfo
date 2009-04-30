@@ -2274,6 +2274,14 @@ will probably never need to use this option.)
 ``+password_changing_service'' option sets the KRB5_KDB_PWCHANGE_SERVICE
 flag on the principal in the database.
 
+@item @{-|+}ok_as_delegate
+The ``+ok_as_delegate'' option sets a flag in tickets issued for the
+service principal.  Some client programs may recognize this flag as
+indicating that it is okay to delegate credentials to the service.  If
+ok_as_delegate is set on a cross-realm TGT, it indicates that the
+foreign realm's ok_as_delegate flags should be honored by clients in
+the local realm.  The default is ``-ok_as_delegate''.
+
 @item -randkey
 Sets the key for the principal to a random value (@code{add_principal}
 only).  @value{COMPANY} recommends using this option for host keys.
@@ -3099,6 +3107,13 @@ another user.  (Sets the @samp{KRB5_KDB_DISALLOW_DUP_SKEY} flag.)
 @code{+requires_hwauth} requires principals to preauthenticate using a
 hardware device before being allowed to kinit. (Sets the
 @samp{KRB5_KDB_REQURES_HW_AUTH} flag.)  @code{-requires_hwauth} clears
+this flag.
+
+@itemx @{-|+@}ok_as_delegate
+@code{+ok_as_delegate} sets the OK-AS-DELEGATE flag on tickets issued for use
+with this principal as the service, which clients may use as a hint that
+credentials can and should be delegated when authenticating to the service.
+(Sets the @samp{KRB5_KDB_OK_AS_DELEGATE} flag.) @code{-ok_as_delegate} clears
 this flag.
 
 @itemx @{-|+@}allow_svr
