@@ -723,102 +723,92 @@ static krb5_error_code
 krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
-    krb5_keytab		keytab;
+    krb5_keytab		keytab = NULL;
     krb5_int32		ibuf;
     krb5_octet		*bp;
     size_t		remain;
-    char		*ktname;
+    char		*ktname = NULL;
     krb5_ktfile_data	*ktdata;
     krb5_int32		file_is_open;
     krb5_int64		foff;
 
+    *argp = NULL;
     bp = *buffer;
     remain = *lenremain;
-    kret = EINVAL;
+
     /* Read our magic number */
-    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
-	ibuf = 0;
-    if (ibuf == KV5M_KEYTAB) {
+    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain) || ibuf != KV5M_KEYTAB)
+	return EINVAL;
 
-	/* Get the length of the keytab name */
-	kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    /* Read the keytab name */
+    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (kret)
+	return kret;
+    ktname = malloc(ibuf + 1);
+    if (!ktname)
+	return ENOMEM;
+    kret = krb5_ser_unpack_bytes((krb5_octet *) ktname, (size_t) ibuf,
+				 &bp, &remain);
+    if (kret)
+	goto cleanup;
+    ktname[ibuf] = '\0';
 
-	if (!kret &&
-	    (ktname = (char *) malloc((size_t) (ibuf+1))) &&
-	    !(kret = krb5_ser_unpack_bytes((krb5_octet *) ktname,
-					   (size_t) ibuf,
-					   &bp, &remain))) {
-	    ktname[ibuf] = '\0';
-	    kret = krb5_kt_resolve(kcontext, ktname, &keytab);
-	    if (!kret) {
-		kret = ENOMEM;
-		ktdata = (krb5_ktfile_data *) keytab->data;
-		if (!ktdata) {
-		    /* XXX */
-		    keytab->data = (void *) malloc(sizeof(krb5_ktfile_data));
-		    ktdata = (krb5_ktfile_data *) keytab->data;
-		    memset(ktdata, 0, sizeof(krb5_ktfile_data));
-		    if (strchr(ktname, (int) ':'))
-			ktdata->name = strdup(strchr(ktname, (int) ':')+1);
-		    else
-			ktdata->name = strdup(ktname);
-		}
-		if (ktdata) {
-		    if (remain >= (sizeof(krb5_int32)*5)) {
-			(void) krb5_ser_unpack_int32(&file_is_open,
-						     &bp, &remain);
-			(void) krb5_ser_unpack_int64(&foff, &bp, &remain);
-			(void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-			ktdata->version = (int) ibuf;
+    /* Resolve the keytab. */
+    kret = krb5_kt_resolve(kcontext, ktname, &keytab);
+    if (kret)
+	goto cleanup;
 
-			(void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-			if (ibuf == KV5M_KEYTAB) {
-			    if (file_is_open) {
-				int 	fmode;
-				long	fpos;
+    if (keytab->ops != &krb5_ktf_writable_ops
+	&& keytab->ops != &krb5_ktf_ops) {
+	kret = EINVAL;
+	goto cleanup;
+    }
+    ktdata = (krb5_ktfile_data *) keytab->data;
+
+    if (remain < (sizeof(krb5_int32)*5)) {
+	kret = EINVAL;
+	goto cleanup;
+    }
+    (void) krb5_ser_unpack_int32(&file_is_open, &bp, &remain);
+    (void) krb5_ser_unpack_int64(&foff, &bp, &remain);
+    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    ktdata->version = (int) ibuf;
+    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (ibuf != KV5M_KEYTAB) {
+	kret = EINVAL;
+	goto cleanup;
+    }
+
+    if (file_is_open) {
+	int 	fmode;
+	long	fpos;
 
 #if !defined(_WIN32)
-				fmode = (file_is_open >> 1) & O_ACCMODE;
+	fmode = (file_is_open >> 1) & O_ACCMODE;
 #else
-				fmode = 0;
+	fmode = 0;
 #endif
-				if (fmode)
-				    kret = krb5_ktfileint_openw(kcontext,
-								keytab);
-				else
-				    kret = krb5_ktfileint_openr(kcontext,
-								keytab);
-				if (!kret) {
-				    fpos = foff; /* XX range check? */
-				    if (fseek(KTFILEP(keytab), fpos,
-					      SEEK_SET) == -1)
-					kret = errno;
-				}
-			    }
-			    kret = 0;
-			}
-			else
-			    kret = EINVAL;
-		    }
-		}
-		if (kret) {
-		    if (keytab->data) {
-			if (KTFILENAME(keytab))
-			    free(KTFILENAME(keytab));
-			free(keytab->data);
-		    }
-		    free(keytab);
-		}
-		else {
-		    *buffer = bp;
-		    *lenremain = remain;
-		    *argp = (krb5_pointer) keytab;
-		}
-	    }
-	    free(ktname);
+	if (fmode)
+	    kret = krb5_ktfileint_openw(kcontext, keytab);
+	else
+	    kret = krb5_ktfileint_openr(kcontext, keytab);
+	if (kret)
+	    goto cleanup;
+	fpos = foff; /* XX range check? */
+	if (fseek(KTFILEP(keytab), fpos, SEEK_SET) == -1) {
+	    kret = errno;
+	    goto cleanup;
 	}
     }
-    return(kret);
+
+    *buffer = bp;
+    *lenremain = remain;
+    *argp = (krb5_pointer) keytab;
+cleanup:
+    if (kret != 0 && keytab)
+	krb5_kt_close(kcontext, keytab);
+    free(ktname);
+    return kret;
 }
 
 /*
