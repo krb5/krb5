@@ -166,11 +166,13 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
     unsigned int pfxlen;
     const char *cp, *resid;
     krb5_error_code err = 0;
-    
+    krb5_keytab id;
+
+    *ktid = NULL;
+
     cp = strchr (name, ':');
-    if (!cp) {
-	    return (*krb5_kt_dfl_ops.resolve)(context, name, ktid);
-    }
+    if (!cp)
+	return (*krb5_kt_dfl_ops.resolve)(context, name, ktid);
 
     pfxlen = cp - name;
 
@@ -209,7 +211,9 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
     k5_mutex_unlock(&kt_typehead_lock);
     for (; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
-	    err = (*tlist->ops->resolve)(context, resid, ktid);
+	    err = (*tlist->ops->resolve)(context, resid, &id);
+	    if (!err)
+		*ktid = id;
 	    goto cleanup;
 	}
     }
