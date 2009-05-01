@@ -1655,6 +1655,8 @@ krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_
 
     for (;;) {
         commit_point = ftell(fp);
+	if (commit_point == -1)
+	    return errno;
         if (!fread(&size, sizeof(size), 1, fp)) {
             /* Hit the end of file, reserve this slot. */
 	    /* htonl(0) is 0, so no need to worry about byte order */
@@ -1685,6 +1687,8 @@ krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_
 	    /* Empty record at end of file; use it. */
 	    /* Ensure the new record will be followed by another 0. */
 	    zero_point = ftell(fp);
+	    if (zero_point == -1)
+		return errno;
 	    if (fseek(fp, *size_needed, SEEK_CUR))
 		return errno;
 	    /* htonl(0) is 0, so no need to worry about byte order */
