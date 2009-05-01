@@ -125,50 +125,50 @@ static krb5_error_code
 krb5_principal_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
-    krb5_principal	principal;
+    krb5_principal	principal = NULL;
     krb5_int32		ibuf;
     krb5_octet		*bp;
     size_t		remain;
-    char		*tmpname;
+    char		*tmpname = NULL;
 
+    *argp = NULL;
     bp = *buffer;
     remain = *lenremain;
-    kret = EINVAL;
+
     /* Read our magic number */
-    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
-	ibuf = 0;
-    if (ibuf == KV5M_PRINCIPAL) {
-	kret = ENOMEM;
+    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain) || ibuf != KV5M_PRINCIPAL)
+	return EINVAL;
 
-	/* See if we have enough data for the length */
-	if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain))) {
-	    /* Get the string */
-	    if ((tmpname = (char *) malloc((size_t) (ibuf+1))) &&
-		!(kret = krb5_ser_unpack_bytes((krb5_octet *) tmpname,
-					       (size_t) ibuf,
-					       &bp, &remain))) {
-		tmpname[ibuf] = '\0';
+    /* Read the principal name */
+    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (kret)
+	return kret;
+    tmpname = malloc(ibuf + 1);
+    kret = krb5_ser_unpack_bytes((krb5_octet *) tmpname, (size_t) ibuf,
+				 &bp, &remain);
+    if (kret)
+	goto cleanup;
+    tmpname[ibuf] = '\0';
 
-		/* Parse the name to a principal structure */
-		principal = (krb5_principal) NULL;
-		kret = krb5_parse_name(kcontext, tmpname, &principal);
-		if (!kret) {
-		    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-		    if (!kret && (ibuf == KV5M_PRINCIPAL)) {
-			*buffer = bp;
-			*lenremain = remain;
-			*argp = principal;
-		    }
-		    else
-			kret = EINVAL;
-		}
-		if (kret && principal)
-		    krb5_free_principal(kcontext, principal);
-		free(tmpname);
-	    }
-	}
+    /* Parse the name to a principal structure */
+    kret = krb5_parse_name(kcontext, tmpname, &principal);
+    if (kret)
+	goto cleanup;
+
+    /* Read the trailing magic number */
+    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain) || ibuf != KV5M_PRINCIPAL) {
+	kret = EINVAL;
+	goto cleanup;
     }
-    return(kret);
+
+    *buffer = bp;
+    *lenremain = remain;
+    *argp = principal;
+cleanup:
+    if (kret)
+	krb5_free_principal(kcontext, principal);
+    free(tmpname);
+    return kret;
 }
 
 /*
