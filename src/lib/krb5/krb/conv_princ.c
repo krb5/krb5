@@ -156,6 +156,9 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
      unsigned int tmp_realm_len;
      int retval; 
 
+     if (context->profile == 0)
+	  return KRB5_CONFIG_CANTOPEN;
+
      *name = *inst = '\0';
      switch (krb5_princ_size(context, princ)) {
      case 2:
@@ -218,8 +221,6 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
      /* Ask for v4_realm corresponding to 
 	krb5 principal realm from krb5.conf realms stanza */
 
-     if (context->profile == 0)
-       return KRB5_CONFIG_CANTOPEN;
      retval = profile_get_string(context->profile, KRB5_CONF_REALMS,
 				 tmp_prealm, KRB5_CONF_V4_REALM, 0,
 				 &tmp_realm);
