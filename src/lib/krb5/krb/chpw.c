@@ -110,11 +110,12 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
 	    if ((ret = krb5_rd_error(context, packet, &krberror)))
 		return(ret);
 
-	    if (krberror->e_data.data  == NULL) {
+	    if (krberror->e_data.data  == NULL)
 		ret = ERROR_TABLE_BASE_krb5 + (krb5_error_code) krberror->error;
-		krb5_free_error(context, krberror);
-		return (ret);
-	    }
+	    else
+		ret = KRB5KRB_AP_ERR_MODIFIED;
+	    krb5_free_error(context, krberror);
+	    return(ret);
 	} else {
 	    return(KRB5KRB_AP_ERR_MODIFIED);
 	}
