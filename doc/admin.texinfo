@@ -2274,7 +2274,7 @@ will probably never need to use this option.)
 ``+password_changing_service'' option sets the KRB5_KDB_PWCHANGE_SERVICE
 flag on the principal in the database.
 
-@item @{-|+}ok_as_delegate
+@item @{-|+@}ok_as_delegate
 The ``+ok_as_delegate'' option sets a flag in tickets issued for the
 service principal.  Some client programs may recognize this flag as
 indicating that it is okay to delegate credentials to the service.  If
