@@ -455,7 +455,7 @@ static krb5_error_code
 obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info etype_info, krb5_keyblock *def_enc_key, git_key_proc key_proc, krb5_const_pointer key_seed, krb5_creds *creds, krb5_kdc_req *request, krb5_pa_data **out_padata)
 {
     krb5_error_code		retval;
-    krb5_data *			scratch;
+    krb5_data *			scratch = 0;
     krb5_data			tmpsam;
     krb5_pa_data *		pa;
     krb5_sam_challenge		*sam_challenge = 0;
@@ -566,9 +566,7 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
     retval = 0;
     
 cleanup:
-    if (scratch)
-	krb5_free_data(context, scratch);
-    if (sam_challenge)
-        free(sam_challenge);
+    krb5_free_data(context, scratch);
+    free(sam_challenge);
     return retval;
 }
