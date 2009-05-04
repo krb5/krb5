@@ -260,6 +260,7 @@ krb5_preauth_supply_preauth_data(krb5_context context,
 	    emsg = krb5_get_error_message(context, retval);
 	    krb5int_set_error(&context->err, retval, "Preauth plugin %s: %s",
 			      context->preauth_context->modules[i].name, emsg);
+	    krb5_free_error_message(context, emsg);
 	    break;
 	}
     }
