@@ -968,8 +968,11 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
         DPRINTF(("gc_from_kdc: no server realm supplied, "
 		 "using client realm.\n"));
 	krb5_free_data_contents(context, &server->realm);
-	if (!( server->realm.data = (char *)malloc(client->realm.length+1)))
-	    return ENOMEM;
+	server->realm.data = malloc(client->realm.length + 1);
+	if (server->realm.data == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
 	memcpy(server->realm.data, client->realm.data, client->realm.length);
 	server->realm.length = client->realm.length;
 	server->realm.data[server->realm.length] = 0;
@@ -1146,7 +1149,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 						&tgtptr->server->data[1],
 						&server->realm);
 	    if (retval)
-		return retval;
+		goto cleanup;
 	    /*
 	     * Future work: rewrite server principal per any
 	     * supplied padata.
@@ -1194,7 +1197,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	     */
 	    DPRINTF(("gc_from_kdc: referral specified "
 		     "but no fallback realm avaiable!\n"));
-	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+	    retval = KRB5_ERR_HOST_REALM_UNKNOWN;
+	    goto cleanup;
 	}
     }
 
@@ -1308,14 +1312,23 @@ cleanup:
 	    if (subretval) {
 #endif
 	        /* Allocate returnable TGT list. */
-	        if (!(*tgts=calloc(sizeof (krb5_creds *), 2)))
-		    return ENOMEM;
-		subretval=krb5_copy_creds(context, referral_tgts[0], &((*tgts)[0]));
-		if(subretval)
-		    return subretval;
-		(*tgts)[1]=NULL;
-		DUMP_PRINC("gc_from_kdc: returning referral TGT for ccache",
-			   (*tgts)[0]->server);
+	        *tgts = calloc(2, sizeof (krb5_creds *));
+		if (*tgts == NULL && retval == 0)
+		    retval = ENOMEM;
+		if (*tgts) {
+		    subretval = krb5_copy_creds(context, referral_tgts[0],
+						&((*tgts)[0]));
+		    if (subretval) {
+			if (retval == 0)
+			    retval = subretval;
+			free(*tgts);
+			*tgts = NULL;
+		    } else {
+			(*tgts)[1] = NULL;
+			DUMP_PRINC("gc_from_kdc: referral TGT for ccache",
+				   (*tgts)[0]->server);
+		    }
+		}
 #if 0
 	    }
 #endif
