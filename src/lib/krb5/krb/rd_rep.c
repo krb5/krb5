@@ -73,49 +73,53 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
 	    const krb5_data *inbuf, krb5_ap_rep_enc_part **repl)
 {
     krb5_error_code 	  retval;
-    krb5_ap_rep 	* reply;
+    krb5_ap_rep 	 *reply = NULL;
+    krb5_ap_rep_enc_part *enc = NULL;
     krb5_data 	 	  scratch;
+
+    *repl = NULL;
 
     if (!krb5_is_ap_rep(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
 
-    /* decode it */
-
-    if ((retval = decode_krb5_ap_rep(inbuf, &reply)))
+    /* Decode inbuf. */
+    retval = decode_krb5_ap_rep(inbuf, &reply);
+    if (retval)
 	return retval;
 
-    /* put together an eblock for this encryption */
-
+    /* Put together an eblock for this encryption. */
     scratch.length = reply->enc_part.ciphertext.length;
-    if (!(scratch.data = malloc(scratch.length))) {
-	krb5_free_ap_rep(context, reply);
-	return(ENOMEM);
+    scratch.data = malloc(scratch.length);
+    if (scratch.data == NULL) {
+	retval = ENOMEM;
+	goto clean_scratch;
     }
 
-    if ((retval = krb5_c_decrypt(context, auth_context->keyblock,
-				 KRB5_KEYUSAGE_AP_REP_ENCPART, 0,
-				 &reply->enc_part, &scratch)))
-	goto clean_scratch;
-
-    /* now decode the decrypted stuff */
-    retval = decode_krb5_ap_rep_enc_part(&scratch, repl);
+    retval = krb5_c_decrypt(context, auth_context->keyblock,
+			    KRB5_KEYUSAGE_AP_REP_ENCPART, 0,
+			    &reply->enc_part, &scratch);
     if (retval)
 	goto clean_scratch;
 
-    /* Check reply fields */
-    if (((*repl)->ctime != auth_context->authentp->ctime) ||
-      ((*repl)->cusec != auth_context->authentp->cusec)) {
+    /* Now decode the decrypted stuff. */
+    retval = decode_krb5_ap_rep_enc_part(&scratch, &enc);
+    if (retval)
+	goto clean_scratch;
+
+    /* Check reply fields. */
+    if ((enc->ctime != auth_context->authentp->ctime)
+	|| (enc->cusec != auth_context->authentp->cusec)) {
 	retval = KRB5_MUTUAL_FAILED;
 	goto clean_scratch;
     }
 
-    /* Set auth subkey */
-    if ((*repl)->subkey) {
+    /* Set auth subkey. */
+    if (enc->subkey) {
 	if (auth_context->recv_subkey) {
 	    krb5_free_keyblock(context, auth_context->recv_subkey);
 	    auth_context->recv_subkey = NULL;
 	}
-	retval = krb5_copy_keyblock(context, (*repl)->subkey,
+	retval = krb5_copy_keyblock(context, enc->subkey,
 				    &auth_context->recv_subkey);
 	if (retval)
 	    goto clean_scratch;
@@ -123,23 +127,27 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
 	    krb5_free_keyblock(context, auth_context->send_subkey);
 	    auth_context->send_subkey = NULL;
 	}
-	retval = krb5_copy_keyblock(context, (*repl)->subkey,
+	retval = krb5_copy_keyblock(context, enc->subkey,
 				    &auth_context->send_subkey);
 	if (retval) {
 	    krb5_free_keyblock(context, auth_context->send_subkey);
 	    auth_context->send_subkey = NULL;
+	    goto clean_scratch;
 	}
-	/* not used for anything yet */
-	auth_context->negotiated_etype = (*repl)->subkey->enctype;
+	/* Not used for anything yet. */
+	auth_context->negotiated_etype = enc->subkey->enctype;
     }
 
-    /* Get remote sequence number */
-    auth_context->remote_seq_number = (*repl)->seq_number;
+    /* Get remote sequence number. */
+    auth_context->remote_seq_number = enc->seq_number;
+
+    *repl = enc;
+    enc = NULL;
 
 clean_scratch:
     memset(scratch.data, 0, scratch.length); 
-
     krb5_free_ap_rep(context, reply);
+    krb5_free_ap_rep_enc_part(context, enc);
     free(scratch.data);
     return retval;
 }
