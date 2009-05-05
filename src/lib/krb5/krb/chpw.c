@@ -370,6 +370,7 @@ krb5int_rd_setpw_rep(krb5_context context, krb5_auth_context auth_context,
 	krberror->e_data.data  = NULL; /*So we can free it later*/
 	krberror->e_data.length = 0;
 	krb5_free_error(context, krberror);
+	ap_rep.length = 0;
 
     } else { /* Not an error*/
 
