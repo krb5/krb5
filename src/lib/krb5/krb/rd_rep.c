@@ -145,10 +145,11 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
     enc = NULL;
 
 clean_scratch:
-    memset(scratch.data, 0, scratch.length); 
+    if (scratch.data)
+	memset(scratch.data, 0, scratch.length); 
+    free(scratch.data);
     krb5_free_ap_rep(context, reply);
     krb5_free_ap_rep_enc_part(context, enc);
-    free(scratch.data);
     return retval;
 }
 
