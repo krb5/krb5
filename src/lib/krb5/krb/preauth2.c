@@ -1652,6 +1652,7 @@ krb5_error_code pa_sam_2(krb5_context context,
    if (retval) {
 	krb5_free_sam_challenge_2(context, sc2);
 	krb5_free_sam_challenge_2_body(context, sc2b);
+	krb5_free_data(context, scratch);
 	return(retval);
    }
    sr2.sam_enc_nonce_or_sad.ciphertext.length = ciph_len;
@@ -1662,6 +1663,7 @@ krb5_error_code pa_sam_2(krb5_context context,
    if (!sr2.sam_enc_nonce_or_sad.ciphertext.data) {
 	krb5_free_sam_challenge_2(context, sc2);
 	krb5_free_sam_challenge_2_body(context, sc2b);
+	krb5_free_data(context, scratch);
 	return(ENOMEM);
    }
 
