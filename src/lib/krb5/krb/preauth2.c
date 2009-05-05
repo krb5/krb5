@@ -1417,8 +1417,10 @@ krb5_error_code pa_sam_2(krb5_context context,
 
    retval = decode_krb5_sam_challenge_2_body(&sc2->sam_challenge_2_body, &sc2b);
 
-   if (retval)
+   if (retval) {
+	krb5_free_sam_challenge_2(context, sc2);
 	return(retval);
+   }
 
    if (!sc2->sam_cksum || ! *sc2->sam_cksum) {
 	krb5_free_sam_challenge_2(context, sc2);
