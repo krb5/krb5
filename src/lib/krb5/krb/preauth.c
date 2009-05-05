@@ -189,7 +189,7 @@ krb5_error_code krb5_obtain_padata(krb5_context context, krb5_pa_data **preauth_
 	 * This will set the salt length 
 	 */
 	if ((retval = krb5_principal2salt(context, request->client, &salt)))
-	    return(retval);
+	    goto cleanup;
 	f_salt = 1;
     }
     
