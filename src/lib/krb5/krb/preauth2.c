@@ -876,8 +876,11 @@ krb5_error_code pa_sam(krb5_context context,
 	   *etype = ENCTYPE_DES_CBC_CRC;
 
 	if ((ret = (gak_fct)(context, request->client, *etype, prompter,
-			prompter_data, salt, s2kparams, as_key, gak_data)))
-	   return(ret);
+			     prompter_data, salt, s2kparams, as_key,
+			     gak_data))) {
+	    krb5_free_sam_challenge(context, sam_challenge);
+	    return(ret);
+	}
     }
     snprintf(name, sizeof(name), "%.*s",
 	     SAMDATA(sam_challenge->sam_type_name, "SAM Authentication",
