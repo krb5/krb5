@@ -520,10 +520,8 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
 	if (retval) {
 	  return (retval);
 	}
-	if (creds->server)
-	    krb5_free_principal( context, creds->server);
-	if (creds->client)
-	    krb5_free_principal( context, creds->client);
+	krb5_free_principal( context, creds->server);
+	krb5_free_principal( context, creds->client);
 	creds->client = client_princ;
 	creds->server = server_princ;
 	/* store it in the ccache! */
