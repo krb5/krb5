@@ -1705,6 +1705,7 @@ krb5_error_code pa_sam_2(krb5_context context,
    sam_padata->pa_type = KRB5_PADATA_SAM_RESPONSE_2;
    sam_padata->length = scratch->length;
    sam_padata->contents = (krb5_octet *) scratch->data;
+   free(scratch);
 
    *out_padata = sam_padata;
 
