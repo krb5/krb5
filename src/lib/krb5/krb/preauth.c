@@ -463,7 +463,9 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
     /* these two get encrypted and stuffed in to sam_response */
     krb5_enc_sam_response_enc	enc_sam_response_enc;
     krb5_keyblock *		sam_use_key = 0;
-    char * prompt;
+    char *prompt = 0, *passcode = 0;
+
+    sam_response.sam_enc_nonce_or_ts.ciphertext.data = 0;
 
     tmpsam.length = in_padata->length;
     tmpsam.data = (char *) in_padata->contents;
@@ -472,7 +474,8 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
       return retval;
 
     if (sam_challenge->sam_flags & KRB5_SAM_MUST_PK_ENCRYPT_SAD) {
-      return KRB5_SAM_UNSUPPORTED;
+      retval = KRB5_SAM_UNSUPPORTED;
+      goto cleanup;
     }
 
     enc_sam_response_enc.sam_nonce = sam_challenge->sam_nonce;
@@ -480,44 +483,44 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
       retval = krb5_us_timeofday(context,
                                  &enc_sam_response_enc.sam_timestamp,
                                  &enc_sam_response_enc.sam_usec);
+      if (retval)
+	goto cleanup;
       sam_response.sam_patimestamp = enc_sam_response_enc.sam_timestamp;
     }
-    if (retval)
-      return retval;
     if (sam_challenge->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
       /* encrypt passcode in key by stuffing it here */
       unsigned int pcsize = 256;
-      char *passcode = malloc(pcsize+1);
-      if (passcode == NULL)
-	return ENOMEM;
+      passcode = malloc(pcsize + 1);
+      if (passcode == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
+      }
       prompt = handle_sam_labels(sam_challenge);
       if (prompt == NULL) {
-	free(passcode);
-	return ENOMEM;
+	retval = ENOMEM;
+	goto cleanup;
       }
       retval = krb5_read_password(context, prompt, 0, passcode, &pcsize);
-      free(prompt);
-
-      if (retval) {
-	free(passcode);
-	return retval;
-      }
+      if (retval)
+	  goto cleanup;
       enc_sam_response_enc.sam_sad.data = passcode;
       enc_sam_response_enc.sam_sad.length = pcsize;
     } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
       prompt = handle_sam_labels(sam_challenge);
-      if (prompt == NULL)
-	return ENOMEM;
+      if (prompt == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
+      }
       retval = sam_get_pass_from_user(context, etype_info, key_proc, 
 				      key_seed, request, &sam_use_key,
 				      prompt);
-      free(prompt);
       if (retval)
-	return retval;      
+	goto cleanup;
       enc_sam_response_enc.sam_sad.length = 0;
     } else {
       /* what *was* it? */
-      return KRB5_SAM_UNSUPPORTED;
+      retval = KRB5_SAM_UNSUPPORTED;
+      goto cleanup;
     }
 
     /* so at this point, either sam_use_key is generated from the passcode
@@ -526,7 +529,7 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
     /* encode the encoded part of the response */
     if ((retval = encode_krb5_enc_sam_response_enc(&enc_sam_response_enc,
 						   &scratch)) != 0)
-      return retval;
+      goto cleanup;
 
     if ((retval = krb5_encrypt_data(context, 
 				    sam_use_key?sam_use_key:def_enc_key, 
@@ -548,7 +551,7 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
     sam_response.magic = KV5M_SAM_RESPONSE;
 
     if ((retval = encode_krb5_sam_response(&sam_response, &scratch)) != 0)
-	return retval;
+	goto cleanup;
     
     if ((pa = malloc(sizeof(krb5_pa_data))) == NULL) {
 	retval = ENOMEM;
@@ -567,6 +570,9 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
     
 cleanup:
     krb5_free_data(context, scratch);
-    free(sam_challenge);
+    krb5_free_sam_challenge(context, sam_challenge);
+    free(prompt);
+    free(passcode);
+    free(sam_response.sam_enc_nonce_or_ts.ciphertext.data);
     return retval;
 }
