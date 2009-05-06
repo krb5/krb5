@@ -1016,6 +1016,7 @@ krb5_error_code pa_sam(krb5_context context,
     } else {
 	/* Eventually, combine SAD with long-term key to get
 	   encryption key.  */
+	krb5_free_sam_challenge(context, sam_challenge);
 	return KRB5_PREAUTH_BAD_TYPE;
     }
 
