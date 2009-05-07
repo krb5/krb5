@@ -1607,13 +1607,6 @@ krb5_error_code pa_sam_2(krb5_context context,
    }
 
    if (!valid_cksum) {
-
-	/* If KRB5_SAM_SEND_ENCRYPTED_SAD is set, then password is only	*/
-	/* source for checksum key.  Therefore, a bad checksum means a	*/
-	/* bad password.  Don't give that direct feedback to someone	*/
-	/* trying to brute-force passwords.				*/
-
-	if (!(sc2b->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD))
 	krb5_free_sam_challenge_2(context, sc2);
 	krb5_free_sam_challenge_2_body(context, sc2b);
 	/*
