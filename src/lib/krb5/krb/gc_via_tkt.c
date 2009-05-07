@@ -290,9 +290,17 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	goto error_4;
     }
 
-    if ((retval = krb5_decode_kdc_rep(context, &tgsrep.response,
-				      subkey, &dec_rep)))
-	goto error_4;
+    /* Unfortunately, Heimdal at least up through 1.2  encrypts using
+       the session key not the subsession key.  So we try both. */
+    if ((retval = krb5int_decode_tgs_rep(context, &tgsrep.response,
+				      subkey,
+					 KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY, &dec_rep))) {
+	    if ((krb5int_decode_tgs_rep(context, &tgsrep.response,
+				      &tkt->keyblock,
+					KRB5_KEYUSAGE_TGS_REP_ENCPART_SESSKEY, &dec_rep)) == 0)
+		retval = 0;
+	    else goto error_4;
+    }
 
     if (dec_rep->msg_type != KRB5_TGS_REP) {
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
