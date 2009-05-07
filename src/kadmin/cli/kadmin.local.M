@@ -1,1 +1,1 @@
-.so man8/kadmin.8
+.so man1/kadmin.1

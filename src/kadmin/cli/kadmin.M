@@ -1,4 +1,4 @@
-.TH KADMIN 8
+.TH KADMIN 1
 .SH NAME
 kadmin \- Kerberos V5 database administration program
 .SH SYNOPSYS
