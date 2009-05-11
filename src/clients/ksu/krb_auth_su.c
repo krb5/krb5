@@ -179,7 +179,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     
     if ((retval = krb5_get_cred_from_kdc(context, cc, &in_creds, 
 					 &out_creds, &tgts))){
-	com_err(prog_name, retval, "while geting credentials from kdc");  
+	com_err(prog_name, retval, "while getting credentials from kdc");  
 	return (FALSE);
     }
     
