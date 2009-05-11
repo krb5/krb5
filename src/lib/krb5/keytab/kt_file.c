@@ -1754,6 +1754,7 @@ krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_
                 if (fseek(KTFILEP(id), zero_point, SEEK_SET)) {
                     return errno;
                 }
+		found = TRUE;
             }
         }
     }
