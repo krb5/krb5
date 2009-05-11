@@ -144,6 +144,16 @@ check_reply_server(krb5_context context, krb5_flags kdcoptions,
     return 0;
 }
 
+/* Return true if a TGS credential is for the client's local realm. */
+static inline int
+tgt_is_local_realm(krb5_creds *tgt)
+{
+    return (tgt->server->length == 2
+	    && data_eq_string(tgt->server->data[0], KRB5_TGS_NAME)
+	    && data_eq(tgt->server->data[1], tgt->client->realm)
+	    && data_eq(tgt->server->realm, tgt->client->realm));
+}
+
 krb5_error_code
 krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 		       krb5_flags kdcoptions, krb5_address *const *address,
@@ -289,6 +299,14 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	goto error_3;
     }
    
+    /*
+     * Don't trust the ok-as-delegate flag from foreign KDCs unless the
+     * cross-realm TGT also had the ok-as-delegate flag set.
+     */
+    if (!tgt_is_local_realm(tkt)
+	&& !(tkt->ticket_flags & TKT_FLG_OK_AS_DELEGATE))
+	dec_rep->enc_part2->flags &= ~TKT_FLG_OK_AS_DELEGATE;
+
     /* make sure the response hasn't been tampered with..... */
     retval = 0;
 
