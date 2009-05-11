@@ -152,9 +152,8 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) {
 	replaydata.seq = auth_context->local_seq_number++;
-	if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE) {
+	if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)
     	    outdata->seq = replaydata.seq;
-	}
     } 
 
 {
