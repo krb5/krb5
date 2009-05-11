@@ -547,8 +547,8 @@ typedef void (*_ure_cclsetup_t)(
 
 typedef struct {
     ucs2_t key;
-    unsigned long len;
-    unsigned long next;
+    unsigned int len : 8;
+    unsigned int next : 8;
     _ure_cclsetup_t func;
     unsigned long mask;
 } _ure_trie_t;
@@ -600,7 +600,7 @@ _ure_xdigit_setup(_ure_symtab_t *sym, unsigned long mask, _ure_buffer_t *b)
     _ure_add_range(&sym->sym.ccl, &range, b);
 }
 
-static _ure_trie_t cclass_trie[] = {
+static const _ure_trie_t cclass_trie[] = {
     {0x003a, 1, 1, 0, 0},
     {0x0061, 9, 10, 0, 0},
     {0x0063, 8, 19, 0, 0},
@@ -678,7 +678,7 @@ _ure_posix_ccl(ucs2_t *cp, unsigned long limit, _ure_symtab_t *sym,
 {
     int i;
     unsigned long n;
-    _ure_trie_t *tp;
+    const _ure_trie_t *tp;
     ucs2_t *sp, *ep;
 
     /*
