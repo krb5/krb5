@@ -15,7 +15,6 @@ static char *rcsid = "$Header$";
 #include	<string.h>
 #include	<errno.h>
 
-#define MAX_PW_HISTORY	10
 #define MIN_PW_HISTORY	1
 #define	MIN_PW_CLASSES	1
 #define MAX_PW_CLASSES	5
@@ -132,8 +131,7 @@ kadm5_create_policy_internal(void *server_handle,
     if (!(mask & KADM5_PW_HISTORY_NUM))
 	pent.pw_history_num = MIN_PW_HISTORY;
     else {
-	if(entry->pw_history_num < MIN_PW_HISTORY ||
-	   entry->pw_history_num > MAX_PW_HISTORY)
+	if(entry->pw_history_num < MIN_PW_HISTORY)
 	    return KADM5_BAD_HISTORY;
 	else
 	    pent.pw_history_num = entry->pw_history_num;
@@ -242,8 +240,7 @@ kadm5_modify_policy_internal(void *server_handle,
 	p->pw_min_classes = entry->pw_min_classes;
     }
     if ((mask & KADM5_PW_HISTORY_NUM)) {
-	if(entry->pw_history_num < MIN_PW_HISTORY ||
-	   entry->pw_history_num > MAX_PW_HISTORY) {
+	if(entry->pw_history_num < MIN_PW_HISTORY) {
 	     krb5_db_free_policy(handle->context, p);
 	     return KADM5_BAD_HISTORY;
 	}
