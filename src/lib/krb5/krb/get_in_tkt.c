@@ -650,7 +650,7 @@ krb5_get_in_tkt(krb5_context context,
 	retval = send_as_request(context, encoded_request,
 				 krb5_princ_realm(context, request.client), &err_reply,
 				 &as_reply, &use_master);
-	krb5_free_data_contents(context, encoded_request);
+	krb5_free_data(context, encoded_request);
 	if (retval != 0)
 	    goto cleanup;
 
