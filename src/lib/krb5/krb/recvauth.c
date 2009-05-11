@@ -173,11 +173,11 @@ recvauth_common(krb5_context context,
 		error.error = KRB_ERR_GENERIC;
 	message = error_message(problem);
 	error.text.length  = strlen(message) + 1;
-	if (!(error.text.data = malloc(error.text.length))) {
+	error.text.data = strdup(message);
+	if (!error.text.data) {
 	    retval = ENOMEM;
 	    goto cleanup;
 	}
-	strcpy(error.text.data, message);
 	if ((retval = krb5_mk_error(context, &error, &outbuf))) {
 	    free(error.text.data);
 	    goto cleanup;
