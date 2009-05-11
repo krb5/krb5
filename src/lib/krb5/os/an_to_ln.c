@@ -481,141 +481,118 @@ cleanup:
 }
 
 /*
- * rule_an_to_ln()	- Handle aname to lname translations for RULE rules.
+ * Compute selection string for RULE rules.
  *
- * The initial part of this routine handles the formulation of the strings from
- * the principal name.
+ * Advance *contextp to the string position after the selectring
+ * string part if present, and set *result to the selection string.
  */
 static krb5_error_code
-rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, const unsigned int lnsize, char *lname)
+aname_get_selstring(krb5_context context, krb5_const_principal aname,
+		    char **contextp, char **result)
 {
-    krb5_error_code	kret;
-    char		*current;
-    char		*fprincname;
-    char		*selstring = 0;
-    int			num_comps, compind, pos;
-    size_t selstring_used;
-    char		*cout;
-    krb5_const krb5_data *datap;
-    char		*outstring;
+    krb5_error_code kret;
+    char *fprincname, *current, *str;
+    long num_comps, compind;
+    const krb5_data *datap;
+    struct k5buf selstring;
+    size_t nlit;
 
-    /*
-     * First flatten the name.
-     */
-    current = rule;
-    if (!(kret = krb5_unparse_name(context, aname, &fprincname))) {
-	/*
-	 * First part.
-	 */
-	if (*current == '[') {
-	    current++;
-	    if (sscanf(current,"%d:%n", &num_comps, &pos) == 1) {
-		if (num_comps == aname->length) {
-		    /*
-		     * We have a match based on the number of components.
-		     */
-		    current += pos;
-		    selstring = (char *) malloc(MAX_FORMAT_BUFFER);
-		    selstring_used = 0;
-		    if (selstring) {
-			cout = selstring;
-			/*
-			 * Plow through the string.
-			 */
-			while ((*current != ']') &&
-			       (*current != '\0')) {
-			    /*
-			     * Expand to a component.
-			     */
-			    if (*current == '$') {
-				if ((sscanf(current+1, "%d", &compind) == 1) &&
-				    (compind <= num_comps) &&
-				    (datap =
-				     (compind > 0)
-				     ? krb5_princ_component(context, aname,
-							    compind-1)
-				     : krb5_princ_realm(context, aname))
-				    ) {
-				    if ((datap->length < MAX_FORMAT_BUFFER)
-					&&  (selstring_used+datap->length
-					     < MAX_FORMAT_BUFFER)) {
-					selstring_used += datap->length;
-				    } else {
-					kret = ENOMEM;
-					goto errout;
-				    }
-				    strncpy(cout,
-					    datap->data,
-					    (unsigned) datap->length);
-				    cout += datap->length;
-				    *cout = '\0';
-				    current++;
-				    /* Point past number */
-				    while (isdigit((int) (*current)))
-					current++;
-				}
-				else
-				    kret = KRB5_CONFIG_BADFORMAT;
-			    }
-			    else {
-				/* Copy in verbatim. */
-				*cout = *current;
-				cout++;
-				*cout = '\0';
-				current++;
-			    }
-			}
-
-			/*
-			 * Advance past separator if appropriate.
-			 */
-			if (*current == ']')
-			    current++;
-			else
-			    kret = KRB5_CONFIG_BADFORMAT;
-
-			errout: if (kret)
-			    free(selstring);
-		    }
-		    else
-			kret = ENOMEM;
-		}
-		else
-		    kret = KRB5_LNAME_NOTRANS;
-	    }
-	    else
-		kret = KRB5_CONFIG_BADFORMAT;
-	}
-	else {
-	    if (!(selstring = aname_full_to_mapping_name(fprincname)))
-		kret = ENOMEM;
-	}
+    *result = NULL;
+    if (**contextp != '[') {
+	/* No selstring part; use the full flattened principal name. */
+	kret = krb5_unparse_name(context, aname, &fprincname);
+	if (kret)
+	    return kret;
+	str = aname_full_to_mapping_name(fprincname);
 	free(fprincname);
-    }
-    if (!kret) {
-	/*
-	 * Second part
-	 */
-	if (*current == '(')
-	    kret = aname_do_match(selstring, &current);
-
-	/*
-	 * Third part.
-	 */
-	if (!kret) {
-	    outstring = (char *) NULL;
-	    kret = aname_replacer(selstring, &current, &outstring);
-	    if (outstring) {
-		/* Copy out the value if there's enough room */
-		if (strlcpy(lname, outstring, lnsize) >= lnsize)
-		    kret = KRB5_CONFIG_NOTENUFSPACE;
-		free(outstring);
-	    }
-	}
-	free(selstring);
+	if (!str)
+	    return ENOMEM;
+	*result = str;
+	return 0;
     }
 
-    return(kret);
+    /* Advance past the '[' and read the number of components. */
+    current = *contextp + 1;
+    errno = 0;
+    num_comps = strtol(current, &current, 10);
+    if (errno != 0 || num_comps < 0 || *current != ':')
+	return KRB5_CONFIG_BADFORMAT;
+    if (num_comps != aname->length)
+	return KRB5_LNAME_NOTRANS;
+    current++;
+
+    krb5int_buf_init_dynamic(&selstring);
+    while (1) {
+	/* Copy in literal characters up to the next $ or ]. */
+	nlit = strcspn(current, "$]");
+	krb5int_buf_add_len(&selstring, current, nlit);
+	current += nlit;
+	if (*current != '$')
+	    break;
+
+	/* Expand $ substitution to a principal component. */
+	errno = 0;
+	compind = strtol(current + 1, &current, 10);
+	if (errno || compind > num_comps)
+	    break;
+	datap = (compind > 0)
+	    ? krb5_princ_component(context, aname, compind - 1)
+	    : krb5_princ_realm(context, aname);
+	if (!datap)
+	    break;
+	krb5int_buf_add_len(&selstring, datap->data, datap->length);
+    }
+
+    /* Check that we hit a ']' and not the end of the string. */
+    if (*current != ']') {
+	krb5int_free_buf(&selstring);
+	return KRB5_CONFIG_BADFORMAT;
+    }
+
+    str = krb5int_buf_data(&selstring);
+    if (str == NULL)
+	return ENOMEM;
+
+    *contextp = current + 1;
+    *result = str;
+    return 0;
+}
+
+/* Handle aname to lname translations for RULE rules. */
+static krb5_error_code
+rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname,
+	      const unsigned int lnsize, char *lname)
+{
+    krb5_error_code kret;
+    char *current, *selstring = 0, *outstring = 0;
+
+    /* Compute the selection string. */
+    current = rule;
+    kret = aname_get_selstring(context, aname, &current, &selstring);
+    if (kret)
+	return kret;
+
+    /* Check the selection string against the regexp, if present. */
+    if (*current == '(') {
+	kret = aname_do_match(selstring, &current);
+	if (kret)
+	    goto cleanup;
+    }
+
+    /* Perform the substitution. */
+    outstring = NULL;
+    kret = aname_replacer(selstring, &current, &outstring);
+    if (kret)
+	goto cleanup;
+
+    /* Copy out the value if there's enough room. */
+    if (strlcpy(lname, outstring, lnsize) >= lnsize)
+	kret = KRB5_CONFIG_NOTENUFSPACE;
+
+cleanup:
+    free(selstring);
+    free(outstring);
+    return kret;
 }
 #endif	/* AN_TO_LN_RULES */
 
