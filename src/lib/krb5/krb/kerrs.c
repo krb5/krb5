@@ -35,6 +35,7 @@ static int error_message_debug = 0;
 #endif
 #endif
 
+#undef krb5_set_error_message
 void KRB5_CALLCONV_C
 krb5_set_error_message (krb5_context ctx, krb5_error_code code,
 			const char *fmt, ...)
@@ -50,6 +51,28 @@ krb5_set_error_message (krb5_context ctx, krb5_error_code code,
 		ctx, &ctx->err, (long) code);
 #endif
     krb5int_vset_error (&ctx->err, code, fmt, args);
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr, "->%s\n", ctx->err.msg);
+#endif
+    va_end (args);
+}
+
+void KRB5_CALLCONV_C
+krb5_set_error_message_fl (krb5_context ctx, krb5_error_code code,
+			   const char *file, int line, const char *fmt, ...)
+{
+    va_list args;
+    if (ctx == NULL)
+	return;
+    va_start (args, fmt);
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr,
+		"krb5_set_error_message(ctx=%p/err=%p, code=%ld, ...)\n",
+		ctx, &ctx->err, (long) code);
+#endif
+    krb5int_vset_error_fl (&ctx->err, code, file, line, fmt, args);
 #ifdef DEBUG
     if (ERROR_MESSAGE_DEBUG())
 	fprintf(stderr, "->%s\n", ctx->err.msg);
