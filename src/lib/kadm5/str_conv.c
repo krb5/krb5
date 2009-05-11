@@ -73,6 +73,7 @@ static const char flags_dup_skey_in[]	= "dup-skey";
 static const char flags_tickets_in[]	= "allow-tickets";
 static const char flags_preauth_in[]	= "preauth";
 static const char flags_hwauth_in[]	= "hwauth";
+static const char flags_ok_as_delegate_in[]	= "ok-as-delegate";
 static const char flags_pwchange_in[]	= "pwchange";
 static const char flags_service_in[]	= "service";
 static const char flags_pwsvc_in[]	= "pwservice";
@@ -86,6 +87,7 @@ static const char flags_dup_skey_out[]	= "No DUP_SKEY requests";
 static const char flags_tickets_out[]	= "All Tickets Disallowed";
 static const char flags_preauth_out[]	= "Preauthorization required";
 static const char flags_hwauth_out[]	= "HW Authorization required";
+static const char flags_ok_as_delegate_out[]	= "OK as Delegate";
 static const char flags_pwchange_out[]	= "Password Change required";
 static const char flags_service_out[]	= "Service Disabled";
 static const char flags_pwsvc_out[]	= "Password Changing Service";
@@ -109,6 +111,7 @@ static const struct flags_lookup_entry flags_table[] = {
 { KRB5_KDB_DISALLOW_ALL_TIX,	0,	flags_tickets_in,  flags_tickets_out },
 { KRB5_KDB_REQUIRES_PRE_AUTH,	1,	flags_preauth_in,  flags_preauth_out },
 { KRB5_KDB_REQUIRES_HW_AUTH,	1,	flags_hwauth_in,   flags_hwauth_out  },
+{ KRB5_KDB_OK_AS_DELEGATE,	1,	flags_ok_as_delegate_in, flags_ok_as_delegate_out },
 { KRB5_KDB_REQUIRES_PWCHANGE,	1,	flags_pwchange_in, flags_pwchange_out},
 { KRB5_KDB_DISALLOW_SVR,	0,	flags_service_in,  flags_service_out },
 { KRB5_KDB_PWCHANGE_SERVICE,	1,	flags_pwsvc_in,	   flags_pwsvc_out   },

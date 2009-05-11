@@ -31,8 +31,6 @@
 #ifndef KRB5_KDB5_EXT__
 #define KRB5_KDB5_EXT__
 
-/* Can be delegated as in TicketFlags */
-#define KRB5_KDB_OK_AS_DELEGATE		0x00100000
 /* Allowed to use protocol transition */
 #define KRB5_KDB_OK_TO_AUTH_AS_DELEGATE	0x00200000
 /* Service does not require authorization data */
