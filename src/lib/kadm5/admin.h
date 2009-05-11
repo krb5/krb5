@@ -56,6 +56,18 @@
 #include	<kadm5/kadm_err.h>
 #include	<kadm5/chpass_util_strings.h>
 
+#ifndef KADM5INT_BEGIN_DECLS
+#if defined(__cplusplus)
+#define KADM5INT_BEGIN_DECLS	extern "C" {
+#define KADM5INT_END_DECLS	}
+#else
+#define KADM5INT_BEGIN_DECLS
+#define KADM5INT_END_DECLS
+#endif
+#endif
+
+KADM5INT_BEGIN_DECLS
+
 #define KADM5_ADMIN_SERVICE	"kadmin/admin"
 #define KADM5_CHANGEPW_SERVICE	"kadmin/changepw"
 #define KADM5_HIST_PRINCIPAL	"kadmin/history"
@@ -789,5 +801,7 @@ ovsec_kadm_ret_t    ovsec_kadm_get_policies(void *server_handle,
 #define OVSEC_KADM_NO_RENAME_SALT KADM5_NO_RENAME_SALT
 
 #endif /* USE_KADM5_API_VERSION == 1 */
+
+KADM5INT_END_DECLS
 
 #endif /* __KADM5_ADMIN_H__ */
