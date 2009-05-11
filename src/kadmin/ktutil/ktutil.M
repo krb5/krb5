@@ -1,4 +1,4 @@
-.TH KTUTIL 8
+.TH KTUTIL 1
 .SH NAME
 ktutil \- Kerberos keytab file maintenance utility
 .SH SYNOPSIS

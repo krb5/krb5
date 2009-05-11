@@ -1,6 +1,6 @@
 .\" Copyright 1989, 2003 by the Massachusetts Institute of Technology.
 .\"
-.TH K5SRVUTIL 8
+.TH K5SRVUTIL 1
 .SH NAME
 k5srvutil \- host key table (keytab) manipulation utility
 .SH SYNOPSIS
