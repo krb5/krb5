@@ -1019,7 +1019,7 @@ krb5_error_code pa_sam(krb5_context context,
     sam_response.sam_type = sam_challenge->sam_type;
     sam_response.magic = KV5M_SAM_RESPONSE;
 
-    free(sam_challenge);
+    krb5_free_sam_challenge(context, sam_challenge);
 
     /* encode the encoded part of the response */
     if ((ret = encode_krb5_enc_sam_response_enc(&enc_sam_response_enc,
