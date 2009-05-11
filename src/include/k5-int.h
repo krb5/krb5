@@ -2644,10 +2644,10 @@ krb5_error_code krb5int_send_tgs
 		 * in with the subkey needed to decrypt the TGS
 		 * response. Otherwise it will be set to null.
 		 */
-krb5_error_code krb5_decode_kdc_rep
+krb5_error_code krb5int_decode_tgs_rep
 	(krb5_context,
 		krb5_data *,
-	  const krb5_keyblock *,
+	 const krb5_keyblock *, krb5_keyusage,
 		krb5_kdc_rep ** );
 krb5_error_code krb5int_find_authdata
 (krb5_context context, krb5_authdata *const * ticket_authdata,

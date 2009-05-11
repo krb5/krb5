@@ -185,7 +185,6 @@ krb5_copy_ticket
 krb5_create_secure_file
 krb5_crypto_us_timeofday
 krb5_decode_authdata_container
-krb5_decode_kdc_rep
 krb5_decode_ticket
 krb5_decrypt_tkt_part
 krb5_default_pwd_prompt1

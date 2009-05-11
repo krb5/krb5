@@ -43,17 +43,15 @@
  */
 
 krb5_error_code
-krb5_decode_kdc_rep(krb5_context context, krb5_data *enc_rep, const krb5_keyblock *key, krb5_kdc_rep **dec_rep)
+krb5int_decode_tgs_rep(krb5_context context, krb5_data *enc_rep, const krb5_keyblock *key,
+		       krb5_keyusage usage, krb5_kdc_rep **dec_rep)
 {
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;
-    krb5_keyusage usage;
 
     if (krb5_is_as_rep(enc_rep)) {
-	usage = KRB5_KEYUSAGE_AS_REP_ENCPART;
 	retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
     } else if (krb5_is_tgs_rep(enc_rep)) {
-	usage = KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY;
 	retval = decode_krb5_tgs_rep(enc_rep, &local_dec_rep);
     } else {
 	return KRB5KRB_AP_ERR_MSG_TYPE;
