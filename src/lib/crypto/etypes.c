@@ -33,6 +33,7 @@
 #include "dk.h"
 #include "arcfour.h"
 #include "aes_s2k.h"
+#include "des/des_int.h"
 
 /* these will be linear searched.  if they ever get big, a binary
    search or hash table would be better, which means these would need
@@ -44,47 +45,47 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
     { ENCTYPE_DES_CBC_CRC,
       "des-cbc-crc", { 0 }, "DES cbc mode with CRC-32",
       &krb5int_enc_des, &krb5int_hash_crc32,
-      8,
+      16,
       krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
       krb5int_des_string_to_key,
-      NULL, /*PRF*/
+      krb5int_des_prf,
       CKSUMTYPE_RSA_MD5,
       NULL, /*AEAD*/
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_MD4,
       "des-cbc-md4", { 0 }, "DES cbc mode with RSA-MD4",
       &krb5int_enc_des, &krb5int_hash_md4,
-      8,
+      16,
       krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
       krb5int_des_string_to_key,
-      NULL, /*PRF*/
+      krb5int_des_prf,
       CKSUMTYPE_RSA_MD4,
       NULL, /*AEAD*/
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_MD5,
       "des-cbc-md5", { "des" }, "DES cbc mode with RSA-MD5",
       &krb5int_enc_des, &krb5int_hash_md5,
-      8,
+      16,
       krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
       krb5int_des_string_to_key,
-      NULL, /*PRF*/
+      krb5int_des_prf,
       CKSUMTYPE_RSA_MD5,
       NULL, /*AEAD*/
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_RAW,
       "des-cbc-raw", { 0 }, "DES cbc mode raw",
       &krb5int_enc_des, NULL,
-      8,
+      16,
       krb5_raw_encrypt_length, krb5_raw_encrypt, krb5_raw_decrypt,
       krb5int_des_string_to_key,
-      NULL, /*PRF*/
+      krb5int_des_prf,
       0,
       &krb5int_aead_raw,
       ETYPE_WEAK },
     { ENCTYPE_DES3_CBC_RAW,
       "des3-cbc-raw", { 0 }, "Triple DES cbc mode raw",
       &krb5int_enc_des3, NULL,
-      8,
+      16,
       krb5_raw_encrypt_length, krb5_raw_encrypt, krb5_raw_decrypt,
       krb5int_dk_string_to_key,
       NULL, /*PRF*/
@@ -96,10 +97,10 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "des3-cbc-sha1", { "des3-hmac-sha1", "des3-cbc-sha1-kd" },
       "Triple DES cbc mode with HMAC/sha1",
       &krb5int_enc_des3, &krb5int_hash_sha1,
-      8,
+      16,
       krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
       krb5int_dk_string_to_key,
-      NULL, /*PRF*/
+      krb5int_dk_prf,
       CKSUMTYPE_HMAC_SHA1_DES3,
       &krb5int_aead_dk,
       0 /*flags*/ },

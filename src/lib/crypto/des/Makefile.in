@@ -18,6 +18,7 @@ STLIBOBJS=\
 	d3_cbc.o	\
 	d3_aead.o	\
 	d3_kysched.o	\
+	des_prf.o \
 	f_aead.o 	\
 	f_cbc.o 	\
 	f_cksum.o	\
@@ -32,6 +33,7 @@ OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
 	$(OUTPRE)d3_cbc.$(OBJEXT)	\
 	$(OUTPRE)d3_aead.$(OBJEXT)	\
 	$(OUTPRE)d3_kysched.$(OBJEXT)	\
+	$(OUTPRE)des_prf.$(OBJEXT) \
 	$(OUTPRE)f_aead.$(OBJEXT) 	\
 	$(OUTPRE)f_cbc.$(OBJEXT) 	\
 	$(OUTPRE)f_cksum.$(OBJEXT)	\
@@ -46,6 +48,7 @@ SRCS=	$(srcdir)/afsstring2key.c	\
 	$(srcdir)/d3_cbc.c	\
 	$(srcdir)/d3_aead.c	\
 	$(srcdir)/d3_kysched.c	\
+	$(srcdir)/des_prf.c \
 	$(srcdir)/f_aead.c	\
 	$(srcdir)/f_cbc.c	\
 	$(srcdir)/f_cksum.c	\
