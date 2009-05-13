@@ -268,12 +268,11 @@ k5_ucs2s_to_utf8s(char *utf8str, const krb5_ucs2 *ucs2str,
     {
 	while (ucs2len == -1 ? *ucs2str : --ucs2len >= 0) {
 	    /* Get UTF-8 size of next wide char */
+	  ch = *ucs2str++;
 #ifdef K5_BE
 	    if (little_endian)
-		ch = SWAP16(*ucs2str++);
-	    else
+		ch = SWAP16(ch);
 #endif
-		ch = *ucs2str++;
 
 	    n = krb5int_ucs2_to_utf8(ch, NULL);
 	    if (n < 1)
@@ -290,12 +289,11 @@ k5_ucs2s_to_utf8s(char *utf8str, const krb5_ucs2 *ucs2str,
 
     n = 1;					/* In case of empty ucs2str */
     while (ucs2len == -1 ? *ucs2str != 0 : --ucs2len >= 0) {
+      ch = *ucs2str++;
 #ifdef K5_BE
 	if (little_endian)
-	    ch = SWAP16(*ucs2str++);
-	else
+	    ch = SWAP16(ch);
 #endif
-	    ch = *ucs2str++;
 
 	n = krb5int_ucs2_to_utf8(ch, p);
 		
