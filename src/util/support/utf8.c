@@ -159,7 +159,11 @@ int krb5int_utf8_charlen2(const char *p)
     return i;
 }
 
-krb5_ucs4 krb5int_utf8_to_ucs4(const char *p)
+/*
+ * Convert a UTF8 character to a UCS4 character.  Return 0 on success,
+ * -1 on failure.
+ */
+int krb5int_utf8_to_ucs4(const char *p, krb5_ucs4 *out)
 {
     const unsigned char *c = (const unsigned char *) p;
     krb5_ucs4 ch;
@@ -167,33 +171,35 @@ krb5_ucs4 krb5int_utf8_to_ucs4(const char *p)
     static unsigned char mask[] = {
 	0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
 
+    *out = 0;
     len = KRB5_UTF8_CHARLEN2(p, len);
 
     if (len == 0)
-	return KRB5_UCS4_INVALID;
+	return -1;
 
     ch = c[0] & mask[len];
 
     for (i = 1; i < len; i++) {
-	if ((c[i] & 0xc0) != 0x80) {
-	    return KRB5_UCS4_INVALID;
-	}
+	if ((c[i] & 0xc0) != 0x80)
+	    return -1;
 
 	ch <<= 6;
 	ch |= c[i] & 0x3f;
     }
 
-    return ch;
+    *out = ch;
+    return 0;
 }
 
-krb5_ucs2 krb5int_utf8_to_ucs2(const char *p)
+int krb5int_utf8_to_ucs2(const char *p, krb5_ucs2 *out)
 {
-    krb5_ucs4 ch = krb5int_utf8_to_ucs4(p);
+    krb5_ucs4 ch;
 
-    if (ch == KRB5_UCS4_INVALID || ch > SHRT_MAX)
-	return KRB5_UCS2_INVALID;
-
-    return (krb5_ucs2)ch;
+    *out = 0;
+    if (krb5int_utf8_to_ucs4(p, &ch) == -1 || ch > 0xFFFF)
+	return -1;
+    *out = (krb5_ucs2) ch;
+    return 0;
 }
 
 /* conv UCS-2 to UTF-8, not used */
@@ -446,10 +452,13 @@ int krb5int_utf8_isupper(const char * p)
 /* like strchr() */
 char *krb5int_utf8_strchr(const char *str, const char *chr)
 {
+    krb5_ucs4 chs, ch;
+
+    if (krb5int_utf8_to_ucs4(chr, &ch) == -1)
+	return NULL;
     for ( ; *str != '\0'; KRB5_UTF8_INCR(str)) {
-	if (krb5int_utf8_to_ucs4(str) == krb5int_utf8_to_ucs4(chr)) {
+	if (krb5int_utf8_to_ucs4(str, &chs) == 0 && chs == ch)
 	    return (char *)str;
-	} 
     }
 
     return NULL;
@@ -458,14 +467,14 @@ char *krb5int_utf8_strchr(const char *str, const char *chr)
 /* like strcspn() but returns number of bytes, not characters */
 size_t krb5int_utf8_strcspn(const char *str, const char *set)
 {
-    const char *cstr;
-    const char *cset;
+    const char *cstr, *cset;
+    krb5_ucs4 chstr, chset;
 
     for (cstr = str; *cstr != '\0'; KRB5_UTF8_INCR(cstr)) {
 	for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
-	    if (krb5int_utf8_to_ucs4(cstr) == krb5int_utf8_to_ucs4(cset)) {
+	    if (krb5int_utf8_to_ucs4(cstr, &chstr) == 0
+		&& krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
 		return cstr - str;
-	    } 
 	}
     }
 
@@ -475,18 +484,16 @@ size_t krb5int_utf8_strcspn(const char *str, const char *set)
 /* like strspn() but returns number of bytes, not characters */
 size_t krb5int_utf8_strspn(const char *str, const char *set)
 {
-    const char *cstr;
-    const char *cset;
+    const char *cstr, *cset;
+    krb5_ucs4 chstr, chset;
 
     for (cstr = str; *cstr != '\0'; KRB5_UTF8_INCR(cstr)) {
 	for (cset = set; ; KRB5_UTF8_INCR(cset)) {
-	    if (*cset == '\0') {
+	    if (*cset == '\0')
 		return cstr - str;
-	    }
-
-	    if (krb5int_utf8_to_ucs4(cstr) == krb5int_utf8_to_ucs4(cset)) {
+	    if (krb5int_utf8_to_ucs4(cstr, &chstr) == 0
+		&& krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
 		break;
-	    } 
 	}
     }
 
@@ -496,13 +503,14 @@ size_t krb5int_utf8_strspn(const char *str, const char *set)
 /* like strpbrk(), replaces strchr() as well */
 char *krb5int_utf8_strpbrk(const char *str, const char *set)
 {
-    for ( ; *str != '\0'; KRB5_UTF8_INCR(str)) {
-	const char *cset;
+    const char *cset;
+    krb5_ucs4 chstr, chset;
 
+    for ( ; *str != '\0'; KRB5_UTF8_INCR(str)) {
 	for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
-	   if (krb5int_utf8_to_ucs4(str) == krb5int_utf8_to_ucs4(cset)) {
+	    if (krb5int_utf8_to_ucs4(str, &chstr) == 0
+		&& krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
 		return (char *)str;
-	    } 
 	}
     }
 

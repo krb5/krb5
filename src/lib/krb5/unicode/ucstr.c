@@ -397,8 +397,7 @@ krb5int_utf8_normcmp(
 
     /* convert and normalize 1st string */
     for (i = 0, ulen = 0; i < l1; i += len, ulen++) {
-	ucs[ulen] = krb5int_utf8_to_ucs4(s1 + i);
-	if (ucs[ulen] == KRB5_UCS4_INVALID) {
+	if (krb5int_utf8_to_ucs4(s1 + i, &ucs[ulen]) == -1) {
 	    free(ucs);
 	    return -1;		/* what to do??? */
 	}
@@ -420,8 +419,7 @@ krb5int_utf8_normcmp(
 
     /* convert and normalize 2nd string */
     for (i = 0, ulen = 0; i < l2; i += len, ulen++) {
-	ucs[ulen] = krb5int_utf8_to_ucs4(s2 + i);
-	if (ucs[ulen] == KRB5_UCS4_INVALID) {
+	if (krb5int_utf8_to_ucs4(s2 + i, &ucs[ulen]) == -1) {
 	    free(ucsout1);
 	    free(ucs);
 	    return 1;		/* what to do??? */
