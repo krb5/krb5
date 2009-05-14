@@ -640,11 +640,14 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_context_time,
     krb5_gss_get_mic,
     krb5_gss_verify_mic,
-#ifdef IOV_SHIM_EXERCISE
-    NULL,
+#if defined(IOV_SHIM_EXERCISE_WRAP) || defined(IOV_SHIM_EXERCISE)
     NULL,
 #else
     krb5_gss_wrap,
+#endif
+#if defined(IOV_SHIM_EXERCISE_UNWRAP) || defined(IOV_SHIM_EXERCISE)
+    NULL,
+#else
     krb5_gss_unwrap,
 #endif
     krb5_gss_display_status,
