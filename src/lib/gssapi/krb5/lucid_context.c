@@ -107,7 +107,7 @@ gss_krb5int_export_lucid_sec_context(
         goto error_out;
     }
 
-    rep.value = lctx;
+    rep.value = &lctx;
     rep.length = sizeof(lctx);
 
     retval = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
