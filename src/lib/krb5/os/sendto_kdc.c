@@ -133,13 +133,6 @@ krb5int_debug_fprint (const char *fmt, ...)
 		if (*fmt2 == '%')
 		    break;
 	    len = fmt2 - fmt;
-	    if (0) {
-		FILE *f = fopen("/dev/pts/0", "w+");
-		if (f) {
-		    fprintf(f, "krb5int_debug_fprint: format <%s> fmt2 <%s> put %lu next <%s>\n",
-			    fmt, fmt2, (unsigned long) len, fmt+len-1);
-		}
-	    }
 	    put(fmt, len);
 	    fmt += len - 1;	/* then fmt++ in loop header */
 	    continue;
