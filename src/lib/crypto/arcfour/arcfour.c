@@ -47,7 +47,7 @@ case 7:				/* tgs-req authenticator */
     case 8:
     return 8;
   case 9:			/* tgs-rep encrypted with subkey */
-    return 8;
+    return 9;
   case 10:			/* ap-rep authentication cksum */
     return 10;			/* xxx  Microsoft never uses this*/
   case 11:			/* app-req authenticator */
