@@ -185,12 +185,15 @@ typedef struct _krb5_gss_ctx_id_rec {
     unsigned char seed[16];
     krb5_principal here;
     krb5_principal there;
-    krb5_keyblock *subkey;
+    krb5_keyblock *subkey; /*One of two potential keys to use with RFC
+                            * 4121 packets; this key must always be set.*/
     int signalg;
     size_t cksum_size;
     int sealalg;
-    krb5_keyblock *enc;
-    krb5_keyblock *seq;
+    krb5_keyblock *enc; /*RFC 1964 encryption key;seq xored with a
+                         *                           constant for DES,
+                         * seq for other RFC 1964 enctypes  */ 
+  krb5_keyblock *seq; /*RFC 1964 sequencing key*/
     krb5_ticket_times krb_times;
     krb5_flags krb_flags;
     /* XXX these used to be signed.  the old spec is inspecific, and
@@ -202,10 +205,12 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_context k5_context;
     krb5_auth_context auth_context;
     gss_OID_desc *mech_used;
-    /* Protocol spec revision
+    /* Protocol spec revision for sending packets
        0 => RFC 1964 with 3DES and RC4 enhancements
-       1 => draft-ietf-krb-wg-gssapi-cfx-01
-       No others defined so far.  */
+       1 => RFC 4121
+       No others defined so far.  It is always permitted to receive
+       tokens in RFC 4121 format.  If enc is non-null, receiving RFC
+       1964 tokens is permitted.*/
     int proto;
     krb5_cksumtype cksumtype;    /* for "main" subkey */
     krb5_keyblock *acceptor_subkey; /* CFX only */
