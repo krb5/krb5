@@ -68,6 +68,8 @@ tgs_construct_tgsreq(krb5_context context, krb5_data *in_data,
     case ENCTYPE_DES_CBC_CRC:
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_ARCFOUR_HMAC:
+    case ENCTYPE_ARCFOUR_HMAC_EXP:
 	cksumtype = context->kdc_req_sumtype;
 	break;
     default:
