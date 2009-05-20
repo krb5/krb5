@@ -398,6 +398,17 @@ handle_request_authdata (krb5_context context,
     if (scratch.data == NULL)
 	return ENOMEM;
 
+    /*
+     * RFC 4120 requires authdata in the TGS body to be encrypted in
+     * the subkey with usage 5 if a subkey is present, and in the TGS
+     * session key with key usage 4 if it is not.  Prior to krb5 1.7,
+     * we got this wrong, always decrypting the authorization data
+     * with the TGS session key and usage 4.  For the sake of
+     * conservatism, try the decryption the old way (wrong if
+     * client_key is a subkey) first, and then try again the right way
+     * (in the case where client_key is a subkey) if the first way
+     * fails.
+     */
     code = krb5_c_decrypt(context,
 			  enc_tkt_request->session,
 			  KRB5_KEYUSAGE_TGS_REQ_AD_SESSKEY,
