@@ -664,7 +664,7 @@ else
     # works, but it also means that declaration-in-code warnings won't
     # be issued.
     # -v -fd -errwarn=E_DECLARATION_IN_CODE ...
-    WARN_CFLAGS="-errtags=yes -errwarn=E_BAD_PTR_INT_COMBINATION,E_BAD_PTR_INT_COMB_ARG,E_PTR_TO_VOID_IN_ARITHMETIC,E_NO_IMPLICIT_DECL_ALLOWED"
+    WARN_CFLAGS="-errtags=yes -errwarn=E_BAD_PTR_INT_COMBINATION,E_BAD_PTR_INT_COMB_ARG,E_PTR_TO_VOID_IN_ARITHMETIC,E_NO_IMPLICIT_DECL_ALLOWED,E_ATTRIBUTE_PARAM_UNDEFINED"
     WARN_CXXFLAGS="-errtags=yes +w +w2 -xport64"
   fi
 fi
