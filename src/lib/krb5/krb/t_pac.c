@@ -96,8 +96,10 @@ static const krb5_keyblock member_keyblock = {
 static time_t authtime = 1120440609;
 static const char *user = "w2003final$@WIN2K3.THINKER.LOCAL";
 
+#if !defined(__cplusplus) && (__GNUC__ > 2)
 static void err(krb5_context ctx, krb5_error_code code, const char *fmt, ...)
     __attribute__((__format__(__printf__, 3, 0)));
+#endif
 
 static void
 err(krb5_context ctx, krb5_error_code code, const char *fmt, ...)
