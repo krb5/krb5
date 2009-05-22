@@ -58,7 +58,7 @@ krb5_c_prf_length(krb5_context context, krb5_enctype enctype,
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_prf(krb5_context context, const krb5_keyblock *key,
-krb5_data *input, krb5_data *output)
+	   krb5_data *input, krb5_data *output)
 {
     int i;
     size_t len;
@@ -78,9 +78,9 @@ krb5_data *input, krb5_data *output)
     if (!krb5_enctypes_list[i].prf)
 	return (KRB5_CRYPTO_INTERNAL);
     krb5_c_prf_length (context, key->enctype, &len);
-    if( len != output->length)
+    if (len != output->length)
 	return (KRB5_CRYPTO_INTERNAL);
-            return((*(krb5_enctypes_list[i].prf))
+    return((*(krb5_enctypes_list[i].prf))
 	   (krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,
 	    key,  input, output));
 }
