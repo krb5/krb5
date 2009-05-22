@@ -41,6 +41,6 @@ unsigned int krb5_max_skdc_timeout = MAX_SKDC_TIMEOUT;
 unsigned int krb5_skdc_timeout_shift = SKDC_TIMEOUT_SHIFT;
 unsigned int krb5_skdc_timeout_1 = SKDC_TIMEOUT_1;
 
-char *krb5_default_pwd_prompt1 = DEFAULT_PWD_STRING1;
-char *krb5_default_pwd_prompt2 = DEFAULT_PWD_STRING2;
+const char *krb5_default_pwd_prompt1 = DEFAULT_PWD_STRING1;
+const char *krb5_default_pwd_prompt2 = DEFAULT_PWD_STRING2;
 
