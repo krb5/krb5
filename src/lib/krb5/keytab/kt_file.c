@@ -1659,6 +1659,9 @@ krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_
 	    return errno;
         if (!fread(&size, sizeof(size), 1, fp)) {
             /* Hit the end of file, reserve this slot. */
+            /* Necessary to avoid a later fseek failing on Solaris 10. */
+	    if (fseek(fp, 0, SEEK_CUR))
+		return errno;
 	    /* htonl(0) is 0, so no need to worry about byte order */
             size = 0;
             if (!fwrite(&size, sizeof(size), 1, fp))
