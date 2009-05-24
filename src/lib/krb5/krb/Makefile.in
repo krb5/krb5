@@ -319,10 +319,10 @@ T_PRINC_OBJS= t_princ.o parse.o unparse.o
 t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(KRB5_BASE_LIBS)
 t_ad_fx_armor: t_ad_fx_armor.o
-	$(CC_LINK) -o $@ $< $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o $@ t_ad_fx_armor.o $(KRB5_BASE_LIBS)
 
 t_authdata: t_authdata.o copy_auth.o
-	$(CC_LINK) -o $@ $< copy_auth.o $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o $@ t_authdata.o copy_auth.o $(KRB5_BASE_LIBS)
 
 t_kerb: $(T_KERB_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_kerb $(T_KERB_OBJS) $(KRB5_BASE_LIBS)
