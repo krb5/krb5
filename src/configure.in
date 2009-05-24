@@ -884,8 +884,8 @@ AC_SUBST(PASS)
 dnl for pkinit
 AC_ARG_ENABLE([pkinit],
 [  --disable-pkinit        disable PKINIT plugin support],,
-enable_pkinit=yes)
-if test "$enable_pkinit" = yes; then
+enable_pkinit=try)
+if test "$enable_pkinit" = yes || test "$enable_pkinit" = try; then
   AC_CACHE_CHECK(for a recent enough OpenSSL, k5_cv_openssl_version_okay,
 [AC_COMPILE_IFELSE([#include <openssl/opensslv.h>
 #if OPENSSL_VERSION_NUMBER < 0x00908000L
@@ -897,8 +897,10 @@ int i = 1;
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
   LIBS="$old_LIBS"
 fi
-if test "$k5_cv_openssl_version_okay" = yes && test "$enable_pkinit" = yes; then
+if test "$k5_cv_openssl_version_okay" = yes && (test "$enable_pkinit" = yes || test "$enable_pkinit" = try); then
   K5_GEN_MAKEFILE(plugins/preauth/pkinit)
+elif test "$k5_cv_openssl_version_okay" = no && test "$enable_pkinit" = yes; then
+  AC_MSG_ERROR([Version of OpenSSL is too old; cannot enable PKINIT.])
 else
   AC_DEFINE([DISABLE_PKINIT], 1, [Define to disable PKINIT plugin support])
   AC_MSG_NOTICE([Disabling PKINIT support.])
