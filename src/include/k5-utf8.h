@@ -84,9 +84,9 @@
 #endif
 
 #if INT_MAX == 0x7fff
-typedef	int	krb5_ucs2;
+typedef	unsigned int	krb5_ucs2;
 #elif SHRT_MAX == 0x7fff
-typedef	short	krb5_ucs2;
+typedef	unsigned short	krb5_ucs2;
 #else
 #error undefined 16 bit type
 #endif
@@ -101,15 +101,12 @@ typedef short	krb5_ucs4;
 #error: undefined 32 bit type
 #endif
 
-#define KRB5_UCS2_INVALID   ((krb5_ucs2)0x8000)
-#define KRB5_UCS4_INVALID   ((krb5_ucs4)0x80000000)
-
 #define KRB5_MAX_UTF8_LEN   (sizeof(krb5_ucs2) * 3/2)
 
-krb5_ucs2 krb5int_utf8_to_ucs2(const char *p);
+int krb5int_utf8_to_ucs2(const char *p, krb5_ucs2 *out);
 size_t krb5int_ucs2_to_utf8(krb5_ucs2 c, char *buf);
 
-krb5_ucs4 krb5int_utf8_to_ucs4(const char *p);
+int krb5int_utf8_to_ucs4(const char *p, krb5_ucs4 *out);
 size_t krb5int_ucs4_to_utf8(krb5_ucs4 c, char *buf);
 
 int
