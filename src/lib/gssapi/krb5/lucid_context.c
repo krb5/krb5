@@ -107,7 +107,7 @@ gss_krb5int_export_lucid_sec_context(
         goto error_out;
     }
 
-    rep.value = lctx;
+    rep.value = &lctx;
     rep.length = sizeof(lctx);
 
     retval = generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
@@ -213,7 +213,7 @@ make_external_lucid_ctx_v1(
         lctx->rfc1964_kd.sign_alg = gctx->signalg;
         lctx->rfc1964_kd.seal_alg = gctx->sealalg;
         /* Copy key */
-        if ((retval = copy_keyblock_to_lucid_key(gctx->subkey,
+        if ((retval = copy_keyblock_to_lucid_key(gctx->seq,
                                                  &lctx->rfc1964_kd.ctx_key)))
             goto error_out;
     }
