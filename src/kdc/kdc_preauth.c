@@ -972,11 +972,10 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
     e_data->data = 0;
     
     hw_only = isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH);
-    /* Allocate 1 entry for the terminator and one for the cookie*/
-    pa_data = malloc(sizeof(krb5_pa_data *) * (n_preauth_systems+21));
+    /* Allocate two extra entries for the cookie and the terminator. */
+    pa_data = calloc(n_preauth_systems + 2, sizeof(krb5_pa_data *));
     if (pa_data == 0)
 	return;
-    memset(pa_data, 0, sizeof(krb5_pa_data *) * (n_preauth_systems+1));
     pa = pa_data;
 
     for (ap = preauth_systems; ap->type != -1; ap++) {
