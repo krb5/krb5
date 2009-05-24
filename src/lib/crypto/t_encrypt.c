@@ -47,14 +47,17 @@ krb5_enctype interesting_enctypes[] = {
   0
 };
 
-#define test(msg, exp) \
-printf ("%s: . . . ", msg); \
-retval = (exp);\
-if( retval) { \
-  printf( "Failed: %s\n", error_message(retval)); \
-  abort(); \
-} else printf ("OK\n");
-  
+static void
+test(const char *msg, krb5_error_code retval)
+{
+    printf("%s: . . . ", msg);
+    if (retval) {
+	printf("Failed: %s\n", error_message(retval));
+	abort();
+    } else
+	printf("OK\n");
+}
+
 static int compare_results(krb5_data *d1, krb5_data *d2)
 {
     if (d1->length != d2->length) {
@@ -185,6 +188,21 @@ main ()
 	  compare_results (&in2, &check2));
     krb5_free_keyblock (context, key);
   }
+
+  /* Test the RC4 decrypt fallback from key usage 9 to 8. */
+  test ("Initializing an RC4 keyblock",
+	krb5_init_keyblock (context, ENCTYPE_ARCFOUR_HMAC, 0, &key));
+  test ("Generating random RC4 key",
+	krb5_c_make_random_key (context, ENCTYPE_ARCFOUR_HMAC, key));
+  enc_out.ciphertext = out;
+  krb5_c_encrypt_length (context, key->enctype, in.length, &len);
+  enc_out.ciphertext.length = len;
+  check.length = 2048;
+  test ("Encrypting with RC4 key usage 8",
+	krb5_c_encrypt (context, key, 8, 0, &in, &enc_out));
+  test ("Decrypting with RC4 key usage 9",
+	krb5_c_decrypt (context, key, 9, 0, &enc_out, &check));
+  test ("Comparing", compare_results (&in, &check));
 
   free(out.data);
   free(out2.data);
