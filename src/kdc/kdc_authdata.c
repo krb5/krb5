@@ -574,7 +574,6 @@ handle_authdata (krb5_context context,
     krb5_error_code code = 0;
     int i;
 
-    assert(enc_tkt_reply->authorization_data == NULL);
     for (i = 0; i < n_authdata_systems; i++) {
 	const krb5_authdata_systems *asys = &authdata_systems[i];
 
