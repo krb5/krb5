@@ -283,7 +283,7 @@ gss_mech_initialize(void)
 
 MAKE_INIT_FUNCTION(gss_krb5int_lib_init);
 MAKE_FINI_FUNCTION(gss_krb5int_lib_fini);
-int gss_krb5int_lib_init(void)
+int gss_krb5int_lib_init(void);
 #endif /* _GSS_STATIC_LINK */
 
 int gss_spnegoint_lib_init(void)
