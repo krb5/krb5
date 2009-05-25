@@ -23,13 +23,14 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- * This file contains tests for the PRF  code in Kerberos.  IT reads
- *an input file, and writes an output file.  It is assumed that the
- *output file will be diffed against expected output  to see whether
- *regression tests pass.  The input file is a very primitive format.
- *It  includes an enctype and  to be string2keyed   followed by a number of bytes of input
- *length, followed by  that many bytes of input.  The program outputs
- *krb5_c_prf of that input and key  as a hex string.
+ * This file contains tests for the PRF code in Kerberos.  IT reads an
+ * input file, and writes an output file.  It is assumed that the
+ * output file will be diffed against expected output to see whether
+ * regression tests pass.  The input file is a very primitive format.
+ * It includes an enctype and password to be string2keyed followed by
+ * a number of bytes of input length, followed by that many bytes of
+ * input.  The program outputs krb5_c_prf of that input and key as a
+ * hex string.
  */
 
 #include "k5-int.h"
@@ -39,7 +40,7 @@ int main () {
   krb5_data input, output;
   krb5_keyblock *key = NULL;
   unsigned int in_length;
-  unsigned int i;
+  size_t i;
   while (1) {
       krb5_enctype enctype;
       char s[1025];
