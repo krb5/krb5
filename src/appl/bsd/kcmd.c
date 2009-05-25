@@ -551,7 +551,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 				    0, options & OPTS_FORWARDABLE_CREDS,
 				    &outbuf);
 	if (status) {
-	    fprintf(stderr, "kcmd: Error getting forwarded creds\n");
+	    fprintf(stderr, "kcmd: Error getting forwarded creds: %s\n",
+		    error_message(status));
 	    goto bad2;
 	}
 
