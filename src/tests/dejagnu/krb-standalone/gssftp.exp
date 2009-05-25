@@ -229,7 +229,7 @@ proc ftp_test { } {
 	    return
 	}
 	-re "--->\[^\r\n\]*\r\n" { exp_continue }
-	-re "encoding \[0-9\]* bytes MIC \[a-zA-Z/+\]*" { exp_continue }
+	-re "encoding \[0-9\]* bytes MIC \[a-zA-Z0-9/+=\]*\r\n" { exp_continue }
 	-re "sealed \[A-Z()\]*" { exp_continue }
 	-re "secure_command\[A-Z()\]*" { exp_continue }
 	timeout {
