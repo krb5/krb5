@@ -131,8 +131,10 @@ the
 option; otherwise the default name and location will be used.
 .TP
 \fB\-T\fP \fIarmor_ccache\fP
-Specifies the name of a credential cache that already contains a ticket.  This ccache
-will be used to armor the request  Ideally, an attacker should have to attack both the armor ticket and the key of the principal.
+Specifies the name of a credential cache that already contains a
+ticket.  This ccache will be used to armor the request.  Ideally, an
+attacker should have to attack both the armor ticket and the key of
+the principal.
 .TP
 \fB\-c\fP \fIcache_name\fP
 use

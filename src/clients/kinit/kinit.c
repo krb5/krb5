@@ -198,7 +198,7 @@ usage()
 	    "[-k [-t keytab_file]] "
 	    "[-c cachename] " 
 	    USAGE_BREAK
-	    "[-S service_name]""-T ticket_armor_cache"
+	    "[-S service_name] [-T ticket_armor_cache]"
 	    USAGE_BREAK
 	    "[-X <attribute>[=<value>]] [principal]"
 	    "\n\n", 
@@ -223,6 +223,7 @@ usage()
     fprintf(stderr, "\t-t filename of keytab to use\n");
     fprintf(stderr, "\t-c Kerberos 5 cache name\n");
     fprintf(stderr, "\t-S service\n");
+    fprintf(stderr, "\t-T armor credential cache\n");
     fprintf(stderr, "\t-X <attribute>[=<value>]\n");
     exit(2);
 }
