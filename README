@@ -124,7 +124,6 @@ Known bugs by ticket ID
 -----------------------
 
 6481    kdb ldap integration removed rev/recurse kdb5_util dumps
-6486    t_pac fails on SPARC Solaris
 6487    gss_unwrap_iov fails in stream mode
 
 Changes by ticket ID
@@ -506,6 +505,21 @@ Changes by ticket ID
 6483    man1 in title header for man1 manpages
 6484    work around Heimdal not using subkey in TGS-REP
 6485    document ok_as_delegate in admin.texinfo
+6486    t_pac fails on SPARC Solaris
+6488    NFS fails to work with KRB5 1.7
+6489    UCS2 support doesn't handle upper half of BMP
+6490    Windows interop with RC4 TGS-REQ subkeys
+6492    Remove spurious assertion in handle_authdata
+6493    some fixes for 1.7
+6495    Fix test rules for non-gmake make versions
+6496    Fix vector initialization error in KDC preauth code
+6497    kinit/fast usage message
+6498    spnego_mech.c syntax error under _GSS_STATIC_LINK
+6499    use printf format attribute only with gcc
+6500    use correct type for krb5_c_prf_length length arg
+6501    Temporarily disable FAST PKINIT for 1.7 release
+6502    typo in doc/api/krb5.tex
+6503    typo in admin.texinfo
 
 Copyright and Other Legal Notices
 ---------------------------------
