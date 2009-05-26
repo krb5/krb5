@@ -35,6 +35,9 @@
 
 #include "pkinit.h"
 
+/* Remove when FAST PKINIT is settled. */
+#include "../fast_factor.h"
+
 static krb5_error_code
 pkinit_server_get_edata(krb5_context context,
 			krb5_kdc_req * request,
@@ -146,8 +149,18 @@ pkinit_server_get_edata(krb5_context context,
 {
     krb5_error_code retval = 0;
     pkinit_kdc_context plgctx = NULL;
+    krb5_keyblock *armor_key = NULL;
 
     pkiDebug("pkinit_server_get_edata: entered!\n");
+
+    /* Remove (along with armor_key) when FAST PKINIT is settled. */
+    retval = fast_kdc_get_armor_key(context, server_get_entry_data, request,
+				    client, &armor_key);
+    if (retval == 0 && armor_key != NULL) {
+	/* Don't advertise PKINIT if the client used FAST. */
+	krb5_free_keyblock(context, armor_key);
+	return EINVAL;
+    }
 
     /*
      * If we don't have a realm context for the given realm,
@@ -344,10 +357,20 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_authdata **my_authz_data = NULL, *pkinit_authz_data = NULL;
     krb5_kdc_req *tmp_as_req = NULL;
     krb5_data k5data;
+    krb5_keyblock *armor_key;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
     if (data == NULL || data->length <= 0 || data->contents == NULL)
 	return 0;
+
+    /* Remove (along with armor_key) when FAST PKINIT is settled. */
+    retval = fast_kdc_get_armor_key(context, server_get_entry_data, request,
+				    client, &armor_key);
+    if (retval == 0 && armor_key != NULL) {
+	/* Don't allow PKINIT if the client used FAST. */
+	krb5_free_keyblock(context, armor_key);
+	return EINVAL;
+    }
 
     if (pa_plugin_context == NULL || e_data == NULL)
 	return EINVAL;

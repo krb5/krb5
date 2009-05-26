@@ -40,6 +40,9 @@
 
 #include "pkinit.h"
 
+/* Remove when FAST PKINIT is settled. */
+#include "../fast_factor.h"
+
 #ifdef LONGHORN_BETA_COMPAT
 /*
  * It is anticipated that all the special checks currently
@@ -1027,9 +1030,18 @@ pkinit_client_process(krb5_context context,
     int processing_request = 0;
     pkinit_context plgctx = (pkinit_context)plugin_context;
     pkinit_req_context reqctx = (pkinit_req_context)request_context;
+    krb5_keyblock *armor_key = NULL;
 
     pkiDebug("pkinit_client_process %p %p %p %p\n",
 	     context, plgctx, reqctx, request);
+
+    /* Remove (along with armor_key) when FAST PKINIT is settled. */
+    retval = fast_get_armor_key(context, get_data_proc, rock, &armor_key);
+    if (retval == 0 && armor_key != NULL) {
+	/* Don't use PKINIT if also using FAST. */
+	krb5_free_keyblock(context, armor_key);
+	return EINVAL;
+    }
 
     if (plgctx == NULL || reqctx == NULL)
 	return EINVAL;
