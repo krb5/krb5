@@ -40,7 +40,9 @@ int main () {
   krb5_data input, output;
   krb5_keyblock *key = NULL;
   unsigned int in_length;
-  size_t i;
+  unsigned int i;
+  size_t prfsz;
+
   while (1) {
       krb5_enctype enctype;
       char s[1025];
@@ -65,17 +67,17 @@ int main () {
 	      input.data[in_length-lc] = (unsigned) (i&0xff);
 	  }
 	  input.length = in_length;
-	  assert (krb5_c_prf_length(0, enctype, &i) == 0);
-	  assert (output.data = malloc(i));
-	  output.length = i;
+	  assert (krb5_c_prf_length(0, enctype, &prfsz) == 0);
+	  assert (output.data = malloc(prfsz));
+	  output.length = prfsz;
 	  assert (krb5_c_prf(0, key, &input, &output) == 0);
       
 	  free (input.data);
 	  input.data = NULL;
       }
-      for (; i > 0; i--) {
+      for (; prfsz > 0; prfsz--) {
 	  printf ("%02x",
-		  (unsigned int) ((unsigned char ) output.data[output.length-i]));
+		  (unsigned int) ((unsigned char ) output.data[output.length-prfsz]));
       }
       printf ("\n");
 
