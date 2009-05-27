@@ -48,20 +48,22 @@ depend:: $(SRCS)
 aes-gen: aes-gen.o $(GEN_OBJS)
 	$(CC_LINK) -o aes-gen aes-gen.o $(GEN_OBJS)
 
-run-aes-gen: aes-gen
+kresults.out: aes-gen
 	./aes-gen > kresults.out
 
-check:: run-aes-gen
+check:: kresults.out
 
 aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 check:: run-aes-test
-run-aes-test: aes-test
-	$(RUN_SETUP) $(VALGRIND) ./aes-test -k > vk.txt
+run-aes-test: vk.txt vt.txt
 	cmp vk.txt $(srcdir)/expect-vk.txt
-	$(RUN_SETUP) $(VALGRIND) ./aes-test > vt.txt
 	cmp vt.txt $(srcdir)/expect-vt.txt
+vk.txt: aes-test
+	$(RUN_SETUP) $(VALGRIND) ./aes-test -k > vk.txt
+vt.txt:
+	$(RUN_SETUP) $(VALGRIND) ./aes-test > vt.txt
 
 clean-unix:: clean-libobjs
 
