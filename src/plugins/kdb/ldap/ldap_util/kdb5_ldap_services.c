@@ -1725,7 +1725,7 @@ kdb5_ldap_set_service_password(argc, argv)
 	    free(hex.data);
 	    goto cleanup;
 	}
-	encrypted_passwd.data = (unsigned char *)str;
+	encrypted_passwd.value = (unsigned char *)str;
 	encrypted_passwd.len = strlen(str);
 	memset(hex.data, 0, hex.length);
 	free(hex.data);
