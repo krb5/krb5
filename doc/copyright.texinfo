@@ -1,4 +1,4 @@
-Copyright @copyright{} 1985-2008 by the Massachusetts Institute of Technology.
+Copyright @copyright{} 1985-2009 by the Massachusetts Institute of Technology.
 
 @quotation
 Export of software employing encryption from the United States of
@@ -324,6 +324,12 @@ the following new or changed files:
   slave/kproplog.c
 @end smallexample
 
+and marked portions of the following files:
+
+@smallexample
+  lib/krb5/os/hst_realm.c
+@end smallexample
+
 are subject to the following license:
 
 @quotation
@@ -412,7 +418,7 @@ backend, are subject to the following license:
 @iftex
 @smallfonts @rm
 @end iftex
-Copyright (c) 2004-2005, Novell, Inc.
+Copyright @copyright{} 2004-2005, Novell, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -553,6 +559,36 @@ WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 @end iftex
 @end quotation
 
+The implementations of strlcpy and strlcat in
+src/util/support/strlcat.c have the following copyright and permission
+notice:
+
+@quotation
+@iftex
+@smallfonts @rm
+@end iftex
+
+Copyright @copyright{} 1998 Todd C. Miller <Todd.Miller@@courtesan.com>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+@end quotation
+
 The implementations of UTF-8 string handling in src/util/support and
 src/lib/krb5/unicode are subject to the following copyright and
 permission notice:
@@ -609,6 +645,51 @@ OpenLDAP is a registered trademark of the OpenLDAP Foundation.
 Copyright 1999-2003 The OpenLDAP Foundation, Redwood City,
 California, USA.  All Rights Reserved.  Permission to copy and
 distribute verbatim copies of this document is granted.
+
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+@end quotation
+
+Marked test programs in src/lib/krb5/krb have the following copyright:
+
+@quotation
+@iftex
+@smallfonts @rm
+@end iftex
+
+Copyright @copyright{} 2006 Kungliga Tekniska H@"{o}gskolan
+(Royal Institute of Technology, Stockholm, Sweden).
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. Neither the name of KTH nor the names of its contributors may be
+   used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY KTH AND ITS CONTRIBUTORS ``AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL KTH OR ITS CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @iftex
 @vskip 12pt

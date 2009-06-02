@@ -53,6 +53,11 @@ If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
 
+Keep in mind that unencrypted e-mail is not secure; if you need to
+send sensitive information, such as reporting potential security
+vulnerabilities, please PGP-encrypt it to our security contact
+address: krbcore-security@mit.edu.
+
 You may view bug reports by visiting
 
 http://krbdev.mit.edu/rt/
@@ -72,7 +77,57 @@ future releases.
 Major changes in 1.7
 --------------------
 
-* Remove support for version 4 of the Kerberos protocol (krb4).
+The krb5-1.7 release contains a large number of changes, featuring
+improvements in the following broad areas:
+
+* Compatibility with Microsoft Windows
+
+* Administrator experience
+
+* User experience
+
+* Code quality
+
+* Protocol evolution
+
+Compatibility with Microsoft Windows:
+
+* Follow client principal referrals in the client library when
+  obtaining initial tickets.
+
+* KDC can issue realm referrals for service principals based on domain
+  names.
+
+* Extensions supporting DCE RPC, including three-leg GSS context setup
+  and unencapsulated GSS tokens inside SPNEGO.
+
+* Microsoft GSS_WrapEX, implemented using the gss_iov API, which is
+  similar to the equivalent SSPI functionality.  This is needed to
+  support some instances of DCE RPC.
+
+* NTLM recognition support in GSS-API, to facilitate dropping in an
+  NTLM implementation for improved compatibility with older releases
+  of Microsoft Windows.
+
+* KDC support for principal aliases, if the back end supports them.
+  Currently, only the LDAP back end supports aliases.
+
+* Support Microsoft set/change password (RFC 3244) protocol in
+  kadmind.
+
+* Implement client and KDC support for GSS_C_DELEG_POLICY_FLAG, which
+  allows a GSS application to request credential delegation only if
+  permitted by KDC policy.
+
+Administrator experience:
+
+* Install header files for the administration API, allowing
+  third-party software to manipulate the KDC database.
+
+* Incremental propagation support for the KDC database.
+
+* Master key rollover support, making it easier to change master key
+  passwords or encryption types.
 
 * New libdefaults configuration variable "allow_weak_crypto".  NOTE:
   Currently defaults to "true", but may default to "false" in a future
@@ -81,50 +136,47 @@ Major changes in 1.7
   enctypes) from permitted_enctypes, default_tkt_enctypes, and
   default_tgs_enctypes.
 
-* Client library now follows client principal referrals, for
-  compatibility with Windows.
+User experience:
 
-* KDC can issue realm referrals for service principals based on domain
-  names.
-
-* Encryption algorithm negotiation (RFC 4537).
+* Provide enhanced GSS-API error message including supplementary
+  details about error conditions.
 
 * In the replay cache, use a hash over the complete ciphertext to
   avoid false-positive replay indications.
 
-* Microsoft GSS_WrapEX, implemented using the gss_iov API, which is
-  similar to the equivalent SSPI functionality.
+Code quality:
 
-* DCE RPC, including three-leg GSS context setup and unencapsulated
-  GSS tokens.
+* Replace many uses of "unsafe" string functions.  While most of these
+  instances were innocuous, they impeded efficient automatic and
+  manual static code analysis.
 
-* NTLM recognition support in GSS-API, to facilitate dropping in an
-  NTLM implementation.
-
-* KDC support for principal aliases, if the back end supports them.
-  Currently, only the LDAP back end supports aliases.
-
-* Microsoft set/change password (RFC 3244) protocol in kadmind.
-
-* Incremental propagation support for the KDC database.
-
-* Master key rollover support.
-
-* Flexible Authentication Secure Tunneling (FAST), a preauthentiation
-  framework that can protect the AS exchange from dictionary attack.
-
-* Implement client and KDC support for GSS_C_DELEG_POLICY_FLAG, which
-  allows a GSS application to request credential delegation only if
-  permitted by KDC policy.
+* Fix many instances of resource leaks and similar bugs identified by
+  static analysis tools.
 
 * Fix CVE-2009-0844, CVE-2009-0845, CVE-2009-0846, CVE-2009-0847 --
   various vulnerabilities in SPNEGO and ASN.1 code.
+
+Protocol evolution:
+
+* Remove support for version 4 of the Kerberos protocol (krb4).
+
+* Encryption algorithm negotiation (RFC 4537), allowing clients and
+  application services to negotiate stronger encryption than their KDC
+  supports.
+
+* Flexible Authentication Secure Tunneling (FAST), a preauthentiation
+  framework that can protect the AS exchange from dictionary attacks
+  on weak user passwords.
 
 Known bugs by ticket ID
 -----------------------
 
 6481    kdb ldap integration removed rev/recurse kdb5_util dumps
 6487    gss_unwrap_iov fails in stream mode
+6505    fix t_prf test code properly
+6506    Make results of krb5_db_def_fetch_mkey more predictable
+6507    kdb5_util update_princ_encryption uses latest mkey instead of
+        active mkey
 
 Changes by ticket ID
 --------------------
