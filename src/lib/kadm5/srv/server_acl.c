@@ -238,20 +238,24 @@ kadm5int_acl_parse_line(lp)
 		free(acle);
 		acle = (aent_t *) NULL;
 	    }
-	    if ( nmatch >= 4 ) {
-		char	*trailing;
 
-		trailing = &acle_restrictions[strlen(acle_restrictions)-1];
-		while ( isspace((int) *trailing) )
-		    trailing--;
-		trailing[1] = '\0';
-		acle->ae_restriction_string = strdup(acle_restrictions);
+	    if (acle) {
+		    if ( nmatch >= 4 ) {
+			    char	*trailing;
+			    
+			    trailing = &acle_restrictions[strlen(acle_restrictions)-1];
+			    while ( isspace((int) *trailing) )
+				    trailing--;
+			    trailing[1] = '\0';
+			    acle->ae_restriction_string = 
+				    strdup(acle_restrictions);
+		    }
+		    else {
+			    acle->ae_restriction_string = (char *) NULL;
+		    }
+		    acle->ae_restriction_bad = 0;
+		    acle->ae_restrictions = (restriction_t *) NULL;
 	    }
-	    else {
-		acle->ae_restriction_string = (char *) NULL;
-	    }
-	    acle->ae_restriction_bad = 0;
-	    acle->ae_restrictions = (restriction_t *) NULL;
 	}
     }
     DPRINT(DEBUG_CALLS, acl_debug_level,
