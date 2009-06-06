@@ -278,7 +278,7 @@ kadm5int_acl_parse_restrictions(s, rpp)
     char		*s;
     restriction_t	**rpp;
 {
-    char		*sp, *tp, *ap;
+    char		*sp = NULL, *tp, *ap;
     static const char	*delims = "\t\n\f\v\r ,";
     krb5_deltat		dt;
     krb5_flags		flag;
