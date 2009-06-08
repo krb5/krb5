@@ -29,7 +29,7 @@ STLIBOBJS=encrypted_challenge_main.o
 
 SRCS= $(srcdir)/encrypted_challenge_main.c
 
-all-unix:: $(LIBBASE)$(SO_EXT)
+all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 

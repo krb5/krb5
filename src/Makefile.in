@@ -9,11 +9,12 @@ mydir=.
 #	plugins/preauth/wpse
 #	plugins/preauth/cksum_body
 #	plugins/authdata/greet
-SUBDIRS=util include lib kdc kadmin @ldap_plugin_dir@ slave clients \
+SUBDIRS=util include lib \
+	@ldap_plugin_dir@ \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \
 	plugins/preauth/encrypted_challenge \
-	appl tests \
+	kdc kadmin slave clients appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
 LOCALINCLUDES = -I$(srcdir) 

@@ -1141,6 +1141,11 @@ if test "$ac_cv_prog_PERL" = "false"; then
 fi
 AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
+AC_SUBST(PLUGIN)
+AC_SUBST(PLUGINLINK)
+AC_SUBST(PLUGININST)
+AC_SUBST(KDB5_PLUGIN_DEPLIBS)
+AC_SUBST(KDB5_PLUGIN_LIBS)
 AC_SUBST(MAKE_SHLIB_COMMAND)
 AC_SUBST(SHLIB_RPATH_FLAGS)
 AC_SUBST(SHLIB_EXPFLAGS)
@@ -1213,6 +1218,11 @@ AC_ARG_ENABLE([shared], ,
 [if test "$enableval" != yes; then
   AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
 fi])
+AC_ARG_ENABLE([static-only],
+AC_HELP_STRING([--enable-static-only],[use static libraries and plugins]),
+[static_only=$enableval],
+[static_only=no])
+
 AC_ARG_ENABLE([rpath],
 AC_HELP_STRING([--disable-rpath],[suppress run path flags in link lines]),
 [enable_rpath=$enableval],
@@ -1231,15 +1241,23 @@ fi
 
 DEPLIBEXT=$SHLIBEXT
 
-if test "$krb5_force_static" = "yes"; then
+if test "x$static_only" = xyes; then
 	LIBLIST='lib$(LIBBASE)$(STLIBEXT)'
 	LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)'
+	PLUGIN='libkrb5_$(LIBBASE)$(STLIBEXT)'
+	PLUGINLINK='$(TOPLIBD)/libkrb5_$(LIBBASE)$(STLIBEXT)'
+	PLUGININST=install-static
 	OBJLISTS=OBJS.ST
-	# This used to be install-static, but now we only follow this
-	# path for internal libraries we don't want installed, not for
-	# configure-time requests for installed static libraries.
-	LIBINSTLIST=
-#	CFLAGS="$CFLAGS -D_KDB5_STATIC_LINK"
+	LIBINSTLIST=install-static
+	DEPLIBEXT=$STLIBEXT
+	AC_DEFINE([STATIC_PLUGINS], 1, [Define for static plugin linkage])
+
+	KDB5_PLUGIN_DEPLIBS='$(TOPLIBD)/libkrb5_db2$(DEPLIBEXT)'
+	KDB5_PLUGIN_LIBS='-lkrb5_db2'
+	if test "x$OPENLDAP_PLUGIN" = xyes; then
+		KDB5_PLUGIN_DEBLIBS=$KDB5_PLUGIN_DEPLIBS' $(TOPLIBD)/libkrb5_ldap$(DEPLIBEXT)'
+		KDB5_PLUGIN_LIBS=$KDB_LUGIN_LIBS' -lkrb5_ldap'
+	fi
 
 	AC_MSG_RESULT([Forcing static libraries.])
 	# avoid duplicate rules generation for AIX and such
@@ -1255,23 +1273,25 @@ else
 	fi
 	case "$SHLIBSEXT" in
 	.so.s-nobuild)
-		SHLIB_HAVE_MINOR_VERS=no
 		LIBLIST='lib$(LIBBASE)$(SHLIBEXT)'
 		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
 		LIBINSTLIST="install-shared"
 		;;
 	*)
-		SHLIB_HAVE_MINOR_VERS=yes
 		LIBLIST='lib$(LIBBASE)$(SHLIBEXT) lib$(LIBBASE)$(SHLIBSEXT)'
 		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
 		LIBINSTLIST="install-shlib-soname"
 		;;
 	esac
 	OBJLISTS="OBJS.SH"
+	PLUGIN='$(LIBBASE)$(DYNOBJEXT)'
+	PLUGINLINK=
+	PLUGININST=install-plugin
+	KDB5_PLUGIN_DEPLIBS=
+	KDB5_PLUGIN_LIBS=
 fi
 CC_LINK="$CC_LINK_SHARED"
 CXX_LINK="$CXX_LINK_SHARED"
-AC_SUBST(SHLIB_HAVE_MINOR_VERS)
 
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])

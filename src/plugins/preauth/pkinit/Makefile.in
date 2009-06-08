@@ -46,7 +46,7 @@ SRCS= \
 	$(srcdir)/pkinit_matching.c \
 	$(srcdir)/pkinit_crypto_openssl.c
 
-all-unix:: $(LIBBASE)$(SO_EXT)
+all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 

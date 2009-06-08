@@ -65,6 +65,23 @@
 
 #include "k5-err.h"
 
+/*
+ * Plugins normally export fixed symbol names, but when statically
+ * linking plugins, we need a different symbol name for each plugin.
+ * The first argument to PLUGIN_SYMBOL_NAME acts as the
+ * differentiator, and is only used for static plugin linking.
+ *
+ * Although this macro (and thus this header file) are used in plugins
+ * whose code lies inside the krb5 tree, plugins maintained separately
+ * from the krb5 tree do not need it; they can just use the fixed
+ * symbol name unconditionally.
+ */
+#ifdef STATIC_PLUGINS
+#define PLUGIN_SYMBOL_NAME(prefix, symbol) prefix ## _ ## symbol
+#else
+#define PLUGIN_SYMBOL_NAME(prefix, symbol) symbol
+#endif
+
 struct plugin_file_handle;	/* opaque */
 
 struct plugin_dir_handle {

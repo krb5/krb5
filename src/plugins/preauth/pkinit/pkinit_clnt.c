@@ -1489,7 +1489,11 @@ pkinit_client_gic_opt(krb5_context context,
     return 0;
 }
 
-struct krb5plugin_preauth_client_ftable_v1 preauthentication_client_1 = {
+/* Only necessary for static plugin linking support. */
+#include "k5-plugin.h"
+
+struct krb5plugin_preauth_client_ftable_v1
+PLUGIN_SYMBOL_NAME(krb5_preauth, preauthentication_client_1) = {
     "pkinit",			/* name */
     supported_client_pa_types,	/* pa_type_list */
     NULL,			/* enctype_list */

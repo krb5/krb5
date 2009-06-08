@@ -27,15 +27,20 @@ LIBPREFIX=
 
 # STOBJLISTS=dir1/OBJS.ST dir2/OBJS.ST etc...
 SHOBJLISTS=$(STOBJLISTS:.ST=.SH)
+PFOBJLISTS=$(STOBJLISTS:.ST=.PF)
 
 dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=.PF): all-recurse
 
 # Gets invoked as $(PARSE_OBJLISTS) list-of-OBJS.*-files
 PARSE_OBJLISTS= set -x && $(PERL) -p -e 'BEGIN { $$SIG{__WARN__} = sub {die @_} }; $$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
 
-SHLIBVEXT=$(SHLIBEXT)
-LIBLIST=$(LIBBASE)$(DYNOBJEXT)
 LIBINSTLIST=install-shared
+
+libkrb5_$(LIBBASE)$(STLIBEXT): $(STOBJLISTS)
+	$(RM) $@
+	@echo "building static $(LIBBASE) library"
+	set -x; objlist=`$(PARSE_OBJLISTS) $(STOBJLISTS)` && $(AR) cq $@ $$objlist
+	$(RANLIB) $@
 
 $(LIBBASE)$(DYNOBJEXT): $(SHOBJLISTS) $(DYNOBJ_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
@@ -80,18 +85,29 @@ darwin.exports: $(SHLIB_EXPORT_FILE) Makefile
 	$(RM) darwin.exports
 	sed "s/^/_/" < $(SHLIB_EXPORT_FILE) > darwin.exports
 
-$(TOPLIBD)/$(LIBBASE)$(SHLIBEXT): $(LIBBASE)$(SHLIBEXT)
+libkrb5_$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/$(LIBBASE)$(SHLIBEXT) .)
+	@echo "building profiled $(LIBBASE) library"
+	set -x; objlist=`$(PARSE_OBJLISTS) $(PFOBJLISTS)` && $(AR) cq $@ $$objlist
+	$(RANLIB) $@
 
-all-libs: $(LIBBASE)$(DYNOBJEXT) # $(LIBLIST)
+$(TOPLIBD)/libkrb5_$(LIBBASE)$(STLIBEXT):
+	$(RM) $@
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/libkrb5_$(LIBBASE)$(STLIBEXT) .)
+
+all-liblinks: all-libs $(PLUGINLINK)
+all-libs: $(PLUGIN)
 
 clean-libs:
 	$(RM) $(LIBBASE)$(DYNOBJEXT)
 	$(RM) binutils.versions osf1.exports darwin.exports hpux10.exports
 
-install-libs: $(LIBINSTLIST)
-install-shared:
+install-libs: $(PLUGININST)
+install-static:
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5_$(LIBBASE)$(STLIBEXT)
+	$(INSTALL_DATA) libkrb5_$(LIBBASE)$(STLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5_$(LIBBASE)$(STLIBEXT)
+install-plugin:
 	$(RM) $(DESTDIR)$(MODULE_INSTALL_DIR)/$(LIBBASE)$(DYNOBJEXT)
 	$(INSTALL_SHLIB) $(LIBBASE)$(DYNOBJEXT) $(DESTDIR)$(MODULE_INSTALL_DIR)
 

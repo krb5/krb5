@@ -60,14 +60,6 @@
 
 static k5_mutex_t db_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
-#ifdef _KDB5_STATIC_LINK
-#undef _KDB5_DYNAMIC_LINK
-#else
-#undef _KDB5_DYNAMIC_LINK
-/* to avoid redefinition problem */
-#define _KDB5_DYNAMIC_LINK
-#endif
-
 static db_library lib_list;
 
 /*
@@ -323,78 +315,54 @@ kdb_setup_opt_functions(db_library lib)
     }
 }
 
-static int kdb_db2_pol_err_loaded = 0;
-#ifdef _KDB5_STATIC_LINK
-#define DEF_SYMBOL(a) extern kdb_vftabl krb5_db_vftabl_ ## a
-#define GET_SYMBOL(a) (krb5_db_vftabl_ ## a)
+#ifdef STATIC_PLUGINS
+
+extern kdb_vftabl krb5_db2_kdb_function_table;
+#ifdef ENABLE_LDAP
+extern kdb_vftabl krb5_db2_ldap_function_table;
+#endif
+
 static krb5_error_code
-kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
+kdb_load_library(krb5_context kcontext, char *lib_name, db_library *libptr)
 {
     krb5_error_code status;
-    void   *vftabl_addr = NULL;
-    char    buf[KRB5_MAX_ERR_STR];
+    db_library lib;
+    kdb_vftabl *vftabl_addr = NULL;
 
-    if (!strcmp("kdb_db2", lib_name) && (kdb_db2_pol_err_loaded == 0)) {
-	initialize_adb_error_table();
-	kdb_db2_pol_err_loaded = 1;
+    if (strcmp(lib_name, "db2") == 0)
+	vftabl_addr = &krb5_db2_kdb_function_table;
+#ifdef ENABLE_LDAP
+    if (strcmp(lib_name, "ldap") == 0)
+	vftabl_addr = &krb5_ldap_kdb_function_table;
+#endif
+    if (!vftabl_addr) {
+	krb5_set_error_message(kcontext, KRB5_KDB_DBTYPE_NOTFOUND,
+			       "Unable to find requested database type: %s",
+			       lib_name);
+	return KRB5_KDB_DBTYPE_NOSUP;
     }
 
-    *lib = calloc((size_t) 1, sizeof(**lib));
-    if (*lib == NULL) {
-	status = ENOMEM;
-	goto clean_n_exit;
-    }
+    lib = calloc(1, sizeof(*lib));
+    if (lib == NULL)
+	return ENOMEM;
 
     status = kdb_init_lib_lock(*lib);
-    if (status) {
-	goto clean_n_exit;
-    }
+    if (status)
+	goto cleanup;
 
-    strlcpy((*lib)->name, lib_name, sizeof((*lib)->name));
+    strlcpy(lib->name, lib_name, sizeof(lib->name));
+    memcpy(&lib->vftabl, vftabl_addr, sizeof(kdb_vftabl));
+    kdb_setup_opt_functions(lib);
 
-#if !defined(KDB5_USE_LIB_KDB_DB2) && !defined(KDB5_USE_LIB_TEST)
-#error No database module defined
-#endif
+    status = lib->vftabl.init_library();
+    if (status)
+	goto cleanup;
 
-#ifdef KDB5_USE_LIB_KDB_DB2
-    if (strcmp(lib_name, "kdb_db2") == 0) {
-	DEF_SYMBOL(kdb_db2);
-	vftabl_addr = (void *) &GET_SYMBOL(kdb_db2);
-    } else
-#endif
-#ifdef KDB5_USE_LIB_TEST
-    if (strcmp(lib_name, "test") == 0) {
-	DEF_SYMBOL(test);
-	vftabl_addr = (void *) &GET_SYMBOL(test);
-    } else
-#endif
-    {
-	snprintf(buf, sizeof(buf),
-		 "Program not built to support %s database type\n",
-		 lib_name);
-	status = KRB5_KDB_DBTYPE_NOSUP;
-	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
-	goto clean_n_exit;
-    }
+    *libptr = lib;
+    return 0;
 
-    memcpy(&(*lib)->vftabl, vftabl_addr, sizeof(kdb_vftabl));
-
-    kdb_setup_opt_functions(*lib);
-
-    if ((status = (*lib)->vftabl.init_library())) {
-	/* ERROR. library not initialized cleanly */
-	snprintf(buf, sizeof(buf),
-		 "%s library initialization failed, error code %ld\n",
-		 lib_name, status);
-	status = KRB5_KDB_DBTYPE_INIT;
-	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
-	goto clean_n_exit;
-    }
-
-  clean_n_exit:
-    if (status) {
-	free(*lib), *lib = NULL;
-    }
+cleanup:
+    free(lib);
     return status;
 }
 
@@ -423,11 +391,6 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     filebases[0] = lib_name;
     filebases[1] = NULL;
-
-    if (!strcmp(DB2_NAME, lib_name) && (kdb_db2_pol_err_loaded == 0)) {
-	initialize_adb_error_table();
-	kdb_db2_pol_err_loaded = 1;
-    }
 
     *lib = calloc((size_t) 1, sizeof(**lib));
     if (*lib == NULL) {
@@ -527,6 +490,12 @@ kdb_find_library(krb5_context kcontext, char *lib_name, db_library * lib)
     krb5_error_code status = 0;
     int     locked = 0;
     db_library curr_elt, prev_elt = NULL;
+    static int kdb_db2_pol_err_loaded = 0;
+
+    if (!strcmp(DB2_NAME, lib_name) && (kdb_db2_pol_err_loaded == 0)) {
+	initialize_adb_error_table();
+	kdb_db2_pol_err_loaded = 1;
+    }
 
     if ((status = kdb_lock_list()) != 0) {
 	goto clean_n_exit;

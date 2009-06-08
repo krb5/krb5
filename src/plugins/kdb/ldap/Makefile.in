@@ -38,7 +38,7 @@ SRCS= 	$(srcdir)/ldap_exp.c
 STOBJLISTS=OBJS.ST
 STLIBOBJS= ldap_exp.o
 
-all-unix:: $(LIBBASE)$(SO_EXT)
+all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 

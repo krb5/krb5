@@ -10,4 +10,3 @@ LIBINSTLIST=
 SHLIBEXT=.so-nobuild
 SHLIBVEXT=.so.v-nobuild
 SHLIBSEXT=.so.s-nobuild
-STLIBEXT=$(STLIBEXT_if_static)

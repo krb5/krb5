@@ -315,6 +315,9 @@ PROG_RPATH_FLAGS=@PROG_RPATH_FLAGS@
 # depending on whether we're building with shared libraries.
 DEPLIBEXT=@DEPLIBEXT@
 
+KDB5_PLUGIN_DEPLIBS = @KDB5_PLUGIN_DEPLIBS@
+KDB5_PLUGIN_LIBS = @KDB5_PLUGIN_LIBS@
+
 KADMCLNT_DEPLIB	= $(TOPLIBD)/libkadm5clnt$(DEPLIBEXT)
 KADMSRV_DEPLIB	= $(TOPLIBD)/libkadm5srv$(DEPLIBEXT)
 KDB5_DEPLIB	= $(TOPLIBD)/libkdb5$(DEPLIBEXT)
@@ -337,7 +340,7 @@ PTY_DEPLIB	= $(TOPLIBD)/libpty.a
 APPUTILS_DEPLIB	= $(TOPLIBD)/libapputils.a
 
 KRB5_BASE_DEPLIBS	= $(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-KDB5_DEPLIBS		= $(KDB5_DEPLIB)
+KDB5_DEPLIBS		= $(KDB5_DEPLIB) $(KDB5_PLUGIN_DEPLIBS)
 GSS_DEPLIBS		= $(GSS_DEPLIB)
 GSSRPC_DEPLIBS		= $(GSSRPC_DEPLIB) $(GSS_DEPLIBS)
 KADM_COMM_DEPLIBS	= $(GSSRPC_DEPLIBS) $(KDB5_DEPLIBS) $(GSSRPC_DEPLIBS)
@@ -365,7 +368,7 @@ GEN_LIB		= @GEN_LIB@
 SS_LIB		= $(SS_LIB-@SS_VERSION@)
 SS_LIB-sys	= @SS_LIB@
 SS_LIB-k5	= $(TOPLIBD)/libss.a
-KDB5_LIB	= -lkdb5
+KDB5_LIB	= -lkdb5 $(KDB5_PLUGIN_LIBS)
 
 DL_LIB		= @DL_LIB@
 
@@ -471,26 +474,28 @@ AR=@AR@
 # Set to "lib$(LIBBASE)$(STEXT) lib$(LIBBASE)$(SHEXT) lib$(LIBBASE)$(PFEXT)" or
 # some subset thereof by configure; determines which types of libs get
 # built.
-LIBLIST=$(LIBLIST_@SHLIB_HAVE_MINOR_VERS@)
-LIBLIST_yes=lib$(LIBBASE)$(SHLIBEXT) lib$(LIBBASE)$(SHLIBSEXT)
-LIBLIST_no=lib$(LIBBASE)$(SHLIBEXT)
+LIBLIST=@LIBLIST@
 
 # Set by configure; list of library symlinks to make to $(TOPLIBD)
-LIBLINKS=$(LIBLINKS_@SHLIB_HAVE_MINOR_VERS@)
-LIBLINKS_yes=$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)
-LIBLINKS_no=$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)
+LIBLINKS=@LIBLINKS@
 
-# Set by configure; list of install targets
-LIBINSTLIST=$(LIBINSTLIST_@SHLIB_HAVE_MINOR_VERS@)
-LIBINSTLIST_yes=install-shlib-soname
-LIBINSTLIST_no=install-shared
+# Set by configure; name of plugin module to build (libfoo.a or foo.so)
+PLUGIN=@PLUGIN@
+
+# Set by configure; symlink for plugin module for static plugin linking
+PLUGINLINK=@PLUGINLINK@
+
+# Set by configure; list of install targets for libraries
+LIBINSTLIST=@LIBINSTLIST@
+
+# Set by configure; install target
+PLUGININST=@PLUGININST@
 
 # Some of these should really move to pre.in, since programs will need
 # it too. (e.g. stuff that has dependencies on the libraries)
 
 # usually .a
-STLIBEXT_if_static=@STLIBEXT@
-STLIBEXT=.a-nobuild
+STLIBEXT=@STLIBEXT@
 
 # usually .so.$(LIBMAJOR).$(LIBMINOR)
 SHLIBVEXT=@SHLIBVEXT@
@@ -536,7 +541,7 @@ SHLIB_EXPFLAGS=@SHLIB_EXPFLAGS@
 
 # Set to "OBJS.ST OBJS.SH OBJS.PF" or some subset thereof by
 # configure; determines which types of object files get built.
-OBJLISTS=OBJS.SH
+OBJLISTS=@OBJLISTS@
 
 # Note that $(LIBSRCS) *cannot* contain any variable references, or
 # the suffix substitution will break on some platforms!

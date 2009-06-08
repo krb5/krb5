@@ -68,7 +68,7 @@ STLIBOBJS= \
 	pol_xdr.o \
 	db2_exp.o
 
-all-unix:: $(LIBBASE)$(SO_EXT)
+all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 

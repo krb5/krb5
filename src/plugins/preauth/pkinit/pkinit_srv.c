@@ -1409,7 +1409,11 @@ pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
     free(reqctx);
 }
 
-struct krb5plugin_preauth_server_ftable_v1 preauthentication_server_1 = {
+/* Only necessary for static plugin linking support. */
+#include "k5-plugin.h"
+
+struct krb5plugin_preauth_server_ftable_v1
+PLUGIN_SYMBOL_NAME(krb5_pkinit, preauthentication_server_1) = {
     "pkinit",			/* name */
     supported_server_pa_types,	/* pa_type_list */
     pkinit_server_plugin_init,	/* (*init_proc) */
