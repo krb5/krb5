@@ -167,11 +167,6 @@ krb5_dbe_free_tl_data(krb5_context context, krb5_tl_data *tl_data)
     }
 }
 
-#define kdb_init_lib_lock(a) 0
-#define kdb_destroy_lib_lock(a) (void)0
-#define kdb_lock_lib_lock(a, b) 0
-#define kdb_unlock_lib_lock(a, b) (void)0
-
 /* Caller must free result*/
 
 static char *
@@ -346,10 +341,6 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library *libptr)
     if (lib == NULL)
 	return ENOMEM;
 
-    status = kdb_init_lib_lock(*lib);
-    if (status)
-	goto cleanup;
-
     strlcpy(lib->name, lib_name, sizeof(lib->name));
     memcpy(&lib->vftabl, vftabl_addr, sizeof(kdb_vftabl));
     kdb_setup_opt_functions(lib);
@@ -395,11 +386,6 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     *lib = calloc((size_t) 1, sizeof(**lib));
     if (*lib == NULL) {
 	status = ENOMEM;
-	goto clean_n_exit;
-    }
-
-    status = kdb_init_lib_lock(*lib);
-    if (status) {
 	goto clean_n_exit;
     }
 
@@ -470,7 +456,6 @@ clean_n_exit:
     free(path);
     if (status) {
         if (*lib) {
-	    kdb_destroy_lib_lock(*lib);
             if (PLUGIN_DIR_OPEN((&(*lib)->dl_dir_handle))) {
                 krb5int_close_plugin_dirs (&(*lib)->dl_dir_handle);
             }
@@ -562,8 +547,6 @@ kdb_free_library(db_library lib)
             krb5int_close_plugin_dirs (&lib->dl_dir_handle);
         }
         
-	kdb_destroy_lib_lock(lib);
-
 	if (lib->prev == NULL) {
 	    /* first element in the list */
 	    lib_list = lib->next;
@@ -690,17 +673,11 @@ krb5_db_open(krb5_context kcontext, char **db_args, int mode)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
 
     status =
 	dal_handle->lib_handle->vftabl.init_module(kcontext, section, db_args,
 						   mode);
     get_errmsg(kcontext, status);
-
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     if (section)
@@ -739,16 +716,9 @@ krb5_db_create(krb5_context kcontext, char **db_args)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_create(kcontext, section, db_args);
     get_errmsg(kcontext, status);
-
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     if (section)
@@ -768,15 +738,8 @@ krb5_db_fini(krb5_context kcontext)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.fini_module(kcontext);
     get_errmsg(kcontext, status);
-
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
     if (status) {
 	goto clean_n_exit;
@@ -812,15 +775,9 @@ krb5_db_destroy(krb5_context kcontext, char **db_args)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_destroy(kcontext, section, db_args);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     if (section)
@@ -842,14 +799,8 @@ krb5_db_get_age(krb5_context kcontext, char *db_name, time_t * t)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_get_age(kcontext, db_name, t);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -869,15 +820,9 @@ krb5_db_set_option(krb5_context kcontext, int option, void *value)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_set_option(kcontext, option, value);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -897,17 +842,8 @@ krb5_db_lock(krb5_context kcontext, int lock_mode)
     }
 
     dal_handle = kcontext->dal_handle;
-    /* acquire an exclusive lock, ensures no other thread uses this context */
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, TRUE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_lock(kcontext, lock_mode);
     get_errmsg(kcontext, status);
-
-    /* exclusive lock is still held, so no other thread could use this context */
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -927,16 +863,8 @@ krb5_db_unlock(krb5_context kcontext)
     }
 
     dal_handle = kcontext->dal_handle;
-    /* normal lock acquired and exclusive lock released */
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_unlock(kcontext);
     get_errmsg(kcontext, status);
-
-    kdb_unlock_lib_lock(dal_handle->lib_handle, TRUE);
 
   clean_n_exit:
     return status;
@@ -959,17 +887,11 @@ krb5_db_get_principal(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_get_principal(kcontext, search_for, 0,
 							entries, nentries,
 							more);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -993,17 +915,11 @@ krb5_db_get_principal_ext(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_get_principal(kcontext, search_for,
 							flags,
 							entries, nentries,
 							more);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1023,16 +939,10 @@ krb5_db_free_principal(krb5_context kcontext, krb5_db_entry * entry, int count)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_free_principal(kcontext, entry,
 							 count);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1171,14 +1081,7 @@ krb5_db_put_principal(krb5_context kcontext,
 	goto clean_n_exit;
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
 
-    /*
-     * We need the lock since ulog_conv_2logentry() does a get
-     */
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
 	if (!(upd = (kdb_incr_update_t *)
 	  malloc(sizeof (kdb_incr_update_t)* *nentries))) {
@@ -1200,9 +1103,6 @@ krb5_db_put_principal(krb5_context kcontext,
     ulog_locked = 1;
 
     for (i = 0; i < *nentries; i++) {
-	/*
-	 * We'll be sharing the same locks as db for logging
-	 */
         if (fupd) {
 		if ((status = krb5_unparse_name(kcontext, entries->princ,
 		    &princ_name)))
@@ -1231,8 +1131,6 @@ krb5_db_put_principal(krb5_context kcontext,
 err_lock:
     if (ulog_locked)
 	ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     free_db_args(kcontext, db_args);
@@ -1282,16 +1180,9 @@ krb5_db_delete_principal(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-    if (status) {
-	kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
+    if (status)
 	return status;
-    }
 
     /*
      * We'll be sharing the same locks as db for logging
@@ -1299,7 +1190,6 @@ krb5_db_delete_principal(krb5_context kcontext,
     if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
 	if ((status = krb5_unparse_name(kcontext, search_for, &princ_name))) {
 	    ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-	    (void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 	    return status;
 	}
 
@@ -1311,7 +1201,6 @@ krb5_db_delete_principal(krb5_context kcontext,
 	if ((status = ulog_delete_update(kcontext, &upd)) != 0) {
 		ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
 		free(princ_name);
-		(void) kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 		return status;
 	}
 
@@ -1331,7 +1220,6 @@ krb5_db_delete_principal(krb5_context kcontext,
 		(void) ulog_finish_update(kcontext, &upd);
 
     ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1354,16 +1242,10 @@ krb5_db_iterate(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_iterate(kcontext,
 						       match_entry,
 						       func, func_arg);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1383,15 +1265,9 @@ krb5_supported_realms(krb5_context kcontext, char **realms)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_supported_realms(kcontext, realms);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1411,16 +1287,10 @@ krb5_free_supported_realms(krb5_context kcontext, char **realms)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_free_supported_realms(kcontext,
 								realms);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1441,15 +1311,8 @@ krb5_db_set_master_key_ext(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.set_master_key(kcontext, pwd, key);
     get_errmsg(kcontext, status);
-
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1476,15 +1339,8 @@ krb5_db_set_mkey_list(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-        goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.set_master_key_list(kcontext, keylist);
     get_errmsg(kcontext, status);
-
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
 clean_n_exit:
     return status;
@@ -1504,16 +1360,10 @@ krb5_db_get_mkey(krb5_context kcontext, krb5_keyblock ** key)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     /* Let's use temp key and copy it later to avoid memory problems
        when freed by the caller.  */
     status = dal_handle->lib_handle->vftabl.get_master_key(kcontext, key);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1533,16 +1383,10 @@ krb5_db_get_mkey_list(krb5_context kcontext, krb5_keylist_node ** keylist)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-        goto clean_n_exit;
-    }
-
     /* Let's use temp key and copy it later to avoid memory problems
        when freed by the caller.  */
     status = dal_handle->lib_handle->vftabl.get_master_key_list(kcontext, keylist);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
 clean_n_exit:
     return status;
@@ -1566,18 +1410,12 @@ krb5_db_fetch_mkey_list(krb5_context     context,
     }
 
     dal_handle = context->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-        goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.fetch_master_key_list(context,
         mname,
         mkey,
         mkvno,
         mkey_list);
     get_errmsg(context, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
     if (status) {
         goto clean_n_exit;
@@ -1621,18 +1459,12 @@ krb5_db_store_master_key(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.store_master_key(kcontext,
 							     keyfile,
 							     mname,
 							     kvno,
 							     key, master_pwd);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1656,18 +1488,12 @@ krb5_db_store_master_key_list(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.store_master_key_list(kcontext,
 								  keyfile,
 								  mname,
 								  keylist,
 								  master_pwd);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -1754,10 +1580,6 @@ krb5_db_fetch_mkey(krb5_context    context,
 	}
 
 	dal_handle = context->dal_handle;
-	retval = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-	if (retval) {
-	    goto clean_n_exit;
-	}
 
         /* get the enctype from the stash */
 	tmp_key.enctype = ENCTYPE_UNKNOWN;
@@ -1768,7 +1590,6 @@ krb5_db_fetch_mkey(krb5_context    context,
 								 kvno,
 								 db_args);
 	get_errmsg(context, retval);
-	kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
 	if (retval) {
 	    goto clean_n_exit;
@@ -1811,17 +1632,11 @@ krb5_db_verify_master_key(krb5_context     kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.verify_master_key(kcontext,
                                                               mprinc,
                                                               kvno,
                                                               mkey);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2067,11 +1882,6 @@ krb5_dbe_search_enctype(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.dbe_search_enctype(kcontext,
 							       dbentp,
 							       start,
@@ -2079,7 +1889,6 @@ krb5_dbe_search_enctype(krb5_context kcontext,
 							       stype,
 							       kvno, kdatap);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2734,11 +2543,6 @@ krb5_dbe_cpw(krb5_context kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_change_pwd(kcontext,
 							  master_key,
 							  ks_tuple,
@@ -2747,7 +2551,6 @@ krb5_dbe_cpw(krb5_context kcontext,
 							  new_kvno,
 							  keepold, db_entry);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2768,14 +2571,8 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_create_policy(kcontext, policy);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2796,16 +2593,10 @@ krb5_db_get_policy(krb5_context kcontext, char *name,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_get_policy(kcontext, name, policy,
 						     cnt);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2825,14 +2616,8 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_put_policy(kcontext, policy);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2853,16 +2638,10 @@ krb5_db_iter_policy(krb5_context kcontext, char *match_entry,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_iter_policy(kcontext, match_entry,
 						      func, data);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2882,14 +2661,8 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status = dal_handle->lib_handle->vftabl.db_delete_policy(kcontext, policy);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -2909,14 +2682,8 @@ krb5_db_free_policy(krb5_context kcontext, osa_policy_ent_t policy)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     dal_handle->lib_handle->vftabl.db_free_policy(kcontext, policy);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return;
@@ -2946,15 +2713,9 @@ krb5_db_promote(krb5_context kcontext, char **db_args)
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.promote_db(kcontext, section, db_args);
     get_errmsg(kcontext, status);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     if (section)
@@ -2980,15 +2741,9 @@ krb5_dbekd_decrypt_key_data( krb5_context 	  kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.dbekd_decrypt_key_data(kcontext,
 	    mkey, key_data, dbkey, keysalt);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -3013,15 +2768,9 @@ krb5_dbekd_encrypt_key_data( krb5_context 		  kcontext,
     }
 
     dal_handle = kcontext->dal_handle;
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.dbekd_encrypt_key_data(kcontext,
 	    mkey, dbkey, keysalt, keyver, key_data);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
@@ -3068,17 +2817,11 @@ krb5_db_invoke(krb5_context kcontext,
 	goto clean_n_exit;
     }
 
-    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
-    if (status) {
-	goto clean_n_exit;
-    }
-
     status =
 	dal_handle->lib_handle->vftabl.db_invoke(kcontext,
 						 method,
 						 req,
 						 rep);
-    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
 
   clean_n_exit:
     return status;
