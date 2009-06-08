@@ -11,10 +11,6 @@ DEFS=
 SRCS= init-test.c destroy-test.c handle-test.c iter-test.c setkey-test.c \
 	randkey-test.c lock-test.c
 
-all:: init-test destroy-test client-handle-test client-iter-test
-all:: randkey-test server-handle-test lock-test server-iter-test 
-all:: server-setkey-test client-setkey-test
-
 #
 # The client-side test programs.
 #
