@@ -83,7 +83,7 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
     krb5_error_code ret;
     krb5_data cipherresult;
     krb5_data clearresult;
-    krb5_error *krberror;
+    krb5_error *krberror = NULL;
     krb5_replay_data replay;
     krb5_keyblock *tmp;
 
