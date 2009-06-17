@@ -280,13 +280,10 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 
 	status = krb5_ldap_read_krbcontainer_params(context,
 						    &(ldap_context->krbcontainer));
-	if (status) {
-	    krb5_set_error_message(context, status, "while reading kerberos container information");
+	if (status)
 	    goto cleanup;
-	}
 
     } else if (status) {
-	krb5_set_error_message(context, status, "while reading kerberos container information");
 	goto cleanup;
     }
 
@@ -302,10 +299,8 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	goto cleanup;
     }
 
-    if ((status = krb5_ldap_create_realm(context, rparams, mask))) {
-	krb5_set_error_message(context, status, "while creating realm object entry");
+    if ((status = krb5_ldap_create_realm(context, rparams, mask)))
 	goto cleanup;
-    }
 
     /* We just created the Realm container. Here starts our transaction tracking */
     realm_obj_created = TRUE;
@@ -314,10 +309,8 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
     if ((status = krb5_ldap_read_realm_params(context,
 					      rparams->realm_name,
 					      &(ldap_context->lrparams),
-					      &mask))) {
-	krb5_set_error_message(context, status, "while reading realm object entry");
+					      &mask)))
 	goto cleanup;
-    }
 
 #ifdef HAVE_EDIRECTORY
     if ((mask & LDAP_REALM_KDCSERVERS) || (mask & LDAP_REALM_ADMINSERVERS) ||
