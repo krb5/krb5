@@ -1210,22 +1210,15 @@ dnl Parse configure options related to library building.
 AC_DEFUN(KRB5_LIB_AUX,
 [AC_REQUIRE([KRB5_LIB_PARAMS])dnl
 
-AC_ARG_ENABLE([static],,
-[if test "$enableval" != no; then
-  AC_MSG_ERROR([Sorry, static libraries do not work in this release.])
-fi])
-AC_ARG_ENABLE([shared], , 
-[if test "$enableval" != yes; then
-  AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
-fi])
-AC_ARG_ENABLE([static-only],
-AC_HELP_STRING([--enable-static-only],[use static libraries and plugins]),
-[static_only=$enableval],
-[static_only=no])
+AC_ARG_ENABLE([static],,, [enable_static=no])
+AC_ARG_ENABLE([shared],,, [enable_shared=yes])
+
+if test "x$enable_static" = "x$enable_shared"; then
+  AC_MSG_ERROR([--enable-static must be specified with --disable-shared])
+fi
 
 AC_ARG_ENABLE([rpath],
-AC_HELP_STRING([--disable-rpath],[suppress run path flags in link lines]),
-[enable_rpath=$enableval],
+AC_HELP_STRING([--disable-rpath],[suppress run path flags in link lines]),,
 [enable_rpath=yes])
 
 if test "x$enable_rpath" != xyes ; then
@@ -1241,7 +1234,8 @@ fi
 
 DEPLIBEXT=$SHLIBEXT
 
-if test "x$static_only" = xyes; then
+if test "x$enable_static" = xyes; then
+	AC_MSG_NOTICE([using static libraries])
 	LIBLIST='lib$(LIBBASE)$(STLIBEXT)'
 	LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)'
 	PLUGIN='libkrb5_$(LIBBASE)$(STLIBEXT)'
@@ -1259,7 +1253,6 @@ if test "x$static_only" = xyes; then
 		KDB5_PLUGIN_LIBS=$KDB_LUGIN_LIBS' -lkrb5_ldap'
 	fi
 
-	AC_MSG_RESULT([Forcing static libraries.])
 	# avoid duplicate rules generation for AIX and such
 	SHLIBEXT=.so-nobuild
 	SHLIBVEXT=.so.v-nobuild
