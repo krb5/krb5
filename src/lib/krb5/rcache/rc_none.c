@@ -44,9 +44,15 @@ krb5_rc_none_noargs(krb5_context ctx, krb5_rcache rc)
     return 0;
 }
 #define krb5_rc_none_recover    krb5_rc_none_noargs
-#define krb5_rc_none_destroy    krb5_rc_none_noargs
-#define krb5_rc_none_close      krb5_rc_none_noargs
 #define krb5_rc_none_expunge    krb5_rc_none_noargs
+
+static krb5_error_code KRB5_CALLCONV
+krb5_rc_none_close(krb5_context ctx, krb5_rcache rc)
+{
+    free (rc);
+    return 0;
+}
+#define krb5_rc_none_destroy    krb5_rc_none_close
 
 static krb5_error_code KRB5_CALLCONV
 krb5_rc_none_store(krb5_context ctx, krb5_rcache rc, krb5_donot_replay *r)
