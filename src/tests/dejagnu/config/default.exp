@@ -1634,7 +1634,7 @@ proc start_tail { fname spawnid_var pid_var which standalone } {
 
     set f [open $fname a]
 
-    spawn tail -f -s 0.01 $fname
+    spawn tail -f $fname
     set spawnid $spawn_id
     set pid [exp_pid]
 
