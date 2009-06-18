@@ -1634,7 +1634,7 @@ proc start_tail { fname spawnid_var pid_var which standalone } {
 
     set f [open $fname a]
 
-    spawn tail -f $fname
+    spawn tail -f -s 0.01 $fname
     set spawnid $spawn_id
     set pid [exp_pid]
 
@@ -2784,7 +2784,7 @@ proc krb_exit { } {
 # helpful sometimes for debugging the test suite
 proc export_debug_envvars { } {
     global env
-    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME GSSCLIENT KPROPLOG} {
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIN_FLAGS RLOGIND FTP FTPD KPASSWD REALMNAME GSSCLIENT KPROPLOG} {
 	global $i
 	if [info exists $i] { set env($i) [set $i] }
     }
