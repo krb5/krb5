@@ -130,20 +130,19 @@ static krb5_mcc_list_node *mcc_head = 0;
 
 static void update_mcc_change_time(krb5_mcc_data *);
 
+static void krb5_mcc_free (krb5_context context, krb5_ccache id);
+
 /*
  * Modifies:
  * id
  *
  * Effects:
- * Creates/refreshes the file cred cache id.  If the cache exists, its
+ * Creates/refreshes the memory cred cache id.  If the cache exists, its
  * contents are destroyed.
  *
  * Errors:
  * system errors
- * permission errors
  */
-static void krb5_mcc_free (krb5_context context, krb5_ccache id);
-
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
@@ -173,8 +172,8 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
  * id
  *
  * Effects:
- * Closes the file cache, invalidates the id, and frees any resources
- * associated with the cache.
+ * Invalidates the id, and frees any resources associated with accessing
+ * the cache.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_close(krb5_context context, krb5_ccache id)
@@ -183,7 +182,7 @@ krb5_mcc_close(krb5_context context, krb5_ccache id)
      return KRB5_OK;
 }
 
-void
+static void
 krb5_mcc_free(krb5_context context, krb5_ccache id)
 {
     krb5_mcc_cursor curr,next;
@@ -202,10 +201,10 @@ krb5_mcc_free(krb5_context context, krb5_ccache id)
 
 /*
  * Effects:
- * Destroys the contents of id.
+ * Destroys the contents of id. id is invalid after call.
  *
  * Errors:
- * none
+ * system errors (locks related)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_destroy(krb5_context context, krb5_ccache id)
@@ -252,8 +251,8 @@ krb5_mcc_destroy(krb5_context context, krb5_ccache id)
  * id
  * 
  * Effects:
- * creates a file-based cred cache that will reside in the file
- * residual.  The cache is not opened, but the filename is reserved.
+ * creates or accesses a memory-based cred cache that is referenced by 
+ * residual.  
  * 
  * Returns:
  * A filled in krb5_ccache structure "id".
@@ -261,7 +260,7 @@ krb5_mcc_destroy(krb5_context context, krb5_ccache id)
  * Errors:
  * KRB5_CC_NOMEM - there was insufficient memory to allocate the
  *              krb5_ccache.  id is undefined.
- * permission errors
+ * system errors (mutex locks related)
  */
 static krb5_error_code new_mcc_data (const char *, krb5_mcc_data **);
 
@@ -383,7 +382,7 @@ krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
  * id, cursor
  *
  * Effects:
- * Finishes sequential processing of the file credentials ccache id,
+ * Finishes sequential processing of the memory credentials ccache id,
  * and invalidates the cursor (it must never be used after this call).
  */
 /* ARGSUSED */
@@ -444,9 +443,8 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
 
 /*
  * Effects:
- * Creates a new file cred cache whose name is guaranteed to be
+ * Creates a new memory cred cache whose name is guaranteed to be
  * unique.  The name begins with the string TKT_ROOT (from mcc.h).
- * The cache is not opened, but the new filename is reserved.
  *  
  * Returns:
  * The filled in krb5_ccache id.
@@ -454,7 +452,7 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
  * Errors:
  * KRB5_CC_NOMEM - there was insufficient memory to allocate the
  *              krb5_ccache.  id is undefined.
- * system errors (from open)
+ * system errors (from open, mutex locking)
  */
 
 krb5_error_code KRB5_CALLCONV
@@ -553,7 +551,7 @@ krb5int_random_string (krb5_context context, char *string, unsigned int length)
  * id is a file credential cache
  * 
  * Returns:
- * The name of the file cred cache id.
+ * A pointer to the name of the file cred cache id.
  */
 const char * KRB5_CALLCONV
 krb5_mcc_get_name (krb5_context context, krb5_ccache id)
@@ -572,7 +570,7 @@ krb5_mcc_get_name (krb5_context context, krb5_ccache id)
  *
  * Errors:
  * system errors
- * KRB5_CC_NOMEM
+ * ENOMEM
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
@@ -610,7 +608,7 @@ krb5_mcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
 /*
  * Requires:
  * id is a cred cache returned by krb5_mcc_resolve or
- * krb5_mcc_generate_new, but has not been opened by krb5_mcc_initialize.
+ * krb5_mcc_generate_new.
  *
  * Modifies:
  * id
@@ -631,7 +629,17 @@ krb5_mcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
     return KRB5_OK;
 }
 
-/* store: Save away creds in the ccache.  */
+/*
+ * Modifies:
+ * the memory cache
+ *
+ * Effects:
+ * Save away creds in the ccache.
+ *
+ * Errors:
+ * system errors (mutex locking)
+ * ENOMEM
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
 {
