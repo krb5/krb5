@@ -11,3 +11,8 @@ $(OUTPRE)t_rcache.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   t_rcache.c
+$(OUTPRE)gss-perf.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
+  gss-perf.c
+$(OUTPRE)prof1.$(OBJEXT): $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) prof1.c
