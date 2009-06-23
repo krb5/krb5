@@ -29,6 +29,9 @@ prof1: prof1.o $(KRB5_BASE_DEPLIBS)
 
 prof1.o: prof1.c
 
+gss-perf: gss-perf.o
+	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-perf gss-perf.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
+
 check-unix:: run-t_rcache
 
 install::
