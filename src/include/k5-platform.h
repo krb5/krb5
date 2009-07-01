@@ -28,7 +28,6 @@
  * Some to a C99-ish level, some related utility code.
  *
  * Currently:
- * + make "static inline" work
  * + [u]int{8,16,32}_t types
  * + 64-bit types and load/store code
  * + SIZE_MAX
