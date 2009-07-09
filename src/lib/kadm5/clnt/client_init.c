@@ -569,6 +569,7 @@ kadm5_setup_gss(kadm5_server_handle_t handle,
      code = KADM5_GSS_ERROR;
      gss_client_creds = GSS_C_NO_CREDENTIAL;
      ccname_orig = NULL;
+     gss_client = gss_target = GSS_C_NO_NAME;
 
      /* Temporarily use the kadm5 cache. */
      gssstat = gss_krb5_ccache_name(&minor_stat, handle->cache_name,
