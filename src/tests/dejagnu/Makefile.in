@@ -22,7 +22,7 @@ check-runtest-no::
 
 # Set VALGRIND at run time, that may be changed when running 'make'.
 check-runtest-yes:: t_inetd site.exp
-	$(RUNTEST) --tool krb --srcdir $(srcdir) VALGRIND="$(VALGRIND)" $(RUNTESTFLAGS)
+	$(RUNTEST) --tool krb VALGRIND="$(VALGRIND)" $(RUNTESTFLAGS)
 
 t_inetd:: t_inetd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_inetd t_inetd.o $(KRB5_BASE_LIBS)
