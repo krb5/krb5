@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/an_to_ln.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -438,7 +438,7 @@ aname_replacer(char *string, char **contextp, char **result)
 		    memset(out, '\0', MAX_FORMAT_BUFFER);
 		    if (!do_replacement(rule, repl, doglobal, in, out)) {
 			free(rule);
-		    free(repl);
+			free(repl);
 			kret = KRB5_LNAME_NOTRANS;
 			break;
 		    }
@@ -453,6 +453,7 @@ aname_replacer(char *string, char **contextp, char **result)
 		}
 		else {
 		    /* No memory for copies */
+		    free(rule);
 		    kret = ENOMEM;
 		    break;
 		}

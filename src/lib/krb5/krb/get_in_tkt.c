@@ -997,13 +997,15 @@ krb5_get_init_creds(krb5_context context,
 
 	/* stuff the client realm into the server principal.
 	   realloc if necessary */
-	if (request.server->realm.length < request.client->realm.length)
-	    if ((request.server->realm.data =
-		 (char *) realloc(request.server->realm.data,
-				  request.client->realm.length)) == NULL) {
+	if (request.server->realm.length < request.client->realm.length) {
+	    char *p = realloc(request.server->realm.data,
+			      request.client->realm.length);
+	    if (p == NULL) {
 		ret = ENOMEM;
 		goto cleanup;
 	    }
+	    request.server->realm.data = p;
+	}
 
 	request.server->realm.length = request.client->realm.length;
 	memcpy(request.server->realm.data, request.client->realm.data,

@@ -360,8 +360,10 @@ get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profst
 	
 	if ((old_ktypes =
 	     (krb5_enctype *)malloc(sizeof(krb5_enctype) * (count + 1))) ==
-	    (krb5_enctype *) NULL)
+	    (krb5_enctype *) NULL) {
+	    profile_release_string(retval);
 	    return ENOMEM;
+	}
 	
 	sp = retval;
 	j = 0;

@@ -186,6 +186,7 @@ authgss_create(CLIENT *clnt, gss_name_t name, struct rpc_gss_sec *sec)
 			rpc_createerr.cf_stat = RPC_SYSTEMERROR;
 			rpc_createerr.cf_error.re_errno = ENOMEM;
 			free(auth);
+			free(gd);
 			return (NULL);
 		}
 	}

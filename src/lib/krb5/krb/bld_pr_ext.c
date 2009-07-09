@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/bld_pr_ext.c
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
+ * Copyright 1991, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -39,7 +39,7 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
     register int i, count = 0;
     register unsigned int size;
     register char *next;
-    char *tmpdata;
+    char *tmpdata = 0;
     krb5_data *princ_data;
     krb5_principal princ_ret;
 
@@ -97,6 +97,7 @@ free_out:
 	krb5_xfree(princ_data[i].data);
     krb5_xfree(princ_data);
     krb5_xfree(princ_ret);
+    krb5_xfree(tmpdata);
     va_end(ap);
     return ENOMEM;
 }

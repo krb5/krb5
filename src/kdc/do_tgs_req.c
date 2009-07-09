@@ -57,7 +57,7 @@ krb5_error_code
 process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
 		krb5_data **response)
 {
-    krb5_keyblock * subkey;
+    krb5_keyblock * subkey = 0;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -99,8 +99,10 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     /*
      * setup_server_realm() sets up the global realm-specific data pointer.
      */
-    if ((retval = setup_server_realm(request->server)))
+    if ((retval = setup_server_realm(request->server))) {
+	krb5_free_kdc_req(kdc_context, request);
 	return retval;
+    }
 
     fromstring = inet_ntop(ADDRTYPE2FAMILY(from->address->addrtype),
 			   from->address->contents,
@@ -712,7 +714,9 @@ cleanup:
     if (session_key.contents)
 	krb5_free_keyblock_contents(kdc_context, &session_key);
     if (newtransited)
-	free(enc_tkt_reply.transited.tr_contents.data); 
+	free(enc_tkt_reply.transited.tr_contents.data);
+    if (subkey)
+	krb5_free_keyblock(kdc_context, subkey);
 
     return retval;
 }
@@ -834,6 +838,7 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
 		       "TGS_REQ: issuing TGT %s", sname);
 		free(sname);
 	    }
+	    krb5_free_realm_tree(kdc_context, plist);
 	    return;
 	}
 	krb5_db_free_principal(kdc_context, server, *nprincs);

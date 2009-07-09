@@ -1,7 +1,7 @@
 /*
  * kdc/kdc_util.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -425,6 +425,10 @@ kdc_get_server_key(krb5_ticket *ticket, krb5_keyblock **key, krb5_kvno *kvno)
 	retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock,
 					     server_key,
 					     *key, NULL);
+	if (retval) {
+	    free(*key);
+	    *key = NULL;
+	}
     } else
 	retval = ENOMEM;
 errout:
