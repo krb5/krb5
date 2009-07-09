@@ -39,8 +39,9 @@ generate-files-mac: kadmin_ct.c getdate.c
 clean::
 	$(RM) $(PROG).local $(PROG) $(COMMON_OBJS) $(KADMIN_OBJS) $(LOCAL_OBJS)
 clean-unix::
-	$(RM) getdate.c kadmin_ct.c
+	$(RM) datetest getdate.c kadmin_ct.c
 
 # for testing getdate.y
+# CC_LINK is not meant for compilation and this use may break in the future.
 datetest: getdate.c
-	$(CC) -o datetest $(ALL_CFLAGS) $(LDFLAGS) $(LDARGS) -DTEST getdate.c
+	$(CC_LINK) $(ALL_CFLAGS) -DTEST -o datetest getdate.c

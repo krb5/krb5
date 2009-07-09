@@ -1053,7 +1053,7 @@ main(ac, av)
     (void)printf("Enter date, or blank line to exit.\n\t> ");
     (void)fflush(stdout);
     while (gets(buff) && buff[0]) {
-	d = get_date(buff, (struct my_timeb *)NULL);
+	d = get_date(buff);
 	if (d == -1)
 	    (void)printf("Bad format - couldn't convert.\n");
 	else
