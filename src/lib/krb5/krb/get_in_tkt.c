@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/get_in_tkt.c
  *
- * Copyright 1990,1991, 2003 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991, 2003, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -409,7 +409,7 @@ make_preauth_list(krb5_context	context,
     for (i=0; i<nptypes; i++) {
  	if ((preauthp[i] =
  	     (krb5_pa_data *) malloc(sizeof(krb5_pa_data))) == NULL) {
- 	    for (; i>=0; i++)
+ 	    for (; i>=0; i--)
  		free(preauthp[i]);
  	    free(preauthp);
 	    return (ENOMEM);
