@@ -242,8 +242,7 @@ SRVTCL		= $(TESTDIR)/util/ovsec_kadm_srv_tcl
 # If we don't set it, then the host type used is "native", which
 # doesn't match "*-*-*".
 host=@krb5_cv_host@
-DEJAFLAGS	= $(DEJALFLAGS) $(CLFLAGS) --debug --srcdir $(srcdir) --host \
-		   $(host)
+DEJAFLAGS	= --debug --srcdir $(srcdir) --host $(host)
 RUNTEST		= runtest $(DEJAFLAGS)
 
 START_SERVERS	= $(STESTDIR)/scripts/start_servers $(TEST_SERVER) $(TEST_PATH)
