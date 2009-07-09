@@ -1628,7 +1628,7 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      }
 
      if (ret.code != 0)
-	 errmsg = krb5_get_error_message(handle ? handle->context : NULL, ret.code);
+	 errmsg = krb5_get_error_message(NULL, ret.code);
      else
 	 errmsg = "success";
 

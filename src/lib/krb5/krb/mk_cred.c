@@ -176,8 +176,8 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context, krb5_creds *
 
     if ((pcred->tickets 
       = (krb5_ticket **)malloc(sizeof(krb5_ticket *) * (ncred + 1))) == NULL) {
-	retval = ENOMEM;
 	free(pcred);
+	return ENOMEM;
     }
     memset(pcred->tickets, 0, sizeof(krb5_ticket *) * (ncred +1));
 

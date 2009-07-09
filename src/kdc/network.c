@@ -775,10 +775,8 @@ static void process_packet(struct connection *conn, const char *prog,
 	return;
     }
     if (cc != response->length) {
-	krb5_free_data(kdc_context, response);
 	com_err(prog, 0, "short reply write %d vs %d\n",
 		response->length, cc);
-	return;
     }
     krb5_free_data(kdc_context, response);
     return;
