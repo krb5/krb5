@@ -567,37 +567,6 @@ proc check_k5login { testname } {
     return 0
 }
 
-proc check_klogin { testname } {
-    global env
-    global REALMNAME
-
-    if {![file exists ~/.klogin]} {
-	if {$env(USER) == "root"} {
-	    return 0
-	} else {
-	    return 1
-	}
-    }
-
-    verbose "looking for $env(USER) in ~/.klogin" 2
-    set file [open ~/.klogin r]
-    while { [gets $file principal] != -1 } {
-	verbose " found $principal" 2
-	if { $principal == "$env(USER)" \
-		|| $principal == "$env(USER)@$REALMNAME" } {
-	    close $file
-	    return 1
-	}
-    }
-    close $file
-
-    note "$testname test requires that your name appear in your ~/.klogin"
-    note "file without a realm."
-    unsupported "$testname"
-
-    return 0
-}
-
 # check_exit_status
 # Check the exit status of a spawned program (using the caller's value
 # of spawn_id).  Returns 1 if the program succeeded, 0 if it failed.
