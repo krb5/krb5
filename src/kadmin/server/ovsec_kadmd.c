@@ -222,6 +222,7 @@ int main(int argc, char *argv[])
      int    db_args_size = 0;
      char *errmsg;
      int i;
+     int strong_random = 1;
 
      kdb_log_context *log_ctx;
 
@@ -292,6 +293,8 @@ int main(int argc, char *argv[])
 	      usage();
 	    params.kadmind_port = atoi(*argv);
 	    params.mask |= KADM5_CONFIG_KADMIND_PORT;
+	  } else if (strcmp(*argv, "-W") == 0) {
+	      strong_random = 0;
 	  } else
 	       break;
 	  argc--; argv++;
@@ -490,7 +493,7 @@ kterr:
      }
      
      krb5_klog_syslog(LOG_INFO, "Seeding random number generator");
-     ret = krb5_c_random_os_entropy(context, 1, NULL);
+     ret = krb5_c_random_os_entropy(context, strong_random, NULL);
      if (ret) {
 	  krb5_klog_syslog(LOG_ERR, "Error getting random seed: %s, aborting",
 			   krb5_get_error_message(context, ret));
