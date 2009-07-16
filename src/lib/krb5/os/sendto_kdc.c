@@ -654,12 +654,14 @@ start_connection (struct conn_state *state,
 	dprint("socket: %m creating with af %d\n", state->err, ai->ai_family);
 	return -1;		/* try other hosts */
     }
+#ifndef _WIN32 /* On Windows FD_SETSIZE is a count, not a max value.  */
     if (fd >= FD_SETSIZE) {
-	close(fd);
+	closesocket(fd);
 	state->err = EMFILE;
 	dprint("socket: fd %d too high\n", fd);
 	return -1;
     }
+#endif
     /* Make it non-blocking.  */
     if (ai->ai_socktype == SOCK_STREAM) {
 	static const int one = 1;
