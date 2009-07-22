@@ -29,21 +29,23 @@
         <package    def="1" />
         <repository def="A" abbr="r" value="skip" options="skip checkout|co export|ex update|up" />
         <sign       def="0" />
-        <verbose    def="0" abbr="v" />
+        <verbose    def="1" abbr="v" />
         <vverbose   def="0" />
-
+        <cpu        def="0" value="i386" options="i386 amd64" />
+        <components def="0" value="base %cpu%" />
+      
         <!-- Directory settings: -->
         <!--    Sources will be checked out of repositories into <src>.  The structure
                 of the repositories will cause pismere/athena to be created under <src>.    -->
-        <src        def="A" abbr="s" value="C:\KfW" />        <!-- Must be absolute path. -->
-        <out        def="A" abbr="o" value="C:\KfW\public" /> <!-- Must be absolute path. -->
+        <src        def="A" abbr="s" value="C:\kfw" />        <!-- Must be absolute path. -->
+        <out        def="A" abbr="o" value="C:\kfw\public" /> <!-- Must be absolute path. -->
 
         <!-- Repository settings: -->
         <cvstag     def="0" abbr="c" value="" />
         <svntag     def="0" abbr="t" value="" />
-        <svnbranch  def="0" abbr="b" value="" />
-        <username   def="0" abbr="u" value="" />    <!-- Needed for svn/plink.  Override from command line -->
-        <CVSROOT    def="A" value=":kserver:cvs.mit.edu:/cvs/pismere" />
+        <svnbranch  def="0" abbr="b" value="krb5-1-6" />
+        <username   def="0" abbr="u" value="rsilk" />    <!-- Needed for svn/plink.  Override from command line -->
+        <CVSROOT    def="A" value=":gserver:cvs.mit.edu:/cvs/pismere" />
         <SVNURL     def="A" value="svn.mit.edu" />  <!-- NB:  No protocol or slashes!! -->
 
         <!-- Environment variables: -->
@@ -61,9 +63,9 @@
                             <!-- File to      paths are relative to <out>.          -->
                             <File dummy="foo" /> <!-- Forces XML::Simple behavior   -->
                             <!-- Without this, XML::Simple does not make an anonymous array and I can't figure out how to iterate over it. -->
-                            <File name="*.*" from="athena"  to="src\athena" />
-                            <File name="*.*" from="doc"     to="src\doc" />
-                            <File name="*.*" from="scripts" to="src\scripts" />
+                            <File name="*.*" from="athena"  to="src\athena"  component="base" />
+                            <File name="*.*" from="doc"     to="src\doc"     component="base" />
+                            <File name="*.*" from="scripts" to="src\scripts" component="base" />
                             </Files>
                     </CopyList>
                     <Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:    -->
@@ -87,7 +89,7 @@
                 <Config>
                     <!--    Debug and Release build results go in different places.
                             The otherwise identical paths differ in one section.  For example:
-                            .../target/bin/i386/bin/rel/filename and .../target/bin/i386/dbg/filename.
+                            .../target/bin/%cpu%/bin/rel/filename and .../target/bin/%cpu%/dbg/filename.
                             Here we define the two differing sections:    -->
                     <DebugArea value="dbg" />
                     <ReleaseArea value="rel" />
@@ -96,13 +98,15 @@
                             Paths that include <DebugTag> (or <ReleaseTag>) will only have the tag substituted 
                             and be copied when doing a debug (or release) build.  Examples:
                             Will always be copied, from a build-dependent directory:
-                            <File name="kfwlogon.dll"                 from="..\target\bin\i386\%bldtype%\" to="\bin\i386" /> 
+                            <File name="kfwlogon.dll"                 from="..\target\bin\%cpu%\%bldtype%\" to="\bin\%cpu%" /> 
                             Will only be copied in debug build:
-                            <File name="netidmgr.exe.static.manifest" from="..\target\bin\i386\%debug%\"   to="\bin\i386" notrequired="true" />
+                            <File name="netidmgr.exe.static.manifest" from="..\target\bin\%cpu%\%debug%\"   to="\bin\%cpu%" notrequired="true" />
                             Will always be copied, from a build-independent directory:
                             <File name="des.h"                        from="auth\krb4\include\"            to="\inc\krb4" newname="foo.h"/>
                             -->
                     <AlwaysTag  value="%bldtype%" />    <!-- Pick a string that won't appear in a path. -->
+                    <ArchTag    value="%WL%" />         <!-- Pick a string that won't appear in a path. -->
+                    <CpuTag     value="%cpu%" />        <!-- Pick a string that won't appear in a path. -->
                     <DebugTag   value="%debug%" />      <!-- Pick a string that won't appear in a path. -->
                     <ReleaseTag value="%release%" />    <!-- Pick a string that won't appear in a path. -->
                     </Config>
@@ -127,7 +131,14 @@
                     <CommandTemplate    value="signtool sign /a /d &quot;MIT Kerberos for Windows&quot; /du &quot;http://web.mit.edu/kerberos&quot; /t TIMESTAMPSERVERGOESHERE %filename%" />
                     <FilePatterns       value="*.exe *.dll *.cpl *.msi" />
                     </Signing>
-                </Config>
+                <DebugArea   value="dbg" />
+                <ReleaseArea value="rel" />
+                <AlwaysTag   value="%bldtype%" />  <!-- Pick a string that won't appear in a path. -->
+                <ArchTag     value="%WL%" />       <!-- Pick a string that won't appear in a path. -->
+                <CpuTag      value="%cpu%" />      <!-- Pick a string that won't appear in a path. -->
+                <DebugTag    value="%debug%" />    <!-- Pick a string that won't appear in a path. -->
+                <ReleaseTag  value="%release%" />  <!-- Pick a string that won't appear in a path. -->
+            </Config>
             <Zips>
                 <Zip dummy="foo" /> <!-- To force desired XML::Simple behavior    -->
                 <!--    Files will be copied into directory <topdir>; <topdir> will appear in the paths of the files.    -->
@@ -139,6 +150,8 @@
                             <DebugArea   value="dbg" />
                             <ReleaseArea value="rel" />
                             <AlwaysTag   value="%bldtype%" /> <!-- Pick a string that won't appear in a path. -->
+                            <ArchTag     value="%WL%" />      <!-- Pick a string that won't appear in a path. -->
+                            <CpuTag      value="%cpu%" />     <!-- Pick a string that won't appear in a path. -->
                             <DebugTag    value="%debug%" />   <!-- Pick a string that won't appear in a path. -->
                             <ReleaseTag  value="%release%" /> <!-- Pick a string that won't appear in a path. -->
                             </Config>
@@ -146,25 +159,43 @@
                             <Include path="corebinaryfiles.xml" />  <!-- Included file is relative to location of bkw.pl. -->
                             </Files> 
                         </CopyList>
-                </Zip>
+                    </Zip>
                 <Zip name="SDK" filename="%filestem%-sdk.zip" topdir="%filestem%-final">
                     <CopyList>
-                        <Files>
+                      <Config>
+                          <DebugArea   value="dbg" />
+                          <ReleaseArea value="rel" />
+                          <AlwaysTag   value="%bldtype%" /> <!-- Pick a string that won't appear in a path. -->
+                          <ArchTag     value="%WL%" />      <!-- Pick a string that won't appear in a path. -->
+                          <CpuTag      value="%cpu%" />     <!-- Pick a string that won't appear in a path. -->
+                          <DebugTag    value="%debug%" />   <!-- Pick a string that won't appear in a path. -->
+                          <ReleaseTag  value="%release%" /> <!-- Pick a string that won't appear in a path. -->
+                          </Config>
+                      <Files>
                             <Include path="sdkfiles.xml" />         <!-- Included file is relative to location of bkw.pl. -->
                             </Files>
                         </CopyList>
                     </Zip>
                 </Zips>            
             <CopyList>            <!-- Copied at end of post-package step.  -->
+                <Config>
+                    <DebugArea   value="dbg" />
+                    <ReleaseArea value="rel" />
+                    <AlwaysTag   value="%bldtype%" /> <!-- Pick a string that won't appear in a path. -->
+                    <ArchTag     value="%WL%" />      <!-- Pick a string that won't appear in a path. -->
+                    <CpuTag      value="%cpu%" />     <!-- Pick a string that won't appear in a path. -->
+                    <DebugTag    value="%debug%" />   <!-- Pick a string that won't appear in a path. -->
+                    <ReleaseTag  value="%release%" /> <!-- Pick a string that won't appear in a path. -->
+                    </Config>
                 <Files>
                     <File dummy="foo" />
                     <!-- File from    paths are relative to <src/pismere>.  -->
                     <!-- File to      paths are relative to <out>.          -->
-                    <File name="msi-deployment-guide.txt"   from="staging\install\wix\" to="" />
-                    <File name="netidmgr_userdoc.pdf"       from="staging\doc"          to="" />
-                    <File name="kfw.msi"                    from="buildwix"             to="" newname="%filestem%.msi" />
-                    <File name="MITKerberosForWindows%-DEBUG%.exe" from="buildnsi"      to="" newname="%filestem%%-DEBUG%.exe" />
-                    <File name="relnotes.html"              from="staging\doc"          to="" />
+                    <File name="msi-deployment-guide.txt"   from="staging\install\wix\" to="" component="base" />
+                    <File name="netidmgr_userdoc.pdf"       from="staging\doc"          to="" component="base" />
+                    <File name="kfw.msi"                    from="buildwix"             to="" component="base" newname="%filestem%-%cpu%.msi" />
+                    <File name="MITKerberosForWindows%-DEBUG%.exe" from="buildnsi"      to="" component="base" newname="%filestem%-%cpu%%-DEBUG%.exe" />
+                    <File name="relnotes.html"              from="staging\doc"          to="" component="base" />
                     </Files>
                 </CopyList>
             </PostPackage>

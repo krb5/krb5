@@ -22,6 +22,11 @@ my $OPT = {foo => 'bar'};
 my $MAKE = 'NMAKE';
 our $config;
 
+# List of programs which must be in PATH:
+my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'doxygen', 
+                     'hhc', 'candle', 'light', 'makensis', 'nmake', 'filever');
+my @required_for_repository_access = ('cvs', 'svn', 'plink');
+
 sub get_info {
     my $cmd = shift || die;
     my $which = $^X.' which.pl';
@@ -59,6 +64,8 @@ Usage: $0 [options] NMAKE-options
     /[no]package       Control the packaging step.
     /[no]sign          Control signing of executable files.
     /verbose /v        Debug mode - verbose output.
+    /vverbose          Debug mode - even more output.
+    /cpu cpu           Type of cpu - i386 or amd64.
     /logfile /l path   Where to write output.  Default is bkw.pl.log.
     /nolog             Don't save output.
   Other:
@@ -112,7 +119,8 @@ sub main {
     while (($sw, $val) = each %$odr) {
         local $arg  = $sw;
         if (exists $val->{abbr})    {$arg .= "|$val->{abbr}";}
-        if (exists $val->{value})   {       ## Can't do both negations and string values.
+        if (exists $val->{value} ||     
+            exists $val->{options})   {     ## Can't do both negations and string values.
             $arg .= ":s";
             }
         else {    
@@ -130,32 +138,6 @@ sub main {
         
     delete $OPT->{foo};        
 
-##++ Validate required conditions:
-
-    # List of programs which must be in PATH:
-    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 
-                         'hhc', 'candle', 'light', 'makensis', 'nmake', 'plink', 'filever');
-    my $requirements_met    = 1;
-    my $first_missing       = 0;
-    my $error_list          = "";
-    foreach my $required (@required_list) {
-        if (!get_info($required)) {
-            $requirements_met = 0;
-            if (!$first_missing) {
-                $first_missing = 1;
-                $error_list = "Fatal -- Environment problem!  The following program(s) are not in PATH:\n";
-                }
-            $error_list .= "$required\n";
-            }
-        }
-    if (!$requirements_met) {
-        print $error_list;
-        print "Info -- Update PATH or install the programs and try again.\n";
-        exit(0);
-        }
-
-##-- Validate required conditions.
-    
     use Time::gmtime;
     $ENV{DATE} = gmctime()." GMT";
     our $originalDir = `cd`;
@@ -164,9 +146,6 @@ sub main {
 ##++ Assemble configuration from config file and command line:
 
     my $bOutputCleaned  = 0;
-
-#while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
-
     # Scan the configuration for switch definitions:
     while (($sw, $val) = each %$odr) {
         next if (! exists $val->{def}); ## ?? Should always exist.
@@ -174,29 +153,38 @@ sub main {
         # Set/clear environment variables:
         if ($val->{env}) {
             if ($val->{def})    {$ENV{$sw}   = (exists $val->{value}) ? $val->{value} : 1; }
-            else                {delete $ENV{$sw};  }
+            else                {
+                delete $ENV{$sw};  
+                undef  $sw;
+                }
             }
 
         # If the switch is in the command line, override the stored value:
         if (exists $OPT->{$sw}) {
             if (exists $val->{value}) {
-                $val->{value}   = $OPT->{$sw};  
-                $val->{def}     = 1;
+                $val->{value} = $OPT->{$sw};  
+                $val->{def}   = 1;
                 }
             else {
-                $val->{def}   = $OPT->{$sw};    ## If no<switch>, value will be zero.
+                $val->{def}   = 0;
                 }
             }
         # If the switch can be negated, test that, too:
         if ( ! ($val->{def} =~ /A/)) {
             local $nosw = "no".$sw;
-            if (exists $OPT->{$nosw}) {
-                $val->{def} = 0;
+            if (exists $OPT->{$nosw}) {         ## -NO<environment variable> ?
+                if ($val->{env}) {              
+                    if (!$val->{def}) {
+                        print "Deleting environment variable $sw\n";
+                        delete $ENV{$sw};           
+                        undef $sw;
+                        }
+                    }
                 }
             }
     
         # For any switch definition with fixed values ("options"), validate:
-        if (exists $val->{options}) {
+        if ( (exists $val->{options}) && ($val->{def})) {
             local $bValid   = 0;
             # options can be like value1|syn1 value2|syn2|syn3
             foreach $option (split(/ /, $val->{options})) {
@@ -229,12 +217,19 @@ sub main {
     local $src      = $odr->{src}->{value};
     local $out      = $odr->{out}->{value};
 
+    # /CPU interacts with CPU environment variable.
+    if (!$odr->{cpu}->{def}) {              ## If not defined locally,
+        $odr->{cpu}->{value} = $ENV{CPU};   ##   use environment variable value.
+        }
+	# /COMPONENTS can have a %CPU% substitution tag in it:
+    $odr->{components}->{value} =~ s/%cpu%/$odr->{cpu}->{value}/g;
+
     if ($clean && $odr->{package}->{def}) {
         print "Info -- /clean forces /nopackage.\n";
         $odr->{package}->{def} = 0;
         }
 
-    if ($vverbose) {print "Debug -- Config: ".Dumper($config);}
+    if ($verbose) {print "Debug -- Config: ".Dumper($config);}
     
     # Test the unix find command:
     # List of directories where it might be:
@@ -292,8 +287,35 @@ sub main {
         if ($len < 1) {
             die "Fatal -- you won't get far accessing the repository without specifying a username.";
             }
+        # If repository action is anything but SKIP, then additional programs must
+        #  be installed to enable repository access:
+        @required_list = (@required_for_repository_access, @required_list);
+
         }
 
+##++ Validate required conditions:
+
+    my $requirements_met    = 1;
+    my $first_missing       = 0;
+    my $error_list          = "";
+    foreach my $required (@required_list) {
+        if (!get_info($required)) {
+            $requirements_met = 0;
+            if (!$first_missing) {
+                $first_missing = 1;
+                $error_list = "Fatal -- Environment problem!  The following program(s) are not in PATH:\n";
+                }
+            $error_list .= "$required\n";
+            }
+        }
+    if (!$requirements_met) {
+        print $error_list;
+        print "Info -- Update PATH or install the programs and try again.\n";
+        exit(0);
+        }
+
+##-- Validate required conditions.
+    
     #                (------------------------------------------------)
     if ( (-d $wd) && ( ($rverb =~ /export/) || ($rverb =~ /checkout/) ) ) {
         print "\n\nHEADS UP!!\n\n";
@@ -315,14 +337,10 @@ sub main {
         $l->no_die_handler;        ## Needed so XML::Simple won't throw exceptions.
         }
 
+    print "Command line options:\n";
+    while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
+
     print "Executing $cmdline\n";
-    local $argvsize     = @ARGV;
-    local $nmakeargs    = "";
-    if ($argvsize > 0) {
-        map {$nmakeargs .= " $_ "} @ARGV;
-        print "Arguments for NMAKE: $nmakeargs\n";
-        }
-       
     print "Info -- Using unix find in $odr->{unixfind}->{value}\n"   if ($verbose);
 
 ##++ Begin repository action:
@@ -412,7 +430,7 @@ sub main {
     # ** Do this now (after repository update and before first zip) 
     #    because making zip files requires some configuration data be set up.
     local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
-    open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
+    open(DAT, "$src/$version_path")     or die "Could not open $src/$version_path.";
     @raw = <DAT>;
     close DAT;
     foreach $line (@raw) {
@@ -497,7 +515,7 @@ sub main {
         $path = "athena\\wshelper\\wshelper\\Makefile.src";
         if (!-e  $path) {die "Fatal -- Expected file $wd\\$path not found.";}
         if (system("grep DEBUG_SYMBOL $path > NUL") != 0) {
-            !system ("echo DEBUG_SYMBOL=1 >> $wd\\$path") or die "Fatal -- Append line to file failed.\n";
+            !system ("echo DEBUG_SYMBOL=0 >> $wd\\$path") or die "Fatal -- Append line to file failed.\n";
             print "Info -- Added DEBUG_SYMBOL to $wd\\$path\n"  if ($verbose);
             }
         
@@ -518,8 +536,15 @@ sub main {
         
         chdir("$wd\\athena") or die "Fatal -- couldn't chdir to source directory $wd\\athena\n";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        local $dbgswitch = ($odr->{debug}->{def}) ? " " : "NODEBUG=1";
-        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=1 $nmakeargs")
+        local $nmakeargs    = "";
+        local $argvsize     = @ARGV;
+        if (!($odr->{debug}->{def})) {$nmakeargs .= " NODEBUG=1";}
+        if ($argvsize > 0) {
+            map {$nmakeargs .= " $_ "} @ARGV;
+            print "Arguments for NMAKE: $nmakeargs\n";
+            }
+       
+        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=0 $nmakeargs")
             or die "Fatal -- build $buildtarget failed.";
             
         chdir("$wd")                        or die "Fatal -- couldn't chdir to $wd.";
@@ -532,7 +557,7 @@ sub main {
     
         if ($verbose) {print "Info -- ***   End build".$buildtext."\n";}
         }                                           ## End make conditional.
-    else {print "Info -- *** Skipping build.\n"    if ($verbose);}
+    else {print "Info -- *** Skipping build.\n"     if ($verbose);}
 ##-- Make action.
         
 ##++ Package action:
@@ -544,6 +569,8 @@ sub main {
         }
     else {
         if ($verbose) {print "Info -- *** Begin prepackage.\n";}
+
+        local $dbgswitch = ($odr->{debug}->{def}) ? "DEBUG=1" : "";
 
         if (! $bOutputCleaned) {                        ## In case somebody cleaned $out before us.
             if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
@@ -587,33 +614,47 @@ sub main {
         # Correct errors in files.wxi:
         !system("sed 's/WorkingDirectory=\"\\[dirbin\\]\"/WorkingDirectory=\"dirbin\"/g' files.wxi > a.tmp") or die "Fatal -- Couldn't modify files.wxi.";
         !system("mv a.tmp files.wxi") or die "Fatal -- Couldn't update files.wxi.";
-            
-        # Make sed script to run on the site-local configuration files:
-        local $tmpfile      = "site-local.sed" ;
+
+        ##++ -----------------------------------------------------------------------------
+        ##++ Transform -tagged files:
+                    
+        ## Make sed script to run on the site-local configuration files:
+        local $tmpfile			= "site-local.sed" ;
         if (-e $tmpfile) {system("del $tmpfile");}
+        open SEDFILE, ">>$tmpfile";
+		
         # Basic substitutions:
         local $dblback_wd   = $wd;
         $dblback_wd         =~ s/\\/\\\\/g;
-        !system("echo s/%BUILDDIR%/$dblback_wd/ >> $tmpfile")               or die "Fatal -- Couldn't modify $tmpfile.";    
+        print SEDFILE "s/%BUILDDIR%/$dblback_wd/\n"          or die "Fatal -- Couldn't modify $tmpfile.";    
         local $dblback_staging  = "$wd\\staging";
         $dblback_staging        =~ s/\\/\\\\/g;
-        !system("echo s/%TARGETDIR%/$dblback_staging/ >> $tmpfile")         or die "Fatal -- Couldn't modify $tmpfile.";    
+        print SEDFILE "s/%TARGETDIR%/$dblback_staging/\n"    or die "Fatal -- Couldn't modify $tmpfile.";    
         local $dblback_sample   = "$wd\\staging\\sample";
         $dblback_sample         =~ s/\\/\\\\/g;
-        !system("echo s/%CONFIGDIR-WIX%/$dblback_sample/ >> $tmpfile")      or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%CONFIGDIR-NSI%/$dblback_staging/ >> $tmpfile")     or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/ >> $tmpfile")  or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/ >> $tmpfile")  or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/ >> $tmpfile")    or die "Fatal -- Couldn't modify $tmpfile.";    
+
+		$ArchTag				= $prepackage->{CopyList}->{Config}->{ArchTag}->{value};
+		$ArchFragment			= ($odr->{cpu}->{value} =~ /386/) ? "32" : "64";
+		$CpuTag				= $prepackage->{CopyList}->{Config}->{CpuTag}->{value};
+		$CpuFragment			= ($odr->{cpu}->{value} =~ /386/) ? "i386" : "AMD64";
+
+		print SEDFILE "s/%CONFIGDIR-WIX%/$dblback_sample/\n"  or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%CONFIGDIR-NSI%/$dblback_staging/\n" or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/\n" or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/\n" or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/\n"   or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/$ArchTag/$ArchFragment/\n"           or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "s/$CpuTag/$CpuFragment/\n"             or die "Fatal -- Couldn't modify $tmpfile.";    
         # Strip out some defines so they can be replaced:  [used for site-local.nsi]
-        !system("echo /\^!define\.\*RELEASE\.\*\$/d >> $tmpfile")           or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo /\^!define\.\*DEBUG\.\*\$/d >> $tmpfile")             or die "Fatal -- Couldn't modify $tmpfile.";    
-        !system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")              or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "/\^!define\.\*RELEASE\.\*\$/d\n"       or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "/\^!define\.\*DEBUG\.\*\$/d\n"         or die "Fatal -- Couldn't modify $tmpfile.";    
+		print SEDFILE "/\^!define\.\*BETA\.\*\$/d\n"          or die "Fatal -- Couldn't modify $tmpfile.";    
+       close SEDFILE;
 
         # Run the script on site-local.wxi:
         !system("sed -f $tmpfile site-local-tagged.wxi > $wd\\buildwix\\site-local.wxi")   or die "Fatal -- Couldn't modify site-local.wxi.";
 
-        # Now update site-local.nsi:
+        ## Now update site-local.nsi:
         chdir "..\\nsis";
         print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
         !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
@@ -628,12 +669,20 @@ sub main {
         if (exists $config->{Versions}->{'BETA_STR'}) {
             !system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp") or die "Fatal -- Couldn't modify b.tmp.";    
             }
-        !system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")                        or die "Fatal -- Couldn't replace site-local.nsi.";
+        !system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")	or die "Fatal -- Couldn't replace site-local.nsi.";
 
-        # Run the script on nsi-includes-tagged.nsi:
+        ## Run the script on nsi-includes-tagged.nsi:
         !system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > $wd\\buildnsi\\nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
-        !system("rm ..\\wix\\$tmpfile")                                     or die "Fatal -- Couldn't remove $tmpfile.";
 
+		 ## Run the script on kfw-fixed-tagged.nsi:
+        print "KPK -- work on kfw-fixed-tagged.nsi in ".`cd`."\n" if ($verbose);
+        !system("sed -f ..\\wix\\$tmpfile kfw-fixed-tagged.nsi > kfw-fixed.nsi")  or die "Fatal -- Couldn't modify kfw_fixed.nsi.";
+        !system("sed -f ..\\wix\\$tmpfile kfw-fixed-tagged.nsi > $wd\\buildnsi\\kfw-fixed.nsi")  or die "Fatal -- Couldn't modify kfw_fixed.nsi.";
+
+        !system("rm ..\\wix\\$tmpfile")                or die "Fatal -- Couldn't remove $tmpfile.";
+        ##-- Transform -tagged files:
+        ##-- -----------------------------------------------------------------------------
+                    
         if ($verbose) {print "Info -- ***   End prepackage.\n";}
         
         if ($verbose) {print "Info -- *** Begin package.\n";}
@@ -641,7 +690,7 @@ sub main {
         chdir("$wd\\buildwix")                      or die "Fatal -- Couldn't cd to $wd\\buildwix";
         print "Info -- *** Make .msi:\n"            if ($verbose);
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        !system("$MAKE")                            or die "Error -- msi installer build failed.";
+        !system("$MAKE $dbgswitch")                 or die "Error -- msi installer build failed.";
                 
         chdir("$wd\\buildnsi")                      or die "Fatal -- Couldn't cd to $wd\\buildnsi";
         print "Info -- *** Make NSIS:\n"            if ($verbose);
@@ -677,6 +726,22 @@ sub main {
     system("rm -rf $src/a.tmp");                ## Clean up junk.
     system("rm -rf $out/a.tmp");                ## Clean up junk.
     system("rm -rf $out/ziptemp");              ## Clean up junk.
+
+    # Now check for ntsecapitest.i.  If it is present, it means that the test in the Windows
+    # directory passed.  
+    $dir    = "$wd\\athena\\auth\\krb5\\src\\windows";
+    chdir($dir)                                 or die "Fatal -- Couldn't cd to $dir";
+    print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+       
+    system("nmake ntsecapitest");
+    if (!-e  "ntsecapitest.i") {
+        print "Warning!  This build does not use the Vista ntsecapi.h.\n";
+        print "  That means that the Windows Identity management code does not have MSLSA\n";
+        print "  access code enabled.  To build with that support, copy ntsecapi.h from a\n";
+        print "  Vista build environment to somewhere in the compiler's include path, like\n";
+        print "  c:\\Program Files\\Platform SDK Server 2003 R2\\Include.  Make sure that the \n";
+        print "  symbol TRUST_ATTRIBUTE_TRUST_USES_AES_KEYS is defined in ntsecapi.h.\n";
+        }
 
 # End logging:
     if ($odr->{logfile}->{def})   {$l->stop;}

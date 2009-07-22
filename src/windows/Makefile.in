@@ -4,7 +4,7 @@ NO_OUTPRE=1
 #
 # Makefile that recurses into cns subdirectory.
 #
-all-windows::
+all-windows:: ntsecapitest
 	@echo Making in windows\lib
 	cd lib
 	$(MAKE) -$(MFLAGS)
@@ -33,7 +33,7 @@ all-windows::
 !endif 
 	cd ..
 
-clean-windows::
+clean-windows:: clean-ntsecapitest
 	@echo Making clean in windows\lib
 	cd lib
 	$(MAKE) -$(MFLAGS) clean
@@ -61,3 +61,17 @@ clean-windows::
         $(MAKE) -$(MFLAGS) clean 
 !endif 
 	cd ..
+
+# If ntsecapi.h contains the string that indicates it came from the Vista SDK,
+#  then ntsecapitest.i will be left behind.  If the string is not present,
+#  ntsecapitest.i will be deleted. 
+ntsecapitest:: clean-ntsecapitest ntsecapitest.i
+    copy ntsecapitest.i ntsecapitest.copy
+    ntsecapitest.pl
+
+clean-ntsecapitest::
+    @echo "Cleaning ntsecapitest.i"
+    $(RM) ntsecapitest.i
+
+{}.c{}.i:
+    @$(C_RULE) -P

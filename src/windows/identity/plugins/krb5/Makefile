@@ -54,8 +54,12 @@ SDKLIBFILES=	\
 	shlwapi.lib	\
 	comctl32.lib
 
-!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+!if ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64") || ("$(CPU)" == "ALPHA64" )
+!if !defined(NO_BUFFEROVERFLOWU) || "$(NO_BUFFEROVERFLOWU)" == "0"
 SCLIB=bufferoverflowu.lib
+!else
+SCLIB=
+!endif
 LIBFILES= \
 	$(LIBDIR)\nidmgr64.lib		\
 	$(KFWLIBDIR)\loadfuncs.lib

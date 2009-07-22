@@ -49,9 +49,15 @@ sub copyFiles {
         $IgnoreTag          = $xml->{Config}->{DebugTag}->{value};
         }            
     my $AlwaysTag           = $xml->{Config}->{AlwaysTag}->{value};
+    my $ArchTag             = $xml->{Config}->{ArchTag}->{value};
+    my $CpuTag              = $xml->{Config}->{CpuTag}->{value};
+    my $DebugFragment       = ($odr->{debug}->{def})  ? "-DEBUG" : "";
+    my $CpuFragment         = $odr->{cpu}->{value};
+    my $ArchFragment        = ($CpuFragment =~ /386/) ? "32" : "64";
+
     $FileStemFragment       = $xml->{Config}->{FileStem}->{name};    
     $fromRoot               = $xml->{Config}->{From}->{root};    
-    $toRoot                 = $xml->{Config}->{To}->{root};    
+    $toRoot                 = $xml->{Config}->{To}->{root};
     ##-- Set up path substitution variables for use inside the copy loop.
     # For each file in the file list:
     #  Substitute any variable parts of the path name.
@@ -61,6 +67,7 @@ sub copyFiles {
     local $i    = 0;
     my $bOldDot = 1;
     my $bDot    = 0;
+	my $first	= 1;
     while ($files[0]->{File}[$i]) {
 
         my ($name, $newname, $from, $to, $file);
@@ -71,24 +78,33 @@ sub copyFiles {
         if ($name && (! exists $file->{ignore})) {      ## Ignore or process this entry?
             $from   = "$fromRoot\\$file->{from}\\$name";
             $to     = "$toRoot\\$file->{to}\\$newname";
-            # Copy this file?  Check for ignore tag [debug-only in release mode or vice versa].
-            if ( $bPathTags || $bFileStem || (index($from.$to, $IgnoreTag) <0) ) {  
-                if ($bPathTags) {                                   ## Apply PathTag substitutions:
+
+            # Copy this file?  
+            if ( (($odr->{components}->{value} =~ /$file->{component}/) && # file's component must be in component list.
+                  (index($from.$to, $IgnoreTag) < 0) ) &&                  # Check for ignore tag [debug-only in release mode or vice versa].
+                 ($bPathTags || $bFileStem) ) {
+                if ($bPathTags) {                       ## Apply PathTag substitutions:
                     $from   =~ s/$AlwaysTag/$PathFragment/g;
                     $to     =~ s/$AlwaysTag/$PathFragment/g;
                     $from   =~ s/$BuildDependentTag/$PathFragment/g;
                     $to     =~ s/$BuildDependentTag/$PathFragment/g;
                     }
-                if ($bFileStem) {                                   ## FileStem substitution?
+                if ($bFileStem) {                       ## FileStem substitution?
                     $from   =~ s/%filestem%/$FileStemFragment/g;
                     $to     =~ s/%filestem%/$FileStemFragment/g;
                     }        
                 # %-DEBUG% substitution:
-                local $DebugFragment    = ($odr->{debug}->{def}) ? "-DEBUG" : "";
                 $from       =~ s/%\-DEBUG%/$DebugFragment/g;
                 $to         =~ s/%\-DEBUG%/$DebugFragment/g;
                 $to         =~ s/\*.*//;                ## Truncate to path before any wildcard
 
+                # %cpu% substitution:
+                $from       =~ s/$CpuTag/$CpuFragment/g;
+                $to         =~ s/$CpuTag/$CpuFragment/g;
+
+                # %WL% substitution:
+                $from       =~ s/$ArchTag/$ArchFragment/g;
+                $to         =~ s/$ArchTag/$ArchFragment/g;
                 my $bCopyOK     = 1;
                 my $fromcheck   = $from;
                 my $bRequired   = ! (exists $file->{notrequired});

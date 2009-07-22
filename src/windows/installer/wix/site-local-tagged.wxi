@@ -46,13 +46,13 @@
 
     <!-- <?define CL1200?> -->
     <!-- <?define CL1300?> -->
-    <?define CL1310?>
-    <!-- <?define CL1400?> -->
+    <!-- <?define CL1310?> -->
+    <?define CL1400?>
 
     <!-- At most one of the following could be defined and must correspond
          to the type of build performed. -->
-    <!-- <?define Debug?> -->
-    <?define Release?>
+    <!--<?define Debug?>-->
+     <?define Release?> 
 
     <!-- We are including debug symbols anyway.  Undefine this for a leaner 
          installer without debug syms. -->

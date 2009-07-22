@@ -79,7 +79,7 @@ $(OBJ)\khapp.res: lang\en_us\khapp.rc
 $(OBJ)\appver.res: appver.rc
 	$(RC2RES)
 
-!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+!if  (("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )) && (!defined(NO_BUFFEROVERFLOWU) || "$(NO_BUFFEROVERFLOWU)" == "0")
 SCLIB=bufferoverflowu.lib
 !else
 SCLIB=

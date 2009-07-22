@@ -45,7 +45,7 @@ DIRNUL=\nul
 !endif
 
 # NOTE: ^ is an escape char for NMAKE.
-!ifdef NODEBUG
+!if defined(NODEBUG) && "$(NODEBUG)" == "1"
 OUTPRE_DBG=rel
 !else
 OUTPRE_DBG=dbg
@@ -134,7 +134,7 @@ CPPFLAGS=-I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 $(DNSFLAGS) -DKRB5_PRIVATE
 CCOPTS=-nologo /W3 $(PDB_OPTS) $(DLL_FILE_DEF)
 LOPTS=-nologo -incremental:no
 
-!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+!if  (("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )) && (!defined(NO_BUFFEROVERFLOWU) || "$(NO_BUFFEROVERFLOWU)" == "0")
 CCLINKOPTION=/link bufferoverflowu.lib
 SCLIB=bufferoverflowu.lib
 DEBUGOPT=/Zi
@@ -162,8 +162,8 @@ _VC_MANIFEST_EMBED_DLL = if exist $*.dll.manifest mt.exe -manifest $*.dll.manife
 # CCOPTS  was for DLL compiles
 # CCOPTS2 was for non-DLL compiles (EXEs, for example)
 #
-!ifdef NODEBUG
-!ifdef DEBUG_SYMBOL
+!if defined(NODEBUG) && "$(NODEBUG)" == "1"
+!if defined(DEBUG_SYMBOL) && "$(DEBUG_SYMBOL)" == "1"
 CCOPTS=$(DEBUGOPT) $(CCOPTS)
 LOPTS=$(LOPTS) -debug
 !endif

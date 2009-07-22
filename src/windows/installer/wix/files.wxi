@@ -119,10 +119,10 @@
 	                    <Registry Id="reg_ts_k524init_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_k524init_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Win64="$(var.Win64)" Id="cmf_kclnt32_dll" Guid="$(var.cmf_kclnt32_dll_guid)" DiskId="1">
-	                    <File Id="fil_kclnt32_dll" LongName="$(var.cmf_kclnt32_dll_name)" Name="$(var.cmf_kclnt32_dll_name)" KeyPath="yes" />
-                    </Component>
-                <?endif?>
+                  <Component Win64="$(var.Win64)" Id="cmf_kclnt32_dll" Guid="$(var.cmf_kclnt32_dll_guid)" DiskId="1">
+                    <File Id="fil_kclnt32_dll" LongName="$(var.cmf_kclnt32_dll_name)" Name="$(var.cmf_kclnt32_dll_name)" KeyPath="yes" />
+                  </Component>
+                  <?endif?>
                     <Component Win64="$(var.Win64)" Id="cmf_kdestroy_exe" Guid="$(var.cmf_kdestroy_exe_guid)" DiskId="1">
 	                    <File Id="fil_kdestroy_exe" LongName="kdestroy.exe" Name="kdestroy.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kdestroy_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Action="createKeyAndRemoveKeyOnUninstall" />
@@ -179,11 +179,11 @@
 	                    <Registry Id="reg_ts_krbcc32s_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\krbcc32s" Name="Flags" Type="integer" Value="1032" />
                     </Component>
         <?if $(var.Platform) = "Intel" ?>
-                    <Component Win64="$(var.Win64)" Id="cmf_krbv4w32_dll" Guid="$(var.cmf_krbv4w32_dll_guid)" DiskId="1">
-	                    <File Id="fil_krbv4w32_dll" LongName="$(var.cmf_krbv4w32_dll_name)" Name="$(var.cmf_krbv4w32_dll_name)" KeyPath="yes" />
-                    </Component>
+                  <Component Win64="$(var.Win64)" Id="cmf_krbv4w32_dll" Guid="$(var.cmf_krbv4w32_dll_guid)" DiskId="1">
+                    <File Id="fil_krbv4w32_dll" LongName="$(var.cmf_krbv4w32_dll_name)" Name="$(var.cmf_krbv4w32_dll_name)" KeyPath="yes" />
+                  </Component>
 
-                    <Component Win64="$(var.Win64)" Id="cmf_leash32_exe" Guid="$(var.cmf_leash32_exe_guid)" DiskId="1">
+                  <Component Win64="$(var.Win64)" Id="cmf_leash32_exe" Guid="$(var.cmf_leash32_exe_guid)" DiskId="1">
 	                    <File Id="fil_leash32_exe" LongName="leash32.exe" Name="leash32.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
@@ -360,24 +360,24 @@
                     <Component Win64="$(var.Win64)" Id="cmf_krb5cred_en_us_dll" Guid="$(var.cmf_krb5cred_en_us_dll_guid)" DiskId="1">
 			<File Id="fil_krb5cred_en_us_dll" LongName="$(var.cmf_krb5cred_en_us_dll_name)" Name="krb5cenu.dll" KeyPath="yes" />
                     </Component>
-        <?if $(var.Platform) = "Intel" ?>
-                    <Component Win64="$(var.Win64)" Id="cmf_krb4cred_dll" Guid="$(var.cmf_krb4cred_dll_guid)" DiskId="1">
-			<File Id="fil_krb4cred_dll" LongName="$(var.cmf_krb4cred_dll_name)" Name="$(var.cmf_krb4cred_dll_name)" KeyPath="yes" />
-                        <Registry Id="reg_krb4cred_1" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Action="createKeyAndRemoveKeyOnUninstall" />
-                        <Registry Id="reg_krb4cred_2" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Name="ImagePath" Type="string" Value="[#fil_krb4cred_dll]" />
-                        <Registry Id="reg_krb4cred_3" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Name="PluginList" Type="string" Value="Krb4Cred" />
-                        <Registry Id="reg_krb4cred_4" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Action="createKeyAndRemoveKeyOnUninstall" />
-                        <Registry Id="reg_krb4cred_5" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Module" Type="string" Value="MITKrb4" />
-                        <Registry Id="reg_krb4cred_6" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Description" Type="string" Value="Kerberos v4 Credentials Provider" />
-                        <Registry Id="reg_krb4cred_7" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Dependencies" Type="string" Value="Krb5Cred" />
-                        <Registry Id="reg_krb4cred_8" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Type" Type="integer" Value="1" />
-                        <Registry Id="reg_krb4cred_9" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Flags" Type="integer" Value="0" />
-                    </Component>
-                    <Component Win64="$(var.Win64)" Id="cmf_krb4cred_en_us_dll" Guid="$(var.cmf_krb4cred_en_us_dll_guid)" DiskId="1">
-			<File Id="fil_krb4cred_en_us_dll" LongName="$(var.cmf_krb4cred_en_us_dll_name)" Name="krb4cenu.dll" KeyPath="yes" />
-                    </Component>
-        <?endif?>
-                    <Component Win64="$(var.Win64)" Id="cmf_netidmgr_exe" Guid="$(var.cmf_netidmgr_exe_guid)" DiskId="1" Transitive="yes">
+                  <?if $(var.Platform) = "Intel" ?>
+                  <Component Win64="$(var.Win64)" Id="cmf_krb4cred_dll" Guid="$(var.cmf_krb4cred_dll_guid)" DiskId="1">
+                    <File Id="fil_krb4cred_dll" LongName="$(var.cmf_krb4cred_dll_name)" Name="$(var.cmf_krb4cred_dll_name)" KeyPath="yes" />
+                    <Registry Id="reg_krb4cred_1" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Action="createKeyAndRemoveKeyOnUninstall" />
+                    <Registry Id="reg_krb4cred_2" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Name="ImagePath" Type="string" Value="[#fil_krb4cred_dll]" />
+                    <Registry Id="reg_krb4cred_3" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Name="PluginList" Type="string" Value="Krb4Cred" />
+                    <Registry Id="reg_krb4cred_4" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Action="createKeyAndRemoveKeyOnUninstall" />
+                    <Registry Id="reg_krb4cred_5" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Module" Type="string" Value="MITKrb4" />
+                    <Registry Id="reg_krb4cred_6" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Description" Type="string" Value="Kerberos v4 Credentials Provider" />
+                    <Registry Id="reg_krb4cred_7" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Dependencies" Type="string" Value="Krb5Cred" />
+                    <Registry Id="reg_krb4cred_8" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Type" Type="integer" Value="1" />
+                    <Registry Id="reg_krb4cred_9" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Flags" Type="integer" Value="0" />
+                  </Component>
+                  <Component Win64="$(var.Win64)" Id="cmf_krb4cred_en_us_dll" Guid="$(var.cmf_krb4cred_en_us_dll_guid)" DiskId="1">
+                    <File Id="fil_krb4cred_en_us_dll" LongName="$(var.cmf_krb4cred_en_us_dll_name)" Name="krb4cenu.dll" KeyPath="yes" />
+                  </Component>
+                  <?endif?>
+                  <Component Win64="$(var.Win64)" Id="cmf_netidmgr_exe" Guid="$(var.cmf_netidmgr_exe_guid)" DiskId="1" Transitive="yes">
 			<File Id="fil_netidmgr_exe" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
 			<File Id="fil_netidmgr_chm" LongName="netidmgr.chm" Name="netidmgr.chm" />
                         <Registry Id="reg_ts_netidmgr_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
@@ -410,21 +410,21 @@
                         <?if $(var.Platform) = "Intel" ?>
 	                    <File Id="fil_k524init_pdb" LongName="k524init.pdb" Name="k524init.pdb" />
 	                    <File Id="fil_krb524_pdb" LongName="krb524.pdb" Name="krb524.pdb" />
-	                    <File Id="fil_kclnt32_pdb" LongName="kclnt32.pdb" Name="kclnt32.pdb" />
+                      <File Id="fil_kclnt32_pdb" LongName="kclnt32.pdb" Name="kclnt32.pdb" />
 	                    <File Id="fil_leash32_pdb" LongName="leash32.pdb" Name="leash32.pdb" />
 
-	                    <File Id="fil_comerr32_pdb" LongName="comerr32.pdb" Name="comerr32.pdb" />
+                      <File Id="fil_comerr32_pdb" LongName="comerr32.pdb" Name="comerr32.pdb" />
 	                    <File Id="fil_gssapi32_pdb" LongName="gssapi32.pdb" Name="gssapi32.pdb" />
 	                    <File Id="fil_krb5_32_pdb" LongName="krb5_32.pdb" Name="krb5_32.pdb" KeyPath="yes" />
 	                    <File Id="fil_k5sprt32_pdb" LongName="k5sprt32.pdb" Name="k5sprt32.pdb" />
 	                    <File Id="fil_krbcc32_pdb" LongName="krbcc32.pdb" Name="krbcc32.pdb" />
 	                    <File Id="fil_krbcc32s_pdb" LongName="krbcc32s.pdb" Name="krbcc32s.pdb" />
-	                    <File Id="fil_krbv4w32_pdb" LongName="krbv4w32.pdb" Name="krbv4w32.pdb" />
-	                    <File Id="fil_leashw32_pdb" LongName="leashw32.pdb" Name="leashw32.pdb" />
+                      <File Id="fil_krbv4w32_pdb" LongName="krbv4w32.pdb" Name="krbv4w32.pdb" />
+                      <File Id="fil_leashw32_pdb" LongName="leashw32.pdb" Name="leashw32.pdb" />
 	                    <File Id="fil_wshelp32_pdb" LongName="wshelp32.pdb" Name="wshelp32.pdb" />
 	                    <File Id="fil_xpprof32_pdb" LongName="xpprof32.pdb" Name="xpprof32.pdb" />
-	                    <File Id="fil_krb4cred_pdb" LongName="krb4cred.pdb" Name="krb4cred.pdb" />
-	                    <File Id="fil_krb5cred_pdb" LongName="krb5cred.pdb" Name="krb5cred.pdb" />
+                      <File Id="fil_krb4cred_pdb" LongName="krb4cred.pdb" Name="krb4cred.pdb" />
+                      <File Id="fil_krb5cred_pdb" LongName="krb5cred.pdb" Name="krb5cred.pdb" />
 	                    <File Id="fil_nidmgr32_pdb" LongName="nidmgr32.pdb" Name="nidmgr32.pdb" />
                         <?else?>
 	                    <File Id="fil_comerr64_pdb" LongName="comerr64.pdb" Name="comerr64.pdb" />
@@ -656,29 +656,22 @@
                 </Directory> <!-- /bin -->
                 
                 <Directory Id="dirinc" Name="inc" src="$(var.IncDir)">
-                  <?if $(var.Platform) = "Intel"?>
-                    <Directory Id="dirinc_kclient" Name="kclient" src="$(var.IncDir)kclient\">
-                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_kclient" Guid="96215203-7FF5-4576-AAC5-F5035B64CC37" DiskId="1">
-                            <File Id="fil_kclient_h" LongName="kclient.h" Name="kclient.h" KeyPath="yes" />
-                            <File Id="fil_kcmacerr_h" LongName="kcmacerr.h" Name="kcmacerr.h" />
-                        </Component>
-                    </Directory>
-                    <Directory Id="dirinc_krb4" Name="krb4" src="$(var.IncDir)krb4\">
-                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb4" Guid="5D2E3F2E-87AE-4905-84AC-AC503662D1B0" DiskId="1">
-                            <File Id="fil_com_err_h" LongName="com_err.h" Name="com_err.h" />
-                            <File Id="fil_conf_pc_h" LongName="conf-pc.h" Name="conf-pc.h" />
-                            <File Id="fil_conf_h" LongName="conf.h" Name="conf.h" />
-                            <File Id="fil_des_h" LongName="des.h" Name="des.h" />
-                            <File Id="fil_kadm_err_h" LongName="kadm_err.h" Name="kadm_err.h" />
-                            <File Id="fil_krb_h" LongName="krb.h" Name="krb.h" KeyPath="yes" />
-                            <File Id="fil_krberr_h" LongName="krberr.h" Name="krberr.h" />
-                            <File Id="fil_mit_copy_h" LongName="mit_copy.h" Name="mit_copy.h" />
-                            <File Id="fil_osconf_h" LongName="osconf.h" Name="osconf.h" />
-                        </Component>
-                    </Directory>
-                  <?endif?>
                     <Directory Id="dirinc_krb5" Name="krb5" src="$(var.IncDir)krb5\">
-                        <Directory Id="dirinc_krb5_gssapi" Name="gssapi" src="$(var.IncDir)\krb5\gssapi\">
+                      <Directory Id="dirinc_krb4" Name="krb4" src="$(var.IncDir)krb4\">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb4" Guid="5D2E3F2E-87AE-4905-84AC-AC503662D1B0" DiskId="1">
+                          <File Id="fil_com_err_h" LongName="com_err.h" Name="com_err.h" />
+                          <File Id="fil_conf_pc_h" LongName="conf-pc.h" Name="conf-pc.h" />
+                          <File Id="fil_conf_h" LongName="conf.h" Name="conf.h" />
+                          <File Id="fil_des_h" LongName="des.h" Name="des.h" />
+                          <File Id="fil_kadm_err_h" LongName="kadm_err.h" Name="kadm_err.h" />
+                          <File Id="fil_krb_h" LongName="krb.h" Name="krb.h" KeyPath="yes" />
+                          <File Id="fil_krberr_h" LongName="krberr.h" Name="krberr.h" />
+                          <File Id="fil_mit_copy_h" LongName="mit_copy.h" Name="mit_copy.h" />
+                          <File Id="fil_osconf_h" LongName="osconf.h" Name="osconf.h" />
+                        </Component>
+                      </Directory>
+
+                      <Directory Id="dirinc_krb5_gssapi" Name="gssapi" src="$(var.IncDir)\krb5\gssapi\">
                             <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb5_gssapi" Guid="BD3C190B-1EBB-4d14-81DD-B2000DC4EAC7" DiskId="1">
                                 <File Id="fil_gssapi_h" LongName="gssapi.h" Name="gssapi.h" KeyPath="yes" />
                                 <File Id="fil_gssapi_generic_h" LongName="gssapi_generic.h" Name="GSSAPI_G.H" />
@@ -687,9 +680,6 @@
                         </Directory>
                         <Directory Id="dirinc_krb5_KerberosIV" LongName="KerberosIV" Name="krb4" src="$(var.IncDir)\krb5\KerberosIV\">
                             <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb5_KerberosIV" Guid="307B8031-2589-4f92-A303-EF4231328490" DiskId="1">
-                                <File Id="fil_des_.h" LongName="des.h" Name="des.h" />
-                                <File Id="fil_kadm_err_.h" LongName="kadm_err.h" Name="kadm_err.h" />
-                                <File Id="fil_krb_.h" LongName="krb.h" Name="krb.h" KeyPath="yes" />
                                 <File Id="fil_krb_err_.h" LongName="krb_err.h" Name="krb_err.h" />
                                 <File Id="fil_mit_copyright_.h" LongName="mit-copyright.h" Name="MIT-COPY.H" />
                             </Component>
@@ -704,11 +694,6 @@
                             <File Id="fil_krb5_.h" LongName="krb5.h" Name="krb5.h" KeyPath="yes" />
                             <File Id="fil_profile_.h" LongName="profile.h" Name="profile.h" />
                             <File Id="fil_win_mac_.h" LongName="win-mac.h" Name="win-mac.h" />
-                        </Component>
-                    </Directory>
-                    <Directory Id="dirinc_krbcc" Name="krbcc" src="$(var.IncDir)krbcc\">
-                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_krbcc" Guid="2CE4B708-7D45-41e4-8A53-BF2D78451A81" DiskId="1">
-                            <File Id="fil_cacheapi_h" LongName="cacheapi.h" Name="cacheapi.h" KeyPath="yes" />
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_leash" Name="leash" src="$(var.IncDir)leash\">
@@ -792,7 +777,7 @@
                             <File Id="fil_kclnt32_lib" LongName="kclnt32.lib" Name="kclnt32.lib" />
                             <File Id="fil_krb524_32_lib" LongName="krb524.lib" Name="krb524.lib" />
                             <File Id="fil_krbv4w32_lib" LongName="krbv4w32.lib" Name="krbv4w32.lib" />
-                            <File Id="fil_krb5_32_lib" LongName="krb5_32.lib" Name="krb5_32.lib" KeyPath="yes" />
+                          <File Id="fil_krb5_32_lib" LongName="krb5_32.lib" Name="krb5_32.lib" KeyPath="yes" />
                             <File Id="fil_krbcc32_lib" LongName="krbcc32.lib" Name="krbcc32.lib" />
                             <File Id="fil_leashw32_lib" LongName="leashw32.lib" Name="leashw32.lib" />
                             <File Id="fil_loadfuncs_32_lib" LongName="loadfuncs.lib" Name="LOADFUNC.LIB" />

@@ -39,20 +39,20 @@ MODULE=all
 # default is to treat warnings as errors.
 
 #RMAKE=$(MAKECMD) /nologo all KH_NO_WX=1
-RMAKE=$(MAKECMD) /nologo all
-RMAKE_W2K=$(MAKECMD) /nologo all KHBUILD_W2K=1
+RMAKE=$(MAKECMD) /nologo all KH_NO_WX=1
+RMAKE_W2K=$(MAKECMD) /nologo all KHBUILD_W2K=1 KH_NO_WX=1
 
 !else
-RMAKE=$(MAKECMD) /nologo etag
+RMAKE=$(MAKECMD) /nologo etag KH_NO_WX=1
 RMAKE_W2K=echo Skipping W2K target for ETAGS run.
 !endif
 !else
-RMAKE=$(MAKECMD) /nologo test
-RMAKE_W2K=$(MAKECMD) /nologo test KHBUILD_W2K=1
+RMAKE=$(MAKECMD) /nologo test KH_NO_WX=1
+RMAKE_W2K=$(MAKECMD) /nologo test KHBUILD_W2K=1 KH_NO_WX=1
 !endif
 !else
-RMAKE=$(MAKECMD) /nologo clean
-RMAKE_W2K=$(MAKECMD) /nologo clean KHBUILD_W2K=1
+RMAKE=$(MAKECMD) /nologo clean KH_NO_WX=1
+RMAKE_W2K=$(MAKECMD) /nologo clean KHBUILD_W2K=1 KH_NO_WX=1
 !endif
 
 !if "$(CPU)" != "i386"
