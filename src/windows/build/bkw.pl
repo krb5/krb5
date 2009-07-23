@@ -544,7 +544,7 @@ sub main {
             print "Arguments for NMAKE: $nmakeargs\n";
             }
        
-        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=0 $nmakeargs")
+        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=1 $nmakeargs")
             or die "Fatal -- build $buildtarget failed.";
             
         chdir("$wd")                        or die "Fatal -- couldn't chdir to $wd.";

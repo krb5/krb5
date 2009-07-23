@@ -43,8 +43,8 @@
         <!-- Repository settings: -->
         <cvstag     def="0" abbr="c" value="" />
         <svntag     def="0" abbr="t" value="" />
-        <svnbranch  def="0" abbr="b" value="krb5-1-6" />
-        <username   def="0" abbr="u" value="rsilk" />    <!-- Needed for svn/plink.  Override from command line -->
+        <svnbranch  def="0" abbr="b" value="" />
+        <username   def="0" abbr="u" value="" />    <!-- Needed for svn/plink.  Override from command line -->
         <CVSROOT    def="A" value=":gserver:cvs.mit.edu:/cvs/pismere" />
         <SVNURL     def="A" value="svn.mit.edu" />  <!-- NB:  No protocol or slashes!! -->
 
