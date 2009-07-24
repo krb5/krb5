@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006, 2007 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007, 2009 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -37,13 +37,13 @@
 /* Add debugging later */
 #define k5_check_error(x) (x)
 
-struct k5_ipc_stream {
+struct k5_ipc_stream_s {
     char *data;
     uint64_t size;
     uint64_t max_size;
 };
 
-const struct k5_ipc_stream k5_ipc_stream_initializer = { NULL, 0, 0 };
+const struct k5_ipc_stream_s k5_ipc_stream_initializer = { NULL, 0, 0 };
 
 #define K5_IPC_STREAM_SIZE_INCREMENT 128
 

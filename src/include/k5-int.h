@@ -2230,11 +2230,11 @@ struct _krb5_ccache {
 /*
  * Per-type ccache cursor.
  */
-struct krb5_cc_ptcursor {
+struct krb5_cc_ptcursor_s {
     const struct _krb5_cc_ops *ops;
     krb5_pointer data;
 };
-typedef struct krb5_cc_ptcursor *krb5_cc_ptcursor;
+typedef struct krb5_cc_ptcursor_s *krb5_cc_ptcursor;
 
 struct _krb5_cc_ops {
     krb5_magic magic;

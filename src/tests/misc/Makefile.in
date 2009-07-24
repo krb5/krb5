@@ -11,15 +11,17 @@ SRCS=\
 	$(srcdir)/test_getpw.c \
 	$(srcdir)/test_getsockname.c \
 	$(srcdir)/test_cxx_krb5.cpp \
+	$(srcdir)/test_cxx_k5int.cpp \
 	$(srcdir)/test_cxx_gss.cpp \
 	$(srcdir)/test_cxx_rpc.cpp \
 	$(srcdir)/test_cxx_kadm5.cpp
 
 all:: test_getpw
 
-check:: test_getpw test_cxx_krb5 test_cxx_gss test_cxx_rpc test_cxx_kadm5
+check:: test_getpw test_cxx_krb5 test_cxx_gss test_cxx_rpc test_cxx_k5int test_cxx_kadm5
 	$(RUN_SETUP) $(VALGRIND) ./test_getpw
 	$(RUN_SETUP) $(VALGRIND) ./test_cxx_krb5
+	$(RUN_SETUP) $(VALGRIND) ./test_cxx_k5int
 	$(RUN_SETUP) $(VALGRIND) ./test_cxx_gss
 	$(RUN_SETUP) $(VALGRIND) ./test_cxx_rpc
 	$(RUN_SETUP) $(VALGRIND) ./test_cxx_kadm5
@@ -32,6 +34,8 @@ test_getsockname: $(OUTPRE)test_getsockname.$(OBJEXT)
 
 test_cxx_krb5: $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_DEPLIB)
 	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_krb5 $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_BASE_LIBS) $(LIBS)
+test_cxx_k5int: $(OUTPRE)test_cxx_k5int.$(OBJEXT) $(KRB5_DEPLIB)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_k5int $(OUTPRE)test_cxx_k5int.$(OBJEXT) $(KRB5_BASE_LIBS) $(LIBS)
 test_cxx_gss: $(OUTPRE)test_cxx_gss.$(OBJEXT)
 	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_gss $(OUTPRE)test_cxx_gss.$(OBJEXT) $(LIBS)
 test_cxx_rpc: $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_DEPLIBS)
