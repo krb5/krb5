@@ -258,10 +258,10 @@ krb5_free_context(krb5_context ctx)
 	 return;
      krb5_os_free_context(ctx);
 
-     free(ctx->in_tkt_ktypes);
-     ctx->in_tkt_ktypes = 0;
-     free(ctx->tgs_ktypes);
-     ctx->tgs_ktypes = 0;
+     free(ctx->in_tkt_etypes);
+     ctx->in_tkt_etypes = NULL;
+     free(ctx->tgs_etypes);
+     ctx->tgs_etypes = NULL;
      free(ctx->default_realm);
      ctx->default_realm = 0;
      if (ctx->ser_ctx_count && ctx->ser_ctx) {
@@ -275,58 +275,87 @@ krb5_free_context(krb5_context ctx)
      free(ctx);
 }
 
-/*
- * Set the desired default ktypes, making sure they are valid.
- */
-krb5_error_code
-krb5_set_default_in_tkt_ktypes(krb5_context context, const krb5_enctype *ktypes)
+/* Copy the zero-terminated enctype list old_list into *new_list. */
+static krb5_error_code
+copy_enctypes(krb5_context context, const krb5_enctype *old_list,
+	      krb5_enctype **new_list)
 {
-    krb5_enctype * new_ktypes;
-    int i;
+    unsigned int count;
+    krb5_enctype *list;
 
-    if (ktypes) {
-	for (i = 0; ktypes[i]; i++) {
-	    if (!krb5_c_valid_enctype(ktypes[i])) 
-		return KRB5_PROG_ETYPE_NOSUPP;
-	    if (!context->allow_weak_crypto && krb5_c_weak_enctype(ktypes[i]))
-		return KRB5_PROG_ETYPE_NOSUPP;
-	}
-
-	/* Now copy the default ktypes into the context pointer */
-	if ((new_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i)))
-	    memcpy(new_ktypes, ktypes, sizeof(krb5_enctype) * i);
-	else
-	    return ENOMEM;
-
-    } else {
-	i = 0;
-	new_ktypes = 0;
-    }
-
-    if (context->in_tkt_ktypes) 
-        free(context->in_tkt_ktypes);
-    context->in_tkt_ktypes = new_ktypes;
-    context->in_tkt_ktype_count = i;
+    *new_list = NULL;
+    for (count = 0; old_list[count]; count++);
+    list = malloc(sizeof(krb5_enctype) * (count + 1));
+    if (list == NULL)
+	return ENOMEM;
+    memcpy(list, old_list, sizeof(krb5_enctype) * (count + 1));
+    *new_list = list;
     return 0;
 }
 
+/*
+ * Set the desired default ktypes, making sure they are valid.
+ */
 static krb5_error_code
-get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profstr,
-		       unsigned int ctx_count, krb5_enctype *ctx_list)
+set_default_etype_var(krb5_context context, const krb5_enctype *etypes,
+		      krb5_enctype **var)
+{
+    krb5_error_code code;
+    krb5_enctype *list;
+    int i;
+
+    if (etypes) {
+	for (i = 0; etypes[i]; i++) {
+	    if (!krb5_c_valid_enctype(etypes[i]))
+		return KRB5_PROG_ETYPE_NOSUPP;
+	    if (!context->allow_weak_crypto && krb5_c_weak_enctype(etypes[i]))
+		return KRB5_PROG_ETYPE_NOSUPP;
+	}
+
+	code = copy_enctypes(context, etypes, &list);
+	if (code)
+	    return code;
+    } else {
+	list = NULL;
+    }
+
+    free(*var);
+    *var = list;
+    return 0;
+}
+
+krb5_error_code
+krb5_set_default_in_tkt_ktypes(krb5_context context,
+			       const krb5_enctype *etypes)
+{
+    return set_default_etype_var(context, etypes, &context->in_tkt_etypes);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes)
+{
+    return set_default_etype_var(context, etypes, &context->tgs_etypes);
+}
+
+/* Old name for above function. */
+krb5_error_code
+krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes)
+{
+    return set_default_etype_var(context, etypes, &context->tgs_etypes);
+}
+
+static krb5_error_code
+get_profile_etype_list(krb5_context context, krb5_enctype **ktypes,
+		       char *profstr, krb5_enctype *ctx_list)
 {
     krb5_enctype *old_ktypes;
     krb5_enctype ktype;
+    krb5_error_code code;
 
-    if (ctx_count) {
-	/* application-set defaults */
-	if ((old_ktypes = 
-	     (krb5_enctype *)malloc(sizeof(krb5_enctype) *
-				    (ctx_count + 1)))) {
-	    memcpy(old_ktypes, ctx_list, sizeof(krb5_enctype) * ctx_count);
-	    old_ktypes[ctx_count] = 0;
-	} else {
-	    return ENOMEM;
-	}
+    if (ctx_list) {
+	code = copy_enctypes(context, ctx_list, &old_ktypes);
+	if (code)
+	    return code;
     } else {
         /*
 	   XXX - For now, we only support libdefaults
@@ -337,7 +366,6 @@ get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profst
 	char *retval = NULL;
 	char *sp = NULL, *ep = NULL;
 	int i, j, count;
-	krb5_error_code code;
 
 	code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS, profstr,
 				  NULL, DEFAULT_ETYPE_LIST, &retval);
@@ -399,49 +427,10 @@ get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profst
 krb5_error_code
 krb5_get_default_in_tkt_ktypes(krb5_context context, krb5_enctype **ktypes)
 {
-    return(get_profile_etype_list(context, ktypes, KRB5_CONF_DEFAULT_TKT_ENCTYPES,
-				  context->in_tkt_ktype_count,
-				  context->in_tkt_ktypes));
+    return(get_profile_etype_list(context, ktypes,
+				  KRB5_CONF_DEFAULT_TKT_ENCTYPES,
+				  context->in_tkt_etypes));
 }
-
-krb5_error_code KRB5_CALLCONV
-krb5_set_default_tgs_enctypes (krb5_context context, const krb5_enctype *ktypes)
-{
-    krb5_enctype * new_ktypes;
-    int i;
-
-    if (ktypes) {
-	for (i = 0; ktypes[i]; i++) {
-	    if (!krb5_c_valid_enctype(ktypes[i])) 
-		return KRB5_PROG_ETYPE_NOSUPP;
-	    if (!context->allow_weak_crypto && krb5_c_weak_enctype(ktypes[i]))
-		return KRB5_PROG_ETYPE_NOSUPP;
-	}
-
-	/* Now copy the default ktypes into the context pointer */
-	if ((new_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i)))
-	    memcpy(new_ktypes, ktypes, sizeof(krb5_enctype) * i);
-	else
-	    return ENOMEM;
-
-    } else {
-	i = 0;
-	new_ktypes = (krb5_enctype *)NULL;
-    }
-
-    if (context->tgs_ktypes) 
-        krb5_free_ktypes(context, context->tgs_ktypes);
-    context->tgs_ktypes = new_ktypes;
-    context->tgs_ktype_count = i;
-    return 0;
-}
-
-krb5_error_code krb5_set_default_tgs_ktypes
-(krb5_context context, const krb5_enctype *etypes)
-{
-  return (krb5_set_default_tgs_enctypes (context, etypes));
-}
-
 
 void
 KRB5_CALLCONV
@@ -457,20 +446,20 @@ krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_encty
     if (context->use_conf_ktypes)
 	/* This one is set *only* by reading the config file; it's not
 	   set by the application.  */
-	return(get_profile_etype_list(context, ktypes, KRB5_CONF_DEFAULT_TKT_ENCTYPES,
-				      0, NULL));
+	return get_profile_etype_list(context, ktypes,
+				      KRB5_CONF_DEFAULT_TKT_ENCTYPES, NULL);
     else
-	return(get_profile_etype_list(context, ktypes, KRB5_CONF_DEFAULT_TGS_ENCTYPES,
-				      context->tgs_ktype_count,
-				      context->tgs_ktypes));
+	return get_profile_etype_list(context, ktypes,
+				      KRB5_CONF_DEFAULT_TGS_ENCTYPES,
+				      context->tgs_etypes);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes)
 {
-    return(get_profile_etype_list(context, ktypes, KRB5_CONF_PERMITTED_ENCTYPES,
-				  context->tgs_ktype_count,
-				  context->tgs_ktypes));
+    return get_profile_etype_list(context, ktypes,
+				  KRB5_CONF_PERMITTED_ENCTYPES,
+				  context->tgs_etypes);
 }
 
 krb5_boolean
@@ -526,26 +515,6 @@ krb5_is_permitted_enctype_ext ( krb5_context context,
     return(ret);
 }
 
-static krb5_error_code
-copy_ktypes(krb5_context ctx,
-	    unsigned int nktypes,
-	    krb5_enctype *oldktypes,
-	    krb5_enctype **newktypes)
-{
-    unsigned int i;
-
-    *newktypes = NULL;
-    if (!nktypes)
-	return 0;
-
-    *newktypes = malloc(nktypes * sizeof(krb5_enctype));
-    if (*newktypes == NULL)
-	return ENOMEM;
-    for (i = 0; i < nktypes; i++)
-	(*newktypes)[i] = oldktypes[i];
-    return 0;
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
 {
@@ -562,10 +531,8 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
 
     *nctx = *ctx;
 
-    nctx->in_tkt_ktypes = NULL;
-    nctx->in_tkt_ktype_count = 0;
-    nctx->tgs_ktypes = NULL;
-    nctx->tgs_ktype_count = 0;
+    nctx->in_tkt_etypes = NULL;
+    nctx->tgs_etypes = NULL;
     nctx->default_realm = NULL;
     nctx->profile = NULL;
     nctx->dal_handle = NULL;
@@ -583,17 +550,12 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
 
     memset(&nctx->err, 0, sizeof(nctx->err));
 
-    ret = copy_ktypes(nctx, ctx->in_tkt_ktype_count,
-		      ctx->in_tkt_ktypes, &nctx->in_tkt_ktypes);
+    ret = copy_enctypes(nctx, ctx->in_tkt_etypes, &nctx->in_tkt_etypes);
     if (ret)
 	goto errout;
-    nctx->in_tkt_ktype_count = ctx->in_tkt_ktype_count;
-
-    ret = copy_ktypes(nctx, ctx->tgs_ktype_count,
-		      ctx->tgs_ktypes, &nctx->in_tkt_ktypes);
+    ret = copy_enctypes(nctx, ctx->tgs_etypes, &nctx->tgs_etypes);
     if (ret)
 	goto errout;
-    nctx->tgs_ktype_count = ctx->tgs_ktype_count;
 
     if (ctx->os_context.default_ccname != NULL) {
 	nctx->os_context.default_ccname =

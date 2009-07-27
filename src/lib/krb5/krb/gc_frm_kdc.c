@@ -1068,10 +1068,10 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	     * Check if the return enctype is one that we requested if
 	     * needed.
 	     */
-	    if (old_use_conf_ktypes || context->tgs_ktype_count == 0)
+	    if (old_use_conf_ktypes || !context->tgs_etypes)
 		goto cleanup;
-	    for (i = 0; i < context->tgs_ktype_count; i++) {
-		if ((*out_cred)->keyblock.enctype == context->tgs_ktypes[i]) {
+	    for (i = 0; context->tgs_etypes[i]; i++) {
+		if ((*out_cred)->keyblock.enctype == context->tgs_etypes[i]) {
 		    /* Found an allowable etype, so we're done */
 		    goto cleanup;
 		}

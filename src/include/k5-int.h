@@ -1322,10 +1322,8 @@ typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
 struct _krb5_context {
 	krb5_magic	magic;
-	krb5_enctype	*in_tkt_ktypes;
-	unsigned int	in_tkt_ktype_count;
-	krb5_enctype	*tgs_ktypes;
-	unsigned int	tgs_ktype_count;
+	krb5_enctype	*in_tkt_etypes;
+	krb5_enctype	*tgs_etypes;
 	struct _krb5_os_context	os_context;
 	char		*default_realm;
 	profile_t	profile;

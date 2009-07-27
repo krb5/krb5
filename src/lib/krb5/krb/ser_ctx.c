@@ -92,6 +92,18 @@ static const krb5_ser_entry krb5_profile_ser_entry = {
     profile_ser_internalize		/* Internalize routine	*/
 };
 #endif /* LEAN_CLIENT */
+
+static unsigned int
+etypes_len(krb5_enctype *list)
+{
+    unsigned int i;
+
+    if (list == NULL)
+	return 0;
+    for (i = 0; list[i]; i++);
+    return i;
+}
+
 /*
  * krb5_context_size()	- Determine the size required to externalize the
  *			  krb5_context.
@@ -108,10 +120,10 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
      *	krb5_int32			for KV5M_CONTEXT
      *	krb5_int32			for sizeof(default_realm)
      *	strlen(default_realm)		for default_realm.
-     *	krb5_int32			for n_in_tkt_ktypes*sizeof(krb5_int32)
-     *	nktypes*sizeof(krb5_int32)	for in_tkt_ktypes.
-     *	krb5_int32			for n_tgs_ktypes*sizeof(krb5_int32)
-     *	nktypes*sizeof(krb5_int32)	for tgs_ktypes.
+     *	krb5_int32			for n_in_tkt_etypes*sizeof(krb5_int32)
+     *	nktypes*sizeof(krb5_int32)	for in_tkt_etypes.
+     *	krb5_int32			for n_tgs_etypes*sizeof(krb5_int32)
+     *	nktypes*sizeof(krb5_int32)	for tgs_etypes.
      *  krb5_int32			for clockskew
      *  krb5_int32			for kdc_req_sumtype
      *  krb5_int32			for ap_req_sumtype
@@ -129,8 +141,8 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     if ((context = (krb5_context) arg)) {
 	/* Calculate base length */
 	required = (14 * sizeof(krb5_int32) +
-		    (context->in_tkt_ktype_count * sizeof(krb5_int32)) +
-		    (context->tgs_ktype_count * sizeof(krb5_int32)));
+		    (etypes_len(context->in_tkt_etypes) * sizeof(krb5_int32)) +
+		    (etypes_len(context->tgs_etypes) * sizeof(krb5_int32)));
 
 	if (context->default_realm)
 	    required += strlen(context->default_realm);
@@ -208,31 +220,33 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
     }
 
     /* Now number of initial ticket ktypes */
-    kret = krb5_ser_pack_int32((krb5_int32) context->in_tkt_ktype_count,
+    kret = krb5_ser_pack_int32(etypes_len(context->in_tkt_etypes),
 			       &bp, &remain);
     if (kret)
 	return (kret);
-    
+
     /* Now serialize ktypes */
-    for (i=0; i<context->in_tkt_ktype_count; i++) {
-	kret = krb5_ser_pack_int32((krb5_int32) context->in_tkt_ktypes[i],
-				   &bp, &remain);
-	if (kret)
-	    return (kret);
+    if (context->in_tkt_etypes) {
+	for (i = 0; context->in_tkt_etypes[i]; i++) {
+	    kret = krb5_ser_pack_int32(context->in_tkt_etypes[i],
+				       &bp, &remain);
+	    if (kret)
+		return (kret);
+	}
     }
-    
+
     /* Now number of default ktypes */
-    kret = krb5_ser_pack_int32((krb5_int32) context->tgs_ktype_count,
-			       &bp, &remain);
+    kret = krb5_ser_pack_int32(etypes_len(context->tgs_etypes), &bp, &remain);
     if (kret)
 	return (kret);
 	
     /* Now serialize ktypes */
-    for (i=0; i<context->tgs_ktype_count; i++) {
-	kret = krb5_ser_pack_int32((krb5_int32) context->tgs_ktypes[i],
-				   &bp, &remain);
-	if (kret)
-	    return (kret);
+    if (context->tgs_etypes) {
+	for (i = 0; context->tgs_etypes[i]; i++) {
+	    kret = krb5_ser_pack_int32(context->tgs_etypes[i], &bp, &remain);
+	    if (kret)
+		return (kret);
+	}
     }
 	
     /* Now allowable clockskew */
@@ -333,7 +347,7 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
     krb5_int32		ibuf;
     krb5_octet		*bp;
     size_t		remain;
-    unsigned int	i;
+    unsigned int	i, count;
 
     bp = *buffer;
     remain = *lenremain;
@@ -369,40 +383,43 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 	context->default_realm[ibuf] = '\0';
     }
 	
-    /* Get the number of in_tkt_ktypes */
+    /* Get the in_tkt_etypes */
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
 	goto cleanup;
-    
-    context->in_tkt_ktype_count = (int) ibuf;
-    context->in_tkt_ktypes = (krb5_enctype *) calloc(context->in_tkt_ktype_count+1,
-						     sizeof(krb5_enctype));
-    if (!context->in_tkt_ktypes) {
-	kret = ENOMEM;
-	goto cleanup;
-    }
-
-    for (i=0; i<context->in_tkt_ktype_count; i++) {
-	if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+    count = ibuf;
+    if (count > 0) {
+	context->in_tkt_etypes = calloc(count + 1, sizeof(krb5_enctype));
+	if (!context->in_tkt_etypes) {
+	    kret = ENOMEM;
 	    goto cleanup;
-	context->in_tkt_ktypes[i] = (krb5_enctype) ibuf;
-    }
+	}
+	for (i = 0; i < count; i++) {
+	    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+		goto cleanup;
+	    context->in_tkt_etypes[i] = ibuf;
+	}
+	context->in_tkt_etypes[count] = 0;
+    } else
+	context->in_tkt_etypes = NULL;
 
-    /* Get the number of tgs_ktypes */
+    /* Get the tgs_etypes */
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
 	goto cleanup;
-    
-    context->tgs_ktype_count = (int) ibuf;
-    context->tgs_ktypes = (krb5_enctype *) calloc(context->tgs_ktype_count+1,
-						  sizeof(krb5_enctype));
-    if (!context->tgs_ktypes) {
-	kret = ENOMEM;
-	goto cleanup;
-    }
-    for (i=0; i<context->tgs_ktype_count; i++) {
-	if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+    count = ibuf;
+    if (count > 0) {
+	context->tgs_etypes = calloc(count + 1, sizeof(krb5_enctype));
+	if (!context->tgs_etypes) {
+	    kret = ENOMEM;
 	    goto cleanup;
-	context->tgs_ktypes[i] = (krb5_enctype) ibuf;
-    }
+	}
+	for (i = 0; i < count; i++) {
+	    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+	    goto cleanup;
+	    context->tgs_etypes[i] = ibuf;
+	}
+	context->tgs_etypes[count] = 0;
+    } else
+	context->tgs_etypes = NULL;
 
     /* Allowable checksum */
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
