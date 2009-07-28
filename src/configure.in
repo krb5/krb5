@@ -115,6 +115,16 @@ if test "$withval" = yes; then
 	AC_DEFINE(KRBCONF_VAGUE_ERRORS,1,[Define if the KDC should return only vague error codes to clients])
 fi
 dnl
+dnl WITH_CRYPTO_IMPL
+dnl
+CRYPTO_IMPL="builtin"
+AC_ARG_WITH([crypto-impl],
+AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @<:@builtin@:>@]),
+[CRYPTO_IMPL=$withval
+AC_MSG_RESULT("k5crypto will use \'$withval\'")
+], withval=builtin)dnl
+AC_SUBST(CRYPTO_IMPL)
+dnl
 dnl --with-kdc-kdb-update makes the KDC update the database with last request
 dnl information and failure information.
 dnl
