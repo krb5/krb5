@@ -39,7 +39,7 @@ static char *prog;
 
 static void xusage()
 {
-    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype] [-k keytab] [-S sname] [-U for_user] service1 service2 ...\n",
+    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype] [-k keytab] [-P] [-S sname] [-U for_user] service1 service2 ...\n",
             prog);
     exit(1);
 }
@@ -49,7 +49,7 @@ int quiet = 0;
 static void do_v5_kvno (int argc, char *argv[], 
                         char *ccachestr, char *etypestr, char *keytab_name,
 			char *sname, int canon, int unknown,
-			char *for_user);
+			char *for_user, int proxy);
 
 #include <com_err.h>
 static void extended_com_err_fn (const char *, errcode_t, const char *,
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
     char *sname = NULL, *for_user = NULL;
-    int canon = 0, unknown = 0;
+    int canon = 0, unknown = 0, proxy = 0;
 
 
     set_com_err_hook (extended_com_err_fn);
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "uCc:e:hk:qS:U:")) != -1) {
+    while ((option = getopt(argc, argv, "uCc:e:hk:qPS:U:")) != -1) {
 	switch (option) {
 	case 'C':
 	    canon = 1;
@@ -87,6 +87,13 @@ int main(int argc, char *argv[])
 	    break;
 	case 'q':
 	    quiet = 1;
+	    break;
+	case 'P':
+	    proxy = 1; /* S4U2Proxy - constrained delegation */
+	    if (keytab_name == NULL) {
+		fprintf(stderr, "Option -P (constrained delegation) requires keytab to be specified\n");
+		xusage();
+	    }
 	    break;
 	case 'S':
 	    sname = optarg;
@@ -116,7 +123,7 @@ int main(int argc, char *argv[])
 
 	do_v5_kvno(argc - optind, argv + optind,
 		   ccachestr, etypestr, keytab_name, sname,
-		   canon, unknown, for_user);
+		   canon, unknown, for_user, proxy);
     return 0;
 }
 
@@ -135,21 +142,18 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
 
 static void do_v5_kvno (int count, char *names[], 
                         char * ccachestr, char *etypestr, char *keytab_name,
-			char *sname, int canon, int unknown, char *for_user)
+			char *sname, int canon, int unknown, char *for_user,
+			int proxy)
 {
     krb5_error_code ret;
     int i, errors;
     krb5_enctype etype;
     krb5_ccache ccache;
     krb5_principal me;
-    krb5_creds in_creds, *out_creds;
-    krb5_ticket *ticket;
-    char *princ;
+    krb5_creds in_creds;
     krb5_keytab keytab = NULL;
-    krb5_s4u_userid userid;
+    krb5_principal for_user_princ = NULL;
     krb5_flags options;
-
-    memset(&userid, 0, sizeof(userid));
 
     ret = krb5_init_context(&context);
     if (ret) {
@@ -187,13 +191,11 @@ static void do_v5_kvno (int count, char *names[],
     if (for_user) {
 	ret = krb5_parse_name_flags(context, for_user,
 				    KRB5_PRINCIPAL_PARSE_ENTERPRISE,
-				    &userid.user);
+				    &for_user_princ);
 	if (ret) {
 	    com_err(prog, ret, "while parsing principal name %s", for_user);
 	    exit(1);
 	}
-	userid.options = KRB5_S4U_OPTS_CHECK_LOGON_HOURS |
-			 KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
     }
 
     ret = krb5_cc_get_principal(context, ccache, &me);
@@ -209,104 +211,121 @@ static void do_v5_kvno (int count, char *names[],
 	options |= KRB5_GC_CANONICALIZE;
 
     for (i = 0; i < count; i++) {
-	memset(&in_creds, 0, sizeof(in_creds));
+	krb5_principal server = NULL;
+	krb5_ticket *ticket = NULL;
+	krb5_creds *out_creds = NULL;
+	char *princ = NULL;
 
-	in_creds.client = me;
+	memset(&in_creds, 0, sizeof(in_creds));
 
 	if (sname != NULL) {
 	    ret = krb5_sname_to_principal(context, names[i],
 					  sname, KRB5_NT_SRV_HST,
 					  &in_creds.server);
 	} else {
-	    ret = krb5_parse_name(context, names[i], &in_creds.server);
+	    ret = krb5_parse_name(context, names[i], &server);
 	}
 	if (ret) {
 	    if (!quiet)
 		com_err(prog, ret, "while parsing principal name %s", names[i]);
-	    errors++;
-	    continue;
+	    goto error;
 	}
         if (unknown == 1) {
-            krb5_princ_type(context, in_creds.server) = KRB5_NT_UNKNOWN;
+            krb5_princ_type(context, server) = KRB5_NT_UNKNOWN;
         }
 
-	ret = krb5_unparse_name(context, in_creds.server, &princ);
+	ret = krb5_unparse_name(context, server, &princ);
 	if (ret) {
 	    com_err(prog, ret,
 		    "while formatting parsed principal name for '%s'",
 		    names[i]);
-	    errors++;
-	    continue;
+	    goto error;
 	}
 
 	in_creds.keyblock.enctype = etype;
 
 	if (for_user) {
-
-	    if (!krb5_principal_compare(context, in_creds.client, in_creds.server)) {
+	    if (!proxy &&
+		!krb5_principal_compare(context, me, server)) {
 		com_err(prog, EINVAL,
 			"client and server principal names must match");
-		errors++;
-		continue;
+		goto error;
 	    }
+
+	    in_creds.client = for_user_princ;
+	    in_creds.server = me;
+
 	    ret = krb5_get_credentials_for_user(context, options, ccache,
-						&userid, &out_creds);
+						&in_creds, NULL, &out_creds);
 	} else {
+	    in_creds.client = me;
 	    ret = krb5_get_credentials(context, options, ccache,
 				       &in_creds, &out_creds);
 	}
 
-	krb5_free_principal(context, in_creds.server);
-
 	if (ret) {
 	    com_err(prog, ret, "while getting credentials for %s", princ);
-
-	    krb5_free_unparsed_name(context, princ);
-
-	    errors++;
-	    continue;
+	    goto error;
 	}
 
 	/* we need a native ticket */
 	ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
 	if (ret) {
 	    com_err(prog, ret, "while decoding ticket for %s", princ);
-	    krb5_free_creds(context, out_creds);
-	    krb5_free_unparsed_name(context, princ);
-
-	    errors++;
-	    continue;
+	    goto error;
 	}
-	    
+
 	if (keytab) {
 	    ret = krb5_server_decrypt_ticket_keytab(context, keytab, ticket);
 	    if (ret) {
 		if (!quiet)
-		    printf("%s: kvno = %d, keytab entry invalid", princ, ticket->enc_part.kvno);
+		    fprintf(stderr, "%s: kvno = %d, keytab entry invalid\n", princ, ticket->enc_part.kvno);
 		com_err(prog, ret, "while decrypting ticket for %s", princ);
-		krb5_free_ticket(context, ticket);
-		krb5_free_creds(context, out_creds);
-		krb5_free_unparsed_name(context, princ);
-
-		errors++;
-		continue;
+		goto error;
 	    }
 	    if (!quiet)
 		printf("%s: kvno = %d, keytab entry valid\n", princ, ticket->enc_part.kvno);
+	    if (proxy) {
+		krb5_free_creds(context, out_creds);
+		out_creds = NULL;
+
+		in_creds.client = for_user_princ;
+		in_creds.server = server;
+
+		ret = krb5_get_credentials_for_proxy(context,
+						     KRB5_GC_CANONICALIZE,
+						     ccache,
+						     &in_creds,
+						     ticket,
+						     &out_creds);
+		if (ret) {
+		    com_err(prog, ret, "%s: constrained delegation failed", princ);
+		    goto error;
+		}
+	    }
 	} else {
 	    if (!quiet)
 		printf("%s: kvno = %d\n", princ, ticket->enc_part.kvno);
 	}
 
-	krb5_free_creds(context, out_creds);
-	krb5_free_unparsed_name(context, princ);
+	continue;
+
+error:
+	if (server != NULL)
+	    krb5_free_principal(context, server);
+	if (ticket != NULL)
+	    krb5_free_ticket(context, ticket);
+	if (out_creds != NULL)
+	    krb5_free_creds(context, out_creds);
+	if (princ != NULL)
+	    krb5_free_unparsed_name(context, princ);
+	errors++;
     }
 
     if (keytab)
 	krb5_kt_close(context, keytab);
     krb5_free_principal(context, me);
-    if (userid.user);
-	krb5_free_principal(context, userid.user);
+    krb5_free_principal(context, for_user_princ);
     krb5_cc_close(context, ccache);
     krb5_free_context(context);
 

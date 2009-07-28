@@ -2823,7 +2823,9 @@ krb5int_pac_sign(krb5_context context,
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
-			      krb5_ccache ccache, krb5_s4u_userid *userid,
+			      krb5_ccache ccache,
+			      krb5_creds *in_creds,
+			      krb5_data *cert,
 			      krb5_creds **out_creds);
 
 krb5_error_code KRB5_CALLCONV

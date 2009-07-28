@@ -282,7 +282,9 @@ int main( int argc, char ** argv )
 /*
 ** change the password -
 */
+#if 0
 	fprintf( stderr, "the password is %s\n", new_password );
+#endif
 
 	{
 		int pw_result;
