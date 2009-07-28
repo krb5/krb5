@@ -965,6 +965,18 @@ typedef struct _krb5_pa_for_user {
     krb5_data		auth_package;
 } krb5_pa_for_user;
 
+typedef struct _krb5_s4u_userid {
+    krb5_int32		nonce;
+    krb5_principal	user;
+    krb5_data		subject_cert;
+    krb5_flags		options;
+} krb5_s4u_userid;
+
+typedef struct _krb5_pa_s4u_x509_user {
+    krb5_s4u_userid	user_id;
+    krb5_checksum	cksum;
+} krb5_pa_s4u_x509_user;
+
 enum {
   KRB5_FAST_ARMOR_AP_REQUEST = 0x1
 };
@@ -1294,6 +1306,10 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts *);
 void KRB5_CALLCONV krb5_free_pa_for_user
 	(krb5_context, krb5_pa_for_user * );
+void KRB5_CALLCONV krb5_free_s4u_userid_contents
+	(krb5_context, krb5_s4u_userid * );
+void KRB5_CALLCONV krb5_free_pa_s4u_x509_user
+	(krb5_context, krb5_pa_s4u_x509_user * );
 void KRB5_CALLCONV krb5_free_pa_svr_referral_data
 	(krb5_context, krb5_pa_svr_referral_data * );
 void KRB5_CALLCONV krb5_free_pa_server_referral_data
@@ -1608,6 +1624,12 @@ krb5_error_code encode_krb5_setpw_req
 krb5_error_code encode_krb5_pa_for_user
 	(const krb5_pa_for_user * , krb5_data **);
 
+krb5_error_code encode_krb5_s4u_userid
+	(const krb5_s4u_userid * , krb5_data **);
+
+krb5_error_code encode_krb5_pa_s4u_x509_user
+	(const krb5_pa_s4u_x509_user * , krb5_data **);
+
 krb5_error_code encode_krb5_pa_svr_referral_data
 	(const krb5_pa_svr_referral_data * , krb5_data **);
 
@@ -1776,6 +1798,9 @@ krb5_error_code decode_krb5_setpw_req
 
 krb5_error_code decode_krb5_pa_for_user
 	(const krb5_data *, krb5_pa_for_user **);
+
+krb5_error_code decode_krb5_pa_s4u_x509_user
+	(const krb5_data *, krb5_pa_s4u_x509_user **);
 
 krb5_error_code decode_krb5_pa_svr_referral_data
 	(const krb5_data *, krb5_pa_svr_referral_data **);
@@ -2605,6 +2630,7 @@ krb5_error_code krb5int_send_tgs
 		krb5_pa_data * const *,
 		const krb5_data *,
 		krb5_creds *,
+		krb5_int32,
 		krb5_response * , krb5_keyblock **subkey);
                 /* The subkey field is an output parameter; if a
 		 * tgs-rep is received then the subkey will be filled
@@ -2794,6 +2820,19 @@ krb5int_pac_sign(krb5_context context,
 		 const krb5_keyblock *server_key,
 		 const krb5_keyblock *privsvr_key,
 		 krb5_data *data);
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
+			      krb5_ccache ccache, krb5_s4u_userid *userid,
+			      krb5_creds **out_creds);
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_credentials_for_proxy(krb5_context context,
+			       krb5_flags options,
+			       krb5_ccache ccache,
+			       krb5_creds *in_creds,
+			       krb5_ticket *evidence_tkt,
+			       krb5_creds **out_creds);
 
 #ifdef DEBUG_ERROR_LOCATIONS
 #define krb5_set_error_message(ctx, code, ...) \

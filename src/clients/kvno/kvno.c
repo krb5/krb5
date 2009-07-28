@@ -39,7 +39,7 @@ static char *prog;
 
 static void xusage()
 {
-    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype] [-k keytab] [-S sname] service1 service2 ...\n",
+    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype] [-k keytab] [-S sname] [-U for_user] service1 service2 ...\n",
             prog);
     exit(1);
 }
@@ -48,7 +48,8 @@ int quiet = 0;
 
 static void do_v5_kvno (int argc, char *argv[], 
                         char *ccachestr, char *etypestr, char *keytab_name,
-			char *sname, int canon, int unknown);
+			char *sname, int canon, int unknown,
+			char *for_user);
 
 #include <com_err.h>
 static void extended_com_err_fn (const char *, errcode_t, const char *,
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
 {
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
-    char *sname = NULL;
+    char *sname = NULL, *for_user = NULL;
     int canon = 0, unknown = 0;
 
 
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "uCc:e:hk:qS:")) != -1) {
+    while ((option = getopt(argc, argv, "uCc:e:hk:qS:U:")) != -1) {
 	switch (option) {
 	case 'C':
 	    canon = 1;
@@ -101,6 +102,9 @@ int main(int argc, char *argv[])
 	        xusage();
             }
             break;
+	case 'U':
+	    for_user = optarg;
+	    break;
 	default:
 	    xusage();
 	    break;
@@ -111,11 +115,12 @@ int main(int argc, char *argv[])
 	xusage();
 
 	do_v5_kvno(argc - optind, argv + optind,
-		   ccachestr, etypestr, keytab_name, sname, canon, unknown);
+		   ccachestr, etypestr, keytab_name, sname,
+		   canon, unknown, for_user);
     return 0;
 }
 
-#include <krb5.h>
+#include <k5-int.h>
 static krb5_context context;
 static void extended_com_err_fn (const char *myprog, errcode_t code,
 				 const char *fmt, va_list args)
@@ -130,7 +135,7 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
 
 static void do_v5_kvno (int count, char *names[], 
                         char * ccachestr, char *etypestr, char *keytab_name,
-			char *sname, int canon, int unknown)
+			char *sname, int canon, int unknown, char *for_user)
 {
     krb5_error_code ret;
     int i, errors;
@@ -141,6 +146,10 @@ static void do_v5_kvno (int count, char *names[],
     krb5_ticket *ticket;
     char *princ;
     krb5_keytab keytab = NULL;
+    krb5_s4u_userid userid;
+    krb5_flags options;
+
+    memset(&userid, 0, sizeof(userid));
 
     ret = krb5_init_context(&context);
     if (ret) {
@@ -175,6 +184,18 @@ static void do_v5_kvno (int count, char *names[],
 	}
     }
 
+    if (for_user) {
+	ret = krb5_parse_name_flags(context, for_user,
+				    KRB5_PRINCIPAL_PARSE_ENTERPRISE,
+				    &userid.user);
+	if (ret) {
+	    com_err(prog, ret, "while parsing principal name %s", for_user);
+	    exit(1);
+	}
+	userid.options = KRB5_S4U_OPTS_CHECK_LOGON_HOURS |
+			 KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
+    }
+
     ret = krb5_cc_get_principal(context, ccache, &me);
     if (ret) {
 	com_err(prog, ret, "while getting client principal name");
@@ -182,6 +203,10 @@ static void do_v5_kvno (int count, char *names[],
     }
 
     errors = 0;
+
+    options = 0;
+    if (canon)
+	options |= KRB5_GC_CANONICALIZE;
 
     for (i = 0; i < count; i++) {
 	memset(&in_creds, 0, sizeof(in_creds));
@@ -216,8 +241,20 @@ static void do_v5_kvno (int count, char *names[],
 
 	in_creds.keyblock.enctype = etype;
 
-	ret = krb5_get_credentials(context, canon ? KRB5_GC_CANONICALIZE : 0,
-				   ccache, &in_creds, &out_creds);
+	if (for_user) {
+
+	    if (!krb5_principal_compare(context, in_creds.client, in_creds.server)) {
+		com_err(prog, EINVAL,
+			"client and server principal names must match");
+		errors++;
+		continue;
+	    }
+	    ret = krb5_get_credentials_for_user(context, options, ccache,
+						&userid, &out_creds);
+	} else {
+	    ret = krb5_get_credentials(context, options, ccache,
+				       &in_creds, &out_creds);
+	}
 
 	krb5_free_principal(context, in_creds.server);
 
@@ -268,6 +305,8 @@ static void do_v5_kvno (int count, char *names[],
     if (keytab)
 	krb5_kt_close(context, keytab);
     krb5_free_principal(context, me);
+    if (userid.user);
+	krb5_free_principal(context, userid.user);
     krb5_cc_close(context, ccache);
     krb5_free_context(context);
 

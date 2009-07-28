@@ -46,7 +46,7 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
-static krb5_error_code
+krb5_error_code
 krb5_get_credentials_core(krb5_context context, krb5_flags options,
 			  krb5_creds *in_creds, krb5_creds *mcreds,
 			  krb5_flags *fields)
@@ -337,3 +337,4 @@ krb5_get_renewed_creds(krb5_context context, krb5_creds *creds, krb5_principal c
     return(krb5_validate_or_renew_creds(context, creds, client, ccache,
 					in_tkt_service, 0));
 }
+

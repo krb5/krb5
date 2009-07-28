@@ -755,6 +755,30 @@ krb5_free_pa_for_user(krb5_context context, krb5_pa_for_user *req)
 }
 
 void KRB5_CALLCONV
+krb5_free_s4u_userid_contents(krb5_context context, krb5_s4u_userid *user_id)
+{
+    if (user_id == NULL)
+	return;
+    user_id->nonce = 0;
+    krb5_free_principal(context, user_id->user);
+    user_id->user = NULL;
+    krb5_free_data_contents(context, &user_id->subject_cert);
+    user_id->subject_cert.length = 0;
+    user_id->subject_cert.data = NULL;
+    user_id->options = 0;
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_s4u_x509_user(krb5_context context, krb5_pa_s4u_x509_user *req)
+{
+    if (req == NULL)
+	return;
+    krb5_free_s4u_userid_contents(context, &req->user_id);
+    krb5_free_checksum_contents(context, &req->cksum);
+    free(req);
+}
+
+void KRB5_CALLCONV
 krb5_free_pa_server_referral_data(krb5_context context,
 				  krb5_pa_server_referral_data *ref)
 {

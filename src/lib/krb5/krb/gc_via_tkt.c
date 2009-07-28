@@ -159,12 +159,30 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 		       krb5_flags kdcoptions, krb5_address *const *address,
 		       krb5_creds *in_cred, krb5_creds **out_cred)
 {
+    return krb5_get_cred_via_tkt_ext (context, tkt,
+				      kdcoptions, address,
+				      0,
+				      NULL, in_cred,
+				      NULL, NULL, out_cred);
+}
+
+krb5_error_code
+krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
+			   krb5_flags kdcoptions, krb5_address *const *address,
+			   krb5_int32 nonce,
+			   krb5_pa_data **in_padata,
+			   krb5_creds *in_cred,
+			   krb5_pa_data ***out_padata,
+			   krb5_pa_data ***out_enc_padata,
+			   krb5_creds **out_cred)
+{
     krb5_error_code retval;
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
     krb5_response tgsrep;
     krb5_enctype *enctypes = 0;
     krb5_keyblock *subkey = NULL;
+    krb5_boolean s4u2self = FALSE;
 
 #ifdef DEBUG_REFERRALS
     printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
@@ -183,6 +201,15 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	(!in_cred->second_ticket.length))
         return(KRB5_NO_2ND_TKT);
 
+    /* XXX some abstraction violating S4U2Self validation */
+    if (in_padata != NULL &&
+	(krb5int_find_pa_data(context, in_padata, KRB5_PADATA_S4U_X509_USER) ||
+	 krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FOR_USER))) {
+	if (!krb5_principal_compare(context, in_cred->client, in_cred->server))
+	    return KRB5_PRINC_NOMATCH;
+
+	s4u2self = TRUE;
+    }
 
     /* check if we have the right TGT                    */
     /* tkt->server must be equal to                      */
@@ -213,10 +240,10 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     
     retval = krb5int_send_tgs(context, kdcoptions, &in_cred->times, enctypes, 
 			   in_cred->server, address, in_cred->authdata,
-			   0,		/* no padata */
+			   in_padata,		/* no padata */
 			   (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
 			   &in_cred->second_ticket : NULL,
-			   tkt, &tgsrep, &subkey);
+			   tkt, nonce, &tgsrep, &subkey);
     if (enctypes)
 	free(enctypes);
     if (retval) {
@@ -318,8 +345,15 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     /* make sure the response hasn't been tampered with..... */
     retval = 0;
 
-    if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
-	retval = KRB5_KDCREP_MODIFIED;
+    if (s4u2self && !IS_TGS_PRINC(context, dec_rep->ticket->server)) {
+	/* Final hop, check whether KDC supports S4U2Self */
+	if (krb5_principal_compare(context, dec_rep->client, in_cred->server))
+	    retval = KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
+    } else {
+	/* No S4U2Self or referral hop */
+	if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
+	    retval = KRB5_KDCREP_MODIFIED;
+    }
 
     if (retval == 0)
 	retval = check_reply_server(context, kdcoptions, in_cred, dec_rep);
@@ -355,6 +389,15 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 		       tgsrep.request_time)) {
 	retval = KRB5_KDCREP_SKEW;
 	goto error_3;
+    }
+
+    if (out_padata != NULL) {
+	*out_padata = dec_rep->padata;
+	dec_rep->padata = NULL;
+    }
+    if (out_enc_padata != NULL) {
+	*out_enc_padata = dec_rep->enc_part2->enc_padata;
+	dec_rep->enc_part2->enc_padata = NULL;
     }
     
     retval = krb5_kdcrep2creds(context, dec_rep, address, 

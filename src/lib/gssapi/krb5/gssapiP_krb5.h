@@ -217,6 +217,7 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
+    krb5_principal *constrained_deleg_targets; /* constrained delegation targets */
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;
@@ -902,6 +903,12 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
                                               const gss_ctx_id_t,
                                               const gss_OID,
                                               gss_buffer_set_t *);
+
+#define GSS_KRB5_ADD_SEC_CONTEXT_DELEGATEE_OID_LENGTH 11
+#define GSS_KRB5_ADD_SEC_CONTEXT_DELEGATEE_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0d"
+
+OM_uint32
+gss_krb5int_add_sec_context_delegatee(OM_uint32 *, gss_ctx_id_t *, const gss_OID, gss_buffer_t);
 
 #ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);

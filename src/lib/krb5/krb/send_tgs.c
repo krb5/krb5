@@ -149,7 +149,8 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
           krb5_const_principal sname, krb5_address *const *addrs,
           krb5_authdata *const *authorization_data,
           krb5_pa_data *const *padata, const krb5_data *second_ticket,
-          krb5_creds *in_cred, krb5_response *rep, krb5_keyblock **subkey)
+          krb5_creds *in_cred, krb5_int32 nonce,
+	  krb5_response *rep, krb5_keyblock **subkey)
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;
@@ -183,7 +184,9 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
     if ((retval = krb5_timeofday(context, &time_now)))
         return(retval);
     /* XXX we know they are the same size... */
-    rep->expected_nonce = tgsreq.nonce = (krb5_int32) time_now;
+    if (nonce == 0)
+	nonce = (krb5_int32) time_now;
+    rep->expected_nonce = tgsreq.nonce = nonce;
     rep->request_time = time_now;
     rep->message_type = KRB5_ERROR;  /*caller only uses the response
                                       * element on successful return*/ 

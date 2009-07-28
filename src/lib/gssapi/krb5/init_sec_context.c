@@ -844,6 +844,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
         }
     } else {
         context = ((krb5_gss_ctx_id_rec *)*context_handle)->k5_context;
+        assert(((krb5_gss_ctx_id_rec *)*context_handle)->constrained_deleg_targets == NULL);
     }
 
     /* set up return values so they can be "freed" successfully */
