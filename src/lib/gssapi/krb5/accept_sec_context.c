@@ -898,6 +898,7 @@ kg_accept_krb5(minor_status, context_handle,
                 major_status = GSS_S_CRED_UNAVAIL;
                 goto fail;
             }
+            gss_flags |= GSS_C_DELEG_FLAG;
         }
     } else {
         ctx = (krb5_gss_ctx_id_rec *) xmalloc(sizeof(*ctx));
