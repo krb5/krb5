@@ -1,6 +1,7 @@
 @ignore 
-the information in this file should be consistent with the information
-in krb5/src/lib/crypto/etypes.c (and krb5/src/include/krb5.h[in]?)
+The information in this file should be consistent with the information
+in krb5/src/lib/crypto/etypes.c and the family processing code in
+krb5/src/lib/krb5/krb/init_ctx.c (krb5int_parse_enctype_list).
 @end ignore
 
 @table @code
@@ -34,4 +35,12 @@ RC4 with HMAC/MD5
 @itemx rc4-hmac-exp
 @itemx arcfour-hmac-md5-exp
 Exportable RC4 with HMAC/MD5 (weak)
+@item des
+The DES family: des-cbc-crc, des-cbc-md5, and des-cbc-md4 (weak)
+@item des3
+The triple DES family: des3-cbc-sha1
+@item aes
+The AES family: aes256-cts-hmac-sha1-96 and aes128-cts-hmac-sha1-96
+@item rc4
+The RC4 family: arcfour-hmac
 @end table

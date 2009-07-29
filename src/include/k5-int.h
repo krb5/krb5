@@ -2795,6 +2795,10 @@ krb5int_pac_sign(krb5_context context,
 		 const krb5_keyblock *privsvr_key,
 		 krb5_data *data);
 
+krb5_error_code krb5int_parse_enctype_list(krb5_context context, char *profstr,
+					   krb5_enctype *default_list,
+					   krb5_enctype **result);
+
 #ifdef DEBUG_ERROR_LOCATIONS
 #define krb5_set_error_message(ctx, code, ...) \
     krb5_set_error_message_fl(ctx, code, __FILE__, __LINE__, __VA_ARGS__)

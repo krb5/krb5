@@ -60,19 +60,20 @@
 #include "../krb5_libinit.h"
 #endif
 
+/* This must be the largest enctype value defined in krb5.h. */
+#define MAX_ENCTYPE ENCTYPE_ARCFOUR_HMAC_EXP
+
 /* The des-mdX entries are last for now, because it's easy to
    configure KDCs to issue TGTs with des-mdX keys and then not accept
    them.  This'll be fixed, but for better compatibility, let's prefer
    des-crc for now.  */
-#define DEFAULT_ETYPE_LIST	\
-	"aes256-cts-hmac-sha1-96 " \
-	"aes128-cts-hmac-sha1-96 " \
-	"des3-cbc-sha1 arcfour-hmac-md5 " \
-	"des-cbc-crc des-cbc-md5 des-cbc-md4 "
-
-/* Not included:
-	"aes128-cts-hmac-sha1-96 " \
- */
+static krb5_enctype default_enctype_list[] = {
+    ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+    ENCTYPE_DES3_CBC_SHA1,
+    ENCTYPE_ARCFOUR_HMAC,
+    ENCTYPE_DES_CBC_CRC, ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_MD4,
+    0
+};
 
 #if (defined(_WIN32))
 extern krb5_error_code krb5_vercheck();
@@ -344,92 +345,137 @@ krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes)
     return set_default_etype_var(context, etypes, &context->tgs_etypes);
 }
 
-static krb5_error_code
-get_profile_etype_list(krb5_context context, krb5_enctype **ktypes,
-		       char *profstr, krb5_enctype *ctx_list)
+/*
+ * Add etype to, or remove etype from, list (of size MAX_ENCTYPE + 1)
+ * which has *count entries.  Filter out weak enctypes if allow_weak
+ * is false.
+ */
+static void
+mod_list(krb5_enctype etype, krb5_boolean add, krb5_boolean allow_weak,
+	 krb5_enctype *list, unsigned int *count)
 {
-    krb5_enctype *old_ktypes;
-    krb5_enctype ktype;
+    unsigned int i;
+
+    assert(etype > 0 && etype <= MAX_ENCTYPE);
+    if (!allow_weak && krb5_c_weak_enctype(etype))
+	return;
+    for (i = 0; i < *count; i++) {
+	if (list[i] == etype) {
+	    if (!add) {
+		for (; i < *count - 1; i++)
+		    list[i] = list[i + 1];
+		(*count)--;
+	    }
+	    return;
+	}
+    }
+    if (add) {
+	assert(*count < MAX_ENCTYPE);
+	list[(*count)++] = etype;
+    }
+}
+
+/*
+ * Set *result to a zero-terminated list of enctypes resulting from
+ * parsing profstr.  profstr may be modified during parsing.
+ */
+krb5_error_code
+krb5int_parse_enctype_list(krb5_context context, char *profstr,
+			   krb5_enctype *default_list, krb5_enctype **result)
+{
+    char *token, *delim = " \t\r\n,", *save = NULL;
+    krb5_boolean sel, weak = context->allow_weak_crypto;
+    krb5_enctype etype, list[MAX_ENCTYPE];
+    unsigned int i, count = 0;
+
+    *result = NULL;
+
+    /* Walk through the words in profstr. */
+    for (token = strtok_r(profstr, delim, &save); token;
+	 token = strtok_r(NULL, delim, &save)) {
+	/* Determine if we are adding or removing enctypes. */
+	sel = TRUE;
+	if (*token == '+' || *token == '-')
+	    sel = (*token++ == '+');
+
+	if (strcasecmp(token, "DEFAULT") == 0) {
+	    /* Set all enctypes in the default list. */
+	    for (i = 0; default_list[i]; i++)
+		mod_list(default_list[i], sel, weak, list, &count);
+	} else if (strcasecmp(token, "des") == 0) {
+	    mod_list(ENCTYPE_DES_CBC_CRC, sel, weak, list, &count);
+	    mod_list(ENCTYPE_DES_CBC_MD5, sel, weak, list, &count);
+	    mod_list(ENCTYPE_DES_CBC_MD4, sel, weak, list, &count);
+	} else if (strcasecmp(token, "des3") == 0) {
+	    mod_list(ENCTYPE_DES3_CBC_SHA1, sel, weak, list, &count);
+	} else if (strcasecmp(token, "aes") == 0) {
+	    mod_list(ENCTYPE_AES256_CTS_HMAC_SHA1_96, sel, weak, list, &count);
+	    mod_list(ENCTYPE_AES128_CTS_HMAC_SHA1_96, sel, weak, list, &count);
+	} else if (strcasecmp(token, "rc4") == 0) {
+	    mod_list(ENCTYPE_ARCFOUR_HMAC, sel, weak, list, &count);
+	} else if (krb5_string_to_enctype(token, &etype) == 0) {
+	    /* Set a specific enctype. */
+	    mod_list(etype, sel, weak, list, &count);
+	}
+    }
+
+    list[count] = 0;
+    return copy_enctypes(context, list, result);
+}
+
+/*
+ * Set *etypes_ptr to a zero-terminated list of enctypes.  ctx_list
+ * (containing application-specified enctypes) is used if non-NULL;
+ * otherwise the libdefaults profile string specified by profkey is
+ * used.  default_list is the default enctype list to be used while
+ * parsing profile strings, and is also used if the profile string is
+ * not set.
+ */
+static krb5_error_code
+get_profile_etype_list(krb5_context context, krb5_enctype **etypes_ptr,
+		       char *profkey, krb5_enctype *ctx_list,
+		       krb5_enctype *default_list)
+{
+    krb5_enctype *etypes;
     krb5_error_code code;
+    char *profstr;
+
+    *etypes_ptr = NULL;
 
     if (ctx_list) {
-	code = copy_enctypes(context, ctx_list, &old_ktypes);
+	/* Use application defaults. */
+	code = copy_enctypes(context, ctx_list, &etypes);
 	if (code)
 	    return code;
     } else {
-        /*
-	   XXX - For now, we only support libdefaults
-	   Perhaps this should be extended to allow for per-host / per-realm
-	   session key types.
-	 */
-
-	char *retval = NULL;
-	char *sp = NULL, *ep = NULL;
-	int i, j, count;
-
-	code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS, profstr,
-				  NULL, DEFAULT_ETYPE_LIST, &retval);
+	/* Parse profile setting, or "DEFAULT" if not specified. */
+	code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+				  profkey, NULL, "DEFAULT", &profstr);
 	if (code)
 	    return code;
-
-	count = 0;
-	sp = retval;
-	while (*sp) {
-	    for (ep = sp; *ep && (*ep != ',') && !isspace((int) (*ep)); ep++)
-		;
-	    if (*ep) {
-		*ep++ = '\0';
-		while (isspace((int) (*ep)) || *ep == ',')
-		    *ep++ = '\0';
-	    }
-	    count++;
-	    sp = ep;
-	}
-	
-	if ((old_ktypes =
-	     (krb5_enctype *)malloc(sizeof(krb5_enctype) * (count + 1))) ==
-	    (krb5_enctype *) NULL) {
-	    profile_release_string(retval);
-	    return ENOMEM;
-	}
-	
-	sp = retval;
-	j = 0;
-	i = 1;
-	while (1) {
-	    if (!krb5_string_to_enctype(sp, &ktype) &&
-		(context->allow_weak_crypto || !krb5_c_weak_enctype(ktype))) {
-		old_ktypes[j] = ktype;
-		j++;
-	    }
-	    if (i++ >= count)
-		break;
-
-	    /* skip to next token */
-	    while (*sp) sp++;
-	    while (! *sp) sp++;
-	}
-
-	old_ktypes[j] = (krb5_enctype) 0;
-	profile_release_string(retval);
+	code = krb5int_parse_enctype_list(context, profstr, default_list,
+					  &etypes);
+	profile_release_string(profstr);
+	if (code)
+	    return code;
     }
 
-    if (old_ktypes[0] == 0) {
-	free (old_ktypes);
-	*ktypes = 0;
+    if (etypes[0] == 0) {
+	free(etypes);
 	return KRB5_CONFIG_ETYPE_NOSUPP;
     }
 
-    *ktypes = old_ktypes;
+    *etypes_ptr = etypes;
     return 0;
 }
 
 krb5_error_code
 krb5_get_default_in_tkt_ktypes(krb5_context context, krb5_enctype **ktypes)
 {
-    return(get_profile_etype_list(context, ktypes,
+    return get_profile_etype_list(context, ktypes,
 				  KRB5_CONF_DEFAULT_TKT_ENCTYPES,
-				  context->in_tkt_etypes));
+				  context->in_tkt_etypes,
+				  default_enctype_list);
 }
 
 void
@@ -447,11 +493,13 @@ krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_encty
 	/* This one is set *only* by reading the config file; it's not
 	   set by the application.  */
 	return get_profile_etype_list(context, ktypes,
-				      KRB5_CONF_DEFAULT_TKT_ENCTYPES, NULL);
+				      KRB5_CONF_DEFAULT_TKT_ENCTYPES, NULL,
+				      default_enctype_list);
     else
 	return get_profile_etype_list(context, ktypes,
 				      KRB5_CONF_DEFAULT_TGS_ENCTYPES,
-				      context->tgs_etypes);
+				      context->tgs_etypes,
+				      default_enctype_list);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -459,7 +507,7 @@ krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes)
 {
     return get_profile_etype_list(context, ktypes,
 				  KRB5_CONF_PERMITTED_ENCTYPES,
-				  context->tgs_etypes);
+				  context->tgs_etypes, default_enctype_list);
 }
 
 krb5_boolean

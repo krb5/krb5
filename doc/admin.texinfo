@@ -360,6 +360,15 @@ but not recommended for use.
 
 @include support-enc.texinfo
 
+The string DEFAULT can be used to refer to the default set of types for
+the variable in question.  Types or families can be removed from the
+current list by prefixing them with a minus sign (``-'').  Types or
+families can be prefixed with a plus sign (``+'') for symmetry; it has
+the same meaning as just listing the type or family.  For example,
+``DEFAULT -des'' would be the default set of encryption types with DES
+types removed, and ``des3 DEFAULT'' would be the default set of
+encryption types with triple DES types moved to the front.
+
 While aes128-cts and aes256-cts are supported for all Kerberos
 operations, they are not supported by older versions of our GSSAPI
 implementation (krb5-1.3.1 and earlier).
