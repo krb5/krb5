@@ -88,6 +88,23 @@ int main(int argc, char *argv[])
     if (gss_display_name(&minor, src_name, &buf, NULL) == GSS_S_COMPLETE) {
 	printf("Client name: %s\n", (char *)buf.value);
 	gss_release_buffer(&minor, &buf);
+	buf.value = NULL;
+    }
+
+    if (delegated_cred_handle != GSS_C_NO_CREDENTIAL) {
+	gss_name_t cred_name = GSS_C_NO_NAME;
+	OM_uint32 lifetime;
+	gss_cred_usage_t usage;
+
+	buf.value = NULL;
+
+	if (gss_inquire_cred(&minor, delegated_cred_handle, &cred_name,
+			     &lifetime, &usage, NULL) == GSS_S_COMPLETE &&
+	    gss_display_name(&minor, cred_name, &buf, NULL) == GSS_S_COMPLETE)
+	    printf("Credential principal name: %s\n", (char *)buf.value);
+
+	gss_release_buffer(&minor, &buf);
+	gss_release_name(&minor, &cred_name);
     }
 
 out:
