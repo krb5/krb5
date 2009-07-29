@@ -182,7 +182,7 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     krb5_response tgsrep;
     krb5_enctype *enctypes = 0;
     krb5_keyblock *subkey = NULL;
-    krb5_boolean s4u2self = FALSE;
+    krb5_boolean s4u2self = FALSE, second_tkt;
 
 #ifdef DEBUG_REFERRALS
     printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
@@ -197,8 +197,9 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     if (!tkt->ticket.length)
 	return KRB5_NO_TKT_SUPPLIED;
 
-    if ((kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) && 
-	(!in_cred->second_ticket.length))
+    second_tkt = ((kdcoptions & (KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)) != 0);
+
+    if (second_tkt && !in_cred->second_ticket.length)
         return(KRB5_NO_2ND_TKT);
 
     /* XXX some abstraction violating S4U2Self validation */
@@ -237,12 +238,11 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 	enctypes[0] = in_cred->keyblock.enctype;
 	enctypes[1] = 0;
     }
-    
+
     retval = krb5int_send_tgs(context, kdcoptions, &in_cred->times, enctypes, 
 			   in_cred->server, address, in_cred->authdata,
-			   in_padata,		/* no padata */
-			   (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
-			   &in_cred->second_ticket : NULL,
+			   in_padata,
+			   second_tkt ? &in_cred->second_ticket : NULL,
 			   tkt, nonce, &tgsrep, &subkey);
     if (enctypes)
 	free(enctypes);
@@ -349,8 +349,10 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 	/* Final hop, check whether KDC supports S4U2Self */
 	if (krb5_principal_compare(context, dec_rep->client, in_cred->server))
 	    retval = KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
-    } else {
-	/* No S4U2Self or referral hop */
+    } else if ((kdcoptions & KDC_OPT_CNAME_IN_ADDL_TKT) == 0) {
+	/* XXX for constrained delegation this check must be performed by caller
+	 * as we don't have access to the key to decrypt the evidence ticket.
+	 */
 	if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
 	    retval = KRB5_KDCREP_MODIFIED;
     }

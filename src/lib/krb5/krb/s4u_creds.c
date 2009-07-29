@@ -774,28 +774,32 @@ krb5_get_proxy_cred_from_kdc(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+    ecreds = *in_creds;
     ecreds.client = evidence_tkt->server;
     ecreds.second_ticket = *evidence_tkt_data;
 
     kdcopt |= KDC_OPT_FORWARDABLE | KDC_OPT_CNAME_IN_ADDL_TKT;
 
-    code = krb5_get_cred_from_kdc_opt(context, ccache, in_creds, out_creds,
+    code = krb5_get_cred_from_kdc_opt(context, ccache, &ecreds, out_creds,
                                       tgts, kdcopt);
     if (code != 0)
         goto cleanup;
 
     /*
+     * Check client name because we couldn't compare that inside
+     * krb5_get_cred_via_tkt_ext(); server should have been checked
+     * there, but just to be sure we check that too.
+     */
+    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client, (*out_creds)->client) ||
+        !krb5_principal_compare(context, in_creds->server, (*out_creds)->server)) {
+        code = KRB5_KDCREP_MODIFIED; /* XXX */
+        goto cleanup;
+    }
+    /*
      * Check the returned ticket is marked as forwardable.
      */
     if (((*out_creds)->ticket_flags & TKT_FLG_FORWARDABLE) == 0) {
         code = KRB5_TKT_NOT_FORWARDABLE;
-        goto cleanup;
-    }
-    /*
-     * XXX are these checks sufficient
-     */
-    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client, (*out_creds)->client)) {
-        code = KRB5KDC_ERR_BADOPTION; /* XXX */
         goto cleanup;
     }
 
