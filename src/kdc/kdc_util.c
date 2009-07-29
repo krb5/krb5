@@ -1964,6 +1964,7 @@ kdc_process_s4u2self_req(krb5_context context,
 	return code;
     }
 
+    /* XXX this is not actually a requirement of the SFU specification */
     if (krb5_princ_type(context, (*for_user)->user) !=
 	KRB5_NT_ENTERPRISE_PRINCIPAL) {
 	*status = "INVALID_S4U2SELF_REQUEST";
