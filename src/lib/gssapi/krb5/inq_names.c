@@ -81,6 +81,10 @@ krb5_gss_inquire_names_for_mech(minor_status, mechanism, name_types)
             ((major = generic_gss_add_oid_set_member(minor_status,
                                                      gss_nt_krb5_name,
                                                      name_types)
+            ) == GSS_S_COMPLETE) &&
+            ((major = generic_gss_add_oid_set_member(minor_status,
+                                                     GSS_KRB5_NT_ENTERPRISE_NAME,
+                                                     name_types)
             ) == GSS_S_COMPLETE)
         ) {
             major = generic_gss_add_oid_set_member(minor_status,

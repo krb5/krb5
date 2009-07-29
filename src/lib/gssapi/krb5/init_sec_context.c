@@ -390,7 +390,7 @@ cleanup:
  *
  * Do the grunt work of setting up a new context.
  */
-static OM_uint32
+OM_uint32
 new_connection(
     OM_uint32 *minor_status,
     krb5_gss_cred_id_t cred,

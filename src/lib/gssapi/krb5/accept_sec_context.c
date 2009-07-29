@@ -113,7 +113,7 @@
 #endif
 
 #ifndef LEAN_CLIENT
-static krb5_error_code
+krb5_error_code
 krb5_to_gss_cred(krb5_context context,
                  krb5_creds *creds,
                  krb5_gss_cred_id_t *out_cred)
@@ -261,12 +261,12 @@ cleanup:
  */
 static krb5_error_code
 acquire_constrained_deleg_creds(krb5_context context,
+                                krb5_gss_cred_id_t acceptor_cred,
                                 krb5_ticket *ticket,
                                 krb5_principal *targets,
                                 krb5_gss_cred_id_t *out_cred)
 {
     krb5_error_code retval;
-    krb5_ccache ccache = NULL;
     krb5_principal princ = NULL;
     int i;
 
@@ -276,11 +276,12 @@ acquire_constrained_deleg_creds(krb5_context context,
     if (out_cred != NULL)
         *out_cred = NULL;
 
-    retval = krb5int_cc_default(context, &ccache);
-    if (retval != 0)
+    if (acceptor_cred->ccache == NULL) {
+        retval = EINVAL;
         goto cleanup;
+    }
 
-    retval = krb5_cc_get_principal(context, ccache, &princ);
+    retval = krb5_cc_get_principal(context, acceptor_cred->ccache, &princ);
     if (retval != 0)
         goto cleanup;
 
@@ -299,7 +300,7 @@ acquire_constrained_deleg_creds(krb5_context context,
 
         retval = krb5_get_credentials_for_proxy(context,
                                                 KRB5_GC_CANONICALIZE,
-                                                ccache,
+                                                acceptor_cred->ccache,
                                                 &pcreds,
                                                 ticket,
                                                 &creds);
@@ -315,8 +316,6 @@ acquire_constrained_deleg_creds(krb5_context context,
     }
 
 cleanup:
-    if (ccache != NULL)
-        krb5_cc_destroy(context, ccache);
     if (princ != NULL)
         krb5_free_principal(context, princ);
     if (retval != 0 && out_cred != NULL && *out_cred != NULL) {
@@ -492,6 +491,7 @@ kg_accept_krb5(minor_status, context_handle,
     int no_encap = 0;
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
+    gss_cred_usage_t usage = GSS_C_ACCEPT;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -519,14 +519,22 @@ kg_accept_krb5(minor_status, context_handle,
     if (mech_type)
         *mech_type = GSS_C_NULL_OID;
     /* return a bogus cred handle */
-    if (delegated_cred_handle)
+    if (delegated_cred_handle) {
         *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+
+        if (*context_handle != GSS_C_NO_CONTEXT) {
+            ctx = (krb5_gss_ctx_id_rec *)*context_handle;
+
+            if (ctx->constrained_deleg_targets != NULL)
+                usage = GSS_C_BOTH;
+        }
+    }
 
     /* handle default cred handle */
     if (verifier_cred_handle == GSS_C_NO_CREDENTIAL) {
         major_status = krb5_gss_acquire_cred(minor_status, GSS_C_NO_NAME,
                                              GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
-                                             GSS_C_ACCEPT, &cred_handle,
+                                             usage, &cred_handle,
                                              NULL, NULL);
         if (major_status != GSS_S_COMPLETE) {
             code = *minor_status;
@@ -546,7 +554,7 @@ kg_accept_krb5(minor_status, context_handle,
 
     /* make sure the supplied credentials are valid for accept */
 
-    if ((cred->usage != GSS_C_ACCEPT) &&
+    if ((cred->usage != usage) &&
         (cred->usage != GSS_C_BOTH)) {
         code = 0;
         major_status = GSS_S_NO_CRED;
@@ -882,6 +890,7 @@ kg_accept_krb5(minor_status, context_handle,
 
         if (delegated_cred_handle != NULL && deleg_cred == NULL) {
             code = acquire_constrained_deleg_creds(context,
+                                                   (krb5_gss_cred_id_t)cred_handle,
                                                    ticket,
                                                    ctx->constrained_deleg_targets,
                                                    &deleg_cred);
@@ -1345,6 +1354,12 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
                          delegated_cred_handle);
 }
 
+/*
+ * This function manages a list of constrained delegation targets in a
+ * skeletal context, such that when gss_accept_sec_context() is called,
+ * the returned delegated credentials can be appropriately constructed
+ * via a S4U2Proxy request to the KDC.
+ */
 OM_uint32
 gss_krb5int_add_sec_context_delegatee(OM_uint32 *minor_status,
                                       gss_ctx_id_t *context_handle,

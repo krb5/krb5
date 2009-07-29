@@ -7,6 +7,7 @@ GSS_C_NT_MACHINE_UID_NAME
 GSS_C_NT_STRING_UID_NAME
 GSS_C_NT_USER_NAME
 GSS_KRB5_NT_PRINCIPAL_NAME
+GSS_KRB5_NT_ENTERPRISE_NAME
 gss_accept_sec_context
 gss_acquire_cred
 gss_add_buffer_set_member
@@ -36,8 +37,10 @@ gss_inquire_cred_by_oid
 gss_inquire_mechs_for_name
 gss_inquire_names_for_mech
 gss_inquire_sec_context_by_oid
+gss_krb5_add_sec_context_delegatee
 gss_krb5_ccache_name
 gss_krb5_copy_ccache
+gss_krb5_create_sec_context_for_principal
 gss_krb5_export_lucid_sec_context
 gss_krb5_get_tkt_flags
 gss_krb5_free_lucid_sec_context

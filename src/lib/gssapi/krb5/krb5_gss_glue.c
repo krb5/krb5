@@ -418,7 +418,7 @@ gsskrb5_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 }
 
 OM_uint32 KRB5_CALLCONV
-krb5_gss_add_sec_context_delegatee(OM_uint32 *minor_status,
+gss_krb5_add_sec_context_delegatee(OM_uint32 *minor_status,
                                    gss_ctx_id_t *context_handle,
                                    gss_name_t name)
 {
@@ -427,14 +427,23 @@ krb5_gss_add_sec_context_delegatee(OM_uint32 *minor_status,
         GSS_KRB5_ADD_SEC_CONTEXT_DELEGATEE_OID };
     OM_uint32 minor, major_status;
     gss_buffer_desc req_buffer;
+    gss_name_t canon_name;
 
     if (name == GSS_C_NO_NAME)
         return GSS_S_CALL_INACCESSIBLE_READ;
 
-    /* export name to convert from union to mechanism name */
-    major_status = gss_export_name(minor_status, name, &req_buffer);
+    major_status = gss_canonicalize_name(minor_status, name,
+                                         (gss_OID)gss_mech_krb5,
+                                         &canon_name);
     if (GSS_ERROR(major_status))
         return major_status;
+
+    /* export name to convert from union to mechanism name */
+    major_status = gss_export_name(minor_status, canon_name, &req_buffer);
+    if (GSS_ERROR(major_status)) {
+        gss_release_name(&minor, &canon_name);
+        return major_status;
+    }
 
     major_status = gss_set_sec_context_option(minor_status,
                                               context_handle,
@@ -442,6 +451,7 @@ krb5_gss_add_sec_context_delegatee(OM_uint32 *minor_status,
                                               &req_buffer);
 
     gss_release_buffer(&minor, &req_buffer);
+    gss_release_name(&minor, &canon_name);
 
     return major_status;
 }

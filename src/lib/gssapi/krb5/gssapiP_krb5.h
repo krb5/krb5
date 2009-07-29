@@ -467,6 +467,29 @@ krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count);
 
 krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size);
 
+krb5_error_code
+krb5_to_gss_cred(krb5_context context,
+                 krb5_creds *creds,
+                 krb5_gss_cred_id_t *out_cred);
+
+OM_uint32
+new_connection(
+    OM_uint32 *minor_status,
+    krb5_gss_cred_id_t cred,
+    gss_ctx_id_t *context_handle,
+    gss_name_t target_name,
+    gss_OID mech_type,
+    OM_uint32 req_flags,
+    OM_uint32 time_req,
+    gss_channel_bindings_t input_chan_bindings,
+    gss_buffer_t input_token,
+    gss_OID *actual_mech_type,
+    gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec,
+    krb5_context context,
+    int default_mech);
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred
@@ -909,6 +932,15 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
 
 OM_uint32
 gss_krb5int_add_sec_context_delegatee(OM_uint32 *, gss_ctx_id_t *, const gss_OID, gss_buffer_t);
+
+#define GSS_KRB5_UNWRAP_CRED_HANDLE_OID_LENGTH 11
+#define GSS_KRB5_UNWRAP_CRED_HANDLE_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0e"
+
+OM_uint32
+gss_krb5int_unwrap_cred_handle(OM_uint32 *,
+                               gss_cred_id_t,
+                               const gss_OID,
+                               const gss_buffer_t);
 
 #ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);
