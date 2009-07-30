@@ -51,6 +51,7 @@ krb5_get_as_key_noop(
     krb5_keyblock *as_key,
     void *gak_data)
 {
+    /* force a hard error, we don't actually have the key */
     return KDC_ERR_PREAUTH_FAILED;
 }
 
@@ -177,9 +178,6 @@ make_pa_for_user_checksum(krb5_context context,
     p += krb5_princ_realm(context, req->user)->length;
 
     memcpy(p, req->auth_package.data, req->auth_package.length);
-#if 0
-    p += req->auth_package.length;
-#endif
 
     code = krb5int_c_mandatory_cksumtype(context, key->enctype, &cksumtype);
     if (code != 0) {
@@ -263,18 +261,24 @@ build_pa_s4u_x509_user(krb5_context context,
     krb5_pa_data *padata;
     krb5_cksumtype cksumtype;
 
+    memset(&s4u_x509_user, 0, sizeof(s4u_x509_user));
+
     s4u_x509_user.user_id = *userid;
-    s4u_x509_user.cksum.contents = NULL;
-    s4u_x509_user.cksum.length = 0;
 
-    code = encode_krb5_s4u_userid(userid, &data);
+    code = encode_krb5_s4u_userid(&s4u_x509_user.user_id, &data);
     if (code != 0)
         goto cleanup;
 
-    code = krb5int_c_mandatory_cksumtype(context, tgt->keyblock.enctype,
-                                         &cksumtype);
-    if (code != 0)
-        goto cleanup;
+    /* [MS-SFU] 2.2.2: unusual to say the least, but enc_padata secures it */
+    if (tgt->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC ||
+        tgt->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+        cksumtype = CKSUMTYPE_RSA_MD4;
+    } else {
+        code = krb5int_c_mandatory_cksumtype(context, tgt->keyblock.enctype,
+                                             &cksumtype);
+        if (code != 0)
+            goto cleanup;
+    }
 
     code = krb5_c_make_checksum(context, cksumtype, &tgt->keyblock,
                                 KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST, data,

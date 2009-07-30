@@ -217,7 +217,7 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
-    krb5_principal *constrained_deleg_targets; /* constrained delegation targets */
+    krb5_principal *s4u2proxy_targets; /* constrained delegation targets */
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;
@@ -473,7 +473,7 @@ krb5_to_gss_cred(krb5_context context,
                  krb5_gss_cred_id_t *out_cred);
 
 OM_uint32
-new_connection(
+kg_new_connection(
     OM_uint32 *minor_status,
     krb5_gss_cred_id_t cred,
     gss_ctx_id_t *context_handle,

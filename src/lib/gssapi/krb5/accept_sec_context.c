@@ -260,11 +260,11 @@ cleanup:
  * default ccache has a TGT in the acceptor's name.
  */
 static krb5_error_code
-acquire_constrained_deleg_creds(krb5_context context,
-                                krb5_gss_cred_id_t acceptor_cred,
-                                krb5_ticket *ticket,
-                                krb5_principal *targets,
-                                krb5_gss_cred_id_t *out_cred)
+kg_acquire_s4u2proxy_creds(krb5_context context,
+                           krb5_gss_cred_id_t acceptor_cred,
+                           krb5_ticket *ticket,
+                           krb5_principal *targets,
+                           krb5_gss_cred_id_t *out_cred)
 {
     krb5_error_code retval;
     krb5_principal princ = NULL;
@@ -525,7 +525,7 @@ kg_accept_krb5(minor_status, context_handle,
         if (*context_handle != GSS_C_NO_CONTEXT) {
             ctx = (krb5_gss_ctx_id_rec *)*context_handle;
 
-            if (ctx->constrained_deleg_targets != NULL)
+            if (ctx->s4u2proxy_targets != NULL)
                 usage = GSS_C_BOTH;
         }
     }
@@ -885,15 +885,15 @@ kg_accept_krb5(minor_status, context_handle,
     if (*context_handle != GSS_C_NO_CONTEXT) {
         ctx = (krb5_gss_ctx_id_rec *)*context_handle;
 
-        assert(ctx->constrained_deleg_targets != NULL);
+        assert(ctx->s4u2proxy_targets != NULL);
         assert(ctx->mech_used == GSS_C_NO_OID);
 
         if (delegated_cred_handle != NULL && deleg_cred == NULL) {
-            code = acquire_constrained_deleg_creds(context,
-                                                   (krb5_gss_cred_id_t)cred_handle,
-                                                   ticket,
-                                                   ctx->constrained_deleg_targets,
-                                                   &deleg_cred);
+            code = kg_acquire_s4u2proxy_creds(context,
+                                              (krb5_gss_cred_id_t)cred_handle,
+                                              ticket,
+                                              ctx->s4u2proxy_targets,
+                                              &deleg_cred);
             if (code) {
                 major_status = GSS_S_CRED_UNAVAIL;
                 goto fail;
@@ -1403,13 +1403,13 @@ gss_krb5int_add_sec_context_delegatee(OM_uint32 *minor_status,
     if (GSS_ERROR(major_status))
         goto cleanup;
 
-    if (ctx->constrained_deleg_targets != NULL) {
-        for (i = 0; ctx->constrained_deleg_targets[i] != NULL; i++)
+    if (ctx->s4u2proxy_targets != NULL) {
+        for (i = 0; ctx->s4u2proxy_targets[i] != NULL; i++)
             ;
     } else
         i = 0;
 
-    targets = (krb5_principal *)realloc(ctx->constrained_deleg_targets,
+    targets = (krb5_principal *)realloc(ctx->s4u2proxy_targets,
                                         (i + 2) * sizeof(krb5_principal));
     if (targets == NULL) {
         *minor_status = ENOMEM;
@@ -1421,7 +1421,7 @@ gss_krb5int_add_sec_context_delegatee(OM_uint32 *minor_status,
     targets[i + 1] = NULL;
 
     target = NULL;
-    ctx->constrained_deleg_targets = targets;
+    ctx->s4u2proxy_targets = targets;
 
 cleanup:
     if (target != GSS_C_NO_NAME)

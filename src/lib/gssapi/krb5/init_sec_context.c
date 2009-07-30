@@ -391,7 +391,7 @@ cleanup:
  * Do the grunt work of setting up a new context.
  */
 OM_uint32
-new_connection(
+kg_new_connection(
     OM_uint32 *minor_status,
     krb5_gss_cred_id_t cred,
     gss_ctx_id_t *context_handle,
@@ -844,7 +844,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
         }
     } else {
         context = ((krb5_gss_ctx_id_rec *)*context_handle)->k5_context;
-        assert(((krb5_gss_ctx_id_rec *)*context_handle)->constrained_deleg_targets == NULL);
+        assert(((krb5_gss_ctx_id_rec *)*context_handle)->s4u2proxy_targets == NULL);
     }
 
     /* set up return values so they can be "freed" successfully */
@@ -932,12 +932,12 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
     /*SUPPRESS 29*/
     if (*context_handle == GSS_C_NO_CONTEXT) {
-        major_status = new_connection(minor_status, cred, context_handle,
-                                      target_name, mech_type, req_flags,
-                                      time_req, input_chan_bindings,
-                                      input_token, actual_mech_type,
-                                      output_token, ret_flags, time_rec,
-                                      context, default_mech);
+        major_status = kg_new_connection(minor_status, cred, context_handle,
+                                        target_name, mech_type, req_flags,
+                                        time_req, input_chan_bindings,
+                                        input_token, actual_mech_type,
+                                        output_token, ret_flags, time_rec,
+                                        context, default_mech);
         k5_mutex_unlock(&cred->lock);
         if (*context_handle == GSS_C_NO_CONTEXT) {
             save_error_info (*minor_status, context);

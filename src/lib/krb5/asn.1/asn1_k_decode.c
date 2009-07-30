@@ -1628,7 +1628,7 @@ asn1_error_code asn1_decode_s4u_userid(asn1buf *buf, krb5_s4u_userid *val)
         alloc_principal(val->user);
         opt_field(val->user,1,asn1_decode_principal_name,0);
         get_field(val->user,2,asn1_decode_realm);
-        opt_lenfield(val->subject_cert.length,val->subject_cert.data,3,asn1_decode_octetstring);
+        opt_lenfield(val->subject_cert.length,val->subject_cert.data,3,asn1_decode_charstring);
         opt_field(val->options,4,asn1_decode_krb5_flags,0);
         end_structure();
     }

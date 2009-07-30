@@ -40,11 +40,17 @@ gss_krb5int_unwrap_cred_handle(OM_uint32 *minor_status,
 {
     krb5_gss_cred_id_t *mech_cred = (krb5_gss_cred_id_t *)value->value;
 
+    assert(mech_cred != NULL);
+
     *mech_cred = (krb5_gss_cred_id_t)cred_handle;
 
     return GSS_S_COMPLETE;
 }
 
+/*
+ * Unwrap a credentials handle to its mechanism specific equivalent
+ * by calling gssspi_set_cred_option().
+ */
 static OM_uint32
 kg_unwrap_cred_handle(OM_uint32 *minor_status,
                       gss_cred_id_t union_cred,
@@ -80,6 +86,10 @@ kg_unwrap_cred_handle(OM_uint32 *minor_status,
 
 }
 
+/*
+ * Unwrap a name to its mechanism specific equivalent by exporting
+ * and importing it.
+ */
 static OM_uint32
 kg_unwrap_name(OM_uint32 *minor_status,
                gss_name_t union_name,
@@ -111,13 +121,16 @@ kg_unwrap_name(OM_uint32 *minor_status,
     return major_status;
 }
 
+/*
+ * Acquire S4U2Self creds.
+ */
 static OM_uint32
-kg_acquire_s4u_creds(OM_uint32 *minor_status,
-                     krb5_gss_cred_id_t acceptor_cred,
-                     gss_name_t s4u_name,
-                     OM_uint32 time_req,
-                     krb5_gss_cred_id_t *initiator_cred,
-                     krb5_context context)
+kg_acquire_s4u2self_creds(OM_uint32 *minor_status,
+                          krb5_gss_cred_id_t acceptor_cred,
+                          gss_name_t s4u_name,
+                          OM_uint32 time_req,
+                          krb5_gss_cred_id_t *initiator_cred,
+                          krb5_context context)
 {
     krb5_error_code code;
     krb5_creds in_creds;
@@ -136,6 +149,7 @@ kg_acquire_s4u_creds(OM_uint32 *minor_status,
                                          NULL, &out_creds);
     if (code != 0) {
         *minor_status = code;
+        save_error_info(*minor_status, context);
         return GSS_S_FAILURE;
     }
 
@@ -150,7 +164,8 @@ kg_acquire_s4u_creds(OM_uint32 *minor_status,
             xfree(*initiator_cred);
             *initiator_cred = NULL;
         }
-    }
+    } else
+        save_error_info(code, context);
 
     krb5_free_creds(context, out_creds);
 
@@ -170,7 +185,7 @@ gss_krb5_create_sec_context_for_principal(OM_uint32 *minor_status,
                                           gss_name_t *src_name,
                                           gss_OID *mech_type,
                                           OM_uint32 *ret_flags,
-                                          OM_uint32 *time_ret,
+                                          OM_uint32 *time_rec,
                                           gss_cred_id_t *delegated_cred_handle)
 {
     OM_uint32 minor, major_status;
@@ -226,32 +241,32 @@ gss_krb5_create_sec_context_for_principal(OM_uint32 *minor_status,
             goto cleanup;
     }
 
-    major_status = kg_acquire_s4u_creds(minor_status,
-                                        cred,
-                                        s4u_name,
-                                        time_req,
-                                        &s4u_cred,
-                                        context);
+    major_status = kg_acquire_s4u2self_creds(minor_status,
+                                             cred,
+                                             s4u_name,
+                                             time_req,
+                                             &s4u_cred,
+                                             context);
     if (GSS_ERROR(major_status))
         goto cleanup;
 
     req_flags &= ~(GSS_C_MUTUAL_FLAG);
 
-    major_status = new_connection(minor_status,
-                                  s4u_cred,
-                                  &initiator_ctx,
-                                  (gss_name_t)cred->princ,
-                                  (gss_OID)gss_mech_krb5,
-                                  req_flags,
-                                  time_req,
-                                  NULL, /* input_chan_bindings */
-                                  &input_token,
-                                  NULL,
-                                  &output_token,
-                                  NULL,
-                                  NULL,
-                                  context,
-                                  TRUE);
+    major_status = kg_new_connection(minor_status,
+                                    s4u_cred,
+                                    &initiator_ctx,
+                                    (gss_name_t)cred->princ,
+                                    (gss_OID)gss_mech_krb5,
+                                    req_flags,
+                                    time_req,
+                                    GSS_C_NO_CHANNEL_BINDINGS,
+                                    &input_token,
+                                    mech_type,
+                                    &output_token,
+                                    ret_flags,
+                                    time_rec,
+                                    context,
+                                    TRUE);
     if (GSS_ERROR(major_status))
         goto cleanup;
 
@@ -259,28 +274,26 @@ gss_krb5_create_sec_context_for_principal(OM_uint32 *minor_status,
                                           context_handle,
                                           verifier_cred_handle,
                                           &output_token,
-                                          NULL,
+                                          GSS_C_NO_CHANNEL_BINDINGS,
                                           src_name,
                                           mech_type,
                                           &input_token,
                                           ret_flags,
-                                          time_ret,
+                                          time_rec,
                                           delegated_cred_handle);
     if (major_status != GSS_S_COMPLETE)
         goto cleanup;
 
 cleanup:
-    if (verifier_cred_handle == GSS_C_NO_CREDENTIAL)
-        krb5_gss_release_cred(&minor, (gss_cred_id_t *)&cred);
-    if (s4u_cred != NULL)
-        krb5_gss_release_cred(&minor, (gss_cred_id_t *)&s4u_cred);
-    if (initiator_ctx != GSS_C_NO_CONTEXT)
-        krb5_gss_delete_sec_context(&minor, &initiator_ctx, NULL);
+    krb5_gss_release_cred(&minor, (gss_cred_id_t *)&cred);
+    krb5_gss_release_cred(&minor, (gss_cred_id_t *)&s4u_cred);
+    krb5_gss_delete_sec_context(&minor, &initiator_ctx, NULL);
     gss_release_buffer(&minor, &input_token);
     gss_release_buffer(&minor, &output_token);
     krb5_gss_release_name(&minor, &s4u_name);
     gss_release_buffer(&minor, &exported_name);
     gss_release_name(&minor, &canon_name);
+
     if (context != NULL) {
         if (GSS_ERROR(major_status) && *minor_status != 0)
             save_error_info(*minor_status, context);

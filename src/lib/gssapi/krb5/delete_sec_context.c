@@ -109,11 +109,11 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
     if (ctx->authdata)
         krb5_free_authdata(context, ctx->authdata);
 
-    if (ctx->constrained_deleg_targets != NULL) {
+    if (ctx->s4u2proxy_targets != NULL) {
         int i;
 
-        for (i = 0; ctx->constrained_deleg_targets[i] != NULL; i++)
-            krb5_gss_release_name(minor_status, (gss_name_t *)&ctx->constrained_deleg_targets[i]);
+        for (i = 0; ctx->s4u2proxy_targets[i] != NULL; i++)
+            krb5_gss_release_name(minor_status, (gss_name_t *)&ctx->s4u2proxy_targets[i]);
     }
 
     if (ctx->k5_context)
