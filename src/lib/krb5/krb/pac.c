@@ -547,8 +547,10 @@ k5_pac_verify_server_checksum(krb5_context context,
 
     ret = krb5_c_verify_checksum(context, server, KRB5_KEYUSAGE_APP_DATA_CKSUM,
 				 &pac_data, &checksum, &valid);
+
+    free(pac_data.data);
+
     if (ret != 0) {
-	free(pac_data.data);
 	return ret;
     }
 

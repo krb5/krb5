@@ -220,6 +220,8 @@ main(int argc, char **argv)
         if (ret)
             err(context, ret, "krb5_pac_verify 4");
         
+        krb5_free_data_contents(context, &data);
+
         krb5_pac_free(context, pac2);
     }
 
