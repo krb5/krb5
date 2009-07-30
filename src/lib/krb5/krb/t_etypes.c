@@ -196,6 +196,9 @@ main(int argc, char **argv)
             free(list);
         }
     }
+
+    krb5_free_context(ctx);
+
     return 0;
 }
 
