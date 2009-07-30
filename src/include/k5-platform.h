@@ -41,6 +41,7 @@
 #define K5_PLATFORM_H
 
 #include "autoconf.h"
+#include <assert.h>
 #include <string.h>
 #include <stdarg.h>
 #include <limits.h>
