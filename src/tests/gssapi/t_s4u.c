@@ -50,7 +50,7 @@
  * Usage eg:
  *
  *    $ kinit -f host/mithost.win.mit.edu@WIN.MIT.EDU
- *    $ s4utest delegtest@WIN.MIT.EDU HOST@WIN-EQ7E4AA2WR8.win.mit.edu krb5.keytab
+ *    $ t_s4u delegtest@WIN.MIT.EDU HOST@WIN-EQ7E4AA2WR8.win.mit.edu krb5.keytab
  */
 
 static void displayStatus_1(m, code, type)
