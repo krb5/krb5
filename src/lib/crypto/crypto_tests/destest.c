@@ -95,7 +95,8 @@ main(argc, argv)
 
 	retval = mit_des_key_sched(key, sched);
 	if (retval) {
-            fprintf(stderr, "des test: can't process key");
+	    fprintf(stderr, "des test: can't process key: %d\n", retval);
+	    fprintf(stderr, "des test: %s %s %s\n", block1, block2, block3);
             exit(1);
         }
 	mit_des_cbc_encrypt((const mit_des_cblock *) input, output2, 8,
