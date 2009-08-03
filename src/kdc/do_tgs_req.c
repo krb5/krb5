@@ -117,7 +117,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* ticket granting or evidence ticket */
     krb5_db_entry client, krbtgt;
     int c_nprincs = 0, k_nprincs = 0;
-    krb5_pa_s4u_x509_user *s4u_x509_user; /* protocol transition request */
+    krb5_pa_s4u_x509_user *s4u_x509_user = NULL; /* protocol transition request */
     krb5_authdata **kdc_issued_auth_data = NULL; /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;       /* client/server KDB flags */
     char *s4u_name = NULL;
@@ -131,7 +131,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_data scratch;
 
     session_key.contents = NULL;
-    memset(&s4u_x509_user, 0, sizeof(s4u_x509_user));
 
     retval = decode_krb5_tgs_req(pkt, &request);
     if (retval)
