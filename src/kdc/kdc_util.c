@@ -2082,7 +2082,8 @@ kdc_process_s4u2self_req(krb5_context context,
 	    return code;
 	}
 
-	if ((*s4u_x509_user)->user_id.subject_cert.length != 0) {
+	if ((*s4u_x509_user)->user_id.user == NULL ||
+	    (*s4u_x509_user)->user_id.subject_cert.length != 0) {
 	    *status = "INVALID_S4U2SELF_REQUEST";
 	    krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
 	    *s4u_x509_user = NULL;
