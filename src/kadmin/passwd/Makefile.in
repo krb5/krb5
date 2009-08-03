@@ -24,3 +24,5 @@ $(PROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 
 clean::
 	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG) $(OBJS)
+
+depend:: kpasswd_strings.h

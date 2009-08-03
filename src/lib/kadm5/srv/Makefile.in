@@ -89,6 +89,8 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 install:: install-libs
 
+depend:: includes
+
 @lib_frag@
 @libobj_frag@
 

@@ -263,7 +263,7 @@ install-headers-unix install::
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 
-depend:: $(ETSRCS)
+depend:: $(ETSRCS) $(ETHDRS) $(GSSAPI_KRB5_HDR) error_map.h
 
 includes::  gssapi_krb5.h
 

@@ -242,7 +242,7 @@ TAGS:	et_name.c error_message.c compile_et.c error_table.c \
 	etags et_name.c error_message.c compile_et.c \
 		error_table.c init_et.c
 
-depend::  et_lex.lex.c
+depend::  et_lex.lex.c includes compile_et
 
 
 @lib_frag@

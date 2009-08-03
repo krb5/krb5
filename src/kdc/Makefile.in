@@ -54,7 +54,7 @@ RT_OBJS= rtest.o \
 	policy.o \
 	extern.o
 
-depend:: kdc5_err.c
+depend:: kdc5_err.c kdc5_err.h
 
 kdc5_err.c: kdc5_err.et
 
