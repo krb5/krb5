@@ -79,10 +79,10 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_cf2 \
 
 #	$(RUN_SETUP) $(VALGRIND) ./t_pkcs5
 
-t_nfold$(EXEEXT): t_nfold.$(OBJEXT) $(srcdir)/../krb/nfold$(DYNOBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) $(srcdir)/../krb/nfold$(DYNOBJEXT) $(SUPPORT_LIB)
+t_nfold$(EXEEXT): t_nfold.$(OBJEXT) ../krb/nfold$(DYNOBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) ../krb/nfold$(DYNOBJEXT) $(SUPPORT_LIB)
 
-t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(srcdir)/../krb/nfold$(DYNOBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
 
 t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
