@@ -120,7 +120,7 @@ t_cksum4: t_cksum4.o $(CRYTPO_DEPLIB)
 t_cksum5: t_cksum5.o $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_cksum5 t_cksum5.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
 
-t_crc: t_crc.o $(K5CRYPTO_LIB) $(SUPPORT_DEPLIB)
+t_crc: t_crc.o $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_crc.o $(K5CRYPTO_LIB) $(SUPPORT_LIB)
 
 aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
