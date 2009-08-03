@@ -56,7 +56,7 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_cf2 \
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
 	diff t_prf.output $(srcdir)/t_prf.expected
 	$(RUN_SETUP) $(VALGRIND) ./t_cf2 <$(srcdir)/t_cf2.in >t_cf2.output
-	diff t_cf2.output ./t_cf2.expected
+	diff t_cf2.output $(srcdir)/t_cf2.expected
 	$(RUN_SETUP) $(VALGRIND) ./t_cksum4 "this is a test"
 	$(RUN_SETUP) $(VALGRIND) ./t_cksum5 "this is a test"
 	$(RUN_SETUP) $(VALGRIND) ./t_crc
