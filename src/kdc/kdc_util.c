@@ -2057,9 +2057,9 @@ kdc_process_s4u2self_req(krb5_context context,
     *nprincs = 0;
     memset(princ, 0, sizeof(*princ));
 
-    pa_data = find_pa_data(request->padata, KRB5_PADATA_FOR_USER);
+    pa_data = find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER);
     if (pa_data == NULL)
-	pa_data = find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER);
+	pa_data = find_pa_data(request->padata, KRB5_PADATA_FOR_USER);
     if (pa_data == NULL)
 	return 0;
 
