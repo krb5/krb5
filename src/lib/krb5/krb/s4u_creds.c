@@ -269,16 +269,17 @@ build_pa_s4u_x509_user(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+#if 0
     /* [MS-SFU] 2.2.2: unusual to say the least, but enc_padata secures it */
     if (tgt->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC ||
         tgt->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
         cksumtype = CKSUMTYPE_RSA_MD4;
-    } else {
-        code = krb5int_c_mandatory_cksumtype(context, tgt->keyblock.enctype,
-                                             &cksumtype);
-        if (code != 0)
-            goto cleanup;
-    }
+    } else
+#endif
+    code = krb5int_c_mandatory_cksumtype(context, tgt->keyblock.enctype,
+                                         &cksumtype);
+    if (code != 0)
+        goto cleanup;
 
     code = krb5_c_make_checksum(context, cksumtype, &tgt->keyblock,
                                 KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST, data,
@@ -383,7 +384,9 @@ verify_s4u2self_reply(krb5_context context,
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES3_CBC_SHA1:
+    case ENCTYPE_DES3_CBC_RAW:
     case ENCTYPE_ARCFOUR_HMAC:
+    case ENCTYPE_ARCFOUR_HMAC_EXP :
         not_newer = TRUE;
         break;
     default:
@@ -393,12 +396,13 @@ verify_s4u2self_reply(krb5_context context,
 
     enc_s4u_padata = krb5int_find_pa_data(context, enc_padata, KRB5_PADATA_S4U_X509_USER);
 
+    /* XXX this will break newer enctypes with a MIT 1.7 KDC */
     rep_s4u_padata = krb5int_find_pa_data(context, rep_padata, KRB5_PADATA_S4U_X509_USER);
     if (rep_s4u_padata == NULL) {
         if (not_newer == FALSE || enc_s4u_padata != NULL)
             return KRB5_KDCREP_MODIFIED;
         else
-            return 0; /* XXX this should be a policy knob */
+            return 0;
     }
 
     data.length = rep_s4u_padata->length;
@@ -455,7 +459,11 @@ verify_s4u2self_reply(krb5_context context,
             code = KRB5_KDCREP_MODIFIED;
             goto cleanup;
         }
+    } else if (!krb5_c_is_keyed_cksum(rep_s4u_user->cksum.checksum_type)) {
+        code = KRB5KRB_AP_ERR_INAPP_CKSUM;
+        goto cleanup;
     }
+
 
 cleanup:
     krb5_free_pa_s4u_x509_user(context, req_s4u_user);
