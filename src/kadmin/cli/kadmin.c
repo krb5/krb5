@@ -72,7 +72,9 @@ static struct pflag flags[] = {
 {"allow_svr", 9,	KRB5_KDB_DISALLOW_SVR, 1},
 {"password_changing_service",	25,	KRB5_KDB_PWCHANGE_SERVICE,	0 },
 {"support_desmd5",	14,	KRB5_KDB_SUPPORT_DESMD5,	0 },
-{"ok_as_delegate",	14,	KRB5_KDB_OK_AS_DELEGATE,	0 }
+{"ok_as_delegate",	14,	KRB5_KDB_OK_AS_DELEGATE,	0 },
+{"ok_to_auth_as_delegate", 22,	KRB5_KDB_OK_TO_AUTH_AS_DELEGATE, 0 },
+{"no_auth_data_required", 21,	KRB5_KDB_NO_AUTH_DATA_REQUIRED, 0},
 };
 
 static char *prflags[] = {
@@ -97,6 +99,8 @@ static char *prflags[] = {
     "UNKNOWN_0x00040000",	/* 0x00040000 */
     "UNKNOWN_0x00080000",	/* 0x00080000 */
     "OK_AS_DELEGATE",		/* 0x00100000 */
+    "OK_TO_AUTH_AS_DELEGATE",	/* 0x00200000 */
+    "NO_AUTH_DATA_REQUIRED",	/* 0x00400000 */
 };
 
 char *getenv();
@@ -1123,7 +1127,7 @@ kadmin_addprinc_usage(func)
 	    "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
 	    "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
 	    "\t\trequires_hwauth needchange allow_svr password_changing_service\n"
-	    "\t\tok_as_delegate\n"
+	    "\t\tok_as_delegate ok_to_auth_as_delegate no_auth_data_required\n"
 	    "\nwhere,\n\t[-x db_princ_args]* - any number of database specific arguments.\n"
 	    "\t\t\tLook at each database documentation for supported arguments\n");
 }
@@ -1140,7 +1144,7 @@ kadmin_modprinc_usage(func)
 	    "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
 	    "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
 	    "\t\trequires_hwauth needchange allow_svr password_changing_service\n"
-	    "\t\tok_as_delegate\n"
+	    "\t\tok_as_delegate ok_to_auth_as_delegate no_auth_data_required\n"
 	    "\nwhere,\n\t[-x db_princ_args]* - any number of database specific arguments.\n"
 	    "\t\t\tLook at each database documentation for supported arguments\n"
 	);
