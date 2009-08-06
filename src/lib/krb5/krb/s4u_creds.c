@@ -574,6 +574,11 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
         assert(s4u_creds.server != NULL);
 
+        /*
+         * We need to rewrite the server realm, both so that libkrb5
+         * can locate the correct KDC, and so that the KDC accepts
+         * the response. This is unclear in the specification.
+         */
         krb5_free_data_contents(context, &s4u_creds.server->realm);
 
         code = krb5int_copy_data_contents(context,
