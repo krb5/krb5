@@ -486,7 +486,8 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 {
     krb5_error_code code;
     krb5_principal tgs = NULL;
-    krb5_creds tgtq, s4u_creds, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
+    krb5_creds tgtq, s4u_creds, *tgt = NULL, *tgtptr;
+    krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_pa_data **in_padata = NULL;
     krb5_pa_data **out_padata = NULL;
     krb5_pa_data **enc_padata = NULL;
@@ -496,7 +497,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     memset(&tgtq, 0, sizeof(tgtq));
     memset(&s4u_creds, 0, sizeof(s4u_creds));
     memset(referral_tgts, 0, sizeof(referral_tgts));
-    tgtptr = NULL;
     *out_creds = NULL;
 
     memset(&userid, 0, sizeof(userid));
@@ -527,9 +527,11 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     tgtq.server = tgs;
 
     code = krb5_get_cred_from_kdc_opt(context, ccache, &tgtq,
-                                      &tgtptr, tgts, kdcopt);
+                                      &tgt, tgts, kdcopt);
     if (code != 0)
         goto cleanup;
+
+    tgtptr = tgt;
 
     code = krb5int_copy_creds_contents(context, in_creds, &s4u_creds);
     if (code != 0)
@@ -569,6 +571,16 @@ krb5_get_self_cred_from_kdc(krb5_context context,
             krb5_free_pa_data(context, enc_padata);
             enc_padata = NULL;
         }
+
+        assert(s4u_creds.server != NULL);
+
+        krb5_free_data_contents(context, &s4u_creds.server->realm);
+
+        code = krb5int_copy_data_contents(context,
+                                          &tgtptr->server->data[1],
+                                          &s4u_creds.server->realm);
+        if (code != 0)
+            goto cleanup;
 
         code = krb5_get_cred_via_tkt_ext(context, tgtptr,
                                          KDC_OPT_CANONICALIZE |
@@ -647,6 +659,7 @@ cleanup:
         } else
             i = 0;
 
+        /* storing the first referral only mirrors krb5_get_cred_from_kdc_opt() */
         tgts2 = (krb5_creds **)realloc(*tgts, (i + 2) * sizeof(krb5_creds *));
         tgts2[i] = referral_tgts[0];
         referral_tgts[0] = NULL;
@@ -662,8 +675,8 @@ cleanup:
     }
     if (tgs != NULL)
         krb5_free_principal(context, tgs);
-    if (tgtptr != NULL)
-        krb5_free_creds(context, tgtptr);
+    if (tgt != NULL)
+        krb5_free_creds(context, tgt);
     if (in_padata != NULL)
         krb5_free_pa_data(context, in_padata);
     if (out_padata != NULL)
@@ -726,7 +739,7 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
         int i = 0;
         krb5_error_code rv2;
 
-        while (tgts[i]) {
+        while (tgts[i] != NULL) {
             if ((rv2 = krb5_cc_store_cred(context, ccache, tgts[i]))) {
                 code = rv2;
                 break;
@@ -774,11 +787,6 @@ krb5_get_proxy_cred_from_kdc(krb5_context context,
 
     if (in_creds == NULL || (kdcopt & KDC_OPT_ENC_TKT_IN_SKEY)) {
         code = EINVAL;
-        goto cleanup;
-    }
-
-    if (!krb5_realm_compare(context, in_creds->client, in_creds->server)) {
-        code = KRB5_IN_TKT_REALM_MISMATCH; /* XXX */
         goto cleanup;
     }
 

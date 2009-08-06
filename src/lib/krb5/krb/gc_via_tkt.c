@@ -202,15 +202,8 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     if (second_tkt && !in_cred->second_ticket.length)
         return(KRB5_NO_2ND_TKT);
 
-    /* XXX some abstraction violating S4U2Self validation */
-    if (in_padata != NULL &&
-	(krb5int_find_pa_data(context, in_padata, KRB5_PADATA_S4U_X509_USER) ||
-	 krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FOR_USER))) {
-	if (!krb5_principal_compare(context, in_cred->client, in_cred->server))
-	    return KRB5_PRINC_NOMATCH;
-
-	s4u2self = TRUE;
-    }
+    s4u2self = krb5int_find_pa_data(context, in_padata, KRB5_PADATA_S4U_X509_USER) ||
+	       krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FOR_USER);
 
     /* check if we have the right TGT                    */
     /* tkt->server must be equal to                      */
