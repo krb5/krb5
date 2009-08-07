@@ -427,14 +427,11 @@ verify_s4u2self_reply(krb5_context context,
             code = KRB5_KDCREP_MODIFIED;
             goto cleanup;
         }
-    }
-#if 0
-    /* We never seem to see this? */
-    else if (!krb5_c_is_keyed_cksum(rep_s4u_user->cksum.checksum_type)) {
+    } else if (not_newer == FALSE && /* XXX this should be removed */
+        !krb5_c_is_keyed_cksum(rep_s4u_user->cksum.checksum_type)) {
         code = KRB5KRB_AP_ERR_INAPP_CKSUM;
         goto cleanup;
     }
-#endif
 
 cleanup:
     krb5_free_pa_s4u_x509_user(context, rep_s4u_user);
