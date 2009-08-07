@@ -883,7 +883,8 @@ difftm(a, b)
 
 /* For get_date extern declaration compatibility check... yuck.  */
 #include <krb5.h>
-#include "kadmin.h"
+
+time_t get_date(char *);
 
 time_t
 get_date(p)
