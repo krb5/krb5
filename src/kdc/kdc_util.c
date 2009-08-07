@@ -1865,8 +1865,15 @@ verify_s4u_x509_user_checksum(krb5_context context,
     krb5_data			*data;
     krb5_boolean		valid = FALSE;
 
-    if (!krb5_c_is_keyed_cksum(req->cksum.checksum_type))
-	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+    switch (key->enctype) {
+    case ENCTYPE_ARCFOUR_HMAC:
+    case ENCTYPE_ARCFOUR_HMAC_EXP:
+	break;
+    default:
+	if (!krb5_c_is_keyed_cksum(req->cksum.checksum_type))
+	    return KRB5KRB_AP_ERR_INAPP_CKSUM;
+	break;
+    }
 
     if (req->user_id.nonce != kdc_req_nonce)
 	return KRB5KRB_AP_ERR_MODIFIED;
@@ -1892,7 +1899,8 @@ verify_s4u_x509_user_checksum(krb5_context context,
 
 krb5_error_code
 kdc_process_s4u2self_rep(krb5_context context,
-			 krb5_keyblock *key,
+			 krb5_keyblock *tgs_subkey,
+			 krb5_keyblock *tgs_session,
 			 krb5_pa_s4u_x509_user *req_s4u_user,
 			 krb5_kdc_rep *reply,
 			 krb5_enc_kdc_rep_part *reply_encpart)
@@ -1901,7 +1909,7 @@ kdc_process_s4u2self_rep(krb5_context context,
     krb5_data			*data = NULL;
     krb5_pa_s4u_x509_user	rep_s4u_user;
     krb5_pa_data		padata;
-    krb5_cksumtype		cksumtype;
+    krb5_enctype		enctype;
     krb5_keyusage		usage;
 
     memset(&rep_s4u_user, 0, sizeof(rep_s4u_user));
@@ -1915,24 +1923,18 @@ kdc_process_s4u2self_rep(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-#if 0
-    /* [MS-SFU] 2.2.2: unusual to say the least, but enc_padata secures it */
-    if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
-        key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-        cksumtype = CKSUMTYPE_RSA_MD4;
-    } else
-#endif
-    code = krb5int_c_mandatory_cksumtype(context, key->enctype,
-                                         &cksumtype);
-    if (code != 0)
-        goto cleanup;
+    if (tgs_subkey != NULL)
+	enctype = tgs_subkey->enctype;
+    else
+	enctype = tgs_session->enctype;
 
     if (req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE)
         usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY;
     else
         usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST;
 
-    code = krb5_c_make_checksum(context, cksumtype, key,
+    code = krb5_c_make_checksum(context, req_s4u_user->cksum.checksum_type,
+				tgs_subkey != NULL ? tgs_subkey : tgs_session,
                                 usage, data,
                                 &rep_s4u_user.cksum);
     if (code != 0)
@@ -1957,7 +1959,7 @@ kdc_process_s4u2self_rep(krb5_context context,
     free(data);
     data = NULL;
 
-    if (!enctype_requires_etype_info_2(key->enctype)) {
+    if (!enctype_requires_etype_info_2(enctype)) {
 	padata.length = req_s4u_user->cksum.length + rep_s4u_user.cksum.length;
 	padata.contents = (krb5_octet *)malloc(padata.length);
 	if (padata.contents == NULL) {
@@ -2042,7 +2044,8 @@ kdc_process_s4u2self_req(krb5_context context,
 			 krb5_kdc_req *request,
 			 krb5_const_principal client_princ,
 			 const krb5_db_entry *server,
-			 krb5_keyblock *subkey,
+			 krb5_keyblock *tgs_subkey,
+			 krb5_keyblock *tgs_session,
 			 krb5_timestamp kdc_time,
 			 krb5_pa_s4u_x509_user **s4u_x509_user,
 			 krb5_db_entry *princ,
@@ -2073,7 +2076,8 @@ kdc_process_s4u2self_req(krb5_context context,
 	if (code)
 	    return code;
 
-	code = verify_s4u_x509_user_checksum(context, subkey,
+	code = verify_s4u_x509_user_checksum(context,
+					     tgs_subkey ? tgs_subkey : tgs_session,
 					     request->nonce, *s4u_x509_user);
 	if (code) {
 	    *status = "INVALID_S4U2SELF_CHECKSUM";
@@ -2096,7 +2100,7 @@ kdc_process_s4u2self_req(krb5_context context,
 	if (code)
 	    return code;
 
-	code = verify_for_user_checksum(context, subkey, for_user);
+	code = verify_for_user_checksum(context, tgs_session, for_user);
 	if (code) {
 	    *status = "INVALID_S4U2SELF_CHECKSUM";
 	    krb5_free_pa_for_user(kdc_context, for_user);
@@ -2491,9 +2495,7 @@ enctype_requires_etype_info_2(krb5_enctype enctype)
     case ENCTYPE_ARCFOUR_HMAC_EXP :
 	return 0;
     default:
-	if (krb5_c_valid_enctype(enctype))
-	    return 1;
-	else return 0;
+	return krb5_c_valid_enctype(enctype);
     }
 }
 

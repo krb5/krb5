@@ -247,7 +247,8 @@ krb5_error_code kdc_process_s4u2self_req
 		krb5_kdc_req *request,
 		krb5_const_principal client_princ,
 		const krb5_db_entry *server,
-		krb5_keyblock *subkey,
+		krb5_keyblock *tgs_subkey,
+		krb5_keyblock *tgs_session,
 		krb5_timestamp kdc_time,
 		krb5_pa_s4u_x509_user **s4u2self_req,
 		krb5_db_entry *princ,
@@ -256,7 +257,8 @@ krb5_error_code kdc_process_s4u2self_req
 
 krb5_error_code kdc_process_s4u2self_rep
 	(krb5_context context,
-		krb5_keyblock *key,
+		krb5_keyblock *tgs_subkey,
+		krb5_keyblock *tgs_session,
 		krb5_pa_s4u_x509_user *req_s4u_user,
 		krb5_kdc_rep *reply,
 		krb5_enc_kdc_rep_part *reply_encpart);
