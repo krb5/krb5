@@ -721,11 +721,12 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 
     if (tgts != NULL) {
         int i = 0;
-        krb5_error_code rv2;
+        krb5_error_code code2;
 
         while (tgts[i] != NULL) {
-            if ((rv2 = krb5_cc_store_cred(context, ccache, tgts[i]))) {
-                code = rv2;
+            code2 = krb5_cc_store_cred(context, ccache, tgts[i]);
+            if (code2 != 0) {
+                code = code2;
                 break;
             }
             i++;
@@ -889,11 +890,12 @@ krb5_get_credentials_for_proxy(krb5_context context,
 
     if (tgts != NULL) {
         int i = 0;
-        krb5_error_code rv2;
+        krb5_error_code code2;
 
-        while (tgts[i]) {
-            if ((rv2 = krb5_cc_store_cred(context, ccache, tgts[i]))) {
-                code = rv2;
+        while (tgts[i] != NULL) {
+            code2 = krb5_cc_store_cred(context, ccache, tgts[i]);
+            if (code2 != 0) {
+                code = code2;
                 break;
             }
             i++;
