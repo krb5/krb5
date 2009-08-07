@@ -570,24 +570,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         if (code != 0)
             goto cleanup;
 
-#if 0
-        {
-            char *p = NULL;
-            krb5_unparse_name(context, s4u_user.user_id.user, &p);
-            fprintf(stderr, "S4U: %s\n", p);
-            free(p);
-            krb5_unparse_name(context, s4u_creds.client, &p);
-            fprintf(stderr, "C  : %s\n", p);
-            free(p);
-            krb5_unparse_name(context, s4u_creds.server, &p);
-            fprintf(stderr, "S  : %s\n", p);
-            free(p);
-            krb5_unparse_name(context, tgtptr->server, &p);
-            fprintf(stderr, "TGS: %s\n", p);
-            free(p);
-        }
-#endif
-
         code = krb5_get_cred_via_tkt_ext(context, tgtptr,
                                          KDC_OPT_CANONICALIZE |
                                          FLAGS2OPTS(tgtptr->ticket_flags) |
