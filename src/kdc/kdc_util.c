@@ -1915,18 +1915,13 @@ kdc_process_s4u2self_rep(krb5_context context,
     memset(&rep_s4u_user, 0, sizeof(rep_s4u_user));
 
     rep_s4u_user.user_id.nonce   = reply_encpart->nonce;
-    rep_s4u_user.user_id.user    = req_s4u_user->user_id.user; /* XXX canon? */
+    rep_s4u_user.user_id.user    = req_s4u_user->user_id.user;
     rep_s4u_user.user_id.options = req_s4u_user->user_id.options &
-	( KRB5_S4U_OPTS_CHECK_LOGON_HOURS | KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE);
+	(KRB5_S4U_OPTS_CHECK_LOGON_HOURS | KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE);
 
     code = encode_krb5_s4u_userid(&rep_s4u_user.user_id, &data);
     if (code != 0)
         goto cleanup;
-
-    if (tgs_subkey != NULL)
-	enctype = tgs_subkey->enctype;
-    else
-	enctype = tgs_session->enctype;
 
     if (req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE)
         usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY;
@@ -1958,6 +1953,11 @@ kdc_process_s4u2self_rep(krb5_context context,
 
     free(data);
     data = NULL;
+
+    if (tgs_subkey != NULL)
+	enctype = tgs_subkey->enctype;
+    else
+	enctype = tgs_session->enctype;
 
     if (!enctype_requires_etype_info_2(enctype)) {
 	padata.length = req_s4u_user->cksum.length + rep_s4u_user.cksum.length;
@@ -2086,7 +2086,7 @@ kdc_process_s4u2self_req(krb5_context context,
 	    return code;
 	}
 
-	if ((*s4u_x509_user)->user_id.user == NULL ||
+	if (krb5_princ_size(context, (*s4u_x509_user)->user_id.user) == 0 ||
 	    (*s4u_x509_user)->user_id.subject_cert.length != 0) {
 	    *status = "INVALID_S4U2SELF_REQUEST";
 	    krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
