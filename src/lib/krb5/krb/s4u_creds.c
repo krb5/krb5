@@ -467,7 +467,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     memset(&s4u_user, 0, sizeof(s4u_user));
 
-    s4u_user.user_id.nonce = 0;
     if (in_creds->client != NULL && krb5_princ_size(context, in_creds->client)) {
         if (krb5_princ_type(context, in_creds->client) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
             code = krb5_build_principal_ext(context, &s4u_user.user_id.user,
