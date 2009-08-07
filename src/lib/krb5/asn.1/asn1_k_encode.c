@@ -1148,16 +1148,27 @@ static const struct field_info pa_for_user_fields[] = {
 DEFSEQTYPE(pa_for_user, krb5_pa_for_user, pa_for_user_fields, 0);
 
 /* [MS-SFU] Section 2.2.2. */
-/* XXX tags 1, 3, 4 should be optional but they don't seem to encode at all? */
 static const struct field_info s4u_userid_fields[] = {
     FIELDOF_NORM(krb5_s4u_userid, int32, nonce, 0),
-    FIELDOF_NORM(krb5_s4u_userid, principal, user, 1),
+    FIELDOF_OPT(krb5_s4u_userid, principal, user, 1, 1),
     FIELDOF_NORM(krb5_s4u_userid, realm_of_principal, user, 2),
     FIELDOF_OPT(krb5_s4u_userid, ostring_data, subject_cert, 3, 3),
-    FIELDOF_NORM(krb5_s4u_userid, krb5_flags, options, 4),
+    FIELDOF_OPT(krb5_s4u_userid, krb5_flags, options, 4, 4),
 };
 
-DEFSEQTYPE(s4u_userid, krb5_s4u_userid, s4u_userid_fields, 0);
+static unsigned int s4u_userid_optional (const void *p) {
+    const krb5_s4u_userid *val = p;
+    unsigned int optional = 0;
+    if (val->user != NULL && val->user->length != 0)
+        optional |= (1u)<<1;
+    if (val->subject_cert.length != 0)
+        optional |= (1u)<<3;
+    if (val->options != 0)
+        optional |= (1u)<<4;
+    return optional;
+}
+
+DEFSEQTYPE(s4u_userid, krb5_s4u_userid, s4u_userid_fields, s4u_userid_optional);
 
 static const struct field_info pa_s4u_x509_user_fields[] = {
     FIELDOF_NORM(krb5_pa_s4u_x509_user, s4u_userid, user_id, 0),
