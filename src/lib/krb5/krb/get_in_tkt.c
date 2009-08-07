@@ -571,7 +571,7 @@ krb5_get_in_tkt(krb5_context context,
     int			referral_count = 0;
     krb5_principal_data	referred_client;
     krb5_principal	referred_server = NULL;
-    krb5_boolean	is_local_realm;
+    krb5_boolean	is_tgt_req;
 
 #if APPLE_PKINIT
     inTktDebug("krb5_get_in_tkt top\n");
@@ -667,7 +667,7 @@ krb5_get_in_tkt(krb5_context context,
 	    goto cleanup;
     }
 	    
-    is_local_realm = tgt_is_local_realm(creds);
+    is_tgt_req = tgt_is_local_realm(creds);
 
     while (1) {
 	if (loopcount++ > MAX_IN_TKT_LOOPS) {
@@ -749,7 +749,7 @@ krb5_get_in_tkt(krb5_context context,
 		retval = rewrite_server_realm(context,
 					      creds->server,
 					      &referred_client.realm,
-					      is_local_realm,
+					      is_tgt_req,
 					      &referred_server);
 		if (retval)
 		    goto cleanup;
