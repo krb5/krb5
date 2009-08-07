@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/gc_via_tgt.c
  *
- * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007-2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -161,20 +161,24 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 {
     return krb5_get_cred_via_tkt_ext (context, tkt,
 				      kdcoptions, address,
-				      0,
-				      NULL, in_cred,
-				      NULL, NULL, out_cred);
+				      NULL, in_cred, NULL, NULL,
+				      NULL, NULL, out_cred, NULL);
 }
 
 krb5_error_code
 krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 			   krb5_flags kdcoptions, krb5_address *const *address,
-			   krb5_int32 nonce,
 			   krb5_pa_data **in_padata,
 			   krb5_creds *in_cred,
+			   krb5_error_code (*gcvt_fct)(krb5_context,
+						       krb5_keyblock *,
+						       krb5_kdc_req *,
+						       void *),
+			   void *gcvt_data,
 			   krb5_pa_data ***out_padata,
 			   krb5_pa_data ***out_enc_padata,
-			   krb5_creds **out_cred)
+			   krb5_creds **out_cred,
+			   krb5_keyblock **out_subkey)
 {
     krb5_error_code retval;
     krb5_kdc_rep *dec_rep;
@@ -236,7 +240,7 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 			   in_cred->server, address, in_cred->authdata,
 			   in_padata,
 			   second_tkt ? &in_cred->second_ticket : NULL,
-			   tkt, nonce, &tgsrep, &subkey);
+			   tkt, gcvt_fct, gcvt_data, &tgsrep, &subkey);
     if (enctypes)
 	free(enctypes);
     if (retval) {
@@ -399,8 +403,12 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 			       &in_cred->second_ticket,  out_cred);
 
 error_3:;
-    if (subkey != NULL)
-      krb5_free_keyblock(context, subkey);
+    if (subkey != NULL) {
+      if (retval == 0 && out_subkey != NULL)
+	  *out_subkey = subkey;
+      else
+	  krb5_free_keyblock(context, subkey);
+    }
     
     memset(dec_rep->enc_part2->session->contents, 0,
 	   dec_rep->enc_part2->session->length);

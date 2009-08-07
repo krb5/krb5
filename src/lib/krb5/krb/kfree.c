@@ -169,8 +169,10 @@ krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val)
 {
     if (val == NULL)
 	return;
-    free(val->contents);
-    val->contents = 0;
+    if (val->contents) {
+	free(val->contents);
+	val->contents = 0;
+    }
 }
 
 void KRB5_CALLCONV

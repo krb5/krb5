@@ -73,12 +73,17 @@ krb5_get_credentials_core(krb5_context context, krb5_flags options,
 krb5_error_code
 krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 			   krb5_flags kdcoptions, krb5_address *const *address,
-			   krb5_int32 nonce,
 			   krb5_pa_data **in_padata,
 			   krb5_creds *in_cred,
+			   krb5_error_code (*gcvt_fct)(krb5_context,
+						       krb5_keyblock *,
+						       krb5_kdc_req *,
+						       void *),
+			   void *gcvt_data,
 			   krb5_pa_data ***out_padata,
 			   krb5_pa_data ***enc_padata,
-			   krb5_creds **out_cred);
+			   krb5_creds **out_cred,
+			   krb5_keyblock **out_subkey);
 
 #endif /* KRB5_INT_FUNC_PROTO__ */
 
