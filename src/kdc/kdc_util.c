@@ -1959,7 +1959,8 @@ kdc_process_s4u2self_rep(krb5_context context,
     else
 	enctype = tgs_session->enctype;
 
-    if (!enctype_requires_etype_info_2(enctype)) {
+    if ((req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) &&
+	enctype_requires_etype_info_2(enctype) == FALSE) {
 	padata.length = req_s4u_user->cksum.length + rep_s4u_user.cksum.length;
 	padata.contents = (krb5_octet *)malloc(padata.length);
 	if (padata.contents == NULL) {

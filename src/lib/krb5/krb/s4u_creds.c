@@ -401,6 +401,12 @@ verify_s4u2self_reply(krb5_context context,
     else
         usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST;
 
+    if (!not_newer &&
+        !krb5_c_is_keyed_cksum(rep_s4u_user->cksum.checksum_type)) {
+        code = KRB5KRB_AP_ERR_INAPP_CKSUM;
+        goto cleanup;
+    }
+
     code = krb5_c_verify_checksum(context, subkey, usage, datap,
                                   &rep_s4u_user->cksum, &valid);
     if (code != 0)
@@ -410,7 +416,17 @@ verify_s4u2self_reply(krb5_context context,
         goto cleanup;
     }
 
-    if (enc_s4u_padata != NULL) {
+    /*
+     * KDCs that support KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE also return
+     * S4U enc_padata for older (pre-AES) encryption types only.
+     */
+    if (not_newer &&
+        (rep_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE)) {
+        if (enc_s4u_padata == NULL) {
+            code = KRB5_KDCREP_MODIFIED;
+            goto cleanup;
+        }
+
         /*
          * According to the terribly written specification, the value of
          * the padata here is the concatenated checksums. Presumably
@@ -427,10 +443,6 @@ verify_s4u2self_reply(krb5_context context,
             code = KRB5_KDCREP_MODIFIED;
             goto cleanup;
         }
-    } else if (not_newer == FALSE && /* XXX this should be removed */
-        !krb5_c_is_keyed_cksum(rep_s4u_user->cksum.checksum_type)) {
-        code = KRB5KRB_AP_ERR_INAPP_CKSUM;
-        goto cleanup;
     }
 
 cleanup:
