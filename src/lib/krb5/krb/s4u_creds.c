@@ -401,12 +401,6 @@ verify_s4u2self_reply(krb5_context context,
     else
         usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST;
 
-    if (!not_newer &&
-        !krb5_c_is_keyed_cksum(rep_s4u_user->cksum.checksum_type)) {
-        code = KRB5KRB_AP_ERR_INAPP_CKSUM;
-        goto cleanup;
-    }
-
     code = krb5_c_verify_checksum(context, subkey, usage, datap,
                                   &rep_s4u_user->cksum, &valid);
     if (code != 0)
@@ -420,29 +414,28 @@ verify_s4u2self_reply(krb5_context context,
      * KDCs that support KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE also return
      * S4U enc_padata for older (pre-AES) encryption types only.
      */
-    if (not_newer &&
-        (rep_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE)) {
+    if (not_newer) {
         if (enc_s4u_padata == NULL) {
-            code = KRB5_KDCREP_MODIFIED;
-            goto cleanup;
+            if (rep_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) {
+                code = KRB5_KDCREP_MODIFIED;
+                goto cleanup;
+            }
+        } else {
+            if (enc_s4u_padata->length != req_s4u_user->cksum.length + rep_s4u_user->cksum.length) {
+                code = KRB5_KDCREP_MODIFIED;
+                goto cleanup;
+            }
+            if (memcmp(enc_s4u_padata->contents,
+                       req_s4u_user->cksum.contents, req_s4u_user->cksum.length) ||
+                memcmp(&enc_s4u_padata->contents[req_s4u_user->cksum.length],
+                       rep_s4u_user->cksum.contents, rep_s4u_user->cksum.length)) {
+                code = KRB5_KDCREP_MODIFIED;
+                goto cleanup;
+            }
         }
-
-        /*
-         * According to the terribly written specification, the value of
-         * the padata here is the concatenated checksums. Presumably
-         * this is to avoid a downgrade attack.
-         */
-        if (enc_s4u_padata->length != req_s4u_user->cksum.length + rep_s4u_user->cksum.length) {
-            code = KRB5_KDCREP_MODIFIED;
-            goto cleanup;
-        }
-        if (memcmp(enc_s4u_padata->contents,
-                   req_s4u_user->cksum.contents, req_s4u_user->cksum.length) ||
-            memcmp(&enc_s4u_padata->contents[req_s4u_user->cksum.length],
-                   rep_s4u_user->cksum.contents, rep_s4u_user->cksum.length)) {
-            code = KRB5_KDCREP_MODIFIED;
-            goto cleanup;
-        }
+    } else if (!krb5_c_is_keyed_cksum(rep_s4u_user->cksum.checksum_type)) {
+        code = KRB5KRB_AP_ERR_INAPP_CKSUM;
+        goto cleanup;
     }
 
 cleanup:
