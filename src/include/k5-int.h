@@ -2630,7 +2630,11 @@ krb5_error_code krb5int_send_tgs
 		krb5_pa_data * const *,
 		const krb5_data *,
 		krb5_creds *,
-		krb5_int32,
+		krb5_error_code (*gcvt_fct)(krb5_context,
+					    krb5_keyblock *,
+					    krb5_kdc_req *,
+					    void *),
+		void *gcvt_data,
 		krb5_response * , krb5_keyblock **subkey);
                 /* The subkey field is an output parameter; if a
 		 * tgs-rep is received then the subkey will be filled
