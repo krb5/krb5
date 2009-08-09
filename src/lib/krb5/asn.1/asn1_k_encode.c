@@ -263,6 +263,8 @@ static unsigned int optional_enc_kdc_rep_part(const void *p)
         optional |= (1u << 8);
     if (val->caddrs != NULL && val->caddrs[0] != NULL)
         optional |= (1u << 11);
+    if (val->enc_padata != NULL)
+        optional |= (1u << 12);
 
     return optional;
 }
