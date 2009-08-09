@@ -1914,7 +1914,7 @@ kdc_process_s4u2self_rep(krb5_context context,
 
     memset(&rep_s4u_user, 0, sizeof(rep_s4u_user));
 
-    rep_s4u_user.user_id.nonce   = reply_encpart->nonce;
+    rep_s4u_user.user_id.nonce   = req_s4u_user->user_id.nonce;
     rep_s4u_user.user_id.user    = req_s4u_user->user_id.user;
     rep_s4u_user.user_id.options = req_s4u_user->user_id.options &
 	(KRB5_S4U_OPTS_CHECK_LOGON_HOURS | KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE);

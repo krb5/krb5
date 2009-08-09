@@ -703,20 +703,6 @@ tgt_again:
         }
     }
 
-    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-	find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER) != NULL) {
-	errcode = kdc_process_s4u2self_rep(kdc_context,
-					   subkey,
-					   header_ticket->enc_part2->session,
-					   s4u_x509_user,
-					   &reply,
-					   &reply_encpart);
-        if (errcode) {
-            status = "KDC_RETURN_S4U2SELF_PADATA";
-            goto cleanup;
-        }
-    }
-
     enc_tkt_reply.session = &session_key;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
@@ -859,6 +845,20 @@ tgt_again:
     /* Start assembling the response */
     reply.msg_type = KRB5_TGS_REP;
     reply.padata = 0;/* always */
+    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
+	find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER) != NULL) {
+	errcode = kdc_process_s4u2self_rep(kdc_context,
+					   subkey,
+					   header_ticket->enc_part2->session,
+					   s4u_x509_user,
+					   &reply,
+					   &reply_encpart);
+        if (errcode) {
+            status = "KDC_RETURN_S4U2SELF_PADATA";
+            goto cleanup;
+        }
+    }
+
     reply.client = enc_tkt_reply.client;
     reply.enc_part.kvno = 0;/* We are using the session key */
     reply.ticket = &ticket_reply;
