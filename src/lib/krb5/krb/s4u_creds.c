@@ -64,7 +64,7 @@ s4u_identify_user(krb5_context context,
     krb5_error_code code;
     krb5_preauthtype ptypes[1] = { KRB5_PADATA_S4U_X509_USER };
     krb5_creds creds;
-    int i, use_master = 0;
+    int use_master = 0;
     krb5_get_init_creds_opt *opts = NULL;
     krb5_gic_opt_ext *opte = NULL;
     krb5_principal_data client_data;
@@ -89,7 +89,6 @@ s4u_identify_user(krb5_context context,
     if (subject_cert != NULL)
         userid.subject_cert = *subject_cert;
 
-    i = 0;
     code = krb5_get_init_creds_opt_alloc(context, &opts);
     if (code != 0)
         goto cleanup;
