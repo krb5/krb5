@@ -259,6 +259,7 @@ static void do_v5_kvno (int count, char *names[],
 						&in_creds, NULL, &out_creds);
 	} else {
 	    in_creds.client = me;
+	    in_creds.server = server;
 	    ret = krb5_get_credentials(context, options, ccache,
 				       &in_creds, &out_creds);
 	}
