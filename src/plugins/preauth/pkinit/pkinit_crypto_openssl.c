@@ -1761,6 +1761,9 @@ crypto_retrieve_X509_sans(krb5_context context,
 		} else if (upns != NULL
 			   && OBJ_cmp(plgctx->id_ms_san_upn,
 				      gen->d.otherName->type_id) == 0) {
+		    /* Prevent abuse of embedded null characters. */
+		    if (memchr(name.data, '\0', name.length))
+			break;
 		    ret = krb5_parse_name(context, name.data, &upns[u]);
 		    if (ret) {
 			pkiDebug("%s: failed parsing ms-upn san value\n",
@@ -1778,6 +1781,10 @@ crypto_retrieve_X509_sans(krb5_context context,
 		break;
 	    case GEN_DNS:
 		if (dnss != NULL) {
+		    /* Prevent abuse of embedded null characters. */
+		    if (memchr(gen->d.dNSName->data, '\0',
+			       gen->d.dNSName->length))
+			break;
 		    pkiDebug("%s: found dns name = %s\n",
 			     __FUNCTION__, gen->d.dNSName->data);
 		    dnss[d] = (unsigned char *)
