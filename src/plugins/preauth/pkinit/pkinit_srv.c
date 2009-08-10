@@ -38,60 +38,14 @@
 /* Remove when FAST PKINIT is settled. */
 #include "../fast_factor.h"
 
-static krb5_error_code
-pkinit_server_get_edata(krb5_context context,
-			krb5_kdc_req * request,
-			struct _krb5_db_entry_new * client,
-			struct _krb5_db_entry_new * server,
-			preauth_get_entry_data_proc server_get_entry_data,
-			void *pa_plugin_context,
-			krb5_pa_data * data);
-
-static krb5_error_code
-pkinit_server_verify_padata(krb5_context context,
-			    struct _krb5_db_entry_new * client,
-			    krb5_data *req_pkt,
-			    krb5_kdc_req * request,
-			    krb5_enc_tkt_part * enc_tkt_reply,
-			    krb5_pa_data * data,
-			    preauth_get_entry_data_proc server_get_entry_data,
-			    void *pa_plugin_context,
-			    void **pa_request_context,
-			    krb5_data **e_data,
-			    krb5_authdata ***authz_data);
-
-static krb5_error_code
-pkinit_server_return_padata(krb5_context context,
-			    krb5_pa_data * padata,
-			    struct _krb5_db_entry_new * client,
-			    krb5_data *req_pkt,
-			    krb5_kdc_req * request,
-			    krb5_kdc_rep * reply,
-			    struct _krb5_key_data * client_key,
-			    krb5_keyblock * encrypting_key,
-			    krb5_pa_data ** send_pa,
-			    preauth_get_entry_data_proc server_get_entry_data,
-			    void *pa_plugin_context,
-			    void **pa_request_context);
-
-static int pkinit_server_get_flags
-	(krb5_context kcontext, krb5_preauthtype patype);
-
 static krb5_error_code pkinit_init_kdc_req_context
 	(krb5_context, void **blob);
 
 static void pkinit_fini_kdc_req_context
 	(krb5_context context, void *blob);
 
-static int pkinit_server_plugin_init_realm
-	(krb5_context context, const char *realmname,
-	 pkinit_kdc_context *pplgctx);
-
 static void pkinit_server_plugin_fini_realm
 	(krb5_context context, pkinit_kdc_context plgctx);
-
-static int pkinit_server_plugin_init
-	(krb5_context context, void **blob, const char **realmnames);
 
 static void pkinit_server_plugin_fini
 	(krb5_context context, void *blob);

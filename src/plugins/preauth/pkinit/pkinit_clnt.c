@@ -58,67 +58,22 @@
 int longhorn = 0;	/* Talking to a Longhorn server? */
 #endif
 
-krb5_error_code pkinit_client_process
-	(krb5_context context, void *plugin_context, void *request_context,
-		krb5_get_init_creds_opt *gic_opt,
-		preauth_get_client_data_proc get_data_proc,
-		struct _krb5_preauth_client_rock *rock,
-		krb5_kdc_req * request, krb5_data *encoded_request_body,
-		krb5_data *encoded_previous_request, krb5_pa_data *in_padata,
-		krb5_prompter_fct prompter, void *prompter_data,
-		preauth_get_as_key_proc gak_fct, void *gak_data,
-		krb5_data * salt, krb5_data * s2kparams,
-		krb5_keyblock * as_key, krb5_pa_data *** out_padata);
-
-krb5_error_code pkinit_client_tryagain
-	(krb5_context context, void *plugin_context, void *request_context,
-		krb5_get_init_creds_opt *gic_opt,
-		preauth_get_client_data_proc get_data_proc,
-		struct _krb5_preauth_client_rock *rock,
-		krb5_kdc_req * request, krb5_data *encoded_request_body,
-		krb5_data *encoded_previous_request,
-		krb5_pa_data *in_padata, krb5_error *err_reply,
-		krb5_prompter_fct prompter, void *prompter_data,
-		preauth_get_as_key_proc gak_fct, void *gak_data,
-		krb5_data * salt, krb5_data * s2kparams,
-		krb5_keyblock * as_key, krb5_pa_data *** out_padata);
-
-void pkinit_client_req_init
-	(krb5_context contex, void *plugin_context, void **request_context);
-
-void pkinit_client_req_fini
-	(krb5_context context, void *plugin_context, void *request_context);
-
-krb5_error_code pa_pkinit_gen_req
-	(krb5_context context, pkinit_context plgctx,
-		pkinit_req_context reqctx, krb5_kdc_req * request,
-		krb5_pa_data * in_padata, krb5_pa_data *** out_padata,
-		krb5_prompter_fct prompter, void *prompter_data,
-		krb5_get_init_creds_opt *gic_opt);
-
-krb5_error_code pkinit_as_req_create
+static krb5_error_code pkinit_as_req_create
 	(krb5_context context, pkinit_context plgctx,
 		pkinit_req_context reqctx, krb5_timestamp ctsec,
 		krb5_int32 cusec, krb5_ui_4 nonce,
 		const krb5_checksum * cksum, krb5_principal server,
 		krb5_data ** as_req);
 
-krb5_error_code pkinit_as_rep_parse
+static krb5_error_code pkinit_as_rep_parse
 	(krb5_context context, pkinit_context plgctx,
 		pkinit_req_context reqctx, krb5_preauthtype pa_type,
 		krb5_kdc_req * request, const krb5_data * as_rep,
 		krb5_keyblock * key_block, krb5_enctype etype, krb5_data *);
 
-krb5_error_code pa_pkinit_parse_rep
-	(krb5_context context, pkinit_context plgctx,
-		pkinit_req_context reqcxt, krb5_kdc_req * request,
-		krb5_pa_data * in_padata, krb5_enctype etype,
-		krb5_keyblock * as_key, krb5_data *);
-
-static int pkinit_client_plugin_init(krb5_context context, void **blob);
 static void pkinit_client_plugin_fini(krb5_context context, void *blob);
 
-krb5_error_code
+static krb5_error_code
 pa_pkinit_gen_req(krb5_context context,
 		  pkinit_context plgctx,
 		  pkinit_req_context reqctx,
@@ -265,7 +220,7 @@ pa_pkinit_gen_req(krb5_context context,
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 pkinit_as_req_create(krb5_context context,
 		     pkinit_context plgctx,
 		     pkinit_req_context reqctx,
@@ -490,7 +445,7 @@ cleanup:
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 pa_pkinit_parse_rep(krb5_context context,
 		    pkinit_context plgctx,
 		    pkinit_req_context reqctx,
@@ -683,7 +638,7 @@ out:
  * certificate chain.
  * Optionally returns various components.
  */
-krb5_error_code
+static krb5_error_code
 pkinit_as_rep_parse(krb5_context context,
 		    pkinit_context plgctx,
   		    pkinit_req_context reqctx,
@@ -1004,7 +959,7 @@ pkinit_client_profile(krb5_context context,
 			      &reqctx->idopts->identity_alt);
 }
 
-krb5_error_code
+static krb5_error_code
 pkinit_client_process(krb5_context context,
 		      void *plugin_context,
 		      void *request_context,
@@ -1110,7 +1065,7 @@ pkinit_client_process(krb5_context context,
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 pkinit_client_tryagain(krb5_context context,
 		       void *plugin_context,
 		       void *request_context,
@@ -1229,7 +1184,7 @@ static krb5_preauthtype supported_client_pa_types[] = {
     0
 };
 
-void
+static void
 pkinit_client_req_init(krb5_context context,
 		       void *plugin_context,
 		       void **request_context)
@@ -1292,7 +1247,7 @@ cleanup:
     return;
 }
 
-void
+static void
 pkinit_client_req_fini(krb5_context context,
 		      void *plugin_context,
 		      void *request_context)
@@ -1322,18 +1277,6 @@ pkinit_client_req_fini(krb5_context context,
 
     free(reqctx);
     return;
-}
-
-static void
-pkinit_fini_client_profile(krb5_context context, pkinit_context plgctx)
-{
-    /* This should clean up anything allocated in pkinit_init_client_profile */
-}
-
-static krb5_error_code
-pkinit_init_client_profile(krb5_context context, pkinit_context plgctx)
-{
-    return 0;
 }
 
 static int
@@ -1367,10 +1310,6 @@ pkinit_client_plugin_init(krb5_context context, void **blob)
     if (retval)
 	goto errout;
 
-    retval = pkinit_init_client_profile(context, ctx);
-    if (retval)
-	goto errout;
-
     *blob = ctx;
 
     pkiDebug("%s: returning plgctx at %p\n", __FUNCTION__, ctx);
@@ -1393,7 +1332,6 @@ pkinit_client_plugin_fini(krb5_context context, void *blob)
     }
     pkiDebug("%s: got plgctx at %p\n", __FUNCTION__, ctx);
 
-    pkinit_fini_client_profile(context, ctx);
     pkinit_fini_identity_opts(ctx->idopts);
     pkinit_fini_plg_crypto(ctx->cryptoctx);
     pkinit_fini_plg_opts(ctx->opts);
