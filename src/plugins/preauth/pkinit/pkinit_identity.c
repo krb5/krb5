@@ -261,7 +261,7 @@ parse_pkcs11_options(krb5_context context,
 		     pkinit_identity_opts *idopts,
 		     const char *residual)
 {
-    char *s, *cp, *vp;
+    char *s, *cp, *vp, *save;
     krb5_error_code retval = ENOMEM;
 
     if (residual == NULL || residual[0] == '\0')
@@ -272,7 +272,7 @@ parse_pkcs11_options(krb5_context context,
     if (s == NULL)
 	return retval;
 
-    for ((cp = strtok(s, ":")); cp; (cp = strtok(NULL, ":"))) {
+    for (cp = strtok_r(s, ":", &save); cp; cp = strtok_r(NULL, ":", &save)) {
 	vp = strchr(cp, '=');
 
 	/* If there is no "=", this is a pkcs11 module name */
@@ -334,7 +334,7 @@ parse_fs_options(krb5_context context,
 		 pkinit_identity_opts *idopts,
 		 const char *residual)
 {
-    char *certname, *keyname;
+    char *certname, *keyname, *save;
     krb5_error_code retval = ENOMEM;
 
     if (residual == NULL || residual[0] == '\0')
@@ -344,8 +344,8 @@ parse_fs_options(krb5_context context,
     if (certname == NULL)
 	goto cleanup;
 
-    certname = strtok(certname, ",");
-    keyname = strtok(NULL, ",");
+    certname = strtok_r(certname, ",", &save);
+    keyname = strtok_r(NULL, ",", &save);
 
     idopts->cert_filename = strdup(certname);
     if (idopts->cert_filename == NULL)
