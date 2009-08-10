@@ -503,51 +503,6 @@ process_option_ca_crl(krb5_context context,
 				    idtype, catype, residual);
 }
 
-static krb5_error_code
-pkinit_identity_process_option(krb5_context context,
-			       pkinit_plg_crypto_context plg_cryptoctx,
-			       pkinit_req_crypto_context req_cryptoctx,
-			       pkinit_identity_opts *idopts,
-			       pkinit_identity_crypto_context id_cryptoctx,
-			       int attr,
-			       const char *value)
-{
-    krb5_error_code retval = 0;
-
-    switch (attr) {
-	case PKINIT_ID_OPT_USER_IDENTITY:
-	    retval = process_option_identity(context, plg_cryptoctx,
-					     req_cryptoctx, idopts,
-					     id_cryptoctx, value);
-	    break;
-	case PKINIT_ID_OPT_ANCHOR_CAS:
-	    retval = process_option_ca_crl(context, plg_cryptoctx,
-					   req_cryptoctx, idopts,
-					   id_cryptoctx, value,
-					   CATYPE_ANCHORS);
-	    break;
-	case PKINIT_ID_OPT_INTERMEDIATE_CAS:
-	    retval = process_option_ca_crl(context, plg_cryptoctx,
-					   req_cryptoctx, idopts,
-					   id_cryptoctx,
-					   value, CATYPE_INTERMEDIATES);
-	    break;
-	case PKINIT_ID_OPT_CRLS:
-	    retval = process_option_ca_crl(context, plg_cryptoctx,
-					   req_cryptoctx, idopts,
-					   id_cryptoctx,
-					   value, CATYPE_CRLS);
-	    break;
-	case PKINIT_ID_OPT_OCSP:
-	    retval = ENOTSUP;
-	    break;
-	default:
-	    retval = EINVAL;
-	    break;
-    }
-    return retval;
-}
-
 krb5_error_code
 pkinit_identity_initialize(krb5_context context,
 			   pkinit_plg_crypto_context plg_cryptoctx,
@@ -573,18 +528,15 @@ pkinit_identity_initialize(krb5_context context,
      * in the config file.
      */
     if (idopts->identity != NULL) {
-	retval = pkinit_identity_process_option(context, plg_cryptoctx,
-						req_cryptoctx, idopts,
-						id_cryptoctx,
-						PKINIT_ID_OPT_USER_IDENTITY,
-						idopts->identity);
+	retval = process_option_identity(context, plg_cryptoctx, req_cryptoctx,
+					 idopts, id_cryptoctx,
+					 idopts->identity);
     } else if (idopts->identity_alt != NULL) {
 	for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++)
-		retval = pkinit_identity_process_option(context, plg_cryptoctx,
-						    req_cryptoctx, idopts,
-						    id_cryptoctx,
-						    PKINIT_ID_OPT_USER_IDENTITY,
-						    idopts->identity_alt[i]);
+	    retval = process_option_identity(context, plg_cryptoctx,
+					     req_cryptoctx, idopts,
+					     id_cryptoctx,
+					     idopts->identity_alt[i]);
     } else {
 	pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
 	goto errout;
@@ -625,41 +577,31 @@ pkinit_identity_initialize(krb5_context context,
 	    goto errout;
 
     for (i = 0; idopts->anchors != NULL && idopts->anchors[i] != NULL; i++) {
-	retval = pkinit_identity_process_option(context, plg_cryptoctx,
-						req_cryptoctx, idopts,
-						id_cryptoctx,
-						PKINIT_ID_OPT_ANCHOR_CAS,
-						idopts->anchors[i]);
+	retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
+				       idopts, id_cryptoctx,
+				       idopts->anchors[i], CATYPE_ANCHORS);
 	if (retval)
 	    goto errout;
     }
     for (i = 0; idopts->intermediates != NULL
 		&& idopts->intermediates[i] != NULL; i++) {
-	retval = pkinit_identity_process_option(context, plg_cryptoctx,
-						req_cryptoctx, idopts,
-						id_cryptoctx,
-						PKINIT_ID_OPT_INTERMEDIATE_CAS,
-						idopts->intermediates[i]);
+	retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
+				       idopts, id_cryptoctx,
+				       idopts->intermediates[i],
+				       CATYPE_INTERMEDIATES);
 	if (retval)
 	    goto errout;
     }
     for (i = 0; idopts->crls != NULL && idopts->crls[i] != NULL; i++) {
-	retval = pkinit_identity_process_option(context, plg_cryptoctx,
-						req_cryptoctx, idopts,
-						id_cryptoctx,
-						PKINIT_ID_OPT_CRLS,
-						idopts->crls[i]);
+	retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
+				       idopts, id_cryptoctx, idopts->crls[i],
+				       CATYPE_CRLS);
 	if (retval)
 	    goto errout;
     }
     if (idopts->ocsp != NULL) {
-	retval = pkinit_identity_process_option(context, plg_cryptoctx,
-						req_cryptoctx, idopts,
-						id_cryptoctx,
-						PKINIT_ID_OPT_OCSP,
-						idopts->ocsp);
-	if (retval)
-	    goto errout;
+	retval = ENOTSUP;
+	goto errout;
     }
 
 errout:

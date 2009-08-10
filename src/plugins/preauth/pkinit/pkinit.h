@@ -182,13 +182,6 @@ typedef struct _pkinit_req_opts {
  * information about identity from config file or command line
  */
 
-#define PKINIT_ID_OPT_USER_IDENTITY	1
-#define PKINIT_ID_OPT_ANCHOR_CAS	2
-#define PKINIT_ID_OPT_INTERMEDIATE_CAS	3
-#define PKINIT_ID_OPT_CRLS		4
-#define PKINIT_ID_OPT_OCSP		5
-#define PKINIT_ID_OPT_DN_MAPPING	6   /* XXX ? */
-
 typedef struct _pkinit_identity_opts {
     char *identity;
     char **identity_alt;
