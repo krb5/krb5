@@ -31,7 +31,6 @@ int *tclDummyMainPtr = (int *) main;
 
 int Tcl_AppInit(Tcl_Interp *interp)
 {
-     Tcl_ovsec_kadm_init(interp);
      Tcl_kadm5_init(interp);
 
      return(TCL_OK);

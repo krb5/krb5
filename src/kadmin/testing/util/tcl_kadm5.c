@@ -123,13 +123,6 @@ static int put_server_handle(Tcl_Interp *interp, void *handle, char **name)
     }
 
     do {
-	/*
-	 * Handles from ovsec_kadm_init() and kadm5_init() should not
-	 * be mixed during unit tests, but the API would happily
-	 * accept them.  Making the hash entry names different in
-	 * tcl_kadm.c and tcl_ovsec_kadm.c ensures that GET_HANDLE
-	 * will fail if presented a handle from the other API.
-	 */
 	sprintf(buf, "kadm5_handle%d", i);
 	entry = Tcl_CreateHashEntry(struct_table, buf, &newPtr);
 	i++;
@@ -152,11 +145,7 @@ static int get_server_handle(Tcl_Interp *interp, const char *name,
     else {
 	if (! (struct_table &&
 	       (entry = Tcl_FindHashEntry(struct_table, name)))) {
-	     if (strncmp(name, "ovsec_kadm_handle", 17) == 0)
-		  Tcl_AppendResult(interp, "ovsec_kadm handle "
-				   "specified for kadm5 api: ", name, 0);
-	     else 
-		  Tcl_AppendResult(interp, "unknown server handle ", name, 0);
+	    Tcl_AppendResult(interp, "unknown server handle ", name, 0);
 	    return TCL_ERROR;
 	}
 	*handle = (void *) Tcl_GetHashValue(entry);
@@ -2497,8 +2486,6 @@ void Tcl_kadm5_init(Tcl_Interp *interp)
 		KADM5_CHANGEPW_SERVICE, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_STRUCT_VERSION);
      Tcl_SetVar(interp, "KADM5_STRUCT_VERSION", buf, TCL_GLOBAL_ONLY);
-    (void) sprintf(buf, "%d", KADM5_API_VERSION_1);
-     Tcl_SetVar(interp, "KADM5_API_VERSION_1", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_API_VERSION_2);
      Tcl_SetVar(interp, "KADM5_API_VERSION_2", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_API_VERSION_MASK);

@@ -13,24 +13,23 @@
 
 int main()
 {
-     ovsec_kadm_ret_t ret;
+     kadm5_ret_t ret;
      char   *cp;
      int    x;
      void *server_handle;
      kadm5_server_handle_t handle;
 
      for(x = 0; x < TEST_NUM; x++) {
-	ret = ovsec_kadm_init("admin", "admin", "ovsec_adm/admin", 0,
-			      OVSEC_KADM_STRUCT_VERSION,
-			      OVSEC_KADM_API_VERSION_1, NULL,
-			      &server_handle);
-	if(ret != OVSEC_KADM_OK) {
+	ret = kadm5_init("admin", "admin", KADM5_ADMIN_SERVICE, 0,
+			 KADM5_STRUCT_VERSION, KADM5_API_VERSION_2, NULL,
+			 &server_handle);
+	if(ret != KADM5_OK) {
 	    com_err("test", ret, "init");
 	    exit(2);
 	}
 	handle = (kadm5_server_handle_t) server_handle;
-	cp = (char *) strdup(((char *) (strchr(handle->cache_name, ':')) + 1));
-	ovsec_kadm_destroy(server_handle);
+	cp = strdup(strchr(handle->cache_name, ':') + 1);
+	kadm5_destroy(server_handle);
 	if(access(cp, F_OK) == 0) {
 	    puts("ticket cache not destroyed");
 	    exit(2);

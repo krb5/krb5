@@ -12,11 +12,11 @@ KRB5_PTHREAD_LIB=$(THREAD_LINKOPTS)
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
 
-SRCS	=	$(srcdir)/tcl_ovsec_kadm.c $(srcdir)/tcl_kadm5.c $(srcdir)/test.c
-OBJS	=	tcl_ovsec_kadm.o tcl_kadm5.o test.o
+SRCS	=	$(srcdir)/tcl_kadm5.c $(srcdir)/test.c
+OBJS	=	tcl_kadm5.o test.o
 
-CLNTPROG=	ovsec_kadm_clnt_tcl
-SRVPROG	=	ovsec_kadm_srv_tcl
+CLNTPROG=	kadm5_clnt_tcl
+SRVPROG	=	kadm5_srv_tcl
 
 DO_ALL=@DO_ALL@
 

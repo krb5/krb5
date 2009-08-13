@@ -1,4 +1,3 @@
-#undef USE_KADM5_API_VERSION
 #include <kadm5/admin.h>
 #include <com_err.h>
 #include <stdio.h>

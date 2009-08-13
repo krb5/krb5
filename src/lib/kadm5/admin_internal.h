@@ -29,7 +29,7 @@
 	if ((srvr->api_version & KADM5_MASK_BITS) != \
 	    KADM5_API_VERSION_MASK) \
 		return KADM5_BAD_API_VERSION; \
-	if (srvr->api_version < KADM5_API_VERSION_1) \
+	if (srvr->api_version < KADM5_API_VERSION_2) \
 		return old_api_version; \
 	if (srvr->api_version > KADM5_API_VERSION_2) \
 		return new_api_version; \

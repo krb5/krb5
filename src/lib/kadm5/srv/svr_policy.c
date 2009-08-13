@@ -258,7 +258,6 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
 		 kadm5_policy_ent_t entry) 
 {
     osa_policy_ent_t		t;
-    kadm5_policy_ent_rec	entry_local, **entry_orig, *new;
     int				ret;
     kadm5_server_handle_t handle = server_handle;
     int                         cnt=1;
@@ -267,16 +266,6 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
 
     krb5_clear_error_message(handle->context);
 
-    /*
-     * In version 1, entry is a pointer to a kadm5_policy_ent_t that
-     * should be filled with allocated memory.
-     */
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 entry_orig = (kadm5_policy_ent_rec **) entry;
-	 *entry_orig = NULL;
-	 entry = &entry_local;
-    }
-    
     if (name == (kadm5_policy_t) NULL)
 	return EINVAL;
     if(strlen(name) == 0)
@@ -299,16 +288,5 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     entry->policy_refcnt = t->policy_refcnt;
     krb5_db_free_policy(handle->context, t);
 
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 new = (kadm5_policy_ent_t) malloc(sizeof(kadm5_policy_ent_rec));
-	 if (new == NULL) {
-	      free(entry->policy);
-	      krb5_db_free_policy(handle->context, t);
-	      return ENOMEM;
-	 }
-	 *new = *entry;
-	 *entry_orig = new;
-    }
-    
     return KADM5_OK;
 }

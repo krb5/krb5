@@ -745,7 +745,6 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
     long			mask;
     int i;
     kadm5_server_handle_t handle = server_handle;
-    kadm5_principal_ent_rec	entry_local, *entry_orig;
 
     CHECK_HANDLE(server_handle);
 
@@ -756,13 +755,7 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
      * entry is a pointer to a kadm5_principal_ent_t_v1 that should be
      * filled with allocated memory.
      */
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 mask = KADM5_PRINCIPAL_NORMAL_MASK;
-	 entry_orig = entry;
-	 entry = &entry_local;
-    } else {
-	 mask = in_mask;
-    }
+    mask = in_mask;
 
     memset(entry, 0, sizeof(*entry));
 
@@ -833,102 +826,51 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
     if (ret)
 	goto done;
 
-    /*
-     * It's my understanding that KADM5_API_VERSION_1 is for OpenVision admin
-     * system compatiblity and is not required to maintain at this point so I'm
-     * commenting out this code.
-     * -- Will Fiveash
-     */
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-    if (handle->api_version == KADM5_API_VERSION_2)
-	 entry->mkvno = 0;
-    else {
-	 /* XXX I'll be damned if I know how to deal with this one --marc */
-	 entry->mkvno = 1;
+    if (mask & KADM5_MAX_RLIFE)
+	entry->max_renewable_life = kdb.max_renewable_life;
+    if (mask & KADM5_LAST_SUCCESS)
+	entry->last_success = kdb.last_success;
+    if (mask & KADM5_LAST_FAILED)
+	entry->last_failed = kdb.last_failed;
+    if (mask & KADM5_FAIL_AUTH_COUNT)
+	entry->fail_auth_count = kdb.fail_auth_count;
+    if (mask & KADM5_TL_DATA) {
+	krb5_tl_data *tl, *tl2;
+
+	entry->tl_data = NULL;
+
+	tl = kdb.tl_data;
+	while (tl) {
+	    if (tl->tl_data_type > 255) {
+		if ((tl2 = dup_tl_data(tl)) == NULL) {
+		    ret = ENOMEM;
+		    goto done;
+		}
+		tl2->tl_data_next = entry->tl_data;
+		entry->tl_data = tl2;
+		entry->n_tl_data++;
+	    }
+
+	    tl = tl->tl_data_next;
+	}
     }
-#endif /**************** END IFDEF'ed OUT *******************************/
+    if (mask & KADM5_KEY_DATA) {
+	entry->n_key_data = kdb.n_key_data;
+	if(entry->n_key_data) {
+	    entry->key_data = malloc(entry->n_key_data*sizeof(krb5_key_data));
+	    if (entry->key_data == NULL) {
+		ret = ENOMEM;
+		goto done;
+	    }
+	} else
+	    entry->key_data = NULL;
 
-    /*
-     * The new fields that only exist in version 2 start here
-     */
-    if (handle->api_version == KADM5_API_VERSION_2) {
-	 if (mask & KADM5_MAX_RLIFE)
-	      entry->max_renewable_life = kdb.max_renewable_life;
-	 if (mask & KADM5_LAST_SUCCESS)
-	      entry->last_success = kdb.last_success;
-	 if (mask & KADM5_LAST_FAILED)
-	      entry->last_failed = kdb.last_failed;
-	 if (mask & KADM5_FAIL_AUTH_COUNT)
-	      entry->fail_auth_count = kdb.fail_auth_count;
-	 if (mask & KADM5_TL_DATA) {
-	      krb5_tl_data *tl, *tl2;
-
-	      entry->tl_data = NULL;
-
-	      tl = kdb.tl_data;
-	      while (tl) {
-		   if (tl->tl_data_type > 255) {
-			if ((tl2 = dup_tl_data(tl)) == NULL) {
-			     ret = ENOMEM;
-			     goto done;
-			}
-			tl2->tl_data_next = entry->tl_data;
-			entry->tl_data = tl2;
-			entry->n_tl_data++;
-		   }
-
-		   tl = tl->tl_data_next;
-	      }
-	 }
-	 if (mask & KADM5_KEY_DATA) {
-	      entry->n_key_data = kdb.n_key_data;
-	      if(entry->n_key_data) {
-		      entry->key_data = (krb5_key_data *)
-			      malloc(entry->n_key_data*sizeof(krb5_key_data));
-		      if (entry->key_data == NULL) {
-			      ret = ENOMEM;
-			      goto done;
-		      }
-	      } else
-		      entry->key_data = NULL;
-
-	      for (i = 0; i < entry->n_key_data; i++)
-		  ret = krb5_copy_key_data_contents(handle->context,
-						    &kdb.key_data[i],
-						    &entry->key_data[i]);
-		   if (ret)
-			goto done;
-	 }
-    }
-
-    /*
-     * If KADM5_API_VERSION_1, we return an allocated structure, and
-     * we need to convert the new structure back into the format the
-     * caller is expecting.
-     */
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 kadm5_principal_ent_t_v1 newv1;
-
-	 newv1 = ((kadm5_principal_ent_t_v1) calloc(1, sizeof(*newv1)));
-	 if (newv1 == NULL) {
-	      ret = ENOMEM;
-	      goto done;
-	 }
-
-	 newv1->principal = entry->principal;
-	 newv1->princ_expire_time = entry->princ_expire_time;
-	 newv1->last_pwd_change = entry->last_pwd_change;
-	 newv1->pw_expiration = entry->pw_expiration;
-	 newv1->max_life = entry->max_life;
-	 newv1->mod_name = entry->mod_name;
-	 newv1->mod_date = entry->mod_date;
-	 newv1->attributes = entry->attributes;
-	 newv1->kvno = entry->kvno;
-	 newv1->mkvno = entry->mkvno;
-	 newv1->policy = entry->policy;
-	 newv1->aux_attributes = entry->aux_attributes;
-
-	 *((kadm5_principal_ent_t_v1 *) entry_orig) = newv1;
+	for (i = 0; i < entry->n_key_data; i++)
+	    ret = krb5_copy_key_data_contents(handle->context,
+					      &kdb.key_data[i],
+					      &entry->key_data[i]);
+	if (ret)
+	    goto done;
     }
 
     ret = KADM5_OK;
@@ -1625,25 +1567,11 @@ kadm5_randkey_principal_3(void *server_handle,
 	 goto done;
 
     if (keyblocks) {
-	 if (handle->api_version == KADM5_API_VERSION_1) {
-	      /* Version 1 clients will expect to see a DES_CRC enctype. */
-	     ret = krb5_dbe_find_enctype(handle->context, &kdb,
-					 ENCTYPE_DES_CBC_CRC,
-					 -1, -1, &key_data);
-	     if (ret)
-		 goto done;
-
-	     ret = decrypt_key_data(handle->context, act_mkey, 1, key_data,
-				     keyblocks, NULL);
-	     if (ret)
-		 goto done;
-	 } else {
-	     ret = decrypt_key_data(handle->context, act_mkey,
-				     kdb.n_key_data, kdb.key_data,
-				     keyblocks, n_keys);
-	     if (ret)
-		 goto done;
-	 }
+	ret = decrypt_key_data(handle->context, act_mkey,
+			       kdb.n_key_data, kdb.key_data,
+			       keyblocks, n_keys);
+	if (ret)
+	    goto done;
     }
 
     /* key data changed, let the database provider know */
@@ -2112,23 +2040,11 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
             }
         }
 
-         if (handle->api_version == KADM5_API_VERSION_1) {
-              /* Version 1 clients will expect to see a DES_CRC enctype. */
-              if ((ret = krb5_dbe_find_enctype(handle->context, &kdb,
-                                              ENCTYPE_DES_CBC_CRC,
-                                              -1, -1, &key_data)))
-                   goto done;
-
-              if ((ret = decrypt_key_data(handle->context, mkey_ptr, 1, key_data,
-                                         keyblocks, NULL)))
-                   goto done;
-         } else {
-              ret = decrypt_key_data(handle->context, mkey_ptr,
-                                     kdb.n_key_data, kdb.key_data,
-                                     keyblocks, n_keys);
-              if (ret)
-                   goto done;
-         }
+	ret = decrypt_key_data(handle->context, mkey_ptr,
+			       kdb.n_key_data, kdb.key_data,
+			       keyblocks, n_keys);
+	if (ret)
+	    goto done;
     }
 
     ret = KADM5_OK;

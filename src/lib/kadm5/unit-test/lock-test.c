@@ -1,8 +1,3 @@
-#if USE_KADM5_API_VERSION == 1
-#undef USE_KADM5_API_VERSION
-#define USE_KADM5_API_VERSION 2
-#endif
-
 #include <stdio.h>
 #include <krb5.h>
 #include <kadm5/admin.h>

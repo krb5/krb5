@@ -1101,8 +1101,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu
 
-	kadmin kadmin/cli kadmin/dbutil kadmin/passwd
-	kadmin/passwd/unit-test kadmin/ktutil kadmin/server
+	kadmin kadmin/cli kadmin/dbutil kadmin/ktutil kadmin/server
 	kadmin/testing kadmin/testing/scripts kadmin/testing/util
 
 	appl

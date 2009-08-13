@@ -29,9 +29,6 @@ kadm5_free_principal_ent(void *server_handle,
 	    free(val->policy);
 
 	/* XXX free key_data and tl_data */
-
-	if (handle->api_version == KADM5_API_VERSION_1)
-	     free(val);
     }
     return KADM5_OK;
 }

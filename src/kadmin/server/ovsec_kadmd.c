@@ -89,14 +89,6 @@ gss_name_t gss_changepw_name = NULL, gss_oldchangepw_name = NULL;
 gss_name_t gss_kadmin_name = NULL;
 void *global_server_handle;
 
-/*
- * This is a kludge, but the server needs these constants to be
- * compatible with old clients.  They are defined in <kadm5/admin.h>,
- * but only if USE_KADM5_API_VERSION == 1.
- */
-#define OVSEC_KADM_ADMIN_SERVICE	"ovsec_adm/admin"
-#define OVSEC_KADM_CHANGEPW_SERVICE	"ovsec_adm/changepw"
-
 extern krb5_keyblock master_keyblock;
 extern krb5_keylist_node  *master_keylist;
 
@@ -210,7 +202,7 @@ int main(int argc, char *argv[])
 {
      extern	char *optarg;
      extern	int optind, opterr;
-     int ret, oldnames = 0;
+     int ret;
      OM_uint32 OMret, major_status, minor_status;
      char *whoami;
      gss_buffer_desc in_buf;
@@ -365,11 +357,7 @@ int main(int argc, char *argv[])
 
      names[0].name = build_princ_name(KADM5_ADMIN_SERVICE, params.realm);
      names[1].name = build_princ_name(KADM5_CHANGEPW_SERVICE, params.realm);
-     names[2].name = build_princ_name(OVSEC_KADM_ADMIN_SERVICE, params.realm);
-     names[3].name = build_princ_name(OVSEC_KADM_CHANGEPW_SERVICE,
-				      params.realm); 
-     if (names[0].name == NULL || names[1].name == NULL ||
-	 names[2].name == NULL || names[3].name == NULL) {
+     if (names[0].name == NULL || names[1].name == NULL) {
 	  krb5_klog_syslog(LOG_ERR,
 			   "Cannot build GSS-API authentication names, "
 			   "failing.");
@@ -424,13 +412,7 @@ kterr:
 	  exit(1);
      }
 
-     /*
-      * Try to acquire creds for the old OV services as well as the
-      * new names, but if that fails just fall back on the new names.
-      */
-     if (svcauth_gssapi_set_names(names, 4) == TRUE)
-	  oldnames++;
-     if (!oldnames && svcauth_gssapi_set_names(names, 2) == FALSE) {
+     if (svcauth_gssapi_set_names(names, 2) == FALSE) {
 	  krb5_klog_syslog(LOG_ERR,
 			   "Cannot set GSS-API authentication names (keytab not present?), "
 			   "failing.");
@@ -447,12 +429,6 @@ kterr:
      in_buf.length = strlen(names[1].name) + 1;
      (void) gss_import_name(&OMret, &in_buf, nt_krb5_name_oid,
 			    &gss_changepw_name);
-     if (oldnames) {
-	  in_buf.value = names[3].name;
-	  in_buf.length = strlen(names[3].name) + 1;
-	  (void) gss_import_name(&OMret, &in_buf, nt_krb5_name_oid,
-				 &gss_oldchangepw_name);
-     }
 
      svcauth_gssapi_set_log_badauth_func(log_badauth, NULL);
      svcauth_gssapi_set_log_badverf_func(log_badverf, NULL);

@@ -231,20 +231,10 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
       * empty mask, and behave like version 2.
       */
      memset(&params_local, 0, sizeof(params_local));
-     if (api_version == KADM5_API_VERSION_1) {
-	  realm = params_local.realm = (char *) params_in;
-	  if (params_in)
-	       params_local.mask = KADM5_CONFIG_REALM;
-
-	  /* Use old AUTH_GSSAPI for version 1 protocol. */
-	  params_local.mask |= KADM5_CONFIG_OLD_AUTH_GSSAPI;
-	  params_in = &params_local;
-     } else {
-	  if (params_in && (params_in->mask & KADM5_CONFIG_REALM))
-	       realm = params_in->realm;
-	  else
-	       realm = NULL;
-     }
+     if (params_in && (params_in->mask & KADM5_CONFIG_REALM))
+	  realm = params_in->realm;
+     else
+	  realm = NULL;
 
 #if 0 /* Since KDC config params can now be put in krb5.conf, these
 	 could show up even when you're just using the remote kadmin

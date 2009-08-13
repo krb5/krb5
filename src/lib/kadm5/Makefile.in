@@ -19,7 +19,6 @@ clean::
 
 SRCS =	kadm_err.c \
 	chpass_util_strings.c \
-	$(srcdir)/ovsec_glue.c \
 	$(srcdir)/misc_free.c \
 	$(srcdir)/kadm_rpc_xdr.c \
 	$(srcdir)/chpass_util.c \
@@ -29,7 +28,6 @@ SRCS =	kadm_err.c \
 
 OBJS =	kadm_err.$(OBJEXT) \
 	chpass_util_strings.$(OBJEXT) \
-	ovsec_glue.$(OBJEXT) \
 	misc_free.$(OBJEXT) \
 	kadm_rpc_xdr.$(OBJEXT) \
 	chpass_util.$(OBJEXT) \
@@ -40,7 +38,6 @@ OBJS =	kadm_err.$(OBJEXT) \
 STLIBOBJS = \
 	kadm_err.o \
 	chpass_util_strings.o \
-	ovsec_glue.o \
 	misc_free.o \
 	kadm_rpc_xdr.o \
 	chpass_util.o \

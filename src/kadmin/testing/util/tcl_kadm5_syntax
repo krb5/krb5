@@ -1,5 +1,5 @@
 Here's a brief summary of the syntax of the tcl versions of the
-ovsec_kadm commands:
+kadm5 functions:
 
 string		Can be a string or "null" which will turn into a null pointer
 principal_ent	A 12-field list in the order of the principal_ent

@@ -103,22 +103,8 @@ kadm5_get_policy(void *server_handle, char *name, kadm5_policy_ent_t ent)
     r = get_policy_2(&arg, handle->clnt);
     if(r == NULL)
 	return KADM5_RPC_ERROR;
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 kadm5_policy_ent_t *entp;
-
-	 entp = (kadm5_policy_ent_t *) ent;
-	 if(r->code == 0) {
-	      if (!(*entp = (kadm5_policy_ent_t)
-		    malloc(sizeof(kadm5_policy_ent_rec))))
-		   return ENOMEM;
-	      memcpy(*entp, &r->rec, sizeof(**entp));
-	 } else {
-	      *entp = NULL;
-	 }
-    } else {
-	 if (r->code == 0)
-	      memcpy(ent, &r->rec, sizeof(r->rec));
-    }
+    if (r->code == 0)
+	memcpy(ent, &r->rec, sizeof(r->rec));
 	 
     return r->code;
 }

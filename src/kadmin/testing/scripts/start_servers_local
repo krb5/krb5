@@ -3,7 +3,7 @@
 DUMMY=${TESTDIR=$TOP/testing}
 DUMMY=${STESTDIR=$STOP/testing}
 DUMMY=${INITDB=$STESTDIR/scripts/init_db}
-DUMMY=${SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl}; export SRVTCL
+DUMMY=${SRVTCL=$TESTDIR/util/kadm5_srv_tcl}; export SRVTCL
 DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 DUMMY=${STOP_SERVERS_LOCAL=$STESTDIR/scripts/stop_servers_local}
 DUMMY=${KRB5RCACHEDIR=$TESTDIR} ; export KRB5RCACHEDIR
@@ -81,11 +81,12 @@ if { [catch {
 	source $env(STOP)/testing/tcl/util.t
 	set r $env(REALM)
 	set q $env(QUALNAME)
-	puts stdout [ovsec_kadm_init $env(SRVTCL) mrroot null $r \
-		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 server_handle]
-	puts stdout [ovsec_kadm_create_principal $server_handle \
-		[simple_principal host/$q@$r] {OVSEC_KADM_PRINCIPAL} notathena]
-	puts stdout [ovsec_kadm_destroy $server_handle]
+	puts stdout [kadm5_init $env(SRVTCL) mrroot null \
+		[config_params {KADM5_CONFIG_REALM} $r] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle]
+	puts stdout [kadm5_create_principal $server_handle \
+		[simple_principal host/$q@$r] {KADM5_PRINCIPAL} notathena]
+	puts stdout [kadm5_destroy $server_handle]
 } err]} {
 	puts stderr "initialization error: $err"
 	exit 1

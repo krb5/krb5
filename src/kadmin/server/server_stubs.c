@@ -641,7 +641,6 @@ gprinc_ret *
 get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
 {
     static gprinc_ret		    ret;
-    kadm5_principal_ent_t_v1	    e;
     char			    *prime_arg, *funcname;
     gss_buffer_desc		    client_name,
 				    service_name;
@@ -659,8 +658,7 @@ get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
 
     ret.api_version = handle->api_version;
 
-    funcname = handle->api_version == KADM5_API_VERSION_1 ?
-	 "kadm5_get_principal (V1)" : "kadm5_get_principal";
+    funcname = "kadm5_get_principal";
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
@@ -681,18 +679,8 @@ get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
 	 log_unauth(funcname, prime_arg,
 		    &client_name, &service_name, rqstp);
     } else {
-	 if (handle->api_version == KADM5_API_VERSION_1) {
-	      ret.code  = kadm5_get_principal_v1((void *)handle,
-						 arg->princ, &e); 
-	      if(ret.code == KADM5_OK) {
-		   memcpy(&ret.rec, e, sizeof(kadm5_principal_ent_rec_v1));
-		   free(e);
-	      }
-	 } else {
-	      ret.code  = kadm5_get_principal((void *)handle,
-					      arg->princ, &ret.rec,
-					      arg->mask);
-	 }
+	 ret.code = kadm5_get_principal(handle, arg->princ, &ret.rec,
+					arg->mask);
 	 
 	 if( ret.code != 0 )
 	     errmsg = krb5_get_error_message(handle->context, ret.code);
@@ -1114,8 +1102,7 @@ chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
 
     ret.api_version = handle->api_version;
 
-    funcname = handle->api_version == KADM5_API_VERSION_1 ?
-	 "kadm5_randkey_principal (V1)" : "kadm5_randkey_principal";
+    funcname = "kadm5_randkey_principal";
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
@@ -1141,13 +1128,8 @@ chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
     }
 
     if(ret.code == KADM5_OK) {
-	 if (handle->api_version == KADM5_API_VERSION_1) {
-	      krb5_copy_keyblock_contents(handle->context, k, &ret.key);
-	      krb5_free_keyblock(handle->context, k);
-	 } else {
-	      ret.keys = k;
-	      ret.n_keys = nkeys;
-	 }
+	 ret.keys = k;
+	 ret.n_keys = nkeys;
     }
 
     if(ret.code != KADM5_AUTH_CHANGEPW) {
@@ -1191,8 +1173,7 @@ chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
 
     ret.api_version = handle->api_version;
 
-    funcname = handle->api_version == KADM5_API_VERSION_1 ?
-	 "kadm5_randkey_principal (V1)" : "kadm5_randkey_principal";
+    funcname = "kadm5_randkey_principal";
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
@@ -1224,13 +1205,8 @@ chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
     }
 
     if(ret.code == KADM5_OK) {
-	 if (handle->api_version == KADM5_API_VERSION_1) {
-	      krb5_copy_keyblock_contents(handle->context, k, &ret.key);
-	      krb5_free_keyblock(handle->context, k);
-	 } else {
-	      ret.keys = k;
-	      ret.n_keys = nkeys;
-	 }
+	 ret.keys = k;
+	 ret.n_keys = nkeys;
     }
 
     if(ret.code != KADM5_AUTH_CHANGEPW) {
@@ -1437,8 +1413,7 @@ get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
 
     ret.api_version = handle->api_version;
 
-    funcname = handle->api_version == KADM5_API_VERSION_1 ?
-	 "kadm5_get_policy (V1)" : "kadm5_get_policy";
+    funcname = "kadm5_get_policy";
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
@@ -1468,16 +1443,7 @@ get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
     }
     
     if (ret.code == KADM5_OK) {
-	 if (handle->api_version == KADM5_API_VERSION_1) {
-	      ret.code  = kadm5_get_policy_v1((void *)handle, arg->name, &e);
-	      if(ret.code == KADM5_OK) {
-		   memcpy(&ret.rec, e, sizeof(kadm5_policy_ent_rec));
-		   free(e);
-	      }
-	 } else {
-	      ret.code = kadm5_get_policy((void *)handle, arg->name,
-					  &ret.rec);
-	 }
+	 ret.code = kadm5_get_policy(handle, arg->name, &ret.rec);
 	 
 	 if( ret.code != 0 )
 	     errmsg = krb5_get_error_message(handle->context, ret.code);
@@ -1632,10 +1598,8 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      slen = service_name.length;
      trunc_name(&slen, &sdots);
      /* okay to cast lengths to int because trunc_name limits max value */
-     krb5_klog_syslog(LOG_NOTICE, "Request: %s, %.*s%s, %s, "
+     krb5_klog_syslog(LOG_NOTICE, "Request: kadm5_init, %.*s%s, %s, "
 		      "client=%.*s%s, service=%.*s%s, addr=%s, flavor=%d",
-		      (ret.api_version == KADM5_API_VERSION_1 ?
-		       "kadm5_init (V1)" : "kadm5_init"),
 		      (int)clen, (char *)client_name.value, cdots,
 		      errmsg ? errmsg : "success",
 		      (int)clen, (char *)client_name.value, cdots,

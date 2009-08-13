@@ -50,7 +50,7 @@ proc expect_kadm_ok {} {
     global kadmin_tcl_spawn_id
     expect {
 	-i $kadmin_tcl_spawn_id
-	-re "^OK OVSEC_KADM_OK \[^\n\]*\n" {}
+	-re "^OK KADM5_OK \[^\n\]*\n" {}
 	-re "^ERROR \[^\n\]*\n" { perror "kadmin tcl subprocess reported unexpected error" }
 	-re "^marshall_new_creds: \[^\n\]*\n" { exp_continue }
 	-re "^gssapi_\[^\n\]*\n" { exp_continue }
@@ -68,7 +68,7 @@ proc setup_database {} {
     send_user "TOP=$TOP\n"
 
     set_from_env TESTDIR $env(TOP)/testing
-    set_from_env CLNTTCL $TESTDIR/util/ovsec_kadm_clnt_tcl
+    set_from_env CLNTTCL $TESTDIR/util/kadm5_clnt_tcl
     set_from_env TCLUTIL $TESTDIR/tcl/util.t
     set env(TCLUTIL) $TCLUTIL
     set_from_env MAKE_KEYTAB $TESTDIR/scripts/make-host-keytab.pl
@@ -96,22 +96,22 @@ proc setup_database {} {
     }
     expect_tcl_prompt
 
-    send_tcl_cmd_await_echo {ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 server_handle}
+    send_tcl_cmd_await_echo {kadm5_init admin admin $KADM5_ADMIN_SERVICE null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle}
     expect_kadm_ok
     expect "^% "
-    send_tcl_cmd_await_echo {ovsec_kadm_create_principal $server_handle [simple_principal server/$h] {OVSEC_KADM_PRINCIPAL} admin}
+    send_tcl_cmd_await_echo {kadm5_create_principal $server_handle [simple_principal server/$h] {KADM5_PRINCIPAL} admin}
     expect_kadm_ok
     expect "^% "
-    send_tcl_cmd_await_echo {ovsec_kadm_randkey_principal $server_handle server/$h key}
+    send_tcl_cmd_await_echo {kadm5_randkey_principal $server_handle server/$h key null}
     expect_kadm_ok
     expect "^% "
-    send_tcl_cmd_await_echo {ovsec_kadm_create_principal $server_handle [simple_principal notserver/$h] {OVSEC_KADM_PRINCIPAL} admin}
+    send_tcl_cmd_await_echo {kadm5_create_principal $server_handle [simple_principal notserver/$h] {KADM5_PRINCIPAL} admin}
     expect_kadm_ok
     expect "^% "
-    send_tcl_cmd_await_echo {ovsec_kadm_randkey_principal $server_handle notserver/$h key}
+    send_tcl_cmd_await_echo {kadm5_randkey_principal $server_handle notserver/$h key null}
     expect_kadm_ok
     expect "^% "
-    send_tcl_cmd_await_echo {ovsec_kadm_destroy $server_handle}
+    send_tcl_cmd_await_echo {kadm5_destroy $server_handle}
     expect_kadm_ok
     expect "^% "
     wait -nowait -i $spawn_id
