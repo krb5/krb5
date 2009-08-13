@@ -1,6 +1,6 @@
 thisconfigdir=../../../..
 myfulldir=lib/crypto/krb/dk
-mydir=lib/crypto/dk
+mydir=lib/crypto/krb/dk
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/..  -I$(srcdir)/../../@CRYPTO_IMPL@
 DEFS=
