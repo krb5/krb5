@@ -21,7 +21,7 @@ INSTALL_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
 	krb5conf.texinfo kdcconf.texinfo send-pr.texinfo
 INSTALL_DEPS=install.texinfo $(INSTALL_INCLUDES)
 
-MANPAGES=$(SRCDIR)/appl/gssftp/ftp/ftp.M $(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $(SRCDIR)/clients/klist/klist.M $(SRCDIR)/clients/ksu/ksu.M $(SRCDIR)/appl/bsd/rcp.M $(SRCDIR)/appl/bsd/rlogin.M $(SRCDIR)/appl/bsd/rsh.M $(SRCDIR)/appl/telnet/telnet/telnet.1 $(SRCDIR)/kadmin/passwd/kpasswd.M
+MANPAGES=$(SRCDIR)/appl/gssftp/ftp/ftp.M $(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $(SRCDIR)/clients/klist/klist.M $(SRCDIR)/clients/ksu/ksu.M $(SRCDIR)/appl/bsd/rcp.M $(SRCDIR)/appl/bsd/rlogin.M $(SRCDIR)/appl/bsd/rsh.M $(SRCDIR)/appl/telnet/telnet/telnet.1 $(SRCDIR)/clients/kpasswd/kpasswd.M
 
 USER_GUIDE_INCLUDES=definitions.texinfo copyright.texinfo glossary.texinfo
 USER_GUIDE_DEPS=user-guide.texinfo $(USER_GUIDE_INCLUDES)
@@ -112,7 +112,7 @@ user-guide.html: $(USER_GUIDE_DEPS)
 	$(MANTXT) $(SRCDIR)/appl/bsd/rlogin.M | $(MANHTML) > rlogin.html
 	$(MANTXT) $(SRCDIR)/appl/bsd/rsh.M | $(MANHTML) > rsh.html
 	$(MANTXT) $(SRCDIR)/appl/telnet/telnet/telnet.1 | $(MANHTML) > telnet.html
-	$(MANTXT) $(SRCDIR)/kadmin/passwd/kpasswd.M | $(MANHTML) > kpasswd.html
+	$(MANTXT) $(SRCDIR)/clients/kpasswd/kpasswd.M | $(MANHTML) > kpasswd.html
 	$(HTML) user-guide.texinfo		
 
 .PHONY: implementor.ps implementor.pdf implementor.info
