@@ -18,9 +18,15 @@ int main()
      int    x;
      void *server_handle;
      kadm5_server_handle_t handle;
+     krb5_context context;
 
+     ret = kadm5_init_krb5_context(&context);
+     if (ret != 0) {
+	 com_err("test", ret, "context init");
+	 exit(2);
+     }
      for(x = 0; x < TEST_NUM; x++) {
-	ret = kadm5_init("admin", "admin", KADM5_ADMIN_SERVICE, 0,
+	ret = kadm5_init(context, "admin", "admin", KADM5_ADMIN_SERVICE, 0,
 			 KADM5_STRUCT_VERSION, KADM5_API_VERSION_2, NULL,
 			 &server_handle);
 	if(ret != KADM5_OK) {

@@ -314,14 +314,22 @@ krb5_error_code kadm5_free_realm_params(krb5_context kcontext,
 krb5_error_code kadm5_get_admin_service_name(krb5_context, char *,
 					     char *, size_t);
 
-kadm5_ret_t    kadm5_init(char *client_name, char *pass,
-			  char *service_name,
+/*
+ * For all initialization functions, the caller must first initialize
+ * a context with kadm5_init_krb5_context which will survive as long
+ * as the resulting handle.  The caller should free the context with
+ * krb5_free_context.
+ */
+
+kadm5_ret_t    kadm5_init(krb5_context context, char *client_name,
+			  char *pass, char *service_name,
 			  kadm5_config_params *params,
 			  krb5_ui_4 struct_version,
 			  krb5_ui_4 api_version,
 			  char **db_args,
 			  void **server_handle);
-kadm5_ret_t    kadm5_init_with_password(char *client_name,
+kadm5_ret_t    kadm5_init_with_password(krb5_context context,
+					char *client_name,
 					char *pass, 
 					char *service_name,
 					kadm5_config_params *params,
@@ -329,7 +337,8 @@ kadm5_ret_t    kadm5_init_with_password(char *client_name,
 					krb5_ui_4 api_version,
 					char **db_args,
 					void **server_handle);
-kadm5_ret_t    kadm5_init_with_skey(char *client_name,
+kadm5_ret_t    kadm5_init_with_skey(krb5_context context,
+				    char *client_name,
 				    char *keytab,
 				    char *service_name,
 				    kadm5_config_params *params,
@@ -337,7 +346,8 @@ kadm5_ret_t    kadm5_init_with_skey(char *client_name,
 				    krb5_ui_4 api_version,
 				    char **db_args,
 				    void **server_handle);
-kadm5_ret_t    kadm5_init_with_creds(char *client_name,
+kadm5_ret_t    kadm5_init_with_creds(krb5_context context,
+				     char *client_name,
 				     krb5_ccache cc,
 				     char *service_name,
 				     kadm5_config_params *params,

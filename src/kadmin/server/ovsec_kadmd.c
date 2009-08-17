@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 
      krb5_klog_init(context, "admin_server", whoami, 1);
 
-     if((ret = kadm5_init("kadmind", NULL,
+     if((ret = kadm5_init(context, "kadmind", NULL,
 			  NULL, &params,
 			  KADM5_STRUCT_VERSION,
 			  KADM5_API_VERSION_2,

@@ -22,7 +22,7 @@ int main()
      kadm5_init_krb5_context(&context);
 
      krb5_parse_name(context, "testuser", &tprinc);
-     ret = kadm5_init("admin", "admin", KADM5_ADMIN_SERVICE, NULL,
+     ret = kadm5_init(context, "admin", "admin", KADM5_ADMIN_SERVICE, NULL,
 		      KADM5_STRUCT_VERSION, KADM5_API_VERSION_2, NULL,
 		      &server_handle);
      if(ret != KADM5_OK) {

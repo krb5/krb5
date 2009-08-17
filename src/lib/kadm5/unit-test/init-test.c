@@ -10,10 +10,16 @@ int main()
      kadm5_ret_t ret;
      void *server_handle;
      kadm5_config_params params;
+     krb5_context context;
 
      memset(&params, 0, sizeof(params));
      params.mask |= KADM5_CONFIG_NO_AUTH;
-     ret = kadm5_init("admin", "admin", NULL, &params,
+     ret = kadm5_init_krb5_context(&context);
+     if (ret != 0) {
+	 com_err("init-test", ret, "while initializing krb5 context");
+	 exit(1);
+     }
+     ret = kadm5_init(context, "admin", "admin", NULL, &params,
 		      KADM5_STRUCT_VERSION, KADM5_API_VERSION_2, NULL,
 		      &server_handle);
      if (ret == KADM5_RPC_ERROR)

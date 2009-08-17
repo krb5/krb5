@@ -60,7 +60,8 @@
 
 enum init_type { INIT_PASS, INIT_SKEY, INIT_CREDS };
 
-static kadm5_ret_t _kadm5_init_any(char *client_name,
+static kadm5_ret_t _kadm5_init_any(krb5_context context,
+				   char *client_name,
 				   enum init_type init_type,
 				   char *pass,
 				   krb5_ccache ccache_in,
@@ -97,7 +98,8 @@ kadm5_rpc_auth(kadm5_server_handle_t handle,
 	       gss_cred_id_t gss_client_creds,
 	       gss_name_t gss_target);
 
-kadm5_ret_t kadm5_init_with_creds(char *client_name,
+kadm5_ret_t kadm5_init_with_creds(krb5_context context,
+				  char *client_name,
 				  krb5_ccache ccache,
 				  char *service_name,
 				  kadm5_config_params *params,
@@ -106,27 +108,27 @@ kadm5_ret_t kadm5_init_with_creds(char *client_name,
 				  char **db_args,
 				  void **server_handle)
 {
-     return _kadm5_init_any(client_name, INIT_CREDS, NULL, ccache,
+     return _kadm5_init_any(context, client_name, INIT_CREDS, NULL, ccache,
 			    service_name, params,
 			    struct_version, api_version, db_args,
 			    server_handle);
 }
 
 
-kadm5_ret_t kadm5_init_with_password(char *client_name, char *pass,
-				     char *service_name,
+kadm5_ret_t kadm5_init_with_password(krb5_context context, char *client_name,
+				     char *pass, char *service_name,
 				     kadm5_config_params *params,
 				     krb5_ui_4 struct_version,
 				     krb5_ui_4 api_version,
 				     char **db_args,
 				     void **server_handle)
 {
-     return _kadm5_init_any(client_name, INIT_PASS, pass, NULL,
+     return _kadm5_init_any(context, client_name, INIT_PASS, pass, NULL,
 			    service_name, params, struct_version,
 			    api_version, db_args, server_handle);
 }
 
-kadm5_ret_t kadm5_init(char *client_name, char *pass,
+kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
 		       char *service_name, 
 		       kadm5_config_params *params,
 		       krb5_ui_4 struct_version,
@@ -134,25 +136,25 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 		       char **db_args,
 		       void **server_handle)
 {
-     return _kadm5_init_any(client_name, INIT_PASS, pass, NULL,
+     return _kadm5_init_any(context, client_name, INIT_PASS, pass, NULL,
 			    service_name, params, struct_version,
 			    api_version, db_args, server_handle);
 }
 
-kadm5_ret_t kadm5_init_with_skey(char *client_name, char *keytab,
-				 char *service_name,
+kadm5_ret_t kadm5_init_with_skey(krb5_context context, char *client_name,
+				 char *keytab, char *service_name,
 				 kadm5_config_params *params,
 				 krb5_ui_4 struct_version,
 				 krb5_ui_4 api_version,
 				 char **db_args,
 				 void **server_handle)
 {
-     return _kadm5_init_any(client_name, INIT_SKEY, keytab, NULL,
+     return _kadm5_init_any(context, client_name, INIT_SKEY, keytab, NULL,
 			    service_name, params, struct_version,
 			    api_version, db_args, server_handle);
 }
 
-static kadm5_ret_t _kadm5_init_any(char *client_name,
+static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
 				   enum init_type init_type,
 				   char *pass,
 				   krb5_ccache ccache_in,
@@ -207,7 +209,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      handle->lhandle->struct_version = KADM5_STRUCT_VERSION;
      handle->lhandle->lhandle = handle->lhandle;
 
-     krb5_init_context(&handle->context);
+     handle->context = context;
 
      if(client_name == NULL) {
 	free(handle);
@@ -258,7 +260,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 
      if ((code = kadm5_get_config_params(handle->context, 0,
 					 params_in, &handle->params))) {
-	  krb5_free_context(handle->context);
 	  free(handle);
 	  return(code);
      }
@@ -268,7 +269,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 			 KADM5_CONFIG_KADMIND_PORT) 
 
      if ((handle->params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
-	  krb5_free_context(handle->context);
 	  free(handle);
 	  return KADM5_MISSING_KRB5_CONF_PARAMS;
      }
@@ -792,7 +792,6 @@ kadm5_destroy(void *server_handle)
           free (handle->lhandle);
 
      kadm5_free_config_params(handle->context, &handle->params);
-     krb5_free_context(handle->context);
 
      handle->magic_number = 0;
      free(handle);

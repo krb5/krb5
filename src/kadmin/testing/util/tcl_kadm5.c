@@ -1600,13 +1600,13 @@ static int _tcl_kadm5_init_any(enum init_type init_type, ClientData clientData,
 	       }
 	  }
 
-	  ret = kadm5_init_with_creds(client_name, cc, service_name,
+	  ret = kadm5_init_with_creds(context, client_name, cc, service_name,
 				      &params, struct_version,
 				      api_version, NULL, &server_handle); 
 	  
 	  (void) krb5_cc_close(context, cc);
      } else
-	  ret = kadm5_init(client_name, pass, service_name, &params,
+	  ret = kadm5_init(context, client_name, pass, service_name, &params,
 			   struct_version, api_version, NULL, &server_handle);
 
      if (ret != KADM5_OK) {

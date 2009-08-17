@@ -8,13 +8,19 @@ int main(int argc, char **argv)
      void *server_handle;
      char **names;
      int count, princ, i;
+     krb5_context context;
 
      if (argc != 3) {
 	  fprintf(stderr, "Usage: %s [-princ|-pol] exp\n", argv[0]);
 	  exit(1);
      }
      princ = (strcmp(argv[1], "-princ") == 0);
-     
+
+     ret = kadm5_init_krb5_context(&context);
+     if (ret != KADM5_OK) {
+	 com_err("iter-test", ret, "while initializing context");
+	 exit(1);
+     }
      ret = kadm5_init("admin", "admin", KADM5_ADMIN_SERVICE, 0,
 		      KADM5_STRUCT_VERSION, KADM5_API_VERSION_2, NULL,
 		      &server_handle);

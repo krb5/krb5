@@ -479,7 +479,7 @@ char *kadmin_startup(argc, argv)
     if (ccache_name) {
 	printf("Authenticating as principal %s with existing credentials.\n",
 	       princstr);
-	retval = kadm5_init_with_creds(princstr, cc,
+	retval = kadm5_init_with_creds(context, princstr, cc,
 				       svcname,
 				       &params,
 				       KADM5_STRUCT_VERSION,
@@ -493,7 +493,7 @@ char *kadmin_startup(argc, argv)
 	else
 	    printf("Authenticating as principal %s with default keytab.\n",
 		   princstr);
-	retval = kadm5_init_with_skey(princstr, keytab_name,
+	retval = kadm5_init_with_skey(context, princstr, keytab_name,
 				      svcname,
 				      &params,
 				      KADM5_STRUCT_VERSION,
@@ -503,7 +503,7 @@ char *kadmin_startup(argc, argv)
     } else {
 	printf("Authenticating as principal %s with password.\n",
 	       princstr);
-	retval = kadm5_init_with_password(princstr, password,
+	retval = kadm5_init_with_password(context, princstr, password,
 					  svcname,
 					  &params,
 					  KADM5_STRUCT_VERSION,
