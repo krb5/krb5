@@ -190,7 +190,7 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
     if ((retval = krb5_timeofday(context, &time_now)))
         return(retval);
     /* XXX we know they are the same size... */
-    rep->expected_nonce = tgsreq.nonce = (krb5_int32) time_now;;
+    rep->expected_nonce = tgsreq.nonce = (krb5_int32) time_now;
     rep->request_time = time_now;
     rep->message_type = KRB5_ERROR;  /*caller only uses the response
                                       * element on successful return*/ 
