@@ -664,7 +664,7 @@ tgt_again:
     enc_tkt_reply.authorization_data = NULL;
 
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-        isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM))
+        !isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM))
         enc_tkt_reply.client = s4u_x509_user->user_id.user;
     else
         enc_tkt_reply.client = header_enc_tkt->client;
