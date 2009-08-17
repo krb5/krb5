@@ -441,14 +441,8 @@ tgt_again:
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
-        if (!krb5_is_tgs_principal(server.princ) &&
-            is_local_principal(server.princ)) {
-            if (isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
-                setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-            else
-                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-        }
-        if (isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
+        if (isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE) ||
+            !isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
             clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
     }
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
