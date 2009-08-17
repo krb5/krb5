@@ -438,8 +438,7 @@ tgt_again:
     /* processing of any of these flags.  For example, some */
     /* realms may refuse to issue renewable tickets         */
 
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE) &&
-        isflagset(header_enc_tkt->flags, TKT_FLG_FORWARDABLE))
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
         if (isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE) ||
@@ -457,8 +456,7 @@ tgt_again:
     if (isflagset(header_enc_tkt->flags, TKT_FLG_FORWARDED))
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDED);
 
-    if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE) &&
-        isflagset(header_enc_tkt->flags, TKT_FLG_PROXIABLE))
+    if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE))
         setflag(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
 
     if (isflagset(request->kdc_options, KDC_OPT_PROXY)) {
