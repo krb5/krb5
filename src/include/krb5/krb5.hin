@@ -1004,7 +1004,7 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define	KRB5_SAM_SEND_ENCRYPTED_SAD	0x40000000
 #define	KRB5_SAM_MUST_PK_ENCRYPT_SAD	0x20000000 /* currently must be zero */
 
-#define KRB5_S4U_OPTS_CHECK_LOGON_HOURS		0400000000 /* check logon hour restrictions */
+#define KRB5_S4U_OPTS_CHECK_LOGON_HOURS		0x40000000 /* check logon hour restrictions */
 #define KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE	0x20000000 /* sign with usage 27 instead of 26 */
 
 /* Reserved for SPX pre-authentication. */
