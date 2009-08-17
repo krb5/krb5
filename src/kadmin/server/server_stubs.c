@@ -1398,7 +1398,6 @@ get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
     gss_buffer_desc		client_name,
 				service_name;
     OM_uint32			minor_stat;    
-    kadm5_policy_ent_t	e;
     kadm5_principal_ent_rec	caller_ent;
     kadm5_server_handle_t	handle;
     const char			*errmsg = NULL;

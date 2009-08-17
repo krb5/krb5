@@ -14,8 +14,6 @@ static char *rcsid = "$Header$";
 kadm5_ret_t
 kadm5_free_policy_ent(void *server_handle, kadm5_policy_ent_t val)
 {
-    kadm5_server_handle_t	handle = server_handle;
-
     _KADM5_CHECK_HANDLE(server_handle);
 
     if (val)

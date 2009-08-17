@@ -1476,7 +1476,6 @@ kadm5_randkey_principal_3(void *server_handle,
     osa_princ_ent_rec		adb;
     krb5_int32			now;
     kadm5_policy_ent_rec	pol;
-    krb5_key_data		*key_data;
     int				ret, last_pwd, have_pol = 0;
     kadm5_server_handle_t	handle = server_handle;
     krb5_keyblock               *act_mkey;
@@ -2004,7 +2003,6 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
 {
     krb5_db_entry               kdb;
     osa_princ_ent_rec           adb;
-    krb5_key_data               *key_data;
     kadm5_ret_t                 ret;
     kadm5_server_handle_t       handle = server_handle;
     krb5_keyblock               *mkey_ptr;
