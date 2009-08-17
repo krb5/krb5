@@ -688,7 +688,7 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
     if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
         goto cleanup;
 
-    kdcopt = KDC_OPT_FORWARDABLE; /* always ask, KDC can deny */
+    kdcopt = 0;
     if (options & KRB5_GC_CANONICALIZE)
         kdcopt |= KDC_OPT_CANONICALIZE;
 
