@@ -460,6 +460,8 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_pa_s4u_x509_user s4u_user;
     int referral_count = 0, i;
+    krb5_principal s4u_server = NULL;
+    char *s4u_server_name = NULL;
 
     memset(&tgtq, 0, sizeof(tgtq));
     memset(&s4u_creds, 0, sizeof(s4u_creds));
@@ -470,7 +472,8 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     if (in_creds->client != NULL && krb5_princ_size(context, in_creds->client)) {
         if (krb5_princ_type(context, in_creds->client) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
-            code = krb5_build_principal_ext(context, &s4u_user.user_id.user,
+            code = krb5_build_principal_ext(context,
+                                            &s4u_user.user_id.user,
                                             user_realm->length,
                                             user_realm->data,
                                             in_creds->client->data[0].length,
@@ -525,6 +528,33 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+    /* Qualify server principal against its realm, if cross-realm */
+    if (!data_eq(in_creds->server->realm, tgtptr->server->data[1])) {
+        unsigned int s4u_server_size;
+
+        s4u_server = s4u_creds.server;
+        s4u_creds.server = NULL;
+
+        code = krb5_unparse_name_ext(context, in_creds->server,
+                                     &s4u_server_name, &s4u_server_size);
+        if (code != 0)
+            goto cleanup;
+
+        assert(s4u_server_size != 0);
+
+        code = krb5_build_principal_ext(context,
+                                        &s4u_creds.server,
+                                        tgtptr->server->data[1].length,
+                                        tgtptr->server->data[1].data,
+                                        s4u_server_size - 1,
+                                        s4u_server_name,
+                                        0);
+        if (code != 0)
+            goto cleanup;
+
+        s4u_creds.server->type = KRB5_NT_ENTERPRISE_PRINCIPAL;
+    }
+
     /* Then, walk back the referral path to S4U2Self for user */
     for (referral_count = 0;
          referral_count < KRB5_REFERRAL_MAXHOPS;
@@ -548,19 +578,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
                 goto cleanup;
             }
         }
-
-        /*
-         * We need to rewrite the server realm, both so that libkrb5
-         * can locate the correct KDC, and so that the KDC accepts
-         * the response. This is unclear in the specification.
-         */
-        krb5_free_data_contents(context, &s4u_creds.server->realm);
-
-        code = krb5int_copy_data_contents(context,
-                                          &tgtptr->server->data[1],
-                                          &s4u_creds.server->realm);
-        if (code != 0)
-            goto cleanup;
 
         code = krb5_get_cred_via_tkt_ext(context, tgtptr,
                                          KDC_OPT_CANONICALIZE |
@@ -611,13 +628,32 @@ krb5_get_self_cred_from_kdc(krb5_context context,
                     goto cleanup;
                 }
             }
+
             tgtptr = *out_creds;
             referral_tgts[referral_count] = *out_creds;
             *out_creds = NULL;
+
+            if (data_eq(in_creds->server->realm, tgtptr->server->data[1])) {
+                assert(s4u_creds.server != s4u_server);
+
+                /* Substitute canonical server name on the final hop */
+                krb5_free_principal(context, s4u_creds.server);
+                s4u_creds.server = s4u_server;
+                s4u_server = NULL;
+            } else {
+                /* Rewrite server realm to match TGS realm */
+                krb5_free_data_contents(context, &s4u_creds.server->realm);
+
+                code = krb5int_copy_data_contents(context,
+                                                  &tgtptr->server->data[1],
+                                                  &s4u_creds.server->realm);
+                if (code != 0)
+                    goto cleanup;
+            }
         } else {
             krb5_free_creds(context, *out_creds);
             *out_creds = NULL;
-            code = KRB5_ERR_HOST_REALM_UNKNOWN; /* XXX */
+            code = KRB5KRB_AP_WRONG_PRINC; /* XXX */
             break;
         }
     }
@@ -654,6 +690,10 @@ cleanup:
     if (s4u_user.user_id.user != NULL)
         krb5_free_principal(context, s4u_user.user_id.user);
     krb5_free_checksum_contents(context, &s4u_user.cksum);
+    if (s4u_server != NULL)
+        krb5_free_principal(context, s4u_server);
+    if (s4u_server_name != NULL)
+        krb5_free_unparsed_name(context, s4u_server_name);
 
     return code;
 }
