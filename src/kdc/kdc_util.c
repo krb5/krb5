@@ -1850,11 +1850,12 @@ verify_for_user_checksum(krb5_context context,
 static krb5_error_code
 verify_s4u_x509_user_checksum(krb5_context context,
 			      krb5_keyblock *key,
+			      krb5_data *req_data,
 			      krb5_int32 kdc_req_nonce,
 			      krb5_pa_s4u_x509_user *req)
 {
     krb5_error_code		code;
-    krb5_data			*data;
+    krb5_data			scratch;
     krb5_boolean		valid = FALSE;
 
     if (enctype_requires_etype_info_2(key->enctype) &&
@@ -1864,23 +1865,39 @@ verify_s4u_x509_user_checksum(krb5_context context,
     if (req->user_id.nonce != kdc_req_nonce)
 	return KRB5KRB_AP_ERR_MODIFIED;
 
-    code = encode_krb5_s4u_userid(&req->user_id, &data);
-    if (code != 0)
-	return code;
+    if (fetch_asn1_field((unsigned char *)req_data->data, 1, 0, &scratch) < 0)
+	return ASN1_PARSE_ERROR;
 
     code = krb5_c_verify_checksum(context,
 				  key,
 				  KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST,
-				  data,
+				  &scratch,
 				  &req->cksum,
 				  &valid);
+    if (code != 0)
+	return code;
 
-    if (code == 0 && valid == FALSE)
-	code = KRB5KRB_AP_ERR_MODIFIED;
+    if (valid == FALSE) {
+	krb5_data *data;
 
-    krb5_free_data(context, data);
+	code = encode_krb5_s4u_userid(&req->user_id, &data);
+	if (code != 0)
+	    return code;
 
-    return code;
+	code = krb5_c_verify_checksum(context,
+				      key,
+				      KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST,
+				      data,
+				      &req->cksum,
+				      &valid);
+
+	krb5_free_data(context, data);
+
+	if (code != 0)
+	    return code;
+    }
+
+    return valid ? 0 : KRB5KRB_AP_ERR_MODIFIED;
 }
 
 krb5_error_code
@@ -2017,6 +2034,7 @@ kdc_process_s4u2self_req(krb5_context context,
 
 	code = verify_s4u_x509_user_checksum(context,
 					     tgs_subkey ? tgs_subkey : tgs_session,
+					     &req_data,
 					     request->nonce, *s4u_x509_user);
 	if (code) {
 	    *status = "INVALID_S4U2SELF_CHECKSUM";
