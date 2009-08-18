@@ -445,8 +445,9 @@ tgt_again:
             /*
              * If S4U2Self principal is not forwardable, then mark ticket as
              * unforwardable. This behaviour matches Windows rather than MIT
-             * (which returns KDC_ERR_BADOPTION in the AS-REQ code path; see
-             * validate_forwardable()).
+             * (which returns KDC_ERR_BADOPTION in the AS-REQ code path).
+	     *
+	     * Consider this block the S4U2Self validate_forwardable().
              */
             if (c_nprincs &&
                 isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
