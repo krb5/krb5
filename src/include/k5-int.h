@@ -972,6 +972,9 @@ typedef struct _krb5_s4u_userid {
     krb5_flags		options;
 } krb5_s4u_userid;
 
+#define KRB5_S4U_OPTS_CHECK_LOGON_HOURS		0x40000000 /* check logon hour restrictions */
+#define KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE	0x20000000 /* sign with usage 27 instead of 26 */
+
 typedef struct _krb5_pa_s4u_x509_user {
     krb5_s4u_userid	user_id;
     krb5_checksum	cksum;
