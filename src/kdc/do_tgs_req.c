@@ -458,9 +458,9 @@ tgt_again:
                 !isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
                 clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
         }
-   }
+    }
 
-   if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDED);
 
         /* include new addresses in ticket & reply */
