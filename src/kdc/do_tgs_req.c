@@ -438,14 +438,29 @@ tgt_again:
     /* processing of any of these flags.  For example, some */
     /* realms may refuse to issue renewable tickets         */
 
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) {
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
-        if (isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE) ||
-            !isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
-            clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-    }
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
+
+        if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
+            /*
+             * If S4U2Self principal is not forwardable, then mark ticket as
+             * unforwardable. Note that handle_authdata() may also clear
+             * this flag.
+             */
+            if (c_nprincs &&
+                isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
+                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+            /*
+             * OK_TO_AUTH_AS_DELEGATE must be set on the service requesting
+             * S4U2Self in order for forwardable tickets to be returned.
+             */
+            else if (!is_referral &&
+                !isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
+                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+        }
+   }
+
+   if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDED);
 
         /* include new addresses in ticket & reply */
