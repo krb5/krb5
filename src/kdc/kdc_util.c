@@ -920,7 +920,7 @@ fail:
  * as a com_err error number!
  */
 #define AS_INVALID_OPTIONS (KDC_OPT_FORWARDED | KDC_OPT_PROXY |\
-KDC_OPT_VALIDATE | KDC_OPT_RENEW | KDC_OPT_ENC_TKT_IN_SKEY)
+KDC_OPT_VALIDATE | KDC_OPT_RENEW | KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
 		    krb5_db_entry server, krb5_timestamp kdc_time,
@@ -1984,58 +1984,6 @@ cleanup:
 }
 
 /*
- * Protocol transition validation code based on AS-REQ
- * validation code
- */
-static int
-validate_s4u2self_request(krb5_kdc_req *request,
-			  const krb5_db_entry *client,
-			  krb5_timestamp kdc_time,
-			  const char **status)
-{
-    int				errcode;
-    krb5_db_entry		server = { 0 };
- 
-    /* The client must not be expired */
-    if (client->expiration && client->expiration < kdc_time) {
-	*status = "CLIENT EXPIRED";
-	return KDC_ERR_NAME_EXP;
-    }
-
-    /* The client's password must not be expired, unless the server is
-      a KRB5_KDC_PWCHANGE_SERVICE. */
-    if (client->pw_expiration && client->pw_expiration < kdc_time) {
-	*status = "CLIENT KEY EXPIRED";
-	return KDC_ERR_KEY_EXP;
-    }
-
-    /*
-     * If the client requires password changing, then return an
-     * error; S4U2Self cannot be used to change a password.
-     */
-    if (isflagset(client->attributes, KRB5_KDB_REQUIRES_PWCHANGE)) {
-	*status = "REQUIRED PWCHANGE";
-	return KDC_ERR_KEY_EXP;
-    }
-
-    /* Check to see if client is locked out */
-    if (isflagset(client->attributes, KRB5_KDB_DISALLOW_ALL_TIX)) {
-	*status = "CLIENT LOCKED OUT";
-	return KDC_ERR_C_PRINCIPAL_UNKNOWN;
-    }
-
-    /*
-     * Check against local policy
-     */
-    errcode = against_local_policy_as(request, *client, server,
-				      kdc_time, status); 
-    if (errcode)
-	return errcode;
-
-    return 0;
-}
-
-/*
  * Protocol transition (S4U2Self)
  */
 krb5_error_code
@@ -2138,7 +2086,7 @@ kdc_process_s4u2self_req(krb5_context context,
      * We can assert from this check that the header ticket was a TGT, as
      * that is validated previously in validate_tgs_request().
      */
-    if (request->kdc_options & (NO_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)) {
+    if (request->kdc_options & AS_INVALID_OPTIONS) {
 	return KRB5KDC_ERR_BADOPTION;
     }
 
@@ -2146,6 +2094,8 @@ kdc_process_s4u2self_req(krb5_context context,
      * Do not attempt to lookup principals in foreign realms.
      */
     if (is_local_principal((*s4u_x509_user)->user_id.user)) {
+	krb5_db_entry no_server;
+
 	*nprincs = 1;
 	code = krb5_db_get_principal_ext(kdc_context,
 					 (*s4u_x509_user)->user_id.user,
@@ -2165,7 +2115,9 @@ kdc_process_s4u2self_req(krb5_context context,
 	    return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
 	}
 
-	code = validate_s4u2self_request(request, princ, kdc_time, status);
+	memset(&no_server, 0, sizeof(no_server));
+
+	code = validate_as_request(request, *princ, no_server, kdc_time, status);
 	if (code) {
 	    return code;
 	}
