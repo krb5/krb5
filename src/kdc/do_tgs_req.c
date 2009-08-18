@@ -446,8 +446,8 @@ tgt_again:
              * If S4U2Self principal is not forwardable, then mark ticket as
              * unforwardable. This behaviour matches Windows rather than MIT
              * (which returns KDC_ERR_BADOPTION in the AS-REQ code path).
-	     *
-	     * Consider this block the S4U2Self validate_forwardable().
+             *
+             * Consider this block the S4U2Self validate_forwardable().
              */
             if (c_nprincs &&
                 isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
@@ -857,13 +857,13 @@ tgt_again:
     reply.msg_type = KRB5_TGS_REP;
     reply.padata = 0;/* always */
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-	find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER) != NULL) {
-	errcode = kdc_process_s4u2self_rep(kdc_context,
-					   subkey,
-					   header_ticket->enc_part2->session,
-					   s4u_x509_user,
-					   &reply,
-					   &reply_encpart);
+        find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER) != NULL) {
+        errcode = kdc_process_s4u2self_rep(kdc_context,
+                                           subkey,
+                                           header_ticket->enc_part2->session,
+                                           s4u_x509_user,
+                                           &reply,
+                                           &reply_encpart);
         if (errcode) {
             status = "KDC_RETURN_S4U2SELF_PADATA";
             goto cleanup;
@@ -984,7 +984,7 @@ cleanup:
     if (c_nprincs)
         krb5_db_free_principal(kdc_context, &client, c_nprincs);
     if (s4u_x509_user != NULL)
-	krb5_free_pa_s4u_x509_user(kdc_context, s4u_x509_user);
+        krb5_free_pa_s4u_x509_user(kdc_context, s4u_x509_user);
     if (kdc_issued_auth_data != NULL)
         krb5_free_authdata(kdc_context, kdc_issued_auth_data);
     if (s4u_name != NULL)
