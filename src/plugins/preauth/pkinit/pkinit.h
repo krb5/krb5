@@ -225,7 +225,7 @@ struct _pkinit_req_context {
     pkinit_identity_opts *idopts;
     krb5_preauthtype pa_type;
 };
-typedef struct _pkinit_kdc_context *pkinit_kdc_context;
+typedef struct _pkinit_req_context *pkinit_req_context;
 
 /*
  * KDC's (per-realm) plugin context
@@ -239,7 +239,7 @@ struct _pkinit_kdc_context {
     char *realmname;
     unsigned int realmname_len;
 };
-typedef struct _pkinit_req_context *pkinit_req_context;
+typedef struct _pkinit_kdc_context *pkinit_kdc_context;
 
 /*
  * KDC's per-request context

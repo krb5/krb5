@@ -610,8 +610,7 @@ pkinit_server_verify_padata(krb5_context context,
     switch ((int)data->pa_type) {
 	case KRB5_PADATA_PK_AS_REQ:
 	    free_krb5_pa_pk_as_req(&reqp);
-	    if (cksum.contents != NULL)
-		free(cksum.contents);
+	    free(cksum.contents);
 	    if (der_req != NULL)
 		 krb5_free_data(context, der_req);
 	    break;
@@ -621,10 +620,8 @@ pkinit_server_verify_padata(krb5_context context,
     }
     if (tmp_as_req != NULL)
 	k5int_krb5_free_kdc_req(context, tmp_as_req); 
-    if (authp_data.data != NULL)
-	free(authp_data.data);
-    if (krb5_authz.data != NULL)
-	free(krb5_authz.data);
+    free(authp_data.data);
+    free(krb5_authz.data);
     if (reqctx != NULL)
 	pkinit_fini_kdc_req_context(context, reqctx);
     if (auth_pack != NULL)
@@ -977,7 +974,7 @@ pkinit_server_return_padata(krb5_context context,
 			 "/tmp/kdc_as_rep");
 #endif
 
-    *send_pa = (krb5_pa_data *) malloc(sizeof(krb5_pa_data));
+    *send_pa = malloc(sizeof(krb5_pa_data));
     if (*send_pa == NULL) {
 	retval = ENOMEM;
 	free(out_data->data);
@@ -1001,20 +998,15 @@ pkinit_server_return_padata(krb5_context context,
 
   cleanup:
     pkinit_fini_kdc_req_context(context, reqctx);
-    if (scratch.data != NULL)
-	free(scratch.data);
-    if (out_data != NULL)
-	free(out_data);
+    free(scratch.data);
+    free(out_data);
     if (encoded_dhkey_info != NULL)
 	krb5_free_data(context, encoded_dhkey_info);
     if (encoded_key_pack != NULL)
 	krb5_free_data(context, encoded_key_pack);
-    if (dh_pubkey != NULL)
-	free(dh_pubkey);
-    if (server_key != NULL)
-	free(server_key);
-    if (cksum_types != NULL)
-	free(cksum_types);
+    free(dh_pubkey);
+    free(server_key);
+    free(cksum_types);
 
     switch ((int)padata->pa_type) {
 	case KRB5_PADATA_PK_AS_REQ:
@@ -1186,7 +1178,7 @@ pkinit_server_plugin_init_realm(krb5_context context, const char *realmname,
 
     *pplgctx = NULL;
 
-    plgctx = (pkinit_kdc_context) calloc(1, sizeof(*plgctx));
+    plgctx = calloc(1, sizeof(*plgctx));
     if (plgctx == NULL)
 	goto errout;
 
@@ -1254,8 +1246,7 @@ pkinit_server_plugin_init(krb5_context context, void **blob,
     for (i = 0; realmnames[i] != NULL; i++) {};
     numrealms = i;
 
-    realm_contexts = (pkinit_kdc_context *)
-			calloc(numrealms+1, sizeof(pkinit_kdc_context));
+    realm_contexts = calloc(numrealms+1, sizeof(pkinit_kdc_context));
     if (realm_contexts == NULL)
 	return ENOMEM;
 
@@ -1321,7 +1312,7 @@ pkinit_init_kdc_req_context(krb5_context context, void **ctx)
     krb5_error_code retval = ENOMEM;
     pkinit_kdc_req_context reqctx = NULL;
 
-    reqctx = (pkinit_kdc_req_context)malloc(sizeof(*reqctx));
+    reqctx = malloc(sizeof(*reqctx));
     if (reqctx == NULL)
 	return retval;
     memset(reqctx, 0, sizeof(*reqctx));

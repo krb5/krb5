@@ -268,15 +268,15 @@ unsigned char pkinit_4096_dhprime[4096/8] = {
 static int pkinit_oids_refs = 0;
 
 krb5_error_code
-pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx) {
-
+pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx)
+{
     krb5_error_code retval = ENOMEM;
     pkinit_plg_crypto_context ctx = NULL;
 
     /* initialize openssl routines */
     openssl_init();
 
-    ctx = (pkinit_plg_crypto_context)malloc(sizeof(*ctx));
+    ctx = malloc(sizeof(*ctx));
     if (ctx == NULL)
 	goto out;
     memset(ctx, 0, sizeof(*ctx));
@@ -318,7 +318,7 @@ pkinit_init_identity_crypto(pkinit_identity_crypto_context *idctx)
     krb5_error_code retval = ENOMEM;
     pkinit_identity_crypto_context ctx = NULL;
 
-    ctx = (pkinit_identity_crypto_context)malloc(sizeof(*ctx));
+    ctx = malloc(sizeof(*ctx));
     if (ctx == NULL)
 	goto out;
     memset(ctx, 0, sizeof(*ctx));
@@ -358,11 +358,10 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context idctx)
 krb5_error_code
 pkinit_init_req_crypto(pkinit_req_crypto_context *cryptoctx)
 {
-
     krb5_error_code retval = ENOMEM;
     pkinit_req_crypto_context ctx = NULL;
 
-    ctx = (pkinit_req_crypto_context)malloc(sizeof(*ctx));
+    ctx = malloc(sizeof(*ctx));
     if (ctx == NULL)
 	goto out;
     memset(ctx, 0, sizeof(*ctx));
@@ -684,14 +683,10 @@ pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx)
 	pkinit_C_UnloadModule(ctx->p11_module);
 	ctx->p11_module = NULL;
     }
-    if (ctx->p11_module_name != NULL)
-	free(ctx->p11_module_name);
-    if (ctx->token_label != NULL)
-	free(ctx->token_label);
-    if (ctx->cert_id != NULL)
-	free(ctx->cert_id);
-    if (ctx->cert_label != NULL)
-	free(ctx->cert_label);
+    free(ctx->p11_module_name);
+    free(ctx->token_label);
+    free(ctx->cert_id);
+    free(ctx->cert_label);
 #endif
 }
 
@@ -894,7 +889,7 @@ cms_signeddata_create(krb5_context context,
 	alg->algorithm = OBJ_nid2obj(NID_sha1);
 	alg->parameter = NULL;
 	alg_len = i2d_X509_ALGOR(alg, NULL);
-	alg_buf = (unsigned char *)malloc(alg_len);
+	alg_buf = malloc(alg_len);
 	if (alg_buf == NULL)
 	    goto cleanup2;
 
@@ -903,13 +898,13 @@ cms_signeddata_create(krb5_context context,
 	    goto cleanup2;
 	ASN1_OCTET_STRING_set(digest, md_data2, (int)md_len2);
 	digest_len = i2d_ASN1_OCTET_STRING(digest, NULL);
-	digest_buf = (unsigned char *)malloc(digest_len);
+	digest_buf = malloc(digest_len);
 	if (digest_buf == NULL)
 	    goto cleanup2;
 
 	digestInfo_len = ASN1_object_size(1, (int)(alg_len + digest_len),
 					  V_ASN1_SEQUENCE);
-	y = digestInfo_buf = (unsigned char *)malloc(digestInfo_len);
+	y = digestInfo_buf = malloc(digestInfo_len);
 	if (digestInfo_buf == NULL)
 	    goto cleanup2;
 	ASN1_put_object(&y, 1, (int)(alg_len + digest_len), V_ASN1_SEQUENCE,
@@ -987,8 +982,7 @@ cms_signeddata_create(krb5_context context,
 	pkiDebug("failed to der encode pkcs7\n");
 	goto cleanup2;
     }
-    if ((p = *signed_data =
-	 (unsigned char *) malloc((size_t)*signed_data_len)) == NULL)
+    if ((p = *signed_data = malloc(*signed_data_len)) == NULL)
 	goto cleanup2;
 
     /* DER encode PKCS7 data */
@@ -1025,12 +1019,9 @@ cms_signeddata_create(krb5_context context,
     if (id_cryptoctx->pkcs11_method == 1 && 
 	    id_cryptoctx->mech == CKM_RSA_PKCS) {
 	EVP_MD_CTX_cleanup(&ctx2);
-	if (digest_buf != NULL)
-	    free(digest_buf);
-	if (digestInfo_buf != NULL)
-	    free(digestInfo_buf);
-	if (alg_buf != NULL)
-	    free(alg_buf);
+	free(digest_buf);
+	free(digestInfo_buf);
+	free(alg_buf);
 	if (digest != NULL)
 	    ASN1_OCTET_STRING_free(digest);
     }
@@ -1040,8 +1031,7 @@ cms_signeddata_create(krb5_context context,
   cleanup:
     if (p7 != NULL) 
 	PKCS7_free(p7);
-    if (sig != NULL)
-	free(sig);
+    free(sig);
 
     return retval;
 }
@@ -1340,7 +1330,7 @@ cms_signeddata_verify(krb5_context context,
 	print_buffer_bin((unsigned char *)authz->data, authz->length,
 			 "/tmp/kdc_ad_initial_verified_cas");
 #endif
-	*authz_data = (unsigned char *)malloc(authz->length);
+	*authz_data = malloc(authz->length);
 	if (*authz_data == NULL) {
 	    retval = ENOMEM;
 	    goto cleanup;
@@ -1471,7 +1461,7 @@ break;
     } 
 
     *out_len = i2d_PKCS7(p7, NULL);
-    if (!*out_len || (p = *out = (unsigned char *)malloc(*out_len)) == NULL) {
+    if (!*out_len || (p = *out = malloc(*out_len)) == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
     }
@@ -1491,10 +1481,8 @@ cleanup:
 	PKCS7_free(p7);
     if (in != NULL)
 	BIO_free(in);
-    if (signed_data != NULL)
-	free(signed_data);
-    if (enc_data != NULL)
-	free(enc_data);
+    free(signed_data);
+    free(enc_data);
     if (encerts != NULL)
 	sk_X509_free(encerts);
 	
@@ -1656,10 +1644,8 @@ cms_envelopeddata_verify(krb5_context context,
 	PKCS7_free(p7);
     if (out != NULL)
 	BIO_free(out);
-    if (tmp_buf != NULL)
-	free(tmp_buf);
-    if (tmp_buf2 != NULL)
-	free(tmp_buf2);
+    free(tmp_buf);
+    free(tmp_buf2);
 
     return retval;
 }
@@ -1949,8 +1935,7 @@ pkinit_octetstring2key(krb5_context context,
     size_t keybytes, keylength, offset;
     krb5_data random_data;
 
-
-    if ((buf = (unsigned char *) malloc(dh_key_len)) == NULL) {
+    if ((buf = malloc(dh_key_len)) == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
     }
@@ -1995,8 +1980,7 @@ pkinit_octetstring2key(krb5_context context,
     retval = krb5_c_random_to_key(context, etype, &random_data, key_block);
 
   cleanup:
-    if (buf != NULL)
-	free(buf);
+    free(buf);
     if (retval && key_block->contents != NULL && key_block->length != 0) {
 	memset(key_block->contents, 0, key_block->length);
 	key_block->length = 0;
@@ -2093,8 +2077,7 @@ client_create_dh(krb5_context context,
     if ((pub_key = BN_to_ASN1_INTEGER(cryptoctx->dh->pub_key, NULL)) == NULL)
 	goto cleanup;
     *dh_pubkey_len = i2d_ASN1_INTEGER(pub_key, NULL);
-    if ((buf = *dh_pubkey = (unsigned char *)
-	    malloc((size_t) *dh_pubkey_len)) == NULL) {
+    if ((buf = *dh_pubkey = malloc(*dh_pubkey_len)) == NULL) {
 	retval  = ENOMEM;
 	goto cleanup;
     }
@@ -2110,11 +2093,9 @@ client_create_dh(krb5_context context,
     if (cryptoctx->dh != NULL)
 	DH_free(cryptoctx->dh);
     cryptoctx->dh = NULL;
-    if (*dh_params != NULL)
-	free(*dh_params);
+    free(*dh_params);
     *dh_params = NULL;
-    if (*dh_pubkey != NULL)
-	free(*dh_pubkey);
+    free(*dh_pubkey);
     *dh_pubkey = NULL;
     if (pub_key != NULL)
 	ASN1_INTEGER_free(pub_key);
@@ -2149,8 +2130,7 @@ client_process_dh(krb5_context context,
     }
 
     *client_key_len = DH_size(cryptoctx->dh);
-    if ((*client_key = (unsigned char *)
-	    malloc((size_t) *client_key_len)) == NULL) {
+    if ((*client_key = malloc(*client_key_len)) == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
     }
@@ -2178,8 +2158,7 @@ client_process_dh(krb5_context context,
     return retval;
 
   cleanup:
-    if (*client_key != NULL)
-	free(*client_key);
+    free(*client_key);
     *client_key = NULL;
     if (pub_key != NULL)
 	ASN1_INTEGER_free(pub_key);
@@ -2294,7 +2273,7 @@ server_process_dh(krb5_context context,
 
     /* generate DH session key */
     *server_key_len = DH_size(dh_server);
-    if ((*server_key = (unsigned char *) malloc((size_t)*server_key_len)) == NULL)
+    if ((*server_key = malloc(*server_key_len)) == NULL)
 	goto cleanup;
     DH_compute_key(*server_key, dh->pub_key, dh_server);
 
@@ -2316,7 +2295,7 @@ server_process_dh(krb5_context context,
     if ((pub_key = BN_to_ASN1_INTEGER(dh_server->pub_key, NULL)) == NULL)
 	goto cleanup;
     *dh_pubkey_len = i2d_ASN1_INTEGER(pub_key, NULL);
-    if ((p = *dh_pubkey = (unsigned char *) malloc((size_t)*dh_pubkey_len)) == NULL)
+    if ((p = *dh_pubkey = malloc(*dh_pubkey_len)) == NULL)
 	goto cleanup;
     i2d_ASN1_INTEGER(pub_key, &p);
     if (pub_key != NULL)
@@ -2331,10 +2310,8 @@ server_process_dh(krb5_context context,
   cleanup:
     if (dh_server != NULL)
 	DH_free(dh_server);
-    if (*dh_pubkey != NULL)
-	free(*dh_pubkey);
-    if (*server_key != NULL)
-	free(*server_key);
+    free(*dh_pubkey);
+    free(*server_key);
 
     return retval;
 }
@@ -2374,7 +2351,7 @@ pkinit_encode_dh_params(BIGNUM *p, BIGNUM *g, BIGNUM *q,
 
     r = ASN1_object_size(1, bufsize, V_ASN1_SEQUENCE);
 
-    tmp = *buf = (unsigned char *)malloc((size_t) r);
+    tmp = *buf = malloc((size_t) r);
     if (tmp == NULL)
 	goto cleanup;
 
@@ -2503,7 +2480,7 @@ pkinit_create_sequence_of_principal_identifiers(
     print_buffer_bin((unsigned char *)td_certifiers->data,
 		     td_certifiers->length, "/tmp/kdc_td_certifiers");
 #endif
-    typed_data = malloc (2 * sizeof(krb5_typed_data *));
+    typed_data = malloc(2 * sizeof(krb5_typed_data *));
     if (typed_data == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
@@ -2527,9 +2504,9 @@ pkinit_create_sequence_of_principal_identifiers(
     print_buffer_bin((unsigned char *)data->data, data->length,
 		     "/tmp/kdc_edata");
 #endif
-    *out_data = (krb5_data *)malloc(sizeof(krb5_data));
+    *out_data = malloc(sizeof(krb5_data));
     (*out_data)->length = data->length;
-    (*out_data)->data = (char *)malloc(data->length);
+    (*out_data)->data = malloc(data->length);
     memcpy((*out_data)->data, data->data, data->length);
 
     retval = 0;
@@ -2539,16 +2516,12 @@ cleanup:
 	free_krb5_external_principal_identifier(&krb5_trusted_certifiers);
 
     if (data != NULL) {
-	if (data->data != NULL)
-	    free(data->data);
+	free(data->data);
 	free(data);
     }
 
-    if (td_certifiers != NULL)
-	free(td_certifiers);
-
-    if (typed_data != NULL)
-	free_krb5_typed_data(&typed_data);
+    free(td_certifiers);
+    free_krb5_typed_data(&typed_data);
 
     return retval;
 }
@@ -2629,30 +2602,30 @@ pkinit_create_td_dh_parameters(krb5_context context,
 	if (algId == NULL)
 	    goto cleanup;
 	algId[3] = NULL;
-	algId[0] = (krb5_algorithm_identifier *)malloc(sizeof(krb5_algorithm_identifier));
+	algId[0] = malloc(sizeof(krb5_algorithm_identifier));
 	if (algId[0] == NULL)
 	    goto cleanup;
-	algId[0]->parameters.data = (unsigned char *)malloc(buf2_len);
+	algId[0]->parameters.data = malloc(buf2_len);
 	if (algId[0]->parameters.data == NULL)
 	    goto cleanup;
 	memcpy(algId[0]->parameters.data, buf2, buf2_len);
 	algId[0]->parameters.length = buf2_len;
 	algId[0]->algorithm = dh_oid;
 
-	algId[1] = (krb5_algorithm_identifier *)malloc(sizeof(krb5_algorithm_identifier));
+	algId[1] = malloc(sizeof(krb5_algorithm_identifier));
 	if (algId[1] == NULL)
 	    goto cleanup;
-	algId[1]->parameters.data = (unsigned char *)malloc(buf3_len);
+	algId[1]->parameters.data = malloc(buf3_len);
 	if (algId[1]->parameters.data == NULL)
 	    goto cleanup;
 	memcpy(algId[1]->parameters.data, buf3, buf3_len);
 	algId[1]->parameters.length = buf3_len;
 	algId[1]->algorithm = dh_oid;
 
-	algId[2] = (krb5_algorithm_identifier *)malloc(sizeof(krb5_algorithm_identifier));
+	algId[2] = malloc(sizeof(krb5_algorithm_identifier));
 	if (algId[2] == NULL)
 	    goto cleanup;
-	algId[2]->parameters.data = (unsigned char *)malloc(buf1_len);
+	algId[2]->parameters.data = malloc(buf1_len);
 	if (algId[2]->parameters.data == NULL)
 	    goto cleanup;
 	memcpy(algId[2]->parameters.data, buf1, buf1_len);
@@ -2664,20 +2637,20 @@ pkinit_create_td_dh_parameters(krb5_context context,
 	if (algId == NULL)
 	    goto cleanup;
 	algId[2] = NULL;
-	algId[0] = (krb5_algorithm_identifier *)malloc(sizeof(krb5_algorithm_identifier));
+	algId[0] = malloc(sizeof(krb5_algorithm_identifier));
 	if (algId[0] == NULL)
 	    goto cleanup;
-	algId[0]->parameters.data = (unsigned char *)malloc(buf2_len);
+	algId[0]->parameters.data = malloc(buf2_len);
 	if (algId[0]->parameters.data == NULL)
 	    goto cleanup;
 	memcpy(algId[0]->parameters.data, buf2, buf2_len);
 	algId[0]->parameters.length = buf2_len;
 	algId[0]->algorithm = dh_oid;
 
-	algId[1] = (krb5_algorithm_identifier *)malloc(sizeof(krb5_algorithm_identifier));
+	algId[1] = malloc(sizeof(krb5_algorithm_identifier));
 	if (algId[1] == NULL)
 	    goto cleanup;
-	algId[1]->parameters.data = (unsigned char *)malloc(buf3_len);
+	algId[1]->parameters.data = malloc(buf3_len);
 	if (algId[1]->parameters.data == NULL)
 	    goto cleanup;
 	memcpy(algId[1]->parameters.data, buf3, buf3_len);
@@ -2689,10 +2662,10 @@ pkinit_create_td_dh_parameters(krb5_context context,
 	if (algId == NULL)
 	    goto cleanup;
 	algId[1] = NULL;
-	algId[0] = (krb5_algorithm_identifier *)malloc(sizeof(krb5_algorithm_identifier));
+	algId[0] = malloc(sizeof(krb5_algorithm_identifier));
 	if (algId[0] == NULL)
 	    goto cleanup;
-	algId[0]->parameters.data = (unsigned char *)malloc(buf3_len);
+	algId[0]->parameters.data = malloc(buf3_len);
 	if (algId[0]->parameters.data == NULL)
 	    goto cleanup;
 	memcpy(algId[0]->parameters.data, buf3, buf3_len);
@@ -2707,7 +2680,7 @@ pkinit_create_td_dh_parameters(krb5_context context,
     print_buffer_bin((unsigned char *)encoded_algId->data,
 		     encoded_algId->length, "/tmp/kdc_td_dh_params");
 #endif
-    typed_data = malloc (2 * sizeof(krb5_typed_data *));
+    typed_data = malloc(2 * sizeof(krb5_typed_data *));
     if (typed_data == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
@@ -2731,11 +2704,11 @@ pkinit_create_td_dh_parameters(krb5_context context,
     print_buffer_bin((unsigned char *)data->data, data->length,
 		     "/tmp/kdc_edata");
 #endif
-    *out_data = (krb5_data *)malloc(sizeof(krb5_data));
+    *out_data = malloc(sizeof(krb5_data));
     if (*out_data == NULL)
 	goto cleanup;
     (*out_data)->length = data->length;
-    (*out_data)->data = (char *)malloc(data->length);
+    (*out_data)->data = malloc(data->length);
     if ((*out_data)->data == NULL) {
 	free(*out_data);
 	*out_data = NULL;
@@ -2746,26 +2719,19 @@ pkinit_create_td_dh_parameters(krb5_context context,
     retval = 0;
 cleanup:
 
-    if (buf1 != NULL)
-	free(buf1);
-    if (buf2 != NULL)
-	free(buf2);
-    if (buf3 != NULL)
-	free(buf3);
+    free(buf1);
+    free(buf2);
+    free(buf3);
     if (data != NULL) {
-	if (data->data != NULL)
-	    free(data->data);
+	free(data->data);
 	free(data);
     }
-    if (typed_data != NULL)
-	free_krb5_typed_data(&typed_data);
-    if (encoded_algId != NULL)
-	free(encoded_algId);
+    free_krb5_typed_data(&typed_data);
+    free(encoded_algId);
 
     if (algId != NULL) {
 	while(algId[i] != NULL) {
-	    if (algId[i]->parameters.data != NULL)
-		free(algId[i]->parameters.data);
+	    free(algId[i]->parameters.data);
 	    free(algId[i]);
 	    i++;
 	}
@@ -3021,7 +2987,7 @@ wrap_signeddata(unsigned char *data, unsigned int data_len,
 	tot_len = ASN1_object_size(1, (int)(orig_len+oid_len), V_ASN1_SEQUENCE);
     }
 
-    p = *out = (unsigned char *)malloc(tot_len);
+    p = *out = malloc(tot_len);
     if (p == NULL) return -1;
 
     if (is_longhorn_server == 0) {
@@ -3074,7 +3040,7 @@ wrap_signeddata(unsigned char *data, unsigned int data_len,
 
     tot_len = ASN1_object_size(1, (int)(oid_len), V_ASN1_SEQUENCE);
 
-    p = *out = (unsigned char *)malloc(tot_len);
+    p = *out = malloc(tot_len);
     if (p == NULL)
        return -1;
 
@@ -3116,7 +3082,7 @@ wrap_signeddata(unsigned char *data, unsigned int data_len,
 
     tot_len = ASN1_object_size(1, (int)(orig_len+oid_len), V_ASN1_SEQUENCE);
 
-    p = *out = (unsigned char *)malloc(tot_len);
+    p = *out = malloc(tot_len);
     if (p == NULL) return -1;
 
     ASN1_put_object(&p, 1, (int)(orig_len+oid_len),
@@ -3159,7 +3125,7 @@ prepare_enc_data(unsigned char *indata,
 
     asn1_const_Finish(&c);
 
-    *outdata = (unsigned char *)malloc((size_t)Tlen);
+    *outdata = malloc((size_t)Tlen);
     if (outdata == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
@@ -3230,7 +3196,7 @@ pkinit_login(krb5_context context,
 	if (asprintf(&prompt, "%.*s PIN%s", (int) sizeof (tip->label),
 		     tip->label, warning) < 0)
 	    return ENOMEM;
-	rdat.data = (char *)malloc(tip->ulMaxPinLen + 2);
+	rdat.data = malloc(tip->ulMaxPinLen + 2);
 	rdat.length = tip->ulMaxPinLen + 1;
 
 	kprompt.prompt = prompt;
@@ -3255,8 +3221,7 @@ pkinit_login(krb5_context context,
 	    r = KRB5KDC_ERR_PREAUTH_FAILED;
 	}
     }
-    if (rdat.data)
-	free(rdat.data);
+    free(rdat.data);
 
     return r;
 }
@@ -3290,14 +3255,14 @@ pkinit_open_session(krb5_context context,
     if (cctx->slotid != PK_NOSLOT) {
 	/* A slot was specified, so that's the only one in the list */
 	count = 1;
-	slotlist = (CK_SLOT_ID_PTR) malloc(sizeof (CK_SLOT_ID));
+	slotlist = malloc(sizeof(CK_SLOT_ID));
 	slotlist[0] = cctx->slotid;
     } else {
 	if (cctx->p11->C_GetSlotList(TRUE, NULL, &count) != CKR_OK)
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
 	if (count == 0)
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
-	slotlist = (CK_SLOT_ID_PTR) malloc(count * sizeof (CK_SLOT_ID));
+	slotlist = malloc(count * sizeof (CK_SLOT_ID));
 	if (cctx->p11->C_GetSlotList(TRUE, slotlist, &count) != CKR_OK)
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
     }
@@ -3490,7 +3455,7 @@ pkinit_decode_data_pkcs11(krb5_context context,
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
     pkiDebug("data_len = %d\n", data_len);
-    cp = (unsigned char *)malloc((size_t) data_len);
+    cp = malloc((size_t) data_len);
     if (cp == NULL)
 	return ENOMEM;
     len = data_len;
@@ -3592,7 +3557,7 @@ pkinit_sign_data_pkcs11(krb5_context context,
      * get that. So guess, and if it's too small, re-malloc.
      */
     len = PK_SIGLEN_GUESS;
-    cp = (unsigned char *)malloc((size_t) len);
+    cp = malloc((size_t) len);
     if (cp == NULL)
 	return ENOMEM;
 
@@ -3601,7 +3566,7 @@ pkinit_sign_data_pkcs11(krb5_context context,
     if (r == CKR_BUFFER_TOO_SMALL || (r == CKR_OK && len >= PK_SIGLEN_GUESS)) {
 	free(cp);
 	pkiDebug("C_Sign realloc %d\n", (int) len);
-	cp = (unsigned char *)malloc((size_t) len);
+	cp = malloc((size_t) len);
 	r = id_cryptoctx->p11->C_Sign(id_cryptoctx->session, data,
 				     (CK_ULONG) data_len, cp, &len);
     }
@@ -3655,7 +3620,7 @@ decode_data(unsigned char **out_data, unsigned int *out_data_len,
     }
 
     buf_len = EVP_PKEY_size(pkey);
-    buf = (unsigned char *)malloc((size_t) buf_len + 10);
+    buf = malloc((size_t) buf_len + 10);
     if (buf == NULL)
 	goto cleanup;
 
@@ -3687,7 +3652,7 @@ create_signature(unsigned char **sig, unsigned int *sig_len,
     EVP_VerifyInit(&md_ctx, EVP_sha1());
     EVP_SignUpdate(&md_ctx, data, data_len);
     *sig_len = EVP_PKEY_size(pkey);
-    if ((*sig = (unsigned char *) malloc((size_t) *sig_len)) == NULL)
+    if ((*sig = malloc(*sig_len)) == NULL)
 	goto cleanup;
     EVP_SignFinal(&md_ctx, *sig, sig_len, pkey);
 
@@ -4071,7 +4036,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 	pkiDebug("C_GetMechanismList: %s\n", pkinit_pkcs11_code_to_text(r));
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
-    mechp = (CK_MECHANISM_TYPE_PTR) malloc(count * sizeof (CK_MECHANISM_TYPE));
+    mechp = malloc(count * sizeof (CK_MECHANISM_TYPE));
     if (mechp == NULL)
 	return ENOMEM;
     if ((r = id_cryptoctx->p11->C_GetMechanismList(id_cryptoctx->slotid,
@@ -4209,8 +4174,7 @@ free_cred_info(krb5_context context,
 	if (cred->key != NULL)
 	    EVP_PKEY_free(cred->key);
 #ifndef WITHOUT_PKCS11
-	if (cred->cert_id != NULL)
-	    free(cred->cert_id);
+	free(cred->cert_id);
 #endif
 	free(cred);
     }
@@ -4981,7 +4945,7 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
     krb5_cas[sk_size] = NULL;
 
     for (i = 0; i < sk_size; i++) {
-	krb5_cas[i] = (krb5_external_principal_identifier *)malloc(sizeof(krb5_external_principal_identifier));
+	krb5_cas[i] = malloc(sizeof(krb5_external_principal_identifier));
 
 	x = sk_X509_value(sk, i);
 
@@ -4995,7 +4959,7 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
 
 	xn = X509_get_subject_name(x);
 	len = i2d_X509_NAME(xn, NULL);
-	if ((p = krb5_cas[i]->subjectName.data = (unsigned char *)malloc((size_t) len)) == NULL)
+	if ((p = krb5_cas[i]->subjectName.data = malloc((size_t) len)) == NULL)
 	    goto cleanup;
 	i2d_X509_NAME(xn, &p);
 	krb5_cas[i]->subjectName.length = len;
@@ -5014,7 +4978,7 @@ if (longhorn == 0) { /* XXX Longhorn doesn't like this */
 	is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
 	len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
 	if ((p = krb5_cas[i]->issuerAndSerialNumber.data =
-	     (unsigned char *)malloc((size_t) len)) == NULL)
+	     malloc((size_t) len)) == NULL)
 	    goto cleanup;
 	i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
 	krb5_cas[i]->issuerAndSerialNumber.length = len;
@@ -5038,7 +5002,7 @@ if (longhorn == 0) {	/* XXX Longhorn doesn't like this */
 					   NULL))) {
 		len = i2d_ASN1_OCTET_STRING(ikeyid, NULL);
 		if ((p = krb5_cas[i]->subjectKeyIdentifier.data =
-			(unsigned char *)malloc((size_t) len)) == NULL)
+		     malloc((size_t) len)) == NULL)
 		    goto cleanup;
 		i2d_ASN1_OCTET_STRING(ikeyid, &p);		
 		krb5_cas[i]->subjectKeyIdentifier.length = len;
@@ -5113,7 +5077,7 @@ create_krb5_supportedCMSTypes(krb5_context context,
     if (loids == NULL)
 	goto cleanup;
     loids[1] = NULL;
-    loids[0] = (krb5_algorithm_identifier *)malloc(sizeof(krb5_algorithm_identifier));
+    loids[0] = malloc(sizeof(krb5_algorithm_identifier));
     if (loids[0] == NULL) {
 	free(loids);
 	goto cleanup;
@@ -5182,7 +5146,7 @@ create_krb5_trustedCas(krb5_context context,
     krb5_cas[sk_size] = NULL;
 
     for (i = 0; i < sk_size; i++) {
-	krb5_cas[i] = (krb5_trusted_ca *)malloc(sizeof(krb5_trusted_ca));
+	krb5_cas[i] = malloc(sizeof(krb5_trusted_ca));
 	if (krb5_cas[i] == NULL)
 	    goto cleanup;
 	x = sk_X509_value(sk, i);
@@ -5201,7 +5165,7 @@ create_krb5_trustedCas(krb5_context context,
 		xn = X509_get_subject_name(x);
 		len = i2d_X509_NAME(xn, NULL);
 		if ((p = krb5_cas[i]->u.caName.data =
-		    (unsigned char *)malloc((size_t) len)) == NULL)
+		     malloc((size_t) len)) == NULL)
 		    goto cleanup;
 		i2d_X509_NAME(xn, &p);
 		krb5_cas[i]->u.caName.length = len;
@@ -5216,7 +5180,7 @@ create_krb5_trustedCas(krb5_context context,
 		is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
 		len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
 		if ((p = krb5_cas[i]->u.issuerAndSerial.data =
-		    (unsigned char *)malloc((size_t) len)) == NULL)
+		    malloc((size_t) len)) == NULL)
 		    goto cleanup;
 		i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
 		krb5_cas[i]->u.issuerAndSerial.length = len;
@@ -5264,7 +5228,7 @@ create_issuerAndSerial(krb5_context context,
     M_ASN1_INTEGER_free(is->serial);
     is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(cert));
     len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
-    if ((p = *out = (unsigned char *)malloc((size_t) len)) == NULL)
+    if ((p = *out = malloc((size_t) len)) == NULL)
 	goto cleanup;
     i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
     *out_len = len;
@@ -5557,7 +5521,7 @@ der_decode_data(unsigned char *data, long data_len,
     if ((s = d2i_ASN1_BIT_STRING(NULL, &p, data_len)) == NULL)
 	goto cleanup;
     *out_len = s->length;
-    if ((*out = (unsigned char *) malloc((size_t) *out_len + 1)) == NULL) {
+    if ((*out = malloc((size_t) *out_len + 1)) == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
     }

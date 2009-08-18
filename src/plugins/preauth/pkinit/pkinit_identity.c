@@ -113,7 +113,7 @@ pkinit_init_identity_opts(pkinit_identity_opts **idopts)
     pkinit_identity_opts *opts = NULL;
 
     *idopts = NULL;
-    opts = (pkinit_identity_opts *) calloc(1, sizeof(pkinit_identity_opts));
+    opts = calloc(1, sizeof(pkinit_identity_opts));
     if (opts == NULL)
 	return ENOMEM;
 
@@ -238,19 +238,13 @@ pkinit_fini_identity_opts(pkinit_identity_opts *idopts)
     free_list(idopts->crls);
     free_list(idopts->identity_alt);
 
-    if (idopts->cert_filename != NULL)
-	free(idopts->cert_filename);
-    if (idopts->key_filename != NULL)
-	free(idopts->key_filename);
+    free(idopts->cert_filename);
+    free(idopts->key_filename);
 #ifndef WITHOUT_PKCS11
-    if (idopts->p11_module_name != NULL)
-	free(idopts->p11_module_name);
-    if (idopts->token_label != NULL)
-	free(idopts->token_label);
-    if (idopts->cert_id_string != NULL)
-	free(idopts->cert_id_string);
-    if (idopts->cert_label != NULL)
-	free(idopts->cert_label);
+    free(idopts->p11_module_name);
+    free(idopts->token_label);
+    free(idopts->cert_id_string);
+    free(idopts->cert_label);
 #endif
     free(idopts);
 }
@@ -277,8 +271,7 @@ parse_pkcs11_options(krb5_context context,
 
 	/* If there is no "=", this is a pkcs11 module name */
 	if (vp == NULL) {
-	    if (idopts->p11_module_name != NULL)
-		free(idopts->p11_module_name);
+	    free(idopts->p11_module_name);
 	    idopts->p11_module_name = strdup(cp);
 	    if (idopts->p11_module_name == NULL)
 		goto cleanup;
@@ -286,8 +279,7 @@ parse_pkcs11_options(krb5_context context,
 	}
 	*vp++ = '\0';
 	if (!strcmp(cp, "module_name")) {
-	    if (idopts->p11_module_name != NULL)
-		free(idopts->p11_module_name);
+	    free(idopts->p11_module_name);
 	    idopts->p11_module_name = strdup(vp);
 	    if (idopts->p11_module_name == NULL)
 		goto cleanup;
@@ -303,20 +295,17 @@ parse_pkcs11_options(krb5_context context,
 	    }
 	    idopts->slotid = slotid;
 	} else if (!strcmp(cp, "token")) {
-	    if (idopts->token_label != NULL)
-		free(idopts->token_label);
+	    free(idopts->token_label);
 	    idopts->token_label = strdup(vp);
 	    if (idopts->token_label == NULL)
 		goto cleanup;
 	} else if (!strcmp(cp, "certid")) {
-	    if (idopts->cert_id_string != NULL)
-		free(idopts->cert_id_string);
+	    free(idopts->cert_id_string);
 	    idopts->cert_id_string = strdup(vp);
 	    if (idopts->cert_id_string == NULL)
 		goto cleanup;
 	} else if (!strcmp(cp, "certlabel")) {
-	    if (idopts->cert_label != NULL)
-		free(idopts->cert_label);
+	    free(idopts->cert_label);
 	    idopts->cert_label = strdup(vp);
 	    if (idopts->cert_label == NULL)
 		goto cleanup;
@@ -357,8 +346,7 @@ parse_fs_options(krb5_context context,
 
     retval = 0;
 cleanup:
-    if (certname != NULL)
-	free(certname);
+    free(certname);
     return retval;
 }
 

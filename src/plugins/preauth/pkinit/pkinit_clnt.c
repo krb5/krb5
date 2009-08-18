@@ -151,18 +151,18 @@ pa_pkinit_gen_req(krb5_context context,
      * The most we'll return is two pa_data, normally just one.
      * We need to make room for the NULL terminator.
      */
-    return_pa_data = (krb5_pa_data **) malloc(3 * sizeof(krb5_pa_data *));
+    return_pa_data = malloc(3 * sizeof(krb5_pa_data *));
     if (return_pa_data == NULL)
 	goto cleanup;
 
     return_pa_data[1] = NULL;	/* in case of an early trip to cleanup */
     return_pa_data[2] = NULL;	/* Terminate the list */
 
-    return_pa_data[0] = (krb5_pa_data *) malloc(sizeof(krb5_pa_data));
+    return_pa_data[0] = malloc(sizeof(krb5_pa_data));
     if (return_pa_data[0] == NULL)
 	goto cleanup;
 
-    return_pa_data[1] = (krb5_pa_data *) malloc(sizeof(krb5_pa_data));
+    return_pa_data[1] = malloc(sizeof(krb5_pa_data));
     if (return_pa_data[1] == NULL)
 	goto cleanup;
 
@@ -200,16 +200,12 @@ pa_pkinit_gen_req(krb5_context context,
   cleanup:
     if (der_req != NULL)
 	krb5_free_data(context, der_req);
-
-    if (out_data != NULL)
-	free(out_data);
+    free(out_data);
 
     if (retval) {
 	if (return_pa_data) {
-	    if (return_pa_data[0] != NULL)
-		free(return_pa_data[0]);
-	    if (return_pa_data[1] != NULL)
-		free(return_pa_data[1]);
+	    free(return_pa_data[0]);
+	    free(return_pa_data[1]);
 	    free(return_pa_data);
 	}
 	if (out_data) {
@@ -859,23 +855,19 @@ pkinit_as_rep_parse(krb5_context context,
     retval = 0;
 
 cleanup:
-    if (dh_data.data != NULL)
-	free(dh_data.data);
-    if (client_key != NULL)
-	free(client_key);
+    free(dh_data.data);
+    free(client_key);
     free_krb5_kdc_dh_key_info(&kdc_dh);
     free_krb5_pa_pk_as_rep(&kdc_reply);
 
     if (key_pack != NULL) {
 	free_krb5_reply_key_pack(&key_pack);
-	if (cksum.contents != NULL)
-	    free(cksum.contents);
+	free(cksum.contents);
     } 
     if (key_pack9 != NULL)
 	free_krb5_reply_key_pack_draft9(&key_pack9);
 
-    if (kdc_hostname != NULL)
-	free(kdc_hostname);
+    free(kdc_hostname);
 
     pkiDebug("pkinit_as_rep_parse returning %d (%s)\n",
 	     retval, error_message(retval));
@@ -1191,12 +1183,12 @@ pkinit_client_req_init(krb5_context context,
 		       void **request_context)
 {
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_req_context *reqctx = NULL;
-    struct _pkinit_context *plgctx = (struct _pkinit_context *)plugin_context;
+    pkinit_req_context reqctx = NULL;
+    pkinit_context plgctx = plugin_context;
 
     *request_context = NULL;
 
-    reqctx = (struct _pkinit_req_context *) malloc(sizeof(*reqctx));
+    reqctx = malloc(sizeof(*reqctx));
     if (reqctx == NULL)
 	return;
     memset(reqctx, 0, sizeof(*reqctx));
@@ -1253,8 +1245,7 @@ pkinit_client_req_fini(krb5_context context,
 		      void *plugin_context,
 		      void *request_context)
 {
-    struct _pkinit_req_context *reqctx =
-	(struct _pkinit_req_context *)request_context;
+    pkinit_req_context reqctx = request_context;
 
     pkiDebug("%s: received reqctx at %p\n", __FUNCTION__, reqctx);
     if (reqctx == NULL)
@@ -1284,9 +1275,9 @@ static int
 pkinit_client_plugin_init(krb5_context context, void **blob)
 {
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_context *ctx = NULL;
+    pkinit_context ctx = NULL;
 
-    ctx = (struct _pkinit_context *)calloc(1, sizeof(*ctx));
+    ctx = calloc(1, sizeof(*ctx));
     if (ctx == NULL)
 	return ENOMEM;
     memset(ctx, 0, sizeof(*ctx));
@@ -1325,7 +1316,7 @@ errout:
 static void
 pkinit_client_plugin_fini(krb5_context context, void *blob)
 {
-    struct _pkinit_context *ctx = (struct _pkinit_context *)blob;
+    pkinit_context ctx = blob;
 
     if (ctx == NULL || ctx->magic != PKINIT_CTX_MAGIC) {
 	pkiDebug("pkinit_lib_fini: got bad plgctx (%p)!\n", ctx);
@@ -1379,7 +1370,7 @@ add_string_to_array(krb5_context context, char ***array, const char *addition)
 }
 static krb5_error_code
 handle_gic_opt(krb5_context context,
-	       struct _pkinit_context *plgctx,
+	       pkinit_context plgctx,
 	       const char *attr,
 	       const char *value)
 {
@@ -1418,7 +1409,7 @@ pkinit_client_gic_opt(krb5_context context,
 		      const char *value)
 {
     krb5_error_code retval;
-    struct _pkinit_context *plgctx = (struct _pkinit_context *)plugin_context;
+    pkinit_context plgctx = plugin_context;
 
     pkiDebug("(pkinit) received '%s' = '%s'\n", attr, value);
     retval = handle_gic_opt(context, plgctx, attr, value);
