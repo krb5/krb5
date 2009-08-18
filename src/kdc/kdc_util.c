@@ -994,17 +994,9 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
      *	   preauthentication data is absent in the request.
      *
      * Hence, this check most be done after the check for preauth
-     * data, and is now performed by validate_forwardable().
+     * data, and is now performed by validate_forwardable() (the
+     * contents of which were previously below).
      */
-#if 0
-    /* Client and server must allow forwardable tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE) &&
-	(isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE) ||
-	 isflagset(server.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))) {
-	*status = "FORWARDABLE NOT ALLOWED";
-	return(KDC_ERR_POLICY);
-    }
-#endif
     
     /* Client and server must allow renewable tickets */
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE) &&
@@ -2081,12 +2073,14 @@ kdc_process_s4u2self_req(krb5_context context,
 
     /*
      * Protocol transition is mutually exclusive with renew/forward/etc
-     * as well as user-to-user and constrained delegation.
+     * as well as user-to-user and constrained delegation. This check
+     * is also made in validate_as_request().
      *
      * We can assert from this check that the header ticket was a TGT, as
      * that is validated previously in validate_tgs_request().
      */
     if (request->kdc_options & AS_INVALID_OPTIONS) {
+	*status = "INVALID AS OPTIONS";
 	return KRB5KDC_ERR_BADOPTION;
     }
 
