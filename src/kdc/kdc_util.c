@@ -1865,15 +1865,9 @@ verify_s4u_x509_user_checksum(krb5_context context,
     krb5_data			*data;
     krb5_boolean		valid = FALSE;
 
-    switch (key->enctype) {
-    case ENCTYPE_ARCFOUR_HMAC:
-    case ENCTYPE_ARCFOUR_HMAC_EXP:
-	break;
-    default:
-	if (!krb5_c_is_keyed_cksum(req->cksum.checksum_type))
-	    return KRB5KRB_AP_ERR_INAPP_CKSUM;
-	break;
-    }
+    if (enctype_requires_etype_info_2(key->enctype) &&
+	!krb5_c_is_keyed_cksum(req->cksum.checksum_type))
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     if (req->user_id.nonce != kdc_req_nonce)
 	return KRB5KRB_AP_ERR_MODIFIED;
@@ -1958,6 +1952,11 @@ kdc_process_s4u2self_rep(krb5_context context,
     else
 	enctype = tgs_session->enctype;
 
+    /*
+     * Owing to a bug in Windows, unkeyed checksums were used for older
+     * enctypes, including rc4-hmac. A forthcoming workaround for this
+     * includes the checksum bytes in the encrypted padata.
+     */
     if ((req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) &&
 	enctype_requires_etype_info_2(enctype) == FALSE) {
 	padata.length = req_s4u_user->cksum.length + rep_s4u_user.cksum.length;
@@ -2118,10 +2117,18 @@ kdc_process_s4u2self_req(krb5_context context,
 	krb5_free_pa_for_user(context, for_user);
     }
 
+    /*
+     * We really want to do this comparison after name canonicalization,
+     * but we don't have a good interface to do that yet (without looking
+     * up the server principal and decoding KRB5_TL_SVR_REFERRAL_DATA).
+     *
+     * The comparison below will work with existing Windows and MIT
+     * client implementations.
+     */
     if (!krb5_principal_compare_flags(context, request->server, client_princ,
 				      KRB5_PRINCIPAL_COMPARE_ENTERPRISE)) {
 	*status = "INVALID_S4U2SELF_REQUEST";
-	return KRB5KDC_ERR_POLICY;
+	return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error code */
     }
 
     /*
