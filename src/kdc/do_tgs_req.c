@@ -444,10 +444,12 @@ tgt_again:
         if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
             /*
              * If S4U2Self principal is not forwardable, then mark ticket as
-             * unforwardable. This behaviour matches Windows rather than MIT
-             * (which returns KDC_ERR_BADOPTION in the AS-REQ code path).
+             * unforwardable. This behaviour matches Windows, but it is
+             * different to the MIT AS-REQ path, which returns an error
+             * (KDC_ERR_POLICY) if forwardable tickets cannot be issued.
              *
-             * Consider this block the S4U2Self validate_forwardable().
+             * Consider this block the S4U2Self equivalent to
+             * validate_forwardable().
              */
             if (c_nprincs &&
                 isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
