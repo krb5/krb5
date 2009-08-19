@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     buf.value = argv[1];
     buf.length = strlen((char *)buf.value);
 
-    major = gss_import_name(&minor, &buf, (gss_OID)GSS_KRB5_NT_ENTERPRISE_NAME, &principal);
+    major = gss_import_name(&minor, &buf, (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME, &principal);
     if (GSS_ERROR(major)) {
         displayStatus("gss_import_name(user)", major, minor);
         goto out;
