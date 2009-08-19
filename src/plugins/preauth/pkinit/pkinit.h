@@ -182,13 +182,6 @@ typedef struct _pkinit_req_opts {
  * information about identity from config file or command line
  */
 
-#define PKINIT_ID_OPT_USER_IDENTITY	1
-#define PKINIT_ID_OPT_ANCHOR_CAS	2
-#define PKINIT_ID_OPT_INTERMEDIATE_CAS	3
-#define PKINIT_ID_OPT_CRLS		4
-#define PKINIT_ID_OPT_OCSP		5
-#define PKINIT_ID_OPT_DN_MAPPING	6   /* XXX ? */
-
 typedef struct _pkinit_identity_opts {
     char *identity;
     char **identity_alt;
@@ -232,7 +225,7 @@ struct _pkinit_req_context {
     pkinit_identity_opts *idopts;
     krb5_preauthtype pa_type;
 };
-typedef struct _pkinit_kdc_context *pkinit_kdc_context;
+typedef struct _pkinit_req_context *pkinit_req_context;
 
 /*
  * KDC's (per-realm) plugin context
@@ -246,7 +239,7 @@ struct _pkinit_kdc_context {
     char *realmname;
     unsigned int realmname_len;
 };
-typedef struct _pkinit_req_context *pkinit_req_context;
+typedef struct _pkinit_kdc_context *pkinit_kdc_context;
 
 /*
  * KDC's per-request context

@@ -151,13 +151,13 @@ proc api_start {} {
 		eof { error "EOF starting API" }
 		timeout { error "Timeout starting API" }
 	}
-	send "set current_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION &~ \$OVSEC_KADM_STRUCT_VERSION_MASK\]\n"
+	send "set current_struct_version \[expr \$KADM5_STRUCT_VERSION &~ \$KADM5_STRUCT_VERSION_MASK\]\n"
 	expect {
 		-re "$prompt$" {}
 		eof { error "EOF setting API varibles"}
 		timeout { error "timeout setting API varibles"}
 	}
-	send "set current_api_version \[expr \$OVSEC_KADM_API_VERSION_1 &~ \$OVSEC_KADM_API_VERSION_MASK\]\n"
+	send "set current_api_version \[expr \$KADM5_API_VERSION_2 &~ \$KADM5_API_VERSION_MASK\]\n"
 	expect {
 		-re "$prompt$" {}
 		eof { error "EOF setting API varibles"}
@@ -187,25 +187,25 @@ proc api_start {} {
 		eof { error "EOF setting API varibles"}
 		timeout { error "timeout setting API varibles"}
 	}
-	send "set old_api_version \[expr \$OVSEC_KADM_API_VERSION_MASK | 0x00\]\n"
+	send "set old_api_version \[expr \$KADM5_API_VERSION_MASK | 0x00\]\n"
 	expect {
 		-re "$prompt$" {}
 		eof { error "EOF setting API varibles"}
 		timeout { error "timeout setting API varibles"}
 	}
-	send "set old_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION_MASK | 0x00\]\n"
+	send "set old_struct_version \[expr \$KADM5_STRUCT_VERSION_MASK | 0x00\]\n"
 	expect {
 		-re "$prompt$" {}
 		eof { error "EOF setting API varibles"}
 		timeout { error "timeout setting API varibles"}
 	}
-	send "set new_api_version \[expr \$OVSEC_KADM_API_VERSION_MASK | 0xca\]\n"
+	send "set new_api_version \[expr \$KADM5_API_VERSION_MASK | 0xca\]\n"
 	expect {
 		-re "$prompt$" {}
 		eof { error "EOF setting API varibles"}
 		timeout { error "timeout setting API varibles"}
 	}
-	send "set new_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION_MASK | 0xca\]\n"
+	send "set new_struct_version \[expr \$KADM5_STRUCT_VERSION_MASK | 0xca\]\n"
 	expect {
 		-re "$prompt$" {}
 		eof { error "EOF setting API varibles"}

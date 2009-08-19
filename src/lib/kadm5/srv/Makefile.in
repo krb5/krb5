@@ -12,7 +12,7 @@ DEFS=
 ##DOSLIBNAME = libkadm5srv.lib
 
 LIBBASE=kadm5srv
-LIBMAJOR=6
+LIBMAJOR=7
 LIBMINOR=0
 STOBJLISTS=../OBJS.ST OBJS.ST
 
@@ -88,6 +88,8 @@ clean-windows::
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 install:: install-libs
+
+depend:: includes
 
 @lib_frag@
 @libobj_frag@

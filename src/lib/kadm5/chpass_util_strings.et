@@ -1,4 +1,4 @@
-# this is really a string table for ovsec_kadm_chpass_principal_util
+# this is really a string table for chpass_principal_util
 
 error_table ovku
 

@@ -43,22 +43,8 @@ kadm5_create_principal(void *server_handle,
     if(princ == NULL)
 	return EINVAL;
 
-    if (handle->api_version == KADM5_API_VERSION_1) {
-       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec_v1));
-    } else {
-       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
-    }
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 /*
-	  * hack hack cough cough.
-	  * krb5_unparse name dumps core if we pass it in garbage
-	  * or null. So, since the client is not allowed to set mod_name
-	  * anyway, we just fill it in with a dummy principal. The server of
-	  * course ignores this.
-	  */
-	 krb5_parse_name(handle->context, "bogus/bogus", &arg.rec.mod_name);
-    } else
-	 arg.rec.mod_name = NULL;
+    memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
+    arg.rec.mod_name = NULL;
     
     if(!(mask & KADM5_POLICY))
 	arg.rec.policy = NULL;
@@ -72,9 +58,6 @@ kadm5_create_principal(void *server_handle,
     }
 	 
     r = create_principal_2(&arg, handle->clnt);
-
-    if (handle->api_version == KADM5_API_VERSION_1)
-	 krb5_free_principal(handle->context, arg.rec.mod_name);
 
     if(r == NULL)
 	eret();
@@ -104,22 +87,8 @@ kadm5_create_principal_3(void *server_handle,
     if(princ == NULL)
 	return EINVAL;
 
-    if (handle->api_version == KADM5_API_VERSION_1) {
-       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec_v1));
-    } else {
-       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
-    }
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 /*
-	  * hack hack cough cough.
-	  * krb5_unparse name dumps core if we pass it in garbage
-	  * or null. So, since the client is not allowed to set mod_name
-	  * anyway, we just fill it in with a dummy principal. The server of
-	  * course ignores this.
-	  */
-	 krb5_parse_name(handle->context, "bogus/bogus", &arg.rec.mod_name);
-    } else
-	 arg.rec.mod_name = NULL;
+    memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
+    arg.rec.mod_name = NULL;
     
     if(!(mask & KADM5_POLICY))
 	arg.rec.policy = NULL;
@@ -133,9 +102,6 @@ kadm5_create_principal_3(void *server_handle,
     }
 	 
     r = create_principal3_2(&arg, handle->clnt);
-
-    if (handle->api_version == KADM5_API_VERSION_1)
-	 krb5_free_principal(handle->context, arg.rec.mod_name);
 
     if(r == NULL)
 	eret();
@@ -174,17 +140,9 @@ kadm5_modify_principal(void *server_handle,
     memset(&arg, 0, sizeof(arg));
     arg.mask = mask;
     arg.api_version = handle->api_version;
-    /*
-     * cough cough gag gag
-     * see comment in create_principal.
-     */
     if(princ == NULL)
 	return EINVAL;
-    if (handle->api_version == KADM5_API_VERSION_1) {
-        memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec_v1));
-    } else {
-        memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
-    }
+    memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
     if(!(mask & KADM5_POLICY))
 	arg.rec.policy = NULL;
     if (! (mask & KADM5_KEY_DATA)) {
@@ -196,18 +154,9 @@ kadm5_modify_principal(void *server_handle,
 	 arg.rec.tl_data = NULL;
     }
 
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 /*
-	  * See comment in create_principal
-	  */
-	 krb5_parse_name(handle->context, "bogus/bogus", &arg.rec.mod_name);
-    } else
-	 arg.rec.mod_name = NULL;
+    arg.rec.mod_name = NULL;
     
     r = modify_principal_2(&arg, handle->clnt);
-
-    if (handle->api_version == KADM5_API_VERSION_1)
-	 krb5_free_principal(handle->context, arg.rec.mod_name);    
 
     if(r == NULL)
 	eret();    
@@ -228,33 +177,13 @@ kadm5_get_principal(void *server_handle,
     if(princ == NULL)
 	return EINVAL;
     arg.princ = princ;
-    if (handle->api_version == KADM5_API_VERSION_1)
-       arg.mask = KADM5_PRINCIPAL_NORMAL_MASK;
-    else
-       arg.mask = mask;
+    arg.mask = mask;
     arg.api_version = handle->api_version;
     r = get_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 kadm5_principal_ent_t_v1 *entp;
-
-	 entp = (kadm5_principal_ent_t_v1 *) ent;
-	 if (r->code == 0) {
-	      if (!(*entp = (kadm5_principal_ent_t_v1)
-		    malloc(sizeof(kadm5_principal_ent_rec_v1))))
-		   return ENOMEM;
-	      /* this memcpy works because the v1 structure is an initial
-		 subset of the v2 struct.  C guarantees that this will
-		 result in the same layout in memory */
-	      memcpy(*entp, &r->rec, sizeof(**entp));
-	 } else {
-	    *entp = NULL;
-	 }
-    } else {
-	 if (r->code == 0)
-	      memcpy(ent, &r->rec, sizeof(r->rec));
-    }
+    if (r->code == 0)
+	memcpy(ent, &r->rec, sizeof(r->rec));
     
     return r->code;
 }
@@ -460,29 +389,23 @@ kadm5_randkey_principal_3(void *server_handle,
     r = chrand_principal3_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 if (key)
-	      krb5_copy_keyblock(handle->context, &r->key, key);
-    } else {
-	 if (n_keys)
-	      *n_keys = r->n_keys;
-	 if (key) {
-	      if(r->n_keys) {
-		      *key = (krb5_keyblock *) 
-			      malloc(r->n_keys*sizeof(krb5_keyblock));
-		      if (*key == NULL)
-			      return ENOMEM;
-		      for (i = 0; i < r->n_keys; i++) {
-			      ret = krb5_copy_keyblock_contents(handle->context,
-								&r->keys[i],
-								&(*key)[i]);
-			      if (ret) {
-				      free(*key);
-				      return ENOMEM;
-			      }
-		      }
-	      } else *key = NULL;
-         }
+    if (n_keys)
+	*n_keys = r->n_keys;
+    if (key) {
+	if(r->n_keys) {
+	    *key = malloc(r->n_keys * sizeof(krb5_keyblock));
+	    if (*key == NULL)
+		return ENOMEM;
+	    for (i = 0; i < r->n_keys; i++) {
+		ret = krb5_copy_keyblock_contents(handle->context, &r->keys[i],
+						  &(*key)[i]);
+		if (ret) {
+		    free(*key);
+		    return ENOMEM;
+		}
+	    }
+	} else
+	    *key = NULL;
     }
 
     return r->code;
@@ -508,29 +431,23 @@ kadm5_randkey_principal(void *server_handle,
     r = chrand_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();
-    if (handle->api_version == KADM5_API_VERSION_1) {
-	 if (key)
-	      krb5_copy_keyblock(handle->context, &r->key, key);
-    } else {
-	 if (n_keys)
-	      *n_keys = r->n_keys;
-	 if (key) {
-	      if(r->n_keys) {
-		      *key = (krb5_keyblock *) 
-			      malloc(r->n_keys*sizeof(krb5_keyblock));
-		      if (*key == NULL)
-			      return ENOMEM;
-		      for (i = 0; i < r->n_keys; i++) {
-			      ret = krb5_copy_keyblock_contents(handle->context,
-								&r->keys[i],
-								&(*key)[i]);
-			      if (ret) {
-				      free(*key);
-				      return ENOMEM;
-			      }
-		      }
-	      } else *key = NULL;
-         }
+    if (n_keys)
+	*n_keys = r->n_keys;
+    if (key) {
+	if(r->n_keys) {
+	    *key = malloc(r->n_keys * sizeof(krb5_keyblock));
+	    if (*key == NULL)
+		return ENOMEM;
+	    for (i = 0; i < r->n_keys; i++) {
+		ret = krb5_copy_keyblock_contents(handle->context, &r->keys[i],
+						  &(*key)[i]);
+		if (ret) {
+		    free(*key);
+		    return ENOMEM;
+		}
+	    }
+	} else
+	    *key = NULL;
     }
 
     return r->code;

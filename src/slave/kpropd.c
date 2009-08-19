@@ -696,7 +696,8 @@ reinit:
 	/*
 	 * Authentication, initialize rpcsec_gss handle etc.
 	 */
-	retval = kadm5_init_with_skey(iprop_svc_princstr, srvtab,
+	retval = kadm5_init_with_skey(kpropd_context, iprop_svc_princstr,
+				      srvtab,
 				      master_svc_princstr,
 				      &params,
 				      KADM5_STRUCT_VERSION,
@@ -1021,7 +1022,7 @@ void PRS(argv)
 
 	(void) memset(&params, 0, sizeof (params));
 
-	retval = krb5_init_context(&kpropd_context);
+	retval = kadm5_init_krb5_context(&kpropd_context);
 	if (retval) {
 		com_err(argv[0], retval, "while initializing krb5");
 		exit(1);

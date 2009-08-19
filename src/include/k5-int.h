@@ -2843,6 +2843,10 @@ krb5_get_credentials_for_proxy(krb5_context context,
 			       krb5_ticket *evidence_tkt,
 			       krb5_creds **out_creds);
 
+krb5_error_code krb5int_parse_enctype_list(krb5_context context, char *profstr,
+					   krb5_enctype *default_list,
+					   krb5_enctype **result);
+
 #ifdef DEBUG_ERROR_LOCATIONS
 #define krb5_set_error_message(ctx, code, ...) \
     krb5_set_error_message_fl(ctx, code, __FILE__, __LINE__, __VA_ARGS__)

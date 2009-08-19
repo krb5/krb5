@@ -18,8 +18,8 @@ proc lib_start_api {} {
 	api_exit
 	set lib_pid [api_start]
 	if {! [cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
+	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		    lib_handle
 	}]} {
 	    error "$test: unexpected failure in init"
@@ -120,8 +120,8 @@ proc create_principal {name} {
     lib_start_api
 
     set ret [cmd [format {
-	ovsec_kadm_create_principal $lib_handle [simple_principal \
-		"%s"] {OVSEC_KADM_PRINCIPAL} "%s"
+	kadm5_create_principal $lib_handle [simple_principal \
+		"%s"] {KADM5_PRINCIPAL} "%s"
     } $name $name]]
 
     return $ret
@@ -131,8 +131,8 @@ proc create_policy {name} {
     lib_start_api
 
     set ret [cmd [format {
-	    ovsec_kadm_create_policy $lib_handle [simple_policy "%s"] \
-		    {OVSEC_KADM_POLICY}
+	    kadm5_create_policy $lib_handle [simple_policy "%s"] \
+		    {KADM5_POLICY}
 	} $name $name]]
 
     return $ret
@@ -142,8 +142,8 @@ proc create_principal_pol {name policy} {
     lib_start_api
 
     set ret [cmd [format {
-	    ovsec_kadm_create_principal $lib_handle [princ_w_pol "%s" \
-		    "%s"] {OVSEC_KADM_PRINCIPAL OVSEC_KADM_POLICY} "%s"
+	    kadm5_create_principal $lib_handle [princ_w_pol "%s" \
+		    "%s"] {KADM5_PRINCIPAL KADM5_POLICY} "%s"
     } $name $policy $name]]
 
     return $ret
@@ -153,7 +153,7 @@ proc delete_principal {name} {
     lib_start_api
 
     set ret [cmd [format {
-	    ovsec_kadm_delete_principal $lib_handle "%s"
+	    kadm5_delete_principal $lib_handle "%s"
     } $name]]
 
     return $ret
@@ -162,7 +162,7 @@ proc delete_principal {name} {
 proc delete_policy {name} {
     lib_start_api
 
-    set ret [cmd [format {ovsec_kadm_delete_policy $lib_handle "%s"} $name]]
+    set ret [cmd [format {kadm5_delete_policy $lib_handle "%s"} $name]]
 
     return $ret
 }
@@ -173,7 +173,7 @@ proc principal_exists {name} {
     lib_start_api
 
     set ret [cmd [format {
-	ovsec_kadm_get_principal $lib_handle "%s" principal
+	kadm5_get_principal $lib_handle "%s" principal
     } $name]]
 
 #   puts stdout "Finishing principal_exists."
@@ -187,7 +187,7 @@ proc policy_exists {name} {
 #    puts stdout "Starting policy_exists."
 
     set ret [cmd [format {
-	    ovsec_kadm_get_policy $lib_handle "%s" policy
+	    kadm5_get_policy $lib_handle "%s" policy
 	} $name]]
 
 #    puts stdout "Finishing policy_exists."

@@ -1,0 +1,37 @@
+thisconfigdir=../../../..
+myfulldir=lib/crypto/builtin/sha1
+mydir=lib/crypto/builtin/sha1
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=sha1
+##DOS##OBJFILE=..\$(OUTPRE)sha1.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS= shs.o
+
+OBJS= $(OUTPRE)shs.$(OBJEXT) 
+
+SRCS= $(srcdir)/shs.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+check-unix:: 
+
+check-windows:: 
+
+clean:: 
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

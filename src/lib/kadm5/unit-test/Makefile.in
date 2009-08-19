@@ -2,7 +2,7 @@ thisconfigdir=../../..
 myfulldir=lib/kadm5/unit-test
 mydir=lib/kadm5/unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
-DEFINES = -DUSE_KADM5_API_VERSION=1
+DEFINES =
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
@@ -54,9 +54,6 @@ lock-test: lock-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 server-iter-test: iter-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o server-iter-test iter-test.o \
 		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
-
-setkey-test.o: $(SRCTOP)/lib/kadm5/unit-test/setkey-test.c
-	$(CC) $(ALL_CFLAGS) -UUSE_KADM5_API_VERSION -DUSE_KADM5_API_VERSION=2 -c $(SRCTOP)/lib/kadm5/unit-test/setkey-test.c
 
 server-setkey-test: setkey-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o server-setkey-test setkey-test.o \

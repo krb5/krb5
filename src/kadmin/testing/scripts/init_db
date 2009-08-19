@@ -42,7 +42,7 @@ fi
 
 DUMMY=${TESTDIR=$TOP/testing}; export TESTDIR
 DUMMY=${STESTDIR=$STOP/testing}
-DUMMY=${SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl}; export SRVTCL
+DUMMY=${SRVTCL=$TESTDIR/util/kadm5_srv_tcl}; export SRVTCL
 DUMMY=${TCLUTIL=$STESTDIR/tcl/util.t}; export TCLUTIL
 DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 
@@ -101,81 +101,82 @@ if {[info exists env(USER)]} {
 }
 
 set cmds {
-    {ovsec_kadm_init $env(SRVTCL) mrroot null $r $OVSEC_KADM_STRUCT_VERSION \
-	    $OVSEC_KADM_API_VERSION_1 server_handle}
+    {kadm5_init $env(SRVTCL) mrroot null \
+	    [config_params {KADM5_CONFIG_REALM} $r] $KADM5_STRUCT_VERSION \
+	    $KADM5_API_VERSION_2 server_handle}
 
-    {ovsec_kadm_create_policy $server_handle "test-pol 0 10000 8 2 3 0" \
-	    {OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_LENGTH OVSEC_KADM_PW_MIN_CLASSES OVSEC_KADM_PW_MAX_LIFE OVSEC_KADM_PW_HISTORY_NUM}}
-    {ovsec_kadm_create_policy $server_handle "once-a-min 10 0 0 0 0 0" \
-	    {OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_LIFE}}
-    {ovsec_kadm_create_policy $server_handle "dict-only 0 0 0 0 0 0" \
-	    {OVSEC_KADM_POLICY}}
-    {ovsec_kadm_create_policy $server_handle [simple_policy test-pol-nopw] \
-	    {OVSEC_KADM_POLICY}}
+    {kadm5_create_policy $server_handle "test-pol 0 10000 8 2 3 0" \
+	    {KADM5_POLICY KADM5_PW_MIN_LENGTH KADM5_PW_MIN_CLASSES KADM5_PW_MAX_LIFE KADM5_PW_HISTORY_NUM}}
+    {kadm5_create_policy $server_handle "once-a-min 10 0 0 0 0 0" \
+	    {KADM5_POLICY KADM5_PW_MIN_LIFE}}
+    {kadm5_create_policy $server_handle "dict-only 0 0 0 0 0 0" \
+	    {KADM5_POLICY}}
+    {kadm5_create_policy $server_handle [simple_policy test-pol-nopw] \
+	    {KADM5_POLICY}}
 
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal testuser@$r] {OVSEC_KADM_PRINCIPAL} notathena}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal test1@$r] {OVSEC_KADM_PRINCIPAL} test1}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal test2@$r] {OVSEC_KADM_PRINCIPAL} test2}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal test3@$r] {OVSEC_KADM_PRINCIPAL} test3}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/get@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/modify@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/delete@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/add@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/none@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/rename@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/mod-add@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/mod-delete@$r] {OVSEC_KADM_PRINCIPAL} \
+    {kadm5_create_principal $server_handle \
+	    [simple_principal testuser@$r] {KADM5_PRINCIPAL} notathena}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal test1@$r] {KADM5_PRINCIPAL} test1}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal test2@$r] {KADM5_PRINCIPAL} test2}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal test3@$r] {KADM5_PRINCIPAL} test3}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/get@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/modify@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/delete@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/add@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/none@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/rename@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/mod-add@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/mod-delete@$r] {KADM5_PRINCIPAL} \
 	    admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/get-add@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/get-delete@$r] {OVSEC_KADM_PRINCIPAL} \
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/get-add@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/get-delete@$r] {KADM5_PRINCIPAL} \
 	    admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/get-mod@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/no-add@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [simple_principal admin/no-delete@$r] {OVSEC_KADM_PRINCIPAL} admin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [princ_w_pol pol1@$r test-pol] {OVSEC_KADM_PRINCIPAL \
-	    OVSEC_KADM_POLICY} pol111111}
-    {ovsec_kadm_create_principal $server_handle \
-	    [princ_w_pol pol2@$r once-a-min] {OVSEC_KADM_PRINCIPAL \
-	    OVSEC_KADM_POLICY} pol222222}
-    {ovsec_kadm_create_principal $server_handle \
-	    [princ_w_pol pol3@$r dict-only] {OVSEC_KADM_PRINCIPAL \
-	    OVSEC_KADM_POLICY} pol333333}
-    {ovsec_kadm_create_principal $server_handle \
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/get-mod@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/no-add@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [simple_principal admin/no-delete@$r] {KADM5_PRINCIPAL} admin}
+    {kadm5_create_principal $server_handle \
+	    [princ_w_pol pol1@$r test-pol] {KADM5_PRINCIPAL \
+	    KADM5_POLICY} pol111111}
+    {kadm5_create_principal $server_handle \
+	    [princ_w_pol pol2@$r once-a-min] {KADM5_PRINCIPAL \
+	    KADM5_POLICY} pol222222}
+    {kadm5_create_principal $server_handle \
+	    [princ_w_pol pol3@$r dict-only] {KADM5_PRINCIPAL \
+	    KADM5_POLICY} pol333333}
+    {kadm5_create_principal $server_handle \
 	    [princ_w_pol admin/get-pol@$r test-pol-nopw] \
-	    {OVSEC_KADM_PRINCIPAL OVSEC_KADM_POLICY} StupidAdmin}
-    {ovsec_kadm_create_principal $server_handle \
-	    [princ_w_pol admin/pol@$r test-pol-nopw] {OVSEC_KADM_PRINCIPAL \
-	    OVSEC_KADM_POLICY} StupidAdmin}
+	    {KADM5_PRINCIPAL KADM5_POLICY} StupidAdmin}
+    {kadm5_create_principal $server_handle \
+	    [princ_w_pol admin/pol@$r test-pol-nopw] {KADM5_PRINCIPAL \
+	    KADM5_POLICY} StupidAdmin}
 
-    {ovsec_kadm_create_principal $server_handle \
+    {kadm5_create_principal $server_handle \
 	    [simple_principal changepw/kerberos] \
-            {OVSEC_KADM_PRINCIPAL} {XXX THIS IS WRONG}}
+            {KADM5_PRINCIPAL} {XXX THIS IS WRONG}}
 
-    {ovsec_kadm_create_principal $server_handle \
+    {kadm5_create_principal $server_handle \
 	    [simple_principal $whoami] \
-	    {OVSEC_KADM_PRINCIPAL} $whoami}
+	    {KADM5_PRINCIPAL} $whoami}
 
-    {ovsec_kadm_destroy $server_handle}
+    {kadm5_destroy $server_handle}
 }
 
 foreach cmd $cmds {

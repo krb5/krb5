@@ -58,67 +58,22 @@
 int longhorn = 0;	/* Talking to a Longhorn server? */
 #endif
 
-krb5_error_code pkinit_client_process
-	(krb5_context context, void *plugin_context, void *request_context,
-		krb5_get_init_creds_opt *gic_opt,
-		preauth_get_client_data_proc get_data_proc,
-		struct _krb5_preauth_client_rock *rock,
-		krb5_kdc_req * request, krb5_data *encoded_request_body,
-		krb5_data *encoded_previous_request, krb5_pa_data *in_padata,
-		krb5_prompter_fct prompter, void *prompter_data,
-		preauth_get_as_key_proc gak_fct, void *gak_data,
-		krb5_data * salt, krb5_data * s2kparams,
-		krb5_keyblock * as_key, krb5_pa_data *** out_padata);
-
-krb5_error_code pkinit_client_tryagain
-	(krb5_context context, void *plugin_context, void *request_context,
-		krb5_get_init_creds_opt *gic_opt,
-		preauth_get_client_data_proc get_data_proc,
-		struct _krb5_preauth_client_rock *rock,
-		krb5_kdc_req * request, krb5_data *encoded_request_body,
-		krb5_data *encoded_previous_request,
-		krb5_pa_data *in_padata, krb5_error *err_reply,
-		krb5_prompter_fct prompter, void *prompter_data,
-		preauth_get_as_key_proc gak_fct, void *gak_data,
-		krb5_data * salt, krb5_data * s2kparams,
-		krb5_keyblock * as_key, krb5_pa_data *** out_padata);
-
-void pkinit_client_req_init
-	(krb5_context contex, void *plugin_context, void **request_context);
-
-void pkinit_client_req_fini
-	(krb5_context context, void *plugin_context, void *request_context);
-
-krb5_error_code pa_pkinit_gen_req
-	(krb5_context context, pkinit_context plgctx,
-		pkinit_req_context reqctx, krb5_kdc_req * request,
-		krb5_pa_data * in_padata, krb5_pa_data *** out_padata,
-		krb5_prompter_fct prompter, void *prompter_data,
-		krb5_get_init_creds_opt *gic_opt);
-
-krb5_error_code pkinit_as_req_create
+static krb5_error_code pkinit_as_req_create
 	(krb5_context context, pkinit_context plgctx,
 		pkinit_req_context reqctx, krb5_timestamp ctsec,
 		krb5_int32 cusec, krb5_ui_4 nonce,
 		const krb5_checksum * cksum, krb5_principal server,
 		krb5_data ** as_req);
 
-krb5_error_code pkinit_as_rep_parse
+static krb5_error_code pkinit_as_rep_parse
 	(krb5_context context, pkinit_context plgctx,
 		pkinit_req_context reqctx, krb5_preauthtype pa_type,
 		krb5_kdc_req * request, const krb5_data * as_rep,
 		krb5_keyblock * key_block, krb5_enctype etype, krb5_data *);
 
-krb5_error_code pa_pkinit_parse_rep
-	(krb5_context context, pkinit_context plgctx,
-		pkinit_req_context reqcxt, krb5_kdc_req * request,
-		krb5_pa_data * in_padata, krb5_enctype etype,
-		krb5_keyblock * as_key, krb5_data *);
-
-static int pkinit_client_plugin_init(krb5_context context, void **blob);
 static void pkinit_client_plugin_fini(krb5_context context, void *blob);
 
-krb5_error_code
+static krb5_error_code
 pa_pkinit_gen_req(krb5_context context,
 		  pkinit_context plgctx,
 		  pkinit_req_context reqctx,
@@ -196,18 +151,18 @@ pa_pkinit_gen_req(krb5_context context,
      * The most we'll return is two pa_data, normally just one.
      * We need to make room for the NULL terminator.
      */
-    return_pa_data = (krb5_pa_data **) malloc(3 * sizeof(krb5_pa_data *));
+    return_pa_data = malloc(3 * sizeof(krb5_pa_data *));
     if (return_pa_data == NULL)
 	goto cleanup;
 
     return_pa_data[1] = NULL;	/* in case of an early trip to cleanup */
     return_pa_data[2] = NULL;	/* Terminate the list */
 
-    return_pa_data[0] = (krb5_pa_data *) malloc(sizeof(krb5_pa_data));
+    return_pa_data[0] = malloc(sizeof(krb5_pa_data));
     if (return_pa_data[0] == NULL)
 	goto cleanup;
 
-    return_pa_data[1] = (krb5_pa_data *) malloc(sizeof(krb5_pa_data));
+    return_pa_data[1] = malloc(sizeof(krb5_pa_data));
     if (return_pa_data[1] == NULL)
 	goto cleanup;
 
@@ -245,16 +200,12 @@ pa_pkinit_gen_req(krb5_context context,
   cleanup:
     if (der_req != NULL)
 	krb5_free_data(context, der_req);
-
-    if (out_data != NULL)
-	free(out_data);
+    free(out_data);
 
     if (retval) {
 	if (return_pa_data) {
-	    if (return_pa_data[0] != NULL)
-		free(return_pa_data[0]);
-	    if (return_pa_data[1] != NULL)
-		free(return_pa_data[1]);
+	    free(return_pa_data[0]);
+	    free(return_pa_data[1]);
 	    free(return_pa_data);
 	}
 	if (out_data) {
@@ -265,7 +216,7 @@ pa_pkinit_gen_req(krb5_context context,
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 pkinit_as_req_create(krb5_context context,
 		     pkinit_context plgctx,
 		     pkinit_req_context reqctx,
@@ -490,7 +441,7 @@ cleanup:
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 pa_pkinit_parse_rep(krb5_context context,
 		    pkinit_context plgctx,
 		    pkinit_req_context reqctx,
@@ -683,7 +634,7 @@ out:
  * certificate chain.
  * Optionally returns various components.
  */
-krb5_error_code
+static krb5_error_code
 pkinit_as_rep_parse(krb5_context context,
 		    pkinit_context plgctx,
   		    pkinit_req_context reqctx,
@@ -904,23 +855,19 @@ pkinit_as_rep_parse(krb5_context context,
     retval = 0;
 
 cleanup:
-    if (dh_data.data != NULL)
-	free(dh_data.data);
-    if (client_key != NULL)
-	free(client_key);
+    free(dh_data.data);
+    free(client_key);
     free_krb5_kdc_dh_key_info(&kdc_dh);
     free_krb5_pa_pk_as_rep(&kdc_reply);
 
     if (key_pack != NULL) {
 	free_krb5_reply_key_pack(&key_pack);
-	if (cksum.contents != NULL)
-	    free(cksum.contents);
+	free(cksum.contents);
     } 
     if (key_pack9 != NULL)
 	free_krb5_reply_key_pack_draft9(&key_pack9);
 
-    if (kdc_hostname != NULL)
-	free(kdc_hostname);
+    free(kdc_hostname);
 
     pkiDebug("pkinit_as_rep_parse returning %d (%s)\n",
 	     retval, error_message(retval));
@@ -931,26 +878,26 @@ static void
 pkinit_client_profile(krb5_context context,
 		      pkinit_context plgctx,
 		      pkinit_req_context reqctx,
-		      krb5_kdc_req *request)
+		      const krb5_data *realm)
 {
     char *eku_string = NULL;
 
     pkiDebug("pkinit_client_profile %p %p %p %p\n",
-	     context, plgctx, reqctx, request);
+	     context, plgctx, reqctx, realm);
 
-    pkinit_libdefault_boolean(context, &request->server->realm,
+    pkinit_libdefault_boolean(context, realm,
 			      KRB5_CONF_PKINIT_WIN2K,
 			      reqctx->opts->win2k_target,
 			      &reqctx->opts->win2k_target);
-    pkinit_libdefault_boolean(context, &request->server->realm,
+    pkinit_libdefault_boolean(context, realm,
 			      KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING,
 			      reqctx->opts->win2k_require_cksum,
 			      &reqctx->opts->win2k_require_cksum);
-    pkinit_libdefault_boolean(context, &request->server->realm,
+    pkinit_libdefault_boolean(context, realm,
 			      KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING,
 			      reqctx->opts->require_crl_checking,
 			      &reqctx->opts->require_crl_checking);
-    pkinit_libdefault_integer(context, &request->server->realm,
+    pkinit_libdefault_integer(context, realm,
 			      KRB5_CONF_PKINIT_DH_MIN_BITS,
 			      reqctx->opts->dh_size,
 			      &reqctx->opts->dh_size);
@@ -961,7 +908,7 @@ pkinit_client_profile(krb5_context context,
 		 reqctx->opts->dh_size, PKINIT_DEFAULT_DH_MIN_BITS);
 	reqctx->opts->dh_size = PKINIT_DEFAULT_DH_MIN_BITS;
     }
-    pkinit_libdefault_string(context, &request->server->realm,
+    pkinit_libdefault_string(context, realm,
 			     KRB5_CONF_PKINIT_EKU_CHECKING,
 			     &eku_string);
     if (eku_string != NULL) {
@@ -982,7 +929,7 @@ pkinit_client_profile(krb5_context context,
     }
 #ifdef LONGHORN_BETA_COMPAT
     /* Temporarily just set global flag from config file */
-    pkinit_libdefault_boolean(context, &request->server->realm,
+    pkinit_libdefault_boolean(context, realm,
 			      KRB5_CONF_PKINIT_LONGHORN,
 			      0,
 			      &longhorn);
@@ -990,21 +937,21 @@ pkinit_client_profile(krb5_context context,
 
     /* Only process anchors here if they were not specified on command line */
     if (reqctx->idopts->anchors == NULL)
-	pkinit_libdefault_strings(context, &request->server->realm,
+	pkinit_libdefault_strings(context, realm,
 				  KRB5_CONF_PKINIT_ANCHORS,
 				  &reqctx->idopts->anchors);
-    pkinit_libdefault_strings(context, &request->server->realm,
+    pkinit_libdefault_strings(context, realm,
 			      KRB5_CONF_PKINIT_POOL,
 			      &reqctx->idopts->intermediates);
-    pkinit_libdefault_strings(context, &request->server->realm,
+    pkinit_libdefault_strings(context, realm,
 			      KRB5_CONF_PKINIT_REVOKE,
 			      &reqctx->idopts->crls);
-    pkinit_libdefault_strings(context, &request->server->realm,
+    pkinit_libdefault_strings(context, realm,
 			      KRB5_CONF_PKINIT_IDENTITIES,
 			      &reqctx->idopts->identity_alt);
 }
 
-krb5_error_code
+static krb5_error_code
 pkinit_client_process(krb5_context context,
 		      void *plugin_context,
 		      void *request_context,
@@ -1073,7 +1020,8 @@ pkinit_client_process(krb5_context context,
     }
 
     if (processing_request) {
-	pkinit_client_profile(context, plgctx, reqctx, request);
+	pkinit_client_profile(context, plgctx, reqctx,
+			      &request->server->realm);
 	pkinit_identity_set_prompter(reqctx->idctx, prompter, prompter_data);
 	retval = pkinit_identity_initialize(context, plgctx->cryptoctx,
 					    reqctx->cryptoctx, reqctx->idopts,
@@ -1110,7 +1058,7 @@ pkinit_client_process(krb5_context context,
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 pkinit_client_tryagain(krb5_context context,
 		       void *plugin_context,
 		       void *request_context,
@@ -1229,18 +1177,18 @@ static krb5_preauthtype supported_client_pa_types[] = {
     0
 };
 
-void
+static void
 pkinit_client_req_init(krb5_context context,
 		       void *plugin_context,
 		       void **request_context)
 {
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_req_context *reqctx = NULL;
-    struct _pkinit_context *plgctx = (struct _pkinit_context *)plugin_context;
+    pkinit_req_context reqctx = NULL;
+    pkinit_context plgctx = plugin_context;
 
     *request_context = NULL;
 
-    reqctx = (struct _pkinit_req_context *) malloc(sizeof(*reqctx));
+    reqctx = malloc(sizeof(*reqctx));
     if (reqctx == NULL)
 	return;
     memset(reqctx, 0, sizeof(*reqctx));
@@ -1292,13 +1240,12 @@ cleanup:
     return;
 }
 
-void
+static void
 pkinit_client_req_fini(krb5_context context,
 		      void *plugin_context,
 		      void *request_context)
 {
-    struct _pkinit_req_context *reqctx =
-	(struct _pkinit_req_context *)request_context;
+    pkinit_req_context reqctx = request_context;
 
     pkiDebug("%s: received reqctx at %p\n", __FUNCTION__, reqctx);
     if (reqctx == NULL)
@@ -1324,25 +1271,13 @@ pkinit_client_req_fini(krb5_context context,
     return;
 }
 
-static void
-pkinit_fini_client_profile(krb5_context context, pkinit_context plgctx)
-{
-    /* This should clean up anything allocated in pkinit_init_client_profile */
-}
-
-static krb5_error_code
-pkinit_init_client_profile(krb5_context context, pkinit_context plgctx)
-{
-    return 0;
-}
-
 static int
 pkinit_client_plugin_init(krb5_context context, void **blob)
 {
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_context *ctx = NULL;
+    pkinit_context ctx = NULL;
 
-    ctx = (struct _pkinit_context *)calloc(1, sizeof(*ctx));
+    ctx = calloc(1, sizeof(*ctx));
     if (ctx == NULL)
 	return ENOMEM;
     memset(ctx, 0, sizeof(*ctx));
@@ -1367,10 +1302,6 @@ pkinit_client_plugin_init(krb5_context context, void **blob)
     if (retval)
 	goto errout;
 
-    retval = pkinit_init_client_profile(context, ctx);
-    if (retval)
-	goto errout;
-
     *blob = ctx;
 
     pkiDebug("%s: returning plgctx at %p\n", __FUNCTION__, ctx);
@@ -1385,7 +1316,7 @@ errout:
 static void
 pkinit_client_plugin_fini(krb5_context context, void *blob)
 {
-    struct _pkinit_context *ctx = (struct _pkinit_context *)blob;
+    pkinit_context ctx = blob;
 
     if (ctx == NULL || ctx->magic != PKINIT_CTX_MAGIC) {
 	pkiDebug("pkinit_lib_fini: got bad plgctx (%p)!\n", ctx);
@@ -1393,7 +1324,6 @@ pkinit_client_plugin_fini(krb5_context context, void *blob)
     }
     pkiDebug("%s: got plgctx at %p\n", __FUNCTION__, ctx);
 
-    pkinit_fini_client_profile(context, ctx);
     pkinit_fini_identity_opts(ctx->idopts);
     pkinit_fini_plg_crypto(ctx->cryptoctx);
     pkinit_fini_plg_opts(ctx->opts);
@@ -1440,7 +1370,7 @@ add_string_to_array(krb5_context context, char ***array, const char *addition)
 }
 static krb5_error_code
 handle_gic_opt(krb5_context context,
-	       struct _pkinit_context *plgctx,
+	       pkinit_context plgctx,
 	       const char *attr,
 	       const char *value)
 {
@@ -1479,7 +1409,7 @@ pkinit_client_gic_opt(krb5_context context,
 		      const char *value)
 {
     krb5_error_code retval;
-    struct _pkinit_context *plgctx = (struct _pkinit_context *)plugin_context;
+    pkinit_context plgctx = plugin_context;
 
     pkiDebug("(pkinit) received '%s' = '%s'\n", attr, value);
     retval = handle_gic_opt(context, plgctx, attr, value);

@@ -758,11 +758,10 @@ user(name)
 			result = 331;
 		} else
 			result = 232;
-		reply(result, "%s", buf);
-		syslog(authorized ? LOG_INFO : LOG_ERR, "%s", buf);
-
 		if (result == 232)
 			login(NULL, result);
+		reply(result, "%s", buf);
+		syslog(authorized ? LOG_INFO : LOG_ERR, "%s", buf);
 		return;
 	}
 

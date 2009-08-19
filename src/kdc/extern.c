@@ -38,6 +38,11 @@ krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
 krb5_rcache	kdc_rcache = (krb5_rcache) NULL;
 krb5_keyblock	psr_key;
+#ifdef KRBCONF_KDC_MODIFIES_KDB
+const int	kdc_modifies_kdb = 1;
+#else
+const int	kdc_modifies_kdb = 0;
+#endif
 krb5_int32	max_dgram_reply_size = MAX_DGRAM_SIZE;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */

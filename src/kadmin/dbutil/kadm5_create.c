@@ -106,7 +106,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
      retval = krb5_klog_init(context, "admin_server", progname, 0);
      if (retval)
 	  return retval;
-     if ((retval = kadm5_init(progname, NULL, NULL, params,
+     if ((retval = kadm5_init(context, progname, NULL, NULL, params,
 			      KADM5_STRUCT_VERSION,
 			      KADM5_API_VERSION_2,
 			      db5util_db_args,

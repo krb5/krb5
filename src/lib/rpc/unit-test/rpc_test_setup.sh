@@ -8,7 +8,7 @@
 # $Source$
 
 DUMMY=${TESTDIR=$TOP/testing}
-DUMMY=${CLNTTCL=$TESTDIR/util/ovsec_kadm_clnt_tcl}
+DUMMY=${CLNTTCL=$TESTDIR/util/kadm5_clnt_tcl}
 DUMMY=${TCLUTIL=$TESTDIR/tcl/util.t}; export TCLUTIL
 DUMMY=${MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 
@@ -26,13 +26,13 @@ export CANON_HOST
 cat - > /tmp/rpc_test_setup$$ <<\EOF
 source $env(TCLUTIL)
 set h $env(CANON_HOST)
-puts stdout [ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 server_handle]
+puts stdout [kadm5_init admin admin $KADM5_ADMIN_SERVICE null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle]
 if ![info exists server_handle] { exit 1 }
-puts stdout [ovsec_kadm_create_principal $server_handle [simple_principal server/$h] {OVSEC_KADM_PRINCIPAL} admin]
-puts stdout [ovsec_kadm_randkey_principal $server_handle server/$h key]
-puts stdout [ovsec_kadm_create_principal $server_handle [simple_principal notserver/$h] {OVSEC_KADM_PRINCIPAL} admin]
-puts stdout [ovsec_kadm_randkey_principal $server_handle notserver/$h key]
-puts stdout [ovsec_kadm_destroy $server_handle]
+puts stdout [kadm5_create_principal $server_handle [simple_principal server/$h] {KADM5_PRINCIPAL} admin]
+puts stdout [kadm5_randkey_principal $server_handle server/$h key null]
+puts stdout [kadm5_create_principal $server_handle [simple_principal notserver/$h] {KADM5_PRINCIPAL} admin]
+puts stdout [kadm5_randkey_principal $server_handle notserver/$h key null]
+puts stdout [kadm5_destroy $server_handle]
 EOF
 eval "$CLNTTCL $REDIRECT < /tmp/rpc_test_setup$$"
 if test $? != 0 ; then

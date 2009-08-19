@@ -65,7 +65,7 @@ clean-unix::
 	$(RM) libpty.a $(BUILDTOP)/include/libpty.h pty_err.c pty_err.h
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-depend::  pty_err.h
+depend:: includes pty_err.h
 
 #install:: libpty.h
 #	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h

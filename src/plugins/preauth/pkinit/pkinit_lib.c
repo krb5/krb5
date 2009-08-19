@@ -53,7 +53,7 @@ pkinit_init_req_opts(pkinit_req_opts **reqopts)
     pkinit_req_opts *opts = NULL;
 
     *reqopts = NULL;
-    opts = (pkinit_req_opts *) calloc(1, sizeof(pkinit_req_opts));
+    opts = calloc(1, sizeof(*opts));
     if (opts == NULL)
 	return retval;
 
@@ -74,8 +74,7 @@ pkinit_init_req_opts(pkinit_req_opts **reqopts)
 void
 pkinit_fini_req_opts(pkinit_req_opts *opts)
 {
-    if (opts != NULL)
-	free(opts);
+    free(opts);
     return;
 }
 
@@ -86,7 +85,7 @@ pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
     pkinit_plg_opts *opts = NULL;
 
     *plgopts = NULL;
-    opts = (pkinit_plg_opts *) calloc(1, sizeof(pkinit_plg_opts));
+    opts = calloc(1, sizeof(pkinit_plg_opts));
     if (opts == NULL)
 	return retval;
 
@@ -106,8 +105,7 @@ pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
 void
 pkinit_fini_plg_opts(pkinit_plg_opts *opts)
 {
-    if (opts != NULL)
-	free(opts);
+    free(opts);
     return;
 }
 
@@ -115,12 +113,10 @@ void
 free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
 {
     if (*in == NULL) return;
-    if ((*in)->signedAuthPack.data != NULL)
-	free((*in)->signedAuthPack.data);
+    free((*in)->signedAuthPack.data);
     if ((*in)->trustedCertifiers != NULL)
 	free_krb5_external_principal_identifier(&(*in)->trustedCertifiers);
-    if ((*in)->kdcPkId.data != NULL)
-	free((*in)->kdcPkId.data);
+    free((*in)->kdcPkId.data);
     free(*in);
 }
 
@@ -128,12 +124,9 @@ void
 free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
 {
     if (*in == NULL) return;
-    if ((*in)->signedAuthPack.data != NULL)
-	free((*in)->signedAuthPack.data);
-    if ((*in)->kdcCert.data != NULL)
-	free((*in)->kdcCert.data);
-    if ((*in)->encryptionCert.data != NULL)
-	free((*in)->encryptionCert.data);
+    free((*in)->signedAuthPack.data);
+    free((*in)->kdcCert.data);
+    free((*in)->encryptionCert.data);
     if ((*in)->trustedCertifiers != NULL)
 	free_krb5_trusted_ca(&(*in)->trustedCertifiers);
     free(*in);
@@ -143,10 +136,8 @@ void
 free_krb5_reply_key_pack(krb5_reply_key_pack **in)
 {
     if (*in == NULL) return;
-    if ((*in)->replyKey.contents != NULL)
-	free((*in)->replyKey.contents);
-    if ((*in)->asChecksum.contents != NULL)
-	free((*in)->asChecksum.contents);
+    free((*in)->replyKey.contents);
+    free((*in)->asChecksum.contents);
     free(*in);
 }
 
@@ -154,8 +145,7 @@ void
 free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
 {
     if (*in == NULL) return;
-    if ((*in)->replyKey.contents != NULL)
-	free((*in)->replyKey.contents);
+    free((*in)->replyKey.contents);
     free(*in);
 }
 
@@ -164,16 +154,12 @@ free_krb5_auth_pack(krb5_auth_pack **in)
 {
     if ((*in) == NULL) return;
     if ((*in)->clientPublicValue != NULL) {
-	if ((*in)->clientPublicValue->algorithm.algorithm.data != NULL)
-	    free((*in)->clientPublicValue->algorithm.algorithm.data);
-	if ((*in)->clientPublicValue->algorithm.parameters.data != NULL)
-	    free((*in)->clientPublicValue->algorithm.parameters.data);
-	if ((*in)->clientPublicValue->subjectPublicKey.data != NULL)
-	    free((*in)->clientPublicValue->subjectPublicKey.data);
+	free((*in)->clientPublicValue->algorithm.algorithm.data);
+	free((*in)->clientPublicValue->algorithm.parameters.data);
+	free((*in)->clientPublicValue->subjectPublicKey.data);
 	free((*in)->clientPublicValue);
     }
-    if ((*in)->pkAuthenticator.paChecksum.contents != NULL)
-	free((*in)->pkAuthenticator.paChecksum.contents);
+    free((*in)->pkAuthenticator.paChecksum.contents);
     if ((*in)->supportedCMSTypes != NULL)
 	free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
     free(*in);
@@ -194,12 +180,10 @@ free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
     if (*in == NULL) return;
     switch ((*in)->choice) {
 	case choice_pa_pk_as_rep_dhInfo:
-	    if ((*in)->u.dh_Info.dhSignedData.data != NULL)
-		free((*in)->u.dh_Info.dhSignedData.data);
+	    free((*in)->u.dh_Info.dhSignedData.data);
 	    break;
 	case choice_pa_pk_as_rep_encKeyPack:
-	    if ((*in)->u.encKeyPack.data != NULL)
-		free((*in)->u.encKeyPack.data);
+	    free((*in)->u.encKeyPack.data);
 	    break;
 	default:
 	    break;
@@ -211,8 +195,7 @@ void
 free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
 {
     if (*in == NULL) return;
-    if ((*in)->u.encKeyPack.data != NULL)
-	free((*in)->u.encKeyPack.data);
+    free((*in)->u.encKeyPack.data);
     free(*in);
 }
 
@@ -222,12 +205,9 @@ free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in
     int i = 0;
     if (*in == NULL) return;
     while ((*in)[i] != NULL) {
-	if ((*in)[i]->subjectName.data != NULL)
-	    free((*in)[i]->subjectName.data);
-	if ((*in)[i]->issuerAndSerialNumber.data != NULL)
-	    free((*in)[i]->issuerAndSerialNumber.data);
-	if ((*in)[i]->subjectKeyIdentifier.data != NULL)
-	    free((*in)[i]->subjectKeyIdentifier.data);
+	free((*in)[i]->subjectName.data);
+	free((*in)[i]->issuerAndSerialNumber.data);
+	free((*in)[i]->subjectKeyIdentifier.data);
 	free((*in)[i]);
 	i++;
     }
@@ -244,12 +224,10 @@ free_krb5_trusted_ca(krb5_trusted_ca ***in)
 	    case choice_trusted_cas_principalName:
 		break;
 	    case choice_trusted_cas_caName:
-		if ((*in)[i]->u.caName.data != NULL)
-		    free((*in)[i]->u.caName.data);
+		free((*in)[i]->u.caName.data);
 		break;
 	    case choice_trusted_cas_issuerAndSerial:
-		if ((*in)[i]->u.issuerAndSerial.data != NULL)
-		    free((*in)[i]->u.issuerAndSerial.data);
+		free((*in)[i]->u.issuerAndSerial.data);
 		break;
 	    case choice_trusted_cas_UNKNOWN:
 		break;
@@ -266,8 +244,7 @@ free_krb5_typed_data(krb5_typed_data ***in)
     int i = 0;
     if (*in == NULL) return;
     while ((*in)[i] != NULL) {
-	if ((*in)[i]->data != NULL)
-	    free((*in)[i]->data);
+	free((*in)[i]->data);
 	free((*in)[i]);
 	i++;
     }
@@ -279,10 +256,8 @@ free_krb5_algorithm_identifier(krb5_algorithm_identifier *in)
 {
     if (in == NULL)
 	return;
-    if (in->algorithm.data != NULL)
-	free(in->algorithm.data);
-    if (in->parameters.data != NULL)
-	free(in->parameters.data);
+    free(in->algorithm.data);
+    free(in->parameters.data);
     free(in);
 }
 
@@ -302,10 +277,8 @@ void
 free_krb5_subject_pk_info(krb5_subject_pk_info **in)
 {
     if ((*in) == NULL) return;
-    if ((*in)->algorithm.parameters.data != NULL)
-	free((*in)->algorithm.parameters.data);
-    if ((*in)->subjectPublicKey.data != NULL)
-	free((*in)->subjectPublicKey.data);
+    free((*in)->algorithm.parameters.data);
+    free((*in)->subjectPublicKey.data);
     free(*in);
 }
 
@@ -313,8 +286,7 @@ void
 free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in)
 {
     if (*in == NULL) return;
-    if ((*in)->subjectPublicKey.data != NULL)
-	free((*in)->subjectPublicKey.data);
+    free((*in)->subjectPublicKey.data);
     free(*in);
 }
 

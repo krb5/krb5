@@ -380,12 +380,6 @@ xdr_kadm5_ret_t(XDR *xdrs, kadm5_ret_t *objp)
 	return (TRUE);
 }
 
-bool_t xdr_kadm5_principal_ent_rec_v1(XDR *xdrs,
-				      kadm5_principal_ent_rec *objp)
-{
-     return _xdr_kadm5_principal_ent_rec(xdrs, objp, KADM5_API_VERSION_1);
-}
-
 bool_t xdr_kadm5_principal_ent_rec(XDR *xdrs,
 				   kadm5_principal_ent_rec *objp)
 {
@@ -413,15 +407,9 @@ _xdr_kadm5_principal_ent_rec(XDR *xdrs, kadm5_principal_ent_rec *objp,
 	if (!xdr_krb5_deltat(xdrs, &objp->max_life)) {
 		return (FALSE);
 	}
-        if (v == KADM5_API_VERSION_1) {
-	     if (!xdr_krb5_principal(xdrs, &objp->mod_name)) {
-		  return (FALSE);
-	     }
-	} else {
-	     if (!xdr_nulltype(xdrs, (void **) &objp->mod_name,
-			       xdr_krb5_principal)) {
-		  return (FALSE);
-	     }
+	if (!xdr_nulltype(xdrs, (void **) &objp->mod_name,
+			  xdr_krb5_principal)) {
+		return (FALSE);
 	}
 	if (!xdr_krb5_timestamp(xdrs, &objp->mod_date)) {
 		return (FALSE);
@@ -441,35 +429,33 @@ _xdr_kadm5_principal_ent_rec(XDR *xdrs, kadm5_principal_ent_rec *objp,
 	if (!xdr_long(xdrs, &objp->aux_attributes)) {
 		return (FALSE);
 	}
-	if (v != KADM5_API_VERSION_1) {
-	     if (!xdr_krb5_deltat(xdrs, &objp->max_renewable_life)) {
-		  return (FALSE);
-	     }
-	     if (!xdr_krb5_timestamp(xdrs, &objp->last_success)) {
-		  return (FALSE);
-	     }
-	     if (!xdr_krb5_timestamp(xdrs, &objp->last_failed)) {
-		  return (FALSE);
-	     }
-	     if (!xdr_krb5_kvno(xdrs, &objp->fail_auth_count)) {
-		  return (FALSE);
-	     }
-	     if (!xdr_krb5_int16(xdrs, &objp->n_key_data)) {
-		  return (FALSE);
-	     }
-	     if (!xdr_krb5_int16(xdrs, &objp->n_tl_data)) {
-		  return (FALSE);
-	     }
-	     if (!xdr_nulltype(xdrs, (void **) &objp->tl_data,
-			       xdr_krb5_tl_data)) { 
-		  return FALSE;
-	     }
-	     n = objp->n_key_data;
-	     if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
-			    &n, ~0, sizeof(krb5_key_data),
-			    xdr_krb5_key_data_nocontents)) {
-		  return (FALSE);
-	     }
+	if (!xdr_krb5_deltat(xdrs, &objp->max_renewable_life)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_timestamp(xdrs, &objp->last_success)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_timestamp(xdrs, &objp->last_failed)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_kvno(xdrs, &objp->fail_auth_count)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_int16(xdrs, &objp->n_key_data)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_int16(xdrs, &objp->n_tl_data)) {
+		return (FALSE);
+	}
+	if (!xdr_nulltype(xdrs, (void **) &objp->tl_data,
+			  xdr_krb5_tl_data)) {
+		return FALSE;
+	}
+	n = objp->n_key_data;
+	if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
+		       &n, ~0, sizeof(krb5_key_data),
+		       xdr_krb5_key_data_nocontents)) {
+		return (FALSE);
 	}
 	return (TRUE);
 }
@@ -510,14 +496,8 @@ xdr_cprinc_arg(XDR *xdrs, cprinc_arg *objp)
 	if (!xdr_ui_4(xdrs, &objp->api_version)) {
 		return (FALSE);
 	}
-	if (objp->api_version == KADM5_API_VERSION_1) {
-	     if (!xdr_kadm5_principal_ent_rec_v1(xdrs, &objp->rec)) {
-		  return (FALSE);
-	     }
-	} else {
-	     if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
-		  return (FALSE);
-	     }
+	if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
+		return (FALSE);
 	}
 	if (!xdr_long(xdrs, &objp->mask)) {
 		return (FALSE);
@@ -534,14 +514,8 @@ xdr_cprinc3_arg(XDR *xdrs, cprinc3_arg *objp)
 	if (!xdr_ui_4(xdrs, &objp->api_version)) {
 		return (FALSE);
 	}
-	if (objp->api_version == KADM5_API_VERSION_1) {
-		if (!xdr_kadm5_principal_ent_rec_v1(xdrs, &objp->rec)) {
-			return (FALSE);
-		}
-	} else {
-		if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
-			return (FALSE);
-		}
+	if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
+		return (FALSE);
 	}
 	if (!xdr_long(xdrs, &objp->mask)) {
 		return (FALSE);
@@ -589,14 +563,8 @@ xdr_mprinc_arg(XDR *xdrs, mprinc_arg *objp)
 	if (!xdr_ui_4(xdrs, &objp->api_version)) {
 		return (FALSE);
 	}
-	if (objp->api_version == KADM5_API_VERSION_1) {
-	     if (!xdr_kadm5_principal_ent_rec_v1(xdrs, &objp->rec)) {
-		  return (FALSE);
-	     }
-	} else {
-	     if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
-		  return (FALSE);
-	     }
+	if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
+		return (FALSE);
 	}
 	if (!xdr_long(xdrs, &objp->mask)) {
 		return (FALSE);
@@ -796,19 +764,10 @@ xdr_chrand_ret(XDR *xdrs, chrand_ret *objp)
 	if (!xdr_kadm5_ret_t(xdrs, &objp->code)) {
 		return (FALSE);
 	}
-	if (objp->api_version == KADM5_API_VERSION_1) {
-	     if(objp->code == KADM5_OK) {
-		  if (!xdr_krb5_keyblock(xdrs, &objp->key)) {
-		       return (FALSE);
-		  }
-	     }
-	} else {
-	     if (objp->code == KADM5_OK) {
-		  if (!xdr_array(xdrs, (char **)&objp->keys, &objp->n_keys, ~0,
-				 sizeof(krb5_keyblock),
-				 xdr_krb5_keyblock))
-		       return FALSE;
-	     }
+	if (objp->code == KADM5_OK) {
+		if (!xdr_array(xdrs, (char **)&objp->keys, &objp->n_keys, ~0,
+			       sizeof(krb5_keyblock), xdr_krb5_keyblock))
+			return FALSE;
 	}
 
 	return (TRUE);
@@ -823,8 +782,7 @@ xdr_gprinc_arg(XDR *xdrs, gprinc_arg *objp)
 	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
 		return (FALSE);
 	}
-	if ((objp->api_version > KADM5_API_VERSION_1) &&
-	    !xdr_long(xdrs, &objp->mask)) {
+	if (!xdr_long(xdrs, &objp->mask)) {
 	     return FALSE;
 	}
 	     
@@ -841,15 +799,9 @@ xdr_gprinc_ret(XDR *xdrs, gprinc_ret *objp)
 		return (FALSE);
 	}
 	if(objp->code == KADM5_OK)  {
-	     if (objp->api_version == KADM5_API_VERSION_1) {
-		  if (!xdr_kadm5_principal_ent_rec_v1(xdrs, &objp->rec)) {
-		       return (FALSE);
-		  }
-	     } else {
-		  if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
-		       return (FALSE);
-		  }
-	     }
+		if (!xdr_kadm5_principal_ent_rec(xdrs, &objp->rec)) {
+			return (FALSE);
+		}
 	}
 
 	return (TRUE);

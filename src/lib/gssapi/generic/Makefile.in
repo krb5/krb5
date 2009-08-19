@@ -167,7 +167,7 @@ install-headers-unix install:: gssapi.h
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 
-depend:: $(ETSRCS)
+depend:: $(ETSRCS) $(ETHDRS) $(HDRS) errmap.h maptest.h
 
 @libobj_frag@
 

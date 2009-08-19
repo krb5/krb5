@@ -235,8 +235,8 @@ INITDB		= $(STESTDIR)/scripts/init_db
 MAKE_KEYTAB	= $(TESTDIR)/scripts/make-host-keytab.pl
 LOCAL_MAKE_KEYTAB= $(TESTDIR)/scripts/make-host-keytab.pl
 ENV_SETUP	= $(TESTDIR)/scripts/env-setup.sh
-CLNTTCL		= $(TESTDIR)/util/ovsec_kadm_clnt_tcl
-SRVTCL		= $(TESTDIR)/util/ovsec_kadm_srv_tcl
+CLNTTCL		= $(TESTDIR)/util/kadm5_clnt_tcl
+SRVTCL		= $(TESTDIR)/util/kadm5_srv_tcl
 # Dejagnu variables.
 # We have to set the host with --host so that setup_xfail will work.
 # If we don't set it, then the host type used is "native", which

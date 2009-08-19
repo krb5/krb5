@@ -381,11 +381,10 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     }
 
     /* first open the database  before doing anything */
-#ifdef KRBCONF_KDC_MODIFIES_KDB
-    kdb_open_flags = KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC;
-#else
-    kdb_open_flags = KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC;
-#endif
+    if (kdc_modifies_kdb)
+	kdb_open_flags = KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC;
+    else
+	kdb_open_flags = KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC;
     if ((kret = krb5_db_open(rdp->realm_context, db_args, kdb_open_flags))) {
 	kdc_err(rdp->realm_context, kret,
 		"while initializing database for realm %s", realm);
@@ -558,6 +557,7 @@ usage(char *name)
     return;
 }
 
+char               **db_args      = NULL;
 void
 initialize_realms(krb5_context kcontext, int argc, char **argv)
 {
@@ -574,7 +574,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     char		*default_tcp_ports = 0;
     krb5_pointer	aprof;
     const char		*hierarchy[3];
-    char               **db_args      = NULL;
     char                *no_refrls = NULL;
     char                *host_based_srvcs = NULL;
     int                  db_args_size = 0;

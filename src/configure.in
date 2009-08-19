@@ -115,6 +115,16 @@ if test "$withval" = yes; then
 	AC_DEFINE(KRBCONF_VAGUE_ERRORS,1,[Define if the KDC should return only vague error codes to clients])
 fi
 dnl
+dnl WITH_CRYPTO_IMPL
+dnl
+CRYPTO_IMPL="builtin"
+AC_ARG_WITH([crypto-impl],
+AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @<:@builtin@:>@]),
+[CRYPTO_IMPL=$withval
+AC_MSG_RESULT("k5crypto will use \'$withval\'")
+], withval=builtin)dnl
+AC_SUBST(CRYPTO_IMPL)
+dnl
 dnl --with-kdc-kdb-update makes the KDC update the database with last request
 dnl information and failure information.
 dnl
@@ -1049,11 +1059,13 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib lib/kdb
 
-	lib/crypto lib/crypto/crc32 lib/crypto/des lib/crypto/dk
-	lib/crypto/enc_provider lib/crypto/hash_provider
-	lib/crypto/keyhash_provider lib/crypto/md4 lib/crypto/md5
-	lib/crypto/old lib/crypto/raw lib/crypto/sha1
-	lib/crypto/arcfour lib/crypto/yarrow lib/crypto/aes
+	lib/crypto lib/crypto/krb lib/crypto/krb/crc32 lib/crypto/builtin/des
+	lib/crypto/krb/dk lib/crypto/krb/enc_provider
+	lib/crypto/krb/hash_provider lib/crypto/krb/keyhash_provider
+	lib/crypto/builtin lib/crypto/builtin/md4 lib/crypto/builtin/md5
+	lib/crypto/krb/old lib/crypto/krb/raw lib/crypto/builtin/sha1
+	lib/crypto/builtin/arcfour lib/crypto/krb/yarrow lib/crypto/builtin/aes
+	lib/crypto/crypto_tests
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache
 dnl	lib/krb5/ccache/ccapi
@@ -1089,8 +1101,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu
 
-	kadmin kadmin/cli kadmin/dbutil kadmin/passwd
-	kadmin/passwd/unit-test kadmin/ktutil kadmin/server
+	kadmin kadmin/cli kadmin/dbutil kadmin/ktutil kadmin/server
 	kadmin/testing kadmin/testing/scripts kadmin/testing/util
 
 	appl

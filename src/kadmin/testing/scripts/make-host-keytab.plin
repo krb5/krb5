@@ -67,7 +67,7 @@ die "Neither \$TOP nor \$TESTDIR is set, and -top not specified.\n"
 $top = $ENV{'TOP'} if (! $top);
 $TESTDIR = ($ENV{'TESTDIR'} || "$top/testing");
 $MAKE_KEYTAB = ($ENV{'MAKE_KEYTAB'} || "$TESTDIR/scripts/$whoami");
-$SRVTCL = ($ENV{'SRVTCL'} || "$TESTDIR/util/ovsec_kadm_srv_tcl");
+$SRVTCL = ($ENV{'SRVTCL'} || "$TESTDIR/util/kadm5_srv_tcl");
 $TCLUTIL = ($ENV{'TCLUTIL'} || "$TESTDIR/tcl/util.t");
 # This'll be wrong sometimes
 $RSH_CMD = ($ENV{'RSH_CMD'} || '/usr/ucb/rsh');

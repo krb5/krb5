@@ -287,7 +287,8 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/t_deltat.c	\
 	$(srcdir)/t_expand.c	\
 	$(srcdir)/t_pac.c	\
-	$(srcdir)/t_princ.c
+	$(srcdir)/t_princ.c	\
+	$(srcdir)/t_etypes.c
 
 # Someday, when we have a "maintainer mode", do this right:
 BISON=bison
@@ -319,6 +320,8 @@ T_PAC_OBJS= t_pac.o pac.o
 
 T_PRINC_OBJS= t_princ.o parse.o unparse.o
 
+T_ETYPES_OBJS= t_etypes.o init_ctx.o
+
 t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(KRB5_BASE_LIBS)
 t_ad_fx_armor: t_ad_fx_armor.o
@@ -347,8 +350,11 @@ t_pac: $(T_PAC_OBJS) $(KRB5_BASE_DEPLIBS)
 t_princ: $(T_PRINC_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_princ $(T_PRINC_OBJS) $(KRB5_BASE_LIBS)
 
+t_etypes: $(T_ETYPES_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_etypes $(T_ETYPES_OBJS) $(KRB5_BASE_LIBS)
+
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
-	t_princ
+	t_princ t_etypes
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
@@ -385,6 +391,7 @@ check-unix:: $(TEST_PROGS)
 	$(RUN_SETUP) $(VALGRIND) ./t_authdata
 	$(RUN_SETUP) $(VALGRIND) ./t_pac
 	$(RUN_SETUP) $(VALGRIND) ./t_princ
+	$(RUN_SETUP) $(VALGRIND) ./t_etypes
 
 clean::
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \
@@ -392,6 +399,9 @@ clean::
 		$(OUTPRE)t_ser$(EXEEXT) $(OUTPRE)t_ser.$(OBJEXT)	\
 		$(OUTPRE)t_deltat$(EXEEXT) $(OUTPRE)t_deltat.$(OBJEXT) \
 		$(OUTPRE)t_expand$(EXEEXT) $(OUTPRE)t_expand.$(OBJEXT)  \
+		$(OUTPRE)t_etypes$(EXEEXT) $(OUTPRE)t_etypes.$(OBJEXT)	\
+		$(OUTPRE)t_pac$(EXEEXT) $(OUTPRE)t_pac.$(OBJEXT)	\
+		$(OUTPRE)t_princ$(EXEEXT) $(OUTPRE)t_princ.$(OBJEXT)	\
 	$(OUTPRE)t_authdata$(EXEEXT) $(OUTPRE)t_authdata.$(OBJEXT)
 
 @libobj_frag@
