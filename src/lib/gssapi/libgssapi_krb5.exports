@@ -7,7 +7,6 @@ GSS_C_NT_MACHINE_UID_NAME
 GSS_C_NT_STRING_UID_NAME
 GSS_C_NT_USER_NAME
 GSS_KRB5_NT_PRINCIPAL_NAME
-GSS_KRB5_NT_ENTERPRISE_NAME
 gss_accept_sec_context
 gss_acquire_cred
 gss_add_buffer_set_member

@@ -141,9 +141,6 @@ const gss_OID_desc krb5_gss_oid_array[] = {
     /* gss_nt_krb5_principal.  Object identifier for a krb5_principal. Do not use. */
     {10, "\052\206\110\206\367\022\001\002\002\002"},
 
-    /* GSS_KRB5_NT_ENTERPRISE_NAME */
-    {10, "\052\206\110\206\367\022\001\002\002\003"}, /* XXX needs an assigned OID */
-
     { 0, 0 }
 };
 
@@ -153,7 +150,6 @@ const gss_OID_desc * const gss_mech_krb5_wrong        = krb5_gss_oid_array+2;
 const gss_OID_desc * const gss_nt_krb5_name           = krb5_gss_oid_array+4;
 const gss_OID_desc * const gss_nt_krb5_principal      = krb5_gss_oid_array+5;
 const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME = krb5_gss_oid_array+4;
-const gss_OID_desc * const GSS_KRB5_NT_ENTERPRISE_NAME= krb5_gss_oid_array+6;
 
 static const gss_OID_set_desc oidsets[] = {
     {1, (gss_OID) krb5_gss_oid_array+0},

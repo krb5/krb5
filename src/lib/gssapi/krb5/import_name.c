@@ -61,7 +61,6 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 #ifndef NO_PASSWORD
     struct passwd *pw;
 #endif
-    krb5_flags flags = 0;
 
     code = krb5_gss_init_context(&context);
     if (code) {
@@ -143,9 +142,6 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             g_OID_equal(input_name_type, gss_nt_krb5_name) ||
             g_OID_equal(input_name_type, gss_nt_user_name)) {
             stringrep = (char *) tmp;
-        } else if (g_OID_equal(input_name_type, GSS_KRB5_NT_ENTERPRISE_NAME)) {
-            stringrep = (char *) tmp;
-            flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
 #ifndef NO_PASSWORD
         } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
             uid = *(uid_t *) input_name_buffer->value;
@@ -201,7 +197,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
         /* at this point, stringrep is set, or if not, *minor_status is. */
 
         if (stringrep)
-            code = krb5_parse_name_flags(context, (char *) stringrep, 0, &princ);
+            code = krb5_parse_name(context, (char *) stringrep, &princ);
         else {
         fail_name:
             xfree(tmp);
