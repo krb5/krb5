@@ -776,79 +776,10 @@ cleanup:
 }
 
 /*
- * Implements S4U2Proxy, by which a service can request a ticket to
- * a service with the client name set to a principal that authenticated
- * to the original service.
- */
-
-static krb5_error_code
-krb5_get_proxy_cred_from_kdc(krb5_context context,
-                             krb5_ccache ccache,
-                             krb5_creds *in_creds,
-                             krb5_ticket *evidence_tkt,
-                             krb5_creds **out_creds,
-                             krb5_creds ***tgts,
-                             krb5_flags kdcopt)
-
-{
-    krb5_error_code code;
-    krb5_data *evidence_tkt_data = NULL;
-    krb5_creds ecreds;
-
-    *out_creds = NULL;
-    *tgts = NULL;
-
-    if (in_creds == NULL || (kdcopt & KDC_OPT_ENC_TKT_IN_SKEY)) {
-        code = EINVAL;
-        goto cleanup;
-    }
-
-    code = encode_krb5_ticket(evidence_tkt, &evidence_tkt_data);
-    if (code != 0)
-        goto cleanup;
-
-    ecreds = *in_creds;
-    ecreds.client = evidence_tkt->server;
-    ecreds.second_ticket = *evidence_tkt_data;
-
-    kdcopt |= KDC_OPT_FORWARDABLE | KDC_OPT_CNAME_IN_ADDL_TKT;
-
-    code = krb5_get_cred_from_kdc_opt(context, ccache, &ecreds, out_creds,
-                                      tgts, kdcopt);
-    if (code != 0)
-        goto cleanup;
-
-    /*
-     * Check client name because we couldn't compare that inside
-     * krb5_get_cred_via_tkt_ext(); server should have been checked
-     * there, but just to be sure we check that too.
-     */
-    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client, (*out_creds)->client) ||
-        !krb5_principal_compare(context, in_creds->server, (*out_creds)->server)) {
-        code = KRB5_KDCREP_MODIFIED; /* XXX */
-        goto cleanup;
-    }
-    /*
-     * Check the returned ticket is marked as forwardable.
-     */
-    if (((*out_creds)->ticket_flags & TKT_FLG_FORWARDABLE) == 0) {
-        code = KRB5_TKT_NOT_FORWARDABLE;
-        goto cleanup;
-    }
-
-cleanup:
-    if (evidence_tkt_data != NULL)
-        krb5_free_data(context, evidence_tkt_data);
-    if (*out_creds != NULL && code != 0) {
-        krb5_free_creds(context, *out_creds);
-        *out_creds = NULL;
-    }
-
-    return code;
-}
-
-/*
  * Exported API for constrained delegation (S4U2Proxy).
+ *
+ * This is preferable to using krb5_get_credentials directly because
+ * it can perform some additional checks.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_for_proxy(krb5_context context,
@@ -861,9 +792,9 @@ krb5_get_credentials_for_proxy(krb5_context context,
     krb5_error_code code;
     krb5_creds mcreds;
     krb5_creds *ncreds = NULL;
-    krb5_creds **tgts = NULL;
     krb5_flags fields;
-    int kdcopt;
+    krb5_data *evidence_tkt_data = NULL;
+    krb5_creds s4u_creds;
 
     *out_creds = NULL;
 
@@ -902,35 +833,29 @@ krb5_get_credentials_for_proxy(krb5_context context,
         || options & KRB5_GC_CACHED)
         goto cleanup;
 
-    kdcopt = 0;
-    if (options & KRB5_GC_CANONICALIZE)
-        kdcopt |= KDC_OPT_CANONICALIZE;
-
-    /* Actually make the S4U2Proxy request to the KDC */
-    code = krb5_get_proxy_cred_from_kdc(context, ccache, ncreds, evidence_tkt,
-                                        out_creds, &tgts, kdcopt);
+    code = encode_krb5_ticket(evidence_tkt, &evidence_tkt_data);
     if (code != 0)
         goto cleanup;
 
-    if ((options & KRB5_GC_NO_STORE) == 0) {
-        code = krb5_cc_store_cred(context, ccache, *out_creds);
-        if (code != 0)
-            goto cleanup;
-    }
+    s4u_creds = *in_creds;
+    s4u_creds.client = evidence_tkt->server;
+    s4u_creds.second_ticket = *evidence_tkt_data;
 
-    if (tgts != NULL) {
-        int i = 0;
-        krb5_error_code code2;
+    code = krb5_get_credentials(context,
+                                options | KRB5_GC_CONSTRAINED_DELEGATION,
+                                ccache,
+                                &s4u_creds,
+                                out_creds);
+    if (code != 0)
+        goto cleanup;
 
-        while (tgts[i] != NULL) {
-            code2 = krb5_cc_store_cred(context, ccache, tgts[i]);
-            if (code2 != 0) {
-                code = code2;
-                break;
-            }
-            i++;
-        }
-        krb5_free_tgt_creds(context, tgts);
+    /*
+     * Check client name because we couldn't compare that inside
+     * krb5_get_credentials() (enc_part2 is unavailable in clear)
+     */
+    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client, (*out_creds)->client)) {
+        code = KRB5_KDCREP_MODIFIED;
+        goto cleanup;
     }
 
 cleanup:
@@ -938,6 +863,8 @@ cleanup:
         krb5_free_creds(context, *out_creds);
         *out_creds = NULL;
     }
+    if (evidence_tkt_data != NULL)
+        krb5_free_data(context, evidence_tkt_data);
 
     return code;
 }
