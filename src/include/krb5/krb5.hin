@@ -1572,7 +1572,9 @@ void KRB5_CALLCONV krb5_free_tgt_creds
 #define	KRB5_GC_CACHED		2	/* want cached ticket only */
 #define	KRB5_GC_CANONICALIZE	4	/* set canonicalize KDC option */
 #define	KRB5_GC_NO_STORE	8	/* do not store in credentials cache */
-#define	KRB5_GC_CONSTRAINED_DELEGATION	16  /* constrained delegation */
+#define	KRB5_GC_FORWARDABLE		16  /* acquire forwardable tickets */
+#define	KRB5_GC_NO_TRANSIT_CHECK	32  /* disable transited check */
+#define	KRB5_GC_CONSTRAINED_DELEGATION	64  /* constrained delegation */
 
 krb5_error_code KRB5_CALLCONV krb5_get_credentials
 	(krb5_context,

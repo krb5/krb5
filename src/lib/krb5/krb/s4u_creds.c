@@ -711,6 +711,11 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 
     *out_creds = NULL;
 
+    if (options & KRB5_GC_CONSTRAINED_DELEGATION) {
+        code = EINVAL;
+        goto cleanup;
+    }
+
     if (in_creds->client != NULL) {
         /* Uncanonicalised check */
         code = krb5_get_credentials(context, options | KRB5_GC_CACHED,
@@ -731,6 +736,10 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
     kdcopt = 0;
     if (options & KRB5_GC_CANONICALIZE)
         kdcopt |= KDC_OPT_CANONICALIZE;
+    if (options & KRB5_GC_FORWARDABLE)
+        kdcopt |= KDC_OPT_FORWARDABLE;
+    if (options & KRB5_GC_NO_TRANSIT_CHECK)
+        kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
 
     code = krb5_get_self_cred_from_kdc(context, ccache,
                                        in_creds, subject_cert,
