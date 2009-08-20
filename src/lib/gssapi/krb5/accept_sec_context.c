@@ -299,7 +299,7 @@ kg_acquire_s4u2proxy_creds(krb5_context context,
         pcreds.server = targets[i];
 
         retval = krb5_get_credentials_for_proxy(context,
-                                                KRB5_GC_CANONICALIZE,
+                                                KRB5_GC_CANONICALIZE | KRB5_GC_NO_STORE,
                                                 acceptor_cred->ccache,
                                                 &pcreds,
                                                 ticket,

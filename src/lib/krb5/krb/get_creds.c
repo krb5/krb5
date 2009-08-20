@@ -175,7 +175,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
 	&& not_ktype)
 	retval = KRB5_CC_NOT_KTYPE;
 
-    if (!retval) {
+    if (!retval && (options & KRB5_GC_NO_STORE) == 0) {
         /* the purpose of the krb5_get_credentials call is to 
          * obtain a set of credentials for the caller.  the 
          * krb5_cc_store_cred() call is to optimize performance

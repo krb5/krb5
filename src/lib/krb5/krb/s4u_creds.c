@@ -741,9 +741,11 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 
     assert(*out_creds != NULL);
 
-    code = krb5_cc_store_cred(context, ccache, *out_creds);
-    if (code != 0)
-        goto cleanup;
+    if ((options & KRB5_GC_NO_STORE) == 0) {
+        code = krb5_cc_store_cred(context, ccache, *out_creds);
+        if (code != 0)
+            goto cleanup;
+    }
 
     if (tgts != NULL) {
         int i = 0;
@@ -910,9 +912,11 @@ krb5_get_credentials_for_proxy(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = krb5_cc_store_cred(context, ccache, *out_creds);
-    if (code != 0)
-        goto cleanup;
+    if ((options & KRB5_GC_NO_STORE) == 0) {
+        code = krb5_cc_store_cred(context, ccache, *out_creds);
+        if (code != 0)
+            goto cleanup;
+    }
 
     if (tgts != NULL) {
         int i = 0;

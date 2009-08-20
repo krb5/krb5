@@ -144,7 +144,8 @@ kg_acquire_s4u2self_creds(OM_uint32 *minor_status,
     if (acceptor_cred->req_enctypes != NULL)
         in_creds.keyblock.enctype = acceptor_cred->req_enctypes[0];
 
-    code = krb5_get_credentials_for_user(context, KRB5_GC_CANONICALIZE,
+    code = krb5_get_credentials_for_user(context,
+                                         KRB5_GC_CANONICALIZE | KRB5_GC_NO_STORE,
                                          acceptor_cred->ccache, &in_creds,
                                          NULL, &out_creds);
     if (code != 0) {
