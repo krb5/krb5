@@ -20,7 +20,7 @@ $(OUTPRE)ss_wrapper.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SS_DEPS) kadmin.h ss_wrapper.c
 $(OUTPRE)getdate.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
-  getdate.c kadmin.h
+  getdate.c
 $(OUTPRE)keytab.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
