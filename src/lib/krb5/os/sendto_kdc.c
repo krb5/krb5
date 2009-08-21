@@ -1017,11 +1017,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	    }
 	    conn->x.in.bufsizebytes_read += nread;
 	    if (conn->x.in.bufsizebytes_read == 4) {
-		unsigned long len;
-		len = conn->x.in.bufsizebytes[0];
-		len = (len << 8) + conn->x.in.bufsizebytes[1];
-		len = (len << 8) + conn->x.in.bufsizebytes[2];
-		len = (len << 8) + conn->x.in.bufsizebytes[3];
+		unsigned long len = load_32_be (conn->x.in.bufsizebytes);
 		dprint("received length on fd %d is %d\n", conn->fd, (int)len);
 		/* Arbitrary 1M cap.  */
 		if (len > 1 * 1024 * 1024) {
