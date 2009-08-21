@@ -102,7 +102,8 @@ kg_return_mechs(OM_uint32 *minor_status,
 static int
 kg_is_initiator_cred(krb5_gss_cred_id_t cred)
 {
-    return (cred->usage == GSS_C_INITIATE || cred->usage == GSS_C_BOTH);
+    return (cred->usage == GSS_C_INITIATE || cred->usage == GSS_C_BOTH) &&
+           (cred->ccache != NULL);
 }
 
 static OM_uint32
@@ -340,7 +341,7 @@ kg_duplicate_ccache(krb5_context context,
     krb5_error_code code;
     krb5_ccache ccache;
 
-    if (impersonator_cred->ccache == NULL)
+    if (!kg_is_initiator_cred(impersonator_cred))
         return EINVAL;
 
     code = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
@@ -386,7 +387,6 @@ kg_compose_cred(OM_uint32 *minor_status,
     k5_mutex_assert_locked(&subject_cred->lock);
 
     if (!kg_is_initiator_cred(impersonator_cred) ||
-        impersonator_cred->ccache == NULL ||
         impersonator_cred->princ == NULL) {
         *minor_status = (OM_uint32)G_BAD_USAGE;
         major_status = GSS_S_FAILURE;
@@ -394,7 +394,6 @@ kg_compose_cred(OM_uint32 *minor_status,
     }
 
     if (!kg_is_initiator_cred(subject_cred) ||
-        subject_cred->ccache == NULL ||
         subject_cred->princ == NULL) {
         *minor_status = (OM_uint32)G_BAD_USAGE;
         major_status = GSS_S_FAILURE;
