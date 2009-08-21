@@ -183,8 +183,8 @@ gss_acquire_cred_with_name(OM_uint32 *minor_status,
     /* for each requested mech attempt to obtain a credential */
     for (i = 0; i < mechs->count; i++) {
 	major = gss_add_cred_with_name(minor_status,
-				       impersonator_cred_handle,
 				       (gss_cred_id_t)creds,
+				       impersonator_cred_handle,
 				       desired_name,
 				       &mechs->elements[i],
 				       cred_usage, time_req, time_req, NULL,
@@ -248,8 +248,8 @@ gss_acquire_cred_with_name(OM_uint32 *minor_status,
 static OM_uint32
 val_add_cred_with_name_args(
     OM_uint32 *minor_status,
-    gss_cred_id_t impersonator_cred_handle,
     gss_cred_id_t input_cred_handle,
+    const gss_cred_id_t impersonator_cred_handle,
     gss_name_t desired_name,
     gss_OID desired_mech,
     gss_cred_usage_t cred_usage,
@@ -310,8 +310,8 @@ val_add_cred_with_name_args(
 /* V2 KRB5_CALLCONV */
 OM_uint32 KRB5_CALLCONV
 gss_add_cred_with_name(OM_uint32 *minor_status,
+		       gss_cred_id_t input_cred_handle,
 		       const gss_cred_id_t impersonator_cred_handle,
-		       const gss_cred_id_t input_cred_handle,
 		       const gss_name_t desired_name,
 		       const gss_OID desired_mech,
 		       gss_cred_usage_t cred_usage,
@@ -335,8 +335,8 @@ gss_add_cred_with_name(OM_uint32 *minor_status,
     gss_cred_id_t *	new_cred_array = NULL;
 
     status = val_add_cred_with_name_args(minor_status,
-					 impersonator_cred_handle,
 					 input_cred_handle,
+					 impersonator_cred_handle,
 					 desired_name,
 					 desired_mech,
 					 cred_usage,
