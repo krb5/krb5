@@ -208,11 +208,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	goto errout;
     } else if (c_nprincs != 1) {
 	status = "CLIENT_NOT_FOUND";
-#ifdef KRBCONF_VAGUE_ERRORS
-	errcode = KRB5KRB_ERR_GENERIC;
-#else
-	errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
-#endif
+	if (vague_errors)
+	    errcode = KRB5KRB_ERR_GENERIC;
+	else
+	    errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
 	goto errout;
     }
    
@@ -409,9 +408,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	    }
 	    update_client = 1;
 	    status = "PREAUTH_FAILED";
-#ifdef KRBCONF_VAGUE_ERRORS
-	    errcode = KRB5KRB_ERR_GENERIC;
-#endif
+	    if (vague_errors)
+		errcode = KRB5KRB_ERR_GENERIC;
 	    goto errout;
 	} 
     }

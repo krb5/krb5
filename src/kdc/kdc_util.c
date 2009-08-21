@@ -69,6 +69,12 @@ static char *kdc_current_rcname = (char *) NULL;
 krb5_deltat rc_lifetime; /* See kdc_initialize_rcache() */
 #endif
 
+#ifdef KRBCONF_VAGUE_ERRORS
+const int vague_errors = 1;
+#else
+const int vague_errors = 0;
+#endif
+
 #ifdef USE_RCACHE
 /*
  * initialize the replay cache.
@@ -939,11 +945,10 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
     /* The client must not be expired */
     if (client.expiration && client.expiration < kdc_time) {
 	*status = "CLIENT EXPIRED";
-#ifdef KRBCONF_VAGUE_ERRORS
-	return(KRB_ERR_GENERIC);
-#else
-	return(KDC_ERR_NAME_EXP);
-#endif
+	if (vague_errors)
+	    return(KRB_ERR_GENERIC);
+	else
+	    return(KDC_ERR_NAME_EXP);
     }
 
     /* The client's password must not be expired, unless the server is
@@ -951,11 +956,10 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
     if (client.pw_expiration && client.pw_expiration < kdc_time &&
 	!isflagset(server.attributes, KRB5_KDB_PWCHANGE_SERVICE)) {
 	*status = "CLIENT KEY EXPIRED";
-#ifdef KRBCONF_VAGUE_ERRORS
-	return(KRB_ERR_GENERIC);
-#else
-	return(KDC_ERR_KEY_EXP);
-#endif
+	if (vague_errors)
+	    return(KRB_ERR_GENERIC);
+	else
+	    return(KDC_ERR_KEY_EXP);
     }
 
     /* The server must not be expired */
