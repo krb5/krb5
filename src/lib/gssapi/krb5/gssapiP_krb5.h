@@ -790,7 +790,7 @@ OM_uint32 krb5_gss_validate_cred
  gss_cred_id_t               /* cred */
 );
 
-OM_uint32 krb5_gss_acquire_cred_with_name(
+OM_uint32 krb5_gss_acquire_cred_impersonate_name(
     OM_uint32 *,            /* minor_status */
     const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_name_t,       /* desired_name */
@@ -801,7 +801,7 @@ OM_uint32 krb5_gss_acquire_cred_with_name(
     gss_OID_set *,          /* actual_mechs */
     OM_uint32 *);           /* time_rec */
 
-OM_uint32 krb5_gss_acquire_cred_with_cred(
+OM_uint32 krb5_gss_acquire_cred_impersonate_cred(
     OM_uint32 *,            /* minor_status */
     const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_cred_id_t,    /* subject_cred_handle */

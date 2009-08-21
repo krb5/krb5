@@ -259,7 +259,7 @@ OM_uint32 KRB5_CALLCONV gss_release_iov_buffer
  * Protocol transition
  */
 OM_uint32 KRB5_CALLCONV
-gss_acquire_cred_with_name(
+gss_acquire_cred_impersonate_name(
     OM_uint32 *,	    /* minor_status */
     const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_name_t,	    /* desired_name */
@@ -271,7 +271,7 @@ gss_acquire_cred_with_name(
     OM_uint32 *);	    /* time_rec */
 
 OM_uint32 KRB5_CALLCONV
-gss_add_cred_with_name(
+gss_add_cred_impersonate_name(
     OM_uint32 *,	    /* minor_status */
     gss_cred_id_t,	    /* input_cred_handle */
     const gss_cred_id_t,    /* impersonator_cred_handle */
@@ -289,7 +289,7 @@ gss_add_cred_with_name(
  * Constrained delegation
  */
 OM_uint32 KRB5_CALLCONV
-gss_acquire_cred_with_cred(
+gss_acquire_cred_impersonate_cred(
     OM_uint32 *,	    /* minor_status */
     const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_cred_id_t,    /* subject_cred_handle */
@@ -301,7 +301,7 @@ gss_acquire_cred_with_cred(
     OM_uint32 *);	    /* time_rec */
 
 OM_uint32 KRB5_CALLCONV
-gss_add_cred_with_cred(
+gss_add_cred_impersonate_cred(
     OM_uint32 *,	    /* minor_status */
     gss_cred_id_t,	    /* input_cred_handle */
     const gss_cred_id_t,    /* impersonator_cred_handle */

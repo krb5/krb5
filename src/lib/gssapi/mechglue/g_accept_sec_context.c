@@ -249,7 +249,7 @@ gss_cred_id_t *		d_cred;
 	    /*
 	     * No longer check for GSS_C_DELEG_FLAG, because
 	     * a mechanism may have returned a credential for
-	     * use with gss_acquire_cred_with_cred().
+	     * use with gss_acquire_cred_impersonate_cred().
 	     */
 	    if (tmp_d_cred != GSS_C_NO_CREDENTIAL) {
 		gss_union_cred_t d_u_cred = NULL;

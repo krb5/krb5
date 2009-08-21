@@ -475,7 +475,7 @@ typedef struct gss_config {
 
 	/* New for 1.8 */
 
-	OM_uint32	(*gss_acquire_cred_with_name)
+	OM_uint32	(*gss_acquire_cred_impersonate_name)
 	(
 	    OM_uint32 *,		/* minor_status */
 	    const gss_cred_id_t,	/* impersonator_cred_handle */
@@ -488,7 +488,7 @@ typedef struct gss_config {
 	    OM_uint32 *			/* time_rec */
 	/* */);
 
-	OM_uint32	(*gss_add_cred_with_name)
+	OM_uint32	(*gss_add_cred_impersonate_name)
 	(
 	    OM_uint32 *,		/* minor_status */
 	    gss_cred_id_t,		/* input_cred_handle */
@@ -504,7 +504,7 @@ typedef struct gss_config {
 	    OM_uint32 *			/* acceptor_time_rec */
 	/* */);
 
-	OM_uint32	(*gss_acquire_cred_with_cred)
+	OM_uint32	(*gss_acquire_cred_impersonate_cred)
 	(
 	    OM_uint32 *,		/* minor_status */
 	    const gss_cred_id_t,	/* impersonator_cred_handle */
@@ -517,7 +517,7 @@ typedef struct gss_config {
 	    OM_uint32 *			/* time_rec */
 	/* */);
 
-	OM_uint32	(*gss_add_cred_with_cred)
+	OM_uint32	(*gss_add_cred_impersonate_cred)
 	(
 	    OM_uint32 *,		/* minor_status */
 	    gss_cred_id_t,		/* input_cred_handle */

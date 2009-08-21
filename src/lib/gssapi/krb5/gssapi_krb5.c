@@ -677,10 +677,10 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_unwrap_iov,
     krb5_gss_wrap_iov_length,
     NULL,               /* complete_auth_token */
-    krb5_gss_acquire_cred_with_name,
-    NULL,               /* krb5_gss_add_cred_with_name */
-    krb5_gss_acquire_cred_with_cred,
-    NULL                /* krb5_gss_add_cred_with_cred */
+    krb5_gss_acquire_cred_impersonate_name,
+    NULL,               /* krb5_gss_add_cred_impersonate_name */
+    krb5_gss_acquire_cred_impersonate_cred,
+    NULL                /* krb5_gss_add_cred_impersonate_cred */
 };
 
 

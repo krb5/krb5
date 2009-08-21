@@ -412,7 +412,7 @@ spnego_gss_complete_auth_token
 );
 
 OM_uint32
-spnego_gss_acquire_cred_with_name(
+spnego_gss_acquire_cred_impersonate_name(
     OM_uint32 *,	    /* minor_status */
     const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_name_t,	    /* desired_name */
@@ -424,7 +424,7 @@ spnego_gss_acquire_cred_with_name(
     OM_uint32 *);	    /* time_rec */
 
 OM_uint32
-spnego_gss_acquire_cred_with_cred(
+spnego_gss_acquire_cred_impersonate_cred(
     OM_uint32 *,	    /* minor_status */
     const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_cred_id_t,    /* subject_cred_handle */

@@ -47,7 +47,7 @@
  */
 
 /*
- *  glue routine for gss_acquire_cred_with_name
+ *  glue routine for gss_acquire_cred_impersonate_name
  */
 
 #include "mglueP.h"
@@ -60,7 +60,7 @@
 #include <time.h>
 
 static OM_uint32
-val_acq_cred_with_name_args(
+val_acq_cred_impersonate_name_args(
     OM_uint32 *minor_status,
     const gss_cred_id_t impersonator_cred_handle,
     const gss_name_t desired_name,
@@ -115,15 +115,15 @@ val_acq_cred_with_name_args(
 
 
 OM_uint32 KRB5_CALLCONV
-gss_acquire_cred_with_name(OM_uint32 *minor_status,
-			   const gss_cred_id_t impersonator_cred_handle,
-			   const gss_name_t desired_name,
-			   OM_uint32 time_req,
-			   const gss_OID_set desired_mechs,
-			   gss_cred_usage_t cred_usage,
-			   gss_cred_id_t *output_cred_handle,
-			   gss_OID_set *actual_mechs,
-			   OM_uint32 *time_rec)
+gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
+				  const gss_cred_id_t impersonator_cred_handle,
+				  const gss_name_t desired_name,
+				  OM_uint32 time_req,
+				  const gss_OID_set desired_mechs,
+				  gss_cred_usage_t cred_usage,
+				  gss_cred_id_t *output_cred_handle,
+				  gss_OID_set *actual_mechs,
+				  OM_uint32 *time_rec)
 {
     OM_uint32 major = GSS_S_FAILURE;
     OM_uint32 initTimeOut, acceptTimeOut, outTime = GSS_C_INDEFINITE;
@@ -134,15 +134,15 @@ gss_acquire_cred_with_name(OM_uint32 *minor_status,
     unsigned int i;
     gss_union_cred_t creds;
 
-    major = val_acq_cred_with_name_args(minor_status,
-					impersonator_cred_handle,
-					desired_name,
-					time_req,
-					desired_mechs,
-					cred_usage,
-					output_cred_handle,
-					actual_mechs,
-					time_rec);
+    major = val_acq_cred_impersonate_name_args(minor_status,
+					       impersonator_cred_handle,
+					       desired_name,
+					       time_req,
+					       desired_mechs,
+					       cred_usage,
+					       output_cred_handle,
+					       actual_mechs,
+					       time_rec);
     if (major != GSS_S_COMPLETE)
 	return (major);
 
@@ -182,13 +182,17 @@ gss_acquire_cred_with_name(OM_uint32 *minor_status,
 
     /* for each requested mech attempt to obtain a credential */
     for (i = 0; i < mechs->count; i++) {
-	major = gss_add_cred_with_name(minor_status,
-				       (gss_cred_id_t)creds,
-				       impersonator_cred_handle,
-				       desired_name,
-				       &mechs->elements[i],
-				       cred_usage, time_req, time_req, NULL,
-				       NULL, &initTimeOut, &acceptTimeOut);
+	major = gss_add_cred_impersonate_name(minor_status,
+					      (gss_cred_id_t)creds,
+					      impersonator_cred_handle,
+					      desired_name,
+					      &mechs->elements[i],
+					      cred_usage,
+					      time_req,
+					      time_req, NULL,
+					      NULL,
+					      &initTimeOut,
+					      &acceptTimeOut);
 	if (major == GSS_S_COMPLETE) {
 	    /* update the credential's time */
 	    if (cred_usage == GSS_C_ACCEPT) {
@@ -246,7 +250,7 @@ gss_acquire_cred_with_name(OM_uint32 *minor_status,
 }
 
 static OM_uint32
-val_add_cred_with_name_args(
+val_add_cred_impersonate_name_args(
     OM_uint32 *minor_status,
     gss_cred_id_t input_cred_handle,
     const gss_cred_id_t impersonator_cred_handle,
@@ -309,18 +313,18 @@ val_add_cred_with_name_args(
 
 /* V2 KRB5_CALLCONV */
 OM_uint32 KRB5_CALLCONV
-gss_add_cred_with_name(OM_uint32 *minor_status,
-		       gss_cred_id_t input_cred_handle,
-		       const gss_cred_id_t impersonator_cred_handle,
-		       const gss_name_t desired_name,
-		       const gss_OID desired_mech,
-		       gss_cred_usage_t cred_usage,
-		       OM_uint32 initiator_time_req,
-		       OM_uint32 acceptor_time_req,
-		       gss_cred_id_t *output_cred_handle,
-		       gss_OID_set *actual_mechs,
-		       OM_uint32 *initiator_time_rec,
-		       OM_uint32 *acceptor_time_rec)
+gss_add_cred_impersonate_name(OM_uint32 *minor_status,
+			      gss_cred_id_t input_cred_handle,
+			      const gss_cred_id_t impersonator_cred_handle,
+			      const gss_name_t desired_name,
+			      const gss_OID desired_mech,
+			      gss_cred_usage_t cred_usage,
+			      OM_uint32 initiator_time_req,
+			      OM_uint32 acceptor_time_req,
+			      gss_cred_id_t *output_cred_handle,
+			      gss_OID_set *actual_mechs,
+			      OM_uint32 *initiator_time_rec,
+			      OM_uint32 *acceptor_time_rec)
 {
     OM_uint32		status, temp_minor_status;
     OM_uint32		time_req, time_rec;
@@ -334,18 +338,18 @@ gss_add_cred_with_name(OM_uint32 *minor_status,
     gss_OID		new_mechs_array = NULL;
     gss_cred_id_t *	new_cred_array = NULL;
 
-    status = val_add_cred_with_name_args(minor_status,
-					 input_cred_handle,
-					 impersonator_cred_handle,
-					 desired_name,
-					 desired_mech,
-					 cred_usage,
-					 initiator_time_req,
-					 acceptor_time_req,
-					 output_cred_handle,
-					 actual_mechs,
-					 initiator_time_rec,
-					 acceptor_time_rec);
+    status = val_add_cred_impersonate_name_args(minor_status,
+						input_cred_handle,
+						impersonator_cred_handle,
+						desired_name,
+						desired_mech,
+						cred_usage,
+						initiator_time_req,
+						acceptor_time_req,
+						output_cred_handle,
+						actual_mechs,
+						initiator_time_rec,
+						acceptor_time_rec);
     if (status != GSS_S_COMPLETE)
 	return (status);
 
@@ -401,15 +405,15 @@ gss_add_cred_with_name(OM_uint32 *minor_status,
     else
 	time_req = 0;
 
-    status = mech->gss_acquire_cred_with_name(minor_status,
-					      mech_impersonator_cred,
-					      internal_name,
-					      time_req,
-					      GSS_C_NULL_OID_SET,
-					      cred_usage,
-					      &cred,
-					      NULL,
-					      &time_rec);
+    status = mech->gss_acquire_cred_impersonate_name(minor_status,
+						     mech_impersonator_cred,
+						     internal_name,
+						     time_req,
+						     GSS_C_NULL_OID_SET,
+						     cred_usage,
+						     &cred,
+						     NULL,
+						     &time_rec);
     if (status != GSS_S_COMPLETE) {
 	map_error(minor_status, mech);
 	goto errout;

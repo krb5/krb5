@@ -209,17 +209,17 @@ constrainedDelegate(OM_uint32 *minor,
     printf("Constrained delegation tests follow\n");
     printf("-----------------------------------\n\n");
 
-    major = gss_acquire_cred_with_cred(minor,
-                                       verifier_cred_handle,
-                                       delegated_cred_handle,
-                                       GSS_C_INDEFINITE,
-                                       desired_mechs,
-                                       GSS_C_INITIATE,
-                                       &cred,
-                                       NULL,
-                                       &time_rec);
+    major = gss_acquire_cred_impersonate_cred(minor,
+                                              verifier_cred_handle,
+                                              delegated_cred_handle,
+                                              GSS_C_INDEFINITE,
+                                              desired_mechs,
+                                              GSS_C_INITIATE,
+                                              &cred,
+                                              NULL,
+                                              &time_rec);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_acquire_cred_with_cred", major, minor);
+        displayStatus("gss_acquire_cred_impersonate_cred", major, minor);
         return major;
     }
 
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
                              &actual_mechs,
                              NULL);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_acquire_cred(impersonator_cred)", major, minor);
+        displayStatus("gss_acquire_cred", major, minor);
         goto out;
     }
 
@@ -334,17 +334,17 @@ int main(int argc, char *argv[])
     printf("-----------------------------------\n\n");
 
     /* get S4U2Self cred */
-    major = gss_acquire_cred_with_name(&minor,
-                                       impersonator_cred_handle,
-                                       user,
-                                       GSS_C_INDEFINITE,
-                                       &mechs,
-                                       GSS_C_INITIATE,
-                                       &user_cred_handle,
-                                       &actual_mechs,
-                                       NULL);
+    major = gss_acquire_cred_impersonate_name(&minor,
+                                              impersonator_cred_handle,
+                                              user,
+                                              GSS_C_INDEFINITE,
+                                              &mechs,
+                                              GSS_C_INITIATE,
+                                              &user_cred_handle,
+                                              &actual_mechs,
+                                              NULL);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_acquire_cred(user_cred)", major, minor);
+        displayStatus("gss_acquire_cred_impersonate_name", major, minor);
         goto out;
     }
 
