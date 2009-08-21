@@ -162,8 +162,9 @@ typedef struct _krb5_gss_cred_id_rec {
     /* name/type of credential */
     gss_cred_usage_t usage;
     krb5_principal princ;        /* this is not interned as a gss_name_t */
-    int prerfc_mech;
-    int rfc_mech;
+    unsigned int prerfc_mech : 1;
+    unsigned int rfc_mech : 1;
+    unsigned int proxy_cred : 1;
 
     /* keytab (accept) data */
     krb5_keytab keytab;
@@ -217,7 +218,6 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
-    krb5_principal *s4u2proxy_targets; /* constrained delegation targets */
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;
@@ -790,6 +790,28 @@ OM_uint32 krb5_gss_validate_cred
  gss_cred_id_t               /* cred */
 );
 
+OM_uint32 krb5_gss_acquire_cred_with_name(
+    OM_uint32 *,            /* minor_status */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
+    const gss_name_t,       /* desired_name */
+    OM_uint32,              /* time_req */
+    const gss_OID_set,      /* desired_mechs */
+    gss_cred_usage_t,       /* cred_usage */
+    gss_cred_id_t *,        /* output_cred_handle */
+    gss_OID_set *,          /* actual_mechs */
+    OM_uint32 *);           /* time_rec */
+
+OM_uint32 krb5_gss_acquire_cred_with_cred(
+    OM_uint32 *,            /* minor_status */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
+    const gss_cred_id_t,    /* subject_cred_handle */
+    OM_uint32,              /* time_req */
+    const gss_OID_set,      /* desired_mechs */
+    gss_cred_usage_t,       /* cred_usage */
+    gss_cred_id_t *,        /* output_cred_handle */
+    gss_OID_set *,          /* actual_mechs */
+    OM_uint32 *);           /* time_rec */
+
 OM_uint32
 krb5_gss_validate_cred_1(OM_uint32 * /* minor_status */,
                          gss_cred_id_t /* cred_handle */,
@@ -926,21 +948,6 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
                                               const gss_ctx_id_t,
                                               const gss_OID,
                                               gss_buffer_set_t *);
-
-#define GSS_KRB5_ADD_SEC_CONTEXT_DELEGATEE_OID_LENGTH 11
-#define GSS_KRB5_ADD_SEC_CONTEXT_DELEGATEE_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0d"
-
-OM_uint32
-gss_krb5int_add_sec_context_delegatee(OM_uint32 *, gss_ctx_id_t *, const gss_OID, gss_buffer_t);
-
-#define GSS_KRB5_UNWRAP_CRED_HANDLE_OID_LENGTH 11
-#define GSS_KRB5_UNWRAP_CRED_HANDLE_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0e"
-
-OM_uint32
-gss_krb5int_unwrap_cred_handle(OM_uint32 *,
-                               gss_cred_id_t,
-                               const gss_OID,
-                               const gss_buffer_t);
 
 #ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);

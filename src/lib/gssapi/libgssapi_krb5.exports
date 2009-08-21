@@ -9,8 +9,12 @@ GSS_C_NT_USER_NAME
 GSS_KRB5_NT_PRINCIPAL_NAME
 gss_accept_sec_context
 gss_acquire_cred
+gss_acquire_cred_with_cred
+gss_acquire_cred_with_name
 gss_add_buffer_set_member
 gss_add_cred
+gss_add_cred_with_cred
+gss_add_cred_with_name
 gss_add_oid_set_member
 gss_canonicalize_name
 gss_compare_name
@@ -39,7 +43,6 @@ gss_inquire_sec_context_by_oid
 gss_krb5_add_sec_context_delegatee
 gss_krb5_ccache_name
 gss_krb5_copy_ccache
-gss_krb5_create_sec_context_for_principal
 gss_krb5_export_lucid_sec_context
 gss_krb5_get_tkt_flags
 gss_krb5_free_lucid_sec_context

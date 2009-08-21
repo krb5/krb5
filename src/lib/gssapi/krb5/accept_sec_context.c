@@ -1,6 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2000, 2004, 2007-2009  by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2004, 2007, 2008  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -113,75 +113,94 @@
 #endif
 
 #ifndef LEAN_CLIENT
-krb5_error_code
-krb5_to_gss_cred(krb5_context context,
-                 krb5_creds *creds,
-                 krb5_gss_cred_id_t *out_cred)
+
+static krb5_error_code
+create_constrained_deleg_creds(context, ticket, out_cred)
+    krb5_context context;
+    krb5_ticket *ticket;
+    krb5_gss_cred_id_t *out_cred;
 {
     krb5_error_code retval;
-    krb5_ccache ccache = NULL, ccachep;
-    krb5_gss_cred_id_t cred = NULL;
+    krb5_gss_cred_id_t cred;
+    krb5_ccache ccache;
+    krb5_creds krb_creds;
+    krb5_data *data;
 
-    if (out_cred == NULL || *out_cred == NULL) {
-        retval = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
-        if (retval != 0)
-            goto cleanup;
+    if (out_cred == NULL)
+        return 0; /* nothing to do */
 
-        retval = krb5_cc_initialize(context, ccache, creds->client);
-        if (retval != 0)
-            goto cleanup;
+    memset(&krb_creds, 0, sizeof(krb_creds));
+    krb_creds.client = ticket->enc_part2->client;
+    krb_creds.server = ticket->server;
+    krb_creds.keyblock = *(ticket->enc_part2->session);
+    krb_creds.ticket_flags = ticket->enc_part2->flags;
+    krb_creds.times = ticket->enc_part2->times;
+    krb_creds.magic = KV5M_CREDS;
+    krb_creds.authdata = NULL;
 
-        ccachep = ccache;
-    } else {
-        ccachep = (*out_cred)->ccache;
+    retval = encode_krb5_ticket(ticket, &data);
+    if (retval)
+        return retval;
+
+    krb_creds.ticket = *data;
+
+    retval = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
+    if (retval) {
+        krb5_free_data(context, data);
+        return retval;
     }
 
-    retval = krb5_cc_store_cred(context, ccachep, creds);
-    if (retval != 0)
-        goto cleanup;
-
-    if (out_cred != NULL && *out_cred == NULL) {
-        cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
-        if (cred == NULL) {
-            retval = ENOMEM;
-            goto cleanup;
-        }
-        memset(cred, 0, sizeof(*cred));
-
-        retval = k5_mutex_init(&cred->lock);
-        if (retval != 0)
-            goto cleanup;
-
-        retval = krb5_copy_principal(context, creds->client, &cred->princ);
-        if (retval != 0)
-            goto cleanup;
-
-        cred->usage = GSS_C_INITIATE; /* we can't accept with this */
-        /* cred->princ already set */
-        cred->prerfc_mech = 1; /* this cred will work with all three mechs */
-        cred->rfc_mech = 1;
-        cred->keytab = NULL; /* no keytab associated with this... */
-        cred->tgt_expire = creds->times.endtime; /* store the end time */
-        cred->ccache = ccache; /* the ccache containing the credential */
-        ccache = NULL; /* cred takes ownership so don't destroy */
-
-        *out_cred = cred;
-        cred = NULL;
-    }
-
-cleanup:
-    if (ccache != NULL)
+    retval = krb5_cc_initialize(context, ccache, ticket->enc_part2->client);
+    if (retval) {
         krb5_cc_destroy(context, ccache);
-    if (cred != NULL) {
-        if (cred->princ != NULL)
-            krb5_free_principal(context, cred->princ);
-        k5_mutex_destroy(&cred->lock);
-        xfree(cred);
+        krb5_free_data(context, data);
+        return retval;
     }
 
-    return retval;
-}
+    retval = krb5_cc_store_cred(context, ccache, &krb_creds);
+    if (retval) {
+        krb5_cc_destroy(context, ccache);
+        krb5_free_data(context, data);
+        return retval;
+    }
 
+    krb5_free_data(context, data);
+
+    cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
+    if (cred == NULL) {
+        krb5_cc_destroy(context, ccache);
+        return ENOMEM;
+    }
+
+    memset(cred, 0, sizeof(*cred));
+
+    retval = k5_mutex_init(&cred->lock);
+    if (retval) {
+        krb5_cc_destroy(context, ccache);
+        xfree(cred);
+        return retval;
+    }
+
+    retval = krb5_copy_principal(context, ticket->enc_part2->client, &cred->princ);
+    if (retval) {
+        k5_mutex_destroy(&cred->lock);
+        krb5_cc_destroy(context, ccache);
+        xfree(cred);
+        return ENOMEM;
+    }
+
+    cred->usage = GSS_C_INITIATE; /* we can't accept with this */
+    /* cred->princ already set */
+    cred->prerfc_mech = 1; /* this cred will work with all three mechs */
+    cred->rfc_mech = 1;
+    cred->keytab = NULL; /* no keytab associated with this... */
+    cred->tgt_expire = krb_creds.times.endtime; /* store the end time */
+    cred->ccache = ccache; /* the ccache containing the credential */
+
+    *out_cred = cred;
+
+    return 0;
+}
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
@@ -193,11 +212,10 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 {
     krb5_creds ** creds = NULL;
     krb5_error_code retval;
+    krb5_ccache ccache = NULL;
+    krb5_gss_cred_id_t cred = NULL;
     krb5_auth_context new_auth_ctx = NULL;
     krb5_int32 flags_org;
-
-    if (out_cred != NULL)
-        *out_cred = NULL;
 
     if ((retval = krb5_auth_con_getflags(context, auth_context, &flags_org)))
         return retval;
@@ -234,9 +252,55 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
             goto cleanup;
     }
 
-    retval = krb5_to_gss_cred(context, creds[0], out_cred);
-    if (retval)
+    if ((retval = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache))) {
+        ccache = NULL;
         goto cleanup;
+    }
+
+    if ((retval = krb5_cc_initialize(context, ccache, creds[0]->client)))
+        goto cleanup;
+
+    if ((retval = krb5_cc_store_cred(context, ccache, creds[0])))
+        goto cleanup;
+
+    /* generate a delegated credential handle */
+    if (out_cred) {
+        /* allocate memory for a cred_t... */
+        if (!(cred =
+              (krb5_gss_cred_id_t) xmalloc(sizeof(krb5_gss_cred_id_rec)))) {
+            retval = ENOMEM; /* out of memory? */
+            goto cleanup;
+        }
+
+        /* zero it out... */
+        memset(cred, 0, sizeof(krb5_gss_cred_id_rec));
+
+        retval = k5_mutex_init(&cred->lock);
+        if (retval) {
+            xfree(cred);
+            cred = NULL;
+            goto cleanup;
+        }
+
+        /* copy the client principle into it... */
+        if ((retval =
+             krb5_copy_principal(context, creds[0]->client, &(cred->princ)))) {
+            k5_mutex_destroy(&cred->lock);
+            retval = ENOMEM; /* out of memory? */
+            xfree(cred); /* clean up memory on failure */
+            cred = NULL;
+            goto cleanup;
+        }
+
+        cred->usage = GSS_C_INITIATE; /* we can't accept with this */
+        /* cred->princ already set */
+        cred->prerfc_mech = 1; /* this cred will work with all three mechs */
+        cred->rfc_mech = 1;
+        cred->keytab = NULL; /* no keytab associated with this... */
+        cred->tgt_expire = creds[0]->times.endtime; /* store the end time */
+        cred->ccache = ccache; /* the ccache containing the credential */
+        ccache = NULL; /* cred takes ownership so don't destroy */
+    }
 
     /* If there were errors, there might have been a memory leak
        if (!cred)
@@ -247,6 +311,12 @@ cleanup:
     if (creds)
         krb5_free_tgt_creds(context, creds);
 
+    if (ccache)
+        (void)krb5_cc_destroy(context, ccache);
+
+    if (out_cred)
+        *out_cred = cred; /* return credential */
+
     if (new_auth_ctx)
         krb5_auth_con_free(context, new_auth_ctx);
 
@@ -255,84 +325,6 @@ cleanup:
     return retval;
 }
 
-/*
- * Get credentials for constrained delegation. We assume the
- * default ccache has a TGT in the acceptor's name.
- */
-static krb5_error_code
-kg_acquire_s4u2proxy_creds(krb5_context context,
-                           krb5_gss_cred_id_t acceptor_cred,
-                           krb5_ticket *ticket,
-                           krb5_principal *targets,
-                           krb5_gss_cred_id_t *out_cred)
-{
-    krb5_error_code retval;
-    krb5_principal princ = NULL;
-    int i;
-
-    assert(targets != NULL);
-    assert(targets[0] != NULL);
-
-    if (out_cred != NULL)
-        *out_cred = NULL;
-
-    if (acceptor_cred->ccache == NULL) {
-        retval = EINVAL;
-        goto cleanup;
-    }
-
-    retval = krb5_cc_get_principal(context, acceptor_cred->ccache, &princ);
-    if (retval != 0)
-        goto cleanup;
-
-    if (krb5_principal_compare(context, princ, ticket->server) == FALSE) {
-        retval = KG_CCACHE_NOMATCH;
-        goto cleanup;
-    }
-
-    for (i = 0; targets[i] != NULL; i++) {
-        krb5_creds pcreds, *creds;
-
-        memset(&pcreds, 0, sizeof(pcreds));
-
-        pcreds.client = ticket->enc_part2->client;
-        pcreds.server = targets[i];
-
-        retval = krb5_get_credentials_for_proxy(context,
-                                                KRB5_GC_CANONICALIZE | KRB5_GC_NO_STORE,
-                                                acceptor_cred->ccache,
-                                                &pcreds,
-                                                ticket,
-                                                &creds);
-        if (retval != 0)
-            goto cleanup;
-
-        retval = krb5_to_gss_cred(context, creds, out_cred);
-        if (retval != 0) {
-            krb5_free_creds(context, creds);
-            goto cleanup;
-        }
-        krb5_free_creds(context, creds);
-    }
-
-cleanup:
-    if (princ != NULL)
-        krb5_free_principal(context, princ);
-    if (retval != 0 && out_cred != NULL && *out_cred != NULL) {
-        krb5_gss_cred_id_t cred = *out_cred;
-
-        if (cred->princ != NULL)
-            krb5_free_principal(context, cred->princ);
-        if (cred->ccache != NULL)
-            krb5_cc_destroy(context, cred->ccache);
-        k5_mutex_destroy(&cred->lock);
-        xfree(cred);
-
-        *out_cred = NULL;
-    }
-
-    return retval;
-}
 
 /*
  * Performs third leg of DCE authentication
@@ -491,7 +483,6 @@ kg_accept_krb5(minor_status, context_handle,
     int no_encap = 0;
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
-    gss_cred_usage_t usage = GSS_C_ACCEPT;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -519,22 +510,14 @@ kg_accept_krb5(minor_status, context_handle,
     if (mech_type)
         *mech_type = GSS_C_NULL_OID;
     /* return a bogus cred handle */
-    if (delegated_cred_handle) {
+    if (delegated_cred_handle)
         *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
-
-        if (*context_handle != GSS_C_NO_CONTEXT) {
-            ctx = (krb5_gss_ctx_id_rec *)*context_handle;
-
-            if (ctx->s4u2proxy_targets != NULL)
-                usage = GSS_C_BOTH;
-        }
-    }
 
     /* handle default cred handle */
     if (verifier_cred_handle == GSS_C_NO_CREDENTIAL) {
         major_status = krb5_gss_acquire_cred(minor_status, GSS_C_NO_NAME,
                                              GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
-                                             usage, &cred_handle,
+                                             GSS_C_ACCEPT, &cred_handle,
                                              NULL, NULL);
         if (major_status != GSS_S_COMPLETE) {
             code = *minor_status;
@@ -554,7 +537,7 @@ kg_accept_krb5(minor_status, context_handle,
 
     /* make sure the supplied credentials are valid for accept */
 
-    if ((cred->usage != usage) &&
+    if ((cred->usage != GSS_C_ACCEPT) &&
         (cred->usage != GSS_C_BOTH)) {
         code = 0;
         major_status = GSS_S_NO_CRED;
@@ -882,47 +865,17 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
-    if (*context_handle != GSS_C_NO_CONTEXT) {
-        ctx = (krb5_gss_ctx_id_rec *)*context_handle;
-
-        assert(ctx->s4u2proxy_targets != NULL);
-        assert(ctx->mech_used == GSS_C_NO_OID);
-
-        if (delegated_cred_handle != NULL && deleg_cred == NULL) {
-            code = kg_acquire_s4u2proxy_creds(context,
-                                              (krb5_gss_cred_id_t)cred_handle,
-                                              ticket,
-                                              ctx->s4u2proxy_targets,
-                                              &deleg_cred);
-            if (code) {
-                major_status = GSS_S_CRED_UNAVAIL;
-                goto fail;
-            }
-            gss_flags |= GSS_C_DELEG_FLAG;
-        }
-    } else {
-        ctx = (krb5_gss_ctx_id_rec *) xmalloc(sizeof(*ctx));
-        if (ctx == NULL) {
-            code = ENOMEM;
-            major_status = GSS_S_FAILURE;
-            goto fail;
-
-        }
-        memset(ctx, 0, sizeof(*ctx));
-        /* Intern the ctx pointer so that delete_sec_context works */
-        if (!kg_save_ctx_id((gss_ctx_id_t) ctx)) {
-            xfree(ctx);
-            ctx = NULL;
-            code = G_VALIDATE_FAILED;
-            major_status = GSS_S_FAILURE;
-            goto fail;
-        }
-    }
-
-    ctx->mech_used = (gss_OID) mech_used;
-
     /* create the ctx struct and start filling it in */
 
+    if ((ctx = (krb5_gss_ctx_id_rec *) xmalloc(sizeof(krb5_gss_ctx_id_rec)))
+        == NULL) {
+        code = ENOMEM;
+        major_status = GSS_S_FAILURE;
+        goto fail;
+    }
+
+    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
+    ctx->mech_used = (gss_OID) mech_used;
     ctx->auth_context = auth_context;
     ctx->initiate = 0;
     ctx->gss_flags = (GSS_C_TRANS_FLAG |
@@ -935,7 +888,17 @@ kg_accept_krb5(minor_status, context_handle,
     ctx->big_endian = bigend;
     ctx->cred_rcache = cred_rcache;
 
-   /* XXX move this into gss_name_t */
+    /* Intern the ctx pointer so that delete_sec_context works */
+    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
+        xfree(ctx);
+        ctx = 0;
+
+        code = G_VALIDATE_FAILED;
+        major_status = GSS_S_FAILURE;
+        goto fail;
+    }
+
+    /* XXX move this into gss_name_t */
     if (        (code = krb5_merge_authdata(context,
                                    ticket->enc_part2->authorization_data,
                                             authdat->authorization_data,
@@ -990,6 +953,19 @@ kg_accept_krb5(minor_status, context_handle,
     }
     ctx->krb_times = ticket->enc_part2->times; /* struct copy */
     ctx->krb_flags = ticket->enc_part2->flags;
+
+    if (delegated_cred_handle != NULL && deleg_cred == NULL) {
+        /*
+         * Now, we always fabricate a delegated credentials handle
+         * containing the service ticket to ourselves, which can be
+         * used for S4U2Proxy.
+         */
+        code = create_constrained_deleg_creds(context, ticket, &deleg_cred);
+        if (code) {
+            major_status = GSS_S_FAILURE;
+            goto fail;
+        }
+    }
 
     krb5_free_ticket(context, ticket); /* Done with ticket */
 
@@ -1180,8 +1156,8 @@ kg_accept_krb5(minor_status, context_handle,
     if (src_name)
         *src_name = (gss_name_t) name;
 
-    if (delegated_cred_handle && deleg_cred) {
-        if (!kg_save_cred_id((gss_cred_id_t) deleg_cred)) {
+    if (delegated_cred_handle) {
+       if (!kg_save_cred_id((gss_cred_id_t) deleg_cred)) {
             major_status = GSS_S_FAILURE;
             code = G_VALIDATE_FAILED;
             goto fail;
@@ -1307,6 +1283,7 @@ done:
     }
     return (major_status);
 }
+#endif /* LEAN_CLIENT */
 
 OM_uint32
 krb5_gss_accept_sec_context(minor_status, context_handle,
@@ -1341,7 +1318,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
                                  input_chan_bindings, src_name, mech_type,
                                  output_token, ret_flags, time_rec,
                                  delegated_cred_handle);
-        } else if (ctx->mech_used != GSS_C_NO_OID) {
+        } else {
             *minor_status = EINVAL;
             save_error_string(EINVAL, "accept_sec_context called with existing context handle");
             return GSS_S_FAILURE;
@@ -1354,85 +1331,3 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
                          output_token, ret_flags, time_rec,
                          delegated_cred_handle);
 }
-
-/*
- * This function manages a list of constrained delegation targets in a
- * skeletal context, such that when gss_accept_sec_context() is called,
- * the returned delegated credentials can be appropriately constructed
- * via a S4U2Proxy request to the KDC.
- */
-OM_uint32
-gss_krb5int_add_sec_context_delegatee(OM_uint32 *minor_status,
-                                      gss_ctx_id_t *context_handle,
-                                      const gss_OID desired_object,
-                                      gss_buffer_t value)
-{
-    krb5_gss_ctx_id_rec *ctx = (krb5_gss_ctx_id_rec *)*context_handle;
-    OM_uint32 minor, major_status = GSS_S_FAILURE;
-    gss_name_t target = GSS_C_NO_NAME;
-    krb5_principal *targets;
-    int i;
-
-    if (ctx != NULL) {
-        if (ctx->mech_used != GSS_C_NO_OID) {
-            *minor_status = EINVAL;
-            save_error_string(EINVAL, "add_sec_context_delegatee called with active context handle");
-            goto cleanup;
-        }
-    } else {
-        ctx = (krb5_gss_ctx_id_rec *)xmalloc(sizeof(*ctx));
-        if (ctx == NULL) {
-            *minor_status = ENOMEM;
-            goto cleanup;
-        }
-        memset(ctx, 0, sizeof(*ctx));
-        ctx->mech_used = GSS_C_NO_OID;
-
-        if (!kg_save_ctx_id((gss_ctx_id_t) ctx)) {
-            xfree(ctx);
-            ctx = NULL;
-            *minor_status = G_VALIDATE_FAILED;
-            goto cleanup;
-        }
-
-        *context_handle = (gss_ctx_id_t)ctx;
-    }
-
-    major_status = krb5_gss_import_name(minor_status, value,
-                                        gss_nt_exported_name, &target);
-    if (GSS_ERROR(major_status))
-        goto cleanup;
-
-    if (ctx->s4u2proxy_targets != NULL) {
-        for (i = 0; ctx->s4u2proxy_targets[i] != NULL; i++)
-            ;
-    } else
-        i = 0;
-
-    targets = (krb5_principal *)realloc(ctx->s4u2proxy_targets,
-                                        (i + 2) * sizeof(krb5_principal));
-    if (targets == NULL) {
-        *minor_status = ENOMEM;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    targets[i] = (krb5_principal)target;
-    targets[i + 1] = NULL;
-
-    target = NULL;
-    ctx->s4u2proxy_targets = targets;
-
-cleanup:
-    if (target != GSS_C_NO_NAME)
-        krb5_gss_release_name(&minor, &target);
-
-    if (GSS_ERROR(major_status)) {
-        krb5_gss_delete_sec_context(&minor, (gss_ctx_id_t *)&ctx, NULL);
-        *context_handle = GSS_C_NO_CONTEXT;
-    }
-
-    return major_status;
-}
-#endif /* !LEAN_CLIENT */
-

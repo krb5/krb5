@@ -128,24 +128,60 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_creds **out_creds;
 {
     krb5_error_code     code;
-    krb5_creds          in_creds;
+    krb5_creds          in_creds, evidence_creds;
+    krb5_flags          flags = 0;
+    krb5_principal      cc_princ = NULL;
 
     k5_mutex_assert_locked(&cred->lock);
     memset(&in_creds, 0, sizeof(krb5_creds));
+    memset(&evidence_creds, 0, sizeof(krb5_creds));
     in_creds.client = in_creds.server = NULL;
 
-    if ((code = krb5_copy_principal(context, cred->princ, &in_creds.client)))
+    if ((code = krb5_cc_get_principal(context, cred->ccache, &cc_princ)))
         goto cleanup;
-    if ((code = krb5_copy_principal(context, server, &in_creds.server)))
-        goto cleanup;
+
+    if (cred->proxy_cred) {
+        krb5_creds mcreds;
+
+        flags |= KRB5_GC_CANONICALIZE |
+                 KRB5_GC_NO_STORE |
+                 KRB5_GC_CONSTRAINED_DELEGATION;
+
+        memset(&mcreds, 0, sizeof(mcreds));
+
+        mcreds.magic = KV5M_CREDS;
+        mcreds.times.endtime = cred->tgt_expire;
+        mcreds.server = cc_princ;
+        mcreds.client = cred->princ;
+
+        code = krb5_cc_retrieve_cred(context, cred->ccache,
+                                     KRB5_TC_MATCH_TIMES, &mcreds,
+                                     &evidence_creds);
+        if (code)
+            goto cleanup;
+
+        in_creds.client = cc_princ;
+        in_creds.second_ticket = evidence_creds.ticket;
+    } else {
+        in_creds.client = cred->princ;
+    }
+
+    in_creds.server = server;
     in_creds.times.endtime = endtime;
 
-    in_creds.keyblock.enctype = 0;
-
-    code = krb5_get_credentials(context, 0, cred->ccache,
+    code = krb5_get_credentials(context, flags, cred->ccache,
                                 &in_creds, out_creds);
     if (code)
         goto cleanup;
+
+    if (flags & KRB5_GC_CONSTRAINED_DELEGATION) {
+        if (!krb5_principal_compare(context, cred->princ,
+                                    (*out_creds)->client)) {
+            /* server did not support constrained delegation */
+            code = KRB5_KDCREP_MODIFIED;
+            goto cleanup;
+        }
+    }
 
     /*
      * Enforce a stricter limit (without timeskew forgiveness at the
@@ -159,10 +195,10 @@ static krb5_error_code get_credentials(context, cred, server, now,
     }
 
 cleanup:
-    if (in_creds.client)
-        krb5_free_principal(context, in_creds.client);
-    if (in_creds.server)
-        krb5_free_principal(context, in_creds.server);
+    if (cc_princ)
+        krb5_free_principal(context, cc_princ);
+    krb5_free_cred_contents(context, &evidence_creds);
+
     return code;
 }
 struct gss_checksum_data {
@@ -844,7 +880,6 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
         }
     } else {
         context = ((krb5_gss_ctx_id_rec *)*context_handle)->k5_context;
-        assert(((krb5_gss_ctx_id_rec *)*context_handle)->s4u2proxy_targets == NULL);
     }
 
     /* set up return values so they can be "freed" successfully */

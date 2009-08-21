@@ -452,10 +452,6 @@ static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, gss_ctx_id_t *, const gss_OID, const gss_buffer_t);
 } krb5_gss_set_sec_context_option_ops[] = {
-    {
-        {GSS_KRB5_ADD_SEC_CONTEXT_DELEGATEE_OID_LENGTH, GSS_KRB5_ADD_SEC_CONTEXT_DELEGATEE_OID},
-        gss_krb5int_add_sec_context_delegatee
-    }
 };
 
 static OM_uint32
@@ -519,10 +515,6 @@ static struct {
     {
         {GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH, GSS_KRB5_SET_CRED_RCACHE_OID},
         gss_krb5int_set_cred_rcache
-    },
-    {
-        {GSS_KRB5_UNWRAP_CRED_HANDLE_OID_LENGTH, GSS_KRB5_UNWRAP_CRED_HANDLE_OID},
-        gss_krb5int_unwrap_cred_handle
     },
 };
 
@@ -685,6 +677,10 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_unwrap_iov,
     krb5_gss_wrap_iov_length,
     NULL,               /* complete_auth_token */
+    krb5_gss_acquire_cred_with_name,
+    NULL,               /* krb5_gss_add_cred_with_name */
+    krb5_gss_acquire_cred_with_cred,
+    NULL                /* krb5_gss_add_cred_with_cred */
 };
 
 

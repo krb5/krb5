@@ -110,18 +110,156 @@ displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
     return GSS_S_COMPLETE;
 }
 
+static OM_uint32
+initAcceptSecContext(OM_uint32 *minor,
+                     gss_cred_id_t claimant_cred_handle,
+                     gss_cred_id_t verifier_cred_handle,
+                     gss_cred_id_t *deleg_cred_handle)
+{
+    OM_uint32 major;
+    gss_buffer_desc token, tmp;
+    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
+    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
+    gss_name_t source_name = GSS_C_NO_NAME;
+    gss_name_t target_name = GSS_C_NO_NAME;
+    OM_uint32 time_rec;
+
+    token.value = NULL;
+    token.length = 0;
+
+    tmp.value = NULL;
+    tmp.length = 0;
+
+    *deleg_cred_handle = GSS_C_NO_CREDENTIAL;
+
+    major = gss_inquire_cred(minor, verifier_cred_handle,
+                             &target_name, NULL, NULL, NULL);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_inquire_cred", major, minor);
+        return major;
+    }
+
+    displayCanonName(minor, target_name, "Target name");
+
+    major = gss_init_sec_context(minor,
+                                 claimant_cred_handle,
+                                 &initiator_context,
+                                 target_name,
+                                 (gss_OID)gss_mech_krb5,
+                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
+                                 GSS_C_INDEFINITE,
+                                 GSS_C_NO_CHANNEL_BINDINGS,
+                                 GSS_C_NO_BUFFER,
+                                 NULL,
+                                 &token,
+                                 NULL,
+                                 &time_rec);
+
+    if (target_name != GSS_C_NO_NAME)
+        (void) gss_release_name(minor, &target_name);
+
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_init_sec_context", major, minor);
+        return major;
+    }
+
+    (void) gss_delete_sec_context(minor, &initiator_context, NULL);
+
+    major = gss_accept_sec_context(minor,
+                                   &acceptor_context,
+                                   verifier_cred_handle,
+                                   &token,
+                                   GSS_C_NO_CHANNEL_BINDINGS,
+                                   &source_name,
+                                   NULL,
+                                   &tmp,
+                                   NULL,
+                                   &time_rec,
+                                   deleg_cred_handle);
+
+    if (GSS_ERROR(major))
+        displayStatus("gss_accept_sec_context", major, minor);
+    else
+        displayCanonName(minor, source_name, "Source name");
+
+    (void) gss_delete_sec_context(minor, &acceptor_context, NULL);
+    (void) gss_release_buffer(minor, &token);
+    (void) gss_release_buffer(minor, &tmp);
+
+    return major;
+}
+
+static OM_uint32
+constrainedDelegate(OM_uint32 *minor,
+                    gss_OID_set desired_mechs,
+                    gss_name_t target,
+                    gss_cred_id_t delegated_cred_handle,
+                    gss_cred_id_t verifier_cred_handle)
+{
+    OM_uint32 major, tmp;
+    gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
+    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
+    gss_name_t cred_name = GSS_C_NO_NAME;
+    OM_uint32 time_rec, lifetime;
+    gss_cred_usage_t usage;
+    gss_buffer_desc token;
+
+    printf("Constrained delegation tests follow\n");
+    printf("-----------------------------------\n\n");
+
+    major = gss_acquire_cred_with_cred(minor,
+                                       verifier_cred_handle,
+                                       delegated_cred_handle,
+                                       GSS_C_INDEFINITE,
+                                       desired_mechs,
+                                       GSS_C_INITIATE,
+                                       &cred,
+                                       NULL,
+                                       &time_rec);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_acquire_cred_with_cred", major, minor);
+        return major;
+    }
+
+    if (gss_inquire_cred(minor, delegated_cred_handle, &cred_name,
+                         &lifetime, &usage, NULL) == GSS_S_COMPLETE)
+        displayCanonName(minor, cred_name, "Proxy cred name");
+    gss_release_name(minor, &cred_name);
+
+        printf("\n");
+    major = gss_init_sec_context(minor,
+                                 cred,
+                                 &initiator_context,
+                                 target,
+                                 (gss_OID)gss_mech_krb5,
+                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
+                                 GSS_C_INDEFINITE,
+                                 GSS_C_NO_CHANNEL_BINDINGS,
+                                 GSS_C_NO_BUFFER,
+                                 NULL,
+                                 &token,
+                                 NULL,
+                                 &time_rec);
+    if (GSS_ERROR(major))
+        displayStatus("gss_init_sec_context", major, minor);
+
+    (void) gss_release_buffer(&tmp, &token);
+    (void) gss_delete_sec_context(&tmp, &initiator_context, NULL);
+    (void) gss_release_cred(&tmp, &cred);
+
+    return major;
+}
 
 int main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
-    gss_ctx_id_t context_handle = GSS_C_NO_CONTEXT;
-    gss_cred_id_t verifier_cred_handle = GSS_C_NO_CREDENTIAL;
-    gss_name_t principal = GSS_C_NO_NAME, target = GSS_C_NO_NAME;
-    gss_name_t src_name = GSS_C_NO_NAME;
+    gss_cred_id_t impersonator_cred_handle = GSS_C_NO_CREDENTIAL;
+    gss_cred_id_t user_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+    gss_name_t user = GSS_C_NO_NAME, target = GSS_C_NO_NAME;
+    gss_OID_set_desc mechs;
+    gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc buf;
-    gss_OID mech_type;
-    OM_uint32 ret_flags, time_ret;
 
     if (argc < 2 || argc > 4) {
         fprintf(stderr, "Usage: %s [user] [proxy-target] [keytab]\n", argv[0]);
@@ -132,7 +270,9 @@ int main(int argc, char *argv[])
     buf.value = argv[1];
     buf.length = strlen((char *)buf.value);
 
-    major = gss_import_name(&minor, &buf, (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME, &principal);
+    major = gss_import_name(&minor, &buf,
+                            (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
+                            &user);
     if (GSS_ERROR(major)) {
         displayStatus("gss_import_name(user)", major, minor);
         goto out;
@@ -142,15 +282,11 @@ int main(int argc, char *argv[])
         buf.value = argv[2];
         buf.length = strlen((char *)buf.value);
 
-        major = gss_import_name(&minor, &buf, (gss_OID)GSS_C_NT_HOSTBASED_SERVICE, &target);
+        major = gss_import_name(&minor, &buf,
+                                (gss_OID)GSS_C_NT_HOSTBASED_SERVICE,
+                                &target);
         if (GSS_ERROR(major)) {
             displayStatus("gss_import_name(target)", major, minor);
-            goto out;
-        }
-
-        major = gss_krb5_add_sec_context_delegatee(&minor, &context_handle, target);
-        if (GSS_ERROR(major)) {
-            displayStatus("gss_krb5_add_sec_context_delegatee", major, minor);
             goto out;
         }
     } else {
@@ -165,74 +301,67 @@ int main(int argc, char *argv[])
         }
     }
 
-   buf.value = NULL;
+    mechs.elements = (gss_OID)gss_mech_krb5;
+    mechs.count = 1;
 
-    major = gss_krb5_create_sec_context_for_principal(&minor,
-        &context_handle,
-        verifier_cred_handle,
-        principal,
-        GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-        0,
-        &src_name,
-        &mech_type,
-        &ret_flags,
-        &time_ret,
-        &delegated_cred_handle);
+    /* get default cred */
+    major = gss_acquire_cred(&minor,
+                             GSS_C_NO_NAME,
+                             GSS_C_INDEFINITE,
+                             &mechs,
+                             GSS_C_BOTH,
+                             &impersonator_cred_handle,
+                             &actual_mechs,
+                             NULL);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_krb5_create_sec_context_for_principal", major, minor);
+        displayStatus("gss_acquire_cred(impersonator_cred)", major, minor);
         goto out;
     }
 
-    displayCanonName(&minor, src_name, "User name");
-    if (target != GSS_C_NO_NAME)
-        displayCanonName(&minor, target, "Target name");
+    (void) gss_release_oid_set(&minor, &actual_mechs);
+
+    printf("Protocol transition tests follow\n");
+    printf("-----------------------------------\n\n");
+
+    /* get S4U2Self cred */
+    major = gss_acquire_cred_with_name(&minor,
+                                       impersonator_cred_handle,
+                                       user,
+                                       GSS_C_INDEFINITE,
+                                       &mechs,
+                                       GSS_C_INITIATE,
+                                       &user_cred_handle,
+                                       &actual_mechs,
+                                       NULL);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_acquire_cred(user_cred)", major, minor);
+        goto out;
+    }
+
+    major = initAcceptSecContext(&minor,
+                                 user_cred_handle,
+                                 impersonator_cred_handle,
+                                 &delegated_cred_handle);
+    if (GSS_ERROR(major))
+        goto out;
+
+    printf("\n");
 
     if (delegated_cred_handle != GSS_C_NO_CREDENTIAL) {
-        gss_name_t cred_name = GSS_C_NO_NAME;
-        OM_uint32 lifetime;
-        gss_cred_usage_t usage;
-
-        buf.value = NULL;
-
-        if (gss_inquire_cred(&minor, delegated_cred_handle, &cred_name,
-                             &lifetime, &usage, NULL) == GSS_S_COMPLETE)
-            displayCanonName(&minor, cred_name, "Cred name");
-        gss_release_name(&minor, &cred_name);
-
-        printf("\n");
-
-        gss_delete_sec_context(&minor, &context_handle, NULL);
-        context_handle = NULL;
-
-        major = gss_init_sec_context(&minor,
-                                     delegated_cred_handle,
-                                     &context_handle,
-                                     target,
-                                     (gss_OID)gss_mech_krb5,
-                                     GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                     0,
-                                     GSS_C_NO_CHANNEL_BINDINGS,
-                                     GSS_C_NO_BUFFER,
-                                     &mech_type,
-                                     &buf,
-                                     &ret_flags,
-                                     &time_ret);
-        if (GSS_ERROR(major)) {
-            displayStatus("gss_init_sec_context(delegated_cred_handle)", major, minor);
-        }
-        printf("gss_init_sec_context with delegated credentials succeeded\n");
-        gss_release_buffer(&minor, &buf);
+        major = constrainedDelegate(&minor, &mechs, target,
+                                    delegated_cred_handle,
+                                    impersonator_cred_handle);
     } else if (target != GSS_C_NO_NAME) {
         fprintf(stderr, "Warning: no delegated credentials handle returned\n");
     }
 
-
 out:
-    gss_release_name(&minor, &principal);
-    gss_release_name(&minor, &target);
-    gss_release_name(&minor, &src_name);
-    gss_delete_sec_context(&minor, &context_handle, NULL);
-    gss_release_cred(&minor, &delegated_cred_handle);
+    (void) gss_release_name(&minor, &user);
+    (void) gss_release_name(&minor, &target);
+    (void) gss_release_cred(&minor, &delegated_cred_handle);
+    (void) gss_release_cred(&minor, &impersonator_cred_handle);
+    (void) gss_release_cred(&minor, &user_cred_handle);
+    (void) gss_release_oid_set(&minor, &actual_mechs);
 
     return GSS_ERROR(major) ? 1 : 0;
 }

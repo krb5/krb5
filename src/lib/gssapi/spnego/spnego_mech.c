@@ -257,7 +257,11 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_wrap_iov,
 	spnego_gss_unwrap_iov,
 	spnego_gss_wrap_iov_length,
-	spnego_gss_complete_auth_token
+	spnego_gss_complete_auth_token,
+	spnego_gss_acquire_cred_with_name,
+	NULL,				/* gss_add_cred_with_name */
+	spnego_gss_acquire_cred_with_cred,
+	NULL,				/* gss_add_cred_with_cred */
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -2208,6 +2212,99 @@ spnego_gss_complete_auth_token(
 				      context_handle,
 				      input_message_buffer);
 	return (ret);
+}
+
+OM_uint32
+spnego_gss_acquire_cred_with_name(OM_uint32 *minor_status,
+				  const gss_cred_id_t impersonator_cred_handle,
+				  gss_name_t desired_name,
+				  OM_uint32 time_req,
+				  gss_OID_set desired_mechs,
+				  gss_cred_usage_t cred_usage,
+				  gss_cred_id_t *output_cred_handle,
+				  gss_OID_set *actual_mechs,
+				  OM_uint32 *time_rec)
+{
+	OM_uint32 status;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET;
+
+	dsyslog("Entering spnego_gss_acquire_cred_with_name\n");
+
+	if (actual_mechs)
+		*actual_mechs = NULL;
+
+	if (time_rec)
+		*time_rec = 0;
+
+	if (desired_mechs == GSS_C_NO_OID_SET) {
+		status = gss_inquire_cred(minor_status,
+					  impersonator_cred_handle,
+					  NULL, NULL,
+					  NULL, &amechs);
+		if (status != GSS_S_COMPLETE)
+			return status;
+
+		desired_mechs = amechs;
+	}
+
+	status = gss_acquire_cred_with_name(minor_status,
+			impersonator_cred_handle,
+			desired_name, time_req,
+			desired_mechs, cred_usage,
+			output_cred_handle, actual_mechs,
+			time_rec);
+
+	if (amechs != GSS_C_NULL_OID_SET)
+		(void) gss_release_oid_set(minor_status, &amechs);
+
+	dsyslog("Leaving spnego_gss_acquire_cred_with_name\n");
+	return (status);
+}
+
+OM_uint32
+spnego_gss_acquire_cred_with_cred(OM_uint32 *minor_status,
+				  const gss_cred_id_t impersonator_cred_handle,
+				  const gss_cred_id_t subject_cred_handle,
+				  OM_uint32 time_req,
+				  gss_OID_set desired_mechs,
+				  gss_cred_usage_t cred_usage,
+				  gss_cred_id_t *output_cred_handle,
+				  gss_OID_set *actual_mechs,
+				  OM_uint32 *time_rec)
+{
+	OM_uint32 status;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET;
+	dsyslog("Entering spnego_gss_acquire_cred_with_cred\n");
+
+	if (actual_mechs)
+		*actual_mechs = NULL;
+
+	if (time_rec)
+		*time_rec = 0;
+
+	if (desired_mechs == GSS_C_NO_OID_SET) {
+		status = gss_inquire_cred(minor_status,
+					  impersonator_cred_handle,
+					  NULL, NULL,
+					  NULL, &amechs);
+		if (status != GSS_S_COMPLETE)
+			return status;
+
+		desired_mechs = amechs;
+	}
+
+	status = gss_acquire_cred_with_cred(minor_status,
+			impersonator_cred_handle,
+			subject_cred_handle, time_req,
+			desired_mechs, cred_usage,
+			output_cred_handle, actual_mechs,
+			time_rec);
+
+	if (amechs != GSS_C_NO_OID_SET)
+		(void) gss_release_oid_set(minor_status, &amechs);
+
+	dsyslog("Leaving spnego_gss_acquire_cred_with_cred\n");
+	return (status);
 }
 
 /*

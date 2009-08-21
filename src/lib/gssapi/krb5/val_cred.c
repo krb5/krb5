@@ -58,7 +58,8 @@ krb5_gss_validate_cred_1(OM_uint32 *minor_status, gss_cred_id_t cred_handle,
             *minor_status = code;
             return(GSS_S_DEFECTIVE_CREDENTIAL);
         }
-        if (!krb5_principal_compare(context, princ, cred->princ)) {
+        if (!cred->proxy_cred &&
+            !krb5_principal_compare(context, princ, cred->princ)) {
             k5_mutex_unlock(&cred->lock);
             *minor_status = KG_CCACHE_NOMATCH;
             return(GSS_S_DEFECTIVE_CREDENTIAL);

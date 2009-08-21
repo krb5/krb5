@@ -411,6 +411,30 @@ spnego_gss_complete_auth_token
 	gss_buffer_t input_message_buffer
 );
 
+OM_uint32
+spnego_gss_acquire_cred_with_name(
+    OM_uint32 *,	    /* minor_status */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
+    const gss_name_t,	    /* desired_name */
+    OM_uint32,		    /* time_req */
+    const gss_OID_set,	    /* desired_mechs */
+    gss_cred_usage_t,	    /* cred_usage */
+    gss_cred_id_t *,	    /* output_cred_handle */
+    gss_OID_set *,	    /* actual_mechs */
+    OM_uint32 *);	    /* time_rec */
+
+OM_uint32
+spnego_gss_acquire_cred_with_cred(
+    OM_uint32 *,	    /* minor_status */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
+    const gss_cred_id_t,    /* subject_cred_handle */
+    OM_uint32,		    /* time_req */
+    const gss_OID_set,	    /* desired_mechs */
+    gss_cred_usage_t,	    /* cred_usage */
+    gss_cred_id_t *,	    /* output_cred_handle */
+    gss_OID_set *,	    /* actual_mechs */
+    OM_uint32 *);	    /* time_rec */
+
 #ifdef	__cplusplus
 }
 #endif
