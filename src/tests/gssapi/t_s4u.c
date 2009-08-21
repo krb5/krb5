@@ -271,7 +271,6 @@ int main(int argc, char *argv[])
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc buf;
 
-
     if (argc < 2 || argc > 4) {
         fprintf(stderr, "Usage: %s [user] [proxy-target] [keytab]\n", argv[0]);
         fprintf(stderr, "       proxy-target and keytab are optional\n");
@@ -358,7 +357,8 @@ int main(int argc, char *argv[])
 
     printf("\n");
 
-    if (delegated_cred_handle != GSS_C_NO_CREDENTIAL) {
+    if (target != GSS_C_NO_NAME &&
+        delegated_cred_handle != GSS_C_NO_CREDENTIAL) {
         major = constrainedDelegate(&minor, &mechs, target,
                                     delegated_cred_handle,
                                     impersonator_cred_handle);
