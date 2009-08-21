@@ -221,12 +221,20 @@ constrainedDelegate(OM_uint32 *minor,
         return major;
     }
 
+    if (gss_inquire_cred(minor, verifier_cred_handle, &cred_name,
+                         &lifetime, &usage, NULL) == GSS_S_COMPLETE) {
+        displayCanonName(minor, cred_name, "Proxy name");
+        gss_release_name(minor, &cred_name);
+    }
+    displayCanonName(minor, target, "Target name");
     if (gss_inquire_cred(minor, delegated_cred_handle, &cred_name,
-                         &lifetime, &usage, NULL) == GSS_S_COMPLETE)
-        displayCanonName(minor, cred_name, "Proxy cred name");
-    gss_release_name(minor, &cred_name);
+                         &lifetime, &usage, NULL) == GSS_S_COMPLETE) {
+        displayCanonName(minor, cred_name, "Source name");
+        gss_release_name(minor, &cred_name);
+    }
 
-        printf("\n");
+    printf("\n");
+
     major = gss_init_sec_context(minor,
                                  cred,
                                  &initiator_context,
