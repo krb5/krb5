@@ -30,6 +30,21 @@
 #endif
 #include <assert.h>
 
+/*
+ * Create a GSS credential that can be used for S4U2Proxy.
+ */
+static OM_uint32
+kg_compose_proxy_cred(OM_uint32 *minor_status,
+                      krb5_gss_cred_id_t impersonator_cred,
+                      krb5_const_principal subject_name,
+                      krb5_creds *subject_creds,
+                      OM_uint32 time_req,
+                      const gss_OID_set desired_mechs,
+                      krb5_gss_cred_id_t *output_cred,
+                      gss_OID_set *actual_mechs,
+                      OM_uint32 *time_rec,
+                      krb5_context context);
+
 static OM_uint32
 kg_set_desired_mechs(OM_uint32 *minor_status,
                      const gss_OID_set desired_mechs,
@@ -107,63 +122,24 @@ kg_is_initiator_cred(krb5_gss_cred_id_t cred)
 }
 
 static OM_uint32
-kg_impersonate(OM_uint32 *minor_status,
-               const krb5_gss_cred_id_t impersonator_cred,
-               const krb5_principal user,
-               OM_uint32 time_req,
-               const gss_OID_set desired_mechs,
-               krb5_gss_cred_id_t *output_cred,
-               gss_OID_set *actual_mechs,
-               OM_uint32 *time_rec,
-               krb5_context context)
+kg_impersonate_name(OM_uint32 *minor_status,
+                    const krb5_gss_cred_id_t impersonator_cred,
+                    const krb5_principal user,
+                    OM_uint32 time_req,
+                    const gss_OID_set desired_mechs,
+                    krb5_gss_cred_id_t *output_cred,
+                    gss_OID_set *actual_mechs,
+                    OM_uint32 *time_rec,
+                    krb5_context context)
 {
     OM_uint32 major_status;
     krb5_error_code code;
-    krb5_gss_cred_id_t cred = NULL;
     krb5_creds in_creds, *out_creds = NULL;
 
     memset(&in_creds, 0, sizeof(in_creds));
     memset(&out_creds, 0, sizeof(out_creds));
 
-    k5_mutex_assert_locked(&impersonator_cred->lock);
-
-    if (!kg_is_initiator_cred(impersonator_cred) ||
-        impersonator_cred->ccache == NULL ||
-        impersonator_cred->princ == NULL) {
-        *minor_status = (OM_uint32)G_BAD_USAGE;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
-    if (cred == NULL) {
-        *minor_status = ENOMEM;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-    memset(cred, 0, sizeof(*cred));
-
-    code = k5_mutex_init(&cred->lock);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    cred->usage = GSS_C_INITIATE;
-
-    major_status = kg_set_desired_mechs(minor_status, desired_mechs, cred);
-    if (GSS_ERROR(major_status))
-        goto cleanup;
-
-    code = krb5_copy_principal(context, user, &cred->princ);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    in_creds.client = cred->princ;
+    in_creds.client = user;
     in_creds.server = impersonator_cred->princ;
 
     if (impersonator_cred->req_enctypes != NULL)
@@ -176,71 +152,21 @@ kg_impersonate(OM_uint32 *minor_status,
                                          NULL, &out_creds);
     if (code != 0) {
         *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
+        return GSS_S_FAILURE;
     }
 
-    code = krb5_cc_new_unique(context, "MEMORY", NULL, &cred->ccache);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
+    major_status = kg_compose_proxy_cred(minor_status,
+                                         impersonator_cred,
+                                         user,
+                                         out_creds,
+                                         time_req,
+                                         desired_mechs,
+                                         output_cred,
+                                         actual_mechs,
+                                         time_rec,
+                                         context);
 
-    code = krb5_cc_initialize(context, cred->ccache, cred->princ);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    code = krb5_cc_store_cred(context, cred->ccache, out_creds);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    cred->tgt_expire = out_creds->times.endtime;
-
-    if (time_rec != NULL) {
-        krb5_timestamp now;
-
-        code = krb5_timeofday(context, &now);
-        if (code != 0) {
-            *minor_status = code;
-            major_status = GSS_S_FAILURE;
-            goto cleanup;
-        }
-
-        *time_rec = cred->tgt_expire - now;
-    }
-
-    major_status = kg_return_mechs(minor_status, cred, actual_mechs);
-    if (GSS_ERROR(major_status))
-        goto cleanup;
-
-    if (!kg_save_cred_id((gss_cred_id_t)cred)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    major_status = GSS_S_COMPLETE;
-    *output_cred = cred;
-
-cleanup:
-    if (GSS_ERROR(major_status) && cred != NULL) {
-        k5_mutex_destroy(&cred->lock);
-        if (cred->ccache != NULL)
-            krb5_cc_destroy(context, cred->ccache);
-        if (cred->princ != NULL)
-            krb5_free_principal(context, cred->princ);
-        xfree(cred);
-    }
-
-    if (out_creds != NULL)
-        krb5_free_creds(context, out_creds);
+    krb5_free_creds(context, out_creds);
 
     return major_status;
 }
@@ -295,15 +221,15 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
         return major_status;
     }
 
-    major_status = kg_impersonate(minor_status,
-                                  (krb5_gss_cred_id_t)impersonator_cred_handle,
-                                  (krb5_principal)desired_name,
-                                  time_req,
-                                  desired_mechs,
-                                  &cred,
-                                  actual_mechs,
-                                  time_rec,
-                                  context);
+    major_status = kg_impersonate_name(minor_status,
+                                       (krb5_gss_cred_id_t)impersonator_cred_handle,
+                                       (krb5_principal)desired_name,
+                                       time_req,
+                                       desired_mechs,
+                                       &cred,
+                                       actual_mechs,
+                                       time_rec,
+                                       context);
 
     *output_cred_handle = (gss_cred_id_t)cred;
 
@@ -366,25 +292,22 @@ kg_duplicate_ccache(krb5_context context,
 }
 
 static OM_uint32
-kg_compose_cred(OM_uint32 *minor_status,
-                krb5_gss_cred_id_t impersonator_cred,
-                krb5_gss_cred_id_t subject_cred,
-                OM_uint32 time_req,
-                const gss_OID_set desired_mechs,
-                krb5_gss_cred_id_t *output_cred,
-                gss_OID_set *actual_mechs,
-                OM_uint32 *time_rec,
-                krb5_context context)
+kg_compose_proxy_cred(OM_uint32 *minor_status,
+                      krb5_gss_cred_id_t impersonator_cred,
+                      krb5_const_principal subject_name,
+                      krb5_creds *subject_creds,
+                      OM_uint32 time_req,
+                      const gss_OID_set desired_mechs,
+                      krb5_gss_cred_id_t *output_cred,
+                      gss_OID_set *actual_mechs,
+                      OM_uint32 *time_rec,
+                      krb5_context context)
 {
     OM_uint32 major_status;
     krb5_error_code code;
     krb5_gss_cred_id_t cred = NULL;
-    krb5_creds evidence_creds;
-
-    memset(&evidence_creds, 0, sizeof(evidence_creds));
 
     k5_mutex_assert_locked(&impersonator_cred->lock);
-    k5_mutex_assert_locked(&subject_cred->lock);
 
     if (!kg_is_initiator_cred(impersonator_cred) ||
         impersonator_cred->princ == NULL) {
@@ -393,12 +316,8 @@ kg_compose_cred(OM_uint32 *minor_status,
         goto cleanup;
     }
 
-    if (!kg_is_initiator_cred(subject_cred) ||
-        subject_cred->princ == NULL) {
-        *minor_status = (OM_uint32)G_BAD_USAGE;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
+    assert(subject_name != NULL);
+    assert(subject_creds != NULL);
 
     cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
     if (cred == NULL) {
@@ -424,8 +343,7 @@ kg_compose_cred(OM_uint32 *minor_status,
 
     cred->tgt_expire = impersonator_cred->tgt_expire;
 
-    /* The returned credential's subject matches subject_cred */
-    code = krb5_copy_principal(context, subject_cred->princ, &cred->princ);
+    code = krb5_copy_principal(context, subject_name, &cred->princ);
     if (code != 0) {
         *minor_status = code;
         major_status = GSS_S_FAILURE;
@@ -439,15 +357,7 @@ kg_compose_cred(OM_uint32 *minor_status,
         goto cleanup;
     }
 
-    code = kg_get_evidence_ticket(context, impersonator_cred,
-                                  subject_cred, &evidence_creds);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    code = krb5_cc_store_cred(context, cred->ccache, &evidence_creds);
+    code = krb5_cc_store_cred(context, cred->ccache, subject_creds);
     if (code != 0) {
         *minor_status = code;
         major_status = GSS_S_FAILURE;
@@ -489,6 +399,53 @@ cleanup:
             krb5_free_principal(context, cred->princ);
         xfree(cred);
     }
+
+    return major_status;
+}
+
+static OM_uint32
+kg_impersonate_cred(OM_uint32 *minor_status,
+                    krb5_gss_cred_id_t impersonator_cred,
+                    krb5_gss_cred_id_t subject_cred,
+                    OM_uint32 time_req,
+                    const gss_OID_set desired_mechs,
+                    krb5_gss_cred_id_t *output_cred,
+                    gss_OID_set *actual_mechs,
+                    OM_uint32 *time_rec,
+                    krb5_context context)
+{
+    OM_uint32 major_status;
+    krb5_error_code code;
+    krb5_creds evidence_creds;
+
+    k5_mutex_assert_locked(&impersonator_cred->lock);
+    k5_mutex_assert_locked(&subject_cred->lock);
+
+    if (!kg_is_initiator_cred(subject_cred) ||
+        subject_cred->princ == NULL) {
+        *minor_status = (OM_uint32)G_BAD_USAGE;
+        return GSS_S_FAILURE;
+    }
+
+    memset(&evidence_creds, 0, sizeof(evidence_creds));
+
+    code = kg_get_evidence_ticket(context, impersonator_cred,
+                                  subject_cred, &evidence_creds);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
+    major_status = kg_compose_proxy_cred(minor_status,
+                                         impersonator_cred,
+                                         subject_cred->princ,
+                                         &evidence_creds,
+                                         time_req,
+                                         desired_mechs,
+                                         output_cred,
+                                         actual_mechs,
+                                         time_rec,
+                                         context);
 
     krb5_free_cred_contents(context, &evidence_creds);
 
@@ -560,15 +517,15 @@ krb5_gss_acquire_cred_impersonate_cred(OM_uint32 *minor_status,
         return major_status;
     }
 
-    major_status = kg_compose_cred(minor_status,
-                                   (krb5_gss_cred_id_t)impersonator_cred_handle,
-                                   (krb5_gss_cred_id_t)subject_cred_handle,
-                                   time_req,
-                                   desired_mechs,
-                                   &cred,
-                                   actual_mechs,
-                                   time_rec,
-                                   context);
+    major_status = kg_impersonate_cred(minor_status,
+                                       (krb5_gss_cred_id_t)impersonator_cred_handle,
+                                       (krb5_gss_cred_id_t)subject_cred_handle,
+                                       time_req,
+                                       desired_mechs,
+                                       &cred,
+                                       actual_mechs,
+                                       time_rec,
+                                       context);
 
     *output_cred_handle = (gss_cred_id_t)cred;
 

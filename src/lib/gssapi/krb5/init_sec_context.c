@@ -140,7 +140,13 @@ static krb5_error_code get_credentials(context, cred, server, now,
     if ((code = krb5_cc_get_principal(context, cred->ccache, &cc_princ)))
         goto cleanup;
 
-    if (cred->proxy_cred) {
+    /*
+     * Do constrained delegation if we have proxy credentials and
+     * we're not trying to get a ticket to ourselves (in which case
+     * we can just use the S4U2Self or evidence ticket directly).
+     */
+    if (cred->proxy_cred &&
+        !krb5_principal_compare(context, cc_princ, server)) {
         krb5_creds mcreds;
 
         flags |= KRB5_GC_CANONICALIZE |
