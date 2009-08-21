@@ -340,6 +340,9 @@ kg_duplicate_ccache(krb5_context context,
     krb5_error_code code;
     krb5_ccache ccache;
 
+    if (impersonator_cred->ccache == NULL)
+        return EINVAL;
+
     code = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
     if (code != 0)
         return code;

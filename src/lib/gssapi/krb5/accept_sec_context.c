@@ -127,8 +127,8 @@ create_constrained_deleg_creds(context, verifier_cred, ticket, out_cred)
     krb5_creds krb_creds;
     krb5_data *data;
 
-    if (out_cred == NULL)
-        return 0; /* nothing to do */
+    assert(out_cred != NULL);
+    assert(verifier_cred->usage == GSS_C_BOTH);
 
     memset(&krb_creds, 0, sizeof(krb_creds));
     krb_creds.client = ticket->enc_part2->client;
@@ -949,7 +949,9 @@ kg_accept_krb5(minor_status, context_handle,
     ctx->krb_times = ticket->enc_part2->times; /* struct copy */
     ctx->krb_flags = ticket->enc_part2->flags;
 
-    if (delegated_cred_handle != NULL && deleg_cred == NULL) {
+    if (delegated_cred_handle != NULL &&
+        deleg_cred == NULL && /* no unconstrained delegation */
+        cred->usage == GSS_C_BOTH) {
         /*
          * Now, we always fabricate a delegated credentials handle
          * containing the service ticket to ourselves, which can be
