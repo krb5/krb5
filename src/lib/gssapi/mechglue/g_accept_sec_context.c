@@ -246,12 +246,9 @@ gss_cred_id_t *		d_cred;
 	    }
 
 	    /* Ensure we're returning correct creds format */
-	    /*
-	     * No longer check for GSS_C_DELEG_FLAG, because
-	     * a mechanism may have returned a credential for
-	     * use with gss_acquire_cred_impersonate_cred().
-	     */
-	    if (tmp_d_cred != GSS_C_NO_CREDENTIAL) {
+	    if ((temp_ret_flags & GSS_C_DELEG_FLAG) &&
+		tmp_d_cred != GSS_C_NO_CREDENTIAL) {
+
 		gss_union_cred_t d_u_cred = NULL;
 
 		d_u_cred = malloc(sizeof (gss_union_cred_desc));

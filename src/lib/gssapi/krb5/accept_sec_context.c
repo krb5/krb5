@@ -965,6 +965,7 @@ kg_accept_krb5(minor_status, context_handle,
             major_status = GSS_S_FAILURE;
             goto fail;
         }
+        ctx->gss_flags |= GSS_C_DELEG_FLAG;
     }
 
     krb5_free_ticket(context, ticket); /* Done with ticket */
