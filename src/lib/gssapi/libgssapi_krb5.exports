@@ -40,7 +40,6 @@ gss_inquire_cred_by_oid
 gss_inquire_mechs_for_name
 gss_inquire_names_for_mech
 gss_inquire_sec_context_by_oid
-gss_krb5_add_sec_context_delegatee
 gss_krb5_ccache_name
 gss_krb5_copy_ccache
 gss_krb5_export_lucid_sec_context
