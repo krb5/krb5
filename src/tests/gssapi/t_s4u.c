@@ -53,6 +53,8 @@
  *    $ t_s4u delegtest@WIN.MIT.EDU HOST@WIN-EQ7E4AA2WR8.win.mit.edu krb5.keytab
  */
 
+static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
+
 static void displayStatus_1(m, code, type)
      char *m;
      OM_uint32 code;
@@ -145,7 +147,7 @@ initAcceptSecContext(OM_uint32 *minor,
                                  claimant_cred_handle,
                                  &initiator_context,
                                  target_name,
-                                 (gss_OID)gss_mech_krb5,
+                                 (gss_OID)&spnego_mech,
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -239,7 +241,7 @@ constrainedDelegate(OM_uint32 *minor,
                                  cred,
                                  &initiator_context,
                                  target,
-                                 (gss_OID)gss_mech_krb5,
+                                 (gss_OID)&spnego_mech,
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -268,6 +270,7 @@ int main(int argc, char *argv[])
     gss_OID_set_desc mechs;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc buf;
+
 
     if (argc < 2 || argc > 4) {
         fprintf(stderr, "Usage: %s [user] [proxy-target] [keytab]\n", argv[0]);
