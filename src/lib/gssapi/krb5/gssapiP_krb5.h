@@ -836,6 +836,12 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 
+/* s4u_gss_glue.c */
+krb5_error_code
+kg_duplicate_ccache(krb5_context context,
+                    krb5_gss_cred_id_t impersonator_cred,
+                    krb5_ccache *out_ccache);
+
 /*
  * These take unglued krb5-mech-specific contexts.
  */

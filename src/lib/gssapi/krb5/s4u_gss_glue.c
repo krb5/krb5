@@ -332,7 +332,7 @@ kg_get_evidence_ticket(krb5_context context,
                                  KRB5_TC_MATCH_TIMES, &mcreds, ncreds);
 }
 
-static krb5_error_code
+krb5_error_code
 kg_duplicate_ccache(krb5_context context,
                     krb5_gss_cred_id_t impersonator_cred,
                     krb5_ccache *out_ccache)

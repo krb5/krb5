@@ -199,7 +199,6 @@ constrainedDelegate(OM_uint32 *minor,
                     gss_cred_id_t verifier_cred_handle)
 {
     OM_uint32 major, tmp;
-    gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
     gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
     gss_name_t cred_name = GSS_C_NO_NAME;
     OM_uint32 time_rec, lifetime;
@@ -208,20 +207,6 @@ constrainedDelegate(OM_uint32 *minor,
 
     printf("Constrained delegation tests follow\n");
     printf("-----------------------------------\n\n");
-
-    major = gss_acquire_cred_impersonate_cred(minor,
-                                              verifier_cred_handle,
-                                              delegated_cred_handle,
-                                              GSS_C_INDEFINITE,
-                                              desired_mechs,
-                                              GSS_C_INITIATE,
-                                              &cred,
-                                              NULL,
-                                              &time_rec);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_acquire_cred_impersonate_cred", major, minor);
-        return major;
-    }
 
     if (gss_inquire_cred(minor, verifier_cred_handle, &cred_name,
                          &lifetime, &usage, NULL) == GSS_S_COMPLETE) {
@@ -238,10 +223,14 @@ constrainedDelegate(OM_uint32 *minor,
     printf("\n");
 
     major = gss_init_sec_context(minor,
-                                 cred,
+                                 delegated_cred_handle,
                                  &initiator_context,
                                  target,
+#if 0
                                  (gss_OID)&spnego_mech,
+#else
+                                 (gss_OID)gss_mech_krb5,
+#endif
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -255,7 +244,6 @@ constrainedDelegate(OM_uint32 *minor,
 
     (void) gss_release_buffer(&tmp, &token);
     (void) gss_delete_sec_context(&tmp, &initiator_context, NULL);
-    (void) gss_release_cred(&tmp, &cred);
 
     return major;
 }

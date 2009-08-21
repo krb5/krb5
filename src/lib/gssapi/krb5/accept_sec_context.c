@@ -115,8 +115,9 @@
 #ifndef LEAN_CLIENT
 
 static krb5_error_code
-create_constrained_deleg_creds(context, ticket, out_cred)
+create_constrained_deleg_creds(context, verifier_cred, ticket, out_cred)
     krb5_context context;
+    krb5_gss_cred_id_t verifier_cred;
     krb5_ticket *ticket;
     krb5_gss_cred_id_t *out_cred;
 {
@@ -144,15 +145,8 @@ create_constrained_deleg_creds(context, ticket, out_cred)
 
     krb_creds.ticket = *data;
 
-    retval = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
+    retval = kg_duplicate_ccache(context, verifier_cred, &ccache);
     if (retval) {
-        krb5_free_data(context, data);
-        return retval;
-    }
-
-    retval = krb5_cc_initialize(context, ccache, ticket->enc_part2->client);
-    if (retval) {
-        krb5_cc_destroy(context, ccache);
         krb5_free_data(context, data);
         return retval;
     }
@@ -193,6 +187,7 @@ create_constrained_deleg_creds(context, ticket, out_cred)
     /* cred->princ already set */
     cred->prerfc_mech = 1; /* this cred will work with all three mechs */
     cred->rfc_mech = 1;
+    cred->proxy_cred = 1;
     cred->keytab = NULL; /* no keytab associated with this... */
     cred->tgt_expire = krb_creds.times.endtime; /* store the end time */
     cred->ccache = ccache; /* the ccache containing the credential */
@@ -960,7 +955,7 @@ kg_accept_krb5(minor_status, context_handle,
          * containing the service ticket to ourselves, which can be
          * used for S4U2Proxy.
          */
-        code = create_constrained_deleg_creds(context, ticket, &deleg_cred);
+        code = create_constrained_deleg_creds(context, cred, ticket, &deleg_cred);
         if (code) {
             major_status = GSS_S_FAILURE;
             goto fail;
