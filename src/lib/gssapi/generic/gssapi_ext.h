@@ -273,8 +273,8 @@ gss_acquire_cred_with_name(
 OM_uint32 KRB5_CALLCONV
 gss_add_cred_with_name(
     OM_uint32 *,	    /* minor_status */
-    const gss_cred_id_t,    /* impersonator_cred_handle */
     gss_cred_id_t,	    /* input_cred_handle */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_name_t,	    /* desired_name */
     const gss_OID,	    /* desired_mech */
     gss_cred_usage_t,	    /* cred_usage */
@@ -303,8 +303,8 @@ gss_acquire_cred_with_cred(
 OM_uint32 KRB5_CALLCONV
 gss_add_cred_with_cred(
     OM_uint32 *,	    /* minor_status */
-    const gss_cred_id_t,    /* impersonator_cred_handle */
     gss_cred_id_t,	    /* input_cred_handle */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_cred_id_t,    /* subject_cred_handle */
     const gss_OID,	    /* desired_mech */
     gss_cred_usage_t,	    /* cred_usage */
