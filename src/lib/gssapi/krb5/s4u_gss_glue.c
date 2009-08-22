@@ -140,7 +140,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    major_status = kg_compose_proxy_cred(minor_status,
+    major_status = kg_compose_deleg_cred(minor_status,
                                          impersonator_cred,
                                          user,
                                          out_creds,
@@ -244,40 +244,8 @@ kg_get_evidence_ticket(krb5_context context,
                                  KRB5_TC_MATCH_TIMES, &mcreds, ncreds);
 }
 
-static krb5_error_code
-kg_duplicate_ccache(krb5_context context,
-                    krb5_gss_cred_id_t impersonator_cred,
-                    krb5_ccache *out_ccache)
-{
-    krb5_error_code code;
-    krb5_ccache ccache;
-
-    if (!kg_is_initiator_cred(impersonator_cred))
-        return EINVAL;
-
-    code = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
-    if (code != 0)
-        return code;
-
-    code = krb5_cc_initialize(context, ccache, impersonator_cred->princ);
-    if (code != 0) {
-        krb5_cc_destroy(context, ccache);
-        return code;
-    }
-
-    code = krb5_cc_copy_creds(context, impersonator_cred->ccache, ccache);
-    if (code != 0) {
-        krb5_cc_destroy(context, ccache);
-        return code;
-    }
-
-    *out_ccache = ccache;
-
-    return 0;
-}
-
 OM_uint32
-kg_compose_proxy_cred(OM_uint32 *minor_status,
+kg_compose_deleg_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t impersonator_cred,
                       krb5_const_principal subject_name,
                       krb5_creds *subject_creds,
@@ -296,8 +264,7 @@ kg_compose_proxy_cred(OM_uint32 *minor_status,
 
     if (!kg_is_initiator_cred(impersonator_cred) ||
         impersonator_cred->princ == NULL) {
-        *minor_status = (OM_uint32)G_BAD_USAGE;
-        major_status = GSS_S_FAILURE;
+        code = G_BAD_USAGE;
         goto cleanup;
     }
 
@@ -306,21 +273,23 @@ kg_compose_proxy_cred(OM_uint32 *minor_status,
 
     cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
     if (cred == NULL) {
-        *minor_status = ENOMEM;
-        major_status = GSS_S_FAILURE;
+        code = ENOMEM;
         goto cleanup;
     }
     memset(cred, 0, sizeof(*cred));
 
     code = k5_mutex_init(&cred->lock);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
+    if (code != 0)
         goto cleanup;
-    }
 
+    /*
+     * Only return a "proxy" credential for use with constrained
+     * delegation if the subject credentials are forwardable.
+     * Submitting non-forwardable credentials to the KDC for use
+     * with constrained delegation will only return an error.
+     */
     cred->usage = GSS_C_INITIATE;
-    cred->proxy_cred = 1;
+    cred->proxy_cred = (subject_creds->ticket_flags & TKT_FLG_FORWARDABLE) != 0;
 
     major_status = kg_set_desired_mechs(minor_status, desired_mechs, cred);
     if (GSS_ERROR(major_status))
@@ -329,35 +298,37 @@ kg_compose_proxy_cred(OM_uint32 *minor_status,
     cred->tgt_expire = impersonator_cred->tgt_expire;
 
     code = krb5_copy_principal(context, subject_name, &cred->princ);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
+    if (code != 0)
         goto cleanup;
-    }
 
-    code = kg_duplicate_ccache(context, impersonator_cred, &cred->ccache);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
+    code = krb5_cc_new_unique(context, "MEMORY", NULL, &cred->ccache);
+    if (code != 0)
         goto cleanup;
+
+    code = krb5_cc_initialize(context, cred->ccache,
+                              cred->proxy_cred ? impersonator_cred->princ :
+                                    (krb5_principal)subject_name);
+    if (code != 0)
+        goto cleanup;
+
+    if (cred->proxy_cred) {
+        /* Impersonator's TGT will be necessary for S4U2Proxy */
+        code = krb5_cc_copy_creds(context, impersonator_cred->ccache,
+                                  cred->ccache);
+        if (code != 0)
+            goto cleanup;
     }
 
     code = krb5_cc_store_cred(context, cred->ccache, subject_creds);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
+    if (code != 0)
         goto cleanup;
-    }
 
     if (time_rec != NULL) {
         krb5_timestamp now;
 
         code = krb5_timeofday(context, &now);
-        if (code != 0) {
-            *minor_status = code;
-            major_status = GSS_S_FAILURE;
+        if (code != 0)
             goto cleanup;
-        }
 
         *time_rec = cred->tgt_expire - now;
     }
@@ -367,15 +338,20 @@ kg_compose_proxy_cred(OM_uint32 *minor_status,
         goto cleanup;
 
     if (!kg_save_cred_id((gss_cred_id_t)cred)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        major_status = GSS_S_FAILURE;
+        code = G_VALIDATE_FAILED;
         goto cleanup;
     }
 
     major_status = GSS_S_COMPLETE;
+    *minor_status = 0;
     *output_cred = cred;
 
 cleanup:
+    if (code != 0) {
+        *minor_status = code;
+        major_status = GSS_S_FAILURE;
+    }
+
     if (GSS_ERROR(major_status) && cred != NULL) {
         k5_mutex_destroy(&cred->lock);
         if (cred->ccache != NULL)
@@ -421,7 +397,7 @@ kg_impersonate_cred(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    major_status = kg_compose_proxy_cred(minor_status,
+    major_status = kg_compose_deleg_cred(minor_status,
                                          impersonator_cred,
                                          subject_cred->princ,
                                          &evidence_creds,
