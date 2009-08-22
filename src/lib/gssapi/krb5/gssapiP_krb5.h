@@ -840,7 +840,6 @@ int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 OM_uint32
 kg_compose_deleg_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t impersonator_cred,
-                      krb5_const_principal subject_name,
                       krb5_creds *subject_creds,
                       OM_uint32 time_req,
                       const gss_OID_set desired_mechs,

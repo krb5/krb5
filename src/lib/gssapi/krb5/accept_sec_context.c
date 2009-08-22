@@ -148,7 +148,6 @@ create_constrained_deleg_creds(OM_uint32 *minor_status,
 
     major_status = kg_compose_deleg_cred(minor_status,
                                          verifier_cred_handle,
-                                         ticket->enc_part2->client,
                                          &krb_creds,
                                          GSS_C_INDEFINITE,
                                          GSS_C_NO_OID_SET,

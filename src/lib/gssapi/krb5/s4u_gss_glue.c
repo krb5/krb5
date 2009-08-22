@@ -142,7 +142,6 @@ kg_impersonate_name(OM_uint32 *minor_status,
 
     major_status = kg_compose_deleg_cred(minor_status,
                                          impersonator_cred,
-                                         user,
                                          out_creds,
                                          time_req,
                                          desired_mechs,
@@ -247,7 +246,6 @@ kg_get_evidence_ticket(krb5_context context,
 OM_uint32
 kg_compose_deleg_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t impersonator_cred,
-                      krb5_const_principal subject_name,
                       krb5_creds *subject_creds,
                       OM_uint32 time_req,
                       const gss_OID_set desired_mechs,
@@ -268,8 +266,8 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
         goto cleanup;
     }
 
-    assert(subject_name != NULL);
     assert(subject_creds != NULL);
+    assert(subject_creds->client != NULL);
 
     cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
     if (cred == NULL) {
@@ -297,7 +295,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
 
     cred->tgt_expire = impersonator_cred->tgt_expire;
 
-    code = krb5_copy_principal(context, subject_name, &cred->princ);
+    code = krb5_copy_principal(context, subject_creds->client, &cred->princ);
     if (code != 0)
         goto cleanup;
 
@@ -307,7 +305,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
 
     code = krb5_cc_initialize(context, cred->ccache,
                               cred->proxy_cred ? impersonator_cred->princ :
-                                    (krb5_principal)subject_name);
+                                    (krb5_principal)subject_creds->client);
     if (code != 0)
         goto cleanup;
 
@@ -399,7 +397,6 @@ kg_impersonate_cred(OM_uint32 *minor_status,
 
     major_status = kg_compose_deleg_cred(minor_status,
                                          impersonator_cred,
-                                         subject_cred->princ,
                                          &evidence_creds,
                                          time_req,
                                          desired_mechs,
