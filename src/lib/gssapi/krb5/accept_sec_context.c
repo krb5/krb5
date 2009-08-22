@@ -114,21 +114,20 @@
 
 #ifndef LEAN_CLIENT
 
-static krb5_error_code
-create_constrained_deleg_creds(context, verifier_cred, ticket, out_cred)
-    krb5_context context;
-    krb5_gss_cred_id_t verifier_cred;
-    krb5_ticket *ticket;
-    krb5_gss_cred_id_t *out_cred;
+static OM_uint32
+create_constrained_deleg_creds(OM_uint32 *minor_status,
+                               krb5_gss_cred_id_t verifier_cred_handle,
+                               krb5_ticket *ticket,
+                               krb5_gss_cred_id_t *out_cred,
+                               krb5_context context)
 {
-    krb5_error_code retval;
-    krb5_gss_cred_id_t cred;
-    krb5_ccache ccache;
+    OM_uint32 major_status;
     krb5_creds krb_creds;
     krb5_data *data;
+    krb5_error_code code;
 
     assert(out_cred != NULL);
-    assert(verifier_cred->usage == GSS_C_BOTH);
+    assert(verifier_cred_handle->usage == GSS_C_BOTH);
 
     memset(&krb_creds, 0, sizeof(krb_creds));
     krb_creds.client = ticket->enc_part2->client;
@@ -139,62 +138,28 @@ create_constrained_deleg_creds(context, verifier_cred, ticket, out_cred)
     krb_creds.magic = KV5M_CREDS;
     krb_creds.authdata = NULL;
 
-    retval = encode_krb5_ticket(ticket, &data);
-    if (retval)
-        return retval;
+    code = encode_krb5_ticket(ticket, &data);
+    if (code) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
 
     krb_creds.ticket = *data;
 
-    retval = kg_duplicate_ccache(context, verifier_cred, &ccache);
-    if (retval) {
-        krb5_free_data(context, data);
-        return retval;
-    }
-
-    retval = krb5_cc_store_cred(context, ccache, &krb_creds);
-    if (retval) {
-        krb5_cc_destroy(context, ccache);
-        krb5_free_data(context, data);
-        return retval;
-    }
+    major_status = kg_compose_proxy_cred(minor_status,
+                                         verifier_cred_handle,
+                                         ticket->enc_part2->client,
+                                         &krb_creds,
+                                         GSS_C_INDEFINITE,
+                                         GSS_C_NO_OID_SET,
+                                         out_cred,
+                                         NULL,
+                                         NULL,
+                                         context);
 
     krb5_free_data(context, data);
 
-    cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
-    if (cred == NULL) {
-        krb5_cc_destroy(context, ccache);
-        return ENOMEM;
-    }
-
-    memset(cred, 0, sizeof(*cred));
-
-    retval = k5_mutex_init(&cred->lock);
-    if (retval) {
-        krb5_cc_destroy(context, ccache);
-        xfree(cred);
-        return retval;
-    }
-
-    retval = krb5_copy_principal(context, ticket->enc_part2->client, &cred->princ);
-    if (retval) {
-        k5_mutex_destroy(&cred->lock);
-        krb5_cc_destroy(context, ccache);
-        xfree(cred);
-        return ENOMEM;
-    }
-
-    cred->usage = GSS_C_INITIATE; /* we can't accept with this */
-    /* cred->princ already set */
-    cred->prerfc_mech = 1; /* this cred will work with all three mechs */
-    cred->rfc_mech = 1;
-    cred->proxy_cred = 1;
-    cred->keytab = NULL; /* no keytab associated with this... */
-    cred->tgt_expire = krb_creds.times.endtime; /* store the end time */
-    cred->ccache = ccache; /* the ccache containing the credential */
-
-    *out_cred = cred;
-
-    return 0;
+    return major_status;
 }
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
@@ -957,11 +922,11 @@ kg_accept_krb5(minor_status, context_handle,
          * containing the service ticket to ourselves, which can be
          * used for S4U2Proxy.
          */
-        code = create_constrained_deleg_creds(context, cred, ticket, &deleg_cred);
-        if (code) {
-            major_status = GSS_S_FAILURE;
+        major_status = create_constrained_deleg_creds(minor_status, cred,
+                                                      ticket, &deleg_cred,
+                                                      context);
+        if (GSS_ERROR(major_status))
             goto fail;
-        }
         ctx->gss_flags |= GSS_C_DELEG_FLAG;
     }
 

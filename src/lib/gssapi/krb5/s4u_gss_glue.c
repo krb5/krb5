@@ -30,21 +30,6 @@
 #endif
 #include <assert.h>
 
-/*
- * Create a GSS credential that can be used for S4U2Proxy.
- */
-static OM_uint32
-kg_compose_proxy_cred(OM_uint32 *minor_status,
-                      krb5_gss_cred_id_t impersonator_cred,
-                      krb5_const_principal subject_name,
-                      krb5_creds *subject_creds,
-                      OM_uint32 time_req,
-                      const gss_OID_set desired_mechs,
-                      krb5_gss_cred_id_t *output_cred,
-                      gss_OID_set *actual_mechs,
-                      OM_uint32 *time_rec,
-                      krb5_context context);
-
 static OM_uint32
 kg_set_desired_mechs(OM_uint32 *minor_status,
                      const gss_OID_set desired_mechs,
@@ -259,7 +244,7 @@ kg_get_evidence_ticket(krb5_context context,
                                  KRB5_TC_MATCH_TIMES, &mcreds, ncreds);
 }
 
-krb5_error_code
+static krb5_error_code
 kg_duplicate_ccache(krb5_context context,
                     krb5_gss_cred_id_t impersonator_cred,
                     krb5_ccache *out_ccache)
@@ -291,7 +276,7 @@ kg_duplicate_ccache(krb5_context context,
     return 0;
 }
 
-static OM_uint32
+OM_uint32
 kg_compose_proxy_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t impersonator_cred,
                       krb5_const_principal subject_name,
