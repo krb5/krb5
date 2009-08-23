@@ -1317,6 +1317,78 @@ void KRB5_CALLCONV krb5_free_fast_response
 #include "com_err.h"
 #include "k5-plugin.h"
 
+#include <krb5/authdata_plugin.h>
+
+struct _krb5_authdata_context {
+    int n_modules;
+    struct _krb5_authdata_context_module {
+	krb5_authdatatype ad_type;
+	void *plugin_context;
+        authdata_client_plugin_fini_proc client_fini;
+	krb5_flags flags;
+	krb5plugin_authdata_client_ftable_v0 *ftable;
+	authdata_client_request_init_proc client_req_init;
+	authdata_client_request_fini_proc client_req_fini;
+	const char *name;
+	void *request_context;
+	void **request_context_pp;
+    } *modules;
+    struct plugin_dir_handle plugins;
+};
+
+typedef struct _krb5_authdata_context *krb5_authdata_context;
+
+void KRB5_CALLCONV
+krb5_authdata_context_free
+(krb5_context kcontext, krb5_authdata_context context);
+
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_get_attribute_types
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_data **attribute_types);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_get_attribute
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ const krb5_data *attribute,
+ krb5_boolean *authenticated,
+ krb5_boolean *complete,
+ krb5_data *value,
+ krb5_data *display_value,
+ int *more);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_set_attribute
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_boolean complete,
+ const krb5_data *attribute,
+ const krb5_data *value);
+
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_delete_attribute
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ const krb5_data *attribute);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_export_attributes
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_authdata ***pauthdata);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_export_internal
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_authdatatype type,
+ void **ptr);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_free_internal
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_authdatatype type,
+ void *ptr);
+
+
 struct _kdb5_dal_handle;	/* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
@@ -1360,6 +1432,9 @@ struct _krb5_context {
     /* preauth module stuff */
     struct plugin_dir_handle preauth_plugins;
     krb5_preauth_context *preauth_context;
+
+    /* authdata module stuff (for {AS,TGS}-REQ) */
+    krb5_authdata_context authdata_context;
 
     /* error detail info */
     struct errinfo err;
@@ -2639,6 +2714,20 @@ krb5_error_code krb5_rd_req_decoded_anyflag
 		krb5_keytab,
 		krb5_flags *,
 		krb5_ticket **);
+
+#define RD_REQ_CHECK_VALID_FLAG		0x1
+
+krb5_error_code KRB5_CALLCONV krb5_rd_req_extended
+	(krb5_context,
+		krb5_auth_context *,
+		const krb5_data *,
+		krb5_const_principal,
+		krb5_keytab,
+		krb5_flags,
+		krb5_flags *,
+		krb5_ticket **,
+		krb5_authdata_context *);
+
 krb5_error_code KRB5_CALLCONV krb5_cc_register
 	(krb5_context,
 		const krb5_cc_ops *,

@@ -485,6 +485,12 @@ krb5_os_free_context(krb5_context ctx)
         ctx->preauth_context = NULL;
     }
     krb5int_close_plugin_dirs (&ctx->preauth_plugins);
+
+    if (ctx->authdata_context) {
+        krb5_authdata_context_free(ctx, ctx->authdata_context);
+        ctx->authdata_context = NULL;
+    }
+
     krb5int_close_plugin_dirs (&ctx->libkrb5_plugins);
 
 #ifdef _WIN32

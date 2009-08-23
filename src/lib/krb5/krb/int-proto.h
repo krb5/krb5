@@ -59,6 +59,13 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			   krb5_creds *in_cred, krb5_creds **out_cred,
 			   krb5_creds ***tgts, int kdcopt);
 
+krb5_error_code
+krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
+			const krb5_ap_req *req, krb5_const_principal server,
+			krb5_keytab keytab, krb5_flags flags,
+			krb5_flags *ap_req_options, krb5_ticket **ticket,
+			krb5_authdata_context *ad_context);
+
 #define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
 
 #define IS_TGS_PRINC(c, p)						\

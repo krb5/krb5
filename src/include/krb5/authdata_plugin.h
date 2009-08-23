@@ -7,7 +7,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -21,7 +21,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * AuthorizationData plugin definitions for Kerberos 5.
  */
 
@@ -156,5 +156,110 @@ typedef struct krb5plugin_authdata_ftable_v1 {
 				     krb5_enc_tkt_part *enc_tkt_request,
 				     krb5_enc_tkt_part *enc_tkt_reply);
 } krb5plugin_authdata_ftable_v1;
+
+typedef krb5_error_code
+(*authdata_client_plugin_init_proc)(krb5_context context, void **plugin_context);
+
+#define AD_USAGE_AS_REQ	    0x01
+#define AD_USAGE_TGS_REQ    0x02
+#define AD_USAGE_AP_REQ	    0x04
+#define AD_INFORMATIONAL    0x10
+
+typedef void
+(*authdata_client_plugin_flags_proc)(krb5_context context,
+				     void *plugin_context,
+				     krb5_authdatatype ad_type,
+				     krb5_flags *flags);
+
+typedef void
+(*authdata_client_plugin_fini_proc)(krb5_context context, void *plugin_context);
+
+typedef krb5_error_code
+(*authdata_client_request_init_proc)(krb5_context context,
+				     void *plugin_context,
+                                     krb5_flags usage,
+				     void **request_context);
+
+typedef void
+(*authdata_client_request_fini_proc)(krb5_context context,
+				     void *plugin_context,
+				     void *request_context);
+
+typedef krb5_error_code
+(*authdata_client_request_verify_proc)(krb5_context context,
+				       void *plugin_context,
+				       void *request_context,
+				       const krb5_auth_context *auth_context,
+				       const krb5_keyblock *key,
+				       const krb5_ap_req *req,
+				       krb5_flags flags,
+				       krb5_authdata **authdata);
+
+typedef krb5_error_code
+(*authdata_client_get_attribute_types_proc)(krb5_context context,
+					    void *plugin_context,
+					    void *request_context,
+					    krb5_data **attribute_types);
+
+typedef krb5_error_code
+(*authdata_client_get_attribute_proc)(krb5_context context,
+				      void *plugin_context,
+				      void *request_context,
+				      const krb5_data *attribute,
+				      krb5_boolean *authenticated,
+				      krb5_boolean *complete,
+				      krb5_data *value,
+				      krb5_data *display_value,
+				      int *more);
+
+typedef krb5_error_code
+(*authdata_client_set_attribute_proc)(krb5_context context,
+				      void *plugin_context,
+				      void *request_context,
+				      krb5_boolean complete,
+				      const krb5_data *attribute,
+				      const krb5_data *value);
+
+typedef krb5_error_code
+(*authdata_client_delete_attribute_proc)(krb5_context context,
+					 void *plugin_context,
+					 void *request_context,
+					 const krb5_data *attribute);
+
+typedef krb5_error_code
+(*authdata_client_export_attributes_proc)(krb5_context context,
+					  void *plugin_context,
+					  void *request_context,
+					  krb5_authdata ***authdata);
+
+typedef krb5_error_code
+(*authdata_client_export_internal_proc)(krb5_context context,
+					void *plugin_context,
+					void *request_context,
+					void **ptr);
+
+typedef void
+(*authdata_client_free_internal_proc)(krb5_context context,
+				      void *plugin_context,
+				      void *request_context,
+				      void *ptr);
+
+typedef struct krb5plugin_authdata_client_ftable_v0 {
+    char *name;
+    krb5_authdatatype *ad_type_list;
+    authdata_client_plugin_init_proc init;
+    authdata_client_plugin_fini_proc fini;
+    authdata_client_plugin_flags_proc flags;
+    authdata_client_request_init_proc request_init;
+    authdata_client_request_fini_proc request_fini;
+    authdata_client_request_verify_proc request_verify;
+    authdata_client_get_attribute_types_proc get_attribute_types;
+    authdata_client_get_attribute_proc get_attribute;
+    authdata_client_set_attribute_proc set_attribute;
+    authdata_client_delete_attribute_proc delete_attribute;
+    authdata_client_export_attributes_proc export_attributes;
+    authdata_client_export_internal_proc export_internal;
+    authdata_client_free_internal_proc free_internal;
+} krb5plugin_authdata_client_ftable_v0;
 
 #endif /* KRB5_AUTHDATA_PLUGIN_H_INCLUDED */

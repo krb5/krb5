@@ -29,6 +29,7 @@
 
 #include "k5-int.h"
 #include "auth_con.h"
+#include "int-proto.h"
 
 /*
  *  Parses a KRB_AP_REQ message, returning its contents.
@@ -46,15 +47,19 @@
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
-	    const krb5_data *inbuf, krb5_const_principal server,
-	    krb5_keytab keytab, krb5_flags *ap_req_options,
-	    krb5_ticket **ticket)
+krb5_rd_req_extended(krb5_context context, krb5_auth_context *auth_context,
+		     const krb5_data *inbuf, krb5_const_principal server,
+		     krb5_keytab keytab, krb5_flags flags,
+		     krb5_flags *ap_req_options, krb5_ticket **ticket,
+		     krb5_authdata_context *ad_context)
 {
     krb5_error_code 	  retval;
     krb5_ap_req 	* request;
     krb5_auth_context	  new_auth_context;
     krb5_keytab           new_keytab = NULL;
+
+    if (ad_context != NULL)
+	*ad_context = NULL;
 
     if (!krb5_is_ap_req(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -87,8 +92,9 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
     }
 #endif /* LEAN_CLIENT */
 
-    retval = krb5_rd_req_decoded(context, auth_context, request, server, 
-				 keytab, ap_req_options, ticket);
+    retval = krb5_rd_req_decoded_opt(context, auth_context, request, server,
+				     keytab, flags,
+				     ap_req_options, ticket, ad_context);
 
 #ifndef LEAN_CLIENT 
     if (new_keytab != NULL)
@@ -103,6 +109,25 @@ cleanup_auth_context:
 
 cleanup_request:
     krb5_free_ap_req(context, request);
+    return retval;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
+	    const krb5_data *inbuf, krb5_const_principal server,
+	    krb5_keytab keytab, krb5_flags *ap_req_options,
+	    krb5_ticket **ticket)
+{
+    krb5_error_code retval;
+    krb5_authdata_context ad_context = NULL;
+
+    retval = krb5_rd_req_extended(context, auth_context, inbuf, server,
+				  keytab, RD_REQ_CHECK_VALID_FLAG,
+				  ap_req_options, ticket, &ad_context);
+
+    if (retval == 0)
+	krb5_authdata_context_free(context, ad_context);
+
     return retval;
 }
 
