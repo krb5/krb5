@@ -228,19 +228,20 @@ static krb5_error_code
 kg_get_evidence_ticket(krb5_context context,
                        krb5_gss_cred_id_t impersonator_cred,
                        krb5_gss_cred_id_t subject_cred,
-                       krb5_creds *ncreds)
+                       krb5_creds **out_creds)
 {
-    krb5_creds mcreds;
+    krb5_creds in_creds;
 
-    memset(&mcreds, 0, sizeof(mcreds));
+    memset(&in_creds, 0, sizeof(in_creds));
 
-    mcreds.magic = KV5M_CREDS;
-    mcreds.times.endtime = subject_cred->tgt_expire;
-    mcreds.server = impersonator_cred->princ;
-    mcreds.client = subject_cred->princ;
+    in_creds.magic = KV5M_CREDS;
+    in_creds.times.endtime = subject_cred->tgt_expire;
+    in_creds.server = impersonator_cred->princ;
+    in_creds.client = subject_cred->princ;
 
-    return krb5_cc_retrieve_cred(context, subject_cred->ccache,
-                                 KRB5_TC_MATCH_TIMES, &mcreds, ncreds);
+    return krb5_get_credentials(context, KRB5_GC_CANONICALIZE,
+                                subject_cred->ccache,
+                                &in_creds, out_creds);
 }
 
 OM_uint32
@@ -375,7 +376,7 @@ kg_impersonate_cred(OM_uint32 *minor_status,
 {
     OM_uint32 major_status;
     krb5_error_code code;
-    krb5_creds evidence_creds;
+    krb5_creds *evidence_creds;
 
     k5_mutex_assert_locked(&impersonator_cred->lock);
     k5_mutex_assert_locked(&subject_cred->lock);
@@ -386,8 +387,6 @@ kg_impersonate_cred(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    memset(&evidence_creds, 0, sizeof(evidence_creds));
-
     code = kg_get_evidence_ticket(context, impersonator_cred,
                                   subject_cred, &evidence_creds);
     if (code != 0) {
@@ -397,7 +396,7 @@ kg_impersonate_cred(OM_uint32 *minor_status,
 
     major_status = kg_compose_deleg_cred(minor_status,
                                          impersonator_cred,
-                                         &evidence_creds,
+                                         evidence_creds,
                                          time_req,
                                          desired_mechs,
                                          output_cred,
@@ -405,7 +404,7 @@ kg_impersonate_cred(OM_uint32 *minor_status,
                                          time_rec,
                                          context);
 
-    krb5_free_cred_contents(context, &evidence_creds);
+    krb5_free_creds(context, evidence_creds);
 
     return major_status;
 }
