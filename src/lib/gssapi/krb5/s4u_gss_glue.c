@@ -262,7 +262,8 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     k5_mutex_assert_locked(&impersonator_cred->lock);
 
     if (!kg_is_initiator_cred(impersonator_cred) ||
-        impersonator_cred->princ == NULL) {
+        impersonator_cred->princ == NULL ||
+        impersonator_cred->proxy_cred) {
         code = G_BAD_USAGE;
         goto cleanup;
     }
