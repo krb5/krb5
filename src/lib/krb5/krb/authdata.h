@@ -37,11 +37,6 @@ krb5_error_code
 krb5int_authdata_context_init(krb5_context kcontext, krb5_authdata_context *);
 
 krb5_error_code
-krb5int_authdata_request_context_init(krb5_context context,
-                                      krb5_authdata_context,
-                                      krb5_flags usage);
-
-krb5_error_code
 krb5int_authdata_reply_context_init(krb5_context context, krb5_authdata_context);
 
 void

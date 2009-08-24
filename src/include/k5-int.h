@@ -1338,6 +1338,14 @@ struct _krb5_authdata_context {
 
 typedef struct _krb5_authdata_context *krb5_authdata_context;
 
+krb5_error_code KRB5_CALLCONV krb5_authdata_request_context_init
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_flags usage);
+
+void KRB5_CALLCONV krb5_authdata_request_context_fini
+(krb5_context kcontext, krb5_authdata_context context);
+
 void KRB5_CALLCONV
 krb5_authdata_context_free
 (krb5_context kcontext, krb5_authdata_context context);
@@ -1346,7 +1354,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_authdata_get_attribute_types
 (krb5_context kcontext,
  krb5_authdata_context context,
- krb5_data **attribute_types);
+ krb5_data **asserted,
+ krb5_data **verified);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_get_attribute
 (krb5_context kcontext,

@@ -208,13 +208,23 @@ krb5_authdata_context_free(krb5_context kcontext, krb5_authdata_context context)
     context = NULL;
 }
 
-krb5_error_code
-krb5int_authdata_request_context_init(krb5_context kcontext,
-                                      krb5_authdata_context context,
-                                      krb5_flags usage)
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_request_context_init(krb5_context kcontext,
+                                   krb5_authdata_context context,
+                                   krb5_flags usage)
 {
     int i;
     krb5_error_code code;
+
+    if (context == NULL)
+        context = kcontext->authdata_context;
+    if (context == NULL) {
+        code = krb5int_authdata_context_init(kcontext, &context);
+        if (code != 0)
+            return code;
+
+        kcontext->authdata_context = context;
+    }
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
@@ -240,11 +250,13 @@ krb5int_authdata_request_context_init(krb5_context kcontext,
 }
 
 void KRB5_CALLCONV
-krb5int_authdata_request_context_fini(krb5_context kcontext,
-                                      krb5_authdata_context context)
+krb5_authdata_request_context_fini(krb5_context kcontext,
+                                   krb5_authdata_context context)
 {
     int i;
 
+    if (context == NULL)
+        context = kcontext->authdata_context;
     if (context == NULL)
         return;
 
@@ -335,16 +347,19 @@ merge_data_array_nocopy(krb5_data **dst, krb5_data *src, unsigned int *len)
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_get_attribute_types(krb5_context kcontext,
                                   krb5_authdata_context context,
-                                  krb5_data **attribute_types)
+                                  krb5_data **asserted_attrs,
+                                  krb5_data **verified_attrs)
 {
     int i;
     krb5_error_code code;
-    krb5_data *attrs = NULL;
+    krb5_data *asserted = NULL;
+    krb5_data *verified = NULL;
     unsigned int len = 0;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
-        krb5_data *attrs2 = NULL;
+        krb5_data *asserted2 = NULL;
+        krb5_data *verified2 = NULL;
 
         if (module->ftable->get_attribute_types == NULL)
             continue;
@@ -352,18 +367,28 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
         if ((*module->ftable->get_attribute_types)(kcontext,
                                                    module->plugin_context,
                                                    module->request_context,
-                                                   &attrs2) != 0)
+                                                   &asserted2,
+                                                   &verified2) != 0)
             continue;
 
-        code = merge_data_array_nocopy(&attrs, attrs2, &len);
+        code = merge_data_array_nocopy(&asserted, asserted2, &len);
         if (code != 0)
             break;
 
-        free(attrs2);
+        code = merge_data_array_nocopy(&verified, verified2, &len);
+        if (code != 0)
+            break;
+
+        if (asserted2 != NULL)
+            free(asserted2);
+        if (verified2 != NULL)
+            free(verified2);
     }
 
-    if (code == 0)
-        *attribute_types = attrs;
+    if (code == 0) {
+        *asserted_attrs = asserted;
+        *verified_attrs = verified;
+    }
 
     return code;
 }
