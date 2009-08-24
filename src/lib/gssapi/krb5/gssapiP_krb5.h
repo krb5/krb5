@@ -153,7 +153,10 @@ enum qop {
 
 /** internal types **/
 
-typedef krb5_principal krb5_gss_name_t;
+typedef struct _krb5_gss_name_rec {
+    krb5_principal princ;
+    krb5_authdata_context ad_context;
+} krb5_gss_name_rec, *krb5_gss_name_t;
 
 typedef struct _krb5_gss_cred_id_rec {
     /* protect against simultaneous accesses */
@@ -161,7 +164,7 @@ typedef struct _krb5_gss_cred_id_rec {
 
     /* name/type of credential */
     gss_cred_usage_t usage;
-    krb5_principal princ;        /* this is not interned as a gss_name_t */
+    krb5_gss_name_t name;
     int prerfc_mech;
     int rfc_mech;
 
@@ -183,8 +186,8 @@ typedef struct _krb5_gss_ctx_id_rec {
     unsigned int seed_init : 1;  /* XXX tested but never actually set */
     OM_uint32 gss_flags;
     unsigned char seed[16];
-    krb5_principal here;
-    krb5_principal there;
+    krb5_gss_name_t here;
+    krb5_gss_name_t there;
     krb5_keyblock *subkey; /*One of two potential keys to use with RFC
                             * 4121 packets; this key must always be set.*/
     int signalg;
@@ -217,6 +220,7 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
+    krb5_authdata_context ad_context;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;
@@ -789,6 +793,32 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                                       int toktype);
 
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
+
+/* naming_exts.c */
+#define KG_INIT_NAME_INTERN  0x1
+#define KG_INIT_NAME_NO_COPY 0x2
+
+krb5_error_code
+kg_init_name(krb5_context context,
+             krb5_principal principal,
+             krb5_authdata_context ad_context,
+             krb5_flags flags,
+             krb5_gss_name_t *name);
+
+krb5_error_code
+kg_release_name(krb5_context context,
+                krb5_gss_name_t *name);
+
+krb5_error_code
+kg_duplicate_name(krb5_context context,
+                  const krb5_gss_name_t src,
+                  krb5_flags flags,
+                  krb5_gss_name_t *dst);
+
+krb5_boolean
+kg_compare_name(krb5_context context,
+                krb5_gss_name_t name1,
+                krb5_gss_name_t name2);
 
 /*
  * These take unglued krb5-mech-specific contexts.

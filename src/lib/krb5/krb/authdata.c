@@ -223,14 +223,6 @@ krb5_authdata_context_free(krb5_context kcontext, krb5_authdata_context context)
     free(context);
 }
 
-#if 0
-void KRB5_CALLCONV
-krb5_authdata_context_copy(krb5_context kcontext,
-                           krb5_authdata_context context)
-{
-}
-#endif
-
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_request_context_init(krb5_context kcontext,
                                    krb5_authdata_context context,
@@ -698,7 +690,8 @@ import_export_authdata(krb5_context kcontext,
                                                   *(dst_module->request_context_pp),
                                                   ptr);
 
-    if (src_module->ftable->free_internal != NULL) {
+    /* assume import takes ownership */
+    if (code != 0 && src_module->ftable->free_internal != NULL) {
         (*src_module->ftable->free_internal)(kcontext,
                                              src_module->plugin_context,
                                              *(src_module->request_context_pp),

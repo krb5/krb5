@@ -54,8 +54,9 @@ krb5_gss_compare_name(minor_status, name1, name2, name_equal)
     }
 
     *minor_status = 0;
-    *name_equal = krb5_principal_compare(context, (krb5_principal) name1,
-                                         (krb5_principal) name2);
+    *name_equal = kg_compare_name(context,
+                                  (krb5_gss_name_t)name1,
+                                  (krb5_gss_name_t)name2);
     krb5_free_context(context);
     return(GSS_S_COMPLETE);
 }

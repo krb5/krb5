@@ -122,7 +122,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
                                        endtime, out_creds)
     krb5_context context;
     krb5_gss_cred_id_t cred;
-    krb5_principal server;
+    krb5_gss_name_t server;
     krb5_timestamp now;
     krb5_timestamp endtime;
     krb5_creds **out_creds;
@@ -134,10 +134,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
     memset(&in_creds, 0, sizeof(krb5_creds));
     in_creds.client = in_creds.server = NULL;
 
-    if ((code = krb5_copy_principal(context, cred->princ, &in_creds.client)))
-        goto cleanup;
-    if ((code = krb5_copy_principal(context, server, &in_creds.server)))
-        goto cleanup;
+    in_creds.client = cred->name->princ;
+    in_creds.server = server->princ;
     in_creds.times.endtime = endtime;
 
     in_creds.keyblock.enctype = 0;
@@ -159,10 +157,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
     }
 
 cleanup:
-    if (in_creds.client)
-        krb5_free_principal(context, in_creds.client);
-    if (in_creds.server)
-        krb5_free_principal(context, in_creds.server);
     return code;
 }
 struct gss_checksum_data {
@@ -199,7 +193,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
                                con_flags & ~KRB5_AUTH_CONTEXT_DO_TIME);
 
         code = krb5_fwd_tgt_creds(context, auth_context, 0,
-                                  data->cred->princ, data->ctx->there,
+                                  data->cred->name->princ, data->ctx->there->princ,
                                   data->cred->ccache, 1,
                                   &credmsg);
 
@@ -482,11 +476,10 @@ new_connection(
         ctx->krb_times.endtime = now + time_req;
     }
 
-    if ((code = krb5_copy_principal(context, cred->princ, &ctx->here)))
+    if ((code = kg_duplicate_name(context, cred->name, 0, &ctx->here)))
         goto fail;
 
-    if ((code = krb5_copy_principal(context, (krb5_principal) target_name,
-                                    &ctx->there)))
+    if ((code = kg_duplicate_name(context, (krb5_gss_name_t)target_name, 0, &ctx->there)))
         goto fail;
 
     code = get_credentials(context, cred, ctx->there, now,
@@ -596,9 +589,9 @@ fail:
         if (ctx_free->auth_context)
             krb5_auth_con_free(context, ctx_free->auth_context);
         if (ctx_free->here)
-            krb5_free_principal(context, ctx_free->here);
+            kg_release_name(context, &ctx_free->here);
         if (ctx_free->there)
-            krb5_free_principal(context, ctx_free->there);
+            kg_release_name(context, &ctx_free->there);
         if (ctx_free->subkey)
             krb5_free_keyblock(context, ctx_free->subkey);
         xfree(ctx_free);
@@ -665,8 +658,7 @@ mutual_auth(
         goto fail;
     }
 
-    if (! krb5_principal_compare(context, ctx->there,
-                                 (krb5_principal) target_name)) {
+    if (! kg_compare_name(context, ctx->there, (krb5_gss_name_t)target_name)) {
         (void)krb5_gss_delete_sec_context(minor_status,
                                           context_handle, NULL);
         code = 0;

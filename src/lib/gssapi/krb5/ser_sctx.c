@@ -736,9 +736,9 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
                 if (ctx->subkey)
                     krb5_free_keyblock(kcontext, ctx->subkey);
                 if (ctx->there)
-                    krb5_free_principal(kcontext, ctx->there);
+                    kg_release_name(kcontext, &ctx->there);
                 if (ctx->here)
-                    krb5_free_principal(kcontext, ctx->here);
+                    kg_release_name(kcontext, &ctx->here);
                 xfree(ctx);
             }
         }

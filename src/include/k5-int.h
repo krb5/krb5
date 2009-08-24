@@ -1349,6 +1349,9 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_request_context_init
 void KRB5_CALLCONV krb5_authdata_request_context_fini
 (krb5_context kcontext, krb5_authdata_context context);
 
+krb5_error_code KRB5_CALLCONV krb5_authdata_context_init
+(krb5_context kcontext, krb5_authdata_context *pcontext);
+
 void KRB5_CALLCONV
 krb5_authdata_context_free
 (krb5_context kcontext, krb5_authdata_context context);
@@ -1393,6 +1396,17 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_export_internal
  krb5_authdata_context context,
  krb5_authdatatype type,
  void **ptr);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_import_internal
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_authdatatype type,
+ void *ptr);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_context_copy
+(krb5_context kcontext,
+ krb5_authdata_context src,
+ krb5_authdata_context *dst);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_free_internal
 (krb5_context kcontext,

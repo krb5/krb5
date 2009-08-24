@@ -1265,13 +1265,14 @@ mspac_export_internal(krb5_context context,
     code = krb5_pac_parse(context, pacctx->pac->data.data,
 	                  pacctx->pac->data.length, &pac);
     if (code == 0) {
-        *ptr = pac;
         pac->verified = pacctx->pac->verified;
+        *ptr = pac;
     }
 
     return code;
 }
 
+/* Note: this takes ownership of ptr by design */
 static krb5_error_code
 mspac_import_internal(krb5_context context,
 		      void *plugin_context,
@@ -1279,22 +1280,15 @@ mspac_import_internal(krb5_context context,
 		      void *ptr)
 {
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
-    krb5_error_code code;
     krb5_pac pac = (krb5_pac)ptr;
-    krb5_pac newpac;
 
     if (pac == NULL)
 	return EINVAL;
 
-    code = krb5_pac_parse(context, pac->data.data,
-	                  pac->data.length, &newpac);
-    if (code == 0) {
-        newpac->verified = pac->verified;
-        krb5_pac_free(context, pacctx->pac);
-        pacctx->pac = newpac;
-    }
+    krb5_pac_free(context, pacctx->pac);
+    pacctx->pac = pac;
 
-    return code;
+    return 0;
 }
 
 static void

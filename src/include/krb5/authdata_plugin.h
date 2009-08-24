@@ -163,6 +163,7 @@ typedef krb5_error_code
 #define AD_USAGE_AS_REQ	    0x01
 #define AD_USAGE_TGS_REQ    0x02
 #define AD_USAGE_AP_REQ	    0x04
+#define AD_USAGE_MASK	    0x0F
 #define AD_INFORMATIONAL    0x10
 
 typedef void
@@ -239,6 +240,13 @@ typedef krb5_error_code
 					void *request_context,
 					void **ptr);
 
+/* NB: this takes ownership of ptr */
+typedef krb5_error_code
+(*authdata_client_import_internal_proc)(krb5_context context,
+					void *plugin_context,
+					void *request_context,
+					void *ptr);
+
 typedef void
 (*authdata_client_free_internal_proc)(krb5_context context,
 				      void *plugin_context,
@@ -260,6 +268,7 @@ typedef struct krb5plugin_authdata_client_ftable_v0 {
     authdata_client_delete_attribute_proc delete_attribute;
     authdata_client_export_attributes_proc export_attributes;
     authdata_client_export_internal_proc export_internal;
+    authdata_client_import_internal_proc import_internal;
     authdata_client_free_internal_proc free_internal;
 } krb5plugin_authdata_client_ftable_v0;
 
