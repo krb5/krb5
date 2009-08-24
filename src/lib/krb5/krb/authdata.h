@@ -34,24 +34,12 @@
 
 /* authdata.c */
 krb5_error_code
-krb5int_authdata_context_init(krb5_context kcontext, krb5_authdata_context *);
-
-krb5_error_code
-krb5int_authdata_reply_context_init(krb5_context context, krb5_authdata_context);
-
-void
-krb5int_authdata_reply_context_fini(krb5_context context, krb5_authdata_context);
-
-krb5_error_code
 krb5int_verify_authdata(krb5_context context,
                         krb5_authdata_context,
                         const krb5_auth_context *auth_context,
                         const krb5_keyblock *key,
                         const krb5_ap_req *ap_req,
                         krb5_flags flags);
-
-void
-krb5int_authdata_request_context_fini(krb5_context context, krb5_authdata_context);
 
 /* pac.c */
 extern krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable;

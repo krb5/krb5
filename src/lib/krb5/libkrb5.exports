@@ -133,7 +133,9 @@ krb5_auth_con_setrecvsubkey
 krb5_auth_con_setsendsubkey
 krb5_auth_con_setuseruserkey
 krb5_auth_to_rep
+krb5_authdata_context_copy
 krb5_authdata_context_free
+krb5_authdata_context_init
 krb5_authdata_get_attribute_types
 krb5_authdata_get_attribute
 krb5_authdata_set_attribute
@@ -456,6 +458,7 @@ krb5_rd_rep_dce
 krb5_rd_req
 krb5_rd_req_decoded
 krb5_rd_req_decoded_anyflag
+krb5_rd_req_extended
 krb5_rd_safe
 krb5_read_message
 krb5_read_password

@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2009 by the Massachusetts Institute of Technology.  All
  * Rights Reserved.
@@ -54,7 +55,8 @@ count_ad_modules(krb5plugin_authdata_client_ftable_v0 *table)
 }
 
 static krb5_error_code
-init_ad_system(krb5_context kcontext, krb5_authdata_context context,
+init_ad_system(krb5_context kcontext,
+               krb5_authdata_context context,
                krb5plugin_authdata_client_ftable_v0 *table,
                int *module_count)
 {
@@ -69,8 +71,9 @@ init_ad_system(krb5_context kcontext, krb5_authdata_context context,
 #endif
         return ENOENT;
     }
-    if (table->init == NULL)
+    if (table->init == NULL) {
         return ENOSYS;
+    }
 
     code = (*table->init)(kcontext, &plugin_context);
     if (code != 0) {
@@ -119,8 +122,8 @@ init_ad_system(krb5_context kcontext, krb5_authdata_context context,
     return 0;
 }
 
-krb5_error_code
-krb5int_authdata_context_init(krb5_context kcontext, krb5_authdata_context *pcontext)
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_context_init(krb5_context kcontext, krb5_authdata_context *pcontext)
 {
     int n_modules, n_tables, i, k;
     void **tables = NULL;
@@ -219,6 +222,14 @@ krb5_authdata_context_free(krb5_context kcontext, krb5_authdata_context context)
     memset(context, 0, sizeof(*context));
     free(context);
 }
+
+#if 0
+void KRB5_CALLCONV
+krb5_authdata_context_copy(krb5_context kcontext,
+                           krb5_authdata_context context)
+{
+}
+#endif
 
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_request_context_init(krb5_context kcontext,
@@ -382,7 +393,7 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
 
         if ((*module->ftable->get_attribute_types)(kcontext,
                                                    module->plugin_context,
-                                                   module->request_context,
+                                                   *(module->request_context_pp),
                                                    &asserted2,
                                                    &verified2) != 0)
             continue;
@@ -431,7 +442,7 @@ krb5_authdata_get_attribute(krb5_context kcontext,
 
         code = (*module->ftable->get_attribute)(kcontext,
                                                 module->plugin_context,
-                                                module->request_context,
+                                                *(module->request_context_pp),
                                                 attribute,
                                                 authenticated,
                                                 complete,
@@ -463,7 +474,7 @@ krb5_authdata_set_attribute(krb5_context kcontext,
 
         code = (*module->ftable->set_attribute)(kcontext,
                                                 module->plugin_context,
-                                                module->request_context,
+                                                *(module->request_context_pp),
                                                 complete,
                                                 attribute,
                                                 value);
@@ -491,7 +502,7 @@ krb5_authdata_delete_attribute(krb5_context kcontext,
 
         code = (*module->ftable->delete_attribute)(kcontext,
                                                    module->plugin_context,
-                                                   module->request_context,
+                                                   *(module->request_context_pp),
                                                    attribute);
         if (code != 0 && code != ENOENT)
             break;
@@ -522,7 +533,7 @@ krb5_authdata_export_attributes(krb5_context kcontext,
 
         code = (*module->ftable->export_attributes)(kcontext,
                                                     module->plugin_context,
-                                                    module->request_context,
+                                                    *(module->request_context_pp),
                                                     &authdata2);
         if (code != 0 && code != ENOENT)
             break;
@@ -569,7 +580,36 @@ krb5_authdata_export_internal(krb5_context kcontext,
 
         code = (*module->ftable->export_internal)(kcontext,
                                                   module->plugin_context,
-                                                  module->request_context,
+                                                  *(module->request_context_pp),
+                                                  ptr);
+
+        break;
+    }
+
+    return code;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_import_internal(krb5_context kcontext,
+                              krb5_authdata_context context,
+                              krb5_authdatatype type,
+                              void *ptr)
+{
+    int i;
+    krb5_error_code code = ENOENT;
+
+    for (i = 0; i < context->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &context->modules[i];
+
+        if (module->ad_type != type)
+            continue;
+
+        if (module->ftable->import_internal == NULL)
+            continue;
+
+        code = (*module->ftable->import_internal)(kcontext,
+                                                  module->plugin_context,
+                                                  *(module->request_context_pp),
                                                   ptr);
 
         break;
@@ -598,10 +638,101 @@ krb5_authdata_free_internal(krb5_context kcontext,
 
         (*module->ftable->free_internal)(kcontext,
                                          module->plugin_context,
-                                         module->request_context,
+                                         *(module->request_context_pp),
                                          ptr);
 
         break;
+    }
+
+    return code;
+}
+
+static krb5_error_code
+import_export_authdata(krb5_context kcontext,
+                       struct _krb5_authdata_context_module *src_module,
+                       krb5_authdata_context dst)
+{
+    int i;
+    krb5_error_code code;
+    struct _krb5_authdata_context_module *dst_module = NULL;
+    void *ptr = NULL;
+
+    for (i = 0; i < dst->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &dst->modules[i];
+
+        if (module->ftable == src_module->ftable) {
+            /* XXX is this safe to assume these pointers are interned? */
+            dst_module = module;
+            break;
+        }
+    }
+
+    if (dst_module == NULL)
+        return ENOENT;
+
+    if (dst_module->client_req_init != NULL) {
+        code = (*dst_module->client_req_init)(kcontext,
+                                              dst_module->plugin_context,
+                                              dst_module->flags & AD_USAGE_MASK,
+                                              dst_module->request_context_pp);
+        if ((code != 0 && code != ENOMEM) &&
+            (dst_module->flags & AD_INFORMATIONAL))
+            code = 0;
+        if (code != 0)
+            return code;
+    }
+
+    if (src_module->ftable->export_internal == NULL ||
+        dst_module->ftable->import_internal == NULL)
+        return 0;
+
+    code = (*src_module->ftable->export_internal)(kcontext,
+                                                  src_module->plugin_context,
+                                                  *(src_module->request_context_pp),
+                                                  &ptr);
+    if (code != 0)
+        return code;
+
+    code = (*dst_module->ftable->import_internal)(kcontext,
+                                                  dst_module->plugin_context,
+                                                  *(dst_module->request_context_pp),
+                                                  ptr);
+
+    if (src_module->ftable->free_internal != NULL) {
+        (*src_module->ftable->free_internal)(kcontext,
+                                             src_module->plugin_context,
+                                             *(src_module->request_context_pp),
+                                             ptr);
+    }
+
+    return code;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_context_copy(krb5_context kcontext,
+                           krb5_authdata_context src,
+                           krb5_authdata_context *pdst)
+{
+    int i;
+    krb5_error_code code;
+    krb5_authdata_context dst;
+
+    code = krb5_authdata_context_init(kcontext, &dst);
+    if (code != 0)
+        return code;
+
+    for (i = 0; i < src->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &src->modules[i];
+
+        code = import_export_authdata(kcontext, module, dst);
+        if (code != 0)
+            break;
+    }
+
+    if (code != 0) {
+        krb5_authdata_context_free(kcontext, dst);
+    } else {
+        *pdst = dst;
     }
 
     return code;

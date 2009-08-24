@@ -102,9 +102,6 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 
     retval = KRB5_KT_NOTFOUND;
 
-    key->enctype = ENCTYPE_NULL;
-    key->contents = NULL;
-
 #ifndef LEAN_CLIENT 
     if (server != NULL || keytab->ops->start_seq_get == NULL) {
 	retval = krb5_kt_get_entry(context, keytab,
@@ -404,7 +401,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
       }
 
       assert(ad_context != NULL);
-      if ((retval = krb5int_authdata_context_init(context, ad_context)))
+      if ((retval = krb5_authdata_context_init(context, ad_context)))
 	goto cleanup;
       if ((retval = krb5_authdata_request_context_init(context,
 						       *ad_context,
