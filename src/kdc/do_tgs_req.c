@@ -860,12 +860,12 @@ tgt_again:
     reply.padata = 0;/* always */
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
         find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER) != NULL) {
-        errcode = kdc_process_s4u2self_rep(kdc_context,
-                                           subkey,
-                                           header_ticket->enc_part2->session,
-                                           s4u_x509_user,
-                                           &reply,
-                                           &reply_encpart);
+        errcode = kdc_make_s4u2self_rep(kdc_context,
+                                        subkey,
+                                        header_ticket->enc_part2->session,
+                                        s4u_x509_user,
+                                        &reply,
+                                        &reply_encpart);
         if (errcode) {
             status = "KDC_RETURN_S4U2SELF_PADATA";
             goto cleanup;

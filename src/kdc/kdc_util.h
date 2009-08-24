@@ -255,7 +255,7 @@ krb5_error_code kdc_process_s4u2self_req
 		int *nprincs,
 		const char **status);
 
-krb5_error_code kdc_process_s4u2self_rep
+krb5_error_code kdc_make_s4u2self_rep
 	(krb5_context context,
 		krb5_keyblock *tgs_subkey,
 		krb5_keyblock *tgs_session,
