@@ -254,6 +254,8 @@ OM_uint32 KRB5_CALLCONV gss_release_iov_buffer
     gss_iov_buffer_desc *, /* iov */
     int);		/* iov_count */
 
+typedef struct gss_any *gss_any_t;
+
 #ifdef __cplusplus
 }
 #endif

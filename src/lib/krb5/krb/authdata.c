@@ -553,7 +553,7 @@ krb5_authdata_export_attributes(krb5_context kcontext,
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_export_internal(krb5_context kcontext,
                               krb5_authdata_context context,
-                              krb5_authdatatype type,
+                              const char *module_name,
                               void **ptr)
 {
     int i;
@@ -564,7 +564,7 @@ krb5_authdata_export_internal(krb5_context kcontext,
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
-        if (module->ad_type != type)
+        if (strcmp(module_name, module->name) != 0)
             continue;
 
         if (module->ftable->export_internal == NULL)
@@ -584,7 +584,7 @@ krb5_authdata_export_internal(krb5_context kcontext,
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_import_internal(krb5_context kcontext,
                               krb5_authdata_context context,
-                              krb5_authdatatype type,
+                              const char *module_name,
                               void *ptr)
 {
     int i;
@@ -593,7 +593,7 @@ krb5_authdata_import_internal(krb5_context kcontext,
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
-        if (module->ad_type != type)
+        if (strcmp(module_name, module->name) != 0)
             continue;
 
         if (module->ftable->import_internal == NULL)
@@ -613,7 +613,7 @@ krb5_authdata_import_internal(krb5_context kcontext,
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_free_internal(krb5_context kcontext,
                             krb5_authdata_context context,
-                            krb5_authdatatype type,
+                            const char *module_name,
                             void *ptr)
 {
     int i;
@@ -622,7 +622,7 @@ krb5_authdata_free_internal(krb5_context kcontext,
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
-        if (module->ad_type != type)
+        if (strcmp(module_name, module->name) != 0)
             continue;
 
         if (module->ftable->free_internal == NULL)

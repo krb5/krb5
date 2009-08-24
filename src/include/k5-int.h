@@ -1394,13 +1394,13 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_export_attributes
 krb5_error_code KRB5_CALLCONV krb5_authdata_export_internal
 (krb5_context kcontext,
  krb5_authdata_context context,
- krb5_authdatatype type,
+ const char *module,
  void **ptr);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_import_internal
 (krb5_context kcontext,
  krb5_authdata_context context,
- krb5_authdatatype type,
+ const char *module,
  void *ptr);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_context_copy
@@ -1411,7 +1411,7 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_context_copy
 krb5_error_code KRB5_CALLCONV krb5_authdata_free_internal
 (krb5_context kcontext,
  krb5_authdata_context context,
- krb5_authdatatype type,
+ const char *module,
  void *ptr);
 
 
