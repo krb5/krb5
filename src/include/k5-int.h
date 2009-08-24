@@ -1338,6 +1338,9 @@ struct _krb5_authdata_context {
 
 typedef struct _krb5_authdata_context *krb5_authdata_context;
 
+void KRB5_CALLCONV krb5int_free_data_list
+(krb5_context context, krb5_data *data);
+
 krb5_error_code KRB5_CALLCONV krb5_authdata_request_context_init
 (krb5_context kcontext,
  krb5_authdata_context context,

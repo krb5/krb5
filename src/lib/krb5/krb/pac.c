@@ -461,7 +461,10 @@ k5_pac_validate_client(krb5_context context,
     free(pac_princname);
 
     if (pac_authtime != authtime ||
-	krb5_principal_compare(context, pac_principal, principal) == FALSE)
+	krb5_principal_compare_flags(context,
+				     pac_principal,
+				     principal,
+				     KRB5_PRINCIPAL_COMPARE_IGNORE_REALM) == FALSE)
 	ret = KRB5KRB_AP_WRONG_PRINC;
 
     krb5_free_principal(context, pac_principal);
@@ -1077,11 +1080,22 @@ mspac_get_attribute_types(krb5_context context,
         return 0;
     }
 
-    attrs = (krb5_data *)calloc(pacctx->pac->pac->cBuffers + 1, sizeof(krb5_data));
+    attrs = (krb5_data *)calloc(1 + pacctx->pac->pac->cBuffers + 1, sizeof(krb5_data));
     if (attrs == NULL)
 	return ENOMEM;
 
-    for (i = 0, j = 0; i < pacctx->pac->pac->cBuffers; i++) {
+    j = 0;
+
+    /* The entire PAC */
+    code = krb5int_copy_data_contents(context,
+                                      &mspac_attribute_types[0].attribute,
+                                      &attrs[j++]);
+    if (code != 0) {
+        free(attrs);
+        return code;
+    }
+
+    for (i = 0; i < pacctx->pac->pac->cBuffers; i++) {
 	krb5_data attr;
 
 	code = mspac_type2attr(pacctx->pac->pac->Buffers[i].ulType, &attr);

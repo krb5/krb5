@@ -858,3 +858,18 @@ void krb5_free_fast_armored_req(krb5_context context,
       krb5_free_checksum_contents(context, &val->req_checksum);
     free(val);
 }
+
+void KRB5_CALLCONV
+krb5int_free_data_list(krb5_context context, krb5_data *data)
+{
+    int i;
+
+    if (data == NULL)
+        return;
+
+    for (i = 0; data[i].data != NULL; i++)
+        free(data[i].data);
+
+    free(data);
+}
+

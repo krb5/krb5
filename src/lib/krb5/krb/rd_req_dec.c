@@ -264,24 +264,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	    goto cleanup;
     }
 
-    if (flags & RD_REQ_CHECK_VALID_FLAG) {
-	assert(ad_context != NULL);
-	if ((retval = krb5int_authdata_context_init(context, ad_context)))
-	    goto cleanup;
-	if ((retval = krb5_authdata_request_context_init(context,
-							 *ad_context,
-							 AD_USAGE_AP_REQ)))
-	    goto cleanup;
-	if ((retval = krb5int_verify_authdata(context,
-					      *ad_context,
-					      auth_context,
-					      &decrypt_key,
-					      req,
-					      0)))
-	    goto cleanup;
-    }
-
-    /* XXX this is an evil hack.  check_valid_flag is set iff the call
+   /* XXX this is an evil hack.  check_valid_flag is set iff the call
        is not from inside the kdc.  we can use this to determine which
        key usage to use */
 #ifndef LEAN_CLIENT
@@ -419,6 +402,22 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	retval = KRB5KRB_AP_ERR_TKT_INVALID;
 	goto cleanup;
       }
+
+      assert(ad_context != NULL);
+      if ((retval = krb5int_authdata_context_init(context, ad_context)))
+	goto cleanup;
+      if ((retval = krb5_authdata_request_context_init(context,
+						       *ad_context,
+						       AD_USAGE_AP_REQ)))
+        goto cleanup;
+      if ((retval = krb5int_verify_authdata(context,
+					    *ad_context,
+					    auth_context,
+					    &decrypt_key,
+					    req,
+					    0)))
+        goto cleanup;
+      krb5_authdata_debug(context, *ad_context);
     }
 
     /* read RFC 4537 etype list from sender */

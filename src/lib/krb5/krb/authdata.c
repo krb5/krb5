@@ -40,7 +40,7 @@ static const char *objdirs[] = { LIBDIR "/krb5/plugins/authdata", NULL };
 static krb5plugin_authdata_client_ftable_v0 *authdata_systems[] = { &krb5int_mspac_authdata_client_ftable, NULL };
 
 static inline int
-ad_modules_in_tables_count(krb5plugin_authdata_client_ftable_v0 *table)
+count_ad_modules(krb5plugin_authdata_client_ftable_v0 *table)
 {
     int i;
 
@@ -53,23 +53,88 @@ ad_modules_in_tables_count(krb5plugin_authdata_client_ftable_v0 *table)
     return i;
 }
 
+static krb5_error_code
+init_ad_system(krb5_context kcontext, krb5_authdata_context context,
+               krb5plugin_authdata_client_ftable_v0 *table,
+               int *module_count)
+{
+    int j, k = *module_count;
+    krb5_error_code code;
+    void *plugin_context = NULL;
+    void **rcpp;
+
+    if (table->ad_type_list == NULL) {
+#ifdef DEBUG
+        fprintf(stderr, "warning: module \"%s\" does not advertise any AD types\n", table->name);
+#endif
+        return ENOENT;
+    }
+    if (table->init == NULL)
+        return ENOSYS;
+
+    code = (*table->init)(kcontext, &plugin_context);
+    if (code != 0) {
+#ifdef DEBUG
+        fprintf(stderr, "warning: skipping module \"%s\" which failed to initialize\n", table->name);
+#endif
+        return code;
+    }
+
+    for (j = 0; table->ad_type_list[j] != 0; j++) {
+        context->modules[k].ad_type = table->ad_type_list[j];
+        context->modules[k].plugin_context = plugin_context;
+        if (j == 0)
+            context->modules[k].client_fini = table->fini;
+        else
+            context->modules[k].client_fini = NULL;
+        context->modules[k].ftable = table;
+        context->modules[k].name = table->name;
+        if (table->flags != NULL) {
+            (*table->flags)(kcontext, plugin_context,
+                            context->modules[k].ad_type, &context->modules[k].flags);
+        } else {
+            context->modules[k].flags = 0;
+        }
+        context->modules[k].request_context = NULL;
+        if (j == 0) {
+            context->modules[k].client_req_init = table->request_init;
+            context->modules[k].client_req_fini = table->request_fini;
+            rcpp = &context->modules[k].request_context;
+        } else {
+            context->modules[k].client_req_init = NULL;
+            context->modules[k].client_req_fini = NULL;
+        }
+        context->modules[k].request_context_pp = rcpp;
+
+#ifdef DEBUG
+        fprintf(stderr, "init module \"%s\", ad_type %d, flags %08x\n",
+                context->modules[k].name,
+                context->modules[k].ad_type,
+                context->modules[k].flags);
+#endif
+        k++;
+    }
+    *module_count = k;
+
+    return 0;
+}
+
 krb5_error_code
 krb5int_authdata_context_init(krb5_context kcontext, krb5_authdata_context *pcontext)
 {
-    int n_modules, n_tables, i, j, k;
+    int n_modules, n_tables, i, k;
     void **tables = NULL;
     krb5plugin_authdata_client_ftable_v0 *table;
     krb5_authdata_context context = NULL;
-    void **rcpp = NULL;
-    krb5_error_code code;
     int internal_count = 0;
     struct plugin_dir_handle plugins;
 
     *pcontext = NULL;
+    memset(&plugins, 0, sizeof(plugins));
 
     n_modules = 0;
     for (n_tables = 0; authdata_systems[n_tables] != NULL; n_tables++) {
-        n_modules += ad_modules_in_tables_count(authdata_systems[n_tables]);
+        n_modules += count_ad_modules(authdata_systems[n_tables]);
     }
     internal_count = n_tables;
 
@@ -85,7 +150,7 @@ krb5int_authdata_context_init(krb5_context kcontext, krb5_authdata_context *pcon
     {
         for (; tables[n_tables - internal_count] != NULL; n_tables++) {
             table = tables[n_tables - internal_count];
-            n_modules += ad_modules_in_tables_count(table);
+            n_modules += count_ad_modules(table);
         }
     }
 
@@ -93,12 +158,14 @@ krb5int_authdata_context_init(krb5_context kcontext, krb5_authdata_context *pcon
     if (kcontext == NULL) {
         if (tables != NULL)
             krb5int_free_plugin_dir_data(tables);
+        krb5int_close_plugin_dirs(&context->plugins);
         return ENOMEM;
     }
     context->modules = (struct _krb5_authdata_context_module *)calloc(n_modules, sizeof(context->modules[0]));
     if (context->modules == NULL) {
         if (tables != NULL)
             krb5int_free_plugin_dir_data(tables);
+        krb5int_close_plugin_dirs(&context->plugins);
         free(kcontext);
         return ENOMEM;
     }
@@ -107,65 +174,11 @@ krb5int_authdata_context_init(krb5_context kcontext, krb5_authdata_context *pcon
     /* fill in the structure */
     k = 0;
 
-    for (i = 0; i < n_tables; i++) {
-        void *plugin_context = NULL;
-
-        if (i < internal_count)
-            table = authdata_systems[i];
-        else
-            table = tables[i - internal_count];
-
-        if (table->ad_type_list == NULL) {
-#ifdef DEBUG
-            fprintf(stderr, "warning: module \"%s\" does not advertise any AD types\n", table->name);
-#endif
-            continue;
-        }
-        if (table->init == NULL)
-            continue;
-
-        code = (*table->init)(kcontext, &plugin_context);
-        if (code != 0) {
-#ifdef DEBUG
-            fprintf(stderr, "warning: skipping module \"%s\" which failed to initialize\n", table->name);
-#endif
-            continue;
-        }
-
-        for (j = 0; table->ad_type_list[j] != 0; j++) {
-            context->modules[k].ad_type = table->ad_type_list[j];
-            context->modules[k].plugin_context = plugin_context;
-            if (j == 0)
-                context->modules[k].client_fini = table->fini;
-            else
-                context->modules[k].client_fini = NULL;
-            context->modules[k].ftable = table;
-            context->modules[k].name = table->name;
-            if (table->flags != NULL) {
-                (*table->flags)(kcontext, plugin_context,
-                                context->modules[k].ad_type, &context->modules[k].flags);
-            } else {
-                context->modules[k].flags = 0;
-            }
-            context->modules[k].request_context = NULL;
-            if (j == 0) {
-                context->modules[k].client_req_init = table->request_init;
-                context->modules[k].client_req_fini = table->request_fini;
-                rcpp = &context->modules[k].request_context;
-            } else {
-                context->modules[k].client_req_init = NULL;
-                context->modules[k].client_req_fini = NULL;
-            }
-            context->modules[k].request_context_pp = rcpp;
-
-#ifdef DEBUG
-            fprintf(stderr, "init module \"%s\", ad_type %d, flags %08x\n",
-                    context->modules[k].name,
-                    context->modules[k].ad_type,
-                    context->modules[k].flags);
-#endif
-            k++;
-        }
+    for (i = 0; i < n_tables - internal_count; i++) {
+        (void) init_ad_system(kcontext, context, tables[i], &k);
+    }
+    for (i = 0; i < internal_count; i++) {
+        (void) init_ad_system(kcontext, context, authdata_systems[i], &k);
     }
 
     if (tables != NULL)
@@ -203,9 +216,8 @@ krb5_authdata_context_free(krb5_context kcontext, krb5_authdata_context context)
         context->modules = NULL;
     }
     krb5int_close_plugin_dirs(&context->plugins);
-
+    memset(context, 0, sizeof(*context));
     free(context);
-    context = NULL;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -216,6 +228,7 @@ krb5_authdata_request_context_init(krb5_context kcontext,
     int i;
     krb5_error_code code;
 
+#if 0
     if (context == NULL)
         context = kcontext->authdata_context;
     if (context == NULL) {
@@ -225,6 +238,7 @@ krb5_authdata_request_context_init(krb5_context kcontext,
 
         kcontext->authdata_context = context;
     }
+#endif
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
@@ -255,8 +269,10 @@ krb5_authdata_request_context_fini(krb5_context kcontext,
 {
     int i;
 
+#if 0
     if (context == NULL)
         context = kcontext->authdata_context;
+#endif
     if (context == NULL)
         return;
 
@@ -439,7 +455,6 @@ krb5_authdata_set_attribute(krb5_context kcontext,
     int i;
     krb5_error_code code = ENOENT;
 
-    /* NB at present a plugin is presumed to be authoritative for an attribute */
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
@@ -468,7 +483,6 @@ krb5_authdata_delete_attribute(krb5_context kcontext,
     int i;
     krb5_error_code code = ENOENT;
 
-    /* NB at present a plugin is presumed to be authoritative for an attribute */
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
@@ -579,7 +593,7 @@ krb5_authdata_free_internal(krb5_context kcontext,
         if (module->ad_type != type)
             continue;
 
-        if (module->ftable->free_internal  == NULL)
+        if (module->ftable->free_internal == NULL)
             continue;
 
         (*module->ftable->free_internal)(kcontext,
@@ -592,4 +606,77 @@ krb5_authdata_free_internal(krb5_context kcontext,
 
     return code;
 }
+
+#ifdef DEBUG
+static void
+debug_authdata_attribute(krb5_context kcontext,
+                         krb5_authdata_context context,
+                         const krb5_data *attr)
+{
+    krb5_error_code code;
+    krb5_boolean authenticated, complete;
+    krb5_data value, display_value;
+    int more = -1;
+
+    while (more != 0) {
+        code = krb5_authdata_get_attribute(kcontext, context, attr,
+                                           &authenticated, &complete,
+                                           &value, &display_value, &more);
+        if (code != 0)
+            break;
+
+        fprintf(stderr, "AD Attribute %.*s Value Length %d Disp Value Length %d More %d\n",
+                attr->length, attr->data, value.length, display_value.length, more);
+
+        krb5_free_data_contents(kcontext, &value);
+        krb5_free_data_contents(kcontext, &display_value);
+    }
+}
+
+void
+krb5_authdata_debug(krb5_context kcontext,
+                    krb5_authdata_context context)
+{
+    krb5_error_code code;
+    krb5_data *asserted = NULL;
+    krb5_data *verified = NULL;
+    int i;
+
+#if 0
+    {
+    krb5_data fooattr = { KV5M_DATA, sizeof("mspac:1234"), "mspac:1234" };
+    krb5_data foovalue = { KV5M_DATA, sizeof("abcdefghijklmnop"), "abcdefghijklmnop" };
+
+    code = krb5_authdata_set_attribute(kcontext, context, TRUE, &fooattr, &foovalue);
+    if (code != 0) {
+        fprintf(stderr, "krb5_authdata_debug failed: %s\n",
+                krb5_get_error_message(kcontext, code));
+    }
+    }
+#endif
+
+    code = krb5_authdata_get_attribute_types(kcontext, context,
+                                             &asserted, &verified);
+    if (code != 0) {
+        fprintf(stderr, "krb5_authdata_debug failed: %s\n",
+                krb5_get_error_message(kcontext, code));
+        return;
+    }
+
+    fprintf(stderr, "Asserted attributes:\n");
+    if (asserted != NULL) {
+        for (i = 0; asserted[i].data != NULL; i++) {
+            debug_authdata_attribute(kcontext, context, &asserted[i]);
+        }
+    }
+    fprintf(stderr, "Authenticated attributes:\n");
+    if (verified != NULL) {
+        for (i = 0; verified[i].data != NULL; i++) {
+            debug_authdata_attribute(kcontext, context, &verified[i]);
+        }
+    }
+    krb5int_free_data_list(kcontext, asserted);
+    krb5int_free_data_list(kcontext, verified);
+}
+#endif /* DEBUG */
 

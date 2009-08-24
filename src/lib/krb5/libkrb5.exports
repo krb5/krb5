@@ -538,6 +538,7 @@ krb5int_find_authdata
 krb5int_find_pa_data
 krb5int_foreach_localaddr
 krb5int_free_addrlist
+krb5int_free_data_list
 krb5int_init_context_kdc
 krb5int_initialize_library
 krb5int_pac_sign
