@@ -964,7 +964,18 @@ mspac_request_verify(krb5_context context,
 			   key,
 			   NULL);
 
+#if 0
+    /*
+     * Now, we could return 0 and just set pac->verified to FALSE.
+     * Thoughts?
+     */
+    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
+        assert(pacctx->pac->verified == FALSE);
+        code = 0;
+    }
+#else
     if (pacctx->pac->verified == TRUE || code != 0);
+#endif
 
     return code;
 }
