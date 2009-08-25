@@ -149,6 +149,9 @@ enumerateAttributes(OM_uint32 *minor,
     gss_buffer_set_t asserted = GSS_C_NO_BUFFER_SET;
     gss_buffer_set_t complete = GSS_C_NO_BUFFER_SET;
     unsigned int i;
+    gss_buffer_desc exported_name;
+
+    exported_name.value = NULL;
 
     major = gss_inquire_name(minor,
                              name,
@@ -175,7 +178,26 @@ enumerateAttributes(OM_uint32 *minor,
             dumpAttribute(minor, name, &complete->elements[i]);
     }
 
+    major = gss_export_name_composite(minor,
+                                      name,
+                                      &exported_name);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_export_name_composite", major, minor);
+        goto cleanup;
+    }
+
+    printf("Exported name:\n");
+
+    for (i = 0; i < exported_name.length; i++) {
+        if ((i % 32) == 0)
+            printf("\n");
+        printf("%02x", ((char *)exported_name.value)[i] & 0xFF);
+    }
+
+    printf("\n");
+
 cleanup:
+    gss_release_buffer(&tmp, &exported_name);
     gss_release_oid(&tmp, &mech);
     gss_release_buffer_set(&tmp, &authenticated);
     gss_release_buffer_set(&tmp, &asserted);

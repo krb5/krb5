@@ -1387,6 +1387,12 @@ krb5_authdata_delete_attribute
  krb5_authdata_context context,
  const krb5_data *attribute);
 
+krb5_error_code KRB5_CALLCONV krb5_authdata_import_attributes
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_flags usage,
+ krb5_authdata **pauthdata);
+
 krb5_error_code KRB5_CALLCONV krb5_authdata_export_attributes
 (krb5_context kcontext,
  krb5_authdata_context context,

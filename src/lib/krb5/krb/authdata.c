@@ -309,29 +309,38 @@ request_context_fini(krb5_context kcontext,
 }
 #endif
 
-krb5_error_code
-krb5int_verify_authdata(krb5_context kcontext,
-                        krb5_authdata_context context,
-                        const krb5_auth_context *auth_context,
-                        const krb5_keyblock *key,
-                        const krb5_ap_req *ap_req,
-                        krb5_flags flags)
+static krb5_error_code
+import_verify_authdata_attributes(krb5_context kcontext,
+                                  krb5_authdata_context context,
+                                  krb5_flags usage,
+                                  const krb5_auth_context *auth_context,
+                                  const krb5_keyblock *key,
+                                  const krb5_ap_req *ap_req,
+                                  krb5_authdata **ticket_authdata)
 {
     int i;
     krb5_error_code code;
-    krb5_ticket *ticket = ap_req->ticket;
-    krb5_authenticator *authenticator = (*auth_context)->authentp;
+    krb5_authdata **authen_authdata = NULL;
+
+    if (auth_context != NULL)
+        authen_authdata = (*auth_context)->authentp->authorization_data;
+
+    if (ticket_authdata == NULL)
+        ticket_authdata = ap_req->ticket->enc_part2->authorization_data;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
         krb5_authdata **authdata;
 
-        if (module->ftable->request_verify == NULL)
+        if ((module->flags & usage) == 0)
+            continue;
+
+        if (module->ftable->import_attributes == NULL)
             continue;
 
         code = krb5int_find_authdata(kcontext,
-                                     ticket->enc_part2->authorization_data,
-                                     authenticator->authorization_data,
+                                     ticket_authdata,
+                                     authen_authdata,
                                      module->ad_type,
                                      &authdata);
         if (code != 0 || authdata == NULL)
@@ -339,14 +348,13 @@ krb5int_verify_authdata(krb5_context kcontext,
 
         assert(authdata[0] != NULL);
 
-        code = (*module->ftable->request_verify)(kcontext,
-                                                 module->plugin_context,
-                                                 *(module->request_context_pp),
-                                                 auth_context,
-                                                 key,
-                                                 ap_req,
-                                                 flags,
-                                                 authdata);
+        code = (*module->ftable->import_attributes)(kcontext,
+                                                    module->plugin_context,
+                                                    *(module->request_context_pp),
+                                                    auth_context,
+                                                    key,
+                                                    ap_req,
+                                                    authdata);
         if (code != 0 && (module->flags & AD_INFORMATIONAL))
             code = 0;
         krb5_free_authdata(kcontext, authdata);
@@ -355,6 +363,28 @@ krb5int_verify_authdata(krb5_context kcontext,
     }
 
     return code;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_import_attributes(krb5_context kcontext,
+                                krb5_authdata_context context,
+                                krb5_flags usage,
+                                krb5_authdata **authdata)
+{
+    return import_verify_authdata_attributes(kcontext, context, usage,
+                                             NULL, NULL, NULL, authdata);
+}
+
+krb5_error_code
+krb5int_authdata_verify(krb5_context kcontext,
+                        krb5_authdata_context context,
+                        krb5_flags usage,
+                        const krb5_auth_context *auth_context,
+                        const krb5_keyblock *key,
+                        const krb5_ap_req *ap_req)
+{
+    return import_verify_authdata_attributes(kcontext, context, usage,
+                                             auth_context, key, ap_req, NULL);
 }
 
 static krb5_error_code

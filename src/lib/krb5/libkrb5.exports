@@ -145,6 +145,7 @@ krb5_authdata_set_attribute
 krb5_authdata_export_attributes
 krb5_authdata_export_internal
 krb5_authdata_free_internal
+krb5_authdata_import_attributes
 krb5_build_principal
 krb5_build_principal_ext
 krb5_build_principal_va
