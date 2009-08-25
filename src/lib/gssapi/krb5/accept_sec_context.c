@@ -827,11 +827,14 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
     if ((code = kg_init_name(context, authdat->client,
-                             ad_context, 0, &ctx->there))) {
+                             ad_context, KG_INIT_NAME_NO_COPY, &ctx->there))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
+    /* Now owned by ctx->there */
     authdat->client = NULL;
+    if (ad_context != NULL)
+        krb5_auth_con_set_authdata_context(context, auth_context, NULL);
 
     if ((code = krb5_auth_con_getrecvsubkey(context, auth_context,
                                             &ctx->subkey))) {

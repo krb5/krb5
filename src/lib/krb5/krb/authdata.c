@@ -28,6 +28,8 @@
 #include "authdata.h"
 #include "auth_con.h"
 
+#define DEBUG 1
+
 /* Based on preauth2.c */
 
 #if TARGET_OS_MAC
