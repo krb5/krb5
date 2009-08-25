@@ -584,6 +584,8 @@ krb5_authdata_export_attributes(krb5_context kcontext,
         len += j;
     }
 
+    authdata[len] = NULL;
+
     *pauthdata = authdata;
 
     return code;
@@ -721,78 +723,4 @@ krb5_authdata_context_copy(krb5_context kcontext,
 
     return code;
 }
-
-#ifdef DEBUG
-static void
-debug_authdata_attribute(krb5_context kcontext,
-                         krb5_authdata_context context,
-                         const krb5_data *attr)
-{
-    krb5_error_code code;
-    krb5_boolean authenticated, complete;
-    krb5_data value, display_value;
-    int more = -1;
-
-    while (more != 0) {
-        code = krb5_authdata_get_attribute(kcontext, context, attr,
-                                           &authenticated, &complete,
-                                           &value, &display_value, &more);
-        if (code != 0)
-            break;
-
-        fprintf(stderr, "AD Attribute %.*s Value Length %d "
-                "Disp Value Length %d More %d\n",
-                attr->length, attr->data, value.length, display_value.length, more);
-
-        krb5_free_data_contents(kcontext, &value);
-        krb5_free_data_contents(kcontext, &display_value);
-    }
-}
-
-void
-krb5_authdata_debug(krb5_context kcontext,
-                    krb5_authdata_context context)
-{
-    krb5_error_code code;
-    krb5_data *asserted = NULL;
-    krb5_data *verified = NULL;
-    int i;
-
-#if 0
-    {
-    krb5_data fooattr = { KV5M_DATA, sizeof("mspac:1234"), "mspac:1234" };
-    krb5_data foovalue = { KV5M_DATA, sizeof("abcdefghijklmnop"), "abcdefghijklmnop" };
-
-    code = krb5_authdata_set_attribute(kcontext, context, TRUE, &fooattr, &foovalue);
-    if (code != 0) {
-        fprintf(stderr, "krb5_authdata_debug failed: %s\n",
-                krb5_get_error_message(kcontext, code));
-    }
-    }
-#endif
-
-    code = krb5_authdata_get_attribute_types(kcontext, context,
-                                             &asserted, &verified);
-    if (code != 0) {
-        fprintf(stderr, "krb5_authdata_debug failed: %s\n",
-                krb5_get_error_message(kcontext, code));
-        return;
-    }
-
-    fprintf(stderr, "Asserted attributes:\n");
-    if (asserted != NULL) {
-        for (i = 0; asserted[i].data != NULL; i++) {
-            debug_authdata_attribute(kcontext, context, &asserted[i]);
-        }
-    }
-    fprintf(stderr, "Authenticated attributes:\n");
-    if (verified != NULL) {
-        for (i = 0; verified[i].data != NULL; i++) {
-            debug_authdata_attribute(kcontext, context, &verified[i]);
-        }
-    }
-    krb5int_free_data_list(kcontext, asserted);
-    krb5int_free_data_list(kcontext, verified);
-}
-#endif /* DEBUG */
 

@@ -615,14 +615,113 @@ krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
 
 }
 
-#if 0
 OM_uint32
 krb5_gss_export_name_composite(OM_uint32 *minor_status,
                                gss_name_t name,
                                gss_buffer_t exp_composite_name)
 {
+    krb5_context context;
+    krb5_error_code code;
+    krb5_gss_name_t kname;
+    krb5_authdata **authdata = NULL;
+    krb5_data *enc_authdata = NULL;
+    char *princstr = NULL, *cp;
+    size_t princlen;
+
+    if (minor_status != NULL)
+        *minor_status = 0;
+
+    code = krb5_gss_init_context(&context);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
+    if (!kg_validate_name(name)) {
+        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
+        krb5_free_context(context);
+        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
+    }
+
+    kname = (krb5_gss_name_t)name;
+
+    code = k5_mutex_lock(&kname->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
+    if (kname->ad_context == NULL) {
+        code = ENOENT;
+        goto cleanup;
+    }
+
+    code = krb5_unparse_name(context, kname->princ, &princstr);
+    if (code != 0)
+        goto cleanup;
+
+    princlen = strlen(princstr);
+
+    code = krb5_authdata_export_attributes(context,
+                                           kname->ad_context,
+                                           AD_USAGE_AP_REQ,
+                                           &authdata);
+    if (code != 0)
+        goto cleanup;
+
+    if (authdata != NULL) {
+        code = encode_krb5_authdata(authdata, &enc_authdata);
+        if (code != 0)
+            goto cleanup;
+    }
+
+    /* 04 02 OID Name AuthData */
+
+    exp_composite_name->length = 14 + princlen +
+        (enc_authdata != NULL ? enc_authdata->length : 0) +
+        gss_mech_krb5->length;
+    exp_composite_name->value = malloc(exp_composite_name->length);
+    if (exp_composite_name->value == NULL) {
+        code = ENOMEM;
+        goto cleanup;
+    }
+
+    cp = exp_composite_name->value;
+
+    /* Note: we assume the OID will be less than 128 bytes... */
+    *cp++ = 0x04;
+    *cp++ = 0x02;
+
+    store_16_be(gss_mech_krb5->length + 2, cp);
+    cp += 2;
+    *cp++ = 0x06;
+    *cp++ = (gss_mech_krb5->length) & 0xFF;
+    memcpy(cp, gss_mech_krb5->elements, gss_mech_krb5->length);
+    cp += gss_mech_krb5->length;
+
+    store_32_be(princlen, cp);
+    cp += 4;
+    memcpy(cp, princstr, princlen);
+    cp += princlen;
+
+    if (enc_authdata != NULL) {
+        store_32_be(enc_authdata->length, cp);
+        cp += 4;
+        memcpy(cp, enc_authdata->data, enc_authdata->length);
+        cp += enc_authdata->length;
+    }
+
+cleanup:
+    krb5_free_unparsed_name(context, princstr);
+    krb5_free_data(context, enc_authdata);
+    krb5_free_authdata(context, authdata);
+    k5_mutex_unlock(&kname->lock);
+    krb5_free_context(context);
+
+    return kg_map_name_error(minor_status, code);
 }
 
+#if 0
 OM_uint32
 krb5_gss_display_name_ext(OM_uint32 *minor_status,
                           gss_name_t name,

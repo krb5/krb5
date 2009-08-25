@@ -1303,6 +1303,10 @@ mspac_export_attributes(krb5_context context,
     authdata[0]->length = data.length;
     authdata[0]->contents = (krb5_octet *)data.data;
 
+    authdata[1] = NULL;
+
+    *out_authdata = authdata;
+
     return 0;
 }
 
