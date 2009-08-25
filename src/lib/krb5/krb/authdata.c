@@ -532,6 +532,9 @@ krb5_authdata_export_attributes(krb5_context kcontext,
         krb5_authdata **authdata2 = NULL;
         int j;
 
+        if ((module->flags & flags) == 0)
+            continue;
+
         if (module->ftable->export_attributes == NULL)
             continue;
 
@@ -566,6 +569,7 @@ krb5_authdata_export_attributes(krb5_context kcontext,
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_export_internal(krb5_context kcontext,
                               krb5_authdata_context context,
+                              krb5_boolean restrict_authenticated,
                               const char *module_name,
                               void **ptr)
 {
@@ -586,6 +590,7 @@ krb5_authdata_export_internal(krb5_context kcontext,
         code = (*module->ftable->export_internal)(kcontext,
                                                   module->plugin_context,
                                                   *(module->request_context_pp),
+                                                  restrict_authenticated,
                                                   ptr);
 
         break;
@@ -695,6 +700,7 @@ import_export_authdata(krb5_context kcontext,
     code = (*src_module->ftable->export_internal)(kcontext,
                                                   src_module->plugin_context,
                                                   *(src_module->request_context_pp),
+                                                  FALSE,
                                                   &ptr);
     if (code != 0)
         return code;

@@ -683,6 +683,14 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_unwrap_iov,
     krb5_gss_wrap_iov_length,
     NULL,               /* complete_auth_token */
+    NULL,               /* display_name_ext */
+    krb5_gss_inquire_name,
+    krb5_gss_get_name_attribute,
+    krb5_gss_set_name_attribute,
+    krb5_gss_delete_name_attribute,
+    NULL,               /* export_name_composite */
+    krb5_gss_map_name_to_any,
+    krb5_gss_release_any_name_mapping,
 };
 
 

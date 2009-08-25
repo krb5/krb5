@@ -136,6 +136,7 @@ krb5_auth_to_rep
 krb5_authdata_context_copy
 krb5_authdata_context_free
 krb5_authdata_context_init
+krb5_authdata_delete_attribute
 krb5_authdata_get_attribute_types
 krb5_authdata_get_attribute
 krb5_authdata_set_attribute

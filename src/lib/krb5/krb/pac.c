@@ -916,15 +916,9 @@ mspac_fini(krb5_context context, void *plugin_context)
 static krb5_error_code
 mspac_request_init(krb5_context context,
 		   void *plugin_context,
-		   krb5_flags usage,
 		   void **request_context)
 {
     struct mspac_context *pacctx;
-
-    if ((usage & AD_USAGE_AP_REQ) == 0) {
-	*request_context = NULL;
-	return 0;
-    }
 
     pacctx = (struct mspac_context *)malloc(sizeof(*pacctx));
     if (pacctx == NULL)
@@ -1149,8 +1143,10 @@ mspac_get_attribute(krb5_context context,
     value->data = NULL;
     value->length = 0;
 
-    display_value->data = NULL;
-    display_value->length = 0;
+    if (display_value != NULL) {
+        display_value->data = NULL;
+        display_value->length = 0;
+    }
 
     if (*more != -1 || pacctx->pac == NULL)
 	return ENOENT;
@@ -1160,10 +1156,19 @@ mspac_get_attribute(krb5_context context,
 	return code;
 
     /* -1 is a magic type that refers to the entire PAC */
-    if (type == (krb5_ui_4)-1)
-	code = krb5int_copy_data_contents(context, &pacctx->pac->data, value);
-    else
-	code = krb5_pac_get_buffer(context, pacctx->pac, type, value);
+    if (type == (krb5_ui_4)-1) {
+        if (value != NULL)
+	    code = krb5int_copy_data_contents(context,
+                                              &pacctx->pac->data,
+                                              value);
+        else
+            code = 0;
+    } else {
+        if (value != NULL)
+	    code = krb5_pac_get_buffer(context, pacctx->pac, type, value);
+        else
+            code = k5_pac_locate_buffer(context, pacctx->pac, type, NULL);
+    }
     if (code == 0) {
 	*authenticated = pacctx->pac->verified;
 	*complete = TRUE;
@@ -1214,6 +1219,7 @@ static krb5_error_code
 mspac_export_attributes(krb5_context context,
 			void *plugin_context,
 			void *request_context,
+			krb5_flags usage,
 			krb5_authdata ***out_authdata)
 {
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
@@ -1253,14 +1259,20 @@ static krb5_error_code
 mspac_export_internal(krb5_context context,
 		      void *plugin_context,
 		      void *request_context,
+                      krb5_boolean restrict_authenticated,
 		      void **ptr)
 {
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
     krb5_error_code code;
     krb5_pac pac;
 
+    *ptr = NULL;
+
     if (pacctx->pac == NULL)
-	return EINVAL;
+	return 0;
+
+    if (restrict_authenticated && (pacctx->pac->verified) == FALSE)
+        return 0;
 
     code = krb5_pac_parse(context, pacctx->pac->data.data,
 	                  pacctx->pac->data.length, &pac);

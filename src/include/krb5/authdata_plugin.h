@@ -238,6 +238,7 @@ typedef krb5_error_code
 (*authdata_client_export_internal_proc)(krb5_context context,
 					void *plugin_context,
 					void *request_context,
+					krb5_boolean restrict_authenticated,
 					void **ptr);
 
 /* NB: this takes ownership of ptr */

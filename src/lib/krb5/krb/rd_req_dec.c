@@ -410,7 +410,6 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 					    req,
 					    0)))
         goto cleanup;
-      krb5_authdata_debug(context, *ad_context);
     }
 
     /* read RFC 4537 etype list from sender */

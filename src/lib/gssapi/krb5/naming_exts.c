@@ -189,7 +189,7 @@ kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
 OM_uint32
 krb5_gss_inquire_name(OM_uint32 *minor_status,
                       gss_name_t name,
-                      int name_is_MN,
+                      int *name_is_MN,
                       gss_OID *MN_mech,
                       gss_buffer_set_t *authenticated,
                       gss_buffer_set_t *asserted,
@@ -306,18 +306,24 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
                                        &kattr,
                                        &kauthenticated,
                                        &kcomplete,
-                                       &kvalue,
-                                       &kdisplay_value,
+                                       value ? &kvalue : NULL,
+                                       display_value ? &kdisplay_value : NULL,
                                        more);
     if (code == 0) {
-        value->value = kvalue.data;
-        value->length = kvalue.length;
+        if (value != NULL) {
+            value->value = kvalue.data;
+            value->length = kvalue.length;
+        }
 
-        *authenticated = kauthenticated;
-        *complete = kcomplete;
+        if (authenticated != NULL)
+            *authenticated = kauthenticated;
+        if (complete != NULL)
+            *complete = kcomplete;
 
-        display_value->value = kvalue.data;
-        display_value->length = kvalue.length;
+        if (display_value != NULL) {
+            display_value->value = kdisplay_value.data;
+            display_value->length = kdisplay_value.length;
+        }
     }
 
     krb5_free_context(context);
@@ -460,6 +466,7 @@ krb5_gss_map_name_to_any(OM_uint32 *minor_status,
 
     code = krb5_authdata_export_internal(context,
                                          kname->ad_context,
+                                         authenticated,
                                          kmodule,
                                          (void **)output);
 

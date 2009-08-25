@@ -1396,6 +1396,7 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_export_attributes
 krb5_error_code KRB5_CALLCONV krb5_authdata_export_internal
 (krb5_context kcontext,
  krb5_authdata_context context,
+ krb5_boolean restrict_authenticated,
  const char *module,
  void **ptr);
 
