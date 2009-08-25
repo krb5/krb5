@@ -589,9 +589,9 @@ fail:
         if (ctx_free->auth_context)
             krb5_auth_con_free(context, ctx_free->auth_context);
         if (ctx_free->here)
-            kg_release_name(context, &ctx_free->here);
+            kg_release_name(context, 0, &ctx_free->here);
         if (ctx_free->there)
-            kg_release_name(context, &ctx_free->there);
+            kg_release_name(context, 0, &ctx_free->there);
         if (ctx_free->subkey)
             krb5_free_keyblock(context, ctx_free->subkey);
         xfree(ctx_free);

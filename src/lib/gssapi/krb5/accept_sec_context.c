@@ -1097,13 +1097,13 @@ fail:
         if (deleg_cred->ccache)
             (void)krb5_cc_close(context, deleg_cred->ccache);
         if (deleg_cred->name)
-            kg_release_name(context, &deleg_cred->name);
+            kg_release_name(context, 0, &deleg_cred->name);
         xfree(deleg_cred);
     }
     if (token.value)
         xfree(token.value);
     if (name) {
-        (void) kg_release_name(context, &name);
+        (void) kg_release_name(context, 0, &name);
     }
 
     *minor_status = code;

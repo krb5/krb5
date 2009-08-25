@@ -169,7 +169,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
                                                             &mechs)))) {
             k5_mutex_unlock(&cred->lock);
             if (ret_name)
-                kg_release_name(context, &ret_name);
+                kg_release_name(context, KG_INIT_NAME_INTERN, &ret_name);
             /* *minor_status set above */
             goto fail;
         }

@@ -88,9 +88,9 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
         krb5_free_keyblock(context, ctx->seq);
 
     if (ctx->here)
-        kg_release_name(context, &ctx->here);
+        kg_release_name(context, 0, &ctx->here);
     if (ctx->there)
-        kg_release_name(context, &ctx->there);
+        kg_release_name(context, 0, &ctx->there);
     if (ctx->subkey)
         krb5_free_keyblock(context, ctx->subkey);
     if (ctx->acceptor_subkey)

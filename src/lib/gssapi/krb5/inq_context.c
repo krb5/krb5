@@ -145,7 +145,9 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
                                       ctx->initiate?ctx->there:ctx->here,
                                       KG_INIT_NAME_INTERN,
                                       &acceptor))) {
-            if (initiator) kg_release_name(context, &initiator);
+            if (initiator)
+                kg_release_name(context, KG_INIT_NAME_INTERN,
+                                &initiator);
             *minor_status = code;
             save_error_info(*minor_status, context);
             return(GSS_S_FAILURE);

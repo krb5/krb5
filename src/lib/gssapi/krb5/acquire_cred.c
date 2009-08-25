@@ -575,7 +575,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
                                        &(cred->name), cred))
             != GSS_S_COMPLETE) {
             if (cred->name)
-                kg_release_name(context, &cred->name);
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             /* minor_status set by acquire_accept_cred() */
@@ -601,7 +601,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
                 krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
             if (cred->name)
-                kg_release_name(context, &cred->name);
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             /* minor_status set by acquire_init_cred() */
@@ -648,7 +648,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
                 (void)krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
             if (cred->name)
-                kg_release_name(context, &cred->name);
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             *minor_status = code;
@@ -681,7 +681,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
                 (void)krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
             if (cred->name)
-                kg_release_name(context, &cred->name);
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             /* *minor_status set above */
@@ -702,7 +702,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
             (void)krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
         if (cred->name)
-            kg_release_name(context, &cred->name);
+            kg_release_name(context, 0, &cred->name);
         k5_mutex_destroy(&cred->lock);
         xfree(cred);
         *minor_status = (OM_uint32) G_VALIDATE_FAILED;

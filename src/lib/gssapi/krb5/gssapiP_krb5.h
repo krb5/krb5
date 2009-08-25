@@ -807,6 +807,7 @@ kg_init_name(krb5_context context,
 
 krb5_error_code
 kg_release_name(krb5_context context,
+                krb5_flags flags,
                 krb5_gss_name_t *name);
 
 krb5_error_code

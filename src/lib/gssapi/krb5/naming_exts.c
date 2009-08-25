@@ -78,27 +78,22 @@ kg_init_name(krb5_context context,
     code = 0;
 
 cleanup:
-    if (code != 0) {
-        if (*name != NULL) {
-            krb5_free_principal(context, (*name)->princ);
-            krb5_authdata_context_free(context, (*name)->ad_context);
-            free(*name);
-            *name = NULL;
-        }
-    }
+    if (code != 0)
+        kg_release_name(context, 0, name);
 
     return code;
 }
 
 krb5_error_code
 kg_release_name(krb5_context context,
+                krb5_flags flags,
                 krb5_gss_name_t *name)
 {
     if (*name != NULL) {
-        if ((*name)->princ != NULL)
-            krb5_free_principal(context, (*name)->princ);
-        if ((*name)->ad_context != NULL)
-            krb5_authdata_context_free(context, (*name)->ad_context);
+        if (flags & KG_INIT_NAME_INTERN)
+            kg_delete_name((gss_name_t)*name);
+        krb5_free_principal(context, (*name)->princ);
+        krb5_authdata_context_free(context, (*name)->ad_context);
         free(*name);
         *name = NULL;
     }
@@ -206,7 +201,9 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
     krb5_gss_name_t kname;
     krb5_data *kauthenticated = NULL;
     krb5_data *kasserted = NULL;
+#if 0
     krb5_data *kcomplete = NULL;
+#endif
 
     if (minor_status != NULL)
         *minor_status = 0;
@@ -315,7 +312,7 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
                                        more);
     if (code == 0) {
         value->value = kvalue.data;
-            value->length = kvalue.length;
+        value->length = kvalue.length;
 
         *authenticated = kauthenticated;
         *complete = kcomplete;
