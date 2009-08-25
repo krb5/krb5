@@ -257,7 +257,15 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_wrap_iov,
 	spnego_gss_unwrap_iov,
 	spnego_gss_wrap_iov_length,
-	spnego_gss_complete_auth_token
+	spnego_gss_complete_auth_token,
+	spnego_gss_display_name_ext,
+	spnego_gss_inquire_name,
+	spnego_gss_get_name_attribute,
+	spnego_gss_set_name_attribute,
+	spnego_gss_delete_name_attribute,
+	spnego_gss_export_name_composite,
+	spnego_gss_map_name_to_any,
+	spnego_gss_release_any_name_mapping,
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -2207,6 +2215,133 @@ spnego_gss_complete_auth_token(
 	ret = gss_complete_auth_token(minor_status,
 				      context_handle,
 				      input_message_buffer);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_display_name_ext(OM_uint32 *minor_status,
+			    gss_name_t name,
+			    gss_OID display_as_name_type,
+			    gss_buffer_t display_name)
+{
+	OM_uint32 ret;
+	ret = gss_display_name_ext(minor_status,
+				   name,
+				   display_as_name_type,
+				   display_name);
+	return (ret);
+}
+
+
+OM_uint32
+spnego_gss_inquire_name(OM_uint32 *minor_status,
+			gss_name_t name,
+			int *name_is_MN,
+			gss_OID *MN_mech,
+			gss_buffer_set_t *authenticated,
+			gss_buffer_set_t *asserted,
+			gss_buffer_set_t *complete)
+{
+	OM_uint32 ret;
+	ret = gss_inquire_name(minor_status,
+			       name,
+			       name_is_MN,
+			       MN_mech,
+			       authenticated,
+			       asserted,
+			       complete);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_get_name_attribute(OM_uint32 *minor_status,
+			      gss_name_t name,
+			      gss_buffer_t attr,
+			      int *authenticated,
+			      int *complete,
+			      gss_buffer_t value,
+			      gss_buffer_t display_value,
+			      int *more)
+{
+	OM_uint32 ret;
+	ret = gss_get_name_attribute(minor_status,
+				     name,
+				     attr,
+				     authenticated,
+				     complete,
+				     value,
+				     display_value,
+				     more);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_set_name_attribute(OM_uint32 *minor_status,
+			      gss_name_t name,
+			      int complete,
+			      gss_buffer_t attr,
+			      gss_buffer_t value)
+{
+	OM_uint32 ret;
+	ret = gss_set_name_attribute(minor_status,
+				     name,
+				     complete,
+				     attr,
+				     value);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_delete_name_attribute(OM_uint32 *minor_status,
+				 gss_name_t name,
+				 gss_buffer_t attr)
+{
+	OM_uint32 ret;
+	ret = gss_delete_name_attribute(minor_status,
+					name,
+					attr);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_export_name_composite(OM_uint32 *minor_status,
+				 gss_name_t name,
+				 gss_buffer_t exp_composite_name)
+{
+	OM_uint32 ret;
+	ret = gss_export_name_composite(minor_status,
+					name,
+					exp_composite_name);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_map_name_to_any(OM_uint32 *minor_status,
+			   gss_name_t name,
+			   int authenticated,
+			   gss_buffer_t type_id,
+			   gss_any_t *output)
+{
+	OM_uint32 ret;
+	ret = gss_map_name_to_any(minor_status,
+				  name,
+				  authenticated,
+				  type_id,
+				  output);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_release_any_name_mapping(OM_uint32 *minor_status,
+				    gss_name_t name,
+				    gss_buffer_t type_id,
+				    gss_any_t *input)
+{
+	OM_uint32 ret;
+	ret = gss_release_any_name_mapping(minor_status,
+					   name,
+					   type_id,
+					   input);
 	return (ret);
 }
 
