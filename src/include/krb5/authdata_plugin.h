@@ -178,7 +178,6 @@ typedef void
 typedef krb5_error_code
 (*authdata_client_request_init_proc)(krb5_context context,
 				     void *plugin_context,
-                                     krb5_flags usage,
 				     void **request_context);
 
 typedef void
@@ -232,6 +231,7 @@ typedef krb5_error_code
 (*authdata_client_export_attributes_proc)(krb5_context context,
 					  void *plugin_context,
 					  void *request_context,
+					  krb5_flags usage,
 					  krb5_authdata ***authdata);
 
 typedef krb5_error_code

@@ -28,7 +28,6 @@
  */
 
 #include <assert.h>
-#include "k5-platform.h"        /* for 64-bit support */
 #include "k5-int.h"          /* for zap() */
 #include "gssapiP_krb5.h"
 #include <stdarg.h>

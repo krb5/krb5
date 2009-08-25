@@ -1341,13 +1341,14 @@ typedef struct _krb5_authdata_context *krb5_authdata_context;
 void KRB5_CALLCONV krb5int_free_data_list
 (krb5_context context, krb5_data *data);
 
+#if 0
 krb5_error_code KRB5_CALLCONV krb5_authdata_request_context_init
 (krb5_context kcontext,
- krb5_authdata_context context,
  krb5_flags usage);
 
 void KRB5_CALLCONV krb5_authdata_request_context_fini
 (krb5_context kcontext, krb5_authdata_context context);
+#endif
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_context_init
 (krb5_context kcontext, krb5_authdata_context *pcontext);
@@ -1389,6 +1390,7 @@ krb5_authdata_delete_attribute
 krb5_error_code KRB5_CALLCONV krb5_authdata_export_attributes
 (krb5_context kcontext,
  krb5_authdata_context context,
+ krb5_flags usage,
  krb5_authdata ***pauthdata);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_export_internal
@@ -1458,9 +1460,6 @@ struct _krb5_context {
     /* preauth module stuff */
     struct plugin_dir_handle preauth_plugins;
     krb5_preauth_context *preauth_context;
-
-    /* authdata module stuff (for {AS,TGS}-REQ) */
-    krb5_authdata_context authdata_context;
 
     /* error detail info */
     struct errinfo err;

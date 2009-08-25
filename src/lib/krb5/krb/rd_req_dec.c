@@ -403,10 +403,6 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
       assert(ad_context != NULL);
       if ((retval = krb5_authdata_context_init(context, ad_context)))
 	goto cleanup;
-      if ((retval = krb5_authdata_request_context_init(context,
-						       *ad_context,
-						       AD_USAGE_AP_REQ)))
-        goto cleanup;
       if ((retval = krb5int_verify_authdata(context,
 					    *ad_context,
 					    auth_context,
