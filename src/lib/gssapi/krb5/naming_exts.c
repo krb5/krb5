@@ -44,12 +44,15 @@ kg_init_name(krb5_context context,
     if (principal == NULL)
         return EINVAL;
 
-    *name = (krb5_gss_name_t)xmalloc(sizeof(krb5_gss_name_rec));
+    *name = xmalloc(sizeof(krb5_gss_name_rec));
     if (*name == NULL) {
         return ENOMEM;
     }
-    (*name)->princ = NULL;
-    (*name)->ad_context = NULL;
+    memset(*name, 0, sizeof(krb5_gss_name_rec));
+
+    code = k5_mutex_init(&(*name)->lock);
+    if (code != 0)
+        goto cleanup;
 
     if ((flags & KG_INIT_NAME_NO_COPY) == 0) {
         code = krb5_copy_principal(context, principal, &(*name)->princ);
@@ -93,6 +96,7 @@ kg_release_name(krb5_context context,
             kg_delete_name((gss_name_t)*name);
         krb5_free_principal(context, (*name)->princ);
         krb5_authdata_context_free(context, (*name)->ad_context);
+        k5_mutex_destroy(&(*name)->lock);
         free(*name);
         *name = NULL;
     }
@@ -155,9 +159,11 @@ kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
     data = *pdata;
 
     if (data == NULL) {
-        *buffer_set = GSS_C_NO_BUFFER_SET;
+        if (buffer_set != NULL)
+            *buffer_set = GSS_C_NO_BUFFER_SET;
         return 0;
-    }
+    } else if (buffer_set == NULL)
+        return EINVAL;
 
     if (GSS_ERROR(gss_create_empty_buffer_set(&minor_status,
                                               &set)))
@@ -207,9 +213,13 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
     if (minor_status != NULL)
         *minor_status = 0;
 
-    *authenticated = GSS_C_NO_BUFFER_SET;
-    *asserted = GSS_C_NO_BUFFER_SET;
+    if (authenticated != NULL)
+        *authenticated = GSS_C_NO_BUFFER_SET;
+    if (asserted != NULL)
+        *asserted = GSS_C_NO_BUFFER_SET;
+#if 0
     *complete = GSS_C_NO_BUFFER_SET;
+#endif
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {
@@ -224,9 +234,17 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
     }
 
     kname = (krb5_gss_name_t)name;
+
+    code = k5_mutex_lock(&kname->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
     if (kname->ad_context == NULL) {
-        krb5_free_context(context);
-        return GSS_S_UNAVAILABLE;
+        code = krb5_authdata_context_init(context, &kname->ad_context);
+        if (code != 0)
+            goto cleanup;
     }
 
     code = krb5_authdata_get_attribute_types(context,
@@ -247,6 +265,7 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
         goto cleanup;
 
 cleanup:
+    k5_mutex_unlock(&kname->lock);
     krb5int_free_data_list(context, kasserted);
     krb5int_free_data_list(context, kauthenticated);
 
@@ -290,9 +309,22 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
     }
 
     kname = (krb5_gss_name_t)name;
-    if (kname->ad_context == NULL) {
+
+    code = k5_mutex_lock(&kname->lock);
+    if (code != 0) {
+        *minor_status = code;
         krb5_free_context(context);
-        return GSS_S_UNAVAILABLE;
+        return GSS_S_FAILURE;
+    }
+
+    if (kname->ad_context == NULL) {
+        code = krb5_authdata_context_init(context, &kname->ad_context);
+        if (code != 0) {
+            *minor_status = code;
+            k5_mutex_unlock(&kname->lock);
+            krb5_free_context(context);
+            return GSS_S_UNAVAILABLE;
+        }
     }
 
     kattr.data = (char *)attr->value;
@@ -326,6 +358,7 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
         }
     }
 
+    k5_mutex_unlock(&kname->lock);
     krb5_free_context(context);
 
     return kg_map_name_error(minor_status, code);
@@ -360,9 +393,21 @@ krb5_gss_set_name_attribute(OM_uint32 *minor_status,
     }
 
     kname = (krb5_gss_name_t)name;
+
+    code = k5_mutex_lock(&kname->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
     if (kname->ad_context == NULL) {
-        krb5_free_context(context);
-        return GSS_S_UNAVAILABLE;
+        code = krb5_authdata_context_init(context, &kname->ad_context);
+        if (code != 0) {
+            *minor_status = code;
+            k5_mutex_unlock(&kname->lock);
+            krb5_free_context(context);
+            return GSS_S_UNAVAILABLE;
+        }
     }
 
     kattr.data = (char *)attr->value;
@@ -377,6 +422,7 @@ krb5_gss_set_name_attribute(OM_uint32 *minor_status,
                                        &kattr,
                                        &kvalue);
 
+    k5_mutex_unlock(&kname->lock);
     krb5_free_context(context);
 
     return kg_map_name_error(minor_status, code);
@@ -408,9 +454,21 @@ krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
     }
 
     kname = (krb5_gss_name_t)name;
+
+    code = k5_mutex_lock(&kname->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
     if (kname->ad_context == NULL) {
-        krb5_free_context(context);
-        return GSS_S_UNAVAILABLE;
+        code = krb5_authdata_context_init(context, &kname->ad_context);
+        if (code != 0) {
+            *minor_status = code;
+            k5_mutex_unlock(&kname->lock);
+            krb5_free_context(context);
+            return GSS_S_UNAVAILABLE;
+        }
     }
 
     kattr.data = (char *)attr->value;
@@ -420,6 +478,7 @@ krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
                                           kname->ad_context,
                                           &kattr);
 
+    k5_mutex_unlock(&kname->lock);
     krb5_free_context(context);
 
     return kg_map_name_error(minor_status, code);
@@ -453,13 +512,26 @@ krb5_gss_map_name_to_any(OM_uint32 *minor_status,
     }
 
     kname = (krb5_gss_name_t)name;
+
+    code = k5_mutex_lock(&kname->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
     if (kname->ad_context == NULL) {
-        krb5_free_context(context);
-        return GSS_S_UNAVAILABLE;
+        code = krb5_authdata_context_init(context, &kname->ad_context);
+        if (code != 0) {
+            *minor_status = code;
+            k5_mutex_unlock(&kname->lock);
+            krb5_free_context(context);
+            return GSS_S_UNAVAILABLE;
+        }
     }
 
     kmodule = (char *)type_id->value;
     if (kmodule[type_id->length] != '\0') {
+        k5_mutex_unlock(&kname->lock);
         krb5_free_context(context);
         return GSS_S_UNAVAILABLE;
     }
@@ -470,6 +542,7 @@ krb5_gss_map_name_to_any(OM_uint32 *minor_status,
                                          kmodule,
                                          (void **)output);
 
+    k5_mutex_unlock(&kname->lock);
     krb5_free_context(context);
 
     return kg_map_name_error(minor_status, code);
@@ -502,13 +575,26 @@ krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
     }
 
     kname = (krb5_gss_name_t)name;
+
+    code = k5_mutex_lock(&kname->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
     if (kname->ad_context == NULL) {
-        krb5_free_context(context);
-        return GSS_S_UNAVAILABLE;
+        code = krb5_authdata_context_init(context, &kname->ad_context);
+        if (code != 0) {
+            *minor_status = code;
+            k5_mutex_unlock(&kname->lock);
+            krb5_free_context(context);
+            return GSS_S_UNAVAILABLE;
+        }
     }
 
     kmodule = (char *)type_id->value;
     if (kmodule[type_id->length] != '\0') {
+        k5_mutex_unlock(&kname->lock);
         krb5_free_context(context);
         return GSS_S_UNAVAILABLE;
     }
@@ -520,6 +606,7 @@ krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
     if (code == 0)
         *input = NULL;
 
+    k5_mutex_unlock(&kname->lock);
     krb5_free_context(context);
 
     return kg_map_name_error(minor_status, code);
@@ -541,5 +628,5 @@ krb5_gss_display_name_ext(OM_uint32 *minor_status,
                           gss_buffer_t display_name)
 {
 }
-
 #endif
+

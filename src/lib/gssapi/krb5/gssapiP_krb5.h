@@ -154,6 +154,7 @@ enum qop {
 /** internal types **/
 
 typedef struct _krb5_gss_name_rec {
+    k5_mutex_t lock;
     krb5_principal princ;
     krb5_authdata_context ad_context;
 } krb5_gss_name_rec, *krb5_gss_name_t;
