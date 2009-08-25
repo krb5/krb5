@@ -105,6 +105,7 @@ krb5_appdefault_string
 krb5_auth_con_free
 krb5_auth_con_genaddrs
 krb5_auth_con_get_checksum_func
+krb5_auth_con_get_authdata_context
 krb5_auth_con_getaddrs
 krb5_auth_con_getauthenticator
 krb5_auth_con_getflags
@@ -120,6 +121,7 @@ krb5_auth_con_getremotesubkey
 krb5_auth_con_getsendsubkey
 krb5_auth_con_init
 krb5_auth_con_initivector
+krb5_auth_con_set_authdata_context
 krb5_auth_con_set_checksum_func
 krb5_auth_con_set_req_cksumtype
 krb5_auth_con_set_safe_cksumtype
@@ -457,7 +459,6 @@ krb5_rd_rep_dce
 krb5_rd_req
 krb5_rd_req_decoded
 krb5_rd_req_decoded_anyflag
-krb5_rd_req_extended
 krb5_rd_safe
 krb5_read_message
 krb5_read_password

@@ -536,11 +536,11 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
-    if ((code = krb5_rd_req_extended(context, &auth_context, &ap_req,
-                                     cred->name->princ,
-                                     cred->keytab, RD_REQ_CHECK_VALID_FLAG,
-                                     &ap_req_options,
-                                     &ticket, &ad_context))) {
+    if ((code = krb5_rd_req(context, &auth_context, &ap_req,
+                            cred->name->princ,
+                            cred->keytab,
+                            &ap_req_options,
+                            &ticket))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
@@ -821,14 +821,17 @@ kg_accept_krb5(minor_status, context_handle,
         major_status = GSS_S_FAILURE;
         goto fail;
     }
-
+    if ((code = krb5_auth_con_get_authdata_context(context, auth_context,
+                                                   &ad_context))) {
+        major_status = GSS_S_FAILURE;
+        goto fail;
+    }
     if ((code = kg_init_name(context, authdat->client,
-                             ad_context, KG_INIT_NAME_NO_COPY, &ctx->there))) {
+                             ad_context, 0, &ctx->there))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
     authdat->client = NULL;
-    ad_context = NULL;
 
     if ((code = krb5_auth_con_getrecvsubkey(context, auth_context,
                                             &ctx->subkey))) {
@@ -1171,8 +1174,6 @@ done:
     if (!verifier_cred_handle && cred_handle) {
         krb5_gss_release_cred(&tmp_minor_status, &cred_handle);
     }
-    if (ad_context)
-        krb5_authdata_context_free(context, ad_context);
     if (context) {
         if (major_status && *minor_status)
             save_error_info(*minor_status, context);

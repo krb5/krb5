@@ -221,7 +221,6 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
-    krb5_authdata_context ad_context;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;

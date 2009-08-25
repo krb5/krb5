@@ -203,12 +203,11 @@ debug_log_authz_data(const char *which, krb5_authdata **a)
 }
 #endif
 
-krb5_error_code
+static krb5_error_code
 krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 			const krb5_ap_req *req, krb5_const_principal server,
-			krb5_keytab keytab, krb5_flags flags,
-			krb5_flags *ap_req_options, krb5_ticket **ticket,
-			krb5_authdata_context *ad_context)
+			krb5_keytab keytab, krb5_flags *ap_req_options,
+			krb5_ticket **ticket, int check_valid_flag)
 {
     krb5_error_code 	  retval = 0;
     krb5_principal_data	princ_data;
@@ -218,11 +217,6 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     krb5_enctype	 *permitted_etypes = NULL;
     int			  permitted_etypes_len = 0;
     krb5_keyblock	 decrypt_key;
-
-    assert((flags & RD_REQ_CHECK_VALID_FLAG) == 0 || ad_context != NULL);
-
-    if (ad_context != NULL)
-	*ad_context = NULL;
 
     decrypt_key.enctype = ENCTYPE_NULL;
     decrypt_key.contents = NULL;
@@ -248,7 +242,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     	if ((retval = krb5_decrypt_tkt_part(context, (*auth_context)->keyblock,
 					    req->ticket)))
 	    goto cleanup;
-	if (flags & RD_REQ_CHECK_VALID_FLAG) {
+	if (check_valid_flag) {
 	    decrypt_key = *((*auth_context)->keyblock);
 	    free((*auth_context)->keyblock);
 	} else
@@ -257,7 +251,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     } else {
     	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req,
 						   server, keytab,
-		(flags & RD_REQ_CHECK_VALID_FLAG) ? &decrypt_key : NULL)))
+			    check_valid_flag ? &decrypt_key : NULL)))
 	    goto cleanup;
     }
 
@@ -267,7 +261,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 #ifndef LEAN_CLIENT
     if ((retval = decrypt_authenticator(context, req, 
 					&((*auth_context)->authentp),
-					(flags & RD_REQ_CHECK_VALID_FLAG) != 0)))
+					check_valid_flag)))
 	goto cleanup;
 #endif
     if (!krb5_principal_compare(context, (*auth_context)->authentp->client,
@@ -394,17 +388,17 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     if ((retval = krb5int_check_clockskew(context, (*auth_context)->authentp->ctime)))
 	goto cleanup;
 
-    if (flags & RD_REQ_CHECK_VALID_FLAG) {
+    if (check_valid_flag) {
       if (req->ticket->enc_part2->flags & TKT_FLG_INVALID) {
 	retval = KRB5KRB_AP_ERR_TKT_INVALID;
 	goto cleanup;
       }
 
-      assert(ad_context != NULL);
-      if ((retval = krb5_authdata_context_init(context, ad_context)))
+      if ((retval = krb5_authdata_context_init(context,
+					       &(*auth_context)->ad_context)))
 	goto cleanup;
       if ((retval = krb5int_verify_authdata(context,
-					    *ad_context,
+					    (*auth_context)->ad_context,
 					    auth_context,
 					    &decrypt_key,
 					    req,
@@ -553,12 +547,8 @@ cleanup:
 	if (req->ticket->enc_part2)
 	    krb5_free_enc_tkt_part(context, req->ticket->enc_part2);
 	req->ticket->enc_part2 = NULL;
-	if (ad_context != NULL && *ad_context != NULL) {
-	    krb5_authdata_context_free(context, *ad_context);
-	    *ad_context = NULL;
-	}
     }
-    if (flags & RD_REQ_CHECK_VALID_FLAG)
+    if (check_valid_flag)
 	krb5_free_keyblock_contents(context, &decrypt_key);
 
     return retval;
@@ -566,33 +556,30 @@ cleanup:
 
 krb5_error_code
 krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
-		    const krb5_ap_req *req, krb5_const_principal server,
-		    krb5_keytab keytab, krb5_flags *ap_req_options,
-		    krb5_ticket **ticket)
+                    const krb5_ap_req *req, krb5_const_principal server,
+                    krb5_keytab keytab, krb5_flags *ap_req_options,
+                    krb5_ticket **ticket)
 {
   krb5_error_code retval;
-  krb5_authdata_context ad_context;
   retval = krb5_rd_req_decoded_opt(context, auth_context,
-				   req, server, keytab, RD_REQ_CHECK_VALID_FLAG,
+				   req, server, keytab,
 				   ap_req_options, ticket,
-				   &ad_context);
-  if (retval == 0)
-    krb5_authdata_context_free(context, ad_context);
+				   1); /* check_valid_flag */
   return retval;
 }
 
 krb5_error_code
 krb5_rd_req_decoded_anyflag(krb5_context context,
-			    krb5_auth_context *auth_context,
-			    const krb5_ap_req *req,
-			    krb5_const_principal server, krb5_keytab keytab,
-			    krb5_flags *ap_req_options, krb5_ticket **ticket)
+                            krb5_auth_context *auth_context,
+                            const krb5_ap_req *req,
+                            krb5_const_principal server, krb5_keytab keytab,
+                            krb5_flags *ap_req_options, krb5_ticket **ticket)
 {
   krb5_error_code retval;
   retval = krb5_rd_req_decoded_opt(context, auth_context,
-				   req, server, keytab, 
-				   0, /* don't check valid flag */
-				   ap_req_options, ticket, NULL);
+				   req, server, keytab,
+				   ap_req_options, ticket,
+				   0); /* don't check_valid_flag */
   return retval;
 }
 

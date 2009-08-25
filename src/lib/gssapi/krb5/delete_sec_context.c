@@ -109,9 +109,6 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
     if (ctx->authdata)
         krb5_free_authdata(context, ctx->authdata);
 
-    if (ctx->ad_context)
-        krb5_authdata_context_free(context, ctx->ad_context);
-
     if (ctx->k5_context)
         krb5_free_context(ctx->k5_context);
 

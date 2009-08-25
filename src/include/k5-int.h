@@ -2741,19 +2741,6 @@ krb5_error_code krb5_rd_req_decoded_anyflag
 		krb5_flags *,
 		krb5_ticket **);
 
-#define RD_REQ_CHECK_VALID_FLAG		0x1
-
-krb5_error_code KRB5_CALLCONV krb5_rd_req_extended
-	(krb5_context,
-		krb5_auth_context *,
-		const krb5_data *,
-		krb5_const_principal,
-		krb5_keytab,
-		krb5_flags,
-		krb5_flags *,
-		krb5_ticket **,
-		krb5_authdata_context *);
-
 krb5_error_code KRB5_CALLCONV krb5_cc_register
 	(krb5_context,
 		const krb5_cc_ops *,
@@ -2797,6 +2784,18 @@ krb5_error_code krb5_auth_con_get_subkey_enctype
 	(krb5_context context,
 	    krb5_auth_context,
 	    krb5_enctype *);
+
+krb5_error_code
+krb5_auth_con_get_authdata_context
+	(krb5_context context,
+	    krb5_auth_context auth_context,
+	    krb5_authdata_context *ad_context);
+
+krb5_error_code
+krb5_auth_con_set_authdata_context
+	(krb5_context context,
+	    krb5_auth_context auth_context,
+	    krb5_authdata_context ad_context);
 
 krb5_error_code KRB5_CALLCONV
 krb5int_server_decrypt_ticket_keyblock
