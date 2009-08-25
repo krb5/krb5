@@ -761,6 +761,15 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap_iov);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_iov_length);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_complete_auth_token);
+	/* Naming extensions */
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_display_name_ext);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_name);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_get_name_attribute);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_set_name_attribute);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_delete_name_attribute);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name_composite);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_map_name_to_any);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_release_any_name_mapping);
 
 	assert(mech_type != GSS_C_NO_OID);
 
