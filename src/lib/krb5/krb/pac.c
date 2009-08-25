@@ -1053,12 +1053,10 @@ mspac_get_attribute_types(krb5_context context,
     unsigned int i, j;
     krb5_data *attrs;
     krb5_error_code code;
-
-    *asserted = NULL;
-    *verified = NULL;
+    krb5_data **outattrs;
 
     if (pacctx->pac == NULL) {
-	attrs = (krb5_data *)calloc(MSPAC_ATTRIBUTE_COUNT + 1, sizeof(krb5_data));
+	attrs = calloc(MSPAC_ATTRIBUTE_COUNT + 1, sizeof(krb5_data));
 	if (attrs == NULL)
 	    return ENOMEM;
 
@@ -1067,7 +1065,7 @@ mspac_get_attribute_types(krb5_context context,
 					      &mspac_attribute_types[i].attribute,
 					      &attrs[i]);
 	    if (code != 0) {
-		free(attrs); /* XXX leak */
+		krb5int_free_data_list(context, attrs);
 		return code;
 	    }
 	}
@@ -1077,7 +1075,11 @@ mspac_get_attribute_types(krb5_context context,
 	return 0;
     }
 
-    attrs = (krb5_data *)calloc(1 + pacctx->pac->pac->cBuffers + 1, sizeof(krb5_data));
+    outattrs = pacctx->pac->verified ? verified : asserted;
+    if (outattrs == NULL)
+	return EINVAL;
+
+    attrs = calloc(1 + pacctx->pac->pac->cBuffers + 1, sizeof(krb5_data));
     if (attrs == NULL)
 	return ENOMEM;
 
@@ -1099,7 +1101,7 @@ mspac_get_attribute_types(krb5_context context,
 	if (code == 0) {
 	    code = krb5int_copy_data_contents(context, &attr, &attrs[j++]);
 	    if (code != 0) {
-		free(attrs); /* XXX leak */
+		krb5int_free_data_list(context, attrs);
 		return code;
 	    }
 	} else {
@@ -1108,7 +1110,7 @@ mspac_get_attribute_types(krb5_context context,
 	    length = asprintf(&attrs[j].data, "mspac:%d",
 			      pacctx->pac->pac->Buffers[i].ulType);
 	    if (length < 0) {
-		free(attrs); /* XXX leak */
+		krb5int_free_data_list(context, attrs);
 		return ENOMEM;
 	    }
 	    attrs[j++].length = length;
@@ -1117,10 +1119,7 @@ mspac_get_attribute_types(krb5_context context,
     attrs[j].data = NULL;
     attrs[j].length = 0;
 
-    if (pacctx->pac->verified)
-	*verified = attrs;
-    else
-	*asserted = attrs;
+    *outattrs = attrs;
 
     return 0;
 }
@@ -1144,8 +1143,8 @@ mspac_get_attribute(krb5_context context,
     value->length = 0;
 
     if (display_value != NULL) {
-        display_value->data = NULL;
-        display_value->length = 0;
+	display_value->data = NULL;
+	display_value->length = 0;
     }
 
     if (*more != -1 || pacctx->pac == NULL)
@@ -1157,17 +1156,17 @@ mspac_get_attribute(krb5_context context,
 
     /* -1 is a magic type that refers to the entire PAC */
     if (type == (krb5_ui_4)-1) {
-        if (value != NULL)
+	if (value != NULL)
 	    code = krb5int_copy_data_contents(context,
-                                              &pacctx->pac->data,
-                                              value);
-        else
-            code = 0;
+					      &pacctx->pac->data,
+					      value);
+	else
+	    code = 0;
     } else {
-        if (value != NULL)
+	if (value != NULL)
 	    code = krb5_pac_get_buffer(context, pacctx->pac, type, value);
-        else
-            code = k5_pac_locate_buffer(context, pacctx->pac, type, NULL);
+	else
+	    code = k5_pac_locate_buffer(context, pacctx->pac, type, NULL);
     }
     if (code == 0) {
 	*authenticated = pacctx->pac->verified;
@@ -1230,11 +1229,11 @@ mspac_export_attributes(krb5_context context,
     if (pacctx->pac == NULL)
 	return EINVAL;
 
-    authdata = (krb5_authdata **)calloc(2, sizeof(krb5_authdata *));
+    authdata = calloc(2, sizeof(krb5_authdata *));
     if (authdata == NULL)
 	return ENOMEM;
 
-    authdata[0] = (krb5_authdata *)calloc(1, sizeof(krb5_authdata));
+    authdata[0] = calloc(1, sizeof(krb5_authdata));
     if (authdata[0] == NULL) {
 	free(authdata);
 	return ENOMEM;
@@ -1259,7 +1258,7 @@ static krb5_error_code
 mspac_export_internal(krb5_context context,
 		      void *plugin_context,
 		      void *request_context,
-                      krb5_boolean restrict_authenticated,
+		      krb5_boolean restrict_authenticated,
 		      void **ptr)
 {
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
@@ -1272,13 +1271,13 @@ mspac_export_internal(krb5_context context,
 	return 0;
 
     if (restrict_authenticated && (pacctx->pac->verified) == FALSE)
-        return 0;
+	return 0;
 
     code = krb5_pac_parse(context, pacctx->pac->data.data,
-	                  pacctx->pac->data.length, &pac);
+			  pacctx->pac->data.length, &pac);
     if (code == 0) {
-        pac->verified = pacctx->pac->verified;
-        *ptr = pac;
+	pac->verified = pacctx->pac->verified;
+	*ptr = pac;
     }
 
     return code;

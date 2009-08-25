@@ -30,15 +30,17 @@
 
 /* Based on preauth2.c */
 
-#define DEBUG 1
-
 #if TARGET_OS_MAC
 static const char *objdirs[] = { KRB5_AUTHDATA_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/authdata", NULL }; /* should be a list */
 #else
 static const char *objdirs[] = { LIBDIR "/krb5/plugins/authdata", NULL };
 #endif
 
-static krb5plugin_authdata_client_ftable_v0 *authdata_systems[] = { &krb5int_mspac_authdata_client_ftable, NULL };
+/* Internal authdata systems */
+static krb5plugin_authdata_client_ftable_v0 *authdata_systems[] = {
+    &krb5int_mspac_authdata_client_ftable,
+    NULL
+};
 
 static inline int
 count_ad_modules(krb5plugin_authdata_client_ftable_v0 *table)
@@ -107,6 +109,7 @@ init_ad_system(krb5_context kcontext,
             context->modules[k].client_req_fini = table->request_fini;
             rcpp = &context->modules[k].request_context;
 
+            /* For now, single request per context. That may change */
             code = (*table->request_init)(kcontext,
                                           plugin_context,
                                           rcpp);
@@ -314,6 +317,8 @@ krb5int_verify_authdata(krb5_context kcontext,
 {
     int i;
     krb5_error_code code;
+    krb5_ticket *ticket = ap_req->ticket;
+    krb5_authenticator *authenticator = (*auth_context)->authentp;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
@@ -323,8 +328,8 @@ krb5int_verify_authdata(krb5_context kcontext,
             continue;
 
         code = krb5int_find_authdata(kcontext,
-                                     ap_req->ticket->enc_part2->authorization_data,
-                                     (*auth_context)->authentp->authorization_data,
+                                     ticket->enc_part2->authorization_data,
+                                     authenticator->authorization_data,
                                      module->ad_type,
                                      &authdata);
         if (code != 0 || authdata == NULL)
@@ -361,7 +366,7 @@ merge_data_array_nocopy(krb5_data **dst, krb5_data *src, unsigned int *len)
     for (i = 0; src[i].data != NULL; i++)
         ;
 
-    *dst = (krb5_data *)realloc(*dst, (*len + i + 1) * sizeof(krb5_data));
+    *dst = realloc(*dst, (*len + i + 1) * sizeof(krb5_data));
     if (*dst == NULL)
         return ENOMEM;
 
@@ -397,27 +402,38 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
         if ((*module->ftable->get_attribute_types)(kcontext,
                                                    module->plugin_context,
                                                    *(module->request_context_pp),
-                                                   &asserted2,
-                                                   &verified2) != 0)
+                                                   asserted_attrs ?
+                                                       &asserted2 : NULL,
+                                                   verified_attrs ?
+                                                       &verified2 : NULL) != 0)
             continue;
 
-        code = merge_data_array_nocopy(&asserted, asserted2, &len);
-        if (code != 0)
-            break;
+        if (asserted_attrs != NULL) {
+            code = merge_data_array_nocopy(&asserted, asserted2, &len);
+            if (code != 0) {
+                krb5int_free_data_list(kcontext, asserted2);
+                break;
+            }
+            if (asserted2 != NULL)
+                free(asserted2);
+        }
 
-        code = merge_data_array_nocopy(&verified, verified2, &len);
-        if (code != 0)
-            break;
-
-        if (asserted2 != NULL)
-            free(asserted2);
-        if (verified2 != NULL)
-            free(verified2);
+        if (verified_attrs != NULL) {
+            code = merge_data_array_nocopy(&verified, verified2, &len);
+            if (code != 0)  {
+                krb5int_free_data_list(kcontext, verified2);
+                break;
+            }
+            if (verified2 != NULL)
+                free(verified2);
+        }
     }
 
     if (code == 0) {
-        *asserted_attrs = asserted;
-        *verified_attrs = verified;
+        if (asserted_attrs != NULL)
+            *asserted_attrs = asserted;
+        if (verified_attrs != NULL)
+            *verified_attrs = verified;
     }
 
     return code;
@@ -436,7 +452,11 @@ krb5_authdata_get_attribute(krb5_context kcontext,
     int i;
     krb5_error_code code = ENOENT;
 
-    /* NB at present a plugin is presumed to be authoritative for an attribute */
+    /*
+     * NB at present a module is presumed to be authoritative for
+     * an attribute; not sure how to federate "more" across module
+     * yet
+     */
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
@@ -552,7 +572,7 @@ krb5_authdata_export_attributes(krb5_context kcontext,
         for (j = 0; authdata2[j] != NULL; j++)
             ;
 
-        authdata = (krb5_authdata **)realloc(authdata, (len + j + 1) * sizeof(krb5_authdata *));
+        authdata = realloc(authdata, (len + j + 1) * sizeof(krb5_authdata *));
         if (authdata == NULL)
             return ENOMEM;
 
@@ -680,19 +700,6 @@ import_export_authdata(krb5_context kcontext,
     if (dst_module == NULL)
         return ENOENT;
 
-#if 0
-    if (dst_module->client_req_init != NULL) {
-        code = (*dst_module->client_req_init)(kcontext,
-                                              dst_module->plugin_context,
-                                              dst_module->request_context_pp);
-        if ((code != 0 && code != ENOMEM) &&
-            (dst_module->flags & AD_INFORMATIONAL))
-            code = 0;
-        if (code != 0)
-            return code;
-    }
-#endif
-
     if (src_module->ftable->export_internal == NULL ||
         dst_module->ftable->import_internal == NULL)
         return 0;
@@ -729,6 +736,8 @@ krb5_authdata_context_copy(krb5_context kcontext,
     int i;
     krb5_error_code code;
     krb5_authdata_context dst;
+
+    /* This is a bit of a hack and potentially very expensive. */
 
     code = krb5_authdata_context_init(kcontext, &dst);
     if (code != 0)
@@ -769,7 +778,8 @@ debug_authdata_attribute(krb5_context kcontext,
         if (code != 0)
             break;
 
-        fprintf(stderr, "AD Attribute %.*s Value Length %d Disp Value Length %d More %d\n",
+        fprintf(stderr, "AD Attribute %.*s Value Length %d "
+                "Disp Value Length %d More %d\n",
                 attr->length, attr->data, value.length, display_value.length, more);
 
         krb5_free_data_contents(kcontext, &value);
