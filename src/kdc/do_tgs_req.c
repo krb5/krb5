@@ -292,9 +292,17 @@ tgt_again:
         !krb5_principal_compare(kdc_context, tgs_server, server.princ);
 
     /* Check for protocol transition */
-    errcode = kdc_process_s4u2self_req(kdc_context, request, header_enc_tkt->client,
-                                       &server, subkey, header_enc_tkt->session, kdc_time,
-                                       &s4u_x509_user, &client, &c_nprincs, &status);
+    errcode = kdc_process_s4u2self_req(kdc_context,
+				       request,
+				       header_enc_tkt->client,
+                                       &server,
+				       subkey,
+				       header_enc_tkt->session,
+				       kdc_time,
+                                       &s4u_x509_user,
+				       &client,
+				       &c_nprincs,
+				       &status);
     if (errcode)
         goto cleanup;
     if (s4u_x509_user != NULL)
@@ -698,7 +706,8 @@ tgt_again:
                               &encrypting_key, /* U2U or server key */
                               pkt,
                               request,
-                              s4u_x509_user ? s4u_x509_user->user_id.user : NULL,
+                              s4u_x509_user ?
+				s4u_x509_user->user_id.user : NULL,
                               header_enc_tkt,
                               &enc_tkt_reply);
     if (errcode) {

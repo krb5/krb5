@@ -271,7 +271,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     assert(subject_creds != NULL);
     assert(subject_creds->client != NULL);
 
-    cred = (krb5_gss_cred_id_t)xmalloc(sizeof(*cred));
+    cred = xmalloc(sizeof(*cred));
     if (cred == NULL) {
         code = ENOMEM;
         goto cleanup;

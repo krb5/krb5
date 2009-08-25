@@ -365,7 +365,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     }
 
     /* make sure the client is of proper lineage (see above) */
-    if (foreign_server && !find_pa_data(request->padata, KRB5_PADATA_FOR_USER)) {
+    if (foreign_server &&
+	!find_pa_data(request->padata, KRB5_PADATA_FOR_USER)) {
 	if (is_local_principal((*ticket)->enc_part2->client)) {
 	    /* someone in a foreign realm claiming to be local */
 	    krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
@@ -920,7 +921,8 @@ fail:
  * as a com_err error number!
  */
 #define AS_INVALID_OPTIONS (KDC_OPT_FORWARDED | KDC_OPT_PROXY |\
-KDC_OPT_VALIDATE | KDC_OPT_RENEW | KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)
+			    KDC_OPT_VALIDATE | KDC_OPT_RENEW | \
+			    KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
 		    krb5_db_entry server, krb5_timestamp kdc_time,
@@ -2033,7 +2035,8 @@ kdc_process_s4u2self_req(krb5_context context,
 	    return code;
 
 	code = verify_s4u_x509_user_checksum(context,
-					     tgs_subkey ? tgs_subkey : tgs_session,
+					     tgs_subkey ? tgs_subkey :
+						tgs_session,
 					     &req_data,
 					     request->nonce, *s4u_x509_user);
 	if (code) {
@@ -2064,7 +2067,7 @@ kdc_process_s4u2self_req(krb5_context context,
 	    return code;
 	}
 
-	*s4u_x509_user = (krb5_pa_s4u_x509_user *)calloc(1, sizeof(krb5_pa_s4u_x509_user));
+	*s4u_x509_user = calloc(1, sizeof(krb5_pa_s4u_x509_user));
 	if (*s4u_x509_user == NULL) {
 	    krb5_free_pa_for_user(kdc_context, for_user);
 	    return ENOMEM;
@@ -2129,7 +2132,8 @@ kdc_process_s4u2self_req(krb5_context context,
 
 	memset(&no_server, 0, sizeof(no_server));
 
-	code = validate_as_request(request, *princ, no_server, kdc_time, status);
+	code = validate_as_request(request, *princ,
+				   no_server, kdc_time, status);
 	if (code) {
 	    return code;
 	}
@@ -2486,7 +2490,7 @@ add_pa_data_element(krb5_context context,
     } else
 	i = 0;
 
-    p = (krb5_pa_data **)realloc(*out_padata, (i + 2) * sizeof(krb5_pa_data *));
+    p = realloc(*out_padata, (i + 2) * sizeof(krb5_pa_data *));
     if (p == NULL)
 	return ENOMEM;
 

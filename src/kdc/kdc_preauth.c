@@ -3146,4 +3146,3 @@ static krb5_error_code return_server_referral(krb5_context context,
     return 0;
 }
 #endif
-

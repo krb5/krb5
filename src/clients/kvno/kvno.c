@@ -39,8 +39,9 @@ static char *prog;
 
 static void xusage()
 {
-    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype] [-k keytab] [-P] [-S sname] [-U for_user] service1 service2 ...\n",
-            prog);
+    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype]\n", prog);
+    fprintf(stderr, "\t[-k keytab] [-P] [-S sname] [-U for_user]\n");
+    fprintf(stderr, "\tservice1 service2 ...\n");
     exit(1);
 }
 
@@ -91,7 +92,8 @@ int main(int argc, char *argv[])
 	case 'P':
 	    proxy = 1; /* S4U2Proxy - constrained delegation */
 	    if (keytab_name == NULL) {
-		fprintf(stderr, "Option -P (constrained delegation) requires keytab to be specified\n");
+		fprintf(stderr, "Option -P (constrained delegation) "
+				"requires keytab to be specified\n");
 		xusage();
 	    }
 	    break;
@@ -279,13 +281,16 @@ static void do_v5_kvno (int count, char *names[],
 	if (keytab) {
 	    ret = krb5_server_decrypt_ticket_keytab(context, keytab, ticket);
 	    if (ret) {
-		if (!quiet)
-		    fprintf(stderr, "%s: kvno = %d, keytab entry invalid\n", princ, ticket->enc_part.kvno);
+		if (!quiet) {
+		    fprintf(stderr, "%s: kvno = %d, keytab entry invalid\n",
+			    princ, ticket->enc_part.kvno);
+		}
 		com_err(prog, ret, "while decrypting ticket for %s", princ);
 		goto error;
 	    }
 	    if (!quiet)
-		printf("%s: kvno = %d, keytab entry valid\n", princ, ticket->enc_part.kvno);
+		printf("%s: kvno = %d, keytab entry valid\n",
+		       princ, ticket->enc_part.kvno);
 	    if (proxy) {
 		krb5_free_creds(context, out_creds);
 		out_creds = NULL;
@@ -300,7 +305,8 @@ static void do_v5_kvno (int count, char *names[],
 						     ticket,
 						     &out_creds);
 		if (ret) {
-		    com_err(prog, ret, "%s: constrained delegation failed", princ);
+		    com_err(prog, ret,
+			    "%s: constrained delegation failed", princ);
 		    goto error;
 		}
 	    }

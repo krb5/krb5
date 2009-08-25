@@ -142,6 +142,9 @@ cleanup:
 }
 /*
  * Note that this function fills in part of rep even on failure.
+ *
+ * The gcvt_fct callback allows the caller access to the nonce
+ * and request subkey, for binding preauthentication data
  */
 krb5_error_code
 krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,

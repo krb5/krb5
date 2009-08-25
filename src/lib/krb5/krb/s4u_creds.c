@@ -107,7 +107,8 @@ s4u_identify_user(krb5_context context,
     else {
         client_data.magic = KV5M_PRINCIPAL;
         client_data.realm = in_creds->server->realm;
-        client_data.data = NULL; /* should this be NULL, empty or a fixed string? XXX */
+        /* should this be NULL, empty or a fixed string? XXX */
+        client_data.data = NULL;
         client_data.length = 0;
         client_data.type = KRB5_NT_ENTERPRISE_PRINCIPAL;
         client = &client_data;
@@ -224,7 +225,7 @@ build_pa_for_user(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    padata = (krb5_pa_data *)malloc(sizeof(*padata));
+    padata = malloc(sizeof(*padata));
     if (padata == NULL) {
         code = ENOMEM;
         goto cleanup;
@@ -311,7 +312,7 @@ build_pa_s4u_x509_user(krb5_context context,
     }
     tgsreq->padata = padata;
 
-    padata[i] = (krb5_pa_data *)malloc(sizeof(krb5_pa_data));
+    padata[i] = malloc(sizeof(krb5_pa_data));
     if (padata[i] == NULL) {
         code = ENOMEM;
         goto cleanup;
@@ -368,10 +369,14 @@ verify_s4u2self_reply(krb5_context context,
         break;
     }
 
-    enc_s4u_padata = krb5int_find_pa_data(context, enc_padata, KRB5_PADATA_S4U_X509_USER);
+    enc_s4u_padata = krb5int_find_pa_data(context,
+                                          enc_padata,
+                                          KRB5_PADATA_S4U_X509_USER);
 
     /* XXX this will break newer enctypes with a MIT 1.7 KDC */
-    rep_s4u_padata = krb5int_find_pa_data(context, rep_padata, KRB5_PADATA_S4U_X509_USER);
+    rep_s4u_padata = krb5int_find_pa_data(context,
+                                          rep_padata,
+                                          KRB5_PADATA_S4U_X509_USER);
     if (rep_s4u_padata == NULL) {
         if (not_newer == FALSE || enc_s4u_padata != NULL)
             return KRB5_KDCREP_MODIFIED;
@@ -420,7 +425,8 @@ verify_s4u2self_reply(krb5_context context,
                 goto cleanup;
             }
         } else {
-            if (enc_s4u_padata->length != req_s4u_user->cksum.length + rep_s4u_user->cksum.length) {
+            if (enc_s4u_padata->length !=
+                req_s4u_user->cksum.length + rep_s4u_user->cksum.length) {
                 code = KRB5_KDCREP_MODIFIED;
                 goto cleanup;
             }
@@ -471,7 +477,9 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     memset(&s4u_user, 0, sizeof(s4u_user));
 
     if (in_creds->client != NULL && krb5_princ_size(context, in_creds->client)) {
-        if (krb5_princ_type(context, in_creds->client) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+        if (krb5_princ_type(context, in_creds->client) ==
+            KRB5_NT_ENTERPRISE_PRINCIPAL)
+        {
             code = krb5_build_principal_ext(context,
                                             &s4u_user.user_id.user,
                                             user_realm->length,
@@ -483,7 +491,9 @@ krb5_get_self_cred_from_kdc(krb5_context context,
                 goto cleanup;
             s4u_user.user_id.user->type = KRB5_NT_ENTERPRISE_PRINCIPAL;
         } else {
-            code = krb5_copy_principal(context, in_creds->client, &s4u_user.user_id.user);
+            code = krb5_copy_principal(context,
+                                       in_creds->client,
+                                       &s4u_user.user_id.user);
             if (code != 0)
                 goto cleanup;
         }
@@ -567,12 +577,14 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
         if (s4u_user.user_id.user != NULL &&
             krb5_princ_size(context, s4u_user.user_id.user)) {
-            in_padata = (krb5_pa_data **)calloc(2, sizeof(krb5_pa_data *));
+            in_padata = calloc(2, sizeof(krb5_pa_data *));
             if (in_padata == NULL) {
                 code = ENOMEM;
                 goto cleanup;
             }
-            code = build_pa_for_user(context, tgtptr, &s4u_user.user_id, &in_padata[0]);
+            code = build_pa_for_user(context,
+                                     tgtptr,
+                                     &s4u_user.user_id, &in_padata[0]);
             if (code != 0) {
                 krb5_free_pa_data(context, in_padata);
                 goto cleanup;
@@ -606,8 +618,9 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         if (code != 0)
             goto cleanup;
 
-        if (krb5_principal_compare(context, in_creds->server, (*out_creds)->server)) {
-            assert(!krb5_principal_compare(context, in_creds->server, (*out_creds)->client));
+        if (krb5_principal_compare(context,
+                                   in_creds->server,
+                                   (*out_creds)->server)) {
             code = 0;
             goto cleanup;
         } else if (IS_TGS_PRINC(context, (*out_creds)->server)) {
@@ -668,7 +681,10 @@ cleanup:
         } else
             i = 0;
 
-        /* storing the first referral only mirrors krb5_get_cred_from_kdc_opt() */
+        /*
+         * storing the first referral only mirrors the behaviour of
+         * krb5_get_cred_from_kdc_opt()
+         */
         tgts2 = (krb5_creds **)realloc(*tgts, (i + 2) * sizeof(krb5_creds *));
         tgts2[i] = referral_tgts[0];
         referral_tgts[0] = NULL;
@@ -823,7 +839,7 @@ krb5_get_credentials_for_proxy(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    ncreds = (krb5_creds *)calloc(1, sizeof(*ncreds));
+    ncreds = calloc(1, sizeof(*ncreds));
     if (ncreds == NULL) {
         code = ENOMEM;
         goto cleanup;
@@ -862,7 +878,9 @@ krb5_get_credentials_for_proxy(krb5_context context,
      * Check client name because we couldn't compare that inside
      * krb5_get_credentials() (enc_part2 is unavailable in clear)
      */
-    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client, (*out_creds)->client)) {
+    if (!krb5_principal_compare(context,
+                                evidence_tkt->enc_part2->client,
+                                (*out_creds)->client)) {
         code = KRB5_KDCREP_MODIFIED;
         goto cleanup;
     }

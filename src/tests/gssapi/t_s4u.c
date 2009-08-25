@@ -49,8 +49,8 @@
  *
  * Usage eg:
  *
- *    $ kinit -f host/mithost.win.mit.edu@WIN.MIT.EDU
- *    $ t_s4u delegtest@WIN.MIT.EDU HOST@WIN-EQ7E4AA2WR8.win.mit.edu krb5.keytab
+ * kinit -f host/mithost.win.mit.edu@WIN.MIT.EDU
+ * t_s4u delegtest@WIN.MIT.EDU HOST@WIN-EQ7E4AA2WR8.win.mit.edu krb5.keytab
  */
 
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
