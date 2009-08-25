@@ -41,6 +41,8 @@ kg_init_name(krb5_context context,
 {
     krb5_error_code code;
 
+    assert(principal != NULL);
+
     if (principal == NULL)
         return EINVAL;
 

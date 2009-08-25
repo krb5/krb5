@@ -284,7 +284,7 @@ krb5_pac_init(krb5_context context,
 
     pac->pac = (PACTYPE *)malloc(sizeof(PACTYPE));
     if (pac->pac == NULL) {
-	free( pac);
+	free(pac);
 	return ENOMEM;
     }
 
@@ -301,6 +301,47 @@ krb5_pac_init(krb5_context context,
     pac->verified = FALSE;
 
     *ppac = pac;
+
+    return 0;
+}
+
+static krb5_error_code
+k5_pac_copy(krb5_context context,
+	    krb5_pac src,
+	    krb5_pac *dst)
+{
+    size_t header_len;
+    krb5_ui_4 cbuffers;
+    krb5_error_code code;
+    krb5_pac pac;
+
+    cbuffers = src->pac->cBuffers;
+    if (cbuffers != 0)
+	cbuffers--;
+
+    header_len = sizeof(PACTYPE) + cbuffers * sizeof(PAC_INFO_BUFFER);
+
+    pac = (krb5_pac)malloc(sizeof(*pac));
+    if (pac == NULL)
+	return ENOMEM;
+
+    pac->pac = (PACTYPE *)malloc(header_len);
+    if (pac->pac == NULL) {
+	free(pac);
+	return ENOMEM;
+    }
+
+    memcpy(pac->pac, src->pac, header_len);
+
+    code = krb5int_copy_data_contents(context, &src->data, &pac->data);
+    if (code != 0) {
+	free(pac->pac);
+	free(pac);
+	return ENOMEM;
+    }
+
+    pac->verified = src->verified;
+    *dst = pac;
 
     return 0;
 }
@@ -1294,21 +1335,27 @@ mspac_export_internal(krb5_context context,
     return code;
 }
 
-/* Note: this takes ownership of ptr by design */
 static krb5_error_code
-mspac_import_internal(krb5_context context,
-		      void *plugin_context,
-		      void *request_context,
-		      void *ptr)
+mspac_copy_context(krb5_context context,
+		   void *plugin_context,
+		   void *request_context,
+		   void **dst_request_context)
 {
-    struct mspac_context *pacctx = (struct mspac_context *)request_context;
-    krb5_pac pac = (krb5_pac)ptr;
+    struct mspac_context *srcctx = (struct mspac_context *)request_context;
+    struct mspac_context *dstctx;
+    krb5_error_code code;
 
-    if (pac == NULL)
-	return EINVAL;
+    code = mspac_request_init(context, plugin_context, (void **)&dstctx);
+    if (code != 0)
+	return code;
 
-    krb5_pac_free(context, pacctx->pac);
-    pacctx->pac = pac;
+    code = k5_pac_copy(context, srcctx->pac, &dstctx->pac);
+    if (code != 0) {
+	free(dstctx);
+	return code;
+    }
+
+    *dst_request_context = dstctx;
 
     return 0;
 }
@@ -1342,8 +1389,8 @@ krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable = {
     NULL, /* delete_attribute_proc */
     mspac_export_attributes,
     mspac_export_internal,
-    mspac_import_internal,
-    mspac_free_internal
+    mspac_free_internal,
+    mspac_copy_context
 };
 
 

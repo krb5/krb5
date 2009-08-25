@@ -622,35 +622,6 @@ krb5_authdata_export_internal(krb5_context kcontext,
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_authdata_import_internal(krb5_context kcontext,
-                              krb5_authdata_context context,
-                              const char *module_name,
-                              void *ptr)
-{
-    int i;
-    krb5_error_code code = ENOENT;
-
-    for (i = 0; i < context->n_modules; i++) {
-        struct _krb5_authdata_context_module *module = &context->modules[i];
-
-        if (strcmp(module_name, module->name) != 0)
-            continue;
-
-        if (module->ftable->import_internal == NULL)
-            continue;
-
-        code = (*module->ftable->import_internal)(kcontext,
-                                                  module->plugin_context,
-                                                  *(module->request_context_pp),
-                                                  ptr);
-
-        break;
-    }
-
-    return code;
-}
-
-krb5_error_code KRB5_CALLCONV
 krb5_authdata_free_internal(krb5_context kcontext,
                             krb5_authdata_context context,
                             const char *module_name,
@@ -680,14 +651,13 @@ krb5_authdata_free_internal(krb5_context kcontext,
 }
 
 static krb5_error_code
-import_export_authdata(krb5_context kcontext,
-                       struct _krb5_authdata_context_module *src_module,
-                       krb5_authdata_context dst)
+copy_authdata_context(krb5_context kcontext,
+                      struct _krb5_authdata_context_module *src_module,
+                      krb5_authdata_context dst)
 {
     int i;
     krb5_error_code code;
     struct _krb5_authdata_context_module *dst_module = NULL;
-    void *ptr = NULL;
 
     for (i = 0; i < dst->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &dst->modules[i];
@@ -702,30 +672,20 @@ import_export_authdata(krb5_context kcontext,
     if (dst_module == NULL)
         return ENOENT;
 
-    if (src_module->ftable->export_internal == NULL ||
-        dst_module->ftable->import_internal == NULL)
+    assert(strcmp(dst_module->name, src_module->name) == 0);
+
+    if (dst_module->client_req_init == NULL) {
+        /* only copy the context for the head module */
         return 0;
-
-    code = (*src_module->ftable->export_internal)(kcontext,
-                                                  src_module->plugin_context,
-                                                  *(src_module->request_context_pp),
-                                                  FALSE,
-                                                  &ptr);
-    if (code != 0)
-        return code;
-
-    code = (*dst_module->ftable->import_internal)(kcontext,
-                                                  dst_module->plugin_context,
-                                                  *(dst_module->request_context_pp),
-                                                  ptr);
-
-    /* assume import takes ownership */
-    if (code != 0 && src_module->ftable->free_internal != NULL) {
-        (*src_module->ftable->free_internal)(kcontext,
-                                             src_module->plugin_context,
-                                             *(src_module->request_context_pp),
-                                             ptr);
     }
+
+    assert(src_module->request_context_pp == &src_module->request_context);
+    assert(dst_module->request_context_pp == &dst_module->request_context);
+
+    code = (*src_module->ftable->copy_context)(kcontext,
+                                               src_module->plugin_context,
+                                               src_module->request_context,
+                                               dst_module->request_context_pp);
 
     return code;
 }
@@ -739,8 +699,7 @@ krb5_authdata_context_copy(krb5_context kcontext,
     krb5_error_code code;
     krb5_authdata_context dst;
 
-    /* This is a bit of a hack and potentially very expensive. */
-
+    /* XXX we need to init a new context because we can't copy plugins */
     code = krb5_authdata_context_init(kcontext, &dst);
     if (code != 0)
         return code;
@@ -748,7 +707,7 @@ krb5_authdata_context_copy(krb5_context kcontext,
     for (i = 0; i < src->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &src->modules[i];
 
-        code = import_export_authdata(kcontext, module, dst);
+        code = copy_authdata_context(kcontext, module, dst);
         if (code != 0)
             break;
     }

@@ -167,11 +167,11 @@ enumerateAttributes(OM_uint32 *minor,
             dumpAttribute(minor, name, &authenticated->elements[i]);
     }
     if (asserted != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < authenticated->count; i++)
+        for (i = 0; i < asserted->count; i++)
             dumpAttribute(minor, name, &asserted->elements[i]);
     }
     if (complete != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < authenticated->count; i++)
+        for (i = 0; i < complete->count; i++)
             dumpAttribute(minor, name, &complete->elements[i]);
     }
 
