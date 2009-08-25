@@ -1867,6 +1867,11 @@ verify_s4u_x509_user_checksum(krb5_context context,
     if (req->user_id.nonce != kdc_req_nonce)
 	return KRB5KRB_AP_ERR_MODIFIED;
 
+    /*
+     * Verify checksum over the encoded userid. If that fails,
+     * re-encode, and verify that. This is similar to the
+     * behaviour in kdc_process_tgs_req().
+     */
     if (fetch_asn1_field((unsigned char *)req_data->data, 1, 0, &scratch) < 0)
 	return ASN1_PARSE_ERROR;
 
