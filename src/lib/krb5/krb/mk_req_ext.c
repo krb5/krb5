@@ -337,6 +337,7 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
 	    krb5_free_authdata(context, ext_authdata);
 	    return retval;
 	}
+	krb5_free_authdata(context, ext_authdata);
     }
 
     /* Only send EtypeList if we prefer another enctype to tkt_enctype */ 
