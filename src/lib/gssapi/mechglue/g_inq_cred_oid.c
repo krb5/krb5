@@ -93,15 +93,19 @@ gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 	return status;
     }
 
-    status = GSS_S_BAD_MECH;
+    status = GSS_S_UNAVAILABLE;
 
     for (i = 0; i < union_cred->count; i++) {
 	mech = gssint_get_mechanism(&union_cred->mechs_array[i]);
-	if (mech == NULL)
-	    continue;
+	if (mech == NULL) {
+	    status = GSS_S_BAD_MECH;
+	    break;
+	}
 
-	if (mech->gss_inquire_cred_by_oid == NULL)
+	if (mech->gss_inquire_cred_by_oid == NULL) {
+	    status = GSS_S_UNAVAILABLE;
 	    continue;
+	}
 
 	status = (mech->gss_inquire_cred_by_oid)(minor_status,
 						 union_cred->cred_array[i],

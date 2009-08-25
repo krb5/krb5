@@ -496,6 +496,7 @@ typedef struct gss_config {
 	(
 	    OM_uint32 *,		/* minor_status */
 	    gss_name_t,			/* name */
+	    gss_buffer_t,		/* attr */
 	    int *,			/* authenticated */
 	    int *,			/* complete */
 	    gss_buffer_t,		/* value */

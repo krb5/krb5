@@ -1,8 +1,7 @@
 /* #pragma ident	"@(#)g_dsp_name.c	1.13	04/02/23 SMI" */
-
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +11,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -102,7 +101,7 @@ gss_OID *		output_name_type;
 					    output_name_buffer,
 					    output_name_type));
     }
-    
+
     /*
      * copy the value of the external_name component of the union
      * name into the output_name_buffer and point the output_name_type

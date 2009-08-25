@@ -1,5 +1,6 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2008 by the Massachusetts Institute of Technology.
+ * Copyright 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,61 +25,48 @@
  */
 
 /*
- *  glue routine for gssspi_set_cred_option
+ *  glue routine for gss_export_name_composite
  */
 
 #include "mglueP.h"
-#include <stdio.h>
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#include <string.h>
-#include <time.h>
 
 OM_uint32 KRB5_CALLCONV
-gssspi_set_cred_option(OM_uint32 *minor_status,
-	               gss_cred_id_t cred_handle,
-	               const gss_OID desired_object,
-	               const gss_buffer_t value)
+gss_export_name_composite(OM_uint32 *minor_status,
+                          gss_name_t name,
+                          gss_buffer_t exp_composite_name)
 {
-    gss_union_cred_t	union_cred;
-    gss_mechanism	mech;
-    int			i;
-    OM_uint32		status;
+    OM_uint32           status;
+    gss_union_name_t    union_name;
+    gss_mechanism       mech;
 
     if (minor_status == NULL)
-	return GSS_S_CALL_INACCESSIBLE_WRITE;
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
-    if (cred_handle == GSS_C_NO_CREDENTIAL)
-	return GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CRED;
+    if (name == GSS_C_NO_NAME)
+        return GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME;
+
+    if (exp_composite_name == GSS_C_NO_BUFFER)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
     *minor_status = 0;
 
-    union_cred = (gss_union_cred_t) cred_handle;
+    union_name = (gss_union_name_t)name;
 
-    status = GSS_S_UNAVAILABLE;
+    if (union_name->mech_type == GSS_C_NO_OID)
+        return GSS_S_UNAVAILABLE;
 
-    for (i = 0; i < union_cred->count; i++) {
-	mech = gssint_get_mechanism(&union_cred->mechs_array[i]);
-	if (mech == NULL) {
-	    status = GSS_S_BAD_MECH;
-	    break;
-	}
+    mech = gssint_get_mechanism(name->mech_type);
+    if (mech == NULL)
+        return GSS_S_BAD_NAME;
 
-	if (mech->gssspi_set_cred_option == NULL) {
-	    status = GSS_S_UNAVAILABLE;
-	    continue;
-	}
+    if (mech->gss_export_name_composite == NULL)
+        return GSS_S_UNAVAILABLE;
 
-	status = (mech->gssspi_set_cred_option)(minor_status,
-						union_cred->cred_array[i],
-						desired_object,
-						value);
-	if (status != GSS_S_COMPLETE) {
-	    map_error(minor_status, mech);
-	    break;
-	}
-    }
+    status = (*mech->gss_export_name_composite)(minor_status,
+                                                union_name->mech_name,
+                                                exp_composite_name);
+    if (status != GSS_S_COMPLETE)
+        map_error(minor_status, mech);
 
     return status;
 }
