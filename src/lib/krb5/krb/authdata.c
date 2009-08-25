@@ -579,6 +579,7 @@ krb5_authdata_export_attributes(krb5_context kcontext,
             return ENOMEM;
 
         memcpy(&authdata[len], authdata2, j * sizeof(krb5_authdata *));
+        free(authdata2);
 
         len += j;
     }
