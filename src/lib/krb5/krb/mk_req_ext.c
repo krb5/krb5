@@ -75,6 +75,7 @@ krb5_generate_authenticator (krb5_context,
 				       krb5_authenticator *, krb5_principal,
 				       krb5_checksum *, krb5_keyblock *,
 				       krb5_ui_4, krb5_authdata **,
+				       krb5_authdata_context ad_context,
 				       krb5_enctype *desired_etypes,
 				       krb5_enctype tkt_enctype);
 
@@ -244,6 +245,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 					      (*auth_context)->send_subkey,
 					      (*auth_context)->local_seq_number,
 					      in_creds->authdata,
+					      (*auth_context)->ad_context,
 					      desired_etypes,
 					      in_creds->keyblock.enctype)))
 	goto cleanup_cksum;
@@ -299,11 +301,13 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
 			    krb5_principal client, krb5_checksum *cksum,
 			    krb5_keyblock *key, krb5_ui_4 seq_number,
 			    krb5_authdata **authorization,
+			    krb5_authdata_context ad_context,
 			    krb5_enctype *desired_etypes,
 			    krb5_enctype tkt_enctype)
 {
     krb5_error_code retval;
-    
+    krb5_authdata **ext_authdata = NULL;
+
     authent->client = client;
     authent->checksum = cksum;
     if (key) {
@@ -315,12 +319,26 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
     authent->seq_number = seq_number;
     authent->authorization_data = NULL;
 
-    if (authorization != NULL) {
-	retval = krb5_copy_authdata(context, authorization,
-				    &authent->authorization_data);
+    if (ad_context != NULL) {
+	retval = krb5_authdata_export_attributes(context,
+						 ad_context,
+						 AD_USAGE_AP_REQ,
+						 &ext_authdata);
 	if (retval)
 	    return retval;
     }
+
+    if (authorization != NULL || ext_authdata != NULL) {
+	retval = krb5_merge_authdata(context,
+				     authorization,
+				     ext_authdata,
+				     &authent->authorization_data);
+	if (retval) {
+	    krb5_free_authdata(context, ext_authdata);
+	    return retval;
+	}
+    }
+
     /* Only send EtypeList if we prefer another enctype to tkt_enctype */ 
     if (desired_etypes != NULL && desired_etypes[0] != tkt_enctype) {
 	retval = make_etype_list(context, desired_etypes, tkt_enctype,
