@@ -2166,7 +2166,7 @@ check_allowed_to_delegate_to(krb5_context context,
 
     /* Must be in same realm */
     if (!krb5_realm_compare(context, server->princ, proxy)) {
-	return KRB5KDC_ERR_PATH_NOT_ACCEPTED;
+	return KRB5KDC_ERR_POLICY;
     }
 
     req.server = server;
