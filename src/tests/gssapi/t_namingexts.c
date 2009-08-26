@@ -224,11 +224,41 @@ testExportImportName(OM_uint32 *minor,
 
     gss_release_buffer(&tmp, &exported_name);
 
+#if 0
     major = enumerateAttributes(minor, imported_name);
+#endif
 
     gss_release_name(&tmp, &imported_name);
 
     return major;
+}
+
+static OM_uint32
+testGreetAuthzData(OM_uint32 *minor,
+                   gss_name_t target_name)
+{
+    OM_uint32 major;
+    gss_buffer_desc attr;
+    gss_buffer_desc value;
+
+    attr.value = "greet:greeting";
+    attr.length = strlen((char *)attr.value);
+
+    value.value = "Hello, acceptor world!";
+    value.length = strlen((char *)value.value);
+
+    major = gss_set_name_attribute(minor,
+                                   target_name,
+                                   1,
+                                   &attr,
+                                   &value);
+    if (GSS_ERROR(major)) {
+        if (major != GSS_S_UNAVAILABLE)
+            displayStatus("gss_set_name_attribute", major, minor);
+        return major;
+    }
+
+    return GSS_S_COMPLETE;
 }
 
 static OM_uint32
@@ -259,6 +289,7 @@ initAcceptSecContext(OM_uint32 *minor,
         return major;
     }
 
+    testGreetAuthzData(minor, target_name);
     displayCanonName(minor, target_name, "Target name");
 
     major = gss_init_sec_context(minor,
