@@ -268,11 +268,13 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 }
 
 static krb5_error_code
-make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
+make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
+               chan_bindings, mech_type, token)
     krb5_context context;
     krb5_gss_ctx_id_rec *ctx;
     krb5_gss_cred_id_t cred;
     krb5_creds *k_cred;
+    krb5_authdata_context ad_context;
     gss_channel_bindings_t chan_bindings;
     gss_OID mech_type;
     gss_buffer_t token;
@@ -325,6 +327,8 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
         mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_ETYPE_NEGOTIATION;
 
+    krb5_auth_con_set_authdata_context(context, ctx->auth_context, ad_context);
+
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
                                 checksum_data, k_cred, &ap_req);
     krb5_free_data_contents(context, &cksum_struct.checksum_data);
@@ -371,6 +375,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     code = 0;
 
 cleanup:
+    krb5_auth_con_set_authdata_context(context, ctx->auth_context, NULL);
     if (checksum_data && checksum_data->data)
         krb5_free_data_contents(context, checksum_data);
     if (ap_req.data)
@@ -515,7 +520,8 @@ new_connection(
         /* gsskrb5 v1 */
         krb5_int32 seq_temp;
         if ((code = make_ap_req_v1(context, ctx,
-                                   cred, k_cred, input_chan_bindings,
+                                   cred, k_cred, ctx->there->ad_context,
+                                   input_chan_bindings,
                                    mech_type, &token))) {
             if ((code == KRB5_FCC_NOFILE) || (code == KRB5_CC_NOTFOUND) ||
                 (code == KG_EMPTY_CCACHE))
