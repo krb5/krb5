@@ -134,6 +134,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
     memset(&in_creds, 0, sizeof(krb5_creds));
     in_creds.client = in_creds.server = NULL;
 
+    assert(cred->name != NULL);
+
     in_creds.client = cred->name->princ;
     in_creds.server = server->princ;
     in_creds.times.endtime = endtime;
@@ -191,6 +193,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         krb5_auth_con_getflags(context, auth_context, &con_flags);
         krb5_auth_con_setflags(context, auth_context,
                                con_flags & ~KRB5_AUTH_CONTEXT_DO_TIME);
+
+        assert(data->cred->name != NULL);
 
         code = krb5_fwd_tgt_creds(context, auth_context, 0,
                                   data->cred->name->princ, data->ctx->there->princ,

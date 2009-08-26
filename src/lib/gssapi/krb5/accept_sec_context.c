@@ -537,7 +537,7 @@ kg_accept_krb5(minor_status, context_handle,
     }
 
     if ((code = krb5_rd_req(context, &auth_context, &ap_req,
-                            cred->name->princ,
+                            cred->name ? cred->name->princ : NULL,
                             cred->keytab,
                             &ap_req_options,
                             &ticket))) {
@@ -1150,7 +1150,7 @@ fail:
         krb_error_data.error = code;
         (void) krb5_us_timeofday(context, &krb_error_data.stime,
                                  &krb_error_data.susec);
-        krb_error_data.server = cred->name->princ;
+        krb_error_data.server = cred->name ? cred->name->princ : NULL;
 
         code = krb5_mk_error(context, &krb_error_data, &scratch);
         if (code)

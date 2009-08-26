@@ -260,6 +260,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
         if (cred->rcache) {
             /* Open the replay cache for this principal. */
+            assert(cred->name->princ != NULL);
+
             if ((code = krb5_get_server_rcache(context,
                                                krb5_princ_component(context, cred->name->princ, 0),
                                                &new_cred->rcache))) {
