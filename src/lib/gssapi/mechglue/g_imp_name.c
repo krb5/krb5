@@ -177,6 +177,7 @@ allocation_failure:
  * GSS export name constants
  */
 static const char *expNameTokId = "\x04\x01";
+static const char *expNameCompositeTokId = "\x04\x02";
 static const unsigned int expNameTokIdLen = 2;
 static const unsigned int mechOidLenLen = 2;
 static const unsigned int nameTypeLenLen = 2;
@@ -201,7 +202,8 @@ importExportName(minor, unionName)
 	return (GSS_S_DEFECTIVE_TOKEN);
 
     buf = (unsigned char *)expName.value;
-    if (memcmp(expNameTokId, buf, expNameTokIdLen) != 0)
+    if (memcmp(expNameTokId, buf, expNameTokIdLen) != 0 &&
+	memcmp(expNameCompositeTokId, buf, expNameTokIdLen) != 0)
 	return (GSS_S_DEFECTIVE_TOKEN);
 
     buf += expNameTokIdLen;

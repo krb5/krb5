@@ -45,6 +45,46 @@
  * GSS_S_FAILURE        if memory allocation fails
  */
 
+static krb5_error_code
+import_name_composite(krb5_context context,
+                      unsigned char *enc_data, size_t enc_length,
+                      krb5_authdata_context *pad_context)
+{
+    krb5_authdata_context ad_context;
+    krb5_error_code code;
+    krb5_data data;
+    krb5_authdata **authdata;
+
+    data.data = (char *)enc_data;
+    data.length = enc_length;
+
+    code = decode_krb5_authdata(&data, &authdata);
+    if (code != 0)
+        return code;
+
+    code = krb5_authdata_context_init(context, &ad_context);
+    if (code != 0) {
+        krb5_free_authdata(context, authdata);
+        return code;
+    }
+
+    code = krb5_authdata_import_attributes(context,
+                                           ad_context,
+                                           AD_USAGE_AP_REQ,
+                                           authdata);
+    if (code != 0) {
+        krb5_free_authdata(context, authdata);
+        krb5_authdata_context_free(context, ad_context);
+        return code;
+    }
+
+    krb5_free_authdata(context, authdata);
+
+    *pad_context = ad_context;
+
+    return 0;
+}
+
 OM_uint32
 krb5_gss_import_name(minor_status, input_name_buffer,
                      input_name_type, output_name)
@@ -56,11 +96,14 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     krb5_context context;
     krb5_principal princ = NULL;
     krb5_error_code code;
-    char *stringrep, *tmp, *tmp2, *cp;
-    OM_uint32    length;
+    unsigned char *cp, *end;
+    char *tmp, *stringrep, *tmp2;
+    ssize_t    length;
 #ifndef NO_PASSWORD
     struct passwd *pw;
 #endif
+    int has_ad = 0;
+    krb5_authdata_context ad_context = NULL;
 
     code = krb5_gss_init_context(&context);
     if (code) {
@@ -81,7 +124,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
         char *service, *host;
 
         if ((tmp =
-             (char *) xmalloc(input_name_buffer->length + 1)) == NULL) {
+             xmalloc(input_name_buffer->length + 1)) == NULL) {
             *minor_status = ENOMEM;
             krb5_free_context(context);
             return(GSS_S_FAILURE);
@@ -155,28 +198,49 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             goto do_getpwuid;
 #endif
         } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
-            cp = tmp;
+#define BOUNDS_CHECK(cp, end, n) do { if (cp + n > end) goto fail_name; } while (0)
+            cp = (unsigned char *)tmp;
+            end = cp + input_name_buffer->length;
+
+            BOUNDS_CHECK(cp, end, 2);
             if (*cp++ != 0x04)
                 goto fail_name;
-            if (*cp++ != 0x01)
+            switch (*cp++) {
+            case 0x01:
+                break;
+            case 0x02:
+                has_ad++;
+                break;
+            default:
                 goto fail_name;
+            }
+
+            BOUNDS_CHECK(cp, end, 2);
             if (*cp++ != 0x00)
                 goto fail_name;
             length = *cp++;
-            if (length != gss_mech_krb5->length+2)
+            if (length != (ssize_t)gss_mech_krb5->length+2)
                 goto fail_name;
+
+            BOUNDS_CHECK(cp, end, 2);
             if (*cp++ != 0x06)
                 goto fail_name;
             length = *cp++;
-            if (length != gss_mech_krb5->length)
+            if (length != (ssize_t)gss_mech_krb5->length)
                 goto fail_name;
+
+            BOUNDS_CHECK(cp, end, length);
             if (memcmp(cp, gss_mech_krb5->elements, length) != 0)
                 goto fail_name;
             cp += length;
+
+            BOUNDS_CHECK(cp, end, 4);
             length = *cp++;
             length = (length << 8) | *cp++;
             length = (length << 8) | *cp++;
             length = (length << 8) | *cp++;
+
+            BOUNDS_CHECK(cp, end, length);
             tmp2 = malloc(length+1);
             if (tmp2 == NULL) {
                 xfree(tmp);
@@ -184,10 +248,27 @@ krb5_gss_import_name(minor_status, input_name_buffer,
                 krb5_free_context(context);
                 return GSS_S_FAILURE;
             }
-            strncpy(tmp2, cp, length);
+            strncpy(tmp2, (char *)cp, length);
             tmp2[length] = 0;
-
             stringrep = tmp2;
+            cp += length;
+
+            if (has_ad) {
+                BOUNDS_CHECK(cp, end, 4);
+                length = *cp++;
+                length = (length << 8) | *cp++;
+                length = (length << 8) | *cp++;
+                length = (length << 8) | *cp++;
+
+                BOUNDS_CHECK(cp, end, length);
+                code = import_name_composite(context,
+                                             cp, length,
+                                             &ad_context);
+                if (code != 0)
+                    goto fail_name;
+                cp += length;
+            }
+            assert(cp == end);
         } else {
             xfree(tmp);
             krb5_free_context(context);
@@ -218,18 +299,20 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     if (code) {
         *minor_status = (OM_uint32) code;
         save_error_info(*minor_status, context);
+        krb5_authdata_context_free(context, ad_context);
         krb5_free_context(context);
         return(GSS_S_BAD_NAME);
     }
 
     /* save the name in the validation database */
-    code = kg_init_name(context, princ, NULL,
+    code = kg_init_name(context, princ, ad_context,
                         KG_INIT_NAME_INTERN | KG_INIT_NAME_NO_COPY,
                         (krb5_gss_name_t *)output_name);
     if (code != 0) {
         *minor_status = (OM_uint32) code;
-        krb5_free_principal(context, princ);
         save_error_info(*minor_status, context);
+        krb5_free_principal(context, princ);
+        krb5_authdata_context_free(context, ad_context);
         krb5_free_context(context);
         return(GSS_S_FAILURE);
     }
