@@ -255,12 +255,6 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 					    &scratch)))
 	goto cleanup_cksum;
     
-    /* Null out these fields, to prevent pointer sharing problems;
-     * they were supplied by the caller
-     */
-    (*auth_context)->authentp->client = NULL;
-    (*auth_context)->authentp->checksum = NULL;
-
     /* call the encryption routine */
     if ((retval = krb5_encrypt_helper(context, &in_creds->keyblock,
 				      KRB5_KEYUSAGE_AP_REQ_AUTH,
@@ -274,6 +268,13 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     free(toutbuf);
 
 cleanup_cksum:
+    /* Null out these fields, to prevent pointer sharing problems;
+     * they were supplied by the caller
+     */
+    if ((*auth_context)->authentp != NULL) {
+	(*auth_context)->authentp->client = NULL;
+	(*auth_context)->authentp->checksum = NULL;
+    }
     if (checksump && checksump->checksum_type != 0x8003)
       free(checksump->contents);
 
