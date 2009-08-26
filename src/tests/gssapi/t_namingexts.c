@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include <gssapi/gssapi_krb5.h>
+#include <gssapi/gssapi_generic.h>
 
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
 
@@ -149,9 +150,6 @@ enumerateAttributes(OM_uint32 *minor,
     gss_buffer_set_t asserted = GSS_C_NO_BUFFER_SET;
     gss_buffer_set_t complete = GSS_C_NO_BUFFER_SET;
     unsigned int i;
-    gss_buffer_desc exported_name;
-
-    exported_name.value = NULL;
 
     major = gss_inquire_name(minor,
                              name,
@@ -178,12 +176,32 @@ enumerateAttributes(OM_uint32 *minor,
             dumpAttribute(minor, name, &complete->elements[i]);
     }
 
+cleanup:
+    gss_release_oid(&tmp, &mech);
+    gss_release_buffer_set(&tmp, &authenticated);
+    gss_release_buffer_set(&tmp, &asserted);
+    gss_release_buffer_set(&tmp, &complete);
+
+    return major;
+}
+
+static OM_uint32
+testExportImportName(OM_uint32 *minor,
+                     gss_name_t name)
+{
+    OM_uint32 major, tmp;
+    gss_buffer_desc exported_name;
+    gss_name_t imported_name = GSS_C_NO_NAME;
+    unsigned int i;
+
+    exported_name.value = NULL;
+
     major = gss_export_name_composite(minor,
                                       name,
                                       &exported_name);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_export_name_composite", major, minor);
-        goto cleanup;
+        displayStatus("gss_export_name_composite", major, *minor);
+        return major;
     }
 
     printf("Exported name:\n");
@@ -196,12 +214,19 @@ enumerateAttributes(OM_uint32 *minor,
 
     printf("\n");
 
-cleanup:
+    major = gss_import_name(minor, &exported_name, gss_nt_exported_name,
+                            &imported_name);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_import_name", major, *minor);
+        gss_release_buffer(&tmp, &exported_name);
+        return major;
+    }
+
     gss_release_buffer(&tmp, &exported_name);
-    gss_release_oid(&tmp, &mech);
-    gss_release_buffer_set(&tmp, &authenticated);
-    gss_release_buffer_set(&tmp, &asserted);
-    gss_release_buffer_set(&tmp, &complete);
+
+    major = enumerateAttributes(minor, imported_name);
+
+    gss_release_name(&tmp, &imported_name);
 
     return major;
 }
@@ -277,6 +302,7 @@ initAcceptSecContext(OM_uint32 *minor,
     else {
         displayCanonName(minor, source_name, "Source name");
         enumerateAttributes(minor, source_name);
+        testExportImportName(minor, source_name);
     }
 
     (void) gss_delete_sec_context(minor, &acceptor_context, NULL);
