@@ -1288,7 +1288,7 @@ mspac_export_attributes(krb5_context context,
     krb5_data data;
 
     if (pacctx->pac == NULL)
-	return EINVAL;
+	return 0;
 
     authdata = calloc(2, sizeof(krb5_authdata *));
     if (authdata == NULL)
