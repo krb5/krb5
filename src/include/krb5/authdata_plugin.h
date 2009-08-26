@@ -160,11 +160,12 @@ typedef struct krb5plugin_authdata_ftable_v1 {
 typedef krb5_error_code
 (*authdata_client_plugin_init_proc)(krb5_context context, void **plugin_context);
 
-#define AD_USAGE_AS_REQ	    0x01
-#define AD_USAGE_TGS_REQ    0x02
-#define AD_USAGE_AP_REQ	    0x04
-#define AD_USAGE_MASK	    0x0F
-#define AD_INFORMATIONAL    0x10
+#define AD_USAGE_AS_REQ		0x01
+#define AD_USAGE_TGS_REQ	0x02
+#define AD_USAGE_AP_REQ		0x04
+#define AD_USAGE_KDC_ISSUED	0x08
+#define AD_USAGE_MASK		0x0F
+#define AD_INFORMATIONAL	0x10
 
 typedef void
 (*authdata_client_plugin_flags_proc)(krb5_context context,
