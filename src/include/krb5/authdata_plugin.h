@@ -189,9 +189,6 @@ typedef krb5_error_code
 (*authdata_client_import_attributes_proc)(krb5_context context,
 					  void *plugin_context,
 					  void *request_context,
-					  const krb5_auth_context *auth_context,
-					  const krb5_keyblock *key,
-					  const krb5_ap_req *req,
 					  krb5_authdata **authdata);
 
 typedef krb5_error_code
@@ -252,6 +249,14 @@ typedef void
 				      void *request_context,
 				      void *ptr);
 
+typedef krb5_error_code
+(*authdata_client_verify_proc)(krb5_context context,
+			       void *plugin_context,
+			       void *request_context,
+			       const krb5_auth_context *auth_context,
+			       const krb5_keyblock *key,
+			       const krb5_ap_req *req);
+
 typedef struct krb5plugin_authdata_client_ftable_v0 {
     char *name;
     krb5_authdatatype *ad_type_list;
@@ -269,6 +274,7 @@ typedef struct krb5plugin_authdata_client_ftable_v0 {
     authdata_client_export_internal_proc export_internal;
     authdata_client_free_internal_proc free_internal;
     authdata_client_copy_context_proc copy_context;
+    authdata_client_verify_proc verify;
 } krb5plugin_authdata_client_ftable_v0;
 
 #endif /* KRB5_AUTHDATA_PLUGIN_H_INCLUDED */

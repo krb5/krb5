@@ -976,9 +976,6 @@ static krb5_error_code
 mspac_import_attributes(krb5_context context,
                         void *plugin_context,
 		        void *request_context,
-		        const krb5_auth_context *auth_context,
-		        const krb5_keyblock *key,
-		        const krb5_ap_req *req,
 		        krb5_authdata **authdata)
 {
     krb5_error_code code;
@@ -994,19 +991,30 @@ mspac_import_attributes(krb5_context context,
 
     code = krb5_pac_parse(context, authdata[0]->contents,
 			  authdata[0]->length, &pacctx->pac);
-    if (code != 0)
-	return code;
 
-    if (req != NULL) {
-        assert(key != NULL);
+    return code;
+}
 
-        code = krb5_pac_verify(context,
-			       pacctx->pac,
-			       req->ticket->enc_part2->times.authtime,
-			       req->ticket->enc_part2->client,
-			       key,
-			       NULL);
-    }
+static krb5_error_code
+mspac_verify(krb5_context context,
+	     void *plugin_context,
+	     void *request_context,
+	     const krb5_auth_context *auth_context,
+	     const krb5_keyblock *key,
+	     const krb5_ap_req *req)
+{
+    krb5_error_code code;
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+
+    if (pacctx->pac == NULL)
+	return EINVAL;
+
+    code = krb5_pac_verify(context,
+			   pacctx->pac,
+			   req->ticket->enc_part2->times.authtime,
+			   req->ticket->enc_part2->client,
+			   key,
+			   NULL);
 
 #if 0
     /*
@@ -1395,7 +1403,8 @@ krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable = {
     mspac_export_attributes,
     mspac_export_internal,
     mspac_free_internal,
-    mspac_copy_context
+    mspac_copy_context,
+    mspac_verify
 };
 
 
