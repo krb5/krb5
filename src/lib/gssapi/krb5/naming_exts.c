@@ -112,8 +112,18 @@ kg_duplicate_name(krb5_context context,
                   krb5_flags flags,
                   krb5_gss_name_t *dst)
 {
-    return kg_init_name(context, src->princ,
+    krb5_error_code code;
+
+    code = k5_mutex_lock(&src->lock);
+    if (code != 0)
+        return code;
+
+    code = kg_init_name(context, src->princ,
                         src->ad_context, flags, dst);
+
+    k5_mutex_unlock(&src->lock);
+
+    return code;
 }
 
 
