@@ -1,6 +1,6 @@
 thisconfigdir=../../..
-myfulldir=plugins/authdata/greet
-mydir=plugins/authdata/greet
+myfulldir=plugins/authdata/greet_client
+mydir=plugins/authdata/greet_client
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
@@ -11,21 +11,20 @@ DEFS=@DEFS@
 
 LOCALINCLUDES = -I../../../include/krb5
 
-LIBBASE=greet
+LIBBASE=greet_client
 LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
-#RELDIR=../plugins/preauth/wpse
-# Depends on nothing
-SHLIB_EXPDEPS =
-SHLIB_EXPLIBS=
+SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
 
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 STOBJLISTS=OBJS.ST
-STLIBOBJS= greet_auth.o
+STLIBOBJS= greet.o
 
-SRCS=	greet_auth.c
+SRCS=	greet.c
 
 all-unix:: all-liblinks
 install-unix:: install-libs
