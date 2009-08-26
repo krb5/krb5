@@ -31,7 +31,9 @@
 #include <gssapi/gssapi_krb5.h>
 #include <gssapi/gssapi_generic.h>
 
+#ifdef USE_SPNEGO
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
+#endif
 
 static void displayStatus_1(m, code, type)
      char *m;
@@ -296,7 +298,11 @@ initAcceptSecContext(OM_uint32 *minor,
                                  verifier_cred_handle,
                                  &initiator_context,
                                  target_name,
+#ifdef USE_SPNEGO
                                  (gss_OID)&spnego_mech,
+#else
+                                 (gss_OID)gss_mech_krb5,
+#endif
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -359,7 +365,11 @@ int main(int argc, char *argv[])
         }
     }
 
+#if USE_SPNEGO
+    mechs.elements = (gss_OID)&spnego_mech;
+#else
     mechs.elements = (gss_OID)gss_mech_krb5;
+#endif
     mechs.count = 1;
 
     /* get default cred */
