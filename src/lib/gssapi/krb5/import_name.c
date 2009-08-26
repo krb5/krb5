@@ -70,7 +70,7 @@ import_name_composite(krb5_context context,
 
     code = krb5_authdata_import_attributes(context,
                                            ad_context,
-                                           AD_USAGE_AP_REQ,
+                                           AD_USAGE_MASK,
                                            authdata);
     if (code != 0) {
         krb5_free_authdata(context, authdata);

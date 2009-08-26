@@ -945,7 +945,7 @@ mspac_flags(krb5_context context,
 	    krb5_authdatatype ad_type,
 	    krb5_flags *flags)
 {
-    *flags = AD_USAGE_AP_REQ;
+    *flags = AD_USAGE_KDC_ISSUED;
 }
 
 static void
@@ -1362,10 +1362,12 @@ mspac_copy_context(krb5_context context,
     if (code != 0)
 	return code;
 
-    code = k5_pac_copy(context, srcctx->pac, &dstctx->pac);
-    if (code != 0) {
-	free(dstctx);
-	return code;
+    if (srcctx->pac != NULL) {
+	code = k5_pac_copy(context, srcctx->pac, &dstctx->pac);
+        if (code != 0) {
+	    free(dstctx);
+	    return code;
+	}
     }
 
     *dst_request_context = dstctx;

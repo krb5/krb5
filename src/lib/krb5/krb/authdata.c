@@ -361,6 +361,7 @@ static krb5_error_code
 k5_merge_data_list(krb5_data **dst, krb5_data *src, unsigned int *len)
 {
     unsigned int i;
+    krb5_data *d;
 
     if (src == NULL)
         return 0;
@@ -368,15 +369,18 @@ k5_merge_data_list(krb5_data **dst, krb5_data *src, unsigned int *len)
     for (i = 0; src[i].data != NULL; i++)
         ;
 
-    *dst = realloc(*dst, (*len + i + 1) * sizeof(krb5_data));
-    if (*dst == NULL)
+    d = realloc(*dst, (*len + i + 1) * sizeof(krb5_data));
+    if (d == NULL)
         return ENOMEM;
 
-    memcpy(&(*dst)[*len], src, i * sizeof(krb5_data));
+    memcpy(&d[*len], src, i * sizeof(krb5_data));
 
     *len += i;
 
-    (*dst)[*len].data = NULL;
+    d[*len].data = NULL;
+    d[*len].length = 0;
+
+    *dst = d;
 
     return 0;
 }
@@ -391,7 +395,8 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
     krb5_error_code code;
     krb5_data *asserted = NULL;
     krb5_data *verified = NULL;
-    unsigned int len = 0;
+    unsigned int asserted_len = 0;
+    unsigned int verified_len = 0;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
@@ -411,7 +416,7 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
             continue;
 
         if (asserted_attrs != NULL) {
-            code = k5_merge_data_list(&asserted, asserted2, &len);
+            code = k5_merge_data_list(&asserted, asserted2, &asserted_len);
             if (code != 0) {
                 krb5int_free_data_list(kcontext, asserted2);
                 break;
@@ -421,7 +426,7 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
         }
 
         if (verified_attrs != NULL) {
-            code = k5_merge_data_list(&verified, verified2, &len);
+            code = k5_merge_data_list(&verified, verified2, &verified_len);
             if (code != 0)  {
                 krb5int_free_data_list(kcontext, verified2);
                 break;
@@ -453,6 +458,15 @@ krb5_authdata_get_attribute(krb5_context kcontext,
 {
     int i;
     krb5_error_code code = ENOENT;
+
+    *authenticated = FALSE;
+    *complete = FALSE;
+
+    value->data = NULL;
+    value->length = 0;
+
+    display_value->data = NULL;
+    display_value->length = 0;
 
     /*
      * NB at present a module is presumed to be authoritative for
@@ -489,7 +503,8 @@ krb5_authdata_set_attribute(krb5_context kcontext,
                             const krb5_data *value)
 {
     int i;
-    krb5_error_code code = ENOENT;
+    krb5_error_code code = 0;
+    int found = 0;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
@@ -503,12 +518,18 @@ krb5_authdata_set_attribute(krb5_context kcontext,
                                                 complete,
                                                 attribute,
                                                 value);
-        if (code != 0 && code != ENOENT)
+        if (code == ENOENT)
+            code = 0;
+        else if (code == 0)
+            found++;
+        else
             break;
     }
 
-    return code;
+    if (code == 0 && found == 0)
+        code = ENOENT;
 
+    return code;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -518,6 +539,7 @@ krb5_authdata_delete_attribute(krb5_context kcontext,
 {
     int i;
     krb5_error_code code = ENOENT;
+    int found = 0;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
@@ -529,9 +551,16 @@ krb5_authdata_delete_attribute(krb5_context kcontext,
                                                    module->plugin_context,
                                                    *(module->request_context_pp),
                                                    attribute);
-        if (code != 0 && code != ENOENT)
+        if (code == ENOENT)
+            code = 0;
+        else if (code == 0)
+            found++;
+        else
             break;
     }
+
+    if (code == 0 && found == 0)
+        code = ENOENT;
 
     return code;
 }
@@ -565,7 +594,9 @@ krb5_authdata_export_attributes(krb5_context kcontext,
                                                     *(module->request_context_pp),
                                                     flags,
                                                     &authdata2);
-        if (code != 0 && code != ENOENT)
+        if (code == ENOENT)
+            code = 0;
+        else if (code != 0)
             break;
 
         if (authdata2 == NULL)

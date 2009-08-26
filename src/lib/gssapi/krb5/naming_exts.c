@@ -426,7 +426,7 @@ krb5_gss_set_name_attribute(OM_uint32 *minor_status,
     kattr.length = attr->length;
 
     kvalue.data = (char *)value->value;
-    kvalue.length = attr->length;
+    kvalue.length = value->length;
 
     code = krb5_authdata_set_attribute(context,
                                        kname->ad_context,
@@ -674,7 +674,7 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
 
     code = krb5_authdata_export_attributes(context,
                                            kname->ad_context,
-                                           AD_USAGE_AP_REQ,
+                                           AD_USAGE_MASK,
                                            &authdata);
     if (code != 0)
         goto cleanup;

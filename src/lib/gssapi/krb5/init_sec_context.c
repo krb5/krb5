@@ -328,9 +328,9 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
         mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_ETYPE_NEGOTIATION;
 
     krb5_auth_con_set_authdata_context(context, ctx->auth_context, ad_context);
-
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
                                 checksum_data, k_cred, &ap_req);
+    krb5_auth_con_set_authdata_context(context, ctx->auth_context, NULL);
     krb5_free_data_contents(context, &cksum_struct.checksum_data);
     if (code)
         goto cleanup;
@@ -375,7 +375,6 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     code = 0;
 
 cleanup:
-    krb5_auth_con_set_authdata_context(context, ctx->auth_context, NULL);
     if (checksum_data && checksum_data->data)
         krb5_free_data_contents(context, checksum_data);
     if (ap_req.data)

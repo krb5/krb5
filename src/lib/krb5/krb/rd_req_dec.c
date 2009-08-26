@@ -399,7 +399,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	goto cleanup;
       if ((retval = krb5int_authdata_verify(context,
 					    (*auth_context)->ad_context,
-					    AD_USAGE_AP_REQ,
+					    AD_USAGE_MASK,
 					    auth_context,
 					    &decrypt_key,
 					    req)))
