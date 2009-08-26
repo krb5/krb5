@@ -1116,7 +1116,9 @@ mspac_get_attribute_types(krb5_context context,
     krb5_error_code code;
     krb5_data **outattrs;
 
+
     if (pacctx->pac == NULL) {
+#if 0
 	attrs = calloc(MSPAC_ATTRIBUTE_COUNT + 1, sizeof(krb5_data));
 	if (attrs == NULL)
 	    return ENOMEM;
@@ -1134,6 +1136,9 @@ mspac_get_attribute_types(krb5_context context,
 	*asserted = attrs;
 
 	return 0;
+#else
+	return ENOENT;
+#endif
     }
 
     outattrs = pacctx->pac->verified ? verified : asserted;
