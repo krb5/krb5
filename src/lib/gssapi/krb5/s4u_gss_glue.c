@@ -289,7 +289,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
      * with constrained delegation will only return an error.
      */
     cred->usage = GSS_C_INITIATE;
-    cred->proxy_cred = (subject_creds->ticket_flags & TKT_FLG_FORWARDABLE) != 0;
+    cred->proxy_cred = !!(subject_creds->ticket_flags & TKT_FLG_FORWARDABLE);
 
     major_status = kg_set_desired_mechs(minor_status, desired_mechs, cred);
     if (GSS_ERROR(major_status))
