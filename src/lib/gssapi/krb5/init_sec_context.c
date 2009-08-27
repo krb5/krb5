@@ -166,6 +166,11 @@ static krb5_error_code get_credentials(context, cred, server, now,
         if (code)
             goto cleanup;
 
+        if ((evidence_creds.ticket_flags & TKT_FLG_FORWARDABLE) == 0) {
+            code = KRB5_TKT_NOT_FORWARDABLE;
+            goto cleanup;
+        }
+
         in_creds.client = cc_princ;
         in_creds.second_ticket = evidence_creds.ticket;
     } else {
