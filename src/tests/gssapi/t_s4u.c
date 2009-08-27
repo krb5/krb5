@@ -351,7 +351,12 @@ int main(int argc, char *argv[])
                                     delegated_cred_handle,
                                     impersonator_cred_handle);
     } else if (target != GSS_C_NO_NAME) {
-        fprintf(stderr, "Warning: no delegated credentials handle returned\n");
+        fprintf(stderr, "Warning: no delegated credentials handle returned\n\n");
+        fprintf(stderr, "Verify:\n\n");
+        fprintf(stderr, " - The TGT for the impersonating service is forwardable\n");
+        fprintf(stderr, " - The T2A4D flag set on the impersonating service's UAC\n");
+        fprintf(stderr, " - The user is not marked sensitive and cannot be delegated\n");
+        fprintf(stderr, "\n");
     }
 
 out:
