@@ -523,7 +523,7 @@ new_connection(
         /* gsskrb5 v1 */
         krb5_int32 seq_temp;
         if ((code = make_ap_req_v1(context, ctx,
-                                   cred, k_cred, ctx->there->ad_context,
+                                   cred, k_cred, ctx->here->ad_context,
                                    input_chan_bindings,
                                    mech_type, &token))) {
             if ((code == KRB5_FCC_NOFILE) || (code == KRB5_CC_NOTFOUND) ||

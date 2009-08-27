@@ -31,6 +31,8 @@
 #include <gssapi/gssapi_krb5.h>
 #include <gssapi/gssapi_generic.h>
 
+#define USE_SPNEGO 1
+
 #ifdef USE_SPNEGO
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
 #endif
@@ -237,7 +239,7 @@ testExportImportName(OM_uint32 *minor,
 
 static OM_uint32
 testGreetAuthzData(OM_uint32 *minor,
-                   gss_name_t target_name)
+                   gss_name_t name)
 {
     OM_uint32 major;
     gss_buffer_desc attr;
@@ -250,7 +252,7 @@ testGreetAuthzData(OM_uint32 *minor,
     value.length = strlen((char *)value.value);
 
     major = gss_set_name_attribute(minor,
-                                   target_name,
+                                   name,
                                    1,
                                    &attr,
                                    &value);
@@ -291,7 +293,6 @@ initAcceptSecContext(OM_uint32 *minor,
         return major;
     }
 
-    testGreetAuthzData(minor, target_name);
     displayCanonName(minor, target_name, "Target name");
 
     major = gss_init_sec_context(minor,
@@ -351,11 +352,12 @@ initAcceptSecContext(OM_uint32 *minor,
 
 int main(int argc, char *argv[])
 {
-    OM_uint32 minor, major;
+    OM_uint32 minor, major, tmp;
     gss_cred_id_t cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_OID_set_desc mechs;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
+    gss_name_t name = GSS_C_NO_NAME;
 
     if (argc > 1) {
         major = krb5_gss_register_acceptor_identity(argv[1]);
@@ -365,7 +367,36 @@ int main(int argc, char *argv[])
         }
     }
 
-#if USE_SPNEGO
+    if (argc > 2) {
+        gss_buffer_desc name_buf;
+        gss_name_t tmp_name;
+
+        name_buf.value = argv[2];
+        name_buf.length = strlen(argv[2]);
+
+        major = gss_import_name(&minor, &name_buf,
+                                (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME, &tmp_name);
+        if (GSS_ERROR(major)) {
+            displayStatus("gss_import_name", major, minor);
+            goto out;
+        }
+
+        major = gss_canonicalize_name(&minor, tmp_name,
+                                      (gss_OID)gss_mech_krb5, &name);
+        if (GSS_ERROR(major)) {
+            gss_release_name(&tmp, &tmp_name);
+            displayStatus("gss_canonicalze_name", major, minor);
+            goto out;
+        }
+
+        gss_release_name(&tmp, &tmp_name);
+
+        major = testGreetAuthzData(&minor, name);
+        if (GSS_ERROR(major))
+            goto out;
+    }
+
+#if 0 /* XXX mechglue bug */
     mechs.elements = (gss_OID)&spnego_mech;
 #else
     mechs.elements = (gss_OID)gss_mech_krb5;
@@ -374,7 +405,7 @@ int main(int argc, char *argv[])
 
     /* get default cred */
     major = gss_acquire_cred(&minor,
-                             GSS_C_NO_NAME,
+                             name,
                              GSS_C_INDEFINITE,
                              &mechs,
                              GSS_C_BOTH,
@@ -397,9 +428,10 @@ int main(int argc, char *argv[])
     printf("\n");
 
 out:
-    (void) gss_release_cred(&minor, &delegated_cred_handle);
-    (void) gss_release_cred(&minor, &cred_handle);
-    (void) gss_release_oid_set(&minor, &actual_mechs);
+    (void) gss_release_cred(&tmp, &delegated_cred_handle);
+    (void) gss_release_cred(&tmp, &cred_handle);
+    (void) gss_release_oid_set(&tmp, &actual_mechs);
+    (void) gss_release_name(&tmp, &name);
 
     return GSS_ERROR(major) ? 1 : 0;
 }
