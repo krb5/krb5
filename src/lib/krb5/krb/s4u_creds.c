@@ -78,10 +78,10 @@ s4u_identify_user(krb5_context context,
     }
 
     if (in_creds->client != NULL &&
-        krb5_princ_type(context, in_creds->client) != KRB5_NT_ENTERPRISE_PRINCIPAL) {
+        krb5_princ_type(context, in_creds->client) !=
+            KRB5_NT_ENTERPRISE_PRINCIPAL)
         /* we already know the realm of the user */
         return krb5_copy_principal(context, in_creds->client, canon_user);
-    }
 
     memset(&creds, 0, sizeof(creds));
 
@@ -98,7 +98,8 @@ s4u_identify_user(krb5_context context,
     krb5_get_init_creds_opt_set_proxiable(opts, 0);
     krb5_get_init_creds_opt_set_canonicalize(opts, 1);
     krb5_get_init_creds_opt_set_preauth_list(opts, ptypes, 1);
-    code = krb5int_gic_opt_to_opte(context, opts, &opte, 0, "s4u_identify_user");
+    code = krb5int_gic_opt_to_opte(context, opts, &opte,
+                                   0, "s4u_identify_user");
     if (code != 0)
         goto cleanup;
 
@@ -304,8 +305,8 @@ build_pa_s4u_x509_user(krb5_context context,
     for (i = 0; tgsreq->padata[i] != NULL; i++)
         ;
 
-    padata = (krb5_pa_data **)realloc(tgsreq->padata,
-                                      (i + 2) * sizeof(krb5_pa_data *));
+    padata = realloc(tgsreq->padata,
+                     (i + 2) * sizeof(krb5_pa_data *));
     if (padata == NULL) {
         code = ENOMEM;
         goto cleanup;
@@ -476,7 +477,8 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     memset(&s4u_user, 0, sizeof(s4u_user));
 
-    if (in_creds->client != NULL && krb5_princ_size(context, in_creds->client)) {
+    if (in_creds->client != NULL &&
+        krb5_princ_size(context, in_creds->client)) {
         if (krb5_princ_type(context, in_creds->client) ==
             KRB5_NT_ENTERPRISE_PRINCIPAL)
         {
@@ -685,7 +687,7 @@ cleanup:
          * storing the first referral only mirrors the behaviour of
          * krb5_get_cred_from_kdc_opt()
          */
-        tgts2 = (krb5_creds **)realloc(*tgts, (i + 2) * sizeof(krb5_creds *));
+        tgts2 = realloc(*tgts, (i + 2) * sizeof(krb5_creds *));
         tgts2[i] = referral_tgts[0];
         referral_tgts[0] = NULL;
 
@@ -830,7 +832,8 @@ krb5_get_credentials_for_proxy(krb5_context context,
     }
 
     /* Caller should have set in_creds->client to match evidence ticket client */
-    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client, in_creds->client)) {
+    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client,
+                                in_creds->client)) {
         code = EINVAL;
         goto cleanup;
     }
@@ -840,7 +843,8 @@ krb5_get_credentials_for_proxy(krb5_context context,
         goto cleanup;
     }
 
-    code = krb5_get_credentials_core(context, options, in_creds, &mcreds, &fields);
+    code = krb5_get_credentials_core(context, options, in_creds,
+                                     &mcreds, &fields);
     if (code != 0)
         goto cleanup;
 
