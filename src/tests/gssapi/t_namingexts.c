@@ -97,7 +97,8 @@ displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
 static void
 dumpAttribute(OM_uint32 *minor,
               gss_name_t name,
-              gss_buffer_t attribute)
+              gss_buffer_t attribute,
+              int noisy)
 {
     OM_uint32 major, tmp;
     gss_buffer_desc value;
@@ -124,19 +125,20 @@ dumpAttribute(OM_uint32 *minor,
             break;
         }
 
-        printf("\nAttribute %.*s %s %s %.*s\n",
+        printf("Attribute %.*s %s %s %.*s\n",
                (int)attribute->length, (char *)attribute->value,
                authenticated ? "Authenticated" : "",
                 complete ? "Complete" : "",
                (int)display_value.length, (char *)display_value.value);
 
-        for (i = 0; i < value.length; i++) {
-            if ((i % 32) == 0)
-                printf("\n");
-            printf("%02x", ((char *)value.value)[i] & 0xFF);
+        if (noisy) {
+            for (i = 0; i < value.length; i++) {
+                if ((i % 32) == 0)
+                    printf("\n");
+                printf("%02x", ((char *)value.value)[i] & 0xFF);
+            }
+            printf("\n\n");
         }
-
-        printf("\n");
 
         gss_release_buffer(&tmp, &value);
         gss_release_buffer(&tmp, &display_value);
@@ -145,7 +147,8 @@ dumpAttribute(OM_uint32 *minor,
 
 static OM_uint32
 enumerateAttributes(OM_uint32 *minor,
-                    gss_name_t name)
+                    gss_name_t name,
+                    int noisy)
 {
     OM_uint32 major, tmp;
     int name_is_MN;
@@ -169,15 +172,15 @@ enumerateAttributes(OM_uint32 *minor,
 
     if (authenticated != GSS_C_NO_BUFFER_SET) {
         for (i = 0; i < authenticated->count; i++)
-            dumpAttribute(minor, name, &authenticated->elements[i]);
+            dumpAttribute(minor, name, &authenticated->elements[i], noisy);
     }
     if (asserted != GSS_C_NO_BUFFER_SET) {
         for (i = 0; i < asserted->count; i++)
-            dumpAttribute(minor, name, &asserted->elements[i]);
+            dumpAttribute(minor, name, &asserted->elements[i], noisy);
     }
     if (complete != GSS_C_NO_BUFFER_SET) {
         for (i = 0; i < complete->count; i++)
-            dumpAttribute(minor, name, &complete->elements[i]);
+            dumpAttribute(minor, name, &complete->elements[i], noisy);
     }
 
 cleanup:
@@ -228,9 +231,8 @@ testExportImportName(OM_uint32 *minor,
 
     gss_release_buffer(&tmp, &exported_name);
 
-#if 0
-    major = enumerateAttributes(minor, imported_name);
-#endif
+    printf("Re-imported attributes:\n\n");
+    major = enumerateAttributes(minor, imported_name, 0);
 
     gss_release_name(&tmp, &imported_name);
 
@@ -339,7 +341,7 @@ initAcceptSecContext(OM_uint32 *minor,
         displayStatus("gss_accept_sec_context", major, minor);
     else {
         displayCanonName(minor, source_name, "Source name");
-        enumerateAttributes(minor, source_name);
+        enumerateAttributes(minor, source_name, 1);
         testExportImportName(minor, source_name);
     }
 
@@ -360,19 +362,11 @@ int main(int argc, char *argv[])
     gss_name_t name = GSS_C_NO_NAME;
 
     if (argc > 1) {
-        major = krb5_gss_register_acceptor_identity(argv[1]);
-        if (GSS_ERROR(major)) {
-            displayStatus("krb5_gss_register_acceptor_identity", major, minor);
-            goto out;
-        }
-    }
-
-    if (argc > 2) {
         gss_buffer_desc name_buf;
         gss_name_t tmp_name;
 
-        name_buf.value = argv[2];
-        name_buf.length = strlen(argv[2]);
+        name_buf.value = argv[1];
+        name_buf.length = strlen(argv[1]);
 
         major = gss_import_name(&minor, &name_buf,
                                 (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME, &tmp_name);
@@ -394,7 +388,19 @@ int main(int argc, char *argv[])
         major = testGreetAuthzData(&minor, name);
         if (GSS_ERROR(major))
             goto out;
+    } else {
+        fprintf(stderr, "Usage: %s [principal] [keytab]\n", argv[0]);
+        exit(1);
     }
+
+    if (argc > 2) {
+        major = krb5_gss_register_acceptor_identity(argv[2]);
+        if (GSS_ERROR(major)) {
+            displayStatus("krb5_gss_register_acceptor_identity", major, minor);
+            goto out;
+        }
+    }
+
 
 #if 0 /* XXX mechglue bug */
     mechs.elements = (gss_OID)&spnego_mech;
