@@ -173,7 +173,8 @@ proc principal_exists {name} {
     lib_start_api
 
     set ret [cmd [format {
-	kadm5_get_principal $lib_handle "%s" principal
+	kadm5_get_principal $lib_handle "%s" principal \
+	  KADM5_PRINCIPAL_NORMAL_MASK
     } $name]]
 
 #   puts stdout "Finishing principal_exists."
