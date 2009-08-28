@@ -2013,7 +2013,8 @@ kdc_make_s4u2self_rep(krb5_context context,
 
     rep_s4u_user.user_id.nonce   = req_s4u_user->user_id.nonce;
     rep_s4u_user.user_id.user    = req_s4u_user->user_id.user;
-    rep_s4u_user.user_id.options = req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
+    rep_s4u_user.user_id.options =
+	req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
 
     code = encode_krb5_s4u_userid(&rep_s4u_user.user_id, &data);
     if (code != 0)
@@ -2070,11 +2071,15 @@ kdc_make_s4u2self_rep(krb5_context context,
 	    goto cleanup;
 	}
 
-	memcpy(padata.contents, req_s4u_user->cksum.contents, req_s4u_user->cksum.length);
+	memcpy(padata.contents,
+	       req_s4u_user->cksum.contents,
+	       req_s4u_user->cksum.length);
 	memcpy(&padata.contents[req_s4u_user->cksum.length],
-	       rep_s4u_user.cksum.contents, rep_s4u_user.cksum.length);
+	       rep_s4u_user.cksum.contents,
+	       rep_s4u_user.cksum.length);
 
-	code = add_pa_data_element(context, &padata, &reply_encpart->enc_padata, FALSE);
+	code = add_pa_data_element(context,&padata,
+				   &reply_encpart->enc_padata, FALSE);
 	if (code != 0)
 	    goto cleanup;
     }
