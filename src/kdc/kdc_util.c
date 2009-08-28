@@ -1849,6 +1849,47 @@ verify_for_user_checksum(krb5_context context,
     return code;
 }
 
+/*
+ * Legacy protocol transition (Windows 2003 and above)
+ */
+static krb5_error_code
+kdc_process_for_user(krb5_context context,
+		     krb5_pa_data *pa_data,
+		     krb5_keyblock *tgs_session,
+		     krb5_pa_s4u_x509_user **s4u_x509_user,
+		     const char **status)
+{
+    krb5_error_code		code;
+    krb5_pa_for_user		*for_user;
+    krb5_data			req_data;
+
+    req_data.length = pa_data->length;
+    req_data.data = (char *)pa_data->contents;
+
+    code = decode_krb5_pa_for_user(&req_data, &for_user);
+    if (code)
+	return code;
+
+    code = verify_for_user_checksum(context, tgs_session, for_user);
+    if (code) {
+	*status = "INVALID_S4U2SELF_CHECKSUM";
+	krb5_free_pa_for_user(kdc_context, for_user);
+	return code;
+    }
+
+    *s4u_x509_user = calloc(1, sizeof(krb5_pa_s4u_x509_user));
+    if (*s4u_x509_user == NULL) {
+	krb5_free_pa_for_user(kdc_context, for_user);
+	return ENOMEM;
+    }
+
+    (*s4u_x509_user)->user_id.user = for_user->user;
+    for_user->user = NULL;
+    krb5_free_pa_for_user(context, for_user);
+
+    return 0;
+}
+
 static krb5_error_code
 verify_s4u_x509_user_checksum(krb5_context context,
 			      krb5_keyblock *key,
@@ -1905,6 +1946,52 @@ verify_s4u_x509_user_checksum(krb5_context context,
     }
 
     return valid ? 0 : KRB5KRB_AP_ERR_MODIFIED;
+}
+
+/*
+ * New protocol transition request (Windows 2008 and above)
+ */
+static krb5_error_code
+kdc_process_s4u_x509_user(krb5_context context,
+			  krb5_kdc_req *request,
+			  krb5_pa_data *pa_data,
+			  krb5_keyblock *tgs_subkey,
+			  krb5_keyblock *tgs_session,
+			  krb5_pa_s4u_x509_user **s4u_x509_user,
+			  const char **status)
+{
+    krb5_error_code		code;
+    krb5_data			req_data;
+
+    req_data.length = pa_data->length;
+    req_data.data = (char *)pa_data->contents;
+
+    code = decode_krb5_pa_s4u_x509_user(&req_data, s4u_x509_user);
+    if (code)
+	return code;
+
+    code = verify_s4u_x509_user_checksum(context,
+					 tgs_subkey ? tgs_subkey :
+					    tgs_session,
+					 &req_data,
+					 request->nonce, *s4u_x509_user);
+
+    if (code) {
+	*status = "INVALID_S4U2SELF_CHECKSUM";
+	krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
+	*s4u_x509_user = NULL;
+	return code;
+    }
+
+    if (krb5_princ_size(context, (*s4u_x509_user)->user_id.user) == 0 ||
+	(*s4u_x509_user)->user_id.subject_cert.length != 0) {
+	*status = "INVALID_S4U2SELF_REQUEST";
+	krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
+	*s4u_x509_user = NULL;
+	return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
+    }
+
+    return 0;
 }
 
 krb5_error_code
@@ -1975,8 +2062,9 @@ kdc_make_s4u2self_rep(krb5_context context,
      */
     if ((req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) &&
 	enctype_requires_etype_info_2(enctype) == FALSE) {
-	padata.length = req_s4u_user->cksum.length + rep_s4u_user.cksum.length;
-	padata.contents = (krb5_octet *)malloc(padata.length);
+	padata.length = req_s4u_user->cksum.length +
+		        rep_s4u_user.cksum.length;
+	padata.contents = malloc(padata.length);
 	if (padata.contents == NULL) {
 	    code = ENOMEM;
 	    goto cleanup;
@@ -2017,70 +2105,34 @@ kdc_process_s4u2self_req(krb5_context context,
 {
     krb5_error_code		code;
     krb5_pa_data		*pa_data;
-    krb5_data			req_data;
     krb5_boolean		more;
 
     *nprincs = 0;
     memset(princ, 0, sizeof(*princ));
 
     pa_data = find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER);
-    if (pa_data == NULL)
-	pa_data = find_pa_data(request->padata, KRB5_PADATA_FOR_USER);
-    if (pa_data == NULL)
-	return 0;
-
-    *status = "PROCESS_S4U2SELF_REQUEST";
-
-    req_data.length = pa_data->length;
-    req_data.data = (char *)pa_data->contents;
-
-    if (pa_data->pa_type == KRB5_PADATA_S4U_X509_USER) {
-	code = decode_krb5_pa_s4u_x509_user(&req_data, s4u_x509_user);
-	if (code)
+    if (pa_data != NULL) {
+	code = kdc_process_s4u_x509_user(context,
+					 request,
+					 pa_data,
+					 tgs_subkey,
+					 tgs_session,
+					 s4u_x509_user,
+					 status);
+	if (code != 0)
 	    return code;
-
-	code = verify_s4u_x509_user_checksum(context,
-					     tgs_subkey ? tgs_subkey :
-						tgs_session,
-					     &req_data,
-					     request->nonce, *s4u_x509_user);
-	if (code) {
-	    *status = "INVALID_S4U2SELF_CHECKSUM";
-	    krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
-	    *s4u_x509_user = NULL;
-	    return code;
-	}
-
-	if (krb5_princ_size(context, (*s4u_x509_user)->user_id.user) == 0 ||
-	    (*s4u_x509_user)->user_id.subject_cert.length != 0) {
-	    *status = "INVALID_S4U2SELF_REQUEST";
-	    krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
-	    *s4u_x509_user = NULL;
-	    return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
-	}
     } else {
-	krb5_pa_for_user *for_user;
-
-	code = decode_krb5_pa_for_user(&req_data, &for_user);
-	if (code)
-	    return code;
-
-	code = verify_for_user_checksum(context, tgs_session, for_user);
-	if (code) {
-	    *status = "INVALID_S4U2SELF_CHECKSUM";
-	    krb5_free_pa_for_user(kdc_context, for_user);
-	    return code;
-	}
-
-	*s4u_x509_user = calloc(1, sizeof(krb5_pa_s4u_x509_user));
-	if (*s4u_x509_user == NULL) {
-	    krb5_free_pa_for_user(kdc_context, for_user);
-	    return ENOMEM;
-	}
-
-	(*s4u_x509_user)->user_id.user = for_user->user;
-	for_user->user = NULL;
-	krb5_free_pa_for_user(context, for_user);
+	pa_data = find_pa_data(request->padata, KRB5_PADATA_FOR_USER);
+	if (pa_data != NULL) {
+	    code = kdc_process_for_user(context,
+					pa_data,
+					tgs_session,
+					s4u_x509_user,
+					status);
+	    if (code != 0)
+		return code;
+	} else
+	    return 0;
     }
 
     /*
@@ -2091,7 +2143,9 @@ kdc_process_s4u2self_req(krb5_context context,
      * The comparison below will work with existing Windows and MIT
      * client implementations.
      */
-    if (!krb5_principal_compare_flags(context, request->server, client_princ,
+    if (!krb5_principal_compare_flags(context,
+				      request->server,
+				      client_princ,
 				      KRB5_PRINCIPAL_COMPARE_ENTERPRISE)) {
 	*status = "INVALID_S4U2SELF_REQUEST";
 	return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error code */
@@ -2143,8 +2197,6 @@ kdc_process_s4u2self_req(krb5_context context,
 	    return code;
 	}
     }
-
-    *status = NULL;
 
     return 0;
 }
