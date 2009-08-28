@@ -140,7 +140,15 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 #endif
 
 #if defined (__linux__) && defined(HAVE_GETADDRINFO)
-# define COPY_FIRST_CANONNAME
+/* Define COPY_FIRST_CANONNAME for glibc 2.3 and prior. */
+#include <features.h>
+# ifdef __GLIBC_PREREQ
+#  if ! __GLIBC_PREREQ(2, 4)
+#   define COPY_FIRST_CANONNAME
+#  endif
+# else
+#   define COPY_FIRST_CANONNAME
+# endif
 #endif
 
 #ifdef _AIX
@@ -1157,7 +1165,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 	return aierr;
     }
 
-    /* Linux libc version 6 (libc-2.2.4.so on Debian) is broken.
+    /* Linux libc version 6 prior to 2.3.4 is broken.
 
        RFC 2553 says that when AI_CANONNAME is set, the ai_canonname
        flag of the first returned structure has the canonical name of
@@ -1188,9 +1196,12 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        Ref: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=133668 .
 
        Since it's dependent on the target hostname, it's hard to check
-       for at configure time.  Always do it on Linux for now.  When
-       they get around to fixing it, add a compile-time or run-time
-       check for the glibc version in use.
+       for at configure time.  The bug was fixed in glibc 2.3.4.
+       After the fix, the ai_canonname field is allocated, so our
+       workaround leaks memory.  We disable the workaround for glibc
+       >= 2.4, but there is no easy way to test for glibc patch
+       versions, so we still leak memory under glibc 2.3.4 through
+       2.3.6.
 
        Some Windows documentation says that even when AI_CANONNAME is
        set, the returned ai_canonname field can be null.  The NetBSD
