@@ -833,8 +833,7 @@ kg_accept_krb5(minor_status, context_handle,
     }
     /* Now owned by ctx->there */
     authdat->client = NULL;
-    if (ad_context != NULL)
-        krb5_auth_con_set_authdata_context(context, auth_context, NULL);
+    krb5_auth_con_set_authdata_context(context, auth_context, NULL);
 
     if ((code = krb5_auth_con_getrecvsubkey(context, auth_context,
                                             &ctx->subkey))) {
