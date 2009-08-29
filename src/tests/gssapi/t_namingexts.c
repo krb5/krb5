@@ -231,6 +231,8 @@ testExportImportName(OM_uint32 *minor,
 
     gss_release_buffer(&tmp, &exported_name);
 
+    printf("\n");
+    displayCanonName(minor, imported_name, "Re-imported name");
     printf("Re-imported attributes:\n\n");
     major = enumerateAttributes(minor, imported_name, 0);
 
