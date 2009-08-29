@@ -101,7 +101,7 @@ gss_inquire_name(OM_uint32 *minor_status,
                                        asserted,
                                        complete);
     if (status != GSS_S_COMPLETE) {
-        gss_release_oid(&tmp, MN_mech);
+        generic_gss_release_oid(&tmp, MN_mech);
         map_error(minor_status, mech);
     }
 
