@@ -495,7 +495,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     /* validate the name */
 
     /*SUPPRESS 29*/
-    if ((desired_name != (gss_name_t) NULL) &&
+    if ((desired_name != GSS_C_NO_NAME) &&
         (! kg_validate_name(desired_name))) {
         *minor_status = (OM_uint32) G_VALIDATE_FAILED;
         krb5_free_context(context);

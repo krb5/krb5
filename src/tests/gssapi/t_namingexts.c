@@ -72,7 +72,7 @@ static OM_uint32
 displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
 {
     gss_name_t canon;
-    OM_uint32 major;
+    OM_uint32 major, tmp;
     gss_buffer_desc buf;
 
     major = gss_canonicalize_name(minor, name, (gss_OID)gss_mech_krb5, &canon);
@@ -83,13 +83,15 @@ displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
 
     major = gss_display_name(minor, canon, &buf, NULL);
     if (GSS_ERROR(major)) {
+        gss_release_name(&tmp, &canon);
         displayStatus("gss_display_name", major, minor);
         return major;
     }
 
     printf("%s:\t%s\n", tag, (char *)buf.value);
 
-    gss_release_buffer(minor, &buf);
+    gss_release_name(&tmp, &canon);
+    gss_release_buffer(&tmp, &buf);
 
     return GSS_S_COMPLETE;
 }
@@ -271,8 +273,7 @@ testGreetAuthzData(OM_uint32 *minor,
 
 static OM_uint32
 initAcceptSecContext(OM_uint32 *minor,
-                     gss_cred_id_t verifier_cred_handle,
-                     gss_cred_id_t *deleg_cred_handle)
+                     gss_cred_id_t verifier_cred_handle)
 {
     OM_uint32 major;
     gss_buffer_desc token, tmp;
@@ -287,8 +288,6 @@ initAcceptSecContext(OM_uint32 *minor,
 
     tmp.value = NULL;
     tmp.length = 0;
-
-    *deleg_cred_handle = GSS_C_NO_CREDENTIAL;
 
     major = gss_inquire_cred(minor, verifier_cred_handle,
                              &target_name, NULL, NULL, NULL);
@@ -337,7 +336,7 @@ initAcceptSecContext(OM_uint32 *minor,
                                    &tmp,
                                    NULL,
                                    &time_rec,
-                                   deleg_cred_handle);
+                                   NULL);
 
     if (GSS_ERROR(major))
         displayStatus("gss_accept_sec_context", major, minor);
@@ -347,6 +346,7 @@ initAcceptSecContext(OM_uint32 *minor,
         testExportImportName(minor, source_name);
     }
 
+    (void) gss_release_name(minor, &source_name);
     (void) gss_delete_sec_context(minor, &acceptor_context, NULL);
     (void) gss_release_buffer(minor, &token);
     (void) gss_release_buffer(minor, &tmp);
@@ -358,7 +358,6 @@ int main(int argc, char *argv[])
 {
     OM_uint32 minor, major, tmp;
     gss_cred_id_t cred_handle = GSS_C_NO_CREDENTIAL;
-    gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_OID_set_desc mechs;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_name_t name = GSS_C_NO_NAME;
@@ -427,16 +426,13 @@ int main(int argc, char *argv[])
 
     (void) gss_release_oid_set(&minor, &actual_mechs);
 
-    major = initAcceptSecContext(&minor,
-                                 cred_handle,
-                                 &delegated_cred_handle);
+    major = initAcceptSecContext(&minor, cred_handle);
     if (GSS_ERROR(major))
         goto out;
 
     printf("\n");
 
 out:
-    (void) gss_release_cred(&tmp, &delegated_cred_handle);
     (void) gss_release_cred(&tmp, &cred_handle);
     (void) gss_release_oid_set(&tmp, &actual_mechs);
     (void) gss_release_name(&tmp, &name);

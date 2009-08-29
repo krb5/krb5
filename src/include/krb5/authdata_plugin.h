@@ -243,7 +243,8 @@ typedef krb5_error_code
 (*authdata_client_copy_context_proc)(krb5_context context,
 				     void *plugin_context,
 				     void *request_context,
-				     void **dst_request_context);
+				     void *dst_plugin_context,
+				     void *dst_request_context);
 
 typedef void
 (*authdata_client_free_internal_proc)(krb5_context context,

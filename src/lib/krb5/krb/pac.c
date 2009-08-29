@@ -1358,27 +1358,20 @@ static krb5_error_code
 mspac_copy_context(krb5_context context,
 		   void *plugin_context,
 		   void *request_context,
-		   void **dst_request_context)
+		   void *dst_plugin_context,
+		   void *dst_request_context)
 {
     struct mspac_context *srcctx = (struct mspac_context *)request_context;
-    struct mspac_context *dstctx;
-    krb5_error_code code;
+    struct mspac_context *dstctx = (struct mspac_context *)dst_request_context;
+    krb5_error_code code = 0;
 
-    code = mspac_request_init(context, plugin_context, (void **)&dstctx);
-    if (code != 0)
-	return code;
+    assert(dstctx != NULL);
+    assert(dstctx->pac == NULL);
 
-    if (srcctx->pac != NULL) {
+    if (srcctx->pac != NULL)
 	code = k5_pac_copy(context, srcctx->pac, &dstctx->pac);
-        if (code != 0) {
-	    free(dstctx);
-	    return code;
-	}
-    }
 
-    *dst_request_context = dstctx;
-
-    return 0;
+    return code;
 }
 
 static void

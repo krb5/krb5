@@ -119,14 +119,18 @@ static krb5_error_code
 greet_get_attribute_types(krb5_context context,
                           void *plugin_context,
                           void *request_context,
+                          krb5_data **verified,
                           krb5_data **asserted,
-                          krb5_data **verified)
+                          krb5_data **all_attrs)
 {
     krb5_error_code code;
     struct greet_context *greet = (struct greet_context *)request_context;
 
     if (greet->greeting.length == 0)
         return ENOENT;
+
+    if (asserted == NULL)
+        return 0;
 
     *asserted = calloc(2, sizeof(krb5_data));
     if (*asserted == NULL)
@@ -138,8 +142,6 @@ greet_get_attribute_types(krb5_context context,
         *asserted = NULL;
         return code;
     }
-
-    *verified = NULL;
 
     return 0;
 }
@@ -230,25 +232,13 @@ static krb5_error_code
 greet_copy_context(krb5_context context,
                    void *plugin_context,
                    void *request_context,
-                   void **dst_request_context)
+                   void *dst_plugin_context,
+                   void *dst_request_context)
 {
     struct greet_context *src = (struct greet_context *)request_context;
-    struct greet_context *dst = (struct greet_context *)request_context;
-    krb5_error_code code;
+    struct greet_context *dst = (struct greet_context *)dst_request_context;
 
-    code = greet_request_init(context, plugin_context, (void **)&dst);
-    if (code != 0)
-        return code;
-
-    code = krb5int_copy_data_contents_add0(context, &src->greeting, &dst->greeting);
-    if (code != 0) {
-        greet_request_fini(context, plugin_context,(void **)&dst);
-        return code;
-    }
-
-    *dst_request_context = dst;
-
-    return 0;
+    return krb5int_copy_data_contents_add0(context, &src->greeting, &dst->greeting);
 }
 
 static krb5_authdatatype greet_ad_types[] = { -42, 0 };

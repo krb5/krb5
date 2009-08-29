@@ -743,7 +743,8 @@ k5_copy_ad_module_data(krb5_context kcontext,
     code = (*src_module->ftable->copy_context)(kcontext,
                                                src_module->plugin_context,
                                                src_module->request_context,
-                                               dst_module->request_context_pp);
+                                               dst_module->plugin_context,
+                                               dst_module->request_context);
 
     return code;
 }
@@ -772,10 +773,11 @@ krb5_authdata_context_copy(krb5_context kcontext,
 
     if (code != 0) {
         krb5_authdata_context_free(kcontext, dst);
-    } else {
-        *pdst = dst;
+        return code;
     }
 
-    return code;
+    *pdst = dst;
+
+    return 0;
 }
 
