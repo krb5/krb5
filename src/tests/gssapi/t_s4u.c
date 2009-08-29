@@ -102,12 +102,14 @@ displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
     major = gss_display_name(minor, canon, &buf, NULL);
     if (GSS_ERROR(major)) {
         displayStatus("gss_display_name", major, minor);
+        gss_release_name(minor, &canon);
         return major;
     }
 
     printf("%s:\t%s\n", tag, (char *)buf.value);
 
     gss_release_buffer(minor, &buf);
+    gss_release_name(minor, &canon);
 
     return GSS_S_COMPLETE;
 }
@@ -147,7 +149,11 @@ initAcceptSecContext(OM_uint32 *minor,
                                  claimant_cred_handle,
                                  &initiator_context,
                                  target_name,
+#if 1
                                  (gss_OID)&spnego_mech,
+#else
+                                 (gss_OID)&gss_mech_krb5,
+#endif
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -184,6 +190,7 @@ initAcceptSecContext(OM_uint32 *minor,
     else
         displayCanonName(minor, source_name, "Source name");
 
+    (void) gss_release_name(minor, &source_name);
     (void) gss_delete_sec_context(minor, &acceptor_context, NULL);
     (void) gss_release_buffer(minor, &token);
     (void) gss_release_buffer(minor, &tmp);
