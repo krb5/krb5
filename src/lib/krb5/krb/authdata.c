@@ -76,9 +76,9 @@ k5_ad_init_modules(krb5_context kcontext,
 #endif
         return ENOENT;
     }
-    if (table->init == NULL) {
+
+    if (table->init == NULL)
         return ENOSYS;
-    }
 
     code = (*table->init)(kcontext, &plugin_context);
     if (code != 0) {
@@ -194,10 +194,7 @@ krb5_authdata_context_init(krb5_context kcontext,
     context->n_modules = n_modules;
 
     /* fill in the structure */
-    k = 0;
-    code = 0;
-
-    for (i = 0; i < n_tables - internal_count; i++) {
+    for (i = 0, k = 0, code = 0; i < n_tables - internal_count; i++) {
         code = k5_ad_init_modules(kcontext, context, tables[i], &k);
         if (code != 0)
             break;
@@ -264,7 +261,7 @@ krb5_authdata_import_attributes(krb5_context kcontext,
                                 krb5_authdata **authdata_to_import)
 {
     int i;
-    krb5_error_code code;
+    krb5_error_code code = 0;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
@@ -309,7 +306,7 @@ krb5int_authdata_verify(krb5_context kcontext,
                         const krb5_ap_req *ap_req)
 {
     int i;
-    krb5_error_code code;
+    krb5_error_code code = 0;
     krb5_authdata **authen_authdata;
     krb5_authdata **ticket_authdata;
 
