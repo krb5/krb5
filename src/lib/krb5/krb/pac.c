@@ -1107,8 +1107,9 @@ static krb5_error_code
 mspac_get_attribute_types(krb5_context context,
 			  void *plugin_context,
 			  void *request_context,
+			  krb5_data **verified,
 			  krb5_data **asserted,
-			  krb5_data **verified)
+			  krb5_data **complete)
 {
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
     unsigned int i, j;

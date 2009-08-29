@@ -37,53 +37,56 @@ kg_init_name(krb5_context context,
              krb5_principal principal,
              krb5_authdata_context ad_context,
              krb5_flags flags,
-             krb5_gss_name_t *name)
+             krb5_gss_name_t *ret_name)
 {
     krb5_error_code code;
+    krb5_gss_name_t name;
+
+    *ret_name = NULL;
 
     assert(principal != NULL);
 
     if (principal == NULL)
         return EINVAL;
 
-    *name = xmalloc(sizeof(krb5_gss_name_rec));
-    if (*name == NULL) {
+    name = xmalloc(sizeof(krb5_gss_name_rec));
+    if (name == NULL)
         return ENOMEM;
-    }
-    memset(*name, 0, sizeof(krb5_gss_name_rec));
 
-    code = k5_mutex_init(&(*name)->lock);
+    memset(name, 0, sizeof(krb5_gss_name_rec));
+
+    code = k5_mutex_init(&name->lock);
     if (code != 0)
         goto cleanup;
 
     if ((flags & KG_INIT_NAME_NO_COPY) == 0) {
-        code = krb5_copy_principal(context, principal, &(*name)->princ);
+        code = krb5_copy_principal(context, principal, &name->princ);
         if (code != 0)
             goto cleanup;
 
         if (ad_context != NULL) {
             code = krb5_authdata_context_copy(context,
                                               ad_context,
-                                              &(*name)->ad_context);
+                                              &name->ad_context);
             if (code != 0)
                 goto cleanup;
         }
     } else {
-        (*name)->princ = principal;
-        (*name)->ad_context = ad_context;
+        name->princ = principal;
+        name->ad_context = ad_context;
     }
 
     if ((flags & KG_INIT_NAME_INTERN) &&
-        !kg_save_name((gss_name_t)*name)) {
+        !kg_save_name((gss_name_t)name)) {
         code = G_VALIDATE_FAILED;
         goto cleanup;
     }
 
-    code = 0;
+    *ret_name = name;
 
 cleanup:
     if (code != 0)
-        kg_release_name(context, 0, name);
+        kg_release_name(context, 0, &name);
 
     return code;
 }
@@ -178,8 +181,10 @@ kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
         return EINVAL;
 
     if (GSS_ERROR(gss_create_empty_buffer_set(&minor_status,
-                                              &set)))
+                                              &set))) {
+        assert(minor_status != 0);
         return minor_status;
+    }
 
     for (i = 0; data[i].data != NULL; i++)
         ;
@@ -211,16 +216,14 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
                       gss_OID *MN_mech,
                       gss_buffer_set_t *authenticated,
                       gss_buffer_set_t *asserted,
-                      gss_buffer_set_t *complete)
+                      gss_buffer_set_t *all_attrs)
 {
     krb5_context context;
     krb5_error_code code;
     krb5_gss_name_t kname;
     krb5_data *kauthenticated = NULL;
     krb5_data *kasserted = NULL;
-#if 0
-    krb5_data *kcomplete = NULL;
-#endif
+    krb5_data *kall_attrs = NULL;
 
     if (minor_status != NULL)
         *minor_status = 0;
@@ -229,9 +232,8 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
         *authenticated = GSS_C_NO_BUFFER_SET;
     if (asserted != NULL)
         *asserted = GSS_C_NO_BUFFER_SET;
-#if 0
-    *complete = GSS_C_NO_BUFFER_SET;
-#endif
+    if (all_attrs != NULL)
+        *all_attrs = GSS_C_NO_BUFFER_SET;
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {
@@ -261,13 +263,9 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
 
     code = krb5_authdata_get_attribute_types(context,
                                              kname->ad_context,
+                                             &kauthenticated,
                                              &kasserted,
-                                             &kauthenticated);
-    if (code != 0)
-        goto cleanup;
-
-    code = kg_data_list_to_buffer_set_nocopy(&kasserted,
-                                             asserted);
+                                             &kall_attrs);
     if (code != 0)
         goto cleanup;
 
@@ -276,10 +274,21 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
     if (code != 0)
         goto cleanup;
 
+    code = kg_data_list_to_buffer_set_nocopy(&kasserted,
+                                             asserted);
+    if (code != 0)
+        goto cleanup;
+
+    code = kg_data_list_to_buffer_set_nocopy(&kall_attrs,
+                                             all_attrs);
+    if (code != 0)
+        goto cleanup;
+
 cleanup:
     k5_mutex_unlock(&kname->lock);
-    krb5int_free_data_list(context, kasserted);
     krb5int_free_data_list(context, kauthenticated);
+    krb5int_free_data_list(context, kasserted);
+    krb5int_free_data_list(context, kall_attrs);
 
     krb5_free_context(context);
 

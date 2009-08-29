@@ -1361,8 +1361,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_authdata_get_attribute_types
 (krb5_context kcontext,
  krb5_authdata_context context,
+ krb5_data **verified,
  krb5_data **asserted,
- krb5_data **verified);
+ krb5_data **all_attrs);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_get_attribute
 (krb5_context kcontext,
