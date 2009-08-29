@@ -394,7 +394,7 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
                                   krb5_data **all_attrs)
 {
     int i;
-    krb5_error_code code = ENOENT;
+    krb5_error_code code = 0;
     krb5_data *verified = NULL;
     krb5_data *asserted = NULL;
     krb5_data *all = NULL;
