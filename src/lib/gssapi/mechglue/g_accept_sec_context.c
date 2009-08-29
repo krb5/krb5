@@ -198,7 +198,7 @@ gss_cred_id_t *		d_cred;
 						  input_cred_handle,
 						  input_token_buffer,
 						  input_chan_bindings,
-						  &internal_name,
+						  src_name ? &internal_name : NULL,
 						  mech_type,
 						  output_token,
 						  &temp_ret_flags,
@@ -222,27 +222,23 @@ gss_cred_id_t *		d_cred;
 	     * then call gss_import_name() to create
 	     * the union name struct cast to src_name
 	     */
-	    if (internal_name != NULL) {
-		temp_status = gssint_convert_name_to_union_name(
-		       &temp_minor_status, mech,
-		       internal_name, &tmp_src_name);
-		if (temp_status != GSS_S_COMPLETE) {
-		    *minor_status = temp_minor_status;
-		    map_error(minor_status, mech);
-		    if (output_token->length)
-			(void) gss_release_buffer(&temp_minor_status,
-						  output_token);
-		    if (internal_name != GSS_C_NO_NAME)
-			mech->gss_release_name(
-			    &temp_minor_status,
-			    &internal_name);
-		    return (temp_status);
-		}
-		if (src_name != NULL) {
+	    if (src_name != NULL) {
+		if (internal_name != GSS_C_NO_NAME) {
+		    /* consumes internal_name regardless of success */
+		    temp_status = gssint_convert_name_to_union_name(
+			    &temp_minor_status, mech,
+			    internal_name, &tmp_src_name);
+		    if (temp_status != GSS_S_COMPLETE) {
+			*minor_status = temp_minor_status;
+			map_error(minor_status, mech);
+			if (output_token->length)
+			    (void) gss_release_buffer(&temp_minor_status,
+						      output_token);
+			return (temp_status);
+		    }
 		    *src_name = tmp_src_name;
-		}
-	    } else if (src_name != NULL) {
-		*src_name = GSS_C_NO_NAME;
+		} else
+		    *src_name = GSS_C_NO_NAME;
 	    }
 
 	    /* Ensure we're returning correct creds format */
@@ -279,11 +275,11 @@ gss_cred_id_t *		d_cred;
 		    goto error_out;
 		}
 
-		internal_name = GSS_C_NO_NAME;
-
 		d_u_cred->auxinfo.creation_time = time(0);
 		d_u_cred->auxinfo.time_rec = 0;
 		d_u_cred->loopback = d_u_cred;
+
+		internal_name = GSS_C_NO_NAME;
 
 		if (mech->gss_inquire_cred) {
 		    status = mech->gss_inquire_cred(minor_status,
@@ -296,7 +292,8 @@ gss_cred_id_t *		d_cred;
 			map_error(minor_status, mech);
 		}
 
-		if (internal_name != NULL) {
+		if (internal_name != GSS_C_NO_NAME) {
+		    /* consumes internal_name regardless of success */
 		    temp_status = gssint_convert_name_to_union_name(
 			&temp_minor_status, mech,
 			internal_name, &tmp_src_name);
@@ -311,22 +308,21 @@ gss_cred_id_t *		d_cred;
 			free(d_u_cred);
 			return (temp_status);
 		    }
-		}
 
-		if (tmp_src_name != NULL) {
-		    status = gss_display_name(
-			&temp_minor_status,
-			tmp_src_name,
-			&d_u_cred->auxinfo.name,
-			&d_u_cred->auxinfo.name_type);
+		    if (tmp_src_name != GSS_C_NO_NAME) {
+			status = gss_display_name(
+			    &temp_minor_status,
+			    tmp_src_name,
+			    &d_u_cred->auxinfo.name,
+			    &d_u_cred->auxinfo.name_type);
+			(void) gss_release_name(&temp_minor_status,
+						&tmp_src_name);
+		    }
 		}
 
 		*d_cred = (gss_cred_id_t)d_u_cred;
 	    }
 
-	    if (src_name == NULL && tmp_src_name != NULL)
-		(void) gss_release_name(&temp_minor_status,
-					&tmp_src_name);
 	    if (ret_flags != NULL)
 		*ret_flags = temp_ret_flags;
 	    return	(status);

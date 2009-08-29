@@ -1939,6 +1939,9 @@ spnego_gss_delete_sec_context(
 	 */
 	if (*ctx != NULL &&
 	    (*ctx)->magic_num == SPNEGO_MAGIC_ID) {
+		(void) gss_delete_sec_context(minor_status,
+				    &(*ctx)->ctx_handle,
+				    output_token);
 		(void) release_spnego_ctx(ctx);
 	} else {
 		ret = gss_delete_sec_context(minor_status,
