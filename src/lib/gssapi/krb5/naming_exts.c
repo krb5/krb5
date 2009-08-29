@@ -644,7 +644,8 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
     krb5_gss_name_t kname;
     krb5_authdata **authdata = NULL;
     krb5_data *enc_authdata = NULL;
-    char *princstr = NULL, *cp;
+    char *princstr = NULL;
+    unsigned char *cp;
     size_t princlen;
 
     if (minor_status != NULL)
@@ -670,35 +671,32 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    if (kname->ad_context == NULL) {
-        code = ENOENT;
-        goto cleanup;
-    }
-
     code = krb5_unparse_name(context, kname->princ, &princstr);
     if (code != 0)
         goto cleanup;
 
     princlen = strlen(princstr);
 
-    code = krb5_authdata_export_attributes(context,
-                                           kname->ad_context,
-                                           AD_USAGE_MASK,
-                                           &authdata);
-    if (code != 0)
-        goto cleanup;
-
-    if (authdata != NULL) {
-        code = encode_krb5_authdata(authdata, &enc_authdata);
+    if (kname->ad_context != NULL) {
+        code = krb5_authdata_export_attributes(context,
+                                               kname->ad_context,
+                                               AD_USAGE_MASK,
+                                               &authdata);
         if (code != 0)
             goto cleanup;
+
+        if (authdata != NULL) {
+            code = encode_krb5_authdata(authdata, &enc_authdata);
+            if (code != 0)
+                goto cleanup;
+        }
     }
 
     /* 04 02 OID Name AuthData */
 
-    exp_composite_name->length = 14 + princlen +
-        (enc_authdata != NULL ? enc_authdata->length : 0) +
-        gss_mech_krb5->length;
+    exp_composite_name->length = 10 + gss_mech_krb5->length + princlen;
+    if (enc_authdata != NULL)
+        exp_composite_name->length += 4 + enc_authdata->length;
     exp_composite_name->value = malloc(exp_composite_name->length);
     if (exp_composite_name->value == NULL) {
         code = ENOMEM;
@@ -709,7 +707,10 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
 
     /* Note: we assume the OID will be less than 128 bytes... */
     *cp++ = 0x04;
-    *cp++ = 0x02;
+    if (enc_authdata != NULL)
+        *cp++ = 0x02;
+    else
+        *cp++ = 0x01;
 
     store_16_be(gss_mech_krb5->length + 2, cp);
     cp += 2;
