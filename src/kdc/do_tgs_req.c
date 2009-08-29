@@ -1002,6 +1002,10 @@ cleanup:
         free(s4u_name);
     if (subkey != NULL)
         krb5_free_keyblock(kdc_context, subkey);
+    if (reply.padata)
+        krb5_free_pa_data(kdc_context, reply.padata);
+    if (reply_encpart.enc_padata)
+        krb5_free_pa_data(kdc_context, reply_encpart.enc_padata);
 
     return retval;
 }
