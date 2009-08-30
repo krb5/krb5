@@ -34,6 +34,7 @@
 
 struct greet_context {
     krb5_data greeting;
+    krb5_boolean verified;
 };
 
 static krb5_data greet_attr = {
@@ -52,7 +53,7 @@ greet_flags(krb5_context context,
             krb5_authdatatype ad_type,
             krb5_flags *flags)
 {
-    *flags = AD_USAGE_AP_REQ | AD_INFORMATIONAL;
+    *flags = AD_USAGE_AP_REQ | AD_USAGE_KDC_ISSUED | AD_INFORMATIONAL;
 }
 
 static void
@@ -91,6 +92,7 @@ greet_import_attributes(krb5_context context,
     krb5_data data;
 
     krb5_free_data_contents(context, &greet->greeting);
+    greet->verified = FALSE;
 
     assert(authdata[0] != NULL);
 
@@ -162,7 +164,7 @@ greet_get_attribute(krb5_context context,
     if (!data_eq(*attribute, greet_attr) || greet->greeting.length == 0)
         return ENOENT;
 
-    *authenticated = FALSE;
+    *authenticated = greet->verified;
     *complete = TRUE;
     *more = 0;
 
@@ -187,6 +189,7 @@ greet_set_attribute(krb5_context context,
 
     krb5_free_data_contents(context, &greet->greeting);
     greet->greeting = data;
+    greet->verified = FALSE;
 
     return 0;
 }
@@ -200,6 +203,7 @@ greet_delete_attribute(krb5_context context,
     struct greet_context *greet = (struct greet_context *)request_context;
 
     krb5_free_data_contents(context, &greet->greeting);
+    greet->verified = FALSE;
 
     return 0;
 }
@@ -241,6 +245,23 @@ greet_copy_context(krb5_context context,
     return krb5int_copy_data_contents_add0(context, &src->greeting, &dst->greeting);
 }
 
+static krb5_error_code
+greet_verify(krb5_context context,
+             void *plugin_context,
+             void *request_context,
+             const krb5_auth_context *auth_context,
+             const krb5_keyblock *key,
+             const krb5_ap_req *req,
+             krb5_boolean kdc_issued_flag,
+             krb5_const_principal issuer)
+{
+    struct greet_context *greet = (struct greet_context *)request_context;
+
+    greet->verified = kdc_issued_flag;
+
+    return 0;
+}
+
 static krb5_authdatatype greet_ad_types[] = { -42, 0 };
 
 krb5plugin_authdata_client_ftable_v0 authdata_client_0 = {
@@ -260,5 +281,5 @@ krb5plugin_authdata_client_ftable_v0 authdata_client_0 = {
     NULL,
     NULL,
     greet_copy_context,
-    NULL
+    greet_verify,
 };
