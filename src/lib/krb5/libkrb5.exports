@@ -371,6 +371,7 @@ krb5_kuserok
 krb5_libdefault_boolean
 krb5_locate_kdc
 krb5_lock_file
+krb5_make_authdata_kdc_issued
 krb5_make_full_ipaddr
 krb5_make_fulladdr
 krb5_max_dgram_size
@@ -527,6 +528,7 @@ krb5_unparse_name_flags_ext
 krb5_us_timeofday
 krb5_use_natural_time
 krb5_validate_times
+krb5_verify_authdata_kdc_issued
 krb5_verify_init_creds
 krb5_verify_init_creds_opt_init
 krb5_verify_init_creds_opt_set_ap_req_nofail

@@ -873,3 +873,15 @@ krb5int_free_data_list(krb5_context context, krb5_data *data)
     free(data);
 }
 
+void KRB5_CALLCONV
+krb5_free_ad_kdcissued(krb5_context context, krb5_ad_kdcissued *val)
+{
+    if (val == NULL)
+        return;
+
+    krb5_free_checksum_contents(context, &val->ad_checksum);
+    krb5_free_principal(context, val->i_principal);
+    krb5_free_authdata(context, val->elements);
+    free(val);
+}
+
