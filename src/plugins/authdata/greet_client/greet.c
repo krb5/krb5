@@ -254,6 +254,8 @@ greet_copy_context(krb5_context kcontext,
     struct greet_context *src = (struct greet_context *)request_context;
     struct greet_context *dst = (struct greet_context *)dst_request_context;
 
+    dst->verified = src->verified;
+
     return krb5int_copy_data_contents_add0(kcontext,
                                            &src->greeting,
                                            &dst->greeting);
