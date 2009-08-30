@@ -320,11 +320,18 @@ k5_get_kdc_issued_authdata(krb5_context kcontext,
     if (code != 0)
         return code;
 
+    /*
+     * Note: a module must still implement a verify_authdata
+     * method, even it is a NOOP that simply records the value
+     8 of kdc_issued_flag.
+     */
     code = krb5_verify_authdata_kdc_issued(kcontext,
                                            ap_req->ticket->enc_part2->session,
                                            authdata[0],
                                            kdc_issuer,
                                            kdc_issued_authdata);
+
+    assert(code == 0 || *kdc_issued_authdata == NULL);
 
     krb5_free_authdata(kcontext, authdata);
 
