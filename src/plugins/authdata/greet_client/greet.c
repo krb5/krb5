@@ -76,6 +76,7 @@ greet_request_init(krb5_context kcontext,
 
     greet->greeting.data = NULL;
     greet->greeting.length = 0;
+    greet->verified = FALSE;
 
     *request_context = greet;
 
@@ -142,7 +143,9 @@ greet_get_attribute_types(krb5_context kcontext,
     if (*asserted == NULL)
         return ENOMEM;
 
-    code = krb5int_copy_data_contents_add0(kcontext, &greet_attr, &(*asserted)[0]);
+    code = krb5int_copy_data_contents_add0(kcontext,
+                                           &greet_attr,
+                                           &(*asserted)[0]);
     if (code != 0) {
         free(*asserted);
         *asserted = NULL;
