@@ -68,7 +68,7 @@ struct _krb5_db_entry_new;
  * functions.
  */
 /* extern krb5plugin_authdata_ftable_v0 authdata_server_0; */
-typedef struct krb5plugin_authdata_ftable_v0 {
+typedef struct krb5plugin_authdata_server_ftable_v0 {
     /* Not-usually-visible name. */
     char *name;
 
@@ -107,9 +107,11 @@ typedef struct krb5plugin_authdata_ftable_v0 {
 				     krb5_data *req_pkt,
 				     krb5_kdc_req *request,
 				     krb5_enc_tkt_part *enc_tkt_reply);
-} krb5plugin_authdata_ftable_v0;
+} krb5plugin_server_authdata_ftable_v0;
 
-typedef struct krb5plugin_authdata_ftable_v1 {
+typedef krb5plugin_server_authdata_ftable_v0 krb5plugin_authdata_ftable_v0;
+
+typedef struct krb5plugin_authdata_server_ftable_v1 {
     /* Not-usually-visible name. */
     char *name;
 
@@ -155,7 +157,9 @@ typedef struct krb5plugin_authdata_ftable_v1 {
 				     krb5_const_principal for_user_princ,
 				     krb5_enc_tkt_part *enc_tkt_request,
 				     krb5_enc_tkt_part *enc_tkt_reply);
-} krb5plugin_authdata_ftable_v1;
+} krb5plugin_authdata_server_ftable_v1;
+
+typedef krb5plugin_authdata_server_ftable_v1 krb5plugin_authdata_ftable_v1;
 
 typedef krb5_error_code
 (*authdata_client_plugin_init_proc)(krb5_context context, void **plugin_context);
@@ -258,7 +262,9 @@ typedef krb5_error_code
 			       void *request_context,
 			       const krb5_auth_context *auth_context,
 			       const krb5_keyblock *key,
-			       const krb5_ap_req *req);
+			       const krb5_ap_req *req,
+			       krb5_boolean kdc_issued_flag,
+			       krb5_const_principal issuer);
 
 typedef struct krb5plugin_authdata_client_ftable_v0 {
     char *name;

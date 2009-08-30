@@ -1001,13 +1001,18 @@ mspac_verify(krb5_context context,
 	     void *request_context,
 	     const krb5_auth_context *auth_context,
 	     const krb5_keyblock *key,
-	     const krb5_ap_req *req)
+	     const krb5_ap_req *req,
+	     krb5_boolean kdc_issued_flag,
+	     krb5_const_principal issuer)
 {
     krb5_error_code code;
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
 
     if (pacctx->pac == NULL)
 	return EINVAL;
+
+    if (kdc_issued_flag)
+	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
     code = krb5_pac_verify(context,
 			   pacctx->pac,

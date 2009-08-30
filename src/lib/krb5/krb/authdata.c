@@ -297,6 +297,40 @@ krb5_authdata_import_attributes(krb5_context kcontext,
     return code;
 }
 
+static krb5_error_code
+k5_get_kdc_issued_authdata(krb5_context kcontext,
+                           const krb5_ap_req *ap_req,
+                           krb5_principal *kdc_issuer,
+                           krb5_authdata ***kdc_issued_authdata)
+{
+    krb5_error_code code;
+    krb5_authdata **authdata;
+    krb5_authdata **ticket_authdata;
+
+    *kdc_issuer = NULL;
+    *kdc_issued_authdata = NULL;
+
+    ticket_authdata = ap_req->ticket->enc_part2->authorization_data;
+
+    code = krb5int_find_authdata(kcontext,
+                                 ticket_authdata,
+                                 NULL,
+                                 KRB5_AUTHDATA_KDC_ISSUED,
+                                 &authdata);
+    if (code != 0)
+        return code;
+
+    code = krb5_verify_authdata_kdc_issued(kcontext,
+                                           ap_req->ticket->enc_part2->session,
+                                           authdata[0],
+                                           kdc_issuer,
+                                           kdc_issued_authdata);
+
+    krb5_free_authdata(kcontext, authdata);
+
+    return code;
+}
+
 krb5_error_code
 krb5int_authdata_verify(krb5_context kcontext,
                         krb5_authdata_context context,
@@ -309,13 +343,18 @@ krb5int_authdata_verify(krb5_context kcontext,
     krb5_error_code code = 0;
     krb5_authdata **authen_authdata;
     krb5_authdata **ticket_authdata;
+    krb5_principal kdc_issuer = NULL;
+    krb5_authdata **kdc_issued_authdata = NULL;
 
     authen_authdata = (*auth_context)->authentp->authorization_data;
     ticket_authdata = ap_req->ticket->enc_part2->authorization_data;
+    k5_get_kdc_issued_authdata(kcontext, ap_req,
+                               &kdc_issuer, &kdc_issued_authdata);
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
         krb5_authdata **authdata;
+        krb5_boolean kdc_issued_flag = FALSE;
 
         if ((module->flags & usage) == 0)
             continue;
@@ -328,7 +367,22 @@ krb5int_authdata_verify(krb5_context kcontext,
                                      authen_authdata,
                                      module->ad_type,
                                      &authdata);
-        if (code != 0 || authdata == NULL)
+        if (code != 0)
+            break;
+
+        if (authdata == NULL && kdc_issued_authdata != NULL) {
+            code = krb5int_find_authdata(kcontext,
+                                         kdc_issued_authdata,
+                                         NULL,
+                                         module->ad_type,
+                                         &authdata);
+            if (code != 0)
+                break;
+
+            kdc_issued_flag = TRUE;
+        }
+
+        if (authdata == NULL)
             continue;
 
         assert(authdata[0] != NULL);
@@ -343,7 +397,9 @@ krb5int_authdata_verify(krb5_context kcontext,
                                              *(module->request_context_pp),
                                              auth_context,
                                              key,
-                                             ap_req);
+                                             ap_req,
+                                             kdc_issued_flag,
+                                             kdc_issuer);
         }
         if (code != 0 && (module->flags & AD_INFORMATIONAL))
             code = 0;
@@ -351,6 +407,9 @@ krb5int_authdata_verify(krb5_context kcontext,
         if (code != 0)
             break;
     }
+
+    krb5_free_principal(kcontext, kdc_issuer);
+    krb5_free_authdata(kcontext, kdc_issued_authdata);
 
     return code;
 }

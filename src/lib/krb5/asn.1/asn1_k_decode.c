@@ -1687,8 +1687,11 @@ asn1_error_code asn1_decode_ad_kdcissued
     val->elements = NULL;
     {begin_structure();
     get_field(val->ad_checksum, 0, asn1_decode_checksum);
-    opt_field(val->i_principal, 1, asn1_decode_realm, 0);
-    opt_field(val->i_principal, 2, asn1_decode_principal_name, 0);
+    if (tagnum == 1) {
+        alloc_principal(val->i_principal);
+        opt_field(val->i_principal, 1, asn1_decode_realm, 0);
+        opt_field(val->i_principal, 2, asn1_decode_principal_name, 0);
+    }
     get_field(val->elements, 3, asn1_decode_authorization_data);
     end_structure();
     }

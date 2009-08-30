@@ -386,9 +386,11 @@ int main(int argc, char *argv[])
 
         gss_release_name(&tmp, &tmp_name);
 
+#if 0
         major = testGreetAuthzData(&minor, name);
         if (GSS_ERROR(major))
             goto out;
+#endif
     } else {
         fprintf(stderr, "Usage: %s [principal] [keytab]\n", argv[0]);
         exit(1);
