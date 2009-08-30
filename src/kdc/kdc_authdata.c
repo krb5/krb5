@@ -526,6 +526,7 @@ handle_tgt_authdata (krb5_context context,
 			    server_key, /* U2U or server key */
 			    enc_tkt_reply->times.authtime,
 			    tgs_req ? enc_tkt_request->authorization_data : NULL,
+			    enc_tkt_reply->session,
 			    &db_authdata,
 			    &ad_entry,
 			    &ad_nprincs);
