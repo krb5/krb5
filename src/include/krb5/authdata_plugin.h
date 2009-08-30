@@ -162,7 +162,8 @@ typedef struct krb5plugin_authdata_server_ftable_v1 {
 typedef krb5plugin_authdata_server_ftable_v1 krb5plugin_authdata_ftable_v1;
 
 typedef krb5_error_code
-(*authdata_client_plugin_init_proc)(krb5_context context, void **plugin_context);
+(*authdata_client_plugin_init_proc)(krb5_context context,
+				    void **plugin_context);
 
 #define AD_USAGE_AS_REQ		0x01
 #define AD_USAGE_TGS_REQ	0x02
@@ -171,33 +172,40 @@ typedef krb5_error_code
 #define AD_USAGE_MASK		0x0F
 #define AD_INFORMATIONAL	0x10
 
+struct _krb5_authdata_context;
+
 typedef void
-(*authdata_client_plugin_flags_proc)(krb5_context context,
+(*authdata_client_plugin_flags_proc)(krb5_context kcontext,
 				     void *plugin_context,
 				     krb5_authdatatype ad_type,
 				     krb5_flags *flags);
 
 typedef void
-(*authdata_client_plugin_fini_proc)(krb5_context context, void *plugin_context);
+(*authdata_client_plugin_fini_proc)(krb5_context kcontext,
+				    void *plugin_context);
 
 typedef krb5_error_code
-(*authdata_client_request_init_proc)(krb5_context context,
+(*authdata_client_request_init_proc)(krb5_context kcontext,
+				     struct _krb5_authdata_context *context,
 				     void *plugin_context,
 				     void **request_context);
 
 typedef void
-(*authdata_client_request_fini_proc)(krb5_context context,
+(*authdata_client_request_fini_proc)(krb5_context kcontext,
+				     struct _krb5_authdata_context *context,
 				     void *plugin_context,
 				     void *request_context);
 
 typedef krb5_error_code
-(*authdata_client_import_attributes_proc)(krb5_context context,
+(*authdata_client_import_attributes_proc)(krb5_context kcontext,
+					  struct _krb5_authdata_context *context,
 					  void *plugin_context,
 					  void *request_context,
 					  krb5_authdata **authdata);
 
 typedef krb5_error_code
-(*authdata_client_get_attribute_types_proc)(krb5_context context,
+(*authdata_client_get_attribute_types_proc)(krb5_context kcontext,
+					    struct _krb5_authdata_context *context,
 					    void *plugin_context,
 					    void *request_context,
 					    krb5_data **verified,
@@ -205,7 +213,8 @@ typedef krb5_error_code
 					    krb5_data **all_attrs);
 
 typedef krb5_error_code
-(*authdata_client_get_attribute_proc)(krb5_context context,
+(*authdata_client_get_attribute_proc)(krb5_context kcontext,
+				      struct _krb5_authdata_context *context,
 				      void *plugin_context,
 				      void *request_context,
 				      const krb5_data *attribute,
@@ -216,7 +225,8 @@ typedef krb5_error_code
 				      int *more);
 
 typedef krb5_error_code
-(*authdata_client_set_attribute_proc)(krb5_context context,
+(*authdata_client_set_attribute_proc)(krb5_context kcontext,
+				      struct _krb5_authdata_context *context,
 				      void *plugin_context,
 				      void *request_context,
 				      krb5_boolean complete,
@@ -224,40 +234,46 @@ typedef krb5_error_code
 				      const krb5_data *value);
 
 typedef krb5_error_code
-(*authdata_client_delete_attribute_proc)(krb5_context context,
+(*authdata_client_delete_attribute_proc)(krb5_context kcontext,
+					 struct _krb5_authdata_context *context,
 					 void *plugin_context,
 					 void *request_context,
 					 const krb5_data *attribute);
 
 typedef krb5_error_code
-(*authdata_client_export_attributes_proc)(krb5_context context,
+(*authdata_client_export_attributes_proc)(krb5_context kcontext,
+					  struct _krb5_authdata_context *context,
 					  void *plugin_context,
 					  void *request_context,
 					  krb5_flags usage,
 					  krb5_authdata ***authdata);
 
 typedef krb5_error_code
-(*authdata_client_export_internal_proc)(krb5_context context,
+(*authdata_client_export_internal_proc)(krb5_context kcontext,
+					struct _krb5_authdata_context *context,
 					void *plugin_context,
 					void *request_context,
 					krb5_boolean restrict_authenticated,
 					void **ptr);
 
 typedef krb5_error_code
-(*authdata_client_copy_context_proc)(krb5_context context,
+(*authdata_client_copy_context_proc)(krb5_context kcontext,
+				     struct _krb5_authdata_context *context,
 				     void *plugin_context,
 				     void *request_context,
 				     void *dst_plugin_context,
 				     void *dst_request_context);
 
 typedef void
-(*authdata_client_free_internal_proc)(krb5_context context,
+(*authdata_client_free_internal_proc)(krb5_context kcontext,
+				      struct _krb5_authdata_context *context,
 				      void *plugin_context,
 				      void *request_context,
 				      void *ptr);
 
 typedef krb5_error_code
-(*authdata_client_verify_proc)(krb5_context context,
+(*authdata_client_verify_proc)(krb5_context kcontext,
+			       struct _krb5_authdata_context *context,
 			       void *plugin_context,
 			       void *request_context,
 			       const krb5_auth_context *auth_context,

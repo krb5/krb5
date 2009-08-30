@@ -113,6 +113,7 @@ k5_ad_init_modules(krb5_context kcontext,
 
             /* For now, single request per context. That may change */
             code = (*table->request_init)(kcontext,
+                                          context,
                                           plugin_context,
                                           rcpp);
             if ((code != 0 && code != ENOMEM) &&
@@ -236,6 +237,7 @@ krb5_authdata_context_free(krb5_context kcontext,
         if (module->client_req_fini != NULL &&
             module->request_context != NULL)
             (*module->client_req_fini)(kcontext,
+                                       context,
                                        module->plugin_context,
                                        module->request_context);
 
@@ -284,6 +286,7 @@ krb5_authdata_import_attributes(krb5_context kcontext,
         assert(authdata[0] != NULL);
 
         code = (*module->ftable->import_attributes)(kcontext,
+                                                    context,
                                                     module->plugin_context,
                                                     *(module->request_context_pp),
                                                     authdata);
@@ -395,11 +398,13 @@ krb5int_authdata_verify(krb5_context kcontext,
         assert(authdata[0] != NULL);
 
         code = (*module->ftable->import_attributes)(kcontext,
+                                                    context,
                                                     module->plugin_context,
                                                     *(module->request_context_pp),
                                                     authdata);
         if (code == 0 && module->ftable->verify != NULL) {
             code = (*module->ftable->verify)(kcontext,
+                                             context,
                                              module->plugin_context,
                                              *(module->request_context_pp),
                                              auth_context,
@@ -475,6 +480,7 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
             continue;
 
         if ((*module->ftable->get_attribute_types)(kcontext,
+                                                   context,
                                                    module->plugin_context,
                                                    *(module->request_context_pp),
                                                    verified_attrs ?
@@ -571,6 +577,7 @@ krb5_authdata_get_attribute(krb5_context kcontext,
             continue;
 
         code = (*module->ftable->get_attribute)(kcontext,
+                                                context,
                                                 module->plugin_context,
                                                 *(module->request_context_pp),
                                                 attribute,
@@ -604,6 +611,7 @@ krb5_authdata_set_attribute(krb5_context kcontext,
             continue;
 
         code = (*module->ftable->set_attribute)(kcontext,
+                                                context,
                                                 module->plugin_context,
                                                 *(module->request_context_pp),
                                                 complete,
@@ -639,6 +647,7 @@ krb5_authdata_delete_attribute(krb5_context kcontext,
             continue;
 
         code = (*module->ftable->delete_attribute)(kcontext,
+                                                   context,
                                                    module->plugin_context,
                                                    *(module->request_context_pp),
                                                    attribute);
@@ -681,6 +690,7 @@ krb5_authdata_export_attributes(krb5_context kcontext,
             continue;
 
         code = (*module->ftable->export_attributes)(kcontext,
+                                                    context,
                                                     module->plugin_context,
                                                     *(module->request_context_pp),
                                                     flags,
@@ -735,6 +745,7 @@ krb5_authdata_export_internal(krb5_context kcontext,
             continue;
 
         code = (*module->ftable->export_internal)(kcontext,
+                                                  context,
                                                   module->plugin_context,
                                                   *(module->request_context_pp),
                                                   restrict_authenticated,
@@ -765,6 +776,7 @@ krb5_authdata_free_internal(krb5_context kcontext,
             continue;
 
         (*module->ftable->free_internal)(kcontext,
+                                         context,
                                          module->plugin_context,
                                          *(module->request_context_pp),
                                          ptr);
@@ -777,8 +789,9 @@ krb5_authdata_free_internal(krb5_context kcontext,
 
 static krb5_error_code
 k5_copy_ad_module_data(krb5_context kcontext,
-                      struct _krb5_authdata_context_module *src_module,
-                      krb5_authdata_context dst)
+                       krb5_authdata_context context,
+                       struct _krb5_authdata_context_module *src_module,
+                       krb5_authdata_context dst)
 {
     int i;
     krb5_error_code code;
@@ -807,6 +820,7 @@ k5_copy_ad_module_data(krb5_context kcontext,
     assert(dst_module->request_context_pp == &dst_module->request_context);
 
     code = (*src_module->ftable->copy_context)(kcontext,
+                                               context,
                                                src_module->plugin_context,
                                                src_module->request_context,
                                                dst_module->plugin_context,
@@ -832,7 +846,7 @@ krb5_authdata_context_copy(krb5_context kcontext,
     for (i = 0; i < src->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &src->modules[i];
 
-        code = k5_copy_ad_module_data(kcontext, module, dst);
+        code = k5_copy_ad_module_data(kcontext, src, module, dst);
         if (code != 0)
             break;
     }

@@ -1,5 +1,5 @@
 /*
- * plugins/authdata/greet/
+ * plugins/authdata/greet_server/
  *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
