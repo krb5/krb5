@@ -535,7 +535,8 @@ krb5_free_tkt_authent(krb5_context context, krb5_tkt_authent *val)
 void KRB5_CALLCONV
 krb5_free_unparsed_name(krb5_context context, char *val)
 {
-    free(val);
+    if (val != NULL)
+	free(val);
 }
 
 void KRB5_CALLCONV
