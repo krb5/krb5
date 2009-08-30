@@ -2573,7 +2573,7 @@ krb5_make_authdata_kdc_issued(krb5_context context,
     const krb5_keyblock *key,
     krb5_const_principal issuer,
     krb5_authdata *const *authdata,
-    krb5_authdata **ad_kdcissued);
+    krb5_authdata ***ad_kdcissued);
 krb5_error_code KRB5_CALLCONV
 krb5_verify_authdata_kdc_issued(krb5_context context,
     const krb5_keyblock *key,
