@@ -57,11 +57,9 @@ static krb5_error_code greet_hello(krb5_context context, krb5_data **ret)
 static krb5_error_code
 greet_kdc_verify(krb5_context context,
                  krb5_enc_tkt_part *enc_tkt_request,
-                 krb5_const_principal greet_issuer,
                  krb5_data **greeting)
 {
     krb5_error_code code;
-    krb5_principal issuer = NULL;
     krb5_authdata **tgt_authdata = NULL;
     krb5_authdata **kdc_issued = NULL;
     krb5_authdata **greet = NULL;
@@ -77,21 +75,12 @@ greet_kdc_verify(krb5_context context,
     code = krb5_verify_authdata_kdc_issued(context,
                                            enc_tkt_request->session,
                                            tgt_authdata[0],
-                                           &issuer,
+                                           NULL,
                                            &kdc_issued);
     if (code != 0) {
         krb5_free_authdata(context, tgt_authdata);
         return code;
     }
-
-#ifdef TEST_ISSUER
-    if (issuer == NULL ||
-        !krb5_principal_compare(context, issuer, greet_issuer)) {
-        krb5_free_principal(context, issuer);
-        krb5_free_authdata(context, kdc_issued);
-        return KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
-    }
-#endif
 
     code = krb5int_find_authdata(context,
                                  kdc_issued,
@@ -111,7 +100,6 @@ greet_kdc_verify(krb5_context context,
     krb5_free_authdata(context, tgt_authdata);
     krb5_free_authdata(context, kdc_issued);
     krb5_free_authdata(context, greet);
-    krb5_free_principal(context, issuer);
 
     return code;
 }
@@ -119,7 +107,7 @@ greet_kdc_verify(krb5_context context,
 static krb5_error_code
 greet_kdc_sign(krb5_context context,
                krb5_enc_tkt_part *enc_tkt_reply,
-               krb5_const_principal greet_issuer,
+               krb5_const_principal tgs,
                krb5_data *greeting)
 {
     krb5_error_code code;
@@ -135,7 +123,7 @@ greet_kdc_sign(krb5_context context,
 
     code = krb5_make_authdata_kdc_issued(context,
                                          enc_tkt_reply->session,
-                                         greet_issuer,
+                                         tgs,
                                          ad_data,
                                          &kdc_issued);
     if (code != 0)
@@ -150,7 +138,7 @@ greet_kdc_sign(krb5_context context,
         return code;
     }
 
-    /* this isn't very nice to other plugins ... */
+    /* this isn't very friendly to other plugins... */
     krb5_free_authdata(context, enc_tkt_reply->authorization_data);
     enc_tkt_reply->authorization_data = if_relevant;
 
@@ -174,33 +162,28 @@ greet_authdata(krb5_context context,
                krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code code;
-    krb5_boolean tgs_req = (request->msg_type == KRB5_TGS_REQ);
     krb5_data *greeting = NULL;
-    krb5_principal issuer = NULL;
 
-#ifdef TEST_ISSUER
-    code = krb5_parse_name(context, "greet@", &issuer);
-    if (code != 0)
-        return code;
-#endif
+    if (request->msg_type == KRB5_TGS_REQ) {
+        code = greet_kdc_verify(context, enc_tkt_request, &greeting);
+        if (code != 0)
+            return code;
+    }
 
-    if (tgs_req)
-        code = greet_kdc_verify(context, enc_tkt_request, issuer, &greeting);
-    else
+    if (greeting == NULL) {
         code = greet_hello(context, &greeting);
+        if (code != 0)
+            return code;
+    }
 
-    if (code != 0)
-        return code;
+    code = greet_kdc_sign(context, enc_tkt_reply, tgs->princ, greeting);
 
-    code = greet_kdc_sign(context, enc_tkt_reply, issuer, greeting);
-
-    krb5_free_principal(context, issuer);
     krb5_free_data(context, greeting);
 
     return code;
 }
 
-krb5plugin_authdata_ftable_v0 authdata_server_1 = {
+krb5plugin_authdata_server_ftable_v1 authdata_server_1 = {
     "greet",
     greet_init,
     greet_fini,
