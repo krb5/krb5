@@ -250,7 +250,6 @@ gss_cred_id_t *		d_cred;
 	    if ((temp_ret_flags & GSS_C_DELEG_FLAG) &&
 		tmp_d_cred != GSS_C_NO_CREDENTIAL) {
 		if (actual_mech != GSS_C_NO_OID &&
-		    token_mech_type != GSS_C_NO_OID &&
 		    !g_OID_prefix_equal(actual_mech, token_mech_type)) {
 		    *d_cred = tmp_d_cred; /* unwrapped pseudo-mech */
 		} else {
