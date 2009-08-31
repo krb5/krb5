@@ -326,7 +326,7 @@ k5_get_kdc_issued_authdata(krb5_context kcontext,
     /*
      * Note: a module must still implement a verify_authdata
      * method, even it is a NOOP that simply records the value
-     8 of kdc_issued_flag.
+     * of the kdc_issued_flag.
      */
     code = krb5_verify_authdata_kdc_issued(kcontext,
                                            ap_req->ticket->enc_part2->session,
@@ -372,15 +372,7 @@ krb5int_authdata_verify(krb5_context kcontext,
         if (module->ftable->import_attributes == NULL)
             continue;
 
-        code = krb5int_find_authdata(kcontext,
-                                     ticket_authdata,
-                                     authen_authdata,
-                                     module->ad_type,
-                                     &authdata);
-        if (code != 0)
-            break;
-
-        if (authdata == NULL && kdc_issued_authdata != NULL) {
+        if (kdc_issued_authdata != NULL) {
             code = krb5int_find_authdata(kcontext,
                                          kdc_issued_authdata,
                                          NULL,
@@ -390,6 +382,16 @@ krb5int_authdata_verify(krb5_context kcontext,
                 break;
 
             kdc_issued_flag = TRUE;
+        }
+
+        if (authdata == NULL) {
+            code = krb5int_find_authdata(kcontext,
+                                        ticket_authdata,
+                                        authen_authdata,
+                                        module->ad_type,
+                                        &authdata);
+            if (code != 0)
+                break;
         }
 
         if (authdata == NULL)
