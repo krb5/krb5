@@ -48,7 +48,7 @@ static krb5_error_code greet_hello(krb5_context context, krb5_data **ret)
 {
     krb5_data tmp;
 
-    tmp.data = "Hello, KDC issued acceptor world!\n";
+    tmp.data = "Hello, KDC issued acceptor world!";
     tmp.length = strlen(tmp.data);
 
     return krb5_copy_data(context, &tmp, ret);

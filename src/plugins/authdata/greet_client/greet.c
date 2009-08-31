@@ -168,6 +168,7 @@ greet_get_attribute(krb5_context kcontext,
                     int *more)
 {
     struct greet_context *greet = (struct greet_context *)request_context;
+    krb5_error_code code;
 
     if (!data_eq(*attribute, greet_attr) || greet->greeting.length == 0)
         return ENOENT;
@@ -176,7 +177,16 @@ greet_get_attribute(krb5_context kcontext,
     *complete = TRUE;
     *more = 0;
 
-    return krb5int_copy_data_contents_add0(kcontext, &greet->greeting, value);
+    code = krb5int_copy_data_contents_add0(kcontext, &greet->greeting, value);
+    if (code == 0) {
+        code = krb5int_copy_data_contents_add0(kcontext,
+                                               &greet->greeting,
+                                               display_value);
+        if (code != 0)
+            krb5_free_data_contents(kcontext, value);
+    }
+
+    return code;
 }
 
 static krb5_error_code
