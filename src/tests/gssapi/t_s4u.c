@@ -149,11 +149,7 @@ initAcceptSecContext(OM_uint32 *minor,
                                  claimant_cred_handle,
                                  &initiator_context,
                                  target_name,
-#if 1
                                  (gss_OID)&spnego_mech,
-#else
-                                 (gss_OID)&gss_mech_krb5,
-#endif
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -233,11 +229,7 @@ constrainedDelegate(OM_uint32 *minor,
                                  delegated_cred_handle,
                                  &initiator_context,
                                  target,
-#if 0
                                  (gss_OID)&spnego_mech,
-#else
-                                 (gss_OID)gss_mech_krb5,
-#endif
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -306,7 +298,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    mechs.elements = (gss_OID)gss_mech_krb5;
+    mechs.elements = (gss_OID)&spnego_mech;
     mechs.count = 1;
 
     /* get default cred */
