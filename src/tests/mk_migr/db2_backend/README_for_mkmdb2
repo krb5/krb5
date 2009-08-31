@@ -1,0 +1,37 @@
+ABOUT:
+A translation of Will Fiveash's "mit_db2_mkey_migrate_testB" ksh code into Python with the default db2 backend.  With minor fixes and changes.  Written by HaoQi Li.
+
+DEFAULT SETTINGS:
+Options     Name              Default Setting
+  -h      Help
+  -v      Verbose:        True
+  -p      Testing pw:     test123
+  -s      Sandbox loc:    src/tests/mk_migr/db2_backend/sandbox
+  -c      Krb5kdc:        src/kdc/krb5kdc
+  -d      Kadmind:        src/kadmin/server/kadmind
+  -b      Kdb5_util:      src/kadmin/dbutil/kdb5_util
+  -l      Kadmin.local:   src/kadmin/cli/kadmin.local
+  -n      Kadmin:         src/kadmin/cli/kadmin
+  -t      Client paths:   src/clients
+
+INPUTS:
+* src/tests/mk_migr/db2_backend/input_conf/kdc_template_db2.conf
+* src/tests/mk_migr/db2_backend/input_conf/krb5_template_db2.conf 
+* src/tests/mk_migr/db2_backend/input_conf/kadm5_template_db2.acl
+
+OUTPUTS:
+* sandbox that contains customized outfile with all commands and their outputs, kdc.conf, krb5.conf, kadm6.acl, and others.
+* Statistics on screen of number of commands passed and failed.
+
+EXAMPLES:
+- MUST RUN from trunk/src. 
+* python tests/mk_migr/db2_backend/mkmdb2.py
+    Using all Default Settings.
+* python tests/mk_migr/db2_backend/mkmdb2.py -s /tmp/mySandbox
+    Sandbox now can be found in /tmp/mySandbox.  
+
+
+# Notes:
+# Exists only at the end, unless fatal errors are encountered.  Otherwise, skips errors and continue!!
+# "haoqili" is a name that can be changed.
+# 2019 and 2029 are future dates that should best be written not as fixed. Such as now+10years.
