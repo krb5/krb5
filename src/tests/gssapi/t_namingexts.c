@@ -127,7 +127,7 @@ dumpAttribute(OM_uint32 *minor,
             break;
         }
 
-        printf("Attribute %.*s %s %s %.*s\n",
+        printf("Attribute %.*s %s %s\n\n%.*s\n",
                (int)attribute->length, (char *)attribute->value,
                authenticated ? "Authenticated" : "",
                 complete ? "Complete" : "",
