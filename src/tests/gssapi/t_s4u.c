@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
         buf.length = strlen((char *)buf.value);
 
         major = gss_import_name(&minor, &buf,
-                                (gss_OID)GSS_C_NT_HOSTBASED_SERVICE,
+                                (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
                                 &target);
         if (GSS_ERROR(major)) {
             displayStatus("gss_import_name(target)", major, minor);
