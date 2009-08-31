@@ -139,8 +139,17 @@ static krb5_error_code get_credentials(context, cred, server, now,
     in_creds.client = cred->name->princ;
     in_creds.server = server->princ;
     in_creds.times.endtime = endtime;
-
+    in_creds.authdata = NULL;
     in_creds.keyblock.enctype = 0;
+
+    if (cred->name->ad_context != NULL) {
+        code = krb5_authdata_export_attributes(context,
+                                               cred->name->ad_context,
+                                               AD_USAGE_TGS_REQ,
+                                               &in_creds.authdata);
+        if (code != 0)
+            goto cleanup;
+    }
 
     code = krb5_get_credentials(context, 0, cred->ccache,
                                 &in_creds, out_creds);
@@ -159,6 +168,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
     }
 
 cleanup:
+    krb5_free_authdata(context, in_creds.authdata);
+
     return code;
 }
 struct gss_checksum_data {
