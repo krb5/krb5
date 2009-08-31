@@ -218,6 +218,16 @@ OM_uint32 spnego_gss_release_name
 	gss_name_t *		/* input_name */
 );
 
+OM_uint32 spnego_gss_inquire_cred
+(
+	OM_uint32 *,		/* minor_status */
+	gss_cred_id_t,		/* cred_handle */
+	gss_name_t *,		/* name */
+	OM_uint32 *,		/* lifetime */
+	int *,			/* cred_usage */
+	gss_OID_set *		/* mechanisms */
+);
+
 OM_uint32 spnego_gss_inquire_names_for_mech
 (
 	OM_uint32 *,		/* minor_status */
@@ -328,6 +338,15 @@ spnego_gss_inquire_sec_context_by_oid
 (
 	OM_uint32 *minor_status,
 	const gss_ctx_id_t context_handle,
+	const gss_OID desired_object,
+	gss_buffer_set_t *data_set
+);
+
+OM_uint32
+spnego_gss_inquire_cred_by_oid
+(
+	OM_uint32 *minor_status,
+	const gss_cred_id_t cred_handle,
 	const gss_OID desired_object,
 	gss_buffer_set_t *data_set
 );

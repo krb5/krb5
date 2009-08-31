@@ -231,7 +231,7 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_display_name,
 	spnego_gss_import_name,
 	spnego_gss_release_name,
-	NULL,				/* gss_inquire_cred */
+	spnego_gss_inquire_cred,	/* gss_inquire_cred */
 	NULL,				/* gss_add_cred */
 #ifndef LEAN_CLIENT
 	spnego_gss_export_sec_context,		/* gss_export_sec_context */
@@ -248,7 +248,7 @@ static struct gss_config spnego_mechanism =
 	NULL,				/* gss_export_name */
 	NULL,				/* gss_store_cred */
  	spnego_gss_inquire_sec_context_by_oid, /* gss_inquire_sec_context_by_oid */
- 	NULL,				/* gss_inquire_cred_by_oid */
+ 	spnego_gss_inquire_cred_by_oid,	/* gss_inquire_cred_by_oid */
  	spnego_gss_set_sec_context_option, /* gss_set_sec_context_option */
  	NULL,				/* gssspi_set_cred_option */
  	NULL,				/* gssspi_mech_invoke */
@@ -1784,6 +1784,28 @@ spnego_gss_release_name(
 	return (status);
 }
 
+OM_uint32
+spnego_gss_inquire_cred(
+			OM_uint32 *minor_status,
+			gss_cred_id_t cred_handle,
+			gss_name_t *name,
+			OM_uint32 *lifetime,
+			int *cred_usage,
+			gss_OID_set *mechanisms)
+{
+	OM_uint32 status;
+
+	dsyslog("Entering inquire_cred\n");
+
+	status = gss_inquire_cred(minor_status, cred_handle,
+				  name, lifetime,
+				  cred_usage, mechanisms);
+
+	dsyslog("Leaving inquire_cred\n");
+
+	return (status);
+}
+
 /*ARGSUSED*/
 OM_uint32
 spnego_gss_compare_name(
@@ -2084,6 +2106,21 @@ spnego_gss_inquire_sec_context_by_oid(
 			    context_handle,
 			    desired_object,
 			    data_set);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_inquire_cred_by_oid(
+		OM_uint32 *minor_status,
+		const gss_cred_id_t cred_handle,
+		const gss_OID desired_object,
+		gss_buffer_set_t *data_set)
+{
+	OM_uint32 ret;
+	ret = gss_inquire_cred_by_oid(minor_status,
+				cred_handle,
+				desired_object,
+				data_set);
 	return (ret);
 }
 
