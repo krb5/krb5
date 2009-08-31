@@ -289,7 +289,9 @@ krb5_authdata_import_attributes(krb5_context kcontext,
                                                     context,
                                                     module->plugin_context,
                                                     *(module->request_context_pp),
-                                                    authdata);
+                                                    authdata,
+                                                    FALSE,
+                                                    NULL);
         if (code != 0 && (module->flags & AD_INFORMATIONAL))
             code = 0;
         krb5_free_authdata(kcontext, authdata);
@@ -403,7 +405,9 @@ krb5int_authdata_verify(krb5_context kcontext,
                                                     context,
                                                     module->plugin_context,
                                                     *(module->request_context_pp),
-                                                    authdata);
+                                                    authdata,
+                                                    kdc_issued_flag,
+                                                    kdc_issuer);
         if (code == 0 && module->ftable->verify != NULL) {
             code = (*module->ftable->verify)(kcontext,
                                              context,
@@ -411,9 +415,7 @@ krb5int_authdata_verify(krb5_context kcontext,
                                              *(module->request_context_pp),
                                              auth_context,
                                              key,
-                                             ap_req,
-                                             kdc_issued_flag,
-                                             kdc_issuer);
+                                             ap_req);
         }
         if (code != 0 && (module->flags & AD_INFORMATIONAL))
             code = 0;
@@ -591,6 +593,9 @@ krb5_authdata_get_attribute(krb5_context kcontext,
         if (code == 0)
             break;
     }
+
+    if (code != 0)
+        *more = 0;
 
     return code;
 }

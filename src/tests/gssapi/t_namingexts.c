@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
 
         gss_release_name(&tmp, &tmp_name);
 
-#if 0
+#if 1
         major = testGreetAuthzData(&minor, name);
         if (GSS_ERROR(major))
             goto out;

@@ -142,6 +142,10 @@ static krb5_error_code get_credentials(context, cred, server, now,
     in_creds.authdata = NULL;
     in_creds.keyblock.enctype = 0;
 
+    /*
+     * cred->name is immutable, so there is no need to acquire
+     * cred->name->lock.
+     */
     if (cred->name->ad_context != NULL) {
         code = krb5_authdata_export_attributes(context,
                                                cred->name->ad_context,

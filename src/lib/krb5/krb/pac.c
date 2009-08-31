@@ -98,7 +98,7 @@ k5_pac_add_buffer(krb5_context context,
 
     /* Check there isn't already a buffer of this type */
     if (k5_pac_locate_buffer(context, pac, type, NULL) == 0) {
-	return EINVAL;
+	return EEXIST;
     }
 
     header = (PACTYPE *)realloc(pac->pac,
@@ -993,10 +993,15 @@ mspac_import_attributes(krb5_context kcontext,
 			krb5_authdata_context context,
                         void *plugin_context,
 		        void *request_context,
-		        krb5_authdata **authdata)
+		        krb5_authdata **authdata,
+			krb5_boolean kdc_issued,
+			krb5_const_principal kdc_issuer)
 {
     krb5_error_code code;
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
+
+    if (kdc_issued)
+	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
     if (pacctx->pac != NULL) {
 	krb5_pac_free(kcontext, pacctx->pac);
@@ -1019,18 +1024,13 @@ mspac_verify(krb5_context kcontext,
 	     void *request_context,
 	     const krb5_auth_context *auth_context,
 	     const krb5_keyblock *key,
-	     const krb5_ap_req *req,
-	     krb5_boolean kdc_issued_flag,
-	     krb5_const_principal issuer)
+	     const krb5_ap_req *req)
 {
     krb5_error_code code;
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
 
     if (pacctx->pac == NULL)
 	return EINVAL;
-
-    if (kdc_issued_flag)
-	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
     code = krb5_pac_verify(kcontext,
 			   pacctx->pac,
