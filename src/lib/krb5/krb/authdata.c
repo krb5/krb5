@@ -322,7 +322,7 @@ k5_get_kdc_issued_authdata(krb5_context kcontext,
                                  NULL,
                                  KRB5_AUTHDATA_KDC_ISSUED,
                                  &authdata);
-    if (code != 0)
+    if (code != 0 || authdata == NULL)
         return code;
 
     /*
@@ -365,7 +365,7 @@ krb5int_authdata_verify(krb5_context kcontext,
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
-        krb5_authdata **authdata;
+        krb5_authdata **authdata = NULL;
         krb5_boolean kdc_issued_flag = FALSE;
 
         if ((module->flags & usage) == 0)
