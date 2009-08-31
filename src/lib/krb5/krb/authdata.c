@@ -672,7 +672,7 @@ krb5_authdata_export_attributes(krb5_context kcontext,
                                 krb5_authdata ***pauthdata)
 {
     int i;
-    krb5_error_code code = ENOENT;
+    krb5_error_code code = 0;
     krb5_authdata **authdata = NULL;
     unsigned int len = 0;
 
@@ -716,7 +716,8 @@ krb5_authdata_export_attributes(krb5_context kcontext,
         len += j;
     }
 
-    authdata[len] = NULL;
+    if (authdata != NULL)
+        authdata[len] = NULL;
 
     *pauthdata = authdata;
 
