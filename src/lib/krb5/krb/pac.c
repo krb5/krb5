@@ -429,7 +429,8 @@ krb5_pac_parse(krb5_context context,
 }
 
 static krb5_error_code
-k5_time_to_seconds_since_1970(krb5_int64 ntTime, krb5_timestamp *elapsedSeconds)
+k5_time_to_seconds_since_1970(krb5_int64 ntTime,
+			      krb5_timestamp *elapsedSeconds)
 {
     krb5_ui_8 abstime;
 
@@ -446,7 +447,8 @@ k5_time_to_seconds_since_1970(krb5_int64 ntTime, krb5_timestamp *elapsedSeconds)
 }
 
 static krb5_error_code
-k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds, krb5_ui_8 *ntTime)
+k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds,
+			      krb5_ui_8 *ntTime)
 {
     *ntTime = elapsedSeconds;
 
@@ -494,7 +496,8 @@ k5_pac_validate_client(krb5_context context,
 	pac_princname_length % 2)
 	return ERANGE;
 
-    ret = krb5int_ucs2lecs_to_utf8s(p, (size_t)pac_princname_length / 2, &pac_princname, NULL);
+    ret = krb5int_ucs2lecs_to_utf8s(p, (size_t)pac_princname_length / 2,
+				    &pac_princname, NULL);
     if (ret != 0)
 	return ret;
 
@@ -601,7 +604,8 @@ k5_pac_verify_server_checksum(krb5_context context,
 	return ret;
     }
 
-    ret = krb5_c_verify_checksum(context, server, KRB5_KEYUSAGE_APP_DATA_CKSUM,
+    ret = krb5_c_verify_checksum(context, server,
+				 KRB5_KEYUSAGE_APP_DATA_CKSUM,
 				 &pac_data, &checksum, &valid);
 
     free(pac_data.data);
@@ -651,7 +655,8 @@ k5_pac_verify_kdc_checksum(krb5_context context,
     server_checksum.data += PAC_SIGNATURE_DATA_LENGTH;
     server_checksum.length -= PAC_SIGNATURE_DATA_LENGTH;
 
-    ret = krb5_c_verify_checksum(context, privsvr, KRB5_KEYUSAGE_APP_DATA_CKSUM,
+    ret = krb5_c_verify_checksum(context, privsvr,
+				 KRB5_KEYUSAGE_APP_DATA_CKSUM,
 				 &server_checksum, &checksum, &valid);
     if (ret != 0)
 	return ret;
@@ -812,7 +817,8 @@ k5_pac_encode_header(krb5_context context, krb5_pac pac)
     unsigned char *p;
     size_t header_len;
 
-    header_len = PACTYPE_LENGTH + (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH);
+    header_len = PACTYPE_LENGTH +
+	(pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH);
     assert(pac->data.length >= header_len);
 
     p = (unsigned char *)pac->data.data;
@@ -1144,34 +1150,12 @@ mspac_get_attribute_types(krb5_context kcontext,
     krb5_error_code code;
     krb5_data **outattrs;
 
-
-    if (pacctx->pac == NULL) {
-#if 0
-	attrs = calloc(MSPAC_ATTRIBUTE_COUNT + 1, sizeof(krb5_data));
-	if (attrs == NULL)
-	    return ENOMEM;
-
-	for (i = 0; i < MSPAC_ATTRIBUTE_COUNT; i++) {
-	    code = krb5int_copy_data_contents(kcontext,
-					      &mspac_attribute_types[i].attribute,
-					      &attrs[i]);
-	    if (code != 0) {
-		krb5int_free_data_list(kcontext, attrs);
-		return code;
-	    }
-	}
-
-	*asserted = attrs;
-
-	return 0;
-#else
+    if (pacctx->pac == NULL)
 	return ENOENT;
-#endif
-    }
 
     outattrs = pacctx->pac->verified ? verified : asserted;
     if (outattrs == NULL)
-	return EINVAL;
+	return ENOENT; /* caller is not interested */
 
     attrs = calloc(1 + pacctx->pac->pac->cBuffers + 1, sizeof(krb5_data));
     if (attrs == NULL)
@@ -1188,6 +1172,7 @@ mspac_get_attribute_types(krb5_context kcontext,
 	return code;
     }
 
+    /* PAC buffers */
     for (i = 0; i < pacctx->pac->pac->cBuffers; i++) {
 	krb5_data attr;
 
