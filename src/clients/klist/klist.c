@@ -82,15 +82,15 @@ static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, "Usage: %s [-A] [-e] [-V] [[-c] [-f] [-s] [-a [-n]]] %s",
+    fprintf(stderr, "Usage: %s [-e] [-V] [[-c] [-d] [-f] [-s] [-a [-n]]] %s",
 	     progname, "[-k [-t] [-K]] [name]\n"); 
-    fprintf(stderr, "\t-A shows the submitted authorization data types\n");
     fprintf(stderr, "\t-c specifies credentials cache\n");
     fprintf(stderr, "\t-k specifies keytab\n");
     fprintf(stderr, "\t   (Default is credentials cache)\n");
     fprintf(stderr, "\t-e shows the encryption type\n");
     fprintf(stderr, "\t-V shows the Kerberos version and exits\n");
     fprintf(stderr, "\toptions for credential caches:\n");
+    fprintf(stderr, "\t\t-d shows the submitted authorization data types\n");
     fprintf(stderr, "\t\t-f shows credentials flags\n");
     fprintf(stderr, "\t\t-s sets exit status based on valid tgt existence\n");
     fprintf(stderr, "\t\t-a displays the address list\n");
@@ -115,9 +115,9 @@ main(argc, argv)
     name = NULL;
     mode = DEFAULT;
     /* V=version so v can be used for verbose later if desired.  */
-    while ((c = getopt(argc, argv, "AfetKsnack45V")) != -1) {
+    while ((c = getopt(argc, argv, "dfetKsnack45V")) != -1) {
 	switch (c) {
-	case 'A':
+	case 'd':
 	    show_adtype = 1;
 	    break;
 	case 'f':
@@ -583,9 +583,12 @@ show_credential(cred)
 		fputs("\t",stdout);
 	    else
 		fputs(", ",stdout);
-	    printf("AD types:");
-	    for (i = 0; cred->authdata[i] != NULL; i++)
-		printf(" %d", cred->authdata[i]->ad_type);
+	    printf("AD types: ");
+	    for (i = 0; cred->authdata[i] != NULL; i++) {
+		if (i)
+		    printf(", ");
+		printf("%d", cred->authdata[i]->ad_type);
+	    }
 	    extra_field++;
 	}
     }
