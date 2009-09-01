@@ -1015,7 +1015,8 @@ mspac_import_attributes(krb5_context kcontext,
     }
 
     assert(authdata[0] != NULL);
-    assert(authdata[0]->ad_type == KRB5_AUTHDATA_WIN2K_PAC);
+    assert((authdata[0]->ad_type & AD_TYPE_FIELD_TYPE_MASK) ==
+	KRB5_AUTHDATA_WIN2K_PAC);
 
     code = krb5_pac_parse(kcontext, authdata[0]->contents,
 			  authdata[0]->length, &pacctx->pac);
