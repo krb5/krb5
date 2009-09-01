@@ -507,10 +507,10 @@ k5_pac_validate_client(krb5_context context,
     free(pac_princname);
 
     if (pac_authtime != authtime ||
-	krb5_principal_compare_flags(context,
-				     pac_principal,
-				     principal,
-				     KRB5_PRINCIPAL_COMPARE_IGNORE_REALM) == FALSE)
+	!krb5_principal_compare_flags(context,
+				      pac_principal,
+				      principal,
+				      KRB5_PRINCIPAL_COMPARE_IGNORE_REALM))
 	ret = KRB5KRB_AP_WRONG_PRINC;
 
     krb5_free_principal(context, pac_principal);
