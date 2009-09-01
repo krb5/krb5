@@ -421,7 +421,8 @@ verify_s4u2self_reply(krb5_context context,
      */
     if (not_newer) {
         if (enc_s4u_padata == NULL) {
-            if (rep_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) {
+            if (rep_s4u_user->user_id.options &
+                    KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) {
                 code = KRB5_KDCREP_MODIFIED;
                 goto cleanup;
             }
@@ -432,9 +433,11 @@ verify_s4u2self_reply(krb5_context context,
                 goto cleanup;
             }
             if (memcmp(enc_s4u_padata->contents,
-                       req_s4u_user->cksum.contents, req_s4u_user->cksum.length) ||
+                       req_s4u_user->cksum.contents,
+                       req_s4u_user->cksum.length) ||
                 memcmp(&enc_s4u_padata->contents[req_s4u_user->cksum.length],
-                       rep_s4u_user->cksum.contents, rep_s4u_user->cksum.length)) {
+                       rep_s4u_user->cksum.contents,
+                       rep_s4u_user->cksum.length)) {
                 code = KRB5_KDCREP_MODIFIED;
                 goto cleanup;
             }
@@ -831,7 +834,10 @@ krb5_get_credentials_for_proxy(krb5_context context,
         goto cleanup;
     }
 
-    /* Caller should have set in_creds->client to match evidence ticket client */
+    /*
+     * Caller should have set in_creds->client to match evidence
+     * ticket client
+     */
     if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client,
                                 in_creds->client)) {
         code = EINVAL;
