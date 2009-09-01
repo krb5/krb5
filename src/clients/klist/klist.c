@@ -57,6 +57,7 @@ extern int optind;
 
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
+int show_adtype = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -81,8 +82,9 @@ static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, "Usage: %s [-e] [-V] [[-c] [-f] [-s] [-a [-n]]] %s",
+    fprintf(stderr, "Usage: %s [-A] [-e] [-V] [[-c] [-f] [-s] [-a [-n]]] %s",
 	     progname, "[-k [-t] [-K]] [name]\n"); 
+    fprintf(stderr, "\t-A shows the submitted authorization data types\n");
     fprintf(stderr, "\t-c specifies credentials cache\n");
     fprintf(stderr, "\t-k specifies keytab\n");
     fprintf(stderr, "\t   (Default is credentials cache)\n");
@@ -113,8 +115,11 @@ main(argc, argv)
     name = NULL;
     mode = DEFAULT;
     /* V=version so v can be used for verbose later if desired.  */
-    while ((c = getopt(argc, argv, "fetKsnack45V")) != -1) {
+    while ((c = getopt(argc, argv, "AfetKsnack45V")) != -1) {
 	switch (c) {
+	case 'A':
+	    show_adtype = 1;
+	    break;
 	case 'f':
 	    show_flags = 1;
 	    break;
@@ -568,6 +573,21 @@ show_credential(cred)
     err_tkt:
 	if (tkt != NULL)
 	    krb5_free_ticket(kcontext, tkt);
+    }
+
+    if (show_adtype) {
+	int i;
+
+	if (cred->authdata != NULL) {
+	    if (!extra_field)
+		fputs("\t",stdout);
+	    else
+		fputs(", ",stdout);
+	    printf("AD types:");
+	    for (i = 0; cred->authdata[i] != NULL; i++)
+		printf(" %d", cred->authdata[i]->ad_type);
+	    extra_field++;
+	}
     }
 
     /* if any additional info was printed, extra_field is non-zero */
