@@ -91,6 +91,10 @@ int ktest_equal_krb5_etype_info_entry
     (krb5_etype_info_entry * ref,
 		    krb5_etype_info_entry * var);
 
+int ktest_equal_ad_kdcissued
+    (krb5_ad_kdcissued *ref,
+		    krb5_ad_kdcissued *var);
+
 int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
 				      ldap_seqof_key_data *var);
 #endif

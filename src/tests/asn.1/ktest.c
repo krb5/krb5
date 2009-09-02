@@ -825,6 +825,19 @@ krb5_error_code ktest_make_sample_enc_sam_response_enc_2(p)
     return 0;
 }
 
+krb5_error_code ktest_make_sample_ad_kdcissued(p)
+    krb5_ad_kdcissued *p;
+{
+    krb5_error_code retval;
+    retval = ktest_make_sample_checksum(&p->ad_checksum);
+    if (retval) return retval;
+    retval = ktest_make_sample_principal(&p->i_principal);
+    if (retval) return retval;
+    retval = ktest_make_sample_authorization_data(&p->elements);
+    if (retval) return retval;
+    return retval;
+}
+
 #ifdef ENABLE_LDAP
 static krb5_error_code ktest_make_sample_key_data(krb5_key_data *p, int i)
 {
@@ -1418,6 +1431,14 @@ void ktest_empty_enc_sam_response_enc_2(p)
     krb5_enc_sam_response_enc_2 *p;
 {
   ktest_empty_data(&p->sam_sad);
+}
+
+void ktest_empty_ad_kdcissued(p)
+    krb5_ad_kdcissued *p;
+{
+    if (p->ad_checksum.contents) free(p->ad_checksum.contents);
+    ktest_destroy_principal(&p->i_principal);
+    ktest_destroy_authorization_data(&p->elements);
 }
 
 #ifdef ENABLE_LDAP

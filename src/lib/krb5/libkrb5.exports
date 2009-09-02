@@ -1,4 +1,5 @@
 _krb5_conf_boolean
+decode_krb5_ad_kdcissued
 decode_krb5_alt_method
 decode_krb5_ap_rep
 decode_krb5_ap_rep_enc_part
@@ -39,6 +40,7 @@ decode_krb5_tgs_rep
 decode_krb5_tgs_req
 decode_krb5_ticket
 decode_krb5_typed_data
+encode_krb5_ad_kdcissued
 encode_krb5_alt_method
 encode_krb5_ap_rep
 encode_krb5_ap_rep_enc_part
@@ -213,6 +215,7 @@ krb5_externalize_data
 krb5_externalize_opaque
 krb5_fcc_ops
 krb5_find_serializer
+krb5_free_ad_kdcissued
 krb5_free_address
 krb5_free_addresses
 krb5_free_alt_method

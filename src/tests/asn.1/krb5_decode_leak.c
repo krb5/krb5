@@ -658,7 +658,18 @@ main(int argc, char **argv)
                   krb5_free_enc_sam_response_enc_2);
         ktest_empty_enc_sam_response_enc_2(&sam_ch2);
     }
+    /****************************************************************/
+    /* encode_krb5_ad_kdcissued */
+    {
+        krb5_ad_kdcissued kdci, *tmp;
 
+        setup(kdci, "ad_kdcissued",
+              ktest_make_sample_ad_kdcissued);
+        leak_test(kdci, encode_krb5_ad_kdcissued,
+                  decode_krb5_ad_kdcissued,
+                  krb5_free_ad_kdcissued);
+        ktest_empty_ad_kdcissued(&kdci);
+    }
     krb5_free_context(test_context);
     return 0;
 }

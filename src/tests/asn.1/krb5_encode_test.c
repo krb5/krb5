@@ -695,6 +695,17 @@ main(argc, argv)
 		   acc.encode_krb5_enc_sam_response_enc_2);
 	ktest_empty_enc_sam_response_enc_2(&sam_ch2);
     }
+    /****************************************************************/
+    /* encode_krb5_ad_kdcissued */
+    {
+	krb5_ad_kdcissued kdci;
+	setup(kdci,krb5_ad_kdcissued,"ad_kdcissued",
+	      ktest_make_sample_ad_kdcissued);
+	encode_run(kdci,krb5_ad_kdcissued,
+		   "ad_kdcissued","",
+		   encode_krb5_ad_kdcissued);
+	ktest_empty_ad_kdcissued(&kdci);
+    }
 #ifdef ENABLE_LDAP
     {
 	ldap_seqof_key_data skd;
