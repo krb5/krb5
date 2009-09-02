@@ -9,7 +9,7 @@
 #include "k5-int.h"
 #include "arcfour-int.h"
 #include "enc_provider.h"
-#include "../aead.h"
+#include <aead.h>
 /* gets the next byte from the PRNG */
 #if ((__GNUC__ >= 2) )
 static __inline__ unsigned int k5_arcfour_byte(ArcfourContext *);

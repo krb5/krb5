@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 #include "des_int.h"
-#include "../aead.h"
+#include <aead.h>
 
 static krb5_error_code
 validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,

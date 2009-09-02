@@ -11,11 +11,11 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS= shs.o
+STLIBOBJS= ../../@CRYPTO_IMPL@/sha1/shs.o
 
-OBJS= $(OUTPRE)shs.$(OBJEXT) 
+OBJS= $(OUTPRE)../../@CRYPTO_IMPL@/sha1/shs.$(OBJEXT) 
 
-SRCS= $(srcdir)/shs.c
+SRCS= $(srcdir)/../../@CRYPTO_IMPL@/sha1/shs.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

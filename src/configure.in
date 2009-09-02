@@ -1060,7 +1060,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	lib lib/kdb
 
 	lib/crypto lib/crypto/krb lib/crypto/krb/crc32 lib/crypto/builtin/des
-	lib/crypto/krb/dk lib/crypto/krb/enc_provider
+	lib/crypto/krb/dk lib/crypto/builtin/enc_provider
 	lib/crypto/krb/hash_provider lib/crypto/krb/keyhash_provider
 	lib/crypto/builtin lib/crypto/builtin/md4 lib/crypto/builtin/md5
 	lib/crypto/krb/old lib/crypto/krb/raw lib/crypto/builtin/sha1

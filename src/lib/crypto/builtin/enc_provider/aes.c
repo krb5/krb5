@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "enc_provider.h"
 #include "aes.h"
-#include "../aead.h"
+#include <aead.h>
 
 #if 0
 aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1]);
