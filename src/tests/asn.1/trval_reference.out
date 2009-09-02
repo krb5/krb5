@@ -1246,3 +1246,20 @@ encode_krb5_enc_sam_response_enc_2:
 .  [0] [Integer] 88
 .  [1] [Octet String] "enc_sam_response_enc_2"
 
+encode_krb5_pa_s4u_x509_user:
+
+[Sequence/Sequence Of] 
+.  [0] [Sequence/Sequence Of] 
+.  .  [0] [Integer] 13243546
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] "hftsai"
+.  .  .  .  [General string] "extra"
+.  .  [2] [General string] "ATHENA.MIT.EDU"
+.  .  [3] [Octet String] "pa_s4u_x509_user"
+.  .  [4] [Bit String] 0x80000000
+.  [1] [Sequence/Sequence Of] 
+.  .  [0] [Integer] 1
+.  .  [1] [Octet String] "1234"
+
