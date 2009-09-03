@@ -192,7 +192,7 @@ etypes.so etypes.po $(OUTPRE)etypes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../builtin/aes/aes_s2k.h $(srcdir)/../builtin/arcfour/arcfour.h \
   $(srcdir)/../builtin/des/des_int.h $(srcdir)/dk/dk.h \
-  $(srcdir)/../builtin/../builtin/enc_provider/enc_provider.h $(srcdir)/hash_provider/hash_provider.h \
+  $(srcdir)/../builtin/enc_provider/enc_provider.h $(srcdir)/hash_provider/hash_provider.h \
   $(srcdir)/old/old.h $(srcdir)/raw/raw.h etypes.c etypes.h
 keyblocks.so keyblocks.po $(OUTPRE)keyblocks.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \

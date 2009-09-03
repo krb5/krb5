@@ -2,7 +2,7 @@ thisconfigdir=../../..
 myfulldir=lib/crypto/crypto_tests
 mydir=lib/crypto/crypto_tests
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../krb/enc_provider 		\
+LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 		\
 	-I$(srcdir)/../krb/hash_provider -I$(srcdir)/../krb/keyhash_provider 	\
 	-I$(srcdir)/../krb/dk -I$(srcdir)/../@CRYPTO_IMPL@/ 			\
 	-I$(srcdir)/../krb/yarrow 	\

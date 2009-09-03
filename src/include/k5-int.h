@@ -675,6 +675,7 @@ struct krb5_enc_provider {
 };
 
 struct krb5_hash_provider {
+    char hash_name[8];
     size_t hashsize, blocksize;
 
     /* this takes multiple inputs to avoid lots of copying. */

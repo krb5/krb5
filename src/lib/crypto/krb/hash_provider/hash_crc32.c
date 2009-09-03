@@ -49,6 +49,7 @@ k5_crc32_hash(unsigned int icount, const krb5_data *input,
 }
 
 const struct krb5_hash_provider krb5int_hash_crc32 = {
+    "CRC32",
     CRC32_CKSUM_LENGTH,
     1,
     k5_crc32_hash
