@@ -504,35 +504,6 @@ typedef struct gss_config {
 	    OM_uint32 *			/* acceptor_time_rec */
 	/* */);
 
-	OM_uint32	(*gss_acquire_cred_impersonate_cred)
-	(
-	    OM_uint32 *,		/* minor_status */
-	    const gss_cred_id_t,	/* impersonator_cred_handle */
-	    const gss_cred_id_t,	/* subject_cred_handle */
-	    OM_uint32,			/* time_req */
-	    const gss_OID_set,		/* desired_mechs */
-	    gss_cred_usage_t,		/* cred_usage */
-	    gss_cred_id_t *,		/* output_cred_handle */
-	    gss_OID_set *,		/* actual_mechs */
-	    OM_uint32 *			/* time_rec */
-	/* */);
-
-	OM_uint32	(*gss_add_cred_impersonate_cred)
-	(
-	    OM_uint32 *,		/* minor_status */
-	    gss_cred_id_t,		/* input_cred_handle */
-	    const gss_cred_id_t,	/* impersonator_cred_handle */
-	    const gss_cred_id_t,	/* subject_cred_handle */
-	    const gss_OID,		/* desired_mech */
-	    gss_cred_usage_t,		/* cred_usage */
-	    OM_uint32,			/* initiator_time_req */
-	    OM_uint32,			/* acceptor_time_req */
-	    gss_cred_id_t *,		/* output_cred_handle */
-	    gss_OID_set *,		/* actual_mechs */
-	    OM_uint32 *,		/* initiator_time_rec */
-	    OM_uint32 *			/* acceptor_time_rec */
-	/* */);
-
 } *gss_mechanism;
 
 /* This structure MUST NOT be used by any code outside libgss */
