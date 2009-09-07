@@ -43,7 +43,8 @@
  *   need to use the canonical name (FOO$), which will cause principal
  *   comparison errors in gss_accept_sec_context().
  * - Add a SPN of host/foo.domain
- * - Add host/foo.domain to the keytab (possibly easiest to do this with ktadd)
+ * - Add host/foo.domain to the keytab (possibly easiest to do this
+ *   with ktadd)
  *
  * For S4U2Proxy to work the TGT must be forwardable too.
  *
@@ -54,6 +55,8 @@
  */
 
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
+
+int use_spnego = 0;
 
 static void displayStatus_1(m, code, type)
      char *m;
@@ -90,26 +93,46 @@ static OM_uint32
 displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
 {
     gss_name_t canon;
-    OM_uint32 major;
+    OM_uint32 major, tmp_minor;
     gss_buffer_desc buf;
 
-    major = gss_canonicalize_name(minor, name, (gss_OID)gss_mech_krb5, &canon);
+    major = gss_canonicalize_name(minor, name,
+                                  (gss_OID)gss_mech_krb5, &canon);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_canonicalize_name", major, minor);
+        displayStatus("gss_canonicalize_name", major, *minor);
         return major;
     }
 
     major = gss_display_name(minor, canon, &buf, NULL);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_display_name", major, minor);
-        gss_release_name(minor, &canon);
+        displayStatus("gss_display_name", major, *minor);
+        gss_release_name(&tmp_minor, &canon);
         return major;
     }
 
     printf("%s:\t%s\n", tag, (char *)buf.value);
 
-    gss_release_buffer(minor, &buf);
-    gss_release_name(minor, &canon);
+    gss_release_buffer(&tmp_minor, &buf);
+    gss_release_name(&tmp_minor, &canon);
+
+    return GSS_S_COMPLETE;
+}
+
+static OM_uint32
+displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
+{
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc buf;
+
+    major = gss_oid_to_str(minor, oid, &buf);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_oid_to_str", major, *minor);
+        return major;
+    }
+
+    printf("%s:\t%s\n", tag, (char *)buf.value);
+
+    gss_release_buffer(&tmp_minor, &buf);
 
     return GSS_S_COMPLETE;
 }
@@ -120,13 +143,14 @@ initAcceptSecContext(OM_uint32 *minor,
                      gss_cred_id_t verifier_cred_handle,
                      gss_cred_id_t *deleg_cred_handle)
 {
-    OM_uint32 major;
+    OM_uint32 major, tmp_minor;
     gss_buffer_desc token, tmp;
     gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
     gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
     gss_name_t source_name = GSS_C_NO_NAME;
     gss_name_t target_name = GSS_C_NO_NAME;
     OM_uint32 time_rec;
+    gss_OID mech = GSS_C_NO_OID;
 
     token.value = NULL;
     token.length = 0;
@@ -139,17 +163,20 @@ initAcceptSecContext(OM_uint32 *minor,
     major = gss_inquire_cred(minor, verifier_cred_handle,
                              &target_name, NULL, NULL, NULL);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_inquire_cred", major, minor);
+        displayStatus("gss_inquire_cred", major, *minor);
         return major;
     }
 
     displayCanonName(minor, target_name, "Target name");
 
+    mech = use_spnego ? (gss_OID)&spnego_mech : (gss_OID)gss_mech_krb5;
+    displayOID(minor, mech, "Target mech");
+
     major = gss_init_sec_context(minor,
                                  claimant_cred_handle,
                                  &initiator_context,
                                  target_name,
-                                 (gss_OID)&spnego_mech,
+                                 mech,
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -160,14 +187,15 @@ initAcceptSecContext(OM_uint32 *minor,
                                  &time_rec);
 
     if (target_name != GSS_C_NO_NAME)
-        (void) gss_release_name(minor, &target_name);
+        (void) gss_release_name(&tmp_minor, &target_name);
 
     if (GSS_ERROR(major)) {
-        displayStatus("gss_init_sec_context", major, minor);
+        displayStatus("gss_init_sec_context", major, *minor);
         return major;
     }
 
     (void) gss_delete_sec_context(minor, &initiator_context, NULL);
+    mech = GSS_C_NO_OID;
 
     major = gss_accept_sec_context(minor,
                                    &acceptor_context,
@@ -175,21 +203,24 @@ initAcceptSecContext(OM_uint32 *minor,
                                    &token,
                                    GSS_C_NO_CHANNEL_BINDINGS,
                                    &source_name,
-                                   NULL,
+                                   &mech,
                                    &tmp,
                                    NULL,
                                    &time_rec,
                                    deleg_cred_handle);
 
     if (GSS_ERROR(major))
-        displayStatus("gss_accept_sec_context", major, minor);
-    else
+        displayStatus("gss_accept_sec_context", major, *minor);
+    else {
         displayCanonName(minor, source_name, "Source name");
+        displayOID(minor, mech, "Source mech");
+    }
 
-    (void) gss_release_name(minor, &source_name);
-    (void) gss_delete_sec_context(minor, &acceptor_context, NULL);
-    (void) gss_release_buffer(minor, &token);
-    (void) gss_release_buffer(minor, &tmp);
+    (void) gss_release_name(&tmp_minor, &source_name);
+    (void) gss_delete_sec_context(&tmp_minor, &acceptor_context, NULL);
+    (void) gss_release_buffer(&tmp_minor, &token);
+    (void) gss_release_buffer(&tmp_minor, &tmp);
+    (void) gss_release_oid(&tmp_minor, &mech);
 
     return major;
 }
@@ -201,12 +232,13 @@ constrainedDelegate(OM_uint32 *minor,
                     gss_cred_id_t delegated_cred_handle,
                     gss_cred_id_t verifier_cred_handle)
 {
-    OM_uint32 major, tmp;
+    OM_uint32 major, tmp_minor;
     gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
     gss_name_t cred_name = GSS_C_NO_NAME;
     OM_uint32 time_rec, lifetime;
     gss_cred_usage_t usage;
     gss_buffer_desc token;
+    gss_OID_set mechs;
 
     printf("Constrained delegation tests follow\n");
     printf("-----------------------------------\n\n");
@@ -214,13 +246,14 @@ constrainedDelegate(OM_uint32 *minor,
     if (gss_inquire_cred(minor, verifier_cred_handle, &cred_name,
                          &lifetime, &usage, NULL) == GSS_S_COMPLETE) {
         displayCanonName(minor, cred_name, "Proxy name");
-        gss_release_name(minor, &cred_name);
+        gss_release_name(&tmp_minor, &cred_name);
     }
     displayCanonName(minor, target, "Target name");
     if (gss_inquire_cred(minor, delegated_cred_handle, &cred_name,
-                         &lifetime, &usage, NULL) == GSS_S_COMPLETE) {
-        displayCanonName(minor, cred_name, "Source name");
-        gss_release_name(minor, &cred_name);
+                         &lifetime, &usage, &mechs) == GSS_S_COMPLETE) {
+        displayCanonName(minor, cred_name, "Delegated name");
+        displayOID(minor, &mechs->elements[0], "Delegated mech");
+        gss_release_name(&tmp_minor, &cred_name);
     }
 
     printf("\n");
@@ -229,7 +262,8 @@ constrainedDelegate(OM_uint32 *minor,
                                  delegated_cred_handle,
                                  &initiator_context,
                                  target,
-                                 (gss_OID)&spnego_mech,
+                                 mechs ? &mechs->elements[0] :
+                                         (gss_OID)gss_mech_krb5,
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -239,10 +273,11 @@ constrainedDelegate(OM_uint32 *minor,
                                  NULL,
                                  &time_rec);
     if (GSS_ERROR(major))
-        displayStatus("gss_init_sec_context", major, minor);
+        displayStatus("gss_init_sec_context", major, *minor);
 
-    (void) gss_release_buffer(&tmp, &token);
-    (void) gss_delete_sec_context(&tmp, &initiator_context, NULL);
+    (void) gss_release_buffer(&tmp_minor, &token);
+    (void) gss_delete_sec_context(&tmp_minor, &initiator_context, NULL);
+    (void) gss_release_oid_set(&tmp_minor, &mechs);
 
     return major;
 }
@@ -258,10 +293,17 @@ int main(int argc, char *argv[])
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc buf;
 
-    if (argc < 2 || argc > 4) {
-        fprintf(stderr, "Usage: %s [user] [proxy-target] [keytab]\n", argv[0]);
+    if (argc < 2 || argc > 5) {
+        fprintf(stderr, "Usage: %s [--spnego] [user] "
+                        "[proxy-target] [keytab]\n", argv[0]);
         fprintf(stderr, "       proxy-target and keytab are optional\n");
         exit(1);
+    }
+
+    if (strcmp(argv[1], "--spnego") == 0) {
+        use_spnego++;
+        argc--;
+        argv++;
     }
 
     buf.value = argv[1];
@@ -293,12 +335,14 @@ int main(int argc, char *argv[])
     if (argc > 3) {
         major = krb5_gss_register_acceptor_identity(argv[3]);
         if (GSS_ERROR(major)) {
-            displayStatus("krb5_gss_register_acceptor_identity", major, minor);
+            displayStatus("krb5_gss_register_acceptor_identity",
+                          major, minor);
             goto out;
         }
     }
 
-    mechs.elements = (gss_OID)&spnego_mech;
+    mechs.elements = use_spnego ? (gss_OID)&spnego_mech :
+                                  (gss_OID)gss_mech_krb5;
     mechs.count = 1;
 
     /* get default cred */
