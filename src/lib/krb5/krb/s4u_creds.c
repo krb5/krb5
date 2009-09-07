@@ -456,13 +456,12 @@ cleanup:
 
 static krb5_error_code
 krb5_get_self_cred_from_kdc(krb5_context context,
+                            krb5_flags options,
                             krb5_ccache ccache,
                             krb5_creds *in_creds,
                             krb5_data *subject_cert,
                             krb5_data *user_realm,
-                            krb5_creds **out_creds,
-                            krb5_creds ***tgts,
-                            krb5_flags kdcopt)
+                            krb5_creds **out_creds)
 {
     krb5_error_code code;
     krb5_principal tgs = NULL;
@@ -472,6 +471,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     int referral_count = 0, i;
     krb5_principal s4u_server = NULL;
     char *s4u_server_name = NULL;
+    krb5_flags kdcopt;
 
     memset(&tgtq, 0, sizeof(tgtq));
     memset(&s4u_creds, 0, sizeof(s4u_creds));
@@ -523,8 +523,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     tgtq.client = in_creds->server;
     tgtq.server = tgs;
 
-    code = krb5_get_cred_from_kdc_opt(context, ccache, &tgtq,
-                                      &tgt, tgts, kdcopt);
+    code = krb5_get_credentials(context, options, ccache, &tgtq, &tgt);
     if (code != 0)
         goto cleanup;
 
@@ -571,6 +570,14 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     }
 
     /* Then, walk back the referral path to S4U2Self for user */
+    kdcopt = 0;
+    if (options & KRB5_GC_CANONICALIZE)
+        kdcopt |= KDC_OPT_CANONICALIZE;
+    if (options & KRB5_GC_FORWARDABLE)
+        kdcopt |= KDC_OPT_FORWARDABLE;
+    if (options & KRB5_GC_NO_TRANSIT_CHECK)
+        kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
+
     for (referral_count = 0;
          referral_count < KRB5_REFERRAL_MAXHOPS;
          referral_count++)
@@ -677,44 +684,17 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     }
 
 cleanup:
-    if (referral_tgts[0] != NULL) {
-        krb5_creds **tgts2;
-
-        if (*tgts != NULL) {
-            for (i = 0; (*tgts)[i] != NULL; i++)
-                ;
-        } else
-            i = 0;
-
-        /*
-         * storing the first referral only mirrors the behaviour of
-         * krb5_get_cred_from_kdc_opt()
-         */
-        tgts2 = realloc(*tgts, (i + 2) * sizeof(krb5_creds *));
-        tgts2[i] = referral_tgts[0];
-        referral_tgts[0] = NULL;
-
-        tgts2[i + 1] = NULL;
-
-        *tgts = tgts2;
-    }
-
     for (i = 0; i < KRB5_REFERRAL_MAXHOPS; i++) {
         if (referral_tgts[i] != NULL)
             krb5_free_creds(context, referral_tgts[i]);
     }
-    if (tgs != NULL)
-        krb5_free_principal(context, tgs);
-    if (tgt != NULL)
-        krb5_free_creds(context, tgt);
+    krb5_free_principal(context, tgs);
+    krb5_free_creds(context, tgt);
     krb5_free_cred_contents(context, &s4u_creds);
-    if (s4u_user.user_id.user != NULL)
-        krb5_free_principal(context, s4u_user.user_id.user);
+    krb5_free_principal(context, s4u_user.user_id.user);
     krb5_free_checksum_contents(context, &s4u_user.cksum);
-    if (s4u_server != NULL)
-        krb5_free_principal(context, s4u_server);
-    if (s4u_server_name != NULL)
-        krb5_free_unparsed_name(context, s4u_server_name);
+    krb5_free_principal(context, s4u_server);
+    krb5_free_unparsed_name(context, s4u_server_name);
 
     return code;
 }
@@ -727,8 +707,6 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 {
     krb5_error_code code;
     krb5_principal realm = NULL;
-    krb5_creds **tgts = NULL;
-    krb5_flags kdcopt;
 
     *out_creds = NULL;
 
@@ -743,6 +721,9 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
                                     ccache, in_creds, out_creds);
         if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
             goto cleanup;
+
+        if ((options & KRB5_GC_CACHED) && !(options & KRB5_GC_CANONICALIZE))
+            goto cleanup;
     }
 
     code = s4u_identify_user(context, in_creds, subject_cert, &realm);
@@ -751,21 +732,14 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 
     code = krb5_get_credentials(context, options | KRB5_GC_CACHED,
                                 ccache, in_creds, out_creds);
-    if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
+    if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
+        || options & KRB5_GC_CACHED)
         goto cleanup;
 
-    kdcopt = 0;
-    if (options & KRB5_GC_CANONICALIZE)
-        kdcopt |= KDC_OPT_CANONICALIZE;
-    if (options & KRB5_GC_FORWARDABLE)
-        kdcopt |= KDC_OPT_FORWARDABLE;
-    if (options & KRB5_GC_NO_TRANSIT_CHECK)
-        kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
-
-    code = krb5_get_self_cred_from_kdc(context, ccache,
+    code = krb5_get_self_cred_from_kdc(context, options, ccache,
                                        in_creds, subject_cert,
                                        krb5_princ_realm(context, realm),
-                                       out_creds, &tgts, kdcopt);
+                                       out_creds);
     if (code != 0)
         goto cleanup;
 
@@ -777,30 +751,13 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
             goto cleanup;
     }
 
-    if (tgts != NULL) {
-        int i = 0;
-        krb5_error_code code2;
-
-        while (tgts[i] != NULL) {
-            code2 = krb5_cc_store_cred(context, ccache, tgts[i]);
-            if (code2 != 0) {
-                code = code2;
-                break;
-            }
-            i++;
-        }
-        krb5_free_tgt_creds(context, tgts);
-    }
-
-
 cleanup:
     if (code != 0 && *out_creds != NULL) {
         krb5_free_creds(context, *out_creds);
         *out_creds = NULL;
     }
 
-    if (realm != NULL)
-        krb5_free_principal(context, realm);
+    krb5_free_principal(context, realm);
 
     return code;
 }
