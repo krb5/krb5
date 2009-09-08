@@ -39,6 +39,7 @@ typedef	long		osa_adb_ret_t;
 
 #define OSA_ADB_POLICY_VERSION_MASK	0x12345D00
 #define OSA_ADB_POLICY_VERSION_1	0x12345D01
+#define OSA_ADB_POLICY_VERSION_2	0x12345D02
 
 
 

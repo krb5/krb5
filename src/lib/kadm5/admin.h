@@ -111,9 +111,10 @@ typedef long		kadm5_ret_t;
 #define KADM5_RANDKEY_USED      0x100000
 #endif
 #define KADM5_LOAD		0x200000
+#define KADM5_LOCKED_TIME	0x400000
 
-/* all but KEY_DATA and TL_DATA */
-#define KADM5_PRINCIPAL_NORMAL_MASK 0x01ffff
+/* all but KEY_DATA, TL_DATA, LOAD */
+#define KADM5_PRINCIPAL_NORMAL_MASK 0x41ffff
 
 
 /* kadm5_policy_ent_t */
@@ -123,6 +124,9 @@ typedef long		kadm5_ret_t;
 #define KADM5_PW_MIN_CLASSES	0x020000
 #define KADM5_PW_HISTORY_NUM	0x040000
 #define KADM5_REF_COUNT		0x080000
+#define KADM5_PW_MAX_FAILURE		0x100000
+#define KADM5_PW_FAILURE_COUNT_INTERVAL	0x200000
+#define KADM5_PW_LOCKOUT_DURATION	0x400000
 
 /* kadm5_config_params */
 #define KADM5_CONFIG_REALM		0x00000001
@@ -176,6 +180,7 @@ typedef long		kadm5_ret_t;
 
 #define KADM5_API_VERSION_MASK	0x12345700
 #define KADM5_API_VERSION_2	(KADM5_API_VERSION_MASK|0x02)
+#define KADM5_API_VERSION_3	(KADM5_API_VERSION_MASK|0x03)
 
 typedef struct _kadm5_principal_ent_t {
 	krb5_principal	principal;
@@ -200,6 +205,9 @@ typedef struct _kadm5_principal_ent_t {
 	krb5_int16 n_tl_data;
         krb5_tl_data *tl_data;
 	krb5_key_data *key_data;
+
+	/* version 3 fields */
+	krb5_timestamp locked_time;
 } kadm5_principal_ent_rec, *kadm5_principal_ent_t;
 
 typedef struct _kadm5_policy_ent_t {
@@ -210,6 +218,11 @@ typedef struct _kadm5_policy_ent_t {
 	long		pw_min_classes;
 	long		pw_history_num;
 	long		policy_refcnt;
+
+	/* version 3 fields */
+	krb5_kvno	pw_max_fail;
+	krb5_deltat	pw_failcnt_interval;
+	krb5_deltat	pw_lockout_duration;
 } kadm5_policy_ent_rec, *kadm5_policy_ent_t;
 
 /*

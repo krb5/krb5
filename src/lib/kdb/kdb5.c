@@ -1659,6 +1659,33 @@ krb5_dbe_lookup_last_pwd_change(context, entry, stamp)
 }
 
 krb5_error_code
+krb5_dbe_lookup_locked_time(context, entry, stamp)
+    krb5_context context;
+    krb5_db_entry *entry;
+    krb5_timestamp *stamp;
+{
+    krb5_tl_data tl_data;
+    krb5_error_code code;
+    krb5_int32 tmp;
+
+    tl_data.tl_data_type = KRB5_TL_LOCKED_TIME;
+
+    if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
+	return (code);
+
+    if (tl_data.tl_data_length != 4) {
+	*stamp = 0;
+	return (0);
+    }
+
+    krb5_kdb_decode_int32(tl_data.tl_data_contents, tmp);
+
+    *stamp = (krb5_timestamp) tmp;
+
+    return (0);
+}
+
+krb5_error_code
 krb5_dbe_lookup_tl_data(context, entry, ret_tl_data)
     krb5_context context;
     krb5_db_entry *entry;
@@ -2128,6 +2155,23 @@ krb5_dbe_update_last_pwd_change(context, entry, stamp)
     krb5_octet buf[4];		/* this is the encoded size of an int32 */
 
     tl_data.tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+    tl_data.tl_data_length = sizeof(buf);
+    krb5_kdb_encode_int32((krb5_int32) stamp, buf);
+    tl_data.tl_data_contents = buf;
+
+    return (krb5_dbe_update_tl_data(context, entry, &tl_data));
+}
+
+krb5_error_code
+krb5_dbe_update_locked_time(context, entry, stamp)
+    krb5_context context;
+    krb5_db_entry *entry;
+    krb5_timestamp stamp;
+{
+    krb5_tl_data tl_data;
+    krb5_octet buf[4];		/* this is the encoded size of an int32 */
+
+    tl_data.tl_data_type = KRB5_TL_LOCKED_TIME;
     tl_data.tl_data_length = sizeof(buf);
     krb5_kdb_encode_int32((krb5_int32) stamp, buf);
     tl_data.tl_data_contents = buf;

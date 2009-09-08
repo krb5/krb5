@@ -32,6 +32,7 @@ typedef	long		osa_adb_ret_t;
 #define OSA_ADB_PRINC_VERSION_1		0x12345C01
 #define OSA_ADB_POLICY_VERSION_MASK	0x12345D00
 #define OSA_ADB_POLICY_VERSION_1	0x12345D01
+#define OSA_ADB_POLICY_VERSION_2	0x12345D02
 
 typedef struct _osa_adb_db_lock_ent_t {
      FILE	*lockfile;
@@ -75,6 +76,9 @@ typedef struct _osa_policy_ent_t {
     uint32_t	pw_min_classes;
     uint32_t	pw_history_num;
     uint32_t	policy_refcnt;
+    uint32_t	pw_max_fail;
+    uint32_t	pw_failcnt_interval;
+    uint32_t	pw_lockout_duration;
 } osa_policy_ent_rec, *osa_policy_ent_t;
 
 typedef	void	(*osa_adb_iter_policy_func) (void *, osa_policy_ent_t);

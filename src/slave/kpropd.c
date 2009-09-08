@@ -701,7 +701,7 @@ reinit:
 				      master_svc_princstr,
 				      &params,
 				      KADM5_STRUCT_VERSION,
-				      KADM5_API_VERSION_2,
+				      KADM5_API_VERSION_3,
 				      db_args,
 				      &server_handle);
 

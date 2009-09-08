@@ -51,14 +51,27 @@ bool_t xdr_nullstring(XDR *xdrs, char **objp)
      return FALSE;
 }
                                                                                                                             
+static int
+osa_policy_min_vers(osa_policy_ent_t objp)
+{
+    int vers;
 
+    if (objp->pw_max_fail ||
+        objp->pw_failcnt_interval ||
+        objp->pw_lockout_duration)
+        vers = OSA_ADB_POLICY_VERSION_2;
+    else
+        vers = OSA_ADB_POLICY_VERSION_1;
+
+    return vers;
+}
 
 bool_t
 xdr_osa_policy_ent_rec(XDR *xdrs, osa_policy_ent_t objp)
 {
     switch (xdrs->x_op) {
     case XDR_ENCODE:
-	 objp->version = OSA_ADB_POLICY_VERSION_1;
+	 objp->version = osa_policy_min_vers(objp);
 	 /* fall through */
     case XDR_FREE:
 	 if (!xdr_int(xdrs, &objp->version))
@@ -67,7 +80,8 @@ xdr_osa_policy_ent_rec(XDR *xdrs, osa_policy_ent_t objp)
     case XDR_DECODE:
 	 if (!xdr_int(xdrs, &objp->version))
 	      return FALSE;
-	 if (objp->version != OSA_ADB_POLICY_VERSION_1)
+	 if (objp->version != OSA_ADB_POLICY_VERSION_1 &&
+             objp->version != OSA_ADB_POLICY_VERSION_2)
 	      return FALSE;
 	 break;
     }
@@ -86,5 +100,13 @@ xdr_osa_policy_ent_rec(XDR *xdrs, osa_policy_ent_t objp)
 	return (FALSE);
     if (!xdr_u_int32(xdrs, &objp->policy_refcnt))
 	return (FALSE);
+    if (objp->version > OSA_ADB_POLICY_VERSION_1) {
+        if (!xdr_u_int32(xdrs, &objp->pw_max_fail))
+	    return (FALSE);
+        if (!xdr_u_int32(xdrs, &objp->pw_failcnt_interval))
+	    return (FALSE);
+        if (!xdr_u_int32(xdrs, &objp->pw_lockout_duration))
+	    return (FALSE);
+    }
     return (TRUE);
 }

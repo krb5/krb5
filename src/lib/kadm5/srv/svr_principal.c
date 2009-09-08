@@ -222,7 +222,7 @@ kadm5_create_principal_3(void *server_handle,
        (mask & KADM5_MKVNO) || (mask & KADM5_POLICY_CLR) ||
        (mask & KADM5_AUX_ATTRIBUTES) || (mask & KADM5_KEY_DATA) ||
        (mask & KADM5_LAST_SUCCESS) || (mask & KADM5_LAST_FAILED) ||
-       (mask & KADM5_FAIL_AUTH_COUNT))
+       (mask & KADM5_FAIL_AUTH_COUNT) || (mask & KADM5_LOCKED_TIME))
 	return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
 	return KADM5_BAD_MASK;
@@ -663,6 +663,26 @@ kadm5_modify_principal(void *server_handle,
 	 }
     }
 
+    /*
+     * Setting entry->locked_time to 0 can be used to manually unlock
+     * an account. It is not possible to set locked_time to any other
+     * value using kadmin. The authentication failure counter is also
+     * reset to zero as a side effect.
+     */
+    if (mask & KADM5_LOCKED_TIME) {
+	if (entry->locked_time != 0) {
+	    ret = KADM5_BAD_SERVER_PARAMS;
+	    goto done;
+	}
+
+	kdb.fail_auth_count = 0;
+	mask |= KADM5_FAIL_AUTH_COUNT;
+
+	ret = krb5_dbe_update_locked_time(handle->context, &kdb, 0);
+	if (ret)
+	    goto done;
+    }
+
     /* let the mask propagate to the database provider */
     kdb.mask = mask;
 
@@ -788,6 +808,12 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
     if ((mask & KADM5_LAST_PWD_CHANGE) &&
 	(ret = krb5_dbe_lookup_last_pwd_change(handle->context, &kdb,
 					       &(entry->last_pwd_change)))) {
+	goto done;
+    }
+
+    if ((mask & KADM5_LOCKED_TIME) &&
+	(ret = krb5_dbe_lookup_locked_time(handle->context, &kdb,
+					   &(entry->locked_time)))) {
 	goto done;
     }
 

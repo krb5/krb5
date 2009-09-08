@@ -92,6 +92,7 @@ static krb5_error_code dump_k5beta7_princ_withpolicy
 static krb5_error_code dump_ov_princ (krb5_pointer,
 				      krb5_db_entry *);
 static void dump_k5beta7_policy (void *, osa_policy_ent_t);
+static void dump_r1_8_policy (void *, osa_policy_ent_t);
 
 typedef krb5_error_code (*dump_func)(krb5_pointer,
 				     krb5_db_entry *);
@@ -101,6 +102,8 @@ static int process_k5beta_record (char *, krb5_context,
 static int process_k5beta6_record (char *, krb5_context,
 				   FILE *, int, int *);
 static int process_k5beta7_record (char *, krb5_context,
+				   FILE *, int, int *);
+static int process_r1_8_record (char *, krb5_context,
 				   FILE *, int, int *);
 static int process_ov_record (char *, krb5_context,
 			      FILE *, int, int *);
@@ -172,6 +175,15 @@ dump_version r1_3_version = {
      dump_k5beta7_policy,
      process_k5beta7_record,
 };
+dump_version r1_8_version = {
+     "Kerberos version 5 release 1.8",
+     "kdb5_util load_dump version 6\n",
+     0,
+     0,
+     dump_k5beta7_princ_withpolicy,
+     dump_r1_8_policy,
+     process_r1_8_record,
+};
 
 /* External data */
 extern char		*current_dbname;
@@ -197,6 +209,7 @@ static const char null_mprinc_name[] = "kdb5_dump@MISSING";
 #define stand_fmt_name		"Kerberos version 5"
 #define old_fmt_name		"Kerberos version 5 old format"
 #define b6_fmt_name		"Kerberos version 5 beta 6 format"
+#define r1_3_fmt_name		"Kerberos version 5 release 1.3 format"
 #define ofopen_error		"%s: cannot open %s for writing (%s)\n"
 #define oflock_error		"%s: cannot lock %s (%s)\n"
 #define dumprec_err		"%s: error performing %s dump (%s)\n"
@@ -257,6 +270,7 @@ static const char verboseoption[] = "-verbose";
 static const char updateoption[] = "-update";
 static const char hashoption[] = "-hash";
 static const char ovoption[] = "-ov";
+static const char r13option[] = "-r13";
 static const char dump_tmptrail[] = "~";
 
 /*
@@ -926,6 +940,19 @@ void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
 	     entry->policy_refcnt);
 }
 
+void dump_r1_8_policy(void *data, osa_policy_ent_t entry)
+{
+     struct dump_args *arg;
+
+     arg = (struct dump_args *) data;
+     fprintf(arg->ofile, "policy\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+	     entry->name,
+	     entry->pw_min_life, entry->pw_max_life, entry->pw_min_length,
+	     entry->pw_min_classes, entry->pw_history_num,
+	     entry->policy_refcnt, entry->pw_max_fail,
+	     entry->pw_failcnt_interval, entry->pw_lockout_duration);
+}
+
 static void print_key_data(FILE *f, krb5_key_data *key_data)
 {
      int c;
@@ -1059,7 +1086,7 @@ dump_db(argc, argv)
      * Parse the arguments.
      */
     ofile = (char *) NULL;
-    dump = &r1_3_version;
+    dump = &r1_8_version;
     arglist.verbose = 0;
     new_mkey_file = 0;
     mkey_convert = 0;
@@ -1079,6 +1106,8 @@ dump_db(argc, argv)
 	     dump = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     dump = &ov_version;
+	else if (!strcmp(argv[aindex], r13option))
+	     dump = &r1_3_version;
 	else if (!strcmp(argv[aindex], ipropoption)) {
 	    if (log_ctx && log_ctx->iproprole) {
 		dump = &iprop_version;
@@ -2072,6 +2101,8 @@ process_k5beta7_policy(fname, kcontext, filep, verbose, linenop)
     char namebuf[1024];
     int nread, ret;
 
+    memset(&rec, 0, sizeof(rec));
+
     (*linenop)++;
     rec.name = namebuf;
 
@@ -2098,6 +2129,52 @@ process_k5beta7_policy(fname, kcontext, filep, verbose, linenop)
     if (verbose)
 	 fprintf(stderr, "created policy %s\n", rec.name);
     
+    return 0;
+}
+
+static int
+process_r1_8_policy(fname, kcontext, filep, verbose, linenop)
+    char		*fname;
+    krb5_context	kcontext;
+    FILE		*filep;
+    int			verbose;
+    int			*linenop;
+{
+    osa_policy_ent_rec rec;
+    char namebuf[1024];
+    int nread, ret;
+
+    memset(&rec, 0, sizeof(rec));
+
+    (*linenop)++;
+    rec.name = namebuf;
+
+    nread = fscanf(filep, "%1024s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
+		   rec.name,
+		   &rec.pw_min_life, &rec.pw_max_life,
+		   &rec.pw_min_length, &rec.pw_min_classes,
+		   &rec.pw_history_num, &rec.policy_refcnt,
+		   &rec.pw_max_fail, &rec.pw_failcnt_interval,
+		   &rec.pw_lockout_duration);
+    if (nread == EOF)
+	 return -1;
+    else if (nread != 10) {
+	 fprintf(stderr, "cannot parse policy on line %d (%d read)\n",
+		 *linenop, nread);
+	 return 1;
+    }
+
+    if ((ret = krb5_db_create_policy(kcontext, &rec))) {
+	 if (ret &&
+	     ((ret = krb5_db_put_policy(kcontext, &rec)))) {
+	      fprintf(stderr, "cannot create policy on line %d: %s\n",
+		      *linenop, error_message(ret));
+	      return 1;
+	 }
+    }
+    if (verbose)
+	 fprintf(stderr, "created policy %s\n", rec.name);
+
     return 0;
 }
 
@@ -2166,6 +2243,42 @@ process_ov_record(fname, kcontext, filep, verbose, linenop)
 				 linenop);
      else if (strcmp(rectype, "End") == 0)
 	  return -1;
+     else {
+	  fprintf(stderr, "unknown record type \"%s\" on line %d\n",
+		  rectype, *linenop);
+	  return 1;
+     }
+
+     return 0;
+}
+
+/*
+ * process_r1_8_record()	- Handle a dump record in krb5 1.8 format.
+ *
+ * Returns -1 for end of file, 0 for success and 1 for failure.
+ */
+static int
+process_r1_8_record(fname, kcontext, filep, verbose, linenop)
+    char		*fname;
+    krb5_context	kcontext;
+    FILE		*filep;
+    int			verbose;
+    int			*linenop;
+{
+     int nread;
+     char rectype[100];
+
+     nread = fscanf(filep, "%100s\t", rectype);
+     if (nread == EOF)
+	  return -1;
+     else if (nread != 1)
+	  return 1;
+     if (strcmp(rectype, "princ") == 0)
+	  process_k5beta6_record(fname, kcontext, filep, verbose,
+				 linenop);
+     else if (strcmp(rectype, "policy") == 0)
+	  process_r1_8_policy(fname, kcontext, filep, verbose,
+			      linenop);
      else {
 	  fprintf(stderr, "unknown record type \"%s\" on line %d\n",
 		  rectype, *linenop);
@@ -2261,6 +2374,8 @@ load_db(argc, argv)
 	     load = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     load = &ov_version;
+	else if (!strcmp(argv[aindex], r13option))
+	     load = &r1_3_version;
 	else if (!strcmp(argv[aindex], ipropoption)) {
 	    if (log_ctx && log_ctx->iproprole) {
 		load = &iprop_version;
@@ -2358,6 +2473,8 @@ load_db(argc, argv)
 	      load = &beta7_version;
 	 else if (strcmp(buf, r1_3_version.header) == 0)
 	      load = &r1_3_version;
+	 else if (strcmp(buf, r1_8_version.header) == 0)
+	      load = &r1_8_version;
 	 else if (strncmp(buf, ov_version.header,
 			  strlen(ov_version.header)) == 0)
 	      load = &ov_version;

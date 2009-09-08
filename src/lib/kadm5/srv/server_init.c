@@ -273,7 +273,7 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
 	 return ENOMEM;
     }
     *handle->lhandle = *handle;
-    handle->lhandle->api_version = KADM5_API_VERSION_2;
+    handle->lhandle->api_version = KADM5_API_VERSION_3;
     handle->lhandle->struct_version = KADM5_STRUCT_VERSION;
     handle->lhandle->lhandle = handle->lhandle;
 
