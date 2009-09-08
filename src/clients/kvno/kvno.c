@@ -295,7 +295,7 @@ static void do_v5_kvno (int count, char *names[],
 		krb5_free_creds(context, out_creds);
 		out_creds = NULL;
 
-		in_creds.client = for_user_princ;
+		in_creds.client = ticket->enc_part2->client;
 		in_creds.server = server;
 
 		ret = krb5_get_credentials_for_proxy(context,
