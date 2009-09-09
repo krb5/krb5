@@ -50,8 +50,11 @@ gss_krb5int_copy_ccache(OM_uint32 *minor_status,
         krb5_free_context(context);
         return(GSS_S_FAILURE);
     }
-    while (!code && !krb5_cc_next_cred(context, k5creds->ccache, &cursor, &creds))
+    while (!code && !krb5_cc_next_cred(context, k5creds->ccache, &cursor,
+                                       &creds)) {
         code = krb5_cc_store_cred(context, out_ccache, &creds);
+        krb5_free_cred_contents(context, &creds);
+    }
     krb5_cc_end_seq_get(context, k5creds->ccache, &cursor);
     k5_mutex_unlock(&k5creds->lock);
     *minor_status = code;
