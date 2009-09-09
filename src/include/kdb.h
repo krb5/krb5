@@ -197,9 +197,8 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_ACTKVNO                 0x0009
 #define KRB5_TL_MKEY_AUX                0x000a
 
-/* Non-replicated TL data attributes */
-#define KRB5_TL_FLAG_NON_REPLICATED     0x8000
-#define KRB5_TL_LOCKED_TIME             ( KRB5_TL_FLAG_NON_REPLICATED | 0x1 )
+/* Non-replicated TL data attributes are < 0 */
+#define KRB5_TL_LOCKED_TIME             (-128)
 
 /* version number for KRB5_TL_ACTKVNO data */
 #define KRB5_TL_ACTKVNO_VER     1
