@@ -469,8 +469,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_pa_s4u_x509_user s4u_user;
     int referral_count = 0, i;
-    krb5_principal s4u_server = NULL;
-    char *s4u_server_name = NULL;
     krb5_flags kdcopt;
 
     memset(&tgtq, 0, sizeof(tgtq));
@@ -657,8 +655,6 @@ cleanup:
     krb5_free_cred_contents(context, &s4u_creds);
     krb5_free_principal(context, s4u_user.user_id.user);
     krb5_free_checksum_contents(context, &s4u_user.cksum);
-    krb5_free_principal(context, s4u_server);
-    krb5_free_unparsed_name(context, s4u_server_name);
 
     return code;
 }
