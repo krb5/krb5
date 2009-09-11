@@ -1,19 +1,19 @@
 K5_AC_INIT([aclocal.m4])
-dnl
-dnl autoconf 2.49 defaults to a /dev/null cache file, which is what we
-dnl do not want for performance reasons. 
+#
+# autoconf 2.49 defaults to a /dev/null cache file, which is what we
+# do not want for performance reasons. 
 if test "x$cache_file" = "x/dev/null"; then
   cache_file=./config.cache
   AC_CACHE_LOAD
 fi
-dnl
+
 CONFIG_RULES
 KRB5_VERSION=K5_VERSION
 AC_SUBST(KRB5_VERSION)
-dnl
-dnl
+
+
 AC_REQUIRE_CPP
-dnl
+
 AC_CACHE_CHECK(if va_copy is available, krb5_cv_va_copy,
 [AC_LINK_IFELSE([
 #include <stdarg.h>
@@ -31,10 +31,10 @@ int main()
 if test "$krb5_cv_va_copy" = yes; then
   AC_DEFINE(HAS_VA_COPY,1,[Define if va_copy macro or function is available.])
 fi
-dnl
-dnl Note that this isn't checking if the copied value *works*, just
-dnl whether the C language constraints permit the copying.  If
-dnl va_list is defined as an array type, it can't be assigned.
+
+# Note that this isn't checking if the copied value *works*, just
+# whether the C language constraints permit the copying.  If
+# va_list is defined as an array type, it can't be assigned.
 AC_CACHE_CHECK(if va_list objects can be copied by assignment,
 	       krb5_cv_va_simple_copy,
 [AC_COMPILE_IFELSE([
@@ -46,23 +46,23 @@ void f(va_list va2) {
 if test "$krb5_cv_va_simple_copy" = yes; then
   AC_DEFINE(CAN_COPY_VA_LIST,1,[Define if va_list objects can be simply copied by assignment.])
 fi
-dnl
-dnl The following lines are so that configure --help gives some global 
-dnl configuration options.
-dnl
+
+# The following lines are so that configure --help gives some global 
+# configuration options.
+
 KRB5_LIB_AUX
 AC_KRB5_TCL
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
-dnl
-dnl Begin autoconf tests for the Makefiles generated out of the top-level
-dnl configure.in...
-dnl
+
+# Begin autoconf tests for the Makefiles generated out of the top-level
+# configure.in...
+
 AC_CHECK_FUNCS(memmove)
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_PROGRAM
-dnl for slave
+# for slave
 AC_TYPE_MODE_T
 AC_PROG_INSTALL
 KRB5_AC_NEED_DAEMON
@@ -73,7 +73,7 @@ AC_CHECK_LIB(util,main,[AC_DEFINE(HAVE_LIBUTIL,1,[Define if the util library is 
 LIBUTIL=-lutil
 ])
 AC_SUBST(LIBUTIL)
-dnl for kdc
+# for kdc
 AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h sys/sockio.h ifaddrs.h unistd.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
 AC_CHECK_FUNCS(strlcpy)
@@ -100,68 +100,68 @@ KRB5_NEED_PROTO([#include <string.h>
 #include <stdlib.h>
 ],swab,1)
 KRB5_NEED_PROTO([#include <ctype.h>],isblank,1)
-dnl
+
 AC_PROG_AWK
 KRB5_AC_INET6
 KRB5_SOCKADDR_SA_LEN
 CHECK_SIGNALS
-dnl
-dnl --with-vague-errors disables useful error messages.
-dnl
+
+# --with-vague-errors disables useful error messages.
+
 AC_ARG_WITH([vague-errors],
-AC_HELP_STRING([--with-vague-errors],[Do not @<:@do@:>@ send helpful errors to client]), , withval=no)dnl
+AC_HELP_STRING([--with-vague-errors],[Do not @<:@do@:>@ send helpful errors to client]), , withval=no)
 if test "$withval" = yes; then
 	AC_MSG_RESULT(Supplying vague error messages to KDC clients)
 	AC_DEFINE(KRBCONF_VAGUE_ERRORS,1,[Define if the KDC should return only vague error codes to clients])
 fi
-dnl
-dnl WITH_CRYPTO_IMPL
-dnl
+
+# WITH_CRYPTO_IMPL
+
 CRYPTO_IMPL="builtin"
 AC_ARG_WITH([crypto-impl],
 AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @<:@builtin@:>@]),
 [CRYPTO_IMPL=$withval
 AC_MSG_RESULT("k5crypto will use \'$withval\'")
-], withval=builtin)dnl
+], withval=builtin)
 AC_SUBST(CRYPTO_IMPL)
-dnl
-dnl --with-kdc-kdb-update makes the KDC update the database with last request
-dnl information and failure information.
-dnl
+
+# --with-kdc-kdb-update makes the KDC update the database with last request
+# information and failure information.
+
 AC_ARG_WITH([kdc-kdb-update],
-AC_HELP_STRING([--with-kdc-kdb-update],[Update the database @<:@don't update@:>@]), , withval=no)dnl
+AC_HELP_STRING([--with-kdc-kdb-update],[Update the database @<:@don't update@:>@]), , withval=no)
 if test "$withval" = yes; then
 	AC_MSG_RESULT(Updating KDC database with each request)
 	AC_DEFINE(KRBCONF_KDC_MODIFIES_KDB,1,[Define if KDC should update database with each request])
 fi
-dnl
-dnl Needed for hw-preauth replay detection on KDC.
-dnl
-dnl USE_RCACHE enables the replay cache
-dnl NOCACHE disables the lookaside cache
-dnl
-dnl The lookaside cache is checked first; if *exactly* the same message
-dnl comes in twice, e.g., because the (legitimate) client resent it,
-dnl the previous response will be resent.  Otherwise, the replay cache
-dnl is used to check for attempts to fake out the KDC.  Some hardware
-dnl preauth methods are weak enough that we *really* want to have this
-dnl checking turned on.
-dnl
+
+# Needed for hw-preauth replay detection on KDC.
+
+# USE_RCACHE enables the replay cache
+# NOCACHE disables the lookaside cache
+
+# The lookaside cache is checked first; if *exactly* the same message
+# comes in twice, e.g., because the (legitimate) client resent it,
+# the previous response will be resent.  Otherwise, the replay cache
+# is used to check for attempts to fake out the KDC.  Some hardware
+# preauth methods are weak enough that we *really* want to have this
+# checking turned on.
+
 AC_ARG_ENABLE([kdc-replay-cache],
-AC_HELP_STRING([--enable-kdc-replay-cache],[check for replayed/retransmitted KDC requests (recommended when hardware preauthentication is in use) @<:@disabled@:>@]), , enableval=yes)dnl
+AC_HELP_STRING([--enable-kdc-replay-cache],[check for replayed/retransmitted KDC requests (recommended when hardware preauthentication is in use) @<:@disabled@:>@]), , enableval=yes)
 if test "$enableval" = yes ; then
 	AC_DEFINE(USE_RCACHE,1,[Define if the KDC should use a replay cache])
 else
 	AC_DEFINE(NOCACHE,1,[Define if the KDC should use no replay cache])
 fi
 KRB5_RUN_FLAGS
-dnl
+
 AC_TYPE_SIGNAL
-dnl
-dnl from old include/configure.in
+
+# from old include/configure.in
 AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE], 
 [Define if "struct sockaddr_storage" is available.])
-dnl
+
 AC_CONFIG_HEADERS(include/autoconf.h, [echo timestamp > include/autoconf.stamp])
 AC_PROG_INSTALL
 AC_PROG_AWK
@@ -169,7 +169,7 @@ AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
 AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield bswap16 bswap64 mkstemp getusershell lstat access ftime getcwd srand48 srand srandom stat strchr strerror strerror_r strstr timezone umask waitpid sem_init sem_trywait daemon)
-dnl
+
 AC_CHECK_FUNC(mkstemp,
 [MKSTEMP_ST_OBJ=
 MKSTEMP_OBJ=],
@@ -179,7 +179,7 @@ EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_mkstemp"])
 AC_SUBST(MKSTEMP_OBJ)
 AC_SUBST(MKSTEMP_ST_OBJ)
 AC_SUBST(EXTRA_SUPPORT_SYMS)
-dnl
+
 AC_HEADER_STDARG
 DECLARE_SYS_ERRLIST
 AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h pthread.h semaphore.h krb_db.h kdc.h)
@@ -198,25 +198,25 @@ AC_CHECK_MEMBERS([struct stat.st_mtimensec,struct stat.st_mtimespec.tv_nsec,stru
 #include <sys/stat.h>])
 KRB5_AC_REGEX_FUNCS
 AC_TYPE_OFF_T
-dnl
-dnl Fancy caching of perror result...
+
+# Fancy caching of perror result...
 AC_MSG_CHECKING(for perror declaration)
 AC_CACHE_VAL(krb5_cv_decl_perror,
 [AC_EGREP_HEADER(perror, errno.h, 
-  krb5_cv_decl_perror=yes, krb5_cv_decl_perror=no)])dnl
+  krb5_cv_decl_perror=yes, krb5_cv_decl_perror=no)])
 AC_MSG_RESULT($krb5_cv_decl_perror)
 if test $krb5_cv_decl_perror = yes; then
 	AC_DEFINE(HDR_HAS_PERROR,1,[Define if errno.h declares perror])
 fi
-dnl
+
 KRB5_NEED_PROTO([#include <time.h>],strptime)
 CHECK_WAIT_TYPE
 CHECK_SIGPROCMASK
 AC_TYPE_GETGROUPS
 CHECK_SETJMP
-dnl
-dnl *rpcent return types needed for lib/rpc
-dnl
+
+# *rpcent return types needed for lib/rpc
+
 AC_MSG_CHECKING([return type of setrpcent])
 AC_CACHE_VAL(k5_cv_type_setrpcent,
 [AC_TRY_COMPILE([#include <netdb.h>
@@ -224,10 +224,10 @@ AC_CACHE_VAL(k5_cv_type_setrpcent,
 extern "C"
 #endif
 extern void setrpcent();],
-[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])dnl
+[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])
 AC_MSG_RESULT($k5_cv_type_setrpcent)
 AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent, [Define as return type of setrpcent])
-dnl
+
 AC_MSG_CHECKING([return type of endrpcent])
 AC_CACHE_VAL(k5_cv_type_endrpcent,
 [AC_TRY_COMPILE([#include <netdb.h>
@@ -235,12 +235,12 @@ AC_CACHE_VAL(k5_cv_type_endrpcent,
 extern "C"
 #endif
 extern void endrpcent();],
-[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])dnl
+[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])
 AC_MSG_RESULT($k5_cv_type_endrpcent)
 AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
-dnl
-dnl
-dnl bswap_16 is a macro in byteswap.h under GNU libc
+
+
+# bswap_16 is a macro in byteswap.h under GNU libc
 AC_MSG_CHECKING(for bswap_16)
 AC_CACHE_VAL(krb5_cv_bswap_16,[
 AC_TRY_LINK([#if HAVE_BYTESWAP_H
@@ -259,9 +259,9 @@ AC_MSG_RESULT($krb5_cv_bswap_64)
 if test "$krb5_cv_bswap_64" = yes; then
   AC_DEFINE(HAVE_BSWAP_64,1,[Define to 1 if bswap_64 is available via byteswap.h])
 fi
-dnl
-dnl Needed for ksu and some appl stuff.
-dnl
+
+# Needed for ksu and some appl stuff.
+
 case $krb5_cv_host in
 alpha*-dec-osf*)
 	AC_CHECK_LIB(security,setluid,
@@ -271,7 +271,7 @@ alpha*-dec-osf*)
 	;;
 esac
 AC_SUBST(KSU_LIBS)
-dnl
+
 if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
   || test $ac_cv_func_getenv = no; then
   SETENVOBJ=setenv.o
@@ -279,9 +279,9 @@ else
   SETENVOBJ=
 fi
 AC_SUBST(SETENVOBJ)
-dnl
-dnl Check what the return types for gethostbyname_r and getservbyname_r are.
-dnl
+
+# Check what the return types for gethostbyname_r and getservbyname_r are.
+
 AC_CHECK_FUNC(gethostbyname_r,[
 ac_cv_func_gethostbyname_r=yes
 if test "$ac_cv_func_gethostbyname_r" = yes; then
@@ -314,7 +314,7 @@ if test "$ac_cv_func_gethostbyname_r" = yes; then
   AC_CHECK_FUNC(gethostbyaddr_r)
 fi
 ])
-dnl
+
 
 AC_CHECK_FUNC(getpwnam_r,ac_cv_func_getpwnam_r=yes,ac_cv_func_getpwnam_r=no)
 AC_CHECK_FUNC(getpwuid_r,ac_cv_func_getpwuid_r=yes,ac_cv_func_getpwuid_r=no)
@@ -436,23 +436,23 @@ if test "$ac_cv_func_getservbyname_r" = yes; then
   AC_CHECK_FUNC(getservbyport_r)
 fi
 ])
-dnl
+
 HAVE_YYLINENO
 CHECK_DIRENT
 AC_TYPE_UID_T
 AC_TYPE_MODE_T
-dnl
-AC_CHECK_HEADER(termios.h,dnl
-[AC_CHECK_FUNC([tcsetattr],dnl
+
+AC_CHECK_HEADER(termios.h,
+[AC_CHECK_FUNC([tcsetattr],
   AC_DEFINE(POSIX_TERMIOS,1,[Define if termios.h exists and tcsetattr exists]))])
-dnl
+
 KRB5_SIGTYPE
 AC_CHECK_HEADERS(stdlib.h string.h stddef.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h errno.h)
 AC_HEADER_STDARG
 KRB5_AC_INET6
-dnl
-dnl If compiling with IPv6 support, test if in6addr_any functions.
-dnl Irix 6.5.16 defines it, but lacks support in the C library.
+
+# If compiling with IPv6 support, test if in6addr_any functions.
+# Irix 6.5.16 defines it, but lacks support in the C library.
 if test $krb5_cv_inet6 = yes || test "$krb5_cv_inet6_with_dinet6" = yes ; then
 AC_CACHE_CHECK([for in6addr_any definition in library], 
   krb5_cv_var_in6addr_any,
@@ -473,11 +473,11 @@ AC_CACHE_CHECK([for in6addr_any definition in library],
   fi
 fi
 
-dnl
-dnl
-dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
-dnl requires a run check...
-dnl
+
+
+# check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
+# requires a run check...
+
 AC_MSG_CHECKING([for ANSI stdio])
 AC_CACHE_VAL(krb5_cv_has_ansi_stdio,
 [AC_TRY_RUN(
@@ -492,19 +492,19 @@ int main()
   exit(0);
 }],
 krb5_cv_has_ansi_stdio=yes, krb5_cv_has_ansi_stdio=no,
-krb5_cv_has_ansi_stdio=yes)])dnl assume ANSI in cross environment
+krb5_cv_has_ansi_stdio=yes)])# assume ANSI in cross environment
 AC_MSG_RESULT($krb5_cv_has_ansi_stdio)
 if test $krb5_cv_has_ansi_stdio = yes; then
 AC_DEFINE(ANSI_STDIO,1,[Define if ANSI stdio is present (in particular "b" option to fopen)])
 fi
-dnl
-dnl then from osconf.h, we have
-dnl
+
+# then from osconf.h, we have
+
 AC_HEADER_TIME
 AC_CHECK_TYPE(time_t, long)
-dnl
-dnl Determine where to put the replay cache.
-dnl
+
+# Determine where to put the replay cache.
+
 AC_MSG_CHECKING([for replay cache directory])
 AC_CACHE_VAL(krb5_cv_sys_rcdir,
 [
@@ -512,12 +512,12 @@ for t_dir in /var/tmp /usr/tmp /var/usr/tmp /tmp ; do
 	test -d $t_dir || continue
 	krb5_cv_sys_rcdir=$t_dir
 	break
-done])dnl
+done])
 AC_MSG_RESULT($krb5_cv_sys_rcdir)
 KRB5_RCTMPDIR=$krb5_cv_sys_rcdir
 AC_SUBST(KRB5_RCTMPDIR)
-dnl
-dnl
+
+
 AC_MSG_CHECKING(for socklen_t)
 AC_CACHE_VAL(krb5_cv_has_type_socklen_t,
 [AC_TRY_COMPILE(
@@ -529,7 +529,7 @@ AC_MSG_RESULT($krb5_cv_has_type_socklen_t)
 if test $krb5_cv_has_type_socklen_t = yes; then
     AC_DEFINE(HAVE_SOCKLEN_T,1,[Define if there is a socklen_t type. If not, probably use size_t])
 fi
-dnl
+
 AC_MSG_CHECKING(for struct lifconf)
 AC_CACHE_VAL(krb5_cv_has_struct_lifconf,
 [AC_TRY_COMPILE(
@@ -541,7 +541,7 @@ AC_MSG_RESULT($krb5_cv_has_struct_lifconf)
 if test $krb5_cv_has_struct_lifconf = yes; then
     AC_DEFINE(HAVE_STRUCT_LIFCONF,1,[Define if there is a struct lifconf.])
 fi
-dnl HP-UX 11 uses stuct if_laddrconf
+# HP-UX 11 uses stuct if_laddrconf
 AC_MSG_CHECKING(for struct if_laddrconf)
 AC_CACHE_VAL(krb5_cv_has_struct_if_laddrconf,
 [AC_TRY_COMPILE(
@@ -554,8 +554,8 @@ AC_MSG_RESULT($krb5_cv_has_struct_if_laddrconf)
 if test $krb5_cv_has_struct_if_laddrconf = yes; then
     AC_DEFINE(HAVE_STRUCT_IF_LADDRCONF,1,[Define if there is a struct if_laddrconf.])
 fi
-dnl
-dnl
+
+
 AC_MSG_CHECKING([for h_errno in netdb.h])
 AC_CACHE_VAL(krb5_cv_header_netdb_h_h_errno,
 [AC_TRY_COMPILE(
@@ -567,13 +567,13 @@ if test $krb5_cv_header_netdb_h_h_errno = yes; then
     AC_DEFINE([HAVE_NETDB_H_H_ERRNO], 1,
 	[Define if netdb.h declares h_errno])
 fi
-dnl
-dnl
+
+
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],
 AC_DEFINE(KRB5_ATHENA_COMPAT,1,[Define if MIT Project Athena default configuration should be used]),)
 
-dnl
+
 AC_C_INLINE
 AH_TOP([
 #ifndef KRB5_AUTOCONF_H
@@ -586,9 +586,9 @@ AH_BOTTOM([
 #endif
 #endif /* KRB5_AUTOCONF_H */
 ])
-dnl
-dnl Not used yet, but let's find out what we've got on the platforms
-dnl we're working with....
+
+# Not used yet, but let's find out what we've got on the platforms
+# we're working with....
 AC_CHECK_HEADERS(inttypes.h stdint.h)
 AC_CHECK_TYPES([uint32_t, int32_t, uint64_t, int64_t, uint_least32_t, uintptr_t, uintmax_t, long long], , , [
 #ifdef HAVE_STDINT_H
@@ -607,19 +607,19 @@ AC_CHECK_TYPES([struct rt_msghdr], , , [
 #include <net/if.h>
 #include <net/route.h>
 ])
-dnl
-dnl stuff for util/profile
-dnl
-dnl AC_KRB5_TCL already done
+
+# stuff for util/profile
+
+# AC_KRB5_TCL already done
 DO_TCL=
 test "$TCL_LIBS" != "" && DO_TCL=ok
 AC_SUBST(DO_TCL)
-dnl
-dnl types libdb2 wants
-dnl
+
+# types libdb2 wants
+
 AC_CHECK_TYPES([ssize_t, u_char, u_int, u_long, u_int8_t, u_int16_t, u_int32_t, int8_t, int16_t, int32_t])
-dnl
-dnl Some libdb2 test programs want a shell that supports functions.
+
+# Some libdb2 test programs want a shell that supports functions.
 FCTSH=false
 AC_PATH_PROG(SH,sh,false)
 AC_PATH_PROG(SH5,sh5,false)
@@ -635,10 +635,10 @@ for prog in $SH $SH5 $BASH; do
   fi
 done
 AC_SUBST(FCTSH)
-dnl
-dnl Test for POSIX 2001 *printf support (X/Open System Interfaces extension
-dnl to ANSI/ISO C 1999 specification).  Specifically, positional
-dnl specifications; not checking for other features like %zx at present.
+
+# Test for POSIX 2001 *printf support (X/Open System Interfaces extension
+# to ANSI/ISO C 1999 specification).  Specifically, positional
+# specifications; not checking for other features like %zx at present.
 AC_MSG_CHECKING(for POSIX printf positional specification support)
 AC_CACHE_VAL(ac_cv_printf_positional,[
 AC_TRY_RUN([
@@ -657,19 +657,19 @@ int main () {
   ac_cv_printf_positional=yes,
   ac_cv_printf_positional=no,
   AC_MSG_ERROR([Cannot test for printf positional argument support when cross compiling]))])
-dnl Nothing for autoconf.h for now.
+# Nothing for autoconf.h for now.
 AC_MSG_RESULT($ac_cv_printf_positional)
-dnl
-dnl
-dnl for kadmin
-dnl
+
+
+# for kadmin
+
 AC_PROG_YACC
 ath_compat=
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],
 ath_compat=compat,)
-dnl The following are tests for the presence of programs required for
-dnl kadmin testing.
+# The following are tests for the presence of programs required for
+# kadmin testing.
 AC_CHECK_PROG(have_RUNTEST,runtest,runtest)
 AC_CHECK_PROG(have_PERL,perl,perl)
 AC_KRB5_TCL	
@@ -677,8 +677,8 @@ if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; t
  	DO_TEST=ok
 fi
 AC_SUBST(DO_TEST) 
-dnl
-dnl The following are substituted into kadmin/testing/scripts/env-setup.sh
+
+# The following are substituted into kadmin/testing/scripts/env-setup.sh
 RBUILD=`pwd`
 AC_SUBST(RBUILD)
 case "$srcdir" in
@@ -688,18 +688,18 @@ esac
 AC_SUBST(S_TOP)
 AC_PATH_PROG(PERL_PATH,perl)
 AC_PATH_PROG(EXPECT,expect)
-dnl For kadmin/testing/util/Makefile.in
+# For kadmin/testing/util/Makefile.in
 if test "$TCL_LIBS" != "" ;  then
 	DO_ALL=tcl
 fi
 AC_SUBST(DO_ALL)
 KRB5_AC_PRIOCNTL_HACK
 K5_GEN_FILE(kadmin/testing/scripts/env-setup.sh:kadmin/testing/scripts/env-setup.shin)
-dnl for lib/kadm5
+# for lib/kadm5
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
 AC_CHECK_PROG(PERL,perl,perl)
-dnl
-dnl lib/gssapi
+
+# lib/gssapi
 AC_CHECK_HEADER(stdint.h,[
 	include_stdint='awk '\''END{printf("%cinclude <stdint.h>\n", 35);}'\'' < /dev/null'],
 	include_stdint='echo "/* no stdint.h */"')
@@ -712,24 +712,24 @@ AC_CHECK_HEADER(xom.h,[
 	include_xom='awk '\''END{printf("%cinclude <xom.h>\n", 35);}'\'' < /dev/null'], [
 	include_xom='echo "/* no xom.h */"'])
 AC_SUBST(include_xom)
-dnl
-dnl
-dnl lib/rpc
+
+
+# lib/rpc
 ### Check where struct rpcent is declared.
-#
+
 # This is necessary to determine:
 # 1. If /usr/include/netdb.h declares struct rpcent
 # 2. If /usr/include/rpc/netdb.h declares struct rpcent
-#
+
 # We have our own rpc/netdb.h, and if /usr/include/netdb.h includes
 # rpc/netdb.h, then nastiness could happen.
-#
+
 # Logic: If /usr/include/netdb.h declares struct rpcent, then check
 # rpc/netdb.h.  If /usr/include/rpc/netdb.h declares struct rpcent,
 # then define STRUCT_RPCENT_IN_RPC_NETDB_H, otherwise do not.  If
 # neither netdb.h nor rpc/netdb.h declares struct rpcent, then define
 # STRUCT_RPCENT_IN_RPC_NETDB_H anyway.
-#
+
 AC_MSG_CHECKING([where struct rpcent is declared])
 AC_TRY_COMPILE([#include <netdb.h>],
 [struct rpcent e;
@@ -847,9 +847,9 @@ else
   GSSRPC__BSD_TYPEALIASES='#define GSSRPC__BSD_TYPEALIASES 1'
 fi
 AC_SUBST(GSSRPC__BSD_TYPEALIASES)
-#
+
 # sockaddr length field checks
-#
+
 AC_CHECK_MEMBERS([struct sockaddr_in.sin_len], , ,
   [#include <sys/types.h>
 @%:@include <netinet/in.h>])
@@ -864,10 +864,10 @@ AC_CACHE_VAL(k5_cv_type_setrpcent,
 extern "C"
 #endif
 extern void setrpcent();],
-[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])dnl
+[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])
 AC_MSG_RESULT($k5_cv_type_setrpcent)
 AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent, [Define as return type of setrpcent])
-dnl
+
 AC_MSG_CHECKING([return type of endrpcent])
 AC_CACHE_VAL(k5_cv_type_endrpcent,
 [AC_TRY_COMPILE([#include <netdb.h>
@@ -875,7 +875,7 @@ AC_CACHE_VAL(k5_cv_type_endrpcent,
 extern "C"
 #endif
 extern void endrpcent();],
-[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])dnl
+[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])
 AC_MSG_RESULT($k5_cv_type_endrpcent)
 AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
 K5_GEN_FILE(include/gssrpc/types.h:include/gssrpc/types.hin)
@@ -891,7 +891,7 @@ esac
 changequote([, ])
 AC_SUBST(PASS)
 
-dnl for pkinit
+# for pkinit
 AC_ARG_ENABLE([pkinit],
 [  --disable-pkinit        disable PKINIT plugin support],,
 enable_pkinit=try)
@@ -916,10 +916,10 @@ else
   AC_MSG_NOTICE([Disabling PKINIT support.])
 fi
 
-dnl for lib/apputils
+# for lib/apputils
 AC_REPLACE_FUNCS(daemon)
 
-dnl for tests/
+# for tests/
 if test x"$RUNTEST" != x; then
 	HAVE_RUNTEST=yes
 else
@@ -927,11 +927,11 @@ else
 fi
 AC_SUBST(HAVE_RUNTEST)
 
-dnl for plugins/kdb/db2
-dnl
-dnl AIX is unusual in that it wants all symbols resolved at link time
-dnl  Fortunately, it will allow us to link the kdb library now, even if
-dnl it is linked again later.
+# for plugins/kdb/db2
+
+# AIX is unusual in that it wants all symbols resolved at link time
+#  Fortunately, it will allow us to link the kdb library now, even if
+# it is linked again later.
 case $krb5_cv_host in
 *-*-aix*)
 	DB_EXTRA_LIBS=-ldb
@@ -942,14 +942,14 @@ case $krb5_cv_host in
 esac
 AC_SUBST(DB_EXTRA_LIBS)
 
-dnl
-dnl
-dnl Check for thread safety issues.
-dnl (Is there a better place for this?)
-dnl tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
-dnl Removed getpwnam_r and getpwuid_r because include/configure.in has some
-dnl more careful checks, and may decide to pretend that they're not found if
-dnl the function signatures can't be figured out.
+
+
+# Check for thread safety issues.
+# (Is there a better place for this?)
+# tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
+# Removed getpwnam_r and getpwuid_r because include/configure.in has some
+# more careful checks, and may decide to pretend that they're not found if
+# the function signatures can't be figured out.
 tsfuncs="gethostbyname_r getservbyname_r gmtime_r localtime_r"
 AC_CHECK_FUNCS($tsfuncs)
 if test "$enable_thread_support" = yes; then
@@ -972,34 +972,34 @@ if test "$enable_thread_support" = yes; then
     AC_MSG_WARN([may not be thread-safe.])
   fi # tsmissing not empty
 fi # enable_thread_support
-dnl
-dnl Sadly, we seem to have accidentally committed ourselves in 1.4 to
-dnl an ABI that includes the existence of libkrb5support.0 even
-dnl though random apps should never use anything from it.  And on
-dnl the Mac, to which that didn't apply, we can't use major version 0.
-dnl
+
+# Sadly, we seem to have accidentally committed ourselves in 1.4 to
+# an ABI that includes the existence of libkrb5support.0 even
+# though random apps should never use anything from it.  And on
+# the Mac, to which that didn't apply, we can't use major version 0.
+
 case $krb5_cv_host in
 *-*-darwin* | *-*-rhapsody*) SUPPORTLIB_MAJOR=1 ;;
 *)			     SUPPORTLIB_MAJOR=0 ;;
 esac
 AC_SUBST(SUPPORTLIB_MAJOR)
-dnl
-dnl On the Mac we need CoreFoundation for UCS-2 conversion for RC4.
+
+# On the Mac we need CoreFoundation for UCS-2 conversion for RC4.
 case $krb5_cv_host in
 *-*-darwin* | *-*-rhapsody*) CRYPTO_LIBS="-framework CoreFoundation" ;;
 *)			     CRYPTO_LIBS="" ;;
 esac
 AC_SUBST(CRYPTO_LIBS)
-dnl
-dnl
+
+
 if test "$COM_ERR_VERSION" = k5 ; then
   K5_GEN_MAKEFILE(util/et)
 fi
 if test "$SS_VERSION" = k5 ; then
   K5_GEN_MAKEFILE(util/ss)
 fi
-dnl
-dnl
+
+
 ldap_plugin_dir=""
 ldap_lib=""
 if test -n "$OPENLDAP_PLUGIN"; then
@@ -1036,20 +1036,20 @@ fi
 AC_SUBST(ldap_plugin_dir)
 AC_SUBST(LDAP)
 
-dnl We really should look for and use python-config.
+# We really should look for and use python-config.
 PYTHON_LIB=
 AC_CHECK_HEADERS(Python.h python2.3/Python.h python2.5/Python.h)
 AC_CHECK_LIB(python2.3,main,[PYTHON_LIB=-lpython2.3],
   AC_CHECK_LIB(python2.5,main,[PYTHON_LIB=-lpython2.5]))
 AC_SUBST(PYTHON_LIB)
 
-dnl
-dnl Kludge for simple server --- FIXME is this the best way to do this?
-dnl
+
+# Kludge for simple server --- FIXME is this the best way to do this?
+
 if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
 	AC_DEFINE(BROKEN_STREAMS_SOCKETS,1,[Define if socket can't be bound to 0.0.0.0])
 fi
-dnl
+
 AC_CONFIG_SUBDIRS(appl/libpty appl/bsd appl/gssftp appl/telnet)
 
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
