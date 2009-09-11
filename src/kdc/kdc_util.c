@@ -2146,29 +2146,41 @@ kdc_process_s4u2self_req(krb5_context context,
     }
 
     /*
-     * We really want to do this comparison after name canonicalization,
-     * but we don't have a good interface to do that yet (without looking
-     * up the server principal and decoding KRB5_TL_SVR_REFERRAL_DATA).
+     * We need to compare the client name in the TGT with the requested
+     * server name. Supporting server name aliases without assuming a
+     * global name service makes this difficult to do.
      *
-     * The comparison below will work with existing Windows and MIT
-     * client implementations. The following referrals, the realm name
-     * will be rewritten; for a host-based service name, we can ignore
-     * the realm when performing this comparison, because sufficient
-     * qualifying information is included in the principal name. For
-     * Enterprise principal names can be compared with their unparsed
-     * canonical name. Otherwise, we require an exact match.
+     * The comparison below handles the following cases (note that the
+     * term "principal name" below excludes the realm).
+     *
+     * (1) The requested service is a host-based service with two name
+     *     components, in which case we assume the principal name to
+     *     contain sufficient qualifying information. The realm is
+     *     ignored for the purpose of comparison.
+     *
+     * (2) The requested service name is an enterprise principal name:
+     *     the service principal name is compared with the unparsed
+     *     form of the client name (including its realm).
+     *
+     * (3) The requested service is some other name type: an exact
+     *     match is required.
+     *
+     * An alternative would be to look up the server once again with
+     * FLAG_CANONICALIZE | FLAG_CLIENT_REFERRALS_ONLY set, do an exact
+     * match between the returned name and client_princ. However, this
+     * assumes that the client set FLAG_CANONICALIZE when requesting
+     * the TGT and that we have a global name service.
      */
-
     flags = 0;
     switch (krb5_princ_type(kdc_context, request->server)) {
-    case KRB5_NT_SRV_HST:
+    case KRB5_NT_SRV_HST:		    /* (1) */
 	if (krb5_princ_size(kdc_context, request->server) == 2)
 	    flags |= KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
 	break;
-    case KRB5_NT_ENTERPRISE_PRINCIPAL:
+    case KRB5_NT_ENTERPRISE_PRINCIPAL:	    /* (2) */
 	flags |= KRB5_PRINCIPAL_COMPARE_ENTERPRISE;
 	break;
-    default:
+    default:				    /* (3) */
 	break;
     }
 
