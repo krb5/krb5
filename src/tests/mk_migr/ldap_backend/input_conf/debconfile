@@ -1,0 +1,9 @@
+slapd	slapd/no_configuration	boolean	false
+slapd	slapd/domain	string	example.org
+slapd	shared/organization	string	My Organization
+slapd	slapd/backend	select	HDB
+slapd	slapd/purge_database	boolean	true
+slapd	slapd/move_old_database	boolean	true
+slapd	slapd/password1	password a
+slapd	slapd/password2	password a
+slapd	slapd/allow_ldap_v2	boolean	false

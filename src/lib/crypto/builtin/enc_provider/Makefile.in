@@ -1,0 +1,48 @@
+thisconfigdir=../../../..
+myfulldir=lib/crypto/builtin/enc_provider
+mydir=lib/crypto/builtin/enc_provider
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/../../@CRYPTO_IMPL@/des 	\
+		-I$(srcdir)/../../@CRYPTO_IMPL@/arcfour \
+		-I$(srcdir)/../../@CRYPTO_IMPL@/aes 	\
+		-I$(srcdir)/../../krb 	\
+		-I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@ 
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=enc_provider
+##DOS##OBJFILE=..\$(OUTPRE)enc_prov.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS= \
+	../../@CRYPTO_IMPL@/enc_provider/des.o 	\
+	../../@CRYPTO_IMPL@/enc_provider/des3.o 	\
+	../../@CRYPTO_IMPL@/enc_provider/rc4.o 	\
+	../../@CRYPTO_IMPL@/enc_provider/aes.o 
+
+OBJS= \
+	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/des.$(OBJEXT) 	\
+	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/des3.$(OBJEXT) 	\
+	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/aes.$(OBJEXT) 	\
+	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/rc4.$(OBJEXT)
+
+SRCS= \
+	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/des.c 	\
+	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/des3.c 	\
+	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/aes.c 	\
+	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/rc4.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

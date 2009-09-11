@@ -2033,7 +2033,7 @@ static int tcl_kadm5_randkey_principal(ClientData clientData,
 
      ret = kadm5_randkey_principal(server_handle,
 				   princ, keyblock_var ? &keyblocks : 0,
-				   num_var ? &num_keys : 0);
+				   &num_keys);
 
      if (ret == KADM5_OK) {
 	  if (keyblock_var) {

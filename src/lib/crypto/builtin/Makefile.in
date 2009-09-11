@@ -2,15 +2,16 @@ thisconfigdir=../../..
 myfulldir=lib/crypto/builtin
 mydir=lib/crypto/builtin
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS=../@CRYPTO_IMPL@/des ../@CRYPTO_IMPL@/arcfour ../@CRYPTO_IMPL@/aes	\
-	../@CRYPTO_IMPL@/md4 ../@CRYPTO_IMPL@/md5  ../@CRYPTO_IMPL@/sha1 
-LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../krb/hash_provider 	\
+SUBDIRS=des arcfour aes	 md4 md5  sha1 enc_provider
+LOCALINCLUDES = -I$(srcdir)/../krb 			\
+		-I$(srcdir)/../krb/hash_provider 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/des 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/aes 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/arcfour 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/md4 	\
-		-I$(srcdir)/../@CRYPTO_IMPL@/md5
+		-I$(srcdir)/../@CRYPTO_IMPL@/md5	\
+		-I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 	
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
@@ -23,8 +24,8 @@ DEFS=
 ##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)arcfour.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)kh_pro.lst $(OUTPRE)aes.lst
 
 STLIBOBJS=\
-	hmac.o	\
-	pbkdf2.o		
+	../@CRYPTO_IMPL@/hmac.o	\
+	../@CRYPTO_IMPL@/pbkdf2.o		
 
 OBJS=\
 	$(OUTPRE)../@CRYPTO_IMPL@/hmac.$(OBJEXT)	\
@@ -34,16 +35,18 @@ SRCS=\
 	$(srcdir)/../@CRYPTO_IMPL@/hmac.c	\
 	$(srcdir)/../@CRYPTO_IMPL@/pbkdf2.c	
 
-STOBJLISTS= ../@CRYPTO_IMPL@/des/OBJS.ST ../@CRYPTO_IMPL@/md4/OBJS.ST 	\
-	../@CRYPTO_IMPL@/md5/OBJS.ST ../@CRYPTO_IMPL@/sha1/OBJS.ST 	\
-	../@CRYPTO_IMPL@/arcfour/OBJS.ST 	\
-	../@CRYPTO_IMPL@/aes/OBJS.ST 		\
-	../@CRYPTO_IMPL@/OBJS.ST
+STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
+	md5/OBJS.ST sha1/OBJS.ST 	\
+	enc_provider/OBJS.ST 		\
+	arcfour/OBJS.ST 		\
+	aes/OBJS.ST 			\
+	OBJS.ST
 
-SUBDIROBJLISTS= ../@CRYPTO_IMPL@/des/OBJS.ST ../@CRYPTO_IMPL@/md4/OBJS.ST 	\
-		../@CRYPTO_IMPL@/md5/OBJS.ST ../@CRYPTO_IMPL@/sha1/OBJS.ST 	\
-		../@CRYPTO_IMPL@/arcfour/OBJS.ST 				\
-		../@CRYPTO_IMPL@/aes/OBJS.ST ../@CRYPTO_IMPL@/OBJS.ST
+SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
+		md5/OBJS.ST sha1/OBJS.ST 	\
+		enc_provider/OBJS.ST 		\
+		arcfour/OBJS.ST 		\
+		aes/OBJS.ST OBJS.ST
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -67,6 +70,9 @@ all-windows::
 	cd ..\sha1
 	@echo Making in crypto\sha1
 	$(MAKE) -$(MFLAGS)
+	cd ..\enc_provider
+	@echo Making in crypto\enc_provider
+	$(MAKE) -$(MFLAGS)
 	cd ..\arcfour
 	@echo Making in crypto\arcfour
 	$(MAKE) -$(MFLAGS)
@@ -88,6 +94,9 @@ clean-windows::
 	cd ..\sha1
 	@echo Making clean in crypto\sha1
 	$(MAKE) -$(MFLAGS) clean
+	cd ..\enc_provider
+	@echo Making clean in crypto\enc_provider
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\arcfour
 	@echo Making clean in crypto\arcfour
 	$(MAKE) -$(MFLAGS) clean
@@ -108,6 +117,9 @@ check-windows::
 	$(MAKE) -$(MFLAGS) check
 	cd ..\sha1
 	@echo Making check in crypto\sha1
+	$(MAKE) -$(MFLAGS) check
+	cd ..\enc_provider
+	@echo Making check in crypto\enc_provider
 	$(MAKE) -$(MFLAGS) check
 	cd ..\arcfour
 	@echo Making check in crypto\arcfour

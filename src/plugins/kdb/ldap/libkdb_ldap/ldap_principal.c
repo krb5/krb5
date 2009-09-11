@@ -188,7 +188,10 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 
 	LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, principal_attributes);
 	for (ent=ldap_first_entry(ld, result); ent != NULL; ent=ldap_next_entry(ld, ent)) {
-	    if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
+	    values=ldap_get_values(ld, ent, "krbcanonicalname");
+	    if (values == NULL)
+		values=ldap_get_values(ld, ent, "krbprincipalname");
+	    if (values != NULL) {
 		for (i=0; values[i] != NULL; ++i) {
 		    if (krb5_ldap_parse_principal_name(values[i], &princ_name) != 0)
 			continue;
@@ -201,13 +204,11 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 			(*func)(func_arg, &entry);
 			krb5_dbe_free_contents(context, &entry);
 			(void) krb5_free_principal(context, principal);
-			if (princ_name)
-			    free(princ_name);
+			free(princ_name);
 			break;
 		    }
 		    (void) krb5_free_principal(context, principal);
-		    if (princ_name)
-			free(princ_name);
+		    free(princ_name);
 		}
 		ldap_value_free(values);
 	    }

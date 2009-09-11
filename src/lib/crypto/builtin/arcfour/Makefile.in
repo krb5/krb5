@@ -12,20 +12,22 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+CIMPL = @CRYPTO_IMPL@/arcfour
+
 STLIBOBJS=\
-	arcfour.o	\
-	arcfour_aead.o	\
-	arcfour_s2k.o
+	../../$(CIMPL)/arcfour.o	\
+	../../$(CIMPL)/arcfour_aead.o	\
+	../../$(CIMPL)/arcfour_s2k.o
 
 OBJS=\
-	$(OUTPRE)arcfour.$(OBJEXT)	\
-	$(OUTPRE)arcfour_aead.$(OBJEXT)	\
-	$(OUTPRE)arcfour_s2k.$(OBJEXT)
+	$(OUTPRE)../../$(CIMPL)/arcfour.$(OBJEXT)	\
+	$(OUTPRE)../../$(CIMPL)/arcfour_aead.$(OBJEXT)	\
+	$(OUTPRE)../../$(CIMPL)/arcfour_s2k.$(OBJEXT)
 
 SRCS=\
-	$(srcdir)/arcfour.c	\
-	$(srcdir)/arcfour_aead.c\
-	$(srcdir)/arcfour_s2k.c
+	$(srcdir)/../../$(CIMPL)/arcfour.c	\
+	$(srcdir)/../../$(CIMPL)/arcfour_aead.c\
+	$(srcdir)/../../$(CIMPL)/arcfour_s2k.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

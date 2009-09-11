@@ -725,7 +725,6 @@ krb5_fcc_read_int32(krb5_context context, krb5_ccache id, krb5_int32 *i)
     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code retval;
     unsigned char buf[4];
-    krb5_int32 val;
 
     k5_cc_mutex_assert_locked(context, &((krb5_fcc_data *) id->data)->lock);
 
@@ -736,11 +735,7 @@ krb5_fcc_read_int32(krb5_context context, krb5_ccache id, krb5_int32 *i)
 	retval = krb5_fcc_read(context, id, buf, 4);
 	if (retval)
 	    return retval;
-        val = buf[0];
-        val = (val << 8) | buf[1];
-        val = (val << 8) | buf[2];
-        val = (val << 8) | buf[3];
-        *i = val;
+        *i = load_32_be (buf);
 	return 0;
     }
 }
@@ -761,7 +756,7 @@ krb5_fcc_read_ui_2(krb5_context context, krb5_ccache id, krb5_ui_2 *i)
 	retval = krb5_fcc_read(context, id, buf, 2);
 	if (retval)
 	    return retval;
-	*i = (buf[0] << 8) + buf[1];
+	*i = load_16_be (buf);
 	return 0;
     }
 }    
@@ -1077,13 +1072,7 @@ krb5_fcc_store_ui_4(krb5_context context, krb5_ccache id, krb5_ui_4 i)
 	(data->version == KRB5_FCC_FVNO_2)) 
 	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
-        buf[3] = (unsigned char) (i & 0xFF);
-	i >>= 8;
-        buf[2] = (unsigned char) (i & 0xFF);
-	i >>= 8;
-        buf[1] = (unsigned char) (i & 0xFF);
-	i >>= 8;
-        buf[0] = (unsigned char) (i & 0xFF);
+	store_32_be (i, buf);
 	return krb5_fcc_write(context, id, buf, 4);
     }
 }
@@ -1102,9 +1091,7 @@ krb5_fcc_store_ui_2(krb5_context context, krb5_ccache id, krb5_int32 i)
         ibuf = (krb5_ui_2) i;
 	return krb5_fcc_write(context, id, (char *) &ibuf, sizeof(krb5_ui_2));
     } else {
-        buf[1] = (unsigned char) (i & 0xFF);
-	i >>= 8;
-        buf[0] = (unsigned char) (i & 0xFF);
+	store_16_be (i, buf);
 	return krb5_fcc_write(context, id, buf, 2);
     }
 }

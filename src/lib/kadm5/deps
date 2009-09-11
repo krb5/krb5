@@ -5,16 +5,6 @@ kadm_err.so kadm_err.po $(OUTPRE)kadm_err.$(OBJEXT): \
   $(COM_ERR_DEPS) kadm_err.c
 chpass_util_strings.so chpass_util_strings.po $(OUTPRE)chpass_util_strings.$(OBJEXT): \
   $(COM_ERR_DEPS) chpass_util_strings.c
-ovsec_glue.so ovsec_glue.po $(OUTPRE)ovsec_glue.$(OBJEXT): \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
-  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
-  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
-  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
-  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h ovsec_glue.c
 misc_free.so misc_free.po $(OUTPRE)misc_free.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \

@@ -49,6 +49,7 @@ k5_md4_hash(unsigned int icount, const krb5_data *input,
 }
 
 const struct krb5_hash_provider krb5int_hash_md4 = {
+    "MD4",
     RSA_MD4_CKSUM_LENGTH,
     64,
     k5_md4_hash

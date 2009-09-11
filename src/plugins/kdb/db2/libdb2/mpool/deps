@@ -2,7 +2,5 @@
 # Generated makefile dependencies follow.
 #
 mpool.so mpool.po $(OUTPRE)mpool.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/db-config.h $(srcdir)/../include/config.h \
-  $(srcdir)/../include/db-config.h $(srcdir)/../include/db-int.h \
-  $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \
-  mpool.c mpool.h
+  $(DB_DEPS) $(srcdir)/../include/config.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db-queue.h mpool.c mpool.h

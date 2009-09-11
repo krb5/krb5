@@ -51,6 +51,7 @@ k5_sha1_hash(unsigned int icount, const krb5_data *input,
 }
 
 const struct krb5_hash_provider krb5int_hash_sha1 = {
+    "SHA1",
     SHS_DIGESTSIZE,
     SHS_DATASIZE,
     k5_sha1_hash
