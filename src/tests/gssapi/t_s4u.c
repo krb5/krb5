@@ -43,6 +43,9 @@
  *   need to use the canonical name (FOO$), which will cause principal
  *   comparison errors in gss_accept_sec_context().
  * - Add a SPN of host/foo.domain
+ * - Configure the computer account to support constrained delegation with
+ *   protocol transition (Trust this computer for delegation to specified
+ *   services only / Use any authentication protocol)
  * - Add host/foo.domain to the keytab (possibly easiest to do this
  *   with ktadd)
  *
@@ -50,8 +53,8 @@
  *
  * Usage eg:
  *
- * kinit -f host/mithost.win.mit.edu@WIN.MIT.EDU
- * t_s4u delegtest@WIN.MIT.EDU HOST@WIN-EQ7E4AA2WR8.win.mit.edu krb5.keytab
+ * kinit -k -t test.keytab -f 'host/test.win.mit.edu@WIN.MIT.EDU'
+ * ./t_s4u delegtest@WIN.MIT.EDU HOST/WIN-EQ7E4AA2WR8.win.mit.edu@WIN.MIT.EDU test.keytab
  */
 
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
