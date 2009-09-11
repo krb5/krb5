@@ -2151,7 +2151,12 @@ kdc_process_s4u2self_req(krb5_context context,
      * up the server principal and decoding KRB5_TL_SVR_REFERRAL_DATA).
      *
      * The comparison below will work with existing Windows and MIT
-     * client implementations.
+     * client implementations. The following referrals, the realm name
+     * will be rewritten; for a host-based service name, we can ignore
+     * the realm when performing this comparison, because sufficient
+     * qualifying information is included in the principal name. For
+     * Enterprise principal names can be compared with their unparsed
+     * canonical name. Otherwise, we require an exact match.
      */
 
     flags = 0;
