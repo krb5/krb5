@@ -91,11 +91,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'P':
 	    proxy = 1; /* S4U2Proxy - constrained delegation */
-	    if (keytab_name == NULL) {
-		fprintf(stderr, "Option -P (constrained delegation) "
-				"requires keytab to be specified\n");
-		xusage();
-	    }
 	    break;
 	case 'S':
 	    sname = optarg;
@@ -118,6 +113,12 @@ int main(int argc, char *argv[])
 	    xusage();
 	    break;
 	}
+    }
+
+    if (proxy && keytab_name == NULL) {
+	fprintf(stderr, "Option -P (constrained delegation) "
+			"requires keytab to be specified\n");
+	xusage();
     }
 
     if ((argc - optind) < 1)
@@ -223,7 +224,7 @@ static void do_v5_kvno (int count, char *names[],
 	if (sname != NULL) {
 	    ret = krb5_sname_to_principal(context, names[i],
 					  sname, KRB5_NT_SRV_HST,
-					  &in_creds.server);
+					  &server);
 	} else {
 	    ret = krb5_parse_name(context, names[i], &server);
 	}
