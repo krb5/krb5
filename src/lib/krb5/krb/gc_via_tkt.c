@@ -170,11 +170,11 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 			   krb5_flags kdcoptions, krb5_address *const *address,
 			   krb5_pa_data **in_padata,
 			   krb5_creds *in_cred,
-			   krb5_error_code (*gcvt_fct)(krb5_context,
+			   krb5_error_code (*pacb_fct)(krb5_context,
 						       krb5_keyblock *,
 						       krb5_kdc_req *,
 						       void *),
-			   void *gcvt_data,
+			   void *pacb_data,
 			   krb5_pa_data ***out_padata,
 			   krb5_pa_data ***out_enc_padata,
 			   krb5_creds **out_cred,
@@ -240,7 +240,7 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 			   in_cred->server, address, in_cred->authdata,
 			   in_padata,
 			   second_tkt ? &in_cred->second_ticket : NULL,
-			   tkt, gcvt_fct, gcvt_data, &tgsrep, &subkey);
+			   tkt, pacb_fct, pacb_data, &tgsrep, &subkey);
     if (enctypes)
 	free(enctypes);
     if (retval) {

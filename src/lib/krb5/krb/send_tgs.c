@@ -143,7 +143,7 @@ cleanup:
 /*
  * Note that this function fills in part of rep even on failure.
  *
- * The gcvt_fct callback allows the caller access to the nonce
+ * The pacb_fct callback allows the caller access to the nonce
  * and request subkey, for binding preauthentication data
  */
 krb5_error_code
@@ -153,11 +153,11 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
           krb5_authdata *const *authorization_data,
           krb5_pa_data *const *padata, const krb5_data *second_ticket,
           krb5_creds *in_cred,
-          krb5_error_code (*gcvt_fct)(krb5_context,
+          krb5_error_code (*pacb_fct)(krb5_context,
                                       krb5_keyblock *,
                                       krb5_kdc_req *,
                                       void *),
-          void *gcvt_data,
+          void *pacb_data,
           krb5_response *rep, krb5_keyblock **subkey)
 {
     krb5_error_code retval;
@@ -318,8 +318,8 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
         tgsreq.padata[1 + i] = NULL;
     }
 
-    if (gcvt_fct != NULL) {
-        if ((retval = (*gcvt_fct)(context, local_subkey, &tgsreq, gcvt_data)))
+    if (pacb_fct != NULL) {
+        if ((retval = (*pacb_fct)(context, local_subkey, &tgsreq, pacb_data)))
             goto send_tgs_error_2;
     }
     /* the TGS_REQ is assembled in tgsreq, so encode it */
