@@ -542,33 +542,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    /* Qualify server principal against its realm, if cross-realm */
-    if (!data_eq(in_creds->server->realm, tgtptr->server->data[1])) {
-        unsigned int s4u_server_size;
-
-        s4u_server = s4u_creds.server;
-        s4u_creds.server = NULL;
-
-        code = krb5_unparse_name_ext(context, in_creds->server,
-                                     &s4u_server_name, &s4u_server_size);
-        if (code != 0)
-            goto cleanup;
-
-        assert(s4u_server_size != 0);
-
-        code = krb5_build_principal_ext(context,
-                                        &s4u_creds.server,
-                                        tgtptr->server->data[1].length,
-                                        tgtptr->server->data[1].data,
-                                        s4u_server_size - 1,
-                                        s4u_server_name,
-                                        0);
-        if (code != 0)
-            goto cleanup;
-
-        s4u_creds.server->type = KRB5_NT_ENTERPRISE_PRINCIPAL;
-    }
-
     /* Then, walk back the referral path to S4U2Self for user */
     kdcopt = 0;
     if (options & KRB5_GC_CANONICALIZE)
@@ -602,6 +575,15 @@ krb5_get_self_cred_from_kdc(krb5_context context,
                 goto cleanup;
             }
         }
+
+        /* Rewrite server realm to match TGS realm */
+        krb5_free_data_contents(context, &s4u_creds.server->realm);
+
+        code = krb5int_copy_data_contents(context,
+                                          &tgtptr->server->data[1],
+                                          &s4u_creds.server->realm);
+        if (code != 0)
+            goto cleanup;
 
         code = krb5_get_cred_via_tkt_ext(context, tgtptr,
                                          KDC_OPT_CANONICALIZE |
@@ -657,24 +639,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
             tgtptr = *out_creds;
             referral_tgts[referral_count] = *out_creds;
             *out_creds = NULL;
-
-            if (data_eq(in_creds->server->realm, tgtptr->server->data[1])) {
-                assert(s4u_creds.server != s4u_server);
-
-                /* Substitute canonical server name on the final hop */
-                krb5_free_principal(context, s4u_creds.server);
-                s4u_creds.server = s4u_server;
-                s4u_server = NULL;
-            } else {
-                /* Rewrite server realm to match TGS realm */
-                krb5_free_data_contents(context, &s4u_creds.server->realm);
-
-                code = krb5int_copy_data_contents(context,
-                                                  &tgtptr->server->data[1],
-                                                  &s4u_creds.server->realm);
-                if (code != 0)
-                    goto cleanup;
-            }
         } else {
             krb5_free_creds(context, *out_creds);
             *out_creds = NULL;
