@@ -40,7 +40,7 @@ static char *prog;
 static void xusage()
 {
     fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype]\n", prog);
-    fprintf(stderr, "\t[-k keytab] [-P] [-S sname] [-U for_user]\n");
+    fprintf(stderr, "\t[-k keytab] [-S sname] [-U for_user [-P]]\n");
     fprintf(stderr, "\tservice1 service2 ...\n");
     exit(1);
 }
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
             }
             break;
 	case 'U':
-	    for_user = optarg;
+	    for_user = optarg; /* S4U2Self - protocol transition */
 	    break;
 	default:
 	    xusage();
@@ -115,10 +115,16 @@ int main(int argc, char *argv[])
 	}
     }
 
-    if (proxy && keytab_name == NULL) {
-	fprintf(stderr, "Option -P (constrained delegation) "
-			"requires keytab to be specified\n");
-	xusage();
+    if (proxy) {
+	if (keytab_name == NULL) {
+	    fprintf(stderr, "Option -P (constrained delegation) "
+			    "requires keytab to be specified\n");
+	    xusage();
+	} else if (for_user == NULL) {
+	    fprintf(stderr, "Option -P (constrained delegation) requires "
+			    "option -U (protocol transition)\n");
+	    xusage();
+	}
     }
 
     if ((argc - optind) < 1)
