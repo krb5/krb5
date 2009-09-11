@@ -224,26 +224,6 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 
 }
 
-static krb5_error_code
-kg_get_evidence_ticket(krb5_context context,
-                       krb5_gss_cred_id_t impersonator_cred,
-                       krb5_gss_cred_id_t subject_cred,
-                       krb5_creds **out_creds)
-{
-    krb5_creds in_creds;
-
-    memset(&in_creds, 0, sizeof(in_creds));
-
-    in_creds.magic = KV5M_CREDS;
-    in_creds.times.endtime = subject_cred->tgt_expire;
-    in_creds.server = impersonator_cred->princ;
-    in_creds.client = subject_cred->princ;
-
-    return krb5_get_credentials(context, KRB5_GC_CANONICALIZE,
-                                subject_cred->ccache,
-                                &in_creds, out_creds);
-}
-
 OM_uint32
 kg_compose_deleg_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t impersonator_cred,
