@@ -2540,23 +2540,23 @@ enctype_requires_etype_info_2(krb5_enctype enctype)
 krb5_error_code
 add_pa_data_element(krb5_context context,
 		    krb5_pa_data *padata,
-		    krb5_pa_data ***out_padata,
+		    krb5_pa_data ***inout_padata,
 		    krb5_boolean copy)
 {
     int				i;
     krb5_pa_data		**p;
 
-    if (*out_padata != NULL) {
-	for (i = 0; (*out_padata)[i] != NULL; i++)
+    if (*inout_padata != NULL) {
+	for (i = 0; (*inout_padata)[i] != NULL; i++)
 	    ;
     } else
 	i = 0;
 
-    p = realloc(*out_padata, (i + 2) * sizeof(krb5_pa_data *));
+    p = realloc(*inout_padata, (i + 2) * sizeof(krb5_pa_data *));
     if (p == NULL)
 	return ENOMEM;
 
-    *out_padata = p;
+    *inout_padata = p;
 
     p[i] = (krb5_pa_data *)malloc(sizeof(krb5_pa_data));
     if (p[i] == NULL)
@@ -2567,8 +2567,11 @@ add_pa_data_element(krb5_context context,
 
     if (copy) {
 	p[i]->contents = (krb5_octet *)malloc(padata->length);
-	if (p[i]->contents == NULL)
+	if (p[i]->contents == NULL) {
+	    free(p[i]);
+	    p[i] = NULL;
 	    return ENOMEM;
+	}
 
 	memcpy(p[i]->contents, padata->contents, padata->length);
     }
