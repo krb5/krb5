@@ -2115,6 +2115,7 @@ kdc_process_s4u2self_req(krb5_context context,
     krb5_error_code		code;
     krb5_pa_data		*pa_data;
     krb5_boolean		more;
+    int				flags;
 
     *nprincs = 0;
     memset(princ, 0, sizeof(*princ));
@@ -2152,10 +2153,24 @@ kdc_process_s4u2self_req(krb5_context context,
      * The comparison below will work with existing Windows and MIT
      * client implementations.
      */
+
+    flags = 0;
+    switch (krb5_princ_type(kdc_context, request->server)) {
+    case KRB5_NT_SRV_HST:
+	if (krb5_princ_size(kdc_context, request->server) == 2)
+	    flags |= KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
+	break;
+    case KRB5_NT_ENTERPRISE_PRINCIPAL:
+	flags |= KRB5_PRINCIPAL_COMPARE_ENTERPRISE;
+	break;
+    default:
+	break;
+    }
+
     if (!krb5_principal_compare_flags(context,
 				      request->server,
 				      client_princ,
-				      KRB5_PRINCIPAL_COMPARE_ENTERPRISE)) {
+				      flags)) {
 	*status = "INVALID_S4U2SELF_REQUEST";
 	return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error code */
     }
