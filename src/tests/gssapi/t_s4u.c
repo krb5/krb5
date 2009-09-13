@@ -140,6 +140,105 @@ displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
     return GSS_S_COMPLETE;
 }
 
+static void
+dumpAttribute(OM_uint32 *minor,
+              gss_name_t name,
+              gss_buffer_t attribute,
+              int noisy)
+{
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc value;
+    gss_buffer_desc display_value;
+    int authenticated = 0;
+    int complete = 0;
+    int more = -1;
+    unsigned int i;
+
+    while (more != 0) {
+        value.value = NULL;
+        display_value.value = NULL;
+
+        major = gss_get_name_attribute(minor,
+                                       name,
+                                       attribute,
+                                       &authenticated,
+                                       &complete,
+                                       &value,
+                                       &display_value,
+                                       &more);
+        if (GSS_ERROR(major)) {
+            displayStatus("gss_get_name_attribute", major, minor);
+            break;
+        }
+
+        printf("Attribute %.*s %s %s\n\n%.*s\n",
+               (int)attribute->length, (char *)attribute->value,
+               authenticated ? "Authenticated" : "",
+                complete ? "Complete" : "",
+               (int)display_value.length, (char *)display_value.value);
+
+        if (noisy) {
+            for (i = 0; i < value.length; i++) {
+                if ((i % 32) == 0)
+                    printf("\n");
+                printf("%02x", ((char *)value.value)[i] & 0xFF);
+            }
+            printf("\n\n");
+        }
+
+        gss_release_buffer(&tmp_minor, &value);
+        gss_release_buffer(&tmp_minor, &display_value);
+    }
+}
+
+static OM_uint32
+enumerateAttributes(OM_uint32 *minor,
+                    gss_name_t name,
+                    int noisy)
+{
+    OM_uint32 major, tmp_minor;
+    int name_is_MN;
+    gss_OID mech = GSS_C_NO_OID;
+    gss_buffer_set_t authenticated = GSS_C_NO_BUFFER_SET;
+    gss_buffer_set_t asserted = GSS_C_NO_BUFFER_SET;
+    gss_buffer_set_t complete = GSS_C_NO_BUFFER_SET;
+    unsigned int i;
+
+    major = gss_inquire_name(minor,
+                             name,
+                             &name_is_MN,
+                             &mech,
+                             &authenticated,
+                             &asserted,
+                             &complete);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_inquire_name", major, minor);
+        goto cleanup;
+    }
+
+    if (authenticated != GSS_C_NO_BUFFER_SET) {
+        for (i = 0; i < authenticated->count; i++)
+            dumpAttribute(minor, name, &authenticated->elements[i], noisy);
+    }
+    if (asserted != GSS_C_NO_BUFFER_SET) {
+        for (i = 0; i < asserted->count; i++)
+            dumpAttribute(minor, name, &asserted->elements[i], noisy);
+    }
+    if (complete != GSS_C_NO_BUFFER_SET) {
+        for (i = 0; i < complete->count; i++)
+            dumpAttribute(minor, name, &complete->elements[i], noisy);
+    }
+
+cleanup:
+    gss_release_oid(&tmp_minor, &mech);
+    gss_release_buffer_set(&tmp_minor, &authenticated);
+    gss_release_buffer_set(&tmp_minor, &asserted);
+    gss_release_buffer_set(&tmp_minor, &complete);
+
+    return major;
+}
+
+
 static OM_uint32
 initAcceptSecContext(OM_uint32 *minor,
                      gss_cred_id_t claimant_cred_handle,
@@ -217,6 +316,7 @@ initAcceptSecContext(OM_uint32 *minor,
     else {
         displayCanonName(minor, source_name, "Source name");
         displayOID(minor, mech, "Source mech");
+        enumerateAttributes(minor, source_name, 1);
     }
 
     (void) gss_release_name(&tmp_minor, &source_name);
