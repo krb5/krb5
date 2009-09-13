@@ -241,8 +241,8 @@ getclhoststr(char *clprinc, char *cl, size_t len)
     return (NULL);
 }
 
-kdb_fullresync_result_t *
-iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
+static kdb_fullresync_result_t *
+ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 {
     static kdb_fullresync_result_t ret;
     char *tmpf = 0;
@@ -254,6 +254,13 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
     gss_name_t name = NULL;
     char *client_name = NULL, *service_name = NULL;
     char *whoami = "iprop_full_resync_1";
+
+    /*
+     * vers contains the highest version number the client is
+     * willing to accept. A client can always accept a lower
+     * version: the version number is indicated in the dump
+     * header.
+     */
 
     /* default return code */
     ret.ret = UPDATE_ERROR;
@@ -323,10 +330,12 @@ iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
 
     /*
      * note the -i; modified version of kdb5_util dump format
-     * to include sno (serial number)
+     * to include sno (serial number). This argument is now
+     * versioned (-i0 for legacy dump format, -i1 for ipropx
+     * version 1 format, etc)
      */
-    if (asprintf(&ubuf, "%s dump -i %s </dev/null 2>&1",
-		 KPROPD_DEFAULT_KDB5_UTIL, tmpf) < 0) {
+    if (asprintf(&ubuf, "%s dump -i%d %s </dev/null 2>&1",
+		 KPROPD_DEFAULT_KDB5_UTIL, vers, tmpf) < 0) {
 	krb5_klog_syslog(LOG_ERR,
 			 _("%s: cannot construct kdb5 util dump string too long; out of memory"),
 			 whoami);
@@ -420,6 +429,18 @@ out:
     free(tmpf);
     free(ubuf);
     return (&ret);
+}
+
+kdb_fullresync_result_t *
+iprop_full_resync_1_svc(/* LINTED */ void *argp, struct svc_req *rqstp)
+{
+    return ipropx_resync(IPROPX_VERSION_0, rqstp);
+}
+
+kdb_fullresync_result_t *
+iprop_full_resync_ext_1_svc(uint32_t *argp, struct svc_req *rqstp)
+{
+    return ipropx_resync(*argp, rqstp);
 }
 
 static int
@@ -533,6 +554,12 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
 	_xdr_argument = xdr_void;
 	_xdr_result = xdr_kdb_fullresync_result_t;
 	local = (char *(*)()) iprop_full_resync_1_svc;
+	break;
+
+    case IPROP_FULL_RESYNC_EXT:
+	_xdr_argument = xdr_u_int32;
+	_xdr_result = xdr_kdb_fullresync_result_t;
+	local = (char *(*)()) iprop_full_resync_ext_1_svc;
 	break;
 
     default:

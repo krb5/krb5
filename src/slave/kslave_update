@@ -23,7 +23,7 @@ if [ "`ls -t $DUMPFILE.dump_ok $KDB_FILE | sed -n 1p`"  = "$KDB_FILE" -o \
 then
 
 	date
-	$KDB5_EDIT dump $DUMPFILE > /dev/null
+	$KDB5_UTIL dump $DUMPFILE > /dev/null
 
 	$KPROP -d -f $DUMPFILE ${SLAVE}
 	rm $DUMPFILE

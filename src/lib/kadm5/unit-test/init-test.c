@@ -20,7 +20,7 @@ int main()
 	 exit(1);
      }
      ret = kadm5_init(context, "admin", "admin", NULL, &params,
-		      KADM5_STRUCT_VERSION, KADM5_API_VERSION_2, NULL,
+		      KADM5_STRUCT_VERSION, KADM5_API_VERSION_3, NULL,
 		      &server_handle);
      if (ret == KADM5_RPC_ERROR)
 	  exit(0);

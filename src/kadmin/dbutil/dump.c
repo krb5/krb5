@@ -184,6 +184,15 @@ dump_version r1_8_version = {
      dump_r1_8_policy,
      process_r1_8_record,
 };
+dump_version ipropx_1_version = {
+     "Kerberos iprop extensible version",
+     "ipropx",
+     0,
+     0,
+     dump_k5beta7_princ_withpolicy,
+     dump_r1_8_policy,
+     process_r1_8_record,
+};
 
 /* External data */
 extern char		*current_dbname;
@@ -1061,7 +1070,7 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
 
 /*
  * usage is:
- *	dump_db [-old] [-b6] [-b7] [-ov] [-verbose] [-mkey_convert]
+ *	dump_db [-old] [-b6] [-b7] [-ov] [-r13] [-verbose] [-mkey_convert]
  *		[-new_mkey_file mkey_file] [-rev] [-recurse]
  *		[filename [principals...]]
  */
@@ -1081,6 +1090,7 @@ dump_db(argc, argv)
     bool_t		dump_sno = FALSE;
     kdb_log_context	*log_ctx;
     char		**db_args = 0; /* XXX */
+    unsigned int	ipropx_version = IPROPX_VERSION_0;
 
     /*
      * Parse the arguments.
@@ -1108,9 +1118,11 @@ dump_db(argc, argv)
 	     dump = &ov_version;
 	else if (!strcmp(argv[aindex], r13option))
 	     dump = &r1_3_version;
-	else if (!strcmp(argv[aindex], ipropoption)) {
+	else if (!strncmp(argv[aindex], ipropoption, sizeof(ipropoption) - 1)) {
 	    if (log_ctx && log_ctx->iproprole) {
-		dump = &iprop_version;
+		/* Note: ipropx_version is the maximum version acceptable */
+		ipropx_version = atoi(argv[aindex] + sizeof(ipropoption) - 1);
+		dump = ipropx_version ? &ipropx_1_version : &iprop_version;
 		/*
 		 * dump_sno is used to indicate if the serial
 		 * # should be populated in the output
@@ -1292,6 +1304,8 @@ dump_db(argc, argv)
 		goto unlock_and_return;
 	    }
 
+	    if (ipropx_version)
+		fprintf(f, " %u", IPROPX_VERSION);
 	    fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
 	    fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
 	    fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
@@ -2149,6 +2163,10 @@ process_r1_8_policy(fname, kcontext, filep, verbose, linenop)
     (*linenop)++;
     rec.name = namebuf;
 
+    /*
+     * To make this compatible with future policy extensions, we
+     * ignore any additional values.
+     */
     nread = fscanf(filep, "%1024s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
 		   rec.name,
 		   &rec.pw_min_life, &rec.pw_max_life,
@@ -2158,7 +2176,7 @@ process_r1_8_policy(fname, kcontext, filep, verbose, linenop)
 		   &rec.pw_lockout_duration);
     if (nread == EOF)
 	 return -1;
-    else if (nread != 10) {
+    else if (nread < 10) {
 	 fprintf(stderr, "cannot parse policy on line %d (%d read)\n",
 		 *linenop, nread);
 	 return 1;
@@ -2324,7 +2342,7 @@ restore_dump(programname, kcontext, dumpfile, f, verbose, dump)
 }
 
 /*
- * Usage: load_db [-old] [-ov] [-b6] [-b7] [-verbose] [-update] [-hash]
+ * Usage: load_db [-old] [-ov] [-b6] [-b7] [-r13] [-verbose] [-update] [-hash]
  *		filename
  */
 void
@@ -2457,6 +2475,7 @@ load_db(argc, argv)
     fgets(buf, sizeof(buf), f);
     if (load) {
 	 /* only check what we know; some headers only contain a prefix */
+	 /* NB: this should work for ipropx even though load is iprop */
 	 if (strncmp(buf, load->header, strlen(load->header)) != 0) {
 	      fprintf(stderr, head_bad_fmt, progname, dumpfile);
 	      exit_status++;
@@ -2619,8 +2638,29 @@ load_db(argc, argv)
 	    log_ctx->iproprole = IPROP_NULL;
 
 	    if (!add_update) {
-		sscanf(buf, "%s %u %u %u", iheader, &last_sno,
+		unsigned int ipropx_version = 0;
+
+		if (!strncmp(buf, "ipropx ", sizeof("ipropx ") - 1))
+		    sscanf(buf, "%s %u %u %u %u", iheader,
+			   &ipropx_version, &last_sno,
+			   &last_seconds, &last_useconds);
+		else
+		    sscanf(buf, "%s %u %u %u", iheader, &last_sno,
 		       &last_seconds, &last_useconds);
+
+		switch (ipropx_version) {
+		case IPROPX_VERSION_0:
+		    load = &iprop_version;
+		    break;
+		case IPROPX_VERSION_1:
+		    load = &ipropx_1_version;
+		    break;
+		default:
+		    fprintf(stderr, _("%s: Unknown iprop dump version %d\n"),
+			    progname, ipropx_version);
+		    exit_status++;
+		    goto error;
+		}
 
 		log_ctx->ulog->kdb_last_sno = last_sno;
 		log_ctx->ulog->kdb_last_time.seconds =

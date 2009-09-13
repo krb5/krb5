@@ -307,9 +307,13 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
     kdb_incr_update_t *upd;
     krb5_db_entry *ent;
     int kadm_data_yes;
+    int master;
 
     if ((updates == NULL) || (entries == NULL))
 	return (KRB5KRB_ERR_GENERIC);
+
+    master = (context->kdblog_context != NULL) &&
+	     (context->kdblog_context->iproprole == IPROP_MASTER);
 
     upd = updates;
     ent = entries;
@@ -413,7 +417,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		break;
 
 	    case AT_LAST_SUCCESS:
-		if (ent->last_success >= 0) {
+		if (master && ent->last_success >= 0) {
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_LAST_SUCCESS;
 		    ULOG_ENTRY(upd,
@@ -423,7 +427,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		break;
 
 	    case AT_LAST_FAILED:
-		if (ent->last_failed >= 0) {
+		if (master && ent->last_failed >= 0) {
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_LAST_FAILED;
 		    ULOG_ENTRY(upd,
@@ -433,7 +437,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		break;
 
 	    case AT_FAIL_AUTH_COUNT:
-		if (ent->fail_auth_count >= (krb5_kvno)0) {
+		if (master && ent->fail_auth_count >= (krb5_kvno)0) {
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_FAIL_AUTH_COUNT;
 		    ULOG_ENTRY(upd,
@@ -530,6 +534,12 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 
 		newtl = ent->tl_data;
 		while (newtl) {
+		    if (master && newtl->tl_data_type < 0) {
+			/* ignore non-replicated attributes on master */
+			newtl = newtl->tl_data_next;
+			continue;
+		    }
+
 		    switch (newtl->tl_data_type) {
 		    case KRB5_TL_LAST_PWD_CHANGE:
 		    case KRB5_TL_MOD_PRINC:
@@ -611,12 +621,16 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
     int k;
     krb5_db_entry *ent;
     kdb_incr_update_t *upd;
+    int slave;
 
     if ((updates == NULL) || (entries == NULL))
 	return (KRB5KRB_ERR_GENERIC);
 
     ent = entries;
     upd = updates;
+
+    slave = (context->kdblog_context != NULL) &&
+	    (context->kdblog_context->iproprole == IPROP_SLAVE);
 
     for (k = 0; k < nentries; k++) {
 	krb5_principal mod_princ = NULL;
@@ -692,15 +706,18 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 		break;
 
 	    case AT_LAST_SUCCESS:
-		ent->last_success = (krb5_timestamp) u.av_last_success;
+		if (!slave)
+		    ent->last_success = (krb5_timestamp) u.av_last_success;
 		break;
 
 	    case AT_LAST_FAILED:
-		ent->last_failed = (krb5_timestamp) u.av_last_failed;
+		if (!slave)
+		    ent->last_failed = (krb5_timestamp) u.av_last_failed;
 		break;
 
 	    case AT_FAIL_AUTH_COUNT:
-		ent->fail_auth_count = (krb5_kvno) u.av_fail_auth_count;
+		if (!slave)
+		    ent->fail_auth_count = (krb5_kvno) u.av_fail_auth_count;
 		break;
 
 	    case AT_PRINC:
@@ -765,34 +782,38 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 		}
 		break;
 
-	    case AT_TL_DATA:
+	    case AT_TL_DATA: {
+		int t;
+
 		cnt = u.av_tldata.av_tldata_len;
-		newtl = malloc(cnt * sizeof (krb5_tl_data));
-		(void) memset(newtl, 0, (cnt * sizeof (krb5_tl_data)));
+		newtl = calloc(cnt, sizeof (krb5_tl_data));
 		if (newtl == NULL)
 		    return (ENOMEM);
 
-		for (j = 0; j < cnt; j++) {
-		    newtl[j].tl_data_type = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_type;
-		    newtl[j].tl_data_length = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_data.tl_data_len;
-		    newtl[j].tl_data_contents = NULL;
-		    newtl[j].tl_data_contents = malloc(newtl[j].tl_data_length * sizeof (krb5_octet));
-		    if (newtl[j].tl_data_contents == NULL)
+		for (j = 0, t = 0; j < cnt; j++) {
+		    /* Negative TL types are non-replicated */
+		    if (slave && u.av_tldata.av_tldata_val[j].tl_type < 0)
+			continue;
+
+		    newtl[t].tl_data_type = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_type;
+		    newtl[t].tl_data_length = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_data.tl_data_len;
+		    newtl[t].tl_data_contents = malloc(newtl[t].tl_data_length * sizeof (krb5_octet));
+		    if (newtl[t].tl_data_contents == NULL)
 			/* XXX Memory leak: newtl
 			   and previously
 			   allocated elements.  */
 			return (ENOMEM);
 
-		    (void) memset(newtl[j].tl_data_contents, 0, (newtl[j].tl_data_length * sizeof (krb5_octet)));
-		    (void) memcpy(newtl[j].tl_data_contents, u.av_tldata.av_tldata_val[j].tl_data.tl_data_val, newtl[j].tl_data_length);
-		    newtl[j].tl_data_next = NULL;
-		    if (j > 0)
-			newtl[j - 1].tl_data_next = &newtl[j];
+		    (void) memcpy(newtl[t].tl_data_contents, u.av_tldata.av_tldata_val[t].tl_data.tl_data_val, newtl[t].tl_data_length);
+		    newtl[t].tl_data_next = NULL;
+		    if (t > 0)
+			newtl[t - 1].tl_data_next = &newtl[t];
+		    t++;
 		}
 
 		if ((ret = krb5_dbe_update_tl_data(context, ent, newtl)))
 		    return (ret);
-		for (j = 0; j < cnt; j++)
+		for (j = 0; j < t; j++)
 		    if (newtl[j].tl_data_contents) {
 			free(newtl[j].tl_data_contents);
 			newtl[j].tl_data_contents = NULL;
@@ -803,7 +824,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 		}
 		break;
 /* END CSTYLED */
-
+	    }
 	    case AT_PW_LAST_CHANGE:
 		if ((ret = krb5_dbe_update_last_pwd_change(context, ent,
 							   u.av_pw_last_change)))
