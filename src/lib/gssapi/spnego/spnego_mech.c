@@ -258,7 +258,6 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_unwrap_iov,
 	spnego_gss_wrap_iov_length,
 	spnego_gss_complete_auth_token,
-	spnego_gss_complete_auth_token,
 	spnego_gss_acquire_cred_impersonate_name,
 	NULL,				/* gss_add_cred_impersonate_name */
 	spnego_gss_display_name_ext,
