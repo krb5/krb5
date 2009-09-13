@@ -71,7 +71,8 @@ krb5_error_code krb5_db2_db_destroy
 krb5_error_code krb5_db2_db_rename 
 	(krb5_context,
 		   char *,
-		   char * );
+		   char *,
+		   int );
 krb5_error_code krb5_db2_db_get_principal 
 	(krb5_context,
 		   krb5_const_principal,
