@@ -542,6 +542,21 @@ int ktest_equal_sam_response(ref, var)
     return p;
 }
 
+int ktest_equal_pa_s4u_x509_user(ref, var)
+    krb5_pa_s4u_x509_user *ref;
+    krb5_pa_s4u_x509_user *var;
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&scalar_equal(user_id.nonce);
+    p=p&&ptr_equal(user_id.user,ktest_equal_principal_data);
+    p=p&&struct_equal(user_id.subject_cert,ktest_equal_data);
+    p=p&&scalar_equal(user_id.options);
+    p=p&&struct_equal(cksum,ktest_equal_checksum);
+    return p;
+}
+
 int ktest_equal_ad_kdcissued(ref, var)
     krb5_ad_kdcissued *ref;
     krb5_ad_kdcissued *var;

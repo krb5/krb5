@@ -1061,6 +1061,18 @@ decode_krb5_pa_for_user(const krb5_data *code, krb5_pa_for_user **repptr)
 }
 
 krb5_error_code
+decode_krb5_pa_s4u_x509_user(const krb5_data *code, krb5_pa_s4u_x509_user **repptr)
+{
+    setup_buf_only(krb5_pa_s4u_x509_user *);
+    alloc_field(rep);
+
+    retval = asn1_decode_pa_s4u_x509_user(&buf, rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
+krb5_error_code
 decode_krb5_pa_pac_req(const krb5_data *code, krb5_pa_pac_req **repptr)
 {
     setup_buf_only(krb5_pa_pac_req *);

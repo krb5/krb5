@@ -43,7 +43,7 @@ STOBJLISTS= \
 	../../lib/crypto/krb/crc32/OBJS.ST \
 	../../lib/crypto/builtin/des/OBJS.ST \
 	../../lib/crypto/krb/dk/OBJS.ST \
-	../../lib/crypto/krb/enc_provider/OBJS.ST \
+	../../lib/crypto/builtin/enc_provider/OBJS.ST \
 	../../lib/crypto/krb/hash_provider/OBJS.ST \
 	../../lib/crypto/krb/keyhash_provider/OBJS.ST \
 	../../lib/crypto/builtin/md4/OBJS.ST \

@@ -90,21 +90,15 @@ if [ "$TEST_PATH" != "" ]; then
 fi
 
 if [ "x$PS_ALL" = "x" ]; then
-	ps -axwwu >/dev/null 2>&1
-	ps_bsd=$?
-
-	ps -ef >/dev/null 2>&1
-	ps_sysv=$?
-
-	if [ $ps_bsd = 0 -a $ps_sysv = 1 ]; then
-		PS_ALL="ps -auxww"
-		PS_PID="ps -auxww"
-	elif [ $ps_bsd = 1 -a $ps_sysv = 0 ]; then
+	if ps auxww >/dev/null 2>&1; then
+		PS_ALL="ps auxww"
+		PS_PID="ps auxww"
+	elif ps -ef >/dev/null 2>&1; then
 		PS_ALL="ps -ef"
 		PS_PID="ps -fp"
 	else
-		PS_ALL="ps -auxww"
-		PS_PID="ps -auxww"
+		PS_ALL="ps auxww"
+		PS_PID="ps auxww"
 		echo "WARNING!  Cannot auto-detect ps type, assuming BSD."
 	fi
 

@@ -2,11 +2,11 @@ thisconfigdir=../../..
 myfulldir=lib/crypto/krb
 mydir=lib/crypto/krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= crc32 dk enc_provider hash_provider keyhash_provider \
+SUBDIRS= crc32 dk hash_provider keyhash_provider \
 	 old raw yarrow 
-LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/enc_provider -I$(srcdir)/dk	\
-		-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider 	\
-		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/yarrow 	\
+LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir)/dk	\
+		-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider 			\
+		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/yarrow 			\
 		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
 		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/arcfour 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/sha1
@@ -149,11 +149,11 @@ SRCS=\
 	$(srcdir)/verify_checksum.c	\
 	$(srcdir)/verify_checksum_iov.c
 
-STOBJLISTS=crc32/OBJS.ST  dk/OBJS.ST enc_provider/OBJS.ST 	\
+STOBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 			 	\
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST  	\
 	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST  OBJS.ST
 
-SUBDIROBJLISTS=crc32/OBJS.ST  dk/OBJS.ST enc_provider/OBJS.ST 	\
+SUBDIROBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 		 	\
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST  	\
 	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST OBJS.ST 
 
@@ -172,9 +172,6 @@ all-windows::
 	$(MAKE) -$(MFLAGS)
 	cd ..\dk
 	@echo Making in crypto\dk
-	$(MAKE) -$(MFLAGS)
-	cd ..\enc_provider
-	@echo Making in crypto\enc_provider
 	$(MAKE) -$(MFLAGS)
 	cd ..\hash_provider
 	@echo Making in crypto\hash_provider
@@ -200,9 +197,6 @@ clean-windows::
 	cd ..\dk
 	@echo Making clean in crypto\dk
 	$(MAKE) -$(MFLAGS) clean
-	cd ..\enc_provider
-	@echo Making clean in crypto\enc_provider
-	$(MAKE) -$(MFLAGS) clean
 	cd ..\hash_provider
 	@echo Making clean in crypto\hash_provider
 	$(MAKE) -$(MFLAGS) clean
@@ -226,9 +220,6 @@ check-windows::
 	$(MAKE) -$(MFLAGS) check
 	cd ..\dk
 	@echo Making check in crypto\dk
-	$(MAKE) -$(MFLAGS) check
-	cd ..\enc_provider
-	@echo Making check in crypto\enc_provider
 	$(MAKE) -$(MFLAGS) check
 	cd ..\hash_provider
 	@echo Making check in crypto\hash_provider

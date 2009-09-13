@@ -416,3 +416,4 @@ gsskrb5_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 
     return GSS_S_COMPLETE;
 }
+

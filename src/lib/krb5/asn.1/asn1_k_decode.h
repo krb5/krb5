@@ -263,6 +263,10 @@ asn1_error_code asn1_decode_setpw_req
         (asn1buf *buf, krb5_data *rep, krb5_principal *principal);
 asn1_error_code asn1_decode_pa_for_user
         (asn1buf *buf, krb5_pa_for_user *val);
+asn1_error_code asn1_decode_s4u_userid
+        (asn1buf *buf, krb5_s4u_userid *val);
+asn1_error_code asn1_decode_pa_s4u_x509_user
+        (asn1buf *buf, krb5_pa_s4u_x509_user *val);
 asn1_error_code asn1_decode_pa_pac_req
         (asn1buf *buf, krb5_pa_pac_req *val);
 

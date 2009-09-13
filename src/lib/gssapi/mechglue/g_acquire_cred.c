@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -34,42 +34,6 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-
-static gss_OID_set
-create_actual_mechs(mechs_array, count)
-    const gss_OID	mechs_array;
-    int count;
-{
-    gss_OID_set 	actual_mechs;
-    int			i;
-    OM_uint32		minor;
-
-    actual_mechs = (gss_OID_set) malloc(sizeof(gss_OID_set_desc));
-    if (!actual_mechs)
-	return NULL;
-
-    actual_mechs->elements = (gss_OID)
-	malloc(sizeof (gss_OID_desc) * count);
-    if (!actual_mechs->elements) {
-	free(actual_mechs);
-	return NULL;
-    }
-    
-    actual_mechs->count = 0;
-
-    for (i = 0; i < count; i++) {
-	actual_mechs->elements[i].elements = (void *)
-	    malloc(mechs_array[i].length);
-	if (actual_mechs->elements[i].elements == NULL) {
-	    (void) gss_release_oid_set(&minor, &actual_mechs);
-	    return (NULL);
-	}
-	g_OID_copy(&actual_mechs->elements[i], &mechs_array[i]);
-	actual_mechs->count++;
-    }
-
-    return actual_mechs;
-}
 
 static OM_uint32
 val_acq_cred_args(
@@ -172,7 +136,7 @@ OM_uint32 *		time_rec;
 	mech = gssint_get_mechanism(NULL);
 	if (mech == NULL)
 	    return (GSS_S_BAD_MECH);
-	
+
 	mechs = &default_OID_set;
 	default_OID_set.count = 1;
 	default_OID_set.elements = &default_OID;
@@ -234,12 +198,16 @@ OM_uint32 *		time_rec;
      * setup the actual mechs output parameter
      */
     if (actual_mechs != NULL) {
-	if ((*actual_mechs = create_actual_mechs(creds->mechs_array,
-						 creds->count)) == NULL) {
+	gss_OID_set_desc oids;
+
+	oids.count = creds->count;
+	oids.elements = creds->mechs_array;
+
+	major = generic_gss_copy_oid_set(minor_status, &oids, actual_mechs);
+	if (GSS_ERROR(major)) {
 	    (void) gss_release_cred(minor_status,
 				    (gss_cred_id_t *)&creds);
-	    *minor_status = 0;
-	    return (GSS_S_FAILURE);
+	    return (major);
 	}
     }
 
@@ -312,7 +280,7 @@ OM_uint32 KRB5_CALLCONV
 gss_add_cred(minor_status, input_cred_handle,
 		  desired_name, desired_mech, cred_usage,
 		  initiator_time_req, acceptor_time_req,
-		  output_cred_handle, actual_mechs, 
+		  output_cred_handle, actual_mechs,
 		  initiator_time_rec, acceptor_time_rec)
     OM_uint32		*minor_status;
     gss_cred_id_t	input_cred_handle;
@@ -434,7 +402,7 @@ gss_add_cred(minor_status, input_cred_handle,
 	    status = mech->gss_display_name(&temp_minor_status, internal_name,
 					    &union_cred->auxinfo.name,
 					    &union_cred->auxinfo.name_type);
-	
+
 	    if (status != GSS_S_COMPLETE)
 		goto errout;
 	}
@@ -475,10 +443,14 @@ gss_add_cred(minor_status, input_cred_handle,
     g_OID_copy(&new_mechs_array[union_cred->count],
 	       &mech->mech_type);
 
-    if (actual_mechs) {
-	*actual_mechs = create_actual_mechs(new_mechs_array,
-					    union_cred->count + 1);
-	if (*actual_mechs == NULL) {
+    if (actual_mechs != NULL) {
+	gss_OID_set_desc oids;
+
+	oids.count = union_cred->count + 1;
+	oids.elements = new_mechs_array;
+
+	status = generic_gss_copy_oid_set(minor_status, &oids, actual_mechs);
+	if (GSS_ERROR(status)) {
 	    free(new_mechs_array[union_cred->count].elements);
 	    goto errout;
 	}

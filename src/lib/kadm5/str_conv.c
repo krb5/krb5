@@ -78,6 +78,8 @@ static const char flags_pwchange_in[]	= "pwchange";
 static const char flags_service_in[]	= "service";
 static const char flags_pwsvc_in[]	= "pwservice";
 static const char flags_md5_in[]	= "md5";
+static const char flags_ok_to_auth_as_delegate_in[] = "ok-to-auth-as-delegate";
+static const char flags_no_auth_data_required_in[] = "no-auth-data-required";
 static const char flags_pdate_out[]	= "Not Postdateable";
 static const char flags_fwd_out[]	= "Not Forwardable";
 static const char flags_tgtbased_out[]	= "No TGT-based requests";
@@ -85,13 +87,15 @@ static const char flags_renew_out[]	= "Not renewable";
 static const char flags_proxy_out[]	= "Not proxiable";
 static const char flags_dup_skey_out[]	= "No DUP_SKEY requests";
 static const char flags_tickets_out[]	= "All Tickets Disallowed";
-static const char flags_preauth_out[]	= "Preauthorization required";
-static const char flags_hwauth_out[]	= "HW Authorization required";
+static const char flags_preauth_out[]	= "Preauthentication required";
+static const char flags_hwauth_out[]	= "HW authentication required";
 static const char flags_ok_as_delegate_out[]	= "OK as Delegate";
 static const char flags_pwchange_out[]	= "Password Change required";
 static const char flags_service_out[]	= "Service Disabled";
 static const char flags_pwsvc_out[]	= "Password Changing Service";
 static const char flags_md5_out[]	= "RSA-MD5 supported";
+static const char flags_ok_to_auth_as_delegate_out[] = "Protocol transition with delegation allowed";
+static const char flags_no_auth_data_required_out[] = "No authorization data required";
 static const char flags_default_neg[]	= "-";
 static const char flags_default_sep[]	= " ";
 
@@ -115,7 +119,9 @@ static const struct flags_lookup_entry flags_table[] = {
 { KRB5_KDB_REQUIRES_PWCHANGE,	1,	flags_pwchange_in, flags_pwchange_out},
 { KRB5_KDB_DISALLOW_SVR,	0,	flags_service_in,  flags_service_out },
 { KRB5_KDB_PWCHANGE_SERVICE,	1,	flags_pwsvc_in,	   flags_pwsvc_out   },
-{ KRB5_KDB_SUPPORT_DESMD5,	1,	flags_md5_in,	   flags_md5_out     }
+{ KRB5_KDB_SUPPORT_DESMD5,	1,	flags_md5_in,	   flags_md5_out     },
+{ KRB5_KDB_OK_TO_AUTH_AS_DELEGATE,  1,	flags_ok_to_auth_as_delegate_in, flags_ok_to_auth_as_delegate_out },
+{ KRB5_KDB_NO_AUTH_DATA_REQUIRED,   1,	flags_no_auth_data_required_in,	flags_no_auth_data_required_out }
 };
 static const int flags_table_nents = sizeof(flags_table)/
 				     sizeof(flags_table[0]);

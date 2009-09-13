@@ -12,11 +12,11 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS= md4.o
+STLIBOBJS= ../../@CRYPTO_IMPL@/md4/md4.o
 
-OBJS= $(OUTPRE)md4.$(OBJEXT) 
+OBJS= $(OUTPRE)../../@CRYPTO_IMPL@/md4/md4.$(OBJEXT) 
 
-SRCS= $(srcdir)/md4.c
+SRCS= $(srcdir)/../../@CRYPTO_IMPL@/md4/md4.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

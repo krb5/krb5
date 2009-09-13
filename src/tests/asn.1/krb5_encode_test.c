@@ -696,6 +696,17 @@ main(argc, argv)
 	ktest_empty_enc_sam_response_enc_2(&sam_ch2);
     }
     /****************************************************************/
+    /* encode_krb5_pa_s4u_x509_user */
+    {
+	krb5_pa_s4u_x509_user s4u;
+	setup(s4u,krb5_pa_s4u_x509_user,"pa_s4u_x509_user",
+	      ktest_make_sample_pa_s4u_x509_user);
+	encode_run(s4u,krb5_pa_s4u_x509_user,
+		   "pa_s4u_x509_user","",
+		   encode_krb5_pa_s4u_x509_user);
+	ktest_empty_pa_s4u_x509_user(&s4u);
+    }
+    /****************************************************************/
     /* encode_krb5_ad_kdcissued */
     {
 	krb5_ad_kdcissued kdci;

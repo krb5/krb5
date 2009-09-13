@@ -128,15 +128,54 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_creds **out_creds;
 {
     krb5_error_code     code;
-    krb5_creds          in_creds;
+    krb5_creds          in_creds, evidence_creds;
+    krb5_flags          flags = 0;
+    krb5_principal      cc_princ = NULL;
 
     k5_mutex_assert_locked(&cred->lock);
     memset(&in_creds, 0, sizeof(krb5_creds));
+    memset(&evidence_creds, 0, sizeof(krb5_creds));
     in_creds.client = in_creds.server = NULL;
 
     assert(cred->name != NULL);
 
-    in_creds.client = cred->name->princ;
+    if ((code = krb5_cc_get_principal(context, cred->ccache, &cc_princ)))
+        goto cleanup;
+
+    /*
+     * Do constrained delegation if we have proxy credentials and
+     * we're not trying to get a ticket to ourselves (in which case
+     * we can just use the S4U2Self or evidence ticket directly).
+     */
+    if (cred->proxy_cred &&
+        !krb5_principal_compare(context, cc_princ, server->princ)) {
+        krb5_creds mcreds;
+
+        flags |= KRB5_GC_CANONICALIZE |
+                 KRB5_GC_NO_STORE |
+                 KRB5_GC_CONSTRAINED_DELEGATION;
+
+        memset(&mcreds, 0, sizeof(mcreds));
+
+        mcreds.magic = KV5M_CREDS;
+        mcreds.times.endtime = cred->tgt_expire;
+        mcreds.server = cc_princ;
+        mcreds.client = cred->name->princ;
+
+        code = krb5_cc_retrieve_cred(context, cred->ccache,
+                                     KRB5_TC_MATCH_TIMES, &mcreds,
+                                     &evidence_creds);
+        if (code)
+            goto cleanup;
+
+        assert(evidence_creds.ticket_flags & TKT_FLG_FORWARDABLE);
+
+        in_creds.client = cc_princ;
+        in_creds.second_ticket = evidence_creds.ticket;
+    } else {
+        in_creds.client = cred->name->princ;
+    }
+
     in_creds.server = server->princ;
     in_creds.times.endtime = endtime;
     in_creds.authdata = NULL;
@@ -155,10 +194,19 @@ static krb5_error_code get_credentials(context, cred, server, now,
             goto cleanup;
     }
 
-    code = krb5_get_credentials(context, 0, cred->ccache,
+    code = krb5_get_credentials(context, flags, cred->ccache,
                                 &in_creds, out_creds);
     if (code)
         goto cleanup;
+
+    if (flags & KRB5_GC_CONSTRAINED_DELEGATION) {
+        if (!krb5_principal_compare(context, cred->name->princ,
+                                    (*out_creds)->client)) {
+            /* server did not support constrained delegation */
+            code = KRB5_KDCREP_MODIFIED;
+            goto cleanup;
+        }
+    }
 
     /*
      * Enforce a stricter limit (without timeskew forgiveness at the
@@ -173,6 +221,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
 cleanup:
     krb5_free_authdata(context, in_creds.authdata);
+    krb5_free_principal(context, cc_princ);
+    krb5_free_cred_contents(context, &evidence_creds);
 
     return code;
 }
@@ -407,8 +457,8 @@ cleanup:
  *
  * Do the grunt work of setting up a new context.
  */
-static OM_uint32
-new_connection(
+OM_uint32
+kg_new_connection(
     OM_uint32 *minor_status,
     krb5_gss_cred_id_t cred,
     gss_ctx_id_t *context_handle,
@@ -947,12 +997,12 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
     /*SUPPRESS 29*/
     if (*context_handle == GSS_C_NO_CONTEXT) {
-        major_status = new_connection(minor_status, cred, context_handle,
-                                      target_name, mech_type, req_flags,
-                                      time_req, input_chan_bindings,
-                                      input_token, actual_mech_type,
-                                      output_token, ret_flags, time_rec,
-                                      context, default_mech);
+        major_status = kg_new_connection(minor_status, cred, context_handle,
+                                        target_name, mech_type, req_flags,
+                                        time_req, input_chan_bindings,
+                                        input_token, actual_mech_type,
+                                        output_token, ret_flags, time_rec,
+                                        context, default_mech);
         k5_mutex_unlock(&cred->lock);
         if (*context_handle == GSS_C_NO_CONTEXT) {
             save_error_info (*minor_status, context);

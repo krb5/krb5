@@ -1,0 +1,77 @@
+##############################################################################
+###################### WARNING: DOES NOT WORK YET ############################
+##############################################################################
+
+ABOUT:
+A translation of Will Fiveash's "mit_db2_mkey_migrate_testB" ksh code into Python with ldap backend.  With minor fixes and changes.  Written by HaoQi Li.
+
+DEFAULT SETTINGS:
+Options     Name              Default Setting
+  -h      Help
+  -v      Verbose:        True
+  -p      Testing pw:     test123
+  -s      Sandbox loc:    src/tests/kdc_realm2/sandbox
+  -c      Krb5kdc:        src/kdc/krb5kdc
+  -d      Kadmind:        src/kadmin/server/kadmind
+  -b      Kdb5_util:      src/kadmin/dbutil/kdb5_util
+  -a      Kdb5_ldap_util: src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util
+  -l      Kadmin.local:   src/kadmin/cli/kadmin.local
+  -n      Kadmin:         src/kadmin/cli/kadmin
+  -t      Client paths:   src/clients
+
+INPUTS:
+* src/tests/mk_migr/ldap_backend/input_conf/kdc_template_ldap.conf
+* src/tests/mk_migr/ldap_backend/input_conf/krb5_template_ldap.conf
+* src/tests/mk_migr/ldap_backend/input_conf/kadm5_template_ldap.acl
+* src/tests/mk_migr/ldap_backend/input_conf/debconfile
+
+OUTPUTS:
+* sandbox that contains customized outfile with all commands and their outputs, kdc.conf, krb5.conf, kadm6.acl, and others.
+* Statistics on screen of number of commands passed and failed (if not interrupted by fatal failures).
+
+EXAMPLES:
+- MUST RUN from trunk/src. 
+* python tests/mk_migr/ldap_backend/ldap7.py 
+    Using all Default Settings.
+* python tests/mk_migr/ldap_backend/ldap7.py  -s /tmp/mySandbox
+    Sandbox now can be found in /tmp/mySandbox. 
+
+REFERENCE:
+http://k5wiki.kerberos.org/wiki/LDAP_on_Kerberos
+and http://k5wiki.kerberos.org/wiki/User_talk:Haoqili
+
+NOTES:
+* "haoqili" is a name that can be changed.
+* "kdb5_util stash" is equivalent to "-s" in "kdb5_ldap_util create -s"
+* 2019 and 2029 are future dates that should best be written not as fixed. Such as now+10years.
+
+FAILURES:
+
+* failure in kpasswd all, ERROR:"password history principal key version mismatch while trying to change password."  This is caused by "-history 3" in testpolicy4
+
+* The beginning of a series of failures starts from: the "kdb5_util list_mkeys" fails after "kdb5_util add_mkey -e aes128-cts-hmac-sha1-96 [with password=abcde]"
+ERROR:-------------------------------------
+kdb5_util: Unable to decrypt latest master key with the provided master key
+while getting master key list
+kdb5_util: Warning: proceeding without master key list
+kdb5_util: master keylist not initialized
+can't decrypt the latest master key 
+--------------------------------------------
+Convo with Tom:
+T: so you didn't activate the new mkey?
+H: correct i just added it
+T: the message looks familiar. does list_mkeys work before you do that add_mkey?
+H: yes it does
+T: Will might have mentioned some problems with the LDAP backend and the master key migration stuff.
+T: how up-to-date is your source tree? Will says he remembers fixing this.
+H: i'm at revision 22523
+T: hm, i think that should be recent enough.
+T: do you have any enctype settings in your config files?
+H: in krb5.conf
+[libdefaults]
+default_realm = EXAMPLE.ORG
+default_tkt_enctypes = des3-hmac-sha1 aes128-cts
+default_tgs_enctypes = des3-hmac-sha1 aes128-cts
+T: anything for supported_enctypes or master_key_type?
+H: no
+

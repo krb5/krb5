@@ -1616,6 +1616,47 @@ error_out:
     return retval;
 }
 
+asn1_error_code asn1_decode_s4u_userid(asn1buf *buf, krb5_s4u_userid *val)
+{
+    setup();
+    val->nonce = 0;
+    val->user = NULL;
+    val->subject_cert.data = NULL;
+    val->options = 0;
+    { begin_structure();
+        get_field(val->nonce,0,asn1_decode_int32);
+        alloc_principal(val->user);
+        opt_field(val->user,1,asn1_decode_principal_name,0);
+        get_field(val->user,2,asn1_decode_realm);
+        opt_lenfield(val->subject_cert.length,val->subject_cert.data,3,asn1_decode_charstring);
+        opt_field(val->options,4,asn1_decode_krb5_flags,0);
+        end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_principal(NULL, val->user);
+    krb5_free_data_contents(NULL, &val->subject_cert);
+    val->user = NULL;
+    val->subject_cert.data = NULL;
+    return retval;
+}
+
+asn1_error_code asn1_decode_pa_s4u_x509_user(asn1buf *buf, krb5_pa_s4u_x509_user *val)
+{
+    setup();
+    val->cksum.contents = NULL;
+    { begin_structure();
+        get_field(val->user_id,0,asn1_decode_s4u_userid);
+        get_field(val->cksum,1,asn1_decode_checksum);
+        end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_s4u_userid_contents(NULL, &val->user_id);
+    krb5_free_checksum_contents(NULL, &val->cksum);
+    return retval;
+}
+
 asn1_error_code asn1_decode_pa_pac_req(asn1buf *buf, krb5_pa_pac_req *val)
 {
     setup();

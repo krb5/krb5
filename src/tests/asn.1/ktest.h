@@ -105,6 +105,7 @@ krb5_error_code ktest_make_sample_enc_sam_response_enc
 	(krb5_enc_sam_response_enc *p);
 krb5_error_code ktest_make_sample_predicted_sam_response(krb5_predicted_sam_response *p);
 krb5_error_code ktest_make_sample_enc_sam_response_enc_2(krb5_enc_sam_response_enc_2 *p);
+krb5_error_code ktest_make_sample_pa_s4u_x509_user(krb5_pa_s4u_x509_user *p);
 krb5_error_code ktest_make_sample_ad_kdcissued(krb5_ad_kdcissued *p);
 
 #ifdef ENABLE_LDAP
@@ -214,6 +215,7 @@ void ktest_empty_enc_sam_response_enc(krb5_enc_sam_response_enc *p);
 void ktest_empty_predicted_sam_response(krb5_predicted_sam_response *p);
 void ktest_empty_sam_response_2(krb5_sam_response_2 *p);
 void ktest_empty_enc_sam_response_enc_2(krb5_enc_sam_response_enc_2 *p);
+void ktest_empty_pa_s4u_x509_user(krb5_pa_s4u_x509_user *p);
 void ktest_empty_ad_kdcissued(krb5_ad_kdcissued *p);
 
 #ifdef ENABLE_LDAP
