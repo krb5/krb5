@@ -163,7 +163,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
         mcreds.client = cred->name->princ;
 
         code = krb5_cc_retrieve_cred(context, cred->ccache,
-                                     KRB5_TC_MATCH_TIMES, &mcreds,
+                                     KRB5_TC_MATCH_TIMES | KRB5_TC_MATCH_AUTHDATA,
+                                     &mcreds,
                                      &evidence_creds);
         if (code)
             goto cleanup;

@@ -130,16 +130,25 @@ kg_impersonate_name(OM_uint32 *minor_status,
     if (impersonator_cred->req_enctypes != NULL)
         in_creds.keyblock.enctype = impersonator_cred->req_enctypes[0];
 
+    code = k5_mutex_lock(&user->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
     if (user->ad_context != NULL) {
         code = krb5_authdata_export_attributes(context,
                                                user->ad_context,
                                                AD_USAGE_TGS_REQ,
                                                &in_creds.authdata);
         if (code != 0) {
+            k5_mutex_unlock(&user->lock);
             *minor_status = code;
             return GSS_S_FAILURE;
         }
     }
+
+    k5_mutex_unlock(&user->lock);
 
     code = krb5_get_credentials_for_user(context,
                                          KRB5_GC_CANONICALIZE | KRB5_GC_NO_STORE,
