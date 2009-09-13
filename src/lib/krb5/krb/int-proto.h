@@ -59,11 +59,31 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			   krb5_creds *in_cred, krb5_creds **out_cred,
 			   krb5_creds ***tgts, int kdcopt);
 
+krb5_error_code
+krb5_get_credentials_core(krb5_context context, krb5_flags options,
+			  krb5_creds *in_creds, krb5_creds *mcreds,
+			  krb5_flags *fields);
+
 #define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
 
 #define IS_TGS_PRINC(c, p)						\
     (krb5_princ_size((c), (p)) == 2 &&					\
      data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
+
+krb5_error_code
+krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
+			   krb5_flags kdcoptions, krb5_address *const *address,
+			   krb5_pa_data **in_padata,
+			   krb5_creds *in_cred,
+			   krb5_error_code (*gcvt_fct)(krb5_context,
+						       krb5_keyblock *,
+						       krb5_kdc_req *,
+						       void *),
+			   void *gcvt_data,
+			   krb5_pa_data ***out_padata,
+			   krb5_pa_data ***enc_padata,
+			   krb5_creds **out_cred,
+			   krb5_keyblock **out_subkey);
 
 #endif /* KRB5_INT_FUNC_PROTO__ */
 

@@ -170,7 +170,7 @@ krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val)
     if (val == NULL)
 	return;
     free(val->contents);
-    val->contents = 0;
+    val->contents = NULL;
 }
 
 void KRB5_CALLCONV
@@ -297,6 +297,7 @@ krb5_free_enc_kdc_rep_part(krb5_context context, register krb5_enc_kdc_rep_part 
     krb5_free_last_req(context, val->last_req);
     krb5_free_principal(context, val->server);
     krb5_free_addresses(context, val->caddrs);
+    krb5_free_pa_data(context, val->enc_padata);
     free(val);
 }
 
@@ -751,6 +752,30 @@ krb5_free_pa_for_user(krb5_context context, krb5_pa_for_user *req)
     req->user = NULL;
     krb5_free_checksum_contents(context, &req->cksum);
     krb5_free_data_contents(context, &req->auth_package);
+    free(req);
+}
+
+void KRB5_CALLCONV
+krb5_free_s4u_userid_contents(krb5_context context, krb5_s4u_userid *user_id)
+{
+    if (user_id == NULL)
+	return;
+    user_id->nonce = 0;
+    krb5_free_principal(context, user_id->user);
+    user_id->user = NULL;
+    krb5_free_data_contents(context, &user_id->subject_cert);
+    user_id->subject_cert.length = 0;
+    user_id->subject_cert.data = NULL;
+    user_id->options = 0;
+}
+
+void KRB5_CALLCONV
+krb5_free_pa_s4u_x509_user(krb5_context context, krb5_pa_s4u_x509_user *req)
+{
+    if (req == NULL)
+	return;
+    krb5_free_s4u_userid_contents(context, &req->user_id);
+    krb5_free_checksum_contents(context, &req->cksum);
     free(req);
 }
 

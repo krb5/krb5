@@ -223,7 +223,7 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
 krb5_pa_data *
 find_pa_data(krb5_pa_data **padata, krb5_preauthtype pa_type)
 {
-return krb5int_find_pa_data(kdc_context, padata, pa_type);
+    return krb5int_find_pa_data(kdc_context, padata, pa_type);
 }
 
 krb5_error_code 
@@ -371,7 +371,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     }
 
     /* make sure the client is of proper lineage (see above) */
-    if (foreign_server && !find_pa_data(request->padata, KRB5_PADATA_FOR_USER)) {
+    if (foreign_server &&
+	!find_pa_data(request->padata, KRB5_PADATA_FOR_USER)) {
 	if (is_local_principal((*ticket)->enc_part2->client)) {
 	    /* someone in a foreign realm claiming to be local */
 	    krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
@@ -926,7 +927,8 @@ fail:
  * as a com_err error number!
  */
 #define AS_INVALID_OPTIONS (KDC_OPT_FORWARDED | KDC_OPT_PROXY |\
-KDC_OPT_VALIDATE | KDC_OPT_RENEW | KDC_OPT_ENC_TKT_IN_SKEY)
+			    KDC_OPT_VALIDATE | KDC_OPT_RENEW | \
+			    KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
 		    krb5_db_entry server, krb5_timestamp kdc_time,
@@ -998,17 +1000,9 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
      *	   preauthentication data is absent in the request.
      *
      * Hence, this check most be done after the check for preauth
-     * data, and is now performed by validate_forwardable().
+     * data, and is now performed by validate_forwardable() (the
+     * contents of which were previously below).
      */
-#if 0
-    /* Client and server must allow forwardable tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE) &&
-	(isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE) ||
-	 isflagset(server.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))) {
-	*status = "FORWARDABLE NOT ALLOWED";
-	return(KDC_ERR_POLICY);
-    }
-#endif
     
     /* Client and server must allow renewable tickets */
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE) &&
@@ -1793,7 +1787,7 @@ sign_db_authdata (krb5_context context,
 }
 
 static krb5_error_code
-verify_s4u2self_checksum(krb5_context context,
+verify_for_user_checksum(krb5_context context,
 			 krb5_keyblock *key,
 			 krb5_pa_for_user *req)
 {
@@ -1852,7 +1846,7 @@ verify_s4u2self_checksum(krb5_context context,
 				  &valid);
 
     if (code == 0 && valid == FALSE)
-	code = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+	code = KRB5KRB_AP_ERR_MODIFIED;
 
     free(data.data);
 
@@ -1860,55 +1854,246 @@ verify_s4u2self_checksum(krb5_context context,
 }
 
 /*
- * Protocol transition validation code based on AS-REQ
- * validation code
+ * Legacy protocol transition (Windows 2003 and above)
  */
-static int
-validate_s4u2self_request(krb5_kdc_req *request,
-			  const krb5_db_entry *client,
-			  krb5_timestamp kdc_time,
-			  const char **status)
+static krb5_error_code
+kdc_process_for_user(krb5_context context,
+		     krb5_pa_data *pa_data,
+		     krb5_keyblock *tgs_session,
+		     krb5_pa_s4u_x509_user **s4u_x509_user,
+		     const char **status)
 {
-    int				errcode;
-    krb5_db_entry		server = { 0 };
- 
-    /* The client must not be expired */
-    if (client->expiration && client->expiration < kdc_time) {
-	*status = "CLIENT EXPIRED";
-	return KDC_ERR_NAME_EXP;
+    krb5_error_code		code;
+    krb5_pa_for_user		*for_user;
+    krb5_data			req_data;
+
+    req_data.length = pa_data->length;
+    req_data.data = (char *)pa_data->contents;
+
+    code = decode_krb5_pa_for_user(&req_data, &for_user);
+    if (code)
+	return code;
+
+    code = verify_for_user_checksum(context, tgs_session, for_user);
+    if (code) {
+	*status = "INVALID_S4U2SELF_CHECKSUM";
+	krb5_free_pa_for_user(kdc_context, for_user);
+	return code;
     }
 
-    /* The client's password must not be expired, unless the server is
-      a KRB5_KDC_PWCHANGE_SERVICE. */
-    if (client->pw_expiration && client->pw_expiration < kdc_time) {
-	*status = "CLIENT KEY EXPIRED";
-	return KDC_ERR_KEY_EXP;
+    *s4u_x509_user = calloc(1, sizeof(krb5_pa_s4u_x509_user));
+    if (*s4u_x509_user == NULL) {
+	krb5_free_pa_for_user(kdc_context, for_user);
+	return ENOMEM;
     }
 
-    /*
-     * If the client requires password changing, then return an
-     * error; S4U2Self cannot be used to change a password.
-     */
-    if (isflagset(client->attributes, KRB5_KDB_REQUIRES_PWCHANGE)) {
-	*status = "REQUIRED PWCHANGE";
-	return KDC_ERR_KEY_EXP;
-    }
-
-    /* Check to see if client is locked out */
-    if (isflagset(client->attributes, KRB5_KDB_DISALLOW_ALL_TIX)) {
-	*status = "CLIENT LOCKED OUT";
-	return KDC_ERR_C_PRINCIPAL_UNKNOWN;
-    }
-
-    /*
-     * Check against local policy
-     */
-    errcode = against_local_policy_as(request, *client, server,
-				      kdc_time, status); 
-    if (errcode)
-	return errcode;
+    (*s4u_x509_user)->user_id.user = for_user->user;
+    for_user->user = NULL;
+    krb5_free_pa_for_user(context, for_user);
 
     return 0;
+}
+
+static krb5_error_code
+verify_s4u_x509_user_checksum(krb5_context context,
+			      krb5_keyblock *key,
+			      krb5_data *req_data,
+			      krb5_int32 kdc_req_nonce,
+			      krb5_pa_s4u_x509_user *req)
+{
+    krb5_error_code		code;
+    krb5_data			scratch;
+    krb5_boolean		valid = FALSE;
+
+    if (enctype_requires_etype_info_2(key->enctype) &&
+	!krb5_c_is_keyed_cksum(req->cksum.checksum_type))
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+
+    if (req->user_id.nonce != kdc_req_nonce)
+	return KRB5KRB_AP_ERR_MODIFIED;
+
+    /*
+     * Verify checksum over the encoded userid. If that fails,
+     * re-encode, and verify that. This is similar to the
+     * behaviour in kdc_process_tgs_req().
+     */
+    if (fetch_asn1_field((unsigned char *)req_data->data, 1, 0, &scratch) < 0)
+	return ASN1_PARSE_ERROR;
+
+    code = krb5_c_verify_checksum(context,
+				  key,
+				  KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST,
+				  &scratch,
+				  &req->cksum,
+				  &valid);
+    if (code != 0)
+	return code;
+
+    if (valid == FALSE) {
+	krb5_data *data;
+
+	code = encode_krb5_s4u_userid(&req->user_id, &data);
+	if (code != 0)
+	    return code;
+
+	code = krb5_c_verify_checksum(context,
+				      key,
+				      KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST,
+				      data,
+				      &req->cksum,
+				      &valid);
+
+	krb5_free_data(context, data);
+
+	if (code != 0)
+	    return code;
+    }
+
+    return valid ? 0 : KRB5KRB_AP_ERR_MODIFIED;
+}
+
+/*
+ * New protocol transition request (Windows 2008 and above)
+ */
+static krb5_error_code
+kdc_process_s4u_x509_user(krb5_context context,
+			  krb5_kdc_req *request,
+			  krb5_pa_data *pa_data,
+			  krb5_keyblock *tgs_subkey,
+			  krb5_keyblock *tgs_session,
+			  krb5_pa_s4u_x509_user **s4u_x509_user,
+			  const char **status)
+{
+    krb5_error_code		code;
+    krb5_data			req_data;
+
+    req_data.length = pa_data->length;
+    req_data.data = (char *)pa_data->contents;
+
+    code = decode_krb5_pa_s4u_x509_user(&req_data, s4u_x509_user);
+    if (code)
+	return code;
+
+    code = verify_s4u_x509_user_checksum(context,
+					 tgs_subkey ? tgs_subkey :
+					    tgs_session,
+					 &req_data,
+					 request->nonce, *s4u_x509_user);
+
+    if (code) {
+	*status = "INVALID_S4U2SELF_CHECKSUM";
+	krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
+	*s4u_x509_user = NULL;
+	return code;
+    }
+
+    if (krb5_princ_size(context, (*s4u_x509_user)->user_id.user) == 0 ||
+	(*s4u_x509_user)->user_id.subject_cert.length != 0) {
+	*status = "INVALID_S4U2SELF_REQUEST";
+	krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
+	*s4u_x509_user = NULL;
+	return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
+    }
+
+    return 0;
+}
+
+krb5_error_code
+kdc_make_s4u2self_rep(krb5_context context,
+		      krb5_keyblock *tgs_subkey,
+		      krb5_keyblock *tgs_session,
+		      krb5_pa_s4u_x509_user *req_s4u_user,
+		      krb5_kdc_rep *reply,
+		      krb5_enc_kdc_rep_part *reply_encpart)
+{
+    krb5_error_code		code;
+    krb5_data			*data = NULL;
+    krb5_pa_s4u_x509_user	rep_s4u_user;
+    krb5_pa_data		padata;
+    krb5_enctype		enctype;
+    krb5_keyusage		usage;
+
+    memset(&rep_s4u_user, 0, sizeof(rep_s4u_user));
+
+    rep_s4u_user.user_id.nonce   = req_s4u_user->user_id.nonce;
+    rep_s4u_user.user_id.user    = req_s4u_user->user_id.user;
+    rep_s4u_user.user_id.options =
+	req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
+
+    code = encode_krb5_s4u_userid(&rep_s4u_user.user_id, &data);
+    if (code != 0)
+        goto cleanup;
+
+    if (req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE)
+        usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY;
+    else
+        usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST;
+
+    code = krb5_c_make_checksum(context, req_s4u_user->cksum.checksum_type,
+				tgs_subkey != NULL ? tgs_subkey : tgs_session,
+                                usage, data,
+                                &rep_s4u_user.cksum);
+    if (code != 0)
+        goto cleanup;
+
+    krb5_free_data(context, data);
+    data = NULL;
+
+    code = encode_krb5_pa_s4u_x509_user(&rep_s4u_user, &data);
+    if (code != 0)
+        goto cleanup;
+
+    padata.magic = KV5M_PA_DATA;
+    padata.pa_type = KRB5_PADATA_S4U_X509_USER;
+    padata.length = data->length;
+    padata.contents = (krb5_octet *)data->data;
+
+    code = add_pa_data_element(context, &padata, &reply->padata, FALSE);
+    if (code != 0)
+	goto cleanup;
+
+    free(data);
+    data = NULL;
+
+    if (tgs_subkey != NULL)
+	enctype = tgs_subkey->enctype;
+    else
+	enctype = tgs_session->enctype;
+
+    /*
+     * Owing to a bug in Windows, unkeyed checksums were used for older
+     * enctypes, including rc4-hmac. A forthcoming workaround for this
+     * includes the checksum bytes in the encrypted padata.
+     */
+    if ((req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) &&
+	enctype_requires_etype_info_2(enctype) == FALSE) {
+	padata.length = req_s4u_user->cksum.length +
+		        rep_s4u_user.cksum.length;
+	padata.contents = malloc(padata.length);
+	if (padata.contents == NULL) {
+	    code = ENOMEM;
+	    goto cleanup;
+	}
+
+	memcpy(padata.contents,
+	       req_s4u_user->cksum.contents,
+	       req_s4u_user->cksum.length);
+	memcpy(&padata.contents[req_s4u_user->cksum.length],
+	       rep_s4u_user.cksum.contents,
+	       rep_s4u_user.cksum.length);
+
+	code = add_pa_data_element(context,&padata,
+				   &reply_encpart->enc_padata, FALSE);
+	if (code != 0)
+	    goto cleanup;
+    }
+
+cleanup:
+    if (rep_s4u_user.cksum.contents != NULL)
+        krb5_free_checksum_contents(context, &rep_s4u_user.cksum);
+    krb5_free_data(context, data);
+
+    return code;
 }
 
 /*
@@ -1919,92 +2104,116 @@ kdc_process_s4u2self_req(krb5_context context,
 			 krb5_kdc_req *request,
 			 krb5_const_principal client_princ,
 			 const krb5_db_entry *server,
-			 krb5_keyblock *subkey,
+			 krb5_keyblock *tgs_subkey,
+			 krb5_keyblock *tgs_session,
 			 krb5_timestamp kdc_time,
-			 krb5_pa_for_user **for_user,
+			 krb5_pa_s4u_x509_user **s4u_x509_user,
 			 krb5_db_entry *princ,
 			 int *nprincs,
 			 const char **status)
 {
     krb5_error_code		code;
-    krb5_pa_data		**pa_data;
-    krb5_data			req_data;
+    krb5_pa_data		*pa_data;
     krb5_boolean		more;
+    int				flags;
 
     *nprincs = 0;
     memset(princ, 0, sizeof(*princ));
 
-    if (request->padata == NULL) {
-	return 0;
+    pa_data = find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER);
+    if (pa_data != NULL) {
+	code = kdc_process_s4u_x509_user(context,
+					 request,
+					 pa_data,
+					 tgs_subkey,
+					 tgs_session,
+					 s4u_x509_user,
+					 status);
+	if (code != 0)
+	    return code;
+    } else {
+	pa_data = find_pa_data(request->padata, KRB5_PADATA_FOR_USER);
+	if (pa_data != NULL) {
+	    code = kdc_process_for_user(context,
+					pa_data,
+					tgs_session,
+					s4u_x509_user,
+					status);
+	    if (code != 0)
+		return code;
+	} else
+	    return 0;
     }
 
-    for (pa_data = request->padata; *pa_data != NULL; pa_data++) {
-	if ((*pa_data)->pa_type == KRB5_PADATA_FOR_USER)
-	    break;
-    }
-    if (*pa_data == NULL) {
-	return 0;
-    }
-
-#if 0
     /*
-     * Ignore request if the server principal is a TGS, not so much
-     * to avoid unconstrained tickets being issued (as that would
-     * require knowing the TGS key anyway) but so that we do not
-     * block the server referral path.
+     * We need to compare the client name in the TGT with the requested
+     * server name. Supporting server name aliases without assuming a
+     * global name service makes this difficult to do.
+     *
+     * The comparison below handles the following cases (note that the
+     * term "principal name" below excludes the realm).
+     *
+     * (1) The requested service is a host-based service with two name
+     *     components, in which case we assume the principal name to
+     *     contain sufficient qualifying information. The realm is
+     *     ignored for the purpose of comparison.
+     *
+     * (2) The requested service name is an enterprise principal name:
+     *     the service principal name is compared with the unparsed
+     *     form of the client name (including its realm).
+     *
+     * (3) The requested service is some other name type: an exact
+     *     match is required.
+     *
+     * An alternative would be to look up the server once again with
+     * FLAG_CANONICALIZE | FLAG_CLIENT_REFERRALS_ONLY set, do an exact
+     * match between the returned name and client_princ. However, this
+     * assumes that the client set FLAG_CANONICALIZE when requesting
+     * the TGT and that we have a global name service.
      */
-    if (krb5_is_tgs_principal(server->princ)) {
-	return 0;
-    }
-#endif
-
-    *status = "PROCESS_S4U2SELF_REQUEST";
-
-    req_data.length = (*pa_data)->length;
-    req_data.data = (char *)(*pa_data)->contents;
-
-    code = decode_krb5_pa_for_user(&req_data, for_user);
-    if (code) {
-	return code;
+    flags = 0;
+    switch (krb5_princ_type(kdc_context, request->server)) {
+    case KRB5_NT_SRV_HST:		    /* (1) */
+	if (krb5_princ_size(kdc_context, request->server) == 2)
+	    flags |= KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
+	break;
+    case KRB5_NT_ENTERPRISE_PRINCIPAL:	    /* (2) */
+	flags |= KRB5_PRINCIPAL_COMPARE_ENTERPRISE;
+	break;
+    default:				    /* (3) */
+	break;
     }
 
-    if (krb5_princ_type(context, (*for_user)->user) !=
-	KRB5_NT_ENTERPRISE_PRINCIPAL) {
+    if (!krb5_principal_compare_flags(context,
+				      request->server,
+				      client_princ,
+				      flags)) {
 	*status = "INVALID_S4U2SELF_REQUEST";
-	return KRB5KDC_ERR_POLICY;
-    }
-
-    code = verify_s4u2self_checksum(context, subkey, *for_user);
-    if (code) {
-	*status = "INVALID_S4U2SELF_CHECKSUM";
-	krb5_free_pa_for_user(kdc_context, *for_user);
-	*for_user = NULL;
-	return code;
-    }
-    if (!krb5_principal_compare_flags(context, request->server, client_princ,
-				      KRB5_PRINCIPAL_COMPARE_ENTERPRISE)) {
-	*status = "INVALID_S4U2SELF_REQUEST";
-	return KRB5KDC_ERR_POLICY;
+	return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error code */
     }
 
     /*
      * Protocol transition is mutually exclusive with renew/forward/etc
-     * as well as user-to-user and constrained delegation.
+     * as well as user-to-user and constrained delegation. This check
+     * is also made in validate_as_request().
      *
      * We can assert from this check that the header ticket was a TGT, as
      * that is validated previously in validate_tgs_request().
      */
-    if (request->kdc_options & (NO_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)) {
+    if (request->kdc_options & AS_INVALID_OPTIONS) {
+	*status = "INVALID AS OPTIONS";
 	return KRB5KDC_ERR_BADOPTION;
     }
 
     /*
      * Do not attempt to lookup principals in foreign realms.
      */
-    if (is_local_principal((*for_user)->user)) {
+    if (is_local_principal((*s4u_x509_user)->user_id.user)) {
+	krb5_db_entry no_server;
+
 	*nprincs = 1;
 	code = krb5_db_get_principal_ext(kdc_context,
-					 (*for_user)->user,
+					 (*s4u_x509_user)->user_id.user,
 					 KRB5_KDB_FLAG_INCLUDE_PAC,
 					 princ, nprincs, &more);
 	if (code) {
@@ -2021,13 +2230,14 @@ kdc_process_s4u2self_req(krb5_context context,
 	    return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
 	}
 
-	code = validate_s4u2self_request(request, princ, kdc_time, status);
+	memset(&no_server, 0, sizeof(no_server));
+
+	code = validate_as_request(request, *princ,
+				   no_server, kdc_time, status);
 	if (code) {
 	    return code;
 	}
     }
-
-    *status = NULL;
 
     return 0;
 }
@@ -2049,7 +2259,7 @@ check_allowed_to_delegate_to(krb5_context context,
 
     /* Must be in same realm */
     if (!krb5_realm_compare(context, server->princ, proxy)) {
-	return KRB5KDC_ERR_BADOPTION;
+	return KRB5KDC_ERR_POLICY;
     }
 
     req.server = server;
@@ -2343,5 +2553,65 @@ log_tgs_alt_tgt(krb5_principal p)
 	free(sname);
     }
     /* OpenSolaris: audit_krb5kdc_tgs_req_alt_tgt(...) */
+}
+
+krb5_boolean
+enctype_requires_etype_info_2(krb5_enctype enctype)
+{
+    switch(enctype) {
+    case ENCTYPE_DES_CBC_CRC:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES3_CBC_SHA1:
+    case ENCTYPE_DES3_CBC_RAW:
+    case ENCTYPE_ARCFOUR_HMAC:
+    case ENCTYPE_ARCFOUR_HMAC_EXP :
+	return 0;
+    default:
+	return krb5_c_valid_enctype(enctype);
+    }
+}
+
+/* XXX where are the generic helper routines for this? */
+krb5_error_code
+add_pa_data_element(krb5_context context,
+		    krb5_pa_data *padata,
+		    krb5_pa_data ***inout_padata,
+		    krb5_boolean copy)
+{
+    int				i;
+    krb5_pa_data		**p;
+
+    if (*inout_padata != NULL) {
+	for (i = 0; (*inout_padata)[i] != NULL; i++)
+	    ;
+    } else
+	i = 0;
+
+    p = realloc(*inout_padata, (i + 2) * sizeof(krb5_pa_data *));
+    if (p == NULL)
+	return ENOMEM;
+
+    *inout_padata = p;
+
+    p[i] = (krb5_pa_data *)malloc(sizeof(krb5_pa_data));
+    if (p[i] == NULL)
+	return ENOMEM;
+    *(p[i]) = *padata;
+
+    p[i + 1] = NULL;
+
+    if (copy) {
+	p[i]->contents = (krb5_octet *)malloc(padata->length);
+	if (p[i]->contents == NULL) {
+	    free(p[i]);
+	    p[i] = NULL;
+	    return ENOMEM;
+	}
+
+	memcpy(p[i]->contents, padata->contents, padata->length);
+    }
+
+    return 0;
 }
 

@@ -56,8 +56,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     krb5_context context;
     krb5_principal princ;
     krb5_error_code code;
-    unsigned char *cp, *end;
-    char *stringrep, *tmp, *tmp2;
+    char *stringrep, *tmp, *tmp2, *cp;
     OM_uint32    length;
 #ifndef NO_PASSWORD
     struct passwd *pw;
@@ -156,12 +155,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             goto do_getpwuid;
 #endif
         } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
-#define BOUNDS_CHECK(cp, end, n) do { if ((end) - (cp) < (n)) \
-                    goto fail_name; } while (0)
-            cp = (unsigned char *)tmp;
-            end = cp + input_name_buffer->length;
-
-            BOUNDS_CHECK(cp, end, 4);
+            cp = tmp;
             if (*cp++ != 0x04)
                 goto fail_name;
             if (*cp++ != 0x01)
@@ -169,28 +163,20 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             if (*cp++ != 0x00)
                 goto fail_name;
             length = *cp++;
-            if (length != (ssize_t)gss_mech_krb5->length+2)
+            if (length != gss_mech_krb5->length+2)
                 goto fail_name;
-
-            BOUNDS_CHECK(cp, end, 2);
             if (*cp++ != 0x06)
                 goto fail_name;
             length = *cp++;
             if (length != gss_mech_krb5->length)
                 goto fail_name;
-
-            BOUNDS_CHECK(cp, end, length);
             if (memcmp(cp, gss_mech_krb5->elements, length) != 0)
                 goto fail_name;
             cp += length;
-
-            BOUNDS_CHECK(cp, end, 4);
             length = *cp++;
             length = (length << 8) | *cp++;
             length = (length << 8) | *cp++;
             length = (length << 8) | *cp++;
-
-            BOUNDS_CHECK(cp, end, length);
             tmp2 = malloc(length+1);
             if (tmp2 == NULL) {
                 xfree(tmp);
@@ -198,7 +184,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
                 krb5_free_context(context);
                 return GSS_S_FAILURE;
             }
-            strncpy(tmp2, (char *)cp, length);
+            strncpy(tmp2, cp, length);
             tmp2[length] = 0;
 
             stringrep = tmp2;

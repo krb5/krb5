@@ -20,11 +20,12 @@ decode_krb5_error
 decode_krb5_etype_info
 decode_krb5_etype_info2
 decode_krb5_fast_req
-decode_krb5_pa_fx_fast_request
 decode_krb5_kdc_req_body
 decode_krb5_pa_enc_ts
 decode_krb5_pa_for_user
+decode_krb5_pa_fx_fast_request
 decode_krb5_pa_pac_req
+decode_krb5_pa_s4u_x509_user
 decode_krb5_padata_sequence
 decode_krb5_predicted_sam_response
 decode_krb5_priv
@@ -60,10 +61,11 @@ encode_krb5_error
 encode_krb5_etype_info
 encode_krb5_etype_info2
 encode_krb5_fast_response
-encode_krb5_pa_fx_fast_reply
 encode_krb5_kdc_req_body
 encode_krb5_pa_enc_ts
 encode_krb5_pa_for_user
+encode_krb5_pa_fx_fast_reply
+encode_krb5_pa_s4u_x509_user
 encode_krb5_pa_server_referral_data
 encode_krb5_pa_svr_referral_data
 encode_krb5_padata_sequence
@@ -71,6 +73,7 @@ encode_krb5_predicted_sam_response
 encode_krb5_priv
 encode_krb5_pwd_data
 encode_krb5_pwd_sequence
+encode_krb5_s4u_userid
 encode_krb5_safe
 encode_krb5_sam_challenge
 encode_krb5_sam_key
@@ -134,9 +137,9 @@ krb5_auth_con_setsendsubkey
 krb5_auth_con_setuseruserkey
 krb5_auth_to_rep
 krb5_build_principal
+krb5_build_principal_alloc_va
 krb5_build_principal_ext
 krb5_build_principal_va
-krb5_build_principal_alloc_va
 krb5_cc_close
 krb5_cc_copy_creds
 krb5_cc_default
@@ -243,8 +246,9 @@ krb5_free_ktypes
 krb5_free_last_req
 krb5_free_pa_data
 krb5_free_pa_enc_ts
-krb5_free_pa_pac_req
 krb5_free_pa_for_user
+krb5_free_pa_pac_req
+krb5_free_pa_s4u_x509_user
 krb5_free_pa_server_referral_data
 krb5_free_pa_svr_referral_data
 krb5_free_passwd_phrase_element
@@ -284,6 +288,8 @@ krb5_get_cred_from_kdc_renew
 krb5_get_cred_from_kdc_validate
 krb5_get_cred_via_tkt
 krb5_get_credentials
+krb5_get_credentials_for_proxy
+krb5_get_credentials_for_user
 krb5_get_credentials_renew
 krb5_get_credentials_validate
 krb5_get_default_config_files
@@ -380,7 +386,6 @@ krb5_os_free_context
 krb5_os_hostaddr
 krb5_os_init_context
 krb5_os_localaddr
-krb5int_get_domain_realm_mapping
 krb5_overridekeyname
 krb5_pac_add_buffer
 krb5_pac_free
@@ -529,6 +534,7 @@ krb5int_find_authdata
 krb5int_find_pa_data
 krb5int_foreach_localaddr
 krb5int_free_addrlist
+krb5int_get_domain_realm_mapping
 krb5int_init_context_kdc
 krb5int_initialize_library
 krb5int_pac_sign

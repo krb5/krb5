@@ -51,6 +51,13 @@ suppress printing
 .B \-h
 prints a usage statement and exits
 .TP
+.B \-P
+specifies that the
+.B service1 service2 ...
+arguments are to be treated as services for which credentials should
+be acquired using constrained delegation. This option is only valid
+when used in conjunction with protocol transition.
+.TP
 .B \-S sname
 specifies that krb5_sname_to_principal() will be used to build
 principal names.  If this flag is specified, the
@@ -59,6 +66,13 @@ arguments are interpreted as hostnames (rather than principal names),
 and
 .B sname
 is interpreted as the service name.
+.TP
+.B \-U for_user
+specifies that protocol transition (S4U2Self) is to be used to acquire
+a ticket on behalf of
+.B for_user.
+If constrained delegation is not requested, the service name
+must match the credentials cache client principal.
 .SH ENVIRONMENT
 .B Kvno
 uses the following environment variable:

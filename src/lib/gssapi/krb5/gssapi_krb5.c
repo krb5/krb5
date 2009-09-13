@@ -140,6 +140,7 @@ const gss_OID_desc krb5_gss_oid_array[] = {
 
     /* gss_nt_krb5_principal.  Object identifier for a krb5_principal. Do not use. */
     {10, "\052\206\110\206\367\022\001\002\002\002"},
+
     { 0, 0 }
 };
 
@@ -447,13 +448,11 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 /*
  * gss_set_sec_context_option() methods
  */
-#if 0
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, gss_ctx_id_t *, const gss_OID, const gss_buffer_t);
 } krb5_gss_set_sec_context_option_ops[] = {
 };
-#endif
 
 static OM_uint32
 krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
@@ -481,12 +480,8 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
             return GSS_S_NO_CONTEXT;
 
         ctx = (krb5_gss_ctx_id_rec *) context_handle;
-
-        if (!ctx->established)
-            return GSS_S_NO_CONTEXT;
     }
 
-#if 0
     for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
                     sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
         if (g_OID_prefix_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
@@ -496,7 +491,6 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
                                                                   value);
         }
     }
-#endif
 
     *minor_status = EINVAL;
 
@@ -521,7 +515,7 @@ static struct {
     {
         {GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH, GSS_KRB5_SET_CRED_RCACHE_OID},
         gss_krb5int_set_cred_rcache
-    }
+    },
 };
 
 static OM_uint32
@@ -587,7 +581,7 @@ static struct {
     {
         {GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH, GSS_KRB5_USE_KDC_CONTEXT_OID},
         krb5int_gss_use_kdc_context
-    }
+    },
 };
 
 static OM_uint32
@@ -683,6 +677,8 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_unwrap_iov,
     krb5_gss_wrap_iov_length,
     NULL,               /* complete_auth_token */
+    krb5_gss_acquire_cred_impersonate_name,
+    NULL,               /* krb5_gss_add_cred_impersonate_name */
 };
 
 

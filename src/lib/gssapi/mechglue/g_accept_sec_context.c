@@ -121,6 +121,7 @@ gss_cred_id_t *		d_cred;
     gss_name_t		tmp_src_name = GSS_C_NO_NAME;
     gss_OID_desc	token_mech_type_desc;
     gss_OID		token_mech_type = &token_mech_type_desc;
+    gss_OID		actual_mech = GSS_C_NO_OID;
     gss_mechanism	mech;
 
     status = val_acc_sec_ctx_args(minor_status,
@@ -198,8 +199,8 @@ gss_cred_id_t *		d_cred;
 						  input_cred_handle,
 						  input_token_buffer,
 						  input_chan_bindings,
-						  &internal_name,
-						  mech_type,
+						  src_name ? &internal_name : NULL,
+						  &actual_mech,
 						  output_token,
 						  &temp_ret_flags,
 						  time_rec,
@@ -222,110 +223,120 @@ gss_cred_id_t *		d_cred;
 	     * then call gss_import_name() to create
 	     * the union name struct cast to src_name
 	     */
-	    if (internal_name != NULL) {
-		temp_status = gssint_convert_name_to_union_name(
-		       &temp_minor_status, mech,
-		       internal_name, &tmp_src_name);
-		if (temp_status != GSS_S_COMPLETE) {
-		    *minor_status = temp_minor_status;
-		    map_error(minor_status, mech);
-		    if (output_token->length)
-			(void) gss_release_buffer(&temp_minor_status,
-						  output_token);
-		    if (internal_name != GSS_C_NO_NAME)
-			mech->gss_release_name(
-			    &temp_minor_status,
-			    &internal_name);
-		    return (temp_status);
-		}
-		if (src_name != NULL) {
-		    *src_name = tmp_src_name;
-		}
-	    } else if (src_name != NULL) {
-		*src_name = GSS_C_NO_NAME;
-	    }
-
-	    /* Ensure we're returning correct creds format */
-	    if ((temp_ret_flags & GSS_C_DELEG_FLAG) &&
-		tmp_d_cred != GSS_C_NO_CREDENTIAL) {
-		gss_union_cred_t d_u_cred = NULL;
-
-		d_u_cred = malloc(sizeof (gss_union_cred_desc));
-		if (d_u_cred == NULL) {
-		    status = GSS_S_FAILURE;
-		    goto error_out;
-		}
-		(void) memset(d_u_cred, 0,
-			      sizeof (gss_union_cred_desc));
-
-		d_u_cred->count = 1;
-
-		status = generic_gss_copy_oid(&temp_minor_status,
-					      token_mech_type,
-					      &d_u_cred->mechs_array);
-
-		if (status != GSS_S_COMPLETE) {
-		    free(d_u_cred);
-		    goto error_out;
-		}
-
-		d_u_cred->cred_array = malloc(sizeof (gss_cred_id_t));
-		if (d_u_cred->cred_array != NULL) {
-		    d_u_cred->cred_array[0] = tmp_d_cred;
-		} else {
-		    free(d_u_cred);
-		    status = GSS_S_FAILURE;
-		    goto error_out;
-		}
-
-		internal_name = GSS_C_NO_NAME;
-
-		d_u_cred->auxinfo.creation_time = time(0);
-		d_u_cred->auxinfo.time_rec = 0;
-		d_u_cred->loopback = d_u_cred;
-
-		if (mech->gss_inquire_cred) {
-		    status = mech->gss_inquire_cred(minor_status,
-						    tmp_d_cred,
-						    &internal_name,
-						    &d_u_cred->auxinfo.time_rec,
-						    &d_u_cred->auxinfo.cred_usage,
-						    NULL);
-		    if (status != GSS_S_COMPLETE)
-			map_error(minor_status, mech);
-		}
-
-		if (internal_name != NULL) {
+	    if (src_name != NULL) {
+		if (internal_name != GSS_C_NO_NAME) {
+		    /* consumes internal_name regardless of success */
 		    temp_status = gssint_convert_name_to_union_name(
-			&temp_minor_status, mech,
-			internal_name, &tmp_src_name);
+			    &temp_minor_status, mech,
+			    internal_name, &tmp_src_name);
 		    if (temp_status != GSS_S_COMPLETE) {
 			*minor_status = temp_minor_status;
 			map_error(minor_status, mech);
 			if (output_token->length)
-			    (void) gss_release_buffer(
-				&temp_minor_status,
-				output_token);
-			free(d_u_cred->cred_array);
-			free(d_u_cred);
+			    (void) gss_release_buffer(&temp_minor_status,
+						      output_token);
 			return (temp_status);
 		    }
-		}
-
-		if (tmp_src_name != NULL) {
-		    status = gss_display_name(
-			&temp_minor_status,
-			tmp_src_name,
-			&d_u_cred->auxinfo.name,
-			&d_u_cred->auxinfo.name_type);
-		}
-
-		*d_cred = (gss_cred_id_t)d_u_cred;
+		    *src_name = tmp_src_name;
+		} else
+		    *src_name = GSS_C_NO_NAME;
 	    }
 
-	    if (src_name == NULL && tmp_src_name != NULL)
-		(void) gss_release_name(&temp_minor_status,
-					&tmp_src_name);
+#define g_OID_prefix_equal(o1, o2) \
+        (((o1)->length >= (o2)->length) && \
+        (memcmp((o1)->elements, (o2)->elements, (o2)->length) == 0))
+
+	    /* Ensure we're returning correct creds format */
+	    if ((temp_ret_flags & GSS_C_DELEG_FLAG) &&
+		tmp_d_cred != GSS_C_NO_CREDENTIAL) {
+		if (actual_mech != GSS_C_NO_OID &&
+		    !g_OID_prefix_equal(actual_mech, token_mech_type)) {
+		    *d_cred = tmp_d_cred; /* unwrapped pseudo-mech */
+		} else {
+		    gss_union_cred_t d_u_cred = NULL;
+
+		    d_u_cred = malloc(sizeof (gss_union_cred_desc));
+		    if (d_u_cred == NULL) {
+			status = GSS_S_FAILURE;
+			goto error_out;
+		    }
+		    (void) memset(d_u_cred, 0, sizeof (gss_union_cred_desc));
+
+		    d_u_cred->count = 1;
+
+		    status = generic_gss_copy_oid(&temp_minor_status,
+						  token_mech_type,
+						  &d_u_cred->mechs_array);
+
+		    if (status != GSS_S_COMPLETE) {
+			free(d_u_cred);
+			goto error_out;
+		    }
+
+		    d_u_cred->cred_array = malloc(sizeof(gss_cred_id_t));
+		    if (d_u_cred->cred_array != NULL) {
+			d_u_cred->cred_array[0] = tmp_d_cred;
+		    } else {
+			free(d_u_cred);
+			status = GSS_S_FAILURE;
+			goto error_out;
+		    }
+
+		    d_u_cred->auxinfo.creation_time = time(0);
+		    d_u_cred->auxinfo.time_rec = 0;
+		    d_u_cred->loopback = d_u_cred;
+
+		    internal_name = GSS_C_NO_NAME;
+
+		    if (mech->gss_inquire_cred) {
+			status = mech->gss_inquire_cred(minor_status,
+							tmp_d_cred,
+							&internal_name,
+							&d_u_cred->auxinfo.time_rec,
+							&d_u_cred->auxinfo.cred_usage,
+							NULL);
+			if (status != GSS_S_COMPLETE)
+			    map_error(minor_status, mech);
+		    }
+
+		    if (internal_name != GSS_C_NO_NAME) {
+			/* consumes internal_name regardless of success */
+			temp_status = gssint_convert_name_to_union_name(
+			    &temp_minor_status, mech,
+			    internal_name, &tmp_src_name);
+			if (temp_status != GSS_S_COMPLETE) {
+			    *minor_status = temp_minor_status;
+			    map_error(minor_status, mech);
+			    if (output_token->length)
+				(void) gss_release_buffer(
+				    &temp_minor_status,
+				    output_token);
+			    (void) gss_release_oid(&temp_minor_status,
+						   &actual_mech);
+			    free(d_u_cred->cred_array);
+			    free(d_u_cred);
+			    return (temp_status);
+			}
+
+			if (tmp_src_name != GSS_C_NO_NAME) {
+			    status = gss_display_name(
+				&temp_minor_status,
+				tmp_src_name,
+				&d_u_cred->auxinfo.name,
+				&d_u_cred->auxinfo.name_type);
+			    (void) gss_release_name(&temp_minor_status,
+						    &tmp_src_name);
+			}
+		    }
+
+		    *d_cred = (gss_cred_id_t)d_u_cred;
+		}
+	    }
+
+	    if (mech_type != NULL)
+		*mech_type = actual_mech;
+	    else
+		(void) gss_release_oid(&temp_minor_status, &actual_mech);
 	    if (ret_flags != NULL)
 		*ret_flags = temp_ret_flags;
 	    return	(status);

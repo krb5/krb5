@@ -70,8 +70,8 @@ gss_set_sec_context_option (OM_uint32 *minor_status,
     }
 
     status = mech->gss_set_sec_context_option(minor_status,
-					      ctx ? &internal_ctx :
-						&ctx->internal_ctx_id,
+					      ctx ? &ctx->internal_ctx_id :
+					      &internal_ctx,
 					      desired_object,
 					      value);
     if (status == GSS_S_COMPLETE) {

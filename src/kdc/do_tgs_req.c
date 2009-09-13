@@ -117,7 +117,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* ticket granting or evidence ticket */
     krb5_db_entry client, krbtgt;
     int c_nprincs = 0, k_nprincs = 0;
-    krb5_pa_for_user *for_user = NULL;           /* protocol transition request */
+    krb5_pa_s4u_x509_user *s4u_x509_user = NULL; /* protocol transition request */
     krb5_authdata **kdc_issued_auth_data = NULL; /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;       /* client/server KDB flags */
     char *s4u_name = NULL;
@@ -131,7 +131,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_data scratch;
 
     session_key.contents = NULL;
-    
+
     retval = decode_krb5_tgs_req(pkt, &request);
     if (retval)
         return retval;
@@ -292,12 +292,20 @@ tgt_again:
         !krb5_principal_compare(kdc_context, tgs_server, server.princ);
 
     /* Check for protocol transition */
-    errcode = kdc_process_s4u2self_req(kdc_context, request, header_enc_tkt->client,
-                                       &server, header_enc_tkt->session, kdc_time,
-                                       &for_user, &client, &c_nprincs, &status);
+    errcode = kdc_process_s4u2self_req(kdc_context,
+				       request,
+				       header_enc_tkt->client,
+                                       &server,
+				       subkey,
+				       header_enc_tkt->session,
+				       kdc_time,
+                                       &s4u_x509_user,
+				       &client,
+				       &c_nprincs,
+				       &status);
     if (errcode)
         goto cleanup;
-    if (for_user != NULL)
+    if (s4u_x509_user != NULL)
         setflag(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION);
 
     /*
@@ -438,19 +446,32 @@ tgt_again:
     /* processing of any of these flags.  For example, some */
     /* realms may refuse to issue renewable tickets         */
 
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) {
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
-        if (!krb5_is_tgs_principal(server.princ) &&
-            is_local_principal(server.princ)) {
-            if (isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
-                setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-            else
+
+        if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
+            /*
+             * If S4U2Self principal is not forwardable, then mark ticket as
+             * unforwardable. This behaviour matches Windows, but it is
+             * different to the MIT AS-REQ path, which returns an error
+             * (KDC_ERR_POLICY) if forwardable tickets cannot be issued.
+             *
+             * Consider this block the S4U2Self equivalent to
+             * validate_forwardable().
+             */
+            if (c_nprincs &&
+                isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
+                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+            /*
+             * OK_TO_AUTH_AS_DELEGATE must be set on the service requesting
+             * S4U2Self in order for forwardable tickets to be returned.
+             */
+            else if (!is_referral &&
+                !isflagset(server.attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
                 clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
         }
-        if (isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
-            clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
     }
+
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDED);
 
@@ -560,7 +581,7 @@ tgt_again:
         enc_tkt_reply.times.starttime = 0;
 
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
-        errcode = krb5_unparse_name(kdc_context, for_user->user, &s4u_name);
+        errcode = krb5_unparse_name(kdc_context, s4u_x509_user->user_id.user, &s4u_name);
     } else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)) {
         errcode = krb5_unparse_name(kdc_context, header_enc_tkt->client, &s4u_name);
     } else {
@@ -670,8 +691,8 @@ tgt_again:
     enc_tkt_reply.authorization_data = NULL;
 
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-        is_local_principal(header_enc_tkt->client))
-        enc_tkt_reply.client = for_user->user;
+        !isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM))
+        enc_tkt_reply.client = s4u_x509_user->user_id.user;
     else
         enc_tkt_reply.client = header_enc_tkt->client;
 
@@ -685,7 +706,8 @@ tgt_again:
                               &encrypting_key, /* U2U or server key */
                               pkt,
                               request,
-                              for_user ? for_user->user : NULL,
+                              s4u_x509_user ?
+				s4u_x509_user->user_id.user : NULL,
                               header_enc_tkt,
                               &enc_tkt_reply);
     if (errcode) {
@@ -845,6 +867,20 @@ tgt_again:
     /* Start assembling the response */
     reply.msg_type = KRB5_TGS_REP;
     reply.padata = 0;/* always */
+    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
+        find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER) != NULL) {
+        errcode = kdc_make_s4u2self_rep(kdc_context,
+                                        subkey,
+                                        header_ticket->enc_part2->session,
+                                        s4u_x509_user,
+                                        &reply,
+                                        &reply_encpart);
+        if (errcode) {
+            status = "KDC_RETURN_S4U2SELF_PADATA";
+            goto cleanup;
+        }
+    }
+
     reply.client = enc_tkt_reply.client;
     reply.enc_part.kvno = 0;/* We are using the session key */
     reply.ticket = &ticket_reply;
@@ -958,14 +994,18 @@ cleanup:
         krb5_db_free_principal(kdc_context, &krbtgt, k_nprincs);
     if (c_nprincs)
         krb5_db_free_principal(kdc_context, &client, c_nprincs);
-    if (for_user != NULL)
-        krb5_free_pa_for_user(kdc_context, for_user);
+    if (s4u_x509_user != NULL)
+        krb5_free_pa_s4u_x509_user(kdc_context, s4u_x509_user);
     if (kdc_issued_auth_data != NULL)
         krb5_free_authdata(kdc_context, kdc_issued_auth_data);
     if (s4u_name != NULL)
         free(s4u_name);
     if (subkey != NULL)
         krb5_free_keyblock(kdc_context, subkey);
+    if (reply.padata)
+        krb5_free_pa_data(kdc_context, reply.padata);
+    if (reply_encpart.enc_padata)
+        krb5_free_pa_data(kdc_context, reply_encpart.enc_padata);
 
     return retval;
 }

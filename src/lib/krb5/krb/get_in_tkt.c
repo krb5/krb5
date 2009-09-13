@@ -493,6 +493,55 @@ static const krb5_enctype get_in_tkt_enctypes[] = {
     0
 };
 
+static krb5_error_code
+rewrite_server_realm(krb5_context context,
+		     krb5_const_principal old_server,
+		     const krb5_data *realm,
+		     krb5_boolean tgs,
+		     krb5_principal *server)
+{
+    krb5_error_code retval;
+
+    assert(*server == NULL);
+
+    retval = krb5_copy_principal(context, old_server, server);
+    if (retval)
+	return retval;
+
+    krb5_free_data_contents(context, &(*server)->realm);
+    (*server)->realm.data = NULL;
+
+    retval = krb5int_copy_data_contents(context, realm, &(*server)->realm);
+    if (retval)
+	goto cleanup;
+
+    if (tgs) {
+	krb5_free_data_contents(context, &(*server)->data[1]);
+	(*server)->data[1].data = NULL;
+
+	retval = krb5int_copy_data_contents(context, realm, &(*server)->data[1]);
+	if (retval)
+	    goto cleanup;
+    }
+
+cleanup:
+    if (retval) {
+	krb5_free_principal(context, *server);
+	*server = NULL;
+    }
+
+    return retval;
+}
+
+static inline int
+tgt_is_local_realm(krb5_creds *tgt)
+{
+    return (tgt->server->length == 2
+            && data_eq_string(tgt->server->data[0], KRB5_TGS_NAME)
+            && data_eq(tgt->server->data[1], tgt->client->realm)
+            && data_eq(tgt->server->realm, tgt->client->realm));
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt(krb5_context context,
 		krb5_flags options,
@@ -521,6 +570,8 @@ krb5_get_in_tkt(krb5_context context,
     int             use_master = 0;
     int			referral_count = 0;
     krb5_principal_data	referred_client;
+    krb5_principal	referred_server = NULL;
+    krb5_boolean	is_tgt_req;
 
 #if APPLE_PKINIT
     inTktDebug("krb5_get_in_tkt top\n");
@@ -616,6 +667,8 @@ krb5_get_in_tkt(krb5_context context,
 	    goto cleanup;
     }
 	    
+    is_tgt_req = tgt_is_local_realm(creds);
+
     while (1) {
 	if (loopcount++ > MAX_IN_TKT_LOOPS) {
 	    retval = KRB5_GET_IN_TKT_LOOP;
@@ -687,6 +740,21 @@ krb5_get_in_tkt(krb5_context context,
 		if (retval)
 		    goto cleanup;
 		request.client = &referred_client;
+
+		if (referred_server != NULL) {
+		    krb5_free_principal(context, referred_server);
+		    referred_server = NULL;
+		}
+
+		retval = rewrite_server_realm(context,
+					      creds->server,
+					      &referred_client.realm,
+					      is_tgt_req,
+					      &referred_server);
+		if (retval)
+		    goto cleanup;
+		request.server = referred_server;
+
 		continue;
 	    } else {
 		retval = (krb5_error_code) err_reply->error 
@@ -739,6 +807,8 @@ cleanup:
     }
     if (referred_client.realm.data)
 	krb5_free_data_contents(context, &referred_client.realm);
+    if (referred_server)
+	krb5_free_principal(context, referred_server);
     return (retval);
 }
 
@@ -939,6 +1009,52 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
     return 0;
 }
 
+static krb5_error_code
+build_in_tkt_name(krb5_context context,
+		  char *in_tkt_service,
+		  krb5_const_principal client,
+		  krb5_principal *server)
+{
+    krb5_error_code ret;
+
+    *server = NULL;
+
+    if (in_tkt_service) {
+	/* this is ugly, because so are the data structures involved.  I'm
+	   in the library, so I'm going to manipulate the data structures
+	   directly, otherwise, it will be worse. */
+
+        if ((ret = krb5_parse_name(context, in_tkt_service, server)))
+	    return ret;
+
+	/* stuff the client realm into the server principal.
+	   realloc if necessary */
+	if ((*server)->realm.length < client->realm.length) {
+	    char *p = realloc((*server)->realm.data,
+			      client->realm.length);
+	    if (p == NULL) {
+		krb5_free_principal(context, *server);
+		*server = NULL;
+		return ENOMEM;
+	    }
+	    (*server)->realm.data = p;
+	}
+
+	(*server)->realm.length = client->realm.length;
+	memcpy((*server)->realm.data, client->realm.data, client->realm.length);
+    } else {
+	ret = krb5_build_principal_ext(context, server,
+				       client->realm.length,
+				       client->realm.data,
+				       KRB5_TGS_NAME_SIZE,
+				       KRB5_TGS_NAME,
+				       client->realm.length,
+				       client->realm.data,
+				       0);
+    }
+    return ret;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds(krb5_context context,
 		    krb5_creds *creds,
@@ -1125,41 +1241,9 @@ krb5_get_init_creds(krb5_context context,
 	client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
 
     /* service */
-    
-    if (in_tkt_service) {
-	/* this is ugly, because so are the data structures involved.  I'm
-	   in the library, so I'm going to manipulate the data structures
-	   directly, otherwise, it will be worse. */
-
-        if ((ret = krb5_parse_name(context, in_tkt_service, &request.server)))
-	    goto cleanup;
-
-	/* stuff the client realm into the server principal.
-	   realloc if necessary */
-	if (request.server->realm.length < request.client->realm.length) {
-	    char *p = realloc(request.server->realm.data,
-			      request.client->realm.length);
-	    if (p == NULL) {
-		ret = ENOMEM;
-		goto cleanup;
-	    }
-	    request.server->realm.data = p;
-	}
-
-	request.server->realm.length = request.client->realm.length;
-	memcpy(request.server->realm.data, request.client->realm.data,
-	       request.client->realm.length);
-    } else {
-	if ((ret = krb5_build_principal_ext(context, &request.server,
-					   request.client->realm.length,
-					   request.client->realm.data,
-					   KRB5_TGS_NAME_SIZE,
-					   KRB5_TGS_NAME,
-					   request.client->realm.length,
-					   request.client->realm.data,
-					   0)))
-	    goto cleanup;
-    }
+    if ((ret = build_in_tkt_name(context, in_tkt_service,
+				 request.client, &request.server)))
+	goto cleanup;
 
     krb5_preauth_request_context_init(context);
 
@@ -1337,8 +1421,10 @@ krb5_get_init_creds(krb5_context context,
 		}
 		preauth_to_use = out_padata;
 		out_padata = NULL;
-		krb5_free_error(context, err_reply);
-		err_reply = NULL;
+		if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED) {
+		    krb5_free_error(context, err_reply);
+		    err_reply = NULL;
+		}
 		ret = sort_krb5_padata_sequence(context,
 						&request.server->realm,
 						preauth_to_use);
@@ -1365,6 +1451,14 @@ krb5_get_init_creds(krb5_context context,
 		if (ret)
 		    goto cleanup;
 		request.client = &referred_client;
+
+		krb5_free_principal(context, request.server);
+		request.server = NULL;
+
+		ret = build_in_tkt_name(context, in_tkt_service,
+					request.client, &request.server);
+		if (ret)
+		    goto cleanup;
 	    } else {
 		if (retry)  {
 		    /* continue to next iteration */

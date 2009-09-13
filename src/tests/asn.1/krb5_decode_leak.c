@@ -658,7 +658,18 @@ main(int argc, char **argv)
                   krb5_free_enc_sam_response_enc_2);
         ktest_empty_enc_sam_response_enc_2(&sam_ch2);
     }
+    /****************************************************************/
+    /* encode_krb5_pa_s4u_x509_user */
+    {
+        krb5_pa_s4u_x509_user s4u, *tmp;
 
+        setup(s4u, "pa_s4u_x509_user",
+              ktest_make_sample_pa_s4u_x509_user);
+        leak_test(s4u, encode_krb5_pa_s4u_x509_user,
+                  decode_krb5_pa_s4u_x509_user,
+                  krb5_free_pa_s4u_x509_user);
+        ktest_empty_pa_s4u_x509_user(&s4u);
+    }
     krb5_free_context(test_context);
     return 0;
 }

@@ -9,8 +9,10 @@ GSS_C_NT_USER_NAME
 GSS_KRB5_NT_PRINCIPAL_NAME
 gss_accept_sec_context
 gss_acquire_cred
+gss_acquire_cred_impersonate_name
 gss_add_buffer_set_member
 gss_add_cred
+gss_add_cred_impersonate_name
 gss_add_oid_set_member
 gss_canonicalize_name
 gss_compare_name
