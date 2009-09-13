@@ -93,7 +93,7 @@ void usage()
 	     "\tdump	[-old|-ov|-b6|-b7|-r13] [-verbose]\n"
 	     "\t	[-mkey_convert] [-new_mkey_file mkey_file]\n"
 	     "\t	[-rev] [-recurse] [filename [princs...]]\n"
-	     "\tload	[-old|-ov|-b6|-b7|-r13] [-verbose] [-update] [-merge] filename\n"
+	     "\tload	[-old|-ov|-b6|-b7|-r13] [-verbose] [-update] filename\n"
 	     "\tark	[-e etype_list] principal\n"
 	     "\tadd_mkey [-e etype] [-s]\n"
 	     "\tuse_mkey kvno [time]\n"

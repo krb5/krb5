@@ -158,7 +158,7 @@ option will.
 .RE
 .TP
 \fBload\fP \fB\-old\fP|\fB-b6\fP|\fB-b7\fP|\fB-ov\fP|\fB-r13\fP] [\fB\-hash\fP]
-[\fB\-verbose\fP] [\fB\-update\fP] [\fB\-merge\fP] \fIfilename dbname\fP
+[\fB\-verbose\fP] [\fB\-update\fP] \fIfilename dbname\fP
 .br
 Loads a database dump from the named file into the named database.
 Unless the 
@@ -210,10 +210,6 @@ dumped.
 records from the dump file are added to or updated in the existing
 database; otherwise, a new database is created containing only what is
 in the dump file and the old one destroyed upon successful completion.
-.TP
-.B \-merge
-causes a new database to be created, merged with non-replicated
-attributes (such as lockout information) from the existing database.
 .TP
 .B dbname
 is required and overrides the value specified on the command line or the
