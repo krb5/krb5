@@ -77,14 +77,14 @@ displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
 
     major = gss_canonicalize_name(minor, name, (gss_OID)gss_mech_krb5, &canon);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_canonicalize_name", major, minor);
+        displayStatus("gss_canonicalize_name", major, *minor);
         return major;
     }
 
     major = gss_display_name(minor, canon, &buf, NULL);
     if (GSS_ERROR(major)) {
         gss_release_name(&tmp, &canon);
-        displayStatus("gss_display_name", major, minor);
+        displayStatus("gss_display_name", major, *minor);
         return major;
     }
 
@@ -123,7 +123,7 @@ dumpAttribute(OM_uint32 *minor,
                                        &display_value,
                                        &more);
         if (GSS_ERROR(major)) {
-            displayStatus("gss_get_name_attribute", major, minor);
+            displayStatus("gss_get_name_attribute", major, *minor);
             break;
         }
 
@@ -168,7 +168,7 @@ enumerateAttributes(OM_uint32 *minor,
                              &asserted,
                              &complete);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_inquire_name", major, minor);
+        displayStatus("gss_inquire_name", major, *minor);
         goto cleanup;
     }
 
@@ -262,13 +262,12 @@ testGreetAuthzData(OM_uint32 *minor,
                                    1,
                                    &attr,
                                    &value);
-    if (GSS_ERROR(major)) {
-        if (major != GSS_S_UNAVAILABLE)
-            displayStatus("gss_set_name_attribute", major, minor);
-        return major;
-    }
+    if (major == GSS_S_UNAVAILABLE)
+        return GSS_S_COMPLETE;
+    else if (GSS_ERROR(major))
+        displayStatus("gss_set_name_attribute", major, *minor);
 
-    return GSS_S_COMPLETE;
+    return major;
 }
 
 static OM_uint32
@@ -292,7 +291,7 @@ initAcceptSecContext(OM_uint32 *minor,
     major = gss_inquire_cred(minor, verifier_cred_handle,
                              &target_name, NULL, NULL, NULL);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_inquire_cred", major, minor);
+        displayStatus("gss_inquire_cred", major, *minor);
         return major;
     }
 
@@ -320,7 +319,7 @@ initAcceptSecContext(OM_uint32 *minor,
         (void) gss_release_name(minor, &target_name);
 
     if (GSS_ERROR(major)) {
-        displayStatus("gss_init_sec_context", major, minor);
+        displayStatus("gss_init_sec_context", major, *minor);
         return major;
     }
 
@@ -339,7 +338,7 @@ initAcceptSecContext(OM_uint32 *minor,
                                    NULL);
 
     if (GSS_ERROR(major))
-        displayStatus("gss_accept_sec_context", major, minor);
+        displayStatus("gss_accept_sec_context", major, *minor);
     else {
         displayCanonName(minor, source_name, "Source name");
         enumerateAttributes(minor, source_name, 1);

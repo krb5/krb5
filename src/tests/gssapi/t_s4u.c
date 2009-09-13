@@ -167,7 +167,7 @@ dumpAttribute(OM_uint32 *minor,
                                        &display_value,
                                        &more);
         if (GSS_ERROR(major)) {
-            displayStatus("gss_get_name_attribute", major, minor);
+            displayStatus("gss_get_name_attribute", major, *minor);
             break;
         }
 
@@ -212,7 +212,7 @@ enumerateAttributes(OM_uint32 *minor,
                              &asserted,
                              &complete);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_inquire_name", major, minor);
+        displayStatus("gss_inquire_name", major, *minor);
         goto cleanup;
     }
 
@@ -238,6 +238,50 @@ cleanup:
     return major;
 }
 
+static OM_uint32
+testGreetAuthzData(OM_uint32 *minor,
+                   gss_name_t *name)
+{
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc attr;
+    gss_buffer_desc value;
+    gss_name_t canon;
+
+    major = gss_canonicalize_name(minor,
+                                  *name,
+                                  (gss_OID)gss_mech_krb5,
+                                  &canon);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_canonicalize_name", major, *minor);
+        return major;
+    }
+
+    attr.value = "greet:greeting";
+    attr.length = strlen((char *)attr.value);
+
+    value.value = "Hello, acceptor world!";
+    value.length = strlen((char *)value.value);
+
+    major = gss_set_name_attribute(minor,
+                                   canon,
+                                   1,
+                                   &attr,
+                                   &value);
+    if (major == GSS_S_UNAVAILABLE)
+        major = GSS_S_COMPLETE;
+    else if (GSS_ERROR(major))
+        displayStatus("gss_set_name_attribute", major, *minor);
+    else {
+        gss_release_name(&tmp_minor, name);
+        *name = canon;
+        canon = GSS_C_NO_NAME;
+    }
+
+    if (canon != GSS_C_NO_NAME)
+        gss_release_name(&tmp_minor, &canon);
+
+    return GSS_S_COMPLETE;
+}
 
 static OM_uint32
 initAcceptSecContext(OM_uint32 *minor,
@@ -466,6 +510,10 @@ int main(int argc, char *argv[])
 
     printf("Protocol transition tests follow\n");
     printf("-----------------------------------\n\n");
+
+    major = testGreetAuthzData(&minor, &user);
+    if (GSS_ERROR(major))
+        goto out;
 
     /* get S4U2Self cred */
     major = gss_acquire_cred_impersonate_name(&minor,
