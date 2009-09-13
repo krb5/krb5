@@ -650,7 +650,7 @@ krb5_authdata_delete_attribute(krb5_context kcontext,
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
-        if (module->ftable->set_attribute == NULL)
+        if (module->ftable->delete_attribute == NULL)
             continue;
 
         code = (*module->ftable->delete_attribute)(kcontext,
