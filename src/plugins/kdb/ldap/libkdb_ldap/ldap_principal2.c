@@ -863,7 +863,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    establish_links = TRUE;
 	}
 
-	if ((entries->last_success)!=0) {
+	if (entries->mask & KADM5_LAST_SUCCESS) {
 	    memset(strval, 0, sizeof(strval));
 	    if ((strval[0]=getstringtime(entries->last_success)) == NULL)
 		goto cleanup;
@@ -874,7 +874,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    free (strval[0]);
 	}
 
-	if (entries->last_failed!=0) {
+	if (entries->mask & KADM5_LAST_FAILED) {
 	    memset(strval, 0, sizeof(strval));
 	    if ((strval[0]=getstringtime(entries->last_failed)) == NULL)
 		goto cleanup;
@@ -885,7 +885,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    free(strval[0]);
 	}
 
-	if (entries->fail_auth_count!=0) {
+	if (entries->mask & KADM5_FAIL_AUTH_COUNT) {
 	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount", LDAP_MOD_REPLACE, entries->fail_auth_count)) !=0)
 		goto cleanup;
 	}
