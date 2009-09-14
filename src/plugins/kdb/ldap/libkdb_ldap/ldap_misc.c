@@ -2101,6 +2101,22 @@ populate_krb5_db_entry (krb5_context context,
 	}
     }
 
+    /* LOCKED TIME */
+    {
+	krb5_timestamp locked_time = 0;
+
+	st = krb5_ldap_get_time(ld, ent, "krbPwdPrincipalLockedTime",
+				&locked_time, &attr_present);
+	if (st != 0)
+	    goto cleanup;
+	if (attr_present == TRUE) {
+	    st = krb5_dbe_update_locked_time(context, entry, locked_time);
+	    if (st != 0)
+		goto cleanup;
+	    mask |= KDB_LOCKED_TIME_ATTR;
+	}
+    }
+
     /* Set tl_data */
     {
 	int i;
