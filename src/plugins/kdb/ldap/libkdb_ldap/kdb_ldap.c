@@ -168,22 +168,23 @@ cleanup:
  *   1 => does not support
  *   2 => don't know
  */
-#define ERR_MSG1 "Unable to check if SASL EXTERNAL mechanism is supported by LDAP server. Proceeding anyway ..."
-#define ERR_MSG2 "SASL EXTERNAL mechanism not supported by LDAP server. Can't perform certificate-based bind."
-
-int
-has_sasl_external_mech(context, ldap_server)
+static int
+has_rootdse_ava(context, ldap_server, attribute, value)
     krb5_context     context;
     char             *ldap_server;
+    char             *attribute;
+    char             *value;
 {
     int               i=0, flag=0, ret=0, retval=0;
-    char              *attrs[]={"supportedSASLMechanisms", NULL}, **values=NULL;
+    char              *attrs[2], **values=NULL;
     LDAP              *ld=NULL;
     LDAPMessage       *msg=NULL, *res=NULL;
 
+    attrs[0] = attribute;
+    attrs[1] = NULL;
+
     retval = ldap_initialize(&ld, ldap_server);
     if (retval != LDAP_SUCCESS) {
-	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
@@ -191,40 +192,35 @@ has_sasl_external_mech(context, ldap_server)
     /* Anonymous bind */
     retval = ldap_sasl_bind_s(ld, NULL, NULL, NULL, NULL, NULL, NULL);
     if (retval != LDAP_SUCCESS) {
-	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
 
     retval = ldap_search_ext_s(ld, "", LDAP_SCOPE_BASE, NULL, attrs, 0, NULL, NULL, NULL, 0, &res);
     if (retval != LDAP_SUCCESS) {
-	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
 
     msg = ldap_first_message(ld, res);
     if (msg == NULL) {
-	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
 
-    values = ldap_get_values(ld, msg, "supportedSASLMechanisms");
+    values = ldap_get_values(ld, msg, attribute);
     if (values == NULL) {
-	krb5_set_error_message(context, 1, "%s", ERR_MSG2);
 	ret = 1; /* Not supported */
 	goto cleanup;
     }
 
     for (i = 0; values[i] != NULL; i++) {
-	if (strcmp(values[i], "EXTERNAL"))
+	if (strcmp(values[i], value))
 	    continue;
 	flag = 1;
     }
 
     if (flag != 1) {
-	krb5_set_error_message(context, 1, "%s", ERR_MSG2);
 	ret = 1; /* Not supported */
 	goto cleanup;
     }
@@ -241,6 +237,41 @@ cleanup:
 	ldap_unbind_ext_s(ld, NULL, NULL);
 
     return ret;
+}
+
+#define ERR_MSG1 "Unable to check if SASL EXTERNAL mechanism is supported by LDAP server. Proceeding anyway ..."
+#define ERR_MSG2 "SASL EXTERNAL mechanism not supported by LDAP server. Can't perform certificate-based bind."
+
+int
+has_sasl_external_mech(context, ldap_server)
+    krb5_context     context;
+    char             *ldap_server;
+{
+    int ret;
+
+    ret = has_rootdse_ava(context, ldap_server,
+			  "supportedSASLMechanisms", "EXTERNAL");
+    switch (ret) {
+    case 1: /* not supported */
+	krb5_set_error_message(context, 1, "%s", ERR_MSG2);
+	break;
+    case 2: /* don't know */
+	krb5_set_error_message(context, 1, "%s", ERR_MSG1);
+	break;
+    default:
+	break;
+    }
+
+    return ret;
+}
+
+int
+has_modify_increment(context, ldap_server)
+    krb5_context     context;
+    char             *ldap_server;
+{
+    return has_rootdse_ava(context, ldap_server,
+			   "supportedExtension", "1.3.6.1.1.14");
 }
 
 void * krb5_ldap_alloc(krb5_context context, void *ptr, size_t size)

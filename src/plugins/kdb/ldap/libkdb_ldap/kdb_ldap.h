@@ -197,6 +197,7 @@ struct _krb5_ldap_server_info {
 #ifdef HAVE_EDIRECTORY
     char			*root_certificate_file;
 #endif
+    int				 modify_increment;
     struct _krb5_ldap_server_info *next;
 };
 
@@ -290,6 +291,9 @@ krb5_ldap_read_startup_information(krb5_context );
 
 int
 has_sasl_external_mech(krb5_context, char *);
+
+int
+has_modify_increment(krb5_context, char *);
 
 krb5_error_code
 krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context);

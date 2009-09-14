@@ -885,6 +885,48 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    free(strval[0]);
 	}
 
+	if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT) {
+	    /*
+	     * If the client library and server supports RFC 4525,
+	     * then use it to increment by one the value of the
+	     * krbLoginFailedCount attribute. Otherwise, assert the
+	     * (provided) old value by deleting it before adding.
+	     */
+#ifdef LDAP_MOD_INCREMENT
+	    if (ldap_server_handle->server_info->modify_increment) {
+		st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+					       LDAP_MOD_INCREMENT, 1);
+		if (st != 0)
+		    goto cleanup;
+	    } else
+#endif /* LDAP_MOD_INCREMENT */
+	    if (entries->fail_auth_count == 0) {
+		/*
+		 * Unfortunately we have no way of distinguishing between
+		 * an absent and a zero-valued attribute by the time we are
+		 * called here. So, although this creates a race condition,
+		 * it appears impossible to assert the old value as that
+		 * would fail were the attribute absent.
+		 */
+		st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+					       LDAP_MOD_REPLACE, 1);
+		if (st != 0)
+		    goto cleanup;
+	    } else {
+		st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+					       LDAP_MOD_DELETE,
+					       entries->fail_auth_count);
+		if (st != 0)
+		    goto cleanup;
+
+		st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+					       LDAP_MOD_ADD,
+					       entries->fail_auth_count + 1);
+		if (st != 0)
+		    goto cleanup;
+	    }
+	}
+
 	if (entries->mask & KADM5_FAIL_AUTH_COUNT) {
 	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount", LDAP_MOD_REPLACE, entries->fail_auth_count)) !=0)
 		goto cleanup;
@@ -1201,6 +1243,9 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		krb5_set_error_message(context, st, "%s", errbuf);
 		goto cleanup;
 	    }
+
+	    if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT)
+		entries->fail_auth_count++;
 	}
     }
 

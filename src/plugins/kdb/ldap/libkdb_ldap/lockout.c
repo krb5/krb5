@@ -185,8 +185,7 @@ krb5_ldap_lockout_audit(krb5_context context,
         }
 
         entry->last_failed = stamp;
-        entry->fail_auth_count++;
-        entry->mask |= KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
+        entry->mask |= KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT_INCREMENT;
 
         if (max_fail != 0 &&
             entry->fail_auth_count >= max_fail) {
