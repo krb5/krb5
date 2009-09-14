@@ -87,6 +87,10 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
   /* fetch_master_key_list */		       NULL,
   /* store_master_key_list */		       NULL,
   /* Search enc type */                        NULL,
-  /* Change pwd   */                           NULL
+  /* Change pwd   */                           NULL,
+  /* promote_db */                             NULL,
+  /* dbekd_decrypt_key_data */                 NULL,
+  /* dbekd_encrypt_key_data */                 NULL,
+  /* db_invoke */			       krb5_ldap_invoke,
 
 };

@@ -58,6 +58,7 @@ static char *kdcrights_subtree[][2] = {
     {"6#subtree#","#krbLastFailedAuth"},
     {"6#subtree#","#krbLoginFailedCount"},
     {"6#subtree#","#krbLastSuccessfulAuth"},
+    {"6#subtree#","#krbPwdPrincipalLockedTime"},
     { "", "" }
 };
 
@@ -87,6 +88,10 @@ static char *adminrights_subtree[][2]={
     {"2#subtree#","#krbLastFailedAuth"},
     {"2#subtree#","#krbLoginFailedCount"},
     {"2#subtree#","#krbLastSuccessfulAuth"},
+    {"6#subtree#","#krbPwdPrincipalLockedTime"},
+    {"6#subtree#","#krbPwdMaxFailure"},
+    {"6#subtree#","#krbPwdFailureCountInterval"},
+    {"6#subtree#","#krbPwdLockoutDuration"},
     { "","" }
 };
 
@@ -116,6 +121,10 @@ static char *pwdrights_subtree[][2] = {
     {"2#subtree#","#krbLastFailedAuth"},
     {"2#subtree#","#krbLoginFailedCount"},
     {"2#subtree#","#krbLastSuccessfulAuth"},
+    {"2#subtree#","#krbPwdPrincipalLockedTime"},
+    {"2#subtree#","#krbPwdMaxFailure"},
+    {"2#subtree#","#krbPwdFailureCountInterval"},
+    {"2#subtree#","#krbPwdLockoutDuration"},
     { "", "" }
 };
 
@@ -149,6 +158,7 @@ static char *kdcrights_realmcontainer[][2]={
     {"6#subtree#","#krbLastFailedAuth"},
     {"6#subtree#","#krbLoginFailedCount"},
     {"6#subtree#","#krbLastSuccessfulAuth"},
+    {"6#subtree#","#krbPwdPrincipalLockedTime"},
     { "", "" }
 };
 
@@ -187,6 +197,10 @@ static char *adminrights_realmcontainer[][2]={
     {"2#subtree#","#krbLastFailedAuth"},
     {"2#subtree#","#krbLoginFailedCount"},
     {"2#subtree#","#krbLastSuccessfulAuth"},
+    {"6#subtree#","#krbPwdPrincipalLockedTime"},
+    {"6#subtree#","#krbPwdMaxFailure"},
+    {"6#subtree#","#krbPwdFailureCountInterval"},
+    {"6#subtree#","#krbPwdLockoutDuration"},
     { "","" }
 };
 
@@ -225,6 +239,10 @@ static char *pwdrights_realmcontainer[][2]={
     {"2#subtree#","#krbLastFailedAuth"},
     {"2#subtree#","#krbLoginFailedCount"},
     {"2#subtree#","#krbLastSuccessfulAuth"},
+    {"2#subtree#","#krbPwdPrincipalLockedTime"},
+    {"2#subtree#","#krbPwdMaxFailure"},
+    {"2#subtree#","#krbPwdFailureCountInterval"},
+    {"2#subtree#","#krbPwdLockoutDuration"},
     { "", "" }
 };
 

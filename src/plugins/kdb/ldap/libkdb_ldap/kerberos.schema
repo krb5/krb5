@@ -270,6 +270,33 @@ attributetype ( 2.16.840.1.113719.1.301.4.34.1
                 SINGLE-VALUE)
 
 
+##### Number of consecutive pre-authentication failures before lockout
+
+attributetype ( 2.16.840.1.113719.1.301.4.35.1
+                NAME 'krbPwdMaxFailure' 
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE)
+
+
+##### Number of consecutive pre-authentication failures before lockout
+
+attributetype ( 2.16.840.1.113719.1.301.4.36.1
+                NAME 'krbPwdFailureCountInterval' 
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE)
+
+
+##### Number of consecutive pre-authentication failures before lockout
+
+attributetype ( 2.16.840.1.113719.1.301.4.37.1
+                NAME 'krbPwdLockoutDuration' 
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE)
+
+
 ##### FDN pointing to a Kerberos Password Policy object
 
 attributetype ( 2.16.840.1.113719.1.301.4.36.1
@@ -506,6 +533,13 @@ attributetype ( 2.16.840.1.113719.1.301.4.53.1
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
 
+##### The time at which the principal was locked out
+
+attributetype ( 2.16.840.1.113719.1.301.4.54.1
+                NAME 'krbPwdPrincipalLockedTime'
+                EQUALITY generalizedTimeMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
+                SINGLE-VALUE)
 
 ########################################################################
 ########################################################################
@@ -576,7 +610,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.8.1
                 NAME 'krbPrincipalAux'
 		SUP top
                 AUXILIARY
-                MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData ) )
+                MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData $ krbPwdAccountLockedTime ) )
 
 
 ###### This class is used to create additional principals and stand alone principals.
@@ -616,7 +650,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.14.1
                 NAME 'krbPwdPolicy' 
                 SUP top
                 MUST ( cn )
-                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength ) )
+                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength $ krbPwdMaxFailure $ krbPwdFailureCountInterval $ krbPwdLockoutDuration ) )
 
 
 ##### The krbTicketPolicyAux holds Kerberos ticket policy attributes.

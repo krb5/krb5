@@ -39,7 +39,9 @@
 
 static char *password_policy_attributes[] = { "cn", "krbmaxpwdlife", "krbminpwdlife",
 					      "krbpwdmindiffchars", "krbpwdminlength",
-					      "krbpwdhistorylength", NULL };
+					      "krbpwdhistorylength", "krbpwdmaxfailure",
+					      "krbpwdfailurecountinterval",
+					      "krbpwdlockoutduration", NULL };
 
 /*
  * Function to create password policy object.
@@ -97,7 +99,13 @@ krb5_ldap_create_password_policy (context, policy)
 	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdminlength", LDAP_MOD_ADD,
 					  (signed) policy->pw_min_length)) != 0)
 	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdhistorylength", LDAP_MOD_ADD,
-					  (signed) policy->pw_history_num)) != 0))
+					  (signed) policy->pw_history_num)) != 0)
+	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdmaxfailure", LDAP_MOD_ADD,
+					  (signed) policy->pw_max_fail)) != 0)
+	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdfailurecountinterval", LDAP_MOD_ADD,
+					  (signed) policy->pw_failcnt_interval)) != 0)
+	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdlockoutduration", LDAP_MOD_ADD,
+					  (signed) policy->pw_lockout_duration)) != 0))
 	goto cleanup;
 
     /* password policy object creation */
@@ -157,7 +165,13 @@ krb5_ldap_put_password_policy (context, policy)
 	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdminlength", LDAP_MOD_REPLACE,
 					  (signed) policy->pw_min_length)) != 0)
 	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdhistorylength", LDAP_MOD_REPLACE,
-					  (signed) policy->pw_history_num)) != 0))
+					  (signed) policy->pw_history_num)) != 0)
+	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdmaxfailure", LDAP_MOD_REPLACE,
+					  (signed) policy->pw_max_fail)) != 0)
+	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdfailurecountinterval", LDAP_MOD_REPLACE,
+					  (signed) policy->pw_failcnt_interval)) != 0)
+	|| ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdlockoutduration", LDAP_MOD_REPLACE,
+					  (signed) policy->pw_lockout_duration)) != 0))
 	goto cleanup;
 
     /* modify the password policy object. */
@@ -198,6 +212,10 @@ populate_policy(krb5_context context,
     krb5_ldap_get_value(ld, ent, "krbpwdmindiffchars", &(pol_entry->pw_min_classes));
     krb5_ldap_get_value(ld, ent, "krbpwdminlength", &(pol_entry->pw_min_length));
     krb5_ldap_get_value(ld, ent, "krbpwdhistorylength", &(pol_entry->pw_history_num));
+
+    krb5_ldap_get_value(ld, ent, "krbpwdmaxfailure", &(pol_entry->pw_max_fail));
+    krb5_ldap_get_value(ld, ent, "krbpwdfailurecountinterval", &(pol_entry->pw_failcnt_interval));
+    krb5_ldap_get_value(ld, ent, "krbpwdlockoutduration", &(pol_entry->pw_lockout_duration));
 
     /* Get the reference count */
     pol_dn = ldap_get_dn(ld, ent);

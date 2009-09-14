@@ -61,6 +61,7 @@ char     *principal_attributes[] = { "krbprincipalname",
 				     "krbLastPwdChange",
 				     "krbExtraData",
 				     "krbObjectReferences",
+				     "krbPwdPrincipalLockedTime",
 				     NULL };
 
 /* Must match KDB_*_ATTR macros in ldap_principal.h.  */
@@ -78,6 +79,7 @@ static char *attributes_set[] = { "krbmaxticketlife",
                                   "krbLastSuccessfulAuth",
                                   "krbLastFailedAuth",
                                   "krbLoginFailedCount",
+                                  "krbPwdPrincipalLockedTime",
 				  NULL };
 
 void
