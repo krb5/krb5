@@ -76,12 +76,9 @@ lookup_lockout_policy(krb5_context context,
         code = krb5_ldap_get_password_policy(context, adb.policy,
                                              &policy, &count);
         if (code == 0 && count == 1) {
-            if (pw_max_fail != NULL)
-                *pw_max_fail = policy->pw_max_fail;
-            if (pw_failcnt_interval != NULL)
-                *pw_failcnt_interval = policy->pw_failcnt_interval;
-            if (pw_lockout_duration != NULL)
-                *pw_lockout_duration = policy->pw_lockout_duration;
+            *pw_max_fail = policy->pw_max_fail;
+            *pw_failcnt_interval = policy->pw_failcnt_interval;
+            *pw_lockout_duration = policy->pw_lockout_duration;
         }
         krb5_ldap_free_password_policy(context, policy);
     }

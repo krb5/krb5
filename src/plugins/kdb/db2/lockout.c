@@ -1,6 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * lib/kdb/lockout.c
+ * plugins/kdb/db2/lockout.c
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -52,12 +52,9 @@ lookup_lockout_policy(krb5_context context,
     osa_princ_ent_rec adb;
     XDR xdrs;
 
-    if (pw_max_fail != NULL)
-        *pw_max_fail = 0;
-    if (pw_failcnt_interval != NULL)
-        *pw_failcnt_interval = 0;
-    if (pw_lockout_duration != NULL)
-        *pw_lockout_duration = 0;
+    *pw_max_fail = 0;
+    *pw_failcnt_interval = 0;
+    *pw_lockout_duration = 0;
 
     tl_data.tl_data_type = KRB5_TL_KADM_DATA;
 
@@ -80,12 +77,9 @@ lookup_lockout_policy(krb5_context context,
         code = krb5_db2_get_policy(context, adb.policy,
                                    &policy, &count);
         if (code == 0 && count == 1) {
-            if (pw_max_fail != NULL)
-                *pw_max_fail = policy->pw_max_fail;
-            if (pw_failcnt_interval != NULL)
-                *pw_failcnt_interval = policy->pw_failcnt_interval;
-            if (pw_lockout_duration != NULL)
-                *pw_lockout_duration = policy->pw_lockout_duration;
+            *pw_max_fail = policy->pw_max_fail;
+            *pw_failcnt_interval = policy->pw_failcnt_interval;
+            *pw_lockout_duration = policy->pw_lockout_duration;
         }
         if (policy != NULL)
             krb5_db2_free_policy(context, policy);

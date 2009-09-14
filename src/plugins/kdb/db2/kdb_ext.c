@@ -1,6 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
- * lib/kdb/kdb_ext.c
+ * plugins/kdb/db2/kdb_ext.c
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
