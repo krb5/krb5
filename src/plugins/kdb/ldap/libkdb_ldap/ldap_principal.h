@@ -81,6 +81,7 @@
 #define KDB_LAST_SUCCESS_ATTR                0x000800
 #define KDB_LAST_FAILED_ATTR                 0x001000
 #define KDB_FAIL_AUTH_COUNT_ATTR             0x002000
+#define KDB_LOCKED_TIME_ATTR                 0x004000
 extern struct timeval timeout;
 extern char *policyclass[];
 
