@@ -801,7 +801,8 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 		      skip++;
 		  break;
 	     default:
-		  if (tlp->tl_data_type < 0 && (arg->flags & FLAG_OMIT_NRA))
+		  if (KRB5_TL_IS_NRA(tlp->tl_data_type) &&
+		      (arg->flags & FLAG_OMIT_NRA))
 		      skip++;
 		  else
 		      counter++;
@@ -831,7 +832,8 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 	    for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
 		if (tlp->tl_data_type == KRB5_TL_KADM_DATA && !kadm)
 		     continue; /* see above, [krb5-admin/89] */
-		else if (tlp->tl_data_type < 0 && (arg->flags & FLAG_OMIT_NRA))
+		else if (KRB5_TL_IS_NRA(tlp->tl_data_type) &&
+			 (arg->flags & FLAG_OMIT_NRA))
 		     continue; /* non-replicated attribute */
 
 		fprintf(arg->ofile, "%d\t%d\t",

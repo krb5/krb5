@@ -614,9 +614,8 @@ full_resync(CLIENT *clnt)
 				    full_resync_timeout);
 	}
 
-	return (stat == RPC_SUCCESS) ? &clnt_res : NULL;
+	return (status == RPC_SUCCESS) ? &clnt_res : NULL;
 }
-
 
 /*
  * Routine to handle incremental update transfer(s) from master KDC
@@ -1660,8 +1659,10 @@ load_database(context, kdb_util, database_file_name)
 			dup(0);
 		}
 
-		execv(kdb_util, edit_av);
-		retval = errno;
+		if (execv(kdb_util, edit_av) < 0)
+			retval = errno;
+		else
+			retval = 0;
 		if (!debug)
 			dup2(save_stderr, 2);
 		com_err(progname, retval, "while trying to exec %s",

@@ -1757,7 +1757,7 @@ krb5_db2_merge_principal(krb5_context kcontext,
 
     /* Scrub non-replicated TL data types in dst */
     for (tl = &dst->tl_data; *tl != NULL; tl = &(*tl)->tl_data_next) {
-	if ((*tl)->tl_data_type < 0) {
+	if (KRB5_TL_IS_NRA((*tl)->tl_data_type)) {
 	    /* Unhook TL data from linked list and free it */
 	    tp = *tl;
 	    *tl = (*tl)->tl_data_next;
@@ -1774,7 +1774,7 @@ krb5_db2_merge_principal(krb5_context kcontext,
 
     /* Move non-replicated TL data types in src to dst */
     for (tl2 = &src->tl_data; *tl2 != NULL; tl2 = &(*tl2)->tl_data_next) {
-	if ((*tl2)->tl_data_type < 0) {
+	if (KRB5_TL_IS_NRA((*tl2)->tl_data_type)) {
 	    /* Unhook TL data from src linked list */
 	    tp = *tl2;
 	    *tl2 = (*tl2)->tl_data_next;
@@ -1930,7 +1930,6 @@ krb5_db2_db_rename(context, from, to, merge_nra)
     char *to;
     int merge_nra;
 {
-    DB *db;
     char *fromok;
     krb5_error_code retval;
     krb5_db2_context *s_context, *db_ctx;
@@ -1947,13 +1946,10 @@ krb5_db2_db_rename(context, from, to, merge_nra)
      * files must exist because krb5_db2_db_lock, called below,
      * will fail otherwise.
      */
-    db = k5db2_dbopen(db_ctx, to, O_RDWR|O_CREAT, 0600, 0);
-    if (db == NULL) {
-	retval = errno;
+    retval = krb5_db2_db_create(context, to, 0);
+    if (retval != 0 && retval != EEXIST)
 	goto errout;
-    }
-    else
-	(*db->close)(db);
+
     /*
      * Set the database to the target, so that other processes sharing
      * the target will stop their activity, and notice the new database.

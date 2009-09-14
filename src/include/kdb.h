@@ -198,6 +198,7 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_MKEY_AUX                0x000a
 
 /* Non-replicated TL data attributes are < 0 */
+#define KRB5_TL_IS_NRA(x)		((x) < 0)
 #define KRB5_TL_LOCKED_TIME             -128
 
 /* version number for KRB5_TL_ACTKVNO data */

@@ -44,6 +44,7 @@ typedef enum {
  */
 static void
 find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
+		   krb5_boolean exclude_nra,
 		   kdbe_attr_type_t *attrs, int *nattrs)
 {
     int i = 0, j = 0;
@@ -65,14 +66,16 @@ find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
     if (current->pw_expiration != new->pw_expiration)
 	attrs[i++] = AT_PW_EXP;
 
-    if (current->last_success != new->last_success)
-	attrs[i++] = AT_LAST_SUCCESS;
+    if (!exclude_nra) {
+	if (current->last_success != new->last_success)
+	    attrs[i++] = AT_LAST_SUCCESS;
 
-    if (current->last_failed != new->last_failed)
-	attrs[i++] = AT_LAST_FAILED;
+	if (current->last_failed != new->last_failed)
+	    attrs[i++] = AT_LAST_FAILED;
 
-    if (current->fail_auth_count != new->fail_auth_count)
-	attrs[i++] = AT_FAIL_AUTH_COUNT;
+	if (current->fail_auth_count != new->fail_auth_count)
+	    attrs[i++] = AT_FAIL_AUTH_COUNT;
+    }
 
     if ((current->princ->type == new->princ->type) &&
 	(current->princ->length == new->princ->length)) {
@@ -116,19 +119,19 @@ find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
 	     first; first = first->tl_data_next,
 		 second = second->tl_data_next) {
 	    if ((first->tl_data_length == second->tl_data_length) &&
-		(first->tl_data_type == second->tl_data_type)) {
+		(first->tl_data_type == second->tl_data_type) &&
+		(!exclude_nra || !KRB5_TL_IS_NRA(second->tl_data_type))) {
 		if ((memcmp((char *)first->tl_data_contents,
 			    (char *)second->tl_data_contents,
 			    first->tl_data_length)) != 0) {
 		    attrs[i++] = AT_TL_DATA;
 		    break;
 		}
-	    } else {
+	    } else if (!exclude_nra || !KRB5_TL_IS_NRA(second->tl_data_type)) {
 		attrs[i++] = AT_TL_DATA;
 		break;
 	    }
 	}
-
     } else {
 	attrs[i++] = AT_TL_DATA;
     }
@@ -307,13 +310,11 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
     kdb_incr_update_t *upd;
     krb5_db_entry *ent;
     int kadm_data_yes;
-    int master;
+    /* always exclude non-replicated attributes, for now */
+    krb5_boolean exclude_nra = TRUE;
 
     if ((updates == NULL) || (entries == NULL))
 	return (KRB5KRB_ERR_GENERIC);
-
-    master = (context->kdblog_context != NULL) &&
-	     (context->kdblog_context->iproprole == IPROP_MASTER);
 
     upd = updates;
     ent = entries;
@@ -324,6 +325,10 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 	kadm_data_yes = 0;
 	attr_types = NULL;
 
+	/*
+	 * XXX we rely on the good behaviour of the database not to
+	 * exceed this limit.
+	 */
 	if ((upd->kdb_update.kdbe_t_val = (kdbe_val_t *)
 	     malloc(MAXENTRY_SIZE)) == NULL) {
 	    return (ENOMEM);
@@ -363,7 +368,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		nattrs++;
 	    }
 	} else {
-	    find_changed_attrs(&curr, ent, attr_types, &nattrs);
+	    find_changed_attrs(&curr, ent, exclude_nra, attr_types, &nattrs);
 
 	    krb5_db_free_principal(context, &curr, nprincs);
 	}
@@ -417,7 +422,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		break;
 
 	    case AT_LAST_SUCCESS:
-		if (master && ent->last_success >= 0) {
+		if (!exclude_nra && ent->last_success >= 0) {
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_LAST_SUCCESS;
 		    ULOG_ENTRY(upd,
@@ -427,7 +432,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		break;
 
 	    case AT_LAST_FAILED:
-		if (master && ent->last_failed >= 0) {
+		if (!exclude_nra && ent->last_failed >= 0) {
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_LAST_FAILED;
 		    ULOG_ENTRY(upd,
@@ -437,7 +442,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 		break;
 
 	    case AT_FAIL_AUTH_COUNT:
-		if (master && ent->fail_auth_count >= (krb5_kvno)0) {
+		if (!exclude_nra && ent->fail_auth_count >= (krb5_kvno)0) {
 		    ULOG_ENTRY_TYPE(upd, ++final).av_type =
 			AT_FAIL_AUTH_COUNT;
 		    ULOG_ENTRY(upd,
@@ -534,8 +539,7 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 
 		newtl = ent->tl_data;
 		while (newtl) {
-		    if (master && newtl->tl_data_type < 0) {
-			/* ignore non-replicated attributes on master */
+		    if (exclude_nra && KRB5_TL_IS_NRA(newtl->tl_data_type)) {
 			newtl = newtl->tl_data_next;
 			continue;
 		    }
@@ -792,7 +796,8 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 
 		for (j = 0, t = 0; j < cnt; j++) {
 		    /* Negative TL types are non-replicated */
-		    if (slave && u.av_tldata.av_tldata_val[j].tl_type < 0)
+		    if (slave &&
+			KRB5_TL_IS_NRA(u.av_tldata.av_tldata_val[j].tl_type))
 			continue;
 
 		    newtl[t].tl_data_type = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_type;
