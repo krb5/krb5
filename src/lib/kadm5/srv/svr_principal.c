@@ -510,7 +510,7 @@ kadm5_modify_principal(void *server_handle,
        (mask & KADM5_MOD_TIME) || (mask & KADM5_MOD_NAME) ||
        (mask & KADM5_MKVNO) || (mask & KADM5_AUX_ATTRIBUTES) ||
        (mask & KADM5_KEY_DATA) || (mask & KADM5_LAST_SUCCESS) ||
-       (mask & KADM5_LAST_FAILED))
+       (mask & KADM5_LAST_FAILED) || (mask & KADM5_FAIL_AUTH_COUNT))
 	return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
 	return KADM5_BAD_MASK;
@@ -639,8 +639,6 @@ kadm5_modify_principal(void *server_handle,
 	 kdb.pw_expiration = entry->pw_expiration;
     if (mask & KADM5_MAX_RLIFE)
 	 kdb.max_renewable_life = entry->max_renewable_life;
-    if (mask & KADM5_FAIL_AUTH_COUNT)
-	 kdb.fail_auth_count = entry->fail_auth_count;
 
     if((mask & KADM5_KVNO)) {
 	 for (i = 0; i < kdb.n_key_data; i++)
@@ -664,6 +662,10 @@ kadm5_modify_principal(void *server_handle,
     }
 
     /*
+     * XXX for legacy compat should we make setting fail_auth_count
+     * to zero a synonym for unlocking?
+     */
+    /*
      * Setting entry->locked_time to 0 can be used to manually unlock
      * an account. It is not possible to set locked_time to any other
      * value using kadmin. The authentication failure counter is also
@@ -676,13 +678,12 @@ kadm5_modify_principal(void *server_handle,
 	}
 
 	kdb.fail_auth_count = 0;
-	mask |= KADM5_FAIL_AUTH_COUNT;
 
 	ret = krb5_dbe_update_locked_time(handle->context, &kdb, 0);
 	if (ret)
 	    goto done;
 
-	mask |= KADM5_TL_DATA;
+	mask |= KADM5_FAIL_AUTH_COUNT | KADM5_LOCKED_TIME;
     }
 
     /* let the mask propagate to the database provider */
@@ -1460,8 +1461,17 @@ kadm5_chpass_principal_3(void *server_handle,
     if (ret)
 	goto done;
 
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
+
+    ret = krb5_dbe_update_locked_time(handle->context, &kdb, 0);
+    if (ret)
+	goto done;
+
     /* key data and attributes changed, let the database provider know */
-    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES /* | KADM5_CPW_FUNCTION */;
+    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES |
+	       KADM5_FAIL_AUTH_COUNT | KADM5_LOCKED_TIME;
+	       /* | KADM5_CPW_FUNCTION */
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
@@ -1593,7 +1603,14 @@ kadm5_randkey_principal_3(void *server_handle,
     if (ret)
 	 goto done;
 
-    if (keyblocks) {
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
+
+    ret = krb5_dbe_update_locked_time(handle->context, &kdb, 0);
+    if (ret)
+	goto done;
+
+   if (keyblocks) {
 	ret = decrypt_key_data(handle->context, act_mkey,
 			       kdb.n_key_data, kdb.key_data,
 			       keyblocks, n_keys);
@@ -1602,7 +1619,8 @@ kadm5_randkey_principal_3(void *server_handle,
     }
 
     /* key data changed, let the database provider know */
-    kdb.mask = KADM5_KEY_DATA /* | KADM5_RANDKEY_USED */;
+    kdb.mask = KADM5_KEY_DATA | KADM5_FAIL_AUTH_COUNT |
+	       KADM5_LOCKED_TIME; /* | KADM5_RANDKEY_USED */;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
@@ -1769,6 +1787,13 @@ kadm5_setv4key_principal(void *server_handle,
     ret = krb5_dbe_update_last_pwd_change(handle->context, &kdb, now);
     if (ret)
 	 goto done;
+
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
+
+    ret = krb5_dbe_update_locked_time(handle->context, &kdb, 0);
+    if (ret)
+	goto done;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
@@ -2006,6 +2031,13 @@ kadm5_setkey_principal_3(void *server_handle,
 
     if ((ret = krb5_dbe_update_last_pwd_change(handle->context, &kdb, now)))
         goto done;
+
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
+
+    ret = krb5_dbe_update_locked_time(handle->context, &kdb, 0);
+    if (ret)
+	goto done;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;

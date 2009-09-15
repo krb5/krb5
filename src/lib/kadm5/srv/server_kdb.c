@@ -395,6 +395,9 @@ kdb_put_entry(kadm5_server_handle_t handle,
 
     one = 1;
 
+    /* we are always updating TL data */
+    kdb->mask |= KADM5_TL_DATA;
+
     ret = krb5_db_put_principal(handle->context, kdb, &one);
     if (ret)
 	return(ret);
