@@ -59,7 +59,7 @@
 
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
 
-int use_spnego = 0;
+static int use_spnego = 0;
 
 static void displayStatus_1(m, code, type)
      char *m;
@@ -199,41 +199,26 @@ enumerateAttributes(OM_uint32 *minor,
     OM_uint32 major, tmp_minor;
     int name_is_MN;
     gss_OID mech = GSS_C_NO_OID;
-    gss_buffer_set_t authenticated = GSS_C_NO_BUFFER_SET;
-    gss_buffer_set_t asserted = GSS_C_NO_BUFFER_SET;
-    gss_buffer_set_t complete = GSS_C_NO_BUFFER_SET;
+    gss_buffer_set_t attrs = GSS_C_NO_BUFFER_SET;
     unsigned int i;
 
     major = gss_inquire_name(minor,
                              name,
                              &name_is_MN,
                              &mech,
-                             &authenticated,
-                             &asserted,
-                             &complete);
+                             &attrs);
     if (GSS_ERROR(major)) {
         displayStatus("gss_inquire_name", major, *minor);
-        goto cleanup;
+        return major;
     }
 
-    if (authenticated != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < authenticated->count; i++)
-            dumpAttribute(minor, name, &authenticated->elements[i], noisy);
-    }
-    if (asserted != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < asserted->count; i++)
-            dumpAttribute(minor, name, &asserted->elements[i], noisy);
-    }
-    if (complete != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < complete->count; i++)
-            dumpAttribute(minor, name, &complete->elements[i], noisy);
+    if (attrs != GSS_C_NO_BUFFER_SET) {
+        for (i = 0; i < attrs->count; i++)
+            dumpAttribute(minor, name, &attrs->elements[i], noisy);
     }
 
-cleanup:
     gss_release_oid(&tmp_minor, &mech);
-    gss_release_buffer_set(&tmp_minor, &authenticated);
-    gss_release_buffer_set(&tmp_minor, &asserted);
-    gss_release_buffer_set(&tmp_minor, &complete);
+    gss_release_buffer_set(&tmp_minor, &attrs);
 
     return major;
 }

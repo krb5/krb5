@@ -53,7 +53,7 @@ greet_flags(krb5_context kcontext,
             krb5_authdatatype ad_type,
             krb5_flags *flags)
 {
-    *flags = AD_USAGE_TGS_REQ | AD_USAGE_KDC_ISSUED | AD_INFORMATIONAL;
+    *flags = AD_USAGE_AP_REQ | AD_USAGE_KDC_ISSUED | AD_INFORMATIONAL;
 }
 
 static void
@@ -130,8 +130,7 @@ greet_get_attribute_types(krb5_context kcontext,
                           krb5_authdata_context context,
                           void *plugin_context,
                           void *request_context,
-                          krb5_data **verified,
-                          krb5_data **asserted)
+                          krb5_data **out_attrs)
 {
     krb5_error_code code;
     struct greet_context *greet = (struct greet_context *)request_context;
@@ -139,19 +138,16 @@ greet_get_attribute_types(krb5_context kcontext,
     if (greet->greeting.length == 0)
         return ENOENT;
 
-    if (asserted == NULL)
-        return 0;
-
-    *asserted = calloc(2, sizeof(krb5_data));
-    if (*asserted == NULL)
+    *out_attrs = calloc(2, sizeof(krb5_data));
+    if (*out_attrs == NULL)
         return ENOMEM;
 
     code = krb5int_copy_data_contents_add0(kcontext,
                                            &greet_attr,
-                                           &(*asserted)[0]);
+                                           &(*out_attrs)[0]);
     if (code != 0) {
-        free(*asserted);
-        *asserted = NULL;
+        free(*out_attrs);
+        *out_attrs = NULL;
         return code;
     }
 

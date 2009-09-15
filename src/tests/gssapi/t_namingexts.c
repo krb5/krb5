@@ -31,11 +31,9 @@
 #include <gssapi/gssapi_krb5.h>
 #include <gssapi/gssapi_generic.h>
 
-#define USE_SPNEGO 1
-
-#ifdef USE_SPNEGO
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
-#endif
+
+static int use_spnego = 0;
 
 static void displayStatus_1(m, code, type)
      char *m;
@@ -155,41 +153,26 @@ enumerateAttributes(OM_uint32 *minor,
     OM_uint32 major, tmp;
     int name_is_MN;
     gss_OID mech = GSS_C_NO_OID;
-    gss_buffer_set_t authenticated = GSS_C_NO_BUFFER_SET;
-    gss_buffer_set_t asserted = GSS_C_NO_BUFFER_SET;
-    gss_buffer_set_t complete = GSS_C_NO_BUFFER_SET;
+    gss_buffer_set_t attrs = GSS_C_NO_BUFFER_SET;
     unsigned int i;
 
     major = gss_inquire_name(minor,
                              name,
                              &name_is_MN,
                              &mech,
-                             &authenticated,
-                             &asserted,
-                             &complete);
+                             &attrs);
     if (GSS_ERROR(major)) {
         displayStatus("gss_inquire_name", major, *minor);
-        goto cleanup;
+        return major;
     }
 
-    if (authenticated != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < authenticated->count; i++)
-            dumpAttribute(minor, name, &authenticated->elements[i], noisy);
-    }
-    if (asserted != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < asserted->count; i++)
-            dumpAttribute(minor, name, &asserted->elements[i], noisy);
-    }
-    if (complete != GSS_C_NO_BUFFER_SET) {
-        for (i = 0; i < complete->count; i++)
-            dumpAttribute(minor, name, &complete->elements[i], noisy);
+    if (attrs != GSS_C_NO_BUFFER_SET) {
+        for (i = 0; i < attrs->count; i++)
+            dumpAttribute(minor, name, &attrs->elements[i], noisy);
     }
 
-cleanup:
     gss_release_oid(&tmp, &mech);
-    gss_release_buffer_set(&tmp, &authenticated);
-    gss_release_buffer_set(&tmp, &asserted);
-    gss_release_buffer_set(&tmp, &complete);
+    gss_release_buffer_set(&tmp, &attrs);
 
     return major;
 }
@@ -301,11 +284,9 @@ initAcceptSecContext(OM_uint32 *minor,
                                  verifier_cred_handle,
                                  &initiator_context,
                                  target_name,
-#ifdef USE_SPNEGO
-                                 (gss_OID)&spnego_mech,
-#else
-                                 (gss_OID)gss_mech_krb5,
-#endif
+                                 use_spnego ?
+                                    (gss_OID)&spnego_mech :
+                                    (gss_OID)gss_mech_krb5,
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE,
                                  GSS_C_NO_CHANNEL_BINDINGS,
@@ -361,6 +342,12 @@ int main(int argc, char *argv[])
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_name_t name = GSS_C_NO_NAME;
 
+    if (argc > 1 && strcmp(argv[1], "--spnego") == 0) {
+        use_spnego++;
+        argc--;
+        argv++;
+    }
+
     if (argc > 1) {
         gss_buffer_desc name_buf;
         gss_name_t tmp_name;
@@ -385,13 +372,11 @@ int main(int argc, char *argv[])
 
         gss_release_name(&tmp, &tmp_name);
 
-#if 1
         major = testGreetAuthzData(&minor, name);
         if (GSS_ERROR(major))
             goto out;
-#endif
     } else {
-        fprintf(stderr, "Usage: %s [principal] [keytab]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [--spnego] [principal] [keytab]\n", argv[0]);
         exit(1);
     }
 
@@ -404,11 +389,8 @@ int main(int argc, char *argv[])
     }
 
 
-#if 0 /* XXX mechglue bug */
-    mechs.elements = (gss_OID)&spnego_mech;
-#else
-    mechs.elements = (gss_OID)gss_mech_krb5;
-#endif
+    mechs.elements = use_spnego ? (gss_OID)&spnego_mech :
+                                  (gss_OID)gss_mech_krb5;
     mechs.count = 1;
 
     /* get default cred */

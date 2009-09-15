@@ -1141,21 +1141,15 @@ mspac_get_attribute_types(krb5_context kcontext,
 			  krb5_authdata_context context,
 			  void *plugin_context,
 			  void *request_context,
-			  krb5_data **verified,
-			  krb5_data **asserted)
+			  krb5_data **out_attrs)
 {
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
     unsigned int i, j;
     krb5_data *attrs;
     krb5_error_code code;
-    krb5_data **outattrs;
 
     if (pacctx->pac == NULL)
 	return ENOENT;
-
-    outattrs = pacctx->pac->verified ? verified : asserted;
-    if (outattrs == NULL)
-	return ENOENT; /* caller is not interested */
 
     attrs = calloc(1 + pacctx->pac->pac->cBuffers + 1, sizeof(krb5_data));
     if (attrs == NULL)
@@ -1198,7 +1192,7 @@ mspac_get_attribute_types(krb5_context kcontext,
     attrs[j].data = NULL;
     attrs[j].length = 0;
 
-    *outattrs = attrs;
+    *out_attrs = attrs;
 
     return 0;
 }
