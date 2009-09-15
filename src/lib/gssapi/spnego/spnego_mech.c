@@ -2383,8 +2383,7 @@ spnego_gss_inquire_name(OM_uint32 *minor_status,
 			int *name_is_MN,
 			gss_OID *MN_mech,
 			gss_buffer_set_t *authenticated,
-			gss_buffer_set_t *asserted,
-			gss_buffer_set_t *complete)
+			gss_buffer_set_t *asserted)
 {
 	OM_uint32 ret;
 	ret = gss_inquire_name(minor_status,
@@ -2392,8 +2391,7 @@ spnego_gss_inquire_name(OM_uint32 *minor_status,
 			       name_is_MN,
 			       MN_mech,
 			       authenticated,
-			       asserted,
-			       complete);
+			       asserted);
 	return (ret);
 }
 

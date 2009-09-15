@@ -211,8 +211,7 @@ typedef krb5_error_code
 					    void *plugin_context,
 					    void *request_context,
 					    krb5_data **verified,
-					    krb5_data **asserted,
-					    krb5_data **all_attrs);
+					    krb5_data **asserted);
 
 typedef krb5_error_code
 (*authdata_client_get_attribute_proc)(krb5_context kcontext,

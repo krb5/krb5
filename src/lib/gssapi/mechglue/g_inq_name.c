@@ -36,8 +36,7 @@ gss_inquire_name(OM_uint32 *minor_status,
                  int *name_is_MN,
                  gss_OID *MN_mech,
                  gss_buffer_set_t *authenticated,
-                 gss_buffer_set_t *asserted,
-                 gss_buffer_set_t *complete)
+                 gss_buffer_set_t *asserted)
 {
     OM_uint32           status, tmp;
     gss_union_name_t    union_name;
@@ -57,8 +56,6 @@ gss_inquire_name(OM_uint32 *minor_status,
         *authenticated = GSS_C_NO_BUFFER_SET;
     if (asserted != NULL)
         *asserted = GSS_C_NO_BUFFER_SET;
-    if (complete != NULL)
-        *complete = GSS_C_NO_BUFFER_SET;
 
     *minor_status = 0;
     union_name = (gss_union_name_t)name;
@@ -98,8 +95,7 @@ gss_inquire_name(OM_uint32 *minor_status,
                                        NULL,
                                        NULL,
                                        authenticated,
-                                       asserted,
-                                       complete);
+                                       asserted);
     if (status != GSS_S_COMPLETE) {
         generic_gss_release_oid(&tmp, MN_mech);
         map_error(minor_status, mech);

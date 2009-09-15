@@ -462,23 +462,19 @@ krb5_error_code KRB5_CALLCONV
 krb5_authdata_get_attribute_types(krb5_context kcontext,
                                   krb5_authdata_context context,
                                   krb5_data **verified_attrs,
-                                  krb5_data **asserted_attrs,
-                                  krb5_data **all_attrs)
+                                  krb5_data **asserted_attrs)
 {
     int i;
     krb5_error_code code = 0;
     krb5_data *verified = NULL;
     krb5_data *asserted = NULL;
-    krb5_data *all = NULL;
     unsigned int verified_len = 0;
     unsigned int asserted_len = 0;
-    unsigned int all_len = 0;
 
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
         krb5_data *verified2 = NULL;
         krb5_data *asserted2 = NULL;
-        krb5_data *all2 = NULL;
 
         if (module->ftable->get_attribute_types == NULL)
             continue;
@@ -490,9 +486,7 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
                                                    verified_attrs ?
                                                        &verified2 : NULL,
                                                    asserted_attrs ?
-                                                       &asserted2 : NULL,
-                                                   all_attrs ?
-                                                       &all2 : NULL))
+                                                       &asserted2 : NULL))
             continue;
 
         if (verified_attrs != NULL) {
@@ -514,16 +508,6 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
             if (asserted2 != NULL)
                 free(asserted2);
         }
-
-        if (all_attrs != NULL) {
-            code = k5_merge_data_list(&all, all2, &all_len);
-            if (code != 0)  {
-                krb5int_free_data_list(kcontext, all2);
-                break;
-            }
-            if (all2 != NULL)
-                free(all2);
-        }
     }
 
     if (code != 0) {
@@ -532,17 +516,12 @@ krb5_authdata_get_attribute_types(krb5_context kcontext,
 
         krb5int_free_data_list(kcontext, asserted);
         asserted = NULL;
-
-        krb5int_free_data_list(kcontext, all);
-        all = NULL;
     }
 
     if (verified_attrs != NULL)
         *verified_attrs = verified;
     if (asserted_attrs != NULL)
         *asserted_attrs = asserted;
-    if (all_attrs != NULL)
-        *all_attrs = all;
 
     return code;
 }

@@ -868,8 +868,7 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
                       int *name_is_MN,
                       gss_OID *MN_mech,
                       gss_buffer_set_t *authenticated,
-                      gss_buffer_set_t *asserted,
-                      gss_buffer_set_t *complete);
+                      gss_buffer_set_t *asserted);
 
 OM_uint32
 krb5_gss_get_name_attribute(OM_uint32 *minor_status,

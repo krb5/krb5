@@ -459,8 +459,7 @@ spnego_gss_inquire_name
 	int *name_is_MN,
 	gss_OID *MN_mech,
 	gss_buffer_set_t *authenticated,
-	gss_buffer_set_t *asserted,
-	gss_buffer_set_t *complete
+	gss_buffer_set_t *asserted
 );
 
 OM_uint32

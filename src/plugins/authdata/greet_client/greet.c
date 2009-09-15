@@ -131,8 +131,7 @@ greet_get_attribute_types(krb5_context kcontext,
                           void *plugin_context,
                           void *request_context,
                           krb5_data **verified,
-                          krb5_data **asserted,
-                          krb5_data **all_attrs)
+                          krb5_data **asserted)
 {
     krb5_error_code code;
     struct greet_context *greet = (struct greet_context *)request_context;
