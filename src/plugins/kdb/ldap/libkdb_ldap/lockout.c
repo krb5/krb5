@@ -97,8 +97,13 @@ locked_check_p(krb5_context context,
                krb5_timestamp locked_time,
                krb5_timestamp lockout_duration)
 {
-    return (locked_time != 0 &&
-            stamp < locked_time + lockout_duration);
+    if (locked_time == 0)
+        return FALSE;
+
+    if (lockout_duration == 0)
+        return TRUE; /* account permanently locked */
+
+    return (stamp < locked_time + lockout_duration);
 }
 
 krb5_error_code

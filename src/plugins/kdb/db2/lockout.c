@@ -101,33 +101,14 @@ locked_check_p(krb5_context context,
                krb5_timestamp locked_time,
                krb5_timestamp lockout_duration)
 {
-    return (locked_time != 0 &&
-            stamp < locked_time + lockout_duration);
-}
-
-#if 0
-/* draft-behera-ldap-password-policy-10.txt 7.6 */
-static krb5_boolean
-intruder_lockout_check_p(krb5_context context,
-                         krb5_db_entry *entry,
-                         krb5_timestamp stamp,
-                         krb5_timestamp max_fail,
-                         krb5_timestamp failcnt_interval)
-{
-    int fail_auth_count;
-
-    if (max_fail == 0)
+    if (locked_time == 0)
         return FALSE;
 
-    if (failcnt_interval != 0 &&
-        entry->last_failed + failcnt_interval > stamp)
-        fail_auth_count = 0;
-    else
-        fail_auth_count = entry->fail_auth_count;
+    if (lockout_duration == 0)
+        return TRUE; /* account permanently locked */
 
-    return (fail_auth_count >= max_fail);
+    return (stamp < locked_time + lockout_duration);
 }
-#endif
 
 krb5_error_code
 krb5_db2_lockout_check_policy(krb5_context context,
@@ -152,12 +133,6 @@ krb5_db2_lockout_check_policy(krb5_context context,
 
     if (locked_check_p(context, stamp, locked_time, lockout_duration))
         return KRB5KDC_ERR_CLIENT_REVOKED;
-
-#if 0
-    if (intruder_lockout_check_p(context, entry, stamp,
-                                 max_fail, failcnt_interval))
-        return KRB5KDC_ERR_CLIENT_REVOKED;
-#endif
 
     return 0;
 }
