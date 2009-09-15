@@ -466,9 +466,9 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define K5_BE
 #elif defined(_LITTLE_ENDIAN)
 # define K5_LE
-#elif defined(__BIG_ENDIAN__) || !defined(__LITTLE_ENDIAN__)
+#elif defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__)
 # define K5_BE
-#elif defined(__LITTLE_ENDIAN__) || !defined(__BIG_ENDIAN__)
+#elif defined(__LITTLE_ENDIAN__) && !defined(__BIG_ENDIAN__)
 # define K5_LE
 #endif
 #if !defined(K5_BE) && !defined(K5_LE)
