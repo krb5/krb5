@@ -681,6 +681,8 @@ kadm5_modify_principal(void *server_handle,
 	ret = krb5_dbe_update_locked_time(handle->context, &kdb, 0);
 	if (ret)
 	    goto done;
+
+	mask |= KADM5_TL_DATA;
     }
 
     /* let the mask propagate to the database provider */
