@@ -163,8 +163,6 @@ krb5_ldap_lockout_audit(krb5_context context,
     if (code != 0)
         return code;
 
-    assert(!locked_check_p(context, stamp, locked_time, lockout_duration));
-
     entry->mask = 0;
 
     if (status == 0 && (entry->attributes & KRB5_KDB_REQUIRES_PRE_AUTH)) {
