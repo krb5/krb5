@@ -1067,20 +1067,29 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	if (entries->mask & KADM5_LOCKED_TIME) {
 	    krb5_timestamp locked_time;
 
-	    if ((st = krb5_dbe_lookup_locked_time(context, entries,
-						  &locked_time)) != 0)
+	    st = krb5_dbe_lookup_locked_time(context, entries, &locked_time);
+	    if (st != 0)
 		goto cleanup;
 
-	    memset(strval, 0, sizeof(strval));
-	    if ((strval[0] = getstringtime(locked_time)) == NULL)
-		goto cleanup;
+	    if (locked_time == 0) {
+		/* account is being unlocked */
+		st = krb5_add_str_mem_ldap_mod(&mods,
+					       "krbPwdPrincipalLockedTime",
+					       LDAP_MOD_DELETE,
+					       NULL);
+	    } else {
+		memset(strval, 0, sizeof(strval));
+		if ((strval[0] = getstringtime(locked_time)) == NULL)
+		    goto cleanup;
 
-	    if ((st = krb5_add_str_mem_ldap_mod(&mods, "krbPwdPrincipalLockedTime",
-						LDAP_MOD_REPLACE, strval)) != 0) {
+		st = krb5_add_str_mem_ldap_mod(&mods,
+					       "krbPwdPrincipalLockedTime",
+						LDAP_MOD_REPLACE,
+						strval);
 		free(strval[0]);
-		goto cleanup;
 	    }
-	    free(strval[0]);
+	    if (st != 0)
+		goto cleanup;
 	}
 
 	/* Set tl_data */
