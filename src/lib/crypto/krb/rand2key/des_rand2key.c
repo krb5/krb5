@@ -47,6 +47,8 @@ krb5int_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
             ((key->contents[6]&1)<<7));
 
     mit_des_fixup_key_parity(key->contents);
+
+    return(0);
 }
 
 
