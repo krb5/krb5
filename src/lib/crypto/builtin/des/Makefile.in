@@ -19,7 +19,6 @@ STLIBOBJS=\
 	../../$(CIMPL)/d3_cbc.o	\
 	../../$(CIMPL)/d3_aead.o	\
 	../../$(CIMPL)/d3_kysched.o	\
-	../../$(CIMPL)/des_prf.o 	\
 	../../$(CIMPL)/f_aead.o 	\
 	../../$(CIMPL)/f_cbc.o 	\
 	../../$(CIMPL)/f_cksum.o	\
@@ -34,7 +33,6 @@ OBJS=	$(OUTPRE)../../$(CIMPL)/afsstring2key.$(OBJEXT)	\
 	$(OUTPRE)../../$(CIMPL)/d3_cbc.$(OBJEXT)	\
 	$(OUTPRE)../../$(CIMPL)/d3_aead.$(OBJEXT)	\
 	$(OUTPRE)../../$(CIMPL)/d3_kysched.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/des_prf.$(OBJEXT) 	\
 	$(OUTPRE)../../$(CIMPL)/f_aead.$(OBJEXT) 	\
 	$(OUTPRE)../../$(CIMPL)/f_cbc.$(OBJEXT) 	\
 	$(OUTPRE)../../$(CIMPL)/f_cksum.$(OBJEXT)	\
@@ -49,7 +47,6 @@ SRCS=	$(srcdir)/../../$(CIMPL)/afsstring2key.c	\
 	$(srcdir)/../../$(CIMPL)/d3_cbc.c	\
 	$(srcdir)/../../$(CIMPL)/d3_aead.c	\
 	$(srcdir)/../../$(CIMPL)/d3_kysched.c	\
-	$(srcdir)/../../$(CIMPL)/des_prf.c 	\
 	$(srcdir)/../../$(CIMPL)/f_aead.c	\
 	$(srcdir)/../../$(CIMPL)/f_cbc.c	\
 	$(srcdir)/../../$(CIMPL)/f_cksum.c	\

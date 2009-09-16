@@ -1,14 +1,14 @@
 /*
- * lib/crypto/des/des_prf.c
+ * lib/crypto/krb/rand2key/rc4_rand2key.c
  *
- * Copyright (C) 2004, 2009  by the Massachusetts Institute of Technology.
+ * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,33 +22,24 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
- * 
- *
- * This file contains an implementation of the RFC 3961 PRF for
- * des-cbc-crc, des-cbc-md4, and des-cbc-md5 enctypes.
  */
 
-#include "k5-int.h"
-#include "hash_provider/hash_provider.h"		/* XXX is this ok? */
+#include "rand2key.h"
+
 
 krb5_error_code
-krb5int_des_prf (const struct krb5_enc_provider *enc,
-		const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key,
-		const krb5_data *in, krb5_data *out)
+krb5int_arcfour_make_key(const krb5_data *randombits, krb5_keyblock *key)
 {
-  krb5_data tmp;
-  krb5_error_code ret = 0;
+    if (key->length != 16)
+        return(KRB5_BAD_KEYSIZE);
+    if (randombits->length != 16)
+        return(KRB5_CRYPTO_INTERNAL);
 
-  hash = &krb5int_hash_md5;		/* MD5 is always used. */
-  tmp.length = hash->hashsize;
-  tmp.data = malloc(hash->hashsize);
-  if (tmp.data == NULL)
-    return ENOMEM;
-  ret = hash->hash(1, in, &tmp);
-  if (ret == 0)
-      ret = enc->encrypt(key, NULL, &tmp, out);
-  free(tmp.data);
-  return ret;
+    key->magic = KV5M_KEYBLOCK;
+    key->length = 16;
+
+    memcpy(key->contents, randombits->data, randombits->length);
+
+    return(0);
 }
+

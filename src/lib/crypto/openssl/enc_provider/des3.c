@@ -4,12 +4,11 @@
 #include "k5-int.h"
 #include "des_int.h"
 #include <aead.h>
+#include <rand2key.h>
 #include <openssl/evp.h>
 
 
 #define DES_BLOCK_SIZE  8
-#define DES3_KEY_BYTES  21
-#define DES3_KEY_LEN    24
 
 static krb5_error_code
 validate(const krb5_keyblock *key, const krb5_data *ivec,
@@ -19,7 +18,7 @@ validate(const krb5_keyblock *key, const krb5_data *ivec,
 
     /* key->enctype was checked by the caller */
 
-    if (key->length != DES3_KEY_LEN)
+    if (key->length != KRB5_MIT_DES3_KEYSIZE)
 	return(KRB5_BAD_KEYSIZE);
     if ((input->length%DES_BLOCK_SIZE) != 0)
 	return(KRB5_BAD_MSIZE);
@@ -52,7 +51,7 @@ validate_iov(const krb5_keyblock *key, const krb5_data *ivec,
 	    input_length += iov->data.length;
     }
 
-    if (key->length != DES3_KEY_LEN)
+    if (key->length != KRB5_MIT_DES3_KEYSIZE)
 	return(KRB5_BAD_KEYSIZE);
     if ((input_length%DES_BLOCK_SIZE) != 0)
 	return(KRB5_BAD_MSIZE);
@@ -175,37 +174,6 @@ k5_des3_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
         return KRB5_CRYPTO_INTERNAL;
     return 0;
 
-}
-
-static krb5_error_code
-k5_des3_make_key(const krb5_data *randombits, krb5_keyblock *key)
-{
-    int i;
-
-    if (key->length != DES3_KEY_LEN)
-	return(KRB5_BAD_KEYSIZE);
-    if (randombits->length != DES3_KEY_BYTES)
-	return(KRB5_CRYPTO_INTERNAL);
-
-    key->magic = KV5M_KEYBLOCK;
-
-    /* take the seven bytes, move them around into the top 7 bits of the
-       8 key bytes, then compute the parity bits.  Do this three times. */
-
-    for (i=0; i<3; i++) {
-	memcpy(key->contents+i*8, randombits->data+i*7, 7);
-	key->contents[i*8+7] = (((key->contents[i*8]&1)<<1) |
-				((key->contents[i*8+1]&1)<<2) |
-				((key->contents[i*8+2]&1)<<3) |
-				((key->contents[i*8+3]&1)<<4) |
-				((key->contents[i*8+4]&1)<<5) |
-				((key->contents[i*8+5]&1)<<6) |
-				((key->contents[i*8+6]&1)<<7));
-
-	mit_des_fixup_key_parity(key->contents+i*8);
-    }
-
-    return(0);
 }
 
 static krb5_error_code
@@ -340,10 +308,10 @@ k5_des3_decrypt_iov(const krb5_keyblock *key,
 
 const struct krb5_enc_provider krb5int_enc_des3 = {
     DES_BLOCK_SIZE,
-    DES3_KEY_BYTES, DES3_KEY_LEN,
+    KRB5_MIT_DES3_KEY_BYTES, KRB5_MIT_DES3_KEYSIZE,
     k5_des3_encrypt,
     k5_des3_decrypt,
-    k5_des3_make_key,
+    krb5int_des3_make_key,
     krb5int_des_init_state,
     krb5int_default_free_state,
     k5_des3_encrypt_iov,

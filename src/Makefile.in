@@ -198,7 +198,8 @@ WINMAKEFILES=Makefile \
 	lib\crypto\krb\dk\Makefile lib\crypto\builtin\enc_provider\Makefile \
 	lib\crypto\krb\hash_provider\Makefile \
 	lib\crypto\krb\keyhash_provider\Makefile \
-	lib\crypto\krb\raw\Makefile lib\crypto\old\Makefile \
+	lib\crypto\krb\prf\Makefile lib\crypto\krb\rand2key\Makefile \
+	lib\crypto\krb\raw\Makefile lib\crypto\krb\old\Makefile \
 	lib\crypto\builtin\sha1\Makefile lib\crypto\builtin\arcfour\Makefile \
 	lib\crypto\builtin\md4\Makefile lib\crypto\builtin\md5\Makefile \
 	lib\crypto\krb\yarrow\Makefile lib\crypto\builtin\aes\Makefile \
@@ -396,7 +397,9 @@ FILES= ./* \
 	include/krb5/* include/krb5/stock/* include/sys/* lib/* \
 	lib/crypto/* lib/crypto/krb/crc32/* lib/crypto/builtin/des/* lib/crypto/krb/dk/* \
 	lib/crypto/builtin/enc_provider/* lib/crypto/krb/hash_provider/* \
-	lib/crypto/krb/keyhash_provider/* lib/crypto/krb/old/* lib/crypto/krb/raw/* \
+	lib/crypto/krb/keyhash_provider/* \
+	lib/crypto/krb/prf/* lib/crypto/krb/rand2key/* \
+	lib/crypto/krb/old/* lib/crypto/krb/raw/* \
 	lib/crypto/builtin/sha1/* lib/crypto/builtin/arcfour/* lib/crypto/builtin/md4/* \
 	lib/crypto/builtin/md5/* lib/crypto/krb/yarrow/* \
 	lib/crypto/builtin/* lib/crypto/krb/* lib/crypto/crypto_tests \

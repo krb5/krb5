@@ -80,16 +80,16 @@ clnt_raw.so clnt_raw.po $(OUTPRE)clnt_raw.$(OBJEXT): \
   clnt_raw.c
 clnt_simple.so clnt_simple.po $(OUTPRE)clnt_simple.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/auth.h \
-  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
-  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
-  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
-  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
-  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/port-sockets.h \
-  clnt_simple.c
+  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/autoconf.h \
+  $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
+  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
+  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
+  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
+  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
+  $(SRCTOP)/include/port-sockets.h clnt_simple.c
 clnt_tcp.so clnt_tcp.po $(OUTPRE)clnt_tcp.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(SRCTOP)/include/autoconf.h $(SRCTOP)/include/gssrpc/auth.h \
   $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
   $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/pmap_clnt.h \
   $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
@@ -97,8 +97,8 @@ clnt_tcp.so clnt_tcp.po $(OUTPRE)clnt_tcp.$(OBJEXT): \
   $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
   $(SRCTOP)/include/port-sockets.h clnt_tcp.c
 clnt_udp.so clnt_udp.po $(OUTPRE)clnt_udp.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(SRCTOP)/include/autoconf.h $(SRCTOP)/include/gssrpc/auth.h \
   $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
   $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/pmap_clnt.h \
   $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
@@ -168,8 +168,8 @@ pmap_prot2.so pmap_prot2.po $(OUTPRE)pmap_prot2.$(OBJEXT): \
   $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/xdr.h \
   pmap_prot2.c
 pmap_rmt.so pmap_rmt.po $(OUTPRE)pmap_rmt.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(SRCTOP)/include/autoconf.h $(SRCTOP)/include/gssrpc/auth.h \
   $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
   $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/pmap_clnt.h \
   $(SRCTOP)/include/gssrpc/pmap_prot.h $(SRCTOP)/include/gssrpc/pmap_rmt.h \
@@ -219,8 +219,8 @@ svc_auth.so svc_auth.po $(OUTPRE)svc_auth.$(OBJEXT): \
   $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
   svc_auth.c
 svc_auth_gss.so svc_auth_gss.po $(OUTPRE)svc_auth_gss.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/autoconf.h \
   $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
   $(SRCTOP)/include/gssrpc/auth_gssapi.h $(SRCTOP)/include/gssrpc/auth_unix.h \
   $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
@@ -278,22 +278,24 @@ svc_simple.so svc_simple.po $(OUTPRE)svc_simple.$(OBJEXT): \
   $(SRCTOP)/include/gssrpc/xdr.h svc_simple.c
 svc_tcp.so svc_tcp.po $(OUTPRE)svc_tcp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
-  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
-  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
-  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
-  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/port-sockets.h svc_tcp.c
+  $(SRCTOP)/include/autoconf.h $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  svc_tcp.c
 svc_udp.so svc_udp.po $(OUTPRE)svc_udp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
-  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
-  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
-  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
-  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/port-sockets.h svc_udp.c
+  $(SRCTOP)/include/autoconf.h $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  svc_udp.c
 xdr.so xdr.po $(OUTPRE)xdr.$(OBJEXT): $(BUILDTOP)/include/gssrpc/types.h \
   $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/xdr.h \
   xdr.c

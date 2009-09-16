@@ -3,9 +3,10 @@ myfulldir=lib/crypto/krb
 mydir=lib/crypto/krb
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS= crc32 dk hash_provider keyhash_provider \
-	 old raw yarrow 
+	prf rand2key old raw yarrow 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir)/dk	\
 		-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider 			\
+		-I$(srcdir)/prf -I$(srcdir)/rand2key		 			\
 		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/yarrow 			\
 		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
 		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/arcfour 	\
@@ -151,10 +152,12 @@ SRCS=\
 
 STOBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 			 	\
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST  	\
+	prf/OBJS.ST rand2key/OBJS.ST 			 	\
 	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST  OBJS.ST
 
 SUBDIROBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 		 	\
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST  	\
+	prf/OBJS.ST rand2key/OBJS.ST 			 	\
 	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST OBJS.ST 
 
 ##DOS##LIBOBJS = $(OBJS)
@@ -178,6 +181,12 @@ all-windows::
 	$(MAKE) -$(MFLAGS)
 	cd ..\keyhash_provider
 	@echo Making in crypto\keyhash_provider
+	$(MAKE) -$(MFLAGS)
+	cd ..\prf
+	@echo Making in crypto\prf
+	$(MAKE) -$(MFLAGS)
+	cd ..\rand2key
+	@echo Making in crypto\rand2key
 	$(MAKE) -$(MFLAGS)
 	cd ..\old
 	@echo Making in crypto\old
@@ -203,6 +212,12 @@ clean-windows::
 	cd ..\keyhash_provider
 	@echo Making clean in crypto\keyhash_provider
 	$(MAKE) -$(MFLAGS) clean
+	cd ..\prf
+	@echo Making clean in crypto\prf
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\rand2key
+	@echo Making clean in crypto\rand2key
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\old
 	@echo Making clean in crypto\old
 	$(MAKE) -$(MFLAGS) clean
@@ -227,7 +242,13 @@ check-windows::
 	cd ..\keyhash_provider
 	@echo Making check in crypto\keyhash_provider
 	$(MAKE) -$(MFLAGS) check
-	cd ..\md4
+	cd ..\prf
+	@echo Making check in crypto\prf
+	$(MAKE) -$(MFLAGS) check
+	cd ..\rand2key
+	@echo Making check in crypto\rand2key
+	$(MAKE) -$(MFLAGS) check
+	cd ..\old
 	@echo Making check in crypto\old
 	$(MAKE) -$(MFLAGS) check
 	cd ..\raw

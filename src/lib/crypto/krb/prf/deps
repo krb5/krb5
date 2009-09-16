@@ -1,7 +1,7 @@
 # 
 # Generated makefile dependencies follow.
 #
-hmac.so hmac.po $(OUTPRE)hmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+des_prf.so des_prf.po $(OUTPRE)des_prf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
@@ -10,9 +10,8 @@ hmac.so hmac.po $(OUTPRE)hmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../builtin/hmac.c \
-  $(srcdir)/../krb/aead.h $(srcdir)/../krb/cksumtypes.h
-pbkdf2.so pbkdf2.po $(OUTPRE)pbkdf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/socket-utils.h des_prf.c prf_int.h
+dk_prf.so dk_prf.po $(OUTPRE)dk_prf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
@@ -21,5 +20,16 @@ pbkdf2.so pbkdf2.po $(OUTPRE)pbkdf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../builtin/pbkdf2.c \
-  $(srcdir)/../krb/hash_provider/hash_provider.h
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../dk/dk.h \
+  dk_prf.c prf_int.h
+rc4_prf.so rc4_prf.po $(OUTPRE)rc4_prf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../hash_provider/hash_provider.h \
+  prf_int.h rc4_prf.c

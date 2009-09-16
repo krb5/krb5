@@ -7,6 +7,7 @@
 #include "arcfour-int.h"
 #include "enc_provider.h"
 #include <aead.h>
+#include <rand2key.h>
 #include <openssl/evp.h>
 
 #define RC4_KEY_SIZE 16
@@ -16,10 +17,6 @@
 static krb5_error_code
 k5_arcfour_docrypt(const krb5_keyblock *, const krb5_data *,
            const krb5_data *, krb5_data *);
-
-/* from a random bitstrem, construct a key */
-static krb5_error_code
-k5_arcfour_make_key(const krb5_data *, krb5_keyblock *);
 
 static krb5_error_code 
 k5_arcfour_free_state ( krb5_data *state);
@@ -114,22 +111,6 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
     return 0;
 }
 
-
-static krb5_error_code
-k5_arcfour_make_key(const krb5_data *randombits, krb5_keyblock *key)
-{
-    if (key->length != RC4_KEY_SIZE)
-        return(KRB5_BAD_KEYSIZE);
-    if (randombits->length != RC4_KEY_SIZE)
-        return(KRB5_CRYPTO_INTERNAL);
-
-    key->magic = KV5M_KEYBLOCK;
-
-    memcpy(key->contents, randombits->data, randombits->length);
-
-    return(0);
-}
-
 static krb5_error_code
 k5_arcfour_free_state ( krb5_data *state)
 {
@@ -158,7 +139,7 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     RC4_KEY_SIZE, RC4_KEY_SIZE, 
     k5_arcfour_docrypt,
     k5_arcfour_docrypt,
-    k5_arcfour_make_key,
+    krb5int_arcfour_make_key,
     k5_arcfour_init_state, /*xxx not implemented */
     k5_arcfour_free_state, /*xxx not implemented */
     k5_arcfour_docrypt_iov,

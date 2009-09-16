@@ -2,7 +2,7 @@ thisconfigdir=../..
 myfulldir=lib/crypto
 mydir=lib/crypto
 BUILDTOP=$(REL)..$(S)..
-SUBDIRS= builtin krb crypto_tests
+SUBDIRS= krb builtin crypto_tests
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -22,6 +22,7 @@ RELDIR=crypto
 
 STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST	\
 	krb/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST  		\
+	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST krb/yarrow/OBJS.ST 			\
 	builtin/md4/OBJS.ST builtin/md5/OBJS.ST builtin/sha1/OBJS.ST 		\
 	builtin/arcfour/OBJS.ST  builtin/aes/OBJS.ST builtin/des/OBJS.ST	\
@@ -29,6 +30,7 @@ STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST	\
 
 SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST 	\
 	krb/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST 			\
+	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST  krb/yarrow/OBJS.ST 			\
 	builtin/md4/OBJS.ST builtin/md5/OBJS.ST	builtin/sha1/OBJS.ST 		\
 	builtin/arcfour/OBJS.ST builtin/aes/OBJS.ST builtin/des/OBJS.ST		\

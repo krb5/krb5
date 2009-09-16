@@ -879,6 +879,9 @@ typedef struct _krb5_os_context {
  * Define our view of the size of a DES key.
  */
 #define	KRB5_MIT_DES_KEYSIZE		8
+#define	KRB5_MIT_DES3_KEYSIZE		24
+#define KRB5_MIT_DES3_KEY_BYTES  	21
+
 /*
  * Check if des_int.h has been included before us.  If so, then check to see
  * that our view of the DES key size is the same as des_int.h's.
