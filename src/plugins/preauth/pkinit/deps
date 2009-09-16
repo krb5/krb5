@@ -13,8 +13,10 @@ pkinit_accessor.so pkinit_accessor.po $(OUTPRE)pkinit_accessor.$(OBJEXT): \
   $(SRCTOP)/include/socket-utils.h pkinit_accessor.c \
   pkinit_accessor.h
 pkinit_srv.so pkinit_srv.po $(OUTPRE)pkinit_srv.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(srcdir)/../fast_factor.h \
   pkcs11.h pkinit.h pkinit_accessor.h pkinit_crypto.h \
   pkinit_srv.c
 pkinit_lib.so pkinit_lib.po $(OUTPRE)pkinit_lib.$(OBJEXT): \
@@ -24,8 +26,10 @@ pkinit_lib.so pkinit_lib.po $(OUTPRE)pkinit_lib.$(OBJEXT): \
   $(SRCTOP)/include/krb5/preauth_plugin.h pkcs11.h pkinit.h \
   pkinit_accessor.h pkinit_crypto.h pkinit_lib.c
 pkinit_clnt.so pkinit_clnt.po $(OUTPRE)pkinit_clnt.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(srcdir)/../fast_factor.h \
   pkcs11.h pkinit.h pkinit_accessor.h pkinit_clnt.c pkinit_crypto.h
 pkinit_profile.so pkinit_profile.po $(OUTPRE)pkinit_profile.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
