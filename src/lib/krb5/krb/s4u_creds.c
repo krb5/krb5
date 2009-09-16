@@ -207,12 +207,13 @@ build_pa_for_user(krb5_context context,
     krb5_data *for_user_data = NULL;
     char package[] = "Kerberos";
 
+    memset(&for_user, 0, sizeof(for_user));
+
     if (userid->user == NULL) {
         code = EINVAL;
         goto cleanup;
     }
 
-    memset(&for_user, 0, sizeof(for_user));
     for_user.user = userid->user;
     for_user.auth_package.data = package;
     for_user.auth_package.length = sizeof(package) - 1;
