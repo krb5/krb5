@@ -36,8 +36,7 @@
 
 /* des-cbc(xorkey, conf | rsa-md5(conf | data)) */
 
-/* this could be done in terms of the md5 and des providers, but
-   that's less efficient, and there's no need for this to be generic */
+extern struct krb5_enc_provider krb5int_enc_des;
 
 static krb5_error_code
 k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
@@ -47,14 +46,8 @@ k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
     krb5_data data;
     krb5_MD5_CTX ctx;
     unsigned char conf[CONFLENGTH];
-    unsigned char xorkey[8];
-    unsigned int i;
-    mit_des_key_schedule schedule;
+    struct krb5_enc_provider *enc = &krb5int_enc_des;
 
-    if (key->length != 8)
-	return(KRB5_BAD_KEYSIZE);
-    if (ivec)
-	return(KRB5_CRYPTO_INTERNAL);
     if (output->length != (CONFLENGTH+RSA_MD5_CKSUM_LENGTH))
 	return(KRB5_CRYPTO_INTERNAL);
 
@@ -64,19 +57,6 @@ k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
     data.data = (char *) conf;
     if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &data)))
 	return(ret);
-
-    /* create and schedule the encryption key */
-
-    memcpy(xorkey, key->contents, sizeof(xorkey));
-    for (i=0; i<sizeof(xorkey); i++)
-	xorkey[i] ^= 0xf0;
-    
-    switch (ret = mit_des_key_sched(xorkey, schedule)) {
-    case -1:
-	return(KRB5DES_BAD_KEYPAR);
-    case -2:
-	return(KRB5DES_WEAK_KEY);
-    }
 
     /* hash the confounder, then the input data */
 
@@ -91,15 +71,10 @@ k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
     memcpy(output->data, conf, CONFLENGTH);
     memcpy(output->data+CONFLENGTH, ctx.digest, RSA_MD5_CKSUM_LENGTH);
 
-    /* encrypt it, in place.  this has a return value, but it's
-       always zero.  */
+    ret = enc->encrypt(key, NULL, output, output);
 
-    mit_des_cbc_encrypt((krb5_pointer) output->data,
-			(krb5_pointer) output->data, output->length,
-			schedule, (const unsigned char *) mit_des_zeroblock,
-			1);
+    return ret;
 
-    return(0);
 }
 
 static krb5_error_code
@@ -107,17 +82,17 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
 		 const krb5_data *input, const krb5_data *hash,
 		 krb5_boolean *valid)
 {
+    krb5_error_code ret;
     krb5_MD5_CTX ctx;
     unsigned char plaintext[CONFLENGTH+RSA_MD5_CKSUM_LENGTH];
-    unsigned char xorkey[8];
-    unsigned int i;
-    mit_des_key_schedule schedule;
+    unsigned char *ivptr = NULL, *outptr = NULL;
     int compathash = 0;
+    struct krb5_enc_provider *enc = &krb5int_enc_des;
+    krb5_data output, iv;
 
     if (key->length != 8)
 	return(KRB5_BAD_KEYSIZE);
-    if (ivec)
-	return(KRB5_CRYPTO_INTERNAL);
+
     if (hash->length != (CONFLENGTH+RSA_MD5_CKSUM_LENGTH)) {
 #ifdef KRB5_MD5DES_BETA5_COMPAT
 	if (hash->length != RSA_MD5_CKSUM_LENGTH)
@@ -129,33 +104,32 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
 #endif
     }
 
-    /* create and schedule the encryption key */
-
-    memcpy(xorkey, key->contents, sizeof(xorkey));
-    if (!compathash) {
-	for (i=0; i<sizeof(xorkey); i++)
-	    xorkey[i] ^= 0xf0;
-    }
-    
-    switch (mit_des_key_sched(xorkey, schedule)) {
-    case -1:
-	return(KRB5DES_BAD_KEYPAR);
-    case -2:
-	return(KRB5DES_WEAK_KEY);
+    if (compathash) {
+        iv.data = malloc(key->length);
+        if (!iv.data) return ENOMEM;
+        iv.length = key->length;
+        if (key->contents)
+            memcpy(iv.data, key->contents, key->length);
     }
 
-    /* decrypt it.  this has a return value, but it's always zero.  */
+    /* decrypt it */
+    output.data = plaintext;
+    output.length = hash->length;
 
     if (!compathash) {
-	mit_des_cbc_encrypt((krb5_pointer) hash->data,
-			    (krb5_pointer) plaintext, hash->length,
-			    schedule,
-			    (const unsigned char *) mit_des_zeroblock, 0);
+        ret = enc->decrypt(key, NULL, hash, &output);
     } else {
-	mit_des_cbc_encrypt((krb5_pointer) hash->data,
-			    (krb5_pointer) plaintext, hash->length,
-			    schedule, xorkey, 0);
+        ret = enc->decrypt(key, &iv, hash, &output);
     }
+
+    if (compathash && iv.data) {
+        free (iv.data);
+    }
+
+    if (ret) return(ret);
+
+    if (output.length > CONFLENGTH+RSA_MD5_CKSUM_LENGTH)
+        return KRB5_CRYPTO_INTERNAL;
 
     /* hash the confounder, then the input data */
 
@@ -163,7 +137,7 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
     if (!compathash) {
 	krb5_MD5Update(&ctx, plaintext, CONFLENGTH);
     }
-    krb5_MD5Update(&ctx, (unsigned char *) input->data, 
+    krb5_MD5Update(&ctx, (unsigned char *) input->data,
 		   (unsigned) input->length);
     krb5_MD5Final(&ctx);
 
