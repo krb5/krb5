@@ -85,7 +85,6 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
     krb5_error_code ret;
     krb5_MD5_CTX ctx;
     unsigned char plaintext[CONFLENGTH+RSA_MD5_CKSUM_LENGTH];
-    unsigned char *ivptr = NULL, *outptr = NULL;
     int compathash = 0;
     struct krb5_enc_provider *enc = &krb5int_enc_des;
     krb5_data output, iv;

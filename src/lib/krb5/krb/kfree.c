@@ -450,8 +450,6 @@ void KRB5_CALLCONV
 krb5_free_passwd_phrase_element(krb5_context context,
 				passwd_phrase_element *val)
 {
-    register passwd_phrase_element **temp;
-
     if (val == NULL)
 	return;
     krb5_free_data(context, val->passwd);
