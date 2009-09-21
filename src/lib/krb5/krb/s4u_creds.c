@@ -207,10 +207,8 @@ build_pa_for_user(krb5_context context,
     krb5_data *for_user_data = NULL;
     char package[] = "Kerberos";
 
-    if (userid->user == NULL) {
-        code = EINVAL;
-        goto cleanup;
-    }
+    if (userid->user == NULL)
+        return EINVAL;
 
     memset(&for_user, 0, sizeof(for_user));
     for_user.user = userid->user;
@@ -580,8 +578,10 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         code = krb5int_copy_data_contents(context,
                                           &tgtptr->server->data[1],
                                           &s4u_creds.server->realm);
-        if (code != 0)
+        if (code != 0) {
+            krb5_free_pa_data(context, in_padata);
             goto cleanup;
+        }
 
         code = krb5_get_cred_via_tkt_ext(context, tgtptr,
                                          KDC_OPT_CANONICALIZE |

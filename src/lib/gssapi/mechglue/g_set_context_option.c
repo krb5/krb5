@@ -81,7 +81,7 @@ gss_set_sec_context_option (OM_uint32 *minor_status,
 	    if (ctx == NULL) {
 		*minor_status = ENOMEM;
 		gssint_delete_internal_sec_context(&minor,
-						   ctx->mech_type,
+						   &mech->mech_type,
 						   &internal_ctx,
 						   GSS_C_NO_BUFFER);
 		return GSS_S_FAILURE;
