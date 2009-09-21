@@ -54,7 +54,7 @@ proc test3 {} {
 	perror "$test: unexpected failure in init"
 	return
     }
-    one_line_fail_test [format {
+    one_line_succeed_test [format {
 	kadm5_create_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_PRINCIPAL} null
     } $test] "EINVAL"

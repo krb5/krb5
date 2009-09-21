@@ -207,6 +207,29 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
     fprintf (stderr, "\n");
 }
 
+/* Create a principal using the oldest appropriate kadm5 API. */
+static krb5_error_code
+create_princ(kadm5_principal_ent_rec *princ, long mask, int n_ks,
+	     krb5_key_salt_tuple *ks, char *pass)
+{
+    if (ks)
+	return kadm5_create_principal_3(handle, princ, mask, n_ks, ks, pass);
+    else
+	return kadm5_create_principal(handle, princ, mask, pass);
+}
+
+/* Randomize a principal's password using the oldest appropriate kadm5 API. */
+static krb5_error_code
+randkey_princ(krb5_principal princ, krb5_boolean keepold, int n_ks,
+	      krb5_key_salt_tuple *ks)
+{
+    if (keepold || ks) {
+	return kadm5_randkey_principal_3(handle, princ, keepold, n_ks, ks,
+					 NULL, NULL);
+    } else
+	return kadm5_randkey_principal(handle, princ, NULL, NULL);
+}
+
 char *kadmin_startup(argc, argv)
     int argc;
     char *argv[];
@@ -780,15 +803,9 @@ void kadmin_cpw(argc, argv)
 	if (db_args) free(db_args);
 	return;
     } else if (randkey) {
-	if (keepold || ks_tuple != NULL) {
-	    retval = kadm5_randkey_principal_3(handle, princ, keepold,
-					       n_ks_tuple, ks_tuple,
-					       NULL, NULL);
-	    if (ks_tuple != NULL)
-		free(ks_tuple);
-	} else {
-	    retval = kadm5_randkey_principal(handle, princ, NULL, NULL);
-	}
+	retval = randkey_princ(princ, keepold, n_ks_tuple, ks_tuple);
+	if (ks_tuple != NULL)
+	    free(ks_tuple);
 	krb5_free_principal(context, princ);
 	if (retval) {
 	    com_err("change_password", retval,
@@ -891,7 +908,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
     kadm5_principal_ent_t oprinc;
     long *mask;
     char **pass;
-    int *randkey;
+    krb5_boolean *randkey;
     krb5_key_salt_tuple **ks_tuple;
     int *n_ks_tuple;
 #if APPLE_PKINIT
@@ -913,7 +930,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
     *cert_hash = NULL;
 #endif /* APPLE_PKINIT */
     time(&now);
-    *randkey = 0;
+    *randkey = FALSE;
     for (i = 1; i < argc - 1; i++) {
 	attrib_set = 0;
 	if (strlen(argv[i]) == 2 &&
@@ -1048,7 +1065,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 	}
 	if (strlen(argv[i]) == 8 &&
 	    !strcmp("-randkey", argv[i])) {
-	    ++*randkey;
+	    *randkey = TRUE;
 	    continue;
 	}
 #if APPLE_PKINIT
@@ -1150,6 +1167,19 @@ kadmin_modprinc_usage(func)
 	);
 }
 
+/* Create a dummy password for old-style (pre-1.8) randkey creation. */
+static void
+prepare_dummy_password(char *buf, size_t sz)
+{
+    size_t i;
+
+    /* Must try to pass any password policy in place, and be valid UTF-8. */
+    strcpy(buf, "6F a[");
+    for (i = strlen(buf); i < sz - 1; i++)
+ 	buf[i] = 'a' + (i % 26);
+    buf[sz - 1] = '\0';
+}
+
 void kadmin_addprinc(argc, argv)
     int argc;
     char *argv[];
@@ -1157,7 +1187,7 @@ void kadmin_addprinc(argc, argv)
     kadm5_principal_ent_rec princ;
     kadm5_policy_ent_rec defpol;
     long mask;
-    int randkey = 0, i;
+    krb5_boolean randkey = FALSE, old_style_randkey = FALSE;
     int n_ks_tuple;
     krb5_key_salt_tuple *ks_tuple;
     char *pass, *canon;
@@ -1167,16 +1197,6 @@ void kadmin_addprinc(argc, argv)
 #if APPLE_PKINIT
     char *cert_hash = NULL;
 #endif /* APPLE_PKINIT */
-
-    /*
-     * We begin with a bad password and DISALLOW_ALL_TIX.  The bad
-     * password must try to pass any password policy in place, and
-     * must be valid UTF-8 for the arcfour string-to-key).
-     */
-    strcpy(dummybuf, "6F a[");
-    for (i = strlen(dummybuf); i < sizeof(dummybuf) - 1; i++)
- 	dummybuf[i] = 'a' + (random() % 25);
-    dummybuf[sizeof(dummybuf) - 1] = '\0';
 
     /* Zero all fields in request structure */
     memset(&princ, 0, sizeof(princ));
@@ -1235,10 +1255,8 @@ void kadmin_addprinc(argc, argv)
     }
     mask &= ~KADM5_POLICY_CLR;
 
-    if (randkey) {		/* do special stuff if -randkey specified */
-	princ.attributes |= KRB5_KDB_DISALLOW_ALL_TIX; /* set notix */
-	mask |= KADM5_ATTRIBUTES;
-	pass = dummybuf;
+    if (randkey) {
+	pass = NULL;
     } else if (pass == NULL) {
 	unsigned int sz = sizeof (newpw) - 1;
 
@@ -1261,11 +1279,18 @@ void kadmin_addprinc(argc, argv)
 	pass = newpw;
     }
     mask |= KADM5_PRINCIPAL;
-    if (ks_tuple != NULL) {
-	retval = kadm5_create_principal_3(handle, &princ, mask,
-					  n_ks_tuple, ks_tuple, pass);
-    } else {
-	retval = kadm5_create_principal(handle, &princ, mask, pass);
+    retval = create_princ(&princ, mask, n_ks_tuple, ks_tuple, pass);
+    if (retval == EINVAL && randkey) {
+	/*
+	 * The server doesn't support randkey creation.  Create the principal
+	 * with a dummy password and disallow tickets.
+	 */
+	prepare_dummy_password(dummybuf, sizeof(dummybuf));
+	princ.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
+	mask |= KADM5_ATTRIBUTES;
+	pass = dummybuf;
+	retval = create_princ(&princ, mask, n_ks_tuple, ks_tuple, pass);
+	old_style_randkey = 1;
     }
     if (retval) {
 	com_err("add_principal", retval, "while creating \"%s\".",
@@ -1277,16 +1302,9 @@ void kadmin_addprinc(argc, argv)
 	kadmin_free_tl_data(&princ);
 	return;
     }
-    if (randkey) {		/* more special stuff for -randkey */
-	if (ks_tuple != NULL) {
-	    retval = kadm5_randkey_principal_3(handle, princ.principal,
-					       FALSE,
-					       n_ks_tuple, ks_tuple,
-					       NULL, NULL);
-	} else {
-	    retval = kadm5_randkey_principal(handle, princ.principal,
-					     NULL, NULL);
-	}
+    if (old_style_randkey) {
+	/* Randomize the password and re-enable tickets. */
+	retval = randkey_princ(princ.principal, FALSE, n_ks_tuple, ks_tuple);
 	if (retval) {
 	    com_err("add_principal", retval,
 		    "while randomizing key for \"%s\".", canon);
@@ -1329,7 +1347,7 @@ void kadmin_modprinc(argc, argv)
     long mask;
     krb5_error_code retval;
     char *pass, *canon;
-    int randkey = 0;
+    krb5_boolean randkey = FALSE;
     int n_ks_tuple = 0;
     krb5_key_salt_tuple *ks_tuple;
 #if APPLE_PKINIT
