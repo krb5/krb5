@@ -1168,12 +1168,13 @@ void kadmin_addprinc(argc, argv)
     char *cert_hash = NULL;
 #endif /* APPLE_PKINIT */
 
-    /* 
-       dummybuf is used to give random key a password,
-       random key entires are created with DISALLOW_ALL_TIX
-       so lets give them a known password utf8 valid pasword
-    */
-    for (i = 0; i < sizeof(dummybuf) - 1; i++)
+    /*
+     * We begin with a bad password and DISALLOW_ALL_TIX.  The bad
+     * password must try to pass any password policy in place, and
+     * must be valid UTF-8 for the arcfour string-to-key).
+     */
+    strcpy(dummybuf, "6F a[");
+    for (i = strlen(dummybuf); i < sizeof(dummybuf) - 1; i++)
  	dummybuf[i] = 'a' + (random() % 25);
     dummybuf[sizeof(dummybuf) - 1] = '\0';
 
