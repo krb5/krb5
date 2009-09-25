@@ -1,11 +1,9 @@
-/* arcfour.c 
+/*  lib/crypto/openssl/enc_provider/rc4.c
  *
  * #include STD_DISCLAIMER
  */
 
 #include "k5-int.h"
-#include "arcfour-int.h"
-#include "enc_provider.h"
 #include <aead.h>
 #include <rand2key.h>
 #include <openssl/evp.h>
@@ -14,17 +12,22 @@
 #define RC4_BLOCK_SIZE 1 
 
 /* Interface layer to kerb5 crypto layer */
+
+/* prototypes */
 static krb5_error_code
 k5_arcfour_docrypt(const krb5_keyblock *, const krb5_data *,
            const krb5_data *, krb5_data *);
-
 static krb5_error_code 
 k5_arcfour_free_state ( krb5_data *state);
 static krb5_error_code
 k5_arcfour_init_state (const krb5_keyblock *key,
                krb5_keyusage keyusage, krb5_data *new_state);
 
-/* The workhorse of the arcfour system, this impliments the cipher */
+/* The workhorse of the arcfour system,
+ * this impliments the cipher
+ */
+
+/* In-place rc4 crypto */
 static krb5_error_code
 k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
            const krb5_data *input, krb5_data *output)
@@ -44,26 +47,30 @@ k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
     keybuf[key->length] = '\0';
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
+
     ret = EVP_EncryptInit_ex(&ciph_ctx, EVP_rc4(), NULL, keybuf, NULL);
     if (ret) {
         tmp_buf=(unsigned char *)output->data;
-        ret = EVP_EncryptUpdate(&ciph_ctx, tmp_buf,  &tmp_len, (unsigned char *)input->data, input->length);
+        ret = EVP_EncryptUpdate(&ciph_ctx, tmp_buf,  &tmp_len,
+                                (unsigned char *)input->data, input->length);
         output->length = tmp_len;
     }
     if (ret) {
         tmp_buf += tmp_len;
         ret = EVP_EncryptFinal_ex(&ciph_ctx, tmp_buf, &tmp_len);
     }
+
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
-    output->length += tmp_len;
 
     if (!ret)
         return KRB5_CRYPTO_INTERNAL;
+
+    output->length += tmp_len;
+
     return 0;
 }
 
-
-/* In-place decryption */
+/* In-place IOV crypto */
 static krb5_error_code
 k5_arcfour_docrypt_iov(const krb5_keyblock *key,
                const krb5_data *state,
@@ -72,10 +79,10 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
 {
     size_t i;
     int ret = 0, tmp_len = 0;
-    EVP_CIPHER_CTX  ciph_ctx;
-    unsigned char   *keybuf = NULL ;
-    krb5_crypto_iov *iov    = NULL;
+    unsigned char   *keybuf  = NULL ;
     unsigned char   *tmp_buf = NULL;
+    krb5_crypto_iov *iov     = NULL;
+    EVP_CIPHER_CTX  ciph_ctx;
 
     keybuf=key->contents;
     keybuf[key->length] = '\0';
@@ -93,7 +100,7 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
 
         if (ENCRYPT_IOV(iov)) {
             tmp_buf=(unsigned char *)iov->data.data;
-            ret = EVP_EncryptUpdate(&ciph_ctx, 
+            ret = EVP_EncryptUpdate(&ciph_ctx,
                       tmp_buf, &tmp_len,
                       (unsigned char *)iov->data.data, iov->data.length);
             if (!ret) break;
@@ -102,12 +109,14 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
     }
     if(ret)
         ret = EVP_EncryptFinal_ex(&ciph_ctx, (unsigned char *)tmp_buf, &tmp_len);
-    if (ret) 
-        iov->data.length += tmp_len;
+
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
     if (!ret) 
-        return -1;
+        return KRB5_CRYPTO_INTERNAL;
+
+    iov->data.length += tmp_len;
+
     return 0;
 }
 
