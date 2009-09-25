@@ -766,8 +766,8 @@ krb5_get_credentials_for_proxy(krb5_context context,
         goto cleanup;
     }
 
-    code = krb5_get_credentials_core(context, options, in_creds,
-                                     &mcreds, &fields);
+    code = krb5int_construct_matching_creds(context, options, in_creds,
+                                            &mcreds, &fields);
     if (code != 0)
         goto cleanup;
 
