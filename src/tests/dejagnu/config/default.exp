@@ -2508,7 +2508,7 @@ proc setup_root_shell { testname } {
 	    set got_refused 1
 	    exp_continue
 	}
-	-re "word:|erberos rlogin failed|ection refused|ection reset by peer|not authorized|Ticket expired" {
+	-re "word:|erberos rlogin failed|ection refused|ection reset by peer|not authorized|Ticket expired|authenticity of" {
 	    note "$testname test requires ability to rlogin as root"
 	    unsupported "$testname"
 	    set timeout $old_timeout
