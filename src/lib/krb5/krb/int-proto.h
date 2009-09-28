@@ -60,9 +60,9 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			   krb5_creds ***tgts, int kdcopt);
 
 krb5_error_code
-krb5_construct_matching_creds(krb5_context context, krb5_flags options,
-			      krb5_creds *in_creds, krb5_creds *mcreds,
-			      krb5_flags *fields);
+krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
+				 krb5_creds *in_creds, krb5_creds *mcreds,
+				 krb5_flags *fields);
 
 #define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
 

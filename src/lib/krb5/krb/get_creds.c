@@ -117,7 +117,8 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     krb5_error_code retval;
     krb5_creds mcreds, *ncreds, **tgts, **tgts_iter;
     krb5_flags fields;
-    int not_ktype, kdcopt = 0;
+    krb5_boolean not_ktype;
+    int kdcopt = 0;
 
     *out_creds = NULL;
 
@@ -147,16 +148,13 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
 	    return 0;
 	}
 	free(ncreds);
+	ncreds = NULL;
 	if ((retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE)
 	    || options & KRB5_GC_CACHED)
 	    return retval;
+	not_ktype = (retval == KRB5_CC_NOT_KTYPE);
     } else if (options & KRB5_GC_CACHED)
 	return KRB5_CC_NOTFOUND;
-
-    if (retval == KRB5_CC_NOT_KTYPE)
-	not_ktype = 1;
-    else
-	not_ktype = 0;
 
     if (options & KRB5_GC_CANONICALIZE)
 	kdcopt |= KDC_OPT_CANONICALIZE;
