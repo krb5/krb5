@@ -35,13 +35,5 @@
 krb5_error_code KRB5_CALLCONV
 krb5_copy_keyblock_contents(krb5_context context, const krb5_keyblock *from, krb5_keyblock *to)
 {
-    *to = *from;
-    if (to->length) {
-        to->contents = (krb5_octet *)malloc(to->length);
-        if (!to->contents)
-            return ENOMEM;
-        memcpy(to->contents, from->contents, to->length);
-    } else 
-        to->contents = 0;
-    return 0;
+    return krb5int_c_copy_keyblock_contents(context, from, to);
 }

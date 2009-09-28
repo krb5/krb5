@@ -635,6 +635,11 @@ krb5int_locate_server (krb5_context, const krb5_data *realm,
 		       struct addrlist *, enum locate_service_type svc,
 		       int sockettype, int family);
 
+/* Internal structure of an opaque key identifier */
+struct krb5_key_st {
+    krb5_keyblock keyblock;
+};
+
 /* new encryption provider api */
 
 struct krb5_enc_provider {
@@ -798,13 +803,18 @@ krb5_error_code krb5int_c_combine_keys
 (krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2,
 		krb5_keyblock *outkey);
 
+
 void  krb5int_c_free_keyblock
 (krb5_context, krb5_keyblock *key);
 void  krb5int_c_free_keyblock_contents
 	(krb5_context, krb5_keyblock *);
-krb5_error_code   krb5int_c_init_keyblock
+krb5_error_code krb5int_c_init_keyblock
 		(krb5_context, krb5_enctype enctype,
 		size_t length, krb5_keyblock **out); 
+krb5_error_code krb5int_c_copy_keyblock
+(krb5_context context, const krb5_keyblock *from, krb5_keyblock **to);
+krb5_error_code krb5int_c_copy_keyblock_contents
+(krb5_context context, const krb5_keyblock *from, krb5_keyblock *to);
 
 /*
  * Internal - for cleanup.

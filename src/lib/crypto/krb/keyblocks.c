@@ -60,7 +60,6 @@ krb5_error_code   krb5int_c_init_keyblock
     return 0;
 }
 
-
 void 
 krb5int_c_free_keyblock(krb5_context context, register krb5_keyblock *val)
 {
@@ -76,4 +75,39 @@ krb5int_c_free_keyblock_contents(krb5_context context, krb5_keyblock *key)
 	free(key->contents);
 	key->contents = 0;
     }
+}
+
+krb5_error_code
+krb5int_c_copy_keyblock(krb5_context context, const krb5_keyblock *from,
+			krb5_keyblock **to)
+{
+    krb5_keyblock *new_key;
+    krb5_error_code code;
+
+    *to = NULL;
+    new_key = malloc(sizeof(*new_key));
+    if (!new_key)
+	return ENOMEM;
+    code = krb5int_c_copy_keyblock_contents(context, from, new_key);
+    if (code) {
+	free(new_key);
+	return code;
+    }
+    *to = new_key;
+    return 0;
+}
+
+krb5_error_code
+krb5int_c_copy_keyblock_contents(krb5_context context,
+				 const krb5_keyblock *from, krb5_keyblock *to)
+{
+    *to = *from;
+    if (to->length) {
+        to->contents = malloc(to->length);
+        if (!to->contents)
+            return ENOMEM;
+        memcpy(to->contents, from->contents, to->length);
+    } else
+        to->contents = 0;
+    return 0;
 }
