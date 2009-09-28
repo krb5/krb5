@@ -117,7 +117,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     krb5_error_code retval;
     krb5_creds mcreds, *ncreds, **tgts, **tgts_iter;
     krb5_flags fields;
-    krb5_boolean not_ktype;
+    krb5_boolean not_ktype = FALSE;
     int kdcopt = 0;
 
     *out_creds = NULL;
