@@ -203,6 +203,9 @@ errcode_t profile_open_file
 #define profile_update_file(P) profile_update_file_data((P)->data)
 errcode_t profile_update_file_data
 	(prf_data_t profile);
+#define profile_update_file_locked(P) profile_update_file_data_locked((P)->data)
+errcode_t profile_update_file_data_locked
+	(prf_data_t data);
 
 #define profile_flush_file(P) (((P) && (P)->magic == PROF_MAGIC_FILE) ? profile_flush_file_data((P)->data) : PROF_MAGIC_FILE)
 errcode_t profile_flush_file_data

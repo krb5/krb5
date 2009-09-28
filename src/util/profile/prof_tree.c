@@ -497,8 +497,8 @@ get_new_file:
 				*ret_value =0;
 			return 0;
 		}
-		k5_mutex_unlock(&iter->file->data->lock);
-		if ((retval = profile_update_file(iter->file))) {
+		if ((retval = profile_update_file_locked(iter->file))) {
+		    k5_mutex_unlock(&iter->file->data->lock);
 		    if (retval == ENOENT || retval == EACCES) {
 			/* XXX memory leak? */
 			iter->file = iter->file->next;
@@ -516,11 +516,6 @@ get_new_file:
 			profile_node_iterator_free(iter_p);
 			return retval;
 		    }
-		}
-		retval = k5_mutex_lock(&iter->file->data->lock);
-		if (retval) {
-		    profile_node_iterator_free(iter_p);
-		    return retval;
 		}
 		iter->file_serial = iter->file->data->upd_serial;
 		/*
