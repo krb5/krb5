@@ -403,7 +403,7 @@ krb5_db_def_fetch_mkey(krb5_context   context,
                        krb5_kvno     *kvno,
                        char          *db_args)
 {
-    krb5_error_code retval_ofs = 0, retval_kt = 0;
+    krb5_error_code retval;
     char keyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
 
@@ -418,31 +418,22 @@ krb5_db_def_fetch_mkey(krb5_context   context,
     /* null terminate no matter what */
     keyfile[sizeof(keyfile) - 1] = '\0';
 
-    /* assume the master key is in a keytab */
-    retval_kt = krb5_db_def_fetch_mkey_keytab(context, keyfile, mname, key, kvno);
-    if (retval_kt != 0) {
-        /*
-         * If it's not in a keytab, fall back and try getting the mkey from the
-         * older stash file format.
-         */
-        retval_ofs = krb5_db_def_fetch_mkey_stash(context, keyfile, key, kvno);
-    }
+    /* Try the keytab and old stash file formats. */
+    retval = krb5_db_def_fetch_mkey_keytab(context, keyfile, mname, key, kvno);
+    if (retval == KRB5_KEYTAB_BADVNO)
+        retval = krb5_db_def_fetch_mkey_stash(context, keyfile, key, kvno);
 
-    if (retval_kt != 0 && retval_ofs != 0) {
-        /*
-         * Error, not able to get mkey from either file format.  Note, in order
-         * to try to return a more correct error, the logic below is assuming
-         * that if either of the stash reading functions returned
-         * KRB5_KDB_BADSTORED_MKEY then this is probably the real error.
-         */
-        krb5_set_error_message (context, KRB5_KDB_CANTREAD_STORED,
-            "Can not fetch master key either from keytab (error: %s) or old "
-            "format (error %s).", error_message(retval_kt),
-            error_message(retval_ofs));
-        return KRB5_KDB_CANTREAD_STORED;
-    } else {
-        return 0;
-    }
+    /*
+     * Use a generic error code for failure to retrieve the master
+     * key, but set a message indicating the actual error.
+     */
+    if (retval != 0) {
+	krb5_set_error_message(context, KRB5_KDB_CANTREAD_STORED,
+			       "Can not fetch master key (error: %s).",
+			       error_message(retval));
+	return KRB5_KDB_CANTREAD_STORED;
+    } else
+	return 0;
 }
 
 /*
