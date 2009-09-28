@@ -108,7 +108,7 @@ krb5_copy_error_message (krb5_context dest_ctx, krb5_context src_ctx)
 	krb5int_set_error(&dest_ctx->err, src_ctx->err.code, "%s",
 			  src_ctx->err.msg);
     } else {
-	krb5int_clear_error(dest_ctx);
+	krb5int_clear_error(&dest_ctx->err);
     }
 }
 
