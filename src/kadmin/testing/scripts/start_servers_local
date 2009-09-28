@@ -137,6 +137,8 @@ max_s=60
 sofar_s=0
 timewait_s=300
 
+ovadm_args=-W
+
 while true; do
 	rm -f $adm_start_file
 

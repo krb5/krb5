@@ -167,8 +167,9 @@ void kdb5_create(argc, argv)
     krb5_data pwd, seed;
     kdb_log_context *log_ctx;
     krb5_kvno mkey_kvno;
+    int strong_random = 1;
 	   
-    while ((optchar = getopt(argc, argv, "s")) != -1) {
+    while ((optchar = getopt(argc, argv, "sW")) != -1) {
 	switch(optchar) {
 	case 's':
 	    do_stash++;
@@ -178,6 +179,9 @@ void kdb5_create(argc, argv)
 		com_err(progname, ENOMEM, "while parsing command arguments\n");
 		exit(1);
 	    }
+	    break;
+	case 'W':
+	    strong_random = 0;
 	    break;
 	case '?':
 	default:
@@ -196,7 +200,7 @@ void kdb5_create(argc, argv)
     log_ctx = util_context->kdblog_context;
 
     printf ("Loading random data\n");
-    retval = krb5_c_random_os_entropy (util_context, 1, NULL);
+    retval = krb5_c_random_os_entropy (util_context, strong_random, NULL);
     if (retval) {
       com_err (progname, retval, "Loading random data");
       exit_status++; return;
