@@ -98,5 +98,6 @@ int main()
     assert( results[3] == NULL);
     krb5_free_authdata(context, results);
     krb5_free_authdata(context, container_out);
+    krb5_free_context(context);
     return 0;
 }
