@@ -46,7 +46,7 @@ SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 		md5/OBJS.ST sha1/OBJS.ST 	\
 		enc_provider/OBJS.ST 		\
 		arcfour/OBJS.ST 		\
-		aes/OBJS.ST OBJS.ST
+		aes/OBJS.ST 
 
 ##DOS##LIBOBJS = $(OBJS)
 

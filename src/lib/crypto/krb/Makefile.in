@@ -158,7 +158,7 @@ STOBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 			 	\
 SUBDIROBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 		 	\
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST  	\
 	prf/OBJS.ST rand2key/OBJS.ST 			 	\
-	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST OBJS.ST 
+	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST 
 
 ##DOS##LIBOBJS = $(OBJS)
 
