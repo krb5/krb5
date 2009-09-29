@@ -2,7 +2,7 @@ thisconfigdir=../../../..
 myfulldir=lib/crypto/builtin/arcfour
 mydir=lib/crypto/builtin/arcfour
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../md4 -I$(srcdir)/../../krb
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@/md4  -I$(srcdir)/../../krb
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
