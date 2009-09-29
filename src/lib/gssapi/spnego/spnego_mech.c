@@ -1681,6 +1681,13 @@ cleanup:
 			*src_name = sc->internal_name;
 		}
 		release_spnego_ctx(&sc);
+	} else if (ret != GSS_S_CONTINUE_NEEDED) {
+		if (sc != NULL) {
+			gss_delete_sec_context(&tmpmin, &sc->ctx_handle,
+					       GSS_C_NO_BUFFER);
+			release_spnego_ctx(&sc);
+		}
+		*context_handle = GSS_C_NO_CONTEXT;
 	}
 	gss_release_buffer(&tmpmin, &mechtok_out);
 	if (mechtok_in != GSS_C_NO_BUFFER) {
