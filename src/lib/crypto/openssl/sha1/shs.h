@@ -22,11 +22,9 @@ typedef krb5_ui_4	SHS_LONG;
 /* The structure for storing SHS info */
 
 typedef struct {
-    EVP_MD_CTX ossl_sha1_ctx;
-    unsigned int   digest_len;
-    SHS_LONG digest[ 5 ];            /* Message digest */
-    SHS_LONG countLo, countHi;       /* 64-bit bit count */
-    SHS_LONG data[ 16 ];             /* SHS data buffer */
+    EVP_MD_CTX ossl_sha1_ctx;  
+    unsigned char   digestBuf[SHS_DIGESTSIZE]; /* output */
+    unsigned int    digestLen; /* output */
 } SHS_INFO;
 
 /* Message digest functions (shs.c) */

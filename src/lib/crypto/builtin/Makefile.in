@@ -2,7 +2,7 @@ thisconfigdir=../../..
 myfulldir=lib/crypto/builtin
 mydir=lib/crypto/builtin
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS=des arcfour aes	 md4 md5  sha1 enc_provider
+SUBDIRS=des arcfour aes	 md4 md5  sha1 enc_provider hash_provider
 LOCALINCLUDES = -I$(srcdir)/../krb 			\
 		-I$(srcdir)/../krb/hash_provider 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/des 	\
@@ -11,7 +11,8 @@ LOCALINCLUDES = -I$(srcdir)/../krb 			\
 		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/md4 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/md5	\
-		-I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 	
+		-I$(srcdir)/../@CRYPTO_IMPL@/enc_provider	\
+		-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider 	
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
@@ -38,6 +39,7 @@ SRCS=\
 STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 	md5/OBJS.ST sha1/OBJS.ST 	\
 	enc_provider/OBJS.ST 		\
+	hash_provider/OBJS.ST 		\
 	arcfour/OBJS.ST 		\
 	aes/OBJS.ST 			\
 	OBJS.ST
@@ -45,6 +47,7 @@ STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 		md5/OBJS.ST sha1/OBJS.ST 	\
 		enc_provider/OBJS.ST 		\
+		hash_provider/OBJS.ST 		\
 		arcfour/OBJS.ST 		\
 		aes/OBJS.ST 
 
@@ -70,6 +73,9 @@ all-windows::
 	cd ..\sha1
 	@echo Making in crypto\sha1
 	$(MAKE) -$(MFLAGS)
+	cd ..\hash_provider
+	@echo Making in crypto\hash_provider
+	$(MAKE) -$(MFLAGS)
 	cd ..\enc_provider
 	@echo Making in crypto\enc_provider
 	$(MAKE) -$(MFLAGS)
@@ -94,6 +100,9 @@ clean-windows::
 	cd ..\sha1
 	@echo Making clean in crypto\sha1
 	$(MAKE) -$(MFLAGS) clean
+	cd ..\hash_provider
+	@echo Making clean in crypto\hash_provider
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\enc_provider
 	@echo Making clean in crypto\enc_provider
 	$(MAKE) -$(MFLAGS) clean
@@ -117,6 +126,9 @@ check-windows::
 	$(MAKE) -$(MFLAGS) check
 	cd ..\sha1
 	@echo Making check in crypto\sha1
+	$(MAKE) -$(MFLAGS) check
+	cd ..\hash_provider
+	@echo Making check in crypto\hash_provider
 	$(MAKE) -$(MFLAGS) check
 	cd ..\enc_provider
 	@echo Making check in crypto\enc_provider

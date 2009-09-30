@@ -1,4 +1,4 @@
-/*
+/* lib/crypto/openssl/hmac.c
  */
 
 #include "k5-int.h"

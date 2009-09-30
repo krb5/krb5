@@ -21,7 +21,7 @@ LIBFINIFUNC=cryptoint_cleanup_library
 RELDIR=crypto
 
 STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST	\
-	krb/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST  		\
+	builtin/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST  		\
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST krb/yarrow/OBJS.ST 			\
 	builtin/md4/OBJS.ST builtin/md5/OBJS.ST builtin/sha1/OBJS.ST 		\
@@ -29,7 +29,7 @@ STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST	\
 	krb/OBJS.ST  builtin/OBJS.ST
 
 SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST 	\
-	krb/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST 			\
+	builtin/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST 		\
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST  krb/yarrow/OBJS.ST 			\
 	builtin/md4/OBJS.ST builtin/md5/OBJS.ST	builtin/sha1/OBJS.ST 		\
