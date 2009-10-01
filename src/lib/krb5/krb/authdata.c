@@ -1153,10 +1153,9 @@ krb5_authdata_context_externalize(krb5_context kcontext,
     remain = *lenremain;
 
     /* Our identifier */
-    if (remain < sizeof(krb5_int32))
-        return ENOMEM;
-
-    krb5_ser_pack_int32(KV5M_AUTHDATA_CONTEXT, &bp, &remain);
+    code = krb5_ser_pack_int32(KV5M_AUTHDATA_CONTEXT, &bp, &remain);
+    if (code != 0)
+        return code;
 
     /* The actual context data */
     code = k5_ad_externalize(kcontext, context, AD_USAGE_MASK,
@@ -1165,10 +1164,9 @@ krb5_authdata_context_externalize(krb5_context kcontext,
         return code;
 
     /* Our trailer */
-    if (remain < sizeof(krb5_int32))
-        return ENOMEM;
-
-    krb5_ser_pack_int32(KV5M_AUTHDATA_CONTEXT, &bp, &remain);
+    code = krb5_ser_pack_int32(KV5M_AUTHDATA_CONTEXT, &bp, &remain);
+    if (code != 0)
+        return code;
 
     *buffer = bp;
     *lenremain = remain;
