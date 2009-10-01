@@ -11,7 +11,7 @@ yarrow.so yarrow.po $(OUTPRE)yarrow.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../../builtin/sha1/shs.h yarrow.c yarrow.h \
-  ycipher.h yexcep.h yhash.h ylock.h ystate.h ytypes.h
+  ycipher.h yexcep.h $(srcdir)/../../builtin/yhash.h ylock.h ystate.h ytypes.h
 ycipher.so ycipher.po $(OUTPRE)ycipher.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -23,4 +23,4 @@ ycipher.so ycipher.po $(OUTPRE)ycipher.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../../builtin/enc_provider/enc_provider.h \
   $(srcdir)/../../builtin/sha1/shs.h yarrow.h ycipher.c \
-  ycipher.h yhash.h ytypes.h
+  ycipher.h $(srcdir)/../../builtin/yhash.h ytypes.h

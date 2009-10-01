@@ -52,7 +52,7 @@ cksumtypes.so cksumtypes.po $(OUTPRE)cksumtypes.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/hash_provider/hash_provider.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../builtin/hash_provider/hash_provider.h \
   $(srcdir)/keyhash_provider/keyhash_provider.h cksumtypes.c \
   cksumtypes.h
 coll_proof_cksum.so coll_proof_cksum.po $(OUTPRE)coll_proof_cksum.$(OBJEXT): \
@@ -192,7 +192,7 @@ etypes.so etypes.po $(OUTPRE)etypes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../builtin/aes/aes_s2k.h $(srcdir)/../builtin/arcfour/arcfour.h \
   $(srcdir)/../builtin/des/des_int.h $(srcdir)/../builtin/enc_provider/enc_provider.h \
-  $(srcdir)/dk/dk.h $(srcdir)/hash_provider/hash_provider.h \
+  $(srcdir)/dk/dk.h $(srcdir)/../builtin/hash_provider/hash_provider.h \
   $(srcdir)/old/old.h $(srcdir)/prf/prf_int.h $(srcdir)/raw/raw.h \
   etypes.c etypes.h
 keyblocks.so keyblocks.po $(OUTPRE)keyblocks.$(OBJEXT): \
@@ -329,7 +329,7 @@ prng.so prng.po $(OUTPRE)prng.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../builtin/enc_provider/enc_provider.h $(srcdir)/../builtin/sha1/shs.h \
   $(srcdir)/yarrow/yarrow.h $(srcdir)/yarrow/ycipher.h \
-  $(srcdir)/yarrow/yhash.h $(srcdir)/yarrow/ytypes.h \
+  $(srcdir)/../builtin/yhash.h $(srcdir)/yarrow/ytypes.h \
   prng.c
 random_to_key.so random_to_key.po $(OUTPRE)random_to_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \

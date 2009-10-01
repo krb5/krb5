@@ -1,8 +1,8 @@
 thisconfigdir=../../../..
-myfulldir=lib/crypto/krb/hash_provider
-mydir=lib/crypto/krb/hash_provider
+myfulldir=lib/crypto/builtin/hash_provider
+mydir=lib/crypto/builtin/hash_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../crc32 -I$(srcdir)/../../@CRYPTO_IMPL@/md4 \
+LOCALINCLUDES = -I$(srcdir)/../../krb/crc32 -I$(srcdir)/../../@CRYPTO_IMPL@/md4 \
 	-I$(srcdir)/../../@CRYPTO_IMPL@/md5 -I$(srcdir)/../../@CRYPTO_IMPL@/sha1
 DEFS=
 

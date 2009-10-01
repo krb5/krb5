@@ -10,7 +10,7 @@
 #define YARROW_NO_MATHLIB
 
 #include "ytypes.h"
-#include "yhash.h"
+#include <yhash.h>
 #include "ycipher.h"
 
 /* These error codes are returned by the functions below. */

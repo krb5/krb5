@@ -2,15 +2,15 @@ thisconfigdir=../../..
 myfulldir=lib/crypto/krb
 mydir=lib/crypto/krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= crc32 dk hash_provider keyhash_provider \
+SUBDIRS= crc32 dk keyhash_provider \
 	prf rand2key old raw yarrow 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir)/dk	\
-		-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider 			\
+		-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider -I$(srcdir)/keyhash_provider	\
 		-I$(srcdir)/prf -I$(srcdir)/rand2key		 			\
 		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/yarrow 			\
 		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
 		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/arcfour 	\
-		-I$(srcdir)/../@CRYPTO_IMPL@/sha1
+		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../@CRYPTO_IMPL@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
@@ -154,14 +154,14 @@ SRCS=\
 	$(srcdir)/verify_checksum_iov.c
 
 STOBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 			 	\
-	hash_provider/OBJS.ST keyhash_provider/OBJS.ST  	\
+	keyhash_provider/OBJS.ST 			 	\
 	prf/OBJS.ST rand2key/OBJS.ST 			 	\
 	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST  OBJS.ST
 
 SUBDIROBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 		 	\
-	hash_provider/OBJS.ST keyhash_provider/OBJS.ST  	\
+	keyhash_provider/OBJS.ST 			 	\
 	prf/OBJS.ST rand2key/OBJS.ST 			 	\
-	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST OBJS.ST 
+	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST 
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -178,9 +178,6 @@ all-windows::
 	$(MAKE) -$(MFLAGS)
 	cd ..\dk
 	@echo Making in crypto\dk
-	$(MAKE) -$(MFLAGS)
-	cd ..\hash_provider
-	@echo Making in crypto\hash_provider
 	$(MAKE) -$(MFLAGS)
 	cd ..\keyhash_provider
 	@echo Making in crypto\keyhash_provider
@@ -209,9 +206,6 @@ clean-windows::
 	cd ..\dk
 	@echo Making clean in crypto\dk
 	$(MAKE) -$(MFLAGS) clean
-	cd ..\hash_provider
-	@echo Making clean in crypto\hash_provider
-	$(MAKE) -$(MFLAGS) clean
 	cd ..\keyhash_provider
 	@echo Making clean in crypto\keyhash_provider
 	$(MAKE) -$(MFLAGS) clean
@@ -238,9 +232,6 @@ check-windows::
 	$(MAKE) -$(MFLAGS) check
 	cd ..\dk
 	@echo Making check in crypto\dk
-	$(MAKE) -$(MFLAGS) check
-	cd ..\hash_provider
-	@echo Making check in crypto\hash_provider
 	$(MAKE) -$(MFLAGS) check
 	cd ..\keyhash_provider
 	@echo Making check in crypto\keyhash_provider
