@@ -321,10 +321,10 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
     authent->authorization_data = NULL;
 
     if (ad_context != NULL) {
-	retval = krb5_authdata_export_attributes(context,
-						 ad_context,
-						 AD_USAGE_AP_REQ,
-						 &ext_authdata);
+	retval = krb5_authdata_export_authdata(context,
+					       ad_context,
+					       AD_USAGE_AP_REQ,
+					       &ext_authdata);
 	if (retval)
 	    return retval;
     }

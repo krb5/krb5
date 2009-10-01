@@ -619,8 +619,7 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
     krb5_context context;
     krb5_error_code code;
     krb5_gss_name_t kname;
-    krb5_authdata **authdata = NULL;
-    krb5_data *enc_authdata = NULL;
+    krb5_data *attrs = NULL;
     char *princstr = NULL;
     unsigned char *cp;
     size_t princlen;
@@ -658,22 +657,16 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
         code = krb5_authdata_export_attributes(context,
                                                kname->ad_context,
                                                AD_USAGE_MASK,
-                                               &authdata);
+                                               &attrs);
         if (code != 0)
             goto cleanup;
-
-        if (authdata != NULL) {
-            code = encode_krb5_authdata(authdata, &enc_authdata);
-            if (code != 0)
-                goto cleanup;
-        }
     }
 
     /* 04 02 OID Name AuthData */
 
     exp_composite_name->length = 10 + gss_mech_krb5->length + princlen;
-    if (enc_authdata != NULL)
-        exp_composite_name->length += 4 + enc_authdata->length;
+    if (attrs != NULL)
+        exp_composite_name->length += 4 + attrs->length;
     exp_composite_name->value = malloc(exp_composite_name->length);
     if (exp_composite_name->value == NULL) {
         code = ENOMEM;
@@ -684,7 +677,7 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
 
     /* Note: we assume the OID will be less than 128 bytes... */
     *cp++ = 0x04;
-    if (enc_authdata != NULL)
+    if (attrs != NULL)
         *cp++ = 0x02;
     else
         *cp++ = 0x01;
@@ -701,17 +694,16 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
     memcpy(cp, princstr, princlen);
     cp += princlen;
 
-    if (enc_authdata != NULL) {
-        store_32_be(enc_authdata->length, cp);
+    if (attrs != NULL) {
+        store_32_be(attrs->length, cp);
         cp += 4;
-        memcpy(cp, enc_authdata->data, enc_authdata->length);
-        cp += enc_authdata->length;
+        memcpy(cp, attrs->data, attrs->length);
+        cp += attrs->length;
     }
 
 cleanup:
     krb5_free_unparsed_name(context, princstr);
-    krb5_free_data(context, enc_authdata);
-    krb5_free_authdata(context, authdata);
+    krb5_free_data(context, attrs);
     k5_mutex_unlock(&kname->lock);
     krb5_free_context(context);
 

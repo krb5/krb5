@@ -1347,6 +1347,7 @@ void KRB5_CALLCONV krb5_free_ad_kdcissued
 #include <krb5/authdata_plugin.h>
 
 struct _krb5_authdata_context {
+    krb5_magic magic;
     int n_modules;
     struct _krb5_authdata_context_module {
 	krb5_authdatatype ad_type;
@@ -1374,6 +1375,12 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_context_init
 void KRB5_CALLCONV
 krb5_authdata_context_free
 (krb5_context kcontext, krb5_authdata_context context);
+
+krb5_error_code KRB5_CALLCONV krb5_authdata_export_authdata
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_flags usage,
+ krb5_authdata ***pauthdata);
 
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_get_attribute_types
@@ -1408,13 +1415,13 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_import_attributes
 (krb5_context kcontext,
  krb5_authdata_context context,
  krb5_flags usage,
- krb5_authdata **pauthdata);
+ const krb5_data *attributes);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_export_attributes
 (krb5_context kcontext,
  krb5_authdata_context context,
  krb5_flags usage,
- krb5_authdata ***pauthdata);
+ krb5_data **pattributes);
 
 krb5_error_code KRB5_CALLCONV krb5_authdata_export_internal
 (krb5_context kcontext,

@@ -47,6 +47,7 @@ krb5_error_code krb5_ser_authenticator_init (krb5_context);
 krb5_error_code krb5_ser_checksum_init (krb5_context);
 krb5_error_code krb5_ser_keyblock_init (krb5_context);
 krb5_error_code krb5_ser_principal_init (krb5_context);
+krb5_error_code krb5_ser_authdata_context_init (krb5_context);
 
 krb5_error_code
 krb5_preauth_supply_preauth_data(krb5_context context,

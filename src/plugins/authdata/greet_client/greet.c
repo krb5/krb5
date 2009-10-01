@@ -84,13 +84,38 @@ greet_request_init(krb5_context kcontext,
 }
 
 static krb5_error_code
-greet_import_attributes(krb5_context kcontext,
-                        krb5_authdata_context context,
-                        void *plugin_context,
-                        void *request_context,
-                        krb5_authdata **authdata,
-                        krb5_boolean kdc_issued_flag,
-                        krb5_const_principal issuer)
+greet_export_authdata(krb5_context kcontext,
+                      krb5_authdata_context context,
+                      void *plugin_context,
+                      void *request_context,
+                      krb5_flags usage,
+                      krb5_authdata ***out_authdata)
+{
+    struct greet_context *greet = (struct greet_context *)request_context;
+    krb5_authdata *data[2];
+    krb5_authdata datum;
+    krb5_error_code code;
+
+    datum.ad_type = -42;
+    datum.length = greet->greeting.length;
+    datum.contents = (krb5_octet *)greet->greeting.data;
+
+    data[0] = &datum;
+    data[1] = NULL;
+
+    code = krb5_copy_authdata(kcontext, data, out_authdata);
+
+    return code;
+}
+
+static krb5_error_code
+greet_import_authdata(krb5_context kcontext,
+                      krb5_authdata_context context,
+                      void *plugin_context,
+                      void *request_context,
+                      krb5_authdata **authdata,
+                      krb5_boolean kdc_issued_flag,
+                      krb5_const_principal issuer)
 {
     krb5_error_code code;
     struct greet_context *greet = (struct greet_context *)request_context;
@@ -231,46 +256,101 @@ greet_delete_attribute(krb5_context kcontext,
 }
 
 static krb5_error_code
-greet_export_attributes(krb5_context kcontext,
-                        krb5_authdata_context context,
-                        void *plugin_context,
-                        void *request_context,
-                        krb5_flags usage,
-                        krb5_authdata ***out_authdata)
+greet_size(krb5_context kcontext,
+           krb5_authdata_context context,
+           void *plugin_context,
+           void *request_context,
+           size_t *sizep)
 {
     struct greet_context *greet = (struct greet_context *)request_context;
-    krb5_authdata *data[2];
-    krb5_authdata datum;
-    krb5_error_code code;
 
-    datum.ad_type = -42;
-    datum.length = greet->greeting.length;
-    datum.contents = (krb5_octet *)greet->greeting.data;
+    *sizep += sizeof(krb5_int32) +
+              greet->greeting.length +
+              sizeof(krb5_int32);
 
-    data[0] = &datum;
-    data[1] = NULL;
-
-    code = krb5_copy_authdata(kcontext, data, out_authdata);
-
-    return code;
+    return 0;
 }
 
 static krb5_error_code
-greet_copy_context(krb5_context kcontext,
-                   krb5_authdata_context context,
-                   void *plugin_context,
-                   void *request_context,
-                   void *dst_plugin_context,
-                   void *dst_request_context)
+greet_externalize(krb5_context kcontext,
+                  krb5_authdata_context context,
+                  void *plugin_context,
+                  void *request_context,
+                  krb5_octet **buffer,
+                  size_t *lenremain)
 {
-    struct greet_context *src = (struct greet_context *)request_context;
-    struct greet_context *dst = (struct greet_context *)dst_request_context;
+    size_t required = 0;
+    struct greet_context *greet = (struct greet_context *)request_context;
 
-    dst->verified = src->verified;
+    greet_size(kcontext, context, plugin_context,
+               request_context, &required);
 
-    return krb5int_copy_data_contents_add0(kcontext,
-                                           &src->greeting,
-                                           &dst->greeting);
+    if (*lenremain < required)
+        return ENOMEM;
+
+    /* Greeting Length | Greeting Contents | Verified */
+    krb5_ser_pack_int32(greet->greeting.length, buffer, lenremain);
+    krb5_ser_pack_bytes((krb5_octet *)greet->greeting.data,
+                        (size_t)greet->greeting.length,
+                        buffer, lenremain);
+    krb5_ser_pack_int32((krb5_int32)greet->verified, buffer, lenremain);
+
+    return 0;
+}
+
+static krb5_error_code
+greet_internalize(krb5_context kcontext,
+                  krb5_authdata_context context,
+                  void *plugin_context,
+                  void *request_context,
+                  krb5_octet **buffer,
+                  size_t *lenremain)
+{
+    struct greet_context *greet = (struct greet_context *)request_context;
+    krb5_error_code code;
+    krb5_int32 length;
+    krb5_octet *contents = NULL;
+    krb5_int32 verified;
+    krb5_octet *bp;
+    size_t remain;
+
+    bp = *buffer;
+    remain = *lenremain;
+
+    /* Greeting Length */
+    code = krb5_ser_unpack_int32(&length, &bp, &remain);
+    if (code != 0)
+        return code;
+
+    /* Greeting Contents */
+    if (length != 0) {
+        contents = malloc(length);
+        if (contents == NULL)
+            return ENOMEM;
+
+        code = krb5_ser_unpack_bytes(contents, (size_t)length, &bp, &remain);
+        if (code != 0) {
+            free(contents);
+            return code;
+        }
+    }
+
+    /* Verified */
+    code = krb5_ser_unpack_int32(&verified, &bp, &remain);
+    if (code != 0) {
+        free(contents);
+        return code;
+    }
+
+    krb5_free_data_contents(kcontext, &greet->greeting);
+    greet->greeting.length = length;
+    greet->greeting.data = (char *)contents;
+    greet->verified = (verified != 0);
+
+    *buffer = bp;
+    *lenremain = remain;
+
+    return 0;
 }
 
 static krb5_authdatatype greet_ad_types[] = { -42, 0 };
@@ -287,10 +367,13 @@ krb5plugin_authdata_client_ftable_v0 authdata_client_0 = {
     greet_get_attribute,
     greet_set_attribute,
     greet_delete_attribute,
-    greet_import_attributes,
-    greet_export_attributes,
+    greet_export_authdata,
+    greet_import_authdata,
     NULL,
     NULL,
-    greet_copy_context,
     NULL,
+    NULL,
+    greet_size,
+    greet_externalize,
+    greet_internalize
 };

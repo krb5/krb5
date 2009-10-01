@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "authdata.h"
 #include "auth_con.h"
+#include "int-proto.h"
 
 /* Loosely based on preauth2.c */
 
@@ -140,6 +141,225 @@ k5_ad_init_modules(krb5_context kcontext,
     return code;
 }
 
+/*
+ * Determine size of to-be-externalized authdata context, for
+ * modules that match given flags mask. Note that this size
+ * does not include the magic identifier/trailer.
+ */
+static krb5_error_code
+k5_ad_size(krb5_context kcontext,
+           krb5_authdata_context context,
+           krb5_flags flags,
+           size_t *sizep)
+{
+    int i;
+    krb5_error_code code = 0;
+
+    *sizep += sizeof(krb5_int32); /* count */
+
+    for (i = 0; i < context->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &context->modules[i];
+        size_t size;
+
+        if ((module->flags & flags) == 0)
+            continue;
+
+        /* externalize request context for the first instance only */
+        if (module->client_req_init == NULL)
+            continue;
+
+        if (module->ftable->size == NULL)
+            continue;
+
+        assert(module->ftable->externalize != NULL);
+
+        size = sizeof(krb5_int32) /* namelen */ + strlen(module->name);
+
+        code = (*module->ftable->size)(kcontext,
+                                       context,
+                                       module->plugin_context,
+                                       *(module->request_context_pp),
+                                       &size);
+        if (code != 0)
+            break;
+
+        *sizep += size;
+    }
+
+    return code;
+}
+
+/*
+ * Externalize authdata context, for modules that match given flags
+ * mask. Note that the magic identifier/trailer is not included.
+ */
+static krb5_error_code
+k5_ad_externalize(krb5_context kcontext,
+                  krb5_authdata_context context,
+                  krb5_flags flags,
+                  krb5_octet **buffer,
+                  size_t *lenremain)
+{
+    int i;
+    krb5_error_code code;
+    krb5_int32 ad_count = 0;
+    krb5_octet *bp;
+    size_t remain;
+
+    bp = *buffer;
+    remain = *lenremain;
+
+    /* placeholder for count */
+    code = krb5_ser_pack_int32(0, &bp, &remain);
+    if (code != 0)
+        return code;
+
+    for (i = 0; i < context->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &context->modules[i];
+        size_t namelen;
+
+        if ((module->flags & flags) == 0)
+            continue;
+
+        /* externalize request context for the first instance only */
+        if (module->client_req_init == NULL)
+            continue;
+
+        if (module->ftable->externalize == NULL)
+            continue;
+
+        /*
+         * We use the module name rather than the authdata type, because
+         * there may be multiple modules for a particular authdata type.
+         */
+        namelen = strlen(module->name);
+
+        code = krb5_ser_pack_int32((krb5_int32)namelen, &bp, &remain);
+        if (code != 0)
+            break;
+
+        code = krb5_ser_pack_bytes((krb5_octet *)module->name,
+                                   namelen, &bp, &remain);
+        if (code != 0)
+            break;
+
+        code = (*module->ftable->externalize)(kcontext,
+                                              context,
+                                              module->plugin_context,
+                                              *(module->request_context_pp),
+                                              &bp,
+                                              &remain);
+        if (code != 0)
+            break;
+
+        ad_count++;
+    }
+
+    if (code == 0) {
+        /* store actual count */
+        krb5_ser_pack_int32(ad_count, buffer, lenremain);
+
+        *buffer = bp;
+        *lenremain = remain;
+    }
+
+    return code;
+}
+
+/*
+ * Find authdata module for authdata type that matches flag mask
+ */
+static struct _krb5_authdata_context_module *
+k5_ad_find_module(krb5_context kcontext,
+                  krb5_authdata_context context,
+                  krb5_flags flags,
+                  const krb5_data *name)
+{
+    int i;
+    struct _krb5_authdata_context_module *ret = NULL;
+
+    for (i = 0; i < context->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &context->modules[i];
+
+        if ((module->flags & flags) &&
+            module->client_req_init != NULL &&
+            strlen(module->name) == name->length &&
+            memcmp(module->name, name->data, name->length) == 0) {
+            ret = module;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+/*
+ * In-place internalize authdata context, for modules that match given
+ * flags mask. The magic identifier/trailer is not expected by this.
+ */
+static krb5_error_code
+k5_ad_internalize(krb5_context kcontext,
+                  krb5_authdata_context context,
+                  krb5_flags flags,
+                  krb5_octet **buffer,
+                  size_t *lenremain)
+{
+    krb5_error_code code = 0;
+    krb5_int32 i, count;
+    krb5_octet *bp;
+    size_t remain;
+
+    bp = *buffer;
+    remain = *lenremain;
+
+    code = krb5_ser_unpack_int32(&count, &bp, &remain);
+    if (code != 0)
+        return code;
+
+    for (i = 0; i < count; i++) {
+        struct _krb5_authdata_context_module *module;
+        krb5_int32 namelen;
+        krb5_data name;
+
+        code = krb5_ser_unpack_int32(&namelen, &bp, &remain);
+        if (code != 0)
+            break;
+
+        if (remain < (size_t)namelen) {
+            code = ENOMEM;
+            break;
+        }
+
+        name.length = namelen;
+        name.data = (char *)bp;
+
+        module = k5_ad_find_module(kcontext, context, flags, &name);
+        if (module == NULL || module->ftable->internalize == NULL) {
+            code = EINVAL;
+            break;
+        }
+
+        bp += namelen;
+        remain -= namelen;
+
+        code = (*module->ftable->internalize)(kcontext,
+                                              context,
+                                              module->plugin_context,
+                                              *(module->request_context_pp),
+                                              &bp,
+                                              &remain);
+        if (code != 0)
+            break;
+    }
+
+    if (code == 0) {
+        *buffer = bp;
+        *lenremain = remain;
+    }
+
+    return code;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_authdata_context_init(krb5_context kcontext,
                            krb5_authdata_context *pcontext)
@@ -184,6 +404,7 @@ krb5_authdata_context_init(krb5_context kcontext,
         krb5int_close_plugin_dirs(&context->plugins);
         return ENOMEM;
     }
+    context->magic = KV5M_AUTHDATA_CONTEXT;
     context->modules = calloc(n_modules, sizeof(context->modules[0]));
     if (context->modules == NULL) {
         if (tables != NULL)
@@ -260,46 +481,15 @@ krb5_error_code KRB5_CALLCONV
 krb5_authdata_import_attributes(krb5_context kcontext,
                                 krb5_authdata_context context,
                                 krb5_flags usage,
-                                krb5_authdata **authdata_to_import)
+                                const krb5_data *attrs)
 {
-    int i;
-    krb5_error_code code = 0;
+    krb5_octet *bp;
+    size_t remain;
 
-    for (i = 0; i < context->n_modules; i++) {
-        struct _krb5_authdata_context_module *module = &context->modules[i];
-        krb5_authdata **authdata;
+    bp = (krb5_octet *)attrs->data;
+    remain = attrs->length;
 
-        if ((module->flags & usage) == 0)
-            continue;
-
-        if (module->ftable->import_attributes == NULL)
-            continue;
-
-        code = krb5int_find_authdata(kcontext,
-                                     authdata_to_import,
-                                     NULL,
-                                     module->ad_type,
-                                     &authdata);
-        if (code != 0 || authdata == NULL)
-            continue;
-
-        assert(authdata[0] != NULL);
-
-        code = (*module->ftable->import_attributes)(kcontext,
-                                                    context,
-                                                    module->plugin_context,
-                                                    *(module->request_context_pp),
-                                                    authdata,
-                                                    FALSE,
-                                                    NULL);
-        if (code != 0 && (module->flags & AD_INFORMATIONAL))
-            code = 0;
-        krb5_free_authdata(kcontext, authdata);
-        if (code != 0)
-            break;
-    }
-
-    return code;
+    return k5_ad_internalize(kcontext, context, usage, &bp, &remain);
 }
 
 static krb5_error_code
@@ -343,6 +533,65 @@ k5_get_kdc_issued_authdata(krb5_context kcontext,
     return code;
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_authdata_export_authdata(krb5_context kcontext,
+                              krb5_authdata_context context,
+                              krb5_flags flags,
+                              krb5_authdata ***pauthdata)
+{
+    int i;
+    krb5_error_code code = 0;
+    krb5_authdata **authdata = NULL;
+    unsigned int len = 0;
+
+    *pauthdata = NULL;
+
+    for (i = 0; i < context->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &context->modules[i];
+        krb5_authdata **authdata2 = NULL;
+        int j;
+
+        if ((module->flags & flags) == 0)
+            continue;
+
+        if (module->ftable->export_authdata == NULL)
+            continue;
+
+        code = (*module->ftable->export_authdata)(kcontext,
+                                                  context,
+                                                  module->plugin_context,
+                                                  *(module->request_context_pp),
+                                                  flags,
+                                                  &authdata2);
+        if (code == ENOENT)
+            code = 0;
+        else if (code != 0)
+            break;
+
+        if (authdata2 == NULL)
+            continue;
+
+        for (j = 0; authdata2[j] != NULL; j++)
+            ;
+
+        authdata = realloc(authdata, (len + j + 1) * sizeof(krb5_authdata *));
+        if (authdata == NULL)
+            return ENOMEM;
+
+        memcpy(&authdata[len], authdata2, j * sizeof(krb5_authdata *));
+        free(authdata2);
+
+        len += j;
+    }
+
+    if (authdata != NULL)
+        authdata[len] = NULL;
+
+    *pauthdata = authdata;
+
+    return code;
+}
+
 krb5_error_code
 krb5int_authdata_verify(krb5_context kcontext,
                         krb5_authdata_context context,
@@ -371,7 +620,7 @@ krb5int_authdata_verify(krb5_context kcontext,
         if ((module->flags & usage) == 0)
             continue;
 
-        if (module->ftable->import_attributes == NULL)
+        if (module->ftable->import_authdata == NULL)
             continue;
 
         if (kdc_issued_authdata != NULL) {
@@ -401,13 +650,13 @@ krb5int_authdata_verify(krb5_context kcontext,
 
         assert(authdata[0] != NULL);
 
-        code = (*module->ftable->import_attributes)(kcontext,
-                                                    context,
-                                                    module->plugin_context,
-                                                    *(module->request_context_pp),
-                                                    authdata,
-                                                    kdc_issued_flag,
-                                                    kdc_issuer);
+        code = (*module->ftable->import_authdata)(kcontext,
+                                                  context,
+                                                  module->plugin_context,
+                                                  *(module->request_context_pp),
+                                                  authdata,
+                                                  kdc_issued_flag,
+                                                  kdc_issuer);
         if (code == 0 && module->ftable->verify != NULL) {
             code = (*module->ftable->verify)(kcontext,
                                              context,
@@ -630,59 +879,44 @@ krb5_error_code KRB5_CALLCONV
 krb5_authdata_export_attributes(krb5_context kcontext,
                                 krb5_authdata_context context,
                                 krb5_flags flags,
-                                krb5_authdata ***pauthdata)
+                                krb5_data **attrsp)
 {
-    int i;
-    krb5_error_code code = 0;
-    krb5_authdata **authdata = NULL;
-    unsigned int len = 0;
+    krb5_error_code code;
+    size_t required = 0;
+    krb5_octet *bp;
+    size_t remain;
+    krb5_data *attrs;
 
-    *pauthdata = NULL;
+    code = k5_ad_size(kcontext, context, AD_USAGE_MASK, &required);
+    if (code != 0)
+        return code;
 
-    for (i = 0; i < context->n_modules; i++) {
-        struct _krb5_authdata_context_module *module = &context->modules[i];
-        krb5_authdata **authdata2 = NULL;
-        int j;
+    attrs = malloc(sizeof(*attrs));
+    if (attrs == NULL)
+        return ENOMEM;
 
-        if ((module->flags & flags) == 0)
-            continue;
-
-        if (module->ftable->export_attributes == NULL)
-            continue;
-
-        code = (*module->ftable->export_attributes)(kcontext,
-                                                    context,
-                                                    module->plugin_context,
-                                                    *(module->request_context_pp),
-                                                    flags,
-                                                    &authdata2);
-        if (code == ENOENT)
-            code = 0;
-        else if (code != 0)
-            break;
-
-        if (authdata2 == NULL)
-            continue;
-
-        for (j = 0; authdata2[j] != NULL; j++)
-            ;
-
-        authdata = realloc(authdata, (len + j + 1) * sizeof(krb5_authdata *));
-        if (authdata == NULL)
-            return ENOMEM;
-
-        memcpy(&authdata[len], authdata2, j * sizeof(krb5_authdata *));
-        free(authdata2);
-
-        len += j;
+    attrs->magic = KV5M_DATA;
+    attrs->length = 0;
+    attrs->data = malloc(required);
+    if (attrs->data == NULL) {
+        free(attrs);
+        return ENOMEM;
     }
 
-    if (authdata != NULL)
-        authdata[len] = NULL;
+    bp = (krb5_octet *)attrs->data;
+    remain = required;
 
-    *pauthdata = authdata;
+    code = k5_ad_externalize(kcontext, context, AD_USAGE_MASK, &bp, &remain);
+    if (code != 0) {
+        krb5_free_data(kcontext, attrs);
+        return code;
+    }
 
-    return code;
+    attrs->length = (bp - (krb5_octet *)attrs->data);
+
+    *attrsp = attrs;
+
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -772,21 +1006,73 @@ k5_copy_ad_module_data(krb5_context kcontext,
     if (dst_module == NULL)
         return ENOENT;
 
-    if (dst_module->client_req_init == NULL) {
-        /* only copy the context for the head module */
+    /* copy request context for the first instance only */
+    if (dst_module->client_req_init == NULL)
         return 0;
-    }
 
     assert(strcmp(dst_module->name, src_module->name) == 0);
-    assert(src_module->request_context_pp == &src_module->request_context);
-    assert(dst_module->request_context_pp == &dst_module->request_context);
 
-    code = (*src_module->ftable->copy_context)(kcontext,
-                                               context,
-                                               src_module->plugin_context,
-                                               src_module->request_context,
-                                               dst_module->plugin_context,
-                                               dst_module->request_context);
+    /* If copy_context is unimplemented, externalize/internalize */
+    if (src_module->ftable->copy_context == NULL) {
+        size_t size = 0, remain;
+        krb5_octet *contents, *bp;
+
+        assert(src_module->ftable->size != NULL);
+        assert(src_module->ftable->externalize != NULL);
+        assert(dst_module->ftable->internalize != NULL);
+
+        code = (*src_module->ftable->size)(kcontext,
+                                           context,
+                                           src_module->plugin_context,
+                                           src_module->request_context,
+                                           &size);
+        if (code != 0)
+            return code;
+
+        contents = malloc(size);
+        if (contents == NULL)
+            return ENOMEM;
+
+        bp = contents;
+        remain = size;
+
+        code = (*src_module->ftable->externalize)(kcontext,
+                                                  context,
+                                                  src_module->plugin_context,
+                                                  *(src_module->request_context_pp),
+                                                  &bp,
+                                                  &remain);
+        if (code != 0) {
+            free(contents);
+            return code;
+        }
+
+        remain = (bp - contents);
+        bp = contents;
+
+        code = (*dst_module->ftable->internalize)(kcontext,
+                                                  context,
+                                                  dst_module->plugin_context,
+                                                  *(dst_module->request_context_pp),
+                                                  &bp,
+                                                  &remain);
+        if (code != 0) {
+            free(contents);
+            return code;
+        }
+
+        free(contents);
+    } else {
+        assert(src_module->request_context_pp == &src_module->request_context);
+        assert(dst_module->request_context_pp == &dst_module->request_context);
+
+        code = (*src_module->ftable->copy_context)(kcontext,
+                                                   context,
+                                                   src_module->plugin_context,
+                                                   src_module->request_context,
+                                                   dst_module->plugin_context,
+                                                   dst_module->request_context);
+    }
 
     return code;
 }
@@ -821,5 +1107,135 @@ krb5_authdata_context_copy(krb5_context kcontext,
     *pdst = dst;
 
     return 0;
+}
+
+/*
+ * Calculate size of to-be-externalized authdata context.
+ */
+static krb5_error_code
+krb5_authdata_context_size(krb5_context kcontext,
+                           krb5_pointer ptr,
+                           size_t *sizep)
+{
+    krb5_error_code code;
+    krb5_authdata_context context = (krb5_authdata_context)ptr;
+
+    code = k5_ad_size(kcontext, context, AD_USAGE_MASK, sizep);
+    if (code != 0)
+        return code;
+
+    *sizep += 2 * sizeof(krb5_int32); /* identifier/trailer */
+
+    return 0;
+}
+
+/*
+ * Externalize an authdata context.
+ */
+static krb5_error_code
+krb5_authdata_context_externalize(krb5_context kcontext,
+                                  krb5_pointer ptr,
+                                  krb5_octet **buffer,
+                                  size_t *lenremain)
+{
+    krb5_error_code code;
+    krb5_authdata_context context = (krb5_authdata_context)ptr;
+    krb5_octet *bp;
+    size_t remain;
+
+    bp = *buffer;
+    remain = *lenremain;
+
+    /* Our identifier */
+    if (remain < sizeof(krb5_int32))
+        return ENOMEM;
+
+    krb5_ser_pack_int32(KV5M_AUTHDATA_CONTEXT, &bp, &remain);
+
+    /* The actual context data */
+    code = k5_ad_externalize(kcontext, context, AD_USAGE_MASK,
+                             &bp, &remain);
+    if (code != 0)
+        return code;
+
+    /* Our trailer */
+    if (remain < sizeof(krb5_int32))
+        return ENOMEM;
+
+    krb5_ser_pack_int32(KV5M_AUTHDATA_CONTEXT, &bp, &remain);
+
+    *buffer = bp;
+    *lenremain = remain;
+
+    return 0;
+}
+
+/*
+ * Internalize an authdata context.
+ */
+static krb5_error_code
+krb5_authdata_context_internalize(krb5_context kcontext,
+                                  krb5_pointer *ptr,
+                                  krb5_octet **buffer,
+                                  size_t *lenremain)
+{
+    krb5_error_code code;
+    krb5_authdata_context context;
+    krb5_int32 ibuf;
+    krb5_octet *bp;
+    size_t remain;
+
+    bp = *buffer;
+    remain = *lenremain;
+
+    code = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (code != 0)
+        return code;
+
+    if (ibuf != KV5M_AUTHDATA_CONTEXT)
+        return EINVAL;
+
+    code = krb5_authdata_context_init(kcontext, &context);
+    if (code != 0)
+        return code;
+
+    code = k5_ad_internalize(kcontext, context, AD_USAGE_MASK,
+                             &bp, &remain);
+    if (code != 0) {
+        krb5_authdata_context_free(kcontext, context);
+        return code;
+    }
+
+    code = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (code != 0)
+        return code;
+
+    if (ibuf != KV5M_AUTHDATA_CONTEXT) {
+        krb5_authdata_context_free(kcontext, context);
+        return EINVAL;
+    }
+
+    *buffer = bp;
+    *lenremain = remain;
+    *ptr = context;
+
+    return 0;
+}
+
+static const krb5_ser_entry krb5_authdata_context_ser_entry = {
+    KV5M_AUTHDATA_CONTEXT,
+    krb5_authdata_context_size,
+    krb5_authdata_context_externalize,
+    krb5_authdata_context_internalize
+};
+
+/*
+ * Register the authdata context serializer.
+ */
+krb5_error_code
+krb5_ser_authdata_context_init(krb5_context kcontext)
+{
+    return krb5_register_serializer(kcontext,
+                                    &krb5_authdata_context_ser_entry);
 }
 

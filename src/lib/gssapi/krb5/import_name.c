@@ -45,6 +45,9 @@
  * GSS_S_FAILURE        if memory allocation fails
  */
 
+/*
+ * Import serialized authdata context
+ */
 static krb5_error_code
 import_name_composite(krb5_context context,
                       unsigned char *enc_data, size_t enc_length,
@@ -53,32 +56,22 @@ import_name_composite(krb5_context context,
     krb5_authdata_context ad_context;
     krb5_error_code code;
     krb5_data data;
-    krb5_authdata **authdata;
+
+    code = krb5_authdata_context_init(context, &ad_context);
+    if (code != 0)
+        return code;
 
     data.data = (char *)enc_data;
     data.length = enc_length;
 
-    code = decode_krb5_authdata(&data, &authdata);
-    if (code != 0)
-        return code;
-
-    code = krb5_authdata_context_init(context, &ad_context);
-    if (code != 0) {
-        krb5_free_authdata(context, authdata);
-        return code;
-    }
-
     code = krb5_authdata_import_attributes(context,
                                            ad_context,
                                            AD_USAGE_MASK,
-                                           authdata);
+                                           &data);
     if (code != 0) {
-        krb5_free_authdata(context, authdata);
         krb5_authdata_context_free(context, ad_context);
         return code;
     }
-
-    krb5_free_authdata(context, authdata);
 
     *pad_context = ad_context;
 

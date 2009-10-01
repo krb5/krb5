@@ -187,10 +187,10 @@ static krb5_error_code get_credentials(context, cred, server, now,
      * cred->name->lock.
      */
     if (cred->name->ad_context != NULL) {
-        code = krb5_authdata_export_attributes(context,
-                                               cred->name->ad_context,
-                                               AD_USAGE_TGS_REQ,
-                                               &in_creds.authdata);
+        code = krb5_authdata_export_authdata(context,
+                                             cred->name->ad_context,
+                                             AD_USAGE_TGS_REQ,
+                                             &in_creds.authdata);
         if (code != 0)
             goto cleanup;
     }

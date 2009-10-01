@@ -137,10 +137,10 @@ kg_impersonate_name(OM_uint32 *minor_status,
     }
 
     if (user->ad_context != NULL) {
-        code = krb5_authdata_export_attributes(context,
-                                               user->ad_context,
-                                               AD_USAGE_TGS_REQ,
-                                               &in_creds.authdata);
+        code = krb5_authdata_export_authdata(context,
+                                             user->ad_context,
+                                             AD_USAGE_TGS_REQ,
+                                             &in_creds.authdata);
         if (code != 0) {
             k5_mutex_unlock(&user->lock);
             *minor_status = code;

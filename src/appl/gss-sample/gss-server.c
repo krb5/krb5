@@ -723,6 +723,8 @@ main(argc, argv)
 
     service_name = *argv;
 
+    krb5_gss_register_acceptor_identity("/Users/lukeh/CVSRoot/mit/authdata/src/appl/gss-sample/rand.keytab");
+
     if (server_acquire_creds(service_name, &server_creds) < 0)
 	return -1;
 
