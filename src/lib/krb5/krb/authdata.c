@@ -31,6 +31,8 @@
 
 /* Loosely based on preauth2.c */
 
+#define IS_PRIMARY_INSTANCE(_module) ((_module)->client_req_init != NULL)
+
 static const char *objdirs[] = {
 #if TARGET_OS_MAC
     KRB5_AUTHDATA_PLUGIN_BUNDLE_DIR,
@@ -165,7 +167,7 @@ k5_ad_size(krb5_context kcontext,
             continue;
 
         /* externalize request context for the first instance only */
-        if (module->client_req_init == NULL)
+        if (!IS_PRIMARY_INSTANCE(module))
             continue;
 
         if (module->ftable->size == NULL)
@@ -222,7 +224,7 @@ k5_ad_externalize(krb5_context kcontext,
             continue;
 
         /* externalize request context for the first instance only */
-        if (module->client_req_init == NULL)
+        if (!IS_PRIMARY_INSTANCE(module))
             continue;
 
         if (module->ftable->externalize == NULL)
@@ -285,7 +287,7 @@ k5_ad_find_module(krb5_context kcontext,
             continue;
 
         /* internalize request context for the first instance only */
-        if (module->client_req_init == NULL)
+        if (!IS_PRIMARY_INSTANCE(module))
             continue;
 
         /* check for name match */
@@ -1011,7 +1013,7 @@ k5_copy_ad_module_data(krb5_context kcontext,
         return ENOENT;
 
     /* copy request context for the first instance only */
-    if (dst_module->client_req_init == NULL)
+    if (!IS_PRIMARY_INSTANCE(dst_module))
         return 0;
 
     assert(strcmp(dst_module->name, src_module->name) == 0);
