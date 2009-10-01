@@ -13,13 +13,23 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS= hash_crc32.o hash_md4.o hash_md5.o hash_sha1.o
+CIMPL = @CRYPTO_IMPL@/hash_provider
 
-OBJS=   $(OUTPRE)hash_crc32.$(OBJEXT) $(OUTPRE)hash_md4.$(OBJEXT) \
-	$(OUTPRE)hash_md5.$(OBJEXT) $(OUTPRE)hash_sha1.$(OBJEXT)
+STLIBOBJS= \
+	../../$(CIMPL)/hash_crc32.o 	\
+	../../$(CIMPL)/hash_md4.o 	\
+	../../$(CIMPL)/hash_md5.o 	\
+	../../$(CIMPL)/hash_sha1.o
 
-SRCS= $(srcdir)/hash_crc32.c $(srcdir)/hash_md4.c \
-	$(srcdir)/hash_md5.c $(srcdir)/hash_sha1.c
+OBJS=   $(OUTPRE)../../$(CIMPL)/hash_crc32.$(OBJEXT) 	\
+	$(OUTPRE)../../$(CIMPL)/hash_md4.$(OBJEXT) 	\
+	$(OUTPRE)../../$(CIMPL)/hash_md5.$(OBJEXT) 	\
+	$(OUTPRE)../../$(CIMPL)/hash_sha1.$(OBJEXT)
+
+SRCS=	$(srcdir)/../../$(CIMPL)/hash_crc32.c	\
+	$(srcdir)/../../$(CIMPL)/hash_md4.c 	\
+	$(srcdir)/../../$(CIMPL)/hash_md5.c 	\
+	$(srcdir)/../../$(CIMPL)/hash_sha1.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
