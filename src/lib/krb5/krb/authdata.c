@@ -281,13 +281,20 @@ k5_ad_find_module(krb5_context kcontext,
     for (i = 0; i < context->n_modules; i++) {
         struct _krb5_authdata_context_module *module = &context->modules[i];
 
-        if ((module->flags & flags) &&
-            module->client_req_init != NULL &&
-            strlen(module->name) == name->length &&
-            memcmp(module->name, name->data, name->length) == 0) {
-            ret = module;
-            break;
-        }
+        if ((module->flags & flags) == 0)
+            continue;
+
+        /* internalize request context for the first instance only */
+        if (module->client_req_init == NULL)
+            continue;
+
+        /* check for name match */
+        if (strlen(module->name) != name->length ||
+            memcmp(module->name, name->data, name->length) != 0)
+            continue;
+
+        ret = module;
+        break;
     }
 
     return ret;
@@ -926,29 +933,28 @@ krb5_authdata_export_internal(krb5_context kcontext,
                               const char *module_name,
                               void **ptr)
 {
-    int i;
-    krb5_error_code code = ENOENT;
+    krb5_error_code code;
+    krb5_data name;
+    struct _krb5_authdata_context_module *module;
 
     *ptr = NULL;
 
-    for (i = 0; i < context->n_modules; i++) {
-        struct _krb5_authdata_context_module *module = &context->modules[i];
+    name.length = strlen(module_name);
+    name.data = (char *)module_name;
 
-        if (strcmp(module_name, module->name) != 0)
-            continue;
+    module = k5_ad_find_module(kcontext, context, AD_USAGE_MASK, &name);
+    if (module == NULL)
+        return ENOENT;
 
-        if (module->ftable->export_internal == NULL)
-            continue;
+    if (module->ftable->export_internal == NULL)
+        return ENOENT;
 
-        code = (*module->ftable->export_internal)(kcontext,
-                                                  context,
-                                                  module->plugin_context,
-                                                  *(module->request_context_pp),
-                                                  restrict_authenticated,
-                                                  ptr);
-
-        break;
-    }
+    code = (*module->ftable->export_internal)(kcontext,
+                                              context,
+                                              module->plugin_context,
+                                              *(module->request_context_pp),
+                                              restrict_authenticated,
+                                              ptr);
 
     return code;
 }
@@ -959,28 +965,26 @@ krb5_authdata_free_internal(krb5_context kcontext,
                             const char *module_name,
                             void *ptr)
 {
-    int i;
-    krb5_error_code code = ENOENT;
+    krb5_data name;
+    struct _krb5_authdata_context_module *module;
 
-    for (i = 0; i < context->n_modules; i++) {
-        struct _krb5_authdata_context_module *module = &context->modules[i];
+    name.length = strlen(module_name);
+    name.data = (char *)module_name;
 
-        if (strcmp(module_name, module->name) != 0)
-            continue;
+    module = k5_ad_find_module(kcontext, context, AD_USAGE_MASK, &name);
+    if (module == NULL)
+        return ENOENT;
 
-        if (module->ftable->free_internal == NULL)
-            continue;
+    if (module->ftable->free_internal == NULL)
+        return ENOENT;
 
-        (*module->ftable->free_internal)(kcontext,
-                                         context,
-                                         module->plugin_context,
-                                         *(module->request_context_pp),
-                                         ptr);
+    (*module->ftable->free_internal)(kcontext,
+                                     context,
+                                     module->plugin_context,
+                                     *(module->request_context_pp),
+                                     ptr);
 
-        break;
-    }
-
-    return code;
+    return 0;
 }
 
 static krb5_error_code
