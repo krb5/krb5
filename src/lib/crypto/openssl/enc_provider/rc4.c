@@ -62,7 +62,7 @@ k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
-    if (!ret)
+    if (ret != 1)
         return KRB5_CRYPTO_INTERNAL;
 
     output->length += tmp_len;
@@ -90,8 +90,10 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
     ret = EVP_EncryptInit_ex(&ciph_ctx, EVP_rc4(), NULL, keybuf, NULL);
-    if (!ret) 
-        return -1;
+    if (!ret){
+        EVP_CIPHER_CTX_cleanup(&ciph_ctx);
+        return KRB5_CRYPTO_INTERNAL;
+    }
 
     for (i = 0; i < num_data; i++) {
         iov = &data[i];
@@ -112,7 +114,7 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
-    if (!ret) 
+    if (ret != 1)
         return KRB5_CRYPTO_INTERNAL;
 
     iov->data.length += tmp_len;
