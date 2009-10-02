@@ -37,7 +37,7 @@
 
 /*
  * Helper routines for databases that wish to use the default
- * account lockout functionality.
+ * principal lockout functionality.
  */
 
 static krb5_error_code
@@ -105,7 +105,7 @@ locked_check_p(krb5_context context,
         return FALSE;
 
     if (lockout_duration == 0)
-        return TRUE; /* account permanently locked */
+        return TRUE; /* principal permanently locked */
 
     return (stamp < locked_time + lockout_duration);
 }
@@ -187,12 +187,16 @@ krb5_db2_lockout_audit(krb5_context context,
         entry->last_success = stamp;
     } else if (status == KRB5KDC_ERR_PREAUTH_FAILED ||
                status == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
-        if (failcnt_interval != 0 &&
-            stamp > entry->last_failed + failcnt_interval) {
-            /* Automatically unlock account after failcnt_interval */
-            entry->fail_auth_count = 0;
+        if (locked_time != 0) {
+            /* Unlock after lockout_duration */
             locked_time = 0;
             update_locked_time++;
+        }
+
+        if (failcnt_interval != 0 &&
+            stamp > entry->last_failed + failcnt_interval) {
+            /* Reset fail_auth_count after failcnt_interval */
+            entry->fail_auth_count = 0;
         }
 
         entry->last_failed = stamp;

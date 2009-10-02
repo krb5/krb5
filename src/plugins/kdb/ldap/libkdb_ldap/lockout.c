@@ -101,7 +101,7 @@ locked_check_p(krb5_context context,
         return FALSE;
 
     if (lockout_duration == 0)
-        return TRUE; /* account permanently locked */
+        return TRUE; /* principal permanently locked */
 
     return (stamp < locked_time + lockout_duration);
 }
@@ -179,13 +179,17 @@ krb5_ldap_lockout_audit(krb5_context context,
         entry->mask |= KADM5_FAIL_AUTH_COUNT | KADM5_LAST_SUCCESS;
     } else if (status == KRB5KDC_ERR_PREAUTH_FAILED ||
                status == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
-        if (failcnt_interval != 0 &&
-            locked_time != 0 &&
-            stamp > entry->last_failed + failcnt_interval) {
-            /* Automatically unlock account after failcnt_interval */
-            entry->fail_auth_count = 0;
+        if (locked_time != 0) {
+            /* Unlock after lockout_duration */
             locked_time = 0;
-            entry->mask |= KADM5_FAIL_AUTH_COUNT | KADM5_LOCKED_TIME;
+            entry->mask |= KADM5_LOCKED_TIME;
+        }
+
+        if (failcnt_interval != 0 &&
+            stamp > entry->last_failed + failcnt_interval) {
+            /* Reset fail_auth_count after failcnt_interval */
+            entry->fail_auth_count = 0;
+            entry->mask |= KADM5_FAIL_AUTH_COUNT;
         }
 
         entry->last_failed = stamp;
