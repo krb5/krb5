@@ -1018,8 +1018,8 @@ k5_copy_ad_module_data(krb5_context kcontext,
 
     assert(strcmp(dst_module->name, src_module->name) == 0);
 
-    /* If copy_context is unimplemented, externalize/internalize */
-    if (src_module->ftable->copy_context == NULL) {
+    /* If copy is unimplemented, externalize/internalize */
+    if (src_module->ftable->copy == NULL) {
         size_t size = 0, remain;
         krb5_octet *contents, *bp;
 
@@ -1072,12 +1072,12 @@ k5_copy_ad_module_data(krb5_context kcontext,
         assert(src_module->request_context_pp == &src_module->request_context);
         assert(dst_module->request_context_pp == &dst_module->request_context);
 
-        code = (*src_module->ftable->copy_context)(kcontext,
-                                                   context,
-                                                   src_module->plugin_context,
-                                                   src_module->request_context,
-                                                   dst_module->plugin_context,
-                                                   dst_module->request_context);
+        code = (*src_module->ftable->copy)(kcontext,
+                                           context,
+                                           src_module->plugin_context,
+                                           src_module->request_context,
+                                           dst_module->plugin_context,
+                                           dst_module->request_context);
     }
 
     return code;

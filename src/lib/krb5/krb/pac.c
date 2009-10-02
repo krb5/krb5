@@ -1364,27 +1364,6 @@ mspac_export_internal(krb5_context kcontext,
     return code;
 }
 
-static krb5_error_code
-mspac_copy_context(krb5_context kcontext,
-		   krb5_authdata_context context,
-		   void *plugin_context,
-		   void *request_context,
-		   void *dst_plugin_context,
-		   void *dst_request_context)
-{
-    struct mspac_context *srcctx = (struct mspac_context *)request_context;
-    struct mspac_context *dstctx = (struct mspac_context *)dst_request_context;
-    krb5_error_code code = 0;
-
-    assert(dstctx != NULL);
-    assert(dstctx->pac == NULL);
-
-    if (srcctx->pac != NULL)
-	code = k5_pac_copy(kcontext, srcctx->pac, &dstctx->pac);
-
-    return code;
-}
-
 static void
 mspac_free_internal(krb5_context kcontext,
 		    krb5_authdata_context context,
@@ -1515,6 +1494,27 @@ mspac_internalize(krb5_context kcontext,
     return 0;
 }
 
+static krb5_error_code
+mspac_copy(krb5_context kcontext,
+	   krb5_authdata_context context,
+	   void *plugin_context,
+	   void *request_context,
+	   void *dst_plugin_context,
+	   void *dst_request_context)
+{
+    struct mspac_context *srcctx = (struct mspac_context *)request_context;
+    struct mspac_context *dstctx = (struct mspac_context *)dst_request_context;
+    krb5_error_code code = 0;
+
+    assert(dstctx != NULL);
+    assert(dstctx->pac == NULL);
+
+    if (srcctx->pac != NULL)
+	code = k5_pac_copy(kcontext, srcctx->pac, &dstctx->pac);
+
+    return code;
+}
+
 static krb5_authdatatype mspac_ad_types[] = { KRB5_AUTHDATA_WIN2K_PAC, 0 };
 
 krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable = {
@@ -1533,10 +1533,10 @@ krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable = {
     mspac_import_authdata,
     mspac_export_internal,
     mspac_free_internal,
-    mspac_copy_context,
     mspac_verify,
     mspac_size,
     mspac_externalize,
-    mspac_internalize
+    mspac_internalize,
+    mspac_copy
 };
 

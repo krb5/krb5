@@ -372,8 +372,8 @@ krb5plugin_authdata_client_ftable_v0 authdata_client_0 = {
     NULL,
     NULL,
     NULL,
-    NULL,
     greet_size,
     greet_externalize,
-    greet_internalize
+    greet_internalize,
+    NULL
 };
