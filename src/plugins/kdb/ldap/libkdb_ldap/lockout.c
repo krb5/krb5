@@ -165,6 +165,8 @@ krb5_ldap_lockout_audit(krb5_context context,
 
     entry->mask = 0;
 
+    assert(!locked_check_p(context, stamp, locked_time, lockout_duration));
+
     if (status == 0 && (entry->attributes & KRB5_KDB_REQUIRES_PRE_AUTH)) {
         /*
          * Only mark the authentication as successful if the entry
