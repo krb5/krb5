@@ -70,27 +70,70 @@ krb5int_server_decrypt_ticket_keyblock(krb5_context context,
 }
 
 
-krb5_error_code	KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_server_decrypt_ticket_keytab(krb5_context context,
-				  const krb5_keytab kt,
+				  const krb5_keytab keytab,
 				  krb5_ticket *ticket)
 {
-    krb5_error_code       retval;
-    krb5_enctype          enctype;
-    krb5_keytab_entry     ktent;
+    krb5_error_code 	  retval;
+    krb5_keytab_entry 	  ktent;
 
-    enctype = ticket->enc_part.enctype;
+    retval = KRB5_KT_NOTFOUND;
 
-    if ((retval = krb5_kt_get_entry(context, kt, ticket->server,
-                                    ticket->enc_part.kvno,
-                                    enctype, &ktent)))
-        return retval;
+    if (keytab->ops->start_seq_get == NULL) {
+	retval = krb5_kt_get_entry(context, keytab,
+				   ticket->server,
+				   ticket->enc_part.kvno,
+				   ticket->enc_part.enctype, &ktent);
+	if (retval == 0) {
+	    retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
 
-    retval = krb5int_server_decrypt_ticket_keyblock(context,
-						    &ktent.key, ticket);
-    /* Upon error, Free keytab entry first, then return */
+	    (void) krb5_free_keytab_entry_contents(context, &ktent);
+	}
+    } else {
+	krb5_error_code code;
+	krb5_kt_cursor cursor;
 
-    (void) krb5_kt_free_entry(context, &ktent);
+	retval = krb5_kt_start_seq_get(context, keytab, &cursor);
+	if (retval != 0)
+	    goto map_error;
+
+	while ((code = krb5_kt_next_entry(context, keytab,
+					  &ktent, &cursor)) == 0) {
+	    if (ktent.key.enctype != ticket->enc_part.enctype)
+		continue;
+
+	    retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
+	    if (retval == 0) {
+		krb5_principal tmp;
+
+		retval = krb5_copy_principal(context, ktent.principal, &tmp);
+		if (retval == 0) {
+		    krb5_free_principal(context, ticket->server);
+		    ticket->server = tmp;
+		}
+		(void) krb5_free_keytab_entry_contents(context, &ktent);
+		break;
+	    }
+	    (void) krb5_free_keytab_entry_contents(context, &ktent);
+	}
+
+	code = krb5_kt_end_seq_get(context, keytab, &cursor);
+	if (code != 0)
+	    retval = code;
+    }
+
+map_error:
+    switch (retval) {
+    case KRB5_KT_KVNONOTFOUND:
+    case KRB5_KT_NOTFOUND:
+    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
+	retval = KRB5KRB_AP_WRONG_PRINC;
+	break;
+    default:
+	break;
+    }
+
     return retval;
 }
 #endif /* LEAN_CLIENT */

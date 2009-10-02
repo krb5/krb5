@@ -44,3 +44,6 @@ mkstemp.so mkstemp.po $(OUTPRE)mkstemp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
 t_k5buf.so t_k5buf.po $(OUTPRE)t_k5buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h k5buf-int.h t_k5buf.c
+t_unal.so t_unal.po $(OUTPRE)t_unal.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  t_unal.c

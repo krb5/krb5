@@ -2,7 +2,10 @@ thisconfigdir=../../../..
 myfulldir=lib/crypto/krb/yarrow
 mydir=lib/crypto/krb/yarrow
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@ -I$(srcdir)/../../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../../@CRYPTO_IMPL@/enc_provider
+LOCALINCLUDES = -I$(srcdir)/.. \
+		-I$(srcdir)/../../@CRYPTO_IMPL@		\
+		-I$(srcdir)/../../@CRYPTO_IMPL@/sha1 	\
+		-I$(srcdir)/../../@CRYPTO_IMPL@/enc_provider
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..

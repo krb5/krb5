@@ -31,6 +31,7 @@
 #include "old.h"
 #include "raw.h"
 #include "dk.h"
+#include "prf_int.h"
 #include "arcfour.h"
 #include "aes_s2k.h"
 #include "des/des_int.h"

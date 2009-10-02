@@ -544,9 +544,18 @@ handle_tgt_authdata (krb5_context context,
     }
 
     if (ad_nprincs != 0) {
+	/*
+	 * This code was submitted by Novell; however there is no
+	 * mention in [MS-SFU] of needing to examine the authorization
+	 * data to clear the forwardable flag. My understanding is that
+	 * the state of the forwardable flag is propagated through the
+	 * cross-realm TGTs.
+	 */
+#if 0
 	if (isflagset(flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
 	    isflagset(ad_entry.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
 	    clear(enc_tkt_reply->flags, TKT_FLG_FORWARDABLE);
+#endif
 
 	krb5_db_free_principal(context, &ad_entry, ad_nprincs);
 

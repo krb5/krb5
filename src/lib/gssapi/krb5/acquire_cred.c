@@ -532,8 +532,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
     cred->usage = cred_usage;
     cred->princ = NULL;
-    cred->prerfc_mech = req_old;
-    cred->rfc_mech = req_new;
+    cred->prerfc_mech = (req_old != 0);
+    cred->rfc_mech = (req_new != 0);
 
 #ifndef LEAN_CLIENT
     cred->keytab = NULL;
@@ -759,3 +759,4 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
    *minor_status = 0;
    return GSS_S_COMPLETE;
 }
+

@@ -73,6 +73,7 @@ SRCS = \
 	$(srcdir)/rel_cred.c \
 	$(srcdir)/rel_oid.c \
 	$(srcdir)/rel_name.c \
+	$(srcdir)/s4u_gss_glue.c \
 	$(srcdir)/seal.c \
 	$(srcdir)/set_allowable_enctypes.c \
 	$(srcdir)/ser_sctx.c \
@@ -123,6 +124,7 @@ OBJS = \
 	$(OUTPRE)rel_cred.$(OBJEXT) \
 	$(OUTPRE)rel_oid.$(OBJEXT) \
 	$(OUTPRE)rel_name.$(OBJEXT) \
+	$(OUTPRE)s4u_gss_glue.$(OBJEXT) \
 	$(OUTPRE)seal.$(OBJEXT) \
 	$(OUTPRE)set_allowable_enctypes.$(OBJEXT) \
 	$(OUTPRE)ser_sctx.$(OBJEXT) \
@@ -176,6 +178,7 @@ STLIBOBJS = \
 	rel_cred.o \
 	rel_oid.o \
 	rel_name.o \
+	s4u_gss_glue.o \
 	seal.o \
 	set_allowable_enctypes.o \
 	ser_sctx.o \

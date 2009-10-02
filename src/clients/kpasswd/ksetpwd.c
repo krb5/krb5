@@ -282,8 +282,6 @@ int main( int argc, char ** argv )
 /*
 ** change the password -
 */
-	fprintf( stderr, "the password is %s\n", new_password );
-
 	{
 		int pw_result;
 		krb5_ccache ccache;

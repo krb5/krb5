@@ -825,6 +825,23 @@ krb5_error_code ktest_make_sample_enc_sam_response_enc_2(p)
     return 0;
 }
 
+krb5_error_code ktest_make_sample_pa_s4u_x509_user(p)
+    krb5_pa_s4u_x509_user *p;
+{
+    krb5_error_code retval;
+    krb5_s4u_userid *u = &p->user_id;
+    u->nonce = 13243546;
+    retval = ktest_make_sample_principal(&u->user);
+    if (retval) return retval;
+    u->subject_cert.data = strdup("pa_s4u_x509_user");
+    if (u->subject_cert.data == NULL) return ENOMEM;
+    u->subject_cert.length = strlen(u->subject_cert.data);
+    u->options = 0x80000000;
+    retval = ktest_make_sample_checksum(&p->cksum);
+    if (retval) return retval;
+    return 0;
+}
+
 #ifdef ENABLE_LDAP
 static krb5_error_code ktest_make_sample_key_data(krb5_key_data *p, int i)
 {
@@ -1418,6 +1435,14 @@ void ktest_empty_enc_sam_response_enc_2(p)
     krb5_enc_sam_response_enc_2 *p;
 {
   ktest_empty_data(&p->sam_sad);
+}
+
+void ktest_empty_pa_s4u_x509_user(p)
+    krb5_pa_s4u_x509_user *p;
+{
+    ktest_destroy_principal(&p->user_id.user);
+    ktest_empty_data(&p->user_id.subject_cert);
+    if (p->cksum.contents) free(p->cksum.contents);
 }
 
 #ifdef ENABLE_LDAP

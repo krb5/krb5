@@ -6,15 +6,18 @@ DEFINES = -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS= $(srcdir)/t_imp_name.c
+SRCS= $(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c
 
-OBJS= t_imp_name.o
+OBJS= t_imp_name.o t_s4u.o
 
-all:: t_imp_name
+all:: t_imp_name t_s4u
 
 t_imp_name: t_imp_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_imp_name t_imp_name.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
+t_s4u: t_s4u.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_s4u t_s4u.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
+
 clean::
-	$(RM) t_imp_name
+	$(RM) t_imp_name t_s4u
 

@@ -631,6 +631,11 @@ krb5_error_code KRB5_CALLCONV
 
 /* Defined in KDC referrals draft */
 #define KRB5_KEYUSAGE_PA_REFERRAL		26 /* XXX note conflict with above */
+
+/* Defined in [MS-SFU] */
+#define KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST	26 /* XXX note conflict with above */
+#define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY	27 /* XXX note conflict with above */
+
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
 #define KRB5_KEYUSAGE_FAST_ENC 51
@@ -1566,6 +1571,10 @@ void KRB5_CALLCONV krb5_free_tgt_creds
 #define	KRB5_GC_USER_USER	1	/* want user-user ticket */
 #define	KRB5_GC_CACHED		2	/* want cached ticket only */
 #define	KRB5_GC_CANONICALIZE	4	/* set canonicalize KDC option */
+#define	KRB5_GC_NO_STORE	8	/* do not store in credentials cache */
+#define	KRB5_GC_FORWARDABLE		16  /* acquire forwardable tickets */
+#define	KRB5_GC_NO_TRANSIT_CHECK	32  /* disable transited check */
+#define	KRB5_GC_CONSTRAINED_DELEGATION	64  /* constrained delegation */
 
 krb5_error_code KRB5_CALLCONV krb5_get_credentials
 	(krb5_context,

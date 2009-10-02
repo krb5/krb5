@@ -231,7 +231,7 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_display_name,
 	spnego_gss_import_name,
 	spnego_gss_release_name,
-	NULL,				/* gss_inquire_cred */
+	spnego_gss_inquire_cred,	/* gss_inquire_cred */
 	NULL,				/* gss_add_cred */
 #ifndef LEAN_CLIENT
 	spnego_gss_export_sec_context,		/* gss_export_sec_context */
@@ -248,7 +248,7 @@ static struct gss_config spnego_mechanism =
 	NULL,				/* gss_export_name */
 	NULL,				/* gss_store_cred */
  	spnego_gss_inquire_sec_context_by_oid, /* gss_inquire_sec_context_by_oid */
- 	NULL,				/* gss_inquire_cred_by_oid */
+ 	spnego_gss_inquire_cred_by_oid,	/* gss_inquire_cred_by_oid */
  	spnego_gss_set_sec_context_option, /* gss_set_sec_context_option */
  	NULL,				/* gssspi_set_cred_option */
  	NULL,				/* gssspi_mech_invoke */
@@ -257,7 +257,9 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_wrap_iov,
 	spnego_gss_unwrap_iov,
 	spnego_gss_wrap_iov_length,
-	spnego_gss_complete_auth_token
+	spnego_gss_complete_auth_token,
+	spnego_gss_acquire_cred_impersonate_name,
+	NULL,				/* gss_add_cred_impersonate_name */
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -1787,6 +1789,76 @@ spnego_gss_release_name(
 	return (status);
 }
 
+OM_uint32
+spnego_gss_inquire_cred(
+			OM_uint32 *minor_status,
+			gss_cred_id_t cred_handle,
+			gss_name_t *name,
+			OM_uint32 *lifetime,
+			int *cred_usage,
+			gss_OID_set *mechanisms)
+{
+	OM_uint32 status;
+	gss_cred_id_t creds = GSS_C_NO_CREDENTIAL;
+	OM_uint32 tmp_minor_status;
+	OM_uint32 initiator_lifetime, acceptor_lifetime;
+
+	dsyslog("Entering inquire_cred\n");
+
+	/*
+	 * To avoid infinite recursion, if GSS_C_NO_CREDENTIAL is
+	 * supplied we call gss_inquire_cred_by_mech() on the
+	 * first non-SPNEGO mechanism.
+	 */
+	if (cred_handle == GSS_C_NO_CREDENTIAL) {
+		status = get_available_mechs(minor_status,
+			GSS_C_NO_NAME,
+			GSS_C_BOTH,
+			&creds,
+			mechanisms);
+		if (status != GSS_S_COMPLETE) {
+			dsyslog("Leaving inquire_cred\n");
+			return (status);
+		}
+
+		if ((*mechanisms)->count == 0) {
+			gss_release_cred(&tmp_minor_status, &creds);
+			gss_release_oid_set(&tmp_minor_status, mechanisms);
+			dsyslog("Leaving inquire_cred\n");
+			return (GSS_S_DEFECTIVE_CREDENTIAL);
+		}
+
+		assert((*mechanisms)->elements != NULL);
+
+		status = gss_inquire_cred_by_mech(minor_status,
+			creds,
+			&(*mechanisms)->elements[0],
+			name,
+			&initiator_lifetime,
+			&acceptor_lifetime,
+			cred_usage);
+		if (status != GSS_S_COMPLETE) {
+			gss_release_cred(&tmp_minor_status, &creds);
+			dsyslog("Leaving inquire_cred\n");
+			return (status);
+		}
+
+		if (lifetime != NULL)
+			*lifetime = (*cred_usage == GSS_C_ACCEPT) ?
+				acceptor_lifetime : initiator_lifetime;
+
+		gss_release_cred(&tmp_minor_status, &creds);
+	} else {
+		status = gss_inquire_cred(minor_status, cred_handle,
+					  name, lifetime,
+					  cred_usage, mechanisms);
+	}
+
+	dsyslog("Leaving inquire_cred\n");
+
+	return (status);
+}
+
 /*ARGSUSED*/
 OM_uint32
 spnego_gss_compare_name(
@@ -1942,6 +2014,9 @@ spnego_gss_delete_sec_context(
 	 */
 	if (*ctx != NULL &&
 	    (*ctx)->magic_num == SPNEGO_MAGIC_ID) {
+		(void) gss_delete_sec_context(minor_status,
+				    &(*ctx)->ctx_handle,
+				    output_token);
 		(void) release_spnego_ctx(ctx);
 	} else {
 		ret = gss_delete_sec_context(minor_status,
@@ -2088,6 +2163,21 @@ spnego_gss_inquire_sec_context_by_oid(
 }
 
 OM_uint32
+spnego_gss_inquire_cred_by_oid(
+		OM_uint32 *minor_status,
+		const gss_cred_id_t cred_handle,
+		const gss_OID desired_object,
+		gss_buffer_set_t *data_set)
+{
+	OM_uint32 ret;
+	ret = gss_inquire_cred_by_oid(minor_status,
+				cred_handle,
+				desired_object,
+				data_set);
+	return (ret);
+}
+
+OM_uint32
 spnego_gss_set_sec_context_option(
 		OM_uint32 *minor_status,
 		gss_ctx_id_t *context_handle,
@@ -2215,6 +2305,53 @@ spnego_gss_complete_auth_token(
 				      context_handle,
 				      input_message_buffer);
 	return (ret);
+}
+
+OM_uint32
+spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
+					 const gss_cred_id_t impersonator_cred_handle,
+					 gss_name_t desired_name,
+					 OM_uint32 time_req,
+					 gss_OID_set desired_mechs,
+					 gss_cred_usage_t cred_usage,
+					 gss_cred_id_t *output_cred_handle,
+					 gss_OID_set *actual_mechs,
+					 OM_uint32 *time_rec)
+{
+	OM_uint32 status;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET;
+
+	dsyslog("Entering spnego_gss_acquire_cred_impersonate_name\n");
+
+	if (actual_mechs)
+		*actual_mechs = NULL;
+
+	if (time_rec)
+		*time_rec = 0;
+
+	if (desired_mechs == GSS_C_NO_OID_SET) {
+		status = gss_inquire_cred(minor_status,
+					  impersonator_cred_handle,
+					  NULL, NULL,
+					  NULL, &amechs);
+		if (status != GSS_S_COMPLETE)
+			return status;
+
+		desired_mechs = amechs;
+	}
+
+	status = gss_acquire_cred_impersonate_name(minor_status,
+			impersonator_cred_handle,
+			desired_name, time_req,
+			desired_mechs, cred_usage,
+			output_cred_handle, actual_mechs,
+			time_rec);
+
+	if (amechs != GSS_C_NULL_OID_SET)
+		(void) gss_release_oid_set(minor_status, &amechs);
+
+	dsyslog("Leaving spnego_gss_acquire_cred_impersonate_name\n");
+	return (status);
 }
 
 /*

@@ -28,6 +28,11 @@ $(BUILDTOP)/.depend-verify-srcdir:
 	@if test "$(srcdir)" = "." ; then \
 		echo 1>&2 error: cannot build dependencies with srcdir=. ; \
 		echo 1>&2 "(can't distinguish generated files from source files)" ; \
+		echo 1>&2 "Run 'make distclean' and create a separate build dir" ; \
+		exit 1 ; \
+	elif test -f "$(top_srcdir)/include/autoconf.h"; then \
+		echo 1>&2 "error: generated headers found in source tree" ; \
+		echo 1>&2 "Run 'make distclean' in source tree first" ; \
 		exit 1 ; \
 	else \
 		if test -r $(BUILDTOP)/.depend-verify-srcdir; then :; \

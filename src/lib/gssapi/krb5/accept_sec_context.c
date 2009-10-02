@@ -114,6 +114,53 @@
 
 #ifndef LEAN_CLIENT
 
+static OM_uint32
+create_constrained_deleg_creds(OM_uint32 *minor_status,
+                               krb5_gss_cred_id_t verifier_cred_handle,
+                               krb5_ticket *ticket,
+                               krb5_gss_cred_id_t *out_cred,
+                               krb5_context context)
+{
+    OM_uint32 major_status;
+    krb5_creds krb_creds;
+    krb5_data *data;
+    krb5_error_code code;
+
+    assert(out_cred != NULL);
+    assert(verifier_cred_handle->usage == GSS_C_BOTH);
+
+    memset(&krb_creds, 0, sizeof(krb_creds));
+    krb_creds.client = ticket->enc_part2->client;
+    krb_creds.server = ticket->server;
+    krb_creds.keyblock = *(ticket->enc_part2->session);
+    krb_creds.ticket_flags = ticket->enc_part2->flags;
+    krb_creds.times = ticket->enc_part2->times;
+    krb_creds.magic = KV5M_CREDS;
+    krb_creds.authdata = NULL;
+
+    code = encode_krb5_ticket(ticket, &data);
+    if (code) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
+    krb_creds.ticket = *data;
+
+    major_status = kg_compose_deleg_cred(minor_status,
+                                         verifier_cred_handle,
+                                         &krb_creds,
+                                         GSS_C_INDEFINITE,
+                                         GSS_C_NO_OID_SET,
+                                         out_cred,
+                                         NULL,
+                                         NULL,
+                                         context);
+
+    krb5_free_data(context, data);
+
+    return major_status;
+}
+
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
 rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
@@ -866,6 +913,23 @@ kg_accept_krb5(minor_status, context_handle,
     ctx->krb_times = ticket->enc_part2->times; /* struct copy */
     ctx->krb_flags = ticket->enc_part2->flags;
 
+    if (delegated_cred_handle != NULL &&
+        deleg_cred == NULL && /* no unconstrained delegation */
+        cred->usage == GSS_C_BOTH &&
+        (ticket->enc_part2->flags & TKT_FLG_FORWARDABLE)) {
+        /*
+         * Now, we always fabricate a delegated credentials handle
+         * containing the service ticket to ourselves, which can be
+         * used for S4U2Proxy.
+         */
+        major_status = create_constrained_deleg_creds(minor_status, cred,
+                                                      ticket, &deleg_cred,
+                                                      context);
+        if (GSS_ERROR(major_status))
+            goto fail;
+        ctx->gss_flags |= GSS_C_DELEG_FLAG;
+    }
+
     krb5_free_ticket(context, ticket); /* Done with ticket */
 
     {
@@ -1055,8 +1119,8 @@ kg_accept_krb5(minor_status, context_handle,
     if (src_name)
         *src_name = (gss_name_t) name;
 
-    if (delegated_cred_handle && deleg_cred) {
-        if (!kg_save_cred_id((gss_cred_id_t) deleg_cred)) {
+    if (delegated_cred_handle) {
+       if (!kg_save_cred_id((gss_cred_id_t) deleg_cred)) {
             major_status = GSS_S_FAILURE;
             code = G_VALIDATE_FAILED;
             goto fail;

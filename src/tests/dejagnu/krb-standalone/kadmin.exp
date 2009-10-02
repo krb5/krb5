@@ -269,8 +269,8 @@ proc kadmin_cpw { pname password } {
 	send "adminpass$KEY\r"
     }
 
-    expect "Enter password for principal \"$pname\":" { send "$password\r" }
-    expect "Re-enter password for principal \"$pname\":" { send "$password\r" }
+    expect "Enter password for principal \"$pname@$REALMNAME\":" { send "$password\r" }
+    expect "Re-enter password for principal \"$pname@$REALMNAME\":" { send "$password\r" }
     # When in doubt, jam one of these in there.
     expect "\r"
     expect "Password for \"$pname@$REALMNAME\" changed."

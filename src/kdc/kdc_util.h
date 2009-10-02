@@ -150,6 +150,8 @@ int against_local_policy_tgs (krb5_kdc_req *, krb5_db_entry,
 					krb5_ticket *, const char **);
 
 /* kdc_preauth.c */
+krb5_boolean enctype_requires_etype_info_2(krb5_enctype enctype);
+
 const char * missing_required_preauth
     (krb5_db_entry *client, krb5_db_entry *server,
 	       krb5_enc_tkt_part *enc_tkt_reply);
@@ -176,6 +178,12 @@ krb5_error_code free_padata_context
 
 krb5_pa_data *find_pa_data
     (krb5_pa_data **padata, krb5_preauthtype pa_type);
+
+krb5_error_code add_pa_data_element
+    (krb5_context context,
+		    krb5_pa_data *padata,
+		    krb5_pa_data ***out_padata,
+		    krb5_boolean copy);
 
 /* kdc_authdata.c */
 krb5_error_code load_authdata_plugins(krb5_context context);
@@ -239,12 +247,21 @@ krb5_error_code kdc_process_s4u2self_req
 		krb5_kdc_req *request,
 		krb5_const_principal client_princ,
 		const krb5_db_entry *server,
-		krb5_keyblock *subkey,
+		krb5_keyblock *tgs_subkey,
+		krb5_keyblock *tgs_session,
 		krb5_timestamp kdc_time,
-		krb5_pa_for_user **s4u2_req,
+		krb5_pa_s4u_x509_user **s4u2self_req,
 		krb5_db_entry *princ,
 		int *nprincs,
 		const char **status);
+
+krb5_error_code kdc_make_s4u2self_rep
+	(krb5_context context,
+		krb5_keyblock *tgs_subkey,
+		krb5_keyblock *tgs_session,
+		krb5_pa_s4u_x509_user *req_s4u_user,
+		krb5_kdc_rep *reply,
+		krb5_enc_kdc_rep_part *reply_encpart);
 
 krb5_error_code kdc_process_s4u2proxy_req
 	(krb5_context context,

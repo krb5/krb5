@@ -21,7 +21,7 @@ SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 all-unix:: includes all-libs
-all-prerecurse: $(HDRS)
+all-prerecurse depend-prerecurse: $(HDRS)
 clean-unix:: clean-libs clean-includes
 
 includes:: $(HDRS)

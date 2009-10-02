@@ -1706,6 +1706,59 @@ krb5_error_code pa_sam_2(krb5_context context,
    return(0);
 }
 
+static krb5_error_code pa_s4u_x509_user(
+    krb5_context context,
+    krb5_kdc_req *request,
+    krb5_pa_data *in_padata,
+    krb5_pa_data **out_padata,
+    krb5_data *salt,
+    krb5_data *s2kparams,
+    krb5_enctype *etype,
+    krb5_keyblock *as_key,
+    krb5_prompter_fct prompter,
+    void *prompter_data,
+    krb5_gic_get_as_key_fct gak_fct,
+    void *gak_data)
+{
+    krb5_s4u_userid *userid = (krb5_s4u_userid *)gak_data; /* XXX private contract */
+    krb5_pa_data *s4u_padata;
+    krb5_error_code code;
+    krb5_principal client;
+
+    *out_padata = NULL;
+
+    if (userid == NULL)
+	return EINVAL;
+
+    code = krb5_copy_principal(context, request->client, &client);
+    if (code != 0)
+	return code;
+
+    if (userid->user != NULL)
+	krb5_free_principal(context, userid->user);
+    userid->user = client;
+
+    if (userid->subject_cert.length != 0) {
+	s4u_padata = malloc(sizeof(*s4u_padata));
+	if (s4u_padata == NULL)
+	    return ENOMEM;
+
+	s4u_padata->magic = KV5M_PA_DATA;
+	s4u_padata->pa_type = KRB5_PADATA_S4U_X509_USER;
+	s4u_padata->contents = malloc(userid->subject_cert.length);
+	if (s4u_padata->contents == NULL) {
+	    free(s4u_padata);
+	    return ENOMEM;
+	}
+	memcpy(s4u_padata->contents, userid->subject_cert.data, userid->subject_cert.length);
+	s4u_padata->length = userid->subject_cert.length;
+
+	*out_padata = s4u_padata;
+    }
+
+    return 0;
+}
+
 /* FIXME - order significant? */
 static const pa_types_t pa_types[] = {
     {
@@ -1748,6 +1801,11 @@ static const pa_types_t pa_types[] = {
     {
 	KRB5_PADATA_FX_COOKIE,
 	pa_fx_cookie,
+	PA_INFO,
+    },
+    {
+	KRB5_PADATA_S4U_X509_USER,
+	pa_s4u_x509_user,
 	PA_INFO,
     },
     {

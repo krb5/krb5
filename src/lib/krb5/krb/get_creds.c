@@ -46,10 +46,16 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
-static krb5_error_code
-krb5_get_credentials_core(krb5_context context, krb5_flags options,
-			  krb5_creds *in_creds, krb5_creds *mcreds,
-			  krb5_flags *fields)
+/*
+ * Set *mcreds and *fields to a matching credential and field set for
+ * use with krb5_cc_retrieve_cred, based on a set of input credentials
+ * and options.  The fields of *mcreds will be aliased to the fields
+ * of in_creds, so the contents of *mcreds should not be freed.
+ */
+krb5_error_code
+krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
+				 krb5_creds *in_creds, krb5_creds *mcreds,
+				 krb5_flags *fields)
 {
     if (!in_creds || !in_creds->server || !in_creds->client)
         return EINVAL;
@@ -77,7 +83,7 @@ krb5_get_credentials_core(krb5_context context, krb5_flags options,
 	int i;
 
 	*fields |= KRB5_TC_MATCH_KTYPE;
-	ret = krb5_get_tgs_ktypes (context, mcreds->server, &ktypes);
+	ret = krb5_get_tgs_ktypes(context, mcreds->server, &ktypes);
 	for (i = 0; ktypes[i]; i++)
 	    if (ktypes[i] == mcreds->keyblock.enctype)
 		break;
@@ -87,11 +93,14 @@ krb5_get_credentials_core(krb5_context context, krb5_flags options,
 	if (ret)
 	    return ret;
     }
-    if (options & KRB5_GC_USER_USER) {
+    if (options & (KRB5_GC_USER_USER | KRB5_GC_CONSTRAINED_DELEGATION)) {
 	/* also match on identical 2nd tkt and tkt encrypted in a
 	   session key */
-	*fields |= KRB5_TC_MATCH_2ND_TKT|KRB5_TC_MATCH_IS_SKEY;
-	mcreds->is_skey = TRUE;
+	*fields |= KRB5_TC_MATCH_2ND_TKT;
+	if (options & KRB5_GC_USER_USER) {
+	    *fields |= KRB5_TC_MATCH_IS_SKEY;
+	    mcreds->is_skey = TRUE;
+	}
 	mcreds->second_ticket = in_creds->second_ticket;
 	if (!in_creds->second_ticket.length)
 	    return KRB5_NO_2ND_TKT;
@@ -106,60 +115,68 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
 		     krb5_creds **out_creds)
 {
     krb5_error_code retval;
-    krb5_creds mcreds;
-    krb5_creds *ncreds;
-    krb5_creds **tgts;
+    krb5_creds mcreds, *ncreds, **tgts, **tgts_iter;
     krb5_flags fields;
-    int not_ktype;
+    krb5_boolean not_ktype = FALSE;
     int kdcopt = 0;
 
-    retval = krb5_get_credentials_core(context, options,
-				       in_creds,
-				       &mcreds, &fields);
+    *out_creds = NULL;
 
-    if (retval) return retval;
+    /*
+     * See if we already have the ticket cached. To do this usefully
+     * for constrained delegation, we would need to look inside
+     * second_ticket, which we can't do.
+     */
+    if ((options & KRB5_GC_CONSTRAINED_DELEGATION) == 0) {
+	retval = krb5int_construct_matching_creds(context, options, in_creds,
+						  &mcreds, &fields);
 
-    if ((ncreds = (krb5_creds *)malloc(sizeof(krb5_creds))) == NULL)
-	return ENOMEM;
+	if (retval)
+	    return retval;
 
-    memset(ncreds, 0, sizeof(krb5_creds));
-    ncreds->magic = KV5M_CREDS;
+	ncreds = malloc(sizeof(krb5_creds));
+	if (!ncreds)
+	    return ENOMEM;
 
-    /* The caller is now responsible for cleaning up in_creds */
-    if ((retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds,
-					ncreds))) {
+	memset(ncreds, 0, sizeof(krb5_creds));
+	ncreds->magic = KV5M_CREDS;
+
+	retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds,
+				       ncreds);
+	if (retval == 0) {
+	    *out_creds = ncreds;
+	    return 0;
+	}
 	free(ncreds);
-	ncreds = in_creds;
-    } else {
-	*out_creds = ncreds;
-    }
-
-    if ((retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE)
-	|| options & KRB5_GC_CACHED)
-	return retval;
-
-    if (retval == KRB5_CC_NOT_KTYPE)
-	not_ktype = 1;
-    else
-	not_ktype = 0;
+	ncreds = NULL;
+	if ((retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE)
+	    || options & KRB5_GC_CACHED)
+	    return retval;
+	not_ktype = (retval == KRB5_CC_NOT_KTYPE);
+    } else if (options & KRB5_GC_CACHED)
+	return KRB5_CC_NOTFOUND;
 
     if (options & KRB5_GC_CANONICALIZE)
 	kdcopt |= KDC_OPT_CANONICALIZE;
+    if (options & KRB5_GC_FORWARDABLE)
+	kdcopt |= KDC_OPT_FORWARDABLE;
+    if (options & KRB5_GC_NO_TRANSIT_CHECK)
+	kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
+    if (options & KRB5_GC_CONSTRAINED_DELEGATION) {
+	if (options & KRB5_GC_USER_USER)
+	    return EINVAL;
+	kdcopt |= KDC_OPT_FORWARDABLE | KDC_OPT_CNAME_IN_ADDL_TKT;
+    }
 
-    retval = krb5_get_cred_from_kdc_opt(context, ccache, ncreds,
-					out_creds, &tgts, kdcopt);
+    retval = krb5_get_cred_from_kdc_opt(context, ccache, in_creds,
+					&ncreds, &tgts, kdcopt);
     if (tgts) {
-	register int i = 0;
-	krb5_error_code rv2;
-	while (tgts[i]) {
-	    if ((rv2 = krb5_cc_store_cred(context, ccache, tgts[i]))) {
-		retval = rv2;
-		break;
-	    }
-	    i++;
-	}
+	/* Attempt to cache intermediate ticket-granting tickets. */
+	for (tgts_iter = tgts; *tgts_iter; tgts_iter++)
+	    (void) krb5_cc_store_cred(context, ccache, *tgts_iter);
 	krb5_free_tgt_creds(context, tgts);
     }
+
     /*
      * Translate KRB5_CC_NOTFOUND if we previously got
      * KRB5_CC_NOT_KTYPE from krb5_cc_retrieve_cred(), in order to
@@ -173,18 +190,23 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
      */
     if ((retval == KRB5_CC_NOTFOUND || retval == KRB5_CC_NOT_KTYPE)
 	&& not_ktype)
-	retval = KRB5_CC_NOT_KTYPE;
+	return KRB5_CC_NOT_KTYPE;
+    else if (retval)
+	return retval;
 
-    if (!retval) {
-        /* the purpose of the krb5_get_credentials call is to 
-         * obtain a set of credentials for the caller.  the 
-         * krb5_cc_store_cred() call is to optimize performance
-         * for future calls.  Ignore any errors, since the credentials
-         * are still valid even if we fail to store them in the cache.
-         */
-	krb5_cc_store_cred(context, ccache, *out_creds);
+    if ((options & KRB5_GC_CONSTRAINED_DELEGATION)
+	&& (ncreds->ticket_flags & TKT_FLG_FORWARDABLE) == 0) {
+	/* This ticket won't work for constrained delegation. */
+	krb5_free_creds(context, ncreds);
+	return KRB5_TKT_NOT_FORWARDABLE;
     }
-    return retval;
+
+    /* Attempt to cache the returned ticket. */
+    if (!(options & KRB5_GC_NO_STORE))
+	(void) krb5_cc_store_cred(context, ccache, ncreds);
+
+    *out_creds = ncreds;
+    return 0;
 }
 
 #define INT_GC_VALIDATE 1
@@ -337,3 +359,4 @@ krb5_get_renewed_creds(krb5_context context, krb5_creds *creds, krb5_principal c
     return(krb5_validate_or_renew_creds(context, creds, client, ccache,
 					in_tkt_service, 0));
 }
+

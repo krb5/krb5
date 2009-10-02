@@ -34,7 +34,6 @@
 
 #define YARROW_IMPL
 #include "yarrow.h"
-#include "yhash.h"
 #include "ycipher.h"
 #include "ylock.h"
 #include "ystate.h"

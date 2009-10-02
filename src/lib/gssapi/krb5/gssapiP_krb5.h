@@ -162,8 +162,9 @@ typedef struct _krb5_gss_cred_id_rec {
     /* name/type of credential */
     gss_cred_usage_t usage;
     krb5_principal princ;        /* this is not interned as a gss_name_t */
-    int prerfc_mech;
-    int rfc_mech;
+    unsigned int prerfc_mech : 1;
+    unsigned int rfc_mech : 1;
+    unsigned int proxy_cred : 1;
 
     /* keytab (accept) data */
     krb5_keytab keytab;
@@ -466,6 +467,29 @@ krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count);
 
 krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size);
 
+krb5_error_code
+krb5_to_gss_cred(krb5_context context,
+                 krb5_creds *creds,
+                 krb5_gss_cred_id_t *out_cred);
+
+OM_uint32
+kg_new_connection(
+    OM_uint32 *minor_status,
+    krb5_gss_cred_id_t cred,
+    gss_ctx_id_t *context_handle,
+    gss_name_t target_name,
+    gss_OID mech_type,
+    OM_uint32 req_flags,
+    OM_uint32 time_req,
+    gss_channel_bindings_t input_chan_bindings,
+    gss_buffer_t input_token,
+    gss_OID *actual_mech_type,
+    gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec,
+    krb5_context context,
+    int default_mech);
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred
@@ -766,6 +790,17 @@ OM_uint32 krb5_gss_validate_cred
  gss_cred_id_t               /* cred */
 );
 
+OM_uint32 krb5_gss_acquire_cred_impersonate_name(
+    OM_uint32 *,            /* minor_status */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
+    const gss_name_t,       /* desired_name */
+    OM_uint32,              /* time_req */
+    const gss_OID_set,      /* desired_mechs */
+    gss_cred_usage_t,       /* cred_usage */
+    gss_cred_id_t *,        /* output_cred_handle */
+    gss_OID_set *,          /* actual_mechs */
+    OM_uint32 *);           /* time_rec */
+
 OM_uint32
 krb5_gss_validate_cred_1(OM_uint32 * /* minor_status */,
                          gss_cred_id_t /* cred_handle */,
@@ -789,6 +824,19 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                                       int toktype);
 
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
+
+/* s4u_gss_glue.c */
+OM_uint32
+kg_compose_deleg_cred(OM_uint32 *minor_status,
+                      krb5_gss_cred_id_t impersonator_cred,
+                      krb5_creds *subject_creds,
+                      OM_uint32 time_req,
+                      const gss_OID_set desired_mechs,
+                      krb5_gss_cred_id_t *output_cred,
+                      gss_OID_set *actual_mechs,
+                      OM_uint32 *time_rec,
+                      krb5_context context);
+
 
 /*
  * These take unglued krb5-mech-specific contexts.

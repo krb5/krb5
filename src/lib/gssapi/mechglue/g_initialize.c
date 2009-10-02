@@ -761,6 +761,9 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap_iov);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_iov_length);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_complete_auth_token);
+	/* New for 1.8 */
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_acquire_cred_impersonate_name);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_add_cred_impersonate_name);
 
 	assert(mech_type != GSS_C_NO_OID);
 

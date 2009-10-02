@@ -77,7 +77,7 @@ tgs_construct_tgsreq(krb5_context context, krb5_data *in_data,
 	if (retval)
 	    goto cleanup;
     }
-    
+
     /* Generate checksum */
     if ((retval = krb5_c_make_checksum(context, cksumtype,
                        &in_cred->keyblock,
@@ -142,6 +142,9 @@ cleanup:
 }
 /*
  * Note that this function fills in part of rep even on failure.
+ *
+ * The pacb_fct callback allows the caller access to the nonce
+ * and request subkey, for binding preauthentication data
  */
 krb5_error_code
 krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
@@ -149,7 +152,13 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
           krb5_const_principal sname, krb5_address *const *addrs,
           krb5_authdata *const *authorization_data,
           krb5_pa_data *const *padata, const krb5_data *second_ticket,
-          krb5_creds *in_cred, krb5_response *rep, krb5_keyblock **subkey)
+          krb5_creds *in_cred,
+          krb5_error_code (*pacb_fct)(krb5_context,
+                                      krb5_keyblock *,
+                                      krb5_kdc_req *,
+                                      void *),
+          void *pacb_data,
+          krb5_response *rep, krb5_keyblock **subkey)
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;
@@ -157,13 +166,14 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
     krb5_ticket *sec_ticket = 0;
     krb5_ticket *sec_ticket_arr[2];
     krb5_timestamp time_now;
-    krb5_pa_data **combined_padata;
+    krb5_pa_data **combined_padata = NULL;
     krb5_pa_data ap_req_padata;
     int tcp_only = 0, use_master;
     krb5_keyblock *local_subkey = NULL;
 
     assert (subkey != NULL);
     *subkey  = NULL;
+
     /* 
      * in_creds MUST be a valid credential NOT just a partially filled in
      * place holder for us to get credentials for the caller.
@@ -215,8 +225,8 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
 
     /* Get the encryption types list */
     if (ktypes) {
-    /* Check passed ktypes and make sure they're valid. */
-       for (tgsreq.nktypes = 0; ktypes[tgsreq.nktypes]; tgsreq.nktypes++) {
+        /* Check passed ktypes and make sure they're valid. */
+        for (tgsreq.nktypes = 0; ktypes[tgsreq.nktypes]; tgsreq.nktypes++) {
             if (!krb5_c_valid_enctype(ktypes[tgsreq.nktypes]))
                 return KRB5_PROG_ETYPE_NOSUPP;
         }
@@ -236,6 +246,8 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
     } else
         tgsreq.second_ticket = 0;
 
+    ap_req_padata.contents = NULL;
+
     /* encode the body; then checksum it */
     if ((retval = encode_krb5_kdc_req_body(&tgsreq, &scratch)))
         goto send_tgs_error_2;
@@ -250,47 +262,74 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
     }
     krb5_free_data(context, scratch);
 
-    ap_req_padata.pa_type = KRB5_PADATA_AP_REQ;
-    ap_req_padata.length = scratch2.length;
-    ap_req_padata.contents = (krb5_octet *)scratch2.data;
-
-    /* combine in any other supplied padata */
-    if (padata) {
-        krb5_pa_data * const * counter;
-        register unsigned int i = 0;
-        for (counter = padata; *counter; counter++, i++);
-        combined_padata = malloc((i+2) * sizeof(*combined_padata));
-        if (!combined_padata) {
-            free(ap_req_padata.contents);
-            retval = ENOMEM;
-            goto send_tgs_error_2;
-        }
-        combined_padata[0] = &ap_req_padata;
-        for (i = 1, counter = padata; *counter; counter++, i++)
-            combined_padata[i] = (krb5_pa_data *) *counter;
-        combined_padata[i] = 0;
-    } else {
-        combined_padata = (krb5_pa_data **)malloc(2*sizeof(*combined_padata));
-        if (!combined_padata) {
-            free(ap_req_padata.contents);
-            retval = ENOMEM;
-            goto send_tgs_error_2;
-        }
-        combined_padata[0] = &ap_req_padata;
-        combined_padata[1] = 0;
-    }
-    tgsreq.padata = combined_padata;
-
-    /* the TGS_REQ is assembled in tgsreq, so encode it */
-    if ((retval = encode_krb5_tgs_req(&tgsreq, &scratch))) {
-        free(ap_req_padata.contents);
-        free(combined_padata);
+    tgsreq.padata = (krb5_pa_data **)calloc(2, sizeof(krb5_pa_data *));
+    if (tgsreq.padata == NULL) {
+        free(scratch2.data);
         goto send_tgs_error_2;
     }
-    free(ap_req_padata.contents);
-    free(combined_padata);
+    tgsreq.padata[0] = (krb5_pa_data *)malloc(sizeof(krb5_pa_data));
+    if (tgsreq.padata[0] == NULL) {
+        free(scratch2.data);
+        goto send_tgs_error_2;
+    }
+    tgsreq.padata[0]->pa_type = KRB5_PADATA_AP_REQ;
+    tgsreq.padata[0]->length = scratch2.length;
+    tgsreq.padata[0]->contents = (krb5_octet *)scratch2.data;
+    tgsreq.padata[1] = NULL;
+
+    /* combine in any other supplied padata, unfortunately now it is
+     * necessary to copy it as the callback function might modify the
+     * padata, and having a separate path for the non-callback case,
+     * or attempting to determine which elements were changed by the
+     * callback, would have complicated the code significantly.
+     */
+    if (padata) {
+        krb5_pa_data **tmp;
+        int i;
+
+        for (i = 0; padata[i]; i++)
+            ;
+
+        tmp = (krb5_pa_data **)realloc(tgsreq.padata,
+                                       (i + 2) * sizeof(*combined_padata));
+        if (tmp == NULL)
+            goto send_tgs_error_2;
+
+        tgsreq.padata = tmp;
+
+        for (i = 0; padata[i]; i++) {
+            krb5_pa_data *pa;
+
+            pa = tgsreq.padata[1 + i] = (krb5_pa_data *)malloc(sizeof(krb5_pa_data));
+            if (tgsreq.padata == NULL) {
+                retval = ENOMEM;
+                goto send_tgs_error_2;
+            }
+
+            pa->pa_type = padata[i]->pa_type;
+            pa->length = padata[i]->length;
+            pa->contents = (krb5_octet *)malloc(padata[i]->length);
+            if (pa->contents == NULL) {
+                retval = ENOMEM;
+                goto send_tgs_error_2;
+            }
+            memcpy(pa->contents, padata[i]->contents, padata[i]->length);
+        }
+        tgsreq.padata[1 + i] = NULL;
+    }
+
+    if (pacb_fct != NULL) {
+        if ((retval = (*pacb_fct)(context, local_subkey, &tgsreq, pacb_data)))
+            goto send_tgs_error_2;
+    }
+    /* the TGS_REQ is assembled in tgsreq, so encode it */
+    if ((retval = encode_krb5_tgs_req(&tgsreq, &scratch)))
+        goto send_tgs_error_2;
 
     /* now send request & get response from KDC */
+    krb5_free_pa_data(context, tgsreq.padata);
+    tgsreq.padata = NULL;
+
 send_again:
     use_master = 0;
     retval = krb5_sendto_kdc(context, scratch, 
@@ -325,6 +364,8 @@ send_again:
     krb5_free_data(context, scratch);
     
 send_tgs_error_2:;
+    if (tgsreq.padata)
+        krb5_free_pa_data(context, tgsreq.padata);
     if (sec_ticket) 
         krb5_free_ticket(context, sec_ticket);
 

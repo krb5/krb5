@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "des_int.h"
 #include <aead.h>
+#include <rand2key.h>
 
 static krb5_error_code
 validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,
@@ -130,38 +131,6 @@ k5_des3_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des3_make_key(const krb5_data *randombits, krb5_keyblock *key)
-{
-    int i;
-
-    if (key->length != 24)
-	return(KRB5_BAD_KEYSIZE);
-    if (randombits->length != 21)
-	return(KRB5_CRYPTO_INTERNAL);
-
-    key->magic = KV5M_KEYBLOCK;
-    key->length = 24;
-
-    /* take the seven bytes, move them around into the top 7 bits of the
-       8 key bytes, then compute the parity bits.  Do this three times. */
-
-    for (i=0; i<3; i++) {
-	memcpy(key->contents+i*8, randombits->data+i*7, 7);
-	key->contents[i*8+7] = (((key->contents[i*8]&1)<<1) |
-				((key->contents[i*8+1]&1)<<2) |
-				((key->contents[i*8+2]&1)<<3) |
-				((key->contents[i*8+3]&1)<<4) |
-				((key->contents[i*8+4]&1)<<5) |
-				((key->contents[i*8+5]&1)<<6) |
-				((key->contents[i*8+6]&1)<<7));
-
-	mit_des_fixup_key_parity(key->contents+i*8);
-    }
-
-    return(0);
-}
-
-static krb5_error_code
 k5_des3_encrypt_iov(const krb5_keyblock *key,
 		    const krb5_data *ivec,
 		    krb5_crypto_iov *data,
@@ -212,7 +181,7 @@ const struct krb5_enc_provider krb5int_enc_des3 = {
     21, 24,
     k5_des3_encrypt,
     k5_des3_decrypt,
-    k5_des3_make_key,
+    krb5int_des3_make_key,
     krb5int_des_init_state,
     krb5int_default_free_state,
     k5_des3_encrypt_iov,

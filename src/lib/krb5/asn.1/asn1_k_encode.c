@@ -263,6 +263,8 @@ static unsigned int optional_enc_kdc_rep_part(const void *p)
         optional |= (1u << 8);
     if (val->caddrs != NULL && val->caddrs[0] != NULL)
         optional |= (1u << 11);
+    if (val->enc_padata != NULL)
+        optional |= (1u << 12);
 
     return optional;
 }
@@ -1147,6 +1149,36 @@ static const struct field_info pa_for_user_fields[] = {
 
 DEFSEQTYPE(pa_for_user, krb5_pa_for_user, pa_for_user_fields, 0);
 
+/* [MS-SFU] Section 2.2.2. */
+static const struct field_info s4u_userid_fields[] = {
+    FIELDOF_NORM(krb5_s4u_userid, int32, nonce, 0),
+    FIELDOF_OPT(krb5_s4u_userid, principal, user, 1, 1),
+    FIELDOF_NORM(krb5_s4u_userid, realm_of_principal, user, 2),
+    FIELDOF_OPT(krb5_s4u_userid, ostring_data, subject_cert, 3, 3),
+    FIELDOF_OPT(krb5_s4u_userid, krb5_flags, options, 4, 4),
+};
+
+static unsigned int s4u_userid_optional (const void *p) {
+    const krb5_s4u_userid *val = p;
+    unsigned int optional = 0;
+    if (val->user != NULL && val->user->length != 0)
+        optional |= (1u)<<1;
+    if (val->subject_cert.length != 0)
+        optional |= (1u)<<3;
+    if (val->options != 0)
+        optional |= (1u)<<4;
+    return optional;
+}
+
+DEFSEQTYPE(s4u_userid, krb5_s4u_userid, s4u_userid_fields, s4u_userid_optional);
+
+static const struct field_info pa_s4u_x509_user_fields[] = {
+    FIELDOF_NORM(krb5_pa_s4u_x509_user, s4u_userid, user_id, 0),
+    FIELDOF_NORM(krb5_pa_s4u_x509_user, checksum, cksum, 1),
+};
+
+DEFSEQTYPE(pa_s4u_x509_user, krb5_pa_s4u_x509_user, pa_s4u_x509_user_fields, 0);
+
 /* draft-ietf-krb-wg-kerberos-referrals Appendix A. */
 static const struct field_info pa_svr_referral_data_fields[] = {
     FIELDOF_NORM(krb5_pa_svr_referral_data, realm_of_principal, principal, 0),
@@ -1323,6 +1355,8 @@ MAKE_FULL_ENCODER(encode_krb5_predicted_sam_response,
                   predicted_sam_response);
 MAKE_FULL_ENCODER(encode_krb5_setpw_req, setpw_req);
 MAKE_FULL_ENCODER(encode_krb5_pa_for_user, pa_for_user);
+MAKE_FULL_ENCODER(encode_krb5_s4u_userid, s4u_userid);
+MAKE_FULL_ENCODER(encode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
 MAKE_FULL_ENCODER(encode_krb5_pa_svr_referral_data, pa_svr_referral_data);
 MAKE_FULL_ENCODER(encode_krb5_pa_server_referral_data, pa_server_referral_data);
 MAKE_FULL_ENCODER(encode_krb5_etype_list, etype_list);
