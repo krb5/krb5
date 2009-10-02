@@ -179,6 +179,7 @@ has_rootdse_ava(context, ldap_server, attribute, value)
     char              *attrs[2], **values=NULL;
     LDAP              *ld=NULL;
     LDAPMessage       *msg=NULL, *res=NULL;
+    struct berval     cred;
 
     attrs[0] = attribute;
     attrs[1] = NULL;
@@ -189,8 +190,11 @@ has_rootdse_ava(context, ldap_server, attribute, value)
 	goto cleanup;
     }
 
+    cred.bv_val = "";
+    cred.bv_len = 0;
+
     /* Anonymous bind */
-    retval = ldap_sasl_bind_s(ld, NULL, NULL, NULL, NULL, NULL, NULL);
+    retval = ldap_sasl_bind_s(ld, "", LDAP_SASL_SIMPLE, &cred, NULL, NULL, NULL);
     if (retval != LDAP_SUCCESS) {
 	ret = 2; /* Don't know */
 	goto cleanup;
@@ -215,9 +219,10 @@ has_rootdse_ava(context, ldap_server, attribute, value)
     }
 
     for (i = 0; values[i] != NULL; i++) {
-	if (strcmp(values[i], value))
-	    continue;
-	flag = 1;
+	if (strcmp(values[i], value) == 0) {
+	    flag = 1;
+	    break;
+	}
     }
 
     if (flag != 1) {
@@ -271,7 +276,7 @@ has_modify_increment(context, ldap_server)
     char             *ldap_server;
 {
     return has_rootdse_ava(context, ldap_server,
-			   "supportedExtension", "1.3.6.1.1.14");
+			   "supportedFeatures", "1.3.6.1.1.14");
 }
 
 void * krb5_ldap_alloc(krb5_context context, void *ptr, size_t size)
