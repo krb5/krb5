@@ -194,7 +194,7 @@ has_rootdse_ava(context, ldap_server, attribute, value)
     cred.bv_len = 0;
 
     /* Anonymous bind */
-    retval = ldap_sasl_bind_s(ld, "", LDAP_SASL_SIMPLE, &cred, NULL, NULL, NULL);
+    retval = ldap_sasl_bind_s(ld, "", NULL, &cred, NULL, NULL, NULL);
     if (retval != LDAP_SUCCESS) {
 	ret = 2; /* Don't know */
 	goto cleanup;
