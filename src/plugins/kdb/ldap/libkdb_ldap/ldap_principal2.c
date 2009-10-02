@@ -885,7 +885,19 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    free(strval[0]);
 	}
 
-	if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT) {
+	if (entries->mask & KADM5_FAIL_AUTH_COUNT) {
+	    krb5_kvno fail_auth_count;
+
+	    fail_auth_count = entries->fail_auth_count;
+	    if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT)
+		fail_auth_count++;
+
+	    st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+					   LDAP_MOD_REPLACE,
+					   fail_auth_count);
+	    if (st != 0)
+		goto cleanup;
+	} else if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT) {
 	    /*
 	     * If the client library and server supports RFC 4525,
 	     * then use it to increment by one the value of the
@@ -925,11 +937,6 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		if (st != 0)
 		    goto cleanup;
 	    }
-	}
-
-	if (entries->mask & KADM5_FAIL_AUTH_COUNT) {
-	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount", LDAP_MOD_REPLACE, entries->fail_auth_count)) !=0)
-		goto cleanup;
 	}
 
 	if (entries->mask & KADM5_MAX_LIFE) {
