@@ -27,8 +27,8 @@ OBJS=\
 	$(OUTPRE)../../$(CIMPL)/aes_s2k.$(OBJEXT)
 
 SRCS=\
-	$(srcdir)..//../$(CIMPL)/aescrypt.c	\
-	$(srcdir)..//../$(CIMPL)/aestab.c	\
+	$(srcdir)/../../$(CIMPL)/aescrypt.c	\
+	$(srcdir)/../../$(CIMPL)/aestab.c	\
 	$(srcdir)/../../$(CIMPL)/aeskey.c	\
 	$(srcdir)/../../$(CIMPL)/aes_s2k.c
 

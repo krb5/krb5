@@ -10,6 +10,8 @@
 #include "arcfour-int.h"
 #include "enc_provider.h"
 #include <aead.h>
+#include <rand2key.h>
+
 /* gets the next byte from the PRNG */
 #if ((__GNUC__ >= 2) )
 static __inline__ unsigned int k5_arcfour_byte(ArcfourContext *);
@@ -29,10 +31,6 @@ static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest,
 static krb5_error_code
 k5_arcfour_docrypt(const krb5_keyblock *, const krb5_data *,
 		   const krb5_data *, krb5_data *);
-
-/* from a random bitstrem, construct a key */
-static krb5_error_code
-k5_arcfour_make_key(const krb5_data *, krb5_keyblock *);
 
 static const unsigned char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
 static const unsigned char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
@@ -213,22 +211,6 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-k5_arcfour_make_key(const krb5_data *randombits, krb5_keyblock *key)
-{
-    if (key->length != 16)
-	return(KRB5_BAD_KEYSIZE);
-    if (randombits->length != 16)
-	return(KRB5_CRYPTO_INTERNAL);
-
-    key->magic = KV5M_KEYBLOCK;
-    key->length = 16;
-
-    memcpy(key->contents, randombits->data, randombits->length);
-
-    return(0);
-}
-
-static krb5_error_code
 k5_arcfour_init_state (const krb5_keyblock *key,
 		       krb5_keyusage keyusage, krb5_data *new_state)
 {
@@ -262,7 +244,7 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     16, 16,
     k5_arcfour_docrypt,
     k5_arcfour_docrypt,
-    k5_arcfour_make_key,
+    krb5int_arcfour_make_key,
     k5_arcfour_init_state, /*xxx not implemented yet*/
     krb5int_default_free_state,
     k5_arcfour_docrypt_iov,

@@ -484,7 +484,6 @@ krb5_error_code krb5int_fast_reply_key(krb5_context context,
 krb5_error_code
 krb5int_fast_make_state( krb5_context context, struct krb5int_fast_request_state **state)
 {
-    krb5_error_code retval = 0;
     struct krb5int_fast_request_state *local_state ;
     local_state = malloc(sizeof *local_state);
     if (local_state == NULL)

@@ -12,7 +12,7 @@ COMMON_OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o
 KADMIN_OBJS = $(COMMON_OBJS) keytab.o
 LOCAL_OBJS = $(COMMON_OBJS) keytab_local.o
 
-SRCS = kadmin.c kadmin_ct.c ss_wrapper.c getdate.c keytab.c
+SRCS = kadmin.c kadmin_ct.c ss_wrapper.c getdate.c keytab.c keytab_local.c
 
 LOCALINCLUDES=-I$(srcdir)
 

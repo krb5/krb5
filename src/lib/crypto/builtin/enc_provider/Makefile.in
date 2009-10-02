@@ -5,7 +5,8 @@ BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../../@CRYPTO_IMPL@/des 	\
 		-I$(srcdir)/../../@CRYPTO_IMPL@/arcfour \
 		-I$(srcdir)/../../@CRYPTO_IMPL@/aes 	\
-		-I$(srcdir)/../../krb 	\
+		-I$(srcdir)/../../krb 			\
+		-I$(srcdir)/../../krb/rand2key	 	\
 		-I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@ 
 DEFS=
 

@@ -226,7 +226,7 @@ kadm5_create_principal_3(void *server_handle,
 	return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
 	return KADM5_BAD_MASK;
-    if (entry == (kadm5_principal_ent_t) NULL || password == NULL)
+    if (entry == NULL)
 	return EINVAL;
 
     /*
@@ -260,11 +260,14 @@ kadm5_create_principal_3(void *server_handle,
 		return ret;
 	}
     }
-    if ((ret = passwd_check(handle, password, (mask & KADM5_POLICY),
-			    &polent, entry->principal))) {
-	if (mask & KADM5_POLICY)
-	     (void) kadm5_free_policy_ent(handle->lhandle, &polent);
-	return ret;
+    if (password) {
+	ret = passwd_check(handle, password, (mask & KADM5_POLICY),
+			   &polent, entry->principal);
+	if (ret) {
+	    if (mask & KADM5_POLICY)
+		(void) kadm5_free_policy_ent(handle->lhandle, &polent);
+	    return ret;
+	}
     }
     /*
      * Start populating the various DB fields, using the
@@ -360,12 +363,20 @@ kadm5_create_principal_3(void *server_handle,
         return (ret);
     }
 
-    if ((ret = krb5_dbe_cpw(handle->context, act_mkey,
-			    n_ks_tuple?ks_tuple:handle->params.keysalts,
-			    n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-			    password,
-			    (mask & KADM5_KVNO)?entry->kvno:1,
-			    FALSE, &kdb))) {
+    if (password) {
+	ret = krb5_dbe_cpw(handle->context, act_mkey,
+			   n_ks_tuple?ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
+			   password, (mask & KADM5_KVNO)?entry->kvno:1,
+			   FALSE, &kdb);
+    } else {
+	/* Null password means create with random key (new in 1.8). */
+	ret = krb5_dbe_crk(handle->context, &master_keyblock,
+			   n_ks_tuple?ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
+			   FALSE, &kdb);
+    }
+    if (ret) {
 	krb5_db_free_principal(handle->context, &kdb, 1);
 	if (mask & KADM5_POLICY)
 	     (void) kadm5_free_policy_ent(handle->lhandle, &polent);

@@ -403,7 +403,9 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 {
     OM_uint32 major_status = GSS_S_FAILURE;
     krb5_gss_cred_id_t cred;
+#if 0
     size_t i;
+#endif
 
     if (minor_status == NULL)
         return GSS_S_CALL_INACCESSIBLE_WRITE;

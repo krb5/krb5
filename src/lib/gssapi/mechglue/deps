@@ -17,6 +17,14 @@ g_acquire_cred.so g_acquire_cred.po $(OUTPRE)g_acquire_cred.$(OBJEXT): \
   $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h g_acquire_cred.c mechglue.h \
   mglueP.h
+g_acquire_cred_imp_name.so g_acquire_cred_imp_name.po \
+  $(OUTPRE)g_acquire_cred_imp_name.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
+  ../generic/gssapi_err_generic.h g_acquire_cred_imp_name.c \
+  mechglue.h mglueP.h
 g_buffer_set.so g_buffer_set.po $(OUTPRE)g_buffer_set.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \

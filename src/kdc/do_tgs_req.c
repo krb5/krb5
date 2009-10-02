@@ -130,6 +130,9 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_pa_data *pa_tgs_req; /*points into request*/
     krb5_data scratch;
 
+    reply.padata = 0; /* For cleanup handler */
+    reply_encpart.enc_padata = 0;
+
     session_key.contents = NULL;
 
     retval = decode_krb5_tgs_req(pkt, &request);
@@ -866,7 +869,6 @@ tgt_again:
     ticket_reply.enc_part.kvno = ticket_kvno;
     /* Start assembling the response */
     reply.msg_type = KRB5_TGS_REP;
-    reply.padata = 0;/* always */
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
         find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER) != NULL) {
         errcode = kdc_make_s4u2self_rep(kdc_context,

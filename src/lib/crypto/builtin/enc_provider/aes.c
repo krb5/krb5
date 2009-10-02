@@ -28,6 +28,7 @@
 #include "enc_provider.h"
 #include "aes.h"
 #include <aead.h>
+#include <rand2key.h>
 
 #if 0
 aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1]);
@@ -364,20 +365,6 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-k5_aes_make_key(const krb5_data *randombits, krb5_keyblock *key)
-{
-    if (key->length != 16 && key->length != 32)
-	return(KRB5_BAD_KEYSIZE);
-    if (randombits->length != key->length)
-	return(KRB5_CRYPTO_INTERNAL);
-
-    key->magic = KV5M_KEYBLOCK;
-
-    memcpy(key->contents, randombits->data, randombits->length);
-    return(0);
-}
-
-static krb5_error_code
 krb5int_aes_init_state (const krb5_keyblock *key, krb5_keyusage usage,
 			krb5_data *state)
 {
@@ -394,7 +381,7 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
     16, 16,
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
-    k5_aes_make_key,
+    krb5int_aes_make_key,
     krb5int_aes_init_state,
     krb5int_default_free_state,
     krb5int_aes_encrypt_iov,
@@ -406,7 +393,7 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     32, 32,
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
-    k5_aes_make_key,
+    krb5int_aes_make_key,
     krb5int_aes_init_state,
     krb5int_default_free_state,
     krb5int_aes_encrypt_iov,

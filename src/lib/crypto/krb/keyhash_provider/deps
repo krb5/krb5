@@ -44,7 +44,7 @@ hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/arcfour/arcfour-int.h \
   $(srcdir)/../../builtin/arcfour/arcfour.h $(srcdir)/../../builtin/md5/rsa-md5.h \
-  $(srcdir)/../aead.h $(srcdir)/../cksumtypes.h $(srcdir)/../hash_provider/hash_provider.h \
+  $(srcdir)/../aead.h $(srcdir)/../cksumtypes.h $(srcdir)/../../builtin/hash_provider/hash_provider.h \
   hmac_md5.c keyhash_provider.h
 md5_hmac.so md5_hmac.po $(OUTPRE)md5_hmac.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
@@ -57,5 +57,5 @@ md5_hmac.so md5_hmac.po $(OUTPRE)md5_hmac.$(OBJEXT): \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/arcfour/arcfour-int.h \
   $(srcdir)/../../builtin/arcfour/arcfour.h $(srcdir)/../../builtin/md5/rsa-md5.h \
-  $(srcdir)/../hash_provider/hash_provider.h keyhash_provider.h \
+  $(srcdir)/../../builtin/hash_provider/hash_provider.h keyhash_provider.h \
   md5_hmac.c

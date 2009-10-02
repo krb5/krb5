@@ -27,7 +27,9 @@
 #include "k5-int.h"
 #include "des_int.h"
 #include "enc_provider.h"
-#include "aead.h"
+#include <aead.h>
+#include <rand2key.h>
+
 
 static krb5_error_code
 k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
@@ -80,31 +82,6 @@ k5_des_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
 {
     return(k5_des_docrypt(key, ivec, input, output, 0));
-}
-
-static krb5_error_code
-k5_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
-{
-    if (key->length != 8)
-	return(KRB5_BAD_KEYSIZE);
-    if (randombits->length != 7)
-	return(KRB5_CRYPTO_INTERNAL);
-
-    key->magic = KV5M_KEYBLOCK;
-    key->length = 8;
-
-    /* take the seven bytes, move them around into the top 7 bits of the
-       8 key bytes, then compute the parity bits */
-
-    memcpy(key->contents, randombits->data, randombits->length);
-    key->contents[7] = (((key->contents[0]&1)<<1) | ((key->contents[1]&1)<<2) |
-			((key->contents[2]&1)<<3) | ((key->contents[3]&1)<<4) |
-			((key->contents[4]&1)<<5) | ((key->contents[5]&1)<<6) |
-			((key->contents[6]&1)<<7));
-
-    mit_des_fixup_key_parity(key->contents);
-
-    return(0);
 }
 
 static krb5_error_code
@@ -173,7 +150,7 @@ const struct krb5_enc_provider krb5int_enc_des = {
     7, 8,
     k5_des_encrypt,
     k5_des_decrypt,
-    k5_des_make_key,
+    krb5int_des_make_key,
     krb5int_des_init_state,
     krb5int_default_free_state,
     k5_des_encrypt_iov,
