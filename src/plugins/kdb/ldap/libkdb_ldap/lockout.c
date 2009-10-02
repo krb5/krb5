@@ -180,6 +180,7 @@ krb5_ldap_lockout_audit(krb5_context context,
     } else if (status == KRB5KDC_ERR_PREAUTH_FAILED ||
                status == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
         if (failcnt_interval != 0 &&
+            locked_time != 0 &&
             stamp > entry->last_failed + failcnt_interval) {
             /* Automatically unlock account after failcnt_interval */
             entry->fail_auth_count = 0;
@@ -191,7 +192,7 @@ krb5_ldap_lockout_audit(krb5_context context,
         entry->mask |= KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT_INCREMENT;
 
         if (max_fail != 0 &&
-            entry->fail_auth_count >= max_fail) {
+            entry->fail_auth_count + 1 >= max_fail) {
             locked_time = stamp;
             entry->mask |= KADM5_LOCKED_TIME;
         }
