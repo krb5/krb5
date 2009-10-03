@@ -32,19 +32,19 @@ krb5_c_is_coll_proof_cksum(krb5_cksumtype ctype)
 {
     unsigned int i;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == ctype)
 	    return((krb5_cksumtypes_list[i].flags &
-		    KRB5_CKSUMFLAG_NOT_COLL_PROOF)?0:1);
+		    KRB5_CKSUMFLAG_NOT_COLL_PROOF) ? FALSE : TRUE);
     }
 
     /* ick, but it's better than coredumping, which is what the
        old code would have done */
-    return(0);
+    return FALSE;
 }
 
 krb5_boolean KRB5_CALLCONV
 is_coll_proof_cksum(krb5_cksumtype ctype)
 {
-    return krb5_c_is_coll_proof_cksum (ctype);
+    return krb5_c_is_coll_proof_cksum(ctype);
 }

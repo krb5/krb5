@@ -33,31 +33,24 @@ krb5_c_encrypt(krb5_context context, const krb5_keyblock *key,
 	       krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_enc_data *output)
 {
-    int i;
+    const struct krb5_keytypes *ktp;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key->enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
+    ktp = find_enctype(key->enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
 
     output->magic = KV5M_ENC_DATA;
     output->kvno = 0;
     output->enctype = key->enctype;
 
-    if (krb5_enctypes_list[i].encrypt == NULL) {
-	assert(krb5_enctypes_list[i].aead != NULL);
+    if (ktp->encrypt == NULL) {
+	assert(ktp->aead != NULL);
 
-	return krb5int_c_encrypt_aead_compat(krb5_enctypes_list[i].aead,
-					     krb5_enctypes_list[i].enc,
-					     krb5_enctypes_list[i].hash,
-					     key, usage, ivec,
-					     input, &output->ciphertext);
+	return krb5int_c_encrypt_aead_compat(ktp->aead, ktp->enc, ktp->hash,
+					     key, usage, ivec, input,
+					     &output->ciphertext);
     }
 
-    return((*(krb5_enctypes_list[i].encrypt))
-	   (krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,
-	    key, usage, ivec, input, &output->ciphertext));
+    return (*ktp->encrypt)(ktp->enc, ktp->hash, key, usage, ivec, input,
+			   &output->ciphertext);
 }

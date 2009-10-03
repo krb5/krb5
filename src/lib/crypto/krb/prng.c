@@ -38,27 +38,28 @@ k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
  */
 
 static size_t
-entropy_estimate (unsigned int randsource, size_t length)
+entropy_estimate(unsigned int randsource, size_t length)
 {
-  switch (randsource) {
-  case KRB5_C_RANDSOURCE_OLDAPI:
-    return (4*length);
-  case KRB5_C_RANDSOURCE_OSRAND:
-    return (8*length);
-  case KRB5_C_RANDSOURCE_TRUSTEDPARTY:
-    return (4*length);
-  case KRB5_C_RANDSOURCE_TIMING:return (2);
-  case KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL:
-    return (0);
-  default:
-    abort();
-  }
-return (0);
+    switch (randsource) {
+    case KRB5_C_RANDSOURCE_OLDAPI:
+	return 4 * length;
+    case KRB5_C_RANDSOURCE_OSRAND:
+	return 8 * length;
+    case KRB5_C_RANDSOURCE_TRUSTEDPARTY:
+	return 4 * length;
+    case KRB5_C_RANDSOURCE_TIMING:
+	return 2;
+    case KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL:
+	return 0;
+    default:
+	abort();
+    }
+    return 0;
 }
 
 int krb5int_prng_init(void)
 {
-    unsigned i;
+    unsigned i, source_id;
     int yerr;
 
     yerr = k5_mutex_finish_init(&yarrow_lock);
@@ -66,12 +67,11 @@ int krb5int_prng_init(void)
 	return yerr;
 
     yerr = krb5int_yarrow_init (&y_ctx, NULL);
-    if ((yerr != YARROW_OK) && (yerr != YARROW_NOT_SEEDED))
+    if (yerr != YARROW_OK && yerr != YARROW_NOT_SEEDED)
 	return KRB5_CRYPTO_INTERNAL;
 
     for (i=0; i < KRB5_C_RANDSOURCE_MAX; i++ ) {
-	unsigned source_id;
-	if (krb5int_yarrow_new_source (&y_ctx, &source_id) != YARROW_OK )
+	if (krb5int_yarrow_new_source(&y_ctx, &source_id) != YARROW_OK)
 	    return KRB5_CRYPTO_INTERNAL;
 	assert (source_id == i);
     }
@@ -80,46 +80,47 @@ int krb5int_prng_init(void)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_add_entropy (krb5_context context, unsigned int randsource,
-			   const krb5_data *data)
+krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
+			  const krb5_data *data)
 {
-  int yerr;
+    int yerr;
 
-  /* Make sure the mutex got initialized.  */
-  yerr = krb5int_crypto_init();
-  if (yerr)
-      return yerr;
-  /* Now, finally, feed in the data.  */
-  yerr = krb5int_yarrow_input (&y_ctx, randsource,
-			       data->data, data->length,
-			       entropy_estimate (randsource, data->length));
-  if (yerr != YARROW_OK)
-      return (KRB5_CRYPTO_INTERNAL);
-  return (0);
+    /* Make sure the mutex got initialized.  */
+    yerr = krb5int_crypto_init();
+    if (yerr)
+	return yerr;
+    /* Now, finally, feed in the data.  */
+    yerr = krb5int_yarrow_input(&y_ctx, randsource,
+				data->data, data->length,
+				entropy_estimate(randsource, data->length));
+    if (yerr != YARROW_OK)
+	return KRB5_CRYPTO_INTERNAL;
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_seed (krb5_context context, krb5_data *data)
+krb5_c_random_seed(krb5_context context, krb5_data *data)
 {
-    return krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_OLDAPI, data);
+    return krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OLDAPI, data);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
     int yerr;
-    yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
+    yerr = krb5int_yarrow_output(&y_ctx, data->data, data->length);
     if (yerr == YARROW_NOT_SEEDED) {
-      yerr = krb5int_yarrow_reseed (&y_ctx, YARROW_SLOW_POOL);
-      if (yerr == YARROW_OK)
-	yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
+	yerr = krb5int_yarrow_reseed(&y_ctx, YARROW_SLOW_POOL);
+	if (yerr == YARROW_OK)
+	    yerr = krb5int_yarrow_output(&y_ctx, data->data, data->length);
     }
-    if ( yerr != YARROW_OK)
-      return (KRB5_CRYPTO_INTERNAL);
-    return(0);
+    if (yerr != YARROW_OK)
+      return KRB5_CRYPTO_INTERNAL;
+    return 0;
 }
 
-void krb5int_prng_cleanup (void)
+void
+krb5int_prng_cleanup (void)
 {
     krb5int_yarrow_final (&y_ctx);
     k5_mutex_destroy(&yarrow_lock);
@@ -133,11 +134,11 @@ void krb5int_prng_cleanup (void)
 #if defined(_WIN32)
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_os_entropy (krb5_context context, int strong, int *success)
+krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 {
-  if (success)
-    *success  = 0;
-  return 0;
+    if (success)
+	*success = 0;
+    return 0;
 }
 
 #else /*Windows*/
@@ -156,60 +157,58 @@ krb5_c_random_os_entropy (krb5_context context, int strong, int *success)
  */
 
 static int
-read_entropy_from_device (krb5_context context, const char *device)
+read_entropy_from_device(krb5_context context, const char *device)
 {
-  krb5_data data;
-  struct stat sb;
-  int fd;
-  unsigned char buf[YARROW_SLOW_THRESH/8], *bp;
-  int left;
-  fd = open (device, O_RDONLY);
-  if (fd == -1)
-    return 0;
-  set_cloexec_fd(fd);
-  if (fstat (fd, &sb) == -1 || S_ISREG(sb.st_mode)) {
-      close(fd);
-      return 0;
-  }
+    krb5_data data;
+    struct stat sb;
+    int fd;
+    unsigned char buf[YARROW_SLOW_THRESH/8], *bp;
+    int left;
 
-  for (bp = buf, left = sizeof (buf); left > 0;) {
-    ssize_t count;
-    count = read (fd, bp, (unsigned) left);
-    if (count <= 0) {
-      close(fd);
-      return 0;
+    fd = open (device, O_RDONLY);
+    if (fd == -1)
+	return 0;
+    set_cloexec_fd(fd);
+    if (fstat(fd, &sb) == -1 || S_ISREG(sb.st_mode)) {
+	close(fd);
+	return 0;
     }
-    left -= count;
-    bp += count;
-  }
-  close (fd);
-  data.length = sizeof (buf);
-  data.data = ( char * ) buf;
-  if ( krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_OSRAND, 
-				  &data) != 0) {
-    return 0;
-  }
-  return 1;
+
+    for (bp = buf, left = sizeof(buf); left > 0;) {
+	ssize_t count;
+	count = read(fd, bp, (unsigned) left);
+	if (count <= 0) {
+	    close(fd);
+	    return 0;
+	}
+	left -= count;
+	bp += count;
+    }
+    close(fd);
+    data.length = sizeof (buf);
+    data.data = (char *) buf;
+    return (krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OSRAND,
+				      &data) == 0);
 }
     
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_os_entropy (krb5_context context,
-			  int strong, int *success)
+krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 {
-  int unused;
-  int *oursuccess = success?success:&unused;
-  *oursuccess = 0;
-  /* If we are getting strong data then try that first.  We are
-     guaranteed to cause a reseed of some kind if strong is true and
-     we have both /dev/random and /dev/urandom.  We want the strong
-     data included in the reseed so we get it first.*/
-  if (strong) {
-    if (read_entropy_from_device (context, "/dev/random"))
-      *oursuccess = 1;
-  }
-  if (read_entropy_from_device (context, "/dev/urandom"))
-    *oursuccess = 1;
-  return 0;
+    int unused;
+    int *oursuccess = success ? success : &unused;
+
+    *oursuccess = 0;
+    /* If we are getting strong data then try that first.  We are
+       guaranteed to cause a reseed of some kind if strong is true and
+       we have both /dev/random and /dev/urandom.  We want the strong
+       data included in the reseed so we get it first.*/
+    if (strong) {
+	if (read_entropy_from_device(context, "/dev/random"))
+	    *oursuccess = 1;
+    }
+    if (read_entropy_from_device(context, "/dev/urandom"))
+	*oursuccess = 1;
+    return 0;
 }
 
 #endif /*Windows or pre-OSX Mac*/
