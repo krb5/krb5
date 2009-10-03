@@ -776,6 +776,16 @@ static inline void krb5int_zap_data(void *ptr, size_t len)
 #endif /* WIN32 */
 #define zap(p,l) krb5int_zap_data(p,l)
 
+/* Convenience function: zap and free ptr if it is non-NULL. */
+static inline void
+zapfree(void *ptr, size_t len)
+{
+    if (ptr != NULL) {
+	zap(ptr, len);
+	free(ptr);
+    }
+}
+
 /* A definition of init_state for DES based encryption systems.
  * sets up an 8-byte IV of all zeros
  */
@@ -2821,6 +2831,17 @@ static inline int authdata_eq (krb5_authdata a1, krb5_authdata a2)
     return (a1.ad_type == a2.ad_type
 	    && a1.length == a2.length
 	    && !memcmp(a1.contents, a2.contents, a1.length));
+}
+
+/* Allocate zeroed memory; set *code to 0 on success or ENOMEM on failure. */
+static inline void *
+k5alloc(size_t size, krb5_error_code *code)
+{
+    void *ptr;
+
+    ptr = calloc(size, 1);
+    *code = (ptr == NULL) ? ENOMEM : 0;
+    return ptr;
 }
 
 krb5_error_code KRB5_CALLCONV
