@@ -30,16 +30,12 @@
 krb5_error_code KRB5_CALLCONV
 krb5_enctype_to_string(krb5_enctype enctype, char *buffer, size_t buflen)
 {
-    int i;
+    const struct krb5_keytypes *ktp;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == enctype) {
-	    if (strlcpy(buffer, krb5_enctypes_list[i].out_string,
-			buflen) >= buflen)
-		return(ENOMEM);
-	    return(0);
-	}
-    }
-
-    return(EINVAL);
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+	return EINVAL;
+    if (strlcpy(buffer, ktp->out_string, buflen) >= buflen)
+	return ENOMEM;
+    return 0;
 }

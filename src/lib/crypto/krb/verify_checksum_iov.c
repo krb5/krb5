@@ -38,6 +38,7 @@ krb5_c_verify_checksum_iov(krb5_context context,
 			   krb5_boolean *valid)
 {
     unsigned int i;
+    const struct krb5_cksumtypes *ctp;
     size_t cksumlen;
     krb5_error_code ret;
     krb5_data computed;
@@ -47,52 +48,49 @@ krb5_c_verify_checksum_iov(krb5_context context,
 	if (krb5_cksumtypes_list[i].ctype == checksum_type)
 	    break;
     }
-
     if (i == krb5_cksumtypes_length)
-	return(KRB5_BAD_ENCTYPE);
+	return KRB5_BAD_ENCTYPE;
+    ctp = &krb5_cksumtypes_list[i];
 
-    checksum = krb5int_c_locate_iov((krb5_crypto_iov *)data, num_data, KRB5_CRYPTO_TYPE_CHECKSUM);
+    checksum = krb5int_c_locate_iov((krb5_crypto_iov *)data, num_data,
+				    KRB5_CRYPTO_TYPE_CHECKSUM);
     if (checksum == NULL)
 	return(KRB5_BAD_MSIZE);
 
-    /* if there's actually a verify function, call it */
+    /* If there's actually a verify function, call it. */
+    if (ctp->keyhash && ctp->keyhash->verify_iov) {
+	return (*ctp->keyhash->verify_iov)(key, usage, 0, data, num_data,
+					   &checksum->data, valid);
+    }
 
-    if (krb5_cksumtypes_list[i].keyhash &&
-	krb5_cksumtypes_list[i].keyhash->verify_iov)
-	return((*(krb5_cksumtypes_list[i].keyhash->verify_iov))(key, usage, 0,
-								data, num_data,
-								&checksum->data,
-								valid));
-
-    /* otherwise, make the checksum again, and compare */
-
-    if (krb5_cksumtypes_list[i].keyhash != NULL)
-	computed.length = krb5_cksumtypes_list[i].keyhash->hashsize;
+    /* Otherwise, make the checksum again, and compare. */
+    if (ctp->keyhash != NULL)
+	computed.length = ctp->keyhash->hashsize;
     else
-	computed.length = krb5_cksumtypes_list[i].hash->hashsize;
+	computed.length = ctp->hash->hashsize;
 
-    if (krb5_cksumtypes_list[i].trunc_size != 0)
-	cksumlen = krb5_cksumtypes_list[i].trunc_size;
+    if (ctp->trunc_size != 0)
+	cksumlen = ctp->trunc_size;
     else
 	cksumlen = computed.length;
 
     if (checksum->data.length != cksumlen)
-	return(KRB5_BAD_MSIZE);
+	return KRB5_BAD_MSIZE;
 
     computed.data = malloc(computed.length);
     if (computed.data == NULL)
-	return(ENOMEM);
+	return ENOMEM;
 
-    if ((ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i], key, usage,
-					   data, num_data, &computed))) {
+    ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i], key, usage,
+				      data, num_data, &computed);
+    if (ret) {
 	free(computed.data);
-	return(ret);
+	return ret;
     }
 
     *valid = (computed.length == cksumlen) &&
 	     (memcmp(computed.data, checksum->data.data, cksumlen) == 0);
 
     free(computed.data);
-
-    return(0);
+    return 0;
 }

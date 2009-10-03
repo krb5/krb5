@@ -31,25 +31,13 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_enctype_compare(krb5_context context, krb5_enctype e1, krb5_enctype e2,
 		       krb5_boolean *similar)
 {
-    int i, j;
+    const struct krb5_keytypes *ktp1, *ktp2;
 
-    for (i=0; i<krb5_enctypes_length; i++) 
-	if (krb5_enctypes_list[i].etype == e1)
-	    break;
+    ktp1 = find_enctype(e1);
+    ktp2 = find_enctype(e2);
+    if (ktp1 == NULL || ktp2 == NULL)
+	return KRB5_BAD_ENCTYPE;
 
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
-
-    for (j=0; j<krb5_enctypes_length; j++) 
-	if (krb5_enctypes_list[j].etype == e2)
-	    break;
-
-    if (j == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
-
-    *similar = 
-	((krb5_enctypes_list[i].enc == krb5_enctypes_list[j].enc) &&
-	 (krb5_enctypes_list[i].str2key == krb5_enctypes_list[j].str2key));
-
-    return(0);
+    *similar = (ktp1->enc == ktp2->enc && ktp1->str2key == ktp2->str2key);
+    return 0;
 }

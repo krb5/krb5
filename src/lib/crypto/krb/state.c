@@ -39,34 +39,22 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_init_state (krb5_context context, const krb5_keyblock *key,
 		   krb5_keyusage keyusage, krb5_data *new_state)
 {
-      int i;
+    const struct krb5_keytypes *ktp;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key->enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
-
-    return (*(krb5_enctypes_list[i].enc->init_state))
-      (key, keyusage, new_state);
+    ktp = find_enctype(key->enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    return ktp->enc->init_state(key, keyusage, new_state);
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_free_state (krb5_context context, const krb5_keyblock *key,
-		   krb5_data *state)
+krb5_c_free_state(krb5_context context, const krb5_keyblock *key,
+		  krb5_data *state)
 {
-      int i;
+    const struct krb5_keytypes *ktp;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key->enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
-
-    return     (*(krb5_enctypes_list[i].enc->free_state))
-      (state);
+    ktp = find_enctype(key->enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    return ktp->enc->free_state(state);
 }

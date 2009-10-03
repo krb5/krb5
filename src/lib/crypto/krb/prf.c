@@ -37,51 +37,35 @@
 #include <assert.h>
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_prf_length(krb5_context context, krb5_enctype enctype,
-		  size_t *len)
+krb5_c_prf_length(krb5_context context, krb5_enctype enctype, size_t *len)
 {
-    int i;
-    assert (len);
+    const struct krb5_keytypes *ktp;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
-
-    *len = krb5_enctypes_list[i].prf_length;
+    assert(len);
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    *len = ktp->prf_length;
     return 0;
-    
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_prf(krb5_context context, const krb5_keyblock *key,
 	   krb5_data *input, krb5_data *output)
 {
-    int i;
-    size_t len;
+    const struct krb5_keytypes *ktp;
+
     assert(input && output);
-    assert (output->data);
+    assert(output->data);
 
-
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key->enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
+    ktp = find_enctype(key->enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    if (ktp->prf == NULL)
+	return KRB5_CRYPTO_INTERNAL;
 
     output->magic = KV5M_DATA;
-    if (!krb5_enctypes_list[i].prf)
-	return (KRB5_CRYPTO_INTERNAL);
-    krb5_c_prf_length (context, key->enctype, &len);
-    if (len != output->length)
-	return (KRB5_CRYPTO_INTERNAL);
-    return((*(krb5_enctypes_list[i].prf))
-	   (krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,
-	    key,  input, output));
+    if (ktp->prf_length != output->length)
+	return KRB5_CRYPTO_INTERNAL;
+    return (*ktp->prf)(ktp->enc, ktp->hash, key, input, output);
 }
-

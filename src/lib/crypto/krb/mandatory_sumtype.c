@@ -26,16 +26,14 @@
 #include "etypes.h"
 
 krb5_error_code
-krb5int_c_mandatory_cksumtype (krb5_context ctx, krb5_enctype etype,
-			       krb5_cksumtype *cksumtype)
+krb5int_c_mandatory_cksumtype(krb5_context ctx, krb5_enctype etype,
+			      krb5_cksumtype *cksumtype)
 {
-    int i;
+    const struct krb5_keytypes *ktp;
 
-    for (i = 0; i < krb5_enctypes_length; i++)
-	if (krb5_enctypes_list[i].etype == etype) {
-	    *cksumtype = krb5_enctypes_list[i].required_ctype;
-	    return 0;
-	}
-
-    return KRB5_BAD_ENCTYPE;
+    ktp = find_enctype(etype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    *cksumtype = ktp->required_ctype;
+    return 0;
 }

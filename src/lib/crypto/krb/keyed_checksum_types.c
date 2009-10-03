@@ -28,62 +28,54 @@
 #include "etypes.h"
 #include "cksumtypes.h"
 
-static int etype_match(krb5_enctype e1, krb5_enctype e2)
+static krb5_boolean
+etype_match(krb5_enctype e1, krb5_enctype e2)
 {
-    int i1, i2;
+    const struct krb5_keytypes *ktp1, *ktp2;
 
-    for (i1=0; i1<krb5_enctypes_length; i1++) 
-	if (krb5_enctypes_list[i1].etype == e1)
-	    break;
-
-    for (i2=0; i2<krb5_enctypes_length; i2++) 
-	if (krb5_enctypes_list[i2].etype == e2)
-	    break;
-
-    return((i1 < krb5_enctypes_length) &&
-	   (i2 < krb5_enctypes_length) &&
-	   (krb5_enctypes_list[i1].enc == krb5_enctypes_list[i2].enc));
+    ktp1 = find_enctype(e1);
+    ktp2 = find_enctype(e2);
+    return (ktp1 != NULL && ktp2 != NULL && ktp1->enc == ktp2->enc);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 			    unsigned int *count, krb5_cksumtype **cksumtypes)
 {
-    unsigned int i, c;
+    unsigned int i, c, nctypes;
+    krb5_cksumtype *ctypes;
+    const struct krb5_cksumtypes *ct;
 
-    c = 0;
-    for (i=0; i<krb5_cksumtypes_length; i++) {
-	if ((krb5_cksumtypes_list[i].keyhash &&
-	     etype_match(krb5_cksumtypes_list[i].keyed_etype, enctype)) ||
-	    (krb5_cksumtypes_list[i].flags & KRB5_CKSUMFLAG_DERIVE)) {
-	    c++;
-	}
+    *count = 0;
+    *cksumtypes = NULL;
+
+    nctypes = 0;
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
+	ct = &krb5_cksumtypes_list[i];
+	if ((ct->keyhash && etype_match(ct->keyed_etype, enctype)) ||
+	    (ct->flags & KRB5_CKSUMFLAG_DERIVE))
+	    nctypes++;
     }
 
-    *count = c;
-
-    if ((*cksumtypes = (krb5_cksumtype *) malloc(c*sizeof(krb5_cksumtype)))
-	== NULL)
-	return(ENOMEM);
+    ctypes = malloc(nctypes * sizeof(krb5_cksumtype));
+    if (ctypes == NULL)
+	return ENOMEM;
 
     c = 0;
-    for (i=0; i<krb5_cksumtypes_length; i++) {
-	if ((krb5_cksumtypes_list[i].keyhash &&
-	     etype_match(krb5_cksumtypes_list[i].keyed_etype, enctype)) ||
-	    (krb5_cksumtypes_list[i].flags & KRB5_CKSUMFLAG_DERIVE)) {
-	    (*cksumtypes)[c] = krb5_cksumtypes_list[i].ctype;
-	    c++;
-	}
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
+	ct = &krb5_cksumtypes_list[i];
+	if ((ct->keyhash && etype_match(ct->keyed_etype, enctype)) ||
+	    (ct->flags & KRB5_CKSUMFLAG_DERIVE))
+	    ctypes[c++] = krb5_cksumtypes_list[i].ctype;
     }
 
-    return(0);
+    *count = nctypes;
+    *cksumtypes = ctypes;
+    return 0;
 }
 
 void KRB5_CALLCONV
 krb5_free_cksumtypes(krb5_context context, krb5_cksumtype *val)
 {
-    if (val)
-	free(val);
-    return;
+    free(val);
 }
-

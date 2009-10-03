@@ -41,22 +41,23 @@ krb5_c_make_checksum_iov(krb5_context context,
     krb5_error_code ret;
     krb5_data cksum_data;
     krb5_crypto_iov *checksum;
+    const struct krb5_cksumtypes *ctp;
 
     for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == cksumtype)
 	    break;
     }
-
     if (i == krb5_cksumtypes_length)
-	return(KRB5_BAD_ENCTYPE);
+	return KRB5_BAD_ENCTYPE;
+    ctp = &krb5_cksumtypes_list[i];
 
-    if (krb5_cksumtypes_list[i].keyhash != NULL)
-	cksum_data.length = krb5_cksumtypes_list[i].keyhash->hashsize;
+    if (ctp->keyhash != NULL)
+	cksum_data.length = ctp->keyhash->hashsize;
     else
-	cksum_data.length = krb5_cksumtypes_list[i].hash->hashsize;
+	cksum_data.length = ctp->hash->hashsize;
 
-    if (krb5_cksumtypes_list[i].trunc_size != 0)
-	cksumlen = krb5_cksumtypes_list[i].trunc_size;
+    if (ctp->trunc_size != 0)
+	cksumlen = ctp->trunc_size;
     else
 	cksumlen = cksum_data.length;
 

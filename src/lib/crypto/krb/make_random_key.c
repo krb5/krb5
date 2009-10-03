@@ -31,53 +31,46 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_make_random_key(krb5_context context, krb5_enctype enctype,
 		       krb5_keyblock *random_key)
 {
-    int i;
     krb5_error_code ret;
+    const struct krb5_keytypes *ktp;
     const struct krb5_enc_provider *enc;
     size_t keybytes, keylength;
     krb5_data random_data;
-    unsigned char *bytes;
+    unsigned char *bytes = NULL;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
-
-    enc = krb5_enctypes_list[i].enc;
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    enc = ktp->enc;
 
     keybytes = enc->keybytes;
     keylength = enc->keylength;
 
-    if ((bytes = (unsigned char *) malloc(keybytes)) == NULL)
-	return(ENOMEM);
-    if ((random_key->contents = (krb5_octet *) malloc(keylength)) == NULL) {
-	free(bytes);
-	return(ENOMEM);
-    }
+    bytes = k5alloc(keybytes, &ret);
+    if (ret)
+	return ret;
+    random_key->contents = k5alloc(keylength, &ret);
+    if (ret)
+	goto cleanup;
 
     random_data.data = (char *) bytes;
     random_data.length = keybytes;
 
-    if ((ret = krb5_c_random_make_octets(context, &random_data)))
+    ret = krb5_c_random_make_octets(context, &random_data);
+    if (ret)
 	goto cleanup;
 
     random_key->magic = KV5M_KEYBLOCK;
     random_key->enctype = enctype;
     random_key->length = keylength;
 
-    ret = ((*(enc->make_key))(&random_data, random_key));
+    ret = (*enc->make_key)(&random_data, random_key);
 
 cleanup:
-    memset(bytes, 0, keybytes);
-    free(bytes);
-
     if (ret) {
-	memset(random_key->contents, 0, keylength);
-	free(random_key->contents);
+	zapfree(random_key->contents, keylength);
+	random_key->contents = NULL;
     }
-
-    return(ret);
+    zapfree(bytes, keybytes);
+    return ret;
 }
