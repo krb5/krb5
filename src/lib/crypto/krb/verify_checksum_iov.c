@@ -29,9 +29,9 @@
 #include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_verify_checksum_iov(krb5_context context, 
+krb5_k_verify_checksum_iov(krb5_context context,
 			   krb5_cksumtype checksum_type,
-			   const krb5_keyblock *key,
+			   krb5_key key,
 			   krb5_keyusage usage,
 			   const krb5_crypto_iov *data,
 			   size_t num_data,
@@ -93,4 +93,25 @@ krb5_c_verify_checksum_iov(krb5_context context,
 
     free(computed.data);
     return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_verify_checksum_iov(krb5_context context,
+			   krb5_cksumtype checksum_type,
+			   const krb5_keyblock *keyblock,
+			   krb5_keyusage usage,
+			   const krb5_crypto_iov *data,
+			   size_t num_data,
+			   krb5_boolean *valid)
+{
+    krb5_key key;
+    krb5_error_code ret;
+
+    ret = krb5_k_create_key(context, keyblock, &key);
+    if (ret != 0)
+	return ret;
+    ret = krb5_k_verify_checksum_iov(context, checksum_type, key, usage, data,
+				     num_data, valid);
+    krb5_k_free_key(context, key);
+    return ret;
 }

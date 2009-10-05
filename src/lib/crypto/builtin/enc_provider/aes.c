@@ -86,7 +86,7 @@ static void xorblock(char *out, const char *in)
 }
 
 krb5_error_code
-krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     aes_ctx ctx;
@@ -95,7 +95,8 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
 /*    CHECK_SIZES; */
 
-    if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
+    if (aes_enc_key(key->keyblock.contents, key->keyblock.length,
+		    &ctx) != aes_good)
 	abort();
 
     if (ivec)
@@ -140,7 +141,7 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 krb5_error_code
-krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     aes_ctx ctx;
@@ -149,7 +150,8 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
     CHECK_SIZES;
 
-    if (aes_dec_key(key->contents, key->length, &ctx) != aes_good)
+    if (aes_dec_key(key->keyblock.contents, key->keyblock.length,
+		    &ctx) != aes_good)
 	abort();
 
     if (ivec)
@@ -200,7 +202,7 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-krb5int_aes_encrypt_iov(const krb5_keyblock *key,
+krb5int_aes_encrypt_iov(krb5_key key,
 		        const krb5_data *ivec,
 		        krb5_crypto_iov *data,
 		        size_t num_data)
@@ -210,7 +212,8 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
     int nblocks = 0, blockno;
     size_t input_length, i;
 
-    if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
+    if (aes_enc_key(key->keyblock.contents, key->keyblock.length, &ctx)
+	!= aes_good)
 	abort();
 
     if (ivec != NULL)
@@ -280,7 +283,7 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-krb5int_aes_decrypt_iov(const krb5_keyblock *key,
+krb5int_aes_decrypt_iov(krb5_key key,
 		        const krb5_data *ivec,
 		        krb5_crypto_iov *data,
 		        size_t num_data)
@@ -293,7 +296,8 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 
     CHECK_SIZES;
 
-    if (aes_dec_key(key->contents, key->length, &ctx) != aes_good)
+    if (aes_dec_key(key->keyblock.contents, key->keyblock.length,
+		    &ctx) != aes_good)
 	abort();
 
     if (ivec != NULL)

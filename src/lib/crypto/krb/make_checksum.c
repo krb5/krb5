@@ -30,8 +30,8 @@
 #include "dk.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
-		     const krb5_keyblock *key, krb5_keyusage usage,
+krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
+		     krb5_key key, krb5_keyusage usage,
 		     const krb5_data *input, krb5_checksum *cksum)
 {
     unsigned int i;
@@ -68,7 +68,7 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 	/* check if key is compatible */
 	if (ctp->keyed_etype) {
 	    ktp1 = find_enctype(ctp->keyed_etype);
-	    ktp2 = find_enctype(key->enctype);
+	    ktp2 = find_enctype(key->keyblock.enctype);
 	    if (ktp1 == NULL || ktp2 == NULL || ktp1->enc != ktp2->enc) {
 		ret = KRB5_BAD_ENCTYPE;
 		goto cleanup;
@@ -112,5 +112,23 @@ cleanup:
 	cksum->contents = NULL;
     }
 
+    return ret;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
+		     const krb5_keyblock *keyblock, krb5_keyusage usage,
+		     const krb5_data *input, krb5_checksum *cksum)
+{
+    krb5_key key = NULL;
+    krb5_error_code ret;
+
+    if (keyblock != NULL) {
+	ret = krb5_k_create_key(context, keyblock, &key);
+	if (ret != 0)
+	    return ret;
+    }
+    ret = krb5_k_make_checksum(context, cksumtype, key, usage, input, cksum);
+    krb5_k_free_key(context, key);
     return ret;
 }

@@ -28,6 +28,17 @@
 #include "aead.h"
 
 /*
+ * Because our built-in HMAC implementation doesn't need to invoke any
+ * encryption or keyed hash functions, it is simplest to define it in
+ * terms of keyblocks, and then supply a simple wrapper for the
+ * "normal" krb5_key-using interfaces.  The keyblock interfaces are
+ * useful for the biult-in arcfour code which constructs a lot of
+ * intermediate HMAC keys.  For other back ends, it should not be
+ * necessary to supply the _keyblock versions of the hmac functions if
+ * the back end code doesn't make use of them.
+ */
+
+/*
  * the HMAC transform looks like:
  *
  * H(K XOR opad, H(K XOR ipad, text))
@@ -40,8 +51,9 @@
  */
 
 krb5_error_code
-krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
-          unsigned int icount, const krb5_data *input, krb5_data *output)
+krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
+		      const krb5_keyblock *key, unsigned int icount,
+		      const krb5_data *input, krb5_data *output)
 {
     size_t hashsize, blocksize;
     unsigned char *xorkey, *ihash;
@@ -127,8 +139,10 @@ cleanup:
 }
 
 krb5_error_code
-krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
-                 const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
+krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
+			  const krb5_keyblock *key,
+			  const krb5_crypto_iov *data, size_t num_data,
+			  krb5_data *output)
 {
     krb5_data *sign_data;
     size_t num_sign_data;
@@ -156,10 +170,25 @@ krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key
     }
 
     /* caller must store checksum in iov as it may be TYPE_TRAILER or TYPE_CHECKSUM */
-    ret = krb5_hmac(hash, key, num_sign_data, sign_data, output);
+    ret = krb5int_hmac_keyblock(hash, key, num_sign_data, sign_data, output);
 
     free(sign_data);
 
     return ret;
 }
 
+krb5_error_code
+krb5_hmac(const struct krb5_hash_provider *hash, krb5_key key,
+	  unsigned int icount, const krb5_data *input, krb5_data *output)
+{
+    return krb5int_hmac_keyblock(hash, &key->keyblock, icount, input, output);
+}
+
+krb5_error_code
+krb5int_hmac_iov(const struct krb5_hash_provider *hash, krb5_key key,
+		 const krb5_crypto_iov *data, size_t num_data,
+		 krb5_data *output)
+{
+    return krb5int_hmac_iov_keyblock(hash, &key->keyblock, data, num_data,
+				     output);
+}

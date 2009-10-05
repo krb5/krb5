@@ -28,7 +28,7 @@
 #include "cksumtypes.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
+krb5_k_verify_checksum(krb5_context context, krb5_key key,
 		       krb5_keyusage usage, const krb5_data *data,
 		       const krb5_checksum *cksum, krb5_boolean *valid)
 {
@@ -78,7 +78,7 @@ krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
 
     computed.length = hashsize;
 
-    ret = krb5_c_make_checksum(context, cksum->checksum_type, key, usage,
+    ret = krb5_k_make_checksum(context, cksum->checksum_type, key, usage,
 			       data, &computed);
     if (ret)
 	return ret;
@@ -87,4 +87,22 @@ krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
 
     free(computed.contents);
     return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *keyblock,
+		       krb5_keyusage usage, const krb5_data *data,
+		       const krb5_checksum *cksum, krb5_boolean *valid)
+{
+    krb5_key key = NULL;
+    krb5_error_code ret;
+
+    if (keyblock != NULL) {
+	ret = krb5_k_create_key(context, keyblock, &key);
+	if (ret != 0)
+	    return ret;
+    }
+    ret = krb5_k_verify_checksum(context, key, usage, data, cksum, valid);
+    krb5_k_free_key(context, key);
+    return ret;
 }

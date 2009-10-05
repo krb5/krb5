@@ -28,9 +28,9 @@
 #include "dk.h"
 
 krb5_error_code
-krb5_derive_key(const struct krb5_enc_provider *enc,
-		const krb5_keyblock *inkey, krb5_keyblock *outkey,
-		const krb5_data *in_constant)
+krb5_derive_keyblock(const struct krb5_enc_provider *enc,
+		     krb5_key inkey, krb5_keyblock *outkey,
+		     const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
     unsigned char *inblockdata = NULL, *outblockdata = NULL, *rawkey = NULL;
@@ -40,7 +40,8 @@ krb5_derive_key(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     keybytes = enc->keybytes;
 
-    if (inkey->length != enc->keylength || outkey->length != enc->keylength)
+    if (inkey->keyblock.length != enc->keylength ||
+	outkey->length != enc->keylength)
 	return KRB5_CRYPTO_INTERNAL;
 
     /* Allocate and set up buffers. */
@@ -103,10 +104,37 @@ cleanup:
     return ret;
 }
 
+krb5_error_code
+krb5_derive_key(const struct krb5_enc_provider *enc,
+		krb5_key inkey, krb5_key *outkey,
+		const krb5_data *in_constant)
+{
+    krb5_keyblock keyblock;
+    krb5_error_code ret;
+
+    *outkey = NULL;
+
+    /* Set up a temporary keyblock. */
+    keyblock.length = enc->keylength;
+    keyblock.contents = malloc(keyblock.length);
+    if (keyblock.contents == NULL)
+	return ENOMEM;
+
+    ret = krb5_derive_keyblock(enc, inkey, &keyblock, in_constant);
+    if (ret)
+	goto cleanup;
+
+    /* Convert the keyblock to a key. */
+    ret = krb5_k_create_key(NULL, &keyblock, outkey);
+
+cleanup:
+    zapfree(keyblock.contents, keyblock.length);
+    return ret;
+}
 
 krb5_error_code
 krb5_derive_random(const struct krb5_enc_provider *enc,
-		   const krb5_keyblock *inkey, krb5_data *outrnd,
+		   krb5_key inkey, krb5_data *outrnd,
 		   const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
@@ -117,7 +145,7 @@ krb5_derive_random(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     keybytes = enc->keybytes;
 
-    if (inkey->length != enc->keylength || outrnd->length != keybytes)
+    if (inkey->keyblock.length != enc->keylength || outrnd->length != keybytes)
 	return KRB5_CRYPTO_INTERNAL;
 
     /* Allocate and set up buffers. */
