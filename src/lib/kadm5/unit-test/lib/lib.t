@@ -19,7 +19,7 @@ proc lib_start_api {} {
 	set lib_pid [api_start]
 	if {! [cmd {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    lib_handle
 	}]} {
 	    perror "$test: unexpected failure in init"
