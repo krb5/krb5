@@ -73,9 +73,17 @@ krb5_free_cksumtypes
 krb5_hmac
 krb5_init_random_key
 krb5_k_create_key
+krb5_k_decrypt
+krb5_k_decrypt_iov
+krb5_k_encrypt
+krb5_k_encrypt_iov
 krb5_k_free_key
 krb5_k_key_enctype
 krb5_k_key_keyblock
+krb5_k_make_checksum
+krb5_k_make_checksum_iov
+krb5_k_verify_checksum
+krb5_k_verify_checksum_iov
 krb5_nfold
 krb5_old_decrypt
 krb5_old_encrypt
