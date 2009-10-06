@@ -167,4 +167,4 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
 };
 
 const int krb5_enctypes_length =
-sizeof(krb5_enctypes_list)/sizeof(struct krb5_keytypes);
+    sizeof(krb5_enctypes_list) / sizeof(struct krb5_keytypes);

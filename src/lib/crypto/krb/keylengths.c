@@ -39,23 +39,19 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_keylengths(krb5_context context, krb5_enctype enctype,
 		  size_t *keybytes, size_t *keylength)
 {
-    int i;
+    const struct krb5_keytypes *ktp;
 
     if (keybytes == NULL && keylength == NULL)
-	return(EINVAL);
+	return EINVAL;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
 
     if (keybytes)
-	*keybytes = krb5_enctypes_list[i].enc->keybytes;
+	*keybytes = ktp->enc->keybytes;
     if (keylength)
-	*keylength = krb5_enctypes_list[i].enc->keylength;
+	*keylength = ktp->enc->keylength;
 
-    return(0);
+    return 0;
 }

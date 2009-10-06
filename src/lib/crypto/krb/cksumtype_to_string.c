@@ -32,14 +32,14 @@ krb5_cksumtype_to_string(krb5_cksumtype cksumtype, char *buffer, size_t buflen)
 {
     unsigned int i;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == cksumtype) {
 	    if (strlcpy(buffer, krb5_cksumtypes_list[i].out_string,
 			buflen) >= buflen)
-		return(ENOMEM);
-	    return(0);
+		return ENOMEM;
+	    return 0;
 	}
     }
 
-    return(EINVAL);
+    return EINVAL;
 }

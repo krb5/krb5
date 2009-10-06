@@ -36,41 +36,35 @@ krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
 		      const krb5_keyblock *key, krb5_keyusage usage,
 		      const krb5_data *input, krb5_data *output)
 {
-    int i;
+    const struct krb5_keytypes *ktp;
     const struct krb5_enc_provider *enc;
-    size_t blocksize, keybytes, keylength;
+    size_t keylength;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data datain;
     unsigned char *kcdata;
     krb5_keyblock kc;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key->enctype)
-	    break;
-    }
+    ktp = find_enctype(key->enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    enc = ktp->enc;
 
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
+    /*
+     * key->length will be tested in enc->encrypt.
+     * output->length will be tested in krb5_hmac.
+     */
 
-    enc = krb5_enctypes_list[i].enc;
-
-    /* allocate and set to-be-derived keys */
-
-    blocksize = enc->block_size;
-    keybytes = enc->keybytes;
+    /* Allocate and set to-be-derived keys. */
     keylength = enc->keylength;
-
-    /* key->length will be tested in enc->encrypt
-       output->length will be tested in krb5_hmac */
-
-    if ((kcdata = (unsigned char *) malloc(keylength)) == NULL)
-	return(ENOMEM);
+    kcdata = malloc(keylength);
+    if (kcdata == NULL)
+	return ENOMEM;
 
     kc.contents = kcdata;
     kc.length = keylength;
 
-    /* derive the key */
+    /* Derive the key. */
  
     datain.data = (char *) constantdata;
     datain.length = K5CLENGTH;
@@ -79,24 +73,21 @@ krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
 
     datain.data[4] = (char) 0x99;
 
-    if ((ret = krb5_derive_key(enc, key, &kc, &datain)) != 0)
+    ret = krb5_derive_key(enc, key, &kc, &datain);
+    if (ret)
 	goto cleanup;
 
     /* hash the data */
 
     datain = *input;
 
-    if ((ret = krb5_hmac(hash, &kc, 1, &datain, output)) != 0)
+    ret = krb5_hmac(hash, &kc, 1, &datain, output);
+    if (ret)
 	memset(output->data, 0, output->length);
 
-    /* ret is set correctly by the prior call */
-
 cleanup:
-    memset(kcdata, 0, keylength);
-
-    free(kcdata);
-
-    return(ret);
+    zapfree(kcdata, keylength);
+    return ret;
 }
 
 krb5_error_code
@@ -105,41 +96,36 @@ krb5int_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
 			  const krb5_crypto_iov *data, size_t num_data,
 			  krb5_data *output)
 {
-    int i;
+    const struct krb5_keytypes *ktp;
     const struct krb5_enc_provider *enc;
-    size_t blocksize, keybytes, keylength;
+    size_t keylength;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data datain;
     unsigned char *kcdata;
     krb5_keyblock kc;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key->enctype)
-	    break;
-    }
+    ktp = find_enctype(key->enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    enc = ktp->enc;
 
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
+    /*
+     * key->length will be tested in enc->encrypt.
+     * output->length will be tested in krb5_hmac.
+     */
 
-    enc = krb5_enctypes_list[i].enc;
+    /* Allocate and set to-be-derived keys. */
 
-    /* allocate and set to-be-derived keys */
-
-    blocksize = enc->block_size;
-    keybytes = enc->keybytes;
     keylength = enc->keylength;
-
-    /* key->length will be tested in enc->encrypt
-       output->length will be tested in krb5_hmac */
-
-    if ((kcdata = (unsigned char *) malloc(keylength)) == NULL)
-	return(ENOMEM);
+    kcdata = malloc(keylength);
+    if (kcdata == NULL)
+	return ENOMEM;
 
     kc.contents = kcdata;
     kc.length = keylength;
 
-    /* derive the key */
+    /* Derive the key. */
  
     datain.data = (char *) constantdata;
     datain.length = K5CLENGTH;
@@ -148,20 +134,18 @@ krb5int_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
 
     datain.data[4] = (char) 0x99;
 
-    if ((ret = krb5_derive_key(enc, key, &kc, &datain)) != 0)
+    ret = krb5_derive_key(enc, key, &kc, &datain);
+    if (ret)
 	goto cleanup;
 
-    /* hash the data */
+    /* Hash the data. */
 
-    if ((ret = krb5int_hmac_iov(hash, &kc, data, num_data, output)) != 0)
+    ret = krb5int_hmac_iov(hash, &kc, data, num_data, output);
+    if (ret)
 	memset(output->data, 0, output->length);
 
-    /* ret is set correctly by the prior call */
-
 cleanup:
-    memset(kcdata, 0, keylength);
-
-    free(kcdata);
+    zapfree(kcdata, keylength);
 
     return(ret);
 }

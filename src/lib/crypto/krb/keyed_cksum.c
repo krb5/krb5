@@ -31,25 +31,22 @@ krb5_boolean KRB5_CALLCONV
 krb5_c_is_keyed_cksum(krb5_cksumtype ctype)
 {
     unsigned int i;
+    const struct krb5_cksumtypes *ctp;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == ctype) {
-	    if (krb5_cksumtypes_list[i].keyhash ||
-		(krb5_cksumtypes_list[i].flags &
-		 KRB5_CKSUMFLAG_DERIVE))
-		return(1);
-	    else
-		return(0);
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
+	ctp = &krb5_cksumtypes_list[i];
+	if (ctp->ctype == ctype) {
+	    return (ctp->keyhash != NULL ||
+		    (ctp->flags & KRB5_CKSUMFLAG_DERIVE));
 	}
     }
 
-    /* ick, but it's better than coredumping, which is what the
-       old code would have done */
-    return 0;   /* error case */
+    /* Invalid ctype.  This is misleading, but better than dumping core. */
+    return FALSE;
 }
 
 krb5_boolean KRB5_CALLCONV
 is_keyed_cksum(krb5_cksumtype ctype)
 {
-    return krb5_c_is_keyed_cksum (ctype);
+    return krb5_c_is_keyed_cksum(ctype);
 }

@@ -30,39 +30,20 @@
 krb5_boolean KRB5_CALLCONV
 krb5_c_valid_enctype(krb5_enctype etype)
 {
-    int i;
-
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == etype)
-	    return(1);
-    }
-
-    return(0);
+    return (find_enctype(etype) != NULL);
 }
 
 krb5_boolean KRB5_CALLCONV
 valid_enctype(krb5_enctype etype)
 {
-    return krb5_c_valid_enctype (etype);
+    return krb5_c_valid_enctype(etype);
 }
 
 krb5_boolean KRB5_CALLCONV
 krb5_c_weak_enctype(krb5_enctype etype)
 {
-    int i;
-    const struct krb5_keytypes *k;
+    const struct krb5_keytypes *ktp;
 
-    for (i = 0; i < krb5_enctypes_length; i++) {
-#if 0
-	if (krb5_enctypes_list[i].etype == etype &&
-	    krb5_enctypes_list[i].flags | ETYPE_WEAK)
-	    return(1);
-#endif
-	k = &krb5_enctypes_list[i];
-	if (k->etype == etype && (k->flags & ETYPE_WEAK)) {
-	    return(1);
-	}
-    }
-
-    return(0);
+    ktp = find_enctype(etype);
+    return ((ktp->flags & ETYPE_WEAK) != 0);
 }

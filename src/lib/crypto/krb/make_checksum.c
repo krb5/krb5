@@ -35,56 +35,47 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 		     const krb5_data *input, krb5_checksum *cksum)
 {
     unsigned int i;
-    int e1, e2;
+    const struct krb5_cksumtypes *ctp;
+    const struct krb5_keytypes *ktp1, *ktp2;
+    const struct krb5_keyhash_provider *keyhash;
     krb5_data data;
+    krb5_octet *trunc;
     krb5_error_code ret;
     size_t cksumlen;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == cksumtype)
 	    break;
     }
-
     if (i == krb5_cksumtypes_length)
-	return(KRB5_BAD_ENCTYPE);
+	return KRB5_BAD_ENCTYPE;
+    ctp = &krb5_cksumtypes_list[i];
 
-    if (krb5_cksumtypes_list[i].keyhash)
-	cksumlen = krb5_cksumtypes_list[i].keyhash->hashsize;
+    if (ctp->keyhash != NULL)
+	cksumlen = ctp->keyhash->hashsize;
     else
-	cksumlen = krb5_cksumtypes_list[i].hash->hashsize;
+	cksumlen = ctp->hash->hashsize;
 
     cksum->length = cksumlen;
-
-    if ((cksum->contents = (krb5_octet *) malloc(cksum->length)) == NULL)
-	return(ENOMEM);
+    cksum->contents = malloc(cksum->length);
+    if (cksum->contents == NULL)
+	return ENOMEM;
 
     data.length = cksum->length;
     data.data = (char *) cksum->contents;
 
-    if (krb5_cksumtypes_list[i].keyhash) {
+    if (ctp->keyhash) {
 	/* check if key is compatible */
-	const struct krb5_keyhash_provider *keyhash;
-
-	keyhash = krb5_cksumtypes_list[i].keyhash;
-
-	if (krb5_cksumtypes_list[i].keyed_etype) {
-	    for (e1=0; e1<krb5_enctypes_length; e1++) 
-		if (krb5_enctypes_list[e1].etype ==
-		    krb5_cksumtypes_list[i].keyed_etype)
-		    break;
-
-	    for (e2=0; e2<krb5_enctypes_length; e2++) 
-		if (krb5_enctypes_list[e2].etype == key->enctype)
-		    break;
-
-	    if ((e1 == krb5_enctypes_length) ||
-		(e2 == krb5_enctypes_length) ||
-		(krb5_enctypes_list[e1].enc != krb5_enctypes_list[e2].enc)) {
+	if (ctp->keyed_etype) {
+	    ktp1 = find_enctype(ctp->keyed_etype);
+	    ktp2 = find_enctype(key->enctype);
+	    if (ktp1 == NULL || ktp2 == NULL || ktp1->enc != ktp2->enc) {
 		ret = KRB5_BAD_ENCTYPE;
 		goto cleanup;
 	    }
 	}
 
+	keyhash = ctp->keyhash;
 	if (keyhash->hash == NULL) {
 	    krb5_crypto_iov iov[1];
 
@@ -97,22 +88,19 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 	} else {
 	    ret = (*keyhash->hash)(key, usage, 0, input, &data);
 	}
-    } else if (krb5_cksumtypes_list[i].flags & KRB5_CKSUMFLAG_DERIVE) {
-	ret = krb5_dk_make_checksum(krb5_cksumtypes_list[i].hash,
-				    key, usage, input, &data);
+    } else if (ctp->flags & KRB5_CKSUMFLAG_DERIVE) {
+	ret = krb5_dk_make_checksum(ctp->hash, key, usage, input, &data);
     } else {
-	/* no key is used */
-
-	ret = (*(krb5_cksumtypes_list[i].hash->hash))(1, input, &data);
+	/* No key is used. */
+	ret = (*ctp->hash->hash)(1, input, &data);
     }
 
     if (!ret) {
 	cksum->magic = KV5M_CHECKSUM;
 	cksum->checksum_type = cksumtype;
-	if (krb5_cksumtypes_list[i].trunc_size) {
-	    krb5_octet *trunc;
-	    cksum->length = krb5_cksumtypes_list[i].trunc_size;
-	    trunc = (krb5_octet *) realloc(cksum->contents, cksum->length);
+	if (ctp->trunc_size) {
+	    cksum->length = ctp->trunc_size;
+	    trunc = realloc(cksum->contents, cksum->length);
 	    if (trunc)
 		cksum->contents = trunc;
 	}
@@ -120,10 +108,9 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 
 cleanup:
     if (ret) {
-	memset(cksum->contents, 0, cksum->length);
-	free(cksum->contents);
+	zapfree(cksum->contents, cksum->length);
 	cksum->contents = NULL;
     }
 
-    return(ret);
+    return ret;
 }

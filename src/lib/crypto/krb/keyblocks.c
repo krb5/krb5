@@ -33,29 +33,31 @@
 #include "k5-int.h"
 #include <assert.h>
 
-krb5_error_code   krb5int_c_init_keyblock
-	(krb5_context context, krb5_enctype enctype,
-	 size_t length, krb5_keyblock **out)
+krb5_error_code
+krb5int_c_init_keyblock(krb5_context context, krb5_enctype enctype,
+			size_t length, krb5_keyblock **out)
 {
     krb5_keyblock *kb;
-    kb = malloc (sizeof(krb5_keyblock));
-    assert (out);
+
+    assert(out);
     *out = NULL;
-    if (!kb) {
+
+    kb = malloc(sizeof(krb5_keyblock));
+    if (kb == NULL)
 	return ENOMEM;
-    }
     kb->magic = KV5M_KEYBLOCK;
     kb->enctype = enctype;
     kb->length = length;
-    if(length) {
-	kb->contents = malloc (length);
-	if(!kb->contents) {
-	    free (kb);
+    if (length) {
+	kb->contents = malloc(length);
+	if (!kb->contents) {
+	    free(kb);
 	    return ENOMEM;
 	}
     } else {
 	kb->contents = NULL;
     }
+
     *out = kb;
     return 0;
 }
@@ -72,8 +74,7 @@ void
 krb5int_c_free_keyblock_contents(krb5_context context, krb5_keyblock *key)
 {
     if (key && key->contents) {
-	krb5int_zap_data (key->contents, key->length);
-	free(key->contents);
-	key->contents = 0;
+	zapfree(key->contents, key->length);
+	key->contents = NULL;
     }
 }
