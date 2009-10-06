@@ -98,6 +98,7 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
     char tmp[40];
     size_t blocksize, hashsize;
     krb5_error_code err;
+    krb5_key k;
 
     printk(" test key", key);
     blocksize = h->blocksize;
@@ -120,7 +121,9 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
 	printk(" pre-hashed key", key);
     }
     printd(" hmac input", in);
-    err = krb5_hmac(h, key, 1, in, out);
+    krb5_k_create_key(NULL, key, &k);
+    err = krb5_hmac(h, k, 1, in, out);
+    krb5_k_free_key(NULL, k);
     if (err == 0)
 	printd(" hmac output", out);
     return err;

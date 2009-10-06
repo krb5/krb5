@@ -75,6 +75,7 @@ main(argc, argv)
   krb5_boolean		valid;
   size_t		length;
   krb5_keyblock		keyblock;
+  krb5_key		key;
   krb5_error_code	kret=0;
   krb5_data		plaintext, newstyle_checksum;
 
@@ -89,6 +90,8 @@ main(argc, argv)
   keyblock.length = sizeof(testkey);
   keyblock.contents = testkey;
 
+  krb5_k_create_key(NULL, &keyblock, &key);
+
   length = khp.hashsize;
 
   newstyle_checksum.length = length;
@@ -102,13 +105,13 @@ main(argc, argv)
     plaintext.length = strlen(argv[msgindex]);
     plaintext.data = argv[msgindex];
 
-    if ((kret = (*(khp.hash))(&keyblock, 0, 0, &plaintext, &newstyle_checksum))) {
+    if ((kret = (*(khp.hash))(key, 0, 0, &plaintext, &newstyle_checksum))) {
       printf("krb5_calculate_checksum choked with %d\n", kret);
       break;
     }
     print_checksum("correct", MD, argv[msgindex], &newstyle_checksum);
 
-    if ((kret = (*(khp.verify))(&keyblock, 0, 0, &plaintext, &newstyle_checksum,
+    if ((kret = (*(khp.verify))(key, 0, 0, &plaintext, &newstyle_checksum,
 				&valid))) {
       printf("verify on new checksum choked with %d\n", kret);
       break;
@@ -120,7 +123,7 @@ main(argc, argv)
     printf("Verify succeeded for \"%s\"\n", argv[msgindex]);
 
     newstyle_checksum.data[0]++;
-    if ((kret = (*(khp.verify))(&keyblock, 0, 0, &plaintext, &newstyle_checksum,
+    if ((kret = (*(khp.verify))(key, 0, 0, &plaintext, &newstyle_checksum,
 				&valid))) {
       printf("verify on new checksum choked with %d\n", kret);
       break;
