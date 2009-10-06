@@ -39,7 +39,7 @@ krb5_c_checksum_length(krb5_context context, krb5_cksumtype cksumtype,
     }
 
     if (i == krb5_cksumtypes_length)
-	return(KRB5_BAD_ENCTYPE);
+	return KRB5_BAD_ENCTYPE;
 
     if (krb5_cksumtypes_list[i].keyhash)
 	*length = krb5_cksumtypes_list[i].keyhash->hashsize;
@@ -48,6 +48,6 @@ krb5_c_checksum_length(krb5_context context, krb5_cksumtype cksumtype,
     else
 	*length = krb5_cksumtypes_list[i].hash->hashsize;
 
-    return(0);
+    return 0;
 }
 	

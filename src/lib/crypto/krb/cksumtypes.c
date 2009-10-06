@@ -88,4 +88,4 @@ const struct krb5_cksumtypes krb5_cksumtypes_list[] = {
 };
 
 const unsigned int krb5_cksumtypes_length =
-sizeof(krb5_cksumtypes_list)/sizeof(struct krb5_cksumtypes);
+    sizeof(krb5_cksumtypes_list) / sizeof(struct krb5_cksumtypes);

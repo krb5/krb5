@@ -31,23 +31,26 @@ krb5_error_code KRB5_CALLCONV
 krb5_string_to_cksumtype(char *string, krb5_cksumtype *cksumtypep)
 {
     unsigned int i, j;
+    const char *alias;
+    const struct krb5_cksumtypes *ctp;
 
     for (i=0; i<krb5_cksumtypes_length; i++) {
-	if (strcasecmp(krb5_cksumtypes_list[i].name, string) == 0) {
-	    *cksumtypep = krb5_cksumtypes_list[i].ctype;
-	    return(0);
+	ctp = &krb5_cksumtypes_list[i];
+	if (strcasecmp(ctp->name, string) == 0) {
+	    *cksumtypep = ctp->ctype;
+	    return 0;
 	}
-#define MAX_ALIASES (sizeof(krb5_cksumtypes_list[i].aliases) / sizeof(krb5_cksumtypes_list[i].aliases[0]))
+#define MAX_ALIASES (sizeof(ctp->aliases) / sizeof(ctp->aliases[0]))
 	for (j = 0; j < MAX_ALIASES; j++) {
-	    const char *alias = krb5_cksumtypes_list[i].aliases[j];
+	    alias = ctp->aliases[j];
 	    if (alias == NULL)
 		break;
 	    if (strcasecmp(alias, string) == 0) {
-		*cksumtypep = krb5_cksumtypes_list[i].ctype;
+		*cksumtypep = ctp->ctype;
 		return 0;
 	    }
 	}
     }
 
-    return(EINVAL);
+    return EINVAL;
 }

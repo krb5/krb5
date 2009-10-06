@@ -36,34 +36,32 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
 {
     krb5_error_code ret;
     size_t keybytes, keylength, concatlen;
-    unsigned char *concat, *foldstring, *foldkeydata;
+    unsigned char *concat = NULL, *foldstring = NULL, *foldkeydata = NULL;
     krb5_data indata;
     krb5_keyblock foldkey;
 
-    /* key->length is checked by krb5_derive_key */
+    /* key->length is checked by krb5_derive_key. */
 
     keybytes = enc->keybytes;
     keylength = enc->keylength;
 
-    concatlen = string->length+(salt?salt->length:0);
+    concatlen = string->length + (salt ? salt->length : 0);
 
-    if ((concat = (unsigned char *) malloc(concatlen)) == NULL)
-	return(ENOMEM);
-    if ((foldstring = (unsigned char *) malloc(keybytes)) == NULL) {
-	free(concat);
-	return(ENOMEM);
-    }
-    if ((foldkeydata = (unsigned char *) malloc(keylength)) == NULL) {
-	free(foldstring);
-	free(concat);
-	return(ENOMEM);
-    }
+    concat = k5alloc(concatlen, &ret);
+    if (ret != 0)
+	goto cleanup;
+    foldstring = k5alloc(keybytes, &ret);
+    if (ret != 0)
+	goto cleanup;
+    foldkeydata = k5alloc(keylength, &ret);
+    if (ret != 0)
+	goto cleanup;
 
     /* construct input string ( = string + salt), fold it, make_key it */
 
     memcpy(concat, string->data, string->length);
     if (salt)
-	memcpy(concat+string->length, salt->data, salt->length);
+	memcpy(concat + string->length, salt->data, salt->length);
 
     krb5_nfold(concatlen*8, concat, keybytes*8, foldstring);
 
@@ -72,25 +70,22 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
     foldkey.length = keylength;
     foldkey.contents = foldkeydata;
 
-    (*(enc->make_key))(&indata, &foldkey);
+    ret = (*enc->make_key)(&indata, &foldkey);
+    if (ret != 0)
+	goto cleanup;
 
     /* now derive the key from this one */
 
     indata.length = kerberos_len;
     indata.data = (char *) kerberos;
 
-    if ((ret = krb5_derive_key(enc, &foldkey, key, &indata)))
+    ret = krb5_derive_key(enc, &foldkey, key, &indata);
+    if (ret != 0)
 	memset(key->contents, 0, key->length);
 
-    /* ret is set correctly by the prior call */
-
-    memset(concat, 0, concatlen);
-    memset(foldstring, 0, keybytes);
-    memset(foldkeydata, 0, keylength);
-
-    free(foldkeydata);
-    free(foldstring);
-    free(concat);
-
-    return(ret);
+cleanup:
+    zapfree(concat, concatlen);
+    zapfree(foldstring, keybytes);
+    zapfree(foldkeydata, keylength);
+    return ret;
 }

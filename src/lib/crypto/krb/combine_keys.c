@@ -46,9 +46,9 @@
 #include "etypes.h"
 #include "dk.h"
 
-static krb5_error_code dr
-(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
-		unsigned char *outdata, const krb5_data *in_constant);
+static krb5_error_code dr(const struct krb5_enc_provider *enc,
+			  const krb5_keyblock *inkey, unsigned char *outdata,
+			  const krb5_data *in_constant);
 
 /*
  * We only support this combine_keys algorithm for des and 3des keys.
@@ -56,85 +56,65 @@ static krb5_error_code dr
  * We don't implement that yet.
  */
 
-static krb5_boolean  enctype_ok (krb5_enctype e) 
+static krb5_boolean
+enctype_ok(krb5_enctype e)
 {
     switch (e) {
     case ENCTYPE_DES_CBC_CRC:
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES3_CBC_SHA1:
-	return 1;
+	return TRUE;
     default:
-	return 0;
+	return FALSE;
     }
 }
 
-krb5_error_code krb5int_c_combine_keys
-(krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2, krb5_keyblock *outkey)
+krb5_error_code
+krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
+		       krb5_keyblock *key2, krb5_keyblock *outkey)
 {
-    unsigned char *r1, *r2, *combined, *rnd, *output;
+    unsigned char *r1 = NULL, *r2 = NULL, *combined = NULL, *rnd = NULL;
+    unsigned char *output = NULL;
     size_t keybytes, keylength;
     const struct krb5_enc_provider *enc;
     krb5_data input, randbits;
     krb5_keyblock tkey;
     krb5_error_code ret;
-    int i, myalloc = 0;
-    if (!(enctype_ok(key1->enctype)&&enctype_ok(key2->enctype)))
-	return (KRB5_CRYPTO_INTERNAL);
-    
+    const struct krb5_keytypes *ktp;
+    krb5_boolean myalloc = FALSE;
+
+    if (!enctype_ok(key1->enctype) || !enctype_ok(key2->enctype))
+	return KRB5_CRYPTO_INTERNAL;
 
     if (key1->length != key2->length || key1->enctype != key2->enctype)
-	return (KRB5_CRYPTO_INTERNAL);
+	return KRB5_CRYPTO_INTERNAL;
 
-    /*
-     * Find our encryption algorithm
-     */
-
-    for (i = 0; i < krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key1->enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return (KRB5_BAD_ENCTYPE);
-
-    enc = krb5_enctypes_list[i].enc;
+    /* Find our encryption algorithm. */
+    ktp = find_enctype(key1->enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    enc = ktp->enc;
 
     keybytes = enc->keybytes;
     keylength = enc->keylength;
 
-    /*
-     * Allocate and set up buffers
-     */
-
-    if ((r1 = (unsigned char *) malloc(keybytes)) == NULL)
-	return (ENOMEM);
-
-    if ((r2 = (unsigned char *) malloc(keybytes)) == NULL) {
-	free(r1);
-	return (ENOMEM);
-    }
-
-    if ((rnd = (unsigned char *) malloc(keybytes)) == NULL) {
-	free(r1);
-	free(r2);
-	return (ENOMEM);
-    }
-
-    if ((combined = (unsigned char *) malloc(keybytes * 2)) == NULL) {
-	free(r1);
-	free(r2);
-	free(rnd);
-	return (ENOMEM);
-    }
-
-    if ((output = (unsigned char *) malloc(keylength)) == NULL) {
-	free(r1);
-	free(r2);
-	free(rnd);
-	free(combined);
-	return (ENOMEM);
-    }
+    /* Allocate and set up buffers. */
+    r1 = k5alloc(keybytes, &ret);
+    if (ret)
+	goto cleanup;
+    r2 = k5alloc(keybytes, &ret);
+    if (ret)
+	goto cleanup;
+    rnd = k5alloc(keybytes, &ret);
+    if (ret)
+	goto cleanup;
+    combined = k5alloc(keybytes * 2, &ret);
+    if (ret)
+	goto cleanup;
+    output = k5alloc(keylength, &ret);
+    if (ret)
+	goto cleanup;
 
     /*
      * Get R1 and R2 (by running the input keys through the DR algorithm.
@@ -143,33 +123,15 @@ krb5_error_code krb5int_c_combine_keys
 
     input.length = key2->length;
     input.data = (char *) key2->contents;
-    if ((ret = dr(enc, key1, r1, &input)))
+    ret = dr(enc, key1, r1, &input);
+    if (ret)
 	goto cleanup;
-
-#if 0
-    {
-	int i;
-	printf("R1 =");
-	for (i = 0; i < keybytes; i++)
-	    printf(" %02x", (unsigned char) r1[i]);
-	printf("\n");
-    }
-#endif
 
     input.length = key1->length;
     input.data = (char *) key1->contents;
-    if ((ret = dr(enc, key2, r2, &input)))
+    ret = dr(enc, key2, r2, &input);
+    if (ret)
 	goto cleanup;
-
-#if 0
-    {
-	int i;
-	printf("R2 =");
-	for (i = 0; i < keybytes; i++)
-	    printf(" %02x", (unsigned char) r2[i]);
-	printf("\n");
-    }
-#endif
 
     /*
      * Concatenate the two keys together, and then run them through
@@ -183,16 +145,6 @@ krb5_error_code krb5int_c_combine_keys
 
     krb5_nfold((keybytes * 2) * 8, combined, keybytes * 8, rnd);
 
-#if 0
-    {
-	int i;
-	printf("rnd =");
-	for (i = 0; i < keybytes; i++)
-	    printf(" %02x", (unsigned char) rnd[i]);
-	printf("\n");
-    }
-#endif
-
     /*
      * Run the "random" bits through random-to-key to produce a encryption
      * key.
@@ -203,25 +155,16 @@ krb5_error_code krb5int_c_combine_keys
     tkey.length = keylength;
     tkey.contents = output;
 
-    if ((ret = (*(enc->make_key))(&randbits, &tkey)))
+    ret = (*enc->make_key)(&randbits, &tkey);
+    if (ret)
 	goto cleanup;
-
-#if 0
-    {
-	int i;
-	printf("tkey =");
-	for (i = 0; i < tkey.length; i++)
-	    printf(" %02x", (unsigned char) tkey.contents[i]);
-	printf("\n");
-    }
-#endif
 
     /*
      * Run through derive-key one more time to produce the final key.
      * Note that the input to derive-key is the ASCII string "combine".
      */
 
-    input.length = 7; /* Note; change this if string length changes */
+    input.length = 7;
     input.data = "combine";
 
     /*
@@ -234,17 +177,16 @@ krb5_error_code krb5int_c_combine_keys
      */
 
     if (outkey->length == 0 || outkey->contents == NULL) {
-	outkey->contents = (krb5_octet *) malloc(keylength);
-	if (!outkey->contents) {
-	    ret = ENOMEM;
+	outkey->contents = k5alloc(keylength, &ret);
+	if (ret)
 	    goto cleanup;
-	}
 	outkey->length = keylength;
 	outkey->enctype = key1->enctype;
-	myalloc = 1;
+	myalloc = TRUE;
     }
 
-    if ((ret = krb5_derive_key(enc, &tkey, outkey, &input))) {
+    ret = krb5_derive_key(enc, &tkey, outkey, &input);
+    if (ret) {
 	if (myalloc) {
 	    free(outkey->contents);
 	    outkey->contents = NULL;
@@ -252,58 +194,38 @@ krb5_error_code krb5int_c_combine_keys
 	goto cleanup;
     }
 
-#if 0
-    {
-	int i;
-	printf("output =");
-	for (i = 0; i < outkey->length; i++)
-	    printf(" %02x", (unsigned char) outkey->contents[i]);
-	printf("\n");
-    }
-#endif
-
-    ret = 0;
-
 cleanup:
-    memset(r1, 0, keybytes);
-    memset(r2, 0, keybytes);
-    memset(rnd, 0, keybytes);
-    memset(combined, 0, keybytes * 2);
-    memset(output, 0, keylength);
-
-    free(r1);
-    free(r2);
-    free(rnd);
-    free(combined);
-    free(output);
-
-    return (ret);
+    zapfree(r1, keybytes);
+    zapfree(r2, keybytes);
+    zapfree(rnd, keybytes);
+    zapfree(combined, keybytes * 2);
+    zapfree(output, keylength);
+    return ret;
 }
 
 /*
  * Our DR function; mostly taken from derive.c
  */
 
-static krb5_error_code dr
-(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey, unsigned char *out, const krb5_data *in_constant)
+static krb5_error_code
+dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
+   unsigned char *out, const krb5_data *in_constant)
 {
-    size_t blocksize, keybytes, keylength, n;
-    unsigned char *inblockdata, *outblockdata;
+    size_t blocksize, keybytes, n;
+    unsigned char *inblockdata = NULL, *outblockdata = NULL;
     krb5_data inblock, outblock;
+    krb5_error_code ret;
 
     blocksize = enc->block_size;
     keybytes = enc->keybytes;
-    keylength = enc->keylength;
 
-    /* allocate and set up buffers */
-
-    if ((inblockdata = (unsigned char *) malloc(blocksize)) == NULL)
-	return(ENOMEM);
-
-    if ((outblockdata = (unsigned char *) malloc(blocksize)) == NULL) {
-	free(inblockdata);
-	return(ENOMEM);
-    }
+    /* Allocate and set up buffers. */
+    inblockdata = k5alloc(blocksize, &ret);
+    if (ret)
+	goto cleanup;
+    outblockdata = k5alloc(blocksize, &ret);
+    if (ret)
+	goto cleanup;
 
     inblock.data = (char *) inblockdata;
     inblock.length = blocksize;
@@ -324,26 +246,23 @@ static krb5_error_code dr
 
     n = 0;
     while (n < keybytes) {
-	(*(enc->encrypt))(inkey, 0, &inblock, &outblock);
+	ret = (*enc->encrypt)(inkey, 0, &inblock, &outblock);
+	if (ret)
+	    goto cleanup;
 
 	if ((keybytes - n) <= outblock.length) {
-	    memcpy(out+n, outblock.data, (keybytes - n));
+	    memcpy(out + n, outblock.data, (keybytes - n));
 	    break;
 	}
 
-	memcpy(out+n, outblock.data, outblock.length);
+	memcpy(out + n, outblock.data, outblock.length);
 	memcpy(inblock.data, outblock.data, outblock.length);
 	n += outblock.length;
     }
 
-    /* clean memory, free resources and exit */
-
-    memset(inblockdata, 0, blocksize);
-    memset(outblockdata, 0, blocksize);
-
-    free(outblockdata);
-    free(inblockdata);
-
-    return(0);
+cleanup:
+    zapfree(inblockdata, blocksize);
+    zapfree(outblockdata, blocksize);
+    return ret;
 }
 

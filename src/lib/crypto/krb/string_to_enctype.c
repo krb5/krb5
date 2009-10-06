@@ -30,24 +30,28 @@
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_enctype(char *string, krb5_enctype *enctypep)
 {
-    unsigned int i, j;
+    int i;
+    unsigned int j;
+    const char *alias;
+    const struct krb5_keytypes *ktp;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (strcasecmp(krb5_enctypes_list[i].name, string) == 0) {
-	    *enctypep = krb5_enctypes_list[i].etype;
+    for (i = 0; i < krb5_enctypes_length; i++) {
+	ktp = &krb5_enctypes_list[i];
+	if (strcasecmp(ktp->name, string) == 0) {
+	    *enctypep = ktp->etype;
 	    return 0;
 	}
-#define MAX_ALIASES (sizeof(krb5_enctypes_list[i].aliases) / sizeof(krb5_enctypes_list[i].aliases[0]))
+#define MAX_ALIASES (sizeof(ktp->aliases) / sizeof(ktp->aliases[0]))
 	for (j = 0; j < MAX_ALIASES; j++) {
-	    const char *alias = krb5_enctypes_list[i].aliases[j];
+	    alias = ktp->aliases[j];
 	    if (alias == NULL)
 		break;
 	    if (strcasecmp(alias, string) == 0) {
-		*enctypep = krb5_enctypes_list[i].etype;
+		*enctypep = ktp->etype;
 		return 0;
 	    }
 	}
     }
 
-    return(EINVAL);
+    return EINVAL;
 }

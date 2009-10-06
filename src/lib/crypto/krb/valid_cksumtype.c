@@ -32,16 +32,16 @@ krb5_c_valid_cksumtype(krb5_cksumtype ctype)
 {
     unsigned int i;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
+    for (i = 0; i < krb5_cksumtypes_length; i++) {
 	if (krb5_cksumtypes_list[i].ctype == ctype)
-	    return(1);
+	    return TRUE;
     }
 
-    return(0);
+    return FALSE;
 }
 
 krb5_boolean KRB5_CALLCONV
 valid_cksumtype(krb5_cksumtype ctype)
 {
-    return krb5_c_valid_cksumtype (ctype);
+    return krb5_c_valid_cksumtype(ctype);
 }

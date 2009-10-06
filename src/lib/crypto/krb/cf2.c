@@ -40,8 +40,8 @@
  * a count byte  to get enough bits of output. 
  */
 static krb5_error_code
-prf_plus( krb5_context context, krb5_keyblock *k,const char *pepper,
-	  size_t keybytes, char **out)
+prf_plus(krb5_context context, krb5_keyblock *k, const char *pepper,
+	 size_t keybytes, char **out)
 {
     krb5_error_code retval = 0;
     size_t prflen, iterations;
@@ -49,46 +49,44 @@ prf_plus( krb5_context context, krb5_keyblock *k,const char *pepper,
     krb5_data in_data;
     char *buffer = NULL;
     struct k5buf prf_inbuf;
+
     krb5int_buf_init_dynamic(&prf_inbuf);
-    krb5int_buf_add_len( &prf_inbuf, "\001", 1);
-    krb5int_buf_add( &prf_inbuf, pepper);
+    krb5int_buf_add_len(&prf_inbuf, "\001", 1);
+    krb5int_buf_add(&prf_inbuf, pepper);
     retval = krb5_c_prf_length( context, k->enctype, &prflen);
-    if (retval != 0)
+    if (retval)
 	goto cleanup;
-    iterations = keybytes/prflen;
-    if ((keybytes%prflen) != 0)
+    iterations = keybytes / prflen;
+    if (keybytes % prflen != 0)
 	iterations++;
     assert(iterations <= 254);
-    buffer = malloc(iterations*prflen);
-    if (buffer == NULL) {
-	retval = ENOMEM;
+    buffer = k5alloc(iterations * prflen, &retval);
+    if (retval)
 	goto cleanup;
-	}
-    if (krb5int_buf_len( &prf_inbuf) == -1) {
+    if (krb5int_buf_len(&prf_inbuf) == -1) {
 	retval = ENOMEM;
 	goto cleanup;
     }
-    in_data.length = (krb5_int32) krb5int_buf_len( &prf_inbuf);
-    in_data.data = krb5int_buf_data( &prf_inbuf);
+    in_data.length = (krb5_int32) krb5int_buf_len(&prf_inbuf);
+    in_data.data = krb5int_buf_data(&prf_inbuf);
     out_data.length = prflen;
     out_data.data = buffer;
 
     while (iterations > 0) {
-	retval = krb5_c_prf( context, k, &in_data, &out_data);
-    if (retval != 0)
-	goto cleanup;
-    out_data.data += prflen;
-    in_data.data[0]++;
-    iterations--;
+	retval = krb5_c_prf(context, k, &in_data, &out_data);
+	if (retval)
+	    goto cleanup;
+	out_data.data += prflen;
+	in_data.data[0]++;
+	iterations--;
     }
- cleanup:
-    if (retval == 0 )
-	*out = buffer;
-    else{
-	if (buffer != NULL)
-	    free(buffer);
-    }
-    krb5int_free_buf( &prf_inbuf);
+
+    *out = buffer;
+    buffer = NULL;
+
+cleanup:
+    free(buffer);
+    krb5int_free_buf(&prf_inbuf);
     return retval;
 }
 
@@ -107,48 +105,46 @@ krb5_c_fx_cf2_simple(krb5_context context,
     krb5_error_code retval = 0;
     krb5_keyblock *out_key = NULL;
 
-
-    if (k1 == NULL ||!krb5_c_valid_enctype(k1->enctype))
+    if (k1 == NULL || !krb5_c_valid_enctype(k1->enctype))
 	return KRB5_BAD_ENCTYPE;
     if (k2 == NULL || !krb5_c_valid_enctype(k2->enctype))
 	return KRB5_BAD_ENCTYPE;
     out_enctype_num = k1->enctype;
     assert(out != NULL);
-    assert ((out_enctype = find_enctype(out_enctype_num)) != NULL);
+    assert((out_enctype = find_enctype(out_enctype_num)) != NULL);
     if (out_enctype->prf == NULL) {
 	if (context)
-	    krb5int_set_error(&(context->err) , KRB5_CRYPTO_INTERNAL,
-				   "Enctype %d has no PRF", out_enctype_num);
+	    krb5int_set_error(&(context->err), KRB5_CRYPTO_INTERNAL,
+			      "Enctype %d has no PRF", out_enctype_num);
 	return KRB5_CRYPTO_INTERNAL;
-		}
+    }
     keybytes = out_enctype->enc->keybytes;
     keylength = out_enctype->enc->keylength;
 
-    retval = prf_plus( context, k1, pepper1, keybytes, &prf1);
-	if (retval != 0)
-	    goto cleanup;
-    retval = prf_plus( context, k2, pepper2, keybytes, &prf2);
-    if (retval != 0)
+    retval = prf_plus(context, k1, pepper1, keybytes, &prf1);
+    if (retval)
+	goto cleanup;
+    retval = prf_plus(context, k2, pepper2, keybytes, &prf2);
+    if (retval)
 	goto cleanup;
     for (i = 0; i < keybytes; i++)
 	prf1[i] ^= prf2[i];
-    zap(prf2, keybytes);
-    retval = krb5int_c_init_keyblock( context, out_enctype_num, keylength, &out_key);
-    if (retval != 0)
+    retval = krb5int_c_init_keyblock(context, out_enctype_num, keylength,
+				     &out_key);
+    if (retval)
 	goto cleanup;
     keydata.data = prf1;
     keydata.length = keybytes;
-    retval = out_enctype->enc->make_key( &keydata, out_key);
+    retval = (*out_enctype->enc->make_key)(&keydata, out_key);
+    if (retval)
+	goto cleanup;
 
- cleanup:
-    if (retval == 0)
-	*out = out_key;
-    else krb5int_c_free_keyblock( context, out_key);
-    if (prf1 != NULL) {
-	zap(prf1, keybytes);
-	free(prf1);
-    }
-    if (prf2 != NULL)
-	free(prf2);
+    *out = out_key;
+    out_key = NULL;
+
+cleanup:
+    krb5int_c_free_keyblock( context, out_key);
+    zapfree(prf1, keybytes);
+    zapfree(prf2, keybytes);
     return retval;
 }

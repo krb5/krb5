@@ -40,34 +40,25 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_random_to_key(krb5_context context, krb5_enctype enctype,
 		     krb5_data *random_data, krb5_keyblock *random_key)
 {
-    int i;
     krb5_error_code ret;
+    const struct krb5_keytypes *ktp;
     const struct krb5_enc_provider *enc;
 
-    if (random_data == NULL || random_key == NULL)
-	return(EINVAL);
+    if (random_data == NULL || random_key == NULL ||
+	random_key->contents == NULL)
+	return EINVAL;
 
-    if (random_key->contents == NULL)
-	return(EINVAL);
-
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == enctype)
-	    break;
-    }
-
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
-
-    enc = krb5_enctypes_list[i].enc;
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
+    enc = ktp->enc;
 
     if (random_key->length != enc->keylength)
-	return(KRB5_BAD_KEYSIZE);
+	return KRB5_BAD_KEYSIZE;
 
-    ret = ((*(enc->make_key))(random_data, random_key));
-
-    if (ret) {
+    ret = (*enc->make_key)(random_data, random_key);
+    if (ret)
 	memset(random_key->contents, 0, random_key->length);
-    }
 
-    return(ret);
+    return ret;
 }

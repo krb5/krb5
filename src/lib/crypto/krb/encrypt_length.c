@@ -32,28 +32,20 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt_length(krb5_context context, krb5_enctype enctype,
 		      size_t inputlen, size_t *length)
 {
-    int i;
+    const struct krb5_keytypes *ktp;
 
-    for (i=0; i<krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == enctype)
-	    break;
-    }
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+	return KRB5_BAD_ENCTYPE;
 
-    if (i == krb5_enctypes_length)
-	return(KRB5_BAD_ENCTYPE);
+    if (ktp->encrypt_len == NULL) {
+	assert(ktp->aead != NULL);
 
-    if (krb5_enctypes_list[i].encrypt_len == NULL) {
-	assert(krb5_enctypes_list[i].aead != NULL);
-
-	krb5int_c_encrypt_length_aead_compat(krb5_enctypes_list[i].aead,
-					     krb5_enctypes_list[i].enc,
-					     krb5_enctypes_list[i].hash,
+	krb5int_c_encrypt_length_aead_compat(ktp->aead, ktp->enc, ktp->hash,
 					     inputlen, length);
     } else {
-	(*(krb5_enctypes_list[i].encrypt_len))
-	    (krb5_enctypes_list[i].enc, krb5_enctypes_list[i].hash,
-	    inputlen, length);
+	(*ktp->encrypt_len)(ktp->enc, ktp->hash, inputlen, length);
     }
 
-    return(0);
+    return 0;
 }

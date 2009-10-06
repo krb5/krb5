@@ -35,21 +35,13 @@ krb5_c_encrypt_iov(krb5_context context,
 		   krb5_crypto_iov *data,
 		   size_t num_data)
 {
-    int i;
-    const struct krb5_keytypes *ktp = NULL;
+    const struct krb5_keytypes *ktp;
 
-    for (i = 0; i < krb5_enctypes_length; i++) {
-	if (krb5_enctypes_list[i].etype == key->enctype) {
-	    ktp = &krb5_enctypes_list[i];
-	    break;
-	}
-    }
-
-    if (ktp == NULL || ktp->aead == NULL) {
+    ktp = find_enctype(key->enctype);
+    if (ktp == NULL || ktp->aead == NULL)
 	return KRB5_BAD_ENCTYPE;
-    }
 
-    return ktp->aead->encrypt_iov(ktp->aead, ktp->enc, ktp->hash,
-				  key, usage, cipher_state, data, num_data);
+    return (*ktp->aead->encrypt_iov)(ktp->aead, ktp->enc, ktp->hash,
+				     key, usage, cipher_state, data, num_data);
 }
 
