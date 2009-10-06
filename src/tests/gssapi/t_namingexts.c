@@ -254,6 +254,57 @@ testGreetAuthzData(OM_uint32 *minor,
 }
 
 static OM_uint32
+testMapNameToAny(OM_uint32 *minor,
+                  gss_name_t name)
+{
+    OM_uint32 major;
+    OM_uint32 tmp_minor;
+    gss_buffer_desc type_id;
+    krb5_pac pac;
+    krb5_context context;
+    krb5_error_code code;
+    size_t len;
+    krb5_ui_4 *types;
+
+    type_id.value = "mspac";
+    type_id.length = strlen((char *)type_id.value);
+
+    major = gss_map_name_to_any(minor,
+                                name,
+                                1, /* authenticated */
+                                &type_id,
+                                (gss_any_t *)&pac);
+    if (major == GSS_S_UNAVAILABLE)
+        return GSS_S_COMPLETE;
+    else if (GSS_ERROR(major))
+        displayStatus("gss_map_name_to_any", major, &minor);
+
+    code = krb5_init_context(&context);
+    if (code != 0) {
+        gss_release_any_name_mapping(&tmp_minor, name,
+                                     &type_id, (gss_any_t *)&pac);
+        *minor = code;
+        return GSS_S_FAILURE;
+    }
+
+    code = krb5_pac_get_types(context, pac, &len, &types);
+    if (code == 0) {
+        size_t i;
+
+        printf("PAC buffer types:");
+        for (i = 0; i < len; i++)
+            printf(" %d", types[i]);
+        printf("\n");
+        free(types);
+    }
+
+    gss_release_any_name_mapping(&tmp_minor, name,
+                                 &type_id, (gss_any_t *)&pac);
+
+    return GSS_S_COMPLETE;
+}
+
+static OM_uint32
 initAcceptSecContext(OM_uint32 *minor,
                      gss_cred_id_t verifier_cred_handle)
 {
@@ -324,6 +375,7 @@ initAcceptSecContext(OM_uint32 *minor,
         displayCanonName(minor, source_name, "Source name");
         enumerateAttributes(minor, source_name, 1);
         testExportImportName(minor, source_name);
+        testMapNameToAny(minor, source_name);
     }
 
     (void) gss_release_name(minor, &source_name);
