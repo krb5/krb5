@@ -54,13 +54,13 @@ proc test101 {} {
     one_line_succeed_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} [list $hostname 1751]] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} [list $hostname 4]] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "RPC_ERROR"
 }
@@ -73,7 +73,7 @@ proc test102 {} {
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_ADMIN_SERVER} does.not.exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "BAD_SERVER_NAME"
 }
@@ -86,7 +86,7 @@ proc test103 {} {
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_DBNAME} /does-not-exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "ENOENT"
 }
@@ -105,7 +105,7 @@ proc test106 {} {
     send [string trim {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_MKEY_FROM_KBD} 1] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]
     send "\n"
@@ -132,7 +132,7 @@ proc test107 {} {
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_STASH_FILE} /does-not-exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "KDB_CANTREAD_STORED"
 }
@@ -145,7 +145,7 @@ proc test108 {} {
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_MKEY_NAME} does/not/exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "KRB5_KDB_CANTREAD_STORED"
 }
@@ -165,7 +165,7 @@ proc test109 {} {
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_MAX_LIFE KADM5_CONFIG_MAX_RLIFE KADM5_CONFIG_EXPIRATION KADM5_CONFIG_ENCTYPES} {10 20 30 {}} ] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	fail "$test: cannot init with max_life"
@@ -301,13 +301,13 @@ proc test116 {} {
     delete_principal "$test/a"
 
     if {! [cmd {kadm5_init admin/get-add admin $KADM5_ADMIN_SERVICE \
-	    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 	    get_add_handle}]} {
 	error_and_restart "$test: couldn't init with admin/get-add"
     }
 
     if {! [cmd {kadm5_init admin/mod-delete admin $KADM5_ADMIN_SERVICE \
-	    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 	    mod_delete_handle}]} {
 	error_and_restart "$test: couldn't init with admin/get-add"
     }
@@ -371,7 +371,7 @@ proc test117 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	fail "$test: unexpected failure in init"
@@ -445,7 +445,7 @@ proc test150 {} {
     kinit testuser notathena "-S $KADM5_ADMIN_SERVICE"
     one_line_succeed_test {
 	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
-		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }
     kdestroy
@@ -460,7 +460,7 @@ proc test151 {} {
     kinit testuser notathena "-S $KADM5_CHANGEPW_SERVICE"
     one_line_succeed_test {
 	kadm5_init_with_creds testuser null $KADM5_CHANGEPW_SERVICE \
-		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }
     kdestroy
@@ -474,7 +474,7 @@ proc test152 {} {
     kdestroy
     one_line_fail_test {
 	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
-		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "KRB5_FCC_NOFILE"
 }
@@ -487,7 +487,7 @@ proc test153 {} {
     kinit testuser notathena
     one_line_fail_test {
 	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
-		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "KRB5_CC_NOTFOUND"
 }
@@ -504,7 +504,7 @@ proc test154 {} {
 
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } "ENOENT"
 

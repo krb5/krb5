@@ -14,21 +14,21 @@ test "init 1"
 one_line_fail_test_nochk \
 	{kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 	[config_params {KADM5_CONFIG_REALM} {""}] \
-	 $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle}
+	 $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 server_handle}
 
 test "init 2"
 
 one_line_fail_test_nochk \
 	{kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 	[config_params {KADM5_CONFIG_REALM} {@}] \
-	 $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle}
+	 $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 server_handle}
 
 test "init 2.5"
 
 one_line_fail_test_nochk \
 	{kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 	[config_params {KADM5_CONFIG_REALM} {BAD.REALM}] \
-	 $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle}
+	 $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 server_handle}
 
 test "init 3"
 
@@ -40,7 +40,7 @@ proc test3 {} {
     }
     one_line_fail_test_nochk [format {
 	kadm5_init admin admin "%s/a" null $KADM5_STRUCT_VERSION \
-		$KADM5_API_VERSION_2 server_handle
+		$KADM5_API_VERSION_3 server_handle
     } $test]
 }
 if {$RPC} { test3 }
@@ -57,7 +57,7 @@ proc test4 {} {
 		
 	one_line_fail_test_nochk [format {
 	    kadm5_init admin admin "%s/a" null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	} $test]
 }
@@ -68,7 +68,7 @@ test "init 5"
 if {$RPC} {
     one_line_fail_test_nochk {
 	kadm5_init admin admin admin null $KADM5_STRUCT_VERSION \
-		$KADM5_API_VERSION_2 server_handle
+		$KADM5_API_VERSION_3 server_handle
     }
 }
 
@@ -77,7 +77,7 @@ test "init 6"
 proc test6 {} {
     global test
 
-    send "kadm5_init admin null \$KADM5_ADMIN_SERVICE null \$KADM5_STRUCT_VERSION \$KADM5_API_VERSION_2 server_handle\n"
+    send "kadm5_init admin null \$KADM5_ADMIN_SERVICE null \$KADM5_STRUCT_VERSION \$KADM5_API_VERSION_3 server_handle\n"
 
     expect {
 	-re "assword\[^\r\n\]*:" { }
@@ -103,7 +103,7 @@ test "init 7"
 proc test7 {} {
     global test
 
-    send "kadm5_init admin \"\" \$KADM5_ADMIN_SERVICE null \$KADM5_STRUCT_VERSION \$KADM5_API_VERSION_2 server_handle\n"
+    send "kadm5_init admin \"\" \$KADM5_ADMIN_SERVICE null \$KADM5_STRUCT_VERSION \$KADM5_API_VERSION_3 server_handle\n"
 
     expect {
 	-re "assword\[^\r\n\]*:" { }
@@ -136,7 +136,7 @@ proc test8 {} {
 	}
  	one_line_fail_test_nochk [format {
 	    kadm5_init "%s/a" admin $KADM5_ADMIN_SERVICE null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	} $test]
 }
@@ -148,7 +148,7 @@ if {$RPC} {
     global test
   one_line_fail_test_nochk {
       kadm5_init admin not-the-password $KADM5_ADMIN_SERVICE null \
-	      $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	      $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 	      server_handle
   }
 }
@@ -161,7 +161,7 @@ proc test10 {} {
 #	setup_xfail {*-*-*} $prms_id
 	one_line_fail_test_nochk {
 	    kadm5_init null admin $KADM5_ADMIN_SERVICE null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 }
@@ -175,7 +175,7 @@ test10
 #	setup_xfail {*-*-*} $prms_id
 #	one_line_fail_test_nochk {
 #	    kadm5_init "" admin $KADM5_ADMIN_SERVICE null \
-#		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+#		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 #		    server_handle
 #	}
 #}
@@ -187,7 +187,7 @@ proc test12 {} {
 	global test
     one_line_fail_test_nochk [format {
 	kadm5_init "%s/a" admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } $test]
 }
@@ -200,7 +200,7 @@ proc test13 {} {
     one_line_fail_test_nochk [format {
 	kadm5_init "%s/a@SECURE-TEST.OV.COM" admin \
 		$KADM5_ADMIN_SERVICE null $KADM5_STRUCT_VERSION \
-		$KADM5_API_VERSION_2 server_handle
+		$KADM5_API_VERSION_3 server_handle
     } $test]
 }
 if {$RPC} { test13 }
@@ -211,7 +211,7 @@ proc test14 {} {
 	global test
     one_line_fail_test_nochk [format {
 	kadm5_init "%s/a@BAD.REALM" admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     } $test]
 }
@@ -222,7 +222,7 @@ test "init 15"
 if {$RPC} {
     one_line_fail_test_nochk {
 	kadm5_init admin@BAD.REALM admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }
 }
@@ -233,7 +233,7 @@ proc test16 {} {
 	global test
 	one_line_succeed_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -249,7 +249,7 @@ proc test17 {} {
 	one_line_succeed_test {
 	    kadm5_init admin@SECURE-TEST.OV.COM admin \
 		    $KADM5_ADMIN_SERVICE null $KADM5_STRUCT_VERSION \
-		    $KADM5_API_VERSION_2 server_handle
+		    $KADM5_API_VERSION_3 server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
 		error_and_restart "$test: couldn't close database"
@@ -263,7 +263,7 @@ proc test18 {} {
 	global test
 	one_line_succeed_test {
 	    kadm5_init admin admin $KADM5_CHANGEPW_SERVICE null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -280,7 +280,7 @@ proc test19 {} {
 	    kadm5_init admin@SECURE-TEST.OV.COM admin \
 		    $KADM5_ADMIN_SERVICE \
 		    [config_params {KADM5_CONFIG_REALM} {SECURE-TEST.OV.COM}] \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -295,7 +295,7 @@ proc test20 {} {
 	global test
   if {! [cmd {
       kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-	      $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	      $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 	      server_handle
   }]} {
 		error_and_restart "$test: couldn't init database"
@@ -315,7 +315,7 @@ test20
 #    global test
 #    if {! [cmd {
 #	kadm5_init admin admin $KADM5_CHANGEPW_SERVICE null \
-#		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+#		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 #		server_handle
 #    }]} {
 #	error_and_restart "$test: couldn't init database"
@@ -323,7 +323,7 @@ test20
 #    }
 #    one_line_fail_test_nochk {
 #	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-#		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+#		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 #		server_handle
 #    }
 #    if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -338,7 +338,7 @@ test20
 # 	set prompting 0
 # 	send [string trim {
 # 	    kadm5_init admin null null null $KADM5_STRUCT_VERSION \
-# 		    $KADM5_API_VERSION_2 server_handle
+# 		    $KADM5_API_VERSION_3 server_handle
 # 	}]
 # 	send "\n"
 # 	expect {
@@ -363,7 +363,7 @@ test20
 # 	set prompting 0
 # 	send [string trim {
 # 	    kadm5_init admin null null null $KADM5_STRUCT_VERSION \
-# 		    $KADM5_API_VERSION_2 server_handle
+# 		    $KADM5_API_VERSION_3 server_handle
 # 	}]
 # 	send "\n"
 # 	expect {
@@ -388,7 +388,7 @@ proc test23 {} {
 	global test
 	one_line_succeed_test {
 	    kadm5_init admin not-the-password $KADM5_ADMIN_SERVICE \
-		    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -403,7 +403,7 @@ proc test24 {} {
 	global test
 	one_line_succeed_test {
 	    kadm5_init admin admin null null $KADM5_STRUCT_VERSION \
-		    $KADM5_API_VERSION_2 server_handle
+		    $KADM5_API_VERSION_3 server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
 		error_and_restart "$test: couldn't close database"
@@ -417,7 +417,7 @@ proc test25 {} {
 	global test
 	one_line_succeed_test {
 	    kadm5_init admin admin foobar null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -472,7 +472,7 @@ test "init 26"
 #    begin_dump
 #    if {! ([cmd {
 #	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-#		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+#		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 #		server_handle
 #    }] && [cmd [format {
 #	kadm5_get_principal $server_handle "%s/a" principal
@@ -531,7 +531,7 @@ proc test30 {} {
 	global test
 	if {[cmd {
 	    kadm5_init admin foobar $KADM5_ADMIN_SERVICE null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}]} {
 		error_and_restart "$test: unexpected success"
@@ -539,7 +539,7 @@ proc test30 {} {
 	}
 	one_line_succeed_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -553,7 +553,7 @@ proc test31 {} {
 	global test
 	one_line_fail_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-	    	    $bad_struct_version_mask $KADM5_API_VERSION_2 \
+	    	    $bad_struct_version_mask $KADM5_API_VERSION_3 \
 		    server_handle
 	} "BAD_STRUCT_VERSION" 
 }
@@ -564,7 +564,7 @@ proc test32 {} {
 	global test
 	one_line_fail_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-	    	    $no_struct_version_mask $KADM5_API_VERSION_2 \
+	    	    $no_struct_version_mask $KADM5_API_VERSION_3 \
 		    server_handle
 	} "BAD_STRUCT_VERSION" 
 }
@@ -575,7 +575,7 @@ proc test33 {} {
 	global test
 	one_line_fail_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-	    	    $old_struct_version $KADM5_API_VERSION_2 \
+	    	    $old_struct_version $KADM5_API_VERSION_3 \
 		    server_handle
 	} "OLD_STRUCT_VERSION" 
 }
@@ -586,7 +586,7 @@ proc test34 {} {
 	global test
 	one_line_fail_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-	    	    $new_struct_version $KADM5_API_VERSION_2 \
+	    	    $new_struct_version $KADM5_API_VERSION_3 \
 		    server_handle
 	} "NEW_STRUCT_VERSION" 
 }
@@ -663,7 +663,7 @@ proc test41 {} {
 	global test
 	one_line_fail_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-	    	    $KADM5_API_VERSION_2 $KADM5_STRUCT_VERSION \
+	    	    $KADM5_API_VERSION_3 $KADM5_STRUCT_VERSION \
 		    server_handle
 	} "BAD_"
 }
@@ -674,7 +674,7 @@ proc test42 {} {
 	global test
 	one_line_succeed_test {
 	    kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-	    	    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	    	    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		    server_handle
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -699,7 +699,7 @@ proc test45_46 {service} {
 
     one_line_fail_test [concat {kadm5_init admin admin } \
 	    $service \
-	    { null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	    { null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 	    server_handle}] "SECURE_PRINC_MISSING"
 
     # this leaves the keytab with an incorrect entry

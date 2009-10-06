@@ -14,7 +14,7 @@ proc test2 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_CHANGEPW_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -42,7 +42,7 @@ proc test4 {} {
     }
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -73,7 +73,7 @@ proc test8 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -102,7 +102,7 @@ proc test9 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -145,14 +145,14 @@ proc test10 {} {
     }
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
-	kadm5_modify_policy $server_handle {"%s/a" 32 0 0 0 0 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 32 0 0 0 0 0 0 0 0} \
 		{KADM5_PW_MIN_LIFE}
     } $test]]} {
 	fail $test
@@ -190,7 +190,7 @@ proc test11 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -234,14 +234,14 @@ proc test12 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
-	kadm5_modify_policy $server_handle {"%s/a" 0 32 0 0 0 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 0 32 0 0 0 0 0 0 0} \
 		{KADM5_PW_MAX_LIFE}
     } $test]]} {
 	fail $test
@@ -276,7 +276,7 @@ proc test13 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -306,14 +306,14 @@ proc test14 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
-	kadm5_modify_policy $server_handle {"%s/a" 0 0 8 0 0 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 8 0 0 0 0 0 0} \
 		{KADM5_PW_MIN_LENGTH}
     } $test]]} {
 	fail $test
@@ -348,7 +348,7 @@ proc test15 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -378,14 +378,14 @@ proc test16 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
-	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 1 0 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 1 0 0 0 0 0} \
 		{KADM5_PW_MIN_CLASSES}
     } $test]]} {
 	fail $test
@@ -424,14 +424,14 @@ proc test17 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
-	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 5 0 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 5 0 0 0 0 0} \
 		{KADM5_PW_MIN_CLASSES}
     } $test]]} {
 	fail $test
@@ -469,14 +469,14 @@ proc test18 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
-	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 6 0 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 6 0 0 0 0 0} \
 		{KADM5_PW_MIN_CLASSES}
     } $test] "BAD_CLASS"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
@@ -498,7 +498,7 @@ proc test19 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -528,14 +528,14 @@ proc test20 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
-	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 0 1 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 0 1 0 0 0 0} \
 		{KADM5_PW_HISTORY_NUM}
     } $test]]} {
 	fail $test
@@ -573,14 +573,14 @@ proc test21 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
-	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 0 10 0} \
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 0 10 0 0 0 0} \
 		{KADM5_PW_HISTORY_NUM}
     } $test]]} {
 	fail $test
@@ -616,7 +616,7 @@ proc test22 {} {
 
     if {! [cmd {
 	kadm5_init admin/none admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -644,7 +644,7 @@ proc test23 {} {
 
     if {! [cmd {
 	kadm5_init admin/get admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -672,7 +672,7 @@ proc test26 {} {
 
     if {! [cmd {
 	kadm5_init admin/modify admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -699,5 +699,41 @@ proc test30 {} {
     } $test] "BAD_SERVER_HANDLE"
 }
 test30
+
+test "modify-policy 31"
+proc test31 {} {
+    global test
+    if {! ((  [policy_exists "$test/a"]) ||
+	   [create_policy "$test/a" ])} {
+	    error_and_restart "$test: couldn't create policy \"$test/a\""
+	    return
+    }
+
+    if {! [cmd {
+	kadm5_init admin/modify admin $KADM5_ADMIN_SERVICE null \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
+		server_handle
+    }]} {
+	perror "$test: unexpected failure in init"
+	return
+    }
+    one_line_succeed_test [format {
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 0 0 0 2 0 0} \
+		{KADM5_PW_MAX_FAILURE}
+    } $test]
+    one_line_succeed_test [format {
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 1 0 0 0 90 0} \
+		{KADM5_PW_FAILURE_COUNT_INTERVAL}
+    } $test]
+    one_line_succeed_test [format {
+	kadm5_modify_policy $server_handle {"%s/a" 0 0 0 1 0 0 0 0 180} \
+		{KADM5_PW_LOCKOUT_DURATION}
+    } $test]
+    if { ! [cmd {kadm5_destroy $server_handle}]} {
+	perror "$test: unexpected failure in destroy"
+	return
+    }
+}
+test31
 
 return ""
