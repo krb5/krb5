@@ -38,7 +38,7 @@ krb5_encrypt_helper(krb5_context context, const krb5_keyblock *key, krb5_keyusag
 
     cipher->ciphertext.length = enclen;
     if ((cipher->ciphertext.data = (char *) malloc(enclen)) == NULL)
-	return(ret);
+	return(ENOMEM);
     ret = krb5_c_encrypt(context, key, usage, 0, plain, cipher);
     if (ret) {
 	free(cipher->ciphertext.data);
