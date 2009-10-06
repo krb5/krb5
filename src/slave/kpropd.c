@@ -593,23 +593,23 @@ static struct timeval full_resync_timeout = { 25, 0 };
 static kdb_fullresync_result_t *
 full_resync(CLIENT *clnt)
 {
-        static kdb_fullresync_result_t clnt_res;
+	static kdb_fullresync_result_t clnt_res;
 	uint32_t vers = IPROPX_VERSION_1; /* max version we support */
-        enum clnt_stat status;
+	enum clnt_stat status;
 
-        memset(&clnt_res, 0, sizeof(clnt_res));
+	memset(&clnt_res, 0, sizeof(clnt_res));
 
-        status = clnt_call (clnt, IPROP_FULL_RESYNC_EXT,
-                	    (xdrproc_t) xdr_u_int32,
+	status = clnt_call (clnt, IPROP_FULL_RESYNC_EXT,
+			    (xdrproc_t) xdr_u_int32,
 			    (caddr_t) &vers,
-                	    (xdrproc_t) xdr_kdb_fullresync_result_t,
+			    (xdrproc_t) xdr_kdb_fullresync_result_t,
 			    (caddr_t) &clnt_res,
 			    full_resync_timeout);
 	if (status == RPC_PROCUNAVAIL) {
 		status = clnt_call (clnt, IPROP_FULL_RESYNC,
 				    (xdrproc_t) xdr_void,
 				    (caddr_t *)&vers,
-                		    (xdrproc_t) xdr_kdb_fullresync_result_t,
+		      		    (xdrproc_t) xdr_kdb_fullresync_result_t,
 				    (caddr_t) &clnt_res,
 				    full_resync_timeout);
 	}
