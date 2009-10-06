@@ -83,7 +83,7 @@ if { [catch {
 	set q $env(QUALNAME)
 	puts stdout [kadm5_init $env(SRVTCL) mrroot null \
 		[config_params {KADM5_CONFIG_REALM} $r] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle]
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 server_handle]
 	puts stdout [kadm5_create_principal $server_handle \
 		[simple_principal host/$q@$r] {KADM5_PRINCIPAL} notathena]
 	puts stdout [kadm5_destroy $server_handle]
