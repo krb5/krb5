@@ -2,7 +2,7 @@ thisconfigdir=../../../..
 myfulldir=lib/crypto/builtin/aes
 mydir=lib/crypto/builtin/aes
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk  -I$(srcdir)/../../../../include
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
@@ -46,10 +46,10 @@ includes:: depend
 depend:: $(SRCS)
 
 aes-gen: aes-gen.o $(GEN_OBJS)
-	$(CC_LINK) -o aes-gen aes-gen.o $(GEN_OBJS)
+	$(CC_LINK) -I../../../../include $(LOCALINCLUDES) -o ../../$(CIMPL)/aes-gen ../../$(CIMPL)/aes-gen.o $(GEN_OBJS)
 
-run-aes-gen: aes-gen
-	./aes-gen > kresults.out
+run-aes-gen: ../../$(CIMPL)/aes-gen
+	../../$(CIMPL)/aes-gen > kresults.out
 
 check:: run-aes-gen
 
@@ -57,7 +57,7 @@ check:: run-aes-gen
 clean-unix:: clean-libobjs
 
 clean::
-	-$(RM) aes-gen aes-gen.o kresults.out
+	-$(RM) ../../$(CIMPL)/aes-gen ../../$(CIMPL)/aes-gen.o ../../$(CIMPL)/kresults.out
 
 @libobj_frag@
 
