@@ -80,7 +80,8 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 	    krb5_crypto_iov iov[1];
 
 	    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-	    iov[0].data = *input;
+	    iov[0].data.data = input->data;
+	    iov[0].data.length = input->length;
 
 	    assert(keyhash->hash_iov != NULL);
 
