@@ -237,6 +237,17 @@ testGreetAuthzData(OM_uint32 *minor,
     attr.value = "greet:greeting";
     attr.length = strlen((char *)attr.value);
 
+    major = gss_delete_name_attribute(minor,
+                                      name,
+                                      &attr);
+    if (major == GSS_S_UNAVAILABLE) {
+        fprintf(stderr, "Warning: greet_client plugin not installed\n");
+        return GSS_S_COMPLETE;
+    } else if (GSS_ERROR(major)) {
+        displayStatus("gss_delete_name_attribute", major, *minor);
+        return major;
+    }
+
     value.value = "Hello, acceptor world!";
     value.length = strlen((char *)value.value);
 
