@@ -46,7 +46,7 @@
  */
 static krb5_error_code
 krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
-		   const krb5_keyblock *keyblock,
+		   krb5_key key,
 		   const krb5_address *recv_addr,
 		   const krb5_address *sender_addr,
 		   krb5_replay_data *replaydata, krb5_data *outbuf)
@@ -124,7 +124,7 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
     if (retval)
 	goto cleanup;
 
-    retval = krb5_c_verify_checksum(context, keyblock,
+    retval = krb5_k_verify_checksum(context, key,
 				    KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
 				    scratch, his_cksum, &valid);
 
@@ -136,7 +136,7 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
 	 * Checksum over only the KRB-SAFE-BODY, like RFC 1510 says, in
 	 * case someone actually implements it correctly.
 	 */
-	retval = krb5_c_verify_checksum(context, keyblock,
+	retval = krb5_k_verify_checksum(context, key,
 					KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
 					&safe_body, his_cksum, &valid);
 	if (!valid) {
@@ -164,7 +164,7 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
 	     krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
-    krb5_keyblock	* keyblock;
+    krb5_key		  key;
     krb5_replay_data	  replaydata;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
@@ -180,9 +180,9 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
     if (!auth_context->remote_addr)
 	return KRB5_REMOTE_ADDR_REQUIRED;
 
-    /* Get keyblock */
-    if ((keyblock = auth_context->recv_subkey) == NULL)
-	keyblock = auth_context->keyblock;
+    /* Get key */
+    if ((key = auth_context->recv_subkey) == NULL)
+	key = auth_context->key;
 
 {
     krb5_address * premote_fulladdr;
@@ -220,7 +220,7 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
     }
 
     memset(&replaydata, 0, sizeof(replaydata));
-    if ((retval = krb5_rd_safe_basic(context, inbuf, keyblock,
+    if ((retval = krb5_rd_safe_basic(context, inbuf, key,
 				     plocal_fulladdr, premote_fulladdr,
 				     &replaydata, outbuf))) {
 	CLEANUP_DONE();

@@ -227,12 +227,13 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
        do we need special processing here ?	*/
 
     /* decrypt the ticket */
-    if ((*auth_context)->keyblock) { /* User to User authentication */
-    	if ((retval = krb5_decrypt_tkt_part(context, (*auth_context)->keyblock,
+    if ((*auth_context)->key) { /* User to User authentication */
+    	if ((retval = krb5_decrypt_tkt_part(context,
+					    &(*auth_context)->key->keyblock,
 					    req->ticket)))
 	    goto cleanup;
-	krb5_free_keyblock(context, (*auth_context)->keyblock);
-	(*auth_context)->keyblock = NULL;
+	krb5_k_free_key(context, (*auth_context)->key);
+	(*auth_context)->key = NULL;
     } else {
     	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, server, keytab)))
 	    goto cleanup;
@@ -459,14 +460,14 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
     if ((*auth_context)->authentp->subkey) {
-	if ((retval = krb5_copy_keyblock(context,
-					 (*auth_context)->authentp->subkey,
-					 &((*auth_context)->recv_subkey))))
+	if ((retval = krb5_k_create_key(context,
+					(*auth_context)->authentp->subkey,
+					&((*auth_context)->recv_subkey))))
 	    goto cleanup;
-	retval = krb5_copy_keyblock(context, (*auth_context)->authentp->subkey,
-				    &((*auth_context)->send_subkey));
+	retval = krb5_k_create_key(context, (*auth_context)->authentp->subkey,
+				   &((*auth_context)->send_subkey));
 	if (retval) {
-	    krb5_free_keyblock(context, (*auth_context)->recv_subkey);
+	    krb5_k_free_key(context, (*auth_context)->recv_subkey);
 	    (*auth_context)->recv_subkey = NULL;
 	    goto cleanup;
 	}
@@ -475,8 +476,8 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	(*auth_context)->send_subkey = 0;
     }
 
-    if ((retval = krb5_copy_keyblock(context, req->ticket->enc_part2->session,
-				     &((*auth_context)->keyblock))))
+    if ((retval = krb5_k_create_key(context, req->ticket->enc_part2->session,
+				    &((*auth_context)->key))))
 	goto cleanup;
 
     debug_log_authz_data("ticket", req->ticket->enc_part2->authorization_data);
@@ -499,7 +500,8 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     	*ap_req_options = req->ap_options & AP_OPTS_WIRE_MASK;
 	if (rfc4537_etypes_len != 0)
 	    *ap_req_options |= AP_OPTS_ETYPE_NEGOTIATION;
-	if ((*auth_context)->negotiated_etype != (*auth_context)->keyblock->enctype)
+	if ((*auth_context)->negotiated_etype !=
+	    krb5_k_key_enctype(context, (*auth_context)->key))
 	    *ap_req_options |= AP_OPTS_USE_SUBKEY;
     }
 

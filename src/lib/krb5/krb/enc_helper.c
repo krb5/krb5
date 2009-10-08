@@ -48,3 +48,28 @@ krb5_encrypt_helper(krb5_context context, const krb5_keyblock *key, krb5_keyusag
     return(ret);
 }
 	
+krb5_error_code
+krb5_encrypt_keyhelper(krb5_context context, krb5_key key, krb5_keyusage usage,
+		       const krb5_data *plain, krb5_enc_data *cipher)
+{
+    krb5_enctype enctype;
+    krb5_error_code ret;
+    size_t enclen;
+
+    enctype = krb5_k_key_enctype(context, key);
+    ret = krb5_c_encrypt_length(context, enctype, plain->length, &enclen);
+    if (ret != 0)
+	return ret;
+
+    cipher->ciphertext.length = enclen;
+    cipher->ciphertext.data = malloc(enclen);
+    if (cipher->ciphertext.data == NULL)
+	return ENOMEM;
+    ret = krb5_k_encrypt(context, key, usage, 0, plain, cipher);
+    if (ret) {
+	free(cipher->ciphertext.data);
+	cipher->ciphertext.data = NULL;
+    }
+
+    return ret;
+}
