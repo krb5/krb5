@@ -96,7 +96,6 @@ proc setup_database {} {
     }
     expect_tcl_prompt
 
-    while {![file exists /tmp/go]} {}
     send_tcl_cmd_await_echo {kadm5_init admin admin $KADM5_ADMIN_SERVICE null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle}
     expect_kadm_ok
     expect "^% "
