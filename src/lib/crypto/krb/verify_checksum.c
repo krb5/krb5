@@ -59,7 +59,8 @@ krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
 	    krb5_crypto_iov iov[1];
 
 	    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-	    iov[0].data = *data;
+	    iov[0].data.data = data->data;
+	    iov[0].data.length = data->length;
 
 	    return (*keyhash->verify_iov)(key, usage, 0, iov, 1, &indata,
 					  valid);
