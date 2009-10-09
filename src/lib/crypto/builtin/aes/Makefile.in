@@ -45,7 +45,7 @@ includes:: depend
 
 depend:: $(SRCS)
 
-aes-gen: aes-gen.o $(GEN_OBJS)
+../../$(CIMPL)/aes-gen: ../../$(CIMPL)/aes-gen.o $(GEN_OBJS)
 	$(CC_LINK) -I../../../../include $(LOCALINCLUDES) -o ../../$(CIMPL)/aes-gen ../../$(CIMPL)/aes-gen.o $(GEN_OBJS)
 
 run-aes-gen: ../../$(CIMPL)/aes-gen
