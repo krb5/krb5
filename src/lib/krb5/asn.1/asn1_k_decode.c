@@ -1720,7 +1720,31 @@ asn1_error_code asn1_decode_fast_finished_ptr
     decode_ptr( krb5_fast_finished *, asn1_decode_fast_finished);
 }
 
-  
+asn1_error_code asn1_decode_ad_kdcissued
+(asn1buf *buf, krb5_ad_kdcissued *val)
+{
+    setup();
+    val->ad_checksum.contents = NULL;
+    val->i_principal = NULL;
+    val->elements = NULL;
+    {begin_structure();
+    get_field(val->ad_checksum, 0, asn1_decode_checksum);
+    if (tagnum == 1) {
+        alloc_principal(val->i_principal);
+        opt_field(val->i_principal, 1, asn1_decode_realm, 0);
+        opt_field(val->i_principal, 2, asn1_decode_principal_name, 0);
+    }
+    get_field(val->elements, 3, asn1_decode_authorization_data);
+    end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_checksum_contents(NULL, &val->ad_checksum);
+    krb5_free_principal(NULL, val->i_principal);
+    krb5_free_authdata(NULL, val->elements);
+    return retval;
+}
+
 #ifndef DISABLE_PKINIT
 /* PKINIT */
 

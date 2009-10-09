@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_rd_req()
  */
@@ -32,16 +32,16 @@
 
 /*
  *  Parses a KRB_AP_REQ message, returning its contents.
- * 
+ *
  *  server specifies the expected server's name for the ticket.
- * 
+ *
  *  keyproc specifies a procedure to generate a decryption key for the
  *  ticket.  If keyproc is non-NULL, keyprocarg is passed to it, and the result
  *  used as a decryption key. If keyproc is NULL, then fetchfrom is checked;
  *  if it is non-NULL, it specifies a parameter name from which to retrieve the
  *  decryption key.  If fetchfrom is NULL, then the default key store is
  *  consulted.
- * 
+ *
  *  returns system errors, encryption errors, replay errors
  */
 
@@ -58,14 +58,14 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
 
     if (!krb5_is_ap_req(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
-#ifndef LEAN_CLIENT 
+#ifndef LEAN_CLIENT
     if ((retval = decode_krb5_ap_req(inbuf, &request))) {
     	switch (retval) {
 	case KRB5_BADMSGTYPE:
-	    return KRB5KRB_AP_ERR_BADVERSION; 
+	    return KRB5KRB_AP_ERR_BADVERSION;
 	default:
 	    return(retval);
-	} 
+	}
     }
 #endif /* LEAN_CLIENT */
 
@@ -78,7 +78,7 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
     }
 
 
-#ifndef LEAN_CLIENT 
+#ifndef LEAN_CLIENT
     /* Get a keytab if necessary. */
     if (keytab == NULL) {
 	if ((retval = krb5_kt_default(context, &new_keytab)))
@@ -87,10 +87,10 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
     }
 #endif /* LEAN_CLIENT */
 
-    retval = krb5_rd_req_decoded(context, auth_context, request, server, 
+    retval = krb5_rd_req_decoded(context, auth_context, request, server,
 				 keytab, ap_req_options, ticket);
 
-#ifndef LEAN_CLIENT 
+#ifndef LEAN_CLIENT
     if (new_keytab != NULL)
         (void) krb5_kt_close(context, new_keytab);
 #endif /* LEAN_CLIENT */

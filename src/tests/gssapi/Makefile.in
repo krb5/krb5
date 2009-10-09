@@ -6,18 +6,19 @@ DEFINES = -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS= $(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c
+SRCS= $(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c $(srcdir)/t_namingexts.c
 
-OBJS= t_imp_name.o t_s4u.o
+OBJS= t_imp_name.o t_s4u.o t_namingexts.o
 
-all:: t_imp_name t_s4u
+all:: t_imp_name t_s4u t_namingexts
 
 t_imp_name: t_imp_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_imp_name t_imp_name.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-
+t_namingexts: t_namingexts.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_namingexts t_namingexts.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 t_s4u: t_s4u.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_s4u t_s4u.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
 clean::
-	$(RM) t_imp_name t_s4u
+	$(RM) t_imp_name t_s4u t_namingexts
 

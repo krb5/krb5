@@ -24,6 +24,7 @@ struct _krb5_auth_context {
     krb5_mk_req_checksum_func checksum_func;
     void *checksum_func_data;
     krb5_enctype	negotiated_etype;
+    krb5_authdata_context   ad_context;
 };
 
 

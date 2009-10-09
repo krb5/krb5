@@ -131,18 +131,18 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
 }
 
 /* get credentials corresponding to a key in the krb5 keytab.
-   If the default name is requested, return the name in output_princ.
-   If output_princ is non-NULL, the caller will use or free it, regardless
+   If the default name is requested, return the name in output_name.
+   If output_name is non-NULL, the caller will use or free it, regardless
    of the return value.
    If successful, set the keytab-specific fields in cred
 */
 
 static OM_uint32
-acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
+acquire_accept_cred(context, minor_status, desired_name, output_name, cred)
     krb5_context context;
     OM_uint32 *minor_status;
-    gss_name_t desired_name;
-    krb5_principal *output_princ;
+    krb5_gss_name_t desired_name;
+    krb5_gss_name_t *output_name;
     krb5_gss_cred_id_rec *cred;
 {
     krb5_error_code code;
@@ -150,7 +150,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
     krb5_keytab kt;
     krb5_keytab_entry entry;
 
-    *output_princ = NULL;
+    *output_name = NULL;
     cred->keytab = NULL;
 
     /* open the default keytab */
@@ -178,8 +178,8 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
         return(GSS_S_CRED_UNAVAIL);
     }
 
-    if (desired_name != GSS_C_NO_NAME) {
-        princ = (krb5_principal) desired_name;
+    if (desired_name != NULL) {
+        princ = desired_name->princ;
         if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
             (void) krb5_kt_close(context, kt);
             if (code == KRB5_KT_NOTFOUND) {
@@ -212,18 +212,18 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
 #endif /* LEAN_CLIENT */
 
 /* get credentials corresponding to the default credential cache.
-   If the default name is requested, return the name in output_princ.
-   If output_princ is non-NULL, the caller will use or free it, regardless
+   If the default name is requested, return the name in output_name.
+   If output_name is non-NULL, the caller will use or free it, regardless
    of the return value.
    If successful, set the ccache-specific fields in cred.
 */
 
 static OM_uint32
-acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
+acquire_init_cred(context, minor_status, desired_name, output_name, cred)
     krb5_context context;
     OM_uint32 *minor_status;
-    gss_name_t desired_name;
-    krb5_principal *output_princ;
+    krb5_gss_name_t desired_name;
+    krb5_gss_name_t *output_name;
     krb5_gss_cred_id_rec *cred;
 {
     krb5_error_code code;
@@ -255,11 +255,10 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
         kim_ccache kimccache = NULL;
         kim_identity identity = NULL;
         kim_credential_state state;
-        krb5_principal desired_princ = (krb5_principal) desired_name;
 
         err = kim_identity_create_from_krb5_principal (&identity,
                                                        context,
-                                                       desired_princ);
+                                                       desired_name->princ);
 
         if (!err) {
             err = kim_ccache_create_from_client_identity (&kimccache, identity);
@@ -307,7 +306,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
         if ( pLeash_AcquireInitialTicketsIfNeeded ) {
             char ccname[256]="";
-            pLeash_AcquireInitialTicketsIfNeeded(context, (krb5_principal) desired_name, ccname, sizeof(ccname));
+            pLeash_AcquireInitialTicketsIfNeeded(context, desired_name->princ, ccname, sizeof(ccname));
             if (!ccname[0]) {
                 *minor_status = KRB5_CC_NOTFOUND;
                 return(GSS_S_CRED_UNAVAIL);
@@ -354,17 +353,24 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
         return(GSS_S_FAILURE);
     }
 
-    if (desired_name != (gss_name_t) NULL) {
-        if (! krb5_principal_compare(context, princ, (krb5_principal) desired_name)) {
+    if (desired_name != (krb5_gss_name_t)NULL) {
+        if (! krb5_principal_compare(context, princ, desired_name->princ)) {
             (void)krb5_free_principal(context, princ);
             (void)krb5_cc_close(context, ccache);
             *minor_status = KG_CCACHE_NOMATCH;
             return(GSS_S_CRED_UNAVAIL);
         }
         (void)krb5_free_principal(context, princ);
-        princ = (krb5_principal) desired_name;
+        princ = desired_name->princ;
     } else {
-        *output_princ = princ;
+        if ((code = kg_init_name(context, princ, NULL,
+                                 KG_INIT_NAME_NO_COPY | KG_INIT_NAME_INTERN,
+                                 output_name))) {
+            (void)krb5_free_principal(context, princ);
+            (void)krb5_cc_close(context, ccache);
+            *minor_status = code;
+            return(GSS_S_FAILURE);
+        }
     }
 
     /* iterate over the ccache, find the tgt */
@@ -489,7 +495,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     /* validate the name */
 
     /*SUPPRESS 29*/
-    if ((desired_name != (gss_name_t) NULL) &&
+    if ((desired_name != GSS_C_NO_NAME) &&
         (! kg_validate_name(desired_name))) {
         *minor_status = (OM_uint32) G_VALIDATE_FAILED;
         krb5_free_context(context);
@@ -531,7 +537,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     memset(cred, 0, sizeof(krb5_gss_cred_id_rec));
 
     cred->usage = cred_usage;
-    cred->princ = NULL;
+    cred->name = NULL;
     cred->prerfc_mech = (req_old != 0);
     cred->rfc_mech = (req_new != 0);
 
@@ -561,15 +567,15 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     }
 
     /* if requested, acquire credentials for accepting */
-    /* this will fill in cred->princ if the desired_name is not specified */
+    /* this will fill in cred->name if the desired_name is not specified */
 #ifndef LEAN_CLIENT
     if ((cred_usage == GSS_C_ACCEPT) ||
         (cred_usage == GSS_C_BOTH))
         if ((ret = acquire_accept_cred(context, minor_status, desired_name,
-                                       &(cred->princ), cred))
+                                       &(cred->name), cred))
             != GSS_S_COMPLETE) {
-            if (cred->princ)
-                krb5_free_principal(context, cred->princ);
+            if (cred->name)
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             /* minor_status set by acquire_accept_cred() */
@@ -580,22 +586,22 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 #endif /* LEAN_CLIENT */
 
     /* if requested, acquire credentials for initiation */
-    /* this will fill in cred->princ if it wasn't set above, and
+    /* this will fill in cred->name if it wasn't set above, and
        the desired_name is not specified */
 
     if ((cred_usage == GSS_C_INITIATE) ||
         (cred_usage == GSS_C_BOTH))
         if ((ret =
              acquire_init_cred(context, minor_status,
-                               cred->princ?(gss_name_t)cred->princ:desired_name,
-                               &(cred->princ), cred))
+                               cred->name?cred->name:(krb5_gss_name_t)desired_name,
+                               &cred->name, cred))
             != GSS_S_COMPLETE) {
 #ifndef LEAN_CLIENT
             if (cred->keytab)
                 krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
-            if (cred->princ)
-                krb5_free_principal(context, cred->princ);
+            if (cred->name)
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             /* minor_status set by acquire_init_cred() */
@@ -606,9 +612,10 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
     /* if the princ wasn't filled in already, fill it in now */
 
-    if (!cred->princ && (desired_name != GSS_C_NO_NAME))
-        if ((code = krb5_copy_principal(context, (krb5_principal) desired_name,
-                                        &(cred->princ)))) {
+    if (!cred->name && (desired_name != GSS_C_NO_NAME))
+        if ((code = kg_duplicate_name(context,
+                                      (krb5_gss_name_t)desired_name,
+                                      0, &cred->name))) {
             if (cred->ccache)
                 (void)krb5_cc_close(context, cred->ccache);
 #ifndef LEAN_CLIENT
@@ -640,8 +647,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
             if (cred->keytab)
                 (void)krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
-            if (cred->princ)
-                krb5_free_principal(context, cred->princ);
+            if (cred->name)
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             *minor_status = code;
@@ -673,8 +680,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
             if (cred->keytab)
                 (void)krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
-            if (cred->princ)
-                krb5_free_principal(context, cred->princ);
+            if (cred->name)
+                kg_release_name(context, 0, &cred->name);
             k5_mutex_destroy(&cred->lock);
             xfree(cred);
             /* *minor_status set above */
@@ -694,8 +701,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
         if (cred->keytab)
             (void)krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
-        if (cred->princ)
-            krb5_free_principal(context, cred->princ);
+        if (cred->name)
+            kg_release_name(context, 0, &cred->name);
         k5_mutex_destroy(&cred->lock);
         xfree(cred);
         *minor_status = (OM_uint32) G_VALIDATE_FAILED;

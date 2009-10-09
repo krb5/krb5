@@ -122,7 +122,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
                                        endtime, out_creds)
     krb5_context context;
     krb5_gss_cred_id_t cred;
-    krb5_principal server;
+    krb5_gss_name_t server;
     krb5_timestamp now;
     krb5_timestamp endtime;
     krb5_creds **out_creds;
@@ -137,6 +137,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
     memset(&evidence_creds, 0, sizeof(krb5_creds));
     in_creds.client = in_creds.server = NULL;
 
+    assert(cred->name != NULL);
+
     if ((code = krb5_cc_get_principal(context, cred->ccache, &cc_princ)))
         goto cleanup;
 
@@ -146,7 +148,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
      * we can just use the S4U2Self or evidence ticket directly).
      */
     if (cred->proxy_cred &&
-        !krb5_principal_compare(context, cc_princ, server)) {
+        !krb5_principal_compare(context, cc_princ, server->princ)) {
         krb5_creds mcreds;
 
         flags |= KRB5_GC_CANONICALIZE |
@@ -158,10 +160,11 @@ static krb5_error_code get_credentials(context, cred, server, now,
         mcreds.magic = KV5M_CREDS;
         mcreds.times.endtime = cred->tgt_expire;
         mcreds.server = cc_princ;
-        mcreds.client = cred->princ;
+        mcreds.client = cred->name->princ;
 
         code = krb5_cc_retrieve_cred(context, cred->ccache,
-                                     KRB5_TC_MATCH_TIMES, &mcreds,
+                                     KRB5_TC_MATCH_TIMES | KRB5_TC_MATCH_AUTHDATA,
+                                     &mcreds,
                                      &evidence_creds);
         if (code)
             goto cleanup;
@@ -171,11 +174,26 @@ static krb5_error_code get_credentials(context, cred, server, now,
         in_creds.client = cc_princ;
         in_creds.second_ticket = evidence_creds.ticket;
     } else {
-        in_creds.client = cred->princ;
+        in_creds.client = cred->name->princ;
     }
 
-    in_creds.server = server;
+    in_creds.server = server->princ;
     in_creds.times.endtime = endtime;
+    in_creds.authdata = NULL;
+    in_creds.keyblock.enctype = 0;
+
+    /*
+     * cred->name is immutable, so there is no need to acquire
+     * cred->name->lock.
+     */
+    if (cred->name->ad_context != NULL) {
+        code = krb5_authdata_export_authdata(context,
+                                             cred->name->ad_context,
+                                             AD_USAGE_TGS_REQ,
+                                             &in_creds.authdata);
+        if (code != 0)
+            goto cleanup;
+    }
 
     code = krb5_get_credentials(context, flags, cred->ccache,
                                 &in_creds, out_creds);
@@ -183,7 +201,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
         goto cleanup;
 
     if (flags & KRB5_GC_CONSTRAINED_DELEGATION) {
-        if (!krb5_principal_compare(context, cred->princ,
+        if (!krb5_principal_compare(context, cred->name->princ,
                                     (*out_creds)->client)) {
             /* server did not support constrained delegation */
             code = KRB5_KDCREP_MODIFIED;
@@ -203,8 +221,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
     }
 
 cleanup:
-    if (cc_princ)
-        krb5_free_principal(context, cc_princ);
+    krb5_free_authdata(context, in_creds.authdata);
+    krb5_free_principal(context, cc_princ);
     krb5_free_cred_contents(context, &evidence_creds);
 
     return code;
@@ -242,8 +260,10 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         krb5_auth_con_setflags(context, auth_context,
                                con_flags & ~KRB5_AUTH_CONTEXT_DO_TIME);
 
+        assert(data->cred->name != NULL);
+
         code = krb5_fwd_tgt_creds(context, auth_context, 0,
-                                  data->cred->princ, data->ctx->there,
+                                  data->cred->name->princ, data->ctx->there->princ,
                                   data->cred->ccache, 1,
                                   &credmsg);
 
@@ -318,11 +338,13 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 }
 
 static krb5_error_code
-make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
+make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
+               chan_bindings, mech_type, token)
     krb5_context context;
     krb5_gss_ctx_id_rec *ctx;
     krb5_gss_cred_id_t cred;
     krb5_creds *k_cred;
+    krb5_authdata_context ad_context;
     gss_channel_bindings_t chan_bindings;
     gss_OID mech_type;
     gss_buffer_t token;
@@ -375,8 +397,10 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
         mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_ETYPE_NEGOTIATION;
 
+    krb5_auth_con_set_authdata_context(context, ctx->auth_context, ad_context);
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
                                 checksum_data, k_cred, &ap_req);
+    krb5_auth_con_set_authdata_context(context, ctx->auth_context, NULL);
     krb5_free_data_contents(context, &cksum_struct.checksum_data);
     if (code)
         goto cleanup;
@@ -526,11 +550,10 @@ kg_new_connection(
         ctx->krb_times.endtime = now + time_req;
     }
 
-    if ((code = krb5_copy_principal(context, cred->princ, &ctx->here)))
+    if ((code = kg_duplicate_name(context, cred->name, 0, &ctx->here)))
         goto fail;
 
-    if ((code = krb5_copy_principal(context, (krb5_principal) target_name,
-                                    &ctx->there)))
+    if ((code = kg_duplicate_name(context, (krb5_gss_name_t)target_name, 0, &ctx->there)))
         goto fail;
 
     code = get_credentials(context, cred, ctx->there, now,
@@ -566,7 +589,8 @@ kg_new_connection(
         /* gsskrb5 v1 */
         krb5_int32 seq_temp;
         if ((code = make_ap_req_v1(context, ctx,
-                                   cred, k_cred, input_chan_bindings,
+                                   cred, k_cred, ctx->here->ad_context,
+                                   input_chan_bindings,
                                    mech_type, &token))) {
             if ((code == KRB5_FCC_NOFILE) || (code == KRB5_CC_NOTFOUND) ||
                 (code == KG_EMPTY_CCACHE))
@@ -640,9 +664,9 @@ fail:
         if (ctx_free->auth_context)
             krb5_auth_con_free(context, ctx_free->auth_context);
         if (ctx_free->here)
-            krb5_free_principal(context, ctx_free->here);
+            kg_release_name(context, 0, &ctx_free->here);
         if (ctx_free->there)
-            krb5_free_principal(context, ctx_free->there);
+            kg_release_name(context, 0, &ctx_free->there);
         if (ctx_free->subkey)
             krb5_free_keyblock(context, ctx_free->subkey);
         xfree(ctx_free);
@@ -709,8 +733,7 @@ mutual_auth(
         goto fail;
     }
 
-    if (! krb5_principal_compare(context, ctx->there,
-                                 (krb5_principal) target_name)) {
+    if (! kg_compare_name(context, ctx->there, (krb5_gss_name_t)target_name)) {
         (void)krb5_gss_delete_sec_context(minor_status,
                                           context_handle, NULL);
         code = 0;

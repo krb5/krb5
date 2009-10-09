@@ -59,7 +59,7 @@
 
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
 
-int use_spnego = 0;
+static int use_spnego = 0;
 
 static void displayStatus_1(m, code, type)
      char *m;
@@ -136,6 +136,134 @@ displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
     printf("%s:\t%s\n", tag, (char *)buf.value);
 
     gss_release_buffer(&tmp_minor, &buf);
+
+    return GSS_S_COMPLETE;
+}
+
+static void
+dumpAttribute(OM_uint32 *minor,
+              gss_name_t name,
+              gss_buffer_t attribute,
+              int noisy)
+{
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc value;
+    gss_buffer_desc display_value;
+    int authenticated = 0;
+    int complete = 0;
+    int more = -1;
+    unsigned int i;
+
+    while (more != 0) {
+        value.value = NULL;
+        display_value.value = NULL;
+
+        major = gss_get_name_attribute(minor,
+                                       name,
+                                       attribute,
+                                       &authenticated,
+                                       &complete,
+                                       &value,
+                                       &display_value,
+                                       &more);
+        if (GSS_ERROR(major)) {
+            displayStatus("gss_get_name_attribute", major, *minor);
+            break;
+        }
+
+        printf("Attribute %.*s %s %s\n\n%.*s\n",
+               (int)attribute->length, (char *)attribute->value,
+               authenticated ? "Authenticated" : "",
+                complete ? "Complete" : "",
+               (int)display_value.length, (char *)display_value.value);
+
+        if (noisy) {
+            for (i = 0; i < value.length; i++) {
+                if ((i % 32) == 0)
+                    printf("\n");
+                printf("%02x", ((char *)value.value)[i] & 0xFF);
+            }
+            printf("\n\n");
+        }
+
+        gss_release_buffer(&tmp_minor, &value);
+        gss_release_buffer(&tmp_minor, &display_value);
+    }
+}
+
+static OM_uint32
+enumerateAttributes(OM_uint32 *minor,
+                    gss_name_t name,
+                    int noisy)
+{
+    OM_uint32 major, tmp_minor;
+    int name_is_MN;
+    gss_OID mech = GSS_C_NO_OID;
+    gss_buffer_set_t attrs = GSS_C_NO_BUFFER_SET;
+    unsigned int i;
+
+    major = gss_inquire_name(minor,
+                             name,
+                             &name_is_MN,
+                             &mech,
+                             &attrs);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_inquire_name", major, *minor);
+        return major;
+    }
+
+    if (attrs != GSS_C_NO_BUFFER_SET) {
+        for (i = 0; i < attrs->count; i++)
+            dumpAttribute(minor, name, &attrs->elements[i], noisy);
+    }
+
+    gss_release_oid(&tmp_minor, &mech);
+    gss_release_buffer_set(&tmp_minor, &attrs);
+
+    return major;
+}
+
+static OM_uint32
+testGreetAuthzData(OM_uint32 *minor,
+                   gss_name_t *name)
+{
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc attr;
+    gss_buffer_desc value;
+    gss_name_t canon;
+
+    major = gss_canonicalize_name(minor,
+                                  *name,
+                                  (gss_OID)gss_mech_krb5,
+                                  &canon);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_canonicalize_name", major, *minor);
+        return major;
+    }
+
+    attr.value = "greet:greeting";
+    attr.length = strlen((char *)attr.value);
+
+    value.value = "Hello, acceptor world!";
+    value.length = strlen((char *)value.value);
+
+    major = gss_set_name_attribute(minor,
+                                   canon,
+                                   1,
+                                   &attr,
+                                   &value);
+    if (major == GSS_S_UNAVAILABLE)
+        major = GSS_S_COMPLETE;
+    else if (GSS_ERROR(major))
+        displayStatus("gss_set_name_attribute", major, *minor);
+    else {
+        gss_release_name(&tmp_minor, name);
+        *name = canon;
+        canon = GSS_C_NO_NAME;
+    }
+
+    if (canon != GSS_C_NO_NAME)
+        gss_release_name(&tmp_minor, &canon);
 
     return GSS_S_COMPLETE;
 }
@@ -217,6 +345,7 @@ initAcceptSecContext(OM_uint32 *minor,
     else {
         displayCanonName(minor, source_name, "Source name");
         displayOID(minor, mech, "Source mech");
+        enumerateAttributes(minor, source_name, 1);
     }
 
     (void) gss_release_name(&tmp_minor, &source_name);
@@ -366,6 +495,10 @@ int main(int argc, char *argv[])
 
     printf("Protocol transition tests follow\n");
     printf("-----------------------------------\n\n");
+
+    major = testGreetAuthzData(&minor, &user);
+    if (GSS_ERROR(major))
+        goto out;
 
     /* get S4U2Self cred */
     major = gss_acquire_cred_impersonate_name(&minor,

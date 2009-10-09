@@ -681,6 +681,14 @@ static struct gss_config krb5_mechanism = {
     NULL,               /* complete_auth_token */
     krb5_gss_acquire_cred_impersonate_name,
     NULL,               /* krb5_gss_add_cred_impersonate_name */
+    NULL,               /* display_name_ext */
+    krb5_gss_inquire_name,
+    krb5_gss_get_name_attribute,
+    krb5_gss_set_name_attribute,
+    krb5_gss_delete_name_attribute,
+    krb5_gss_export_name_composite,
+    krb5_gss_map_name_to_any,
+    krb5_gss_release_any_name_mapping,
 };
 
 

@@ -288,7 +288,46 @@ OM_uint32 gssint_get_mech_type(OID, token)
  *  Internal routines to get and release an internal mechanism name
  */
 
-#include "mglueP.h"
+#if 0
+static OM_uint32
+import_internal_name_composite(OM_uint32 *minor_status,
+			       gss_mechanism mech,
+			       gss_union_name_t union_name,
+			       gss_name_t *internal_name)
+{
+    OM_uint32		status, tmp;
+    gss_mechanism	name_mech;
+    gss_buffer_desc	composite_name;
+
+    if (mech->gss_import_name == NULL)
+	return (GSS_S_UNAVAILABLE);
+
+    name_mech = gssint_get_mechanism(union_name->mech_type);
+    if (name_mech == NULL)
+	return (GSS_S_BAD_MECH);
+
+    if (name_mech->gss_export_name_composite == NULL)
+	return (GSS_S_UNAVAILABLE);
+
+    composite_name.length = 0;
+    composite_name.value = NULL;
+
+    status = (*name_mech->gss_export_name_composite)(minor_status,
+						     union_name->mech_name,
+						     &composite_name);
+    if (GSS_ERROR(status))
+	return (status);
+
+    status = (*mech->gss_import_name)(minor_status,
+				      &composite_name,
+				      gss_nt_exported_name,
+				      internal_name);
+
+    gss_release_buffer(&tmp, &composite_name);
+
+    return (status);
+}
+#endif
 
 OM_uint32 gssint_import_internal_name (minor_status, mech_type, union_name, 
 				internal_name)
@@ -301,22 +340,32 @@ gss_name_t	*internal_name;
     gss_mechanism	mech;
 
     mech = gssint_get_mechanism (mech_type);
-    if (mech) {
-	if (mech->gss_import_name) {
-	    status = mech->gss_import_name (
-					    minor_status,
-					    union_name->external_name,
-					    union_name->name_type,
-					    internal_name);
-	    if (status != GSS_S_COMPLETE)
-		map_error(minor_status, mech);
-	} else
-	    status = GSS_S_UNAVAILABLE;
+    if (mech == NULL)
+	return (GSS_S_BAD_MECH);
 
-	return (status);
+#if 0
+    /* Try composite name, it will preserve any extended attributes */
+    if (union_name->mech_type && union_name->mech_name) {
+	status = import_internal_name_composite(minor_status,
+						mech,
+						union_name,
+						internal_name);
+	if (status == GSS_S_COMPLETE)
+	    return (GSS_S_COMPLETE);
     }
+#endif
 
-    return (GSS_S_BAD_MECH);
+    if (mech->gss_import_name == NULL)
+	return (GSS_S_UNAVAILABLE);
+
+    status = mech->gss_import_name(minor_status,
+				   union_name->external_name,
+				   union_name->name_type,
+				   internal_name);
+    if (status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
+
+    return (status);
 }
 
 OM_uint32 gssint_export_internal_name(minor_status, mech_type,

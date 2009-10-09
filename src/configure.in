@@ -1098,6 +1098,8 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/preauth/cksum_body plugins/preauth/encrypted_challenge
 	plugins/preauth/wpse
 	plugins/authdata/greet
+	plugins/authdata/greet_client
+	plugins/authdata/greet_server
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

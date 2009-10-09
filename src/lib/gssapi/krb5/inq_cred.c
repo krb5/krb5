@@ -88,7 +88,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
     krb5_error_code code;
     krb5_timestamp now;
     krb5_deltat lifetime;
-    krb5_principal ret_name;
+    krb5_gss_name_t ret_name;
     gss_OID_set mechs;
     OM_uint32 ret;
 
@@ -145,8 +145,9 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
         lifetime = GSS_C_INDEFINITE;
 
     if (name) {
-        if (cred->princ &&
-            (code = krb5_copy_principal(context, cred->princ, &ret_name))) {
+        if (cred->name &&
+            (code = kg_duplicate_name(context, cred->name,
+                                      KG_INIT_NAME_INTERN, &ret_name))) {
             k5_mutex_unlock(&cred->lock);
             *minor_status = code;
             save_error_info(*minor_status, context);
@@ -168,24 +169,13 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
                                                             &mechs)))) {
             k5_mutex_unlock(&cred->lock);
             if (ret_name)
-                krb5_free_principal(context, ret_name);
+                kg_release_name(context, KG_INIT_NAME_INTERN, &ret_name);
             /* *minor_status set above */
             goto fail;
         }
     }
 
     if (name) {
-        if (ret_name != NULL && ! kg_save_name((gss_name_t) ret_name)) {
-            k5_mutex_unlock(&cred->lock);
-            if (cred_handle == GSS_C_NO_CREDENTIAL)
-                krb5_gss_release_cred(minor_status, (gss_cred_id_t *)&cred);
-
-            (void) generic_gss_release_oid_set(minor_status, &mechs);
-            krb5_free_principal(context, ret_name);
-            *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-            krb5_free_context(context);
-            return(GSS_S_FAILURE);
-        }
         if (ret_name != NULL)
             *name = (gss_name_t) ret_name;
         else

@@ -18,6 +18,7 @@ STLIBOBJS= \
 	addr_srch.o	\
 	appdefault.o	\
 	auth_con.o	\
+	authdata.o	\
 	bld_pr_ext.o	\
 	bld_princ.o	\
 	chk_trans.o	\
@@ -107,6 +108,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)addr_srch.$(OBJEXT)	\
 	$(OUTPRE)appdefault.$(OBJEXT)	\
 	$(OUTPRE)auth_con.$(OBJEXT)	\
+	$(OUTPRE)authdata.$(OBJEXT)	\
 	$(OUTPRE)bld_pr_ext.$(OBJEXT)	\
 	$(OUTPRE)bld_princ.$(OBJEXT)	\
 	$(OUTPRE)chk_trans.$(OBJEXT)	\
@@ -196,6 +198,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_srch.c	\
 	$(srcdir)/appdefault.c	\
 	$(srcdir)/auth_con.c	\
+	$(srcdir)/authdata.c	\
 	$(srcdir)/bld_pr_ext.c	\
 	$(srcdir)/bld_princ.c	\
 	$(srcdir)/brand.c	\
@@ -312,11 +315,11 @@ T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
 T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
-	ser_ctx.o ser_key.o ser_princ.o serialize.o 
+	ser_ctx.o ser_key.o ser_princ.o serialize.o authdata.o pac.o copy_data.o
 
 T_DELTAT_OBJS= t_deltat.o deltat.o
 
-T_PAC_OBJS= t_pac.o pac.o
+T_PAC_OBJS= t_pac.o pac.o copy_data.o
 
 T_PRINC_OBJS= t_princ.o parse.o unparse.o
 
@@ -327,8 +330,8 @@ t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
 t_ad_fx_armor: t_ad_fx_armor.o
 	$(CC_LINK) -o $@ t_ad_fx_armor.o $(KRB5_BASE_LIBS)
 
-t_authdata: t_authdata.o copy_auth.o
-	$(CC_LINK) -o $@ t_authdata.o copy_auth.o $(KRB5_BASE_LIBS)
+t_authdata: t_authdata.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_authdata.o $(KRB5_BASE_LIBS)
 
 t_kerb: $(T_KERB_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_kerb $(T_KERB_OBJS) $(KRB5_BASE_LIBS)

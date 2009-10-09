@@ -1739,6 +1739,7 @@ sign_db_authdata (krb5_context context,
 		  krb5_keyblock *server_key,
 		  krb5_timestamp authtime,
 		  krb5_authdata **tgs_authdata,
+		  krb5_keyblock *session_key,
 		  krb5_authdata ***ret_authdata,
 		  krb5_db_entry *ad_entry,
 		  int *ad_nprincs)
@@ -1765,6 +1766,7 @@ sign_db_authdata (krb5_context context,
     req.server_key		= server_key;
     req.authtime		= authtime;
     req.auth_data		= tgs_authdata;
+    req.session_key		= session_key;
 
     rep.entry			= ad_entry;
     rep.nprincs			= 0;

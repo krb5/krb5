@@ -51,7 +51,8 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
     }
 
     if ((code = krb5_unparse_name(context,
-                                  (krb5_principal) input_name, &str))) {
+                                  ((krb5_gss_name_t) input_name)->princ,
+                                  &str))) {
         *minor_status = code;
         save_error_info(*minor_status, context);
         krb5_free_context(context);

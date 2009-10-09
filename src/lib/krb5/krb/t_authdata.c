@@ -65,6 +65,13 @@ krb5_authdata *adseq1[] = {&ad1, &ad2, &ad4, NULL};
 
 krb5_authdata *adseq2[] = {&ad3, NULL};
 
+krb5_keyblock key = {
+    KV5M_KEYBLOCK,
+    ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+    16,
+    (unsigned char *)"1234567890ABCDEF"
+};
+
 static void compare_authdata(const krb5_authdata *adc1, krb5_authdata *adc2) {
   assert(adc1->ad_type == adc2->ad_type);
   assert(adc1->length == adc2->length);
@@ -77,7 +84,7 @@ int main()
     krb5_authdata **results;
     krb5_authdata *container[2];
     krb5_authdata **container_out;
-  
+    krb5_authdata **kdci;
 
     assert(krb5_init_context(&context) == 0);
     assert(krb5_merge_authdata(context, adseq1, adseq2, &results) == 0);
@@ -96,6 +103,13 @@ int main()
     compare_authdata( results[1], &ad4);
     compare_authdata( results[2], &ad3);
     assert( results[3] == NULL);
+    krb5_free_authdata(context, container_out);
+    assert(krb5_make_authdata_kdc_issued(context, &key, NULL, results, &kdci) == 0);
+    assert(krb5_verify_authdata_kdc_issued(context, &key, kdci[0], NULL, &container_out) == 0);
+    compare_authdata(container_out[0], results[0]);
+    compare_authdata(container_out[1], results[1]);
+    compare_authdata(container_out[2], results[2]);
+    krb5_free_authdata(context, kdci);
     krb5_free_authdata(context, results);
     krb5_free_authdata(context, container_out);
     krb5_free_context(context);

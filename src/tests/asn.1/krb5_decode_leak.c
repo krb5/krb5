@@ -662,13 +662,23 @@ main(int argc, char **argv)
     /* encode_krb5_pa_s4u_x509_user */
     {
         krb5_pa_s4u_x509_user s4u, *tmp;
-
         setup(s4u, "pa_s4u_x509_user",
               ktest_make_sample_pa_s4u_x509_user);
         leak_test(s4u, encode_krb5_pa_s4u_x509_user,
                   decode_krb5_pa_s4u_x509_user,
                   krb5_free_pa_s4u_x509_user);
         ktest_empty_pa_s4u_x509_user(&s4u);
+    }
+    /****************************************************************/
+    /* encode_krb5_ad_kdcissued */
+    {
+        krb5_ad_kdcissued kdci, *tmp;
+        setup(kdci, "ad_kdcissued",
+              ktest_make_sample_ad_kdcissued);
+        leak_test(kdci, encode_krb5_ad_kdcissued,
+                  decode_krb5_ad_kdcissued,
+                  krb5_free_ad_kdcissued);
+        ktest_empty_ad_kdcissued(&kdci);
     }
     krb5_free_context(test_context);
     return 0;

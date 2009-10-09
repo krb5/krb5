@@ -442,6 +442,83 @@ spnego_gss_acquire_cred_impersonate_name(
     gss_OID_set *,	    /* actual_mechs */
     OM_uint32 *);	    /* time_rec */
 
+OM_uint32
+spnego_gss_display_name_ext
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	gss_OID display_as_name_type,
+	gss_buffer_t display_name
+);
+
+OM_uint32
+spnego_gss_inquire_name
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	int *name_is_MN,
+	gss_OID *MN_mech,
+	gss_buffer_set_t *attrs
+);
+
+OM_uint32
+spnego_gss_get_name_attribute
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	gss_buffer_t attr,
+	int *authenticated,
+	int *complete,
+	gss_buffer_t value,
+	gss_buffer_t display_value,
+	int *more
+);
+
+OM_uint32
+spnego_gss_set_name_attribute
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	int complete,
+	gss_buffer_t attr,
+	gss_buffer_t value
+);
+
+OM_uint32
+spnego_gss_delete_name_attribute
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	gss_buffer_t attr
+);
+
+OM_uint32
+spnego_gss_export_name_composite
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	gss_buffer_t exp_composite_name
+);
+
+OM_uint32
+spnego_gss_map_name_to_any
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	int authenticated,
+	gss_buffer_t type_id,
+	gss_any_t *output
+);
+
+OM_uint32
+spnego_gss_release_any_name_mapping
+(
+	OM_uint32 *minor_status,
+	gss_name_t name,
+	gss_buffer_t type_id,
+	gss_any_t *input
+);
+
 #ifdef	__cplusplus
 }
 #endif

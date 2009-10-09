@@ -934,6 +934,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_boolean old_use_conf_ktypes;
     char **hrealms;
     unsigned int referral_count, i;
+    krb5_authdata **supplied_authdata, **out_supplied_authdata = NULL;
 
     /* 
      * Set up client and server pointers.  Make a fresh and modifyable
@@ -948,8 +949,18 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	krb5_free_principal(context, server);
 	return retval;
     }
+    if (in_cred->authdata != NULL) {
+	if ((retval = krb5_copy_authdata(context, in_cred->authdata,
+					 &out_supplied_authdata)) != 0) {
+	    krb5_free_principal(context, out_supplied_server);
+	    krb5_free_principal(context, server);
+	    return retval;
+	}
+    }
+
     supplied_server = in_cred->server;
     in_cred->server=server;
+    supplied_authdata = in_cred->authdata;
 
     DUMP_PRINC("gc_from_kdc initial client", client);
     DUMP_PRINC("gc_from_kdc initial server", server);
@@ -1139,6 +1150,15 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    if (tgtptr == &cc_tgt)
 		krb5_free_cred_contents(context, tgtptr);
 	    tgtptr=*out_cred;
+	    /* Save requested auth data with TGT in case it ends up stored */
+	    if (supplied_authdata != NULL) {
+		/* Ensure we note TGT contains authorization data */
+		retval = krb5_copy_authdata(context,
+					    supplied_authdata,
+					    &(*out_cred)->authdata);
+		if (retval)
+		    goto cleanup;
+	    }
 	    /* Save pointer to tgt in referral_tgts. */
 	    referral_tgts[referral_count]=*out_cred;
 	    *out_cred = NULL;
@@ -1149,6 +1169,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 						&server->realm);
 	    if (retval)
 		goto cleanup;
+	    /* Don't ask for KDC to add auth data multiple times */
+	    in_cred->authdata = NULL;
 	    /*
 	     * Future work: rewrite server principal per any
 	     * supplied padata.
@@ -1252,7 +1274,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	retval = KRB5_PROG_ETYPE_NOSUPP;
 	goto cleanup;
     }
-
     context->use_conf_ktypes = old_use_conf_ktypes;
     retval = krb5_get_cred_via_tkt(context, tgtptr,
 				   FLAGS2OPTS(tgtptr->ticket_flags) |
@@ -1272,10 +1293,13 @@ cleanup:
 	       server);
     krb5_free_principal(context, server);
     in_cred->server = supplied_server;
+    in_cred->authdata = supplied_authdata;
     if (*out_cred && !retval) {
         /* Success: free server, swap supplied server back in. */
         krb5_free_principal (context, (*out_cred)->server);
-	(*out_cred)->server= out_supplied_server;
+	(*out_cred)->server = out_supplied_server;
+	assert((*out_cred)->authdata == NULL);
+	(*out_cred)->authdata = out_supplied_authdata;
     }
     else {
         /* 
@@ -1283,7 +1307,8 @@ cleanup:
 	 * since it's either null or a referral TGT that we free below,
 	 * and we may need it to return.
 	 */
-        krb5_free_principal (context, out_supplied_server);
+        krb5_free_principal(context, out_supplied_server);
+	krb5_free_authdata(context, out_supplied_authdata);
     }
     DUMP_PRINC("gc_from_kdc: final server after reversion", in_cred->server);
     /*

@@ -21,11 +21,15 @@ SRCS = \
 	$(srcdir)/g_complete_auth_token.c \
 	$(srcdir)/g_context_time.c \
 	$(srcdir)/g_delete_sec_context.c \
+	$(srcdir)/g_del_name_attr.c \
 	$(srcdir)/g_dsp_name.c \
+	$(srcdir)/g_dsp_name_ext.c \
 	$(srcdir)/g_dsp_status.c \
 	$(srcdir)/g_dup_name.c \
 	$(srcdir)/g_exp_sec_context.c \
 	$(srcdir)/g_export_name.c \
+	$(srcdir)/g_export_name_comp.c \
+	$(srcdir)/g_get_name_attr.c \
 	$(srcdir)/g_glue.c \
 	$(srcdir)/g_imp_name.c \
 	$(srcdir)/g_imp_sec_context.c \
@@ -35,7 +39,9 @@ SRCS = \
 	$(srcdir)/g_inq_context_oid.c \
 	$(srcdir)/g_inq_cred.c \
 	$(srcdir)/g_inq_cred_oid.c \
+	$(srcdir)/g_inq_name.c \
 	$(srcdir)/g_inq_names.c \
+	$(srcdir)/g_map_name_to_any.c \
 	$(srcdir)/g_mech_invoke.c \
 	$(srcdir)/g_mechname.c \
 	$(srcdir)/g_oid_ops.c \
@@ -43,10 +49,12 @@ SRCS = \
 	$(srcdir)/g_rel_buffer.c \
 	$(srcdir)/g_rel_cred.c \
 	$(srcdir)/g_rel_name.c \
+	$(srcdir)/g_rel_name_mapping.c \
 	$(srcdir)/g_rel_oid_set.c \
 	$(srcdir)/g_seal.c \
 	$(srcdir)/g_set_context_option.c \
 	$(srcdir)/g_set_cred_option.c \
+	$(srcdir)/g_set_name_attr.c \
 	$(srcdir)/g_sign.c \
 	$(srcdir)/g_store_cred.c \
 	$(srcdir)/g_unseal.c \
@@ -66,11 +74,15 @@ OBJS = \
 	$(OUTPRE)g_complete_auth_token.$(OBJEXT) \
 	$(OUTPRE)g_context_time.$(OBJEXT) \
 	$(OUTPRE)g_delete_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_del_name_attr.$(OBJEXT) \
 	$(OUTPRE)g_dsp_name.$(OBJEXT) \
+	$(OUTPRE)g_dsp_name_ext.$(OBJEXT) \
 	$(OUTPRE)g_dsp_status.$(OBJEXT) \
 	$(OUTPRE)g_dup_name.$(OBJEXT) \
 	$(OUTPRE)g_exp_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_export_name.$(OBJEXT) \
+	$(OUTPRE)g_export_name_comp.$(OBJEXT) \
+	$(OUTPRE)g_get_name_attr.$(OBJEXT) \
 	$(OUTPRE)g_glue.$(OBJEXT) \
 	$(OUTPRE)g_imp_name.$(OBJEXT) \
 	$(OUTPRE)g_imp_sec_context.$(OBJEXT) \
@@ -80,7 +92,9 @@ OBJS = \
 	$(OUTPRE)g_inq_context_oid.$(OBJEXT) \
 	$(OUTPRE)g_inq_cred.$(OBJEXT) \
 	$(OUTPRE)g_inq_cred_oid.$(OBJEXT) \
+	$(OUTPRE)g_inq_name.$(OBJEXT) \
 	$(OUTPRE)g_inq_names.$(OBJEXT) \
+	$(OUTPRE)g_map_name_to_any.$(OBJEXT) \
 	$(OUTPRE)g_mech_invoke.$(OBJEXT) \
 	$(OUTPRE)g_mechname.$(OBJEXT) \
 	$(OUTPRE)g_oid_ops.$(OBJEXT) \
@@ -88,10 +102,12 @@ OBJS = \
 	$(OUTPRE)g_rel_buffer.$(OBJEXT) \
 	$(OUTPRE)g_rel_cred.$(OBJEXT) \
 	$(OUTPRE)g_rel_name.$(OBJEXT) \
+	$(OUTPRE)g_rel_name_mapping.$(OBJEXT) \
 	$(OUTPRE)g_rel_oid_set.$(OBJEXT) \
 	$(OUTPRE)g_seal.$(OBJEXT) \
 	$(OUTPRE)g_set_context_option.$(OBJEXT) \
 	$(OUTPRE)g_set_cred_option.$(OBJEXT) \
+	$(OUTPRE)g_set_name_attr.$(OBJEXT) \
 	$(OUTPRE)g_sign.$(OBJEXT) \
 	$(OUTPRE)g_store_cred.$(OBJEXT) \
 	$(OUTPRE)g_unseal.$(OBJEXT) \
@@ -111,11 +127,15 @@ STLIBOBJS = \
 	g_complete_auth_token.o \
 	g_context_time.o \
 	g_delete_sec_context.o \
+	g_del_name_attr.o \
 	g_dsp_name.o \
+	g_dsp_name_ext.o \
 	g_dsp_status.o \
 	g_dup_name.o \
 	g_exp_sec_context.o \
 	g_export_name.o \
+	g_export_name_comp.o \
+	g_get_name_attr.o \
 	g_glue.o \
 	g_imp_name.o \
 	g_imp_sec_context.o \
@@ -125,7 +145,9 @@ STLIBOBJS = \
 	g_inq_context_oid.o \
 	g_inq_cred.o \
 	g_inq_cred_oid.o \
+	g_inq_name.o \
 	g_inq_names.o \
+	g_map_name_to_any.o \
 	g_mech_invoke.o \
 	g_mechname.o \
 	g_oid_ops.o \
@@ -133,10 +155,12 @@ STLIBOBJS = \
 	g_rel_buffer.o \
 	g_rel_cred.o \
 	g_rel_name.o \
+	g_rel_name_mapping.o \
 	g_rel_oid_set.o \
 	g_seal.o \
 	g_set_context_option.o \
 	g_set_cred_option.o \
+	g_set_name_attr.o \
 	g_sign.o \
 	g_store_cred.o \
 	g_unseal.o \

@@ -859,14 +859,14 @@ krb5_fcc_read_authdatum(krb5_context context, krb5_ccache id, krb5_authdata *a)
 {
     krb5_error_code kret;
     krb5_int32 int32;
-    krb5_ui_2 ui2;
+    krb5_int16 ui2; /* negative authorization data types are allowed */
     
     k5_cc_mutex_assert_locked(context, &((krb5_fcc_data *) id->data)->lock);
 
     a->magic = KV5M_AUTHDATA;
     a->contents = NULL;
 
-    kret = krb5_fcc_read_ui_2(context, id, &ui2);
+    kret = krb5_fcc_read_ui_2(context, id, (krb5_ui_2 *)&ui2);
     CHECK(kret);
     a->ad_type = (krb5_authdatatype)ui2;
     kret = krb5_fcc_read_int32(context, id, &int32);

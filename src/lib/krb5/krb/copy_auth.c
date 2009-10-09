@@ -276,3 +276,126 @@ krb5_error_code krb5int_find_authdata
   else krb5_free_authdata(context, fctx.out);
   return retval;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_make_authdata_kdc_issued(krb5_context context,
+    const krb5_keyblock *key,
+    krb5_const_principal issuer,
+    krb5_authdata *const *authdata,
+    krb5_authdata ***ad_kdcissued)
+{
+    krb5_error_code code;
+    krb5_ad_kdcissued ad_kdci;
+    krb5_data *data;
+    krb5_cksumtype cksumtype;
+    krb5_authdata ad_datum;
+    krb5_authdata *ad_data[2];
+
+    *ad_kdcissued = NULL;
+
+    ad_kdci.ad_checksum.contents = NULL;
+    ad_kdci.i_principal = (krb5_principal)issuer;
+    ad_kdci.elements = (krb5_authdata **)authdata;
+
+    code = krb5int_c_mandatory_cksumtype(context, key->enctype,
+                                         &cksumtype);
+    if (code != 0)
+        return code;
+
+    code = encode_krb5_authdata(ad_kdci.elements, &data);
+    if (code != 0)
+        return code;
+
+    code = krb5_c_make_checksum(context, cksumtype,
+                                key, KRB5_KEYUSAGE_AD_KDCISSUED_CKSUM,
+                                data, &ad_kdci.ad_checksum);
+    if (code != 0) {
+        krb5_free_data(context, data);
+        return code;
+    }
+
+    krb5_free_data(context, data);
+
+    code = encode_krb5_ad_kdcissued(&ad_kdci, &data);
+    if (code != 0)
+        return code;
+
+    ad_datum.ad_type = KRB5_AUTHDATA_KDC_ISSUED;
+    ad_datum.length = data->length;
+    ad_datum.contents = (unsigned char *)data->data;
+
+    ad_data[0] = &ad_datum;
+    ad_data[1] = NULL;
+
+    code = krb5_copy_authdata(context, ad_data, ad_kdcissued);
+
+    krb5_free_data(context, data);
+    krb5_free_checksum_contents(context, &ad_kdci.ad_checksum);
+
+    return code;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_verify_authdata_kdc_issued(krb5_context context,
+    const krb5_keyblock *key,
+    const krb5_authdata *ad_kdcissued,
+    krb5_principal *issuer,
+    krb5_authdata ***authdata)
+{
+    krb5_error_code code;
+    krb5_ad_kdcissued *ad_kdci;
+    krb5_data data, *data2;
+    krb5_boolean valid = FALSE;
+
+    if ((ad_kdcissued->ad_type & AD_TYPE_FIELD_TYPE_MASK) !=
+	KRB5_AUTHDATA_KDC_ISSUED)
+	return EINVAL;
+
+    if (issuer != NULL)
+        *issuer = NULL;
+    if (authdata != NULL)
+        *authdata = NULL;
+
+    data.length = ad_kdcissued->length;
+    data.data = (char *)ad_kdcissued->contents;
+
+    code = decode_krb5_ad_kdcissued(&data, &ad_kdci);
+    if (code != 0)
+        return code;
+
+    code = encode_krb5_authdata(ad_kdci->elements, &data2);
+    if (code != 0) {
+        krb5_free_ad_kdcissued(context, ad_kdci);
+        return code;
+    }
+
+    code = krb5_c_verify_checksum(context, key,
+                                  KRB5_KEYUSAGE_AD_KDCISSUED_CKSUM,
+                                  data2, &ad_kdci->ad_checksum, &valid);
+    if (code != 0) {
+        krb5_free_ad_kdcissued(context, ad_kdci);
+        krb5_free_data(context, data2);
+    }
+
+    krb5_free_data(context, data2);
+
+    if (valid == FALSE) {
+        krb5_free_ad_kdcissued(context, ad_kdci);
+        return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    }
+
+    if (issuer != NULL) {
+        *issuer = ad_kdci->i_principal;
+        ad_kdci->i_principal = NULL;
+    }
+
+    if (authdata != NULL) {
+        *authdata = ad_kdci->elements;
+        ad_kdci->elements = NULL;
+    }
+
+    krb5_free_ad_kdcissued(context, ad_kdci);
+
+    return 0;
+}
+

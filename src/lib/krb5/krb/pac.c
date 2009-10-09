@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -27,6 +27,7 @@
 
 #include "k5-int.h"
 #include "k5-utf8.h"
+#include "authdata.h"
 
 /* draft-brezak-win2k-krb-authz-00 */
 
@@ -46,9 +47,12 @@ typedef struct _PAC_INFO_BUFFER {
 
 /* ulType */
 #define PAC_LOGON_INFO		1
+#define PAC_CREDENTIALS_INFO	2
 #define PAC_SERVER_CHECKSUM	6
 #define PAC_PRIVSVR_CHECKSUM	7
 #define PAC_CLIENT_INFO		10
+#define PAC_DELEGATION_INFO	11
+#define PAC_UPN_DNS_INFO	12
 
 typedef struct _PACTYPE {
     krb5_ui_4 cBuffers;
@@ -66,6 +70,7 @@ typedef struct _PACTYPE {
 struct krb5_pac_data {
     PACTYPE *pac;	/* PAC header + info buffer array */
     krb5_data data;	/* PAC data (including uninitialised header) */
+    krb5_boolean verified;
 };
 
 static krb5_error_code
@@ -93,7 +98,7 @@ k5_pac_add_buffer(krb5_context context,
 
     /* Check there isn't already a buffer of this type */
     if (k5_pac_locate_buffer(context, pac, type, NULL) == 0) {
-	return EINVAL;
+	return EEXIST;
     }
 
     header = (PACTYPE *)realloc(pac->pac,
@@ -147,6 +152,8 @@ k5_pac_add_buffer(krb5_context context,
 	out_data->data = pac->data.data + pac->pac->Buffers[i].Offset;
 	out_data->length = data->length;
     }
+
+    pac->verified = FALSE;
 
     return 0;
 }
@@ -228,7 +235,7 @@ krb5_pac_get_buffer(krb5_context context,
     ret = k5_pac_locate_buffer(context, pac, type, &d);
     if (ret != 0)
 	return ret;
- 
+
     data->data = malloc(d.length);
     if (data->data == NULL)
 	return ENOMEM;
@@ -277,7 +284,7 @@ krb5_pac_init(krb5_context context,
 
     pac->pac = (PACTYPE *)malloc(sizeof(PACTYPE));
     if (pac->pac == NULL) {
-	free( pac);
+	free(pac);
 	return ENOMEM;
     }
 
@@ -291,7 +298,50 @@ krb5_pac_init(krb5_context context,
 	return ENOMEM;
     }
 
+    pac->verified = FALSE;
+
     *ppac = pac;
+
+    return 0;
+}
+
+static krb5_error_code
+k5_pac_copy(krb5_context context,
+	    krb5_pac src,
+	    krb5_pac *dst)
+{
+    size_t header_len;
+    krb5_ui_4 cbuffers;
+    krb5_error_code code;
+    krb5_pac pac;
+
+    cbuffers = src->pac->cBuffers;
+    if (cbuffers != 0)
+	cbuffers--;
+
+    header_len = sizeof(PACTYPE) + cbuffers * sizeof(PAC_INFO_BUFFER);
+
+    pac = (krb5_pac)malloc(sizeof(*pac));
+    if (pac == NULL)
+	return ENOMEM;
+
+    pac->pac = (PACTYPE *)malloc(header_len);
+    if (pac->pac == NULL) {
+	free(pac);
+	return ENOMEM;
+    }
+
+    memcpy(pac->pac, src->pac, header_len);
+
+    code = krb5int_copy_data_contents(context, &src->data, &pac->data);
+    if (code != 0) {
+	free(pac->pac);
+	free(pac);
+	return ENOMEM;
+    }
+
+    pac->verified = src->verified;
+    *dst = pac;
 
     return 0;
 }
@@ -379,7 +429,8 @@ krb5_pac_parse(krb5_context context,
 }
 
 static krb5_error_code
-k5_time_to_seconds_since_1970(krb5_int64 ntTime, krb5_timestamp *elapsedSeconds)
+k5_time_to_seconds_since_1970(krb5_int64 ntTime,
+			      krb5_timestamp *elapsedSeconds)
 {
     krb5_ui_8 abstime;
 
@@ -393,10 +444,11 @@ k5_time_to_seconds_since_1970(krb5_int64 ntTime, krb5_timestamp *elapsedSeconds)
     *elapsedSeconds = abstime;
 
     return 0;
-}    
+}
 
 static krb5_error_code
-k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds, krb5_ui_8 *ntTime)
+k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds,
+			      krb5_ui_8 *ntTime)
 {
     *ntTime = elapsedSeconds;
 
@@ -404,7 +456,7 @@ k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds, krb5_ui_8 *ntTime)
 	*ntTime += NT_TIME_EPOCH;
 
     *ntTime *= 10000000;
-   
+
     return 0;
 }
 
@@ -441,10 +493,11 @@ k5_pac_validate_client(krb5_context context,
 	return ret;
 
     if (client_info.length < PAC_CLIENT_INFO_LENGTH + pac_princname_length ||
-        pac_princname_length % 2)
+	pac_princname_length % 2)
 	return ERANGE;
 
-    ret = krb5int_ucs2lecs_to_utf8s(p, (size_t)pac_princname_length / 2, &pac_princname, NULL);
+    ret = krb5int_ucs2lecs_to_utf8s(p, (size_t)pac_princname_length / 2,
+				    &pac_princname, NULL);
     if (ret != 0)
 	return ret;
 
@@ -457,7 +510,10 @@ k5_pac_validate_client(krb5_context context,
     free(pac_princname);
 
     if (pac_authtime != authtime ||
-	krb5_principal_compare(context, pac_principal, principal) == FALSE)
+	!krb5_principal_compare_flags(context,
+				      pac_principal,
+				      principal,
+				      KRB5_PRINCIPAL_COMPARE_IGNORE_REALM))
 	ret = KRB5KRB_AP_WRONG_PRINC;
 
     krb5_free_principal(context, pac_principal);
@@ -513,7 +569,8 @@ k5_pac_verify_server_checksum(krb5_context context,
     krb5_boolean valid;
     krb5_octet *p;
 
-    ret = k5_pac_locate_buffer(context, pac, PAC_SERVER_CHECKSUM, &checksum_data);
+    ret = k5_pac_locate_buffer(context, pac,
+			       PAC_SERVER_CHECKSUM, &checksum_data);
     if (ret != 0)
 	return ret;
 
@@ -533,19 +590,22 @@ k5_pac_verify_server_checksum(krb5_context context,
     memcpy(pac_data.data, pac->data.data, pac->data.length);
 
     /* Zero out both checksum buffers */
-    ret = k5_pac_zero_signature(context, pac, PAC_SERVER_CHECKSUM, &pac_data);
+    ret = k5_pac_zero_signature(context, pac,
+				PAC_SERVER_CHECKSUM, &pac_data);
     if (ret != 0) {
 	free(pac_data.data);
 	return ret;
     }
 
-    ret = k5_pac_zero_signature(context, pac, PAC_PRIVSVR_CHECKSUM, &pac_data);
+    ret = k5_pac_zero_signature(context, pac,
+				PAC_PRIVSVR_CHECKSUM, &pac_data);
     if (ret != 0) {
 	free(pac_data.data);
 	return ret;
     }
 
-    ret = krb5_c_verify_checksum(context, server, KRB5_KEYUSAGE_APP_DATA_CKSUM,
+    ret = krb5_c_verify_checksum(context, server,
+				 KRB5_KEYUSAGE_APP_DATA_CKSUM,
 				 &pac_data, &checksum, &valid);
 
     free(pac_data.data);
@@ -571,14 +631,16 @@ k5_pac_verify_kdc_checksum(krb5_context context,
     krb5_boolean valid;
     krb5_octet *p;
 
-    ret = k5_pac_locate_buffer(context, pac, PAC_PRIVSVR_CHECKSUM, &privsvr_checksum);
+    ret = k5_pac_locate_buffer(context, pac,
+			       PAC_PRIVSVR_CHECKSUM, &privsvr_checksum);
     if (ret != 0)
 	return ret;
 
     if (privsvr_checksum.length < PAC_SIGNATURE_DATA_LENGTH)
 	return KRB5_BAD_MSIZE;
 
-    ret = k5_pac_locate_buffer(context, pac, PAC_SERVER_CHECKSUM, &server_checksum);
+    ret = k5_pac_locate_buffer(context, pac,
+			       PAC_SERVER_CHECKSUM, &server_checksum);
     if (ret != 0)
 	return ret;
 
@@ -593,7 +655,8 @@ k5_pac_verify_kdc_checksum(krb5_context context,
     server_checksum.data += PAC_SIGNATURE_DATA_LENGTH;
     server_checksum.length -= PAC_SIGNATURE_DATA_LENGTH;
 
-    ret = krb5_c_verify_checksum(context, privsvr, KRB5_KEYUSAGE_APP_DATA_CKSUM,
+    ret = krb5_c_verify_checksum(context, privsvr,
+				 KRB5_KEYUSAGE_APP_DATA_CKSUM,
 				 &server_checksum, &checksum, &valid);
     if (ret != 0)
 	return ret;
@@ -633,6 +696,8 @@ krb5_pac_verify(krb5_context context,
 	    return ret;
     }
 
+    pac->verified = TRUE;
+
     return 0;
 }
 
@@ -650,12 +715,14 @@ k5_insert_client_info(krb5_context context,
     krb5_ui_8 nt_authtime;
 
     /* If we already have a CLIENT_INFO buffer, then just validate it */
-    if (k5_pac_locate_buffer(context, pac, PAC_CLIENT_INFO, &client_info) == 0) {
+    if (k5_pac_locate_buffer(context, pac,
+			     PAC_CLIENT_INFO, &client_info) == 0) {
 	return k5_pac_validate_client(context, pac, authtime, principal);
     }
 
     ret = krb5_unparse_name_flags(context, principal,
-				  KRB5_PRINCIPAL_UNPARSE_NO_REALM, &princ_name_utf8);
+				  KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+				  &princ_name_utf8);
     if (ret != 0)
 	goto cleanup;
 
@@ -668,7 +735,8 @@ k5_insert_client_info(krb5_context context,
     client_info.length = PAC_CLIENT_INFO_LENGTH + princ_name_ucs2_len;
     client_info.data = NULL;
 
-    ret = k5_pac_add_buffer(context, pac, PAC_CLIENT_INFO, &client_info, TRUE, &client_info);
+    ret = k5_pac_add_buffer(context, pac, PAC_CLIENT_INFO,
+			    &client_info, TRUE, &client_info);
     if (ret != 0)
 	goto cleanup;
 
@@ -685,12 +753,11 @@ k5_insert_client_info(krb5_context context,
 
     /* copy in principal name */
     memcpy(p, princ_name_ucs2, princ_name_ucs2_len);
- 
+
 cleanup:
-    if (princ_name_utf8 != NULL)
-	free(princ_name_utf8);
     if (princ_name_ucs2 != NULL)
 	free(princ_name_ucs2);
+    krb5_free_unparsed_name(context, princ_name_utf8);
 
     return ret;
 }
@@ -716,7 +783,10 @@ k5_insert_checksum(krb5_context context,
 
     ret = k5_pac_locate_buffer(context, pac, type, &cksumdata);
     if (ret == 0) {
-	/* If we're resigning PAC, make sure we can fit checksum into existing buffer */
+	/*
+	 * If we're resigning PAC, make sure we can fit checksum
+	 * into existing buffer
+	 */
 	if (cksumdata.length != PAC_SIGNATURE_DATA_LENGTH + len)
 	    return ERANGE;
 
@@ -726,7 +796,9 @@ k5_insert_checksum(krb5_context context,
 	cksumdata.length = PAC_SIGNATURE_DATA_LENGTH + len;
 	cksumdata.data = NULL;
 
-	ret = k5_pac_add_buffer(context, pac, type, &cksumdata, TRUE, &cksumdata);
+	ret = k5_pac_add_buffer(context, pac,
+				type, &cksumdata,
+				TRUE, &cksumdata);
 	if (ret != 0)
 	    return ret;
     }
@@ -745,7 +817,8 @@ k5_pac_encode_header(krb5_context context, krb5_pac pac)
     unsigned char *p;
     size_t header_len;
 
-    header_len = PACTYPE_LENGTH + (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH);
+    header_len = PACTYPE_LENGTH +
+	(pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH);
     assert(pac->data.length >= header_len);
 
     p = (unsigned char *)pac->data.data;
@@ -818,7 +891,8 @@ krb5int_pac_sign(krb5_context context,
 	return ret;
 
     /* Generate the server checksum over the entire PAC */
-    ret = k5_pac_locate_buffer(context, pac, PAC_SERVER_CHECKSUM, &server_cksum);
+    ret = k5_pac_locate_buffer(context, pac,
+			       PAC_SERVER_CHECKSUM, &server_cksum);
     if (ret != 0)
 	return ret;
 
@@ -838,7 +912,8 @@ krb5int_pac_sign(krb5_context context,
 	return ret;
 
     /* Generate the privsvr checksum over the server checksum buffer */
-    ret = k5_pac_locate_buffer(context, pac, PAC_PRIVSVR_CHECKSUM, &privsvr_cksum);
+    ret = k5_pac_locate_buffer(context, pac,
+			       PAC_PRIVSVR_CHECKSUM, &privsvr_cksum);
     if (ret != 0)
 	return ret;
 
@@ -865,8 +940,603 @@ krb5int_pac_sign(krb5_context context,
     data->length = pac->data.length;
 
     memcpy(data->data, pac->data.data, pac->data.length);
-    memset(pac->data.data, 0, PACTYPE_LENGTH + (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH));
+    memset(pac->data.data, 0,
+	   PACTYPE_LENGTH + (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH));
 
     return 0;
 }
+
+/*
+ * PAC auth data attribute backend
+ */
+struct mspac_context {
+    krb5_pac pac;
+};
+
+static krb5_error_code
+mspac_init(krb5_context kcontext, void **plugin_context)
+{
+    *plugin_context = NULL;
+    return 0;
+}
+
+static void
+mspac_flags(krb5_context kcontext,
+	    void *plugin_context,
+	    krb5_authdatatype ad_type,
+	    krb5_flags *flags)
+{
+    *flags = AD_USAGE_KDC_ISSUED;
+}
+
+static void
+mspac_fini(krb5_context kcontext, void *plugin_context)
+{
+    return;
+}
+
+static krb5_error_code
+mspac_request_init(krb5_context kcontext,
+		   krb5_authdata_context context,
+		   void *plugin_context,
+		   void **request_context)
+{
+    struct mspac_context *pacctx;
+
+    pacctx = (struct mspac_context *)malloc(sizeof(*pacctx));
+    if (pacctx == NULL)
+	return ENOMEM;
+
+    pacctx->pac = NULL;
+
+    *request_context = pacctx;
+
+    return 0;
+}
+
+static krb5_error_code
+mspac_import_authdata(krb5_context kcontext,
+		      krb5_authdata_context context,
+		      void *plugin_context,
+		      void *request_context,
+		      krb5_authdata **authdata,
+		      krb5_boolean kdc_issued,
+		      krb5_const_principal kdc_issuer)
+{
+    krb5_error_code code;
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+
+    if (kdc_issued)
+	return EINVAL;
+
+    if (pacctx->pac != NULL) {
+	krb5_pac_free(kcontext, pacctx->pac);
+	pacctx->pac = NULL;
+    }
+
+    assert(authdata[0] != NULL);
+    assert((authdata[0]->ad_type & AD_TYPE_FIELD_TYPE_MASK) ==
+	KRB5_AUTHDATA_WIN2K_PAC);
+
+    code = krb5_pac_parse(kcontext, authdata[0]->contents,
+			  authdata[0]->length, &pacctx->pac);
+
+    return code;
+}
+
+static krb5_error_code
+mspac_export_authdata(krb5_context kcontext,
+		      krb5_authdata_context context,
+		      void *plugin_context,
+		      void *request_context,
+		      krb5_flags usage,
+		      krb5_authdata ***out_authdata)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    krb5_error_code code;
+    krb5_authdata **authdata;
+    krb5_data data;
+
+    if (pacctx->pac == NULL)
+	return 0;
+
+    authdata = calloc(2, sizeof(krb5_authdata *));
+    if (authdata == NULL)
+	return ENOMEM;
+
+    authdata[0] = calloc(1, sizeof(krb5_authdata));
+    if (authdata[0] == NULL) {
+	free(authdata);
+	return ENOMEM;
+    }
+    authdata[1] = NULL;
+
+    code = krb5int_copy_data_contents(kcontext, &pacctx->pac->data, &data);
+    if (code != 0) {
+	krb5_free_authdata(kcontext, authdata);
+	return code;
+    }
+
+    authdata[0]->magic = KV5M_AUTHDATA;
+    authdata[0]->ad_type = KRB5_AUTHDATA_WIN2K_PAC;
+    authdata[0]->length = data.length;
+    authdata[0]->contents = (krb5_octet *)data.data;
+
+    authdata[1] = NULL;
+
+    *out_authdata = authdata;
+
+    return 0;
+}
+
+static krb5_error_code
+mspac_verify(krb5_context kcontext,
+	     krb5_authdata_context context,
+	     void *plugin_context,
+	     void *request_context,
+	     const krb5_auth_context *auth_context,
+	     const krb5_keyblock *key,
+	     const krb5_ap_req *req)
+{
+    krb5_error_code code;
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+
+    if (pacctx->pac == NULL)
+	return EINVAL;
+
+    code = krb5_pac_verify(kcontext,
+			   pacctx->pac,
+			   req->ticket->enc_part2->times.authtime,
+			   req->ticket->enc_part2->client,
+			   key,
+			   NULL);
+
+#if 0
+    /*
+     * Now, we could return 0 and just set pac->verified to FALSE.
+     * Thoughts?
+     */
+    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
+	assert(pacctx->pac->verified == FALSE);
+	code = 0;
+    }
+#endif
+
+    return code;
+}
+
+static void
+mspac_request_fini(krb5_context kcontext,
+		   krb5_authdata_context context,
+		   void *plugin_context,
+		   void *request_context)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+
+    if (pacctx != NULL) {
+	if (pacctx->pac != NULL)
+	    krb5_pac_free(kcontext, pacctx->pac);
+
+	free(pacctx);
+    }
+}
+
+#define STRLENOF(x) (sizeof((x)) - 1)
+
+static struct {
+    krb5_ui_4 type;
+    krb5_data attribute;
+} mspac_attribute_types[] = {
+    { (krb5_ui_4)-1,		{ KV5M_DATA, STRLENOF("mspac:"), "mspac:" } },
+    { PAC_LOGON_INFO,		{ KV5M_DATA, STRLENOF("mspac:logon-info"), "mspac:logon-info" } },
+    { PAC_CREDENTIALS_INFO,	{ KV5M_DATA, STRLENOF("mspac:credentials-info"), "mspac:credentials-info" } },
+    { PAC_SERVER_CHECKSUM,	{ KV5M_DATA, STRLENOF("mspac:server-checksum"), "mspac:server-checksum" } },
+    { PAC_PRIVSVR_CHECKSUM,	{ KV5M_DATA, STRLENOF("mspac:privsvr-checksum"), "mspac:privsvr-checksum" } },
+    { PAC_CLIENT_INFO,		{ KV5M_DATA, STRLENOF("mspac:client-info"), "mspac:client-info" } },
+    { PAC_DELEGATION_INFO,	{ KV5M_DATA, STRLENOF("mspac:delegation-info"), "mspac:delegation-info" } },
+    { PAC_UPN_DNS_INFO,		{ KV5M_DATA, STRLENOF("mspac:upn-dns-info"), "mspac:upn-dns-info" } },
+};
+
+#define MSPAC_ATTRIBUTE_COUNT	(sizeof(mspac_attribute_types)/sizeof(mspac_attribute_types[0]))
+
+static krb5_error_code
+mspac_type2attr(krb5_ui_4 type, krb5_data *attr)
+{
+    unsigned int i;
+
+    for (i = 0; i < MSPAC_ATTRIBUTE_COUNT; i++) {
+	if (mspac_attribute_types[i].type == type) {
+	    *attr = mspac_attribute_types[i].attribute;
+	    return 0;
+	}
+    }
+
+    return ENOENT;
+}
+
+static krb5_error_code
+mspac_attr2type(const krb5_data *attr, krb5_ui_4 *type)
+{
+    unsigned int i;
+
+    for (i = 0; i < MSPAC_ATTRIBUTE_COUNT; i++) {
+	if (attr->length == mspac_attribute_types[i].attribute.length &&
+	    strncasecmp(attr->data, mspac_attribute_types[i].attribute.data, attr->length) == 0) {
+	    *type = mspac_attribute_types[i].type;
+	    return 0;
+	}
+    }
+
+    if (attr->length > STRLENOF("mspac:") &&
+	strncasecmp(attr->data, "mspac:", STRLENOF("mspac:")) == 0)
+    {
+	char *p = &attr->data[STRLENOF("mspac:")];
+	char *endptr;
+
+	*type = strtoul(p, &endptr, 10);
+	if (*type != 0 && *endptr == '\0')
+	    return 0;
+    }
+
+    return ENOENT;
+}
+
+static krb5_error_code
+mspac_get_attribute_types(krb5_context kcontext,
+			  krb5_authdata_context context,
+			  void *plugin_context,
+			  void *request_context,
+			  krb5_data **out_attrs)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    unsigned int i, j;
+    krb5_data *attrs;
+    krb5_error_code code;
+
+    if (pacctx->pac == NULL)
+	return ENOENT;
+
+    attrs = calloc(1 + pacctx->pac->pac->cBuffers + 1, sizeof(krb5_data));
+    if (attrs == NULL)
+	return ENOMEM;
+
+    j = 0;
+
+    /* The entire PAC */
+    code = krb5int_copy_data_contents(kcontext,
+				      &mspac_attribute_types[0].attribute,
+				      &attrs[j++]);
+    if (code != 0) {
+	free(attrs);
+	return code;
+    }
+
+    /* PAC buffers */
+    for (i = 0; i < pacctx->pac->pac->cBuffers; i++) {
+	krb5_data attr;
+
+	code = mspac_type2attr(pacctx->pac->pac->Buffers[i].ulType, &attr);
+	if (code == 0) {
+	    code = krb5int_copy_data_contents(kcontext, &attr, &attrs[j++]);
+	    if (code != 0) {
+		krb5int_free_data_list(kcontext, attrs);
+		return code;
+	    }
+	} else {
+	    int length;
+
+	    length = asprintf(&attrs[j].data, "mspac:%d",
+			      pacctx->pac->pac->Buffers[i].ulType);
+	    if (length < 0) {
+		krb5int_free_data_list(kcontext, attrs);
+		return ENOMEM;
+	    }
+	    attrs[j++].length = length;
+	}
+    }
+    attrs[j].data = NULL;
+    attrs[j].length = 0;
+
+    *out_attrs = attrs;
+
+    return 0;
+}
+
+static krb5_error_code
+mspac_get_attribute(krb5_context kcontext,
+		    krb5_authdata_context context,
+		    void *plugin_context,
+		    void *request_context,
+		    const krb5_data *attribute,
+		    krb5_boolean *authenticated,
+		    krb5_boolean *complete,
+		    krb5_data *value,
+		    krb5_data *display_value,
+		    int *more)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    krb5_error_code code;
+    krb5_ui_4 type;
+
+    value->data = NULL;
+    value->length = 0;
+
+    if (display_value != NULL) {
+	display_value->data = NULL;
+	display_value->length = 0;
+    }
+
+    if (*more != -1 || pacctx->pac == NULL)
+	return ENOENT;
+
+    code = mspac_attr2type(attribute, &type);
+    if (code != 0)
+	return code;
+
+    /* -1 is a magic type that refers to the entire PAC */
+    if (type == (krb5_ui_4)-1) {
+	if (value != NULL)
+	    code = krb5int_copy_data_contents(kcontext,
+					      &pacctx->pac->data,
+					      value);
+	else
+	    code = 0;
+    } else {
+	if (value != NULL)
+	    code = krb5_pac_get_buffer(kcontext, pacctx->pac, type, value);
+	else
+	    code = k5_pac_locate_buffer(kcontext, pacctx->pac, type, NULL);
+    }
+    if (code == 0) {
+	*authenticated = pacctx->pac->verified;
+	*complete = TRUE;
+    }
+
+    *more = 0;
+
+    return code;
+}
+
+static krb5_error_code
+mspac_set_attribute(krb5_context kcontext,
+		    krb5_authdata_context context,
+		    void *plugin_context,
+		    void *request_context,
+		    krb5_boolean complete,
+		    const krb5_data *attribute,
+		    const krb5_data *value)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    krb5_error_code code;
+    krb5_ui_4 type;
+
+    if (pacctx->pac == NULL)
+	return ENOENT;
+
+    code = mspac_attr2type(attribute, &type);
+    if (code != 0)
+	return code;
+
+    /* -1 is a magic type that refers to the entire PAC */
+    if (type == (krb5_ui_4)-1) {
+	krb5_pac newpac;
+
+	code = krb5_pac_parse(kcontext, value->data, value->length, &newpac);
+	if (code != 0)
+	    return code;
+
+	krb5_pac_free(kcontext, pacctx->pac);
+	pacctx->pac = newpac;
+    } else {
+	code = krb5_pac_add_buffer(kcontext, pacctx->pac, type, value);
+    }
+
+    return code;
+}
+
+static krb5_error_code
+mspac_export_internal(krb5_context kcontext,
+		      krb5_authdata_context context,
+		      void *plugin_context,
+		      void *request_context,
+		      krb5_boolean restrict_authenticated,
+		      void **ptr)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    krb5_error_code code;
+    krb5_pac pac;
+
+    *ptr = NULL;
+
+    if (pacctx->pac == NULL)
+	return 0;
+
+    if (restrict_authenticated && (pacctx->pac->verified) == FALSE)
+	return 0;
+
+    code = krb5_pac_parse(kcontext, pacctx->pac->data.data,
+			  pacctx->pac->data.length, &pac);
+    if (code == 0) {
+	pac->verified = pacctx->pac->verified;
+	*ptr = pac;
+    }
+
+    return code;
+}
+
+static void
+mspac_free_internal(krb5_context kcontext,
+		    krb5_authdata_context context,
+		    void *plugin_context,
+		    void *request_context,
+		    void *ptr)
+{
+    if (ptr != NULL)
+	krb5_pac_free(kcontext, (krb5_pac)ptr);
+
+    return;
+}
+
+static krb5_error_code
+mspac_size(krb5_context kcontext,
+	   krb5_authdata_context context,
+	   void *plugin_context,
+	   void *request_context,
+	   size_t *sizep)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+
+    *sizep += sizeof(krb5_int32);
+
+    if (pacctx->pac != NULL)
+	*sizep += pacctx->pac->data.length;
+
+    *sizep += sizeof(krb5_int32);
+
+    return 0;
+}
+
+static krb5_error_code
+mspac_externalize(krb5_context kcontext,
+		  krb5_authdata_context context,
+		  void *plugin_context,
+		  void *request_context,
+		  krb5_octet **buffer,
+		  size_t *lenremain)
+{
+    krb5_error_code code = 0;
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    size_t required = 0;
+    krb5_octet *bp;
+    size_t remain;
+
+    bp = *buffer;
+    remain = *lenremain;
+
+    if (pacctx->pac != NULL) {
+	mspac_size(kcontext, context, plugin_context,
+		   request_context, &required);
+
+	if (required <= remain) {
+	    krb5_ser_pack_int32((krb5_int32)pacctx->pac->data.length,
+				&bp, &remain);
+	    krb5_ser_pack_bytes((krb5_octet *)pacctx->pac->data.data,
+				(size_t)pacctx->pac->data.length,
+				&bp, &remain);
+	    krb5_ser_pack_int32((krb5_int32)pacctx->pac->verified,
+				&bp, &remain);
+	} else {
+	    code = ENOMEM;
+	}
+    } else {
+	krb5_ser_pack_int32(0, &bp, &remain); /* length */
+	krb5_ser_pack_int32(0, &bp, &remain); /* verified */
+    }
+
+    *buffer = bp;
+    *lenremain = remain;
+
+    return code;
+}
+
+static krb5_error_code
+mspac_internalize(krb5_context kcontext,
+		  krb5_authdata_context context,
+		  void *plugin_context,
+		  void *request_context,
+		  krb5_octet **buffer,
+		  size_t *lenremain)
+{
+    struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    krb5_error_code code;
+    krb5_int32 ibuf;
+    krb5_octet *bp;
+    size_t remain;
+    krb5_pac pac = NULL;
+
+    bp = *buffer;
+    remain = *lenremain;
+
+    /* length */
+    code = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (code != 0)
+	return code;
+
+    if (ibuf != 0) {
+	code = krb5_pac_parse(kcontext, bp, ibuf, &pac);
+	if (code != 0)
+	    return code;
+
+	bp += ibuf;
+	remain -= ibuf;
+    }
+
+    /* verified */
+    code = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    if (code != 0) {
+	krb5_pac_free(kcontext, pac);
+	return code;
+    }
+
+    if (pac != NULL) {
+	pac->verified = (ibuf != 0);
+    }
+
+    if (pacctx->pac != NULL) {
+	krb5_pac_free(kcontext, pacctx->pac);
+    }
+
+    pacctx->pac = pac;
+
+    *buffer = bp;
+    *lenremain = remain;
+
+    return 0;
+}
+
+static krb5_error_code
+mspac_copy(krb5_context kcontext,
+	   krb5_authdata_context context,
+	   void *plugin_context,
+	   void *request_context,
+	   void *dst_plugin_context,
+	   void *dst_request_context)
+{
+    struct mspac_context *srcctx = (struct mspac_context *)request_context;
+    struct mspac_context *dstctx = (struct mspac_context *)dst_request_context;
+    krb5_error_code code = 0;
+
+    assert(dstctx != NULL);
+    assert(dstctx->pac == NULL);
+
+    if (srcctx->pac != NULL)
+	code = k5_pac_copy(kcontext, srcctx->pac, &dstctx->pac);
+
+    return code;
+}
+
+static krb5_authdatatype mspac_ad_types[] = { KRB5_AUTHDATA_WIN2K_PAC, 0 };
+
+krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable = {
+    "mspac",
+    mspac_ad_types,
+    mspac_init,
+    mspac_fini,
+    mspac_flags,
+    mspac_request_init,
+    mspac_request_fini,
+    mspac_get_attribute_types,
+    mspac_get_attribute,
+    mspac_set_attribute,
+    NULL, /* delete_attribute_proc */
+    mspac_export_authdata,
+    mspac_import_authdata,
+    mspac_export_internal,
+    mspac_free_internal,
+    mspac_verify,
+    mspac_size,
+    mspac_externalize,
+    mspac_internalize,
+    mspac_copy
+};
 

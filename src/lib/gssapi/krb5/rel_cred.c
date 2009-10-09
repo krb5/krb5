@@ -71,8 +71,8 @@ krb5_gss_release_cred(minor_status, cred_handle)
         code3 = krb5_rc_close(context, cred->rcache);
     else
         code3 = 0;
-    if (cred->princ)
-        krb5_free_principal(context, cred->princ);
+    if (cred->name)
+        kg_release_name(context, 0, &cred->name);
 
     if (cred->req_enctypes)
         free(cred->req_enctypes);
