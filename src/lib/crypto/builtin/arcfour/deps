@@ -8,10 +8,11 @@ arcfour.so arcfour.po $(OUTPRE)arcfour.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/arcfour/arcfour-int.h $(srcdir)/../../builtin/arcfour/arcfour.c \
-  $(srcdir)/../../builtin/arcfour/arcfour.h $(srcdir)/../../krb/hash_provider/hash_provider.h
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/arcfour/arcfour-int.h \
+  $(srcdir)/../../builtin/arcfour/arcfour.c $(srcdir)/../../builtin/arcfour/arcfour.h \
+  $(srcdir)/../hash_provider/hash_provider.h
 arcfour_aead.so arcfour_aead.po $(OUTPRE)arcfour_aead.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -19,11 +20,12 @@ arcfour_aead.so arcfour_aead.po $(OUTPRE)arcfour_aead.$(OBJEXT): \
   $(SRCTOP)/include/k5-gmt_mktime.h $(SRCTOP)/include/k5-int-pkinit.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/arcfour/arcfour-int.h \
-  $(srcdir)/../../builtin/arcfour/arcfour.h $(srcdir)/../../builtin/arcfour/arcfour_aead.c \
-  $(srcdir)/../../krb/aead.h $(srcdir)/../../krb/cksumtypes.h
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(srcdir)/../../builtin/arcfour/arcfour-int.h $(srcdir)/../../builtin/arcfour/arcfour.h \
+  $(srcdir)/../../builtin/arcfour/arcfour_aead.c $(srcdir)/../../krb/aead.h \
+  $(srcdir)/../../krb/cksumtypes.h
 arcfour_s2k.so arcfour_s2k.po $(OUTPRE)arcfour_s2k.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -32,7 +34,8 @@ arcfour_s2k.so arcfour_s2k.po $(OUTPRE)arcfour_s2k.$(OBJEXT): \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-utf8.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/arcfour/arcfour-int.h $(srcdir)/../../builtin/arcfour/arcfour.h \
-  $(srcdir)/../../builtin/arcfour/arcfour_s2k.c $(srcdir)/../md4/rsa-md4.h
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/arcfour/arcfour-int.h \
+  $(srcdir)/../../builtin/arcfour/arcfour.h $(srcdir)/../../builtin/arcfour/arcfour_s2k.c \
+  $(srcdir)/../../builtin/md4/rsa-md4.h

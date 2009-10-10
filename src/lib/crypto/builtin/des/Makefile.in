@@ -9,6 +9,7 @@ DEFS=
 ##DOS##PREFIXDIR=des
 ##DOS##OBJFILE=..\$(OUTPRE)des.lst
 
+RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -57,9 +58,21 @@ SRCS=	$(srcdir)/../../$(CIMPL)/afsstring2key.c	\
 	$(srcdir)/../../$(CIMPL)/weak_key.c	\
 	$(srcdir)/../../$(CIMPL)/string2key.c
 
+EXTRADEPSRCS = $(SRCDIR)destest.c
+
 ##DOS##LIBOBJS = $(OBJS)
 
+TOBJS = $(OUTPRE)key_sched.$(OBJEXT) $(OUTPRE)f_sched.$(OBJEXT) \
+	$(OUTPRE)f_cbc.$(OBJEXT) $(OUTPRE)f_tables.$(OBJEXT) \
+	$(OUTPRE)f_cksum.$(OBJEXT)
+
+destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS) $(SUPPORT_LIB)
+
 all-unix:: all-libobjs
+
+check-unix:: destest
+	$(RUN_SETUP) $(VALGRIND) ./destest < $(srcdir)/keytest.data
 
 includes:: depend
 
@@ -67,7 +80,8 @@ depend:: $(SRCS)
 
 check-windows::
 
-clean:: 
+clean::
+	$(RM) destest.$(OBJEXT) destest$(EXEEXT)
 
 clean-unix:: clean-libobjs
 

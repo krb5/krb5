@@ -18,7 +18,7 @@ aes_s2k.so aes_s2k.po $(OUTPRE)aes_s2k.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/aes/aes_s2k.c $(srcdir)/../../builtin/aes/aes_s2k.h \
-  $(srcdir)/../../krb/dk/dk.h
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/aes/aes_s2k.c \
+  $(srcdir)/../../builtin/aes/aes_s2k.h $(srcdir)/../../krb/dk/dk.h
