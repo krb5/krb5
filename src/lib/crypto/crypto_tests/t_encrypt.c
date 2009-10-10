@@ -83,7 +83,6 @@ main ()
   int i;
   size_t len;
   krb5_enc_data enc_out, enc_out2;
-  krb5_error_code retval;
   krb5_keyblock *key;
 
   memset(iov, 0, sizeof(iov));
@@ -102,7 +101,9 @@ main ()
   if (out.data == NULL || out2.data == NULL
       || check.data == NULL || check2.data == NULL)
       abort();
+  out.magic = KV5M_DATA;
   out.length = 2048;
+  out2.magic = KV5M_DATA;
   out2.length = 2048;
   check.length = 2048;
   check2.length = 2048;
@@ -128,6 +129,7 @@ main ()
 	/* We support iov/aead*/
 	int j, pos;
 	krb5_data signdata;
+	signdata.magic = KV5M_DATA;
 	signdata.data = (char *) "This should be signed";
 	signdata.length = strlen(signdata.data);
 	iov[0].flags= KRB5_CRYPTO_TYPE_STREAM;
@@ -204,6 +206,7 @@ main ()
 	krb5_c_decrypt (context, key, 9, 0, &enc_out, &check));
   test ("Comparing", compare_results (&in, &check));
 
+  krb5_free_keyblock (context, key);
   free(out.data);
   free(out2.data);
   free(check.data);
