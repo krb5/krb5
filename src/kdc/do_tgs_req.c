@@ -103,7 +103,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime=0;
     krb5_keyblock session_key;
-    krb5_timestamp until, rtime;
+    krb5_timestamp rtime;
     krb5_keyblock *reply_key = NULL;
     krb5_keyblock *mkey_ptr;
     krb5_key_data  *server_key;
@@ -533,20 +533,27 @@ tgt_again:
             min(header_ticket->enc_part2->times.renew_till,
                 kdc_time + old_life);
     } else {
+	krb5_timestamp life;
+
         /* not a renew request */
         enc_tkt_reply.times.starttime = kdc_time;
-        until = (request->till == 0) ? kdc_infinity : request->till;
-        enc_tkt_reply.times.endtime =
-            min(until, min(enc_tkt_reply.times.starttime + server.max_life,
-               min(enc_tkt_reply.times.starttime + max_life_for_realm,
-                   header_enc_tkt->times.endtime)));
+
+	life = header_enc_tkt->times.endtime - enc_tkt_reply.times.starttime;
+	if (client.max_life)
+	    life = min(life, client.max_life);
+	if (server.max_life)
+	    life = min(life, server.max_life);
+	if (max_life_for_realm)
+	    life = min(life, max_life_for_realm);
+	enc_tkt_reply.times.endtime = enc_tkt_reply.times.starttime + life;
+
         if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
             (enc_tkt_reply.times.endtime < request->till) &&
             isflagset(header_enc_tkt->flags, TKT_FLG_RENEWABLE)) {
             setflag(request->kdc_options, KDC_OPT_RENEWABLE);
             request->rtime =
                 min(request->till, header_enc_tkt->times.renew_till);
-        }
+	}
     }
     rtime = (request->rtime == 0) ? kdc_infinity : request->rtime;
 

@@ -1457,6 +1457,12 @@ krb5_dbe_find_act_mkey(krb5_context         context,
     krb5_timestamp	now;
     krb5_boolean	found = FALSE;
 
+    if (act_mkey_list == NULL) {
+	*act_kvno = 0;
+	*act_mkey = NULL;
+	return 0;
+    }
+
     if ((retval = krb5_timeofday(context, &now)))
         return (retval);
 
