@@ -567,7 +567,7 @@ kh_unmarshal_Principal(krb5_context context,
 {
     krb5_error_code code;
     krb5_principal kprinc;
-    size_t i;
+    unsigned int i;
 
     kprinc = calloc(1, sizeof(*kprinc));
     if (kprinc == NULL)
@@ -717,12 +717,76 @@ kh_unmarshal_Key(krb5_context context,
 }
 
 static krb5_error_code
+kh_unmarshal_HDB_extension_last_pw_change(krb5_context context,
+                                          HDB_extension *hext,
+                                          krb5_db_entry *kentry)
+{
+    return krb5_dbe_update_last_pwd_change(context, kentry,
+                                           hext->data.u.last_pw_change);
+}
+
+typedef krb5_error_code (*kh_hdb_marshall_extension_fn)(krb5_context,
+                                                        HDB_extension *,
+                                                        krb5_db_entry *);
+
+static kh_hdb_marshall_extension_fn kh_hdb_extension_vtable[] = {
+
+    NULL,           /* choice_HDB_extension_data_asn1_ellipsis */
+    NULL,           /* choice_HDB_extension_data_pkinit_acl */
+    NULL,           /* choice_HDB_extension_data_pkinit_cert_hash */
+    NULL,           /* choice_HDB_extension_data_allowed_to_delegate_to */
+    NULL,           /* choice_HDB_extension_data_lm_owf */
+    NULL,           /* choice_HDB_extension_data_password */
+    NULL,           /* choice_HDB_extension_data_aliases */
+    kh_unmarshal_HDB_extension_last_pw_change
+};
+
+static krb5_error_code
+kh_unmarshal_HDB_extension(krb5_context context,
+                           HDB_extension *hext,
+                           krb5_db_entry *kentry)
+{
+    static const size_t nexts =
+        sizeof(kh_hdb_extension_vtable) / sizeof(kh_hdb_extension_vtable[0]);
+    kh_hdb_marshall_extension_fn marshall = NULL;
+    krb5_error_code code;
+
+    if (hext->data.element < nexts)
+        marshall = kh_hdb_extension_vtable[hext->data.element];
+
+    if (marshall == NULL && hext->mandatory)
+        return KRB5_KDB_DBTYPE_NOSUP;
+
+    code = (*marshall)(context, hext, kentry);
+
+    return code;
+}
+
+
+static krb5_error_code
+kh_unmarshal_HDB_extensions(krb5_context context,
+                            HDB_extensions *hexts,
+                            krb5_db_entry *kentry)
+{
+    unsigned int i;
+    krb5_error_code code = 0;
+
+    for (i = 0; i < hexts->len; i++) {
+        code = kh_unmarshal_HDB_extension(context, &hexts->val[i], kentry);
+        if (code != 0)
+            break;
+    }
+
+    return code;
+}
+
+static krb5_error_code
 kh_unmarshal_hdb_entry(krb5_context context,
                        const hdb_entry *hentry,
                        krb5_db_entry *kentry)
 {
     krb5_error_code code;
-    size_t i;
+    unsigned int i;
 
     memset(kentry, 0, sizeof(*kentry));
 
@@ -757,7 +821,9 @@ kh_unmarshal_hdb_entry(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    /* XXX other tldata */
+    code = kh_unmarshal_HDB_extensions(context, hentry->extensions, kentry);
+    if (code != 0)
+        goto cleanup;
 
     kentry->key_data = calloc(hentry->keys.len, sizeof(krb5_key_data));
     if (kentry->key_data == NULL) {
