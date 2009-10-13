@@ -1421,10 +1421,8 @@ krb5_get_init_creds(krb5_context context,
 		}
 		preauth_to_use = out_padata;
 		out_padata = NULL;
-		if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED) {
-		    krb5_free_error(context, err_reply);
-		    err_reply = NULL;
-		}
+		krb5_free_error(context, err_reply);
+		err_reply = NULL;
 		ret = sort_krb5_padata_sequence(context,
 						&request.server->realm,
 						preauth_to_use);
