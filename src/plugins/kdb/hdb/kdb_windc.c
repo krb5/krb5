@@ -518,13 +518,18 @@ kh_hdb_windc_init(krb5_context context,
     if (code != 0)
         return code;
 
+    code = KRB5_KDB_DBTYPE_NOSUP;
+
     for (i = 0; tables[i] != NULL; i++) {
         krb5plugin_windc_ftable *windc = tables[i];
 
         if (windc->minor_version < KRB5_WINDC_PLUGING_MINOR)
             continue;
 
-        (*windc->init)(kh->hcontext, &kh->windc_ctx);
+        code = kh_map_error((*windc->init)(kh->hcontext, &kh->windc_ctx));
+        if (code != 0)
+            continue;
+
         kh->windc = windc;
         break;
     }
@@ -532,6 +537,6 @@ kh_hdb_windc_init(krb5_context context,
     if (tables != NULL)
         krb5int_free_plugin_dir_data(tables);
 
-    return 0;
+    return code;
 }
 
