@@ -49,9 +49,6 @@
 
 struct hdb_entry_ex;
 
-struct _KDC_REQ;
-typedef struct _KDC_REQ KDC_REQ;
-
 struct _heim_pac_data;
 typedef struct _heim_pac_data *heim_pac;
 

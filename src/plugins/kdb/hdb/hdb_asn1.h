@@ -1,3 +1,35 @@
+/*
+ * Copyright (c) 1997 - 2007 Kungliga Tekniska Högskolan
+ * (Royal Institute of Technology, Stockholm, Sweden).
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the Institute nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
 /* Generated from ./hdb.asn1 */
 /* Do not edit */
 
@@ -92,12 +124,77 @@ typedef struct Principal {
   Realm realm;
 } Principal;
 
+typedef struct KDCOptions {
+  unsigned int reserved:1;
+  unsigned int forwardable:1;
+  unsigned int forwarded:1;
+  unsigned int proxiable:1;
+  unsigned int proxy:1;
+  unsigned int allow_postdate:1;
+  unsigned int postdated:1;
+  unsigned int unused7:1;
+  unsigned int renewable:1;
+  unsigned int unused9:1;
+  unsigned int unused10:1;
+  unsigned int unused11:1;
+  unsigned int request_anonymous:1;
+  unsigned int canonicalize:1;
+  unsigned int constrained_delegation:1;
+  unsigned int disable_transited_check:1;
+  unsigned int renewable_ok:1;
+  unsigned int enc_tkt_in_skey:1;
+  unsigned int renew:1;
+  unsigned int validate:1;
+} KDCOptions;
+
+typedef struct HostAddress {
+  krb5_ui_4 addr_type;
+  heim_octet_string address;
+} HostAddress;
+
+typedef struct HostAddresses {
+  unsigned int len;
+  HostAddress *val;
+} HostAddresses;
+
 typedef time_t KerberosTime;
 
+typedef krb5_enctype ENCTYPE;
+
 typedef struct EncryptionKey {
-  krb5_ui_4 keytype;
+  ENCTYPE keytype;
   heim_octet_string keyvalue;
 } EncryptionKey;
+
+typedef struct _METHOD_DATA *METHOD_DATA;
+
+typedef struct KDC_REQ_BODY {
+  KDCOptions kdc_options;
+  PrincipalName *cname;
+  Realm realm;
+  PrincipalName *sname;
+  KerberosTime *from;
+  KerberosTime *till;
+  KerberosTime *rtime;
+  krb5_ui_4 nonce;
+  struct  {
+    unsigned int len;
+    ENCTYPE *val;
+  } etype;
+  HostAddresses *addresses;
+  krb5_pointer *enc_authorization_data;
+  struct  {
+    unsigned int len;
+    krb5_pointer *val;
+  } *additional_tickets;
+} KDC_REQ_BODY;
+
+typedef struct KDC_REQ {
+  krb5_ui_4 pvno;
+  krb5_ui_4 msg_type;
+  METHOD_DATA *padata;
+  KDC_REQ_BODY req_body;
+} KDC_REQ;
 
 enum { HDB_DB_FORMAT = 2 };
 

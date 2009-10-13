@@ -210,6 +210,7 @@ kh_db_context_init(krb5_context context,
     GET_PLUGIN_FUNC(libkrb5, "krb5_init_context",     heim_init_context);
     GET_PLUGIN_FUNC(libkrb5, "krb5_free_context",     heim_free_context);
     GET_PLUGIN_FUNC(libkrb5, "krb5_free_principal",   heim_free_principal);
+    GET_PLUGIN_FUNC(libkrb5, "krb5_free_addresses",   heim_free_addresses);
     GET_PLUGIN_FUNC(libkrb5, "krb5_pac_free",         heim_pac_free);
     GET_PLUGIN_FUNC(libkrb5, "krb5_pac_parse",        heim_pac_parse);
     GET_PLUGIN_FUNC(libkrb5, "krb5_pac_verify",       heim_pac_verify);
@@ -494,6 +495,16 @@ kh_free_Principal(krb5_context context,
 
     if (principal != NULL)
         (*kh->heim_free_principal)(kh->hcontext, principal);
+}
+
+void
+kh_free_HostAddresses(krb5_context context,
+                      HostAddresses *addrs)
+{
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+
+    if (addrs != NULL)
+        (*kh->heim_free_addresses)(kh->hcontext, addrs);
 }
 
 static krb5_error_code
@@ -1245,6 +1256,7 @@ static struct _kh_invoke_fn {
     krb5_error_code (*function)(krb5_context, unsigned int,
                                 const krb5_data *, krb5_data *);
 } kh_invoke_vtable[] = {
+    { KRB5_KDB_METHOD_CHECK_POLICY_AS,              kh_db_check_policy_as },
     { KRB5_KDB_METHOD_SIGN_AUTH_DATA,               kh_db_sign_auth_data },
     { KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE,    kh_db_check_allowed_to_delegate },
 };

@@ -15,6 +15,7 @@ typedef struct _kh_db_context {
     krb5_error_code (*heim_init_context)(heim_context *);
     void (*heim_free_context)(heim_context);
     void (*heim_free_principal)(heim_context, Principal *);
+    krb5_error_code (*heim_free_addresses)(heim_context, HostAddresses *);
     void (*heim_pac_free)(heim_context, heim_pac);
     krb5_error_code (*heim_pac_parse)(heim_context, const void *,
                                       size_t, heim_pac *);
@@ -52,6 +53,12 @@ kh_db_sign_auth_data(krb5_context context,
                      krb5_data *rep_data);
 
 krb5_error_code
+kh_db_check_policy_as(krb5_context context,
+                      unsigned int method,
+                      const krb5_data *req_data,
+                      krb5_data *rep_data);
+
+krb5_error_code
 kh_map_error(krb5_error_code code);
 
 krb5_error_code
@@ -62,6 +69,10 @@ kh_marshal_Principal(krb5_context context,
 void
 kh_free_Principal(krb5_context context,
                   Principal *principal);
+
+void
+kh_free_HostAddresses(krb5_context context,
+                      HostAddresses *addrs);
 
 #endif /* KRB5_KDB_HDB_H */
 

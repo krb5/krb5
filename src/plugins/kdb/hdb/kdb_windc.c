@@ -76,6 +76,23 @@ kh_windc_pac_verify(krb5_context context,
                                                  pac));
 }
 
+static krb5_error_code
+kh_windc_client_access(krb5_context context,
+                       kh_db_context *kh,
+                       struct hdb_entry_ex *client,
+                       KDC_REQ *req,
+                       heim_octet_string *e_data)
+{
+    if (kh->windc == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP;
+
+    return kh_map_error((*kh->windc->client_access)(kh->windc_ctx,
+                                                    kh->hcontext,
+                                                    client,
+                                                    req,
+                                                    e_data));
+}
+
 static void
 kh_pac_free(krb5_context context, heim_pac pac)
 {
@@ -291,6 +308,180 @@ cleanup:
     if (pac_data.data != NULL)
         free(pac_data.data);
     krb5_free_authdata(context, authdata);
+
+    return code;
+}
+
+static krb5_error_code
+kh_marshal_KDCOptions(krb5_context context,
+                      krb5_flags koptions,
+                      KDCOptions *hoptions)
+{
+    memset(hoptions, 0, sizeof(*hoptions));
+
+    if (koptions & KDC_OPT_FORWARDABLE)
+        hoptions->forwardable = 1;
+    if (koptions & KDC_OPT_FORWARDED)
+        hoptions->forwarded = 1;
+    if (koptions & KDC_OPT_PROXIABLE)
+        hoptions->proxiable = 1;
+    if (koptions & KDC_OPT_PROXY)
+        hoptions->proxy = 1;
+    if (koptions & KDC_OPT_ALLOW_POSTDATE)
+        hoptions->allow_postdate = 1;
+    if (koptions & KDC_OPT_POSTDATED)
+        hoptions->postdated = 1;
+    if (koptions & KDC_OPT_RENEWABLE)
+        hoptions->renewable = 1;
+    if (koptions & KDC_OPT_REQUEST_ANONYMOUS)
+        hoptions->request_anonymous = 1;
+    if (koptions & KDC_OPT_CANONICALIZE)
+        hoptions->canonicalize = 1;
+    if (koptions & KDC_OPT_DISABLE_TRANSITED_CHECK)
+        hoptions->disable_transited_check = 1;
+    if (koptions & KDC_OPT_RENEWABLE_OK)
+        hoptions->renewable_ok = 1;
+    if (koptions & KDC_OPT_ENC_TKT_IN_SKEY)
+        hoptions->enc_tkt_in_skey = 1;
+    if (koptions & KDC_OPT_RENEW)
+        hoptions->renew = 1;
+    if (koptions & KDC_OPT_VALIDATE)
+        hoptions->validate = 1;
+
+    return 0;
+}
+
+static krb5_error_code
+kh_marshall_HostAddress(krb5_context context,
+                        krb5_address *kaddress,
+                        HostAddress *haddress)
+{
+    haddress->addr_type = kaddress->addrtype;
+    haddress->address.data = malloc(kaddress->length);
+    if (haddress->address.data == NULL)
+        return ENOMEM;
+
+    memcpy(haddress->address.data, kaddress->contents, kaddress->length);
+    haddress->address.length = kaddress->length;
+
+    return 0;
+}
+
+static krb5_error_code
+kh_marshall_HostAddresses(krb5_context context,
+                          krb5_address **kaddresses,
+                          HostAddresses **phaddresses)
+{
+    krb5_error_code code;
+    HostAddresses *haddresses;
+    int i;
+
+    *phaddresses = NULL;
+
+    if (kaddresses == NULL)
+        return 0;
+
+    for (i = 0; kaddresses[i] != NULL; i++)
+        ;
+
+    haddresses = calloc(1, sizeof(*haddresses));
+    if (haddresses == NULL)
+        return ENOMEM;
+
+    haddresses->len = 0;
+    haddresses->val = (HostAddress *)calloc(i, sizeof(HostAddress));
+    if (haddresses->val == NULL)
+        return ENOMEM;
+
+    for (i = 0; kaddresses[i] != NULL; i++) {
+        code = kh_marshall_HostAddress(context,
+                                       kaddresses[i],
+                                       &haddresses->val[i]);
+        if (code != 0)
+            break;
+
+        haddresses->len++;
+    }
+
+    if (code != 0) {
+        free(haddresses->val);
+        free(haddresses);
+    } else {
+        *phaddresses = haddresses;
+    }
+
+    return code;
+}
+
+krb5_error_code
+kh_db_check_policy_as(krb5_context context,
+                      unsigned int method,
+                      const krb5_data *req_data,
+                      krb5_data *rep_data)
+{
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    kdb_audit_as_req *req = (kdb_audit_as_req *)req_data->data;
+    krb5_error_code code;
+    heim_octet_string e_data;
+    krb5_kdc_req *kkdcreq = req->request;
+    KDC_REQ hkdcreq;
+    Principal *client = NULL;
+    Principal *server = NULL;
+    time_t from, till, rtime;
+
+    memset(&hkdcreq, 0, sizeof(hkdcreq));
+    e_data.data = NULL;
+
+    hkdcreq.pvno = KRB5_PVNO;
+    hkdcreq.msg_type = kkdcreq->msg_type;
+    hkdcreq.padata = NULL; /* FIXME */
+    code = kh_marshal_KDCOptions(context,
+                                 kkdcreq->kdc_options,
+                                 &hkdcreq.req_body.kdc_options);
+    if (code != 0)
+        goto cleanup;
+
+    code = kh_marshal_Principal(context, kkdcreq->client, &client);
+    if (code != 0)
+        goto cleanup;
+
+    code = kh_marshal_Principal(context, kkdcreq->server, &server);
+    if (code != 0)
+        goto cleanup;
+
+    hkdcreq.req_body.cname = &client->name;
+    hkdcreq.req_body.realm = server->realm;
+    hkdcreq.req_body.sname = &server->name;
+
+    from  = kkdcreq->from;  hkdcreq.req_body.from = &from;
+    till  = kkdcreq->till;  hkdcreq.req_body.till = &till;
+    rtime = kkdcreq->rtime; hkdcreq.req_body.rtime = &rtime;
+
+    hkdcreq.req_body.nonce = kkdcreq->nonce;
+    hkdcreq.req_body.etype.len = kkdcreq->nktypes;
+    hkdcreq.req_body.etype.val = kkdcreq->ktype;
+
+    code = kh_marshall_HostAddresses(context,
+                                     kkdcreq->addresses,
+                                     &hkdcreq.req_body.addresses);
+    if (code != 0)
+        goto cleanup;
+
+    /* hkdcreq.req_body.enc_authorization_data */
+    /* hkdcreq.req_body.additional_tickets */
+
+    code = kh_windc_client_access(context, kh,
+                                  KH_DB_ENTRY(req->client),
+                                  &hkdcreq, &e_data);
+    if (code != 0)
+        goto cleanup;
+
+cleanup:
+    kh_free_HostAddresses(context, hkdcreq.req_body.addresses);
+    kh_free_Principal(context, client);
+    kh_free_Principal(context, server);
+    if (e_data.data != NULL)
+        free(e_data.data);
 
     return code;
 }
