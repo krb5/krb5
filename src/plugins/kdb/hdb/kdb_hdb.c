@@ -38,7 +38,11 @@
 #include "kdb5.h"
 #include "kdb_hdb.h"
 
-#define KH_DB_CONTEXT(_context)    ((kh_db_context *)(_context)->dal_handle->db_context)
+#define KH_DB_CONTEXT(_context)    \
+    ((kh_db_context *)(_context)->dal_handle->db_context)
+
+#define KH_DB_ENTRY(_entry)         \
+    ((hdb_entry_ex *)(_entry)->e_data)
 
 static krb5_error_code
 kh_init(void)
@@ -131,6 +135,9 @@ kh_db_context_init(krb5_context context,
     char *libkrb5 = NULL;
     struct errinfo errinfo;
 
+    if (libdir == NULL)
+        return KRB5_KDB_DBTYPE_INIT; /* XXX */
+
     kh = calloc(1, sizeof(*kh));
     if (kh == NULL)
         goto cleanup;
@@ -138,9 +145,6 @@ kh_db_context_init(krb5_context context,
     code = krb5int_mutex_alloc(&kh->lock);
     if (code != 0)
         goto cleanup;
-
-    if (libdir == NULL)
-        libdir = "/usr/local/heimdal";
 
     if (asprintf(&libkrb5, "%s/libkrb5%s", libdir, SHLIBEXT) < 0) {
         code = ENOMEM;
@@ -211,7 +215,7 @@ kh_init_module(krb5_context context,
                               KDB_MODULE_SECTION,
                               conf_section,
                               "heimdal_libdir",
-                              "/usr/local/heimdal/lib",
+                              NULL,
                               &libdir);
     if (code != 0)
         goto cleanup;
@@ -256,7 +260,7 @@ kh_db_create(krb5_context context,
              char *conf_section,
              char **db_args)
 {
-    return ENOSYS;
+    return KRB5_KDB_DBTYPE_NOSUP;
 }
 
 static krb5_error_code
@@ -264,7 +268,7 @@ kh_db_destroy(krb5_context context,
               char *conf_section,
               char **db_args)
 {
-    return ENOSYS;
+    return KRB5_KDB_DBTYPE_NOSUP;
 }
 
 static krb5_error_code
@@ -272,7 +276,7 @@ kh_db_get_age(krb5_context context,
               char *db_name,
               time_t *age)
 {
-    return ENOSYS;
+    return KRB5_KDB_DBTYPE_NOSUP;
 }
 
 static krb5_error_code
@@ -280,7 +284,7 @@ kh_db_set_option(krb5_context context,
                   int option,
                   void *value)
 {
-    return ENOSYS;
+    return KRB5_KDB_DBTYPE_NOSUP;
 }
 
 static krb5_error_code
@@ -368,31 +372,37 @@ kh_hdb_free_entry(krb5_context context,
 
 static void
 kh_kdb_free_entry(krb5_context context,
+                  kh_db_context *kh,
                   krb5_db_entry *entry)
 {
-    krb5_tl_data        *tl_data_next=NULL;
-    krb5_tl_data        *tl_data=NULL;
+    krb5_tl_data *tl_data_next = NULL;
+    krb5_tl_data *tl_data = NULL;
     int i, j;
 
-    if (entry->e_data)
+    if (entry->e_data != NULL) {
+        assert(entry->e_length == sizeof(hdb_entry_ex));
+        kh_hdb_free_entry(context, kh, KH_DB_ENTRY(entry));
         free(entry->e_data);
-    if (entry->princ)
-        krb5_free_principal(context, entry->princ);
+    }
+
+    krb5_free_principal(context, entry->princ);
+
     for (tl_data = entry->tl_data; tl_data; tl_data = tl_data_next) {
         tl_data_next = tl_data->tl_data_next;
-        if (tl_data->tl_data_contents)
+        if (tl_data->tl_data_contents != NULL)
             free(tl_data->tl_data_contents);
         free(tl_data);
     }
-    if (entry->key_data) {
+
+    if (entry->key_data != NULL) {
         for (i = 0; i < entry->n_key_data; i++) {
             for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
-                if (entry->key_data[i].key_data_length[j]) {
+                if (entry->key_data[i].key_data_length[j] != 0) {
                     if (entry->key_data[i].key_data_contents[j]) {
                         memset(entry->key_data[i].key_data_contents[j],
                                0,
                                (unsigned) entry->key_data[i].key_data_length[j]);
-                        free (entry->key_data[i].key_data_contents[j]);
+                        free(entry->key_data[i].key_data_contents[j]);
                     }
                 }
                 entry->key_data[i].key_data_contents[j] = NULL;
@@ -402,8 +412,8 @@ kh_kdb_free_entry(krb5_context context,
         }
         free(entry->key_data);
     }
+
     memset(entry, 0, sizeof(*entry));
-    return;
 }
 
 static void
@@ -716,6 +726,9 @@ kh_unmarshal_Key(krb5_context context,
     return 0;
 }
 
+/*
+ * Extension marshallers
+ */
 static krb5_error_code
 kh_unmarshal_HDB_extension_last_pw_change(krb5_context context,
                                           HDB_extension *hext,
@@ -749,17 +762,14 @@ kh_unmarshal_HDB_extension(krb5_context context,
     static const size_t nexts =
         sizeof(kh_hdb_extension_vtable) / sizeof(kh_hdb_extension_vtable[0]);
     kh_hdb_marshall_extension_fn marshall = NULL;
-    krb5_error_code code;
 
     if (hext->data.element < nexts)
         marshall = kh_hdb_extension_vtable[hext->data.element];
 
-    if (marshall == NULL && hext->mandatory)
-        return KRB5_KDB_DBTYPE_NOSUP;
+    if (marshall == NULL)
+        return hext->mandatory ? KRB5_KDB_DBTYPE_NOSUP : 0;
 
-    code = (*marshall)(context, hext, kentry);
-
-    return code;
+    return (*marshall)(context, hext, kentry);
 }
 
 
@@ -785,6 +795,7 @@ kh_unmarshal_hdb_entry(krb5_context context,
                        const hdb_entry *hentry,
                        krb5_db_entry *kentry)
 {
+    kh_db_context *kh = KH_DB_CONTEXT(context);
     krb5_error_code code;
     unsigned int i;
 
@@ -843,7 +854,7 @@ kh_unmarshal_hdb_entry(krb5_context context,
 
 cleanup:
     if (code != 0)
-        kh_kdb_free_entry(context, kentry);
+        kh_kdb_free_entry(context, kh, kentry);
 
     return code;
 }
@@ -852,14 +863,14 @@ static krb5_error_code
 kh_db_get_principal(krb5_context context,
                     krb5_const_principal princ,
                     unsigned int kflags,
-                    krb5_db_entry *entry,
+                    krb5_db_entry *kentry,
                     int *nentries,
                     krb5_boolean *more)
 {
     krb5_error_code code;
     kh_db_context *kh = KH_DB_CONTEXT(context);
     Principal *hprinc = NULL;
-    hdb_entry_ex ent;
+    hdb_entry_ex *hentry = NULL;
     unsigned int hflags = 0;
 
     *nentries = 0;
@@ -871,8 +882,6 @@ kh_db_get_principal(krb5_context context,
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
         return code;
-
-    memset(&ent, 0, sizeof(ent));
 
     code = kh_marshall_Principal(context, princ, &hprinc);
     if (code != 0)
@@ -892,20 +901,32 @@ kh_db_get_principal(krb5_context context,
     else
         hflags |= HDB_F_GET_ANY;
 
-    code = kh_hdb_fetch(context, kh, hprinc, hflags, &ent);
+    hentry = calloc(1, sizeof(*hentry));
+    if (hentry == NULL) {
+        code = ENOMEM;
+        goto cleanup;
+    }
+
+    code = kh_hdb_fetch(context, kh, hprinc, hflags, hentry);
     if (code != 0) {
         kh_hdb_close(context, kh);
         goto cleanup;
     }
 
-    if (kh_unmarshal_hdb_entry(context, &ent.entry, entry) == 0) {
+    if (kh_unmarshal_hdb_entry(context, &hentry->entry, kentry) == 0) {
         *nentries = 1;
+        kentry->e_length = sizeof(*hentry);
+        kentry->e_data = (krb5_octet *)hentry;
+        hentry = NULL;
     }
 
     kh_hdb_close(context, kh);
 
 cleanup:
-    kh_hdb_free_entry(context, kh, &ent);
+    if (hentry != NULL) {
+        kh_hdb_free_entry(context, kh, hentry);
+        free(hentry);
+    }
     kh_free_Principal(context, hprinc);
     k5_mutex_unlock(kh->lock);
 
@@ -917,7 +938,13 @@ kh_db_free_principal(krb5_context context,
                      krb5_db_entry *entry,
                      int count)
 {
-    return ENOSYS;
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    int i;
+
+    for (i = 0; i < count; i++)
+        kh_kdb_free_entry(context, kh, &entry[i]);
+
+    return 0;
 }
 
 static krb5_error_code
@@ -926,7 +953,7 @@ kh_db_put_principal(krb5_context context,
                     int *nentries,
                     char **db_args)
 {
-    return 0;
+    return KRB5_KDB_DBTYPE_NOSUP;
 }
 
 static krb5_error_code
@@ -959,12 +986,13 @@ kh_db_iterate(krb5_context context,
 
         if (kh_unmarshal_hdb_entry(context, &hentry.entry, &kentry) == 0) {
             code = (*func)(func_arg, &kentry);
-            if (code != 0) {
-                kh_kdb_free_entry(context, &kentry);
-                break;
-            }
-            kh_kdb_free_entry(context, &kentry);
+            kh_kdb_free_entry(context, kh, &kentry);
         }
+
+        kh_hdb_free_entry(context, kh, &hentry);
+
+        if (code != 0)
+            break;
 
         code = kh_hdb_nextkey(context, kh, hflags, &hentry);
     }
@@ -1089,6 +1117,116 @@ kh_dbekd_encrypt_key_data(krb5_context context,
     return 0;
 }
 
+/*
+ * Invoke methods
+ */
+static krb5_error_code
+kh_db_sign_auth_data(krb5_context context,
+                     unsigned int method,
+                     const krb5_data *req_data,
+                     krb5_data *rep_data)
+{
+    kdb_sign_auth_data_req *req = (kdb_sign_auth_data_req *)req_data->data;
+    kdb_sign_auth_data_rep *rep = (kdb_sign_auth_data_rep *)rep_data->data;
+    krb5_error_code code;
+
+    code = KRB5_KDB_DBTYPE_NOSUP;
+
+    return code;
+}
+
+static HDB_extension *
+kh_hdb_find_extension(const hdb_entry *entry, unsigned int type)
+{
+    unsigned int i;
+    HDB_extension *ret = NULL;
+
+    if (entry->extensions != NULL) {
+        for (i = 0; i < entry->extensions->len; i++) {
+            if (entry->extensions->val[i].data.element == type) {
+                ret = &entry->extensions->val[i];
+                break;
+            }
+        }
+    }
+
+    return ret;
+}
+
+static krb5_error_code
+kh_db_check_allowed_to_delegate(krb5_context context,
+                                unsigned int method,
+                                const krb5_data *req_data,
+                                krb5_data *rep_data)
+{
+    kdb_check_allowed_to_delegate_req *req;
+    krb5_error_code code;
+    hdb_entry_ex *hentry;
+    HDB_extension *ext;
+    HDB_Ext_Constrained_delegation_acl *acl;
+    unsigned int i;
+
+    req = (kdb_check_allowed_to_delegate_req *)req_data->data;
+    hentry = KH_DB_ENTRY(req->server);
+    ext = kh_hdb_find_extension(&hentry->entry,
+                                choice_HDB_extension_data_allowed_to_delegate_to);
+
+    code = KRB5KDC_ERR_POLICY;
+
+    if (ext != NULL) {
+        acl = &ext->data.u.allowed_to_delegate_to;
+
+        for (i = 0; i < acl->len; i++) {
+            krb5_principal princ;
+
+            if (kh_unmarshal_Principal(context, &acl->val[i], &princ) == 0) {
+                if (krb5_principal_compare(context, req->proxy, princ)) {
+                    code = 0;
+                    krb5_free_principal(context, princ);
+                    break;
+                }
+                krb5_free_principal(context, princ);
+            }
+        }
+    }
+
+    return code;
+}
+
+static struct _kh_invoke_fn {
+    unsigned int method;
+    krb5_error_code (*function)(krb5_context, unsigned int,
+                                const krb5_data *, krb5_data *);
+} kh_invoke_vtable[] = {
+    { KRB5_KDB_METHOD_SIGN_AUTH_DATA,               kh_db_sign_auth_data },
+    { KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE,    kh_db_check_allowed_to_delegate },
+};
+
+static krb5_error_code
+kh_db_invoke(krb5_context context,
+             unsigned int method,
+             const krb5_data *req,
+             krb5_data *rep)
+{
+    size_t i;
+    krb5_error_code code;
+
+    code = KRB5_KDB_DBTYPE_NOSUP;
+
+    for (i = 0;
+         i < sizeof(kh_invoke_vtable) / sizeof(kh_invoke_vtable[0]);
+         i++) {
+        struct _kh_invoke_fn *fn = &kh_invoke_vtable[i];
+
+        if (fn->method == method) {
+            code = (*fn->function)(context, method, req, rep);
+            break;
+        }
+    }
+
+    return code;
+}
+
 kdb_vftabl kdb_function_table = {
     1,
     0,
@@ -1134,6 +1272,6 @@ kdb_vftabl kdb_function_table = {
     NULL,
     kh_dbekd_decrypt_key_data,
     kh_dbekd_encrypt_key_data,
-    NULL,
+    kh_db_invoke,
 };
 

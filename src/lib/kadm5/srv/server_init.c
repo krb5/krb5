@@ -296,7 +296,7 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
     }
 
     ret = kdb_init_hist(handle, handle->params.realm);
-    if (ret != 0 && ret != KADM5_UNK_PRINC) {
+    if (ret != 0 && ret != KADM5_UNK_PRINC && ret != KRB5_KDB_DBTYPE_NOSUP) {
 	 krb5_db_fini(handle->context);
 	 free_db_args(handle);
 	 free(handle);
@@ -304,7 +304,7 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
     }
 
     ret = init_dict(&handle->params);
-    if (ret != 0 && ret != KADM5_UNK_PRINC) {
+    if (ret != 0 && ret != KADM5_UNK_PRINC && ret != KRB5_KDB_DBTYPE_NOSUP) {
 	 krb5_db_fini(handle->context);
 	 krb5_free_principal(handle->context, handle->current_caller);
 	 free_db_args(handle);
