@@ -230,6 +230,7 @@ krb5_error_code
 kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 		    krb5_data *pkt, krb5_ticket **ticket,
 		    krb5_db_entry *krbtgt, int *nprincs,
+		    krb5_keyblock **tgskey,
 		    krb5_keyblock **subkey,
 		    krb5_pa_data **pa_tgs_req)
 {
@@ -243,10 +244,10 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     krb5_auth_context 	  auth_context = NULL;
     krb5_authenticator	* authenticator = NULL;
     krb5_checksum 	* his_cksum = NULL;
-    krb5_keyblock 	* key = NULL;
     krb5_kvno 		  kvno = 0;
 
     *nprincs = 0;
+    *tgskey = NULL;
 
     tmppa = find_pa_data(request->padata, KRB5_PADATA_AP_REQ);
     if (!tmppa)
@@ -289,13 +290,12 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 #endif
 
     if ((retval = kdc_get_server_key(apreq->ticket, 0, foreign_server,
-				     krbtgt, nprincs, &key, &kvno)))
+				     krbtgt, nprincs, tgskey, &kvno)))
 	goto cleanup_auth_context;
     /*
      * We do not use the KDB keytab because other parts of the TGS need the TGT key.
      */
-    retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, key);
-    krb5_free_keyblock(kdc_context, key);
+    retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, *tgskey);
     if (retval) 
 	goto cleanup_auth_context;
 
@@ -411,6 +411,10 @@ cleanup_auth_context:
     krb5_auth_con_free(kdc_context, auth_context);
 
 cleanup:
+    if (retval != 0) {
+	krb5_free_keyblock(kdc_context, *tgskey);
+	*tgskey = NULL;
+    }
     krb5_free_ap_req(kdc_context, apreq);
     return retval;
 }
@@ -1737,6 +1741,7 @@ sign_db_authdata (krb5_context context,
 		  krb5_db_entry *krbtgt,
 		  krb5_keyblock *client_key,
 		  krb5_keyblock *server_key,
+		  krb5_keyblock *krbtgt_key,
 		  krb5_timestamp authtime,
 		  krb5_authdata **tgs_authdata,
 		  krb5_keyblock *session_key,
@@ -1767,6 +1772,7 @@ sign_db_authdata (krb5_context context,
     req.authtime		= authtime;
     req.auth_data		= tgs_authdata;
     req.session_key		= session_key;
+    req.krbtgt_key		= krbtgt_key;
 
     rep.entry			= ad_entry;
     rep.nprincs			= 0;

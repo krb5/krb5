@@ -800,10 +800,11 @@ kh_unmarshal_Key(krb5_context context,
 /*
  * Extension marshalers
  */
+
 static krb5_error_code
-kh_unmarshal_HDB_extension_last_pw_change(krb5_context context,
-                                          HDB_extension *hext,
-                                          krb5_db_entry *kentry)
+kh_unmarshal_HDB_extension_data_last_pw_change(krb5_context context,
+                                               HDB_extension *hext,
+                                               krb5_db_entry *kentry)
 {
     return krb5_dbe_update_last_pwd_change(context, kentry,
                                            hext->data.u.last_pw_change);
@@ -821,8 +822,8 @@ static kh_hdb_marshal_extension_fn kh_hdb_extension_vtable[] = {
     NULL,           /* choice_HDB_extension_data_allowed_to_delegate_to */
     NULL,           /* choice_HDB_extension_data_lm_owf */
     NULL,           /* choice_HDB_extension_data_password */
-    NULL,           /* choice_HDB_extension_data_aliases */
-    kh_unmarshal_HDB_extension_last_pw_change
+    NULL,
+    kh_unmarshal_HDB_extension_data_last_pw_change
 };
 
 static krb5_error_code
@@ -1195,6 +1196,9 @@ kh_dbekd_encrypt_key_data(krb5_context context,
     return 0;
 }
 
+/*
+ * Invoke methods
+ */
 
 static krb5_error_code
 kh_db_check_allowed_to_delegate(krb5_context context,

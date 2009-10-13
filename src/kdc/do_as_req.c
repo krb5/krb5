@@ -582,6 +582,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 			      &server,
 			      &client_keyblock,
 			      &server_keyblock,
+			      &server_keyblock,
 			      req_pkt,
 			      request,
 			      NULL, /* for_user_princ */

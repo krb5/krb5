@@ -66,7 +66,8 @@ krb5_error_code kdc_process_tgs_req
 	           krb5_ticket **,
 		   krb5_db_entry *krbtgt,
 		   int *nprincs,
-	           krb5_keyblock **, krb5_pa_data **pa_tgs_req);
+	           krb5_keyblock **, krb5_keyblock **,
+		   krb5_pa_data **pa_tgs_req);
 
 krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
 				    krb5_boolean match_enctype,
@@ -197,6 +198,7 @@ handle_authdata (krb5_context context,
 		 krb5_db_entry *krbtgt,
 		 krb5_keyblock *client_key,
 		 krb5_keyblock *server_key,
+		 krb5_keyblock *krbtgt_key,
 		 krb5_data *req_pkt,
 		 krb5_kdc_req *request,
 		 krb5_const_principal for_user_princ,
@@ -236,6 +238,7 @@ krb5_error_code sign_db_authdata
 		krb5_db_entry *krbtgt,
 		krb5_keyblock *client_key,
 		krb5_keyblock *server_key,
+		krb5_keyblock *krbtgt_key,
 		krb5_timestamp authtime,
 		krb5_authdata **tgs_authdata,
 		krb5_keyblock *session_key,

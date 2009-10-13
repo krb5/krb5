@@ -137,35 +137,6 @@ kh_pac_sign(krb5_context context,
                                              data));
 }
 
-static krb5_error_code
-kh_find_key(krb5_context context,
-            kh_db_context *kh,
-            krb5_enctype enctype,
-            krb5_db_entry *kentry,
-            EncryptionKey *key)
-{
-    krb5_error_code code = KRB5_KDB_NO_MATCHING_KEY;
-    int i;
-
-    for (i = 0; i < kentry->n_key_data; i++) {
-        krb5_key_data *kd = &kentry->key_data[i];
-
-        if (kd->key_data_type[0] == enctype) {
-            key->keytype         = kd->key_data_type[0];
-            key->keyvalue.data   = kd->key_data_contents[0];
-            key->keyvalue.length = kd->key_data_length[0];
-            code = 0;
-            break;
-        }
-    }
-
-    return code;
-}
-
-/*
- * Invoke methods
- */
-
 krb5_error_code
 kh_db_sign_auth_data(krb5_context context,
                      unsigned int method,
@@ -183,6 +154,9 @@ kh_db_sign_auth_data(krb5_context context,
     Principal *client_hprinc = NULL;
     EncryptionKey server_hkey;
     EncryptionKey privsvr_hkey;
+
+    if (kh->windc == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP; /* short circuit */
 
     memset(rep, 0, sizeof(*rep));
 
@@ -204,15 +178,13 @@ kh_db_sign_auth_data(krb5_context context,
             goto cleanup;
     }
 
-    server_hkey.keytype         = req->server_key->enctype;
-    server_hkey.keyvalue.data   = req->server_key->contents;
-    server_hkey.keyvalue.length = req->server_key->length;
+    server_hkey.keytype          = req->server_key->enctype;
+    server_hkey.keyvalue.data    = req->server_key->contents;
+    server_hkey.keyvalue.length  = req->server_key->length;
 
-    /* XXX this is completely wrong, need to find the TGT enctype */
-    code = kh_find_key(context, kh, req->server_key->enctype,
-                       req->krbtgt, &privsvr_hkey);
-    if (code != 0)
-        goto cleanup;
+    privsvr_hkey.keytype         = req->krbtgt_key->enctype;
+    privsvr_hkey.keyvalue.data   = req->krbtgt_key->contents;
+    privsvr_hkey.keyvalue.length = req->krbtgt_key->length;
 
     if (!is_as_req) {
         /* find the existing PAC, if present */
@@ -263,7 +235,8 @@ kh_db_sign_auth_data(krb5_context context,
             goto cleanup;
 
         code = kh_windc_pac_verify(context, kh, client_hprinc,
-                                   KH_DB_ENTRY(req->client),
+                                   req->client ?
+                                        KH_DB_ENTRY(req->client) : NULL,
                                    KH_DB_ENTRY(req->server),
                                    &hpac);
         if (code != 0)
@@ -273,8 +246,7 @@ kh_db_sign_auth_data(krb5_context context,
         goto cleanup;
     }
 
-    code = kh_pac_sign(context, hpac, req->authtime,
-                       KH_DB_ENTRY(req->client)->entry.principal,
+    code = kh_pac_sign(context, hpac, req->authtime, client_hprinc,
                        &server_hkey, &privsvr_hkey, &pac_data);
     if (code != 0)
         goto cleanup;
@@ -313,7 +285,7 @@ kh_db_sign_auth_data(krb5_context context,
         goto cleanup;
                                           
 cleanup:
-    if (req->client != NULL)
+    if (req->client == NULL)
         kh_free_Principal(context, client_hprinc);
     kh_pac_free(context, hpac);
     if (pac_data.data != NULL)

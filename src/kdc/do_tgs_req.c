@@ -88,6 +88,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
                 krb5_data **response)
 {
     krb5_keyblock * subkey = 0;
+    krb5_keyblock * tgskey = 0;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -147,7 +148,8 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
         return retval;
     }
     errcode = kdc_process_tgs_req(request, from, pkt, &header_ticket,
-                                  &krbtgt, &k_nprincs, &subkey, &pa_tgs_req);
+                                  &krbtgt, &k_nprincs, &tgskey,
+                                  &subkey, &pa_tgs_req);
     if (header_ticket && header_ticket->enc_part2 &&
         (errcode2 = krb5_unparse_name(kdc_context, 
                                       header_ticket->enc_part2->client,
@@ -718,6 +720,7 @@ tgt_again:
                               subkey != NULL ? subkey :
                               header_ticket->enc_part2->session,
                               &encrypting_key, /* U2U or server key */
+                              tgskey,
                               pkt,
                               request,
                               s4u_x509_user ?
@@ -1011,6 +1014,8 @@ cleanup:
         free(s4u_name);
     if (subkey != NULL)
         krb5_free_keyblock(kdc_context, subkey);
+    if (tgskey != NULL)
+        krb5_free_keyblock(kdc_context, tgskey);
     if (reply.padata)
         krb5_free_pa_data(kdc_context, reply.padata);
     if (reply_encpart.enc_padata)
