@@ -30,11 +30,13 @@ SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 SRCS= \
-	$(srcdir)/kdb_hdb.c
+	$(srcdir)/kdb_hdb.c \
+	$(srcdir)/kdb_windc.c
 
 STOBJLISTS=OBJS.ST $(DBOBJLISTS)
 STLIBOBJS= \
-	kdb_hdb.o
+	kdb_hdb.o \
+	kdb_windc.o
 
 all-unix:: all-liblinks
 install-unix:: install-libs
