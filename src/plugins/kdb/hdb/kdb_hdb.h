@@ -74,5 +74,10 @@ void
 kh_free_HostAddresses(krb5_context context,
                       HostAddresses *addrs);
 
+krb5_error_code
+kh_hdb_windc_init(krb5_context context,
+                  const char *libdir,
+                  kh_db_context *kh);
+
 #endif /* KRB5_KDB_HDB_H */
 

@@ -121,55 +121,6 @@ kh_db_context_free(krb5_context context, kh_db_context *kh)
 }
 
 static krb5_error_code
-kh_hdb_windc_init(krb5_context context,
-                  const char *libdir,
-                  kh_db_context *kh)
-{
-    krb5_error_code code;
-    const char *objdirs[2];
-    void **tables = NULL;
-    int i;
-
-    memset(&kh->windc_plugins, 0, sizeof(kh->windc_plugins));
-
-    code = PLUGIN_DIR_OPEN(&kh->windc_plugins);
-    if (code != 0)
-        return code;
-
-    objdirs[0] = libdir;
-    objdirs[1] = NULL;
-
-    code = krb5int_open_plugin_dirs(objdirs, NULL,
-                                    &kh->windc_plugins,
-                                    &context->err);
-    if (code != 0)
-        return code;
-
-    code = krb5int_get_plugin_dir_data(&kh->windc_plugins,
-                                       "windc",
-                                       &tables,
-                                       &context->err);
-    if (code != 0)
-        return code;
-
-    for (i = 0; tables[i] != NULL; i++) {
-        krb5plugin_windc_ftable *windc = tables[i];
-
-        if (windc->minor_version < KRB5_WINDC_PLUGING_MINOR)
-            continue;
-
-        (*windc->init)(kh->hcontext, &kh->windc_ctx);
-        kh->windc = windc;
-        break;
-    }
-
-    if (tables != NULL)
-        krb5int_free_plugin_dir_data(tables);
-
-    return 0;
-}
-
-static krb5_error_code
 kh_db_context_init(krb5_context context,
                    const char *libdir,
                    const char *filename,
