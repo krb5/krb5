@@ -215,7 +215,7 @@ kh_db_sign_auth_data(krb5_context context,
     }
 
     if ((is_as_req && (req->flags & KRB5_KDB_FLAG_INCLUDE_PAC)) ||
-        authdata == NULL) {
+        (authdata == NULL && req->client != NULL)) {
         code = kh_windc_pac_generate(context, kh,
                                      KH_DB_ENTRY(req->client), &hpac);
         if (code != 0)
@@ -269,17 +269,13 @@ kh_db_sign_auth_data(krb5_context context,
         goto cleanup;
 
     if (authdata == NULL) {
-        authdata = calloc(2, sizeof(krb5_authdata *));
-        if (authdata == NULL) {
-            code = ENOMEM;
+        authdata = k5alloc(2 * sizeof(krb5_authdata *), &code);
+        if (code != 0)
             goto cleanup;
-        }
 
-        authdata[0] = calloc(1, sizeof(krb5_authdata));
-        if (authdata[0] == NULL) {
-            code = ENOMEM;
+        authdata[0] = k5alloc(sizeof(krb5_authdata), &code);
+        if (code != 0)
             goto cleanup;
-        }
     } else {
         free(authdata[0]->contents);
         authdata[0]->contents = NULL;
@@ -384,14 +380,14 @@ kh_marshall_HostAddresses(krb5_context context,
     for (i = 0; kaddresses[i] != NULL; i++)
         ;
 
-    haddresses = calloc(1, sizeof(*haddresses));
-    if (haddresses == NULL)
-        return ENOMEM;
+    haddresses = k5alloc(sizeof(*haddresses), &code);
+    if (code != 0)
+        return code;
 
     haddresses->len = 0;
-    haddresses->val = (HostAddress *)calloc(i, sizeof(HostAddress));
-    if (haddresses->val == NULL)
-        return ENOMEM;
+    haddresses->val = k5alloc(i * sizeof(HostAddress), &code);
+    if (code != 0)
+        return code;
 
     for (i = 0; kaddresses[i] != NULL; i++) {
         code = kh_marshall_HostAddress(context,

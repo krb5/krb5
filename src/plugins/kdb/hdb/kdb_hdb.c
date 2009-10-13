@@ -184,8 +184,8 @@ kh_db_context_init(krb5_context context,
     if (libdir == NULL)
         return KRB5_KDB_DBTYPE_INIT; /* XXX */
 
-    kh = calloc(1, sizeof(*kh));
-    if (kh == NULL)
+    kh = k5alloc(sizeof(*kh), &code);
+    if (code != 0)
         goto cleanup;
 
     code = krb5int_mutex_alloc(&kh->lock);
@@ -621,16 +621,17 @@ kh_marshal_Principal(krb5_context context,
     Principal *hprinc;
     int i;
 
-    hprinc = calloc(1, sizeof(*hprinc));
-    if (hprinc == NULL)
-        return ENOMEM;
+    hprinc = k5alloc(sizeof(*hprinc), &code);
+    if (code != 0)
+        return code;
 
     hprinc->name.name_type = kprinc->type;
-    hprinc->name.name_string.val = calloc(kprinc->length,
-                                          sizeof(heim_general_string));
-    if (hprinc->name.name_string.val == NULL) {
+    hprinc->name.name_string.val = k5alloc(kprinc->length *
+                                           sizeof(heim_general_string),
+                                           &code);
+    if (code != 0) {
         kh_free_Principal(context, hprinc);
-        return ENOMEM;
+        return code;
     }
     for (i = 0; i < kprinc->length; i++) {
         code = kh_marshal_general_string(context, &kprinc->data[i],
@@ -661,16 +662,17 @@ kh_unmarshal_Principal(krb5_context context,
     krb5_principal kprinc;
     unsigned int i;
 
-    kprinc = calloc(1, sizeof(*kprinc));
-    if (kprinc == NULL)
-        return ENOMEM;
+    kprinc = k5alloc(sizeof(*kprinc), &code);
+    if (code != 0)
+        return code;
 
     kprinc->magic = KV5M_PRINCIPAL;
     kprinc->type = hprinc->name.name_type;
-    kprinc->data = calloc(hprinc->name.name_string.len, sizeof(krb5_data));
-    if (kprinc->data == NULL) {
+    kprinc->data = k5alloc(hprinc->name.name_string.len * sizeof(krb5_data),
+                           &code);
+    if (code != 0) {
         krb5_free_principal(context, kprinc);
-        return ENOMEM;
+        return code;
     }
     for (i = 0; i < hprinc->name.name_string.len; i++) {
         code = kh_unmarshal_general_string_contents(context,
@@ -919,11 +921,9 @@ kh_unmarshal_hdb_entry(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    kentry->key_data = calloc(hentry->keys.len, sizeof(krb5_key_data));
-    if (kentry->key_data == NULL) {
-        code = ENOMEM;
+    kentry->key_data = k5alloc(hentry->keys.len * sizeof(krb5_key_data), &code);
+    if (code != 0)
         goto cleanup;
-    }
 
     for (i = 0; i < hentry->keys.len; i++) {
         code = kh_unmarshal_Key(context, hentry,
@@ -984,11 +984,9 @@ kh_db_get_principal(krb5_context context,
     else
         hflags |= HDB_F_GET_ANY;
 
-    hentry = calloc(1, sizeof(*hentry));
-    if (hentry == NULL) {
-        code = ENOMEM;
+    hentry = k5alloc(sizeof(*hentry), &code);
+    if (code != 0)
         goto cleanup;
-    }
 
     code = kh_hdb_fetch(context, kh, hprinc, hflags, hentry);
     if (code != 0) {
@@ -1117,10 +1115,11 @@ kh_fetch_master_key_list(krb5_context context,
 {
     /* just create a dummy one so that the KDC doesn't balk */
     krb5_keylist_node *mkey;
+    krb5_error_code code;
 
-    mkey = calloc(1, sizeof(*mkey));
+    mkey = k5alloc(sizeof(*mkey), &code);
     if (mkey == NULL)
-        return ENOMEM;
+        return code;
 
     mkey->keyblock.magic = KV5M_KEYBLOCK;
     mkey->keyblock.enctype = ENCTYPE_NULL;
@@ -1155,11 +1154,11 @@ static krb5_error_code
 kh_get_master_key(krb5_context context,
                   krb5_keyblock **key)
 {
-    *key = calloc(1, sizeof(krb5_keyblock));
-    if (*key == NULL)
-        return ENOMEM;
+    krb5_error_code code;
 
-    return 0;
+    *key = k5alloc(sizeof(krb5_keyblock), &code);
+
+    return code;
 }
 
 static krb5_error_code
