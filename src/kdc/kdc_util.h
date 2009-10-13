@@ -76,7 +76,7 @@ krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
 
 int validate_as_request (krb5_kdc_req *, krb5_db_entry, 
 					  krb5_db_entry, krb5_timestamp,
-					  const char **);
+					  const char **, krb5_data *);
 
 int validate_forwardable(krb5_kdc_req *, krb5_db_entry, 
 			 krb5_db_entry, krb5_timestamp,
@@ -84,7 +84,7 @@ int validate_forwardable(krb5_kdc_req *, krb5_db_entry,
 
 int validate_tgs_request (krb5_kdc_req *, krb5_db_entry, 
 					  krb5_ticket *, krb5_timestamp,
-					  const char **);
+					  const char **, krb5_data *);
 
 int fetch_asn1_field (unsigned char *, unsigned int, unsigned int,
 				 krb5_data *);
@@ -145,10 +145,11 @@ krb5_error_code closedown_network (void);
 /* policy.c */
 int against_local_policy_as (krb5_kdc_req *, krb5_db_entry,
 					krb5_db_entry, krb5_timestamp,
-					const char **);
+					const char **, krb5_data *);
 
 int against_local_policy_tgs (krb5_kdc_req *, krb5_db_entry,
-					krb5_ticket *, const char **);
+					krb5_ticket *, const char **,
+					krb5_data *);
 
 /* kdc_preauth.c */
 krb5_boolean enctype_requires_etype_info_2(krb5_enctype enctype);

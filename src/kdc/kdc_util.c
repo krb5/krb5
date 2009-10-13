@@ -936,7 +936,7 @@ fail:
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
 		    krb5_db_entry server, krb5_timestamp kdc_time,
-		    const char **status)
+		    const char **status, krb5_data *e_data)
 {
     int		errcode;
     
@@ -1046,7 +1046,7 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
      * Check against local policy
      */
     errcode = against_local_policy_as(request, client, server,
-				      kdc_time, status); 
+				      kdc_time, status, e_data);
     if (errcode)
 	return errcode;
 
@@ -1229,7 +1229,7 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
 int
 validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 		     krb5_ticket *ticket, krb5_timestamp kdc_time,
-		     const char **status)
+		     const char **status, krb5_data *e_data)
 {
     int		errcode;
     int		st_idx = 0;
@@ -1462,7 +1462,8 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
     /*
      * Check local policy
      */
-    errcode = against_local_policy_tgs(request, server, ticket, status);
+    errcode = against_local_policy_tgs(request, server, ticket,
+				       status, e_data);
     if (errcode)
 	return errcode;
     
@@ -2180,9 +2181,9 @@ kdc_process_s4u2self_req(krb5_context context,
      * the TGT and that we have a global name service.
      */
     flags = 0;
-    switch (krb5_princ_type(kdc_context, request->server)) {
+    switch (krb5_princ_type(context, request->server)) {
     case KRB5_NT_SRV_HST:		    /* (1) */
-	if (krb5_princ_size(kdc_context, request->server) == 2)
+	if (krb5_princ_size(context, request->server) == 2)
 	    flags |= KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
 	break;
     case KRB5_NT_ENTERPRISE_PRINCIPAL:	    /* (2) */
@@ -2218,9 +2219,11 @@ kdc_process_s4u2self_req(krb5_context context,
      */
     if (is_local_principal((*s4u_x509_user)->user_id.user)) {
 	krb5_db_entry no_server;
+	krb5_data e_data;
 
+	e_data.data = NULL;
 	*nprincs = 1;
-	code = krb5_db_get_principal_ext(kdc_context,
+	code = krb5_db_get_principal_ext(context,
 					 (*s4u_x509_user)->user_id.user,
 					 KRB5_KDB_FLAG_INCLUDE_PAC,
 					 princ, nprincs, &more);
@@ -2241,8 +2244,9 @@ kdc_process_s4u2self_req(krb5_context context,
 	memset(&no_server, 0, sizeof(no_server));
 
 	code = validate_as_request(request, *princ,
-				   no_server, kdc_time, status);
+				   no_server, kdc_time, status, &e_data);
 	if (code) {
+	    krb5_free_data_contents(context, &e_data);
 	    return code;
 	}
     }

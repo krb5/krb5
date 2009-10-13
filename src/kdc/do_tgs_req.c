@@ -77,7 +77,7 @@ find_alternate_tgs(krb5_kdc_req *,krb5_db_entry *,
 
 static krb5_error_code 
 prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
-                  krb5_principal,krb5_data **,const char *);
+                  krb5_principal,krb5_data **,const char *, krb5_data *);
 
 static krb5_int32
 prep_reprocess_req(krb5_kdc_req *,krb5_principal *);
@@ -130,9 +130,11 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     struct kdc_request_state *state = NULL;
     krb5_pa_data *pa_tgs_req; /*points into request*/
     krb5_data scratch;
+    krb5_data e_data; /* backend-provided error data */
 
     reply.padata = 0; /* For cleanup handler */
     reply_encpart.enc_padata = 0;
+    e_data.data = NULL;
 
     session_key.contents = NULL;
 
@@ -283,7 +285,7 @@ tgt_again:
     }
     
     if ((retval = validate_tgs_request(request, server, header_ticket,
-                                       kdc_time, &status))) {
+                                       kdc_time, &status, &e_data))) {
     if (!status)
         status = "UNKNOWN_REASON";
         errcode = retval + ERROR_TABLE_BASE_krb5;
@@ -979,7 +981,7 @@ cleanup:
             
         retval = prepare_error_tgs(state, request, header_ticket, errcode,
         nprincs ? server.princ : NULL,
-                   response, status);
+                   response, status, &e_data);
         if (got_err) {
             krb5_free_error_message (kdc_context, status);
             status = 0;
@@ -1020,6 +1022,7 @@ cleanup:
         krb5_free_pa_data(kdc_context, reply.padata);
     if (reply_encpart.enc_padata)
         krb5_free_pa_data(kdc_context, reply_encpart.enc_padata);
+    krb5_free_data_contents(kdc_context, &e_data);
 
     return retval;
 }
@@ -1028,7 +1031,8 @@ static krb5_error_code
 prepare_error_tgs (struct kdc_request_state *state,
 		   krb5_kdc_req *request, krb5_ticket *ticket, int error,
                    krb5_principal canon_server,
-                   krb5_data **response, const char *status)
+                   krb5_data **response, const char *status,
+		   krb5_data *e_data)
 {
     krb5_error errpkt;
     krb5_error_code retval = 0;
@@ -1054,8 +1058,7 @@ prepare_error_tgs (struct kdc_request_state *state,
         free(errpkt.text.data);
         return ENOMEM;
     }
-    errpkt.e_data.length = 0;
-    errpkt.e_data.data = NULL;
+    errpkt.e_data = *e_data;
     if (state)
 	retval = kdc_fast_handle_error(kdc_context, state, request, NULL, &errpkt);
     if (retval) {

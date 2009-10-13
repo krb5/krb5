@@ -416,7 +416,8 @@ kh_db_check_policy_as(krb5_context context,
                       krb5_data *rep_data)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
-    kdb_audit_as_req *req = (kdb_audit_as_req *)req_data->data;
+    kdb_check_policy_as_req *req = (kdb_check_policy_as_req *)req_data->data;
+    kdb_check_policy_as_rep *rep = (kdb_check_policy_as_rep *)rep_data->data;
     krb5_error_code code;
     heim_octet_string e_data;
     krb5_kdc_req *kkdcreq = req->request;
@@ -469,8 +470,11 @@ kh_db_check_policy_as(krb5_context context,
     code = kh_windc_client_access(context, kh,
                                   KH_DB_ENTRY(req->client),
                                   &hkdcreq, &e_data);
-    if (code != 0)
-        goto cleanup;
+
+    rep->e_data.data = e_data.data;
+    rep->e_data.length = e_data.length;
+
+    e_data.data = NULL;
 
 cleanup:
     kh_free_HostAddresses(context, hkdcreq.req_body.addresses);

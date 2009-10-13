@@ -266,7 +266,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     authtime = kdc_time; /* for audit_as_request() */
 
     if ((errcode = validate_as_request(request, client, server,
-				       kdc_time, &status))) {
+				       kdc_time, &status, &e_data))) {
 	if (!status) 
 	    status = "UNKNOWN_REASON";
 	errcode += ERROR_TABLE_BASE_krb5;

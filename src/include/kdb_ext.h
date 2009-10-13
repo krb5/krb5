@@ -126,6 +126,7 @@ typedef struct _kdb_check_policy_as_req {
 typedef struct _kdb_check_policy_as_rep {
     krb5_magic magic;
     const char *status;
+    krb5_data e_data;
 } kdb_check_policy_as_rep;
 
 typedef struct _kdb_check_policy_tgs_req {
@@ -138,6 +139,7 @@ typedef struct _kdb_check_policy_tgs_req {
 typedef struct _kdb_check_policy_tgs_rep {
     krb5_magic magic;
     const char *status;
+    krb5_data e_data;
 } kdb_check_policy_tgs_rep;
 
 typedef struct _kdb_audit_as_req {
