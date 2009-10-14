@@ -131,6 +131,7 @@ kh_db_context_init(krb5_context context,
     char *libhdb = NULL;
     char *libkrb5 = NULL;
     struct errinfo errinfo;
+    int *hdb_interface_version;
 
     if (libdir == NULL)
         return KRB5_KDB_DBTYPE_INIT; /* XXX */
@@ -155,7 +156,8 @@ kh_db_context_init(krb5_context context,
 #define GET_PLUGIN_FUNC(_lib, _sym, _member)     do { \
     code = krb5int_get_plugin_func(kh->_lib, _sym, \
                                    (void (**)())&kh->_member, &errinfo); \
-    if (code != 0) goto cleanup; \
+    if (code != 0) \
+        goto cleanup; \
     } while (0)
 
     GET_PLUGIN_FUNC(libkrb5, "krb5_init_context",     heim_init_context);
@@ -173,6 +175,18 @@ kh_db_context_init(krb5_context context,
     code = krb5int_open_plugin(libhdb, &kh->libhdb, &errinfo);
     if (code != 0)
         goto cleanup;
+
+    /*
+     * New versions of Heimdal export this symbol to mark the
+     * HDB ABI version.
+     */
+    if (krb5int_get_plugin_data(kh->libhdb, "hdb_interface_version",
+                                (void **)&hdb_interface_version,
+                                &errinfo) == 0 &&
+        *hdb_interface_version != HDB_INTERFACE_VERSION) {
+        code = KRB5_KDB_DBTYPE_NOSUP;
+        goto cleanup;
+    }
 
     GET_PLUGIN_FUNC(libhdb,  "hdb_create",            hdb_create);
     GET_PLUGIN_FUNC(libhdb,  "hdb_free_entry",        hdb_free_entry);
@@ -786,7 +800,7 @@ static kh_hdb_marshal_extension_fn kh_hdb_extension_vtable[] = {
     NULL,           /* choice_HDB_extension_data_allowed_to_delegate_to */
     NULL,           /* choice_HDB_extension_data_lm_owf */
     NULL,           /* choice_HDB_extension_data_password */
-    NULL,
+    NULL,           /* choice_HDB_extension_data_aliases */
     kh_unmarshal_HDB_extension_data_last_pw_change
 };
 
