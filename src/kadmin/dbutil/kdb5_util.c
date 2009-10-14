@@ -437,10 +437,12 @@ static int open_db_and_mkey()
 	(void) krb5_db_fini(util_context);
 	return(1);
     } else if (!nentries) {
+#if 0
 	com_err(progname, KRB5_KDB_NOENTRY, "while retrieving master entry");
 	exit_status++;
 	(void) krb5_db_fini(util_context);
 	return(1);
+#endif
     }
 
     if (global_params.mask & KADM5_CONFIG_KVNO)

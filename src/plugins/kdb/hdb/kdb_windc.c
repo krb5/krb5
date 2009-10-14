@@ -422,8 +422,8 @@ kh_db_check_policy_as(krb5_context context,
     heim_octet_string e_data;
     krb5_kdc_req *kkdcreq = req->request;
     KDC_REQ hkdcreq;
-    Principal *client = NULL;
-    Principal *server = NULL;
+    Principal *hclient = NULL;
+    Principal *hserver = NULL;
     time_t from, till, rtime;
 
     memset(&hkdcreq, 0, sizeof(hkdcreq));
@@ -438,17 +438,17 @@ kh_db_check_policy_as(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = kh_marshal_Principal(context, kkdcreq->client, &client);
+    code = kh_marshal_Principal(context, kkdcreq->client, &hclient);
     if (code != 0)
         goto cleanup;
 
-    code = kh_marshal_Principal(context, kkdcreq->server, &server);
+    code = kh_marshal_Principal(context, kkdcreq->server, &hserver);
     if (code != 0)
         goto cleanup;
 
-    hkdcreq.req_body.cname = &client->name;
-    hkdcreq.req_body.realm = server->realm;
-    hkdcreq.req_body.sname = &server->name;
+    hkdcreq.req_body.cname = &hclient->name;
+    hkdcreq.req_body.realm = hserver->realm;
+    hkdcreq.req_body.sname = &hserver->name;
 
     from  = kkdcreq->from;  hkdcreq.req_body.from = &from;
     till  = kkdcreq->till;  hkdcreq.req_body.till = &till;
@@ -478,8 +478,8 @@ kh_db_check_policy_as(krb5_context context,
 
 cleanup:
     kh_free_HostAddresses(context, hkdcreq.req_body.addresses);
-    kh_free_Principal(context, client);
-    kh_free_Principal(context, server);
+    kh_free_Principal(context, hclient);
+    kh_free_Principal(context, hserver);
     if (e_data.data != NULL)
         free(e_data.data);
 
