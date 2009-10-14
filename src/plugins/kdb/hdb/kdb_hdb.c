@@ -420,10 +420,10 @@ kh_kdb_free_entry(krb5_context context,
         for (i = 0; i < entry->n_key_data; i++) {
             for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
                 if (entry->key_data[i].key_data_length[j] != 0) {
-                    if (entry->key_data[i].key_data_contents[j]) {
+                    if (entry->key_data[i].key_data_contents[j] != NULL) {
                         memset(entry->key_data[i].key_data_contents[j],
                                0,
-                               (unsigned) entry->key_data[i].key_data_length[j]);
+                               entry->key_data[i].key_data_length[j]);
                         free(entry->key_data[i].key_data_contents[j]);
                     }
                 }
@@ -894,6 +894,14 @@ cleanup:
 }
 
 static krb5_error_code
+kh_is_tgs_principal(krb5_context context,
+                    krb5_const_principal princ)
+{
+    return krb5_princ_size(context, princ) == 2 &&
+        data_eq_string(princ->data[0], KRB5_TGS_NAME);
+}
+
+static krb5_error_code
 kh_db_get_principal(krb5_context context,
                     krb5_const_principal princ,
                     unsigned int kflags,
@@ -932,6 +940,8 @@ kh_db_get_principal(krb5_context context,
         hflags |= HDB_F_GET_CLIENT;
     else if (kflags & KRB5_KDB_FLAG_INCLUDE_PAC)
         hflags |= HDB_F_GET_SERVER;
+    else if (kh_is_tgs_principal(context, princ))
+        hflags |= HDB_F_GET_KRBTGT;
     else
         hflags |= HDB_F_GET_ANY;
 
