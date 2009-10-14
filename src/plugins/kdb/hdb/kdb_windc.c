@@ -426,6 +426,9 @@ kh_db_check_policy_as(krb5_context context,
     Principal *hserver = NULL;
     time_t from, till, rtime;
 
+    if (kh->windc == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP; /* short circuit */
+
     memset(&hkdcreq, 0, sizeof(hkdcreq));
     e_data.data = NULL;
 
