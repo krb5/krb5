@@ -1230,9 +1230,9 @@ static struct _kh_invoke_fn {
     krb5_error_code (*function)(krb5_context, unsigned int,
                                 const krb5_data *, krb5_data *);
 } kh_invoke_vtable[] = {
-    { KRB5_KDB_METHOD_CHECK_POLICY_AS,              kh_db_check_policy_as },
-    { KRB5_KDB_METHOD_SIGN_AUTH_DATA,               kh_db_sign_auth_data },
-    { KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE,    kh_db_check_allowed_to_delegate },
+    { KRB5_KDB_METHOD_CHECK_POLICY_AS,           kh_db_check_policy_as },
+    { KRB5_KDB_METHOD_SIGN_AUTH_DATA,            kh_db_sign_auth_data },
+    { KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE, kh_db_check_allowed_to_delegate },
 };
 
 static krb5_error_code
