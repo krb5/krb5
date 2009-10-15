@@ -213,7 +213,7 @@ make_external_lucid_ctx_v1(
         lctx->rfc1964_kd.sign_alg = gctx->signalg;
         lctx->rfc1964_kd.seal_alg = gctx->sealalg;
         /* Copy key */
-        if ((retval = copy_keyblock_to_lucid_key(gctx->seq,
+        if ((retval = copy_keyblock_to_lucid_key(&gctx->seq->keyblock,
                                                  &lctx->rfc1964_kd.ctx_key)))
             goto error_out;
     }
@@ -221,11 +221,11 @@ make_external_lucid_ctx_v1(
         /* Copy keys */
         /* (subkey is always present, either a copy of the kerberos
            session key or a subkey) */
-        if ((retval = copy_keyblock_to_lucid_key(gctx->subkey,
+        if ((retval = copy_keyblock_to_lucid_key(&gctx->subkey->keyblock,
                                                  &lctx->cfx_kd.ctx_key)))
             goto error_out;
         if (gctx->have_acceptor_subkey) {
-            if ((retval = copy_keyblock_to_lucid_key(gctx->acceptor_subkey,
+            if ((retval = copy_keyblock_to_lucid_key(&gctx->acceptor_subkey->keyblock,
                                                      &lctx->cfx_kd.acceptor_subkey)))
                 goto error_out;
             lctx->cfx_kd.have_acceptor_subkey = 1;

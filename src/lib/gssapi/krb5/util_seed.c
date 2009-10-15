@@ -31,25 +31,31 @@ static const unsigned char zeros[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 krb5_error_code
 kg_make_seed(context, key, seed)
     krb5_context context;
-    krb5_keyblock *key;
+    krb5_key key;
     unsigned char *seed;
 {
     krb5_error_code code;
-    krb5_keyblock *tmpkey;
+    krb5_key rkey = NULL;
+    krb5_keyblock *tmpkey, *kb;
     unsigned int i;
 
-    code = krb5_copy_keyblock(context, key, &tmpkey);
+    code = krb5_k_key_keyblock(context, key, &tmpkey);
     if (code)
         return(code);
 
     /* reverse the key bytes, as per spec */
-
+    kb = &key->keyblock;
     for (i=0; i<tmpkey->length; i++)
-        tmpkey->contents[i] = key->contents[key->length - 1 - i];
+        tmpkey->contents[i] = kb->contents[kb->length - 1 - i];
 
-    code = kg_encrypt(context, tmpkey, KG_USAGE_SEAL, NULL, zeros, seed, 16);
+    code = krb5_k_create_key(context, tmpkey, &rkey);
+    if (code)
+        goto cleanup;
 
+    code = kg_encrypt(context, rkey, KG_USAGE_SEAL, NULL, zeros, seed, 16);
+
+cleanup:
     krb5_free_keyblock(context, tmpkey);
-
+    krb5_k_free_key(context, rkey);
     return(code);
 }
