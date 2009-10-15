@@ -136,6 +136,7 @@ krb5int_hash_crc32
 krb5int_hash_md4
 krb5int_hash_md5
 krb5int_hash_sha1
+krb5int_hmac_keyblock
 krb5int_keyhash_descbc
 krb5int_keyhash_hmac_md5
 krb5int_keyhash_md4des
