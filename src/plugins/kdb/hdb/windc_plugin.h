@@ -33,8 +33,8 @@
 
 /* $Id: windc_plugin.h 22693 2008-03-19 08:57:49Z lha $ */
 
-#ifndef HEIMDAL_heim_pac_PLUGIN_H
-#define HEIMDAL_heim_pac_PLUGIN_H 1
+#ifndef HEIMDAL_WINDC_PLUGIN_H
+#define HEIMDAL_WINDC_PLUGIN_H 1
 
 /*
  * The PAC generate function should allocate a heim_pac using
@@ -78,5 +78,5 @@ typedef struct krb5plugin_windc_ftable {
     krb5plugin_windc_client_access	client_access;
 } krb5plugin_windc_ftable;
 
-#endif /* HEIMDAL_heim_pac_PLUGIN_H */
+#endif /* HEIMDAL_WINDC_PLUGIN_H */
 
