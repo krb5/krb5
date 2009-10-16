@@ -507,8 +507,8 @@ kh_unmarshal_octet_string_contents(krb5_context context,
 
 static krb5_error_code
 kh_unmarshal_octet_string(krb5_context context,
-                           heim_octet_string *in_data,
-                           krb5_data **out_data)
+                          heim_octet_string *in_data,
+                          krb5_data **out_data)
 {
     krb5_error_code code;
 
