@@ -136,6 +136,8 @@ kh_db_context_init(krb5_context context,
     if (libdir == NULL)
         return KRB5_KDB_DBTYPE_INIT; /* XXX */
 
+    memset(&errinfo, 0, sizeof(errinfo));
+
     kh = k5alloc(sizeof(*kh), &code);
     if (code != 0)
         goto cleanup;
