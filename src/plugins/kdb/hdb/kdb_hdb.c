@@ -51,7 +51,7 @@ kh_fini(void)
 }
 
 krb5_error_code
-kh_map_error(krb5_error_code code)
+kh_map_error(heim_error_code code)
 {
     switch (code) {
     case HDB_ERR_UK_SERROR:
@@ -292,7 +292,7 @@ kh_hdb_open(krb5_context context,
             int oflag,
             mode_t mode)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_open)(kh->hcontext, kh->hdb, oflag, mode);
 
@@ -302,7 +302,7 @@ kh_hdb_open(krb5_context context,
 static krb5_error_code
 kh_hdb_close(krb5_context context,kh_db_context *kh)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_close)(kh->hcontext, kh->hdb);
 
@@ -316,7 +316,7 @@ kh_hdb_fetch(krb5_context context,
              unsigned int flags,
              hdb_entry_ex *entry)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_fetch)(kh->hcontext, kh->hdb, princ, flags, entry);
 
@@ -329,7 +329,7 @@ kh_hdb_store(krb5_context context,
              unsigned int flags,
              hdb_entry_ex *entry)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_store)(kh->hcontext, kh->hdb, flags, entry);
 
@@ -341,7 +341,7 @@ kh_hdb_remove(krb5_context context,
               kh_db_context *kh,
               const Principal *princ)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_remove)(kh->hcontext, kh->hdb, princ);
 
@@ -354,7 +354,7 @@ kh_hdb_firstkey(krb5_context context,
                 unsigned int flags,
                 hdb_entry_ex *entry)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_firstkey)(kh->hcontext, kh->hdb, flags, entry);
 
@@ -367,7 +367,7 @@ kh_hdb_nextkey(krb5_context context,
                unsigned int flags,
                hdb_entry_ex *entry)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_nextkey)(kh->hcontext, kh->hdb, flags, entry);
 
@@ -379,7 +379,7 @@ kh_hdb_lock(krb5_context context,
             kh_db_context *kh,
             int operation)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_lock)(kh->hcontext, kh->hdb, operation);
 
@@ -390,7 +390,7 @@ static krb5_error_code
 kh_hdb_unlock(krb5_context context,
               kh_db_context *kh)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_unlock)(kh->hcontext, kh->hdb);
 
@@ -402,7 +402,7 @@ kh_hdb_rename(krb5_context context,
               kh_db_context *kh,
               const char *name)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb->hdb_rename)(kh->hcontext, kh->hdb, name);
 
@@ -433,7 +433,7 @@ kh_hdb_seal_key(krb5_context context,
                 HDB *hdb,
                 Key *key)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb_seal_key)(kh->hcontext, hdb, key);
 
@@ -446,7 +446,7 @@ kh_hdb_unseal_key(krb5_context context,
                   HDB *hdb,
                   Key *key)
 {
-    krb5_error_code hcode;
+    heim_error_code hcode;
 
     hcode = (*kh->hdb_unseal_key)(kh->hcontext, hdb, key);
 
