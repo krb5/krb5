@@ -693,7 +693,7 @@ kh_get_master_key_principal(krb5_context context,
 
     key_data->key_data_ver          = KRB5_KDB_V1_KEY_DATA_ARRAY;
     key_data->key_data_kvno         = 1;
-    key_data->key_data_type[0]      = ENCTYPE_NULL;
+    key_data->key_data_type[0]      = ENCTYPE_UNKNOWN;
 
     *nentries = 1;
 
@@ -995,7 +995,7 @@ kh_fetch_master_key_list(krb5_context context,
         return code;
 
     mkey->keyblock.magic = KV5M_KEYBLOCK;
-    mkey->keyblock.enctype = ENCTYPE_NULL;
+    mkey->keyblock.enctype = ENCTYPE_UNKNOWN;
     mkey->kvno = 1;
 
     *mkeys_list = mkey;
@@ -1027,6 +1027,9 @@ kh_set_master_key(krb5_context context,
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
+    if (kkey->enctype == ENCTYPE_UNKNOWN)
+        return 0;
+
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
         return code;
@@ -1050,7 +1053,7 @@ kh_get_master_key(krb5_context context,
     /*
      * The Heimdal master key interface is opaque; we can't
      * return the master key without poking into internal data
-     * structures that would make this shim even more brittle.
+     * structures that would make this bridge even more brittle.
      * So, we just return a dummy key.
      */
     key = k5alloc(sizeof(krb5_keyblock), &code);
@@ -1058,7 +1061,7 @@ kh_get_master_key(krb5_context context,
         return code;
 
     key->magic = KV5M_KEYBLOCK;
-    key->enctype = ENCTYPE_NULL;
+    key->enctype = ENCTYPE_UNKNOWN;
 
     *pkey = key;
 
@@ -1128,7 +1131,7 @@ kh_dbekd_decrypt_key_data(krb5_context context,
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
-    if (mkey->enctype != ENCTYPE_NULL)
+    if (mkey->enctype != ENCTYPE_UNKNOWN)
         code = krb5_dbekd_def_decrypt_key_data(context, mkey, key_data,
                                                kkey, keysalt);
     else
@@ -1204,7 +1207,7 @@ kh_dbekd_encrypt_key_data(krb5_context context,
         return KRB5_KDB_DBNOTINITED;
 
     /* For migration */
-    if (mkey->enctype != ENCTYPE_NULL)
+    if (mkey->enctype != ENCTYPE_UNKNOWN)
         code = krb5_dbekd_def_encrypt_key_data(context, mkey, kkey,
                                                keysalt, keyver, key_data);
     else

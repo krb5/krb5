@@ -173,7 +173,6 @@ kh_get_tgs_key(krb5_context context,
     krb5_principal tgsname = NULL;
     krb5_key_data *krbtgt_key = NULL;
     krb5_db_entry krbtgt;
-    unsigned int hflags = HDB_F_DECRYPT | HDB_F_GET_KRBTGT;
 
     memset(&krbtgt, 0, sizeof(krbtgt));
     krbtgt_keyblock->contents = NULL;
@@ -190,7 +189,7 @@ kh_get_tgs_key(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = kh_get_principal(context, kh, tgsname, hflags, &krbtgt);
+    code = kh_get_principal(context, kh, tgsname, HDB_F_GET_KRBTGT, &krbtgt);
     if (code != 0)
         goto cleanup;
 
