@@ -37,6 +37,7 @@ typedef struct _kh_db_context {
     heim_error_code (*hdb_create)(heim_context, HDB **, const char *);
     heim_error_code (*hdb_seal_key)(heim_context, HDB *, Key *);
     heim_error_code (*hdb_unseal_key)(heim_context, HDB *, Key *);
+    heim_error_code (*hdb_set_master_key)(heim_context, HDB *, EncryptionKey *);
     void (*hdb_free_entry)(heim_context, hdb_entry_ex *);
 
     /* widdc SPIs */
@@ -81,6 +82,12 @@ kh_hdb_free_entry(krb5_context context,
                   hdb_entry_ex *entry);
 
 /* kdb_marshal.c */
+
+#define KH_MARSHAL_KEY(_kkey, _hkey)        do {        \
+    (_hkey)->keytype            = (_kkey)->enctype;     \
+    (_hkey)->keyvalue.data      = (_kkey)->contents;    \
+    (_hkey)->keyvalue.length    = (_kkey)->length;      \
+    } while (0)
 
 krb5_error_code
 kh_marshal_Principal(krb5_context context,

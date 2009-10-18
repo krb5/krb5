@@ -194,6 +194,7 @@ kh_db_context_init(krb5_context context,
     GET_PLUGIN_FUNC(libhdb,  "hdb_create",            hdb_create);
     GET_PLUGIN_FUNC(libhdb,  "hdb_seal_key",          hdb_seal_key);
     GET_PLUGIN_FUNC(libhdb,  "hdb_unseal_key",        hdb_unseal_key);
+    GET_PLUGIN_FUNC(libhdb,  "hdb_set_master_key",    hdb_set_master_key);
     GET_PLUGIN_FUNC(libhdb,  "hdb_free_entry",        hdb_free_entry);
 
     code = kh_map_error((*kh->heim_init_context)(&kh->hcontext));
@@ -430,12 +431,11 @@ kh_hdb_find_extension(const hdb_entry *entry, unsigned int type)
 static krb5_error_code
 kh_hdb_seal_key(krb5_context context,
                 kh_db_context *kh,
-                HDB *hdb,
                 Key *key)
 {
     heim_error_code hcode;
 
-    hcode = (*kh->hdb_seal_key)(kh->hcontext, hdb, key);
+    hcode = (*kh->hdb_seal_key)(kh->hcontext, kh->hdb, key);
 
     return kh_map_error(hcode);
 }
@@ -443,12 +443,23 @@ kh_hdb_seal_key(krb5_context context,
 static krb5_error_code
 kh_hdb_unseal_key(krb5_context context,
                   kh_db_context *kh,
-                  HDB *hdb,
                   Key *key)
 {
     heim_error_code hcode;
 
-    hcode = (*kh->hdb_unseal_key)(kh->hcontext, hdb, key);
+    hcode = (*kh->hdb_unseal_key)(kh->hcontext, kh->hdb, key);
+
+    return kh_map_error(hcode);
+}
+
+static krb5_error_code
+kh_hdb_set_master_key(krb5_context context,
+                      kh_db_context *kh,
+                      EncryptionKey *key)
+{
+    heim_error_code hcode;
+
+    hcode = (*kh->hdb_set_master_key)(kh->hcontext, kh->hdb, key);
 
     return kh_map_error(hcode);
 }
@@ -635,8 +646,8 @@ kh_get_principal(krb5_context context,
 }
 
 static krb5_boolean
-kh_is_master_key_princ(krb5_context context,
-                       krb5_const_principal princ)
+kh_is_master_key_principal(krb5_context context,
+                           krb5_const_principal princ)
 {
     return krb5_princ_size(context, princ) == 2 &&
         data_eq_string(princ->data[0], "K") &&
@@ -649,6 +660,32 @@ kh_is_tgs_principal(krb5_context context,
 {
     return krb5_princ_size(context, princ) == 2 &&
         data_eq_string(princ->data[0], KRB5_TGS_NAME);
+}
+
+static krb5_error_code
+kh_get_master_key_principal(krb5_context context,
+                            krb5_const_principal princ,
+                            krb5_db_entry *kentry,
+                            int *nentries)
+{
+    krb5_error_code code;
+    krb5_key_data *key_data;
+
+    /* Return a dummy principal */
+    kentry->n_key_data = 1;
+    kentry->key_data = k5alloc(sizeof(krb5_key_data), &code);
+    if (code != 0)
+        return code;
+
+    key_data = &kentry->key_data[0];
+
+    key_data->key_data_ver          = KRB5_KDB_V1_KEY_DATA_ARRAY;
+    key_data->key_data_kvno         = 1;
+    key_data->key_data_type[0]      = ENCTYPE_NULL;
+
+    *nentries = 1;
+
+    return 0;
 }
 
 static krb5_error_code
@@ -669,6 +706,9 @@ kh_db_get_principal(krb5_context context,
 
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
+
+    if (kh_is_master_key_principal(context, princ))
+        return kh_get_master_key_principal(context, princ, kentry, nentries);
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
@@ -955,20 +995,51 @@ kh_db_free(krb5_context context, void *ptr)
 static krb5_error_code
 kh_set_master_key(krb5_context context,
                   char *pwd,
-                  krb5_keyblock *key)
+                  krb5_keyblock *kkey)
 {
-    return 0;
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    krb5_error_code code;
+    EncryptionKey hkey;
+
+    if (kh == NULL)
+        return KRB5_KDB_DBNOTINITED;
+
+    code = k5_mutex_lock(kh->lock);
+    if (code != 0)
+        return code;
+
+    KH_MARSHAL_KEY(kkey, &hkey);
+
+    code = kh_hdb_set_master_key(context, kh, &hkey);
+
+    k5_mutex_unlock(kh->lock);
+
+    return code;
 }
 
 static krb5_error_code
 kh_get_master_key(krb5_context context,
-                  krb5_keyblock **key)
+                  krb5_keyblock **pkey)
 {
     krb5_error_code code;
+    krb5_keyblock *key;
 
-    *key = k5alloc(sizeof(krb5_keyblock), &code);
+    /*
+     * The Heimdal master key interface is opaque; we can't
+     * return the master key without poking into internal data
+     * structures that would make this shim even more brittle.
+     * So, we just return a dummy key.
+     */
+    key = k5alloc(sizeof(krb5_keyblock), &code);
+    if (code != 0)
+        return code;
 
-    return code;
+    key->magic = KV5M_KEYBLOCK;
+    key->enctype = ENCTYPE_NULL;
+
+    *pkey = key;
+
+    return 0;
 }
 
 krb5_error_code
@@ -992,7 +1063,7 @@ kh_decrypt_key(krb5_context context,
            key_data->key_data_length[0]);
     hkey.key.keyvalue.length = key_data->key_data_length[0];
 
-    code = kh_hdb_unseal_key(context, kh, kh->hdb, &hkey);
+    code = kh_hdb_unseal_key(context, kh, &hkey);
     if (code != 0) {
         memset(hkey.key.keyvalue.data, 0, hkey.key.keyvalue.length);
         free(hkey.key.keyvalue.data);
@@ -1067,7 +1138,7 @@ kh_encrypt_key(krb5_context context,
     memcpy(hkey.key.keyvalue.data, kkey->contents, kkey->length);
     hkey.key.keyvalue.length = kkey->length;
 
-    code = kh_hdb_seal_key(context, kh, kh->hdb, &hkey);
+    code = kh_hdb_seal_key(context, kh, &hkey);
     if (code != 0) {
         memset(hkey.key.keyvalue.data, 0, hkey.key.keyvalue.length);
         free(hkey.key.keyvalue.data);

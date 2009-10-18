@@ -222,12 +222,6 @@ cleanup:
     return code;
 }
 
-#define KH_MARSHAL_KEY(_kkey, _hkey)        do {        \
-    (_hkey)->keytype            = (_kkey)->enctype;     \
-    (_hkey)->keyvalue.data      = (_kkey)->contents;    \
-    (_hkey)->keyvalue.length    = (_kkey)->length;      \
-    } while (0)
-
 krb5_error_code
 kh_db_sign_auth_data(krb5_context context,
                      unsigned int method,
