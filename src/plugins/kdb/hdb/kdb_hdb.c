@@ -287,50 +287,6 @@ kh_fini_module(krb5_context context)
 }
 
 static krb5_error_code
-kh_db_create(krb5_context context,
-             char *conf_section,
-             char **db_args)
-{
-    return KRB5_KDB_DBTYPE_NOSUP;
-}
-
-static krb5_error_code
-kh_db_destroy(krb5_context context,
-              char *conf_section,
-              char **db_args)
-{
-    return KRB5_KDB_DBTYPE_NOSUP;
-}
-
-static krb5_error_code
-kh_db_get_age(krb5_context context,
-              char *db_name,
-              time_t *age)
-{
-    return KRB5_KDB_DBTYPE_NOSUP;
-}
-
-static krb5_error_code
-kh_db_set_option(krb5_context context,
-                  int option,
-                  void *value)
-{
-    return KRB5_KDB_DBTYPE_NOSUP;
-}
-
-static krb5_error_code
-kh_db_lock(krb5_context context, int mode)
-{
-    return 0;
-}
-
-static krb5_error_code
-kh_db_unlock(krb5_context context)
-{
-    return 0;
-}
-
-static krb5_error_code
 kh_hdb_open(krb5_context context,
             kh_db_context *kh,
             int oflag,
@@ -552,11 +508,81 @@ kh_kdb_free_entry(krb5_context context,
 }
 
 static krb5_error_code
-kh_is_tgs_principal(krb5_context context,
-                    krb5_const_principal princ)
+kh_db_create(krb5_context context,
+             char *conf_section,
+             char **db_args)
 {
-    return krb5_princ_size(context, princ) == 2 &&
-        data_eq_string(princ->data[0], KRB5_TGS_NAME);
+    return KRB5_KDB_DBTYPE_NOSUP;
+}
+
+static krb5_error_code
+kh_db_destroy(krb5_context context,
+              char *conf_section,
+              char **db_args)
+{
+    return KRB5_KDB_DBTYPE_NOSUP;
+}
+
+static krb5_error_code
+kh_db_get_age(krb5_context context,
+              char *db_name,
+              time_t *age)
+{
+    return KRB5_KDB_DBTYPE_NOSUP;
+}
+
+static krb5_error_code
+kh_db_set_option(krb5_context context,
+                  int option,
+                  void *value)
+{
+    return KRB5_KDB_DBTYPE_NOSUP;
+}
+
+static krb5_error_code
+kh_db_lock(krb5_context context, int kmode)
+{
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    krb5_error_code code;
+    enum hdb_lockop hmode;
+
+    if (kh == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP;
+
+    code = k5_mutex_lock(kh->lock);
+    if (code != 0)
+        return code;
+
+    if (kmode & KRB5_DB_LOCKMODE_EXCLUSIVE)
+        hmode = HDB_WLOCK;
+    else
+        hmode = HDB_RLOCK;
+
+    code = kh_hdb_lock(context, kh, hmode);
+
+    k5_mutex_unlock(kh->lock);
+
+    return code;
+}
+
+static krb5_error_code
+kh_db_unlock(krb5_context context)
+{
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    krb5_error_code code;
+
+    if (kh == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP;
+
+    code = k5_mutex_lock(kh->lock);
+    if (code != 0)
+        return code;
+
+    code = kh_hdb_unlock(context, kh);
+
+    k5_mutex_unlock(kh->lock);
+
+    return code;
 }
 
 krb5_error_code
@@ -608,6 +634,23 @@ kh_get_principal(krb5_context context,
     return code;
 }
 
+static krb5_boolean
+kh_is_master_key_princ(krb5_context context,
+                       krb5_const_principal princ)
+{
+    return krb5_princ_size(context, princ) == 2 &&
+        data_eq_string(princ->data[0], "K") &&
+        data_eq_string(princ->data[1], "M");
+}
+
+static krb5_error_code
+kh_is_tgs_principal(krb5_context context,
+                    krb5_const_principal princ)
+{
+    return krb5_princ_size(context, princ) == 2 &&
+        data_eq_string(princ->data[0], KRB5_TGS_NAME);
+}
+
 static krb5_error_code
 kh_db_get_principal(krb5_context context,
                     krb5_const_principal princ,
@@ -634,10 +677,9 @@ kh_db_get_principal(krb5_context context,
     hflags = 0;
     if (kflags & KRB5_KDB_FLAG_CANONICALIZE)
         hflags |= HDB_F_CANON;
-    if (kflags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY)
+    if (kflags & (KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY |
+                  KRB5_KDB_FLAG_INCLUDE_PAC))
         hflags |= HDB_F_GET_CLIENT;
-    else if (kflags & KRB5_KDB_FLAG_INCLUDE_PAC)
-        hflags |= HDB_F_GET_SERVER;
     else if (kh_is_tgs_principal(context, princ))
         hflags |= HDB_F_GET_KRBTGT;
     else
@@ -796,6 +838,9 @@ kh_db_delete_principal(krb5_context context,
     krb5_error_code code;
     kh_db_context *kh = KH_DB_CONTEXT(context);
 
+    if (kh == NULL)
+        return KRB5_KDB_DBNOTINITED;
+
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
         return code;
@@ -883,7 +928,7 @@ kh_fetch_master_key_list(krb5_context context,
     krb5_error_code code;
 
     mkey = k5alloc(sizeof(*mkey), &code);
-    if (mkey == NULL)
+    if (code != 0)
         return code;
 
     mkey->keyblock.magic = KV5M_KEYBLOCK;
@@ -986,6 +1031,9 @@ kh_dbekd_decrypt_key_data(krb5_context context,
     kh_db_context *kh = KH_DB_CONTEXT(context);
     krb5_error_code code;
 
+    if (kh == NULL)
+        return KRB5_KDB_DBNOTINITED;
+
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
         return code;
@@ -1059,6 +1107,9 @@ kh_dbekd_encrypt_key_data(krb5_context context,
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
     krb5_error_code code;
+
+    if (kh == NULL)
+        return KRB5_KDB_DBNOTINITED;
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
@@ -1134,6 +1185,9 @@ kh_db_invoke(krb5_context context,
     kh_db_context *kh = KH_DB_CONTEXT(context);
     size_t i;
     krb5_error_code code;
+
+    if (kh == NULL)
+        return KRB5_KDB_DBNOTINITED;
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
