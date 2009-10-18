@@ -664,12 +664,14 @@ kh_is_tgs_principal(krb5_context context,
 
 static krb5_error_code
 kh_get_master_key_principal(krb5_context context,
+                            kh_db_context *kh,
                             krb5_const_principal princ,
                             krb5_db_entry *kentry,
                             int *nentries)
 {
     krb5_error_code code;
     krb5_key_data *key_data;
+    krb5_timestamp now;
 
     memset(kentry, 0, sizeof(*kentry));
     *nentries = 0;
@@ -681,11 +683,19 @@ kh_get_master_key_principal(krb5_context context,
     if (code != 0)
         return code;
 
+    now = time(NULL);
+
+    code = krb5_dbe_update_mod_princ_data(context, kentry, now, princ);
+    if (code != 0) {
+        kh_kdb_free_entry(context, kh, kentry);
+        return code;
+    }
+
     /* Return a dummy principal */
     kentry->n_key_data = 1;
     kentry->key_data = k5alloc(sizeof(krb5_key_data), &code);
     if (code != 0) {
-        krb5_free_principal(context, kentry->princ);
+        kh_kdb_free_entry(context, kh, kentry);
         return code;
     }
 
@@ -720,7 +730,8 @@ kh_db_get_principal(krb5_context context,
         return KRB5_KDB_DBNOTINITED;
 
     if (kh_is_master_key_principal(context, princ))
-        return kh_get_master_key_principal(context, princ, kentry, nentries);
+        return kh_get_master_key_principal(context, kh, princ,
+                                           kentry, nentries);
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
@@ -952,7 +963,7 @@ kh_db_iterate(krb5_context context,
         int nentries;
 
         /* Return the fake master key principal */
-        if (kh_get_master_key_principal(context, NULL,
+        if (kh_get_master_key_principal(context, kh, NULL,
                                         &kentry, &nentries) == 0) {
             code = (*func)(func_arg, &kentry);
             kh_kdb_free_entry(context, kh, &kentry);
