@@ -676,6 +676,8 @@ kh_get_master_key_principal(krb5_context context,
     memset(kentry, 0, sizeof(*kentry));
     *nentries = 0;
 
+    kentry->attributes = KRB5_KDB_DISALLOW_ALL_TIX;
+
     if (princ == NULL)
         code = krb5_parse_name(context, KRB5_KDB_M_NAME, &kentry->princ);
     else
@@ -685,7 +687,7 @@ kh_get_master_key_principal(krb5_context context,
 
     now = time(NULL);
 
-    code = krb5_dbe_update_mod_princ_data(context, kentry, now, princ);
+    code = krb5_dbe_update_mod_princ_data(context, kentry, now, kentry->princ);
     if (code != 0) {
         kh_kdb_free_entry(context, kh, kentry);
         return code;
