@@ -31,11 +31,13 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 SRCS= \
 	$(srcdir)/kdb_hdb.c \
+	$(srcdir)/kdb_marshal.c \
 	$(srcdir)/kdb_windc.c
 
 STOBJLISTS=OBJS.ST $(DBOBJLISTS)
 STLIBOBJS= \
 	kdb_hdb.o \
+	kdb_marshal.o \
 	kdb_windc.o
 
 all-unix:: all-liblinks

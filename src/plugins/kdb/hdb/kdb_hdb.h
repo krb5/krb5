@@ -56,19 +56,6 @@ krb5_error_code
 kh_map_error(heim_error_code code);
 
 krb5_error_code
-kh_marshal_Principal(krb5_context context,
-                     krb5_const_principal kprinc,
-                     Principal **out_hprinc);
-
-void
-kh_free_Principal(krb5_context context,
-                  Principal *principal);
-
-void
-kh_free_HostAddresses(krb5_context context,
-                      HostAddresses *addrs);
-
-krb5_error_code
 kh_get_principal(krb5_context context,
                  kh_db_context *kh,
                  krb5_const_principal princ,
@@ -86,6 +73,45 @@ kh_decrypt_key(krb5_context context,
                const krb5_key_data *key_data,
                krb5_keyblock *dbkey,
                krb5_keysalt *keysalt);
+
+void
+kh_hdb_free_entry(krb5_context context,
+                  kh_db_context *kh,
+                  hdb_entry_ex *entry);
+
+/* kdb_marshal.c */
+
+krb5_error_code
+kh_marshal_Principal(krb5_context context,
+                     krb5_const_principal kprinc,
+                     Principal **out_hprinc);
+
+krb5_error_code
+kh_unmarshal_Principal(krb5_context context,
+                       const Principal *hprinc,
+                       krb5_principal *out_kprinc);
+
+void
+kh_free_Principal(krb5_context context,
+                  Principal *principal);
+
+void
+kh_free_Event(krb5_context context,
+              Event *event);
+
+void
+kh_free_HostAddresses(krb5_context context,
+                      HostAddresses *addrs);
+
+krb5_error_code
+kh_unmarshal_hdb_entry(krb5_context context,
+                       const hdb_entry *hentry,
+                       krb5_db_entry *kentry);
+
+krb5_error_code
+kh_marshal_hdb_entry(krb5_context context,
+                     const krb5_db_entry *kentry,
+                     hdb_entry *hentry);
 
 /* kdb_windc.c */
 
