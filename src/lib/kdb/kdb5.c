@@ -2336,6 +2336,8 @@ krb5_db_get_policy(krb5_context kcontext, char *name,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_get_policy == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_get_policy(kcontext, name, policy, cnt);
     get_errmsg(kcontext, status);
     return status;

@@ -56,6 +56,8 @@ krb5_dbe_update_mkey_aux
 krb5_dbe_update_mkvno
 krb5_dbe_update_mod_princ_data
 krb5_dbe_update_tl_data
+krb5_dbekd_def_encrypt_key_data
+krb5_dbekd_def_decrypt_key_data
 krb5_dbekd_decrypt_key_data
 krb5_dbekd_encrypt_key_data
 krb5_kt_kdb_ops

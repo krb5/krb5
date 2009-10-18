@@ -671,11 +671,23 @@ kh_get_master_key_principal(krb5_context context,
     krb5_error_code code;
     krb5_key_data *key_data;
 
+    memset(kentry, 0, sizeof(*kentry));
+    *nentries = 0;
+
+    if (princ == NULL)
+        code = krb5_parse_name(context, KRB5_KDB_M_NAME, &kentry->princ);
+    else
+        code = krb5_copy_principal(context, princ, &kentry->princ);
+    if (code != 0)
+        return code;
+
     /* Return a dummy principal */
     kentry->n_key_data = 1;
     kentry->key_data = k5alloc(sizeof(krb5_key_data), &code);
-    if (code != 0)
+    if (code != 0) {
+        krb5_free_principal(context, kentry->princ);
         return code;
+    }
 
     key_data = &kentry->key_data[0];
 
@@ -935,8 +947,19 @@ kh_db_iterate(krb5_context context,
         code = kh_hdb_nextkey(context, kh, hflags, &hentry);
     }
 
-    if (code == KRB5_KDB_NOENTRY)
+    if (code == KRB5_KDB_NOENTRY) {
+        krb5_db_entry kentry;
+        int nentries;
+
+        /* Return the fake master key principal */
+        if (kh_get_master_key_principal(context, NULL,
+                                        &kentry, &nentries) == 0) {
+            code = (*func)(func_arg, &kentry);
+            kh_kdb_free_entry(context, kh, &kentry);
+        }
+
         code = 0;
+    }
 
     kh_hdb_close(context, kh);
 
@@ -1105,13 +1128,11 @@ kh_dbekd_decrypt_key_data(krb5_context context,
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
-
-    code = kh_decrypt_key(context, kh, key_data, kkey, keysalt);
-
-    k5_mutex_unlock(kh->lock);
+    if (mkey->enctype != ENCTYPE_NULL)
+        code = krb5_dbekd_def_decrypt_key_data(context, mkey, key_data,
+                                               kkey, keysalt);
+    else
+        code = kh_decrypt_key(context, kh, key_data, kkey, keysalt);
 
     return code;
 }
@@ -1182,13 +1203,12 @@ kh_dbekd_encrypt_key_data(krb5_context context,
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
-
-    code = kh_encrypt_key(context, kh, kkey, keysalt, keyver, key_data);
-
-    k5_mutex_unlock(kh->lock);
+    /* For migration */
+    if (mkey->enctype != ENCTYPE_NULL)
+        code = krb5_dbekd_def_encrypt_key_data(context, mkey, kkey,
+                                               keysalt, keyver, key_data);
+    else
+        code = kh_encrypt_key(context, kh, kkey, keysalt, keyver, key_data);
 
     return code;
 }
