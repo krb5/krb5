@@ -1460,7 +1460,6 @@ kh_put_principal(krb5_context context,
         goto cleanup;
     }
 
-#if 0
     if (kentry->e_data != NULL) {
         assert(kentry->e_length == sizeof(hdb_entry_ex));
         kh_hdb_free_entry(context, kh, KH_DB_ENTRY(kentry));
@@ -1470,7 +1469,6 @@ kh_put_principal(krb5_context context,
     kentry->e_length = sizeof(*hentry);
     kentry->e_data = (krb5_octet *)hentry;
     hentry = NULL;
-#endif
 
     kh_hdb_close(context, kh);
 
