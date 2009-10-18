@@ -50,6 +50,7 @@ krb5_k_create_key(krb5_context context, const krb5_keyblock *key_data,
 	goto cleanup;
 
     key->refcount = 1;
+    key->derived = NULL;
     *out = key;
     return 0;
 
@@ -68,8 +69,17 @@ krb5_k_reference_key(krb5_context context, krb5_key key)
 void KRB5_CALLCONV
 krb5_k_free_key(krb5_context context, krb5_key key)
 {
+    struct derived_key *dk;
+
     if (key == NULL || --key->refcount > 0)
 	return;
+
+    /* Free the derived key cache. */
+    while ((dk = key->derived) != NULL) {
+	key->derived = dk->next;
+	krb5_k_free_key(context, dk->dkey);
+	free(dk);
+    }
     krb5int_c_free_keyblock_contents(context, &key->keyblock);
 }
 

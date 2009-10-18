@@ -635,10 +635,17 @@ krb5int_locate_server (krb5_context, const krb5_data *realm,
 		       struct addrlist *, enum locate_service_type svc,
 		       int sockettype, int family);
 
+struct derived_key {
+    krb5_data constant;
+    krb5_key dkey;
+    struct derived_key *next;
+};
+
 /* Internal structure of an opaque key identifier */
 struct krb5_key_st {
     krb5_keyblock keyblock;
     int refcount;
+    struct derived_key *derived;
 };
 
 /* new encryption provider api */
