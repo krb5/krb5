@@ -209,7 +209,8 @@ kh_db_context_init(krb5_context context,
     else
         kh->mode = O_RDWR;
 
-    kh_hdb_windc_init(context, libdir, kh);
+    if (mode & KRB5_KDB_SRV_TYPE_KDC)
+        kh_hdb_windc_init(context, libdir, kh);
 
 cleanup:
     if (code != 0) {
