@@ -207,11 +207,11 @@ kh_get_tgs_key(krb5_context context,
         goto cleanup;
     }
 
-    code = kh_unmarshal_key_data(context,
-                                 NULL, /* XXX mkey */
-                                 krbtgt_key,
-                                 krbtgt_keyblock,
-                                 NULL);
+    code = kh_decrypt_key(context,
+                          KH_DB_CONTEXT(context),
+                          krbtgt_key,
+                          krbtgt_keyblock,
+                          NULL);
     if (code != 0)
         goto cleanup;
 

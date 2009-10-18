@@ -5,6 +5,8 @@
 #include "hdb.h"
 #include "windc_plugin.h"
 
+typedef krb5_int32 heim_error_code;
+
 typedef struct _kh_db_context {
     k5_mutex_t *lock;
     heim_context hcontext;
@@ -12,18 +14,18 @@ typedef struct _kh_db_context {
 
     /* libkrb5 APIs */
     struct plugin_file_handle *libkrb5;
-    krb5_error_code (*heim_init_context)(heim_context *);
+    heim_error_code (*heim_init_context)(heim_context *);
     void (*heim_free_context)(heim_context);
     void (*heim_free_principal)(heim_context, Principal *);
-    krb5_error_code (*heim_free_addresses)(heim_context, HostAddresses *);
+    heim_error_code (*heim_free_addresses)(heim_context, HostAddresses *);
     void (*heim_pac_free)(heim_context, heim_pac);
-    krb5_error_code (*heim_pac_parse)(heim_context, const void *,
+    heim_error_code (*heim_pac_parse)(heim_context, const void *,
                                       size_t, heim_pac *);
-    krb5_error_code (*heim_pac_verify)(heim_context, const heim_pac,
+    heim_error_code (*heim_pac_verify)(heim_context, const heim_pac,
                                        time_t, const Principal *,
                                        const EncryptionKey *,
                                        const EncryptionKey *);
-    krb5_error_code (*heim_pac_sign)(heim_context, heim_pac,
+    heim_error_code (*heim_pac_sign)(heim_context, heim_pac,
                                      time_t, Principal *,
                                      const EncryptionKey *,
                                      const EncryptionKey *,
@@ -31,8 +33,9 @@ typedef struct _kh_db_context {
 
     /* libhdb APIs */
     struct plugin_file_handle *libhdb;
-    krb5_error_code (*hdb_create)(heim_context, HDB **, const char *);
-    krb5_error_code (*hdb_seal_keys)(heim_context, HDB *, hdb_entry *);
+    heim_error_code (*hdb_create)(heim_context, HDB **, const char *);
+    heim_error_code (*hdb_seal_key)(heim_context, HDB *, Key *);
+    heim_error_code (*hdb_unseal_key)(heim_context, HDB *, Key *);
     void (*hdb_free_entry)(heim_context, hdb_entry_ex *);
 
     /* widdc SPIs */
@@ -50,7 +53,7 @@ typedef struct _kh_db_context {
 /* kdb_hdb.c */
 
 krb5_error_code
-kh_map_error(krb5_error_code code);
+kh_map_error(heim_error_code code);
 
 krb5_error_code
 kh_marshal_Principal(krb5_context context,
@@ -78,11 +81,12 @@ kh_kdb_free_entry(krb5_context context,
                   krb5_db_entry *entry);
 
 krb5_error_code
-kh_unmarshal_key_data(krb5_context context,
-                      const krb5_keyblock *mkey,
-                      const krb5_key_data *key_data,
-                      krb5_keyblock *dbkey,
-                      krb5_keysalt *keysalt);
+kh_decrypt_key(krb5_context context,
+               kh_db_context *kh,
+               const krb5_key_data *key_data,
+               krb5_keyblock *dbkey,
+               krb5_keysalt *keysalt);
+
 /* kdb_windc.c */
 
 krb5_error_code

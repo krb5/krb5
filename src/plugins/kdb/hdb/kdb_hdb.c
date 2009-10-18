@@ -191,7 +191,8 @@ kh_db_context_init(krb5_context context,
     }
 
     GET_PLUGIN_FUNC(libhdb,  "hdb_create",            hdb_create);
-    GET_PLUGIN_FUNC(libhdb,  "hdb_seal_keys",         hdb_seal_keys);
+    GET_PLUGIN_FUNC(libhdb,  "hdb_seal_key",          hdb_seal_key);
+    GET_PLUGIN_FUNC(libhdb,  "hdb_unseal_key",        hdb_unseal_key);
     GET_PLUGIN_FUNC(libhdb,  "hdb_free_entry",        hdb_free_entry);
 
     code = kh_map_error((*kh->heim_init_context)(&kh->hcontext));
@@ -464,14 +465,27 @@ kh_hdb_find_extension(const hdb_entry *entry, unsigned int type)
 }
 
 static krb5_error_code
-kh_hdb_seal_keys(krb5_context context,
-                 kh_db_context *kh,
-                 HDB *hdb,
-                 hdb_entry *entry)
+kh_hdb_seal_key(krb5_context context,
+                kh_db_context *kh,
+                HDB *hdb,
+                Key *key)
 {
     krb5_error_code hcode;
 
-    hcode = (*kh->hdb_seal_keys)(kh->hcontext, hdb, entry);
+    hcode = (*kh->hdb_seal_key)(kh->hcontext, hdb, key);
+
+    return kh_map_error(hcode);
+}
+
+static krb5_error_code
+kh_hdb_unseal_key(krb5_context context,
+                  kh_db_context *kh,
+                  HDB *hdb,
+                  Key *key)
+{
+    krb5_error_code hcode;
+
+    hcode = (*kh->hdb_unseal_key)(kh->hcontext, hdb, key);
 
     return kh_map_error(hcode);
 }
@@ -1374,7 +1388,7 @@ kh_db_get_principal(krb5_context context,
     if (code != 0)
         return code;
 
-    hflags = HDB_F_DECRYPT;
+    hflags = 0;
     if (kflags & KRB5_KDB_FLAG_CANONICALIZE)
         hflags |= HDB_F_CANON;
     if (kflags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY)
@@ -1443,10 +1457,6 @@ kh_put_principal(krb5_context context,
         goto cleanup;
 
     code = kh_marshal_hdb_entry(context, kentry, &hentry->entry);
-    if (code != 0)
-        goto cleanup;
-
-    code = kh_hdb_seal_keys(context, kh, kh->hdb, &hentry->entry);
     if (code != 0)
         goto cleanup;
 
@@ -1565,7 +1575,7 @@ kh_db_iterate(krb5_context context,
     krb5_error_code code;
     kh_db_context *kh = KH_DB_CONTEXT(context);
     hdb_entry_ex hentry;
-    unsigned int hflags = HDB_F_DECRYPT | HDB_F_GET_ANY;
+    unsigned int hflags = HDB_F_GET_ANY;
 
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
@@ -1674,31 +1684,47 @@ kh_get_master_key(krb5_context context,
 }
 
 krb5_error_code
-kh_unmarshal_key_data(krb5_context context,
-                      const krb5_keyblock *mkey,
-                      const krb5_key_data *key_data,
-                      krb5_keyblock *dbkey,
-                      krb5_keysalt *keysalt)
+kh_decrypt_key(krb5_context context,
+               kh_db_context *kh,
+               const krb5_key_data *key_data,
+               krb5_keyblock *kkey,
+               krb5_keysalt *keysalt)
 {
-    dbkey->magic = KV5M_KEYBLOCK;
+    krb5_error_code code;
+    Key hkey;
 
-    dbkey->enctype = key_data->key_data_type[0];
-    dbkey->contents = malloc(key_data->key_data_length[0]);
-    if (dbkey->contents == NULL) {
-        return ENOMEM;
-    }
-    memcpy(dbkey->contents, key_data->key_data_contents[0],
+    memset(&hkey, 0, sizeof(hkey));
+
+    hkey.key.keytype = key_data->key_data_type[0];
+    hkey.key.keyvalue.data = k5alloc(key_data->key_data_length[0], &code);
+    if (code != 0)
+        return code;
+
+    memcpy(hkey.key.keyvalue.data, key_data->key_data_contents[0],
            key_data->key_data_length[0]);
-    dbkey->length = key_data->key_data_length[0];
+    hkey.key.keyvalue.length = key_data->key_data_length[0];
+
+    code = kh_hdb_unseal_key(context, kh, kh->hdb, &hkey);
+    if (code != 0) {
+        memset(hkey.key.keyvalue.data, 0, hkey.key.keyvalue.length);
+        free(hkey.key.keyvalue.data);
+        return code;
+    }
+
+    kkey->magic     = KV5M_KEYBLOCK;
+    kkey->enctype   = hkey.key.keytype;
+    kkey->contents  = hkey.key.keyvalue.data;
+    kkey->length    = hkey.key.keyvalue.length;
 
     if (keysalt != NULL) {
         keysalt->type = key_data->key_data_type[1];
-        keysalt->data.data = malloc(key_data->key_data_length[1]);
-        if (keysalt->data.data == NULL) {
-            memset(dbkey->contents, 0, dbkey->length);
-            free(dbkey->contents);
-            return ENOMEM;
+        keysalt->data.data = k5alloc(key_data->key_data_length[1], &code);
+        if (code != 0) {
+            memset(hkey.key.keyvalue.data, 0, hkey.key.keyvalue.length);
+            free(hkey.key.keyvalue.data);
+            return code;
         }
+
         memcpy(keysalt->data.data, key_data->key_data_contents[1],
                key_data->key_data_length[1]);
         keysalt->data.length = key_data->key_data_length[1];
@@ -1708,40 +1734,98 @@ kh_unmarshal_key_data(krb5_context context,
 }
 
 static krb5_error_code
-kh_marshal_key_data(krb5_context context,
-                    const krb5_keyblock *mkey,
-                    const krb5_keyblock *dbkey,
-                    const krb5_keysalt *keysalt,
-                    int keyver,
-                    krb5_key_data *key_data)
+kh_dbekd_decrypt_key_data(krb5_context context,
+                          const krb5_keyblock *mkey,
+                          const krb5_key_data *key_data,
+                          krb5_keyblock *kkey,
+                          krb5_keysalt *keysalt)
 {
+    kh_db_context *kh = KH_DB_CONTEXT(context);
     krb5_error_code code;
 
-    memset(key_data, 0, sizeof(*key_data));
-
-    key_data->key_data_ver = KRB5_KDB_V1_KEY_DATA_ARRAY;
-    key_data->key_data_kvno = keyver;
-
-    key_data->key_data_type[0] = dbkey->enctype;
-    key_data->key_data_contents[0] = k5alloc(dbkey->length, &code);
+    code = k5_mutex_lock(kh->lock);
     if (code != 0)
         return code;
-    memcpy(key_data->key_data_contents[0], dbkey->contents, dbkey->length);
-    key_data->key_data_length[0] = dbkey->length;
+
+    code = kh_decrypt_key(context, kh, key_data, kkey, keysalt);
+
+    k5_mutex_unlock(kh->lock);
+
+    return code;
+}
+
+static krb5_error_code
+kh_encrypt_key(krb5_context context,
+               kh_db_context *kh,
+               const krb5_keyblock *kkey,
+               const krb5_keysalt *keysalt,
+               int keyver,
+               krb5_key_data *key_data)
+{
+    krb5_error_code code;
+    Key hkey;
+
+    memset(&hkey, 0, sizeof(hkey));
+    memset(key_data, 0, sizeof(*key_data));
+
+    hkey.key.keytype = kkey->enctype;
+    hkey.key.keyvalue.data = k5alloc(kkey->length, &code);
+    if (code != 0)
+        return code;
+
+    memcpy(hkey.key.keyvalue.data, kkey->contents, kkey->length);
+    hkey.key.keyvalue.length = kkey->length;
+
+    code = kh_hdb_seal_key(context, kh, kh->hdb, &hkey);
+    if (code != 0) {
+        memset(hkey.key.keyvalue.data, 0, hkey.key.keyvalue.length);
+        free(hkey.key.keyvalue.data);
+        return code;
+    }
+
+    key_data->key_data_ver          = KRB5_KDB_V1_KEY_DATA_ARRAY;
+    key_data->key_data_kvno         = keyver;
+    key_data->key_data_type[0]      = hkey.key.keytype;
+    key_data->key_data_contents[0]  = hkey.key.keyvalue.data;
+    key_data->key_data_length[0]    = hkey.key.keyvalue.length;
 
     if (keysalt != NULL) {
-
         key_data->key_data_type[1] = keysalt->type;
         key_data->key_data_contents[1] = k5alloc(keysalt->data.length, &code);
         if (code != 0) {
-            free(key_data->key_data_contents[0]);
+            memset(hkey.key.keyvalue.data, 0, hkey.key.keyvalue.length);
+            free(hkey.key.keyvalue.data);
             return code;
         }
+
         memcpy(key_data->key_data_contents[1],
                keysalt->data.data, keysalt->data.length);
         key_data->key_data_length[1] = keysalt->data.length;
     }
+
     return 0;
+}
+
+static krb5_error_code
+kh_dbekd_encrypt_key_data(krb5_context context,
+                          const krb5_keyblock *mkey,
+                          const krb5_keyblock *kkey,
+                          const krb5_keysalt *keysalt,
+                          int keyver,
+                          krb5_key_data *key_data)
+{
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    krb5_error_code code;
+
+    code = k5_mutex_lock(kh->lock);
+    if (code != 0)
+        return code;
+
+    code = kh_encrypt_key(context, kh, kkey, keysalt, keyver, key_data);
+
+    k5_mutex_unlock(kh->lock);
+
+    return code;
 }
 
 /*
@@ -1873,8 +1957,8 @@ kdb_vftabl kdb_function_table = {
     NULL,
     NULL,
     NULL,
-    kh_unmarshal_key_data,
-    kh_marshal_key_data,
+    kh_dbekd_decrypt_key_data,
+    kh_dbekd_encrypt_key_data,
     kh_db_invoke,
 };
 
