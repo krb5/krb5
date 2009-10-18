@@ -32,6 +32,7 @@ typedef struct _kh_db_context {
     /* libhdb APIs */
     struct plugin_file_handle *libhdb;
     krb5_error_code (*hdb_create)(heim_context, HDB **, const char *);
+    krb5_error_code (*hdb_seal_keys)(heim_context, HDB *, hdb_entry *);
     void (*hdb_free_entry)(heim_context, hdb_entry_ex *);
 
     /* widdc SPIs */
@@ -46,17 +47,7 @@ typedef struct _kh_db_context {
 #define KH_DB_ENTRY(_entry)         \
     ((hdb_entry_ex *)(_entry)->e_data)
 
-krb5_error_code
-kh_db_sign_auth_data(krb5_context context,
-                     unsigned int method,
-                     const krb5_data *req_data,
-                     krb5_data *rep_data);
-
-krb5_error_code
-kh_db_check_policy_as(krb5_context context,
-                      unsigned int method,
-                      const krb5_data *req_data,
-                      krb5_data *rep_data);
+/* kdb_hdb.c */
 
 krb5_error_code
 kh_map_error(krb5_error_code code);
@@ -73,6 +64,38 @@ kh_free_Principal(krb5_context context,
 void
 kh_free_HostAddresses(krb5_context context,
                       HostAddresses *addrs);
+
+krb5_error_code
+kh_get_principal(krb5_context context,
+                 kh_db_context *kh,
+                 krb5_const_principal princ,
+                 unsigned int hflags,
+                 krb5_db_entry *kentry);
+
+void
+kh_kdb_free_entry(krb5_context context,
+                  kh_db_context *kh,
+                  krb5_db_entry *entry);
+
+krb5_error_code
+kh_unmarshal_key_data(krb5_context context,
+                      const krb5_keyblock *mkey,
+                      const krb5_key_data *key_data,
+                      krb5_keyblock *dbkey,
+                      krb5_keysalt *keysalt);
+/* kdb_windc.c */
+
+krb5_error_code
+kh_db_sign_auth_data(krb5_context context,
+                     unsigned int method,
+                     const krb5_data *req_data,
+                     krb5_data *rep_data);
+
+krb5_error_code
+kh_db_check_policy_as(krb5_context context,
+                      unsigned int method,
+                      const krb5_data *req_data,
+                      krb5_data *rep_data);
 
 krb5_error_code
 kh_hdb_windc_init(krb5_context context,

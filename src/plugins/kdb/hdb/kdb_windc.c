@@ -165,15 +165,15 @@ kh_pac_sign(krb5_context context,
  */
 static krb5_error_code
 kh_get_tgs_key(krb5_context context,
+               kh_db_context *kh,
                const krb5_principal princ,
                krb5_keyblock *krbtgt_keyblock)
 {
     krb5_error_code code;
     krb5_principal tgsname = NULL;
-    krb5_boolean more = FALSE;
     krb5_key_data *krbtgt_key = NULL;
     krb5_db_entry krbtgt;
-    int nprincs = 0;
+    unsigned int hflags = HDB_F_DECRYPT | HDB_F_GET_KRBTGT;
 
     memset(&krbtgt, 0, sizeof(krbtgt));
     krbtgt_keyblock->contents = NULL;
@@ -190,26 +190,15 @@ kh_get_tgs_key(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = krb5_db_get_principal_ext(context,
-                                     tgsname,
-                                     0,
-                                     &krbtgt,
-                                     &nprincs,
-                                     &more);
-    if (code == 0) {
-        if (more)
-            code = KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
-        else if (nprincs == 0)
-            code = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
-    }
+    code = kh_get_principal(context, kh, tgsname, hflags, &krbtgt);
     if (code != 0)
         goto cleanup;
 
     code = krb5_dbe_find_enctype(context,
                                  &krbtgt,
-                                 -1,
-                                 -1,
-                                 -1,
+                                 -1,    /* ignore enctype */
+                                 -1,    /* ignore salttype */
+                                 0,     /* highest kvno */
                                  &krbtgt_key);
     if (code != 0)
         goto cleanup;
@@ -218,17 +207,16 @@ kh_get_tgs_key(krb5_context context,
         goto cleanup;
     }
 
-    code = krb5_dbekd_decrypt_key_data(context,
-                                       NULL, /* XXX mkey */
-                                       krbtgt_key,
-                                       krbtgt_keyblock,
-                                       NULL);
+    code = kh_unmarshal_key_data(context,
+                                 NULL, /* XXX mkey */
+                                 krbtgt_key,
+                                 krbtgt_keyblock,
+                                 NULL);
     if (code != 0)
         goto cleanup;
 
 cleanup:
-    if (nprincs != 0)
-        krb5_db_free_principal(context, &krbtgt, nprincs);
+    kh_kdb_free_entry(context, KH_DB_CONTEXT(context), &krbtgt);
     krb5_free_principal(context, tgsname);
 
     return code;
@@ -344,7 +332,9 @@ kh_db_sign_auth_data(krb5_context context,
      * TGS key, so we need to explicitly lookup our TGS key.
      */
     if (req->flags & KRB5_KDB_FLAG_CROSS_REALM) {
-        code = kh_get_tgs_key(context, req->server->princ, &krbtgt_kkey);
+        assert(!is_as_req);
+
+        code = kh_get_tgs_key(context, kh, req->server->princ, &krbtgt_kkey);
         if (code != 0)
             goto cleanup;
 
