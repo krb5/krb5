@@ -638,6 +638,7 @@ krb5int_locate_server (krb5_context, const krb5_data *realm,
 /* Internal structure of an opaque key identifier */
 struct krb5_key_st {
     krb5_keyblock keyblock;
+    int refcount;
 };
 
 /* new encryption provider api */

@@ -715,13 +715,18 @@ krb5_error_code KRB5_CALLCONV
 
 /*
  * krb5_k_* functions use opaque key identifiers and should perform
- * better for repeated operations with the same key usage.
+ * better for repeated operations with the same key usage.  krb5_keys
+ * are immutable once created.
  */
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_create_key(krb5_context context, const krb5_keyblock *key_data,
 		  krb5_key *out);
 
+/* Since keys are immutable, they can be "copied" by reference count. */
+void KRB5_CALLCONV krb5_k_reference_key(krb5_context context, krb5_key key);
+
+/* Decrement the reference count on a key and free it if it hits zero. */
 void KRB5_CALLCONV krb5_k_free_key(krb5_context context, krb5_key key);
 
 krb5_error_code KRB5_CALLCONV

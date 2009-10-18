@@ -49,6 +49,7 @@ krb5_k_create_key(krb5_context context, const krb5_keyblock *key_data,
     if (code)
 	goto cleanup;
 
+    key->refcount = 1;
     *out = key;
     return 0;
 
@@ -57,11 +58,17 @@ cleanup:
     return code;
 }
 
+void KRB5_CALLCONV
+krb5_k_reference_key(krb5_context context, krb5_key key)
+{
+    key->refcount++;
+}
+
 /* Free the memory used by a krb5_key. */
 void KRB5_CALLCONV
 krb5_k_free_key(krb5_context context, krb5_key key)
 {
-    if (key == NULL)
+    if (key == NULL || --key->refcount > 0)
 	return;
     krb5int_c_free_keyblock_contents(context, &key->keyblock);
 }
