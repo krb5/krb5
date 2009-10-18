@@ -124,6 +124,7 @@ static krb5_error_code
 kh_db_context_init(krb5_context context,
                    const char *libdir,
                    const char *filename,
+                   int mode,
                    kh_db_context **pkh)
 {
     kh_db_context *kh;
@@ -203,6 +204,11 @@ kh_db_context_init(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+    if (mode & KRB5_KDB_OPEN_RO)
+        kh->mode = O_RDONLY;
+    else
+        kh->mode = O_RDWR;
+
     kh_hdb_windc_init(context, libdir, kh);
 
 cleanup:
@@ -253,7 +259,7 @@ kh_init_module(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = kh_db_context_init(context, libdir, filename, &kh);
+    code = kh_db_context_init(context, libdir, filename, mode, &kh);
     if (code != 0)
         goto cleanup;
 
@@ -567,7 +573,7 @@ kh_get_principal(krb5_context context,
     if (code != 0)
         return code;
 
-    code = kh_hdb_open(context, kh, O_RDONLY, 0);
+    code = kh_hdb_open(context, kh, kh->mode, 0);
     if (code != 0) {
         kh_free_Principal(context, hprinc);
         return code;
@@ -696,7 +702,7 @@ kh_put_principal(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = kh_hdb_open(context, kh, O_RDWR, 0);
+    code = kh_hdb_open(context, kh, kh->mode, 0);
     if (code != 0)
         goto cleanup;
 
@@ -767,7 +773,7 @@ kh_delete_principal(krb5_context context,
     if (code != 0)
         return code;
 
-    code = kh_hdb_open(context, kh, O_RDONLY, 0);
+    code = kh_hdb_open(context, kh, kh->mode, 0);
     if (code != 0) {
         kh_free_Principal(context, hprinc);
         return code;
@@ -822,7 +828,7 @@ kh_db_iterate(krb5_context context,
 
     memset(&hentry, 0, sizeof(hentry));
 
-    code = kh_hdb_open(context, kh, O_RDONLY, 0);
+    code = kh_hdb_open(context, kh, kh->mode, 0);
     if (code != 0)
         goto cleanup;
 

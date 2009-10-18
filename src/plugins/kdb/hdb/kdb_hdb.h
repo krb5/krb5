@@ -11,6 +11,7 @@ typedef struct _kh_db_context {
     k5_mutex_t *lock;
     heim_context hcontext;
     HDB *hdb;
+    int mode;
 
     /* libkrb5 APIs */
     struct plugin_file_handle *libkrb5;
