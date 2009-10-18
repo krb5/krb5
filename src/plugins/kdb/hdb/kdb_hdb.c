@@ -1,3 +1,4 @@
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * plugins/kdb/hdb/kdb_hdb.c
  *
