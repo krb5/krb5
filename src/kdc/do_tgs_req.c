@@ -699,6 +699,10 @@ tgt_again:
     else
         enc_tkt_reply.client = header_enc_tkt->client;
 
+    enc_tkt_reply.session = &session_key;
+    enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
+    enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
+
     errcode = handle_authdata(kdc_context,
                               c_flags,
                               (c_nprincs != 0) ? &client : NULL,
@@ -727,10 +731,6 @@ tgt_again:
             goto cleanup;
         }
     }
-
-    enc_tkt_reply.session = &session_key;
-    enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
-    enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 
     /*
      * Only add the realm of the presented tgt to the transited list if 

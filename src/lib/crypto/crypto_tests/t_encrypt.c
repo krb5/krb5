@@ -105,7 +105,9 @@ main ()
   if (out.data == NULL || out2.data == NULL
       || check.data == NULL || check2.data == NULL)
       abort();
+  out.magic = KV5M_DATA;
   out.length = 2048;
+  out2.magic = KV5M_DATA;
   out2.length = 2048;
   check.length = 2048;
   check2.length = 2048;
@@ -167,6 +169,7 @@ main ()
 	     compare_results(&in, &iov[1].data));
 
 	/* Set up iovecs for AEAD encryption. */
+	signdata.magic = KV5M_DATA;
 	signdata.data = (char *) "This should be signed";
 	signdata.length = strlen(signdata.data);
 	iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
@@ -251,6 +254,7 @@ main ()
 	krb5_c_decrypt (context, keyblock, 9, 0, &enc_out, &check));
   test ("Comparing", compare_results (&in, &check));
 
+  krb5_free_keyblock (context, keyblock);
   free(out.data);
   free(out2.data);
   free(check.data);

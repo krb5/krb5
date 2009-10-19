@@ -31,6 +31,8 @@
 
 #include "k5-int.h"
 #include "auth_con.h"
+#include "authdata.h"
+#include "int-proto.h"
 
 /*
  * essentially the same as krb_rd_req, but uses a decoded AP_REQ as
@@ -92,7 +94,8 @@ krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
 
 static krb5_error_code
 krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
-			     krb5_const_principal server, krb5_keytab keytab)
+			     krb5_const_principal server, krb5_keytab keytab,
+			     krb5_keyblock *key)
 {
     krb5_error_code 	  retval;
     krb5_keytab_entry 	  ktent;
@@ -107,10 +110,12 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 				   req->ticket->enc_part.enctype, &ktent);
 	if (retval == 0) {
 	    retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
+	    if (retval == 0 && key != NULL)
+		retval = krb5_copy_keyblock_contents(context, &ktent.key, key);
 
 	    (void) krb5_free_keytab_entry_contents(context, &ktent);
 	}
-    } else { 
+    } else {
 	krb5_error_code code;
 	krb5_kt_cursor cursor;
 
@@ -142,6 +147,8 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 		 * server as it appeared in the ticket.
 		 */
 		retval = krb5_copy_principal(context, ktent.principal, &tmp);
+		if (retval == 0 && key != NULL)
+		    retval = krb5_copy_keyblock_contents(context, &ktent.key, key);
 		if (retval == 0) {
 		    krb5_free_principal(context, req->ticket->server);
 		    req->ticket->server = tmp;
@@ -204,11 +211,15 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 {
     krb5_error_code 	  retval = 0;
     krb5_principal_data	princ_data;
-    krb5_enctype         *desired_etypes = NULL;
+    krb5_enctype	 *desired_etypes = NULL;
     int			  desired_etypes_len = 0;
     int			  rfc4537_etypes_len = 0;
-    krb5_enctype         *permitted_etypes = NULL;
+    krb5_enctype	 *permitted_etypes = NULL;
     int			  permitted_etypes_len = 0;
+    krb5_keyblock	 decrypt_key;
+
+    decrypt_key.enctype = ENCTYPE_NULL;
+    decrypt_key.contents = NULL;
  
     req->ticket->enc_part2 = NULL;
     if (server && krb5_is_referral_realm(&server->realm)) {
@@ -232,14 +243,20 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 					    &(*auth_context)->key->keyblock,
 					    req->ticket)))
 	    goto cleanup;
+	if (check_valid_flag) {
+	    decrypt_key = (*auth_context)->key->keyblock;
+	    (*auth_context)->key->keyblock.contents = NULL;
+	}
 	krb5_k_free_key(context, (*auth_context)->key);
 	(*auth_context)->key = NULL;
     } else {
-    	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, server, keytab)))
+    	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req,
+						   server, keytab,
+			    check_valid_flag ? &decrypt_key : NULL)))
 	    goto cleanup;
     }
 
-    /* XXX this is an evil hack.  check_valid_flag is set iff the call
+   /* XXX this is an evil hack.  check_valid_flag is set iff the call
        is not from inside the kdc.  we can use this to determine which
        key usage to use */
 #ifndef LEAN_CLIENT
@@ -285,7 +302,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 
       	/* If the transited list is empty, then we have at most one hop */
       	if (trans->tr_contents.data && trans->tr_contents.data[0])
-            retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	    retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
     }
 
 #elif defined(_NO_CROSS_REALM)
@@ -326,7 +343,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	/*
       	 * If the transited list is not empty, then check that all realms 
       	 * transited are within the hierarchy between the client's realm  
-      	 * and the local realm.                                        
+      	 * and the local realm.
   	 */
 	if (trans->tr_contents.data && trans->tr_contents.data[0]) {
 	    retval = krb5_check_transited_list(context, &(trans->tr_contents), 
@@ -345,7 +362,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 
     if ((*auth_context)->rcache) {
 	krb5_donot_replay  rep;
-        krb5_tkt_authent   tktauthent;
+	krb5_tkt_authent   tktauthent;
 
 	tktauthent.ticket = req->ticket;	
 	tktauthent.authenticator = (*auth_context)->authentp;
@@ -377,6 +394,17 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 	retval = KRB5KRB_AP_ERR_TKT_INVALID;
 	goto cleanup;
       }
+
+      if ((retval = krb5_authdata_context_init(context,
+					       &(*auth_context)->ad_context)))
+	goto cleanup;
+      if ((retval = krb5int_authdata_verify(context,
+					    (*auth_context)->ad_context,
+					    AD_USAGE_MASK,
+					    auth_context,
+					    &decrypt_key,
+					    req)))
+        goto cleanup;
     }
 
     /* read RFC 4537 etype list from sender */
@@ -522,18 +550,21 @@ cleanup:
 	    krb5_free_enc_tkt_part(context, req->ticket->enc_part2);
 	req->ticket->enc_part2 = NULL;
     }
+    if (check_valid_flag)
+	krb5_free_keyblock_contents(context, &decrypt_key);
+
     return retval;
 }
 
 krb5_error_code
 krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
-		    const krb5_ap_req *req, krb5_const_principal server,
-		    krb5_keytab keytab, krb5_flags *ap_req_options,
-		    krb5_ticket **ticket)
+                    const krb5_ap_req *req, krb5_const_principal server,
+                    krb5_keytab keytab, krb5_flags *ap_req_options,
+                    krb5_ticket **ticket)
 {
   krb5_error_code retval;
   retval = krb5_rd_req_decoded_opt(context, auth_context,
-				   req, server, keytab, 
+				   req, server, keytab,
 				   ap_req_options, ticket,
 				   1); /* check_valid_flag */
   return retval;
@@ -541,14 +572,14 @@ krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
 
 krb5_error_code
 krb5_rd_req_decoded_anyflag(krb5_context context,
-			    krb5_auth_context *auth_context,
-			    const krb5_ap_req *req,
-			    krb5_const_principal server, krb5_keytab keytab,
-			    krb5_flags *ap_req_options, krb5_ticket **ticket)
+                            krb5_auth_context *auth_context,
+                            const krb5_ap_req *req,
+                            krb5_const_principal server, krb5_keytab keytab,
+                            krb5_flags *ap_req_options, krb5_ticket **ticket)
 {
   krb5_error_code retval;
   retval = krb5_rd_req_decoded_opt(context, auth_context,
-				   req, server, keytab, 
+				   req, server, keytab,
 				   ap_req_options, ticket,
 				   0); /* don't check_valid_flag */
   return retval;

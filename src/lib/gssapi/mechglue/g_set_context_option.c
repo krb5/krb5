@@ -65,9 +65,10 @@ gss_set_sec_context_option (OM_uint32 *minor_status,
 	mech = gssint_get_mechanism (ctx->mech_type);
     }
 
-    if (mech == NULL || mech->gss_set_sec_context_option == NULL) {
+    if (mech == NULL)
 	return GSS_S_BAD_MECH;
-    }
+    if (mech->gss_set_sec_context_option == NULL)
+	return GSS_S_UNAVAILABLE;
 
     status = mech->gss_set_sec_context_option(minor_status,
 					      ctx ? &ctx->internal_ctx_id :

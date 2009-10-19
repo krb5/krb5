@@ -109,7 +109,7 @@ kg_is_initiator_cred(krb5_gss_cred_id_t cred)
 static OM_uint32
 kg_impersonate_name(OM_uint32 *minor_status,
                     const krb5_gss_cred_id_t impersonator_cred,
-                    const krb5_principal user,
+                    const krb5_gss_name_t user,
                     OM_uint32 time_req,
                     const gss_OID_set desired_mechs,
                     krb5_gss_cred_id_t *output_cred,
@@ -124,11 +124,31 @@ kg_impersonate_name(OM_uint32 *minor_status,
     memset(&in_creds, 0, sizeof(in_creds));
     memset(&out_creds, 0, sizeof(out_creds));
 
-    in_creds.client = user;
-    in_creds.server = impersonator_cred->princ;
+    in_creds.client = user->princ;
+    in_creds.server = impersonator_cred->name->princ;
 
     if (impersonator_cred->req_enctypes != NULL)
         in_creds.keyblock.enctype = impersonator_cred->req_enctypes[0];
+
+    code = k5_mutex_lock(&user->lock);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
+    if (user->ad_context != NULL) {
+        code = krb5_authdata_export_authdata(context,
+                                             user->ad_context,
+                                             AD_USAGE_TGS_REQ,
+                                             &in_creds.authdata);
+        if (code != 0) {
+            k5_mutex_unlock(&user->lock);
+            *minor_status = code;
+            return GSS_S_FAILURE;
+        }
+    }
+
+    k5_mutex_unlock(&user->lock);
 
     code = krb5_get_credentials_for_user(context,
                                          KRB5_GC_CANONICALIZE | KRB5_GC_NO_STORE,
@@ -136,6 +156,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
                                          &in_creds,
                                          NULL, &out_creds);
     if (code != 0) {
+        krb5_free_authdata(context, in_creds.authdata);
         *minor_status = code;
         return GSS_S_FAILURE;
     }
@@ -150,6 +171,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
                                          time_rec,
                                          context);
 
+    krb5_free_authdata(context, in_creds.authdata);
     krb5_free_creds(context, out_creds);
 
     return major_status;
@@ -207,7 +229,7 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 
     major_status = kg_impersonate_name(minor_status,
                                        (krb5_gss_cred_id_t)impersonator_cred_handle,
-                                       (krb5_principal)desired_name,
+                                       (krb5_gss_name_t)desired_name,
                                        time_req,
                                        desired_mechs,
                                        &cred,
@@ -242,11 +264,13 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     k5_mutex_assert_locked(&impersonator_cred->lock);
 
     if (!kg_is_initiator_cred(impersonator_cred) ||
-        impersonator_cred->princ == NULL ||
+        impersonator_cred->name == NULL ||
         impersonator_cred->proxy_cred) {
         code = G_BAD_USAGE;
         goto cleanup;
     }
+
+    assert(impersonator_cred->name->princ != NULL);
 
     assert(subject_creds != NULL);
     assert(subject_creds->client != NULL);
@@ -277,7 +301,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
 
     cred->tgt_expire = impersonator_cred->tgt_expire;
 
-    code = krb5_copy_principal(context, subject_creds->client, &cred->princ);
+    code = kg_init_name(context, subject_creds->client, NULL, 0, &cred->name);
     if (code != 0)
         goto cleanup;
 
@@ -286,8 +310,8 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
         goto cleanup;
 
     code = krb5_cc_initialize(context, cred->ccache,
-                              cred->proxy_cred ? impersonator_cred->princ :
-                                    (krb5_principal)subject_creds->client);
+                              cred->proxy_cred ? impersonator_cred->name->princ :
+                                    subject_creds->client);
     if (code != 0)
         goto cleanup;
 
@@ -334,10 +358,8 @@ cleanup:
 
     if (GSS_ERROR(major_status) && cred != NULL) {
         k5_mutex_destroy(&cred->lock);
-        if (cred->ccache != NULL)
-            krb5_cc_destroy(context, cred->ccache);
-        if (cred->princ != NULL)
-            krb5_free_principal(context, cred->princ);
+        krb5_cc_destroy(context, cred->ccache);
+        kg_release_name(context, 0, &cred->name);
         xfree(cred);
     }
 

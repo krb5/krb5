@@ -1263,3 +1263,23 @@ encode_krb5_pa_s4u_x509_user:
 .  .  [0] [Integer] 1
 .  .  [1] [Octet String] "1234"
 
+encode_krb5_ad_kdcissued:
+
+[Sequence/Sequence Of] 
+.  [0] [Sequence/Sequence Of] 
+.  .  [0] [Integer] 1
+.  .  [1] [Octet String] "1234"
+.  [1] [General string] "ATHENA.MIT.EDU"
+.  [2] [Sequence/Sequence Of] 
+.  .  [0] [Integer] 1
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [General string] "hftsai"
+.  .  .  [General string] "extra"
+.  [3] [Sequence/Sequence Of] 
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "foobar"
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "foobar"
+

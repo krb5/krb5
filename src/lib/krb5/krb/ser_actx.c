@@ -569,5 +569,7 @@ krb5_ser_auth_context_init(krb5_context kcontext)
 	kret = krb5_ser_keyblock_init(kcontext);
     if (!kret)
 	kret = krb5_ser_principal_init(kcontext);
+    if (!kret)
+	kret = krb5_ser_authdata_context_init(kcontext);
     return(kret);
 }

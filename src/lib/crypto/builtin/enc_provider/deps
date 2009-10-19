@@ -8,10 +8,10 @@ des.so des.po $(OUTPRE)des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/des/des_int.h $(srcdir)/../../builtin/enc_provider/des.c \
-  $(srcdir)/../../builtin/enc_provider/enc_provider.h \
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/des/des_int.h \
+  $(srcdir)/../../builtin/enc_provider/des.c $(srcdir)/../../builtin/enc_provider/enc_provider.h \
   $(srcdir)/../../krb/aead.h $(srcdir)/../../krb/cksumtypes.h \
   $(srcdir)/../../krb/rand2key/rand2key.h
 des3.so des3.po $(OUTPRE)des3.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -21,11 +21,11 @@ des3.so des3.po $(OUTPRE)des3.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/des/des_int.h $(srcdir)/../../builtin/enc_provider/des3.c \
-  $(srcdir)/../../krb/aead.h $(srcdir)/../../krb/cksumtypes.h \
-  $(srcdir)/../../krb/rand2key/rand2key.h
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/des/des_int.h \
+  $(srcdir)/../../builtin/enc_provider/des3.c $(srcdir)/../../krb/aead.h \
+  $(srcdir)/../../krb/cksumtypes.h $(srcdir)/../../krb/rand2key/rand2key.h
 aes.so aes.po $(OUTPRE)aes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -33,10 +33,11 @@ aes.so aes.po $(OUTPRE)aes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/aes/aes.h $(srcdir)/../../builtin/aes/uitypes.h \
-  $(srcdir)/../../builtin/enc_provider/aes.c $(srcdir)/../../builtin/enc_provider/enc_provider.h \
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/aes/aes.h \
+  $(srcdir)/../../builtin/aes/uitypes.h $(srcdir)/../../builtin/enc_provider/aes.c \
+  $(srcdir)/../../builtin/enc_provider/enc_provider.h \
   $(srcdir)/../../krb/aead.h $(srcdir)/../../krb/cksumtypes.h \
   $(srcdir)/../../krb/rand2key/rand2key.h
 rc4.so rc4.po $(OUTPRE)rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -46,9 +47,9 @@ rc4.so rc4.po $(OUTPRE)rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/arcfour/arcfour-int.h $(srcdir)/../../builtin/arcfour/arcfour.h \
-  $(srcdir)/../../builtin/enc_provider/enc_provider.h \
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/arcfour/arcfour-int.h \
+  $(srcdir)/../../builtin/arcfour/arcfour.h $(srcdir)/../../builtin/enc_provider/enc_provider.h \
   $(srcdir)/../../builtin/enc_provider/rc4.c $(srcdir)/../../krb/aead.h \
   $(srcdir)/../../krb/cksumtypes.h $(srcdir)/../../krb/rand2key/rand2key.h

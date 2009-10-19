@@ -153,7 +153,11 @@ enum qop {
 
 /** internal types **/
 
-typedef krb5_principal krb5_gss_name_t;
+typedef struct _krb5_gss_name_rec {
+    krb5_principal princ; /* immutable */
+    k5_mutex_t lock; /* protects ad_context only for now */
+    krb5_authdata_context ad_context;
+} krb5_gss_name_rec, *krb5_gss_name_t;
 
 typedef struct _krb5_gss_cred_id_rec {
     /* protect against simultaneous accesses */
@@ -161,7 +165,7 @@ typedef struct _krb5_gss_cred_id_rec {
 
     /* name/type of credential */
     gss_cred_usage_t usage;
-    krb5_principal princ;        /* this is not interned as a gss_name_t */
+    krb5_gss_name_t name;
     unsigned int prerfc_mech : 1;
     unsigned int rfc_mech : 1;
     unsigned int proxy_cred : 1;
@@ -184,8 +188,8 @@ typedef struct _krb5_gss_ctx_id_rec {
     unsigned int seed_init : 1;  /* XXX tested but never actually set */
     OM_uint32 gss_flags;
     unsigned char seed[16];
-    krb5_principal here;
-    krb5_principal there;
+    krb5_gss_name_t here;
+    krb5_gss_name_t there;
     krb5_key subkey; /* One of two potential keys to use with RFC 4121
                       * packets; this key must always be set. */
     int signalg;
@@ -824,6 +828,86 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 
+/* naming_exts.c */
+#define KG_INIT_NAME_INTERN  0x1
+#define KG_INIT_NAME_NO_COPY 0x2
+
+krb5_error_code
+kg_init_name(krb5_context context,
+             krb5_principal principal,
+             krb5_authdata_context ad_context,
+             krb5_flags flags,
+             krb5_gss_name_t *name);
+
+krb5_error_code
+kg_release_name(krb5_context context,
+                krb5_flags flags,
+                krb5_gss_name_t *name);
+
+krb5_error_code
+kg_duplicate_name(krb5_context context,
+                  const krb5_gss_name_t src,
+                  krb5_flags flags,
+                  krb5_gss_name_t *dst);
+
+krb5_boolean
+kg_compare_name(krb5_context context,
+                krb5_gss_name_t name1,
+                krb5_gss_name_t name2);
+
+OM_uint32
+krb5_gss_display_name_ext(OM_uint32 *minor_status,
+                          gss_name_t name,
+                          gss_OID display_as_name_type,
+                          gss_buffer_t display_name);
+
+OM_uint32
+krb5_gss_inquire_name(OM_uint32 *minor_status,
+                      gss_name_t name,
+                      int *name_is_MN,
+                      gss_OID *MN_mech,
+                      gss_buffer_set_t *attrs);
+
+OM_uint32
+krb5_gss_get_name_attribute(OM_uint32 *minor_status,
+                            gss_name_t name,
+                            gss_buffer_t attr,
+                            int *authenticated,
+                            int *complete,
+                            gss_buffer_t value,
+                            gss_buffer_t display_value,
+                            int *more);
+
+OM_uint32
+krb5_gss_set_name_attribute(OM_uint32 *minor_status,
+                            gss_name_t name,
+                            int complete,
+                            gss_buffer_t attr,
+                            gss_buffer_t value);
+
+OM_uint32
+krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
+                               gss_name_t name,
+                               gss_buffer_t attr);
+
+OM_uint32
+krb5_gss_export_name_composite(OM_uint32 *minor_status,
+                               gss_name_t name,
+                               gss_buffer_t exp_composite_name);
+
+OM_uint32
+krb5_gss_map_name_to_any(OM_uint32 *minor_status,
+                         gss_name_t name,
+                         int authenticated,
+                         gss_buffer_t type_id,
+                         gss_any_t *output);
+
+OM_uint32
+krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
+                                  gss_name_t name,
+                                  gss_buffer_t type_id,
+                                  gss_any_t *input);
+
 /* s4u_gss_glue.c */
 OM_uint32
 kg_compose_deleg_cred(OM_uint32 *minor_status,
@@ -835,7 +919,6 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
                       gss_OID_set *actual_mechs,
                       OM_uint32 *time_rec,
                       krb5_context context);
-
 
 /*
  * These take unglued krb5-mech-specific contexts.

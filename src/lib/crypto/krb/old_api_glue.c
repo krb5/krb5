@@ -215,6 +215,7 @@ krb5_calculate_checksum(krb5_context context, krb5_cksumtype ctype,
     input.data = in;
     input.length = in_length;
 
+    key.enctype = ENCTYPE_NULL;
     key.length = seed_length;
     key.contents = seed;
 

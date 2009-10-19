@@ -243,7 +243,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 
         /* copy the client principle into it... */
         if ((retval =
-             krb5_copy_principal(context, creds[0]->client, &(cred->princ)))) {
+             kg_init_name(context, creds[0]->client, NULL, 0, &cred->name))) {
             k5_mutex_destroy(&cred->lock);
             retval = ENOMEM; /* out of memory? */
             xfree(cred); /* clean up memory on failure */
@@ -252,7 +252,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
         }
 
         cred->usage = GSS_C_INITIATE; /* we can't accept with this */
-        /* cred->princ already set */
+        /* cred->name already set */
         cred->prerfc_mech = 1; /* this cred will work with all three mechs */
         cred->rfc_mech = 1;
         cred->keytab = NULL; /* no keytab associated with this... */
@@ -307,7 +307,7 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
    krb5_error_code code;
    krb5_gss_ctx_id_rec *ctx = 0;
    krb5_timestamp now;
-   krb5_principal name = NULL;
+   krb5_gss_name_t name = NULL;
    krb5_ui_4 nonce = 0;
    krb5_data ap_rep;
    OM_uint32 major_status = GSS_S_FAILURE;
@@ -350,13 +350,8 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
    ctx->established = 1;
 
    if (src_name) {
-       if ((code = krb5_copy_principal(ctx->k5_context, ctx->there, &name))) {
-           major_status = GSS_S_FAILURE;
-           goto fail;
-       }
-       /* intern the src_name */
-       if (! kg_save_name((gss_name_t) name)) {
-           code = G_VALIDATE_FAILED;
+       if ((code = kg_duplicate_name(ctx->k5_context, ctx->there,
+                                     KG_INIT_NAME_INTERN, &name))) {
            major_status = GSS_S_FAILURE;
            goto fail;
        }
@@ -420,7 +415,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_address addr, *paddr;
     krb5_authenticator *authdat = 0;
     krb5_checksum reqcksum;
-    krb5_principal name = NULL;
+    krb5_gss_name_t name = NULL;
     krb5_ui_4 gss_flags = 0;
     int decode_req_message = 0;
     krb5_gss_ctx_id_rec *ctx = NULL;
@@ -443,6 +438,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
     krb5_keyblock *keyblock = NULL;
+    krb5_authdata_context ad_context = NULL;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -588,8 +584,11 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
-    if ((code = krb5_rd_req(context, &auth_context, &ap_req, cred->princ,
-                            cred->keytab, &ap_req_options, &ticket))) {
+    if ((code = krb5_rd_req(context, &auth_context, &ap_req,
+                            cred->name ? cred->name->princ : NULL,
+                            cred->keytab,
+                            &ap_req_options,
+                            &ticket))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
@@ -866,15 +865,23 @@ kg_accept_krb5(minor_status, context_handle,
         major_status = GSS_S_FAILURE;
         goto fail;
     }
-    if ((code = krb5_copy_principal(context, ticket->server, &ctx->here))) {
+    if ((code = kg_init_name(context, ticket->server, NULL, 0, &ctx->here))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
-
-    if ((code = krb5_copy_principal(context, authdat->client, &ctx->there))) {
+    if ((code = krb5_auth_con_get_authdata_context(context, auth_context,
+                                                   &ad_context))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
+    if ((code = kg_init_name(context, authdat->client,
+                             ad_context, KG_INIT_NAME_NO_COPY, &ctx->there))) {
+        major_status = GSS_S_FAILURE;
+        goto fail;
+    }
+    /* Now owned by ctx->there */
+    authdat->client = NULL;
+    krb5_auth_con_set_authdata_context(context, auth_context, NULL);
 
     if ((code = krb5_auth_con_getrecvsubkey(context, auth_context,
                                             &keyblock))) {
@@ -1105,13 +1112,8 @@ kg_accept_krb5(minor_status, context_handle,
     /* set the return arguments */
 
     if (src_name) {
-        if ((code = krb5_copy_principal(context, ctx->there, &name))) {
-            major_status = GSS_S_FAILURE;
-            goto fail;
-        }
-        /* intern the src_name */
-        if (! kg_save_name((gss_name_t) name)) {
-            code = G_VALIDATE_FAILED;
+        if ((code = kg_duplicate_name(context, ctx->there,
+                                      KG_INIT_NAME_INTERN, &name))) {
             major_status = GSS_S_FAILURE;
             goto fail;
         }
@@ -1178,15 +1180,14 @@ fail:
     if (deleg_cred) { /* free memory associated with the deleg credential */
         if (deleg_cred->ccache)
             (void)krb5_cc_close(context, deleg_cred->ccache);
-        if (deleg_cred->princ)
-            krb5_free_principal(context, deleg_cred->princ);
+        if (deleg_cred->name)
+            kg_release_name(context, 0, &deleg_cred->name);
         xfree(deleg_cred);
     }
     if (token.value)
         xfree(token.value);
     if (name) {
-        (void) kg_delete_name((gss_name_t) name);
-        krb5_free_principal(context, name);
+        (void) kg_release_name(context, 0, &name);
     }
 
     *minor_status = code;
@@ -1227,7 +1228,7 @@ fail:
         krb_error_data.error = code;
         (void) krb5_us_timeofday(context, &krb_error_data.stime,
                                  &krb_error_data.susec);
-        krb_error_data.server = cred->princ;
+        krb_error_data.server = cred->name ? cred->name->princ : NULL;
 
         code = krb5_mk_error(context, &krb_error_data, &scratch);
         if (code)

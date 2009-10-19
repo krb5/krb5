@@ -20,13 +20,17 @@ gss_complete_auth_token
 gss_context_time
 gss_create_empty_buffer_set
 gss_create_empty_oid_set
+gss_delete_name_attribute
 gss_delete_sec_context
 gss_display_name
+gss_display_name_ext
 gss_display_status
 gss_duplicate_name
 gss_export_name
+gss_export_name_composite
 gss_export_sec_context
 gss_get_mic
+gss_get_name_attribute
 gss_import_name
 gss_import_sec_context
 gss_indicate_mechs
@@ -49,6 +53,7 @@ gss_krb5int_make_seal_token_v3
 gss_krb5int_unseal_token_v3
 gsskrb5_extract_authtime_from_sec_context
 gsskrb5_extract_authz_data_from_sec_context
+gss_map_name_to_any
 gss_mech_krb5
 gss_mech_krb5_old
 gss_mech_set_krb5
@@ -64,6 +69,7 @@ gss_nt_string_uid_name
 gss_nt_user_name
 gss_oid_to_str
 gss_process_context_token
+gss_release_any_name_mapping
 gss_release_buffer_set
 gss_release_buffer
 gss_release_cred
@@ -72,6 +78,7 @@ gss_release_name
 gss_release_oid
 gss_release_oid_set
 gss_seal
+gss_set_name_attribute
 gss_set_sec_context_option
 gss_sign
 gss_str_to_oid
@@ -92,3 +99,4 @@ gssspi_mech_invoke
 krb5_gss_dbg_client_expcreds
 krb5_gss_register_acceptor_identity
 krb5_gss_use_kdc_context
+gss_inquire_name

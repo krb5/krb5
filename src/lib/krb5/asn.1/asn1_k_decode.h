@@ -282,4 +282,10 @@ asn1_error_code asn1_decode_fast_finished
 asn1_error_code asn1_decode_fast_finished_ptr
 (asn1buf *buf, krb5_fast_finished **val);
 
+asn1_error_code asn1_decode_ad_kdcissued
+(asn1buf *buf, krb5_ad_kdcissued *val);
+
+asn1_error_code asn1_decode_ad_kdcissued_ptr
+(asn1buf *buf, krb5_ad_kdcissued **val);
+
 #endif

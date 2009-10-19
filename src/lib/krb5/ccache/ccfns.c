@@ -70,7 +70,7 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
     krb5_principal s1, s2;
 
     /* remove any dups */
-    krb5_cc_remove_cred(context, cache, 0, creds);
+    krb5_cc_remove_cred(context, cache, KRB5_TC_MATCH_AUTHDATA, creds);
 
     ret = cache->ops->store(context, cache, creds);
     if (ret) return ret;
@@ -87,7 +87,7 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
     if (!krb5_principal_compare(context, s1, s2)) {
         creds->server = s2;
         /* remove any dups */
-        krb5_cc_remove_cred(context, cache, 0, creds);
+        krb5_cc_remove_cred(context, cache, KRB5_TC_MATCH_AUTHDATA, creds);
         ret = cache->ops->store(context, cache, creds);
         creds->server = s1;
     }

@@ -66,6 +66,8 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context)
 	krb5_rc_close(context, auth_context->rcache);
     if (auth_context->permitted_etypes)
 	free(auth_context->permitted_etypes);
+    if (auth_context->ad_context)
+	krb5_authdata_context_free(context, auth_context->ad_context);
     free(auth_context);
     return 0;
 }
@@ -566,6 +568,24 @@ krb5_auth_con_get_subkey_enctype(krb5_context context,
 				 krb5_enctype *etype)
 {
     *etype = auth_context->negotiated_etype;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_get_authdata_context(krb5_context context,
+				   krb5_auth_context auth_context,
+				   krb5_authdata_context *ad_context)
+{
+    *ad_context = auth_context->ad_context;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_set_authdata_context(krb5_context context,
+				   krb5_auth_context auth_context,
+				   krb5_authdata_context ad_context)
+{
+    auth_context->ad_context = ad_context;
     return 0;
 }
 

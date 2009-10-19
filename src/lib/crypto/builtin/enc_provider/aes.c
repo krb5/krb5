@@ -342,6 +342,9 @@ krb5int_aes_decrypt_iov(krb5_key key,
 	krb5int_c_iov_get_block((unsigned char *)blockN2, BLOCK_SIZE, data, num_data, &input_pos);
 	krb5int_c_iov_get_block((unsigned char *)blockN1, BLOCK_SIZE, data, num_data, &input_pos);
 
+	if (ivec != NULL)
+	    memcpy(ivec->data, blockN2, BLOCK_SIZE);
+
 	/* Decrypt second last block */
 	dec(tmp2, blockN2, &ctx);
 	/* Set tmp2 to last (possibly partial) plaintext block, and
@@ -355,9 +358,6 @@ krb5int_aes_decrypt_iov(krb5_key key,
 	memcpy(tmp2, blockN1, input_length ? input_length : BLOCK_SIZE);
 	dec(tmp3, tmp2, &ctx);
 	xorblock(tmp3, tmp);
-	/* Copy out ivec first before we clobber blockN1 with plaintext */
-	if (ivec != NULL)
-	    memcpy(ivec->data, blockN1, BLOCK_SIZE);
 	memcpy(blockN1, tmp3, BLOCK_SIZE);
 
 	/* Put the last two blocks back into the iovec */

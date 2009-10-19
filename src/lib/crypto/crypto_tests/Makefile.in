@@ -46,9 +46,9 @@ EXTRADEPSRCS=\
 
 check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_cf2 \
 		t_cksum4 t_cksum5 \
-		aes-test verify destest t_afss2k \
+		aes-test verify t_afss2k \
 		t_mddriver4 t_mddriver \
-		t_shs t_shs3 t_crc
+		t_shs t_shs3 t_crc t_cts
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
@@ -68,7 +68,6 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_cf2 \
 	$(RUN_SETUP) $(VALGRIND) ./verify -z
 	$(RUN_SETUP) $(VALGRIND) ./verify -m
 	$(RUN_SETUP) $(VALGRIND) ./verify
-	$(RUN_SETUP) $(VALGRIND) ./destest < $(srcdir)/keytest.data
 	$(RUN_SETUP) $(VALGRIND) ./t_afss2k
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver4 -x
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
@@ -108,9 +107,9 @@ t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
-# t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-#	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
-#		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+ t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 t_cksum4.o: $(srcdir)/t_cksum.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_cksum4.o -c $(srcdir)/t_cksum.c
@@ -132,9 +131,6 @@ aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
 
 verify$(EXEEXT): t_verify.$(OBJEXT) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_verify.$(OBJEXT) -lcom_err $(SUPPORT_LIB) -lk5crypto
-
-destest$(EXEEXT): destest.$(OBJEXT)  $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS) $(SUPPORT_LIB) -lk5crypto
 
 t_afss2k: t_afss2k.$(OBJEXT) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o $@ t_afss2k.$(OBJEXT) -lcom_err $(SUPPORT_LIB) -lk5crypto
@@ -163,16 +159,16 @@ ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 
 
 clean::
-	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o t_prng.o t_prng \
-		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o t_cf2 t_cf2.o \
-		aes-test.o aes-test vt.txt vk.txt kresults.out 	\
-		destest.o destest 	\
-		t_afss2k.o t_afss2k t_cksum.o t_cksum 	\
-		t_crc.o t_crc t_cts.o t_cts 	\
-		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver	\
+	$(RM) t_nfold.o t_nfold nfold.$(OBJEXT) t_encrypt t_encrypt.o \
+		t_prng.o t_prng t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o \
+		t_prf t_prf.o t_cf2 t_cf2.o \
+		aes-test.o aes-test vt.txt vk.txt kresults.out \
+		t_afss2k.o t_afss2k t_cksum.o t_cksum \
+		t_crc.o t_crc t_cts.o t_cts \
+		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
 		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o \
 		t_shs3 t_shs3.o t_shs t_shs.o verify t_verify.o  \
-		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)	\
+		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) \
 		t_shs$(EXEEXT) t_shs.$(OBJEXT) t_shs3$(EXEEXT) t_shs3.$(OBJEXT)
 
 	-$(RM) t_prng.output

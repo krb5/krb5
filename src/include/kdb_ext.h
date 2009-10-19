@@ -97,6 +97,7 @@ typedef struct _kdb_sign_auth_data_req {
     krb5_keyblock *server_key;		/* Key used to generate server signature */
     krb5_timestamp authtime;		/* Authtime of TGT */
     krb5_authdata **auth_data;		/* Authorization data from TGT */
+    krb5_keyblock *session_key;		/* Reply session key */
 } kdb_sign_auth_data_req;
 
 typedef struct _kdb_sign_auth_data_rep {

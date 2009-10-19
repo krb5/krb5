@@ -3624,7 +3624,11 @@ decode_data(unsigned char **out_data, unsigned int *out_data_len,
     if (buf == NULL)
 	goto cleanup;
 
-    retval = EVP_PKEY_decrypt(buf, data, (int)data_len, pkey);
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+    retval = EVP_PKEY_decrypt_old(buf, data, (int)data_len, pkey);
+#else
+     retval = EVP_PKEY_decrypt(buf, data, (int)data_len, pkey);
+#endif
     if (retval <= 0) {
 	pkiDebug("unable to decrypt received data (len=%d)\n", data_len);
 	goto cleanup;

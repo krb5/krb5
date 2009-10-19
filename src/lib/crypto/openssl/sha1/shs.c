@@ -29,7 +29,7 @@ void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
 
 void shsFinal(SHS_INFO *shsInfo)
 {
-    EVP_DigestFinal_ex(&shsInfo->ossl_sha1_ctx ,(unsigned char *)shsInfo->digestBuf , &shsInfo->digestLen); 
+    EVP_DigestFinal_ex(&shsInfo->ossl_sha1_ctx ,(unsigned char *)shsInfo->digestBuf , &shsInfo->digestLen);
     EVP_MD_CTX_cleanup(&shsInfo->ossl_sha1_ctx );
 }
 

@@ -17,9 +17,9 @@ $(OUTPRE)test_cxx_k5int.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-ipc_stream.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-utf8.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  test_cxx_k5int.cpp
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h test_cxx_k5int.cpp
 $(OUTPRE)test_cxx_gss.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   test_cxx_gss.cpp
 $(OUTPRE)test_cxx_rpc.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
