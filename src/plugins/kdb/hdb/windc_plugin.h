@@ -67,7 +67,7 @@ typedef krb5_error_code
     void *, heim_context, struct hdb_entry_ex *, KDC_REQ *, heim_octet_string *);
 
 
-#define KRB5_WINDC_PLUGING_MINOR		3
+#define KRB5_WINDC_PLUGIN_MINOR		3
 
 typedef struct krb5plugin_windc_ftable {
     int			minor_version;

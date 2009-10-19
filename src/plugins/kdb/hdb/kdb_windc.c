@@ -596,7 +596,7 @@ kh_hdb_windc_init(krb5_context context,
     for (i = 0; tables[i] != NULL; i++) {
         krb5plugin_windc_ftable *windc = tables[i];
 
-        if (windc->minor_version < KRB5_WINDC_PLUGING_MINOR)
+        if (windc->minor_version < KRB5_WINDC_PLUGIN_MINOR)
             continue;
 
         code = kh_map_error((*windc->init)(kh->hcontext, &kh->windc_ctx));
