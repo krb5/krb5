@@ -340,21 +340,14 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	enc_tkt_reply.times.starttime = request->from;
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
-    
-    {
-	krb5_timestamp until, life;
 
-	until = (request->till == 0) ? kdc_infinity : request->till;
-	life = until - enc_tkt_reply.times.starttime;
-
-	if (client.max_life)
-	    life = min(life, client.max_life);
-	if (server.max_life)
-	    life = min(life, server.max_life);
-	if (max_life_for_realm)
-	    life = min(life, max_life_for_realm);
-	enc_tkt_reply.times.endtime = enc_tkt_reply.times.starttime + life;
-    }
+    kdc_get_ticket_endtime(kdc_context,
+			   enc_tkt_reply.times.starttime,
+			   kdc_infinity,
+			   request->till,
+			   &client,
+			   &server,
+			   &enc_tkt_reply.times.endtime);
 
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
 	!isflagset(client.attributes, KRB5_KDB_DISALLOW_RENEWABLE) &&

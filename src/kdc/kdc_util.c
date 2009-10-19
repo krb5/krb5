@@ -2627,3 +2627,36 @@ add_pa_data_element(krb5_context context,
     return 0;
 }
 
+void
+kdc_get_ticket_endtime(krb5_context context,
+		       krb5_timestamp starttime,
+		       krb5_timestamp endtime,
+		       krb5_timestamp till,
+		       krb5_db_entry *client,
+		       krb5_db_entry *server,
+		       krb5_timestamp *out_endtime)
+{
+    krb5_timestamp until, life;
+
+    if (till == 0)
+	till = kdc_infinity;
+
+    until = min(till, endtime);
+
+    /* check for underflow */
+    life = (until < starttime) ? 0 : until - starttime;
+
+    if (client->max_life != 0)
+	life = min(life, client->max_life);
+    if (server->max_life != 0)
+	life = min(life, server->max_life);
+    if (max_life_for_realm != 0)
+	life = min(life, max_life_for_realm);
+
+    /* check for overflow */
+    if (starttime > kdc_infinity - life)
+	*out_endtime = kdc_infinity;
+    else
+	*out_endtime = starttime + life;
+}
+

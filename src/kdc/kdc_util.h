@@ -302,7 +302,14 @@ validate_transit_path(krb5_context context,
 	krb5_const_principal client,
 		krb5_db_entry *server,
 		      krb5_db_entry *krbtgt);
-
+void
+kdc_get_ticket_endtime(krb5_context context,
+       krb5_timestamp now,
+	       krb5_timestamp endtime,
+	       krb5_timestamp till,
+	       krb5_db_entry *client,
+	       krb5_db_entry *server,
+	       krb5_timestamp *out_endtime);
 
 void
 log_as_req(const krb5_fulladdr *from,

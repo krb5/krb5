@@ -537,19 +537,16 @@ tgt_again:
             min(header_ticket->enc_part2->times.renew_till,
                 kdc_time + old_life);
     } else {
-	krb5_timestamp life;
-
         /* not a renew request */
         enc_tkt_reply.times.starttime = kdc_time;
 
-	life = header_enc_tkt->times.endtime - enc_tkt_reply.times.starttime;
-	if (client.max_life)
-	    life = min(life, client.max_life);
-	if (server.max_life)
-	    life = min(life, server.max_life);
-	if (max_life_for_realm)
-	    life = min(life, max_life_for_realm);
-	enc_tkt_reply.times.endtime = enc_tkt_reply.times.starttime + life;
+	kdc_get_ticket_endtime(kdc_context,
+			       enc_tkt_reply.times.starttime,
+			       header_enc_tkt->times.endtime,
+			       request->till,
+			       &client,
+			       &server,
+			       &enc_tkt_reply.times.endtime);
 
         if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
             (enc_tkt_reply.times.endtime < request->till) &&
