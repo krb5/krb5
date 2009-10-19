@@ -21,18 +21,21 @@ STLIBOBJS= \
 	../../@CRYPTO_IMPL@/enc_provider/des.o 	\
 	../../@CRYPTO_IMPL@/enc_provider/des3.o 	\
 	../../@CRYPTO_IMPL@/enc_provider/rc4.o 	\
-	../../@CRYPTO_IMPL@/enc_provider/aes.o 
+	../../@CRYPTO_IMPL@/enc_provider/aes.o	\
+	../../@CRYPTO_IMPL@/enc_provider/aes_ctr.o 
 
 OBJS= \
 	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/des.$(OBJEXT) 	\
 	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/des3.$(OBJEXT) 	\
 	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/aes.$(OBJEXT) 	\
+	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/aes_ctr.$(OBJEXT) 	\
 	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/rc4.$(OBJEXT)
 
 SRCS= \
 	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/des.c 	\
 	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/des3.c 	\
 	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/aes.c 	\
+	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/aes_ctr.c 	\
 	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/rc4.c
 
 ##DOS##LIBOBJS = $(OBJS)

@@ -15,6 +15,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 STLIBOBJS=\
 	checksum.o	\
 	dk_aead.o	\
+	dk_ccm.o	\
 	dk_decrypt.o	\
 	dk_encrypt.o	\
 	derive.o	\
@@ -23,6 +24,7 @@ STLIBOBJS=\
 OBJS=\
 	$(OUTPRE)checksum.$(OBJEXT)	\
 	$(OUTPRE)dk_aead.$(OBJEXT)	\
+	$(OUTPRE)dk_ccm.$(OBJEXT)	\
 	$(OUTPRE)dk_decrypt.$(OBJEXT)	\
 	$(OUTPRE)dk_encrypt.$(OBJEXT)	\
 	$(OUTPRE)derive.$(OBJEXT)	\
@@ -31,6 +33,7 @@ OBJS=\
 SRCS=\
 	$(srcdir)/checksum.c	\
 	$(srcdir)/dk_aead.c	\
+	$(srcdir)/dk_ccm.c	\
 	$(srcdir)/dk_decrypt.c	\
 	$(srcdir)/dk_encrypt.c	\
 	$(srcdir)/derive.c	\
