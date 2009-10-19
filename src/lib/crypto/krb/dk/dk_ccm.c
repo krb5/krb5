@@ -303,7 +303,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ivec != NULL) {
 	if (ivec->length != 16 ||
 	    ivec->data[0] & ~(CCM_FLAG_MASK_Q) ||
-	    15 - (unsigned)ivec->data[0] != header_len) {
+	    14 - (unsigned)ivec->data[0] != header_len) {
 	    ret = KRB5_BAD_MSIZE;
 	    goto cleanup;
 	}

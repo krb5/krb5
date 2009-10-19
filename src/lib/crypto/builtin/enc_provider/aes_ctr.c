@@ -272,13 +272,14 @@ krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
     assert(n >= 7 && n <= 13);
 
     state->length = 16;
-    state->data = malloc(state->length);
-    if (state->data == NULL)
-	return ENOMEM;
+    state->data = k5alloc(state->length, &code);
+    if (code != 0)
+	return code;
 
     q = 15 - n;
     state->data[0] = q - 1;
 
+#if 0
     nonce.data = &state->data[1];
     nonce.length = n;
 
@@ -290,6 +291,7 @@ krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
     }
 
     memset(&state->data[1 + n], 0, q);
+#endif
 
     return 0;
 }
