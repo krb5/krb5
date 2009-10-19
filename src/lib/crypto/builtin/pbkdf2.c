@@ -25,19 +25,36 @@
  * 
  *
  * Implementation of PBKDF2 from RFC 2898.
- * Not currently used; likely to be used when we get around to AES support.
  */
 
 #include <ctype.h>
 #include "k5-int.h"
 #include "hash_provider.h"
 
+/*
+ * RFC 2898 specifies PBKDF2 in terms of an underlying pseudo-random
+ * function with two arguments (password and salt||blockindex).  Right
+ * now we only use PBKDF2 with the hmac-sha1 PRF, also specified in
+ * RFC 2898, which invokes HMAC with the password as the key and the
+ * second argument as the text.  (HMAC accepts any key size up to the
+ * block size; the password is pre-hashed with unkeyed SHA1 if it is
+ * longer than the block size.)
+ *
+ * For efficiency, it is better to generate the key from the password
+ * once at the beginning, so we specify prf_func in terms of a
+ * krb5_key first argument.  That might not be convenient for a PRF
+ * which uses the password in some other way, so this might need to be
+ * adjusted in the future.
+ */
+
+typedef krb5_error_code (*prf_func)(krb5_key pass, krb5_data *salt,
+				    krb5_data *out);
+
 /* Not exported, for now.  */
 static krb5_error_code
-krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
-				       krb5_data *),
-		size_t hlen, const krb5_data *pass, const krb5_data *salt,
-		unsigned long count, const krb5_data *output);
+krb5int_pbkdf2 (prf_func prf, size_t hlen, krb5_key pass,
+		const krb5_data *salt, unsigned long count,
+		const krb5_data *output);
 
 static int debug_hmac = 0;
 
@@ -61,35 +78,21 @@ static void printd (const char *descr, krb5_data *d) {
     }
     printf("\n");
 }
-static void printk(const char *descr, krb5_keyblock *k) {
-    krb5_data d;
-    d.data = (char *) k->contents;
-    d.length = k->length;
-    printd(descr, &d);
-}
 
 static krb5_error_code
-F(char *output, char *u_tmp1, char *u_tmp2,
-  krb5_error_code (*prf)(krb5_keyblock *, krb5_data *, krb5_data *),
-  size_t hlen,
-  const krb5_data *pass, const krb5_data *salt,
-  unsigned long count, int i)
+F(char *output, char *u_tmp1, char *u_tmp2, prf_func prf, size_t hlen,
+  krb5_key pass, const krb5_data *salt, unsigned long count, int i)
 {
     unsigned char ibytes[4];
     size_t tlen;
     unsigned int j, k;
-    krb5_keyblock pdata;
     krb5_data sdata;
     krb5_data out;
     krb5_error_code err;
 
-    pdata.contents = pass->data;
-    pdata.length = pass->length;
-
 #if 0
     printf("F(i=%d, count=%lu, pass=%d:%s)\n", i, count,
 	   pass->length, pass->data);
-    printk("F password", &pdata);
 #endif
 
     /* Compute U_1.  */
@@ -112,7 +115,7 @@ F(char *output, char *u_tmp1, char *u_tmp2,
 #if 0
     printf("F: computing hmac #1 (U_1) with %s\n", pdata.contents);
 #endif
-    err = (*prf)(&pdata, &sdata, &out);
+    err = (*prf)(pass, &sdata, &out);
     if (err)
 	return err;
 #if 0
@@ -127,7 +130,7 @@ F(char *output, char *u_tmp1, char *u_tmp2,
 	printf("F: computing hmac #%d (U_%d)\n", j, j);
 #endif
 	memcpy(u_tmp2, u_tmp1, hlen);
-	err = (*prf)(&pdata, &sdata, &out);
+	err = (*prf)(pass, &sdata, &out);
 	if (err)
 	    return err;
 #if 0
@@ -147,11 +150,9 @@ F(char *output, char *u_tmp1, char *u_tmp2,
 }
 
 static krb5_error_code
-krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
-				       krb5_data *),
-		size_t hlen,
-		const krb5_data *pass, const krb5_data *salt,
-		unsigned long count, const krb5_data *output)
+krb5int_pbkdf2 (prf_func prf, size_t hlen, krb5_key pass,
+		const krb5_data *salt, unsigned long count,
+		const krb5_data *output)
 {
     int l, r, i;
     char *utmp1, *utmp2;
@@ -209,51 +210,22 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
     return 0;
 }
 
-static krb5_error_code hmac1(const struct krb5_hash_provider *h,
-			     krb5_keyblock *key, krb5_data *in, krb5_data *out)
+/*
+ * Implements the hmac-sha1 PRF.  pass has been pre-hashed (if
+ * necessary) and converted to a key already; salt has had the block
+ * index appended to the original salt.
+ */
+static krb5_error_code
+hmac_sha1(krb5_key pass, krb5_data *salt, krb5_data *out)
 {
-    char tmp[40];
-    size_t blocksize, hashsize;
+    const struct krb5_hash_provider *h = &krb5int_hash_sha1;
     krb5_error_code err;
-    krb5_keyblock k;
 
-    k = *key;
-    key = &k;
     if (debug_hmac)
-	printk(" test key", key);
-    blocksize = h->blocksize;
-    hashsize = h->hashsize;
-    if (hashsize > sizeof(tmp))
-	abort();
-    if (key->length > blocksize) {
-	krb5_data d, d2;
-	d.data = (char *) key->contents;
-	d.length = key->length;
-	d2.data = tmp;
-	d2.length = hashsize;
-	err = h->hash (1, &d, &d2);
-	if (err)
-	    return err;
-	key->length = d2.length;
-	key->contents = (krb5_octet *) d2.data;
-	if (debug_hmac)
-	    printk(" pre-hashed key", key);
-    }
-    if (debug_hmac)
-	printd(" hmac input", in);
-    err = krb5_hmac(h, key, 1, in, out);
+	printd(" hmac input", salt);
+    err = krb5_hmac(h, pass, 1, salt, out);
     if (err == 0 && debug_hmac)
 	printd(" hmac output", out);
-    return err;
-}
-
-static krb5_error_code
-foo(krb5_keyblock *pass, krb5_data *salt, krb5_data *out)
-{
-    krb5_error_code err;
-
-    memset(out->data, 0, out->length);
-    err = hmac1 (&krb5int_hash_sha1, pass, salt, out);
     return err;
 }
 
@@ -261,5 +233,32 @@ krb5_error_code
 krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
 			  const krb5_data *pass, const krb5_data *salt)
 {
-    return krb5int_pbkdf2 (foo, 20, pass, salt, count, out);
+    const struct krb5_hash_provider *h = &krb5int_hash_sha1;
+    krb5_keyblock keyblock;
+    krb5_key key;
+    char tmp[40];
+    krb5_data d;
+    krb5_error_code err;
+
+    assert(h->hashsize <= sizeof(tmp));
+    if (pass->length > h->blocksize) {
+	d.data = tmp;
+	d.length = h->hashsize;
+	err = h->hash (1, pass, &d);
+	if (err)
+	    return err;
+	keyblock.length = d.length;
+	keyblock.contents = (krb5_octet *) d.data;
+    } else {
+	keyblock.length = pass->length;
+	keyblock.contents = (krb5_octet *) pass->data;
+    }
+
+    err = krb5_k_create_key(NULL, &keyblock, &key);
+    if (err)
+	return err;
+
+    err = krb5int_pbkdf2(hmac_sha1, 20, key, salt, count, out);
+    krb5_k_free_key(NULL, key);
+    return err;
 }

@@ -29,8 +29,8 @@
 #include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_decrypt_iov(krb5_context context,
-		   const krb5_keyblock *key,
+krb5_k_decrypt_iov(krb5_context context,
+		   krb5_key key,
 		   krb5_keyusage usage,
 		   const krb5_data *cipher_state,
 		   krb5_crypto_iov *data,
@@ -38,7 +38,7 @@ krb5_c_decrypt_iov(krb5_context context,
 {
     const struct krb5_keytypes *ktp;
 
-    ktp = find_enctype(key->enctype);
+    ktp = find_enctype(key->keyblock.enctype);
     if (ktp == NULL || ktp->aead == NULL)
 	return KRB5_BAD_ENCTYPE;
 
@@ -53,3 +53,22 @@ krb5_c_decrypt_iov(krb5_context context,
 				     usage, cipher_state, data, num_data);
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_c_decrypt_iov(krb5_context context,
+		   const krb5_keyblock *keyblock,
+		   krb5_keyusage usage,
+		   const krb5_data *cipher_state,
+		   krb5_crypto_iov *data,
+		   size_t num_data)
+{
+    krb5_key key;
+    krb5_error_code ret;
+
+    ret = krb5_k_create_key(context, keyblock, &key);
+    if (ret != 0)
+	return ret;
+    ret = krb5_k_decrypt_iov(context, key, usage, cipher_state, data,
+			     num_data);
+    krb5_k_free_key(context, key);
+    return ret;
+}

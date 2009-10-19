@@ -53,8 +53,8 @@
 
 static krb5_error_code
 make_seal_token_v1 (krb5_context context,
-                    krb5_keyblock *enc,
-                    krb5_keyblock *seq,
+                    krb5_key enc,
+                    krb5_key seq,
                     gssint_uint64 *seqnum,
                     int direction,
                     gss_buffer_t text,
@@ -197,7 +197,7 @@ make_seal_token_v1 (krb5_context context,
         (void) memcpy(data_ptr+8, plain, msglen);
     plaind.length = 8 + (bigend ? text->length : msglen);
     plaind.data = data_ptr;
-    code = krb5_c_make_checksum(context, md5cksum.checksum_type, seq,
+    code = krb5_k_make_checksum(context, md5cksum.checksum_type, seq,
                                 sign_usage, &plaind, &md5cksum);
     xfree(data_ptr);
 
@@ -212,7 +212,7 @@ make_seal_token_v1 (krb5_context context,
 
         if ((code = kg_encrypt(context, seq, KG_USAGE_SEAL,
                                (g_OID_equal(oid, gss_mech_krb5_old) ?
-                                seq->contents : NULL),
+                                seq->keyblock.contents : NULL),
                                md5cksum.contents, md5cksum.contents, 16))) {
             krb5_free_checksum_contents(context, &md5cksum);
             xfree (plain);
@@ -259,7 +259,7 @@ make_seal_token_v1 (krb5_context context,
             krb5_keyblock *enc_key;
             int i;
             store_32_be(*seqnum, bigend_seqnum);
-            code = krb5_copy_keyblock (context, enc, &enc_key);
+            code = krb5_k_key_keyblock(context, enc, &enc_key);
             if (code)
             {
                 xfree(plain);

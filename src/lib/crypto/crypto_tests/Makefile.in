@@ -33,6 +33,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_shs3.c	\
 	$(srcdir)/t_shs.c	\
 	$(srcdir)/t_verify.c	\
+	$(srcdir)/t_kperf.c	\
 	$(srcdir)/ytest.c	
 
 ##DOSBUILDTOP = ..\..\..
@@ -148,6 +149,9 @@ t_shs: t_shs.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 
 t_shs3: t_shs3.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_shs3 t_shs3.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
+
+t_kperf: t_kperf.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o t_kperf t_kperf.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
 
 ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o ytest ytest.o  $(SUPPORT_LIB)  $(CRYPTO_DEPLIB)

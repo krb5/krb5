@@ -176,7 +176,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
                 krb5_keyblock *enc_key;
                 int i;
                 store_32_be(seqnum, bigend_seqnum);
-                code = krb5_copy_keyblock (context, ctx->enc, &enc_key);
+                code = krb5_k_key_keyblock(context, ctx->enc, &enc_key);
                 if (code)
                 {
                     xfree(plain);
@@ -287,7 +287,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
         plaind.length = 8 + (ctx->big_endian ? token.length : plainlen);
         plaind.data = data_ptr;
-        code = krb5_c_make_checksum(context, md5cksum.checksum_type,
+        code = krb5_k_make_checksum(context, md5cksum.checksum_type,
                                     ctx->seq, sign_usage,
                                     &plaind, &md5cksum);
         xfree(data_ptr);
@@ -301,7 +301,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
         if ((code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
                                (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
-                                ctx->seq->contents : NULL),
+                                ctx->seq->keyblock.contents : NULL),
                                md5cksum.contents, md5cksum.contents, 16))) {
             krb5_free_checksum_contents(context, &md5cksum);
             if (toktype == KG_TOK_SEAL_MSG)
@@ -354,7 +354,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
             (ctx->big_endian ? token.length : plainlen);
         plaind.data = data_ptr;
         krb5_free_checksum_contents(context, &md5cksum);
-        code = krb5_c_make_checksum(context, md5cksum.checksum_type,
+        code = krb5_k_make_checksum(context, md5cksum.checksum_type,
                                     ctx->seq, sign_usage,
                                     &plaind, &md5cksum);
         xfree(data_ptr);
@@ -400,7 +400,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
         plaind.length = 8 + (ctx->big_endian ? token.length : plainlen);
         plaind.data = data_ptr;
-        code = krb5_c_make_checksum(context, md5cksum.checksum_type,
+        code = krb5_k_make_checksum(context, md5cksum.checksum_type,
                                     ctx->seq, sign_usage,
                                     &plaind, &md5cksum);
         xfree(data_ptr);

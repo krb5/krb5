@@ -72,6 +72,18 @@ krb5_finish_random_key
 krb5_free_cksumtypes
 krb5_hmac
 krb5_init_random_key
+krb5_k_create_key
+krb5_k_decrypt
+krb5_k_decrypt_iov
+krb5_k_encrypt
+krb5_k_encrypt_iov
+krb5_k_free_key
+krb5_k_key_enctype
+krb5_k_key_keyblock
+krb5_k_make_checksum
+krb5_k_make_checksum_iov
+krb5_k_verify_checksum
+krb5_k_verify_checksum_iov
 krb5_nfold
 krb5_old_decrypt
 krb5_old_encrypt
@@ -100,6 +112,8 @@ krb5int_aes_string_to_key
 krb5int_arcfour_string_to_key
 krb5int_arcfour_translate_usage
 krb5int_c_combine_keys
+krb5int_c_copy_keyblock
+krb5int_c_copy_keyblock_contents
 krb5int_c_free_keyblock
 krb5int_c_free_keyblock_contents
 krb5int_c_init_keyblock
@@ -122,6 +136,7 @@ krb5int_hash_crc32
 krb5int_hash_md4
 krb5int_hash_md5
 krb5int_hash_sha1
+krb5int_hmac_keyblock
 krb5int_keyhash_descbc
 krb5int_keyhash_hmac_md5
 krb5int_keyhash_md4des

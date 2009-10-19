@@ -44,6 +44,7 @@ STLIBOBJS=\
 	enctype_compare.o	\
 	enctype_to_string.o	\
 	etypes.o		\
+	key.o			\
 	keyblocks.o 		\
 	keyed_cksum.o		\
 	keyed_checksum_types.o	\
@@ -86,6 +87,7 @@ OBJS=\
 	$(OUTPRE)enctype_compare.$(OBJEXT)	\
 	$(OUTPRE)enctype_to_string.$(OBJEXT)	\
 	$(OUTPRE)etypes.$(OBJEXT)		\
+	$(OUTPRE)key.$(OBJECT)			\
 	$(OUTPRE)keyblocks.$(OBJEXT) 		\
 	$(OUTPRE)keyed_cksum.$(OBJEXT)		\
 	$(OUTPRE)keyed_checksum_types.$(OBJEXT)	\
@@ -127,6 +129,7 @@ SRCS=\
 	$(srcdir)/enctype_compare.c	\
 	$(srcdir)/enctype_to_string.c	\
 	$(srcdir)/etypes.c		\
+	$(srcdir)/key.c			\
 	$(srcdir)/keyblocks.c 		\
 	$(srcdir)/keyed_cksum.c		\
 	$(srcdir)/keyed_checksum_types.c\

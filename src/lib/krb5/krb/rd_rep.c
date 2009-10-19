@@ -95,7 +95,7 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
 	goto clean_scratch;
     }
 
-    retval = krb5_c_decrypt(context, auth_context->keyblock,
+    retval = krb5_k_decrypt(context, auth_context->key,
 			    KRB5_KEYUSAGE_AP_REP_ENCPART, 0,
 			    &reply->enc_part, &scratch);
     if (retval)
@@ -115,23 +115,14 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
 
     /* Set auth subkey. */
     if (enc->subkey) {
-	if (auth_context->recv_subkey) {
-	    krb5_free_keyblock(context, auth_context->recv_subkey);
-	    auth_context->recv_subkey = NULL;
-	}
-	retval = krb5_copy_keyblock(context, enc->subkey,
-				    &auth_context->recv_subkey);
+	retval = krb5_auth_con_setrecvsubkey(context, auth_context,
+					     enc->subkey);
 	if (retval)
 	    goto clean_scratch;
-	if (auth_context->send_subkey) {
-	    krb5_free_keyblock(context, auth_context->send_subkey);
-	    auth_context->send_subkey = NULL;
-	}
-	retval = krb5_copy_keyblock(context, enc->subkey,
-				    &auth_context->send_subkey);
+	retval = krb5_auth_con_setsendsubkey(context, auth_context,
+					     enc->subkey);
 	if (retval) {
-	    krb5_free_keyblock(context, auth_context->send_subkey);
-	    auth_context->send_subkey = NULL;
+	    (void) krb5_auth_con_setrecvsubkey(context, auth_context, NULL);
 	    goto clean_scratch;
 	}
 	/* Not used for anything yet. */
@@ -178,7 +169,7 @@ krb5_rd_rep_dce(krb5_context context, krb5_auth_context auth_context,
 	return(ENOMEM);
     }
 
-    if ((retval = krb5_c_decrypt(context, auth_context->keyblock,
+    if ((retval = krb5_k_decrypt(context, auth_context->key,
 				 KRB5_KEYUSAGE_AP_REP_ENCPART, 0,
 				 &reply->enc_part, &scratch)))
 	goto clean_scratch;

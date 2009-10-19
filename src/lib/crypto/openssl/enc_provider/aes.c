@@ -36,22 +36,22 @@
 
 /* proto's */
 static krb5_error_code
-cts_enc(const krb5_keyblock *key, const krb5_data *ivec,
+cts_enc(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);
 static krb5_error_code
-cbc_enc(const krb5_keyblock *key, const krb5_data *ivec,
+cbc_enc(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);
 static krb5_error_code
-cts_decr(const krb5_keyblock *key, const krb5_data *ivec,
+cts_decr(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);
 static krb5_error_code
-cbc_decr(const krb5_keyblock *key, const krb5_data *ivec,
+cbc_decr(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);
 static krb5_error_code
-cts_encr_iov(const krb5_keyblock *key, const krb5_data *ivec,
+cts_encr_iov(krb5_key key, const krb5_data *ivec,
                     krb5_crypto_iov *data, size_t num_data, size_t dlen);
 static krb5_error_code
-cts_decr_iov(const krb5_keyblock *key, const krb5_data *ivec,
+cts_decr_iov(krb5_key key, const krb5_data *ivec,
                     krb5_crypto_iov *data, size_t num_data, size_t dlen);
 
 #define NUM_BITS 8
@@ -69,7 +69,7 @@ map_mode(unsigned int len)
 }
 
 static krb5_error_code
-cbc_enc(const krb5_keyblock *key, const krb5_data *ivec,
+cbc_enc(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     int             ret = 0, tmp_len = 0;
@@ -77,7 +77,7 @@ cbc_enc(const krb5_keyblock *key, const krb5_data *ivec,
     unsigned char  *tmp_buf = NULL;
     EVP_CIPHER_CTX  ciph_ctx;
 
-    key_buf = OPENSSL_malloc(key->length);
+    key_buf = OPENSSL_malloc(key->keyblock.length);
     if (!key_buf)
         return ENOMEM;
 
@@ -87,11 +87,11 @@ cbc_enc(const krb5_keyblock *key, const krb5_data *ivec,
         OPENSSL_free(key_buf);
         return ENOMEM;
     }
-    memcpy(key_buf, key->contents, key->length);
+    memcpy(key_buf, key->keyblock.contents, key->keyblock.length);
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
-    ret = EVP_EncryptInit_ex(&ciph_ctx, map_mode(key->length),
+    ret = EVP_EncryptInit_ex(&ciph_ctx, map_mode(key->keyblock.length),
                   NULL, key_buf, (ivec) ? (unsigned char*)ivec->data : NULL);
 
     if (ret == 1){
@@ -112,7 +112,7 @@ cbc_enc(const krb5_keyblock *key, const krb5_data *ivec,
         ret = KRB5_CRYPTO_INTERNAL;
     }
 
-    memset(key_buf, 0, key->length);
+    memset(key_buf, 0, key->keyblock.length);
     memset(tmp_buf, 0, input->length);
     OPENSSL_free(key_buf);
     OPENSSL_free(tmp_buf);
@@ -121,7 +121,7 @@ cbc_enc(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-cbc_decr(const krb5_keyblock *key, const krb5_data *ivec,
+cbc_decr(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     int              ret = 0, tmp_len = 0;
@@ -129,7 +129,7 @@ cbc_decr(const krb5_keyblock *key, const krb5_data *ivec,
     unsigned char   *tmp_buf = NULL;
     EVP_CIPHER_CTX   ciph_ctx;
 
-    key_buf = OPENSSL_malloc(key->length);
+    key_buf = OPENSSL_malloc(key->keyblock.length);
     if (!key_buf)
         return ENOMEM;
 
@@ -139,11 +139,11 @@ cbc_decr(const krb5_keyblock *key, const krb5_data *ivec,
         OPENSSL_free(key_buf);
         return ENOMEM;
     }
-    memcpy(key_buf, key->contents, key->length);
+    memcpy(key_buf, key->keyblock.contents, key->keyblock.length);
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
-    ret = EVP_DecryptInit_ex(&ciph_ctx, map_mode(key->length),
+    ret = EVP_DecryptInit_ex(&ciph_ctx, map_mode(key->keyblock.length),
                   NULL, key_buf, (ivec) ? (unsigned char*)ivec->data : NULL);
     if (ret == 1) {
         EVP_CIPHER_CTX_set_padding(&ciph_ctx,0); 
@@ -164,7 +164,7 @@ cbc_decr(const krb5_keyblock *key, const krb5_data *ivec,
         ret = KRB5_CRYPTO_INTERNAL;
     }
 
-    memset(key_buf, 0, key->length);
+    memset(key_buf, 0, key->keyblock.length);
     memset(tmp_buf, 0, input->length);
     OPENSSL_free(key_buf);
     OPENSSL_free(tmp_buf);
@@ -173,7 +173,7 @@ cbc_decr(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-cts_enc(const krb5_keyblock *key, const krb5_data *ivec,
+cts_enc(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     int             ret = 0, tmp_len = 0;
@@ -194,7 +194,8 @@ cts_enc(const krb5_keyblock *key, const krb5_data *ivec,
         return ENOMEM;
     tmp_len = input->length;
 
-    AES_set_encrypt_key(key->contents, NUM_BITS * key->length, &enck);
+    AES_set_encrypt_key(key->keyblock.contents,
+			NUM_BITS * key->keyblock.length, &enck);
 
     size = CRYPTO_cts128_encrypt((unsigned char *)input->data, tmp_buf,
                                  input->length, &enck,
@@ -217,7 +218,7 @@ cts_enc(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-cts_decr(const krb5_keyblock *key, const krb5_data *ivec,
+cts_decr(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     int    ret = 0, tmp_len = 0;
@@ -238,7 +239,8 @@ cts_decr(const krb5_keyblock *key, const krb5_data *ivec,
         return ENOMEM;
     tmp_len = input->length;
 
-    AES_set_decrypt_key(key->contents, NUM_BITS * key->length, &deck);
+    AES_set_decrypt_key(key->keyblock.contents,
+			NUM_BITS * key->keyblock.length, &deck);
 
     size = CRYPTO_cts128_decrypt((unsigned char *)input->data, tmp_buf,
                                  input->length, &deck,
@@ -261,7 +263,7 @@ cts_decr(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-cts_encr_iov(const krb5_keyblock *key,
+cts_encr_iov(krb5_key key,
 		        const krb5_data *ivec,
 		        krb5_crypto_iov *data,
 		        size_t num_data, size_t dlen)
@@ -313,7 +315,8 @@ cts_encr_iov(const krb5_keyblock *key,
         if (tlen > dlen) break;
     }
 
-    AES_set_encrypt_key(key->contents, NUM_BITS * key->length, &enck);
+    AES_set_encrypt_key(key->keyblock.contents,
+			NUM_BITS * key->keyblock.length, &enck);
 
     size = CRYPTO_cts128_encrypt((unsigned char *)dbuf, oblock, dlen, &enck,
                                  iv_cts, (cbc128_f)AES_cbc_encrypt);
@@ -336,7 +339,7 @@ cts_encr_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-cts_decr_iov(const krb5_keyblock *key,
+cts_decr_iov(krb5_key key,
 		        const krb5_data *ivec,
 		        krb5_crypto_iov *data,
 		        size_t num_data, size_t dlen)
@@ -373,7 +376,8 @@ cts_decr_iov(const krb5_keyblock *key,
     memset(oblock, 0, oblock_len);
     memset(dbuf, 0, dlen);
 
-    AES_set_decrypt_key(key->contents, NUM_BITS * key->length, &deck);
+    AES_set_decrypt_key(key->keyblock.contents,
+			NUM_BITS * key->keyblock.length, &deck);
 
     tlen = 0;
     for (;;) {
@@ -411,7 +415,7 @@ cts_decr_iov(const krb5_keyblock *key,
 }
 
 krb5_error_code
-krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     int  ret = 0;
@@ -426,7 +430,7 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 krb5_error_code
-krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     int ret = 0;
@@ -445,7 +449,7 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-krb5int_aes_encrypt_iov(const krb5_keyblock *key,
+krb5int_aes_encrypt_iov(krb5_key key,
 		        const krb5_data *ivec,
 		        krb5_crypto_iov *data,
 		        size_t num_data)
@@ -470,7 +474,7 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-krb5int_aes_decrypt_iov(const krb5_keyblock *key,
+krb5int_aes_decrypt_iov(krb5_key key,
 		        const krb5_data *ivec,
 		        krb5_crypto_iov *data,
 		        size_t num_data)

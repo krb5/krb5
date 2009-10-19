@@ -50,7 +50,11 @@ static void init()
 }
 static void enc()
 {
-    krb5int_aes_encrypt(&enc_key, &ivec, &in, &out);
+    krb5_key key;
+
+    krb5_k_create_key(NULL, &enc_key, &key);
+    krb5int_aes_encrypt(key, &ivec, &in, &out);
+    krb5_k_free_key(NULL, key);
 }
 
 static void hexdump(const char *label, const char *cp, int len)

@@ -13,7 +13,7 @@
  */
 static krb5_error_code 
 decrypt_credencdata(krb5_context context, krb5_cred *pcred,
-		    krb5_keyblock *pkeyblock, krb5_cred_enc_part *pcredenc)
+		    krb5_key pkey, krb5_cred_enc_part *pcredenc)
 {
     krb5_cred_enc_part  * ppart = NULL;
     krb5_error_code 	  retval;
@@ -23,8 +23,8 @@ decrypt_credencdata(krb5_context context, krb5_cred *pcred,
     if (!(scratch.data = (char *)malloc(scratch.length))) 
 	return ENOMEM;
 
-    if (pkeyblock != NULL) {
-	if ((retval = krb5_c_decrypt(context, pkeyblock,
+    if (pkey != NULL) {
+	if ((retval = krb5_k_decrypt(context, pkey,
 				     KRB5_KEYUSAGE_KRB_CRED_ENCPART, 0,
 				     &pcred->enc_part, &scratch)))
 	    goto cleanup;
@@ -53,7 +53,7 @@ cleanup:
 
 static krb5_error_code 
 krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
-		   krb5_keyblock *pkeyblock, krb5_replay_data *replaydata,
+		   krb5_key pkey, krb5_replay_data *replaydata,
 		   krb5_creds ***pppcreds)
 {
     krb5_error_code       retval;
@@ -68,7 +68,7 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
 
     memset(&encpart, 0, sizeof(encpart));
 
-    if ((retval = decrypt_credencdata(context, pcred, pkeyblock, &encpart)))
+    if ((retval = decrypt_credencdata(context, pcred, pkey, &encpart)))
 	goto cleanup_cred;
 
 
@@ -167,12 +167,12 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
 	     krb5_replay_data *outdata)
 {
     krb5_error_code       retval;
-    krb5_keyblock       * keyblock;
+    krb5_key              key;
     krb5_replay_data      replaydata;
 
-    /* Get keyblock */
-    if ((keyblock = auth_context->recv_subkey) == NULL)
-	keyblock = auth_context->keyblock;
+    /* Get key */
+    if ((key = auth_context->recv_subkey) == NULL)
+	key = auth_context->key;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
       (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
@@ -186,14 +186,14 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
 
 
     /*
-     * If decrypting with the first keyblock we try fails, perhaps the
+     * If decrypting with the first key we try fails, perhaps the
      * credentials are stored in the session key so try decrypting with
      * that.
      */
-    if ((retval = krb5_rd_cred_basic(context, pcreddata, keyblock,
+    if ((retval = krb5_rd_cred_basic(context, pcreddata, key,
 				     &replaydata, pppcreds))) {
 	if ((retval = krb5_rd_cred_basic(context, pcreddata,
-					 auth_context->keyblock,
+					 auth_context->key,
 					 &replaydata, pppcreds))) {
 	    return retval;
 	}

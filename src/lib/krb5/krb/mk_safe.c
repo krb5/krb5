@@ -48,7 +48,7 @@
 */
 static krb5_error_code
 krb5_mk_safe_basic(krb5_context context, const krb5_data *userdata,
-		   const krb5_keyblock *keyblock, krb5_replay_data *replaydata,
+		   krb5_key key, krb5_replay_data *replaydata,
 		   krb5_address *local_addr, krb5_address *remote_addr,
 		   krb5_cksumtype sumtype, krb5_data *outbuf)
 {
@@ -88,7 +88,7 @@ krb5_mk_safe_basic(krb5_context context, const krb5_data *userdata,
     if ((retval = encode_krb5_safe(&safemsg, &scratch1)))
 	return retval;
 
-    if ((retval = krb5_c_make_checksum(context, sumtype, keyblock,
+    if ((retval = krb5_k_make_checksum(context, sumtype, key,
 				       KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
 				       scratch1, &safe_checksum)))
 	goto cleanup_checksum;
@@ -115,15 +115,15 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
 	     krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
-    krb5_keyblock       * keyblock;
+    krb5_key              key;
     krb5_replay_data      replaydata;
 
     /* Clear replaydata block */
     memset(&replaydata, 0, sizeof(krb5_replay_data));
 
-    /* Get keyblock */
-    if ((keyblock = auth_context->send_subkey) == NULL)
-	keyblock = auth_context->keyblock;
+    /* Get key */
+    if ((key = auth_context->send_subkey) == NULL)
+	key = auth_context->key;
 
     /* Get replay info */
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
@@ -195,10 +195,11 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
     }
 
     {
+	krb5_enctype enctype = krb5_k_key_enctype(context, key);
 	unsigned int nsumtypes;
 	unsigned int i;
 	krb5_cksumtype *sumtypes;
-	retval = krb5_c_keyed_checksum_types (context, keyblock->enctype,
+	retval = krb5_c_keyed_checksum_types (context, enctype,
 					      &nsumtypes, &sumtypes);
 	if (retval) {
 	    CLEANUP_DONE ();
@@ -218,7 +219,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
 	sumtype = sumtypes[i];
 	krb5_free_cksumtypes (context, sumtypes);
     }
-    if ((retval = krb5_mk_safe_basic(context, userdata, keyblock, &replaydata, 
+    if ((retval = krb5_mk_safe_basic(context, userdata, key, &replaydata,
 				     plocal_fulladdr, premote_fulladdr,
 				     sumtype, outbuf))) {
 	CLEANUP_DONE();

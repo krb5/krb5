@@ -34,14 +34,14 @@ void krb5_old_encrypt_length
 krb5_error_code krb5_old_encrypt
 (const struct krb5_enc_provider *enc,
 		const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key, krb5_keyusage usage,
+		krb5_key key, krb5_keyusage usage,
 		const krb5_data *ivec, const krb5_data *input,
 		krb5_data *output);
 
 krb5_error_code krb5_old_decrypt
 (const struct krb5_enc_provider *enc,
 		const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key, krb5_keyusage usage,
+		krb5_key key, krb5_keyusage usage,
 		const krb5_data *ivec, const krb5_data *input,
 		krb5_data *arg_output);
 

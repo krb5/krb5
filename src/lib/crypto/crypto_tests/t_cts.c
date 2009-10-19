@@ -114,15 +114,12 @@ static void test_cts()
 	"I would like the General Gau's Chicken, please, and wonton soup.";
     static const unsigned char aeskey[16] = "chicken teriyaki";
     static const int lengths[] = { 17, 31, 32, 47, 48, 64 };
-    extern krb5_error_code krb5int_aes_encrypt(const krb5_keyblock *,
-					       const krb5_data *,
-					       const krb5_data *,
-					       krb5_data *);
 
     int i;
     char outbuf[64], encivbuf[16], decivbuf[16], outbuf2[64];
     krb5_data in, out, enciv, deciv, out2;
-    krb5_keyblock key;
+    krb5_keyblock keyblock;
+    krb5_key key;
     krb5_error_code err;
 
     in.data = input;
@@ -131,11 +128,17 @@ static void test_cts()
     enciv.length = deciv.length = 16;
     enciv.data = encivbuf;
     deciv.data = decivbuf;
-    key.contents = aeskey;
-    key.length = 16;
+    keyblock.contents = aeskey;
+    keyblock.length = 16;
+
+    err = krb5_k_create_key(NULL, &keyblock, &key);
+    if (err) {
+	printf("error %ld from krb5_k_create_key\n", (long)err);
+	exit(1);
+    }
 
     memset(enciv.data, 0, 16);
-    printk("AES 128-bit key", &key);
+    printk("AES 128-bit key", &keyblock);
     for (i = 0; i < sizeof(lengths)/sizeof(lengths[0]); i++) {
     memset(enciv.data, 0, 16);
     memset(deciv.data, 0, 16);
@@ -143,7 +146,7 @@ static void test_cts()
 	printf("\n");
 	in.length = out.length = lengths[i];
 	printd("IV", &enciv);
-	err = krb5int_aes_encrypt(&key, &enciv, &in, &out);
+	err = krb5int_aes_encrypt(key, &enciv, &in, &out);
 	if (err) {
 	    printf("error %ld from krb5int_aes_encrypt\n", (long)err);
 	    exit(1);
@@ -152,7 +155,7 @@ static void test_cts()
 	printd("Output", &out);
 	printd("Next IV", &enciv);
 	out2.length = out.length;
-	err = krb5int_aes_decrypt(&key, &deciv, &out, &out2);
+	err = krb5int_aes_decrypt(key, &deciv, &out, &out2);
 	if (err) {
 	    printf("error %ld from krb5int_aes_decrypt\n", (long)err);
 	    exit(1);
