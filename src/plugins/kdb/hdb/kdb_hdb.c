@@ -153,16 +153,17 @@ kh_db_context_init(krb5_context context,
         goto cleanup;
     }
 
-    code = krb5int_open_plugin(libkrb5, &kh->libkrb5, &errinfo);
-    if (code != 0)
-        goto cleanup;
-
 #define GET_PLUGIN_FUNC(_lib, _sym, _member)     do { \
     code = krb5int_get_plugin_func(kh->_lib, _sym, \
                                    (void (**)())&kh->_member, &errinfo); \
     if (code != 0) \
         goto cleanup; \
     } while (0)
+
+    /* libkrb5 */
+    code = krb5int_open_plugin(libkrb5, &kh->libkrb5, &errinfo);
+    if (code != 0)
+        goto cleanup;
 
     GET_PLUGIN_FUNC(libkrb5, "krb5_init_context",     heim_init_context);
     GET_PLUGIN_FUNC(libkrb5, "krb5_free_context",     heim_free_context);
@@ -176,6 +177,7 @@ kh_db_context_init(krb5_context context,
     if (asprintf(&libhdb, "%s/libhdb%s", libdir, SHLIBEXT) < 0)
         goto cleanup;
 
+    /* libhdb */
     code = krb5int_open_plugin(libhdb, &kh->libhdb, &errinfo);
     if (code != 0)
         goto cleanup;
@@ -287,6 +289,10 @@ kh_fini_module(krb5_context context)
 
     return 0;
 }
+
+/*
+ * Heimdal API and SPI wrappers.
+ */
 
 static krb5_error_code
 kh_hdb_open(krb5_context context,
@@ -406,6 +412,9 @@ kh_hdb_rename(krb5_context context,
 {
     heim_error_code hcode;
 
+    if (kh->hdb->hdb_rename == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP;
+
     hcode = (*kh->hdb->hdb_rename)(kh->hcontext, kh->hdb, name);
 
     return kh_map_error(hcode);
@@ -524,7 +533,21 @@ kh_db_create(krb5_context context,
              char *conf_section,
              char **db_args)
 {
-    return KRB5_KDB_DBTYPE_NOSUP;
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    krb5_error_code code;
+
+    if (kh == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP;
+
+    code = k5_mutex_lock(kh->lock);
+    if (code != 0)
+        return code;
+
+    code = kh_hdb_open(context, kh, kh->mode, 0);
+
+    k5_mutex_unlock(kh->lock);
+
+    return code;
 }
 
 static krb5_error_code
@@ -1082,6 +1105,38 @@ kh_get_master_key(krb5_context context,
     return 0;
 }
 
+static krb5_error_code
+kh_promote_db(krb5_context context,
+              char *conf_section,
+              char **db_args)
+{
+    kh_db_context *kh = KH_DB_CONTEXT(context);
+    krb5_error_code code;
+    char *name;
+
+    if (kh == NULL)
+        return KRB5_KDB_DBNOTINITED;
+
+    if (kh->hdb->hdb_name == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP;
+
+    if (asprintf(&name, "%s~", kh->hdb->hdb_name) < 0)
+        return ENOMEM;
+
+    code = k5_mutex_lock(kh->lock);
+    if (code != 0) {
+        free(name);
+        return code;
+    }
+
+    code = kh_hdb_rename(context, kh, name);
+
+    k5_mutex_unlock(kh->lock);
+    free(name);
+
+    return code;
+}
+
 krb5_error_code
 kh_decrypt_key(krb5_context context,
                kh_db_context *kh,
@@ -1361,7 +1416,7 @@ kdb_vftabl kdb_function_table = {
     NULL,
     NULL,
     NULL,
-    NULL,
+    kh_promote_db,
     kh_dbekd_decrypt_key_data,
     kh_dbekd_encrypt_key_data,
     kh_db_invoke,
