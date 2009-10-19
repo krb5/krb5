@@ -460,12 +460,6 @@ _xdr_kadm5_principal_ent_rec(XDR *xdrs, kadm5_principal_ent_rec *objp,
 		       xdr_krb5_key_data_nocontents)) {
 		return (FALSE);
 	}
-	if (v == KADM5_API_VERSION_3) {
-		if (!xdr_long(xdrs, &objp->locked_time))
-			return (FALSE);
-	} else if (xdrs->x_op == XDR_DECODE) {
-		objp->locked_time = 0;
-	}
 
 	return (TRUE);
 }

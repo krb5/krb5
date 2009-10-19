@@ -1735,9 +1735,6 @@ krb5_db2_merge_principal(krb5_context kcontext,
 			 krb5_db_entry *dst,
 			 int *changed)
 {
-    krb5_tl_data **tl, *tp;
-    krb5_tl_data **tl2;
-
     *changed = 0;
 
     if (dst->last_success != src->last_success) {
@@ -1753,45 +1750,6 @@ krb5_db2_merge_principal(krb5_context kcontext,
     if (dst->fail_auth_count != src->fail_auth_count) {
 	dst->fail_auth_count = src->fail_auth_count;
 	(*changed)++;
-    }
-
-    /* Scrub non-replicated TL data types in dst */
-    for (tl = &dst->tl_data; *tl != NULL; tl = &(*tl)->tl_data_next) {
-	if (KRB5_TL_IS_NRA((*tl)->tl_data_type)) {
-	    /* Unhook TL data from linked list and free it */
-	    tp = *tl;
-	    *tl = (*tl)->tl_data_next;
-	    free(tp->tl_data_contents);
-	    free(tp);
-	    (*changed)++;
-
-	    dst->n_tl_data--;
-
-	    if (*tl == NULL)
-		break;
-	}
-    }
-
-    /* Move non-replicated TL data types in src to dst */
-    for (tl2 = &src->tl_data; *tl2 != NULL; tl2 = &(*tl2)->tl_data_next) {
-	if (KRB5_TL_IS_NRA((*tl2)->tl_data_type)) {
-	    /* Unhook TL data from src linked list */
-	    tp = *tl2;
-	    *tl2 = (*tl2)->tl_data_next;
-
-	    /* Add to tail of dst linked list */
-	    *tl = tp;
-	    tp->tl_data_next = NULL;
-	    tl = &tp->tl_data_next;
-
-	    (*changed)++;
-
-	    src->n_tl_data--;
-	    dst->n_tl_data++;
-
-	    if (*tl2 == NULL)
-		break;
-	}
     }
 
     return 0;

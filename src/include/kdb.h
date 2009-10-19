@@ -199,10 +199,6 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_ACTKVNO                 0x0009
 #define KRB5_TL_MKEY_AUX                0x000a
 
-/* Non-replicated TL data attributes are < 0 */
-#define KRB5_TL_IS_NRA(x)		((x) < 0)
-#define KRB5_TL_LOCKED_TIME             -128
-
 /* version number for KRB5_TL_ACTKVNO data */
 #define KRB5_TL_ACTKVNO_VER     1
 
@@ -472,11 +468,6 @@ krb5_dbe_update_last_pwd_change( krb5_context     context,
 				 krb5_timestamp	  stamp);
 
 krb5_error_code
-krb5_dbe_update_locked_time ( krb5_context     context,
-			      krb5_db_entry  * entry,
-			      krb5_timestamp   stamp);
-
-krb5_error_code
 krb5_dbe_lookup_tl_data( krb5_context          context,
 			 krb5_db_entry       * entry,
 			 krb5_tl_data        * ret_tl_data);
@@ -504,11 +495,6 @@ krb5_error_code
 krb5_dbe_lookup_last_pwd_change( krb5_context          context,
 				 krb5_db_entry       * entry,
 				 krb5_timestamp      * stamp);
-
-krb5_error_code
-krb5_dbe_lookup_locked_time ( krb5_context          context,
-			      krb5_db_entry       * entry,
-			      krb5_timestamp      * stamp);
 
 krb5_error_code
 krb5_dbe_delete_tl_data( krb5_context    context,

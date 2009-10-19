@@ -1956,10 +1956,10 @@ proc test44 {} {
 	perror "$test: unexpected failure in init"
 	return
     }
-    # setting locked time to a non-zero value must fail
+    # setting fail auth count to a non-zero value must fail
     one_line_fail_test [format {
 	kadm5_modify_principal $server_handle \
-		{"%s/a" 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 {} {} 1234} {KADM5_LOCKED_TIME}
+		{"%s/a" 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1234 0 0 {} {}} {KADM5_FAIL_AUTH_COUNT}
     } $test] "BAD_SERVER_PARAMS"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	perror "$test: unexpected failure in destroy"

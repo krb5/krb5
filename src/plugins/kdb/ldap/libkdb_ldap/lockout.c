@@ -94,16 +94,17 @@ lookup_lockout_policy(krb5_context context,
 static krb5_boolean
 locked_check_p(krb5_context context,
                krb5_timestamp stamp,
-               krb5_timestamp locked_time,
-               krb5_timestamp lockout_duration)
+               krb5_kvno max_fail,
+               krb5_timestamp lockout_duration,
+               krb5_db_entry *entry)
 {
-    if (locked_time == 0)
+    if (max_fail == 0 || entry->fail_auth_count < max_fail)
         return FALSE;
 
     if (lockout_duration == 0)
         return TRUE; /* principal permanently locked */
 
-    return (stamp < locked_time + lockout_duration);
+    return (stamp < entry->last_failed + lockout_duration);
 }
 
 krb5_error_code
@@ -112,22 +113,17 @@ krb5_ldap_lockout_check_policy(krb5_context context,
                                krb5_timestamp stamp)
 {
     krb5_error_code code;
-    krb5_timestamp locked_time = 0;
     krb5_kvno max_fail = 0;
     krb5_deltat failcnt_interval = 0;
     krb5_deltat lockout_duration = 0;
 
-    code = krb5_dbe_lookup_locked_time(context, entry, &locked_time);
-    if (code != 0 || locked_time == 0)
-        return code;
-
     code = lookup_lockout_policy(context, entry, &max_fail,
                                  &failcnt_interval,
                                  &lockout_duration);
-    if (code != 0)
+    if (code != 0 || failcnt_interval == 0)
         return code;
 
-    if (locked_check_p(context, stamp, locked_time, lockout_duration))
+    if (locked_check_p(context, stamp, max_fail, lockout_duration, entry))
         return KRB5KDC_ERR_CLIENT_REVOKED;
 
     return 0;
@@ -140,7 +136,6 @@ krb5_ldap_lockout_audit(krb5_context context,
                         krb5_error_code status)
 {
     krb5_error_code code;
-    krb5_timestamp locked_time = 0;
     krb5_kvno max_fail = 0;
     krb5_deltat failcnt_interval = 0;
     krb5_deltat lockout_duration = 0;
@@ -155,8 +150,6 @@ krb5_ldap_lockout_audit(krb5_context context,
         return 0;
     }
 
-    krb5_dbe_lookup_locked_time(context, entry, &locked_time);
-
     code = lookup_lockout_policy(context, entry, &max_fail,
                                  &failcnt_interval,
                                  &lockout_duration);
@@ -165,7 +158,7 @@ krb5_ldap_lockout_audit(krb5_context context,
 
     entry->mask = 0;
 
-    assert(!locked_check_p(context, stamp, locked_time, lockout_duration));
+    assert (!locked_check_p(context, stamp, max_fail, lockout_duration, entry));
 
     if (status == 0 && (entry->attributes & KRB5_KDB_REQUIRES_PRE_AUTH)) {
         /*
@@ -173,20 +166,10 @@ krb5_ldap_lockout_audit(krb5_context context,
          * required preauthentication, otherwise we have no idea.
          */
         entry->fail_auth_count = 0;
-        if (locked_time != 0) {
-            locked_time = 0;
-            entry->mask |= KADM5_LOCKED_TIME;
-        }
         entry->last_success = stamp;
         entry->mask |= KADM5_FAIL_AUTH_COUNT | KADM5_LAST_SUCCESS;
     } else if (status == KRB5KDC_ERR_PREAUTH_FAILED ||
                status == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
-        if (locked_time != 0) {
-            /* Unlock after lockout_duration */
-            locked_time = 0;
-            entry->mask |= KADM5_LOCKED_TIME;
-        }
-
         if (failcnt_interval != 0 &&
             stamp > entry->last_failed + failcnt_interval) {
             /* Reset fail_auth_count after failcnt_interval */
@@ -196,18 +179,6 @@ krb5_ldap_lockout_audit(krb5_context context,
 
         entry->last_failed = stamp;
         entry->mask |= KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT_INCREMENT;
-
-        if (max_fail != 0 &&
-            entry->fail_auth_count + 1 >= max_fail) {
-            locked_time = stamp;
-            entry->mask |= KADM5_LOCKED_TIME;
-        }
-    }
-
-    if (entry->mask & KADM5_LOCKED_TIME) {
-        code = krb5_dbe_update_locked_time(context, entry, locked_time);
-        if (code != 0)
-            return code;
     }
 
     if (entry->mask) {

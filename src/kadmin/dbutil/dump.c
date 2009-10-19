@@ -790,8 +790,7 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 	for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
 	     /*
 	      * don't dump tl data types we know aren't understood by
-	      * earlier revisions [krb5-admin/89]; don't dump negative
-	      * tl data types if FLAG_OMIT_NRA is set.
+	      * earlier revisions [krb5-admin/89]
 	      */
 	     switch (tlp->tl_data_type) {
 	     case KRB5_TL_KADM_DATA:
@@ -801,11 +800,7 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 		      skip++;
 		  break;
 	     default:
-		  if (KRB5_TL_IS_NRA(tlp->tl_data_type) &&
-		      (arg->flags & FLAG_OMIT_NRA))
-		      skip++;
-		  else
-		      counter++;
+		  counter++;
 		  break;
 	     }
 	}
@@ -832,9 +827,6 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 	    for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
 		if (tlp->tl_data_type == KRB5_TL_KADM_DATA && !kadm)
 		     continue; /* see above, [krb5-admin/89] */
-		else if (KRB5_TL_IS_NRA(tlp->tl_data_type) &&
-			 (arg->flags & FLAG_OMIT_NRA))
-		     continue; /* non-replicated attribute */
 
 		fprintf(arg->ofile, "%d\t%d\t",
 			(int) tlp->tl_data_type,

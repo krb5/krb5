@@ -61,7 +61,6 @@ static struct flagval principal_mask_flags[] = {
      {"KADM5_FAIL_AUTH_COUNT", KADM5_FAIL_AUTH_COUNT},
      {"KADM5_KEY_DATA", KADM5_KEY_DATA},
      {"KADM5_TL_DATA", KADM5_TL_DATA},
-     {"KADM5_LOCKED_TIME", KADM5_LOCKED_TIME},
      {"KADM5_PRINCIPAL_NORMAL_MASK", KADM5_PRINCIPAL_NORMAL_MASK}
 };
 
@@ -782,9 +781,6 @@ static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ,
      Tcl_DStringFree(tmp_dstring);
      free(tmp_dstring);
      
-     sprintf(buf, "%d", princ->locked_time);
-     Tcl_DStringAppendElement(str, buf);
-
      return str;
 }
 
@@ -1134,9 +1130,9 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
 	  return tcl_ret;
      }
 
-     if (argc != 12 && argc != 20 && argc != 21) {
+     if (argc != 12 && argc != 20) {
 	  sprintf(interp->result,
-             "wrong # args in principal structure (%d should be 12 or 20 or 21)",
+             "wrong # args in principal structure (%d should be 12 or 20)",
 		  argc);
 	  retcode = TCL_ERROR;
 	  goto finished;
@@ -1317,16 +1313,6 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
 	  goto finished;
      }
      princ->n_tl_data = tmp;
-
-     if (argc > 20) {
-	  if ((tcl_ret = Tcl_GetInt(interp, argv[20], &tmp))
-	      != TCL_OK) {
-	      Tcl_AppendElement(interp, "while parsing locked_time");
-	      retcode = TCL_ERROR;
-	      goto finished;
-	  }
-	  princ->locked_time = tmp;
-     }
 
 finished:
      Tcl_Free((char *) argv);

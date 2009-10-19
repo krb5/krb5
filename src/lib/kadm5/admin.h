@@ -111,7 +111,6 @@ typedef long		kadm5_ret_t;
 #define KADM5_RANDKEY_USED      0x100000
 #endif
 #define KADM5_LOAD		0x200000
-#define KADM5_LOCKED_TIME	0x400000
 
 /* all but KEY_DATA, TL_DATA, LOAD */
 #define KADM5_PRINCIPAL_NORMAL_MASK 0x41ffff
@@ -205,9 +204,6 @@ typedef struct _kadm5_principal_ent_t {
 	krb5_int16 n_tl_data;
         krb5_tl_data *tl_data;
 	krb5_key_data *key_data;
-
-	/* version 3 fields */
-	krb5_timestamp locked_time;
 } kadm5_principal_ent_rec, *kadm5_principal_ent_t;
 
 typedef struct _kadm5_policy_ent_t {

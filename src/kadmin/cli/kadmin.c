@@ -971,8 +971,8 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
         }
 #endif /* APPLE_PKINIT */
         if (strlen(argv[i]) == 7 && !strcmp("-unlock", argv[i])) {
-            oprinc->locked_time = 0;
-            *mask |= KADM5_LOCKED_TIME;
+            oprinc->fail_auth_count = 0;
+            *mask |= KADM5_FAIL_AUTH_COUNT;
             continue;
         }
         if (!strcmp("-e", argv[i])) {
@@ -1363,9 +1363,6 @@ kadmin_getprinc(int argc, char *argv[])
                "[never]");
         printf("Failed password attempts: %d\n",
                dprinc.fail_auth_count);
-        printf("Account locked time: %s\n",
-               dprinc.locked_time ? strdate(dprinc.locked_time) :
-               "[never]");
         printf("Number of keys: %d\n", dprinc.n_key_data);
         for (i = 0; i < dprinc.n_key_data; i++) {
             krb5_key_data *key_data = &dprinc.key_data[i];
@@ -1397,14 +1394,14 @@ kadmin_getprinc(int argc, char *argv[])
         printf("Policy: %s\n", dprinc.policy ? dprinc.policy : "[none]");
     } else {
         printf("\"%s\"\t%d\t%d\t%d\t%d\t\"%s\"\t%d\t%d\t%d\t%d\t\"%s\""
-               "\t%d\t%d\t%d\t%d\t%d\t%d",
+               "\t%d\t%d\t%d\t%d\t%d",
                canon, dprinc.princ_expire_time, dprinc.last_pwd_change,
                dprinc.pw_expiration, dprinc.max_life, modcanon,
                dprinc.mod_date, dprinc.attributes, dprinc.kvno,
                dprinc.mkvno, dprinc.policy ? dprinc.policy : "[none]",
                dprinc.max_renewable_life, dprinc.last_success,
                dprinc.last_failed, dprinc.fail_auth_count,
-               dprinc.n_key_data, dprinc.locked_time);
+               dprinc.n_key_data);
         for (i = 0; i < dprinc.n_key_data; i++)
             printf("\t%d\t%d\t%d\t%d",
                    dprinc.key_data[i].key_data_ver,

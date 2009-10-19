@@ -119,15 +119,14 @@ find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
 	     first; first = first->tl_data_next,
 		 second = second->tl_data_next) {
 	    if ((first->tl_data_length == second->tl_data_length) &&
-		(first->tl_data_type == second->tl_data_type) &&
-		(!exclude_nra || !KRB5_TL_IS_NRA(second->tl_data_type))) {
+		(first->tl_data_type == second->tl_data_type)) {
 		if ((memcmp((char *)first->tl_data_contents,
 			    (char *)second->tl_data_contents,
 			    first->tl_data_length)) != 0) {
 		    attrs[i++] = AT_TL_DATA;
 		    break;
 		}
-	    } else if (!exclude_nra || !KRB5_TL_IS_NRA(second->tl_data_type)) {
+	    } else {
 		attrs[i++] = AT_TL_DATA;
 		break;
 	    }
@@ -539,11 +538,6 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
 
 		newtl = ent->tl_data;
 		while (newtl) {
-		    if (exclude_nra && KRB5_TL_IS_NRA(newtl->tl_data_type)) {
-			newtl = newtl->tl_data_next;
-			continue;
-		    }
-
 		    switch (newtl->tl_data_type) {
 		    case KRB5_TL_LAST_PWD_CHANGE:
 		    case KRB5_TL_MOD_PRINC:
@@ -795,11 +789,6 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
 		    return (ENOMEM);
 
 		for (j = 0, t = 0; j < cnt; j++) {
-		    /* Negative TL types are non-replicated */
-		    if (slave &&
-			KRB5_TL_IS_NRA(u.av_tldata.av_tldata_val[j].tl_type))
-			continue;
-
 		    newtl[t].tl_data_type = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_type;
 		    newtl[t].tl_data_length = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_data.tl_data_len;
 		    newtl[t].tl_data_contents = malloc(newtl[t].tl_data_length * sizeof (krb5_octet));

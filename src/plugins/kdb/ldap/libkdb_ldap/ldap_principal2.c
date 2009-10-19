@@ -1071,34 +1071,6 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 
 	} /* Modify Key data ends here */
 
-	if (entries->mask & KADM5_LOCKED_TIME) {
-	    krb5_timestamp locked_time;
-
-	    st = krb5_dbe_lookup_locked_time(context, entries, &locked_time);
-	    if (st != 0)
-		goto cleanup;
-
-	    if (locked_time == 0) {
-		/* account is being unlocked */
-		st = krb5_add_str_mem_ldap_mod(&mods,
-					       "krbPwdPrincipalLockedTime",
-					       LDAP_MOD_DELETE,
-					       NULL);
-	    } else {
-		memset(strval, 0, sizeof(strval));
-		if ((strval[0] = getstringtime(locked_time)) == NULL)
-		    goto cleanup;
-
-		st = krb5_add_str_mem_ldap_mod(&mods,
-					       "krbPwdPrincipalLockedTime",
-						LDAP_MOD_REPLACE,
-						strval);
-		free(strval[0]);
-	    }
-	    if (st != 0)
-		goto cleanup;
-	}
-
 	/* Set tl_data */
 	if (entries->tl_data != NULL) {
 	    int count = 0;
@@ -1110,7 +1082,6 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		    || ptr->tl_data_type == KRB5_TL_DB_ARGS
 #endif
 		    || ptr->tl_data_type == KRB5_TL_KADM_DATA
-		    || ptr->tl_data_type == KRB5_TL_LOCKED_TIME
 		    || ptr->tl_data_type == KDB_TL_USER_INFO)
 		    continue;
 		count++;
@@ -1131,7 +1102,6 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 			|| ptr->tl_data_type == KRB5_TL_DB_ARGS
 #endif
 			|| ptr->tl_data_type == KRB5_TL_KADM_DATA
-			|| ptr->tl_data_type == KRB5_TL_LOCKED_TIME
 			|| ptr->tl_data_type == KDB_TL_USER_INFO)
 			continue;
 		    if ((st = tl_data2berval (ptr, &ber_tl_data[j])) != 0)

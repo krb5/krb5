@@ -533,15 +533,6 @@ attributetype ( 2.16.840.1.113719.1.301.4.53.1
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
 
-##### The time at which the principal was locked out
-
-attributetype ( 2.16.840.1.113719.1.301.4.54.1
-                NAME 'krbPwdPrincipalLockedTime'
-                EQUALITY generalizedTimeMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
-                SINGLE-VALUE)
-
-
 ########################################################################
 ########################################################################
 # 		        Object Class Definitions                       #
@@ -611,7 +602,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.8.1
                 NAME 'krbPrincipalAux'
 		SUP top
                 AUXILIARY
-                MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData $ krbPwdPrincipalLockedTime ) )
+                MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData ) )
 
 
 ###### This class is used to create additional principals and stand alone principals.
