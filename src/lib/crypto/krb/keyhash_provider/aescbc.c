@@ -39,7 +39,7 @@ static void xorblock(unsigned char *out, unsigned const char *in)
 }
 
 static  krb5_error_code
-k5_aescbc_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
+k5_aescbc_hash_iov (krb5_key key, krb5_keyusage usage,
 		    const krb5_data *iv,
 		    const krb5_crypto_iov *data, size_t num_data,
 		    krb5_data *output)
@@ -51,7 +51,8 @@ k5_aescbc_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
     if (output->length < BLOCK_SIZE)
 	return KRB5_BAD_MSIZE;
 
-    if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
+    if (aes_enc_key(key->keyblock.contents,
+		    key->keyblock.length, &ctx) != aes_good)
 	abort();
 
     if (iv != NULL)
@@ -88,7 +89,7 @@ k5_aescbc_hash_iov (const krb5_keyblock *key, krb5_keyusage usage,
 }
 
 static  krb5_error_code
-k5_aescbc_hash (const krb5_keyblock *key, krb5_keyusage usage,
+k5_aescbc_hash (krb5_key key, krb5_keyusage usage,
 		const krb5_data *iv,
 		const krb5_data *input, krb5_data *output)
 {

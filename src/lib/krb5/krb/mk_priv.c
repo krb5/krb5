@@ -33,10 +33,11 @@
 
 static krb5_error_code
 krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata,
-		   const krb5_keyblock *keyblock, krb5_replay_data *replaydata,
+		   krb5_key key, krb5_replay_data *replaydata,
 		   krb5_address *local_addr, krb5_address *remote_addr,
 		   krb5_pointer i_vector, krb5_data *outbuf)
 {
+    krb5_enctype	enctype = krb5_k_key_enctype(context, key);
     krb5_error_code 	retval;
     krb5_priv 		privmsg;
     krb5_priv_enc_part 	privmsg_enc_part;
@@ -44,7 +45,7 @@ krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata,
     size_t		blocksize, enclen;
 
     privmsg.enc_part.kvno = 0;	/* XXX allow user-set? */
-    privmsg.enc_part.enctype = keyblock->enctype; 
+    privmsg.enc_part.enctype = enctype;
 
     privmsg_enc_part.user_data = *userdata;
     privmsg_enc_part.s_address = local_addr;
@@ -60,7 +61,7 @@ krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata,
 	return retval;
 
     /* put together an eblock for this encryption */
-    if ((retval = krb5_c_encrypt_length(context, keyblock->enctype,
+    if ((retval = krb5_c_encrypt_length(context, enctype,
 					scratch1->length, &enclen)))
 	goto clean_scratch;
 
@@ -73,15 +74,14 @@ krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata,
 
     /* call the encryption routine */
     if (i_vector) {
-	if ((retval = krb5_c_block_size(context, keyblock->enctype,
-					&blocksize)))
+	if ((retval = krb5_c_block_size(context, enctype, &blocksize)))
 	    goto clean_encpart;
 
 	ivdata.length = blocksize;
 	ivdata.data = i_vector;
     }
 
-    if ((retval = krb5_c_encrypt(context, keyblock,
+    if ((retval = krb5_k_encrypt(context, key,
 				 KRB5_KEYUSAGE_KRB_PRIV_ENCPART,
 				 i_vector?&ivdata:0,
 				 scratch1, &privmsg.enc_part)))
@@ -115,15 +115,15 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
 	     krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
-    krb5_keyblock       * keyblock;
+    krb5_key              key;
     krb5_replay_data      replaydata;
 
     /* Clear replaydata block */
     memset(&replaydata, 0, sizeof(krb5_replay_data));
 
     /* Get keyblock */
-    if ((keyblock = auth_context->send_subkey) == NULL)
-	keyblock = auth_context->keyblock;
+    if ((key = auth_context->send_subkey) == NULL)
+	key = auth_context->key;
 
     /* Get replay info */
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
@@ -192,7 +192,7 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
 	}
     }
 
-    if ((retval = krb5_mk_priv_basic(context, userdata, keyblock, &replaydata, 
+    if ((retval = krb5_mk_priv_basic(context, userdata, key, &replaydata,
 				     plocal_fulladdr, premote_fulladdr,
 				     auth_context->i_vector, outbuf))) {
 	CLEANUP_DONE();

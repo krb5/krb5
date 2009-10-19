@@ -80,7 +80,8 @@ k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
 	(auth_context->local_seq_number == 0)) {
-	if ((retval = krb5_generate_seq_number(context, auth_context->keyblock,
+	if ((retval = krb5_generate_seq_number(context,
+					       &auth_context->key->keyblock,
 					       &auth_context->local_seq_number)))
             return(retval);
     }
@@ -98,11 +99,11 @@ k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
 	assert(auth_context->negotiated_etype != ENCTYPE_NULL);
 
 	retval = krb5int_generate_and_save_subkey (context, auth_context,
-						   auth_context->keyblock,
+						   &auth_context->key->keyblock,
 						   auth_context->negotiated_etype);
 	if (retval)
 	    return retval;
-	repl.subkey = auth_context->send_subkey;
+	repl.subkey = &auth_context->send_subkey->keyblock;
     } else
 	repl.subkey = auth_context->authentp->subkey;
 
@@ -115,9 +116,9 @@ k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
     if ((retval = encode_krb5_ap_rep_enc_part(&repl, &scratch)))
 	return retval;
 
-    if ((retval = krb5_encrypt_helper(context, auth_context->keyblock,
-				      KRB5_KEYUSAGE_AP_REP_ENCPART,
-				      scratch, &reply.enc_part)))
+    if ((retval = krb5_encrypt_keyhelper(context, auth_context->key,
+					 KRB5_KEYUSAGE_AP_REP_ENCPART,
+					 scratch, &reply.enc_part)))
 	goto cleanup_scratch;
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {

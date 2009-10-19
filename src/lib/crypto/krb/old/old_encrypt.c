@@ -44,7 +44,7 @@ krb5_old_encrypt_length(const struct krb5_enc_provider *enc,
 krb5_error_code
 krb5_old_encrypt(const struct krb5_enc_provider *enc,
 		 const struct krb5_hash_provider *hash,
-		 const krb5_keyblock *key,
+		 krb5_key key,
 		 krb5_keyusage usage,
 		 const krb5_data *ivec,
 		 const krb5_data *input,
@@ -87,9 +87,9 @@ krb5_old_encrypt(const struct krb5_enc_provider *enc,
     /* encrypt it */
 
     /* XXX this is gross, but I don't have much choice */
-    if ((key->enctype == ENCTYPE_DES_CBC_CRC) && (ivec == 0)) {
-	crcivec.length = key->length;
-	crcivec.data = (char *) key->contents;
+    if ((key->keyblock.enctype == ENCTYPE_DES_CBC_CRC) && (ivec == 0)) {
+	crcivec.length = key->keyblock.length;
+	crcivec.data = (char *) key->keyblock.contents;
 	ivec = &crcivec;
 	real_ivec = 0;
     } else

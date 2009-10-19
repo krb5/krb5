@@ -635,6 +635,19 @@ krb5int_locate_server (krb5_context, const krb5_data *realm,
 		       struct addrlist *, enum locate_service_type svc,
 		       int sockettype, int family);
 
+struct derived_key {
+    krb5_data constant;
+    krb5_key dkey;
+    struct derived_key *next;
+};
+
+/* Internal structure of an opaque key identifier */
+struct krb5_key_st {
+    krb5_keyblock keyblock;
+    int refcount;
+    struct derived_key *derived;
+};
+
 /* new encryption provider api */
 
 struct krb5_enc_provider {
@@ -643,12 +656,12 @@ struct krb5_enc_provider {
     size_t block_size, keybytes, keylength;
 
     /* cipher-state == 0 fresh state thrown away at end */
-    krb5_error_code (*encrypt) (const krb5_keyblock *key,
+    krb5_error_code (*encrypt) (krb5_key key,
 				const krb5_data *cipher_state,
 				const krb5_data *input,
 				krb5_data *output);
 
-    krb5_error_code (*decrypt) (const krb5_keyblock *key,
+    krb5_error_code (*decrypt) (krb5_key key,
 				const krb5_data *ivec,
 				const krb5_data *input,
 				krb5_data *output);
@@ -661,13 +674,13 @@ struct krb5_enc_provider {
   krb5_error_code (*free_state) (krb5_data *state);
 
     /* In-place encryption/decryption of multiple buffers */
-    krb5_error_code (*encrypt_iov) (const krb5_keyblock *key,
+    krb5_error_code (*encrypt_iov) (krb5_key key,
 				    const krb5_data *cipher_state,
 				    krb5_crypto_iov *data,
 				    size_t num_data);
 
 
-    krb5_error_code (*decrypt_iov) (const krb5_keyblock *key,
+    krb5_error_code (*decrypt_iov) (krb5_key key,
 				    const krb5_data *cipher_state,
 				    krb5_crypto_iov *data,
 				    size_t num_data);
@@ -686,27 +699,27 @@ struct krb5_hash_provider {
 struct krb5_keyhash_provider {
     size_t hashsize;
 
-    krb5_error_code (*hash) (const krb5_keyblock *key,
+    krb5_error_code (*hash) (krb5_key key,
 			     krb5_keyusage keyusage,
 			     const krb5_data *ivec,
 			     const krb5_data *input,
 			     krb5_data *output);
 
-    krb5_error_code (*verify) (const krb5_keyblock *key,
+    krb5_error_code (*verify) (krb5_key key,
 			       krb5_keyusage keyusage,
 			       const krb5_data *ivec,
 			       const krb5_data *input,
 			       const krb5_data *hash,
 			       krb5_boolean *valid);
 
-    krb5_error_code (*hash_iov) (const krb5_keyblock *key,
+    krb5_error_code (*hash_iov) (krb5_key key,
 				 krb5_keyusage keyusage,
 				 const krb5_data *ivec,
 				 const krb5_crypto_iov *data,
 				 size_t num_data,
 				 krb5_data *output);
 
-    krb5_error_code (*verify_iov) (const krb5_keyblock *key,
+    krb5_error_code (*verify_iov) (krb5_key key,
 				  krb5_keyusage keyusage,
 				  const krb5_data *ivec,
 				  const krb5_crypto_iov *data,
@@ -724,7 +737,7 @@ struct krb5_aead_provider {
     krb5_error_code (*encrypt_iov) (const struct krb5_aead_provider *aead,
 				    const struct krb5_enc_provider *enc,
 				    const struct krb5_hash_provider *hash,
-				    const krb5_keyblock *key,
+				    krb5_key key,
 				    krb5_keyusage keyusage,
 				    const krb5_data *ivec,
 				    krb5_crypto_iov *data,
@@ -732,7 +745,7 @@ struct krb5_aead_provider {
     krb5_error_code (*decrypt_iov) (const struct krb5_aead_provider *aead,
 				    const struct krb5_enc_provider *enc,
 				    const struct krb5_hash_provider *hash,
-				    const krb5_keyblock *key,
+				    krb5_key key,
 				    krb5_keyusage keyusage,
 				    const krb5_data *ivec,
 				    krb5_crypto_iov *data,
@@ -749,10 +762,21 @@ void krb5_nfold
 
 krb5_error_code krb5_hmac
 (const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key, unsigned int icount,
+		krb5_key key, unsigned int icount,
 		const krb5_data *input, krb5_data *output);
 
 krb5_error_code krb5int_hmac_iov
+(const struct krb5_hash_provider *hash,
+		krb5_key key,
+		const krb5_crypto_iov *data, size_t num_data,
+		krb5_data *output);
+
+krb5_error_code krb5int_hmac_keyblock
+(const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key, unsigned int icount,
+		const krb5_data *input, krb5_data *output);
+
+krb5_error_code krb5int_hmac_iov_keyblock
 (const struct krb5_hash_provider *hash,
 		const krb5_keyblock *key,
 		const krb5_crypto_iov *data, size_t num_data,
@@ -808,13 +832,18 @@ krb5_error_code krb5int_c_combine_keys
 (krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2,
 		krb5_keyblock *outkey);
 
+
 void  krb5int_c_free_keyblock
 (krb5_context, krb5_keyblock *key);
 void  krb5int_c_free_keyblock_contents
 	(krb5_context, krb5_keyblock *);
-krb5_error_code   krb5int_c_init_keyblock
+krb5_error_code krb5int_c_init_keyblock
 		(krb5_context, krb5_enctype enctype,
 		size_t length, krb5_keyblock **out); 
+krb5_error_code krb5int_c_copy_keyblock
+(krb5_context context, const krb5_keyblock *from, krb5_keyblock **to);
+krb5_error_code krb5int_c_copy_keyblock_contents
+(krb5_context context, const krb5_keyblock *from, krb5_keyblock *to);
 
 /*
  * Internal - for cleanup.
@@ -847,6 +876,11 @@ krb5_error_code krb5_crypto_us_timeofday
 
 krb5_error_code krb5_encrypt_helper
 (krb5_context context, const krb5_keyblock *key,
+		krb5_keyusage keyusage, const krb5_data *plain,
+		krb5_enc_data *cipher);
+
+krb5_error_code krb5_encrypt_keyhelper
+(krb5_context context, krb5_key key,
 		krb5_keyusage keyusage, const krb5_data *plain,
 		krb5_enc_data *cipher);
 
@@ -2566,10 +2600,10 @@ krb5_error_code krb5_decrypt_data
 		krb5_data *enc_data);
 
 krb5_error_code
-krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);
 krb5_error_code
-krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);
 
 struct _krb5_kt {	/* should move into k5-int.h */

@@ -32,19 +32,17 @@
 krb5_error_code 
 krb5int_arcfour_prf(const struct krb5_enc_provider *enc,
                     const struct krb5_hash_provider *hash,
-                    const krb5_keyblock *key,
-                    const krb5_data *in, krb5_data *out);
+                    krb5_key key, const krb5_data *in, krb5_data *out);
 
 krb5_error_code
 krb5int_des_prf (const struct krb5_enc_provider *enc,
                 const struct krb5_hash_provider *hash,
-                const krb5_keyblock *key,
-                 const krb5_data *in, krb5_data *out);
+                krb5_key key, const krb5_data *in, krb5_data *out);
 
 krb5_error_code
 krb5int_dk_prf(const struct krb5_enc_provider *enc,
                const struct krb5_hash_provider *hash,
-               const krb5_keyblock *key, const krb5_data *in, krb5_data *out);
+               krb5_key key, const krb5_data *in, krb5_data *out);
 
 #endif  /*PRF_INTERNAL_DEFS*/
 

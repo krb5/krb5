@@ -482,6 +482,7 @@ kg_new_connection(
     krb5_gss_ctx_id_rec *ctx, *ctx_free;
     krb5_timestamp now;
     gss_buffer_desc token;
+    krb5_keyblock *keyblock;
 
     k5_mutex_assert_locked(&cred->lock);
     major_status = GSS_S_FAILURE;
@@ -602,8 +603,14 @@ kg_new_connection(
 
         krb5_auth_con_getlocalseqnumber(context, ctx->auth_context, &seq_temp);
         ctx->seq_send = seq_temp;
-        krb5_auth_con_getsendsubkey(context, ctx->auth_context,
-                                    &ctx->subkey);
+        code = krb5_auth_con_getsendsubkey(context, ctx->auth_context,
+                                           &keyblock);
+        if (code != 0)
+            goto fail;
+        code = krb5_k_create_key(context, keyblock, &ctx->subkey);
+        krb5_free_keyblock(context, keyblock);
+        if (code != 0)
+            goto fail;
     }
 
     krb5_free_creds(context, k_cred);
@@ -668,7 +675,7 @@ fail:
         if (ctx_free->there)
             kg_release_name(context, 0, &ctx_free->there);
         if (ctx_free->subkey)
-            krb5_free_keyblock(context, ctx_free->subkey);
+            krb5_k_free_key(context, ctx_free->subkey);
         xfree(ctx_free);
     } else
         (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
@@ -797,7 +804,7 @@ mutual_auth(
          * To be removed in 1999 -- proven
          */
         krb5_auth_con_setuseruserkey(context, ctx->auth_context,
-                                     ctx->subkey);
+                                     &ctx->subkey->keyblock);
         if ((krb5_rd_rep(context, ctx->auth_context, &ap_rep,
                          &ap_rep_data)))
             goto fail;
@@ -811,11 +818,11 @@ mutual_auth(
 
     if (ap_rep_data->subkey != NULL &&
         (ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE) ||
-         ap_rep_data->subkey->enctype != ctx->subkey->enctype)) {
+         ap_rep_data->subkey->enctype != ctx->subkey->keyblock.enctype)) {
         /* Keep acceptor's subkey.  */
         ctx->have_acceptor_subkey = 1;
-        code = krb5_copy_keyblock(context, ap_rep_data->subkey,
-                                  &ctx->acceptor_subkey);
+        code = krb5_k_create_key(context, ap_rep_data->subkey,
+                                 &ctx->acceptor_subkey);
         if (code) {
             krb5_free_ap_rep_enc_part(context, ap_rep_data);
             goto fail;

@@ -27,7 +27,8 @@
 #include "k5-int.h"
 #include "enc_provider.h"
 #include "aes.h"
-#include "aead.h"
+#include <aead.h>
+#include <rand2key.h>
 
 #define CCM_FLAG_MASK_Q		0x07
 
@@ -82,7 +83,7 @@ static inline void putctrblockno(krb5_ui_8 blockno,
  * ivec must be a correctly formatted counter block per SP800-38C A.3
  */
 static krb5_error_code
-krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
+krb5int_aes_encrypt_ctr_iov(krb5_key key,
 		            const krb5_data *ivec,
 			    krb5_crypto_iov *data,
 			    size_t num_data)
@@ -92,7 +93,8 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
     krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
-    if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
+    if (aes_enc_key(key->keyblock.contents,
+		    key->keyblock.length, &ctx) != aes_good)
 	abort();
 
     IOV_BLOCK_STATE_INIT(&input_pos);
@@ -140,7 +142,7 @@ krb5int_aes_encrypt_ctr_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
+krb5int_aes_decrypt_ctr_iov(krb5_key key,
 			    const krb5_data *ivec,
 			    krb5_crypto_iov *data,
 			    size_t num_data)
@@ -150,7 +152,8 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
     krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
-    if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
+    if (aes_enc_key(key->keyblock.contents,
+		    key->keyblock.length, &ctx) != aes_good)
 	abort();
 
     IOV_BLOCK_STATE_INIT(&input_pos);
@@ -198,7 +201,7 @@ krb5int_aes_decrypt_ctr_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-krb5int_aes_encrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_encrypt_ctr(krb5_key key, const krb5_data *ivec,
 		        const krb5_data *input, krb5_data *output)
 {
     krb5_crypto_iov iov[1];
@@ -212,7 +215,8 @@ krb5int_aes_encrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data = *output;
 
-    ret = krb5int_aes_encrypt_ctr_iov(key, ivec, iov, sizeof(iov)/sizeof(iov[0]));
+    ret = krb5int_aes_encrypt_ctr_iov(key, ivec,
+				      iov, sizeof(iov)/sizeof(iov[0]));
     if (ret != 0) {
 	zap(output->data, output->length);
     }
@@ -221,7 +225,7 @@ krb5int_aes_encrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-krb5int_aes_decrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
+krb5int_aes_decrypt_ctr(krb5_key key, const krb5_data *ivec,
 		        const krb5_data *input, krb5_data *output)
 {
     krb5_crypto_iov iov[1];
@@ -244,26 +248,13 @@ krb5int_aes_decrypt_ctr(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_aes_make_key_ctr(const krb5_data *randombits, krb5_keyblock *key)
-{
-    if (key->length != 16 && key->length != 32)
-	return(KRB5_BAD_KEYSIZE);
-    if (randombits->length != key->length)
-	return(KRB5_CRYPTO_INTERNAL);
-
-    key->magic = KV5M_KEYBLOCK;
-
-    memcpy(key->contents, randombits->data, randombits->length);
-    return(0);
-}
-
-static krb5_error_code
 krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
 			    krb5_data *state)
 {
     krb5_data nonce;
     unsigned int n, q;
     krb5_error_code code;
+    krb5_enctype enctype;
 
     code = krb5_c_crypto_length(NULL, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &n);
     if (code != 0)
@@ -301,7 +292,7 @@ const struct krb5_enc_provider krb5int_enc_aes128_ctr = {
     16, 16,
     krb5int_aes_encrypt_ctr,
     krb5int_aes_decrypt_ctr,
-    k5_aes_make_key_ctr,
+    krb5int_aes_make_key,
     krb5int_aes_init_state_ctr,
     krb5int_default_free_state,
     krb5int_aes_encrypt_ctr_iov,
@@ -313,7 +304,7 @@ const struct krb5_enc_provider krb5int_enc_aes256_ctr = {
     32, 32,
     krb5int_aes_encrypt_ctr,
     krb5int_aes_decrypt_ctr,
-    k5_aes_make_key_ctr,
+    krb5int_aes_make_key,
     krb5int_aes_init_state_ctr,
     krb5int_default_free_state,
     krb5int_aes_encrypt_ctr_iov,

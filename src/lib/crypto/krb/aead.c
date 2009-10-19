@@ -93,7 +93,7 @@ make_unkeyed_checksum_iov(const struct krb5_hash_provider *hash_provider,
 
 krb5_error_code 
 krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
-			    const krb5_keyblock *key,
+			    krb5_key key,
 			    krb5_keyusage usage,
 			    const krb5_crypto_iov *data,
 			    size_t num_data,
@@ -107,7 +107,7 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
 
 	if (cksum_type->keyed_etype) {
 	    e1 = find_enctype(cksum_type->keyed_etype);
-	    e2 = find_enctype(key->enctype);
+	    e2 = find_enctype(key->keyblock.enctype);
 	    if (e1 == NULL || e2 == NULL || e1->enc != e2->enc) {
 		ret = KRB5_BAD_ENCTYPE;
 		goto cleanup;
@@ -338,7 +338,7 @@ krb5_error_code
 krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
 			     const struct krb5_enc_provider *enc,
 			     const struct krb5_hash_provider *hash,
-			     const krb5_keyblock *key,
+			     krb5_key key,
 			     krb5_keyusage keyusage,
 			     const krb5_data *ivec,
 			     krb5_crypto_iov *data,
@@ -451,7 +451,7 @@ krb5_error_code
 krb5int_c_encrypt_aead_compat(const struct krb5_aead_provider *aead,
 			      const struct krb5_enc_provider *enc,
 			      const struct krb5_hash_provider *hash,
-			      const krb5_keyblock *key, krb5_keyusage usage,
+			      krb5_key key, krb5_keyusage usage,
 			      const krb5_data *ivec, const krb5_data *input,
 			      krb5_data *output)
 {
@@ -513,7 +513,7 @@ krb5_error_code
 krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
 			      const struct krb5_enc_provider *enc,
 			      const struct krb5_hash_provider *hash,
-			      const krb5_keyblock *key, krb5_keyusage usage,
+			      krb5_key key, krb5_keyusage usage,
 			      const krb5_data *ivec, const krb5_data *input,
 			      krb5_data *output)
 {

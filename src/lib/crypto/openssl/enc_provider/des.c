@@ -11,11 +11,11 @@
 #define DES_KEY_BYTES   7
 
 static krb5_error_code
-validate(const krb5_keyblock *key, const krb5_data *ivec,
+validate(krb5_key key, const krb5_data *ivec,
                       const krb5_data *input, const krb5_data *output)
 {
-    /* key->enctype was checked by the caller */
-    if (key->length != KRB5_MIT_DES_KEYSIZE)
+    /* key->keyblock.enctype was checked by the caller */
+    if (key->keyblock.length != KRB5_MIT_DES_KEYSIZE)
         return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
         return(KRB5_BAD_MSIZE);
@@ -28,7 +28,7 @@ validate(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-validate_iov(const krb5_keyblock *key, const krb5_data *ivec,
+validate_iov(krb5_key key, const krb5_data *ivec,
                           const krb5_crypto_iov *data, size_t num_data)
 {
     size_t i, input_length;
@@ -39,7 +39,7 @@ validate_iov(const krb5_keyblock *key, const krb5_data *ivec,
             input_length += iov->data.length;
     }
 
-    if (key->length != KRB5_MIT_DES3_KEYSIZE)
+    if (key->keyblock.length != KRB5_MIT_DES3_KEYSIZE)
         return(KRB5_BAD_KEYSIZE);
     if ((input_length%DES_BLOCK_SIZE) != 0)
         return(KRB5_BAD_MSIZE);
@@ -50,7 +50,7 @@ validate_iov(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des_encrypt(krb5_key key, const krb5_data *ivec,
            const krb5_data *input, krb5_data *output)
 {
     int              ret = 0, tmp_len = 0;
@@ -63,8 +63,8 @@ k5_des_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
     if (ret)
         return ret;
 
-    keybuf=key->contents;
-    keybuf[key->length] = '\0';
+    keybuf=key->keyblock.contents;
+    keybuf[key->keyblock.length] = '\0';
 
     tmp_buf_len = output->length*2;
     tmp_buf=OPENSSL_malloc(tmp_buf_len);
@@ -103,10 +103,10 @@ k5_des_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
 
 static krb5_error_code
-k5_des_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des_decrypt(krb5_key key, const krb5_data *ivec,
            const krb5_data *input, krb5_data *output)
 {
-    /* key->enctype was checked by the caller */
+    /* key->keyblock.enctype was checked by the caller */
     int              ret = 0, tmp_len = 0;
     unsigned char   *keybuf  = NULL;
     unsigned char   *tmp_buf;
@@ -116,8 +116,8 @@ k5_des_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
     if (ret)
         return ret;
 
-    keybuf=key->contents;
-    keybuf[key->length] = '\0';
+    keybuf=key->keyblock.contents;
+    keybuf[key->keyblock.length] = '\0';
 
     tmp_buf=OPENSSL_malloc(output->length);
     if (!tmp_buf)
@@ -152,7 +152,7 @@ k5_des_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des_encrypt_iov(const krb5_keyblock *key,
+k5_des_encrypt_iov(krb5_key key,
             const krb5_data *ivec,
             krb5_crypto_iov *data,
             size_t num_data)
@@ -176,8 +176,8 @@ k5_des_encrypt_iov(const krb5_keyblock *key,
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
-    keybuf=key->contents;
-    keybuf[key->length] = '\0';
+    keybuf=key->keyblock.contents;
+    keybuf[key->keyblock.length] = '\0';
 
     ret = validate_iov(key, ivec, data, num_data);
     if (ret)
@@ -229,7 +229,7 @@ k5_des_encrypt_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-k5_des_decrypt_iov(const krb5_keyblock *key,
+k5_des_decrypt_iov(krb5_key key,
            const krb5_data *ivec,
            krb5_crypto_iov *data,
            size_t num_data)
@@ -254,8 +254,8 @@ k5_des_decrypt_iov(const krb5_keyblock *key,
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
-    keybuf=key->contents;
-    keybuf[key->length] = '\0';
+    keybuf=key->keyblock.contents;
+    keybuf[key->keyblock.length] = '\0';
 
     ret = validate_iov(key, ivec, data, num_data);
     if (ret)

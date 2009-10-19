@@ -236,7 +236,7 @@ static krb5_error_code
 krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 			const struct krb5_enc_provider *enc,
 			const struct krb5_hash_provider *hash,
-			const krb5_keyblock *key,
+			krb5_key key,
 			krb5_keyusage usage,
 			const krb5_data *ivec,
 			krb5_crypto_iov *data,
@@ -246,7 +246,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
-    krb5_keyblock kc;
+    krb5_key kc = NULL;
     size_t i, num_sign_data = 0;
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
@@ -257,9 +257,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     const struct krb5_cksumtypes *keyhash;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
-
-    kc.contents = NULL;
-    kc.length = 0;
+    krb5_enctype enctype;
 
     cksum.data = NULL;
     cksum.length = 0;
@@ -358,13 +356,6 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 
     d1.data[4] = 0xCC;
 
-    kc.length = enc->keylength;
-    kc.contents = malloc(kc.length);
-    if (kc.contents == NULL) {
-	ret = ENOMEM;
-	goto cleanup;
-    }
-
     ret = krb5_derive_key(enc, key, &kc, &d1);
     if (ret != 0)
 	goto cleanup;
@@ -378,7 +369,8 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     }
     cksum.length = trailer_len;
 
-    ret = krb5int_c_mandatory_cksumtype(NULL, key->enctype, &cksumtype);
+    enctype = krb5_k_key_enctype(NULL, key);
+    ret = krb5int_c_mandatory_cksumtype(NULL, enctype, &cksumtype);
     if (ret != 0)
 	goto cleanup;
 
@@ -388,7 +380,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    ret = krb5int_c_make_checksum_iov(keyhash, &kc, usage, sign_data, num_sign_data, &cksum);
+    ret = krb5int_c_make_checksum_iov(keyhash, kc, usage, sign_data, num_sign_data, &cksum);
     if (ret != 0)
 	goto cleanup;
 
@@ -407,20 +399,17 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
     trailer->data.length = trailer_len;
 
     /* Encrypt checksum and place in trailer */
-    ret = enc->encrypt(&kc, ivec, &cksum, &trailer->data);
+    ret = enc->encrypt(kc, ivec, &cksum, &trailer->data);
     if (ret != 0)
 	goto cleanup;
 
     /* Don't encrypt B0 (header), but encrypt everything else */
-    ret = enc->encrypt_iov(&kc, ivec, data, num_data);
+    ret = enc->encrypt_iov(kc, ivec, data, num_data);
     if (ret != 0)
 	goto cleanup;
 
 cleanup:
-    if (kc.contents != NULL) {
-	zap(kc.contents, kc.length);
-	free(kc.contents);
-    }
+    krb5_k_free_key(NULL, kc);
     if (cksum.data != NULL) {
 	free(cksum.data);
     }
@@ -435,7 +424,7 @@ static krb5_error_code
 krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 			const struct krb5_enc_provider *enc,
 			const struct krb5_hash_provider *hash,
-			const krb5_keyblock *key,
+			krb5_key key,
 			krb5_keyusage usage,
 			const krb5_data *ivec,
 			krb5_crypto_iov *data,
@@ -445,7 +434,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
-    krb5_keyblock kc;
+    krb5_key kc = NULL;
     size_t i, num_sign_data = 0;
     unsigned int header_len = 0;
     unsigned int trailer_len = 0;
@@ -456,9 +445,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     const struct krb5_cksumtypes *keyhash;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
-
-    kc.contents = NULL;
-    kc.length = 0;
+    krb5_enctype enctype;
 
     cksum.data = NULL;
     cksum.length = 0;
@@ -532,13 +519,6 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 
     d1.data[4] = 0xCC;
 
-    kc.length = enc->keylength;
-    kc.contents = malloc(kc.length);
-    if (kc.contents == NULL) {
-	ret = ENOMEM;
-	goto cleanup;
-    }
-
     ret = krb5_derive_key(enc, key, &kc, &d1);
     if (ret != 0)
 	goto cleanup;
@@ -565,17 +545,18 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     }
 
     /* Decrypt checksum from trailer */
-    ret = enc->decrypt(&kc, ivec, &trailer->data, &trailer->data);
+    ret = enc->decrypt(kc, ivec, &trailer->data, &trailer->data);
     if (ret != 0)
 	goto cleanup;
 
     /* Don't decrypt B0 (header), but decrypt everything else */
-    ret = enc->decrypt_iov(&kc, ivec, data, num_data);
+    ret = enc->decrypt_iov(kc, ivec, data, num_data);
     if (ret != 0)
 	goto cleanup;
 
     /* Now, calculate hash for comparison (including B0) */
-    ret = krb5int_c_mandatory_cksumtype(NULL, key->enctype, &cksumtype);
+    enctype = krb5_k_key_enctype(NULL, key);
+    ret = krb5int_c_mandatory_cksumtype(NULL, enctype, &cksumtype);
     if (ret != 0)
 	goto cleanup;
 
@@ -595,7 +576,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	    sign_data[num_sign_data++] = data[i];
     }
 
-    ret = krb5int_c_make_checksum_iov(keyhash, &kc, usage, sign_data, num_sign_data, &cksum);
+    ret = krb5int_c_make_checksum_iov(keyhash, kc, usage, sign_data, num_sign_data, &cksum);
     if (ret != 0)
 	goto cleanup;
 
@@ -606,10 +587,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
     }
 
 cleanup:
-    if (kc.contents != NULL) {
-	zap(kc.contents, kc.length);
-	free(kc.contents);
-    }
+    krb5_k_free_key(NULL, kc);
     if (cksum.data != NULL) {
 	free(cksum.data);
     }

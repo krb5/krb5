@@ -33,7 +33,7 @@ typedef void (*krb5_encrypt_length_func)(const struct krb5_enc_provider *enc,
 typedef krb5_error_code (*krb5_crypt_func)(const struct krb5_enc_provider *enc,
 					   const struct
 					   krb5_hash_provider *hash,
-					   const krb5_keyblock *key,
+					   krb5_key key,
 					   krb5_keyusage keyusage,
 					   const krb5_data *ivec,
 					   const krb5_data *input,
@@ -48,7 +48,7 @@ typedef krb5_error_code (*krb5_str2key_func)(const struct
 
 typedef krb5_error_code (*krb5_prf_func)(const struct krb5_enc_provider *enc,
 					 const struct krb5_hash_provider *hash,
-					 const krb5_keyblock *key,
+					 krb5_key key,
 					 const krb5_data *in, krb5_data *out);
 
 struct krb5_keytypes {

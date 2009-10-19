@@ -32,15 +32,16 @@ static const unsigned char kerberos[] = "kerberos";
 krb5_error_code
 krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
 			 const krb5_data *string, const krb5_data *salt,
-			 const krb5_data *parms, krb5_keyblock *key)
+			 const krb5_data *parms, krb5_keyblock *keyblock)
 {
     krb5_error_code ret;
     size_t keybytes, keylength, concatlen;
     unsigned char *concat = NULL, *foldstring = NULL, *foldkeydata = NULL;
     krb5_data indata;
-    krb5_keyblock foldkey;
+    krb5_keyblock foldkeyblock;
+    krb5_key foldkey = NULL;
 
-    /* key->length is checked by krb5_derive_key. */
+    /* keyblock->length is checked by krb5_derive_key. */
 
     keybytes = enc->keybytes;
     keylength = enc->keylength;
@@ -67,10 +68,14 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
 
     indata.length = keybytes;
     indata.data = (char *) foldstring;
-    foldkey.length = keylength;
-    foldkey.contents = foldkeydata;
+    foldkeyblock.length = keylength;
+    foldkeyblock.contents = foldkeydata;
 
-    ret = (*enc->make_key)(&indata, &foldkey);
+    ret = (*enc->make_key)(&indata, &foldkeyblock);
+    if (ret != 0)
+	goto cleanup;
+
+    ret = krb5_k_create_key(NULL, &foldkeyblock, &foldkey);
     if (ret != 0)
 	goto cleanup;
 
@@ -79,13 +84,14 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
     indata.length = kerberos_len;
     indata.data = (char *) kerberos;
 
-    ret = krb5_derive_key(enc, &foldkey, key, &indata);
+    ret = krb5_derive_keyblock(enc, foldkey, keyblock, &indata);
     if (ret != 0)
-	memset(key->contents, 0, key->length);
+	memset(keyblock->contents, 0, keyblock->length);
 
 cleanup:
     zapfree(concat, concatlen);
     zapfree(foldstring, keybytes);
     zapfree(foldkeydata, keylength);
+    krb5_k_free_key(NULL, foldkey);
     return ret;
 }

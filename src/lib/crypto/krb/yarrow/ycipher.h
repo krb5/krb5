@@ -7,7 +7,7 @@
 
 typedef struct 
 {
-    krb5_keyblock key;
+    krb5_key key;
 } CIPHER_CTX;
 
 /* We need to choose a cipher. To do this, choose an enc_provider.

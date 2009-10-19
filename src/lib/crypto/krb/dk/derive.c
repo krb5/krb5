@@ -27,10 +27,67 @@
 #include "k5-int.h"
 #include "dk.h"
 
+static krb5_key
+find_cached_dkey(struct derived_key *list, const krb5_data *constant)
+{
+    for (; list; list = list->next) {
+	if (data_eq(list->constant, *constant)) {
+	    krb5_k_reference_key(NULL, list->dkey);
+	    return list->dkey;
+	}
+    }
+    return NULL;
+}
+
+static krb5_error_code
+add_cached_dkey(krb5_key key, const krb5_data *constant,
+		const krb5_keyblock *dkeyblock, krb5_key *cached_dkey)
+{
+    krb5_key dkey;
+    krb5_error_code ret;
+    struct derived_key *dkent = NULL;
+    char *data = NULL;
+
+    /* Allocate fields for the new entry. */
+    dkent = malloc(sizeof(*dkent));
+    if (dkent == NULL)
+	goto cleanup;
+    data = malloc(constant->length);
+    if (data == NULL)
+	goto cleanup;
+    ret = krb5_k_create_key(NULL, dkeyblock, &dkey);
+    if (ret != 0)
+	goto cleanup;
+
+    /* Add the new entry to the list. */
+    memcpy(data, constant->data, constant->length);
+    dkent->dkey = dkey;
+    dkent->constant.data = data;
+    dkent->constant.length = constant->length;
+    dkent->next = key->derived;
+    key->derived = dkent;
+
+    /* Return a "copy" of the cached key. */
+    krb5_k_reference_key(NULL, dkey);
+    *cached_dkey = dkey;
+    return 0;
+
+cleanup:
+    free(dkent);
+    free(data);
+    return ENOMEM;
+}
+
+/*
+ * Compute a derived key into the keyblock outkey.  This variation on
+ * krb5_derive_key does not cache the result, as it is only used
+ * directly in situations which are not expected to be repeated with
+ * the same inkey and constant.
+ */
 krb5_error_code
-krb5_derive_key(const struct krb5_enc_provider *enc,
-		const krb5_keyblock *inkey, krb5_keyblock *outkey,
-		const krb5_data *in_constant)
+krb5_derive_keyblock(const struct krb5_enc_provider *enc,
+		     krb5_key inkey, krb5_keyblock *outkey,
+		     const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
     unsigned char *inblockdata = NULL, *outblockdata = NULL, *rawkey = NULL;
@@ -40,7 +97,8 @@ krb5_derive_key(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     keybytes = enc->keybytes;
 
-    if (inkey->length != enc->keylength || outkey->length != enc->keylength)
+    if (inkey->keyblock.length != enc->keylength ||
+	outkey->length != enc->keylength)
 	return KRB5_CRYPTO_INTERNAL;
 
     /* Allocate and set up buffers. */
@@ -103,10 +161,48 @@ cleanup:
     return ret;
 }
 
+krb5_error_code
+krb5_derive_key(const struct krb5_enc_provider *enc,
+		krb5_key inkey, krb5_key *outkey,
+		const krb5_data *in_constant)
+{
+    krb5_keyblock keyblock;
+    krb5_error_code ret;
+    krb5_key dkey;
+
+    *outkey = NULL;
+
+    /* Check for a cached result. */
+    dkey = find_cached_dkey(inkey->derived, in_constant);
+    if (dkey != NULL) {
+	*outkey = dkey;
+	return 0;
+    }
+
+    /* Derive into a temporary keyblock. */
+    keyblock.length = enc->keylength;
+    keyblock.contents = malloc(keyblock.length);
+    if (keyblock.contents == NULL)
+	return ENOMEM;
+    ret = krb5_derive_keyblock(enc, inkey, &keyblock, in_constant);
+    if (ret)
+	goto cleanup;
+
+    /* Cache the derived key. */
+    ret = add_cached_dkey(inkey, in_constant, &keyblock, &dkey);
+    if (ret != 0)
+	goto cleanup;
+
+    *outkey = dkey;
+
+cleanup:
+    zapfree(keyblock.contents, keyblock.length);
+    return ret;
+}
 
 krb5_error_code
 krb5_derive_random(const struct krb5_enc_provider *enc,
-		   const krb5_keyblock *inkey, krb5_data *outrnd,
+		   krb5_key inkey, krb5_data *outrnd,
 		   const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
@@ -117,7 +213,7 @@ krb5_derive_random(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     keybytes = enc->keybytes;
 
-    if (inkey->length != enc->keylength || outrnd->length != keybytes)
+    if (inkey->keyblock.length != enc->keylength || outrnd->length != keybytes)
 	return KRB5_CRYPTO_INTERNAL;
 
     /* Allocate and set up buffers. */
