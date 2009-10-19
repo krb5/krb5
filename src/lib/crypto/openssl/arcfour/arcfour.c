@@ -65,11 +65,12 @@ case 7:				/* tgs-req authenticator */
 krb5_error_code
 krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
 		     const struct krb5_hash_provider *hash,
-		     const krb5_keyblock *key, krb5_keyusage usage,
+		     krb5_key key, krb5_keyusage usage,
 		     const krb5_data *ivec, const krb5_data *input,
 		     krb5_data *output)
 {
   krb5_keyblock k1, k2, k3;
+  krb5_key k3key = NULL;
   krb5_data d1, d2, d3, salt, plaintext, checksum, ciphertext, confounder;
   krb5_keyusage ms_usage;
   size_t keylength, keybytes, blocksize, hashsize;
@@ -84,7 +85,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
   d1.data=malloc(d1.length);
   if (d1.data == NULL)
     return (ENOMEM);
-  k1 = *key;
+  k1 = key->keyblock;
   k1.length=d1.length;
   k1.contents= (void *) d1.data;
 
@@ -94,7 +95,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
     free(d1.data);
     return (ENOMEM);
   }
-  k2 = *key;
+  k2 = key->keyblock;
   k2.length=d2.length;
   k2.contents=(void *) d2.data;
 
@@ -105,7 +106,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
     free(d2.data);
     return (ENOMEM);
   }
-  k3 = *key;
+  k3 = key->keyblock;
   k3.length=d3.length;
   k3.contents= (void *) d3.data;
 
@@ -141,7 +142,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
 
   /* begin the encryption, computer K1 */
   ms_usage=krb5int_arcfour_translate_usage(usage);
-  if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+  if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
     strncpy(salt.data, krb5int_arcfour_l40, salt.length);
     store_32_le(ms_usage, salt.data+10);
   } else {
@@ -152,7 +153,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
 
   memcpy(k2.contents, k1.contents, k2.length);
 
-  if (key->enctype==ENCTYPE_ARCFOUR_HMAC_EXP)
+  if (key->keyblock.enctype==ENCTYPE_ARCFOUR_HMAC_EXP)
     memset(k1.contents+7, 0xab, 9);
 
   ret=krb5_c_random_make_octets(/* XXX */ 0, &confounder);
@@ -160,11 +161,19 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
   if (ret)
     goto cleanup;
 
-  krb5_hmac(hash, &k2, 1, &plaintext, &checksum);
+  ret = krb5int_hmac_keyblock(hash, &k2, 1, &plaintext, &checksum);
+  if (ret)
+    goto cleanup;
 
-  krb5_hmac(hash, &k1, 1, &checksum, &d3);
+  ret = krb5int_hmac_keyblock(hash, &k1, 1, &checksum, &d3);
+  if (ret)
+    goto cleanup;
 
-  ret=(*(enc->encrypt))(&k3, ivec, &plaintext, &ciphertext);
+  ret = krb5_k_create_key(NULL, &k3, &k3key);
+  if (ret)
+    goto cleanup;
+
+  ret=(*(enc->encrypt))(k3key, ivec, &plaintext, &ciphertext);
 
  cleanup:
   memset(d1.data, 0, d1.length);
@@ -185,11 +194,12 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
 krb5_error_code
 krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
 		     const struct krb5_hash_provider *hash,
-		     const krb5_keyblock *key, krb5_keyusage usage,
+		     krb5_key key, krb5_keyusage usage,
 		     const krb5_data *ivec, const krb5_data *input,
 		     krb5_data *output)
 {
   krb5_keyblock k1,k2,k3;
+  krb5_key k3key;
   krb5_data d1,d2,d3,salt,ciphertext,plaintext,checksum;
   krb5_keyusage ms_usage;
   size_t keybytes, keylength, hashsize, blocksize;
@@ -204,7 +214,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
   d1.data=malloc(d1.length);
   if (d1.data == NULL)
     return (ENOMEM);
-  k1 = *key;
+  k1 = key->keyblock;
   k1.length=d1.length;
   k1.contents= (void *) d1.data;
 
@@ -214,7 +224,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
     free(d1.data);
     return (ENOMEM);
   }
-  k2 = *key;
+  k2 = key->keyblock;
   k2.length=d2.length;
   k2.contents= (void *) d2.data;
 
@@ -225,7 +235,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
     free(d2.data);
     return (ENOMEM);
   }
-  k3 = *key;
+  k3 = key->keyblock;
   k3.length=d3.length;
   k3.contents= (void *) d3.data;
 
@@ -258,7 +268,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
   /* We may have to try two ms_usage values; see below. */
   do {
       /* compute the salt */
-      if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+      if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
 	  strncpy(salt.data, krb5int_arcfour_l40, salt.length);
 	  store_32_le(ms_usage, salt.data + 10);
       } else {
@@ -271,18 +281,22 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
 
       memcpy(k2.contents, k1.contents, k2.length);
 
-      if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
+      if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
 	  memset(k1.contents + 7, 0xab, 9);
 
-      ret = krb5_hmac(hash, &k1, 1, &checksum, &d3);
+      ret = krb5int_hmac_keyblock(hash, &k1, 1, &checksum, &d3);
       if (ret)
 	  goto cleanup;
 
-      ret = (*(enc->decrypt))(&k3, ivec, &ciphertext, &plaintext);
+      ret = krb5_k_create_key(NULL, &k3, &k3key);
+      if (ret)
+	goto cleanup;
+      ret = (*(enc->decrypt))(k3key, ivec, &ciphertext, &plaintext);
+      krb5_k_free_key(NULL, k3key);
       if (ret)
 	  goto cleanup;
 
-      ret = krb5_hmac(hash, &k2, 1, &plaintext, &d1);
+      ret = krb5int_hmac_keyblock(hash, &k2, 1, &plaintext, &d1);
       if (ret)
 	  goto cleanup;
 
