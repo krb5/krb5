@@ -32,7 +32,7 @@
  * encryption or keyed hash functions, it is simplest to define it in
  * terms of keyblocks, and then supply a simple wrapper for the
  * "normal" krb5_key-using interfaces.  The keyblock interfaces are
- * useful for the biult-in arcfour code which constructs a lot of
+ * useful for the built-in arcfour code which constructs a lot of
  * intermediate HMAC keys.  For other back ends, it should not be
  * necessary to supply the _keyblock versions of the hmac functions if
  * the back end code doesn't make use of them.
