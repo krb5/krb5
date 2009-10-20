@@ -138,12 +138,11 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
 */
 
 static OM_uint32
-acquire_accept_cred(context, minor_status, desired_name, output_name, cred)
-    krb5_context context;
-    OM_uint32 *minor_status;
-    krb5_gss_name_t desired_name;
-    krb5_gss_name_t *output_name;
-    krb5_gss_cred_id_rec *cred;
+acquire_accept_cred(krb5_context context,
+                    OM_uint32 *minor_status,
+                    krb5_gss_name_t desired_name,
+                    krb5_gss_name_t *output_name,
+                    krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
     krb5_principal princ;
@@ -219,12 +218,11 @@ acquire_accept_cred(context, minor_status, desired_name, output_name, cred)
 */
 
 static OM_uint32
-acquire_init_cred(context, minor_status, desired_name, output_name, cred)
-    krb5_context context;
-    OM_uint32 *minor_status;
-    krb5_gss_name_t desired_name;
-    krb5_gss_name_t *output_name;
-    krb5_gss_cred_id_rec *cred;
+acquire_init_cred(krb5_context context,
+                  OM_uint32 *minor_status,
+                  krb5_gss_name_t desired_name,
+                  krb5_gss_name_t *output_name,
+                  krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
     krb5_ccache ccache;
@@ -571,8 +569,9 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 #ifndef LEAN_CLIENT
     if ((cred_usage == GSS_C_ACCEPT) ||
         (cred_usage == GSS_C_BOTH))
-        if ((ret = acquire_accept_cred(context, minor_status, desired_name,
-                                       &(cred->name), cred))
+        if ((ret = acquire_accept_cred(context, minor_status,
+                                       (krb5_gss_name_t)desired_name,
+                                       &cred->name, cred))
             != GSS_S_COMPLETE) {
             if (cred->name)
                 kg_release_name(context, 0, &cred->name);
