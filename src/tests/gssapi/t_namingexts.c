@@ -234,7 +234,7 @@ testGreetAuthzData(OM_uint32 *minor,
     gss_buffer_desc attr;
     gss_buffer_desc value;
 
-    attr.value = "greet:greeting";
+    attr.value = "urn:greet:greeting";
     attr.length = strlen((char *)attr.value);
 
     major = gss_delete_name_attribute(minor,

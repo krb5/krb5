@@ -38,7 +38,7 @@ struct greet_context {
 };
 
 static krb5_data greet_attr = {
-    KV5M_DATA, sizeof("greet:greeting") - 1, "greet:greeting" };
+    KV5M_DATA, sizeof("urn:greet:greeting") - 1, "urn:greet:greeting" };
 
 static krb5_error_code
 greet_init(krb5_context kcontext, void **plugin_context)

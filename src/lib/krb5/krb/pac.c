@@ -1127,14 +1127,14 @@ static struct {
     krb5_ui_4 type;
     krb5_data attribute;
 } mspac_attribute_types[] = {
-    { (krb5_ui_4)-1,		{ KV5M_DATA, STRLENOF("mspac:"), "mspac:" } },
-    { PAC_LOGON_INFO,		{ KV5M_DATA, STRLENOF("mspac:logon-info"), "mspac:logon-info" } },
-    { PAC_CREDENTIALS_INFO,	{ KV5M_DATA, STRLENOF("mspac:credentials-info"), "mspac:credentials-info" } },
-    { PAC_SERVER_CHECKSUM,	{ KV5M_DATA, STRLENOF("mspac:server-checksum"), "mspac:server-checksum" } },
-    { PAC_PRIVSVR_CHECKSUM,	{ KV5M_DATA, STRLENOF("mspac:privsvr-checksum"), "mspac:privsvr-checksum" } },
-    { PAC_CLIENT_INFO,		{ KV5M_DATA, STRLENOF("mspac:client-info"), "mspac:client-info" } },
-    { PAC_DELEGATION_INFO,	{ KV5M_DATA, STRLENOF("mspac:delegation-info"), "mspac:delegation-info" } },
-    { PAC_UPN_DNS_INFO,		{ KV5M_DATA, STRLENOF("mspac:upn-dns-info"), "mspac:upn-dns-info" } },
+    { (krb5_ui_4)-1,		{ KV5M_DATA, STRLENOF("urn:mspac:"), "urn:mspac:" } },
+    { PAC_LOGON_INFO,		{ KV5M_DATA, STRLENOF("urn:mspac:logon-info"), "urn:mspac:logon-info" } },
+    { PAC_CREDENTIALS_INFO,	{ KV5M_DATA, STRLENOF("urn:mspac:credentials-info"), "urn:mspac:credentials-info" } },
+    { PAC_SERVER_CHECKSUM,	{ KV5M_DATA, STRLENOF("urn:mspac:server-checksum"), "urn:mspac:server-checksum" } },
+    { PAC_PRIVSVR_CHECKSUM,	{ KV5M_DATA, STRLENOF("urn:mspac:privsvr-checksum"), "urn:mspac:privsvr-checksum" } },
+    { PAC_CLIENT_INFO,		{ KV5M_DATA, STRLENOF("urn:mspac:client-info"), "urn:mspac:client-info" } },
+    { PAC_DELEGATION_INFO,	{ KV5M_DATA, STRLENOF("urn:mspac:delegation-info"), "urn:mspac:delegation-info" } },
+    { PAC_UPN_DNS_INFO,		{ KV5M_DATA, STRLENOF("urn:mspac:upn-dns-info"), "urn:mspac:upn-dns-info" } },
 };
 
 #define MSPAC_ATTRIBUTE_COUNT	(sizeof(mspac_attribute_types)/sizeof(mspac_attribute_types[0]))
@@ -1167,10 +1167,10 @@ mspac_attr2type(const krb5_data *attr, krb5_ui_4 *type)
 	}
     }
 
-    if (attr->length > STRLENOF("mspac:") &&
-	strncasecmp(attr->data, "mspac:", STRLENOF("mspac:")) == 0)
+    if (attr->length > STRLENOF("urn:mspac:") &&
+	strncasecmp(attr->data, "urn:mspac:", STRLENOF("urn:mspac:")) == 0)
     {
-	char *p = &attr->data[STRLENOF("mspac:")];
+	char *p = &attr->data[STRLENOF("urn:mspac:")];
 	char *endptr;
 
 	*type = strtoul(p, &endptr, 10);
@@ -1225,7 +1225,7 @@ mspac_get_attribute_types(krb5_context kcontext,
 	} else {
 	    int length;
 
-	    length = asprintf(&attrs[j].data, "mspac:%d",
+	    length = asprintf(&attrs[j].data, "urn:mspac:%d",
 			      pacctx->pac->pac->Buffers[i].ulType);
 	    if (length < 0) {
 		krb5int_free_data_list(kcontext, attrs);
