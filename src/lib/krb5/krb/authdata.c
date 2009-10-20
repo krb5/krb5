@@ -408,19 +408,14 @@ krb5_authdata_context_init(krb5_context kcontext,
 
     context = calloc(1, sizeof(*context));
     if (kcontext == NULL) {
-        if (tables != NULL)
-            krb5int_free_plugin_dir_data(tables);
-        krb5int_close_plugin_dirs(&context->plugins);
-        return ENOMEM;
+        code = ENOMEM;
+        goto cleanup;
     }
     context->magic = KV5M_AUTHDATA_CONTEXT;
     context->modules = calloc(n_modules, sizeof(context->modules[0]));
     if (context->modules == NULL) {
-        if (tables != NULL)
-            krb5int_free_plugin_dir_data(tables);
-        krb5int_close_plugin_dirs(&context->plugins);
-        free(kcontext);
-        return ENOMEM;
+        code = ENOMEM;
+        goto cleanup;
     }
     context->n_modules = n_modules;
 
@@ -428,26 +423,28 @@ krb5_authdata_context_init(krb5_context kcontext,
     for (i = 0, k = 0, code = 0; i < n_tables - internal_count; i++) {
         code = k5_ad_init_modules(kcontext, context, tables[i], &k);
         if (code != 0)
-            break;
+            goto cleanup;
     }
 
-    if (code == 0) {
-        for (i = 0; i < internal_count; i++) {
-            code = k5_ad_init_modules(kcontext, context, authdata_systems[i], &k);
-            if (code != 0)
-                break;
-        }
+    for (i = 0; i < internal_count; i++) {
+        code = k5_ad_init_modules(kcontext, context, authdata_systems[i], &k);
+        if (code != 0)
+            goto cleanup;
     }
-
-    if (tables != NULL)
-        krb5int_free_plugin_dir_data(tables);
 
     context->plugins = plugins;
 
-    if (code != 0)
+cleanup:
+    if (tables != NULL)
+        krb5int_free_plugin_dir_data(tables);
+
+    if (code != 0) {
+        krb5int_close_plugin_dirs(&plugins);
         krb5_authdata_context_free(kcontext, context);
-    else
+    } else {
+        /* plugins is owned by context now */
         *pcontext = context;
+    }
 
     return code;
 }
@@ -596,9 +593,14 @@ krb5_authdata_export_authdata(krb5_context kcontext,
     if (authdata != NULL)
         authdata[len] = NULL;
 
+    if (code != 0) {
+        krb5_free_authdata(kcontext, authdata);
+        return code;
+    }
+
     *pauthdata = authdata;
 
-    return code;
+    return 0;
 }
 
 krb5_error_code

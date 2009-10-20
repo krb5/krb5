@@ -375,6 +375,7 @@ krb5_verify_authdata_kdc_issued(krb5_context context,
     if (code != 0) {
         krb5_free_ad_kdcissued(context, ad_kdci);
         krb5_free_data(context, data2);
+        return code;
     }
 
     krb5_free_data(context, data2);

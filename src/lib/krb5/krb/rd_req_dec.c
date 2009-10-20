@@ -132,7 +132,7 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 					   req->ticket);
 
 	    if (retval == 0) {
-		krb5_principal tmp;
+		krb5_principal tmp = NULL;
 
 		/*
 		 * We overwrite ticket->server to be the principal
@@ -152,6 +152,8 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 		if (retval == 0) {
 		    krb5_free_principal(context, req->ticket->server);
 		    req->ticket->server = tmp;
+		} else {
+		    krb5_free_principal(context, tmp);
 		}
 		(void) krb5_free_keytab_entry_contents(context, &ktent);
 		break;

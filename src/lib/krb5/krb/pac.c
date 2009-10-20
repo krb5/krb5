@@ -1258,9 +1258,6 @@ mspac_get_attribute(krb5_context kcontext,
     krb5_error_code code;
     krb5_ui_4 type;
 
-    value->data = NULL;
-    value->length = 0;
-
     if (display_value != NULL) {
 	display_value->data = NULL;
 	display_value->length = 0;
