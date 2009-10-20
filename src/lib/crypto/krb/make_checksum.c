@@ -68,7 +68,7 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 	/* check if key is compatible */
 	if (ctp->keyed_etype) {
 	    ktp1 = find_enctype(ctp->keyed_etype);
-	    ktp2 = find_enctype(key->keyblock.enctype);
+	    ktp2 = key ? find_enctype(key->keyblock.enctype) : NULL;
 	    if (ktp1 == NULL || ktp2 == NULL || ktp1->enc != ktp2->enc) {
 		ret = KRB5_BAD_ENCTYPE;
 		goto cleanup;
