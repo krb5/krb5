@@ -210,7 +210,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
         if ((sealalg == 0xffff) && ctx->big_endian) {
             token.length = tmsglen;
         } else {
-            conflen = kg_confounder_size(context, ctx->enc);
+            conflen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
             token.length = tmsglen - conflen - plain[tmsglen-1];
         }
 

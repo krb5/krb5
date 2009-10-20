@@ -277,10 +277,10 @@ kg_setup_keys(krb5_context context,
               krb5_key subkey,
               krb5_cksumtype *cksumtype);
 
-int kg_confounder_size (krb5_context context, krb5_key key);
+int kg_confounder_size (krb5_context context, krb5_enctype enctype);
 
 krb5_error_code kg_make_confounder (krb5_context context,
-                                    krb5_key key, unsigned char *buf);
+                                    krb5_enctype enctype, unsigned char *buf);
 
 krb5_error_code kg_encrypt (krb5_context context,
                             krb5_key key, int usage,

@@ -180,7 +180,7 @@ kg_unseal_v1_iov(krb5_context context,
                 goto cleanup;
             }
         }
-        conflen = kg_confounder_size(context, ctx->enc);
+        conflen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
     }
 
     if (header->buffer.length != token_wrapper_len + 14 + cksum_len + conflen) {
@@ -557,7 +557,8 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     case KG_TOK_MIC_MSG:
     case KG_TOK_WRAP_MSG:
     case KG_TOK_DEL_CTX:
-        theader->buffer.length += ctx->cksum_size + kg_confounder_size(context, ctx->enc);
+        theader->buffer.length += ctx->cksum_size +
+            kg_confounder_size(context, ctx->enc->keyblock.enctype);
 
         /*
          * we can't set the padding accurately until decryption;

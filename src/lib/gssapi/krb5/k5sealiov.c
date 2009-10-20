@@ -73,7 +73,7 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* Determine confounder length */
     if (toktype == KG_TOK_WRAP_MSG || conf_req_flag)
-        k5_headerlen = kg_confounder_size(context, ctx->enc);
+        k5_headerlen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
 
     /* Check padding length */
     if (toktype == KG_TOK_WRAP_MSG) {
@@ -175,7 +175,8 @@ make_seal_token_v1_iov(krb5_context context,
     md5cksum.length = k5_trailerlen;
 
     if (k5_headerlen != 0) {
-        code = kg_make_confounder(context, ctx->enc, ptr + 14 + ctx->cksum_size);
+        code = kg_make_confounder(context, ctx->enc->keyblock.enctype,
+                                  ptr + 14 + ctx->cksum_size);
         if (code != 0)
             goto cleanup;
     }
@@ -473,7 +474,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
         /* Header | Checksum | Confounder | Data | Pad */
         size_t data_size;
 
-        k5_headerlen = kg_confounder_size(context, ctx->enc);
+        k5_headerlen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
 
         data_size = 14 /* Header */ + ctx->cksum_size + k5_headerlen;
 

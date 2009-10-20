@@ -90,7 +90,7 @@ make_seal_token_v1 (krb5_context context,
     /* create the token buffer */
     /* Do we need confounder? */
     if (do_encrypt || (!bigend && (toktype == KG_TOK_SEAL_MSG)))
-        conflen = kg_confounder_size(context, enc);
+        conflen = kg_confounder_size(context, enc->keyblock.enctype);
     else conflen = 0;
 
     if (toktype == KG_TOK_SEAL_MSG) {
@@ -171,7 +171,8 @@ make_seal_token_v1 (krb5_context context,
     }
 
     if (conflen) {
-        if ((code = kg_make_confounder(context, enc, plain))) {
+        if ((code = kg_make_confounder(context, enc->keyblock.enctype,
+                                       plain))) {
             xfree(plain);
             xfree(t);
             return(code);

@@ -137,7 +137,7 @@ kg_make_checksum_iov_v1(krb5_context context,
 
     /* Checksum over ( Header | Confounder | Data | Pad ) */
     if (toktype == KG_TOK_WRAP_MSG)
-        conf_len = kg_confounder_size(context, enc);
+        conf_len = kg_confounder_size(context, enc->keyblock.enctype);
 
     /* Checksum output */
     kiov[i].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
