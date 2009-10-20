@@ -169,6 +169,7 @@ static void test_cts()
 	    exit(1);
 	}
     }
+    krb5_k_free_key(NULL, key);
 }
 
 int main (int argc, char **argv)

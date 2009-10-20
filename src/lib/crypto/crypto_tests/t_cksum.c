@@ -138,5 +138,8 @@ main(argc, argv)
   free(newstyle_checksum.data);
   if (!kret)
     printf("%d tests passed successfully for MD%d checksum\n", argc-1, MD);
+
+  krb5_k_free_key(NULL, key);
+
   return(kret);
 }
