@@ -187,6 +187,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
   free(d3.data);
   free(salt.data);
   free(plaintext.data);
+  krb5_k_free_key(NULL, k3key);
   return (ret);
 }
 
