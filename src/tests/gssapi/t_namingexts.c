@@ -266,7 +266,7 @@ testGreetAuthzData(OM_uint32 *minor,
 
 static OM_uint32
 testMapNameToAny(OM_uint32 *minor,
-                  gss_name_t name)
+                 gss_name_t name)
 {
     OM_uint32 major;
     OM_uint32 tmp_minor;
@@ -288,7 +288,7 @@ testMapNameToAny(OM_uint32 *minor,
     if (major == GSS_S_UNAVAILABLE)
         return GSS_S_COMPLETE;
     else if (GSS_ERROR(major))
-        displayStatus("gss_map_name_to_any", major, &minor);
+        displayStatus("gss_map_name_to_any", major, *minor);
 
     code = krb5_init_context(&context);
     if (code != 0) {
