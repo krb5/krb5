@@ -49,7 +49,7 @@ typedef krb5_error_code (*authdata_proc_0)
      krb5_data *req_pkt,
      krb5_kdc_req *request,
      krb5_enc_tkt_part * enc_tkt_reply);
-/* MIT Kerberos 1.7 (V1) authdata plugin callback */
+/* MIT Kerberos 1.8 (V2) authdata plugin callback */
 typedef krb5_error_code (*authdata_proc_1)
     (krb5_context, unsigned int flags,
      krb5_db_entry *client, krb5_db_entry *server,
@@ -100,7 +100,7 @@ typedef struct _krb5_authdata_systems {
     const char *name;
 #define AUTHDATA_SYSTEM_UNKNOWN	-1
 #define AUTHDATA_SYSTEM_V0	0
-#define AUTHDATA_SYSTEM_V1	1
+#define AUTHDATA_SYSTEM_V2	2
     int         type;
 #define AUTHDATA_FLAG_CRITICAL	0x1
     int         flags;
@@ -108,26 +108,26 @@ typedef struct _krb5_authdata_systems {
     init_proc   init;
     fini_proc   fini;
     union {
-	authdata_proc_1 v1;
+	authdata_proc_1 v2;
 	authdata_proc_0 v0;
     } handle_authdata;
 } krb5_authdata_systems;
 
 static krb5_authdata_systems static_authdata_systems[] = {
-    { "tgs_req", AUTHDATA_SYSTEM_V1, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_request_authdata } },
-    { "tgt", AUTHDATA_SYSTEM_V1, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_tgt_authdata } },
+    { "tgs_req", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_request_authdata } },
+    { "tgt", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_tgt_authdata } },
 };
 
 static krb5_authdata_systems *authdata_systems;
 static int n_authdata_systems;
 static struct plugin_dir_handle authdata_plugins;
 
-/* Load both v0 and v1 authdata plugins */
+/* Load both v0 and v2 authdata plugins */
 krb5_error_code
 load_authdata_plugins(krb5_context context)
 {
     void **authdata_plugins_ftables_v0 = NULL;
-    void **authdata_plugins_ftables_v1 = NULL;
+    void **authdata_plugins_ftables_v2 = NULL;
     size_t module_count;
     size_t i, k;
     init_proc server_init_proc = NULL;
@@ -144,12 +144,12 @@ load_authdata_plugins(krb5_context context)
 
     /* Get the method tables provided by the loaded plugins. */
     authdata_plugins_ftables_v0 = NULL;
-    authdata_plugins_ftables_v1 = NULL;
+    authdata_plugins_ftables_v2 = NULL;
     n_authdata_systems = 0;
 
     if (krb5int_get_plugin_dir_data(&authdata_plugins,
 				    "authdata_server_1",
-				    &authdata_plugins_ftables_v1, &context->err) != 0 ||
+				    &authdata_plugins_ftables_v2, &context->err) != 0 ||
 	krb5int_get_plugin_dir_data(&authdata_plugins,
 				    "authdata_server_0",
 				    &authdata_plugins_ftables_v0, &context->err) != 0) {
@@ -160,11 +160,11 @@ load_authdata_plugins(krb5_context context)
     /* Count the valid modules. */ 
     module_count = 0;
 
-    if (authdata_plugins_ftables_v1 != NULL) {
-	struct krb5plugin_authdata_server_ftable_v1 *ftable;
+    if (authdata_plugins_ftables_v2 != NULL) {
+	struct krb5plugin_authdata_server_ftable_v2 *ftable;
 
-	for (i = 0; authdata_plugins_ftables_v1[i] != NULL; i++) {
-	    ftable = authdata_plugins_ftables_v1[i];
+	for (i = 0; authdata_plugins_ftables_v2[i] != NULL; i++) {
+	    ftable = authdata_plugins_ftables_v2[i];
 	    if (ftable->authdata_proc != NULL)
 		module_count++;
 	}
@@ -193,15 +193,15 @@ load_authdata_plugins(krb5_context context)
 
     k = 0;
 
-    /* Add dynamically loaded V1 plugins */
-    if (authdata_plugins_ftables_v1 != NULL) {
-	struct krb5plugin_authdata_server_ftable_v1 *ftable;
+    /* Add dynamically loaded V2 plugins */
+    if (authdata_plugins_ftables_v2 != NULL) {
+	struct krb5plugin_authdata_server_ftable_v2 *ftable;
 
-	for (i = 0; authdata_plugins_ftables_v1[i] != NULL; i++) {
+	for (i = 0; authdata_plugins_ftables_v2[i] != NULL; i++) {
 	    krb5_error_code initerr;
 	    void *pctx = NULL;
 
-	    ftable = authdata_plugins_ftables_v1[i];
+	    ftable = authdata_plugins_ftables_v2[i];
 	    if ((ftable->authdata_proc == NULL)) {
 		continue;
 	    }
@@ -222,10 +222,10 @@ load_authdata_plugins(krb5_context context)
 	    }
     
 	    authdata_systems[k].name = ftable->name;
-	    authdata_systems[k].type = AUTHDATA_SYSTEM_V1;
+	    authdata_systems[k].type = AUTHDATA_SYSTEM_V2;
 	    authdata_systems[k].init = server_init_proc;
 	    authdata_systems[k].fini = ftable->fini_proc;
-	    authdata_systems[k].handle_authdata.v1 = ftable->authdata_proc;
+	    authdata_systems[k].handle_authdata.v2 = ftable->authdata_proc;
 	    authdata_systems[k].plugin_context = pctx;
 	    k++;
 	}
@@ -292,8 +292,8 @@ load_authdata_plugins(krb5_context context)
     code = 0;
 
 cleanup:
-    if (authdata_plugins_ftables_v1 != NULL)
-	krb5int_free_plugin_dir_data(authdata_plugins_ftables_v1);
+    if (authdata_plugins_ftables_v2 != NULL)
+	krb5int_free_plugin_dir_data(authdata_plugins_ftables_v2);
     if (authdata_plugins_ftables_v0 != NULL)
 	krb5int_free_plugin_dir_data(authdata_plugins_ftables_v0);
 
@@ -611,8 +611,8 @@ handle_authdata (krb5_context context,
 	    code = (*asys->handle_authdata.v0)(context, client, req_pkt,
 					       request, enc_tkt_reply);
 	    break;
-	case AUTHDATA_SYSTEM_V1:
-	    code = (*asys->handle_authdata.v1)(context, flags,
+	case AUTHDATA_SYSTEM_V2:
+	    code = (*asys->handle_authdata.v2)(context, flags,
 					      client, server, krbtgt,
 					      client_key, server_key,
 					      req_pkt, request, for_user_princ,

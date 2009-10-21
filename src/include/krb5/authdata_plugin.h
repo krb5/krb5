@@ -111,7 +111,7 @@ typedef struct krb5plugin_authdata_server_ftable_v0 {
 
 typedef krb5plugin_server_authdata_ftable_v0 krb5plugin_authdata_ftable_v0;
 
-typedef struct krb5plugin_authdata_server_ftable_v1 {
+typedef struct krb5plugin_authdata_server_ftable_v2 {
     /* Not-usually-visible name. */
     char *name;
 
@@ -157,9 +157,9 @@ typedef struct krb5plugin_authdata_server_ftable_v1 {
 				     krb5_const_principal for_user_princ,
 				     krb5_enc_tkt_part *enc_tkt_request,
 				     krb5_enc_tkt_part *enc_tkt_reply);
-} krb5plugin_authdata_server_ftable_v1;
+} krb5plugin_authdata_server_ftable_v2;
 
-typedef krb5plugin_authdata_server_ftable_v1 krb5plugin_authdata_ftable_v1;
+typedef krb5plugin_authdata_server_ftable_v2 krb5plugin_authdata_ftable_v2;
 
 typedef krb5_error_code
 (*authdata_client_plugin_init_proc)(krb5_context context,
