@@ -239,9 +239,7 @@ krb5_error_code sign_db_authdata
 		krb5_timestamp authtime,
 		krb5_authdata **tgs_authdata,
 		krb5_keyblock *session_key,
-		krb5_authdata ***ret_authdata,
-		krb5_db_entry *ad_entry,
-		int *ad_nprincs);
+		krb5_authdata ***ret_authdata);
 
 krb5_error_code kdc_process_s4u2self_req
 	(krb5_context context,

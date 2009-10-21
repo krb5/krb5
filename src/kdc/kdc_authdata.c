@@ -463,8 +463,6 @@ handle_tgt_authdata (krb5_context context,
 {
     krb5_error_code code;
     krb5_authdata **db_authdata = NULL;
-    krb5_db_entry ad_entry;
-    int ad_nprincs = 0;
     krb5_boolean tgs_req = (request->msg_type == KRB5_TGS_REQ);
     krb5_const_principal actual_client;
 
@@ -531,11 +529,8 @@ handle_tgt_authdata (krb5_context context,
 			    enc_tkt_reply->times.authtime,
 			    tgs_req ? enc_tkt_request->authorization_data : NULL,
 			    enc_tkt_reply->session,
-			    &db_authdata,
-			    &ad_entry,
-			    &ad_nprincs);
+			    &db_authdata);
     if (code == KRB5_KDB_DBTYPE_NOSUP) {
-	assert(ad_nprincs == 0);
 	assert(db_authdata == NULL);
 
 	if (isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
@@ -546,29 +541,6 @@ handle_tgt_authdata (krb5_context context,
 				  &enc_tkt_reply->authorization_data, TRUE);
 	else
 	    return 0;
-    }
-
-    if (ad_nprincs != 0) {
-	/*
-	 * This code was submitted by Novell; however there is no
-	 * mention in [MS-SFU] of needing to examine the authorization
-	 * data to clear the forwardable flag. My understanding is that
-	 * the state of the forwardable flag is propagated through the
-	 * cross-realm TGTs.
-	 */
-#if 0
-	if (isflagset(flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-	    isflagset(ad_entry.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
-	    clear(enc_tkt_reply->flags, TKT_FLG_FORWARDABLE);
-#endif
-
-	krb5_db_free_principal(context, &ad_entry, ad_nprincs);
-
-	if (ad_nprincs != 1) {
-	    if (db_authdata != NULL)
-		krb5_free_authdata(context, db_authdata);
-	    return KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
-	}
     }
 
     if (db_authdata != NULL) {
