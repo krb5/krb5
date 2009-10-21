@@ -2238,6 +2238,7 @@ kdc_process_s4u2self_req(krb5_context context,
 
 static krb5_error_code
 check_allowed_to_delegate_to(krb5_context context,
+			     krb5_const_principal client,
 			     const krb5_db_entry *server,
 			     krb5_const_principal proxy)
 {
@@ -2258,6 +2259,7 @@ check_allowed_to_delegate_to(krb5_context context,
 
     req.server = server;
     req.proxy = proxy;
+    req.client = client;
 
     req_data.data = (void *)&req;
     req_data.length = sizeof(req);
@@ -2312,7 +2314,9 @@ kdc_process_s4u2proxy_req(krb5_context context,
 
     /* Backend policy check */
     errcode = check_allowed_to_delegate_to(kdc_context,
-					   server, proxy_princ);
+					   t2enc->client,
+					   server,
+					   proxy_princ);
     if (errcode) {
 	*status = "NOT_ALLOWED_TO_DELEGATE";
 	return errcode;
