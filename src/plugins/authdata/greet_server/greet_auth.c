@@ -183,7 +183,7 @@ greet_authdata(krb5_context context,
     return code;
 }
 
-krb5plugin_authdata_server_ftable_v1 authdata_server_1 = {
+krb5plugin_authdata_server_ftable_v2 authdata_server_2 = {
     "greet",
     greet_init,
     greet_fini,

@@ -50,7 +50,7 @@ typedef krb5_error_code (*authdata_proc_0)
      krb5_kdc_req *request,
      krb5_enc_tkt_part * enc_tkt_reply);
 /* MIT Kerberos 1.8 (V2) authdata plugin callback */
-typedef krb5_error_code (*authdata_proc_1)
+typedef krb5_error_code (*authdata_proc_2)
     (krb5_context, unsigned int flags,
      krb5_db_entry *client, krb5_db_entry *server,
      krb5_db_entry *krbtgt,
@@ -108,7 +108,7 @@ typedef struct _krb5_authdata_systems {
     init_proc   init;
     fini_proc   fini;
     union {
-	authdata_proc_1 v2;
+	authdata_proc_2 v2;
 	authdata_proc_0 v0;
     } handle_authdata;
 } krb5_authdata_systems;
@@ -148,7 +148,7 @@ load_authdata_plugins(krb5_context context)
     n_authdata_systems = 0;
 
     if (krb5int_get_plugin_dir_data(&authdata_plugins,
-				    "authdata_server_1",
+				    "authdata_server_2",
 				    &authdata_plugins_ftables_v2, &context->err) != 0 ||
 	krb5int_get_plugin_dir_data(&authdata_plugins,
 				    "authdata_server_0",
