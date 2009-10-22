@@ -311,24 +311,6 @@ kdc_get_ticket_endtime(krb5_context context,
 	       krb5_db_entry *server,
 	       krb5_timestamp *out_endtime);
 
-/* constrained delegation */
-krb5_error_code make_ad_signedpath
-	(krb5_context context,
-		krb5_const_principal server,
-		krb5_delegatee **delegated,
-		const krb5_db_entry *krbtgt,
-		krb5_keyblock *krbtgt_key,
-		krb5_enc_tkt_part *enc_tkt_reply);
-
-krb5_error_code verify_ad_signedpath
-	(krb5_context context,
-		krb5_const_principal server,
-		const krb5_db_entry *krbtgt,
-		krb5_keyblock *krbtgt_key,
-		krb5_enc_tkt_part *enc_tkt_part,
-		krb5_delegatee ***pdelegated,
-		krb5_boolean *path_is_signed);
-
 void
 log_as_req(const krb5_fulladdr *from,
 	   krb5_kdc_req *request, krb5_kdc_rep *reply,

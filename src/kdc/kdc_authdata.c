@@ -649,75 +649,6 @@ handle_tgt_authdata (krb5_context context,
     return code;
 }
 
-static krb5_error_code
-handle_signedpath_authdata (krb5_context context,
-			    unsigned int flags,
-			    krb5_db_entry *client,
-			    krb5_db_entry *server,
-			    krb5_db_entry *krbtgt,
-			    krb5_keyblock *client_key,
-			    krb5_keyblock *server_key,
-			    krb5_keyblock *krbtgt_key,
-			    krb5_data *req_pkt,
-			    krb5_kdc_req *request,
-			    krb5_const_principal for_user_princ,
-			    krb5_enc_tkt_part *enc_tkt_request,
-			    krb5_enc_tkt_part *enc_tkt_reply)
-{
-    krb5_error_code code = 0;
-    krb5_delegatee **deleg_path = NULL;
-    krb5_boolean signed_path = FALSE;
-    int is_as_req;
-
-    /*
-     * If backend/another plugin returned the PAC, then it presumably
-     * verified the path for constrained delegation, and we can NOOP.
-     */
-    if (has_kdc_issued_authdata(context,
-				enc_tkt_reply->authorization_data,
-				KRB5_AUTHDATA_WIN2K_PAC))
-	return 0;
-
-    is_as_req = ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) != 0);
-
-    if (!is_as_req) {
-	int s4u2proxy = ((flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) != 0);
-
-	/* XXX we don't validate the signed path in the TGT for S4U2Proxy */
-
-	code = verify_ad_signedpath(context,
-				    s4u2proxy ? server->princ : NULL,
-				    krbtgt,
-				    krbtgt_key,
-				    enc_tkt_request,
-				    &deleg_path,
-				    &signed_path);
-	if (code != 0)
-	    goto cleanup;
-
-	if (s4u2proxy && !signed_path) {
-	    code = KRB5KDC_ERR_POLICY;
-	    goto cleanup;
-	}
-    }
-
-    if ((flags & KRB5_KDB_FLAG_CROSS_REALM) == 0) {
-	code = make_ad_signedpath(context,
-				  is_as_req ? NULL : server->princ,
-				  deleg_path,
-				  krbtgt,
-				  krbtgt_key,
-				  enc_tkt_reply);
-	if (code != 0)
-	    goto cleanup;
-    }
-
-cleanup:
-    krb5_free_delegatees(context, deleg_path);
-
-    return code;
-}
-
 krb5_error_code
 handle_authdata (krb5_context context,
 		 unsigned int flags,
@@ -773,6 +704,280 @@ handle_authdata (krb5_context context,
 		break;
 	}
     }
+
+    return code;
+}
+
+static krb5_error_code
+verify_ad_signedpath(krb5_context context,
+		     krb5_db_entry *krbtgt,
+		     krb5_keyblock *krbtgt_key,
+		     krb5_enc_tkt_part *enc_tkt_part,
+		     krb5_delegatee ***pdelegated,
+		     krb5_boolean *path_is_signed)
+{
+    krb5_error_code		code;
+    krb5_ad_signedpath		*sp = NULL;
+    krb5_ad_signedpath_data	sp_data;
+    krb5_authdata		**container = NULL;
+    krb5_authdata		**sp_authdata = NULL;
+    krb5_data			enc_sp, *enc_spdata = NULL;
+    int				i;
+
+    *pdelegated = NULL;
+    *path_is_signed = FALSE;
+
+    if (enc_tkt_part->authorization_data == NULL)
+	return 0;
+
+    for (i = 0; enc_tkt_part->authorization_data[i] != NULL; i++)
+	;
+    container = &enc_tkt_part->authorization_data[i - 1];
+    if (*container == NULL)
+	return 0;
+
+    code = krb5_decode_authdata_container(context,
+					  KRB5_AUTHDATA_IF_RELEVANT,
+					  *container,
+					  &sp_authdata);
+    if (code != 0)
+	goto cleanup;
+
+    if (sp_authdata == NULL ||
+	sp_authdata[0]->ad_type != KRB5_AUTHDATA_SIGNTICKET ||
+	sp_authdata[1] != NULL)
+	goto cleanup;
+
+    enc_sp.data = (char *)sp_authdata[0]->contents;
+    enc_sp.length = sp_authdata[0]->length;
+
+    code = decode_krb5_ad_signedpath(&enc_sp, &sp);
+    if (code != 0)
+	goto cleanup;
+
+    container = enc_tkt_part->authorization_data;
+    enc_tkt_part->authorization_data = NULL;
+
+    sp_data.enc_tkt_part = *enc_tkt_part;
+
+    /* XXX workaround for workaround in do_tgs_req.c */
+    if (sp_data.enc_tkt_part.times.starttime ==
+	sp_data.enc_tkt_part.times.authtime)
+	sp_data.enc_tkt_part.times.starttime = 0;
+    sp_data.delegated = sp->delegated;
+
+    code = encode_krb5_ad_signedpath_data(&sp_data, &enc_spdata);
+    if (code != 0) {
+	enc_tkt_part->authorization_data = container;
+	goto cleanup;
+    }
+
+    enc_tkt_part->authorization_data = container;
+
+    code = krb5_c_verify_checksum(context,
+				  krbtgt_key,
+				  KRB5_KEYUSAGE_AD_SIGNEDPATH,
+				  enc_spdata,
+				  &sp->checksum,
+				  path_is_signed);
+    if (code != 0)
+	goto cleanup;
+
+    if (*path_is_signed == FALSE) {
+	code = KRB5KRB_AP_ERR_MODIFIED;
+	goto cleanup;
+    }
+
+    *pdelegated = sp->delegated;
+    sp->delegated = NULL;
+
+cleanup:
+    krb5_free_data(context, enc_spdata);
+    krb5_free_ad_signedpath(context, sp);
+    krb5_free_authdata(context, sp_authdata);
+
+    return code;
+}
+
+static krb5_error_code
+make_ad_signedpath(krb5_context context,
+		   krb5_const_principal server,
+		   krb5_delegatee **deleg_path,
+		   const krb5_db_entry *krbtgt,
+		   krb5_keyblock *krbtgt_key,
+		   krb5_enc_tkt_part *enc_tkt_reply)
+{
+    krb5_error_code		code;
+    krb5_ad_signedpath_data	sp_data;
+    krb5_ad_signedpath		sp;
+    krb5_delegatee		delegatee;
+    krb5_delegatee		**new_deleg_path = NULL;
+    int				i;
+    krb5_data			*data = NULL;
+    krb5_cksumtype		cksumtype;
+    krb5_authdata		ad_datum, *ad_data[2];
+    krb5_authdata		**if_relevant = NULL;
+    krb5_authdata		**authdata;
+
+    memset(&sp_data, 0, sizeof(sp_data));
+    memset(&sp,	     0, sizeof(sp));
+
+    if (deleg_path != NULL) {
+	for (i = 0; deleg_path[i] != NULL; i++)
+	    ;
+    } else
+	i = 0;
+
+    new_deleg_path = k5alloc((i + 2) * sizeof(krb5_delegatee *), &code);
+    if (code != 0)
+	goto cleanup;
+
+    if (deleg_path != NULL)
+	memcpy(new_deleg_path, deleg_path, i * sizeof(krb5_delegatee *));
+    if (server != NULL) {
+	delegatee.principal = (krb5_principal)server;
+	new_deleg_path[i] = &delegatee;
+    }
+    new_deleg_path[i + 1] = NULL;
+
+    sp_data.enc_tkt_part = *enc_tkt_reply;
+    sp_data.enc_tkt_part.authorization_data = NULL;
+    sp_data.delegated = new_deleg_path;
+
+    code = encode_krb5_ad_signedpath_data(&sp_data, &data);
+    if (code != 0)
+	goto cleanup;
+
+    sp.enctype = krbtgt_key->enctype;
+
+    code = krb5int_c_mandatory_cksumtype(context,
+					 krbtgt_key->enctype,
+					 &cksumtype);
+    if (code != 0)
+	goto cleanup;
+
+    code = krb5_c_make_checksum(context, cksumtype, krbtgt_key,
+				KRB5_KEYUSAGE_AD_SIGNEDPATH, data,
+				&sp.checksum);
+    if (code != 0)
+	goto cleanup;
+
+    sp.delegated = new_deleg_path;
+
+    code = encode_krb5_ad_signedpath(&sp, &data);
+    if (code != 0)
+	goto cleanup;
+
+    ad_datum.ad_type = KRB5_AUTHDATA_SIGNTICKET;
+    ad_datum.contents = (krb5_octet *)data->data;
+    ad_datum.length = data->length;
+
+    ad_data[0] = &ad_datum;
+    ad_data[1] = NULL;
+
+    code = krb5_encode_authdata_container(context,
+					  KRB5_AUTHDATA_IF_RELEVANT,
+					  ad_data,
+					  &if_relevant);
+    if (code != 0)
+	goto cleanup;
+
+    if (enc_tkt_reply->authorization_data != NULL) {
+	for (i = 0; enc_tkt_reply->authorization_data[i] != NULL; i++)
+	    ;
+    } else
+	i = 0;
+
+    authdata = realloc(enc_tkt_reply->authorization_data,
+		       (i + 2) * sizeof(krb5_authdata *));
+    if (authdata == NULL) {
+	code = ENOMEM;
+	goto cleanup;
+    }
+
+    enc_tkt_reply->authorization_data = authdata;
+    enc_tkt_reply->authorization_data[i] = if_relevant[0];
+    enc_tkt_reply->authorization_data[i + 1] = NULL;
+
+    free(if_relevant);
+    if_relevant = NULL;
+
+cleanup:
+    if (new_deleg_path != NULL)
+	free(new_deleg_path);
+    krb5_free_authdata(context, if_relevant);
+    krb5_free_data(context, data);
+    krb5_free_checksum_contents(context, &sp.checksum);
+
+    return code;
+}
+
+static krb5_error_code
+handle_signedpath_authdata (krb5_context context,
+			    unsigned int flags,
+			    krb5_db_entry *client,
+			    krb5_db_entry *server,
+			    krb5_db_entry *krbtgt,
+			    krb5_keyblock *client_key,
+			    krb5_keyblock *server_key,
+			    krb5_keyblock *krbtgt_key,
+			    krb5_data *req_pkt,
+			    krb5_kdc_req *request,
+			    krb5_const_principal for_user_princ,
+			    krb5_enc_tkt_part *enc_tkt_request,
+			    krb5_enc_tkt_part *enc_tkt_reply)
+{
+    krb5_error_code code = 0;
+    krb5_delegatee **deleg_path = NULL;
+    krb5_boolean signed_path;
+    krb5_boolean s4u2proxy;
+
+    /*
+     * If backend/another plugin returned the PAC, then it presumably
+     * verified the path for constrained delegation, and we can NOOP.
+     */
+    if (has_kdc_issued_authdata(context,
+				enc_tkt_reply->authorization_data,
+				KRB5_AUTHDATA_WIN2K_PAC))
+	return 0;
+
+    /* Verification presently depends on us being last. */
+    assert(authdata_systems[n_authdata_systems - 1].handle_authdata.v2
+	== handle_signedpath_authdata);
+
+    signed_path = FALSE;
+    s4u2proxy = ((flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) != 0);
+
+    /* Verification is only necessary for the TGS-REQ case. */
+    if ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) == 0) {
+	code = verify_ad_signedpath(context,
+				    krbtgt,
+				    krbtgt_key,
+				    enc_tkt_request,
+				    &deleg_path,
+				    &signed_path);
+	if (code != 0)
+	    goto cleanup;
+
+	if (s4u2proxy == TRUE && signed_path == FALSE) {
+	    code = KRB5KDC_ERR_BADOPTION;
+	    goto cleanup;
+	}
+    }
+
+    if ((flags & KRB5_KDB_FLAG_CROSS_REALM) == 0) {
+	code = make_ad_signedpath(context,
+				  s4u2proxy ? client->princ : NULL,
+				  deleg_path,
+				  krbtgt,
+				  krbtgt_key,
+				  enc_tkt_reply);
+	if (code != 0)
+	    goto cleanup;
+    }
+
+cleanup:
+    krb5_free_delegatees(context, deleg_path);
 
     return code;
 }
