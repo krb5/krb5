@@ -33,6 +33,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_shs3.c	\
 	$(srcdir)/t_shs.c	\
 	$(srcdir)/t_verify.c	\
+	$(srcdir)/t_kperf.c	\
 	$(srcdir)/ytest.c	
 
 ##DOSBUILDTOP = ..\..\..
@@ -47,7 +48,7 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_cf2 \
 		t_cksum4 t_cksum5 \
 		aes-test verify t_afss2k \
 		t_mddriver4 t_mddriver \
-		t_shs t_shs3 t_crc
+		t_shs t_shs3 t_crc t_cts
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
@@ -106,9 +107,9 @@ t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
-# t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-#	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
-#		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+ t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 t_cksum4.o: $(srcdir)/t_cksum.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_cksum4.o -c $(srcdir)/t_cksum.c
@@ -148,6 +149,9 @@ t_shs: t_shs.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 
 t_shs3: t_shs3.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_shs3 t_shs3.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
+
+t_kperf: t_kperf.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o t_kperf t_kperf.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
 
 ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o ytest ytest.o  $(SUPPORT_LIB)  $(CRYPTO_DEPLIB)

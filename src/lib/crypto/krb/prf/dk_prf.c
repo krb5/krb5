@@ -35,12 +35,11 @@
 krb5_error_code
 krb5int_dk_prf (const struct krb5_enc_provider *enc,
 		const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key,
-		const krb5_data *in, krb5_data *out)
+		krb5_key key, const krb5_data *in, krb5_data *out)
 {
   krb5_data tmp;
   krb5_data prfconst;
-  krb5_keyblock *kp = NULL;
+  krb5_key kp = NULL;
   krb5_error_code ret = 0;
   
   prfconst.data = (char *) "prf";
@@ -51,14 +50,10 @@ krb5int_dk_prf (const struct krb5_enc_provider *enc,
     return ENOMEM;
   hash->hash(1, in, &tmp);
   tmp.length = (tmp.length/enc->block_size)*enc->block_size; /*truncate to block size*/
-  ret = krb5int_c_init_keyblock(0, key->enctype,
-			   key->length, &kp);
-    if (ret == 0)
-      ret = krb5_derive_key(enc, key, kp, &prfconst);
+  ret = krb5_derive_key(enc, key, &kp, &prfconst);
   if (ret == 0)
-    ret = enc->encrypt(kp, NULL, &tmp, out);
-      if (kp)
-	krb5int_c_free_keyblock(0, kp);
+      ret = enc->encrypt(kp, NULL, &tmp, out);
+  krb5_k_free_key(NULL, kp);
   free (tmp.data);
   return ret;
 }

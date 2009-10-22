@@ -22,7 +22,7 @@
  */
 static krb5_error_code 
 encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart,
-		    krb5_keyblock *pkeyblock, krb5_enc_data *pencdata)
+		    krb5_key pkey, krb5_enc_data *pencdata)
 {
     krb5_error_code 	  retval;
     krb5_data 		* scratch;
@@ -35,7 +35,7 @@ encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart,
      * If the keyblock is NULL, just copy the data from the encoded
      * data to the ciphertext area.
      */
-    if (pkeyblock == NULL) {
+    if (pkey == NULL) {
 	    pencdata->ciphertext.data = scratch->data;
 	    pencdata->ciphertext.length = scratch->length;
 	    free(scratch);
@@ -43,9 +43,9 @@ encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart,
     }
 
     /* call the encryption routine */
-    retval = krb5_encrypt_helper(context, pkeyblock,
-				 KRB5_KEYUSAGE_KRB_CRED_ENCPART,
-				 scratch, pencdata);
+    retval = krb5_encrypt_keyhelper(context, pkey,
+				    KRB5_KEYUSAGE_KRB_CRED_ENCPART,
+				    scratch, pencdata);
 
     if (retval) {
     	memset(pencdata->ciphertext.data, 0, pencdata->ciphertext.length);
@@ -65,7 +65,7 @@ encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart,
 static krb5_error_code
 krb5_mk_ncred_basic(krb5_context context,
 		    krb5_creds **ppcreds, krb5_int32 nppcreds,
-		    krb5_keyblock *keyblock, krb5_replay_data *replaydata,
+		    krb5_key key, krb5_replay_data *replaydata,
 		    krb5_address *local_addr, krb5_address *remote_addr,
 		    krb5_cred *pcred)
 {
@@ -134,8 +134,7 @@ krb5_mk_ncred_basic(krb5_context context,
     pcred->tickets[i] = NULL;
 
     /* encrypt the credential encrypted part */
-    retval = encrypt_credencpart(context, &credenc, keyblock,
-				 &pcred->enc_part);
+    retval = encrypt_credencpart(context, &credenc, key, &pcred->enc_part);
 
 cleanup:
     krb5_free_cred_enc_part(context, &credenc);
@@ -158,7 +157,7 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
     krb5_address remote_fulladdr;
     krb5_address local_fulladdr;
     krb5_error_code 	retval;
-    krb5_keyblock	 * keyblock;
+    krb5_key		key;
     krb5_replay_data    replaydata;
     krb5_cred 		 * pcred;
     krb5_int32		ncred;
@@ -188,8 +187,8 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
     }
 
     /* Get keyblock */
-    if ((keyblock = auth_context->send_subkey) == NULL) 
-	keyblock = auth_context->keyblock;
+    if ((key = auth_context->send_subkey) == NULL)
+	key = auth_context->key;
 
     /* Get replay info */
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
@@ -246,7 +245,7 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
     }
 
     /* Setup creds structure */
-    if ((retval = krb5_mk_ncred_basic(context, ppcreds, ncred, keyblock,
+    if ((retval = krb5_mk_ncred_basic(context, ppcreds, ncred, key,
 				      &replaydata, plocal_fulladdr, 
 				      premote_fulladdr, pcred))) {
 	goto error;

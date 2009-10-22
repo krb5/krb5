@@ -26,6 +26,7 @@
 
 
 #include "rand2key.h"
+#include "des_int.h"
 
 krb5_error_code
 krb5int_des_make_key(const krb5_data *randombits, krb5_keyblock *key)

@@ -1,14 +1,15 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil */
 /*
  * prototype/prototype.h
  *
- * Copyright (C) 2002 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * <<< Description >>>
  */

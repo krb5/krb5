@@ -56,12 +56,12 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context)
 	krb5_free_address(context, auth_context->remote_port);
     if (auth_context->authentp) 
 	krb5_free_authenticator(context, auth_context->authentp);
-    if (auth_context->keyblock) 
-	krb5_free_keyblock(context, auth_context->keyblock);
+    if (auth_context->key)
+	krb5_k_free_key(context, auth_context->key);
     if (auth_context->send_subkey) 
-	krb5_free_keyblock(context, auth_context->send_subkey);
+	krb5_k_free_key(context, auth_context->send_subkey);
     if (auth_context->recv_subkey) 
-	krb5_free_keyblock(context, auth_context->recv_subkey);
+	krb5_k_free_key(context, auth_context->recv_subkey);
     if (auth_context->rcache)
 	krb5_rc_close(context, auth_context->rcache);
     if (auth_context->permitted_etypes)
@@ -160,16 +160,16 @@ krb5_auth_con_setports(krb5_context context, krb5_auth_context auth_context, krb
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setuseruserkey(krb5_context context, krb5_auth_context auth_context, krb5_keyblock *keyblock)
 {
-    if (auth_context->keyblock)
-	krb5_free_keyblock(context, auth_context->keyblock);
-    return(krb5_copy_keyblock(context, keyblock, &(auth_context->keyblock)));
+    if (auth_context->key)
+	krb5_k_free_key(context, auth_context->key);
+    return(krb5_k_create_key(context, keyblock, &(auth_context->key)));
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getkey(krb5_context context, krb5_auth_context auth_context, krb5_keyblock **keyblock)
 {
-    if (auth_context->keyblock)
-    	return krb5_copy_keyblock(context, auth_context->keyblock, keyblock);
+    if (auth_context->key)
+    	return krb5_k_key_keyblock(context, auth_context->key, keyblock);
     *keyblock = NULL;
     return 0;
 }
@@ -190,10 +190,10 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setsendsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keyblock *keyblock)
 {
     if (ac->send_subkey != NULL)
-	krb5_free_keyblock(ctx, ac->send_subkey);
+	krb5_k_free_key(ctx, ac->send_subkey);
     ac->send_subkey = NULL;
     if (keyblock !=NULL)
-	return krb5_copy_keyblock(ctx, keyblock, &ac->send_subkey);
+	return krb5_k_create_key(ctx, keyblock, &ac->send_subkey);
     else
 	return 0;
 }
@@ -202,10 +202,10 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setrecvsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keyblock *keyblock)
 {
     if (ac->recv_subkey != NULL)
-	krb5_free_keyblock(ctx, ac->recv_subkey);
+	krb5_k_free_key(ctx, ac->recv_subkey);
     ac->recv_subkey = NULL;
     if (keyblock != NULL)
-	return krb5_copy_keyblock(ctx, keyblock, &ac->recv_subkey);
+	return krb5_k_create_key(ctx, keyblock, &ac->recv_subkey);
     else
 	return 0;
 }
@@ -214,7 +214,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getsendsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keyblock **keyblock)
 {
     if (ac->send_subkey != NULL)
-	return krb5_copy_keyblock(ctx, ac->send_subkey, keyblock);
+	return krb5_k_key_keyblock(ctx, ac->send_subkey, keyblock);
     *keyblock = NULL;
     return 0;
 }
@@ -223,7 +223,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getrecvsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keyblock **keyblock)
 {
     if (ac->recv_subkey != NULL)
-	return krb5_copy_keyblock(ctx, ac->recv_subkey, keyblock);
+	return krb5_k_key_keyblock(ctx, ac->recv_subkey, keyblock);
     *keyblock = NULL;
     return 0;
 }
@@ -268,12 +268,13 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context)
 {
     krb5_error_code ret;
+    krb5_enctype enctype;
 
-    if (auth_context->keyblock) {
+    if (auth_context->key) {
 	size_t blocksize;
 
-	if ((ret = krb5_c_block_size(context, auth_context->keyblock->enctype,
-				    &blocksize)))
+	enctype = krb5_k_key_enctype(context, auth_context->key);
+	if ((ret = krb5_c_block_size(context, enctype, &blocksize)))
 	    return(ret);
 	if ((auth_context->i_vector = (krb5_pointer)calloc(1,blocksize))) {
 	    return 0;

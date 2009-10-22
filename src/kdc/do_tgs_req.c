@@ -470,6 +470,11 @@ tgt_again:
                 isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
                 clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
             /*
+             * Forwardable flag is propagated along referral path.
+             */
+            else if (!isflagset(header_enc_tkt->flags, TKT_FLG_FORWARDABLE))
+                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+            /*
              * OK_TO_AUTH_AS_DELEGATE must be set on the service requesting
              * S4U2Self in order for forwardable tickets to be returned.
              */

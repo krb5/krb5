@@ -32,8 +32,9 @@ map_digest(const struct krb5_hash_provider *hash)
 }
 
 krb5_error_code
-krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
-          unsigned int icount, const krb5_data *input, krb5_data *output)
+krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
+		      const krb5_keyblock *key, unsigned int icount,
+		      const krb5_data *input, krb5_data *output)
 {
     unsigned int i = 0, md_len = 0; 
     unsigned char md[EVP_MAX_MD_SIZE];
@@ -72,8 +73,10 @@ krb5_hmac(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
 }
 
 krb5_error_code
-krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key,
-                 const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
+krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
+                          const krb5_keyblock *key,
+                          const krb5_crypto_iov *data, size_t num_data,
+                          krb5_data *output)
 {
     krb5_data *sign_data;
     size_t num_sign_data;
@@ -101,10 +104,25 @@ krb5int_hmac_iov(const struct krb5_hash_provider *hash, const krb5_keyblock *key
     }
 
     /* caller must store checksum in iov as it may be TYPE_TRAILER or TYPE_CHECKSUM */
-    ret = krb5_hmac(hash, key, num_sign_data, sign_data, output);
+    ret = krb5int_hmac_keyblock(hash, key, num_sign_data, sign_data, output);
 
     free(sign_data);
 
     return ret;
 }
 
+krb5_error_code
+krb5_hmac(const struct krb5_hash_provider *hash, krb5_key key,
+         unsigned int icount, const krb5_data *input, krb5_data *output)
+{
+    return krb5int_hmac_keyblock(hash, &key->keyblock, icount, input, output);
+}
+
+krb5_error_code
+krb5int_hmac_iov(const struct krb5_hash_provider *hash, krb5_key key,
+                const krb5_crypto_iov *data, size_t num_data,
+                krb5_data *output)
+{
+    return krb5int_hmac_iov_keyblock(hash, &key->keyblock, data, num_data,
+                                    output);
+}

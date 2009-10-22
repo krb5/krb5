@@ -59,39 +59,53 @@ static const char kg_arcfour_l40[] = "fortybits";
 static krb5_error_code
 kg_copy_keys(krb5_context context,
              krb5_gss_ctx_id_rec *ctx,
-             krb5_keyblock *subkey)
+             krb5_key subkey)
 {
     krb5_error_code code;
 
-    if (ctx->enc != NULL) {
-        krb5_free_keyblock(context, ctx->enc);
-        ctx->enc = NULL;
-    }
-
-    code = krb5_copy_keyblock(context, subkey, &ctx->enc);
+    krb5_k_free_key(context, ctx->enc);
+    ctx->enc = NULL;
+    code = krb5_k_create_key(context, &subkey->keyblock, &ctx->enc);
     if (code != 0)
         return code;
 
-    if (ctx->seq != NULL) {
-        krb5_free_keyblock(context, ctx->seq);
-        ctx->seq = NULL;
-    }
-
-    code = krb5_copy_keyblock(context, subkey, &ctx->seq);
+    krb5_k_free_key(context, ctx->seq);
+    ctx->seq = NULL;
+    code = krb5_k_create_key(context, &subkey->keyblock, &ctx->seq);
     if (code != 0)
         return code;
 
     return 0;
 }
 
+static krb5_error_code
+kg_derive_des_enc_key(krb5_context context, krb5_key subkey, krb5_key *out)
+{
+    krb5_error_code code;
+    krb5_keyblock *keyblock;
+    unsigned int i;
+
+    *out = NULL;
+
+    code = krb5_k_key_keyblock(context, subkey, &keyblock);
+    if (code != 0)
+        return code;
+
+    for (i = 0; i < keyblock->length; i++)
+        keyblock->contents[i] ^= 0xF0;
+
+    code = krb5_k_create_key(context, keyblock, out);
+    krb5_free_keyblock(context, keyblock);
+    return code;
+}
+
 krb5_error_code
 kg_setup_keys(krb5_context context,
               krb5_gss_ctx_id_rec *ctx,
-              krb5_keyblock *subkey,
+              krb5_key subkey,
               krb5_cksumtype *cksumtype)
 {
     krb5_error_code code;
-    unsigned int i;
     krb5int_access kaccess;
 
     assert(ctx != NULL);
@@ -109,36 +123,40 @@ kg_setup_keys(krb5_context context,
     if (code != 0)
         return code;
 
-    code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, subkey->enctype,
+    code = (*kaccess.krb5int_c_mandatory_cksumtype)(context,
+                                                    subkey->keyblock.enctype,
                                                     cksumtype);
     if (code != 0)
         return code;
 
-    switch (subkey->enctype) {
+    switch (subkey->keyblock.enctype) {
     case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_CRC:
-        code = kg_copy_keys(context, ctx, subkey);
+        krb5_k_free_key(context, ctx->seq);
+        code = krb5_k_create_key(context, &subkey->keyblock, &ctx->seq);
         if (code != 0)
             return code;
 
-        ctx->enc->enctype = ENCTYPE_DES_CBC_RAW;
-        ctx->seq->enctype = ENCTYPE_DES_CBC_RAW;
+        krb5_k_free_key(context, ctx->enc);
+        code = kg_derive_des_enc_key(context, subkey, &ctx->enc);
+        if (code != 0)
+            return code;
+
+        ctx->enc->keyblock.enctype = ENCTYPE_DES_CBC_RAW;
+        ctx->seq->keyblock.enctype = ENCTYPE_DES_CBC_RAW;
         ctx->signalg = SGN_ALG_DES_MAC_MD5;
         ctx->cksum_size = 8;
         ctx->sealalg = SEAL_ALG_DES;
 
-        for (i = 0; i < ctx->enc->length; i++)
-            /*SUPPRESS 113*/
-            ctx->enc->contents[i] ^= 0xF0;
         break;
     case ENCTYPE_DES3_CBC_SHA1:
         code = kg_copy_keys(context, ctx, subkey);
         if (code != 0)
             return code;
 
-        ctx->enc->enctype = ENCTYPE_DES3_CBC_RAW;
-        ctx->seq->enctype = ENCTYPE_DES3_CBC_RAW;
+        ctx->enc->keyblock.enctype = ENCTYPE_DES3_CBC_RAW;
+        ctx->seq->keyblock.enctype = ENCTYPE_DES3_CBC_RAW;
         ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
         ctx->cksum_size = 20;
         ctx->sealalg = SEAL_ALG_DES3KD;
@@ -162,17 +180,16 @@ kg_setup_keys(krb5_context context,
 }
 
 int
-kg_confounder_size(context, key)
+kg_confounder_size(context, enctype)
     krb5_context context;
-    krb5_keyblock *key;
+    krb5_enctype enctype;
 {
     krb5_error_code code;
     size_t blocksize;
     /* We special case rc4*/
-    if (key->enctype == ENCTYPE_ARCFOUR_HMAC ||
-        key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
+    if (enctype == ENCTYPE_ARCFOUR_HMAC || enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
         return 8;
-    code = krb5_c_block_size(context, key->enctype, &blocksize);
+    code = krb5_c_block_size(context, enctype, &blocksize);
     if (code)
         return(-1); /* XXX */
 
@@ -180,15 +197,15 @@ kg_confounder_size(context, key)
 }
 
 krb5_error_code
-kg_make_confounder(context, key, buf)
+kg_make_confounder(context, enctype, buf)
     krb5_context context;
-    krb5_keyblock *key;
+    krb5_enctype enctype;
     unsigned char *buf;
 {
     int confsize;
     krb5_data lrandom;
 
-    confsize = kg_confounder_size(context, key);
+    confsize = kg_confounder_size(context, enctype);
     if (confsize < 0)
         return KRB5_BAD_MSIZE;
 
@@ -201,7 +218,7 @@ kg_make_confounder(context, key, buf)
 krb5_error_code
 kg_encrypt(context, key, usage, iv, in, out, length)
     krb5_context context;
-    krb5_keyblock *key;
+    krb5_key key;
     int usage;
     krb5_pointer iv;
     krb5_const_pointer in;
@@ -214,7 +231,7 @@ kg_encrypt(context, key, usage, iv, in, out, length)
     krb5_enc_data outputd;
 
     if (iv) {
-        code = krb5_c_block_size(context, key->enctype, &blocksize);
+        code = krb5_c_block_size(context, key->keyblock.enctype, &blocksize);
         if (code)
             return(code);
 
@@ -234,7 +251,7 @@ kg_encrypt(context, key, usage, iv, in, out, length)
     outputd.ciphertext.length = length;
     outputd.ciphertext.data = out;
 
-    code = krb5_c_encrypt(context, key, usage, pivd, &inputd, &outputd);
+    code = krb5_k_encrypt(context, key, usage, pivd, &inputd, &outputd);
     if (pivd != NULL)
         free(pivd->data);
     return code;
@@ -245,7 +262,7 @@ kg_encrypt(context, key, usage, iv, in, out, length)
 krb5_error_code
 kg_decrypt(context, key, usage, iv, in, out, length)
     krb5_context context;
-    krb5_keyblock *key;
+    krb5_key key;
     int usage;
     krb5_pointer iv;
     krb5_const_pointer in;
@@ -258,7 +275,7 @@ kg_decrypt(context, key, usage, iv, in, out, length)
     krb5_enc_data inputd;
 
     if (iv) {
-        code = krb5_c_block_size(context, key->enctype, &blocksize);
+        code = krb5_c_block_size(context, key->keyblock.enctype, &blocksize);
         if (code)
             return(code);
 
@@ -279,7 +296,7 @@ kg_decrypt(context, key, usage, iv, in, out, length)
     outputd.length = length;
     outputd.data = out;
 
-    code = krb5_c_decrypt(context, key, usage, pivd, &inputd, &outputd);
+    code = krb5_k_decrypt(context, key, usage, pivd, &inputd, &outputd);
     if (pivd != NULL)
         free(pivd->data);
     return code;
@@ -294,6 +311,7 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
     krb5_error_code code;
     krb5_data input, output;
     krb5int_access kaccess;
+    krb5_key key;
     krb5_keyblock seq_enc_key, usage_key;
     unsigned char t[14];
     size_t i = 0;
@@ -341,9 +359,11 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
     input.length = input_len;
     output.data = (void * ) output_buf;
     output.length = input_len;
-    code =  ((*kaccess.arcfour_enc_provider->encrypt)(
-                 &seq_enc_key, 0,
-                 &input, &output));
+    code = krb5_k_create_key(NULL, &seq_enc_key, &key);
+    if (code)
+        goto cleanup_arcfour;
+    code = (*kaccess.arcfour_enc_provider->encrypt)(key, 0, &input, &output);
+    krb5_k_free_key(NULL, key);
 cleanup_arcfour:
     memset (seq_enc_key.contents, 0, seq_enc_key.length);
     memset (usage_key.contents, 0, usage_key.length);
@@ -354,9 +374,9 @@ cleanup_arcfour:
 
 /* AEAD */
 static krb5_error_code
-kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
+kg_translate_iov_v1(context, enctype, iov, iov_count, pkiov, pkiov_count)
     krb5_context context;
-    const krb5_keyblock *key;
+    krb5_enctype enctype;
     gss_iov_buffer_desc *iov;
     int iov_count;
     krb5_crypto_iov **pkiov;
@@ -372,7 +392,7 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
     *pkiov = NULL;
     *pkiov_count = 0;
 
-    conf_len = kg_confounder_size(context, (krb5_keyblock *)key);
+    conf_len = kg_confounder_size(context, enctype);
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     assert(header != NULL);
@@ -422,12 +442,12 @@ kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count)
 }
 
 static krb5_error_code
-kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pkiov_count)
+kg_translate_iov_v3(context, dce_style, ec, rrc, enctype, iov, iov_count, pkiov, pkiov_count)
     krb5_context context;
     int dce_style;              /* DCE_STYLE indicates actual RRC is EC + RRC */
     size_t ec;                  /* Extra rotate count for DCE_STYLE, pad length otherwise */
     size_t rrc;                 /* Rotate count */
-    const krb5_keyblock *key;
+    krb5_enctype enctype;
     gss_iov_buffer_desc *iov;
     int iov_count;
     krb5_crypto_iov **pkiov;
@@ -451,11 +471,13 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
     assert(trailer == NULL || rrc == 0);
 
-    code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &k5_headerlen);
+    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_HEADER,
+                                &k5_headerlen);
     if (code != 0)
         return code;
 
-    code = krb5_c_crypto_length(context, key->enctype, KRB5_CRYPTO_TYPE_TRAILER, &k5_trailerlen);
+    code = krb5_c_crypto_length(context, enctype, KRB5_CRYPTO_TYPE_TRAILER,
+                                &k5_trailerlen);
     if (code != 0)
         return code;
 
@@ -535,21 +557,23 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pki
 }
 
 static krb5_error_code
-kg_translate_iov(context, proto, dce_style, ec, rrc, key, iov, iov_count, pkiov, pkiov_count)
+kg_translate_iov(context, proto, dce_style, ec, rrc, enctype, iov, iov_count, pkiov, pkiov_count)
     krb5_context context;
     int proto;                  /* 1 if CFX, 0 for pre-CFX */
     int dce_style;
     size_t ec;
     size_t rrc;
-    const krb5_keyblock *key;
+    krb5_enctype enctype;
     gss_iov_buffer_desc *iov;
     int iov_count;
     krb5_crypto_iov **pkiov;
     size_t *pkiov_count;
 {
     return proto ?
-        kg_translate_iov_v3(context, dce_style, ec, rrc, key, iov, iov_count, pkiov, pkiov_count) :
-        kg_translate_iov_v1(context, key, iov, iov_count, pkiov, pkiov_count);
+        kg_translate_iov_v3(context, dce_style, ec, rrc, enctype,
+                            iov, iov_count, pkiov, pkiov_count) :
+        kg_translate_iov_v1(context, enctype, iov, iov_count,
+                            pkiov, pkiov_count);
 }
 
 krb5_error_code
@@ -559,7 +583,7 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
     int dce_style;
     size_t ec;
     size_t rrc;
-    krb5_keyblock *key;
+    krb5_key key;
     int usage;
     krb5_pointer iv;
     gss_iov_buffer_desc *iov;
@@ -572,7 +596,7 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
     krb5_crypto_iov *kiov;
 
     if (iv) {
-        code = krb5_c_block_size(context, key->enctype, &blocksize);
+        code = krb5_c_block_size(context, key->keyblock.enctype, &blocksize);
         if (code)
             return(code);
 
@@ -586,10 +610,11 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key,
-                            iov, iov_count, &kiov, &kiov_count);
+    code = kg_translate_iov(context, proto, dce_style, ec, rrc,
+                            key->keyblock.enctype, iov, iov_count,
+                            &kiov, &kiov_count);
     if (code == 0) {
-        code = krb5_c_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
+        code = krb5_k_encrypt_iov(context, key, usage, pivd, kiov, kiov_count);
         free(kiov);
     }
 
@@ -608,7 +633,7 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
     int dce_style;
     size_t ec;
     size_t rrc;
-    krb5_keyblock *key;
+    krb5_key key;
     int usage;
     krb5_pointer iv;
     gss_iov_buffer_desc *iov;
@@ -621,7 +646,7 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
     krb5_crypto_iov *kiov;
 
     if (iv) {
-        code = krb5_c_block_size(context, key->enctype, &blocksize);
+        code = krb5_c_block_size(context, key->keyblock.enctype, &blocksize);
         if (code)
             return(code);
 
@@ -635,10 +660,11 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
         pivd = NULL;
     }
 
-    code = kg_translate_iov(context, proto, dce_style, ec, rrc, key,
-                            iov, iov_count, &kiov, &kiov_count);
+    code = kg_translate_iov(context, proto, dce_style, ec, rrc,
+                            key->keyblock.enctype, iov, iov_count,
+                            &kiov, &kiov_count);
     if (code == 0) {
-        code = krb5_c_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
+        code = krb5_k_decrypt_iov(context, key, usage, pivd, kiov, kiov_count);
         free(kiov);
     }
 
@@ -657,6 +683,7 @@ kg_arcfour_docrypt_iov (krb5_context context,
     krb5_error_code code;
     krb5_data input, output;
     krb5int_access kaccess;
+    krb5_key key;
     krb5_keyblock seq_enc_key, usage_key;
     unsigned char t[14];
     size_t i = 0;
@@ -704,14 +731,17 @@ kg_arcfour_docrypt_iov (krb5_context context,
         goto cleanup_arcfour;
 
     code = kg_translate_iov(context, 0 /* proto */, 0 /* dce_style */,
-                            0 /* ec */, 0 /* rrc */, longterm_key,
+                            0 /* ec */, 0 /* rrc */, longterm_key->enctype,
                             iov, iov_count, &kiov, &kiov_count);
     if (code)
         goto cleanup_arcfour;
 
-    code =  ((*kaccess.arcfour_enc_provider->encrypt_iov)(
-                 &seq_enc_key, 0,
-                 kiov, kiov_count));
+    code = krb5_k_create_key(context, &seq_enc_key, &key);
+    if (code)
+        goto cleanup_arcfour;
+    code = (*kaccess.arcfour_enc_provider->encrypt_iov)(key, 0, kiov,
+                                                        kiov_count);
+    krb5_k_free_key(context, key);
 cleanup_arcfour:
     memset (seq_enc_key.contents, 0, seq_enc_key.length);
     memset (usage_key.contents, 0, usage_key.length);

@@ -26,6 +26,7 @@
 
 
 #include "rand2key.h"
+#include "des_int.h"
 
 /* RFC 3961 */
 krb5_error_code

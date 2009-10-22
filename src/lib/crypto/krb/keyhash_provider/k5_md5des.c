@@ -39,7 +39,7 @@
 extern struct krb5_enc_provider krb5int_enc_des;
 
 static krb5_error_code
-k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
+k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
 {
     krb5_error_code ret;
@@ -78,7 +78,7 @@ k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
 }
 
 static krb5_error_code
-k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
+k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 		 const krb5_data *input, const krb5_data *hash,
 		 krb5_boolean *valid)
 {
@@ -89,7 +89,7 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
     struct krb5_enc_provider *enc = &krb5int_enc_des;
     krb5_data output, iv;
 
-    if (key->length != 8)
+    if (key->keyblock.length != 8)
 	return(KRB5_BAD_KEYSIZE);
 
     if (hash->length != (CONFLENGTH+RSA_MD5_CKSUM_LENGTH)) {
@@ -104,11 +104,11 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
     }
 
     if (compathash) {
-        iv.data = malloc(key->length);
+        iv.data = malloc(key->keyblock.length);
         if (!iv.data) return ENOMEM;
-        iv.length = key->length;
-        if (key->contents)
-            memcpy(iv.data, key->contents, key->length);
+        iv.length = key->keyblock.length;
+        if (key->keyblock.contents)
+            memcpy(iv.data, key->keyblock.contents, key->keyblock.length);
     }
 
     /* decrypt it */

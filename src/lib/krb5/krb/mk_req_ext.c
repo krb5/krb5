@@ -73,7 +73,7 @@ make_etype_list(krb5_context context,
 static krb5_error_code 
 krb5_generate_authenticator (krb5_context,
 				       krb5_authenticator *, krb5_principal,
-				       krb5_checksum *, krb5_keyblock *,
+				       krb5_checksum *, krb5_key,
 				       krb5_ui_4, krb5_authdata **,
 				       krb5_authdata_context ad_context,
 				       krb5_enctype *desired_etypes,
@@ -94,6 +94,7 @@ krb5int_generate_and_save_subkey (krb5_context context,
     } rnd_data;
     krb5_data d;
     krb5_error_code retval;
+    krb5_keyblock *kb = NULL;
 
     if (krb5_crypto_us_timeofday(&rnd_data.sec, &rnd_data.usec) == 0) {
 	d.length = sizeof(rnd_data);
@@ -101,22 +102,23 @@ krb5int_generate_and_save_subkey (krb5_context context,
 	krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TIMING, &d);
     }
 
-    if (auth_context->send_subkey)
-	krb5_free_keyblock(context, auth_context->send_subkey);
-    if ((retval = krb5_generate_subkey_extended(context, keyblock, enctype,
-						&auth_context->send_subkey)))
+    retval = krb5_generate_subkey_extended(context, keyblock, enctype, &kb);
+    if (retval)
 	return retval;
+    retval = krb5_auth_con_setsendsubkey(context, auth_context, kb);
+    if (retval)
+	goto cleanup;
+    retval = krb5_auth_con_setrecvsubkey(context, auth_context, kb);
+    if (retval)
+	goto cleanup;
 
-    if (auth_context->recv_subkey)
-	krb5_free_keyblock(context, auth_context->recv_subkey);
-    retval = krb5_copy_keyblock(context, auth_context->send_subkey,
-				&auth_context->recv_subkey);
+cleanup:
     if (retval) {
-	krb5_free_keyblock(context, auth_context->send_subkey);
-	auth_context->send_subkey = NULL;
-	return retval;
+	(void) krb5_auth_con_setsendsubkey(context, auth_context, NULL);
+	(void) krb5_auth_con_setrecvsubkey(context, auth_context, NULL);
     }
-    return 0;
+    krb5_free_keyblock(context, kb);
+    return retval;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -160,14 +162,14 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	*auth_context = new_auth_context;
     }
 
-    if ((*auth_context)->keyblock != NULL) {
-	krb5_free_keyblock(context, (*auth_context)->keyblock);
-	(*auth_context)->keyblock = NULL;
+    if ((*auth_context)->key != NULL) {
+	krb5_k_free_key(context, (*auth_context)->key);
+	(*auth_context)->key = NULL;
     }
 
     /* set auth context keyblock */
-    if ((retval = krb5_copy_keyblock(context, &in_creds->keyblock, 
-				     &((*auth_context)->keyblock))))
+    if ((retval = krb5_k_create_key(context, &in_creds->keyblock,
+				    &((*auth_context)->key))))
 	goto cleanup;
 
     /* generate seq number if needed */
@@ -206,16 +208,18 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	    checksum.length = in_data->length;
 	    checksum.contents = (krb5_octet *) in_data->data;
 	} else {
+	    krb5_enctype enctype = krb5_k_key_enctype(context,
+						      (*auth_context)->key);
 	    krb5_cksumtype cksumtype;
-	    retval = krb5int_c_mandatory_cksumtype(context, (*auth_context)->keyblock->enctype,
+	    retval = krb5int_c_mandatory_cksumtype(context, enctype,
 						   &cksumtype);
 	    if (retval)
 		goto cleanup_cksum;
 	    if ((*auth_context)->req_cksumtype)
 		cksumtype = (*auth_context)->req_cksumtype;
-	    if ((retval = krb5_c_make_checksum(context, 
+	    if ((retval = krb5_k_make_checksum(context,
 					       cksumtype,
-					       (*auth_context)->keyblock,
+					       (*auth_context)->key,
 					       KRB5_KEYUSAGE_AP_REQ_AUTH_CKSUM,
 					       in_data, &checksum)))
 		goto cleanup_cksum;
@@ -300,7 +304,7 @@ cleanup:
 static krb5_error_code
 krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
 			    krb5_principal client, krb5_checksum *cksum,
-			    krb5_keyblock *key, krb5_ui_4 seq_number,
+			    krb5_key key, krb5_ui_4 seq_number,
 			    krb5_authdata **authorization,
 			    krb5_authdata_context ad_context,
 			    krb5_enctype *desired_etypes,
@@ -312,7 +316,7 @@ krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
     authent->client = client;
     authent->checksum = cksum;
     if (key) {
-	retval = krb5_copy_keyblock(context, key, &authent->subkey);
+	retval = krb5_k_key_keyblock(context, key, &authent->subkey);
 	if (retval)
 	    return retval;
     } else

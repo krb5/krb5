@@ -2,7 +2,7 @@ thisconfigdir=../../../..
 myfulldir=lib/crypto/krb/rand2key
 mydir=lib/crypto/krb/rand2key
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.
+LOCALINCLUDES = -I$(srcdir)/. -I$(srcdir)/../../@CRYPTO_IMPL@/des
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..

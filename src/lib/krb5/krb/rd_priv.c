@@ -54,8 +54,7 @@ Returns system errors, integrity errors.
 
 static krb5_error_code
 krb5_rd_priv_basic(krb5_context context, const krb5_data *inbuf,
-		   const krb5_keyblock *keyblock,
-		   const krb5_address *local_addr,
+		   const krb5_key key, const krb5_address *local_addr,
 		   const krb5_address *remote_addr, krb5_pointer i_vector,
 		   krb5_replay_data *replaydata, krb5_data *outbuf)
 {
@@ -65,6 +64,7 @@ krb5_rd_priv_basic(krb5_context context, const krb5_data *inbuf,
     krb5_priv_enc_part  * privmsg_enc_part;
     size_t		  blocksize;
     krb5_data		  ivdata;
+    krb5_enctype	  enctype;
 
     if (!krb5_is_krb_priv(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -74,8 +74,8 @@ krb5_rd_priv_basic(krb5_context context, const krb5_data *inbuf,
 	return retval;
     
     if (i_vector) {
-	if ((retval = krb5_c_block_size(context, keyblock->enctype,
-					&blocksize)))
+	enctype = krb5_k_key_enctype(context, key);
+	if ((retval = krb5_c_block_size(context, enctype, &blocksize)))
 	    goto cleanup_privmsg;
 
 	ivdata.length = blocksize;
@@ -88,7 +88,7 @@ krb5_rd_priv_basic(krb5_context context, const krb5_data *inbuf,
 	goto cleanup_privmsg;
     }
 
-    if ((retval = krb5_c_decrypt(context, keyblock,
+    if ((retval = krb5_k_decrypt(context, key,
 				 KRB5_KEYUSAGE_KRB_PRIV_ENCPART, 
 				 i_vector?&ivdata:0,
 				 &privmsg->enc_part, &scratch)))
@@ -156,12 +156,12 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
 	     krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
-    krb5_keyblock       * keyblock;
+    krb5_key              key;
     krb5_replay_data	  replaydata;
 
-    /* Get keyblock */
-    if ((keyblock = auth_context->recv_subkey) == NULL)
-	keyblock = auth_context->keyblock;
+    /* Get key */
+    if ((key = auth_context->recv_subkey) == NULL)
+	key = auth_context->key;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
       (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
@@ -213,7 +213,7 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
     }
 
     memset(&replaydata, 0, sizeof(replaydata));
-    if ((retval = krb5_rd_priv_basic(context, inbuf, keyblock,
+    if ((retval = krb5_rd_priv_basic(context, inbuf, key,
 				     plocal_fulladdr,
 				     premote_fulladdr,
 				     auth_context->i_vector,

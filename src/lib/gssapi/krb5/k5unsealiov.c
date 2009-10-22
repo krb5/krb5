@@ -153,7 +153,7 @@ kg_unseal_v1_iov(krb5_context context,
 
                 store_32_be(seqnum, bigend_seqnum);
 
-                code = krb5_copy_keyblock(context, ctx->enc, &enc_key);
+                code = krb5_k_key_keyblock(context, ctx->enc, &enc_key);
                 if (code != 0) {
                     retval = GSS_S_FAILURE;
                     goto cleanup;
@@ -180,7 +180,7 @@ kg_unseal_v1_iov(krb5_context context,
                 goto cleanup;
             }
         }
-        conflen = kg_confounder_size(context, ctx->enc);
+        conflen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
     }
 
     if (header->buffer.length != token_wrapper_len + 14 + cksum_len + conflen) {
@@ -231,7 +231,7 @@ kg_unseal_v1_iov(krb5_context context,
     case SGN_ALG_3:
         code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
                           (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
-                           ctx->seq->contents : NULL),
+                           ctx->seq->keyblock.contents : NULL),
                           md5cksum.contents, md5cksum.contents, 16);
         if (code != 0) {
             retval = GSS_S_FAILURE;
@@ -518,7 +518,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     case KG2_TOK_WRAP_MSG:
     case KG2_TOK_DEL_CTX: {
         size_t ec, rrc;
-        krb5_enctype enctype = ctx->enc->enctype;
+        krb5_enctype enctype = ctx->enc->keyblock.enctype;
         unsigned int k5_headerlen = 0;
         unsigned int k5_trailerlen = 0;
 
@@ -557,7 +557,8 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     case KG_TOK_MIC_MSG:
     case KG_TOK_WRAP_MSG:
     case KG_TOK_DEL_CTX:
-        theader->buffer.length += ctx->cksum_size + kg_confounder_size(context, ctx->enc);
+        theader->buffer.length += ctx->cksum_size +
+            kg_confounder_size(context, ctx->enc->keyblock.enctype);
 
         /*
          * we can't set the padding accurately until decryption;

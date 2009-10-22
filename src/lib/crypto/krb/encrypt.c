@@ -29,19 +29,19 @@
 #include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_encrypt(krb5_context context, const krb5_keyblock *key,
+krb5_k_encrypt(krb5_context context, krb5_key key,
 	       krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_enc_data *output)
 {
     const struct krb5_keytypes *ktp;
 
-    ktp = find_enctype(key->enctype);
+    ktp = find_enctype(key->keyblock.enctype);
     if (ktp == NULL)
 	return KRB5_BAD_ENCTYPE;
 
     output->magic = KV5M_ENC_DATA;
     output->kvno = 0;
-    output->enctype = key->enctype;
+    output->enctype = key->keyblock.enctype;
 
     if (ktp->encrypt == NULL) {
 	assert(ktp->aead != NULL);
@@ -53,4 +53,20 @@ krb5_c_encrypt(krb5_context context, const krb5_keyblock *key,
 
     return (*ktp->encrypt)(ktp->enc, ktp->hash, key, usage, ivec, input,
 			   &output->ciphertext);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_encrypt(krb5_context context, const krb5_keyblock *keyblock,
+	       krb5_keyusage usage, const krb5_data *ivec,
+	       const krb5_data *input, krb5_enc_data *output)
+{
+    krb5_key key;
+    krb5_error_code ret;
+
+    ret = krb5_k_create_key(context, keyblock, &key);
+    if (ret != 0)
+	return ret;
+    ret = krb5_k_encrypt(context, key, usage, ivec, input, output);
+    krb5_k_free_key(context, key);
+    return ret;
 }
