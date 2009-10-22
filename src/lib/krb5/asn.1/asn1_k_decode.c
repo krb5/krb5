@@ -1745,28 +1745,33 @@ error_out:
     return retval;
 }
 
-static asn1_error_code asn1_decode_principal_ptr
-(asn1buf *buf, krb5_principal *val)
+static asn1_error_code asn1_decode_delegatee
+(asn1buf *buf, krb5_delegatee *val)
 {
     setup();
-    *val = k5alloc(sizeof(krb5_principal), &retval);
-    if (retval != 0)
-        goto error_out;
-    {begin_structure();
-    get_field((*val), 0, asn1_decode_principal_name);
-    get_field((*val), 1, asn1_decode_realm);
-    end_structure();
+    alloc_principal(val->principal);
+    { begin_structure();
+        get_field(val->principal, 0, asn1_decode_principal_name);
+        get_field(val->principal, 1, asn1_decode_realm);
+        end_structure();
     }
     return 0;
 error_out:
-    krb5_free_principal(NULL, *val);
+    krb5_free_principal(NULL, val->principal);
+    val->principal = NULL;
     return retval;
 }
 
-static asn1_error_code asn1_decode_sequence_of_principal_ptr
-(asn1buf *buf, krb5_principal **val)
+static asn1_error_code asn1_decode_delegatee_ptr
+(asn1buf *buf, krb5_delegatee **valptr)
 {
-    decode_array_body(krb5_principal_data,asn1_decode_principal_ptr,krb5_free_principal);
+    decode_ptr(krb5_delegatee *, asn1_decode_delegatee);
+}
+
+static asn1_error_code asn1_decode_sequence_of_delegatee
+(asn1buf *buf, krb5_delegatee ***val)
+{
+    decode_array_body(krb5_delegatee,asn1_decode_delegatee_ptr,krb5_free_delegatee);
 }
 
 asn1_error_code asn1_decode_ad_signedpath
@@ -1779,9 +1784,7 @@ asn1_error_code asn1_decode_ad_signedpath
     {begin_structure();
     get_field(val->enctype, 0, asn1_decode_enctype);
     get_field(val->checksum, 1, asn1_decode_checksum);
-    if (tagnum == 2) {
-        get_field(val->delegated, 2, asn1_decode_sequence_of_principal_ptr);
-    }
+    opt_field(val->delegated, 2, asn1_decode_sequence_of_delegatee, NULL);
     end_structure();
     }
     return 0;

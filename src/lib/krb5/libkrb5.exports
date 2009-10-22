@@ -244,6 +244,8 @@ krb5_free_creds
 krb5_free_data
 krb5_free_data_contents
 krb5_free_default_realm
+krb5_free_delegatee
+krb5_free_delegatees
 krb5_free_enc_data
 krb5_free_enc_kdc_rep_part
 krb5_free_enc_sam_response_enc

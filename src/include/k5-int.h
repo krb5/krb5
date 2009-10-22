@@ -1075,15 +1075,19 @@ typedef struct _krb5_ad_kdcissued {
     krb5_authdata **elements;
 } krb5_ad_kdcissued;
 
+typedef struct _krb5_delegatee {
+    krb5_principal principal;
+} krb5_delegatee;
+
 typedef struct _krb5_ad_signedpath_data {
     krb5_enc_tkt_part enc_tkt_part;
-    krb5_principal *delegated;
+    krb5_delegatee **delegated;
 } krb5_ad_signedpath_data;
 
 typedef struct _krb5_ad_signedpath {
     krb5_enctype enctype;
     krb5_checksum checksum;
-    krb5_principal *delegated;
+    krb5_delegatee **delegated;
 } krb5_ad_signedpath;
 
 typedef krb5_error_code (*krb5_preauth_obtain_proc)
@@ -1399,6 +1403,10 @@ void KRB5_CALLCONV krb5_free_ad_kdcissued
 (krb5_context, krb5_ad_kdcissued *);
 void KRB5_CALLCONV krb5_free_ad_signedpath
 (krb5_context, krb5_ad_signedpath *);
+void KRB5_CALLCONV krb5_free_delegatee
+(krb5_context, krb5_delegatee *);
+void KRB5_CALLCONV krb5_free_delegatees
+(krb5_context, krb5_delegatee **);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1823,6 +1831,8 @@ krb5_error_code encode_krb5_fast_response
 
 krb5_error_code encode_krb5_ad_kdcissued
 (const krb5_ad_kdcissued *, krb5_data **);
+krb5_error_code encode_krb5_delegatee
+(const krb5_delegatee *, krb5_data **);
 krb5_error_code encode_krb5_ad_signedpath
 (const krb5_ad_signedpath *, krb5_data **);
 krb5_error_code encode_krb5_ad_signedpath_data
@@ -2005,6 +2015,9 @@ krb5_error_code decode_krb5_fast_response
 
 krb5_error_code decode_krb5_ad_kdcissued
 (const krb5_data *, krb5_ad_kdcissued **);
+
+krb5_error_code decode_krb5_delegatee
+(const krb5_data *, krb5_delegatee **);
 
 krb5_error_code decode_krb5_ad_signedpath
 (const krb5_data *, krb5_ad_signedpath **);
