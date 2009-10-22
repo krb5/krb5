@@ -94,7 +94,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
     krb5_context context;
     krb5_error_code code;
     krb5_gss_ctx_id_rec *ctx;
-    krb5_principal initiator, acceptor;
+    krb5_gss_name_t initiator, acceptor;
     krb5_timestamp now;
     krb5_deltat lifetime;
 
@@ -130,36 +130,26 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
         lifetime = 0;
 
     if (initiator_name) {
-        if ((code = krb5_copy_principal(context,
-                                        ctx->initiate?ctx->here:ctx->there,
-                                        &initiator))) {
+        if ((code = kg_duplicate_name(context,
+                                      ctx->initiate?ctx->here:ctx->there,
+                                      KG_INIT_NAME_INTERN,
+                                      &initiator))) {
             *minor_status = code;
             save_error_info(*minor_status, context);
-            return(GSS_S_FAILURE);
-        }
-        if (! kg_save_name((gss_name_t) initiator)) {
-            krb5_free_principal(context, initiator);
-            *minor_status = (OM_uint32) G_VALIDATE_FAILED;
             return(GSS_S_FAILURE);
         }
     }
 
     if (acceptor_name) {
-        if ((code = krb5_copy_principal(context,
-                                        ctx->initiate?ctx->there:ctx->here,
-                                        &acceptor))) {
-            if (initiator) krb5_free_principal(context, initiator);
+        if ((code = kg_duplicate_name(context,
+                                      ctx->initiate?ctx->there:ctx->here,
+                                      KG_INIT_NAME_INTERN,
+                                      &acceptor))) {
+            if (initiator)
+                kg_release_name(context, KG_INIT_NAME_INTERN,
+                                &initiator);
             *minor_status = code;
             save_error_info(*minor_status, context);
-            return(GSS_S_FAILURE);
-        }
-        if (! kg_save_name((gss_name_t) acceptor)) {
-            krb5_free_principal(context, acceptor);
-            if (initiator) {
-                kg_delete_name((gss_name_t) initiator);
-                krb5_free_principal(context, initiator);
-            }
-            *minor_status = (OM_uint32) G_VALIDATE_FAILED;
             return(GSS_S_FAILURE);
         }
     }
@@ -197,7 +187,7 @@ gss_krb5int_inq_session_key(
     gss_buffer_set_t *data_set)
 {
     krb5_gss_ctx_id_rec *ctx;
-    krb5_keyblock *key;
+    krb5_key key;
     gss_buffer_desc keyvalue, keyinfo;
     OM_uint32 major_status, minor;
     unsigned char oid_buf[GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH + 6];
@@ -206,8 +196,8 @@ gss_krb5int_inq_session_key(
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
     key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey : ctx->subkey;
 
-    keyvalue.value = key->contents;
-    keyvalue.length = key->length;
+    keyvalue.value = key->keyblock.contents;
+    keyvalue.length = key->keyblock.length;
 
     major_status = generic_gss_add_buffer_set_member(minor_status, &keyvalue, data_set);
     if (GSS_ERROR(major_status))
@@ -219,7 +209,7 @@ gss_krb5int_inq_session_key(
     major_status = generic_gss_oid_compose(minor_status,
                                            GSS_KRB5_SESSION_KEY_ENCTYPE_OID,
                                            GSS_KRB5_SESSION_KEY_ENCTYPE_OID_LENGTH,
-                                           key->enctype,
+                                           key->keyblock.enctype,
                                            &oid);
     if (GSS_ERROR(major_status))
         goto cleanup;

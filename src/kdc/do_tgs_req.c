@@ -466,6 +466,11 @@ tgt_again:
                 isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
                 clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
             /*
+             * Forwardable flag is propagated along referral path.
+             */
+            else if (!isflagset(header_enc_tkt->flags, TKT_FLG_FORWARDABLE))
+                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+            /*
              * OK_TO_AUTH_AS_DELEGATE must be set on the service requesting
              * S4U2Self in order for forwardable tickets to be returned.
              */
@@ -699,6 +704,10 @@ tgt_again:
     else
         enc_tkt_reply.client = header_enc_tkt->client;
 
+    enc_tkt_reply.session = &session_key;
+    enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
+    enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
+
     errcode = handle_authdata(kdc_context,
                               c_flags,
                               (c_nprincs != 0) ? &client : NULL,
@@ -727,10 +736,6 @@ tgt_again:
             goto cleanup;
         }
     }
-
-    enc_tkt_reply.session = &session_key;
-    enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
-    enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 
     /*
      * Only add the realm of the presented tgt to the transited list if 

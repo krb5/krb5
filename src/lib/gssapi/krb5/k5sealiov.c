@@ -73,7 +73,7 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* Determine confounder length */
     if (toktype == KG_TOK_WRAP_MSG || conf_req_flag)
-        k5_headerlen = kg_confounder_size(context, ctx->enc);
+        k5_headerlen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
 
     /* Check padding length */
     if (toktype == KG_TOK_WRAP_MSG) {
@@ -175,7 +175,8 @@ make_seal_token_v1_iov(krb5_context context,
     md5cksum.length = k5_trailerlen;
 
     if (k5_headerlen != 0) {
-        code = kg_make_confounder(context, ctx->enc, ptr + 14 + ctx->cksum_size);
+        code = kg_make_confounder(context, ctx->enc->keyblock.enctype,
+                                  ptr + 14 + ctx->cksum_size);
         if (code != 0)
             goto cleanup;
     }
@@ -193,7 +194,7 @@ make_seal_token_v1_iov(krb5_context context,
     case SGN_ALG_3:
         code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
                           (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
-                           ctx->seq->contents : NULL),
+                           ctx->seq->keyblock.contents : NULL),
                           md5cksum.contents, md5cksum.contents, 16);
         if (code != 0)
             goto cleanup;
@@ -226,7 +227,7 @@ make_seal_token_v1_iov(krb5_context context,
 
             store_32_be(ctx->seq_send, bigend_seqnum);
 
-            code = krb5_copy_keyblock(context, ctx->enc, &enc_key);
+            code = krb5_k_key_keyblock(context, ctx->enc, &enc_key);
             if (code != 0)
                 goto cleanup;
 
@@ -408,13 +409,12 @@ kg_seal_iov_length(OM_uint32 *minor_status,
     gss_headerlen = gss_padlen = gss_trailerlen = 0;
 
     if (ctx->proto == 1) {
+        krb5_key key;
         krb5_enctype enctype;
         size_t ec;
 
-        if (ctx->have_acceptor_subkey)
-            enctype = ctx->acceptor_subkey->enctype;
-        else
-            enctype = ctx->subkey->enctype;
+        key = (ctx->have_acceptor_subkey) ? ctx->acceptor_subkey : ctx->subkey;
+        enctype = key->keyblock.enctype;
 
         code = krb5_c_crypto_length(context, enctype,
                                     conf_req_flag ?
@@ -474,7 +474,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
         /* Header | Checksum | Confounder | Data | Pad */
         size_t data_size;
 
-        k5_headerlen = kg_confounder_size(context, ctx->enc);
+        k5_headerlen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
 
         data_size = 14 /* Header */ + ctx->cksum_size + k5_headerlen;
 

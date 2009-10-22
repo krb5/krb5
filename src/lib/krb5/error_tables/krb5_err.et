@@ -220,7 +220,7 @@ error_code KRB5_RC_MALLOC,		"No more memory to allocate (in replay cache code)"
 error_code KRB5_RC_TYPE_NOTFOUND,	"Replay cache type is unknown"
 error_code KRB5_RC_UNKNOWN,		"Generic unknown RC error"
 error_code KRB5_RC_REPLAY,		"Message is a replay"
-error_code KRB5_RC_IO,			"Replay I/O operation failed XXX"
+error_code KRB5_RC_IO,			"Replay cache I/O operation failed"
 error_code KRB5_RC_NOIO,		"Replay cache type does not support non-volatile storage"
 error_code KRB5_RC_PARSE,		"Replay cache name parse/format error"
 

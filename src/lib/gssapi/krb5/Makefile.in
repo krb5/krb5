@@ -69,6 +69,7 @@ SRCS = \
 	$(srcdir)/k5unsealiov.c \
 	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/lucid_context.c \
+	$(srcdir)/naming_exts.c \
 	$(srcdir)/process_context_token.c \
 	$(srcdir)/rel_cred.c \
 	$(srcdir)/rel_oid.c \
@@ -120,6 +121,7 @@ OBJS = \
 	$(OUTPRE)k5unsealiov.$(OBJEXT) \
 	$(OUTPRE)krb5_gss_glue.$(OBJEXT) \
 	$(OUTPRE)lucid_context.$(OBJEXT) \
+	$(OUTPRE)naming_exts.$(OBJEXT) \
 	$(OUTPRE)process_context_token.$(OBJEXT) \
 	$(OUTPRE)rel_cred.$(OBJEXT) \
 	$(OUTPRE)rel_oid.$(OBJEXT) \
@@ -174,6 +176,7 @@ STLIBOBJS = \
 	k5unsealiov.o \
 	krb5_gss_glue.o \
 	lucid_context.o \
+	naming_exts.o \
 	process_context_token.o \
 	rel_cred.o \
 	rel_oid.o \

@@ -691,9 +691,7 @@ Identifies the master KDC(s).  Currently, this tag is used in only one
 case: If an attempt to get credentials fails because of an invalid
 password, the client software will attempt to contact the master KDC,
 in case the user's password has just been changed, and the updated
-database has not been propagated to the slave servers yet.  (We don't
-currently check whether the KDC from which the initial response came
-is on the master KDC list.  That may be fixed in the future.)
+database has not been propagated to the slave servers yet.
 
 @itemx database_module
 

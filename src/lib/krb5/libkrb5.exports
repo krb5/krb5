@@ -1,4 +1,5 @@
 _krb5_conf_boolean
+decode_krb5_ad_kdcissued
 decode_krb5_alt_method
 decode_krb5_ap_rep
 decode_krb5_ap_rep_enc_part
@@ -40,6 +41,7 @@ decode_krb5_tgs_rep
 decode_krb5_tgs_req
 decode_krb5_ticket
 decode_krb5_typed_data
+encode_krb5_ad_kdcissued
 encode_krb5_alt_method
 encode_krb5_ap_rep
 encode_krb5_ap_rep_enc_part
@@ -108,6 +110,7 @@ krb5_appdefault_string
 krb5_auth_con_free
 krb5_auth_con_genaddrs
 krb5_auth_con_get_checksum_func
+krb5_auth_con_get_authdata_context
 krb5_auth_con_getaddrs
 krb5_auth_con_getauthenticator
 krb5_auth_con_getflags
@@ -123,6 +126,7 @@ krb5_auth_con_getremotesubkey
 krb5_auth_con_getsendsubkey
 krb5_auth_con_init
 krb5_auth_con_initivector
+krb5_auth_con_set_authdata_context
 krb5_auth_con_set_checksum_func
 krb5_auth_con_set_req_cksumtype
 krb5_auth_con_set_safe_cksumtype
@@ -136,6 +140,18 @@ krb5_auth_con_setrecvsubkey
 krb5_auth_con_setsendsubkey
 krb5_auth_con_setuseruserkey
 krb5_auth_to_rep
+krb5_authdata_context_copy
+krb5_authdata_context_free
+krb5_authdata_context_init
+krb5_authdata_delete_attribute
+krb5_authdata_get_attribute_types
+krb5_authdata_get_attribute
+krb5_authdata_set_attribute
+krb5_authdata_export_attributes
+krb5_authdata_export_authdata
+krb5_authdata_export_internal
+krb5_authdata_free_internal
+krb5_authdata_import_attributes
 krb5_build_principal
 krb5_build_principal_alloc_va
 krb5_build_principal_ext
@@ -203,6 +219,7 @@ krb5_externalize_data
 krb5_externalize_opaque
 krb5_fcc_ops
 krb5_find_serializer
+krb5_free_ad_kdcissued
 krb5_free_address
 krb5_free_addresses
 krb5_free_alt_method
@@ -364,6 +381,7 @@ krb5_kuserok
 krb5_libdefault_boolean
 krb5_locate_kdc
 krb5_lock_file
+krb5_make_authdata_kdc_issued
 krb5_make_full_ipaddr
 krb5_make_fulladdr
 krb5_max_dgram_size
@@ -519,6 +537,7 @@ krb5_unparse_name_flags_ext
 krb5_us_timeofday
 krb5_use_natural_time
 krb5_validate_times
+krb5_verify_authdata_kdc_issued
 krb5_verify_init_creds
 krb5_verify_init_creds_opt_init
 krb5_verify_init_creds_opt_set_ap_req_nofail
@@ -534,6 +553,7 @@ krb5int_find_authdata
 krb5int_find_pa_data
 krb5int_foreach_localaddr
 krb5int_free_addrlist
+krb5int_free_data_list
 krb5int_get_domain_realm_mapping
 krb5int_init_context_kdc
 krb5int_initialize_library

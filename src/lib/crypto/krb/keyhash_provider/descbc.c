@@ -29,12 +29,12 @@
 #include "keyhash_provider.h"
 
 static krb5_error_code
-k5_descbc_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
+k5_descbc_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
 {
     mit_des_key_schedule schedule;
 
-    if (key->length != 8)
+    if (key->keyblock.length != 8)
 	return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
 	return(KRB5_BAD_MSIZE);
@@ -43,7 +43,7 @@ k5_descbc_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
     if (output->length != 8)
 	return(KRB5_CRYPTO_INTERNAL);
 
-    switch (mit_des_key_sched(key->contents, schedule)) {
+    switch (mit_des_key_sched(key->keyblock.contents, schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
     case -2:

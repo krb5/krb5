@@ -56,15 +56,19 @@ gssspi_set_cred_option(OM_uint32 *minor_status,
 
     union_cred = (gss_union_cred_t) cred_handle;
 
-    status = GSS_S_BAD_MECH;
+    status = GSS_S_UNAVAILABLE;
 
     for (i = 0; i < union_cred->count; i++) {
 	mech = gssint_get_mechanism(&union_cred->mechs_array[i]);
-	if (mech == NULL)
-	    continue;
+	if (mech == NULL) {
+	    status = GSS_S_BAD_MECH;
+	    break;
+	}
 
-	if (mech->gssspi_set_cred_option == NULL)
+	if (mech->gssspi_set_cred_option == NULL) {
+	    status = GSS_S_UNAVAILABLE;
 	    continue;
+	}
 
 	status = (mech->gssspi_set_cred_option)(minor_status,
 						union_cred->cred_array[i],

@@ -1290,6 +1290,23 @@ DEFSEQTYPE(fast_rep, krb5_enc_data, fast_rep_fields, 0);
 DEFFIELDTYPE(pa_fx_fast_reply, krb5_enc_data,
              FIELDOF_ENCODEAS(krb5_enc_data, fast_rep, 0));
 
+static const struct field_info ad_kdcissued_fields[] = {
+    FIELDOF_NORM(krb5_ad_kdcissued, checksum, ad_checksum, 0),
+    FIELDOF_OPT(krb5_ad_kdcissued, realm_of_principal, i_principal, 1, 1),
+    FIELDOF_OPT(krb5_ad_kdcissued, principal, i_principal, 2, 1),
+    FIELDOF_NORM(krb5_ad_kdcissued, auth_data_ptr, elements, 3),
+};
+
+static unsigned int ad_kdcissued_optional(const void *p)
+{
+    unsigned int optional = 0;
+    const krb5_ad_kdcissued *val = p;
+    if (val->i_principal)
+        optional |= (1u << 1);
+    return optional;
+}
+
+DEFSEQTYPE(ad_kdc_issued, krb5_ad_kdcissued, ad_kdcissued_fields, ad_kdcissued_optional);
 
 
 
@@ -1366,7 +1383,7 @@ MAKE_FULL_ENCODER( encode_krb5_fast_req, fast_req);
 MAKE_FULL_ENCODER( encode_krb5_pa_fx_fast_reply, pa_fx_fast_reply);
 MAKE_FULL_ENCODER(encode_krb5_fast_response, fast_response);
 
-
+MAKE_FULL_ENCODER(encode_krb5_ad_kdcissued, ad_kdc_issued);
 
 
 

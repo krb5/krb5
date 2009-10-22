@@ -45,5 +45,5 @@ krb5_c_weak_enctype(krb5_enctype etype)
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(etype);
-    return ((ktp->flags & ETYPE_WEAK) != 0);
+    return (ktp != NULL && (ktp->flags & ETYPE_WEAK) != 0);
 }

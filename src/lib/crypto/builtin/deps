@@ -8,10 +8,10 @@ hmac.so hmac.po $(OUTPRE)hmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../builtin/hmac.c $(srcdir)/../krb/aead.h \
-  $(srcdir)/../krb/cksumtypes.h
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../builtin/hmac.c \
+  $(srcdir)/../krb/aead.h $(srcdir)/../krb/cksumtypes.h
 pbkdf2.so pbkdf2.po $(OUTPRE)pbkdf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -19,6 +19,7 @@ pbkdf2.so pbkdf2.po $(OUTPRE)pbkdf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../builtin/pbkdf2.c $(srcdir)/../builtin/hash_provider/hash_provider.h
+  $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../builtin/hash_provider/hash_provider.h \
+  $(srcdir)/../builtin/pbkdf2.c

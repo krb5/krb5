@@ -153,7 +153,11 @@ enum qop {
 
 /** internal types **/
 
-typedef krb5_principal krb5_gss_name_t;
+typedef struct _krb5_gss_name_rec {
+    krb5_principal princ; /* immutable */
+    k5_mutex_t lock; /* protects ad_context only for now */
+    krb5_authdata_context ad_context;
+} krb5_gss_name_rec, *krb5_gss_name_t;
 
 typedef struct _krb5_gss_cred_id_rec {
     /* protect against simultaneous accesses */
@@ -161,10 +165,11 @@ typedef struct _krb5_gss_cred_id_rec {
 
     /* name/type of credential */
     gss_cred_usage_t usage;
-    krb5_principal princ;        /* this is not interned as a gss_name_t */
+    krb5_gss_name_t name;
     unsigned int prerfc_mech : 1;
     unsigned int rfc_mech : 1;
     unsigned int proxy_cred : 1;
+    unsigned int default_identity : 1;
 
     /* keytab (accept) data */
     krb5_keytab keytab;
@@ -184,17 +189,16 @@ typedef struct _krb5_gss_ctx_id_rec {
     unsigned int seed_init : 1;  /* XXX tested but never actually set */
     OM_uint32 gss_flags;
     unsigned char seed[16];
-    krb5_principal here;
-    krb5_principal there;
-    krb5_keyblock *subkey; /*One of two potential keys to use with RFC
-                            * 4121 packets; this key must always be set.*/
+    krb5_gss_name_t here;
+    krb5_gss_name_t there;
+    krb5_key subkey; /* One of two potential keys to use with RFC 4121
+                      * packets; this key must always be set. */
     int signalg;
     size_t cksum_size;
     int sealalg;
-    krb5_keyblock *enc; /*RFC 1964 encryption key;seq xored with a
-                         *                           constant for DES,
-                         * seq for other RFC 1964 enctypes  */ 
-  krb5_keyblock *seq; /*RFC 1964 sequencing key*/
+    krb5_key enc; /* RFC 1964 encryption key; seq xored with a constant
+                   * for DES, seq for other RFC 1964 enctypes  */
+    krb5_key seq; /* RFC 1964 sequencing key */
     krb5_ticket_times krb_times;
     krb5_flags krb_flags;
     /* XXX these used to be signed.  the old spec is inspecific, and
@@ -214,7 +218,7 @@ typedef struct _krb5_gss_ctx_id_rec {
        1964 tokens is permitted.*/
     int proto;
     krb5_cksumtype cksumtype;    /* for "main" subkey */
-    krb5_keyblock *acceptor_subkey; /* CFX only */
+    krb5_key acceptor_subkey; /* CFX only */
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
@@ -255,32 +259,32 @@ krb5_error_code kg_checksum_channel_bindings
  int bigend);
 
 krb5_error_code kg_make_seq_num (krb5_context context,
-                                 krb5_keyblock *key,
+                                 krb5_key key,
                                  int direction, krb5_ui_4 seqnum, unsigned char *cksum,
                                  unsigned char *buf);
 
 krb5_error_code kg_get_seq_num (krb5_context context,
-                                krb5_keyblock *key,
+                                krb5_key key,
                                 unsigned char *cksum, unsigned char *buf, int *direction,
                                 krb5_ui_4 *seqnum);
 
 krb5_error_code kg_make_seed (krb5_context context,
-                              krb5_keyblock *key,
+                              krb5_key key,
                               unsigned char *seed);
 
 krb5_error_code
 kg_setup_keys(krb5_context context,
               krb5_gss_ctx_id_rec *ctx,
-              krb5_keyblock *subkey,
+              krb5_key subkey,
               krb5_cksumtype *cksumtype);
 
-int kg_confounder_size (krb5_context context, krb5_keyblock *key);
+int kg_confounder_size (krb5_context context, krb5_enctype enctype);
 
 krb5_error_code kg_make_confounder (krb5_context context,
-                                    krb5_keyblock *key, unsigned char *buf);
+                                    krb5_enctype enctype, unsigned char *buf);
 
 krb5_error_code kg_encrypt (krb5_context context,
-                            krb5_keyblock *key, int usage,
+                            krb5_key key, int usage,
                             krb5_pointer iv,
                             krb5_const_pointer in,
                             krb5_pointer out,
@@ -289,7 +293,7 @@ krb5_error_code kg_encrypt (krb5_context context,
 krb5_error_code kg_encrypt_iov (krb5_context context,
                                 int proto, int dce_style,
                                 size_t ec, size_t rrc,
-                                krb5_keyblock *key, int usage,
+                                krb5_key key, int usage,
                                 krb5_pointer iv,
                                 gss_iov_buffer_desc *iov,
                                 int iov_count);
@@ -308,7 +312,7 @@ kg_arcfour_docrypt_iov (krb5_context context,
                         int iov_count);
 
 krb5_error_code kg_decrypt (krb5_context context,
-                            krb5_keyblock *key,  int usage,
+                            krb5_key key,  int usage,
                             krb5_pointer iv,
                             krb5_const_pointer in,
                             krb5_pointer out,
@@ -317,7 +321,7 @@ krb5_error_code kg_decrypt (krb5_context context,
 krb5_error_code kg_decrypt_iov (krb5_context context,
                                 int proto, int dce_style,
                                 size_t ec, size_t rrc,
-                                krb5_keyblock *key,  int usage,
+                                krb5_key key,  int usage,
                                 krb5_pointer iv,
                                 gss_iov_buffer_desc *iov,
                                 int iov_count);
@@ -405,8 +409,8 @@ void kg_release_iov(gss_iov_buffer_desc *iov,
 krb5_error_code kg_make_checksum_iov_v1(krb5_context context,
                 krb5_cksumtype type,
                 size_t token_cksum_len,
-                krb5_keyblock *seq,
-                krb5_keyblock *enc, /* for conf len */
+                krb5_key seq,
+                krb5_key enc, /* for conf len */
                 krb5_keyusage sign_usage,
                 gss_iov_buffer_desc *iov,
                 int iov_count,
@@ -416,7 +420,7 @@ krb5_error_code kg_make_checksum_iov_v1(krb5_context context,
 krb5_error_code kg_make_checksum_iov_v3(krb5_context context,
                 krb5_cksumtype type,
                 size_t rrc,
-                krb5_keyblock *key,
+                krb5_key key,
                 krb5_keyusage sign_usage,
                 gss_iov_buffer_desc *iov,
                 int iov_count);
@@ -424,7 +428,7 @@ krb5_error_code kg_make_checksum_iov_v3(krb5_context context,
 krb5_error_code kg_verify_checksum_iov_v3(krb5_context context,
                 krb5_cksumtype type,
                 size_t rrc,
-                krb5_keyblock *key,
+                krb5_key key,
                 krb5_keyusage sign_usage,
                 gss_iov_buffer_desc *iov,
                 int iov_count,
@@ -825,6 +829,86 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 
+/* naming_exts.c */
+#define KG_INIT_NAME_INTERN  0x1
+#define KG_INIT_NAME_NO_COPY 0x2
+
+krb5_error_code
+kg_init_name(krb5_context context,
+             krb5_principal principal,
+             krb5_authdata_context ad_context,
+             krb5_flags flags,
+             krb5_gss_name_t *name);
+
+krb5_error_code
+kg_release_name(krb5_context context,
+                krb5_flags flags,
+                krb5_gss_name_t *name);
+
+krb5_error_code
+kg_duplicate_name(krb5_context context,
+                  const krb5_gss_name_t src,
+                  krb5_flags flags,
+                  krb5_gss_name_t *dst);
+
+krb5_boolean
+kg_compare_name(krb5_context context,
+                krb5_gss_name_t name1,
+                krb5_gss_name_t name2);
+
+OM_uint32
+krb5_gss_display_name_ext(OM_uint32 *minor_status,
+                          gss_name_t name,
+                          gss_OID display_as_name_type,
+                          gss_buffer_t display_name);
+
+OM_uint32
+krb5_gss_inquire_name(OM_uint32 *minor_status,
+                      gss_name_t name,
+                      int *name_is_MN,
+                      gss_OID *MN_mech,
+                      gss_buffer_set_t *attrs);
+
+OM_uint32
+krb5_gss_get_name_attribute(OM_uint32 *minor_status,
+                            gss_name_t name,
+                            gss_buffer_t attr,
+                            int *authenticated,
+                            int *complete,
+                            gss_buffer_t value,
+                            gss_buffer_t display_value,
+                            int *more);
+
+OM_uint32
+krb5_gss_set_name_attribute(OM_uint32 *minor_status,
+                            gss_name_t name,
+                            int complete,
+                            gss_buffer_t attr,
+                            gss_buffer_t value);
+
+OM_uint32
+krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
+                               gss_name_t name,
+                               gss_buffer_t attr);
+
+OM_uint32
+krb5_gss_export_name_composite(OM_uint32 *minor_status,
+                               gss_name_t name,
+                               gss_buffer_t exp_composite_name);
+
+OM_uint32
+krb5_gss_map_name_to_any(OM_uint32 *minor_status,
+                         gss_name_t name,
+                         int authenticated,
+                         gss_buffer_t type_id,
+                         gss_any_t *output);
+
+OM_uint32
+krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
+                                  gss_name_t name,
+                                  gss_buffer_t type_id,
+                                  gss_any_t *input);
+
 /* s4u_gss_glue.c */
 OM_uint32
 kg_compose_deleg_cred(OM_uint32 *minor_status,
@@ -836,7 +920,6 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
                       gss_OID_set *actual_mechs,
                       OM_uint32 *time_rec,
                       krb5_context context);
-
 
 /*
  * These take unglued krb5-mech-specific contexts.

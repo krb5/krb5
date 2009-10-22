@@ -15,7 +15,7 @@
 
 /* prototypes */
 static krb5_error_code
-k5_arcfour_docrypt(const krb5_keyblock *, const krb5_data *,
+k5_arcfour_docrypt(krb5_key, const krb5_data *,
            const krb5_data *, krb5_data *);
 static krb5_error_code 
 k5_arcfour_free_state ( krb5_data *state);
@@ -29,7 +29,7 @@ k5_arcfour_init_state (const krb5_keyblock *key,
 
 /* In-place rc4 crypto */
 static krb5_error_code
-k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
+k5_arcfour_docrypt(krb5_key key, const krb5_data *state,
            const krb5_data *input, krb5_data *output)
 {
     int ret = 0, tmp_len = 0;
@@ -37,14 +37,14 @@ k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
     unsigned char   *tmp_buf = NULL;
     EVP_CIPHER_CTX  ciph_ctx;
 
-    if (key->length != RC4_KEY_SIZE)
+    if (key->keyblock.length != RC4_KEY_SIZE)
         return(KRB5_BAD_KEYSIZE);
 
     if (input->length != output->length)
         return(KRB5_BAD_MSIZE);
 
-    keybuf=key->contents;
-    keybuf[key->length] = '\0';
+    keybuf=key->keyblock.contents;
+    keybuf[key->keyblock.length] = '\0';
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
@@ -72,7 +72,7 @@ k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
 
 /* In-place IOV crypto */
 static krb5_error_code
-k5_arcfour_docrypt_iov(const krb5_keyblock *key,
+k5_arcfour_docrypt_iov(krb5_key key,
                const krb5_data *state,
                krb5_crypto_iov *data,
                size_t num_data)
@@ -84,8 +84,8 @@ k5_arcfour_docrypt_iov(const krb5_keyblock *key,
     krb5_crypto_iov *iov     = NULL;
     EVP_CIPHER_CTX  ciph_ctx;
 
-    keybuf=key->contents;
-    keybuf[key->length] = '\0';
+    keybuf=key->keyblock.contents;
+    keybuf[key->keyblock.length] = '\0';
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 

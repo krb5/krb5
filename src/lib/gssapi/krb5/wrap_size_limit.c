@@ -114,10 +114,12 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 
         /* Token header: 16 octets.  */
         if (conf_req_flag) {
+            krb5_key key;
             krb5_enctype enctype;
 
-            enctype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey->enctype
-                                                : ctx->subkey->enctype;
+            key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey
+                                            : ctx->subkey;
+            enctype = key->keyblock.enctype;
 
             while (sz > 0 && krb5_encrypt_size(sz, enctype) + 16 > req_output_size)
                 sz--;
@@ -163,7 +165,7 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     /* Calculate the token size and subtract that from the output size */
     overhead = 7 + ctx->mech_used->length;
     data_size = req_output_size;
-    conflen = kg_confounder_size(ctx->k5_context, ctx->enc);
+    conflen = kg_confounder_size(ctx->k5_context, ctx->enc->keyblock.enctype);
     data_size = (conflen + data_size + 8) & (~(OM_uint32)7);
     ohlen = g_token_size(ctx->mech_used,
                          (unsigned int) (data_size + ctx->cksum_size + 14))

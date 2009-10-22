@@ -9,10 +9,10 @@ ldap_exp.so ldap_exp.po $(OUTPRE)ldap_exp.$(OBJEXT): \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/kdb_ext.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  $(srcdir)/libkdb_ldap/kdb_ldap.h $(srcdir)/libkdb_ldap/ldap_krbcontainer.h \
-  $(srcdir)/libkdb_ldap/ldap_principal.h $(srcdir)/libkdb_ldap/ldap_pwd_policy.h \
-  $(srcdir)/libkdb_ldap/ldap_realm.h $(srcdir)/libkdb_ldap/ldap_tkt_policy.h \
-  ldap_exp.c
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/lib/kdb/kdb5.h $(srcdir)/libkdb_ldap/kdb_ldap.h \
+  $(srcdir)/libkdb_ldap/ldap_krbcontainer.h $(srcdir)/libkdb_ldap/ldap_principal.h \
+  $(srcdir)/libkdb_ldap/ldap_pwd_policy.h $(srcdir)/libkdb_ldap/ldap_realm.h \
+  $(srcdir)/libkdb_ldap/ldap_tkt_policy.h ldap_exp.c

@@ -30,13 +30,13 @@
 #include <rand2key.h>
 
 static krb5_error_code
-validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,
+validate_and_schedule(krb5_key key, const krb5_data *ivec,
 		      const krb5_data *input, const krb5_data *output,
 		      mit_des3_key_schedule *schedule)
 {
-    /* key->enctype was checked by the caller */
+    /* key->keyblock.enctype was checked by the caller */
 
-    if (key->length != 24)
+    if (key->keyblock.length != 24)
 	return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
 	return(KRB5_BAD_MSIZE);
@@ -45,7 +45,7 @@ validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,
     if (input->length != output->length)
 	return(KRB5_BAD_MSIZE);
 
-    switch (mit_des3_key_sched(*(mit_des3_cblock *)key->contents,
+    switch (mit_des3_key_sched(*(mit_des3_cblock *)key->keyblock.contents,
 			       *schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
@@ -56,7 +56,7 @@ validate_and_schedule(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-validate_and_schedule_iov(const krb5_keyblock *key, const krb5_data *ivec,
+validate_and_schedule_iov(krb5_key key, const krb5_data *ivec,
 			  const krb5_crypto_iov *data, size_t num_data,
 			  mit_des3_key_schedule *schedule)
 {
@@ -69,14 +69,14 @@ validate_and_schedule_iov(const krb5_keyblock *key, const krb5_data *ivec,
 	    input_length += iov->data.length;
     }
 
-    if (key->length != 24)
+    if (key->keyblock.length != 24)
 	return(KRB5_BAD_KEYSIZE);
     if ((input_length%8) != 0)
 	return(KRB5_BAD_MSIZE);
     if (ivec && (ivec->length != 8))
 	return(KRB5_BAD_MSIZE);
 
-    switch (mit_des3_key_sched(*(mit_des3_cblock *)key->contents,
+    switch (mit_des3_key_sched(*(mit_des3_cblock *)key->keyblock.contents,
 			       *schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
@@ -87,7 +87,7 @@ validate_and_schedule_iov(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des3_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
 		const krb5_data *input, krb5_data *output)
 {
     mit_des3_key_schedule schedule;
@@ -109,7 +109,7 @@ k5_des3_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des3_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
 		const krb5_data *input, krb5_data *output)
 {
     mit_des3_key_schedule schedule;
@@ -131,7 +131,7 @@ k5_des3_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des3_encrypt_iov(const krb5_keyblock *key,
+k5_des3_encrypt_iov(krb5_key key,
 		    const krb5_data *ivec,
 		    krb5_crypto_iov *data,
 		    size_t num_data)
@@ -154,7 +154,7 @@ k5_des3_encrypt_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-k5_des3_decrypt_iov(const krb5_keyblock *key,
+k5_des3_decrypt_iov(krb5_key key,
 		    const krb5_data *ivec,
 		    krb5_crypto_iov *data,
 		    size_t num_data)

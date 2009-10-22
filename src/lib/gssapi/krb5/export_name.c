@@ -58,7 +58,7 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
         return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
     }
 
-    if ((code = krb5_unparse_name(context, (krb5_principal) input_name,
+    if ((code = krb5_unparse_name(context, ((krb5_gss_name_t) input_name)->princ,
                                   &str))) {
         if (minor_status)
             *minor_status = code;

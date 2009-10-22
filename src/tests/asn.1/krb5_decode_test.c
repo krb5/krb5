@@ -891,10 +891,20 @@ int main(argc, argv)
 	ktest_empty_sam_response(&ref);
     }
 
+    /****************************************************************/
+    /* decode_pa_s4u_x509_user */
     {
 	setup(krb5_pa_s4u_x509_user,"krb5_pa_s4u_x509_user",ktest_make_sample_pa_s4u_x509_user);
 	decode_run("pa_s4u_x509_user","","30 68 A0 55 30 53 A0 06 02 04 00 CA 14 9A A1 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 12 04 10 70 61 5F 73 34 75 5F 78 35 30 39 5F 75 73 65 72 A4 07 03 05 00 80 00 00 00 A1 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34",decode_krb5_pa_s4u_x509_user,ktest_equal_pa_s4u_x509_user,krb5_free_pa_s4u_x509_user);
 	ktest_empty_pa_s4u_x509_user(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_ad_kdcissued */
+    {
+	setup(krb5_ad_kdcissued,"krb5_ad_kdcissued",ktest_make_sample_ad_kdcissued);
+	decode_run("ad_kdcissued","","30 65 A0 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 24 30 22 30 0F A0 03 02 01 01 A1 08 04 06 66 6F 6F 62 61 72 30 0F A0 03 02 01 01 A1 08 04 06 66 6F 6F 62 61 72",decode_krb5_ad_kdcissued,ktest_equal_ad_kdcissued,krb5_free_ad_kdcissued);
+	ktest_empty_ad_kdcissued(&ref);
     }
 
 #ifdef ENABLE_LDAP

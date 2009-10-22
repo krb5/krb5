@@ -48,5 +48,5 @@ mkeystash_check: kdc.conf krb5.conf bigendian
 	$(RM) $(TEST_DB)* stash_file
 
 clean::
-	$(RM) kdc.conf
+	$(RM) kdc.conf krb5.conf bigendian.$(OBJEXT) bigendian
 

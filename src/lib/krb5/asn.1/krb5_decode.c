@@ -1180,6 +1180,17 @@ krb5_error_code decode_krb5_pa_fx_fast_reply
     cleanup(free);
 }
 
+krb5_error_code decode_krb5_ad_kdcissued
+(const krb5_data *code, krb5_ad_kdcissued **repptr)
+{
+    setup_buf_only(krb5_ad_kdcissued *);
+    alloc_field(rep);
+
+    retval = asn1_decode_ad_kdcissued(&buf, rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
   
 #ifndef DISABLE_PKINIT
 krb5_error_code

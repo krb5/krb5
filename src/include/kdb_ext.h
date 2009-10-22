@@ -97,13 +97,12 @@ typedef struct _kdb_sign_auth_data_req {
     krb5_keyblock *server_key;		/* Key used to generate server signature */
     krb5_timestamp authtime;		/* Authtime of TGT */
     krb5_authdata **auth_data;		/* Authorization data from TGT */
+    krb5_keyblock *session_key;		/* Reply session key */
 } kdb_sign_auth_data_req;
 
 typedef struct _kdb_sign_auth_data_rep {
     krb5_magic magic;
     krb5_authdata **auth_data;		/* Signed authorization data */
-    krb5_db_entry *entry;		/* Optional client principal extracted from auth data */
-    int nprincs;			/* Non-zero if above contains principal data */
 } kdb_sign_auth_data_rep;
 
 typedef struct _kdb_check_transited_realms_req {
@@ -160,6 +159,7 @@ typedef struct _kdb_check_allowed_to_delegate_req {
     krb5_magic magic;
     const krb5_db_entry *server;
     krb5_const_principal proxy;
+    krb5_const_principal client;
 } kdb_check_allowed_to_delegate_req;
 
 #endif /* KRB5_KDB5_EXT__ */

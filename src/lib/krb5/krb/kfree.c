@@ -534,7 +534,8 @@ krb5_free_tkt_authent(krb5_context context, krb5_tkt_authent *val)
 void KRB5_CALLCONV
 krb5_free_unparsed_name(krb5_context context, char *val)
 {
-    free(val);
+    if (val != NULL)
+	free(val);
 }
 
 void KRB5_CALLCONV
@@ -881,3 +882,30 @@ void krb5_free_fast_armored_req(krb5_context context,
       krb5_free_checksum_contents(context, &val->req_checksum);
     free(val);
 }
+
+void KRB5_CALLCONV
+krb5int_free_data_list(krb5_context context, krb5_data *data)
+{
+    int i;
+
+    if (data == NULL)
+        return;
+
+    for (i = 0; data[i].data != NULL; i++)
+        free(data[i].data);
+
+    free(data);
+}
+
+void KRB5_CALLCONV
+krb5_free_ad_kdcissued(krb5_context context, krb5_ad_kdcissued *val)
+{
+    if (val == NULL)
+        return;
+
+    krb5_free_checksum_contents(context, &val->ad_checksum);
+    krb5_free_principal(context, val->i_principal);
+    krb5_free_authdata(context, val->elements);
+    free(val);
+}
+

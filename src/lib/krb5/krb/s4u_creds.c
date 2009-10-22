@@ -115,7 +115,7 @@ s4u_identify_user(krb5_context context,
         client = &client_data;
     }
 
-    code = krb5_get_init_creds(context, &creds, in_creds->client,
+    code = krb5_get_init_creds(context, &creds, client,
                                NULL, NULL, 0, NULL, opte,
                                krb5_get_as_key_noop, &userid,
                                &use_master, NULL);

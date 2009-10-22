@@ -52,7 +52,7 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    krb5int_access internals_temp;
 #endif
 	    S (free_addrlist, krb5int_free_addrlist),
-	    S (krb5_hmac, krb5_hmac),
+	    S (krb5_hmac, krb5int_hmac_keyblock),
 	    S (krb5_auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
 	    S (md5_hash_provider, &krb5int_hash_md5),
 	    S (arcfour_enc_provider, &krb5int_enc_arcfour),

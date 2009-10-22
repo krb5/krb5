@@ -1,3 +1,5 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil */
+
 extern int optind;
 extern char *optarg;
 
@@ -7,9 +9,9 @@ main(argc, argv)
 {
     int c;
     int errflg = 0;
-    
+
     <<<other globals here>>>;
-	
+
     while ((c = getopt(argc, argv, "<<<>>>")) != -1) {
 	switch (c) {
 	    <<<add cases for arguments here>>>;

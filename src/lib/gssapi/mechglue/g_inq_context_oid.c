@@ -62,11 +62,11 @@ gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);
 	} else
-	    status = GSS_S_BAD_MECH;
+	    status = GSS_S_UNAVAILABLE;
 
 	return status;
     }
 
-    return GSS_S_NO_CONTEXT;
+    return GSS_S_BAD_MECH;
 }
 

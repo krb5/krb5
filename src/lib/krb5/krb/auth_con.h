@@ -8,9 +8,9 @@ struct _krb5_auth_context {
     krb5_address      *	remote_port;
     krb5_address      *	local_addr;
     krb5_address      *	local_port;
-    krb5_keyblock     * keyblock;
-    krb5_keyblock     * send_subkey;
-    krb5_keyblock     * recv_subkey;
+    krb5_key            key;
+    krb5_key            send_subkey;
+    krb5_key            recv_subkey;
 
     krb5_int32		auth_context_flags;
     krb5_ui_4		remote_seq_number;
@@ -24,6 +24,7 @@ struct _krb5_auth_context {
     krb5_mk_req_checksum_func checksum_func;
     void *checksum_func_data;
     krb5_enctype	negotiated_etype;
+    krb5_authdata_context   ad_context;
 };
 
 

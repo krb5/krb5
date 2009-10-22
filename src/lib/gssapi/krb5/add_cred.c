@@ -170,8 +170,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     /* make sure the desired_name is the same as the existing one */
 
     if (desired_name &&
-        !krb5_principal_compare(context, (krb5_principal) desired_name,
-                                cred->princ)) {
+        !kg_compare_name(context, (krb5_gss_name_t)desired_name, cred->name)) {
         *minor_status = 0;
         krb5_free_context(context);
         return(GSS_S_BAD_NAME);
@@ -200,8 +199,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
         new_cred->rfc_mech = cred->rfc_mech;
         new_cred->tgt_expire = cred->tgt_expire;
 
-        if (cred->princ)
-            code = krb5_copy_principal(context, cred->princ, &new_cred->princ);
+        if (cred->name)
+            code = kg_duplicate_name(context, cred->name, 0, &new_cred->name);
         if (code) {
             xfree(new_cred);
 
@@ -214,8 +213,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
         if (cred->keytab) {
             kttype = krb5_kt_get_type(context, cred->keytab);
             if ((strlen(kttype)+2) > sizeof(ktboth)) {
-                if (new_cred->princ)
-                    krb5_free_principal(context, new_cred->princ);
+                if (new_cred->name)
+                    kg_release_name(context, 0, &new_cred->name);
                 xfree(new_cred);
 
                 *minor_status = ENOMEM;
@@ -231,8 +230,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
                                     ktboth+strlen(ktboth),
                                     sizeof(ktboth)-strlen(ktboth));
             if (code) {
-                if(new_cred->princ)
-                    krb5_free_principal(context, new_cred->princ);
+                if(new_cred->name)
+                    kg_release_name(context, 0, &new_cred->name);
                 xfree(new_cred);
 
                 *minor_status = code;
@@ -243,8 +242,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
             code = krb5_kt_resolve(context, ktboth, &new_cred->keytab);
             if (code) {
-                if (new_cred->princ)
-                    krb5_free_principal(context, new_cred->princ);
+                if (new_cred->name)
+                    kg_release_name(context, 0, &new_cred->name);
                 xfree(new_cred);
 
                 *minor_status = code;
@@ -261,15 +260,17 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
         if (cred->rcache) {
             /* Open the replay cache for this principal. */
+            assert(cred->name->princ != NULL);
+
             if ((code = krb5_get_server_rcache(context,
-                                               krb5_princ_component(context, cred->princ, 0),
+                                               krb5_princ_component(context, cred->name->princ, 0),
                                                &new_cred->rcache))) {
 #ifndef LEAN_CLIENT
                 if (new_cred->keytab)
                     krb5_kt_close(context, new_cred->keytab);
 #endif /* LEAN_CLIENT */
-                if (new_cred->princ)
-                    krb5_free_principal(context, new_cred->princ);
+                if (new_cred->name)
+                    kg_release_name(context, 0, &new_cred->name);
                 xfree(new_cred);
 
                 *minor_status = code;
@@ -292,8 +293,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
                 if (new_cred->keytab)
                     krb5_kt_close(context, new_cred->keytab);
 #endif /* LEAN_CLIENT */
-                if (new_cred->princ)
-                    krb5_free_principal(context, new_cred->princ);
+                if (new_cred->name)
+                    kg_release_name(context, 0, &new_cred->name);
                 xfree(new_cred);
 
                 krb5_free_context(context);
@@ -314,8 +315,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
                 if (new_cred->keytab)
                     krb5_kt_close(context, new_cred->keytab);
 #endif /* LEAN_CLIENT */
-                if (new_cred->princ)
-                    krb5_free_principal(context, new_cred->princ);
+                if (new_cred->name)
+                    kg_release_name(context, 0, &new_cred->name);
                 xfree(new_cred);
 
                 *minor_status = code;
@@ -338,8 +339,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
             if (new_cred->keytab)
                 krb5_kt_close(context, new_cred->keytab);
 #endif /* LEAN_CLIENT */
-            if (new_cred->princ)
-                krb5_free_principal(context, new_cred->princ);
+            if (new_cred->name)
+                kg_release_name(context, 0, &new_cred->name);
             xfree(new_cred);
             krb5_free_context(context);
 

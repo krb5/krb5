@@ -79,7 +79,8 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     size_t keybytes, keylength;
     const struct krb5_enc_provider *enc;
     krb5_data input, randbits;
-    krb5_keyblock tkey;
+    krb5_keyblock tkeyblock;
+    krb5_key tkey = NULL;
     krb5_error_code ret;
     const struct krb5_keytypes *ktp;
     krb5_boolean myalloc = FALSE;
@@ -152,10 +153,14 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
 
     randbits.length = keybytes;
     randbits.data = (char *) rnd;
-    tkey.length = keylength;
-    tkey.contents = output;
+    tkeyblock.length = keylength;
+    tkeyblock.contents = output;
 
-    ret = (*enc->make_key)(&randbits, &tkey);
+    ret = (*enc->make_key)(&randbits, &tkeyblock);
+    if (ret)
+	goto cleanup;
+
+    ret = krb5_k_create_key(NULL, &tkeyblock, &tkey);
     if (ret)
 	goto cleanup;
 
@@ -185,7 +190,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
 	myalloc = TRUE;
     }
 
-    ret = krb5_derive_key(enc, &tkey, outkey, &input);
+    ret = krb5_derive_keyblock(enc, tkey, outkey, &input);
     if (ret) {
 	if (myalloc) {
 	    free(outkey->contents);
@@ -200,6 +205,7 @@ cleanup:
     zapfree(rnd, keybytes);
     zapfree(combined, keybytes * 2);
     zapfree(output, keylength);
+    krb5_k_free_key(NULL, tkey);
     return ret;
 }
 
@@ -215,6 +221,7 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
     unsigned char *inblockdata = NULL, *outblockdata = NULL;
     krb5_data inblock, outblock;
     krb5_error_code ret;
+    krb5_key key = NULL;
 
     blocksize = enc->block_size;
     keybytes = enc->keybytes;
@@ -224,6 +231,9 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
     if (ret)
 	goto cleanup;
     outblockdata = k5alloc(blocksize, &ret);
+    if (ret)
+	goto cleanup;
+    ret = krb5_k_create_key(NULL, inkey, &key);
     if (ret)
 	goto cleanup;
 
@@ -246,7 +256,7 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
 
     n = 0;
     while (n < keybytes) {
-	ret = (*enc->encrypt)(inkey, 0, &inblock, &outblock);
+	ret = (*enc->encrypt)(key, 0, &inblock, &outblock);
 	if (ret)
 	    goto cleanup;
 
@@ -263,6 +273,7 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
 cleanup:
     zapfree(inblockdata, blocksize);
     zapfree(outblockdata, blocksize);
+    krb5_k_free_key(NULL, key);
     return ret;
 }
 

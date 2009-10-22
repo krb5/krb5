@@ -32,14 +32,14 @@
 
 
 static krb5_error_code
-k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des_docrypt(krb5_key key, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output, int enc)
 {
     mit_des_key_schedule schedule;
 
-    /* key->enctype was checked by the caller */
+    /* key->keyblock.enctype was checked by the caller */
 
-    if (key->length != 8)
+    if (key->keyblock.length != 8)
 	return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
 	return(KRB5_BAD_MSIZE);
@@ -48,7 +48,7 @@ k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
     if (input->length != output->length)
 	return(KRB5_BAD_MSIZE);
 
-    switch (mit_des_key_sched(key->contents, schedule)) {
+    switch (mit_des_key_sched(key->keyblock.contents, schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
     case -2:
@@ -71,30 +71,30 @@ k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des_encrypt(krb5_key key, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
 {
     return(k5_des_docrypt(key, ivec, input, output, 1));
 }
 
 static krb5_error_code
-k5_des_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des_decrypt(krb5_key key, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
 {
     return(k5_des_docrypt(key, ivec, input, output, 0));
 }
 
 static krb5_error_code
-k5_des_docrypt_iov(const krb5_keyblock *key, const krb5_data *ivec,
+k5_des_docrypt_iov(krb5_key key, const krb5_data *ivec,
 		   krb5_crypto_iov *data, size_t num_data, int enc)
 {
     mit_des_key_schedule schedule;
     size_t input_length = 0;
     unsigned int i;
 
-    /* key->enctype was checked by the caller */
+    /* key->keyblock.enctype was checked by the caller */
 
-    if (key->length != 8)
+    if (key->keyblock.length != 8)
 	return(KRB5_BAD_KEYSIZE);
 
     for (i = 0; i < num_data; i++) {
@@ -109,7 +109,7 @@ k5_des_docrypt_iov(const krb5_keyblock *key, const krb5_data *ivec,
     if (ivec && (ivec->length != 8))
 	return(KRB5_BAD_MSIZE);
 
-    switch (mit_des_key_sched(key->contents, schedule)) {
+    switch (mit_des_key_sched(key->keyblock.contents, schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
     case -2:
@@ -128,7 +128,7 @@ k5_des_docrypt_iov(const krb5_keyblock *key, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des_encrypt_iov(const krb5_keyblock *key,
+k5_des_encrypt_iov(krb5_key key,
 		    const krb5_data *ivec,
 		    krb5_crypto_iov *data,
 		    size_t num_data)
@@ -137,7 +137,7 @@ k5_des_encrypt_iov(const krb5_keyblock *key,
 }
 
 static krb5_error_code
-k5_des_decrypt_iov(const krb5_keyblock *key,
+k5_des_decrypt_iov(krb5_key key,
 		   const krb5_data *ivec,
 		   krb5_crypto_iov *data,
 		   size_t num_data)

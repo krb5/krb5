@@ -292,31 +292,31 @@ kg_ctx_size(kcontext, arg, sizep)
         if (!kret && ctx->here)
             kret = krb5_size_opaque(kcontext,
                                     KV5M_PRINCIPAL,
-                                    (krb5_pointer) ctx->here,
+                                    (krb5_pointer) ctx->here->princ,
                                     &required);
 
         if (!kret && ctx->there)
             kret = krb5_size_opaque(kcontext,
                                     KV5M_PRINCIPAL,
-                                    (krb5_pointer) ctx->there,
+                                    (krb5_pointer) ctx->there->princ,
                                     &required);
 
         if (!kret && ctx->subkey)
             kret = krb5_size_opaque(kcontext,
                                     KV5M_KEYBLOCK,
-                                    (krb5_pointer) ctx->subkey,
+                                    (krb5_pointer) &ctx->subkey->keyblock,
                                     &required);
 
         if (!kret && ctx->enc)
             kret = krb5_size_opaque(kcontext,
                                     KV5M_KEYBLOCK,
-                                    (krb5_pointer) ctx->enc,
+                                    (krb5_pointer) &ctx->enc->keyblock,
                                     &required);
 
         if (!kret && ctx->seq)
             kret = krb5_size_opaque(kcontext,
                                     KV5M_KEYBLOCK,
-                                    (krb5_pointer) ctx->seq,
+                                    (krb5_pointer) &ctx->seq->keyblock,
                                     &required);
 
         if (!kret)
@@ -339,8 +339,8 @@ kg_ctx_size(kcontext, arg, sizep)
                                     &required);
         if (!kret && ctx->acceptor_subkey)
             kret = krb5_size_opaque(kcontext,
-                                    KV5M_KEYBLOCK,
-                                    (krb5_pointer) ctx->acceptor_subkey,
+                                    KV5M_KEYBLOCK, (krb5_pointer)
+                                    &ctx->acceptor_subkey->keyblock,
                                     &required);
         if (!kret && ctx->authdata) {
             krb5_int32 i;
@@ -352,7 +352,18 @@ kg_ctx_size(kcontext, arg, sizep)
                                         &required);
             }
         }
-        if (!kret)
+        if (!kret) {
+            krb5_gss_name_t initiator_name;
+
+            initiator_name = ctx->initiate ? ctx->here : ctx->there;
+
+            if (initiator_name) {
+                kret = krb5_size_opaque(kcontext,
+                                        KV5M_AUTHDATA_CONTEXT,
+                                        initiator_name->ad_context,
+                                        &required);
+            }
+        }
             *sizep += required;
     }
     return(kret);
@@ -437,31 +448,31 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
             if (!kret && ctx->here)
                 kret = krb5_externalize_opaque(kcontext,
                                                KV5M_PRINCIPAL,
-                                               (krb5_pointer) ctx->here,
+                                               (krb5_pointer) ctx->here->princ,
                                                &bp, &remain);
 
             if (!kret && ctx->there)
                 kret = krb5_externalize_opaque(kcontext,
                                                KV5M_PRINCIPAL,
-                                               (krb5_pointer) ctx->there,
+                                               (krb5_pointer) ctx->there->princ,
                                                &bp, &remain);
 
             if (!kret && ctx->subkey)
                 kret = krb5_externalize_opaque(kcontext,
-                                               KV5M_KEYBLOCK,
-                                               (krb5_pointer) ctx->subkey,
+                                               KV5M_KEYBLOCK, (krb5_pointer)
+                                               &ctx->subkey->keyblock,
                                                &bp, &remain);
 
             if (!kret && ctx->enc)
                 kret = krb5_externalize_opaque(kcontext,
-                                               KV5M_KEYBLOCK,
-                                               (krb5_pointer) ctx->enc,
+                                               KV5M_KEYBLOCK, (krb5_pointer)
+                                               &ctx->enc->keyblock,
                                                &bp, &remain);
 
             if (!kret && ctx->seq)
                 kret = krb5_externalize_opaque(kcontext,
-                                               KV5M_KEYBLOCK,
-                                               (krb5_pointer) ctx->seq,
+                                               KV5M_KEYBLOCK, (krb5_pointer)
+                                               &ctx->seq->keyblock,
                                                &bp, &remain);
 
             if (!kret && ctx->seqstate)
@@ -488,8 +499,8 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                                            &bp, &remain);
             if (!kret && ctx->acceptor_subkey)
                 kret = krb5_externalize_opaque(kcontext,
-                                               KV5M_KEYBLOCK,
-                                               (krb5_pointer) ctx->acceptor_subkey,
+                                               KV5M_KEYBLOCK, (krb5_pointer)
+                                               &ctx->acceptor_subkey->keyblock,
                                                &bp, &remain);
             if (!kret)
                 kret = krb5_ser_pack_int32((krb5_int32) ctx->acceptor_subkey_cksumtype,
@@ -517,6 +528,20 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                                                        &remain);
                 }
             }
+            /* authdata context */
+            if (!kret) {
+                krb5_gss_name_t initiator_name;
+
+                initiator_name = ctx->initiate ? ctx->here : ctx->there;
+
+                if (initiator_name) {
+                    kret = krb5_externalize_opaque(kcontext,
+                                                   KV5M_AUTHDATA_CONTEXT,
+                                                   initiator_name->ad_context,
+                                                   &bp,
+                                                   &remain);
+                }
+            }
             /* trailer */
             if (!kret)
                 kret = krb5_ser_pack_int32(KG_CONTEXT, &bp, &remain);
@@ -527,6 +552,22 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
         }
     }
     return(kret);
+}
+
+/* Internalize a keyblock and convert it to a key. */
+static krb5_error_code
+intern_key(krb5_context ctx, krb5_key *key, krb5_octet **bp, size_t *sp)
+{
+    krb5_keyblock *keyblock;
+    krb5_error_code ret;
+
+    ret = krb5_internalize_opaque(ctx, KV5M_KEYBLOCK,
+                                  (krb5_pointer *) &keyblock, bp, sp);
+    if (ret != 0)
+        return ret;
+    ret = krb5_k_create_key(ctx, keyblock, key);
+    krb5_free_keyblock(ctx, keyblock);
+    return ret;
 }
 
 /*
@@ -545,6 +586,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
     krb5_octet          *bp;
     size_t              remain;
     krb5int_access kaccess;
+    krb5_principal        princ;
 
     kret = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (kret)
@@ -553,6 +595,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
     bp = *buffer;
     remain = *lenremain;
     kret = EINVAL;
+    princ = NULL;
     /* Read our magic number */
     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
         ibuf = 0;
@@ -618,42 +661,42 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
                     kret = 0;
             }
             /* Now get substructure data */
-            if ((kret = krb5_internalize_opaque(kcontext,
-                                                KV5M_PRINCIPAL,
-                                                (krb5_pointer *) &ctx->here,
-                                                &bp, &remain))) {
+            kret = krb5_internalize_opaque(kcontext,
+                                           KV5M_PRINCIPAL,
+                                            (krb5_pointer *) &princ,
+                                            &bp, &remain);
+            if (kret == 0) {
+                kret = kg_init_name(kcontext, princ, NULL,
+                                    KG_INIT_NAME_NO_COPY, &ctx->here);
+                if (kret)
+                    krb5_free_principal(kcontext, princ);
+            } else if (kret == EINVAL)
+                kret = 0;
+            if (!kret) {
+                kret = krb5_internalize_opaque(kcontext,
+                                               KV5M_PRINCIPAL,
+                                               (krb5_pointer *) &princ,
+                                               &bp, &remain);
+                if (kret == 0) {
+                    kret = kg_init_name(kcontext, princ, NULL,
+                                        KG_INIT_NAME_NO_COPY, &ctx->there);
+                    if (kret)
+                        krb5_free_principal(kcontext, princ);
+                } else if (kret == EINVAL)
+                    kret = 0;
+            }
+            if (!kret &&
+                (kret = intern_key(kcontext, &ctx->subkey, &bp, &remain))) {
                 if (kret == EINVAL)
                     kret = 0;
             }
             if (!kret &&
-                (kret = krb5_internalize_opaque(kcontext,
-                                                KV5M_PRINCIPAL,
-                                                (krb5_pointer *) &ctx->there,
-                                                &bp, &remain))) {
+                (kret = intern_key(kcontext, &ctx->enc, &bp, &remain))) {
                 if (kret == EINVAL)
                     kret = 0;
             }
             if (!kret &&
-                (kret = krb5_internalize_opaque(kcontext,
-                                                KV5M_KEYBLOCK,
-                                                (krb5_pointer *) &ctx->subkey,
-                                                &bp, &remain))) {
-                if (kret == EINVAL)
-                    kret = 0;
-            }
-            if (!kret &&
-                (kret = krb5_internalize_opaque(kcontext,
-                                                KV5M_KEYBLOCK,
-                                                (krb5_pointer *) &ctx->enc,
-                                                &bp, &remain))) {
-                if (kret == EINVAL)
-                    kret = 0;
-            }
-            if (!kret &&
-                (kret = krb5_internalize_opaque(kcontext,
-                                                KV5M_KEYBLOCK,
-                                                (krb5_pointer *) &ctx->seq,
-                                                &bp, &remain))) {
+                (kret = intern_key(kcontext, &ctx->seq, &bp, &remain))) {
                 if (kret == EINVAL)
                     kret = 0;
             }
@@ -684,10 +727,8 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->cksumtype = ibuf;
             if (!kret &&
-                (kret = krb5_internalize_opaque(kcontext,
-                                                KV5M_KEYBLOCK,
-                                                (krb5_pointer *) &ctx->acceptor_subkey,
-                                                &bp, &remain))) {
+                (kret = intern_key(kcontext, &ctx->acceptor_subkey,
+                                   &bp, &remain))) {
                 if (kret == EINVAL)
                     kret = 0;
             }
@@ -718,6 +759,21 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
                     }
                 }
             }
+            /* authdata context */
+            if (!kret) {
+                krb5_gss_name_t initiator_name;
+
+                initiator_name = ctx->initiate ? ctx->here : ctx->there;
+                if (initiator_name == NULL) {
+                    kret = EINVAL;
+                } else {
+                    kret = krb5_internalize_opaque(kcontext,
+                                                   KV5M_AUTHDATA_CONTEXT,
+                                                   (krb5_pointer *)&initiator_name->ad_context,
+                                                   &bp,
+                                                   &remain);
+                }
+            }
             /* Get trailer */
             if (!kret)
                 kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
@@ -730,15 +786,15 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
                 *argp = (krb5_pointer) ctx;
             } else {
                 if (ctx->seq)
-                    krb5_free_keyblock(kcontext, ctx->seq);
+                    krb5_k_free_key(kcontext, ctx->seq);
                 if (ctx->enc)
-                    krb5_free_keyblock(kcontext, ctx->enc);
+                    krb5_k_free_key(kcontext, ctx->enc);
                 if (ctx->subkey)
-                    krb5_free_keyblock(kcontext, ctx->subkey);
+                    krb5_k_free_key(kcontext, ctx->subkey);
                 if (ctx->there)
-                    krb5_free_principal(kcontext, ctx->there);
+                    kg_release_name(kcontext, 0, &ctx->there);
                 if (ctx->here)
-                    krb5_free_principal(kcontext, ctx->here);
+                    kg_release_name(kcontext, 0, &ctx->here);
                 xfree(ctx);
             }
         }
