@@ -83,8 +83,24 @@ static krb5_error_code handle_request_authdata
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
-/* Internal authdata system for handling KDC-issued authdata */
+/* Internal authdata system for copying TGT authdata to ticket */
 static krb5_error_code handle_tgt_authdata
+    (krb5_context context,
+     unsigned int flags,
+     krb5_db_entry *client,
+     krb5_db_entry *server,
+     krb5_db_entry *krbtgt,
+     krb5_keyblock *client_key,
+     krb5_keyblock *server_key,
+     krb5_keyblock *krbtgt_key,
+     krb5_data *req_pkt,
+     krb5_kdc_req *request,
+     krb5_const_principal for_user_princ,
+     krb5_enc_tkt_part *enc_tkt_request,
+     krb5_enc_tkt_part *enc_tkt_reply);
+
+/* Internal authdata system for handling KDB provided authdata */
+static krb5_error_code handle_kdb_authdata
     (krb5_context context,
      unsigned int flags,
      krb5_db_entry *client,
@@ -135,6 +151,7 @@ typedef struct _krb5_authdata_systems {
 static krb5_authdata_systems static_authdata_systems[] = {
     { "tgs_req", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_request_authdata } },
     { "tgt", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_tgt_authdata } },
+    { "kdb", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_kdb_authdata } },
     { "signedpath", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_signedpath_authdata } },
 };
 
@@ -542,9 +559,32 @@ handle_request_authdata (krb5_context context,
     return code;
 }
 
-/* Handle backend-managed authorization data */
+/* Copy authorization data from TGT */
 static krb5_error_code
 handle_tgt_authdata (krb5_context context,
+		     unsigned int flags,
+		     krb5_db_entry *client,
+		     krb5_db_entry *server,
+		     krb5_db_entry *krbtgt,
+		     krb5_keyblock *client_key,
+		     krb5_keyblock *server_key,
+		     krb5_keyblock *krbtgt_key,
+		     krb5_data *req_pkt,
+		     krb5_kdc_req *request,
+		     krb5_const_principal for_user_princ,
+		     krb5_enc_tkt_part *enc_tkt_request,
+		     krb5_enc_tkt_part *enc_tkt_reply)
+{
+    if (enc_tkt_request == NULL)
+	return 0;
+
+    return merge_authdata(context, enc_tkt_request->authorization_data,
+			  &enc_tkt_reply->authorization_data, TRUE);
+}
+
+/* Handle backend-managed authorization data */
+static krb5_error_code
+handle_kdb_authdata (krb5_context context,
 		     unsigned int flags,
 		     krb5_db_entry *client,
 		     krb5_db_entry *server,
@@ -572,12 +612,6 @@ handle_tgt_authdata (krb5_context context,
      * or protocol transition/constrained delegation was used, or, in
      * the AS-REQ case, if the pre-auth data indicated the PAC should
      * be present.
-     *
-     * We permit sign_authorization_data() to return a krb5_db_entry
-     * representing the principal associated with the authorization
-     * data, in case that principal is not local to our realm and we
-     * need to perform additional checks (such as disabling delegation
-     * for cross-realm protocol transition below).
      */
     if (tgs_req) {
 	assert(enc_tkt_request != NULL);
@@ -628,23 +662,14 @@ handle_tgt_authdata (krb5_context context,
 			    tgs_req ? enc_tkt_request->authorization_data : NULL,
 			    enc_tkt_reply->session,
 			    &db_authdata);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
-	assert(db_authdata == NULL);
-
-	if (tgs_req)
-	    return merge_authdata(context, enc_tkt_request->authorization_data,
-				  &enc_tkt_reply->authorization_data, TRUE);
-	else
-	    return 0;
-    }
-
-    if (db_authdata != NULL) {
+    if (code == 0) {
 	code = merge_authdata(context, db_authdata,
 			      &enc_tkt_reply->authorization_data,
 			      FALSE);
 	if (code != 0)
 	    krb5_free_authdata(context, db_authdata);
-    }
+    } else if (code == KRB5_KDB_DBTYPE_NOSUP)
+	code = 0;
 
     return code;
 }
