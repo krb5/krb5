@@ -349,7 +349,7 @@ is_kdc_issued_authdatum (krb5_context context,
     krb5_boolean ret;
     krb5_authdatatype ad_type;
 
-    if (authdata->ad_type != KRB5_AUTHDATA_IF_RELEVANT) {
+    if (authdata->ad_type == KRB5_AUTHDATA_IF_RELEVANT) {
 	krb5_authdata **tmp;
 
 	/* This should avoid decoding the entire container */
@@ -368,8 +368,8 @@ is_kdc_issued_authdatum (krb5_context context,
     } else
 	ad_type = authdata->ad_type;
 
-    if (desired_type && desired_type == ad_type)
-	ret = TRUE;
+    if (desired_type)
+	ret = (desired_type == ad_type);
     else
 	switch (ad_type) {
 	case KRB5_AUTHDATA_SIGNTICKET:
