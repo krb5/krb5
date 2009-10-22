@@ -2636,7 +2636,7 @@ verify_ad_signedpath(krb5_context context,
 		     const krb5_db_entry *krbtgt,
 		     krb5_keyblock *krbtgt_key,
 		     krb5_enc_tkt_part *enc_tkt_part,
-		     krb5_principal **pdelegated,
+		     krb5_delegatee ***pdelegated,
 		     krb5_boolean *path_is_signed)
 {
     krb5_error_code		code;
@@ -2726,7 +2726,7 @@ cleanup:
 krb5_error_code
 make_ad_signedpath(krb5_context context,
 		   krb5_const_principal server,
-		   const krb5_principal *deleg_path,
+		   krb5_delegatee **deleg_path,
 		   const krb5_db_entry *krbtgt,
 		   krb5_keyblock *krbtgt_key,
 		   krb5_enc_tkt_part *enc_tkt_reply)
@@ -2734,7 +2734,8 @@ make_ad_signedpath(krb5_context context,
     krb5_error_code		code;
     krb5_ad_signedpath_data	sp_data;
     krb5_ad_signedpath		sp;
-    krb5_principal		*new_deleg_path = NULL;
+    krb5_delegatee		delegatee;
+    krb5_delegatee		**new_deleg_path = NULL;
     int				i;
     krb5_data			*data = NULL;
     krb5_cksumtype		cksumtype;
@@ -2743,7 +2744,7 @@ make_ad_signedpath(krb5_context context,
     krb5_authdata		**authdata;
 
     memset(&sp_data, 0, sizeof(sp_data));
-    memset(&sp, 0, sizeof(sp));
+    memset(&sp,	     0, sizeof(sp));
 
     if (deleg_path != NULL) {
 	for (i = 0; deleg_path[i] != NULL; i++)
@@ -2751,27 +2752,21 @@ make_ad_signedpath(krb5_context context,
     } else
 	i = 0;
 
-    new_deleg_path = k5alloc((i + 2) * sizeof(krb5_principal), &code);
+    new_deleg_path = k5alloc((i + 2) * sizeof(krb5_delegatee *), &code);
     if (code != 0)
 	goto cleanup;
 
     if (deleg_path != NULL)
-	memcpy(new_deleg_path, deleg_path, i * sizeof(krb5_principal));
-    if (server != NULL)
-	new_deleg_path[i] = (krb5_principal)server;
+	memcpy(new_deleg_path, deleg_path, i * sizeof(krb5_delegatee *));
+    if (server != NULL) {
+	delegatee.principal = (krb5_principal)server;
+	new_deleg_path[i] = &delegatee;
+    }
     new_deleg_path[i + 1] = NULL;
 
     sp_data.enc_tkt_part = *enc_tkt_reply;
     sp_data.enc_tkt_part.authorization_data = NULL;
-#if 0
-    /* XXX workaround for workaround in do_tgs_req.c */
-    if (sp_data.enc_tkt_part.times.starttime ==
-	sp_data.enc_tkt_part.times.authtime)
-	sp_data.enc_tkt_part.times.starttime = 0;
-#endif
-#if 0
     sp_data.delegated = new_deleg_path;
-#endif
 
     code = encode_krb5_ad_signedpath_data(&sp_data, &data);
     if (code != 0)
@@ -2790,6 +2785,8 @@ make_ad_signedpath(krb5_context context,
 				&sp.checksum);
     if (code != 0)
 	goto cleanup;
+
+    sp.delegated = new_deleg_path;
 
     code = encode_krb5_ad_signedpath(&sp, &data);
     if (code != 0)
@@ -2815,7 +2812,6 @@ make_ad_signedpath(krb5_context context,
     } else
 	i = 0;
 
-#if 0
     authdata = realloc(enc_tkt_reply->authorization_data,
 		       (i + 2) * sizeof(krb5_authdata *));
     if (authdata == NULL) {
@@ -2828,11 +2824,6 @@ make_ad_signedpath(krb5_context context,
     enc_tkt_reply->authorization_data[i + 1] = NULL;
 
     free(if_relevant);
-#else
-    krb5_free_authdata(context, enc_tkt_reply->authorization_data);
-    enc_tkt_reply->authorization_data = if_relevant;
-#endif
-
     if_relevant = NULL;
 
 cleanup:

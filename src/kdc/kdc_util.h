@@ -315,7 +315,7 @@ kdc_get_ticket_endtime(krb5_context context,
 krb5_error_code make_ad_signedpath
 	(krb5_context context,
 		krb5_const_principal server,
-		const krb5_principal *delegated,
+		krb5_delegatee **delegated,
 		const krb5_db_entry *krbtgt,
 		krb5_keyblock *krbtgt_key,
 		krb5_enc_tkt_part *enc_tkt_reply);
@@ -326,7 +326,7 @@ krb5_error_code verify_ad_signedpath
 		const krb5_db_entry *krbtgt,
 		krb5_keyblock *krbtgt_key,
 		krb5_enc_tkt_part *enc_tkt_part,
-		krb5_principal **pdelegated,
+		krb5_delegatee ***pdelegated,
 		krb5_boolean *path_is_signed);
 
 void

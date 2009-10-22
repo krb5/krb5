@@ -35,7 +35,7 @@
 #include <syslog.h>
 
 #include <assert.h>
-#include "../include/krb5/authdata_plugin.h"
+#include <krb5/authdata_plugin.h>
 
 #if TARGET_OS_MAC
 static const char *objdirs[] = { KRB5_AUTHDATA_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/authdata", NULL }; /* should be a list */
@@ -340,6 +340,71 @@ unload_authdata_plugins(krb5_context context)
     return 0;
 }
 
+/* Returns TRUE if authdata should be filtered when copying. */
+static krb5_boolean
+is_kdc_issued_authdatum (krb5_context context,
+			 krb5_authdata *authdata,
+		         krb5_authdatatype desired_type)
+{
+    krb5_boolean ret;
+    krb5_authdatatype ad_type;
+
+    if (authdata->ad_type != KRB5_AUTHDATA_IF_RELEVANT) {
+	krb5_authdata **tmp;
+
+	/* This should avoid decoding the entire container */
+	if (krb5_decode_authdata_container(context,
+					   authdata->ad_type,
+					   authdata,
+					   &tmp) != 0)
+	    return FALSE;
+
+	if (tmp == NULL || tmp[1] != NULL) {
+	    krb5_free_authdata(context, tmp);
+	    return FALSE;
+	}
+	ad_type = tmp[0]->ad_type;
+	krb5_free_authdata(context, tmp);
+    } else
+	ad_type = authdata->ad_type;
+
+    if (desired_type && desired_type == ad_type)
+	ret = TRUE;
+    else
+	switch (ad_type) {
+	case KRB5_AUTHDATA_SIGNTICKET:
+	case KRB5_AUTHDATA_KDC_ISSUED:
+	case KRB5_AUTHDATA_WIN2K_PAC:
+	    ret = TRUE;
+	    break;
+	default:
+	    ret = FALSE;
+	    break;
+	}
+
+    return ret;
+}
+
+static krb5_boolean
+has_kdc_issued_authdata (krb5_context context,
+			 krb5_authdata **authdata,
+			 krb5_authdatatype desired_type)
+{
+    int i;
+    krb5_boolean ret = FALSE;
+
+    if (authdata != NULL) {
+	for (i = 0; authdata[i] != NULL; i++) {
+	    if (is_kdc_issued_authdatum(context, authdata[i], desired_type)) {
+		ret = TRUE;
+		break;
+	    }
+	}
+    }
+
+    return ret;
+}
+
 /* Merge authdata. If copy == 0, in_authdata is invalid on return */
 static krb5_error_code
 merge_authdata (krb5_context context,
@@ -381,12 +446,22 @@ merge_authdata (krb5_context context,
 	in_authdata = tmp;
     }
 
-    for (i = 0; in_authdata[i] != NULL; i++)
-	authdata[nadata + i] = in_authdata[i];
+    for (i = 0; in_authdata[i] != NULL; i++) {
+	if (is_kdc_issued_authdatum(context, in_authdata[i], 0)) {
+	    free(in_authdata[i]->contents);
+	    free(in_authdata[i]);
+	} else
+	    authdata[nadata + i] = in_authdata[i];
+    }
 
     authdata[nadata + i] = NULL;
 
     free(in_authdata);
+
+    if (authdata[0] == NULL) {
+	free(authdata);
+	authdata = NULL;
+    }
 
     *out_authdata = authdata;
 
@@ -556,11 +631,6 @@ handle_tgt_authdata (krb5_context context,
     if (code == KRB5_KDB_DBTYPE_NOSUP) {
 	assert(db_authdata == NULL);
 
-#if 0
-	if (isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
-	    return KRB5KDC_ERR_POLICY;
-#endif
-
 	if (tgs_req)
 	    return merge_authdata(context, enc_tkt_request->authorization_data,
 				  &enc_tkt_reply->authorization_data, TRUE);
@@ -595,9 +665,18 @@ handle_signedpath_authdata (krb5_context context,
 			    krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code code = 0;
-    krb5_principal *deleg_path = NULL;
+    krb5_delegatee **deleg_path = NULL;
     krb5_boolean signed_path = FALSE;
-    int is_as_req, i;
+    int is_as_req;
+
+    /*
+     * If backend/another plugin returned the PAC, then it presumably
+     * verified the path for constrained delegation, and we can NOOP.
+     */
+    if (has_kdc_issued_authdata(context,
+				enc_tkt_reply->authorization_data,
+				KRB5_AUTHDATA_WIN2K_PAC))
+	return 0;
 
     is_as_req = ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) != 0);
 
@@ -616,7 +695,7 @@ handle_signedpath_authdata (krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	if (s4u2proxy && signed_path == FALSE) {
+	if (s4u2proxy && !signed_path) {
 	    code = KRB5KDC_ERR_POLICY;
 	    goto cleanup;
 	}
@@ -634,10 +713,7 @@ handle_signedpath_authdata (krb5_context context,
     }
 
 cleanup:
-    if (deleg_path != NULL) {
-	for (i = 0; deleg_path[i] != NULL; i++)
-	    krb5_free_principal(context, deleg_path[i]);
-    }
+    krb5_free_delegatees(context, deleg_path);
 
     return code;
 }
