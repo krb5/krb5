@@ -169,6 +169,7 @@ typedef struct _krb5_gss_cred_id_rec {
     unsigned int prerfc_mech : 1;
     unsigned int rfc_mech : 1;
     unsigned int proxy_cred : 1;
+    unsigned int default_identity : 1;
 
     /* keytab (accept) data */
     krb5_keytab keytab;

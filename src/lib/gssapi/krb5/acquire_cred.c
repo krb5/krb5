@@ -538,6 +538,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     cred->name = NULL;
     cred->prerfc_mech = (req_old != 0);
     cred->rfc_mech = (req_new != 0);
+    cred->default_identity = (desired_name == GSS_C_NO_NAME);
 
 #ifndef LEAN_CLIENT
     cred->keytab = NULL;
