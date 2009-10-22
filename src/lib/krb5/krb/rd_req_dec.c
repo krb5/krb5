@@ -119,9 +119,11 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 	krb5_error_code code;
 	krb5_kt_cursor cursor;
 
-	retval = krb5_kt_start_seq_get(context, keytab, &cursor);
-	if (retval != 0)
+	code = krb5_kt_start_seq_get(context, keytab, &cursor);
+	if (code != 0) {
+	    retval = code;
 	    goto map_error;
+	}
 
 	while ((code = krb5_kt_next_entry(context, keytab,
 					  &ktent, &cursor)) == 0) {
