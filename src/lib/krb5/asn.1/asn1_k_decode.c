@@ -1745,6 +1745,51 @@ error_out:
     return retval;
 }
 
+static asn1_error_code asn1_decode_principal_ptr
+(asn1buf *buf, krb5_principal *val)
+{
+    setup();
+    *val = k5alloc(sizeof(krb5_principal), &retval);
+    if (retval != 0)
+        goto error_out;
+    {begin_structure();
+    get_field((*val), 0, asn1_decode_principal_name);
+    get_field((*val), 1, asn1_decode_realm);
+    end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_principal(NULL, *val);
+    return retval;
+}
+
+static asn1_error_code asn1_decode_sequence_of_principal_ptr
+(asn1buf *buf, krb5_principal **val)
+{
+    decode_array_body(krb5_principal_data,asn1_decode_principal_ptr,krb5_free_principal);
+}
+
+asn1_error_code asn1_decode_ad_signedpath
+(asn1buf *buf, krb5_ad_signedpath *val)
+{
+    setup();
+    val->enctype = ENCTYPE_NULL;
+    val->checksum.contents = NULL;
+    val->delegated = NULL;
+    {begin_structure();
+    get_field(val->enctype, 0, asn1_decode_enctype);
+    get_field(val->checksum, 1, asn1_decode_checksum);
+    if (tagnum == 2) {
+        get_field(val->delegated, 2, asn1_decode_sequence_of_principal_ptr);
+    }
+    end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_checksum_contents(NULL, &val->checksum);
+    return retval;
+}
+
 #ifndef DISABLE_PKINIT
 /* PKINIT */
 

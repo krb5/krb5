@@ -230,6 +230,7 @@ krb5_error_code
 kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 		    krb5_data *pkt, krb5_ticket **ticket,
 		    krb5_db_entry *krbtgt, int *nprincs,
+		    krb5_keyblock **tgskey,
 		    krb5_keyblock **subkey,
 		    krb5_pa_data **pa_tgs_req)
 {
@@ -243,10 +244,10 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     krb5_auth_context 	  auth_context = NULL;
     krb5_authenticator	* authenticator = NULL;
     krb5_checksum 	* his_cksum = NULL;
-    krb5_keyblock 	* key = NULL;
     krb5_kvno 		  kvno = 0;
 
     *nprincs = 0;
+    *tgskey = NULL;
 
     tmppa = find_pa_data(request->padata, KRB5_PADATA_AP_REQ);
     if (!tmppa)
@@ -289,13 +290,12 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 #endif
 
     if ((retval = kdc_get_server_key(apreq->ticket, 0, foreign_server,
-				     krbtgt, nprincs, &key, &kvno)))
+				     krbtgt, nprincs, tgskey, &kvno)))
 	goto cleanup_auth_context;
     /*
      * We do not use the KDB keytab because other parts of the TGS need the TGT key.
      */
-    retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, key);
-    krb5_free_keyblock(kdc_context, key);
+    retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, *tgskey);
     if (retval) 
 	goto cleanup_auth_context;
 
@@ -411,6 +411,10 @@ cleanup_auth_context:
     krb5_auth_con_free(kdc_context, auth_context);
 
 cleanup:
+    if (retval != 0) {
+	krb5_free_keyblock(kdc_context, *tgskey);
+	*tgskey = NULL;
+    }
     krb5_free_ap_req(kdc_context, apreq);
     return retval;
 }
@@ -932,7 +936,7 @@ fail:
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
 		    krb5_db_entry server, krb5_timestamp kdc_time,
-		    const char **status)
+		    const char **status, krb5_data *e_data)
 {
     int		errcode;
     
@@ -1042,7 +1046,7 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
      * Check against local policy
      */
     errcode = against_local_policy_as(request, client, server,
-				      kdc_time, status); 
+				      kdc_time, status, e_data);
     if (errcode)
 	return errcode;
 
@@ -1225,7 +1229,7 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
 int
 validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 		     krb5_ticket *ticket, krb5_timestamp kdc_time,
-		     const char **status)
+		     const char **status, krb5_data *e_data)
 {
     int		errcode;
     int		st_idx = 0;
@@ -1458,7 +1462,8 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
     /*
      * Check local policy
      */
-    errcode = against_local_policy_tgs(request, server, ticket, status);
+    errcode = against_local_policy_tgs(request, server, ticket,
+				       status, e_data);
     if (errcode)
 	return errcode;
     
@@ -1737,6 +1742,7 @@ sign_db_authdata (krb5_context context,
 		  krb5_db_entry *krbtgt,
 		  krb5_keyblock *client_key,
 		  krb5_keyblock *server_key,
+		  krb5_keyblock *krbtgt_key,
 		  krb5_timestamp authtime,
 		  krb5_authdata **tgs_authdata,
 		  krb5_keyblock *session_key,
@@ -1763,6 +1769,7 @@ sign_db_authdata (krb5_context context,
     req.authtime		= authtime;
     req.auth_data		= tgs_authdata;
     req.session_key		= session_key;
+    req.krbtgt_key		= krbtgt_key;
 
     req_data.data = (void *)&req;
     req_data.length = sizeof(req);
@@ -2166,9 +2173,9 @@ kdc_process_s4u2self_req(krb5_context context,
      * the TGT and that we have a global name service.
      */
     flags = 0;
-    switch (krb5_princ_type(kdc_context, request->server)) {
+    switch (krb5_princ_type(context, request->server)) {
     case KRB5_NT_SRV_HST:		    /* (1) */
-	if (krb5_princ_size(kdc_context, request->server) == 2)
+	if (krb5_princ_size(context, request->server) == 2)
 	    flags |= KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
 	break;
     case KRB5_NT_ENTERPRISE_PRINCIPAL:	    /* (2) */
@@ -2204,9 +2211,11 @@ kdc_process_s4u2self_req(krb5_context context,
      */
     if (is_local_principal((*s4u_x509_user)->user_id.user)) {
 	krb5_db_entry no_server;
+	krb5_data e_data;
 
+	e_data.data = NULL;
 	*nprincs = 1;
-	code = krb5_db_get_principal_ext(kdc_context,
+	code = krb5_db_get_principal_ext(context,
 					 (*s4u_x509_user)->user_id.user,
 					 KRB5_KDB_FLAG_INCLUDE_PAC,
 					 princ, nprincs, &more);
@@ -2227,8 +2236,9 @@ kdc_process_s4u2self_req(krb5_context context,
 	memset(&no_server, 0, sizeof(no_server));
 
 	code = validate_as_request(request, *princ,
-				   no_server, kdc_time, status);
+				   no_server, kdc_time, status, &e_data);
 	if (code) {
+	    krb5_free_data_contents(context, &e_data);
 	    return code;
 	}
     }
@@ -2283,10 +2293,12 @@ check_allowed_to_delegate_to(krb5_context context,
 krb5_error_code
 kdc_process_s4u2proxy_req(krb5_context context,
 			  krb5_kdc_req *request,
-			  const krb5_enc_tkt_part *t2enc,
+			  krb5_enc_tkt_part *t2enc,
 			  const krb5_db_entry *server,
 			  krb5_const_principal server_princ,
 			  krb5_const_principal proxy_princ,
+			  const krb5_db_entry *krbtgt,
+			  krb5_keyblock *krbtgt_key,
 			  const char **status)
 {
     krb5_error_code errcode;
@@ -2311,6 +2323,11 @@ kdc_process_s4u2proxy_req(krb5_context context,
 	*status = "EVIDENCE_TKT_NOT_FORWARDABLE";
 	return KRB5_TKT_NOT_FORWARDABLE;
     }
+
+#if 1
+#warning remove this!
+	return 0;
+#endif
 
     /* Backend policy check */
     errcode = check_allowed_to_delegate_to(kdc_context,
@@ -2611,5 +2628,253 @@ add_pa_data_element(krb5_context context,
     }
 
     return 0;
+}
+
+krb5_error_code
+verify_ad_signedpath(krb5_context context,
+		     krb5_const_principal server,
+		     const krb5_db_entry *krbtgt,
+		     krb5_keyblock *krbtgt_key,
+		     krb5_enc_tkt_part *enc_tkt_part,
+		     krb5_principal **pdelegated,
+		     krb5_boolean *path_is_signed)
+{
+    krb5_error_code		code;
+    krb5_ad_signedpath		*sp = NULL;
+    krb5_ad_signedpath_data	sp_data;
+    krb5_authdata		**container = NULL;
+    krb5_authdata		**sp_authdata = NULL;
+    krb5_data			enc_sp, *enc_spdata = NULL;
+    int				i;
+
+    *pdelegated = NULL;
+    *path_is_signed = FALSE;
+
+    if (enc_tkt_part->authorization_data == NULL)
+	return 0;
+
+    for (i = 0; enc_tkt_part->authorization_data[i] != NULL; i++)
+	;
+    container = &enc_tkt_part->authorization_data[i - 1];
+    if (*container == NULL)
+	return 0;
+
+    code = krb5_decode_authdata_container(context,
+					  KRB5_AUTHDATA_IF_RELEVANT,
+					  *container,
+					  &sp_authdata);
+    if (code != 0)
+	goto cleanup;
+
+    if (sp_authdata == NULL ||
+	sp_authdata[0]->ad_type != KRB5_AUTHDATA_SIGNTICKET ||
+	sp_authdata[1] != NULL)
+	goto cleanup;
+
+    enc_sp.data = (char *)sp_authdata[0]->contents;
+    enc_sp.length = sp_authdata[0]->length;
+
+    code = decode_krb5_ad_signedpath(&enc_sp, &sp);
+    if (code != 0)
+	goto cleanup;
+
+    container = enc_tkt_part->authorization_data;
+    enc_tkt_part->authorization_data = NULL;
+
+    sp_data.enc_tkt_part = *enc_tkt_part;
+
+    /* XXX workaround for workaround in do_tgs_req.c */
+    if (server == NULL &&
+	sp_data.enc_tkt_part.times.starttime ==
+	sp_data.enc_tkt_part.times.authtime)
+	sp_data.enc_tkt_part.times.starttime = 0;
+    sp_data.delegated = sp->delegated;
+
+    code = encode_krb5_ad_signedpath_data(&sp_data, &enc_spdata);
+    if (code != 0) {
+	enc_tkt_part->authorization_data = container;
+	goto cleanup;
+    }
+
+    enc_tkt_part->authorization_data = container;
+
+    code = krb5_c_verify_checksum(context,
+				  krbtgt_key,
+				  KRB5_KEYUSAGE_AD_SIGNEDPATH,
+				  enc_spdata,
+				  &sp->checksum,
+				  path_is_signed);
+    if (code != 0)
+	goto cleanup;
+
+    if (*path_is_signed == FALSE) {
+	code = KRB5KRB_AP_ERR_MODIFIED;
+	goto cleanup;
+    }
+
+    *pdelegated = sp->delegated;
+    sp->delegated = NULL;
+
+cleanup:
+    krb5_free_data(context, enc_spdata);
+    krb5_free_ad_signedpath(context, sp);
+    krb5_free_authdata(context, sp_authdata);
+
+    return code;
+}
+
+krb5_error_code
+make_ad_signedpath(krb5_context context,
+		   krb5_const_principal server,
+		   const krb5_principal *deleg_path,
+		   const krb5_db_entry *krbtgt,
+		   krb5_keyblock *krbtgt_key,
+		   krb5_enc_tkt_part *enc_tkt_reply)
+{
+    krb5_error_code		code;
+    krb5_ad_signedpath_data	sp_data;
+    krb5_ad_signedpath		sp;
+    krb5_principal		*new_deleg_path = NULL;
+    int				i;
+    krb5_data			*data = NULL;
+    krb5_cksumtype		cksumtype;
+    krb5_authdata		ad_datum, *ad_data[2];
+    krb5_authdata		**if_relevant = NULL;
+    krb5_authdata		**authdata;
+
+    memset(&sp_data, 0, sizeof(sp_data));
+    memset(&sp, 0, sizeof(sp));
+
+    if (deleg_path != NULL) {
+	for (i = 0; deleg_path[i] != NULL; i++)
+	    ;
+    } else
+	i = 0;
+
+    new_deleg_path = k5alloc((i + 2) * sizeof(krb5_principal), &code);
+    if (code != 0)
+	goto cleanup;
+
+    if (deleg_path != NULL)
+	memcpy(new_deleg_path, deleg_path, i * sizeof(krb5_principal));
+    if (server != NULL)
+	new_deleg_path[i] = (krb5_principal)server;
+    new_deleg_path[i + 1] = NULL;
+
+    sp_data.enc_tkt_part = *enc_tkt_reply;
+    sp_data.enc_tkt_part.authorization_data = NULL;
+#if 0
+    /* XXX workaround for workaround in do_tgs_req.c */
+    if (sp_data.enc_tkt_part.times.starttime ==
+	sp_data.enc_tkt_part.times.authtime)
+	sp_data.enc_tkt_part.times.starttime = 0;
+#endif
+#if 0
+    sp_data.delegated = new_deleg_path;
+#endif
+
+    code = encode_krb5_ad_signedpath_data(&sp_data, &data);
+    if (code != 0)
+	goto cleanup;
+
+    sp.enctype = krbtgt_key->enctype;
+
+    code = krb5int_c_mandatory_cksumtype(context,
+					 krbtgt_key->enctype,
+					 &cksumtype);
+    if (code != 0)
+	goto cleanup;
+
+    code = krb5_c_make_checksum(context, cksumtype, krbtgt_key,
+				KRB5_KEYUSAGE_AD_SIGNEDPATH, data,
+				&sp.checksum);
+    if (code != 0)
+	goto cleanup;
+
+    code = encode_krb5_ad_signedpath(&sp, &data);
+    if (code != 0)
+	goto cleanup;
+
+    ad_datum.ad_type = KRB5_AUTHDATA_SIGNTICKET;
+    ad_datum.contents = (krb5_octet *)data->data;
+    ad_datum.length = data->length;
+
+    ad_data[0] = &ad_datum;
+    ad_data[1] = NULL;
+
+    code = krb5_encode_authdata_container(context,
+					  KRB5_AUTHDATA_IF_RELEVANT,
+					  ad_data,
+					  &if_relevant);
+    if (code != 0)
+	goto cleanup;
+
+    if (enc_tkt_reply->authorization_data != NULL) {
+	for (i = 0; enc_tkt_reply->authorization_data[i] != NULL; i++)
+	    ;
+    } else
+	i = 0;
+
+#if 0
+    authdata = realloc(enc_tkt_reply->authorization_data,
+		       (i + 2) * sizeof(krb5_authdata *));
+    if (authdata == NULL) {
+	code = ENOMEM;
+	goto cleanup;
+    }
+
+    enc_tkt_reply->authorization_data = authdata;
+    enc_tkt_reply->authorization_data[i] = if_relevant[0];
+    enc_tkt_reply->authorization_data[i + 1] = NULL;
+
+    free(if_relevant);
+#else
+    krb5_free_authdata(context, enc_tkt_reply->authorization_data);
+    enc_tkt_reply->authorization_data = if_relevant;
+#endif
+
+    if_relevant = NULL;
+
+cleanup:
+    if (new_deleg_path != NULL)
+	free(new_deleg_path);
+    krb5_free_authdata(context, if_relevant);
+    krb5_free_data(context, data);
+    krb5_free_checksum_contents(context, &sp.checksum);
+
+    return code;
+}
+
+void
+kdc_get_ticket_endtime(krb5_context context,
+		       krb5_timestamp starttime,
+		       krb5_timestamp endtime,
+		       krb5_timestamp till,
+		       krb5_db_entry *client,
+		       krb5_db_entry *server,
+		       krb5_timestamp *out_endtime)
+{
+    krb5_timestamp until, life;
+
+    if (till == 0)
+	till = kdc_infinity;
+
+    until = min(till, endtime);
+
+    /* check for underflow */
+    life = (until < starttime) ? 0 : until - starttime;
+
+    if (client->max_life != 0)
+	life = min(life, client->max_life);
+    if (server->max_life != 0)
+	life = min(life, server->max_life);
+    if (max_life_for_realm != 0)
+	life = min(life, max_life_for_realm);
+
+    /* check for overflow */
+    if (starttime > kdc_infinity - life)
+	*out_endtime = kdc_infinity;
+    else
+	*out_endtime = starttime + life;
 }
 

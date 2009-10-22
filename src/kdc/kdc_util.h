@@ -66,7 +66,8 @@ krb5_error_code kdc_process_tgs_req
 	           krb5_ticket **,
 		   krb5_db_entry *krbtgt,
 		   int *nprincs,
-	           krb5_keyblock **, krb5_pa_data **pa_tgs_req);
+	           krb5_keyblock **, krb5_keyblock **,
+		   krb5_pa_data **pa_tgs_req);
 
 krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
 				    krb5_boolean match_enctype,
@@ -75,7 +76,7 @@ krb5_error_code kdc_get_server_key (krb5_ticket *, unsigned int,
 
 int validate_as_request (krb5_kdc_req *, krb5_db_entry, 
 					  krb5_db_entry, krb5_timestamp,
-					  const char **);
+					  const char **, krb5_data *);
 
 int validate_forwardable(krb5_kdc_req *, krb5_db_entry, 
 			 krb5_db_entry, krb5_timestamp,
@@ -83,7 +84,7 @@ int validate_forwardable(krb5_kdc_req *, krb5_db_entry,
 
 int validate_tgs_request (krb5_kdc_req *, krb5_db_entry, 
 					  krb5_ticket *, krb5_timestamp,
-					  const char **);
+					  const char **, krb5_data *);
 
 int fetch_asn1_field (unsigned char *, unsigned int, unsigned int,
 				 krb5_data *);
@@ -144,10 +145,11 @@ krb5_error_code closedown_network (void);
 /* policy.c */
 int against_local_policy_as (krb5_kdc_req *, krb5_db_entry,
 					krb5_db_entry, krb5_timestamp,
-					const char **);
+					const char **, krb5_data *);
 
 int against_local_policy_tgs (krb5_kdc_req *, krb5_db_entry,
-					krb5_ticket *, const char **);
+					krb5_ticket *, const char **,
+					krb5_data *);
 
 /* kdc_preauth.c */
 krb5_boolean enctype_requires_etype_info_2(krb5_enctype enctype);
@@ -197,6 +199,7 @@ handle_authdata (krb5_context context,
 		 krb5_db_entry *krbtgt,
 		 krb5_keyblock *client_key,
 		 krb5_keyblock *server_key,
+		 krb5_keyblock *krbtgt_key,
 		 krb5_data *req_pkt,
 		 krb5_kdc_req *request,
 		 krb5_const_principal for_user_princ,
@@ -236,6 +239,7 @@ krb5_error_code sign_db_authdata
 		krb5_db_entry *krbtgt,
 		krb5_keyblock *client_key,
 		krb5_keyblock *server_key,
+		krb5_keyblock *krbtgt_key,
 		krb5_timestamp authtime,
 		krb5_authdata **tgs_authdata,
 		krb5_keyblock *session_key,
@@ -265,10 +269,12 @@ krb5_error_code kdc_make_s4u2self_rep
 krb5_error_code kdc_process_s4u2proxy_req
 	(krb5_context context,
 		krb5_kdc_req *request,
-		const krb5_enc_tkt_part *t2enc,
+		krb5_enc_tkt_part *t2enc,
 		const krb5_db_entry *server,
 		krb5_const_principal server_princ,
 		krb5_const_principal proxy_princ,
+		const krb5_db_entry *krbtgt,
+		krb5_keyblock *krbtgt_key,
 		const char **status);
 
 krb5_error_code kdc_check_transited_list
@@ -296,7 +302,32 @@ validate_transit_path(krb5_context context,
 	krb5_const_principal client,
 		krb5_db_entry *server,
 		      krb5_db_entry *krbtgt);
+void
+kdc_get_ticket_endtime(krb5_context context,
+       krb5_timestamp now,
+	       krb5_timestamp endtime,
+	       krb5_timestamp till,
+	       krb5_db_entry *client,
+	       krb5_db_entry *server,
+	       krb5_timestamp *out_endtime);
 
+/* constrained delegation */
+krb5_error_code make_ad_signedpath
+	(krb5_context context,
+		krb5_const_principal server,
+		const krb5_principal *delegated,
+		const krb5_db_entry *krbtgt,
+		krb5_keyblock *krbtgt_key,
+		krb5_enc_tkt_part *enc_tkt_reply);
+
+krb5_error_code verify_ad_signedpath
+	(krb5_context context,
+		krb5_const_principal server,
+		const krb5_db_entry *krbtgt,
+		krb5_keyblock *krbtgt_key,
+		krb5_enc_tkt_part *enc_tkt_part,
+		krb5_principal **pdelegated,
+		krb5_boolean *path_is_signed);
 
 void
 log_as_req(const krb5_fulladdr *from,

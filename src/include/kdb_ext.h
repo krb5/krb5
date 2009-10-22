@@ -98,6 +98,7 @@ typedef struct _kdb_sign_auth_data_req {
     krb5_timestamp authtime;		/* Authtime of TGT */
     krb5_authdata **auth_data;		/* Authorization data from TGT */
     krb5_keyblock *session_key;		/* Reply session key */
+    krb5_keyblock *krbtgt_key;		/* Key used to decrypt TGT, valid for TGS-REQ only */
 } kdb_sign_auth_data_req;
 
 typedef struct _kdb_sign_auth_data_rep {
@@ -123,6 +124,7 @@ typedef struct _kdb_check_policy_as_req {
 typedef struct _kdb_check_policy_as_rep {
     krb5_magic magic;
     const char *status;
+    krb5_data e_data;
 } kdb_check_policy_as_rep;
 
 typedef struct _kdb_check_policy_tgs_req {
@@ -135,6 +137,7 @@ typedef struct _kdb_check_policy_tgs_req {
 typedef struct _kdb_check_policy_tgs_rep {
     krb5_magic magic;
     const char *status;
+    krb5_data e_data;
 } kdb_check_policy_tgs_rep;
 
 typedef struct _kdb_audit_as_req {

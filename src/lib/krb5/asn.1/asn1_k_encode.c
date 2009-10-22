@@ -97,7 +97,6 @@ DEFFIELDTYPE(realm_of_principal_data, krb5_principal_data,
              FIELDOF_NORM(krb5_principal_data, gstring_data, realm, -1));
 DEFPTRTYPE(realm_of_principal, realm_of_principal_data);
 
-
 static const struct field_info princname_fields[] = {
     FIELDOF_NORM(krb5_principal_data, int32, type, 0),
     FIELDOF_SEQOF_INT32(krb5_principal_data, gstring_data_ptr, data, length, 1),
@@ -106,6 +105,9 @@ static const struct field_info princname_fields[] = {
    effectively "encode_principal_data_at" with an address arg.  */
 DEFSEQTYPE(principal_data, krb5_principal_data, princname_fields, 0);
 DEFPTRTYPE(principal, principal_data);
+
+DEFNULLTERMSEQOFTYPE(seq_of_principal, principal);
+DEFPTRTYPE(ptr_seqof_principal, seq_of_principal);
 
 static asn1_error_code
 asn1_encode_kerberos_time_at(asn1buf *buf, const krb5_timestamp *val,
@@ -1308,7 +1310,38 @@ static unsigned int ad_kdcissued_optional(const void *p)
 
 DEFSEQTYPE(ad_kdc_issued, krb5_ad_kdcissued, ad_kdcissued_fields, ad_kdcissued_optional);
 
+static const struct field_info ad_signedpath_data_fields[] = {
+    FIELDOF_NORM(krb5_ad_signedpath_data, enc_tkt_part, enc_tkt_part, 0),
+    FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_principal, delegated, 1, 1),
+};
 
+static unsigned int ad_signedpath_data_optional(const void *p)
+{
+    unsigned int optional = 0;
+    const krb5_ad_signedpath_data *val = p;
+    if (val->delegated && val->delegated[0])
+        optional |= (1u << 1);
+    return optional;
+}
+
+DEFSEQTYPE(ad_signedpath_data, krb5_ad_signedpath_data, ad_signedpath_data_fields, ad_signedpath_data_optional);
+
+static const struct field_info ad_signedpath_fields[] = {
+    FIELDOF_NORM(krb5_ad_signedpath, int32, enctype, 0),
+    FIELDOF_NORM(krb5_ad_signedpath, checksum, checksum, 1),
+    FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_principal, delegated, 2, 2),
+};
+
+static unsigned int ad_signedpath_optional(const void *p)
+{
+    unsigned int optional = 0;
+    const krb5_ad_signedpath *val = p;
+    if (val->delegated && val->delegated[0])
+        optional |= (1u << 2);
+    return optional;
+}
+
+DEFSEQTYPE(ad_signedpath, krb5_ad_signedpath, ad_signedpath_fields, ad_signedpath_optional);
 
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
@@ -1384,6 +1417,8 @@ MAKE_FULL_ENCODER( encode_krb5_pa_fx_fast_reply, pa_fx_fast_reply);
 MAKE_FULL_ENCODER(encode_krb5_fast_response, fast_response);
 
 MAKE_FULL_ENCODER(encode_krb5_ad_kdcissued, ad_kdc_issued);
+MAKE_FULL_ENCODER(encode_krb5_ad_signedpath_data, ad_signedpath_data);
+MAKE_FULL_ENCODER(encode_krb5_ad_signedpath, ad_signedpath);
 
 
 

@@ -56,6 +56,7 @@ typedef krb5_error_code (*authdata_proc_2)
      krb5_db_entry *krbtgt,
      krb5_keyblock *client_key,
      krb5_keyblock *server_key,
+     krb5_keyblock *krbtgt_key,
      krb5_data *req_pkt,
      krb5_kdc_req *request,
      krb5_const_principal for_user_princ,
@@ -75,6 +76,7 @@ static krb5_error_code handle_request_authdata
      krb5_db_entry *krbtgt,
      krb5_keyblock *client_key,
      krb5_keyblock *server_key,
+     krb5_keyblock *krbtgt_key,
      krb5_data *req_pkt,
      krb5_kdc_req *request,
      krb5_const_principal for_user_princ,
@@ -90,6 +92,23 @@ static krb5_error_code handle_tgt_authdata
      krb5_db_entry *krbtgt,
      krb5_keyblock *client_key,
      krb5_keyblock *server_key,
+     krb5_keyblock *krbtgt_key,
+     krb5_data *req_pkt,
+     krb5_kdc_req *request,
+     krb5_const_principal for_user_princ,
+     krb5_enc_tkt_part *enc_tkt_request,
+     krb5_enc_tkt_part *enc_tkt_reply);
+
+/* Internal authdata system for handling delegation path */
+static krb5_error_code handle_signedpath_authdata
+    (krb5_context context,
+     unsigned int flags,
+     krb5_db_entry *client,
+     krb5_db_entry *server,
+     krb5_db_entry *krbtgt,
+     krb5_keyblock *client_key,
+     krb5_keyblock *server_key,
+     krb5_keyblock *krbtgt_key,
      krb5_data *req_pkt,
      krb5_kdc_req *request,
      krb5_const_principal for_user_princ,
@@ -116,6 +135,7 @@ typedef struct _krb5_authdata_systems {
 static krb5_authdata_systems static_authdata_systems[] = {
     { "tgs_req", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_request_authdata } },
     { "tgt", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_tgt_authdata } },
+    { "signedpath", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_signedpath_authdata } },
 };
 
 static krb5_authdata_systems *authdata_systems;
@@ -382,6 +402,7 @@ handle_request_authdata (krb5_context context,
 			 krb5_db_entry *krbtgt,
 			 krb5_keyblock *client_key,
 			 krb5_keyblock *server_key,
+                         krb5_keyblock *krbtgt_key,
 			 krb5_data *req_pkt,
 			 krb5_kdc_req *request,
 			 krb5_const_principal for_user_princ,
@@ -455,6 +476,7 @@ handle_tgt_authdata (krb5_context context,
 		     krb5_db_entry *krbtgt,
 		     krb5_keyblock *client_key,
 		     krb5_keyblock *server_key,
+		     krb5_keyblock *krbtgt_key,
 		     krb5_data *req_pkt,
 		     krb5_kdc_req *request,
 		     krb5_const_principal for_user_princ,
@@ -526,6 +548,7 @@ handle_tgt_authdata (krb5_context context,
 			    krbtgt,
 			    client_key,
 			    server_key, /* U2U or server key */
+			    krbtgt_key,
 			    enc_tkt_reply->times.authtime,
 			    tgs_req ? enc_tkt_request->authorization_data : NULL,
 			    enc_tkt_reply->session,
@@ -533,8 +556,10 @@ handle_tgt_authdata (krb5_context context,
     if (code == KRB5_KDB_DBTYPE_NOSUP) {
 	assert(db_authdata == NULL);
 
+#if 0
 	if (isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
 	    return KRB5KDC_ERR_POLICY;
+#endif
 
 	if (tgs_req)
 	    return merge_authdata(context, enc_tkt_request->authorization_data,
@@ -554,6 +579,69 @@ handle_tgt_authdata (krb5_context context,
     return code;
 }
 
+static krb5_error_code
+handle_signedpath_authdata (krb5_context context,
+			    unsigned int flags,
+			    krb5_db_entry *client,
+			    krb5_db_entry *server,
+			    krb5_db_entry *krbtgt,
+			    krb5_keyblock *client_key,
+			    krb5_keyblock *server_key,
+			    krb5_keyblock *krbtgt_key,
+			    krb5_data *req_pkt,
+			    krb5_kdc_req *request,
+			    krb5_const_principal for_user_princ,
+			    krb5_enc_tkt_part *enc_tkt_request,
+			    krb5_enc_tkt_part *enc_tkt_reply)
+{
+    krb5_error_code code = 0;
+    krb5_principal *deleg_path = NULL;
+    krb5_boolean signed_path = FALSE;
+    int is_as_req, i;
+
+    is_as_req = ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) != 0);
+
+    if (!is_as_req) {
+	int s4u2proxy = ((flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) != 0);
+
+	/* XXX we don't validate the signed path in the TGT for S4U2Proxy */
+
+	code = verify_ad_signedpath(context,
+				    s4u2proxy ? server->princ : NULL,
+				    krbtgt,
+				    krbtgt_key,
+				    enc_tkt_request,
+				    &deleg_path,
+				    &signed_path);
+	if (code != 0)
+	    goto cleanup;
+
+	if (s4u2proxy && signed_path == FALSE) {
+	    code = KRB5KDC_ERR_POLICY;
+	    goto cleanup;
+	}
+    }
+
+    if ((flags & KRB5_KDB_FLAG_CROSS_REALM) == 0) {
+	code = make_ad_signedpath(context,
+				  is_as_req ? NULL : server->princ,
+				  deleg_path,
+				  krbtgt,
+				  krbtgt_key,
+				  enc_tkt_reply);
+	if (code != 0)
+	    goto cleanup;
+    }
+
+cleanup:
+    if (deleg_path != NULL) {
+	for (i = 0; deleg_path[i] != NULL; i++)
+	    krb5_free_principal(context, deleg_path[i]);
+    }
+
+    return code;
+}
+
 krb5_error_code
 handle_authdata (krb5_context context,
 		 unsigned int flags,
@@ -562,6 +650,7 @@ handle_authdata (krb5_context context,
 		 krb5_db_entry *krbtgt,
 		 krb5_keyblock *client_key,
 		 krb5_keyblock *server_key,
+		 krb5_keyblock *krbtgt_key,
 		 krb5_data *req_pkt,
 		 krb5_kdc_req *request,
 		 krb5_const_principal for_user_princ,
@@ -586,7 +675,7 @@ handle_authdata (krb5_context context,
 	case AUTHDATA_SYSTEM_V2:
 	    code = (*asys->handle_authdata.v2)(context, flags,
 					      client, server, krbtgt,
-					      client_key, server_key,
+					      client_key, server_key, krbtgt_key,
 					      req_pkt, request, for_user_princ,
 					      enc_tkt_request,
 					      enc_tkt_reply);
