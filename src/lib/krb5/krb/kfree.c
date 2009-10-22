@@ -910,7 +910,7 @@ krb5_free_ad_kdcissued(krb5_context context, krb5_ad_kdcissued *val)
 }
 
 void KRB5_CALLCONV
-krb5_free_delegatee(krb5_context context, krb5_delegatee *val)
+krb5_free_transited_service(krb5_context context, krb5_transited_service *val)
 {
     if (val != NULL) {
 	krb5_free_principal(context, val->principal);
@@ -919,7 +919,7 @@ krb5_free_delegatee(krb5_context context, krb5_delegatee *val)
 }
 
 void KRB5_CALLCONV
-krb5_free_delegatees(krb5_context context, krb5_delegatee **val)
+krb5_free_transited_services(krb5_context context, krb5_transited_service **val)
 {
     int i;
 
@@ -927,7 +927,7 @@ krb5_free_delegatees(krb5_context context, krb5_delegatee **val)
 	return;
 
     for (i = 0; val[i] != NULL; i++)
-	krb5_free_delegatee(context, val[i]);
+	krb5_free_transited_service(context, val[i]);
 
     free(val);
 }
@@ -938,5 +938,5 @@ krb5_free_ad_signedpath(krb5_context context, krb5_ad_signedpath *val)
 	return;
 
     krb5_free_checksum_contents(context, &val->checksum);
-    krb5_free_delegatees(context, val->delegated);
+    krb5_free_transited_services(context, val->delegated);
 }

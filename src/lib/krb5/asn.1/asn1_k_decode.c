@@ -1745,8 +1745,8 @@ error_out:
     return retval;
 }
 
-static asn1_error_code asn1_decode_delegatee
-(asn1buf *buf, krb5_delegatee *val)
+static asn1_error_code asn1_decode_transited_service
+(asn1buf *buf, krb5_transited_service *val)
 {
     setup();
     alloc_principal(val->principal);
@@ -1762,16 +1762,16 @@ error_out:
     return retval;
 }
 
-static asn1_error_code asn1_decode_delegatee_ptr
-(asn1buf *buf, krb5_delegatee **valptr)
+static asn1_error_code asn1_decode_transited_service_ptr
+(asn1buf *buf, krb5_transited_service **valptr)
 {
-    decode_ptr(krb5_delegatee *, asn1_decode_delegatee);
+    decode_ptr(krb5_transited_service *, asn1_decode_transited_service);
 }
 
-static asn1_error_code asn1_decode_sequence_of_delegatee
-(asn1buf *buf, krb5_delegatee ***val)
+static asn1_error_code asn1_decode_sequence_of_transited_service
+(asn1buf *buf, krb5_transited_service ***val)
 {
-    decode_array_body(krb5_delegatee,asn1_decode_delegatee_ptr,krb5_free_delegatee);
+    decode_array_body(krb5_transited_service,asn1_decode_transited_service_ptr,krb5_free_transited_service);
 }
 
 asn1_error_code asn1_decode_ad_signedpath
@@ -1784,7 +1784,7 @@ asn1_error_code asn1_decode_ad_signedpath
     {begin_structure();
     get_field(val->enctype, 0, asn1_decode_enctype);
     get_field(val->checksum, 1, asn1_decode_checksum);
-    opt_field(val->delegated, 2, asn1_decode_sequence_of_delegatee, NULL);
+    opt_field(val->delegated, 2, asn1_decode_sequence_of_transited_service, NULL);
     end_structure();
     }
     return 0;

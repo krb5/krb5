@@ -1307,20 +1307,20 @@ static unsigned int ad_kdcissued_optional(const void *p)
 
 DEFSEQTYPE(ad_kdc_issued, krb5_ad_kdcissued, ad_kdcissued_fields, ad_kdcissued_optional);
 
-static const struct field_info delegatee_fields[] = {
-    FIELDOF_NORM(krb5_delegatee, principal, principal, 0),
-    FIELDOF_NORM(krb5_delegatee, realm_of_principal, principal, 1),
+static const struct field_info transited_service_fields[] = {
+    FIELDOF_NORM(krb5_transited_service, principal, principal, 0),
+    FIELDOF_NORM(krb5_transited_service, realm_of_principal, principal, 1),
 };
 
-DEFSEQTYPE(delegatee, krb5_delegatee, delegatee_fields, 0);
-DEFPTRTYPE(delegatee_ptr, delegatee);
+DEFSEQTYPE(transited_service, krb5_transited_service, transited_service_fields, 0);
+DEFPTRTYPE(transited_service_ptr, transited_service);
 
-DEFNULLTERMSEQOFTYPE(seq_of_delegatee, delegatee_ptr);
-DEFPTRTYPE(ptr_seqof_delegatee, seq_of_delegatee);
+DEFNULLTERMSEQOFTYPE(seq_of_transited_service, transited_service_ptr);
+DEFPTRTYPE(ptr_seqof_transited_service, seq_of_transited_service);
 
 static const struct field_info ad_signedpath_data_fields[] = {
     FIELDOF_NORM(krb5_ad_signedpath_data, enc_tkt_part, enc_tkt_part, 0),
-    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_delegatee, delegated, 1, 1),
+    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_transited_service, delegated, 1, 1),
 };
 
 static unsigned int ad_signedpath_data_optional(const void *p)
@@ -1337,7 +1337,7 @@ DEFSEQTYPE(ad_signedpath_data, krb5_ad_signedpath_data, ad_signedpath_data_field
 static const struct field_info ad_signedpath_fields[] = {
     FIELDOF_NORM(krb5_ad_signedpath, int32, enctype, 0),
     FIELDOF_NORM(krb5_ad_signedpath, checksum, checksum, 1),
-    FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_delegatee, delegated, 2, 2),
+    FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_transited_service, delegated, 2, 2),
 };
 
 static unsigned int ad_signedpath_optional(const void *p)
