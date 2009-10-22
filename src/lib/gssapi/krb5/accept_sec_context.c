@@ -585,7 +585,7 @@ kg_accept_krb5(minor_status, context_handle,
     }
 
     if ((code = krb5_rd_req(context, &auth_context, &ap_req,
-                            cred->name ? cred->name->princ : NULL,
+                            cred->default_identity ? NULL : cred->name->princ,
                             cred->keytab,
                             &ap_req_options,
                             &ticket))) {
