@@ -2324,11 +2324,6 @@ kdc_process_s4u2proxy_req(krb5_context context,
 	return KRB5_TKT_NOT_FORWARDABLE;
     }
 
-#if 1
-#warning remove this!
-	return 0;
-#endif
-
     /* Backend policy check */
     errcode = check_allowed_to_delegate_to(kdc_context,
 					   t2enc->client,
