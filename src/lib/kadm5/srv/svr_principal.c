@@ -673,10 +673,6 @@ kadm5_modify_principal(void *server_handle,
     }
 
     /*
-     * XXX for legacy compat should we make setting fail_auth_count
-     * to zero a synonym for unlocking?
-     */
-    /*
      * Setting entry->fail_auth_count to 0 can be used to manually unlock
      * an account. It is not possible to set fail_auth_count to any other
      * value using kadmin.
