@@ -1,5 +1,5 @@
 /*
- * plugins/authdata/greet_server/
+ * plugins/authdata/saml_server/
  *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
@@ -34,17 +34,17 @@
 #include <kdb_ext.h>
 
 static krb5_error_code
-greet_init(krb5_context ctx, void **blob)
+saml_init(krb5_context ctx, void **blob)
 {
     return 0;
 }
 
 static void
-greet_fini(krb5_context ctx, void *blob)
+saml_fini(krb5_context ctx, void *blob)
 {
 }
 
-static krb5_error_code greet_hello(krb5_context context, krb5_data **ret)
+static krb5_error_code saml_hello(krb5_context context, krb5_data **ret)
 {
     krb5_data tmp;
 
@@ -55,7 +55,7 @@ static krb5_error_code greet_hello(krb5_context context, krb5_data **ret)
 }
 
 static krb5_error_code
-greet_kdc_verify(krb5_context context,
+saml_kdc_verify(krb5_context context,
                  krb5_enc_tkt_part *enc_tkt_request,
                  krb5_data **greeting)
 {
@@ -85,7 +85,7 @@ greet_kdc_verify(krb5_context context,
     code = krb5int_find_authdata(context,
                                  kdc_issued,
                                  NULL,
-                                 -42,
+                                 KRB5_AUTHDATA_SAML,
                                  &greet);
     if (code == 0) {
         krb5_data tmp;
@@ -105,7 +105,7 @@ greet_kdc_verify(krb5_context context,
 }
 
 static krb5_error_code
-greet_kdc_sign(krb5_context context,
+saml_kdc_sign(krb5_context context,
                krb5_enc_tkt_part *enc_tkt_reply,
                krb5_const_principal tgs,
                krb5_data *greeting)
@@ -115,7 +115,7 @@ greet_kdc_sign(krb5_context context,
     krb5_authdata **if_relevant = NULL;
     krb5_authdata **tkt_authdata;
 
-    ad_datum.ad_type = -42;
+    ad_datum.ad_type = KRB5_AUTHDATA_SAML;
     ad_datum.contents = (krb5_octet *)greeting->data;
     ad_datum.length = greeting->length;
 
@@ -156,7 +156,7 @@ greet_kdc_sign(krb5_context context,
 }
 
 static krb5_error_code
-greet_authdata(krb5_context context,
+saml_authdata(krb5_context context,
                unsigned int flags,
                krb5_db_entry *client,
                krb5_db_entry *server,
@@ -174,18 +174,18 @@ greet_authdata(krb5_context context,
     krb5_data *greeting = NULL;
 
     if (request->msg_type == KRB5_TGS_REQ) {
-        code = greet_kdc_verify(context, enc_tkt_request, &greeting);
+        code = saml_kdc_verify(context, enc_tkt_request, &greeting);
         if (code != 0)
             return code;
     }
 
     if (greeting == NULL) {
-        code = greet_hello(context, &greeting);
+        code = saml_hello(context, &greeting);
         if (code != 0)
             return code;
     }
 
-    code = greet_kdc_sign(context, enc_tkt_reply, tgs->princ, greeting);
+    code = saml_kdc_sign(context, enc_tkt_reply, tgs->princ, greeting);
 
     krb5_free_data(context, greeting);
 
@@ -193,8 +193,8 @@ greet_authdata(krb5_context context,
 }
 
 krb5plugin_authdata_server_ftable_v2 authdata_server_2 = {
-    "greet",
-    greet_init,
-    greet_fini,
-    greet_authdata,
+    "saml",
+    saml_init,
+    saml_fini,
+    saml_authdata,
 };

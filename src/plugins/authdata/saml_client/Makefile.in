@@ -1,6 +1,6 @@
 thisconfigdir=../../..
-myfulldir=plugins/authdata/greet_client
-mydir=plugins/authdata/greet_client
+myfulldir=plugins/authdata/saml_client
+mydir=plugins/authdata/saml_client
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
@@ -11,7 +11,7 @@ DEFS=@DEFS@
 
 LOCALINCLUDES = -I../../../include/krb5
 
-LIBBASE=greet_client
+LIBBASE=saml_client
 LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
@@ -22,9 +22,9 @@ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 STOBJLISTS=OBJS.ST
-STLIBOBJS= greet.o
+STLIBOBJS= saml_authdata.o
 
-SRCS=	greet.c
+SRCS=	saml_authdata.c
 
 all-unix:: all-liblinks
 install-unix:: install-libs
