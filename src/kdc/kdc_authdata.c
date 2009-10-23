@@ -385,7 +385,7 @@ is_kdc_issued_authdatum (krb5_context context,
 	case KRB5_AUTHDATA_SIGNTICKET:
 	case KRB5_AUTHDATA_KDC_ISSUED:
 	case KRB5_AUTHDATA_WIN2K_PAC:
-	    ret = desired_type ? (desired_type == ad_type) : TRUE;
+	    ret = desired_type ? (desired_type == ad_types[i]) : TRUE;
 	    break;
 	default:
 	    ret = FALSE;
@@ -423,12 +423,13 @@ has_kdc_issued_authdata (krb5_context context,
     return ret;
 }
 
-/* Merge authdata. If copy == 0, in_authdata is invalid on return */
+/* Merge authdata. If copy == 0, in_authdata is invalid on successful return */
 static krb5_error_code
 merge_authdata (krb5_context context,
 		krb5_authdata **in_authdata,
 		krb5_authdata ***out_authdata,
-		krb5_boolean copy)
+		krb5_boolean copy,
+		krb5_boolean ignore_kdc_issued)
 {
     size_t i, nadata = 0;
     krb5_authdata **authdata = *out_authdata;
@@ -465,7 +466,8 @@ merge_authdata (krb5_context context,
     }
 
     for (i = 0; in_authdata[i] != NULL; i++) {
-	if (is_kdc_issued_authdatum(context, in_authdata[i], 0)) {
+	if (ignore_kdc_issued &&
+	    is_kdc_issued_authdatum(context, in_authdata[i], 0)) {
 	    free(in_authdata[i]->contents);
 	    free(in_authdata[i]);
 	} else
@@ -554,8 +556,11 @@ handle_request_authdata (krb5_context context,
 
     free(scratch.data);
 
-    code = merge_authdata(context, request->unenc_authdata,
-			  &enc_tkt_reply->authorization_data, TRUE /* copy */);
+    code = merge_authdata(context,
+			  request->unenc_authdata,
+			  &enc_tkt_reply->authorization_data,
+			  TRUE,	    /* copy */
+			  TRUE);    /* ignore_kdc_issued */
 
     return code;
 }
@@ -579,8 +584,11 @@ handle_tgt_authdata (krb5_context context,
     if (enc_tkt_request == NULL)
 	return 0;
 
-    return merge_authdata(context, enc_tkt_request->authorization_data,
-			  &enc_tkt_reply->authorization_data, TRUE);
+    return merge_authdata(context,
+			  enc_tkt_request->authorization_data,
+			  &enc_tkt_reply->authorization_data,
+			  TRUE,	    /* copy */
+			  TRUE);    /* ignore_kdc_issued */
 }
 
 /* Handle backend-managed authorization data */
@@ -664,9 +672,11 @@ handle_kdb_authdata (krb5_context context,
 			    enc_tkt_reply->session,
 			    &db_authdata);
     if (code == 0) {
-	code = merge_authdata(context, db_authdata,
+	code = merge_authdata(context,
+			      db_authdata,
 			      &enc_tkt_reply->authorization_data,
-			      FALSE);
+			      FALSE,	/* !copy */
+			      FALSE);	/* !ignore_kdc_issued */
 	if (code != 0)
 	    krb5_free_authdata(context, db_authdata);
     } else if (code == KRB5_KDB_DBTYPE_NOSUP)
@@ -735,6 +745,90 @@ handle_authdata (krb5_context context,
 }
 
 static krb5_error_code
+make_ad_signedpath_data(krb5_context context,
+			krb5_enc_tkt_part *enc_tkt_part,
+			krb5_transited_service **deleg_path,
+			krb5_boolean omit_signedpath,
+			krb5_data **data)
+{
+    krb5_ad_signedpath_data	sp_data;
+
+    memset(&sp_data, 0, sizeof(sp_data));
+
+    if (omit_signedpath && enc_tkt_part->authorization_data != NULL) {
+	int i, sp_index = -1;
+
+	for (i = 0; enc_tkt_part->authorization_data[i] != NULL; i++) {
+	    krb5_authdata *ad = enc_tkt_part->authorization_data[i];
+
+	    if (is_kdc_issued_authdatum(context, ad, KRB5_AUTHDATA_SIGNTICKET))
+		sp_index = i;
+	}
+
+	if (sp_index != -1) {
+	    /*
+	     * Whilst this is destructive, we are always the last handler,
+	     * and unlike Heimdal it does not require that the signedpath
+	     * be the last element in the ticket authorization data. This
+	     * should make this code less brittle.
+	     */
+	    free(enc_tkt_part->authorization_data[sp_index]->contents);
+	    free(enc_tkt_part->authorization_data[sp_index]);
+	    memmove(&enc_tkt_part->authorization_data[sp_index],
+		    &enc_tkt_part->authorization_data[sp_index + 1],
+		    (i - sp_index) * sizeof(krb5_authdata *));
+	}
+    }
+
+    sp_data.enc_tkt_part = *enc_tkt_part;
+    /* XXX workaround for workaround in do_tgs_req.c */
+    if (sp_data.enc_tkt_part.times.starttime ==
+	sp_data.enc_tkt_part.times.authtime)
+	sp_data.enc_tkt_part.times.starttime = 0;
+    sp_data.delegated = deleg_path;
+
+    return encode_krb5_ad_signedpath_data(&sp_data, data);
+}
+
+static krb5_error_code
+verify_ad_signedpath_checksum(krb5_context context,
+			      const krb5_db_entry *krbtgt,
+			      krb5_keyblock *krbtgt_key,
+			      krb5_enc_tkt_part *enc_tkt_reply,
+			      krb5_transited_service **deleg_path,
+			      krb5_checksum *cksum,
+			      krb5_boolean *valid)
+{
+    krb5_error_code		code;
+    krb5_data			*data;
+
+    *valid = FALSE;
+
+    code = make_ad_signedpath_data(context,
+				   enc_tkt_reply,
+				   deleg_path,
+				   TRUE,
+				   &data);
+    if (code != 0)
+	return code;
+
+    code = krb5_c_verify_checksum(context,
+				  krbtgt_key,
+				  KRB5_KEYUSAGE_AD_SIGNEDPATH,
+				  data,
+				  cksum,
+				  valid);
+
+    krb5_free_data(context, data);
+
+    if (code == 0 && *valid == FALSE)
+	code = KRB5KRB_AP_ERR_MODIFIED;
+
+    return code;
+}
+
+
+static krb5_error_code
 verify_ad_signedpath(krb5_context context,
 		     krb5_db_entry *krbtgt,
 		     krb5_keyblock *krbtgt_key,
@@ -744,28 +838,17 @@ verify_ad_signedpath(krb5_context context,
 {
     krb5_error_code		code;
     krb5_ad_signedpath		*sp = NULL;
-    krb5_ad_signedpath_data	sp_data;
-    krb5_authdata		**container = NULL;
     krb5_authdata		**sp_authdata = NULL;
-    krb5_data			enc_sp, *enc_spdata = NULL;
-    int				i;
+    krb5_data			enc_sp;
 
     *pdelegated = NULL;
     *path_is_signed = FALSE;
 
-    if (enc_tkt_part->authorization_data == NULL)
-	return 0;
-
-    for (i = 0; enc_tkt_part->authorization_data[i] != NULL; i++)
-	;
-    container = &enc_tkt_part->authorization_data[i - 1];
-    if (*container == NULL)
-	return 0;
-
-    code = krb5_decode_authdata_container(context,
-					  KRB5_AUTHDATA_IF_RELEVANT,
-					  *container,
-					  &sp_authdata);
+    code = krb5int_find_authdata(context,
+				 enc_tkt_part->authorization_data,
+				 NULL,
+				 KRB5_AUTHDATA_SIGNTICKET,
+				 &sp_authdata);
     if (code != 0)
 	goto cleanup;
 
@@ -781,46 +864,59 @@ verify_ad_signedpath(krb5_context context,
     if (code != 0)
 	goto cleanup;
 
-    container = enc_tkt_part->authorization_data;
-    enc_tkt_part->authorization_data = NULL;
-
-    sp_data.enc_tkt_part = *enc_tkt_part;
-
-    /* XXX workaround for workaround in do_tgs_req.c */
-    if (sp_data.enc_tkt_part.times.starttime ==
-	sp_data.enc_tkt_part.times.authtime)
-	sp_data.enc_tkt_part.times.starttime = 0;
-    sp_data.delegated = sp->delegated;
-
-    code = encode_krb5_ad_signedpath_data(&sp_data, &enc_spdata);
-    if (code != 0) {
-	enc_tkt_part->authorization_data = container;
-	goto cleanup;
-    }
-
-    enc_tkt_part->authorization_data = container;
-
-    code = krb5_c_verify_checksum(context,
-				  krbtgt_key,
-				  KRB5_KEYUSAGE_AD_SIGNEDPATH,
-				  enc_spdata,
-				  &sp->checksum,
-				  path_is_signed);
+    code = verify_ad_signedpath_checksum(context,
+					 krbtgt,
+					 krbtgt_key,
+					 enc_tkt_part,
+					 sp->delegated,
+					 &sp->checksum,
+					 path_is_signed);
     if (code != 0)
 	goto cleanup;
-
-    if (*path_is_signed == FALSE) {
-	code = KRB5KRB_AP_ERR_MODIFIED;
-	goto cleanup;
-    }
 
     *pdelegated = sp->delegated;
     sp->delegated = NULL;
 
 cleanup:
-    krb5_free_data(context, enc_spdata);
     krb5_free_ad_signedpath(context, sp);
     krb5_free_authdata(context, sp_authdata);
+
+    return code;
+}
+
+static krb5_error_code
+make_ad_signedpath_checksum(krb5_context context,
+			    const krb5_db_entry *krbtgt,
+			    krb5_keyblock *krbtgt_key,
+			    krb5_enc_tkt_part *enc_tkt_reply,
+			    krb5_transited_service **deleg_path,
+			    krb5_checksum *cksum)
+{
+    krb5_error_code		code;
+    krb5_data			*data;
+    krb5_cksumtype		cksumtype;
+
+    code = make_ad_signedpath_data(context,
+				   enc_tkt_reply,
+				   deleg_path,
+				   FALSE,
+				   &data);
+    if (code != 0)
+	return code;
+
+    code = krb5int_c_mandatory_cksumtype(context,
+					 krbtgt_key->enctype,
+					 &cksumtype);
+    if (code != 0) {
+	krb5_free_data(context, data);
+	return code;
+    }
+
+    code = krb5_c_make_checksum(context, cksumtype, krbtgt_key,
+				KRB5_KEYUSAGE_AD_SIGNEDPATH, data,
+				cksum);
+
+    krb5_free_data(context, data);
 
     return code;
 }
@@ -834,19 +930,16 @@ make_ad_signedpath(krb5_context context,
 		   krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code		code;
-    krb5_ad_signedpath_data	sp_data;
     krb5_ad_signedpath		sp;
     krb5_transited_service	transited;
-    krb5_transited_service	**new_deleg_path = NULL;
     int				i;
     krb5_data			*data = NULL;
-    krb5_cksumtype		cksumtype;
     krb5_authdata		ad_datum, *ad_data[2];
     krb5_authdata		**if_relevant = NULL;
-    krb5_authdata		**authdata;
 
-    memset(&sp_data, 0, sizeof(sp_data));
-    memset(&sp,	     0, sizeof(sp));
+    memset(&sp, 0, sizeof(sp));
+
+    sp.enctype = krbtgt_key->enctype;
 
     if (deleg_path != NULL) {
 	for (i = 0; deleg_path[i] != NULL; i++)
@@ -854,41 +947,29 @@ make_ad_signedpath(krb5_context context,
     } else
 	i = 0;
 
-    new_deleg_path = k5alloc((i + 2) * sizeof(krb5_transited_service *), &code);
+    sp.delegated = k5alloc((i + 2) * sizeof(krb5_transited_service *), &code);
     if (code != 0)
 	goto cleanup;
 
-    if (deleg_path != NULL)
-	memcpy(new_deleg_path, deleg_path, i * sizeof(krb5_transited_service *));
+    /* Combine existing and new transited services, if any */
+    if (deleg_path != NULL) {
+	memcpy(sp.delegated, deleg_path,
+	       i * sizeof(krb5_transited_service *));
+    }
     if (server != NULL) {
 	transited.principal = (krb5_principal)server;
-	new_deleg_path[i] = &transited;
+	sp.delegated[i] = &transited;
     }
-    new_deleg_path[i + 1] = NULL;
+    sp.delegated[i + 1] = NULL;
 
-    sp_data.enc_tkt_part = *enc_tkt_reply;
-    sp_data.enc_tkt_part.authorization_data = NULL;
-    sp_data.delegated = new_deleg_path;
-
-    code = encode_krb5_ad_signedpath_data(&sp_data, &data);
+    code = make_ad_signedpath_checksum(context,
+				       krbtgt,
+				       krbtgt_key,
+				       enc_tkt_reply,
+				       sp.delegated,
+				       &sp.checksum);
     if (code != 0)
 	goto cleanup;
-
-    sp.enctype = krbtgt_key->enctype;
-
-    code = krb5int_c_mandatory_cksumtype(context,
-					 krbtgt_key->enctype,
-					 &cksumtype);
-    if (code != 0)
-	goto cleanup;
-
-    code = krb5_c_make_checksum(context, cksumtype, krbtgt_key,
-				KRB5_KEYUSAGE_AD_SIGNEDPATH, data,
-				&sp.checksum);
-    if (code != 0)
-	goto cleanup;
-
-    sp.delegated = new_deleg_path;
 
     code = encode_krb5_ad_signedpath(&sp, &data);
     if (code != 0)
@@ -908,29 +989,19 @@ make_ad_signedpath(krb5_context context,
     if (code != 0)
 	goto cleanup;
 
-    if (enc_tkt_reply->authorization_data != NULL) {
-	for (i = 0; enc_tkt_reply->authorization_data[i] != NULL; i++)
-	    ;
-    } else
-	i = 0;
-
-    authdata = realloc(enc_tkt_reply->authorization_data,
-		       (i + 2) * sizeof(krb5_authdata *));
-    if (authdata == NULL) {
-	code = ENOMEM;
+    code = merge_authdata(context,
+			  if_relevant,
+			  &enc_tkt_reply->authorization_data,
+			  FALSE,	/* !copy */
+			  FALSE);	/* !ignore_kdc_issued */
+    if (code != 0)
 	goto cleanup;
-    }
 
-    enc_tkt_reply->authorization_data = authdata;
-    enc_tkt_reply->authorization_data[i] = if_relevant[0];
-    enc_tkt_reply->authorization_data[i + 1] = NULL;
-
-    free(if_relevant);
-    if_relevant = NULL;
+    if_relevant = NULL; /* merge_authdata() freed */
 
 cleanup:
-    if (new_deleg_path != NULL)
-	free(new_deleg_path);
+    if (sp.delegated != NULL)
+	free(sp.delegated);
     krb5_free_authdata(context, if_relevant);
     krb5_free_data(context, data);
     krb5_free_checksum_contents(context, &sp.checksum);
@@ -966,10 +1037,6 @@ handle_signedpath_authdata (krb5_context context,
 				enc_tkt_reply->authorization_data,
 				KRB5_AUTHDATA_WIN2K_PAC))
 	return 0;
-
-    /* Verification presently depends on us being last. */
-    assert(authdata_systems[n_authdata_systems - 1].handle_authdata.v2
-	== handle_signedpath_authdata);
 
     signed_path = FALSE;
     s4u2proxy = ((flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) != 0);
