@@ -10,5 +10,5 @@ md4.so md4.po $(OUTPRE)md4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../builtin/md4/md4.c \
-  $(srcdir)/../../builtin/md4/rsa-md4.h
+  $(SRCTOP)/include/socket-utils.h md4.c \
+  rsa-md4.h

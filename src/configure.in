@@ -1059,13 +1059,13 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib lib/kdb
 
-	lib/crypto lib/crypto/krb lib/crypto/krb/crc32 lib/crypto/builtin/des
-	lib/crypto/krb/dk lib/crypto/builtin/enc_provider
-	lib/crypto/builtin/hash_provider lib/crypto/krb/keyhash_provider
+	lib/crypto lib/crypto/krb lib/crypto/krb/crc32 lib/crypto/$CRYPTO_IMPL/des
+	lib/crypto/krb/dk lib/crypto/$CRYPTO_IMPL/enc_provider
+	lib/crypto/$CRYPTO_IMPL/hash_provider lib/crypto/krb/keyhash_provider
 	lib/crypto/krb/prf lib/crypto/krb/rand2key
-	lib/crypto/builtin lib/crypto/builtin/md4 lib/crypto/builtin/md5
-	lib/crypto/krb/old lib/crypto/krb/raw lib/crypto/builtin/sha1
-	lib/crypto/builtin/arcfour lib/crypto/krb/yarrow lib/crypto/builtin/aes
+	lib/crypto/$CRYPTO_IMPL lib/crypto/$CRYPTO_IMPL/md4 lib/crypto/$CRYPTO_IMPL/md5
+	lib/crypto/krb/old lib/crypto/krb/raw lib/crypto/$CRYPTO_IMPL/sha1
+	lib/crypto/$CRYPTO_IMPL/arcfour lib/crypto/krb/yarrow lib/crypto/$CRYPTO_IMPL/aes
 	lib/crypto/crypto_tests
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache

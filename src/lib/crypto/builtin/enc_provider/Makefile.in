@@ -2,12 +2,12 @@ thisconfigdir=../../../..
 myfulldir=lib/crypto/builtin/enc_provider
 mydir=lib/crypto/builtin/enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../../@CRYPTO_IMPL@/des 	\
-		-I$(srcdir)/../../@CRYPTO_IMPL@/arcfour \
-		-I$(srcdir)/../../@CRYPTO_IMPL@/aes 	\
+LOCALINCLUDES = -I$(srcdir)/../des 	\
+		-I$(srcdir)/../arcfour \
+		-I$(srcdir)/../aes 	\
 		-I$(srcdir)/../../krb 			\
 		-I$(srcdir)/../../krb/rand2key	 	\
-		-I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@ 
+		-I$(srcdir)/.. -I$(srcdir)/. 
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
@@ -18,22 +18,22 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS= \
-	../../@CRYPTO_IMPL@/enc_provider/des.o 	\
-	../../@CRYPTO_IMPL@/enc_provider/des3.o 	\
-	../../@CRYPTO_IMPL@/enc_provider/rc4.o 	\
-	../../@CRYPTO_IMPL@/enc_provider/aes.o 
+	des.o 	\
+	des3.o 	\
+	rc4.o 	\
+	aes.o 
 
 OBJS= \
-	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/des.$(OBJEXT) 	\
-	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/des3.$(OBJEXT) 	\
-	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/aes.$(OBJEXT) 	\
-	$(OUTPRE)../../@CRYPTO_IMPL@/enc_provider/rc4.$(OBJEXT)
+	$(OUTPRE)des.$(OBJEXT) 	\
+	$(OUTPRE)des3.$(OBJEXT) 	\
+	$(OUTPRE)aes.$(OBJEXT) 	\
+	$(OUTPRE)rc4.$(OBJEXT)
 
 SRCS= \
-	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/des.c 	\
-	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/des3.c 	\
-	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/aes.c 	\
-	$(srcdir)/../../@CRYPTO_IMPL@/enc_provider/rc4.c
+	$(srcdir)/des.c 	\
+	$(srcdir)/des3.c 	\
+	$(srcdir)/aes.c 	\
+	$(srcdir)/rc4.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

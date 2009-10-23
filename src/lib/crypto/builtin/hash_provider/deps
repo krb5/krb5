@@ -11,8 +11,8 @@ hash_crc32.so hash_crc32.po $(OUTPRE)hash_crc32.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/hash_provider/hash_crc32.c \
-  $(srcdir)/../../builtin/hash_provider/hash_provider.h \
+  $(srcdir)/hash_crc32.c \
+  $(srcdir)/hash_provider.h \
   $(srcdir)/../../krb/crc32/crc-32.h
 hash_md4.so hash_md4.po $(OUTPRE)hash_md4.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
@@ -24,8 +24,8 @@ hash_md4.so hash_md4.po $(OUTPRE)hash_md4.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/hash_provider/hash_md4.c $(srcdir)/../../builtin/hash_provider/hash_provider.h \
-  $(srcdir)/../../builtin/md4/rsa-md4.h
+  $(srcdir)/hash_md4.c $(srcdir)/hash_provider.h \
+  $(srcdir)/../md4/rsa-md4.h
 hash_md5.so hash_md5.po $(OUTPRE)hash_md5.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -36,8 +36,8 @@ hash_md5.so hash_md5.po $(OUTPRE)hash_md5.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/hash_provider/hash_md5.c $(srcdir)/../../builtin/hash_provider/hash_provider.h \
-  $(srcdir)/../../builtin/md5/rsa-md5.h
+  $(srcdir)/hash_md5.c $(srcdir)/hash_provider.h \
+  $(srcdir)/../md5/rsa-md5.h
 hash_sha1.so hash_sha1.po $(OUTPRE)hash_sha1.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -48,5 +48,5 @@ hash_sha1.so hash_sha1.po $(OUTPRE)hash_sha1.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/../../builtin/hash_provider/hash_provider.h \
-  $(srcdir)/../../builtin/hash_provider/hash_sha1.c $(srcdir)/../../builtin/sha1/shs.h
+  $(srcdir)/hash_provider.h \
+  $(srcdir)/hash_sha1.c $(srcdir)/../sha1/shs.h

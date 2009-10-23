@@ -2,7 +2,7 @@ thisconfigdir=../..
 myfulldir=lib/crypto
 mydir=lib/crypto
 BUILDTOP=$(REL)..$(S)..
-SUBDIRS= krb builtin crypto_tests
+SUBDIRS= krb @CRYPTO_IMPL@ crypto_tests
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -20,21 +20,21 @@ LIBINITFUNC=cryptoint_initialize_library
 LIBFINIFUNC=cryptoint_cleanup_library
 RELDIR=crypto
 
-STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST	\
-	builtin/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST  		\
+STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.ST	\
+	@CRYPTO_IMPL@/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST  		\
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST krb/yarrow/OBJS.ST 			\
-	builtin/md4/OBJS.ST builtin/md5/OBJS.ST builtin/sha1/OBJS.ST 		\
-	builtin/arcfour/OBJS.ST  builtin/aes/OBJS.ST builtin/des/OBJS.ST	\
-	krb/OBJS.ST  builtin/OBJS.ST
+	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST @CRYPTO_IMPL@/sha1/OBJS.ST 		\
+	@CRYPTO_IMPL@/arcfour/OBJS.ST  @CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST	\
+	krb/OBJS.ST  @CRYPTO_IMPL@/OBJS.ST
 
-SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST builtin/enc_provider/OBJS.ST 	\
-	builtin/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST 		\
+SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.ST 	\
+	@CRYPTO_IMPL@/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST 		\
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST  krb/yarrow/OBJS.ST 			\
-	builtin/md4/OBJS.ST builtin/md5/OBJS.ST	builtin/sha1/OBJS.ST 		\
-	builtin/arcfour/OBJS.ST builtin/aes/OBJS.ST builtin/des/OBJS.ST		\
-	krb/OBJS.ST builtin/OBJS.ST
+	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST	@CRYPTO_IMPL@/sha1/OBJS.ST 		\
+	@CRYPTO_IMPL@/arcfour/OBJS.ST @CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
+	krb/OBJS.ST @CRYPTO_IMPL@/OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target
 # link editor and loader support it.

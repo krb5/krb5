@@ -220,8 +220,11 @@ k5_des3_encrypt_iov(krb5_key key,
                                 oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
     }
 
-    if(ret)
+    if(ret) {
+        /*if (ivec != NULL && ivec->data)
+            memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
         ret = EVP_EncryptFinal_ex(&ciph_ctx, oblock+input_pos.data_pos, &tmp_len);
+    }
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
@@ -300,9 +303,12 @@ k5_des3_decrypt_iov(krb5_key key,
                                 oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
     }
 
-    if(ret)
+    if(ret) {
+        /*if (ivec != NULL && ivec->data)
+            memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
         ret = EVP_DecryptFinal_ex(&ciph_ctx,
                                   oblock + input_pos.data_pos, &tmp_len);
+    }
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
