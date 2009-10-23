@@ -426,6 +426,25 @@ has_kdc_issued_authdata (krb5_context context,
     return ret;
 }
 
+static krb5_boolean
+has_mandatory_for_kdc_authdata (krb5_context context,
+				krb5_authdata **authdata)
+{
+    int i;
+    krb5_boolean ret = FALSE;
+
+    if (authdata != NULL) {
+	for (i = 0; authdata[i] != NULL; i++) {
+	    if (authdata[0]->ad_type == KRB5_AUTHDATA_MANDATORY_FOR_KDC) {
+		ret = TRUE;
+		break;
+	    }
+	}
+    }
+
+    return ret;
+}
+
 /*
  * Merge authdata.
  *
@@ -564,6 +583,9 @@ handle_request_authdata (krb5_context context,
 
     free(scratch.data);
 
+    if (has_mandatory_for_kdc_authdata(context, request->unenc_authdata))
+	return KRB5KDC_ERR_POLICY;
+
     code = merge_authdata(context,
 			  request->unenc_authdata,
 			  &enc_tkt_reply->authorization_data,
@@ -591,6 +613,10 @@ handle_tgt_authdata (krb5_context context,
 {
     if (request->msg_type != KRB5_TGS_REQ)
 	return 0;
+
+    if (has_mandatory_for_kdc_authdata(context,
+				       enc_tkt_request->authorization_data))
+	return KRB5KDC_ERR_POLICY;
 
     return merge_authdata(context,
 			  enc_tkt_request->authorization_data,
