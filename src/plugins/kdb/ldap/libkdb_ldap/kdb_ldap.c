@@ -162,11 +162,9 @@ cleanup:
 }
 
 
-/* Function to check if a LDAP server supports the SASL external mechanism
- *Return values:
- *   0 => supports
- *   1 => does not support
- *   2 => don't know
+/*
+ * Interrogate the root DSE (zero length DN) for an attribute
+ * value assertion.
  */
 static int
 has_rootdse_ava(context, ldap_server, attribute, value)
@@ -247,6 +245,12 @@ cleanup:
 #define ERR_MSG1 "Unable to check if SASL EXTERNAL mechanism is supported by LDAP server. Proceeding anyway ..."
 #define ERR_MSG2 "SASL EXTERNAL mechanism not supported by LDAP server. Can't perform certificate-based bind."
 
+/* Function to check if a LDAP server supports the SASL external mechanism
+ *Return values:
+ *   0 => supports
+ *   1 => does not support
+ *   2 => don't know
+ */
 int
 has_sasl_external_mech(context, ldap_server)
     krb5_context     context;
