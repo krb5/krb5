@@ -2,7 +2,7 @@
  * kdc/kdc_authdata.c
  *
  * Copyright (C) 2007 Apple Inc.  All Rights Reserved.
- * Copyright (C) 2008 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2008, 2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
