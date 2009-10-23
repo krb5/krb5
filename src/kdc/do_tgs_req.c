@@ -718,7 +718,28 @@ tgt_again:
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 
-   if (is_referral && isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
+    errcode = handle_authdata(kdc_context,
+                              c_flags,
+                              (c_nprincs != 0) ? &client : NULL,
+                              &server,
+                              (k_nprincs != 0) ? &krbtgt : NULL,
+                              subkey != NULL ? subkey :
+                              header_ticket->enc_part2->session,
+                              &encrypting_key, /* U2U or server key */
+                              tgskey,
+                              pkt,
+                              request,
+                              s4u_x509_user ?
+				s4u_x509_user->user_id.user : NULL,
+                              header_enc_tkt,
+                              &enc_tkt_reply);
+    if (errcode) {
+        krb5_klog_syslog(LOG_INFO, "TGS_REQ : handle_authdata (%d)", errcode);
+        status = "HANDLE_AUTHDATA";
+        goto cleanup;
+    }
+
+    if (is_referral && isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
         errcode = return_svr_referral_data(kdc_context,
                                            &server, &reply_encpart);
         if (errcode) {
@@ -851,27 +872,6 @@ tgt_again:
         st_idx++;
     } else {
         ticket_kvno = server_key->key_data_kvno;
-    }
-
-    errcode = handle_authdata(kdc_context,
-                              c_flags,
-                              (c_nprincs != 0) ? &client : NULL,
-                              &server,
-                              (k_nprincs != 0) ? &krbtgt : NULL,
-                              subkey != NULL ? subkey :
-                              header_ticket->enc_part2->session,
-                              &encrypting_key, /* U2U or server key */
-                              tgskey,
-                              pkt,
-                              request,
-                              s4u_x509_user ?
-                                s4u_x509_user->user_id.user : NULL,
-                              header_enc_tkt,
-                              &enc_tkt_reply);
-    if (errcode) {
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ : handle_authdata (%d)", errcode);
-        status = "HANDLE_AUTHDATA";
-        goto cleanup;
     }
 
     errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
