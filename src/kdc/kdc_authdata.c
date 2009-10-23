@@ -947,7 +947,8 @@ make_ad_signedpath(krb5_context context,
     } else
 	i = 0;
 
-    sp.delegated = k5alloc((i + 2) * sizeof(krb5_transited_service *), &code);
+    sp.delegated = k5alloc((i + (server ? 1 : 0) + 1) *
+			   sizeof(krb5_transited_service *), &code);
     if (code != 0)
 	goto cleanup;
 
