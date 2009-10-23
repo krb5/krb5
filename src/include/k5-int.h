@@ -3054,6 +3054,12 @@ krb5_get_credentials_for_proxy(krb5_context context,
 			       krb5_ticket *evidence_tkt,
 			       krb5_creds **out_creds);
 
+krb5_error_code KRB5_CALLCONV
+krb5int_get_authdata_containee_types(krb5_context context,
+				     const krb5_authdata *container,
+				     unsigned int *nad_types,
+				     krb5_authdatatype **ad_types);
+
 krb5_error_code krb5int_parse_enctype_list(krb5_context context, char *profstr,
 					   krb5_enctype *default_list,
 					   krb5_enctype **result);

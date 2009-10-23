@@ -148,6 +148,8 @@ asn1_error_code asn1_decode_authdata_elt
         (asn1buf *buf, krb5_authdata *val);
 asn1_error_code asn1_decode_authdata_elt_ptr
         (asn1buf *buf, krb5_authdata **valptr);
+asn1_error_code asn1_peek_authorization_data
+        (asn1buf *buf, unsigned int *num, krb5_authdatatype **val);
 asn1_error_code asn1_decode_krb_cred_info
         (asn1buf *buf, krb5_cred_info *val);
 asn1_error_code asn1_decode_krb_cred_info_ptr

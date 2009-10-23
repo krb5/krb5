@@ -983,6 +983,45 @@ error_out:
     return retval;
 }
 
+static asn1_error_code asn1_peek_authdata_elt(asn1buf *buf, krb5_authdatatype *val)
+{
+    setup();
+    *val = 0;
+    { begin_structure();
+        get_field(*val, 0, asn1_decode_authdatatype);
+        end_structure();
+    }
+    return 0;
+error_out:
+    return retval;
+}
+
+asn1_error_code asn1_peek_authorization_data
+(asn1buf *buf, unsigned int *num, krb5_authdatatype **val)
+{
+    int size = 0;
+    krb5_authdatatype *array = NULL, *new_array;
+
+    asn1_error_code retval;
+    { sequence_of(buf);
+        while (asn1buf_remains(&seqbuf,seqofindef) > 0) {
+            size++;
+            new_array = realloc(array,size*sizeof(krb5_authdatatype));
+            if (new_array == NULL) clean_return(ENOMEM);
+            array = new_array;
+            retval = asn1_peek_authdata_elt(&seqbuf,&array[size-1]);
+            if (retval) clean_return(retval);
+        }
+        end_sequence_of(buf);
+    }
+    *num = size;
+    *val = array;
+    return 0;
+error_out:
+    free(array);
+    return retval;
+}
+
 asn1_error_code
 asn1_decode_authdata_elt_ptr(asn1buf *buf, krb5_authdata **valptr)
 {
