@@ -654,7 +654,7 @@ krb5int_authdata_verify(krb5_context kcontext,
             /*
              * Determine which authdata sources to interrogate based on the
              * module's usage. This is important if the authdata is signed
-             * by the KDC with the TGT key (as the user can forget that in
+             * by the KDC with the TGT key (as the user can forge that in
              * the AP-REQ).
              */
             if (module->flags & (AD_USAGE_AS_REQ | AD_USAGE_TGS_REQ))
