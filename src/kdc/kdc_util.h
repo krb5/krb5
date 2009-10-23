@@ -269,7 +269,7 @@ krb5_error_code kdc_make_s4u2self_rep
 krb5_error_code kdc_process_s4u2proxy_req
 	(krb5_context context,
 		krb5_kdc_req *request,
-		krb5_enc_tkt_part *t2enc,
+		const krb5_enc_tkt_part *t2enc,
 		const krb5_db_entry *server,
 		krb5_const_principal server_princ,
 		krb5_const_principal proxy_princ,
