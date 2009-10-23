@@ -363,41 +363,42 @@ is_kdc_issued_authdatum (krb5_context context,
 			 krb5_authdata *authdata,
 		         krb5_authdatatype desired_type)
 {
-    krb5_boolean ret;
+    krb5_boolean ret = FALSE;
     krb5_authdatatype ad_type;
+    unsigned int i, count = 0;
+    krb5_authdatatype *ad_types = NULL;
 
     if (authdata->ad_type == KRB5_AUTHDATA_IF_RELEVANT) {
-	krb5_authdata **tmp;
-
-	/* This should avoid decoding the entire container */
-	if (krb5_decode_authdata_container(context,
-					   authdata->ad_type,
-					   authdata,
-					   &tmp) != 0)
-	    return FALSE;
-
-	if (tmp == NULL || tmp[1] != NULL) {
-	    krb5_free_authdata(context, tmp);
-	    return FALSE;
-	}
-	ad_type = tmp[0]->ad_type;
-	krb5_free_authdata(context, tmp);
-    } else
+	if (krb5int_get_authdata_containee_types(context,
+						 authdata,
+						 &count,
+						 &ad_types) != 0)
+	    goto cleanup;
+    } else {
 	ad_type = authdata->ad_type;
+	count = 1;
+	ad_types = &ad_type;
+    }
 
-    if (desired_type)
-	ret = (desired_type == ad_type);
-    else
-	switch (ad_type) {
+    for (i = 0; i < count; i++) {
+	switch (ad_types[i]) {
 	case KRB5_AUTHDATA_SIGNTICKET:
 	case KRB5_AUTHDATA_KDC_ISSUED:
 	case KRB5_AUTHDATA_WIN2K_PAC:
-	    ret = TRUE;
+	    ret = desired_type ? (desired_type == ad_type) : TRUE;
 	    break;
 	default:
 	    ret = FALSE;
 	    break;
 	}
+	if (ret)
+	    break;
+    }
+
+cleanup:
+    if (authdata->ad_type == KRB5_AUTHDATA_IF_RELEVANT &&
+	ad_types != NULL)
+	free(ad_types);
 
     return ret;
 }
