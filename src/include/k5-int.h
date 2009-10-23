@@ -1080,14 +1080,17 @@ typedef struct _krb5_transited_service {
 } krb5_transited_service;
 
 typedef struct _krb5_ad_signedpath_data {
-    krb5_enc_tkt_part enc_tkt_part;
+    krb5_principal client;
+    krb5_timestamp authtime;
     krb5_transited_service **delegated;
+    krb5_pa_data **method_data;
 } krb5_ad_signedpath_data;
 
 typedef struct _krb5_ad_signedpath {
     krb5_enctype enctype;
     krb5_checksum checksum;
     krb5_transited_service **delegated;
+    krb5_pa_data **method_data;
 } krb5_ad_signedpath;
 
 typedef krb5_error_code (*krb5_preauth_obtain_proc)

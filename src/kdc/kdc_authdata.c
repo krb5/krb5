@@ -770,46 +770,20 @@ handle_authdata (krb5_context context,
 
 static krb5_error_code
 make_ad_signedpath_data(krb5_context context,
-			krb5_enc_tkt_part *enc_tkt_part,
+			krb5_const_principal client,
+			krb5_timestamp authtime,
 			krb5_transited_service **deleg_path,
-			krb5_boolean omit_signedpath,
+			krb5_pa_data **method_data,
 			krb5_data **data)
 {
     krb5_ad_signedpath_data	sp_data;
 
     memset(&sp_data, 0, sizeof(sp_data));
 
-    if (omit_signedpath && enc_tkt_part->authorization_data != NULL) {
-	int i, sp_index = -1;
-
-	for (i = 0; enc_tkt_part->authorization_data[i] != NULL; i++) {
-	    krb5_authdata *ad = enc_tkt_part->authorization_data[i];
-
-	    if (is_kdc_issued_authdatum(context, ad, KRB5_AUTHDATA_SIGNTICKET))
-		sp_index = i;
-	}
-
-	if (sp_index != -1) {
-	    /*
-	     * Whilst this is destructive, we are always the last handler,
-	     * and unlike Heimdal it does not require that the signedpath
-	     * be the last element in the ticket authorization data. This
-	     * should make this code less brittle.
-	     */
-	    free(enc_tkt_part->authorization_data[sp_index]->contents);
-	    free(enc_tkt_part->authorization_data[sp_index]);
-	    memmove(&enc_tkt_part->authorization_data[sp_index],
-		    &enc_tkt_part->authorization_data[sp_index + 1],
-		    (i - sp_index) * sizeof(krb5_authdata *));
-	}
-    }
-
-    sp_data.enc_tkt_part = *enc_tkt_part;
-    /* XXX workaround for workaround in do_tgs_req.c */
-    if (sp_data.enc_tkt_part.times.starttime ==
-	sp_data.enc_tkt_part.times.authtime)
-	sp_data.enc_tkt_part.times.starttime = 0;
+    sp_data.client = (krb5_principal)client;
+    sp_data.authtime = authtime;
     sp_data.delegated = deleg_path;
+    sp_data.method_data = method_data;
 
     return encode_krb5_ad_signedpath_data(&sp_data, data);
 }
@@ -818,8 +792,9 @@ static krb5_error_code
 verify_ad_signedpath_checksum(krb5_context context,
 			      const krb5_db_entry *krbtgt,
 			      krb5_keyblock *krbtgt_key,
-			      krb5_enc_tkt_part *enc_tkt_reply,
+			      krb5_enc_tkt_part *enc_tkt_part,
 			      krb5_transited_service **deleg_path,
+			      krb5_pa_data **method_data,
 			      krb5_checksum *cksum,
 			      krb5_boolean *valid)
 {
@@ -829,9 +804,10 @@ verify_ad_signedpath_checksum(krb5_context context,
     *valid = FALSE;
 
     code = make_ad_signedpath_data(context,
-				   enc_tkt_reply,
+				   enc_tkt_part->client,
+				   enc_tkt_part->times.authtime,
 				   deleg_path,
-				   TRUE,
+				   method_data,
 				   &data);
     if (code != 0)
 	return code;
@@ -893,6 +869,7 @@ verify_ad_signedpath(krb5_context context,
 					 krbtgt_key,
 					 enc_tkt_part,
 					 sp->delegated,
+					 sp->method_data,
 					 &sp->checksum,
 					 path_is_signed);
     if (code != 0)
@@ -910,20 +887,29 @@ cleanup:
 
 static krb5_error_code
 make_ad_signedpath_checksum(krb5_context context,
+			    krb5_const_principal for_user_princ,
 			    const krb5_db_entry *krbtgt,
 			    krb5_keyblock *krbtgt_key,
-			    krb5_enc_tkt_part *enc_tkt_reply,
+			    krb5_enc_tkt_part *enc_tkt_part,
 			    krb5_transited_service **deleg_path,
+			    krb5_pa_data **method_data,
 			    krb5_checksum *cksum)
 {
     krb5_error_code		code;
     krb5_data			*data;
     krb5_cksumtype		cksumtype;
+    krb5_const_principal	client;
+
+    if (for_user_princ != NULL)
+	client = for_user_princ;
+    else
+	client = enc_tkt_part->client;
 
     code = make_ad_signedpath_data(context,
-				   enc_tkt_reply,
+				   client,
+				   enc_tkt_part->times.authtime,
 				   deleg_path,
-				   FALSE,
+				   method_data,
 				   &data);
     if (code != 0)
 	return code;
@@ -947,10 +933,11 @@ make_ad_signedpath_checksum(krb5_context context,
 
 static krb5_error_code
 make_ad_signedpath(krb5_context context,
-		   krb5_const_principal server,
-		   krb5_transited_service **deleg_path,
+		   krb5_const_principal for_user_princ,
+		   krb5_principal server,
 		   const krb5_db_entry *krbtgt,
 		   krb5_keyblock *krbtgt_key,
+		   krb5_transited_service **deleg_path,
 		   krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code		code;
@@ -986,12 +973,15 @@ make_ad_signedpath(krb5_context context,
 	sp.delegated[i] = &transited;
     }
     sp.delegated[i + 1] = NULL;
+    sp.method_data = NULL;
 
     code = make_ad_signedpath_checksum(context,
+				       for_user_princ,
 				       krbtgt,
 				       krbtgt_key,
 				       enc_tkt_reply,
 				       sp.delegated,
+				       sp.method_data,
 				       &sp.checksum);
     if (code != 0)
 	goto cleanup;
@@ -1064,7 +1054,7 @@ handle_signedpath_authdata (krb5_context context,
 	return 0;
 
     signed_path = FALSE;
-    s4u2proxy = ((flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) != 0);
+    s4u2proxy = isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
     /* Verification is only necessary for the TGS-REQ case. */
     if (request->msg_type == KRB5_TGS_REQ) {
@@ -1083,12 +1073,13 @@ handle_signedpath_authdata (krb5_context context,
 	}
     }
 
-    if ((flags & KRB5_KDB_FLAG_CROSS_REALM) == 0) {
+    if (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
 	code = make_ad_signedpath(context,
+				  for_user_princ,
 				  s4u2proxy ? client->princ : NULL,
-				  deleg_path,
 				  krbtgt,
 				  krbtgt_key,
+				  deleg_path,
 				  enc_tkt_reply);
 	if (code != 0)
 	    goto cleanup;

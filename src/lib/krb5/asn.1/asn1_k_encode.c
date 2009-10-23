@@ -1318,9 +1318,19 @@ DEFPTRTYPE(transited_service_ptr, transited_service);
 DEFNULLTERMSEQOFTYPE(seq_of_transited_service, transited_service_ptr);
 DEFPTRTYPE(ptr_seqof_transited_service, seq_of_transited_service);
 
+static const struct field_info princ_plus_realm_fields[] = {
+    FIELDOF_ENCODEAS(krb5_principal_data, principal_data, 0),
+    FIELDOF_ENCODEAS(krb5_principal_data, realm_of_principal_data, 1),
+};
+
+DEFSEQTYPE(princ_plus_realm_data, krb5_principal_data, princ_plus_realm_fields, 0);
+DEFPTRTYPE(princ_plus_realm, princ_plus_realm_data);
+
 static const struct field_info ad_signedpath_data_fields[] = {
-    FIELDOF_NORM(krb5_ad_signedpath_data, enc_tkt_part, enc_tkt_part, 0),
-    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_transited_service, delegated, 1, 1),
+    FIELDOF_NORM(krb5_ad_signedpath_data, princ_plus_realm, client, 0),
+    FIELDOF_NORM(krb5_ad_signedpath_data, kerberos_time, authtime, 1),
+    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_transited_service, delegated, 2, 2),
+    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_pa_data, method_data, 3, 3),
 };
 
 static unsigned int ad_signedpath_data_optional(const void *p)
@@ -1328,7 +1338,9 @@ static unsigned int ad_signedpath_data_optional(const void *p)
     unsigned int optional = 0;
     const krb5_ad_signedpath_data *val = p;
     if (val->delegated && val->delegated[0])
-        optional |= (1u << 1);
+        optional |= (1u << 2);
+    if (val->method_data && val->method_data[0])
+        optional |= (1u << 3);
     return optional;
 }
 
@@ -1338,6 +1350,7 @@ static const struct field_info ad_signedpath_fields[] = {
     FIELDOF_NORM(krb5_ad_signedpath, int32, enctype, 0),
     FIELDOF_NORM(krb5_ad_signedpath, checksum, checksum, 1),
     FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_transited_service, delegated, 2, 2),
+    FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_pa_data, method_data, 3, 3),
 };
 
 static unsigned int ad_signedpath_optional(const void *p)
@@ -1346,6 +1359,8 @@ static unsigned int ad_signedpath_optional(const void *p)
     const krb5_ad_signedpath *val = p;
     if (val->delegated && val->delegated[0])
         optional |= (1u << 2);
+    if (val->method_data && val->method_data[0])
+        optional |= (1u << 3);
     return optional;
 }
 

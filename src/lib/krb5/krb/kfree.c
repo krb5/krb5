@@ -939,4 +939,5 @@ krb5_free_ad_signedpath(krb5_context context, krb5_ad_signedpath *val)
 
     krb5_free_checksum_contents(context, &val->checksum);
     krb5_free_transited_services(context, val->delegated);
+    krb5_free_pa_data(context, val->method_data);
 }

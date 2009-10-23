@@ -1820,10 +1820,12 @@ asn1_error_code asn1_decode_ad_signedpath
     val->enctype = ENCTYPE_NULL;
     val->checksum.contents = NULL;
     val->delegated = NULL;
-    {begin_structure();
+    {
+    begin_structure();
     get_field(val->enctype, 0, asn1_decode_enctype);
     get_field(val->checksum, 1, asn1_decode_checksum);
     opt_field(val->delegated, 2, asn1_decode_sequence_of_transited_service, NULL);
+    opt_field(val->method_data, 3, asn1_decode_sequence_of_pa_data, NULL);
     end_structure();
     }
     return 0;
