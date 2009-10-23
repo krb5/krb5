@@ -1225,6 +1225,7 @@ krb5int_get_authdata_containee_types(krb5_context context,
 
     cleanup_none();
     }
+    assert(0); /* NOTREACHED */
 }
 
 #ifndef DISABLE_PKINIT

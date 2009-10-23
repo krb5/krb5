@@ -2116,6 +2116,7 @@ populate_krb5_db_entry (krb5_context context,
 		*tlp = tl;
 		tlp = &tl->tl_data_next;
 	    }
+	    ldap_value_free(a2d2);
 	}
     }
 
