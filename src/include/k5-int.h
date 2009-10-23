@@ -1075,19 +1075,18 @@ typedef struct _krb5_ad_kdcissued {
     krb5_authdata **elements;
 } krb5_ad_kdcissued;
 
-typedef struct _krb5_transited_service {
-    krb5_principal principal;
-} krb5_transited_service;
-
 typedef struct _krb5_ad_signedpath_data {
-    krb5_enc_tkt_part enc_tkt_part;
-    krb5_transited_service **delegated;
+    krb5_principal client;
+    krb5_timestamp authtime;
+    krb5_principal *delegated;
+    krb5_pa_data **method_data;
 } krb5_ad_signedpath_data;
 
 typedef struct _krb5_ad_signedpath {
     krb5_enctype enctype;
     krb5_checksum checksum;
-    krb5_transited_service **delegated;
+    krb5_principal *delegated;
+    krb5_pa_data **method_data;
 } krb5_ad_signedpath;
 
 typedef krb5_error_code (*krb5_preauth_obtain_proc)
@@ -1403,10 +1402,6 @@ void KRB5_CALLCONV krb5_free_ad_kdcissued
 (krb5_context, krb5_ad_kdcissued *);
 void KRB5_CALLCONV krb5_free_ad_signedpath
 (krb5_context, krb5_ad_signedpath *);
-void KRB5_CALLCONV krb5_free_transited_service
-(krb5_context, krb5_transited_service *);
-void KRB5_CALLCONV krb5_free_transited_services
-(krb5_context, krb5_transited_service **);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
