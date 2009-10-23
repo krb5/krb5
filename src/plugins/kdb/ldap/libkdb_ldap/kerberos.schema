@@ -57,13 +57,6 @@ attributetype ( 1.2.840.113554.1.4.1.6.1
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
                 SINGLE-VALUE)
 
-attributetype ( 1.2.840.113554.1.4.1.7.1
-                NAME 'krbAllowedToDelegateTo'
-                EQUALITY caseExactIA5Match
-                SUBSTR caseExactSubstringsMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-                SINGLE-VALUE)
-
 ##### This specifies the type of the principal, the types could be any of
 ##### the types mentioned in section 6.2 of RFC 4120
 
@@ -539,6 +532,13 @@ attributetype ( 2.16.840.1.113719.1.301.4.53.1
                 NAME 'krbPrincContainerRef'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
+
+##### A list of services to which a service principal can delegate.
+attributetype ( 1.2.840.113554.1.4.1.7.1
+                NAME 'krbAllowedToDelegateTo'
+                EQUALITY caseExactIA5Match
+                SUBSTR caseExactSubstringsMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
 
 ########################################################################
 ########################################################################
