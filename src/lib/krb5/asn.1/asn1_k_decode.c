@@ -1784,33 +1784,27 @@ error_out:
     return retval;
 }
 
-static asn1_error_code asn1_decode_transited_service
-(asn1buf *buf, krb5_transited_service *val)
+static asn1_error_code asn1_decode_princ_plus_realm
+(asn1buf *buf, krb5_principal *valptr)
 {
     setup();
-    alloc_principal(val->principal);
+    alloc_principal((*valptr));
     { begin_structure();
-        get_field(val->principal, 0, asn1_decode_principal_name);
-        get_field(val->principal, 1, asn1_decode_realm);
+        get_field((*valptr), 0, asn1_decode_principal_name);
+        get_field((*valptr), 1, asn1_decode_realm);
         end_structure();
     }
     return 0;
 error_out:
-    krb5_free_principal(NULL, val->principal);
-    val->principal = NULL;
+    krb5_free_principal(NULL, *valptr);
+    *valptr = NULL;
     return retval;
 }
 
-static asn1_error_code asn1_decode_transited_service_ptr
-(asn1buf *buf, krb5_transited_service **valptr)
+static asn1_error_code asn1_decode_sequence_of_princ_plus_realm
+(asn1buf *buf, krb5_principal **val)
 {
-    decode_ptr(krb5_transited_service *, asn1_decode_transited_service);
-}
-
-static asn1_error_code asn1_decode_sequence_of_transited_service
-(asn1buf *buf, krb5_transited_service ***val)
-{
-    decode_array_body(krb5_transited_service,asn1_decode_transited_service_ptr,krb5_free_transited_service);
+    decode_array_body(krb5_principal_data,asn1_decode_princ_plus_realm,krb5_free_principal);
 }
 
 asn1_error_code asn1_decode_ad_signedpath
@@ -1824,7 +1818,7 @@ asn1_error_code asn1_decode_ad_signedpath
     begin_structure();
     get_field(val->enctype, 0, asn1_decode_enctype);
     get_field(val->checksum, 1, asn1_decode_checksum);
-    opt_field(val->delegated, 2, asn1_decode_sequence_of_transited_service, NULL);
+    opt_field(val->delegated, 2, asn1_decode_sequence_of_princ_plus_realm, NULL);
     opt_field(val->method_data, 3, asn1_decode_sequence_of_pa_data, NULL);
     end_structure();
     }

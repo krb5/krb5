@@ -910,34 +910,18 @@ krb5_free_ad_kdcissued(krb5_context context, krb5_ad_kdcissued *val)
 }
 
 void KRB5_CALLCONV
-krb5_free_transited_service(krb5_context context, krb5_transited_service *val)
-{
-    if (val != NULL) {
-	krb5_free_principal(context, val->principal);
-	free(val);
-    }
-}
-
-void KRB5_CALLCONV
-krb5_free_transited_services(krb5_context context, krb5_transited_service **val)
+krb5_free_ad_signedpath(krb5_context context, krb5_ad_signedpath *val)
 {
     int i;
 
     if (val == NULL)
 	return;
 
-    for (i = 0; val[i] != NULL; i++)
-	krb5_free_transited_service(context, val[i]);
-
-    free(val);
-}
-void KRB5_CALLCONV
-krb5_free_ad_signedpath(krb5_context context, krb5_ad_signedpath *val)
-{
-    if (val == NULL)
-	return;
-
     krb5_free_checksum_contents(context, &val->checksum);
-    krb5_free_transited_services(context, val->delegated);
+    if (val->delegated != NULL) {
+	for (i = 0; val->delegated[i] != NULL; i++)
+	    krb5_free_principal(context, val->delegated[i]);
+	free(val->delegated);
+    }
     krb5_free_pa_data(context, val->method_data);
 }

@@ -772,7 +772,7 @@ static krb5_error_code
 make_ad_signedpath_data(krb5_context context,
 			krb5_const_principal client,
 			krb5_timestamp authtime,
-			krb5_transited_service **deleg_path,
+			krb5_principal *deleg_path,
 			krb5_pa_data **method_data,
 			krb5_data **data)
 {
@@ -793,7 +793,7 @@ verify_ad_signedpath_checksum(krb5_context context,
 			      const krb5_db_entry *krbtgt,
 			      krb5_keyblock *krbtgt_key,
 			      krb5_enc_tkt_part *enc_tkt_part,
-			      krb5_transited_service **deleg_path,
+			      krb5_principal *deleg_path,
 			      krb5_pa_data **method_data,
 			      krb5_checksum *cksum,
 			      krb5_boolean *valid)
@@ -833,7 +833,7 @@ verify_ad_signedpath(krb5_context context,
 		     krb5_db_entry *krbtgt,
 		     krb5_keyblock *krbtgt_key,
 		     krb5_enc_tkt_part *enc_tkt_part,
-		     krb5_transited_service ***pdelegated,
+		     krb5_principal **pdelegated,
 		     krb5_boolean *path_is_signed)
 {
     krb5_error_code		code;
@@ -891,7 +891,7 @@ make_ad_signedpath_checksum(krb5_context context,
 			    const krb5_db_entry *krbtgt,
 			    krb5_keyblock *krbtgt_key,
 			    krb5_enc_tkt_part *enc_tkt_part,
-			    krb5_transited_service **deleg_path,
+			    krb5_principal *deleg_path,
 			    krb5_pa_data **method_data,
 			    krb5_checksum *cksum)
 {
@@ -937,12 +937,11 @@ make_ad_signedpath(krb5_context context,
 		   krb5_principal server,
 		   const krb5_db_entry *krbtgt,
 		   krb5_keyblock *krbtgt_key,
-		   krb5_transited_service **deleg_path,
+		   krb5_principal *deleg_path,
 		   krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code		code;
     krb5_ad_signedpath		sp;
-    krb5_transited_service	transited;
     int				i;
     krb5_data			*data = NULL;
     krb5_authdata		ad_datum, *ad_data[2];
@@ -959,20 +958,16 @@ make_ad_signedpath(krb5_context context,
 	i = 0;
 
     sp.delegated = k5alloc((i + (server ? 1 : 0) + 1) *
-			   sizeof(krb5_transited_service *), &code);
+			   sizeof(krb5_principal), &code);
     if (code != 0)
 	goto cleanup;
 
     /* Combine existing and new transited services, if any */
-    if (deleg_path != NULL) {
-	memcpy(sp.delegated, deleg_path,
-	       i * sizeof(krb5_transited_service *));
-    }
-    if (server != NULL) {
-	transited.principal = (krb5_principal)server;
-	sp.delegated[i] = &transited;
-    }
-    sp.delegated[i + 1] = NULL;
+    if (deleg_path != NULL)
+	memcpy(sp.delegated, deleg_path, i * sizeof(krb5_principal));
+    if (server != NULL)
+	sp.delegated[i++] = server;
+    sp.delegated[i] = NULL;
     sp.method_data = NULL;
 
     code = make_ad_signedpath_checksum(context,
@@ -1020,8 +1015,21 @@ cleanup:
     krb5_free_authdata(context, if_relevant);
     krb5_free_data(context, data);
     krb5_free_checksum_contents(context, &sp.checksum);
+    krb5_free_pa_data(context, sp.method_data);
 
     return code;
+}
+
+static void
+free_deleg_path(krb5_context context, krb5_principal *deleg_path)
+{
+    if (deleg_path != NULL) {
+	int i;
+
+	for (i = 0; deleg_path[i] != NULL; i++)
+	    krb5_free_principal(context, deleg_path[i]);
+	free(deleg_path);
+    }
 }
 
 static krb5_error_code
@@ -1040,7 +1048,7 @@ handle_signedpath_authdata (krb5_context context,
 			    krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code code = 0;
-    krb5_transited_service **deleg_path = NULL;
+    krb5_principal *deleg_path = NULL;
     krb5_boolean signed_path;
     krb5_boolean s4u2proxy;
 
@@ -1056,7 +1064,6 @@ handle_signedpath_authdata (krb5_context context,
     signed_path = FALSE;
     s4u2proxy = isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
-    /* Verification is only necessary for the TGS-REQ case. */
     if (request->msg_type == KRB5_TGS_REQ) {
 	code = verify_ad_signedpath(context,
 				    krbtgt,
@@ -1067,7 +1074,7 @@ handle_signedpath_authdata (krb5_context context,
 	if (code != 0)
 	    goto cleanup;
 
-	if (s4u2proxy == TRUE && signed_path == FALSE) {
+	if (s4u2proxy && signed_path == FALSE) {
 	    code = KRB5KDC_ERR_BADOPTION;
 	    goto cleanup;
 	}
@@ -1086,7 +1093,7 @@ handle_signedpath_authdata (krb5_context context,
     }
 
 cleanup:
-    krb5_free_transited_services(context, deleg_path);
+    free_deleg_path(context, deleg_path);
 
     return code;
 }
