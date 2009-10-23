@@ -357,7 +357,10 @@ unload_authdata_plugins(krb5_context context)
     return 0;
 }
 
-/* Returns TRUE if authdata should be filtered when copying. */
+/*
+ * Returns TRUE if authdata should be filtered when copying from
+ * untrusted authdata.
+ */
 static krb5_boolean
 is_kdc_issued_authdatum (krb5_context context,
 			 krb5_authdata *authdata,
@@ -423,7 +426,12 @@ has_kdc_issued_authdata (krb5_context context,
     return ret;
 }
 
-/* Merge authdata. If copy == 0, in_authdata is invalid on successful return */
+/*
+ * Merge authdata.
+ *
+ * If copy is FALSE, in_authdata is invalid on successful return.
+ * If ignore_kdc_issued is TRUE, KDC-issued authdata is not copied.
+ */
 static krb5_error_code
 merge_authdata (krb5_context context,
 		krb5_authdata **in_authdata,
@@ -565,7 +573,7 @@ handle_request_authdata (krb5_context context,
     return code;
 }
 
-/* Copy authorization data from TGT */
+/* Handle copying TGT authorization data into reply */
 static krb5_error_code
 handle_tgt_authdata (krb5_context context,
 		     unsigned int flags,
@@ -581,7 +589,7 @@ handle_tgt_authdata (krb5_context context,
 		     krb5_enc_tkt_part *enc_tkt_request,
 		     krb5_enc_tkt_part *enc_tkt_reply)
 {
-    if (enc_tkt_request == NULL)
+    if (request->msg_type != KRB5_TGS_REQ)
 	return 0;
 
     return merge_authdata(context,
@@ -648,16 +656,6 @@ handle_kdb_authdata (krb5_context context,
     else
 	actual_client = enc_tkt_reply->client;
 
-    /*
-     * If the backend does not implement the sign authdata method, then
-     * just copy the TGT authorization data into the reply, except for
-     * the constrained delegation case (which requires special handling
-     * because it will promote untrusted auth data to KDC issued auth
-     * data; this requires backend-specific code)
-     *
-     * Presently this interface does not support using request auth data
-     * to influence (eg. possibly restrict) the reply auth data.
-     */
     code = sign_db_authdata(context,
 			    flags,
 			    actual_client,
@@ -1043,7 +1041,7 @@ handle_signedpath_authdata (krb5_context context,
     s4u2proxy = ((flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) != 0);
 
     /* Verification is only necessary for the TGS-REQ case. */
-    if ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) == 0) {
+    if (request->msg_type == KRB5_TGS_REQ) {
 	code = verify_ad_signedpath(context,
 				    krbtgt,
 				    krbtgt_key,
