@@ -380,8 +380,6 @@ tgt_again:
                                                 &st_client,
                                                 header_ticket->enc_part2->client,
                                                 request->server,
-                                                &krbtgt,
-                                                tgskey,
                                                 &status);
             if (errcode)
                 goto cleanup;

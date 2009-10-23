@@ -273,8 +273,6 @@ krb5_error_code kdc_process_s4u2proxy_req
 		const krb5_db_entry *server,
 		krb5_const_principal server_princ,
 		krb5_const_principal proxy_princ,
-		const krb5_db_entry *krbtgt,
-		krb5_keyblock *krbtgt_key,
 		const char **status);
 
 krb5_error_code kdc_check_transited_list
