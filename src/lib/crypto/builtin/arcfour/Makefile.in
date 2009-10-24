@@ -2,7 +2,7 @@ thisconfigdir=../../../..
 myfulldir=lib/crypto/builtin/arcfour
 mydir=lib/crypto/builtin/arcfour
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@/md4  -I$(srcdir)/../../krb
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../md4  -I$(srcdir)/../../krb
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
@@ -12,22 +12,20 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-CIMPL = @CRYPTO_IMPL@/arcfour
-
 STLIBOBJS=\
-	../../$(CIMPL)/arcfour.o	\
-	../../$(CIMPL)/arcfour_aead.o	\
-	../../$(CIMPL)/arcfour_s2k.o
+	arcfour.o	\
+	arcfour_aead.o	\
+	arcfour_s2k.o
 
 OBJS=\
-	$(OUTPRE)../../$(CIMPL)/arcfour.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/arcfour_aead.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/arcfour_s2k.$(OBJEXT)
+	$(OUTPRE)arcfour.$(OBJEXT)	\
+	$(OUTPRE)arcfour_aead.$(OBJEXT)	\
+	$(OUTPRE)arcfour_s2k.$(OBJEXT)
 
 SRCS=\
-	$(srcdir)/../../$(CIMPL)/arcfour.c	\
-	$(srcdir)/../../$(CIMPL)/arcfour_aead.c\
-	$(srcdir)/../../$(CIMPL)/arcfour_s2k.c
+	$(srcdir)/arcfour.c	\
+	$(srcdir)/arcfour_aead.c\
+	$(srcdir)/arcfour_s2k.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

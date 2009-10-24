@@ -41,21 +41,21 @@ STOBJLISTS= \
 	../../lib/krb5/unicode/OBJS.ST \
 	../profile/OBJS.ST \
 	../../lib/crypto/krb/crc32/OBJS.ST \
-	../../lib/crypto/builtin/des/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/des/OBJS.ST \
 	../../lib/crypto/krb/dk/OBJS.ST \
-	../../lib/crypto/builtin/enc_provider/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/enc_provider/OBJS.ST \
 	../../lib/crypto/krb/hash_provider/OBJS.ST \
 	../../lib/crypto/krb/keyhash_provider/OBJS.ST \
-	../../lib/crypto/builtin/md4/OBJS.ST \
-	../../lib/crypto/builtin/md5/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/md4/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/md5/OBJS.ST \
 	../../lib/crypto/krb/old/OBJS.ST \
 	../../lib/crypto/krb/raw/OBJS.ST \
-	../../lib/crypto/builtin/sha1/OBJS.ST \
-	../../lib/crypto/builtin/arcfour/OBJS.ST \
-	../../lib/crypto/builtin/aes/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/sha1/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/arcfour/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/aes/OBJS.ST \
 	../../lib/crypto/krb/yarrow/OBJS.ST \
 	../../lib/crypto/krb/OBJS.ST \
-	../../lib/crypto/builtin/OBJS.ST \
+	../../lib/crypto/@CRYPTO_IMPL@/OBJS.ST \
 	../../lib/crypto/OBJS.ST \
 	../et/OBJS.ST \
 	../support/OBJS.ST

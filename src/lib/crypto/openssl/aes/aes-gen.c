@@ -32,9 +32,11 @@ static void init ()
 	    test_case[i].input[j] = 0xff & rand();
 	}
 
-    r = aes_enc_key (key, sizeof(key), &ctx);
+    r = krb5int_aes_enc_key (key, sizeof(key), &ctx);
+    //r = aes_enc_key (key, sizeof(key), &ctx);
     if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
-    r = aes_dec_key (key, sizeof(key), &dctx);
+    r = krb5int_aes_dec_key (key, sizeof(key), &dctx);
+    //r = aes_dec_key (key, sizeof(key), &dctx);
     if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
 }
 

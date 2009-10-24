@@ -17,7 +17,6 @@ DEFS=
 
 EXTRADEPSRCS=\
 	$(srcdir)/t_nfold.c	\
-	$(srcdir)/t_cf2.c 	\
 	$(srcdir)/t_encrypt.c	\
 	$(srcdir)/t_prf.c 	\
 	$(srcdir)/t_prng.c	\
@@ -26,13 +25,9 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_cts.c	\
 	$(srcdir)/vectors.c	\
 	$(srcdir)/aes-test.c	\
-	$(srcdir)/t_afss2k.c	\
 	$(srcdir)/t_cksum.c	\
 	$(srcdir)/t_crc.c	\
 	$(srcdir)/t_mddriver.c	\
-	$(srcdir)/t_shs3.c	\
-	$(srcdir)/t_shs.c	\
-	$(srcdir)/t_verify.c	\
 	$(srcdir)/t_kperf.c	\
 	$(srcdir)/ytest.c	
 
@@ -44,11 +39,11 @@ EXTRADEPSRCS=\
 
 ##DOS##LIBOBJS = $(OBJS)
 
-check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_cf2 \
+check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
 		t_cksum4 t_cksum5 \
-		aes-test verify t_afss2k \
+		aes-test  \
 		t_mddriver4 t_mddriver \
-		t_shs t_shs3 t_crc t_cts
+		t_crc t_cts
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
@@ -56,23 +51,16 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_cf2 \
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
 	diff t_prf.output $(srcdir)/t_prf.expected
-	$(RUN_SETUP) $(VALGRIND) ./t_cf2 <$(srcdir)/t_cf2.in >t_cf2.output
-	diff t_cf2.output $(srcdir)/t_cf2.expected
 	$(RUN_SETUP) $(VALGRIND) ./t_cksum4 "this is a test"
 	$(RUN_SETUP) $(VALGRIND) ./t_cksum5 "this is a test"
 	$(RUN_SETUP) $(VALGRIND) ./t_crc
+	$(RUN_SETUP) $(VALGRIND) ./t_cts
 	$(RUN_SETUP) $(VALGRIND) ./aes-test -k > vk.txt
 	cmp vk.txt $(srcdir)/expect-vk.txt
 	$(RUN_SETUP) $(VALGRIND) ./aes-test > vt.txt
 	cmp vt.txt $(srcdir)/expect-vt.txt
-	$(RUN_SETUP) $(VALGRIND) ./verify -z
-	$(RUN_SETUP) $(VALGRIND) ./verify -m
-	$(RUN_SETUP) $(VALGRIND) ./verify
-	$(RUN_SETUP) $(VALGRIND) ./t_afss2k
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver4 -x
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
-	$(RUN_SETUP) $(VALGRIND) $(C)t_shs -x
-	$(RUN_SETUP) $(VALGRIND) $(C)t_shs3
 
 
 
@@ -90,10 +78,6 @@ t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 
 t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_prf.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
-
-t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_cf2.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
-
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)
@@ -129,12 +113,6 @@ t_crc: t_crc.o $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
-verify$(EXEEXT): t_verify.$(OBJEXT) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_verify.$(OBJEXT) -lcom_err $(SUPPORT_LIB) -lk5crypto
-
-t_afss2k: t_afss2k.$(OBJEXT) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ t_afss2k.$(OBJEXT) -lcom_err $(SUPPORT_LIB) -lk5crypto
-
 t_mddriver4.o: $(srcdir)/t_mddriver.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_mddriver4.o -c $(srcdir)/t_mddriver.c
 
@@ -143,12 +121,6 @@ t_mddriver4: t_mddriver4.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 
 t_mddriver: t_mddriver.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_mddriver t_mddriver.o -lk5crypto $(SUPPORT_LIB)
-
-t_shs: t_shs.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_shs t_shs.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
-
-t_shs3: t_shs3.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_shs3 t_shs3.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
 
 t_kperf: t_kperf.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_kperf t_kperf.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
@@ -161,19 +133,16 @@ ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 clean::
 	$(RM) t_nfold.o t_nfold nfold.$(OBJEXT) t_encrypt t_encrypt.o \
 		t_prng.o t_prng t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o \
-		t_prf t_prf.o t_cf2 t_cf2.o \
+		t_prf t_prf.o \
 		aes-test.o aes-test vt.txt vk.txt kresults.out \
-		t_afss2k.o t_afss2k t_cksum.o t_cksum \
+		t_cksum.o t_cksum \
 		t_crc.o t_crc t_cts.o t_cts \
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
 		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o \
-		t_shs3 t_shs3.o t_shs t_shs.o verify t_verify.o  \
-		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) \
-		t_shs$(EXEEXT) t_shs.$(OBJEXT) t_shs3$(EXEEXT) t_shs3.$(OBJEXT)
+		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
 
 	-$(RM) t_prng.output
 	-$(RM) t_prf.output
-	-$(RM) t_cf2.output
 
 @lib_frag@
 @libobj_frag@
