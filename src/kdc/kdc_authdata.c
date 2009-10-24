@@ -1102,14 +1102,14 @@ handle_signedpath_authdata (krb5_context context,
     krb5_principal *deleg_path = NULL;
     krb5_boolean signed_path;
     krb5_boolean s4u2proxy;
+    krb5_authdata **ad_reply = enc_tkt_reply->authorization_data;
 
     /*
-     * If backend/another plugin returned the PAC, then it presumably
-     * verified the path for constrained delegation, and we can NOOP.
+     * The Windows PAC fulfils the same role as the signed path
+     * in the case that there is no other KDC issued auth data.
      */
-    if (has_kdc_issued_authdata(context,
-				enc_tkt_reply->authorization_data,
-				KRB5_AUTHDATA_WIN2K_PAC))
+    if (has_kdc_issued_authdata(context, ad_reply, KRB5_AUTHDATA_WIN2K_PAC) &&
+	!has_kdc_issued_authdata(context, ad_reply, KRB5_AUTHDATA_KDC_ISSUED))
 	return 0;
 
     signed_path = FALSE;
