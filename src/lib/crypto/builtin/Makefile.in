@@ -13,6 +13,7 @@ LOCALINCLUDES = -I$(srcdir)/../krb 			\
 		-I$(srcdir)/md5	\
 		-I$(srcdir)/enc_provider	\
 		-I$(srcdir)/hash_provider 	
+RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
