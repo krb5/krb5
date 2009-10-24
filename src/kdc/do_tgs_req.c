@@ -102,7 +102,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_keyblock encrypting_key;
     int nprincs = 0;
     krb5_boolean more;
-    krb5_timestamp kdc_time, authtime=0;
+    krb5_timestamp kdc_time, authtime = 0;
     krb5_keyblock session_key;
     krb5_timestamp rtime;
     krb5_keyblock *reply_key = NULL;
@@ -906,10 +906,8 @@ tgt_again:
     reply_encpart.session = &session_key;
     reply_encpart.nonce = request->nonce;
 
-    /* copy the time fields EXCEPT for authtime; its location
-       is used for ktime */
+    /* copy the time fields */
     reply_encpart.times = enc_tkt_reply.times;
-    reply_encpart.times.authtime = authtime;
 
     /* starttime is optional, and treated as authtime if not present.
        so we can nuke it if it matches */
