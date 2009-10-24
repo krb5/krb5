@@ -817,7 +817,7 @@ make_ad_signedpath_data(krb5_context context,
     if (sign_authdata != NULL)
 	free(sign_authdata);
 
-    return 0;
+    return code;
 }
 
 static krb5_error_code
