@@ -2085,6 +2085,7 @@ populate_krb5_db_entry (krb5_context context,
 	}
     }
 
+    /* ALLOWED TO DELEGATE TO */
     {
 	char **a2d2 = NULL;
 	int i;
@@ -2095,7 +2096,7 @@ populate_krb5_db_entry (krb5_context context,
 	if (st != 0)
 	    goto cleanup;
 
-	if (a2d2 != NULL) {
+	if (attr_present == TRUE) {
 	    for (tlp = &entry->tl_data; *tlp; tlp = &(*tlp)->tl_data_next)
 		;
 	    for (i = 0; a2d2[i] != NULL; i++) {
@@ -2110,6 +2111,7 @@ populate_krb5_db_entry (krb5_context context,
 		if (tl->tl_data_contents == NULL) {
 		    st = ENOMEM;
 		    ldap_value_free(a2d2);
+		    free(tl);
 		    goto cleanup;
 		}
 		tl->tl_data_next = NULL;

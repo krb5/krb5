@@ -67,7 +67,6 @@ typedef krb5_error_code (*init_proc)
 typedef void (*fini_proc)
     (krb5_context, void *);
 
-/* Internal authdata system for copying TGS-REQ authdata to ticket */
 static krb5_error_code handle_request_authdata
     (krb5_context context,
      unsigned int flags,
@@ -83,7 +82,6 @@ static krb5_error_code handle_request_authdata
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
-/* Internal authdata system for copying TGT authdata to ticket */
 static krb5_error_code handle_tgt_authdata
     (krb5_context context,
      unsigned int flags,
@@ -99,7 +97,6 @@ static krb5_error_code handle_tgt_authdata
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
-/* Internal authdata system for handling KDB provided authdata */
 static krb5_error_code handle_kdb_authdata
     (krb5_context context,
      unsigned int flags,
@@ -115,7 +112,6 @@ static krb5_error_code handle_kdb_authdata
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
-/* Internal authdata system for handling delegation path */
 static krb5_error_code handle_signedpath_authdata
     (krb5_context context,
      unsigned int flags,
@@ -149,10 +145,46 @@ typedef struct _krb5_authdata_systems {
 } krb5_authdata_systems;
 
 static krb5_authdata_systems static_authdata_systems[] = {
-    { "tgs_req", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_request_authdata } },
-    { "tgt", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_tgt_authdata } },
-    { "kdb", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_kdb_authdata } },
-    { "signedpath", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_signedpath_authdata } },
+    {
+	/* Propagate client-submitted authdata */
+	"tgs_req",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_request_authdata }
+    },
+    {
+	/* Propagate TGT authdata */
+	"tgt",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_tgt_authdata }
+    },
+    {
+	/* Verify and issue KDB issued authdata */
+	"kdb",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_kdb_authdata }
+    },
+    {
+	/* Verify and issue signed delegation path */
+	"signedpath",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_signedpath_authdata }
+    }
 };
 
 static krb5_authdata_systems *authdata_systems;
@@ -817,7 +849,7 @@ make_ad_signedpath_data(krb5_context context,
     if (sign_authdata != NULL)
 	free(sign_authdata);
 
-    return 0;
+    return code;
 }
 
 static krb5_error_code
@@ -1083,6 +1115,18 @@ free_deleg_path(krb5_context context, krb5_principal *deleg_path)
     }
 }
 
+/*
+ * Returns TRUE if the Windows 2000 PAC is the only element in the
+ * supplied authorization data.
+ */
+static krb5_boolean
+only_pac_p(krb5_context context, krb5_authdata **authdata)
+{
+    return has_kdc_issued_authdata(context,
+				   authdata, KRB5_AUTHDATA_WIN2K_PAC) &&
+	(authdata[1] == NULL);
+}
+
 static krb5_error_code
 handle_signedpath_authdata (krb5_context context,
 			    unsigned int flags,
@@ -1100,22 +1144,17 @@ handle_signedpath_authdata (krb5_context context,
 {
     krb5_error_code code = 0;
     krb5_principal *deleg_path = NULL;
-    krb5_boolean signed_path;
+    krb5_boolean signed_path = FALSE;
     krb5_boolean s4u2proxy;
 
-    /*
-     * If backend/another plugin returned the PAC, then it presumably
-     * verified the path for constrained delegation, and we can NOOP.
-     */
-    if (has_kdc_issued_authdata(context,
-				enc_tkt_reply->authorization_data,
-				KRB5_AUTHDATA_WIN2K_PAC))
-	return 0;
-
-    signed_path = FALSE;
     s4u2proxy = isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
-    if (request->msg_type == KRB5_TGS_REQ) {
+    /*
+     * The Windows PAC fulfils the same role as the signed path
+     * if it is the only authorization data element.
+     */
+    if (request->msg_type == KRB5_TGS_REQ &&
+	!only_pac_p(context, enc_tkt_request->authorization_data)) {
 	code = verify_ad_signedpath(context,
 				    krbtgt,
 				    krbtgt_key,
@@ -1131,7 +1170,8 @@ handle_signedpath_authdata (krb5_context context,
 	}
     }
 
-    if (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
+    if (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM) &&
+	!only_pac_p(context, enc_tkt_reply->authorization_data)) {
 	code = make_ad_signedpath(context,
 				  for_user_princ,
 				  s4u2proxy ? client->princ : NULL,
