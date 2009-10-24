@@ -1323,6 +1323,7 @@ static const struct field_info ad_signedpath_data_fields[] = {
     FIELDOF_NORM(krb5_ad_signedpath_data, kerberos_time, authtime, 1),
     FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seq_of_princ_plus_realm, delegated, 2, 2),
     FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_pa_data, method_data, 3, 3),
+    FIELDOF_OPT(krb5_ad_signedpath_data, auth_data_ptr, authorization_data, 4, 4),
 };
 
 static unsigned int ad_signedpath_data_optional(const void *p)
@@ -1333,6 +1334,8 @@ static unsigned int ad_signedpath_data_optional(const void *p)
         optional |= (1u << 2);
     if (val->method_data && val->method_data[0])
         optional |= (1u << 3);
+    if (val->authorization_data && val->authorization_data[0])
+        optional |= (1u << 4);
     return optional;
 }
 
