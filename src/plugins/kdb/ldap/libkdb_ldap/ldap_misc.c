@@ -2085,6 +2085,7 @@ populate_krb5_db_entry (krb5_context context,
 	}
     }
 
+    /* ALLOWED TO DELEGATE TO */
     {
 	char **a2d2 = NULL;
 	int i;
