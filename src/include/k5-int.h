@@ -1080,6 +1080,7 @@ typedef struct _krb5_ad_signedpath_data {
     krb5_timestamp authtime;
     krb5_principal *delegated;
     krb5_pa_data **method_data;
+    krb5_authdata **authorization_data;
 } krb5_ad_signedpath_data;
 
 typedef struct _krb5_ad_signedpath {
