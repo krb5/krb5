@@ -272,7 +272,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.34.1
 
 ##### Number of consecutive pre-authentication failures before lockout
 
-attributetype ( 2.16.840.1.113719.1.301.4.55.1
+attributetype ( 1.3.6.1.4.1.5322.21.1.1
                 NAME 'krbPwdMaxFailure' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -281,7 +281,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.55.1
 
 ##### Period after which bad preauthentication count will be reset
 
-attributetype ( 2.16.840.1.113719.1.301.4.56.1
+attributetype ( 1.3.6.1.4.1.5322.21.1.2
                 NAME 'krbPwdFailureCountInterval' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -290,7 +290,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.56.1
 
 ##### Period in which lockout is enforced
 
-attributetype ( 2.16.840.1.113719.1.301.4.57.1
+attributetype ( 1.3.6.1.4.1.5322.21.1.3
                 NAME 'krbPwdLockoutDuration' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
