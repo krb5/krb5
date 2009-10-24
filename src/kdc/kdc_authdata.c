@@ -67,7 +67,6 @@ typedef krb5_error_code (*init_proc)
 typedef void (*fini_proc)
     (krb5_context, void *);
 
-/* Internal authdata system for copying TGS-REQ authdata to ticket */
 static krb5_error_code handle_request_authdata
     (krb5_context context,
      unsigned int flags,
@@ -83,7 +82,6 @@ static krb5_error_code handle_request_authdata
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
-/* Internal authdata system for copying TGT authdata to ticket */
 static krb5_error_code handle_tgt_authdata
     (krb5_context context,
      unsigned int flags,
@@ -99,7 +97,6 @@ static krb5_error_code handle_tgt_authdata
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
-/* Internal authdata system for handling KDB provided authdata */
 static krb5_error_code handle_kdb_authdata
     (krb5_context context,
      unsigned int flags,
@@ -115,7 +112,6 @@ static krb5_error_code handle_kdb_authdata
      krb5_enc_tkt_part *enc_tkt_request,
      krb5_enc_tkt_part *enc_tkt_reply);
 
-/* Internal authdata system for handling delegation path */
 static krb5_error_code handle_signedpath_authdata
     (krb5_context context,
      unsigned int flags,
@@ -149,10 +145,46 @@ typedef struct _krb5_authdata_systems {
 } krb5_authdata_systems;
 
 static krb5_authdata_systems static_authdata_systems[] = {
-    { "tgs_req", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_request_authdata } },
-    { "tgt", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_tgt_authdata } },
-    { "kdb", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_kdb_authdata } },
-    { "signedpath", AUTHDATA_SYSTEM_V2, AUTHDATA_FLAG_CRITICAL, NULL, NULL, NULL, { handle_signedpath_authdata } },
+    {
+	/* Propagate client-submitted authdata */
+	"tgs_req",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_request_authdata }
+    },
+    {
+	/* Propagate TGT authdata */
+	"tgt",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_tgt_authdata }
+    },
+    {
+	/* Verify and issue KDB issued authdata */
+	"kdb",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_kdb_authdata }
+    },
+    {
+	/* Verify and issue signed delegation path */
+	"signedpath",
+	AUTHDATA_SYSTEM_V2,
+	AUTHDATA_FLAG_CRITICAL,
+	NULL,
+	NULL,
+	NULL,
+	{ handle_signedpath_authdata }
+    }
 };
 
 static krb5_authdata_systems *authdata_systems;
