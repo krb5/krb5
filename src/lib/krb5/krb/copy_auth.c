@@ -302,6 +302,9 @@ krb5_make_authdata_kdc_issued(krb5_context context,
     if (code != 0)
         return code;
 
+    if (!krb5_c_is_keyed_cksum(cksumtype))
+        return KRB5KRB_AP_ERR_INAPP_CKSUM;
+
     code = encode_krb5_authdata(ad_kdci.elements, &data);
     if (code != 0)
         return code;
@@ -362,6 +365,11 @@ krb5_verify_authdata_kdc_issued(krb5_context context,
     code = decode_krb5_ad_kdcissued(&data, &ad_kdci);
     if (code != 0)
         return code;
+
+    if (!krb5_c_is_keyed_cksum(ad_kdci->ad_checksum.checksum_type)) {
+        krb5_free_ad_kdcissued(context, ad_kdci);
+        return KRB5KRB_AP_ERR_INAPP_CKSUM;
+    }
 
     code = encode_krb5_authdata(ad_kdci->elements, &data2);
     if (code != 0) {

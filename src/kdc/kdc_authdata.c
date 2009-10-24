@@ -803,6 +803,9 @@ verify_ad_signedpath_checksum(krb5_context context,
 
     *valid = FALSE;
 
+    if (!krb5_c_is_keyed_cksum(cksum->checksum_type))
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+
     code = make_ad_signedpath_data(context,
 				   enc_tkt_part->client,
 				   enc_tkt_part->times.authtime,
@@ -922,6 +925,11 @@ make_ad_signedpath_checksum(krb5_context context,
 	return code;
     }
 
+    if (!krb5_c_is_keyed_cksum(cksumtype)) {
+	krb5_free_data(context, data);
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+    }
+
     code = krb5_c_make_checksum(context, cksumtype, krbtgt_key,
 				KRB5_KEYUSAGE_AD_SIGNEDPATH, data,
 				cksum);
@@ -978,8 +986,17 @@ make_ad_signedpath(krb5_context context,
 				       sp.delegated,
 				       sp.method_data,
 				       &sp.checksum);
-    if (code != 0)
+    if (code != 0) {
+	if (code == KRB5KRB_AP_ERR_INAPP_CKSUM) {
+	    /*
+	     * In the hopefully unlikely case the TGS key enctype
+	     * has an unkeyed mandatory checksum type, do not fail
+	     * so we do not prevent the KDC from servicing requests.
+	     */
+	    code = 0;
+	}
 	goto cleanup;
+    }
 
     code = encode_krb5_ad_signedpath(&sp, &data);
     if (code != 0)
