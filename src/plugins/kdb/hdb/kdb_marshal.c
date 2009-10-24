@@ -751,6 +751,9 @@ kh_unmarshal_hdb_entry(krb5_context context,
 
     memset(kentry, 0, sizeof(*kentry));
 
+    kentry->magic = KRB5_KDB_MAGIC_NUMBER;
+    kentry->len = KRB5_KDB_V1_BASE_LENGTH;
+
     code = kh_unmarshal_Principal(context, hentry->principal, &kentry->princ);
     if (code != 0)
         goto cleanup;

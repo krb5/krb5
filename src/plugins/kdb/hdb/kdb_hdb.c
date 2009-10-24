@@ -700,6 +700,8 @@ kh_get_master_key_principal(krb5_context context,
     memset(kentry, 0, sizeof(*kentry));
     *nentries = 0;
 
+    kentry->magic = KRB5_KDB_MAGIC_NUMBER;
+    kentry->len = KRB5_KDB_V1_BASE_LENGTH;
     kentry->attributes = KRB5_KDB_DISALLOW_ALL_TIX;
 
     if (princ == NULL)
