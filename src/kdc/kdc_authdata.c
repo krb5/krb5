@@ -1083,6 +1083,18 @@ free_deleg_path(krb5_context context, krb5_principal *deleg_path)
     }
 }
 
+/*
+ * Returns TRUE if the Windows 2000 PAC is the only element in the
+ * supplied authorization data.
+ */
+static krb5_boolean
+only_pac_p(krb5_context context, krb5_authdata **authdata)
+{
+    return has_kdc_issued_authdata(context,
+				   authdata, KRB5_AUTHDATA_WIN2K_PAC) &&
+	(authdata[1] == NULL);
+}
+
 static krb5_error_code
 handle_signedpath_authdata (krb5_context context,
 			    unsigned int flags,
@@ -1100,22 +1112,17 @@ handle_signedpath_authdata (krb5_context context,
 {
     krb5_error_code code = 0;
     krb5_principal *deleg_path = NULL;
-    krb5_boolean signed_path;
+    krb5_boolean signed_path = FALSE;
     krb5_boolean s4u2proxy;
-    krb5_authdata **ad_reply = enc_tkt_reply->authorization_data;
+
+    s4u2proxy = isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
     /*
      * The Windows PAC fulfils the same role as the signed path
-     * in the case that there is no other KDC issued auth data.
+     * if it is the only authorization data element.
      */
-    if (has_kdc_issued_authdata(context, ad_reply, KRB5_AUTHDATA_WIN2K_PAC) &&
-	!has_kdc_issued_authdata(context, ad_reply, KRB5_AUTHDATA_KDC_ISSUED))
-	return 0;
-
-    signed_path = FALSE;
-    s4u2proxy = isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
-
-    if (request->msg_type == KRB5_TGS_REQ) {
+    if (request->msg_type == KRB5_TGS_REQ &&
+	!only_pac_p(context, enc_tkt_request->authorization_data)) {
 	code = verify_ad_signedpath(context,
 				    krbtgt,
 				    krbtgt_key,
@@ -1131,7 +1138,8 @@ handle_signedpath_authdata (krb5_context context,
 	}
     }
 
-    if (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
+    if (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM) &&
+	!only_pac_p(context, enc_tkt_reply->authorization_data)) {
 	code = make_ad_signedpath(context,
 				  for_user_princ,
 				  s4u2proxy ? client->princ : NULL,
