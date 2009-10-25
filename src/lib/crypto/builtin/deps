@@ -10,8 +10,8 @@ hmac.so hmac.po $(OUTPRE)hmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/hmac.c \
-  $(srcdir)/../krb/aead.h $(srcdir)/../krb/cksumtypes.h
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../krb/aead.h \
+  $(srcdir)/../krb/cksumtypes.h hmac.c
 pbkdf2.so pbkdf2.po $(OUTPRE)pbkdf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -22,4 +22,6 @@ pbkdf2.so pbkdf2.po $(OUTPRE)pbkdf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/hash_provider/hash_provider.h \
-  $(srcdir)/pbkdf2.c
+  pbkdf2.c
+t_cf2.so t_cf2.po $(OUTPRE)t_cf2.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h t_cf2.c

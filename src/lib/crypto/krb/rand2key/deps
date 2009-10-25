@@ -22,7 +22,8 @@ des_rand2key.so des_rand2key.po $(OUTPRE)des_rand2key.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  des_rand2key.c rand2key.h
+  $(srcdir)/../../builtin/des/des_int.h des_rand2key.c \
+  rand2key.h
 des3_rand2key.so des3_rand2key.po $(OUTPRE)des3_rand2key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -33,7 +34,8 @@ des3_rand2key.so des3_rand2key.po $(OUTPRE)des3_rand2key.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  des3_rand2key.c rand2key.h
+  $(srcdir)/../../builtin/des/des_int.h des3_rand2key.c \
+  rand2key.h
 rc4_rand2key.so rc4_rand2key.po $(OUTPRE)rc4_rand2key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

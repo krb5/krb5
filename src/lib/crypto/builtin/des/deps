@@ -11,7 +11,7 @@ afsstring2key.so afsstring2key.po $(OUTPRE)afsstring2key.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/afsstring2key.c $(srcdir)/des_int.h
+  afsstring2key.c des_int.h
 d3_cbc.so d3_cbc.po $(OUTPRE)d3_cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -21,8 +21,8 @@ d3_cbc.so d3_cbc.po $(OUTPRE)d3_cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/d3_cbc.c \
-  $(srcdir)/des_int.h $(srcdir)/f_tables.h
+  $(SRCTOP)/include/socket-utils.h d3_cbc.c des_int.h \
+  f_tables.h
 d3_aead.so d3_aead.po $(OUTPRE)d3_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -32,9 +32,9 @@ d3_aead.so d3_aead.po $(OUTPRE)d3_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/d3_aead.c \
-  $(srcdir)/des_int.h $(srcdir)/f_tables.h \
-  $(srcdir)/../../krb/aead.h $(srcdir)/../../krb/cksumtypes.h
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../krb/aead.h \
+  $(srcdir)/../../krb/cksumtypes.h d3_aead.c des_int.h \
+  f_tables.h
 d3_kysched.so d3_kysched.po $(OUTPRE)d3_kysched.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -45,7 +45,7 @@ d3_kysched.so d3_kysched.po $(OUTPRE)d3_kysched.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/d3_kysched.c $(srcdir)/des_int.h
+  d3_kysched.c des_int.h
 f_aead.so f_aead.po $(OUTPRE)f_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -55,9 +55,9 @@ f_aead.so f_aead.po $(OUTPRE)f_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/des_int.h \
-  $(srcdir)/f_aead.c $(srcdir)/f_tables.h \
-  $(srcdir)/../../krb/aead.h $(srcdir)/../../krb/cksumtypes.h
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../krb/aead.h \
+  $(srcdir)/../../krb/cksumtypes.h des_int.h f_aead.c \
+  f_tables.h
 f_cbc.so f_cbc.po $(OUTPRE)f_cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -67,8 +67,8 @@ f_cbc.so f_cbc.po $(OUTPRE)f_cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/des_int.h \
-  $(srcdir)/f_cbc.c $(srcdir)/f_tables.h
+  $(SRCTOP)/include/socket-utils.h des_int.h f_cbc.c \
+  f_tables.h
 f_cksum.so f_cksum.po $(OUTPRE)f_cksum.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -78,8 +78,8 @@ f_cksum.so f_cksum.po $(OUTPRE)f_cksum.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/des_int.h \
-  $(srcdir)/f_cksum.c $(srcdir)/f_tables.h
+  $(SRCTOP)/include/socket-utils.h des_int.h f_cksum.c \
+  f_tables.h
 f_parity.so f_parity.po $(OUTPRE)f_parity.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -90,7 +90,7 @@ f_parity.so f_parity.po $(OUTPRE)f_parity.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/des_int.h $(srcdir)/f_parity.c
+  des_int.h f_parity.c
 f_sched.so f_sched.po $(OUTPRE)f_sched.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
@@ -100,8 +100,7 @@ f_sched.so f_sched.po $(OUTPRE)f_sched.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/des_int.h \
-  $(srcdir)/f_sched.c
+  $(SRCTOP)/include/socket-utils.h des_int.h f_sched.c
 f_tables.so f_tables.po $(OUTPRE)f_tables.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -112,8 +111,7 @@ f_tables.so f_tables.po $(OUTPRE)f_tables.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/des_int.h $(srcdir)/f_tables.c \
-  $(srcdir)/f_tables.h
+  des_int.h f_tables.c f_tables.h
 key_sched.so key_sched.po $(OUTPRE)key_sched.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -124,7 +122,7 @@ key_sched.so key_sched.po $(OUTPRE)key_sched.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/des_int.h $(srcdir)/key_sched.c
+  des_int.h key_sched.c
 weak_key.so weak_key.po $(OUTPRE)weak_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -135,7 +133,7 @@ weak_key.so weak_key.po $(OUTPRE)weak_key.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/des_int.h $(srcdir)/weak_key.c
+  des_int.h weak_key.c
 string2key.so string2key.po $(OUTPRE)string2key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -146,7 +144,7 @@ string2key.so string2key.po $(OUTPRE)string2key.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/authdata_plugin.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/des_int.h $(srcdir)/string2key.c
+  des_int.h string2key.c
 destest.so destest.po $(OUTPRE)destest.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
