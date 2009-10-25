@@ -123,6 +123,7 @@ AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @
 [CRYPTO_IMPL=$withval
 AC_MSG_RESULT("k5crypto will use \'$withval\'")
 ], withval=builtin)
+AC_CONFIG_COMMANDS(CRYPTO_IMPL, , CRYPTO_IMPL=$CRYPTO_IMPL)
 AC_SUBST(CRYPTO_IMPL)
 
 # --with-kdc-kdb-update makes the KDC update the database with last request
