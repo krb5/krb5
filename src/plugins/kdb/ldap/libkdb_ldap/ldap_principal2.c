@@ -159,6 +159,7 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     ldapent = k5alloc(sizeof(*ldapent), &st);
     if (st != 0)
 	goto cleanup;
+    ldapent->magic = KRB5_LDAP_ENTRY_MAGIC;
 
     GET_HANDLE();
     for (tree=0; tree < ntrees && *nentries == 0; ++tree) {

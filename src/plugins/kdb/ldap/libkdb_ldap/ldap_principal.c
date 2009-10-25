@@ -92,6 +92,8 @@ krb5_dbe_free_contents(context, entry)
 
     if (entry->e_data) {
 	krb5_ldap_entry *ldapent = (krb5_ldap_entry *)entry->e_data;
+	assert(entry->e_length == sizeof(*ldapent));
+	assert(ldapent->magic == KRB5_LDAP_ENTRY_MAGIC);
 	ldap_msgfree(ldapent->result);
 	free(entry->e_data);
     }

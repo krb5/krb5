@@ -231,7 +231,10 @@ typedef struct {
   struct berval **keys;
 }KEY;
 
+#define KRB5_LDAP_ENTRY_MAGIC	    0xcafecafe
+
 typedef struct _krb5_ldap_entry {
+    krb5_magic magic;
     LDAPMessage *result;
     LDAPMessage *entry;
 } krb5_ldap_entry;
