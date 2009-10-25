@@ -1,5 +1,5 @@
 /*
- * plugins/authdata/saml_server/
+ * plugins/authdata/saml_server/saml_kdc.c
  *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
