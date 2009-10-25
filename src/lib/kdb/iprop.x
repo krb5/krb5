@@ -219,5 +219,11 @@ program KRB5_IPROP_PROG {
 		 */
 		kdb_fullresync_result_t
 		IPROP_FULL_RESYNC(void) = 2;
+
+		/*
+		 * Full resync with version marker
+		 */
+		kdb_fullresync_result_t
+		IPROP_FULL_RESYNC_EXT(uint32_t) = 3;
 	} = 1;
 } = 100423;

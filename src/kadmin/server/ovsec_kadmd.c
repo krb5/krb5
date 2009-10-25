@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
      if((ret = kadm5_init(context, "kadmind", NULL,
 			  NULL, &params,
 			  KADM5_STRUCT_VERSION,
-			  KADM5_API_VERSION_2,
+			  KADM5_API_VERSION_3,
 			  db_args,
 		     &global_server_handle)) != KADM5_OK) {
 	  const char *e_txt = krb5_get_error_message (context, ret);

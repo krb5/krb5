@@ -71,7 +71,8 @@ krb5_error_code krb5_db2_db_destroy
 krb5_error_code krb5_db2_db_rename 
 	(krb5_context,
 		   char *,
-		   char * );
+		   char *,
+		   int );
 krb5_error_code krb5_db2_db_get_principal 
 	(krb5_context,
 		   krb5_const_principal,
@@ -218,5 +219,24 @@ void krb5_db2_free_policy( krb5_context kcontext,
 
 /* Thread-safety wrapper slapped on top of original implementation.  */
 extern k5_mutex_t *krb5_db2_mutex;
+
+/* lockout */
+krb5_error_code
+krb5_db2_lockout_check_policy(krb5_context context,
+                              krb5_db_entry *entry,
+                              krb5_timestamp stamp);
+
+krb5_error_code
+krb5_db2_lockout_audit(krb5_context context,
+                       krb5_db_entry *entry,
+                       krb5_timestamp stamp,
+                       krb5_error_code status);
+
+/* methods */
+krb5_error_code
+krb5_db2_invoke(krb5_context context,
+                unsigned int method,
+                const krb5_data *req,
+                krb5_data *rep);
 
 #endif /* KRB5_KDB_DB2_H */

@@ -140,6 +140,26 @@ kadm5_create_policy_internal(void *server_handle,
 	pent.policy_refcnt = 0;
     else
 	pent.policy_refcnt = entry->policy_refcnt;
+
+    if (handle->api_version == KADM5_API_VERSION_3) {
+	if (!(mask & KADM5_PW_MAX_FAILURE))
+	    pent.pw_max_fail = 0;
+	else
+	    pent.pw_max_fail = entry->pw_max_fail;
+	if (!(mask & KADM5_PW_FAILURE_COUNT_INTERVAL))
+	    pent.pw_failcnt_interval = 0;
+	else
+	    pent.pw_failcnt_interval = entry->pw_failcnt_interval;
+	if (!(mask & KADM5_PW_LOCKOUT_DURATION))
+	    pent.pw_lockout_duration = 0;
+	else
+	    pent.pw_lockout_duration = entry->pw_lockout_duration;
+    } else {
+	pent.pw_max_fail = 0;
+	pent.pw_failcnt_interval = 0;
+	pent.pw_lockout_duration = 0;
+    }
+
     if ((ret = krb5_db_create_policy(handle->context, &pent)))
 	return ret;
     else
@@ -248,6 +268,14 @@ kadm5_modify_policy_internal(void *server_handle,
     }
     if ((mask & KADM5_REF_COUNT))
 	p->policy_refcnt = entry->policy_refcnt;
+    if (handle->api_version == KADM5_API_VERSION_3) {
+	if ((mask & KADM5_PW_MAX_FAILURE))
+	    p->pw_max_fail = entry->pw_max_fail;
+	if ((mask & KADM5_PW_FAILURE_COUNT_INTERVAL))
+	    p->pw_failcnt_interval = entry->pw_failcnt_interval;
+	if ((mask & KADM5_PW_LOCKOUT_DURATION))
+	    p->pw_lockout_duration = entry->pw_lockout_duration;
+    }
     ret = krb5_db_put_policy(handle->context, p);
     krb5_db_free_policy(handle->context, p);
     return ret;
@@ -286,6 +314,11 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     entry->pw_min_classes = t->pw_min_classes;
     entry->pw_history_num = t->pw_history_num;
     entry->policy_refcnt = t->policy_refcnt;
+    if (handle->api_version == KADM5_API_VERSION_3) {
+	entry->pw_max_fail = t->pw_max_fail;
+	entry->pw_failcnt_interval = t->pw_failcnt_interval;
+	entry->pw_lockout_duration = t->pw_lockout_duration;
+    }
     krb5_db_free_policy(handle->context, t);
 
     return KADM5_OK;

@@ -42,11 +42,12 @@ proc test100_104 {} {
 		{KADM5_LAST_FAILED}
     } $origtest] "BAD_MASK"
 
-    test "modify-principal 103"
-    one_line_fail_test [format {
-	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
-		{KADM5_FAIL_AUTH_COUNT}
-    } $origtest] "BAD_MASK"
+#    This is now permitted to reset lockout count
+#    test "modify-principal 103"
+#    one_line_fail_test [format {
+#	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
+#		{KADM5_FAIL_AUTH_COUNT}
+#    } $origtest] "BAD_MASK"
 
     test "modify-principal 103.5"
     one_line_fail_test [format {

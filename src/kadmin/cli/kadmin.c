@@ -486,7 +486,7 @@ kadmin_startup(int argc, char *argv[])
                princstr);
         retval = kadm5_init_with_creds(context, princstr, cc, svcname, &params,
                                        KADM5_STRUCT_VERSION,
-                                       KADM5_API_VERSION_2, db_args, &handle);
+                                       KADM5_API_VERSION_3, db_args, &handle);
     } else if (use_keytab) {
         if (keytab_name)
             printf("Authenticating as principal %s with keytab %s.\n",
@@ -496,13 +496,13 @@ kadmin_startup(int argc, char *argv[])
                    princstr);
         retval = kadm5_init_with_skey(context, princstr, keytab_name, svcname,
                                       &params, KADM5_STRUCT_VERSION,
-                                      KADM5_API_VERSION_2, db_args, &handle);
+                                      KADM5_API_VERSION_3, db_args, &handle);
     } else {
         printf("Authenticating as principal %s with password.\n",
                princstr);
         retval = kadm5_init_with_password(context, princstr, password, svcname,
                                           &params, KADM5_STRUCT_VERSION,
-                                          KADM5_API_VERSION_2, db_args,
+                                          KADM5_API_VERSION_3, db_args,
                                           &handle);
     }
     if (retval) {
@@ -970,6 +970,11 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
             }
         }
 #endif /* APPLE_PKINIT */
+        if (strlen(argv[i]) == 7 && !strcmp("-unlock", argv[i])) {
+            oprinc->fail_auth_count = 0;
+            *mask |= KADM5_FAIL_AUTH_COUNT;
+            continue;
+        }
         if (!strcmp("-e", argv[i])) {
             if (++i > argc - 2)
                 return -1;
@@ -1047,7 +1052,7 @@ kadmin_modprinc_usage()
 {
     fprintf(stderr, "usage: modify_principal [options] principal\n");
     fprintf(stderr, "\toptions are:\n");
-    fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy]\n\t\t[-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
+    fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy]\n\t\t[-maxrenewlife maxrenewlife] [-unlock] [{+|-}attribute]\n");
     fprintf(stderr, "\tattributes are:\n");
     fprintf(stderr, "%s%s%s",
             "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
@@ -1496,6 +1501,33 @@ kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
                 *mask |= KADM5_PW_HISTORY_NUM;
                 continue;
             }
+        } else if (strlen(argv[i]) == 11 &&
+                   !strcmp(argv[i], "-maxfailure")) {
+            if (++i > argc - 2)
+                return -1;
+            else {
+                policy->pw_max_fail = atoi(argv[i]);
+                *mask |= KADM5_PW_MAX_FAILURE;
+                continue;
+            }
+        } else if (strlen(argv[i]) == 21 &&
+                   !strcmp(argv[i], "-failurecountinterval")) {
+            if (++i > argc - 2)
+                return -1;
+            else {
+                policy->pw_failcnt_interval = atoi(argv[i]);
+                *mask |= KADM5_PW_FAILURE_COUNT_INTERVAL;
+                continue;
+            }
+        } else if (strlen(argv[i]) == 16 &&
+                   !strcmp(argv[i], "-lockoutduration")) {
+            if (++i > argc - 2)
+                return -1;
+            else {
+                policy->pw_lockout_duration = atoi(argv[i]);
+                *mask |= KADM5_PW_LOCKOUT_DURATION;
+                continue;
+            }
         } else
             return -1;
     }
@@ -1511,7 +1543,8 @@ kadmin_addmodpol_usage(char *func)
 {
     fprintf(stderr, "usage; %s [options] policy\n", func);
     fprintf(stderr, "\toptions are:\n");
-    fprintf(stderr, "\t\t[-maxlife time] [-minlife time] [-minlength length]\n\t\t[-minclasses number] [-history number]\n");
+    fprintf(stderr, "\t\t[-maxlife time] [-minlife time] [-minlength length]\n\t\t[-minclasses number] [-history number]\n\t\t[-maxfailure number] [-failurecountinterval time]\n");
+    fprintf(stderr, "\t\t[-lockoutduration time]\n");
 }
 
 void
@@ -1607,11 +1640,19 @@ kadmin_getpol(int argc, char *argv[])
                policy.pw_min_classes);
         printf("Number of old keys kept: %ld\n", policy.pw_history_num);
         printf("Reference count: %ld\n", policy.policy_refcnt);
+        printf("Maximum password failures before lockout: %ld\n",
+                policy.pw_max_fail);
+        printf("Password failure count reset interval: %ld\n",
+                (long)policy.pw_failcnt_interval);
+        printf("Password lockout duration: %ld\n",
+                (long)policy.pw_lockout_duration);
     } else {
-        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\n",
+        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\n",
                policy.policy, policy.pw_max_life, policy.pw_min_life,
                policy.pw_min_length, policy.pw_min_classes,
-               policy.pw_history_num, policy.policy_refcnt);
+               policy.pw_history_num, policy.policy_refcnt,
+               policy.pw_max_fail, (long)policy.pw_failcnt_interval,
+               (long)policy.pw_lockout_duration);
     }
     kadm5_free_policy_ent(handle, &policy);
 }

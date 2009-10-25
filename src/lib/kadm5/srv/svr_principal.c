@@ -650,8 +650,6 @@ kadm5_modify_principal(void *server_handle,
 	 kdb.pw_expiration = entry->pw_expiration;
     if (mask & KADM5_MAX_RLIFE)
 	 kdb.max_renewable_life = entry->max_renewable_life;
-    if (mask & KADM5_FAIL_AUTH_COUNT)
-	 kdb.fail_auth_count = entry->fail_auth_count;
 
     if((mask & KADM5_KVNO)) {
 	 for (i = 0; i < kdb.n_key_data; i++)
@@ -672,6 +670,20 @@ kadm5_modify_principal(void *server_handle,
 		 goto done;
 	     }
 	 }
+    }
+
+    /*
+     * Setting entry->fail_auth_count to 0 can be used to manually unlock
+     * an account. It is not possible to set fail_auth_count to any other
+     * value using kadmin.
+     */
+    if (mask & KADM5_FAIL_AUTH_COUNT) {
+	if (entry->fail_auth_count != 0) {
+	    ret = KADM5_BAD_SERVER_PARAMS;
+	    goto done;
+	}
+
+	kdb.fail_auth_count = 0;
     }
 
     /* let the mask propagate to the database provider */
@@ -1443,8 +1455,13 @@ kadm5_chpass_principal_3(void *server_handle,
     if (ret)
 	goto done;
 
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
+
     /* key data and attributes changed, let the database provider know */
-    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES /* | KADM5_CPW_FUNCTION */;
+    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES |
+	       KADM5_FAIL_AUTH_COUNT;
+	       /* | KADM5_CPW_FUNCTION */
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
@@ -1576,7 +1593,10 @@ kadm5_randkey_principal_3(void *server_handle,
     if (ret)
 	 goto done;
 
-    if (keyblocks) {
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
+
+   if (keyblocks) {
 	ret = decrypt_key_data(handle->context, act_mkey,
 			       kdb.n_key_data, kdb.key_data,
 			       keyblocks, n_keys);
@@ -1585,7 +1605,8 @@ kadm5_randkey_principal_3(void *server_handle,
     }
 
     /* key data changed, let the database provider know */
-    kdb.mask = KADM5_KEY_DATA /* | KADM5_RANDKEY_USED */;
+    kdb.mask = KADM5_KEY_DATA | KADM5_FAIL_AUTH_COUNT;
+	       /* | KADM5_RANDKEY_USED */;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
@@ -1752,6 +1773,9 @@ kadm5_setv4key_principal(void *server_handle,
     ret = krb5_dbe_update_last_pwd_change(handle->context, &kdb, now);
     if (ret)
 	 goto done;
+
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
@@ -1989,6 +2013,9 @@ kadm5_setkey_principal_3(void *server_handle,
 
     if ((ret = krb5_dbe_update_last_pwd_change(handle->context, &kdb, now)))
         goto done;
+
+    /* unlock principal on this KDC */
+    kdb.fail_auth_count = 0;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;

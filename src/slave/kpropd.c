@@ -190,7 +190,7 @@ unsigned int backoff_from_master(int *);
 
 static kadm5_ret_t
 kadm5_get_kiprop_host_srv_name(krb5_context context,
-			       const char *realm,
+			       const char *realm_name,
 			       char **host_service_name);
 
 static void usage()
@@ -587,6 +587,36 @@ void doit(fd)
 	exit(0);
 }
 
+/* Default timeout can be changed using clnt_control() */
+static struct timeval full_resync_timeout = { 25, 0 };
+
+static kdb_fullresync_result_t *
+full_resync(CLIENT *clnt)
+{
+	static kdb_fullresync_result_t clnt_res;
+	uint32_t vers = IPROPX_VERSION_1; /* max version we support */
+	enum clnt_stat status;
+
+	memset(&clnt_res, 0, sizeof(clnt_res));
+
+	status = clnt_call (clnt, IPROP_FULL_RESYNC_EXT,
+			    (xdrproc_t) xdr_u_int32,
+			    (caddr_t) &vers,
+			    (xdrproc_t) xdr_kdb_fullresync_result_t,
+			    (caddr_t) &clnt_res,
+			    full_resync_timeout);
+	if (status == RPC_PROCUNAVAIL) {
+		status = clnt_call (clnt, IPROP_FULL_RESYNC,
+				    (xdrproc_t) xdr_void,
+				    (caddr_t *)&vers,
+		      		    (xdrproc_t) xdr_kdb_fullresync_result_t,
+				    (caddr_t) &clnt_res,
+				    full_resync_timeout);
+	}
+
+	return (status == RPC_SUCCESS) ? &clnt_res : NULL;
+}
+
 /*
  * Routine to handle incremental update transfer(s) from master KDC
  */
@@ -609,7 +639,6 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 	static kdb_last_t mylast;
 
 	kdb_fullresync_result_t *full_ret;
-	char *full_resync_arg = NULL;
 
 	kadm5_iprop_handle_t handle;
 	kdb_hlog_t *ulog;
@@ -701,7 +730,7 @@ reinit:
 				      master_svc_princstr,
 				      &params,
 				      KADM5_STRUCT_VERSION,
-				      KADM5_API_VERSION_2,
+				      KADM5_API_VERSION_3,
 				      db_args,
 				      &server_handle);
 
@@ -788,10 +817,7 @@ reinit:
 						== 0)) {
 				break;
 			} else {
-
-				full_ret = iprop_full_resync_1((void *)
-						&full_resync_arg, handle->clnt);
-
+				full_ret = full_resync(handle->clnt);
 				if (full_ret == (kdb_fullresync_result_t *)
 							NULL) {
 					clnt_perror(handle->clnt,
@@ -873,8 +899,8 @@ reinit:
 					     db_args);
 
 			if (retval) {
-			    char *msg = krb5_get_error_message(kpropd_context,
-							       retval);
+			    const char *msg =
+				krb5_get_error_message(kpropd_context, retval);
 			    syslog(LOG_ERR,
 				   _("kpropd: ulog_replay failed (%s), updates not registered."), msg);
 			    krb5_free_error_message(kpropd_context, msg);
@@ -1633,8 +1659,10 @@ load_database(context, kdb_util, database_file_name)
 			dup(0);
 		}
 
-		execv(kdb_util, edit_av);
-		retval = errno;
+		if (execv(kdb_util, edit_av) < 0)
+			retval = errno;
+		else
+			retval = 0;
 		if (!debug)
 			dup2(save_stderr, 2);
 		com_err(progname, retval, "while trying to exec %s",
@@ -1667,7 +1695,7 @@ load_database(context, kdb_util, database_file_name)
  */
 static kadm5_ret_t
 kadm5_get_kiprop_host_srv_name(krb5_context context,
-			       const char *realm,
+			       const char *realm_name,
 			       char **host_service_name)
 {
 	char *name;

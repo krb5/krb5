@@ -106,7 +106,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_keyblock server_keyblock, client_keyblock;
     krb5_keyblock *mkey_ptr;
     krb5_enctype useenctype;
-    krb5_boolean update_client = 0;
     krb5_data e_data;
     register int i;
     krb5_timestamp until, rtime;
@@ -392,21 +391,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	    if (errcode == KRB5KDC_ERR_PREAUTH_FAILED)
 		get_preauth_hint_list(request, &client, &server, &e_data);
 	    
-	    if (kdc_modifies_kdb) {
-		/*
-		 * Note: this doesn't work if you're using slave servers!!!
-		 * It also causes the database to be modified (and thus
-		 * need to be locked) frequently.
-		 */
-		if (client.fail_auth_count < KRB5_MAX_FAIL_COUNT) {
-		    client.fail_auth_count = client.fail_auth_count + 1;
-		    if (client.fail_auth_count == KRB5_MAX_FAIL_COUNT) {
-			client.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
-		    }
-		}
-		client.last_failed = kdc_time;
-	    }
-	    update_client = 1;
 	    status = "PREAUTH_FAILED";
 	    if (vague_errors)
 		errcode = KRB5KRB_ERR_GENERIC;
@@ -620,15 +604,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
 
-    if (kdc_modifies_kdb) {
-	/*
-	 * If we get this far, we successfully did the AS_REQ.
-	 */
-	client.last_success = kdc_time;
-	client.fail_auth_count = 0;
-    }
-    update_client = 1;
-
     log_as_req(from, request, &reply, &client, cname, &server, sname,
 	       authtime, 0, 0, 0);
     did_log = 1;
@@ -648,8 +623,8 @@ egress:
 	emsg = krb5_get_error_message(kdc_context, errcode);
 
     if (status) {
-	log_as_req(from, request, &reply, &client, cname, &server, sname, 0,
-		   status, errcode, emsg);
+	log_as_req(from, request, &reply, &client, cname, &server, sname,
+		   authtime, status, errcode, emsg);
 	did_log = 1;
     }
     if (errcode) {
@@ -681,25 +656,8 @@ egress:
 	    free(cname);
     if (sname != NULL)
 	    free(sname);
-    if (c_nprincs) {
-	if (kdc_modifies_kdb) {
-	    if (update_client) {
-		krb5_error_code errcode2;
-
-		krb5_db_put_principal(kdc_context, &client, &c_nprincs);
-		/*
-		 * ptooey.  We want krb5_db_sync() or something like that.
-		 */
-		errcode2 = krb5_db_fini(kdc_context);
-		if (errcode2 == 0)
-		    errcode2 = krb5_db_open(kdc_context, db_args,
-					    KRB5_KDB_OPEN_RW|KRB5_KDB_SRV_TYPE_KDC);
-		/* Reset master key */
-		krb5_db_set_mkey(kdc_context, &kdc_active_realm->realm_mkey);
-	    }
-	}
+    if (c_nprincs)
 	krb5_db_free_principal(kdc_context, &client, c_nprincs);
-    }
     if (s_nprincs)
 	krb5_db_free_principal(kdc_context, &server, s_nprincs);
     if (session_key.contents != NULL)

@@ -51,3 +51,4 @@ krb5_ldap_release_errcode_string
 krb5_ldap_create
 krb5_ldap_set_mkey_list
 krb5_ldap_get_mkey_list
+krb5_ldap_invoke

@@ -35,6 +35,13 @@ enum iprop_role {
 };
 typedef enum iprop_role iprop_role;
 
+/*
+ * Full resync dump versioning
+ */
+#define IPROPX_VERSION_0    0
+#define IPROPX_VERSION_1    1
+#define IPROPX_VERSION      IPROPX_VERSION_1
+
 #ifdef	__cplusplus
 }
 #endif

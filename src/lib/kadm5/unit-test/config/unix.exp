@@ -157,7 +157,7 @@ proc api_start {} {
 		eof { perror "EOF setting API varibles"}
 		timeout { perror "timeout setting API varibles"}
 	}
-	send "set current_api_version \[expr \$KADM5_API_VERSION_2 &~ \$KADM5_API_VERSION_MASK\]\n"
+	send "set current_api_version \[expr \$KADM5_API_VERSION_3 &~ \$KADM5_API_VERSION_MASK\]\n"
 	expect {
 		-re "$prompt$" {}
 		eof { perror "EOF setting API varibles"}

@@ -1598,12 +1598,14 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      trunc_name(&slen, &sdots);
      /* okay to cast lengths to int because trunc_name limits max value */
      krb5_klog_syslog(LOG_NOTICE, "Request: kadm5_init, %.*s%s, %s, "
-		      "client=%.*s%s, service=%.*s%s, addr=%s, flavor=%d",
+		      "client=%.*s%s, service=%.*s%s, addr=%s, "
+		      "vers=%d, flavor=%d",
 		      (int)clen, (char *)client_name.value, cdots,
 		      errmsg ? errmsg : "success",
 		      (int)clen, (char *)client_name.value, cdots,
 		      (int)slen, (char *)service_name.value, sdots,
 		      inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
+		      ret.api_version & ~(KADM5_API_VERSION_MASK),
 		      rqstp->rq_cred.oa_flavor);
      if (errmsg != NULL)
 	 krb5_free_error_message(NULL, errmsg);

@@ -54,8 +54,10 @@ SRCS= 	$(srcdir)/kdb_ldap.c \
 	$(srcdir)/princ_xdr.c \
 	$(srcdir)/ldap_fetch_mkey.c \
 	$(srcdir)/ldap_service_stash.c \
+	$(srcdir)/kdb_ext.c \
 	$(srcdir)/kdb_xdr.c \
-	$(srcdir)/ldap_err.c
+	$(srcdir)/ldap_err.c \
+	$(srcdir)/lockout.c \
 
 STOBJLISTS=OBJS.ST
 STLIBOBJS= kdb_ldap.o \
@@ -74,8 +76,10 @@ STLIBOBJS= kdb_ldap.o \
 	princ_xdr.o \
 	ldap_fetch_mkey.o \
 	ldap_service_stash.o \
+	kdb_ext.o \
 	kdb_xdr.o \
-	ldap_err.o
+	ldap_err.o \
+	lockout.o
 
 all-unix:: all-liblinks
 install-unix:: install-libs

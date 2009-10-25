@@ -229,6 +229,13 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
 
 	    krb5_clear_error_message(context);
 
+#ifdef LDAP_MOD_INCREMENT
+	    server_info->modify_increment =
+		(has_modify_increment(context, server_info->server_name) == 0);
+#else
+	    server_info->modify_increment = 0;
+#endif /* LDAP_MOD_INCREMENT */
+
 	    for (conns=0; conns < ldap_context->max_server_conns; ++conns) {
 		if ((st=krb5_ldap_initialize(ldap_context, server_info)) != 0)
 		    break;
