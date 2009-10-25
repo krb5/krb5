@@ -43,6 +43,7 @@
 #include <kadm5/admin.h>
 
 extern char* principal_attributes[];
+extern char* all_attributes[];
 extern char* max_pwd_life_attr[];
 
 static char *
@@ -164,7 +165,7 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     GET_HANDLE();
     for (tree=0; tree < ntrees && *nentries == 0; ++tree) {
 #define result ldapent->result
-	LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, principal_attributes);
+	LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, (flags & KRB5_KDB_FLAG_INCLUDE_PAC) ? all_attributes : principal_attributes);
 #undef result
 	for (ent=ldap_first_entry(ld, ldapent->result); ent != NULL && *nentries == 0; ent=ldap_next_entry(ld, ent)) {
 

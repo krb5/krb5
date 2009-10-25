@@ -96,6 +96,9 @@ extern struct timeval timelimit;
     ld = ldap_server_handle->ldap_handle;
 
 extern int set_ldap_error (krb5_context ctx, int st, int op);
+
+#define prepend_err_str krb5int_ldap_prepend_err_str
+
 extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code err, krb5_error_code oerr);
 
 #define LDAP_SEARCH(base, scope, filter, attrs)   LDAP_SEARCH_1(base, scope, filter, attrs, CHECK_STATUS)
@@ -231,7 +234,7 @@ typedef struct {
   struct berval **keys;
 }KEY;
 
-#define KRB5_LDAP_ENTRY_MAGIC	    0xcafecafe
+#define KRB5_LDAP_ENTRY_MAGIC	    ((krb5_magic)0xcafecafe)
 
 typedef struct _krb5_ldap_entry {
     krb5_magic magic;

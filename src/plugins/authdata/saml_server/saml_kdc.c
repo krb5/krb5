@@ -29,9 +29,8 @@
 #include <string.h>
 #include <errno.h>
 #include <k5-int.h>
-#include <krb5/authdata_plugin.h>
-#include <kdb.h>
-#include <kdb_ext.h>
+
+#include "saml_kdc.h"
 
 static krb5_error_code
 saml_init(krb5_context ctx, void **blob)
@@ -44,20 +43,29 @@ saml_fini(krb5_context ctx, void *blob)
 {
 }
 
-static krb5_error_code saml_hello(krb5_context context, krb5_data **ret)
+static krb5_error_code
+saml_kdc_issue(krb5_context context,
+               unsigned int flags,
+               krb5_const_principal client_princ,
+               krb5_db_entry *client,
+               krb5_enc_tkt_part *enc_part,
+               krb5_data **assertion)
 {
-    krb5_data tmp;
+    krb5_error_code code;
 
-    tmp.data = "Hello, KDC issued acceptor world!";
-    tmp.length = strlen(tmp.data);
+    if (client == NULL)
+        return 0;
 
-    return krb5_copy_data(context, &tmp, ret);
+    code = saml_kdc_ldap_issue(context, flags, client_princ, client,
+                               enc_part->times.authtime, assertion);
+
+    return code;
 }
 
 static krb5_error_code
 saml_kdc_verify(krb5_context context,
-                 krb5_enc_tkt_part *enc_tkt_request,
-                 krb5_data **greeting)
+                krb5_enc_tkt_part *enc_tkt_request,
+                krb5_data **assertion)
 {
     krb5_error_code code;
     krb5_authdata **tgt_authdata = NULL;
@@ -93,7 +101,7 @@ saml_kdc_verify(krb5_context context,
         tmp.data = (char *)greet[0]->contents;
         tmp.length = greet[0]->length;
 
-        code = krb5_copy_data(context, &tmp, greeting);
+        code = krb5_copy_data(context, &tmp, assertion);
     } else
         code = 0;
 
@@ -106,9 +114,9 @@ saml_kdc_verify(krb5_context context,
 
 static krb5_error_code
 saml_kdc_sign(krb5_context context,
-               krb5_enc_tkt_part *enc_tkt_reply,
-               krb5_const_principal tgs,
-               krb5_data *greeting)
+              krb5_enc_tkt_part *enc_tkt_reply,
+              krb5_const_principal tgs,
+              krb5_data *assertion)
 {
     krb5_error_code code;
     krb5_authdata ad_datum, *ad_data[2], **kdc_issued = NULL;
@@ -116,12 +124,13 @@ saml_kdc_sign(krb5_context context,
     krb5_authdata **tkt_authdata;
 
     ad_datum.ad_type = KRB5_AUTHDATA_SAML;
-    ad_datum.contents = (krb5_octet *)greeting->data;
-    ad_datum.length = greeting->length;
+    ad_datum.contents = (krb5_octet *)assertion->data;
+    ad_datum.length = assertion->length;
 
     ad_data[0] = &ad_datum;
     ad_data[1] = NULL;
 
+#if 0
     code = krb5_make_authdata_kdc_issued(context,
                                          enc_tkt_reply->session,
                                          tgs,
@@ -129,10 +138,11 @@ saml_kdc_sign(krb5_context context,
                                          &kdc_issued);
     if (code != 0)
         return code;
+#endif
 
     code = krb5_encode_authdata_container(context,
                                           KRB5_AUTHDATA_IF_RELEVANT,
-                                          kdc_issued,
+                                          ad_data,
                                           &if_relevant);
     if (code != 0) {
         krb5_free_authdata(context, kdc_issued);
@@ -157,37 +167,45 @@ saml_kdc_sign(krb5_context context,
 
 static krb5_error_code
 saml_authdata(krb5_context context,
-               unsigned int flags,
-               krb5_db_entry *client,
-               krb5_db_entry *server,
-               krb5_db_entry *tgs,
-               krb5_keyblock *client_key,
-               krb5_keyblock *server_key,
-               krb5_keyblock *tgs_key,
-               krb5_data *req_pkt,
-               krb5_kdc_req *request,
-               krb5_const_principal for_user_princ,
-               krb5_enc_tkt_part *enc_tkt_request,
-               krb5_enc_tkt_part *enc_tkt_reply)
+              unsigned int flags,
+              krb5_db_entry *client,
+              krb5_db_entry *server,
+              krb5_db_entry *tgs,
+              krb5_keyblock *client_key,
+              krb5_keyblock *server_key,
+              krb5_keyblock *tgs_key,
+              krb5_data *req_pkt,
+              krb5_kdc_req *request,
+              krb5_const_principal for_user_princ,
+              krb5_enc_tkt_part *enc_tkt_request,
+              krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code code;
-    krb5_data *greeting = NULL;
+    krb5_data *assertion = NULL;
+    krb5_const_principal client_princ;
 
-    if (request->msg_type == KRB5_TGS_REQ) {
-        code = saml_kdc_verify(context, enc_tkt_request, &greeting);
+    if (request->msg_type != KRB5_TGS_REQ)
+        return 0;
+
+    code = saml_kdc_verify(context, enc_tkt_request, &assertion);
+    if (code != 0)
+        return code;
+
+    if (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION)
+        client_princ = for_user_princ;
+    else
+        client_princ = enc_tkt_reply->client;
+
+    if (assertion == NULL) {
+        code = saml_kdc_issue(context, flags, client_princ, client,
+                              enc_tkt_reply, &assertion);
         if (code != 0)
             return code;
     }
 
-    if (greeting == NULL) {
-        code = saml_hello(context, &greeting);
-        if (code != 0)
-            return code;
-    }
+    code = saml_kdc_sign(context, enc_tkt_reply, tgs->princ, assertion);
 
-    code = saml_kdc_sign(context, enc_tkt_reply, tgs->princ, greeting);
-
-    krb5_free_data(context, greeting);
+    krb5_free_data(context, assertion);
 
     return code;
 }

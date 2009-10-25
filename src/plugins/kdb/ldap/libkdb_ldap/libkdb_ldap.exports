@@ -52,3 +52,6 @@ krb5_ldap_create
 krb5_ldap_set_mkey_list
 krb5_ldap_get_mkey_list
 krb5_ldap_invoke
+krb5_ldap_request_handle_from_pool
+krb5_ldap_put_handle_to_pool
+krb5int_ldap_prepend_err_str

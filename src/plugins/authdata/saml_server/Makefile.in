@@ -17,7 +17,7 @@ LIBMINOR=0
 SO_EXT=.so
 SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto -lkdb_ldap $(SUPPORT_LIB) $(LIBS)
+SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto -lkdb_ldap $(SUPPORT_LIB) $(LIBS) @LDAP_LIBS@
 
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)

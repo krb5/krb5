@@ -39,6 +39,10 @@
 #include "ldap_err.h"
 
 struct timeval timelimit = {300, 0};  /* 5 minutes */
+
+/* all attributes for KRB5_KDB_FLAG_INCLUDE_PAC */
+char	 *all_attributes[]	 = { "*", NULL };
+
 char     *principal_attributes[] = { "krbprincipalname",
 				     "krbcanonicalname",
 				     "objectclass",

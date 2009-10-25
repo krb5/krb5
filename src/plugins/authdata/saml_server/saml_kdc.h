@@ -33,12 +33,8 @@
 #include <kdb.h>
 #include <kdb_ext.h>
 
-#include "saml_kdc.h"
-#include "ldap_main.h"
-#include "kdb_ldap.h"
-#include "ldap_principal.h" 
-#include "princ_xdr.h"
-#include "ldap_err.h"
+#ifndef SAML_KDC_H_
+#define SAML_KDC_H_ 1
 
 krb5_error_code
 saml_kdc_ldap_issue(krb5_context context,
@@ -46,33 +42,7 @@ saml_kdc_ldap_issue(krb5_context context,
                     krb5_const_principal client_princ,
                     krb5_db_entry *client,
                     krb5_timestamp authtime,
-                    krb5_data **assertion)
-{
-    krb5_data data;
-    krb5_error_code st;
-    krb5_ldap_entry *ldapent;
-    LDAP *ld = NULL;
-    krb5_ldap_context *ldap_context = NULL;
-    krb5_ldap_server_handle *ldap_server_handle = NULL;
+                    krb5_data **assertion);
 
-    ldapent = (krb5_ldap_entry *)client->e_data;
-    if (client->e_length != sizeof(*ldapent) ||
-        ldapent->magic != KRB5_LDAP_ENTRY_MAGIC) {
-        return EINVAL;
-    }
-
-    ldap_context = context->dal_handle->db_context;
-    CHECK_LDAP_HANDLE(ldap_context);
-    GET_HANDLE();
-
-    data.data = ldap_get_dn(ld, ldapent->entry);
-    data.length = strlen(data.data);
-
-    st = krb5_copy_data(context, &data, assertion);
-
-cleanup:
-    krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
-
-    return st;
-}
+#endif /* SAML_KDC_H_ */
 
