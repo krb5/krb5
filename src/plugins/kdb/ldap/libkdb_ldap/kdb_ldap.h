@@ -231,6 +231,11 @@ typedef struct {
   struct berval **keys;
 }KEY;
 
+typedef struct _krb5_ldap_entry {
+    LDAPMessage *result;
+    LDAPMessage *entry;
+} krb5_ldap_entry;
+
 #define k5ldap_inited(c) (c && c->db_context \
                          && ((kdb5_dal_handle*)c->db_context)->db_context \
                          && ((krb5_ldap_context *) ((kdb5_dal_handle*)c->db_context)->db_context))

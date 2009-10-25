@@ -90,8 +90,11 @@ krb5_dbe_free_contents(context, entry)
     krb5_tl_data 	*tl_data=NULL;
     int i, j;
 
-    if (entry->e_data)
+    if (entry->e_data) {
+	krb5_ldap_entry *ldapent = (krb5_ldap_entry *)entry->e_data;
+	ldap_msgfree(ldapent->result);
 	free(entry->e_data);
+    }
     if (entry->princ)
 	krb5_free_principal(context, entry->princ);
     for (tl_data = entry->tl_data; tl_data; tl_data = tl_data_next) {

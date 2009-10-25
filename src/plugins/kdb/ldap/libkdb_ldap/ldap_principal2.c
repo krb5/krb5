@@ -111,11 +111,12 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     krb5_error_code	        tempst=0, st=0;
     char                        **values=NULL, *cname=NULL;
     LDAP	                *ld=NULL;
-    LDAPMessage	                *result=NULL, *ent=NULL;
+    LDAPMessage			*ent=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
     krb5_principal		cprinc=NULL;
+    krb5_ldap_entry		*ldapent = NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -155,11 +156,16 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntrees)) != 0)
 	goto cleanup;
 
+    ldapent = k5alloc(sizeof(*ldapent), &st);
+    if (st != 0)
+	goto cleanup;
+
     GET_HANDLE();
     for (tree=0; tree < ntrees && *nentries == 0; ++tree) {
-
+#define result ldapent->result
 	LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, principal_attributes);
-	for (ent=ldap_first_entry(ld, result); ent != NULL && *nentries == 0; ent=ldap_next_entry(ld, ent)) {
+#undef result
+	for (ent=ldap_first_entry(ld, ldapent->result); ent != NULL && *nentries == 0; ent=ldap_next_entry(ld, ent)) {
 
 	    /* get the associated directory user information */
 	    if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
@@ -203,18 +209,23 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
 					     cprinc ? cprinc : searchfor,
 					     entries)) != 0)
 		goto cleanup;
+
+	    ldapent->entry = ent;
 	}
-	ldap_msgfree(result);
-	result = NULL;
+
     } /* for (tree=0 ... */
+
+    if (st == 0 && *nentries) {
+	entries->e_data = (krb5_octet *)ldapent;
+	entries->e_length = sizeof(*ldapent);
+	ldapent = NULL;
+    }
 
     /* once done, put back the ldap handle */
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     ldap_server_handle = NULL;
 
 cleanup:
-    ldap_msgfree(result);
-
     if (*nentries == 0 || st != 0)
 	krb5_dbe_free_contents(context, entries);
 
@@ -239,6 +250,11 @@ cleanup:
 
     if (cprinc)
 	krb5_free_principal(context, cprinc);
+
+    if (ldapent) {
+	ldap_msgfree(ldapent->result);
+	free (ldapent);
+    }
 
     return st;
 }
