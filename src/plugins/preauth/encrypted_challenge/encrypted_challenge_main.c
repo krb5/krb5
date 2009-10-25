@@ -339,6 +339,8 @@ static krb5_error_code kdc_return_preauth
         return 0;
     * pa_request_context = NULL; /*this function will free the
                   * challenge key*/
+    enc.ciphertext.data = NULL; /* In case of error pass through */
+
     retval = krb5_us_timeofday(context, &ts.patimestamp, &ts.pausec);
     if (retval == 0)
         retval = kaccess.encode_enc_ts(&ts, &plain);
