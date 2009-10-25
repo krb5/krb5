@@ -1,5 +1,5 @@
 /*
- * plugins/authdata/saml_server/saml_ldap.c
+ * plugins/authdata/saml_server/saml_ldap.cpp
  *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
@@ -34,17 +34,21 @@
 #include <kdb_ext.h>
 
 #include "saml_kdc.h"
+
+extern "C" {
 #include "ldap_main.h"
 #include "kdb_ldap.h"
 #include "ldap_principal.h" 
 #include "princ_xdr.h"
 #include "ldap_err.h"
+}
 
 krb5_error_code
 saml_kdc_ldap_issue(krb5_context context,
                     unsigned int flags,
                     krb5_const_principal client_princ,
                     krb5_db_entry *client,
+                    krb5_db_entry *server,
                     krb5_timestamp authtime,
                     krb5_data **assertion)
 {
@@ -61,7 +65,7 @@ saml_kdc_ldap_issue(krb5_context context,
         return EINVAL;
     }
 
-    ldap_context = context->dal_handle->db_context;
+    ldap_context = (krb5_ldap_context *)context->dal_handle->db_context;
     CHECK_LDAP_HANDLE(ldap_context);
     GET_HANDLE();
 

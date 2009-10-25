@@ -1,5 +1,5 @@
 /*
- * plugins/authdata/saml_server/saml_kdc.c
+ * plugins/authdata/saml_server/saml_kdc.cpp
  *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
@@ -28,19 +28,29 @@
 
 #include <string.h>
 #include <errno.h>
-#include <k5-int.h>
 
 #include "saml_kdc.h"
 
-static krb5_error_code
-saml_init(krb5_context ctx, void **blob)
+krb5_error_code
+saml_init(krb5_context ctx, void **data)
 {
+    SAMLConfig &config = SAMLConfig::getConfig();
+
+    if (!config.init()) {
+	return KRB5KDC_ERR_SVC_UNAVAILABLE;
+    }
+
+    *data = &config;
+
     return 0;
 }
 
-static void
-saml_fini(krb5_context ctx, void *blob)
+void
+saml_fini(krb5_context ctx, void *data)
 {
+    SAMLConfig *config = (SAMLConfig *)data;
+
+    config->term();
 }
 
 static krb5_error_code
@@ -48,7 +58,9 @@ saml_kdc_issue(krb5_context context,
                unsigned int flags,
                krb5_const_principal client_princ,
                krb5_db_entry *client,
-               krb5_enc_tkt_part *enc_part,
+               krb5_db_entry *server,
+               krb5_enc_tkt_part *enc_tkt_request,
+               krb5_enc_tkt_part *enc_tkt_reply,
                krb5_data **assertion)
 {
     krb5_error_code code;
@@ -57,7 +69,8 @@ saml_kdc_issue(krb5_context context,
         return 0;
 
     code = saml_kdc_ldap_issue(context, flags, client_princ, client,
-                               enc_part->times.authtime, assertion);
+                               server, enc_tkt_reply->times.authtime,
+                               assertion);
 
     return code;
 }
@@ -95,7 +108,7 @@ saml_kdc_verify(krb5_context context,
                                  NULL,
                                  KRB5_AUTHDATA_SAML,
                                  &greet);
-    if (code == 0) {
+    if (code == 0 && greet != NULL) {
         krb5_data tmp;
 
         tmp.data = (char *)greet[0]->contents;
@@ -165,7 +178,7 @@ saml_kdc_sign(krb5_context context,
     return code;
 }
 
-static krb5_error_code
+krb5_error_code
 saml_authdata(krb5_context context,
               unsigned int flags,
               krb5_db_entry *client,
@@ -198,7 +211,8 @@ saml_authdata(krb5_context context,
 
     if (assertion == NULL) {
         code = saml_kdc_issue(context, flags, client_princ, client,
-                              enc_tkt_reply, &assertion);
+                              server, enc_tkt_request, enc_tkt_reply,
+                              &assertion);
         if (code != 0)
             return code;
     }
