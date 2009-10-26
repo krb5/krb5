@@ -171,7 +171,7 @@ dumpAttribute(OM_uint32 *minor,
             break;
         }
 
-        printf("Attribute %.*s %s %s\n\n%.*s\n",
+        printf("Attribute: %.*s %s %s\nValue: %.*s\n",
                (int)attribute->length, (char *)attribute->value,
                authenticated ? "Authenticated" : "",
                 complete ? "Complete" : "",
@@ -183,12 +183,13 @@ dumpAttribute(OM_uint32 *minor,
                     printf("\n");
                 printf("%02x", ((char *)value.value)[i] & 0xFF);
             }
-            printf("\n\n");
+            printf("\n");
         }
 
         gss_release_buffer(&tmp_minor, &value);
         gss_release_buffer(&tmp_minor, &display_value);
     }
+    printf("\n");
 }
 
 static OM_uint32
@@ -345,7 +346,7 @@ initAcceptSecContext(OM_uint32 *minor,
     else {
         displayCanonName(minor, source_name, "Source name");
         displayOID(minor, mech, "Source mech");
-        enumerateAttributes(minor, source_name, 1);
+        enumerateAttributes(minor, source_name, 0);
     }
 
     (void) gss_release_name(&tmp_minor, &source_name);
