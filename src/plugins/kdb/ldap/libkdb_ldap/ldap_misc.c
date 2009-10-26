@@ -40,6 +40,7 @@
 #include "ldap_principal.h"
 #include "princ_xdr.h"
 #include "ldap_pwd_policy.h"
+#include "ldap_schema.h"
 
 #ifdef NEED_STRPTIME_PROTO
 extern char *strptime (const char *, const char *, struct tm *);
@@ -2306,3 +2307,107 @@ ldap_unbind_ext_s(LDAP *ld, LDAPControl **sctrls, LDAPControl **cctrls)
     return ldap_unbind_ext(ld, sctrls, cctrls);
 }
 #endif /* HAVE_LDAP_UNBIND_EXT_S */
+
+krb5_error_code
+krb5_ldap_get_entry_attrtypes(krb5_context context,
+			      krb5_ldap_context *ldap_context,
+			      krb5_ldap_server_handle *ldap_server_handle,
+			      LDAP *ld,
+			      LDAPMessage *entry,
+			      LDAPAttributeType ***pAttributeTypes)
+{
+    LDAPMessage *result = NULL, *ent;
+    char *attrs[] = { "attributeTypes", NULL };
+    krb5_error_code st = 0, tempst = 0;
+    char **values = NULL;
+    LDAPAttributeType **attributeTypes;
+    size_t i, j;
+
+    *pAttributeTypes = NULL;
+
+    values = ldap_get_values(ld, entry, "subschemaSubentry");
+    if (values == NULL)
+        return ENOENT;
+
+    LDAP_SEARCH(values[0], LDAP_SCOPE_BASE, "(objectClass=*)", attrs);
+
+    ent = ldap_first_entry(ld, result);
+    if (ent == NULL) {
+        st = ENOENT;
+        goto cleanup;
+    }
+
+    ldap_value_free(values);
+    values = ldap_get_values(ld, ent, attrs[0]);
+    if (values == NULL) {
+        st = ENOENT;
+        goto cleanup;
+    }
+
+    for (i = 0; values[i] != NULL; i++)
+        ;
+
+    attributeTypes = (LDAPAttributeType **)k5alloc(
+                             (i + 1) * sizeof(LDAPAttributeType *), &st);
+    if (st != 0)
+        goto cleanup;
+
+    for (i = 0, j = 0; values[i] != NULL; i++) {
+        int code;
+        const char *err = NULL;
+
+        attributeTypes[j] = ldap_str2attributetype(values[0],
+                                                   &code,
+                                                   &err,
+                                                   LDAP_SCHEMA_ALLOW_ALL);
+        if (attributeTypes[j] != NULL)
+            j++;
+    }
+    attributeTypes[j] = NULL;
+
+    *pAttributeTypes = attributeTypes;
+
+cleanup:
+    if (values != NULL)
+        ldap_value_free(values);
+    if (result != NULL)
+        ldap_msgfree(result);
+
+    return 0;
+}
+
+void
+krb5_ldap_free_entry_attrtypes(LDAPAttributeType **types)
+{
+    if (types) {
+	int i;
+
+	for (i = 0; types[i]; i++)
+	    ldap_attributetype_free(types[i]);
+    }
+}
+
+const LDAPAttributeType *krb5_ldap_find_attrtype(
+    LDAPAttributeType **types,
+    const char *name)
+{
+    int i;
+
+    if (types == NULL)
+	return NULL;
+
+    for (i = 0; types[i] != NULL; i++) {
+	int j;
+
+	if (types[i]->at_names == NULL)
+	    continue;
+
+	for (j = 0; types[i]->at_names[j] != NULL; j++) {
+	    if (strcasecmp(types[i]->at_names[j], name) == 0)
+		return types[i];
+	}
+    }
+
+    return NULL;
+}
+

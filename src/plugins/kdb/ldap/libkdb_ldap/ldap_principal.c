@@ -41,7 +41,7 @@
 struct timeval timelimit = {300, 0};  /* 5 minutes */
 
 /* all attributes for KRB5_KDB_FLAG_INCLUDE_PAC */
-char	 *all_attributes[]	 = { "*", NULL };
+char	 *all_attributes[]	 = { "*", "subschemaSubentry", NULL };
 
 char     *principal_attributes[] = { "krbprincipalname",
 				     "krbcanonicalname",

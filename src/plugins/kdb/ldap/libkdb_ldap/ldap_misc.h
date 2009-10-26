@@ -37,6 +37,7 @@
 #define _HAVE_LDAP_MISC_H 1
 
 #include "ldap_services.h"
+#include "ldap_schema.h"
 
 /* misc functions */
 
@@ -151,5 +152,19 @@ populate_krb5_db_entry(krb5_context context,
     krb5_db_entry *entry);
 
 int kldap_ensure_initialized (void);
+
+krb5_error_code
+krb5_ldap_get_entry_attrtypes(krb5_context context,
+    krb5_ldap_context *ldap_context,
+    krb5_ldap_server_handle *ldap_server_handle,
+    LDAP *ld,
+    LDAPMessage *entry,
+    LDAPAttributeType ***pAttributeTypes);
+
+void krb5_ldap_free_entry_attrtypes(LDAPAttributeType **types);
+
+const LDAPAttributeType *krb5_ldap_find_attrtype(
+    LDAPAttributeType **types,
+    const char *name);
 
 #endif
