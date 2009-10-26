@@ -37,7 +37,11 @@ saml_init(krb5_context ctx, void **data)
     SAMLConfig &config = SAMLConfig::getConfig();
 
     XMLToolingConfig& xmlconf = XMLToolingConfig::getConfig();
-    xmlconf.log_config("DEBUG");
+
+    if (getenv("SAML_DEBUG"))
+	xmlconf.log_config("DEBUG");
+    else
+	xmlconf.log_config();
 
     if (!config.init()) {
         return KRB5KDC_ERR_SVC_UNAVAILABLE;
@@ -150,9 +154,11 @@ saml_kdc_build_assertion(krb5_context context,
     AuthnContext *authnContext = NULL;
     AuthnContextClassRef *authnContextClass = NULL;
     AttributeStatement *attrStatement = NULL;
+    Conditions *conditions = NULL;
     saml2::Assertion *assertion;
     DateTime authtime((time_t)enc_tkt_request->times.authtime);
     DateTime starttime((time_t)enc_tkt_request->times.starttime);
+    DateTime endtime((time_t)enc_tkt_request->times.endtime);
     auto_ptr_XMLCh method("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos");
 
     code = saml_kdc_build_issuer(context, tgs->princ, &issuer);
@@ -177,8 +183,13 @@ saml_kdc_build_assertion(krb5_context context,
         statement->setAuthnInstant(authtime.getFormattedString());
         statement->setAuthnContext(authnContext);
 
+	conditions = ConditionsBuilder::buildConditions();
+	conditions->setNotBefore(starttime.getFormattedString());
+	conditions->setNotOnOrAfter(endtime.getFormattedString());
+
         assertion = AssertionBuilder::buildAssertion();
-        assertion->setIssueInstant(starttime.getFormattedString());
+        assertion->setIssueInstant(authtime.getFormattedString());
+        assertion->setConditions(conditions);
         assertion->setIssuer(issuer);
         assertion->setSubject(subject);
         assertion->getAuthnStatements().push_back(statement);
@@ -226,8 +237,10 @@ saml_kdc_issue(krb5_context context,
         return code;
 
     code = saml_krb_derive_key(context, enc_tkt_reply->session, &key);
-    if (code != 0)
+    if (code != 0) {
+	delete assertion;
 	return code;
+    }
 
     try {
         signature = SignatureBuilder::buildSignature();
@@ -252,8 +265,6 @@ saml_kdc_issue(krb5_context context,
         data.length = buf.length();
 
         code = krb5_copy_data(context, &data, assertion_data); 
-
-        fprintf(stderr, "%s\n", data.data);
     }
 
     delete assertion;
