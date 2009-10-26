@@ -17,14 +17,15 @@ LIBMINOR=0
 SO_EXT=.so
 SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
+SAML_LIBS = -L/usr/local/lib -lsaml -lxml-security-c -lxmltooling -lxerces-c
+SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS) $(SAML_LIBS)
 
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 STOBJLISTS=OBJS.ST
 STLIBOBJS= saml_authdata.o
 
-SRCS=	saml_authdata.c
+SRCS=	saml_authdata.cpp
 
 all-unix:: all-liblinks
 install-unix:: install-libs
@@ -36,3 +37,5 @@ clean::
 @libnover_frag@
 @libobj_frag@
 
+CC=$(CXX)
+CXXFLAGS=-g

@@ -1,5 +1,5 @@
 /*
- * plugins/authdata/saml_server/saml_ldap.c
+ * plugins/authdata/saml_server/saml_kdc.h
  *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
@@ -40,15 +40,6 @@ extern "C" {
 #include <kdb_ext.h>
 
 krb5_error_code
-saml_kdc_ldap_issue(krb5_context context,
-                    unsigned int flags,
-                    krb5_const_principal client_princ,
-                    krb5_db_entry *client,
-                    krb5_db_entry *server,
-                    krb5_timestamp authtime,
-                    krb5_data **assertion);
-
-krb5_error_code
 saml_init(krb5_context ctx, void **blob);
 
 void
@@ -80,9 +71,12 @@ saml_authdata(krb5_context context,
 #include <xmltooling/logging.h>
 #include <xmltooling/XMLToolingConfig.h>
 #include <xmltooling/security/SignatureTrustEngine.h>
+#include <xmltooling/security/OpenSSLCredential.h>
 #include <xmltooling/signature/Signature.h>
 #include <xmltooling/signature/SignatureValidator.h>
 #include <xmltooling/util/XMLHelper.h>
+#include <xsec/enc/XSECCryptoKeyHMAC.hpp>
+#include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
 
 using namespace xmlsignature;
 using namespace xmlconstants;
@@ -90,9 +84,19 @@ using namespace xmltooling::logging;
 using namespace xmltooling;
 using namespace samlconstants;
 using namespace opensaml::saml2md;
+using namespace opensaml::saml2;
 using namespace opensaml;
 using namespace xercesc;
 using namespace std;
+
+krb5_error_code
+saml_kdc_ldap_issue(krb5_context context,
+                    unsigned int flags,
+                    krb5_const_principal client_princ,
+                    krb5_db_entry *client,
+                    krb5_db_entry *server,
+                    krb5_timestamp authtime,
+                    saml2::AttributeStatement **attrs);
 
 #endif /* SAML_KDC_H_ */
 

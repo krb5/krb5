@@ -36,8 +36,11 @@ saml_init(krb5_context ctx, void **data)
 {
     SAMLConfig &config = SAMLConfig::getConfig();
 
+    XMLToolingConfig& xmlconf = XMLToolingConfig::getConfig();
+    xmlconf.log_config("DEBUG");
+
     if (!config.init()) {
-	return KRB5KDC_ERR_SVC_UNAVAILABLE;
+        return KRB5KDC_ERR_SVC_UNAVAILABLE;
     }
 
     *data = &config;
@@ -54,23 +57,205 @@ saml_fini(krb5_context ctx, void *data)
 }
 
 static krb5_error_code
+saml_unparse_name_xmlch(krb5_context context,
+                        krb5_const_principal name,
+                        XMLCh **unicodePrincipal)
+{
+    krb5_error_code code;
+    char *utf8Name;
+
+    code = krb5_unparse_name(context, name, &utf8Name);
+    if (code != 0)
+        return code;
+
+    *unicodePrincipal = fromUTF8(utf8Name, false);
+
+    if (*unicodePrincipal == NULL)
+        code = ENOMEM;
+
+    free(utf8Name);
+
+    return code;
+}
+
+static krb5_error_code
+saml_kdc_build_issuer(krb5_context context,
+                      krb5_const_principal principal,
+                      Issuer **pIssuer)
+{
+    Issuer *issuer;
+    XMLCh *unicodePrincipal = NULL;
+    krb5_error_code code;
+
+    code = saml_unparse_name_xmlch(context, principal, &unicodePrincipal);
+    if (code != 0)
+        goto cleanup;
+
+    issuer = IssuerBuilder::buildIssuer();
+    issuer->setFormat(NameIDType::KERBEROS);
+    issuer->setName(unicodePrincipal);
+
+    *pIssuer = issuer;
+
+cleanup:
+    delete unicodePrincipal;
+
+    return code;
+}
+
+static krb5_error_code
+saml_kdc_build_subject(krb5_context context,
+                       krb5_const_principal principal,
+                       Subject **pSubject)
+{
+    NameID *nameID;
+    Subject *subject;
+    XMLCh *unicodePrincipal = NULL;
+    krb5_error_code code;
+
+    code = saml_unparse_name_xmlch(context, principal, &unicodePrincipal);
+    if (code != 0)
+        goto cleanup;
+
+    nameID = NameIDBuilder::buildNameID();
+    nameID->setName(unicodePrincipal);
+    nameID->setFormat(NameIDType::KERBEROS);
+
+    subject = SubjectBuilder::buildSubject();
+    subject->setNameID(nameID);
+
+    *pSubject = subject;
+
+cleanup:
+    delete unicodePrincipal;
+
+    return code;
+}
+
+static krb5_error_code
+saml_kdc_build_assertion(krb5_context context,
+                         unsigned int flags,
+                         krb5_const_principal client_princ,
+                         krb5_db_entry *client,
+                         krb5_db_entry *server,
+                         krb5_db_entry *tgs,
+                         krb5_enc_tkt_part *enc_tkt_request,
+                         krb5_enc_tkt_part *enc_tkt_reply,
+                         saml2::Assertion **pAssertion)
+{
+    krb5_error_code code;
+    Issuer *issuer = NULL;
+    Subject *subject = NULL;
+    AuthnStatement *statement = NULL;
+    AuthnContext *authnContext = NULL;
+    AuthnContextClassRef *authnContextClass = NULL;
+    saml2::Assertion *assertion;
+    DateTime authtime((time_t)enc_tkt_request->times.authtime);
+    DateTime starttime((time_t)enc_tkt_request->times.starttime);
+    auto_ptr_XMLCh method("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos");
+
+    code = saml_kdc_build_issuer(context, tgs->princ, &issuer);
+    if (code != 0)
+        return code;
+
+    code = saml_kdc_build_subject(context, client->princ, &subject);
+    if (code != 0) {
+        delete issuer;
+        return code;
+    }
+
+    try {
+        authnContext = AuthnContextBuilder::buildAuthnContext();
+        authnContextClass = AuthnContextClassRefBuilder::buildAuthnContextClassRef();
+        authnContextClass->setReference(method.get());
+        authnContext->setAuthnContextClassRef(authnContextClass);
+
+        statement = AuthnStatementBuilder::buildAuthnStatement();
+        statement->setAuthnInstant(authtime.getFormattedString());
+        statement->setAuthnContext(authnContext);
+
+        assertion = AssertionBuilder::buildAssertion();
+        assertion->setIssueInstant(starttime.getFormattedString());
+        assertion->setIssuer(issuer);
+        assertion->setSubject(subject);
+        assertion->getAuthnStatements().push_back(statement);
+    } catch (XMLToolingException &e) {
+        code = ASN1_PARSE_ERROR; /* XXX */
+    }
+
+    if (code == 0) {
+        *pAssertion = assertion;
+    } else {
+        delete assertion;
+    }
+
+    return code;
+}
+
+static krb5_error_code
 saml_kdc_issue(krb5_context context,
                unsigned int flags,
                krb5_const_principal client_princ,
                krb5_db_entry *client,
                krb5_db_entry *server,
+               krb5_db_entry *tgs,
                krb5_enc_tkt_part *enc_tkt_request,
                krb5_enc_tkt_part *enc_tkt_reply,
-               krb5_data **assertion)
+               krb5_data **assertion_data)
 {
     krb5_error_code code;
+    saml2::Assertion *assertion = NULL;
+    Signature *signature = NULL;
+    OpenSSLCryptoKeyHMAC *xkey;
+    DOMDocument *doc = NULL;
+    DOMElement *rootElement = NULL;
+    string buf;
+    krb5_data data;
+    auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
 
-    if (client == NULL)
-        return 0;
+    *assertion_data = NULL;
 
-    code = saml_kdc_ldap_issue(context, flags, client_princ, client,
-                               server, enc_tkt_reply->times.authtime,
-                               assertion);
+    code = saml_kdc_build_assertion(context, flags, client_princ,
+                                    client, server, tgs,
+                                    enc_tkt_request, enc_tkt_reply,
+                                    &assertion);
+    if (code != 0)
+        return code;
+
+    try {
+        xkey = new OpenSSLCryptoKeyHMAC();
+        xkey->setKey(enc_tkt_reply->session->contents,
+                     enc_tkt_reply->session->length);
+        signature = SignatureBuilder::buildSignature();
+        signature->setSignatureAlgorithm(algorithm.get());
+        signature->setSigningKey(xkey);
+
+        assertion->setSignature(signature);
+#if 0
+        assertion->addNamespace(Namespace(XSD_NS, XSD_PREFIX));
+        assertion->addNamespace(Namespace(XSI_NS, XSI_PREFIX));
+        assertion->addNamespace(Namespace(XMLSIG_NS, XMLSIG_PREFIX));
+        assertion->addNamespace(Namespace(SAML20_NS, SAML20_PREFIX));
+#endif
+        vector <Signature *> signatures(1, signature);
+        doc = XMLToolingConfig::getConfig().getParser().newDocument();
+        rootElement = doc->createElementNS(SAML20_NS, SAML20_PREFIX);
+        XMLHelper::serialize(assertion->marshall(rootElement, &signatures, NULL), buf);
+        doc->release();
+    } catch (XMLToolingException &e) {
+        code = ASN1_PARSE_ERROR; /* XXX */
+    }
+  
+    if (code == 0) { 
+        data.data = (char *)buf.c_str();
+        data.length = buf.length();
+
+        code = krb5_copy_data(context, &data, assertion_data); 
+
+        fprintf(stderr, "%s\n", data.data);
+    }
+
+    delete assertion;
 
     return code;
 }
@@ -200,9 +385,11 @@ saml_authdata(krb5_context context,
     if (request->msg_type != KRB5_TGS_REQ)
         return 0;
 
+#if 0
     code = saml_kdc_verify(context, enc_tkt_request, &assertion);
     if (code != 0)
         return code;
+#endif
 
     if (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION)
         client_princ = for_user_princ;
@@ -210,8 +397,13 @@ saml_authdata(krb5_context context,
         client_princ = enc_tkt_reply->client;
 
     if (assertion == NULL) {
-        code = saml_kdc_issue(context, flags, client_princ, client,
-                              server, enc_tkt_request, enc_tkt_reply,
+        if (client == NULL)
+            return 0;
+
+        code = saml_kdc_issue(context, flags,
+                              client_princ, client,
+                              server, tgs,
+                              enc_tkt_request, enc_tkt_reply,
                               &assertion);
         if (code != 0)
             return code;

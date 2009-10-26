@@ -23,7 +23,7 @@
  * or implied warranty.
  * 
  *
- * Sample authorization data plugin
+ * LDAP SAML backend
  */
 
 #include <string.h>
@@ -50,7 +50,7 @@ saml_kdc_ldap_issue(krb5_context context,
                     krb5_db_entry *client,
                     krb5_db_entry *server,
                     krb5_timestamp authtime,
-                    krb5_data **assertion)
+                    saml2::AttributeStatement **attrs)
 {
     krb5_data data;
     krb5_error_code st;
@@ -71,8 +71,6 @@ saml_kdc_ldap_issue(krb5_context context,
 
     data.data = ldap_get_dn(ld, ldapent->entry);
     data.length = strlen(data.data);
-
-    st = krb5_copy_data(context, &data, assertion);
 
 cleanup:
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
