@@ -211,7 +211,7 @@ saml_kdc_issue(krb5_context context,
     krb5_error_code code;
     saml2::Assertion *assertion = NULL;
     Signature *signature = NULL;
-    OpenSSLCryptoKeyHMAC *hmackey;
+    XSECCryptoKey *key;
     string buf;
     krb5_data data;
     auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
@@ -225,13 +225,14 @@ saml_kdc_issue(krb5_context context,
     if (code != 0)
         return code;
 
+    code = saml_krb_derive_key(context, enc_tkt_reply->session, &key);
+    if (code != 0)
+	return code;
+
     try {
-        hmackey = new OpenSSLCryptoKeyHMAC();
-        hmackey->setKey(enc_tkt_reply->session->contents,
-                        enc_tkt_reply->session->length);
         signature = SignatureBuilder::buildSignature();
         signature->setSignatureAlgorithm(algorithm.get());
-        signature->setSigningKey(hmackey);
+        signature->setSigningKey(key);
 
         assertion->addNamespace(Namespace(XSD_NS, XSD_PREFIX));
         assertion->addNamespace(Namespace(XSI_NS, XSI_PREFIX));

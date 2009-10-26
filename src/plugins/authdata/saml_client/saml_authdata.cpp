@@ -29,28 +29,7 @@
 #include <string.h>
 #include <errno.h>
 
-extern "C" {
-#include "k5-int.h"
-#include <krb5/authdata_plugin.h>
-}
-
-#include <saml/SAMLConfig.h>
-#include <saml/saml2/metadata/Metadata.h>
-#include <saml/saml2/metadata/MetadataProvider.h>
-#include <saml/saml2/metadata/MetadataCredentialCriteria.h>
-#include <saml/signature/SignatureProfileValidator.h>
-#include <saml/util/SAMLConstants.h>
-#include <xmltooling/logging.h>
-#include <xmltooling/XMLToolingConfig.h>
-#include <xmltooling/security/SignatureTrustEngine.h>
-#include <xmltooling/security/OpenSSLCredential.h>
-#include <xmltooling/signature/Signature.h>
-#include <xmltooling/signature/SignatureValidator.h>
-#include <xmltooling/util/XMLHelper.h>
-#include <xsec/enc/XSECCryptoKeyHMAC.hpp>
-#include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
-#include <xsec/enc/XSECCryptoException.hpp>
-#include <xsec/framework/XSECException.hpp>
+#include "../saml_server/saml_krb.h"
 
 using namespace xmlsignature;
 using namespace xmlconstants;
@@ -371,22 +350,25 @@ saml_verify_authdata(krb5_context kcontext,
 {
     krb5_error_code code;
     struct saml_context *sc = (struct saml_context *)request_context;
-    krb5_keyblock *skey = req->ticket->enc_part2->session;
+    XSECCryptoKey *xkey;
 
     if (sc->assertion == NULL)
         return EINVAL;
 
+    code = saml_krb_derive_key(kcontext, req->ticket->enc_part2->session, &xkey);
+    if (code != 0)
+        return code;
+
     try {
-        OpenSSLCryptoKeyHMAC xkey;
         Signature *signature = sc->assertion->getSignature();
         DSIGSignature *dsig = signature->getXMLSignature();
 
-        if (dsig == NULL)
+        if (dsig == NULL) {
+            delete xkey;
             return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+        }
 
-        xkey.setKey(skey->contents, skey->length);
-
-        dsig->setSigningKey(xkey.clone());
+        dsig->setSigningKey(xkey);
         if (dsig->verify())
             code = 0;
         else

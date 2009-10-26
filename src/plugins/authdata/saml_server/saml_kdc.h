@@ -29,13 +29,10 @@
 #ifndef SAML_KDC_H_
 #define SAML_KDC_H_ 1
 
+#include "saml_krb.h"
+
 extern "C" {
 
-#include <string.h>
-#include <errno.h>
-
-#include <k5-int.h>
-#include <krb5/authdata_plugin.h>
 #include <kdb.h>
 #include <kdb_ext.h>
 
@@ -61,34 +58,6 @@ saml_authdata(krb5_context context,
               krb5_enc_tkt_part *enc_tkt_reply);
 
 }
-
-#include <saml/SAMLConfig.h>
-#include <saml/saml2/metadata/Metadata.h>
-#include <saml/saml2/metadata/MetadataProvider.h>
-#include <saml/saml2/metadata/MetadataCredentialCriteria.h>
-#include <saml/signature/SignatureProfileValidator.h>
-#include <saml/util/SAMLConstants.h>
-#include <xmltooling/logging.h>
-#include <xmltooling/XMLToolingConfig.h>
-#include <xmltooling/security/SignatureTrustEngine.h>
-#include <xmltooling/security/OpenSSLCredential.h>
-#include <xmltooling/signature/Signature.h>
-#include <xmltooling/signature/SignatureValidator.h>
-#include <xmltooling/util/XMLHelper.h>
-#include <xsec/enc/XSECCryptoKeyHMAC.hpp>
-#include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
-#include <xercesc/util/Base64.hpp>
-
-using namespace xmlsignature;
-using namespace xmlconstants;
-using namespace xmltooling::logging;
-using namespace xmltooling;
-using namespace samlconstants;
-using namespace opensaml::saml2md;
-using namespace opensaml::saml2;
-using namespace opensaml;
-using namespace xercesc;
-using namespace std;
 
 krb5_error_code
 saml_kdc_ldap_issue(krb5_context context,
