@@ -41,16 +41,106 @@ extern "C" {
 #include "ldap_principal.h" 
 #include "princ_xdr.h"
 #include "ldap_err.h"
+#include "ldap_schema.h"
+}
+
+static const XMLCh urnOidPrefix[] = {'u','r','n',':','o','i','d',':',0};
+static const XMLCh xsdString[] = {'x','s','d',':','s','t','r','i','n','g',0};
+static const XMLCh xsdBase64Binary[] = {'x','s','d',':','b','a','s','e','6','4','B','i','n','a','r','y',0};
+static const XMLCh x500EncodingAttr[] = {'E','n','c','o','d','i','n','g',0};
+static const XMLCh x500EncodingValue[] = {'L','D','A','P',0};
+
+
+static xmltooling::QName qXsdString(XSI_NS, xsdString, XSI_PREFIX);
+static xmltooling::QName qXsdBase64Binary(XSI_NS, xsdBase64Binary, XSI_PREFIX);
+static xmltooling::QName qX500Encoding(SAML20X500_NS, x500EncodingAttr, SAML20X500_PREFIX);
+
+static krb5_boolean
+is_not_printable(const struct berval *bv)
+{
+    size_t i;
+
+    if (isgraph(bv->bv_val[0]) &&
+        isgraph(bv->bv_val[bv->bv_len - 1]))
+    {
+        for (i = 0; bv->bv_val[i]; i++) {
+            if (!isascii(bv->bv_val[i]) || !isprint(bv->bv_val[i]))
+                return TRUE;
+        }
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static krb5_error_code
+saml_kdc_get_attribute(krb5_context context,
+                       LDAP *ld,
+                       LDAPMessage *entry,
+                       const char *attrname,
+                       const LDAPAttributeType *attrtype,
+                       saml2::Attribute **pAttr)
+{
+    struct berval **vals;
+    Attribute *attr;
+    XMLCh *canonicalName = NULL;
+    auto_ptr_XMLCh oid(attrtype->at_oid);
+    auto_ptr_XMLCh friendlyName(attrtype->at_names[0]);
+
+    *pAttr = NULL;
+
+    vals = ldap_get_values_len(ld, entry, attrname);
+    if (vals == NULL || vals[0] == NULL) {
+        ldap_value_free_len(vals);
+        return 0;
+    }
+
+    attr = AttributeBuilder::buildAttribute();
+    if (attr == NULL)
+        return ENOMEM;
+
+    canonicalName = new XMLCh[XMLString::stringLen(urnOidPrefix) +
+        XMLString::stringLen(oid.get())];
+    XMLString::catString(canonicalName, urnOidPrefix);
+    XMLString::catString(canonicalName, oid.get());
+
+    attr->setNameFormat(Attribute::URI_REFERENCE);
+    attr->setName(canonicalName);
+    delete canonicalName;
+    attr->setFriendlyName(friendlyName.get());
+    attr->setAttribute(qX500Encoding, x500EncodingValue);
+
+    for (int i = 0; vals[i] != NULL; i++) {
+        AttributeValue *value;
+        struct berval *bv = vals[i];
+
+        value = AttributeValueBuilder::buildAttributeValue();
+
+        if (is_not_printable(bv)) {
+            XMLSize_t len;
+            XMLByte *b64 = Base64::encode((XMLByte *)bv->bv_val,
+                                          bv->bv_len, &len);
+            value->setTextContent(XMLString::transcode((char *)b64));
+            delete b64;
+        } else {
+            auto_ptr_XMLCh unistr(bv->bv_val);
+            value->setTextContent(unistr.get());
+        }
+        attr->getAttributeValues().push_back(value);
+    }
+
+    ldap_value_free_len(vals);
+
+    *pAttr = attr;
+
+    return 0;
 }
 
 krb5_error_code
 saml_kdc_ldap_issue(krb5_context context,
-                    unsigned int flags,
-                    krb5_const_principal client_princ,
                     krb5_db_entry *client,
                     krb5_db_entry *server,
-                    krb5_timestamp authtime,
-                    saml2::AttributeStatement **attrs)
+                    saml2::AttributeStatement **pAttrStatement)
 {
     krb5_data data;
     krb5_error_code st;
@@ -58,6 +148,12 @@ saml_kdc_ldap_issue(krb5_context context,
     LDAP *ld = NULL;
     krb5_ldap_context *ldap_context = NULL;
     krb5_ldap_server_handle *ldap_server_handle = NULL;
+    saml2::AttributeStatement *attrStatement = NULL;
+    char *attrname;
+    BerElement *ber = NULL;
+    LDAPAttributeType **attrSchema = NULL;
+
+    *pAttrStatement = NULL;
 
     ldapent = (krb5_ldap_entry *)client->e_data;
     if (client->e_length != sizeof(*ldapent) ||
@@ -69,11 +165,47 @@ saml_kdc_ldap_issue(krb5_context context,
     CHECK_LDAP_HANDLE(ldap_context);
     GET_HANDLE();
 
+    st = krb5_ldap_get_entry_attrtypes(context, ldap_context,
+                                       ldap_server_handle, ld,
+                                       ldapent->entry, &attrSchema);
+    if (st != 0)
+        goto cleanup;
+
     data.data = ldap_get_dn(ld, ldapent->entry);
     data.length = strlen(data.data);
 
+    attrStatement = AttributeStatementBuilder::buildAttributeStatement();
+    attrStatement->addNamespace(SAML20X500_NS);
+
+    for (attrname = ldap_first_attribute(ld, ldapent->entry, &ber);
+         attrname != NULL;
+         attrname = ldap_next_attribute(ld, ldapent->entry, ber)) {
+        Attribute *attr;
+        const LDAPAttributeType *attrtype;
+
+        attrtype = krb5_ldap_find_attrtype(attrSchema, attrname);
+        if (attrtype == NULL ||
+            strcasecmp(attrname, "subschemaSubentry") == 0 ||
+            krb5_ldap_is_kerberos_attr(attrname)) {
+            ldap_memfree(attrname);
+            continue;
+        }
+
+        saml_kdc_get_attribute(context, ld, ldapent->entry,
+                               attrname, attrtype, &attr);
+
+        if (attr != NULL)
+            attrStatement->getAttributes().push_back(attr);
+        ldap_memfree(attrname);
+    }
+
+    *pAttrStatement = attrStatement;
+    attrStatement = NULL;
+
 cleanup:
+    krb5_ldap_free_entry_attrtypes(attrSchema);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
+    delete attrStatement;
 
     return st;
 }

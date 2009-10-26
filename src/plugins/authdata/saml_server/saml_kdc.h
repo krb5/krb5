@@ -77,6 +77,7 @@ saml_authdata(krb5_context context,
 #include <xmltooling/util/XMLHelper.h>
 #include <xsec/enc/XSECCryptoKeyHMAC.hpp>
 #include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
+#include <xercesc/util/Base64.hpp>
 
 using namespace xmlsignature;
 using namespace xmlconstants;
@@ -91,11 +92,8 @@ using namespace std;
 
 krb5_error_code
 saml_kdc_ldap_issue(krb5_context context,
-                    unsigned int flags,
-                    krb5_const_principal client_princ,
                     krb5_db_entry *client,
                     krb5_db_entry *server,
-                    krb5_timestamp authtime,
                     saml2::AttributeStatement **attrs);
 
 #endif /* SAML_KDC_H_ */
