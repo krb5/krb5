@@ -57,4 +57,5 @@ krb5_ldap_put_handle_to_pool
 krb5_ldap_get_entry_attrtypes
 krb5_ldap_find_attrtype
 krb5_ldap_free_entry_attrtypes
+krb5_ldap_is_kerberos_attr
 krb5int_ldap_prepend_err_str

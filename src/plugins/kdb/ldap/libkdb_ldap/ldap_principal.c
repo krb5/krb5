@@ -449,3 +449,16 @@ krb5_ldap_parse_principal_name(i_princ_name, o_princ_name)
     }
     return 0;
 }
+
+krb5_boolean
+krb5_ldap_is_kerberos_attr(const char *attr)
+{
+    int i;
+
+    for (i = 0; i < principal_attributes[i] != NULL; i++) {
+	if (strcasecmp(principal_attributes[i], attr) == 0)
+	    return TRUE;
+    }
+
+    return FALSE;
+}

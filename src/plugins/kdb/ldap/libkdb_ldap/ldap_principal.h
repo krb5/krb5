@@ -119,4 +119,8 @@ berval2tl_data(struct berval *in, krb5_tl_data **out);
 
 krb5_error_code
 krb5_read_tkt_policy (krb5_context, krb5_ldap_context *, krb5_db_entry *, char *);
+
+krb5_boolean
+krb5_ldap_is_kerberos_attr(const char *attr);
+
 #endif
