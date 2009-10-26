@@ -100,7 +100,8 @@ saml_kdc_get_attribute(krb5_context context,
         return ENOMEM;
 
     canonicalName = new XMLCh[XMLString::stringLen(urnOidPrefix) +
-        XMLString::stringLen(oid.get())];
+        XMLString::stringLen(oid.get()) + 1];
+    canonicalName[0] = 0;
     XMLString::catString(canonicalName, urnOidPrefix);
     XMLString::catString(canonicalName, oid.get());
 
@@ -142,7 +143,6 @@ saml_kdc_ldap_issue(krb5_context context,
                     krb5_db_entry *server,
                     saml2::AttributeStatement **pAttrStatement)
 {
-    krb5_data data;
     krb5_error_code st;
     krb5_ldap_entry *ldapent;
     LDAP *ld = NULL;
@@ -171,11 +171,8 @@ saml_kdc_ldap_issue(krb5_context context,
     if (st != 0)
         goto cleanup;
 
-    data.data = ldap_get_dn(ld, ldapent->entry);
-    data.length = strlen(data.data);
-
     attrStatement = AttributeStatementBuilder::buildAttributeStatement();
-    attrStatement->addNamespace(SAML20X500_NS);
+    attrStatement->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
 
     for (attrname = ldap_first_attribute(ld, ldapent->entry, &ber);
          attrname != NULL;

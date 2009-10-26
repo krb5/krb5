@@ -212,7 +212,6 @@ saml_kdc_issue(krb5_context context,
     saml2::Assertion *assertion = NULL;
     Signature *signature = NULL;
     OpenSSLCryptoKeyHMAC *hmackey;
-    DOMDocument *doc = NULL;
     string buf;
     krb5_data data;
     auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
@@ -238,12 +237,11 @@ saml_kdc_issue(krb5_context context,
         assertion->addNamespace(Namespace(XSI_NS, XSI_PREFIX));
         assertion->addNamespace(Namespace(XMLSIG_NS, XMLSIG_PREFIX));
         assertion->addNamespace(Namespace(SAML20_NS, SAML20_PREFIX));
+	assertion->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
 
         assertion->setSignature(signature);
         vector <Signature *> signatures(1, signature);
-        doc = XMLToolingConfig::getConfig().getParser().newDocument();
         XMLHelper::serialize(assertion->marshall((DOMDocument *)NULL, &signatures, NULL), buf);
-        doc->release();
     } catch (XMLToolingException &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
     }
