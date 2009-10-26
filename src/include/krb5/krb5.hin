@@ -1650,6 +1650,7 @@ void KRB5_CALLCONV krb5_free_tgt_creds
 #define	KRB5_GC_FORWARDABLE		16  /* acquire forwardable tickets */
 #define	KRB5_GC_NO_TRANSIT_CHECK	32  /* disable transited check */
 #define	KRB5_GC_CONSTRAINED_DELEGATION	64  /* constrained delegation */
+#define KRB5_GC_S4U_SAML	128 /* cert contains assertion */
 
 krb5_error_code KRB5_CALLCONV krb5_get_credentials
 	(krb5_context,
