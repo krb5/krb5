@@ -124,82 +124,38 @@ timewait_s=300
 
 ovadm_args=-W
 
-while true; do
-	rm -f $adm_start_file
+rm -f $adm_start_file
 
-	(sleep 1; cd $TOP/server; ./kadmind $ovadm_args; \
-		touch $adm_start_file) < /dev/null > $usrtmp/kadm-log.$USER 2>&1 &
+(sleep 1; cd $TOP/server; ./kadmind $ovadm_args; \
+	touch $adm_start_file) < /dev/null > $usrtmp/kadm-log.$USER 2>&1 &
 
-	# wait until they start
+# wait until they start
 
-	while [ $sofar_s -le $max_s ]; do
-		if $VERBOSE; then
-			echo "Sleeping for $s seconds to allow servers" \
-				"to start..."
-		fi
+while [ $sofar_s -le $max_s ]; do
+	if $VERBOSE; then
+		echo "Sleeping for $s seconds to allow servers" \
+			"to start..."
+	fi
 
-		sofar_s=`expr $sofar_s + $s`
+	sofar_s=`expr $sofar_s + $s`
 
-		sleep $s
+	sleep $s
 
-		if [ -f $adm_start_file -a -f $kdc_start_file ]; then
-			break
-		fi
-
-	done
-
-	if [ $sofar_s -le $max_s ]; then
-		if $VERBOSE; then
-			LOG_USER='log_user 1'
-		else
-			LOG_USER='log_user 0'
-		fi
-		if $EXPECT <<EOF
-		$LOG_USER
-#		spawn telnet localhost 1751
-# Connect to 127.0.0.1 explicitly, so failure to connect to ::1 will not
-# cause bogus errors.
-		spawn telnet 127.0.0.1 1751
-		expect {
-			"Connection refused" {
-				close
-				wait
-				exit 1
-			}
-			"Connected" {
-				send "close\n"
-				close
-				wait
-				exit 0
-			}
-			default {
-				catch {close}
-				wait
-				exit 1
-			}
-		}
-EOF
-		then
-			rm -f $kdc_start_file $adm_start_file
-			break
-		else
-			if $VERBOSE; then
-				echo "Could not connect to Admin server;" \
-					"attempting restart ($sofar_s" \
-					"seconds so far)."
-			fi
-			max_s=$timewait_s
-			continue
-		fi
-	else
-		echo "Admin server or KDC failed to start after $sofar_s" \
-			"seconds." 1>&2
-		if [ ! -f $adm_start_file ]; then
-		    echo "  No admin server start file $adm_start_file." 1>&2
-		fi
-		if [ ! -f $kdc_start_file ]; then
-		    echo "  No KDC start file $adm_start_file." 1>&2
-		fi
-		exit 1
+	if [ -f $adm_start_file -a -f $kdc_start_file ]; then
+		break
 	fi
 done
+
+if [ $sofar_s -gt $max_s ]; then
+	echo "Admin server or KDC failed to start after $sofar_s" \
+		"seconds." 1>&2
+	if [ ! -f $adm_start_file ]; then
+	    echo "  No admin server start file $adm_start_file." 1>&2
+	fi
+	if [ ! -f $kdc_start_file ]; then
+	    echo "  No KDC start file $adm_start_file." 1>&2
+	fi
+	exit 1
+fi
+
+rm -f $kdc_start_file $adm_start_file
