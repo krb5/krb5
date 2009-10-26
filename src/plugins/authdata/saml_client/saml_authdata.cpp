@@ -114,6 +114,20 @@ saml_delete_attribute(krb5_context kcontext,
                       void *plugin_context,
                       void *request_context,
                       const krb5_data *attribute);
+static krb5_error_code
+saml_export_internal(krb5_context kcontext,
+                     krb5_authdata_context context,
+                     void *plugin_context,
+                     void *request_context,
+                     krb5_boolean restrict_authenticated,
+                     void **ptr);
+
+void
+saml_free_internal(krb5_context kcontext,
+                   krb5_authdata_context context,
+                   void *plugin_context,
+                   void *request_context,
+                   void *ptr);
 
 static krb5_error_code
 saml_size(krb5_context kcontext,
@@ -267,7 +281,11 @@ saml_import_authdata(krb5_context kcontext,
     const XMLObjectBuilder *b;
     XMLObject *xobj;
 
-    assert(sc->verified == FALSE);
+    if (sc->assertion != NULL) {
+        delete sc->assertion;
+        sc->assertion = NULL;
+    }
+    sc->verified = FALSE;
 
     try {
         doc = XMLToolingConfig::getConfig().getParser().parse(samlin);
@@ -291,29 +309,6 @@ saml_import_authdata(krb5_context kcontext,
     return code;
 }
 
-static krb5_error_code
-saml_verify_authdata(krb5_context kcontext,
-                     krb5_authdata_context context,
-                     void *plugin_context,
-                     void *request_context,
-                     const krb5_auth_context *auth_context,
-                     const krb5_keyblock *key,
-                     const krb5_ap_req *req)
-{
-    krb5_error_code code;
-    struct saml_context *sc = (struct saml_context *)request_context;
-    krb5_enc_tkt_part *enc_part = req->ticket->enc_part2;
-
-    code = saml_krb_verify(kcontext,
-			   sc->assertion,
-			   enc_part->session,
-			   enc_part->client,
-			   enc_part->times.authtime,
-			   &sc->verified);
-
-    return code;
-}
-
 static void
 saml_request_fini(krb5_context kcontext,
                   krb5_authdata_context context,
@@ -324,6 +319,7 @@ saml_request_fini(krb5_context kcontext,
 
     if (sc != NULL) {
         delete sc->assertion;
+        sc->assertion = NULL;
         free(sc);
     }
 }
@@ -445,8 +441,11 @@ saml_get_attribute_value(krb5_context context,
         return ENOENT;
     }
 
-//    av = dynamic_cast<const AttributeValue *>(attr->getAttributeValues().at(*more));
+#if 0
+    av = dynamic_cast<const AttributeValue *>(attr->getAttributeValues().at(*more));
+#else
     av = (const AttributeValue *)((void *)attr->getAttributeValues().at(*more));
+#endif
     if (av == NULL) {
         *more = 0;
         return ENOENT;
@@ -489,10 +488,8 @@ saml_get_attribute(krb5_context kcontext,
         return EINVAL;
 
     attr = saml_get_attribute_object(kcontext, sc, attribute);
-    if (attr == NULL) {
-        assert(0);
+    if (attr == NULL)
         return ENOENT;
-    }
 
     code = saml_get_attribute_value(kcontext, sc, attr,
                                     authenticated, complete,
@@ -572,6 +569,57 @@ saml_delete_attribute(krb5_context kcontext,
 }
 
 static krb5_error_code
+saml_export_internal(krb5_context kcontext,
+                     krb5_authdata_context context,
+                     void *plugin_context,
+                     void *request_context,
+                     krb5_boolean restrict_authenticated,
+                     void **ptr)
+{
+    struct saml_context *sc = (struct saml_context *)request_context;
+
+    if (sc->assertion == NULL)
+        return ENOENT;
+
+    *ptr = (void *)(sc->assertion->clone());
+
+    return 0; 
+}
+
+void
+saml_free_internal(krb5_context kcontext,
+                   krb5_authdata_context context,
+                   void *plugin_context,
+                   void *request_context,
+                   void *ptr)
+{
+    delete (saml2::Assertion *)ptr;
+}
+
+static krb5_error_code
+saml_verify_authdata(krb5_context kcontext,
+                     krb5_authdata_context context,
+                     void *plugin_context,
+                     void *request_context,
+                     const krb5_auth_context *auth_context,
+                     const krb5_keyblock *key,
+                     const krb5_ap_req *req)
+{
+    krb5_error_code code;
+    struct saml_context *sc = (struct saml_context *)request_context;
+    krb5_enc_tkt_part *enc_part = req->ticket->enc_part2;
+
+    code = saml_krb_verify(kcontext,
+                           sc->assertion,
+                           enc_part->session,
+                           enc_part->client,
+                           enc_part->times.authtime,
+                           &sc->verified);
+
+    return code;
+}
+
+static krb5_error_code
 saml_size(krb5_context kcontext,
            krb5_authdata_context context,
            void *plugin_context,
@@ -609,6 +657,7 @@ saml_externalize(krb5_context kcontext,
         return ASN1_PARSE_ERROR;
     }
 
+    /* Length || XML encoded assertion || Verified flag */
     if (*lenremain < sizeof(krb5_int32) + buf.length() + sizeof(krb5_int32))
         return ENOMEM;
 
@@ -716,8 +765,8 @@ krb5plugin_authdata_client_ftable_v0 authdata_client_0 = {
     saml_delete_attribute,
     saml_export_authdata,
     saml_import_authdata,
-    NULL,
-    NULL,
+    saml_export_internal,
+    saml_free_internal,
     saml_verify_authdata,
     saml_size,
     saml_externalize,

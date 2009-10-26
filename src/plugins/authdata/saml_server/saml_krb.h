@@ -1,5 +1,5 @@
 /*
- * plugins/authdata/saml_server/saml_kerb.h
+ * plugins/authdata/saml_server/saml_krb.h
  *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
@@ -168,8 +168,8 @@ saml_krb_verify(krb5_context context,
                 krb5_boolean *pValid)
 {
     krb5_error_code code;
-    XSECCryptoKey *key;
     krb5_boolean validSig = FALSE;
+    XSECCryptoKey *key;
 
     *pValid = FALSE;
 
@@ -181,17 +181,13 @@ saml_krb_verify(krb5_context context,
         return code;
 
     try {
-        Signature *signature = assertion->getSignature();
-        DSIGSignature *dsig = signature->getXMLSignature();
+	SignatureValidator sigValidator;
 
-        if (dsig != NULL) {
-            dsig->setSigningKey(key);
-            validSig = dsig->verify();
-        }
-    } catch (XSECException &e) {
-        code = KRB5_CRYPTO_INTERNAL;
-    } catch (XSECCryptoException &e) {
-        code = KRB5_CRYPTO_INTERNAL;
+	sigValidator.setKey(key);
+	sigValidator.validate(assertion->getSignature());
+	validSig = TRUE;
+    } catch (exception &e) {
+	validSig = FALSE;
     }
 
     if (validSig) {
