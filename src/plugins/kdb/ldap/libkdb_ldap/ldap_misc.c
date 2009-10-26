@@ -2356,7 +2356,7 @@ krb5_ldap_get_entry_attrtypes(krb5_context context,
         int code;
         const char *err = NULL;
 
-        attributeTypes[j] = ldap_str2attributetype(values[0],
+        attributeTypes[j] = ldap_str2attributetype(values[i],
                                                    &code,
                                                    &err,
                                                    LDAP_SCHEMA_ALLOW_ALL);
@@ -2379,17 +2379,17 @@ cleanup:
 void
 krb5_ldap_free_entry_attrtypes(LDAPAttributeType **types)
 {
-    if (types) {
+    if (types != NULL) {
 	int i;
 
 	for (i = 0; types[i]; i++)
 	    ldap_attributetype_free(types[i]);
+	free(types);
     }
 }
 
-const LDAPAttributeType *krb5_ldap_find_attrtype(
-    LDAPAttributeType **types,
-    const char *name)
+const LDAPAttributeType *
+krb5_ldap_find_attrtype(LDAPAttributeType **types, const char *name)
 {
     int i;
 
@@ -2401,6 +2401,11 @@ const LDAPAttributeType *krb5_ldap_find_attrtype(
 
 	if (types[i]->at_names == NULL)
 	    continue;
+
+#if 0
+	if (strcasecmp(types[i]->at_oid, name) == 0)
+	    return types[i];
+#endif
 
 	for (j = 0; types[i]->at_names[j] != NULL; j++) {
 	    if (strcasecmp(types[i]->at_names[j], name) == 0)
