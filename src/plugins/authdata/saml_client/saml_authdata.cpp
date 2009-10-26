@@ -291,54 +291,6 @@ saml_import_authdata(krb5_context kcontext,
     return code;
 }
 
-static krb5_boolean
-saml_compare_subject(krb5_context kcontext,
-                     Subject *subject,
-                     krb5_const_principal principal)
-{
-    NameID *nameID = subject->getNameID();
-    char *sname;
-    krb5_error_code ret;
-    krb5_principal sprinc;
-
-    if (nameID == NULL)
-        return FALSE;
-
-    if (!XMLString::equals(nameID->getFormat(), NameIDType::KERBEROS))
-        return FALSE;
-
-    if (!nameID->getName())
-        return FALSE;
-
-    sname = toUTF8(nameID->getName());
-    if (sname == NULL)
-        return FALSE;
-
-    if (krb5_parse_name(kcontext, sname, &sprinc) == 0)
-        ret = krb5_principal_compare(kcontext, sprinc, principal);
-    else
-        ret = FALSE;
-
-    delete sname;
-
-    return ret;
-}
-
-static krb5_timestamp
-saml_get_authtime(krb5_context kcontext,
-                  saml2::Assertion *assertion)
-{
-    krb5_timestamp ktime = 0;
-    const AuthnStatement *statement;
-
-    if (assertion->getAuthnStatements().size() == 1) {
-        statement = assertion->getAuthnStatements().front();
-        ktime = statement->getAuthnInstant()->getEpoch(false);
-    }
-
-    return ktime;
-}
-
 static krb5_error_code
 saml_verify_authdata(krb5_context kcontext,
                      krb5_authdata_context context,
@@ -350,49 +302,16 @@ saml_verify_authdata(krb5_context kcontext,
 {
     krb5_error_code code;
     struct saml_context *sc = (struct saml_context *)request_context;
-    XSECCryptoKey *xkey;
+    krb5_enc_tkt_part *enc_part = req->ticket->enc_part2;
 
-    if (sc->assertion == NULL)
-        return EINVAL;
+    code = saml_krb_verify(kcontext,
+			   sc->assertion,
+			   enc_part->session,
+			   enc_part->client,
+			   enc_part->times.authtime,
+			   &sc->verified);
 
-    code = saml_krb_derive_key(kcontext, req->ticket->enc_part2->session, &xkey);
-    if (code != 0)
-        return code;
-
-    try {
-        Signature *signature = sc->assertion->getSignature();
-        DSIGSignature *dsig = signature->getXMLSignature();
-
-        if (dsig == NULL) {
-            delete xkey;
-            return KRB5KRB_AP_ERR_BAD_INTEGRITY;
-        }
-
-        dsig->setSigningKey(xkey);
-        if (dsig->verify())
-            code = 0;
-        else
-            code = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-    } catch (XSECException &e) {
-        code = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-    } catch (XSECCryptoException &e) {
-        code = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-    }
-
-    if (code == 0) {
-        krb5_timestamp authtime;
-
-        authtime = req->ticket->enc_part2->times.authtime;
-
-        if (saml_get_authtime(kcontext, sc->assertion) != authtime ||
-            saml_compare_subject(kcontext, sc->assertion->getSubject(),
-                                 req->ticket->enc_part2->client) == FALSE)
-            code = KRB5KRB_AP_WRONG_PRINC;
-    }
-
-    sc->verified = (code == 0);
-
-    return 0;
+    return code;
 }
 
 static void

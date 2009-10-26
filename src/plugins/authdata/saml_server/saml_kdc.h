@@ -60,10 +60,10 @@ saml_authdata(krb5_context context,
 }
 
 krb5_error_code
-saml_kdc_ldap_issue(krb5_context context,
-                    krb5_db_entry *client,
-                    krb5_db_entry *server,
-                    saml2::AttributeStatement **attrs);
+saml_kdc_build_attrs_ldap(krb5_context context,
+                          krb5_db_entry *client,
+                          krb5_db_entry *server,
+                          AttributeStatement **attrs);
 
 #endif /* SAML_KDC_H_ */
 

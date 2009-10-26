@@ -23,7 +23,7 @@
  * or implied warranty.
  * 
  *
- * Sample authorization data plugin
+ * SAML KDC authorization data plugin
  */
 
 #include <string.h>
@@ -161,17 +161,9 @@ saml_kdc_build_assertion(krb5_context context,
     DateTime endtime((time_t)enc_tkt_request->times.endtime);
     auto_ptr_XMLCh method("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos");
 
-    code = saml_kdc_build_issuer(context, tgs->princ, &issuer);
-    if (code != 0)
-        return code;
-
-    code = saml_kdc_build_subject(context, client_princ, &subject);
-    if (code != 0) {
-        delete issuer;
-        return code;
-    }
-
-    saml_kdc_ldap_issue(context, client, server, &attrStatement);
+    saml_kdc_build_issuer(context, tgs->princ, &issuer);
+    saml_kdc_build_subject(context, client_princ, &subject);
+    saml_kdc_build_attrs_ldap(context, client, server, &attrStatement);
 
     try {
         authnContext = AuthnContextBuilder::buildAuthnContext();

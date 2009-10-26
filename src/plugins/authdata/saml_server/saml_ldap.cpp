@@ -138,10 +138,10 @@ saml_kdc_get_attribute(krb5_context context,
 }
 
 krb5_error_code
-saml_kdc_ldap_issue(krb5_context context,
-                    krb5_db_entry *client,
-                    krb5_db_entry *server,
-                    saml2::AttributeStatement **pAttrStatement)
+saml_kdc_build_attrs_ldap(krb5_context context,
+                          krb5_db_entry *client,
+                          krb5_db_entry *server,
+                          AttributeStatement **pAttrStatement)
 {
     krb5_error_code st;
     krb5_ldap_entry *ldapent;

@@ -7,7 +7,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -21,7 +21,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * SAML Kerberos helpers
  */
@@ -109,6 +109,98 @@ saml_krb_derive_key(krb5_context context,
     krb5_free_data_contents(context, &dk);
 
     return code;
+}
+
+static inline krb5_boolean
+saml_krb_compare_subject(krb5_context context,
+                         Subject *subject,
+                         krb5_const_principal principal)
+{
+    NameID *nameID = subject->getNameID();
+    char *sname;
+    krb5_error_code ret;
+    krb5_principal sprinc;
+
+    if (nameID == NULL)
+        return FALSE;
+
+    if (!XMLString::equals(nameID->getFormat(), NameIDType::KERBEROS))
+        return FALSE;
+
+    if (!nameID->getName())
+        return FALSE;
+
+    sname = toUTF8(nameID->getName());
+    if (sname == NULL)
+        return FALSE;
+
+    if (krb5_parse_name(context, sname, &sprinc) == 0)
+        ret = krb5_principal_compare(context, sprinc, principal);
+    else
+        ret = FALSE;
+
+    delete sname;
+
+    return ret;
+}
+
+static krb5_timestamp
+saml_krb_get_authtime(krb5_context context,
+                      saml2::Assertion *assertion)
+{
+    krb5_timestamp ktime = 0;
+    const AuthnStatement *statement;
+
+    if (assertion->getAuthnStatements().size() == 1) {
+        statement = assertion->getAuthnStatements().front();
+        ktime = statement->getAuthnInstant()->getEpoch(false);
+    }
+
+    return ktime;
+}
+
+static inline krb5_error_code
+saml_krb_verify(krb5_context context,
+                opensaml::saml2::Assertion *assertion,
+                krb5_keyblock *basekey,
+                krb5_const_principal client,
+                krb5_timestamp authtime,
+                krb5_boolean *pValid)
+{
+    krb5_error_code code;
+    XSECCryptoKey *key;
+    krb5_boolean validSig = FALSE;
+
+    *pValid = FALSE;
+
+    if (assertion == NULL)
+        return EINVAL;
+
+    code = saml_krb_derive_key(context, basekey, &key);
+    if (code != 0)
+        return code;
+
+    try {
+        Signature *signature = assertion->getSignature();
+        DSIGSignature *dsig = signature->getXMLSignature();
+
+        if (dsig != NULL) {
+            dsig->setSigningKey(key);
+            validSig = dsig->verify();
+        }
+    } catch (XSECException &e) {
+        code = KRB5_CRYPTO_INTERNAL;
+    } catch (XSECCryptoException &e) {
+        code = KRB5_CRYPTO_INTERNAL;
+    }
+
+    if (validSig) {
+        if (saml_krb_get_authtime(context, assertion) == authtime &&
+            saml_krb_compare_subject(context, assertion->getSubject(), client))
+            *pValid = TRUE;
+    }
+
+    return 0;
 }
 
 #endif /* SAML_KRB_H_ */
