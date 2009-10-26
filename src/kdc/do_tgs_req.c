@@ -668,15 +668,13 @@ tgt_again:
     if (isflagset(server.attributes, KRB5_KDB_NO_AUTH_DATA_REQUIRED) == 0) {
         /*
          * If we are not doing protocol transition/constrained delegation
-         * and there was no authorization data included, try to lookup
-         * the client principal as it may be mapped to a local account.
+         * try to lookup the client principal so plugins can add additional
+         * authorization information.
          *
          * Always validate authorization data for constrained delegation
          * because we must validate the KDC signatures.
          */
-        if (!isflagset(c_flags, KRB5_KDB_FLAGS_S4U) &&
-            subject_tkt->authorization_data == NULL) {
-
+        if (!isflagset(c_flags, KRB5_KDB_FLAGS_S4U)) {
             /* Generate authorization data so we can include it in ticket */
             setflag(c_flags, KRB5_KDB_FLAG_INCLUDE_PAC);
             /* Map principals from foreign (possibly non-AD) realms */
