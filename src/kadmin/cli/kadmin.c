@@ -1640,18 +1640,19 @@ kadmin_getpol(int argc, char *argv[])
                policy.pw_min_classes);
         printf("Number of old keys kept: %ld\n", policy.pw_history_num);
         printf("Reference count: %ld\n", policy.policy_refcnt);
-        printf("Maximum password failures before lockout: %ld\n",
-                policy.pw_max_fail);
+        printf("Maximum password failures before lockout: %lu\n",
+               (unsigned long)policy.pw_max_fail);
         printf("Password failure count reset interval: %ld\n",
                 (long)policy.pw_failcnt_interval);
         printf("Password lockout duration: %ld\n",
                 (long)policy.pw_lockout_duration);
     } else {
-        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\n",
+        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%lu\t%ld\t%ld\n",
                policy.policy, policy.pw_max_life, policy.pw_min_life,
                policy.pw_min_length, policy.pw_min_classes,
                policy.pw_history_num, policy.policy_refcnt,
-               policy.pw_max_fail, (long)policy.pw_failcnt_interval,
+               (unsigned long)policy.pw_max_fail,
+               (long)policy.pw_failcnt_interval,
                (long)policy.pw_lockout_duration);
     }
     kadm5_free_policy_ent(handle, &policy);
