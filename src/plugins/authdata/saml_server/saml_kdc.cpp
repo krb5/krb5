@@ -148,9 +148,9 @@ saml_kdc_build_assertion(krb5_context context,
                          saml2::Assertion **pAssertion)
 {
     krb5_error_code code;
-    Issuer *issuer = NULL;
-    Subject *subject = NULL;
-    AttributeStatement *attrStatement = NULL;
+    Issuer *issuer;
+    Subject *subject;
+    AttributeStatement *attrStatement;
     AuthnStatement *statement;
     AuthnContext *authnContext;
     AuthnContextClassRef *authnContextClass;
@@ -188,13 +188,10 @@ saml_kdc_build_assertion(krb5_context context,
         assertion->getAuthnStatements().push_back(statement);
         if (attrStatement != NULL)
             assertion->getAttributeStatements().push_back(attrStatement);
+        code = 0;
+        *pAssertion = assertion;
     } catch (XMLToolingException &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
-    }
-
-    if (code == 0) {
-        *pAssertion = assertion;
-    } else {
         delete assertion;
     }
 
