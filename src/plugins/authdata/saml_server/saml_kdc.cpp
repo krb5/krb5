@@ -39,9 +39,9 @@ saml_init(krb5_context ctx, void **data)
     XMLToolingConfig& xmlconf = XMLToolingConfig::getConfig();
 
     if (getenv("SAML_DEBUG"))
-	xmlconf.log_config("DEBUG");
+        xmlconf.log_config("DEBUG");
     else
-	xmlconf.log_config();
+        xmlconf.log_config();
 
     if (!config.init()) {
         return KRB5KDC_ERR_SVC_UNAVAILABLE;
@@ -150,11 +150,11 @@ saml_kdc_build_assertion(krb5_context context,
     krb5_error_code code;
     Issuer *issuer = NULL;
     Subject *subject = NULL;
-    AuthnStatement *statement = NULL;
-    AuthnContext *authnContext = NULL;
-    AuthnContextClassRef *authnContextClass = NULL;
     AttributeStatement *attrStatement = NULL;
-    Conditions *conditions = NULL;
+    AuthnStatement *statement;
+    AuthnContext *authnContext;
+    AuthnContextClassRef *authnContextClass;
+    Conditions *conditions;
     saml2::Assertion *assertion;
     DateTime authtime((time_t)enc_tkt_request->times.authtime);
     DateTime starttime((time_t)enc_tkt_request->times.starttime);
@@ -175,9 +175,10 @@ saml_kdc_build_assertion(krb5_context context,
         statement->setAuthnInstant(authtime.getFormattedString());
         statement->setAuthnContext(authnContext);
 
-	conditions = ConditionsBuilder::buildConditions();
-	conditions->setNotBefore(starttime.getFormattedString());
-	conditions->setNotOnOrAfter(endtime.getFormattedString());
+
+        conditions = ConditionsBuilder::buildConditions();
+        conditions->setNotBefore(starttime.getFormattedString());
+        conditions->setNotOnOrAfter(endtime.getFormattedString());
 
         assertion = AssertionBuilder::buildAssertion();
         assertion->setIssueInstant(authtime.getFormattedString());
@@ -185,8 +186,8 @@ saml_kdc_build_assertion(krb5_context context,
         assertion->setIssuer(issuer);
         assertion->setSubject(subject);
         assertion->getAuthnStatements().push_back(statement);
-	if (attrStatement != NULL)
-	    assertion->getAttributeStatements().push_back(attrStatement);
+        if (attrStatement != NULL)
+            assertion->getAttributeStatements().push_back(attrStatement);
     } catch (XMLToolingException &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
     }
@@ -230,8 +231,8 @@ saml_kdc_issue(krb5_context context,
 
     code = saml_krb_derive_key(context, enc_tkt_reply->session, &key);
     if (code != 0) {
-	delete assertion;
-	return code;
+        delete assertion;
+        return code;
     }
 
     try {
@@ -243,7 +244,7 @@ saml_kdc_issue(krb5_context context,
         assertion->addNamespace(Namespace(XSI_NS, XSI_PREFIX));
         assertion->addNamespace(Namespace(XMLSIG_NS, XMLSIG_PREFIX));
         assertion->addNamespace(Namespace(SAML20_NS, SAML20_PREFIX));
-	assertion->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
+        assertion->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
 
         assertion->setSignature(signature);
         vector <Signature *> signatures(1, signature);
