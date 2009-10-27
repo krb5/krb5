@@ -654,3 +654,14 @@ coverity prevent cov: Makefiles
 	else \
 		echo "** Coverity Prevent analysis results not commit to Defect Manager"; \
 	fi
+
+FIND = find
+XARGS = xargs
+EMACS = emacs
+
+reindent::
+	$(FIND) $(SRCTOP) \
+	\( -name '*.[ch]' -o -name '*.hin' -o -name '*.[ch].in' \) \
+	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
+	-l $(SRCTOP)/util/krb5-c-style.el \
+	-l $(SRCTOP)/util/krb5-batch-reindent.el
