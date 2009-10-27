@@ -354,6 +354,8 @@ typedef INT64_TYPE krb5_int64;
 #define KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED 80 /* bad digest algorithm in SignedData */
 #define KDC_ERR_PUBLIC_KEY_ENCRYPTION_NOT_SUPPORTED 81
 #define KRB_AP_ERR_PRINCIPAL_UNKNOWN		82
+#define KRB_AP_ERR_REALM_UNKNOWN		83
+#define KRB_AP_ERR_PRINCIPAL_RESERVED		84
 
 /*
  * This structure is returned in the e-data field of the KRB-ERROR
