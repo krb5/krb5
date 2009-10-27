@@ -122,6 +122,10 @@ static const gss_OID_desc const_oids[] = {
 
     /* GSS_C_INQ_SSPI_SESSION_KEY 1.2.840.113554.1.2.2.5.5 */
     {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"},
+
+    /* GSS_C_NT_SAML 1.2.840.113554.1.2.2.6.1 */
+    {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x06\x01"},
+
 };
 
 /* Here are the constants which point to the static structure above.
@@ -153,3 +157,4 @@ gss_OID gss_nt_exported_name                    = oids+6;
 
 GSS_DLLIMP gss_OID GSS_C_INQ_SSPI_SESSION_KEY   = oids+7;
 
+GSS_DLLIMP gss_OID GSS_C_NT_SAML                = oids+8;

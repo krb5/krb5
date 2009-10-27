@@ -604,6 +604,55 @@ krb5_authdata_export_authdata(krb5_context kcontext,
 }
 
 krb5_error_code
+krb5_authdata_import_authdata(krb5_context kcontext,
+                              krb5_authdata_context context,
+                              krb5_flags usage,
+                              krb5_authdata **import_authdata)
+{
+    int i;
+    krb5_error_code code = 0;
+
+    for (i = 0; i < context->n_modules; i++) {
+        struct _krb5_authdata_context_module *module = &context->modules[i];
+        krb5_authdata **authdata = NULL;
+
+        if ((module->flags & usage) == 0)
+            continue;
+
+        if (module->ftable->import_authdata == NULL)
+            continue;
+
+        code = krb5int_find_authdata(kcontext,
+                                     import_authdata,
+                                     NULL,
+                                     module->ad_type,
+                                     &authdata);
+        if (code != 0)
+            break;
+
+        if (authdata == NULL)
+            continue;
+
+        assert(authdata[0] != NULL);
+
+        code = (*module->ftable->import_authdata)(kcontext,
+                                                  context,
+                                                  module->plugin_context,
+                                                  *(module->request_context_pp),
+                                                  authdata,
+                                                  FALSE,
+                                                  NULL);
+        if (code != 0 && (module->flags & AD_INFORMATIONAL))
+            code = 0;
+        krb5_free_authdata(kcontext, authdata);
+        if (code != 0)
+            break;
+    }
+
+    return code;
+}
+
+krb5_error_code
 krb5int_authdata_verify(krb5_context kcontext,
                         krb5_authdata_context context,
                         krb5_flags usage,

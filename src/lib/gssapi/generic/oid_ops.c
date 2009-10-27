@@ -75,7 +75,8 @@ generic_gss_release_oid(minor_status, oid)
 	(*oid != GSS_C_NT_HOSTBASED_SERVICE) &&
 	(*oid != GSS_C_NT_ANONYMOUS) &&
 	(*oid != GSS_C_NT_EXPORT_NAME) &&
-	(*oid != gss_nt_service_name)) {
+	(*oid != gss_nt_service_name) &&
+	(*oid != GSS_C_NT_SAML)) {
 	free((*oid)->elements);
 	free(*oid);
     }

@@ -111,6 +111,9 @@
  * Provisionally reserved for Kerberos mechanism-specific APIs:
  *      iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
  *      krb5(2) krb5_gssapi_ext(5) = 1.2.840.113554.1.2.2.5
+ * Provisionally reserved for Kerberos naming extension name types:
+ *      iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
+ *      krb5(2) krb5_gssapi_ext(6) = 1.2.840.113554.1.2.2.6
  */
 
 /*

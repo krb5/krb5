@@ -137,6 +137,44 @@ cleanup:
 }
 
 static krb5_error_code
+saml_kdc_annotate_assertion(krb5_context context,
+                            unsigned int flags,
+                            krb5_const_principal client_princ,
+                            krb5_db_entry *client,
+                            krb5_db_entry *server,
+                            krb5_db_entry *tgs,
+                            krb5_enc_tkt_part *enc_tkt_request,
+                            saml2::Assertion *assertion)
+{
+    AuthnStatement *statement;
+    AuthnContext *authnContext;
+    AuthnContextClassRef *authnContextClass;
+    Conditions *conditions;
+    DateTime authtime((time_t)enc_tkt_request->times.authtime);
+    DateTime starttime((time_t)enc_tkt_request->times.starttime);
+    DateTime endtime((time_t)enc_tkt_request->times.endtime);
+    auto_ptr_XMLCh method("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos");
+
+    authnContext = AuthnContextBuilder::buildAuthnContext();
+    authnContextClass = AuthnContextClassRefBuilder::buildAuthnContextClassRef();
+    authnContextClass->setReference(method.get());
+    authnContext->setAuthnContextClassRef(authnContextClass);
+
+    statement = AuthnStatementBuilder::buildAuthnStatement();
+    statement->setAuthnInstant(authtime.getFormattedString());
+    statement->setAuthnContext(authnContext);
+
+    conditions = ConditionsBuilder::buildConditions();
+    conditions->setNotBefore(starttime.getFormattedString());
+    conditions->setNotOnOrAfter(endtime.getFormattedString());
+
+    assertion->setConditions(conditions);
+    assertion->getAuthnStatements().push_back(statement);
+
+    return 0;
+}
+
+static krb5_error_code
 saml_kdc_build_assertion(krb5_context context,
                          unsigned int flags,
                          krb5_const_principal client_princ,
@@ -144,50 +182,40 @@ saml_kdc_build_assertion(krb5_context context,
                          krb5_db_entry *server,
                          krb5_db_entry *tgs,
                          krb5_enc_tkt_part *enc_tkt_request,
-                         krb5_enc_tkt_part *enc_tkt_reply,
                          saml2::Assertion **pAssertion)
 {
     krb5_error_code code;
     Issuer *issuer;
     Subject *subject;
     AttributeStatement *attrStatement;
-    AuthnStatement *statement;
-    AuthnContext *authnContext;
-    AuthnContextClassRef *authnContextClass;
-    Conditions *conditions;
     saml2::Assertion *assertion;
     DateTime authtime((time_t)enc_tkt_request->times.authtime);
-    DateTime starttime((time_t)enc_tkt_request->times.starttime);
-    DateTime endtime((time_t)enc_tkt_request->times.endtime);
-    auto_ptr_XMLCh method("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos");
-
-    saml_kdc_build_issuer(context, tgs->princ, &issuer);
-    saml_kdc_build_subject(context, client_princ, &subject);
-    saml_kdc_build_attrs_ldap(context, client, server, &attrStatement);
 
     try {
-        authnContext = AuthnContextBuilder::buildAuthnContext();
-        authnContextClass = AuthnContextClassRefBuilder::buildAuthnContextClassRef();
-        authnContextClass->setReference(method.get());
-        authnContext->setAuthnContextClassRef(authnContextClass);
-
-        statement = AuthnStatementBuilder::buildAuthnStatement();
-        statement->setAuthnInstant(authtime.getFormattedString());
-        statement->setAuthnContext(authnContext);
-
-
-        conditions = ConditionsBuilder::buildConditions();
-        conditions->setNotBefore(starttime.getFormattedString());
-        conditions->setNotOnOrAfter(endtime.getFormattedString());
-
         assertion = AssertionBuilder::buildAssertion();
+        assertion->addNamespace(Namespace(XSD_NS, XSD_PREFIX));
+        assertion->addNamespace(Namespace(XSI_NS, XSI_PREFIX));
+        assertion->addNamespace(Namespace(XMLSIG_NS, XMLSIG_PREFIX));
+        assertion->addNamespace(Namespace(SAML20_NS, SAML20_PREFIX));
+        assertion->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
+
         assertion->setIssueInstant(authtime.getFormattedString());
-        assertion->setConditions(conditions);
+
+        saml_kdc_build_issuer(context, tgs->princ, &issuer);
         assertion->setIssuer(issuer);
+
+        saml_kdc_build_subject(context, client_princ, &subject);
         assertion->setSubject(subject);
-        assertion->getAuthnStatements().push_back(statement);
+
+        saml_kdc_build_attrs_ldap(context, client, server, &attrStatement);
         if (attrStatement != NULL)
             assertion->getAttributeStatements().push_back(attrStatement);
+
+        saml_kdc_annotate_assertion(context, flags, client_princ,
+                                    client, server, tgs,
+                                    enc_tkt_request,
+                                    assertion);
+
         code = 0;
         *pAssertion = assertion;
     } catch (XMLToolingException &e) {
@@ -198,94 +226,147 @@ saml_kdc_build_assertion(krb5_context context,
     return code;
 }
 
+/*
+ * Look for an assertion in the TGS-REQ authorization data.
+ */ 
 static krb5_error_code
-saml_kdc_issue(krb5_context context,
-               unsigned int flags,
-               krb5_const_principal client_princ,
-               krb5_db_entry *client,
-               krb5_db_entry *server,
-               krb5_db_entry *tgs,
-               krb5_enc_tkt_part *enc_tkt_request,
-               krb5_enc_tkt_part *enc_tkt_reply,
-               krb5_data **assertion_data)
+saml_kdc_get_assertion(krb5_context context,
+                       unsigned int flags,
+                       krb5_kdc_req *request,
+                       krb5_enc_tkt_part *enc_tkt_request,
+                       saml2::Assertion **pAssertion,
+                       krb5_boolean *verified)
 {
     krb5_error_code code;
-    saml2::Assertion *assertion = NULL;
-    Signature *signature = NULL;
-    XSECCryptoKey *key;
-    string buf;
-    krb5_data data;
-    auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
+    krb5_authdata **authdata = NULL;
+    DOMDocument *doc;
+    const XMLObjectBuilder *b;
+    DOMElement *elem;
+    XMLObject *xobj;
+    saml2::Assertion *assertion;
+    krb5_boolean fromEncPart = FALSE;
 
-    *assertion_data = NULL;
+    *pAssertion = NULL;
 
-    code = saml_kdc_build_assertion(context, flags, client_princ,
-                                    client, server, tgs,
-                                    enc_tkt_request, enc_tkt_reply,
-                                    &assertion);
+    code = krb5int_find_authdata(context,
+                                 request->unenc_authdata,
+                                 NULL,
+                                 KRB5_AUTHDATA_SAML,
+                                 &authdata);
     if (code != 0)
         return code;
 
-    code = saml_krb_derive_key(context, enc_tkt_reply->session, &key);
-    if (code != 0) {
-        delete assertion;
-        return code;
+    if (authdata == NULL) {
+        code = krb5int_find_authdata(context,
+                                     enc_tkt_request->authorization_data,
+                                     NULL,
+                                     KRB5_AUTHDATA_SAML,
+                                     &authdata);
+        if (code != 0)
+            return code;
+
+        fromEncPart = TRUE;
     }
+
+    if (authdata == NULL ||
+        authdata[0]->ad_type != KRB5_AUTHDATA_SAML ||
+        authdata[1] != NULL)
+        return 0;
 
     try {
-        signature = SignatureBuilder::buildSignature();
-        signature->setSignatureAlgorithm(algorithm.get());
-        signature->setSigningKey(key);
+        string samlbuf((char *)authdata[0]->contents, authdata[0]->length);
+        istringstream samlin(samlbuf);
 
-        assertion->addNamespace(Namespace(XSD_NS, XSD_PREFIX));
-        assertion->addNamespace(Namespace(XSI_NS, XSI_PREFIX));
-        assertion->addNamespace(Namespace(XMLSIG_NS, XMLSIG_PREFIX));
-        assertion->addNamespace(Namespace(SAML20_NS, SAML20_PREFIX));
-        assertion->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
-
-        assertion->setSignature(signature);
-        vector <Signature *> signatures(1, signature);
-        XMLHelper::serialize(assertion->marshall((DOMDocument *)NULL, &signatures, NULL), buf);
+        doc = XMLToolingConfig::getConfig().getParser().parse(samlin);
+        b = XMLObjectBuilder::getDefaultBuilder();
+        elem = doc->getDocumentElement();
+        xobj = b->buildOneFromElement(elem, true);
+#if 0
+        assertion = dynamic_cast<saml2::Assertion*>(xobj);
+        if (assertion == NULL) {
+            fprintf(stderr, "%s\n", typeid(xobj).name());
+            delete xobj;
+            code = ASN1_PARSE_ERROR;
+        }
+#else
+        assertion = (saml2::Assertion*)((void *)xobj);
+#endif
     } catch (XMLToolingException &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
-    }
-  
-    if (code == 0) { 
-        data.data = (char *)buf.c_str();
-        data.length = buf.length();
-
-        code = krb5_copy_data(context, &data, assertion_data); 
+        assertion = NULL;
     }
 
-    delete assertion;
+    *pAssertion = assertion;
+    *verified = fromEncPart;
 
     return code;
 }
 
-#if 0
 static krb5_error_code
-saml_kdc_verify(krb5_context context,
-                krb5_enc_tkt_part *enc_tkt_request,
-                krb5_data **assertion)
+saml_kdc_verify_assertion(krb5_context context,
+                          unsigned int flags,
+                          krb5_const_principal client_princ,
+                          krb5_db_entry *client,
+                          krb5_db_entry *server,
+                          krb5_db_entry *tgs,
+                          krb5_enc_tkt_part *enc_tkt_request,
+                          saml2::Assertion *assertion,
+                          krb5_boolean *verified)
 {
-    return 0;
+    krb5_error_code code;
+
+    /*
+     * This is a NOOP until we support PKI validation. But it is
+     * a start. We're probably going to need some kind of pluggable
+     * SAML to Kerberos name mapping.
+     */
+    code = saml_krb_verify(context,
+                           assertion,
+                           NULL,
+                           client_princ,
+                           0,
+                           verified);
+
+    return code;
 }
-#endif
 
 static krb5_error_code
-saml_kdc_sign(krb5_context context,
-              krb5_enc_tkt_part *enc_tkt_reply,
-              krb5_const_principal tgs,
-              krb5_data *assertion)
+saml_kdc_encode(krb5_context context,
+                krb5_enc_tkt_part *enc_tkt_reply,
+                krb5_boolean sign,
+                saml2::Assertion *assertion)
 {
     krb5_error_code code;
     krb5_authdata ad_datum, *ad_data[2], **kdc_issued = NULL;
     krb5_authdata **if_relevant = NULL;
     krb5_authdata **tkt_authdata;
+    Signature *signature;
+    auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
+    string buf;
+    XSECCryptoKey *key = NULL;
+
+    try {
+        if (sign) {
+            code = saml_krb_derive_key(context, enc_tkt_reply->session, &key);
+            if (code != 0)
+                return code;
+
+            signature = SignatureBuilder::buildSignature();
+            signature->setSignatureAlgorithm(algorithm.get());
+            signature->setSigningKey(key);
+            assertion->setSignature(signature);
+            vector <Signature *> signatures(1, signature);
+            XMLHelper::serialize(assertion->marshall((DOMDocument *)NULL, &signatures, NULL), buf);
+        } else {
+            XMLHelper::serialize(assertion->marshall((DOMDocument *)NULL), buf);
+        }
+    } catch (exception &e) {
+        code = ASN1_PARSE_ERROR; /* XXX */
+    }
 
     ad_datum.ad_type = KRB5_AUTHDATA_SAML;
-    ad_datum.contents = (krb5_octet *)assertion->data;
-    ad_datum.length = assertion->length;
+    ad_datum.contents = (krb5_octet *)buf.c_str();
+    ad_datum.length = buf.length();
 
     ad_data[0] = &ad_datum;
     ad_data[1] = NULL;
@@ -331,8 +412,9 @@ saml_authdata(krb5_context context,
               krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code code;
-    krb5_data *assertion = NULL;
     krb5_const_principal client_princ;
+    saml2::Assertion *assertion = NULL;
+    krb5_boolean vouch = FALSE;
 
     if (request->msg_type != KRB5_TGS_REQ)
         return 0;
@@ -342,22 +424,42 @@ saml_authdata(krb5_context context,
     else
         client_princ = enc_tkt_reply->client;
 
-    if (assertion == NULL) {
+    code = saml_kdc_get_assertion(context, flags,
+                                  request, enc_tkt_request,
+                                  &assertion, &vouch);
+    if (code != 0)
+        return code;
+
+    if (assertion != NULL) {
+        if (vouch == FALSE) {
+            code = saml_kdc_verify_assertion(context, flags,
+                                            client_princ, client,
+                                            server, tgs,
+                                            enc_tkt_request,
+                                            assertion, &vouch);
+            if (code != 0) {
+                delete assertion;
+                return code;
+            }
+        }
+    } else {
         if (client == NULL)
             return 0;
 
-        code = saml_kdc_issue(context, flags,
-                              client_princ, client,
-                              server, tgs,
-                              enc_tkt_request, enc_tkt_reply,
-                              &assertion);
+        code = saml_kdc_build_assertion(context, flags,
+                                        client_princ, client,
+                                        server, tgs,
+                                        enc_tkt_request,
+                                        &assertion);
         if (code != 0)
             return code;
+
+        vouch = TRUE;
     }
 
-    code = saml_kdc_sign(context, enc_tkt_reply, tgs->princ, assertion);
+    code = saml_kdc_encode(context, enc_tkt_reply, vouch, assertion);
 
-    krb5_free_data(context, assertion);
+    delete assertion;
 
     return code;
 }

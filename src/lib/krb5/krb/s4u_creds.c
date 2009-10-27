@@ -667,6 +667,7 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 {
     krb5_error_code code;
     krb5_principal realm = NULL;
+    krb5_data *realm_name = NULL;
 
     *out_creds = NULL;
 
@@ -684,11 +685,18 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 
         if ((options & KRB5_GC_CACHED) && !(options & KRB5_GC_CANONICALIZE))
             goto cleanup;
+
+        if (in_creds->client->type == KRB5_NT_WELLKNOWN)
+            realm_name = krb5_princ_realm(context, in_creds->server);
     }
 
-    code = s4u_identify_user(context, in_creds, subject_cert, &realm);
-    if (code != 0)
-        goto cleanup;
+    if (realm_name == NULL) {
+        code = s4u_identify_user(context, in_creds, subject_cert, &realm);
+        if (code != 0)
+            goto cleanup;
+
+        realm_name = krb5_princ_realm(context, realm);
+    }
 
     code = krb5_get_credentials(context, options | KRB5_GC_CACHED,
                                 ccache, in_creds, out_creds);
@@ -698,8 +706,7 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
 
     code = krb5_get_self_cred_from_kdc(context, options, ccache,
                                        in_creds, subject_cert,
-                                       krb5_princ_realm(context, realm),
-                                       out_creds);
+                                       realm_name, out_creds);
     if (code != 0)
         goto cleanup;
 

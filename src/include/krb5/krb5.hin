@@ -262,7 +262,7 @@ typedef	krb5_principal_data * krb5_principal;
 /* Windows 2000 UPN */
 #define KRB5_NT_ENTERPRISE_PRINCIPAL	10
 /* draft-ietf-krb-wg-naming-xx */
-#define KRB_NT_WELLKNOWN		11
+#define KRB5_NT_WELLKNOWN		11
 /* Windows 2000 UPN and SID */
 #define KRB5_NT_MS_PRINCIPAL		-128
 /* NT 4 style name */

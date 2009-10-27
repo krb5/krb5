@@ -1508,6 +1508,11 @@ krb5_error_code KRB5_CALLCONV krb5_authdata_free_internal
  const char *module,
  void *ptr);
 
+krb5_error_code KRB5_CALLCONV krb5_authdata_import_authdata
+(krb5_context kcontext,
+ krb5_authdata_context context,
+ krb5_flags usage,
+ krb5_authdata **import_authdata);
 
 struct _kdb5_dal_handle;	/* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;

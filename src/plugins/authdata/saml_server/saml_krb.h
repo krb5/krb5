@@ -111,6 +111,16 @@ saml_krb_derive_key(krb5_context context,
     return code;
 }
 
+static char saml_krb_realm[] = "WELLKNOWN:SAML";
+
+static inline krb5_boolean
+saml_krb_is_saml_principal(krb5_context context,
+                           krb5_const_principal principal)
+{
+    return principal->type == KRB5_NT_WELLKNOWN &&
+        data_eq_string(principal->realm, saml_krb_realm);
+}
+
 static inline krb5_boolean
 saml_krb_compare_subject(krb5_context context,
                          Subject *subject,
@@ -124,8 +134,9 @@ saml_krb_compare_subject(krb5_context context,
     if (nameID == NULL)
         return FALSE;
 
-    if (!XMLString::equals(nameID->getFormat(), NameIDType::KERBEROS))
-        return FALSE;
+    if (!XMLString::equals(nameID->getFormat(), NameIDType::KERBEROS)) {
+        return saml_krb_is_saml_principal(context, principal);
+    }
 
     if (!nameID->getName())
         return FALSE;
@@ -170,24 +181,32 @@ saml_krb_verify(krb5_context context,
     krb5_error_code code;
     krb5_boolean validSig = FALSE;
     XSECCryptoKey *key;
+    Signature *signature;
 
     *pValid = FALSE;
 
     if (assertion == NULL)
         return EINVAL;
 
-    code = saml_krb_derive_key(context, basekey, &key);
-    if (code != 0)
-        return code;
+    signature = assertion->getSignature();
+
+    if (signature == NULL)
+        return 0;
 
     try {
-	SignatureValidator sigValidator;
+        SignatureValidator sigValidator;
 
-	sigValidator.setKey(key);
-	sigValidator.validate(assertion->getSignature());
-	validSig = TRUE;
+        if (basekey != NULL) {
+           code = saml_krb_derive_key(context, basekey, &key);
+            if (code != 0)
+                return code;
+
+            sigValidator.setKey(key);
+            sigValidator.validate(signature);
+            validSig = TRUE;
+        }
     } catch (exception &e) {
-	validSig = FALSE;
+        validSig = FALSE;
     }
 
     if (validSig) {
