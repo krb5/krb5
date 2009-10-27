@@ -55,8 +55,6 @@
  */
 
 #include "des_int.h"
-#include "com_err.h"
-
 #include <stdio.h>
 
 void convert (char *, unsigned char []);
