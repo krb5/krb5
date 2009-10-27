@@ -69,6 +69,8 @@ int ktest_equal_sequence_of_pa_data
 	(krb5_pa_data **ref, krb5_pa_data **var);
 int ktest_equal_sequence_of_cred_info
 	(krb5_cred_info **ref, krb5_cred_info **var);
+int ktest_equal_sequence_of_principal
+	(krb5_principal *ref, krb5_principal *var);
 
 len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
@@ -98,6 +100,12 @@ int ktest_equal_pa_s4u_x509_user
 int ktest_equal_ad_kdcissued
     (krb5_ad_kdcissued *ref,
 		    krb5_ad_kdcissued *var);
+int ktest_equal_ad_signedpath_data
+    (krb5_ad_signedpath_data *ref,
+		    krb5_ad_signedpath_data *var);
+int ktest_equal_ad_signedpath
+    (krb5_ad_signedpath *ref,
+		    krb5_ad_signedpath *var);
 
 int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
 				      ldap_seqof_key_data *var);

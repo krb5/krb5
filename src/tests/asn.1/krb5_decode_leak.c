@@ -680,6 +680,30 @@ main(int argc, char **argv)
                   krb5_free_ad_kdcissued);
         ktest_empty_ad_kdcissued(&kdci);
     }
+#if 0
+    /****************************************************************/
+    /* encode_krb5_ad_signedpath_data */
+    {
+        krb5_ad_signedpath_data spd, *tmp;
+        setup(spd, "ad_signedpath_data",
+              ktest_make_sample_ad_signedpath_data);
+        leak_test(spd, encode_krb5_ad_signedpath_data,
+                  decode_krb5_ad_signedpath_data,
+                  NULL);
+        ktest_empty_ad_signedpath_data(&spd);
+    }
+#endif
+    /****************************************************************/
+    /* encode_krb5_ad_signedpath */
+    {
+        krb5_ad_signedpath sp, *tmp;
+        setup(sp, "ad_signedpath",
+              ktest_make_sample_ad_signedpath);
+        leak_test(sp, encode_krb5_ad_signedpath,
+                  decode_krb5_ad_signedpath,
+                  krb5_free_ad_signedpath);
+        ktest_empty_ad_signedpath(&sp);
+    }
     krb5_free_context(test_context);
     return 0;
 }

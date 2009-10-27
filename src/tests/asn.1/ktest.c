@@ -855,6 +855,42 @@ krb5_error_code ktest_make_sample_ad_kdcissued(p)
     return retval;
 }
 
+krb5_error_code ktest_make_sample_ad_signedpath_data(p)
+    krb5_ad_signedpath_data *p;
+{
+    krb5_error_code retval;
+    retval = ktest_make_sample_principal(&p->client);
+    if (retval) return retval;
+    p->authtime = SAMPLE_TIME;
+    p->delegated = k5alloc((2 * sizeof(krb5_principal)), &retval);
+    if (retval) return retval;
+    retval = ktest_make_sample_principal(&p->delegated[0]);
+    if (retval) return retval;
+    p->delegated[1] = NULL;
+    retval = ktest_make_sample_principal(&p->client);
+    if (retval) return retval;
+    retval = ktest_make_sample_authorization_data(&p->authorization_data);
+    if (retval) return retval;
+    retval = ktest_make_sample_pa_data_array(&p->method_data);
+    if (retval) return retval;
+    return retval;
+}
+
+krb5_error_code ktest_make_sample_ad_signedpath(p)
+    krb5_ad_signedpath*p;
+{
+    krb5_error_code retval;
+    p->enctype = 1;
+    retval = ktest_make_sample_checksum(&p->checksum);
+    if (retval) return retval;
+    p->delegated = k5alloc((2 * sizeof(krb5_principal)), &retval);
+    if (retval) return retval;
+    p->delegated[1] = NULL;
+    retval = ktest_make_sample_pa_data_array(&p->method_data);
+    if (retval) return retval;
+    return retval;
+}
+
 #ifdef ENABLE_LDAP
 static krb5_error_code ktest_make_sample_key_data(krb5_key_data *p, int i)
 {
@@ -1464,6 +1500,37 @@ void ktest_empty_ad_kdcissued(p)
     if (p->ad_checksum.contents) free(p->ad_checksum.contents);
     ktest_destroy_principal(&p->i_principal);
     ktest_destroy_authorization_data(&p->elements);
+}
+
+void ktest_empty_ad_signedpath_data(p)
+    krb5_ad_signedpath_data *p;
+{
+    int i;
+    ktest_destroy_principal(&p->client);
+    if (p->delegated != NULL) {
+        for (i = 0; p->delegated[i] != NULL; i++) {
+	    krb5_principal princ = p->delegated[i];
+            ktest_destroy_principal(&princ);
+	}
+        free(p->delegated);
+    }
+    ktest_destroy_pa_data_array(&p->method_data);
+    ktest_destroy_authorization_data(&p->authorization_data);
+}
+
+void ktest_empty_ad_signedpath(p)
+    krb5_ad_signedpath *p;
+{
+    int i;
+    if (p->checksum.contents) free(p->checksum.contents);
+    if (p->delegated != NULL) {
+        for (i = 0; p->delegated[i] != NULL; i++) {
+	    krb5_principal princ = p->delegated[i];
+            ktest_destroy_principal(&princ);
+	}
+        free(p->delegated);
+    }
+    ktest_destroy_pa_data_array(&p->method_data);
 }
 
 #ifdef ENABLE_LDAP

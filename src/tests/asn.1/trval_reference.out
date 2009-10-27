@@ -1283,3 +1283,52 @@ encode_krb5_ad_kdcissued:
 .  .  .  [0] [Integer] 1
 .  .  .  [1] [Octet String] "foobar"
 
+encode_krb5_ad_signedpath_data:
+
+[Sequence/Sequence Of] 
+.  [0] [Sequence/Sequence Of] 
+.  .  [0] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] "hftsai"
+.  .  .  .  [General string] "extra"
+.  .  [1] [General string] "ATHENA.MIT.EDU"
+.  [1] [Generalized Time] "19940610060317Z"
+.  [2] [Sequence/Sequence Of] 
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] 1
+.  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  [General string] "hftsai"
+.  .  .  .  .  [General string] "extra"
+.  .  .  [1] [General string] "ATHENA.MIT.EDU"
+.  [3] [Sequence/Sequence Of] 
+.  .  [Sequence/Sequence Of] 
+.  .  .  [1] [Integer] 13
+.  .  .  [2] [Octet String] "pa-data"
+.  .  [Sequence/Sequence Of] 
+.  .  .  [1] [Integer] 13
+.  .  .  [2] [Octet String] "pa-data"
+.  [4] [Sequence/Sequence Of] 
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "foobar"
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "foobar"
+
+encode_krb5_ad_signedpath:
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] 1
+.  [1] [Sequence/Sequence Of] 
+.  .  [0] [Integer] 1
+.  .  [1] [Octet String] "1234"
+.  [3] [Sequence/Sequence Of] 
+.  .  [Sequence/Sequence Of] 
+.  .  .  [1] [Integer] 13
+.  .  .  [2] [Octet String] "pa-data"
+.  .  [Sequence/Sequence Of] 
+.  .  .  [1] [Integer] 13
+.  .  .  [2] [Octet String] "pa-data"
+
