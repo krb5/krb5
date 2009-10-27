@@ -740,11 +740,12 @@ saml_copy(krb5_context kcontext,
     struct saml_context *src = (struct saml_context *)request_context;
     struct saml_context *dst = (struct saml_context *)dst_request_context;
 
-    if (src->assertion != NULL)
+    if (src->assertion != NULL) {
         dst->assertion = (saml2::Assertion *)((void *)src->assertion->clone());
-    dst->verified = src->verified;
+        assert(dst->assertion != NULL);
+    }
 
-    assert(dst->assertion != NULL);
+    dst->verified = src->verified;
 
     return 0;
 }
