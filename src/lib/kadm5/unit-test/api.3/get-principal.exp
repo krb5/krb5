@@ -6,7 +6,7 @@ test "get-principal 1"
 proc test1 {} {
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -32,7 +32,7 @@ proc test2 {} {
 
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -59,7 +59,7 @@ proc test3 {} {
 
     if {! [cmd {
 	kadm5_init admin/none admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -86,7 +86,7 @@ proc test4 {} {
 
     if {! [cmd {
 	kadm5_init admin/add admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -114,7 +114,7 @@ proc test5 {} {
 
     if {! [cmd {
 	kadm5_init admin/modify admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -142,7 +142,7 @@ proc test6 {} {
 
     if {! [cmd {
 	kadm5_init admin/delete admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -170,7 +170,7 @@ proc test7 {} {
 
     if {! [cmd {
 	kadm5_init admin/delete admin $KADM5_CHANGEPW_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -199,7 +199,7 @@ proc test8 {} {
 
     if {! [cmd {
 	kadm5_init admin/get admin $KADM5_CHANGEPW_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -221,7 +221,7 @@ proc test9 {} {
     global test
     if {! [cmd {
 	kadm5_init admin/none admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -241,7 +241,7 @@ proc test10 {} {
     global test
     if {! [cmd {
 	kadm5_init admin/none admin $KADM5_CHANGEPW_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -261,7 +261,7 @@ proc test11 {} {
     global test
     if {! [cmd {
 	kadm5_init admin/get admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -280,7 +280,7 @@ proc test12 {} {
     global test
     if {! [cmd {
 	kadm5_init admin/get admin $KADM5_CHANGEPW_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -299,7 +299,7 @@ proc test13 {} {
     global test
     if {! [cmd {
 	kadm5_init admin/get admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"
@@ -318,7 +318,7 @@ proc test14 {} {
     global test
     if {! [cmd {
 	kadm5_init admin/get-mod admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
 	perror "$test: unexpected failure in init"

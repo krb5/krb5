@@ -1,6 +1,3 @@
-des_FP_table
-des_IP_table
-des_SP_table
 is_coll_proof_cksum
 is_keyed_cksum
 krb5_MD4Final

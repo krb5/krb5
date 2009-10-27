@@ -81,6 +81,15 @@
 #define KDB_LAST_SUCCESS_ATTR                0x000800
 #define KDB_LAST_FAILED_ATTR                 0x001000
 #define KDB_FAIL_AUTH_COUNT_ATTR             0x002000
+#define KDB_LOCKED_TIME_ATTR                 0x004000
+
+/*
+ * This is a private contract between krb5_ldap_lockout_audit()
+ * and krb5_ldap_put_principal(). If present, it means that the
+ * krbPwdMaxFailure attribute should be incremented by one.
+ */
+#define KADM5_FAIL_AUTH_COUNT_INCREMENT	     0x080000 /* KADM5_CPW_FUNCTION */
+
 extern struct timeval timeout;
 extern char *policyclass[];
 

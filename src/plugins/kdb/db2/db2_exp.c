@@ -197,6 +197,13 @@ WRAP_K (krb5_db2_promote_db,
 	( krb5_context kcontext, char *conf_section, char **db_args ),
 	(kcontext, conf_section, db_args));
 
+WRAP_K (krb5_db2_invoke,
+	(krb5_context kcontext,
+	 unsigned int method,
+	 const krb5_data *request,
+	 krb5_data *response),
+	(kcontext, method, request, response));
+
 static krb5_error_code
 hack_init ()
 {
@@ -256,5 +263,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
   /* get_master_key_list */	    	       wrap_krb5_db2_db_get_mkey_list,
   /* blah blah blah */ 0,0,0,0,0,0,0,0,
   /* promote_db */			       wrap_krb5_db2_promote_db,
-  0,0,0,
+  0, 0,
+  /* invoke */				       wrap_krb5_db2_invoke
 };

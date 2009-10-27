@@ -7,7 +7,7 @@ proc princ_w_pol {name policy} {
 }
 
 proc simple_policy {name} {
-    return "{$name} 0 0 0 0 0 0"
+    return "{$name} 0 0 0 0 0 0 0 0 0"
 }
 
 proc config_params {masks values} {

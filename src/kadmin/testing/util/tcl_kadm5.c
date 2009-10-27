@@ -71,7 +71,10 @@ static struct flagval policy_mask_flags[] = {
      {"KADM5_PW_MIN_LENGTH", KADM5_PW_MIN_LENGTH},
      {"KADM5_PW_MIN_CLASSES", KADM5_PW_MIN_CLASSES},
      {"KADM5_PW_HISTORY_NUM", KADM5_PW_HISTORY_NUM},
-     {"KADM5_REF_COUNT", KADM5_REF_COUNT}
+     {"KADM5_REF_COUNT", KADM5_REF_COUNT},
+     {"KADM5_PW_MAX_FAILURE", KADM5_PW_MAX_FAILURE},
+     {"KADM5_PW_FAILURE_COUNT_INTERVAL", KADM5_PW_FAILURE_COUNT_INTERVAL},
+     {"KADM5_PW_LOCKOUT_DURATION", KADM5_PW_LOCKOUT_DURATION},
 };
 
 static struct flagval config_mask_flags[] = {
@@ -1309,6 +1312,7 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
+     princ->n_tl_data = tmp;
 
 finished:
      Tcl_Free((char *) argv);
@@ -1360,6 +1364,15 @@ static Tcl_DString *unparse_policy_ent(kadm5_policy_ent_t policy)
      sprintf(buf, "%ld", policy->policy_refcnt);
      Tcl_DStringAppendElement(str, buf);
 
+     sprintf(buf, "%d", policy->pw_max_fail);
+     Tcl_DStringAppendElement(str, buf);
+
+     sprintf(buf, "%d", policy->pw_failcnt_interval);
+     Tcl_DStringAppendElement(str, buf);
+
+     sprintf(buf, "%d", policy->pw_lockout_duration);
+     Tcl_DStringAppendElement(str, buf);
+
      return str;
 }
 
@@ -1379,8 +1392,8 @@ static int parse_policy_ent(Tcl_Interp *interp, char *list,
 	  return tcl_ret;
      }
 
-     if (argc != 7) {
-	  sprintf(interp->result, "wrong # args in policy structure (%d should be 7)",
+     if (argc != 7 && argc != 10) {
+	  sprintf(interp->result, "wrong # args in policy structure (%d should be 7 or 10)",
 		  argc);
 	  retcode = TCL_ERROR;
 	  goto finished;
@@ -1458,6 +1471,32 @@ static int parse_policy_ent(Tcl_Interp *interp, char *list,
 	  goto finished;
      }
      policy->policy_refcnt = tmp;
+
+     if (argc == 7) goto finished;
+
+     if ((tcl_ret = Tcl_GetInt(interp, argv[7], &tmp))
+	 != TCL_OK) {
+	  Tcl_AppendElement(interp, "while parsing pw_max_fail");
+	  retcode = TCL_ERROR;
+	  goto finished;
+     }
+     policy->pw_max_fail = tmp;
+
+     if ((tcl_ret = Tcl_GetInt(interp, argv[8], &tmp))
+	 != TCL_OK) {
+	  Tcl_AppendElement(interp, "while parsing pw_failcnt_interval");
+	  retcode = TCL_ERROR;
+	  goto finished;
+     }
+     policy->pw_failcnt_interval = tmp;
+
+     if ((tcl_ret = Tcl_GetInt(interp, argv[9], &tmp))
+	 != TCL_OK) {
+	  Tcl_AppendElement(interp, "while parsing pw_lockout_duration");
+	  retcode = TCL_ERROR;
+	  goto finished;
+     }
+     policy->pw_lockout_duration = tmp;
 
 finished:
      Tcl_Free((char *) argv);
@@ -2488,6 +2527,8 @@ void Tcl_kadm5_init(Tcl_Interp *interp)
      Tcl_SetVar(interp, "KADM5_STRUCT_VERSION", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_API_VERSION_2);
      Tcl_SetVar(interp, "KADM5_API_VERSION_2", buf, TCL_GLOBAL_ONLY);
+    (void) sprintf(buf, "%d", KADM5_API_VERSION_3);
+     Tcl_SetVar(interp, "KADM5_API_VERSION_3", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_API_VERSION_MASK);
      Tcl_SetVar(interp, "KADM5_API_VERSION_MASK", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_STRUCT_VERSION_MASK);

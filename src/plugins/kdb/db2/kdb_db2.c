@@ -1,7 +1,7 @@
 /*
  * lib/kdb/kdb_db2.c
  *
- * Copyright 1997,2006,2007,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1997,2006,2007-2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -67,8 +67,6 @@
 #include "policy_db.h"
 
 #define KDB_DB2_DATABASE_NAME "database_name"
-
-#include "kdb_db2.h"
 
 static char *gen_dbsuffix(char *, char *);
 
@@ -774,7 +772,7 @@ destroy_file_suffix(char *dbname, char *suffix)
     char   *filename;
     struct stat statb;
     int     nb, fd;
-    unsigned int j;
+    int	    j;
     off_t   pos;
     char    buf[BUFSIZ];
     char    zbuf[BUFSIZ];
@@ -1315,6 +1313,9 @@ krb5_db2_open(krb5_context kcontext,
 	else if (!opt && !strcmp(val, "temporary") ) {
 	    tempdb = 1;
 	}
+	else if (!opt && !strcmp(val, "merge_nra")) {
+	    ;
+	}
 	/* ignore hash argument. Might have been passed from create */
 	else if (!opt || strcmp(opt, "hash")) {
 	    krb5_set_error_message(kcontext, EINVAL,
@@ -1394,8 +1395,9 @@ krb5_db2_create(krb5_context kcontext, char *conf_section, char **db_args)
 	}
 	else if (!opt && !strcmp(val, "temporary")) {
 	    tempdb = 1;
-	}
-	else if (opt && !strcmp(opt, "hash")) {
+	} else if (!opt && !strcmp(val, "merge_nra")) {
+	    ;
+	} else if (opt && !strcmp(opt, "hash")) {
 	    flags = KRB5_KDB_CREATE_HASH;
 	} else {
 	    krb5_set_error_message(kcontext, EINVAL,
@@ -1563,7 +1565,7 @@ krb5_db2_db_set_option(krb5_context kcontext, int option, void *value)
     krb5_db2_context *db_ctx;
     kdb5_dal_handle *dal_handle;
 
-        if (!k5db2_inited(kcontext))
+    if (!k5db2_inited(kcontext))
 	return KRB5_KDB_DBNOTINITED;
 
     dal_handle = kcontext->dal_handle;
@@ -1679,6 +1681,8 @@ krb5_db2_promote_db(krb5_context kcontext, char *conf_section, char **db_args)
     krb5_error_code status = 0;
     char *db_name = NULL;
     char *temp_db_name = NULL;
+    char **db_argp;
+    int merge_nra = 0;
 
     krb5_clear_error_message (kcontext);
 
@@ -1699,7 +1703,14 @@ krb5_db2_promote_db(krb5_context kcontext, char *conf_section, char **db_args)
 	goto clean_n_exit;
     }
 
-    status = krb5_db2_db_rename (kcontext, temp_db_name, db_name);
+    for (db_argp = db_args; *db_argp; db_argp++) {
+	if (!strcmp(*db_argp, "merge_nra")) {
+	    merge_nra++;
+	    break;
+	}
+    }
+
+    status = krb5_db2_db_rename (kcontext, temp_db_name, db_name, merge_nra);
     if (status)
 	goto clean_n_exit;
 
@@ -1709,6 +1720,154 @@ clean_n_exit:
     if (temp_db_name)
 	free(temp_db_name);
     return status;
+}
+
+/*
+ * Merge non-replicated attributes from src into dst, setting
+ * changed to non-zero if dst was changed.
+ *
+ * Non-replicated attributes are: last_success, last_failed,
+ * fail_auth_count, and any negative TL data values.
+ */
+static krb5_error_code
+krb5_db2_merge_principal(krb5_context kcontext,
+			 krb5_db_entry *src,
+			 krb5_db_entry *dst,
+			 int *changed)
+{
+    *changed = 0;
+
+    if (dst->last_success != src->last_success) {
+	dst->last_success = src->last_success;
+	(*changed)++;
+    }
+
+    if (dst->last_failed != src->last_failed) {
+	dst->last_failed = src->last_failed;
+	(*changed)++;
+    }
+
+    if (dst->fail_auth_count != src->fail_auth_count) {
+	dst->fail_auth_count = src->fail_auth_count;
+	(*changed)++;
+    }
+
+    return 0;
+}
+
+struct nra_context {
+    krb5_context kcontext;
+    krb5_db2_context *db_context;
+};
+
+/*
+ * Iteration callback merges non-replicated attributes from
+ * old database.
+ */
+static krb5_error_code
+krb5_db2_merge_nra_iterator(krb5_pointer ptr, krb5_db_entry *entry)
+{
+    struct nra_context *nra = (struct nra_context *)ptr;
+    kdb5_dal_handle *dal_handle = nra->kcontext->dal_handle;
+    krb5_error_code retval;
+    int n_entries = 0, changed;
+    krb5_db_entry s_entry;
+    krb5_boolean more;
+    krb5_db2_context *dst_db;
+
+    memset(&s_entry, 0, sizeof(s_entry));
+
+    dst_db = dal_handle->db_context;
+    dal_handle->db_context = nra->db_context;
+
+    /* look up the new principal in the old DB */
+    retval = krb5_db2_db_get_principal(nra->kcontext,
+				       entry->princ,
+				       &s_entry,
+				       &n_entries,
+				       &more);
+    if (retval != 0 || n_entries == 0) {
+	/* principal may be newly created, so ignore */
+	dal_handle->db_context = dst_db;
+	return 0;
+    }
+
+    /* merge non-replicated attributes from the old entry in */
+    krb5_db2_merge_principal(nra->kcontext, &s_entry, entry, &changed);
+
+    dal_handle->db_context = dst_db;
+
+    /* if necessary, commit the modified new entry to the new DB */
+    if (changed) {
+	retval = krb5_db2_db_put_principal(nra->kcontext,
+					   entry,
+					   &n_entries,
+					   NULL);
+    } else {
+	retval = 0;
+    }
+
+    return retval;
+}
+
+/*
+ * Merge non-replicated attributes (that is, lockout-related
+ * attributes and negative TL data types) from the old database
+ * into the new one.
+ *
+ * Note: src_db is locked on success.
+ */
+static krb5_error_code
+krb5_db2_begin_nra_merge(krb5_context kcontext,
+			 krb5_db2_context *src_db,
+			 krb5_db2_context *dst_db)
+{
+    krb5_error_code retval;
+    kdb5_dal_handle *dal_handle = kcontext->dal_handle;
+    struct nra_context nra;
+
+    nra.kcontext = kcontext;
+    nra.db_context = dst_db;
+
+    assert(dal_handle->db_context == dst_db);
+    dal_handle->db_context = src_db;
+
+    retval = krb5_db2_db_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+    if (retval) {
+	dal_handle->db_context = dst_db;
+	return retval;
+    }
+
+    retval = krb5_db2_db_iterate_ext(kcontext,
+				     krb5_db2_merge_nra_iterator,
+				     &nra,
+				     0,
+				     0);
+    if (retval != 0)
+	(void) krb5_db2_db_unlock(kcontext);
+
+    dal_handle->db_context = dst_db;
+
+    return retval;
+}
+
+/*
+ * Finish merge of non-replicated attributes by unlocking
+ * src_db.
+ */
+static krb5_error_code
+krb5_db2_end_nra_merge(krb5_context kcontext,
+		       krb5_db2_context *src_db,
+		       krb5_db2_context *dst_db)
+{
+    krb5_error_code retval;
+    kdb5_dal_handle *dal_handle = kcontext->dal_handle;
+
+    dal_handle->db_context = src_db;
+    retval = krb5_db2_db_unlock(kcontext);
+    dal_handle->db_context = dst_db;
+
+    return retval;
 }
 
 /* Retrieved from pre-DAL code base.  */
@@ -1723,12 +1882,12 @@ clean_n_exit:
  * have to go through the same stuff that we went through up in db_destroy.
  */
 krb5_error_code
-krb5_db2_db_rename(context, from, to)
+krb5_db2_db_rename(context, from, to, merge_nra)
     krb5_context context;
     char *from;
     char *to;
+    int merge_nra;
 {
-    DB *db;
     char *fromok;
     krb5_error_code retval;
     krb5_db2_context *s_context, *db_ctx;
@@ -1745,13 +1904,10 @@ krb5_db2_db_rename(context, from, to)
      * files must exist because krb5_db2_db_lock, called below,
      * will fail otherwise.
      */
-    db = k5db2_dbopen(db_ctx, to, O_RDWR|O_CREAT, 0600, 0);
-    if (db == NULL) {
-	retval = errno;
+    retval = krb5_db2_db_create(context, to, 0);
+    if (retval != 0 && retval != EEXIST)
 	goto errout;
-    }
-    else
-	(*db->close)(db);
+
     /*
      * Set the database to the target, so that other processes sharing
      * the target will stop their activity, and notice the new database.
@@ -1763,25 +1919,6 @@ krb5_db2_db_rename(context, from, to)
     retval = krb5_db2_db_init(context);
     if (retval)
 	goto errout;
-
-    {
-	/* Ugly brute force hack.
-
-	   Should be going through nice friendly helper routines for
-	   this, but it's a mess of jumbled so-called interfaces right
-	   now.  */
-	char    policy[2048], new_policy[2048];
-	assert (strlen(db_ctx->db_name) < 2000);
-	snprintf(policy, sizeof(policy), "%s.kadm5", db_ctx->db_name);
-	snprintf(new_policy, sizeof(new_policy),
-		 "%s~.kadm5", db_ctx->db_name);
-	if (0 != rename(new_policy, policy)) {
-	    retval = errno;
-	    goto errout;
-	}
-	strlcat(new_policy, ".lock",sizeof(new_policy));
-	(void) unlink(new_policy);
-    }
 
     db_ctx->db_lf_name = gen_dbsuffix(db_ctx->db_name, KDB2_LOCK_EXT);
     if (db_ctx->db_lf_name == NULL) {
@@ -1813,6 +1950,11 @@ krb5_db2_db_rename(context, from, to)
     if ((retval = krb5_db2_db_start_update(context)))
 	goto errfromok;
 
+    if (merge_nra) {
+	if ((retval = krb5_db2_begin_nra_merge(context, s_context, db_ctx)))
+	    goto errfromok;
+    }
+
     if (rename(from, to)) {
 	retval = errno;
 	goto errfromok;
@@ -1821,7 +1963,35 @@ krb5_db2_db_rename(context, from, to)
 	retval = errno;
 	goto errfromok;
     }
+
+    if (merge_nra) {
+	krb5_db2_end_nra_merge(context, s_context, db_ctx);
+    }
+
     retval = krb5_db2_db_end_update(context);
+    if (retval)
+	goto errfromok;
+
+    {
+	/* XXX moved so that NRA merge works */
+	/* Ugly brute force hack.
+
+	   Should be going through nice friendly helper routines for
+	   this, but it's a mess of jumbled so-called interfaces right
+	   now.  */
+	char    policy[2048], new_policy[2048];
+	assert (strlen(db_ctx->db_name) < 2000);
+	snprintf(policy, sizeof(policy), "%s.kadm5", db_ctx->db_name);
+	snprintf(new_policy, sizeof(new_policy),
+		 "%s~.kadm5", db_ctx->db_name);
+	if (0 != rename(new_policy, policy)) {
+	    retval = errno;
+	    goto errfromok;
+	}
+	strlcat(new_policy, ".lock",sizeof(new_policy));
+	(void) unlink(new_policy);
+    }
+
 errfromok:
     free_dbsuffix(fromok);
 errout:
@@ -1839,3 +2009,4 @@ errout:
 
     return retval;
 }
+

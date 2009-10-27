@@ -104,6 +104,7 @@ k5_hmac_md5_hash_iov (krb5_key key, krb5_keyusage usage,
   size_t i;
 
   keyblock.contents = NULL;
+  keyblock.length = 0;
 
   ds.length = key->keyblock.length;
   ds.data = malloc(ds.length);

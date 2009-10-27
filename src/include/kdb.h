@@ -169,6 +169,10 @@ typedef struct _osa_policy_ent_t {
     krb5_ui_4       pw_min_classes;
     krb5_ui_4       pw_history_num;
     krb5_ui_4       policy_refcnt;
+    /* Only valid if version > 1 */
+    krb5_ui_4       pw_max_fail;                /* pwdMaxFailure */
+    krb5_ui_4       pw_failcnt_interval;        /* pwdFailureCountInterval */
+    krb5_ui_4       pw_lockout_duration;        /* pwdLockoutDuration */
 } osa_policy_ent_rec, *osa_policy_ent_t;
 
 typedef       void    (*osa_adb_iter_policy_func) (void *, osa_policy_ent_t);
@@ -180,7 +184,7 @@ typedef struct __krb5_key_salt_tuple {
 
 #define	KRB5_KDB_MAGIC_NUMBER		0xdbdbdbdb
 #define KRB5_KDB_V1_BASE_LENGTH		38
-  
+
 #define KRB5_TL_LAST_PWD_CHANGE		0x0001
 #define KRB5_TL_MOD_PRINC		0x0002
 #define KRB5_TL_KADM_DATA		0x0003
@@ -478,11 +482,6 @@ krb5_dbe_update_mod_princ_data( krb5_context          context,
 				krb5_db_entry       * entry,
 				krb5_timestamp        mod_date,
 				krb5_const_principal  mod_princ);
-
-krb5_error_code
-krb5_dbe_update_last_pwd_change( krb5_context          context,
-				 krb5_db_entry       * entry,
-				 krb5_timestamp	  stamp);
 
 void *krb5_db_alloc( krb5_context kcontext,
 		     void *ptr,
@@ -913,6 +912,7 @@ typedef struct _kdb_vftabl {
 		   const krb5_data *req,
 		   krb5_data *rep );
 } kdb_vftabl;
+
 #endif /* !defined(_WIN32) */
 
 #endif /* KRB5_KDB5__ */

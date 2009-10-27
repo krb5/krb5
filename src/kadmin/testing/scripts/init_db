@@ -103,13 +103,13 @@ if {[info exists env(USER)]} {
 set cmds {
     {kadm5_init $env(SRVTCL) mrroot null \
 	    [config_params {KADM5_CONFIG_REALM} $r] $KADM5_STRUCT_VERSION \
-	    $KADM5_API_VERSION_2 server_handle}
+	    $KADM5_API_VERSION_3 server_handle}
 
-    {kadm5_create_policy $server_handle "test-pol 0 10000 8 2 3 0" \
-	    {KADM5_POLICY KADM5_PW_MIN_LENGTH KADM5_PW_MIN_CLASSES KADM5_PW_MAX_LIFE KADM5_PW_HISTORY_NUM}}
-    {kadm5_create_policy $server_handle "once-a-min 10 0 0 0 0 0" \
+    {kadm5_create_policy $server_handle "test-pol 0 10000 8 2 3 0 2 90 180" \
+	    {KADM5_POLICY KADM5_PW_MIN_LENGTH KADM5_PW_MIN_CLASSES KADM5_PW_MAX_LIFE KADM5_PW_HISTORY_NUM KADM5_PW_MAX_FAILURE KADM5_PW_FAILURE_COUNT_INTERVAL KADM5_PW_LOCKOUT_DURATION}}
+    {kadm5_create_policy $server_handle "once-a-min 10 0 0 0 0 0 0 0 0" \
 	    {KADM5_POLICY KADM5_PW_MIN_LIFE}}
-    {kadm5_create_policy $server_handle "dict-only 0 0 0 0 0 0" \
+    {kadm5_create_policy $server_handle "dict-only 0 0 0 0 0 0 0 0 0" \
 	    {KADM5_POLICY}}
     {kadm5_create_policy $server_handle [simple_policy test-pol-nopw] \
 	    {KADM5_POLICY}}

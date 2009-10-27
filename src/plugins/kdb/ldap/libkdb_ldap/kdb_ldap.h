@@ -332,6 +332,18 @@ int
 ldap_unbind_ext_s(LDAP *, LDAPControl **, LDAPControl **);
 #endif
 
+/* lockout.c */
+krb5_error_code
+krb5_ldap_lockout_check_policy(krb5_context context,
+                               krb5_db_entry *entry,
+                               krb5_timestamp stamp);
+
+krb5_error_code
+krb5_ldap_lockout_audit(krb5_context context,
+                        krb5_db_entry *entry,
+                        krb5_timestamp stamp,
+                        krb5_error_code status);
+
 /* kdb_ext.c */
 krb5_error_code
 krb5_ldap_invoke(krb5_context context,

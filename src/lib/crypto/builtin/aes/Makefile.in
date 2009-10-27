@@ -12,30 +12,28 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-CIMPL = @CRYPTO_IMPL@/aes
-
 STLIBOBJS=\
-	../../$(CIMPL)/aescrypt.o	\
-	../../$(CIMPL)/aestab.o	\
-	../../$(CIMPL)/aeskey.o	\
-	../../$(CIMPL)/aes_s2k.o
+	aescrypt.o	\
+	aestab.o	\
+	aeskey.o	\
+	aes_s2k.o
 
 OBJS=\
-	$(OUTPRE)../../$(CIMPL)/aescrypt.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/aestab.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/aeskey.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/aes_s2k.$(OBJEXT)
+	$(OUTPRE)aescrypt.$(OBJEXT)	\
+	$(OUTPRE)aestab.$(OBJEXT)	\
+	$(OUTPRE)aeskey.$(OBJEXT)	\
+	$(OUTPRE)aes_s2k.$(OBJEXT)
 
 SRCS=\
-	$(srcdir)/../../$(CIMPL)/aescrypt.c	\
-	$(srcdir)/../../$(CIMPL)/aestab.c	\
-	$(srcdir)/../../$(CIMPL)/aeskey.c	\
-	$(srcdir)/../../$(CIMPL)/aes_s2k.c
+	$(srcdir)/aescrypt.c	\
+	$(srcdir)/aestab.c	\
+	$(srcdir)/aeskey.c	\
+	$(srcdir)/aes_s2k.c
 
 GEN_OBJS=\
-	$(OUTPRE)../../$(CIMPL)/aescrypt.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/aestab.$(OBJEXT)	\
-	$(OUTPRE)../../$(CIMPL)/aeskey.$(OBJEXT)
+	$(OUTPRE)aescrypt.$(OBJEXT)	\
+	$(OUTPRE)aestab.$(OBJEXT)	\
+	$(OUTPRE)aeskey.$(OBJEXT)
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -45,11 +43,11 @@ includes:: depend
 
 depend:: $(SRCS)
 
-../../$(CIMPL)/aes-gen: ../../$(CIMPL)/aes-gen.o $(GEN_OBJS)
-	$(CC_LINK) -I../../../../include $(LOCALINCLUDES) -o ../../$(CIMPL)/aes-gen ../../$(CIMPL)/aes-gen.o $(GEN_OBJS)
+aes-gen: aes-gen.o $(GEN_OBJS)
+	$(CC_LINK) -I../../../../include $(LOCALINCLUDES) -o aes-gen aes-gen.o $(GEN_OBJS)
 
-run-aes-gen: ../../$(CIMPL)/aes-gen
-	../../$(CIMPL)/aes-gen > kresults.out
+run-aes-gen: aes-gen
+	./aes-gen > kresults.out
 
 check:: run-aes-gen
 
@@ -57,7 +55,7 @@ check:: run-aes-gen
 clean-unix:: clean-libobjs
 
 clean::
-	-$(RM) ../../$(CIMPL)/aes-gen ../../$(CIMPL)/aes-gen.o ../../$(CIMPL)/kresults.out
+	-$(RM) aes-gen aes-gen.o kresults.out
 
 @libobj_frag@
 

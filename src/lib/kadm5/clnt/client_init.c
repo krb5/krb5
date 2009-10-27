@@ -205,7 +205,7 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
      handle->destroy_cache = 0;
      handle->context = 0;
      *handle->lhandle = *handle;
-     handle->lhandle->api_version = KADM5_API_VERSION_2;
+     handle->lhandle->api_version = KADM5_API_VERSION_3;
      handle->lhandle->struct_version = KADM5_STRUCT_VERSION;
      handle->lhandle->lhandle = handle->lhandle;
 
@@ -360,6 +360,16 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
 	  clnt_perror(handle->clnt, "init_2 null resp");
 #endif
 	  goto error;
+     }
+     /* Drop down to v2 wire protocol if server does not support v3 */
+     if (r->code == KADM5_NEW_SERVER_API_VERSION &&
+	 handle->api_version == KADM5_API_VERSION_3) {
+	 handle->api_version = KADM5_API_VERSION_2;
+	 r = init_2(&handle->api_version, handle->clnt);
+	 if (r == NULL) {
+	    code = KADM5_RPC_ERROR;
+	    goto error;
+	 }
      }
      if (r->code) {
 	  code = r->code;

@@ -57,9 +57,7 @@
 static const char kg_arcfour_l40[] = "fortybits";
 
 static krb5_error_code
-kg_copy_keys(krb5_context context,
-             krb5_gss_ctx_id_rec *ctx,
-             krb5_key subkey)
+kg_copy_keys(krb5_context context, krb5_gss_ctx_id_rec *ctx, krb5_key subkey)
 {
     krb5_error_code code;
 
@@ -100,9 +98,7 @@ kg_derive_des_enc_key(krb5_context context, krb5_key subkey, krb5_key *out)
 }
 
 krb5_error_code
-kg_setup_keys(krb5_context context,
-              krb5_gss_ctx_id_rec *ctx,
-              krb5_key subkey,
+kg_setup_keys(krb5_context context, krb5_gss_ctx_id_rec *ctx, krb5_key subkey,
               krb5_cksumtype *cksumtype)
 {
     krb5_error_code code;
@@ -180,9 +176,7 @@ kg_setup_keys(krb5_context context,
 }
 
 int
-kg_confounder_size(context, enctype)
-    krb5_context context;
-    krb5_enctype enctype;
+kg_confounder_size(krb5_context context, krb5_enctype enctype)
 {
     krb5_error_code code;
     size_t blocksize;
@@ -197,10 +191,8 @@ kg_confounder_size(context, enctype)
 }
 
 krb5_error_code
-kg_make_confounder(context, enctype, buf)
-    krb5_context context;
-    krb5_enctype enctype;
-    unsigned char *buf;
+kg_make_confounder(krb5_context context, krb5_enctype enctype,
+                   unsigned char *buf)
 {
     int confsize;
     krb5_data lrandom;
@@ -216,14 +208,8 @@ kg_make_confounder(context, enctype, buf)
 }
 
 krb5_error_code
-kg_encrypt(context, key, usage, iv, in, out, length)
-    krb5_context context;
-    krb5_key key;
-    int usage;
-    krb5_pointer iv;
-    krb5_const_pointer in;
-    krb5_pointer out;
-    unsigned int length;
+kg_encrypt(krb5_context context, krb5_key key, int usage, krb5_pointer iv,
+           krb5_const_pointer in, krb5_pointer out, unsigned int length)
 {
     krb5_error_code code;
     size_t blocksize;
@@ -260,14 +246,8 @@ kg_encrypt(context, key, usage, iv, in, out, length)
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt(context, key, usage, iv, in, out, length)
-    krb5_context context;
-    krb5_key key;
-    int usage;
-    krb5_pointer iv;
-    krb5_const_pointer in;
-    krb5_pointer out;
-    unsigned int length;
+kg_decrypt(krb5_context context, krb5_key key, int usage, krb5_pointer iv,
+           krb5_const_pointer in, krb5_pointer out, unsigned int length)
 {
     krb5_error_code code;
     size_t blocksize;
@@ -303,10 +283,10 @@ kg_decrypt(context, key, usage, iv, in, out, length)
 }
 
 krb5_error_code
-kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
-                    const unsigned char *kd_data, size_t kd_data_len,
-                    const unsigned char *input_buf, size_t input_len,
-                    unsigned char *output_buf)
+kg_arcfour_docrypt(const krb5_keyblock *longterm_key , int ms_usage,
+                   const unsigned char *kd_data, size_t kd_data_len,
+                   const unsigned char *input_buf, size_t input_len,
+                   unsigned char *output_buf)
 {
     krb5_error_code code;
     krb5_data input, output;
@@ -374,13 +354,9 @@ cleanup_arcfour:
 
 /* AEAD */
 static krb5_error_code
-kg_translate_iov_v1(context, enctype, iov, iov_count, pkiov, pkiov_count)
-    krb5_context context;
-    krb5_enctype enctype;
-    gss_iov_buffer_desc *iov;
-    int iov_count;
-    krb5_crypto_iov **pkiov;
-    size_t *pkiov_count;
+kg_translate_iov_v1(krb5_context context, krb5_enctype enctype,
+                    gss_iov_buffer_desc *iov, int iov_count,
+                    krb5_crypto_iov **pkiov, size_t *pkiov_count)
 {
     gss_iov_buffer_desc *header;
     gss_iov_buffer_desc *trailer;
@@ -441,17 +417,16 @@ kg_translate_iov_v1(context, enctype, iov, iov_count, pkiov, pkiov_count)
     return 0;
 }
 
+/*
+ * DCE_STYLE indicates actual RRC is EC + RRC
+ * EC is extra rotate count for DCE_STYLE, pad length otherwise
+ * RRC is rotate count.
+ */
 static krb5_error_code
-kg_translate_iov_v3(context, dce_style, ec, rrc, enctype, iov, iov_count, pkiov, pkiov_count)
-    krb5_context context;
-    int dce_style;              /* DCE_STYLE indicates actual RRC is EC + RRC */
-    size_t ec;                  /* Extra rotate count for DCE_STYLE, pad length otherwise */
-    size_t rrc;                 /* Rotate count */
-    krb5_enctype enctype;
-    gss_iov_buffer_desc *iov;
-    int iov_count;
-    krb5_crypto_iov **pkiov;
-    size_t *pkiov_count;
+kg_translate_iov_v3(krb5_context context, int dce_style, size_t ec, size_t rrc,
+                    krb5_enctype enctype, gss_iov_buffer_desc *iov,
+                    int iov_count, krb5_crypto_iov **pkiov,
+                    size_t *pkiov_count)
 {
     gss_iov_buffer_t header;
     gss_iov_buffer_t trailer;
@@ -556,18 +531,11 @@ kg_translate_iov_v3(context, dce_style, ec, rrc, enctype, iov, iov_count, pkiov,
     return 0;
 }
 
+/* PROTO is 1 if CFX, 0 if pre-CFX */
 static krb5_error_code
-kg_translate_iov(context, proto, dce_style, ec, rrc, enctype, iov, iov_count, pkiov, pkiov_count)
-    krb5_context context;
-    int proto;                  /* 1 if CFX, 0 for pre-CFX */
-    int dce_style;
-    size_t ec;
-    size_t rrc;
-    krb5_enctype enctype;
-    gss_iov_buffer_desc *iov;
-    int iov_count;
-    krb5_crypto_iov **pkiov;
-    size_t *pkiov_count;
+kg_translate_iov(krb5_context context, int proto, int dce_style, size_t ec,
+                 size_t rrc, krb5_enctype enctype, gss_iov_buffer_desc *iov,
+                 int iov_count, krb5_crypto_iov **pkiov, size_t *pkiov_count)
 {
     return proto ?
         kg_translate_iov_v3(context, dce_style, ec, rrc, enctype,
@@ -577,17 +545,9 @@ kg_translate_iov(context, proto, dce_style, ec, rrc, enctype, iov, iov_count, pk
 }
 
 krb5_error_code
-kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_count)
-    krb5_context context;
-    int proto;
-    int dce_style;
-    size_t ec;
-    size_t rrc;
-    krb5_key key;
-    int usage;
-    krb5_pointer iv;
-    gss_iov_buffer_desc *iov;
-    int iov_count;
+kg_encrypt_iov(krb5_context context, int proto, int dce_style, size_t ec,
+               size_t rrc, krb5_key key, int usage, krb5_pointer iv,
+               gss_iov_buffer_desc *iov, int iov_count)
 {
     krb5_error_code code;
     size_t blocksize;
@@ -627,17 +587,9 @@ kg_encrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_count)
-    krb5_context context;
-    int proto;
-    int dce_style;
-    size_t ec;
-    size_t rrc;
-    krb5_key key;
-    int usage;
-    krb5_pointer iv;
-    gss_iov_buffer_desc *iov;
-    int iov_count;
+kg_decrypt_iov(krb5_context context, int proto, int dce_style, size_t ec,
+               size_t rrc, krb5_key key, int usage, krb5_pointer iv,
+               gss_iov_buffer_desc *iov, int iov_count)
 {
     krb5_error_code code;
     size_t blocksize;
@@ -675,10 +627,10 @@ kg_decrypt_iov(context, proto, dce_style, ec, rrc, key, usage, iv, iov, iov_coun
 }
 
 krb5_error_code
-kg_arcfour_docrypt_iov (krb5_context context,
-                        const krb5_keyblock *longterm_key , int ms_usage,
-                        const unsigned char *kd_data, size_t kd_data_len,
-                        gss_iov_buffer_desc *iov, int iov_count)
+kg_arcfour_docrypt_iov(krb5_context context,
+                       const krb5_keyblock *longterm_key, int ms_usage,
+                       const unsigned char *kd_data, size_t kd_data_len,
+                       gss_iov_buffer_desc *iov, int iov_count)
 {
     krb5_error_code code;
     krb5_data input, output;
@@ -774,9 +726,7 @@ kg_translate_flag_iov(OM_uint32 type)
 }
 
 gss_iov_buffer_t
-kg_locate_iov(gss_iov_buffer_desc *iov,
-              int iov_count,
-              OM_uint32 type)
+kg_locate_iov(gss_iov_buffer_desc *iov, int iov_count, OM_uint32 type)
 {
     int i;
     gss_iov_buffer_t p = GSS_C_NO_IOV_BUFFER;
@@ -797,9 +747,7 @@ kg_locate_iov(gss_iov_buffer_desc *iov,
 }
 
 void
-kg_iov_msglen(gss_iov_buffer_desc *iov,
-              int iov_count,
-              size_t *data_length_p,
+kg_iov_msglen(gss_iov_buffer_desc *iov, int iov_count, size_t *data_length_p,
               size_t *assoc_data_length_p)
 {
     int i;
@@ -841,8 +789,7 @@ kg_release_iov(gss_iov_buffer_desc *iov, int iov_count)
 }
 
 OM_uint32
-kg_fixup_padding_iov(OM_uint32 *minor_status,
-                     gss_iov_buffer_desc *iov,
+kg_fixup_padding_iov(OM_uint32 *minor_status, gss_iov_buffer_desc *iov,
                      int iov_count)
 {
     gss_iov_buffer_t padding = NULL;
@@ -913,7 +860,8 @@ kg_fixup_padding_iov(OM_uint32 *minor_status,
     return GSS_S_COMPLETE;
 }
 
-int kg_map_toktype(int proto, int toktype)
+int
+kg_map_toktype(int proto, int toktype)
 {
     int toktype2;
 
@@ -938,7 +886,8 @@ int kg_map_toktype(int proto, int toktype)
     return toktype2;
 }
 
-krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count)
+krb5_boolean
+kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count)
 {
     int i;
     krb5_boolean has_conf_data = FALSE;
@@ -955,7 +904,8 @@ krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count)
     return (has_conf_data == FALSE);
 }
 
-krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
+krb5_error_code
+kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
 {
     assert(iov != GSS_C_NO_IOV_BUFFER);
     assert(iov->type & GSS_IOV_BUFFER_FLAG_ALLOCATE);

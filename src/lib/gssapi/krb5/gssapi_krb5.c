@@ -450,11 +450,13 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 /*
  * gss_set_sec_context_option() methods
  */
+#if 0
 static struct {
     gss_OID_desc oid;
     OM_uint32 (*func)(OM_uint32 *, gss_ctx_id_t *, const gss_OID, const gss_buffer_t);
 } krb5_gss_set_sec_context_option_ops[] = {
 };
+#endif
 
 static OM_uint32
 krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
@@ -484,6 +486,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
         ctx = (krb5_gss_ctx_id_rec *) context_handle;
     }
 
+#if 0
     for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
                     sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
         if (g_OID_prefix_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
@@ -493,6 +496,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
                                                                   value);
         }
     }
+#endif
 
     *minor_status = EINVAL;
 

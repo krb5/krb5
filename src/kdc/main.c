@@ -381,10 +381,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     }
 
     /* first open the database  before doing anything */
-    if (kdc_modifies_kdb)
-	kdb_open_flags = KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC;
-    else
-	kdb_open_flags = KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC;
+    kdb_open_flags = KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC;
     if ((kret = krb5_db_open(rdp->realm_context, db_args, kdb_open_flags))) {
 	kdc_err(rdp->realm_context, kret,
 		"while initializing database for realm %s", realm);
