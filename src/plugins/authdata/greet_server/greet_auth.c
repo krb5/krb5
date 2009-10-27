@@ -173,17 +173,12 @@ greet_authdata(krb5_context context,
     krb5_error_code code;
     krb5_data *greeting = NULL;
 
-    if (request->msg_type == KRB5_TGS_REQ) {
-        code = greet_kdc_verify(context, enc_tkt_request, &greeting);
-        if (code != 0)
-            return code;
-    }
+    if (request->msg_type != KRB5_TGS_REQ)
+	return 0;
 
-    if (greeting == NULL) {
-        code = greet_hello(context, &greeting);
-        if (code != 0)
-            return code;
-    }
+    code = greet_hello(context, &greeting);
+    if (code != 0)
+        return code;
 
     code = greet_kdc_sign(context, enc_tkt_reply, tgs->princ, greeting);
 
