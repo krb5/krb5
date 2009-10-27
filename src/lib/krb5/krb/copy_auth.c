@@ -220,32 +220,45 @@ static krb5_error_code grow_find_authdata
   return retval;
 }
 
-  
-  
-
-static krb5_error_code find_authdata_1
-(krb5_context context, krb5_authdata *const *in_authdat, krb5_authdatatype ad_type,
- struct find_authdata_context *fctx)
+static krb5_error_code
+find_authdata_1(krb5_context context,
+                krb5_authdata *const *in_authdat,
+                krb5_authdatatype ad_type,
+                struct find_authdata_context *fctx,
+                int from_ap_req)
 {
   int i = 0;
-  krb5_error_code retval=0;
+  krb5_error_code retval = 0;
   
   for (i = 0; in_authdat[i]; i++) {
     krb5_authdata *ad = in_authdat[i];
-    if (ad->ad_type == ad_type && retval ==0)
-      retval = grow_find_authdata(context, fctx, ad);
-    else switch (ad->ad_type) {
-      krb5_authdata **decoded_container;
+    krb5_authdata **decoded_container;
+
+    switch (ad->ad_type) {
     case KRB5_AUTHDATA_IF_RELEVANT:
       if (retval == 0)
-	retval = krb5_decode_authdata_container( context, ad->ad_type, ad, &decoded_container);
+          retval = krb5_decode_authdata_container(context,
+                                                  ad->ad_type,
+                                                  ad,
+                                                  &decoded_container);
       if (retval == 0) {
-	retval = find_authdata_1(context,
-				 decoded_container, ad_type, fctx);
-	krb5_free_authdata(context, decoded_container);
+        retval = find_authdata_1(context,
+                                decoded_container,
+                                ad_type,
+                                fctx,
+                                from_ap_req);
+        krb5_free_authdata(context, decoded_container);
       }
       break;
+    case KRB5_AUTHDATA_SIGNTICKET:
+    case KRB5_AUTHDATA_KDC_ISSUED:
+    case KRB5_AUTHDATA_WIN2K_PAC:
+    case KRB5_AUTHDATA_SAML:
+      if (from_ap_req)
+        continue;
     default:
+    if (ad->ad_type == ad_type && retval == 0)
+      retval = grow_find_authdata(context, fctx, ad);
       break;
     }
   }
@@ -268,12 +281,13 @@ krb5_error_code krb5int_find_authdata
   if (fctx.out == NULL)
     return ENOMEM;
   if (ticket_authdata)
-      retval = find_authdata_1( context, ticket_authdata, ad_type, &fctx);
-  if ((retval==0) && ap_req_authdata)
-    retval = find_authdata_1( context, ap_req_authdata, ad_type, &fctx);
-  if ((retval== 0) && fctx.length)
+      retval = find_authdata_1(context, ticket_authdata, ad_type, &fctx, 0);
+  if (retval ==0 && ap_req_authdata)
+    retval = find_authdata_1(context, ap_req_authdata, ad_type, &fctx, 1);
+  if (retval == 0 && fctx.length)
     *results = fctx.out;
-  else krb5_free_authdata(context, fctx.out);
+  else
+    krb5_free_authdata(context, fctx.out);
   return retval;
 }
 
