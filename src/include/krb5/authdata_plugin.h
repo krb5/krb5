@@ -152,6 +152,7 @@ typedef struct krb5plugin_authdata_server_ftable_v2 {
 				     struct _krb5_db_entry_new *tgs,
 				     krb5_keyblock *client_key,
 				     krb5_keyblock *server_key,
+				     krb5_keyblock *tgs_key,
 				     krb5_data *req_pkt,
 				     krb5_kdc_req *request,
 				     krb5_const_principal for_user_princ,

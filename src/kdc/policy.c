@@ -60,7 +60,7 @@
 int
 against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
 			krb5_db_entry server, krb5_timestamp kdc_time,
-			const char **status)
+			const char **status, krb5_data *e_data)
 {
     krb5_error_code		code;
     kdb_check_policy_as_req	req;
@@ -98,6 +98,7 @@ against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
 	return 0;
 
     *status = rep.status;
+    *e_data = rep.e_data;
 
     if (code != 0) {
 	code -= ERROR_TABLE_BASE_krb5;
@@ -113,7 +114,8 @@ against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
  */
 krb5_error_code
 against_local_policy_tgs(register krb5_kdc_req *request, krb5_db_entry server,
-			 krb5_ticket *ticket, const char **status)
+			 krb5_ticket *ticket, const char **status,
+			 krb5_data *e_data)
 {
     krb5_error_code		code;
     kdb_check_policy_tgs_req	req;
@@ -154,6 +156,7 @@ against_local_policy_tgs(register krb5_kdc_req *request, krb5_db_entry server,
 	return 0;
 
     *status = rep.status;
+    *e_data = rep.e_data;
 
     if (code != 0) {
 	code -= ERROR_TABLE_BASE_krb5;

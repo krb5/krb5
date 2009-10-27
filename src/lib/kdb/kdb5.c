@@ -624,6 +624,7 @@ krb5_db_open(krb5_context kcontext, char **db_args, int mode)
     status = get_vftabl(kcontext, &v);
     if (status)
 	goto clean_n_exit;
+    assert(v->init_module != NULL);
     status = v->init_module(kcontext, section, db_args, mode);
     get_errmsg(kcontext, status);
 
@@ -659,6 +660,10 @@ krb5_db_create(krb5_context kcontext, char **db_args)
     status = get_vftabl(kcontext, &v);
     if (status)
 	goto clean_n_exit;
+    if (v->db_create == NULL) {
+	status = KRB5_KDB_DBTYPE_NOSUP;
+	goto clean_n_exit;
+    }
     status = v->db_create(kcontext, section, db_args);
     get_errmsg(kcontext, status);
 
@@ -679,6 +684,7 @@ krb5_db_fini(krb5_context kcontext)
 	return 0;
 
     v = &kcontext->dal_handle->lib_handle->vftabl;
+    assert(v->fini_module != NULL);
     status = v->fini_module(kcontext);
     get_errmsg(kcontext, status);
 
@@ -707,6 +713,10 @@ krb5_db_destroy(krb5_context kcontext, char **db_args)
     status = get_vftabl(kcontext, &v);
     if (status)
 	goto clean_n_exit;
+    if (v->db_destroy == NULL) {
+	status = KRB5_KDB_DBTYPE_NOSUP;
+	goto clean_n_exit;
+    }
     status = v->db_destroy(kcontext, section, db_args);
     get_errmsg(kcontext, status);
 
@@ -725,6 +735,8 @@ krb5_db_get_age(krb5_context kcontext, char *db_name, time_t * t)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_get_age == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_get_age(kcontext, db_name, t);
     get_errmsg(kcontext, status);
     return status;
@@ -739,6 +751,8 @@ krb5_db_set_option(krb5_context kcontext, int option, void *value)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_set_option == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_set_option(kcontext, option, value);
     get_errmsg(kcontext, status);
     return status;
@@ -753,6 +767,8 @@ krb5_db_lock(krb5_context kcontext, int lock_mode)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_lock == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_lock(kcontext, lock_mode);
     get_errmsg(kcontext, status);
     return status;
@@ -767,6 +783,8 @@ krb5_db_unlock(krb5_context kcontext)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_unlock == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_unlock(kcontext);
     get_errmsg(kcontext, status);
     return status;
@@ -784,6 +802,8 @@ krb5_db_get_principal(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_get_principal == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_get_principal(kcontext, search_for, 0, entries, nentries,
 				 more);
     get_errmsg(kcontext, status);
@@ -803,8 +823,12 @@ krb5_db_get_principal_ext(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
-    return v->db_get_principal(kcontext, search_for, flags, entries, nentries,
-			       more);
+    if (v->db_get_principal == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
+    status = v->db_get_principal(kcontext, search_for,
+				 flags, entries, nentries, more);
+    get_errmsg(kcontext, status);
+    return status;
 }
 
 krb5_error_code
@@ -816,6 +840,8 @@ krb5_db_free_principal(krb5_context kcontext, krb5_db_entry * entry, int count)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_free_principal == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_free_principal(kcontext, entry, count);
     get_errmsg(kcontext, status);
     return status;
@@ -912,6 +938,8 @@ krb5int_put_principal_no_log(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_put_principal == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = extract_db_args_from_tl_data(kcontext, &entries->tl_data,
 					  &entries->n_tl_data,
 					  &db_args);
@@ -982,6 +1010,11 @@ krb5_db_put_principal(krb5_context kcontext,
         }
     }
 
+    if (v->db_put_principal == NULL) {
+	status = KRB5_KDB_DBTYPE_NOSUP;
+	goto err_lock;
+    }
+
     status = v->db_put_principal(kcontext, entries, nentries, db_args);
     get_errmsg(kcontext, status);
     if (status == 0 && fupd) {
@@ -1015,6 +1048,8 @@ krb5int_delete_principal_no_log(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_delete_principal == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_delete_principal(kcontext, search_for, nentries);
     get_errmsg(kcontext, status);
     return status;
@@ -1062,6 +1097,9 @@ krb5_db_delete_principal(krb5_context kcontext,
 	free(princ_name);
     }
 
+    if (v->db_delete_principal == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
+
     status = v->db_delete_principal(kcontext, search_for, nentries);
     get_errmsg(kcontext, status);
 
@@ -1089,6 +1127,8 @@ krb5_db_iterate(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_iterate == NULL)
+	return 0;
     status = v->db_iterate(kcontext, match_entry, func, func_arg);
     get_errmsg(kcontext, status);
     return status;
@@ -1103,6 +1143,8 @@ krb5_supported_realms(krb5_context kcontext, char **realms)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_supported_realms == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_supported_realms(kcontext, realms);
     get_errmsg(kcontext, status);
     return status;
@@ -1117,6 +1159,8 @@ krb5_free_supported_realms(krb5_context kcontext, char **realms)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_free_supported_realms == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_free_supported_realms(kcontext, realms);
     get_errmsg(kcontext, status);
     return status;
@@ -1181,6 +1225,8 @@ krb5_db_get_mkey_list(krb5_context kcontext, krb5_keylist_node ** keylist)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->get_master_key_list == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->get_master_key_list(kcontext, keylist);
     get_errmsg(kcontext, status);
     return status;
@@ -1233,6 +1279,8 @@ krb5_db_store_master_key(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->store_master_key == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->store_master_key(kcontext, keyfile, mname, kvno, key,
 				 master_pwd);
     get_errmsg(kcontext, status);
@@ -1252,6 +1300,8 @@ krb5_db_store_master_key_list(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->store_master_key_list == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->store_master_key_list(kcontext, keyfile, mname, keylist,
 				      master_pwd);
     get_errmsg(kcontext, status);
@@ -1379,6 +1429,8 @@ krb5_db_verify_master_key(krb5_context     kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->verify_master_key == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->verify_master_key(kcontext, mprinc, kvno, mkey);
     get_errmsg(kcontext, status);
     return status;
@@ -1456,6 +1508,12 @@ krb5_dbe_find_act_mkey(krb5_context         context,
     krb5_actkvno_node   *prev_actkvno, *cur_actkvno;
     krb5_timestamp	now;
     krb5_boolean	found = FALSE;
+
+    if (act_mkey_list == NULL) {
+	*act_kvno = 0;
+	*act_mkey = NULL;
+	return 0;
+    }
 
     if ((retval = krb5_timeofday(context, &now)))
         return (retval);
@@ -2261,6 +2319,8 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_create_policy == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_create_policy(kcontext, policy);
     get_errmsg(kcontext, status);
     return status;
@@ -2276,6 +2336,8 @@ krb5_db_get_policy(krb5_context kcontext, char *name,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_get_policy == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_get_policy(kcontext, name, policy, cnt);
     get_errmsg(kcontext, status);
     return status;
@@ -2290,6 +2352,8 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_put_policy == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_put_policy(kcontext, policy);
     get_errmsg(kcontext, status);
     return status;
@@ -2305,6 +2369,8 @@ krb5_db_iter_policy(krb5_context kcontext, char *match_entry,
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_iter_policy == NULL)
+	return 0;
     status = v->db_iter_policy(kcontext, match_entry, func, data);
     get_errmsg(kcontext, status);
     return status;
@@ -2319,6 +2385,8 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
     status = get_vftabl(kcontext, &v);
     if (status)
 	return status;
+    if (v->db_delete_policy == NULL)
+	return KRB5_KDB_DBTYPE_NOSUP;
     status = v->db_delete_policy(kcontext, policy);
     get_errmsg(kcontext, status);
     return status;
@@ -2331,7 +2399,7 @@ krb5_db_free_policy(krb5_context kcontext, osa_policy_ent_t policy)
     kdb_vftabl *v;
 
     status = get_vftabl(kcontext, &v);
-    if (status)
+    if (status || v->db_free_policy == NULL)
 	return;
     v->db_free_policy(kcontext, policy);
     get_errmsg(kcontext, status);

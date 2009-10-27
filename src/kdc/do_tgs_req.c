@@ -77,7 +77,7 @@ find_alternate_tgs(krb5_kdc_req *,krb5_db_entry *,
 
 static krb5_error_code 
 prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
-                  krb5_principal,krb5_data **,const char *);
+                  krb5_principal,krb5_data **,const char *, krb5_data *);
 
 static krb5_int32
 prep_reprocess_req(krb5_kdc_req *,krb5_principal *);
@@ -88,6 +88,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
                 krb5_data **response)
 {
     krb5_keyblock * subkey = 0;
+    krb5_keyblock * tgskey = 0;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -103,7 +104,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime=0;
     krb5_keyblock session_key;
-    krb5_timestamp until, rtime;
+    krb5_timestamp rtime;
     krb5_keyblock *reply_key = NULL;
     krb5_keyblock *mkey_ptr;
     krb5_key_data  *server_key;
@@ -129,9 +130,11 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     struct kdc_request_state *state = NULL;
     krb5_pa_data *pa_tgs_req; /*points into request*/
     krb5_data scratch;
+    krb5_data e_data; /* backend-provided error data */
 
     reply.padata = 0; /* For cleanup handler */
     reply_encpart.enc_padata = 0;
+    e_data.data = NULL;
 
     session_key.contents = NULL;
 
@@ -147,7 +150,8 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
         return retval;
     }
     errcode = kdc_process_tgs_req(request, from, pkt, &header_ticket,
-                                  &krbtgt, &k_nprincs, &subkey, &pa_tgs_req);
+                                  &krbtgt, &k_nprincs, &tgskey,
+                                  &subkey, &pa_tgs_req);
     if (header_ticket && header_ticket->enc_part2 &&
         (errcode2 = krb5_unparse_name(kdc_context, 
                                       header_ticket->enc_part2->client,
@@ -281,7 +285,7 @@ tgt_again:
     }
     
     if ((retval = validate_tgs_request(request, server, header_ticket,
-                                       kdc_time, &status))) {
+                                       kdc_time, &status, &e_data))) {
     if (!status)
         status = "UNKNOWN_REASON";
         errcode = retval + ERROR_TABLE_BASE_krb5;
@@ -540,18 +544,22 @@ tgt_again:
     } else {
         /* not a renew request */
         enc_tkt_reply.times.starttime = kdc_time;
-        until = (request->till == 0) ? kdc_infinity : request->till;
-        enc_tkt_reply.times.endtime =
-            min(until, min(enc_tkt_reply.times.starttime + server.max_life,
-               min(enc_tkt_reply.times.starttime + max_life_for_realm,
-                   header_enc_tkt->times.endtime)));
+
+	kdc_get_ticket_endtime(kdc_context,
+			       enc_tkt_reply.times.starttime,
+			       header_enc_tkt->times.endtime,
+			       request->till,
+			       &client,
+			       &server,
+			       &enc_tkt_reply.times.endtime);
+
         if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
             (enc_tkt_reply.times.endtime < request->till) &&
             isflagset(header_enc_tkt->flags, TKT_FLG_RENEWABLE)) {
             setflag(request->kdc_options, KDC_OPT_RENEWABLE);
             request->rtime =
                 min(request->till, header_enc_tkt->times.renew_till);
-        }
+	}
     }
     rtime = (request->rtime == 0) ? kdc_infinity : request->rtime;
 
@@ -716,6 +724,7 @@ tgt_again:
                               subkey != NULL ? subkey :
                               header_ticket->enc_part2->session,
                               &encrypting_key, /* U2U or server key */
+                              tgskey,
                               pkt,
                               request,
                               s4u_x509_user ?
@@ -974,7 +983,7 @@ cleanup:
             
         retval = prepare_error_tgs(state, request, header_ticket, errcode,
         nprincs ? server.princ : NULL,
-                   response, status);
+                   response, status, &e_data);
         if (got_err) {
             krb5_free_error_message (kdc_context, status);
             status = 0;
@@ -1009,10 +1018,13 @@ cleanup:
         free(s4u_name);
     if (subkey != NULL)
         krb5_free_keyblock(kdc_context, subkey);
+    if (tgskey != NULL)
+        krb5_free_keyblock(kdc_context, tgskey);
     if (reply.padata)
         krb5_free_pa_data(kdc_context, reply.padata);
     if (reply_encpart.enc_padata)
         krb5_free_pa_data(kdc_context, reply_encpart.enc_padata);
+    krb5_free_data_contents(kdc_context, &e_data);
 
     return retval;
 }
@@ -1021,7 +1033,8 @@ static krb5_error_code
 prepare_error_tgs (struct kdc_request_state *state,
 		   krb5_kdc_req *request, krb5_ticket *ticket, int error,
                    krb5_principal canon_server,
-                   krb5_data **response, const char *status)
+                   krb5_data **response, const char *status,
+		   krb5_data *e_data)
 {
     krb5_error errpkt;
     krb5_error_code retval = 0;
@@ -1047,8 +1060,7 @@ prepare_error_tgs (struct kdc_request_state *state,
         free(errpkt.text.data);
         return ENOMEM;
     }
-    errpkt.e_data.length = 0;
-    errpkt.e_data.data = NULL;
+    errpkt.e_data = *e_data;
     if (state)
 	retval = kdc_fast_handle_error(kdc_context, state, request, NULL, &errpkt);
     if (retval) {

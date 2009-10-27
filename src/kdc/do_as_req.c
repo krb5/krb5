@@ -108,7 +108,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_enctype useenctype;
     krb5_data e_data;
     register int i;
-    krb5_timestamp until, rtime;
+    krb5_timestamp rtime;
     char *cname = 0, *sname = 0;
     unsigned int c_flags = 0, s_flags = 0;
     krb5_principal_data client_princ;
@@ -265,7 +265,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     authtime = kdc_time; /* for audit_as_request() */
 
     if ((errcode = validate_as_request(request, client, server,
-				       kdc_time, &status))) {
+				       kdc_time, &status, &e_data))) {
 	if (!status) 
 	    status = "UNKNOWN_REASON";
 	errcode += ERROR_TABLE_BASE_krb5;
@@ -339,14 +339,14 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 	enc_tkt_reply.times.starttime = request->from;
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
-    
-    until = (request->till == 0) ? kdc_infinity : request->till;
 
-    enc_tkt_reply.times.endtime =
-	min(until,
-	    min(enc_tkt_reply.times.starttime + client.max_life,
-		min(enc_tkt_reply.times.starttime + server.max_life,
-		    enc_tkt_reply.times.starttime + max_life_for_realm)));
+    kdc_get_ticket_endtime(kdc_context,
+			   enc_tkt_reply.times.starttime,
+			   kdc_infinity,
+			   request->till,
+			   &client,
+			   &server,
+			   &enc_tkt_reply.times.endtime);
 
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
 	!isflagset(client.attributes, KRB5_KDB_DISALLOW_RENEWABLE) &&
@@ -558,6 +558,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 			      &server,
 			      &server,
 			      &client_keyblock,
+			      &server_keyblock,
 			      &server_keyblock,
 			      req_pkt,
 			      request,

@@ -899,8 +899,10 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
     ret = KADM5_OK;
 
 done:
-    if (ret && entry->principal)
+    if (ret && entry->principal) {
 	 krb5_free_principal(handle->context, entry->principal);
+	 entry->principal = NULL;
+    }
     kdb_free_entry(handle, &kdb, &adb);
 
     return ret;
