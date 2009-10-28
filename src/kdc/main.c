@@ -891,6 +891,8 @@ int main(int argc, char **argv)
 	return 1;
     }
     krb5_klog_syslog(LOG_INFO, "commencing operation");
+    if (nofork)
+	fprintf(stderr, "%s: starting...\n", kdc_progname);
     if ((retval = listen_and_process())) {
 	kdc_err(kcontext, retval, "while processing network requests");
 	errout++;
