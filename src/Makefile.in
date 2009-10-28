@@ -665,3 +665,20 @@ reindent::
 	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
 	-l $(SRCTOP)/util/krb5-c-style.el \
 	-l $(SRCTOP)/util/krb5-batch-reindent.el
+
+mark-cstyle::
+	$(FIND) $(SRCTOP) \( \
+	-path $(SRCTOP)/appl/bsd -o \
+	-path $(SRCTOP)/appl/gssftp -o \
+	-path $(SRCTOP)/appl/telnet -o \
+	-path $(SRCTOP)/include/gssrpc -o \
+	-path $(SRCTOP)/lib/crypto/krb/yarrow -o \
+	-path $(SRCTOP)/lib/rpc -o \
+	-path $(SRCTOP)/plugins/kdb/db2/libdb2 -o \
+	-path $(SRCTOP)/lib/krb5/unicode -o \
+	-path $(SRCTOP)/windows/wintel \
+	\) -prune -o \
+	-name '*.[ch]' \
+	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
+	-l $(SRCTOP)/util/krb5-c-style.el \
+	-l $(SRCTOP)/util/krb5-mark-cstyle.el -cstyle-krb5
