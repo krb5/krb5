@@ -42,12 +42,12 @@
    that the keytypes are all near each other.  I'd rather not make
    that assumption. */
 
-const struct krb5_keytypes krb5_enctypes_list[] = {
+const struct krb5_keytypes krb5int_enctypes_list[] = {
     { ENCTYPE_DES_CBC_CRC,
       "des-cbc-crc", { 0 }, "DES cbc mode with CRC-32",
       &krb5int_enc_des, &krb5int_hash_crc32,
       16,
-      krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
+      krb5int_old_encrypt_length, krb5int_old_encrypt, krb5int_old_decrypt,
       krb5int_des_string_to_key,
       krb5int_des_prf,
       CKSUMTYPE_RSA_MD5,
@@ -57,7 +57,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "des-cbc-md4", { 0 }, "DES cbc mode with RSA-MD4",
       &krb5int_enc_des, &krb5int_hash_md4,
       16,
-      krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
+      krb5int_old_encrypt_length, krb5int_old_encrypt, krb5int_old_decrypt,
       krb5int_des_string_to_key,
       krb5int_des_prf,
       CKSUMTYPE_RSA_MD4,
@@ -67,7 +67,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "des-cbc-md5", { "des" }, "DES cbc mode with RSA-MD5",
       &krb5int_enc_des, &krb5int_hash_md5,
       16,
-      krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
+      krb5int_old_encrypt_length, krb5int_old_encrypt, krb5int_old_decrypt,
       krb5int_des_string_to_key,
       krb5int_des_prf,
       CKSUMTYPE_RSA_MD5,
@@ -77,7 +77,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "des-cbc-raw", { 0 }, "DES cbc mode raw",
       &krb5int_enc_des, NULL,
       16,
-      krb5_raw_encrypt_length, krb5_raw_encrypt, krb5_raw_decrypt,
+      krb5_raw_encrypt_length, krb5int_raw_encrypt, krb5int_raw_decrypt,
       krb5int_des_string_to_key,
       krb5int_des_prf,
       0,
@@ -87,7 +87,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "des3-cbc-raw", { 0 }, "Triple DES cbc mode raw",
       &krb5int_enc_des3, NULL,
       16,
-      krb5_raw_encrypt_length, krb5_raw_encrypt, krb5_raw_decrypt,
+      krb5_raw_encrypt_length, krb5int_raw_encrypt, krb5int_raw_decrypt,
       krb5int_dk_string_to_key,
       NULL, /*PRF*/
       0,
@@ -99,7 +99,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "Triple DES cbc mode with HMAC/sha1",
       &krb5int_enc_des3, &krb5int_hash_sha1,
       16,
-      krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
+      krb5int_dk_encrypt_length, krb5int_dk_encrypt, krb5int_dk_decrypt,
       krb5int_dk_string_to_key,
       krb5int_dk_prf,
       CKSUMTYPE_HMAC_SHA1_DES3,
@@ -110,7 +110,7 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "des-hmac-sha1", { 0 }, "DES with HMAC/sha1",
       &krb5int_enc_des, &krb5int_hash_sha1,
       8,
-      krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
+      krb5int_dk_encrypt_length, krb5int_dk_encrypt, krb5int_dk_decrypt,
       krb5int_dk_string_to_key,
       NULL, /*PRF*/
       0,
@@ -122,8 +122,8 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       &krb5int_enc_arcfour,
       &krb5int_hash_md5,
       20,
-      krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
-      krb5_arcfour_decrypt, krb5int_arcfour_string_to_key,
+      krb5int_arcfour_encrypt_length, krb5int_arcfour_encrypt,
+      krb5int_arcfour_decrypt, krb5int_arcfour_string_to_key,
       krb5int_arcfour_prf, /*PRF*/
       CKSUMTYPE_HMAC_MD5_ARCFOUR,
       &krb5int_aead_arcfour,
@@ -134,8 +134,8 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       &krb5int_enc_arcfour,
       &krb5int_hash_md5,
       20,
-      krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
-      krb5_arcfour_decrypt, krb5int_arcfour_string_to_key,
+      krb5int_arcfour_encrypt_length, krb5int_arcfour_encrypt,
+      krb5int_arcfour_decrypt, krb5int_arcfour_string_to_key,
       krb5int_arcfour_prf, /*PRF*/
       CKSUMTYPE_HMAC_MD5_ARCFOUR,
       &krb5int_aead_arcfour,
@@ -166,5 +166,5 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       0 /*flags*/ },
 };
 
-const int krb5_enctypes_length =
-    sizeof(krb5_enctypes_list) / sizeof(struct krb5_keytypes);
+const int krb5int_enctypes_length =
+    sizeof(krb5int_enctypes_list) / sizeof(struct krb5_keytypes);

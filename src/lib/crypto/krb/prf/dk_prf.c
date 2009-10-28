@@ -50,7 +50,7 @@ krb5int_dk_prf (const struct krb5_enc_provider *enc,
     return ENOMEM;
   hash->hash(1, in, &tmp);
   tmp.length = (tmp.length/enc->block_size)*enc->block_size; /*truncate to block size*/
-  ret = krb5_derive_key(enc, key, &kp, &prfconst);
+  ret = krb5int_derive_key(enc, key, &kp, &prfconst);
   if (ret == 0)
       ret = enc->encrypt(kp, NULL, &tmp, out);
   krb5_k_free_key(NULL, kp);

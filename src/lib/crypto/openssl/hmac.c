@@ -112,7 +112,7 @@ krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
 }
 
 krb5_error_code
-krb5_hmac(const struct krb5_hash_provider *hash, krb5_key key,
+krb5int_hmac(const struct krb5_hash_provider *hash, krb5_key key,
          unsigned int icount, const krb5_data *input, krb5_data *output)
 {
     return krb5int_hmac_keyblock(hash, &key->keyblock, icount, input, output);

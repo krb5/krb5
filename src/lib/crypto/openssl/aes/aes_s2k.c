@@ -81,7 +81,7 @@ krb5int_aes_string_to_key(const struct krb5_enc_provider *enc,
     if (err)
 	goto cleanup;
 
-    err = krb5_derive_keyblock (enc, tempkey, key, &usage);
+    err = krb5int_derive_keyblock (enc, tempkey, key, &usage);
 
 cleanup:
     if (err)

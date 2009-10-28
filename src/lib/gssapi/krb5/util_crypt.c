@@ -321,7 +321,7 @@ kg_arcfour_docrypt(const krb5_keyblock *longterm_key , int ms_usage,
     input.length = i;
     output.data = (void *) usage_key.contents;
     output.length = usage_key.length;
-    code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
+    code = (*kaccess.krb5int_hmac) (kaccess.md5_hash_provider,
                                  longterm_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;
@@ -331,7 +331,7 @@ kg_arcfour_docrypt(const krb5_keyblock *longterm_key , int ms_usage,
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
     output.data = (void *) seq_enc_key.contents;
-    code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
+    code = (*kaccess.krb5int_hmac) (kaccess.md5_hash_provider,
                                  &usage_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;
@@ -667,7 +667,7 @@ kg_arcfour_docrypt_iov(krb5_context context,
     input.length = i;
     output.data = (void *) usage_key.contents;
     output.length = usage_key.length;
-    code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
+    code = (*kaccess.krb5int_hmac) (kaccess.md5_hash_provider,
                                  longterm_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;
@@ -677,7 +677,7 @@ kg_arcfour_docrypt_iov(krb5_context context,
     input.data = ( void *) kd_data;
     input.length = kd_data_len;
     output.data = (void *) seq_enc_key.contents;
-    code = (*kaccess.krb5_hmac) (kaccess.md5_hash_provider,
+    code = (*kaccess.krb5int_hmac) (kaccess.md5_hash_provider,
                                  &usage_key, 1, &input, &output);
     if (code)
         goto cleanup_arcfour;

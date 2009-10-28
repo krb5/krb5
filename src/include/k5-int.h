@@ -756,11 +756,11 @@ struct krb5_aead_provider {
  * in here to deal with stuff from lib/crypto
  */
 
-void krb5_nfold
+void krb5int_nfold
 (unsigned int inbits, const unsigned char *in,
 		unsigned int outbits, unsigned char *out);
 
-krb5_error_code krb5_hmac
+krb5_error_code krb5int_hmac
 (const struct krb5_hash_provider *hash,
 		krb5_key key, unsigned int icount,
 		const krb5_data *input, krb5_data *output);
@@ -2227,7 +2227,7 @@ typedef struct _krb5int_access {
     /* crypto stuff */
     const struct krb5_hash_provider *md5_hash_provider;
     const struct krb5_enc_provider *arcfour_enc_provider;
-    krb5_error_code (* krb5_hmac) (const struct krb5_hash_provider *hash,
+    krb5_error_code (* krb5int_hmac) (const struct krb5_hash_provider *hash,
 				   const krb5_keyblock *key,
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
@@ -2644,7 +2644,7 @@ typedef struct
 krb5_boolean krb5_is_permitted_enctype_ext 
          ( krb5_context, krb5_etypes_permitted *);
 
-krb5_boolean KRB5_CALLCONV krb5_c_weak_enctype(krb5_enctype);
+krb5_boolean KRB5_CALLCONV krb5int_c_weak_enctype(krb5_enctype);
 
 krb5_error_code krb5_kdc_rep_decrypt_proc
 	(krb5_context,

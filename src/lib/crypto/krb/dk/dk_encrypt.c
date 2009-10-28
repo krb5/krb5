@@ -39,7 +39,7 @@
  */
 
 void
-krb5_dk_encrypt_length(const struct krb5_enc_provider *enc,
+krb5int_dk_encrypt_length(const struct krb5_enc_provider *enc,
 		       const struct krb5_hash_provider *hash,
 		       size_t inputlen, size_t *length)
 {
@@ -51,7 +51,7 @@ krb5_dk_encrypt_length(const struct krb5_enc_provider *enc,
 }
 
 krb5_error_code
-krb5_dk_encrypt(const struct krb5_enc_provider *enc,
+krb5int_dk_encrypt(const struct krb5_enc_provider *enc,
 		const struct krb5_hash_provider *hash,
 		krb5_key key, krb5_keyusage usage,
 		const krb5_data *ivec, const krb5_data *input,
@@ -68,7 +68,7 @@ krb5_dk_encrypt(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     plainlen = krb5_roundup(blocksize + input->length, blocksize);
 
-    krb5_dk_encrypt_length(enc, hash, input->length, &enclen);
+    krb5int_dk_encrypt_length(enc, hash, input->length, &enclen);
 
     /* key->length, ivec will be tested in enc->encrypt. */
 
@@ -90,13 +90,13 @@ krb5_dk_encrypt(const struct krb5_enc_provider *enc,
 
     d1.data[4] = (char) 0xAA;
 
-    ret = krb5_derive_key(enc, key, &ke, &d1);
+    ret = krb5int_derive_key(enc, key, &ke, &d1);
     if (ret != 0)
 	goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5_derive_key(enc, key, &ki, &d1);
+    ret = krb5int_derive_key(enc, key, &ki, &d1);
     if (ret != 0)
 	goto cleanup;
 
@@ -138,7 +138,7 @@ krb5_dk_encrypt(const struct krb5_enc_provider *enc,
 
     output->length = enclen;
 
-    ret = krb5_hmac(hash, ki, 1, &d1, &d2);
+    ret = krb5int_hmac(hash, ki, 1, &d1, &d2);
     if (ret != 0) {
 	memset(d2.data, 0, d2.length);
 	goto cleanup;
@@ -188,7 +188,7 @@ trunc_hmac (const struct krb5_hash_provider *hash,
     tmp.data = malloc(hashsize);
     if (tmp.data == NULL)
 	return ENOMEM;
-    ret = krb5_hmac(hash, ki, num, input, &tmp);
+    ret = krb5int_hmac(hash, ki, num, input, &tmp);
     if (ret == 0)
 	memcpy(output->data, tmp.data, output->length);
     memset(tmp.data, 0, hashsize);
@@ -237,13 +237,13 @@ krb5int_aes_dk_encrypt(const struct krb5_enc_provider *enc,
 
     d1.data[4] = (char) 0xAA;
 
-    ret = krb5_derive_key(enc, key, &ke, &d1);
+    ret = krb5int_derive_key(enc, key, &ke, &d1);
     if (ret != 0)
 	goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5_derive_key(enc, key, &ki, &d1);
+    ret = krb5int_derive_key(enc, key, &ki, &d1);
     if (ret != 0)
 	goto cleanup;
 

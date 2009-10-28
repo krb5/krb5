@@ -33,20 +33,20 @@ krb5_c_checksum_length(krb5_context context, krb5_cksumtype cksumtype,
 {
     unsigned int i;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == cksumtype)
+    for (i=0; i<krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == cksumtype)
 	    break;
     }
 
-    if (i == krb5_cksumtypes_length)
+    if (i == krb5int_cksumtypes_length)
 	return KRB5_BAD_ENCTYPE;
 
-    if (krb5_cksumtypes_list[i].keyhash)
-	*length = krb5_cksumtypes_list[i].keyhash->hashsize;
-    else if (krb5_cksumtypes_list[i].trunc_size)
-	*length = krb5_cksumtypes_list[i].trunc_size;
+    if (krb5int_cksumtypes_list[i].keyhash)
+	*length = krb5int_cksumtypes_list[i].keyhash->hashsize;
+    else if (krb5int_cksumtypes_list[i].trunc_size)
+	*length = krb5int_cksumtypes_list[i].trunc_size;
     else
-	*length = krb5_cksumtypes_list[i].hash->hashsize;
+	*length = krb5int_cksumtypes_list[i].hash->hashsize;
 
     return 0;
 }

@@ -57,7 +57,7 @@ k5_hmac_md5_hash (krb5_key key, krb5_keyusage usage,
   ks_constant.data = "signaturekey";
   ks_constant.length = strlen(ks_constant.data)+1; /* Including null*/
 
-  ret = krb5_hmac( &krb5int_hash_md5, key, 1,
+  ret = krb5int_hmac( &krb5int_hash_md5, key, 1,
 		   &ks_constant, &ds);
   if (ret)
     goto cleanup;
@@ -68,17 +68,17 @@ k5_hmac_md5_hash (krb5_key key, krb5_keyusage usage,
   if (ret)
       goto cleanup;
 
-  krb5_MD5Init (&ctx);
+  krb5int_MD5Init (&ctx);
   ms_usage = krb5int_arcfour_translate_usage (usage);
   store_32_le(ms_usage, t);
-  krb5_MD5Update (&ctx, (unsigned char * ) &t, 4);
-  krb5_MD5Update (&ctx, (unsigned char *) input-> data,
+  krb5int_MD5Update (&ctx, (unsigned char * ) &t, 4);
+  krb5int_MD5Update (&ctx, (unsigned char *) input-> data,
 		  (unsigned int) input->length );
-  krb5_MD5Final(&ctx);
+  krb5int_MD5Final(&ctx);
   md5tmp.data = (void *) ctx.digest;
   md5tmp.length = 16;
 
-  ret = krb5_hmac ( &krb5int_hash_md5, ks, 1, &md5tmp,
+  ret = krb5int_hmac ( &krb5int_hash_md5, ks, 1, &md5tmp,
 		    output);
 
     cleanup:
@@ -114,7 +114,7 @@ k5_hmac_md5_hash_iov (krb5_key key, krb5_keyusage usage,
   ks_constant.data = "signaturekey";
   ks_constant.length = strlen(ks_constant.data)+1; /* Including null*/
 
-  ret = krb5_hmac( &krb5int_hash_md5, key, 1,
+  ret = krb5int_hmac( &krb5int_hash_md5, key, 1,
 		   &ks_constant, &ds);
   if (ret)
     goto cleanup;
@@ -125,21 +125,21 @@ k5_hmac_md5_hash_iov (krb5_key key, krb5_keyusage usage,
   if (ret)
       goto cleanup;
 
-  krb5_MD5Init (&ctx);
+  krb5int_MD5Init (&ctx);
   ms_usage = krb5int_arcfour_translate_usage (usage);
   store_32_le(ms_usage, t);
-  krb5_MD5Update (&ctx, (unsigned char * ) &t, 4);
+  krb5int_MD5Update (&ctx, (unsigned char * ) &t, 4);
   for (i = 0; i < num_data; i++) {
     const krb5_crypto_iov *iov = &data[i];
 
     if (SIGN_IOV(iov))
-      krb5_MD5Update (&ctx, (unsigned char *)iov->data.data,
+      krb5int_MD5Update (&ctx, (unsigned char *)iov->data.data,
 		      (unsigned int)iov->data.length);
   }
-  krb5_MD5Final(&ctx);
+  krb5int_MD5Final(&ctx);
   md5tmp.data = (void *) ctx.digest;
   md5tmp.length = 16;
-  ret = krb5_hmac ( &krb5int_hash_md5, ks, 1, &md5tmp,
+  ret = krb5int_hmac ( &krb5int_hash_md5, ks, 1, &md5tmp,
 		    output);
 
     cleanup:

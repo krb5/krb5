@@ -78,7 +78,7 @@ static void test_nfold ()
 	printf ("%d-fold(", tests[i].n);
 	printstringhex (p);
 	printf (") =\n\t");
-	krb5_nfold (8 * strlen (p), p, tests[i].n, outbuf);
+	krb5int_nfold (8 * strlen (p), p, tests[i].n, outbuf);
 	printhex (tests[i].n / 8U, outbuf);
 	printf ("\n\n");
     }
@@ -218,7 +218,7 @@ void DK (krb5_keyblock *out, krb5_keyblock *in, const krb5_data *usage) {
 
 void DR (krb5_data *out, krb5_keyblock *in, const krb5_data *usage) {
     krb5_error_code r;
-    r = krb5_derive_random (enc, in, out, usage);
+    r = krb5int_derive_random (enc, in, out, usage);
     CHECK;
 }
 

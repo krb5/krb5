@@ -32,8 +32,8 @@ krb5_c_valid_cksumtype(krb5_cksumtype ctype)
 {
     unsigned int i;
 
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == ctype)
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == ctype)
 	    return TRUE;
     }
 

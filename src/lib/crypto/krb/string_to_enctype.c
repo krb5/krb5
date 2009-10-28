@@ -35,8 +35,8 @@ krb5_string_to_enctype(char *string, krb5_enctype *enctypep)
     const char *alias;
     const struct krb5_keytypes *ktp;
 
-    for (i = 0; i < krb5_enctypes_length; i++) {
-	ktp = &krb5_enctypes_list[i];
+    for (i = 0; i < krb5int_enctypes_length; i++) {
+	ktp = &krb5int_enctypes_list[i];
 	if (strcasecmp(ktp->name, string) == 0) {
 	    *enctypep = ktp->etype;
 	    return 0;

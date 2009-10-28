@@ -58,9 +58,9 @@ struct md_test_entry {
 
 #if MD == 4
 #define MD_CTX krb5_MD4_CTX
-#define MDInit krb5_MD4Init
-#define MDUpdate krb5_MD4Update
-#define MDFinal krb5_MD4Final
+#define MDInit krb5int_MD4Init
+#define MDUpdate krb5int_MD4Update
+#define MDFinal krb5int_MD4Final
 
 #define HAVE_TEST_SUITE
 /* Test suite from RFC 1320 */
@@ -94,9 +94,9 @@ struct md_test_entry md_test_suite[] = {
 
 #if MD == 5
 #define MD_CTX krb5_MD5_CTX
-#define MDInit krb5_MD5Init
-#define MDUpdate krb5_MD5Update
-#define MDFinal krb5_MD5Final
+#define MDInit krb5int_MD5Init
+#define MDUpdate krb5int_MD5Update
+#define MDFinal krb5int_MD5Final
 
 #define HAVE_TEST_SUITE
 /* Test suite from RFC 1321 */

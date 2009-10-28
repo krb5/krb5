@@ -136,13 +136,13 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
 
     d1.data[4] = 0xAA;
 
-    ret = krb5_derive_key(enc, key, &ke, &d1);
+    ret = krb5int_derive_key(enc, key, &ke, &d1);
     if (ret != 0)
 	goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5_derive_key(enc, key, &ki, &d1);
+    ret = krb5int_derive_key(enc, key, &ki, &d1);
     if (ret != 0)
 	goto cleanup;
 
@@ -261,13 +261,13 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
 
     d1.data[4] = 0xAA;
 
-    ret = krb5_derive_key(enc, key, &ke, &d1);
+    ret = krb5int_derive_key(enc, key, &ke, &d1);
     if (ret != 0)
 	goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5_derive_key(enc, key, &ki, &d1);
+    ret = krb5int_derive_key(enc, key, &ki, &d1);
     if (ret != 0)
 	goto cleanup;
 

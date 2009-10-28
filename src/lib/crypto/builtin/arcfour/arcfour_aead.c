@@ -152,7 +152,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 	salt.length = 4;
 	store_32_le(ms_usage, salt.data);
     }
-    ret = krb5_hmac(hash, key, 1, &salt, &d1);
+    ret = krb5int_hmac(hash, key, 1, &salt, &d1);
     if (ret != 0)
 	goto cleanup;
 
@@ -272,7 +272,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
 	salt.length = 4;
 	store_32_le(ms_usage, (unsigned char *)salt.data);
     }
-    ret = krb5_hmac(hash, key, 1, &salt, &d1);
+    ret = krb5int_hmac(hash, key, 1, &salt, &d1);
     if (ret != 0)
 	goto cleanup;
 

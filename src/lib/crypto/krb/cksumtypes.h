@@ -63,6 +63,6 @@ struct krb5_cksumtypes {
 #define KRB5_CKSUMFLAG_DERIVE		0x0001
 #define KRB5_CKSUMFLAG_NOT_COLL_PROOF	0x0002
 
-extern const struct krb5_cksumtypes krb5_cksumtypes_list[];
-extern const unsigned int krb5_cksumtypes_length;
+extern const struct krb5_cksumtypes krb5int_cksumtypes_list[];
+extern const unsigned int krb5int_cksumtypes_length;
 #endif

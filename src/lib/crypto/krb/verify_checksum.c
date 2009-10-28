@@ -40,13 +40,13 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
     krb5_data indata;
     krb5_checksum computed;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == cksum->checksum_type)
+    for (i=0; i<krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == cksum->checksum_type)
 	    break;
     }
-    if (i == krb5_cksumtypes_length)
+    if (i == krb5int_cksumtypes_length)
 	return KRB5_BAD_ENCTYPE;
-    ctp = &krb5_cksumtypes_list[i];
+    ctp = &krb5int_cksumtypes_list[i];
 
     indata.length = cksum->length;
     indata.data = (char *) cksum->contents;

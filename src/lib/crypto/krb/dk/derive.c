@@ -80,12 +80,12 @@ cleanup:
 
 /*
  * Compute a derived key into the keyblock outkey.  This variation on
- * krb5_derive_key does not cache the result, as it is only used
+ * krb5int_derive_key does not cache the result, as it is only used
  * directly in situations which are not expected to be repeated with
  * the same inkey and constant.
  */
 krb5_error_code
-krb5_derive_keyblock(const struct krb5_enc_provider *enc,
+krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
 		     krb5_key inkey, krb5_keyblock *outkey,
 		     const krb5_data *in_constant)
 {
@@ -123,7 +123,7 @@ krb5_derive_keyblock(const struct krb5_enc_provider *enc,
     if (in_constant->length == inblock.length) {
 	memcpy(inblock.data, in_constant->data, inblock.length);
     } else {
-	krb5_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
+	krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
 		   inblock.length*8, (unsigned char *) inblock.data);
     }
 
@@ -162,7 +162,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5_derive_key(const struct krb5_enc_provider *enc,
+krb5int_derive_key(const struct krb5_enc_provider *enc,
 		krb5_key inkey, krb5_key *outkey,
 		const krb5_data *in_constant)
 {
@@ -184,7 +184,7 @@ krb5_derive_key(const struct krb5_enc_provider *enc,
     keyblock.contents = malloc(keyblock.length);
     if (keyblock.contents == NULL)
 	return ENOMEM;
-    ret = krb5_derive_keyblock(enc, inkey, &keyblock, in_constant);
+    ret = krb5int_derive_keyblock(enc, inkey, &keyblock, in_constant);
     if (ret)
 	goto cleanup;
 
@@ -201,7 +201,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5_derive_random(const struct krb5_enc_provider *enc,
+krb5int_derive_random(const struct krb5_enc_provider *enc,
 		   krb5_key inkey, krb5_data *outrnd,
 		   const krb5_data *in_constant)
 {
@@ -238,7 +238,7 @@ krb5_derive_random(const struct krb5_enc_provider *enc,
     if (in_constant->length == inblock.length) {
 	memcpy(inblock.data, in_constant->data, inblock.length);
     } else {
-	krb5_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
+	krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
 		   inblock.length*8, (unsigned char *) inblock.data);
     }
 

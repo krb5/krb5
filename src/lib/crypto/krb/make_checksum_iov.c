@@ -43,13 +43,13 @@ krb5_k_make_checksum_iov(krb5_context context,
     krb5_crypto_iov *checksum;
     const struct krb5_cksumtypes *ctp;
 
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == cksumtype)
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == cksumtype)
 	    break;
     }
-    if (i == krb5_cksumtypes_length)
+    if (i == krb5int_cksumtypes_length)
 	return KRB5_BAD_ENCTYPE;
-    ctp = &krb5_cksumtypes_list[i];
+    ctp = &krb5int_cksumtypes_list[i];
 
     if (ctp->keyhash != NULL)
 	cksum_data.length = ctp->keyhash->hashsize;
@@ -69,7 +69,7 @@ krb5_k_make_checksum_iov(krb5_context context,
     if (cksum_data.data == NULL)
 	return(ENOMEM);
 
-    ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i],
+    ret = krb5int_c_make_checksum_iov(&krb5int_cksumtypes_list[i],
 				      key, usage, data, num_data,
 				      &cksum_data);
     if (ret == 0) {

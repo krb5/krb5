@@ -147,15 +147,15 @@ krb5int_c_find_checksum_type(krb5_cksumtype cksumtype)
 {
     size_t i;
 
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == cksumtype)
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == cksumtype)
 	    break;
     }
 
-    if (i == krb5_cksumtypes_length)
+    if (i == krb5int_cksumtypes_length)
 	return NULL;
 
-    return &krb5_cksumtypes_list[i];
+    return &krb5int_cksumtypes_list[i];
 }
 
 #ifdef DEBUG_IOV

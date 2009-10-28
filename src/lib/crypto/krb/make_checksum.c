@@ -43,13 +43,13 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
     krb5_error_code ret;
     size_t cksumlen;
 
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == cksumtype)
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == cksumtype)
 	    break;
     }
-    if (i == krb5_cksumtypes_length)
+    if (i == krb5int_cksumtypes_length)
 	return KRB5_BAD_ENCTYPE;
-    ctp = &krb5_cksumtypes_list[i];
+    ctp = &krb5int_cksumtypes_list[i];
 
     if (ctp->keyhash != NULL)
 	cksumlen = ctp->keyhash->hashsize;
@@ -90,7 +90,7 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 	    ret = (*keyhash->hash)(key, usage, 0, input, &data);
 	}
     } else if (ctp->flags & KRB5_CKSUMFLAG_DERIVE) {
-	ret = krb5_dk_make_checksum(ctp->hash, key, usage, input, &data);
+	ret = krb5int_dk_make_checksum(ctp->hash, key, usage, input, &data);
     } else {
 	/* No key is used. */
 	ret = (*ctp->hash->hash)(1, input, &data);

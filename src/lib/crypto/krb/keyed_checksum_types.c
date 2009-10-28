@@ -50,8 +50,8 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
     *cksumtypes = NULL;
 
     nctypes = 0;
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	ct = &krb5_cksumtypes_list[i];
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	ct = &krb5int_cksumtypes_list[i];
 	if ((ct->keyhash && etype_match(ct->keyed_etype, enctype)) ||
 	    (ct->flags & KRB5_CKSUMFLAG_DERIVE))
 	    nctypes++;
@@ -62,11 +62,11 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 	return ENOMEM;
 
     c = 0;
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	ct = &krb5_cksumtypes_list[i];
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	ct = &krb5int_cksumtypes_list[i];
 	if ((ct->keyhash && etype_match(ct->keyed_etype, enctype)) ||
 	    (ct->flags & KRB5_CKSUMFLAG_DERIVE))
-	    ctypes[c++] = krb5_cksumtypes_list[i].ctype;
+	    ctypes[c++] = krb5int_cksumtypes_list[i].ctype;
     }
 
     *count = nctypes;

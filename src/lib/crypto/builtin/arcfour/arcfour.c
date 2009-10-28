@@ -13,7 +13,7 @@ of RSA Data Security)
 const char *const krb5int_arcfour_l40 = "fortybits";
 
 void
-krb5_arcfour_encrypt_length(const struct krb5_enc_provider *enc,
+krb5int_arcfour_encrypt_length(const struct krb5_enc_provider *enc,
 			    const struct krb5_hash_provider *hash,
 			    size_t inputlen, size_t *length)
 {
@@ -62,7 +62,7 @@ case 7:				/* tgs-req authenticator */
 }
 
 krb5_error_code
-krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
+krb5int_arcfour_encrypt(const struct krb5_enc_provider *enc,
 		     const struct krb5_hash_provider *hash,
 		     krb5_key key, krb5_keyusage usage,
 		     const krb5_data *ivec, const krb5_data *input,
@@ -148,7 +148,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
     salt.length=4;
     store_32_le(ms_usage, salt.data);
   }
-  krb5_hmac(hash, key, 1, &salt, &d1);
+  krb5int_hmac(hash, key, 1, &salt, &d1);
 
   memcpy(k2.contents, k1.contents, k2.length);
 
@@ -192,7 +192,7 @@ krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
 
 /* This is the arcfour-hmac decryption routine */
 krb5_error_code
-krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
+krb5int_arcfour_decrypt(const struct krb5_enc_provider *enc,
 		     const struct krb5_hash_provider *hash,
 		     krb5_key key, krb5_keyusage usage,
 		     const krb5_data *ivec, const krb5_data *input,
@@ -275,7 +275,7 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
 	  salt.length = 4;
 	  store_32_le(ms_usage, salt.data);
       }
-      ret = krb5_hmac(hash, key, 1, &salt, &d1);
+      ret = krb5int_hmac(hash, key, 1, &salt, &d1);
       if (ret)
 	  goto cleanup;
 

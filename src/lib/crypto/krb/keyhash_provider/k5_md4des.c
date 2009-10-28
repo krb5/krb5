@@ -32,7 +32,7 @@
 #define CONFLENGTH 8
 
 /* Force acceptance of krb5-beta5 md4des checksum for now. */
-#define KRB5_MD4DES_BETA5_COMPAT
+#define KRB5int_MD4DES_BETA5_COMPAT
 
 /* des-cbc(xorkey, conf | rsa-md4(conf | data)) */
 
@@ -60,11 +60,11 @@ k5_md4des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 
     /* hash the confounder, then the input data */
 
-    krb5_MD4Init(&ctx);
-    krb5_MD4Update(&ctx, conf, CONFLENGTH);
-    krb5_MD4Update(&ctx, (unsigned char *) input->data,
+    krb5int_MD4Init(&ctx);
+    krb5int_MD4Update(&ctx, conf, CONFLENGTH);
+    krb5int_MD4Update(&ctx, (unsigned char *) input->data,
 		   (unsigned int) input->length);
-    krb5_MD4Final(&ctx);
+    krb5int_MD4Final(&ctx);
 
     /* construct the buffer to be encrypted */
 
@@ -92,7 +92,7 @@ k5_md4des_verify(krb5_key key, krb5_keyusage usage,
     if (key->keyblock.length != 8)
 	return(KRB5_BAD_KEYSIZE);
     if (hash->length != (CONFLENGTH+RSA_MD4_CKSUM_LENGTH)) {
-#ifdef KRB5_MD4DES_BETA5_COMPAT
+#ifdef KRB5int_MD4DES_BETA5_COMPAT
 	if (hash->length != RSA_MD4_CKSUM_LENGTH)
 	    return(KRB5_CRYPTO_INTERNAL);
 	else
@@ -132,13 +132,13 @@ k5_md4des_verify(krb5_key key, krb5_keyusage usage,
 
     /* hash the confounder, then the input data */
 
-    krb5_MD4Init(&ctx);
+    krb5int_MD4Init(&ctx);
     if (!compathash) {
-	krb5_MD4Update(&ctx, plaintext, CONFLENGTH);
+	krb5int_MD4Update(&ctx, plaintext, CONFLENGTH);
     }
-    krb5_MD4Update(&ctx, (unsigned char *) input->data,
+    krb5int_MD4Update(&ctx, (unsigned char *) input->data,
 		   (unsigned int) input->length);
-    krb5_MD4Final(&ctx);
+    krb5int_MD4Final(&ctx);
 
     /* compare the decrypted hash to the computed one */
 

@@ -28,7 +28,7 @@
 #include "old.h"
 
 void
-krb5_old_encrypt_length(const struct krb5_enc_provider *enc,
+krb5int_old_encrypt_length(const struct krb5_enc_provider *enc,
 			const struct krb5_hash_provider *hash,
 			size_t inputlen,
 			size_t *length)
@@ -42,7 +42,7 @@ krb5_old_encrypt_length(const struct krb5_enc_provider *enc,
 }
 
 krb5_error_code
-krb5_old_encrypt(const struct krb5_enc_provider *enc,
+krb5int_old_encrypt(const struct krb5_enc_provider *enc,
 		 const struct krb5_hash_provider *hash,
 		 krb5_key key,
 		 krb5_keyusage usage,
@@ -58,7 +58,7 @@ krb5_old_encrypt(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     hashsize = hash->hashsize;
 
-    krb5_old_encrypt_length(enc, hash, input->length, &enclen);
+    krb5int_old_encrypt_length(enc, hash, input->length, &enclen);
 
     if (output->length < enclen)
 	return(KRB5_BAD_MSIZE);

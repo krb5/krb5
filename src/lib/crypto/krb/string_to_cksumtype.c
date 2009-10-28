@@ -34,8 +34,8 @@ krb5_string_to_cksumtype(char *string, krb5_cksumtype *cksumtypep)
     const char *alias;
     const struct krb5_cksumtypes *ctp;
 
-    for (i=0; i<krb5_cksumtypes_length; i++) {
-	ctp = &krb5_cksumtypes_list[i];
+    for (i=0; i<krb5int_cksumtypes_length; i++) {
+	ctp = &krb5int_cksumtypes_list[i];
 	if (strcasecmp(ctp->name, string) == 0) {
 	    *cksumtypep = ctp->ctype;
 	    return 0;

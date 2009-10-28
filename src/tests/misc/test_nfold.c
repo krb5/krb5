@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	exit(1);
     }
 
-    krb5_nfold(inlen,instr,outlen,outstr);
+    krb5int_nfold(inlen,instr,outlen,outstr);
 
     printf("%d-fold(",outlen);
     for (i=0; i<(inlen/8); i++)

@@ -32,7 +32,7 @@
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
 krb5_error_code
-krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
+krb5int_dk_make_checksum(const struct krb5_hash_provider *hash,
 		      krb5_key key, krb5_keyusage usage,
 		      const krb5_data *input, krb5_data *output)
 {
@@ -50,7 +50,7 @@ krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
 
     /*
      * key->length will be tested in enc->encrypt.
-     * output->length will be tested in krb5_hmac.
+     * output->length will be tested in krb5int_hmac.
      */
 
     /* Derive the key. */
@@ -62,7 +62,7 @@ krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
 
     datain.data[4] = (char) 0x99;
 
-    ret = krb5_derive_key(enc, key, &kc, &datain);
+    ret = krb5int_derive_key(enc, key, &kc, &datain);
     if (ret)
 	return ret;
 
@@ -70,7 +70,7 @@ krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
 
     datain = *input;
 
-    ret = krb5_hmac(hash, kc, 1, &datain, output);
+    ret = krb5int_hmac(hash, kc, 1, &datain, output);
     if (ret)
 	memset(output->data, 0, output->length);
 
@@ -98,7 +98,7 @@ krb5int_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
 
     /*
      * key->length will be tested in enc->encrypt.
-     * output->length will be tested in krb5_hmac.
+     * output->length will be tested in krb5int_hmac.
      */
 
     /* Derive the key. */
@@ -110,7 +110,7 @@ krb5int_dk_make_checksum_iov(const struct krb5_hash_provider *hash,
 
     datain.data[4] = (char) 0x99;
 
-    ret = krb5_derive_key(enc, key, &kc, &datain);
+    ret = krb5int_derive_key(enc, key, &kc, &datain);
     if (ret)
 	return ret;
 

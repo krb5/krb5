@@ -309,7 +309,7 @@ set_default_etype_var(krb5_context context, const krb5_enctype *etypes,
 	for (i = 0; etypes[i]; i++) {
 	    if (!krb5_c_valid_enctype(etypes[i]))
 		return KRB5_PROG_ETYPE_NOSUPP;
-	    if (!context->allow_weak_crypto && krb5_c_weak_enctype(etypes[i]))
+	    if (!context->allow_weak_crypto && krb5int_c_weak_enctype(etypes[i]))
 		return KRB5_PROG_ETYPE_NOSUPP;
 	}
 
@@ -357,7 +357,7 @@ mod_list(krb5_enctype etype, krb5_boolean add, krb5_boolean allow_weak,
     unsigned int i;
 
     assert(etype > 0 && etype <= MAX_ENCTYPE);
-    if (!allow_weak && krb5_c_weak_enctype(etype))
+    if (!allow_weak && krb5int_c_weak_enctype(etype))
 	return;
     for (i = 0; i < *count; i++) {
 	if (list[i] == etype) {

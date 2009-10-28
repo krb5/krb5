@@ -223,7 +223,7 @@ hmac_sha1(krb5_key pass, krb5_data *salt, krb5_data *out)
 
     if (debug_hmac)
 	printd(" hmac input", salt);
-    err = krb5_hmac(h, pass, 1, salt, out);
+    err = krb5int_hmac(h, pass, 1, salt, out);
     if (err == 0 && debug_hmac)
 	printd(" hmac output", out);
     return err;

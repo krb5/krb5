@@ -28,7 +28,7 @@
 #include "old.h"
 
 krb5_error_code
-krb5_old_decrypt(const struct krb5_enc_provider *enc,
+krb5int_old_decrypt(const struct krb5_enc_provider *enc,
 		 const struct krb5_hash_provider *hash,
 		 krb5_key key,
 		 krb5_keyusage usage,

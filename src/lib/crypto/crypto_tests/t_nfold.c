@@ -82,7 +82,7 @@ static void rfc_tests ()
     for (i = 0; i < ASIZE (tests); i++) {
 	unsigned char *p = (unsigned char *) tests[i].input;
 	assert (tests[i].n / 8 <= sizeof (outbuf));
-	krb5_nfold (8 * strlen ((char *) p), p, tests[i].n, outbuf);
+	krb5int_nfold (8 * strlen ((char *) p), p, tests[i].n, outbuf);
 	printf ("%d-fold(\"%s\") =\n", tests[i].n, p);
 	printf ("%d-fold(", tests[i].n);
 	printstringhex (p);
@@ -106,7 +106,7 @@ static void fold_kerberos(unsigned int nbytes)
 	abort();
 
     printf("%d-fold(\"kerberos\") =\n\t", nbytes*8);
-    krb5_nfold(64, (unsigned char *) "kerberos", 8*nbytes, cipher_text);
+    krb5int_nfold(64, (unsigned char *) "kerberos", 8*nbytes, cipher_text);
     for (j=0; j<nbytes; j++)
 	printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
     printf("\n");
@@ -142,7 +142,7 @@ main(argc, argv)
 	printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]), 
 	       nfold_in[i]);
 	printf("\t192-Fold:\t");
-	krb5_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8, 
+	krb5int_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8,
 		   cipher_text);
 	for (j=0; j<24; j++)
 	    printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);

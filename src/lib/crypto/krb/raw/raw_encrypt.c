@@ -40,7 +40,7 @@ krb5_raw_encrypt_length(const struct krb5_enc_provider *enc,
 }
 
 krb5_error_code
-krb5_raw_encrypt(const struct krb5_enc_provider *enc,
+krb5int_raw_encrypt(const struct krb5_enc_provider *enc,
 		 const struct krb5_hash_provider *hash,
 		 krb5_key key, krb5_keyusage usage,
 		 const krb5_data *ivec, const krb5_data *input,

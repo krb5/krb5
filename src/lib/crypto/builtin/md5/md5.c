@@ -42,9 +42,9 @@
  ***********************************************************************
  **  Message-digest routines:                                         **
  **  To form the message digest for a message M                       **
- **    (1) Initialize a context buffer mdContext using krb5_MD5Init   **
- **    (2) Call krb5_MD5Update on mdContext and M                     **
- **    (3) Call krb5_MD5Final on mdContext                            **
+ **    (1) Initialize a context buffer mdContext using krb5int_MD5Init   **
+ **    (2) Call krb5int_MD5Update on mdContext and M                     **
+ **    (3) Call krb5int_MD5Final on mdContext                            **
  **  The message digest is now in mdContext->digest[0...15]           **
  ***********************************************************************
  */
@@ -103,11 +103,11 @@ static const unsigned char PADDING[64] = {
    (a) &= 0xffffffff; \
   }
 
-/* The routine krb5_MD5Init initializes the message-digest context
+/* The routine krb5int_MD5Init initializes the message-digest context
    mdContext. All fields are set to zero.
  */
 void 
-krb5_MD5Init (krb5_MD5_CTX *mdContext)
+krb5int_MD5Init (krb5_MD5_CTX *mdContext)
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
@@ -119,12 +119,12 @@ krb5_MD5Init (krb5_MD5_CTX *mdContext)
   mdContext->buf[3] = 0x10325476UL;
 }
 
-/* The routine krb5_MD5Update updates the message-digest context to
+/* The routine krb5int_MD5Update updates the message-digest context to
    account for the presence of each of the characters inBuf[0..inLen-1]
    in the message whose digest is being computed.
  */
 void
-krb5_MD5Update (krb5_MD5_CTX *mdContext, const unsigned char *inBuf, unsigned int inLen)
+krb5int_MD5Update (krb5_MD5_CTX *mdContext, const unsigned char *inBuf, unsigned int inLen)
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -153,11 +153,11 @@ krb5_MD5Update (krb5_MD5_CTX *mdContext, const unsigned char *inBuf, unsigned in
   }
 }
 
-/* The routine krb5_MD5Final terminates the message-digest computation and
+/* The routine krb5int_MD5Final terminates the message-digest computation and
    ends with the desired message digest in mdContext->digest[0...15].
  */
 void
-krb5_MD5Final (krb5_MD5_CTX *mdContext)
+krb5int_MD5Final (krb5_MD5_CTX *mdContext)
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -173,7 +173,7 @@ krb5_MD5Final (krb5_MD5_CTX *mdContext)
 
   /* pad out to 56 mod 64 */
   padLen = (mdi < 56) ? (56 - mdi) : (120 - mdi);
-  krb5_MD5Update (mdContext, PADDING, padLen);
+  krb5int_MD5Update (mdContext, PADDING, padLen);
 
   /* append length in bits and transform */
   for (i = 0, ii = 0; i < 14; i++, ii += 4)

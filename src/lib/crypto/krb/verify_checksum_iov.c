@@ -44,13 +44,13 @@ krb5_k_verify_checksum_iov(krb5_context context,
     krb5_data computed;
     krb5_crypto_iov *checksum;
 
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == checksum_type)
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == checksum_type)
 	    break;
     }
-    if (i == krb5_cksumtypes_length)
+    if (i == krb5int_cksumtypes_length)
 	return KRB5_BAD_ENCTYPE;
-    ctp = &krb5_cksumtypes_list[i];
+    ctp = &krb5int_cksumtypes_list[i];
 
     checksum = krb5int_c_locate_iov((krb5_crypto_iov *)data, num_data,
 				    KRB5_CRYPTO_TYPE_CHECKSUM);
@@ -81,7 +81,7 @@ krb5_k_verify_checksum_iov(krb5_context context,
     if (computed.data == NULL)
 	return ENOMEM;
 
-    ret = krb5int_c_make_checksum_iov(&krb5_cksumtypes_list[i], key, usage,
+    ret = krb5int_c_make_checksum_iov(&krb5int_cksumtypes_list[i], key, usage,
 				      data, num_data, &computed);
     if (ret) {
 	free(computed.data);

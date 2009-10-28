@@ -32,9 +32,9 @@ krb5_c_is_coll_proof_cksum(krb5_cksumtype ctype)
 {
     unsigned int i;
 
-    for (i = 0; i < krb5_cksumtypes_length; i++) {
-	if (krb5_cksumtypes_list[i].ctype == ctype)
-	    return((krb5_cksumtypes_list[i].flags &
+    for (i = 0; i < krb5int_cksumtypes_length; i++) {
+	if (krb5int_cksumtypes_list[i].ctype == ctype)
+	    return((krb5int_cksumtypes_list[i].flags &
 		    KRB5_CKSUMFLAG_NOT_COLL_PROOF) ? FALSE : TRUE);
     }
 

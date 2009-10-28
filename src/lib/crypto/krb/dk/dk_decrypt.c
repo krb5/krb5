@@ -41,7 +41,7 @@ krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
 				 int ivec_mode);
 
 krb5_error_code
-krb5_dk_decrypt(const struct krb5_enc_provider *enc,
+krb5int_dk_decrypt(const struct krb5_enc_provider *enc,
 		const struct krb5_hash_provider *hash,
 		krb5_key key, krb5_keyusage usage,
 		const krb5_data *ivec, const krb5_data *input,
@@ -104,13 +104,13 @@ krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
 
     d1.data[4] = (char) 0xAA;
 
-    ret = krb5_derive_key(enc, key, &ke, &d1);
+    ret = krb5int_derive_key(enc, key, &ke, &d1);
     if (ret != 0)
 	goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5_derive_key(enc, key, &ki, &d1);
+    ret = krb5int_derive_key(enc, key, &ki, &d1);
     if (ret != 0)
 	goto cleanup;
 
@@ -142,7 +142,7 @@ krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
     d1.length = hashsize;
     d1.data = (char *) cksum;
 
-    ret = krb5_hmac(hash, ki, 1, &d2, &d1);
+    ret = krb5int_hmac(hash, ki, 1, &d2, &d1);
     if (ret != 0)
 	goto cleanup;
 

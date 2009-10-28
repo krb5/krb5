@@ -29,7 +29,7 @@
 #include "keyhash_provider.h"
 #include "cksumtypes.h"
 
-const struct krb5_cksumtypes krb5_cksumtypes_list[] = {
+const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
     { CKSUMTYPE_CRC32, KRB5_CKSUMFLAG_NOT_COLL_PROOF,
       "crc32", { 0 }, "CRC-32",
       0, NULL,
@@ -87,5 +87,5 @@ const struct krb5_cksumtypes krb5_cksumtypes_list[] = {
       NULL }
 };
 
-const unsigned int krb5_cksumtypes_length =
-    sizeof(krb5_cksumtypes_list) / sizeof(struct krb5_cksumtypes);
+const unsigned int krb5int_cksumtypes_length =
+    sizeof(krb5int_cksumtypes_list) / sizeof(struct krb5_cksumtypes);
