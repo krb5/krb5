@@ -988,9 +988,9 @@ kg_accept_krb5(minor_status, context_handle,
         if (ctx->proto == 0 &&
             (ctx->gss_flags & GSS_C_DCE_STYLE) == 0 &&
             (ap_req_options & AP_OPTS_USE_SUBKEY)) {
-            code = (*kaccess.krb5_auth_con_get_subkey_enctype) (context,
-                                                                auth_context,
-                                                                &negotiated_etype);
+            code = (*kaccess.auth_con_get_subkey_enctype)(context,
+                                                          auth_context,
+                                                          &negotiated_etype);
             if (code != 0) {
                 major_status = GSS_S_FAILURE;
                 goto fail;

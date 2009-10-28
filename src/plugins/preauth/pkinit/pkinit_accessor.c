@@ -111,8 +111,8 @@ k5int_decode_##type = k5int.decode_##type;
     k5int_decode_krb5_principal_name = k5int.decode_krb5_principal_name;
     k5int_decode_krb5_as_req = k5int.decode_krb5_as_req;
     k5int_encode_krb5_kdc_req_body = k5int.encode_krb5_kdc_req_body;
-    k5int_krb5_free_kdc_req = k5int.krb5_free_kdc_req;
-    k5int_set_prompt_types = k5int.krb5int_set_prompt_types;
+    k5int_krb5_free_kdc_req = k5int.free_kdc_req;
+    k5int_set_prompt_types = k5int.set_prompt_types;
     k5int_encode_krb5_authdata_elt = k5int.encode_krb5_authdata_elt;
     return 0;
 }

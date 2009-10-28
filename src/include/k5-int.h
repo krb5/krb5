@@ -2218,7 +2218,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 14
+#define KRB5INT_ACCESS_STRUCT_VERSION 15
 
 #ifndef ANAME_SZ
 struct ktext;			/* from krb.h, for krb524 support */
@@ -2227,11 +2227,13 @@ typedef struct _krb5int_access {
     /* crypto stuff */
     const struct krb5_hash_provider *md5_hash_provider;
     const struct krb5_enc_provider *arcfour_enc_provider;
-    krb5_error_code (* krb5int_hmac) (const struct krb5_hash_provider *hash,
-				   const krb5_keyblock *key,
-				   unsigned int icount, const krb5_data *input,
-				   krb5_data *output);
-    krb5_error_code (* krb5_auth_con_get_subkey_enctype)(krb5_context, krb5_auth_context, krb5_enctype *);
+    krb5_error_code (*hmac)(const struct krb5_hash_provider *hash,
+			    const krb5_keyblock *key,
+			    unsigned int icount, const krb5_data *input,
+			    krb5_data *output);
+    krb5_error_code (*auth_con_get_subkey_enctype)(krb5_context,
+						   krb5_auth_context,
+						   krb5_enctype *);
     /* service location and communication */
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, struct sendto_callback_info*, krb5_data *reply,
@@ -2253,16 +2255,12 @@ typedef struct _krb5int_access {
     int (*use_dns_kdc)(krb5_context);
     krb5_error_code (*clean_hostname)(krb5_context, const char *, char *, size_t);
 
-    /* krb4 compatibility stuff -- may be null if not enabled */
-    krb5_int32 (*krb_life_to_time)(krb5_int32, int);
-    int (*krb_time_to_life)(krb5_int32, krb5_int32);
-    int (*krb524_encode_v4tkt)(struct ktext *, char *, unsigned int *);
-    krb5_error_code (*krb5int_c_mandatory_cksumtype)
-        (krb5_context, krb5_enctype, krb5_cksumtype *);
-    krb5_error_code (KRB5_CALLCONV *krb5_ser_pack_int64)
-        (krb5_int64, krb5_octet **, size_t *);
-    krb5_error_code (KRB5_CALLCONV *krb5_ser_unpack_int64)
-        (krb5_int64 *, krb5_octet **, size_t *);
+    krb5_error_code (*mandatory_cksumtype)(krb5_context, krb5_enctype,
+					   krb5_cksumtype *);
+    krb5_error_code (KRB5_CALLCONV *ser_pack_int64)(krb5_int64, krb5_octet **,
+						    size_t *);
+    krb5_error_code (KRB5_CALLCONV *ser_unpack_int64)(krb5_int64 *,
+						      krb5_octet **, size_t *);
 
     /* Used for KDB LDAP back end.  */
     krb5_error_code
@@ -2342,9 +2340,9 @@ typedef struct _krb5int_access {
 	(const krb5_data *output, krb5_kdc_req **rep);
     krb5_error_code (*encode_krb5_kdc_req_body)
 	(const krb5_kdc_req *rep, krb5_data **code);
-    void (KRB5_CALLCONV *krb5_free_kdc_req)
+    void (KRB5_CALLCONV *free_kdc_req)
 	(krb5_context, krb5_kdc_req * );
-    void (*krb5int_set_prompt_types)
+    void (*set_prompt_types)
 	(krb5_context, krb5_prompt_type *);
     krb5_error_code (*encode_krb5_authdata_elt)
 	(const krb5_authdata *rep, krb5_data **code);

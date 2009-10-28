@@ -52,8 +52,8 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    krb5int_access internals_temp;
 #endif
 	    S (free_addrlist, krb5int_free_addrlist),
-	    S (krb5int_hmac, krb5int_hmac_keyblock),
-	    S (krb5_auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
+	    S (hmac, krb5int_hmac_keyblock),
+	    S (auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
 	    S (md5_hash_provider, &krb5int_hash_md5),
 	    S (arcfour_enc_provider, &krb5int_enc_arcfour),
 	    S (sendto_udp, &krb5int_sendto),
@@ -70,18 +70,14 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #undef SC
 	    S (clean_hostname, krb5int_clean_hostname),
 
-	    S (krb_life_to_time, 0),
-	    S (krb_time_to_life, 0),
-	    S (krb524_encode_v4tkt, 0),
-
-	    S (krb5int_c_mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
+	    S (mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
 #ifndef LEAN_CLIENT
 #define SC(FIELD, VAL)	S(FIELD, VAL)
 #else /* disable */
 #define SC(FIELD, VAL)	S(FIELD, 0)
 #endif
-	    SC (krb5_ser_pack_int64, krb5_ser_pack_int64),
-	    SC (krb5_ser_unpack_int64, krb5_ser_unpack_int64),
+	    SC (ser_pack_int64, krb5_ser_pack_int64),
+	    SC (ser_unpack_int64, krb5_ser_unpack_int64),
 #undef SC
 
 #ifdef ENABLE_LDAP
@@ -125,8 +121,8 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    SC (decode_krb5_td_dh_parameters, decode_krb5_td_dh_parameters),
 	    SC (decode_krb5_as_req, decode_krb5_as_req),
 	    SC (encode_krb5_kdc_req_body, encode_krb5_kdc_req_body),
-	    SC (krb5_free_kdc_req, krb5_free_kdc_req),
-	    SC (krb5int_set_prompt_types, krb5int_set_prompt_types),
+	    SC (free_kdc_req, krb5_free_kdc_req),
+	    SC (set_prompt_types, krb5int_set_prompt_types),
 	    SC (encode_krb5_authdata_elt, encode_krb5_authdata_elt),
 #undef SC
 

@@ -122,7 +122,7 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
     }
     printd(" hmac input", in);
     krb5_k_create_key(NULL, key, &k);
-    err = krb5_hmac(h, k, 1, in, out);
+    err = krb5int_hmac(h, k, 1, in, out);
     krb5_k_free_key(NULL, k);
     if (err == 0)
 	printd(" hmac output", out);

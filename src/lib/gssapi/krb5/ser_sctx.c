@@ -433,10 +433,10 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                                        &bp, &remain);
             (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_flags,
                                        &bp, &remain);
-            (void) (*kaccess.krb5_ser_pack_int64)((krb5_int64) ctx->seq_send,
-                                                  &bp, &remain);
-            (void) (*kaccess.krb5_ser_pack_int64)((krb5_int64) ctx->seq_recv,
-                                                  &bp, &remain);
+            (void) (*kaccess.ser_pack_int64)((krb5_int64) ctx->seq_send,
+                                             &bp, &remain);
+            (void) (*kaccess.ser_pack_int64)((krb5_int64) ctx->seq_recv,
+                                             &bp, &remain);
 
             /* Now dynamic data */
             kret = 0;
@@ -644,8 +644,10 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             ctx->krb_times.renew_till = (krb5_timestamp) ibuf;
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->krb_flags = (krb5_flags) ibuf;
-            (void) (*kaccess.krb5_ser_unpack_int64)((krb5_int64 *)&ctx->seq_send, &bp, &remain);
-            kret = (*kaccess.krb5_ser_unpack_int64)((krb5_int64 *)&ctx->seq_recv, &bp, &remain);
+            (void) (*kaccess.ser_unpack_int64)((krb5_int64 *)&ctx->seq_send,
+                                               &bp, &remain);
+            kret = (*kaccess.ser_unpack_int64)((krb5_int64 *)&ctx->seq_recv,
+                                               &bp, &remain);
             if (kret) {
                 free(ctx);
                 return kret;
