@@ -20,11 +20,11 @@
         (untabify (point-min) (point-max)))
 
     ;; Only reindent if the file C style is guessed to be "krb5".
-    (if (and (eq c-basic-offset 4)
-             (eq indent-tabs-mode nil))
-        (progn
-          (c-set-style "krb5")
-          (c-indent-region (point-min) (point-max))))
+    ;; Note that krb5-c-style.el already has a heuristic for setting
+    ;; the C style if the file has "c-basic-offset: 4;
+    ;; indent-tabs-mode: nil".
+    (if (equal c-indentation-style "krb5")
+        (c-indent-region (point-min) (point-max)))
 
     (whitespace-cleanup)
 
