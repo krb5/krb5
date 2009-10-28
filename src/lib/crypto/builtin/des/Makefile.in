@@ -96,7 +96,7 @@ depend:: $(SRCS)
 check-windows::
 
 clean::
-	$(RM) destest.$(OBJEXT) destest$(EXEEXT) \
+	$(RM) destest.$(OBJEXT) destest$(EXEEXT) verify$(EXEEXT) \
 	t_verify.$(OBJEXT) t_afss2k.$(OBJEXT) t_afss2k$(EXEEXT)
 
 clean-unix:: clean-libobjs
