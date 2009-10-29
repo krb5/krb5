@@ -2952,37 +2952,44 @@ krb5int_build_principal_alloc_va(krb5_context context,
                                  va_list ap);
 
 /* Some data comparison and conversion functions.  */
-#if 0
-static inline int data_cmp(krb5_data d1, krb5_data d2)
-{
-    if (d1.length < d2.length) return -1;
-    if (d1.length > d2.length) return 1;
-    return memcmp(d1.data, d2.data, d1.length);
-}
-static inline int data_eq (krb5_data d1, krb5_data d2)
-{
-    return data_cmp(d1, d2) == 0;
-}
-#else
-static inline int data_eq (krb5_data d1, krb5_data d2)
+static inline int
+data_eq(krb5_data d1, krb5_data d2)
 {
     return (d1.length == d2.length
 	    && !memcmp(d1.data, d2.data, d1.length));
 }
-#endif
-static inline krb5_data string2data (char *str)
+
+static inline krb5_data
+make_data(void *data, unsigned int len)
 {
     krb5_data d;
+
     d.magic = KV5M_DATA;
-    d.length = strlen(str);
-    d.data = str;
+    d.data = data;
+    d.length = len;
     return d;
 }
-static inline int data_eq_string (krb5_data d, char *s)
+
+static inline krb5_data
+empty_data()
+{
+    return make_data(NULL, 0);
+}
+
+static inline krb5_data
+string2data(char *str)
+{
+    return make_data(str, strlen(str));
+}
+
+static inline int
+data_eq_string (krb5_data d, char *s)
 {
     return data_eq(d, string2data(s));
 }
-static inline int authdata_eq (krb5_authdata a1, krb5_authdata a2)
+
+static inline int
+authdata_eq(krb5_authdata a1, krb5_authdata a2)
 {
     return (a1.ad_type == a2.ad_type
 	    && a1.length == a2.length
