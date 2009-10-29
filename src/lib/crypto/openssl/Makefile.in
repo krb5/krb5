@@ -1,0 +1,161 @@
+thisconfigdir=../../..
+myfulldir=lib/crypto/openssl
+mydir=lib/crypto/openssl
+BUILDTOP=$(REL)..$(S)..$(S)..
+SUBDIRS=des arcfour aes	 md4 md5  sha1 enc_provider hash_provider
+LOCALINCLUDES = -I$(srcdir)/../krb 			\
+		-I$(srcdir)/../krb/hash_provider 	\
+		-I$(srcdir)/des 	\
+		-I$(srcdir)/aes 	\
+		-I$(srcdir)/arcfour 	\
+		-I$(srcdir)/sha1 	\
+		-I$(srcdir)/md4 	\
+		-I$(srcdir)/md5	\
+		-I$(srcdir)/enc_provider	\
+		-I$(srcdir)/hash_provider 	
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+EXTRADEPSRCS= $(srcdir)/t_cf2.c 
+
+
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=$(OUTPRE)crypto.lib
+##DOSOBJFILE=$(OUTPRE)crypto.lst
+##DOSOBJFILELIST=@$(OUTPRE)crypto.lst @$(OUTPRE)des.lst @$(OUTPRE)md4.lst @$(OUTPRE)md5.lst @$(OUTPRE)sha1.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)crc32.lst @$(OUTPRE)dk.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)enc_prov.lst @$(OUTPRE)hash_pro.lst @$(OUTPRE)kh_pro.lst @$(OUTPRE)yarrow.lst @$(OUTPRE)aes.lst
+##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)arcfour.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)kh_pro.lst $(OUTPRE)aes.lst
+
+STLIBOBJS=\
+	hmac.o	\
+	pbkdf2.o		
+
+OBJS=\
+	$(OUTPRE)hmac.$(OBJEXT)	\
+	$(OUTPRE)pbkdf2.$(OBJEXT)		
+
+SRCS=\
+	$(srcdir)/hmac.c	\
+	$(srcdir)/pbkdf2.c	
+
+STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
+	md5/OBJS.ST sha1/OBJS.ST 	\
+	enc_provider/OBJS.ST 		\
+	hash_provider/OBJS.ST 		\
+	arcfour/OBJS.ST 		\
+	aes/OBJS.ST 			\
+	OBJS.ST
+
+SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
+		md5/OBJS.ST sha1/OBJS.ST 	\
+		enc_provider/OBJS.ST 		\
+		hash_provider/OBJS.ST 		\
+		arcfour/OBJS.ST 		\
+		aes/OBJS.ST 
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+check-unix:: t_cf2
+	$(RUN_SETUP) $(VALGRIND) ./t_cf2 <$(srcdir)/t_cf2.in >t_cf2.output
+	diff t_cf2.output $(srcdir)/t_cf2.expected
+
+t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_cf2.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+
+clean::
+	$(RM)  t_cf2 t_cf2.o  t_cf2.output
+
+
+
+
+all-windows::
+	cd ..\des
+	@echo Making in crypto\des
+	$(MAKE) -$(MFLAGS)
+	cd ..\md4
+	@echo Making in crypto\md4
+	$(MAKE) -$(MFLAGS)
+	cd ..\md5
+	@echo Making in crypto\md5
+	$(MAKE) -$(MFLAGS)
+	cd ..\sha1
+	@echo Making in crypto\sha1
+	$(MAKE) -$(MFLAGS)
+	cd ..\hash_provider
+	@echo Making in crypto\hash_provider
+	$(MAKE) -$(MFLAGS)
+	cd ..\enc_provider
+	@echo Making in crypto\enc_provider
+	$(MAKE) -$(MFLAGS)
+	cd ..\arcfour
+	@echo Making in crypto\arcfour
+	$(MAKE) -$(MFLAGS)
+	cd ..\aes
+	@echo Making in crypto\aes
+	$(MAKE) -$(MFLAGS)
+	cd ..
+
+clean-windows::
+	cd ..\des
+	@echo Making clean in crypto\des
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\md4
+	@echo Making clean in crypto\md4
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\md5
+	@echo Making clean in crypto\md5
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\sha1
+	@echo Making clean in crypto\sha1
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\hash_provider
+	@echo Making clean in crypto\hash_provider
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\enc_provider
+	@echo Making clean in crypto\enc_provider
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\arcfour
+	@echo Making clean in crypto\arcfour
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\aes
+	@echo Making clean in crypto\aes
+	$(MAKE) -$(MFLAGS) clean
+	cd ..
+
+check-windows::
+	cd ..\des
+	@echo Making check in crypto\des
+	$(MAKE) -$(MFLAGS) check
+	cd ..\md4
+	@echo Making check in crypto\md4
+	$(MAKE) -$(MFLAGS) check
+	cd ..\md5
+	@echo Making check in crypto\md5
+	$(MAKE) -$(MFLAGS) check
+	cd ..\sha1
+	@echo Making check in crypto\sha1
+	$(MAKE) -$(MFLAGS) check
+	cd ..\hash_provider
+	@echo Making check in crypto\hash_provider
+	$(MAKE) -$(MFLAGS) check
+	cd ..\enc_provider
+	@echo Making check in crypto\enc_provider
+	$(MAKE) -$(MFLAGS) check
+	cd ..\arcfour
+	@echo Making check in crypto\arcfour
+	$(MAKE) -$(MFLAGS) check
+	cd ..\aes
+	@echo Making check in crypto\aes
+	$(MAKE) -$(MFLAGS) check
+	cd ..
+
+
+@lib_frag@
+@libobj_frag@
+
