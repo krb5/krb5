@@ -82,7 +82,7 @@ krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
 				     const krb5_data *in_constant);
 
 krb5_error_code
-krb5_derive_key(const struct krb5_enc_provider *enc,
+krb5int_derive_key(const struct krb5_enc_provider *enc,
 				krb5_key inkey,
 				krb5_key *outkey,
 				const krb5_data *in_constant);

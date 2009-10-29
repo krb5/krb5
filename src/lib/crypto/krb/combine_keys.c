@@ -22,7 +22,7 @@
  * DR is defined as the generate "random" data from a key
  * (defined in crypto draft)
  *
- * DK is defined as the key derivation function (krb5_derive_key())
+ * DK is defined as the key derivation function (krb5int_derive_key())
  *
  * (note: | means "concatenate")
  *
