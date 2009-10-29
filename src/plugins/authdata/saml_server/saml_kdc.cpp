@@ -184,36 +184,43 @@ saml_kdc_build_subject_confirmation(krb5_context context,
                                     unsigned int flags,
                                     krb5_const_principal client_princ,
                                     krb5_db_entry *client,
+                                    krb5_db_entry *server,
                                     krb5_enc_tkt_part *enc_tkt_reply,
                                     saml2::SubjectConfirmation **pSubjectConf)
 {
     saml2::SubjectConfirmation *subjectConf;
-    saml2::SubjectConfirmationData *subjectConfData;
+    saml2::KeyInfoConfirmationDataType *keyConfData;
     DateTime authtime((time_t)enc_tkt_reply->times.authtime);
     DateTime starttime((time_t)enc_tkt_reply->times.starttime);
     DateTime endtime((time_t)enc_tkt_reply->times.endtime);
-    NameID *nameID;
+    NameID *nameID = NULL;
     krb5_error_code code;
-    const XMLCh *method;
+    KeyInfo *keyInfo;
 
     *pSubjectConf = NULL;
 
-    code = saml_krb_build_nameid(context, client_princ, &nameID);
+    code = saml_krb_build_principal_keyinfo(context, client_princ, &keyInfo);
     if (code != 0)
         return code;
 
-    subjectConfData = SubjectConfirmationDataBuilder::buildSubjectConfirmationData();
-    subjectConfData->setNotBefore(starttime.getFormattedString());
-    subjectConfData->setNotOnOrAfter(endtime.getFormattedString());
+    if (flags & KRB5_KDB_FLAGS_S4U) {
+        code = saml_krb_build_nameid(context, server->princ, &nameID);
+        if (code != 0) {
+            delete keyInfo;
+            return code;
+        }
+    }
+
+    keyConfData = KeyInfoConfirmationDataTypeBuilder::buildKeyInfoConfirmationDataType();
+    keyConfData->setNotBefore(authtime.getFormattedString());
+    keyConfData->setNotOnOrAfter(endtime.getFormattedString());
+    keyConfData->getKeyInfos().push_back(keyInfo);
 
     subjectConf = SubjectConfirmationBuilder::buildSubjectConfirmation();
-    if (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)
-        method = SubjectConfirmation::SENDER_VOUCHES;
-    else
-        method = SubjectConfirmation::BEARER;
-    subjectConf->setMethod(method);
-    subjectConf->setNameID(nameID);
-    subjectConf->setSubjectConfirmationData(subjectConfData);
+    if (nameID != NULL)
+        subjectConf->setNameID(nameID);
+    subjectConf->setMethod(SubjectConfirmation::HOLDER_KEY);
+    subjectConf->setSubjectConfirmationData(keyConfData);
 
     *pSubjectConf = subjectConf;
 
@@ -364,6 +371,7 @@ saml_kdc_confirm_subject(krb5_context context,
                          unsigned int flags,
                          krb5_const_principal client_princ,
                          krb5_db_entry *client,
+                         krb5_db_entry *server,
                          krb5_db_entry *tgs,
                          krb5_enc_tkt_part *enc_tkt_reply,
                          saml2::Assertion *assertion)
@@ -380,12 +388,12 @@ saml_kdc_confirm_subject(krb5_context context,
      * to an explicit principal in our realm. Consider this similar to
      * the cases where a PAC is issued in the Windows world.
      */
-    if (isSamlPrincipal ||
+    if (/* isSamlPrincipal || */
         !krb5_realm_compare(context, client_princ, tgs->princ))
         return 0;
 
     code = saml_kdc_build_subject_confirmation(context, flags,
-                                               client_princ, client,
+                                               client_princ, client, server,
                                                enc_tkt_reply,
                                                &subjectConfirmation);
     if (code != 0)
@@ -410,9 +418,11 @@ saml_kdc_verify_assertion(krb5_context context,
                           unsigned int flags,
                           krb5_const_principal client_princ,
                           krb5_db_entry *client,
+                          krb5_db_entry *server,
                           krb5_db_entry *tgs,
                           krb5_keyblock *tgs_key,
-                          krb5_enc_tkt_part *enc_tkt_reply,
+                          krb5_kdc_req *request,
+                          krb5_enc_tkt_part *enc_tkt_request,
                           saml2::Assertion *assertion,
                           krb5_boolean *verified)
 {
@@ -428,16 +438,11 @@ saml_kdc_verify_assertion(krb5_context context,
                            assertion,
                            NULL,
                            client_princ,
+                           request->server,
                            0,
                            usage,
                            verified);
     if (code == 0) {
-        if (*verified == TRUE) {
-            code = saml_kdc_confirm_subject(context, flags,
-                                            client_princ, client,
-                                            tgs, enc_tkt_reply,
-                                            assertion);
-        }
     }
 
     return code;
@@ -445,24 +450,33 @@ saml_kdc_verify_assertion(krb5_context context,
 
 static krb5_error_code
 saml_kdc_build_signature(krb5_context context,
+                         krb5_const_principal keyOwner,
                          krb5_keyblock *key,
                          unsigned int usage,
                          Signature **pSignature)
 {
     krb5_error_code code;
+    KeyInfo *keyInfo;
     XSECCryptoKey *xmlKey;
     Signature *signature;
     auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
 
     *pSignature = NULL;
 
-    code = saml_krb_derive_key(context, key, usage, &xmlKey);
+    code = saml_krb_build_principal_keyinfo(context, keyOwner, &keyInfo);
     if (code != 0)
         return code;
+
+    code = saml_krb_derive_key(context, key, usage, &xmlKey);
+    if (code != 0) {
+        delete keyInfo;
+        return code;
+    }
 
     signature = SignatureBuilder::buildSignature();
     signature->setSignatureAlgorithm(algorithm.get());
     signature->setSigningKey(xmlKey);
+    signature->setKeyInfo(keyInfo);
 
     *pSignature = signature;
 
@@ -471,8 +485,10 @@ saml_kdc_build_signature(krb5_context context,
 
 static krb5_error_code
 saml_kdc_encode(krb5_context context,
-                krb5_enc_tkt_part *enc_tkt_reply,
+                unsigned int flags,
+                krb5_const_principal client_princ,
                 krb5_keyblock *tgs_key,
+                krb5_enc_tkt_part *enc_tkt_reply,
                 krb5_boolean sign,
                 saml2::Assertion *assertion)
 {
@@ -486,8 +502,10 @@ saml_kdc_encode(krb5_context context,
 
     try {
         if (sign) {
-            code = saml_kdc_build_signature(context, enc_tkt_reply->session,
-                                            SAML_KRB_USAGE_SESSKEY, &signature);
+            code = saml_kdc_build_signature(context, client_princ,
+                                            enc_tkt_reply->session,
+                                            SAML_KRB_USAGE_SESSKEY,
+                                            &signature);
             if (code != 0)
                 return code;
 
@@ -576,8 +594,9 @@ saml_authdata(krb5_context context,
         if (vouch == FALSE) {
             code = saml_kdc_verify_assertion(context, flags,
                                              client_princ, client,
+                                             server,
                                              tgs, tgs_key,
-                                             enc_tkt_reply,
+                                             request, enc_tkt_request,
                                              assertion, &vouch);
             if (code != 0)
                 goto cleanup;
@@ -595,7 +614,17 @@ saml_authdata(krb5_context context,
     }
 
     if (assertion != NULL) {
-        code = saml_kdc_encode(context, enc_tkt_reply, tgs_key,
+        if (vouch == TRUE) {
+            code = saml_kdc_confirm_subject(context, flags,
+                                            client_princ, client,
+                                            server, tgs,
+                                            enc_tkt_reply,
+                                            assertion);
+            if (code != 0)
+                goto cleanup;
+        }
+        code = saml_kdc_encode(context, flags, client_princ,
+                               tgs_key, enc_tkt_reply,
                                vouch, assertion);
         if (code != 0)
             goto cleanup;

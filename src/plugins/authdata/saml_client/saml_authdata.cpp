@@ -613,6 +613,7 @@ saml_verify_authdata(krb5_context kcontext,
                            sc->assertion,
                            enc_part->session,
                            enc_part->client,
+                           req->ticket->server,
                            enc_part->times.authtime,
                            SAML_KRB_USAGE_SESSKEY | SAML_KRB_USAGE_TRUSTENGINE,
                            &sc->verified);

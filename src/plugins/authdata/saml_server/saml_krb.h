@@ -48,6 +48,8 @@ extern "C" {
 #include <xmltooling/signature/SignatureValidator.h>
 #include <xmltooling/util/XMLHelper.h>
 #include <xsec/framework/XSECException.hpp>
+#include <xsec/dsig/DSIGKeyInfoValue.hpp>
+#include <xsec/dsig/DSIGKeyInfoName.hpp>
 #include <xsec/enc/XSECCryptoKeyHMAC.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
 #include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
@@ -185,18 +187,15 @@ saml_krb_build_nameid(krb5_context context,
 }
 
 static inline krb5_boolean
-saml_krb_compare_nameid(krb5_context context,
-                        const NameID *nameID,
-                        krb5_const_principal principal)
+saml_krb_compare_principal(krb5_context context,
+                           const XMLCh *unicodePrincipal,
+                           krb5_const_principal principal)
 {
     char *name = NULL;
-    krb5_principal p;
     krb5_boolean ret;
+    krb5_principal p;
 
-    if (!XMLString::equals(nameID->getFormat(), NameIDType::KERBEROS))
-        return FALSE;
-
-    name = toUTF8(nameID->getName());
+    name = toUTF8(unicodePrincipal);
     if (name == NULL)
         return FALSE;
 
@@ -212,6 +211,18 @@ saml_krb_compare_nameid(krb5_context context,
     return ret;
 }
 
+static inline krb5_boolean
+saml_krb_compare_nameid(krb5_context context,
+                        const NameID *nameID,
+                        krb5_const_principal principal)
+{
+    if (!XMLString::equals(nameID->getFormat(), NameIDType::KERBEROS))
+        return FALSE;
+
+    return saml_krb_compare_principal(context, nameID->getName(), principal);
+}
+
+#if 0
 typedef enum _saml_krb_subject_type {
     SAML_KRB_NO_SUBJECT = 0,
     SAML_KRB_ANY_SUBJECT,
@@ -240,7 +251,7 @@ saml_krb_validate_subject(krb5_context context,
         for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
              sc != confs.end();
              sc++) {
-            if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::BEARER) &&
+            if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::HOLDER_KEY) &&
                 saml_krb_compare_nameid(context, (*sc)->getNameID(), principal)) {
                 ret = SAML_KRB_CONFIRMED_SUBJECT;
                 break;
@@ -250,6 +261,7 @@ saml_krb_validate_subject(krb5_context context,
 
     return ret;
 }
+#endif
 
 #if 0
 static inline krb5_timestamp
@@ -268,32 +280,111 @@ saml_krb_get_authtime(krb5_context context,
 }
 #endif
 
-static inline krb5_timestamp
-saml_krb_get_notonorafter(krb5_context context,
-                          const saml2::Assertion *assertion)
+static krb5_error_code
+saml_krb_build_principal_keyinfo(krb5_context context,
+                                 krb5_const_principal principal,
+                                 KeyInfo **pKeyInfo)
 {
-    time_t ktime = 0;
-    const Subject *subject = assertion->getSubject();
+    krb5_error_code code;
+    XMLCh *unicodePrincipal;
+    KeyName *keyName;
+    KeyInfo *keyInfo;
+
+    *pKeyInfo = NULL;
+
+    code = saml_krb_unparse_name_xmlch(context, principal, &unicodePrincipal);
+    if (code != 0)
+        return code;
+
+    keyName = KeyNameBuilder::buildKeyName();
+    keyName->setTextContent(unicodePrincipal);
+
+    keyInfo = KeyInfoBuilder::buildKeyInfo();
+    keyInfo->getKeyNames().push_back(keyName);
+
+    *pKeyInfo = keyInfo;
+
+    return 0;
+}
+
+static inline krb5_error_code
+saml_krb_confirm_keyinfo(krb5_context context,
+                         const saml2::SubjectConfirmation *conf,
+                         krb5_const_principal principal,
+                         krb5_boolean *pConfirmed)
+{
+    krb5_error_code code;
+    const saml2::KeyInfoConfirmationDataType *keyConfData;
+
+    *pConfirmed = FALSE;
+
+    keyConfData = (KeyInfoConfirmationDataType *)((void *)conf->getSubjectConfirmationData());
+
+    for (vector<KeyInfo *>::const_iterator ki = keyConfData->getKeyInfos().begin();
+         ki != keyConfData->getKeyInfos().end();
+         ki++)
+    {
+        KeyName *kn = (*ki)->getKeyNames().front();
+        const XMLCh *knValue = kn->getTextContent();
+
+        if (saml_krb_compare_principal(context, knValue, principal)) {
+            *pConfirmed = TRUE;
+            break;
+        }
+    }
+
+    return 0;
+}
+
+static inline krb5_error_code
+saml_krb_confirm_subject(krb5_context context,
+                         const saml2::Subject *subject,
+                         krb5_const_principal principal,
+                         krb5_timestamp authtime,
+                         krb5_boolean *pConfirmed,
+                         krb5_boolean *pBound)
+{
+    krb5_error_code code;
     const vector<SubjectConfirmation *>&confs = subject->getSubjectConfirmations();
+    krb5_boolean confirmed = FALSE;
+    krb5_boolean bound = FALSE;
 
     for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
          sc != confs.end();
          sc++)
     {
-        if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::BEARER)) {
-            const SubjectConfirmationData *subjectConfirmationData;
-            time_t ts;
+         const SubjectConfirmationData *subjectConfirmationData;
+         time_t ts;
 
-            subjectConfirmationData = (SubjectConfirmationData *)((void *)(*sc)->getSubjectConfirmationData());
-            ts = subjectConfirmationData->getNotOnOrAfter()->getEpoch(false);
+         subjectConfirmationData = (SubjectConfirmationData *)((void *)(*sc)->getSubjectConfirmationData());
 
-            /* return earliest value */
-            if (ktime == 0 || ts < ktime)
-                ktime = ts;
+         ts = subjectConfirmationData->getNotBefore()->getEpoch(false);
+         if (ts < authtime)
+            continue;
+
+#if 0
+         ts = subjectConfirmationData->getNotOnOrAfter()->getEpoch(false);
+         if (ts > endtime)
+             continue;
+#endif
+
+        if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::HOLDER_KEY)) {
+            code = saml_krb_confirm_keyinfo(context, *sc, principal, &confirmed);
+            if (code != 0)
+                break;
+
+            bound = TRUE;
+        } else {
+            confirmed = saml_krb_is_saml_principal(context, principal);
         }
+        if (confirmed)
+            break;
     }
 
-    return (krb5_timestamp)ktime;
+    *pConfirmed = confirmed;
+    *pBound = bound;
+
+    return 0;
 }
 
 static inline krb5_error_code
@@ -302,35 +393,56 @@ saml_krb_verify_recipient(krb5_context context,
                           krb5_const_principal spn,
                           krb5_boolean *pValid)
 {
-    krb5_error_code code;
     const Subject *subject = assertion->getSubject();
     const vector<SubjectConfirmation *>&confs = subject->getSubjectConfirmations();
-    krb5_boolean validSpn = FALSE;
+    krb5_boolean spnMatch = FALSE;
+    krb5_boolean hasRecipient = FALSE;
     XMLCh *spnInstance = NULL;
+    XMLCh *spnAll = NULL;
+    krb5_error_code code;
+
+    code = saml_krb_unparse_name_xmlch(context, spn, &spnAll);
+    if (code != 0)
+        return code;
+
+    if (spn->type == KRB5_NT_SRV_HST && spn->length > 1) {
+        spnInstance = new XMLCh[spn->data[1].length + 1];
+        XMLString::transcode(spn->data[1].data, spnInstance, spn->data[1].length);
+    }
 
     for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
          sc != confs.end();
          sc++)
     {
-        if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::BEARER)) {
-            const SubjectConfirmationData *subjectConfirmationData;
+#if 0
+        const SubjectConfirmationDataType* data = dynamic_cast<const SubjectConfirmationDataType*>((*sc)->getSubjectConfirmationData());
+#else
+        const SubjectConfirmationDataType* data = (const SubjectConfirmationDataType *)((void *)(*sc)->getSubjectConfirmationData());
+#endif
 
-            subjectConfirmationData = (SubjectConfirmationData *)((void *)(*sc)->getSubjectConfirmationData());
+        if (data == NULL || data->getRecipient() == NULL)
+            continue;
 
-            if (spnInstance == NULL) {
-                if (spn->type != KRB5_NT_SRV_HST || spn->length != 2)
-                    break;
-                else {
-                    spnInstance = new XMLCh[spn->data[1].length + 1];
-                    XMLString::transcode(spn->data[1].data, spnInstance, spn->data[1].length);
-                }
-            }
+        hasRecipient = TRUE;
+
+        if (spnInstance != NULL &&
+            XMLString::equals((*sc)->getMethod(),
+                              SubjectConfirmation::BEARER)) {
+            XMLURL url(data->getRecipient());
+
+            spnMatch = XMLString::equals(url.getHost(), spnInstance);
+        } else if (XMLString::equals((*sc)->getMethod(),
+                                     SubjectConfirmation::HOLDER_KEY)) {
+            spnMatch = XMLString::equals(data->getRecipient(), spnAll);
         }
+        if (spnMatch == TRUE)
+            break;
     }
 
-    delete spnInstance;
+    *pValid = hasRecipient ? spnMatch : TRUE;
 
-    *pValid = validSpn;
+    delete spnInstance;
+    delete spnAll;
 
     return 0;
 }
@@ -382,36 +494,38 @@ saml_krb_verify(krb5_context context,
                 saml2::Assertion *assertion,
                 krb5_keyblock *key,
                 krb5_const_principal client,
+                krb5_const_principal server,
                 krb5_timestamp authtime,
                 unsigned int flags,
-                krb5_boolean *pValid)
+                krb5_boolean *pValid,
+                krb5_principal *pMappedPrincipal = NULL)
 {
     krb5_error_code code;
     krb5_boolean validSig = FALSE;
+    krb5_boolean validNameBinding = FALSE;
     Signature *signature;
-    saml_krb_subject_type stype;
+    Subject *subject;
 
     *pValid = FALSE;
 
     if (assertion == NULL)
         return EINVAL;
 
+    subject = assertion->getSubject();
+    if (subject == NULL)
+        return KRB5KRB_AP_WRONG_PRINC;
+
     signature = assertion->getSignature();
     if (signature == NULL)
         return 0;
 
     /*
-     * Verify the assertion is appropriately bound to the ticket client.
+     * Verify the assertion is appropriately bound to the ticket client
      */
-    stype = saml_krb_validate_subject(context, assertion->getSubject(), client);
-
-    /*
-     * If SAML_KRB_USAGE_SESSKEY is set, then a service is validating;
-     * the KDC must have bound the assertion or the principal must be
-     * the well-known SAML principal name.
-     */
-    if ((flags & SAML_KRB_USAGE_SESSKEY) && stype == SAML_KRB_NO_SUBJECT)
-        return 0;
+    code = saml_krb_confirm_subject(context, subject, client,
+                                    authtime, &validSig, &validNameBinding);
+    if (code != 0)
+        return code;
 
     /*
      * Verify any signatures present on the assertion.
@@ -424,21 +538,20 @@ saml_krb_verify(krb5_context context,
      * Verify that the Recipient in any bearer SubjectConfirmationData
      * matches the service principal.
      */
+    code = saml_krb_verify_recipient(context, assertion, server, &validSig);
+    if (code != 0 || validSig == FALSE)
+        return code;
 
-    /*
-     * Verify NotOnOrAfter in any bearer SubjectConfirmationData has not
-     * passed.
-     */
-    if (saml_krb_get_notonorafter(context, assertion) >= time(NULL))
-        validSig = FALSE;
+    if (validNameBinding) {
+    }
 
     *pValid = TRUE;
 
     return 0;
 }
 
-class auto_ptr_krb5_data
-{
+/* Helper for transcoding krb5_data objects */
+class auto_ptr_krb5_data {
     MAKE_NONCOPYABLE(auto_ptr_krb5_data);
     public:
         auto_ptr_krb5_data() : m_buf(NULL) {
@@ -454,10 +567,10 @@ class auto_ptr_krb5_data
             return m_buf;
         }
         XMLCh* release() {
-            XMLCh* temp=m_buf; m_buf=NULL; return temp;
+            XMLCh *temp = m_buf; m_buf = NULL; return temp;
         }
     private:
-        XMLCh* m_buf;
+        XMLCh *m_buf;
 };
 
 #endif /* SAML_KRB_H_ */
