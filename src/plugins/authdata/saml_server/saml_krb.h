@@ -67,7 +67,7 @@ using namespace xercesc;
 using namespace std;
 
 #define SAML_KRB_USAGE_SESSKEY          0x1 /* signed with session key */
-#define SAML_KRB_USAGE_TGSKEY           0x2 /* signed with TGS key */
+#define SAML_KRB_USAGE_SERVERKEY        0x2 /* signed with server key */
 #define SAML_KRB_USAGE_TRUSTENGINE      0x4 /* signed with public key */
 
 static inline krb5_error_code
@@ -88,7 +88,7 @@ saml_krb_derive_key(krb5_context context,
     cdata.data = constant;
     cdata.length = sizeof(constant);
 
-    constant[4] = (flags & SAML_KRB_USAGE_TGSKEY) ? 0xFF : 0;
+    constant[4] = (flags & SAML_KRB_USAGE_SERVERKEY) ? 0xFF : 0;
     constant[5] = 0;
     constant[6] = 0;
     constant[7] = 0;
@@ -501,8 +501,8 @@ saml_krb_verify(krb5_context context,
                 krb5_principal *pMappedPrincipal = NULL)
 {
     krb5_error_code code;
-    krb5_boolean validSig = FALSE;
-    krb5_boolean validNameBinding = FALSE;
+    krb5_boolean verified = FALSE;
+    krb5_boolean bound = FALSE;
     Signature *signature;
     Subject *subject;
 
@@ -523,29 +523,32 @@ saml_krb_verify(krb5_context context,
      * Verify the assertion is appropriately bound to the ticket client
      */
     code = saml_krb_confirm_subject(context, subject, client,
-                                    authtime, &validSig, &validNameBinding);
+                                    authtime, &verified, &bound);
     if (code != 0)
         return code;
+    else if (verified == FALSE)
+        return KRB5KRB_AP_WRONG_PRINC;
 
     /*
      * Verify any signatures present on the assertion.
      */
-    code = saml_krb_verify_signature(context, signature, key, flags, &validSig);
-    if (code != 0 || validSig == FALSE)
-        return code;
+    code = saml_krb_verify_signature(context, signature, key, flags, &verified);
+    if (code != 0 || verified == FALSE)
+        return KRB5KRB_AP_ERR_MODIFIED;
 
     /*
      * Verify that the Recipient in any bearer SubjectConfirmationData
      * matches the service principal.
      */
-    code = saml_krb_verify_recipient(context, assertion, server, &validSig);
-    if (code != 0 || validSig == FALSE)
-        return code;
+    code = saml_krb_verify_recipient(context, assertion, server, &verified);
+    if (code != 0 || verified == FALSE)
+        return KRB5KRB_AP_WRONG_PRINC;
 
-    if (validNameBinding) {
+    if (bound == FALSE) {
+        /* Map to a local principal. */
     }
 
-    *pValid = TRUE;
+    *pValid = (bound && verified);
 
     return 0;
 }
