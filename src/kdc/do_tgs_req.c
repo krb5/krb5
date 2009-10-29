@@ -130,11 +130,10 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     struct kdc_request_state *state = NULL;
     krb5_pa_data *pa_tgs_req; /*points into request*/
     krb5_data scratch;
-    krb5_data e_data; /* backend-provided error data */
+    krb5_data e_data = empty_data(); /* backend-provided error data */
 
     reply.padata = 0; /* For cleanup handler */
     reply_encpart.enc_padata = 0;
-    e_data.data = NULL;
 
     session_key.contents = NULL;
 
