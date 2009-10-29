@@ -497,9 +497,11 @@ int main(int argc, char *argv[])
     printf("Protocol transition tests follow\n");
     printf("-----------------------------------\n\n");
 
+#if 0
     major = testGreetAuthzData(&minor, &user);
     if (GSS_ERROR(major))
         goto out;
+#endif
 
     /* get S4U2Self cred */
     major = gss_acquire_cred_impersonate_name(&minor,

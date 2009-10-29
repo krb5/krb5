@@ -7,7 +7,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -21,7 +21,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * SAML KDC authorization data plugin
  */
@@ -30,6 +30,41 @@
 #include <errno.h>
 
 #include "saml_kdc.h"
+
+/*
+ * Some notes on the binding between SAML assertions and Kerberos principals.
+ *
+ * A KDC-issued assertion will contain the Kerberos principal as the subject
+ * name.
+ *
+ * A KDC-vouched assertion will contain the principal in the subject
+ * confirmation. This will match the principal name in the ticket. This
+ * principal may be the well-known SAML principal name.
+ *
+ * KRB5SignedData protects these assertions with the TGS session key
+ * within the service's realm realm.
+ *
+ * Now to consider some interesting cases:
+ *
+ * (a) In the cross-realm S4U2Self case, the principal name in returned
+ *     ticket is not changed until the server's realm. To protect misuse
+ *     of referral tickets, the service must check the name binding. This
+ *     is no different to PAC-based S4U2Self.
+ *
+ * (b) An IdP acquires a ticket with non-SAML S4U2Self and ends up with a
+ *     ticket with an assertion. It then issues its own assertion and
+ *     includes the ticket in the assertion. Then it does S4U2Proxy with
+ *     its own assertion in the TGS-REQ. In this case we ignore the first
+ *     assertion: ideally, the IdP has KRB5_KDB_NO_AUTH_DATA_REQUIRED set
+ *     on its service principal.
+ *
+ * (c) A service does S4U2Self with a KDC-issued assertion. This is more
+ *     akin to doing S4U2Proxy with a ticket: somehow we need to verify
+ *     that we issued the assertion (we can't use the session key because
+ *     the ticket containing the session key is not available). For now,
+ *     we're not going to support this, although we could with a TGS
+ *     signature.
+ */
 
 krb5_error_code
 saml_init(krb5_context ctx, void **data)
@@ -61,28 +96,6 @@ saml_fini(krb5_context ctx, void *data)
 }
 
 static krb5_error_code
-saml_unparse_name_xmlch(krb5_context context,
-                        krb5_const_principal name,
-                        XMLCh **unicodePrincipal)
-{
-    krb5_error_code code;
-    char *utf8Name;
-
-    code = krb5_unparse_name(context, name, &utf8Name);
-    if (code != 0)
-        return code;
-
-    *unicodePrincipal = fromUTF8(utf8Name, false);
-
-    if (*unicodePrincipal == NULL)
-        code = ENOMEM;
-
-    free(utf8Name);
-
-    return code;
-}
-
-static krb5_error_code
 saml_kdc_build_issuer(krb5_context context,
                       krb5_const_principal principal,
                       Issuer **pIssuer)
@@ -91,7 +104,7 @@ saml_kdc_build_issuer(krb5_context context,
     XMLCh *unicodePrincipal = NULL;
     krb5_error_code code;
 
-    code = saml_unparse_name_xmlch(context, principal, &unicodePrincipal);
+    code = saml_krb_unparse_name_xmlch(context, principal, &unicodePrincipal);
     if (code != 0)
         goto cleanup;
 
@@ -114,26 +127,18 @@ saml_kdc_build_subject(krb5_context context,
 {
     NameID *nameID;
     Subject *subject;
-    XMLCh *unicodePrincipal = NULL;
     krb5_error_code code;
 
-    code = saml_unparse_name_xmlch(context, principal, &unicodePrincipal);
+    code = saml_krb_build_nameid(context, principal, &nameID);
     if (code != 0)
-        goto cleanup;
-
-    nameID = NameIDBuilder::buildNameID();
-    nameID->setName(unicodePrincipal);
-    nameID->setFormat(NameIDType::KERBEROS);
+        return code;
 
     subject = SubjectBuilder::buildSubject();
     subject->setNameID(nameID);
 
     *pSubject = subject;
 
-cleanup:
-    delete unicodePrincipal;
-
-    return code;
+    return 0;
 }
 
 static krb5_error_code
@@ -143,16 +148,16 @@ saml_kdc_annotate_assertion(krb5_context context,
                             krb5_db_entry *client,
                             krb5_db_entry *server,
                             krb5_db_entry *tgs,
-                            krb5_enc_tkt_part *enc_tkt_request,
+                            krb5_enc_tkt_part *enc_tkt_reply,
                             saml2::Assertion *assertion)
 {
     AuthnStatement *statement;
     AuthnContext *authnContext;
     AuthnContextClassRef *authnContextClass;
     Conditions *conditions;
-    DateTime authtime((time_t)enc_tkt_request->times.authtime);
-    DateTime starttime((time_t)enc_tkt_request->times.starttime);
-    DateTime endtime((time_t)enc_tkt_request->times.endtime);
+    DateTime authtime((time_t)enc_tkt_reply->times.authtime);
+    DateTime starttime((time_t)enc_tkt_reply->times.starttime);
+    DateTime endtime((time_t)enc_tkt_reply->times.endtime);
     auto_ptr_XMLCh method("urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos");
 
     authnContext = AuthnContextBuilder::buildAuthnContext();
@@ -175,13 +180,54 @@ saml_kdc_annotate_assertion(krb5_context context,
 }
 
 static krb5_error_code
+saml_kdc_build_subject_confirmation(krb5_context context,
+                                    unsigned int flags,
+                                    krb5_const_principal client_princ,
+                                    krb5_db_entry *client,
+                                    krb5_enc_tkt_part *enc_tkt_reply,
+                                    saml2::SubjectConfirmation **pSubjectConf)
+{
+    saml2::SubjectConfirmation *subjectConf;
+    saml2::SubjectConfirmationData *subjectConfData;
+    DateTime authtime((time_t)enc_tkt_reply->times.authtime);
+    DateTime starttime((time_t)enc_tkt_reply->times.starttime);
+    DateTime endtime((time_t)enc_tkt_reply->times.endtime);
+    NameID *nameID;
+    krb5_error_code code;
+    const XMLCh *method;
+
+    *pSubjectConf = NULL;
+
+    code = saml_krb_build_nameid(context, client_princ, &nameID);
+    if (code != 0)
+        return code;
+
+    subjectConfData = SubjectConfirmationDataBuilder::buildSubjectConfirmationData();
+    subjectConfData->setNotBefore(starttime.getFormattedString());
+    subjectConfData->setNotOnOrAfter(endtime.getFormattedString());
+
+    subjectConf = SubjectConfirmationBuilder::buildSubjectConfirmation();
+    if (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)
+        method = SubjectConfirmation::SENDER_VOUCHES;
+    else
+        method = SubjectConfirmation::BEARER;
+    subjectConf->setMethod(method);
+    subjectConf->setNameID(nameID);
+    subjectConf->setSubjectConfirmationData(subjectConfData);
+
+    *pSubjectConf = subjectConf;
+
+    return 0;
+}
+
+static krb5_error_code
 saml_kdc_build_assertion(krb5_context context,
                          unsigned int flags,
                          krb5_const_principal client_princ,
                          krb5_db_entry *client,
                          krb5_db_entry *server,
                          krb5_db_entry *tgs,
-                         krb5_enc_tkt_part *enc_tkt_request,
+                         krb5_enc_tkt_part *enc_tkt_reply,
                          saml2::Assertion **pAssertion)
 {
     krb5_error_code code;
@@ -189,7 +235,7 @@ saml_kdc_build_assertion(krb5_context context,
     Subject *subject;
     AttributeStatement *attrStatement;
     saml2::Assertion *assertion;
-    DateTime authtime((time_t)enc_tkt_request->times.authtime);
+    DateTime authtime((time_t)enc_tkt_reply->times.authtime);
 
     try {
         assertion = AssertionBuilder::buildAssertion();
@@ -197,7 +243,6 @@ saml_kdc_build_assertion(krb5_context context,
         assertion->addNamespace(Namespace(XSI_NS, XSI_PREFIX));
         assertion->addNamespace(Namespace(XMLSIG_NS, XMLSIG_PREFIX));
         assertion->addNamespace(Namespace(SAML20_NS, SAML20_PREFIX));
-        assertion->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
 
         assertion->setIssueInstant(authtime.getFormattedString());
 
@@ -208,12 +253,14 @@ saml_kdc_build_assertion(krb5_context context,
         assertion->setSubject(subject);
 
         saml_kdc_build_attrs_ldap(context, client, server, &attrStatement);
-        if (attrStatement != NULL)
+        if (attrStatement != NULL) {
+            assertion->addNamespace(Namespace(SAML20X500_NS, SAML20X500_PREFIX));
             assertion->getAttributeStatements().push_back(attrStatement);
+        }
 
         saml_kdc_annotate_assertion(context, flags, client_princ,
                                     client, server, tgs,
-                                    enc_tkt_request,
+                                    enc_tkt_reply,
                                     assertion);
 
         code = 0;
@@ -227,8 +274,10 @@ saml_kdc_build_assertion(krb5_context context,
 }
 
 /*
- * Look for an assertion in the TGS-REQ authorization data.
- */ 
+ * Look for an assertion submitted by the client or in the TGT. In
+ * the latter case, we considered it verified because it was encrypted
+ * in our secret key.
+ */
 static krb5_error_code
 saml_kdc_get_assertion(krb5_context context,
                        unsigned int flags,
@@ -256,7 +305,12 @@ saml_kdc_get_assertion(krb5_context context,
     if (code != 0)
         return code;
 
-    if (authdata == NULL) {
+    /*
+     * In the S4U case, we can't use any assertion present in the TGT
+     * because it would refer to the service itself, not the client.
+     */
+    if (authdata == NULL &&
+        (flags & KRB5_KDB_FLAGS_S4U) == 0) {
         code = krb5int_find_authdata(context,
                                      enc_tkt_request->authorization_data,
                                      NULL,
@@ -273,6 +327,9 @@ saml_kdc_get_assertion(krb5_context context,
         authdata[1] != NULL)
         return 0;
 
+    /*
+     * Attempt to parse the assertion.
+     */
     try {
         string samlbuf((char *)authdata[0]->contents, authdata[0]->length);
         istringstream samlin(samlbuf);
@@ -303,17 +360,64 @@ saml_kdc_get_assertion(krb5_context context,
 }
 
 static krb5_error_code
+saml_kdc_confirm_subject(krb5_context context,
+                         unsigned int flags,
+                         krb5_const_principal client_princ,
+                         krb5_db_entry *client,
+                         krb5_db_entry *tgs,
+                         krb5_enc_tkt_part *enc_tkt_reply,
+                         saml2::Assertion *assertion)
+{
+    SubjectConfirmation *subjectConfirmation;
+    krb5_error_code code;
+    krb5_boolean isSamlPrincipal;
+
+    isSamlPrincipal = saml_krb_is_saml_principal(context, client_princ);
+
+    /*
+     * We confirm the subject - that is, add the principal name to the
+     * list of subject confirmations - where we have mapped the assertion
+     * to an explicit principal in our realm. Consider this similar to
+     * the cases where a PAC is issued in the Windows world.
+     */
+    if (isSamlPrincipal ||
+        !krb5_realm_compare(context, client_princ, tgs->princ))
+        return 0;
+
+    code = saml_kdc_build_subject_confirmation(context, flags,
+                                               client_princ, client,
+                                               enc_tkt_reply,
+                                               &subjectConfirmation);
+    if (code != 0)
+        return code;
+
+    assertion->getSubject()->getSubjectConfirmations().push_back(subjectConfirmation);
+
+    return 0;
+}
+
+/*
+ * Verify a client-submitted assertion is bound to the client principal:
+ *
+ * (a) TGS-REQ: assertion must be bound to the header ticket client
+ * (b) S4U2Self: assertion must be bound to the S4U2Self client
+ * (c) S4U2Proxy: assertion must be bound to evidence ticket client
+ *
+ * Regardless, client_princ is set to the appropriate value in all cases.
+ */
+static krb5_error_code
 saml_kdc_verify_assertion(krb5_context context,
                           unsigned int flags,
                           krb5_const_principal client_princ,
                           krb5_db_entry *client,
-                          krb5_db_entry *server,
                           krb5_db_entry *tgs,
-                          krb5_enc_tkt_part *enc_tkt_request,
+                          krb5_keyblock *tgs_key,
+                          krb5_enc_tkt_part *enc_tkt_reply,
                           saml2::Assertion *assertion,
                           krb5_boolean *verified)
 {
     krb5_error_code code;
+    unsigned usage = SAML_KRB_USAGE_TRUSTENGINE;
 
     /*
      * This is a NOOP until we support PKI validation. But it is
@@ -325,14 +429,50 @@ saml_kdc_verify_assertion(krb5_context context,
                            NULL,
                            client_princ,
                            0,
+                           usage,
                            verified);
+    if (code == 0) {
+        if (*verified == TRUE) {
+            code = saml_kdc_confirm_subject(context, flags,
+                                            client_princ, client,
+                                            tgs, enc_tkt_reply,
+                                            assertion);
+        }
+    }
 
     return code;
 }
 
 static krb5_error_code
+saml_kdc_build_signature(krb5_context context,
+                         krb5_keyblock *key,
+                         unsigned int usage,
+                         Signature **pSignature)
+{
+    krb5_error_code code;
+    XSECCryptoKey *xmlKey;
+    Signature *signature;
+    auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
+
+    *pSignature = NULL;
+
+    code = saml_krb_derive_key(context, key, usage, &xmlKey);
+    if (code != 0)
+        return code;
+
+    signature = SignatureBuilder::buildSignature();
+    signature->setSignatureAlgorithm(algorithm.get());
+    signature->setSigningKey(xmlKey);
+
+    *pSignature = signature;
+
+    return 0;
+}
+
+static krb5_error_code
 saml_kdc_encode(krb5_context context,
                 krb5_enc_tkt_part *enc_tkt_reply,
+                krb5_keyblock *tgs_key,
                 krb5_boolean sign,
                 saml2::Assertion *assertion)
 {
@@ -341,20 +481,18 @@ saml_kdc_encode(krb5_context context,
     krb5_authdata **if_relevant = NULL;
     krb5_authdata **tkt_authdata;
     Signature *signature;
-    auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
+
     string buf;
-    XSECCryptoKey *key = NULL;
 
     try {
         if (sign) {
-            code = saml_krb_derive_key(context, enc_tkt_reply->session, &key);
+            code = saml_kdc_build_signature(context, enc_tkt_reply->session,
+                                            SAML_KRB_USAGE_SESSKEY, &signature);
             if (code != 0)
                 return code;
 
-            signature = SignatureBuilder::buildSignature();
-            signature->setSignatureAlgorithm(algorithm.get());
-            signature->setSigningKey(key);
             assertion->setSignature(signature);
+
             vector <Signature *> signatures(1, signature);
             XMLHelper::serialize(assertion->marshall((DOMDocument *)NULL, &signatures, NULL), buf);
         } else {
@@ -363,6 +501,9 @@ saml_kdc_encode(krb5_context context,
     } catch (exception &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
     }
+
+    if (getenv("SAML_DEBUG_SERIALIZE"))
+        fprintf(stderr, "%s\n", buf.c_str());
 
     ad_datum.ad_type = KRB5_AUTHDATA_SAML;
     ad_datum.contents = (krb5_octet *)buf.c_str();
@@ -416,7 +557,8 @@ saml_authdata(krb5_context context,
     saml2::Assertion *assertion = NULL;
     krb5_boolean vouch = FALSE;
 
-    if (request->msg_type != KRB5_TGS_REQ)
+    if (request->msg_type != KRB5_TGS_REQ ||
+        (server->attributes & KRB5_KDB_NO_AUTH_DATA_REQUIRED))
         return 0;
 
     if (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION)
@@ -428,37 +570,38 @@ saml_authdata(krb5_context context,
                                   request, enc_tkt_request,
                                   &assertion, &vouch);
     if (code != 0)
-        return code;
+        goto cleanup;
 
     if (assertion != NULL) {
         if (vouch == FALSE) {
             code = saml_kdc_verify_assertion(context, flags,
-                                            client_princ, client,
-                                            server, tgs,
-                                            enc_tkt_request,
-                                            assertion, &vouch);
-            if (code != 0) {
-                delete assertion;
-                return code;
-            }
+                                             client_princ, client,
+                                             tgs, tgs_key,
+                                             enc_tkt_reply,
+                                             assertion, &vouch);
+            if (code != 0)
+                goto cleanup;
         }
-    } else {
-        if (client == NULL)
-            return 0;
-
+    } else if (client != NULL) {
         code = saml_kdc_build_assertion(context, flags,
                                         client_princ, client,
                                         server, tgs,
-                                        enc_tkt_request,
+                                        enc_tkt_reply,
                                         &assertion);
         if (code != 0)
-            return code;
+            goto cleanup;
 
-        vouch = TRUE;
+        vouch = TRUE; /* we built it, we'll vouch for it */
     }
 
-    code = saml_kdc_encode(context, enc_tkt_reply, vouch, assertion);
+    if (assertion != NULL) {
+        code = saml_kdc_encode(context, enc_tkt_reply, tgs_key,
+                               vouch, assertion);
+        if (code != 0)
+            goto cleanup;
+    }
 
+cleanup:
     delete assertion;
 
     return code;

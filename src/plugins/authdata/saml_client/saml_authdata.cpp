@@ -376,7 +376,7 @@ saml_get_attribute_object(krb5_context context,
                           const krb5_data *name)
 {
     saml2::Assertion *token2 = sc->assertion;
-    auto_ptr_XMLCh desiredName(name->data, name->length);
+    auto_ptr_krb5_data desiredName(name);
 
     if (token2->getAttributeStatements().size() == 0)
         return NULL;
@@ -399,7 +399,7 @@ saml_get_attribute_index(krb5_context context,
                          AttributeStatement *statement,
                          const krb5_data *name)
 {
-    auto_ptr_XMLCh desiredName(name->data, name->length);
+    auto_ptr_krb5_data desiredName(name);
     int index = 0;
 
     const vector<saml2::Attribute*>& attrs2 =
@@ -510,8 +510,8 @@ saml_set_attribute(krb5_context kcontext,
     struct saml_context *sc = (struct saml_context *)request_context;
     Attribute *attr;
     AttributeValue *attrValue;
-    auto_ptr_XMLCh canonicalName(attribute->data, attribute->length);
-    auto_ptr_XMLCh valueString(value->data, value->length);
+    auto_ptr_krb5_data canonicalName(attribute);
+    auto_ptr_krb5_data valueString(value);
 
     attr = AttributeBuilder::buildAttribute();
     attr->setNameFormat(Attribute::URI_REFERENCE);
@@ -545,7 +545,7 @@ saml_delete_attribute(krb5_context kcontext,
 {
     struct saml_context *sc = (struct saml_context *)request_context;
     saml2::Assertion *token2 = sc->assertion;
-    auto_ptr_XMLCh desiredName(attribute->data, attribute->length);
+    auto_ptr_krb5_data desiredName(attribute);
     saml2::AttributeStatement *attrStatement;
     int index;
 
@@ -614,6 +614,7 @@ saml_verify_authdata(krb5_context kcontext,
                            enc_part->session,
                            enc_part->client,
                            enc_part->times.authtime,
+                           SAML_KRB_USAGE_SESSKEY | SAML_KRB_USAGE_TRUSTENGINE,
                            &sc->verified);
 
     return code;
