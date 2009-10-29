@@ -1,4 +1,51 @@
 /* lib/crypto/openssl/enc_provider/des3.c
+ *
+ * Copyright (C) 2009 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ *
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "k5-int.h"
@@ -56,16 +103,12 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
 {
     int              ret = 0, tmp_len = 0;
     unsigned int     tmp_buf_len = 0;
-    unsigned char   *keybuf  = NULL;
     unsigned char   *tmp_buf = NULL;
     EVP_CIPHER_CTX   ciph_ctx;
 
     ret = validate(key, ivec, input, output);
     if (ret)
 	return ret;
-
-    keybuf=key->keyblock.contents;
-    keybuf[key->keyblock.length] = '\0';
 
     tmp_buf_len = output->length * 2;
     tmp_buf = OPENSSL_malloc(tmp_buf_len);
@@ -74,7 +117,7 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
-    ret = EVP_EncryptInit_ex(&ciph_ctx, EVP_des_ede3_cbc(), NULL, keybuf,
+    ret = EVP_EncryptInit_ex(&ciph_ctx, EVP_des_ede3_cbc(), NULL, key->keyblock.contents,
                              (ivec) ? (unsigned char*)ivec->data : NULL);
     if (ret) {
         EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
@@ -109,7 +152,6 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
 {
     int              ret = 0, tmp_len = 0;
     unsigned int     tmp_buf_len = 0;
-    unsigned char   *keybuf  = NULL;
     unsigned char   *tmp_buf = NULL;
     EVP_CIPHER_CTX   ciph_ctx;
 
@@ -117,8 +159,6 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
     if (ret)
 	return ret;
 
-    keybuf=key->keyblock.contents;
-    keybuf[key->keyblock.length] = '\0';
 
     tmp_buf_len = output->length;
     tmp_buf=OPENSSL_malloc(tmp_buf_len);
@@ -127,7 +167,7 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
-    ret = EVP_DecryptInit_ex(&ciph_ctx, EVP_des_ede3_cbc(), NULL, keybuf,
+    ret = EVP_DecryptInit_ex(&ciph_ctx, EVP_des_ede3_cbc(), NULL, key->keyblock.contents,
                              (ivec) ? (unsigned char*)ivec->data: NULL);
     if (ret) {
         EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
@@ -165,7 +205,6 @@ k5_des3_encrypt_iov(krb5_key key,
     int                    tmp_len = MIT_DES_BLOCK_LENGTH;
     int                    oblock_len = MIT_DES_BLOCK_LENGTH*num_data;
     unsigned char         *iblock = NULL, *oblock = NULL;
-    unsigned char         *keybuf = NULL;
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX         ciph_ctx;
 
@@ -185,15 +224,12 @@ k5_des3_encrypt_iov(krb5_key key,
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
-    keybuf=key->keyblock.contents;
-    keybuf[key->keyblock.length] = '\0';
-
     memset(oblock, 0, oblock_len);
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
     ret = EVP_EncryptInit_ex(&ciph_ctx, EVP_des_ede3_cbc(), NULL,
-                             keybuf, (ivec) ? (unsigned char*)ivec->data : NULL);
+                             key->keyblock.contents, (ivec) ? (unsigned char*)ivec->data : NULL);
     if (!ret){
         EVP_CIPHER_CTX_cleanup(&ciph_ctx);
         OPENSSL_free(iblock);
@@ -248,7 +284,6 @@ k5_des3_decrypt_iov(krb5_key key,
     int                    tmp_len = MIT_DES_BLOCK_LENGTH;
     int                    oblock_len = MIT_DES_BLOCK_LENGTH * num_data;
     unsigned char         *iblock = NULL, *oblock = NULL;
-    unsigned char         *keybuf = NULL ;
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX         ciph_ctx;
 
@@ -268,15 +303,12 @@ k5_des3_decrypt_iov(krb5_key key,
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
-    keybuf=key->keyblock.contents;
-    keybuf[key->keyblock.length] = '\0';
-
     memset(oblock, 0, oblock_len);
 
     EVP_CIPHER_CTX_init(&ciph_ctx);
 
     ret = EVP_DecryptInit_ex(&ciph_ctx, EVP_des_ede3_cbc(), NULL,
-                             keybuf, (ivec) ? (unsigned char*)ivec->data : NULL);
+                             key->keyblock.contents, (ivec) ? (unsigned char*)ivec->data : NULL);
     if (!ret){
         EVP_CIPHER_CTX_cleanup(&ciph_ctx);
         OPENSSL_free(iblock);

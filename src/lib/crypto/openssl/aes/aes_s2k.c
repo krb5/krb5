@@ -1,7 +1,7 @@
 /*
  * lib/crypto/openssl/aes/aes_s2k.c
  *
- * Copyright 2003 by the Massachusetts Institute of Technology.
+ * Copyright 2003, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may

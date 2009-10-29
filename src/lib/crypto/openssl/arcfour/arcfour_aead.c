@@ -1,7 +1,7 @@
 /*
  * lib/crypto/arcfour/arcfour_aead.c
  *
- * Copyright 2008 by the Massachusetts Institute of Technology.
+ * Copyright 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may

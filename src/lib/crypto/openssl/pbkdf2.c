@@ -1,7 +1,7 @@
 /*
  * lib/crypto/openssl/pbkdf2.c
  *
- * Copyright 2002, 2008 by the Massachusetts Institute of Technology.
+ * Copyright 2002, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may

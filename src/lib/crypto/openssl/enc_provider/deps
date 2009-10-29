@@ -35,8 +35,8 @@ aes.so aes.po $(OUTPRE)aes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/authdata_plugin.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../aes/aes.h \
-  $(srcdir)/../aes/uitypes.h $(srcdir)/aes.c \
+  $(SRCTOP)/include/socket-utils.h \
+  $(srcdir)/aes.c \
   $(srcdir)/enc_provider.h \
   $(srcdir)/../../krb/aead.h $(srcdir)/../../krb/cksumtypes.h \
   $(srcdir)/../../krb/rand2key/rand2key.h
