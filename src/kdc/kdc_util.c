@@ -2639,8 +2639,7 @@ kdc_get_ticket_endtime(krb5_context context,
 
     until = min(till, endtime);
 
-    /* check for underflow */
-    life = (until < starttime) ? 0 : until - starttime;
+    life = until - starttime;
 
     if (client->max_life != 0)
 	life = min(life, client->max_life);
@@ -2649,10 +2648,6 @@ kdc_get_ticket_endtime(krb5_context context,
     if (max_life_for_realm != 0)
 	life = min(life, max_life_for_realm);
 
-    /* check for overflow */
-    if (starttime > kdc_infinity - life)
-	*out_endtime = kdc_infinity;
-    else
-	*out_endtime = starttime + life;
+    *out_endtime = starttime + life;
 }
 
