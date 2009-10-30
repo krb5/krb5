@@ -667,16 +667,30 @@ reindent::
 	-l $(SRCTOP)/util/krb5-batch-reindent.el
 
 mark-cstyle::
-	$(FIND) $(SRCTOP) \( \
-	-path $(SRCTOP)/appl/bsd -o \
-	-path $(SRCTOP)/appl/gssftp -o \
-	-path $(SRCTOP)/appl/telnet -o \
-	-path $(SRCTOP)/include/gssrpc -o \
-	-path $(SRCTOP)/lib/crypto/krb/yarrow -o \
-	-path $(SRCTOP)/lib/rpc -o \
-	-path $(SRCTOP)/plugins/kdb/db2/libdb2 -o \
-	-path $(SRCTOP)/lib/krb5/unicode -o \
-	-path $(SRCTOP)/windows/wintel \
+	$(FIND) \
+	$(SRCTOP)/clients \
+	$(SRCTOP)/lib/kadm5 \
+	$(SRCTOP)/lib/kdb \
+	$(SRCTOP)/lib/krb5 \
+	$(SRCTOP)/kadmin \
+	$(SRCTOP)/kdc \
+	\( \
+	-path $(SRCTOP)/kadmin/cli/strftime.c -o \
+	-path $(SRCTOP)/kadmin/server/ipropd_svc.c -o \
+	-path $(SRCTOP)/kadmin/server/kadm_rpc_svc.c -o \
+	-path $(SRCTOP)/lib/kadm5/admin_xdr.h -o \
+	-path $(SRCTOP)/lib/kadm5/client/client_rpc.c -o \
+	-path $(SRCTOP)/lib/kadm5/kadm_rpc.h -o \
+	-path $(SRCTOP)/lib/kadm5/kadm_rpc_xdr.c -o \
+	-path $(SRCTOP)/lib/kadm5/srv/adm_xdr.c -o \
+	-path $(SRCTOP)/lib/krb5/asn.1 -o \
+	-path $(SRCTOP)/lib/krb5/ccche/cc_file.c -o \
+	-path $(SRCTOP)/lib/krb5/krb/deltat.c -o \
+	-path $(SRCTOP)/lib/krb5/krb/preauth.c -o \
+	-path $(SRCTOP)/lib/krb5/krb/ser_ctx.c -o \
+	-path $(SRCTOP)/lib/krb5/krb/strftime.c -o \
+	-path $(SRCTOP)/lib/krb5/krb/strptime.c -o \
+	-path $(SRCTOP)/lib/krb5/unicode \
 	\) -prune -o \
 	-name '*.[ch]' \
 	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
