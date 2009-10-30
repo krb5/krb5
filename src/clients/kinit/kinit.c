@@ -480,6 +480,16 @@ k5_begin(opts, k5)
 		    "when creating default server principal name");
 	    return 0;
 	  }
+	  if (k5->me->realm.data[0] == 0) {
+	      code = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
+	      if (code == 0)
+		  com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
+			  "(principal %s)", k5->name);
+	      else
+		  com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
+			  "for local services");
+	      return 0;
+	  }
 	} else {
 	  /* Get default principal from cache if one exists */
 	  code = krb5_cc_get_principal(k5->ctx, k5->cc, 
