@@ -808,6 +808,12 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 
     *addrlist = al;
 
+    if (realm == NULL || realm->data == NULL || realm->data[0] == 0) {
+	krb5_set_error_message(context, KRB5_REALM_CANT_RESOLVE,
+			       "Cannot find KDC for invalid realm name \"\"");
+	return KRB5_REALM_CANT_RESOLVE;
+    }
+
     code = module_locate_server(context, realm, &al, svc, socktype, family);
     Tprintf("module_locate_server returns %d\n", code);
     if (code == KRB5_PLUGIN_NO_HANDLE) {
@@ -847,7 +853,7 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 	if (al.space)
 	    free_list (&al);
 	krb5_set_error_message(context, KRB5_REALM_CANT_RESOLVE,
-			       "Cannot resolve network address for KDC in realm %.*s",
+			       "Cannot resolve network address for KDC in realm \"%.*s\"",
 			       realm->length, realm->data);
 			       
 	return KRB5_REALM_CANT_RESOLVE;
