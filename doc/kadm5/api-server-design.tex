@@ -130,12 +130,23 @@ CHECK_HANDLE and return the result.
 
 \section{API Versioning}
 
-The KADM5 system is designed to support multiple versions of the KADM5
-API.  Presently, two versions exist: KADM5_API_VERSION_1 and
-KADM5_API_VERSION_2.  The former is equivalant to the initial
-OpenVision API, OVSEC_KADM_API_VERSION_1; the latter was created
-during the initial integration of the OpenVision system into the MIT
-release.
+The KADM5 system was designed by OpenVision to support multiple
+versions of the KADM5 API.  MIT has not adopted this level of support,
+and considers the KADM5 C API to be unstable from release to release.
+This section describes the original design intent; bear in mind that
+only the most recent API is supported by current MIT krb5 releases,
+and that the API version does not necessarily change with API changes
+unless there is a need to do so for wire compatibility.
+
+Historically, three versions of the KADM5 API have existed:
+KADM5_API_VERSION_1 through KADM5_API_VERSION_3.  The first version
+was equivalent to the initial OpenVision API,
+OVSEC_KADM_API_VERSION_1; the second was created during the initial
+integration of the OpenVision system into the MIT release; and the
+third was created for MIT krb5 1.8 to add lockout fields to policy
+entries.  MIT dropped wire compatibility support for version 1 in MIT
+krb5 1.8 (as version 1 was never used in shipped MIT code), but
+retains wire compatibility support for version 2.
 
 Implementing a versioned API in C via with both local and RPC access
 presents a number of design issues, some of them quite subtle.  The
