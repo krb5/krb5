@@ -385,10 +385,12 @@ saml_kdc_confirm_subject(krb5_context context,
     /*
      * We confirm the subject - that is, add the principal name to the
      * list of subject confirmations - where we have mapped the assertion
-     * to an explicit principal in our realm. Consider this similar to
-     * the cases where a PAC is issued in the Windows world.
+     * to an explicit principal in our realm. In the case of cross-realm
+     * S4U2Self, only the realm that has the originating mapping confirms
+     * the subject. In the case of no explicit mapping (the well known
+     * SAML principal is used) then there is no subject confirmation.
      */
-    if (/* isSamlPrincipal || */
+    if (isSamlPrincipal ||
         !krb5_realm_compare(context, client_princ, tgs->princ))
         return 0;
 
@@ -419,21 +421,25 @@ saml_kdc_verify_assertion(krb5_context context,
                           krb5_const_principal client_princ,
                           krb5_db_entry *client,
                           krb5_db_entry *server,
+                          krb5_keyblock *server_key,
                           krb5_db_entry *tgs,
                           krb5_keyblock *tgs_key,
                           krb5_kdc_req *request,
                           krb5_enc_tkt_part *enc_tkt_request,
                           saml2::Assertion *assertion,
+                          krb5_boolean fromTGT,
                           krb5_boolean *verified)
 {
     krb5_error_code code;
-    unsigned usage = SAML_KRB_USAGE_TRUSTENGINE;
+    unsigned usage = SAML_KRB_VERIFY_TRUSTENGINE;
 
     /*
-     * This is a NOOP until we support PKI validation. But it is
-     * a start. We're probably going to need some kind of pluggable
-     * SAML to Kerberos name mapping.
+     * Verify using PKI or potentially the server key if the server
+     * is a trusted entity.
      */
+    if (fromTGT)
+        usage |= SAML_KRB_VERIFY_KDC_VOUCHED;
+
     code = saml_krb_verify(context,
                            assertion,
                            NULL,
@@ -487,6 +493,7 @@ static krb5_error_code
 saml_kdc_encode(krb5_context context,
                 unsigned int flags,
                 krb5_const_principal client_princ,
+                krb5_keyblock *server_key,
                 krb5_keyblock *tgs_key,
                 krb5_enc_tkt_part *enc_tkt_reply,
                 krb5_boolean sign,
@@ -504,7 +511,7 @@ saml_kdc_encode(krb5_context context,
         if (sign) {
             code = saml_kdc_build_signature(context, client_princ,
                                             enc_tkt_reply->session,
-                                            SAML_KRB_USAGE_SESSKEY,
+                                            SAML_KRB_USAGE_SESSION_KEY,
                                             &signature);
             if (code != 0)
                 return code;
@@ -574,6 +581,7 @@ saml_authdata(krb5_context context,
     krb5_const_principal client_princ;
     saml2::Assertion *assertion = NULL;
     krb5_boolean vouch = FALSE;
+    krb5_boolean fromTGT = FALSE;
 
     if (request->msg_type != KRB5_TGS_REQ ||
         (server->attributes & KRB5_KDB_NO_AUTH_DATA_REQUIRED))
@@ -586,21 +594,19 @@ saml_authdata(krb5_context context,
 
     code = saml_kdc_get_assertion(context, flags,
                                   request, enc_tkt_request,
-                                  &assertion, &vouch);
+                                  &assertion, &fromTGT);
     if (code != 0)
         goto cleanup;
 
     if (assertion != NULL) {
-        if (vouch == FALSE) {
-            code = saml_kdc_verify_assertion(context, flags,
-                                             client_princ, client,
-                                             server,
-                                             tgs, tgs_key,
-                                             request, enc_tkt_request,
-                                             assertion, &vouch);
-            if (code != 0)
-                goto cleanup;
-        }
+        code = saml_kdc_verify_assertion(context, flags,
+                                         client_princ, client,
+                                         server, server_key,
+                                         tgs, tgs_key,
+                                         request, enc_tkt_request,
+                                         assertion, fromTGT, &vouch);
+        if (code != 0)
+            goto cleanup;
     } else if (client != NULL) {
         code = saml_kdc_build_assertion(context, flags,
                                         client_princ, client,
@@ -624,7 +630,7 @@ saml_authdata(krb5_context context,
                 goto cleanup;
         }
         code = saml_kdc_encode(context, flags, client_princ,
-                               tgs_key, enc_tkt_reply,
+                               server_key, tgs_key, enc_tkt_reply,
                                vouch, assertion);
         if (code != 0)
             goto cleanup;

@@ -66,14 +66,17 @@ using namespace opensaml;
 using namespace xercesc;
 using namespace std;
 
-#define SAML_KRB_USAGE_SESSKEY          0x1 /* signed with session key */
-#define SAML_KRB_USAGE_SERVERKEY        0x2 /* signed with server key */
-#define SAML_KRB_USAGE_TRUSTENGINE      0x4 /* signed with public key */
+#define SAML_KRB_VERIFY_SESSION_KEY     0x1 /* signed with session key */
+#define SAML_KRB_VERIFY_TRUSTENGINE     0x4 /* signed with public key */
+#define SAML_KRB_VERIFY_KDC_VOUCHED     0x8 /* extracted from TGT */
+
+#define SAML_KRB_USAGE_SESSION_KEY      1   /* derive from session key */
+#define SAML_KRB_USAGE_SERVER_KEY       2   /* derive from server key */
 
 static inline krb5_error_code
 saml_krb_derive_key(krb5_context context,
-                    krb5_keyblock *basekey,
-                    unsigned int flags,
+                    const krb5_keyblock *basekey,
+                    unsigned int usage,
                     XSECCryptoKey **pXMLKey)
 {
     OpenSSLCryptoKeyHMAC *hmackey;
@@ -88,8 +91,29 @@ saml_krb_derive_key(krb5_context context,
     cdata.data = constant;
     cdata.length = sizeof(constant);
 
-    constant[4] = (flags & SAML_KRB_USAGE_SERVERKEY) ? 0xFF : 0;
-    constant[5] = 0;
+    /*
+     * Object to be signed:
+     *
+     *      0x00   SAML assertion
+     */
+    constant[4] = 0;
+    /*
+     * Signing key:
+     *
+     *      0x00   TGT session key
+     *      0xFF   Long-term service key
+     */
+    switch (usage) {
+    case SAML_KRB_USAGE_SESSION_KEY:
+        constant[5] = 0x00;
+        break;
+    case SAML_KRB_USAGE_SERVER_KEY:
+        constant[5] = 0xFF;
+        break;
+    default:
+        return EINVAL;
+    }
+    /* Reserved */
     constant[6] = 0;
     constant[7] = 0;
 
@@ -123,9 +147,9 @@ saml_krb_derive_key(krb5_context context,
     return code;
 }
 
-static char saml_krb_wk_string[] = "WELLKNOWN";
-static char saml_krb_null_string[] = "NULL";
-static char saml_krb_realm[] = "WELLKNOWN:SAML";
+static char saml_krb_wk_string[]        = "WELLKNOWN";
+static char saml_krb_null_string[]      = "NULL";
+static char saml_krb_realm[]            = "WELLKNOWN:SAML";
 
 static inline krb5_boolean
 saml_krb_is_saml_principal(krb5_context context,
@@ -221,47 +245,6 @@ saml_krb_compare_nameid(krb5_context context,
 
     return saml_krb_compare_principal(context, nameID->getName(), principal);
 }
-
-#if 0
-typedef enum _saml_krb_subject_type {
-    SAML_KRB_NO_SUBJECT = 0,
-    SAML_KRB_ANY_SUBJECT,
-    SAML_KRB_NATIVE_SUBJECT,
-    SAML_KRB_CONFIRMED_SUBJECT,
-} saml_krb_subject_type;
-
-static inline saml_krb_subject_type
-saml_krb_validate_subject(krb5_context context,
-                          const Subject *subject,
-                          krb5_const_principal principal)
-{
-    const NameID *nameID = subject->getNameID();
-    saml_krb_subject_type ret = SAML_KRB_NO_SUBJECT;
-
-    if (nameID == NULL)
-        ret = SAML_KRB_NO_SUBJECT;
-    else if (saml_krb_is_saml_principal(context, principal))
-        ret = SAML_KRB_ANY_SUBJECT;
-    else if (saml_krb_compare_nameid(context, subject->getNameID(), principal))
-        ret = SAML_KRB_NATIVE_SUBJECT;
-    else {
-        const vector<SubjectConfirmation *>&confs =
-            subject->getSubjectConfirmations();
-
-        for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
-             sc != confs.end();
-             sc++) {
-            if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::HOLDER_KEY) &&
-                saml_krb_compare_nameid(context, (*sc)->getNameID(), principal)) {
-                ret = SAML_KRB_CONFIRMED_SUBJECT;
-                break;
-            }
-        }
-    }
-
-    return ret;
-}
-#endif
 
 #if 0
 static inline krb5_timestamp
@@ -450,7 +433,7 @@ saml_krb_verify_recipient(krb5_context context,
 static inline krb5_error_code
 saml_krb_verify_signature(krb5_context context,
                           Signature *signature,
-                          krb5_keyblock *key,
+                          const krb5_keyblock *key,
                           unsigned int flags,
                           krb5_boolean *pValid)
 {
@@ -464,8 +447,9 @@ saml_krb_verify_signature(krb5_context context,
         XSECCryptoKey *krbXmlKey;
 
         /* Only KDC-issued assertions can be natively bound */
-        if (flags & SAML_KRB_USAGE_SESSKEY) {
-            code = saml_krb_derive_key(context, key, flags, &krbXmlKey);
+        if (flags & SAML_KRB_VERIFY_SESSION_KEY) {
+            code = saml_krb_derive_key(context, key,
+                                       SAML_KRB_USAGE_SESSION_KEY, &krbXmlKey);
             if (code != 0)
                 return code;
 
@@ -478,7 +462,7 @@ saml_krb_verify_signature(krb5_context context,
             }
         }
         if (validSig == FALSE &&
-            (flags & SAML_KRB_USAGE_TRUSTENGINE)) {
+            (flags & SAML_KRB_VERIFY_TRUSTENGINE)) {
         }
     } catch (exception &e) {
         code = KRB5_CRYPTO_INTERNAL;
@@ -492,7 +476,7 @@ saml_krb_verify_signature(krb5_context context,
 static inline krb5_error_code
 saml_krb_verify(krb5_context context,
                 saml2::Assertion *assertion,
-                krb5_keyblock *key,
+                const krb5_keyblock *key,
                 krb5_const_principal client,
                 krb5_const_principal server,
                 krb5_timestamp authtime,
@@ -532,9 +516,12 @@ saml_krb_verify(krb5_context context,
     /*
      * Verify any signatures present on the assertion.
      */
-    code = saml_krb_verify_signature(context, signature, key, flags, &verified);
-    if (code != 0 || verified == FALSE)
-        return KRB5KRB_AP_ERR_MODIFIED;
+    if ((flags & SAML_KRB_VERIFY_KDC_VOUCHED) != 0) {
+        code = saml_krb_verify_signature(context, signature, key,
+                                         flags, &verified);
+        if (code != 0 || verified == FALSE)
+            return KRB5KRB_AP_ERR_MODIFIED;
+    }
 
     /*
      * Verify that the Recipient in any bearer SubjectConfirmationData

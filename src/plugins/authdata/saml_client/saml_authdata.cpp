@@ -615,7 +615,7 @@ saml_verify_authdata(krb5_context kcontext,
                            enc_part->client,
                            req->ticket->server,
                            enc_part->times.authtime,
-                           SAML_KRB_USAGE_SESSKEY | SAML_KRB_USAGE_TRUSTENGINE,
+                           SAML_KRB_VERIFY_SESSION_KEY | SAML_KRB_VERIFY_TRUSTENGINE,
                            &sc->verified);
 
     return code;
