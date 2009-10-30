@@ -36,7 +36,7 @@
           (whitespace-style '(empty trailing)))
       ;; Only clean up tab issues if indent-tabs-mode is explicitly
       ;; set in the file local variables.
-      (if (assq 'indent-tabs-mode file-local-variables-alist)
+      (if (local-variable-p 'indent-tabs-mode)
           (progn
             (message "Enabling tab cleanups.")
             (add-to-list 'whitespace-style 'indentation)
@@ -48,5 +48,5 @@
       (whitespace-cleanup))
 
     (save-buffer)
-    (kill-buffer)
+    (kill-buffer nil)
     (setq command-line-args-left (cdr command-line-args-left))))
