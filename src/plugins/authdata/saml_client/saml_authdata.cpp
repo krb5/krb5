@@ -249,7 +249,7 @@ saml_export_authdata(krb5_context kcontext,
 
     try {
         XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), buf);
-    } catch (XMLToolingException &e) {
+    } catch (exception &e) {
         return ASN1_PARSE_ERROR;
     }
 
@@ -302,7 +302,7 @@ saml_import_authdata(krb5_context kcontext,
 #else
         sc->assertion = (saml2::Assertion*)((void *)xobj);
 #endif
-    } catch (XMLToolingException &e) {
+    } catch (exception &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
     }
 
@@ -613,10 +613,20 @@ saml_verify_authdata(krb5_context kcontext,
                            sc->assertion,
                            enc_part->session,
                            enc_part->client,
+                           NULL,
                            req->ticket->server,
                            enc_part->times.authtime,
                            SAML_KRB_VERIFY_SESSION_KEY | SAML_KRB_VERIFY_TRUSTENGINE,
                            &sc->verified);
+    /* Squash KDC error codes */
+    switch (code) {
+    case KRB5KDC_ERR_CLIENT_NAME_MISMATCH:
+    case KRB5KDC_ERR_CLIENT_NOT_TRUSTED:
+    case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN:
+    case KRB5KDC_ERR_CLIENT_NOTYET:
+        code = KRB5KRB_AP_WRONG_PRINC;
+        break;
+    }
 
     return code;
 }
@@ -633,7 +643,7 @@ saml_size(krb5_context kcontext,
 
     try {
         XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), buf);
-    } catch (XMLToolingException &e) {
+    } catch (exception &e) {
         return ASN1_PARSE_ERROR;
     }
 
@@ -655,7 +665,7 @@ saml_externalize(krb5_context kcontext,
 
     try {
         XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), buf);
-    } catch (XMLToolingException &e) {
+    } catch (exception &e) {
         return ASN1_PARSE_ERROR;
     }
 

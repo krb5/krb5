@@ -272,7 +272,7 @@ saml_kdc_build_assertion(krb5_context context,
 
         code = 0;
         *pAssertion = assertion;
-    } catch (XMLToolingException &e) {
+    } catch (exception &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
         delete assertion;
     }
@@ -355,7 +355,7 @@ saml_kdc_get_assertion(krb5_context context,
 #else
         assertion = (saml2::Assertion*)((void *)xobj);
 #endif
-    } catch (XMLToolingException &e) {
+    } catch (exception &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
         assertion = NULL;
     }
@@ -444,6 +444,7 @@ saml_kdc_verify_assertion(krb5_context context,
                            assertion,
                            NULL,
                            client_princ,
+                           client,
                            request->server,
                            0,
                            usage,
@@ -462,27 +463,32 @@ saml_kdc_build_signature(krb5_context context,
                          Signature **pSignature)
 {
     krb5_error_code code;
+#if 0
     KeyInfo *keyInfo;
+#endif
     XSECCryptoKey *xmlKey;
     Signature *signature;
     auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
 
     *pSignature = NULL;
 
+#if 0
     code = saml_krb_build_principal_keyinfo(context, keyOwner, &keyInfo);
     if (code != 0)
         return code;
+#endif
 
     code = saml_krb_derive_key(context, key, usage, &xmlKey);
     if (code != 0) {
-        delete keyInfo;
         return code;
     }
 
     signature = SignatureBuilder::buildSignature();
     signature->setSignatureAlgorithm(algorithm.get());
     signature->setSigningKey(xmlKey);
+#if 0
     signature->setKeyInfo(keyInfo);
+#endif
 
     *pSignature = signature;
 

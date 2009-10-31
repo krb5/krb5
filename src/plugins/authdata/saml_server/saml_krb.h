@@ -32,6 +32,8 @@
 extern "C" {
 #include <k5-int.h>
 #include <krb5/authdata_plugin.h>
+#include <kdb.h>
+#include <kdb_ext.h>
 }
 
 #include <saml/SAMLConfig.h>
@@ -67,478 +69,122 @@ using namespace xercesc;
 using namespace std;
 
 #define SAML_KRB_VERIFY_SESSION_KEY     0x1 /* signed with session key */
-#define SAML_KRB_VERIFY_TRUSTENGINE     0x4 /* signed with public key */
-#define SAML_KRB_VERIFY_KDC_VOUCHED     0x8 /* extracted from TGT */
+#define SAML_KRB_VERIFY_TRUSTENGINE     0x2 /* signed with trusted key */
+#define SAML_KRB_VERIFY_KDC_VOUCHED     0x4 /* extracted from TGT */
 
 #define SAML_KRB_USAGE_SESSION_KEY      1   /* derive from session key */
 #define SAML_KRB_USAGE_SERVER_KEY       2   /* derive from server key */
 
-static inline krb5_error_code
+krb5_error_code
 saml_krb_derive_key(krb5_context context,
                     const krb5_keyblock *basekey,
                     unsigned int usage,
-                    XSECCryptoKey **pXMLKey)
-{
-    OpenSSLCryptoKeyHMAC *hmackey;
-    krb5_error_code code;
-    char constant[8] = "saml";
-    krb5_data cdata;
-    krb5_data dk;
-    size_t dklen;
+                    XSECCryptoKey **pXMLKey);
 
-    *pXMLKey = NULL;
-
-    cdata.data = constant;
-    cdata.length = sizeof(constant);
-
-    /*
-     * Object to be signed:
-     *
-     *      0x00   SAML assertion
-     */
-    constant[4] = 0;
-    /*
-     * Signing key:
-     *
-     *      0x00   TGT session key
-     *      0xFF   Long-term service key
-     */
-    switch (usage) {
-    case SAML_KRB_USAGE_SESSION_KEY:
-        constant[5] = 0x00;
-        break;
-    case SAML_KRB_USAGE_SERVER_KEY:
-        constant[5] = 0xFF;
-        break;
-    default:
-        return EINVAL;
-    }
-    /* Reserved */
-    constant[6] = 0;
-    constant[7] = 0;
-
-    code = krb5_c_prf_length(context, basekey->enctype, &dklen);
-    if (code != 0)
-        return code;
-
-    dk.data = (char *)k5alloc(dklen, &code);
-    if (code != 0)
-        return code;
-
-    dk.length = dklen;
-
-    code = krb5_c_prf(context, basekey, &cdata, &dk);
-    if (code != 0)
-        return code;
-
-    try {
-        hmackey = new OpenSSLCryptoKeyHMAC();
-        hmackey->setKey((unsigned char *)dk.data, dk.length);
-    } catch (XSECCryptoException &e) {
-        code = KRB5_CRYPTO_INTERNAL;
-    } catch (XSECException &e) {
-        code = KRB5_CRYPTO_INTERNAL;
-    }
-
-    *pXMLKey = hmackey;
-
-    krb5_free_data_contents(context, &dk);
-
-    return code;
-}
-
-static char saml_krb_wk_string[]        = "WELLKNOWN";
-static char saml_krb_null_string[]      = "NULL";
-static char saml_krb_realm[]            = "WELLKNOWN:SAML";
-
-static inline krb5_boolean
+krb5_boolean
 saml_krb_is_saml_principal(krb5_context context,
-                           krb5_const_principal principal)
-{
-    return principal->type == KRB5_NT_WELLKNOWN &&
-        principal->length == 2 &&
-        data_eq_string(principal->data[0], saml_krb_wk_string) &&
-        data_eq_string(principal->data[1], saml_krb_null_string) &&
-        data_eq_string(principal->realm, saml_krb_realm);
-}
+                           krb5_const_principal principal);
 
-static krb5_error_code
+krb5_error_code
 saml_krb_unparse_name_xmlch(krb5_context context,
                             krb5_const_principal name,
-                            XMLCh **unicodePrincipal)
-{
-    krb5_error_code code;
-    char *utf8Name;
+                            XMLCh **unicodePrincipal,
+                            int flags = 0);
 
-    code = krb5_unparse_name(context, name, &utf8Name);
-    if (code != 0)
-        return code;
+krb5_error_code
+saml_krb_parse_name_xmlch(krb5_context context,
+                          const XMLCh *unicodePrincipal,
+                          krb5_principal *name,
+                          int flags = 0);
 
-    *unicodePrincipal = fromUTF8(utf8Name, false);
-
-    if (*unicodePrincipal == NULL)
-        code = ENOMEM;
-
-    free(utf8Name);
-
-    return code;
-}
-
-static krb5_error_code
+krb5_error_code
 saml_krb_build_nameid(krb5_context context,
                       krb5_const_principal principal,
-                      NameID **pNameID)
-{
-    NameID *nameID;
-    krb5_error_code code;
-    XMLCh *unicodePrincipal = NULL;
+                      NameID **pNameID);
 
-    *pNameID = NULL;
-
-    code = saml_krb_unparse_name_xmlch(context, principal, &unicodePrincipal);
-    if (code != 0)
-        return code;
-
-    nameID = NameIDBuilder::buildNameID();
-    nameID->setName(unicodePrincipal);
-    nameID->setFormat(NameIDType::KERBEROS);
-
-    *pNameID = nameID;
-
-    delete unicodePrincipal;
-
-    return 0;
-}
-
-static inline krb5_boolean
+krb5_boolean
 saml_krb_compare_principal(krb5_context context,
                            const XMLCh *unicodePrincipal,
-                           krb5_const_principal principal)
-{
-    char *name = NULL;
-    krb5_boolean ret;
-    krb5_principal p;
+                           krb5_const_principal princ1);
 
-    name = toUTF8(unicodePrincipal);
-    if (name == NULL)
-        return FALSE;
+krb5_error_code
+saml_krb_map_subject(krb5_context context,
+                     Subject *subject,
+                     krb5_principal *pMappedPrincipal);
 
-    if (krb5_parse_name(context, name, &p) != 0) {
-        delete name;
-        return FALSE;
-    }
+krb5_boolean
+saml_krb_compare_issuer(krb5_context context,
+                        Issuer *asserted,
+                        Issuer *actual);
 
-    ret = krb5_principal_compare(context, p, principal);
+krb5_boolean
+saml_krb_compare_subject(krb5_context context,
+                         Subject *asserted,
+                         Subject *actual);
 
-    delete name;
+krb5_error_code
+saml_krb_bind_subject_kdb(krb5_context context,
+                          krb5_db_entry *entry,
+                          Issuer *issuer,
+                          Subject *subject);
 
-    return ret;
-}
-
-static inline krb5_boolean
-saml_krb_compare_nameid(krb5_context context,
-                        const NameID *nameID,
-                        krb5_const_principal principal)
-{
-    if (!XMLString::equals(nameID->getFormat(), NameIDType::KERBEROS))
-        return FALSE;
-
-    return saml_krb_compare_principal(context, nameID->getName(), principal);
-}
-
-#if 0
-static inline krb5_timestamp
+krb5_timestamp
 saml_krb_get_authtime(krb5_context context,
-                      const saml2::Assertion *assertion)
-{
-    krb5_timestamp ktime = 0;
-    const AuthnStatement *statement;
+                      const saml2::Assertion *assertion);
 
-    if (assertion->getAuthnStatements().size() == 1) {
-        statement = assertion->getAuthnStatements().front();
-        ktime = statement->getAuthnInstant()->getEpoch(false);
-    }
-
-    return ktime;
-}
-#endif
-
-static krb5_error_code
+krb5_error_code
 saml_krb_build_principal_keyinfo(krb5_context context,
                                  krb5_const_principal principal,
-                                 KeyInfo **pKeyInfo)
-{
-    krb5_error_code code;
-    XMLCh *unicodePrincipal;
-    KeyName *keyName;
-    KeyInfo *keyInfo;
+                                 KeyInfo **pKeyInfo);
 
-    *pKeyInfo = NULL;
-
-    code = saml_krb_unparse_name_xmlch(context, principal, &unicodePrincipal);
-    if (code != 0)
-        return code;
-
-    keyName = KeyNameBuilder::buildKeyName();
-    keyName->setTextContent(unicodePrincipal);
-
-    keyInfo = KeyInfoBuilder::buildKeyInfo();
-    keyInfo->getKeyNames().push_back(keyName);
-
-    *pKeyInfo = keyInfo;
-
-    return 0;
-}
-
-static inline krb5_error_code
+krb5_error_code
 saml_krb_confirm_keyinfo(krb5_context context,
                          const saml2::SubjectConfirmation *conf,
                          krb5_const_principal principal,
-                         krb5_boolean *pConfirmed)
-{
-    krb5_error_code code;
-    const saml2::KeyInfoConfirmationDataType *keyConfData;
+                         krb5_boolean *pConfirmed);
 
-    *pConfirmed = FALSE;
-
-    keyConfData = (KeyInfoConfirmationDataType *)((void *)conf->getSubjectConfirmationData());
-
-    for (vector<KeyInfo *>::const_iterator ki = keyConfData->getKeyInfos().begin();
-         ki != keyConfData->getKeyInfos().end();
-         ki++)
-    {
-        KeyName *kn = (*ki)->getKeyNames().front();
-        const XMLCh *knValue = kn->getTextContent();
-
-        if (saml_krb_compare_principal(context, knValue, principal)) {
-            *pConfirmed = TRUE;
-            break;
-        }
-    }
-
-    return 0;
-}
-
-static inline krb5_error_code
+krb5_error_code
 saml_krb_confirm_subject(krb5_context context,
                          const saml2::Subject *subject,
                          krb5_const_principal principal,
                          krb5_timestamp authtime,
                          krb5_boolean *pConfirmed,
-                         krb5_boolean *pBound)
-{
-    krb5_error_code code;
-    const vector<SubjectConfirmation *>&confs = subject->getSubjectConfirmations();
-    krb5_boolean confirmed = FALSE;
-    krb5_boolean bound = FALSE;
+                         krb5_boolean *pBound);
 
-    for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
-         sc != confs.end();
-         sc++)
-    {
-         const SubjectConfirmationData *subjectConfirmationData;
-         time_t ts;
-
-         subjectConfirmationData = (SubjectConfirmationData *)((void *)(*sc)->getSubjectConfirmationData());
-
-         ts = subjectConfirmationData->getNotBefore()->getEpoch(false);
-         if (ts < authtime)
-            continue;
-
-#if 0
-         ts = subjectConfirmationData->getNotOnOrAfter()->getEpoch(false);
-         if (ts > endtime)
-             continue;
-#endif
-
-        if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::HOLDER_KEY)) {
-            code = saml_krb_confirm_keyinfo(context, *sc, principal, &confirmed);
-            if (code != 0)
-                break;
-
-            bound = TRUE;
-        } else {
-            confirmed = saml_krb_is_saml_principal(context, principal);
-        }
-        if (confirmed)
-            break;
-    }
-
-    *pConfirmed = confirmed;
-    *pBound = bound;
-
-    return 0;
-}
-
-static inline krb5_error_code
+krb5_error_code
 saml_krb_verify_recipient(krb5_context context,
                           const saml2::Assertion *assertion,
                           krb5_const_principal spn,
-                          krb5_boolean *pValid)
-{
-    const Subject *subject = assertion->getSubject();
-    const vector<SubjectConfirmation *>&confs = subject->getSubjectConfirmations();
-    krb5_boolean spnMatch = FALSE;
-    krb5_boolean hasRecipient = FALSE;
-    XMLCh *spnInstance = NULL;
-    XMLCh *spnAll = NULL;
-    krb5_error_code code;
+                          krb5_boolean *pValid);
 
-    code = saml_krb_unparse_name_xmlch(context, spn, &spnAll);
-    if (code != 0)
-        return code;
-
-    if (spn->type == KRB5_NT_SRV_HST && spn->length > 1) {
-        spnInstance = new XMLCh[spn->data[1].length + 1];
-        XMLString::transcode(spn->data[1].data, spnInstance, spn->data[1].length);
-    }
-
-    for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
-         sc != confs.end();
-         sc++)
-    {
-#if 0
-        const SubjectConfirmationDataType* data = dynamic_cast<const SubjectConfirmationDataType*>((*sc)->getSubjectConfirmationData());
-#else
-        const SubjectConfirmationDataType* data = (const SubjectConfirmationDataType *)((void *)(*sc)->getSubjectConfirmationData());
-#endif
-
-        if (data == NULL || data->getRecipient() == NULL)
-            continue;
-
-        hasRecipient = TRUE;
-
-        if (spnInstance != NULL &&
-            XMLString::equals((*sc)->getMethod(),
-                              SubjectConfirmation::BEARER)) {
-            XMLURL url(data->getRecipient());
-
-            spnMatch = XMLString::equals(url.getHost(), spnInstance);
-        } else if (XMLString::equals((*sc)->getMethod(),
-                                     SubjectConfirmation::HOLDER_KEY)) {
-            spnMatch = XMLString::equals(data->getRecipient(), spnAll);
-        }
-        if (spnMatch == TRUE)
-            break;
-    }
-
-    *pValid = hasRecipient ? spnMatch : TRUE;
-
-    delete spnInstance;
-    delete spnAll;
-
-    return 0;
-}
-
-static inline krb5_error_code
+krb5_error_code
 saml_krb_verify_signature(krb5_context context,
                           Signature *signature,
                           const krb5_keyblock *key,
                           unsigned int flags,
-                          krb5_boolean *pValid)
-{
-    krb5_error_code code = 0;
-    krb5_boolean validSig;
+                          krb5_boolean bound,
+                          krb5_boolean *pValid);
 
-    validSig = FALSE;
+krb5_error_code
+saml_krb_bind_subject(krb5_context context,
+                      Issuer *issuer,
+                      Subject *subject,
+                      krb5_const_principal client_princ,
+                      krb5_db_entry *client,
+                      krb5_boolean *pBound,
+                      krb5_principal *pMappedPrincipal = NULL);
 
-    try {
-        SignatureValidator krbSigValidator;
-        XSECCryptoKey *krbXmlKey;
-
-        /* Only KDC-issued assertions can be natively bound */
-        if (flags & SAML_KRB_VERIFY_SESSION_KEY) {
-            code = saml_krb_derive_key(context, key,
-                                       SAML_KRB_USAGE_SESSION_KEY, &krbXmlKey);
-            if (code != 0)
-                return code;
-
-            krbSigValidator.setKey(krbXmlKey);
-
-            try {
-                krbSigValidator.validate(signature);
-                validSig = TRUE;
-            } catch (ValidationException &v) {
-            }
-        }
-        if (validSig == FALSE &&
-            (flags & SAML_KRB_VERIFY_TRUSTENGINE)) {
-        }
-    } catch (exception &e) {
-        code = KRB5_CRYPTO_INTERNAL;
-    }
-
-    *pValid = validSig;
-
-    return code;
-}
-
-static inline krb5_error_code
+krb5_error_code
 saml_krb_verify(krb5_context context,
                 saml2::Assertion *assertion,
                 const krb5_keyblock *key,
-                krb5_const_principal client,
+                krb5_const_principal client_princ,
+                krb5_db_entry *client,
                 krb5_const_principal server,
                 krb5_timestamp authtime,
                 unsigned int flags,
                 krb5_boolean *pValid,
-                krb5_principal *pMappedPrincipal = NULL)
-{
-    krb5_error_code code;
-    krb5_boolean verified = FALSE;
-    krb5_boolean bound = FALSE;
-    Signature *signature;
-    Subject *subject;
-
-    *pValid = FALSE;
-
-    if (assertion == NULL)
-        return EINVAL;
-
-    subject = assertion->getSubject();
-    if (subject == NULL)
-        return KRB5KRB_AP_WRONG_PRINC;
-
-    signature = assertion->getSignature();
-    if (signature == NULL)
-        return 0;
-
-    /*
-     * Verify the assertion is appropriately bound to the ticket client
-     */
-    code = saml_krb_confirm_subject(context, subject, client,
-                                    authtime, &verified, &bound);
-    if (code != 0)
-        return code;
-    else if (verified == FALSE)
-        return KRB5KRB_AP_WRONG_PRINC;
-
-    /*
-     * Verify any signatures present on the assertion.
-     */
-    if ((flags & SAML_KRB_VERIFY_KDC_VOUCHED) != 0) {
-        code = saml_krb_verify_signature(context, signature, key,
-                                         flags, &verified);
-        if (code != 0 || verified == FALSE)
-            return KRB5KRB_AP_ERR_MODIFIED;
-    }
-
-    /*
-     * Verify that the Recipient in any bearer SubjectConfirmationData
-     * matches the service principal.
-     */
-    code = saml_krb_verify_recipient(context, assertion, server, &verified);
-    if (code != 0 || verified == FALSE)
-        return KRB5KRB_AP_WRONG_PRINC;
-
-    if (bound == FALSE) {
-        /* Map to a local principal. */
-    }
-
-    *pValid = (bound && verified);
-
-    return 0;
-}
+                krb5_principal *pMappedPrincipal = NULL);
 
 /* Helper for transcoding krb5_data objects */
 class auto_ptr_krb5_data {
